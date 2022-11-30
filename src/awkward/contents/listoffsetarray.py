@@ -316,7 +316,7 @@ class ListOffsetArray(Content):
         return out._getitem_next_jagged(slicestarts, slicestops, slicecontent, tail)
 
     def _getitem_next(self, head, tail, advanced):
-        advanced = advanced._to_nplike(self._backend.nplike)
+        advanced = advanced.to_nplike(self._backend.nplike)
         if head == ():
             return self
 
@@ -2110,9 +2110,9 @@ class ListOffsetArray(Content):
                 out[i] = content[starts_data[i] : stops_data[i]]
             return out
 
-    def _to_backend(self, backend: ak._backends.Backend) -> Self:
-        content = self._content._to_backend(backend)
-        offsets = self._offsets._to_nplike(backend.index_nplike)
+    def to_backend(self, backend: ak._backends.Backend) -> Self:
+        content = self._content.to_backend(backend)
+        offsets = self._offsets.to_nplike(backend.index_nplike)
         return ListOffsetArray(offsets, content, parameters=self._parameters)
 
     def _awkward_strings_to_nonfinite(self, nonfinit_dict):

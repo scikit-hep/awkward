@@ -322,7 +322,7 @@ class UnionArray(Content):
         backend: ak._backends.Backend,
         index_cls: type[Index] = Index64,
     ):
-        tags = tags._to_nplike(backend.index_nplike)
+        tags = tags.to_nplike(backend.index_nplike)
 
         lentags = tags.length
         size = ak.index.Index64.empty(1, nplike=backend.index_nplike)
@@ -377,8 +377,8 @@ class UnionArray(Content):
         tags_cls: type[Index] = Index8,
         index_cls: type[Index] = Index64,
     ) -> tuple[Index, Index]:
-        offsets = offsets._to_nplike(backend.index_nplike)
-        counts = [c._to_nplike(backend.index_nplike) for c in counts]
+        offsets = offsets.to_nplike(backend.index_nplike)
+        counts = [c.to_nplike(backend.index_nplike) for c in counts]
 
         f_offsets = ak.index.Index64(copy.deepcopy(offsets.data))
         contentlen = f_offsets[f_offsets.length - 1]
@@ -1474,9 +1474,9 @@ class UnionArray(Content):
             out[i] = contents[tag][index[i]]
         return out
 
-    def _to_backend(self, backend: ak._backends.Backend) -> Self:
-        index = self._index._to_nplike(backend.index_nplike)
-        contents = [content._to_backend(backend) for content in self._contents]
+    def to_backend(self, backend: ak._backends.Backend) -> Self:
+        index = self._index.to_nplike(backend.index_nplike)
+        contents = [content.to_backend(backend) for content in self._contents]
         return UnionArray(
             self._tags,
             index,

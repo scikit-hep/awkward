@@ -284,8 +284,8 @@ class ListArray(Content):
         return ListOffsetArray._broadcast_tooffsets64(self, offsets)
 
     def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
-        slicestarts = slicestarts._to_nplike(self._backend.index_nplike)
-        slicestops = slicestops._to_nplike(self._backend.index_nplike)
+        slicestarts = slicestarts.to_nplike(self._backend.index_nplike)
+        slicestops = slicestops.to_nplike(self._backend.index_nplike)
         if self._backend.nplike.known_shape and slicestarts.length != self.length:
             raise ak._errors.index_error(
                 self,
@@ -690,7 +690,7 @@ class ListArray(Content):
                     nextadvanced = ak.index.Index64.empty(
                         ak._typetracer.UnknownLength, self._backend.index_nplike
                     )
-                advanced = advanced._to_nplike(self._backend.index_nplike)
+                advanced = advanced.to_nplike(self._backend.index_nplike)
                 assert (
                     nextadvanced.nplike is self._backend.index_nplike
                     and advanced.nplike is self._backend.index_nplike
@@ -787,7 +787,7 @@ class ListArray(Content):
                 nextadvanced = ak.index.Index64.empty(
                     lenstarts, self._backend.index_nplike
                 )
-                advanced = advanced._to_nplike(self._backend.index_nplike)
+                advanced = advanced.to_nplike(self._backend.index_nplike)
                 assert (
                     nextcarry.nplike is self._backend.index_nplike
                     and nextadvanced.nplike is self._backend.index_nplike
@@ -824,7 +824,7 @@ class ListArray(Content):
 
         elif isinstance(head, ak.contents.ListOffsetArray):
             headlength = head.length
-            head = head._to_backend(self._backend)
+            head = head.to_backend(self._backend)
             if advanced is not None:
                 raise ak._errors.index_error(
                     self,
@@ -1462,10 +1462,10 @@ class ListArray(Content):
     def _to_list(self, behavior, json_conversions):
         return ListOffsetArray._to_list(self, behavior, json_conversions)
 
-    def _to_backend(self, backend: ak._backends.Backend) -> Self:
-        content = self._content._to_backend(backend)
-        starts = self._starts._to_nplike(backend.index_nplike)
-        stops = self._stops._to_nplike(backend.index_nplike)
+    def to_backend(self, backend: ak._backends.Backend) -> Self:
+        content = self._content.to_backend(backend)
+        starts = self._starts.to_nplike(backend.index_nplike)
+        stops = self._stops.to_nplike(backend.index_nplike)
         return ListArray(starts, stops, content, parameters=self._parameters)
 
     def _layout_equal(self, other, index_dtype=True, numpyarray=True):

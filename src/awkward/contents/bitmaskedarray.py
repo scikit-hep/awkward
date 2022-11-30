@@ -699,9 +699,9 @@ class BitMaskedArray(Content):
 
         return out
 
-    def _to_backend(self, backend: ak._backends.Backend) -> Self:
-        content = self._content._to_backend(backend)
-        mask = self._mask._to_nplike(backend.index_nplike)
+    def to_backend(self, backend: ak._backends.Backend) -> Self:
+        content = self._content.to_backend(backend)
+        mask = self._mask.to_nplike(backend.index_nplike)
         return BitMaskedArray(
             mask,
             content,

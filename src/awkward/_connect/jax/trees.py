@@ -32,14 +32,12 @@ def replace_all_buffers(
     buffers: list,
     backend: ak._backends.Backend,
 ):
-    jax = nplikes.Jax.instance()
-    numpy = nplikes.Numpy.instance()
-
     def action(node, **kwargs):
+        jaxlike = nplikes.Jax.instance()
         if isinstance(node, ak.contents.NumpyArray):
             buffer = buffers.pop(0)
             # JAX might give us non-buffers, so ignore them
-            if not (numpy.is_own_array(buffer) or jax.is_own_array(buffer)):
+            if not (numpy.is_own_array(buffer) or jaxlike.is_own_array(buffer)):
                 return
             else:
                 return ak.contents.NumpyArray(
@@ -76,7 +74,8 @@ class AuxData(Generic[T]):
             raise _errors.wrap_error(TypeError)
 
         # First, make sure we're all JAX
-        layout = layout.to_backend("jax")
+        jax_backend = ak._backends.JaxBackend.instance()
+        layout = layout.to_backend(jax_backend)
 
         # Now pull out the Jax tracers / arrays
         buffers = find_all_buffers(layout)

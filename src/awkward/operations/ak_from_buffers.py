@@ -77,7 +77,7 @@ def from_buffers(
 
 
 def _impl(form, length, container, buffer_key, backend, highlevel, behavior):
-    backend = ak._util.regularize_backend(backend)
+    backend = ak._backends.regularize_backend(backend)
 
     if isinstance(form, str):
         if ak.types.numpytype.is_primitive(form):

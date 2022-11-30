@@ -27,21 +27,6 @@ kMaxInt64 = 9223372036854775806  # 2**63 - 2: see below
 kSliceNone = kMaxInt64 + 1  # for Slice::none()
 kMaxLevels = 48
 
-_backends = {
-    "cpu": ak._backends.NumpyBackend,
-    "cuda": ak._backends.CupyBackend,
-    "jax": ak._backends.JaxBackend,
-}
-
-
-def regularize_backend(backend: str) -> ak._backends.Backend:
-    if backend in _backends:
-        return _backends[backend].instance()
-    else:
-        raise ak._errors.wrap_error(
-            ValueError("The available backends for now are `cpu` and `cuda`.")
-        )
-
 
 def parse_version(version):
     return packaging.version.parse(version)

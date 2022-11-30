@@ -372,7 +372,7 @@ class Content:
         length = 1 if length == 0 else length
         index = ak.index.Index64(head.index, nplike=self._backend.index_nplike)
         indexlength = index.length
-        index = index._to_nplike(self._backend.index_nplike)
+        index = index.to_nplike(self._backend.index_nplike)
         outindex = ak.index.Index64.empty(
             index.length * length, self._backend.index_nplike
         )
@@ -405,7 +405,7 @@ class Content:
     def _getitem_next_missing_jagged(
         self, head: Content, tail, advanced: ak.index.Index | None, that: Content
     ):
-        head = head._to_backend(self._backend)
+        head = head.to_backend(self._backend)
         jagged = head.content.to_ListOffsetArray64()
 
         index = ak.index.Index64(head._index, nplike=self._backend.index_nplike)
@@ -1790,14 +1790,7 @@ class Content:
     ) -> tuple[ak.index.Index, Content]:
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def to_backend(self, backend: str) -> Self:
-        instance = ak._util.regularize_backend(backend)
-        if self._backend is instance:
-            return self
-        else:
-            return self._to_backend(instance)
-
-    def _to_backend(self, backend: Backend) -> Self:
+    def to_backend(self, backend: Backend) -> Self:
         raise ak._errors.wrap_error(NotImplementedError)
 
     def with_parameter(self, key: str, value: Any) -> Self:

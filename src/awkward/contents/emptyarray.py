@@ -371,7 +371,7 @@ class EmptyArray(Content):
     def _to_list(self, behavior, json_conversions):
         return []
 
-    def _to_backend(self, backend: ak._backends.Backend) -> Self:
+    def to_backend(self, backend: ak._backends.Backend) -> Self:
         return EmptyArray(parameters=self._parameters, backend=backend)
 
     def _layout_equal(self, other, index_dtype=True, numpyarray=True):

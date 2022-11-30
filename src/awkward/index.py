@@ -1,10 +1,14 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+from __future__ import annotations
 
 import copy
+
+from typing_extensions import Self
 
 import awkward as ak
 
 np = ak.nplikes.NumpyMetadata.instance()
+
 
 _dtype_to_form = {
     np.dtype(np.int8): "i8",
@@ -191,16 +195,8 @@ class Index:
     def _nbytes_part(self):
         return self.data.nbytes
 
-    def to_backend(self, backend):
-        if self.nplike is ak._util.regularize_backend(backend):
-            return self
-        else:
-            return self._to_nplike(ak._util.regularize_backend(backend))
-
-    def _to_nplike(self, nplike):
-        # if isinstance(nplike, ak.nplikes.Jax):
-        #     print("YES OFFICER, this nplike right here")
-        return Index(self.raw(nplike), metadata=self.metadata, nplike=nplike)
+    def to_nplike(self, nplike: ak._nplikes.NumpyLike) -> Self:
+        return type(self)(self.raw(nplike), metadata=self.metadata, nplike=nplike)
 
     def layout_equal(self, other, index_dtype=True, numpyarray=True):
         if index_dtype:

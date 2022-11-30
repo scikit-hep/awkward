@@ -163,3 +163,19 @@ def backend_for(*arrays, default: T = _UNSET) -> Backend | D:
             return default
     else:
         return _backend_for_nplike(nplike)
+
+
+_backends = {
+    "cpu": NumpyBackend,
+    "cuda": CupyBackend,
+    "jax": JaxBackend,
+}
+
+
+def regularize_backend(backend: str) -> Backend:
+    if backend in _backends:
+        return _backends[backend].instance()
+    else:
+        raise ak._errors.wrap_error(
+            ValueError("The available backends for now are `cpu` and `cuda`.")
+        )

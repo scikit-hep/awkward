@@ -1373,7 +1373,7 @@ class NumpyArray(Content):
 
             return out
 
-    def _to_backend(self, backend: ak._backends.Backend) -> Self:
+    def to_backend(self, backend: ak._backends.Backend) -> Self:
         return NumpyArray(
             self.raw(backend.nplike),
             parameters=self.parameters,

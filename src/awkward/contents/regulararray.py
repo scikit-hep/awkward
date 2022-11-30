@@ -403,7 +403,7 @@ class RegularArray(Content):
                 nextadvanced = ak.index.Index64.empty(
                     self._length * nextsize, self._backend.index_nplike
                 )
-                advanced = advanced._to_nplike(self._backend.index_nplike)
+                advanced = advanced.to_nplike(self._backend.index_nplike)
                 assert (
                     nextadvanced.nplike is self._backend.index_nplike
                     and advanced.nplike is self._backend.index_nplike
@@ -441,7 +441,7 @@ class RegularArray(Content):
             return self._getitem_next_ellipsis(tail, advanced)
 
         elif isinstance(head, ak.index.Index64):
-            head = head._to_nplike(self._backend.index_nplike)
+            head = head.to_nplike(self._backend.index_nplike)
             nexthead, nexttail = ak._slicing.headtail(tail)
             flathead = self._backend.index_nplike.asarray(head.data.reshape(-1))
 
@@ -516,7 +516,7 @@ class RegularArray(Content):
                 nextadvanced = ak.index.Index64.empty(
                     self._length, self._backend.index_nplike
                 )
-                advanced = advanced._to_nplike(self._backend.index_nplike)
+                advanced = advanced.to_nplike(self._backend.index_nplike)
                 assert (
                     nextcarry.nplike is self._backend.index_nplike
                     and nextadvanced.nplike is self._backend.index_nplike
@@ -546,7 +546,7 @@ class RegularArray(Content):
 
         elif isinstance(head, ak.contents.ListOffsetArray):
             headlength = head.length
-            head = head._to_backend(self._backend)
+            head = head.to_backend(self._backend)
 
             if advanced is not None:
                 raise ak._errors.index_error(
@@ -1369,8 +1369,8 @@ class RegularArray(Content):
                 out[i] = content[(i) * size : (i + 1) * size]
             return out
 
-    def _to_backend(self, backend: ak._backends.Backend) -> Self:
-        content = self._content._to_backend(backend)
+    def to_backend(self, backend: ak._backends.Backend) -> Self:
+        content = self._content.to_backend(backend)
         return RegularArray(
             content, self._size, zeros_length=self._length, parameters=self._parameters
         )
