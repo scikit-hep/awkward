@@ -35,7 +35,7 @@ def _impl(array, highlevel, behavior):
         if isinstance(layout, ak.contents.NumpyArray) and issubclass(
             layout.dtype.type, np.floating
         ):
-            mask = layout.nplike.isnan(layout.data)
+            mask = layout.backend.nplike.isnan(layout.data)
             return ak.contents.ByteMaskedArray(
                 ak.index.Index8(mask, nplike=layout.backend.index_nplike),
                 layout,

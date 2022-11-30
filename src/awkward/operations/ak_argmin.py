@@ -108,9 +108,10 @@ def nanargmin(
 
 def _impl(array, axis, keepdims, mask_identity, flatten_records):
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
+    backend = layout.backend
 
     if axis is None:
-        if not layout.nplike.known_data or not layout.nplike.known_shape:
+        if not backend.nplike.known_data or not backend.nplike.known_shape:
             reducer_cls = ak._reducers.ArgMin
             return ak._typetracer.MaybeNone(
                 ak._typetracer.UnknownScalar(np.dtype(reducer_cls.return_dtype(None)))
@@ -123,9 +124,9 @@ def _impl(array, axis, keepdims, mask_identity, flatten_records):
         for tmp in layout.completely_flatten(
             function_name="ak.argmin", flatten_records=flatten_records
         ):
-            tmp = layout.nplike.asarray(tmp)
+            tmp = backend.nplike.asarray(tmp)
             if len(tmp) > 0:
-                out = layout.nplike.argmin(tmp, axis=None)
+                out = backend.nplike.argmin(tmp, axis=None)
                 if best_index is None or tmp[out] < best_value:
                     best_index = out
                     best_value = tmp[out]
