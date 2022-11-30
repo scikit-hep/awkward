@@ -34,10 +34,6 @@ class Record:
         return self._array
 
     @property
-    def nplike(self):
-        return self._array.nplike
-
-    @property
     def backend(self):
         return self._array.backend
 
@@ -68,10 +64,10 @@ class Record:
         return self._array.content(index_or_field)[self._at]
 
     def completely_flatten(
-        self, nplike=None, flatten_records=True, function_name=None, drop_nones=True
+        self, backend=None, flatten_records=True, function_name=None, drop_nones=True
     ):
         return self._array[self._at : self._at + 1].completely_flatten(
-            nplike, flatten_records, function_name, drop_nones
+            backend, flatten_records, function_name, drop_nones
         )
 
     def __repr__(self):
