@@ -334,9 +334,7 @@ class IndexedOptionArray(Content):
         ):
             nexthead, nexttail = ak._slicing.headtail(tail)
 
-            numnull, nextcarry, outindex = self._nextcarry_outindex(
-                self._backend.nplike
-            )
+            numnull, nextcarry, outindex = self._nextcarry_outindex(self._backend)
 
             next = self._content._carry(nextcarry, True)
             out = next._getitem_next(head, tail, advanced)
@@ -519,9 +517,7 @@ class IndexedOptionArray(Content):
         if posaxis == depth:
             raise ak._errors.wrap_error(np.AxisError("axis=0 not allowed for flatten"))
         else:
-            numnull, nextcarry, outindex = self._nextcarry_outindex(
-                self._backend.nplike
-            )
+            numnull, nextcarry, outindex = self._nextcarry_outindex(self._backend)
             next = self._content._carry(nextcarry, False)
 
             offsets, flattened = next._offsets_and_flattened(posaxis, depth)
