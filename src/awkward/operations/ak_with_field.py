@@ -110,7 +110,6 @@ def _impl(base, what, where, highlevel, behavior):
                             ak.index.Index64(
                                 backend.index_nplike.full(len(base), -1, np.int64),
                                 nplike=backend.index_nplike,
-                                index_is_fixed=True,
                             ),
                             ak.contents.EmptyArray(),
                         )

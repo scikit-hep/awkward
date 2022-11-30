@@ -678,7 +678,6 @@ def apply_step(
                                         maxsize,
                                     ),
                                     nplike=backend.index_nplike,
-                                    index_is_fixed=True,
                                 )
 
                     nextinputs = []
@@ -748,7 +747,6 @@ def apply_step(
                                 (x.offsets.data.shape[0],), np.int64
                             ),
                             nplike=backend.index_nplike,
-                            index_is_fixed=True,
                         )
                         nextinputs.append(x.content)
                     elif isinstance(x, ListArray):
@@ -757,7 +755,6 @@ def apply_step(
                                 (x.starts.data.shape[0] + 1,), np.int64
                             ),
                             nplike=backend.index_nplike,
-                            index_is_fixed=True,
                         )
                         nextinputs.append(x.content)
                     elif isinstance(x, RegularArray):

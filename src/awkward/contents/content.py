@@ -370,13 +370,11 @@ class Content:
     ):
         # if this is in a tuple-slice and really should be 0, it will be trimmed later
         length = 1 if length == 0 else length
-        index = ak.index.Index64(
-            head.index, nplike=self._backend.index_nplike, index_is_fixed=True
-        )
+        index = ak.index.Index64(head.index, nplike=self._backend.index_nplike)
         indexlength = index.length
-        index = index._to_nplike(self._backend.index_nplike, index_is_fixed=True)
+        index = index._to_nplike(self._backend.index_nplike)
         outindex = ak.index.Index64.empty(
-            index.length * length, self._backend.index_nplike, index_is_fixed=True
+            index.length * length, self._backend.index_nplike
         )
 
         assert (
@@ -410,9 +408,7 @@ class Content:
         head = head._to_backend(self._backend)
         jagged = head.content.to_ListOffsetArray64()
 
-        index = ak.index.Index64(
-            head._index, nplike=self._backend.index_nplike, index_is_fixed=True
-        )
+        index = ak.index.Index64(head._index, nplike=self._backend.index_nplike)
         content = that._getitem_at(0)
         if self._backend.nplike.known_shape and content.length < index.length:
             raise ak._errors.index_error(
@@ -423,15 +419,9 @@ class Content:
                 ),
             )
 
-        outputmask = ak.index.Index64.empty(
-            index.length, self._backend.index_nplike, index_is_fixed=True
-        )
-        starts = ak.index.Index64.empty(
-            index.length, self._backend.index_nplike, index_is_fixed=True
-        )
-        stops = ak.index.Index64.empty(
-            index.length, self._backend.index_nplike, index_is_fixed=True
-        )
+        outputmask = ak.index.Index64.empty(index.length, self._backend.index_nplike)
+        starts = ak.index.Index64.empty(index.length, self._backend.index_nplike)
+        stops = ak.index.Index64.empty(index.length, self._backend.index_nplike)
 
         assert (
             index.nplike is self._backend.index_nplike
@@ -606,15 +596,12 @@ class Content:
                 carry = ak.index.Index64(
                     where.data.astype(np.int64).reshape(-1),
                     nplike=self._backend.index_nplike,
-                    index_is_fixed=True,
                 )
                 allow_lazy = "copied"  # True, but also can be modified in-place
             elif issubclass(where.dtype.type, (np.bool_, bool)):
                 if len(where.data.shape) == 1:
                     where = self._backend.nplike.nonzero(where.data)[0]
-                    carry = ak.index.Index64(
-                        where, nplike=self._backend.index_nplike, index_is_fixed=True
-                    )
+                    carry = ak.index.Index64(where, nplike=self._backend.index_nplike)
                     allow_lazy = "copied"  # True, but also can be modified in-place
                 else:
                     wheres = self._backend.nplike.nonzero(where.data)
@@ -641,9 +628,7 @@ class Content:
 
         elif ak._util.is_sized_iterable(where) and len(where) == 0:
             return self._carry(
-                ak.index.Index64.empty(
-                    0, self._backend.index_nplike, index_is_fixed=True
-                ),
+                ak.index.Index64.empty(0, self._backend.index_nplike),
                 allow_lazy=True,
             )
 
@@ -748,9 +733,7 @@ class Content:
         return axis
 
     def _local_index_axis0(self) -> ak.contents.NumpyArray:
-        localindex = ak.index.Index64.empty(
-            self.length, self._backend.index_nplike, index_is_fixed=True
-        )
+        localindex = ak.index.Index64.empty(self.length, self._backend.index_nplike)
         self._handle_error(
             self._backend["awkward_localindex", np.int64](
                 localindex.data,
@@ -790,10 +773,10 @@ class Content:
         mylength = self.length
         theirlength = other.length
         tags = ak.index.Index8.empty(
-            (mylength + theirlength), self._backend.index_nplike, index_is_fixed=True
+            (mylength + theirlength), self._backend.index_nplike
         )
         index = ak.index.Index64.empty(
-            (mylength + theirlength), self._backend.index_nplike, index_is_fixed=True
+            (mylength + theirlength), self._backend.index_nplike
         )
         contents = [self, other]
         assert tags.nplike is self._backend.index_nplike
@@ -926,12 +909,8 @@ class Content:
                     )
                 )
 
-        starts = ak.index.Index64.zeros(
-            1, self._backend.index_nplike, index_is_fixed=True
-        )
-        parents = ak.index.Index64.zeros(
-            self.length, self._backend.index_nplike, index_is_fixed=True
-        )
+        starts = ak.index.Index64.zeros(1, self._backend.index_nplike)
+        parents = ak.index.Index64.zeros(self.length, self._backend.index_nplike)
         shifts = None
         next = self._reduce_next(
             reducer,
@@ -1098,12 +1077,8 @@ class Content:
                     )
                 )
 
-        starts = ak.index.Index64.zeros(
-            1, nplike=self._backend.index_nplike, index_is_fixed=True
-        )
-        parents = ak.index.Index64.zeros(
-            self.length, nplike=self._backend.index_nplike, index_is_fixed=True
-        )
+        starts = ak.index.Index64.zeros(1, nplike=self._backend.index_nplike)
+        parents = ak.index.Index64.zeros(self.length, nplike=self._backend.index_nplike)
         return self._argsort_next(
             negaxis,
             starts,
@@ -1169,12 +1144,8 @@ class Content:
                     )
                 )
 
-        starts = ak.index.Index64.zeros(
-            1, nplike=self._backend.index_nplike, index_is_fixed=True
-        )
-        parents = ak.index.Index64.zeros(
-            self.length, nplike=self._backend.index_nplike, index_is_fixed=True
-        )
+        starts = ak.index.Index64.zeros(1, nplike=self._backend.index_nplike)
+        parents = ak.index.Index64.zeros(self.length, nplike=self._backend.index_nplike)
         return self._sort_next(
             negaxis,
             starts,
@@ -1229,18 +1200,15 @@ class Content:
             ptr = ak.index.Index64.empty(
                 combinationslen,
                 nplike=self._backend.index_nplike,
-                index_is_fixed=True,
                 dtype=np.int64,
             )
             tocarry.append(ptr)
             if self._backend.nplike.known_data:
                 tocarryraw[i] = ptr.ptr
 
-        toindex = ak.index.Index64.empty(
-            n, self._backend.index_nplike, index_is_fixed=True, dtype=np.int64
-        )
+        toindex = ak.index.Index64.empty(n, self._backend.index_nplike, dtype=np.int64)
         fromindex = ak.index.Index64.empty(
-            n, self._backend.index_nplike, index_is_fixed=True, dtype=np.int64
+            n, self._backend.index_nplike, dtype=np.int64
         )
 
         assert (
@@ -1424,12 +1392,8 @@ class Content:
 
     def is_unique(self, axis: Integral | None = None) -> bool:
         negaxis = axis if axis is None else -axis
-        starts = ak.index.Index64.zeros(
-            1, nplike=self._backend.index_nplike, index_is_fixed=True
-        )
-        parents = ak.index.Index64.zeros(
-            self.length, nplike=self._backend.index_nplike, index_is_fixed=True
-        )
+        starts = ak.index.Index64.zeros(1, nplike=self._backend.index_nplike)
+        parents = ak.index.Index64.zeros(self.length, nplike=self._backend.index_nplike)
         return self._is_unique(negaxis, starts, parents, 1)
 
     def _is_unique(
@@ -1476,11 +1440,9 @@ class Content:
                             )
                         )
 
-            starts = ak.index.Index64.zeros(
-                1, nplike=self._backend.index_nplike, index_is_fixed=True
-            )
+            starts = ak.index.Index64.zeros(1, nplike=self._backend.index_nplike)
             parents = ak.index.Index64.zeros(
-                self.length, nplike=self._backend.index_nplike, index_is_fixed=True
+                self.length, nplike=self._backend.index_nplike
             )
 
             return self._unique(negaxis, starts, parents, 1)
@@ -1539,13 +1501,10 @@ class Content:
             index = ak.index.Index64(
                 self._backend.index_nplike.arange(self.length, dtype=np.int64),
                 nplike=self._backend.index_nplike,
-                index_is_fixed=True,
             )
 
         else:
-            index = ak.index.Index64.empty(
-                target, self._backend.index_nplike, index_is_fixed=True
-            )
+            index = ak.index.Index64.empty(target, self._backend.index_nplike)
 
             assert index.nplike is self._backend.index_nplike
             self._handle_error(

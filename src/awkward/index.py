@@ -18,8 +18,7 @@ _dtype_to_form = {
 class Index:
     _expected_dtype = None
 
-    def __init__(self, data, *, metadata=None, nplike=None, index_is_fixed=False):
-        assert index_is_fixed or nplike is None
+    def __init__(self, data, *, metadata=None, nplike=None):
         if nplike is None:
             nplike = ak.nplikes.nplike_of(data)
         self._nplike = nplike
@@ -67,22 +66,16 @@ class Index:
                 )
 
     @classmethod
-    def zeros(cls, length, nplike, dtype=None, *, index_is_fixed=False):
-        assert index_is_fixed
+    def zeros(cls, length, nplike, dtype=None):
         if dtype is None:
             dtype = cls._expected_dtype
-        return Index(
-            nplike.zeros(length, dtype=dtype), nplike=nplike, index_is_fixed=True
-        )
+        return Index(nplike.zeros(length, dtype=dtype), nplike=nplike)
 
     @classmethod
-    def empty(cls, length, nplike, dtype=None, *, index_is_fixed=False):
-        assert index_is_fixed
+    def empty(cls, length, nplike, dtype=None):
         if dtype is None:
             dtype = cls._expected_dtype
-        return Index(
-            nplike.empty(length, dtype=dtype), nplike=nplike, index_is_fixed=True
-        )
+        return Index(nplike.empty(length, dtype=dtype), nplike=nplike)
 
     @property
     def data(self):
@@ -116,12 +109,7 @@ class Index:
             data = self._data
         else:
             data = self.raw(tt)
-        return type(self)(
-            data.forget_length(),
-            metadata=self._metadata,
-            nplike=tt,
-            index_is_fixed=True,
-        )
+        return type(self)(data.forget_length(), metadata=self._metadata, nplike=tt)
 
     def raw(self, nplike):
         return self.nplike.raw(self.data, nplike)
@@ -176,9 +164,7 @@ class Index:
         out = self._data[where]
 
         if hasattr(out, "shape") and len(out.shape) != 0:
-            return Index(
-                out, metadata=self.metadata, nplike=self._nplike, index_is_fixed=True
-            )
+            return Index(out, metadata=self.metadata, nplike=self._nplike)
         elif (
             ak.nplikes.Jax.is_own_array(out) or ak.nplikes.Cupy.is_own_array(out)
         ) and len(out.shape) == 0:
@@ -193,19 +179,13 @@ class Index:
         return Index(self._data.astype(np.int64))
 
     def __copy__(self):
-        return type(self)(
-            self._data,
-            metadata=self._metadata,
-            nplike=self._nplike,
-            index_is_fixed=True,
-        )
+        return type(self)(self._data, metadata=self._metadata, nplike=self._nplike)
 
     def __deepcopy__(self, memo):
         return type(self)(
             copy.deepcopy(self._data, memo),
             metadata=copy.deepcopy(self._metadata, memo),
             nplike=self._nplike,
-            index_is_fixed=True,
         )
 
     def _nbytes_part(self):
@@ -215,17 +195,12 @@ class Index:
         if self.nplike is ak._util.regularize_backend(backend):
             return self
         else:
-            return self._to_nplike(
-                ak._util.regularize_backend(backend), index_is_fixed=True
-            )
+            return self._to_nplike(ak._util.regularize_backend(backend))
 
-    def _to_nplike(self, nplike, *, index_is_fixed):
-        assert index_is_fixed
+    def _to_nplike(self, nplike):
         # if isinstance(nplike, ak.nplikes.Jax):
         #     print("YES OFFICER, this nplike right here")
-        return Index(
-            self.raw(nplike), metadata=self.metadata, nplike=nplike, index_is_fixed=True
-        )
+        return Index(self.raw(nplike), metadata=self.metadata, nplike=nplike)
 
     def layout_equal(self, other, index_dtype=True, numpyarray=True):
         if index_dtype:

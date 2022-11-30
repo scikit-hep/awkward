@@ -280,12 +280,8 @@ class UnionArray(Content):
     def project(self, index):
         lentags = self._tags.length
         assert not self._index.length < lentags
-        lenout = ak.index.Index64.empty(
-            1, self._backend.index_nplike, index_is_fixed=True
-        )
-        tmpcarry = ak.index.Index64.empty(
-            lentags, self._backend.index_nplike, index_is_fixed=True
-        )
+        lenout = ak.index.Index64.empty(1, self._backend.index_nplike)
+        tmpcarry = ak.index.Index64.empty(lentags, self._backend.index_nplike)
         assert (
             lenout.nplike is self._backend.index_nplike
             and tmpcarry.nplike is self._backend.index_nplike
@@ -309,9 +305,7 @@ class UnionArray(Content):
             )
         )
         nextcarry = ak.index.Index64(
-            tmpcarry.data[: lenout[0]],
-            nplike=self._backend.index_nplike,
-            index_is_fixed=True,
+            tmpcarry.data[: lenout[0]], nplike=self._backend.index_nplike
         )
         return self._contents[index]._carry(nextcarry, False)
 
@@ -322,9 +316,7 @@ class UnionArray(Content):
         backend = ak._backends.backend_for_nplike(nplike)
 
         lentags = tags.length
-        size = ak.index.Index64.empty(
-            1, nplike=backend.index_nplike, index_is_fixed=True
-        )
+        size = ak.index.Index64.empty(1, nplike=backend.index_nplike)
         assert (
             size.nplike is backend.index_nplike and tags.nplike is backend.index_nplike
         )
@@ -339,12 +331,8 @@ class UnionArray(Content):
                 lentags,
             )
         )
-        current = IndexClass.empty(
-            size[0], nplike=backend.index_nplike, index_is_fixed=True
-        )
-        outindex = IndexClass.empty(
-            lentags, nplike=backend.index_nplike, index_is_fixed=True
-        )
+        current = IndexClass.empty(size[0], nplike=backend.index_nplike)
+        outindex = IndexClass.empty(lentags, nplike=backend.index_nplike)
         assert (
             outindex.nplike is backend.index_nplike
             and current.nplike is backend.index_nplike
@@ -382,12 +370,8 @@ class UnionArray(Content):
         f_offsets = ak.index.Index64(copy.deepcopy(offsets.data))
         contentlen = f_offsets[f_offsets.length - 1]
 
-        tags = TagsClass.empty(
-            contentlen, nplike=backend.index_nplike, index_is_fixed=True
-        )
-        index = IndexClass.empty(
-            contentlen, nplike=backend.index_nplike, index_is_fixed=True
-        )
+        tags = TagsClass.empty(contentlen, nplike=backend.index_nplike)
+        index = IndexClass.empty(contentlen, nplike=backend.index_nplike)
 
         for tag, count in enumerate(counts):
             assert (
@@ -489,12 +473,8 @@ class UnionArray(Content):
             )
 
         length = self._tags.length
-        tags = ak.index.Index8.empty(
-            length, self._backend.index_nplike, index_is_fixed=True
-        )
-        index = ak.index.Index64.empty(
-            length, self._backend.index_nplike, index_is_fixed=True
-        )
+        tags = ak.index.Index8.empty(length, self._backend.index_nplike)
+        index = ak.index.Index64.empty(length, self._backend.index_nplike)
         contents = []
 
         for i, self_cont in enumerate(self._contents):
@@ -726,7 +706,7 @@ class UnionArray(Content):
 
             if has_offsets:
                 total_length = ak.index.Index64.empty(
-                    1, nplike=self._backend.index_nplike, index_is_fixed=True
+                    1, nplike=self._backend.index_nplike
                 )
                 assert (
                     total_length.nplike is self._backend.index_nplike
@@ -752,19 +732,13 @@ class UnionArray(Content):
                 )
 
                 totags = ak.index.Index8.empty(
-                    total_length[0],
-                    nplike=self._backend.index_nplike,
-                    index_is_fixed=True,
+                    total_length[0], nplike=self._backend.index_nplike
                 )
                 toindex = ak.index.Index64.empty(
-                    total_length[0],
-                    nplike=self._backend.index_nplike,
-                    index_is_fixed=True,
+                    total_length[0], nplike=self._backend.index_nplike
                 )
                 tooffsets = ak.index.Index64.empty(
-                    self._tags.length + 1,
-                    nplike=self._backend.index_nplike,
-                    index_is_fixed=True,
+                    self._tags.length + 1, nplike=self._backend.index_nplike
                 )
 
                 assert (
@@ -811,7 +785,6 @@ class UnionArray(Content):
                 offsets = ak.index.Index64.zeros(
                     0,
                     nplike=self._backend.index_nplike,
-                    index_is_fixed=True,
                     dtype=np.int64,
                 )
                 return (
@@ -859,14 +832,10 @@ class UnionArray(Content):
         mylength = self.length
 
         tags = ak.index.Index8.empty(
-            theirlength + mylength,
-            nplike=self._backend.index_nplike,
-            index_is_fixed=True,
+            theirlength + mylength, nplike=self._backend.index_nplike
         )
         index = ak.index.Index64.empty(
-            theirlength + mylength,
-            nplike=self._backend.index_nplike,
-            index_is_fixed=True,
+            theirlength + mylength, nplike=self._backend.index_nplike
         )
 
         contents = [other]
@@ -947,10 +916,10 @@ class UnionArray(Content):
             total_length += array.length
 
         nexttags = ak.index.Index8.empty(
-            total_length, nplike=self._backend.index_nplike, index_is_fixed=True
+            total_length, nplike=self._backend.index_nplike
         )
         nextindex = ak.index.Index64.empty(
-            total_length, nplike=self._backend.index_nplike, index_is_fixed=True
+            total_length, nplike=self._backend.index_nplike
         )
 
         nextcontents = []
@@ -1471,12 +1440,8 @@ class UnionArray(Content):
             contents[tag] = contents[tag].packed()
 
         return UnionArray(
-            ak.index.Index8(
-                tags, nplike=self._backend.index_nplike, index_is_fixed=True
-            ),
-            ak.index.Index(
-                index, nplike=self._backend.index_nplike, index_is_fixed=True
-            ),
+            ak.index.Index8(tags, nplike=self._backend.index_nplike),
+            ak.index.Index(index, nplike=self._backend.index_nplike),
             contents,
             parameters=self._parameters,
             backend=self._backend,
@@ -1497,7 +1462,7 @@ class UnionArray(Content):
         return out
 
     def _to_backend(self, backend: ak._backends.Backend) -> Self:
-        index = self._index._to_nplike(backend.index_nplike, index_is_fixed=True)
+        index = self._index._to_nplike(backend.index_nplike)
         contents = [content._to_backend(backend) for content in self._contents]
         return UnionArray(
             self._tags,

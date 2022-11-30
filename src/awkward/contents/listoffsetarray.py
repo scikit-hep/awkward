@@ -152,7 +152,6 @@ class ListOffsetArray(Content):
                 offsets = ak.index.Index64(
                     self._offsets.raw(self._backend.nplike) - self._offsets[0],
                     nplike=self._backend.index_nplike,
-                    index_is_fixed=True,
                 )
                 content = self._content[self._offsets[0] :]
             else:
@@ -167,9 +166,7 @@ class ListOffsetArray(Content):
     def to_RegularArray(self):
         start, stop = self._offsets[0], self._offsets[self._offsets.length - 1]
         content = self._content._getitem_range(slice(start, stop))
-        size = ak.index.Index64.empty(
-            1, self._backend.index_nplike, index_is_fixed=True
-        )
+        size = ak.index.Index64.empty(1, self._backend.index_nplike)
         assert (
             size.nplike is self._backend.index_nplike
             and self._offsets.nplike is self._backend.index_nplike
@@ -214,7 +211,6 @@ class ListOffsetArray(Content):
             offsets = Index(
                 self._backend.index_nplike.array([0], dtype=self._offsets.dtype),
                 nplike=self._backend.index_nplike,
-                index_is_fixed=True,
             )
         return ListOffsetArray(offsets, self._content, parameters=self._parameters)
 
@@ -247,9 +243,7 @@ class ListOffsetArray(Content):
 
     def _compact_offsets64(self, start_at_zero):
         offsets_len = self._offsets.length - 1
-        out = ak.index.Index64.empty(
-            offsets_len + 1, self._backend.index_nplike, index_is_fixed=True
-        )
+        out = ak.index.Index64.empty(offsets_len + 1, self._backend.index_nplike)
         assert (
             out.nplike is self._backend.index_nplike
             and self._offsets.nplike is self._backend.index_nplike
@@ -284,9 +278,7 @@ class ListOffsetArray(Content):
 
         starts, stops = self.starts, self.stops
 
-        nextcarry = ak.index.Index64.empty(
-            offsets[-1], self._backend.index_nplike, index_is_fixed=True
-        )
+        nextcarry = ak.index.Index64.empty(offsets[-1], self._backend.index_nplike)
         assert (
             nextcarry.nplike is self._backend.index_nplike
             and offsets.nplike is self._backend.index_nplike
@@ -330,9 +322,7 @@ class ListOffsetArray(Content):
             lenstarts = self._offsets.length - 1
             starts, stops = self.starts, self.stops
             nexthead, nexttail = ak._slicing.headtail(tail)
-            nextcarry = ak.index.Index64.empty(
-                lenstarts, self._backend.index_nplike, index_is_fixed=True
-            )
+            nextcarry = ak.index.Index64.empty(lenstarts, self._backend.index_nplike)
 
             assert (
                 nextcarry.nplike is self._backend.index_nplike
@@ -366,9 +356,7 @@ class ListOffsetArray(Content):
             start = ak._util.kSliceNone if start is None else start
             stop = ak._util.kSliceNone if stop is None else stop
 
-            carrylength = ak.index.Index64.empty(
-                1, self._backend.index_nplike, index_is_fixed=True
-            )
+            carrylength = ak.index.Index64.empty(1, self._backend.index_nplike)
             assert (
                 carrylength.nplike is self._backend.index_nplike
                 and self.starts.nplike is self._backend.index_nplike
@@ -394,24 +382,18 @@ class ListOffsetArray(Content):
 
             if self._starts.dtype == "int64":
                 nextoffsets = ak.index.Index64.empty(
-                    lenstarts + 1,
-                    nplike=self._backend.index_nplike,
-                    index_is_fixed=True,
+                    lenstarts + 1, nplike=self._backend.index_nplike
                 )
             elif self._starts.dtype == "int32":
                 nextoffsets = ak.index.Index32.empty(
-                    lenstarts + 1,
-                    nplike=self._backend.index_nplike,
-                    index_is_fixed=True,
+                    lenstarts + 1, nplike=self._backend.index_nplike
                 )
             elif self._starts.dtype == "uint32":
                 nextoffsets = ak.index.IndexU32.empty(
-                    lenstarts + 1,
-                    nplike=self._backend.index_nplike,
-                    index_is_fixed=True,
+                    lenstarts + 1, nplike=self._backend.index_nplike
                 )
             nextcarry = ak.index.Index64.empty(
-                carrylength[0], self._backend.index_nplike, index_is_fixed=True
+                carrylength[0], self._backend.index_nplike
             )
 
             assert (
@@ -450,9 +432,7 @@ class ListOffsetArray(Content):
                 )
 
             else:
-                total = ak.index.Index64.empty(
-                    1, self._backend.index_nplike, index_is_fixed=True
-                )
+                total = ak.index.Index64.empty(1, self._backend.index_nplike)
                 assert (
                     total.nplike is self._backend.index_nplike
                     and nextoffsets.nplike is self._backend.index_nplike
@@ -471,7 +451,7 @@ class ListOffsetArray(Content):
                 )
 
                 nextadvanced = ak.index.Index64.empty(
-                    total[0], self._backend.index_nplike, index_is_fixed=True
+                    total[0], self._backend.index_nplike
                 )
                 assert (
                     nextadvanced.nplike is self._backend.index_nplike
@@ -518,14 +498,10 @@ class ListOffsetArray(Content):
             regular_flathead = ak.index.Index64(flathead)
             if advanced is None or advanced.length == 0:
                 nextcarry = ak.index.Index64.empty(
-                    lenstarts * flathead.length,
-                    self._backend.index_nplike,
-                    index_is_fixed=True,
+                    lenstarts * flathead.length, self._backend.index_nplike
                 )
                 nextadvanced = ak.index.Index64.empty(
-                    lenstarts * flathead.length,
-                    self._backend.index_nplike,
-                    index_is_fixed=True,
+                    lenstarts * flathead.length, self._backend.index_nplike
                 )
                 assert (
                     nextcarry.nplike is self._backend.index_nplike
@@ -562,10 +538,10 @@ class ListOffsetArray(Content):
 
             else:
                 nextcarry = ak.index.Index64.empty(
-                    self.length, self._backend.index_nplike, index_is_fixed=True
+                    self.length, self._backend.index_nplike
                 )
                 nextadvanced = ak.index.Index64.empty(
-                    self.length, self._backend.index_nplike, index_is_fixed=True
+                    self.length, self._backend.index_nplike
                 )
                 assert (
                     nextcarry.nplike is self._backend.index_nplike
@@ -621,9 +597,7 @@ class ListOffsetArray(Content):
             else:
                 return out
         elif posaxis == depth + 1:
-            tonum = ak.index.Index64.empty(
-                self.length, self._backend.index_nplike, index_is_fixed=True
-            )
+            tonum = ak.index.Index64.empty(self.length, self._backend.index_nplike)
             assert (
                 tonum.nplike is self._backend.index_nplike
                 and self.starts.nplike is self._backend.index_nplike
@@ -668,7 +642,6 @@ class ListOffsetArray(Content):
             offsets = ak.index.Index64.zeros(
                 0,
                 nplike=self._backend.index_nplike,
-                index_is_fixed=True,
                 dtype=np.int64,
             )
 
@@ -691,7 +664,6 @@ class ListOffsetArray(Content):
                 tooffsets = ak.index.Index64.empty(
                     self._offsets.length,
                     self._backend.index_nplike,
-                    index_is_fixed=True,
                     dtype=np.int64,
                 )
                 assert (
@@ -775,9 +747,7 @@ class ListOffsetArray(Content):
                 innerlength = offsets[offsets.length - 1]
             else:
                 innerlength = ak._typetracer.UnknownLength
-            localindex = ak.index.Index64.empty(
-                innerlength, self._backend.index_nplike, index_is_fixed=True
-            )
+            localindex = ak.index.Index64.empty(innerlength, self._backend.index_nplike)
             assert (
                 localindex.nplike is self._backend.index_nplike
                 and offsets.nplike is self._backend.index_nplike
@@ -843,9 +813,7 @@ class ListOffsetArray(Content):
             return self._content._is_unique(negaxis - 1, starts, parents, outlength)
         else:
             nextparents = ak.index.Index64.empty(
-                self._offsets[-1] - self._offsets[0],
-                self._backend.index_nplike,
-                index_is_fixed=True,
+                self._offsets[-1] - self._offsets[0], self._backend.index_nplike
             )
 
             assert (
@@ -920,7 +888,7 @@ class ListOffsetArray(Content):
             )
 
             outcarry = ak.index.Index64.empty(
-                nextcarry.length, self._backend.index_nplike, index_is_fixed=True
+                nextcarry.length, self._backend.index_nplike
             )
             assert (
                 outcarry.nplike is self._backend.index_nplike
@@ -946,9 +914,7 @@ class ListOffsetArray(Content):
 
         else:
             nextparents = ak.index.Index64.empty(
-                self._offsets[-1] - self._offsets[0],
-                self._backend.index_nplike,
-                index_is_fixed=True,
+                self._offsets[-1] - self._offsets[0], self._backend.index_nplike
             )
 
             assert (
@@ -1010,9 +976,7 @@ class ListOffsetArray(Content):
 
             if isinstance(self._content, ak.contents.NumpyArray):
                 nextcarry = ak.index.Index64.empty(
-                    self._offsets.length - 1,
-                    self._backend.index_nplike,
-                    index_is_fixed=True,
+                    self._offsets.length - 1, self._backend.index_nplike
                 )
 
                 self_starts, self_stops = self._offsets[:-1], self._offsets[1:]
@@ -1068,14 +1032,12 @@ class ListOffsetArray(Content):
                 nextstarts,
             ) = self._rearrange_prepare_next(outlength, parents)
 
-            nummissing = ak.index.Index64.empty(
-                maxcount, self._backend.index_nplike, index_is_fixed=True
-            )
+            nummissing = ak.index.Index64.empty(maxcount, self._backend.index_nplike)
             missing = ak.index.Index64.empty(
-                self._offsets[-1], self._backend.index_nplike, index_is_fixed=True
+                self._offsets[-1], self._backend.index_nplike
             )
             nextshifts = ak.index.Index64.empty(
-                nextcarry.length, self._backend.index_nplike, index_is_fixed=True
+                nextcarry.length, self._backend.index_nplike
             )
             assert (
                 nummissing.nplike is self._backend.index_nplike
@@ -1125,7 +1087,7 @@ class ListOffsetArray(Content):
             )
 
             outcarry = ak.index.Index64.empty(
-                nextcarry.length, self._backend.index_nplike, index_is_fixed=True
+                nextcarry.length, self._backend.index_nplike
             )
             assert (
                 outcarry.nplike is self._backend.index_nplike
@@ -1150,9 +1112,7 @@ class ListOffsetArray(Content):
             )
         else:
             nextparents = ak.index.Index64.empty(
-                self._offsets[-1] - self._offsets[0],
-                self._backend.index_nplike,
-                index_is_fixed=True,
+                self._offsets[-1] - self._offsets[0], self._backend.index_nplike
             )
 
             assert (
@@ -1206,9 +1166,7 @@ class ListOffsetArray(Content):
 
             if isinstance(self._content, ak.contents.NumpyArray):
                 nextcarry = ak.index.Index64.empty(
-                    self._offsets.length - 1,
-                    self._backend.index_nplike,
-                    index_is_fixed=True,
+                    self._offsets.length - 1, self._backend.index_nplike
                 )
 
                 starts, stops = self._offsets[:-1], self._offsets[1:]
@@ -1275,7 +1233,7 @@ class ListOffsetArray(Content):
             )
 
             outcarry = ak.index.Index64.empty(
-                nextcarry.length, self._backend.index_nplike, index_is_fixed=True
+                nextcarry.length, self._backend.index_nplike
             )
             assert (
                 outcarry.nplike is self._backend.index_nplike
@@ -1300,9 +1258,7 @@ class ListOffsetArray(Content):
             )
         else:
             nextparents = ak.index.Index64.empty(
-                self._offsets[-1] - self._offsets[0],
-                self._backend.index_nplike,
-                index_is_fixed=True,
+                self._offsets[-1] - self._offsets[0], self._backend.index_nplike
             )
 
             assert (
@@ -1356,12 +1312,11 @@ class ListOffsetArray(Content):
             stops = self.stops
 
             totallen = ak.index.Index64.empty(
-                1, self._backend.index_nplike, index_is_fixed=True, dtype=np.int64
+                1, self._backend.index_nplike, dtype=np.int64
             )
             offsets = ak.index.Index64.empty(
                 self.length + 1,
                 self._backend.index_nplike,
-                index_is_fixed=True,
                 dtype=np.int64,
             )
             assert (
@@ -1388,7 +1343,7 @@ class ListOffsetArray(Content):
             )
 
             tocarryraw = ak.index.Index.empty(
-                n, dtype=np.intp, nplike=self._backend.index_nplike, index_is_fixed=True
+                n, dtype=np.intp, nplike=self._backend.index_nplike
             )
             tocarry = []
 
@@ -1396,7 +1351,6 @@ class ListOffsetArray(Content):
                 ptr = ak.index.Index64.empty(
                     totallen[0],
                     nplike=self._backend.index_nplike,
-                    index_is_fixed=True,
                     dtype=np.int64,
                 )
                 tocarry.append(ptr)
@@ -1404,10 +1358,10 @@ class ListOffsetArray(Content):
                     tocarryraw[i] = ptr.ptr
 
             toindex = ak.index.Index64.empty(
-                n, self._backend.index_nplike, index_is_fixed=True, dtype=np.int64
+                n, self._backend.index_nplike, dtype=np.int64
             )
             fromindex = ak.index.Index64.empty(
-                n, self._backend.index_nplike, index_is_fixed=True, dtype=np.int64
+                n, self._backend.index_nplike, dtype=np.int64
             )
             assert (
                 toindex.nplike is self._backend.index_nplike
@@ -1499,12 +1453,8 @@ class ListOffsetArray(Content):
                 nextstarts,
             ) = self._rearrange_prepare_next(outlength, parents)
 
-            outstarts = ak.index.Index64.empty(
-                outlength, self._backend.index_nplike, index_is_fixed=True
-            )
-            outstops = ak.index.Index64.empty(
-                outlength, self._backend.index_nplike, index_is_fixed=True
-            )
+            outstarts = ak.index.Index64.empty(outlength, self._backend.index_nplike)
+            outstops = ak.index.Index64.empty(outlength, self._backend.index_nplike)
             assert (
                 outstarts.nplike is self._backend.index_nplike
                 and outstops.nplike is self._backend.index_nplike
@@ -1527,13 +1477,13 @@ class ListOffsetArray(Content):
 
             if reducer.needs_position:
                 nextshifts = ak.index.Index64.empty(
-                    nextcarry.length, self._backend.index_nplike, index_is_fixed=True
+                    nextcarry.length, self._backend.index_nplike
                 )
                 nummissing = ak.index.Index64.empty(
-                    maxcount, self._backend.index_nplike, index_is_fixed=True
+                    maxcount, self._backend.index_nplike
                 )
                 missing = ak.index.Index64.empty(
-                    self._offsets[-1], self._backend.index_nplike, index_is_fixed=True
+                    self._offsets[-1], self._backend.index_nplike
                 )
                 assert (
                     nummissing.nplike is self._backend.index_nplike
@@ -1595,9 +1545,7 @@ class ListOffsetArray(Content):
 
         else:
             nextlen = self._offsets[-1] - self._offsets[0]
-            nextparents = ak.index.Index64.empty(
-                nextlen, self._backend.index_nplike, index_is_fixed=True
-            )
+            nextparents = ak.index.Index64.empty(nextlen, self._backend.index_nplike)
 
             assert (
                 nextparents.nplike is self._backend.index_nplike
@@ -1631,7 +1579,7 @@ class ListOffsetArray(Content):
             )
 
             outoffsets = ak.index.Index64.empty(
-                outlength + 1, self._backend.index_nplike, index_is_fixed=True
+                outlength + 1, self._backend.index_nplike
             )
             assert (
                 outoffsets.nplike is self._backend.index_nplike
@@ -1665,11 +1613,9 @@ class ListOffsetArray(Content):
 
     def _rearrange_prepare_next(self, outlength, parents):
         nextlen = self._offsets[-1] - self._offsets[0]
-        maxcount = ak.index.Index64.empty(
-            1, self._backend.index_nplike, index_is_fixed=True
-        )
+        maxcount = ak.index.Index64.empty(1, self._backend.index_nplike)
         offsetscopy = ak.index.Index64.empty(
-            self.offsets.length, self._backend.index_nplike, index_is_fixed=True
+            self.offsets.length, self._backend.index_nplike
         )
         assert (
             maxcount.nplike is self._backend.index_nplike
@@ -1691,17 +1637,11 @@ class ListOffsetArray(Content):
         )
 
         # A "stable" sort is essential for the subsequent steps.
-        nextcarry = ak.index.Index64.empty(
-            nextlen, nplike=self._backend.index_nplike, index_is_fixed=True
-        )
-        nextparents = ak.index.Index64.empty(
-            nextlen, nplike=self._backend.index_nplike, index_is_fixed=True
-        )
-        maxnextparents = ak.index.Index64.empty(
-            1, self._backend.index_nplike, index_is_fixed=True
-        )
+        nextcarry = ak.index.Index64.empty(nextlen, nplike=self._backend.index_nplike)
+        nextparents = ak.index.Index64.empty(nextlen, nplike=self._backend.index_nplike)
+        maxnextparents = ak.index.Index64.empty(1, self._backend.index_nplike)
         distincts = ak.index.Index64.empty(
-            outlength * maxcount[0], self._backend.index_nplike, index_is_fixed=True
+            outlength * maxcount[0], self._backend.index_nplike
         )
         assert (
             maxnextparents.nplike is self._backend.index_nplike
@@ -1735,7 +1675,7 @@ class ListOffsetArray(Content):
             )
         )
         nextstarts = ak.index.Index64.empty(
-            maxnextparents[0] + 1, self._backend.index_nplike, index_is_fixed=True
+            maxnextparents[0] + 1, self._backend.index_nplike
         )
         assert (
             nextstarts.nplike is self._backend.index_nplike
@@ -1805,13 +1745,9 @@ class ListOffsetArray(Content):
             return self.pad_none_axis0(target, clip)
         if posaxis == depth + 1:
             if not clip:
-                tolength = ak.index.Index64.empty(
-                    1, self._backend.index_nplike, index_is_fixed=True
-                )
+                tolength = ak.index.Index64.empty(1, self._backend.index_nplike)
                 offsets_ = ak.index.Index64.empty(
-                    self._offsets.length,
-                    self._backend.index_nplike,
-                    index_is_fixed=True,
+                    self._offsets.length, self._backend.index_nplike
                 )
                 assert (
                     offsets_.nplike is self._backend.index_nplike
@@ -1834,7 +1770,7 @@ class ListOffsetArray(Content):
                 )
 
                 outindex = ak.index.Index64.empty(
-                    tolength[0], self._backend.index_nplike, index_is_fixed=True
+                    tolength[0], self._backend.index_nplike
                 )
                 assert (
                     outindex.nplike is self._backend.index_nplike
@@ -1860,14 +1796,10 @@ class ListOffsetArray(Content):
                 )
             else:
                 starts_ = ak.index.Index64.empty(
-                    self._offsets.length - 1,
-                    self._backend.index_nplike,
-                    index_is_fixed=True,
+                    self._offsets.length - 1, self._backend.index_nplike
                 )
                 stops_ = ak.index.Index64.empty(
-                    self._offsets.length - 1,
-                    self._backend.index_nplike,
-                    index_is_fixed=True,
+                    self._offsets.length - 1, self._backend.index_nplike
                 )
                 assert (
                     starts_.nplike is self._backend.index_nplike
@@ -1887,9 +1819,7 @@ class ListOffsetArray(Content):
                 )
 
                 outindex = ak.index.Index64.empty(
-                    target * (self._offsets.length - 1),
-                    self._backend.index_nplike,
-                    index_is_fixed=True,
+                    target * (self._offsets.length - 1), self._backend.index_nplike
                 )
                 assert (
                     outindex.nplike is self._backend.index_nplike
@@ -2058,9 +1988,7 @@ class ListOffsetArray(Content):
         if self._backend.nplike.known_shape and self._backend.nplike.known_data:
             offsetsmin = self._offsets[0]
             offsets = ak.index.Index(
-                self._offsets.data - offsetsmin,
-                nplike=self._backend.index_nplike,
-                index_is_fixed=True,
+                self._offsets.data - offsetsmin, nplike=self._backend.index_nplike
             )
             content = self._content[offsetsmin : self._offsets[-1]]
         else:
@@ -2181,7 +2109,7 @@ class ListOffsetArray(Content):
 
     def _to_backend(self, backend: ak._backends.Backend) -> Self:
         content = self._content._to_backend(backend)
-        offsets = self._offsets._to_nplike(backend.index_nplike, index_is_fixed=True)
+        offsets = self._offsets._to_nplike(backend.index_nplike)
         return ListOffsetArray(offsets, content, parameters=self._parameters)
 
     def _awkward_strings_to_nonfinite(self, nonfinit_dict):
@@ -2203,9 +2131,7 @@ class ListOffsetArray(Content):
 
                 if has_another_string:
                     union_tags = ak.index.Index8.zeros(
-                        content.length,
-                        nplike=self._backend.index_nplike,
-                        index_is_fixed=True,
+                        content.length, nplike=self._backend.index_nplike
                     )
                     content.backend.nplike.isnan(content._data, union_tags._data)
                     union_index = ak.index.Index64(
@@ -2213,7 +2139,6 @@ class ListOffsetArray(Content):
                             content.length, dtype=np.int64
                         ),
                         nplike=self._backend.index_nplike,
-                        index_is_fixed=True,
                     )
 
                     return ak.contents.UnionArray(

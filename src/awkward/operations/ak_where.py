@@ -116,7 +116,6 @@ def _impl3(condition, x, y, mergebool, highlevel, behavior):
             index = ak.index.Index64(
                 backend.index_nplike.arange(len(tags), dtype=np.int64),
                 nplike=backend.index_nplike,
-                index_is_fixed=True,
             )
             if not isinstance(left, ak.contents.Content):
                 left = ak.contents.NumpyArray(backend.nplike.repeat(left, len(tags)))

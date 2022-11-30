@@ -134,9 +134,7 @@ def _impl(array, counts, axis, highlevel, behavior):
             out = ak.contents.ListOffsetArray(ak.index.Index64(offsets), layout)
             if not isinstance(mask, (bool, np.bool_)):
                 index = ak.index.Index8(
-                    backend.nplike.asarray(mask).astype(np.int8),
-                    nplike=backend.nplike,
-                    index_is_fixed=True,
+                    backend.nplike.asarray(mask).astype(np.int8), nplike=backend.nplike
                 )
                 out = ak.contents.ByteMaskedArray(index, out, valid_when=False)
 

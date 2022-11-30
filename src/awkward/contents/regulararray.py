@@ -227,7 +227,7 @@ class RegularArray(Content):
             raise ak._errors.index_error(self, where)
 
         nextcarry = ak.index.Index64.empty(
-            where.shape[0] * self._size, self._backend.index_nplike, index_is_fixed=True
+            where.shape[0] * self._size, self._backend.index_nplike
         )
 
         assert nextcarry.nplike is self._backend.index_nplike
@@ -253,9 +253,7 @@ class RegularArray(Content):
         )
 
     def _compact_offsets64(self, start_at_zero):
-        out = ak.index.Index64.empty(
-            (self._length + 1), self._backend.index_nplike, index_is_fixed=True
-        )
+        out = ak.index.Index64.empty((self._length + 1), self._backend.index_nplike)
         assert out.nplike is self._backend.index_nplike
         self._handle_error(
             self._backend["awkward_RegularArray_compact_offsets", out.dtype.type](
@@ -287,9 +285,7 @@ class RegularArray(Content):
 
         if self._size == 1:
             carrylen = offsets[-1]
-            nextcarry = ak.index.Index64.empty(
-                carrylen, self._backend.index_nplike, index_is_fixed=True
-            )
+            nextcarry = ak.index.Index64.empty(carrylen, self._backend.index_nplike)
             assert (
                 nextcarry.nplike is self._backend.index_nplike
                 and offsets.nplike is self._backend.index_nplike
@@ -342,9 +338,7 @@ class RegularArray(Content):
 
         elif isinstance(head, int):
             nexthead, nexttail = ak._slicing.headtail(tail)
-            nextcarry = ak.index.Index64.empty(
-                self._length, self._backend.index_nplike, index_is_fixed=True
-            )
+            nextcarry = ak.index.Index64.empty(self._length, self._backend.index_nplike)
             assert nextcarry.nplike is self._backend.index_nplike
             self._handle_error(
                 self._backend[
@@ -377,7 +371,7 @@ class RegularArray(Content):
                     nextsize += 1
 
             nextcarry = ak.index.Index64.empty(
-                self._length * nextsize, self._backend.index_nplike, index_is_fixed=True
+                self._length * nextsize, self._backend.index_nplike
             )
             assert nextcarry.nplike is self._backend.index_nplike
             self._handle_error(
@@ -406,13 +400,9 @@ class RegularArray(Content):
                 )
             else:
                 nextadvanced = ak.index.Index64.empty(
-                    self._length * nextsize,
-                    self._backend.index_nplike,
-                    index_is_fixed=True,
+                    self._length * nextsize, self._backend.index_nplike
                 )
-                advanced = advanced._to_nplike(
-                    self._backend.index_nplike, index_is_fixed=True
-                )
+                advanced = advanced._to_nplike(self._backend.index_nplike)
                 assert (
                     nextadvanced.nplike is self._backend.index_nplike
                     and advanced.nplike is self._backend.index_nplike
@@ -450,12 +440,12 @@ class RegularArray(Content):
             return self._getitem_next_ellipsis(tail, advanced)
 
         elif isinstance(head, ak.index.Index64):
-            head = head._to_nplike(self._backend.index_nplike, index_is_fixed=True)
+            head = head._to_nplike(self._backend.index_nplike)
             nexthead, nexttail = ak._slicing.headtail(tail)
             flathead = self._backend.index_nplike.asarray(head.data.reshape(-1))
 
             regular_flathead = ak.index.Index64.empty(
-                flathead.shape[0], self._backend.index_nplike, index_is_fixed=True
+                flathead.shape[0], self._backend.index_nplike
             )
             assert regular_flathead.nplike is self._backend.index_nplike
             self._handle_error(
@@ -474,14 +464,10 @@ class RegularArray(Content):
 
             if advanced is None or advanced.length == 0:
                 nextcarry = ak.index.Index64.empty(
-                    self._length * flathead.shape[0],
-                    self._backend.index_nplike,
-                    index_is_fixed=True,
+                    self._length * flathead.shape[0], self._backend.index_nplike
                 )
                 nextadvanced = ak.index.Index64.empty(
-                    self._length * flathead.shape[0],
-                    self._backend.index_nplike,
-                    index_is_fixed=True,
+                    self._length * flathead.shape[0], self._backend.index_nplike
                 )
                 assert (
                     nextcarry.nplike is self._backend.index_nplike
@@ -515,25 +501,21 @@ class RegularArray(Content):
                     return out
 
             elif self._size == 0:
-                nextcarry = ak.index.Index64.empty(
-                    0, nplike=self._backend.index_nplike, index_is_fixed=True
-                )
+                nextcarry = ak.index.Index64.empty(0, nplike=self._backend.index_nplike)
                 nextadvanced = ak.index.Index64.empty(
-                    0, nplike=self._backend.index_nplike, index_is_fixed=True
+                    0, nplike=self._backend.index_nplike
                 )
                 nextcontent = self._content._carry(nextcarry, True)
                 return nextcontent._getitem_next(nexthead, nexttail, nextadvanced)
 
             else:
                 nextcarry = ak.index.Index64.empty(
-                    self._length, self._backend.index_nplike, index_is_fixed=True
+                    self._length, self._backend.index_nplike
                 )
                 nextadvanced = ak.index.Index64.empty(
-                    self._length, self._backend.index_nplike, index_is_fixed=True
+                    self._length, self._backend.index_nplike
                 )
-                advanced = advanced._to_nplike(
-                    self._backend.index_nplike, index_is_fixed=True
-                )
+                advanced = advanced._to_nplike(self._backend.index_nplike)
                 assert (
                     nextcarry.nplike is self._backend.index_nplike
                     and nextadvanced.nplike is self._backend.index_nplike
@@ -584,14 +566,10 @@ class RegularArray(Content):
             regularlength = self._length
             singleoffsets = head._offsets
             multistarts = ak.index.Index64.empty(
-                head.length * regularlength,
-                self._backend.index_nplike,
-                index_is_fixed=True,
+                head.length * regularlength, self._backend.index_nplike
             )
             multistops = ak.index.Index64.empty(
-                head.length * regularlength,
-                self._backend.index_nplike,
-                index_is_fixed=True,
+                head.length * regularlength, self._backend.index_nplike
             )
 
             assert singleoffsets.nplike is self._backend.index_nplike
@@ -633,9 +611,7 @@ class RegularArray(Content):
             else:
                 return out
         elif posaxis == depth + 1:
-            tonum = ak.index.Index64.empty(
-                self._length, self._backend.index_nplike, index_is_fixed=True
-            )
+            tonum = ak.index.Index64.empty(self._length, self._backend.index_nplike)
             assert tonum.nplike is self._backend.index_nplike
             self._handle_error(
                 self._backend["awkward_RegularArray_num", tonum.dtype.type](
@@ -729,9 +705,7 @@ class RegularArray(Content):
             return self._local_index_axis0()
         elif posaxis == depth + 1:
             localindex = ak.index.Index64.empty(
-                self._length * self._size,
-                nplike=self._backend.index_nplike,
-                index_is_fixed=True,
+                self._length * self._size, nplike=self._backend.index_nplike
             )
             self._handle_error(
                 self._backend["awkward_RegularArray_localindex", np.int64](
@@ -896,7 +870,6 @@ class RegularArray(Content):
                 ptr = ak.index.Index64.empty(
                     totallen,
                     nplike=self._backend.index_nplike,
-                    index_is_fixed=True,
                     dtype=np.int64,
                 )
                 tocarry.append(ptr)
@@ -904,10 +877,10 @@ class RegularArray(Content):
                     tocarryraw[i] = ptr.ptr
 
             toindex = ak.index.Index64.empty(
-                n, self._backend.index_nplike, index_is_fixed=True, dtype=np.int64
+                n, self._backend.index_nplike, dtype=np.int64
             )
             fromindex = ak.index.Index64.empty(
-                n, self._backend.index_nplike, index_is_fixed=True, dtype=np.int64
+                n, self._backend.index_nplike, dtype=np.int64
             )
 
             if self._size != 0:
@@ -978,21 +951,19 @@ class RegularArray(Content):
                 nextstarts = ak.index.Index64(
                     self._backend.index_nplike.full(0, len(self)),
                     nplike=self._backend.index_nplike,
-                    index_is_fixed=True,
                 )
             else:
                 nextstarts = ak.index.Index64(
                     self._backend.index_nplike.arange(0, nextlen, self.size),
                     nplike=self._backend.index_nplike,
-                    index_is_fixed=True,
                 )
                 assert nextstarts.length == len(self)
 
             nextcarry = ak.index.Index64.empty(
-                nextlen, nplike=self._backend.index_nplike, index_is_fixed=True
+                nextlen, nplike=self._backend.index_nplike
             )
             nextparents = ak.index.Index64.empty(
-                nextlen, nplike=self._backend.index_nplike, index_is_fixed=True
+                nextlen, nplike=self._backend.index_nplike
             )
             assert (
                 parents.nplike is self._backend.index_nplike
@@ -1018,9 +989,7 @@ class RegularArray(Content):
                 # Regular arrays have the same length rows, so there can be no "missing" values
                 # unlike ragged list types
                 nextshifts = ak.index.Index64.zeros(
-                    nextcarry.length,
-                    nplike=self._backend.index_nplike,
-                    index_is_fixed=True,
+                    nextcarry.length, nplike=self._backend.index_nplike
                 )
             else:
                 nextshifts = None
@@ -1047,9 +1016,7 @@ class RegularArray(Content):
                 out = ak.contents.RegularArray(out, 1, self.length, parameters=None)
             return out
         else:
-            nextparents = ak.index.Index64.empty(
-                nextlen, self._backend.index_nplike, index_is_fixed=True
-            )
+            nextparents = ak.index.Index64.empty(nextlen, self._backend.index_nplike)
 
             assert nextparents.nplike is self._backend.index_nplike
             self._handle_error(
@@ -1067,14 +1034,12 @@ class RegularArray(Content):
                 nextstarts = ak.index.Index64(
                     self._backend.index_nplike.arange(0, len(nextparents), self._size),
                     nplike=self._backend.index_nplike,
-                    index_is_fixed=True,
                 )
             else:
                 assert len(nextparents) == 0
                 nextstarts = ak.index.Index64(
                     self._backend.index_nplike.zeros(0),
                     nplike=self._backend.index_nplike,
-                    index_is_fixed=True,
                 )
 
             outcontent = self._content._reduce_next(
@@ -1142,7 +1107,7 @@ class RegularArray(Content):
                     assert outcontent.is_regular
 
             outoffsets = ak.index.Index64.empty(
-                outlength + 1, self._backend.index_nplike, index_is_fixed=True
+                outlength + 1, self._backend.index_nplike
             )
             assert (
                 outoffsets.nplike is self._backend.index_nplike
@@ -1191,9 +1156,7 @@ class RegularArray(Content):
 
             else:
                 index = ak.index.Index64.empty(
-                    self._length * target,
-                    self._backend.index_nplike,
-                    index_is_fixed=True,
+                    self._length * target, self._backend.index_nplike
                 )
                 assert index.nplike is self._backend.index_nplike
                 self._handle_error(

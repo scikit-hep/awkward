@@ -367,9 +367,7 @@ class RecordArray(Content):
             if self._backend.index_nplike.any(where >= self._length, prefer=False):
                 raise ak._errors.index_error(self, where)
 
-            nextindex = ak.index.Index64(
-                where, nplike=self._backend.index_nplike, index_is_fixed=True
-            )
+            nextindex = ak.index.Index64(where, nplike=self._backend.index_nplike)
             return ak.contents.IndexedArray(nextindex, self, parameters=None)
 
         else:
@@ -452,9 +450,7 @@ class RecordArray(Content):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
             npsingle = self._backend.index_nplike.full((1,), self.length, np.int64)
-            single = ak.index.Index64(
-                npsingle, nplike=self._backend.index_nplike, index_is_fixed=True
-            )
+            single = ak.index.Index64(npsingle, nplike=self._backend.index_nplike)
             singleton = ak.contents.NumpyArray(
                 single, parameters=None, backend=self._backend
             )
@@ -506,7 +502,6 @@ class RecordArray(Content):
             offsets = ak.index.Index64.zeros(
                 1,
                 nplike=self._backend.index_nplike,
-                index_is_fixed=True,
                 dtype=np.int64,
             )
             return (

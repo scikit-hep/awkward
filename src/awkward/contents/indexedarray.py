@@ -197,9 +197,7 @@ class IndexedArray(Content):
                 ),
             )
 
-        nextcarry = ak.index.Index64.empty(
-            self.length, self._backend.index_nplike, index_is_fixed=True
-        )
+        nextcarry = ak.index.Index64.empty(self.length, self._backend.index_nplike)
         assert (
             nextcarry.nplike is self._backend.index_nplike
             and self._index.nplike is self._backend.index_nplike
@@ -236,7 +234,7 @@ class IndexedArray(Content):
             nexthead, nexttail = ak._slicing.headtail(tail)
 
             nextcarry = ak.index.Index64.empty(
-                self._index.length, self._backend.index_nplike, index_is_fixed=True
+                self._index.length, self._backend.index_nplike
             )
             assert (
                 nextcarry.nplike is self._backend.index_nplike
@@ -288,7 +286,7 @@ class IndexedArray(Content):
                     )
                 )
             nextindex = ak.index.Index64.empty(
-                self._index.length, self._backend.index_nplike, index_is_fixed=True
+                self._index.length, self._backend.index_nplike
             )
             assert (
                 nextindex.nplike is self._backend.index_nplike
@@ -314,9 +312,7 @@ class IndexedArray(Content):
             return next.project()
 
         else:
-            nextcarry = ak.index.Index64.empty(
-                self.length, self._backend.index_nplike, index_is_fixed=True
-            )
+            nextcarry = ak.index.Index64.empty(self.length, self._backend.index_nplike)
             assert (
                 nextcarry.nplike is self._backend.index_nplike
                 and self._index.nplike is self._backend.index_nplike
@@ -356,9 +352,7 @@ class IndexedArray(Content):
             ):
                 inner = self._content.index
                 result = ak.index.Index64.empty(
-                    self.index.length,
-                    nplike=self._backend.index_nplike,
-                    index_is_fixed=True,
+                    self.index.length, nplike=self._backend.index_nplike
                 )
             elif isinstance(
                 self._content,
@@ -371,7 +365,7 @@ class IndexedArray(Content):
                 rawcontent = self._content.to_IndexedOptionArray64()
                 inner = rawcontent.index
                 result = ak.index.Index64.empty(
-                    self.index.length, self._backend.index_nplike, index_is_fixed=True
+                    self.index.length, self._backend.index_nplike
                 )
 
             assert (
@@ -489,7 +483,7 @@ class IndexedArray(Content):
         theirlength = other.length
         mylength = self.length
         index = ak.index.Index64.empty(
-            (theirlength + mylength), self._backend.index_nplike, index_is_fixed=True
+            (theirlength + mylength), self._backend.index_nplike
         )
 
         content = other.merge(self._content)
@@ -538,7 +532,7 @@ class IndexedArray(Content):
         contentlength_so_far = 0
         length_so_far = 0
         nextindex = ak.index.Index64.empty(
-            total_length, nplike=self._backend.index_nplike, index_is_fixed=True
+            total_length, nplike=self._backend.index_nplike
         )
 
         parameters = self._parameters
@@ -633,18 +627,12 @@ class IndexedArray(Content):
             return self.project()._local_index(posaxis, depth)
 
     def _unique_index(self, index, sorted=True):
-        next = ak.index.Index64.zeros(
-            self.length, nplike=self._backend.index_nplike, index_is_fixed=True
-        )
-        length = ak.index.Index64.zeros(
-            1, nplike=self._backend.index_nplike, index_is_fixed=True
-        )
+        next = ak.index.Index64.zeros(self.length, nplike=self._backend.index_nplike)
+        length = ak.index.Index64.zeros(1, nplike=self._backend.index_nplike)
 
         if not sorted:
             next = self._index
-            offsets = ak.index.Index64.empty(
-                2, self._backend.index_nplike, index_is_fixed=True
-            )
+            offsets = ak.index.Index64.empty(2, self._backend.index_nplike)
             offsets[0] = 0
             offsets[1] = next.length
             assert (
@@ -732,15 +720,9 @@ class IndexedArray(Content):
         parents_length = parents.length
         next_length = index_length
 
-        nextcarry = ak.index.Index64.empty(
-            index_length, self._backend.index_nplike, index_is_fixed=True
-        )
-        nextparents = ak.index.Index64.empty(
-            index_length, self._backend.index_nplike, index_is_fixed=True
-        )
-        outindex = ak.index.Index64.empty(
-            index_length, self._backend.index_nplike, index_is_fixed=True
-        )
+        nextcarry = ak.index.Index64.empty(index_length, self._backend.index_nplike)
+        nextparents = ak.index.Index64.empty(index_length, self._backend.index_nplike)
+        outindex = ak.index.Index64.empty(index_length, self._backend.index_nplike)
         assert (
             nextcarry.nplike is self._backend.index_nplike
             and nextparents.nplike is self._backend.index_nplike
@@ -775,7 +757,7 @@ class IndexedArray(Content):
 
         if branch or (negaxis is not None and negaxis != depth):
             nextoutindex = ak.index.Index64.empty(
-                parents_length, self._backend.index_nplike, index_is_fixed=True
+                parents_length, self._backend.index_nplike
             )
             assert (
                 nextoutindex.nplike is self._backend.index_nplike
@@ -822,7 +804,7 @@ class IndexedArray(Content):
                     )
 
                 outoffsets = ak.index.Index64.empty(
-                    starts.length + 1, self._backend.index_nplike, index_is_fixed=True
+                    starts.length + 1, self._backend.index_nplike
                 )
                 assert (
                     outoffsets.nplike is self._backend.index_nplike
@@ -851,7 +833,6 @@ class IndexedArray(Content):
                 nextoutindex = ak.index.Index64(
                     self._backend.index_nplike.arange(unique.length, dtype=np.int64),
                     nplike=self._backend.index_nplike,
-                    index_is_fixed=True,
                 )
                 out = ak.contents.IndexedOptionArray(
                     nextoutindex, unique, parameters=self._parameters
@@ -1054,9 +1035,7 @@ class IndexedArray(Content):
             npindex = self._index.data
             indexmin = npindex.min()
             index = ak.index.Index(
-                npindex - indexmin,
-                nplike=self._backend.index_nplike,
-                index_is_fixed=True,
+                npindex - indexmin, nplike=self._backend.index_nplike
             )
             content = self._content[indexmin : npindex.max() + 1]
         else:
@@ -1127,7 +1106,7 @@ class IndexedArray(Content):
 
     def _to_backend(self, backend: ak._backends.Backend) -> Self:
         content = self._content._to_backend(backend)
-        index = self._index._to_nplike(backend.index_nplike, index_is_fixed=True)
+        index = self._index._to_nplike(backend.index_nplike)
         return IndexedArray(index, content, parameters=self._parameters)
 
     def _layout_equal(self, other, index_dtype=True, numpyarray=True):

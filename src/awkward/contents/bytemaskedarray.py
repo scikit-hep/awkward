@@ -158,7 +158,7 @@ class ByteMaskedArray(Content):
 
     def to_IndexedOptionArray64(self):
         index = ak.index.Index64.empty(
-            self._mask.length, nplike=self._backend.index_nplike, index_is_fixed=True
+            self._mask.length, nplike=self._backend.index_nplike
         )
         assert (
             index.nplike is self._backend.index_nplike
@@ -299,9 +299,7 @@ class ByteMaskedArray(Content):
 
     def _nextcarry_outindex(self, nplike):
         backend = ak._backends.backend_for_nplike(nplike)
-        numnull = ak.index.Index64.empty(
-            1, nplike=backend.index_nplike, index_is_fixed=True
-        )
+        numnull = ak.index.Index64.empty(1, nplike=backend.index_nplike)
 
         assert (
             numnull.nplike is self._backend.index_nplike
@@ -320,11 +318,9 @@ class ByteMaskedArray(Content):
             )
         )
         nextcarry = ak.index.Index64.empty(
-            self.length - numnull[0], nplike=backend.index_nplike, index_is_fixed=True
+            self.length - numnull[0], nplike=backend.index_nplike
         )
-        outindex = ak.index.Index64.empty(
-            self.length, nplike=backend.index_nplike, index_is_fixed=True
-        )
+        outindex = ak.index.Index64.empty(self.length, nplike=backend.index_nplike)
         assert (
             nextcarry.nplike is self._backend.index_nplike
             and outindex.nplike is self._backend.index_nplike
@@ -365,14 +361,10 @@ class ByteMaskedArray(Content):
         numnull, nextcarry, outindex = self._nextcarry_outindex(self._backend.nplike)
 
         reducedstarts = ak.index.Index64.empty(
-            self.length - numnull,
-            nplike=self._backend.index_nplike,
-            index_is_fixed=True,
+            self.length - numnull, nplike=self._backend.index_nplike
         )
         reducedstops = ak.index.Index64.empty(
-            self.length - numnull,
-            nplike=self._backend.index_nplike,
-            index_is_fixed=True,
+            self.length - numnull, nplike=self._backend.index_nplike
         )
 
         assert (
@@ -451,9 +443,7 @@ class ByteMaskedArray(Content):
 
     def project(self, mask=None):
         mask_length = self._mask.length
-        numnull = ak.index.Index64.zeros(
-            1, nplike=self._backend.index_nplike, index_is_fixed=True
-        )
+        numnull = ak.index.Index64.zeros(1, nplike=self._backend.index_nplike)
 
         if mask is not None:
             if self._backend.nplike.known_shape and mask_length != mask.length:
@@ -466,7 +456,7 @@ class ByteMaskedArray(Content):
                 )
 
             nextmask = ak.index.Index8.empty(
-                mask_length, nplike=self._backend.index_nplike, index_is_fixed=True
+                mask_length, nplike=self._backend.index_nplike
             )
             assert (
                 nextmask.nplike is self._backend.index_nplike
@@ -511,9 +501,7 @@ class ByteMaskedArray(Content):
                 )
             )
             nextcarry = ak.index.Index64.empty(
-                mask_length - numnull[0],
-                nplike=self._backend.index_nplike,
-                index_is_fixed=True,
+                mask_length - numnull[0], nplike=self._backend.index_nplike
             )
             assert (
                 nextcarry.nplike is self._backend.index_nplike
@@ -593,7 +581,6 @@ class ByteMaskedArray(Content):
                 outoffsets = ak.index.Index64.empty(
                     offsets.length + numnull,
                     nplike=self._backend.index_nplike,
-                    index_is_fixed=True,
                     dtype=np.int64,
                 )
 
@@ -774,9 +761,7 @@ class ByteMaskedArray(Content):
     ):
         mask_length = self._mask.length
 
-        numnull = ak.index.Index64.empty(
-            1, nplike=self._backend.index_nplike, index_is_fixed=True
-        )
+        numnull = ak.index.Index64.empty(1, nplike=self._backend.index_nplike)
         assert (
             numnull.nplike is self._backend.index_nplike
             and self._mask.nplike is self._backend.index_nplike
@@ -796,13 +781,13 @@ class ByteMaskedArray(Content):
 
         next_length = mask_length - numnull[0]
         nextcarry = ak.index.Index64.empty(
-            next_length, nplike=self._backend.index_nplike, index_is_fixed=True
+            next_length, nplike=self._backend.index_nplike
         )
         nextparents = ak.index.Index64.empty(
-            next_length, nplike=self._backend.index_nplike, index_is_fixed=True
+            next_length, nplike=self._backend.index_nplike
         )
         outindex = ak.index.Index64.empty(
-            mask_length, nplike=self._backend.index_nplike, index_is_fixed=True
+            mask_length, nplike=self._backend.index_nplike
         )
         assert (
             nextcarry.nplike is self._backend.index_nplike
@@ -834,7 +819,7 @@ class ByteMaskedArray(Content):
 
         if reducer.needs_position and (not branch and negaxis == depth):
             nextshifts = ak.index.Index64.empty(
-                next_length, nplike=self._backend.index_nplike, index_is_fixed=True
+                next_length, nplike=self._backend.index_nplike
             )
             if shifts is None:
                 assert (
@@ -906,9 +891,7 @@ class ByteMaskedArray(Content):
                 )
 
             outoffsets = ak.index.Index64.empty(
-                starts.length + 1,
-                nplike=self._backend.index_nplike,
-                index_is_fixed=True,
+                starts.length + 1, nplike=self._backend.index_nplike
             )
             assert outoffsets.nplike is self._backend.nplike
             self._handle_error(
@@ -957,7 +940,7 @@ class ByteMaskedArray(Content):
         elif posaxis == depth + 1:
             mask = ak.index.Index8(self.mask_as_bool(valid_when=False))
             index = ak.index.Index64.empty(
-                mask.length, nplike=self._backend.index_nplike, index_is_fixed=True
+                mask.length, nplike=self._backend.index_nplike
             )
             assert (
                 index.nplike is self._backend.index_nplike
@@ -1100,7 +1083,7 @@ class ByteMaskedArray(Content):
 
     def _to_backend(self, backend: ak._backends.Backend) -> Self:
         content = self._content._to_backend(backend)
-        mask = self._mask._to_nplike(backend.index_nplike, index_is_fixed=True)
+        mask = self._mask._to_nplike(backend.index_nplike)
         return ByteMaskedArray(
             mask, content, valid_when=self._valid_when, parameters=self._parameters
         )

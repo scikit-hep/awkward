@@ -211,7 +211,6 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
                                         length + 1, dtype=np.int64
                                     ),
                                     nplike=backend.index_nplike,
-                                    index_is_fixed=True,
                                 ),
                                 ak.contents.NumpyArray(
                                     backend.nplike.broadcast_to(
@@ -239,20 +238,14 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
                 offsets[0] = 0
                 backend.index_nplike.cumsum(counts, out=offsets[1:])
 
-                offsets = ak.index.Index64(
-                    offsets, nplike=backend.index_nplike, index_is_fixed=True
-                )
+                offsets = ak.index.Index64(offsets, nplike=backend.index_nplike)
 
                 inner = ak.contents.UnionArray(
                     ak.index.Index8.empty(
-                        len(offsets) - 1,
-                        nplike=backend.index_nplike,
-                        index_is_fixed=True,
+                        len(offsets) - 1, nplike=backend.index_nplike
                     ),
                     ak.index.Index64.empty(
-                        len(offsets) - 1,
-                        nplike=backend.index_nplike,
-                        index_is_fixed=True,
+                        len(offsets) - 1, nplike=backend.index_nplike
                     ),
                     all_flatten,
                 )

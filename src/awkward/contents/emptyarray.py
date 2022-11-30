@@ -174,9 +174,7 @@ class EmptyArray(Content):
                 return out
         else:
             # TODO: This was changed to use `nplike` instead of `index_nplike`. Is this OK?
-            out = ak.index.Index64.empty(
-                0, nplike=self._backend.nplike, index_is_fixed=True
-            )
+            out = ak.index.Index64.empty(0, nplike=self._backend.nplike)
             return ak.contents.NumpyArray(out, parameters=None, backend=self._backend)
 
     def _offsets_and_flattened(self, axis, depth):
@@ -186,9 +184,7 @@ class EmptyArray(Content):
                 np.AxisError(self, "axis=0 not allowed for flatten")
             )
         else:
-            offsets = ak.index.Index64.zeros(
-                1, nplike=self._backend.index_nplike, index_is_fixed=True
-            )
+            offsets = ak.index.Index64.zeros(1, nplike=self._backend.index_nplike)
             return (
                 offsets,
                 EmptyArray(parameters=self._parameters, backend=self._backend),

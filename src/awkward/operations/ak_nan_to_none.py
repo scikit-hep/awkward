@@ -37,9 +37,7 @@ def _impl(array, highlevel, behavior):
         ):
             mask = layout.nplike.isnan(layout.data)
             return ak.contents.ByteMaskedArray(
-                ak.index.Index8(
-                    mask, nplike=layout.backend.index_nplike, index_is_fixed=True
-                ),
+                ak.index.Index8(mask, nplike=layout.backend.index_nplike),
                 layout,
                 valid_when=False,
             )

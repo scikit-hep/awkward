@@ -208,7 +208,7 @@ class BitMaskedArray(Content):
 
     def to_IndexedOptionArray64(self):
         index = ak.index.Index64.empty(
-            self._mask.length * 8, self._backend.index_nplike, index_is_fixed=True
+            self._mask.length * 8, self._backend.index_nplike
         )
         assert (
             index.nplike is self._backend.nplike
@@ -233,7 +233,7 @@ class BitMaskedArray(Content):
 
     def to_ByteMaskedArray(self):
         bytemask = ak.index.Index8.empty(
-            self._mask.length * 8, self._backend.index_nplike, index_is_fixed=True
+            self._mask.length * 8, self._backend.index_nplike
         )
         assert (
             bytemask.nplike is self._backend.nplike
@@ -298,7 +298,7 @@ class BitMaskedArray(Content):
             valid_when = self._valid_when
 
         bytemask = ak.index.Index8.empty(
-            self._mask.length * 8, self._backend.index_nplike, index_is_fixed=True
+            self._mask.length * 8, self._backend.index_nplike
         )
         assert (
             bytemask.nplike is self._backend.nplike
@@ -698,7 +698,7 @@ class BitMaskedArray(Content):
 
     def _to_backend(self, backend: ak._backends.Backend) -> Self:
         content = self._content._to_backend(backend)
-        mask = self._mask._to_nplike(backend.index_nplike, index_is_fixed=True)
+        mask = self._mask._to_nplike(backend.index_nplike)
         return BitMaskedArray(
             mask,
             content,

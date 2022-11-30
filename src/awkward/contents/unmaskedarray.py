@@ -96,9 +96,7 @@ class UnmaskedArray(Content):
     def to_IndexedOptionArray64(self):
         arange = self._backend.index_nplike.arange(self._content.length, dtype=np.int64)
         return ak.contents.IndexedOptionArray(
-            ak.index.Index64(
-                arange, nplike=self._backend.index_nplike, index_is_fixed=True
-            ),
+            ak.index.Index64(arange, nplike=self._backend.index_nplike),
             self._content,
             parameters=self._parameters,
         )
@@ -108,7 +106,6 @@ class UnmaskedArray(Content):
             ak.index.Index8(
                 self.mask_as_bool(valid_when).view(np.int8),
                 nplike=self._backend.index_nplike,
-                index_is_fixed=True,
             ),
             self._content,
             valid_when,
