@@ -41,6 +41,10 @@ class EmptyArray(Content):
 
     Form = EmptyForm
 
+    @classmethod
+    def simplified(cls, *, parameters=None, backend=None):
+        return cls(parameters=parameters, backend=backend)
+
     def _form_with_key(self, getkey):
         return self.Form(parameters=self._parameters, form_key=getkey(self))
 

@@ -88,6 +88,27 @@ class ByteMaskedForm(Form):
     def valid_when(self):
         return self._valid_when
 
+    @classmethod
+    def simplified(
+        cls,
+        mask,
+        content,
+        valid_when,
+        *,
+        parameters=None,
+        form_key=None,
+    ):
+        if content.is_indexed or content.is_option:
+            return ak.forms.IndexedOptionForm.simplified(
+                "i64",
+                content,
+                parameters=parameters,
+            )
+        else:
+            return cls(
+                mask, content, valid_when, parameters=parameters, form_key=form_key
+            )
+
     @property
     def is_identity_like(self):
         return False
@@ -131,27 +152,6 @@ class ByteMaskedForm(Form):
             )
         else:
             return False
-
-    @classmethod
-    def simplified(
-        cls,
-        mask,
-        content,
-        valid_when,
-        *,
-        parameters=None,
-        form_key=None,
-    ):
-        if content.is_indexed or content.is_option:
-            return ak.forms.IndexedOptionForm.simplified(
-                "i64",
-                content,
-                parameters=parameters,
-            )
-        else:
-            return cls(
-                mask, content, valid_when, parameters=parameters, form_key=form_key
-            )
 
     def simplify_optiontype(self):
         if isinstance(

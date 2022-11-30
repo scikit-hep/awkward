@@ -11,6 +11,10 @@ class EmptyForm(Form):
     def __init__(self, *, parameters=None, form_key=None):
         self._init(parameters, form_key)
 
+    @classmethod
+    def simplified(cls, *, parameters=None, form_key=None):
+        return cls(parameters=parameters, form_key=form_key)
+
     def __repr__(self):
         args = self._repr_args()
         return "{}({})".format(type(self).__name__, ", ".join(args))

@@ -58,6 +58,18 @@ class ListForm(Form):
     def content(self):
         return self._content
 
+    @classmethod
+    def simplified(
+        cls,
+        starts,
+        stops,
+        content,
+        *,
+        parameters=None,
+        form_key=None,
+    ):
+        return cls(starts, stops, content, parameters=parameters, form_key=form_key)
+
     def __repr__(self):
         args = [
             repr(self._starts),

@@ -82,6 +82,10 @@ class RegularArray(Content):
 
     Form = RegularForm
 
+    @classmethod
+    def simplified(cls, content, size, zeros_length=0, *, parameters=None):
+        return cls(content, size, zeros_length, parameters=parameters)
+
     def _form_with_key(self, getkey):
         form_key = getkey(self)
         return self.Form(

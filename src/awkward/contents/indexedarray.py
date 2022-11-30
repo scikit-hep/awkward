@@ -75,6 +75,50 @@ class IndexedArray(Content):
 
     Form = IndexedForm
 
+    @classmethod
+    def simplified(cls, index, content, *, parameters=None):
+        if content.is_indexed or content.is_option:
+            backend = content.backend
+            if content.is_indexed:
+                inner = content.index
+            else:
+                inner = content.to_IndexedOptionArray64().index
+            result = ak.index.Index64.empty(index.length, nplike=backend.index_nplike)
+
+            Content._selfless_handle_error(
+                backend[
+                    "awkward_IndexedArray_simplify",
+                    result.dtype.type,
+                    index.dtype.type,
+                    inner.dtype.type,
+                ](
+                    result.data,
+                    index.data,
+                    index.length,
+                    inner.data,
+                    inner.length,
+                )
+            )
+            if isinstance(content, ak.contents.IndexedArray):
+                return IndexedArray(
+                    result,
+                    content.content,
+                    parameters=ak._util.merge_parameters(
+                        content._parameters, parameters
+                    ),
+                )
+            else:
+                return ak.contents.IndexedOptionArray(
+                    result,
+                    content.content,
+                    parameters=ak._util.merge_parameters(
+                        content._parameters, parameters
+                    ),
+                )
+
+        else:
+            return ak.contents.IndexedOptionArray(index, content, parameters=parameters)
+
     def _form_with_key(self, getkey):
         form_key = getkey(self)
         return self.Form(
@@ -333,50 +377,6 @@ class IndexedArray(Content):
                 )
             )
             return self._content._carry(nextcarry, False)
-
-    @classmethod
-    def simplified(cls, index, content, *, parameters=None):
-        if content.is_indexed or content.is_option:
-            backend = content.backend
-            if content.is_indexed:
-                inner = content.index
-            else:
-                inner = content.to_IndexedOptionArray64().index
-            result = ak.index.Index64.empty(index.length, nplike=backend.index_nplike)
-
-            Content._selfless_handle_error(
-                backend[
-                    "awkward_IndexedArray_simplify",
-                    result.dtype.type,
-                    index.dtype.type,
-                    inner.dtype.type,
-                ](
-                    result.data,
-                    index.data,
-                    index.length,
-                    inner.data,
-                    inner.length,
-                )
-            )
-            if isinstance(content, ak.contents.IndexedArray):
-                return IndexedArray(
-                    result,
-                    content.content,
-                    parameters=ak._util.merge_parameters(
-                        content._parameters, parameters
-                    ),
-                )
-            else:
-                return ak.contents.IndexedOptionArray(
-                    result,
-                    content.content,
-                    parameters=ak._util.merge_parameters(
-                        content._parameters, parameters
-                    ),
-                )
-
-        else:
-            return ak.contents.IndexedOptionArray(index, content, parameters=parameters)
 
     def simplify_optiontype(self):
         if isinstance(

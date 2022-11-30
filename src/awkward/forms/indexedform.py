@@ -72,6 +72,30 @@ class IndexedForm(Form):
     def content(self):
         return self._content
 
+    @classmethod
+    def simplified(
+        cls,
+        index,
+        content,
+        *,
+        parameters=None,
+        form_key=None,
+    ):
+        if content.is_option:
+            return ak.forms.IndexedOptionForm.simplified(
+                "i64",
+                content.content,
+                parameters=ak._util.merge_parameters(content._parameters, parameters),
+            )
+        elif content.is_indexed:
+            return ak.forms.IndexedForm(
+                "i64",
+                content.content,
+                parameters=ak._util.merge_parameters(content._parameters, parameters),
+            )
+        else:
+            return cls(index, content, parameters=parameters, form_key=form_key)
+
     def __repr__(self):
         args = [repr(self._index), repr(self._content)] + self._repr_args()
         return "{}({})".format(type(self).__name__, ", ".join(args))
@@ -122,30 +146,6 @@ class IndexedForm(Form):
             )
         else:
             return False
-
-    @classmethod
-    def simplified(
-        cls,
-        index,
-        content,
-        *,
-        parameters=None,
-        form_key=None,
-    ):
-        if content.is_option:
-            return ak.forms.IndexedOptionForm.simplified(
-                "i64",
-                content.content,
-                parameters=ak._util.merge_parameters(content._parameters, parameters),
-            )
-        elif content.is_indexed:
-            return ak.forms.IndexedForm(
-                "i64",
-                content.content,
-                parameters=ak._util.merge_parameters(content._parameters, parameters),
-            )
-        else:
-            return cls(index, content, parameters=parameters, form_key=form_key)
 
     def purelist_parameter(self, key):
         if self._parameters is None or key not in self._parameters:

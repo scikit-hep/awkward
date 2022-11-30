@@ -73,6 +73,24 @@ class IndexedOptionForm(Form):
     def content(self):
         return self._content
 
+    @classmethod
+    def simplified(
+        cls,
+        index,
+        content,
+        *,
+        parameters=None,
+        form_key=None,
+    ):
+        if content.is_indexed or content.is_option:
+            return ak.forms.IndexedOptionForm.simplified(
+                "i64",
+                content.content,
+                parameters=ak._util.merge_parameters(content._parameters, parameters),
+            )
+        else:
+            return cls(index, content, parameters=parameters, form_key=form_key)
+
     def __repr__(self):
         args = [repr(self._index), repr(self._content)] + self._repr_args()
         return "{}({})".format(type(self).__name__, ", ".join(args))
@@ -113,24 +131,6 @@ class IndexedOptionForm(Form):
             )
         else:
             return False
-
-    @classmethod
-    def simplified(
-        cls,
-        index,
-        content,
-        *,
-        parameters=None,
-        form_key=None,
-    ):
-        if content.is_indexed or content.is_option:
-            return ak.forms.IndexedOptionForm.simplified(
-                "i64",
-                content.content,
-                parameters=ak._util.merge_parameters(content._parameters, parameters),
-            )
-        else:
-            return cls(index, content, parameters=parameters, form_key=form_key)
 
     def simplify_optiontype(self):
         if isinstance(

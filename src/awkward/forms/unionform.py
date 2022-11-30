@@ -99,6 +99,23 @@ class UnionForm(Form):
     def contents(self):
         return self._contents
 
+    @classmethod
+    def simplified(
+        cls,
+        tags,
+        index,
+        contents,
+        *,
+        parameters=None,
+        form_key=None,
+    ):
+        return ak.contents.UnionArray.simplified(
+            ak.index._form_to_zero_length(tags),
+            ak.index._form_to_zero_length(index),
+            [x.zero_length_array(highlevel=False) for x in contents],
+            parameters=parameters,
+        ).form
+
     def content(self, index):
         return self._contents[index]
 
@@ -145,23 +162,6 @@ class UnionForm(Form):
             return self._contents == other._contents
 
         return False
-
-    @classmethod
-    def simplified(
-        cls,
-        tags,
-        index,
-        contents,
-        *,
-        parameters=None,
-        form_key=None,
-    ):
-        return ak.contents.UnionArray.simplified(
-            ak.index._form_to_zero_length(tags),
-            ak.index._form_to_zero_length(index),
-            [x.zero_length_array(highlevel=False) for x in contents],
-            parameters=parameters,
-        ).form
 
     def purelist_parameter(self, key):
         if self._parameters is None or key not in self._parameters:

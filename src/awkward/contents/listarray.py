@@ -100,6 +100,10 @@ class ListArray(Content):
 
     Form = ListForm
 
+    @classmethod
+    def simplified(cls, starts, stops, content, *, parameters=None):
+        return cls(starts, stops, content, parameters=parameters)
+
     def _form_with_key(self, getkey):
         form_key = getkey(self)
         return self.Form(

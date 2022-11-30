@@ -101,6 +101,10 @@ class NumpyArray(Content):
 
     Form = NumpyForm
 
+    @classmethod
+    def simplified(cls, data, *, parameters=None, backend=None):
+        return cls(data, parameters=parameters, backend=backend)
+
     def _form_with_key(self, getkey):
         return self.Form(
             ak.types.numpytype.dtype_to_primitive(self._data.dtype),

@@ -55,6 +55,21 @@ class UnmaskedForm(Form):
     def content(self):
         return self._content
 
+    @classmethod
+    def simplified(
+        cls,
+        content,
+        *,
+        parameters=None,
+        form_key=None,
+    ):
+        if content.is_indexed or content.is_option:
+            return content.copy(
+                parameters=ak._util.merge_parameters(content._parameters, parameters)
+            )
+        else:
+            return cls(content, parameters=parameters, form_key=form_key)
+
     def __repr__(self):
         args = [repr(self._content)] + self._repr_args()
         return "{}({})".format(type(self).__name__, ", ".join(args))
@@ -86,21 +101,6 @@ class UnmaskedForm(Form):
             )
         else:
             return False
-
-    @classmethod
-    def simplified(
-        cls,
-        content,
-        *,
-        parameters=None,
-        form_key=None,
-    ):
-        if content.is_indexed or content.is_option:
-            return content.copy(
-                parameters=ak._util.merge_parameters(content._parameters, parameters)
-            )
-        else:
-            return cls(content, parameters=parameters, form_key=form_key)
 
     def simplify_optiontype(self):
         if isinstance(

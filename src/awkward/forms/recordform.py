@@ -55,6 +55,17 @@ class RecordForm(Form):
         else:
             return self._fields
 
+    @classmethod
+    def simplified(
+        cls,
+        contents,
+        fields,
+        *,
+        parameters=None,
+        form_key=None,
+    ):
+        return cls(contents, fields, parameters=parameters, form_key=form_key)
+
     @property
     def is_tuple(self):
         return self._fields is None

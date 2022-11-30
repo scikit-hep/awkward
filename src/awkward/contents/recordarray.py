@@ -180,6 +180,18 @@ class RecordArray(Content):
 
     Form = RecordForm
 
+    @classmethod
+    def simplified(
+        cls,
+        contents,
+        fields,
+        length=None,
+        *,
+        parameters=None,
+        backend=None,
+    ):
+        return cls(contents, fields, length, parameters=parameters, backend=backend)
+
     def _form_with_key(self, getkey):
         form_key = getkey(self)
         return self.Form(

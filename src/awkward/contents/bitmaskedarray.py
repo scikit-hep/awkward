@@ -137,6 +137,46 @@ class BitMaskedArray(Content):
 
     Form = BitMaskedForm
 
+    @classmethod
+    def simplified(
+        cls,
+        mask,
+        content,
+        valid_when,
+        length,
+        lsb_order,
+        *,
+        parameters=None,
+    ):
+        if content.is_indexed or content.is_option:
+            backend = content.backend
+            index = ak.index.Index64.empty(mask.length * 8, backend.index_nplike)
+            Content._selfless_handle_error(
+                backend[
+                    "awkward_BitMaskedArray_to_IndexedOptionArray",
+                    index.dtype.type,
+                    mask.dtype.type,
+                ](
+                    index.raw(backend.nplike),
+                    mask.data,
+                    mask.length,
+                    valid_when,
+                    lsb_order,
+                ),
+            )
+            return ak.contents.IndexedOptionArray.simplified(
+                index[0:length], content, parameters=parameters
+            )
+        else:
+            return BitMaskedArray(
+                mask,
+                content,
+                valid_when,
+                length,
+                lsb_order,
+                parameters=parameters,
+            )
+
     def _form_with_key(self, getkey):
         form_key = getkey(self)
         return self.Form(
@@ -403,46 +443,6 @@ class BitMaskedArray(Content):
 
     def project(self, mask=None):
         return self.to_ByteMaskedArray().project(mask)
-
-    @classmethod
-    def simplified(
-        cls,
-        mask,
-        content,
-        valid_when,
-        length,
-        lsb_order,
-        *,
-        parameters=None,
-    ):
-        if content.is_indexed or content.is_option:
-            backend = content.backend
-            index = ak.index.Index64.empty(mask.length * 8, backend.index_nplike)
-            Content._selfless_handle_error(
-                backend[
-                    "awkward_BitMaskedArray_to_IndexedOptionArray",
-                    index.dtype.type,
-                    mask.dtype.type,
-                ](
-                    index.raw(backend.nplike),
-                    mask.data,
-                    mask.length,
-                    valid_when,
-                    lsb_order,
-                ),
-            )
-            return ak.contents.IndexedOptionArray.simplified(
-                index[0:length], content, parameters=parameters
-            )
-        else:
-            return BitMaskedArray(
-                mask,
-                content,
-                valid_when,
-                length,
-                lsb_order,
-                parameters=parameters,
-            )
 
     def simplify_optiontype(self):
         if isinstance(

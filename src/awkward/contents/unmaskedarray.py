@@ -49,6 +49,15 @@ class UnmaskedArray(Content):
 
     Form = UnmaskedForm
 
+    @classmethod
+    def simplified(cls, content, *, parameters=None):
+        if content.is_indexed or content.is_option:
+            return content.copy(
+                parameters=ak._util.merge_parameters(content._parameters, parameters)
+            )
+        else:
+            return cls(content, parameters=parameters)
+
     def _form_with_key(self, getkey):
         form_key = getkey(self)
         return self.Form(
@@ -219,15 +228,6 @@ class UnmaskedArray(Content):
             ).project()
         else:
             return self._content
-
-    @classmethod
-    def simplified(cls, content, *, parameters=None):
-        if content.is_indexed or content.is_option:
-            return content.copy(
-                parameters=ak._util.merge_parameters(content._parameters, parameters)
-            )
-        else:
-            return cls(content, parameters=parameters)
 
     def simplify_optiontype(self):
         if isinstance(

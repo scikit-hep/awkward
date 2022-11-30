@@ -87,6 +87,10 @@ class ListOffsetArray(Content):
 
     Form = ListOffsetForm
 
+    @classmethod
+    def simplified(cls, offsets, content, *, parameters=None):
+        return cls(offsets, content, parameters=parameters)
+
     def _form_with_key(self, getkey):
         form_key = getkey(self)
         return self.Form(

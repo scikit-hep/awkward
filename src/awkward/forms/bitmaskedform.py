@@ -26,7 +26,7 @@ class BitMaskedForm(Form):
             self._valid_when if valid_when is unset else valid_when,
             self._lsb_order if lsb_order is unset else lsb_order,
             parameters=self._parameters if parameters is unset else parameters,
-            form_key=self._form_key if form_key is form_key else form_key,
+            form_key=self._form_key if form_key is unset else form_key,
         )
 
     def __copy__(self):
@@ -104,6 +104,33 @@ class BitMaskedForm(Form):
     def lsb_order(self):
         return self._lsb_order
 
+    @classmethod
+    def simplified(
+        cls,
+        mask,
+        content,
+        valid_when,
+        lsb_order,
+        *,
+        parameters=None,
+        form_key=None,
+    ):
+        if content.is_indexed or content.is_option:
+            return ak.forms.IndexedOptionForm.simplified(
+                "i64",
+                content,
+                parameters=parameters,
+            )
+        else:
+            return cls(
+                mask,
+                content,
+                valid_when,
+                lsb_order,
+                parameters=parameters,
+                form_key=form_key,
+            )
+
     @property
     def is_identity_like(self):
         return False
@@ -150,33 +177,6 @@ class BitMaskedForm(Form):
             )
         else:
             return False
-
-    @classmethod
-    def simplified(
-        cls,
-        mask,
-        content,
-        valid_when,
-        lsb_order,
-        *,
-        parameters=None,
-        form_key=None,
-    ):
-        if content.is_indexed or content.is_option:
-            return ak.forms.IndexedOptionForm.simplified(
-                "i64",
-                content,
-                parameters=parameters,
-            )
-        else:
-            return cls(
-                mask,
-                content,
-                valid_when,
-                lsb_order,
-                parameters=parameters,
-                form_key=form_key,
-            )
 
     def simplify_optiontype(self):
         if isinstance(
