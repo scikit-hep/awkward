@@ -1,12 +1,11 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 from __future__ import annotations
 
-from typing import Generic, TypeVar, Union
-
 import jax
 
 import awkward as ak
 from awkward import _errors, contents, highlevel, nplikes, record
+from awkward.typing import Generic, TypeVar, Union
 
 numpy = nplikes.Numpy.instance()
 np = nplikes.NumpyMetadata.instance()

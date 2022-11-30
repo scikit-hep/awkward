@@ -1,12 +1,12 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import numbers
-from typing import TypeVar
 
 import numpy
 
 import awkward as ak
 from awkward import index, nplikes
+from awkward.typing import TypeVar
 
 np = nplikes.NumpyMetadata.instance()
 

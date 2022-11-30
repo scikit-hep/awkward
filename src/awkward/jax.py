@@ -3,10 +3,10 @@ from __future__ import annotations
 import enum
 import threading
 import weakref
-from typing import TypeVar
 
 import awkward as ak
 from awkward import _errors, highlevel, nplikes
+from awkward.typing import TypeVar
 
 numpy = nplikes.Numpy.instance()
 
