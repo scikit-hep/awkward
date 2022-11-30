@@ -554,7 +554,7 @@ class Content:
                 return self
 
             # Normalise valid indices onto well-defined basis
-            items = ak._slicing.normalise_items(where, self._backend.nplike)
+            items = ak._slicing.normalise_items(where, self._backend)
             # Prepare items for advanced indexing (e.g. via broadcasting)
             nextwhere = ak._slicing.prepare_advanced_indexing(items)
 
