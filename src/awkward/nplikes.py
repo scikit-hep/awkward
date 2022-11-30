@@ -4,7 +4,6 @@ from __future__ import annotations
 import ctypes
 from collections.abc import Iterable
 
-import awkward_cpp.cpu_kernels
 import numpy
 from awkward_cpp.lib import _ext
 
@@ -507,11 +506,6 @@ class Numpy(NumpyLike):
                 TypeError("to_rectilinear argument must be iterable")
             )
 
-    def __getitem__(self, name_and_types):
-        return NumpyKernel(
-            awkward_cpp.cpu_kernels.kernel[name_and_types], name_and_types
-        )
-
     def __init__(self):
         self._module = numpy
 
@@ -565,21 +559,6 @@ class Cupy(NumpyLike):
 
     def to_rectilinear(self, array, *args, **kwargs):
         return ak.operations.ak_to_cupy.to_cupy(array, *args, **kwargs)
-
-    def __getitem__(self, name_and_types):
-        cupy = ak._connect.cuda.import_cupy("Awkward Arrays with CUDA")
-        _cuda_kernels = ak._connect.cuda.initialize_cuda_kernels(cupy)
-
-        func = _cuda_kernels[name_and_types]
-        if func is not None:
-            return CupyKernel(func, name_and_types)
-        else:
-            raise ak._errors.wrap_error(
-                NotImplementedError(
-                    f"{name_and_types[0]} is not implemented for CUDA. Please transfer the array back to the Main Memory to "
-                    "continue the operation."
-                )
-            )
 
     def __init__(self):
         import awkward._connect.cuda  # noqa: F401
@@ -805,9 +784,6 @@ class Jax(NumpyLike):
             raise ak._errors.wrap_error(
                 ValueError("to_rectilinear argument must be iterable")
             )
-
-    def __getitem__(self, name_and_types):
-        return JaxKernel(awkward_cpp.cpu_kernels.kernel[name_and_types], name_and_types)
 
     def __init__(self):
         jax = ak.jax.import_jax()
