@@ -135,10 +135,6 @@ class TypeTracerBackend(Backend[Any], Singleton):
         return NoKernel(index)
 
 
-_UNSET = object()
-D = TypeVar("D")
-
-
 def _backend_for_nplike(nplike: ak.nplikes.NumpyLike) -> Backend:
     if isinstance(nplike, Numpy):
         return NumpyBackend.instance()
@@ -152,7 +148,11 @@ def _backend_for_nplike(nplike: ak.nplikes.NumpyLike) -> Backend:
         raise ak._errors.wrap_error(ValueError("unrecognised nplike", nplike))
 
 
-def backend_for(*arrays, default: T = _UNSET) -> Backend | D:
+_UNSET = object()
+D = TypeVar("D")
+
+
+def backend_for(*arrays, default: D = _UNSET) -> Backend | D:
     nplike = nplike_of(*arrays, default=None)
     if nplike is None:
         if default is _UNSET:
