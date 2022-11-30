@@ -1574,15 +1574,15 @@ class Content:
 
     def completely_flatten(
         self,
-        nplike: NumpyLike | None = None,
+        backend: ak._backends.Backend | None = None,
         flatten_records: bool = True,
         function_name: str | None = None,
         drop_nones: bool = True,
     ):
-        if nplike is None:
-            nplike = self._backend.nplike
+        if backend is None:
+            backend = self._backend
         arrays = self._completely_flatten(
-            nplike,
+            backend,
             {
                 "flatten_records": flatten_records,
                 "function_name": function_name,
@@ -1591,9 +1591,7 @@ class Content:
         )
         return tuple(arrays)
 
-    def _completely_flatten(
-        self, nplike: NumpyLike | None, options: dict[str, Any]
-    ) -> list:
+    def _completely_flatten(self, backend, options):
         raise ak._errors.wrap_error(NotImplementedError)
 
     def recursively_apply(

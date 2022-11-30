@@ -925,11 +925,13 @@ class RecordArray(Content):
 
         return out
 
-    def _completely_flatten(self, nplike, options):
+    def _completely_flatten(self, backend, options):
         if options["flatten_records"]:
             out = []
             for content in self._contents:
-                out.extend(content[: self._length]._completely_flatten(nplike, options))
+                out.extend(
+                    content[: self._length]._completely_flatten(backend, options)
+                )
             return out
         else:
             in_function = ""

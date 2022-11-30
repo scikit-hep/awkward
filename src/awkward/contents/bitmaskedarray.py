@@ -584,10 +584,10 @@ class BitMaskedArray(Content):
     def _to_numpy(self, allow_missing):
         return self.to_ByteMaskedArray()._to_numpy(allow_missing)
 
-    def _completely_flatten(self, nplike, options):
+    def _completely_flatten(self, backend, options):
         branch, depth = self.branch_depth
         if branch or options["drop_nones"] or depth > 1:
-            return self.project()._completely_flatten(nplike, options)
+            return self.project()._completely_flatten(backend, options)
         else:
             return [self.simplify_optiontype()]
 

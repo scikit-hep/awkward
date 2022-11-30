@@ -1261,9 +1261,12 @@ class NumpyArray(Content):
         else:
             return out
 
-    def _completely_flatten(self, nplike, options):
-        backend = ak._backends.backend_for_nplike(nplike)
-        return [ak.contents.NumpyArray(self.raw(nplike).reshape(-1), backend=backend)]
+    def _completely_flatten(self, backend, options):
+        return [
+            ak.contents.NumpyArray(
+                self.raw(backend.nplike).reshape(-1), backend=backend
+            )
+        ]
 
     def _recursively_apply(
         self, action, behavior, depth, depth_context, lateral_context, options

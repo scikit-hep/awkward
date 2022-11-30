@@ -1375,7 +1375,7 @@ class ListArray(Content):
             self.to_RegularArray(), allow_missing=allow_missing
         )
 
-    def _completely_flatten(self, nplike, options):
+    def _completely_flatten(self, backend, options):
         if (
             self.parameter("__array__") == "string"
             or self.parameter("__array__") == "bytestring"
@@ -1384,7 +1384,7 @@ class ListArray(Content):
         else:
             next = self.to_ListOffsetArray64(False)
             flat = next.content[next.offsets[0] : next.offsets[-1]]
-            return flat._completely_flatten(nplike, options)
+            return flat._completely_flatten(backend, options)
 
     def _recursively_apply(
         self, action, behavior, depth, depth_context, lateral_context, options
