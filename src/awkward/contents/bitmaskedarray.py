@@ -222,7 +222,7 @@ class BitMaskedArray(Content):
             nplike=self._nplike,
         )
 
-    def to_IndexedOptionArray64(self, simplified=False):
+    def to_IndexedOptionArray64(self):
         index = ak.index.Index64.empty(self._mask.length * 8, self._nplike)
         assert index.nplike is self._nplike and self._mask.nplike is self._nplike
         self._handle_error(
@@ -238,20 +238,12 @@ class BitMaskedArray(Content):
                 self._lsb_order,
             ),
         )
-        if simplified:
-            return ak.contents.IndexedOptionArray.simplified(
-                index[0 : self._length],
-                self._content,
-                parameters=self._parameters,
-                nplike=self._nplike,
-            )
-        else:
-            return ak.contents.IndexedOptionArray(
-                index[0 : self._length],
-                self._content,
-                parameters=self._parameters,
-                nplike=self._nplike,
-            )
+        return ak.contents.IndexedOptionArray(
+            index[0 : self._length],
+            self._content,
+            parameters=self._parameters,
+            nplike=self._nplike,
+        )
 
     def to_ByteMaskedArray(self):
         bytemask = ak.index.Index8.empty(self._mask.length * 8, self._nplike)
