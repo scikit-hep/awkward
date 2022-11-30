@@ -189,8 +189,10 @@ _backends = {
 }
 
 
-def regularize_backend(backend: str) -> Backend:
-    if backend in _backends:
+def regularize_backend(backend: str | Backend) -> Backend:
+    if isinstance(backend, Backend):
+        return backend
+    elif backend in _backends:
         return _backends[backend].instance()
     else:
         raise ak._errors.wrap_error(

@@ -9,7 +9,7 @@ from awkward import _errors
 from awkward.typing import Any
 
 np = ak.nplikes.NumpyMetadata.instance()
-numpy = ak.nplikes.Numpy.instance()
+numpy_backend = ak._backends.NumpyBackend.instance()
 
 
 def from_dict(input: dict) -> Form:
@@ -414,13 +414,15 @@ class Form:
     def _type(self, typestrs):
         raise _errors.wrap_error(NotImplementedError)
 
-    def length_zero_array(self, *, nplike=numpy, highlevel=True, behavior=None):
+    def length_zero_array(
+        self, *, backend=numpy_backend, highlevel=True, behavior=None
+    ):
         return ak.operations.ak_from_buffers._impl(
             form=self,
             length=0,
             container={"": b"\x00\x00\x00\x00\x00\x00\x00\x00"},
             buffer_key="",
-            nplike=nplike,
+            backend=backend,
             highlevel=highlevel,
             behavior=behavior,
         )
