@@ -411,11 +411,11 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
         if parameters is None:
             parameters = {"__array__": "categorical"}
 
-        return ak.contents.IndexedOptionArray(
+        return ak.contents.IndexedOptionArray.simplified(
             ak.index.Index(index),
             content,
             parameters=parameters,
-        ).simplify_optiontype()
+        )
 
     elif isinstance(storage_type, pyarrow.lib.FixedSizeListType):
         assert storage_type.num_buffers == 1
@@ -697,11 +697,11 @@ def form_popbuffers(awkwardarrow_type, storage_type):
         if parameters is None:
             parameters = {"__array__": "categorical"}
 
-        return ak.forms.IndexedOptionForm(
+        return ak.forms.IndexedOptionForm.simplified(
             index,
             content,
             parameters=parameters,
-        ).simplify_optiontype()
+        )
 
     elif isinstance(storage_type, pyarrow.lib.FixedSizeListType):
         a, b = to_awkwardarrow_storage_types(storage_type.value_type)

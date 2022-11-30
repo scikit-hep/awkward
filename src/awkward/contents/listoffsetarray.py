@@ -1795,11 +1795,11 @@ class ListOffsetArray(Content):
                         target,
                     )
                 )
-                next = ak.contents.IndexedOptionArray(
+                next = ak.contents.IndexedOptionArray.simplified(
                     outindex, self._content, parameters=self._parameters
                 )
                 return ak.contents.ListOffsetArray(
-                    offsets_, next.simplify_optiontype(), parameters=self._parameters
+                    offsets_, next, parameters=self._parameters
                 )
             else:
                 starts_ = ak.index.Index64.empty(
@@ -1844,11 +1844,11 @@ class ListOffsetArray(Content):
                         target,
                     )
                 )
-                next = ak.contents.IndexedOptionArray(
+                next = ak.contents.IndexedOptionArray.simplified(
                     outindex, self._content, parameters=self._parameters
                 )
                 return ak.contents.RegularArray(
-                    next.simplify_optiontype(),
+                    next,
                     target,
                     self.length,
                     parameters=self._parameters,

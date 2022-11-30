@@ -198,10 +198,10 @@ class UnmaskedArray(Content):
         elif isinstance(
             head, (int, slice, ak.index.Index64, ak.contents.ListOffsetArray)
         ):
-            return UnmaskedArray(
+            return UnmaskedArray.simplified(
                 self._content._getitem_next(head, tail, advanced),
                 parameters=self._parameters,
-            ).simplify_optiontype()
+            )
 
         elif isinstance(head, str):
             return self._getitem_next_field(head, tail, advanced)
@@ -361,10 +361,7 @@ class UnmaskedArray(Content):
         )
 
         if isinstance(out, ak.contents.RegularArray):
-            tmp = ak.contents.UnmaskedArray(
-                out._content, parameters=None
-            ).simplify_optiontype()
-
+            tmp = ak.contents.UnmaskedArray.simplified(out._content, parameters=None)
             return ak.contents.RegularArray(
                 tmp, out._size, out._length, parameters=None
             )
@@ -387,9 +384,9 @@ class UnmaskedArray(Content):
         )
 
         if isinstance(out, ak.contents.RegularArray):
-            tmp = ak.contents.UnmaskedArray(
+            tmp = ak.contents.UnmaskedArray.simplified(
                 out._content, parameters=self._parameters
-            ).simplify_optiontype()
+            )
 
             return ak.contents.RegularArray(
                 tmp, out._size, out._length, parameters=self._parameters
@@ -479,7 +476,7 @@ class UnmaskedArray(Content):
         if branch or options["drop_nones"] or depth > 1:
             return self.project()._completely_flatten(backend, options)
         else:
-            return [self.simplify_optiontype()]
+            return [self]
 
     def _recursively_apply(
         self, action, behavior, depth, depth_context, lateral_context, options

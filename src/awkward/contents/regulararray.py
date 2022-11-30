@@ -1169,11 +1169,11 @@ class RegularArray(Content):
                         "awkward_RegularArray_rpad_and_clip_axis1", index.dtype.type
                     ](index.data, target, self._size, self._length)
                 )
-                next = ak.contents.IndexedOptionArray(
+                next = ak.contents.IndexedOptionArray.simplified(
                     index, self._content, parameters=self._parameters
                 )
                 return ak.contents.RegularArray(
-                    next.simplify_optiontype(),
+                    next,
                     target,
                     self._length,
                     parameters=self._parameters,

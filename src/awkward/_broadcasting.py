@@ -653,7 +653,7 @@ def apply_step(
             assert isinstance(outcontent, tuple)
             parameters = parameters_factory(len(outcontent))
             return tuple(
-                IndexedOptionArray(index, x, parameters=p).simplify_optiontype()
+                IndexedOptionArray.simplified(index, x, parameters=p)
                 for x, p in zip(outcontent, parameters)
             )
 

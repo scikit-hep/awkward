@@ -266,8 +266,7 @@ def normalise_item_nested(item):
             ak.contents.UnmaskedArray,
         ),
     ):
-        next = item.simplify_optiontype()
-        return normalise_item_nested(next)
+        return normalise_item_nested(item)
 
     elif isinstance(
         item,

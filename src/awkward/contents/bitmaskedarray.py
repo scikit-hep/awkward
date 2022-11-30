@@ -386,24 +386,24 @@ class BitMaskedArray(Content):
         return self.to_ByteMaskedArray()._getitem_range(where)
 
     def _getitem_field(self, where, only_fields=()):
-        return BitMaskedArray(
+        return BitMaskedArray.simplified(
             self._mask,
             self._content._getitem_field(where, only_fields),
             self._valid_when,
             self._length,
             self._lsb_order,
             parameters=None,
-        ).simplify_optiontype()
+        )
 
     def _getitem_fields(self, where, only_fields=()):
-        return BitMaskedArray(
+        return BitMaskedArray.simplified(
             self._mask,
             self._content._getitem_fields(where, only_fields),
             self._valid_when,
             self._length,
             self._lsb_order,
             parameters=None,
-        ).simplify_optiontype()
+        )
 
     def _carry(self, carry, allow_lazy):
         assert isinstance(carry, ak.index.Index)
@@ -632,7 +632,7 @@ class BitMaskedArray(Content):
         if branch or options["drop_nones"] or depth > 1:
             return self.project()._completely_flatten(backend, options)
         else:
-            return [self.simplify_optiontype()]
+            return [self]
 
     def _recursively_apply(
         self, action, behavior, depth, depth_context, lateral_context, options

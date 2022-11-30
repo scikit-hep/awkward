@@ -835,9 +835,9 @@ class IndexedArray(Content):
                 )
             )
 
-            return ak.contents.IndexedOptionArray(
+            return ak.contents.IndexedOptionArray.simplified(
                 nextoutindex, unique, parameters=self._parameters
-            ).simplify_optiontype()
+            )
 
         if not branch and negaxis == depth:
             return unique
@@ -887,11 +887,9 @@ class IndexedArray(Content):
                     self._backend.index_nplike.arange(unique.length, dtype=np.int64),
                     nplike=self._backend.index_nplike,
                 )
-                out = ak.contents.IndexedOptionArray(
+                return ak.contents.IndexedOptionArray.simplified(
                     nextoutindex, unique, parameters=self._parameters
-                ).simplify_optiontype()
-
-                return out
+                )
 
         raise ak._errors.wrap_error(NotImplementedError)
 

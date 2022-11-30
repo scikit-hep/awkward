@@ -379,12 +379,11 @@ class Content:
             slicer=head,
         )
 
-        out = ak.contents.IndexedOptionArray(
+        out = ak.contents.IndexedOptionArray.simplified(
             outindex, raw.content, parameters=self._parameters
         )
-
         return ak.contents.RegularArray(
-            out.simplify_optiontype(), indexlength, 1, parameters=self._parameters
+            out, indexlength, 1, parameters=self._parameters
         )
 
     def _getitem_next_missing_jagged(
@@ -435,11 +434,11 @@ class Content:
         )
 
         tmp = content._getitem_next_jagged(starts, stops, jagged.content, tail)
-        out = ak.contents.IndexedOptionArray(
+        out = ak.contents.IndexedOptionArray.simplified(
             outputmask, tmp, parameters=self._parameters
         )
         return ak.contents.RegularArray(
-            out.simplify_optiontype(), index.length, 1, parameters=self._parameters
+            out, index.length, 1, parameters=self._parameters
         )
 
     def _getitem_next_missing(
@@ -1505,8 +1504,9 @@ class Content:
                 ](index.data, target, self.length)
             )
 
-        next = ak.contents.IndexedOptionArray(index, self, parameters=self._parameters)
-        return next.simplify_optiontype()
+        return ak.contents.IndexedOptionArray.simplified(
+            index, self, parameters=self._parameters
+        )
 
     def pad_none(self, length: Integral, axis: Integral, clip: bool = False) -> Content:
         return self._pad_none(length, axis, 0, clip)

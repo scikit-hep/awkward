@@ -83,8 +83,6 @@ def to_categorical(array, *, highlevel=True, behavior=None):
 def _impl(array, highlevel, behavior):
     def action(layout, **kwargs):
         if layout.purelist_depth == 1:
-            if layout.is_option:
-                layout = layout.simplify_optiontype()
             if layout.is_indexed and layout.is_option:
                 content = layout.content
                 cls = ak.contents.IndexedOptionArray

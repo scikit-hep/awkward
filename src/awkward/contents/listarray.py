@@ -515,14 +515,14 @@ class ListArray(Content):
                     missing_trim = missing[0 : largeoffsets[-1]]
                 else:
                     missing_trim = missing
-                indexedoptionarray = ak.contents.IndexedOptionArray(
+                out = ak.contents.IndexedOptionArray.simplified(
                     missing_trim, content, parameters=self._parameters
                 )
                 if isinstance(self._backend.nplike, ak._typetracer.TypeTracer):
-                    indexedoptionarray = indexedoptionarray.typetracer
+                    out = out.typetracer
                 return ak.contents.ListOffsetArray(
                     largeoffsets,
-                    indexedoptionarray.simplify_optiontype(),
+                    out,
                     parameters=self._parameters,
                 )
             else:
@@ -1351,14 +1351,13 @@ class ListArray(Content):
                             self._starts.length,
                         )
                     )
-                    next = ak.contents.IndexedOptionArray(
+                    next = ak.contents.IndexedOptionArray.simplified(
                         index, self._content, parameters=None
                     )
-
                     return ak.contents.ListArray(
                         starts_,
                         stops_,
-                        next.simplify_optiontype(),
+                        next,
                         parameters=self._parameters,
                     )
             else:
