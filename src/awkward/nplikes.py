@@ -480,10 +480,6 @@ class CupyKernel(NumpyKernel):
 
 
 class Numpy(NumpyLike):
-    @property
-    def index_nplike(self):
-        return self
-
     def to_rectilinear(self, array, *args, **kwargs):
         if isinstance(array, numpy.ndarray):
             return array
@@ -564,10 +560,6 @@ class Numpy(NumpyLike):
 
 class Cupy(NumpyLike):
     is_eager = False
-
-    @property
-    def index_nplike(self):
-        return self
 
     def to_rectilinear(self, array, *args, **kwargs):
         return ak.operations.ak_to_cupy.to_cupy(array, *args, **kwargs)
@@ -787,10 +779,6 @@ class Cupy(NumpyLike):
 
 
 class Jax(NumpyLike):
-    @property
-    def index_nplike(self):
-        return ak.nplikes.Numpy.instance()
-
     def to_rectilinear(self, array, *args, **kwargs):
         if isinstance(array, self._module.DeviceArray):
             return array
