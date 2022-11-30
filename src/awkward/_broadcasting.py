@@ -7,7 +7,6 @@ import enum
 import functools
 import itertools
 from collections.abc import Sequence
-from typing import Any, Callable, Dict, List, Union
 
 import awkward as ak
 from awkward.contents.bitmaskedarray import BitMaskedArray
@@ -29,6 +28,7 @@ from awkward.index import (  # IndexU8,  ; Index32,  ; IndexU32,  ; noqa: F401
     Index64,
 )
 from awkward.record import Record
+from awkward.typing import Any, Callable, Dict, List, TypeAlias, Union
 
 np = ak.nplikes.NumpyMetadata.instance()
 numpy = ak.nplikes.Numpy.instance()
@@ -37,7 +37,7 @@ optiontypes = (IndexedOptionArray, ByteMaskedArray, BitMaskedArray, UnmaskedArra
 listtypes = (ListOffsetArray, ListArray, RegularArray)
 
 
-def broadcast_pack(inputs, isscalar):
+def broadcast_pack(inputs: Sequence, isscalar: list[bool]) -> list:
     maxlen = -1
     for x in inputs:
         if isinstance(x, Content):
@@ -55,10 +55,9 @@ def broadcast_pack(inputs, isscalar):
             nextinputs.append(
                 RegularArray(
                     x,
-                    x.length if x.nplike.known_shape else 1,
+                    x.length if x.backend.nplike.known_shape else 1,
                     1,
                     parameters=None,
-                    nplike=x.nplike,
                 )
             )
             isscalar.append(False)
@@ -69,14 +68,14 @@ def broadcast_pack(inputs, isscalar):
     return nextinputs
 
 
-def broadcast_unpack(x, isscalar, nplike):
+def broadcast_unpack(x, isscalar: list[bool], backend: ak._backends.Backend):
     if all(isscalar):
-        if not nplike.known_shape or x.length == 0:
+        if not backend.nplike.known_shape or x.length == 0:
             return x._getitem_nothing()._getitem_nothing()
         else:
             return x[0][0]
     else:
-        if not nplike.known_shape or x.length == 0:
+        if not backend.nplike.known_shape or x.length == 0:
             return x._getitem_nothing()
         else:
             return x[0]
@@ -106,48 +105,48 @@ def checklength(inputs, options):
             )
 
 
-def all_same_offsets(nplike, inputs):
+def all_same_offsets(backend: ak._backends.Backend, inputs: list) -> bool:
+    index_nplike = backend.index_nplike
+
     offsets = None
     for x in inputs:
         if isinstance(x, ListOffsetArray):
             if offsets is None:
-                offsets = x.offsets.raw(nplike)
-            elif not nplike.index_nplike.array_equal(offsets, x.offsets.raw(nplike)):
+                offsets = x.offsets.raw(index_nplike)
+            elif not index_nplike.array_equal(offsets, x.offsets.raw(index_nplike)):
                 return False
 
         elif isinstance(x, ListArray):
-            starts = x.starts.raw(nplike)
-            stops = x.stops.raw(nplike)
+            starts = x.starts.raw(index_nplike)
+            stops = x.stops.raw(index_nplike)
 
-            if not nplike.index_nplike.array_equal(starts[1:], stops[:-1]):
+            if not index_nplike.array_equal(starts[1:], stops[:-1]):
                 return False
 
             elif offsets is None:
-                offsets = nplike.index_nplike.empty(
-                    starts.shape[0] + 1, dtype=starts.dtype
-                )
+                offsets = index_nplike.empty(starts.shape[0] + 1, dtype=starts.dtype)
                 if offsets.shape[0] == 1:
                     offsets[0] = 0
                 else:
                     offsets[:-1] = starts
                     offsets[-1] = stops[-1]
 
-            elif not nplike.index_nplike.array_equal(offsets[:-1], starts) or (
+            elif not index_nplike.array_equal(offsets[:-1], starts) or (
                 stops.shape[0] != 0 and offsets[-1] != stops[-1]
             ):
                 return False
 
         elif isinstance(x, RegularArray):
             if x.size == 0:
-                my_offsets = nplike.index_nplike.empty(0, dtype=np.int64)
+                my_offsets = index_nplike.empty(0, dtype=np.int64)
             else:
-                my_offsets = nplike.index_nplike.arange(
+                my_offsets = index_nplike.arange(
                     0, x.content.length, x.size, dtype=np.int64
                 )
 
             if offsets is None:
                 offsets = my_offsets
-            elif not nplike.index_nplike.array_equal(offsets, my_offsets):
+            elif not index_nplike.array_equal(offsets, my_offsets):
                 return False
 
         elif isinstance(x, Content):
@@ -183,7 +182,9 @@ class BroadcastParameterRule(str, enum.Enum):
     NONE = "none"
 
 
-BroadcastParameterFactory = Callable[[int], List[Union[Dict[str, Any], None]]]
+BroadcastParameterFactory: TypeAlias = Callable[
+    [int], List[Union[Dict[str, Any], None]]
+]
 
 
 def _parameters_of(obj: Any, default: Any = NO_PARAMETERS) -> Any:
@@ -343,7 +344,14 @@ BROADCAST_RULE_TO_FACTORY_IMPL = {
 
 
 def apply_step(
-    nplike, inputs, action, depth, depth_context, lateral_context, behavior, options
+    backend: ak._backends.Backend,
+    inputs: Sequence,
+    action,
+    depth: int,
+    depth_context,
+    lateral_context,
+    behavior,
+    options,
 ):
     # This happens when descending anyway, but setting the option does it before action.
     if options["numpy_to_regular"] and any(
@@ -377,7 +385,7 @@ def apply_step(
                 nextinputs.append(obj)
             if any(x is not y for x, y in zip(inputs, nextinputs)):
                 return apply_step(
-                    nplike,
+                    backend,
                     nextinputs,
                     action,
                     depth,
@@ -388,7 +396,7 @@ def apply_step(
                 )
 
     # Now all lengths must agree.
-    if nplike.known_shape:
+    if backend.nplike.known_shape:
         checklength([x for x in inputs if isinstance(x, Content)], options)
 
     # Load the parameter broadcasting rule implementation
@@ -409,11 +417,11 @@ def apply_step(
         # Any EmptyArrays?
         if any(isinstance(x, EmptyArray) for x in inputs):
             nextinputs = [
-                x.to_NumpyArray(np.float64, nplike) if isinstance(x, EmptyArray) else x
+                x.to_NumpyArray(np.float64, backend) if isinstance(x, EmptyArray) else x
                 for x in inputs
             ]
             return apply_step(
-                nplike,
+                backend,
                 nextinputs,
                 action,
                 depth,
@@ -429,7 +437,7 @@ def apply_step(
                 x.to_RegularArray() if isinstance(x, NumpyArray) else x for x in inputs
             ]
             return apply_step(
-                nplike,
+                backend,
                 nextinputs,
                 action,
                 depth,
@@ -445,7 +453,7 @@ def apply_step(
                 x.project() if isinstance(x, IndexedArray) else x for x in inputs
             ]
             return apply_step(
-                nplike,
+                backend,
                 nextinputs,
                 action,
                 depth,
@@ -457,7 +465,7 @@ def apply_step(
 
         # Any UnionArrays?
         elif any(isinstance(x, UnionArray) for x in inputs):
-            if not nplike.known_data:
+            if not backend.nplike.known_data:
                 numtags, length = [], None
                 for x in inputs:
                     if isinstance(x, UnionArray):
@@ -468,8 +476,8 @@ def apply_step(
 
                 all_combos = list(itertools.product(*[range(x) for x in numtags]))
 
-                tags = nplike.index_nplike.empty(length, dtype=np.int8)
-                index = nplike.index_nplike.empty(length, dtype=np.int64)
+                tags = backend.index_nplike.empty(length, dtype=np.int8)
+                index = backend.index_nplike.empty(length, dtype=np.int64)
                 numoutputs, outcontents = None, []
                 for combo in all_combos:
                     nextinputs = []
@@ -483,7 +491,7 @@ def apply_step(
 
                     outcontents.append(
                         apply_step(
-                            nplike,
+                            backend,
                             nextinputs,
                             action,
                             depth,
@@ -505,7 +513,7 @@ def apply_step(
                 tagslist, numtags, length = [], [], None
                 for x in inputs:
                     if isinstance(x, UnionArray):
-                        tagslist.append(x.tags.raw(nplike))
+                        tagslist.append(x.tags.raw(backend.index_nplike))
                         numtags.append(len(x.contents))
                         if length is None:
                             length = tagslist[-1].shape[0]
@@ -522,25 +530,24 @@ def apply_step(
                             )
                 assert length is not None
 
-                combos = nplike.index_nplike.stack(tagslist, axis=-1)
+                combos = backend.index_nplike.stack(tagslist, axis=-1)
 
-                all_combos = nplike.array(
+                all_combos = backend.index_nplike.array(
                     list(itertools.product(*[range(x) for x in numtags])),
                     dtype=[(str(i), combos.dtype) for i in range(len(tagslist))],
                 )
-
                 combos = combos.view(
                     [(str(i), combos.dtype) for i in range(len(tagslist))]
                 ).reshape(length)
 
-                tags = nplike.index_nplike.empty(length, dtype=np.int8)
-                index = nplike.index_nplike.empty(length, dtype=np.int64)
+                tags = backend.index_nplike.empty(length, dtype=np.int8)
+                index = backend.index_nplike.empty(length, dtype=np.int64)
                 numoutputs, outcontents = None, []
                 for tag, combo in enumerate(all_combos):
                     mask = combos == combo
                     tags[mask] = tag
-                    index[mask] = nplike.index_nplike.arange(
-                        nplike.count_nonzero(mask), dtype=np.int64
+                    index[mask] = backend.index_nplike.arange(
+                        backend.index_nplike.count_nonzero(mask), dtype=np.int64
                     )
                     nextinputs = []
                     i = 0
@@ -554,7 +561,7 @@ def apply_step(
                             nextinputs.append(x)
                     outcontents.append(
                         apply_step(
-                            nplike,
+                            backend,
                             nextinputs,
                             action,
                             depth,
@@ -585,25 +592,25 @@ def apply_step(
 
         # Any option-types?
         elif any(isinstance(x, optiontypes) for x in inputs):
-            if nplike.known_data:
+            if backend.nplike.known_data:
                 mask = None
                 for x in inputs:
                     if isinstance(x, optiontypes):
-                        m = x.mask_as_bool(valid_when=False, nplike=nplike)
+                        m = x.mask_as_bool(valid_when=False)
                         if mask is None:
                             mask = m
                         else:
-                            mask = nplike.index_nplike.bitwise_or(mask, m, out=mask)
+                            mask = backend.index_nplike.bitwise_or(mask, m, out=mask)
 
                 nextmask = Index8(mask.view(np.int8))
-                index = nplike.index_nplike.full(mask.shape[0], -1, dtype=np.int64)
-                index[~mask] = nplike.index_nplike.arange(
-                    mask.shape[0] - nplike.index_nplike.count_nonzero(mask),
+                index = backend.index_nplike.full(mask.shape[0], -1, dtype=np.int64)
+                index[~mask] = backend.index_nplike.arange(
+                    mask.shape[0] - backend.index_nplike.count_nonzero(mask),
                     dtype=np.int64,
                 )
                 index = Index64(index)
                 if any(not isinstance(x, optiontypes) for x in inputs):
-                    nextindex = nplike.index_nplike.arange(
+                    nextindex = backend.index_nplike.arange(
                         mask.shape[0], dtype=np.int64
                     )
                     nextindex[mask] = -1
@@ -626,7 +633,7 @@ def apply_step(
                 for x in inputs:
                     if isinstance(x, optiontypes):
                         index = Index64(
-                            nplike.index_nplike.empty((x.length,), np.int64)
+                            backend.index_nplike.empty((x.length,), np.int64)
                         )
                         nextinputs.append(x.content)
                     else:
@@ -634,7 +641,7 @@ def apply_step(
                 assert index is not None
 
             outcontent = apply_step(
-                nplike,
+                backend,
                 nextinputs,
                 action,
                 depth,
@@ -659,18 +666,18 @@ def apply_step(
             ):
                 maxsize = max(x.size for x in inputs if isinstance(x, RegularArray))
 
-                if nplike.known_data:
+                if backend.nplike.known_data:
                     for x in inputs:
                         if isinstance(x, RegularArray):
                             if maxsize > 1 and x.size == 1:
                                 tmpindex = Index64(
-                                    nplike.index_nplike.repeat(
-                                        nplike.index_nplike.arange(
+                                    backend.index_nplike.repeat(
+                                        backend.index_nplike.arange(
                                             x.length, dtype=np.int64
                                         ),
                                         maxsize,
                                     ),
-                                    nplike=nplike,
+                                    nplike=backend.index_nplike,
                                 )
 
                     nextinputs = []
@@ -709,12 +716,12 @@ def apply_step(
                     if isinstance(x, Content):
                         if length is None:
                             length = x.length
-                        elif nplike.known_shape:
+                        elif backend.nplike.known_shape:
                             assert length == x.length
                 assert length is not None
 
                 outcontent = apply_step(
-                    nplike,
+                    backend,
                     nextinputs,
                     action,
                     depth + 1,
@@ -730,24 +737,24 @@ def apply_step(
                     for x, p in zip(outcontent, parameters)
                 )
 
-            elif not nplike.known_data or not nplike.known_shape:
+            elif not backend.nplike.known_data or not backend.nplike.known_shape:
                 offsets = None
                 nextinputs = []
                 for x in inputs:
                     if isinstance(x, ListOffsetArray):
                         offsets = Index64(
-                            nplike.index_nplike.empty(
+                            backend.index_nplike.empty(
                                 (x.offsets.data.shape[0],), np.int64
                             ),
-                            nplike=nplike,
+                            nplike=backend.index_nplike,
                         )
                         nextinputs.append(x.content)
                     elif isinstance(x, ListArray):
                         offsets = Index64(
-                            nplike.index_nplike.empty(
+                            backend.index_nplike.empty(
                                 (x.starts.data.shape[0] + 1,), np.int64
                             ),
-                            nplike=nplike,
+                            nplike=backend.index_nplike,
                         )
                         nextinputs.append(x.content)
                     elif isinstance(x, RegularArray):
@@ -757,7 +764,7 @@ def apply_step(
                 assert offsets is not None
 
                 outcontent = apply_step(
-                    nplike,
+                    backend,
                     nextinputs,
                     action,
                     depth + 1,
@@ -775,7 +782,7 @@ def apply_step(
 
             # Not all regular, but all same offsets?
             # Optimization: https://github.com/scikit-hep/awkward-1.0/issues/442
-            elif all_same_offsets(nplike, inputs):
+            elif all_same_offsets(backend, inputs):
                 lencontent, offsets, starts, stops = None, None, None, None
                 nextinputs = []
 
@@ -790,14 +797,14 @@ def apply_step(
                         if starts.length == 0 or stops.length == 0:
                             nextinputs.append(x.content[:0])
                         else:
-                            lencontent = nplike.index_nplike.max(stops)
+                            lencontent = backend.index_nplike.max(stops)
                             nextinputs.append(x.content[:lencontent])
 
                     else:
                         nextinputs.append(x)
 
                 outcontent = apply_step(
-                    nplike,
+                    backend,
                     nextinputs,
                     action,
                     depth + 1,
@@ -886,7 +893,7 @@ def apply_step(
                         nextinputs.append(x)
 
                 outcontent = apply_step(
-                    nplike,
+                    backend,
                     nextinputs,
                     action,
                     depth + 1,
@@ -943,7 +950,7 @@ def apply_step(
             for field in fields:
                 outcontents.append(
                     apply_step(
-                        nplike,
+                        backend,
                         [x[field] if isinstance(x, RecordArray) else x for x in inputs],
                         action,
                         depth,
@@ -984,7 +991,7 @@ def apply_step(
         lateral_context=lateral_context,
         continuation=continuation,
         behavior=behavior,
-        nplike=nplike,
+        backend=backend,
         options=options,
     )
 
@@ -1010,10 +1017,10 @@ def broadcast_and_apply(
     function_name=None,
     broadcast_parameters_rule=BroadcastParameterRule.INTERSECT,
 ):
-    nplike = ak.nplikes.nplike_of(*inputs)
+    backend = ak._backends.backend_of(*inputs)
     isscalar = []
     out = apply_step(
-        nplike,
+        backend,
         broadcast_pack(inputs, isscalar),
         action,
         0,
@@ -1031,4 +1038,4 @@ def broadcast_and_apply(
         },
     )
     assert isinstance(out, tuple)
-    return tuple(broadcast_unpack(x, isscalar, nplike) for x in out)
+    return tuple(broadcast_unpack(x, isscalar, backend) for x in out)

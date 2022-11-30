@@ -5,6 +5,8 @@ from awkward._version import __version__
 
 # NumPy-like alternatives
 import awkward.nplikes
+import awkward._typetracer
+import awkward._backends
 
 # layout classes; functionality that used to be in C++ (in Awkward 1.x)
 import awkward.index
@@ -14,7 +16,6 @@ import awkward.types
 import awkward.forms
 import awkward._slicing
 import awkward._broadcasting
-import awkward._typetracer
 
 # internal
 import awkward._util

@@ -4,4 +4,3 @@ packaging
 PyYAML
 requests
 toml
-typing_extensions>=4.3.0

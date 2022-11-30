@@ -27,21 +27,6 @@ kMaxInt64 = 9223372036854775806  # 2**63 - 2: see below
 kSliceNone = kMaxInt64 + 1  # for Slice::none()
 kMaxLevels = 48
 
-_backends = {
-    "cpu": ak.nplikes.Numpy,
-    "cuda": ak.nplikes.Cupy,
-    "jax": ak.nplikes.Jax,
-}
-
-
-def regularize_backend(backend):
-    if backend in _backends:
-        return _backends[backend].instance()
-    else:
-        raise ak._errors.wrap_error(
-            ValueError("The available backends for now are `cpu` and `cuda`.")
-        )
-
 
 def parse_version(version):
     return packaging.version.parse(version)
@@ -634,7 +619,9 @@ def from_arraylib(array, regulararray, recordarray, highlevel, behavior):
                 ak.index.Index64(starts),
                 ak.index.Index64(stops),
                 ak.contents.NumpyArray(
-                    asbytes.view("u1"), parameters={"__array__": "byte"}, nplike=numpy
+                    asbytes.view("u1"),
+                    parameters={"__array__": "byte"},
+                    backend=ak._backends.NumpyBackend.instance(),
                 ),
                 parameters={"__array__": "bytestring"},
             )
@@ -652,7 +639,9 @@ def from_arraylib(array, regulararray, recordarray, highlevel, behavior):
                 ak.index.Index64(starts),
                 ak.index.Index64(stops),
                 ak.contents.NumpyArray(
-                    asbytes.view("u1"), parameters={"__array__": "char"}, nplike=numpy
+                    asbytes.view("u1"),
+                    parameters={"__array__": "char"},
+                    backend=ak._backends.NumpyBackend.instance(),
                 ),
                 parameters={"__array__": "string"},
             )

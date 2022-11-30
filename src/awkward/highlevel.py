@@ -1183,7 +1183,10 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         except AttributeError:
             pytype = type(self).__name__
 
-        if self._layout.nplike.known_shape and self._layout.nplike.known_data:
+        if (
+            self._layout.backend.nplike.known_shape
+            and self._layout.backend.nplike.known_data
+        ):
             typestr = repr(str(self.type))[1:-1]
             if len(typestr) + len(pytype) + len(" type=''") + 3 < limit_cols // 2:
                 strwidth = limit_cols - (
@@ -1886,8 +1889,8 @@ class Record(NDArrayOperatorsMixin):
         pytype = type(self).__name__
 
         if (
-            self._layout.array.nplike.known_shape
-            and self._layout.array.nplike.known_data
+            self._layout.array.backend.nplike.known_shape
+            and self._layout.array.backend.nplike.known_data
         ):
             typestr = repr(str(self.type))[1:-1]
             if len(typestr) + len(pytype) + len(" type=''") + 3 < limit_cols // 2:

@@ -110,7 +110,7 @@ def _impl(array, allow_record, allow_other, numpytype):
         )
 
     elif ak._typetracer.TypeTracer.is_own_array(array):
-        typetracer = ak._typetracer.TypeTracer.instance()
+        backend = ak._backends.TypeTracerBackend.instance()
 
         if len(array.shape) == 0:
             array = array.reshape(1)
@@ -122,7 +122,7 @@ def _impl(array, allow_record, allow_other, numpytype):
                 )
             )
 
-        return ak.contents.NumpyArray(array, parameters=None, nplike=typetracer)
+        return ak.contents.NumpyArray(array, parameters=None, backend=backend)
 
     elif isinstance(array, (str, bytes)):
         return _impl(

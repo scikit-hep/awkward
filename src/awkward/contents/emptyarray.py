@@ -1,4 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+from __future__ import annotations
 
 import copy
 
@@ -6,6 +7,7 @@ import awkward as ak
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.emptyform import EmptyForm
+from awkward.typing import Self
 
 np = ak.nplikes.NumpyMetadata.instance()
 numpy = ak.nplikes.Numpy.instance()
@@ -19,11 +21,11 @@ class EmptyArray(Content):
         self,
         *,
         parameters=unset,
-        nplike=unset,
+        backend=unset,
     ):
         return EmptyArray(
             parameters=self._parameters if parameters is unset else parameters,
-            nplike=self._nplike if nplike is unset else nplike,
+            backend=self._backend if backend is unset else backend,
         )
 
     def __copy__(self):
@@ -32,10 +34,10 @@ class EmptyArray(Content):
     def __deepcopy__(self, memo):
         return self.copy(parameters=copy.deepcopy(self._parameters, memo))
 
-    def __init__(self, *, parameters=None, nplike=None):
-        if nplike is None:
-            nplike = numpy
-        self._init(parameters, nplike)
+    def __init__(self, *, parameters=None, backend=None):
+        if backend is None:
+            backend = ak._backends.NumpyBackend.instance()
+        self._init(parameters, backend)
 
     Form = EmptyForm
 
@@ -47,15 +49,17 @@ class EmptyArray(Content):
 
     @property
     def typetracer(self):
-        tt = ak._typetracer.TypeTracer.instance()
-        return EmptyArray(parameters=self._parameters, nplike=tt)
+        return EmptyArray(
+            parameters=self._parameters,
+            backend=ak._backends.TypeTracerBackend.instance(),
+        )
 
     @property
     def length(self):
         return 0
 
     def _forget_length(self):
-        return EmptyArray(parameters=self._parameters, nplike=self._nplike)
+        return EmptyArray(parameters=self._parameters, backend=self._backend)
 
     def __repr__(self):
         return self._repr("", "", "")
@@ -74,16 +78,13 @@ class EmptyArray(Content):
     def merge_parameters(self, parameters):
         return EmptyArray(
             parameters=ak._util.merge_parameters(self._parameters, parameters),
-            nplike=self._nplike,
+            backend=self._backend,
         )
 
-    def to_NumpyArray(self, dtype, nplike=None):
-        if nplike is None:
-            nplike = self._nplike
-        if nplike is None:
-            nplike = numpy
+    def to_NumpyArray(self, dtype, backend=None):
+        backend = backend or self._backend
         return ak.contents.NumpyArray(
-            nplike.empty(0, dtype), parameters=self._parameters, nplike=nplike
+            backend.nplike.empty(0, dtype), parameters=self._parameters, backend=backend
         )
 
     def __array__(self, **kwargs):
@@ -121,11 +122,7 @@ class EmptyArray(Content):
         raise ak._errors.index_error(
             self,
             ak.contents.ListArray(
-                slicestarts,
-                slicestops,
-                slicecontent,
-                parameters=None,
-                nplike=self._nplike,
+                slicestarts, slicestops, slicecontent, parameters=None
             ),
             "too many jagged slice dimensions for array",
         )
@@ -177,8 +174,9 @@ class EmptyArray(Content):
             else:
                 return out
         else:
-            out = ak.index.Index64.empty(0, self._nplike)
-            return ak.contents.NumpyArray(out, parameters=None, nplike=self._nplike)
+            # TODO: This was changed to use `nplike` instead of `index_nplike`. Is this OK?
+            out = ak.index.Index64.empty(0, nplike=self._backend.nplike)
+            return ak.contents.NumpyArray(out, parameters=None, backend=self._backend)
 
     def _offsets_and_flattened(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
@@ -187,10 +185,10 @@ class EmptyArray(Content):
                 np.AxisError(self, "axis=0 not allowed for flatten")
             )
         else:
-            offsets = ak.index.Index64.zeros(1, self._nplike)
+            offsets = ak.index.Index64.zeros(1, nplike=self._backend.index_nplike)
             return (
                 offsets,
-                EmptyArray(parameters=self._parameters, nplike=self._nplike),
+                EmptyArray(parameters=self._parameters, backend=self._backend),
             )
 
     def _mergeable(self, other, mergebool):
@@ -207,16 +205,20 @@ class EmptyArray(Content):
             tail_others = others[1:]
             return others[0].mergemany(tail_others)
 
-    def fill_none(self, value):
-        return EmptyArray(parameters=self._parameters, nplike=self._nplike)
+    def fill_none(self, value: Content) -> Content:
+        return EmptyArray(parameters=self._parameters, backend=self._backend)
 
     def _local_index(self, axis, depth):
         return ak.contents.NumpyArray(
-            self._nplike.empty(0, np.int64), parameters=None, nplike=self._nplike
+            self._backend.nplike.empty(0, np.int64),
+            parameters=None,
+            backend=self._backend,
         )
 
     def numbers_to_type(self, name):
-        return ak.contents.EmptyArray(parameters=self._parameters, nplike=self._nplike)
+        return ak.contents.EmptyArray(
+            parameters=self._parameters, backend=self._backend
+        )
 
     def _is_unique(self, negaxis, starts, parents, outlength):
         return True
@@ -255,7 +257,9 @@ class EmptyArray(Content):
         return self
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
-        return ak.contents.EmptyArray(parameters=self._parameters, nplike=self._nplike)
+        return ak.contents.EmptyArray(
+            parameters=self._parameters, backend=self._backend
+        )
 
     def _reduce_next(
         self,
@@ -317,16 +321,14 @@ class EmptyArray(Content):
         else:
             dtype = np.dtype(options["emptyarray_to"])
             next = ak.contents.NumpyArray(
-                numpy.empty(length, dtype),
-                self._parameters,
-                nplike=self.nplike,
+                numpy.empty(length, dtype), self._parameters, backend=self._backend
             )
             return next._to_arrow(pyarrow, mask_node, validbytes, length, options)
 
     def _to_numpy(self, allow_missing):
-        return self._nplike.empty(0, dtype=np.float64)
+        return self._backend.nplike.empty(0, dtype=np.float64)
 
-    def _completely_flatten(self, nplike, options):
+    def _completely_flatten(self, backend, options):
         return []
 
     def _recursively_apply(
@@ -338,7 +340,7 @@ class EmptyArray(Content):
                 if options["keep_parameters"]:
                     return self
                 else:
-                    return EmptyArray(parameters=None, nplike=self._nplike)
+                    return EmptyArray(parameters=None, backend=self._backend)
 
         else:
 
@@ -352,7 +354,7 @@ class EmptyArray(Content):
             lateral_context=lateral_context,
             continuation=continuation,
             behavior=behavior,
-            nplike=self._nplike,
+            backend=self._backend,
             options=options,
         )
 
@@ -369,8 +371,8 @@ class EmptyArray(Content):
     def _to_list(self, behavior, json_conversions):
         return []
 
-    def _to_nplike(self, nplike):
-        return EmptyArray(self._parameters, nplike=nplike)
+    def to_backend(self, backend: ak._backends.Backend) -> Self:
+        return EmptyArray(parameters=self._parameters, backend=backend)
 
     def _layout_equal(self, other, index_dtype=True, numpyarray=True):
         return True

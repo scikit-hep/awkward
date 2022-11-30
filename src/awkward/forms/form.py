@@ -3,10 +3,10 @@ from __future__ import annotations
 
 import json
 from collections.abc import Mapping
-from typing import Any
 
 import awkward as ak
 from awkward import _errors
+from awkward.typing import Any
 
 np = ak.nplikes.NumpyMetadata.instance()
 numpy = ak.nplikes.Numpy.instance()

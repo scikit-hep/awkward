@@ -1,6 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-# from typing import Type
+# from awkward.typing import Type
 import pathlib
 
 import awkward as ak

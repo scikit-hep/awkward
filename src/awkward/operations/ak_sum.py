@@ -245,9 +245,10 @@ def nansum(
 
 def _impl(array, axis, keepdims, mask_identity, flatten_records):
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
+    backend = layout.backend
 
     if axis is None:
-        if not layout.nplike.known_data or not layout.nplike.known_shape:
+        if not backend.nplike.known_data or not backend.nplike.known_shape:
             reducer_cls = ak._reducers.Sum
 
             def map(x):
@@ -258,13 +259,13 @@ def _impl(array, axis, keepdims, mask_identity, flatten_records):
         else:
 
             def map(x):
-                return layout.nplike.sum(x.data)
+                return backend.nplike.sum(x.data)
 
         def reduce(xs):
             if len(xs) == 1:
                 return xs[0]
             else:
-                return layout.nplike.add(xs[0], reduce(xs[1:]))
+                return backend.nplike.add(xs[0], reduce(xs[1:]))
 
         return reduce(
             [

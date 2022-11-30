@@ -99,7 +99,6 @@ def flatten(array, axis=1, *, highlevel=True, behavior=None):
 
 def _impl(array, axis, highlevel, behavior):
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
-    nplike = ak.nplikes.nplike_of(layout)
 
     if axis is None:
         out = layout.completely_flatten(function_name="ak.flatten")
@@ -114,8 +113,10 @@ def _impl(array, axis, highlevel, behavior):
     elif axis == 0 or layout.axis_wrap_if_negative(axis) == 0:
 
         def apply(layout):
+            backend = layout.backend
+
             if layout.is_unknown:
-                return apply(ak.contents.NumpyArray(nplike.array([])))
+                return apply(ak.contents.NumpyArray(backend.nplike.array([])))
 
             elif layout.is_indexed:
                 return apply(layout.project())
@@ -127,17 +128,17 @@ def _impl(array, axis, highlevel, behavior):
                 ):
                     return layout
 
-                tags = nplike.index_nplike.asarray(layout.tags)
-                index = nplike.index_nplike.array(
-                    nplike.asarray(layout.index), copy=True
+                tags = backend.index_nplike.asarray(layout.tags)
+                index = backend.index_nplike.array(
+                    backend.nplike.asarray(layout.index), copy=True
                 )
-                bigmask = nplike.index_nplike.empty(len(index), dtype=np.bool_)
+                bigmask = backend.index_nplike.empty(len(index), dtype=np.bool_)
                 for tag, content in enumerate(layout.contents):
                     if content.is_option and not isinstance(
                         content, ak.contents.UnmaskedArray
                     ):
                         bigmask[:] = False
-                        bigmask[tags == tag] = nplike.index_nplike.asarray(
+                        bigmask[tags == tag] = backend.index_nplike.asarray(
                             content.mask_as_bool(valid_when=False)
                         ).view(np.bool_)
                         index[bigmask] = -1

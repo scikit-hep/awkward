@@ -441,7 +441,7 @@ def _impl(
     more_layouts = [
         ak.to_layout(x, allow_record=False, allow_other=False) for x in more_arrays
     ]
-    nplike = ak.nplikes.nplike_of(layout, *more_layouts)
+    backend = ak._backends.backend_of(layout, *more_layouts)
 
     options = {
         "allow_records": allow_records,
@@ -538,7 +538,7 @@ def _impl(
         inputs = [layout] + more_layouts
         isscalar = []
         out = ak._broadcasting.apply_step(
-            nplike,
+            backend,
             ak._broadcasting.broadcast_pack(inputs, isscalar),
             action,
             0,
@@ -548,7 +548,7 @@ def _impl(
             options,
         )
         assert isinstance(out, tuple)
-        out = [ak._broadcasting.broadcast_unpack(x, isscalar, nplike) for x in out]
+        out = [ak._broadcasting.broadcast_unpack(x, isscalar, backend) for x in out]
 
         if return_array:
             if len(out) == 1:
