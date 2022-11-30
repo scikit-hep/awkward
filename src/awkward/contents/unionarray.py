@@ -1026,7 +1026,7 @@ class UnionArray(Content):
         else:
             return reversed.mergemany(tail[1:])
 
-    def fill_none(self, value):
+    def fill_none(self, value: Content) -> Content:
         contents = []
         for content in self._contents:
             contents.append(content.fill_none(value))

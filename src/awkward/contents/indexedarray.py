@@ -610,8 +610,8 @@ class IndexedArray(Content):
             )
         )
 
-    def fill_none(self, value):
-        if value.nplike.known_shape and value.length != 1:
+    def fill_none(self, value: Content) -> Content:
+        if value.backend.nplike.known_shape and value.length != 1:
             raise ak._errors.wrap_error(
                 ValueError(f"fill_none value length ({value.length}) is not equal to 1")
             )

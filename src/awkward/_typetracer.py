@@ -513,8 +513,6 @@ class TypeTracer(ak.nplikes.NumpyLike):
         return TypeTracerArray
 
     def raw(self, array, nplike):
-        assert isinstance(array.nplike, TypeTracer)
-
         if isinstance(nplike, TypeTracer):
             return TypeTracerArray.from_array(array)
         elif isinstance(array, TypeTracerArray):

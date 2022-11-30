@@ -63,7 +63,7 @@ class ByteMaskedArray(Content):
             )
         if (
             mask.nplike.known_shape
-            and content.nplike.known_shape
+            and content.backend.nplike.known_shape
             and mask.length > content.length
         ):
             raise ak._errors.wrap_error(
@@ -651,7 +651,7 @@ class ByteMaskedArray(Content):
         else:
             return self.to_IndexedOptionArray64().mergemany(others)
 
-    def fill_none(self, value):
+    def fill_none(self, value: Content) -> Content:
         return self.to_IndexedOptionArray64().fill_none(value)
 
     def _local_index(self, axis, depth):

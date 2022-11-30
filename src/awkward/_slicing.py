@@ -287,10 +287,12 @@ def normalise_item_nested(item):
         projected = item.content._carry(ak.index.Index64(nextindex[nonnull]), False)
 
         # content has been projected; index must agree
-        nextindex[nonnull] = item.nplike.arange(projected.length, dtype=np.int64)
+        nextindex[nonnull] = item.backend.index_nplike.arange(
+            projected.length, dtype=np.int64
+        )
 
         return ak.contents.IndexedOptionArray(
-            ak.index.Index64(nextindex, nplike=item.backend.index_nplike),
+            ak.index.Index64(nextindex),
             normalise_item_nested(projected),
             parameters=item.parameters,
         )
@@ -354,7 +356,7 @@ def normalise_item_bool_to_int(item):
         and isinstance(item.content, ak.contents.NumpyArray)
         and issubclass(item.content.dtype.type, (bool, np.bool_))
     ):
-        if item.nplike.known_data or item.nplike.known_shape:
+        if item.backend.nplike.known_data or item.backend.nplike.known_shape:
             localindex = item.local_index(axis=1)
             nextcontent = localindex.content.data[item.content.data]
 
@@ -363,13 +365,13 @@ def normalise_item_bool_to_int(item):
             )
             cumsum[0] = 0
             cumsum[1:] = item.backend.index_nplike.asarray(
-                item.nplike.cumsum(item.content.data)
+                item.backend.nplike.cumsum(item.content.data)
             )
             nextoffsets = cumsum[item.offsets]
 
         else:
             nextoffsets = item.offsets
-            nextcontent = item.nplike.empty(
+            nextcontent = item.backend.nplike.empty(
                 (ak._typetracer.UnknownLength,), dtype=np.int64
             )
 
@@ -384,7 +386,7 @@ def normalise_item_bool_to_int(item):
         and isinstance(item.content.content, ak.contents.NumpyArray)
         and issubclass(item.content.content.dtype.type, (bool, np.bool_))
     ):
-        if item.nplike.known_data or item.nplike.known_shape:
+        if item.backend.nplike.known_data or item.backend.nplike.known_shape:
             if isinstance(item.nplike, ak.nplikes.Jax):
                 raise ak._errors.wrap_error(
                     "This slice is not supported for JAX differentiation."
@@ -401,7 +403,7 @@ def normalise_item_bool_to_int(item):
             if item.content.content.data.shape[0] > 0:
                 expanded = item.content.content.data[safeindex]
             else:
-                expanded = item.content.content.nplike.ones(
+                expanded = item.content.content.backend.nplike.ones(
                     safeindex.shape[0], np.bool_
                 )
 
@@ -413,9 +415,9 @@ def normalise_item_bool_to_int(item):
 
             # list offsets do include missing values
             expanded[isnegative] = True
-            cumsum = item.nplike.empty(expanded.shape[0] + 1, np.int64)
+            cumsum = item.backend.nplike.empty(expanded.shape[0] + 1, np.int64)
             cumsum[0] = 0
-            cumsum[1:] = item.nplike.cumsum(expanded)
+            cumsum[1:] = item.backend.nplike.cumsum(expanded)
             nextoffsets = cumsum[item.offsets]
 
             # outindex fits into the lists; non-missing are sequential
@@ -427,7 +429,7 @@ def normalise_item_bool_to_int(item):
         else:
             nextoffsets = item.offsets
             outindex = item.content.index
-            nextcontent = item.nplike.empty(
+            nextcontent = item.backend.nplike.empty(
                 (ak._typetracer.UnknownLength,), dtype=np.int64
             )
 
@@ -453,7 +455,7 @@ def normalise_item_bool_to_int(item):
         if isinstance(item.content, ak.contents.NumpyArray) and issubclass(
             item.content.dtype.type, (bool, np.bool_)
         ):
-            if item.nplike.known_data or item.nplike.known_shape:
+            if item.backend.nplike.known_data or item.backend.nplike.known_shape:
                 if isinstance(item.nplike, ak.nplikes.Jax):
                     raise ak._errors.wrap_error(
                         "This slice is not supported for JAX differentiation."
@@ -470,25 +472,27 @@ def normalise_item_bool_to_int(item):
                 if item.content.data.shape[0] > 0:
                     expanded = item.content.data[safeindex]
                 else:
-                    expanded = item.content.nplike.ones(safeindex.shape[0], np.bool_)
+                    expanded = item.content.backend.nplike.ones(
+                        safeindex.shape[0], np.bool_
+                    )
 
                 # nextcontent does not include missing values
                 expanded[isnegative] = False
-                nextcontent = item.nplike.nonzero(expanded)[0]
+                nextcontent = item.backend.nplike.nonzero(expanded)[0]
 
                 # outindex does include missing values
                 expanded[isnegative] = True
-                lenoutindex = item.nplike.count_nonzero(expanded)
+                lenoutindex = item.backend.nplike.count_nonzero(expanded)
 
                 # non-missing are sequential
-                outindex = item.nplike.full(lenoutindex, -1, np.int64)
-                outindex[~isnegative[expanded]] = item.nplike.arange(
+                outindex = item.backend.nplike.full(lenoutindex, -1, np.int64)
+                outindex[~isnegative[expanded]] = item.backend.nplike.arange(
                     nextcontent.shape[0], dtype=np.int64
                 )
 
             else:
                 outindex = item.index
-                nextcontent = item.nplike.empty(
+                nextcontent = item.backend.nplike.empty(
                     (ak._typetracer.UnknownLength,), dtype=np.int64
                 )
 

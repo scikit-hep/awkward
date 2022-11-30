@@ -639,7 +639,7 @@ class Content:
 
         elif ak._util.is_sized_iterable(where):
             layout = ak.operations.to_layout(where)
-            as_array = layout.maybe_to_array(layout.nplike)
+            as_array = layout.maybe_to_array()
             if as_array is None:
                 return self._getitem(layout)
             else:
@@ -1839,4 +1839,7 @@ class Content:
         raise ak._errors.wrap_error(NotImplementedError)
 
     def numbers_to_type(self, name: str) -> Self:
+        raise ak._errors.wrap_error(NotImplementedError)
+
+    def fill_none(self, value: Content) -> Content:
         raise ak._errors.wrap_error(NotImplementedError)

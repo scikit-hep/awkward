@@ -732,7 +732,7 @@ class ListOffsetArray(Content):
         else:
             return out
 
-    def fill_none(self, value):
+    def fill_none(self, value: Content) -> Content:
         return ListOffsetArray(
             self._offsets, self._content.fill_none(value), parameters=self._parameters
         )

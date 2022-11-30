@@ -299,7 +299,7 @@ class UnmaskedArray(Content):
         else:
             return self.to_IndexedOptionArray64().mergemany(others)
 
-    def fill_none(self, value):
+    def fill_none(self, value: Content) -> Content:
         return self._content.fill_none(value)
 
     def _local_index(self, axis, depth):
