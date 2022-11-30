@@ -1,13 +1,43 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+import copy
 from collections.abc import Iterable
 
 import awkward as ak
+from awkward._util import unset
 from awkward.forms.form import Form, _parameters_equal
 
 
 class UnionForm(Form):
     is_union = True
+
+    def copy(
+        self,
+        tags=unset,
+        index=unset,
+        contents=unset,
+        *,
+        parameters=unset,
+        form_key=unset,
+    ):
+        return UnionForm(
+            self._tags if tags is unset else tags,
+            self._index if index is unset else index,
+            self._contents if contents is unset else contents,
+            parameters=self._parameters if parameters is unset else parameters,
+            form_key=self._form_key if form_key is unset else form_key,
+        )
+
+    def __copy__(self):
+        return self.copy()
+
+    def __deepcopy__(self, memo):
+        return self.copy(
+            tags=copy.deepcopy(self._tags, memo),
+            index=copy.deepcopy(self._index, memo),
+            contents=[copy.deepcopy(x, memo) for x in self._contents],
+            parameters=copy.deepcopy(self._parameters, memo),
+        )
 
     def __init__(
         self,
@@ -115,6 +145,23 @@ class UnionForm(Form):
             return self._contents == other._contents
 
         return False
+
+    @classmethod
+    def simplified(
+        cls,
+        tags,
+        index,
+        contents,
+        *,
+        parameters=None,
+        form_key=None,
+    ):
+        return ak.contents.UnionArray.simplified(
+            ak.index._form_to_zero_length(tags),
+            ak.index._form_to_zero_length(index),
+            [x.zero_length_array(highlevel=False) for x in contents],
+            parameters=parameters,
+        ).form
 
     def purelist_parameter(self, key):
         if self._parameters is None or key not in self._parameters:

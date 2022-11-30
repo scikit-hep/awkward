@@ -5,7 +5,8 @@ import json
 from collections.abc import Iterable
 
 import awkward as ak
-from awkward.contents.content import Content, unset
+from awkward._util import unset
+from awkward.contents.content import Content
 from awkward.forms.recordform import RecordForm
 from awkward.record import Record
 

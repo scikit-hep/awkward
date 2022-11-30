@@ -5,6 +5,7 @@ import copy
 import awkward as ak
 
 np = ak.nplikes.NumpyMetadata.instance()
+numpy = ak.nplikes.Numpy.instance()
 
 _dtype_to_form = {
     np.dtype(np.int8): "i8",
@@ -13,6 +14,23 @@ _dtype_to_form = {
     np.dtype(np.uint32): "u32",
     np.dtype(np.int64): "i64",
 }
+
+
+def _form_to_zero_length(form):
+    if form == "i8":
+        return Index8(np.zeros(0, dtype=np.int8))
+    elif form == "u8":
+        return IndexU8(np.zeros(0, dtype=np.uint8))
+    elif form == "i32":
+        return Index32(np.zeros(0, dtype=np.int32))
+    elif form == "u32":
+        return IndexU32(np.zeros(0, dtype=np.uint32))
+    elif form == "i64":
+        return Index64(np.zeros(0, dtype=np.int64))
+    else:
+        raise ak._errors.wrap_error(
+            AssertionError(f"unrecognized Index form: {form!r}")
+        )
 
 
 class Index:

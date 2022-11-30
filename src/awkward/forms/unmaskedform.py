@@ -1,11 +1,36 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+import copy
+
 import awkward as ak
+from awkward._util import unset
 from awkward.forms.form import Form, _parameters_equal
 
 
 class UnmaskedForm(Form):
     is_option = True
+
+    def copy(
+        self,
+        content=unset,
+        *,
+        parameters=unset,
+        form_key=unset,
+    ):
+        return UnmaskedForm(
+            self._content if content is unset else content,
+            parameters=self._parameters if parameters is unset else parameters,
+            form_key=self._form_key if form_key is unset else form_key,
+        )
+
+    def __copy__(self):
+        return self.copy()
+
+    def __deepcopy__(self, memo):
+        return self.copy(
+            content=copy.deepcopy(self._content, memo),
+            parameters=copy.deepcopy(self._parameters, memo),
+        )
 
     def __init__(
         self,
@@ -61,6 +86,21 @@ class UnmaskedForm(Form):
             )
         else:
             return False
+
+    @classmethod
+    def simplified(
+        cls,
+        content,
+        *,
+        parameters=None,
+        form_key=None,
+    ):
+        if content.is_indexed or content.is_option:
+            return content.copy(
+                parameters=ak._util.merge_parameters(content._parameters, parameters)
+            )
+        else:
+            return cls(content, parameters=parameters, form_key=form_key)
 
     def simplify_optiontype(self):
         if isinstance(

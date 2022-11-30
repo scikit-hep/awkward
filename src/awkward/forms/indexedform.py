@@ -1,11 +1,39 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+import copy
+
 import awkward as ak
+from awkward._util import unset
 from awkward.forms.form import Form, _parameters_equal, _parameters_update
 
 
 class IndexedForm(Form):
     is_indexed = True
+
+    def copy(
+        self,
+        index=unset,
+        content=unset,
+        *,
+        parameters=unset,
+        form_key=unset,
+    ):
+        return IndexedForm(
+            self._index if index is unset else index,
+            self._content if content is unset else content,
+            parameters=self._parameters if parameters is unset else parameters,
+            form_key=self._form_key if form_key is unset else form_key,
+        )
+
+    def __copy__(self):
+        return self.copy()
+
+    def __deepcopy__(self, memo):
+        return self.copy(
+            index=copy.deepcopy(self._index, memo),
+            content=copy.deepcopy(self._content, memo),
+            parameters=copy.deepcopy(self._parameters, memo),
+        )
 
     def __init__(
         self,
@@ -94,6 +122,30 @@ class IndexedForm(Form):
             )
         else:
             return False
+
+    @classmethod
+    def simplified(
+        cls,
+        index,
+        content,
+        *,
+        parameters=None,
+        form_key=None,
+    ):
+        if content.is_option:
+            return ak.forms.IndexedOptionForm.simplified(
+                "i64",
+                content.content,
+                parameters=ak._util.merge_parameters(parameters, content._parameters),
+            )
+        elif content.is_indexed:
+            return ak.forms.IndexedForm(
+                "i64",
+                content.content,
+                parameters=ak._util.merge_parameters(parameters, content._parameters),
+            )
+        else:
+            return cls(index, content, parameters=parameters, form_key=form_key)
 
     def purelist_parameter(self, key):
         if self._parameters is None or key not in self._parameters:

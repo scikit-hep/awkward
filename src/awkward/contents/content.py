@@ -32,15 +32,6 @@ ActionType: TypeAlias = """Callable[
 ]"""
 
 
-# FIXME: introduce sentinel type for this
-class _Unset:
-    def __repr__(self):
-        return f"{__name__}.unset"
-
-
-unset = _Unset()
-
-
 class Content:
     is_numpy = False
     is_unknown = False

@@ -3,7 +3,8 @@
 import copy
 
 import awkward as ak
-from awkward.contents.content import Content, unset
+from awkward._util import unset
+from awkward.contents.content import Content
 from awkward.forms.indexedoptionform import IndexedOptionForm
 from awkward.index import Index
 
@@ -491,6 +492,7 @@ class IndexedOptionArray(Content):
                 rawcontent = self._content.to_IndexedOptionArray64()
                 inner = rawcontent.index
                 result = ak.index.Index64.empty(self.index.length, self._nplike)
+
             assert (
                 result.nplike is self._nplike
                 and self._index.nplike is self._nplike

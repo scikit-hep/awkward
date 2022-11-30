@@ -5,8 +5,9 @@ import json
 import math
 
 import awkward as ak
+from awkward._util import unset
 from awkward.contents.bytemaskedarray import ByteMaskedArray
-from awkward.contents.content import Content, unset
+from awkward.contents.content import Content
 from awkward.forms.bitmaskedform import BitMaskedForm
 from awkward.index import Index
 

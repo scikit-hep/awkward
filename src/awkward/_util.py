@@ -97,6 +97,15 @@ def identifier_hash(str):
     )
 
 
+# FIXME: introduce sentinel type for this
+class _Unset:
+    def __repr__(self):
+        return f"{__name__}.unset"
+
+
+unset = _Unset()
+
+
 # Sentinel object for catching pass-through values
 class Unspecified:
     pass

@@ -3,7 +3,8 @@
 import copy
 
 import awkward as ak
-from awkward.contents.content import Content, unset
+from awkward._util import unset
+from awkward.contents.content import Content
 from awkward.contents.listoffsetarray import ListOffsetArray
 from awkward.forms.listform import ListForm
 from awkward.index import Index
