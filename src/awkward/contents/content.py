@@ -7,13 +7,12 @@ from collections.abc import Callable, Iterable, Mapping, MutableMapping, Sized
 from numbers import Complex, Integral, Real
 from typing import Any, TypeVar
 
-from typing_extensions import Self, TypeAlias
-
 import awkward as ak
 import awkward._reducers
 from awkward._backends import Backend, TypeTracerBackend
 from awkward.forms import form
 from awkward.nplikes import NumpyLike
+from awkward.typing import Self, TypeAlias
 
 np = ak.nplikes.NumpyMetadata.instance()
 numpy = ak.nplikes.Numpy.instance()

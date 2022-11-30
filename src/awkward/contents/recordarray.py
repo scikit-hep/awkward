@@ -5,12 +5,11 @@ import copy
 import json
 from collections.abc import Iterable
 
-from typing_extensions import Self
-
 import awkward as ak
 from awkward.contents.content import Content, unset
 from awkward.forms.recordform import RecordForm
 from awkward.record import Record
+from awkward.typing import Self
 
 np = ak.nplikes.NumpyMetadata.instance()
 numpy = ak.nplikes.Numpy.instance()

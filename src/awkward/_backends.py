@@ -1,10 +1,8 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import Any, Callable, TypeVar
 
 import awkward_cpp
-from typing_extensions import Protocol, TypeAlias, Unpack, runtime_checkable
 
 import awkward as ak
 from awkward._typetracer import NoKernel, TypeTracer
@@ -20,13 +18,23 @@ from awkward.nplikes import (
     Singleton,
     nplike_of,
 )
+from awkward.typing import (
+    Any,
+    Callable,
+    Protocol,
+    Tuple,
+    TypeAlias,
+    TypeVar,
+    Unpack,
+    runtime_checkable,
+)
 
 np = NumpyMetadata.instance()
 
 
 T = TypeVar("T")
-KernelKeyType: TypeAlias = "tuple[str, Unpack[tuple[np.dtype, ...]]]"
-KernelType: TypeAlias = "Callable[[...], None]"
+KernelKeyType: TypeAlias = Tuple[str, Unpack[tuple[np.dtype, ...]]]
+KernelType: TypeAlias = Callable[[...], None]
 
 
 @runtime_checkable

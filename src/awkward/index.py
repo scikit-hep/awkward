@@ -3,9 +3,8 @@ from __future__ import annotations
 
 import copy
 
-from typing_extensions import Self
-
 import awkward as ak
+from awkward.typing import Self
 
 np = ak.nplikes.NumpyMetadata.instance()
 

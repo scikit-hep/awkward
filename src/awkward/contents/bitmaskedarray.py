@@ -5,13 +5,12 @@ import copy
 import json
 import math
 
-from typing_extensions import Self
-
 import awkward as ak
 from awkward.contents.bytemaskedarray import ByteMaskedArray
 from awkward.contents.content import Content, unset
 from awkward.forms.bitmaskedform import BitMaskedForm
 from awkward.index import Index
+from awkward.typing import Self
 
 np = ak.nplikes.NumpyMetadata.instance()
 numpy = ak.nplikes.Numpy.instance()

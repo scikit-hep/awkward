@@ -7,12 +7,11 @@ import copy
 import ctypes
 from collections.abc import Iterable, Sequence
 
-from typing_extensions import Self
-
 import awkward as ak
 from awkward.contents.content import Content, unset
 from awkward.forms.unionform import UnionForm
 from awkward.index import Index, Index8, Index64
+from awkward.typing import Self
 
 np = ak.nplikes.NumpyMetadata.instance()
 numpy = ak.nplikes.Numpy.instance()

@@ -7,9 +7,6 @@ import enum
 import functools
 import itertools
 from collections.abc import Sequence
-from typing import Any, Callable
-
-from typing_extensions import TypeAlias
 
 import awkward as ak
 from awkward.contents.bitmaskedarray import BitMaskedArray
@@ -31,6 +28,7 @@ from awkward.index import (  # IndexU8,  ; Index32,  ; IndexU32,  ; noqa: F401
     Index64,
 )
 from awkward.record import Record
+from awkward.typing import Any, Callable, Dict, List, TypeAlias
 
 np = ak.nplikes.NumpyMetadata.instance()
 numpy = ak.nplikes.Numpy.instance()
@@ -184,7 +182,7 @@ class BroadcastParameterRule(str, enum.Enum):
     NONE = "none"
 
 
-BroadcastParameterFactory: TypeAlias = "Callable[[int], list[dict[str, Any]| None]]"
+BroadcastParameterFactory: TypeAlias = Callable[[int], List[Dict[str, Any] | None]]
 
 
 def _parameters_of(obj: Any, default: Any = NO_PARAMETERS) -> Any:

@@ -3,13 +3,12 @@ from __future__ import annotations
 
 import copy
 
-from typing_extensions import Self
-
 import awkward as ak
 from awkward.contents.content import Content, unset
 from awkward.contents.listoffsetarray import ListOffsetArray
 from awkward.forms.listform import ListForm
 from awkward.index import Index
+from awkward.typing import Self
 
 np = ak.nplikes.NumpyMetadata.instance()
 

@@ -3,11 +3,10 @@ from __future__ import annotations
 
 import copy
 
-from typing_extensions import Self
-
 import awkward as ak
 from awkward.contents.content import Content, unset
 from awkward.forms.unmaskedform import UnmaskedForm
+from awkward.typing import Self
 
 np = ak.nplikes.NumpyMetadata.instance()
 numpy = ak.nplikes.Numpy.instance()
