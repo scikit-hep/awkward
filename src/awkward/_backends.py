@@ -22,6 +22,7 @@ from awkward.typing import (
     Any,
     Callable,
     Protocol,
+    Self,
     Tuple,
     TypeAlias,
     TypeVar,
@@ -32,7 +33,7 @@ from awkward.typing import (
 np = NumpyMetadata.instance()
 
 
-T = TypeVar("T")
+T = TypeVar("T", covariant=True)
 KernelKeyType: TypeAlias = Tuple[str, Unpack[Tuple[np.dtype, ...]]]
 KernelType: TypeAlias = Callable[..., None]
 
@@ -47,6 +48,11 @@ class Backend(Protocol[T]):
     @property
     @abstractmethod
     def index_nplike(self) -> NumpyLike:
+        ...
+
+    @classmethod
+    @abstractmethod
+    def instance(cls) -> Self:
         ...
 
     def __getitem__(self, key: KernelKeyType) -> KernelType:
