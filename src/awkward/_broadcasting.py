@@ -585,7 +585,7 @@ def apply_step(
                 mask = None
                 for x in inputs:
                     if isinstance(x, optiontypes):
-                        m = x.mask_as_bool(valid_when=False, nplike=nplike)
+                        m = x.mask_as_bool(valid_when=False)
                         if mask is None:
                             mask = m
                         else:

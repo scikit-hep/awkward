@@ -293,23 +293,19 @@ class BitMaskedArray(Content):
                 parameters=self._parameters,
             )
 
-    def mask_as_bool(self, valid_when=None, nplike=None):
+    def mask_as_bool(self, valid_when=None):
         if valid_when is None:
             valid_when = self._valid_when
 
-        backend = (
-            self._backend if nplike is None else ak._backends.backend_for_nplike(nplike)
-        )
-
         bytemask = ak.index.Index8.empty(
-            self._mask.length * 8, backend.index_nplike, index_is_fixed=True
+            self._mask.length * 8, self._backend.index_nplike, index_is_fixed=True
         )
         assert (
             bytemask.nplike is self._backend.nplike
             and self._mask.nplike is self._backend.nplike
         )
         self._handle_error(
-            backend[
+            self._backend[
                 "awkward_BitMaskedArray_to_ByteMaskedArray",
                 bytemask.dtype.type,
                 self._mask.dtype.type,
@@ -689,9 +685,7 @@ class BitMaskedArray(Content):
         if out is not None:
             return out
 
-        mask = self.mask_as_bool(valid_when=True, nplike=self._backend.nplike)[
-            : self._length
-        ]
+        mask = self.mask_as_bool(valid_when=True)[: self._length]
         out = self._content._getitem_range(slice(0, self._length))._to_list(
             behavior, json_conversions
         )

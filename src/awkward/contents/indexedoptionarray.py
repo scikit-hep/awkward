@@ -136,7 +136,7 @@ class IndexedOptionArray(Content):
             )
 
     def to_ByteMaskedArray(self, valid_when):
-        mask = ak.index.Index8(self.mask_as_bool(valid_when, self._backend.nplike))
+        mask = ak.index.Index8(self.mask_as_bool(valid_when))
 
         carry = self._index.data
         too_negative = carry < -1
@@ -159,14 +159,11 @@ class IndexedOptionArray(Content):
             valid_when, lsb_order
         )
 
-    def mask_as_bool(self, valid_when=True, nplike=None):
-        if nplike is None:
-            nplike = self._backend.nplike
-
+    def mask_as_bool(self, valid_when=True):
         if valid_when:
-            return self._index.raw(nplike) >= 0
+            return self._index.raw(self._backend.index_nplike) >= 0
         else:
-            return self._index.raw(nplike) < 0
+            return self._index.raw(self._backend.index_nplike) < 0
 
     def _getitem_nothing(self):
         return self._content._getitem_range(slice(0, 0))

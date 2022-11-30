@@ -133,14 +133,13 @@ class UnmaskedArray(Content):
             parameters=self._parameters,
         )
 
-    def mask_as_bool(self, valid_when=True, nplike=None):
-        if nplike is None:
-            nplike = self._backend.nplike
-
+    def mask_as_bool(self, valid_when=True):
         if valid_when:
-            return nplike.index_nplike.ones(self._content.length, dtype=np.bool_)
+            return self._backend.index_nplike.ones(self._content.length, dtype=np.bool_)
         else:
-            return nplike.index_nplike.zeros(self._content.length, dtype=np.bool_)
+            return self._backend.index_nplike.zeros(
+                self._content.length, dtype=np.bool_
+            )
 
     def _getitem_nothing(self):
         return self._content._getitem_range(slice(0, 0))

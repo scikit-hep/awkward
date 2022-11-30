@@ -216,9 +216,7 @@ class ByteMaskedArray(Content):
         else:
             import awkward._connect.pyarrow
 
-            bytearray = self.mask_as_bool(valid_when, self._backend.nplike).view(
-                np.uint8
-            )
+            bytearray = self.mask_as_bool(valid_when).view(np.uint8)
             bitarray = awkward._connect.pyarrow.packbits(bytearray, lsb_order)
 
             return ak.contents.BitMaskedArray(
@@ -230,16 +228,14 @@ class ByteMaskedArray(Content):
                 parameters=self._parameters,
             )
 
-    def mask_as_bool(self, valid_when=None, nplike=None):
+    def mask_as_bool(self, valid_when=None):
         if valid_when is None:
             valid_when = self._valid_when
-        if nplike is None:
-            nplike = self._backend.nplike
 
         if valid_when == self._valid_when:
-            return self._mask.raw(nplike) != 0
+            return self._mask.raw(self._backend.index_nplike) != 0
         else:
-            return self._mask.raw(nplike) != 1
+            return self._mask.raw(self._backend.index_nplike) != 1
 
     def _getitem_nothing(self):
         return self._content._getitem_range(slice(0, 0))
@@ -1091,7 +1087,7 @@ class ByteMaskedArray(Content):
         if out is not None:
             return out
 
-        mask = self.mask_as_bool(valid_when=True, nplike=self._backend.nplike)
+        mask = self.mask_as_bool(valid_when=True)
         out = self._content._getitem_range(slice(0, len(mask)))._to_list(
             behavior, json_conversions
         )
