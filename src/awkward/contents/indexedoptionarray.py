@@ -215,8 +215,7 @@ class IndexedOptionArray(Content):
 
         return IndexedOptionArray(nextindex, self._content, parameters=self._parameters)
 
-    def _nextcarry_outindex(self, nplike):
-        backend = ak._backends.backend_for_nplike(nplike)
+    def _nextcarry_outindex(self, backend):
         numnull = ak.index.Index64.empty(1, backend.index_nplike)
 
         assert (
@@ -280,7 +279,7 @@ class IndexedOptionArray(Content):
                 ),
             )
 
-        numnull, nextcarry, outindex = self._nextcarry_outindex(self._backend.nplike)
+        numnull, nextcarry, outindex = self._nextcarry_outindex(self._backend)
 
         reducedstarts = ak.index.Index64.empty(
             self.length - numnull, nplike=self._backend.index_nplike
@@ -509,7 +508,7 @@ class IndexedOptionArray(Content):
                 return np.int64(out)
             else:
                 return out
-        _, nextcarry, outindex = self._nextcarry_outindex(self._backend.nplike)
+        _, nextcarry, outindex = self._nextcarry_outindex(self._backend)
         next = self._content._carry(nextcarry, False)
         out = next.num(posaxis, depth)
         out2 = ak.contents.IndexedOptionArray(outindex, out, parameters=self.parameters)
@@ -780,7 +779,7 @@ class IndexedOptionArray(Content):
         if posaxis == depth:
             return self._local_index_axis0()
         else:
-            _, nextcarry, outindex = self._nextcarry_outindex(self._backend.nplike)
+            _, nextcarry, outindex = self._nextcarry_outindex(self._backend)
 
             next = self._content._carry(nextcarry, False)
             out = next._local_index(posaxis, depth)
@@ -1402,7 +1401,7 @@ class IndexedOptionArray(Content):
         if posaxis == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         else:
-            _, nextcarry, outindex = self._nextcarry_outindex(self._backend.nplike)
+            _, nextcarry, outindex = self._nextcarry_outindex(self._backend)
             next = self._content._carry(nextcarry, True)
             out = next._combinations(
                 n, replacement, recordlookup, parameters, posaxis, depth

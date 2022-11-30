@@ -4,7 +4,7 @@
 
 import copy
 import ctypes
-from collections.abc import Iterable
+from collections.abc import Iterable, Sequence
 
 from typing_extensions import Self
 
@@ -310,10 +310,13 @@ class UnionArray(Content):
         return self._contents[index]._carry(nextcarry, False)
 
     @staticmethod
-    def regular_index(tags, IndexClass=Index64, nplike=None):
-        if nplike is None:
-            nplike = ak.nplikes.nplike_of(tags)
-        backend = ak._backends.backend_for_nplike(nplike)
+    def regular_index(
+        tags: Index,
+        *,
+        backend: ak._backends.Backend,
+        index_cls: type[Index] = Index64,
+    ):
+        tags = tags._to_nplike(backend.index_nplike)
 
         lentags = tags.length
         size = ak.index.Index64.empty(1, nplike=backend.index_nplike)
@@ -331,8 +334,8 @@ class UnionArray(Content):
                 lentags,
             )
         )
-        current = IndexClass.empty(size[0], nplike=backend.index_nplike)
-        outindex = IndexClass.empty(lentags, nplike=backend.index_nplike)
+        current = index_cls.empty(size[0], nplike=backend.index_nplike)
+        outindex = index_cls.empty(lentags, nplike=backend.index_nplike)
         assert (
             outindex.nplike is backend.index_nplike
             and current.nplike is backend.index_nplike
@@ -354,31 +357,35 @@ class UnionArray(Content):
         )
         return outindex
 
-    def _regular_index(self, tags):
+    def _regular_index(self, tags: Index) -> Index:
         return self.regular_index(
-            tags, IndexClass=type(self._index), nplike=self._backend.nplike
+            tags, index_cls=type(self._index), backend=self._backend
         )
 
     @staticmethod
     def nested_tags_index(
-        offsets, counts, TagsClass=Index8, IndexClass=Index64, nplike=None
-    ):
-        if nplike is None:
-            nplike = ak.nplikes.nplike_of(offsets, counts)
-        backend = ak._backends.backend_for_nplike(nplike)
+        offsets: Index,
+        counts: Sequence[Index],
+        *,
+        backend: ak._backends.Backend,
+        tags_cls: type[Index] = Index8,
+        index_cls: type[Index] = Index64,
+    ) -> tuple[Index, Index]:
+        offsets = offsets._to_nplike(backend.index_nplike)
+        counts = [c._to_nplike(backend.index_nplike) for c in counts]
 
         f_offsets = ak.index.Index64(copy.deepcopy(offsets.data))
         contentlen = f_offsets[f_offsets.length - 1]
 
-        tags = TagsClass.empty(contentlen, nplike=backend.index_nplike)
-        index = IndexClass.empty(contentlen, nplike=backend.index_nplike)
+        tags = tags_cls.empty(contentlen, nplike=backend.index_nplike)
+        index = index_cls.empty(contentlen, nplike=backend.index_nplike)
 
         for tag, count in enumerate(counts):
             assert (
-                tags.nplike is nplike
-                and index.nplike is nplike
-                and f_offsets.nplike is nplike
-                and count.nplike is nplike
+                tags.nplike is backend.index_nplike
+                and index.nplike is backend.index_nplike
+                and f_offsets.nplike is backend.index_nplike
+                and count.nplike is backend.index_nplike
             )
             Content._selfless_handle_error(
                 backend[
@@ -398,13 +405,13 @@ class UnionArray(Content):
             )
         return (tags, index)
 
-    def _nested_tags_index(self, offsets, counts):
+    def _nested_tags_index(self, offsets: Index, counts: Sequence[Index]):
         return self.nested_tags_index(
             offsets,
             counts,
-            TagsClass=type(self._tags),
-            IndexClass=type(self._index),
-            nplike=self._backend.nplike,
+            backend=self._backend,
+            tags_cls=type(self._tags),
+            index_cls=type(self._index),
         )
 
     def _getitem_next_jagged_generic(self, slicestarts, slicestops, slicecontent, tail):

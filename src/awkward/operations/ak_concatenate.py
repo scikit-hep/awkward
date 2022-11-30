@@ -181,7 +181,7 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
                     start += size
 
                 tags = ak.index.Index8(backend.index_nplike.tile(prototype, length))
-                index = ak.contents.UnionArray.regular_index(tags)
+                index = ak.contents.UnionArray.regular_index(tags, backend=backend)
                 inner = ak.contents.UnionArray(
                     tags, index, [x._content for x in regulararrays]
                 )

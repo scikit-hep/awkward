@@ -297,8 +297,9 @@ class ByteMaskedArray(Content):
             parameters=self._parameters,
         )
 
-    def _nextcarry_outindex(self, nplike):
-        backend = ak._backends.backend_for_nplike(nplike)
+    def _nextcarry_outindex(
+        self, backend: ak._backends.Backend
+    ) -> tuple[int, ak.index.Index64, ak.index.Index64]:
         numnull = ak.index.Index64.empty(1, nplike=backend.index_nplike)
 
         assert (
@@ -358,7 +359,7 @@ class ByteMaskedArray(Content):
                 ),
             )
 
-        numnull, nextcarry, outindex = self._nextcarry_outindex(self._backend.nplike)
+        numnull, nextcarry, outindex = self._nextcarry_outindex(self._backend)
 
         reducedstarts = ak.index.Index64.empty(
             self.length - numnull, nplike=self._backend.index_nplike
@@ -414,7 +415,7 @@ class ByteMaskedArray(Content):
             head, (int, slice, ak.index.Index64, ak.contents.ListOffsetArray)
         ):
             nexthead, nexttail = ak._slicing.headtail(tail)
-            _, nextcarry, outindex = self._nextcarry_outindex(self._backend.nplike)
+            _, nextcarry, outindex = self._nextcarry_outindex(self._backend)
 
             next = self._content._carry(nextcarry, True)
             out = next._getitem_next(head, tail, advanced)
@@ -546,7 +547,7 @@ class ByteMaskedArray(Content):
             else:
                 return out
         else:
-            _, nextcarry, outindex = self._nextcarry_outindex(self._backend.nplike)
+            _, nextcarry, outindex = self._nextcarry_outindex(self._backend)
 
             next = self._content._carry(nextcarry, False)
             out = next.num(posaxis, depth)
@@ -561,9 +562,7 @@ class ByteMaskedArray(Content):
         if posaxis == depth:
             raise ak._errors.wrap_error(np.AxisError("axis=0 not allowed for flatten"))
         else:
-            numnull, nextcarry, outindex = self._nextcarry_outindex(
-                self._backend.nplike
-            )
+            numnull, nextcarry, outindex = self._nextcarry_outindex(self._backend)
 
             next = self._content._carry(nextcarry, False)
 
@@ -660,7 +659,7 @@ class ByteMaskedArray(Content):
         if posaxis == depth:
             return self._local_index_axis0()
         else:
-            _, nextcarry, outindex = self._nextcarry_outindex(self._backend.nplike)
+            _, nextcarry, outindex = self._nextcarry_outindex(self._backend)
 
             next = self._content._carry(nextcarry, False)
             out = next._local_index(posaxis, depth)
@@ -738,7 +737,7 @@ class ByteMaskedArray(Content):
         if posaxis == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         else:
-            _, nextcarry, outindex = self._nextcarry_outindex(self._backend.nplike)
+            _, nextcarry, outindex = self._nextcarry_outindex(self._backend)
 
             next = self._content._carry(nextcarry, True)
             out = next._combinations(
