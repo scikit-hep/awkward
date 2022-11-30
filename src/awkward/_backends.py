@@ -64,8 +64,6 @@ class NumpyBackend(Backend[Any], Singleton):
     ) -> KernelType[Any]:  # pylint: disable=invalid-sequence-index
         return NumpyKernel(awkward_cpp.cpu_kernels.kernel[index], index)
 
-    __iter__ = None
-
 
 class CupyBackend(Backend[Any], Singleton):
     _cupy: Cupy

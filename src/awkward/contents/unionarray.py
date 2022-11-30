@@ -58,6 +58,8 @@ class UnionArray(Content):
                     )
                 )
             )
+        assert len(contents) > 0
+
         if not isinstance(index, Index) and index.dtype in (
             np.dtype(np.int32),
             np.dtype(np.uint32),
