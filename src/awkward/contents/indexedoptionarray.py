@@ -2,6 +2,8 @@
 
 import copy
 
+from typing_extensions import Self
+
 import awkward as ak
 from awkward.contents.content import Content, unset
 from awkward.forms.indexedoptionform import IndexedOptionForm
@@ -1714,10 +1716,9 @@ class IndexedOptionArray(Content):
 
         return out
 
-    def _to_nplike(self, nplike):
-        backend = ak._backends.backend_for_nplike(nplike)
+    def _to_backend(self, backend: ak._backends.Backend) -> Self:
+        content = self._content._to_backend(backend)
         index = self._index._to_nplike(backend.index_nplike, index_is_fixed=True)
-        content = self._content._to_nplike(backend.nplike)
         return IndexedOptionArray(index, content, parameters=self.parameters)
 
     def _layout_equal(self, other, index_dtype=True, numpyarray=True):

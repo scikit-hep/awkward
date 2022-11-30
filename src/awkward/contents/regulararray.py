@@ -2,6 +2,8 @@
 
 import copy
 
+from typing_extensions import Self
+
 import awkward as ak
 from awkward.contents.content import Content, unset
 from awkward.forms.regularform import RegularForm
@@ -561,7 +563,7 @@ class RegularArray(Content):
 
         elif isinstance(head, ak.contents.ListOffsetArray):
             headlength = head.length
-            head = head._to_nplike(self._backend.nplike)
+            head = head._to_backend(self._backend)
 
             if advanced is not None:
                 raise ak._errors.index_error(
@@ -1403,8 +1405,8 @@ class RegularArray(Content):
                 out[i] = content[(i) * size : (i + 1) * size]
             return out
 
-    def _to_nplike(self, nplike):
-        content = self._content._to_nplike(nplike)
+    def _to_backend(self, backend: ak._backends.Backend) -> Self:
+        content = self._content._to_backend(backend)
         return RegularArray(
             content, self._size, zeros_length=self._length, parameters=self._parameters
         )

@@ -2,6 +2,8 @@
 
 import copy
 
+from typing_extensions import Self
+
 import awkward as ak
 from awkward.contents.content import Content, unset
 from awkward.forms.numpyform import NumpyForm
@@ -1395,10 +1397,9 @@ class NumpyArray(Content):
 
             return out
 
-    def _to_nplike(self, nplike):
-        backend = ak._backends.backend_for_nplike(nplike)
+    def _to_backend(self, backend: ak._backends.Backend) -> Self:
         return NumpyArray(
-            self.raw(nplike),
+            self.raw(backend.nplike),
             parameters=self.parameters,
             backend=backend,
         )

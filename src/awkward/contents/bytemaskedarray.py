@@ -4,6 +4,8 @@ import copy
 import json
 import math
 
+from typing_extensions import Self
+
 import awkward as ak
 from awkward.contents.content import Content, unset
 from awkward.forms.bytemaskedform import ByteMaskedForm
@@ -1100,9 +1102,8 @@ class ByteMaskedArray(Content):
 
         return out
 
-    def _to_nplike(self, nplike):
-        backend = ak._backends.backend_for_nplike(nplike)
-        content = self._content._to_nplike(backend.nplike)
+    def _to_backend(self, backend: ak._backends.Backend) -> Self:
+        content = self._content._to_backend(backend)
         mask = self._mask._to_nplike(backend.index_nplike, index_is_fixed=True)
         return ByteMaskedArray(
             mask, content, valid_when=self._valid_when, parameters=self._parameters

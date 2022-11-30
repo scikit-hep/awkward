@@ -43,7 +43,8 @@ dependencies = [
     "awkward_cpp==1",
     "importlib_resources;python_version < \"3.9\"",
     "numpy>=1.14.5",
-    "packaging"
+    "packaging",
+    "typing_extensions>=4.1.0; python_version < \"3.11\""
 ]
 dynamic = [
     "readme"

@@ -28,13 +28,13 @@ kSliceNone = kMaxInt64 + 1  # for Slice::none()
 kMaxLevels = 48
 
 _backends = {
-    "cpu": ak.nplikes.Numpy,
-    "cuda": ak.nplikes.Cupy,
-    "jax": ak.nplikes.Jax,
+    "cpu": ak._backends.NumpyBackend,
+    "cuda": ak._backends.CupyBackend,
+    "jax": ak._backends.JaxBackend,
 }
 
 
-def regularize_backend(backend):
+def regularize_backend(backend: str) -> ak._backends.Backend:
     if backend in _backends:
         return _backends[backend].instance()
     else:

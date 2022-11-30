@@ -2,6 +2,8 @@
 
 import copy
 
+from typing_extensions import Self
+
 import awkward as ak
 from awkward.contents.content import Content, unset
 from awkward.forms.unmaskedform import UnmaskedForm
@@ -531,8 +533,8 @@ class UnmaskedArray(Content):
 
         return self._content._to_list(behavior, json_conversions)
 
-    def _to_nplike(self, nplike):
-        content = self._content._to_nplike(nplike)
+    def _to_backend(self, backend: ak._backends.Backend) -> Self:
+        content = self._content._to_backend(backend)
         return UnmaskedArray(content, parameters=self.parameters)
 
     def _layout_equal(self, other, index_dtype=True, numpyarray=True):

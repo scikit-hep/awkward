@@ -6,6 +6,8 @@ import copy
 import ctypes
 from collections.abc import Iterable
 
+from typing_extensions import Self
+
 import awkward as ak
 from awkward.contents.content import Content, unset
 from awkward.forms.unionform import UnionForm
@@ -1494,10 +1496,9 @@ class UnionArray(Content):
             out[i] = contents[tag][index[i]]
         return out
 
-    def _to_nplike(self, nplike):
-        backend = ak._backends.backend_for_nplike(nplike)
-        index = self._index._to_nplike(nplike)
-        contents = [content._to_nplike(nplike) for content in self._contents]
+    def _to_backend(self, backend: ak._backends.Backend) -> Self:
+        index = self._index._to_nplike(backend.index_nplike, index_is_fixed=True)
+        contents = [content._to_backend(backend) for content in self._contents]
         return UnionArray(
             self._tags,
             index,

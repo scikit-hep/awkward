@@ -2,6 +2,8 @@
 
 import copy
 
+from typing_extensions import Self
+
 import awkward as ak
 from awkward.contents.content import Content, unset
 from awkward.contents.listoffsetarray import ListOffsetArray
@@ -854,7 +856,7 @@ class ListArray(Content):
 
         elif isinstance(head, ak.contents.ListOffsetArray):
             headlength = head.length
-            head = head._to_nplike(self._backend.nplike)
+            head = head._to_backend(self._backend)
             if advanced is not None:
                 raise ak._errors.index_error(
                     self,
@@ -1512,11 +1514,10 @@ class ListArray(Content):
     def _to_list(self, behavior, json_conversions):
         return ListOffsetArray._to_list(self, behavior, json_conversions)
 
-    def _to_nplike(self, nplike):
-        backend = ak._backends.backend_for_nplike(nplike)
+    def _to_backend(self, backend: ak._backends.Backend) -> Self:
+        content = self._content._to_backend(backend)
         starts = self._starts._to_nplike(backend.index_nplike, index_is_fixed=True)
         stops = self._stops._to_nplike(backend.index_nplike, index_is_fixed=True)
-        content = self._content._to_nplike(backend.nplike)
         return ListArray(starts, stops, content, parameters=self._parameters)
 
     def _layout_equal(self, other, index_dtype=True, numpyarray=True):

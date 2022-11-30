@@ -7,12 +7,13 @@ from collections.abc import Callable, Iterable, Mapping, MutableMapping, Sized
 from numbers import Complex, Integral, Real
 from typing import Any, TypeVar
 
+from typing_extensions import Self, TypeAlias
+
 import awkward as ak
 import awkward._reducers
 from awkward._backends import Backend, TypeTracerBackend
 from awkward.forms import form
 from awkward.nplikes import NumpyLike
-from awkward.typing import Self, TypeAlias
 
 np = ak.nplikes.NumpyMetadata.instance()
 numpy = ak.nplikes.Numpy.instance()
@@ -360,7 +361,12 @@ class Content:
             return self._getitem_next(slice(None), (Ellipsis,) + tail, advanced)
 
     def _getitem_next_regular_missing(
-        self, head, tail, advanced: ak.index.Index | None, raw, length: Integral
+        self,
+        head: ak.contents.IndexedOptionArray,
+        tail,
+        advanced: ak.index.Index | None,
+        raw: Content,
+        length: Integral,
     ):
         # if this is in a tuple-slice and really should be 0, it will be trimmed later
         length = 1 if length == 0 else length
@@ -399,9 +405,9 @@ class Content:
         )
 
     def _getitem_next_missing_jagged(
-        self, head, tail, advanced: ak.index.Index | None, that
+        self, head: Content, tail, advanced: ak.index.Index | None, that: Content
     ):
-        head = head._to_nplike(self._backend.nplike)
+        head = head._to_backend(self._backend)
         jagged = head.content.to_ListOffsetArray64()
 
         index = ak.index.Index64(
@@ -1828,12 +1834,13 @@ class Content:
         raise ak._errors.wrap_error(NotImplementedError)
 
     def to_backend(self, backend: str) -> Self:
-        if self._backend.nplike is ak._util.regularize_backend(backend):
+        instance = ak._util.regularize_backend(backend)
+        if self._backend is instance:
             return self
         else:
-            return self._to_nplike(ak._util.regularize_backend(backend))
+            return self._to_backend(instance)
 
-    def _to_nplike(self, nplike: NumpyLike) -> Self:
+    def _to_backend(self, backend: Backend) -> Self:
         raise ak._errors.wrap_error(NotImplementedError)
 
     def with_parameter(self, key: str, value: Any) -> Self:
