@@ -131,7 +131,7 @@ _UNSET = object()
 D = TypeVar("D")
 
 
-def backend_for_nplike(nplike) -> Backend:
+def _backend_for_nplike(nplike: ak.nplikes.NumpyLike) -> Backend:
     if isinstance(nplike, Numpy):
         return NumpyBackend.instance()
     elif isinstance(nplike, Cupy):
@@ -154,4 +154,4 @@ def backend_for(*arrays, default: T = _UNSET) -> Backend | D:
         else:
             return default
     else:
-        return backend_for_nplike(nplike)
+        return _backend_for_nplike(nplike)
