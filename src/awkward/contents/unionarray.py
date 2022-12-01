@@ -333,7 +333,7 @@ class UnionArray(Content):
             return contents[0]._carry(index, True)
 
         else:
-            return UnionArray(
+            return cls(
                 tags,
                 index,
                 contents,

@@ -88,7 +88,7 @@ class IndexedForm(Form):
                 parameters=ak._util.merge_parameters(content._parameters, parameters),
             )
         elif content.is_indexed:
-            return ak.forms.IndexedForm(
+            return IndexedForm(
                 "i64",
                 content.content,
                 parameters=ak._util.merge_parameters(content._parameters, parameters),

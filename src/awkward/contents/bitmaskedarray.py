@@ -168,7 +168,7 @@ class BitMaskedArray(Content):
                 index[0:length], content, parameters=parameters
             )
         else:
-            return BitMaskedArray(
+            return cls(
                 mask,
                 content,
                 valid_when,

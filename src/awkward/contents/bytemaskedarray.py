@@ -124,7 +124,7 @@ class ByteMaskedArray(Content):
                 index, content, parameters=parameters
             )
         else:
-            return ByteMaskedArray(mask, content, valid_when, parameters=parameters)
+            return cls(mask, content, valid_when, parameters=parameters)
 
     def _form_with_key(self, getkey):
         form_key = getkey(self)

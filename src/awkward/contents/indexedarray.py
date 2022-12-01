@@ -100,7 +100,7 @@ class IndexedArray(Content):
                 )
             )
             if isinstance(content, ak.contents.IndexedArray):
-                return IndexedArray(
+                return ak.contents.IndexedArray(
                     result,
                     content.content,
                     parameters=ak._util.merge_parameters(
@@ -117,7 +117,7 @@ class IndexedArray(Content):
                 )
 
         else:
-            return ak.contents.IndexedOptionArray(index, content, parameters=parameters)
+            return cls(index, content, parameters=parameters)
 
     def _form_with_key(self, getkey):
         form_key = getkey(self)

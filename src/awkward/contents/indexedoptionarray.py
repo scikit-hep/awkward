@@ -99,14 +99,14 @@ class IndexedOptionArray(Content):
                     inner.length,
                 )
             )
-            return ak.contents.IndexedOptionArray(
+            return IndexedOptionArray(
                 result,
                 content.content,
                 parameters=ak._util.merge_parameters(content._parameters, parameters),
             )
 
         else:
-            return IndexedOptionArray(index, content, parameters=parameters)
+            return cls(index, content, parameters=parameters)
 
     def _form_with_key(self, getkey):
         form_key = getkey(self)
