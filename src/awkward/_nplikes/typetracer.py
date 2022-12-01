@@ -563,7 +563,7 @@ class TypeTracer(numpylike.NumpyLike[TypeTracerArray]):
     ) -> TypeTracerArray:
         raise _errors.wrap_error(NotImplementedError)
 
-    def from_buffer(self, buffer, *, dtype=None) -> TypeTracerArray:
+    def from_buffer(self, buffer, *, dtype=None, count: int = -1) -> TypeTracerArray:
         raise _errors.wrap_error(NotImplementedError)
 
     def array_equal(
