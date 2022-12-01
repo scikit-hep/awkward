@@ -1383,7 +1383,7 @@ class ListArray(Content):
             self.parameter("__array__") == "string"
             or self.parameter("__array__") == "bytestring"
         ):
-            return [ak.operations.to_numpy(self)]
+            return [self]
         else:
             next = self.to_ListOffsetArray64(False)
             flat = next.content[next.offsets[0] : next.offsets[-1]]
