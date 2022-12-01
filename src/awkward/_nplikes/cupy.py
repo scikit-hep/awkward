@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from awkward.nplikes.numpy import ArrayModuleNumpyLike
+from awkward._nplikes.numpy import ArrayModuleNumpyLike
 
 
 class Cupy(ArrayModuleNumpyLike):
