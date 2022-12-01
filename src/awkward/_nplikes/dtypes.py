@@ -5,7 +5,7 @@ The known dtypes supported by Awkward's internals, and a type-promotion table
 """
 
 import numpy
-from numpy import dtype
+from numpy import dtype, iinfo
 
 __all__ = [
     "bool_",
@@ -22,6 +22,7 @@ __all__ = [
     "complex64",
     "complex128",
     "dtype",
+    "iinfo",
 ]
 
 # DTypes ###############################################################################################################
