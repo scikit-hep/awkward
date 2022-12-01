@@ -188,6 +188,12 @@ class ArrayModuleArray(numpylike.Array, Generic[RawArray]):
     def __index__(self) -> int:
         return self._array.__index__()  # type: ignore
 
+    def __str__(self) -> str:
+        return str(self._array)
+
+    def __repr__(self) -> str:
+        return f"<{self._nplike.__class__.__name__} :: {self._array!r}>"
+
 
 class ArrayModuleNumpyLike(numpylike.NumpyLike[ArrayModuleArray], Generic[RawArray]):
     """
