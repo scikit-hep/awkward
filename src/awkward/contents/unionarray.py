@@ -524,7 +524,7 @@ class UnionArray(Content):
                 nexttags = self._backend.index_nplike.full(
                     len(carry_data), tag_for_missing, dtype=self._tags.dtype
                 )
-                nextindex = self._backend.nplike.full(
+                nextindex = self._backend.index_nplike.full(
                     len(carry_data),
                     self._contents[tag_for_missing].length,
                     dtype=self._index.dtype,
