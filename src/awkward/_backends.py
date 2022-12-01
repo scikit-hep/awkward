@@ -63,7 +63,7 @@ class Backend(Protocol[T]):
 
 
 class NumpyBackend(Singleton, Backend[Any]):
-    name: Final[str] = "numpy"
+    name: Final[str] = "cpu"
 
     _numpy: Numpy
 
