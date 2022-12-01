@@ -444,21 +444,6 @@ class BitMaskedArray(Content):
     def project(self, mask=None):
         return self.to_ByteMaskedArray().project(mask)
 
-    def simplify_optiontype(self):
-        if isinstance(
-            self._content,
-            (
-                ak.contents.IndexedArray,
-                ak.contents.IndexedOptionArray,
-                ak.contents.ByteMaskedArray,
-                ak.contents.BitMaskedArray,
-                ak.contents.UnmaskedArray,
-            ),
-        ):
-            return self.to_IndexedOptionArray64().simplify_optiontype()
-        else:
-            return self
-
     def num(self, axis, depth=0):
         return self.to_ByteMaskedArray().num(axis, depth)
 

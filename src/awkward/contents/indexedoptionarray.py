@@ -472,68 +472,6 @@ class IndexedOptionArray(Content):
 
             return self._content._carry(nextcarry, False)
 
-    def simplify_optiontype(self):
-        if isinstance(
-            self._content,
-            (
-                ak.contents.IndexedArray,
-                ak.contents.IndexedOptionArray,
-                ak.contents.ByteMaskedArray,
-                ak.contents.BitMaskedArray,
-                ak.contents.UnmaskedArray,
-            ),
-        ):
-
-            if isinstance(
-                self._content,
-                (
-                    ak.contents.IndexedArray,
-                    ak.contents.IndexedOptionArray,
-                ),
-            ):
-                inner = self._content.index
-                result = ak.index.Index64.empty(
-                    self.index.length, nplike=self._backend.index_nplike
-                )
-            elif isinstance(
-                self._content,
-                (
-                    ak.contents.ByteMaskedArray,
-                    ak.contents.BitMaskedArray,
-                    ak.contents.UnmaskedArray,
-                ),
-            ):
-                rawcontent = self._content.to_IndexedOptionArray64()
-                inner = rawcontent.index
-                result = ak.index.Index64.empty(
-                    self.index.length, self._backend.index_nplike
-                )
-            assert (
-                result.nplike is self._backend.index_nplike
-                and self._index.nplike is self._backend.index_nplike
-                and inner.nplike is self._backend.index_nplike
-            )
-            self._handle_error(
-                self._backend[
-                    "awkward_IndexedArray_simplify",
-                    result.dtype.type,
-                    self._index.dtype.type,
-                    inner.dtype.type,
-                ](
-                    result.data,
-                    self._index.data,
-                    self._index.length,
-                    inner.data,
-                    inner.length,
-                )
-            )
-            return ak.contents.IndexedOptionArray(
-                result, self._content.content, parameters=self._parameters
-            )
-
-        else:
-            return self
-
     def num(self, axis, depth=0):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:

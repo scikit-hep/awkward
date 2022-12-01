@@ -229,21 +229,6 @@ class UnmaskedArray(Content):
         else:
             return self._content
 
-    def simplify_optiontype(self):
-        if isinstance(
-            self._content,
-            (
-                ak.contents.IndexedArray,
-                ak.contents.IndexedOptionArray,
-                ak.contents.ByteMaskedArray,
-                ak.contents.BitMaskedArray,
-                ak.contents.UnmaskedArray,
-            ),
-        ):
-            return self._content
-        else:
-            return self
-
     def num(self, axis, depth=0):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:

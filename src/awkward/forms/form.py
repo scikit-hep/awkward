@@ -365,9 +365,6 @@ class Form:
     def type_from_behavior(self, behavior):
         return self._type(ak._util.typestrs(behavior))
 
-    def simplify_optiontype(self):
-        return self
-
     def columns(self, list_indicator=None, column_prefix=()):
         output = []
         self._columns(column_prefix, output, list_indicator)

@@ -102,21 +102,6 @@ class UnmaskedForm(Form):
         else:
             return False
 
-    def simplify_optiontype(self):
-        if isinstance(
-            self._content,
-            (
-                ak.forms.IndexedForm,
-                ak.forms.IndexedOptionForm,
-                ak.forms.ByteMaskedForm,
-                ak.forms.BitMaskedForm,
-                ak.forms.UnmaskedForm,
-            ),
-        ):
-            return self._content
-        else:
-            return self
-
     def purelist_parameter(self, key):
         if self._parameters is None or key not in self._parameters:
             return self._content.purelist_parameter(key)
