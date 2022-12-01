@@ -480,7 +480,7 @@ class UnionArray(Content):
     def _union_of_optionarrays(self, index, parameters):
         tag_for_missing = 0
         for i, content in enumerate(self._contents):
-            if content.is_record:
+            if content.is_option:
                 tag_for_missing = i
                 break
 
