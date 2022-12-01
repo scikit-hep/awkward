@@ -18,11 +18,10 @@ We don't implement Device support, as it is not used in Awkward.
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import Literal, Protocol, SupportsInt, TypeVar, runtime_checkable
+from typing import Literal, SupportsIndex, SupportsInt, TypeVar, overload
 
 from awkward._nplikes.dtypes import dtype
-
-NumpyLikeSelf = TypeVar("NumpyLikeSelf", bound="NumpyLike")
+from awkward.typing import Protocol, Self, runtime_checkable
 
 ArrayType = TypeVar("ArrayType", bound="Array")
 ArrayType_co = TypeVar("ArrayType_co", bound="Array", covariant=True)
@@ -53,6 +52,22 @@ class Array(Protocol):
     @property
     @abstractmethod
     def T(self: ArrayType) -> ArrayType:
+        ...
+
+    @overload
+    def __getitem__(
+        self, index: SupportsIndex
+    ) -> int | float | complex | str | bytes | bytes:
+        ...
+
+    @overload
+    def __getitem__(
+        self, index: slice | Ellipsis | tuple[SupportsIndex | slice | Ellipsis, ...]
+    ) -> Self:
+        ...
+
+    @abstractmethod
+    def __getitem__(self, index) -> Self:
         ...
 
     @abstractmethod
@@ -100,27 +115,35 @@ class Array(Protocol):
         ...
 
     @abstractmethod
-    def __lt__(self: ArrayType, other: int | float | complex | ArrayType) -> ArrayType:
+    def __lt__(
+        self: ArrayType, other: int | float | complex | str | bytes | ArrayType
+    ) -> ArrayType:
         ...
 
     @abstractmethod
-    def __le__(self: ArrayType, other: int | float | complex | ArrayType) -> ArrayType:
+    def __le__(
+        self: ArrayType, other: int | float | complex | str | bytes | ArrayType
+    ) -> ArrayType:
         ...
 
     @abstractmethod
-    def __gt__(self: ArrayType, other: int | float | complex | ArrayType) -> ArrayType:
+    def __gt__(
+        self: ArrayType, other: int | float | complex | str | bytes | ArrayType
+    ) -> ArrayType:
         ...
 
     @abstractmethod
-    def __ge__(self: ArrayType, other: int | float | complex | ArrayType) -> ArrayType:
+    def __ge__(
+        self: ArrayType, other: int | float | complex | str | bytes | ArrayType
+    ) -> ArrayType:
         ...
 
     @abstractmethod
-    def __eq__(self: ArrayType, other: int | float | bool | complex | ArrayType) -> ArrayType:  # type: ignore
+    def __eq__(self: ArrayType, other: int | float | bool | complex | str | bytes | ArrayType) -> ArrayType:  # type: ignore
         ...
 
     @abstractmethod
-    def __ne__(self: ArrayType, other: int | float | bool | complex | ArrayType) -> ArrayType:  # type: ignore
+    def __ne__(self: ArrayType, other: int | float | bool | complex | str | bytes | ArrayType) -> ArrayType:  # type: ignore
         ...
 
     @abstractmethod
@@ -154,9 +177,20 @@ class Array(Protocol):
 
 @runtime_checkable
 class NumpyLike(Protocol[ArrayType]):
-    known_data: bool
-    known_shape: bool
-    is_eager: bool
+    @property
+    @abstractmethod
+    def known_data(self) -> bool:
+        ...
+
+    @property
+    @abstractmethod
+    def known_shape(self) -> bool:
+        ...
+
+    @property
+    @abstractmethod
+    def is_eager(self) -> bool:
+        ...
 
     _instance: NumpyLike[ArrayType]
 
@@ -439,7 +473,7 @@ class NumpyLike(Protocol[ArrayType]):
 
     @abstractmethod
     def from_buffer(
-        self, buffer: ArrayType, *, dtype: dtype | None = None
+        self, buffer: ArrayType, *, dtype: dtype | None = None, count: int = -1
     ) -> ArrayType:  # TODO dtype: float?`
         ...
 
