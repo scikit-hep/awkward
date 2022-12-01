@@ -533,7 +533,7 @@ class UnionArray(Content):
             contents = []
             for tag, content in enumerate(self._contents):
                 if tag == tag_for_missing:
-                    indexedoption_index = self._backend.nplike.arange(
+                    indexedoption_index = self._backend.index_nplike.arange(
                         content.length + 1, dtype=np.int64
                     )
                     indexedoption_index[content.length] = -1
