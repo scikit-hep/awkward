@@ -8,10 +8,10 @@ from typing import Any, Callable
 import numpy as metadata  # todo: implement this
 
 import awkward as ak
-from awkward._nplikes import Jax, Numpy
+from awkward._nplikes import JAX, Numpy, dtypes
 from awkward.typing import Protocol, TypeAlias
 
-KernelKeyType: TypeAlias = tuple  # Tuple[str, Unpack[Tuple[metadata.dtype, ...]]]
+KernelKeyType: TypeAlias = tuple  # Tuple[str, Unpack[Tuple[dtypes.dtype, ...]]]
 
 
 class KernelError(Protocol):
@@ -49,7 +49,7 @@ class BaseKernel(Kernel):
         return "<{} {}{}>".format(
             type(self).__name__,
             self.key[0],
-            "".join(", " + str(metadata.dtype(x)) for x in self.key[1:]),
+            "".join(", " + str(dtypes.dtype(x)) for x in self.key[1:]),
         )
 
 
@@ -90,7 +90,7 @@ class JaxKernel(NumpyKernel):
     def __call__(self, *args) -> None:
         assert len(args) == len(self._impl.argtypes)  # type: ignore
 
-        if not any(Jax.is_tracer(arg) for arg in args):
+        if not any(JAX.is_tracer(arg) for arg in args):
             return super().__call__(*args)
 
 
@@ -99,7 +99,7 @@ class CupyKernel(BaseKernel):
         import awkward._connect.cuda as ak_cuda
 
         cupy = ak_cuda.import_cupy("Awkward Arrays with CUDA")
-        max_length = metadata.iinfo(metadata.int64).min
+        max_length = dtypes.iinfo(dtypes.int64).min
         # TODO should kernels strip nplike wrapper? Probably
         for array in args:
             if isinstance(array, cupy.ndarray):
@@ -170,5 +170,5 @@ class TypeTracerKernel:
         return "<{} {}{}>".format(
             type(self).__name__,
             self._name_and_types[0],
-            "".join(", " + str(metadata.dtype(x)) for x in self._name_and_types[1:]),
+            "".join(", " + str(dtypes.dtype(x)) for x in self._name_and_types[1:]),
         )
