@@ -1281,10 +1281,12 @@ class ListArray(Content):
                         self._starts,
                         self._stops,
                         nextcontent,
-                        parameters=self._parameters
+                        parameters=self._parameters,
                     )
 
-                min_ = self._backend.index_nplike.min(self._stops.data - self._starts.data)
+                min_ = self._backend.index_nplike.min(
+                    self._stops.data - self._starts.data
+                )
                 if target <= min_:
                     nextcontent = ak.contents.IndexedOptionArray(
                         ak.index.Index64(
@@ -1293,13 +1295,13 @@ class ListArray(Content):
                             )
                         ),
                         self._content,
-                        parameters=None
+                        parameters=None,
                     ).simplify_optiontype()
                     return ak.contents.ListArray(
                         self._starts,
                         self._stops,
                         nextcontent,
-                        parameters=self._parameters
+                        parameters=self._parameters,
                     )
                 else:
                     tolength = ak.index.Index64.empty(1, self._backend.index_nplike)

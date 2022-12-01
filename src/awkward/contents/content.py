@@ -1590,7 +1590,9 @@ class Content:
         )
         return tuple(arrays)
 
-    def _completely_flatten(self, backend: ak._backends.Backend, options: dict[str, Any]) -> list[Content]:
+    def _completely_flatten(
+        self, backend: ak._backends.Backend, options: dict[str, Any]
+    ) -> list[Content]:
         raise ak._errors.wrap_error(NotImplementedError)
 
     def recursively_apply(
