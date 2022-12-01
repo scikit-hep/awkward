@@ -148,7 +148,7 @@ class BitMaskedArray(Content):
         *,
         parameters=None,
     ):
-        if content.is_indexed or content.is_option:
+        if content.is_union or content.is_indexed or content.is_option:
             backend = content.backend
             index = ak.index.Index64.empty(mask.length * 8, backend.index_nplike)
             Content._selfless_handle_error(
@@ -164,9 +164,12 @@ class BitMaskedArray(Content):
                     lsb_order,
                 ),
             )
-            return ak.contents.IndexedOptionArray.simplified(
-                index[0:length], content, parameters=parameters
-            )
+            if content.is_union:
+                return content._union_of_optionarrays(index[0:length], parameters)
+            else:
+                return ak.contents.IndexedOptionArray.simplified(
+                    index[0:length], content, parameters=parameters
+                )
         else:
             return cls(
                 mask,

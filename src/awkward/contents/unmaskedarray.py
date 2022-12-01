@@ -51,7 +51,12 @@ class UnmaskedArray(Content):
 
     @classmethod
     def simplified(cls, content, *, parameters=None):
-        if content.is_indexed or content.is_option:
+        if content.is_union:
+            return content.copy(
+                contents=[cls.simplified(x) for x in content.contents],
+                parameters=ak._util.merge_parameters(content._parameters, parameters),
+            )
+        elif content.is_indexed or content.is_option:
             return content.copy(
                 parameters=ak._util.merge_parameters(content._parameters, parameters)
             )

@@ -82,7 +82,9 @@ class IndexedOptionForm(Form):
         parameters=None,
         form_key=None,
     ):
-        if content.is_indexed or content.is_option:
+        if content.is_union:
+            return content._union_of_optionarrays(index, parameters)
+        elif content.is_indexed or content.is_option:
             return ak.forms.IndexedOptionForm.simplified(
                 "i64",
                 content.content,

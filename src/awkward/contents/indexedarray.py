@@ -77,7 +77,12 @@ class IndexedArray(Content):
 
     @classmethod
     def simplified(cls, index, content, *, parameters=None):
-        if content.is_indexed or content.is_option:
+        if content.is_union:
+            return content._carry(index, allow_lazy=False).copy(
+                parameters=ak._util.merge_parameters(content._parameters, parameters)
+            )
+
+        elif content.is_indexed or content.is_option:
             backend = content.backend
             if content.is_indexed:
                 inner = content.index

@@ -77,7 +77,10 @@ class IndexedOptionArray(Content):
 
     @classmethod
     def simplified(cls, index, content, *, parameters=None):
-        if content.is_indexed or content.is_option:
+        if content.is_union:
+            return content._union_of_optionarrays(index, parameters)
+
+        elif content.is_indexed or content.is_option:
             backend = content.backend
             if content.is_indexed:
                 inner = content.index

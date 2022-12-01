@@ -477,6 +477,82 @@ class UnionArray(Content):
             backend=self._backend,
         )
 
+    def _union_of_optionarrays(self, index, parameters):
+        tag_for_missing = 0
+        for i, content in enumerate(self._contents):
+            if content.is_record:
+                tag_for_missing = i
+                break
+
+        if not self._backend.nplike.known_data:
+            nexttags = self._tags.data
+            nextindex = self._index.data
+            contents = []
+            for tag, content in enumerate(self._contents):
+                if tag == tag_for_missing:
+                    indexedoption_index = self._backend.nplike.arange(
+                        content.length + 1, dtype=np.int64
+                    )
+                    contents.append(
+                        ak.contents.IndexedOptionArray.simplified(
+                            ak.index.Index64(indexedoption_index), content
+                        )
+                    )
+                else:
+                    contents.append(ak.contents.UnmaskedArray.simplified(content))
+
+        else:
+            # like _carry, above
+            carry_data = index.raw(self._backend.nplike).copy()
+            is_missing = carry_data < 0
+
+            if self._tags.length != 0:
+                # but the missing values will temporarily use 0 as a placeholder
+                carry_data[is_missing] = 0
+                try:
+                    nexttags = self._tags.data[carry_data]
+                    nextindex = self._index.data[: self._tags.length][carry_data]
+                except IndexError as err:
+                    raise ak._errors.index_error(self, carry_data, str(err)) from err
+
+                # now actually set the missing values
+                nexttags[is_missing] = tag_for_missing
+                nextindex[is_missing] = self._contents[tag_for_missing].length
+
+            else:
+                # UnionArray is empty, so
+                nexttags = self._backend.nplike.full(
+                    len(carry_data), tag_for_missing, dtype=self._tags.dtype
+                )
+                nextindex = self._backend.nplike.full(
+                    len(carry_data),
+                    self._contents[tag_for_missing].length,
+                    dtype=self._index.dtype,
+                )
+
+            contents = []
+            for tag, content in enumerate(self._contents):
+                if tag == tag_for_missing:
+                    indexedoption_index = self._backend.nplike.arange(
+                        content.length + 1, dtype=np.int64
+                    )
+                    indexedoption_index[content.length] = -1
+                    contents.append(
+                        ak.contents.IndexedOptionArray.simplified(
+                            ak.index.Index64(indexedoption_index), content
+                        )
+                    )
+                else:
+                    contents.append(ak.contents.UnmaskedArray.simplified(content))
+
+        return UnionArray.simplified(
+            ak.index.Index(nexttags),
+            ak.index.Index(nextindex),
+            contents,
+            parameters=ak._util.merge_parameters(self._parameters, parameters),
+            backend=self._backend,
+        )
+
     def project(self, index):
         lentags = self._tags.length
         assert not self._index.length < lentags

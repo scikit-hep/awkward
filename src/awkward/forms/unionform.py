@@ -116,6 +116,13 @@ class UnionForm(Form):
             parameters=parameters,
         ).form
 
+    def _union_of_optionarrays(self, index, parameters):
+        return (
+            self.zero_length_array(highlevel=False)
+            ._union_of_optionarrays(ak.index._form_to_zero_length(index), parameters)
+            .form
+        )
+
     def content(self, index):
         return self._contents[index]
 

@@ -81,7 +81,11 @@ class IndexedForm(Form):
         parameters=None,
         form_key=None,
     ):
-        if content.is_option:
+        if content.is_union:
+            return content.copy(
+                parameters=ak._util.merge_parameters(content._parameters, parameters)
+            )
+        elif content.is_option:
             return ak.forms.IndexedOptionForm.simplified(
                 "i64",
                 content.content,
