@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 import numpy
 
 from awkward._nplikes.array_module import ArrayModuleNumpyLike
+from awkward.typing import Final
 
 
 class Numpy(ArrayModuleNumpyLike):
@@ -12,4 +15,6 @@ class Numpy(ArrayModuleNumpyLike):
     A concrete class importing `NumpyModuleLike` for `numpy`
     """
 
-    array_module = numpy
+    is_eager: Final[bool] = True
+
+    array_module: Final[Any] = numpy

@@ -3,9 +3,13 @@
 from __future__ import annotations
 
 from awkward._nplikes.numpy import ArrayModuleNumpyLike
+from awkward.typing import Final
 
 
 class Cupy(ArrayModuleNumpyLike):
+
+    is_eager: Final[bool] = False
+
     @property
     def array_module(self):
         import cupy
