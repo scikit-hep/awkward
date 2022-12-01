@@ -1,25 +1,24 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
+"""
+Most of the nplikes can re-use implementation shared between CuPy, NumPy, and JAX. This module
+defines a robust interface to these numpy-like libraries.
+"""
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import Generic, Literal, SupportsInt, TypeAlias, TypeVar
 
 import numpy
 
 from awkward import _errors
-from awkward._nplikes import dtypes, numpylike
-
-# How will CuPy work? Same Array object? what about typetracer?
-
-RawArray = TypeVar("RawArray")
-
-ArrayModuleArrayType: TypeAlias = "ArrayModuleArray[RawArray]"
+from awkward._nplikes import Array, NumpyLike, dtypes
+from awkward.typing import Any, Literal, Self, SupportsInt
 
 
-class ArrayModuleArray(numpylike.Array, Generic[RawArray]):
+class ArrayModuleArray(Array):
 
-    _array: RawArray
+    __slots__ = ("_array", "_nplike")
+
+    _array: Any
     _nplike: ArrayModuleNumpyLike
 
     @property
@@ -39,7 +38,7 @@ class ArrayModuleArray(numpylike.Array, Generic[RawArray]):
         return self._array.size  # type: ignore
 
     @property
-    def T(self) -> ArrayModuleArrayType:
+    def T(self) -> Self:
         return self._new(self._array.T, nplike=self._nplike)  # type: ignore
 
     def __new__(cls, *args, **kwargs):
@@ -50,7 +49,7 @@ class ArrayModuleArray(numpylike.Array, Generic[RawArray]):
         )
 
     @classmethod
-    def _new(cls, x, nplike: ArrayModuleNumpyLike) -> ArrayModuleArrayType:
+    def _new(cls, x, nplike: ArrayModuleNumpyLike) -> Self:
         obj = super().__new__(cls)
         if isinstance(x, numpy.generic):
             x = nplike.array_module.asarray(x)
@@ -65,118 +64,96 @@ class ArrayModuleArray(numpylike.Array, Generic[RawArray]):
         obj._nplike = nplike
         return obj
 
-    def __add__(
-        self, other: int | float | complex | ArrayModuleArrayType
-    ) -> ArrayModuleArrayType:
+    def __add__(self, other: int | float | complex | Self) -> Self:
         other = self._nplike.promote_scalar(other)
         left, right = self._nplike.normalise_binary_arguments(self, other)
         return left._new(left._array.__add__(right._array), nplike=self._nplike)  # type: ignore
 
-    def __sub__(
-        self, other: int | float | complex | ArrayModuleArrayType
-    ) -> ArrayModuleArrayType:
+    def __sub__(self, other: int | float | complex | Self) -> Self:
         other = self._nplike.promote_scalar(other)
         left, right = self._nplike.normalise_binary_arguments(self, other)
         return left._new(left._array.__sub__(right._array), nplike=self._nplike)  # type: ignore
 
-    def __truediv__(
-        self, other: int | float | complex | ArrayModuleArrayType
-    ) -> ArrayModuleArrayType:
+    def __truediv__(self, other: int | float | complex | Self) -> Self:
         other = self._nplike.promote_scalar(other)
         left, right = self._nplike.normalise_binary_arguments(self, other)
         return left._new(left._array.__truediv__(right._array), nplike=self._nplike)  # type: ignore
 
-    def __floordiv__(
-        self, other: int | float | complex | ArrayModuleArrayType
-    ) -> ArrayModuleArrayType:
+    def __floordiv__(self, other: int | float | complex | Self) -> Self:
         other = self._nplike.promote_scalar(other)
         left, right = self._nplike.normalise_binary_arguments(self, other)
         return left._new(left._array.__floordiv__(right._array), nplike=self._nplike)  # type: ignore
 
-    def __mod__(
-        self, other: int | float | ArrayModuleArrayType
-    ) -> ArrayModuleArrayType:
+    def __mod__(self, other: int | float | Self) -> Self:
         other = self._nplike.promote_scalar(other)
         left, right = self._nplike.normalise_binary_arguments(self, other)
         return left._new(left._array.__mod__(right._array), nplike=self._nplike)  # type: ignore
 
-    def __mul__(
-        self, other: int | float | complex | ArrayModuleArrayType
-    ) -> ArrayModuleArrayType:
+    def __mul__(self, other: int | float | complex | Self) -> Self:
         other = self._nplike.promote_scalar(other)
         left, right = self._nplike.normalise_binary_arguments(self, other)
         return left._new(left._array.__mul__(right._array), nplike=self._nplike)  # type: ignore
 
-    def __pow__(
-        self, other: int | float | complex | ArrayModuleArrayType
-    ) -> ArrayModuleArrayType:
+    def __pow__(self, other: int | float | complex | Self) -> Self:
         other = self._nplike.promote_scalar(other)
         left, right = self._nplike.normalise_binary_arguments(self, other)
         return left._new(left._array.__pow__(right._array), nplike=self._nplike)  # type: ignore
 
-    def __xor__(self, other: int | bool | ArrayModuleArrayType) -> ArrayModuleArrayType:
+    def __xor__(self, other: int | bool | Self) -> Self:
         other = self._nplike.promote_scalar(other)
         left, right = self._nplike.normalise_binary_arguments(self, other)
         return left._new(left._array.__xor__(right._array), nplike=self._nplike)  # type: ignore
 
-    def __and__(self, other: int | bool | ArrayModuleArrayType) -> ArrayModuleArrayType:
+    def __and__(self, other: int | bool | Self) -> Self:
         other = self._nplike.promote_scalar(other)
         left, right = self._nplike.normalise_binary_arguments(self, other)
         return left._new(left._array.__and__(right._array), nplike=self._nplike)  # type: ignore
 
-    def __or__(self, other: int | bool | ArrayModuleArrayType) -> ArrayModuleArrayType:
+    def __or__(self, other: int | bool | Self) -> Self:
         other = self._nplike.promote_scalar(other)
         left, right = self._nplike.normalise_binary_arguments(self, other)
         return left._new(left._array.__or__(right._array), nplike=self._nplike)  # type: ignore
 
-    def __lt__(
-        self, other: int | float | complex | ArrayModuleArrayType
-    ) -> ArrayModuleArrayType:
+    def __lt__(self, other: int | float | complex | Self) -> Self:
         other = self._nplike.promote_scalar(other)
         left, right = self._nplike.normalise_binary_arguments(self, other)
         return left._new(left._array.__lt__(right._array), nplike=self._nplike)  # type: ignore
 
-    def __le__(
-        self, other: int | float | complex | ArrayModuleArrayType
-    ) -> ArrayModuleArrayType:
+    def __le__(self, other: int | float | complex | Self) -> Self:
         other = self._nplike.promote_scalar(other)
         left, right = self._nplike.normalise_binary_arguments(self, other)
         return left._new(left._array.__lt__(right._array), nplike=self._nplike)  # type: ignore
 
-    def __gt__(
-        self, other: int | float | complex | ArrayModuleArrayType
-    ) -> ArrayModuleArrayType:
+    def __gt__(self, other: int | float | complex | Self) -> Self:
         other = self._nplike.promote_scalar(other)
         left, right = self._nplike.normalise_binary_arguments(self, other)
         return left._new(left._array.__gt__(right._array), nplike=self._nplike)  # type: ignore
 
-    def __ge__(
-        self, other: int | float | complex | ArrayModuleArrayType
-    ) -> ArrayModuleArrayType:
+    def __ge__(self, other: int | float | complex | Self) -> Self:
         other = self._nplike.promote_scalar(other)
         left, right = self._nplike.normalise_binary_arguments(self, other)
         return left._new(left._array.__ge__(right._array), nplike=self._nplike)  # type: ignore
 
-    def __eq__(self, other: int | float | bool | complex | ArrayModuleArrayType) -> ArrayModuleArrayType:  # type: ignore
+    def __eq__(self, other: int | float | bool | complex | Self) -> Self:  # type: ignore
         other = self._nplike.promote_scalar(other)
         left, right = self._nplike.normalise_binary_arguments(self, other)
         return left._new(left._array.__eq__(right._array), nplike=self._nplike)
 
-    def __ne__(self, other: int | float | bool | complex | ArrayModuleArrayType) -> ArrayModuleArrayType:  # type: ignore
+    def __ne__(self, other: int | float | bool | complex | Self) -> Self:  # type: ignore
         other = self._nplike.promote_scalar(other)
         left, right = self._nplike.normalise_binary_arguments(self, other)
         return left._new(left._array.__ne__(right._array), nplike=self._nplike)  # type: ignore
 
-    def __abs__(self) -> ArrayModuleArrayType:
+    def __abs__(self) -> Self:
         return self._new(self._array.__abs__(), nplike=self._nplike)  # type: ignore
 
-    def __neg__(self) -> ArrayModuleArrayType:
+    def __neg__(self) -> Self:
         return self._new(self._array.__neg__(), nplike=self._nplike)  # type: ignore
 
-    def __pos__(self) -> ArrayModuleArrayType:
+    def __pos__(self) -> Self:
         return self._new(self._array.__pos__(), nplike=self._nplike)  # type: ignore
 
-    def __invert__(self) -> ArrayModuleArrayType:
+    def __invert__(self) -> Self:
         return self._new(self._array.__invert__(), nplike=self._nplike)  # type: ignore
 
     def __bool__(self) -> bool:
@@ -195,7 +172,7 @@ class ArrayModuleArray(numpylike.Array, Generic[RawArray]):
         return f"<{self._nplike.__class__.__name__} :: {self._array!r}>"
 
 
-class ArrayModuleNumpyLike(numpylike.NumpyLike[ArrayModuleArray], Generic[RawArray]):
+class ArrayModuleNumpyLike(NumpyLike[ArrayModuleArray]):
     """
     An abstract class implementing NumpyLike support for a `numpy_api` module e.g. numpy, cupy
     """
