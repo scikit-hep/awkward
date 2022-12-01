@@ -4,12 +4,22 @@ from __future__ import annotations
 
 import operator
 from functools import reduce
-from typing import Any, Callable, Literal, SupportsInt, TypeVar, cast
+from typing import (
+    Any,
+    Callable,
+    Literal,
+    SupportsIndex,
+    SupportsInt,
+    TypeVar,
+    cast,
+    overload,
+)
 
 import numpy
 
 from awkward import _errors
 from awkward._nplikes import dtypes, numpylike
+from awkward.typing import Self
 
 
 def unknown_scalar(dtype: dtypes.dtype) -> TypeTracerArray:
@@ -165,6 +175,24 @@ class TypeTracerArray(numpylike.Array):
         else:
             return f"TypeTracerArray({self._array.dtype!r})"
 
+    @overload
+    def __getitem__(
+        self, index: SupportsIndex
+    ) -> int | float | complex | str | bytes | bytes:
+        ...
+
+    @overload
+    def __getitem__(
+        self, index: slice | Ellipsis | tuple[SupportsIndex | slice | Ellipsis, ...]
+    ) -> Self:
+        ...
+
+    def __getitem__(self, index):
+        if isinstance(index, SupportsIndex):
+            return self._new_as_scalar(self._array, nplike=self._nplike)
+        else:
+            raise _errors.wrap_error(NotImplementedError)
+
     def __add__(
         self: TypeTracerArray, other: int | float | complex | TypeTracerArray
     ) -> TypeTracerArray:
@@ -220,32 +248,38 @@ class TypeTracerArray(numpylike.Array):
         return cast(TypeTracerArray, self._invoke_binary_op(other, operator.__or__))
 
     def __lt__(
-        self: TypeTracerArray, other: int | float | complex | TypeTracerArray
+        self: TypeTracerArray,
+        other: int | float | complex | str | bytes | TypeTracerArray,
     ) -> TypeTracerArray:
         return cast(TypeTracerArray, self._invoke_binary_op(other, operator.__lt__))
 
     def __le__(
-        self: TypeTracerArray, other: int | float | complex | TypeTracerArray
+        self: TypeTracerArray,
+        other: int | float | complex | str | bytes | TypeTracerArray,
     ) -> TypeTracerArray:
         return cast(TypeTracerArray, self._invoke_binary_op(other, operator.__le__))
 
     def __gt__(
-        self: TypeTracerArray, other: int | float | complex | TypeTracerArray
+        self: TypeTracerArray,
+        other: int | float | complex | str | bytes | TypeTracerArray,
     ) -> TypeTracerArray:
         return cast(TypeTracerArray, self._invoke_binary_op(other, operator.__gt__))
 
     def __ge__(
-        self: TypeTracerArray, other: int | float | complex | TypeTracerArray
+        self: TypeTracerArray,
+        other: int | float | complex | str | bytes | TypeTracerArray,
     ) -> TypeTracerArray:
         return cast(TypeTracerArray, self._invoke_binary_op(other, operator.__ge__))
 
     def __eq__(  # type: ignore[override]
-        self: TypeTracerArray, other: int | float | bool | complex | TypeTracerArray
+        self: TypeTracerArray,
+        other: int | float | bool | complex | str | bytes | TypeTracerArray,
     ) -> TypeTracerArray:
         return cast(TypeTracerArray, self._invoke_binary_op(other, operator.__eq__))
 
     def __ne__(  # type: ignore[override]
-        self: TypeTracerArray, other: int | float | bool | complex | TypeTracerArray
+        self: TypeTracerArray,
+        other: int | float | bool | complex | str | bytes | TypeTracerArray,
     ) -> TypeTracerArray:
         return cast(TypeTracerArray, self._invoke_binary_op(other, operator.__ne__))
 

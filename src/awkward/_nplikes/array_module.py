@@ -6,12 +6,13 @@ defines a robust interface to these numpy-like libraries.
 from __future__ import annotations
 
 from abc import abstractmethod
+from typing import Any, Literal, SupportsIndex, SupportsInt, overload
 
 import numpy
 
 from awkward import _errors
 from awkward._nplikes import Array, NumpyLike, dtypes
-from awkward.typing import Any, Literal, Self, SupportsInt
+from awkward.typing import Final, Self
 
 
 class ArrayModuleArray(Array):
@@ -49,10 +50,13 @@ class ArrayModuleArray(Array):
         )
 
     @classmethod
-    def _new(cls, x, nplike: ArrayModuleNumpyLike) -> Self:
+    def _new(cls, x, *, nplike: ArrayModuleNumpyLike) -> Self:
         obj = super().__new__(cls)
+        # Scalars must become 0-D arrays
         if isinstance(x, numpy.generic):
             x = nplike.array_module.asarray(x)
+
+        # We can only handle instances of the current nplike's module ndarray
         if not isinstance(x, nplike.array_module.ndarray):
             raise _errors.wrap_error(
                 TypeError(
@@ -63,6 +67,21 @@ class ArrayModuleArray(Array):
         obj._array = x  # type: ignore
         obj._nplike = nplike
         return obj
+
+    @overload
+    def __getitem__(
+        self, index: SupportsIndex
+    ) -> int | float | complex | str | bytes | bytes:
+        ...
+
+    @overload
+    def __getitem__(
+        self, index: slice | Ellipsis | tuple[SupportsIndex | slice | Ellipsis, ...]
+    ) -> Self:
+        ...
+
+    def __getitem__(self, index):
+        return self._new(self._array[index], nplike=self._nplike)
 
     def __add__(self, other: int | float | complex | Self) -> Self:
         other = self._nplike.promote_scalar(other)
@@ -177,9 +196,8 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayModuleArray]):
     An abstract class implementing NumpyLike support for a `numpy_api` module e.g. numpy, cupy
     """
 
-    known_data: bool
-    known_shape: bool
-    is_eager: bool
+    known_data: Final[bool] = True
+    known_shape: Final[bool] = True
 
     def promote_scalar(
         self, x: bool | int | float | complex | ArrayModuleArray
@@ -590,9 +608,9 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayModuleArray]):
             self.array_module.cumsum(x._array, axis=axis), nplike=self
         )
 
-    def from_buffer(self, buffer, *, dtype=None) -> ArrayModuleArray:
+    def from_buffer(self, buffer, *, dtype=None, count: int = -1) -> ArrayModuleArray:
         return ArrayModuleArray._new(
-            self.array_module.frombuffer(buffer, dtype=dtype), nplike=self
+            self.array_module.frombuffer(buffer, dtype=dtype, count=count), nplike=self
         )
 
     def array_equal(
