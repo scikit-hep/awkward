@@ -4,7 +4,8 @@ from __future__ import annotations
 import copy
 
 import awkward as ak
-from awkward.contents.content import Content, unset
+from awkward._util import unset
+from awkward.contents.content import Content
 from awkward.forms.numpyform import NumpyForm
 from awkward.types.numpytype import primitive_to_dtype
 from awkward.typing import Self
@@ -99,6 +100,10 @@ class NumpyArray(Content):
         return self._backend.nplike.raw(self.data, nplike)
 
     Form = NumpyForm
+
+    @classmethod
+    def simplified(cls, data, *, parameters=None, backend=None):
+        return cls(data, parameters=parameters, backend=backend)
 
     def _form_with_key(self, getkey):
         return self.Form(

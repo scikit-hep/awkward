@@ -29,6 +29,10 @@ class ListOffsetForm(Form):
     def content(self):
         return self._content
 
+    @classmethod
+    def simplified(cls, offsets, content, *, parameters=None, form_key=None):
+        return cls(offsets, content, parameters=parameters, form_key=form_key)
+
     def __repr__(self):
         args = [
             repr(self._offsets),

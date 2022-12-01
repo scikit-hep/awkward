@@ -121,8 +121,14 @@ def _impl3(condition, x, y, mergebool, highlevel, behavior):
                 left = ak.contents.NumpyArray(backend.nplike.repeat(left, len(tags)))
             if not isinstance(right, ak.contents.Content):
                 right = ak.contents.NumpyArray(backend.nplike.repeat(right, len(tags)))
-            tmp = ak.contents.UnionArray(tags, index, [left, right])
-            return (tmp.simplify_uniontype(mergebool=mergebool),)
+            return (
+                ak.contents.UnionArray.simplified(
+                    tags,
+                    index,
+                    [left, right],
+                    mergebool=mergebool,
+                ),
+            )
         else:
             return None
 

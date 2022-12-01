@@ -4,7 +4,8 @@ from __future__ import annotations
 import copy
 
 import awkward as ak
-from awkward.contents.content import Content, unset
+from awkward._util import unset
+from awkward.contents.content import Content
 from awkward.forms.indexedform import IndexedForm
 from awkward.index import Index
 from awkward.typing import Self
@@ -73,6 +74,55 @@ class IndexedArray(Content):
         return self._content
 
     Form = IndexedForm
+
+    @classmethod
+    def simplified(cls, index, content, *, parameters=None):
+        if content.is_union:
+            return content._carry(index, allow_lazy=False).copy(
+                parameters=ak._util.merge_parameters(content._parameters, parameters)
+            )
+
+        elif content.is_indexed or content.is_option:
+            backend = content.backend
+            if content.is_indexed:
+                inner = content.index
+            else:
+                inner = content.to_IndexedOptionArray64().index
+            result = ak.index.Index64.empty(index.length, nplike=backend.index_nplike)
+
+            Content._selfless_handle_error(
+                backend[
+                    "awkward_IndexedArray_simplify",
+                    result.dtype.type,
+                    index.dtype.type,
+                    inner.dtype.type,
+                ](
+                    result.data,
+                    index.data,
+                    index.length,
+                    inner.data,
+                    inner.length,
+                )
+            )
+            if isinstance(content, ak.contents.IndexedArray):
+                return ak.contents.IndexedArray(
+                    result,
+                    content.content,
+                    parameters=ak._util.merge_parameters(
+                        content._parameters, parameters
+                    ),
+                )
+            else:
+                return ak.contents.IndexedOptionArray(
+                    result,
+                    content.content,
+                    parameters=ak._util.merge_parameters(
+                        content._parameters, parameters
+                    ),
+                )
+
+        else:
+            return cls(index, content, parameters=parameters)
 
     def _form_with_key(self, getkey):
         form_key = getkey(self)
@@ -332,83 +382,6 @@ class IndexedArray(Content):
                 )
             )
             return self._content._carry(nextcarry, False)
-
-    def simplify_optiontype(self):
-        if isinstance(
-            self._content,
-            (
-                ak.contents.IndexedArray,
-                ak.contents.IndexedOptionArray,
-                ak.contents.ByteMaskedArray,
-                ak.contents.BitMaskedArray,
-                ak.contents.UnmaskedArray,
-            ),
-        ):
-
-            if isinstance(
-                self._content,
-                (
-                    ak.contents.IndexedArray,
-                    ak.contents.IndexedOptionArray,
-                ),
-            ):
-                inner = self._content.index
-                result = ak.index.Index64.empty(
-                    self.index.length, nplike=self._backend.index_nplike
-                )
-            elif isinstance(
-                self._content,
-                (
-                    ak.contents.ByteMaskedArray,
-                    ak.contents.BitMaskedArray,
-                    ak.contents.UnmaskedArray,
-                ),
-            ):
-                rawcontent = self._content.to_IndexedOptionArray64()
-                inner = rawcontent.index
-                result = ak.index.Index64.empty(
-                    self.index.length, self._backend.index_nplike
-                )
-
-            assert (
-                result.nplike is self._backend.index_nplike
-                and self._index.nplike is self._backend.index_nplike
-                and inner.nplike is self._backend.index_nplike
-            )
-            self._handle_error(
-                self._backend[
-                    "awkward_IndexedArray_simplify",
-                    result.dtype.type,
-                    self._index.dtype.type,
-                    inner.dtype.type,
-                ](
-                    result.data,
-                    self._index.data,
-                    self._index.length,
-                    inner.data,
-                    inner.length,
-                )
-            )
-            if isinstance(self._content, ak.contents.IndexedArray):
-                return IndexedArray(
-                    result, self._content.content, parameters=self._parameters
-                )
-
-            if isinstance(
-                self._content,
-                (
-                    ak.contents.IndexedOptionArray,
-                    ak.contents.ByteMaskedArray,
-                    ak.contents.BitMaskedArray,
-                    ak.contents.UnmaskedArray,
-                ),
-            ):
-                return ak.contents.IndexedOptionArray(
-                    result, self._content.content, parameters=self._parameters
-                )
-
-        else:
-            return self
 
     def num(self, axis, depth=0):
         posaxis = self.axis_wrap_if_negative(axis)
@@ -790,9 +763,9 @@ class IndexedArray(Content):
                 )
             )
 
-            return ak.contents.IndexedOptionArray(
+            return ak.contents.IndexedOptionArray.simplified(
                 nextoutindex, unique, parameters=self._parameters
-            ).simplify_optiontype()
+            )
 
         if not branch and negaxis == depth:
             return unique
@@ -842,11 +815,9 @@ class IndexedArray(Content):
                     self._backend.index_nplike.arange(unique.length, dtype=np.int64),
                     nplike=self._backend.index_nplike,
                 )
-                out = ak.contents.IndexedOptionArray(
+                return ak.contents.IndexedOptionArray.simplified(
                     nextoutindex, unique, parameters=self._parameters
-                ).simplify_optiontype()
-
-                return out
+                )
 
         raise ak._errors.wrap_error(NotImplementedError)
 

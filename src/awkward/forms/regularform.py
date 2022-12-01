@@ -38,6 +38,10 @@ class RegularForm(Form):
     def size(self):
         return self._size
 
+    @classmethod
+    def simplified(cls, content, size, *, parameters=None, form_key=None):
+        return cls(content, size, parameters=parameters, form_key=form_key)
+
     def __repr__(self):
         args = [repr(self._content), repr(self._size)] + self._repr_args()
         return "{}({})".format(type(self).__name__, ", ".join(args))

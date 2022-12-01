@@ -53,7 +53,13 @@ def _impl(array, name, highlevel, behavior):
 
     def action2(layout, **ignore):
         if layout.is_union:
-            return layout.simplify_uniontype(merge=True, mergebool=False)
+            return ak.contents.UnionArray.simplified(
+                layout._tags,
+                layout._index,
+                layout._contents,
+                parameters=layout._parameters,
+                backend=layout._backend,
+            )
         else:
             return None
 

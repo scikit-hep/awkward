@@ -82,6 +82,15 @@ def identifier_hash(str):
     )
 
 
+# FIXME: introduce sentinel type for this
+class _Unset:
+    def __repr__(self):
+        return f"{__name__}.unset"
+
+
+unset = _Unset()
+
+
 # Sentinel object for catching pass-through values
 class Unspecified:
     pass
@@ -505,12 +514,12 @@ def union_to_record(unionarray, anonymous):
                         union_contents.append(missingarray)
 
             all_fields.append(
-                ak.contents.UnionArray(
+                ak.contents.UnionArray.simplified(
                     unionarray.tags,
                     unionarray.index,
                     union_contents,
                     parameters=unionarray.parameters,
-                ).simplify_uniontype()
+                )
             )
 
         return ak.contents.RecordArray(all_fields, all_names, len(unionarray))

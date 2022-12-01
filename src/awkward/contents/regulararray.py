@@ -4,7 +4,8 @@ from __future__ import annotations
 import copy
 
 import awkward as ak
-from awkward.contents.content import Content, unset
+from awkward._util import unset
+from awkward.contents.content import Content
 from awkward.forms.regularform import RegularForm
 from awkward.typing import Self
 
@@ -80,6 +81,10 @@ class RegularArray(Content):
         return self._content
 
     Form = RegularForm
+
+    @classmethod
+    def simplified(cls, content, size, zeros_length=0, *, parameters=None):
+        return cls(content, size, zeros_length, parameters=parameters)
 
     def _form_with_key(self, getkey):
         form_key = getkey(self)
@@ -1164,11 +1169,11 @@ class RegularArray(Content):
                         "awkward_RegularArray_rpad_and_clip_axis1", index.dtype.type
                     ](index.data, target, self._size, self._length)
                 )
-                next = ak.contents.IndexedOptionArray(
+                next = ak.contents.IndexedOptionArray.simplified(
                     index, self._content, parameters=self._parameters
                 )
                 return ak.contents.RegularArray(
-                    next.simplify_optiontype(),
+                    next,
                     target,
                     self._length,
                     parameters=self._parameters,

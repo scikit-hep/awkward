@@ -9,6 +9,7 @@ from awkward import _errors
 from awkward.typing import Any
 
 np = ak.nplikes.NumpyMetadata.instance()
+numpy_backend = ak._backends.NumpyBackend.instance()
 
 
 def from_dict(input: dict) -> Form:
@@ -364,9 +365,6 @@ class Form:
     def type_from_behavior(self, behavior):
         return self._type(ak._util.typestrs(behavior))
 
-    def simplify_optiontype(self):
-        return self
-
     def columns(self, list_indicator=None, column_prefix=()):
         output = []
         self._columns(column_prefix, output, list_indicator)
@@ -412,3 +410,16 @@ class Form:
 
     def _type(self, typestrs):
         raise _errors.wrap_error(NotImplementedError)
+
+    def length_zero_array(
+        self, *, backend=numpy_backend, highlevel=True, behavior=None
+    ):
+        return ak.operations.ak_from_buffers._impl(
+            form=self,
+            length=0,
+            container={"": b"\x00\x00\x00\x00\x00\x00\x00\x00"},
+            buffer_key="",
+            backend=backend,
+            highlevel=highlevel,
+            behavior=behavior,
+        )

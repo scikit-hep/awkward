@@ -46,7 +46,7 @@ def _impl(array, highlevel, behavior):
             isinstance(layout.content, ak.contents.NumpyArray)
             and issubclass(layout.content.dtype.type, np.floating)
         ):
-            return continuation().simplify_optiontype()
+            return continuation()
 
         else:
             return None

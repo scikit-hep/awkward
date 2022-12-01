@@ -88,12 +88,12 @@ def test_union_array():
     a = ak.contents.NumpyArray(np.arange(4))
     b = ak.contents.NumpyArray(np.arange(4) + 4)
     c = ak.contents.RegularArray(ak.contents.NumpyArray(np.arange(12)), 3)
-    layout = ak.contents.UnionArray(
+    layout = ak.contents.UnionArray.simplified(
         ak.index.Index8([1, 1, 2, 2, 0, 0]),
         ak.index.Index64([0, 1, 0, 1, 0, 1]),
         [a, b, c],
     )
-    packed = ak.operations.packed(layout.simplify_uniontype(), highlevel=False)
+    packed = ak.operations.packed(layout, highlevel=False)
     assert to_list(packed) == to_list(layout)
     # Check that it merges like contents
     assert len(packed.contents) == 2

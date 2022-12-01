@@ -4,7 +4,8 @@ from __future__ import annotations
 import copy
 
 import awkward as ak
-from awkward.contents.content import Content, unset
+from awkward._util import unset
+from awkward.contents.content import Content
 from awkward.forms.emptyform import EmptyForm
 from awkward.typing import Self
 
@@ -39,6 +40,10 @@ class EmptyArray(Content):
         self._init(parameters, backend)
 
     Form = EmptyForm
+
+    @classmethod
+    def simplified(cls, *, parameters=None, backend=None):
+        return cls(parameters=parameters, backend=backend)
 
     def _form_with_key(self, getkey):
         return self.Form(parameters=self._parameters, form_key=getkey(self))

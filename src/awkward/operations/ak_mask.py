@@ -111,9 +111,9 @@ def _impl(array, mask, valid_when, highlevel, behavior):
                 )
             bytemask = ak.index.Index8(m.view(np.int8))
             return (
-                ak.contents.ByteMaskedArray(
+                ak.contents.ByteMaskedArray.simplified(
                     bytemask, layoutarray, valid_when=valid_when
-                ).simplify_optiontype(),
+                ),
             )
         else:
             return None

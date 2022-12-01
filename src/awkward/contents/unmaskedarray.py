@@ -4,7 +4,8 @@ from __future__ import annotations
 import copy
 
 import awkward as ak
-from awkward.contents.content import Content, unset
+from awkward._util import unset
+from awkward.contents.content import Content
 from awkward.forms.unmaskedform import UnmaskedForm
 from awkward.typing import Self
 
@@ -47,6 +48,20 @@ class UnmaskedArray(Content):
         return self._content
 
     Form = UnmaskedForm
+
+    @classmethod
+    def simplified(cls, content, *, parameters=None):
+        if content.is_union:
+            return content.copy(
+                contents=[cls.simplified(x) for x in content.contents],
+                parameters=ak._util.merge_parameters(content._parameters, parameters),
+            )
+        elif content.is_indexed or content.is_option:
+            return content.copy(
+                parameters=ak._util.merge_parameters(content._parameters, parameters)
+            )
+        else:
+            return cls(content, parameters=parameters)
 
     def _form_with_key(self, getkey):
         form_key = getkey(self)
@@ -188,10 +203,10 @@ class UnmaskedArray(Content):
         elif isinstance(
             head, (int, slice, ak.index.Index64, ak.contents.ListOffsetArray)
         ):
-            return UnmaskedArray(
+            return UnmaskedArray.simplified(
                 self._content._getitem_next(head, tail, advanced),
                 parameters=self._parameters,
-            ).simplify_optiontype()
+            )
 
         elif isinstance(head, str):
             return self._getitem_next_field(head, tail, advanced)
@@ -218,21 +233,6 @@ class UnmaskedArray(Content):
             ).project()
         else:
             return self._content
-
-    def simplify_optiontype(self):
-        if isinstance(
-            self._content,
-            (
-                ak.contents.IndexedArray,
-                ak.contents.IndexedOptionArray,
-                ak.contents.ByteMaskedArray,
-                ak.contents.BitMaskedArray,
-                ak.contents.UnmaskedArray,
-            ),
-        ):
-            return self._content
-        else:
-            return self
 
     def num(self, axis, depth=0):
         posaxis = self.axis_wrap_if_negative(axis)
@@ -351,10 +351,7 @@ class UnmaskedArray(Content):
         )
 
         if isinstance(out, ak.contents.RegularArray):
-            tmp = ak.contents.UnmaskedArray(
-                out._content, parameters=None
-            ).simplify_optiontype()
-
+            tmp = ak.contents.UnmaskedArray.simplified(out._content, parameters=None)
             return ak.contents.RegularArray(
                 tmp, out._size, out._length, parameters=None
             )
@@ -377,9 +374,9 @@ class UnmaskedArray(Content):
         )
 
         if isinstance(out, ak.contents.RegularArray):
-            tmp = ak.contents.UnmaskedArray(
+            tmp = ak.contents.UnmaskedArray.simplified(
                 out._content, parameters=self._parameters
-            ).simplify_optiontype()
+            )
 
             return ak.contents.RegularArray(
                 tmp, out._size, out._length, parameters=self._parameters
@@ -469,7 +466,7 @@ class UnmaskedArray(Content):
         if branch or options["drop_nones"] or depth > 1:
             return self.project()._completely_flatten(backend, options)
         else:
-            return [self.simplify_optiontype()]
+            return [self]
 
     def _recursively_apply(
         self, action, behavior, depth, depth_context, lateral_context, options

@@ -4,7 +4,8 @@ from __future__ import annotations
 import copy
 
 import awkward as ak
-from awkward.contents.content import Content, unset
+from awkward._util import unset
+from awkward.contents.content import Content
 from awkward.forms.listoffsetform import ListOffsetForm
 from awkward.index import Index
 from awkward.typing import Self
@@ -85,6 +86,10 @@ class ListOffsetArray(Content):
         return self._content
 
     Form = ListOffsetForm
+
+    @classmethod
+    def simplified(cls, offsets, content, *, parameters=None):
+        return cls(offsets, content, parameters=parameters)
 
     def _form_with_key(self, getkey):
         form_key = getkey(self)
@@ -1790,11 +1795,11 @@ class ListOffsetArray(Content):
                         target,
                     )
                 )
-                next = ak.contents.IndexedOptionArray(
+                next = ak.contents.IndexedOptionArray.simplified(
                     outindex, self._content, parameters=self._parameters
                 )
                 return ak.contents.ListOffsetArray(
-                    offsets_, next.simplify_optiontype(), parameters=self._parameters
+                    offsets_, next, parameters=self._parameters
                 )
             else:
                 starts_ = ak.index.Index64.empty(
@@ -1839,11 +1844,11 @@ class ListOffsetArray(Content):
                         target,
                     )
                 )
-                next = ak.contents.IndexedOptionArray(
+                next = ak.contents.IndexedOptionArray.simplified(
                     outindex, self._content, parameters=self._parameters
                 )
                 return ak.contents.RegularArray(
-                    next.simplify_optiontype(),
+                    next,
                     target,
                     self.length,
                     parameters=self._parameters,

@@ -68,6 +68,17 @@ class NumpyForm(Form):
     def inner_shape(self):
         return self._inner_shape
 
+    @classmethod
+    def simplified(
+        cls,
+        primitive,
+        inner_shape=(),
+        *,
+        parameters=None,
+        form_key=None,
+    ):
+        return cls(primitive, inner_shape, parameters=parameters, form_key=form_key)
+
     @property
     def itemsize(self):
         return ak.types.numpytype.primitive_to_dtype(self._primitive).itemsize
