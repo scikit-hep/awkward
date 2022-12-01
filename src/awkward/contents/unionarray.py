@@ -521,7 +521,7 @@ class UnionArray(Content):
 
             else:
                 # UnionArray is empty, so
-                nexttags = self._backend.nplike.full(
+                nexttags = self._backend.index_nplike.full(
                     len(carry_data), tag_for_missing, dtype=self._tags.dtype
                 )
                 nextindex = self._backend.nplike.full(
