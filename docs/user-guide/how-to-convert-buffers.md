@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.14.1
+    jupytext_version: 1.14.0
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -51,7 +51,7 @@ The pieces needed to reconstitute this array are:
 
 The {class}`ak.forms.Form` is like an Awkward {class}`ak.types.Type` in that it describes how the data are structured, but with more detail: it includes distinctions such as the difference between {class}`ak.contents.ListArray` and {class}`ak.contents.ListOffsetArray`, as well as the integer types of structural {class}`ak.index.Index`.
 
-It is usually presented as JSON, and has a compact JSON format (when {method}`ak.forms.Form.tojson` is invoked).
+It is usually presented as JSON, and has a compact JSON format (when {meth}`ak.forms.Form.tojson` is invoked).
 
 ```{code-cell} ipython3
 form
