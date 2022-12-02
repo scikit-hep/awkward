@@ -919,50 +919,9 @@ def to_awkwardarrow_type(
 def remove_optiontype(akarray):
     return akarray.__pyarrow_original
 
-    # assert akarray.is_option or akarray.is_union
-
-    # if akarray.is_union:
-    #     return ak.contents.UnionArray(
-    #         akarray._tags,
-    #         akarray._index,
-    #         [remove_optiontype(x) for x in akarray._contents],
-    #         parameters=akarray._parameters,
-    #         backend=akarray._backend,
-    #     )
-
-    # elif isinstance(akarray, ak.contents.IndexedOptionArray):
-    #     return ak.contents.IndexedArray(
-    #         akarray.index, akarray.content, parameters=akarray.parameters
-    #     )
-
-    # else:
-    #     return akarray.content
-
 
 def form_remove_optiontype(akform):
     return akform.__pyarrow_original
-
-    # assert akform.is_option or akform.is_union
-
-    # if akform.is_union:
-    #     return ak.forms.UnionForm(
-    #         akform._tags,
-    #         akform._index,
-    #         [form_remove_optiontype(x) for x in akform._contents],
-    #         parameters=akform._parameters,
-    #         form_key=akform._form_key,
-    #     )
-
-    # elif isinstance(akform, ak.forms.IndexedOptionForm):
-    #     return ak.forms.IndexedForm(
-    #         akform.index,
-    #         akform.content,
-    #         parameters=akform.parameters,
-    #         form_key=akform.form_key,
-    #     )
-
-    # else:
-    #     return akform.content
 
 
 def handle_arrow(obj, generate_bitmasks=False, pass_empty_field=False):
