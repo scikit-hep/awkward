@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.14.1
+    jupytext_version: 1.14.0
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -40,7 +40,6 @@ records = ak.Array([
 ])
 ```
 
-
 The type of an array gives an indication of the fields that it contains. We can see that the `records` array contains two fields `"x"` and `"y"`:
 
 ```{code-cell} ipython3
@@ -63,7 +62,7 @@ ak.fields(records)
 
 +++
 
-In addition to records, Awkward Array also has the concept of _tuples_. 
+In addition to records, Awkward Array also has the concept of _tuples_.
 
 ```{code-cell} ipython3
 tuples = ak.Array([
@@ -110,20 +109,6 @@ The same is not true of tuples, because integers are not valid attribute names:
 :tags: [raises-exception]
 
 tuples.0
-```
-
-Instead, the {class}`ak.Array` class defines a fixed set of properties (`slot0`, `slot1`, ..., `slot9`) that lookup the first ten slots of the array:
-
-```{code-cell} ipython3
-tuples.slot0
-```
-
-```{code-cell} ipython3
-tuples.slot1
-```
-
-```{code-cell} ipython3
-tuples.slot2
 ```
 
 The close similarity between records and tuples naturally raises the question:
