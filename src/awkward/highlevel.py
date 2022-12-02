@@ -12,8 +12,8 @@ from awkward_cpp.lib import _ext
 import awkward as ak
 from awkward._connect.numpy import NDArrayOperatorsMixin
 
-np = ak.nplikes.NumpyMetadata.instance()
-numpy = ak.nplikes.Numpy.instance()
+np = ak._nplikes.NumpyMetadata.instance()
+numpy = ak._nplikes.Numpy.instance()
 
 _dir_pattern = re.compile(r"^[a-zA-Z_]\w*$")
 
@@ -200,10 +200,10 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         elif numpy.is_own_array(data) and data.dtype != np.dtype("O"):
             layout = ak.operations.from_numpy(data, highlevel=False)
 
-        elif ak.nplikes.Cupy.is_own_array(data):
+        elif ak._nplikes.Cupy.is_own_array(data):
             layout = ak.operations.from_cupy(data, highlevel=False)
 
-        elif ak.nplikes.Jax.is_own_array(data):
+        elif ak._nplikes.Jax.is_own_array(data):
             layout = ak.operations.from_jax(data, highlevel=False)
 
         elif ak._util.in_module(data, "pyarrow"):

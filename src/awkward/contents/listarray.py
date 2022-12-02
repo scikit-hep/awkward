@@ -11,7 +11,7 @@ from awkward.forms.listform import ListForm
 from awkward.index import Index
 from awkward.typing import Self
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 class ListArray(Content):
@@ -114,13 +114,13 @@ class ListArray(Content):
             form_key=form_key,
         )
 
-    def _to_buffers(self, form, getkey, container, nplike):
+    def _to_buffers(self, form, getkey, container, backend):
         assert isinstance(form, self.Form)
         key1 = getkey(self, form, "starts")
         key2 = getkey(self, form, "stops")
-        container[key1] = ak._util.little_endian(self._starts.raw(nplike))
-        container[key2] = ak._util.little_endian(self._stops.raw(nplike))
-        self._content._to_buffers(form.content, getkey, container, nplike)
+        container[key1] = ak._util.little_endian(self._starts.raw(backend.index_nplike))
+        container[key2] = ak._util.little_endian(self._stops.raw(backend.index_nplike))
+        self._content._to_buffers(form.content, getkey, container, backend)
 
     @property
     def typetracer(self):

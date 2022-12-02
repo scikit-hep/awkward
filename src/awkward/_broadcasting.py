@@ -30,8 +30,8 @@ from awkward.index import (  # IndexU8,  ; Index32,  ; IndexU32,  ; noqa: F401
 from awkward.record import Record
 from awkward.typing import Any, Callable, Dict, List, TypeAlias, Union
 
-np = ak.nplikes.NumpyMetadata.instance()
-numpy = ak.nplikes.Numpy.instance()
+np = ak._nplikes.NumpyMetadata.instance()
+numpy = ak._nplikes.Numpy.instance()
 
 optiontypes = (IndexedOptionArray, ByteMaskedArray, BitMaskedArray, UnmaskedArray)
 listtypes = (ListOffsetArray, ListArray, RegularArray)
@@ -48,7 +48,7 @@ def broadcast_pack(inputs: Sequence, isscalar: list[bool]) -> list:
     nextinputs = []
     for x in inputs:
         if isinstance(x, Record):
-            index = ak.nplikes.nplike_of(*inputs).full(maxlen, x.at, dtype=np.int64)
+            index = ak._nplikes.nplike_of(*inputs).full(maxlen, x.at, dtype=np.int64)
             nextinputs.append(RegularArray(x.array[index], maxlen, 1))
             isscalar.append(True)
         elif isinstance(x, Content):

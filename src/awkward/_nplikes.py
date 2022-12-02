@@ -835,11 +835,11 @@ class Jax(NumpyLike):
     def raw(self, array, nplike):
         if isinstance(nplike, Jax):
             return array
-        elif isinstance(nplike, ak.nplikes.Cupy):
-            cupy = ak.nplikes.Cupy.instance()
+        elif isinstance(nplike, ak._nplikes.Cupy):
+            cupy = ak._nplikes.Cupy.instance()
             return cupy.asarray(array)
-        elif isinstance(nplike, ak.nplikes.Numpy):
-            numpy = ak.nplikes.Numpy.instance()
+        elif isinstance(nplike, ak._nplikes.Numpy):
+            numpy = ak._nplikes.Numpy.instance()
             return numpy.asarray(array)
         elif isinstance(nplike, ak._typetracer.TypeTracer):
             return ak._typetracer.TypeTracerArray(dtype=array.dtype, shape=array.shape)
@@ -939,7 +939,7 @@ def nplike_of(*arrays, default: D = _UNSET) -> NumpyLike | D:
         *arrays: iterable of possible array objects
         default: default NumpyLike instance if no array objects found
 
-    Return the #ak.nplikes.NumpyLike that is best-suited to operating upon the given
+    Return the #ak._nplikes.NumpyLike that is best-suited to operating upon the given
     iterable of arrays. Return an instance of the `default_cls` if no known array types
     are found.
     """

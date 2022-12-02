@@ -3,7 +3,7 @@
 import awkward as ak
 from awkward.typing import Sequence
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 def headtail(oldtail):
@@ -62,7 +62,7 @@ def prepare_advanced_indexing(items):
         )
 
     # Then broadcast the index items
-    nplike = ak.nplikes.nplike_of(*broadcastable)
+    nplike = ak._nplikes.nplike_of(*broadcastable)
     broadcasted = nplike.broadcast_arrays(*broadcastable)
 
     # And re-assemble the index with the broadcasted items
@@ -381,7 +381,7 @@ def normalise_item_bool_to_int(item):
         and issubclass(item.content.content.dtype.type, (bool, np.bool_))
     ):
         if item.backend.nplike.known_data or item.backend.nplike.known_shape:
-            if isinstance(item.backend.nplike, ak.nplikes.Jax):
+            if isinstance(item.backend.nplike, ak._nplikes.Jax):
                 raise ak._errors.wrap_error(
                     "This slice is not supported for JAX differentiation."
                 )
@@ -450,7 +450,7 @@ def normalise_item_bool_to_int(item):
             item.content.dtype.type, (bool, np.bool_)
         ):
             if item.backend.nplike.known_data or item.backend.nplike.known_shape:
-                if isinstance(item.backend.nplike, ak.nplikes.Jax):
+                if isinstance(item.backend.nplike, ak._nplikes.Jax):
                     raise ak._errors.wrap_error(
                         "This slice is not supported for JAX differentiation."
                     )

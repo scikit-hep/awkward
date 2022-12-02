@@ -5,10 +5,10 @@ import numbers
 import numpy
 
 import awkward as ak
-from awkward import index, nplikes
+from awkward import _nplikes, index
 from awkward.typing import TypeVar
 
-np = nplikes.NumpyMetadata.instance()
+np = _nplikes.NumpyMetadata.instance()
 
 
 class NoError:
@@ -486,7 +486,7 @@ class TypeTracerArray:
         return self
 
 
-class TypeTracer(ak.nplikes.NumpyLike):
+class TypeTracer(ak._nplikes.NumpyLike):
     known_data = False
     known_shape = False
 

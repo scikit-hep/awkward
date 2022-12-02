@@ -10,8 +10,8 @@ from awkward.forms.numpyform import NumpyForm
 from awkward.types.numpytype import primitive_to_dtype
 from awkward.typing import Self
 
-np = ak.nplikes.NumpyMetadata.instance()
-numpy = ak.nplikes.Numpy.instance()
+np = ak._nplikes.NumpyMetadata.instance()
+numpy = ak._nplikes.Numpy.instance()
 
 
 class NumpyArray(Content):
@@ -26,7 +26,7 @@ class NumpyArray(Content):
             data = data.data
         self._data = backend.nplike.asarray(data)
 
-        if not isinstance(backend.nplike, ak.nplikes.Jax):
+        if not isinstance(backend.nplike, ak._nplikes.Jax):
             ak.types.numpytype.dtype_to_primitive(self._data.dtype)
         if len(self._data.shape) == 0:
             raise ak._errors.wrap_error(
@@ -89,11 +89,11 @@ class NumpyArray(Content):
 
     @property
     def ptr(self):
-        if isinstance(self._backend.nplike, ak.nplikes.Numpy):
+        if isinstance(self._backend.nplike, ak._nplikes.Numpy):
             return self._data.ctypes.data
-        elif isinstance(self._backend.nplike, ak.nplikes.Cupy):
+        elif isinstance(self._backend.nplike, ak._nplikes.Cupy):
             return self._data.data.ptr
-        elif isinstance(self._backend.nplike, ak.nplikes.Jax):
+        elif isinstance(self._backend.nplike, ak._nplikes.Jax):
             return self._data.device_buffer.unsafe_buffer_pointer()
         else:
             raise ak._errors.wrap_error(
@@ -113,10 +113,10 @@ class NumpyArray(Content):
             form_key=getkey(self),
         )
 
-    def _to_buffers(self, form, getkey, container, nplike):
+    def _to_buffers(self, form, getkey, container, backend):
         assert isinstance(form, self.Form)
         key = getkey(self, form, "data")
-        container[key] = ak._util.little_endian(self.raw(nplike))
+        container[key] = ak._util.little_endian(self.raw(backend.nplike))
 
     @property
     def typetracer(self):
@@ -1120,7 +1120,7 @@ class NumpyArray(Content):
         assert self.is_contiguous
         assert self._data.ndim == 1
 
-        if isinstance(self._backend.nplike, ak.nplikes.Jax):
+        if isinstance(self._backend.nplike, ak._nplikes.Jax):
             from awkward._connect.jax.reducers import get_jax_reducer
 
             reducer = get_jax_reducer(reducer)

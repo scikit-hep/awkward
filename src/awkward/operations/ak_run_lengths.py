@@ -2,7 +2,8 @@
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
+cpu = ak._backends.NumpyBackend.instance()
 
 
 def run_lengths(array, *, highlevel=True, behavior=None):
@@ -95,9 +96,7 @@ def run_lengths(array, *, highlevel=True, behavior=None):
 
 
 def _impl(array, highlevel, behavior):
-    backend = ak._backends.backend_of(
-        array, default=ak._backends.NumpyBackend.instance()
-    )
+    backend = ak._backends.backend_of(array, default=cpu)
 
     def lengths_of(data, offsets):
         if len(data) == 0:
