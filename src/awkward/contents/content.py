@@ -844,13 +844,6 @@ class Content:
 
         return (head, tail)
 
-    def dummy(self):
-        raise ak._errors.wrap_error(
-            NotImplementedError(
-                "FIXME: need to implement 'dummy', which makes an array of length 1 and an arbitrary value (0?) for this array type"
-            )
-        )
-
     def local_index(self, axis: Integral):
         return self._local_index(axis, 0)
 

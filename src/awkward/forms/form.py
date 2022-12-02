@@ -423,3 +423,16 @@ class Form:
             highlevel=highlevel,
             behavior=behavior,
         )
+
+    def length_one_array(self, *, backend=numpy_backend, highlevel=True, behavior=None):
+        return ak.operations.ak_from_buffers._impl(
+            form=self,
+            length=1,
+            container={
+                "": b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+            },
+            buffer_key="",
+            backend=backend,
+            highlevel=highlevel,
+            behavior=behavior,
+        )

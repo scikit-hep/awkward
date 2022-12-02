@@ -39,6 +39,14 @@ class BitMaskedArray(Content):
                     )
                 )
             )
+        if content.is_union or content.is_indexed or content.is_option:
+            raise ak._errors.wrap_error(
+                TypeError(
+                    "{0} cannot contain a union-type, option-type, or indexed 'content' ({1}); try {0}.simplified instead".format(
+                        type(self).__name__, type(content).__name__
+                    )
+                )
+            )
         if not isinstance(valid_when, bool):
             raise ak._errors.wrap_error(
                 TypeError(
@@ -587,17 +595,6 @@ class BitMaskedArray(Content):
             return f'at {path} ("{type(self)}"): len(mask) * 8 < length'
         elif self._content.length < self.length:
             return f'at {path} ("{type(self)}"): len(content) < length'
-        elif isinstance(
-            self._content,
-            (
-                ak.contents.BitMaskedArray,
-                ak.contents.ByteMaskedArray,
-                ak.contents.IndexedArray,
-                ak.contents.IndexedOptionArray,
-                ak.contents.UnmaskedArray,
-            ),
-        ):
-            return "{0} contains \"{1}\", the operation that made it might have forgotten to call 'simplify_optiontype()'"
         else:
             return self._content.validity_error(path + ".content")
 

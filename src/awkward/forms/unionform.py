@@ -100,7 +100,7 @@ class UnionForm(Form):
         return ak.contents.UnionArray.simplified(
             ak.index._form_to_zero_length(tags),
             ak.index._form_to_zero_length(index),
-            [x.zero_length_array(highlevel=False) for x in contents],
+            [x.length_zero_array(highlevel=False) for x in contents],
             parameters=parameters,
         ).form
 

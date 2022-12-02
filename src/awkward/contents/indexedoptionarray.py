@@ -185,7 +185,9 @@ class IndexedOptionArray(Content):
         carry = ak.index.Index(carry)
 
         if self._content.length == 0:
-            content = self._content.dummy()._carry(carry, False)
+            content = self._content.form.length_one_array(
+                backend=self._backend, highlevel=False
+            )._carry(carry, False)
         else:
             content = self._content._carry(carry, False)
 
