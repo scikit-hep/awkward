@@ -63,7 +63,7 @@ class Backend(Protocol[T]):
 
 
 class NumpyBackend(Singleton, Backend[Any]):
-    name: Final[str] = "numpy"
+    name: Final[str] = "cpu"
 
     _numpy: Numpy
 
@@ -83,7 +83,7 @@ class NumpyBackend(Singleton, Backend[Any]):
 
 
 class CupyBackend(Singleton, Backend[Any]):
-    name: Final[str] = "cupy"
+    name: Final[str] = "cuda"
 
     _cupy: Cupy
 
@@ -204,6 +204,4 @@ def regularize_backend(backend: str | Backend) -> Backend:
     elif backend in _backends:
         return _backends[backend].instance()
     else:
-        raise ak._errors.wrap_error(
-            ValueError("The available backends for now are `cpu` and `cuda`.")
-        )
+        raise ak._errors.wrap_error(ValueError(f"No such backend {backend!r} exists."))
