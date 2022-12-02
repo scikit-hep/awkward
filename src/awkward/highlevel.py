@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import copy
+import html
 import io
 import itertools
 import keyword
@@ -1245,7 +1246,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         else:
             stream.write(out + "\n")
 
-    def _ipython_display_(self):
+    def _repr_mimebundle_(self, include=None, exclude=None):
         value_buff = io.StringIO()
         self.show(type=False, stream=value_buff)
         header_lines = value_buff.getvalue().splitlines()
@@ -1253,12 +1254,19 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         type_buff = io.StringIO()
         self.type.show(stream=type_buff)
         footer_lines = type_buff.getvalue().splitlines()
+        # Prepend a `type: ` prefix to the type information
+        footer_lines[0] = f"type: {footer_lines[0]}"
 
         if header_lines[-1] == "":
             del header_lines[-1]
 
         n_cols = max(len(line) for line in itertools.chain(header_lines, footer_lines))
-        print("\n".join([*header_lines, "-" * n_cols, *footer_lines]))  # noqa: T201
+        body = "\n".join([*header_lines, "-" * n_cols, *footer_lines])
+
+        return {
+            "text/html": f"<pre>{html.escape(body)}</pre>",
+            "text/plain": repr(self),
+        }
 
     def __array__(self, *args, **kwargs):
         """
@@ -1965,7 +1973,7 @@ class Record(NDArrayOperatorsMixin):
         else:
             stream.write(out + "\n")
 
-    def _ipython_display_(self):
+    def _repr_mimebundle_(self, include=None, exclude=None):
         value_buff = io.StringIO()
         self.show(type=False, stream=value_buff)
         header_lines = value_buff.getvalue().splitlines()
@@ -1973,12 +1981,19 @@ class Record(NDArrayOperatorsMixin):
         type_buff = io.StringIO()
         self.type.show(stream=type_buff)
         footer_lines = type_buff.getvalue().splitlines()
+        # Prepend a `type: ` prefix to the type information
+        footer_lines[0] = f"type: {footer_lines[0]}"
 
         if header_lines[-1] == "":
             del header_lines[-1]
 
         n_cols = max(len(line) for line in itertools.chain(header_lines, footer_lines))
-        print("\n".join([*header_lines, "-" * n_cols, *footer_lines]))  # noqa: T201
+        body = "\n".join([*header_lines, "-" * n_cols, *footer_lines])
+
+        return {
+            "text/html": f"<pre>{html.escape(body)}</pre>",
+            "text/plain": repr(self),
+        }
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         """
