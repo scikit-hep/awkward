@@ -36,7 +36,7 @@ def from_buffers(
         backend (str): Library to use to generate values that are
             put into the new array. The default, cpu, makes NumPy
             arrays, which are in main memory (e.g. not GPU). If all the values in
-            `container` have the same `nplike` as this, they won't be copied.
+            `container` have the same `backend` as this, they won't be copied.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if

@@ -40,7 +40,7 @@ def to_buffers(
             generate values that are put into the `container`. The default,
             `"cpu"`, makes NumPy arrays, which are in main memory
             (e.g. not GPU) and satisfy Python's Buffer protocol. If all the
-            buffers in `array` have the same `nplike` as this, they won't be
+            buffers in `array` have the same `backend` as this, they won't be
             copied. If the backend is None, then the backend of the layout
             will be used to generate the buffers.
 
