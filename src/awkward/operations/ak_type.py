@@ -13,6 +13,9 @@ np = ak._nplikes.NumpyMetadata.instance()
 
 def type(array):
     """
+    Args:
+        array: Array to determine the type of.
+
     The high-level type of an `array` (many types supported, including all
     Awkward Arrays and Records) as #ak.types.Type objects.
 

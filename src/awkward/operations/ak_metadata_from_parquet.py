@@ -22,18 +22,23 @@ def metadata_from_parquet(
     scan_files=True
 ):
     """
-    This function differs from ak.from_parquet._metadata as follows:
-
-      * this function will always use a _metadata file, if present
-      * if there is no _metadata, the schema comes from _common_metadata or the first
-        data file
-      * the total number of rows is always known  # TODO: is this true?
-
     Args:
         path (str): Local filename or remote URL, passed to fsspec for resolution.
             May contain glob patterns. A list of paths is also allowed, but they
             must be data files, not directories.
-        storage_options: Passed to `fsspec`.
+        storage_options: Passed to `fsspec.parquet.open_parquet_file`.
+        row_groups (None or set of int): Row groups to read; must be non-negative.
+            Order is ignored: the output array is presented in the order specified
+            by Parquet metadata. If None, all row groups/all rows are read.
+        ignore_metadata (bool): ignore the dedicated _metadata file if found
+            and instead derive metadata from the first data file.
+        scan_files (bool): TODO
+
+    This function differs from ak.from_parquet._metadata as follows:
+      * this function will always use a _metadata file, if present
+      * if there is no _metadata, the schema comes from _common_metadata or
+        the first data file
+      * the total number of rows is always known
 
     Returns dict containing
 

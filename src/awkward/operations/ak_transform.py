@@ -61,6 +61,10 @@ def transform(
             calling `transformation`.
         regular_to_jagged (bool): If True, regular-type lists are converted into
             variable-length lists before calling `transformation`.
+        return_array (bool): If True, the result of calling `transformation`
+            replaces the original node in the new layout that is returned.
+            If False, the `transformation` function is expected to return
+            any results by modifying the `lateral_context` dict.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if

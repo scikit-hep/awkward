@@ -7,7 +7,6 @@ cpu = ak._backends.NumpyBackend.instance()
 
 
 def run_lengths(array, *, highlevel=True, behavior=None):
-
     """
     Args:
         array: Data containing runs of numbers to count.

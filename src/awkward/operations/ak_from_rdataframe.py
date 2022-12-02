@@ -7,8 +7,9 @@ def from_rdataframe(data_frame, columns):
     """
     Args:
         data_frame (`ROOT.RDataFrame`): ROOT RDataFrame to convert into an
-             Awkward Array.
-         columns (str or tuple of str): A column or multiple columns to be converted to Awkward Array.
+            Awkward Array.
+        columns (str or tuple of str): A column or multiple columns to be
+            converted to Awkward Array.
 
      Converts ROOT Data Frame columns into an Awkward Array.
 

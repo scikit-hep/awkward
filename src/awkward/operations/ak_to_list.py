@@ -11,6 +11,9 @@ np = ak._nplikes.NumpyMetadata.instance()
 
 def to_list(array):
     """
+    Args:
+        array: Array to convert to a list.
+
     Converts `array` (many types supported, including all Awkward Arrays and
     Records) into Python objects. If `array` is not recognized as an array, it
     is passed through as-is.

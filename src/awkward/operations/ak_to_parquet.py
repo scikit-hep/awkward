@@ -62,6 +62,7 @@ def to_parquet(
         parquet_compliant_nested:
         parquet_extra_options:
         hook_after_write: callable
+        storage_options:
 
     Returns:
 

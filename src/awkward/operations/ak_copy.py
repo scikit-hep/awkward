@@ -10,6 +10,9 @@ np = ak._nplikes.NumpyMetadata.instance()
 @ak._connect.numpy.implements("copy")
 def copy(array):
     """
+    Args:
+        array: Array to be copied.
+
     Returns a deep copy of the array (no memory shared with original).
 
     This is identical to `np.copy` and `copy.deepcopy`.

@@ -15,8 +15,8 @@ def isclose(
         b: Array-like data (anything #ak.to_layout recognizes).
         rtol (float): The relative tolerance parameter.
         atol (float): The absolute tolerance parameter.
-        equal_nan (bool): Whether to compare `NaN` as equal. If True, `NaN` in `a`
-            will be considered equal to `NaN` in `b`.
+        equal_nan (bool): Whether to compare `NaN` as equal. If True, `NaN` in
+            `a` will be considered equal to `NaN` in `b`.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if

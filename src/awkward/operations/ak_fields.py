@@ -7,6 +7,9 @@ np = ak._nplikes.NumpyMetadata.instance()
 
 def fields(array):
     """
+    Args:
+        array: Array to determine the fields of.
+
     Extracts record fields or tuple slot numbers from `array` (many types
     supported, including all Awkward Arrays and Records).
 
