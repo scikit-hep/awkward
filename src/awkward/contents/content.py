@@ -12,8 +12,8 @@ from awkward._backends import Backend, TypeTracerBackend
 from awkward.forms import form
 from awkward.typing import Any, Self, TypeAlias, TypeVar
 
-np = ak.nplikes.NumpyMetadata.instance()
-numpy = ak.nplikes.Numpy.instance()
+np = ak._nplikes.NumpyMetadata.instance()
+numpy = ak._nplikes.Numpy.instance()
 
 AxisMaybeNone = TypeVar("AxisMaybeNone", int, None)
 ActionType: TypeAlias = """Callable[

@@ -12,8 +12,8 @@ from awkward.forms.bytemaskedform import ByteMaskedForm
 from awkward.index import Index
 from awkward.typing import Self
 
-np = ak.nplikes.NumpyMetadata.instance()
-numpy = ak.nplikes.Numpy.instance()
+np = ak._nplikes.NumpyMetadata.instance()
+numpy = ak._nplikes.Numpy.instance()
 
 
 class ByteMaskedArray(Content):

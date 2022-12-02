@@ -4,11 +4,11 @@ from __future__ import annotations
 import jax
 
 import awkward as ak
-from awkward import _errors, contents, highlevel, nplikes, record
+from awkward import _errors, _nplikes, contents, highlevel, record
 from awkward.typing import Generic, TypeVar, Union
 
-numpy = nplikes.Numpy.instance()
-np = nplikes.NumpyMetadata.instance()
+numpy = _nplikes.Numpy.instance()
+np = _nplikes.NumpyMetadata.instance()
 
 
 def find_all_buffers(
@@ -32,7 +32,7 @@ def replace_all_buffers(
     backend: ak._backends.Backend,
 ):
     def action(node, **kwargs):
-        jaxlike = nplikes.Jax.instance()
+        jaxlike = _nplikes.Jax.instance()
         if isinstance(node, ak.contents.NumpyArray):
             buffer = buffers.pop(0)
             # JAX might give us non-buffers, so ignore them
@@ -96,7 +96,7 @@ class AuxData(Generic[T]):
         # layout = replace_all_buffers(
         #     layout,
         #     [create_placeholder_like(n) for n in buffers],
-        #     nplike=nplikes.Numpy.instance(),
+        #     nplike=_nplikes.Numpy.instance(),
         # )
 
         return buffers, AuxData(

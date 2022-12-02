@@ -5,7 +5,7 @@ from collections.abc import Iterable
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 def with_field(base, what, where=None, *, highlevel=True, behavior=None):

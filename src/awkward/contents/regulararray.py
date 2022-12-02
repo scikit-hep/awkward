@@ -9,8 +9,8 @@ from awkward.contents.content import Content
 from awkward.forms.regularform import RegularForm
 from awkward.typing import Self
 
-np = ak.nplikes.NumpyMetadata.instance()
-numpy = ak.nplikes.Numpy.instance()
+np = ak._nplikes.NumpyMetadata.instance()
+numpy = ak._nplikes.Numpy.instance()
 
 
 class RegularArray(Content):

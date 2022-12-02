@@ -12,8 +12,8 @@ from awkward.forms.recordform import RecordForm
 from awkward.record import Record
 from awkward.typing import Self
 
-np = ak.nplikes.NumpyMetadata.instance()
-numpy = ak.nplikes.Numpy.instance()
+np = ak._nplikes.NumpyMetadata.instance()
+numpy = ak._nplikes.Numpy.instance()
 
 
 class RecordArray(Content):

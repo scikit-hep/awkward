@@ -10,8 +10,8 @@ from awkward.forms.indexedform import IndexedForm
 from awkward.index import Index
 from awkward.typing import Self
 
-np = ak.nplikes.NumpyMetadata.instance()
-numpy = ak.nplikes.Numpy.instance()
+np = ak._nplikes.NumpyMetadata.instance()
+numpy = ak._nplikes.Numpy.instance()
 
 
 class IndexedArray(Content):

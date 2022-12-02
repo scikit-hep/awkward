@@ -6,8 +6,8 @@ import copy
 import awkward as ak
 from awkward.typing import Self
 
-np = ak.nplikes.NumpyMetadata.instance()
-numpy = ak.nplikes.Numpy.instance()
+np = ak._nplikes.NumpyMetadata.instance()
+numpy = ak._nplikes.Numpy.instance()
 
 
 _dtype_to_form = {
@@ -41,7 +41,7 @@ class Index:
 
     def __init__(self, data, *, metadata=None, nplike=None):
         if nplike is None:
-            nplike = ak.nplikes.nplike_of(data)
+            nplike = ak._nplikes.nplike_of(data)
         self._nplike = nplike
         if metadata is not None and not isinstance(metadata, dict):
             raise ak._errors.wrap_error(
@@ -187,7 +187,7 @@ class Index:
         if hasattr(out, "shape") and len(out.shape) != 0:
             return Index(out, metadata=self.metadata, nplike=self._nplike)
         elif (
-            ak.nplikes.Jax.is_own_array(out) or ak.nplikes.Cupy.is_own_array(out)
+            ak._nplikes.Jax.is_own_array(out) or ak._nplikes.Cupy.is_own_array(out)
         ) and len(out.shape) == 0:
             return out.item()
         else:

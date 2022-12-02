@@ -4,7 +4,7 @@
 from awkward._version import __version__
 
 # NumPy-like alternatives
-import awkward.nplikes
+import awkward._nplikes
 import awkward._typetracer
 import awkward._backends
 

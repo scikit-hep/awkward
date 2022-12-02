@@ -13,10 +13,10 @@ from awkward_cpp.lib import _ext
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 win = os.name == "nt"
-bits32 = ak.nplikes.numpy.iinfo(np.intp).bits == 32
+bits32 = ak._nplikes.numpy.iinfo(np.intp).bits == 32
 
 # matches include/awkward/common.h
 kMaxInt8 = 127  # 2**7  - 1
@@ -454,7 +454,7 @@ def extra(args, kwargs, defaults):
 
 
 def union_to_record(unionarray, anonymous):
-    nplike = ak.nplikes.nplike_of(unionarray)
+    nplike = ak._nplikes.nplike_of(unionarray)
 
     contents = []
     for layout in unionarray.contents:
@@ -591,11 +591,11 @@ expand_braces.regex = re.compile(r"\{[^\{\}]*\}")
 
 
 def from_arraylib(array, regulararray, recordarray, highlevel, behavior):
-    np = ak.nplikes.NumpyMetadata.instance()
-    numpy = ak.nplikes.Numpy.instance()
+    np = ak._nplikes.NumpyMetadata.instance()
+    numpy = ak._nplikes.Numpy.instance()
 
     def recurse(array, mask=None):
-        if ak.nplikes.Jax.is_tracer(array):
+        if ak._nplikes.Jax.is_tracer(array):
             raise ak._errors.wrap_error(
                 TypeError("Jax tracers cannot be used with `ak.from_arraylib`")
             )
@@ -747,7 +747,7 @@ def to_arraylib(module, array, allow_missing):
             tags = module.asarray(array.tags)
             for tag, content in enumerate(contents):
                 mask = tags == tag
-                if ak.nplikes.Jax.is_own_array(out):
+                if ak._nplikes.Jax.is_own_array(out):
                     out = out.at[mask].set(content)
                 else:
                     out[mask] = content

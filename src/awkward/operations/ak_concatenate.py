@@ -3,7 +3,7 @@
 import awkward as ak
 from awkward.operations.ak_fill_none import fill_none
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 cpu = ak._backends.NumpyBackend.instance()
 
 
@@ -56,7 +56,7 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
         # Is an Awkward Content
         isinstance(arrays, ak.contents.Content)
         # Is an array with a known NumpyLike
-        or ak.nplikes.nplike_of(arrays, default=None) is not None
+        or ak._nplikes.nplike_of(arrays, default=None) is not None
     ):
         # Convert the array to a layout object
         content = ak.operations.to_layout(arrays, allow_record=False, allow_other=False)

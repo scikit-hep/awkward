@@ -26,10 +26,10 @@ implemented = {}
 
 def _to_rectilinear(arg):
     if isinstance(arg, tuple):
-        nplike = ak.nplikes.nplike_of(*arg)
+        nplike = ak._nplikes.nplike_of(*arg)
         return tuple(nplike.to_rectilinear(x) for x in arg)
     else:
-        nplike = ak.nplikes.nplike_of(arg)
+        nplike = ak._nplikes.nplike_of(arg)
         nplike.to_rectilinear(arg)
 
 
@@ -39,7 +39,7 @@ def array_function(func, types, args, kwargs):
         args = tuple(_to_rectilinear(x) for x in args)
         kwargs = {k: _to_rectilinear(v) for k, v in kwargs.items()}
         out = func(*args, **kwargs)
-        nplike = ak.nplikes.nplike_of(out)
+        nplike = ak._nplikes.nplike_of(out)
         if isinstance(out, nplike.ndarray) and len(out.shape) != 0:
             return ak.Array(out)
         else:
@@ -167,7 +167,7 @@ def array_ufunc(ufunc, method, inputs, kwargs):
                     else:
                         args.append(x)
 
-                if isinstance(nplike, ak.nplikes.Jax):
+                if isinstance(nplike, ak._nplikes.Jax):
                     from awkward._connect.jax import get_jax_ufunc
 
                     jax_ufunc = get_jax_ufunc(ufunc)

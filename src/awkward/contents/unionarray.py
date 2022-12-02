@@ -14,8 +14,8 @@ from awkward.forms.unionform import UnionForm
 from awkward.index import Index, Index8, Index64
 from awkward.typing import Self
 
-np = ak.nplikes.NumpyMetadata.instance()
-numpy = ak.nplikes.Numpy.instance()
+np = ak._nplikes.NumpyMetadata.instance()
+numpy = ak._nplikes.Numpy.instance()
 
 
 class UnionArray(Content):

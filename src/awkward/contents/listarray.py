@@ -11,7 +11,7 @@ from awkward.forms.listform import ListForm
 from awkward.index import Index
 from awkward.typing import Self
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 class ListArray(Content):
