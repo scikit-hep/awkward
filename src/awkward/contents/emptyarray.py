@@ -48,7 +48,7 @@ class EmptyArray(Content):
     def _form_with_key(self, getkey):
         return self.Form(parameters=self._parameters, form_key=getkey(self))
 
-    def _to_buffers(self, form, getkey, container, nplike):
+    def _to_buffers(self, form, getkey, container, backend):
         assert isinstance(form, self.Form)
 
     @property

@@ -10,7 +10,6 @@ import awkward as ak
 import awkward._reducers
 from awkward._backends import Backend, TypeTracerBackend
 from awkward.forms import form
-from awkward.nplikes import NumpyLike
 from awkward.typing import Any, Self, TypeAlias, TypeVar
 
 np = ak.nplikes.NumpyMetadata.instance()
@@ -150,13 +149,13 @@ class Content:
         buffer_key="{form_key}-{attribute}",
         form_key: str | None = "node{id}",
         id_start: Integral = 0,
-        nplike: NumpyLike | None = None,
+        backend: Backend = None,
     ) -> tuple[form.Form, int, Mapping[str, Any]]:
         if container is None:
             container = {}
-        if nplike is None:
-            nplike = self._backend.nplike
-        if not nplike.known_data:
+        if backend is None:
+            backend = self._backend
+        if not backend.nplike.known_data:
             raise ak._errors.wrap_error(
                 TypeError("cannot call 'to_buffers' on an array without concrete data")
             )
@@ -194,7 +193,7 @@ class Content:
 
         form = self.form_with_key(form_key=form_key, id_start=id_start)
 
-        self._to_buffers(form, getkey, container, nplike)
+        self._to_buffers(form, getkey, container, backend)
 
         return form, len(self), container
 
@@ -203,7 +202,7 @@ class Content:
         form: form.Form,
         getkey: Callable[[Content, form.Form, str], str],
         container: MutableMapping[str, Any] | None,
-        nplike: NumpyLike | None,
+        backend: Backend,
     ) -> tuple[form.Form, int, Mapping[str, Any]]:
         raise ak._errors.wrap_error(NotImplementedError)
 

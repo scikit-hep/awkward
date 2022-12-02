@@ -3,7 +3,6 @@
 import awkward as ak
 
 np = ak.nplikes.NumpyMetadata.instance()
-numpy = ak.nplikes.Numpy.instance()
 
 
 def to_buffers(
@@ -13,7 +12,7 @@ def to_buffers(
     form_key="node{id}",
     *,
     id_start=0,
-    nplike=numpy,
+    backend=None,
 ):
     """
     Args:
@@ -37,11 +36,13 @@ def to_buffers(
         id_start (int): Starting `id` to use in `form_key` and hence `buffer_key`.
             This integer increases in a depth-first walk over the `array` nodes and
             can be used to generate unique keys for each Form.
-        nplike (#ak.nplikes.NumpyLike): Library to use to generate values that are
-            put into the `container`. The default, #ak.nplikes.Numpy, makes NumPy
-            arrays, which are in main memory (e.g. not GPU) and satisfy Python's
-            Buffer protocol. If all the buffers in `array` have the same `nplike`
-            as this, they won't be copied.
+        backend (`"cpu"`, `"cuda"`, `"jax"`, None): Backend to use to
+            generate values that are put into the `container`. The default,
+            `"cpu"`, makes NumPy arrays, which are in main memory
+            (e.g. not GPU) and satisfy Python's Buffer protocol. If all the
+            buffers in `array` have the same `nplike` as this, they won't be
+            copied. If the backend is None, then the backend of the layout
+            will be used to generate the buffers.
 
     Decomposes an Awkward Array into a Form and a collection of memory buffers,
     so that data can be losslessly written to file formats and storage devices
@@ -120,18 +121,22 @@ def to_buffers(
             buffer_key=buffer_key,
             form_key=form_key,
             id_start=id_start,
-            nplike=nplike,
+            backend=backend,
         ),
     ):
-        return _impl(array, container, buffer_key, form_key, id_start, nplike)
+        return _impl(array, container, buffer_key, form_key, id_start, backend)
 
 
-def _impl(array, container, buffer_key, form_key, id_start, nplike):
+def _impl(array, container, buffer_key, form_key, id_start, backend):
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
+
+    if backend is not None:
+        backend = ak._backends.regularize_backend(backend)
+
     return layout.to_buffers(
         container=container,
         buffer_key=buffer_key,
         form_key=form_key,
         id_start=id_start,
-        nplike=nplike,
+        backend=backend,
     )
