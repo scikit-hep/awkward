@@ -19,24 +19,6 @@ numpy = ak.nplikes.Numpy.instance()
 class ByteMaskedArray(Content):
     is_option = True
 
-    def copy(self, mask=unset, content=unset, valid_when=unset, *, parameters=unset):
-        return ByteMaskedArray(
-            self._mask if mask is unset else mask,
-            self._content if content is unset else content,
-            self._valid_when if valid_when is unset else valid_when,
-            parameters=self._parameters if parameters is unset else parameters,
-        )
-
-    def __copy__(self):
-        return self.copy()
-
-    def __deepcopy__(self, memo):
-        return self.copy(
-            mask=copy.deepcopy(self._mask, memo),
-            content=copy.deepcopy(self._content, memo),
-            parameters=copy.deepcopy(self._parameters, memo),
-        )
-
     def __init__(self, mask, content, valid_when, *, parameters=None):
         if not (isinstance(mask, Index) and mask.dtype == np.dtype(np.int8)):
             raise ak._errors.wrap_error(
@@ -95,6 +77,24 @@ class ByteMaskedArray(Content):
         return self._valid_when
 
     Form = ByteMaskedForm
+
+    def copy(self, mask=unset, content=unset, valid_when=unset, *, parameters=unset):
+        return ByteMaskedArray(
+            self._mask if mask is unset else mask,
+            self._content if content is unset else content,
+            self._valid_when if valid_when is unset else valid_when,
+            parameters=self._parameters if parameters is unset else parameters,
+        )
+
+    def __copy__(self):
+        return self.copy()
+
+    def __deepcopy__(self, memo):
+        return self.copy(
+            mask=copy.deepcopy(self._mask, memo),
+            content=copy.deepcopy(self._content, memo),
+            parameters=copy.deepcopy(self._parameters, memo),
+        )
 
     @classmethod
     def simplified(

@@ -20,35 +20,6 @@ numpy = ak.nplikes.Numpy.instance()
 class BitMaskedArray(Content):
     is_option = True
 
-    def copy(
-        self,
-        mask=unset,
-        content=unset,
-        valid_when=unset,
-        length=unset,
-        lsb_order=unset,
-        *,
-        parameters=unset,
-    ):
-        return BitMaskedArray(
-            self._mask if mask is unset else mask,
-            self._content if content is unset else content,
-            self._valid_when if valid_when is unset else valid_when,
-            self._length if length is unset else length,
-            self._lsb_order if lsb_order is unset else lsb_order,
-            parameters=self._parameters if parameters is unset else parameters,
-        )
-
-    def __copy__(self):
-        return self.copy()
-
-    def __deepcopy__(self, memo):
-        return self.copy(
-            mask=copy.deepcopy(self._mask, memo),
-            content=copy.deepcopy(self._content, memo),
-            parameters=copy.deepcopy(self._parameters, memo),
-        )
-
     def __init__(
         self, mask, content, valid_when, length, lsb_order, *, parameters=None
     ):
@@ -136,6 +107,35 @@ class BitMaskedArray(Content):
         return self._lsb_order
 
     Form = BitMaskedForm
+
+    def copy(
+        self,
+        mask=unset,
+        content=unset,
+        valid_when=unset,
+        length=unset,
+        lsb_order=unset,
+        *,
+        parameters=unset,
+    ):
+        return BitMaskedArray(
+            self._mask if mask is unset else mask,
+            self._content if content is unset else content,
+            self._valid_when if valid_when is unset else valid_when,
+            self._length if length is unset else length,
+            self._lsb_order if lsb_order is unset else lsb_order,
+            parameters=self._parameters if parameters is unset else parameters,
+        )
+
+    def __copy__(self):
+        return self.copy()
+
+    def __deepcopy__(self, memo):
+        return self.copy(
+            mask=copy.deepcopy(self._mask, memo),
+            content=copy.deepcopy(self._content, memo),
+            parameters=copy.deepcopy(self._parameters, memo),
+        )
 
     @classmethod
     def simplified(

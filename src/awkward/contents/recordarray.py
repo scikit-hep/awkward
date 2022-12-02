@@ -19,33 +19,6 @@ numpy = ak.nplikes.Numpy.instance()
 class RecordArray(Content):
     is_record = True
 
-    def copy(
-        self,
-        contents=unset,
-        fields=unset,
-        length=unset,
-        *,
-        parameters=unset,
-        backend=unset,
-    ):
-        return RecordArray(
-            self._contents if contents is unset else contents,
-            self._fields if fields is unset else fields,
-            self._length if length is unset else length,
-            parameters=self._parameters if parameters is unset else parameters,
-            backend=self._backend if backend is unset else backend,
-        )
-
-    def __copy__(self):
-        return self.copy()
-
-    def __deepcopy__(self, memo):
-        return self.copy(
-            contents=[copy.deepcopy(x, memo) for x in self._contents],
-            fields=copy.deepcopy(self._fields, memo),
-            parameters=copy.deepcopy(self._parameters, memo),
-        )
-
     def __init__(
         self,
         contents,
@@ -168,17 +141,34 @@ class RecordArray(Content):
         else:
             return self._fields
 
-    @property
-    def is_tuple(self):
-        return self._fields is None
+    Form = RecordForm
 
-    @property
-    def as_tuple(self):
+    def copy(
+        self,
+        contents=unset,
+        fields=unset,
+        length=unset,
+        *,
+        parameters=unset,
+        backend=unset,
+    ):
         return RecordArray(
-            self._contents, None, self._length, parameters=None, backend=self._backend
+            self._contents if contents is unset else contents,
+            self._fields if fields is unset else fields,
+            self._length if length is unset else length,
+            parameters=self._parameters if parameters is unset else parameters,
+            backend=self._backend if backend is unset else backend,
         )
 
-    Form = RecordForm
+    def __copy__(self):
+        return self.copy()
+
+    def __deepcopy__(self, memo):
+        return self.copy(
+            contents=[copy.deepcopy(x, memo) for x in self._contents],
+            fields=copy.deepcopy(self._fields, memo),
+            parameters=copy.deepcopy(self._parameters, memo),
+        )
 
     @classmethod
     def simplified(
@@ -191,6 +181,16 @@ class RecordArray(Content):
         backend=None,
     ):
         return cls(contents, fields, length, parameters=parameters, backend=backend)
+
+    @property
+    def is_tuple(self):
+        return self._fields is None
+
+    @property
+    def as_tuple(self):
+        return RecordArray(
+            self._contents, None, self._length, parameters=None, backend=self._backend
+        )
 
     def _form_with_key(self, getkey):
         form_key = getkey(self)

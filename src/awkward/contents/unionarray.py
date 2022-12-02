@@ -21,34 +21,6 @@ numpy = ak.nplikes.Numpy.instance()
 class UnionArray(Content):
     is_union = True
 
-    def copy(
-        self,
-        tags=unset,
-        index=unset,
-        contents=unset,
-        *,
-        parameters=unset,
-        backend=unset,
-    ):
-        return UnionArray(
-            self._tags if tags is unset else tags,
-            self._index if index is unset else index,
-            self._contents if contents is unset else contents,
-            parameters=self._parameters if parameters is unset else parameters,
-            backend=self._backend if backend is unset else backend,
-        )
-
-    def __copy__(self):
-        return self.copy()
-
-    def __deepcopy__(self, memo):
-        return self.copy(
-            tags=copy.deepcopy(self._tags, memo),
-            index=copy.deepcopy(self._index, memo),
-            contents=[copy.deepcopy(x, memo) for x in self._contents],
-            parameters=copy.deepcopy(self._parameters, memo),
-        )
-
     def __init__(self, tags, index, contents, *, parameters=None, backend=None):
         if not (isinstance(tags, Index) and tags.dtype == np.dtype(np.int8)):
             raise ak._errors.wrap_error(
@@ -138,14 +110,39 @@ class UnionArray(Content):
     def index(self):
         return self._index
 
-    def content(self, index):
-        return self._contents[index]
-
     @property
     def contents(self):
         return self._contents
 
     Form = UnionForm
+
+    def copy(
+        self,
+        tags=unset,
+        index=unset,
+        contents=unset,
+        *,
+        parameters=unset,
+        backend=unset,
+    ):
+        return UnionArray(
+            self._tags if tags is unset else tags,
+            self._index if index is unset else index,
+            self._contents if contents is unset else contents,
+            parameters=self._parameters if parameters is unset else parameters,
+            backend=self._backend if backend is unset else backend,
+        )
+
+    def __copy__(self):
+        return self.copy()
+
+    def __deepcopy__(self, memo):
+        return self.copy(
+            tags=copy.deepcopy(self._tags, memo),
+            index=copy.deepcopy(self._index, memo),
+            contents=[copy.deepcopy(x, memo) for x in self._contents],
+            parameters=copy.deepcopy(self._parameters, memo),
+        )
 
     @classmethod
     def simplified(
@@ -340,6 +337,9 @@ class UnionArray(Content):
                 parameters=parameters,
                 backend=backend,
             )
+
+    def content(self, index):
+        return self._contents[index]
 
     def _form_with_key(self, getkey):
         form_key = getkey(self)

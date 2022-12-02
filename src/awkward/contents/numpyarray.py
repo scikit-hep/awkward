@@ -17,28 +17,6 @@ numpy = ak.nplikes.Numpy.instance()
 class NumpyArray(Content):
     is_numpy = True
 
-    def copy(
-        self,
-        data=unset,
-        *,
-        parameters=unset,
-        backend=unset,
-    ):
-        return NumpyArray(
-            self._data if data is unset else data,
-            parameters=self._parameters if parameters is unset else parameters,
-            backend=self._backend if backend is unset else backend,
-        )
-
-    def __copy__(self):
-        return self.copy()
-
-    def __deepcopy__(self, memo):
-        return self.copy(
-            data=copy.deepcopy(self._data, memo),
-            parameters=copy.deepcopy(self._parameters, memo),
-        )
-
     def __init__(self, data, *, parameters=None, backend=None):
         if backend is None:
             backend = ak._backends.backend_of(
@@ -64,6 +42,34 @@ class NumpyArray(Content):
     @property
     def data(self):
         return self._data
+
+    Form = NumpyForm
+
+    def copy(
+        self,
+        data=unset,
+        *,
+        parameters=unset,
+        backend=unset,
+    ):
+        return NumpyArray(
+            self._data if data is unset else data,
+            parameters=self._parameters if parameters is unset else parameters,
+            backend=self._backend if backend is unset else backend,
+        )
+
+    def __copy__(self):
+        return self.copy()
+
+    def __deepcopy__(self, memo):
+        return self.copy(
+            data=copy.deepcopy(self._data, memo),
+            parameters=copy.deepcopy(self._parameters, memo),
+        )
+
+    @classmethod
+    def simplified(cls, data, *, parameters=None, backend=None):
+        return cls(data, parameters=parameters, backend=backend)
 
     @property
     def shape(self):
@@ -98,12 +104,6 @@ class NumpyArray(Content):
 
     def raw(self, nplike):
         return self._backend.nplike.raw(self.data, nplike)
-
-    Form = NumpyForm
-
-    @classmethod
-    def simplified(cls, data, *, parameters=None, backend=None):
-        return cls(data, parameters=parameters, backend=backend)
 
     def _form_with_key(self, getkey):
         return self.Form(

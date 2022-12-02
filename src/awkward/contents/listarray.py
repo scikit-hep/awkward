@@ -17,25 +17,6 @@ np = ak.nplikes.NumpyMetadata.instance()
 class ListArray(Content):
     is_list = True
 
-    def copy(self, starts=unset, stops=unset, content=unset, *, parameters=unset):
-        return ListArray(
-            self._starts if starts is unset else starts,
-            self._stops if stops is unset else stops,
-            self._content if content is unset else content,
-            parameters=self._parameters if parameters is unset else parameters,
-        )
-
-    def __copy__(self):
-        return self.copy()
-
-    def __deepcopy__(self, memo):
-        return self.copy(
-            starts=copy.deepcopy(self._starts, memo),
-            stops=copy.deepcopy(self._stops, memo),
-            content=copy.deepcopy(self._content, memo),
-            parameters=copy.deepcopy(self._parameters, memo),
-        )
-
     def __init__(self, starts, stops, content, *, parameters=None):
         if not isinstance(starts, Index) and starts.dtype in (
             np.dtype(np.int32),
@@ -99,6 +80,25 @@ class ListArray(Content):
         return self._content
 
     Form = ListForm
+
+    def copy(self, starts=unset, stops=unset, content=unset, *, parameters=unset):
+        return ListArray(
+            self._starts if starts is unset else starts,
+            self._stops if stops is unset else stops,
+            self._content if content is unset else content,
+            parameters=self._parameters if parameters is unset else parameters,
+        )
+
+    def __copy__(self):
+        return self.copy()
+
+    def __deepcopy__(self, memo):
+        return self.copy(
+            starts=copy.deepcopy(self._starts, memo),
+            stops=copy.deepcopy(self._stops, memo),
+            content=copy.deepcopy(self._content, memo),
+            parameters=copy.deepcopy(self._parameters, memo),
+        )
 
     @classmethod
     def simplified(cls, starts, stops, content, *, parameters=None):

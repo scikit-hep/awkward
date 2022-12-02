@@ -17,23 +17,6 @@ numpy = ak.nplikes.Numpy.instance()
 class ListOffsetArray(Content):
     is_list = True
 
-    def copy(self, offsets=unset, content=unset, *, parameters=unset):
-        return ListOffsetArray(
-            self._offsets if offsets is unset else offsets,
-            self._content if content is unset else content,
-            parameters=self._parameters if parameters is unset else parameters,
-        )
-
-    def __copy__(self):
-        return self.copy()
-
-    def __deepcopy__(self, memo):
-        return self.copy(
-            offsets=copy.deepcopy(self._offsets, memo),
-            content=copy.deepcopy(self._content, memo),
-            parameters=copy.deepcopy(self._parameters, memo),
-        )
-
     def __init__(self, offsets, content, *, parameters=None):
         if not isinstance(offsets, Index) and offsets.dtype in (
             np.dtype(np.int32),
@@ -70,14 +53,6 @@ class ListOffsetArray(Content):
         self._init(parameters, content.backend)
 
     @property
-    def starts(self):
-        return self._offsets[:-1]
-
-    @property
-    def stops(self):
-        return self._offsets[1:]
-
-    @property
     def offsets(self):
         return self._offsets
 
@@ -87,9 +62,34 @@ class ListOffsetArray(Content):
 
     Form = ListOffsetForm
 
+    def copy(self, offsets=unset, content=unset, *, parameters=unset):
+        return ListOffsetArray(
+            self._offsets if offsets is unset else offsets,
+            self._content if content is unset else content,
+            parameters=self._parameters if parameters is unset else parameters,
+        )
+
+    def __copy__(self):
+        return self.copy()
+
+    def __deepcopy__(self, memo):
+        return self.copy(
+            offsets=copy.deepcopy(self._offsets, memo),
+            content=copy.deepcopy(self._content, memo),
+            parameters=copy.deepcopy(self._parameters, memo),
+        )
+
     @classmethod
     def simplified(cls, offsets, content, *, parameters=None):
         return cls(offsets, content, parameters=parameters)
+
+    @property
+    def starts(self):
+        return self._offsets[:-1]
+
+    @property
+    def stops(self):
+        return self._offsets[1:]
 
     def _form_with_key(self, getkey):
         form_key = getkey(self)

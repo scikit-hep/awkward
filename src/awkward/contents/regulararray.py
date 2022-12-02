@@ -17,23 +17,6 @@ class RegularArray(Content):
     is_list = True
     is_regular = True
 
-    def copy(self, content=unset, size=unset, zeros_length=unset, *, parameters=unset):
-        return RegularArray(
-            self._content if content is unset else content,
-            self._size if size is unset else size,
-            self._length if zeros_length is unset else zeros_length,
-            parameters=self._parameters if parameters is unset else parameters,
-        )
-
-    def __copy__(self):
-        return self.copy()
-
-    def __deepcopy__(self, memo):
-        return self.copy(
-            content=copy.deepcopy(self._content, memo),
-            parameters=copy.deepcopy(self._parameters, memo),
-        )
-
     def __init__(self, content, size, zeros_length=0, *, parameters=None):
         if not isinstance(content, Content):
             raise ak._errors.wrap_error(
@@ -73,14 +56,31 @@ class RegularArray(Content):
         self._init(parameters, content.backend)
 
     @property
-    def size(self):
-        return self._size
-
-    @property
     def content(self):
         return self._content
 
+    @property
+    def size(self):
+        return self._size
+
     Form = RegularForm
+
+    def copy(self, content=unset, size=unset, zeros_length=unset, *, parameters=unset):
+        return RegularArray(
+            self._content if content is unset else content,
+            self._size if size is unset else size,
+            self._length if zeros_length is unset else zeros_length,
+            parameters=self._parameters if parameters is unset else parameters,
+        )
+
+    def __copy__(self):
+        return self.copy()
+
+    def __deepcopy__(self, memo):
+        return self.copy(
+            content=copy.deepcopy(self._content, memo),
+            parameters=copy.deepcopy(self._parameters, memo),
+        )
 
     @classmethod
     def simplified(cls, content, size, zeros_length=0, *, parameters=None):

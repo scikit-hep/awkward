@@ -17,6 +17,13 @@ class EmptyArray(Content):
     is_numpy = True
     is_unknown = True
 
+    def __init__(self, *, parameters=None, backend=None):
+        if backend is None:
+            backend = ak._backends.NumpyBackend.instance()
+        self._init(parameters, backend)
+
+    Form = EmptyForm
+
     def copy(
         self,
         *,
@@ -33,13 +40,6 @@ class EmptyArray(Content):
 
     def __deepcopy__(self, memo):
         return self.copy(parameters=copy.deepcopy(self._parameters, memo))
-
-    def __init__(self, *, parameters=None, backend=None):
-        if backend is None:
-            backend = ak._backends.NumpyBackend.instance()
-        self._init(parameters, backend)
-
-    Form = EmptyForm
 
     @classmethod
     def simplified(cls, *, parameters=None, backend=None):

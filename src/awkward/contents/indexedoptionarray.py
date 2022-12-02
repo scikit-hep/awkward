@@ -18,23 +18,6 @@ class IndexedOptionArray(Content):
     is_option = True
     is_indexed = True
 
-    def copy(self, index=unset, content=unset, *, parameters=unset):
-        return IndexedOptionArray(
-            self._index if index is unset else index,
-            self._content if content is unset else content,
-            parameters=self._parameters if parameters is unset else parameters,
-        )
-
-    def __copy__(self):
-        return self.copy()
-
-    def __deepcopy__(self, memo):
-        return self.copy(
-            index=copy.deepcopy(self._index, memo),
-            content=copy.deepcopy(self._content, memo),
-            parameters=copy.deepcopy(self._parameters, memo),
-        )
-
     def __init__(self, index, content, *, parameters=None):
         if not (
             isinstance(index, Index)
@@ -74,6 +57,23 @@ class IndexedOptionArray(Content):
         return self._content
 
     Form = IndexedOptionForm
+
+    def copy(self, index=unset, content=unset, *, parameters=unset):
+        return IndexedOptionArray(
+            self._index if index is unset else index,
+            self._content if content is unset else content,
+            parameters=self._parameters if parameters is unset else parameters,
+        )
+
+    def __copy__(self):
+        return self.copy()
+
+    def __deepcopy__(self, memo):
+        return self.copy(
+            index=copy.deepcopy(self._index, memo),
+            content=copy.deepcopy(self._content, memo),
+            parameters=copy.deepcopy(self._parameters, memo),
+        )
 
     @classmethod
     def simplified(cls, index, content, *, parameters=None):

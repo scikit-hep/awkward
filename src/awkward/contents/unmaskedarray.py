@@ -16,21 +16,6 @@ numpy = ak.nplikes.Numpy.instance()
 class UnmaskedArray(Content):
     is_option = True
 
-    def copy(self, content=unset, *, parameters=unset):
-        return UnmaskedArray(
-            self._content if content is unset else content,
-            parameters=self._parameters if parameters is unset else parameters,
-        )
-
-    def __copy__(self):
-        return self.copy()
-
-    def __deepcopy__(self, memo):
-        return self.copy(
-            content=copy.deepcopy(self._content, memo),
-            parameters=copy.deepcopy(self._parameters, memo),
-        )
-
     def __init__(self, content, *, parameters=None):
         if not isinstance(content, Content):
             raise ak._errors.wrap_error(
@@ -48,6 +33,21 @@ class UnmaskedArray(Content):
         return self._content
 
     Form = UnmaskedForm
+
+    def copy(self, content=unset, *, parameters=unset):
+        return UnmaskedArray(
+            self._content if content is unset else content,
+            parameters=self._parameters if parameters is unset else parameters,
+        )
+
+    def __copy__(self):
+        return self.copy()
+
+    def __deepcopy__(self, memo):
+        return self.copy(
+            content=copy.deepcopy(self._content, memo),
+            parameters=copy.deepcopy(self._parameters, memo),
+        )
 
     @classmethod
     def simplified(cls, content, *, parameters=None):
