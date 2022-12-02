@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 def combinations(

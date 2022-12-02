@@ -4,7 +4,7 @@ import numbers
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 def unflatten(array, counts, axis=0, *, highlevel=True, behavior=None):
@@ -87,7 +87,7 @@ def _impl(array, counts, axis, highlevel, behavior):
         if counts.is_option:
             mask = counts.mask_as_bool(valid_when=False)
             counts = counts.to_numpy(allow_missing=True)
-            counts = ak.nplikes.numpy.ma.filled(counts, 0)
+            counts = ak._nplikes.numpy.ma.filled(counts, 0)
         elif counts.is_numpy or counts.is_unknown:
             counts = counts.to_numpy(allow_missing=False)
             mask = False

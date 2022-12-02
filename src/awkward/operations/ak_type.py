@@ -8,7 +8,7 @@ from awkward_cpp.lib import _ext
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 def type(array):

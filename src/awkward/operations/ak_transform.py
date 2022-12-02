@@ -163,8 +163,8 @@ def transform(
 
        * behavior (None or dict): Behavior that would be attached to the output
            array(s) if `highlevel`.
-       * nplike (array library shim): Handle to the NumPy library, CuPy, etc.,
-           depending on the type of arrays.
+       * backend (array library / kernel library shim): Handle to the NumPy
+           library, CuPy, etc., depending on the type of arrays.
        * options (dict): Options provided to #ak.transform.
 
     If there is only one array, the `transformation` function must either return

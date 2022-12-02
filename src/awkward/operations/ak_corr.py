@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 def corr(
@@ -128,5 +128,5 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, flatten_records):
                 mask_identity,
                 flatten_records,
             )
-        nplike = ak.nplikes.nplike_of(sumwxy, sumwxx, sumwyy)
+        nplike = ak._nplikes.nplike_of(sumwxy, sumwxx, sumwyy)
         return nplike.true_divide(sumwxy, nplike.sqrt(sumwxx * sumwyy))

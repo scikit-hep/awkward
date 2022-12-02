@@ -7,8 +7,8 @@ from awkward_cpp.lib import _ext
 import awkward as ak
 from awkward import _errors
 
-np = ak.nplikes.NumpyMetadata.instance()
-numpy = ak.nplikes.Numpy.instance()
+np = ak._nplikes.NumpyMetadata.instance()
+numpy = ak._nplikes.Numpy.instance()
 
 
 def to_layout(
@@ -89,7 +89,7 @@ def _impl(array, allow_record, allow_other, numpytype):
             numpytype,
         )
 
-    elif ak.nplikes.Cupy.is_own_array(array):
+    elif ak._nplikes.Cupy.is_own_array(array):
         if not issubclass(array.dtype.type, numpytype):
             raise _errors.wrap_error(ValueError(f"dtype {array.dtype!r} not allowed"))
         return _impl(
@@ -99,7 +99,7 @@ def _impl(array, allow_record, allow_other, numpytype):
             numpytype,
         )
 
-    elif ak.nplikes.Jax.is_own_array(array):
+    elif ak._nplikes.Jax.is_own_array(array):
         if not issubclass(array.dtype.type, numpytype):
             raise _errors.wrap_error(ValueError(f"dtype {array.dtype!r} not allowed"))
         return _impl(

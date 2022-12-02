@@ -10,8 +10,8 @@ from awkward.forms.listoffsetform import ListOffsetForm
 from awkward.index import Index
 from awkward.typing import Self
 
-np = ak.nplikes.NumpyMetadata.instance()
-numpy = ak.nplikes.Numpy.instance()
+np = ak._nplikes.NumpyMetadata.instance()
+numpy = ak._nplikes.Numpy.instance()
 
 
 class ListOffsetArray(Content):
@@ -100,11 +100,11 @@ class ListOffsetArray(Content):
             form_key=form_key,
         )
 
-    def _to_buffers(self, form, getkey, container, nplike):
+    def _to_buffers(self, form, getkey, container, backend):
         assert isinstance(form, self.Form)
         key = getkey(self, form, "offsets")
-        container[key] = ak._util.little_endian(self._offsets.raw(nplike))
-        self._content._to_buffers(form.content, getkey, container, nplike)
+        container[key] = ak._util.little_endian(self._offsets.raw(backend.index_nplike))
+        self._content._to_buffers(form.content, getkey, container, backend)
 
     @property
     def typetracer(self):

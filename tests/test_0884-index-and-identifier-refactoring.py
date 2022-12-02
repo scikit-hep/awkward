@@ -8,7 +8,7 @@ import awkward as ak
 
 def test_index32():
     py_array = ak.index.Index.zeros(
-        10, nplike=ak.nplikes.Numpy.instance(), dtype=np.int32
+        10, nplike=ak._nplikes.Numpy.instance(), dtype=np.int32
     )
 
     assert len(py_array) == 10
@@ -17,7 +17,7 @@ def test_index32():
 
 def test_index64():
     py_array = ak.index.Index.zeros(
-        10, nplike=ak.nplikes.Numpy.instance(), dtype=np.int64
+        10, nplike=ak._nplikes.Numpy.instance(), dtype=np.int64
     )
 
     assert len(py_array) == 10

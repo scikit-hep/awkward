@@ -7,7 +7,7 @@ import awkward as ak
 from awkward.forms.form import _parameters_equal
 from awkward.types.type import Type
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 def is_primitive(primitive):

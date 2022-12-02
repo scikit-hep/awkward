@@ -227,7 +227,7 @@ def test_astype_complex():
         (5.5 + 0j),
     ]
     assert to_list(
-        ak.nplikes.nplike_of(array_complex64).asarray(
+        ak._nplikes.nplike_of(array_complex64).asarray(
             ak.highlevel.Array(array_complex64)
         )
     ) == [

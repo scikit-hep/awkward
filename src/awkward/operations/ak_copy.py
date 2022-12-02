@@ -4,7 +4,7 @@ import copy as _copy
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 @ak._connect.numpy.implements("copy")

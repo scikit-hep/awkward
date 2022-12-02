@@ -14,8 +14,8 @@ from awkward.forms.unionform import UnionForm
 from awkward.index import Index, Index8, Index64
 from awkward.typing import Self
 
-np = ak.nplikes.NumpyMetadata.instance()
-numpy = ak.nplikes.Numpy.instance()
+np = ak._nplikes.NumpyMetadata.instance()
+numpy = ak._nplikes.Numpy.instance()
 
 
 class UnionArray(Content):
@@ -351,14 +351,14 @@ class UnionArray(Content):
             form_key=form_key,
         )
 
-    def _to_buffers(self, form, getkey, container, nplike):
+    def _to_buffers(self, form, getkey, container, backend):
         assert isinstance(form, self.Form)
         key1 = getkey(self, form, "tags")
         key2 = getkey(self, form, "index")
-        container[key1] = ak._util.little_endian(self._tags.raw(nplike))
-        container[key2] = ak._util.little_endian(self._index.raw(nplike))
+        container[key1] = ak._util.little_endian(self._tags.raw(backend.index_nplike))
+        container[key2] = ak._util.little_endian(self._index.raw(backend.index_nplike))
         for i, content in enumerate(self._contents):
-            content._to_buffers(form.content(i), getkey, container, nplike)
+            content._to_buffers(form.content(i), getkey, container, backend)
 
     @property
     def typetracer(self):
@@ -1585,10 +1585,11 @@ class UnionArray(Content):
         return out
 
     def to_backend(self, backend: ak._backends.Backend) -> Self:
+        tags = self._tags.to_nplike(backend.index_nplike)
         index = self._index.to_nplike(backend.index_nplike)
         contents = [content.to_backend(backend) for content in self._contents]
         return UnionArray(
-            self._tags,
+            tags,
             index,
             contents,
             parameters=self.parameters,

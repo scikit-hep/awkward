@@ -5,7 +5,7 @@ from collections.abc import Iterable
 import awkward as ak
 from awkward.forms.form import Form, _parameters_equal
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 def from_dtype(dtype, parameters=None):

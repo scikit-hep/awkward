@@ -12,8 +12,8 @@ from awkward.forms.recordform import RecordForm
 from awkward.record import Record
 from awkward.typing import Self
 
-np = ak.nplikes.NumpyMetadata.instance()
-numpy = ak.nplikes.Numpy.instance()
+np = ak._nplikes.NumpyMetadata.instance()
+numpy = ak._nplikes.Numpy.instance()
 
 
 class RecordArray(Content):
@@ -201,14 +201,14 @@ class RecordArray(Content):
             form_key=form_key,
         )
 
-    def _to_buffers(self, form, getkey, container, nplike):
+    def _to_buffers(self, form, getkey, container, backend):
         assert isinstance(form, self.Form)
         if self._fields is None:
             for i, content in enumerate(self._contents):
-                content._to_buffers(form.content(i), getkey, container, nplike)
+                content._to_buffers(form.content(i), getkey, container, backend)
         else:
             for field, content in zip(self._fields, self._contents):
-                content._to_buffers(form.content(field), getkey, container, nplike)
+                content._to_buffers(form.content(field), getkey, container, backend)
 
     @property
     def typetracer(self):

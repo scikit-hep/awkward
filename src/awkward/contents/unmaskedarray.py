@@ -9,8 +9,8 @@ from awkward.contents.content import Content
 from awkward.forms.unmaskedform import UnmaskedForm
 from awkward.typing import Self
 
-np = ak.nplikes.NumpyMetadata.instance()
-numpy = ak.nplikes.Numpy.instance()
+np = ak._nplikes.NumpyMetadata.instance()
+numpy = ak._nplikes.Numpy.instance()
 
 
 class UnmaskedArray(Content):
@@ -71,9 +71,9 @@ class UnmaskedArray(Content):
             form_key=form_key,
         )
 
-    def _to_buffers(self, form, getkey, container, nplike):
+    def _to_buffers(self, form, getkey, container, backend):
         assert isinstance(form, self.Form)
-        self._content._to_buffers(form.content, getkey, container, nplike)
+        self._content._to_buffers(form.content, getkey, container, backend)
 
     @property
     def typetracer(self):
