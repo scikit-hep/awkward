@@ -2,6 +2,7 @@
 
 import copy
 import io
+import itertools
 import keyword
 import re
 import sys
@@ -1244,6 +1245,21 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         else:
             stream.write(out + "\n")
 
+    def _ipython_display_(self):
+        value_buff = io.StringIO()
+        self.show(type=False, stream=value_buff)
+        header_lines = value_buff.getvalue().splitlines()
+
+        type_buff = io.StringIO()
+        self.type.show(stream=type_buff)
+        footer_lines = type_buff.getvalue().splitlines()
+
+        if header_lines[-1] == "":
+            del header_lines[-1]
+
+        n_cols = max(len(line) for line in itertools.chain(header_lines, footer_lines))
+        print("\n".join([*header_lines, "-" * n_cols, *footer_lines]))  # noqa: T201
+
     def __array__(self, *args, **kwargs):
         """
         Intercepts attempts to convert this Array into a NumPy array and
@@ -1948,6 +1964,21 @@ class Record(NDArrayOperatorsMixin):
             return out
         else:
             stream.write(out + "\n")
+
+    def _ipython_display_(self):
+        value_buff = io.StringIO()
+        self.show(type=False, stream=value_buff)
+        header_lines = value_buff.getvalue().splitlines()
+
+        type_buff = io.StringIO()
+        self.type.show(stream=type_buff)
+        footer_lines = type_buff.getvalue().splitlines()
+
+        if header_lines[-1] == "":
+            del header_lines[-1]
+
+        n_cols = max(len(line) for line in itertools.chain(header_lines, footer_lines))
+        print("\n".join([*header_lines, "-" * n_cols, *footer_lines]))  # noqa: T201
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         """
