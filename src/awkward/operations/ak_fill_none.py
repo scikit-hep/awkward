@@ -5,6 +5,7 @@ import numbers
 import awkward as ak
 
 np = ak.nplikes.NumpyMetadata.instance()
+cpu = ak._backends.NumpyBackend.instance()
 
 
 def fill_none(array, value, axis=-1, *, highlevel=True, behavior=None):
@@ -60,7 +61,7 @@ def fill_none(array, value, axis=-1, *, highlevel=True, behavior=None):
 def _impl(array, value, axis, highlevel, behavior):
     arraylayout = ak.operations.to_layout(array, allow_record=True, allow_other=False)
     behavior = ak._util.behavior_of(array, behavior=behavior)
-    backend = ak._backends.backend_of(arraylayout)
+    backend = ak._backends.backend_of(arraylayout, default=cpu)
 
     # Convert value type to appropriate layout
     if (

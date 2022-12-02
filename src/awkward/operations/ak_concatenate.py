@@ -4,6 +4,7 @@ import awkward as ak
 from awkward.operations.ak_fill_none import fill_none
 
 np = ak.nplikes.NumpyMetadata.instance()
+cpu = ak._backends.NumpyBackend.instance()
 
 
 @ak._connect.numpy.implements("concatenate")
@@ -140,7 +141,7 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
                 inputs = nextinputs
 
             if depth == posaxis:
-                backend = ak._backends.backend_of(*inputs)
+                backend = ak._backends.backend_of(*inputs, default=cpu)
 
                 length = ak._typetracer.UnknownLength
                 for x in inputs:

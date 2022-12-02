@@ -21,6 +21,7 @@ from awkward.nplikes import (
 from awkward.typing import (
     Any,
     Callable,
+    Final,
     Protocol,
     Self,
     Tuple,
@@ -40,6 +41,8 @@ KernelType: TypeAlias = Callable[..., None]
 
 @runtime_checkable
 class Backend(Protocol[T]):
+    name: str
+
     @property
     @abstractmethod
     def nplike(self) -> NumpyLike:
@@ -60,6 +63,8 @@ class Backend(Protocol[T]):
 
 
 class NumpyBackend(Singleton, Backend[Any]):
+    name: Final[str] = "cpu"
+
     _numpy: Numpy
 
     @property
@@ -78,6 +83,8 @@ class NumpyBackend(Singleton, Backend[Any]):
 
 
 class CupyBackend(Singleton, Backend[Any]):
+    name: Final[str] = "cuda"
+
     _cupy: Cupy
 
     @property
@@ -106,6 +113,8 @@ class CupyBackend(Singleton, Backend[Any]):
 
 
 class JaxBackend(Singleton, Backend[Any]):
+    name: Final[str] = "jax"
+
     _jax: Jax
     _numpy: Numpy
 
@@ -127,6 +136,8 @@ class JaxBackend(Singleton, Backend[Any]):
 
 
 class TypeTracerBackend(Singleton, Backend[Any]):
+    name: Final[str] = "typetracer"
+
     _typetracer: TypeTracer
 
     @property
@@ -182,10 +193,8 @@ def backend_of(*objects, default: D = _UNSET) -> Backend | D:
         return default
 
 
-_backends = {
-    "cpu": NumpyBackend,
-    "cuda": CupyBackend,
-    "jax": JaxBackend,
+_backends: Final[dict[str, type[Backend]]] = {
+    b.name: b for b in (NumpyBackend, CupyBackend, JaxBackend, TypeTracerBackend)
 }
 
 
@@ -195,6 +204,4 @@ def regularize_backend(backend: str | Backend) -> Backend:
     elif backend in _backends:
         return _backends[backend].instance()
     else:
-        raise ak._errors.wrap_error(
-            ValueError("The available backends for now are `cpu` and `cuda`.")
-        )
+        raise ak._errors.wrap_error(ValueError(f"No such backend {backend!r} exists."))

@@ -5,6 +5,8 @@ from collections.abc import Iterable
 
 import awkward as ak
 
+cpu = ak._backends.NumpyBackend.instance()
+
 
 def transform(
     transformation,
@@ -441,7 +443,7 @@ def _impl(
     more_layouts = [
         ak.to_layout(x, allow_record=False, allow_other=False) for x in more_arrays
     ]
-    backend = ak._backends.backend_of(layout, *more_layouts)
+    backend = ak._backends.backend_of(layout, *more_layouts, default=cpu)
 
     options = {
         "allow_records": allow_records,
