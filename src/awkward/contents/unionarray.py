@@ -1585,10 +1585,11 @@ class UnionArray(Content):
         return out
 
     def to_backend(self, backend: ak._backends.Backend) -> Self:
+        tags = self._tags.to_nplike(backend.index_nplike)
         index = self._index.to_nplike(backend.index_nplike)
         contents = [content.to_backend(backend) for content in self._contents]
         return UnionArray(
-            self._tags,
+            tags,
             index,
             contents,
             parameters=self.parameters,
