@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.14.1
+    jupytext_version: 1.14.0
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -16,7 +16,7 @@ Direct constructors (fastest)
 
 If you're willing to think about your data in a columnar way, directly constructing layouts and wrapping them in {class}`ak.Array` interfaces is the fastest way to make them. (All other methods do this at some level.)
 
-"Thinking about data in a columnar way" is the crucial difference between this method and [ArrayBuilder](how-to-create-arraybuilder) and [LayoutBuilder](how-to-create-layoutbuilder). Both of the builders let you think about a data structure the way you would think about Python objects, in which all fields of a given record or elements of a list are "together" and one record or list is "separate" from another record or list. For example,
+"Thinking about data in a columnar way" is the crucial difference between this method and [using ArrayBuilder](how-to-create-arraybuilder.md). The builder method lets you think about a data structure the way you would think about Python objects, in which all fields of a given record or elements of a list are "together" and one record or list is "separate" from another record or list. For example,
 
 ```{code-cell} ipython3
 import awkward as ak
