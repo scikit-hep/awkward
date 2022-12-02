@@ -67,10 +67,13 @@ def from_avro_file(
 
 def _impl(form, length, container, highlevel, behavior):
 
-    return ak.from_buffers(
+    return ak.operations.ak_from_buffers._impl(
         form=form,
         length=length,
         container=container,
+        buffer_key="{form_key}-{attribute}",
+        backend="cpu",
         highlevel=highlevel,
         behavior=behavior,
+        simplify=True,
     )

@@ -36,6 +36,14 @@ class ByteMaskedArray(Content):
                     )
                 )
             )
+        if content.is_union or content.is_indexed or content.is_option:
+            raise ak._errors.wrap_error(
+                TypeError(
+                    "{0} cannot contain a union-type, option-type, or indexed 'content' ({1}); try {0}.simplified instead".format(
+                        type(self).__name__, type(content).__name__
+                    )
+                )
+            )
         if not isinstance(valid_when, bool):
             raise ak._errors.wrap_error(
                 TypeError(
@@ -325,7 +333,7 @@ class ByteMaskedArray(Content):
         except IndexError as err:
             raise ak._errors.index_error(self, carry.data, str(err)) from err
 
-        return ByteMaskedArray(
+        return ByteMaskedArray.simplified(
             nextmask,
             self._content._carry(carry, allow_lazy),
             self._valid_when,
@@ -931,17 +939,6 @@ class ByteMaskedArray(Content):
     def _validity_error(self, path):
         if self._backend.nplike.known_shape and self._content.length < self.mask.length:
             return f'at {path} ("{type(self)}"): len(content) < len(mask)'
-        elif isinstance(
-            self._content,
-            (
-                ak.contents.BitMaskedArray,
-                ak.contents.ByteMaskedArray,
-                ak.contents.IndexedArray,
-                ak.contents.IndexedOptionArray,
-                ak.contents.UnmaskedArray,
-            ),
-        ):
-            return "{0} contains \"{1}\", the operation that made it might have forgotten to call 'simplify_optiontype()'"
         else:
             return self._content.validity_error(path + ".content")
 

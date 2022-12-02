@@ -761,7 +761,7 @@ def test_unionarray(tmp_path, through, extensionarray):
         )
         assert predicted_form == array_form
 
-    akarray = ak.contents.ByteMaskedArray(
+    akarray = ak.contents.ByteMaskedArray.simplified(
         ak.index.Index8(
             np.array([False, True, False, True, False, True, True]).view(np.int8)
         ),
@@ -790,7 +790,7 @@ def test_unionarray(tmp_path, through, extensionarray):
         )
         assert predicted_form == array_form
 
-    akarray = ak.contents.ByteMaskedArray(
+    akarray = ak.contents.ByteMaskedArray.simplified(
         ak.index.Index8(
             np.array([False, True, False, True, False, True, True]).view(np.int8)
         ),

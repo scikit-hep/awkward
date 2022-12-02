@@ -639,7 +639,7 @@ def test_unionarray(tmp_path, extensionarray):
     paarray = akarray.to_arrow(extensionarray=extensionarray)
     arrow_round_trip(akarray, paarray, extensionarray)
 
-    akarray = ak.contents.ByteMaskedArray(
+    akarray = ak.contents.ByteMaskedArray.simplified(
         ak.index.Index8(
             np.array([False, True, False, True, False, True, True]).view(np.int8)
         ),
@@ -663,7 +663,7 @@ def test_unionarray(tmp_path, extensionarray):
     paarray = akarray.to_arrow(extensionarray=extensionarray)
     arrow_round_trip(akarray, paarray, extensionarray)
 
-    akarray = ak.contents.ByteMaskedArray(
+    akarray = ak.contents.ByteMaskedArray.simplified(
         ak.index.Index8(
             np.array([False, True, False, True, False, True, True]).view(np.int8)
         ),

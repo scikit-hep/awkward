@@ -422,6 +422,7 @@ class Form:
             backend=backend,
             highlevel=highlevel,
             behavior=behavior,
+            simplify=False,
         )
 
     def length_one_array(self, *, backend=numpy_backend, highlevel=True, behavior=None):
@@ -435,4 +436,5 @@ class Form:
             backend=backend,
             highlevel=highlevel,
             behavior=behavior,
+            simplify=False,
         )

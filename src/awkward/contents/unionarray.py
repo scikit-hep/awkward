@@ -1412,9 +1412,13 @@ class UnionArray(Content):
             else:
                 this_validbytes = None
 
+            this_length = 0
+            if len(this_index) != 0:
+                this_length = this_index.max() + 1
+
             values.append(
                 content._to_arrow(
-                    pyarrow, mask_node, this_validbytes, this_index.shape[0], options
+                    pyarrow, mask_node, this_validbytes, this_length, options
                 )
             )
 

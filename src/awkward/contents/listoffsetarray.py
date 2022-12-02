@@ -1869,7 +1869,6 @@ class ListOffsetArray(Content):
             downsize = options["bytestring_to32"]
         else:
             downsize = options["list_to32"]
-
         npoffsets = self._offsets.raw(numpy)
         akcontent = self._content[npoffsets[0] : npoffsets[length]]
         if len(npoffsets) > length + 1:

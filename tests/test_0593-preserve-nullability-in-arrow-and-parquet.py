@@ -55,11 +55,12 @@ def test_record_to_arrow():
 
 
 def test_union_to_arrow():
-    ak_array = ak.highlevel.Array([1.1, 2.2, None, [1, 2, 3], "hello"]).layout
+    ak_array = ak.highlevel.Array(
+        [1.1, 2.2, None, [1, 2, 3], "hello"], check_valid=True
+    ).layout
     pa_array = ak_array.to_arrow()
     assert isinstance(pa_array.type.storage_type, pyarrow.DenseUnionType)
     assert pa_array.to_pylist() == [1.1, 2.2, None, [1, 2, 3], "hello"]
-
     ak_array = ak.contents.UnmaskedArray(
         ak.highlevel.Array([1.1, 2.2, [1, 2, 3], "hello"]).layout
     )

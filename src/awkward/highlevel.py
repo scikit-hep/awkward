@@ -2362,7 +2362,18 @@ class ArrayBuilder(Sized):
         """
         formstr, length, container = self._layout.to_buffers()
         form = ak.forms.from_json(formstr)
-        return ak.operations.from_buffers(form, length, container, highlevel=True)
+
+        with ak._errors.OperationErrorContext("ak.ArrayBuilder.snapshot", {}):
+            return ak.operations.ak_from_buffers._impl(
+                form,
+                length,
+                container,
+                buffer_key="{form_key}-{attribute}",
+                backend="cpu",
+                highlevel=True,
+                behavior=self._behavior,
+                simplify=True,
+            )
 
     def null(self):
         """

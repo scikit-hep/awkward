@@ -405,14 +405,14 @@ class NumpyArray(Content):
                 return False
 
             if not matching_dtype and np.datetime64 in (
-                self._data.dtype,
-                other._data.dtype,
+                self._data.dtype.type,
+                other._data.dtype.type,
             ):
                 return False
 
             if not matching_dtype and np.timedelta64 in (
-                self._data.dtype,
-                other._data.dtype,
+                self._data.dtype.type,
+                other._data.dtype.type,
             ):
                 return False
 
