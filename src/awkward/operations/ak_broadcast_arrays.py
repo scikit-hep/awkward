@@ -14,14 +14,14 @@ def broadcast_arrays(*arrays, **kwargs):
             left-broadcasting, as described below.
         right_broadcast (bool): If True, follow rules for implicit
             right-broadcasting, as described below.
-        highlevel (bool, default is True): If True, return an #ak.Array;
-            otherwise, return a low-level #ak.contents.Content subclass.
-        behavior (None or dict): Custom #ak.behavior for the output array, if
-            high-level.
         depth_limit (None or int, default is None): If None, attempt to fully
             broadcast the `arrays` to all levels. If an int, limit the number
             of dimensions that get broadcasted. The minimum value is `1`,
             for no broadcasting.
+        highlevel (bool, default is True): If True, return an #ak.Array;
+            otherwise, return a low-level #ak.contents.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
     Like NumPy's
     [broadcast_arrays](https://docs.scipy.org/doc/numpy/reference/generated/numpy.broadcast_arrays.html)
