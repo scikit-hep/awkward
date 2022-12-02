@@ -4,9 +4,9 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.10.3
+    jupytext_version: 1.14.0
 kernelspec:
-  display_name: Python 3
+  display_name: Python 3 (ipykernel)
   language: python
   name: python3
 ---
@@ -31,7 +31,7 @@ To destructure an array for plotting, you'll want to
    * remove record structures,
    * remove missing data
 
-There are two functions that do all of these things in one call, {func}`ak.flatten` with `axis=None`; and {func}`ak.ravel` but you don't want to apply them without thinking, because structure is important to the meaning of your data and you want to be able to interpret the plot. Destructuring is an information-losing operation, so your guidance is required to eliminate exactly the structure you want to eliminate, and there are several ways to do that, depending on what you want to do.
+There are two functions that are responsible for flattening arrays: {func}`ak.flatten` with `axis=None`; and {func}`ak.ravel`; but you don't want to apply them without thinking, because structure is important to the meaning of your data and you want to be able to interpret the plot. Destructuring is an information-losing operation, so your guidance is required to eliminate exactly the structure you want to eliminate, and there are several ways to do that, depending on what you want to do.
 
 After destructuring, you might _still_ need to call `np.asarray` on the output because the plotting library might not recognize an {class}`ak.Array` as an array. You'll probably also want to develop your destructuring on a commandline or a different Jupyter cell from the plotting library function call, to understand what structure the output has without the added complication of the plotting library's error messages.
 
@@ -40,20 +40,19 @@ import awkward as ak
 import numpy as np
 ```
 
-
 ak.ravel
 -------------------------
 
-As mentioned above, {func}`ak.ravel` is one of two functions that turns any array into a 1-dimensional array with no nested lists, no nested records.
++++
+
+First, let's create an array with some interesting structure.
 
 ```{code-cell} ipython3
 array = ak.Array([[{"x": 1.1, "y": [1]}, {"x": None, "y": [1, 2]}], [], [{"x": 3.3, "y": [1, 2, 3]}]])
 array
 ```
 
-```{code-cell} ipython3
-array.type
-```
+As mentioned above, {func}`ak.ravel` is one of two functions that turns any array into a 1-dimensional array with no nested lists, no nested records.
 
 ```{code-cell} ipython3
 ak.ravel(array)
@@ -85,10 +84,6 @@ array
 ```
 
 ```{code-cell} ipython3
-array.type
-```
-
-```{code-cell} ipython3
 ak.flatten(array, axis=None)
 ```
 
@@ -108,8 +103,6 @@ y = ak.Array([[8, None, 6], [5, None, None, 4]])
 
 z = 2 * np.ravel(x) + np.ravel(y)
 ```
-
-+++
 
 Selecting record fields
 -----------------------
