@@ -21,15 +21,15 @@ _dtype_to_form = {
 
 def _form_to_zero_length(form):
     if form == "i8":
-        return Index8(np.zeros(0, dtype=np.int8))
+        return Index8(numpy.zeros(0, dtype=np.int8))
     elif form == "u8":
-        return IndexU8(np.zeros(0, dtype=np.uint8))
+        return IndexU8(numpy.zeros(0, dtype=np.uint8))
     elif form == "i32":
-        return Index32(np.zeros(0, dtype=np.int32))
+        return Index32(numpy.zeros(0, dtype=np.int32))
     elif form == "u32":
-        return IndexU32(np.zeros(0, dtype=np.uint32))
+        return IndexU32(numpy.zeros(0, dtype=np.uint32))
     elif form == "i64":
-        return Index64(np.zeros(0, dtype=np.int64))
+        return Index64(numpy.zeros(0, dtype=np.int64))
     else:
         raise ak._errors.wrap_error(
             AssertionError(f"unrecognized Index form: {form!r}")

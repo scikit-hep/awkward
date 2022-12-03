@@ -147,7 +147,7 @@ def test_0166_ByteMaskedArray():
         [6, None, 5, 7, 11, 13, None, 17, 19], highlevel=False
     )
     mask = ak.index.Index8(np.array([0, 1, 0, 0, 0, 0, 1, 0, 0], dtype=np.int8))
-    bytemasked = ak.contents.ByteMaskedArray(mask, content, valid_when=False)
+    bytemasked = ak.contents.ByteMaskedArray.simplified(mask, content, valid_when=False)
     offsets = ak.index.Index64(np.array([0, 3, 3, 5, 6, 9], dtype=np.int64))
     array = ak.highlevel.Array(ak.contents.ListOffsetArray(offsets, bytemasked))
     assert to_list(array) == [[6, None, 5], [], [7, 11], [13], [None, 17, 19]]

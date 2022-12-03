@@ -17,23 +17,6 @@ class RegularArray(Content):
     is_list = True
     is_regular = True
 
-    def copy(self, content=unset, size=unset, zeros_length=unset, *, parameters=unset):
-        return RegularArray(
-            self._content if content is unset else content,
-            self._size if size is unset else size,
-            self._length if zeros_length is unset else zeros_length,
-            parameters=self._parameters if parameters is unset else parameters,
-        )
-
-    def __copy__(self):
-        return self.copy()
-
-    def __deepcopy__(self, memo):
-        return self.copy(
-            content=copy.deepcopy(self._content, memo),
-            parameters=copy.deepcopy(self._parameters, memo),
-        )
-
     def __init__(self, content, size, zeros_length=0, *, parameters=None):
         if not isinstance(content, Content):
             raise ak._errors.wrap_error(
@@ -64,6 +47,25 @@ class RegularArray(Content):
                     )
                 )
 
+        if parameters is not None and parameters.get("__array__") == "string":
+            if not content.is_numpy or not content.parameter("__array__") == "char":
+                raise ak._errors.wrap_error(
+                    ValueError(
+                        "{} is a string, so its 'content' must be uint8 NumpyArray of char, not {}".format(
+                            type(self).__name__, repr(content)
+                        )
+                    )
+                )
+        if parameters is not None and parameters.get("__array__") == "bytestring":
+            if not content.is_numpy or not content.parameter("__array__") == "byte":
+                raise ak._errors.wrap_error(
+                    ValueError(
+                        "{} is a bytestring, so its 'content' must be uint8 NumpyArray of byte, not {}".format(
+                            type(self).__name__, repr(content)
+                        )
+                    )
+                )
+
         self._content = content
         self._size = size
         if size != 0:
@@ -73,14 +75,31 @@ class RegularArray(Content):
         self._init(parameters, content.backend)
 
     @property
-    def size(self):
-        return self._size
-
-    @property
     def content(self):
         return self._content
 
+    @property
+    def size(self):
+        return self._size
+
     Form = RegularForm
+
+    def copy(self, content=unset, size=unset, zeros_length=unset, *, parameters=unset):
+        return RegularArray(
+            self._content if content is unset else content,
+            self._size if size is unset else size,
+            self._length if zeros_length is unset else zeros_length,
+            parameters=self._parameters if parameters is unset else parameters,
+        )
+
+    def __copy__(self):
+        return self.copy()
+
+    def __deepcopy__(self, memo):
+        return self.copy(
+            content=copy.deepcopy(self._content, memo),
+            parameters=copy.deepcopy(self._parameters, memo),
+        )
 
     @classmethod
     def simplified(cls, content, size, zeros_length=0, *, parameters=None):
@@ -720,17 +739,11 @@ class RegularArray(Content):
                 )
             )
             return ak.contents.RegularArray(
-                ak.contents.NumpyArray(localindex),
-                self._size,
-                self._length,
-                parameters=self._parameters,
+                ak.contents.NumpyArray(localindex), self._size, self._length
             )
         else:
             return ak.contents.RegularArray(
-                self._content._local_index(posaxis, depth + 1),
-                self._size,
-                self._length,
-                parameters=self._parameters,
+                self._content._local_index(posaxis, depth + 1), self._size, self._length
             )
 
     def numbers_to_type(self, name):
@@ -1136,13 +1149,8 @@ class RegularArray(Content):
     def _validity_error(self, path):
         if self.size < 0:
             return f'at {path} ("{type(self)}"): size < 0'
-        if (
-            self.parameter("__array__") == "string"
-            or self.parameter("__array__") == "bytestring"
-        ):
-            return ""
-        else:
-            return self._content.validity_error(path + ".content")
+
+        return self._content.validity_error(path + ".content")
 
     def _nbytes_part(self):
         return self.content._nbytes_part()

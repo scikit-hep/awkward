@@ -42,7 +42,9 @@ class Content:
     is_union = False
 
     def _init(self, parameters: dict[str, Any] | None, backend: Backend):
-        if parameters is not None and not isinstance(parameters, dict):
+        if parameters is None:
+            pass
+        elif not isinstance(parameters, dict):
             raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'parameters' must be a dict or None, not {}".format(
@@ -50,6 +52,37 @@ class Content:
                     )
                 )
             )
+        else:
+            if not self.is_list and parameters.get("__array__") in (
+                "string",
+                "bytestring",
+                "sorted_map",
+            ):
+                raise ak._errors.wrap_error(
+                    TypeError(
+                        '{} is not allowed to have parameters["__array__"] = "{}"'.format(
+                            type(self).__name__, parameters["__array__"]
+                        )
+                    )
+                )
+            if not isinstance(self, ak.contents.NumpyArray) and parameters.get(
+                "__array__"
+            ) in ("char", "byte"):
+                raise ak._errors.wrap_error(
+                    TypeError(
+                        '{} is not allowed to have parameters["__array__"] = "{}"'.format(
+                            type(self).__name__, parameters["__array__"]
+                        )
+                    )
+                )
+            if not self.is_indexed and parameters.get("__array__") == "categorical":
+                raise ak._errors.wrap_error(
+                    TypeError(
+                        '{} is not allowed to have parameters["__array__"] = "{}"'.format(
+                            type(self).__name__, parameters["__array__"]
+                        )
+                    )
+                )
 
         if not isinstance(backend, Backend):
             raise ak._errors.wrap_error(
@@ -785,9 +818,7 @@ class Content:
             )
         )
 
-        return ak.contents.UnionArray(
-            tags, index, contents, parameters=None, backend=self._backend
-        )
+        return ak.contents.UnionArray(tags, index, contents, parameters=None)
 
     def _merging_strategy(
         self, others: list[Content]
@@ -842,13 +873,6 @@ class Content:
             ]
 
         return (head, tail)
-
-    def dummy(self):
-        raise ak._errors.wrap_error(
-            NotImplementedError(
-                "FIXME: need to implement 'dummy', which makes an array of length 1 and an arbitrary value (0?) for this array type"
-            )
-        )
 
     def local_index(self, axis: Integral):
         return self._local_index(axis, 0)
@@ -1223,7 +1247,9 @@ class Content:
         contents = []
         length = None
         for ptr in tocarry:
-            contents.append(ak.contents.IndexedArray(ptr, self, parameters=None))
+            contents.append(
+                ak.contents.IndexedArray.simplified(ptr, self, parameters=None)
+            )
             length = contents[-1].length
         assert length is not None
         return ak.contents.RecordArray(
@@ -1264,103 +1290,11 @@ class Content:
         raise ak._errors.wrap_error(NotImplementedError)
 
     def validity_error_parameters(self, path: str) -> str:
-        if self.parameter("__array__") == "string":
-            content = None
-            if isinstance(
-                self,
-                (
-                    ak.contents.ListArray,
-                    ak.contents.ListOffsetArray,
-                    ak.contents.RegularArray,
-                ),
-            ):
-                content = self.content
-            else:
-                return 'at {} ("{}"): __array__ = "string" only allowed for ListArray, ListOffsetArray and RegularArray'.format(
-                    path, type(self)
-                )
-            if content.parameter("__array__") != "char":
-                return 'at {} ("{}"): __array__ = "string" must directly contain a node with __array__ = "char"'.format(
-                    path, type(self)
-                )
-            if isinstance(content, ak.contents.NumpyArray):
-                if content.dtype.type != np.uint8:
-                    return 'at {} ("{}"): __array__ = "char" requires dtype == uint8'.format(
-                        path, type(self)
-                    )
-                if len(content.shape) != 1:
-                    return 'at {} ("{}"): __array__ = "char" must be one-dimensional'.format(
-                        path, type(self)
-                    )
-            else:
-                return 'at {} ("{}"): __array__ = "char" only allowed for NumpyArray'.format(
-                    path, type(self)
-                )
-            return ""
-
-        if self.parameter("__array__") == "bytestring":
-            content = None
-            if isinstance(
-                self,
-                (
-                    ak.contents.ListArray,
-                    ak.contents.ListOffsetArray,
-                    ak.contents.RegularArray,
-                ),
-            ):
-                content = self.content
-            else:
-                return 'at {} ("{}"): __array__ = "bytestring" only allowed for ListArray, ListOffsetArray and RegularArray'.format(
-                    path, type(self)
-                )
-            if content.parameter("__array__") != "byte":
-                return 'at {} ("{}"): __array__ = "bytestring" must directly contain a node with __array__ = "byte"'.format(
-                    path, type(self)
-                )
-            if isinstance(content, ak.contents.NumpyArray):
-                if content.dtype.type != np.uint8:
-                    return 'at {} ("{}"): __array__ = "byte" requires dtype == uint8'.format(
-                        path, type(self)
-                    )
-                if len(content.shape) != 1:
-                    return 'at {} ("{}"): __array__ = "byte" must be one-dimensional'.format(
-                        path, type(self)
-                    )
-            else:
-                return 'at {} ("{}"): __array__ = "byte" only allowed for NumpyArray'.format(
-                    path, type(self)
-                )
-            return ""
-
-        if self.parameter("__array__") == "char":
-            return 'at {} ("{}"): __array__ = "char" must be directly inside __array__ = "string"'.format(
-                path, type(self)
-            )
-
-        if self.parameter("__array__") == "byte":
-            return 'at {} ("{}"): __array__ = "byte" must be directly inside __array__ = "bytestring"'.format(
-                path, type(self)
-            )
-
         if self.parameter("__array__") == "categorical":
-            content = None
-            if isinstance(
-                self,
-                (
-                    ak.contents.IndexedArray,
-                    ak.contents.IndexedOptionArray,
-                ),
-            ):
-                content = self.content
-            else:
-                return 'at {} ("{}"): __array__ = "categorical" only allowed for IndexedArray and IndexedOptionArray'.format(
-                    path, type(self)
-                )
-            if not content.is_unique():
+            if not self._content.is_unique():
                 return 'at {} ("{}"): __array__ = "categorical" requires contents to be unique'.format(
                     path, type(self)
                 )
-
         return ""
 
     def validity_error(self, path: str = "layout") -> str:

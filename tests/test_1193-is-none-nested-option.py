@@ -8,7 +8,7 @@ import awkward as ak
 
 def test():
     index_of_index = ak.highlevel.Array(
-        ak.contents.IndexedOptionArray(
+        ak.contents.IndexedOptionArray.simplified(
             ak.index.Index64(np.r_[0, 1, 2, -1]),
             ak.contents.IndexedOptionArray(
                 ak.index.Index64(np.r_[0, -1, 2, 3]),

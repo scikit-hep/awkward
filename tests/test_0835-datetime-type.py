@@ -457,6 +457,29 @@ def test_min_max():
             datetime.datetime(2020, 1, 27, 10, 41, 11),
         ],
     ]
+
+    array = ak.highlevel.Array(
+        [
+            [
+                np.datetime64("2020-03-27T10:41:11"),
+                np.datetime64("2020-01-27T10:41:11"),
+                np.datetime64("2020-05-01T00:00:00"),
+                np.datetime64("2020-01-27T10:41:11"),
+                np.datetime64("2020-04-27T10:41:11"),
+            ],
+            [
+                np.datetime64("2020-04-27T00:00:00"),
+                np.datetime64("2020-02-27T10:41:11"),
+                np.datetime64("2020-01-27T10:41:11"),
+                np.datetime64("2020-06-27T10:41:11"),
+            ],
+            [
+                np.datetime64("2020-02-27T10:41:11"),
+                np.datetime64("2020-03-27T10:41:11"),
+                np.datetime64("2020-01-27T10:41:11"),
+            ],
+        ]
+    ).layout
     assert to_list(array.min()) == [
         np.datetime64("2020-01-27T10:41:11"),
         np.datetime64("2020-01-27T10:41:11"),
@@ -559,6 +582,29 @@ def test_highlevel_min_max():
             np.datetime64("2020-01-27T10:41:11"),
         ],
     ]
+
+    array = ak.highlevel.Array(
+        [
+            [
+                np.datetime64("2020-03-27T10:41:11"),
+                np.datetime64("2020-01-27T10:41:11"),
+                np.datetime64("2020-05-01T00:00:00"),
+                np.datetime64("2020-01-27T10:41:11"),
+                np.datetime64("2020-04-27T10:41:11"),
+            ],
+            [
+                np.datetime64("2020-04-27T00:00:00"),
+                np.datetime64("2020-02-27T10:41:11"),
+                np.datetime64("2020-01-27T10:41:11"),
+                np.datetime64("2020-06-27T10:41:11"),
+            ],
+            [
+                np.datetime64("2020-02-27T10:41:11"),
+                np.datetime64("2020-03-27T10:41:11"),
+                np.datetime64("2020-01-27T10:41:11"),
+            ],
+        ]
+    )
     assert to_list(ak.operations.min(array, axis=0)) == [
         np.datetime64("2020-02-27T10:41:11"),
         np.datetime64("2020-01-27T10:41:11"),

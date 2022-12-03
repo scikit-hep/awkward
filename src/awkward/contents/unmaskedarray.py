@@ -16,6 +16,32 @@ numpy = ak._nplikes.Numpy.instance()
 class UnmaskedArray(Content):
     is_option = True
 
+    def __init__(self, content, *, parameters=None):
+        if not isinstance(content, Content):
+            raise ak._errors.wrap_error(
+                TypeError(
+                    "{} 'content' must be a Content subtype, not {}".format(
+                        type(self).__name__, repr(content)
+                    )
+                )
+            )
+        if content.is_union or content.is_indexed or content.is_option:
+            raise ak._errors.wrap_error(
+                TypeError(
+                    "{0} cannot contain a union-type, option-type, or indexed 'content' ({1}); try {0}.simplified instead".format(
+                        type(self).__name__, type(content).__name__
+                    )
+                )
+            )
+        self._content = content
+        self._init(parameters, content.backend)
+
+    @property
+    def content(self):
+        return self._content
+
+    Form = UnmaskedForm
+
     def copy(self, content=unset, *, parameters=unset):
         return UnmaskedArray(
             self._content if content is unset else content,
@@ -30,24 +56,6 @@ class UnmaskedArray(Content):
             content=copy.deepcopy(self._content, memo),
             parameters=copy.deepcopy(self._parameters, memo),
         )
-
-    def __init__(self, content, *, parameters=None):
-        if not isinstance(content, Content):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} 'content' must be a Content subtype, not {}".format(
-                        type(self).__name__, repr(content)
-                    )
-                )
-            )
-        self._content = content
-        self._init(parameters, content.backend)
-
-    @property
-    def content(self):
-        return self._content
-
-    Form = UnmaskedForm
 
     @classmethod
     def simplified(cls, content, *, parameters=None):
@@ -174,17 +182,17 @@ class UnmaskedArray(Content):
         )
 
     def _getitem_field(self, where, only_fields=()):
-        return UnmaskedArray(
+        return UnmaskedArray.simplified(
             self._content._getitem_field(where, only_fields), parameters=None
         )
 
     def _getitem_fields(self, where, only_fields=()):
-        return UnmaskedArray(
+        return UnmaskedArray.simplified(
             self._content._getitem_fields(where, only_fields), parameters=None
         )
 
     def _carry(self, carry, allow_lazy):
-        return UnmaskedArray(
+        return UnmaskedArray.simplified(
             self._content._carry(carry, allow_lazy), parameters=self._parameters
         )
 
@@ -422,19 +430,7 @@ class UnmaskedArray(Content):
         )
 
     def _validity_error(self, path):
-        if isinstance(
-            self._content,
-            (
-                ak.contents.BitMaskedArray,
-                ak.contents.ByteMaskedArray,
-                ak.contents.IndexedArray,
-                ak.contents.IndexedOptionArray,
-                ak.contents.UnmaskedArray,
-            ),
-        ):
-            return "{0} contains \"{1}\", the operation that made it might have forgotten to call 'simplify_optiontype()'"
-        else:
-            return self._content.validity_error(path + ".content")
+        return self._content.validity_error(path + ".content")
 
     def _nbytes_part(self):
         return self.content._nbytes_part()

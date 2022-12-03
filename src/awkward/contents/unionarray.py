@@ -21,35 +21,7 @@ numpy = ak._nplikes.Numpy.instance()
 class UnionArray(Content):
     is_union = True
 
-    def copy(
-        self,
-        tags=unset,
-        index=unset,
-        contents=unset,
-        *,
-        parameters=unset,
-        backend=unset,
-    ):
-        return UnionArray(
-            self._tags if tags is unset else tags,
-            self._index if index is unset else index,
-            self._contents if contents is unset else contents,
-            parameters=self._parameters if parameters is unset else parameters,
-            backend=self._backend if backend is unset else backend,
-        )
-
-    def __copy__(self):
-        return self.copy()
-
-    def __deepcopy__(self, memo):
-        return self.copy(
-            tags=copy.deepcopy(self._tags, memo),
-            index=copy.deepcopy(self._index, memo),
-            contents=[copy.deepcopy(x, memo) for x in self._contents],
-            parameters=copy.deepcopy(self._parameters, memo),
-        )
-
-    def __init__(self, tags, index, contents, *, parameters=None, backend=None):
+    def __init__(self, tags, index, contents, *, parameters=None):
         if not (isinstance(tags, Index) and tags.dtype == np.dtype(np.int8)):
             raise ak._errors.wrap_error(
                 TypeError(
@@ -58,7 +30,6 @@ class UnionArray(Content):
                     )
                 )
             )
-        assert len(contents) > 0
 
         if not isinstance(index, Index) and index.dtype in (
             np.dtype(np.int32),
@@ -83,12 +54,38 @@ class UnionArray(Content):
         if not isinstance(contents, list):
             contents = list(contents)
 
+        if len(contents) < 2:
+            raise ak._errors.wrap_error(
+                TypeError(f"{type(self).__name__} must have at least 2 'contents'")
+            )
         for content in contents:
             if not isinstance(content, Content):
                 raise ak._errors.wrap_error(
                     TypeError(
                         "{} all 'contents' must be Content subclasses, not {}".format(
                             type(self).__name__, repr(content)
+                        )
+                    )
+                )
+            if content.is_union:
+                raise ak._errors.wrap_error(
+                    TypeError(
+                        "{0} cannot contain union-types in its 'contents' ({1}); try {0}.simplified instead".format(
+                            type(self).__name__, type(content).__name__
+                        )
+                    )
+                )
+
+        for content in contents[1:]:
+            if contents[0].mergeable(content, mergebool=False):
+                raise ak._errors.wrap_error(
+                    TypeError(
+                        "{0} cannot contain mergeable 'contents' ({1} of {2} and {3} of {4}); try {0}.simplified instead".format(
+                            type(self).__name__,
+                            type(contents[0]).__name__,
+                            repr(str(contents[0].form.type)),
+                            type(content).__name__,
+                            repr(str(content.form.type)),
                         )
                     )
                 )
@@ -105,10 +102,11 @@ class UnionArray(Content):
                     )
                 )
             )
+
+        backend = None
         for content in contents:
             if backend is None:
                 backend = content.backend
-                break
             elif backend is not content.backend:
                 raise ak._errors.wrap_error(
                     TypeError(
@@ -119,8 +117,6 @@ class UnionArray(Content):
                         )
                     )
                 )
-        if backend is None:
-            backend = ak._backends.NumpyBackend.instance()
 
         assert tags.nplike is backend.index_nplike
         assert index.nplike is backend.index_nplike
@@ -138,14 +134,37 @@ class UnionArray(Content):
     def index(self):
         return self._index
 
-    def content(self, index):
-        return self._contents[index]
-
     @property
     def contents(self):
         return self._contents
 
     Form = UnionForm
+
+    def copy(
+        self,
+        tags=unset,
+        index=unset,
+        contents=unset,
+        *,
+        parameters=unset,
+    ):
+        return UnionArray(
+            self._tags if tags is unset else tags,
+            self._index if index is unset else index,
+            self._contents if contents is unset else contents,
+            parameters=self._parameters if parameters is unset else parameters,
+        )
+
+    def __copy__(self):
+        return self.copy()
+
+    def __deepcopy__(self, memo):
+        return self.copy(
+            tags=copy.deepcopy(self._tags, memo),
+            index=copy.deepcopy(self._index, memo),
+            contents=[copy.deepcopy(x, memo) for x in self._contents],
+            parameters=copy.deepcopy(self._parameters, memo),
+        )
 
     @classmethod
     def simplified(
@@ -155,14 +174,17 @@ class UnionArray(Content):
         contents,
         *,
         parameters=None,
-        backend=None,
         merge=True,
         mergebool=False,
     ):
+        self_index = index
+        self_tags = tags
+        self_contents = contents
+
+        backend = None
         for content in contents:
             if backend is None:
                 backend = content.backend
-                break
             elif backend is not content.backend:
                 raise ak._errors.wrap_error(
                     TypeError(
@@ -173,12 +195,6 @@ class UnionArray(Content):
                         )
                     )
                 )
-        if backend is None:
-            backend = ak._backends.NumpyBackend.instance()
-
-        self_index = index
-        self_tags = tags
-        self_contents = contents
 
         if backend.nplike.known_shape and self_index.length < self_tags.length:
             raise ak._errors.wrap_error(
@@ -338,8 +354,10 @@ class UnionArray(Content):
                 index,
                 contents,
                 parameters=parameters,
-                backend=backend,
             )
+
+    def content(self, index):
+        return self._contents[index]
 
     def _form_with_key(self, getkey):
         form_key = getkey(self)
@@ -368,7 +386,6 @@ class UnionArray(Content):
             ak.index.Index(self._index.raw(backend.nplike)),
             [x.typetracer for x in self._contents],
             parameters=self._parameters,
-            backend=backend,
         )
 
     @property
@@ -381,7 +398,6 @@ class UnionArray(Content):
             self._index,
             self._contents,
             parameters=self._parameters,
-            backend=self._backend,
         )
 
     def __repr__(self):
@@ -411,7 +427,6 @@ class UnionArray(Content):
             self._index,
             self._contents,
             parameters=ak._util.merge_parameters(self._parameters, parameters),
-            backend=self._backend,
         )
 
     def _getitem_nothing(self):
@@ -439,7 +454,6 @@ class UnionArray(Content):
             self._index[start:stop],
             self._contents,
             parameters=self._parameters,
-            backend=self._backend,
         )
 
     def _getitem_field(self, where, only_fields=()):
@@ -448,7 +462,6 @@ class UnionArray(Content):
             self._index,
             [x._getitem_field(where, only_fields) for x in self._contents],
             parameters=None,
-            backend=self._backend,
         )
 
     def _getitem_fields(self, where, only_fields=()):
@@ -457,7 +470,6 @@ class UnionArray(Content):
             self._index,
             [x._getitem_fields(where, only_fields) for x in self._contents],
             parameters=None,
-            backend=self._backend,
         )
 
     def _carry(self, carry, allow_lazy):
@@ -474,7 +486,6 @@ class UnionArray(Content):
             nextindex,
             self._contents,
             parameters=self._parameters,
-            backend=self._backend,
         )
 
     def _union_of_optionarrays(self, index, parameters):
@@ -550,7 +561,6 @@ class UnionArray(Content):
             ak.index.Index(nextindex),
             contents,
             parameters=ak._util.merge_parameters(self._parameters, parameters),
-            backend=self._backend,
         )
 
     def project(self, index):
@@ -724,7 +734,6 @@ class UnionArray(Content):
                 outindex,
                 outcontents,
                 parameters=self._parameters,
-                backend=self._backend,
             )
 
         elif isinstance(head, str):
@@ -762,7 +771,6 @@ class UnionArray(Content):
                 self._index,
                 contents,
                 parameters=self._parameters,
-                backend=self._backend,
             )
 
     def _offsets_and_flattened(self, axis, depth):
@@ -859,7 +867,6 @@ class UnionArray(Content):
                         toindex,
                         contents,
                         parameters=self._parameters,
-                        backend=self._backend,
                     ),
                 )
 
@@ -876,7 +883,6 @@ class UnionArray(Content):
                         self._index,
                         contents,
                         parameters=self._parameters,
-                        backend=self._backend,
                     ),
                 )
 
@@ -988,9 +994,14 @@ class UnionArray(Content):
                 AssertionError("FIXME: handle UnionArray with more than 127 contents")
             )
 
-        parameters = ak._util.merge_parameters(self._parameters, other._parameters)
-        return ak.contents.UnionArray(
-            tags, index, contents, parameters=parameters, backend=self._backend
+        parameters = ak._util.merge_parameters(
+            self._parameters,
+            other._parameters,
+            exclude=ak._util.meaningful_parameters,
+        )
+
+        return ak.contents.UnionArray.simplified(
+            tags, index, contents, parameters=parameters
         )
 
     def mergemany(self, others):
@@ -1088,15 +1099,12 @@ class UnionArray(Content):
                 ValueError("FIXME: handle UnionArray with more than 127 contents")
             )
 
-        next = ak.contents.UnionArray(
+        next = ak.contents.UnionArray.simplified(
             nexttags,
             nextindex,
             nextcontents,
             parameters=parameters,
-            backend=self._backend,
         )
-
-        # Given UnionArray's merging_strategy, tail is always empty, but just to be formal...
 
         if len(tail) == 0:
             return next
@@ -1116,7 +1124,6 @@ class UnionArray(Content):
             self._index,
             contents,
             parameters=self._parameters,
-            backend=self._backend,
         )
 
     def _local_index(self, axis, depth):
@@ -1132,7 +1139,6 @@ class UnionArray(Content):
                 self._index,
                 contents,
                 parameters=self._parameters,
-                backend=self._backend,
             )
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
@@ -1152,7 +1158,6 @@ class UnionArray(Content):
                 self._index,
                 contents,
                 parameters=self._parameters,
-                backend=self._backend,
             )
 
     def numbers_to_type(self, name):
@@ -1164,7 +1169,6 @@ class UnionArray(Content):
             self._index,
             contents,
             parameters=self._parameters,
-            backend=self._backend,
         )
 
     def _is_unique(self, negaxis, starts, parents, outlength):
@@ -1173,7 +1177,6 @@ class UnionArray(Content):
             self._index,
             self._contents,
             parameters=self._parameters,
-            backend=self._backend,
             merge=True,
             mergebool=True,
         )
@@ -1190,7 +1193,6 @@ class UnionArray(Content):
             self._index,
             self._contents,
             parameters=self._parameters,
-            backend=self._backend,
             merge=True,
             mergebool=True,
         )
@@ -1218,7 +1220,6 @@ class UnionArray(Content):
             self._index,
             self._contents,
             parameters=self._parameters,
-            backend=self._backend,
             mergebool=True,
         )
         if simplified.length == 0:
@@ -1248,7 +1249,6 @@ class UnionArray(Content):
             self._index,
             self._contents,
             parameters=self._parameters,
-            backend=self._backend,
             mergebool=True,
         )
         if simplified.length == 0:
@@ -1280,7 +1280,6 @@ class UnionArray(Content):
             self._index,
             self._contents,
             parameters=self._parameters,
-            backend=self._backend,
             mergebool=True,
         )
         if isinstance(simplified, UnionArray):
@@ -1372,7 +1371,6 @@ class UnionArray(Content):
                 self.index,
                 contents,
                 parameters=self._parameters,
-                backend=self._backend,
             )
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
@@ -1412,9 +1410,13 @@ class UnionArray(Content):
             else:
                 this_validbytes = None
 
+            this_length = 0
+            if len(this_index) != 0:
+                this_length = this_index.max() + 1
+
             values.append(
                 content._to_arrow(
-                    pyarrow, mask_node, this_validbytes, this_index.shape[0], options
+                    pyarrow, mask_node, this_validbytes, this_length, options
                 )
             )
 
@@ -1493,7 +1495,7 @@ class UnionArray(Content):
         if options["return_array"]:
 
             def continuation():
-                return UnionArray(
+                return UnionArray.simplified(
                     self._tags,
                     self._index,
                     [
@@ -1508,7 +1510,6 @@ class UnionArray(Content):
                         for content in self._contents
                     ],
                     parameters=self._parameters if options["keep_parameters"] else None,
-                    backend=self._backend,
                 )
 
         else:
@@ -1567,7 +1568,6 @@ class UnionArray(Content):
             ak.index.Index(index, nplike=self._backend.index_nplike),
             contents,
             parameters=self._parameters,
-            backend=self._backend,
         )
 
     def _to_list(self, behavior, json_conversions):
@@ -1593,7 +1593,6 @@ class UnionArray(Content):
             index,
             contents,
             parameters=self.parameters,
-            backend=backend,
         )
 
     def _layout_equal(self, other, index_dtype=True, numpyarray=True):

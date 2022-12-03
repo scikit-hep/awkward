@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._util import unset
 from awkward.forms.form import Form, _parameters_equal
 
 
@@ -28,6 +29,21 @@ class ListOffsetForm(Form):
     @property
     def content(self):
         return self._content
+
+    def copy(
+        self,
+        offsets=unset,
+        content=unset,
+        *,
+        parameters=unset,
+        form_key=unset,
+    ):
+        return ListOffsetForm(
+            self._offsets if offsets is unset else offsets,
+            self._content if content is unset else content,
+            parameters=self._parameters if parameters is unset else parameters,
+            form_key=self._form_key if form_key is unset else form_key,
+        )
 
     @classmethod
     def simplified(cls, offsets, content, *, parameters=None, form_key=None):

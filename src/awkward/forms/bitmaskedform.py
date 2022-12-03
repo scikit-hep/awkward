@@ -1,7 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import copy
-
 import awkward as ak
 from awkward._util import unset
 from awkward.forms.form import Form, _parameters_equal
@@ -9,35 +7,6 @@ from awkward.forms.form import Form, _parameters_equal
 
 class BitMaskedForm(Form):
     is_option = True
-
-    def copy(
-        self,
-        mask=unset,
-        content=unset,
-        valid_when=unset,
-        lsb_order=unset,
-        *,
-        parameters=unset,
-        form_key=unset,
-    ):
-        return BitMaskedForm(
-            self._mask if mask is unset else mask,
-            self._content if content is unset else content,
-            self._valid_when if valid_when is unset else valid_when,
-            self._lsb_order if lsb_order is unset else lsb_order,
-            parameters=self._parameters if parameters is unset else parameters,
-            form_key=self._form_key if form_key is unset else form_key,
-        )
-
-    def __copy__(self):
-        return self.copy()
-
-    def __deepcopy__(self, memo):
-        return self.copy(
-            mask=copy.deepcopy(self._mask, memo),
-            content=copy.deepcopy(self._content, memo),
-            parameters=copy.deepcopy(self._parameters, memo),
-        )
 
     def __init__(
         self,
@@ -103,6 +72,25 @@ class BitMaskedForm(Form):
     @property
     def lsb_order(self):
         return self._lsb_order
+
+    def copy(
+        self,
+        mask=unset,
+        content=unset,
+        valid_when=unset,
+        lsb_order=unset,
+        *,
+        parameters=unset,
+        form_key=unset,
+    ):
+        return BitMaskedForm(
+            self._mask if mask is unset else mask,
+            self._content if content is unset else content,
+            self._valid_when if valid_when is unset else valid_when,
+            self._lsb_order if lsb_order is unset else lsb_order,
+            parameters=self._parameters if parameters is unset else parameters,
+            form_key=self._form_key if form_key is unset else form_key,
+        )
 
     @classmethod
     def simplified(

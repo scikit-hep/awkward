@@ -186,16 +186,22 @@ def test_tonumpy():
     content0 = ak.contents.NumpyArray(
         np.array([1.1, 2.2, 3.3, 4.4, 5.5], dtype=np.float64)
     )
-    content1 = ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64))
+    content1 = ak.from_iter(["1", "2", "3"], highlevel=False)
     tags = ak.index.Index8(np.array([0, 1, 1, 0, 0, 0, 1, 0], dtype=np.int8))
     index = ak.index.Index64(np.array([0, 0, 1, 1, 2, 3, 2, 4], dtype=np.int64))
     array = ak.highlevel.Array(
         ak.contents.UnionArray(tags, index, [content0, content1]), check_valid=True
     )
-    assert np.array_equal(
-        ak.operations.to_numpy(array),
-        np.array([1.1, 1, 2, 2.2, 3.3, 4.4, 3, 5.5]),
-    )
+    assert ak.operations.to_numpy(array).tolist() == [
+        "1.1",
+        "1",
+        "2",
+        "2.2",
+        "3.3",
+        "4.4",
+        "3",
+        "5.5",
+    ]
 
     assert ak.operations.to_numpy(
         ak.highlevel.Array([1.1, 2.2, None, None, 3.3], check_valid=True)
@@ -268,15 +274,22 @@ def test_numpy_array():
     content0 = ak.contents.NumpyArray(
         np.array([1.1, 2.2, 3.3, 4.4, 5.5], dtype=np.float64)
     )
-    content1 = ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64))
+    content1 = ak.from_iter(["1", "2", "3"], highlevel=False)
     tags = ak.index.Index8(np.array([0, 1, 1, 0, 0, 0, 1, 0], dtype=np.int8))
     index = ak.index.Index64(np.array([0, 0, 1, 1, 2, 3, 2, 4], dtype=np.int64))
     array = ak.highlevel.Array(
         ak.contents.UnionArray(tags, index, [content0, content1]), check_valid=True
     )
-    assert np.array_equal(
-        np.asarray(array), np.array([1.1, 1, 2, 2.2, 3.3, 4.4, 3, 5.5])
-    )
+    assert np.asarray(array).tolist() == [
+        "1.1",
+        "1",
+        "2",
+        "2.2",
+        "3.3",
+        "4.4",
+        "3",
+        "5.5",
+    ]
 
     assert ak.operations.to_numpy(
         ak.highlevel.Array([1.1, 2.2, None, None, 3.3], check_valid=True)

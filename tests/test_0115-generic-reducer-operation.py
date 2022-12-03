@@ -1019,6 +1019,9 @@ def test_IndexedOptionArray():
     assert depth2.typetracer.prod(-3).form == depth2.prod(-3).form
 
 
+@pytest.mark.skip(
+    reason="I can't think of a canonical UnionArray (non-mergeable contents) that can be used in a reducer"
+)
 def test_UnionArray():
     content1 = ak.operations.from_iter(
         [[[2, 3, 5, 7, 11], [13, 17, 19, 23, 29], [31, 37, 41, 43, 47]]],

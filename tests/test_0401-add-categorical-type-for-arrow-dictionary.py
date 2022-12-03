@@ -362,7 +362,9 @@ def test_to_categorical_masked_again():
             ]
         )
     )
-    array = ak.Array(ak.contents.ByteMaskedArray(mask, indexedarray, valid_when=False))
+    array = ak.Array(
+        ak.contents.ByteMaskedArray.simplified(mask, indexedarray, valid_when=False)
+    )
     assert not ak.operations.ak_is_categorical.is_categorical(array)
     categorical = ak.operations.ak_to_categorical.to_categorical(array)
     assert ak.operations.ak_is_categorical.is_categorical(categorical)
