@@ -328,7 +328,12 @@ def test_flatten_UnionArray():
         [[[3, 3, 3], [3, 3, 3], [3, 3, 3]], [[2, 2], [2, 2]], [[1]]], highlevel=False
     )
     content3 = ak.operations.from_iter(
-        [[["3", "3", "3"], ["3", "3", "3"], ["3", "3", "3"]], [["2", "2"], ["2", "2"]], [["1"]]], highlevel=False
+        [
+            [["3", "3", "3"], ["3", "3", "3"], ["3", "3", "3"]],
+            [["2", "2"], ["2", "2"]],
+            [["1"]],
+        ],
+        highlevel=False,
     )
     tags = ak.index.Index8(np.array([0, 1, 0, 1, 0, 1], dtype=np.int8))
     index = ak.index.Index64(np.array([0, 0, 1, 1, 2, 2], dtype=np.int64))

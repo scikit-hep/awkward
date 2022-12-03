@@ -188,7 +188,18 @@ def test_0522():
     unionarray = ak.highlevel.Array(
         ak.contents.UnionArray(tags, index, [content1, content2])
     )
-    assert unionarray.tolist() == [0.0, 1.1, 2.2, [0], [100], 3.3, 4.4, [200], [300], [400]]
+    assert unionarray.tolist() == [
+        0.0,
+        1.1,
+        2.2,
+        [0],
+        [100],
+        3.3,
+        4.4,
+        [200],
+        [300],
+        [400],
+    ]
 
     assert (unionarray + 10).tolist() == [
         10.0,

@@ -192,7 +192,16 @@ def test_tonumpy():
     array = ak.highlevel.Array(
         ak.contents.UnionArray(tags, index, [content0, content1]), check_valid=True
     )
-    assert ak.operations.to_numpy(array).tolist() == ['1.1', '1', '2', '2.2', '3.3', '4.4', '3', '5.5']
+    assert ak.operations.to_numpy(array).tolist() == [
+        "1.1",
+        "1",
+        "2",
+        "2.2",
+        "3.3",
+        "4.4",
+        "3",
+        "5.5",
+    ]
 
     assert ak.operations.to_numpy(
         ak.highlevel.Array([1.1, 2.2, None, None, 3.3], check_valid=True)
@@ -271,7 +280,16 @@ def test_numpy_array():
     array = ak.highlevel.Array(
         ak.contents.UnionArray(tags, index, [content0, content1]), check_valid=True
     )
-    assert np.asarray(array).tolist() == ['1.1', '1', '2', '2.2', '3.3', '4.4', '3', '5.5']
+    assert np.asarray(array).tolist() == [
+        "1.1",
+        "1",
+        "2",
+        "2.2",
+        "3.3",
+        "4.4",
+        "3",
+        "5.5",
+    ]
 
     assert ak.operations.to_numpy(
         ak.highlevel.Array([1.1, 2.2, None, None, 3.3], check_valid=True)

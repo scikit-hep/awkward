@@ -8,9 +8,7 @@ cpu = ak._backends.NumpyBackend.instance()
 
 
 @ak._connect.numpy.implements("concatenate")
-def concatenate(
-    arrays, axis=0, *, mergebool=True, highlevel=True, behavior=None
-):
+def concatenate(arrays, axis=0, *, mergebool=True, highlevel=True, behavior=None):
     """
     Args:
         arrays: Arrays to concatenate along any dimension.

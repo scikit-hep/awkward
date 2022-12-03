@@ -1118,7 +1118,9 @@ def test_sequential():
 
 
 def test_union():
-    one = ak.operations.from_iter([["1.1", "2.2", "3.3"], [], ["4.4", "5.5"]], highlevel=False)
+    one = ak.operations.from_iter(
+        [["1.1", "2.2", "3.3"], [], ["4.4", "5.5"]], highlevel=False
+    )
     two = ak.operations.from_iter(
         [[6.6], [7.7, 8.8], [], [9.9, 10.0, 11.1, 12.2]], highlevel=False
     )

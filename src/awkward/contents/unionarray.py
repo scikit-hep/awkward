@@ -56,9 +56,7 @@ class UnionArray(Content):
 
         if len(contents) < 2:
             raise ak._errors.wrap_error(
-                TypeError(
-                    "{} must have at least 2 'contents'".format(type(self).__name__, repr(index))
-                )
+                TypeError(f"{type(self).__name__} must have at least 2 'contents'")
             )
         for content in contents:
             if not isinstance(content, Content):
