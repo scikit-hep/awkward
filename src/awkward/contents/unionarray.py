@@ -21,7 +21,7 @@ numpy = ak._nplikes.Numpy.instance()
 class UnionArray(Content):
     is_union = True
 
-    def __init__(self, tags, index, contents, *, parameters=None, backend=None):
+    def __init__(self, tags, index, contents, *, parameters=None):
         if not (isinstance(tags, Index) and tags.dtype == np.dtype(np.int8)):
             raise ak._errors.wrap_error(
                 TypeError(
@@ -102,10 +102,11 @@ class UnionArray(Content):
                     )
                 )
             )
+
+        backend = None
         for content in contents:
             if backend is None:
                 backend = content.backend
-                break
             elif backend is not content.backend:
                 raise ak._errors.wrap_error(
                     TypeError(
@@ -116,8 +117,6 @@ class UnionArray(Content):
                         )
                     )
                 )
-        if backend is None:
-            backend = ak._backends.NumpyBackend.instance()
 
         assert tags.nplike is backend.index_nplike
         assert index.nplike is backend.index_nplike
@@ -148,14 +147,12 @@ class UnionArray(Content):
         contents=unset,
         *,
         parameters=unset,
-        backend=unset,
     ):
         return UnionArray(
             self._tags if tags is unset else tags,
             self._index if index is unset else index,
             self._contents if contents is unset else contents,
             parameters=self._parameters if parameters is unset else parameters,
-            backend=self._backend if backend is unset else backend,
         )
 
     def __copy__(self):
@@ -177,14 +174,17 @@ class UnionArray(Content):
         contents,
         *,
         parameters=None,
-        backend=None,
         merge=True,
         mergebool=False,
     ):
+        self_index = index
+        self_tags = tags
+        self_contents = contents
+
+        backend = None
         for content in contents:
             if backend is None:
                 backend = content.backend
-                break
             elif backend is not content.backend:
                 raise ak._errors.wrap_error(
                     TypeError(
@@ -195,12 +195,6 @@ class UnionArray(Content):
                         )
                     )
                 )
-        if backend is None:
-            backend = ak._backends.NumpyBackend.instance()
-
-        self_index = index
-        self_tags = tags
-        self_contents = contents
 
         if backend.nplike.known_shape and self_index.length < self_tags.length:
             raise ak._errors.wrap_error(
@@ -360,7 +354,6 @@ class UnionArray(Content):
                 index,
                 contents,
                 parameters=parameters,
-                backend=backend,
             )
 
     def content(self, index):
@@ -393,7 +386,6 @@ class UnionArray(Content):
             ak.index.Index(self._index.raw(backend.nplike)),
             [x.typetracer for x in self._contents],
             parameters=self._parameters,
-            backend=backend,
         )
 
     @property
@@ -406,7 +398,6 @@ class UnionArray(Content):
             self._index,
             self._contents,
             parameters=self._parameters,
-            backend=self._backend,
         )
 
     def __repr__(self):
@@ -436,7 +427,6 @@ class UnionArray(Content):
             self._index,
             self._contents,
             parameters=ak._util.merge_parameters(self._parameters, parameters),
-            backend=self._backend,
         )
 
     def _getitem_nothing(self):
@@ -464,7 +454,6 @@ class UnionArray(Content):
             self._index[start:stop],
             self._contents,
             parameters=self._parameters,
-            backend=self._backend,
         )
 
     def _getitem_field(self, where, only_fields=()):
@@ -473,7 +462,6 @@ class UnionArray(Content):
             self._index,
             [x._getitem_field(where, only_fields) for x in self._contents],
             parameters=None,
-            backend=self._backend,
         )
 
     def _getitem_fields(self, where, only_fields=()):
@@ -482,7 +470,6 @@ class UnionArray(Content):
             self._index,
             [x._getitem_fields(where, only_fields) for x in self._contents],
             parameters=None,
-            backend=self._backend,
         )
 
     def _carry(self, carry, allow_lazy):
@@ -499,7 +486,6 @@ class UnionArray(Content):
             nextindex,
             self._contents,
             parameters=self._parameters,
-            backend=self._backend,
         )
 
     def _union_of_optionarrays(self, index, parameters):
@@ -575,7 +561,6 @@ class UnionArray(Content):
             ak.index.Index(nextindex),
             contents,
             parameters=ak._util.merge_parameters(self._parameters, parameters),
-            backend=self._backend,
         )
 
     def project(self, index):
@@ -749,7 +734,6 @@ class UnionArray(Content):
                 outindex,
                 outcontents,
                 parameters=self._parameters,
-                backend=self._backend,
             )
 
         elif isinstance(head, str):
@@ -787,7 +771,6 @@ class UnionArray(Content):
                 self._index,
                 contents,
                 parameters=self._parameters,
-                backend=self._backend,
             )
 
     def _offsets_and_flattened(self, axis, depth):
@@ -884,7 +867,6 @@ class UnionArray(Content):
                         toindex,
                         contents,
                         parameters=self._parameters,
-                        backend=self._backend,
                     ),
                 )
 
@@ -901,7 +883,6 @@ class UnionArray(Content):
                         self._index,
                         contents,
                         parameters=self._parameters,
-                        backend=self._backend,
                     ),
                 )
 
@@ -1020,7 +1001,7 @@ class UnionArray(Content):
         )
 
         return ak.contents.UnionArray.simplified(
-            tags, index, contents, parameters=parameters, backend=self._backend
+            tags, index, contents, parameters=parameters
         )
 
     def mergemany(self, others):
@@ -1123,7 +1104,6 @@ class UnionArray(Content):
             nextindex,
             nextcontents,
             parameters=parameters,
-            backend=self._backend,
         )
 
         if len(tail) == 0:
@@ -1144,7 +1124,6 @@ class UnionArray(Content):
             self._index,
             contents,
             parameters=self._parameters,
-            backend=self._backend,
         )
 
     def _local_index(self, axis, depth):
@@ -1160,7 +1139,6 @@ class UnionArray(Content):
                 self._index,
                 contents,
                 parameters=self._parameters,
-                backend=self._backend,
             )
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
@@ -1180,7 +1158,6 @@ class UnionArray(Content):
                 self._index,
                 contents,
                 parameters=self._parameters,
-                backend=self._backend,
             )
 
     def numbers_to_type(self, name):
@@ -1192,7 +1169,6 @@ class UnionArray(Content):
             self._index,
             contents,
             parameters=self._parameters,
-            backend=self._backend,
         )
 
     def _is_unique(self, negaxis, starts, parents, outlength):
@@ -1201,7 +1177,6 @@ class UnionArray(Content):
             self._index,
             self._contents,
             parameters=self._parameters,
-            backend=self._backend,
             merge=True,
             mergebool=True,
         )
@@ -1218,7 +1193,6 @@ class UnionArray(Content):
             self._index,
             self._contents,
             parameters=self._parameters,
-            backend=self._backend,
             merge=True,
             mergebool=True,
         )
@@ -1246,7 +1220,6 @@ class UnionArray(Content):
             self._index,
             self._contents,
             parameters=self._parameters,
-            backend=self._backend,
             mergebool=True,
         )
         if simplified.length == 0:
@@ -1276,7 +1249,6 @@ class UnionArray(Content):
             self._index,
             self._contents,
             parameters=self._parameters,
-            backend=self._backend,
             mergebool=True,
         )
         if simplified.length == 0:
@@ -1308,7 +1280,6 @@ class UnionArray(Content):
             self._index,
             self._contents,
             parameters=self._parameters,
-            backend=self._backend,
             mergebool=True,
         )
         if isinstance(simplified, UnionArray):
@@ -1400,7 +1371,6 @@ class UnionArray(Content):
                 self.index,
                 contents,
                 parameters=self._parameters,
-                backend=self._backend,
             )
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
@@ -1540,7 +1510,6 @@ class UnionArray(Content):
                         for content in self._contents
                     ],
                     parameters=self._parameters if options["keep_parameters"] else None,
-                    backend=self._backend,
                 )
 
         else:
@@ -1599,7 +1568,6 @@ class UnionArray(Content):
             ak.index.Index(index, nplike=self._backend.index_nplike),
             contents,
             parameters=self._parameters,
-            backend=self._backend,
         )
 
     def _to_list(self, behavior, json_conversions):
@@ -1625,7 +1593,6 @@ class UnionArray(Content):
             index,
             contents,
             parameters=self.parameters,
-            backend=backend,
         )
 
     def _layout_equal(self, other, index_dtype=True, numpyarray=True):

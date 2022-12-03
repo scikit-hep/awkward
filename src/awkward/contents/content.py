@@ -816,9 +816,7 @@ class Content:
             )
         )
 
-        return ak.contents.UnionArray(
-            tags, index, contents, parameters=None, backend=self._backend
-        )
+        return ak.contents.UnionArray(tags, index, contents, parameters=None)
 
     def _merging_strategy(
         self, others: list[Content]

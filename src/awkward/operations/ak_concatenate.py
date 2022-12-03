@@ -116,7 +116,6 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
                 out._index,
                 out._contents,
                 parameters=out._parameters,
-                backend=out._backend,
                 mergebool=mergebool,
             )
 

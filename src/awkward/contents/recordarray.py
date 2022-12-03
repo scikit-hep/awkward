@@ -111,7 +111,6 @@ class RecordArray(Content):
         for content in contents:
             if backend is None:
                 backend = content.backend
-                break
             elif backend is not content.backend:
                 raise ak._errors.wrap_error(
                     TypeError(
