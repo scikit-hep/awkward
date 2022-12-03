@@ -222,9 +222,10 @@ def normalise_item_nested(item):
                 parameters=item.parameters,
                 backend=item.backend,
             )
-        next = next.to_RegularArray()
-        next = normalise_item_RegularArray_to_ListOffsetArray64(next)
-        return next
+        # Any NumpyArray at this point is part of a non-Numpy indexing
+        # slice item. Therefore, we want to invoke ragged indexing by
+        # converting this layout to a ListOffsetAray64
+        return normalise_item_RegularArray_to_ListOffsetArray64(next.to_RegularArray())
 
     elif isinstance(
         item,
