@@ -65,7 +65,9 @@ class Content:
                         )
                     )
                 )
-            if not self.is_numpy and parameters.get("__array__") in ("char", "byte"):
+            if not isinstance(self, ak.contents.NumpyArray) and parameters.get(
+                "__array__"
+            ) in ("char", "byte"):
                 raise ak._errors.wrap_error(
                     TypeError(
                         '{} is not allowed to have parameters["__array__"] = "{}"'.format(
