@@ -541,14 +541,16 @@ def direct_Content_subclass_name(node):
         return out.__name__
 
 
-meaningful_parameters = frozenset({
-    ("__array__", "string"),
-    ("__array__", "bytestring"),
-    ("__array__", "char"),
-    ("__array__", "byte"),
-    ("__array__", "sorted_map"),
-    ("__array__", "categorical"),
-})
+meaningful_parameters = frozenset(
+    {
+        ("__array__", "string"),
+        ("__array__", "bytestring"),
+        ("__array__", "char"),
+        ("__array__", "byte"),
+        ("__array__", "sorted_map"),
+        ("__array__", "categorical"),
+    }
+)
 
 
 def merge_parameters(one, two, merge_equal=False, exclude=()):
