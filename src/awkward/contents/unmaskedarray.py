@@ -25,6 +25,14 @@ class UnmaskedArray(Content):
                     )
                 )
             )
+        if content.is_union or content.is_indexed or content.is_option:
+            raise ak._errors.wrap_error(
+                TypeError(
+                    "{0} cannot contain a union-type, option-type, or indexed 'content' ({1}); try {0}.simplified instead".format(
+                        type(self).__name__, type(content).__name__
+                    )
+                )
+            )
         self._content = content
         self._init(parameters, content.backend)
 
@@ -184,7 +192,7 @@ class UnmaskedArray(Content):
         )
 
     def _carry(self, carry, allow_lazy):
-        return UnmaskedArray(
+        return UnmaskedArray.simplified(
             self._content._carry(carry, allow_lazy), parameters=self._parameters
         )
 
@@ -422,19 +430,7 @@ class UnmaskedArray(Content):
         )
 
     def _validity_error(self, path):
-        if isinstance(
-            self._content,
-            (
-                ak.contents.BitMaskedArray,
-                ak.contents.ByteMaskedArray,
-                ak.contents.IndexedArray,
-                ak.contents.IndexedOptionArray,
-                ak.contents.UnmaskedArray,
-            ),
-        ):
-            return "{0} contains \"{1}\", the operation that made it might have forgotten to call 'simplify_optiontype()'"
-        else:
-            return self._content.validity_error(path + ".content")
+        return self._content.validity_error(path + ".content")
 
     def _nbytes_part(self):
         return self.content._nbytes_part()
