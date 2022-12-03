@@ -1482,7 +1482,7 @@ class IndexedOptionArray(Content):
         )
 
     def _to_numpy(self, allow_missing):
-        content = ak.operations.to_numpy(self.project(), allow_missing=allow_missing)
+        content = self.project()._to_numpy(allow_missing)
 
         shape = list(content.shape)
         shape[0] = self.length

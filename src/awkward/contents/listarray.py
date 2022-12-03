@@ -1391,9 +1391,7 @@ class ListArray(Content):
         )
 
     def _to_numpy(self, allow_missing):
-        return ak.operations.to_numpy(
-            self.to_RegularArray(), allow_missing=allow_missing
-        )
+        return self.to_RegularArray()._to_numpy(allow_missing)
 
     def _completely_flatten(self, backend, options):
         if (

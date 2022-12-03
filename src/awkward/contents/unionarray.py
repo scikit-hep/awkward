@@ -1453,8 +1453,7 @@ class UnionArray(Content):
 
     def _to_numpy(self, allow_missing):
         contents = [
-            ak.operations.to_numpy(self.project(i), allow_missing=allow_missing)
-            for i in range(len(self.contents))
+            self.project(i)._to_numpy(allow_missing) for i in range(len(self.contents))
         ]
 
         if any(isinstance(x, self._backend.nplike.ma.MaskedArray) for x in contents):
