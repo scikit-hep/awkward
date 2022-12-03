@@ -8,6 +8,13 @@ import awkward as ak
 to_list = ak.operations.to_list
 
 
+def test_issue434():
+    a = ak.highlevel.Array([[0.0, 1.1, 2.2], [3.3, 4.4], [5.5]])
+    b = ak.highlevel.Array([[9.9, 8.8, 7.7], [6.6, 5.5], [4.4]])
+    assert to_list(b[ak.argmin(a, axis=1, keepdims=True)]) == [[9.9], [6.6], [4.4]]
+    assert to_list(b[ak.argmax(a, axis=1, keepdims=True)]) == [[7.7], [5.5], [4.4]]
+
+
 def test_nokeepdims():
     nparray = np.arange(2 * 3 * 5, dtype=np.int64).reshape(2, 3, 5)
     content = ak.contents.NumpyArray(np.arange(2 * 3 * 5, dtype=np.int64))
