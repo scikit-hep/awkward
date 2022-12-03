@@ -30,7 +30,6 @@ class UnionArray(Content):
                     )
                 )
             )
-        assert len(contents) > 0
 
         if not isinstance(index, Index) and index.dtype in (
             np.dtype(np.int32),
@@ -55,12 +54,40 @@ class UnionArray(Content):
         if not isinstance(contents, list):
             contents = list(contents)
 
+        if len(contents) < 2:
+            raise ak._errors.wrap_error(
+                TypeError(
+                    "{} must have at least 2 'contents'".format(type(self).__name__, repr(index))
+                )
+            )
         for content in contents:
             if not isinstance(content, Content):
                 raise ak._errors.wrap_error(
                     TypeError(
                         "{} all 'contents' must be Content subclasses, not {}".format(
                             type(self).__name__, repr(content)
+                        )
+                    )
+                )
+            if content.is_union:
+                raise ak._errors.wrap_error(
+                    TypeError(
+                        "{0} cannot contain union-types in its 'contents' ({1}); try {0}.simplified instead".format(
+                            type(self).__name__, type(content).__name__
+                        )
+                    )
+                )
+
+        for content in contents[1:]:
+            if contents[0].mergeable(content, mergebool=False):
+                raise ak._errors.wrap_error(
+                    TypeError(
+                        "{0} cannot contain mergeable 'contents' ({1} of {2} and {3} of {4}); try {0}.simplified instead".format(
+                            type(self).__name__,
+                            type(contents[0]).__name__,
+                            repr(str(contents[0].form.type)),
+                            type(content).__name__,
+                            repr(str(content.form.type)),
                         )
                     )
                 )
@@ -989,7 +1016,7 @@ class UnionArray(Content):
             )
 
         parameters = ak._util.merge_parameters(self._parameters, other._parameters)
-        return ak.contents.UnionArray(
+        return ak.contents.UnionArray.simplified(
             tags, index, contents, parameters=parameters, backend=self._backend
         )
 
@@ -1088,15 +1115,13 @@ class UnionArray(Content):
                 ValueError("FIXME: handle UnionArray with more than 127 contents")
             )
 
-        next = ak.contents.UnionArray(
+        next = ak.contents.UnionArray.simplified(
             nexttags,
             nextindex,
             nextcontents,
             parameters=parameters,
             backend=self._backend,
         )
-
-        # Given UnionArray's merging_strategy, tail is always empty, but just to be formal...
 
         if len(tail) == 0:
             return next
@@ -1497,7 +1522,7 @@ class UnionArray(Content):
         if options["return_array"]:
 
             def continuation():
-                return UnionArray(
+                return UnionArray.simplified(
                     self._tags,
                     self._index,
                     [

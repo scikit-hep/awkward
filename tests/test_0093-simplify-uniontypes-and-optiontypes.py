@@ -1060,7 +1060,7 @@ def test_unionarray_simplify():
     index1 = ak.index.Index32(
         np.array([0, 1, 0, 1, 2, 2, 3, 4, 5, 3, 6, 4], dtype=np.int32)
     )
-    outer = ak.contents.UnionArray(tags1, index1, [inner, one])
+    outer = ak.contents.UnionArray.simplified(tags1, index1, [inner, one])
     assert to_list(outer) == [
         5,
         4,

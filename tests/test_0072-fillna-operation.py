@@ -108,29 +108,29 @@ def test_fillna_listarray_array():
 
 def test_fillna_unionarray():
     content1 = ak.operations.from_iter([[], [1.1], [2.2, 2.2]], highlevel=False)
-    content2 = ak.operations.from_iter([[2, 2], [1], []], highlevel=False)
+    content2 = ak.operations.from_iter([["two", "two"], ["one"], []], highlevel=False)
     tags = ak.index.Index8(np.array([0, 1, 0, 1, 0, 1], dtype=np.int8))
     index = ak.index.Index64(np.array([0, 0, 1, 1, 2, 2], dtype=np.int64))
     array = ak.contents.UnionArray(tags, index, [content1, content2])
-    value = ak.contents.NumpyArray(np.array([777]))
 
-    assert to_list(array) == [[], [2, 2], [1.1], [1], [2.2, 2.2], []]
+    assert to_list(array) == [[], ["two", "two"], [1.1], ["one"], [2.2, 2.2], []]
 
     padded_array = array.pad_none(2, 1)
     assert to_list(padded_array) == [
         [None, None],
-        [2, 2],
+        ["two", "two"],
         [1.1, None],
-        [1, None],
+        ["one", None],
         [2.2, 2.2],
         [None, None],
     ]
 
+    value = ak.contents.NumpyArray(np.array([777]))
     assert to_list(padded_array.fill_none(value)) == [
         [777, 777],
-        [2, 2],
+        ["two", "two"],
         [1.1, 777],
-        [1, 777],
+        ["one", 777],
         [2.2, 2.2],
         [777, 777],
     ]

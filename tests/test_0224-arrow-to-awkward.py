@@ -1774,7 +1774,7 @@ def test_arrow_coverage100_broken_unions():
     ]
 
     content1 = ak.operations.from_iter([1.1, 2.2, 3.3, 4.4, 5.5]).layout
-    content2 = ak.contents.NumpyArray(np.array([], dtype=np.int32))
+    content2 = ak.operations.from_iter(["hello"]).layout[1:]
     a = ak.contents.UnionArray(
         ak.index.Index8(np.array([0, 0, 0, 0, 0], "i1")),
         ak.index.Index32(np.array([0, 1, 2, 3, 4], "i4")),
