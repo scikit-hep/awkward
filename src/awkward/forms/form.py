@@ -428,7 +428,7 @@ class Form:
     def length_one_array(self, *, backend=numpy_backend, highlevel=True, behavior=None):
         # A length-1 array will need at least N bytes, where N is the largest dtype (e.g. 256 bit complex)
         # Similarly, a length-1 array will need no more than 2*N bytes, as all contents need at most two
-        # index-types e.g. `ListOffsetArray.offsets` for their various index metadata. Therefore, we 
+        # index-types e.g. `ListOffsetArray.offsets` for their various index metadata. Therefore, we
         # create a buffer of this length (2N) and instruct all contents to use it (via `buffer_key=""`).
         # At the same time, with all index-like metadata set to 0, the list types will have zero lengths
         # whilst unions, indexed, and option types will contain a single value.
