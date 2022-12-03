@@ -178,8 +178,8 @@ def normalise_item(item, backend: ak._backends.Backend):
     elif ak._util.is_sized_iterable(item) and len(item) == 0:
         return backend.index_nplike.empty(0, dtype=np.int64)
 
-    elif isinstance(item, list) and all(isinstance(x, str) for x in item):
-        return item
+    elif ak._util.is_sized_iterable(item) and all(isinstance(x, str) for x in item):
+        return list(item)
 
     elif ak._util.is_sized_iterable(item):
         layout = ak.operations.to_layout(item)
