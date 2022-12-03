@@ -1613,6 +1613,9 @@ class ListOffsetArray(Content):
                 # means this will be broadcastable
                 assert outcontent.is_regular
             elif depth >= negaxis + 2:
+                # The *only* >1D list types that we can have as direct children
+                # are the `is_list` or `is_regular` types; NumpyArray should be
+                # converted to `RegularArray`.
                 assert outcontent.is_list or outcontent.is_regular
                 outcontent = outcontent.to_ListOffsetArray64(False)
 
