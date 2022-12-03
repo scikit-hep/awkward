@@ -77,7 +77,9 @@ class IndexedOptionArray(Content):
 
     @classmethod
     def simplified(cls, index, content, *, parameters=None):
-        if content.is_union:
+        is_cat = parameters is not None and parameters.get("__array__") == "categorical"
+
+        if content.is_union and not is_cat:
             return content._union_of_optionarrays(index, parameters)
 
         elif content.is_indexed or content.is_option:

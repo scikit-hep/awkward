@@ -70,14 +70,18 @@ class IndexedOptionForm(Form):
         parameters=None,
         form_key=None,
     ):
-        if content.is_union:
+        is_cat = parameters is not None and parameters.get("__array__") == "categorical"
+
+        if content.is_union and not is_cat:
             return content._union_of_optionarrays(index, parameters)
+
         elif content.is_indexed or content.is_option:
             return ak.forms.IndexedOptionForm.simplified(
                 "i64",
                 content.content,
                 parameters=ak._util.merge_parameters(content._parameters, parameters),
             )
+
         else:
             return cls(index, content, parameters=parameters, form_key=form_key)
 

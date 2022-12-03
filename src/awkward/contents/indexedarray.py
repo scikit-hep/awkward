@@ -77,7 +77,9 @@ class IndexedArray(Content):
 
     @classmethod
     def simplified(cls, index, content, *, parameters=None):
-        if content.is_union:
+        is_cat = parameters is not None and parameters.get("__array__") == "categorical"
+
+        if content.is_union and not is_cat:
             return content._carry(index, allow_lazy=False).copy(
                 parameters=ak._util.merge_parameters(content._parameters, parameters)
             )
