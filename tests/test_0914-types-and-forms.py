@@ -515,7 +515,7 @@ def test_ListType():
                 parameters={"__array__": "bytestring"},
             )
         )
-        == "byte"
+        == "bytes"
     )
 
     assert (
