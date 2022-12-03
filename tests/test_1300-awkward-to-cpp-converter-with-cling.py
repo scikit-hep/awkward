@@ -814,7 +814,7 @@ def test_UnionArray_NumpyArray():
         ak.index.Index(np.array([1, 1, 0, 0, 1, 0, 1], np.int8)),
         ak.index.Index(np.array([4, 3, 0, 1, 2, 2, 4, 100], np.int64)),
         [
-            ak.contents.numpyarray.NumpyArray(np.array([1, 2, 3], np.int64)),
+            ak.from_iter(["1", "2", "3"], highlevel=False),
             ak.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5])),
         ],
     )
@@ -838,10 +838,10 @@ void roottest_UnionArray_NumpyArray_v2a(double* out, ssize_t length, ssize_t* pt
   out[7] = obj[6].index();
   out[8] = std::get<double>(obj[0]);
   out[9] = std::get<double>(obj[1]);
-  out[10] = std::get<int64_t>(obj[2]);
-  out[11] = std::get<int64_t>(obj[3]);
+  out[10] = std::atoi(std::get<std::string>(obj[2]).c_str());
+  out[11] = std::atoi(std::get<std::string>(obj[3]).c_str());
   out[12] = std::get<double>(obj[4]);
-  out[13] = std::get<int64_t>(obj[5]);
+  out[13] = std::atoi(std::get<std::string>(obj[5]).c_str());
   out[14] = std::get<double>(obj[6]);
 }}
 """
@@ -1786,7 +1786,7 @@ def test_nested_UnionArray_NumpyArray():
             ak.index.Index(np.array([123, 1, 1, 0, 0, 1, 0, 1], np.int8)),
             ak.index.Index(np.array([999, 4, 3, 0, 1, 2, 2, 4, 100], np.int64)),
             [
-                ak.contents.numpyarray.NumpyArray(np.array([1, 2, 3], np.int64)),
+                ak.from_iter(["1", "2", "3"], highlevel=False),
                 ak.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5])),
             ],
         ),
@@ -1811,10 +1811,10 @@ void roottest_nested_UnionArray_NumpyArray_v2a(double* out, ssize_t length, ssiz
   out[7] = obj[6].index();
   out[8] = std::get<double>(obj[0]);
   out[9] = std::get<double>(obj[1]);
-  out[10] = std::get<int64_t>(obj[2]);
-  out[11] = std::get<int64_t>(obj[3]);
+  out[10] = std::atoi(std::get<std::string>(obj[2]).c_str());
+  out[11] = std::atoi(std::get<std::string>(obj[3]).c_str());
   out[12] = std::get<double>(obj[4]);
-  out[13] = std::get<int64_t>(obj[5]);
+  out[13] = std::atoi(std::get<std::string>(obj[5]).c_str());
   out[14] = std::get<double>(obj[6]);
 }}
 """

@@ -5454,7 +5454,7 @@ def test_UnmaskedArray_RecordArray_NumpyArray():
 def test_UnionArray_RecordArray_NumpyArray():
     # 100 is inaccessible in index
     # 1.1 is inaccessible in contents[1]
-    a = ak.contents.unionarray.UnionArray(  # noqa: F841
+    a = ak.contents.unionarray.UnionArray.simplified(  # noqa: F841
         ak.index.Index(np.array([1, 1, 0, 0, 1, 0, 1], dtype=np.int8)),
         ak.index.Index(np.array([4, 3, 0, 1, 2, 2, 4, 100])),
         [
@@ -5570,12 +5570,6 @@ def test_UnionArray_RecordArray_NumpyArray():
             -1,
         ]
         == 5.5
-    )
-    assert isinstance(
-        a["nest",][  # noqa: E231
-            3:,
-        ],
-        ak.contents.NumpyArray,
     )
     assert (
         a.typetracer["nest",][  # noqa: E231

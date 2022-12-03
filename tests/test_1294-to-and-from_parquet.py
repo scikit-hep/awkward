@@ -719,7 +719,7 @@ def test_unionarray(tmp_path, through, extensionarray):
                 parameters={"which": "inner1"},
             ),
             ak.contents.NumpyArray(
-                np.array([0, 10, 20, 30], dtype=np.int32),
+                np.array([[0], [10], [20], [30]], dtype=np.int32),
                 parameters={"which": "inner2"},
             ),
         ],
@@ -744,7 +744,7 @@ def test_unionarray(tmp_path, through, extensionarray):
             ak.contents.ByteMaskedArray(
                 ak.index.Index8(np.array([False, False, True, False]).view(np.int8)),
                 ak.contents.NumpyArray(
-                    np.array([0, 10, 20, 30], dtype=np.int32),
+                    np.array([[0], [10], [20], [30]], dtype=np.int32),
                     parameters={"which": "inner2"},
                 ),
                 valid_when=False,
@@ -773,7 +773,7 @@ def test_unionarray(tmp_path, through, extensionarray):
                     np.array([0.0, 1.1, 2.2]), parameters={"which": "inner1"}
                 ),
                 ak.contents.NumpyArray(
-                    np.array([0, 10, 20, 30], dtype=np.int32),
+                    np.array([[0], [10], [20], [30]], dtype=np.int32),
                     parameters={"which": "inner2"},
                 ),
             ],
@@ -806,7 +806,7 @@ def test_unionarray(tmp_path, through, extensionarray):
                         np.array([False, False, True, False]).view(np.int8)
                     ),
                     ak.contents.NumpyArray(
-                        np.array([0, 10, 20, 30], dtype=np.int32),
+                        np.array([[0], [10], [20], [30]], dtype=np.int32),
                         parameters={"which": "inner2"},
                     ),
                     valid_when=False,

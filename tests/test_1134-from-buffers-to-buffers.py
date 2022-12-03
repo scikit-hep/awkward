@@ -273,7 +273,7 @@ def test_UnionArray_NumpyArray():
         ak.index.Index(np.array([1, 1, 0, 0, 1, 0, 1], np.int8)),
         ak.index.Index(np.array([4, 3, 0, 1, 2, 2, 4, 100], np.int64)),
         [
-            ak.contents.numpyarray.NumpyArray(np.array([1, 2, 3], np.int64)),
+            ak.from_iter(["1", "2", "3"], highlevel=False),
             ak.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5])),
         ],
     )
@@ -630,7 +630,7 @@ def test_UnionArray_RecordArray_NumpyArray():
         ak.index.Index(np.array([4, 3, 0, 1, 2, 2, 4, 100], np.int64)),
         [
             ak.contents.recordarray.RecordArray(
-                [ak.contents.numpyarray.NumpyArray(np.array([1, 2, 3], np.int64))],
+                [ak.from_iter(["1", "2", "3"], highlevel=False)],
                 ["nest"],
             ),
             ak.contents.recordarray.RecordArray(

@@ -152,7 +152,7 @@ def test_UnionArray():
         ak.index.Index(np.array([4, 3, 0, 1, 2, 2, 4, 100])),
         [
             ak.contents.recordarray.RecordArray(
-                [ak.contents.numpyarray.NumpyArray(np.array([1, 2, 3]))], ["nest"]
+                [ak.from_iter(["1", "2", "3"], highlevel=False)], ["nest"]
             ),
             ak.contents.recordarray.RecordArray(
                 [

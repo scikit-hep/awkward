@@ -106,7 +106,7 @@ class UnionForm(Form):
 
     def _union_of_optionarrays(self, index, parameters):
         return (
-            self.zero_length_array(highlevel=False)
+            self.length_zero_array(highlevel=False)
             ._union_of_optionarrays(ak.index._form_to_zero_length(index), parameters)
             .form
         )
