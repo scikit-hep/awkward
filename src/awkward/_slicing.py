@@ -199,7 +199,7 @@ def normalise_item_RegularArray_to_ListOffsetArray64(item):
             parameters=item.parameters,
         )
 
-    elif isinstance(item, ak.contents.NumpyArray):
+    elif isinstance(item, ak.contents.NumpyArray) and item.purelist_depth == 1:
         return item
 
     else:
