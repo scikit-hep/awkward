@@ -558,9 +558,6 @@ class Content:
         elif isinstance(where, ak.highlevel.Array):
             return self._getitem(where.layout)
 
-        elif isinstance(where, ak.highlevel.Array):
-            return self._getitem(where.layout)
-
         elif (
             isinstance(where, Content)
             and where._parameters is not None
