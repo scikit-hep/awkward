@@ -47,7 +47,7 @@ class ListType(Type):
             out = ["string"]
 
         elif self.parameter("__array__") == "bytestring":
-            out = ["byte"]
+            out = ["bytes"]
 
         else:
             params = self._str_parameters()
