@@ -232,7 +232,7 @@ class IndexedArray(Content):
         )
 
     def _getitem_fields(self, where, only_fields=()):
-        return IndexedArray(
+        return IndexedArray.simplified(
             self._index,
             self._content._getitem_fields(where, only_fields),
             parameters=None,

@@ -182,12 +182,12 @@ class UnmaskedArray(Content):
         )
 
     def _getitem_field(self, where, only_fields=()):
-        return UnmaskedArray(
+        return UnmaskedArray.simplified(
             self._content._getitem_field(where, only_fields), parameters=None
         )
 
     def _getitem_fields(self, where, only_fields=()):
-        return UnmaskedArray(
+        return UnmaskedArray.simplified(
             self._content._getitem_fields(where, only_fields), parameters=None
         )
 
