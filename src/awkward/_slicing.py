@@ -151,9 +151,25 @@ def normalise_item(item, backend: ak._backends.Backend):
     elif isinstance(item, ak.contents.NumpyArray):
         return item.data
 
+    elif isinstance(item, ak.contents.RegularArray) and item.purelist_isregular:
+        try:
+            as_numpy = item.to_numpy(allow_missing=True)
+        except Exception as err:
+            raise ak._errors.wrap_error(
+                TypeError(
+                    "only integers, slices (`:`), ellipsis (`...`), np.newaxis (`None`), "
+                    "integer/boolean arrays (possibly with variable-length nested "
+                    "lists or missing values), field name (str) or names (non-tuple "
+                    "iterable of str) are valid indices for slicing, not\n\n    "
+                    + repr(item).replace("\n", "\n    ")
+                )
+            ) from err
+        else:
+            return as_numpy
+
     elif isinstance(item, ak.contents.Content):
         out = normalise_item_bool_to_int(normalise_item_nested(item))
-        if isinstance(out, ak.contents.NumpyArray):
+        if out.is_numpy:
             return out.data
         else:
             return out
@@ -191,7 +207,6 @@ def normalise_items(where: Sequence, backend: ak._backends.Backend) -> list:
 
 def normalise_item_RegularArray_to_ListOffsetArray64(item):
     if isinstance(item, ak.contents.RegularArray):
-
         next = item.to_ListOffsetArray64()
         return ak.contents.ListOffsetArray(
             next.offsets,
@@ -224,7 +239,8 @@ def normalise_item_nested(item):
             )
         # Any NumpyArray at this point is part of a non-Numpy indexing
         # slice item. Therefore, we want to invoke ragged indexing by
-        # converting this layout to a ListOffsetAray64
+        # converting N-dimensional layouts to ListOffsetArray, and converting the
+        # dtype to int if not a supported index type
         return normalise_item_RegularArray_to_ListOffsetArray64(next.to_RegularArray())
 
     elif isinstance(
