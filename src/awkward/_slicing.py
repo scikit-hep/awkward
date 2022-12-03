@@ -161,7 +161,7 @@ def normalise_item(item, backend: ak._backends.Backend):
 
         if as_numpy is None:
             out = normalise_item_bool_to_int(normalise_item_nested(item))
-            if out.is_numpy:
+            if isinstance(out, ak.contents.NumpyArray):
                 return out.data
             else:
                 return out
@@ -170,7 +170,7 @@ def normalise_item(item, backend: ak._backends.Backend):
 
     elif isinstance(item, ak.contents.Content):
         out = normalise_item_bool_to_int(normalise_item_nested(item))
-        if out.is_numpy:
+        if isinstance(out, ak.contents.NumpyArray):
             return out.data
         else:
             return out
