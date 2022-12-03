@@ -107,7 +107,7 @@ class RecordType(Type):
                     in (
                         "unknown",
                         "string",
-                        "bytes",
+                        "byte",
                         "option",
                         "tuple",
                         "struct",

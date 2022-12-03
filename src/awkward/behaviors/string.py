@@ -249,7 +249,7 @@ def register(behavior):
     behavior["__typestr__", "char"] = "char"
 
     behavior["bytestring"] = ByteStringBehavior
-    behavior["__typestr__", "bytestring"] = "bytes"
+    behavior["__typestr__", "bytestring"] = "byte"
     behavior["string"] = StringBehavior
     behavior["__typestr__", "string"] = "string"
 

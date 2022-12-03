@@ -1388,7 +1388,7 @@ def test_arrow_coverage100():
     a = ak.contents.ListOffsetArray(
         ak.index.Index32(np.array([0, 5, 10], "i4")),
         ak.contents.NumpyArray(
-            np.frombuffer(b"hellothere", "u1"), parameters={"__array__": "bytes"}
+            np.frombuffer(b"hellothere", "u1"), parameters={"__array__": "byte"}
         ),
         parameters={"__array__": "bytestring"},
     )
@@ -1400,7 +1400,7 @@ def test_arrow_coverage100():
             ak.index.Index32(np.array([0, 5, 10, 15, 20, 25, 30], "i4")),
             ak.contents.NumpyArray(
                 np.frombuffer(b"hellotherehellotherehellothere", "u1"),
-                parameters={"__array__": "bytes"},
+                parameters={"__array__": "byte"},
             ),
             parameters={"__array__": "bytestring"},
         ),
@@ -1420,7 +1420,7 @@ def test_arrow_coverage100():
         ak.contents.ListOffsetArray(
             ak.index.Index32(np.array([0, 5, 10], "i4")),
             ak.contents.NumpyArray(
-                np.frombuffer(b"hellothere", "u1"), parameters={"__array__": "bytes"}
+                np.frombuffer(b"hellothere", "u1"), parameters={"__array__": "byte"}
             ),
             parameters={"__array__": "bytestring"},
         ),
@@ -1433,7 +1433,7 @@ def test_arrow_coverage100():
         ak.contents.ListOffsetArray(
             ak.index.Index32(np.array([0, 5, 10], "i4")),
             ak.contents.NumpyArray(
-                np.frombuffer(b"hellothere", "u1"), parameters={"__array__": "bytes"}
+                np.frombuffer(b"hellothere", "u1"), parameters={"__array__": "byte"}
             ),
             parameters={"__array__": "bytestring"},
         ),
@@ -1450,7 +1450,7 @@ def test_arrow_coverage100():
     a = ak.contents.ListOffsetArray(
         ak.index.Index32(np.array([0, 5, 10], "i4")),
         ak.contents.NumpyArray(
-            np.frombuffer(b"hellothere", "u1"), parameters={"__array__": "chars"}
+            np.frombuffer(b"hellothere", "u1"), parameters={"__array__": "char"}
         ),
         parameters={"__array__": "string"},
     )
@@ -1462,7 +1462,7 @@ def test_arrow_coverage100():
             ak.index.Index32(np.array([0, 5, 10, 15, 20, 25, 30], "i4")),
             ak.contents.NumpyArray(
                 np.frombuffer(b"hellotherehellotherehellothere", "u1"),
-                parameters={"__array__": "chars"},
+                parameters={"__array__": "char"},
             ),
             parameters={"__array__": "string"},
         ),
@@ -1484,7 +1484,7 @@ def test_arrow_coverage100():
             ak.index.Index64(np.array([0, 5, 10, 15, 20, 25, 30], "i8")),
             ak.contents.NumpyArray(
                 np.frombuffer(b"hellotherehellotherehellothere", "u1"),
-                parameters={"__array__": "chars"},
+                parameters={"__array__": "char"},
             ),
             parameters={"__array__": "string"},
         ),
@@ -1506,7 +1506,7 @@ def test_arrow_coverage100():
             ak.index.Index64(np.array([0, 5, 10, 15, 20, 25, 30], "i8")),
             ak.contents.NumpyArray(
                 np.frombuffer(b"hellotherehellotherehellothere", "u1"),
-                parameters={"__array__": "bytes"},
+                parameters={"__array__": "byte"},
             ),
             parameters={"__array__": "bytestring"},
         ),
@@ -1534,7 +1534,7 @@ def test_arrow_coverage100():
         ak.contents.ListOffsetArray(
             ak.index.Index32(np.array([0, 5, 10], "i4")),
             ak.contents.NumpyArray(
-                np.frombuffer(b"hellothere", "u1"), parameters={"__array__": "chars"}
+                np.frombuffer(b"hellothere", "u1"), parameters={"__array__": "char"}
             ),
             parameters={"__array__": "string"},
         ),
@@ -1547,7 +1547,7 @@ def test_arrow_coverage100():
         ak.contents.ListOffsetArray(
             ak.index.Index32(np.array([0, 5, 10], "i4")),
             ak.contents.NumpyArray(
-                np.frombuffer(b"hellothere", "u1"), parameters={"__array__": "chars"}
+                np.frombuffer(b"hellothere", "u1"), parameters={"__array__": "char"}
             ),
             parameters={"__array__": "string"},
         ),

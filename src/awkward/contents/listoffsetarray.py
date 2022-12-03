@@ -46,6 +46,25 @@ class ListOffsetArray(Content):
                 )
             )
 
+        if parameters is not None and parameters.get("__array__") == "string":
+            if not content.is_numpy or not content.parameter("__array__") == "char":
+                raise ak._errors.wrap_error(
+                    ValueError(
+                        "{} is a string, so its 'content' must be uint8 NumpyArray of char, not {}".format(
+                            type(self).__name__, repr(content)
+                        )
+                    )
+                )
+        if parameters is not None and parameters.get("__array__") == "bytestring":
+            if not content.is_numpy or not content.parameter("__array__") == "byte":
+                raise ak._errors.wrap_error(
+                    ValueError(
+                        "{} is a bytestring, so its 'content' must be uint8 NumpyArray of byte, not {}".format(
+                            type(self).__name__, repr(content)
+                        )
+                    )
+                )
+
         assert offsets.nplike is content.backend.index_nplike
 
         self._offsets = offsets
@@ -771,13 +790,11 @@ class ListOffsetArray(Content):
                 )
             )
             return ak.contents.ListOffsetArray(
-                offsets, ak.contents.NumpyArray(localindex), parameters=self._parameters
+                offsets, ak.contents.NumpyArray(localindex)
             )
         else:
             return ak.contents.ListOffsetArray(
-                self._offsets,
-                self._content._local_index(posaxis, depth + 1),
-                parameters=self._parameters,
+                self._offsets, self._content._local_index(posaxis, depth + 1)
             )
 
     def numbers_to_type(self, name):
@@ -1735,13 +1752,7 @@ class ListOffsetArray(Content):
                 path, type(self), message, error.id, filename
             )
         else:
-            if (
-                self.parameter("__array__") == "string"
-                or self.parameter("__array__") == "bytestring"
-            ):
-                return ""
-            else:
-                return self._content.validity_error(path + ".content")
+            return self._content.validity_error(path + ".content")
 
     def _nbytes_part(self):
         return self.offsets._nbytes_part() + self.content._nbytes_part()

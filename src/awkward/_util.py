@@ -541,11 +541,27 @@ def direct_Content_subclass_name(node):
         return out.__name__
 
 
-def merge_parameters(one, two, merge_equal=False):
+meaningful_parameters = {
+    ("__array__", "string"),
+    ("__array__", "bytestring"),
+    ("__array__", "char"),
+    ("__array__", "byte"),
+    ("__array__", "sorted_map"),
+    ("__array__", "categorical"),
+}
+
+
+def merge_parameters(one, two, merge_equal=False, exclude=()):
     if one is None and two is None:
         return None
 
-    elif one is None:
+    if len(exclude) != 0:
+        if one is None:
+            one = {}
+        if two is None:
+            two = {}
+
+    if one is None:
         return two
 
     elif two is None:
@@ -555,15 +571,20 @@ def merge_parameters(one, two, merge_equal=False):
         out = {}
         for k, v in two.items():
             if k in one.keys():
-                if v == one[k]:
-                    out[k] = v
+                if len(exclude) == 0 or (k, v) not in exclude:
+                    if v == one[k]:
+                        out[k] = v
         return out
 
     else:
-        out = dict(one)
+        if len(exclude) != 0:
+            out = {k: v for k, v in one.items() if (k, v) not in exclude}
+        else:
+            out = dict(one)
         for k, v in two.items():
-            if v is not None:
-                out[k] = v
+            if len(exclude) == 0 or (k, v) not in exclude:
+                if v is not None:
+                    out[k] = v
         return out
 
 

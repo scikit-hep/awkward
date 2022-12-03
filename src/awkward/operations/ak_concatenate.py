@@ -109,6 +109,7 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
                 batch = [collapsed.merge_as_union(x)]
 
         out = batch[0].mergemany(batch[1:])
+
         if isinstance(out, ak.contents.UnionArray):
             out = type(out).simplified(
                 out._tags,

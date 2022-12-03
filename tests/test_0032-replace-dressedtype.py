@@ -135,8 +135,8 @@ def test_builder_string():
     assert (
         ak.operations.to_json(a, convert_bytes=bytes.decode) == '["one","two","three"]'
     )
-    assert repr(a) == "<Array [b'one', b'two', b'three'] type='3 * bytes'>"
-    assert str(ak.operations.type(a)) == "3 * bytes"
+    assert repr(a) == "<Array [b'one', b'two', b'three'] type='3 * byte'>"
+    assert str(ak.operations.type(a)) == "3 * byte"
 
     builder = ak.highlevel.ArrayBuilder()
 

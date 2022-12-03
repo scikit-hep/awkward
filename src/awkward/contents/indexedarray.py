@@ -932,17 +932,6 @@ class IndexedArray(Content):
                 path, type(self), message, error.id, filename
             )
 
-        elif isinstance(
-            self._content,
-            (
-                ak.contents.BitMaskedArray,
-                ak.contents.ByteMaskedArray,
-                ak.contents.IndexedArray,
-                ak.contents.IndexedOptionArray,
-                ak.contents.UnmaskedArray,
-            ),
-        ):
-            return "{0} contains \"{1}\", the operation that made it might have forgotten to call 'simplify_optiontype()'"
         else:
             return self._content.validity_error(path + ".content")
 

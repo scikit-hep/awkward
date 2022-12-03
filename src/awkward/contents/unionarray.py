@@ -1013,7 +1013,12 @@ class UnionArray(Content):
                 AssertionError("FIXME: handle UnionArray with more than 127 contents")
             )
 
-        parameters = ak._util.merge_parameters(self._parameters, other._parameters)
+        parameters = ak._util.merge_parameters(
+            self._parameters,
+            other._parameters,
+            exclude=ak._util.meaningful_parameters,
+        )
+
         return ak.contents.UnionArray.simplified(
             tags, index, contents, parameters=parameters, backend=self._backend
         )

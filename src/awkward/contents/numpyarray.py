@@ -28,6 +28,7 @@ class NumpyArray(Content):
 
         if not isinstance(backend.nplike, ak._nplikes.Jax):
             ak.types.numpytype.dtype_to_primitive(self._data.dtype)
+
         if len(self._data.shape) == 0:
             raise ak._errors.wrap_error(
                 TypeError(
@@ -36,6 +37,16 @@ class NumpyArray(Content):
                     )
                 )
             )
+
+        if parameters is not None and parameters.get("__array__") in ("char", "byte"):
+            if data.dtype != np.dtype(np.uint8) or len(data.shape) != 1:
+                raise ak._errors.wrap_error(
+                    ValueError(
+                        "{} is a {}, so its 'data' must be 1-dimensional and uint8, not {}".format(
+                            type(self).__name__, parameters["__array__"], repr(data)
+                        )
+                    )
+                )
 
         self._init(parameters, backend)
 
