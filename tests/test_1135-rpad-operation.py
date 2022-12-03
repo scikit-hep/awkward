@@ -1480,7 +1480,7 @@ def test_rpad_indexed_option_array():
             ]
         )
     )
-    listoffsetarray = ak.contents.indexedoptionarray.IndexedOptionArray(
+    indexedoptionarray = ak.contents.indexedoptionarray.IndexedOptionArray(
         index, listoffsetarray
     )
     content = ak.contents.numpyarray.NumpyArray(
@@ -1489,9 +1489,7 @@ def test_rpad_indexed_option_array():
     index = ak.index.Index64(np.asarray([0, 1, 2, 3, 4, 5, 6, 7, -1, -1]))
     offsets = ak.index.Index64(np.asarray([0, 4, 5, 7, 10]))
     indexedarray = ak.contents.indexedoptionarray.IndexedOptionArray(index, content)
-    listoffsetarray_ = ak.contents.listoffsetarray.ListOffsetArray(
-        offsets, indexedarray
-    )
+    listoffsetarray = ak.contents.listoffsetarray.ListOffsetArray(offsets, indexedarray)
     index = ak.index.Index64(
         np.asarray(
             [
@@ -1503,13 +1501,11 @@ def test_rpad_indexed_option_array():
             ]
         )
     )
-    backward = ak.contents.indexedoptionarray.IndexedOptionArray(
-        index, listoffsetarray_
-    )
+    backward = ak.contents.indexedoptionarray.IndexedOptionArray(index, listoffsetarray)
 
     index = ak.index.Index64(np.array([4, 3, 2, -1, 0], dtype=np.int64))
-    indexedarray = ak.contents.indexedoptionarray.IndexedOptionArray(
-        index, listoffsetarray
+    indexedarray = ak.contents.indexedoptionarray.IndexedOptionArray.simplified(
+        index, indexedoptionarray
     )
     assert to_list(indexedarray) == [
         [6.6, 7.7, 8.8, 9.9],

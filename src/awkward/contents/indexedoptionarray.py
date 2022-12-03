@@ -41,6 +41,15 @@ class IndexedOptionArray(Content):
                     )
                 )
             )
+        is_cat = parameters is not None and parameters.get("__array__") == "categorical"
+        if (content.is_union and not is_cat) or content.is_indexed or content.is_option:
+            raise ak._errors.wrap_error(
+                TypeError(
+                    "{0} cannot contain a union-type (unless categorical), option-type, or indexed 'content' ({1}); try {0}.simplified instead".format(
+                        type(self).__name__, type(content).__name__
+                    )
+                )
+            )
 
         assert index.nplike is content.backend.index_nplike
 
@@ -235,7 +244,7 @@ class IndexedOptionArray(Content):
         )
 
     def _getitem_field(self, where, only_fields=()):
-        return IndexedOptionArray(
+        return IndexedOptionArray.simplified(
             self._index,
             self._content._getitem_field(where, only_fields),
             parameters=None,
@@ -640,7 +649,9 @@ class IndexedOptionArray(Content):
         )
         parameters = ak._util.merge_parameters(self._parameters, other._parameters)
 
-        return ak.contents.IndexedOptionArray(index, content, parameters=parameters)
+        return ak.contents.IndexedOptionArray.simplified(
+            index, content, parameters=parameters
+        )
 
     def mergemany(self, others):
         if len(others) == 0:
@@ -1413,17 +1424,6 @@ class IndexedOptionArray(Content):
                 path, type(self), message, error.id, filename
             )
 
-        elif isinstance(
-            self._content,
-            (
-                ak.contents.BitMaskedArray,
-                ak.contents.ByteMaskedArray,
-                ak.contents.IndexedArray,
-                ak.contents.IndexedOptionArray,
-                ak.contents.UnmaskedArray,
-            ),
-        ):
-            return "{0} contains \"{1}\", the operation that made it might have forgotten to call 'simplify_optiontype()'"
         else:
             return self._content.validity_error(path + ".content")
 

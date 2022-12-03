@@ -41,6 +41,15 @@ class IndexedArray(Content):
                     )
                 )
             )
+        is_cat = parameters is not None and parameters.get("__array__") == "categorical"
+        if (content.is_union and not is_cat) or content.is_indexed or content.is_option:
+            raise ak._errors.wrap_error(
+                TypeError(
+                    "{0} cannot contain a union-type (unless categorical), option-type, or indexed 'content' ({1}); try {0}.simplified instead".format(
+                        type(self).__name__, type(content).__name__
+                    )
+                )
+            )
 
         assert index.nplike is content.backend.index_nplike
 
@@ -216,7 +225,7 @@ class IndexedArray(Content):
         )
 
     def _getitem_field(self, where, only_fields=()):
-        return IndexedArray(
+        return IndexedArray.simplified(
             self._index,
             self._content._getitem_field(where, only_fields),
             parameters=None,
@@ -499,7 +508,9 @@ class IndexedArray(Content):
         )
         parameters = ak._util.merge_parameters(self._parameters, other._parameters)
 
-        return ak.contents.IndexedArray(index, content, parameters=parameters)
+        return ak.contents.IndexedArray.simplified(
+            index, content, parameters=parameters
+        )
 
     def mergemany(self, others):
         if len(others) == 0:

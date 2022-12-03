@@ -724,7 +724,7 @@ def test_mask_as_bool():
         ["one", "two", None, "three", None, None, "four"], highlevel=False
     )
     index2 = ak.index.Index64(np.array([2, 2, 1, 5, 0], dtype=np.int64))
-    array2 = ak.contents.IndexedArray(index2, array)
+    array2 = ak.contents.IndexedArray.simplified(index2, array)
     assert np.asarray(array.mask_as_bool(valid_when=False).view(np.int8)).tolist() == [
         0,
         0,
@@ -735,10 +735,10 @@ def test_mask_as_bool():
         0,
     ]
     assert np.asarray(array2.mask_as_bool(valid_when=False).view(np.int8)).tolist() == [
+        1,
+        1,
         0,
-        0,
-        0,
-        0,
+        1,
         0,
     ]
 
