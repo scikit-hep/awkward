@@ -151,21 +151,22 @@ def normalise_item(item, backend: ak._backends.Backend):
     elif isinstance(item, ak.contents.NumpyArray):
         return item.data
 
-    elif isinstance(item, ak.contents.RegularArray) and item.purelist_isregular:
-        try:
-            as_numpy = item.to_numpy(allow_missing=True)
-        except Exception as err:
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "only integers, slices (`:`), ellipsis (`...`), np.newaxis (`None`), "
-                    "integer/boolean arrays (possibly with variable-length nested "
-                    "lists or missing values), field name (str) or names (non-tuple "
-                    "iterable of str) are valid indices for slicing, not\n\n    "
-                    + repr(item).replace("\n", "\n    ")
-                )
-            ) from err
+    elif isinstance(item, ak.contents.RegularArray):
+        # Pure NumPy arrays without masks follow NumPy advanced indexing
+        # If we can produce such a content, return the underlying NumPy array
+        # Otherwise, we probably have options or are not purelist_regular, etc.
+        # As such, we then follow Awkward indexing. This logic should follow
+        # the generic `isinstance(item, ak.contents.Content)` case below
+        as_numpy = item.maybe_to_NumpyArray()
+
+        if as_numpy is None:
+            out = normalise_item_bool_to_int(normalise_item_nested(item))
+            if out.is_numpy:
+                return out.data
+            else:
+                return out
         else:
-            return as_numpy
+            return as_numpy.data
 
     elif isinstance(item, ak.contents.Content):
         out = normalise_item_bool_to_int(normalise_item_nested(item))
