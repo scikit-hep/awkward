@@ -1553,7 +1553,7 @@ class Content:
     ):
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def to_numpy(self, allow_missing: bool):
+    def to_numpy(self, allow_missing: bool = True):
         return self._to_numpy(allow_missing)
 
     def _to_numpy(self, allow_missing: bool):
