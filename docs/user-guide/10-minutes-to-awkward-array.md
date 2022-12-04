@@ -38,7 +38,7 @@ Given that this file is so large, let's first look at the *metadata* with `ak.me
 
 ```{code-cell} ipython3
 import numpy as np
-import awkward._v2 as ak
+import awkward as ak
 
 metadata = ak.metadata_from_parquet("https://pivarski-princeton.s3.amazonaws.com/chicago-taxi.parquet")
 ```
