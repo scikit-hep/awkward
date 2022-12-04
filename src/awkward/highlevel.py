@@ -40,13 +40,10 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         with_name (None or str): Gives tuples and records a name that can be
             used to override their behavior (see below).
         check_valid (bool): If True, verify that the #layout is valid.
-        backend (None, `"cpu"`, or `"cuda"`): If `"cpu"`, the Array will be placed in
+        backend (None, `"cpu"`, `"jax"`, `"cuda"`): If `"cpu"`, the Array will be placed in
             main memory for use with other `"cpu"` Arrays and Records; if `"cuda"`,
-            the Array will be placed in GPU global memory using CUDA; if None,
-            the `data` are left untouched. For `"cuda"`,
-            [awkward-cuda-kernels](https://pypi.org/project/awkward-cuda-kernels)
-            must be installed, which can be invoked with
-            `pip install awkward[cuda] --upgrade`.
+            the Array will be placed in GPU global memory using CUDA; if "jax", the structure
+            is copied to the CPU for use with JAX. if None, the `data` are left untouched.
 
     High-level array that can contain data of any type.
 
@@ -277,8 +274,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
            * node types, such as #ak.contents.ListArray and
              #ak.contents.ListOffsetArray,
-           * integer type specialization, such as #ak.contents.ListArray
-             and #ak.contents.ListArray,
+           * integer type specialization, such as `int64` vs `int32`
            * or specific values, such as gaps in a #ak.contents.ListArray.
 
         The #ak.contents.Content elements are fully composable, whereas an
