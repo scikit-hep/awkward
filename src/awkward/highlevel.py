@@ -296,14 +296,14 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         but `array.layout` is presented as
 
-            <ListOffsetArray64>
+            <ListOffsetArray>
                 <offsets>
                     <Index64 i="[0 3 3 5]" offset="0" length="4" at="0x55a26df62590"/>
                 </offsets>
                 <content>
                     <NumpyArray format="d" shape="5" data="1.1 2.2 3.3 4.4 5.5" at="0x55a26e0c5f50"/>
                 </content>
-            </ListOffsetArray64>
+            </ListOffsetArray>
 
         (with truncation for large arrays).
         """

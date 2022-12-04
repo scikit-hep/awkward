@@ -75,15 +75,15 @@ def flatten(array, axis=1, *, highlevel=True, behavior=None):
     In that case, the flattened data is simply the array node's `content`.
 
         >>> array.layout
-        <ListOffsetArray64>
+        <ListOffsetArray>
             <offsets><Index64 i="[0 4 4 6]" offset="0" length="4"/></offsets>
-            <content><ListOffsetArray64>
+            <content><ListOffsetArray>
                 <offsets><Index64 i="[0 3 3 5 6 7 9]" offset="0" length="7"/></offsets>
                 <content>
                     <NumpyArray format="d" shape="9" data="1.1 2.2 3.3 4.4 5.5 6.6 7.7 8.8 9.9"/>
                 </content>
-            </ListOffsetArray64></content>
-        </ListOffsetArray64>
+            </ListOffsetArray></content>
+        </ListOffsetArray>
         >>> np.asarray(array.layout.content.content)
         array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
 

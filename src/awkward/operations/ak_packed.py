@@ -44,10 +44,10 @@ def packed(array, *, highlevel=True, behavior=None):
         >>> c
         <Array [[7, 8, 9, 10], [6, ... [], [1, 2, 3]] type='5 * var * int64'>
         >>> c.layout
-        <ListOffsetArray64>
+        <ListOffsetArray>
             <offsets><Index64 i="[0 4 5 7 7 10]" offset="0" length="6" at="0x55e091b077a0"/></offsets>
             <content><NumpyArray format="l" shape="10" data="7 8 9 10 6 4 5 1 2 3" at="0x55e091d04d30"/></content>
-        </ListOffsetArray64>
+        </ListOffsetArray>
 
     Performing these operations will minimize the output size of data sent to
     #ak.to_buffers (though conversions through Arrow, #ak.to_arrow and
