@@ -35,11 +35,11 @@ def packed(array, *, highlevel=True, behavior=None):
         >>> b
         <Array [[7, 8, 9, 10], [6, ... [], [1, 2, 3]] type='5 * var * int64'>
         >>> b.layout
-        <ListArray64>
+        <ListArray>
             <starts><Index64 i="[6 5 3 3 0]" offset="0" length="5" at="0x55e091c2b1f0"/></starts>
             <stops><Index64 i="[10 6 5 3 3]" offset="0" length="5" at="0x55e091a6ce80"/></stops>
             <content><NumpyArray format="l" shape="10" data="1 2 3 4 5 6 7 8 9 10" at="0x55e091c47260"/></content>
-        </ListArray64>
+        </ListArray>
         >>> c = ak.packed(b)
         >>> c
         <Array [[7, 8, 9, 10], [6, ... [], [1, 2, 3]] type='5 * var * int64'>
