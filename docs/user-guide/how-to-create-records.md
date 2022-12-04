@@ -18,7 +18,7 @@ In Awkward Array, a "record" is a structure containing a fixed-length set of typ
 
 All methods in Awkward Array are implemented as "[structs of arrays](https://en.wikipedia.org/wiki/AoS_and_SoA)," rather than arrays of structs, so making and breaking records are inexpensive operations that you can perform frequently in data analysis.
 
-```{code-cell} ipython3
+```{code-cell} python3
 import awkward as ak
 import numpy as np
 ```
@@ -28,7 +28,7 @@ From a list of Python dicts
 
 Records have a natural representation in JSON and Python as dicts, but only if all dicts in a series have the same set of field names. The {class}`ak.Array` invokes {func}`ak.from_iter` whenever presented with a list (or other non-string, non-dict iterable).
 
-```{code-cell} ipython3
+```{code-cell} python3
 python_dicts = [
     {"x": 1, "y": 1.1, "z": "one"},
     {"x": 2, "y": 2.2, "z": "two"},
@@ -41,7 +41,7 @@ python_dicts
 
 It is important that all of the dicts in the series have the same set of field names, since Awkward Array has to identify all of the records as having a single type:
 
-```{code-cell} ipython3
+```{code-cell} python3
 awkward_array = ak.Array(python_dicts)
 awkward_array
 ```
@@ -50,7 +50,7 @@ That is to say, an array of records is not a mapping from one type to another, s
 
 If you _try_ to mix field types in {func}`ak.from_iter` (ultimately from {class}`ak.ArrayBuilder`), the union of all sets of fields will be assumed, and any that aren't filled in every item will be presumed "missing."
 
-```{code-cell} ipython3
+```{code-cell} python3
 array = ak.Array([
     {"a": 1, "b": 1, "c": 1},
     {"b": 2, "c": 2},
@@ -65,14 +65,14 @@ From a single dict of columns
 
 If a _single dict_ is passed to {class}`ak.Array`, it will be interpreted as a set of columns, like [Pandas's DataFrame](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html) constructor. This is to provide a familiar interface to Pandas users.
 
-```{code-cell} ipython3
+```{code-cell} python3
 from_columns = ak.Array({"x": [1, 2, 3, 4, 5], "y": [1.1, 2.2, 3.3, 4.4, 5.5], "z": ["one", "two", "three", "four", "five"]})
 from_columns
 ```
 
 This is _not_ the same as calling {func}`ak.from_iter` on the same input, which could not be a valid {class}`ak.Array` because a single dict would be an {class}`ak.Record`.
 
-```{code-cell} ipython3
+```{code-cell} python3
 from_rows = ak.from_iter({"x": [1, 2, 3, 4, 5], "y": [1.1, 2.2, 3.3, 4.4, 5.5], "z": ["one", "two", "three", "four", "five"]})
 from_rows
 ```
@@ -82,7 +82,7 @@ Using ak.zip
 
 The {func}`ak.zip` function combines columns into an array of records, similar to the Pandas-style constructor described above.
 
-```{code-cell} ipython3
+```{code-cell} python3
 from_columns = ak.zip({"x": [1, 2, 3, 4, 5], "y": [1.1, 2.2, 3.3, 4.4, 5.5], "z": ["one", "two", "three", "four", "five"]})
 from_columns
 ```
@@ -91,42 +91,42 @@ The difference is that {func}`ak.zip` attempts to nested lists deeply, up to a `
 
 Given columns with nested lists:
 
-```{code-cell} ipython3
+```{code-cell} python3
 zipped = ak.zip({"x": ak.Array([[1, 2, 3], [], [4, 5]]), "y": ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])})
 zipped
 ```
 
 By contrast, the same input to {class}`ak.Array`'s Pandas-style constructor keeps nested lists separate.
 
-```{code-cell} ipython3
+```{code-cell} python3
 not_zipped = ak.Array({"x": ak.Array([[1, 2, 3], [], [4, 5]]), "y": ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])})
 not_zipped
 ```
 
 The difference can be seen in a comparison of their types:
 
-```{code-cell} ipython3
+```{code-cell} python3
 zipped.type.show()
 not_zipped.type.show()
 ```
 
 Also, {func}`ak.zip` can build records without field names, also known as "tuples."
 
-```{code-cell} ipython3
+```{code-cell} python3
 tuples = ak.zip((ak.Array([[1, 2, 3], [], [4, 5]]), ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])))
 tuples
 ```
 
 Functions that return lists of pairs, such as {func}`ak.cartesian` and {func}`ak.combinations`, also use the tuple type.
 
-```{code-cell} ipython3
+```{code-cell} python3
 one = ak.Array([[1, 2, 3], [], [4, 5], [6]])
 two = ak.Array([["a", "b"], ["c"], ["d"], ["e", "f"]])
 
 ak.cartesian((one, two))
 ```
 
-```{code-cell} ipython3
+```{code-cell} python3
 ak.combinations(one, 2)
 ```
 
@@ -135,7 +135,7 @@ Record names
 
 In addition to optional field names, record types can also have names.
 
-```{code-cell} ipython3
+```{code-cell} python3
 ak.Array([
     {"x": 1, "y": 1.1},
     {"x": 2, "y": 2.2},
@@ -145,20 +145,20 @@ ak.Array([
 ], with_name="XYZ")
 ```
 
-```{code-cell} ipython3
+```{code-cell} python3
 ak.zip(
     (ak.Array([[1, 2, 3], [], [4, 5]]), ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])),
     with_name="AB",
 )
 ```
 
-```{code-cell} ipython3
+```{code-cell} python3
 ak.cartesian({"L": ak.Array([1, 2, 3]), "R": ak.Array(["a", "b"])}, with_name="LeftRight", axis=0)
 ```
 
 Names are for giving records [specialized behavior](how-to-specialize) through the {data}`ak.behavior` registry. These are like attaching methods to a class in the sense that all records with a particular name can be given Python properties and methods.
 
-```{code-cell} ipython3
+```{code-cell} python3
 class XYZRecord(ak.Record):
     def __repr__(self):
         return f"(X={self.x}:Y={self.y})"
@@ -182,15 +182,15 @@ array = ak.Array([
 array
 ```
 
-```{code-cell} ipython3
+```{code-cell} python3
 array.diff()
 ```
 
-```{code-cell} ipython3
+```{code-cell} python3
 array[0]
 ```
 
-```{code-cell} ipython3
+```{code-cell} python3
 np.sqrt(array)
 ```
 
@@ -201,7 +201,7 @@ With ArrayBuilder
 
 (This is what {func}`ak.from_iter` uses internally to accumulate records.)
 
-```{code-cell} ipython3
+```{code-cell} python3
 builder = ak.ArrayBuilder()
 
 builder.begin_record()
@@ -223,7 +223,7 @@ array = builder.snapshot()
 array
 ```
 
-```{code-cell} ipython3
+```{code-cell} python3
 builder = ak.ArrayBuilder()
 
 with builder.record():
@@ -244,7 +244,7 @@ array
 
 The `begin_record` method and `record` context manager can take a name, which allows you to name your records on the spot.
 
-```{code-cell} ipython3
+```{code-cell} python3
 builder = ak.ArrayBuilder()
 
 for i in range(3):
@@ -263,7 +263,7 @@ Record names also let you decide between two ways of dealing with changing sets 
 
 Here is an illustration of that difference.
 
-```{code-cell} ipython3
+```{code-cell} python3
 def fill_A(builder, use_name):
     with builder.record("A" if use_name else None):
         builder.field("x").append(len(builder))
@@ -277,7 +277,7 @@ def fill_B(builder, use_name):
 
 Without names:
 
-```{code-cell} ipython3
+```{code-cell} python3
 builder = ak.ArrayBuilder()
 
 fill_A(builder, use_name=False)
@@ -294,7 +294,7 @@ without_names
 
 With names:
 
-```{code-cell} ipython3
+```{code-cell} python3
 builder = ak.ArrayBuilder()
 
 fill_A(builder, use_name=True)
@@ -311,11 +311,11 @@ with_names
 
 The difference can be seen in the type: `without_names` has only one record type, but the _x_ and _z_ fields are optional, and `with_names` has a union of two record types, neither of which have optional fields.
 
-```{code-cell} ipython3
+```{code-cell} python3
 without_names.type.show()
 ```
 
-```{code-cell} ipython3
+```{code-cell} python3
 with_names.type.show()
 ```
 
@@ -326,11 +326,11 @@ Functions that Numba Just-In-Time (JIT) compiles can use {class}`ak.ArrayBuilder
 
 ([At this time](https://numba.pydata.org/numba-doc/dev/reference/pysupported.html#language), Numba can't use context managers, the `with` statement, in fully compiled code. {class}`ak.ArrayBuilder` can't be constructed or converted to an array using `snapshot` inside a JIT-compiled function, but can be outside the compiled context. Similarly, `ak.*` functions like {func}`ak.zip` can't be called inside a JIT-compiled function, but can be outside.)
 
-```{code-cell} ipython3
+```{code-cell} python3
 import numba as nb
 ```
 
-```{code-cell} ipython3
+```{code-cell} python3
 @nb.jit
 def append_record(builder, i):
     builder.begin_record()
@@ -351,7 +351,7 @@ array = builder.snapshot()
 array
 ```
 
-```{code-cell} ipython3
+```{code-cell} python3
 @nb.jit
 def faster_example():
     x = np.empty(3, np.int64)
