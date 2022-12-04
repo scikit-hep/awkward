@@ -40,7 +40,7 @@ def to_json(
         line_delimited (bool or str): If False, a single JSON document is written,
             representing the entire array or record. If True, each element of the
             array (or just the one record) is written on a separate line of text,
-            separated by `"\n"`. If a string, such as `"\r\n"`, it is taken as a
+            separated by `"\\n"`. If a string, such as `"\\r\\n"`, it is taken as a
             custom line delimiter. (Use `os.linesep` for a platform-dependent
             line delimiter.)
         num_indent_spaces (None or nonnegative int): Number of spaces to indent nested
@@ -74,7 +74,7 @@ def to_json(
     `convert_other`), then uses `json.dumps` to return a string or `json.dump`
     to write to a file (depending on the value of `file`).
 
-    If `line_delimited` is True or a line-delimiter string like `"\r\n"`/`os.linesep`,
+    If `line_delimited` is True or a line-delimiter string like `"\\r\\n"`/`os.linesep`,
     the output is line-delimited JSON, variously referred to as "ldjson", "ndjson", and
     "jsonl". (Use an appropriate file extension!)
 

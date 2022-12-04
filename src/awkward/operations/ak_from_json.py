@@ -40,7 +40,7 @@ def from_json(
         line_delimited (bool): If False, a single JSON document is read as an
             entire array or record. If True, this function reads line-delimited
             JSON into an array (regardless of how many there are). The line
-            delimiter is not actually checked, so it may be `"\n"`, `"\r\n"`
+            delimiter is not actually checked, so it may be `"\\n"`, `"\\r\\n"`
             or anything else.
         schema (None, JSON str or equivalent lists/dicts): If None, the data type
             is discovered while parsing. If a JSONSchema
