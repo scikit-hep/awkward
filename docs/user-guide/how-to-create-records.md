@@ -4,9 +4,9 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.10.3
+    jupytext_version: 1.14.0
 kernelspec:
-  display_name: Python 3
+  display_name: Python 3 (ipykernel)
   language: python
   name: python3
 ---
@@ -39,15 +39,11 @@ python_dicts = [
 python_dicts
 ```
 
-```{code-cell} ipython3
-awkward_array = ak.Array(python_dicts)
-awkward_array
-```
-
 It is important that all of the dicts in the series have the same set of field names, since Awkward Array has to identify all of the records as having a single type:
 
 ```{code-cell} ipython3
-awkward_array.type
+awkward_array = ak.Array(python_dicts)
+awkward_array
 ```
 
 That is to say, an array of records is not a mapping from one type to another, such as from strings to numbers. The above record has exactly three fields: _x_, _y_, and _z_, and they have fixed types: `int64`, `float64`, and `string`. A mapping could have a variable set of keys, but the value type would have to be uniform.
@@ -64,14 +60,6 @@ array = ak.Array([
 array
 ```
 
-```{code-cell} ipython3
-array.to_list()
-```
-
-```{code-cell} ipython3
-array.type
-```
-
 From a single dict of columns
 -----------------------------
 
@@ -82,27 +70,11 @@ from_columns = ak.Array({"x": [1, 2, 3, 4, 5], "y": [1.1, 2.2, 3.3, 4.4, 5.5], "
 from_columns
 ```
 
-```{code-cell} ipython3
-from_columns.to_list()
-```
-
-```{code-cell} ipython3
-from_columns.type
-```
-
 This is _not_ the same as calling {func}`ak.from_iter` on the same input, which could not be a valid {class}`ak.Array` because a single dict would be an {class}`ak.Record`.
 
 ```{code-cell} ipython3
 from_rows = ak.from_iter({"x": [1, 2, 3, 4, 5], "y": [1.1, 2.2, 3.3, 4.4, 5.5], "z": ["one", "two", "three", "four", "five"]})
 from_rows
-```
-
-```{code-cell} ipython3
-from_rows.to_list()
-```
-
-```{code-cell} ipython3
-from_rows.type
 ```
 
 Using ak.zip
@@ -115,14 +87,6 @@ from_columns = ak.zip({"x": [1, 2, 3, 4, 5], "y": [1.1, 2.2, 3.3, 4.4, 5.5], "z"
 from_columns
 ```
 
-```{code-cell} ipython3
-from_columns.to_list()
-```
-
-```{code-cell} ipython3
-from_columns.type
-```
-
 The difference is that {func}`ak.zip` attempts to nested lists deeply, up to a `depth_limit`.
 
 Given columns with nested lists:
@@ -132,10 +96,6 @@ zipped = ak.zip({"x": ak.Array([[1, 2, 3], [], [4, 5]]), "y": ak.Array([[1.1, 2.
 zipped
 ```
 
-```{code-cell} ipython3
-zipped.to_list()
-```
-
 By contrast, the same input to {class}`ak.Array`'s Pandas-style constructor keeps nested lists separate.
 
 ```{code-cell} ipython3
@@ -143,14 +103,11 @@ not_zipped = ak.Array({"x": ak.Array([[1, 2, 3], [], [4, 5]]), "y": ak.Array([[1
 not_zipped
 ```
 
-```{code-cell} ipython3
-not_zipped.to_list()
-```
-
 The difference can be seen in a comparison of their types:
 
 ```{code-cell} ipython3
-zipped.type, not_zipped.type
+zipped.type.show()
+not_zipped.type.show()
 ```
 
 Also, {func}`ak.zip` can build records without field names, also known as "tuples."
@@ -158,14 +115,6 @@ Also, {func}`ak.zip` can build records without field names, also known as "tuple
 ```{code-cell} ipython3
 tuples = ak.zip((ak.Array([[1, 2, 3], [], [4, 5]]), ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])))
 tuples
-```
-
-```{code-cell} ipython3
-tuples.to_list()
-```
-
-```{code-cell} ipython3
-tuples.type
 ```
 
 Functions that return lists of pairs, such as {func}`ak.cartesian` and {func}`ak.combinations`, also use the tuple type.
@@ -343,10 +292,6 @@ without_names = builder.snapshot()
 without_names
 ```
 
-```{code-cell} ipython3
-without_names.to_list()
-```
-
 With names:
 
 ```{code-cell} ipython3
@@ -364,18 +309,14 @@ with_names = builder.snapshot()
 with_names
 ```
 
-```{code-cell} ipython3
-with_names.to_list()
-```
-
 The difference can be seen in the type: `without_names` has only one record type, but the _x_ and _z_ fields are optional, and `with_names` has a union of two record types, neither of which have optional fields.
 
 ```{code-cell} ipython3
-without_names.type
+without_names.type.show()
 ```
 
 ```{code-cell} ipython3
-with_names.type
+with_names.type.show()
 ```
 
 In Numba
