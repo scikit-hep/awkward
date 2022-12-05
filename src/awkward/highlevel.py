@@ -566,64 +566,64 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         the following.
 
         * **An integer** selects one element. Like Python/NumPy, it is
-             zero-indexed: `0` is the first item, `1` is the second, etc.
-             Negative indexes count from the end of the list: `-1` is the
-             last, `-2` is the second-to-last, etc.
-             Indexes beyond the size of the array, either because they're too
-             large or because they're too negative, raise errors. In
-             particular, some nested lists might contain a desired element
-             while others don't; this would raise an error.
+          zero-indexed: `0` is the first item, `1` is the second, etc.
+          Negative indexes count from the end of the list: `-1` is the
+          last, `-2` is the second-to-last, etc.
+          Indexes beyond the size of the array, either because they're too
+          large or because they're too negative, raise errors. In
+          particular, some nested lists might contain a desired element
+          while others don't; this would raise an error.
         * **A slice** (either a Python `slice` object or the
-             `start:stop:step` syntax) selects a range of elements. The
-             `start` and `stop` values are zero-indexed; `start` is inclusive
-             and `stop` is exclusive, like Python/NumPy. Negative `step`
-             values are allowed, but a `step` of `0` is an error. Slices
-             beyond the size of the array are not errors but are truncated,
-             like Python/NumPy.
+          `start:stop:step` syntax) selects a range of elements. The
+          `start` and `stop` values are zero-indexed; `start` is inclusive
+          and `stop` is exclusive, like Python/NumPy. Negative `step`
+          values are allowed, but a `step` of `0` is an error. Slices
+          beyond the size of the array are not errors but are truncated,
+          like Python/NumPy.
         * **A string** selects a tuple or record field, even if its
-             position in the tuple is to the left of the dimension where the
-             tuple/record is defined. (See <<projection>> below.) This is
-             similar to NumPy's
-             [field access](https://docs.scipy.org/doc/numpy/reference/arrays.indexing.html#field-access),
-             except that strings are allowed in the same tuple with other
-             slice types. While record fields have names, tuple fields are
-             integer strings, such as `"0"`, `"1"`, `"2"` (always
-             non-negative). Be careful to distinguish these from non-string
-             integers.
+          position in the tuple is to the left of the dimension where the
+          tuple/record is defined. (See <<projection>> below.) This is
+          similar to NumPy's
+          [field access](https://docs.scipy.org/doc/numpy/reference/arrays.indexing.html#field-access),
+          except that strings are allowed in the same tuple with other
+          slice types. While record fields have names, tuple fields are
+          integer strings, such as `"0"`, `"1"`, `"2"` (always
+          non-negative). Be careful to distinguish these from non-string
+          integers.
         * **An iterable of strings** (not the top-level tuple) selects
-             multiple tuple/record fields.
+          multiple tuple/record fields.
         * **An ellipsis** (either the Python `Ellipsis` object or the
-             `...` syntax) skips as many dimensions as needed to put the
-             rest of the slice items to the innermost dimensions.
+          `...` syntax) skips as many dimensions as needed to put the
+          rest of the slice items to the innermost dimensions.
         * **A np.newaxis** or its equivalent, None, does not select items
-             but introduces a new regular dimension in the output with size
-             `1`. This is a convenient way to explicitly choose a dimension
-             for broadcasting.
+          but introduces a new regular dimension in the output with size
+          `1`. This is a convenient way to explicitly choose a dimension
+          for broadcasting.
         * **A boolean array** with the same length as the current dimension
-             (or any iterable, other than the top-level tuple) selects elements
-             corresponding to each True value in the array, dropping those
-             that correspond to each False. The behavior is similar to
-             NumPy's
-             [compress](https://docs.scipy.org/doc/numpy/reference/generated/numpy.compress.html)
-             function.
+          (or any iterable, other than the top-level tuple) selects elements
+          corresponding to each True value in the array, dropping those
+          that correspond to each False. The behavior is similar to
+          NumPy's
+          [compress](https://docs.scipy.org/doc/numpy/reference/generated/numpy.compress.html)
+          function.
         * **An integer array** (or any iterable, other than the top-level
-             tuple) selects elements like a single integer, but produces a
-             regular dimension of as many as are desired. The array can have
-             any length, any order, and it can have duplicates and incomplete
-             coverage. The behavior is similar to NumPy's
-             [take](https://docs.scipy.org/doc/numpy/reference/generated/numpy.take.html)
-             function.
+          tuple) selects elements like a single integer, but produces a
+          regular dimension of as many as are desired. The array can have
+          any length, any order, and it can have duplicates and incomplete
+          coverage. The behavior is similar to NumPy's
+          [take](https://docs.scipy.org/doc/numpy/reference/generated/numpy.take.html)
+          function.
         * **An integer Array with missing (None) items** selects multiple
-             values by index, as above, but None values are passed through
-             to the output. This behavior matches pyarrow's
-             [Array.take](https://arrow.apache.org/docs/python/generated/pyarrow.Array.html#pyarrow.Array.take)
-             which also manages arrays with missing values. See
-             <<option indexing>> below.
+          values by index, as above, but None values are passed through
+          to the output. This behavior matches pyarrow's
+          [Array.take](https://arrow.apache.org/docs/python/generated/pyarrow.Array.html#pyarrow.Array.take)
+          which also manages arrays with missing values. See
+          <<option indexing>> below.
         * **An Array of nested lists**, ultimately containing booleans or
-             integers and having the same lengths of lists at each level as
-             the Array to which they're applied, selects by boolean or by
-             integer at the deeply nested level. Missing items at any level
-             above the deepest level must broadcast. See <<nested indexing>> below.
+          integers and having the same lengths of lists at each level as
+          the Array to which they're applied, selects by boolean or by
+          integer at the deeply nested level. Missing items at any level
+          above the deepest level must broadcast. See <<nested indexing>> below.
 
         A tuple of the above applies each slice item to a dimension of the
         data, which can be very expressive. More than one flat boolean/integer
