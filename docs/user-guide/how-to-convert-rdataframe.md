@@ -87,7 +87,3 @@ array = ak.from_rdataframe(
 )
 array
 ```
-
-```{code-cell} python3
-array.show(type=True)
-```
