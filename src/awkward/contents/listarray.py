@@ -17,25 +17,6 @@ np = ak._nplikes.NumpyMetadata.instance()
 class ListArray(Content):
     is_list = True
 
-    def copy(self, starts=unset, stops=unset, content=unset, *, parameters=unset):
-        return ListArray(
-            self._starts if starts is unset else starts,
-            self._stops if stops is unset else stops,
-            self._content if content is unset else content,
-            parameters=self._parameters if parameters is unset else parameters,
-        )
-
-    def __copy__(self):
-        return self.copy()
-
-    def __deepcopy__(self, memo):
-        return self.copy(
-            starts=copy.deepcopy(self._starts, memo),
-            stops=copy.deepcopy(self._stops, memo),
-            content=copy.deepcopy(self._content, memo),
-            parameters=copy.deepcopy(self._parameters, memo),
-        )
-
     def __init__(self, starts, stops, content, *, parameters=None):
         if not isinstance(starts, Index) and starts.dtype in (
             np.dtype(np.int32),
@@ -78,6 +59,25 @@ class ListArray(Content):
                 )
             )
 
+        if parameters is not None and parameters.get("__array__") == "string":
+            if not content.is_numpy or not content.parameter("__array__") == "char":
+                raise ak._errors.wrap_error(
+                    ValueError(
+                        "{} is a string, so its 'content' must be uint8 NumpyArray of char, not {}".format(
+                            type(self).__name__, repr(content)
+                        )
+                    )
+                )
+        if parameters is not None and parameters.get("__array__") == "bytestring":
+            if not content.is_numpy or not content.parameter("__array__") == "byte":
+                raise ak._errors.wrap_error(
+                    ValueError(
+                        "{} is a bytestring, so its 'content' must be uint8 NumpyArray of byte, not {}".format(
+                            type(self).__name__, repr(content)
+                        )
+                    )
+                )
+
         assert starts.nplike is content.backend.index_nplike
         assert stops.nplike is content.backend.index_nplike
 
@@ -99,6 +99,25 @@ class ListArray(Content):
         return self._content
 
     Form = ListForm
+
+    def copy(self, starts=unset, stops=unset, content=unset, *, parameters=unset):
+        return ListArray(
+            self._starts if starts is unset else starts,
+            self._stops if stops is unset else stops,
+            self._content if content is unset else content,
+            parameters=self._parameters if parameters is unset else parameters,
+        )
+
+    def __copy__(self):
+        return self.copy()
+
+    def __deepcopy__(self, memo):
+        return self.copy(
+            starts=copy.deepcopy(self._starts, memo),
+            stops=copy.deepcopy(self._stops, memo),
+            content=copy.deepcopy(self._content, memo),
+            parameters=copy.deepcopy(self._parameters, memo),
+        )
 
     @classmethod
     def simplified(cls, starts, stops, content, *, parameters=None):
@@ -965,6 +984,7 @@ class ListArray(Content):
         contents = []
 
         parameters = self._parameters
+
         for array in head:
             parameters = ak._util.merge_parameters(parameters, array._parameters, True)
 
@@ -1122,14 +1142,13 @@ class ListArray(Content):
                 )
             )
             return ak.contents.ListOffsetArray(
-                offsets, ak.contents.NumpyArray(localindex), parameters=self._parameters
+                offsets, ak.contents.NumpyArray(localindex)
             )
         else:
             return ak.contents.ListArray(
                 self._starts,
                 self._stops,
                 self._content._local_index(posaxis, depth + 1),
-                parameters=self._parameters,
             )
 
     def numbers_to_type(self, name):
@@ -1251,13 +1270,7 @@ class ListArray(Content):
                 path, type(self), message, error.id, filename
             )
         else:
-            if (
-                self.parameter("__array__") == "string"
-                or self.parameter("__array__") == "bytestring"
-            ):
-                return ""
-            else:
-                return self._content.validity_error(path + ".content")
+            return self._content.validity_error(path + ".content")
 
     def _nbytes_part(self):
         return (
@@ -1378,9 +1391,7 @@ class ListArray(Content):
         )
 
     def _to_numpy(self, allow_missing):
-        return ak.operations.to_numpy(
-            self.to_RegularArray(), allow_missing=allow_missing
-        )
+        return self.to_RegularArray()._to_numpy(allow_missing)
 
     def _completely_flatten(self, backend, options):
         if (

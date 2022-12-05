@@ -800,7 +800,7 @@ def test_UnmaskedArray_NumpyArray():
 def test_UnionArray_NumpyArray():
     # 100 is inaccessible in index
     # 1.1 is inaccessible in contents[1]
-    a = ak.contents.unionarray.UnionArray(
+    a = ak.contents.unionarray.UnionArray.simplified(
         ak.index.Index(np.array([1, 1, 0, 0, 1, 0, 1], dtype=np.int8)),
         ak.index.Index(np.array([4, 3, 0, 1, 2, 2, 4, 100])),
         [
@@ -829,7 +829,6 @@ def test_UnionArray_NumpyArray():
     assert a[-3] == 3.3
     assert a[-2] == 3.0
     assert a[-1] == 5.5
-    assert isinstance(a[3:], ak.contents.unionarray.UnionArray)
     assert a.typetracer[3:].form == a[3:].form
     assert len(a[3:]) == 4
     assert len(a[-4:]) == 4
@@ -1608,7 +1607,7 @@ def test_UnmaskedArray_RecordArray_NumpyArray():
 def test_UnionArray_RecordArray_NumpyArray():
     # 100 is inaccessible in index
     # 1.1 is inaccessible in contents[1]
-    a = ak.contents.unionarray.UnionArray(
+    a = ak.contents.unionarray.UnionArray.simplified(
         ak.index.Index(np.array([1, 1, 0, 0, 1, 0, 1], dtype=np.int8)),
         ak.index.Index(np.array([4, 3, 0, 1, 2, 2, 4, 100])),
         [
@@ -1647,7 +1646,6 @@ def test_UnionArray_RecordArray_NumpyArray():
     assert a["nest"][-3] == 3.3
     assert a["nest"][-2] == 3.0
     assert a["nest"][-1] == 5.5
-    assert isinstance(a["nest"][3:], ak.contents.NumpyArray)
     assert a.typetracer["nest"][3:].form == a["nest"][3:].form
     assert len(a["nest"][3:]) == 4
     assert len(a["nest"][-4:]) == 4

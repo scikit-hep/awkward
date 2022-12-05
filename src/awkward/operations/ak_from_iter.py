@@ -99,6 +99,13 @@ def _impl(iterable, highlevel, behavior, allow_record, initial, resize):
     formstr, length, buffers = builder.to_buffers()
     form = ak.forms.from_json(formstr)
 
-    return ak.operations.from_buffers(
-        form, length, buffers, highlevel=highlevel, behavior=behavior
+    return ak.operations.ak_from_buffers._impl(
+        form,
+        length,
+        buffers,
+        buffer_key="{form_key}-{attribute}",
+        backend="cpu",
+        highlevel=highlevel,
+        behavior=behavior,
+        simplify=True,
     )[0]

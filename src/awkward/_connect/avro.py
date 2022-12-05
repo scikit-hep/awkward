@@ -912,3 +912,8 @@ class ReadAvroFT:
             #         exec_code = exec_code+jj
             #         exec_code = exec_code+kk
             raise ak._errors.wrap_error(NotImplementedError)
+
+        else:
+            raise ak._errors.wrap_error(
+                AssertionError(f"unrecognized Avro type: {file['type']}")
+            )
