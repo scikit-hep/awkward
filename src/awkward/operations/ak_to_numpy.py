@@ -15,7 +15,7 @@ def to_numpy(array, *, allow_missing=True):
     Records) into a NumPy array, if possible.
 
     If the data are numerical and regular (nested lists have equal lengths
-    in each dimension, as described by the #type), they can be losslessly
+    in each dimension, as described by the #ak.Array.type), they can be losslessly
     converted to a NumPy array and this function returns without an error.
 
     Otherwise, the function raises an error. It does not create a NumPy
