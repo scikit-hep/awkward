@@ -3,16 +3,16 @@ ak.behavior
 
 .. py:data:: ak.behavior
 
-   * `Motivation <#motivation>`__
-   * `Parameters and behaviors <#parameters-and-behaviors>`__
-   * `Adding behavior to records <#adding-behavior-to-records>`__
-   * `Overriding NumPy ufuncs and binary operators <#overriding-numpy-ufuncs-and-binary-operators>`__
-   * `Mixin decorators <#mixin-decorators>`__
-   * `Adding behavior to arrays <#adding-behavior-to-arrays>`__
-   * `Custom type names <#custom-type-names>`__
-   * `Custom broadcasting <#custom-broadcasting>`__
-   * `Overriding behavior in Numba <#overriding-behavior-in-numba>`__
-   * `Complete example <#complete-example>`__
+* `Motivation <#motivation>`__
+* `Parameters and behaviors <#parameters-and-behaviors>`__
+* `Adding behavior to records <#adding-behavior-to-records>`__
+* `Overriding NumPy ufuncs and binary operators <#overriding-numpy-ufuncs-and-binary-operators>`__
+* `Mixin decorators <#mixin-decorators>`__
+* `Adding behavior to arrays <#adding-behavior-to-arrays>`__
+* `Custom type names <#custom-type-names>`__
+* `Custom broadcasting <#custom-broadcasting>`__
+* `Overriding behavior in Numba <#overriding-behavior-in-numba>`__
+* `Complete example <#complete-example>`__
 
 Motivation
 ==========
@@ -68,8 +68,8 @@ constructor argument. See
 
 The general flow is
 
-   * **parameters** link data objects to names;
-   * **behavior** links names to code.
+* **parameters** link data objects to names;
+* **behavior** links names to code.
 
 In large datasets, parameters may be hard to change (permanently, at least:
 on-the-fly parameter changes are easier), but behavior is easy to change
@@ -463,10 +463,10 @@ are a behavior overlaid on arrays.
 
 There are four predefined string behaviors:
 
-   * :class:`ak.CharBehavior`: an array of UTF-8 encoded characters;
-   * :class:`ak.ByteBehavior`: an array of unencoded characters;
-   * :class:`ak.StringBehavior`: an array of variable-length UTF-8 encoded strings;
-   * :class:`ak.ByteStringBehavior`: an array of variable-length unencoded bytestrings.
+* :class:`ak.CharBehavior`: an array of UTF-8 encoded characters;
+* :class:`ak.ByteBehavior`: an array of unencoded characters;
+* :class:`ak.StringBehavior`: an array of variable-length UTF-8 encoded strings;
+* :class:`ak.ByteStringBehavior`: an array of variable-length unencoded bytestrings.
 
 All four override the string representations (``__str__`` and ``__repr__``),
 but the string behaviors additionally override equality:
@@ -660,14 +660,14 @@ The ``typer`` function takes an
 and returns the Numba type of its replacement, while the ``lower``
 function takes
 
-   * ``context``: Numba context
-   * ``builder``: Numba builder
-   * ``rettype``: the Numba type of its replacement
-   * ``viewtype``: an :func:`ak._connect._numba.arrayview.ArrayViewType`
-   * ``viewval``: a Numba value of the view
-   * ``viewproxy``: a Numba proxy (``context.make_helper``) of the view
-   * ``attype``: the Numba integer type of the index position
-   * ``atval``: the Numba value of the index position
+* ``context``: Numba context
+* ``builder``: Numba builder
+* ``rettype``: the Numba type of its replacement
+* ``viewtype``: an :func:`ak._connect._numba.arrayview.ArrayViewType`
+* ``viewval``: a Numba value of the view
+* ``viewproxy``: a Numba proxy (``context.make_helper``) of the view
+* ``attype``: the Numba integer type of the index position
+* ``atval``: the Numba value of the index position
 
 .. Add back once https://github.com/scikit-hep/vector/issues/273 is completed
 .. Complete example
