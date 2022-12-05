@@ -12,8 +12,8 @@ def full_like(array, fill_value, *, dtype=None, highlevel=True, behavior=None):
     Args:
         array: Array to use as a model for a replacement that contains only
             `fill_value`.
-        fill_value: Value to fill new new array with.
-        dtype (None or NumPy dtype)): Overrides the data type of the result.
+        fill_value: Value to fill the new array with.
+        dtype (None or NumPy dtype): Overrides the data type of the result.
         highlevel (bool, default is True): If True, return an #ak.Array;
             otherwise, return a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
@@ -21,8 +21,8 @@ def full_like(array, fill_value, *, dtype=None, highlevel=True, behavior=None):
 
     This is the equivalent of NumPy's `np.full_like` for Awkward Arrays.
 
-    Although it's possible to produce an array of `fill_value` with the structure
-    of an `array` using #ak.broadcast_arrays:
+    Although it's possible to produce an array of `fill_value` with the
+    structure of an `array` using #ak.broadcast_arrays:
 
         >>> array = ak.Array([[1, 2, 3], [], [4, 5]])
         >>> ak.broadcast_arrays(array, 1)

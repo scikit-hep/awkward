@@ -6,7 +6,7 @@ import awkward as ak
 def is_categorical(array):
     """
     Args:
-        array: A possibly-categorical Awkward Array.
+        array: A possibly-categorical array.
 
     If the `array` is categorical (contains #ak.contents.IndexedArray or
     #ak.contents.IndexedOptionArray labeled with parameter

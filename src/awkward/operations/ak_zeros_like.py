@@ -13,7 +13,7 @@ def zeros_like(array, *, dtype=None, highlevel=True, behavior=None):
     """
     Args:
         array: Array to use as a model for a replacement that contains only `0`.
-        dtype (None or NumPy dtype)): Overrides the data type of the result.
+        dtype (None or NumPy dtype): Overrides the data type of the result.
         highlevel (bool, default is True): If True, return an #ak.Array;
             otherwise, return a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if

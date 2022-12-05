@@ -7,11 +7,11 @@ def backend(*arrays) -> str:
     """
     Returns the names of the backend used by `arrays`. May be
 
-       * `"cpu"` for arrays backed by NumPy;
-       * `"cuda"` for arrays backed by CuPy;
-       * `"jax"` for arrays backed by JAX;
-       * None if the objects are not Awkward, NumPy, JAX, or CuPy arrays (e.g.
-         Python numbers, booleans, strings).
+    * `"cpu"` for arrays backed by NumPy;
+    * `"cuda"` for arrays backed by CuPy;
+    * `"jax"` for arrays backed by JAX;
+    * None if the objects are not Awkward, NumPy, JAX, or CuPy arrays (e.g.
+      Python numbers, booleans, strings).
 
     See #ak.to_backend.
     """

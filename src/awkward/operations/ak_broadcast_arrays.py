@@ -14,14 +14,14 @@ def broadcast_arrays(*arrays, **kwargs):
             left-broadcasting, as described below.
         right_broadcast (bool): If True, follow rules for implicit
             right-broadcasting, as described below.
-        highlevel (bool, default is True): If True, return an #ak.Array;
-            otherwise, return a low-level #ak.contents.Content subclass.
-        behavior (None or dict): Custom #ak.behavior for the output array, if
-            high-level.
         depth_limit (None or int, default is None): If None, attempt to fully
             broadcast the `arrays` to all levels. If an int, limit the number
             of dimensions that get broadcasted. The minimum value is `1`,
             for no broadcasting.
+        highlevel (bool, default is True): If True, return an #ak.Array;
+            otherwise, return a low-level #ak.contents.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
     Like NumPy's
     [broadcast_arrays](https://docs.scipy.org/doc/numpy/reference/generated/numpy.broadcast_arrays.html)
@@ -101,12 +101,12 @@ def broadcast_arrays(*arrays, **kwargs):
     Awkward Array's broadcasting manages to have it both ways by applying the
     following rules:
 
-       * If all dimensions are regular (i.e. #ak.types.RegularType), like NumPy,
-         implicit broadcasting aligns to the right, like NumPy.
-       * If any dimension is variable (i.e. #ak.types.ListType), which can
-         never be true of NumPy, implicit broadcasting aligns to the left.
-       * Explicit broadcasting with a length-1 regular dimension always
-         broadcasts, like NumPy.
+    * If all dimensions are regular (i.e. #ak.types.RegularType), like NumPy,
+      implicit broadcasting aligns to the right, like NumPy.
+    * If any dimension is variable (i.e. #ak.types.ListType), which can
+      never be true of NumPy, implicit broadcasting aligns to the left.
+    * Explicit broadcasting with a length-1 regular dimension always
+      broadcasts, like NumPy.
 
     Thus, it is important to be aware of the distinction between a dimension
     that is declared to be regular in the type specification and a dimension

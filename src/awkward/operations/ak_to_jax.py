@@ -5,6 +5,9 @@ from awkward import _errors, _util, jax
 
 def to_jax(array):
     """
+    Args:
+        array: Array to convert to JAX.
+
     Converts `array` (many types supported) into a JAX Device Array, if possible.
 
     If the data are numerical and regular (nested lists have equal lengths

@@ -39,6 +39,8 @@ def argcombinations(
             (overriding `parameters`, if necessary).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
     Computes a Cartesian product (i.e. cross product) of `array` with itself
     that is restricted to combinations sampled without replacement,

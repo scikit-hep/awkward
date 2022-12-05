@@ -7,7 +7,7 @@ def is_tuple(array):
     """
     Args:
         array (#ak.Array, #ak.Record, #ak.contents.Content, #ak.record.Record, #ak.ArrayBuilder):
-            Array or record to check.
+            Array or record to check for a tuple type.
 
     If `array` is a record, this returns True if the record is a tuple.
     If `array` is an array, this returns True if the outermost record is a tuple.

@@ -42,19 +42,19 @@ def from_iter(
 
     The following Python types are supported.
 
-       * bool, including `np.bool_`: converted into #ak.contents.NumpyArray.
-       * int, including `np.integer`: converted into #ak.contents.NumpyArray.
-       * float, including `np.floating`: converted into #ak.contents.NumpyArray.
-       * bytes: converted into #ak.contents.ListOffsetArray with parameter
-         `"__array__"` equal to `"bytestring"` (unencoded bytes).
-       * str: converted into #ak.contents.ListOffsetArray with parameter
-         `"__array__"` equal to `"string"` (UTF-8 encoded string).
-       * tuple: converted into #ak.contents.RecordArray without field names
-         (i.e. homogeneously typed, uniform sized tuples).
-       * dict: converted into #ak.contents.RecordArray with field names
-         (i.e. homogeneously typed records with the same sets of fields).
-       * iterable, including np.ndarray: converted into
-         #ak.contents.ListOffsetArray.
+    * bool, including `np.bool_`: converted into #ak.contents.NumpyArray.
+    * int, including `np.integer`: converted into #ak.contents.NumpyArray.
+    * float, including `np.floating`: converted into #ak.contents.NumpyArray.
+    * bytes: converted into #ak.contents.ListOffsetArray with parameter
+      `"__array__"` equal to `"bytestring"` (unencoded bytes).
+    * str: converted into #ak.contents.ListOffsetArray with parameter
+      `"__array__"` equal to `"string"` (UTF-8 encoded string).
+    * tuple: converted into #ak.contents.RecordArray without field names
+      (i.e. homogeneously typed, uniform sized tuples).
+    * dict: converted into #ak.contents.RecordArray with field names
+      (i.e. homogeneously typed records with the same sets of fields).
+    * iterable, including np.ndarray: converted into
+      #ak.contents.ListOffsetArray.
 
     See also #ak.to_list.
     """

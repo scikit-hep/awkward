@@ -13,10 +13,13 @@ np = ak._nplikes.NumpyMetadata.instance()
 
 def type(array):
     """
+    Args:
+        array: Array to determine the type of.
+
     The high-level type of an `array` (many types supported, including all
     Awkward Arrays and Records) as #ak.types.Type objects.
 
-    The high-level type ignores #layout differences like
+    The high-level type ignores layout differences like
     #ak.contents.ListArray versus #ak.contents.ListOffsetArray, but
     not differences like "regular-sized lists" (i.e.
     #ak.contents.RegularArray) versus "variable-sized lists" (i.e.
