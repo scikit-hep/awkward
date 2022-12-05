@@ -1,7 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import copy
-from collections.abc import Iterable
 
 import awkward as ak
 
@@ -168,9 +167,7 @@ def transform(
        * options (dict): Options provided to #ak.transform.
 
     If there is only one array, the `transformation` function must either return
-    None or return an array: #ak.contents.Content, #ak.Array, or a NumPy,
-    CuPy, etc. array. (The preferred type is #ak.contents.Content; all others
-    are converted to a layout.)
+    None or return an #ak.contents.Content.
 
     If there are multiple arrays (`more_arrays`), then the transformation function
     may return one array or a tuple of arrays. (The preferred type is a tuple, even
@@ -468,19 +465,13 @@ def _impl(
             if out is None:
                 return out
 
-            if isinstance(out, ak.highlevel.Array):
-                return out.layout
-
-            if isinstance(out, ak.contents.Content):
+            elif isinstance(out, ak.contents.Content):
                 return out
-
-            if hasattr(out, "dtype") and hasattr(out, "shape"):
-                return ak.contents.NumpyArray(out)
 
             else:
                 raise ak._errors.wrap_error(
                     TypeError(
-                        f"transformation must return an Awkward array, not {type(out)}\n\n{out!r}"
+                        f"transformation must return a Content or None, not {type(out)}\n\n{out!r}"
                     )
                 )
 
@@ -499,7 +490,7 @@ def _impl(
     else:
 
         def action(inputs, **kwargs):
-            out = transformation(inputs, **kwargs)
+            out = transformation(tuple(inputs), **kwargs)
 
             if out is None:
                 if all(isinstance(x, ak.contents.NumpyArray) for x in inputs):
@@ -507,38 +498,25 @@ def _impl(
                 else:
                     return None
 
-            if isinstance(out, ak.highlevel.Array):
-                return (out.layout,)
+            elif isinstance(out, tuple):
+                for x in out:
+                    if not isinstance(x, ak.contents.Content):
+                        raise ak._errors.wrap_error(
+                            TypeError(
+                                f"transformation must return a Content, tuple of Contents, or None, not {type(x)}\n\n{x!r}"
+                            )
+                        )
+                return out
 
-            if isinstance(out, ak.contents.Content):
+            elif isinstance(out, ak.contents.Content):
                 return (out,)
 
-            if hasattr(out, "dtype") and hasattr(out, "shape"):
-                return (ak.contents.NumpyArray(out),)
-
-            if isinstance(out, Iterable) and not isinstance(out, tuple):
-                out = tuple(out)
-
-            if any(isinstance(x, ak.highlevel.Array) for x in out):
-                out = tuple(
-                    x.layout if isinstance(x, ak.highlevel.Array) else x for x in out
-                )
-
-            if any(hasattr(x, "dtype") and hasattr(x, "shape") for x in out):
-                out = tuple(
-                    x.layout if hasattr(x, "dtype") and hasattr(x, "shape") else x
-                    for x in out
-                )
-
-            for x in out:
-                if not isinstance(x, ak.contents.Content):
-                    raise ak._errors.wrap_error(
-                        TypeError(
-                            f"transformation must return an Awkward array or tuple of arrays, not {type(x)}\n\n{x!r}"
-                        )
+            else:
+                raise ak._errors.wrap_error(
+                    TypeError(
+                        f"transformation must return a Content, tuple of Contents, or None, not {type(out)}\n\n{out!r}"
                     )
-
-            return out
+                )
 
         inputs = [layout] + more_layouts
         isscalar = []
