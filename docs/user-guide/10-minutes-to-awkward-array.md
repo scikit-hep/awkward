@@ -129,7 +129,12 @@ Clearly, these two arrays have _different_ dimensions. When we add them together
 
 ```{code-cell} python3
 x = np.array([1, 2, 3])
-y = np.array([[4, 5, 6], [7, 8, 9]])
+y = np.array(
+    [
+        [4, 5, 6],
+        [7, 8, 9],
+    ]
+)
 np.broadcast_arrays(x, y)
 ```
 
@@ -137,7 +142,12 @@ In Awkward, broadcasting aligns *to the left* by default, which means that lengt
 
 ```{code-cell} python3
 x = ak.Array([1, 2])  # note the missing 3!
-y = ak.Array([[4, 5, 6], [7, 8, 9]])
+y = ak.Array(
+    [
+        [4, 5, 6],
+        [7, 8, 9],
+    ]
+)
 ak.broadcast_arrays(x, y)
 ```
 
