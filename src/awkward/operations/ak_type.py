@@ -30,31 +30,41 @@ def type(array):
 
     For example,
 
-        ak.Array([[{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}],
-                  [],
-                  [{"x": 3.3, "y": [3, 3, 3]}]])
+        >>> array = ak.Array([[{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}],
+        ...                   [],
+        ...                   [{"x": 3.3, "y": [3, 3, 3]}]])
 
     has type
 
-        3 * var * {"x": float64, "y": var * int64}
+        >>> ak.type(array).show()
+        3 * var * {
+            x: float64,
+            y: var * int64
+        }
 
     but
 
-        ak.Array(np.arange(2*3*5).reshape(2, 3, 5))
+        >>> array = ak.Array(np.arange(2*3*5).reshape(2, 3, 5))
 
     has type
 
+        >>> ak.type(array).show()
         2 * 3 * 5 * int64
 
     Some cases, like heterogeneous data, require [extensions beyond the
     Datashape specification](https://github.com/blaze/datashape/issues/237).
     For example,
 
-        ak.Array([1, "two", [3, 3, 3]])
+        >>> array = ak.Array([1, "two", [3, 3, 3]])
 
     has type
 
-        3 * union[int64, string, var * int64]
+        >>> ak.type(array).show()
+        3 * union[
+            int64,
+            string,
+            var * int64
+        ]
 
     but "union" is not a Datashape type-constructor. (Its syntax is
     similar to existing type-constructors, so it's a plausible addition

@@ -23,20 +23,26 @@ def to_regular(array, axis=1, *, highlevel=True, behavior=None):
     Converts a variable-length axis into a regular one, if possible.
 
         >>> irregular = ak.from_iter(np.arange(2*3*5).reshape(2, 3, 5))
-        >>> print(irregular.type)
+        >>> irregular.type.show()
         2 * var * var * int64
-        >>> print(ak.to_regular(irregular).type)
+        >>> ak.to_regular(irregular).type.show()
         2 * 3 * var * int64
-        >>> print(ak.to_regular(irregular, axis=2).type)
+        >>> ak.to_regular(irregular, axis=2).type.show()
         2 * var * 5 * int64
-        >>> print(ak.to_regular(irregular, axis=-1).type)
+        >>> ak.to_regular(irregular, axis=-1).type.show()
         2 * var * 5 * int64
 
     But truly irregular data cannot be converted.
 
         >>> ak.to_regular(ak.Array([[1, 2, 3], [], [4, 5]]))
-        ValueError: in ListOffsetArray64, cannot convert to RegularArray because
-        subarray lengths are not regular
+        ValueError: while calling
+            ak.to_regular(
+                array = <Array [[1, 2, 3], [], [4, 5]] type='3 * var * int64'>
+                axis = 1
+                highlevel = True
+                behavior = None
+            )
+        Error details: cannot convert to RegularArray because subarray lengths are not regular
 
     See also #ak.from_regular.
     """

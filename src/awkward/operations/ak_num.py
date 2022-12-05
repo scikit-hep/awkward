@@ -23,17 +23,15 @@ def num(array, axis=1, *, highlevel=True, behavior=None):
 
     For instance, given the following doubly nested `array`,
 
-        ak.Array([[
-                   [1.1, 2.2, 3.3],
-                   [],
-                   [4.4, 5.5],
-                   [6.6]
-                  ],
-                  [],
-                  [
-                   [7.7],
-                   [8.8, 9.9]]
-                  ])
+        >>> array = ak.Array([[[1.1, 2.2, 3.3],
+        ...                    [],
+        ...                    [4.4, 5.5],
+        ...                    [6.6]
+        ...                   ],
+        ...                   [],
+        ...                   [[7.7],
+        ...                    [8.8, 9.9]]
+        ...                   ])
 
     The number of elements in `axis=1` is
 
@@ -63,7 +61,7 @@ def num(array, axis=1, *, highlevel=True, behavior=None):
     To keep a placeholder (None) in each place we do not want to select,
     consider using #ak.mask instead of a #ak.Array.__getitem__.
 
-        >>> ak.mask(array, ak.num(array) > 0)[:, 0]
+        >>> array.mask[ak.num(array) > 0][:, 0]
         <Array [[1.1, 2.2, 3.3], None, [7.7]] type='3 * option[var * float64]'>
     """
     with ak._errors.OperationErrorContext(
