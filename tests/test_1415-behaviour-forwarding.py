@@ -164,7 +164,8 @@ def test_behavior_forwarding_structure(operation_behavior):
         == merged_behavior
     )
 
-    def transformer(layout, **kwargs):
+    def transformer(array, **kwargs):
+        layout = ak.to_layout(array)
         if layout.is_numpy:
             return ak.contents.NumpyArray(layout.data * 2)
 
