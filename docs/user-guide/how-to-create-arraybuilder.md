@@ -51,14 +51,14 @@ builder.append(3+1j)
 builder
 ```
 
-Note that this can include missing data by promoting to an [option-type](https://awkward-array.readthedocs.io/en/latest/ak.types.OptionType.html),
+Note that this can include missing data by promoting to an {class}`option-type <ak.types.OptionType>`,
 
 ```{code-cell} python3
 builder.append(None)
 builder
 ```
 
-and mix types by promoting to a [union-type](https://awkward-array.readthedocs.io/en/latest/ak.types.UnionType.html):
+and mix types by promoting to a {class}`union-type <ak.types.UnionType>`:
 
 ```{code-cell} python3
 builder.append("five")
@@ -275,7 +275,7 @@ policy2.type.show()
 Comments on union-type
 ----------------------
 
-Although it's easy to make [union-type](https://awkward-array.readthedocs.io/en/latest/ak.types.UnionType.html) data with {class}`ak.ArrayBuilder`, the applications of union-type data are more limited. For instance, we can select a field that belongs to _all_ types of the union, but not any fields that don't share that field.
+Although it's easy to make {class}`union-type <ak.types.UnionType>` data with {class}`ak.ArrayBuilder`, the applications of union-type data are more limited. For instance, we can select a field that belongs to _all_ types of the union, but not any fields that don't share that field.
 
 ```{code-cell} python3
 array2 = policy2.snapshot()
@@ -307,7 +307,7 @@ array1.y
 array1.x
 ```
 
-At the time of writing, [union-types](https://awkward-array.readthedocs.io/en/latest/ak.types.UnionType.html) are not supported in Numba ([issue 174](https://github.com/scikit-hep/awkward-1.0/issues/174)).
+At the time of writing, {class}`union-type <ak.types.UnionType>` are not supported in Numba ([issue 174](https://github.com/scikit-hep/awkward-1.0/issues/174)).
 
 +++
 

@@ -107,7 +107,7 @@ z = 2 * np.ravel(x) + np.ravel(y)
 Selecting record fields
 -----------------------
 
-A more controlled way to extract fields from a record is to [project](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Array.html#projection) them by name.
+A more controlled way to extract fields from a record is to [project](../reference/generated/ak.Array.html#projection) them by name.
 
 ```{code-cell} python3
 array = ak.Array([[{"x": 1.1, "y": [1], "z": "one"}, {"x": None, "y": [1, 2], "z": "two"}], [], [{"x": 3.3, "y": [1, 2, 3], "z": "three"}]])
@@ -148,7 +148,7 @@ ak.flatten(array[["x", "y"]], axis=None)
 array[("x", "y")]
 ```
 
-If you have records inside of records, you can extract them with [nested projection](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Array.html#nested-projection) if they have common names.
+If you have records inside of records, you can extract them with [nested projection](../reference/generated/ak.Array.html#nested-projection) if they have common names.
 
 ```{code-cell} python3
 array = ak.Array([

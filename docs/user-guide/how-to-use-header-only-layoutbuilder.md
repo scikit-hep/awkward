@@ -26,7 +26,7 @@ What is header-only Layout Builder?
 
 The header-only Layout Builder consists of a set of compile-time, templated, static C++ classes, implemented entirely in header file which can be dropped into any external project, and easily separable from the rest of the Awkward C++ codebase.
 
-The Layout Builder namespace consists of [14 types of Layout Builders](https://awkward-array.readthedocs.io/en/main/_static/doxygen/LayoutBuilder_8h.html).
+The Layout Builder namespace consists of [14 types of Layout Builders](../_static/doxygen/LayoutBuilder_8h.html).
 
 All Builders except `Numpy` and `Empty` can take any other Builder as template parameters.
 These Builders are sufficient to build every type of Awkward Array.
