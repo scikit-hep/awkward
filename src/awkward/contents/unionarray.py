@@ -239,7 +239,16 @@ class UnionArray(Content):
                                     contents[k].length,
                                 )
                             )
-                            contents[k] = contents[k].merge(inner_cont)
+                            old_parameters = contents[k]._parameters
+                            contents[k] = (
+                                contents[k]
+                                .merge(inner_cont)
+                                .copy(
+                                    parameters=ak._util.merge_parameters(
+                                        old_parameters, inner_cont._parameters
+                                    )
+                                )
+                            )
                             unmerged = False
                             break
 
@@ -313,7 +322,16 @@ class UnionArray(Content):
                                 contents[k].length,
                             )
                         )
-                        contents[k] = contents[k].merge(self_cont)
+                        old_parameters = contents[k]._parameters
+                        contents[k] = (
+                            contents[k]
+                            .merge(self_cont)
+                            .copy(
+                                parameters=ak._util.merge_parameters(
+                                    old_parameters, self_cont._parameters
+                                )
+                            )
+                        )
                         unmerged = False
                         break
 
@@ -346,7 +364,10 @@ class UnionArray(Content):
             )
 
         if len(contents) == 1:
-            return contents[0]._carry(index, True)
+            next = contents[0]._carry(index, True)
+            return next.copy(
+                parameters=ak._util.merge_parameters(next._parameters, parameters)
+            )
 
         else:
             return cls(
