@@ -78,7 +78,6 @@ def transform(
         ...     print("Hello", type(layout).__name__, "at", depth)
         ...
         >>> array = ak.Array([[1.1, 2.2, "three"], [], None, [4.4, 5.5]])
-        >>>
         >>> ak.transform(say_hello, array, return_array=False)
         Hello IndexedOptionArray at 1
         Hello ListOffsetArray at 1
@@ -97,15 +96,19 @@ def transform(
     instance, you want to apply NumPy's `np.round` function to numerical data,
     regardless of what lists or other structures they're embedded in.
 
+    The return value must be a subclass of #ak.contents.Content (to replace the
+    array node) or None (to leave the array node unchanged).
+
         >>> def rounder(layout, **kwargs):
         ...     if layout.is_numpy:
-        ...         return np.round(layout.data).astype(np.int32)
+        ...         return ak.contents.NumpyArray(
+        ...             np.round(layout.data).astype(np.int32)
+        ...         )
         ...
         >>> array = ak.Array(
         ... [[[[[1.1, 2.2, 3.3], []], None], []],
         ...  [[[[4.4, 5.5]]]]]
         ... )
-        >>>
         >>> ak.transform(rounder, array).show(type=True)
         type: 2 * var * var * option[var * var * int32]
         [[[[[1, 2, 3], []], None], []],
@@ -120,11 +123,12 @@ def transform(
         >>> def combine(layouts, **kwargs):
         ...     assert len(layouts) == 2
         ...     if layouts[0].is_numpy and layouts[1].is_numpy:
-        ...         return layouts[0].data + 10 * layouts[1].data
+        ...         return ak.contents.NumpyArray(
+        ...             layouts[0].data + 10 * layouts[1].data
+        ...         )
         ...
         >>> array1 = ak.Array([[1, 2, 3], [], None, [4, 5]])
         >>> array2 = ak.Array([1, 2, 3, 4])
-        >>>
         >>> ak.transform(combine, array1, array2)
         <Array [[11, 12, 13], [], None, [44, 45]] type='4 * option[var * int64]'>
 
@@ -223,6 +227,10 @@ def transform(
 
     On the other hand, if we do the same with a `lateral_context`,
 
+        >>> def crawl(layout, lateral_context, **kwargs):
+        ...     lateral_context["types"] = lateral_context["types"] + (type(layout).__name__,)
+        ...     print(lateral_context["types"])
+        ...
         >>> context = {"types": ()}
         >>> ak.transform(crawl, array, lateral_context=context, return_array=False)
         ('ListOffsetArray',)
@@ -258,7 +266,7 @@ def transform(
         >>> array = ak.Array([[[[[1.1, 2.2, 3.3], []]], []], [[[[4.4, 5.5]]]]])
         >>> array.type.show()
         2 * var * var * var * var * float64
-        >>>
+
         >>> array2 = ak.transform(insert_optiontype, array)
         >>> array2.type.show()
         2 * option[var * option[var * option[var * option[var * ?float64]]]]
