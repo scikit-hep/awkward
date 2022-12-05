@@ -83,17 +83,17 @@ def to_json(
 
     Awkward Array types have the following JSON translations.
 
-       * #ak.types.PrimitiveType: converted into JSON booleans and numbers.
-       * #ak.types.OptionType: missing values are converted into None.
-       * #ak.types.ListType: converted into JSON lists.
-       * #ak.types.RegularType: also converted into JSON lists. JSON (and
-         Python) forms lose information about the regularity of list lengths.
-       * #ak.types.ListType or #ak.types.RegularType with parameter `"__array__"`
-         equal to `"string"`: converted into JSON strings.
-       * #ak.types.RecordArray without field names: converted into JSON
-         objects with numbers as strings for keys.
-       * #ak.types.RecordArray with field names: converted into JSON objects.
-       * #ak.types.UnionArray: JSON data are naturally heterogeneous.
+    * #ak.types.PrimitiveType: converted into JSON booleans and numbers.
+    * #ak.types.OptionType: missing values are converted into None.
+    * #ak.types.ListType: converted into JSON lists.
+    * #ak.types.RegularType: also converted into JSON lists. JSON (and
+      Python) forms lose information about the regularity of list lengths.
+    * #ak.types.ListType or #ak.types.RegularType with parameter `"__array__"`
+      equal to `"string"`: converted into JSON strings.
+    * #ak.types.RecordArray without field names: converted into JSON
+      objects with numbers as strings for keys.
+    * #ak.types.RecordArray with field names: converted into JSON objects.
+    * #ak.types.UnionArray: JSON data are naturally heterogeneous.
 
     If the array contains any NaN (not a number), infinite values, or
     imaginary/complex types, `nan_string`, `posinf_string`, and/or `neginf_string`

@@ -20,19 +20,19 @@ def to_list(array):
 
     Awkward Array types have the following Pythonic translations.
 
-       * #ak.types.NumpyType: converted into bool, int, float, datetimes, etc.
-         (Same as NumPy's `ndarray.tolist`.)
-       * #ak.types.OptionType: missing values are converted into None.
-       * #ak.types.ListType: converted into list.
-       * #ak.types.RegularType: also converted into list. Python (and JSON)
-         forms lose information about the regularity of list lengths.
-       * #ak.types.ListType with parameter `"__array__"` equal to
-         `"__bytestring__"`: converted into bytes.
-       * #ak.types.ListType with parameter `"__array__"` equal to
-         `"__string__"`: converted into str.
-       * #ak.types.RecordArray without field names: converted into tuple.
-       * #ak.types.RecordArray with field names: converted into dict.
-       * #ak.types.UnionArray: Python data are naturally heterogeneous.
+    * #ak.types.NumpyType: converted into bool, int, float, datetimes, etc.
+      (Same as NumPy's `ndarray.tolist`.)
+    * #ak.types.OptionType: missing values are converted into None.
+    * #ak.types.ListType: converted into list.
+    * #ak.types.RegularType: also converted into list. Python (and JSON)
+      forms lose information about the regularity of list lengths.
+    * #ak.types.ListType with parameter `"__array__"` equal to
+      `"__bytestring__"`: converted into bytes.
+    * #ak.types.ListType with parameter `"__array__"` equal to
+      `"__string__"`: converted into str.
+    * #ak.types.RecordArray without field names: converted into tuple.
+    * #ak.types.RecordArray with field names: converted into dict.
+    * #ak.types.UnionArray: Python data are naturally heterogeneous.
 
     See also #ak.from_iter and #ak.Array.tolist.
     """

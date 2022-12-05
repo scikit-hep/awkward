@@ -11,9 +11,9 @@ def from_rdataframe(data_frame, columns):
         columns (str or tuple of str): A column or multiple columns to be
             converted to Awkward Array.
 
-     Converts ROOT Data Frame columns into an Awkward Array.
+    Converts ROOT Data Frame columns into an Awkward Array.
 
-     See also #ak.to_rdataframe.
+    See also #ak.to_rdataframe.
     """
     with ak._errors.OperationErrorContext(
         "ak.from_rdataframe",

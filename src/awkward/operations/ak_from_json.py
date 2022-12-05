@@ -72,14 +72,14 @@ def from_json(
     There are a few different dichotomies in JSON-reading; all of the combinations
     are supported:
 
-      * Reading from in-memory str/bytes, on-disk or over-network file, or an
-        arbitrary Python object with a `read(num_bytes)` method.
-      * Reading a single JSON document or a sequence of line-delimited documents.
-      * Unknown schema (slow and general) or with a provided JSONSchema (fast, but
-        not all possible cases are supported).
-      * Conversion of strings representing not-a-number, plus and minus infinity
-        into the appropriate floating-point numbers.
-      * Conversion of records with a real and imaginary part into complex numbers.
+    * Reading from in-memory str/bytes, on-disk or over-network file, or an
+      arbitrary Python object with a `read(num_bytes)` method.
+    * Reading a single JSON document or a sequence of line-delimited documents.
+    * Unknown schema (slow and general) or with a provided JSONSchema (fast, but
+      not all possible cases are supported).
+    * Conversion of strings representing not-a-number, plus and minus infinity
+      into the appropriate floating-point numbers.
+    * Conversion of records with a real and imaginary part into complex numbers.
 
     Non-JSON features not allowed, including literals for not-a-number or infinite
     numbers; they must be quoted strings for `nan_string`, `posinf_string`, and
@@ -207,29 +207,29 @@ def from_json(
     as JSON text or as Python lists and dicts representing JSON, but the following
     conditions apply:
 
-      * The root of the schema must be `"type": "array"` or `"type": "object"`.
-      * Every level must have a `"type"`, which can only name one type (as a string
-        or length-1 list) or one type and `"null"` (as a length-2 list).
-      * `"type": "boolean"` \u2192 1-byte boolean values.
-      * `"type": "integer"` \u2192 8-byte integer values. If a part of the schema
-        is declared to have integer type but the JSON numbers are expressed as
-        floating-point, such as `3.14`, `3.0`, or `3e0`, this function raises an
-        error.
-      * `"type": "number"` \u2192 8-byte floating-point values. If used with
-        this function's `nan_string`, `posinf_string`, and/or `neginf_string`, the
-        value in the JSON could be a string, as long as it matches one of these
-        three.
-      * `"type": "string"` \u2192 UTF-8 encoded strings. All JSON escape sequences are
-        supported. Remember that the `source` data are ASCII; Unicode is derived from
-        "`\\uXXXX`" escape sequences. If an `"enum"` is given, strings are represented
-        as categorical values (#ak.contents.IndexedArray or #ak.contents.IndexedOptionArray).
-      * `"type": "array"` \u2192 nested lists. The `"items"` must be specified. If
-        `"minItems"` and `"maxItems"` are specified and equal to each other, the
-        list has regular-type (#ak.types.RegularType); otherwise, it has variable-length
-        type (#ak.types.ListType).
-      * `"type": "object"` \u2192 nested records. The `"properties"` must be specified,
-        and any properties in the data not described by `"properties"` will not
-        appear in the output.
+    * The root of the schema must be `"type": "array"` or `"type": "object"`.
+    * Every level must have a `"type"`, which can only name one type (as a string
+      or length-1 list) or one type and `"null"` (as a length-2 list).
+    * `"type": "boolean"` \u2192 1-byte boolean values.
+    * `"type": "integer"` \u2192 8-byte integer values. If a part of the schema
+      is declared to have integer type but the JSON numbers are expressed as
+      floating-point, such as `3.14`, `3.0`, or `3e0`, this function raises an
+      error.
+    * `"type": "number"` \u2192 8-byte floating-point values. If used with
+      this function's `nan_string`, `posinf_string`, and/or `neginf_string`, the
+      value in the JSON could be a string, as long as it matches one of these
+      three.
+    * `"type": "string"` \u2192 UTF-8 encoded strings. All JSON escape sequences are
+      supported. Remember that the `source` data are ASCII; Unicode is derived from
+      "`\\uXXXX`" escape sequences. If an `"enum"` is given, strings are represented
+      as categorical values (#ak.contents.IndexedArray or #ak.contents.IndexedOptionArray).
+    * `"type": "array"` \u2192 nested lists. The `"items"` must be specified. If
+      `"minItems"` and `"maxItems"` are specified and equal to each other, the
+      list has regular-type (#ak.types.RegularType); otherwise, it has variable-length
+      type (#ak.types.ListType).
+    * `"type": "object"` \u2192 nested records. The `"properties"` must be specified,
+      and any properties in the data not described by `"properties"` will not
+      appear in the output.
 
     Substitutions for non-finite and complex numbers
     ================================================

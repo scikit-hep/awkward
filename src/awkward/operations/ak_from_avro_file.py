@@ -20,6 +20,7 @@ def from_avro_file(
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
+
     Reads Avro files as Awkward Arrays.
 
     Internally this function uses AwkwardForth DSL. The function recursively parses the Avro schema, generates

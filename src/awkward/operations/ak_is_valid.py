@@ -6,8 +6,7 @@ import awkward as ak
 def is_valid(array, *, exception=False):
     """
     Args:
-        array (#ak.Array, #ak.Record, #ak.contents.Content, #ak.record.Record,
-               #ak.ArrayBuilder):
+        array (#ak.Array, #ak.Record, #ak.contents.Content, #ak.record.Record, #ak.ArrayBuilder):
             Array or record to check.
         exception (bool): If True, validity errors raise exceptions.
 
