@@ -154,7 +154,7 @@ def from_json(
     (`line_delimited=True`) only results in #ak.Array:
 
         >>> ak.from_json(
-        ...     '{"x": 1.1, "y": [1]}\n{"x": 2.2, "y": [1, 2]}\n{"x": 3.3, "y": [1, 2, 3]}',
+        ...     '{"x": 1.1, "y": [1]}\\n{"x": 2.2, "y": [1, 2]}\\n{"x": 3.3, "y": [1, 2, 3]}',
         ...     line_delimited=True,
         ... )
         <Array [{x: 1.1, y: [1]}, ..., {x: 3.3, ...}] type='3 * {x: float64, y: var...'>
@@ -191,7 +191,7 @@ def from_json(
         <Record {x: 1.1, y: [1, ..., 3]} type='{x: float64, y: var * int64}'>
 
         >>> ak.from_json(
-        ...     '{"x": 1.1, "y": [1]}\n{"x": 2.2, "y": [1, 2]}\n{"x": 3.3, "y": [1, 2, 3]}',
+        ...     '{"x": 1.1, "y": [1]}\\n{"x": 2.2, "y": [1, 2]}\\n{"x": 3.3, "y": [1, 2, 3]}',
         ...     schema=schema,
         ...     line_delimited=True,
         ... )
