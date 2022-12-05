@@ -1997,7 +1997,7 @@ class ListOffsetArray(Content):
             self.parameter("__array__") == "string"
             or self.parameter("__array__") == "bytestring"
         ):
-            return [ak.operations.to_numpy(self)]
+            return [self]
         else:
             flat = self._content[self._offsets[0] : self._offsets[-1]]
             return flat._completely_flatten(backend, options)
