@@ -1474,13 +1474,10 @@ class Record(NDArrayOperatorsMixin):
         with_name (None or str): Gives the record type a name that can be
             used to override its behavior (see below).
         check_valid (bool): If True, verify that the #layout is valid.
-        kernels (None, `"cpu"`, or `"cuda"`): If `"cpu"`, the Record will be placed in
+        backend (None, `"cpu"`, `"jax"`, `"cuda"`): If `"cpu"`, the Array will be placed in
             main memory for use with other `"cpu"` Arrays and Records; if `"cuda"`,
-            the Record will be placed in GPU global memory using CUDA; if None,
-            the `data` are left untouched. For `"cuda"`,
-            [awkward-cuda-kernels](https://pypi.org/project/awkward-cuda-kernels)
-            must be installed, which can be invoked with
-            `pip install awkward[cuda] --upgrade`.
+            the Array will be placed in GPU global memory using CUDA; if `"jax"`, the structure
+            is copied to the CPU for use with JAX. if None, the `data` are left untouched.
 
     High-level record that can contain fields of any type.
 
