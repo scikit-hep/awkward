@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 @ak._connect.numpy.implements("mean")
@@ -185,4 +185,4 @@ def _impl(x, weight, axis, keepdims, mask_identity, flatten_records):
             sumwx = ak.operations.ak_sum._impl(
                 x * weight, axis, keepdims, mask_identity, flatten_records
             )
-        return ak.nplikes.nplike_of(sumwx, sumw).true_divide(sumwx, sumw)
+        return ak._nplikes.nplike_of(sumwx, sumw).true_divide(sumwx, sumw)

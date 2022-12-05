@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 def to_categorical(array, *, highlevel=True, behavior=None):
@@ -83,8 +83,6 @@ def to_categorical(array, *, highlevel=True, behavior=None):
 def _impl(array, highlevel, behavior):
     def action(layout, **kwargs):
         if layout.purelist_depth == 1:
-            if layout.is_option:
-                layout = layout.simplify_optiontype()
             if layout.is_indexed and layout.is_option:
                 content = layout.content
                 cls = ak.contents.IndexedOptionArray
@@ -102,8 +100,8 @@ def _impl(array, highlevel, behavior):
             hashable = [ak.behaviors.categorical.as_hashable(x) for x in content_list]
 
             lookup = {}
-            is_first = ak.nplikes.numpy.empty(len(hashable), dtype=np.bool_)
-            mapping = ak.nplikes.numpy.empty(len(hashable), dtype=np.int64)
+            is_first = ak._nplikes.numpy.empty(len(hashable), dtype=np.bool_)
+            mapping = ak._nplikes.numpy.empty(len(hashable), dtype=np.int64)
             for i, x in enumerate(hashable):
                 if x in lookup:
                     is_first[i] = False
@@ -114,17 +112,17 @@ def _impl(array, highlevel, behavior):
                     mapping[i] = j
 
             if layout.is_indexed and layout.is_option:
-                original_index = ak.nplikes.numpy.asarray(layout.index)
+                original_index = ak._nplikes.numpy.asarray(layout.index)
                 index = mapping[original_index]
                 index[original_index < 0] = -1
                 index = ak.index.Index64(index)
 
             elif layout.is_indexed:
-                original_index = ak.nplikes.numpy.asarray(layout.index)
+                original_index = ak._nplikes.numpy.asarray(layout.index)
                 index = ak.index.Index64(mapping[original_index])
 
             elif layout.is_option:
-                mask = ak.nplikes.numpy.asarray(layout.mask_as_bool(valid_when=False))
+                mask = ak._nplikes.numpy.asarray(layout.mask_as_bool(valid_when=False))
                 mapping[mask.view(np.bool_)] = -1
                 index = ak.index.Index64(mapping)
 

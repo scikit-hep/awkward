@@ -7,6 +7,7 @@ import pytest
 import awkward as ak
 
 
+@pytest.mark.xfail(reason="unimplemented CUDA Kernels (awkward_ByteMaskedArray_numnull")
 def test_num_1():
     content = ak.Array(
         ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
@@ -21,6 +22,7 @@ def test_num_1():
         ak.num(cuda_array, 1)
 
 
+@pytest.mark.xfail(reason="unimplemented CUDA Kernels (awkward_ByteMaskedArray_numnull")
 def test_num_2():
     content = ak.Array(
         ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]

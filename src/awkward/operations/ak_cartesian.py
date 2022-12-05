@@ -2,7 +2,8 @@
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
+cpu = ak._backends.NumpyBackend.instance()
 
 
 def cartesian(
@@ -233,7 +234,7 @@ def cartesian(
 def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
     if isinstance(arrays, dict):
         behavior = ak._util.behavior_of(*arrays.values(), behavior=behavior)
-        backend = ak._backends.backend_of(*arrays.values())
+        backend = ak._backends.backend_of(*arrays.values(), default=cpu)
         new_arrays = {}
         for n, x in arrays.items():
             new_arrays[n] = ak.operations.to_layout(
@@ -243,7 +244,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
     else:
         arrays = list(arrays)
         behavior = ak._util.behavior_of(*arrays, behavior=behavior)
-        backend = ak._backends.backend_of(*arrays)
+        backend = ak._backends.backend_of(*arrays, default=cpu)
         new_arrays = []
         for x in arrays:
             new_arrays.append(
@@ -325,7 +326,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
             )
         ]
         outs = [
-            ak.contents.IndexedArray(x, y)
+            ak.contents.IndexedArray.simplified(x, y)
             for x, y in __builtins__["zip"](indexes, layouts)
         ]
 

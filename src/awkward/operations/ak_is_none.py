@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 def is_none(array, axis=0, *, highlevel=True, behavior=None):
@@ -47,7 +47,7 @@ def _impl(array, axis, highlevel, behavior):
                 tag, 0, backend.nplike.asarray(layout.index)
             )
 
-            return ak.contents.UnionArray(
+            return ak.contents.UnionArray.simplified(
                 ak.index.Index8(tag),
                 ak.index.Index64(index),
                 [
@@ -56,7 +56,7 @@ def _impl(array, axis, highlevel, behavior):
                         backend.nplike.array([True], dtype=np.bool_)
                     ),
                 ],
-            ).simplify_uniontype()
+            )
 
         elif layout.is_unknown or layout.is_list or layout.is_record or layout.is_numpy:
             return ak.contents.NumpyArray(

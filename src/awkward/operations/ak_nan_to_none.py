@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 def nan_to_none(array, *, highlevel=True, behavior=None):
@@ -46,7 +46,7 @@ def _impl(array, highlevel, behavior):
             isinstance(layout.content, ak.contents.NumpyArray)
             and issubclass(layout.content.dtype.type, np.floating)
         ):
-            return continuation().simplify_optiontype()
+            return continuation()
 
         else:
             return None

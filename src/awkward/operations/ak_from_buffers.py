@@ -6,8 +6,8 @@ import math
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
-numpy = ak.nplikes.Numpy.instance()
+np = ak._nplikes.NumpyMetadata.instance()
+numpy = ak._nplikes.Numpy.instance()
 
 
 def from_buffers(
@@ -36,7 +36,7 @@ def from_buffers(
         backend (str): Library to use to generate values that are
             put into the new array. The default, cpu, makes NumPy
             arrays, which are in main memory (e.g. not GPU). If all the values in
-            `container` have the same `nplike` as this, they won't be copied.
+            `container` have the same `backend` as this, they won't be copied.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
@@ -73,10 +73,12 @@ def from_buffers(
             behavior=behavior,
         ),
     ):
-        return _impl(form, length, container, buffer_key, backend, highlevel, behavior)
+        return _impl(
+            form, length, container, buffer_key, backend, highlevel, behavior, False
+        )
 
 
-def _impl(form, length, container, buffer_key, backend, highlevel, behavior):
+def _impl(form, length, container, buffer_key, backend, highlevel, behavior, simplify):
     backend = ak._backends.regularize_backend(backend)
 
     if isinstance(form, str):
@@ -116,7 +118,7 @@ def _impl(form, length, container, buffer_key, backend, highlevel, behavior):
             )
         )
 
-    out = reconstitute(form, length, container, getkey, backend)
+    out = reconstitute(form, length, container, getkey, backend, simplify)
     return ak._util.wrap(out, behavior, highlevel)
 
 
@@ -129,7 +131,7 @@ _index_to_dtype = {
 }
 
 
-def reconstitute(form, length, container, getkey, backend):
+def reconstitute(form, length, container, getkey, backend, simplify):
     if isinstance(form, ak.forms.EmptyForm):
         if length != 0:
             raise ak._errors.wrap_error(
@@ -152,8 +154,14 @@ def reconstitute(form, length, container, getkey, backend):
         return ak.contents.NumpyArray(data, parameters=form.parameters, backend=backend)
 
     elif isinstance(form, ak.forms.UnmaskedForm):
-        content = reconstitute(form.content, length, container, getkey, backend)
-        return ak.contents.UnmaskedArray(content, parameters=form.parameters)
+        content = reconstitute(
+            form.content, length, container, getkey, backend, simplify
+        )
+        if simplify:
+            make = ak.contents.UnmaskedArray.simplified
+        else:
+            make = ak.contents.UnmaskedArray
+        return make(content, parameters=form.parameters)
 
     elif isinstance(form, ak.forms.BitMaskedForm):
         raw_array = container[getkey(form, "mask")]
@@ -161,9 +169,16 @@ def reconstitute(form, length, container, getkey, backend):
         mask = backend.index_nplike.frombuffer(
             raw_array, dtype=_index_to_dtype[form.mask], count=excess_length
         )
-        return ak.contents.BitMaskedArray(
+        content = reconstitute(
+            form.content, length, container, getkey, backend, simplify
+        )
+        if simplify:
+            make = ak.contents.BitMaskedArray.simplified
+        else:
+            make = ak.contents.BitMaskedArray
+        return make(
             ak.index.Index(mask),
-            reconstitute(form.content, length, container, getkey, backend),
+            content,
             form.valid_when,
             length,
             form.lsb_order,
@@ -175,9 +190,16 @@ def reconstitute(form, length, container, getkey, backend):
         mask = backend.index_nplike.frombuffer(
             raw_array, dtype=_index_to_dtype[form.mask], count=length
         )
-        return ak.contents.ByteMaskedArray(
+        content = reconstitute(
+            form.content, length, container, getkey, backend, simplify
+        )
+        if simplify:
+            make = ak.contents.ByteMaskedArray.simplified
+        else:
+            make = ak.contents.ByteMaskedArray
+        return make(
             ak.index.Index(mask),
-            reconstitute(form.content, length, container, getkey, backend),
+            content,
             form.valid_when,
             parameters=form.parameters,
         )
@@ -190,9 +212,16 @@ def reconstitute(form, length, container, getkey, backend):
         next_length = (
             0 if len(index) == 0 else max(0, backend.index_nplike.max(index) + 1)
         )
-        return ak.contents.IndexedOptionArray(
+        content = reconstitute(
+            form.content, next_length, container, getkey, backend, simplify
+        )
+        if simplify:
+            make = ak.contents.IndexedOptionArray.simplified
+        else:
+            make = ak.contents.IndexedOptionArray
+        return make(
             ak.index.Index(index),
-            reconstitute(form.content, next_length, container, getkey, backend),
+            content,
             parameters=form.parameters,
         )
 
@@ -202,9 +231,16 @@ def reconstitute(form, length, container, getkey, backend):
             raw_array, dtype=_index_to_dtype[form.index], count=length
         )
         next_length = 0 if len(index) == 0 else backend.index_nplike.max(index) + 1
-        return ak.contents.IndexedArray(
+        content = reconstitute(
+            form.content, next_length, container, getkey, backend, simplify
+        )
+        if simplify:
+            make = ak.contents.IndexedArray.simplified
+        else:
+            make = ak.contents.IndexedArray
+        return make(
             ak.index.Index(index),
-            reconstitute(form.content, next_length, container, getkey, backend),
+            content,
             parameters=form.parameters,
         )
 
@@ -219,10 +255,13 @@ def reconstitute(form, length, container, getkey, backend):
         )
         reduced_stops = stops[starts != stops]
         next_length = 0 if len(starts) == 0 else backend.index_nplike.max(reduced_stops)
+        content = reconstitute(
+            form.content, next_length, container, getkey, backend, simplify
+        )
         return ak.contents.ListArray(
             ak.index.Index(starts),
             ak.index.Index(stops),
-            reconstitute(form.content, next_length, container, getkey, backend),
+            content,
             parameters=form.parameters,
         )
 
@@ -232,27 +271,34 @@ def reconstitute(form, length, container, getkey, backend):
             raw_array, dtype=_index_to_dtype[form.offsets], count=length + 1
         )
         next_length = 0 if len(offsets) == 1 else offsets[-1]
+        content = reconstitute(
+            form.content, next_length, container, getkey, backend, simplify
+        )
         return ak.contents.ListOffsetArray(
             ak.index.Index(offsets),
-            reconstitute(form.content, next_length, container, getkey, backend),
+            content,
             parameters=form.parameters,
         )
 
     elif isinstance(form, ak.forms.RegularForm):
         next_length = length * form.size
+        content = reconstitute(
+            form.content, next_length, container, getkey, backend, simplify
+        )
         return ak.contents.RegularArray(
-            reconstitute(form.content, next_length, container, getkey, backend),
+            content,
             form.size,
             length,
             parameters=form.parameters,
         )
 
     elif isinstance(form, ak.forms.RecordForm):
+        contents = [
+            reconstitute(content, length, container, getkey, backend, simplify)
+            for content in form.contents
+        ]
         return ak.contents.RecordArray(
-            [
-                reconstitute(content, length, container, getkey, backend)
-                for content in form.contents
-            ],
+            contents,
             None if form.is_tuple else form.fields,
             length,
             parameters=form.parameters,
@@ -274,13 +320,18 @@ def reconstitute(form, length, container, getkey, backend):
                 lengths.append(0)
             else:
                 lengths.append(backend.index_nplike.max(selected_index) + 1)
-        return ak.contents.UnionArray(
+        contents = [
+            reconstitute(content, lengths[i], container, getkey, backend, simplify)
+            for i, content in enumerate(form.contents)
+        ]
+        if simplify:
+            make = ak.contents.UnionArray.simplified
+        else:
+            make = ak.contents.UnionArray
+        return make(
             ak.index.Index(tags),
             ak.index.Index(index),
-            [
-                reconstitute(content, lengths[i], container, getkey, backend)
-                for i, content in enumerate(form.contents)
-            ],
+            contents,
             parameters=form.parameters,
         )
 

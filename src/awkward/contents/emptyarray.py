@@ -4,17 +4,25 @@ from __future__ import annotations
 import copy
 
 import awkward as ak
-from awkward.contents.content import Content, unset
+from awkward._util import unset
+from awkward.contents.content import Content
 from awkward.forms.emptyform import EmptyForm
 from awkward.typing import Self
 
-np = ak.nplikes.NumpyMetadata.instance()
-numpy = ak.nplikes.Numpy.instance()
+np = ak._nplikes.NumpyMetadata.instance()
+numpy = ak._nplikes.Numpy.instance()
 
 
 class EmptyArray(Content):
     is_numpy = True
     is_unknown = True
+
+    def __init__(self, *, parameters=None, backend=None):
+        if backend is None:
+            backend = ak._backends.NumpyBackend.instance()
+        self._init(parameters, backend)
+
+    Form = EmptyForm
 
     def copy(
         self,
@@ -33,17 +41,14 @@ class EmptyArray(Content):
     def __deepcopy__(self, memo):
         return self.copy(parameters=copy.deepcopy(self._parameters, memo))
 
-    def __init__(self, *, parameters=None, backend=None):
-        if backend is None:
-            backend = ak._backends.NumpyBackend.instance()
-        self._init(parameters, backend)
-
-    Form = EmptyForm
+    @classmethod
+    def simplified(cls, *, parameters=None, backend=None):
+        return cls(parameters=parameters, backend=backend)
 
     def _form_with_key(self, getkey):
         return self.Form(parameters=self._parameters, form_key=getkey(self))
 
-    def _to_buffers(self, form, getkey, container, nplike):
+    def _to_buffers(self, form, getkey, container, backend):
         assert isinstance(form, self.Form)
 
     @property

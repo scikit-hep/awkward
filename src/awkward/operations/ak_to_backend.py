@@ -2,47 +2,45 @@
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 def to_backend(array, backend, *, highlevel=True, behavior=None):
     """
     Args:
         array: Data to convert to a specified `backend` set.
-        backend (`"cpu"` or `"cuda"`): If `"cpu"`, the array structure is
+        backend (`"cpu"`, `"cuda"`, or `"jax"`): If `"cpu"`, the array structure is
             recursively copied (if need be) to main memory for use with
-            the default `libawkward-cpu-kernels.so`; if `"cuda"`, the
-            structure is copied to the GPU(s) for use with
-            `libawkward-cuda-kernels.so`.
+            the default Numpy backend; if `"cuda"`, the structure is copied
+            to the GPU(s) for use with CuPy. If `"jax"`, the structure is
+            copied to the CPU for use with JAX.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
-    Converts an array from `"cpu"`, `"cuda"`, or `"mixed"` kernels to `"cpu"`
-    or `"cuda"`.
-
-    An array is `"mixed"` if some components are set to use the `"cpu"` backend and
-    others are set to use the `"cuda"` backend. Mixed arrays can't be used in any
-    operations, and two arrays set to different backends can't be used in the
-    same operation.
+    Converts an array from `"cpu"`, `"cuda"`, or `"jax"` kernels to `"cpu"`,
+    `"cuda"`, or `"jax"`.
 
     Any components that are already in the desired backend are viewed,
     rather than copied, so this operation can be an inexpensive way to ensure
     that an array is ready for a particular library.
 
-    To use `"cuda"`, the package
-    [awkward-cuda-kernels](https://pypi.org/project/awkward-cuda-kernels)
-    be installed, either by
+    To use `"cuda"`, the `cupy` package must be installed, either with
 
-        pip install awkward-cuda-kernels
+        pip install cupy
 
-    or as an optional dependency with
+    or
 
-        pip install awkward[cuda] --upgrade
+        conda install -c conda-forge cupy
 
-    It is only available for Linux as a binary wheel, and only supports Nvidia
-    GPUs (it is written in CUDA).
+    To use `"jax"`, the `jax` package must be installed, either with
+
+        pip install jax
+
+    or
+
+        conda install -c conda-forge jax
 
     See #ak.kernels.
     """

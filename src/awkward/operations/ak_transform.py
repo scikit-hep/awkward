@@ -5,6 +5,8 @@ from collections.abc import Iterable
 
 import awkward as ak
 
+cpu = ak._backends.NumpyBackend.instance()
+
 
 def transform(
     transformation,
@@ -161,8 +163,8 @@ def transform(
 
        * behavior (None or dict): Behavior that would be attached to the output
            array(s) if `highlevel`.
-       * nplike (array library shim): Handle to the NumPy library, CuPy, etc.,
-           depending on the type of arrays.
+       * backend (array library / kernel library shim): Handle to the NumPy
+           library, CuPy, etc., depending on the type of arrays.
        * options (dict): Options provided to #ak.transform.
 
     If there is only one array, the `transformation` function must either return
@@ -441,7 +443,7 @@ def _impl(
     more_layouts = [
         ak.to_layout(x, allow_record=False, allow_other=False) for x in more_arrays
     ]
-    backend = ak._backends.backend_of(layout, *more_layouts)
+    backend = ak._backends.backend_of(layout, *more_layouts, default=cpu)
 
     options = {
         "allow_records": allow_records,

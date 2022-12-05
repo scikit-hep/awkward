@@ -1,7 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import copy
+import html
 import io
+import itertools
 import keyword
 import re
 import sys
@@ -12,8 +14,8 @@ from awkward_cpp.lib import _ext
 import awkward as ak
 from awkward._connect.numpy import NDArrayOperatorsMixin
 
-np = ak.nplikes.NumpyMetadata.instance()
-numpy = ak.nplikes.Numpy.instance()
+np = ak._nplikes.NumpyMetadata.instance()
+numpy = ak._nplikes.Numpy.instance()
 
 _dir_pattern = re.compile(r"^[a-zA-Z_]\w*$")
 
@@ -200,10 +202,10 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         elif numpy.is_own_array(data) and data.dtype != np.dtype("O"):
             layout = ak.operations.from_numpy(data, highlevel=False)
 
-        elif ak.nplikes.Cupy.is_own_array(data):
+        elif ak._nplikes.Cupy.is_own_array(data):
             layout = ak.operations.from_cupy(data, highlevel=False)
 
-        elif ak.nplikes.Jax.is_own_array(data):
+        elif ak._nplikes.Jax.is_own_array(data):
             layout = ak.operations.from_jax(data, highlevel=False)
 
         elif ak._util.in_module(data, "pyarrow"):
@@ -1244,6 +1246,28 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         else:
             stream.write(out + "\n")
 
+    def _repr_mimebundle_(self, include=None, exclude=None):
+        value_buff = io.StringIO()
+        self.show(type=False, stream=value_buff)
+        header_lines = value_buff.getvalue().splitlines()
+
+        type_buff = io.StringIO()
+        self.type.show(stream=type_buff)
+        footer_lines = type_buff.getvalue().splitlines()
+        # Prepend a `type: ` prefix to the type information
+        footer_lines[0] = f"type: {footer_lines[0]}"
+
+        if header_lines[-1] == "":
+            del header_lines[-1]
+
+        n_cols = max(len(line) for line in itertools.chain(header_lines, footer_lines))
+        body = "\n".join([*header_lines, "-" * n_cols, *footer_lines])
+
+        return {
+            "text/html": f"<pre>{html.escape(body)}</pre>",
+            "text/plain": repr(self),
+        }
+
     def __array__(self, *args, **kwargs):
         """
         Intercepts attempts to convert this Array into a NumPy array and
@@ -1949,6 +1973,28 @@ class Record(NDArrayOperatorsMixin):
         else:
             stream.write(out + "\n")
 
+    def _repr_mimebundle_(self, include=None, exclude=None):
+        value_buff = io.StringIO()
+        self.show(type=False, stream=value_buff)
+        header_lines = value_buff.getvalue().splitlines()
+
+        type_buff = io.StringIO()
+        self.type.show(stream=type_buff)
+        footer_lines = type_buff.getvalue().splitlines()
+        # Prepend a `type: ` prefix to the type information
+        footer_lines[0] = f"type: {footer_lines[0]}"
+
+        if header_lines[-1] == "":
+            del header_lines[-1]
+
+        n_cols = max(len(line) for line in itertools.chain(header_lines, footer_lines))
+        body = "\n".join([*header_lines, "-" * n_cols, *footer_lines])
+
+        return {
+            "text/html": f"<pre>{html.escape(body)}</pre>",
+            "text/plain": repr(self),
+        }
+
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         """
         Intercepts attempts to pass this Record to a NumPy
@@ -2362,7 +2408,18 @@ class ArrayBuilder(Sized):
         """
         formstr, length, container = self._layout.to_buffers()
         form = ak.forms.from_json(formstr)
-        return ak.operations.from_buffers(form, length, container, highlevel=True)
+
+        with ak._errors.OperationErrorContext("ak.ArrayBuilder.snapshot", {}):
+            return ak.operations.ak_from_buffers._impl(
+                form,
+                length,
+                container,
+                buffer_key="{form_key}-{attribute}",
+                backend="cpu",
+                highlevel=True,
+                behavior=self._behavior,
+                simplify=True,
+            )
 
     def null(self):
         """

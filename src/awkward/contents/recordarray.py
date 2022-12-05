@@ -6,44 +6,18 @@ import json
 from collections.abc import Iterable
 
 import awkward as ak
-from awkward.contents.content import Content, unset
+from awkward._util import unset
+from awkward.contents.content import Content
 from awkward.forms.recordform import RecordForm
 from awkward.record import Record
 from awkward.typing import Self
 
-np = ak.nplikes.NumpyMetadata.instance()
-numpy = ak.nplikes.Numpy.instance()
+np = ak._nplikes.NumpyMetadata.instance()
+numpy = ak._nplikes.Numpy.instance()
 
 
 class RecordArray(Content):
     is_record = True
-
-    def copy(
-        self,
-        contents=unset,
-        fields=unset,
-        length=unset,
-        *,
-        parameters=unset,
-        backend=unset,
-    ):
-        return RecordArray(
-            self._contents if contents is unset else contents,
-            self._fields if fields is unset else fields,
-            self._length if length is unset else length,
-            parameters=self._parameters if parameters is unset else parameters,
-            backend=self._backend if backend is unset else backend,
-        )
-
-    def __copy__(self):
-        return self.copy()
-
-    def __deepcopy__(self, memo):
-        return self.copy(
-            contents=[copy.deepcopy(x, memo) for x in self._contents],
-            fields=copy.deepcopy(self._fields, memo),
-            parameters=copy.deepcopy(self._parameters, memo),
-        )
 
     def __init__(
         self,
@@ -137,7 +111,6 @@ class RecordArray(Content):
         for content in contents:
             if backend is None:
                 backend = content.backend
-                break
             elif backend is not content.backend:
                 raise ak._errors.wrap_error(
                     TypeError(
@@ -167,6 +140,47 @@ class RecordArray(Content):
         else:
             return self._fields
 
+    Form = RecordForm
+
+    def copy(
+        self,
+        contents=unset,
+        fields=unset,
+        length=unset,
+        *,
+        parameters=unset,
+        backend=unset,
+    ):
+        return RecordArray(
+            self._contents if contents is unset else contents,
+            self._fields if fields is unset else fields,
+            self._length if length is unset else length,
+            parameters=self._parameters if parameters is unset else parameters,
+            backend=self._backend if backend is unset else backend,
+        )
+
+    def __copy__(self):
+        return self.copy()
+
+    def __deepcopy__(self, memo):
+        return self.copy(
+            contents=[copy.deepcopy(x, memo) for x in self._contents],
+            fields=copy.deepcopy(self._fields, memo),
+            parameters=copy.deepcopy(self._parameters, memo),
+        )
+
+    @classmethod
+    def simplified(
+        cls,
+        contents,
+        fields,
+        length=None,
+        *,
+        parameters=None,
+        backend=None,
+    ):
+        return cls(contents, fields, length, parameters=parameters, backend=backend)
+
     @property
     def is_tuple(self):
         return self._fields is None
@@ -177,8 +191,6 @@ class RecordArray(Content):
             self._contents, None, self._length, parameters=None, backend=self._backend
         )
 
-    Form = RecordForm
-
     def _form_with_key(self, getkey):
         form_key = getkey(self)
         return self.Form(
@@ -188,14 +200,14 @@ class RecordArray(Content):
             form_key=form_key,
         )
 
-    def _to_buffers(self, form, getkey, container, nplike):
+    def _to_buffers(self, form, getkey, container, backend):
         assert isinstance(form, self.Form)
         if self._fields is None:
             for i, content in enumerate(self._contents):
-                content._to_buffers(form.content(i), getkey, container, nplike)
+                content._to_buffers(form.content(i), getkey, container, backend)
         else:
             for field, content in zip(self._fields, self._contents):
-                content._to_buffers(form.content(field), getkey, container, nplike)
+                content._to_buffers(form.content(field), getkey, container, backend)
 
     @property
     def typetracer(self):

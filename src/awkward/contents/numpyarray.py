@@ -4,17 +4,57 @@ from __future__ import annotations
 import copy
 
 import awkward as ak
-from awkward.contents.content import Content, unset
+from awkward._util import unset
+from awkward.contents.content import Content
 from awkward.forms.numpyform import NumpyForm
 from awkward.types.numpytype import primitive_to_dtype
 from awkward.typing import Self
 
-np = ak.nplikes.NumpyMetadata.instance()
-numpy = ak.nplikes.Numpy.instance()
+np = ak._nplikes.NumpyMetadata.instance()
+numpy = ak._nplikes.Numpy.instance()
 
 
 class NumpyArray(Content):
     is_numpy = True
+
+    def __init__(self, data, *, parameters=None, backend=None):
+        if backend is None:
+            backend = ak._backends.backend_of(
+                data, default=ak._backends.NumpyBackend.instance()
+            )
+        if isinstance(data, ak.index.Index):
+            data = data.data
+        self._data = backend.nplike.asarray(data)
+
+        if not isinstance(backend.nplike, ak._nplikes.Jax):
+            ak.types.numpytype.dtype_to_primitive(self._data.dtype)
+
+        if len(self._data.shape) == 0:
+            raise ak._errors.wrap_error(
+                TypeError(
+                    "{} 'data' must be an array, not a scalar: {}".format(
+                        type(self).__name__, repr(data)
+                    )
+                )
+            )
+
+        if parameters is not None and parameters.get("__array__") in ("char", "byte"):
+            if data.dtype != np.dtype(np.uint8) or len(data.shape) != 1:
+                raise ak._errors.wrap_error(
+                    ValueError(
+                        "{} is a {}, so its 'data' must be 1-dimensional and uint8, not {}".format(
+                            type(self).__name__, parameters["__array__"], repr(data)
+                        )
+                    )
+                )
+
+        self._init(parameters, backend)
+
+    @property
+    def data(self):
+        return self._data
+
+    Form = NumpyForm
 
     def copy(
         self,
@@ -38,31 +78,9 @@ class NumpyArray(Content):
             parameters=copy.deepcopy(self._parameters, memo),
         )
 
-    def __init__(self, data, *, parameters=None, backend=None):
-        if backend is None:
-            backend = ak._backends.backend_of(
-                data, default=ak._backends.NumpyBackend.instance()
-            )
-        if isinstance(data, ak.index.Index):
-            data = data.data
-        self._data = backend.nplike.asarray(data)
-
-        if not isinstance(backend.nplike, ak.nplikes.Jax):
-            ak.types.numpytype.dtype_to_primitive(self._data.dtype)
-        if len(self._data.shape) == 0:
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} 'data' must be an array, not a scalar: {}".format(
-                        type(self).__name__, repr(data)
-                    )
-                )
-            )
-
-        self._init(parameters, backend)
-
-    @property
-    def data(self):
-        return self._data
+    @classmethod
+    def simplified(cls, data, *, parameters=None, backend=None):
+        return cls(data, parameters=parameters, backend=backend)
 
     @property
     def shape(self):
@@ -82,11 +100,11 @@ class NumpyArray(Content):
 
     @property
     def ptr(self):
-        if isinstance(self._backend.nplike, ak.nplikes.Numpy):
+        if isinstance(self._backend.nplike, ak._nplikes.Numpy):
             return self._data.ctypes.data
-        elif isinstance(self._backend.nplike, ak.nplikes.Cupy):
+        elif isinstance(self._backend.nplike, ak._nplikes.Cupy):
             return self._data.data.ptr
-        elif isinstance(self._backend.nplike, ak.nplikes.Jax):
+        elif isinstance(self._backend.nplike, ak._nplikes.Jax):
             return self._data.device_buffer.unsafe_buffer_pointer()
         else:
             raise ak._errors.wrap_error(
@@ -98,8 +116,6 @@ class NumpyArray(Content):
     def raw(self, nplike):
         return self._backend.nplike.raw(self.data, nplike)
 
-    Form = NumpyForm
-
     def _form_with_key(self, getkey):
         return self.Form(
             ak.types.numpytype.dtype_to_primitive(self._data.dtype),
@@ -108,10 +124,10 @@ class NumpyArray(Content):
             form_key=getkey(self),
         )
 
-    def _to_buffers(self, form, getkey, container, nplike):
+    def _to_buffers(self, form, getkey, container, backend):
         assert isinstance(form, self.Form)
         key = getkey(self, form, "data")
-        container[key] = ak._util.little_endian(self.raw(nplike))
+        container[key] = ak._util.little_endian(self.raw(backend.nplike))
 
     @property
     def typetracer(self):
@@ -400,14 +416,14 @@ class NumpyArray(Content):
                 return False
 
             if not matching_dtype and np.datetime64 in (
-                self._data.dtype,
-                other._data.dtype,
+                self._data.dtype.type,
+                other._data.dtype.type,
             ):
                 return False
 
             if not matching_dtype and np.timedelta64 in (
-                self._data.dtype,
-                other._data.dtype,
+                self._data.dtype.type,
+                other._data.dtype.type,
             ):
                 return False
 
@@ -1115,7 +1131,7 @@ class NumpyArray(Content):
         assert self.is_contiguous
         assert self._data.ndim == 1
 
-        if isinstance(self._backend.nplike, ak.nplikes.Jax):
+        if isinstance(self._backend.nplike, ak._nplikes.Jax):
             from awkward._connect.jax.reducers import get_jax_reducer
 
             reducer = get_jax_reducer(reducer)

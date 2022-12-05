@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 def from_arrow(array, *, generate_bitmasks=False, highlevel=True, behavior=None):
@@ -67,5 +67,11 @@ def _impl(array, generate_bitmasks, highlevel, behavior):
 
             if awkwardarrow_type.record_is_scalar:
                 out = out._getitem_at(0)
+
+    def remove_revertable(layout, **kwargs):
+        if hasattr(layout, "__pyarrow_original"):
+            del layout.__pyarrow_original
+
+    out.recursively_apply(remove_revertable)
 
     return ak._util.wrap(out, behavior, highlevel)

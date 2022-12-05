@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 def with_name(array, name, *, highlevel=True, behavior=None):
@@ -53,7 +53,12 @@ def _impl(array, name, highlevel, behavior):
 
     def action2(layout, **ignore):
         if layout.is_union:
-            return layout.simplify_uniontype(merge=True, mergebool=False)
+            return ak.contents.UnionArray.simplified(
+                layout._tags,
+                layout._index,
+                layout._contents,
+                parameters=layout._parameters,
+            )
         else:
             return None
 

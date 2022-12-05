@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 def covar(
@@ -118,4 +118,4 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, flatten_records):
                 mask_identity,
                 flatten_records,
             )
-        return ak.nplikes.nplike_of(sumwxy, sumw).true_divide(sumwxy, sumw)
+        return ak._nplikes.nplike_of(sumwxy, sumw).true_divide(sumwxy, sumw)

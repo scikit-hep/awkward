@@ -823,7 +823,7 @@ def test_UnionArray():
     )
     tags = ak.index.Index8(np.array([0, 1, 0, 1, 0, 1, 0, 1], dtype=np.int8))
     index = ak.index.Index64(np.array([0, 0, 1, 1, 2, 2, 3, 3], dtype=np.int64))
-    array = ak.contents.UnionArray(tags, index, [content1, content2])
+    array = ak.contents.UnionArray.simplified(tags, index, [content1, content2])
 
     assert to_list(array) == [
         [],

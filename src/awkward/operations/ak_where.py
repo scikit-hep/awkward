@@ -2,7 +2,8 @@
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
+cpu = ak._backends.NumpyBackend.instance()
 
 
 @ak._connect.numpy.implements("where")
@@ -77,7 +78,7 @@ def _impl1(condition, mergebool, highlevel, behavior):
     akcondition = ak.operations.to_layout(
         condition, allow_record=False, allow_other=False
     )
-    backend = ak._backends.backend_of(akcondition)
+    backend = ak._backends.backend_of(akcondition, default=cpu)
 
     akcondition = ak.contents.NumpyArray(ak.operations.to_numpy(akcondition))
     out = backend.nplike.nonzero(ak.operations.to_numpy(akcondition))
@@ -106,7 +107,7 @@ def _impl3(condition, x, y, mergebool, highlevel, behavior):
         good_arrays.append(left)
     if isinstance(right, ak.contents.Content):
         good_arrays.append(right)
-    backend = ak._backends.backend_of(*good_arrays)
+    backend = ak._backends.backend_of(*good_arrays, default=cpu)
 
     def action(inputs, **kwargs):
         akcondition, left, right = inputs
@@ -121,8 +122,14 @@ def _impl3(condition, x, y, mergebool, highlevel, behavior):
                 left = ak.contents.NumpyArray(backend.nplike.repeat(left, len(tags)))
             if not isinstance(right, ak.contents.Content):
                 right = ak.contents.NumpyArray(backend.nplike.repeat(right, len(tags)))
-            tmp = ak.contents.UnionArray(tags, index, [left, right])
-            return (tmp.simplify_uniontype(mergebool=mergebool),)
+            return (
+                ak.contents.UnionArray.simplified(
+                    tags,
+                    index,
+                    [left, right],
+                    mergebool=mergebool,
+                ),
+            )
         else:
             return None
 

@@ -3,7 +3,7 @@
 import awkward as ak
 from awkward.operations.ak_zeros_like import _ZEROS
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 @ak._connect.numpy.implements("full_like")
@@ -88,7 +88,7 @@ def _impl(array, fill_value, highlevel, behavior, dtype):
         # In the case of strings and byte strings,
         # converting the fill avoids a ValueError.
         dtype = np.dtype(dtype)
-        nplike = ak.nplikes.nplike_of(array)
+        nplike = ak._nplikes.nplike_of(array)
         fill_value = nplike.array([fill_value], dtype=dtype)[0]
         # Also, if the fill_value cannot be converted to the dtype
         # this should throw a clear, early, error.

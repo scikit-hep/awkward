@@ -216,7 +216,7 @@ def test_UnionArray():
         ak.index.Index64(np.array([1, 0], np.int64)),
         [
             ak.contents.RegularArray(
-                ak.operations.from_numpy(np.arange(2 * 3 * 5).reshape(-1, 5)).layout,
+                ak.operations.from_iter(["nothing"]).layout[1:],
                 3,
             ),
             ak.contents.RegularArray(
@@ -243,7 +243,7 @@ def test_UnionArray():
         [[15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]]
     ]
     assert new.typetracer[0, np.newaxis].form == new[0, np.newaxis].form
-    assert new.minmax_depth == (3, 3)
+    assert new.minmax_depth == (2, 3)
 
     assert to_list(new[1, ...]) == [
         [0, 1, 2, 3, 4],

@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 def mask(array, mask, *, valid_when=True, highlevel=True, behavior=None):
@@ -102,7 +102,7 @@ def _impl(array, mask, valid_when, highlevel, behavior):
     def action(inputs, **kwargs):
         layoutarray, layoutmask = inputs
         if isinstance(layoutmask, ak.contents.NumpyArray):
-            m = ak.nplikes.nplike_of(layoutmask).asarray(layoutmask)
+            m = ak._nplikes.nplike_of(layoutmask).asarray(layoutmask)
             if not issubclass(m.dtype.type, (bool, np.bool_)):
                 raise ak._errors.wrap_error(
                     ValueError(
@@ -111,9 +111,9 @@ def _impl(array, mask, valid_when, highlevel, behavior):
                 )
             bytemask = ak.index.Index8(m.view(np.int8))
             return (
-                ak.contents.ByteMaskedArray(
+                ak.contents.ByteMaskedArray.simplified(
                     bytemask, layoutarray, valid_when=valid_when
-                ).simplify_optiontype(),
+                ),
             )
         else:
             return None

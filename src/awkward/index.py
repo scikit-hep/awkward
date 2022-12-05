@@ -6,7 +6,8 @@ import copy
 import awkward as ak
 from awkward.typing import Self
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
+numpy = ak._nplikes.Numpy.instance()
 
 
 _dtype_to_form = {
@@ -18,12 +19,29 @@ _dtype_to_form = {
 }
 
 
+def _form_to_zero_length(form):
+    if form == "i8":
+        return Index8(numpy.zeros(0, dtype=np.int8))
+    elif form == "u8":
+        return IndexU8(numpy.zeros(0, dtype=np.uint8))
+    elif form == "i32":
+        return Index32(numpy.zeros(0, dtype=np.int32))
+    elif form == "u32":
+        return IndexU32(numpy.zeros(0, dtype=np.uint32))
+    elif form == "i64":
+        return Index64(numpy.zeros(0, dtype=np.int64))
+    else:
+        raise ak._errors.wrap_error(
+            AssertionError(f"unrecognized Index form: {form!r}")
+        )
+
+
 class Index:
     _expected_dtype = None
 
     def __init__(self, data, *, metadata=None, nplike=None):
         if nplike is None:
-            nplike = ak.nplikes.nplike_of(data)
+            nplike = ak._nplikes.nplike_of(data)
         self._nplike = nplike
         if metadata is not None and not isinstance(metadata, dict):
             raise ak._errors.wrap_error(
@@ -169,7 +187,7 @@ class Index:
         if hasattr(out, "shape") and len(out.shape) != 0:
             return Index(out, metadata=self.metadata, nplike=self._nplike)
         elif (
-            ak.nplikes.Jax.is_own_array(out) or ak.nplikes.Cupy.is_own_array(out)
+            ak._nplikes.Jax.is_own_array(out) or ak._nplikes.Cupy.is_own_array(out)
         ) and len(out.shape) == 0:
             return out.item()
         else:

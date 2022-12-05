@@ -4,34 +4,18 @@ from __future__ import annotations
 import copy
 
 import awkward as ak
-from awkward.contents.content import Content, unset
+from awkward._util import unset
+from awkward.contents.content import Content
 from awkward.forms.listoffsetform import ListOffsetForm
 from awkward.index import Index
 from awkward.typing import Self
 
-np = ak.nplikes.NumpyMetadata.instance()
-numpy = ak.nplikes.Numpy.instance()
+np = ak._nplikes.NumpyMetadata.instance()
+numpy = ak._nplikes.Numpy.instance()
 
 
 class ListOffsetArray(Content):
     is_list = True
-
-    def copy(self, offsets=unset, content=unset, *, parameters=unset):
-        return ListOffsetArray(
-            self._offsets if offsets is unset else offsets,
-            self._content if content is unset else content,
-            parameters=self._parameters if parameters is unset else parameters,
-        )
-
-    def __copy__(self):
-        return self.copy()
-
-    def __deepcopy__(self, memo):
-        return self.copy(
-            offsets=copy.deepcopy(self._offsets, memo),
-            content=copy.deepcopy(self._content, memo),
-            parameters=copy.deepcopy(self._parameters, memo),
-        )
 
     def __init__(self, offsets, content, *, parameters=None):
         if not isinstance(offsets, Index) and offsets.dtype in (
@@ -62,19 +46,30 @@ class ListOffsetArray(Content):
                 )
             )
 
+        if parameters is not None and parameters.get("__array__") == "string":
+            if not content.is_numpy or not content.parameter("__array__") == "char":
+                raise ak._errors.wrap_error(
+                    ValueError(
+                        "{} is a string, so its 'content' must be uint8 NumpyArray of char, not {}".format(
+                            type(self).__name__, repr(content)
+                        )
+                    )
+                )
+        if parameters is not None and parameters.get("__array__") == "bytestring":
+            if not content.is_numpy or not content.parameter("__array__") == "byte":
+                raise ak._errors.wrap_error(
+                    ValueError(
+                        "{} is a bytestring, so its 'content' must be uint8 NumpyArray of byte, not {}".format(
+                            type(self).__name__, repr(content)
+                        )
+                    )
+                )
+
         assert offsets.nplike is content.backend.index_nplike
 
         self._offsets = offsets
         self._content = content
         self._init(parameters, content.backend)
-
-    @property
-    def starts(self):
-        return self._offsets[:-1]
-
-    @property
-    def stops(self):
-        return self._offsets[1:]
 
     @property
     def offsets(self):
@@ -86,6 +81,35 @@ class ListOffsetArray(Content):
 
     Form = ListOffsetForm
 
+    def copy(self, offsets=unset, content=unset, *, parameters=unset):
+        return ListOffsetArray(
+            self._offsets if offsets is unset else offsets,
+            self._content if content is unset else content,
+            parameters=self._parameters if parameters is unset else parameters,
+        )
+
+    def __copy__(self):
+        return self.copy()
+
+    def __deepcopy__(self, memo):
+        return self.copy(
+            offsets=copy.deepcopy(self._offsets, memo),
+            content=copy.deepcopy(self._content, memo),
+            parameters=copy.deepcopy(self._parameters, memo),
+        )
+
+    @classmethod
+    def simplified(cls, offsets, content, *, parameters=None):
+        return cls(offsets, content, parameters=parameters)
+
+    @property
+    def starts(self):
+        return self._offsets[:-1]
+
+    @property
+    def stops(self):
+        return self._offsets[1:]
+
     def _form_with_key(self, getkey):
         form_key = getkey(self)
         return self.Form(
@@ -95,11 +119,11 @@ class ListOffsetArray(Content):
             form_key=form_key,
         )
 
-    def _to_buffers(self, form, getkey, container, nplike):
+    def _to_buffers(self, form, getkey, container, backend):
         assert isinstance(form, self.Form)
         key = getkey(self, form, "offsets")
-        container[key] = ak._util.little_endian(self._offsets.raw(nplike))
-        self._content._to_buffers(form.content, getkey, container, nplike)
+        container[key] = ak._util.little_endian(self._offsets.raw(backend.index_nplike))
+        self._content._to_buffers(form.content, getkey, container, backend)
 
     @property
     def typetracer(self):
@@ -766,13 +790,11 @@ class ListOffsetArray(Content):
                 )
             )
             return ak.contents.ListOffsetArray(
-                offsets, ak.contents.NumpyArray(localindex), parameters=self._parameters
+                offsets, ak.contents.NumpyArray(localindex)
             )
         else:
             return ak.contents.ListOffsetArray(
-                self._offsets,
-                self._content._local_index(posaxis, depth + 1),
-                parameters=self._parameters,
+                self._offsets, self._content._local_index(posaxis, depth + 1)
             )
 
     def numbers_to_type(self, name):
@@ -1608,6 +1630,9 @@ class ListOffsetArray(Content):
                 # means this will be broadcastable
                 assert outcontent.is_regular
             elif depth >= negaxis + 2:
+                # The *only* >1D list types that we can have as direct children
+                # are the `is_list` or `is_regular` types; NumpyArray should be
+                # converted to `RegularArray`.
                 assert outcontent.is_list or outcontent.is_regular
                 outcontent = outcontent.to_ListOffsetArray64(False)
 
@@ -1730,13 +1755,7 @@ class ListOffsetArray(Content):
                 path, type(self), message, error.id, filename
             )
         else:
-            if (
-                self.parameter("__array__") == "string"
-                or self.parameter("__array__") == "bytestring"
-            ):
-                return ""
-            else:
-                return self._content.validity_error(path + ".content")
+            return self._content.validity_error(path + ".content")
 
     def _nbytes_part(self):
         return self.offsets._nbytes_part() + self.content._nbytes_part()
@@ -1790,11 +1809,11 @@ class ListOffsetArray(Content):
                         target,
                     )
                 )
-                next = ak.contents.IndexedOptionArray(
+                next = ak.contents.IndexedOptionArray.simplified(
                     outindex, self._content, parameters=self._parameters
                 )
                 return ak.contents.ListOffsetArray(
-                    offsets_, next.simplify_optiontype(), parameters=self._parameters
+                    offsets_, next, parameters=self._parameters
                 )
             else:
                 starts_ = ak.index.Index64.empty(
@@ -1839,11 +1858,11 @@ class ListOffsetArray(Content):
                         target,
                     )
                 )
-                next = ak.contents.IndexedOptionArray(
+                next = ak.contents.IndexedOptionArray.simplified(
                     outindex, self._content, parameters=self._parameters
                 )
                 return ak.contents.RegularArray(
-                    next.simplify_optiontype(),
+                    next,
                     target,
                     self.length,
                     parameters=self._parameters,
@@ -1864,7 +1883,6 @@ class ListOffsetArray(Content):
             downsize = options["bytestring_to32"]
         else:
             downsize = options["list_to32"]
-
         npoffsets = self._offsets.raw(numpy)
         akcontent = self._content[npoffsets[0] : npoffsets[length]]
         if len(npoffsets) > length + 1:

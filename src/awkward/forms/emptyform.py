@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._util import unset
 from awkward.forms.form import Form
 
 
@@ -10,6 +11,13 @@ class EmptyForm(Form):
 
     def __init__(self, *, parameters=None, form_key=None):
         self._init(parameters, form_key)
+
+    def copy(self, *, parameters=unset, form_key=unset):
+        return EmptyForm(parameters=parameters, form_key=form_key)
+
+    @classmethod
+    def simplified(cls, *, parameters=None, form_key=None):
+        return cls(parameters=parameters, form_key=form_key)
 
     def __repr__(self):
         args = self._repr_args()

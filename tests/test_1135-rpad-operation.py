@@ -1480,7 +1480,7 @@ def test_rpad_indexed_option_array():
             ]
         )
     )
-    listoffsetarray = ak.contents.indexedoptionarray.IndexedOptionArray(
+    indexedoptionarray = ak.contents.indexedoptionarray.IndexedOptionArray(
         index, listoffsetarray
     )
     content = ak.contents.numpyarray.NumpyArray(
@@ -1489,9 +1489,7 @@ def test_rpad_indexed_option_array():
     index = ak.index.Index64(np.asarray([0, 1, 2, 3, 4, 5, 6, 7, -1, -1]))
     offsets = ak.index.Index64(np.asarray([0, 4, 5, 7, 10]))
     indexedarray = ak.contents.indexedoptionarray.IndexedOptionArray(index, content)
-    listoffsetarray_ = ak.contents.listoffsetarray.ListOffsetArray(
-        offsets, indexedarray
-    )
+    listoffsetarray = ak.contents.listoffsetarray.ListOffsetArray(offsets, indexedarray)
     index = ak.index.Index64(
         np.asarray(
             [
@@ -1503,13 +1501,11 @@ def test_rpad_indexed_option_array():
             ]
         )
     )
-    backward = ak.contents.indexedoptionarray.IndexedOptionArray(
-        index, listoffsetarray_
-    )
+    backward = ak.contents.indexedoptionarray.IndexedOptionArray(index, listoffsetarray)
 
     index = ak.index.Index64(np.array([4, 3, 2, -1, 0], dtype=np.int64))
-    indexedarray = ak.contents.indexedoptionarray.IndexedOptionArray(
-        index, listoffsetarray
+    indexedarray = ak.contents.indexedoptionarray.IndexedOptionArray.simplified(
+        index, indexedoptionarray
     )
     assert to_list(indexedarray) == [
         [6.6, 7.7, 8.8, 9.9],
@@ -1658,18 +1654,18 @@ def test_rpad_unionarray():
     content = ak.contents.numpyarray.NumpyArray(np.asarray([1.1, 2.2, 2.2]))
     content1 = ak.contents.listoffsetarray.ListOffsetArray(offsets, content)
     offsets = ak.index.Index64(np.asarray([0, 2, 3, 3]))
-    content = ak.contents.numpyarray.NumpyArray(np.asarray([2, 2, 1]))
+    content = ak.from_iter(["2", "2", "1"], highlevel=False)
     content2 = ak.contents.listoffsetarray.ListOffsetArray(offsets, content)
     tags = ak.index.Index8(np.array([0, 1, 0, 1, 0, 1], dtype=np.int8))
     index = ak.index.Index64(np.array([0, 0, 1, 1, 2, 2], dtype=np.int64))
     array = ak.contents.unionarray.UnionArray(tags, index, [content1, content2])
-    assert to_list(array) == [[], [2, 2], [1.1], [1], [2.2, 2.2], []]
+    assert to_list(array) == [[], ["2", "2"], [1.1], ["1"], [2.2, 2.2], []]
 
     assert to_list(array.pad_none(7, 0)) == [
         [],
-        [2, 2],
+        ["2", "2"],
         [1.1],
-        [1],
+        ["1"],
         [2.2, 2.2],
         [],
         None,
@@ -1678,9 +1674,9 @@ def test_rpad_unionarray():
 
     assert to_list(array.pad_none(2, 1)) == [
         [None, None],
-        [2, 2],
+        ["2", "2"],
         [1.1, None],
-        [1, None],
+        ["1", None],
         [2.2, 2.2],
         [None, None],
     ]

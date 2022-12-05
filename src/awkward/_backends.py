@@ -5,8 +5,7 @@ from abc import abstractmethod
 import awkward_cpp
 
 import awkward as ak
-from awkward._typetracer import NoKernel, TypeTracer
-from awkward.nplikes import (
+from awkward._nplikes import (
     Cupy,
     CupyKernel,
     Jax,
@@ -18,9 +17,11 @@ from awkward.nplikes import (
     Singleton,
     nplike_of,
 )
+from awkward._typetracer import NoKernel, TypeTracer
 from awkward.typing import (
     Any,
     Callable,
+    Final,
     Protocol,
     Self,
     Tuple,
@@ -40,6 +41,8 @@ KernelType: TypeAlias = Callable[..., None]
 
 @runtime_checkable
 class Backend(Protocol[T]):
+    name: str
+
     @property
     @abstractmethod
     def nplike(self) -> NumpyLike:
@@ -60,6 +63,8 @@ class Backend(Protocol[T]):
 
 
 class NumpyBackend(Singleton, Backend[Any]):
+    name: Final[str] = "cpu"
+
     _numpy: Numpy
 
     @property
@@ -78,6 +83,8 @@ class NumpyBackend(Singleton, Backend[Any]):
 
 
 class CupyBackend(Singleton, Backend[Any]):
+    name: Final[str] = "cuda"
+
     _cupy: Cupy
 
     @property
@@ -106,6 +113,8 @@ class CupyBackend(Singleton, Backend[Any]):
 
 
 class JaxBackend(Singleton, Backend[Any]):
+    name: Final[str] = "jax"
+
     _jax: Jax
     _numpy: Numpy
 
@@ -127,6 +136,8 @@ class JaxBackend(Singleton, Backend[Any]):
 
 
 class TypeTracerBackend(Singleton, Backend[Any]):
+    name: Final[str] = "typetracer"
+
     _typetracer: TypeTracer
 
     @property
@@ -144,7 +155,7 @@ class TypeTracerBackend(Singleton, Backend[Any]):
         return NoKernel(index)
 
 
-def _backend_for_nplike(nplike: ak.nplikes.NumpyLike) -> Backend:
+def _backend_for_nplike(nplike: ak._nplikes.NumpyLike) -> Backend:
     # Currently there exists a one-to-one relationship between the nplike
     # and the backend. In future, this might need refactoring
     if isinstance(nplike, Numpy):
@@ -182,17 +193,15 @@ def backend_of(*objects, default: D = _UNSET) -> Backend | D:
         return default
 
 
-_backends = {
-    "cpu": NumpyBackend,
-    "cuda": CupyBackend,
-    "jax": JaxBackend,
+_backends: Final[dict[str, type[Backend]]] = {
+    b.name: b for b in (NumpyBackend, CupyBackend, JaxBackend, TypeTracerBackend)
 }
 
 
-def regularize_backend(backend: str) -> Backend:
-    if backend in _backends:
+def regularize_backend(backend: str | Backend) -> Backend:
+    if isinstance(backend, Backend):
+        return backend
+    elif backend in _backends:
         return _backends[backend].instance()
     else:
-        raise ak._errors.wrap_error(
-            ValueError("The available backends for now are `cpu` and `cuda`.")
-        )
+        raise ak._errors.wrap_error(ValueError(f"No such backend {backend!r} exists."))

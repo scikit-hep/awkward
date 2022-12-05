@@ -4,7 +4,7 @@ import collections
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 ParquetMetadata = collections.namedtuple(

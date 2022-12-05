@@ -7,7 +7,7 @@ from awkward_cpp import libawkward
 
 import awkward as ak
 
-numpy = ak.nplikes.Numpy.instance()
+numpy = ak._nplikes.Numpy.instance()
 
 
 dynamic_addrs = {}

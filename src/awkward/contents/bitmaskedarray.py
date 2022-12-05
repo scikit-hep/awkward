@@ -6,47 +6,19 @@ import json
 import math
 
 import awkward as ak
+from awkward._util import unset
 from awkward.contents.bytemaskedarray import ByteMaskedArray
-from awkward.contents.content import Content, unset
+from awkward.contents.content import Content
 from awkward.forms.bitmaskedform import BitMaskedForm
 from awkward.index import Index
 from awkward.typing import Self
 
-np = ak.nplikes.NumpyMetadata.instance()
-numpy = ak.nplikes.Numpy.instance()
+np = ak._nplikes.NumpyMetadata.instance()
+numpy = ak._nplikes.Numpy.instance()
 
 
 class BitMaskedArray(Content):
     is_option = True
-
-    def copy(
-        self,
-        mask=unset,
-        content=unset,
-        valid_when=unset,
-        length=unset,
-        lsb_order=unset,
-        *,
-        parameters=unset,
-    ):
-        return BitMaskedArray(
-            self._mask if mask is unset else mask,
-            self._content if content is unset else content,
-            self._valid_when if valid_when is unset else valid_when,
-            self._length if length is unset else length,
-            self._lsb_order if lsb_order is unset else lsb_order,
-            parameters=self._parameters if parameters is unset else parameters,
-        )
-
-    def __copy__(self):
-        return self.copy()
-
-    def __deepcopy__(self, memo):
-        return self.copy(
-            mask=copy.deepcopy(self._mask, memo),
-            content=copy.deepcopy(self._content, memo),
-            parameters=copy.deepcopy(self._parameters, memo),
-        )
 
     def __init__(
         self, mask, content, valid_when, length, lsb_order, *, parameters=None
@@ -64,6 +36,14 @@ class BitMaskedArray(Content):
                 TypeError(
                     "{} 'content' must be a Content subtype, not {}".format(
                         type(self).__name__, repr(content)
+                    )
+                )
+            )
+        if content.is_union or content.is_indexed or content.is_option:
+            raise ak._errors.wrap_error(
+                TypeError(
+                    "{0} cannot contain a union-type, option-type, or indexed 'content' ({1}); try {0}.simplified instead".format(
+                        type(self).__name__, type(content).__name__
                     )
                 )
             )
@@ -136,6 +116,78 @@ class BitMaskedArray(Content):
 
     Form = BitMaskedForm
 
+    def copy(
+        self,
+        mask=unset,
+        content=unset,
+        valid_when=unset,
+        length=unset,
+        lsb_order=unset,
+        *,
+        parameters=unset,
+    ):
+        return BitMaskedArray(
+            self._mask if mask is unset else mask,
+            self._content if content is unset else content,
+            self._valid_when if valid_when is unset else valid_when,
+            self._length if length is unset else length,
+            self._lsb_order if lsb_order is unset else lsb_order,
+            parameters=self._parameters if parameters is unset else parameters,
+        )
+
+    def __copy__(self):
+        return self.copy()
+
+    def __deepcopy__(self, memo):
+        return self.copy(
+            mask=copy.deepcopy(self._mask, memo),
+            content=copy.deepcopy(self._content, memo),
+            parameters=copy.deepcopy(self._parameters, memo),
+        )
+
+    @classmethod
+    def simplified(
+        cls,
+        mask,
+        content,
+        valid_when,
+        length,
+        lsb_order,
+        *,
+        parameters=None,
+    ):
+        if content.is_union or content.is_indexed or content.is_option:
+            backend = content.backend
+            index = ak.index.Index64.empty(mask.length * 8, backend.index_nplike)
+            Content._selfless_handle_error(
+                backend[
+                    "awkward_BitMaskedArray_to_IndexedOptionArray",
+                    index.dtype.type,
+                    mask.dtype.type,
+                ](
+                    index.raw(backend.nplike),
+                    mask.data,
+                    mask.length,
+                    valid_when,
+                    lsb_order,
+                ),
+            )
+            if content.is_union:
+                return content._union_of_optionarrays(index[0:length], parameters)
+            else:
+                return ak.contents.IndexedOptionArray.simplified(
+                    index[0:length], content, parameters=parameters
+                )
+        else:
+            return cls(
+                mask,
+                content,
+                valid_when,
+                length,
+                lsb_order,
+                parameters=parameters,
+            )
+
     def _form_with_key(self, getkey):
         form_key = getkey(self)
         return self.Form(
@@ -147,11 +199,11 @@ class BitMaskedArray(Content):
             form_key=form_key,
         )
 
-    def _to_buffers(self, form, getkey, container, nplike):
+    def _to_buffers(self, form, getkey, container, backend):
         assert isinstance(form, self.Form)
         key = getkey(self, form, "mask")
-        container[key] = ak._util.little_endian(self._mask.raw(nplike))
-        self._content._to_buffers(form.content, getkey, container, nplike)
+        container[key] = ak._util.little_endian(self._mask.raw(backend.index_nplike))
+        self._content._to_buffers(form.content, getkey, container, backend)
 
     @property
     def typetracer(self):
@@ -345,24 +397,24 @@ class BitMaskedArray(Content):
         return self.to_ByteMaskedArray()._getitem_range(where)
 
     def _getitem_field(self, where, only_fields=()):
-        return BitMaskedArray(
+        return BitMaskedArray.simplified(
             self._mask,
             self._content._getitem_field(where, only_fields),
             self._valid_when,
             self._length,
             self._lsb_order,
             parameters=None,
-        ).simplify_optiontype()
+        )
 
     def _getitem_fields(self, where, only_fields=()):
-        return BitMaskedArray(
+        return BitMaskedArray.simplified(
             self._mask,
             self._content._getitem_fields(where, only_fields),
             self._valid_when,
             self._length,
             self._lsb_order,
             parameters=None,
-        ).simplify_optiontype()
+        )
 
     def _carry(self, carry, allow_lazy):
         assert isinstance(carry, ak.index.Index)
@@ -402,21 +454,6 @@ class BitMaskedArray(Content):
 
     def project(self, mask=None):
         return self.to_ByteMaskedArray().project(mask)
-
-    def simplify_optiontype(self):
-        if isinstance(
-            self._content,
-            (
-                ak.contents.IndexedArray,
-                ak.contents.IndexedOptionArray,
-                ak.contents.ByteMaskedArray,
-                ak.contents.BitMaskedArray,
-                ak.contents.UnmaskedArray,
-            ),
-        ):
-            return self.to_IndexedOptionArray64().simplify_optiontype()
-        else:
-            return self
 
     def num(self, axis, depth=0):
         return self.to_ByteMaskedArray().num(axis, depth)
@@ -558,17 +595,6 @@ class BitMaskedArray(Content):
             return f'at {path} ("{type(self)}"): len(mask) * 8 < length'
         elif self._content.length < self.length:
             return f'at {path} ("{type(self)}"): len(content) < length'
-        elif isinstance(
-            self._content,
-            (
-                ak.contents.BitMaskedArray,
-                ak.contents.ByteMaskedArray,
-                ak.contents.IndexedArray,
-                ak.contents.IndexedOptionArray,
-                ak.contents.UnmaskedArray,
-            ),
-        ):
-            return "{0} contains \"{1}\", the operation that made it might have forgotten to call 'simplify_optiontype()'"
         else:
             return self._content.validity_error(path + ".content")
 
@@ -591,7 +617,7 @@ class BitMaskedArray(Content):
         if branch or options["drop_nones"] or depth > 1:
             return self.project()._completely_flatten(backend, options)
         else:
-            return [self.simplify_optiontype()]
+            return [self]
 
     def _recursively_apply(
         self, action, behavior, depth, depth_context, lateral_context, options

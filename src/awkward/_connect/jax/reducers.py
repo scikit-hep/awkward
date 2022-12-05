@@ -5,7 +5,7 @@ import jax
 import awkward as ak
 from awkward._reducers import Reducer
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 class ArgMin(Reducer):
