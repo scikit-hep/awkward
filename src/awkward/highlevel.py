@@ -292,12 +292,12 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         but `array.layout` is presented as
 
-            <ListOffsetArray>
-                <offsets>
-                    <Index64 i="[0 3 3 5]" offset="0" length="4" at="0x55a26df62590"/>
-                </offsets>
+            <ListOffsetArray len='3'>
+                <offsets><Index dtype='int64' len='4'>
+                    [0 3 3 5]
+                </Index></offsets>
                 <content>
-                    <NumpyArray format="d" shape="5" data="1.1 2.2 3.3 4.4 5.5" at="0x55a26e0c5f50"/>
+                    <NumpyArray dtype='float64' len='5'>[1.1 2.2 3.3 4.4 5.5]</NumpyArray>
                 </content>
             </ListOffsetArray>
 
@@ -495,8 +495,8 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         In other words, do this:
 
-            >>> print(np.sqrt(ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])))
-            [[1.05, 1.48, 1.82], [], [2.1, 2.35]]
+            >>> np.sqrt(ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]))
+            <Array [[1.05, 1.48, 1.82], [], [2.1, 2.35]] type='3 * var * float64'>
 
         not this:
 
@@ -633,9 +633,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         *********
 
         A common use of selection by boolean arrays is to filter a dataset by
-        some property. For instance, to get the odd values of the `array`
+        some property. For instance, to get the odd values of
 
-            ak.Array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+            >>> array = ak.Array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
 
         one can put an array expression with True for each odd value inside
         square brackets:
@@ -648,7 +648,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         The extension to nested arrays like
 
-            ak.Array([[[0, 1, 2], [], [3, 4], [5]], [[6, 7, 8], [9]]])
+            >>> array = ak.Array([[[0, 1, 2], [], [3, 4], [5]], [[6, 7, 8], [9]]])
 
         allows us to use the same syntax more generally.
 
@@ -659,7 +659,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         <<nested indexing>> below).
 
             >>> array % 2 == 1
-            <Array [[[False, True, False], ... [True]]] type='2 * var * var * bool'>
+            <Array [[[False, True, False], ..., [True]], ...] type='2 * var * var * bool'>
 
         This also applies to data with record structures.
 
@@ -686,8 +686,8 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         useful because it inserts None in positions that fail the filter,
         rather than removing them.
 
-            >>> print(ak.mask(array, ak.num(array) > 1))
-            [[1.1, 2.2, 3.3], None, [4.4, 5.5], None, None, [7.7, 8.8, 9.9]]
+            >>> ak.mask(array, ak.num(array) > 1)
+            <Array [[1.1, 2.2, 3.3], ..., [7.7, ..., 9.9]] type='6 * option[var * float64]'>
 
         Note, however, that the `0` or `1` to pick the first or second
         item of each nested list is in the second dimension, so the first
@@ -711,16 +711,19 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         Projection
         **********
 
-        The following `array`
+        The following
 
-            ak.Array([[{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}],
-                      [{"x": 3.3, "y": [3, 3, 3]}],
-                      [{"x": 0, "y": []}, {"x": 1.1, "y": [1, 1, 1]}]])
+            >>> array = ak.Array([[{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}],
+            ...                   [{"x": 3.3, "y": [3, 3, 3]}],
+            ...                   [{"x": 0, "y": []}, {"x": 1.1, "y": [1, 1, 1]}]])
 
         has records inside of nested lists:
 
-            >>> ak.type(array)
-            3 * var * {"x": float64, "y": var * int64}
+            >>> array.type.show()
+            3 * var * {
+                x: float64,
+                y: var * int64
+            }
 
         In principle, one should select nested lists before record fields,
 
@@ -772,7 +775,11 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         but it's not possible to move `"y"` to the right
 
             >>> array[0, :, 0, "y"]
-            ValueError: in NumpyArray, too many dimensions in slice
+            IndexError: while attempting to slice
+                <Array [[{x: 1.1, y: [1]}, {...}], ...] type='3 * var * {x: float64, y:...'>
+            with
+                (0, :, 0, 'y')
+            at inner NumpyArray of length 2, using sub-slice (0).
 
         because the `array[0, :, 0, ...]` slice applies to both `"x"` and
         `"y"` before `"y"` is selected, and `"x"` is a one-dimensional
@@ -785,18 +792,18 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             >>> array.x
             <Array [[1.1, 2.2], [3.3], [0, 1.1]] type='3 * var * float64'>
             >>> array.y
-            <Array [[[1], [2, 2]], ... [[], [1, 1, 1]]] type='3 * var * var * int64'>
+            <Array [[[1], [2, 2]], ..., [[], [1, ...]]] type='3 * var * var * int64'>
 
         Nested Projection
         *****************
 
         If records are nested within records, you can use a series of strings in
-        the selector to drill down. For instance, with the following `array`,
+        the selector to drill down. For instance, with the following
 
-            ak.Array([
-                {"a": {"x": 1, "y": 2}, "b": {"x": 10, "y": 20}, "c": {"x": 1.1, "y": 2.2}},
-                {"a": {"x": 1, "y": 2}, "b": {"x": 10, "y": 20}, "c": {"x": 1.1, "y": 2.2}},
-                {"a": {"x": 1, "y": 2}, "b": {"x": 10, "y": 20}, "c": {"x": 1.1, "y": 2.2}}])
+            >>> array = ak.Array([
+            ...     {"a": {"x": 1, "y": 2}, "b": {"x": 10, "y": 20}, "c": {"x": 1.1, "y": 2.2}},
+            ...     {"a": {"x": 1, "y": 2}, "b": {"x": 10, "y": 20}, "c": {"x": 1.1, "y": 2.2}},
+            ...     {"a": {"x": 1, "y": 2}, "b": {"x": 10, "y": 20}, "c": {"x": 1.1, "y": 2.2}}])
 
         we can go directly to the numerical data by specifying a string for the
         outer field and a string for the inner field.
@@ -821,24 +828,24 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         a list of field names for the outer record. The following selects the `"x"`
         field of `"a"`, `"b"`, and `"c"` records:
 
-            >>> array[["a", "b", "c"], "x"].tolist()
-            [{'a': 1, 'b': 10, 'c': 1.1},
-             {'a': 1, 'b': 10, 'c': 1.1},
-             {'a': 1, 'b': 10, 'c': 1.1}]
+            >>> array[["a", "b", "c"], "x"].show()
+            [{a: 1, b: 10, c: 1.1},
+             {a: 1, b: 10, c: 1.1},
+             {a: 1, b: 10, c: 1.1}]
 
         You don't need to get all fields:
 
-            >>> array[["a", "b"], "x"].tolist()
-            [{'a': 1, 'b': 10},
-             {'a': 1, 'b': 10},
-             {'a': 1, 'b': 10}]
+            >>> array[["a", "b"], "x"].show()
+            [{a: 1, b: 10},
+             {a: 1, b: 10},
+             {a: 1, b: 10}]
 
         And you can select lists of field names at all levels:
 
-            >>> array[["a", "b"], ["x", "y"]].tolist()
-            [{'a': {'x': 1, 'y': 2}, 'b': {'x': 10, 'y': 20}},
-             {'a': {'x': 1, 'y': 2}, 'b': {'x': 10, 'y': 20}},
-             {'a': {'x': 1, 'y': 2}, 'b': {'x': 10, 'y': 20}}]
+            >>> array[["a", "b"], ["x", "y"]].show()
+            [{a: {x: 1, y: 2}, b: {x: 10, y: 20}},
+             {a: {x: 1, y: 2}, b: {x: 10, y: 20}},
+             {a: {x: 1, y: 2}, b: {x: 10, y: 20}}]
 
         Option indexing
         ***************
@@ -849,9 +856,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         None in Python, are called option types (#ak.types.OptionType) in
         Awkward Array and can be used as a slice.
 
-        For example, an `array` like
+        For example,
 
-            ak.Array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
+            >>> array = ak.Array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
 
         can be sliced with a boolean array
 
@@ -892,9 +899,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         Awkward Array's nested lists can be used as slices as well, as long
         as the type at the deepest level of nesting is boolean or integer.
 
-        For example, the `array`
+        For example,
 
-            ak.Array([[[0.0, 1.1, 2.2], [], [3.3, 4.4]], [], [[5.5]]])
+            >>> array = ak.Array([[[0.0, 1.1, 2.2], [], [3.3, 4.4]], [], [[5.5]]])
 
         can be sliced at the top level with one-dimensional arrays:
 
@@ -927,18 +934,26 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         produce arrays with the same structure as the original array, which
         can then be used as filters.
 
-            >>> print((array * 10) % 2 == 1)
-            [[[False, True, False], [], [True, False]], [], [[True]]]
-            >>> print(array[(array * 10) % 2 == 1])
-            [[[1.1], [], [3.3]], [], [[5.5]]]
+            >>> ((array * 10) % 2 == 1).show()
+            [[[False, True, False], [], [True, False]],
+             [],
+             [[True]]]
+            >>> (array[(array * 10) % 2 == 1]).show()
+            [[[1.1], [], [3.3]],
+             [],
+             [[5.5]]]
 
         Functions whose names start with "arg" return index positions, which
         can be used with the integer form.
 
-            >>> print(np.argmax(array, axis=-1))
-            [[2, None, 1], [], [0]]
-            >>> print(array[np.argmax(array, axis=-1)])
-            [[[3.3, 4.4], None, []], [], [[5.5]]]
+            >>> np.argmax(array, axis=-1).show()
+            [[2, None, 1],
+             [],
+             [0]]
+            >>> array[np.argmax(array, axis=-1)].show()
+            [[[3.3, 4.4], None, []],
+             [],
+             [[5.5]]]
 
         Here, the `np.argmax` returns the integer position of the maximum
         element or None for empty arrays. It's a nice example of
@@ -949,8 +964,10 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         as the array being indexed, and the resulting output will have missing
         entries at the corresponding locations, e.g. for
 
-            >>> print(array[ [[[0, None, 2, None, None], None, [1]], None, [[0]]] ])
-            [[[0, None, 2.2, None, None], None, [4.4]], None, [[5.5]]]
+            >>> array[ [[[0, None, 2, None, None], None, [1]], None, [[0]]] ].show()
+            [[[0, None, 2.2, None, None], None, [4.4]],
+             None,
+             [[5.5]]]
 
         the sub-list at entry 0,0 is extended as the masked entries are
         acting at the last level, while the higher levels of the indexer all
@@ -986,8 +1003,10 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
             >>> nested = ak.zip({"a" : ak.zip({"x" : [1, 2, 3]})})
             >>> nested["a", "y"] = 2 * nested.a.x
-            >>> ak.to_list(nested)
-            [{'a': {'x': 1, 'y': 2}}, {'a': {'x': 2, 'y': 4}}, {'a': {'x': 3, 'y': 6}}]
+            >>> nested.show()
+            [{a: {x: 1, y: 2}},
+             {a: {x: 2, y: 4}},
+             {a: {x: 3, y: 6}}]
 
         Note that the following does **not** work:
 
@@ -998,9 +1017,11 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             >>> nested["a", "y"] = 2 * nested.a.x
 
         If necessary, the new field will be broadcasted to fit the array.
-        For example, given an `array` like
+        For example, given
 
-            ak.Array([[{"x": 1.1}, {"x": 2.2}, {"x": 3.3}], [], [{"x": 4.4}, {"x": 5.5}]])
+            >>> array = ak.Array([
+            ...     [{"x": 1.1}, {"x": 2.2}, {"x": 3.3}], [], [{"x": 4.4}, {"x": 5.5}]
+            ... ])
 
         which has three elements with nested data in each, assigning
 
@@ -1008,10 +1029,10 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         will result in
 
-            >>> ak.to_list(array)
-            [[{'x': 1.1, 'y': 100}, {'x': 2.2, 'y': 100}, {'x': 3.3, 'y': 100}],
+            >>> array.show()
+            [[{x: 1.1, y: 100}, {x: 2.2, y: 100}, {x: 3.3, y: 100}],
              [],
-             [{'x': 4.4, 'y': 300}, {'x': 5.5, 'y': 300}]]
+             [{x: 4.4, y: 300}, {x: 5.5, y: 300}]]
 
         because the `100` in `what[0]` is broadcasted to all three nested
         elements of `array[0]`, the `200` in `what[1]` is broadcasted to the
@@ -1065,18 +1086,20 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         Whenever possible, fields can be accessed as attributes.
 
-        For example, the fields of an `array` like
+        For example, the fields of
 
-            ak.Array([[{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}],
-                      [],
-                      [{"x": 4.4, "y": [4, 4, 4, 4]}, {"x": 5.5, "y": [5, 5, 5, 5, 5]}]])
+            >>> array = ak.Array([
+            ...     [{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}],
+            ...     [],
+            ...     [{"x": 4.4, "y": [4, 4, 4, 4]}, {"x": 5.5, "y": [5, 5, 5, 5, 5]}]
+            ... ])
 
         can be accessed as
 
             >>> array.x
             <Array [[1.1, 2.2, 3.3], [], [4.4, 5.5]] type='3 * var * float64'>
             >>> array.y
-            <Array [[[1], [2, 2], ... [5, 5, 5, 5, 5]]] type='3 * var * var * int64'>
+            <Array [[[1], [2, 2], [3, 3, 3]], [], [...]] type='3 * var * var * int64'>
 
         which are equivalent to `array["x"]` and `array["y"]`. (See
         <<projection>>.)
@@ -1311,20 +1334,24 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         innermost level of structure and preserves the structure through the
         operation.
 
-        For example, with an `array` like
+        For example, with
 
-            ak.Array([[{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}], [], [{"x": 2.2, "y": [2, 2]}]])
+            >>> array = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
 
         applying `np.sqrt` would yield
 
-            >>> print(np.sqrt(array))
-            [[{x: 0, y: []}, {x: 1.05, y: [1]}], [], [{x: 1.48, y: [1.41, 1.41]}]]
+            >>> np.sqrt(array).show()
+            [[1.05, 1.48, 1.82],
+             [],
+             [2.1, 2.35]]
 
         In addition, many unary and binary operators implicitly call ufuncs,
         such as `np.power` in
 
-            >>> print(array**2)
-            [[{x: 0, y: []}, {x: 1.21, y: [1]}], [], [{x: 4.84, y: [4, 4]}]]
+            >>> (array**2).show()
+            [[1.21, 4.84, 10.9],
+             [],
+             [19.4, 30.2]]
 
         In the above example, `array` is a nested list of records and `2` is
         a scalar. Awkward Array applies the same broadcasting rules as NumPy
@@ -1332,8 +1359,10 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         broadcasting a scalar, as above, it is possible to broadcast
         arrays with less depth into arrays with more depth, such as
 
-            >>> print(array + ak.Array([10, 20, 30]))
-            [[{x: 10, y: []}, {x: 11.1, y: [11]}], [], [{x: 32.2, y: [32, 32]}]]
+            >>> (array + ak.Array([10, 20, 30])).show()
+            [[11.1, 12.2, 13.3],
+             [],
+             [34.4, 35.5]]
 
         See #ak.broadcast_arrays for details about broadcasting and the
         generalized set of broadcasting rules.
@@ -1347,8 +1376,10 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             ... def sqr(x):
             ...     return x * x
             ...
-            >>> print(sqr(array))
-            [[{x: 0, y: []}, {x: 1.21, y: [1]}], [], [{x: 4.84, y: [4, 4]}]]
+            >>> sqr(array).show()
+            [[1.21, 4.84, 10.9],
+             [],
+             [19.4, 30.2]]
 
         See also #__array_function__.
         """
@@ -1567,20 +1598,19 @@ class Record(NDArrayOperatorsMixin):
             >>> vectors = ak.Array([{"x": 0.1, "y": 1.0, "z": 30.0},
             ...                     {"x": 0.2, "y": 2.0, "z": 20.0},
             ...                     {"x": 0.3, "y": 3.0, "z": 10.0}])
-
             >>> vectors[1].layout
-            <Record at="1">
-                <RecordArray>
-                    <field index="0" key="x">
-                        <NumpyArray format="d" shape="3" data="0.1 0.2 0.3" at="0x555660dfe7d0"/>
-                    </field>
-                    <field index="1" key="y">
-                        <NumpyArray format="d" shape="3" data="1 2 3" at="0x555660df4180"/>
-                    </field>
-                    <field index="2" key="z">
-                        <NumpyArray format="d" shape="3" data="30 20 10" at="0x555660df6190"/>
-                    </field>
-                </RecordArray>
+            <Record at='1'>
+                <array><RecordArray is_tuple='false' len='3'>
+                    <content index='0' field='x'>
+                        <NumpyArray dtype='float64' len='3'>[0.1 0.2 0.3]</NumpyArray>
+                    </content>
+                    <content index='1' field='y'>
+                        <NumpyArray dtype='float64' len='3'>[1. 2. 3.]</NumpyArray>
+                    </content>
+                    <content index='2' field='z'>
+                        <NumpyArray dtype='float64' len='3'>[30. 20. 10.]</NumpyArray>
+                    </content>
+                </RecordArray></array>
             </Record>
         """
         return self._layout
@@ -1707,9 +1737,9 @@ class Record(NDArrayOperatorsMixin):
         this is a record, the first item in the slice tuple must be a
         string, selecting a field.
 
-        For example, with a `record` like
+        For example, with
 
-            ak.Record({"x": 3.3, "y": [1, 2, 3]})
+            >>> record = ak.Record({"x": 3.3, "y": [1, 2, 3]})
 
         we can select
 
@@ -1746,8 +1776,10 @@ class Record(NDArrayOperatorsMixin):
             >>> record = ak.Record({"x": 3.3})
             >>> record["y"] = 4
             >>> record["z"] = {"another": "record"}
-            >>> print(record)
-            {x: 3.3, y: 4, z: {another: 'record'}}
+            >>> record.show()
+            {x: 3.3,
+             y: 4,
+             z: {another: 'record'}}
 
         See #ak.with_field for a variant that does not change the #ak.Record
         in-place. (Internally, this method uses #ak.with_field, so performance
@@ -1793,9 +1825,9 @@ class Record(NDArrayOperatorsMixin):
         """
         Whenever possible, fields can be accessed as attributes.
 
-        For example, the fields of a record like
+        For example, the fields of
 
-            record = ak.Record({"x": 1.1, "y": [2, 2], "z": "three"})
+            >>> record = ak.Record({"x": 1.1, "y": [2, 2], "z": "three"})
 
         can be accessed as
 
@@ -2112,30 +2144,35 @@ class ArrayBuilder(Sized):
         b.integer(1)      #   1,      # 0 * var * int64
         b.integer(2)      #   2,      # 0 * var * int64
         b.real(3)         #   3.0     # 0 * var * float64     (all the integers have become floats)
-        b.end_list()      # ],        # 1 * var * float64
+        b.end_list()      # ],        # 1 * var * float64     (closed first list; array length is 1)
         b.begin_list()    # [         # 1 * var * float64
-        b.end_list()      # ],        # 2 * var * float64
+        b.end_list()      # ],        # 2 * var * float64     (closed empty list; array length is 2)
         b.begin_list()    # [         # 2 * var * float64
         b.integer(4)      #   4,      # 2 * var * float64
         b.null()          #   null,   # 2 * var * ?float64    (now the floats are nullable)
         b.integer(5)      #   5       # 2 * var * ?float64
         b.end_list()      # ],        # 3 * var * ?float64
         b.begin_list()    # [         # 3 * var * ?float64
-        b.begin_record()  #   {       # 3 * var * ?union[float64, {}]
-        b.field("x")      #     "x":  # 3 * var * ?union[float64, {"x": unknown}]
-        b.integer(1)      #      1,   # 3 * var * ?union[float64, {"x": int64}]
-        b.field("y")      #      "y": # 3 * var * ?union[float64, {"x": int64, "y": unknown}]
-        b.begin_list()    #      [    # 3 * var * ?union[float64, {"x": int64, "y": var * unknown}]
-        b.integer(2)      #        2, # 3 * var * ?union[float64, {"x": int64, "y": var * int64}]
-        b.integer(3)      #        3  # 3 * var * ?union[float64, {"x": int64, "y": var * int64}]
-        b.end_list()      #      ]    # 3 * var * ?union[float64, {"x": int64, "y": var * int64}]
-        b.end_record()    #   }       # 3 * var * ?union[float64, {"x": int64, "y": var * int64}]
-        b.end_list()      # ]         # 4 * var * ?union[float64, {"x": int64, "y": var * int64}]
+        b.begin_record()  #   {       # 3 * var * union[?float64, ?{}]
+        b.field("x")      #     "x":  # 3 * var * union[?float64, ?{x: unknown}]
+        b.integer(1)      #      1,   # 3 * var * union[?float64, ?{x: int64}]
+        b.field("y")      #      "y": # 3 * var * union[?float64, ?{x: int64, y: unknown}]
+        b.begin_list()    #      [    # 3 * var * union[?float64, ?{x: int64, y: var * unknown}]
+        b.integer(2)      #        2, # 3 * var * union[?float64, ?{x: int64, y: var * int64}]
+        b.integer(3)      #        3  # 3 * var * union[?float64, ?{x: int64, y: var * int64}]
+        b.end_list()      #      ]    # 3 * var * union[?float64, ?{x: int64, y: var * int64}]
+        b.end_record()    #   }       # 3 * var * union[?float64, ?{x: int64, y: var * int64}]
+        b.end_list()      # ]         # 4 * var * union[?float64, ?{x: int64, y: var * int64}]
 
     To get an array, we take a #snapshot of the ArrayBuilder's current state.
 
-        >>> ak.to_list(b.snapshot())
-        [[1.0, 2.0, 3.0], [], [4.0, None, 5.0], [{'x': 1, 'y': [2, 3]}]]
+        >>> b.snapshot()
+        <Array [[1, 2, 3], ..., [{x: 1, y: ..., ...}]] type='4 * var * union[?float...'>
+        >>> b.snapshot().show()
+        [[1, 2, 3],
+         [],
+         [4, None, 5],
+         [{x: 1, y: [2, 3]}]]
 
     The full set of filling commands is the following.
 
@@ -2198,11 +2235,18 @@ class ArrayBuilder(Sized):
         >>> builder = ak.ArrayBuilder()
         >>> deepnesting(builder, 0.9)
         >>> builder.snapshot()
-        <Array [... 1.23, -0.498, 0.272], -0.0519]]]] type='1 * var * var * union[var * ...'>
-        >>> ak.to_list(builder)
-        [[[[2.05, 0.95], [[[0.25], 1.86, 0.89, 0.31], 0.38, -1.62, [[0.18], 0.46, 0.39], [-0.57, 1.39, -0.15, -0.20]], [[[-0.74, -0.34], -0.84], [-0.81, -0.72, -0.42, [1.04, 1.69, -0.18, 1.07]]], [[0.51]]], [[-1.97, 0.57], [-1.24, -2.14, -0.54, [[0.24, -2.31, [-0.68, 0.08], 1.80, 0.16], -0.63, [0.01, [-1.28, 0.38, 1.40, -0.26, -0.48]]], -0.62, -2.53], [-1.66, 0.58]], [0.62, [[-0.76, -0.67, -1.15], -0.50, [0.36, 0.48, -0.80, [1.15, -1.09], -1.39, 1.28]], 0.93, [1.35, [0.36, 1.09, -0.27, -0.79], [-0.41], [0.67, 0.89, 0.79]], [], [0.67, [-0.48, -0.39], 1.06, 0.80, -0.34], [[1.56, -1.60, [-0.69], -0.42], 0.33, -0.73, 0.50, -1.25, -1.15], [[0.64], [-0.01], -0.95], [[0.41, -0.68, 0.79], 0.51]], [[0.62, [0.58, -0.75]], [1.61, 0.52, 0.24], -1.09, [-1.11], 0.22], [-0.41, [[0.42], 0.78, [1.22, -0.49, 0.27], -0.05xs]]]]
-        >>> ak.type(builder.snapshot())
-        1 * var * var * union[var * union[float64, var * union[var * union[float64, var * float64], float64]], float64]
+        <Array [[[-0.523, ..., [[2.16, ...], ...]]]] type='1 * var * var * union[fl...'>
+        >>> builder.type.show()
+        1 * var * var * union[
+            float64,
+            var * union[
+                var * union[
+                    float64,
+                    var * unknown
+                ],
+                float64
+            ]
+        ]
 
     Note that this is a *general* method for building arrays; if the type is
     known in advance, more specialized procedures can be faster. This should
@@ -2479,21 +2523,25 @@ class ArrayBuilder(Sized):
 
         For example,
 
-            builder.begin_list()
-            builder.real(1.1)
-            builder.real(2.2)
-            builder.real(3.3)
-            builder.end_list()
-            builder.begin_list()
-            builder.end_list()
-            builder.begin_list()
-            builder.real(4.4)
-            builder.real(5.5)
-            builder.end_list()
+            >>> builder = ak.ArrayBuilder()
+            >>> builder.begin_list()
+            >>> builder.real(1.1)
+            >>> builder.real(2.2)
+            >>> builder.real(3.3)
+            >>> builder.end_list()
+            >>> builder.begin_list()
+            >>> builder.end_list()
+            >>> builder.begin_list()
+            >>> builder.real(4.4)
+            >>> builder.real(5.5)
+            >>> builder.end_list()
 
         produces
 
-            [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
+            >>> builder.show()
+            [[1.1, 2.2, 3.3],
+             [],
+             [4.4, 5.5]]
         """
         self._layout.beginlist()
 
@@ -2510,20 +2558,23 @@ class ArrayBuilder(Sized):
 
         For example,
 
-            builder.begin_tuple(3)
-            builder.index(0).integer(1)
-            builder.index(1).real(1.1)
-            builder.index(2).string("one")
-            builder.end_tuple()
-            builder.begin_tuple(3)
-            builder.index(0).integer(2)
-            builder.index(1).real(2.2)
-            builder.index(2).string("two")
-            builder.end_tuple()
+            >>> builder = ak.ArrayBuilder()
+            >>> builder.begin_tuple(3)
+            >>> builder.index(0).integer(1)
+            >>> builder.index(1).real(1.1)
+            >>> builder.index(2).string("one")
+            >>> builder.end_tuple()
+            >>> builder.begin_tuple(3)
+            >>> builder.index(0).integer(2)
+            >>> builder.index(1).real(2.2)
+            >>> builder.index(2).string("two")
+            >>> builder.end_tuple()
 
         produces
 
-            [(1, 1.1, "one"), (2, 2.2, "two")]
+            >>> builder.show()
+            [(1, 1.1, 'one'),
+             (2, 2.2, 'two')]
         """
         self._layout.begintuple(numfields)
 
@@ -2565,13 +2616,17 @@ class ArrayBuilder(Sized):
 
         produces
 
-            >>> ak.to_list(builder.snapshot())
-            [{"x": 1.0, "y": 1.1}, {"x": 2.0, "y": 2.2}]
+            >>> builder.show()
+            [{x: 1, y: 1.1},
+             {x: 2, y: 2.2}]
 
         with type
 
-            >>> ak.type(builder.snapshot())
-            2 * points["x": float64, "y": float64]
+            >>> builder.type.show()
+            2 * points[
+                x: float64,
+                y: float64
+            ]
 
         The record type is named `"points"` because its `"__record__"`
         parameter is set to that value:
@@ -2657,19 +2712,26 @@ class ArrayBuilder(Sized):
         Context manager to prevent unpaired #begin_list and #end_list. The
         example in the #begin_list documentation can be rewritten as
 
-            with builder.list():
-                builder.real(1.1)
-                builder.real(2.2)
-                builder.real(3.3)
-            with builder.list():
-                pass
-            with builder.list():
-                builder.real(4.4)
-                builder.real(5.5)
+            >>> builder = ak.ArrayBuilder()
+            >>> with builder.list():
+            ...     builder.real(1.1)
+            ...     builder.real(2.2)
+            ...     builder.real(3.3)
+            ...
+            >>> with builder.list():
+            ...     pass
+            ...
+            >>> with builder.list():
+            ...     builder.real(4.4)
+            ...     builder.real(5.5)
+            ...
 
         to produce the same result.
 
-            [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
+            >>> builder.show()
+            [[1.1, 2.2, 3.3],
+             [],
+             [4.4, 5.5]]
 
         Since context managers aren't yet supported by Numba, this method
         can't be used in Numba.
@@ -2694,18 +2756,23 @@ class ArrayBuilder(Sized):
         Context manager to prevent unpaired #begin_tuple and #end_tuple. The
         example in the #begin_tuple documentation can be rewritten as
 
-            with builder.tuple(3):
-                builder.index(0).integer(1)
-                builder.index(1).real(1.1)
-                builder.index(2).string("one")
-            with builder.tuple(3):
-                builder.index(0).integer(2)
-                builder.index(1).real(2.2)
-                builder.index(2).string("two")
+            >>> builder = ak.ArrayBuilder()
+            >>> with builder.tuple(3):
+            ...     builder.index(0).integer(1)
+            ...     builder.index(1).real(1.1)
+            ...     builder.index(2).string("one")
+            ...
+            >>> with builder.tuple(3):
+            ...     builder.index(0).integer(2)
+            ...     builder.index(1).real(2.2)
+            ...     builder.index(2).string("two")
+            ...
 
         to produce the same result.
 
-            [(1, 1.1, "one"), (2, 2.2, "two")]
+            >>> builder.show()
+            [(1, 1.1, 'one'),
+             (2, 2.2, 'two')]
 
         Since context managers aren't yet supported by Numba, this method
         can't be used in Numba.
@@ -2730,16 +2797,21 @@ class ArrayBuilder(Sized):
         Context manager to prevent unpaired #begin_record and #end_record. The
         example in the #begin_record documentation can be rewritten as
 
-            with builder.record("points"):
-                builder.field("x").real(1)
-                builder.field("y").real(1.1)
-            with builder.record("points"):
-                builder.field("x").real(2)
-                builder.field("y").real(2.2)
+            >>> builder = ak.ArrayBuilder()
+            >>> with builder.record("points"):
+            ...     builder.field("x").real(1)
+            ...     builder.field("y").real(1.1)
+            ...
+            >>> with builder.record("points"):
+            ...     builder.field("x").real(2)
+            ...     builder.field("y").real(2.2)
+            ...
 
         to produce the same result.
 
-            [{"x": 1.0, "y": 1.1}, {"x": 2.0, "y": 2.2}]
+            >>> builder.show()
+            [{x: 1, y: 1.1},
+             {x: 2, y: 2.2}]
 
         Since context managers aren't yet supported by Numba, this method
         can't be used in Numba.
