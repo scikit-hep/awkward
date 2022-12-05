@@ -54,7 +54,7 @@ Parameters and behaviors
 In Awkward Array, metadata are embedded in data using an array node's
 **parameters**, and parameter-dependent operations can be defined using
 **behavior**. A global mapping from parameters to behavior is in a dict called
-``ak.behavior``:
+:data:`.behavior`:
 
 .. code-block:: python
 
