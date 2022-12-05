@@ -155,13 +155,7 @@ def all_same_offsets(backend: ak._backends.Backend, inputs: list) -> bool:
     return True
 
 
-def _custom_broadcast_apply(
-    fcn,
-    layout: ak.contents.Content,
-    offsets: ak.index.Index,
-    backend: ak._backends.Backend,
-    behavior: dict,
-) -> ak.contents.Content:
+def _custom_broadcast_apply(fcn, layout, offsets, backend, behavior):
     array = (
         ak._util.wrap(layout, behavior)
         if isinstance(layout, ak.contents.Content)
@@ -170,8 +164,7 @@ def _custom_broadcast_apply(
     offsets_array = ak._util.wrap(
         ak.contents.NumpyArray(offsets.to_nplike(backend.nplike).data, backend=backend)
     )
-    broadcasted = fcn(array, offsets_array)
-    return ak.operations.to_layout(broadcasted, allow_record=False, allow_other=False)
+    return fcn(array, offsets_array)
 
 
 # TODO: move to _util or another module
