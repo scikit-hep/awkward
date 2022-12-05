@@ -155,6 +155,18 @@ def all_same_offsets(backend: ak._backends.Backend, inputs: list) -> bool:
     return True
 
 
+def _custom_broadcast_apply(fcn, layout, offsets, backend, behavior):
+    array = (
+        ak._util.wrap(layout, behavior)
+        if isinstance(layout, ak.contents.Content)
+        else layout
+    )
+    offsets_array = ak._util.wrap(
+        ak.contents.NumpyArray(offsets.to_nplike(backend.nplike).data, backend=backend)
+    )
+    return fcn(array, offsets_array)
+
+
 # TODO: move to _util or another module
 class Sentinel:
     """A class for implementing sentinel types"""
@@ -878,17 +890,9 @@ def apply_step(
                 nextinputs = []
                 for x, fcn in zip(inputs, fcns):
                     if callable(fcn) and not secondround:
-                        content_arg = (
-                            ak._util.wrap(x, behavior)
-                            if isinstance(x, ak.contents.Content)
-                            else x
+                        nextinputs.append(
+                            _custom_broadcast_apply(fcn, x, offsets, backend, behavior)
                         )
-                        offset_arg = ak._util.wrap(
-                            ak.contents.NumpyArray(
-                                offsets.to_nplike(backend.nplike).data, backend=backend
-                            )
-                        )
-                        nextinputs.append(fcn(content_arg, offset_arg))
                     elif isinstance(x, listtypes):
                         nextinputs.append(x._broadcast_tooffsets64(offsets).content)
 
