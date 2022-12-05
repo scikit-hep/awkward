@@ -43,11 +43,11 @@ def array_function(func, types, args, kwargs, behavior):
         result = function(*args, **kwargs)
 
     # We want the result to be a layout
-    layout = ak.operations.ak_to_layout._impl(
-        result, allow_record=True, allow_other=True
-    )
-    if isinstance(layout, (ak.contents.Content, ak.record.Record)):
-        return ak._util.wrap(layout, behavior=behavior)
+    out = ak.operations.ak_to_layout._impl(result, allow_record=True, allow_other=True)
+    if isinstance(out, (ak.contents.Content, ak.record.Record)):
+        return ak._util.wrap(out, behavior=behavior)
+    else:
+        return out
 
 
 def implements(numpy_function):
