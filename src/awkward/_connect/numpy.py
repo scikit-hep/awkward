@@ -57,8 +57,14 @@ def implements(numpy_function):
 
 
 def _array_ufunc_custom_cast(inputs, behavior):
+    args = [
+        ak._util.wrap(x, behavior)
+        if isinstance(x, (ak.contents.Content, ak.record.Record))
+        else x
+        for x in inputs
+    ]
     nextinputs = []
-    for x in inputs:
+    for x in args:
         cast_fcn = ak._util.custom_cast(x, behavior)
         if cast_fcn is not None:
             x = cast_fcn(x)
