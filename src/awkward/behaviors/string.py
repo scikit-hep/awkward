@@ -1,5 +1,4 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-from __future__ import annotations
 
 import awkward as ak
 from awkward.highlevel import Array
@@ -145,18 +144,11 @@ def _string_notequal(one, two):
     return ~_string_equal(one, two)
 
 
-def _string_broadcast(array: ak.Array, offsets_array: ak.Array):
-    assert isinstance(array, ak.Array)
-    assert isinstance(offsets_array, ak.Array)
+def _string_broadcast(layout, offsets):
+    nplike = ak._nplikes.nplike_of(offsets)
+    assert nplike is layout.backend.index_nplike
 
-    layout = array.layout
-
-    backend = array.layout.backend
-    nplike = backend.nplike
-
-    offsets = nplike.asarray(offsets_array.layout.data)
-    assert nplike is backend.index_nplike
-
+    offsets = nplike.asarray(offsets)
     counts = offsets[1:] - offsets[:-1]
     if ak._util.win or ak._util.bits32:
         counts = counts.astype(np.int32)

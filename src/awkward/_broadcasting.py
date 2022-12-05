@@ -878,17 +878,7 @@ def apply_step(
                 nextinputs = []
                 for x, fcn in zip(inputs, fcns):
                     if callable(fcn) and not secondround:
-                        content_arg = (
-                            ak._util.wrap(x, behavior)
-                            if isinstance(x, ak.contents.Content)
-                            else x
-                        )
-                        offset_arg = ak._util.wrap(
-                            ak.contents.NumpyArray(
-                                offsets.to_nplike(backend.nplike).data, backend=backend
-                            )
-                        )
-                        nextinputs.append(fcn(content_arg, offset_arg))
+                        nextinputs.append(fcn(x, offsets))
                     elif isinstance(x, listtypes):
                         nextinputs.append(x._broadcast_tooffsets64(offsets).content)
 
