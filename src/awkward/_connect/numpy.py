@@ -30,7 +30,7 @@ def _to_rectilinear(arg):
         return tuple(nplike.to_rectilinear(x) for x in arg)
     else:
         nplike = ak._nplikes.nplike_of(arg)
-        nplike.to_rectilinear(arg)
+        return nplike.to_rectilinear(arg)
 
 
 def array_function(func, types, args, kwargs):
