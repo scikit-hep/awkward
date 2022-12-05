@@ -42,7 +42,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         check_valid (bool): If True, verify that the #layout is valid.
         backend (None, `"cpu"`, `"jax"`, `"cuda"`): If `"cpu"`, the Array will be placed in
             main memory for use with other `"cpu"` Arrays and Records; if `"cuda"`,
-            the Array will be placed in GPU global memory using CUDA; if "jax", the structure
+            the Array will be placed in GPU global memory using CUDA; if `"jax"`, the structure
             is copied to the CPU for use with JAX. if None, the `data` are left untouched.
 
     High-level array that can contain data of any type.
