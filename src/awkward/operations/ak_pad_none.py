@@ -8,7 +8,7 @@ np = ak._nplikes.NumpyMetadata.instance()
 def pad_none(array, target, axis=1, *, clip=False, highlevel=True, behavior=None):
     """
     Args:
-        array: Data containing nested lists to pad to a target length.
+        array: Array-like data (anything #ak.to_layout recognizes).
         target (int): The intended length of the lists. If `clip=True`,
             the output lists will have exactly this length; otherwise,
             they will have *at least* this length.
@@ -95,9 +95,9 @@ def pad_none(array, target, axis=1, *, clip=False, highlevel=True, behavior=None
     at least `target` or exactly `target`, it also determines the type of the
     output:
 
-       * `clip=True` returns regular lists (#ak.types.RegularType), and
-       * `clip=False` returns in-principle variable lengths
-         (#ak.types.ListType).
+    * `clip=True` returns regular lists (#ak.types.RegularType), and
+    * `clip=False` returns in-principle variable lengths
+      (#ak.types.ListType).
 
     The in-principle variable-length lists might, in fact, all have the same
     length, but the type difference is significant, for instance in

@@ -8,9 +8,8 @@ np = ak._nplikes.NumpyMetadata.instance()
 def from_arrow(array, *, generate_bitmasks=False, highlevel=True, behavior=None):
     """
     Args:
-        array (`pyarrow.Array`, `pyarrow.ChunkedArray`, `pyarrow.RecordBatch`,
-            or `pyarrow.Table`): Apache Arrow array to convert into an
-            Awkward Array.
+        array (`pyarrow.Array`, `pyarrow.ChunkedArray`, `pyarrow.RecordBatch`, or `pyarrow.Table`):
+            Apache Arrow array to convert into an  Awkward Array.
         generate_bitmasks (bool): If enabled and Arrow/Parquet does not have Awkward
             metadata, `generate_bitmasks=True` creates empty bitmasks for nullable
             types that don't have bitmasks in the Arrow/Parquet data, so that the

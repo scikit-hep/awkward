@@ -18,8 +18,8 @@ def cartesian(
 ):
     """
     Args:
-        arrays (dict or iterable of arrays): Arrays on which to compute the
-            Cartesian product.
+        arrays (dict or iterable of arrays): Each value in this dict or iterable
+            can be any array-like data that #ak.to_layout recognizes.
         axis (int): The dimension at which this operation is applied. The
             outermost dimension is `0`, followed by `1`, etc., and negative
             values count backward from the innermost: `-1` is the innermost
@@ -53,14 +53,21 @@ def cartesian(
 
     is
 
-        >>> ak.to_list(ak.cartesian([one, two], axis=0))
-        [(1, 'a'), (1, 'b'), (2, 'a'), (2, 'b'), (3, 'a'), (3, 'b')]
+        >>> ak.cartesian([one, two], axis=0).show()
+        [(1, 'a'),
+         (1, 'b'),
+         (2, 'a'),
+         (2, 'b'),
+         (3, 'a'),
+         (3, 'b')]
 
     With nesting, a new level of nested lists is created to group combinations
     that share the same element from `one` into the same list.
 
-        >>> ak.to_list(ak.cartesian([one, two], axis=0, nested=True))
-        [[(1, 'a'), (1, 'b')], [(2, 'a'), (2, 'b')], [(3, 'a'), (3, 'b')]]
+        >>> ak.cartesian([one, two], axis=0, nested=True).show()
+        [[(1, 'a'), (1, 'b')],
+         [(2, 'a'), (2, 'b')],
+         [(3, 'a'), (3, 'b')]]
 
     The primary purpose of this function, however, is to compute a different
     Cartesian product for each element of an array: in other words, `axis=1`.
@@ -73,7 +80,7 @@ def cartesian(
     `[1, 2, 3]` and `["a", "b"]`, 0 pairs from `[]` and `["c"]`, 1 pair from
     `[4, 5]` and `["d"]`, and 1 pair from `[6]` and `["e", "f"]`.
 
-        >>> ak.to_list(ak.cartesian([one, two]))
+        >>> ak.cartesian([one, two]).show()
         [[(1, 'a'), (1, 'b'), (2, 'a'), (2, 'b'), (3, 'a'), (3, 'b')],
          [],
          [(4, 'd'), (5, 'd')],
@@ -83,8 +90,8 @@ def cartesian(
     the nesting depth is increased by 1 and tuples are grouped by their
     first element.
 
-        >>> ak.to_list(ak.cartesian([one, two], nested=True))
-        [[[(1, 'a'), (1, 'b')], [(2, 'a'), (2, 'b')], [(3, 'a'), (3, 'b')]],
+        >>> ak.cartesian([one, two], nested=True).show()
+        [[[(1, 'a'), (1, 'b')], [(2, 'a'), (2, ...)], [(3, 'a'), (3, 'b')]],
          [],
          [[(4, 'd')], [(5, 'd')]],
          [[(6, 'e'), (6, 'f')]]]
@@ -92,20 +99,11 @@ def cartesian(
     These tuples are #ak.contents.RecordArray nodes with unnamed fields. To
     name the fields, we can pass `one` and `two` in a dict, rather than a list.
 
-        >>> ak.to_list(ak.cartesian({"x": one, "y": two}))
-        [
-         [{'x': 1, 'y': 'a'},
-          {'x': 1, 'y': 'b'},
-          {'x': 2, 'y': 'a'},
-          {'x': 2, 'y': 'b'},
-          {'x': 3, 'y': 'a'},
-          {'x': 3, 'y': 'b'}],
+        >>> ak.cartesian({"x": one, "y": two}).show()
+        [[{x: 1, y: 'a'}, {x: 1, y: 'b'}, {...}, ..., {x: 3, y: 'a'}, {x: 3, y: 'b'}],
          [],
-         [{'x': 4, 'y': 'd'},
-          {'x': 5, 'y': 'd'}],
-         [{'x': 6, 'y': 'e'},
-          {'x': 6, 'y': 'f'}]
-        ]
+         [{x: 4, y: 'd'}, {x: 5, y: 'd'}],
+         [{x: 6, y: 'e'}, {x: 6, y: 'f'}]]
 
     With more than two elements in the Cartesian product, `nested` can specify
     which are grouped and which are not. For example,
@@ -116,9 +114,8 @@ def cartesian(
 
     can be left entirely ungrouped:
 
-        >>> ak.to_list(ak.cartesian([one, two, three], axis=0))
-        [
-         (1, 1.1, 'a'),
+        >>> ak.cartesian([one, two, three], axis=0).show()
+        [(1, 1.1, 'a'),
          (1, 1.1, 'b'),
          (1, 2.2, 'a'),
          (1, 2.2, 'b'),
@@ -128,11 +125,7 @@ def cartesian(
          (2, 1.1, 'b'),
          (2, 2.2, 'a'),
          (2, 2.2, 'b'),
-         (2, 3.3, 'a'),
-         (2, 3.3, 'b'),
-         (3, 1.1, 'a'),
-         (3, 1.1, 'b'),
-         (3, 2.2, 'a'),
+         ...,
          (3, 2.2, 'b'),
          (3, 3.3, 'a'),
          (3, 3.3, 'b'),
@@ -141,52 +134,32 @@ def cartesian(
          (4, 2.2, 'a'),
          (4, 2.2, 'b'),
          (4, 3.3, 'a'),
-         (4, 3.3, 'b')
-        ]
+         (4, 3.3, 'b')]
 
     can be grouped by `one` (adding 1 more dimension):
 
-        >>> ak.to_list(ak.cartesian([one, two, three], axis=0, nested=[0]))
-        [
-         [(1, 1.1, 'a'), (1, 1.1, 'b'), (1, 2.2, 'a')],
+        >>> ak.cartesian([one, two, three], axis=0, nested=[0]).show()
+        [[(1, 1.1, 'a'), (1, 1.1, 'b'), (1, 2.2, 'a')],
          [(1, 2.2, 'b'), (1, 3.3, 'a'), (1, 3.3, 'b')],
          [(2, 1.1, 'a'), (2, 1.1, 'b'), (2, 2.2, 'a')],
          [(2, 2.2, 'b'), (2, 3.3, 'a'), (2, 3.3, 'b')],
          [(3, 1.1, 'a'), (3, 1.1, 'b'), (3, 2.2, 'a')],
          [(3, 2.2, 'b'), (3, 3.3, 'a'), (3, 3.3, 'b')],
          [(4, 1.1, 'a'), (4, 1.1, 'b'), (4, 2.2, 'a')],
-         [(4, 2.2, 'b'), (4, 3.3, 'a'), (4, 3.3, 'b')]
-        ]
+         [(4, 2.2, 'b'), (4, 3.3, 'a'), (4, 3.3, 'b')]]
 
     can be grouped by `one` and `two` (adding 2 more dimensions):
 
-        >>> ak.to_list(ak.cartesian([one, two, three], axis=0, nested=[0, 1]))
-        [
-         [
-          [(1, 1.1, 'a'), (1, 1.1, 'b')],
-          [(1, 2.2, 'a'), (1, 2.2, 'b')],
-          [(1, 3.3, 'a'), (1, 3.3, 'b')]
-         ],
-         [
-          [(2, 1.1, 'a'), (2, 1.1, 'b')],
-          [(2, 2.2, 'a'), (2, 2.2, 'b')],
-          [(2, 3.3, 'a'), (2, 3.3, 'b')]
-         ],
-         [
-          [(3, 1.1, 'a'), (3, 1.1, 'b')],
-          [(3, 2.2, 'a'), (3, 2.2, 'b')],
-          [(3, 3.3, 'a'), (3, 3.3, 'b')]],
-         [
-          [(4, 1.1, 'a'), (4, 1.1, 'b')],
-          [(4, 2.2, 'a'), (4, 2.2, 'b')],
-          [(4, 3.3, 'a'), (4, 3.3, 'b')]]
-        ]
+        >>> ak.cartesian([one, two, three], axis=0, nested=[0, 1]).show()
+        [[[(1, 1.1, 'a'), (1, 1.1, 'b')], [...], [(1, 3.3, 'a'), (1, 3.3, ...)]],
+         [[(2, 1.1, 'a'), (2, 1.1, 'b')], [...], [(2, 3.3, 'a'), (2, 3.3, ...)]],
+         [[(3, 1.1, 'a'), (3, 1.1, 'b')], [...], [(3, 3.3, 'a'), (3, 3.3, ...)]],
+         [[(4, 1.1, 'a'), (4, 1.1, 'b')], [...], [(4, 3.3, 'a'), (4, 3.3, ...)]]]
 
     or grouped by unique `one`-`two` pairs (adding 1 more dimension):
 
-        >>> ak.to_list(ak.cartesian([one, two, three], axis=0, nested=[1]))
-        [
-         [(1, 1.1, 'a'), (1, 1.1, 'b')],
+        >>> ak.cartesian([one, two, three], axis=0, nested=[1]).show()
+        [[(1, 1.1, 'a'), (1, 1.1, 'b')],
          [(1, 2.2, 'a'), (1, 2.2, 'b')],
          [(1, 3.3, 'a'), (1, 3.3, 'b')],
          [(2, 1.1, 'a'), (2, 1.1, 'b')],
@@ -197,8 +170,7 @@ def cartesian(
          [(3, 3.3, 'a'), (3, 3.3, 'b')],
          [(4, 1.1, 'a'), (4, 1.1, 'b')],
          [(4, 2.2, 'a'), (4, 2.2, 'b')],
-         [(4, 3.3, 'a'), (4, 3.3, 'b')]
-        ]
+         [(4, 3.3, 'a'), (4, 3.3, 'b')]]
 
     The order of the output is fixed: it is always lexicographical in the
     order that the `arrays` are written. (Before Python 3.6, the order of

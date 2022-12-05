@@ -16,14 +16,14 @@ Direct constructors (fastest)
 
 If you're willing to think about your data in a columnar way, directly constructing layouts and wrapping them in {class}`ak.Array` interfaces is the fastest way to make them. (All other methods do this at some level.)
 
-"Thinking about data in a columnar way" is the crucial difference between this method and [ArrayBuilder](how-to-create-arraybuilder) and [LayoutBuilder](how-to-create-layoutbuilder). Both of the builders let you think about a data structure the way you would think about Python objects, in which all fields of a given record or elements of a list are "together" and one record or list is "separate" from another record or list. For example,
+"Thinking about data in a columnar way" is the crucial difference between this method and [using ArrayBuilder](how-to-create-arraybuilder.md). The builder method lets you think about a data structure the way you would think about Python objects, in which all fields of a given record or elements of a list are "together" and one record or list is "separate" from another record or list. For example,
 
-```{code-cell} ipython3
+```{code-cell} python3
 import awkward as ak
 import numpy as np
 ```
 
-```{code-cell} ipython3
+```{code-cell} python3
 builder = ak.ArrayBuilder()
 
 with builder.list():
@@ -52,7 +52,7 @@ with builder.list():
         with builder.field("y").list():
             builder.integer(3)
             builder.integer(2)
-            
+
     with builder.record():
         builder.field("x").real(5.5)
         with builder.field("y").list():
@@ -62,7 +62,7 @@ array = builder.snapshot()
 array
 ```
 
-```{code-cell} ipython3
+```{code-cell} python3
 array.to_list()
 ```
 
@@ -70,7 +70,7 @@ gets all of the items in the first list separately from the items in the second 
 
 By contrast, the physical data are laid out in columns, with all _x_ values next to each other, regardless of which records or lists they're in, and all the _y_ values next to each other in another buffer.
 
-```{code-cell} ipython3
+```{code-cell} python3
 array.layout
 ```
 
@@ -126,18 +126,20 @@ Content >: EmptyArray
 
 EmptyArray is a trivial node type: it can only represent empty arrays with unknown type.
 
-```{code-cell} ipython3
+```{code-cell} python3
 ak.contents.EmptyArray()
 ```
 
-```{code-cell} ipython3
+```{code-cell} python3
 ak.Array(ak.contents.EmptyArray())
 ```
 
 Since this is such a simple node type, let's use it to show examples of adding parameters.
 
-```{code-cell} ipython3
-ak.contents.EmptyArray(parameters={"name1": "value1", "name2": {"more": ["complex", "value"]}})
+```{code-cell} python3
+ak.contents.EmptyArray(
+    parameters={"name1": "value1", "name2": {"more": ["complex", "value"]}}
+)
 ```
 
 Content >: NumpyArray
@@ -147,19 +149,19 @@ Content >: NumpyArray
 
 NumpyArray represents data the same way as a NumPy [np.ndarray](https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html). That is, it can be multidimensional, but only rectilinear arrays.
 
-```{code-cell} ipython3
+```{code-cell} python3
 ak.contents.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5]))
 ```
 
-```{code-cell} ipython3
+```{code-cell} python3
 ak.contents.NumpyArray(np.array([[1, 2, 3], [4, 5, 6]], np.int16))
 ```
 
-```{code-cell} ipython3
+```{code-cell} python3
 ak.contents.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5])[::2])
 ```
 
-```{code-cell} ipython3
+```{code-cell} python3
 ak.contents.NumpyArray(np.array([[1, 2, 3], [4, 5, 6]], np.int16)[:, 1:])
 ```
 
@@ -167,22 +169,28 @@ In most array structures, the NumpyArrays only need to be 1-dimensional, since r
 
 The {class}`ak.from_numpy` function has a `regulararray` argument to choose between putting multiple dimensions into the NumpyArray node or nesting a 1-dimensional NumpyArray in RegularArray nodes.
 
-```{code-cell} ipython3
-ak.from_numpy(np.array([[1, 2, 3], [4, 5, 6]], np.int16), regulararray=False, highlevel=False)
+```{code-cell} python3
+ak.from_numpy(
+    np.array([[1, 2, 3], [4, 5, 6]], np.int16), regulararray=False, highlevel=False
+)
 ```
 
-```{code-cell} ipython3
-ak.from_numpy(np.array([[1, 2, 3], [4, 5, 6]], np.int16), regulararray=True, highlevel=False)
+```{code-cell} python3
+ak.from_numpy(
+    np.array([[1, 2, 3], [4, 5, 6]], np.int16), regulararray=True, highlevel=False
+)
 ```
 
 All of these representations look the same in an {class}`ak.Array` (high-level view).
 
-```{code-cell} ipython3
+```{code-cell} python3
 ak.Array(ak.contents.NumpyArray(np.array([[1, 2, 3], [4, 5, 6]])))
 ```
 
-```{code-cell} ipython3
-ak.Array(ak.contents.RegularArray(ak.contents.NumpyArray(np.array([1, 2, 3, 4, 5, 6])), 3))
+```{code-cell} python3
+ak.Array(
+    ak.contents.RegularArray(ak.contents.NumpyArray(np.array([1, 2, 3, 4, 5, 6])), 3)
+)
 ```
 
 If you are _producing_ arrays, you can pick any representation that is convenient. If you are _consuming_ arrays, you need to be aware of the different representations.
@@ -194,7 +202,7 @@ Content >: RegularArray
 
 {class}`ak.contents.RegularArray` represents regular-length lists (lists with all the same length). This was shown above as being equivalent to dimensions in a {class}`ak.contents.NumpyArray`, but it can also contain irregular data.
 
-```{code-cell} ipython3
+```{code-cell} python3
 layout = ak.contents.RegularArray(
     ak.from_iter([1, 2, 3, 4, 5, 6], highlevel=False),
     3,
@@ -202,19 +210,21 @@ layout = ak.contents.RegularArray(
 layout
 ```
 
-```{code-cell} ipython3
+```{code-cell} python3
 ak.Array(layout)
 ```
 
-```{code-cell} ipython3
+```{code-cell} python3
 layout = ak.contents.RegularArray(
-    ak.from_iter([[], [1], [1, 2], [1, 2, 3], [1, 2, 3, 4], [1, 2, 3, 4, 5]], highlevel=False),
+    ak.from_iter(
+        [[], [1], [1, 2], [1, 2, 3], [1, 2, 3, 4], [1, 2, 3, 4, 5]], highlevel=False
+    ),
     3,
 )
 layout
 ```
 
-```{code-cell} ipython3
+```{code-cell} python3
 ak.Array(layout)
 ```
 
@@ -226,7 +236,7 @@ The "`var *`" is the type of variable-length lists, nested inside of the Regular
 
 RegularArray is the first array type that can have unreachable data: the length of its nested content might not evenly divide the RegularArray's regular `size`.
 
-```{code-cell} ipython3
+```{code-cell} python3
 ak.Array(
     ak.contents.RegularArray(
         ak.contents.NumpyArray(np.array([1, 2, 3, 4, 5, 6, 7])),
@@ -244,7 +254,7 @@ Content >: ListArray
 
 {class}`ak.contents.ListArray` and {class}`ak.contents.ListOffsetArray` are the two node types that describe variable-length lists ({class}`ak.types.ListType`, represented in type strings as "`var *`"). {class}`ak.contents.ListArray` is the most general. It takes two Indexes, `starts` and `stops`, which indicate where each nested list starts and stops.
 
-```{code-cell} ipython3
+```{code-cell} python3
 layout = ak.contents.ListArray(
     ak.index.Index64(np.array([0, 3, 3])),
     ak.index.Index64(np.array([3, 3, 5])),
@@ -253,7 +263,7 @@ layout = ak.contents.ListArray(
 layout
 ```
 
-```{code-cell} ipython3
+```{code-cell} python3
 ak.Array(layout)
 ```
 
@@ -273,7 +283,7 @@ stops  = offsets[1:]
 
 for a single array `offsets`. If we were only representing arrays and not doing computations on them, we would always use ListOffsetArrays, because they are the most compact. Knowing that a node is a ListOffsetArray can also simplify the implementation of some operations. In a sense, operations that produce ListArrays (previous section) can be thought of as delaying the part of the operation that would propagate down into the `content`, as an optimization.
 
-```{code-cell} ipython3
+```{code-cell} python3
 layout = ak.contents.ListOffsetArray(
     ak.index.Index64(np.array([0, 3, 3, 5])),
     ak.contents.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5])),
@@ -281,7 +291,7 @@ layout = ak.contents.ListOffsetArray(
 layout
 ```
 
-```{code-cell} ipython3
+```{code-cell} python3
 ak.Array(layout)
 ```
 
@@ -289,7 +299,7 @@ The length of the `offsets` array is one larger than the length of the array its
 
 However, the `offsets` does not need to start at `0` or stop at `len(content)`.
 
-```{code-cell} ipython3
+```{code-cell} python3
 ak.Array(
     ak.contents.ListOffsetArray(
         ak.index.Index64(np.array([1, 3, 3, 4])),
@@ -309,10 +319,10 @@ As with all non-leaf Content nodes, arbitrarily deep nested lists can be built b
 
 For example, here is an array of 5 lists, whose length is approximately 20 each.
 
-```{code-cell} ipython3
+```{code-cell} python3
 layout = ak.contents.ListOffsetArray(
     ak.index.Index64(np.array([0, 18, 42, 59, 83, 100])),
-    ak.contents.NumpyArray(np.arange(100))
+    ak.contents.NumpyArray(np.arange(100)),
 )
 array = ak.Array(layout)
 array[0], array[1], array[2], array[3], array[4]
@@ -320,7 +330,7 @@ array[0], array[1], array[2], array[3], array[4]
 
 Making an array of 3 lists that contains these 5 lists requires us to make indexes that go up to 5, not 100.
 
-```{code-cell} ipython3
+```{code-cell} python3
 array = ak.Array(
     ak.contents.ListOffsetArray(
         ak.index.Index64(np.array([0, 3, 3, 5])),
@@ -348,48 +358,113 @@ The {class}`ak.contents.NumpyArray` must be directly nested within the list-type
 
 Here is an example of a raw bytestring:
 
-```{code-cell} ipython3
+```{code-cell} python3
 ak.Array(
     ak.contents.ListOffsetArray(
         ak.index.Index64(np.array([0, 3, 8, 11, 15])),
         ak.contents.NumpyArray(
-            np.array([104, 101, 121, 116, 104, 101, 114, 101, 121, 111, 117, 103, 117, 121, 115], np.uint8),
-            parameters={"__array__": "byte"}
+            np.array(
+                [
+                    104,
+                    101,
+                    121,
+                    116,
+                    104,
+                    101,
+                    114,
+                    101,
+                    121,
+                    111,
+                    117,
+                    103,
+                    117,
+                    121,
+                    115,
+                ],
+                np.uint8,
+            ),
+            parameters={"__array__": "byte"},
         ),
-        parameters={"__array__": "bytestring"}
+        parameters={"__array__": "bytestring"},
     )
 )
 ```
 
 And here is an example of a Unicode-encoded string (UTF-8):
 
-```{code-cell} ipython3
+```{code-cell} python3
 ak.Array(
     ak.contents.ListOffsetArray(
         ak.index.Index64(np.array([0, 3, 12, 15, 19])),
         ak.contents.NumpyArray(
-            np.array([104, 101, 121, 226, 128, 148, 226, 128, 148, 226, 128, 148, 121, 111, 117, 103, 117, 121, 115], np.uint8),
-            parameters={"__array__": "char"}
+            np.array(
+                [
+                    104,
+                    101,
+                    121,
+                    226,
+                    128,
+                    148,
+                    226,
+                    128,
+                    148,
+                    226,
+                    128,
+                    148,
+                    121,
+                    111,
+                    117,
+                    103,
+                    117,
+                    121,
+                    115,
+                ],
+                np.uint8,
+            ),
+            parameters={"__array__": "char"},
         ),
-        parameters={"__array__": "string"}
+        parameters={"__array__": "string"},
     )
 )
 ```
 
 As with any other lists, strings can be nested within lists. Only the {class}`ak.contents.RegularArray`/{class}`ak.contents.ListArray`/{class}`ak.contents.ListOffsetArray` corresponding to the strings should have the `"__array__": "string"` or `"bytestring"` parameter.
 
-```{code-cell} ipython3
+```{code-cell} python3
 ak.Array(
     ak.contents.ListOffsetArray(
         ak.index.Index64([0, 2, 4]),
         ak.contents.ListOffsetArray(
             ak.index.Index64(np.array([0, 3, 12, 15, 19])),
             ak.contents.NumpyArray(
-                np.array([104, 101, 121, 226, 128, 148, 226, 128, 148, 226, 128, 148, 121, 111, 117, 103, 117, 121, 115], np.uint8),
-                parameters={"__array__": "char"}
+                np.array(
+                    [
+                        104,
+                        101,
+                        121,
+                        226,
+                        128,
+                        148,
+                        226,
+                        128,
+                        148,
+                        226,
+                        128,
+                        148,
+                        121,
+                        111,
+                        117,
+                        103,
+                        117,
+                        121,
+                        115,
+                    ],
+                    np.uint8,
+                ),
+                parameters={"__array__": "char"},
             ),
-            parameters={"__array__": "string"}
-        )
+            parameters={"__array__": "string"},
+        ),
     )
 )
 ```
@@ -405,7 +480,7 @@ RecordArrays have no {class}`ak.index.Index`-valued properties; they may be thou
 
 RecordArray fields are ordered and provided as an ordered list of `contents` and field names (the `recordlookup`).
 
-```{code-cell} ipython3
+```{code-cell} python3
 layout = ak.contents.RecordArray(
     [
         ak.from_iter([1.1, 2.2, 3.3, 4.4, 5.5], highlevel=False),
@@ -419,17 +494,17 @@ layout = ak.contents.RecordArray(
 layout
 ```
 
-```{code-cell} ipython3
+```{code-cell} python3
 ak.Array(layout)
 ```
 
-```{code-cell} ipython3
+```{code-cell} python3
 ak.to_list(layout)
 ```
 
 RecordArray fields do not need to have names. If the `recordlookup` is `None`, the RecordArray is interpreted as an array of tuples. (The word "tuple," in statically typed environments, usually means a fixed-length type in which each element may be a different type.)
 
-```{code-cell} ipython3
+```{code-cell} python3
 layout = ak.contents.RecordArray(
     [
         ak.from_iter([1.1, 2.2, 3.3, 4.4, 5.5], highlevel=False),
@@ -440,38 +515,42 @@ layout = ak.contents.RecordArray(
 layout
 ```
 
-```{code-cell} ipython3
+```{code-cell} python3
 ak.Array(layout)
 ```
 
-```{code-cell} ipython3
+```{code-cell} python3
 ak.to_list(layout)
 ```
 
 Since the RecordArray node holds an array for each of its fields, it is possible for these arrays to have different lengths. In such a case, the length of the RecordArray can be given explicitly or it is taken to be the length of the shortest field-array.
 
-```{code-cell} ipython3
+```{code-cell} python3
 content0 = ak.contents.NumpyArray(np.array([1, 2, 3, 4, 5, 6, 7, 8]))
 content1 = ak.contents.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5]))
-content2 = ak.from_iter([[1], [1, 2], [1, 2, 3], [3, 2, 1], [3, 2], [3]], highlevel=False)
+content2 = ak.from_iter(
+    [[1], [1, 2], [1, 2, 3], [3, 2, 1], [3, 2], [3]], highlevel=False
+)
 print(f"{len(content0) = }, {len(content1) = }, {len(content2) = }")
 
 layout = ak.contents.RecordArray([content0, content1, content2], ["x", "y", "z"])
 print(f"{len(layout) = }")
 ```
 
-```{code-cell} ipython3
-layout = ak.contents.RecordArray([content0, content1, content2], ["x", "y", "z"], length=3)
+```{code-cell} python3
+layout = ak.contents.RecordArray(
+    [content0, content1, content2], ["x", "y", "z"], length=3
+)
 print(f"{len(layout) = }")
 ```
 
 RecordArrays are also allowed to have zero fields. This is an unusual case, but it is one that allows a RecordArray to be a leaf node (like {class}`ak.contents.EmptyArray` and {class}`ak.contents.NumpyArray`). If a RecordArray has no fields, a length _must_ be given.
 
-```{code-cell} ipython3
+```{code-cell} python3
 ak.Array(ak.contents.RecordArray([], [], length=5))
 ```
 
-```{code-cell} ipython3
+```{code-cell} python3
 ak.Array(ak.contents.RecordArray([], None, length=5))
 ```
 
@@ -480,7 +559,7 @@ Scalar Records
 
 An {class}`ak.contents.RecordArray` is an _array_ of records. Just as you can extract a scalar number from an array of numbers, you can extract a scalar record. Unlike numbers, records may still be sliced in some ways like Awkward Arrays:
 
-```{code-cell} ipython3
+```{code-cell} python3
 array = ak.Array(
     ak.contents.RecordArray(
         [
@@ -497,7 +576,7 @@ record = array[2]
 record
 ```
 
-```{code-cell} ipython3
+```{code-cell} python3
 record["y", -1]
 ```
 
@@ -505,13 +584,13 @@ Therefore, we need an {class}`ak.record.Record` type, but this Record is not an 
 
 Due to the columnar orientation of Awkward Array, a RecordArray does not contain Records, a Record contains a RecordArray.
 
-```{code-cell} ipython3
+```{code-cell} python3
 record.layout
 ```
 
 It can be built by passing a RecordArray as its first argument and the item of interest in its second argument.
 
-```{code-cell} ipython3
+```{code-cell} python3
 layout = ak.record.Record(
     ak.contents.RecordArray(
         [
@@ -523,9 +602,9 @@ layout = ak.record.Record(
             "y",
         ],
     ),
-    2
+    2,
 )
-record = ak.Record(layout)   # note the high-level ak.Record, rather than ak.Array
+record = ak.Record(layout)  # note the high-level ak.Record, rather than ak.Array
 record
 ```
 
@@ -536,7 +615,7 @@ The records discussed so far are generic. Naming a record not only makes it easi
 
 A name is given to an {class}`ak.contents.RecordArray` node through its "`__record__`" parameter.
 
-```{code-cell} ipython3
+```{code-cell} python3
 layout = ak.contents.RecordArray(
     [
         ak.from_iter([1.1, 2.2, 3.3, 4.4, 5.5], highlevel=False),
@@ -546,41 +625,43 @@ layout = ak.contents.RecordArray(
         "x",
         "y",
     ],
-    parameters={"__record__": "Special"}
+    parameters={"__record__": "Special"},
 )
 layout
 ```
 
-```{code-cell} ipython3
+```{code-cell} python3
 ak.Array(layout)
 ```
 
-```{code-cell} ipython3
+```{code-cell} python3
 ak.type(layout)
 ```
 
 Behavioral overloads are presented in more depth in {data}`ak.behavior`, but here are three examples:
 
-```{code-cell} ipython3
+```{code-cell} python3
 ak.behavior[np.sqrt, "Special"] = lambda special: np.sqrt(special.x)
 
 np.sqrt(ak.Array(layout))
 ```
 
-```{code-cell} ipython3
+```{code-cell} python3
 class SpecialRecord(ak.Record):
     def len_y(self):
         return len(self.y)
+
 
 ak.behavior["Special"] = SpecialRecord
 
 ak.Record(layout[2]).len_y()
 ```
 
-```{code-cell} ipython3
+```{code-cell} python3
 class SpecialArray(ak.Array):
     def len_y(self):
         return ak.num(self.y)
+
 
 ak.behavior["*", "Special"] = SpecialArray
 
@@ -592,7 +673,7 @@ Content >: IndexedArray
 
 {class}`ak.contents.IndexedArray` is the only Content node that has exactly the same type as its `content`. An IndexedArray rearranges the elements of its `content`, as though it were a lazily applied array-slice.
 
-```{code-cell} ipython3
+```{code-cell} python3
 layout = ak.contents.IndexedArray(
     ak.index.Index64(np.array([2, 0, 0, 1, 2])),
     ak.contents.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3])),
@@ -600,7 +681,7 @@ layout = ak.contents.IndexedArray(
 layout
 ```
 
-```{code-cell} ipython3
+```{code-cell} python3
 ak.Array(layout)
 ```
 
@@ -610,7 +691,7 @@ IndexedArrays are used as an optimization when performing some operations on {cl
 
 For example, slicing the following `recordarray` by `[3, 2, 4, 4, 1, 0, 3]` does not affect any of the RecordArray's fields.
 
-```{code-cell} ipython3
+```{code-cell} python3
 recordarray = ak.contents.RecordArray(
     [
         ak.from_iter([1.1, 2.2, 3.3, 4.4, 5.5], highlevel=False),
@@ -621,7 +702,7 @@ recordarray = ak.contents.RecordArray(
 recordarray
 ```
 
-```{code-cell} ipython3
+```{code-cell} python3
 recordarray[[3, 2, 4, 4, 1, 0, 3]]
 ```
 
@@ -630,11 +711,11 @@ Categorical data
 
 IndexedArrays, with the `"__array__": "categorical"` parameter, can represent categorical data (sometimes called dictionary-encoding).
 
-```{code-cell} ipython3
+```{code-cell} python3
 layout = ak.contents.IndexedArray(
     ak.index.Index64(np.array([2, 2, 1, 4, 0, 5, 3, 3, 0, 1])),
     ak.from_iter(["zero", "one", "two", "three", "four", "five"], highlevel=False),
-    parameters={"__array__": "categorical"}
+    parameters={"__array__": "categorical"},
 )
 ak.to_list(layout)
 ```
@@ -654,7 +735,7 @@ Content >: IndexedOptionArray
 
 {class}`ak.contents.IndexedOptionArray` is an {class}`ak.contents.IndexedArray` in which negative values in the `index` are interpreted as missing. Since it has an `index`, the `content` does not need to have "dummy values" at each index of a missing value. It is therefore more compact for record-type data with many missing values, but {class}`ak.contents.ByteMaskedArray` and especially {class}`ak.contents.BitMaskedArray` are more compact for numerical data or data without many missing values.
 
-```{code-cell} ipython3
+```{code-cell} python3
 layout = ak.contents.IndexedOptionArray(
     ak.index.Index64(np.array([2, -1, 0, -1, -1, 1, 2])),
     ak.contents.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3])),
@@ -662,7 +743,7 @@ layout = ak.contents.IndexedOptionArray(
 layout
 ```
 
-```{code-cell} ipython3
+```{code-cell} python3
 ak.Array(layout)
 ```
 
@@ -677,7 +758,7 @@ Content >: ByteMaskedArray
 
 {class}`ak.contents.ByteMaskedArray` is most similar to NumPy's [masked arrays](https://numpy.org/doc/stable/reference/maskedarray.html), except that Awkward ByteMaskedArrays can contain any data type and variable-length structures. The `valid_when` parameter lets you choose whether `True` means an element is valid (not masked/not `None`) or `False` means an element is valid.
 
-```{code-cell} ipython3
+```{code-cell} python3
 layout = ak.contents.ByteMaskedArray(
     ak.index.Index8(np.array([False, False, True, True, False, True, False], np.int8)),
     ak.contents.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
@@ -686,7 +767,7 @@ layout = ak.contents.ByteMaskedArray(
 layout
 ```
 
-```{code-cell} ipython3
+```{code-cell} python3
 ak.Array(layout)
 ```
 
@@ -699,9 +780,11 @@ Content >: BitMaskedArray
 
 Since bits always come in groups of at least 8, an explicit `length` must be supplied to the constructor. Also, `lsb_order=True` or `False` determines whether the bytes are interpreted [least-significant bit](https://en.wikipedia.org/wiki/Bit_numbering#Least_significant_bit) first or [most-significant bit](https://en.wikipedia.org/wiki/Bit_numbering#Most_significant_bit) first, respectively.
 
-```{code-cell} ipython3
+```{code-cell} python3
 layout = ak.contents.BitMaskedArray(
-    ak.index.IndexU8(np.packbits(np.array([False, False, True, True, False, True, False], np.uint8))),
+    ak.index.IndexU8(
+        np.packbits(np.array([False, False, True, True, False, True, False], np.uint8))
+    ),
     ak.contents.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
     valid_when=False,
     length=7,
@@ -710,13 +793,13 @@ layout = ak.contents.BitMaskedArray(
 layout
 ```
 
-```{code-cell} ipython3
+```{code-cell} python3
 ak.Array(layout)
 ```
 
 Changing only the `lsb_order` changes the interpretation in important ways!
 
-```{code-cell} ipython3
+```{code-cell} python3
 ak.Array(
     ak.contents.BitMaskedArray(
         layout.mask,
@@ -733,20 +816,20 @@ Content >: UnmaskedArray
 
 {class}`ak.contents.UnmaskedArray` describes formally missing data, but in a case in which no data are actually missing. It is a corner case of the four nodes that allow for missing data ({class}`ak.contents.IndexedOptionArray`, {class}`ak.contents.ByteMaskedArray`, {class}`ak.contents.BitMaskedArray`, and {class}`ak.contents.UnmaskedArray`). Missing data is also known as "[option type](https://en.wikipedia.org/wiki/Option_type)" (denoted by a question mark `?` or the word `option` in type strings).
 
-```{code-cell} ipython3
+```{code-cell} python3
 layout = ak.contents.UnmaskedArray(
     ak.contents.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5]))
 )
 layout
 ```
 
-```{code-cell} ipython3
+```{code-cell} python3
 ak.Array(layout)
 ```
 
 The only distinguishing feature of an UnmaskedArray is the question mark `?` or `option` in its type.
 
-```{code-cell} ipython3
+```{code-cell} python3
 ak.type(layout)
 ```
 
@@ -767,39 +850,69 @@ Although the ability to make arrays with mixed data type is very expressive, not
 
 Awkward Array's UnionArray is equivalent to Apache Arrow's [dense union](https://arrow.apache.org/docs/format/Columnar.html#dense-union). Awkward Array has no counterpart for Apache Arrow's [sparse union](https://arrow.apache.org/docs/format/Columnar.html#sparse-union) (which has no `index`). {func}`ak.from_arrow` generates an `index` on demand when reading sparse union from Arrow.
 
-```{code-cell} ipython3
+```{code-cell} python3
 layout = ak.contents.UnionArray(
-    ak.index.Index8( np.array([0, 1, 2, 0, 0, 1, 1, 2, 2, 0], np.int8)),
+    ak.index.Index8(np.array([0, 1, 2, 0, 0, 1, 1, 2, 2, 0], np.int8)),
     ak.index.Index64(np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])),
     [
-        ak.contents.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])),
-        ak.from_iter([[], [1], [1, 2], [1, 2, 3], [1, 2, 3, 4], [1, 2, 3, 4, 5], [6], [6, 7], [6, 7, 8], [6, 7, 8, 9]], highlevel=False),
-        ak.from_iter(["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"], highlevel=False)
-    ]
+        ak.contents.NumpyArray(
+            np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
+        ),
+        ak.from_iter(
+            [
+                [],
+                [1],
+                [1, 2],
+                [1, 2, 3],
+                [1, 2, 3, 4],
+                [1, 2, 3, 4, 5],
+                [6],
+                [6, 7],
+                [6, 7, 8],
+                [6, 7, 8, 9],
+            ],
+            highlevel=False,
+        ),
+        ak.from_iter(
+            [
+                "zero",
+                "one",
+                "two",
+                "three",
+                "four",
+                "five",
+                "six",
+                "seven",
+                "eight",
+                "nine",
+            ],
+            highlevel=False,
+        ),
+    ],
 )
 layout
 ```
 
-```{code-cell} ipython3
+```{code-cell} python3
 ak.to_list(layout)
 ```
 
 The `index` can be used to prevent the need to set up "dummy values" for all contents other than the one specified by a given tag. The above example could thus be more compact with the following (no unreachable data):
 
-```{code-cell} ipython3
+```{code-cell} python3
 layout = ak.contents.UnionArray(
-    ak.index.Index8( np.array([0, 1, 2, 0, 0, 1, 1, 2, 2, 0], np.int8)),
+    ak.index.Index8(np.array([0, 1, 2, 0, 0, 1, 1, 2, 2, 0], np.int8)),
     ak.index.Index64(np.array([0, 0, 0, 1, 2, 1, 2, 1, 2, 3])),
     [
         ak.contents.NumpyArray(np.array([0.0, 3.3, 4.4, 9.9])),
         ak.from_iter([[1], [1, 2, 3, 4, 5], [6]], highlevel=False),
-        ak.from_iter(["two", "seven", "eight"], highlevel=False)
-    ]
+        ak.from_iter(["two", "seven", "eight"], highlevel=False),
+    ],
 )
 layout
 ```
 
-```{code-cell} ipython3
+```{code-cell} python3
 ak.to_list(layout)
 ```
 
@@ -816,17 +929,17 @@ The {func}`ak.from_buffers` builds arrays using the above constructors, but the 
 
 Every {class}`ak.contents.Content` subclass has a corresponding {class}`ak.forms.Form`, and you can see a layout's Form through its `form` property.
 
-```{code-cell} ipython3
+```{code-cell} python3
 array = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
 array.layout
 ```
 
-```{code-cell} ipython3
+```{code-cell} python3
 # Abbreviated JSON representation
 array.layout.form
 ```
 
-```{code-cell} ipython3
+```{code-cell} python3
 # Full JSON representation
 print(array.layout.form.to_json())
 ```

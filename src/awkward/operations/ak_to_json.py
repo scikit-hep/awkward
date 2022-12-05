@@ -29,7 +29,7 @@ def to_json(
 ):
     """
     Args:
-        array: Data to convert to JSON.
+        array: Array-like data (anything #ak.to_layout recognizes).
         file (None, str/pathlib.Path, or file-like object): If None, this function returns
             JSON-encoded bytes. Otherwise, this function has no return value.
             If a string/pathlib.Path, this function opens a file with that name, writes JSON
@@ -40,7 +40,7 @@ def to_json(
         line_delimited (bool or str): If False, a single JSON document is written,
             representing the entire array or record. If True, each element of the
             array (or just the one record) is written on a separate line of text,
-            separated by `"\n"`. If a string, such as `"\r\n"`, it is taken as a
+            separated by `"\\n"`. If a string, such as `"\\r\\n"`, it is taken as a
             custom line delimiter. (Use `os.linesep` for a platform-dependent
             line delimiter.)
         num_indent_spaces (None or nonnegative int): Number of spaces to indent nested
@@ -74,7 +74,7 @@ def to_json(
     `convert_other`), then uses `json.dumps` to return a string or `json.dump`
     to write to a file (depending on the value of `file`).
 
-    If `line_delimited` is True or a line-delimiter string like `"\r\n"`/`os.linesep`,
+    If `line_delimited` is True or a line-delimiter string like `"\\r\\n"`/`os.linesep`,
     the output is line-delimited JSON, variously referred to as "ldjson", "ndjson", and
     "jsonl". (Use an appropriate file extension!)
 
@@ -83,17 +83,16 @@ def to_json(
 
     Awkward Array types have the following JSON translations.
 
-       * #ak.types.PrimitiveType: converted into JSON booleans and numbers.
-       * #ak.types.OptionType: missing values are converted into None.
-       * #ak.types.ListType: converted into JSON lists.
-       * #ak.types.RegularType: also converted into JSON lists. JSON (and
-         Python) forms lose information about the regularity of list lengths.
-       * #ak.types.ListType or #ak.types.RegularType with parameter `"__array__"`
-         equal to `"string"`: converted into JSON strings.
-       * #ak.types.RecordArray without field names: converted into JSON
-         objects with numbers as strings for keys.
-       * #ak.types.RecordArray with field names: converted into JSON objects.
-       * #ak.types.UnionArray: JSON data are naturally heterogeneous.
+    * #ak.types.OptionType: missing values are converted into None.
+    * #ak.types.ListType: converted into JSON lists.
+    * #ak.types.RegularType: also converted into JSON lists. JSON (and
+      Python) forms lose information about the regularity of list lengths.
+    * #ak.types.ListType or #ak.types.RegularType with parameter `"__array__"`
+      equal to `"string"`: converted into JSON strings.
+    * #ak.types.RecordType without field names: converted into JSON
+      objects with numbers as strings for keys.
+    * #ak.types.RecordType with field names: converted into JSON objects.
+    * #ak.types.UnionType: JSON data are naturally heterogeneous.
 
     If the array contains any NaN (not a number), infinite values, or
     imaginary/complex types, `nan_string`, `posinf_string`, and/or `neginf_string`

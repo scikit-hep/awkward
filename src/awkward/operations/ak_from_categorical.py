@@ -6,7 +6,7 @@ import awkward as ak
 def from_categorical(array, *, highlevel=True, behavior=None):
     """
     Args:
-        array: Awkward Array from which to remove the 'categorical' parameter.
+        array: Array-like data (anything #ak.to_layout recognizes).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if

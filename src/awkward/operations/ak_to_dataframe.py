@@ -12,7 +12,7 @@ def to_dataframe(
 ):
     """
     Args:
-        array: Data to convert into one or more Pandas DataFrames.
+        array: Array-like data (anything #ak.to_layout recognizes).
         how (None or str): Passed to
             [pd.merge](https://pandas.pydata.org/pandas-docs/version/1.0.3/reference/api/pandas.merge.html)
             to combine DataFrames for each multiplicity into one DataFrame. If

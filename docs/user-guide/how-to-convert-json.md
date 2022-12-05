@@ -16,7 +16,7 @@ How to convert to/from JSON
 
 Any JSON data can be converted to Awkward Arrays and any Awkward Arrays can be converted to JSON. Awkward type information, such as the distinction between fixed-size and variable-length lists, is lost in the transformation to JSON, however.
 
-```{code-cell} ipython3
+```{code-cell} python3
 import awkward as ak
 import pathlib
 ```
@@ -28,23 +28,23 @@ The function for JSON → Awkward conversion is {func}`ak.from_json`.
 
 It can be given a JSON string:
 
-```{code-cell} ipython3
+```{code-cell} python3
 ak.from_json("[[1.1, 2.2, 3.3], [], [4.4, 5.5]]")
 ```
 
 or a file name:
 
-```{code-cell} ipython3
+```{code-cell} python3
 !echo "[[1.1, 2.2, 3.3], [], [4.4, 5.5]]" > /tmp/awkward-example-1.json
 ```
 
-```{code-cell} ipython3
+```{code-cell} python3
 ak.from_json(pathlib.Path("/tmp/awkward-example-1.json"))
 ```
 
 If the dataset contains a single JSON object, an {class}`ak.Record` is returned, rather than an {class}`ak.Array`.
 
-```{code-cell} ipython3
+```{code-cell} python3
 ak.from_json('{"x": 1, "y": [1, 2], "z": "hello"}')
 ```
 
@@ -55,17 +55,17 @@ The function for Awkward → JSON conversion is {func}`ak.to_json`.
 
 With one argument, it returns a string.
 
-```{code-cell} ipython3
+```{code-cell} python3
 ak.to_json(ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]))
 ```
 
 But if a `destination` is given, it is taken to be a filename for output.
 
-```{code-cell} ipython3
+```{code-cell} python3
 ak.to_json(ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]), "/tmp/awkward-example-2.json")
 ```
 
-```{code-cell} ipython3
+```{code-cell} python3
 !cat /tmp/awkward-example-2.json
 ```
 

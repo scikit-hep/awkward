@@ -6,7 +6,7 @@ import awkward as ak
 def categories(array, highlevel=True):
     """
     Args:
-        array: A possibly-categorical Awkward Array.
+        array: Array-like data (anything #ak.to_layout recognizes).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
 

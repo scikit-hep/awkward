@@ -40,13 +40,10 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         with_name (None or str): Gives tuples and records a name that can be
             used to override their behavior (see below).
         check_valid (bool): If True, verify that the #layout is valid.
-        backend (None, `"cpu"`, or `"cuda"`): If `"cpu"`, the Array will be placed in
+        backend (None, `"cpu"`, `"jax"`, `"cuda"`): If `"cpu"`, the Array will be placed in
             main memory for use with other `"cpu"` Arrays and Records; if `"cuda"`,
-            the Array will be placed in GPU global memory using CUDA; if None,
-            the `data` are left untouched. For `"cuda"`,
-            [awkward-cuda-kernels](https://pypi.org/project/awkward-cuda-kernels)
-            must be installed, which can be invoked with
-            `pip install awkward[cuda] --upgrade`.
+            the Array will be placed in GPU global memory using CUDA; if `"jax"`, the structure
+            is copied to the CPU for use with JAX. if None, the `data` are left untouched.
 
     High-level array that can contain data of any type.
 
@@ -275,11 +272,10 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         arrays that have the same logical meaning (i.e. same JSON output and
         high-level #type) but different
 
-           * node types, such as #ak.contents.ListArray and
+        * node types, such as #ak.contents.ListArray and
              #ak.contents.ListOffsetArray,
-           * integer type specialization, such as #ak.contents.ListArray
-             and #ak.contents.ListArray,
-           * or specific values, such as gaps in a #ak.contents.ListArray.
+        * integer type specialization, such as `int64` vs `int32`
+        * or specific values, such as gaps in a #ak.contents.ListArray.
 
         The #ak.contents.Content elements are fully composable, whereas an
         Array is not; the high-level Array is a single-layer "shell" around
@@ -296,14 +292,14 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         but `array.layout` is presented as
 
-            <ListOffsetArray64>
+            <ListOffsetArray>
                 <offsets>
                     <Index64 i="[0 3 3 5]" offset="0" length="4" at="0x55a26df62590"/>
                 </offsets>
                 <content>
                     <NumpyArray format="d" shape="5" data="1.1 2.2 3.3 4.4 5.5" at="0x55a26e0c5f50"/>
                 </content>
-            </ListOffsetArray64>
+            </ListOffsetArray>
 
         (with truncation for large arrays).
         """
@@ -324,14 +320,14 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         """
         The `behavior` parameter passed into this Array's constructor.
 
-           * If a dict, this `behavior` overrides the global #ak.behavior.
+        * If a dict, this `behavior` overrides the global #ak.behavior.
              Any keys in the global #ak.behavior but not this `behavior` are
              still valid, but any keys in both are overridden by this
              `behavior`. Keys with a None value are equivalent to missing keys,
              so this `behavior` can effectively remove keys from the
              global #ak.behavior.
 
-           * If None, the Array defaults to the global #ak.behavior.
+        * If None, the Array defaults to the global #ak.behavior.
 
         See #ak.behavior for a list of recognized key patterns and their
         meanings.
@@ -404,8 +400,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         It does not count buffers that must be kept in memory because
         of ownership, but are not directly used in the array. Nor does it count
-        the (small) C++ nodes or Python objects that reference the (large)
-        array buffers.
+        the (small) Python objects that reference the (large) array buffers.
         """
         return self._layout.nbytes
 
@@ -569,65 +564,65 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         The `where` parameter can be any of the following or a tuple of
         the following.
 
-           * **An integer** selects one element. Like Python/NumPy, it is
-             zero-indexed: `0` is the first item, `1` is the second, etc.
-             Negative indexes count from the end of the list: `-1` is the
-             last, `-2` is the second-to-last, etc.
-             Indexes beyond the size of the array, either because they're too
-             large or because they're too negative, raise errors. In
-             particular, some nested lists might contain a desired element
-             while others don't; this would raise an error.
-           * **A slice** (either a Python `slice` object or the
-             `start:stop:step` syntax) selects a range of elements. The
-             `start` and `stop` values are zero-indexed; `start` is inclusive
-             and `stop` is exclusive, like Python/NumPy. Negative `step`
-             values are allowed, but a `step` of `0` is an error. Slices
-             beyond the size of the array are not errors but are truncated,
-             like Python/NumPy.
-           * **A string** selects a tuple or record field, even if its
-             position in the tuple is to the left of the dimension where the
-             tuple/record is defined. (See <<projection>> below.) This is
-             similar to NumPy's
-             [field access](https://docs.scipy.org/doc/numpy/reference/arrays.indexing.html#field-access),
-             except that strings are allowed in the same tuple with other
-             slice types. While record fields have names, tuple fields are
-             integer strings, such as `"0"`, `"1"`, `"2"` (always
-             non-negative). Be careful to distinguish these from non-string
-             integers.
-           * **An iterable of strings** (not the top-level tuple) selects
-             multiple tuple/record fields.
-           * **An ellipsis** (either the Python `Ellipsis` object or the
-             `...` syntax) skips as many dimensions as needed to put the
-             rest of the slice items to the innermost dimensions.
-           * **A np.newaxis** or its equivalent, None, does not select items
-             but introduces a new regular dimension in the output with size
-             `1`. This is a convenient way to explicitly choose a dimension
-             for broadcasting.
-           * **A boolean array** with the same length as the current dimension
-             (or any iterable, other than the top-level tuple) selects elements
-             corresponding to each True value in the array, dropping those
-             that correspond to each False. The behavior is similar to
-             NumPy's
-             [compress](https://docs.scipy.org/doc/numpy/reference/generated/numpy.compress.html)
-             function.
-           * **An integer array** (or any iterable, other than the top-level
-             tuple) selects elements like a single integer, but produces a
-             regular dimension of as many as are desired. The array can have
-             any length, any order, and it can have duplicates and incomplete
-             coverage. The behavior is similar to NumPy's
-             [take](https://docs.scipy.org/doc/numpy/reference/generated/numpy.take.html)
-             function.
-           * **An integer Array with missing (None) items** selects multiple
-             values by index, as above, but None values are passed through
-             to the output. This behavior matches pyarrow's
-             [Array.take](https://arrow.apache.org/docs/python/generated/pyarrow.Array.html#pyarrow.Array.take)
-             which also manages arrays with missing values. See
-             <<option indexing>> below.
-           * **An Array of nested lists**, ultimately containing booleans or
-             integers and having the same lengths of lists at each level as
-             the Array to which they're applied, selects by boolean or by
-             integer at the deeply nested level. Missing items at any level
-             above the deepest level must broadcast. See <<nested indexing>> below.
+        * **An integer** selects one element. Like Python/NumPy, it is
+          zero-indexed: `0` is the first item, `1` is the second, etc.
+          Negative indexes count from the end of the list: `-1` is the
+          last, `-2` is the second-to-last, etc.
+          Indexes beyond the size of the array, either because they're too
+          large or because they're too negative, raise errors. In
+          particular, some nested lists might contain a desired element
+          while others don't; this would raise an error.
+        * **A slice** (either a Python `slice` object or the
+          `start:stop:step` syntax) selects a range of elements. The
+          `start` and `stop` values are zero-indexed; `start` is inclusive
+          and `stop` is exclusive, like Python/NumPy. Negative `step`
+          values are allowed, but a `step` of `0` is an error. Slices
+          beyond the size of the array are not errors but are truncated,
+          like Python/NumPy.
+        * **A string** selects a tuple or record field, even if its
+          position in the tuple is to the left of the dimension where the
+          tuple/record is defined. (See <<projection>> below.) This is
+          similar to NumPy's
+          [field access](https://docs.scipy.org/doc/numpy/reference/arrays.indexing.html#field-access),
+          except that strings are allowed in the same tuple with other
+          slice types. While record fields have names, tuple fields are
+          integer strings, such as `"0"`, `"1"`, `"2"` (always
+          non-negative). Be careful to distinguish these from non-string
+          integers.
+        * **An iterable of strings** (not the top-level tuple) selects
+          multiple tuple/record fields.
+        * **An ellipsis** (either the Python `Ellipsis` object or the
+          `...` syntax) skips as many dimensions as needed to put the
+          rest of the slice items to the innermost dimensions.
+        * **A np.newaxis** or its equivalent, None, does not select items
+          but introduces a new regular dimension in the output with size
+          `1`. This is a convenient way to explicitly choose a dimension
+          for broadcasting.
+        * **A boolean array** with the same length as the current dimension
+          (or any iterable, other than the top-level tuple) selects elements
+          corresponding to each True value in the array, dropping those
+          that correspond to each False. The behavior is similar to
+          NumPy's
+          [compress](https://docs.scipy.org/doc/numpy/reference/generated/numpy.compress.html)
+          function.
+        * **An integer array** (or any iterable, other than the top-level
+          tuple) selects elements like a single integer, but produces a
+          regular dimension of as many as are desired. The array can have
+          any length, any order, and it can have duplicates and incomplete
+          coverage. The behavior is similar to NumPy's
+          [take](https://docs.scipy.org/doc/numpy/reference/generated/numpy.take.html)
+          function.
+        * **An integer Array with missing (None) items** selects multiple
+          values by index, as above, but None values are passed through
+          to the output. This behavior matches pyarrow's
+          [Array.take](https://arrow.apache.org/docs/python/generated/pyarrow.Array.html#pyarrow.Array.take)
+          which also manages arrays with missing values. See
+          <<option indexing>> below.
+        * **An Array of nested lists**, ultimately containing booleans or
+          integers and having the same lengths of lists at each level as
+          the Array to which they're applied, selects by boolean or by
+          integer at the deeply nested level. Missing items at any level
+          above the deepest level must broadcast. See <<nested indexing>> below.
 
         A tuple of the above applies each slice item to a dimension of the
         data, which can be very expressive. More than one flat boolean/integer
@@ -1088,10 +1083,10 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         Fields can't be accessed as attributes when
 
-           * #ak.Array methods or properties take precedence,
-           * a domain-specific behavior has methods or properties that take
+        * #ak.Array methods or properties take precedence,
+        * a domain-specific behavior has methods or properties that take
              precedence, or
-           * the field name is not a valid Python identifier or is a Python
+        * the field name is not a valid Python identifier or is a Python
              keyword.
 
         Note that while fields can be accessed as attributes, they cannot be
@@ -1478,13 +1473,10 @@ class Record(NDArrayOperatorsMixin):
         with_name (None or str): Gives the record type a name that can be
             used to override its behavior (see below).
         check_valid (bool): If True, verify that the #layout is valid.
-        kernels (None, `"cpu"`, or `"cuda"`): If `"cpu"`, the Record will be placed in
+        backend (None, `"cpu"`, `"jax"`, `"cuda"`): If `"cpu"`, the Array will be placed in
             main memory for use with other `"cpu"` Arrays and Records; if `"cuda"`,
-            the Record will be placed in GPU global memory using CUDA; if None,
-            the `data` are left untouched. For `"cuda"`,
-            [awkward-cuda-kernels](https://pypi.org/project/awkward-cuda-kernels)
-            must be installed, which can be invoked with
-            `pip install awkward[cuda] --upgrade`.
+            the Array will be placed in GPU global memory using CUDA; if `"jax"`, the structure
+            is copied to the CPU for use with JAX. if None, the `data` are left untouched.
 
     High-level record that can contain fields of any type.
 
@@ -1564,9 +1556,7 @@ class Record(NDArrayOperatorsMixin):
         See #ak.Array.layout for a more complete description.
 
         The #ak.record.Record is not a subclass of #ak.contents.Content in
-        Python (note: [Record](../_static/classawkward_1_1Record.html) *is* a
-        subclass of [Content](../_static/classawkward_1_1Content.html) in
-        C++!) and it is not composable with them: #ak.record.Record contains
+        Python and it is not composable with them: #ak.record.Record contains
         one #ak.contents.RecordArray (which is a #ak.contents.Content), but
         #ak.contents.Content nodes cannot contain a #ak.record.Record.
 
@@ -1610,14 +1600,14 @@ class Record(NDArrayOperatorsMixin):
         """
         The `behavior` parameter passed into this Record's constructor.
 
-           * If a dict, this `behavior` overrides the global #ak.behavior.
+        * If a dict, this `behavior` overrides the global #ak.behavior.
              Any keys in the global #ak.behavior but not this `behavior` are
              still valid, but any keys in both are overridden by this
              `behavior`. Keys with a None value are equivalent to missing keys,
              so this `behavior` can effectively remove keys from the
              global #ak.behavior.
 
-           * If None, the Record defaults to the global #ak.behavior.
+        * If None, the Record defaults to the global #ak.behavior.
 
         See #ak.behavior for a list of recognized key patterns and their
         meanings.
@@ -1654,7 +1644,7 @@ class Record(NDArrayOperatorsMixin):
 
         It does not count buffers that must be kept in memory because
         of ownership, but are not directly used in the array. Nor does it count
-        the (small) C++ nodes or Python objects that reference the (large)
+        the (small) Python objects that reference the (large)
         array buffers.
         """
         return self._layout.nbytes
@@ -1821,10 +1811,10 @@ class Record(NDArrayOperatorsMixin):
 
         Fields can't be accessed as attributes when
 
-           * #ak.Record methods or properties take precedence,
-           * a domain-specific behavior has methods or properties that take
+        * #ak.Record methods or properties take precedence,
+        * a domain-specific behavior has methods or properties that take
              precedence, or
-           * the field name is not a valid Python identifier or is a Python
+        * the field name is not a valid Python identifier or is a Python
              keyword.
         """
         if hasattr(type(self), where):
@@ -2103,9 +2093,9 @@ class ArrayBuilder(Sized):
         behavior (None or dict): Custom #ak.behavior for arrays built by
             this ArrayBuilder.
         initial (int): Initial size (in bytes) of buffers used by the
-            [ak::ArrayBuilder](_static/classawkward_1_1ArrayBuilder.html).
+            [ak::ArrayBuilder](../_static/doxygen/classawkward_1_1ArrayBuilder.html).
         resize (float): Resize multiplier for buffers used by the
-            [ak::ArrayBuilder](_static/classawkward_1_1ArrayBuilder.html);
+            [ak::ArrayBuilder](../_static/doxygen/classawkward_1_1ArrayBuilder.html);
             should be strictly greater than 1.
 
     General tool for building arrays of nested data structures from a sequence
@@ -2149,32 +2139,32 @@ class ArrayBuilder(Sized):
 
     The full set of filling commands is the following.
 
-       * #null: appends a None value.
-       * #boolean: appends True or False.
-       * #integer: appends an integer.
-       * #real: appends a floating-point value.
-       * #complex: appends a complex value.
-       * #datetime: appends a datetime value.
-       * #timedelta: appends a timedelta value.
-       * #bytestring: appends an unencoded string (raw bytes).
-       * #string: appends a UTF-8 encoded string.
-       * #begin_list: begins filling a list; must be closed with #end_list.
-       * #end_list: ends a list.
-       * #begin_tuple: begins filling a tuple; must be closed with #end_tuple.
-       * #index: selects a tuple slot to fill; must be followed by a command
+    * #null: appends a None value.
+    * #boolean: appends True or False.
+    * #integer: appends an integer.
+    * #real: appends a floating-point value.
+    * #complex: appends a complex value.
+    * #datetime: appends a datetime value.
+    * #timedelta: appends a timedelta value.
+    * #bytestring: appends an unencoded string (raw bytes).
+    * #string: appends a UTF-8 encoded string.
+    * #begin_list: begins filling a list; must be closed with #end_list.
+    * #end_list: ends a list.
+    * #begin_tuple: begins filling a tuple; must be closed with #end_tuple.
+    * #index: selects a tuple slot to fill; must be followed by a command
          that actually fills that slot.
-       * #end_tuple: ends a tuple.
-       * #begin_record: begins filling a record; must be closed with
+    * #end_tuple: ends a tuple.
+    * #begin_record: begins filling a record; must be closed with
          #end_record.
-       * #field: selects a record field to fill; must be followed by a command
+    * #field: selects a record field to fill; must be followed by a command
          that actually fills that field.
-       * #end_record: ends a record.
-       * #append: generic method for filling #null, #boolean, #integer, #real,
+    * #end_record: ends a record.
+    * #append: generic method for filling #null, #boolean, #integer, #real,
          #bytestring, #string, #ak.Array, #ak.Record, or arbitrary Python data.
-       * #extend: appends all the items from an iterable.
-       * #list: context manager for #begin_list and #end_list.
-       * #tuple: context manager for #begin_tuple and #end_tuple.
-       * #record: context manager for #begin_record and #end_record.
+    * #extend: appends all the items from an iterable.
+    * #list: context manager for #begin_list and #end_list.
+    * #tuple: context manager for #begin_tuple and #end_tuple.
+    * #record: context manager for #begin_record and #end_record.
 
     ArrayBuilders can be used in [Numba](http://numba.pydata.org/): they can
     be passed as arguments to a Numba-compiled function or returned as return
@@ -2249,14 +2239,14 @@ class ArrayBuilder(Sized):
         """
         The `behavior` parameter passed into this ArrayBuilder's constructor.
 
-           * If a dict, this `behavior` overrides the global #ak.behavior.
+        * If a dict, this `behavior` overrides the global #ak.behavior.
              Any keys in the global #ak.behavior but not this `behavior` are
              still valid, but any keys in both are overridden by this
              `behavior`. Keys with a None value are equivalent to missing keys,
              so this `behavior` can effectively remove keys from the
              global #ak.behavior.
 
-           * If None, the Array defaults to the global #ak.behavior.
+        * If None, the Array defaults to the global #ak.behavior.
 
         See #ak.behavior for a list of recognized key patterns and their
         meanings.
