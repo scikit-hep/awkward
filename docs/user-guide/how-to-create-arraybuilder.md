@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.14.0
+    jupytext_version: 1.14.1
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -47,7 +47,7 @@ builder
 ```
 
 ```{code-cell} python3
-builder.append(3+1j)
+builder.append(3 + 1j)
 builder
 ```
 
@@ -76,7 +76,7 @@ builder = ak.ArrayBuilder()
 builder.boolean(False)
 builder.integer(1)
 builder.real(2.2)
-builder.complex(3+1j)
+builder.complex(3 + 1j)
 builder.null()
 builder.string("five")
 builder
@@ -156,6 +156,7 @@ def arbitrary_nesting(builder, depth):
         builder.begin_list()
         arbitrary_nesting(builder, depth - 1)
         builder.end_list()
+
 
 builder = ak.ArrayBuilder()
 arbitrary_nesting(builder, 5)
@@ -327,6 +328,7 @@ Therefore, a common pattern is:
 ```{code-cell} python3
 import numba as nb
 
+
 @nb.jit
 def build(builder):
     builder.begin_list()
@@ -341,6 +343,7 @@ def build(builder):
     builder.append(5.5)
     builder.end_list()
     return builder
+
 
 array = build(ak.ArrayBuilder()).snapshot()
 array

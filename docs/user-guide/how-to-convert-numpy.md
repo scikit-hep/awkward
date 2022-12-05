@@ -162,7 +162,9 @@ NumPy's structured arrays
 [NumPy's structured arrays](https://numpy.org/doc/stable/user/basics.rec.html) correspond to Awkward's "record type."
 
 ```{code-cell} python3
-np_array = np.array([(1, 1.1), (2, 2.2), (3, 3.3), (4, 4.4), (5, 5.5)], dtype=[("x", int), ("y", float)])
+np_array = np.array(
+    [(1, 1.1), (2, 2.2), (3, 3.3), (4, 4.4), (5, 5.5)], dtype=[("x", int), ("y", float)]
+)
 np_array
 ```
 
@@ -217,7 +219,9 @@ NumPy's masked arrays
 [NumPy's masked arrays](https://numpy.org/doc/stable/reference/maskedarray.generic.html) correspond to Awkward's "option type."
 
 ```{code-cell} python3
-np_array = np.ma.MaskedArray([[1, 2, 3], [4, 5, 6]], mask=[[False, True, False], [True, True, False]])
+np_array = np.ma.MaskedArray(
+    [[1, 2, 3], [4, 5, 6]], mask=[[False, True, False], [True, True, False]]
+)
 np_array
 ```
 

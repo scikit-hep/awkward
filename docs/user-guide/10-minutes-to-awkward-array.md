@@ -38,7 +38,9 @@ Given that this file is so large, let's first look at the *metadata* with `ak.me
 import numpy as np
 import awkward as ak
 
-metadata = ak.metadata_from_parquet("https://pivarski-princeton.s3.amazonaws.com/chicago-taxi.parquet")
+metadata = ak.metadata_from_parquet(
+    "https://pivarski-princeton.s3.amazonaws.com/chicago-taxi.parquet"
+)
 ```
 
 Of particular interest here is the `num_row_groups` value. Parquet has the concept of *row groups*: contiguous rows of data in the file, and the smallest granularity that can be read.
@@ -46,7 +48,7 @@ Of particular interest here is the `num_row_groups` value. Parquet has the conce
 We can also look at the `type` of the data to see the structure of the dataset:
 
 ```{code-cell} python3
-metadata['form'].type.show()
+metadata["form"].type.show()
 ```
 
 There are a lot of different columns here (`trip.sec`, `trip.begin.lon`, `trip.payment.fare`, etc.). For this example, we only want a small subset of them. Additionally, we don't need to load *all* of the data, as we are only interested in a representative sample. Let's use `ak.from_parquet` with the `row_groups` argument to read (download) only a single group, and the `columns` argument to read only the necessary columns.
@@ -127,21 +129,15 @@ Clearly, these two arrays have _different_ dimensions. When we add them together
 
 ```{code-cell} python3
 x = np.array([1, 2, 3])
-y = np.array([
-    [4, 5, 6],
-    [7, 8, 9]
-])
+y = np.array([[4, 5, 6], [7, 8, 9]])
 np.broadcast_arrays(x, y)
 ```
 
 In Awkward, broadcasting aligns *to the left* by default, which means that length-1 dimensions are added *to the end* of the shape:
 
 ```{code-cell} python3
-x = ak.Array([1, 2]) # note the missing 3!
-y = ak.Array([
-    [4, 5, 6],
-    [7, 8, 9]
-])
+x = ak.Array([1, 2])  # note the missing 3!
+y = ak.Array([[4, 5, 6], [7, 8, 9]])
 ak.broadcast_arrays(x, y)
 ```
 
@@ -216,7 +212,7 @@ trip_longest = trip[ix_length[:3]]
 ```{code-cell} python3
 lat_lon_taxi_75 = ak.concatenate(
     (trip_longest.path.lat[..., np.newaxis], trip_longest.path.lon[..., np.newaxis]),
-    axis=-1
+    axis=-1,
 )
 ```
 
@@ -234,13 +230,10 @@ import ipyleaflet as ipl
 map_taxi_75 = ipl.Map(
     basemap=ipl.basemap_to_tiles(ipl.basemaps.CartoDB.Voyager, "2022-04-08"),
     center=(41.8921, -87.6623),
-    zoom=11
+    zoom=11,
 )
 for route in lat_lon_taxi_75:
-    path = ipl.AntPath(
-        locations=route.to_list(),
-        delay=1000
-    )
+    path = ipl.AntPath(locations=route.to_list(), delay=1000)
     map_taxi_75.add_layer(path)
 map_taxi_75
 ```

@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.14.0
+    jupytext_version: 1.14.1
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -29,11 +29,13 @@ From Awkward to buffers
 Consider the following complex array:
 
 ```{code-cell} python3
-ak_array = ak.Array([
-    [{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}, {"x": 3.3, "y": [1, 2, 3]}],
-    [],
-    [{"x": 4.4, "y": [1, 2, 3, 4]}, {"x": 5.5, "y": [1, 2, 3, 4, 5]}],
-])
+ak_array = ak.Array(
+    [
+        [{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}, {"x": 3.3, "y": [1, 2, 3]}],
+        [],
+        [{"x": 4.4, "y": [1, 2, 3, 4]}, {"x": 5.5, "y": [1, 2, 3, 4, 5]}],
+    ]
+)
 ak_array
 ```
 
@@ -90,9 +92,7 @@ unpacked = ak.Array(
     ak.contents.ListArray(
         ak.index.Index64(np.array([4, 10, 1])),
         ak.index.Index64(np.array([7, 10, 3])),
-        ak.contents.NumpyArray(
-            np.array([999, 4.4, 5.5, 999, 1.1, 2.2, 3.3, 999])
-        )
+        ak.contents.NumpyArray(np.array([999, 4.4, 5.5, 999, 1.1, 2.2, 3.3, 999])),
     )
 )
 unpacked
@@ -170,7 +170,7 @@ group.attrs["form"]
 ```
 
 ```{code-cell} python3
-group.attrs["length"] = json.dumps(length)   # JSON-encode it because it might be a list
+group.attrs["length"] = json.dumps(length)  # JSON-encode it because it might be a list
 group.attrs["length"]
 ```
 

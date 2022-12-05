@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.14.0
+    jupytext_version: 1.14.1
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -51,12 +51,14 @@ That is to say, an array of records is not a mapping from one type to another, s
 If you _try_ to mix field types in {func}`ak.from_iter` (ultimately from {class}`ak.ArrayBuilder`), the union of all sets of fields will be assumed, and any that aren't filled in every item will be presumed "missing."
 
 ```{code-cell} python3
-array = ak.Array([
-    {"a": 1, "b": 1, "c": 1},
-    {"b": 2, "c": 2},
-    {"c": 3, "d": 3, "e": 3, "f": 3},
-    {"c": 4},
-])
+array = ak.Array(
+    [
+        {"a": 1, "b": 1, "c": 1},
+        {"b": 2, "c": 2},
+        {"c": 3, "d": 3, "e": 3, "f": 3},
+        {"c": 4},
+    ]
+)
 array
 ```
 
@@ -66,14 +68,26 @@ From a single dict of columns
 If a _single dict_ is passed to {class}`ak.Array`, it will be interpreted as a set of columns, like [Pandas's DataFrame](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html) constructor. This is to provide a familiar interface to Pandas users.
 
 ```{code-cell} python3
-from_columns = ak.Array({"x": [1, 2, 3, 4, 5], "y": [1.1, 2.2, 3.3, 4.4, 5.5], "z": ["one", "two", "three", "four", "five"]})
+from_columns = ak.Array(
+    {
+        "x": [1, 2, 3, 4, 5],
+        "y": [1.1, 2.2, 3.3, 4.4, 5.5],
+        "z": ["one", "two", "three", "four", "five"],
+    }
+)
 from_columns
 ```
 
 This is _not_ the same as calling {func}`ak.from_iter` on the same input, which could not be a valid {class}`ak.Array` because a single dict would be an {class}`ak.Record`.
 
 ```{code-cell} python3
-from_rows = ak.from_iter({"x": [1, 2, 3, 4, 5], "y": [1.1, 2.2, 3.3, 4.4, 5.5], "z": ["one", "two", "three", "four", "five"]})
+from_rows = ak.from_iter(
+    {
+        "x": [1, 2, 3, 4, 5],
+        "y": [1.1, 2.2, 3.3, 4.4, 5.5],
+        "z": ["one", "two", "three", "four", "five"],
+    }
+)
 from_rows
 ```
 
@@ -83,7 +97,13 @@ Using ak.zip
 The {func}`ak.zip` function combines columns into an array of records, similar to the Pandas-style constructor described above.
 
 ```{code-cell} python3
-from_columns = ak.zip({"x": [1, 2, 3, 4, 5], "y": [1.1, 2.2, 3.3, 4.4, 5.5], "z": ["one", "two", "three", "four", "five"]})
+from_columns = ak.zip(
+    {
+        "x": [1, 2, 3, 4, 5],
+        "y": [1.1, 2.2, 3.3, 4.4, 5.5],
+        "z": ["one", "two", "three", "four", "five"],
+    }
+)
 from_columns
 ```
 
@@ -92,14 +112,24 @@ The difference is that {func}`ak.zip` attempts to nested lists deeply, up to a `
 Given columns with nested lists:
 
 ```{code-cell} python3
-zipped = ak.zip({"x": ak.Array([[1, 2, 3], [], [4, 5]]), "y": ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])})
+zipped = ak.zip(
+    {
+        "x": ak.Array([[1, 2, 3], [], [4, 5]]),
+        "y": ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]),
+    }
+)
 zipped
 ```
 
 By contrast, the same input to {class}`ak.Array`'s Pandas-style constructor keeps nested lists separate.
 
 ```{code-cell} python3
-not_zipped = ak.Array({"x": ak.Array([[1, 2, 3], [], [4, 5]]), "y": ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])})
+not_zipped = ak.Array(
+    {
+        "x": ak.Array([[1, 2, 3], [], [4, 5]]),
+        "y": ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]),
+    }
+)
 not_zipped
 ```
 
@@ -113,7 +143,9 @@ not_zipped.type.show()
 Also, {func}`ak.zip` can build records without field names, also known as "tuples."
 
 ```{code-cell} python3
-tuples = ak.zip((ak.Array([[1, 2, 3], [], [4, 5]]), ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])))
+tuples = ak.zip(
+    (ak.Array([[1, 2, 3], [], [4, 5]]), ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]))
+)
 tuples
 ```
 
@@ -136,13 +168,16 @@ Record names
 In addition to optional field names, record types can also have names.
 
 ```{code-cell} python3
-ak.Array([
-    {"x": 1, "y": 1.1},
-    {"x": 2, "y": 2.2},
-    {"x": 3, "y": 3.3},
-    {"x": 4, "y": 4.4},
-    {"x": 5, "y": 5.5},
-], with_name="XYZ")
+ak.Array(
+    [
+        {"x": 1, "y": 1.1},
+        {"x": 2, "y": 2.2},
+        {"x": 3, "y": 3.3},
+        {"x": 4, "y": 4.4},
+        {"x": 5, "y": 5.5},
+    ],
+    with_name="XYZ",
+)
 ```
 
 ```{code-cell} python3
@@ -153,7 +188,9 @@ ak.zip(
 ```
 
 ```{code-cell} python3
-ak.cartesian({"L": ak.Array([1, 2, 3]), "R": ak.Array(["a", "b"])}, with_name="LeftRight", axis=0)
+ak.cartesian(
+    {"L": ak.Array([1, 2, 3]), "R": ak.Array(["a", "b"])}, with_name="LeftRight", axis=0
+)
 ```
 
 Names are for giving records [specialized behavior](how-to-specialize) through the {data}`ak.behavior` registry. These are like attaching methods to a class in the sense that all records with a particular name can be given Python properties and methods.
@@ -163,22 +200,27 @@ class XYZRecord(ak.Record):
     def __repr__(self):
         return f"(X={self.x}:Y={self.y})"
 
+
 class XYZArray(ak.Array):
     def diff(self):
         return abs(self.x - self.y)
+
 
 ak.behavior["XYZ"] = XYZRecord
 ak.behavior["*", "XYZ"] = XYZArray
 ak.behavior["__typestr__", "XYZ"] = "XYZ"
 ak.behavior[np.sqrt, "XYZ"] = lambda xyz: np.sqrt(xyz.x)
 
-array = ak.Array([
-    {"x": 1, "y": 1.1},
-    {"x": 2, "y": 2.2},
-    {"x": 3, "y": 3.3},
-    {"x": 4, "y": 4.4},
-    {"x": 5, "y": 5.5},
-], with_name="XYZ")
+array = ak.Array(
+    [
+        {"x": 1, "y": 1.1},
+        {"x": 2, "y": 2.2},
+        {"x": 3, "y": 3.3},
+        {"x": 4, "y": 4.4},
+        {"x": 5, "y": 5.5},
+    ],
+    with_name="XYZ",
+)
 array
 ```
 
@@ -269,6 +311,7 @@ def fill_A(builder, use_name):
         builder.field("x").append(len(builder))
         builder.field("y").append(len(builder) * 1.1)
 
+
 def fill_B(builder, use_name):
     with builder.record("B" if use_name else None):
         builder.field("y").append(len(builder) * 1.1)
@@ -338,12 +381,14 @@ def append_record(builder, i):
     builder.field("y").append(i * 1.1)
     builder.end_record()
 
+
 @nb.jit
 def example(builder):
     append_record(builder, 1)
     append_record(builder, 2)
     append_record(builder, 3)
     return builder
+
 
 builder = example(ak.ArrayBuilder())
 
@@ -363,6 +408,7 @@ def faster_example():
     x[2] = 3
     y[2] = 3.3
     return x, y
+
 
 array = ak.zip(dict(zip(["x", "y"], faster_example())))
 array
