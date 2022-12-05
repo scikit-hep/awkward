@@ -19,6 +19,8 @@ def is_tuple(array):
 
 
 def _impl(array):
-    layout = ak.to_layout(array, allow_record=True)
+    layout = ak.operations.ak_to_layout._impl(
+        array, allow_record=True, allow_other=False
+    )
 
     return layout.is_tuple

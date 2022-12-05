@@ -11,13 +11,7 @@ np = ak._nplikes.NumpyMetadata.instance()
 numpy = ak._nplikes.Numpy.instance()
 
 
-def to_layout(
-    array,
-    *,
-    allow_record=True,
-    allow_other=False,
-    numpytype=(np.number, np.bool_, np.str_, np.bytes_, np.datetime64, np.timedelta64),
-):
+def to_layout(array, *, allow_record=True, allow_other=False):
     """
     Args:
         array: Array-like data. May be a high level #ak.Array, #ak.Record (if `allow_record`),
@@ -29,7 +23,6 @@ def to_layout(
             otherwise, if the output would be a scalar record, raise an error.
         allow_other (bool): If True, allow non-Awkward outputs; otherwise,
             if the output would be another type, raise an error.
-        numpytype (tuple of NumPy types): Dtypes to allow from NumPy arrays.
 
     Converts `array` (many types supported, including all Awkward Arrays and
     Records) into a #ak.contents.Content and maybe #ak.record.Record or
@@ -41,17 +34,12 @@ def to_layout(
     """
     with _errors.OperationErrorContext(
         "ak.to_layout",
-        dict(
-            array=array,
-            allow_record=allow_record,
-            allow_other=allow_other,
-            numpytype=numpytype,
-        ),
+        dict(array=array, allow_record=allow_record, allow_other=allow_other),
     ):
-        return _impl(array, allow_record, allow_other, numpytype)
+        return _impl(array, allow_record, allow_other)
 
 
-def _impl(array, allow_record, allow_other, numpytype):
+def _impl(array, allow_record, allow_other):
     if isinstance(array, ak.contents.Content):
         return array
 
@@ -81,35 +69,26 @@ def _impl(array, allow_record, allow_other, numpytype):
         return array.snapshot()
 
     elif numpy.is_own_array(array):
-        if not issubclass(array.dtype.type, numpytype):
-            raise _errors.wrap_error(ValueError(f"dtype {array.dtype!r} not allowed"))
         return _impl(
             ak.operations.from_numpy(
                 array, regulararray=True, recordarray=True, highlevel=False
             ),
             allow_record,
             allow_other,
-            numpytype,
         )
 
     elif ak._nplikes.Cupy.is_own_array(array):
-        if not issubclass(array.dtype.type, numpytype):
-            raise _errors.wrap_error(ValueError(f"dtype {array.dtype!r} not allowed"))
         return _impl(
             ak.operations.from_cupy(array, regulararray=True, highlevel=False),
             allow_record,
             allow_other,
-            numpytype,
         )
 
     elif ak._nplikes.Jax.is_own_array(array):
-        if not issubclass(array.dtype.type, numpytype):
-            raise _errors.wrap_error(ValueError(f"dtype {array.dtype!r} not allowed"))
         return _impl(
             ak.operations.from_jax(array, regulararray=True, highlevel=False),
             allow_record,
             allow_other,
-            numpytype,
         )
 
     elif ak._typetracer.TypeTracer.is_own_array(array):
@@ -132,7 +111,6 @@ def _impl(array, allow_record, allow_other, numpytype):
             ak.operations.from_iter([array], highlevel=False),
             allow_record,
             allow_other,
-            numpytype,
         )
 
     elif isinstance(array, Iterable):
@@ -140,7 +118,6 @@ def _impl(array, allow_record, allow_other, numpytype):
             ak.operations.from_iter(array, highlevel=False),
             allow_record,
             allow_other,
-            numpytype,
         )
 
     elif not allow_other:

@@ -1377,7 +1377,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         See also #__array_ufunc__.
         """
-        return ak._connect.numpy.array_function(func, types, args, kwargs)
+        return ak._connect.numpy.array_function(
+            func, types, args, kwargs, behavior=self._behavior
+        )
 
     @property
     def numba_type(self):
