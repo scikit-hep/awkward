@@ -11,8 +11,7 @@ def argsort(
 ):
     """
     Args:
-        array: Data for which to get a sorting index, possibly within nested
-            lists.
+        array: Array-like data (anything #ak.to_layout recognizes).
         axis (int): The dimension at which this operation is applied. The
             outermost dimension is `0`, followed by `1`, etc., and negative
             values count backward from the innermost: `-1` is the innermost
@@ -28,6 +27,9 @@ def argsort(
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
+
+    Returns an array of integer indexes that would sort the array if applied
+    as an integer-array slice.
 
     For example,
 

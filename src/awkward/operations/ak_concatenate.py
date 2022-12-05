@@ -11,7 +11,7 @@ cpu = ak._backends.NumpyBackend.instance()
 def concatenate(arrays, axis=0, *, mergebool=True, highlevel=True, behavior=None):
     """
     Args:
-        arrays: Arrays to concatenate along any dimension.
+        arrays: Array-like data (anything #ak.to_layout recognizes).
         axis (int): The dimension at which this operation is applied. The
             outermost dimension is `0`, followed by `1`, etc., and negative
             values count backward from the innermost: `-1` is the innermost

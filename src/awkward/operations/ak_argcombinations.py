@@ -19,7 +19,7 @@ def argcombinations(
 ):
     """
     Args:
-        array: Array from which to choose `n` items without replacement.
+        array: Array-like data (anything #ak.to_layout recognizes).
         n (int): The number of items to choose from each list: `2` chooses
             unique pairs, `3` chooses unique triples, etc.
         replacement (bool): If True, combinations that include the same
@@ -39,6 +39,8 @@ def argcombinations(
             (overriding `parameters`, if necessary).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
     Computes a Cartesian product (i.e. cross product) of `array` with itself
     that is restricted to combinations sampled without replacement,

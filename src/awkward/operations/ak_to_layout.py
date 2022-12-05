@@ -14,8 +14,11 @@ numpy = ak._nplikes.Numpy.instance()
 def to_layout(array, *, allow_record=True, allow_other=False):
     """
     Args:
-        array: Data to convert into a low-level #ak.contents.Content layout
-            or maybe #ak.record.Record, its record equivalent, or other types.
+        array: Array-like data. May be a high level #ak.Array, #ak.Record (if `allow_record`),
+            #ak.ArrayBuilder, or low-level #ak.contents.Content, #ak.record.Record (if `allow_record`),
+            or a supported backend array (NumPy `ndarray`, CuPy `ndarray`,
+            JAX DeviceArray), dataless TypeTracer, or an arbitrary Python
+            iterable (for #ak.from_iter to convert).
         allow_record (bool): If True, allow #ak.record.Record as an output;
             otherwise, if the output would be a scalar record, raise an error.
         allow_other (bool): If True, allow non-Awkward outputs; otherwise,

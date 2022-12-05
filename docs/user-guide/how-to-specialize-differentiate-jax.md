@@ -28,6 +28,7 @@ Before using JAX on functions which deal with Awkward Arrays we need to configur
 
 ```{code-cell}
 import jax
+
 jax.config.update("jax_platform_name", "cpu")
 ```
 
@@ -63,9 +64,7 @@ tangent = ak.Array([[0.0, 0.0, 0.0], [], [0.0, 1.0]], backend="jax")
 ```
 
 ```{code-cell}
-value_jvp, jvp_grad = jax.jvp(
-    reverse_sum, (array,), (tangent,)
-)
+value_jvp, jvp_grad = jax.jvp(reverse_sum, (array,), (tangent,))
 ```
 
 {func}`jax.jvp` returns both the value of `reverse_sum` evaluated at `array`:

@@ -11,16 +11,15 @@ def zip(
     *,
     parameters=None,
     with_name=None,
-    highlevel=True,
-    behavior=None,
     right_broadcast=False,
     optiontype_outside_record=False,
+    highlevel=True,
+    behavior=None,
 ):
     """
     Args:
-        arrays (dict or iterable of arrays): Arrays to combine into a
-            record-containing structure (if a dict) or a tuple-containing
-            structure (if any other kind of iterable).
+        arrays (dict or iterable of arrays): Each value in this dict or iterable
+            can be any array-like data that #ak.to_layout recognizes.
         depth_limit (None or int): If None, attempt to fully broadcast the
             `array` to all levels. If an int, limit the number of dimensions
             that get broadcasted. The minimum value is `1`, for no
@@ -30,14 +29,14 @@ def zip(
         with_name (None or str): Assigns a `"__record__"` name to the new
             #ak.contents.RecordArray node that is created by this operation
             (overriding `parameters`, if necessary).
-        highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.contents.Content subclass.
-        behavior (None or dict): Custom #ak.behavior for the output array, if
-            high-level.
         right_broadcast (bool): If True, follow rules for implicit
             right-broadcasting, as described in #ak.broadcast_arrays.
         optiontype_outside_record (bool): If True, continue broadcasting past
             any option types before creating the new #ak.contents.RecordArray node.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.contents.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
     Combines `arrays` into a single structure as the fields of a collection
     of records or the slots of a collection of tuples. If the `arrays` have
@@ -131,10 +130,10 @@ def zip(
             depth_limit=depth_limit,
             parameters=parameters,
             with_name=with_name,
-            highlevel=highlevel,
-            behavior=behavior,
             right_broadcast=right_broadcast,
             optiontype_outside_record=optiontype_outside_record,
+            highlevel=highlevel,
+            behavior=behavior,
         ),
     ):
         return _impl(
@@ -142,10 +141,10 @@ def zip(
             depth_limit,
             parameters,
             with_name,
-            highlevel,
-            behavior,
             right_broadcast,
             optiontype_outside_record,
+            highlevel,
+            behavior,
         )
 
 
@@ -154,10 +153,10 @@ def _impl(
     depth_limit,
     parameters,
     with_name,
-    highlevel,
-    behavior,
     right_broadcast,
     optiontype_outside_record,
+    highlevel,
+    behavior,
 ):
     if depth_limit is not None and depth_limit <= 0:
         raise ak._errors.wrap_error(

@@ -8,7 +8,7 @@ np = ak._nplikes.NumpyMetadata.instance()
 def is_none(array, axis=0, *, highlevel=True, behavior=None):
     """
     Args:
-        array: Data to check for missing values (None).
+        array: Array-like data (anything #ak.to_layout recognizes).
         axis (int): The dimension at which this operation is applied. The
             outermost dimension is `0`, followed by `1`, etc., and negative
             values count backward from the innermost: `-1` is the innermost

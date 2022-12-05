@@ -29,11 +29,11 @@ def from_numpy(
 
     The resulting layout can only involve the following #ak.contents.Content types:
 
-       * #ak.contents.NumpyArray
-       * #ak.contents.ByteMaskedArray or #ak.contents.UnmaskedArray if the
-         `array` is an np.ma.MaskedArray.
-       * #ak.contents.RegularArray if `regulararray=True`.
-       * #ak.contents.RecordArray if `recordarray=True`.
+    * #ak.contents.NumpyArray
+    * #ak.contents.ByteMaskedArray or #ak.contents.UnmaskedArray if the
+      `array` is an np.ma.MaskedArray.
+    * #ak.contents.RegularArray if `regulararray=True`.
+    * #ak.contents.RecordArray if `recordarray=True`.
 
     See also #ak.to_numpy and #ak.from_cupy.
     """

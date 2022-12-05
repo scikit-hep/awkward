@@ -8,8 +8,8 @@ import awkward as ak
 def to_rdataframe(arrays, *, flatlist_as_rvec=True):
     """
     Args:
-        arrays (dict of str \u2192 arrays): A dictionary of Array-like data (anything
-            #ak.to_layout recognizes). All of these arrays must have the same length.
+        arrays (dict of arrays): Each value in this dict can be any array-like data
+            that #ak.to_layout recognizes, but they must all have the same length.
         flatlist_as_rvec (bool): If True, lists of primitive types (numbers, booleans, etc.)
             are presented to C++ as `ROOT::RVec<primitive>`, but all other types use
             Awkward Array's custom C++ classes. If False, even these "flat" lists use

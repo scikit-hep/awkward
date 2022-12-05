@@ -27,11 +27,10 @@ def transform(
     Args:
         transformation (callable): Function to apply to each node of the array.
             See below for details.
-        array: First (and possibly only) array to be transformed. Can be any
-            array-like object that #ak.to_layout recognizes, but not an
-            #ak.Record.
-        more_arrays: Arrays to be broadcasted together (with first `array`) and
-            used together in the transformation. See below for details.
+        array: Array-like data (anything #ak.to_layout recognizes), but not an
+            #ak.Record or #ak.record.Record.
+        more_arrays: Additional arrays to be broadcasted together (with first `array`)
+            and used together in the transformation. See below for details.
         depth_context (None or dict): User data to propagate through the transformation.
             New data added to `depth_context` is available to the entire *subtree*
             at which it is added, but no other *subtrees*. For example, data added
@@ -60,6 +59,10 @@ def transform(
             calling `transformation`.
         regular_to_jagged (bool): If True, regular-type lists are converted into
             variable-length lists before calling `transformation`.
+        return_array (bool): If True, the result of calling `transformation`
+            replaces the original node in the new layout that is returned.
+            If False, the `transformation` function is expected to return
+            any results by modifying the `lateral_context` dict.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
@@ -148,27 +151,27 @@ def transform(
     All other arguments can be absorbed into a `**kwargs` because they will always
     be passed to your function by keyword. They are
 
-       * depth (int): The current list depth, where 1 is the outermost array and
-           higher numbers are deeper levels of list nesting. This does not count
-           nesting of other data structures, such as option-types and records.
-       * depth_context (None or dict): Any user-specified data. You can add to
-           this dict during transformation; changes would only be seen in the
-           subtree's nodes.
-       * lateral_context (None or dict): Any user-specified data. You can add to
-           this dict during transformation; changes would be seen in any node
-           visited later in the depth-first search.
-       * continuation (callable): Zero-argument function that continues the
-           recursion from this point in the walk, so that you can perform
-           post-processing instead of pre-processing.
+    * depth (int): The current list depth, where 1 is the outermost array and
+        higher numbers are deeper levels of list nesting. This does not count
+        nesting of other data structures, such as option-types and records.
+    * depth_context (None or dict): Any user-specified data. You can add to
+        this dict during transformation; changes would only be seen in the
+        subtree's nodes.
+    * lateral_context (None or dict): Any user-specified data. You can add to
+        this dict during transformation; changes would be seen in any node
+        visited later in the depth-first search.
+    * continuation (callable): Zero-argument function that continues the
+        recursion from this point in the walk, so that you can perform
+        post-processing instead of pre-processing.
 
     For completeness, the following arguments are also passed to `transformation`,
     but you usually won't need them:
 
-       * behavior (None or dict): Behavior that would be attached to the output
-           array(s) if `highlevel`.
-       * backend (array library / kernel library shim): Handle to the NumPy
-           library, CuPy, etc., depending on the type of arrays.
-       * options (dict): Options provided to #ak.transform.
+    * behavior (None or dict): Behavior that would be attached to the output
+        array(s) if `highlevel`.
+    * backend (array library / kernel library shim): Handle to the NumPy
+        library, CuPy, etc., depending on the type of arrays.
+    * options (dict): Options provided to #ak.transform.
 
     If there is only one array, the `transformation` function must either return
     None or return an #ak.contents.Content.

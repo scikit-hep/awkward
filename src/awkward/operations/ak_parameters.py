@@ -12,6 +12,9 @@ np = ak._nplikes.NumpyMetadata.instance()
 
 def parameters(array):
     """
+    Args:
+        array: Array-like data (anything #ak.to_layout recognizes).
+
     Extracts parameters from the outermost array node of `array` (many types
     supported, including all Awkward Arrays and Records).
 
@@ -41,7 +44,7 @@ def _impl(array):
         return _copy(array.parameters)
 
     elif isinstance(array, ak.highlevel.ArrayBuilder):
-        form = ak.forms.from_json(array._layout.form())
+        form = ak.forms.from_json(array.layout.form())
         return form.parameters
 
     elif isinstance(array, _ext.ArrayBuilder):
