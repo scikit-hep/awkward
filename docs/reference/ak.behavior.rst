@@ -549,11 +549,11 @@ want the string to be taken as an object. That is fixed (in
 
 .. code-block:: python
 
-    def _string_broadcast(layout, offsets):
-        # layout:  an ak.layout.Content object
-        # offsets: an ak.layout.Index of offsets to match
+    def _string_broadcast(array, offsets):
+        # array:  an ak.Array object
+        # offsets: an ak.Array of offsets to match
         # 
-        # should return: an ak.layout.Content object of the broadcasted result
+        # should return: an ak.layout.Content or ak.Array object of the broadcasted result
         ...
 
     awkward.behavior["__broadcast__", "string"] = _string_broadcast
