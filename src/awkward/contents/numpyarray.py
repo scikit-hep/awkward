@@ -17,6 +17,45 @@ numpy = ak._nplikes.Numpy.instance()
 class NumpyArray(Content):
     is_numpy = True
 
+    def __init__(self, data, *, parameters=None, backend=None):
+        if backend is None:
+            backend = ak._backends.backend_of(
+                data, default=ak._backends.NumpyBackend.instance()
+            )
+        if isinstance(data, ak.index.Index):
+            data = data.data
+        self._data = backend.nplike.asarray(data)
+
+        if not isinstance(backend.nplike, ak._nplikes.Jax):
+            ak.types.numpytype.dtype_to_primitive(self._data.dtype)
+
+        if len(self._data.shape) == 0:
+            raise ak._errors.wrap_error(
+                TypeError(
+                    "{} 'data' must be an array, not a scalar: {}".format(
+                        type(self).__name__, repr(data)
+                    )
+                )
+            )
+
+        if parameters is not None and parameters.get("__array__") in ("char", "byte"):
+            if data.dtype != np.dtype(np.uint8) or len(data.shape) != 1:
+                raise ak._errors.wrap_error(
+                    ValueError(
+                        "{} is a {}, so its 'data' must be 1-dimensional and uint8, not {}".format(
+                            type(self).__name__, parameters["__array__"], repr(data)
+                        )
+                    )
+                )
+
+        self._init(parameters, backend)
+
+    @property
+    def data(self):
+        return self._data
+
+    Form = NumpyForm
+
     def copy(
         self,
         data=unset,
@@ -39,31 +78,9 @@ class NumpyArray(Content):
             parameters=copy.deepcopy(self._parameters, memo),
         )
 
-    def __init__(self, data, *, parameters=None, backend=None):
-        if backend is None:
-            backend = ak._backends.backend_of(
-                data, default=ak._backends.NumpyBackend.instance()
-            )
-        if isinstance(data, ak.index.Index):
-            data = data.data
-        self._data = backend.nplike.asarray(data)
-
-        if not isinstance(backend.nplike, ak._nplikes.Jax):
-            ak.types.numpytype.dtype_to_primitive(self._data.dtype)
-        if len(self._data.shape) == 0:
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} 'data' must be an array, not a scalar: {}".format(
-                        type(self).__name__, repr(data)
-                    )
-                )
-            )
-
-        self._init(parameters, backend)
-
-    @property
-    def data(self):
-        return self._data
+    @classmethod
+    def simplified(cls, data, *, parameters=None, backend=None):
+        return cls(data, parameters=parameters, backend=backend)
 
     @property
     def shape(self):
@@ -98,12 +115,6 @@ class NumpyArray(Content):
 
     def raw(self, nplike):
         return self._backend.nplike.raw(self.data, nplike)
-
-    Form = NumpyForm
-
-    @classmethod
-    def simplified(cls, data, *, parameters=None, backend=None):
-        return cls(data, parameters=parameters, backend=backend)
 
     def _form_with_key(self, getkey):
         return self.Form(
@@ -405,14 +416,14 @@ class NumpyArray(Content):
                 return False
 
             if not matching_dtype and np.datetime64 in (
-                self._data.dtype,
-                other._data.dtype,
+                self._data.dtype.type,
+                other._data.dtype.type,
             ):
                 return False
 
             if not matching_dtype and np.timedelta64 in (
-                self._data.dtype,
-                other._data.dtype,
+                self._data.dtype.type,
+                other._data.dtype.type,
             ):
                 return False
 

@@ -327,6 +327,14 @@ def test_flatten_UnionArray():
     content2 = ak.operations.from_iter(
         [[[3, 3, 3], [3, 3, 3], [3, 3, 3]], [[2, 2], [2, 2]], [[1]]], highlevel=False
     )
+    content3 = ak.operations.from_iter(
+        [
+            [["3", "3", "3"], ["3", "3", "3"], ["3", "3", "3"]],
+            [["2", "2"], ["2", "2"]],
+            [["1"]],
+        ],
+        highlevel=False,
+    )
     tags = ak.index.Index8(np.array([0, 1, 0, 1, 0, 1], dtype=np.int8))
     index = ak.index.Index64(np.array([0, 0, 1, 1, 2, 2], dtype=np.int64))
     array = ak.contents.UnionArray(tags, index, [content1, content2])
@@ -374,36 +382,36 @@ def test_flatten_UnionArray():
         [1],
     ]
 
-    array = ak.contents.UnionArray(tags, index, [content2, content2])
+    array = ak.contents.UnionArray(tags, index, [content2, content3])
 
     assert to_list(array) == [
         [[3, 3, 3], [3, 3, 3], [3, 3, 3]],
-        [[3, 3, 3], [3, 3, 3], [3, 3, 3]],
+        [["3", "3", "3"], ["3", "3", "3"], ["3", "3", "3"]],
         [[2, 2], [2, 2]],
-        [[2, 2], [2, 2]],
+        [["2", "2"], ["2", "2"]],
         [[1]],
-        [[1]],
+        [["1"]],
     ]
     assert ak.operations.to_list(ak.operations.flatten(array, axis=2)) == [
         [3, 3, 3, 3, 3, 3, 3, 3, 3],
-        [3, 3, 3, 3, 3, 3, 3, 3, 3],
+        ["3", "3", "3", "3", "3", "3", "3", "3", "3"],
         [2, 2, 2, 2],
-        [2, 2, 2, 2],
+        ["2", "2", "2", "2"],
         [1],
-        [1],
+        ["1"],
     ]
     assert ak.operations.to_list(ak.operations.flatten(array[1:], axis=2)) == [
-        [3, 3, 3, 3, 3, 3, 3, 3, 3],
+        ["3", "3", "3", "3", "3", "3", "3", "3", "3"],
         [2, 2, 2, 2],
-        [2, 2, 2, 2],
+        ["2", "2", "2", "2"],
         [1],
-        [1],
+        ["1"],
     ]
     assert ak.operations.to_list(ak.operations.flatten(array[:, 1:], axis=2)) == [
         [3, 3, 3, 3, 3, 3],
-        [3, 3, 3, 3, 3, 3],
+        ["3", "3", "3", "3", "3", "3"],
         [2, 2],
-        [2, 2],
+        ["2", "2"],
         [],
         [],
     ]

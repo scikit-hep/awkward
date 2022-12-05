@@ -8,9 +8,7 @@ cpu = ak._backends.NumpyBackend.instance()
 
 
 @ak._connect.numpy.implements("concatenate")
-def concatenate(
-    arrays, axis=0, *, merge=True, mergebool=True, highlevel=True, behavior=None
-):
+def concatenate(arrays, axis=0, *, mergebool=True, highlevel=True, behavior=None):
     """
     Args:
         arrays: Arrays to concatenate along any dimension.
@@ -18,9 +16,6 @@ def concatenate(
             outermost dimension is `0`, followed by `1`, etc., and negative
             values count backward from the innermost: `-1` is the innermost
             dimension, `-2` is the next level up, etc.
-        merge (bool): If True, combine data into the same buffers wherever
-            possible, eliminating unnecessary #ak.contents.UnionArray8_64 types
-            at the expense of materializing #ak.contents.VirtualArray nodes.
         mergebool (bool): If True, boolean and numeric data can be combined
             into the same buffer, losing information about False vs `0` and
             True vs `1`; otherwise, they are kept in separate buffers with
@@ -40,16 +35,15 @@ def concatenate(
         dict(
             arrays=arrays,
             axis=axis,
-            merge=merge,
             mergebool=mergebool,
             highlevel=highlevel,
             behavior=behavior,
         ),
     ):
-        return _impl(arrays, axis, merge, mergebool, highlevel, behavior)
+        return _impl(arrays, axis, mergebool, highlevel, behavior)
 
 
-def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
+def _impl(arrays, axis, mergebool, highlevel, behavior):
     # Simple single-array, axis=0 fast-path
     behavior = ak._util.behavior_of(*arrays, behavior=behavior)
     if (
@@ -115,14 +109,13 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
                 batch = [collapsed.merge_as_union(x)]
 
         out = batch[0].mergemany(batch[1:])
+
         if isinstance(out, ak.contents.UnionArray):
             out = type(out).simplified(
                 out._tags,
                 out._index,
                 out._contents,
                 parameters=out._parameters,
-                backend=out._backend,
-                merge=merge,
                 mergebool=mergebool,
             )
 
@@ -195,7 +188,6 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
                     tags,
                     index,
                     [x._content for x in regulararrays],
-                    merge=merge,
                     mergebool=mergebool,
                 )
 
@@ -249,23 +241,14 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
 
                 offsets = ak.index.Index64(offsets, nplike=backend.index_nplike)
 
-                inner = ak.contents.UnionArray(
-                    ak.index.Index8.empty(
-                        len(offsets) - 1, nplike=backend.index_nplike
-                    ),
-                    ak.index.Index64.empty(
-                        len(offsets) - 1, nplike=backend.index_nplike
-                    ),
-                    all_flatten,
-                )
-
-                tags, index = inner._nested_tags_index(
+                tags, index = ak.contents.UnionArray.nested_tags_index(
                     offsets,
                     [ak.index.Index64(x) for x in all_counts],
+                    backend=backend,
                 )
 
                 inner = ak.contents.UnionArray.simplified(
-                    tags, index, all_flatten, merge=merge, mergebool=mergebool
+                    tags, index, all_flatten, mergebool=mergebool
                 )
 
                 return (ak.contents.ListOffsetArray(offsets, inner),)

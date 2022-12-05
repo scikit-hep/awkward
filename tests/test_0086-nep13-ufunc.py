@@ -162,25 +162,11 @@ def test_listarray():
 
 
 def test_unionarray():
-    one0 = ak.contents.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3], dtype=np.float64))
-    one1 = ak.contents.NumpyArray(np.array([4, 5], dtype=np.int64))
-    onetags = ak.index.Index8(np.array([0, 0, 0, 0, 1, 1], dtype=np.int8))
-    oneindex = ak.index.Index64(np.array([0, 1, 2, 3, 0, 1], dtype=np.int64))
-    one = ak.highlevel.Array(ak.contents.UnionArray(onetags, oneindex, [one0, one1]))
+    one = ak.Array([1, 2, 3, [], [4, 5]])
+    assert np.square(one).tolist() == [1, 4, 9, [], [16, 25]]
 
-    two0 = ak.contents.NumpyArray(np.array([0, 100], dtype=np.int64))
-    two1 = ak.contents.NumpyArray(
-        np.array([200.3, 300.3, 400.4, 500.5], dtype=np.float64)
-    )
-    twotags = ak.index.Index8(np.array([0, 0, 1, 1, 1, 1], dtype=np.int8))
-    twoindex = ak.index.Index64(np.array([0, 1, 0, 1, 2, 3], dtype=np.int64))
-    two = ak.highlevel.Array(ak.contents.UnionArray(twotags, twoindex, [two0, two1]))
+    two = ak.Array([[1.1], [2.2, 2.2], 3.3, 4.4, 5.5])
 
-    assert to_list(one) == [0.0, 1.1, 2.2, 3.3, 4, 5]
-    assert to_list(two) == [0, 100, 200.3, 300.3, 400.4, 500.5]
-    assert to_list(one + two) == [0.0, 101.1, 202.5, 303.6, 404.4, 505.5]
-    assert to_list(one + 100) == [100.0, 101.1, 102.2, 103.3, 104, 105]
-    assert to_list(100 + one) == [100.0, 101.1, 102.2, 103.3, 104, 105]
-    assert (one + two).layout.form == (tt(one) + tt(two)).layout.form
-    assert (one + 100).layout.form == (tt(one) + 100).layout.form
-    assert (100 + one).layout.form == (100 + tt(one)).layout.form
+    uno, dos = ak.broadcast_arrays(one, two)
+    assert uno.tolist() == [[1], [2, 2], 3, [], [4, 5]]
+    assert dos.tolist() == [[1.1], [2.2, 2.2], 3.3, [], [5.5, 5.5]]

@@ -18,23 +18,6 @@ class IndexedOptionArray(Content):
     is_option = True
     is_indexed = True
 
-    def copy(self, index=unset, content=unset, *, parameters=unset):
-        return IndexedOptionArray(
-            self._index if index is unset else index,
-            self._content if content is unset else content,
-            parameters=self._parameters if parameters is unset else parameters,
-        )
-
-    def __copy__(self):
-        return self.copy()
-
-    def __deepcopy__(self, memo):
-        return self.copy(
-            index=copy.deepcopy(self._index, memo),
-            content=copy.deepcopy(self._content, memo),
-            parameters=copy.deepcopy(self._parameters, memo),
-        )
-
     def __init__(self, index, content, *, parameters=None):
         if not (
             isinstance(index, Index)
@@ -58,6 +41,15 @@ class IndexedOptionArray(Content):
                     )
                 )
             )
+        is_cat = parameters is not None and parameters.get("__array__") == "categorical"
+        if (content.is_union and not is_cat) or content.is_indexed or content.is_option:
+            raise ak._errors.wrap_error(
+                TypeError(
+                    "{0} cannot contain a union-type (unless categorical), option-type, or indexed 'content' ({1}); try {0}.simplified instead".format(
+                        type(self).__name__, type(content).__name__
+                    )
+                )
+            )
 
         assert index.nplike is content.backend.index_nplike
 
@@ -75,9 +67,28 @@ class IndexedOptionArray(Content):
 
     Form = IndexedOptionForm
 
+    def copy(self, index=unset, content=unset, *, parameters=unset):
+        return IndexedOptionArray(
+            self._index if index is unset else index,
+            self._content if content is unset else content,
+            parameters=self._parameters if parameters is unset else parameters,
+        )
+
+    def __copy__(self):
+        return self.copy()
+
+    def __deepcopy__(self, memo):
+        return self.copy(
+            index=copy.deepcopy(self._index, memo),
+            content=copy.deepcopy(self._content, memo),
+            parameters=copy.deepcopy(self._parameters, memo),
+        )
+
     @classmethod
     def simplified(cls, index, content, *, parameters=None):
-        if content.is_union:
+        is_cat = parameters is not None and parameters.get("__array__") == "categorical"
+
+        if content.is_union and not is_cat:
             return content._union_of_optionarrays(index, parameters)
 
         elif content.is_indexed or content.is_option:
@@ -185,7 +196,9 @@ class IndexedOptionArray(Content):
         carry = ak.index.Index(carry)
 
         if self._content.length == 0:
-            content = self._content.dummy()._carry(carry, False)
+            content = self._content.form.length_one_array(
+                backend=self._backend, highlevel=False
+            )._carry(carry, False)
         else:
             content = self._content._carry(carry, False)
 
@@ -231,14 +244,14 @@ class IndexedOptionArray(Content):
         )
 
     def _getitem_field(self, where, only_fields=()):
-        return IndexedOptionArray(
+        return IndexedOptionArray.simplified(
             self._index,
             self._content._getitem_field(where, only_fields),
             parameters=None,
         )
 
     def _getitem_fields(self, where, only_fields=()):
-        return IndexedOptionArray(
+        return IndexedOptionArray.simplified(
             self._index,
             self._content._getitem_fields(where, only_fields),
             parameters=None,
@@ -636,7 +649,9 @@ class IndexedOptionArray(Content):
         )
         parameters = ak._util.merge_parameters(self._parameters, other._parameters)
 
-        return ak.contents.IndexedOptionArray(index, content, parameters=parameters)
+        return ak.contents.IndexedOptionArray.simplified(
+            index, content, parameters=parameters
+        )
 
     def mergemany(self, others):
         if len(others) == 0:
@@ -754,7 +769,6 @@ class IndexedOptionArray(Content):
             index,
             contents,
             parameters=self._parameters,
-            backend=self._backend,
             merge=True,
             mergebool=True,
         )
@@ -1409,17 +1423,6 @@ class IndexedOptionArray(Content):
                 path, type(self), message, error.id, filename
             )
 
-        elif isinstance(
-            self._content,
-            (
-                ak.contents.BitMaskedArray,
-                ak.contents.ByteMaskedArray,
-                ak.contents.IndexedArray,
-                ak.contents.IndexedOptionArray,
-                ak.contents.UnmaskedArray,
-            ),
-        ):
-            return "{0} contains \"{1}\", the operation that made it might have forgotten to call 'simplify_optiontype()'"
         else:
             return self._content.validity_error(path + ".content")
 
@@ -1479,7 +1482,7 @@ class IndexedOptionArray(Content):
         )
 
     def _to_numpy(self, allow_missing):
-        content = ak.operations.to_numpy(self.project(), allow_missing=allow_missing)
+        content = self.project()._to_numpy(allow_missing)
 
         shape = list(content.shape)
         shape[0] = self.length

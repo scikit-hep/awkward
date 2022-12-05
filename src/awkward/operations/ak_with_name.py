@@ -58,7 +58,6 @@ def _impl(array, name, highlevel, behavior):
                 layout._index,
                 layout._contents,
                 parameters=layout._parameters,
-                backend=layout._backend,
             )
         else:
             return None

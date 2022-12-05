@@ -151,6 +151,23 @@ def normalise_item(item, backend: ak._backends.Backend):
     elif isinstance(item, ak.contents.NumpyArray):
         return item.data
 
+    elif isinstance(item, ak.contents.RegularArray):
+        # Pure NumPy arrays without masks follow NumPy advanced indexing
+        # If we can produce such a content, return the underlying NumPy array
+        # Otherwise, we probably have options or are not purelist_regular, etc.
+        # As such, we then follow Awkward indexing. This logic should follow
+        # the generic `isinstance(item, ak.contents.Content)` case below
+        as_numpy = item.maybe_to_NumpyArray()
+
+        if as_numpy is None:
+            out = normalise_item_bool_to_int(normalise_item_nested(item))
+            if isinstance(out, ak.contents.NumpyArray):
+                return out.data
+            else:
+                return out
+        else:
+            return as_numpy.data
+
     elif isinstance(item, ak.contents.Content):
         out = normalise_item_bool_to_int(normalise_item_nested(item))
         if isinstance(out, ak.contents.NumpyArray):
@@ -191,7 +208,6 @@ def normalise_items(where: Sequence, backend: ak._backends.Backend) -> list:
 
 def normalise_item_RegularArray_to_ListOffsetArray64(item):
     if isinstance(item, ak.contents.RegularArray):
-
         next = item.to_ListOffsetArray64()
         return ak.contents.ListOffsetArray(
             next.offsets,
@@ -199,7 +215,7 @@ def normalise_item_RegularArray_to_ListOffsetArray64(item):
             parameters=item.parameters,
         )
 
-    elif isinstance(item, ak.contents.NumpyArray):
+    elif isinstance(item, ak.contents.NumpyArray) and item.purelist_depth == 1:
         return item
 
     else:
@@ -222,9 +238,11 @@ def normalise_item_nested(item):
                 parameters=item.parameters,
                 backend=item.backend,
             )
-        next = next.to_RegularArray()
-        next = normalise_item_RegularArray_to_ListOffsetArray64(next)
-        return next
+        # Any NumpyArray at this point is part of a non-Numpy indexing
+        # slice item. Therefore, we want to invoke ragged indexing by
+        # converting N-dimensional layouts to ListOffsetArray, and converting the
+        # dtype to int if not a supported index type
+        return normalise_item_RegularArray_to_ListOffsetArray64(next.to_RegularArray())
 
     elif isinstance(
         item,

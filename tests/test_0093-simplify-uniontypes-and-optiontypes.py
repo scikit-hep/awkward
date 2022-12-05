@@ -724,7 +724,7 @@ def test_mask_as_bool():
         ["one", "two", None, "three", None, None, "four"], highlevel=False
     )
     index2 = ak.index.Index64(np.array([2, 2, 1, 5, 0], dtype=np.int64))
-    array2 = ak.contents.IndexedArray(index2, array)
+    array2 = ak.contents.IndexedArray.simplified(index2, array)
     assert np.asarray(array.mask_as_bool(valid_when=False).view(np.int8)).tolist() == [
         0,
         0,
@@ -735,10 +735,10 @@ def test_mask_as_bool():
         0,
     ]
     assert np.asarray(array2.mask_as_bool(valid_when=False).view(np.int8)).tolist() == [
+        1,
+        1,
         0,
-        0,
-        0,
-        0,
+        1,
         0,
     ]
 
@@ -1060,7 +1060,7 @@ def test_unionarray_simplify():
     index1 = ak.index.Index32(
         np.array([0, 1, 0, 1, 2, 2, 3, 4, 5, 3, 6, 4], dtype=np.int32)
     )
-    outer = ak.contents.UnionArray(tags1, index1, [inner, one])
+    outer = ak.contents.UnionArray.simplified(tags1, index1, [inner, one])
     assert to_list(outer) == [
         5,
         4,

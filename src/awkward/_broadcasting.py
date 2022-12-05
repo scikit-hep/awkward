@@ -704,9 +704,9 @@ def apply_step(
                         if isinstance(x, RegularArray):
                             if maxsize > 1 and x.size == 1:
                                 nextinputs.append(
-                                    IndexedArray(
-                                        tmpindex, x.content[: x.length * x.size]
-                                    ).project()
+                                    x.content[: x.length * x.size]._carry(
+                                        tmpindex, allow_lazy=False
+                                    )
                                 )
                             elif x.size == maxsize:
                                 nextinputs.append(x.content[: x.length * x.size])

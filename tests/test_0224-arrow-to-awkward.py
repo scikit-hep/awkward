@@ -293,7 +293,7 @@ def test_toarrow_ByteMaskedArray_5():
     index = ak.index.Index32(np.array([0, 2, 4, 6, 8, 9, 7, 5], dtype=np.int64))
     indexedarray = ak.contents.IndexedArray(index, content)
 
-    bytemaskedarray = ak.contents.ByteMaskedArray(
+    bytemaskedarray = ak.contents.ByteMaskedArray.simplified(
         ak.index.Index8(np.array([True, False, False], dtype=np.int8)),
         indexedarray,
         True,
@@ -310,7 +310,7 @@ def test_toarrow_ByteMaskedArray_broken_unions_1():
     index = ak.index.Index32(np.array([0, 1, 1, 0, 2, 2, 4, 3, 3, 4], dtype=np.int32))
     unionarray = ak.contents.UnionArray(tags, index, [content0, content1])
 
-    bytemaskedarray = ak.contents.ByteMaskedArray(
+    bytemaskedarray = ak.contents.ByteMaskedArray.simplified(
         ak.index.Index8(
             # tags          1,     1,     0,    0,     1,    0,    1,     1,    0,     0
             # index         0,     1,     1,    0,     2,    2,    4,     3,    3,     4
@@ -322,6 +322,7 @@ def test_toarrow_ByteMaskedArray_broken_unions_1():
         unionarray,
         valid_when=True,
     )
+
     assert bytemaskedarray.to_arrow().to_pylist() == to_list(bytemaskedarray)
 
 
@@ -336,7 +337,7 @@ def test_toarrow_ByteMaskedArray_broken_unions_2():
     )
     unionarray = ak.contents.UnionArray(tags, index, [content0, content1])
 
-    bytemaskedarray = ak.contents.ByteMaskedArray(
+    bytemaskedarray = ak.contents.ByteMaskedArray.simplified(
         ak.index.Index8(
             # tags          1,     1,     0,    0,     1,    0,    1,     1,    0,     0,    0
             # index         0,     1,     1,    0,     2,    2,    4,     3,    3,     4,    3
@@ -555,6 +556,7 @@ def test_recordbatch():
         ],
         ["a", "b", "c", "d", "e"],
     )
+
     assert to_list(ak._connect.pyarrow.handle_arrow(a)) == [
         {
             "a": 1.1,
@@ -1386,7 +1388,7 @@ def test_arrow_coverage100():
     a = ak.contents.ListOffsetArray(
         ak.index.Index32(np.array([0, 5, 10], "i4")),
         ak.contents.NumpyArray(
-            np.frombuffer(b"hellothere", "u1"), parameters={"__array__": "bytes"}
+            np.frombuffer(b"hellothere", "u1"), parameters={"__array__": "byte"}
         ),
         parameters={"__array__": "bytestring"},
     )
@@ -1398,7 +1400,7 @@ def test_arrow_coverage100():
             ak.index.Index32(np.array([0, 5, 10, 15, 20, 25, 30], "i4")),
             ak.contents.NumpyArray(
                 np.frombuffer(b"hellotherehellotherehellothere", "u1"),
-                parameters={"__array__": "bytes"},
+                parameters={"__array__": "byte"},
             ),
             parameters={"__array__": "bytestring"},
         ),
@@ -1418,7 +1420,7 @@ def test_arrow_coverage100():
         ak.contents.ListOffsetArray(
             ak.index.Index32(np.array([0, 5, 10], "i4")),
             ak.contents.NumpyArray(
-                np.frombuffer(b"hellothere", "u1"), parameters={"__array__": "bytes"}
+                np.frombuffer(b"hellothere", "u1"), parameters={"__array__": "byte"}
             ),
             parameters={"__array__": "bytestring"},
         ),
@@ -1431,7 +1433,7 @@ def test_arrow_coverage100():
         ak.contents.ListOffsetArray(
             ak.index.Index32(np.array([0, 5, 10], "i4")),
             ak.contents.NumpyArray(
-                np.frombuffer(b"hellothere", "u1"), parameters={"__array__": "bytes"}
+                np.frombuffer(b"hellothere", "u1"), parameters={"__array__": "byte"}
             ),
             parameters={"__array__": "bytestring"},
         ),
@@ -1448,7 +1450,7 @@ def test_arrow_coverage100():
     a = ak.contents.ListOffsetArray(
         ak.index.Index32(np.array([0, 5, 10], "i4")),
         ak.contents.NumpyArray(
-            np.frombuffer(b"hellothere", "u1"), parameters={"__array__": "chars"}
+            np.frombuffer(b"hellothere", "u1"), parameters={"__array__": "char"}
         ),
         parameters={"__array__": "string"},
     )
@@ -1460,7 +1462,7 @@ def test_arrow_coverage100():
             ak.index.Index32(np.array([0, 5, 10, 15, 20, 25, 30], "i4")),
             ak.contents.NumpyArray(
                 np.frombuffer(b"hellotherehellotherehellothere", "u1"),
-                parameters={"__array__": "chars"},
+                parameters={"__array__": "char"},
             ),
             parameters={"__array__": "string"},
         ),
@@ -1482,7 +1484,7 @@ def test_arrow_coverage100():
             ak.index.Index64(np.array([0, 5, 10, 15, 20, 25, 30], "i8")),
             ak.contents.NumpyArray(
                 np.frombuffer(b"hellotherehellotherehellothere", "u1"),
-                parameters={"__array__": "chars"},
+                parameters={"__array__": "char"},
             ),
             parameters={"__array__": "string"},
         ),
@@ -1504,7 +1506,7 @@ def test_arrow_coverage100():
             ak.index.Index64(np.array([0, 5, 10, 15, 20, 25, 30], "i8")),
             ak.contents.NumpyArray(
                 np.frombuffer(b"hellotherehellotherehellothere", "u1"),
-                parameters={"__array__": "bytes"},
+                parameters={"__array__": "byte"},
             ),
             parameters={"__array__": "bytestring"},
         ),
@@ -1532,7 +1534,7 @@ def test_arrow_coverage100():
         ak.contents.ListOffsetArray(
             ak.index.Index32(np.array([0, 5, 10], "i4")),
             ak.contents.NumpyArray(
-                np.frombuffer(b"hellothere", "u1"), parameters={"__array__": "chars"}
+                np.frombuffer(b"hellothere", "u1"), parameters={"__array__": "char"}
             ),
             parameters={"__array__": "string"},
         ),
@@ -1545,7 +1547,7 @@ def test_arrow_coverage100():
         ak.contents.ListOffsetArray(
             ak.index.Index32(np.array([0, 5, 10], "i4")),
             ak.contents.NumpyArray(
-                np.frombuffer(b"hellothere", "u1"), parameters={"__array__": "chars"}
+                np.frombuffer(b"hellothere", "u1"), parameters={"__array__": "char"}
             ),
             parameters={"__array__": "string"},
         ),
@@ -1661,7 +1663,7 @@ def test_arrow_coverage100():
         None,
     ]
 
-    a = ak.contents.ByteMaskedArray(
+    a = ak.contents.ByteMaskedArray.simplified(
         ak.index.Index8(np.array([True, True, True, True, False, False])),
         ak.contents.IndexedOptionArray(
             ak.index.Index32(np.array([-1, 1, -1, 0, 0, -1], "i4")),
@@ -1757,7 +1759,7 @@ def test_arrow_coverage100():
 
 def test_arrow_coverage100_broken_unions():
     a = ak.operations.from_iter([[1, 2, 3], [], [4, 5], 999, 123]).layout
-    b = ak.contents.ByteMaskedArray(
+    b = ak.contents.ByteMaskedArray.simplified(
         ak.index.Index8(np.array([True, True, False, False, True])),
         a,
         valid_when=True,
@@ -1772,7 +1774,7 @@ def test_arrow_coverage100_broken_unions():
     ]
 
     content1 = ak.operations.from_iter([1.1, 2.2, 3.3, 4.4, 5.5]).layout
-    content2 = ak.contents.NumpyArray(np.array([], dtype=np.int32))
+    content2 = ak.operations.from_iter(["hello"]).layout[1:]
     a = ak.contents.UnionArray(
         ak.index.Index8(np.array([0, 0, 0, 0, 0], "i1")),
         ak.index.Index32(np.array([0, 1, 2, 3, 4], "i4")),

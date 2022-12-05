@@ -264,7 +264,9 @@ def test_recordarray():
 
 
 def test_unionarray():
-    content1 = ak.operations.from_iter([[], [1], [2, 2], [3, 3, 3]], highlevel=False)
+    content1 = ak.operations.from_iter(
+        [[], ["1"], ["2", "2"], ["3", "3", "3"]], highlevel=False
+    )
     content2 = ak.operations.from_iter(
         [[3.3, 3.3, 3.3], [2.2, 2.2], [1.1], []], highlevel=False
     )
@@ -274,11 +276,11 @@ def test_unionarray():
     assert to_list(array) == [
         [],
         [3.3, 3.3, 3.3],
-        [1],
+        ["1"],
         [2.2, 2.2],
-        [2, 2],
+        ["2", "2"],
         [1.1],
-        [3, 3, 3],
+        ["3", "3", "3"],
         [],
     ]
 

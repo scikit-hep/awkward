@@ -326,7 +326,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
             )
         ]
         outs = [
-            ak.contents.IndexedArray(x, y)
+            ak.contents.IndexedArray.simplified(x, y)
             for x, y in __builtins__["zip"](indexes, layouts)
         ]
 
