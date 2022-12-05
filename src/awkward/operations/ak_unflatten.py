@@ -10,7 +10,7 @@ np = ak._nplikes.NumpyMetadata.instance()
 def unflatten(array, counts, axis=0, *, highlevel=True, behavior=None):
     """
     Args:
-        array: Data to create an array with an additional level from.
+        array: Array-like data (anything #ak.to_layout recognizes).
         counts (int or array): Number of elements the new level should have.
             If an integer, the new level will be regularly sized; otherwise,
             it will consist of variable-length lists with the given lengths.

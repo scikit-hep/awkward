@@ -11,7 +11,7 @@ np = ak._nplikes.NumpyMetadata.instance()
 def copy(array):
     """
     Args:
-        array: Array to be copied.
+        array: Array-like data (anything #ak.to_layout recognizes).
 
     Returns a deep copy of the array (no memory shared with original).
 

@@ -19,7 +19,7 @@ def nan_to_num(
 
     """
     Args:
-        array: Array whose `NaN` values should be converted to a number.
+        array: Array-like data (anything #ak.to_layout recognizes).
         copy (bool): Ignored (Awkward Arrays are immutable).
         nan (int, float, broadcastable array): Value to be used to fill `NaN` values.
         posinf (None, int, float, broadcastable array): Value to be used to fill positive infinity

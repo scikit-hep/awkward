@@ -8,7 +8,7 @@ np = ak._nplikes.NumpyMetadata.instance()
 def mask(array, mask, *, valid_when=True, highlevel=True, behavior=None):
     """
     Args:
-        array: Data to mask, rather than filter.
+        array: Array-like data (anything #ak.to_layout recognizes).
         mask (array of booleans): The mask that overlays elements in the
             `array` with None. Must have the same length as `array`.
         valid_when (bool): If True, True values in `mask` are considered

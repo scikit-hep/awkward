@@ -9,7 +9,7 @@ np = ak._nplikes.NumpyMetadata.instance()
 def ravel(array, *, highlevel=True, behavior=None):
     """
     Args:
-        array: Data containing nested lists to flatten
+        array: Array-like data (anything #ak.to_layout recognizes).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if

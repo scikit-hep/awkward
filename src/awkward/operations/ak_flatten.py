@@ -8,7 +8,7 @@ np = ak._nplikes.NumpyMetadata.instance()
 def flatten(array, axis=1, *, highlevel=True, behavior=None):
     """
     Args:
-        array: Data containing nested lists to flatten.
+        array: Array-like data (anything #ak.to_layout recognizes).
         axis (None or int): If None, the operation flattens all levels of
             nesting, returning a 1-dimensional array. Otherwise, it flattens
             at a specified depth. The outermost dimension is `0`, followed

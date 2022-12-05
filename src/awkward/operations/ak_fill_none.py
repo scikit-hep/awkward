@@ -11,7 +11,7 @@ cpu = ak._backends.NumpyBackend.instance()
 def fill_none(array, value, axis=-1, *, highlevel=True, behavior=None):
     """
     Args:
-        array: Data in which to replace None with a given value.
+        array: Array-like data (anything #ak.to_layout recognizes).
         value: Data with which to replace None.
         axis (None or int): If None, replace all None values in the array
             with the given value; if an int, The dimension at which this

@@ -8,8 +8,8 @@ import awkward as ak
 
 def test_unknown_type():
     array = ak.Array({"x": np.arange(10)})
-    array = ak.operations.with_field(base=array, what=None, where="unknown field1")
-    array = ak.operations.with_field(base=array, what=[None], where="unknown field2")
+    array = ak.operations.with_field(array=array, what=None, where="unknown field1")
+    array = ak.operations.with_field(array=array, what=[None], where="unknown field2")
 
     # Try to access the type of a single element
     # This raises a ValueError in #879

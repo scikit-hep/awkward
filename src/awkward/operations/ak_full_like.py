@@ -10,8 +10,7 @@ np = ak._nplikes.NumpyMetadata.instance()
 def full_like(array, fill_value, *, dtype=None, highlevel=True, behavior=None):
     """
     Args:
-        array: Array to use as a model for a replacement that contains only
-            `fill_value`.
+        array: Array-like data (anything #ak.to_layout recognizes).
         fill_value: Value to fill the new array with.
         dtype (None or NumPy dtype): Overrides the data type of the result.
         highlevel (bool, default is True): If True, return an #ak.Array;

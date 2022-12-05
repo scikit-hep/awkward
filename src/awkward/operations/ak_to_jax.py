@@ -6,7 +6,7 @@ from awkward import _errors, _util, jax
 def to_jax(array):
     """
     Args:
-        array: Array to convert to JAX.
+        array: Array-like data (anything #ak.to_layout recognizes).
 
     Converts `array` (many types supported) into a JAX Device Array, if possible.
 

@@ -29,7 +29,7 @@ def to_json(
 ):
     """
     Args:
-        array: Data to convert to JSON.
+        array: Array-like data (anything #ak.to_layout recognizes).
         file (None, str/pathlib.Path, or file-like object): If None, this function returns
             JSON-encoded bytes. Otherwise, this function has no return value.
             If a string/pathlib.Path, this function opens a file with that name, writes JSON

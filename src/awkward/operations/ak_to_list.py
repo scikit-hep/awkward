@@ -12,7 +12,7 @@ np = ak._nplikes.NumpyMetadata.instance()
 def to_list(array):
     """
     Args:
-        array: Array to convert to a list.
+        array: Array-like data (anything #ak.to_layout recognizes).
 
     Converts `array` (many types supported, including all Awkward Arrays and
     Records) into Python objects. If `array` is not recognized as an array, it

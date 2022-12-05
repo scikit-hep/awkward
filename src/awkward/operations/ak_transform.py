@@ -28,11 +28,10 @@ def transform(
     Args:
         transformation (callable): Function to apply to each node of the array.
             See below for details.
-        array: First (and possibly only) array to be transformed. Can be any
-            array-like object that #ak.to_layout recognizes, but not an
-            #ak.Record.
-        more_arrays: Arrays to be broadcasted together (with first `array`) and
-            used together in the transformation. See below for details.
+        array: Array-like data (anything #ak.to_layout recognizes), but not an
+            #ak.Record or #ak.record.Record.
+        more_arrays: Additional arrays to be broadcasted together (with first `array`)
+            and used together in the transformation. See below for details.
         depth_context (None or dict): User data to propagate through the transformation.
             New data added to `depth_context` is available to the entire *subtree*
             at which it is added, but no other *subtrees*. For example, data added

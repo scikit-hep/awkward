@@ -3,10 +3,10 @@
 import awkward as ak
 
 
-def from_rdataframe(data_frame, columns):
+def from_rdataframe(rdf, columns):
     """
     Args:
-        data_frame (`ROOT.RDataFrame`): ROOT RDataFrame to convert into an
+        rdf (`ROOT.RDataFrame`): ROOT RDataFrame to convert into an
             Awkward Array.
         columns (str or tuple of str): A column or multiple columns to be
             converted to Awkward Array.
@@ -16,22 +16,12 @@ def from_rdataframe(data_frame, columns):
     See also #ak.to_rdataframe.
     """
     with ak._errors.OperationErrorContext(
-        "ak.from_rdataframe",
-        dict(
-            data_frame=data_frame,
-            columns=columns,
-        ),
+        "ak.from_rdataframe", dict(rdf=rdf, columns=columns)
     ):
-        return _impl(
-            data_frame,
-            columns,
-        )
+        return _impl(rdf, columns)
 
 
-def _impl(
-    data_frame,
-    columns,
-):
+def _impl(data_frame, columns):
     import awkward._connect.rdataframe.from_rdataframe  # noqa: F401
 
     return ak._connect.rdataframe.from_rdataframe.from_rdataframe(

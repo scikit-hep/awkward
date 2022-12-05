@@ -8,7 +8,7 @@ np = ak._nplikes.NumpyMetadata.instance()
 def with_name(array, name, *, highlevel=True, behavior=None):
     """
     Args:
-        array: Data containing records or tuples.
+        array: Array-like data (anything #ak.to_layout recognizes).
         name (str or None): Name to give to the records or tuples; this assigns
             the `"__record__"` parameter. If None, any existing name is unset.
         highlevel (bool): If True, return an #ak.Array; otherwise, return

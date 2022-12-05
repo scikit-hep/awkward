@@ -19,7 +19,7 @@ def argcombinations(
 ):
     """
     Args:
-        array: Array from which to choose `n` items without replacement.
+        array: Array-like data (anything #ak.to_layout recognizes).
         n (int): The number of items to choose from each list: `2` chooses
             unique pairs, `3` chooses unique triples, etc.
         replacement (bool): If True, combinations that include the same

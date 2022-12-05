@@ -5,7 +5,10 @@ import awkward as ak
 
 def backend(*arrays) -> str:
     """
-    Returns the names of the backend used by `arrays`. May be
+    Args:
+        arrays: Array-like data (anything #ak.to_layout recognizes).
+
+    Returns the names of the backend used by `arrays`. This name may be
 
     * `"cpu"` for arrays backed by NumPy;
     * `"cuda"` for arrays backed by CuPy;

@@ -13,7 +13,7 @@ np = ak._nplikes.NumpyMetadata.instance()
 def parameters(array):
     """
     Args:
-        array: Array to determine the parameters of.
+        array: Array-like data (anything #ak.to_layout recognizes).
 
     Extracts parameters from the outermost array node of `array` (many types
     supported, including all Awkward Arrays and Records).

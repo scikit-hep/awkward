@@ -18,9 +18,8 @@ def zip(
 ):
     """
     Args:
-        arrays (dict or iterable of arrays): Arrays to combine into a
-            record-containing structure (if a dict) or a tuple-containing
-            structure (if any other kind of iterable).
+        arrays (dict or iterable of arrays): Each value in this dict or iterable
+            can be any array-like data that #ak.to_layout recognizes.
         depth_limit (None or int): If None, attempt to fully broadcast the
             `array` to all levels. If an int, limit the number of dimensions
             that get broadcasted. The minimum value is `1`, for no

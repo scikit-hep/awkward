@@ -6,7 +6,7 @@ import awkward as ak
 def to_cupy(array):
     """
     Args:
-        array: Array to convert to CuPy.
+        array: Array-like data (anything #ak.to_layout recognizes).
 
     Converts `array` (many types supported) into a CuPy array, if possible.
 

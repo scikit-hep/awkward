@@ -8,7 +8,7 @@ np = ak._nplikes.NumpyMetadata.instance()
 def pad_none(array, target, axis=1, *, clip=False, highlevel=True, behavior=None):
     """
     Args:
-        array: Data containing nested lists to pad to a target length.
+        array: Array-like data (anything #ak.to_layout recognizes).
         target (int): The intended length of the lists. If `clip=True`,
             the output lists will have exactly this length; otherwise,
             they will have *at least* this length.

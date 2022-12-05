@@ -8,7 +8,7 @@ import awkward as ak
 
 
 def to_parquet(
-    data,
+    array,
     destination,
     *,
     list_to32=False,
@@ -36,7 +36,7 @@ def to_parquet(
 ):
     """
     Args:
-        data: Array-like data (anything #ak.to_layout recognizes).
+        array: Array-like data (anything #ak.to_layout recognizes).
         destination (str): Name of the output file, file path, or remote URL passed to
             [fsspec.core.url_to_fs](https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.core.url_to_fs)
             for remote writing.
@@ -161,6 +161,8 @@ def to_parquet(
     See also #ak.to_arrow, which is used as an intermediate step.
     """
     import awkward._connect.pyarrow
+
+    data = array
 
     pyarrow_parquet = awkward._connect.pyarrow.import_pyarrow_parquet("ak.to_parquet")
     fsspec = awkward._connect.pyarrow.import_fsspec("ak.to_parquet")

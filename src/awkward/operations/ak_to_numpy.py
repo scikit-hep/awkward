@@ -8,7 +8,7 @@ import awkward as ak
 def to_numpy(array, *, allow_missing=True):
     """
     Args:
-        array: Array to convert to NumPy.
+        array: Array-like data (anything #ak.to_layout recognizes).
         allow_missing (bool): allow missing (None) values.
 
     Converts `array` (many types supported, including all Awkward Arrays and

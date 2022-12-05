@@ -8,7 +8,7 @@ np = ak._nplikes.NumpyMetadata.instance()
 def packed(array, *, highlevel=True, behavior=None):
     """
     Args:
-        array: Array whose internal structure will be packed.
+        array: Array-like data (anything #ak.to_layout recognizes).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if

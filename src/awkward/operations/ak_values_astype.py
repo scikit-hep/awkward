@@ -8,7 +8,7 @@ np = ak._nplikes.NumpyMetadata.instance()
 def values_astype(array, to, *, highlevel=True, behavior=None):
     """
     Args:
-        array: Array whose numbers should be converted to a new numeric type.
+        array: Array-like data (anything #ak.to_layout recognizes).
         to (dtype or dtype specifier): Type to convert the numbers into.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
