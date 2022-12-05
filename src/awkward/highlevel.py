@@ -400,8 +400,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         It does not count buffers that must be kept in memory because
         of ownership, but are not directly used in the array. Nor does it count
-        the (small) C++ nodes or Python objects that reference the (large)
-        array buffers.
+        the (small) Python objects that reference the (large) array buffers.
         """
         return self._layout.nbytes
 
@@ -1557,9 +1556,7 @@ class Record(NDArrayOperatorsMixin):
         See #ak.Array.layout for a more complete description.
 
         The #ak.record.Record is not a subclass of #ak.contents.Content in
-        Python (note: [Record](../_static/classawkward_1_1Record.html) *is* a
-        subclass of [Content](../_static/classawkward_1_1Content.html) in
-        C++!) and it is not composable with them: #ak.record.Record contains
+        Python and it is not composable with them: #ak.record.Record contains
         one #ak.contents.RecordArray (which is a #ak.contents.Content), but
         #ak.contents.Content nodes cannot contain a #ak.record.Record.
 
@@ -1647,7 +1644,7 @@ class Record(NDArrayOperatorsMixin):
 
         It does not count buffers that must be kept in memory because
         of ownership, but are not directly used in the array. Nor does it count
-        the (small) C++ nodes or Python objects that reference the (large)
+        the (small) Python objects that reference the (large)
         array buffers.
         """
         return self._layout.nbytes
