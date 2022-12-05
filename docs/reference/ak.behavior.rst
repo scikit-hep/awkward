@@ -1,6 +1,8 @@
 ak.behavior
 -----------
 
+.. py:data:: ak.behavior
+
    * `Motivation <#motivation>`__
    * `Parameters and behaviors <#parameters-and-behaviors>`__
    * `Adding behavior to records <#adding-behavior-to-records>`__
