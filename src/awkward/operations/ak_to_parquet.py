@@ -64,7 +64,7 @@ def to_parquet(
         storage_options:
 
     Returns:
-    ``pyarrow._parquet.FileMetaData`` instance
+    `pyarrow._parquet.FileMetaData` instance
 
     Writes an Awkward Array to a Parquet file (through pyarrow).
 
