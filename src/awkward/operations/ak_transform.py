@@ -75,7 +75,8 @@ def transform(
 
     Here is a "hello world" example:
 
-        >>> def say_hello(layout, depth, **kwargs):
+        >>> def say_hello(array, depth, **kwargs):
+        ...     layout = ak.to_layout(array)
         ...     print("Hello", type(layout).__name__, "at", depth)
         ...
         >>> array = ak.Array([[1.1, 2.2, "three"], [], None, [4.4, 5.5]])
@@ -98,7 +99,8 @@ def transform(
     instance, you want to apply NumPy's `np.round` function to numerical data,
     regardless of what lists or other structures they're embedded in.
 
-        >>> def rounder(layout, **kwargs):
+        >>> def rounder(array, **kwargs):
+        ...     layout = ak.to_layout(array)
         ...     if layout.is_numpy:
         ...         return np.round(layout.data).astype(np.int32)
         ...
@@ -118,7 +120,8 @@ def transform(
 
     Here is an example with broadcasting:
 
-        >>> def combine(layouts, **kwargs):
+        >>> def combine(arrays, **kwargs):
+        ...     layouts = [ak.to_layout(layout) for layout in arrays]
         ...     assert len(layouts) == 2
         ...     if layouts[0].is_numpy and layouts[1].is_numpy:
         ...         return layouts[0].data + 10 * layouts[1].data
@@ -205,7 +208,8 @@ def transform(
 
     If we accumulate node type names using `depth_context`,
 
-        >>> def crawl(layout, depth_context, **kwargs):
+        >>> def crawl(array, depth_context, **kwargs):
+        ...     layout = ak.to_layout(array)
         ...     depth_context["types"] = depth_context["types"] + (type(layout).__name__,)
         ...     print(depth_context["types"])
         ...
@@ -248,14 +252,14 @@ def transform(
     Continuation
     ============
 
-    The `transformation` function is given an input, untransformed layout or layouts.
+    The `transformation` function is given an input, untransformed array or arrays.
     Some algorithms need to perform a correction on transformed outputs, so
     `continuation()` can be called at any point to continue descending but obtain
     the transformed result.
 
     For example, this function inserts an option-type at every level of an array:
 
-        >>> def insert_optiontype(layout, continuation, **kwargs):
+        >>> def insert_optiontype(array, continuation, **kwargs):
         ...     return ak.contents.UnmaskedArray(continuation())
         ...
         >>> array = ak.Array([[[[[1.1, 2.2, 3.3], []]], []], [[[[4.4, 5.5]]]]])
@@ -273,8 +277,9 @@ def transform(
 
     To see this process as it happens, we can add `print` statements to the function.
 
-        >>> def insert_optiontype(input, continuation, **kwargs):
-        ...     print("before", input.form.type)
+        >>> def insert_optiontype(array, continuation, **kwargs):
+        ...     layout = ak.to_layout(array)
+        ...     print("before", layout.form.type)
         ...     output = ak.contents.UnmaskedArray(continuation())
         ...     print("after ", output.form.type)
         ...     return output
@@ -309,6 +314,7 @@ def transform(
     down either one of them.
 
         >>> def one_array(layout, **kwargs):
+        ...     layout = ak.to_layout(array)
         ...     print(type(layout).__name__)
         ...
         >>> ak.transform(one_array, array1, return_array=False)
@@ -323,6 +329,7 @@ def transform(
     However, when the following two-array function is applied,
 
         >>> def two_arrays(layouts, **kwargs):
+        ...     layouts = [ak.to_layout(layout) for layout in layouts]
         ...     assert len(layouts) == 2
         ...     print(type(layouts[0]).__name__, ak.to_list(layouts[0]))
         ...     print(type(layouts[1]).__name__, ak.to_list(layouts[1]))
@@ -437,7 +444,7 @@ def _impl(
     behavior,
     highlevel,
 ):
-    behavior = ak._util.behavior_of(*((array,) + more_arrays), behavior=behavior)
+    behavior = ak._util.behavior_of(array, *more_arrays, behavior=behavior)
 
     layout = ak.to_layout(array, allow_record=False, allow_other=False)
     more_layouts = [
@@ -460,7 +467,8 @@ def _impl(
     if len(more_layouts) == 0:
 
         def action(layout, **kwargs):
-            out = transformation(layout, **kwargs)
+            array = ak._util.wrap(layout, behavior, highlevel)
+            out = transformation(array, **kwargs)
 
             if out is None:
                 return out
@@ -496,7 +504,8 @@ def _impl(
     else:
 
         def action(inputs, **kwargs):
-            out = transformation(inputs, **kwargs)
+            arrays = [ak._util.wrap(layout, behavior, highlevel) for layout in inputs]
+            out = transformation(arrays, **kwargs)
 
             if out is None:
                 if all(isinstance(x, ak.contents.NumpyArray) for x in inputs):
