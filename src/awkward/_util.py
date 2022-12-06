@@ -441,18 +441,6 @@ def wrap(content, behavior=None, highlevel=True, like=None):
     return content
 
 
-def extra(args, kwargs, defaults):
-    out = []
-    for i, (name, default) in enumerate(defaults):
-        if i < len(args):
-            out.append(args[i])
-        elif name in kwargs:
-            out.append(kwargs[name])
-        else:
-            out.append(default)
-    return out
-
-
 def union_to_record(unionarray, anonymous):
     nplike = ak._nplikes.nplike_of(unionarray)
 
