@@ -18,7 +18,7 @@ The [Apache Arrow](https://arrow.apache.org/) data format is very similar to Awk
 
 The [Apache Parquet](https://parquet.apache.org/) file format has strong connections to Arrow with a large overlap in available tools, and while it's also a columnar format like Awkward and Arrow, it is implemented in a different way, which emphasizes compact storage over random access.
 
-```{code-cell} python3
+```{code-cell} ipython3
 import awkward as ak
 import pyarrow as pa
 import pyarrow.csv
@@ -39,18 +39,18 @@ The argument to this function can be any of the following types from the pyarrow
 
 and they are converted into non-partitioned, non-virtual Awkward Arrays. (Any disjoint chunks in the Arrow array are concatenated.)
 
-```{code-cell} python3
+```{code-cell} ipython3
 pa_array = pa.array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
 pa_array
 ```
 
-```{code-cell} python3
+```{code-cell} ipython3
 ak.from_arrow(pa_array)
 ```
 
 Here is an example of an Arrow Table, derived from CSV. (Printing a table shows its field types.)
 
-```{code-cell} python3
+```{code-cell} ipython3
 pokemon = urllib.request.urlopen(
     "https://gist.githubusercontent.com/armgilles/194bcff35001e7eb53a2a8b441e8b2c6/raw/92200bc0a673d5ce2110aaad4544ed6c4010f687/pokemon.csv"
 )
@@ -60,24 +60,24 @@ table
 
 Awkward Array doesn't make a deep distinction between "arrays" and "tables" the way Arrow does: the Awkward equivalent of an Arrow table is just an Awkward Array of record type.
 
-```{code-cell} python3
+```{code-cell} ipython3
 array = ak.from_arrow(table)
 array
 ```
 
 The Awkward equivalent of Arrow's schemas is {func}`ak.type`.
 
-```{code-cell} python3
+```{code-cell} ipython3
 ak.type(array)
 ```
 
-```{code-cell} python3
+```{code-cell} ipython3
 ak.to_list(array[0])
 ```
 
 This array is ready for data analysis.
 
-```{code-cell} python3
+```{code-cell} ipython3
 array[array.Legendary].Attack - array[array.Legendary].Defense
 ```
 
@@ -90,29 +90,29 @@ The function for Awkward → Arrow conversion is {func}`ak.to_arrow`. This funct
 
 type.
 
-```{code-cell} python3
+```{code-cell} ipython3
 ak_array = ak.Array(
     [{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}, {"x": 3.3, "y": [1, 2, 3]}]
 )
 ak_array
 ```
 
-```{code-cell} python3
+```{code-cell} ipython3
 pa_array = ak.to_arrow(ak_array)
 pa_array
 ```
 
-```{code-cell} python3
+```{code-cell} ipython3
 type(pa_array)
 ```
 
-```{code-cell} python3
+```{code-cell} ipython3
 isinstance(pa_array, pa.lib.Array)
 ```
 
 If you need {class}`pyarrow.lib.RecordBatch`, you can build this using pyarrow:
 
-```{code-cell} python3
+```{code-cell} ipython3
 pa_batch = pa.RecordBatch.from_arrays(
     [
         ak.to_arrow(ak_array.x),
@@ -125,18 +125,18 @@ pa_batch
 
 If you need {class}`pyarrow.lib.Table`, you can build this using pyarrow:
 
-```{code-cell} python3
+```{code-cell} ipython3
 pa_table = pa.Table.from_batches([pa_batch])
 pa_table
 ```
 
 The columns of this Table are {class}`pa.lib.ChunkedArray` instances:
 
-```{code-cell} python3
+```{code-cell} ipython3
 pa_table[0]
 ```
 
-```{code-cell} python3
+```{code-cell} ipython3
 pa_table[1]
 ```
 
@@ -153,14 +153,14 @@ When following those instructions, remember that {func}`ak.from_arrow` can accep
 
 For instance, when writing to an IPC stream, Arrow requires {class}`pyarrow.lib.RecordBatch`, so you need to build them:
 
-```{code-cell} python3
+```{code-cell} ipython3
 ak_array = ak.Array(
     [{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}, {"x": 3.3, "y": [1, 2, 3]}]
 )
 ak_array
 ```
 
-```{code-cell} python3
+```{code-cell} ipython3
 first_batch = pa.RecordBatch.from_arrays(
     [
         ak.to_arrow(ak_array.x),
@@ -171,7 +171,7 @@ first_batch = pa.RecordBatch.from_arrays(
 first_batch.schema
 ```
 
-```{code-cell} python3
+```{code-cell} ipython3
 sink = pa.BufferOutputStream()
 writer = pa.ipc.new_stream(sink, first_batch.schema)
 
@@ -191,18 +191,18 @@ for i in range(5):
 writer.close()
 ```
 
-```{code-cell} python3
+```{code-cell} ipython3
 bytes(sink.getvalue())
 ```
 
 But when reading them back, we can just pass the record batches (yielded by the {class}`pyarrow.lib.RecordBatchStreamReader` `reader`) to {func}`ak.from_arrow`:
 
-```{code-cell} python3
+```{code-cell} ipython3
 reader = pa.ipc.open_stream(sink.getvalue())
 reader.schema
 ```
 
-```{code-cell} python3
+```{code-cell} ipython3
 for batch in reader:
     print(repr(ak.from_arrow(batch)))
 ```
@@ -216,14 +216,14 @@ When following those instructions, remember that {func}`ak.from_arrow` can accep
 
 For instance, when writing to a Feather file, Arrow requires {class}`pyarrow.lib.Table`, so you need to build them:
 
-```{code-cell} python3
+```{code-cell} ipython3
 ak_array = ak.Array(
     [{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}, {"x": 3.3, "y": [1, 2, 3]}]
 )
 ak_array
 ```
 
-```{code-cell} python3
+```{code-cell} ipython3
 pa_batch = pa.RecordBatch.from_arrays(
     [
         ak.to_arrow(ak_array.x),
@@ -236,7 +236,7 @@ pa_table = pa.Table.from_batches([pa_batch])
 pa_table
 ```
 
-```{code-cell} python3
+```{code-cell} ipython3
 import pyarrow.feather
 
 pyarrow.feather.write_feather(pa_table, "/tmp/example.feather")
@@ -244,16 +244,16 @@ pyarrow.feather.write_feather(pa_table, "/tmp/example.feather")
 
 But when reading them back, we can just pass the Arrow Table to {func}`ak.from_arrow`.
 
-```{code-cell} python3
+```{code-cell} ipython3
 from_feather = pyarrow.feather.read_table("/tmp/example.feather")
 from_feather
 ```
 
-```{code-cell} python3
+```{code-cell} ipython3
 type(from_feather)
 ```
 
-```{code-cell} python3
+```{code-cell} ipython3
 ak.from_arrow(from_feather)
 ```
 
@@ -264,20 +264,20 @@ With data converted to and from Arrow, it can then be saved and loaded from Parq
 
 The {func}`ak.to_parquet` function writes Awkward Arrays as Parquet files. It has relatively few options.
 
-```{code-cell} python3
+```{code-cell} ipython3
 ak_array = ak.Array(
     [{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}, {"x": 3.3, "y": [1, 2, 3]}]
 )
 ak_array
 ```
 
-```{code-cell} python3
+```{code-cell} ipython3
 ak.to_parquet(ak_array, "/tmp/example.parquet")
 ```
 
 The {func}`ak.from_parquet` function reads Parquet files as Awkward Arrays, with quite a few more options. Basic usage just gives you the Awkward Array back.
 
-```{code-cell} python3
+```{code-cell} ipython3
 ak.from_parquet("/tmp/example.parquet")
 ```
 
@@ -288,7 +288,7 @@ Since the data in a Parquet file may be huge, there are `columns` and `row_group
 
 For instance, the expression
 
-```{code-cell} python3
+```{code-cell} ipython3
 ak.from_parquet("/tmp/example.parquet", columns=["x"])
 ```
 

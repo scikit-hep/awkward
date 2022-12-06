@@ -16,7 +16,7 @@ How to convert to/from ROOT RDataFrame
 
 The [ROOT RDataFrame](https://root.cern.ch/doc/master/classROOT_1_1RDataFrame.html) is a declarative, parallel framework for data analysis and manipulation. `RDataFrame` reads columnar data via a data source. The transformations can be applied to the data to select rows and/or to define new columns, and to produce results: histograms, etc.
 
-```{code-cell} python3
+```{code-cell} ipython3
 import awkward as ak
 import ROOT
 ```
@@ -32,7 +32,7 @@ The argument to this function requires a dictionary: `{ <column name string> : <
 
 object.
 
-```{code-cell} python3
+```{code-cell} ipython3
 array_x = ak.Array(
     [
         {"x": [1.1, 1.2, 1.3]},
@@ -48,13 +48,13 @@ array_z = ak.Array([[1.1], [2.1, 2.3, 2.4], [3.1], [4.1, 4.2, 4.3], [5.1]])
 
 The arrays given for each column have to be equal length:
 
-```{code-cell} python3
+```{code-cell} ipython3
 assert len(array_x) == len(array_y) == len(array_z)
 ```
 
 The dictionary key defines a column name in RDataFrame.
 
-```{code-cell} python3
+```{code-cell} ipython3
 df = ak.to_rdataframe({"x": array_x, "y": array_y, "z": array_z})
 ```
 
@@ -62,7 +62,7 @@ The {func} `ak.to_rdataframe` function presents a generated on demand Awkward Ar
 
 The column readers are generated based on the run-time type of the views. Here is a description of the `RDataFrame` columns:
 
-```{code-cell} python3
+```{code-cell} ipython3
 df.Describe().Print()
 ```
 
@@ -80,7 +80,7 @@ The function for `RDataFrame`  → Awkward conversion is {func}`ak.from_rdatafra
 
 type.
 
-```{code-cell} python3
+```{code-cell} ipython3
 array = ak.from_rdataframe(
     df,
     columns=(
