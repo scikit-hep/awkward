@@ -30,22 +30,24 @@ def _to_rectilinear(arg):
         return tuple(nplike.to_rectilinear(x) for x in arg)
     else:
         nplike = ak._nplikes.nplike_of(arg)
-        nplike.to_rectilinear(arg)
+        return nplike.to_rectilinear(arg)
 
 
-def array_function(func, types, args, kwargs):
+def array_function(func, types, args, kwargs, behavior):
     function = implemented.get(func)
     if function is None:
-        args = tuple(_to_rectilinear(x) for x in args)
-        kwargs = {k: _to_rectilinear(v) for k, v in kwargs.items()}
-        out = func(*args, **kwargs)
-        nplike = ak._nplikes.nplike_of(out)
-        if isinstance(out, nplike.ndarray) and len(out.shape) != 0:
-            return ak.Array(out)
-        else:
-            return out
+        rectilinear_args = tuple(_to_rectilinear(x) for x in args)
+        rectilinear_kwargs = {k: _to_rectilinear(v) for k, v in kwargs.items()}
+        result = func(*rectilinear_args, **rectilinear_kwargs)
     else:
-        return function(*args, **kwargs)
+        result = function(*args, **kwargs)
+
+    # We want the result to be a layout
+    out = ak.operations.ak_to_layout._impl(result, allow_record=True, allow_other=True)
+    if isinstance(out, (ak.contents.Content, ak.record.Record)):
+        return ak._util.wrap(out, behavior=behavior)
+    else:
+        return out
 
 
 def implements(numpy_function):
@@ -57,8 +59,15 @@ def implements(numpy_function):
 
 
 def _array_ufunc_custom_cast(inputs, behavior):
+    args = [
+        ak._util.wrap(x, behavior)
+        if isinstance(x, (ak.contents.Content, ak.record.Record))
+        else x
+        for x in inputs
+    ]
+
     nextinputs = []
-    for x in inputs:
+    for x in args:
         cast_fcn = ak._util.custom_cast(x, behavior)
         if cast_fcn is not None:
             x = cast_fcn(x)

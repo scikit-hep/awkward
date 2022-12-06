@@ -121,7 +121,7 @@ def to_dataframe(
               3         4.0  NaN
     """
     with ak._errors.OperationErrorContext(
-        "ak.to_layout",
+        "ak.to_dataframe",
         dict(
             array=array,
             how=how,
