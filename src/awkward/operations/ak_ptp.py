@@ -33,16 +33,16 @@ def ptp(array, axis=None, *, keepdims=False, mask_identity=True, flatten_records
     if all lists at a given dimension have the same length and no None values,
     but it generalizes to cases where they do not.
 
-    For example, with an `array` like
+    For example, with
 
-        ak.Array([[0, 1, 2, 3],
-                  [          ],
-                  [4, 5      ]])
+        >>> array = ak.Array([[0, 1, 2, 3],
+        ...                   [          ],
+        ...                   [4, 5      ]])
 
     The range of the innermost lists is
 
         >>> ak.ptp(array, axis=-1)
-        <Array [3, None, 1] type='3 * ?float64'>
+        <Array [3, None, 1] type='3 * ?int64'>
 
     because there are three lists, the first has a range of `3`, the second is
     `None` because the list is empty, and the third has a range of `1`. Similarly,

@@ -98,6 +98,7 @@ def from_json(
     recognized by URI protocol (like "https://" or "s3://") and handled by fsspec
     (which must be installed).
 
+        >>> import pathlib
         >>> with open("tmp.json", "w") as file:
         ...     file.write("[[1.1, 2.2, 3.3], [], [4.4, 5.5]]")
         ...
@@ -136,6 +137,7 @@ def from_json(
 
     Consider
 
+        >>> import json
         >>> json_data = "[[1.1, 2.2, 3.3], [], [4.4, 5.5]]"
         >>> ak.from_iter(json.loads(json_data))
         <Array [[1.1, 2.2, 3.3], [], [4.4, 5.5]] type='3 * var * float64'>
@@ -144,11 +146,11 @@ def from_json(
 
     and
 
-        >>> json_data = '{"x": 1.1, "y": [1, 2, 3]}'
+        >>> json_data = '{"x": 1.1, "y": [1, 2]}'
         >>> ak.from_iter(json.loads(json_data))
-        <Record {x: 1.1, y: [1, 2, 3]} type='{"x": float64, "y": var * int64}'>
+        <Record {x: 1.1, y: [1, 2]} type='{x: float64, y: var * int64}'>
         >>> ak.from_json(json_data)
-        <Record {x: 1.1, y: [1, 2, 3]} type='{"x": float64, "y": var * int64}'>
+        <Record {x: 1.1, y: [1, 2]} type='{x: float64, y: var * int64}'>
 
     As shown above, reading JSON may result in #ak.Array or #ak.Record, but line-delimited
     (`line_delimited=True`) only results in #ak.Array:

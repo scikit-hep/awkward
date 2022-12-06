@@ -22,13 +22,13 @@ def from_regular(array, axis=1, *, highlevel=True, behavior=None):
     Converts a regular axis into an irregular one.
 
         >>> regular = ak.Array(np.arange(2*3*5).reshape(2, 3, 5))
-        >>> print(regular.type)
+        >>> regular.type.show()
         2 * 3 * 5 * int64
-        >>> print(ak.from_regular(regular).type)
+        >>> ak.from_regular(regular).type.show()
         2 * var * 5 * int64
-        >>> print(ak.from_regular(regular, axis=2).type)
+        >>> ak.from_regular(regular, axis=2).type.show()
         2 * 3 * var * int64
-        >>> print(ak.from_regular(regular, axis=-1).type)
+        >>> ak.from_regular(regular, axis=-1).type.show()
         2 * 3 * var * int64
 
     See also #ak.to_regular.

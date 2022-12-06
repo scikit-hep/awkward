@@ -37,10 +37,10 @@ def sum(
     For example, consider this `array`, in which all lists at a given dimension
     have the same length.
 
-        ak.Array([[ 0.1,  0.2,  0.3],
-                  [10.1, 10.2, 10.3],
-                  [20.1, 20.2, 20.3],
-                  [30.1, 30.2, 30.3]])
+        >>> array = ak.Array([[ 0.1,  0.2,  0.3],
+        ...                   [10.1, 10.2, 10.3],
+        ...                   [20.1, 20.2, 20.3],
+        ...                   [30.1, 30.2, 30.3]])
 
     A sum over `axis=-1` combines the inner lists, leaving one value per
     outer list:
@@ -56,10 +56,10 @@ def sum(
 
     Now with some values missing,
 
-        ak.Array([[ 0.1,  0.2      ],
-                  [10.1            ],
-                  [20.1, 20.2, 20.3],
-                  [30.1, 30.2      ]])
+        >>> array = ak.Array([[ 0.1,  0.2      ],
+        ...                   [10.1            ],
+        ...                   [20.1, 20.2, 20.3],
+        ...                   [30.1, 30.2      ]])
 
     The sum over `axis=-1` results in
 
@@ -90,10 +90,10 @@ def sum(
 
     The same is true if the values were None, rather than gaps:
 
-        ak.Array([[ 0.1,  0.2, None],
-                  [10.1, None, None],
-                  [20.1, 20.2, 20.3],
-                  [30.1, 30.2, None]])
+        >>> array = ak.Array([[ 0.1,  0.2, None],
+        ...                   [10.1, None, None],
+        ...                   [20.1, 20.2, 20.3],
+        ...                   [30.1, 30.2, None]])
 
         >>> ak.sum(array, axis=-1)
         <Array [0.3, 10.1, 60.6, 60.3] type='4 * float64'>
@@ -103,10 +103,10 @@ def sum(
     However, the missing value placeholder, None, allows us to align the
     remaining data differently:
 
-        ak.Array([[None,  0.1,  0.2],
-                  [None, None, 10.1],
-                  [20.1, 20.2, 20.3],
-                  [None, 30.1, 30.2]])
+        >>> array = ak.Array([[None,  0.1,  0.2],
+        ...                   [None, None, 10.1],
+        ...                   [20.1, 20.2, 20.3],
+        ...                   [None, 30.1, 30.2]])
 
     Now the `axis=-1` result is the same but the `axis=0` result has changed:
 
@@ -123,10 +123,10 @@ def sum(
 
     If, instead of missing numbers, we had missing lists,
 
-        ak.Array([[ 0.1,  0.2,  0.3],
-                  None,
-                  [20.1, 20.2, 20.3],
-                  [30.1, 30.2, 30.3]])
+        >>> array = ak.Array([[ 0.1,  0.2,  0.3],
+        ...                   None,
+        ...                   [20.1, 20.2, 20.3],
+        ...                   [30.1, 30.2, 30.3]])
 
     then the placeholder would pass through the `axis=-1` sum because summing
     over the inner dimension shouldn't change the length of the outer

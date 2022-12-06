@@ -56,36 +56,30 @@ def zip(
     Zipping them together using a dict creates a collection of records with
     the same nesting structure as `one` and `two`.
 
-        >>> ak.to_list(ak.zip({"x": one, "y": two}))
-        [
-         [{'x': 1.1, 'y': 'a'}, {'x': 2.2, 'y': 'b'}, {'x': 3.3, 'y': 'c'}],
+        >>> ak.zip({"x": one, "y": two}).show()
+        [[{x: 1.1, y: 'a'}, {x: 2.2, y: 'b'}, {x: 3.3, y: 'c'}],
          [],
-         [{'x': 4.4, 'y': 'd'}, {'x': 5.5, 'y': 'e'}],
-         [{'x': 6.6, 'y': 'f'}]
-        ]
+         [{x: 4.4, y: 'd'}, {x: 5.5, y: 'e'}],
+         [{x: 6.6, y: 'f'}]]
 
     Doing so with a list creates tuples, whose fields are not named.
 
-        >>> ak.to_list(ak.zip([one, two]))
-        [
-         [(1.1, 'a'), (2.2, 'b'), (3.3, 'c')],
+        >>> ak.zip([one, two]).show()
+        [[(1.1, 'a'), (2.2, 'b'), (3.3, 'c')],
          [],
          [(4.4, 'd'), (5.5, 'e')],
-         [(6.6, 'f')]
-        ]
+         [(6.6, 'f')]]
 
     Adding a third array with the same length as `one` and `two` but less
     internal structure is okay: it gets broadcasted to match the others.
     (See #ak.broadcast_arrays for broadcasting rules.)
 
         >>> three = ak.Array([100, 200, 300, 400])
-        >>> ak.to_list(ak.zip([one, two, three]))
-        [
-         [[(1.1, 97, 100)], [(2.2, 98, 100)], [(3.3, 99, 100)]],
+        >>> ak.zip([one, two, three]).show()
+        [[(1.1, 'a', 100), (2.2, 'b', 100), (3.3, 'c', 100)],
          [],
-         [[(4.4, 100, 300)], [(5.5, 101, 300)]],
-         [[(6.6, 102, 400)]]
-        ]
+         [(4.4, 'd', 300), (5.5, 'e', 300)],
+         [(6.6, 'f', 400)]]
 
     However, if arrays have the same depth but different lengths of nested
     lists, attempting to zip them together is a broadcasting error.
@@ -93,13 +87,24 @@ def zip(
         >>> one = ak.Array([[[1, 2, 3], [], [4, 5], [6]], [], [[7, 8]]])
         >>> two = ak.Array([[[1.1, 2.2], [3.3], [4.4], [5.5]], [], [[6.6]]])
         >>> ak.zip([one, two])
-        ValueError: in ListArray64, cannot broadcast nested list
+        ValueError: while calling
+            ak.zip(
+                arrays = [<Array [[[1, 2, 3], [], [4, ...], [6]], ...] type='3 * var ...
+                depth_limit = None
+                parameters = None
+                with_name = None
+                right_broadcast = False
+                optiontype_outside_record = False
+                highlevel = True
+                behavior = None
+            )
+        Error details: cannot broadcast nested list
 
     For this, one can set the `depth_limit` to prevent the operation from
     attempting to broadcast what can't be broadcasted.
 
-        >>> ak.to_list(ak.zip([one, two], depth_limit=1))
-        [([[1, 2, 3], [], [4, 5], [6]], [[1.1, 2.2], [3.3], [4.4], [5.5]]),
+        >>> ak.zip([one, two], depth_limit=1).show()
+        [([[1, 2, 3], [], [4, ...], [6]], [[1.1, ...], ...]),
          ([], []),
          ([[7, 8]], [[6.6]])]
 
@@ -215,8 +220,7 @@ def _impl(
                 x.purelist_depth == 1
                 or (
                     x.purelist_depth == 2
-                    and x.purelist_parameter("__array__")
-                    in ("string", "bytestring", "categorical")
+                    and x.purelist_parameter("__array__") in ("string", "bytestring")
                 )
                 for x in inputs
             )

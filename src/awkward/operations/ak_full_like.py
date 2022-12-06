@@ -47,16 +47,10 @@ def full_like(array, fill_value, *, dtype=None, highlevel=True, behavior=None):
         ...  False,
         ...  True,
         ...  {"x": 4.4, "y": [1, 2, None, 3, 4]}]])
-        >>> ak.to_list(ak.full_like(array, 12.3))
-        [[{"x": 12.3, "y": []},
-          {"x": 12.3, "y": [12]},
-          {"x": 12.3, "y": [12, 12]}],
+        >>> ak.full_like(array, 12.3).show()
+        [[{x: 12.3, y: []}, {x: 12.3, y: [12]}, {x: 12.3, y: [12, 12]}],
          [],
-         [{"x": 12.3, "y": [12, 12, None, 12]},
-          True,
-          True,
-          True,
-          {"x": 12.3, "y": [12, 12, None, 12, 12]}]]
+         [{x: 12.3, y: [12, 12, None, 12]}, True, ..., True, {x: 12.3, y: [12, ...]}]]
 
     The `"x"` values get filled in with `12.3` because they retain their type
     (`float64`) and the `"y"` list items get filled in with `12` because they

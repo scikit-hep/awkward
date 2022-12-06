@@ -20,8 +20,15 @@ def singletons(array, *, highlevel=True, behavior=None):
     For example,
 
         >>> array = ak.Array([1.1, 2.2, None, 3.3, None, None, 4.4, 5.5])
-        >>> print(ak.singletons(array))
-        [[1.1], [2.2], [], [3.3], [], [], [4.4], [5.5]]
+        >>> ak.singletons(array).show()
+        [[1.1],
+         [2.2],
+         [],
+         [3.3],
+         [],
+         [],
+         [4.4],
+         [5.5]]
 
     See #ak.firsts to invert this function.
     """

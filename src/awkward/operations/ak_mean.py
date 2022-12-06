@@ -52,14 +52,14 @@ def mean(
 
     For example, with an `array` like
 
-        ak.Array([[0, 1, 2, 3],
-                  [          ],
-                  [4, 5      ]])
+        >>> array = ak.Array([[0, 1, 2, 3],
+                              [          ],
+                              [4, 5      ]])
 
     The mean of the innermost lists is
 
         >>> ak.mean(array, axis=-1)
-        <Array [1.5, None, 4.5] type='3 * ?float64'>
+        <Array [1.5, nan, 4.5] type='3 * float64'>
 
     because there are three lists, the first has mean `1.5`, the second is
     empty, and the third has mean `4.5`.
@@ -67,7 +67,7 @@ def mean(
     The mean of the outermost lists is
 
         >>> ak.mean(array, axis=0)
-        <Array [2, 3, 2, 3] type='4 * ?float64'>
+        <Array [2, 3, 2, 3] type='4 * float64'>
 
     because the longest list has length 4, the mean of `0` and `4` is `2.0`,
     the mean of `1` and `5` is `3.0`, the mean of `2` (by itself) is `2.0`,

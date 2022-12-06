@@ -144,6 +144,13 @@ def to_parquet(
 
         >>> array1 = ak.Array([[1, 2, 3], [], [4, 5], [], [], [6, 7, 8, 9]])
         >>> ak.to_parquet(array1, "array1.parquet")
+        <pyarrow._parquet.FileMetaData object at 0x7f646c38ff40>
+          created_by: parquet-cpp-arrow version 9.0.0
+          num_columns: 1
+          num_rows: 6
+          num_row_groups: 1
+          format_version: 2.6
+          serialized_size: 0
 
     If the `array` does not contain records at top-level, the Arrow table will consist
     of one field whose name is `""` iff. `extensionarray` is False.

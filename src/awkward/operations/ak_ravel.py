@@ -20,23 +20,29 @@ def ravel(array, *, highlevel=True, behavior=None):
 
     This is the equivalent of NumPy's `np.ravel` for Awkward Arrays.
 
-    Consider the following doubly nested `array`.
+    Consider the following:
 
-        ak.Array([[
-                   [1.1, 2.2, 3.3],
-                   [],
-                   [4.4, 5.5],
-                   [6.6]],
-                  [],
-                  [
-                   [7.7],
-                   [8.8, 9.9]
-                  ]])
+        >>> array = ak.Array([[[1.1, 2.2, 3.3],
+        ...                    [],
+        ...                    [4.4, 5.5],
+        ...                    [6.6]],
+        ...                   [],
+        ...                   [[7.7],
+        ...                    [8.8, 9.9]
+        ...                   ]])
 
     Ravelling the array produces a flat array
 
-        >>> print(ak.ravel(array))
-        [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]
+        >>> ak.ravel(array).show()
+        [1.1,
+         2.2,
+         3.3,
+         4.4,
+         5.5,
+         6.6,
+         7.7,
+         8.8,
+         9.9]
 
     Missing values are not eliminated by flattening. See #ak.flatten with
     `axis=None` for an equivalent function that eliminates the option type.
