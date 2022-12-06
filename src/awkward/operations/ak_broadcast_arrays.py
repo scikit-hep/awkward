@@ -6,10 +6,27 @@ np = ak._nplikes.NumpyMetadata.instance()
 
 
 @ak._connect.numpy.implements("broadcast_arrays")
-def broadcast_arrays(*arrays, **kwargs):
+def broadcast_arrays(
+    *arrays,
+    depth_limit=None,
+    broadcast_parameters_rule="one_to_one",
+    left_broadcast=True,
+    right_broadcast=True,
+    highlevel=True,
+    behavior=None
+):
     """
     Args:
-        arrays: Arrays to broadcast into the same structure.
+        arrays: Array-like data (anything #ak.to_layout recognizes).
+        depth_limit (None or int, default is None): If None, attempt to fully
+            broadcast the `arrays` to all levels. If an int, limit the number
+            of dimensions that get broadcasted. The minimum value is `1`,
+            for no broadcasting.
+        broadcast_parameters_rule (str): Rule for broadcasting parameters, one of:
+            - `"intersect"`
+            - `"all_or_nothing"`
+            - `"one_to_one"`
+            - `"none"`
         left_broadcast (bool): If True, follow rules for implicit
             left-broadcasting, as described below.
         right_broadcast (bool): If True, follow rules for implicit
@@ -18,10 +35,6 @@ def broadcast_arrays(*arrays, **kwargs):
             otherwise, return a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
-        depth_limit (None or int, default is None): If None, attempt to fully
-            broadcast the `arrays` to all levels. If an int, limit the number
-            of dimensions that get broadcasted. The minimum value is `1`,
-            for no broadcasting.
 
     Like NumPy's
     [broadcast_arrays](https://docs.scipy.org/doc/numpy/reference/generated/numpy.broadcast_arrays.html)
@@ -53,7 +66,18 @@ def broadcast_arrays(*arrays, **kwargs):
 
         >>> ak.broadcast_arrays(np.array([1, 2]),
         ...                     np.array([[0.1, 0.2, 0.3], [10, 20, 30]]))
-        ValueError: cannot broadcast RegularArray of size 2 with RegularArray of size 3
+        ValueError: while calling
+            ak.broadcast_arrays(
+                arrays = (array([1, 2]), array([[ 0.1,  0.2,  0.3],
+               [10. , 20....
+                depth_limit = None
+                broadcast_parameters_rule = 'one_to_one'
+                left_broadcast = True
+                right_broadcast = True
+                highlevel = True
+                behavior = None
+            )
+        Error details: cannot broadcast RegularArray of size 2 with RegularArray of size 3
 
     NumPy has the same behavior: arrays with different numbers of dimensions
     are aligned to the right before expansion. One can control this by
@@ -101,12 +125,12 @@ def broadcast_arrays(*arrays, **kwargs):
     Awkward Array's broadcasting manages to have it both ways by applying the
     following rules:
 
-       * If all dimensions are regular (i.e. #ak.types.RegularType), like NumPy,
-         implicit broadcasting aligns to the right, like NumPy.
-       * If any dimension is variable (i.e. #ak.types.ListType), which can
-         never be true of NumPy, implicit broadcasting aligns to the left.
-       * Explicit broadcasting with a length-1 regular dimension always
-         broadcasts, like NumPy.
+    * If all dimensions are regular (i.e. #ak.types.RegularType), like NumPy,
+      implicit broadcasting aligns to the right, like NumPy.
+    * If any dimension is variable (i.e. #ak.types.ListType), which can
+      never be true of NumPy, implicit broadcasting aligns to the left.
+    * Explicit broadcasting with a length-1 regular dimension always
+      broadcasts, like NumPy.
 
     Thus, it is important to be aware of the distinction between a dimension
     that is declared to be regular in the type specification and a dimension
@@ -121,48 +145,63 @@ def broadcast_arrays(*arrays, **kwargs):
         >>> one = ak.Array([[[1, 2, 3], [], [4, 5], [6]], [], [[7, 8]]])
         >>> two = ak.Array([[[1.1, 2.2], [3.3], [4.4], [5.5]], [], [[6.6]]])
         >>> ak.broadcast_arrays(one, two)
-        ValueError: in ListArray64, cannot broadcast nested list
+        ValueError: while calling
+            ak.broadcast_arrays(
+                arrays = (<Array [[[1, 2, 3], [], [4, ...], [6]], ...] type='3 * var ...
+                depth_limit = None
+                broadcast_parameters_rule = 'one_to_one'
+                left_broadcast = True
+                right_broadcast = True
+                highlevel = True
+                behavior = None
+            )
+        Error details: cannot broadcast nested list
 
     For this, one can set the `depth_limit` to prevent the operation from
     attempting to broadcast what can't be broadcasted.
 
         >>> this, that = ak.broadcast_arrays(one, two, depth_limit=1)
-        >>> ak.to_list(this)
-        [[[1, 2, 3], [], [4, 5], [6]], [], [[7, 8]]]
-        >>> ak.to_list(that)
-        [[[1.1, 2.2], [3.3], [4.4], [5.5]], [], [[6.6]]]
+        >>> this.show()
+        [[[1, 2, 3], [], [4, 5], [6]],
+         [],
+         [[7, 8]]]
+        >>> that.show()
+        [[[1.1, 2.2], [3.3], [4.4], [5.5]],
+         [],
+         [[6.6]]]
     """
     with ak._errors.OperationErrorContext(
         "ak.broadcast_arrays",
-        dict(arrays=arrays, kwargs=kwargs),
+        dict(
+            arrays=arrays,
+            depth_limit=depth_limit,
+            broadcast_parameters_rule=broadcast_parameters_rule,
+            left_broadcast=left_broadcast,
+            right_broadcast=right_broadcast,
+            highlevel=highlevel,
+            behavior=behavior,
+        ),
     ):
-        return _impl(arrays, kwargs)
+        return _impl(
+            arrays,
+            depth_limit,
+            broadcast_parameters_rule,
+            left_broadcast,
+            right_broadcast,
+            highlevel,
+            behavior,
+        )
 
 
-def _impl(arrays, kwargs):
-    (
-        highlevel,
-        behavior,
-        depth_limit,
-        left_broadcast,
-        right_broadcast,
-        broadcast_parameters_rule,
-    ) = ak._util.extra(
-        (),
-        kwargs,
-        [
-            ("highlevel", True),
-            ("behavior", None),
-            ("depth_limit", None),
-            ("left_broadcast", True),
-            ("right_broadcast", True),
-            (
-                "broadcast_parameters_rule",
-                ak._broadcasting.BroadcastParameterRule.ONE_TO_ONE,
-            ),
-        ],
-    )
-
+def _impl(
+    arrays,
+    depth_limit,
+    broadcast_parameters_rule,
+    left_broadcast,
+    right_broadcast,
+    highlevel,
+    behavior,
+):
     inputs = []
     for x in arrays:
         y = ak.operations.to_layout(x, allow_record=True, allow_other=True)

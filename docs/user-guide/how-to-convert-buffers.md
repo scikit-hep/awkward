@@ -29,11 +29,13 @@ From Awkward to buffers
 Consider the following complex array:
 
 ```{code-cell} ipython3
-ak_array = ak.Array([
-    [{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}, {"x": 3.3, "y": [1, 2, 3]}],
-    [],
-    [{"x": 4.4, "y": [1, 2, 3, 4]}, {"x": 5.5, "y": [1, 2, 3, 4, 5]}],
-])
+ak_array = ak.Array(
+    [
+        [{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}, {"x": 3.3, "y": [1, 2, 3]}],
+        [],
+        [{"x": 4.4, "y": [1, 2, 3, 4]}, {"x": 5.5, "y": [1, 2, 3, 4, 5]}],
+    ]
+)
 ak_array
 ```
 
@@ -51,7 +53,7 @@ The pieces needed to reconstitute this array are:
 
 The {class}`ak.forms.Form` is like an Awkward {class}`ak.types.Type` in that it describes how the data are structured, but with more detail: it includes distinctions such as the difference between {class}`ak.contents.ListArray` and {class}`ak.contents.ListOffsetArray`, as well as the integer types of structural {class}`ak.index.Index`.
 
-It is usually presented as JSON, and has a compact JSON format (when {method}`ak.forms.Form.tojson` is invoked).
+It is usually presented as JSON, and has a compact JSON format (when {meth}`ak.forms.Form.tojson` is invoked).
 
 ```{code-cell} ipython3
 form
@@ -90,9 +92,7 @@ unpacked = ak.Array(
     ak.contents.ListArray(
         ak.index.Index64(np.array([4, 10, 1])),
         ak.index.Index64(np.array([7, 10, 3])),
-        ak.contents.NumpyArray(
-            np.array([999, 4.4, 5.5, 999, 1.1, 2.2, 3.3, 999])
-        )
+        ak.contents.NumpyArray(np.array([999, 4.4, 5.5, 999, 1.1, 2.2, 3.3, 999])),
     )
 )
 unpacked
@@ -170,7 +170,7 @@ group.attrs["form"]
 ```
 
 ```{code-cell} ipython3
-group.attrs["length"] = json.dumps(length)   # JSON-encode it because it might be a list
+group.attrs["length"] = json.dumps(length)  # JSON-encode it because it might be a list
 group.attrs["length"]
 ```
 

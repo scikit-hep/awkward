@@ -8,11 +8,11 @@ import awkward as ak
 np = ak._nplikes.NumpyMetadata.instance()
 
 
-def with_field(base, what, where=None, *, highlevel=True, behavior=None):
+def with_field(array, what, where=None, *, highlevel=True, behavior=None):
     """
     Args:
-        base: Data containing records or tuples.
-        what: Data to add as a new field.
+        array: Array-like data (anything #ak.to_layout recognizes).
+        what: Array-like data (anything #ak.to_layout recognizes) to add as a new field.
         where (None or str or non-empy iterable of str): If None, the new field
             has no name (can be accessed as an integer slot number in a
             string); If str, the name of the new field. If iterable, it is
@@ -33,9 +33,11 @@ def with_field(base, what, where=None, *, highlevel=True, behavior=None):
     """
     with ak._errors.OperationErrorContext(
         "ak.with_field",
-        dict(base=base, what=what, where=where, highlevel=highlevel, behavior=behavior),
+        dict(
+            array=array, what=what, where=where, highlevel=highlevel, behavior=behavior
+        ),
     ):
-        return _impl(base, what, where, highlevel, behavior)
+        return _impl(array, what, where, highlevel, behavior)
 
 
 def _impl(base, what, where, highlevel, behavior):

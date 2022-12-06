@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.10.3
+    jupytext_version: 1.14.1
 kernelspec:
   display_name: Python 3
   language: python
@@ -50,7 +50,9 @@ ak.flatten(ak.Array([[[[[[1.1, 2.2, 3.3]]], [[[4.4, 5.5]]]]]]), axis=None)
 However, be aware that {func}`ak.flatten` with `axis=None` will also merge all fields of a record, which is usually undesirable, and the order might not be what you expect.
 
 ```{code-cell} ipython3
-ak.flatten(ak.Array([{"x": 1.1, "y": 10}, {"x": 2.2, "y": 20}, {"x": 3.3, "y": 30}]), axis=None)
+ak.flatten(
+    ak.Array([{"x": 1.1, "y": 10}, {"x": 2.2, "y": 20}, {"x": 3.3, "y": 30}]), axis=None
+)
 ```
 
 Also be aware that flattening (for any `axis`) removes missing values (at that `axis`). That is, at the level where lists are concatenated, missing lists are treated the same way as empty lists.
@@ -156,13 +158,15 @@ Record fields into lists
 Sometimes, the data you need to put into one big array (tensor) for machine learning is scattered among several record fields. In Awkward Array, record fields are discontiguous (are stored in separate arrays) and nested lists are contiguous (same array). This will require a copy using {func}`ak.concatenate`.
 
 ```{code-cell} ipython3
-array = ak.Array([
-    {"a": 11, "b": 12, "c": 13, "d": 14, "e": 15, "f": 16, "g": 17, "h": 18},
-    {"a": 21, "b": 22, "c": 23, "d": 24, "e": 25, "f": 26, "g": 27, "h": 28},
-    {"a": 31, "b": 32, "c": 33, "d": 34, "e": 35, "f": 36, "g": 37, "h": 38},
-    {"a": 41, "b": 42, "c": 43, "d": 44, "e": 45, "f": 46, "g": 47, "h": 48},
-    {"a": 51, "b": 52, "c": 53, "d": 54, "e": 55, "f": 56, "g": 57, "h": 58},
-])
+array = ak.Array(
+    [
+        {"a": 11, "b": 12, "c": 13, "d": 14, "e": 15, "f": 16, "g": 17, "h": 18},
+        {"a": 21, "b": 22, "c": 23, "d": 24, "e": 25, "f": 26, "g": 27, "h": 28},
+        {"a": 31, "b": 32, "c": 33, "d": 34, "e": 35, "f": 36, "g": 37, "h": 38},
+        {"a": 41, "b": 42, "c": 43, "d": 44, "e": 45, "f": 46, "g": 47, "h": 48},
+        {"a": 51, "b": 52, "c": 53, "d": 54, "e": 55, "f": 56, "g": 57, "h": 58},
+    ]
+)
 array
 ```
 

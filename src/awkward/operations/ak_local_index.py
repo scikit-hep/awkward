@@ -8,7 +8,7 @@ np = ak._nplikes.NumpyMetadata.instance()
 def local_index(array, axis=-1, *, highlevel=True, behavior=None):
     """
     Args:
-        array: Array to index.
+        array: Array-like data (anything #ak.to_layout recognizes).
         axis (int): The dimension at which this operation is applied. The
             outermost dimension is `0`, followed by `1`, etc., and negative
             values count backward from the innermost: `-1` is the innermost
@@ -30,20 +30,18 @@ def local_index(array, axis=-1, *, highlevel=True, behavior=None):
         >>> ak.local_index(array, axis=1)
         <Array [[0, 1], [0], [], [0, 1, 2]] type='4 * var * int64'>
         >>> ak.local_index(array, axis=2)
-        <Array [[[0, 1, 2], []], ... [], [0, 1, 2, 3]]] type='4 * var * var * int64'>
+        <Array [[[0, 1, 2], []], ..., [[0], ..., [...]]] type='4 * var * var * int64'>
 
     Note that you can make a Pandas-style MultiIndex by calling this function on
     every axis.
 
         >>> multiindex = ak.zip([ak.local_index(array, i) for i in range(array.ndim)])
-        >>> multiindex
-        <Array [[[(0, 0, 0), (0, 0, ... ), (3, 2, 3)]]] type='4 * var * var * (int64, in...'>
-        >>> ak.to_list(multiindex)
+        >>> multiindex.show()
         [[[(0, 0, 0), (0, 0, 1), (0, 0, 2)], []],
          [[(1, 0, 0), (1, 0, 1)]],
          [],
          [[(3, 0, 0)], [], [(3, 2, 0), (3, 2, 1), (3, 2, 2), (3, 2, 3)]]]
-        >>> ak.to_list(ak.flatten(ak.flatten(multiindex)))
+        >>> ak.flatten(ak.flatten(multiindex)).show()
         [(0, 0, 0),
          (0, 0, 1),
          (0, 0, 2),

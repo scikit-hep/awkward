@@ -100,8 +100,7 @@ def to_buffers(
         >>> length
         3
         >>> container
-        {'node0-offsets': array([0, 3, 3, 5], dtype=int64),
-         'node1-data': array([1, 2, 3, 4, 5])}
+        {'node0-offsets': array([0, 3, 3, 5]), 'node1-data': array([1, 2, 3, 4, 5])}
 
     which may be read back with
 

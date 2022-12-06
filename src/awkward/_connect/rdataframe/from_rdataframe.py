@@ -166,6 +166,12 @@ def from_rdataframe(data_frame, columns):
 
         else:  # Convert the C++ vectors to Awkward arrays
             form_str = ROOT.awkward.type_to_form[col_type](0)
+
+            if form_str == "unsupported type":
+                raise ak._errors.wrap_error(
+                    TypeError(f'"{col}" column\'s type "{col_type}" is not supported.')
+                )
+
             form = ak.forms.from_json(form_str)
 
             list_depth = form.purelist_depth

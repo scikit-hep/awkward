@@ -10,7 +10,7 @@ np = ak._nplikes.NumpyMetadata.instance()
 def unflatten(array, counts, axis=0, *, highlevel=True, behavior=None):
     """
     Args:
-        array: Data to create an array with an additional level from.
+        array: Array-like data (anything #ak.to_layout recognizes).
         counts (int or array): Number of elements the new level should have.
             If an integer, the new level will be regularly sized; otherwise,
             it will consist of variable-length lists with the given lengths.
@@ -37,7 +37,7 @@ def unflatten(array, counts, axis=0, *, highlevel=True, behavior=None):
         >>> array
         <Array [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] type='10 * int64'>
         >>> ak.unflatten(array, counts)
-        <Array [[0, 1, 2], [], ... [5], [6, 7, 8, 9]] type='5 * var * int64'>
+        <Array [[0, 1, 2], [], [3, ...], [5], [6, 7, 8, 9]] type='5 * var * int64'>
 
     An inner dimension can be unflattened by setting the `axis` parameter, but
     operations like this constrain the `counts` more tightly.
@@ -45,16 +45,25 @@ def unflatten(array, counts, axis=0, *, highlevel=True, behavior=None):
     For example, we can subdivide an already divided list:
 
         >>> original = ak.Array([[1, 2, 3, 4], [], [5, 6, 7], [8, 9]])
-        >>> print(ak.unflatten(original, [2, 2, 1, 2, 1, 1], axis=1))
-        [[[1, 2], [3, 4]], [], [[5], [6, 7]], [[8], [9]]]
+        >>> ak.unflatten(original, [2, 2, 1, 2, 1, 1], axis=1).show()
+        [[[1, 2], [3, 4]],
+         [],
+         [[5], [6, 7]],
+         [[8], [9]]]
 
     But the counts have to add up to the lengths of those lists. We can't mix
     values from the first `[1, 2, 3, 4]` with values from the next `[5, 6, 7]`.
 
-        >>> print(ak.unflatten(original, [2, 1, 2, 2, 1, 1], axis=1))
-        Traceback (most recent call last):
-        ...
-        ValueError: structure imposed by 'counts' does not fit in the array at axis=1
+        >>> ak.unflatten(original, [2, 1, 2, 2, 1, 1], axis=1).show()
+        ValueError: while calling
+            ak.unflatten(
+                array = <Array [[1, 2, 3, 4], [], ..., [8, 9]] type='4 * var * int64'>
+                counts = [2, 1, 2, 2, 1, 1]
+                axis = 1
+                highlevel = True
+                behavior = None
+            )
+        Error details: structure imposed by 'counts' does not fit in the array or partition at axis=1
 
     Also note that new lists created by this function cannot cross partitions
     (which is only possible at `axis=0`, anyway).

@@ -5,10 +5,13 @@ import awkward as ak
 
 def to_cupy(array):
     """
+    Args:
+        array: Array-like data (anything #ak.to_layout recognizes).
+
     Converts `array` (many types supported) into a CuPy array, if possible.
 
     If the data are numerical and regular (nested lists have equal lengths
-    in each dimension, as described by the #type), they can be losslessly
+    in each dimension, as described by the #ak.Array.type), they can be losslessly
     converted to a CuPy array and this function returns without an error.
 
     Otherwise, the function raises an error.

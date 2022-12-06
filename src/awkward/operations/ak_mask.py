@@ -8,7 +8,7 @@ np = ak._nplikes.NumpyMetadata.instance()
 def mask(array, mask, *, valid_when=True, highlevel=True, behavior=None):
     """
     Args:
-        array: Data to mask, rather than filter.
+        array: Array-like data (anything #ak.to_layout recognizes).
         mask (array of booleans): The mask that overlays elements in the
             `array` with None. Must have the same length as `array`.
         valid_when (bool): If True, True values in `mask` are considered
@@ -28,15 +28,15 @@ def mask(array, mask, *, valid_when=True, highlevel=True, behavior=None):
     calculations with it, such as
     [universal functions](https://docs.scipy.org/doc/numpy/reference/ufuncs.html).
 
-    For example, with an `array` like
+    For example, with
 
-        ak.Array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+        >>> array = ak.Array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
 
     with a boolean selection of `good` elements like
 
         >>> good = (array % 2 == 1)
         >>> good
-        <Array [False, True, False, ... False, True] type='10 * bool'>
+        <Array [False, True, False, True, ..., True, False, True] type='10 * bool'>
 
     could be used to filter the original `array` (or another with the same
     length).
@@ -48,14 +48,14 @@ def mask(array, mask, *, valid_when=True, highlevel=True, behavior=None):
     where they were. If we instead use #ak.mask,
 
         >>> ak.mask(array, good)
-        <Array [None, 1, None, 3, ... None, 7, None, 9] type='10 * ?int64'>
+        <Array [None, 1, None, 3, None, 5, None, 7, None, 9] type='10 * ?int64'>
 
     this information and the length of the array is preserved, and it can be
     used in further calculations with the original `array` (or another with
     the same length).
 
         >>> ak.mask(array, good) + array
-        <Array [None, 2, None, 6, ... 14, None, 18] type='10 * ?int64'>
+        <Array [None, 2, None, 6, None, 10, None, 14, None, 18] type='10 * ?int64'>
 
     In particular, successive filters can be applied to the same array.
 
@@ -64,13 +64,13 @@ def mask(array, mask, *, valid_when=True, highlevel=True, behavior=None):
         >>> array = ak.Array([[[0, 1, 2], [], [3, 4], [5]], [[6, 7, 8], [9]]])
         >>> good = (array % 2 == 1)
         >>> good
-        <Array [[[False, True, False], ... [True]]] type='2 * var * var * bool'>
+        <Array [[[False, True, False], ..., [True]], ...] type='2 * var * var * bool'>
 
     it can still be used with #ak.mask because the `array` and `mask`
     parameters are broadcasted.
 
         >>> ak.mask(array, good)
-        <Array [[[None, 1, None], ... None], [9]]] type='2 * var * var * ?int64'>
+        <Array [[[None, 1, None], [], ..., [5]], ...] type='2 * var * var * ?int64'>
 
     See #ak.broadcast_arrays for details about broadcasting and the generalized
     set of broadcasting rules.

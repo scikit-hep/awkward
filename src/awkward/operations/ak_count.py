@@ -35,13 +35,13 @@ def count(
     [shape](https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.shape.html).
 
     However, for nested lists of variable dimension and missing values, the
-    result of counting is non-trivial. For example, with this `array`,
+    result of counting is non-trivial. For example, with this
 
-        ak.Array([[ 0.1,  0.2      ],
-                  [None, 10.2, None],
-                  None,
-                  [20.1, 20.2, 20.3],
-                  [30.1, 30.2      ]])
+        >>> array = ak.Array([[ 0.1,  0.2      ],
+        ...                   [None, 10.2, None],
+        ...                   None,
+        ...                   [20.1, 20.2, 20.3],
+        ...                   [30.1, 30.2      ]])
 
     the result of counting over the innermost dimension is
 

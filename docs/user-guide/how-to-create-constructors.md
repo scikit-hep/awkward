@@ -16,7 +16,7 @@ Direct constructors (fastest)
 
 If you're willing to think about your data in a columnar way, directly constructing layouts and wrapping them in {class}`ak.Array` interfaces is the fastest way to make them. (All other methods do this at some level.)
 
-"Thinking about data in a columnar way" is the crucial difference between this method and [ArrayBuilder](how-to-create-arraybuilder) and [LayoutBuilder](how-to-create-layoutbuilder). Both of the builders let you think about a data structure the way you would think about Python objects, in which all fields of a given record or elements of a list are "together" and one record or list is "separate" from another record or list. For example,
+"Thinking about data in a columnar way" is the crucial difference between this method and [using ArrayBuilder](how-to-create-arraybuilder.md). The builder method lets you think about a data structure the way you would think about Python objects, in which all fields of a given record or elements of a list are "together" and one record or list is "separate" from another record or list. For example,
 
 ```{code-cell} ipython3
 import awkward as ak
@@ -52,7 +52,7 @@ with builder.list():
         with builder.field("y").list():
             builder.integer(3)
             builder.integer(2)
-            
+
     with builder.record():
         builder.field("x").real(5.5)
         with builder.field("y").list():
@@ -137,7 +137,9 @@ ak.Array(ak.contents.EmptyArray())
 Since this is such a simple node type, let's use it to show examples of adding parameters.
 
 ```{code-cell} ipython3
-ak.contents.EmptyArray(parameters={"name1": "value1", "name2": {"more": ["complex", "value"]}})
+ak.contents.EmptyArray(
+    parameters={"name1": "value1", "name2": {"more": ["complex", "value"]}}
+)
 ```
 
 Content >: NumpyArray
@@ -168,11 +170,15 @@ In most array structures, the NumpyArrays only need to be 1-dimensional, since r
 The {class}`ak.from_numpy` function has a `regulararray` argument to choose between putting multiple dimensions into the NumpyArray node or nesting a 1-dimensional NumpyArray in RegularArray nodes.
 
 ```{code-cell} ipython3
-ak.from_numpy(np.array([[1, 2, 3], [4, 5, 6]], np.int16), regulararray=False, highlevel=False)
+ak.from_numpy(
+    np.array([[1, 2, 3], [4, 5, 6]], np.int16), regulararray=False, highlevel=False
+)
 ```
 
 ```{code-cell} ipython3
-ak.from_numpy(np.array([[1, 2, 3], [4, 5, 6]], np.int16), regulararray=True, highlevel=False)
+ak.from_numpy(
+    np.array([[1, 2, 3], [4, 5, 6]], np.int16), regulararray=True, highlevel=False
+)
 ```
 
 All of these representations look the same in an {class}`ak.Array` (high-level view).
@@ -182,7 +188,9 @@ ak.Array(ak.contents.NumpyArray(np.array([[1, 2, 3], [4, 5, 6]])))
 ```
 
 ```{code-cell} ipython3
-ak.Array(ak.contents.RegularArray(ak.contents.NumpyArray(np.array([1, 2, 3, 4, 5, 6])), 3))
+ak.Array(
+    ak.contents.RegularArray(ak.contents.NumpyArray(np.array([1, 2, 3, 4, 5, 6])), 3)
+)
 ```
 
 If you are _producing_ arrays, you can pick any representation that is convenient. If you are _consuming_ arrays, you need to be aware of the different representations.
@@ -208,7 +216,9 @@ ak.Array(layout)
 
 ```{code-cell} ipython3
 layout = ak.contents.RegularArray(
-    ak.from_iter([[], [1], [1, 2], [1, 2, 3], [1, 2, 3, 4], [1, 2, 3, 4, 5]], highlevel=False),
+    ak.from_iter(
+        [[], [1], [1, 2], [1, 2, 3], [1, 2, 3, 4], [1, 2, 3, 4, 5]], highlevel=False
+    ),
     3,
 )
 layout
@@ -312,7 +322,7 @@ For example, here is an array of 5 lists, whose length is approximately 20 each.
 ```{code-cell} ipython3
 layout = ak.contents.ListOffsetArray(
     ak.index.Index64(np.array([0, 18, 42, 59, 83, 100])),
-    ak.contents.NumpyArray(np.arange(100))
+    ak.contents.NumpyArray(np.arange(100)),
 )
 array = ak.Array(layout)
 array[0], array[1], array[2], array[3], array[4]
@@ -353,10 +363,29 @@ ak.Array(
     ak.contents.ListOffsetArray(
         ak.index.Index64(np.array([0, 3, 8, 11, 15])),
         ak.contents.NumpyArray(
-            np.array([104, 101, 121, 116, 104, 101, 114, 101, 121, 111, 117, 103, 117, 121, 115], np.uint8),
-            parameters={"__array__": "byte"}
+            np.array(
+                [
+                    104,
+                    101,
+                    121,
+                    116,
+                    104,
+                    101,
+                    114,
+                    101,
+                    121,
+                    111,
+                    117,
+                    103,
+                    117,
+                    121,
+                    115,
+                ],
+                np.uint8,
+            ),
+            parameters={"__array__": "byte"},
         ),
-        parameters={"__array__": "bytestring"}
+        parameters={"__array__": "bytestring"},
     )
 )
 ```
@@ -368,10 +397,33 @@ ak.Array(
     ak.contents.ListOffsetArray(
         ak.index.Index64(np.array([0, 3, 12, 15, 19])),
         ak.contents.NumpyArray(
-            np.array([104, 101, 121, 226, 128, 148, 226, 128, 148, 226, 128, 148, 121, 111, 117, 103, 117, 121, 115], np.uint8),
-            parameters={"__array__": "char"}
+            np.array(
+                [
+                    104,
+                    101,
+                    121,
+                    226,
+                    128,
+                    148,
+                    226,
+                    128,
+                    148,
+                    226,
+                    128,
+                    148,
+                    121,
+                    111,
+                    117,
+                    103,
+                    117,
+                    121,
+                    115,
+                ],
+                np.uint8,
+            ),
+            parameters={"__array__": "char"},
         ),
-        parameters={"__array__": "string"}
+        parameters={"__array__": "string"},
     )
 )
 ```
@@ -385,11 +437,34 @@ ak.Array(
         ak.contents.ListOffsetArray(
             ak.index.Index64(np.array([0, 3, 12, 15, 19])),
             ak.contents.NumpyArray(
-                np.array([104, 101, 121, 226, 128, 148, 226, 128, 148, 226, 128, 148, 121, 111, 117, 103, 117, 121, 115], np.uint8),
-                parameters={"__array__": "char"}
+                np.array(
+                    [
+                        104,
+                        101,
+                        121,
+                        226,
+                        128,
+                        148,
+                        226,
+                        128,
+                        148,
+                        226,
+                        128,
+                        148,
+                        121,
+                        111,
+                        117,
+                        103,
+                        117,
+                        121,
+                        115,
+                    ],
+                    np.uint8,
+                ),
+                parameters={"__array__": "char"},
             ),
-            parameters={"__array__": "string"}
-        )
+            parameters={"__array__": "string"},
+        ),
     )
 )
 ```
@@ -453,7 +528,9 @@ Since the RecordArray node holds an array for each of its fields, it is possible
 ```{code-cell} ipython3
 content0 = ak.contents.NumpyArray(np.array([1, 2, 3, 4, 5, 6, 7, 8]))
 content1 = ak.contents.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5]))
-content2 = ak.from_iter([[1], [1, 2], [1, 2, 3], [3, 2, 1], [3, 2], [3]], highlevel=False)
+content2 = ak.from_iter(
+    [[1], [1, 2], [1, 2, 3], [3, 2, 1], [3, 2], [3]], highlevel=False
+)
 print(f"{len(content0) = }, {len(content1) = }, {len(content2) = }")
 
 layout = ak.contents.RecordArray([content0, content1, content2], ["x", "y", "z"])
@@ -461,7 +538,9 @@ print(f"{len(layout) = }")
 ```
 
 ```{code-cell} ipython3
-layout = ak.contents.RecordArray([content0, content1, content2], ["x", "y", "z"], length=3)
+layout = ak.contents.RecordArray(
+    [content0, content1, content2], ["x", "y", "z"], length=3
+)
 print(f"{len(layout) = }")
 ```
 
@@ -523,9 +602,9 @@ layout = ak.record.Record(
             "y",
         ],
     ),
-    2
+    2,
 )
-record = ak.Record(layout)   # note the high-level ak.Record, rather than ak.Array
+record = ak.Record(layout)  # note the high-level ak.Record, rather than ak.Array
 record
 ```
 
@@ -546,7 +625,7 @@ layout = ak.contents.RecordArray(
         "x",
         "y",
     ],
-    parameters={"__record__": "Special"}
+    parameters={"__record__": "Special"},
 )
 layout
 ```
@@ -572,6 +651,7 @@ class SpecialRecord(ak.Record):
     def len_y(self):
         return len(self.y)
 
+
 ak.behavior["Special"] = SpecialRecord
 
 ak.Record(layout[2]).len_y()
@@ -581,6 +661,7 @@ ak.Record(layout[2]).len_y()
 class SpecialArray(ak.Array):
     def len_y(self):
         return ak.num(self.y)
+
 
 ak.behavior["*", "Special"] = SpecialArray
 
@@ -634,7 +715,7 @@ IndexedArrays, with the `"__array__": "categorical"` parameter, can represent ca
 layout = ak.contents.IndexedArray(
     ak.index.Index64(np.array([2, 2, 1, 4, 0, 5, 3, 3, 0, 1])),
     ak.from_iter(["zero", "one", "two", "three", "four", "five"], highlevel=False),
-    parameters={"__array__": "categorical"}
+    parameters={"__array__": "categorical"},
 )
 ak.to_list(layout)
 ```
@@ -701,7 +782,9 @@ Since bits always come in groups of at least 8, an explicit `length` must be sup
 
 ```{code-cell} ipython3
 layout = ak.contents.BitMaskedArray(
-    ak.index.IndexU8(np.packbits(np.array([False, False, True, True, False, True, False], np.uint8))),
+    ak.index.IndexU8(
+        np.packbits(np.array([False, False, True, True, False, True, False], np.uint8))
+    ),
     ak.contents.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
     valid_when=False,
     length=7,
@@ -769,13 +852,43 @@ Awkward Array's UnionArray is equivalent to Apache Arrow's [dense union](https:/
 
 ```{code-cell} ipython3
 layout = ak.contents.UnionArray(
-    ak.index.Index8( np.array([0, 1, 2, 0, 0, 1, 1, 2, 2, 0], np.int8)),
+    ak.index.Index8(np.array([0, 1, 2, 0, 0, 1, 1, 2, 2, 0], np.int8)),
     ak.index.Index64(np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])),
     [
-        ak.contents.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])),
-        ak.from_iter([[], [1], [1, 2], [1, 2, 3], [1, 2, 3, 4], [1, 2, 3, 4, 5], [6], [6, 7], [6, 7, 8], [6, 7, 8, 9]], highlevel=False),
-        ak.from_iter(["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"], highlevel=False)
-    ]
+        ak.contents.NumpyArray(
+            np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
+        ),
+        ak.from_iter(
+            [
+                [],
+                [1],
+                [1, 2],
+                [1, 2, 3],
+                [1, 2, 3, 4],
+                [1, 2, 3, 4, 5],
+                [6],
+                [6, 7],
+                [6, 7, 8],
+                [6, 7, 8, 9],
+            ],
+            highlevel=False,
+        ),
+        ak.from_iter(
+            [
+                "zero",
+                "one",
+                "two",
+                "three",
+                "four",
+                "five",
+                "six",
+                "seven",
+                "eight",
+                "nine",
+            ],
+            highlevel=False,
+        ),
+    ],
 )
 layout
 ```
@@ -788,13 +901,13 @@ The `index` can be used to prevent the need to set up "dummy values" for all con
 
 ```{code-cell} ipython3
 layout = ak.contents.UnionArray(
-    ak.index.Index8( np.array([0, 1, 2, 0, 0, 1, 1, 2, 2, 0], np.int8)),
+    ak.index.Index8(np.array([0, 1, 2, 0, 0, 1, 1, 2, 2, 0], np.int8)),
     ak.index.Index64(np.array([0, 0, 0, 1, 2, 1, 2, 1, 2, 3])),
     [
         ak.contents.NumpyArray(np.array([0.0, 3.3, 4.4, 9.9])),
         ak.from_iter([[1], [1, 2, 3, 4, 5], [6]], highlevel=False),
-        ak.from_iter(["two", "seven", "eight"], highlevel=False)
-    ]
+        ak.from_iter(["two", "seven", "eight"], highlevel=False),
+    ],
 )
 layout
 ```

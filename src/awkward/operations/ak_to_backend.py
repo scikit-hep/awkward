@@ -8,7 +8,7 @@ np = ak._nplikes.NumpyMetadata.instance()
 def to_backend(array, backend, *, highlevel=True, behavior=None):
     """
     Args:
-        array: Data to convert to a specified `backend` set.
+        array: Array-like data (anything #ak.to_layout recognizes).
         backend (`"cpu"`, `"cuda"`, or `"jax"`): If `"cpu"`, the array structure is
             recursively copied (if need be) to main memory for use with
             the default Numpy backend; if `"cuda"`, the structure is copied

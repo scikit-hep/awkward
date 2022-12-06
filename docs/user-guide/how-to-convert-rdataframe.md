@@ -34,14 +34,14 @@ object.
 
 ```{code-cell} ipython3
 array_x = ak.Array(
-        [
-            {"x": [1.1, 1.2, 1.3]},
-            {"x": [2.1, 2.2]},
-            {"x": [3.1]},
-            {"x": [4.1, 4.2, 4.3, 4.4]},
-            {"x": [5.1]},
-        ]
-    )
+    [
+        {"x": [1.1, 1.2, 1.3]},
+        {"x": [2.1, 2.2]},
+        {"x": [3.1]},
+        {"x": [4.1, 4.2, 4.3, 4.4]},
+        {"x": [5.1]},
+    ]
+)
 array_y = ak.Array([1, 2, 3, 4, 5])
 array_z = ak.Array([[1.1], [2.1, 2.3, 2.4], [3.1], [4.1, 4.2, 4.3], [5.1]])
 ```
@@ -83,11 +83,11 @@ type.
 ```{code-cell} ipython3
 array = ak.from_rdataframe(
     df,
-    columns=("x", "y", "z",),
+    columns=(
+        "x",
+        "y",
+        "z",
+    ),
 )
 array
-```
-
-```{code-cell} ipython3
-array.show(type=True)
 ```

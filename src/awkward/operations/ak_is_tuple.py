@@ -6,8 +6,7 @@ import awkward as ak
 def is_tuple(array):
     """
     Args:
-        array (#ak.Array, #ak.Record, #ak.contents.Content, #ak.record.Record, #ak.ArrayBuilder):
-            Array or record to check.
+        array: Array-like data (anything #ak.to_layout recognizes).
 
     If `array` is a record, this returns True if the record is a tuple.
     If `array` is an array, this returns True if the outermost record is a tuple.
@@ -20,6 +19,8 @@ def is_tuple(array):
 
 
 def _impl(array):
-    layout = ak.to_layout(array, allow_record=True)
+    layout = ak.operations.ak_to_layout._impl(
+        array, allow_record=True, allow_other=False
+    )
 
     return layout.is_tuple

@@ -8,7 +8,7 @@ np = ak._nplikes.NumpyMetadata.instance()
 def to_categorical(array, *, highlevel=True, behavior=None):
     """
     Args:
-        array: Data convertible to an Awkward Array
+        array: Array-like data (anything #ak.to_layout recognizes).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
@@ -30,17 +30,17 @@ def to_categorical(array, *, highlevel=True, behavior=None):
         >>> array = ak.Array([["one", "two", "three"], [], ["three", "two"]])
         >>> categorical = ak.to_categorical(array)
         >>> categorical
-        <Array [['one', 'two', ... 'three', 'two']] type='3 * var * categorical[type=str...'>
-        >>> ak.type(categorical)
+        <Array [['one', 'two', 'three'], ..., [...]] type='3 * var * categorical[ty...'>
+        >>> categorical.type.show()
         3 * var * categorical[type=string]
-        >>> ak.to_list(categorical) == ak.to_list(array)
+        >>> categorical.to_list() == array.to_list()
         True
         >>> ak.categories(categorical)
         <Array ['one', 'two', 'three'] type='3 * string'>
         >>> ak.is_categorical(categorical)
         True
         >>> ak.from_categorical(categorical)
-        <Array [['one', 'two', ... 'three', 'two']] type='3 * var * string'>
+        <Array [['one', 'two', 'three'], ..., ['three', ...]] type='3 * var * string'>
 
     This function descends through nested lists, but not into the fields of
     records, so records can be categories. To make categorical record
@@ -55,16 +55,19 @@ def to_categorical(array, *, highlevel=True, behavior=None):
         ...     {"x": 1.1, "y": "one"}
         ... ])
         >>> records
-        <Array [{x: 1.1, y: 'one'}, ... y: 'one'}] type='5 * {"x": float64, "y": string}'>
+            <Array [{x: 1.1, y: 'one'}, ..., {x: 1.1, ...}] type='5 * {x: float64, y: s...'>
         >>> categorical_records = ak.zip({
         ...     "x": ak.to_categorical(records["x"]),
         ...     "y": ak.to_categorical(records["y"]),
         ... })
         >>> categorical_records
         <Array [{x: 1.1, y: 'one'}, ... y: 'one'}] type='5 * {"x": categorical[type=floa...'>
-        >>> ak.type(categorical_records)
-        5 * {"x": categorical[type=float64], "y": categorical[type=string]}
-        >>> ak.to_list(categorical_records) == ak.to_list(records)
+        >>> categorical_records.type.show()
+        5 * {
+            x: categorical[type=float64],
+            y: categorical[type=string]
+        }
+        >>> categorical_records.to_list() == records.to_list()
         True
 
     The check for uniqueness is currently implemented in a Python loop, so

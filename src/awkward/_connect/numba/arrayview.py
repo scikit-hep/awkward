@@ -109,7 +109,6 @@ class ArrayView:
             array,
             allow_record=False,
             allow_other=False,
-            numpytype=(np.number, np.bool_, np.datetime64, np.timedelta64),
         )
         return ArrayView(
             tonumbatype(layout.form),
@@ -496,12 +495,7 @@ class RecordView:
     @classmethod
     def fromrecord(cls, record):
         behavior = ak._util.behavior_of(record)
-        layout = ak.operations.to_layout(
-            record,
-            allow_record=True,
-            allow_other=False,
-            numpytype=(np.number, np.bool_, np.datetime64, np.timedelta64),
-        )
+        layout = ak.operations.to_layout(record, allow_record=True, allow_other=False)
         assert isinstance(layout, ak.record.Record)
         arraylayout = layout.array
         return RecordView(

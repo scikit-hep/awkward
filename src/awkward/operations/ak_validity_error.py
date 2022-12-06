@@ -6,8 +6,7 @@ import awkward as ak
 def validity_error(array, *, exception=False):
     """
     Args:
-        array (#ak.Array, #ak.Record, #ak.contents.Content, #ak.record.Record, #ak.ArrayBuilder):
-            Array or record to check.
+        array: Array-like data (anything #ak.to_layout recognizes).
         exception (bool): If True, validity errors raise exceptions.
 
     Returns an empty string if there are no errors and a str containing the error message

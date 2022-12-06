@@ -11,7 +11,7 @@ cpu = ak._backends.NumpyBackend.instance()
 def fill_none(array, value, axis=-1, *, highlevel=True, behavior=None):
     """
     Args:
-        array: Data in which to replace None with a given value.
+        array: Array-like data (anything #ak.to_layout recognizes).
         value: Data with which to replace None.
         axis (None or int): If None, replace all None values in the array
             with the given value; if an int, The dimension at which this
@@ -26,9 +26,9 @@ def fill_none(array, value, axis=-1, *, highlevel=True, behavior=None):
 
     Replaces missing values (None) with a given `value`.
 
-    For example, in the following `array`,
+    For example, in the following
 
-        ak.Array([[1.1, None, 2.2], [], [None, 3.3, 4.4]])
+        >>> array = ak.Array([[1.1, None, 2.2], [], [None, 3.3, 4.4]])
 
     The None values could be replaced with `0` by
 
@@ -40,12 +40,15 @@ def fill_none(array, value, axis=-1, *, highlevel=True, behavior=None):
     by a string.
 
         >>> ak.fill_none(array, "hi")
-        <Array [[1.1, 'hi', 2.2], ... ['hi', 3.3, 4.4]] type='3 * var * union[float64, s...'>
+        <Array [[1.1, 'hi', 2.2], [], ['hi', ...]] type='3 * var * union[float64, s...'>
 
     The list content now has a union type:
 
-        >>> ak.type(ak.fill_none(array, "hi"))
-        3 * var * union[float64, string]
+        >>> ak.fill_none(array, "hi").type.show()
+        3 * var * union[
+            float64,
+            string
+        ]
 
     The values could be floating-point numbers or strings.
     """

@@ -392,7 +392,14 @@ class IndexedArray(Content):
                     self._content.length,
                 )
             )
-            return self._content._carry(nextcarry, False)
+            next = self._content._carry(nextcarry, False)
+            return next.copy(
+                parameters=ak._util.merge_parameters(
+                    next._parameters,
+                    self._parameters,
+                    exclude=(("__array__", "categorical"),),
+                )
+            )
 
     def num(self, axis, depth=0):
         posaxis = self.axis_wrap_if_negative(axis)

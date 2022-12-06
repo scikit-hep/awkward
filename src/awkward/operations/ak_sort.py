@@ -9,7 +9,7 @@ np = ak._nplikes.NumpyMetadata.instance()
 def sort(array, axis=-1, *, ascending=True, stable=True, highlevel=True, behavior=None):
     """
     Args:
-        array: Data to sort, possibly within nested lists.
+        array: Array-like data (anything #ak.to_layout recognizes).
         axis (int): The dimension at which this operation is applied. The
             outermost dimension is `0`, followed by `1`, etc., and negative
             values count backward from the innermost: `-1` is the innermost
@@ -25,6 +25,8 @@ def sort(array, axis=-1, *, ascending=True, stable=True, highlevel=True, behavio
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
+
+    Returns a sorted array.
 
     For example,
 

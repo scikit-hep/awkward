@@ -8,7 +8,7 @@ np = ak._nplikes.NumpyMetadata.instance()
 def firsts(array, axis=1, *, highlevel=True, behavior=None):
     """
     Args:
-        array: Data from which to select the first elements from nested lists.
+        array: Array-like data (anything #ak.to_layout recognizes).
         axis (int): The dimension at which this operation is applied. The
             outermost dimension is `0`, followed by `1`, etc., and negative
             values count backward from the innermost: `-1` is the innermost
@@ -24,8 +24,15 @@ def firsts(array, axis=1, *, highlevel=True, behavior=None):
     For example,
 
         >>> array = ak.Array([[1.1], [2.2], [], [3.3], [], [], [4.4], [5.5]])
-        >>> print(ak.firsts(array))
-        [1.1, 2.2, None, 3.3, None, None, 4.4, 5.5]
+        >>> ak.firsts(array).show()
+        [1.1,
+         2.2,
+         None,
+         3.3,
+         None,
+         None,
+         4.4,
+         5.5]
 
     See #ak.singletons to invert this function.
     """

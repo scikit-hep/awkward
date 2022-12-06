@@ -4,9 +4,9 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.10.3
+    jupytext_version: 1.14.1
 kernelspec:
-  display_name: Python 3
+  display_name: Python 3 (ipykernel)
   language: python
   name: python3
 ---
@@ -31,7 +31,7 @@ To destructure an array for plotting, you'll want to
    * remove record structures,
    * remove missing data
 
-There are two functions that do all of these things in one call, {func}`ak.flatten` with `axis=None`; and {func}`ak.ravel` but you don't want to apply them without thinking, because structure is important to the meaning of your data and you want to be able to interpret the plot. Destructuring is an information-losing operation, so your guidance is required to eliminate exactly the structure you want to eliminate, and there are several ways to do that, depending on what you want to do.
+There are two functions that are responsible for flattening arrays: {func}`ak.flatten` with `axis=None`; and {func}`ak.ravel`; but you don't want to apply them without thinking, because structure is important to the meaning of your data and you want to be able to interpret the plot. Destructuring is an information-losing operation, so your guidance is required to eliminate exactly the structure you want to eliminate, and there are several ways to do that, depending on what you want to do.
 
 After destructuring, you might _still_ need to call `np.asarray` on the output because the plotting library might not recognize an {class}`ak.Array` as an array. You'll probably also want to develop your destructuring on a commandline or a different Jupyter cell from the plotting library function call, to understand what structure the output has without the added complication of the plotting library's error messages.
 
@@ -40,20 +40,21 @@ import awkward as ak
 import numpy as np
 ```
 
-
 ak.ravel
 -------------------------
 
-As mentioned above, {func}`ak.ravel` is one of two functions that turns any array into a 1-dimensional array with no nested lists, no nested records.
++++
+
+First, let's create an array with some interesting structure.
 
 ```{code-cell} ipython3
-array = ak.Array([[{"x": 1.1, "y": [1]}, {"x": None, "y": [1, 2]}], [], [{"x": 3.3, "y": [1, 2, 3]}]])
+array = ak.Array(
+    [[{"x": 1.1, "y": [1]}, {"x": None, "y": [1, 2]}], [], [{"x": 3.3, "y": [1, 2, 3]}]]
+)
 array
 ```
 
-```{code-cell} ipython3
-array.type
-```
+As mentioned above, {func}`ak.ravel` is one of two functions that turns any array into a 1-dimensional array with no nested lists, no nested records.
 
 ```{code-cell} ipython3
 ak.ravel(array)
@@ -80,12 +81,10 @@ ak.flatten with axis=None
 If {func}`ak.ravel` is a sledgehammer, then {func}`ak.flatten` with `axis=None` is a pile driver that turns any array into a 1-dimensional array with no nested lists, no nested records, and no missing data.
 
 ```{code-cell} ipython3
-array = ak.Array([[{"x": 1.1, "y": [1]}, {"x": None, "y": [1, 2]}], [], [{"x": 3.3, "y": [1, 2, 3]}]])
+array = ak.Array(
+    [[{"x": 1.1, "y": [1]}, {"x": None, "y": [1, 2]}], [], [{"x": 3.3, "y": [1, 2, 3]}]]
+)
 array
-```
-
-```{code-cell} ipython3
-array.type
 ```
 
 ```{code-cell} ipython3
@@ -109,15 +108,19 @@ y = ak.Array([[8, None, 6], [5, None, None, 4]])
 z = 2 * np.ravel(x) + np.ravel(y)
 ```
 
-+++
-
 Selecting record fields
 -----------------------
 
-A more controlled way to extract fields from a record is to [project](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Array.html#projection) them by name.
+A more controlled way to extract fields from a record is to [project](../reference/generated/ak.Array.html#projection) them by name.
 
 ```{code-cell} ipython3
-array = ak.Array([[{"x": 1.1, "y": [1], "z": "one"}, {"x": None, "y": [1, 2], "z": "two"}], [], [{"x": 3.3, "y": [1, 2, 3], "z": "three"}]])
+array = ak.Array(
+    [
+        [{"x": 1.1, "y": [1], "z": "one"}, {"x": None, "y": [1, 2], "z": "two"}],
+        [],
+        [{"x": 3.3, "y": [1, 2, 3], "z": "three"}],
+    ]
+)
 array
 ```
 
@@ -155,15 +158,17 @@ ak.flatten(array[["x", "y"]], axis=None)
 array[("x", "y")]
 ```
 
-If you have records inside of records, you can extract them with [nested projection](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Array.html#nested-projection) if they have common names.
+If you have records inside of records, you can extract them with [nested projection](../reference/generated/ak.Array.html#nested-projection) if they have common names.
 
 ```{code-cell} ipython3
-array = ak.Array([
-    {"x": {"up": 1, "down": -1}, "y": {"up": 1.1, "down": -1.1}},
-    {"x": {"up": 2, "down": -2}, "y": {"up": 2.2, "down": -2.2}},
-    {"x": {"up": 3, "down": -3}, "y": {"up": 3.3, "down": -3.3}},
-    {"x": {"up": 4, "down": -4}, "y": {"up": 4.4, "down": -4.4}},
-])
+array = ak.Array(
+    [
+        {"x": {"up": 1, "down": -1}, "y": {"up": 1.1, "down": -1.1}},
+        {"x": {"up": 2, "down": -2}, "y": {"up": 2.2, "down": -2.2}},
+        {"x": {"up": 3, "down": -3}, "y": {"up": 3.3, "down": -3.3}},
+        {"x": {"up": 4, "down": -4}, "y": {"up": 4.4, "down": -4.4}},
+    ]
+)
 array
 ```
 
@@ -290,11 +295,13 @@ You can also do fancy things, requesting both the first and last element of each
 ```{code-cell} ipython3
 :tags: [raises-exception]
 
-array[ak.num(array) > 0, [0, -1]]   # these two arrays have different lengths, can't be broadcasted as in NumPy advanced slicing
+array[
+    ak.num(array) > 0, [0, -1]
+]  # these two arrays have different lengths, can't be broadcasted as in NumPy advanced slicing
 ```
 
 ```{code-cell} ipython3
-array[ak.num(array) > 0][:, [0, -1]]   # so just put them in different slices
+array[ak.num(array) > 0][:, [0, -1]]  # so just put them in different slices
 ```
 
 And then flatten the result (if necessary—the shape is regular; some plotting libraries would interpret it as a single set of numbers).
@@ -328,11 +335,11 @@ ak.mean(array, axis=1)
 ```
 
 ```{code-cell} ipython3
-ak.fill_none(ak.mean(array, axis=1), 0)   # fill with zero
+ak.fill_none(ak.mean(array, axis=1), 0)  # fill with zero
 ```
 
 ```{code-cell} ipython3
-ak.fill_none(ak.mean(array, axis=1), ak.mean(array))   # fill with the mean of all
+ak.fill_none(ak.mean(array, axis=1), ak.mean(array))  # fill with the mean of all
 ```
 
 ```{code-cell} ipython3
@@ -395,12 +402,23 @@ Minimizing/maximizing lists of records
 Unlike numbers, records do not have an ordering: you cannot call {func}`ak.min` on an array of records. But usually, what you want to do instead is to find the minimum or maximum of some quantity calculated from the records and pick records (or record fields) from that.
 
 ```{code-cell} ipython3
-array = ak.Array([
-    [{"x": 2, "y": 2, "z": 2.2}, {"x": 1, "y": 1, "z": 1.1}, {"x": 3, "y": 3, "z": 3.3}],
-    [],
-    [{"x": 5, "y": 5, "z": 5.5}, {"x": 4, "y": 4, "z": 4.4}],
-    [{"x": 7, "y": 7, "z": 7.7}, {"x": 9, "y": 9, "z": 9.9}, {"x": 8, "y": 8, "z": 8.8}, {"x": 6, "y": 6, "z": 6.6}],
-])
+array = ak.Array(
+    [
+        [
+            {"x": 2, "y": 2, "z": 2.2},
+            {"x": 1, "y": 1, "z": 1.1},
+            {"x": 3, "y": 3, "z": 3.3},
+        ],
+        [],
+        [{"x": 5, "y": 5, "z": 5.5}, {"x": 4, "y": 4, "z": 4.4}],
+        [
+            {"x": 7, "y": 7, "z": 7.7},
+            {"x": 9, "y": 9, "z": 9.9},
+            {"x": 8, "y": 8, "z": 8.8},
+            {"x": 6, "y": 6, "z": 6.6},
+        ],
+    ]
+)
 array
 ```
 
@@ -443,7 +461,9 @@ Concatenating independently restructured arrays
 Sometimes, what you want to do can't be a single expression. Suppose we have this data:
 
 ```{code-cell} ipython3
-array = ak.Array([[{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}], [], [{"x": 3.3, "y": [1, 2, 3]}]])
+array = ak.Array(
+    [[{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}], [], [{"x": 3.3, "y": [1, 2, 3]}]]
+)
 array
 ```
 
@@ -460,10 +480,12 @@ ak.flatten(ak.max(array.y, axis=2), axis=None)
 To get all of these into one array (because the plotting function only accepts one argument), you'll need to {func}`ak.concatenate` them.
 
 ```{code-cell} ipython3
-ak.concatenate([
-    ak.flatten(array.x),
-    ak.flatten(ak.max(array.y, axis=2), axis=None),
-])
+ak.concatenate(
+    [
+        ak.flatten(array.x),
+        ak.flatten(ak.max(array.y, axis=2), axis=None),
+    ]
+)
 ```
 
 Maintaining alignment between arrays with missing values
@@ -474,13 +496,15 @@ Dropping missing values with {func}`ak.flatten` doesn't keep track of where they
 Instead of {func}`ak.flatten`, you can use {func}`ak.is_none`.
 
 ```{code-cell} ipython3
-array = ak.Array([
-    {"x": 1, "y": 5.5},
-    {"x": 2, "y": 3.3},
-    {"x": None, "y": 2.2},
-    {"x": 4, "y": None},
-    {"x": 5, "y": 1.1},
-])
+array = ak.Array(
+    [
+        {"x": 1, "y": 5.5},
+        {"x": 2, "y": 3.3},
+        {"x": None, "y": 2.2},
+        {"x": 4, "y": None},
+        {"x": 5, "y": 1.1},
+    ]
+)
 array
 ```
 
@@ -507,12 +531,19 @@ Actually drawing structure
 If need be, you can change the plotter to match the data.
 
 ```{code-cell} ipython3
-array = ak.Array([
-    [{"x": 1, "y": 3.3}, {"x": 2, "y": 1.1}, {"x": 3, "y": 2.2}],
-    [],
-    [{"x": 4, "y": 5.5}, {"x": 5, "y": 4.4}],
-    [{"x": 5, "y": 1.1}, {"x": 4, "y": 3.3}, {"x": 2, "y": 5.5}, {"x": 1, "y": 4.4}],
-])
+array = ak.Array(
+    [
+        [{"x": 1, "y": 3.3}, {"x": 2, "y": 1.1}, {"x": 3, "y": 2.2}],
+        [],
+        [{"x": 4, "y": 5.5}, {"x": 5, "y": 4.4}],
+        [
+            {"x": 5, "y": 1.1},
+            {"x": 4, "y": 3.3},
+            {"x": 2, "y": 5.5},
+            {"x": 1, "y": 4.4},
+        ],
+    ]
+)
 array
 ```
 
@@ -526,7 +557,9 @@ fig, ax = plt.subplots()
 for line in array:
     if len(line) > 0:
         vertices = np.dstack([np.asarray(line.x), np.asarray(line.y)])[0]
-        codes = [matplotlib.path.Path.MOVETO] + [matplotlib.path.Path.LINETO] * (len(line) - 1)
+        codes = [matplotlib.path.Path.MOVETO] + [matplotlib.path.Path.LINETO] * (
+            len(line) - 1
+        )
         path = matplotlib.path.Path(vertices, codes)
         ax.add_patch(matplotlib.patches.PathPatch(path, facecolor="none"))
 

@@ -8,8 +8,7 @@ np = ak._nplikes.NumpyMetadata.instance()
 def singletons(array, *, highlevel=True, behavior=None):
     """
     Args:
-        array: Data to wrap in lists of length 1 if present and length 0
-            if missing (None).
+        array: Array-like data (anything #ak.to_layout recognizes).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
@@ -21,8 +20,15 @@ def singletons(array, *, highlevel=True, behavior=None):
     For example,
 
         >>> array = ak.Array([1.1, 2.2, None, 3.3, None, None, 4.4, 5.5])
-        >>> print(ak.singletons(array))
-        [[1.1], [2.2], [], [3.3], [], [], [4.4], [5.5]]
+        >>> ak.singletons(array).show()
+        [[1.1],
+         [2.2],
+         [],
+         [3.3],
+         [],
+         [],
+         [4.4],
+         [5.5]]
 
     See #ak.firsts to invert this function.
     """
