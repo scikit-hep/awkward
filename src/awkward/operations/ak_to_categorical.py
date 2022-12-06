@@ -33,7 +33,7 @@ def to_categorical(array, *, highlevel=True, behavior=None):
         <Array [['one', 'two', 'three'], ..., [...]] type='3 * var * categorical[ty...'>
         >>> categorical.type.show()
         3 * var * categorical[type=string]
-        >>> categorical.tolist() == array.tolist()
+        >>> categorical.to_list() == array.to_list()
         True
         >>> ak.categories(categorical)
         <Array ['one', 'two', 'three'] type='3 * string'>
@@ -67,7 +67,7 @@ def to_categorical(array, *, highlevel=True, behavior=None):
             x: categorical[type=float64],
             y: categorical[type=string]
         }
-        >>> categorical_records.tolist() == records.tolist()
+        >>> categorical_records.to_list() == records.to_list()
         True
 
     The check for uniqueness is currently implemented in a Python loop, so

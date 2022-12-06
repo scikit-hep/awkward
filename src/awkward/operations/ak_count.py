@@ -39,9 +39,9 @@ def count(
 
         >>> array = ak.Array([[ 0.1,  0.2      ],
         ...                   [None, 10.2, None],
-        ...                    None,
-        ...                    [20.1, 20.2, 20.3],
-        ...                    [30.1, 30.2      ]])
+        ...                   None,
+        ...                   [20.1, 20.2, 20.3],
+        ...                   [30.1, 30.2      ]])
 
     the result of counting over the innermost dimension is
 
