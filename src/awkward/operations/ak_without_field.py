@@ -38,11 +38,7 @@ def without_field(array, where, *, highlevel=True, behavior=None):
 def _impl(base, where, highlevel, behavior):
     if isinstance(where, str):
         where = [where]
-    elif not (
-        ak._util.is_non_string_iterable(where)
-        and isinstance(where, Sequence)
-        and all(isinstance(x, str) for x in where)
-    ):
+    elif not (isinstance(where, Sequence) and all(isinstance(x, str) for x in where)):
         raise ak._errors.wrap_error(
             TypeError(
                 "Field names must be given as a single string, or a sequence of strings"
