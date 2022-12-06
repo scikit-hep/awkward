@@ -98,8 +98,8 @@ subtrees:
                         title: "By number of items [todo]"
                       - file: user-guide/how-to-filter-cut-mask
                         title: "Cuts vs. masks [todo]"
-                      - file: user-guide/how-to-filter-jagged
-                        title: "Slicing lists within arrays [todo]"
+                      - file: user-guide/how-to-filter-ragged
+                        title: "Slicing lists within arrays"
                       - file: user-guide/how-to-filter-masked
                         title: "Slices with missing values [todo]"
 
