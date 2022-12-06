@@ -70,9 +70,12 @@ def broadcast_arrays(
             ak.broadcast_arrays(
                 arrays = (array([1, 2]), array([[ 0.1,  0.2,  0.3],
                [10. , 20....
-                depth_limit = None,
-                highlevel = True,
-                behavior = None,
+                depth_limit = None
+                broadcast_parameters_rule = 'one_to_one'
+                left_broadcast = True
+                right_broadcast = True
+                highlevel = True
+                behavior = None
             )
         Error details: cannot broadcast RegularArray of size 2 with RegularArray of size 3
 
@@ -145,9 +148,12 @@ def broadcast_arrays(
         ValueError: while calling
             ak.broadcast_arrays(
                 arrays = (<Array [[[1, 2, 3], [], [4, ...], [6]], ...] type='3 * var ...
-                depth_limit = None,
-                highlevel = True,
-                behavior = None,
+                depth_limit = None
+                broadcast_parameters_rule = 'one_to_one'
+                left_broadcast = True
+                right_broadcast = True
+                highlevel = True
+                behavior = None
             )
         Error details: cannot broadcast nested list
 
