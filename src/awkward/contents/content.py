@@ -56,7 +56,6 @@ class Content:
             if not self.is_list and parameters.get("__array__") in (
                 "string",
                 "bytestring",
-                "sorted_map",
             ):
                 raise ak._errors.wrap_error(
                     TypeError(
@@ -76,6 +75,14 @@ class Content:
                     )
                 )
             if not self.is_indexed and parameters.get("__array__") == "categorical":
+                raise ak._errors.wrap_error(
+                    TypeError(
+                        '{} is not allowed to have parameters["__array__"] = "{}"'.format(
+                            type(self).__name__, parameters["__array__"]
+                        )
+                    )
+                )
+            if not self.is_record and parameters.get("__array__") == "sorted_map":
                 raise ak._errors.wrap_error(
                     TypeError(
                         '{} is not allowed to have parameters["__array__"] = "{}"'.format(
