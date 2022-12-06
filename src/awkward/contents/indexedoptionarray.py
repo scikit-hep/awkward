@@ -1539,7 +1539,7 @@ class IndexedOptionArray(Content):
         else:
             return [self]
 
-    def _recursively_apply(
+    def _recursively_apply_impl(
         self, action, behavior, depth, depth_context, lateral_context, options
     ):
         if (
@@ -1561,11 +1561,15 @@ class IndexedOptionArray(Content):
             index, content = self._index, self._content
 
         if options["return_array"]:
+            if options["return_simplified"]:
+                make = IndexedOptionArray.simplified
+            else:
+                make = IndexedOptionArray
 
             def continuation():
-                return IndexedOptionArray(
+                return make(
                     index,
-                    content._recursively_apply(
+                    content._recursively_apply_impl(
                         action,
                         behavior,
                         depth,
@@ -1579,7 +1583,7 @@ class IndexedOptionArray(Content):
         else:
 
             def continuation():
-                content._recursively_apply(
+                content._recursively_apply_impl(
                     action,
                     behavior,
                     depth,

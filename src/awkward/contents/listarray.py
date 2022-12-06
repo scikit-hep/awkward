@@ -1404,7 +1404,7 @@ class ListArray(Content):
             flat = next.content[next.offsets[0] : next.offsets[-1]]
             return flat._completely_flatten(backend, options)
 
-    def _recursively_apply(
+    def _recursively_apply_impl(
         self, action, behavior, depth, depth_context, lateral_context, options
     ):
         if (
@@ -1429,7 +1429,7 @@ class ListArray(Content):
                 return ListArray(
                     starts,
                     stops,
-                    content._recursively_apply(
+                    content._recursively_apply_impl(
                         action,
                         behavior,
                         depth + 1,
@@ -1443,7 +1443,7 @@ class ListArray(Content):
         else:
 
             def continuation():
-                content._recursively_apply(
+                content._recursively_apply_impl(
                     action,
                     behavior,
                     depth + 1,

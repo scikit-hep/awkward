@@ -71,6 +71,6 @@ def _impl(array, generate_bitmasks, highlevel, behavior):
         if hasattr(layout, "__pyarrow_original"):
             del layout.__pyarrow_original
 
-    out.recursively_apply(remove_revertable)
+    out._recursively_apply(remove_revertable)
 
     return ak._util.wrap(out, behavior, highlevel)

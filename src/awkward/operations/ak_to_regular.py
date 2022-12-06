@@ -64,7 +64,7 @@ def _impl(array, axis, highlevel, behavior):
             if layout.is_list:
                 return continuation().to_RegularArray()
 
-        out = layout.recursively_apply(action, behavior)
+        out = layout._recursively_apply(action, behavior)
 
     elif posaxis == 0:
         out = layout  # the top-level can only be regular (ArrayType)
@@ -85,6 +85,6 @@ def _impl(array, axis, highlevel, behavior):
             depth_context["posaxis"] = posaxis
 
         depth_context = {"posaxis": posaxis}
-        out = layout.recursively_apply(action, behavior, depth_context)
+        out = layout._recursively_apply(action, behavior, depth_context)
 
     return ak._util.wrap(out, behavior, highlevel)

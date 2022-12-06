@@ -1012,7 +1012,7 @@ class IndexedArray(Content):
     def _completely_flatten(self, backend, options):
         return self.project()._completely_flatten(backend, options)
 
-    def _recursively_apply(
+    def _recursively_apply_impl(
         self, action, behavior, depth, depth_context, lateral_context, options
     ):
         if (
@@ -1030,11 +1030,15 @@ class IndexedArray(Content):
             index, content = self._index, self._content
 
         if options["return_array"]:
+            if options["return_simplified"]:
+                make = IndexedArray.simplified
+            else:
+                make = IndexedArray
 
             def continuation():
-                return IndexedArray(
+                return make(
                     index,
-                    content._recursively_apply(
+                    content._recursively_apply_impl(
                         action,
                         behavior,
                         depth,
@@ -1048,7 +1052,7 @@ class IndexedArray(Content):
         else:
 
             def continuation():
-                content._recursively_apply(
+                content._recursively_apply_impl(
                     action,
                     behavior,
                     depth,

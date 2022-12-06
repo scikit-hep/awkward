@@ -105,6 +105,18 @@ class RegularArray(Content):
     def simplified(cls, content, size, zeros_length=0, *, parameters=None):
         return cls(content, size, zeros_length, parameters=parameters)
 
+    @property
+    def offsets(self):
+        return self._compact_offsets64(True)
+
+    @property
+    def starts(self):
+        return self._compact_offsets64(True)[:-1]
+
+    @property
+    def stops(self):
+        return self._compact_offsets64(True)[1:]
+
     def _form_with_key(self, getkey):
         form_key = getkey(self)
         return self.Form(
@@ -1269,7 +1281,7 @@ class RegularArray(Content):
             flat = self._content[: self._length * self._size]
             return flat._completely_flatten(backend, options)
 
-    def _recursively_apply(
+    def _recursively_apply_impl(
         self, action, behavior, depth, depth_context, lateral_context, options
     ):
         if self._backend.nplike.known_shape:
@@ -1281,7 +1293,7 @@ class RegularArray(Content):
 
             def continuation():
                 return RegularArray(
-                    content._recursively_apply(
+                    content._recursively_apply_impl(
                         action,
                         behavior,
                         depth + 1,
@@ -1297,7 +1309,7 @@ class RegularArray(Content):
         else:
 
             def continuation():
-                content._recursively_apply(
+                content._recursively_apply_impl(
                     action,
                     behavior,
                     depth + 1,

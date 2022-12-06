@@ -1509,17 +1509,21 @@ class UnionArray(Content):
             )
         return out
 
-    def _recursively_apply(
+    def _recursively_apply_impl(
         self, action, behavior, depth, depth_context, lateral_context, options
     ):
         if options["return_array"]:
+            if options["return_simplified"]:
+                make = UnionArray.simplified
+            else:
+                make = UnionArray
 
             def continuation():
-                return UnionArray.simplified(
+                return make(
                     self._tags,
                     self._index,
                     [
-                        content._recursively_apply(
+                        content._recursively_apply_impl(
                             action,
                             behavior,
                             depth,
@@ -1536,7 +1540,7 @@ class UnionArray(Content):
 
             def continuation():
                 for content in self._contents:
-                    content._recursively_apply(
+                    content._recursively_apply_impl(
                         action,
                         behavior,
                         depth,

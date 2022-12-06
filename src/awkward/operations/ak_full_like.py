@@ -172,7 +172,7 @@ def _impl(array, fill_value, highlevel, behavior, dtype):
         else:
             return None
 
-    out = layout.recursively_apply(action, behavior)
+    out = layout._recursively_apply(action, behavior)
     if dtype is not None:
         out = ak.operations.strings_astype(
             out, dtype, highlevel=highlevel, behavior=behavior

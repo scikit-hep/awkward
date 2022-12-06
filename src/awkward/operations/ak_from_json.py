@@ -453,7 +453,7 @@ def _record_to_complex(layout, complex_record_fields):
                             )
                         )
 
-        return layout.recursively_apply(action)
+        return layout._recursively_apply(action)
 
     else:
         raise ak._errors.wrap_error(

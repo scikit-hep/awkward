@@ -1284,11 +1284,11 @@ class NumpyArray(Content):
             )
         ]
 
-    def _recursively_apply(
+    def _recursively_apply_impl(
         self, action, behavior, depth, depth_context, lateral_context, options
     ):
         if self._data.ndim != 1 and options["numpy_to_regular"]:
-            return self.to_RegularArray()._recursively_apply(
+            return self.to_RegularArray()._recursively_apply_impl(
                 action, behavior, depth, depth_context, lateral_context, options
             )
 

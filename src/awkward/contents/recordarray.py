@@ -957,7 +957,7 @@ class RecordArray(Content):
                 )
             )
 
-    def _recursively_apply(
+    def _recursively_apply_impl(
         self, action, behavior, depth, depth_context, lateral_context, options
     ):
         if self._backend.nplike.known_shape:
@@ -976,7 +976,7 @@ class RecordArray(Content):
                     )
                 return RecordArray(
                     [
-                        content._recursively_apply(
+                        content._recursively_apply_impl(
                             action,
                             behavior,
                             depth,
@@ -996,7 +996,7 @@ class RecordArray(Content):
 
             def continuation():
                 for content in contents:
-                    content._recursively_apply(
+                    content._recursively_apply_impl(
                         action,
                         behavior,
                         depth,

@@ -44,24 +44,55 @@ def firsts(array, axis=1, *, highlevel=True, behavior=None):
 
 
 def _impl(array, axis, highlevel, behavior):
-    layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
+    layout = ak.operations.to_layout(array)
+    behavior = ak._util.behavior_of(array, behavior=behavior)
     posaxis = layout.axis_wrap_if_negative(axis)
 
-    if posaxis == 0:
-        if len(layout) == 0:
-            out = None
-        else:
-            out = layout[0]
-    else:
-        if posaxis < 0:
-            raise ak._errors.wrap_error(
-                NotImplementedError("ak.firsts with ambiguous negative axis")
-            )
-        toslice = (slice(None, None, None),) * posaxis + (0,)
-        out = ak.operations.mask(
-            layout,
-            ak.operations.num(layout, axis=posaxis) > 0,
-            highlevel=False,
-        )[toslice]
+    if not ak._util.is_integer(axis):
+        raise ak._errors.wrap_error(
+            TypeError(f"'axis' must be an integer, not {axis!r}")
+        )
 
-    return ak._util.wrap(out, behavior, highlevel, like=array)
+    if posaxis == 0:
+        # specialized logic; it's tested in test_0582-propagate-context-in-broadcast_and_apply.py
+        slicer = ak.from_iter([None, 0])
+        if layout.length == 0:
+            out = layout[slicer[[0]]][0]
+        else:
+            out = layout[slicer[[1]]][0]
+
+    else:
+
+        def action(layout, depth, depth_context, **kwargs):
+            posaxis = layout.axis_wrap_if_negative(depth_context["posaxis"])
+            if posaxis == depth and layout.is_list:
+                nplike = layout._backend.index_nplike
+
+                # this is a copy of the raw array
+                index = starts = nplike.array(layout.starts.raw(nplike), dtype=np.int64)
+
+                # this might be a view
+                stops = layout.stops.raw(nplike)
+
+                empties = starts == stops
+                index[empties] = -1
+
+                return ak.contents.IndexedOptionArray.simplified(
+                    ak.index.Index64(index), layout._content
+                )
+
+            elif posaxis == 0:
+                raise ak._errors.wrap_error(
+                    np.AxisError(
+                        f"axis={axis} exceeds the depth of this array ({depth})"
+                    )
+                )
+
+            depth_context["posaxis"] = posaxis
+
+        depth_context = {"posaxis": posaxis}
+        out = layout._recursively_apply(
+            action, behavior, depth_context, numpy_to_regular=True
+        )
+
+    return ak._util.wrap(out, behavior, highlevel)
