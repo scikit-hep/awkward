@@ -28,13 +28,13 @@ Our dataset is formatted as a 611 MB [Apache Parquet](https://parquet.apache.org
 
 Given that this file is so large, let's first look at the *metadata* with `ak.metadata_from_parquet` to see what we're working with:
 
-```{code-cell} python3
+```{code-cell} ipython3
 :tags: [hide-cell]
 
 %config InteractiveShell.ast_node_interactivity = "last_expr_or_assign"
 ```
 
-```{code-cell} python3
+```{code-cell} ipython3
 import numpy as np
 import awkward as ak
 
@@ -47,13 +47,13 @@ Of particular interest here is the `num_row_groups` value. Parquet has the conce
 
 We can also look at the `type` of the data to see the structure of the dataset:
 
-```{code-cell} python3
+```{code-cell} ipython3
 metadata["form"].type.show()
 ```
 
 There are a lot of different columns here (`trip.sec`, `trip.begin.lon`, `trip.payment.fare`, etc.). For this example, we only want a small subset of them. Additionally, we don't need to load *all* of the data, as we are only interested in a representative sample. Let's use `ak.from_parquet` with the `row_groups` argument to read (download) only a single group, and the `columns` argument to read only the necessary columns.
 
-```{code-cell} python3
+```{code-cell} ipython3
 taxi = ak.from_parquet(
     "https://pivarski-princeton.s3.amazonaws.com/chicago-taxi.parquet",
     row_groups=[0],
@@ -63,7 +63,7 @@ taxi = ak.from_parquet(
 
 We can look at the `type` of the array to see its structure
 
-```{code-cell} python3
+```{code-cell} ipython3
 taxi.type.show()
 ```
 
@@ -85,49 +85,49 @@ In order to plot the taxi routes, we can use the waypoints given by the `path` f
 
 The fields of a record can be accessed with attribute notation:
 
-```{code-cell} python3
+```{code-cell} ipython3
 taxi.trip
 ```
 
 or using subscript notation:
 
-```{code-cell} python3
+```{code-cell} ipython3
 taxi["trip"]
 ```
 
 Field lookup can be nested, e.g. with attribute notation:
 
-```{code-cell} python3
+```{code-cell} ipython3
 taxi.trip.path
 ```
 
 or with subscript notation:
 
-```{code-cell} python3
+```{code-cell} ipython3
 taxi["trip", "path"]
 ```
 
 Let's look at two fields of interest, `path.latdiff`, and `begin.lat`, and their types:
 
-```{code-cell} python3
+```{code-cell} ipython3
 taxi.trip.path.latdiff
 ```
 
-```{code-cell} python3
+```{code-cell} ipython3
 taxi.trip.path.latdiff.type.show()
 ```
 
-```{code-cell} python3
+```{code-cell} ipython3
 taxi.trip.begin.lat
 ```
 
-```{code-cell} python3
+```{code-cell} ipython3
 taxi.trip.begin.lat.type.show()
 ```
 
 Clearly, these two arrays have _different_ dimensions. When we add them together, we want the operation to broadcast: each trip has one starting point, but multiple waypoints. In NumPy, broadcasting aligns *to the right*, which means that arrays with differing dimensions are made compatible against one another by adding length-1 dimensions to the front of the shape:
 
-```{code-cell} python3
+```{code-cell} ipython3
 x = np.array([1, 2, 3])
 y = np.array(
     [
@@ -140,7 +140,7 @@ np.broadcast_arrays(x, y)
 
 In Awkward, broadcasting aligns *to the left* by default, which means that length-1 dimensions are added *to the end* of the shape:
 
-```{code-cell} python3
+```{code-cell} ipython3
 x = ak.Array([1, 2])  # note the missing 3!
 y = ak.Array(
     [
@@ -153,7 +153,7 @@ ak.broadcast_arrays(x, y)
 
 In this instance, we also want broadcasting to align to the left: we want a single starting point to broadcast against multiple waypoints. We can simply add our two arrays together, and Awkward will broadast them correctly.
 
-```{code-cell} python3
+```{code-cell} ipython3
 taxi_trip_lat = taxi.trip.begin.lat + taxi.trip.path.latdiff
 taxi_trip_lon = taxi.trip.begin.lon + taxi.trip.path.londiff
 ```
@@ -162,7 +162,7 @@ taxi_trip_lon = taxi.trip.begin.lon + taxi.trip.path.londiff
 
 Having computed `taxi_trip_lat` and `taxi_trip_lon`, we might wish to add these as fields to our `taxi` dataset, so that later manipulations are also applied to these values. Here, we can use the subscript operator `[]` to add new fields to our dataset.
 
-```{code-cell} python3
+```{code-cell} ipython3
 taxi[("trip", "path", "lat")] = taxi_trip_lat
 taxi[("trip", "path", "lon")] = taxi_trip_lon
 ```
@@ -173,19 +173,19 @@ Note that fields cannot be set using attribute notation.
 
 We can see the result of adding these fields:
 
-```{code-cell} python3
+```{code-cell} ipython3
 taxi.type.show()
 ```
 
 In Awkward, records are lightweight because they can be composed of existing arrays. We can see this with `ak.fields`, which returns a list containing the field names of a record:
 
-```{code-cell} python3
+```{code-cell} ipython3
 ak.fields(taxi.trip.path)
 ```
 
 and `ak.unzip`, which decomposes an array into the corresponding field values:
 
-```{code-cell} python3
+```{code-cell} ipython3
 ak.unzip(taxi.trip.path)
 ```
 
@@ -193,25 +193,25 @@ ak.unzip(taxi.trip.path)
 
 Let's imagine that we want to plot the three longest routes taken by any taxi in the city. The distance travelled by any taxi is given by `taxi.trip.km`:
 
-```{code-cell} python3
+```{code-cell} ipython3
 taxi.trip.km
 ```
 
 This array has two dimensions: `353`, indicating the number of taxis, and `var` indicating the number of trips for each taxi. Because we want to find the longest trips amongst all taxis, we can flatten one of the dimensions using `ak.flatten` to produce a list of trips.
 
-```{code-cell} python3
+```{code-cell} ipython3
 trip = ak.flatten(taxi.trip, axis=1)
 ```
 
 From this list of 1003517 journeys, we can sort by length using `ak.argsort`.
 
-```{code-cell} python3
+```{code-cell} ipython3
 ix_length = ak.argsort(trip.km, ascending=False)
 ```
 
 Now let's take only the three largest trips.
 
-```{code-cell} python3
+```{code-cell} ipython3
 trip_longest = trip[ix_length[:3]]
 ```
 
@@ -219,7 +219,7 @@ trip_longest = trip[ix_length[:3]]
 
 `ipyleaflet` requires a list of coordinate tuples in order to plot a path. Let's stack these two arrays together to build a `(16, 2)` array.
 
-```{code-cell} python3
+```{code-cell} ipython3
 lat_lon_taxi_75 = ak.concatenate(
     (trip_longest.path.lat[..., np.newaxis], trip_longest.path.lon[..., np.newaxis]),
     axis=-1,
@@ -228,13 +228,13 @@ lat_lon_taxi_75 = ak.concatenate(
 
 We can convert this to a list with `to_list()`:
 
-```{code-cell} python3
+```{code-cell} ipython3
 lat_lon_taxi_75.to_list()
 ```
 
 What does our route look like?
 
-```{code-cell} python3
+```{code-cell} ipython3
 import ipyleaflet as ipl
 
 map_taxi_75 = ipl.Map(

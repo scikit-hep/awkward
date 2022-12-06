@@ -23,55 +23,55 @@ The biggest difference between an {class}`ak.ArrayBuilder` and an {class}`ak.Arr
 Appending
 ---------
 
-```{code-cell} python3
+```{code-cell} ipython3
 import awkward as ak
 ```
 
 When a builder is first created, it has zero length and unknown type.
 
-```{code-cell} python3
+```{code-cell} ipython3
 builder = ak.ArrayBuilder()
 builder
 ```
 
 Calling its `append` method adds data and also determines its type.
 
-```{code-cell} python3
+```{code-cell} ipython3
 builder.append(1)
 builder
 ```
 
-```{code-cell} python3
+```{code-cell} ipython3
 builder.append(2.2)
 builder
 ```
 
-```{code-cell} python3
+```{code-cell} ipython3
 builder.append(3 + 1j)
 builder
 ```
 
 Note that this can include missing data by promoting to an {class}`option-type <ak.types.OptionType>`,
 
-```{code-cell} python3
+```{code-cell} ipython3
 builder.append(None)
 builder
 ```
 
 and mix types by promoting to a {class}`union-type <ak.types.UnionType>`:
 
-```{code-cell} python3
+```{code-cell} ipython3
 builder.append("five")
 builder
 ```
 
-```{code-cell} python3
+```{code-cell} ipython3
 builder.type.show()
 ```
 
 We've been using "`append`" because it is generic (it recognizes the types of its arguments and builds that), but there are also methods for building structure explicitly.
 
-```{code-cell} python3
+```{code-cell} ipython3
 builder = ak.ArrayBuilder()
 builder.boolean(False)
 builder.integer(1)
@@ -82,7 +82,7 @@ builder.string("five")
 builder
 ```
 
-```{code-cell} python3
+```{code-cell} ipython3
 builder.type.show()
 ```
 
@@ -91,7 +91,7 @@ Snapshot
 
 To turn an {class}`ak.ArrayBuilder` into an {class}`ak.Array`, call `snapshot`. This is an inexpensive operation (may be done multiple times; the builder is unaffected).
 
-```{code-cell} python3
+```{code-cell} ipython3
 array = builder.snapshot()
 array
 ```
@@ -111,7 +111,7 @@ The most useful of these create nested data structures:
 
 which switch into a mode that starts filling inside of a list, record, or tuple. For records and tuples, you additionally have to specify the `field` or `index` of the record or tuple (respectively).
 
-```{code-cell} python3
+```{code-cell} ipython3
 builder = ak.ArrayBuilder()
 
 builder.begin_list()
@@ -133,20 +133,20 @@ builder
 
 Appending after the `begin_list` puts data inside the list, rather than outside:
 
-```{code-cell} python3
+```{code-cell} ipython3
 builder.append(9.9)
 builder
 ```
 
 This `9.9` is outside of the lists, and hence the type is now "lists of numbers *or* numbers."
 
-```{code-cell} python3
+```{code-cell} ipython3
 builder.type.show()
 ```
 
 Since `begin_list` and `end_list` are imperative, the nesting structure of an array can be determined by program flow:
 
-```{code-cell} python3
+```{code-cell} ipython3
 def arbitrary_nesting(builder, depth):
     if depth == 0:
         builder.append(1)
@@ -165,7 +165,7 @@ builder
 
 Often, you'll know the exact depth of nesting you want. The Python `with` statement can be used to restrict the generality (nd free you from having to remember to `end` what you `begin`).
 
-```{code-cell} python3
+```{code-cell} ipython3
 builder = ak.ArrayBuilder()
 
 with builder.list():
@@ -188,7 +188,7 @@ When using `begin_record`/`end_record` (or the equivalent `record` in the `with`
 
    * `field("fieldname")`: switches to fill a field with a given name (and returns the builder, for convenience).
 
-```{code-cell} python3
+```{code-cell} ipython3
 builder = ak.ArrayBuilder()
 
 with builder.record():
@@ -201,7 +201,7 @@ builder
 
 The record type can also be given a name.
 
-```{code-cell} python3
+```{code-cell} ipython3
 builder = ak.ArrayBuilder()
 
 with builder.record("Point"):
@@ -214,7 +214,7 @@ builder
 
 This gives the resulting records a type named "`Point`", which might have specialized behaviors.
 
-```{code-cell} python3
+```{code-cell} ipython3
 array = builder.snapshot()
 array
 ```
@@ -224,7 +224,7 @@ Nested tuples
 
 The same is true for tuples, but the next field to fill is selected by "`index`" (integer), rather than "`field`" (string), and the tuple size has to be given up-front.
 
-```{code-cell} python3
+```{code-cell} ipython3
 builder = ak.ArrayBuilder()
 
 with builder.tuple(3):
@@ -245,7 +245,7 @@ If the set of fields changes while collecting records, the builder algorithm cou
 
 By default, {class}`ak.ArrayBuilder` follows policy (1), but it can be made to follow policy (2) if the names of the records are different.
 
-```{code-cell} python3
+```{code-cell} ipython3
 policy1 = ak.ArrayBuilder()
 
 with policy1.record():
@@ -259,7 +259,7 @@ with policy1.record():
 policy1.type.show()
 ```
 
-```{code-cell} python3
+```{code-cell} ipython3
 policy2 = ak.ArrayBuilder()
 
 with policy2.record("First"):
@@ -278,16 +278,16 @@ Comments on union-type
 
 Although it's easy to make {class}`union-type <ak.types.UnionType>` data with {class}`ak.ArrayBuilder`, the applications of union-type data are more limited. For instance, we can select a field that belongs to _all_ types of the union, but not any fields that don't share that field.
 
-```{code-cell} python3
+```{code-cell} ipython3
 array2 = policy2.snapshot()
 array2
 ```
 
-```{code-cell} python3
+```{code-cell} ipython3
 array2.y
 ```
 
-```{code-cell} python3
+```{code-cell} ipython3
 :tags: [raises-exception]
 
 array2.x
@@ -295,16 +295,16 @@ array2.x
 
 The above would be no problem for records collected using policy 1 (see previous section).
 
-```{code-cell} python3
+```{code-cell} ipython3
 array1 = policy1.snapshot()
 array1
 ```
 
-```{code-cell} python3
+```{code-cell} ipython3
 array1.y
 ```
 
-```{code-cell} python3
+```{code-cell} ipython3
 array1.x
 ```
 
@@ -325,7 +325,7 @@ There are a few limitations, though:
 
 Therefore, a common pattern is:
 
-```{code-cell} python3
+```{code-cell} ipython3
 import numba as nb
 
 
@@ -353,7 +353,7 @@ Setting the type of empty lists
 -------------------------------
 In addition to supporting type-discovery at execution time, {class}`ak.ArrayBuilder` also makes it convenient to work with complex, ragged arrays when the type is known ahead of time. Although it is not the most performant means of constructing an array whose type is already known, it provides a readable abstraction in the event that building the array is not a limiting factor for performance. However, due to this "on-line" type-discovery, it is possible that for certain data the result of {meth}`ak.ArrayBuilder.snapshot` will have different types. Consider this function that builds an array from the contents of some iterable:
 
-```{code-cell} python3
+```{code-cell} ipython3
 def process_data(builder, data):
     for item in data:
         if item < 0:
@@ -365,7 +365,7 @@ def process_data(builder, data):
 
 If we pass in only positive integers, the result is an array of integers:
 
-```{code-cell} python3
+```{code-cell} ipython3
 process_data(
     ak.ArrayBuilder(),
     [1, 2, 3, 4],
@@ -374,7 +374,7 @@ process_data(
 
 If we pass in only negative integers, the result is an array of `None`s with an unknown type:
 
-```{code-cell} python3
+```{code-cell} ipython3
 process_data(
     ak.ArrayBuilder(),
     [-1, -2, -3, -4],
@@ -383,7 +383,7 @@ process_data(
 
 It is only if we pass in a mix of these values that we see the "full" array type:
 
-```{code-cell} python3
+```{code-cell} ipython3
 process_data(
     ak.ArrayBuilder(),
     [1, 2, 3, 4, -1, -2, -3, -4],
@@ -392,7 +392,7 @@ process_data(
 
 A simple way to solve this problem is to explore all code branches explicitly, and remove the generated entry(ies) from the final array:
 
-```{code-cell} python3
+```{code-cell} ipython3
 def process_data(builder, data):
     for item in data:
         if item < 0:
@@ -408,21 +408,21 @@ def process_data(builder, data):
 
 The previous examples now have the same type:
 
-```{code-cell} python3
+```{code-cell} ipython3
 process_data(
     ak.ArrayBuilder(),
     [1, 2, 3, 4],
 )
 ```
 
-```{code-cell} python3
+```{code-cell} ipython3
 process_data(
     ak.ArrayBuilder(),
     [-1, -2, -3, -4],
 )
 ```
 
-```{code-cell} python3
+```{code-cell} ipython3
 process_data(
     ak.ArrayBuilder(),
     [1, 2, 3, 4, -1, -2, -3, -4],
