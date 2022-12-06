@@ -1063,20 +1063,34 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     def __delitem__(self, where):
         """
         Args:
-            where (str): Field name to remove from records in the array.
+            where (str or tuple of str): Field name to remove from the array.
 
-        Removes a field from records in the array.
+        For example:
+
+            >>> array = ak.Array([{"x": 3.3, "y": {"this": 10, "that": 20}}])
+            >>> del array["y", "that"]
+            >>> array.show()
+            [{x: 3.3, y: {this: 10}}]
+
+        See #ak.without_field for a variant that does not change the #ak.Array
+        in-place. (Internally, this method uses #ak.without_field, so performance
+        is not a factor in choosing one over the other.)
         """
         with ak._errors.OperationErrorContext(
             "ak.Array.__delitem__",
             dict(self=self, field_name=where),
         ):
-            names = ak.operations.fields(self._layout)
-            if where not in names:
+            if not (
+                isinstance(where, str)
+                or (isinstance(where, tuple) and all(isinstance(x, str) for x in where))
+            ):
                 raise ak._errors.wrap_error(
-                    TypeError(f"array fields do not contain {where!r}")
+                    TypeError("only fields may be removed in-place (by field name)")
                 )
-            self._layout = self._layout[[x for x in names if x != where]]
+
+            self._layout = ak.operations.ak_without_field._impl(
+                self._layout, where, highlevel=False, behavior=self._behavior
+            )
             self._numbaview = None
 
     def __getattr__(self, where):
@@ -1788,28 +1802,43 @@ class Record(NDArrayOperatorsMixin):
                     TypeError("only fields may be assigned in-place (by field name)")
                 )
 
-            self._layout = ak.operations.with_field(
-                self._layout, what, where, highlevel=False
+            self._layout = ak.operations.ak_with_field._impl(
+                self._layout, what, where, highlevel=False, behavior=self._behavior
             )
             self._numbaview = None
 
     def __delitem__(self, where):
         """
         Args:
-            where (str): Field name to add to records in the array.
+            where (str or tuple of str): Field name to remove from the record.
 
-        Removes a field from records in the array.
+        For example:
+
+            >>> record = ak.Record({"x": 3.3, "y": {"this": 10, "that": 20}})
+            >>> del record["y", "that"]
+            >>> record.show()
+            {x: 3.3,
+             y: {this: 10}}
+
+        See #ak.without_field for a variant that does not change the #ak.Record
+        in-place. (Internally, this method uses #ak.without_field, so performance
+        is not a factor in choosing one over the other.)
         """
         with ak._errors.OperationErrorContext(
             "ak.Record.__delitem__",
             dict(self=self, field_name=where),
         ):
-            names = ak.operations.fields(self._layout)
-            if where not in names:
+            if not (
+                isinstance(where, str)
+                or (isinstance(where, tuple) and all(isinstance(x, str) for x in where))
+            ):
                 raise ak._errors.wrap_error(
-                    TypeError(f"array fields do not contain {where!r}")
+                    TypeError("only fields may be removed in-place (by field name)")
                 )
-            self._layout = self._layout[[x for x in names if x != where]]
+
+            self._layout = ak.operations.ak_without_field._impl(
+                self._layout, where, highlevel=False, behavior=self._behavior
+            )
             self._numbaview = None
 
     def __getattr__(self, where):
