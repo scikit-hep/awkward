@@ -6,18 +6,31 @@ np = ak._nplikes.NumpyMetadata.instance()
 
 
 @ak._connect.numpy.implements("broadcast_arrays")
-def broadcast_arrays(*arrays, **kwargs):
+def broadcast_arrays(
+    *arrays,
+    depth_limit=None,
+    broadcast_parameters_rule="one_to_one",
+    left_broadcast=True,
+    right_broadcast=True,
+    highlevel=True,
+    behavior=None
+):
     """
     Args:
         arrays: Array-like data (anything #ak.to_layout recognizes).
-        left_broadcast (bool): If True, follow rules for implicit
-            left-broadcasting, as described below.
-        right_broadcast (bool): If True, follow rules for implicit
-            right-broadcasting, as described below.
         depth_limit (None or int, default is None): If None, attempt to fully
             broadcast the `arrays` to all levels. If an int, limit the number
             of dimensions that get broadcasted. The minimum value is `1`,
             for no broadcasting.
+        broadcast_parameters_rule (str): Rule for broadcasting parameters, one of:
+            - `"intersect"`
+            - `"all_or_nothing"`
+            - `"one_to_one"`
+            - `"none"`
+        left_broadcast (bool): If True, follow rules for implicit
+            left-broadcasting, as described below.
+        right_broadcast (bool): If True, follow rules for implicit
+            right-broadcasting, as described below.
         highlevel (bool, default is True): If True, return an #ak.Array;
             otherwise, return a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
@@ -57,7 +70,9 @@ def broadcast_arrays(*arrays, **kwargs):
             ak.broadcast_arrays(
                 arrays = (array([1, 2]), array([[ 0.1,  0.2,  0.3],
                [10. , 20....
-                kwargs = {}
+                depth_limit = None,
+                highlevel = True,
+                behavior = None,
             )
         Error details: cannot broadcast RegularArray of size 2 with RegularArray of size 3
 
@@ -130,7 +145,9 @@ def broadcast_arrays(*arrays, **kwargs):
         ValueError: while calling
             ak.broadcast_arrays(
                 arrays = (<Array [[[1, 2, 3], [], [4, ...], [6]], ...] type='3 * var ...
-                kwargs = {}
+                depth_limit = None,
+                highlevel = True,
+                behavior = None,
             )
         Error details: cannot broadcast nested list
 
@@ -149,35 +166,36 @@ def broadcast_arrays(*arrays, **kwargs):
     """
     with ak._errors.OperationErrorContext(
         "ak.broadcast_arrays",
-        dict(arrays=arrays, kwargs=kwargs),
+        dict(
+            arrays=arrays,
+            depth_limit=depth_limit,
+            broadcast_parameters_rule=broadcast_parameters_rule,
+            left_broadcast=left_broadcast,
+            right_broadcast=right_broadcast,
+            highlevel=highlevel,
+            behavior=behavior,
+        ),
     ):
-        return _impl(arrays, kwargs)
+        return _impl(
+            arrays,
+            depth_limit,
+            broadcast_parameters_rule,
+            left_broadcast,
+            right_broadcast,
+            highlevel,
+            behavior,
+        )
 
 
-def _impl(arrays, kwargs):
-    (
-        highlevel,
-        behavior,
-        depth_limit,
-        left_broadcast,
-        right_broadcast,
-        broadcast_parameters_rule,
-    ) = ak._util.extra(
-        (),
-        kwargs,
-        [
-            ("highlevel", True),
-            ("behavior", None),
-            ("depth_limit", None),
-            ("left_broadcast", True),
-            ("right_broadcast", True),
-            (
-                "broadcast_parameters_rule",
-                ak._broadcasting.BroadcastParameterRule.ONE_TO_ONE,
-            ),
-        ],
-    )
-
+def _impl(
+    arrays,
+    depth_limit,
+    broadcast_parameters_rule,
+    left_broadcast,
+    right_broadcast,
+    highlevel,
+    behavior,
+):
     inputs = []
     for x in arrays:
         y = ak.operations.to_layout(x, allow_record=True, allow_other=True)

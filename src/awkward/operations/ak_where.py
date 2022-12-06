@@ -7,7 +7,7 @@ cpu = ak._backends.NumpyBackend.instance()
 
 
 @ak._connect.numpy.implements("where")
-def where(condition, *args, **kwargs):
+def where(condition, *args, mergebool=True, highlevel=True, behavior=None):
     """
     Args:
         condition: Array-like data (anything #ak.to_layout recognizes) of booleans.
@@ -38,10 +38,6 @@ def where(condition, *args, **kwargs):
     for all `i`. The structure of `x` and `y` do not need to be the same; if
     they are incompatible types, the output will have #ak.type.UnionType.
     """
-    mergebool, highlevel, behavior = ak._util.extra(
-        (), kwargs, [("mergebool", True), ("highlevel", True), ("behavior", None)]
-    )
-
     if len(args) == 0:
         with ak._errors.OperationErrorContext(
             "ak.where",
