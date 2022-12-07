@@ -501,6 +501,8 @@ def _impl(
                     )
                 )
 
+        # An exception to the rule of ak._do.recursively_apply, for symmetry with
+        # ak._broadcasting.apply_step, below. ak_transform._impl knows implementation details.
         out = layout._recursively_apply(
             action,
             behavior,

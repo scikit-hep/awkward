@@ -1523,35 +1523,6 @@ class Content:
     def _completely_flatten(self, backend, options):
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def recursively_apply(
-        self,
-        action: ActionType,
-        behavior: dict | None = None,
-        depth_context: dict[str, Any] | None = None,
-        lateral_context: dict[str, Any] | None = None,
-        allow_records: bool = True,
-        keep_parameters: bool = True,
-        numpy_to_regular: bool = True,
-        return_simplified: bool = True,
-        return_array: bool = True,
-        function_name: str | None = None,
-    ) -> Content | None:
-        return self._recursively_apply(
-            action,
-            behavior,
-            1,
-            copy.copy(depth_context),
-            lateral_context,
-            {
-                "allow_records": allow_records,
-                "keep_parameters": keep_parameters,
-                "numpy_to_regular": numpy_to_regular,
-                "return_simplified": return_simplified,
-                "return_array": return_array,
-                "function_name": function_name,
-            },
-        )
-
     def _recursively_apply(
         self,
         action: ActionType,

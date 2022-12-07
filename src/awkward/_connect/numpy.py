@@ -254,8 +254,12 @@ def array_ufunc(ufunc, method, inputs, kwargs):
                 assert isinstance(result, tuple) and len(result) == 1
                 return result[0]
 
-        out = inputs[where].recursively_apply(
-            unary_action, behavior, function_name=ufunc.__name__, allow_records=False
+        out = ak._do.recursively_apply(
+            inputs[where],
+            unary_action,
+            behavior,
+            function_name=ufunc.__name__,
+            allow_records=False,
         )
 
     else:

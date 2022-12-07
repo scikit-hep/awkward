@@ -79,8 +79,8 @@ def _impl(array, axis, highlevel, behavior):
         depth_context["posaxis"] = posaxis
 
     depth_context = {"posaxis": posaxis}
-    out = layout.recursively_apply(
-        action, behavior, depth_context, numpy_to_regular=True
+    out = ak._do.recursively_apply(
+        layout, action, behavior, depth_context, numpy_to_regular=True
     )
 
     return ak._util.wrap(out, behavior, highlevel)

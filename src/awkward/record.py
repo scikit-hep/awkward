@@ -240,38 +240,6 @@ class Record:
     def __deepcopy__(self, memo):
         return Record(copy.deepcopy(self._array, memo), self._at)
 
-    def recursively_apply(
-        self,
-        action,
-        behavior=None,
-        depth_context=None,
-        lateral_context=None,
-        allow_records=True,
-        keep_parameters=True,
-        numpy_to_regular=True,
-        return_simplified=True,
-        return_array=True,
-        function_name=None,
-    ):
-
-        out = self._array.recursively_apply(
-            action,
-            behavior,
-            depth_context,
-            lateral_context,
-            allow_records,
-            keep_parameters,
-            numpy_to_regular,
-            return_simplified,
-            return_array,
-            function_name,
-        )
-
-        if return_array:
-            return Record(out, self._at)
-        else:
-            return None
-
     def jax_flatten(self):
         from awkward._connect.jax import AuxData, find_all_buffers
 
