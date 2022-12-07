@@ -60,7 +60,7 @@ def _impl(array, axis, highlevel, behavior):
                 ],
             )
 
-        elif layout.is_unknown or layout.is_list or layout.is_record or layout.is_numpy:
+        elif layout.is_numpy or layout.is_unknown or layout.is_list or layout.is_record:
             return ak.contents.NumpyArray(
                 backend.nplike.zeros(len(layout), dtype=np.bool_)
             )

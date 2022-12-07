@@ -1433,7 +1433,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     def __getstate__(self):
         packed = ak.operations.packed(self._layout, highlevel=False)
         form, length, container = ak.operations.to_buffers(
-            packed, buffer_key="part0-{form_key}-{attribute}", form_key="node{id}"
+            packed, buffer_key="{form_key}-{attribute}", form_key="node{id}"
         )
         if self._behavior is ak.behavior:
             behavior = None
@@ -1442,34 +1442,14 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         return form.to_dict(), length, container, behavior
 
     def __setstate__(self, state):
-        if isinstance(state[1], dict):
-            raise ak._errors.wrap_error(
-                ValueError(
-                    "Awkward 2.x and later can only unpickle arrays from 1.0.1 and later"
-                )
-            )
-        else:
-            form, length, container, behavior = state
-            if ak._util.is_integer(length):
-                layout = ak.operations.from_buffers(
-                    form,
-                    length,
-                    container,
-                    highlevel=False,
-                    buffer_key="part0-{form_key}-{attribute}",
-                )
-            else:
-                layouts = [
-                    ak.operations.from_buffers(
-                        form,
-                        length,
-                        container,
-                        highlevel=False,
-                        buffer_key=f"part{i}-{{form_key}}-{{attribute}}",
-                    )
-                    for i in length
-                ]
-                layout = ak.operations.concatenate(layouts, highlevel=False)
+        form, length, container, behavior = state
+        layout = ak.operations.from_buffers(
+            form,
+            length,
+            container,
+            highlevel=False,
+            buffer_key="{form_key}-{attribute}",
+        )
         self.layout = layout
         self.behavior = behavior
 
@@ -2062,7 +2042,7 @@ class Record(NDArrayOperatorsMixin):
     def __getstate__(self):
         packed = ak.operations.packed(self._layout, highlevel=False)
         form, length, container = ak.operations.to_buffers(
-            packed.array, buffer_key="part0-{form_key}-{attribute}", form_key="node{id}"
+            packed.array, buffer_key="{form_key}-{attribute}", form_key="node{id}"
         )
         if self._behavior is ak.behavior:
             behavior = None
@@ -2071,34 +2051,14 @@ class Record(NDArrayOperatorsMixin):
         return form.to_dict(), length, container, behavior, packed.at
 
     def __setstate__(self, state):
-        if isinstance(state[1], dict):
-            raise ak._errors.wrap_error(
-                ValueError(
-                    "Awkward 2.x and later can only unpickle arrays from 1.0.1 and later"
-                )
-            )
-        else:
-            form, length, container, behavior, at = state
-            if ak._util.is_integer(length):
-                layout = ak.operations.from_buffers(
-                    form,
-                    length,
-                    container,
-                    highlevel=False,
-                    buffer_key="part0-{form_key}-{attribute}",
-                )
-            else:
-                layouts = [
-                    ak.operations.from_buffers(
-                        form,
-                        length,
-                        container,
-                        highlevel=False,
-                        buffer_key=f"part{i}-{{form_key}}-{{attribute}}",
-                    )
-                    for i in length
-                ]
-                layout = ak.operations.concatenate(layouts, highlevel=False)
+        form, length, container, behavior, at = state
+        layout = ak.operations.from_buffers(
+            form,
+            length,
+            container,
+            highlevel=False,
+            buffer_key="{form_key}-{attribute}",
+        )
         layout = ak.record.Record(layout, at)
         self.layout = layout
         self.behavior = behavior
