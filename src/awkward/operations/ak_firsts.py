@@ -55,6 +55,9 @@ def _impl(array, axis, highlevel, behavior):
 
     if posaxis == 0:
         # specialized logic; it's tested in test_0582-propagate-context-in-broadcast_and_apply.py
+        # Build an integer-typed slice array, so that we can
+        # ensure we have advanced indexing for both length==0
+        # and length > 0 cases.
         slicer = ak.from_iter([None, 0])
         if layout.length == 0:
             out = layout[slicer[[0]]][0]
