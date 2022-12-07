@@ -385,7 +385,9 @@ class NumpyArray(Content):
             return self.to_RegularArray()._offsets_and_flattened(posaxis, depth)
 
         else:
-            raise ak._errors.wrap_error(np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})"))
+            raise ak._errors.wrap_error(
+                np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
+            )
 
     def _mergeable(self, other, mergebool):
         if isinstance(
