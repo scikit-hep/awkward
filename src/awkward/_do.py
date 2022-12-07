@@ -7,10 +7,12 @@ from numbers import Integral
 
 import awkward as ak
 from awkward._backends import Backend
-from awkward.contents.content import ActionType, Content
+from awkward.contents.content import ActionType, AxisMaybeNone, Content
 from awkward.forms import form
 from awkward.record import Record
 from awkward.typing import Any
+
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 def recursively_apply(
@@ -118,3 +120,41 @@ def to_buffers(
     content._to_buffers(form, getkey, container, backend)
 
     return form, len(content), container
+
+
+def axis_wrap_if_negative(
+    layout: Content | Record, axis: AxisMaybeNone
+) -> AxisMaybeNone:
+    if isinstance(layout, Record):
+        if axis == 0:
+            raise ak._errors.wrap_error(
+                np.AxisError("Record type at axis=0 is a scalar, not an array")
+            )
+        return axis_wrap_if_negative(layout._array, axis)
+
+    else:
+        if axis is None or axis >= 0:
+            return axis
+
+        mindepth, maxdepth = layout.minmax_depth
+        depth = layout.purelist_depth
+        if mindepth == depth and maxdepth == depth:
+            posaxis = depth + axis
+            if posaxis < 0:
+                raise ak._errors.wrap_error(
+                    np.AxisError(
+                        f"axis={axis} exceeds the depth ({depth}) of this array"
+                    )
+                )
+            return posaxis
+
+        elif mindepth + axis == 0:
+            raise ak._errors.wrap_error(
+                np.AxisError(
+                    "axis={} exceeds the depth ({}) of at least one record field (or union possibility) of this array".format(
+                        axis, depth
+                    )
+                )
+            )
+
+        return axis

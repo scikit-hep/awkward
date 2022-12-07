@@ -120,7 +120,7 @@ def _impl(array, value, axis, highlevel, behavior):
     else:
 
         def action(layout, depth, depth_context, **kwargs):
-            posaxis = layout.axis_wrap_if_negative(depth_context["posaxis"])
+            posaxis = ak._do.axis_wrap_if_negative(layout, depth_context["posaxis"])
             depth_context["posaxis"] = posaxis
             if posaxis + 1 < depth:
                 return layout

@@ -169,7 +169,7 @@ class EmptyArray(Content):
             raise ak._errors.wrap_error(AssertionError(repr(head)))
 
     def num(self, axis, depth=0):
-        posaxis = self.axis_wrap_if_negative(axis)
+        posaxis = ak._do.axis_wrap_if_negative(self, axis)
 
         if posaxis == depth:
             out = self.length
@@ -183,7 +183,7 @@ class EmptyArray(Content):
             return ak.contents.NumpyArray(out, parameters=None, backend=self._backend)
 
     def _offsets_and_flattened(self, axis, depth):
-        posaxis = self.axis_wrap_if_negative(axis)
+        posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:
             raise ak._errors.wrap_error(
                 np.AxisError(self, "axis=0 not allowed for flatten")
@@ -297,7 +297,7 @@ class EmptyArray(Content):
         return 0
 
     def _pad_none(self, target, axis, depth, clip):
-        posaxis = self.axis_wrap_if_negative(axis)
+        posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis != depth:
             raise ak._errors.wrap_error(
                 np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")

@@ -672,33 +672,6 @@ class Content:
         else:
             return None
 
-    def axis_wrap_if_negative(self, axis: AxisMaybeNone) -> AxisMaybeNone:
-        if axis is None or axis >= 0:
-            return axis
-
-        mindepth, maxdepth = self.minmax_depth
-        depth = self.purelist_depth
-        if mindepth == depth and maxdepth == depth:
-            posaxis = depth + axis
-            if posaxis < 0:
-                raise ak._errors.wrap_error(
-                    np.AxisError(
-                        f"axis={axis} exceeds the depth ({depth}) of this array"
-                    )
-                )
-            return posaxis
-
-        elif mindepth + axis == 0:
-            raise ak._errors.wrap_error(
-                np.AxisError(
-                    "axis={} exceeds the depth ({}) of at least one record field (or union possibility) of this array".format(
-                        axis, depth
-                    )
-                )
-            )
-
-        return axis
-
     def _local_index_axis0(self) -> ak.contents.NumpyArray:
         localindex = ak.index.Index64.empty(self.length, self._backend.index_nplike)
         self._handle_error(

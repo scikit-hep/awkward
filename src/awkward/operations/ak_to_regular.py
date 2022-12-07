@@ -56,7 +56,7 @@ def to_regular(array, axis=1, *, highlevel=True, behavior=None):
 def _impl(array, axis, highlevel, behavior):
     layout = ak.operations.to_layout(array)
     behavior = ak._util.behavior_of(array, behavior=behavior)
-    posaxis = layout.axis_wrap_if_negative(axis)
+    posaxis = ak._do.axis_wrap_if_negative(layout, axis)
 
     if axis is None:
 
@@ -72,7 +72,7 @@ def _impl(array, axis, highlevel, behavior):
     else:
 
         def action(layout, depth, depth_context, **kwargs):
-            posaxis = layout.axis_wrap_if_negative(depth_context["posaxis"])
+            posaxis = ak._do.axis_wrap_if_negative(layout, depth_context["posaxis"])
             if posaxis == depth and layout.is_list:
                 return layout.to_RegularArray()
             elif posaxis == 0:

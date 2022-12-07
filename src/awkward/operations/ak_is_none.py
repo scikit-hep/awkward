@@ -67,8 +67,8 @@ def _impl(array, axis, highlevel, behavior):
 
     # Locate the axis
     def getfunction_outer(layout, depth, depth_context, **kwargs):
-        depth_context["posaxis"] = layout.axis_wrap_if_negative(
-            depth_context["posaxis"]
+        depth_context["posaxis"] = ak._do.axis_wrap_if_negative(
+            layout, depth_context["posaxis"]
         )
         if depth_context["posaxis"] == depth - 1:
             return ak._do.recursively_apply(layout, getfunction_inner, behavior)
