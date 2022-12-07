@@ -1012,7 +1012,7 @@ class IndexedArray(Content):
     def _completely_flatten(self, backend, options):
         return self.project()._completely_flatten(backend, options)
 
-    def _recursively_apply_impl(
+    def _recursively_apply(
         self, action, behavior, depth, depth_context, lateral_context, options
     ):
         if (
@@ -1038,7 +1038,7 @@ class IndexedArray(Content):
             def continuation():
                 return make(
                     index,
-                    content._recursively_apply_impl(
+                    content._recursively_apply(
                         action,
                         behavior,
                         depth,
@@ -1052,7 +1052,7 @@ class IndexedArray(Content):
         else:
 
             def continuation():
-                content._recursively_apply_impl(
+                content._recursively_apply(
                     action,
                     behavior,
                     depth,

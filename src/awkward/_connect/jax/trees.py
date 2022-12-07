@@ -21,7 +21,7 @@ def find_all_buffers(
         if isinstance(node, ak.contents.NumpyArray):
             data_ptrs.append(node.data)
 
-    layout._recursively_apply(action=action, return_array=False, numpy_to_regular=False)
+    layout.recursively_apply(action=action, return_array=False, numpy_to_regular=False)
 
     return data_ptrs
 
@@ -43,7 +43,7 @@ def replace_all_buffers(
                     buffer, parameters=node.parameters, backend=backend
                 )
 
-    return layout._recursively_apply(action=action, numpy_to_regular=False)
+    return layout.recursively_apply(action=action, numpy_to_regular=False)
 
 
 T = TypeVar(

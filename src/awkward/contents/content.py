@@ -1523,7 +1523,7 @@ class Content:
     def _completely_flatten(self, backend, options):
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def _recursively_apply(
+    def recursively_apply(
         self,
         action: ActionType,
         behavior: dict | None = None,
@@ -1536,7 +1536,7 @@ class Content:
         return_array: bool = True,
         function_name: str | None = None,
     ) -> Content | None:
-        return self._recursively_apply_impl(
+        return self._recursively_apply(
             action,
             behavior,
             1,
@@ -1552,7 +1552,7 @@ class Content:
             },
         )
 
-    def _recursively_apply_impl(
+    def _recursively_apply(
         self,
         action: ActionType,
         behavior: dict | None,

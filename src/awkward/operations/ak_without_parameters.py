@@ -31,7 +31,7 @@ def _impl(array, highlevel, behavior):
     behavior = ak._util.behavior_of(array, behavior=behavior)
     layout = ak.operations.to_layout(array, allow_record=True, allow_other=False)
 
-    out = layout._recursively_apply(
+    out = layout.recursively_apply(
         lambda layout, behavior=behavior, **kwargs: None, keep_parameters=False
     )
 

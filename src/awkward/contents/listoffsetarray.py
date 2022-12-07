@@ -2002,7 +2002,7 @@ class ListOffsetArray(Content):
             flat = self._content[self._offsets[0] : self._offsets[-1]]
             return flat._completely_flatten(backend, options)
 
-    def _recursively_apply_impl(
+    def _recursively_apply(
         self, action, behavior, depth, depth_context, lateral_context, options
     ):
         if self._backend.nplike.known_shape and self._backend.nplike.known_data:
@@ -2019,7 +2019,7 @@ class ListOffsetArray(Content):
             def continuation():
                 return ListOffsetArray(
                     offsets,
-                    content._recursively_apply_impl(
+                    content._recursively_apply(
                         action,
                         behavior,
                         depth + 1,
@@ -2033,7 +2033,7 @@ class ListOffsetArray(Content):
         else:
 
             def continuation():
-                content._recursively_apply_impl(
+                content._recursively_apply(
                     action,
                     behavior,
                     depth + 1,

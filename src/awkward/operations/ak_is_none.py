@@ -51,7 +51,7 @@ def _impl(array, axis, highlevel, behavior):
                 ak.index.Index8(tag),
                 ak.index.Index64(index),
                 [
-                    layout.content._recursively_apply(getfunction_inner, behavior),
+                    layout.content.recursively_apply(getfunction_inner, behavior),
                     ak.contents.NumpyArray(
                         backend.nplike.array([True], dtype=np.bool_)
                     ),
@@ -69,7 +69,7 @@ def _impl(array, axis, highlevel, behavior):
             depth_context["posaxis"]
         )
         if depth_context["posaxis"] == depth - 1:
-            return layout._recursively_apply(getfunction_inner, behavior)
+            return layout.recursively_apply(getfunction_inner, behavior)
 
     layout = ak.operations.to_layout(array)
     max_axis = layout.branch_depth[1] - 1
@@ -79,7 +79,7 @@ def _impl(array, axis, highlevel, behavior):
         )
     behavior = ak._util.behavior_of(array, behavior=behavior)
     depth_context = {"posaxis": axis}
-    out = layout._recursively_apply(
+    out = layout.recursively_apply(
         getfunction_outer, behavior, depth_context=depth_context
     )
     return ak._util.wrap(out, behavior, highlevel)

@@ -464,7 +464,7 @@ class UnmaskedArray(Content):
         else:
             return [self]
 
-    def _recursively_apply_impl(
+    def _recursively_apply(
         self, action, behavior, depth, depth_context, lateral_context, options
     ):
         if options["return_array"]:
@@ -475,7 +475,7 @@ class UnmaskedArray(Content):
 
             def continuation():
                 return make(
-                    self._content._recursively_apply_impl(
+                    self._content._recursively_apply(
                         action,
                         behavior,
                         depth,
@@ -489,7 +489,7 @@ class UnmaskedArray(Content):
         else:
 
             def continuation():
-                self._content._recursively_apply_impl(
+                self._content._recursively_apply(
                     action,
                     behavior,
                     depth,

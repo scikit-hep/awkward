@@ -240,7 +240,7 @@ class Record:
     def __deepcopy__(self, memo):
         return Record(copy.deepcopy(self._array, memo), self._at)
 
-    def _recursively_apply(
+    def recursively_apply(
         self,
         action,
         behavior=None,
@@ -254,7 +254,7 @@ class Record:
         function_name=None,
     ):
 
-        out = self._array._recursively_apply(
+        out = self._array.recursively_apply(
             action,
             behavior,
             depth_context,

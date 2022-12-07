@@ -339,7 +339,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
                                 "characters of a string; please split it into lists"
                             )
                         )
-                    nextlayout = layout._recursively_apply(
+                    nextlayout = layout.recursively_apply(
                         getgetfunction1(inside), behavior
                     )
                     return newaxis(nextlayout, outside)
@@ -350,7 +350,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
 
         def apply(x, i):
             layout = ak.operations.to_layout(x, allow_record=False, allow_other=False)
-            return layout._recursively_apply(getgetfunction2(i), behavior)
+            return layout.recursively_apply(getgetfunction2(i), behavior)
 
         toflatten = []
         if nested is None or nested is False:
