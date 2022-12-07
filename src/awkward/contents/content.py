@@ -40,6 +40,7 @@ class Content:
     is_indexed = False
     is_record = False
     is_union = False
+    is_leaf = False
 
     def _init(self, parameters: dict[str, Any] | None, backend: Backend):
         if parameters is None:

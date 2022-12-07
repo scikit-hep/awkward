@@ -19,6 +19,10 @@ numpy = ak._nplikes.Numpy.instance()
 class RecordArray(Content):
     is_record = True
 
+    @property
+    def is_leaf(self):
+        return len(self._contents) == 0
+
     def __init__(
         self,
         contents,

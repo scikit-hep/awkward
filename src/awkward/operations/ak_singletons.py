@@ -71,7 +71,7 @@ def _impl(array, axis, highlevel, behavior):
             else:
                 return ak.contents.RegularArray(layout, 1).to_ListOffsetArray64(True)
 
-        elif posaxis == 0:
+        elif layout.is_leaf:
             raise ak._errors.wrap_error(
                 np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
             )
