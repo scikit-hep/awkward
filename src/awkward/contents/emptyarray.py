@@ -14,7 +14,6 @@ numpy = ak._nplikes.Numpy.instance()
 
 
 class EmptyArray(Content):
-    is_numpy = True
     is_unknown = True
 
     def __init__(self, *, parameters=None, backend=None):
