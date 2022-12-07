@@ -249,6 +249,7 @@ class Record:
         allow_records=True,
         keep_parameters=True,
         numpy_to_regular=True,
+        return_simplified=True,
         return_array=True,
         function_name=None,
     ):
@@ -261,6 +262,7 @@ class Record:
             allow_records,
             keep_parameters,
             numpy_to_regular,
+            return_simplified,
             return_array,
             function_name,
         )

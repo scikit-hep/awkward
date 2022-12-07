@@ -19,7 +19,8 @@ def transform(
     right_broadcast=True,
     numpy_to_regular=False,
     regular_to_jagged=False,
-    return_array=True,
+    return_simplified=True,
+    return_value="simplified",
     highlevel=True,
     behavior=None,
 ):
@@ -59,10 +60,14 @@ def transform(
             calling `transformation`.
         regular_to_jagged (bool): If True, regular-type lists are converted into
             variable-length lists before calling `transformation`.
-        return_array (bool): If True, the result of calling `transformation`
-            replaces the original node in the new layout that is returned.
-            If False, the `transformation` function is expected to return
-            any results by modifying the `lateral_context` dict.
+        return_value (`"none"`, `"original", `"simplified"`): If `"none"`, the output of
+            this function is None; if `"original"`, untouched nodes surrounding
+            the ones replaced by the `transformation` are returned in their original
+            state; if `"simplified"`, the #ak.Content.simplified constructor is
+            used on the surrounding nodes to ensure that option-type and union-type
+            nodes are not nested inappropriately. Note that if `return_value` is `"none"`,
+            the only way to get information out of this function is through the
+            `lateral_context`.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
@@ -81,7 +86,7 @@ def transform(
         ...     print("Hello", type(layout).__name__, "at", depth)
         ...
         >>> array = ak.Array([[1.1, 2.2, "three"], [], None, [4.4, 5.5]])
-        >>> ak.transform(say_hello, array, return_array=False)
+        >>> ak.transform(say_hello, array, return_value="none")
         Hello IndexedOptionArray at 1
         Hello ListOffsetArray at 1
         Hello UnionArray at 2
@@ -186,8 +191,16 @@ def transform(
     nodes unchanged when `transformation` returns None. If `transformation` returns
     length-1 tuples, the final output is an array, not a length-1 tuple.
 
-    If `return_array` is False, #ak.transform returns None. This is useful for
-    functions that return non-array data through `lateral_context`.
+    If `return_value` is `"none"`, #ak.transform returns None. This is useful for
+    functions that return non-array data through `lateral_context`. The other two
+    choices, `"original"` and `"simplified"`, determine how untouched array nodes,
+    the ones that are _not_ modified by the `transformation` function, are returned.
+    With `"original"`, they are returned without modification, which might result
+    in illegal combinations of option-type and union-type, which would raise an
+    error. With `"simplified"`, the surrounding array nodes are simplified upon
+    reconstruction. For example, if the `transformation` puts a new #ak.contents.ByteMaskedArray
+    inside an existing #ak.contents.ByteMaskedArray, the two will be consolidated
+    into a single option-type array node.
 
     Contexts
     ========
@@ -214,7 +227,7 @@ def transform(
         ...     print(depth_context["types"])
         ...
         >>> context = {"types": ()}
-        >>> ak.transform(crawl, array, depth_context=context, return_array=False)
+        >>> ak.transform(crawl, array, depth_context=context, return_value="none")
         ('ListOffsetArray',)
         ('ListOffsetArray', 'RecordArray')
         ('ListOffsetArray', 'RecordArray', 'ListOffsetArray')
@@ -235,7 +248,7 @@ def transform(
         ...     print(lateral_context["types"])
         ...
         >>> context = {"types": ()}
-        >>> ak.transform(crawl, array, lateral_context=context, return_array=False)
+        >>> ak.transform(crawl, array, lateral_context=context, return_value="none")
         ('ListOffsetArray',)
         ('ListOffsetArray', 'RecordArray')
         ('ListOffsetArray', 'RecordArray', 'ListOffsetArray')
@@ -247,7 +260,7 @@ def transform(
     The data accumulate through the walk over the tree. There are two leaf-types
     (#ak.contents.NumpyArray) in the tuple because this tree has two leaves.
     The data are even available outside of the function, so `lateral_context` can
-    be paired with `return_array=False` to extract non-array data, rather than
+    be paired with `return_value="none"` to extract non-array data, rather than
     transforming the array.
 
     The visitation order is stable: a recursive walk always proceeds through the
@@ -319,11 +332,11 @@ def transform(
         >>> def one_array(layout, **kwargs):
         ...     print(type(layout).__name__)
         ...
-        >>> ak.transform(one_array, array1, return_array=False)
+        >>> ak.transform(one_array, array1, return_value="none")
         IndexedOptionArray
         ListOffsetArray
         NumpyArray
-        >>> ak.transform(one_array, array2, return_array=False)
+        >>> ak.transform(one_array, array2, return_value="none")
         NumpyArray
 
     The first array has three nested nodes; the second has only one node.
@@ -364,6 +377,7 @@ def transform(
 
     Broadcasting Parameters
     =======================
+
     When broadcasting multiple arrays with parameters, there are different ways of
     assigning parameters to the outputs. The assignment of array parameters happens
     at every level above the transformation action.
@@ -406,7 +420,7 @@ def transform(
             right_broadcast=right_broadcast,
             numpy_to_regular=numpy_to_regular,
             regular_to_jagged=regular_to_jagged,
-            return_array=return_array,
+            return_value=return_value,
             behavior=behavior,
             highlevel=highlevel,
         ),
@@ -423,7 +437,7 @@ def transform(
             right_broadcast,
             numpy_to_regular,
             regular_to_jagged,
-            return_array,
+            return_value,
             behavior,
             highlevel,
         )
@@ -441,7 +455,7 @@ def _impl(
     right_broadcast,
     numpy_to_regular,
     regular_to_jagged,
-    return_array,
+    return_value,
     behavior,
     highlevel,
 ):
@@ -463,7 +477,8 @@ def _impl(
         "numpy_to_regular": numpy_to_regular,
         "regular_to_jagged": regular_to_jagged,
         "keep_parameters": True,
-        "return_array": return_array,
+        "return_simplified": return_value == "simplified",
+        "return_array": return_value != "none",
         "function_name": "ak.transform",
         "broadcast_parameters_rule": broadcast_parameters_rule,
     }
@@ -495,7 +510,7 @@ def _impl(
             options,
         )
 
-        if return_array:
+        if return_value != "none":
             return ak._util.wrap(out, behavior, highlevel)
 
     else:
@@ -544,7 +559,7 @@ def _impl(
         assert isinstance(out, tuple)
         out = [ak._broadcasting.broadcast_unpack(x, isscalar, backend) for x in out]
 
-        if return_array:
+        if return_value != "none":
             if len(out) == 1:
                 return ak._util.wrap(out[0], behavior, highlevel)
             else:

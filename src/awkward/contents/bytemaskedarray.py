@@ -1011,9 +1011,13 @@ class ByteMaskedArray(Content):
             content = self._content
 
         if options["return_array"]:
+            if options["return_simplified"]:
+                make = ByteMaskedArray.simplified
+            else:
+                make = ByteMaskedArray
 
             def continuation():
-                return ByteMaskedArray(
+                return make(
                     self._mask,
                     content._recursively_apply(
                         action,

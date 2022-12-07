@@ -15,6 +15,7 @@ numpy = ak._nplikes.Numpy.instance()
 
 class EmptyArray(Content):
     is_unknown = True
+    is_leaf = True
 
     def __init__(self, *, parameters=None, backend=None):
         if backend is None:
@@ -299,7 +300,7 @@ class EmptyArray(Content):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis != depth:
             raise ak._errors.wrap_error(
-                np.AxisError(f"axis={axis} exceeds the depth of this array({depth})")
+                np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
             )
         else:
             return self.pad_none_axis0(target, True)

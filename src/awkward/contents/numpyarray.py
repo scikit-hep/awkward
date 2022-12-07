@@ -16,6 +16,7 @@ numpy = ak._nplikes.Numpy.instance()
 
 class NumpyArray(Content):
     is_numpy = True
+    is_leaf = True
 
     def __init__(self, data, *, parameters=None, backend=None):
         if backend is None:
@@ -384,7 +385,9 @@ class NumpyArray(Content):
             return self.to_RegularArray()._offsets_and_flattened(posaxis, depth)
 
         else:
-            raise ak._errors.wrap_error(np.AxisError("axis out of range for flatten"))
+            raise ak._errors.wrap_error(
+                np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
+            )
 
     def _mergeable(self, other, mergebool):
         if isinstance(
@@ -497,7 +500,7 @@ class NumpyArray(Content):
             return self._local_index_axis0()
         elif len(self.shape) <= 1:
             raise ak._errors.wrap_error(
-                np.AxisError("'axis' out of range for local_index")
+                np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
             )
         else:
             return self.to_RegularArray()._local_index(posaxis, depth)
@@ -1083,7 +1086,7 @@ class NumpyArray(Content):
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         elif len(self.shape) <= 1:
             raise ak._errors.wrap_error(
-                np.AxisError("'axis' out of range for combinations")
+                np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
             )
         else:
             return self.to_RegularArray()._combinations(
@@ -1227,7 +1230,7 @@ class NumpyArray(Content):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis != depth:
             raise ak._errors.wrap_error(
-                np.AxisError(f"axis={axis} exceeds the depth of this array({depth})")
+                np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
             )
         if not clip:
             if target < self.length:

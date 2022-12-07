@@ -1561,9 +1561,13 @@ class IndexedOptionArray(Content):
             index, content = self._index, self._content
 
         if options["return_array"]:
+            if options["return_simplified"]:
+                make = IndexedOptionArray.simplified
+            else:
+                make = IndexedOptionArray
 
             def continuation():
-                return IndexedOptionArray(
+                return make(
                     index,
                     content._recursively_apply(
                         action,

@@ -5,10 +5,14 @@ import awkward as ak
 np = ak._nplikes.NumpyMetadata.instance()
 
 
-def singletons(array, *, highlevel=True, behavior=None):
+def singletons(array, axis=0, *, highlevel=True, behavior=None):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
+        axis (int): The dimension at which this operation is applied. The
+            outermost dimension is `0`, followed by `1`, etc., and negative
+            values count backward from the innermost: `-1` is the innermost
+            dimension, `-2` is the next level up, etc.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
@@ -34,49 +38,49 @@ def singletons(array, *, highlevel=True, behavior=None):
     """
     with ak._errors.OperationErrorContext(
         "ak.singletons",
-        dict(array=array, highlevel=highlevel, behavior=behavior),
+        dict(array=array, axis=axis, highlevel=highlevel, behavior=behavior),
     ):
-        return _impl(array, highlevel, behavior)
+        return _impl(array, axis, highlevel, behavior)
 
 
-def _impl(array, highlevel, behavior):
-    def action(layout, **kwargs):
-        backend = layout.backend
-
-        if layout.is_option:
-            nulls = backend.index_nplike.asarray(
-                layout.mask_as_bool(valid_when=False)
-            ).view(np.bool_)
-            offsets = backend.index_nplike.ones(len(layout) + 1, dtype=np.int64)
-            offsets[0] = 0
-            offsets[1:][nulls] = 0
-            backend.index_nplike.cumsum(offsets, out=offsets)
-            return ak.contents.ListOffsetArray(
-                ak.index.Index64(offsets), layout.project()
-            )
-
-        elif isinstance(layout, ak.contents.IndexedArray) and isinstance(
-            layout.content, (ak.contents.EmptyArray, ak.contents.NumpyArray)
-        ):
-            return action(
-                ak.contents.IndexedOptionArray(
-                    layout.index,
-                    layout.content,
-                    parameters=layout.parameters,
-                )
-            )
-
-        elif isinstance(layout, ak.contents.EmptyArray):
-            return action(ak.contents.UnmaskedArray(layout.to_NumpyArray(np.int64)))
-
-        elif isinstance(layout, ak.contents.NumpyArray):
-            return action(ak.contents.UnmaskedArray(layout))
-
-        else:
-            return None
-
+def _impl(array, axis, highlevel, behavior):
     layout = ak.operations.to_layout(array)
     behavior = ak._util.behavior_of(array, behavior=behavior)
-    out = layout.recursively_apply(action, behavior)
+    posaxis = layout.axis_wrap_if_negative(axis)
+
+    if not ak._util.is_integer(axis):
+        raise ak._errors.wrap_error(
+            TypeError(f"'axis' must be an integer, not {axis!r}")
+        )
+
+    def action(layout, depth, depth_context, **kwargs):
+        posaxis = layout.axis_wrap_if_negative(depth_context["posaxis"])
+        if posaxis >= 0 and posaxis + 1 == depth:
+            if layout.is_option:
+                nplike = layout._backend.index_nplike
+
+                offsets = nplike.empty(layout.length + 1, dtype=np.int64)
+                offsets[0] = 0
+
+                nplike.cumsum(layout.mask_as_bool(valid_when=True), out=offsets[1:])
+
+                return ak.contents.ListOffsetArray(
+                    ak.index.Index64(offsets), layout.project()
+                )
+
+            else:
+                return ak.contents.RegularArray(layout, 1).to_ListOffsetArray64(True)
+
+        elif layout.is_leaf:
+            raise ak._errors.wrap_error(
+                np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
+            )
+
+        depth_context["posaxis"] = posaxis
+
+    depth_context = {"posaxis": posaxis}
+    out = layout.recursively_apply(
+        action, behavior, depth_context, numpy_to_regular=True
+    )
 
     return ak._util.wrap(out, behavior, highlevel)
