@@ -184,60 +184,6 @@ class Content:
     def _forget_length(self) -> Self:
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def to_buffers(
-        self,
-        container: MutableMapping[str, Any] | None = None,
-        buffer_key="{form_key}-{attribute}",
-        form_key: str | None = "node{id}",
-        id_start: Integral = 0,
-        backend: Backend = None,
-    ) -> tuple[form.Form, int, Mapping[str, Any]]:
-        if container is None:
-            container = {}
-        if backend is None:
-            backend = self._backend
-        if not backend.nplike.known_data:
-            raise ak._errors.wrap_error(
-                TypeError("cannot call 'to_buffers' on an array without concrete data")
-            )
-
-        if isinstance(buffer_key, str):
-
-            def getkey(layout, form, attribute):
-                return buffer_key.format(form_key=form.form_key, attribute=attribute)
-
-        elif callable(buffer_key):
-
-            def getkey(layout, form, attribute):
-                return buffer_key(
-                    form_key=form.form_key,
-                    attribute=attribute,
-                    layout=layout,
-                    form=form,
-                )
-
-        else:
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "buffer_key must be a string or a callable, not {}".format(
-                        type(buffer_key)
-                    )
-                )
-            )
-
-        if form_key is None:
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "a 'form_key' must be supplied, to match Form elements to buffers in the 'container'"
-                )
-            )
-
-        form = self.form_with_key(form_key=form_key, id_start=id_start)
-
-        self._to_buffers(form, getkey, container, backend)
-
-        return form, len(self), container
-
     def _to_buffers(
         self,
         form: form.Form,
