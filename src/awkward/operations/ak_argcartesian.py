@@ -100,18 +100,20 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
     if isinstance(arrays, dict):
         behavior = ak._util.behavior_of(*arrays.values(), behavior=behavior)
         layouts = {
-            n: ak.operations.to_layout(
-                x, allow_record=False, allow_other=False
-            ).local_index(axis)
+            n: ak._do.local_index(
+                ak.operations.to_layout(x, allow_record=False, allow_other=False),
+                axis,
+            )
             for n, x in arrays.items()
         }
     else:
         arrays = list(arrays)
         behavior = ak._util.behavior_of(*arrays, behavior=behavior)
         layouts = [
-            ak.operations.to_layout(
-                x, allow_record=False, allow_other=False
-            ).local_index(axis)
+            ak._do.local_index(
+                ak.operations.to_layout(x, allow_record=False, allow_other=False),
+                axis,
+            )
             for x in arrays
         ]
 

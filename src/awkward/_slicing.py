@@ -369,7 +369,7 @@ def normalise_item_bool_to_int(item):
         and issubclass(item.content.dtype.type, (bool, np.bool_))
     ):
         if item.backend.nplike.known_data or item.backend.nplike.known_shape:
-            localindex = item.local_index(axis=1)
+            localindex = ak._do.local_index(item, axis=1)
             nextcontent = localindex.content.data[item.content.data]
 
             cumsum = item.backend.index_nplike.empty(
@@ -419,7 +419,7 @@ def normalise_item_bool_to_int(item):
                     safeindex.shape[0], np.bool_
                 )
 
-            localindex = item.local_index(axis=1)
+            localindex = ak._do.local_index(item, axis=1)
 
             # nextcontent does not include missing values
             expanded[isnegative] = False

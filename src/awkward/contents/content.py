@@ -798,9 +798,6 @@ class Content:
 
         return (head, tail)
 
-    def local_index(self, axis: Integral):
-        return self._local_index(axis, 0)
-
     def _local_index(self, axis: Integral, depth: Integral):
         raise ak._errors.wrap_error(NotImplementedError)
 

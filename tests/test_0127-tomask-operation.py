@@ -718,18 +718,30 @@ def test_ByteMaskedArray_localindex():
         None,
         [[], [10.0, 11.1, 12.2]],
     ]
-    assert to_list(array.local_index(axis=0)) == [0, 1, 2, 3, 4]
-    assert to_list(array.local_index(axis=-3)) == [0, 1, 2, 3, 4]
-    assert to_list(array.local_index(axis=1)) == [[0, 1, 2], [], None, None, [0, 1]]
-    assert to_list(array.local_index(axis=-2)) == [[0, 1, 2], [], None, None, [0, 1]]
-    assert to_list(array.local_index(axis=2)) == [
+    assert to_list(ak._do.local_index(array, axis=0)) == [0, 1, 2, 3, 4]
+    assert to_list(ak._do.local_index(array, axis=-3)) == [0, 1, 2, 3, 4]
+    assert to_list(ak._do.local_index(array, axis=1)) == [
+        [0, 1, 2],
+        [],
+        None,
+        None,
+        [0, 1],
+    ]
+    assert to_list(ak._do.local_index(array, axis=-2)) == [
+        [0, 1, 2],
+        [],
+        None,
+        None,
+        [0, 1],
+    ]
+    assert to_list(ak._do.local_index(array, axis=2)) == [
         [[0, 1, 2], [], [0, 1]],
         [],
         None,
         None,
         [[], [0, 1, 2]],
     ]
-    assert to_list(array.local_index(axis=-1)) == [
+    assert to_list(ak._do.local_index(array, axis=-1)) == [
         [[0, 1, 2], [], [0, 1]],
         [],
         None,

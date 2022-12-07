@@ -93,9 +93,10 @@ def _impl(
             ValueError("the 'axis' for argcombinations must be non-negative")
         )
     else:
-        layout = ak.operations.to_layout(
-            array, allow_record=False, allow_other=False
-        ).local_index(axis)
+        layout = ak._do.local_index(
+            ak.operations.to_layout(array, allow_record=False, allow_other=False),
+            axis,
+        )
         out = layout.combinations(
             n, replacement=replacement, axis=axis, fields=fields, parameters=parameters
         )

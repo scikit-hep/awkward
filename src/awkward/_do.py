@@ -158,3 +158,7 @@ def axis_wrap_if_negative(
             )
 
         return axis
+
+
+def local_index(layout: Content, axis: Integral):
+    return layout._local_index(axis, 0)
