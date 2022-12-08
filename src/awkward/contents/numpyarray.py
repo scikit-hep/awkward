@@ -213,13 +213,13 @@ class NumpyArray(Content):
     def __iter__(self):
         return iter(self._data)
 
-    def _getitem_nothing(self):
+    def _pub_getitem_nothing(self):
         tmp = self._data[0:0]
         return NumpyArray(
             tmp.reshape((0,) + tmp.shape[2:]), parameters=None, backend=self._backend
         )
 
-    def _getitem_at(self, where):
+    def _pub_getitem_at(self, where):
         if not self._backend.nplike.known_data and len(self._data.shape) == 1:
             return ak._typetracer.UnknownScalar(self._data.dtype)
 
@@ -233,7 +233,7 @@ class NumpyArray(Content):
         else:
             return out
 
-    def _getitem_range(self, where):
+    def _pub_getitem_range(self, where):
         if not self._backend.nplike.known_shape:
             return self
 
@@ -247,12 +247,12 @@ class NumpyArray(Content):
 
         return NumpyArray(out, parameters=self._parameters, backend=self._backend)
 
-    def _getitem_field(self, where, only_fields=()):
+    def _pub_getitem_field(self, where, only_fields=()):
         raise ak._errors.index_error(self, where, "not an array of records")
 
-    def _getitem_fields(self, where, only_fields=()):
+    def _pub_getitem_fields(self, where, only_fields=()):
         if len(where) == 0:
-            return self._getitem_range(slice(0, 0))
+            return self._pub_getitem_range(slice(0, 0))
         raise ak._errors.index_error(self, where, "not an array of records")
 
     def _carry(self, carry, allow_lazy):
@@ -263,7 +263,7 @@ class NumpyArray(Content):
             raise ak._errors.index_error(self, carry.data, str(err)) from err
         return NumpyArray(nextdata, parameters=self._parameters, backend=self._backend)
 
-    def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
+    def _pub_getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
         if self._data.ndim == 1:
             raise ak._errors.index_error(
                 self,
@@ -274,11 +274,11 @@ class NumpyArray(Content):
             )
         else:
             next = self.to_RegularArray()
-            return next._getitem_next_jagged(
+            return next._pub_getitem_next_jagged(
                 slicestarts, slicestops, slicecontent, tail
             )
 
-    def _getitem_next(self, head, tail, advanced):
+    def _pub_getitem_next(self, head, tail, advanced):
         if head == ():
             return self
 
@@ -305,10 +305,10 @@ class NumpyArray(Content):
             return out2
 
         elif isinstance(head, str):
-            return self._getitem_next_field(head, tail, advanced)
+            return self._pub_getitem_next_field(head, tail, advanced)
 
         elif isinstance(head, list):
-            return self._getitem_next_fields(head, tail, advanced)
+            return self._pub_getitem_next_fields(head, tail, advanced)
 
         elif isinstance(head, ak.index.Index64):
             if advanced is None:
@@ -337,7 +337,7 @@ class NumpyArray(Content):
 
         elif isinstance(head, ak.contents.IndexedOptionArray):
             next = self.to_RegularArray()
-            return next._getitem_next_missing(head, tail, advanced)
+            return next._pub_getitem_next_missing(head, tail, advanced)
 
         else:
             raise ak._errors.wrap_error(AssertionError(repr(head)))

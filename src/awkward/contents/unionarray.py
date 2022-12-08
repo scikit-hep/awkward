@@ -450,21 +450,23 @@ class UnionArray(Content):
             parameters=ak._util.merge_parameters(self._parameters, parameters),
         )
 
-    def _getitem_nothing(self):
-        return self._getitem_range(slice(0, 0))
+    def _pub_getitem_nothing(self):
+        return self._pub_getitem_range(slice(0, 0))
 
-    def _getitem_at(self, where):
+    def _pub_getitem_at(self, where):
         if not self._backend.nplike.known_data:
-            return ak._typetracer.OneOf([x._getitem_at(where) for x in self._contents])
+            return ak._typetracer.OneOf(
+                [x._pub_getitem_at(where) for x in self._contents]
+            )
 
         if where < 0:
             where += self.length
         if self._backend.nplike.known_shape and not 0 <= where < self.length:
             raise ak._errors.index_error(self, where)
         tag, index = self._tags[where], self._index[where]
-        return self._contents[tag]._getitem_at(index)
+        return self._contents[tag]._pub_getitem_at(index)
 
-    def _getitem_range(self, where):
+    def _pub_getitem_range(self, where):
         if not self._backend.nplike.known_shape:
             return self
 
@@ -477,19 +479,19 @@ class UnionArray(Content):
             parameters=self._parameters,
         )
 
-    def _getitem_field(self, where, only_fields=()):
+    def _pub_getitem_field(self, where, only_fields=()):
         return UnionArray.simplified(
             self._tags,
             self._index,
-            [x._getitem_field(where, only_fields) for x in self._contents],
+            [x._pub_getitem_field(where, only_fields) for x in self._contents],
             parameters=None,
         )
 
-    def _getitem_fields(self, where, only_fields=()):
+    def _pub_getitem_fields(self, where, only_fields=()):
         return UnionArray.simplified(
             self._tags,
             self._index,
-            [x._getitem_fields(where, only_fields) for x in self._contents],
+            [x._pub_getitem_fields(where, only_fields) for x in self._contents],
             parameters=None,
         )
 
@@ -721,7 +723,9 @@ class UnionArray(Content):
             index_cls=type(self._index),
         )
 
-    def _getitem_next_jagged_generic(self, slicestarts, slicestops, slicecontent, tail):
+    def _pub_getitem_next_jagged_generic(
+        self, slicestarts, slicestops, slicecontent, tail
+    ):
         if isinstance(self, ak.contents.UnionArray):
             raise ak._errors.index_error(
                 self,
@@ -730,14 +734,16 @@ class UnionArray(Content):
                 ),
                 "cannot apply jagged slices to irreducible union arrays",
             )
-        return self._getitem_next_jagged(slicestarts, slicestops, slicecontent, tail)
-
-    def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
-        return self._getitem_next_jagged_generic(
+        return self._pub_getitem_next_jagged(
             slicestarts, slicestops, slicecontent, tail
         )
 
-    def _getitem_next(self, head, tail, advanced):
+    def _pub_getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
+        return self._pub_getitem_next_jagged_generic(
+            slicestarts, slicestops, slicecontent, tail
+        )
+
+    def _pub_getitem_next(self, head, tail, advanced):
         if head == ():
             return self
 
@@ -747,7 +753,7 @@ class UnionArray(Content):
             outcontents = []
             for i in range(len(self._contents)):
                 projection = self.project(i)
-                outcontents.append(projection._getitem_next(head, tail, advanced))
+                outcontents.append(projection._pub_getitem_next(head, tail, advanced))
             outindex = self._regular_index(self._tags)
 
             return UnionArray.simplified(
@@ -758,19 +764,19 @@ class UnionArray(Content):
             )
 
         elif isinstance(head, str):
-            return self._getitem_next_field(head, tail, advanced)
+            return self._pub_getitem_next_field(head, tail, advanced)
 
         elif isinstance(head, list):
-            return self._getitem_next_fields(head, tail, advanced)
+            return self._pub_getitem_next_fields(head, tail, advanced)
 
         elif head is np.newaxis:
-            return self._getitem_next_newaxis(tail, advanced)
+            return self._pub_getitem_next_newaxis(tail, advanced)
 
         elif head is Ellipsis:
-            return self._getitem_next_ellipsis(tail, advanced)
+            return self._pub_getitem_next_ellipsis(tail, advanced)
 
         elif isinstance(head, ak.contents.IndexedOptionArray):
-            return self._getitem_next_missing(head, tail, advanced)
+            return self._pub_getitem_next_missing(head, tail, advanced)
 
         else:
             raise ak._errors.wrap_error(AssertionError(repr(head)))

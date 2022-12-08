@@ -199,19 +199,19 @@ class RegularArray(Content):
                 backend=self._backend,
             )
 
-    def _getitem_nothing(self):
-        return self._content._getitem_range(slice(0, 0))
+    def _pub_getitem_nothing(self):
+        return self._content._pub_getitem_range(slice(0, 0))
 
-    def _getitem_at(self, where):
+    def _pub_getitem_at(self, where):
         if self._backend.nplike.known_data and where < 0:
             where += self._length
 
         if where < 0 or where >= self._length:
             raise ak._errors.index_error(self, where)
         start, stop = (where) * self._size, (where + 1) * self._size
-        return self._content._getitem_range(slice(start, stop))
+        return self._content._pub_getitem_range(slice(start, stop))
 
-    def _getitem_range(self, where):
+    def _pub_getitem_range(self, where):
         if not self._backend.nplike.known_shape:
             return self
 
@@ -220,23 +220,23 @@ class RegularArray(Content):
         zeros_length = stop - start
         substart, substop = start * self._size, stop * self._size
         return RegularArray(
-            self._content._getitem_range(slice(substart, substop)),
+            self._content._pub_getitem_range(slice(substart, substop)),
             self._size,
             zeros_length,
             parameters=self._parameters,
         )
 
-    def _getitem_field(self, where, only_fields=()):
+    def _pub_getitem_field(self, where, only_fields=()):
         return RegularArray(
-            self._content._getitem_field(where, only_fields),
+            self._content._pub_getitem_field(where, only_fields),
             self._size,
             self._length,
             parameters=None,
         )
 
-    def _getitem_fields(self, where, only_fields=()):
+    def _pub_getitem_fields(self, where, only_fields=()):
         return RegularArray(
-            self._content._getitem_fields(where, only_fields),
+            self._content._pub_getitem_fields(where, only_fields),
             self._size,
             self._length,
             parameters=None,
@@ -357,9 +357,9 @@ class RegularArray(Content):
                 offsets, self._content, parameters=self._parameters
             )
 
-    def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
+    def _pub_getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
         out = self.to_ListOffsetArray64(True)
-        return out._getitem_next_jagged(slicestarts, slicestops, slicecontent, tail)
+        return out._pub_getitem_next_jagged(slicestarts, slicestops, slicecontent, tail)
 
     def maybe_to_array(self):
         out = self._content.maybe_to_array()
@@ -368,7 +368,7 @@ class RegularArray(Content):
         else:
             return out.reshape((self._length, -1) + out.shape[1:])
 
-    def _getitem_next(self, head, tail, advanced):
+    def _pub_getitem_next(self, head, tail, advanced):
         if head == ():
             return self
 
@@ -388,7 +388,7 @@ class RegularArray(Content):
                 slicer=head,
             )
             nextcontent = self._content._carry(nextcarry, True)
-            return nextcontent._getitem_next(nexthead, nexttail, advanced)
+            return nextcontent._pub_getitem_next(nexthead, nexttail, advanced)
 
         elif isinstance(head, slice):
             nexthead, nexttail = ak._slicing.headtail(tail)
@@ -429,7 +429,7 @@ class RegularArray(Content):
 
             if advanced is None or advanced.length == 0:
                 return RegularArray(
-                    nextcontent._getitem_next(nexthead, nexttail, advanced),
+                    nextcontent._pub_getitem_next(nexthead, nexttail, advanced),
                     nextsize,
                     self._length,
                     parameters=self._parameters,
@@ -457,23 +457,23 @@ class RegularArray(Content):
                     slicer=head,
                 )
                 return RegularArray(
-                    nextcontent._getitem_next(nexthead, nexttail, nextadvanced),
+                    nextcontent._pub_getitem_next(nexthead, nexttail, nextadvanced),
                     nextsize,
                     self._length,
                     parameters=self._parameters,
                 )
 
         elif isinstance(head, str):
-            return self._getitem_next_field(head, tail, advanced)
+            return self._pub_getitem_next_field(head, tail, advanced)
 
         elif isinstance(head, list):
-            return self._getitem_next_fields(head, tail, advanced)
+            return self._pub_getitem_next_fields(head, tail, advanced)
 
         elif head is np.newaxis:
-            return self._getitem_next_newaxis(tail, advanced)
+            return self._pub_getitem_next_newaxis(tail, advanced)
 
         elif head is Ellipsis:
-            return self._getitem_next_ellipsis(tail, advanced)
+            return self._pub_getitem_next_ellipsis(tail, advanced)
 
         elif isinstance(head, ak.index.Index64):
             head = head.to_nplike(self._backend.index_nplike)
@@ -528,7 +528,7 @@ class RegularArray(Content):
                 )
                 nextcontent = self._content._carry(nextcarry, True)
 
-                out = nextcontent._getitem_next(nexthead, nexttail, nextadvanced)
+                out = nextcontent._pub_getitem_next(nexthead, nexttail, nextadvanced)
                 if advanced is None:
                     return ak._slicing.getitem_next_array_wrap(
                         out, head.metadata.get("shape", (head.length,)), self._length
@@ -542,7 +542,7 @@ class RegularArray(Content):
                     0, nplike=self._backend.index_nplike
                 )
                 nextcontent = self._content._carry(nextcarry, True)
-                return nextcontent._getitem_next(nexthead, nexttail, nextadvanced)
+                return nextcontent._pub_getitem_next(nexthead, nexttail, nextadvanced)
 
             else:
                 nextcarry = ak.index.Index64.empty(
@@ -577,7 +577,7 @@ class RegularArray(Content):
                     slicer=head,
                 )
                 nextcontent = self._content._carry(nextcarry, True)
-                return nextcontent._getitem_next(nexthead, nexttail, nextadvanced)
+                return nextcontent._pub_getitem_next(nexthead, nexttail, nextadvanced)
 
         elif isinstance(head, ak.contents.ListOffsetArray):
             headlength = head.length
@@ -624,7 +624,7 @@ class RegularArray(Content):
                 ),
                 slicer=head,
             )
-            down = self._content._getitem_next_jagged(
+            down = self._content._pub_getitem_next_jagged(
                 multistarts, multistops, head._content, tail
             )
 
@@ -633,7 +633,7 @@ class RegularArray(Content):
             )
 
         elif isinstance(head, ak.contents.IndexedOptionArray):
-            return self._getitem_next_missing(head, tail, advanced)
+            return self._pub_getitem_next_missing(head, tail, advanced)
 
         else:
             raise ak._errors.wrap_error(AssertionError(repr(head)))
@@ -952,7 +952,7 @@ class RegularArray(Content):
                 recordarray, combinationslen, self._length, parameters=self._parameters
             )
         else:
-            next = self._content._getitem_range(
+            next = self._content._pub_getitem_range(
                 slice(0, self._length * self._size)
             )._combinations(
                 n, replacement, recordlookup, parameters, posaxis, depth + 1
@@ -1125,7 +1125,7 @@ class RegularArray(Content):
                         outcontent.offsets[outcontent.offsets.length - 1],
                     )
 
-                    trimmed = outcontent.content._getitem_range(slice(start, stop))
+                    trimmed = outcontent.content._pub_getitem_range(slice(start, stop))
                     assert len(trimmed) == self._size * len(outcontent)
 
                     outcontent = ak.contents.RegularArray(

@@ -217,12 +217,12 @@ class IndexedOptionArray(Content):
         else:
             return self._index.raw(self._backend.index_nplike) < 0
 
-    def _getitem_nothing(self):
-        return self._content._getitem_range(slice(0, 0))
+    def _pub_getitem_nothing(self):
+        return self._content._pub_getitem_range(slice(0, 0))
 
-    def _getitem_at(self, where):
+    def _pub_getitem_at(self, where):
         if not self._backend.nplike.known_data:
-            return ak._typetracer.MaybeNone(self._content._getitem_at(where))
+            return ak._typetracer.MaybeNone(self._content._pub_getitem_at(where))
 
         if where < 0:
             where += self.length
@@ -231,9 +231,9 @@ class IndexedOptionArray(Content):
         if self._index[where] < 0:
             return None
         else:
-            return self._content._getitem_at(self._index[where])
+            return self._content._pub_getitem_at(self._index[where])
 
-    def _getitem_range(self, where):
+    def _pub_getitem_range(self, where):
         if not self._backend.nplike.known_shape:
             return self
 
@@ -243,17 +243,17 @@ class IndexedOptionArray(Content):
             self._index[start:stop], self._content, parameters=self._parameters
         )
 
-    def _getitem_field(self, where, only_fields=()):
+    def _pub_getitem_field(self, where, only_fields=()):
         return IndexedOptionArray.simplified(
             self._index,
-            self._content._getitem_field(where, only_fields),
+            self._content._pub_getitem_field(where, only_fields),
             parameters=None,
         )
 
-    def _getitem_fields(self, where, only_fields=()):
+    def _pub_getitem_fields(self, where, only_fields=()):
         return IndexedOptionArray.simplified(
             self._index,
-            self._content._getitem_fields(where, only_fields),
+            self._content._pub_getitem_fields(where, only_fields),
             parameters=None,
         )
 
@@ -316,7 +316,9 @@ class IndexedOptionArray(Content):
 
         return numnull[0], nextcarry, outindex
 
-    def _getitem_next_jagged_generic(self, slicestarts, slicestops, slicecontent, tail):
+    def _pub_getitem_next_jagged_generic(
+        self, slicestarts, slicestops, slicecontent, tail
+    ):
         slicestarts = slicestarts.to_nplike(self._backend.index_nplike)
         slicestops = slicestops.to_nplike(self._backend.index_nplike)
 
@@ -365,18 +367,20 @@ class IndexedOptionArray(Content):
             slicer=ak.contents.ListArray(slicestarts, slicestops, slicecontent),
         )
         next = self._content._carry(nextcarry, True)
-        out = next._getitem_next_jagged(reducedstarts, reducedstops, slicecontent, tail)
+        out = next._pub_getitem_next_jagged(
+            reducedstarts, reducedstops, slicecontent, tail
+        )
 
         return ak.contents.IndexedOptionArray.simplified(
             outindex, out, parameters=self._parameters
         )
 
-    def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
-        return self._getitem_next_jagged_generic(
+    def _pub_getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
+        return self._pub_getitem_next_jagged_generic(
             slicestarts, slicestops, slicecontent, tail
         )
 
-    def _getitem_next(self, head, tail, advanced):
+    def _pub_getitem_next(self, head, tail, advanced):
         if head == ():
             return self
 
@@ -388,25 +392,25 @@ class IndexedOptionArray(Content):
             numnull, nextcarry, outindex = self._nextcarry_outindex(self._backend)
 
             next = self._content._carry(nextcarry, True)
-            out = next._getitem_next(head, tail, advanced)
+            out = next._pub_getitem_next(head, tail, advanced)
             return IndexedOptionArray.simplified(
                 outindex, out, parameters=self._parameters
             )
 
         elif isinstance(head, str):
-            return self._getitem_next_field(head, tail, advanced)
+            return self._pub_getitem_next_field(head, tail, advanced)
 
         elif isinstance(head, list) and isinstance(head[0], str):
-            return self._getitem_next_fields(head, tail, advanced)
+            return self._pub_getitem_next_fields(head, tail, advanced)
 
         elif head is np.newaxis:
-            return self._getitem_next_newaxis(tail, advanced)
+            return self._pub_getitem_next_newaxis(tail, advanced)
 
         elif head is Ellipsis:
-            return self._getitem_next_ellipsis(tail, advanced)
+            return self._pub_getitem_next_ellipsis(tail, advanced)
 
         elif isinstance(head, ak.contents.IndexedOptionArray):
-            return self._getitem_next_missing(head, tail, advanced)
+            return self._pub_getitem_next_missing(head, tail, advanced)
 
         else:
             raise ak._errors.wrap_error(AssertionError(repr(head)))

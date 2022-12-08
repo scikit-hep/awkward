@@ -340,13 +340,15 @@ class Content:
             )
 
         for i in range(len(self)):
-            yield self._getitem_at(i)
+            yield self._pub_getitem_at(i)
 
-    def _getitem_next_field(self, head, tail, advanced: ak.index.Index | None):
+    def _pub_getitem_next_field(self, head, tail, advanced: ak.index.Index | None):
         nexthead, nexttail = ak._slicing.headtail(tail)
-        return self._getitem_field(head)._getitem_next(nexthead, nexttail, advanced)
+        return self._pub_getitem_field(head)._pub_getitem_next(
+            nexthead, nexttail, advanced
+        )
 
-    def _getitem_next_fields(self, head, tail, advanced: ak.index.Index | None):
+    def _pub_getitem_next_fields(self, head, tail, advanced: ak.index.Index | None):
         only_fields, not_fields = [], []
         for x in tail:
             if isinstance(x, (str, list)):
@@ -354,17 +356,17 @@ class Content:
             else:
                 not_fields.append(x)
         nexthead, nexttail = ak._slicing.headtail(tuple(not_fields))
-        return self._getitem_fields(head, tuple(only_fields))._getitem_next(
+        return self._pub_getitem_fields(head, tuple(only_fields))._pub_getitem_next(
             nexthead, nexttail, advanced
         )
 
-    def _getitem_next_newaxis(self, tail, advanced: ak.index.Index | None):
+    def _pub_getitem_next_newaxis(self, tail, advanced: ak.index.Index | None):
         nexthead, nexttail = ak._slicing.headtail(tail)
         return ak.contents.RegularArray(
-            self._getitem_next(nexthead, nexttail, advanced), 1, 0, parameters=None
+            self._pub_getitem_next(nexthead, nexttail, advanced), 1, 0, parameters=None
         )
 
-    def _getitem_next_ellipsis(self, tail, advanced: ak.index.Index | None):
+    def _pub_getitem_next_ellipsis(self, tail, advanced: ak.index.Index | None):
         mindepth, maxdepth = self.minmax_depth
 
         dimlength = sum(
@@ -373,7 +375,7 @@ class Content:
 
         if len(tail) == 0 or mindepth - 1 == maxdepth - 1 == dimlength:
             nexthead, nexttail = ak._slicing.headtail(tail)
-            return self._getitem_next(nexthead, nexttail, advanced)
+            return self._pub_getitem_next(nexthead, nexttail, advanced)
 
         elif dimlength in {mindepth - 1, maxdepth - 1}:
             raise ak._errors.index_error(
@@ -383,9 +385,9 @@ class Content:
             )
 
         else:
-            return self._getitem_next(slice(None), (Ellipsis,) + tail, advanced)
+            return self._pub_getitem_next(slice(None), (Ellipsis,) + tail, advanced)
 
-    def _getitem_next_regular_missing(
+    def _pub_getitem_next_regular_missing(
         self,
         head: ak.contents.IndexedOptionArray,
         tail,
@@ -426,14 +428,14 @@ class Content:
             out, indexlength, 1, parameters=self._parameters
         )
 
-    def _getitem_next_missing_jagged(
+    def _pub_getitem_next_missing_jagged(
         self, head: Content, tail, advanced: ak.index.Index | None, that: Content
     ):
         head = head.to_backend(self._backend)
         jagged = head.content.to_ListOffsetArray64()
 
         index = ak.index.Index64(head._index, nplike=self._backend.index_nplike)
-        content = that._getitem_at(0)
+        content = that._pub_getitem_at(0)
         if self._backend.nplike.known_shape and content.length < index.length:
             raise ak._errors.index_error(
                 self,
@@ -473,7 +475,7 @@ class Content:
             slicer=head,
         )
 
-        tmp = content._getitem_next_jagged(starts, stops, jagged.content, tail)
+        tmp = content._pub_getitem_next_jagged(starts, stops, jagged.content, tail)
         out = ak.contents.IndexedOptionArray.simplified(
             outputmask, tmp, parameters=self._parameters
         )
@@ -481,7 +483,7 @@ class Content:
             out, index.length, 1, parameters=self._parameters
         )
 
-    def _getitem_next_missing(
+    def _pub_getitem_next_missing(
         self,
         head: ak.contents.IndexedOptionArray,
         tail,
@@ -501,16 +503,16 @@ class Content:
                 raise ak._errors.wrap_error(
                     NotImplementedError("reached a not-well-considered code path")
                 )
-            return self._getitem_next_missing_jagged(head, tail, advanced, self)
+            return self._pub_getitem_next_missing_jagged(head, tail, advanced, self)
 
         if isinstance(head.content, ak.contents.NumpyArray):
             headcontent = ak.index.Index64(head.content.data)
-            nextcontent = self._getitem_next(headcontent, tail, advanced)
+            nextcontent = self._pub_getitem_next(headcontent, tail, advanced)
         else:
-            nextcontent = self._getitem_next(head.content, tail, advanced)
+            nextcontent = self._pub_getitem_next(head.content, tail, advanced)
 
         if isinstance(nextcontent, ak.contents.RegularArray):
-            return self._getitem_next_regular_missing(
+            return self._pub_getitem_next_regular_missing(
                 head, tail, advanced, nextcontent, nextcontent.length
             )
 
@@ -523,7 +525,7 @@ class Content:
             for content in nextcontent.contents:
                 if isinstance(content, ak.contents.RegularArray):
                     contents.append(
-                        self._getitem_next_regular_missing(
+                        self._pub_getitem_next_regular_missing(
                             head, tail, advanced, content, content.length
                         )
                     )
@@ -552,26 +554,26 @@ class Content:
             )
 
     def __getitem__(self, where):
-        return self._getitem(where)
+        return self._pub_getitem(where)
 
-    def _getitem(self, where):
+    def _pub_getitem(self, where):
         if ak._util.is_integer(where):
-            return self._getitem_at(where)
+            return self._pub_getitem_at(where)
 
         elif isinstance(where, slice) and where.step is None:
-            return self._getitem_range(where)
+            return self._pub_getitem_range(where)
 
         elif isinstance(where, slice):
-            return self._getitem((where,))
+            return self._pub_getitem((where,))
 
         elif isinstance(where, str):
-            return self._getitem_field(where)
+            return self._pub_getitem_field(where)
 
         elif where is np.newaxis:
-            return self._getitem((where,))
+            return self._pub_getitem((where,))
 
         elif where is Ellipsis:
-            return self._getitem((where,))
+            return self._pub_getitem((where,))
 
         elif isinstance(where, tuple):
             if len(where) == 0:
@@ -589,22 +591,22 @@ class Content:
                 parameters=None,
             )
 
-            out = next._getitem_next(nextwhere[0], nextwhere[1:], None)
+            out = next._pub_getitem_next(nextwhere[0], nextwhere[1:], None)
 
             if out.length == 0:
-                return out._getitem_nothing()
+                return out._pub_getitem_nothing()
             else:
-                return out._getitem_at(0)
+                return out._pub_getitem_at(0)
 
         elif isinstance(where, ak.highlevel.Array):
-            return self._getitem(where.layout)
+            return self._pub_getitem(where.layout)
 
         elif (
             isinstance(where, Content)
             and where._parameters is not None
             and (where._parameters.get("__array__") in ("string", "bytestring"))
         ):
-            return self._getitem_fields(ak.operations.to_list(where))
+            return self._pub_getitem_fields(ak.operations.to_list(where))
 
         elif isinstance(where, ak.contents.EmptyArray):
             return where.to_NumpyArray(np.int64)
@@ -626,7 +628,7 @@ class Content:
                     allow_lazy = "copied"  # True, but also can be modified in-place
                 else:
                     wheres = self._backend.nplike.nonzero(where.data)
-                    return self._getitem(wheres)
+                    return self._pub_getitem(wheres)
             else:
                 raise ak._errors.wrap_error(
                     TypeError(
@@ -640,12 +642,12 @@ class Content:
                 self._carry(carry, allow_lazy), where.shape
             )
             if out.length == 0:
-                return out._getitem_nothing()
+                return out._pub_getitem_nothing()
             else:
-                return out._getitem_at(0)
+                return out._pub_getitem_at(0)
 
         elif isinstance(where, Content):
-            return self._getitem((where,))
+            return self._pub_getitem((where,))
 
         elif ak._util.is_sized_iterable(where) and len(where) == 0:
             return self._carry(
@@ -656,15 +658,15 @@ class Content:
         elif ak._util.is_sized_iterable(where) and all(
             isinstance(x, str) for x in where
         ):
-            return self._getitem_fields(where)
+            return self._pub_getitem_fields(where)
 
         elif ak._util.is_sized_iterable(where):
             layout = ak.operations.to_layout(where)
             as_array = layout.maybe_to_array()
             if as_array is None:
-                return self._getitem(layout)
+                return self._pub_getitem(layout)
             else:
-                return self._getitem(
+                return self._pub_getitem(
                     ak.contents.NumpyArray(
                         as_array, parameters=None, backend=layout.backend
                     )
@@ -681,19 +683,19 @@ class Content:
                 )
             )
 
-    def _getitem_at(self, where: Integral):
+    def _pub_getitem_at(self, where: Integral):
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def _getitem_range(self, where: slice):
+    def _pub_getitem_range(self, where: slice):
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def _getitem_field(self, where: str):
+    def _pub_getitem_field(self, where: str):
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def _getitem_fields(self, where: list[str], only_fields: tuple[str, ...] = ()):
+    def _pub_getitem_fields(self, where: list[str], only_fields: tuple[str, ...] = ()):
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def _getitem_next(self, head, tail, advanced: ak.index.Index | None):
+    def _pub_getitem_next(self, head, tail, advanced: ak.index.Index | None):
         raise ak._errors.wrap_error(NotImplementedError)
 
     def _carry(self, carry: ak.index.Index, allow_lazy: bool):
@@ -720,7 +722,7 @@ class Content:
             if carry.length == self.length:
                 return self
             elif carry.length < self.length:
-                return self._getitem_range(slice(0, carry.length))
+                return self._pub_getitem_range(slice(0, carry.length))
             else:
                 raise ak._errors.wrap_error(IndexError)
         else:

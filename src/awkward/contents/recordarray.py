@@ -293,10 +293,10 @@ class RecordArray(Content):
         else:
             return out[: self._length]
 
-    def _getitem_nothing(self):
-        return self._getitem_range(slice(0, 0))
+    def _pub_getitem_nothing(self):
+        return self._pub_getitem_range(slice(0, 0))
 
-    def _getitem_at(self, where):
+    def _pub_getitem_at(self, where):
         if self._backend.nplike.known_data and where < 0:
             where += self.length
 
@@ -304,7 +304,7 @@ class RecordArray(Content):
             raise ak._errors.index_error(self, where)
         return Record(self, where)
 
-    def _getitem_range(self, where):
+    def _pub_getitem_range(self, where):
         if not self._backend.nplike.known_shape:
             return self
 
@@ -325,25 +325,25 @@ class RecordArray(Content):
         else:
             nextslice = slice(start, stop)
             return RecordArray(
-                [x._getitem_range(nextslice) for x in self._contents],
+                [x._pub_getitem_range(nextslice) for x in self._contents],
                 self._fields,
                 stop - start,
                 parameters=self._parameters,
                 backend=self._backend,
             )
 
-    def _getitem_field(self, where, only_fields=()):
+    def _pub_getitem_field(self, where, only_fields=()):
         if len(only_fields) == 0:
             return self.content(where)
 
         else:
             nexthead, nexttail = ak._slicing.headtail(only_fields)
             if isinstance(nexthead, str):
-                return self.content(where)._getitem_field(nexthead, nexttail)
+                return self.content(where)._pub_getitem_field(nexthead, nexttail)
             else:
-                return self.content(where)._getitem_fields(nexthead, nexttail)
+                return self.content(where)._pub_getitem_fields(nexthead, nexttail)
 
-    def _getitem_fields(self, where, only_fields=()):
+    def _pub_getitem_fields(self, where, only_fields=()):
         indexes = [self.field_to_index(field) for field in where]
         if self._fields is None:
             fields = None
@@ -356,11 +356,13 @@ class RecordArray(Content):
             nexthead, nexttail = ak._slicing.headtail(only_fields)
             if isinstance(nexthead, str):
                 contents = [
-                    self.content(i)._getitem_field(nexthead, nexttail) for i in indexes
+                    self.content(i)._pub_getitem_field(nexthead, nexttail)
+                    for i in indexes
                 ]
             else:
                 contents = [
-                    self.content(i)._getitem_fields(nexthead, nexttail) for i in indexes
+                    self.content(i)._pub_getitem_fields(nexthead, nexttail)
+                    for i in indexes
                 ]
 
         return RecordArray(
@@ -407,11 +409,11 @@ class RecordArray(Content):
                 backend=self._backend,
             )
 
-    def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
+    def _pub_getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
         contents = []
         for i in range(len(self._contents)):
             contents.append(
-                self.content(i)._getitem_next_jagged(
+                self.content(i)._pub_getitem_next_jagged(
                     slicestarts, slicestops, slicecontent, tail
                 )
             )
@@ -419,25 +421,25 @@ class RecordArray(Content):
             contents, self._fields, self._length, parameters=None, backend=self._backend
         )
 
-    def _getitem_next(self, head, tail, advanced):
+    def _pub_getitem_next(self, head, tail, advanced):
         if head == ():
             return self
 
         elif isinstance(head, str):
-            return self._getitem_next_field(head, tail, advanced)
+            return self._pub_getitem_next_field(head, tail, advanced)
 
         elif isinstance(head, list):
-            return self._getitem_next_fields(head, tail, advanced)
+            return self._pub_getitem_next_fields(head, tail, advanced)
 
         elif isinstance(head, ak.contents.IndexedOptionArray):
-            return self._getitem_next_missing(head, tail, advanced)
+            return self._pub_getitem_next_missing(head, tail, advanced)
 
         else:
             nexthead, nexttail = ak._slicing.headtail(tail)
 
             contents = []
             for i in range(len(self._contents)):
-                contents.append(self.content(i)._getitem_next(head, (), advanced))
+                contents.append(self.content(i)._pub_getitem_next(head, (), advanced))
 
             parameters = None
             if (
@@ -460,7 +462,7 @@ class RecordArray(Content):
                 parameters=parameters,
                 backend=self._backend,
             )
-            return next._getitem_next(nexthead, nexttail, advanced)
+            return next._pub_getitem_next(nexthead, nexttail, advanced)
 
     def num(self, axis, depth=0):
         posaxis = self.axis_wrap_if_negative(axis)
@@ -506,7 +508,7 @@ class RecordArray(Content):
         else:
             contents = []
             for content in self._contents:
-                trimmed = content._getitem_range(slice(0, self.length))
+                trimmed = content._pub_getitem_range(slice(0, self.length))
                 offsets, flattened = trimmed._offsets_and_flattened(posaxis, depth)
                 if self._backend.nplike.known_shape and offsets.length != 0:
                     raise ak._errors.wrap_error(

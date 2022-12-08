@@ -491,7 +491,7 @@ def union_to_record(unionarray, anonymous):
                 if isinstance(layout, ak.contents.RecordArray):
                     for field in layout.fields:
                         if name == field:
-                            union_contents.append(layout._getitem_field(field))
+                            union_contents.append(layout._pub_getitem_field(field))
                             break
                     else:
                         union_contents.append(missingarray)

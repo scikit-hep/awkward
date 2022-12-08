@@ -1004,7 +1004,7 @@ def handle_arrow(obj, generate_bitmasks=False, pass_empty_field=False):
             )
 
             if record_is_scalar:
-                return out._getitem_at(0)
+                return out._pub_getitem_at(0)
 
             if record_is_optiontype and record_mask is None and generate_bitmasks:
                 record_mask = numpy.zeros(len(out), dtype=np.bool_)

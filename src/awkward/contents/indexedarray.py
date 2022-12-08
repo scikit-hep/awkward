@@ -201,20 +201,20 @@ class IndexedArray(Content):
         else:
             return self._index.data < 0
 
-    def _getitem_nothing(self):
-        return self._content._getitem_range(slice(0, 0))
+    def _pub_getitem_nothing(self):
+        return self._content._pub_getitem_range(slice(0, 0))
 
-    def _getitem_at(self, where):
+    def _pub_getitem_at(self, where):
         if not self._backend.nplike.known_data:
-            return self._content._getitem_at(where)
+            return self._content._pub_getitem_at(where)
 
         if where < 0:
             where += self.length
         if self._backend.nplike.known_shape and not 0 <= where < self.length:
             raise ak._errors.index_error(self, where)
-        return self._content._getitem_at(self._index[where])
+        return self._content._pub_getitem_at(self._index[where])
 
-    def _getitem_range(self, where):
+    def _pub_getitem_range(self, where):
         if not self._backend.nplike.known_shape:
             return self
 
@@ -224,17 +224,17 @@ class IndexedArray(Content):
             self._index[start:stop], self._content, parameters=self._parameters
         )
 
-    def _getitem_field(self, where, only_fields=()):
+    def _pub_getitem_field(self, where, only_fields=()):
         return IndexedArray.simplified(
             self._index,
-            self._content._getitem_field(where, only_fields),
+            self._content._pub_getitem_field(where, only_fields),
             parameters=None,
         )
 
-    def _getitem_fields(self, where, only_fields=()):
+    def _pub_getitem_fields(self, where, only_fields=()):
         return IndexedArray.simplified(
             self._index,
-            self._content._getitem_fields(where, only_fields),
+            self._content._pub_getitem_fields(where, only_fields),
             parameters=None,
         )
 
@@ -248,7 +248,9 @@ class IndexedArray(Content):
 
         return IndexedArray(nextindex, self._content, parameters=self._parameters)
 
-    def _getitem_next_jagged_generic(self, slicestarts, slicestops, slicecontent, tail):
+    def _pub_getitem_next_jagged_generic(
+        self, slicestarts, slicestops, slicecontent, tail
+    ):
         if self._backend.nplike.known_shape and slicestarts.length != self.length:
             raise ak._errors.index_error(
                 self,
@@ -280,14 +282,16 @@ class IndexedArray(Content):
         )
         # an eager carry (allow_lazy = false) to avoid infinite loop (unproven)
         next = self._content._carry(nextcarry, False)
-        return next._getitem_next_jagged(slicestarts, slicestops, slicecontent, tail)
-
-    def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
-        return self._getitem_next_jagged_generic(
+        return next._pub_getitem_next_jagged(
             slicestarts, slicestops, slicecontent, tail
         )
 
-    def _getitem_next(self, head, tail, advanced):
+    def _pub_getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
+        return self._pub_getitem_next_jagged_generic(
+            slicestarts, slicestops, slicecontent, tail
+        )
+
+    def _pub_getitem_next(self, head, tail, advanced):
         if head == ():
             return self
 
@@ -318,22 +322,22 @@ class IndexedArray(Content):
             )
 
             next = self._content._carry(nextcarry, False)
-            return next._getitem_next(head, tail, advanced)
+            return next._pub_getitem_next(head, tail, advanced)
 
         elif isinstance(head, str):
-            return self._getitem_next_field(head, tail, advanced)
+            return self._pub_getitem_next_field(head, tail, advanced)
 
         elif isinstance(head, list):
-            return self._getitem_next_fields(head, tail, advanced)
+            return self._pub_getitem_next_fields(head, tail, advanced)
 
         elif head is np.newaxis:
-            return self._getitem_next_newaxis(tail, advanced)
+            return self._pub_getitem_next_newaxis(tail, advanced)
 
         elif head is Ellipsis:
-            return self._getitem_next_ellipsis(tail, advanced)
+            return self._pub_getitem_next_ellipsis(tail, advanced)
 
         elif isinstance(head, ak.contents.IndexedOptionArray):
-            return self._getitem_next_missing(head, tail, advanced)
+            return self._pub_getitem_next_missing(head, tail, advanced)
 
         else:
             raise ak._errors.wrap_error(AssertionError(repr(head)))

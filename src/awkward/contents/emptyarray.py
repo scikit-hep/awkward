@@ -97,21 +97,21 @@ class EmptyArray(Content):
     def __iter__(self):
         return iter([])
 
-    def _getitem_nothing(self):
+    def _pub_getitem_nothing(self):
         return self
 
-    def _getitem_at(self, where):
+    def _pub_getitem_at(self, where):
         raise ak._errors.index_error(self, where, "array is empty")
 
-    def _getitem_range(self, where):
+    def _pub_getitem_range(self, where):
         return self
 
-    def _getitem_field(self, where, only_fields=()):
+    def _pub_getitem_field(self, where, only_fields=()):
         raise ak._errors.index_error(self, where, "not an array of records")
 
-    def _getitem_fields(self, where, only_fields=()):
+    def _pub_getitem_fields(self, where, only_fields=()):
         if len(where) == 0:
-            return self._getitem_range(slice(0, 0))
+            return self._pub_getitem_range(slice(0, 0))
         raise ak._errors.index_error(self, where, "not an array of records")
 
     def _carry(self, carry, allow_lazy):
@@ -122,7 +122,7 @@ class EmptyArray(Content):
         else:
             raise ak._errors.index_error(self, carry.data, "array is empty")
 
-    def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
+    def _pub_getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
         raise ak._errors.index_error(
             self,
             ak.contents.ListArray(
@@ -131,7 +131,7 @@ class EmptyArray(Content):
             "too many jagged slice dimensions for array",
         )
 
-    def _getitem_next(self, head, tail, advanced):
+    def _pub_getitem_next(self, head, tail, advanced):
         if head == ():
             return self
 
@@ -142,16 +142,16 @@ class EmptyArray(Content):
             raise ak._errors.index_error(self, head, "array is empty")
 
         elif isinstance(head, str):
-            return self._getitem_next_field(head, tail, advanced)
+            return self._pub_getitem_next_field(head, tail, advanced)
 
         elif isinstance(head, list):
-            return self._getitem_next_fields(head, tail, advanced)
+            return self._pub_getitem_next_fields(head, tail, advanced)
 
         elif head is np.newaxis:
-            return self._getitem_next_newaxis(tail, advanced)
+            return self._pub_getitem_next_newaxis(tail, advanced)
 
         elif head is Ellipsis:
-            return self._getitem_next_ellipsis(tail, advanced)
+            return self._pub_getitem_next_ellipsis(tail, advanced)
 
         elif isinstance(head, ak.index.Index64):
             if not head.nplike.known_shape or head.length == 0:

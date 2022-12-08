@@ -373,12 +373,12 @@ class BitMaskedArray(Content):
         )
         return bytemask.data[: self._length].view(np.bool_)
 
-    def _getitem_nothing(self):
-        return self._content._getitem_range(slice(0, 0))
+    def _pub_getitem_nothing(self):
+        return self._content._pub_getitem_range(slice(0, 0))
 
-    def _getitem_at(self, where):
+    def _pub_getitem_at(self, where):
         if not self._backend.nplike.known_data:
-            return ak._typetracer.MaybeNone(self._content._getitem_at(where))
+            return ak._typetracer.MaybeNone(self._content._pub_getitem_at(where))
 
         if where < 0:
             where += self.length
@@ -389,27 +389,27 @@ class BitMaskedArray(Content):
         else:
             bit = bool(self._mask[where // 8] & (128 >> (where % 8)))
         if bit == self._valid_when:
-            return self._content._getitem_at(where)
+            return self._content._pub_getitem_at(where)
         else:
             return None
 
-    def _getitem_range(self, where):
-        return self.to_ByteMaskedArray()._getitem_range(where)
+    def _pub_getitem_range(self, where):
+        return self.to_ByteMaskedArray()._pub_getitem_range(where)
 
-    def _getitem_field(self, where, only_fields=()):
+    def _pub_getitem_field(self, where, only_fields=()):
         return BitMaskedArray.simplified(
             self._mask,
-            self._content._getitem_field(where, only_fields),
+            self._content._pub_getitem_field(where, only_fields),
             self._valid_when,
             self._length,
             self._lsb_order,
             parameters=None,
         )
 
-    def _getitem_fields(self, where, only_fields=()):
+    def _pub_getitem_fields(self, where, only_fields=()):
         return BitMaskedArray.simplified(
             self._mask,
-            self._content._getitem_fields(where, only_fields),
+            self._content._pub_getitem_fields(where, only_fields),
             self._valid_when,
             self._length,
             self._lsb_order,
@@ -420,34 +420,34 @@ class BitMaskedArray(Content):
         assert isinstance(carry, ak.index.Index)
         return self.to_ByteMaskedArray()._carry(carry, allow_lazy)
 
-    def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
-        return self.to_ByteMaskedArray()._getitem_next_jagged(
+    def _pub_getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
+        return self.to_ByteMaskedArray()._pub_getitem_next_jagged(
             slicestarts, slicestops, slicecontent, tail
         )
 
-    def _getitem_next(self, head, tail, advanced):
+    def _pub_getitem_next(self, head, tail, advanced):
         if head == ():
             return self
 
         elif isinstance(
             head, (int, slice, ak.index.Index64, ak.contents.ListOffsetArray)
         ):
-            return self.to_ByteMaskedArray()._getitem_next(head, tail, advanced)
+            return self.to_ByteMaskedArray()._pub_getitem_next(head, tail, advanced)
 
         elif isinstance(head, str):
-            return self._getitem_next_field(head, tail, advanced)
+            return self._pub_getitem_next_field(head, tail, advanced)
 
         elif isinstance(head, list):
-            return self._getitem_next_fields(head, tail, advanced)
+            return self._pub_getitem_next_fields(head, tail, advanced)
 
         elif head is np.newaxis:
-            return self._getitem_next_newaxis(tail, advanced)
+            return self._pub_getitem_next_newaxis(tail, advanced)
 
         elif head is Ellipsis:
-            return self._getitem_next_ellipsis(tail, advanced)
+            return self._pub_getitem_next_ellipsis(tail, advanced)
 
         elif isinstance(head, ak.contents.IndexedOptionArray):
-            return self._getitem_next_missing(head, tail, advanced)
+            return self._pub_getitem_next_missing(head, tail, advanced)
 
         else:
             raise ak._errors.wrap_error(AssertionError(repr(head)))
@@ -718,7 +718,7 @@ class BitMaskedArray(Content):
             return out
 
         mask = self.mask_as_bool(valid_when=True)[: self._length]
-        out = self._content._getitem_range(slice(0, self._length))._to_list(
+        out = self._content._pub_getitem_range(slice(0, self._length))._to_list(
             behavior, json_conversions
         )
 

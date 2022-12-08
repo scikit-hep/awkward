@@ -39,7 +39,7 @@ is_identifier = re.compile(r"^[A-Za-z_][A-Za-z_0-9]*$")
 
 
 def get_at(data, index):
-    out = data._layout._getitem_at(index)
+    out = data._layout._pub_getitem_at(index)
     if isinstance(out, ak.contents.NumpyArray):
         array_param = out.parameter("__array__")
         if array_param == "byte":
@@ -53,7 +53,7 @@ def get_at(data, index):
 
 
 def get_field(data, field):
-    out = data._layout._getitem_field(field)
+    out = data._layout._pub_getitem_field(field)
     if isinstance(out, ak.contents.NumpyArray):
         array_param = out.parameter("__array__")
         if array_param == "byte":

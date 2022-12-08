@@ -431,8 +431,8 @@ def _record_to_complex(layout, complex_record_fields):
         def action(node, **kwargs):
             if isinstance(node, ak.contents.RecordArray):
                 if set(complex_record_fields).issubset(node.fields):
-                    real = node._getitem_field(complex_record_fields[0])
-                    imag = node._getitem_field(complex_record_fields[1])
+                    real = node._pub_getitem_field(complex_record_fields[0])
+                    imag = node._pub_getitem_field(complex_record_fields[1])
                     if (
                         isinstance(real, ak.contents.NumpyArray)
                         and len(real.shape) == 1

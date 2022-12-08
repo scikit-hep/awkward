@@ -71,12 +71,12 @@ def broadcast_pack(inputs: Sequence, isscalar: list[bool]) -> list:
 def broadcast_unpack(x, isscalar: list[bool], backend: ak._backends.Backend):
     if all(isscalar):
         if not backend.nplike.known_shape or x.length == 0:
-            return x._getitem_nothing()._getitem_nothing()
+            return x._pub_getitem_nothing()._pub_getitem_nothing()
         else:
             return x[0][0]
     else:
         if not backend.nplike.known_shape or x.length == 0:
-            return x._getitem_nothing()
+            return x._pub_getitem_nothing()
         else:
             return x[0]
 

@@ -123,9 +123,9 @@ class Record:
 
     def __getitem__(self, where):
         with ak._errors.SlicingErrorContext(self, where):
-            return self._getitem(where)
+            return self._pub_getitem(where)
 
-    def _getitem(self, where):
+    def _pub_getitem(self, where):
         if ak._util.is_integer(where):
             raise ak._errors.wrap_error(
                 IndexError("scalar Record cannot be sliced by an integer")
@@ -137,7 +137,7 @@ class Record:
             )
 
         elif isinstance(where, str):
-            return self._getitem_field(where)
+            return self._pub_getitem_field(where)
 
         elif where is np.newaxis:
             raise ak._errors.wrap_error(
@@ -153,10 +153,10 @@ class Record:
             return self
 
         elif isinstance(where, tuple) and len(where) == 1:
-            return self._getitem(where[0])
+            return self._pub_getitem(where[0])
 
         elif isinstance(where, tuple) and isinstance(where[0], str):
-            return self._getitem_field(where[0])._getitem(where[1:])
+            return self._pub_getitem_field(where[0])._pub_getitem(where[1:])
 
         elif isinstance(where, ak.highlevel.Array):
             raise ak._errors.wrap_error(
@@ -174,7 +174,7 @@ class Record:
             )
 
         elif isinstance(where, Iterable) and all(isinstance(x, str) for x in where):
-            return self._getitem_fields(where)
+            return self._pub_getitem_fields(where)
 
         elif isinstance(where, Iterable):
             raise ak._errors.wrap_error(
@@ -190,11 +190,11 @@ class Record:
                 )
             )
 
-    def _getitem_field(self, where):
-        return self._array._getitem_field(where)._getitem_at(self._at)
+    def _pub_getitem_field(self, where):
+        return self._array._pub_getitem_field(where)._pub_getitem_at(self._at)
 
-    def _getitem_fields(self, where):
-        return self._array._getitem_fields(where)._getitem_at(self._at)
+    def _pub_getitem_fields(self, where):
+        return self._array._pub_getitem_fields(where)._pub_getitem_at(self._at)
 
     def packed(self):
         if self._array.length == 1:

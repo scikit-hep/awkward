@@ -224,21 +224,21 @@ class ListArray(Content):
         offsets = self._compact_offsets64(True)
         return self._broadcast_tooffsets64(offsets).to_RegularArray()
 
-    def _getitem_nothing(self):
-        return self._content._getitem_range(slice(0, 0))
+    def _pub_getitem_nothing(self):
+        return self._content._pub_getitem_range(slice(0, 0))
 
-    def _getitem_at(self, where):
+    def _pub_getitem_at(self, where):
         if not self._backend.nplike.known_data:
-            return self._content._getitem_range(slice(0, 0))
+            return self._content._pub_getitem_range(slice(0, 0))
 
         if where < 0:
             where += self.length
         if not (0 <= where < self.length) and self._backend.nplike.known_shape:
             raise ak._errors.index_error(self, where)
         start, stop = self._starts[where], self._stops[where]
-        return self._content._getitem_range(slice(start, stop))
+        return self._content._pub_getitem_range(slice(start, stop))
 
-    def _getitem_range(self, where):
+    def _pub_getitem_range(self, where):
         if not self._backend.nplike.known_shape:
             return self
 
@@ -251,19 +251,19 @@ class ListArray(Content):
             parameters=self._parameters,
         )
 
-    def _getitem_field(self, where, only_fields=()):
+    def _pub_getitem_field(self, where, only_fields=()):
         return ListArray(
             self._starts,
             self._stops,
-            self._content._getitem_field(where, only_fields),
+            self._content._pub_getitem_field(where, only_fields),
             parameters=None,
         )
 
-    def _getitem_fields(self, where, only_fields=()):
+    def _pub_getitem_fields(self, where, only_fields=()):
         return ListArray(
             self._starts,
             self._stops,
-            self._content._getitem_fields(where, only_fields),
+            self._content._pub_getitem_fields(where, only_fields),
             parameters=None,
         )
 
@@ -306,7 +306,7 @@ class ListArray(Content):
     def _broadcast_tooffsets64(self, offsets):
         return ListOffsetArray._broadcast_tooffsets64(self, offsets)
 
-    def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
+    def _pub_getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
         slicestarts = slicestarts.to_nplike(self._backend.index_nplike)
         slicestops = slicestops.to_nplike(self._backend.index_nplike)
         if self._backend.nplike.known_shape and slicestarts.length != self.length:
@@ -357,7 +357,7 @@ class ListArray(Content):
 
             sliceoffsets = ak.index.Index64(slicecontent._offsets)
 
-            outcontent = next_content._getitem_next_jagged(
+            outcontent = next_content._pub_getitem_next_jagged(
                 sliceoffsets[:-1], sliceoffsets[1:], slicecontent._content, tail
             )
 
@@ -427,7 +427,7 @@ class ListArray(Content):
             )
             nextcontent = self._content._carry(nextcarry, True)
             nexthead, nexttail = ak._slicing.headtail(tail)
-            outcontent = nextcontent._getitem_next(nexthead, nexttail, None)
+            outcontent = nextcontent._pub_getitem_next(nexthead, nexttail, None)
 
             return ak.contents.ListOffsetArray(outoffsets, outcontent, parameters=None)
 
@@ -519,12 +519,12 @@ class ListArray(Content):
                 next = ak.contents.ListOffsetArray(
                     smalloffsets, nextcontent, parameters=self._parameters
                 )
-                out = next._getitem_next_jagged(
+                out = next._pub_getitem_next_jagged(
                     smalloffsets[:-1], smalloffsets[1:], slicecontent._content, tail
                 )
 
             else:
-                out = self._getitem_next_jagged(
+                out = self._pub_getitem_next_jagged(
                     smalloffsets[:-1], smalloffsets[1:], slicecontent._content, tail
                 )
 
@@ -547,7 +547,7 @@ class ListArray(Content):
             else:
                 raise ak._errors.wrap_error(
                     AssertionError(
-                        "expected ListOffsetArray from ListArray._getitem_next_jagged, got {}".format(
+                        "expected ListOffsetArray from ListArray._pub_getitem_next_jagged, got {}".format(
                             type(out).__name__
                         )
                     )
@@ -559,13 +559,13 @@ class ListArray(Content):
         else:
             raise ak._errors.wrap_error(
                 AssertionError(
-                    "expected Index/IndexedOptionArray/ListOffsetArray in ListArray._getitem_next_jagged, got {}".format(
+                    "expected Index/IndexedOptionArray/ListOffsetArray in ListArray._pub_getitem_next_jagged, got {}".format(
                         type(slicecontent).__name__
                     )
                 )
             )
 
-    def _getitem_next(self, head, tail, advanced):
+    def _pub_getitem_next(self, head, tail, advanced):
         if head == ():
             return self
 
@@ -595,7 +595,7 @@ class ListArray(Content):
                 slicer=head,
             )
             nextcontent = self._content._carry(nextcarry, True)
-            return nextcontent._getitem_next(nexthead, nexttail, advanced)
+            return nextcontent._pub_getitem_next(nexthead, nexttail, advanced)
 
         elif isinstance(head, slice):
             lenstarts = self._starts.length
@@ -684,7 +684,7 @@ class ListArray(Content):
             if advanced is None or advanced.length == 0:
                 return ak.contents.ListOffsetArray(
                     nextoffsets,
-                    nextcontent._getitem_next(nexthead, nexttail, advanced),
+                    nextcontent._pub_getitem_next(nexthead, nexttail, advanced),
                     parameters=self._parameters,
                 )
             else:
@@ -735,21 +735,21 @@ class ListArray(Content):
                 )
                 return ak.contents.ListOffsetArray(
                     nextoffsets,
-                    nextcontent._getitem_next(nexthead, nexttail, nextadvanced),
+                    nextcontent._pub_getitem_next(nexthead, nexttail, nextadvanced),
                     parameters=self._parameters,
                 )
 
         elif isinstance(head, str):
-            return self._getitem_next_field(head, tail, advanced)
+            return self._pub_getitem_next_field(head, tail, advanced)
 
         elif isinstance(head, list):
-            return self._getitem_next_fields(head, tail, advanced)
+            return self._pub_getitem_next_fields(head, tail, advanced)
 
         elif head is np.newaxis:
-            return self._getitem_next_newaxis(tail, advanced)
+            return self._pub_getitem_next_newaxis(tail, advanced)
 
         elif head is Ellipsis:
-            return self._getitem_next_ellipsis(tail, advanced)
+            return self._pub_getitem_next_ellipsis(tail, advanced)
 
         elif isinstance(head, ak.index.Index64):
             lenstarts = self._starts.length
@@ -795,7 +795,7 @@ class ListArray(Content):
                 )
                 nextcontent = self._content._carry(nextcarry, True)
 
-                out = nextcontent._getitem_next(nexthead, nexttail, nextadvanced)
+                out = nextcontent._pub_getitem_next(nexthead, nexttail, nextadvanced)
                 if advanced is None:
                     return ak._slicing.getitem_next_array_wrap(
                         out, head.metadata.get("shape", (head.length,)), self.length
@@ -843,7 +843,7 @@ class ListArray(Content):
                 )
                 nextcontent = self._content._carry(nextcarry, True)
 
-                return nextcontent._getitem_next(nexthead, nexttail, nextadvanced)
+                return nextcontent._pub_getitem_next(nexthead, nexttail, nextadvanced)
 
         elif isinstance(head, ak.contents.ListOffsetArray):
             headlength = head.length
@@ -896,7 +896,7 @@ class ListArray(Content):
                 slicer=head,
             )
             carried = self._content._carry(nextcarry, True)
-            down = carried._getitem_next_jagged(
+            down = carried._pub_getitem_next_jagged(
                 multistarts, multistops, head._content, tail
             )
 
@@ -905,7 +905,7 @@ class ListArray(Content):
             )
 
         elif isinstance(head, ak.contents.IndexedOptionArray):
-            return self._getitem_next_missing(head, tail, advanced)
+            return self._pub_getitem_next_missing(head, tail, advanced)
 
         else:
             raise ak._errors.wrap_error(AssertionError(repr(head)))
