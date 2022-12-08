@@ -225,15 +225,3 @@ class Record:
 
     def __deepcopy__(self, memo):
         return Record(copy.deepcopy(self._array, memo), self._at)
-
-    def jax_flatten(self):
-        from awkward._connect.jax import AuxData, find_all_buffers
-
-        numpyarray_nodes = find_all_buffers(self)
-        return (numpyarray_nodes, AuxData(self))
-
-    @classmethod
-    def jax_unflatten(cls, aux_data, children):
-        from awkward._connect.jax import replace_all_buffers
-
-        return ak._util.wrap(replace_all_buffers(aux_data.layout, list(children)))
