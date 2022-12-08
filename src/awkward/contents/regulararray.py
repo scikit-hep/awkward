@@ -1310,7 +1310,7 @@ class RegularArray(Content):
         else:
             raise ak._errors.wrap_error(AssertionError(result))
 
-    def packed(self):
+    def to_packed(self) -> Self:
         length = self._length * self._size
         if self._content.length == length:
             content = self._content.to_packed()

@@ -183,7 +183,7 @@ class Record:
     def _getitem_fields(self, where):
         return self._array._getitem_fields(where)._getitem_at(self._at)
 
-    def packed(self):
+    def to_packed(self) -> Self:
         if self._array.length == 1:
             return Record(self._array.to_packed(), self._at)
         else:

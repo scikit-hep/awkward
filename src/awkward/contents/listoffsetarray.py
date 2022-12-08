@@ -2047,7 +2047,7 @@ class ListOffsetArray(Content):
         else:
             raise ak._errors.wrap_error(AssertionError(result))
 
-    def packed(self):
+    def to_packed(self) -> Self:
         next = self.to_ListOffsetArray64(True)
         content = next._content.to_packed()
         if content.length != next._offsets[-1]:

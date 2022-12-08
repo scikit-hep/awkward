@@ -1002,7 +1002,7 @@ class RecordArray(Content):
         else:
             raise ak._errors.wrap_error(AssertionError(result))
 
-    def packed(self):
+    def to_packed(self) -> Self:
         return RecordArray(
             [
                 x.to_packed()

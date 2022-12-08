@@ -1061,7 +1061,7 @@ class IndexedArray(Content):
         else:
             raise ak._errors.wrap_error(AssertionError(result))
 
-    def packed(self):
+    def to_packed(self) -> Self:
         if self.parameter("__array__") == "categorical":
             return IndexedArray(
                 self._index, self._content.to_packed(), parameters=self._parameters

@@ -1591,7 +1591,7 @@ class IndexedOptionArray(Content):
         else:
             raise ak._errors.wrap_error(AssertionError(result))
 
-    def packed(self):
+    def to_packed(self) -> Self:
         original_index = self._index.raw(self._backend.nplike)
         is_none = original_index < 0
         num_none = self._backend.index_nplike.count_nonzero(is_none)

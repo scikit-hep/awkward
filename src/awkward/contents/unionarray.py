@@ -1551,7 +1551,7 @@ class UnionArray(Content):
         else:
             raise ak._errors.wrap_error(AssertionError(result))
 
-    def packed(self):
+    def to_packed(self) -> Self:
         tags = self._tags.raw(self._backend.nplike)
         original_index = index = self._index.raw(self._backend.nplike)[: tags.shape[0]]
 

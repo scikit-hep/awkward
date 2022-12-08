@@ -1053,7 +1053,7 @@ class ByteMaskedArray(Content):
         else:
             raise ak._errors.wrap_error(AssertionError(result))
 
-    def packed(self):
+    def to_packed(self) -> Self:
         if self._content.is_record:
             next = self.to_IndexedOptionArray64()
             content = next._content.to_packed()
