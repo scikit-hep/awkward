@@ -183,7 +183,7 @@ def test_basic_tofrom_json():
         [content1, listoffsetarray, content2, content1],
         fields=["one", "two", "2", "wonky"],
     )
-    assert json.loads(ak.operations.to_json(recordarray.as_tuple)) == [
+    assert json.loads(ak.operations.to_json(recordarray.to_tuple())) == [
         {"0": 1, "1": [1.1, 2.2, 3.3], "2": 1.1, "3": 1},
         {"0": 2, "1": [], "2": 2.2, "3": 2},
         {"0": 3, "1": [4.4, 5.5], "2": 3.3, "3": 3},

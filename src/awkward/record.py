@@ -1,10 +1,12 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+from __future__ import annotations
 
 import copy
 from collections.abc import Iterable
 
 import awkward as ak
 from awkward.contents.content import Content
+from awkward.typing import Self
 
 np = ak._nplikes.NumpyMetadata.instance()
 
@@ -49,9 +51,8 @@ class Record:
     def is_tuple(self):
         return self._array.is_tuple
 
-    @property
-    def as_tuple(self):
-        return Record(self._array.as_tuple, self._at)
+    def to_tuple(self) -> Self:
+        return Record(self._array.to_tuple(), self._at)
 
     @property
     def contents(self):

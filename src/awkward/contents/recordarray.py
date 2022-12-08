@@ -189,8 +189,7 @@ class RecordArray(Content):
     def is_tuple(self):
         return self._fields is None
 
-    @property
-    def as_tuple(self):
+    def to_tuple(self) -> Self:
         return RecordArray(
             self._contents, None, self._length, parameters=None, backend=self._backend
         )
