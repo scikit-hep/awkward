@@ -170,7 +170,7 @@ def _impl(array, axis, highlevel, behavior):
             isinstance(x, ak.contents.NumpyArray) for x in out
         )
 
-        result = out[0].mergemany(out[1:])
+        result = ak._do.mergemany(out)
 
         return ak._util.wrap(result, behavior, highlevel)
 

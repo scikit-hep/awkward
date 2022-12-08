@@ -283,7 +283,7 @@ class UnmaskedArray(Content):
     def _reverse_merge(self, other):
         return self.to_IndexedOptionArray64()._reverse_merge(other)
 
-    def mergemany(self, others):
+    def _mergemany(self, others):
         if len(others) == 0:
             return self
 
@@ -295,11 +295,11 @@ class UnmaskedArray(Content):
                 tail_contents.append(x._content)
 
             return UnmaskedArray(
-                self._content.mergemany(tail_contents), parameters=parameters
+                self._content._mergemany(tail_contents), parameters=parameters
             )
 
         else:
-            return self.to_IndexedOptionArray64().mergemany(others)
+            return self.to_IndexedOptionArray64()._mergemany(others)
 
     def _fill_none(self, value: Content) -> Content:
         return self._content._fill_none(value)

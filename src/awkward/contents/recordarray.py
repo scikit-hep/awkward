@@ -561,7 +561,7 @@ class RecordArray(Content):
         else:
             return False
 
-    def mergemany(self, others):
+    def _mergemany(self, others):
         if len(others) == 0:
             return self
 
@@ -655,7 +655,7 @@ class RecordArray(Content):
         nextcontents = []
         minlength = None
         for forfield in for_each_field:
-            merged = forfield[0].mergemany(forfield[1:])
+            merged = forfield[0]._mergemany(forfield[1:])
 
             nextcontents.append(merged)
 
@@ -682,13 +682,7 @@ class RecordArray(Content):
         if len(tail) == 1:
             return reversed
         else:
-            return reversed.mergemany(tail[1:])
-
-        raise ak._errors.wrap_error(
-            NotImplementedError(
-                "not implemented: " + type(self).__name__ + " ::mergemany"
-            )
-        )
+            return reversed._mergemany(tail[1:])
 
     def _fill_none(self, value: Content) -> Content:
         contents = []

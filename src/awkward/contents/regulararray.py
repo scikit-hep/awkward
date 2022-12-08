@@ -687,12 +687,12 @@ class RegularArray(Content):
         else:
             return False
 
-    def mergemany(self, others):
+    def _mergemany(self, others):
         if len(others) == 0:
             return self
 
         if any(x.is_option for x in others):
-            return ak.contents.UnmaskedArray(self).mergemany(others)
+            return ak.contents.UnmaskedArray(self)._mergemany(others)
 
         # Regularize NumpyArray into RegularArray (or NumpyArray if 1D)
         others = [
@@ -710,14 +710,14 @@ class RegularArray(Content):
                 zeros_length += x._length
 
             return RegularArray(
-                self._content[: self._length * self._size].mergemany(tail_contents),
+                self._content[: self._length * self._size]._mergemany(tail_contents),
                 self._size,
                 zeros_length,
                 parameters=parameters,
             )
 
         else:
-            return self.to_ListOffsetArray64(True).mergemany(others)
+            return self.to_ListOffsetArray64(True)._mergemany(others)
 
     def _fill_none(self, value: Content) -> Content:
         return RegularArray(

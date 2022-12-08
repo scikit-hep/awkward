@@ -242,7 +242,7 @@ class UnionArray(Content):
                             old_parameters = contents[k]._parameters
                             contents[k] = (
                                 contents[k]
-                                .mergemany([inner_cont])
+                                ._mergemany([inner_cont])
                                 .copy(
                                     parameters=ak._util.merge_parameters(
                                         old_parameters, inner_cont._parameters
@@ -325,7 +325,7 @@ class UnionArray(Content):
                         old_parameters = contents[k]._parameters
                         contents[k] = (
                             contents[k]
-                            .mergemany([self_cont])
+                            ._mergemany([self_cont])
                             .copy(
                                 parameters=ak._util.merge_parameters(
                                     old_parameters, self_cont._parameters
@@ -1017,7 +1017,7 @@ class UnionArray(Content):
             tags, index, contents, parameters=parameters
         )
 
-    def mergemany(self, others):
+    def _mergemany(self, others):
         if len(others) == 0:
             return self
 
@@ -1126,7 +1126,7 @@ class UnionArray(Content):
         if len(tail) == 1:
             return reversed
         else:
-            return reversed.mergemany(tail[1:])
+            return reversed._mergemany(tail[1:])
 
     def _fill_none(self, value: Content) -> Content:
         contents = []

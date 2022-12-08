@@ -735,13 +735,13 @@ class ListOffsetArray(Content):
         else:
             return False
 
-    def mergemany(self, others):
+    def _mergemany(self, others):
         if len(others) == 0:
             return self
         listarray = ak.contents.ListArray(
             self.starts, self.stops, self._content, parameters=self._parameters
         )
-        out = listarray.mergemany(others)
+        out = listarray._mergemany(others)
 
         if all(
             isinstance(x, ListOffsetArray) and x._offsets.dtype == self._offsets.dtype

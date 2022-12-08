@@ -963,7 +963,7 @@ class ListArray(Content):
         else:
             return False
 
-    def mergemany(self, others):
+    def _mergemany(self, others):
         if len(others) == 0:
             return self
 
@@ -1004,7 +1004,7 @@ class ListArray(Content):
                 )
 
         tail_contents = contents[1:]
-        nextcontent = contents[0].mergemany(tail_contents)
+        nextcontent = contents[0]._mergemany(tail_contents)
 
         nextstarts = ak.index.Index64.empty(total_length, self._backend.index_nplike)
         nextstops = ak.index.Index64.empty(total_length, self._backend.index_nplike)
@@ -1097,7 +1097,7 @@ class ListArray(Content):
         if len(tail) == 1:
             return reversed
         else:
-            return reversed.mergemany(tail[1:])
+            return reversed._mergemany(tail[1:])
 
     def _fill_none(self, value: Content) -> Content:
         return ListArray(

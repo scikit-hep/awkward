@@ -470,11 +470,11 @@ class BitMaskedArray(Content):
     def _reverse_merge(self, other):
         return self.to_IndexedOptionArray64()._reverse_merge(other)
 
-    def mergemany(self, others):
+    def _mergemany(self, others):
         if len(others) == 0:
             return self
 
-        out = self.to_IndexedOptionArray64().mergemany(others)
+        out = self.to_IndexedOptionArray64()._mergemany(others)
 
         if all(
             isinstance(x, BitMaskedArray)

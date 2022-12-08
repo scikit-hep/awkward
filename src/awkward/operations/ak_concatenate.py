@@ -105,10 +105,10 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
             if ak._do.mergeable(batch[-1], x, mergebool=mergebool):
                 batch.append(x)
             else:
-                collapsed = batch[0].mergemany(batch[1:])
+                collapsed = ak._do.mergemany(batch)
                 batch = [ak._do.merge_as_union(collapsed, x)]
 
-        out = batch[0].mergemany(batch[1:])
+        out = ak._do.mergemany(batch)
 
         if isinstance(out, ak.contents.UnionArray):
             out = type(out).simplified(

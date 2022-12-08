@@ -10,7 +10,7 @@ from awkward.types import ArrayType, ListType, NumpyType, OptionType, RegularTyp
 def test_simple():
     a = ak.from_numpy(np.array([[1, 2], [3, 4], [5, 6]]), regulararray=True)
     b = ak.from_numpy(np.array([[7, 8], [9, 10]]), regulararray=True)
-    c = a.layout.mergemany([b.layout])
+    c = a.layout._mergemany([b.layout])
     assert isinstance(c, ak.contents.RegularArray)
     assert c.size == 2
     assert ak.operations.to_list(c) == [[1, 2], [3, 4], [5, 6], [7, 8], [9, 10]]

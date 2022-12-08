@@ -607,7 +607,7 @@ class IndexedOptionArray(Content):
             (theirlength + mylength), self._backend.index_nplike
         )
 
-        content = other.mergemany([self._content])
+        content = other._mergemany([self._content])
 
         assert index.nplike is self._backend.index_nplike
         self._handle_error(
@@ -646,7 +646,7 @@ class IndexedOptionArray(Content):
             index, content, parameters=parameters
         )
 
-    def mergemany(self, others):
+    def _mergemany(self, others):
         if len(others) == 0:
             return self
 
@@ -718,7 +718,7 @@ class IndexedOptionArray(Content):
                 length_so_far += array.length
 
         tail_contents = contents[1:]
-        nextcontent = contents[0].mergemany(tail_contents)
+        nextcontent = contents[0]._mergemany(tail_contents)
         next = ak.contents.IndexedOptionArray(
             nextindex, nextcontent, parameters=parameters
         )
@@ -730,13 +730,7 @@ class IndexedOptionArray(Content):
         if len(tail) == 1:
             return reversed
         else:
-            return reversed.mergemany(tail[1:])
-
-        raise ak._errors.wrap_error(
-            NotImplementedError(
-                "not implemented: " + type(self).__name__ + " ::mergemany"
-            )
-        )
+            return reversed._mergemany(tail[1:])
 
     def _fill_none(self, value: Content) -> Content:
         if value.backend.nplike.known_shape and value.length != 1:
@@ -1160,7 +1154,7 @@ class IndexedOptionArray(Content):
             nulls_index, parameters=None, backend=self._backend
         )
         if out._mergeable(nulls_index_content, True):
-            out = out.mergemany([nulls_index_content])
+            out = out._mergemany([nulls_index_content])
             nulls_merged = True
 
         nextoutindex = ak.index.Index64.empty(

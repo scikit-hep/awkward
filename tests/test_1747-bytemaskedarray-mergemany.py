@@ -17,6 +17,6 @@ def test():
         ak.contents.NumpyArray(np.arange(12)),
         valid_when=True,
     )
-    z = x.mergemany([y])
+    z = x._mergemany([y])
 
     assert z.to_list() == [None, 1, 2, 0, 1, 2, None, None]

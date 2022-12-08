@@ -440,13 +440,13 @@ class NumpyArray(Content):
         else:
             return False
 
-    def mergemany(self, others):
+    def _mergemany(self, others):
         if len(others) == 0:
             return self
 
         # Resolve merging against regular types by
         if any(isinstance(o, ak.contents.RegularArray) for o in others):
-            return self.to_RegularArray().mergemany(others)
+            return self.to_RegularArray()._mergemany(others)
 
         head, tail = self._merging_strategy(others)
 
@@ -482,7 +482,7 @@ class NumpyArray(Content):
         if len(tail) == 1:
             return reversed
         else:
-            return reversed.mergemany(tail[1:])
+            return reversed._mergemany(tail[1:])
 
     def _fill_none(self, value: Content) -> Content:
         return self

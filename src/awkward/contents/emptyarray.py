@@ -192,7 +192,7 @@ class EmptyArray(Content):
     def _mergeable_next(self, other, mergebool):
         return True
 
-    def mergemany(self, others):
+    def _mergemany(self, others):
         if len(others) == 0:
             return self
 
@@ -201,7 +201,7 @@ class EmptyArray(Content):
 
         else:
             tail_others = others[1:]
-            return others[0].mergemany(tail_others)
+            return others[0]._mergemany(tail_others)
 
     def _fill_none(self, value: Content) -> Content:
         return EmptyArray(parameters=self._parameters, backend=self._backend)

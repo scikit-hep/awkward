@@ -640,7 +640,7 @@ class ByteMaskedArray(Content):
     def _reverse_merge(self, other):
         return self.to_IndexedOptionArray64()._reverse_merge(other)
 
-    def mergemany(self, others):
+    def _mergemany(self, others):
         if len(others) == 0:
             return self
 
@@ -660,13 +660,13 @@ class ByteMaskedArray(Content):
 
             return ByteMaskedArray(
                 ak.index.Index8(self._backend.nplike.concatenate(masks)),
-                self._content[: self.length].mergemany(tail_contents),
+                self._content[: self.length]._mergemany(tail_contents),
                 self._valid_when,
                 parameters=parameters,
             )
 
         else:
-            return self.to_IndexedOptionArray64().mergemany(others)
+            return self.to_IndexedOptionArray64()._mergemany(others)
 
     def _fill_none(self, value: Content) -> Content:
         return self.to_IndexedOptionArray64()._fill_none(value)
