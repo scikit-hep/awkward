@@ -393,13 +393,15 @@ class UnmaskedArray(Content):
         else:
             return out
 
-    def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
+    def _pub_combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            return self._combinations_axis0(n, replacement, recordlookup, parameters)
+            return self._pub_combinations_axis0(
+                n, replacement, recordlookup, parameters
+            )
         else:
             return ak.contents.UnmaskedArray(
-                self._content._combinations(
+                self._content._pub_combinations(
                     n, replacement, recordlookup, parameters, posaxis, depth
                 ),
                 parameters=self._parameters,

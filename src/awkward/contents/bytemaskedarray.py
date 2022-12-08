@@ -756,19 +756,21 @@ class ByteMaskedArray(Content):
             order,
         )
 
-    def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
+    def _pub_combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         if n < 1:
             raise ak._errors.wrap_error(
                 ValueError("in combinations, 'n' must be at least 1")
             )
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            return self._combinations_axis0(n, replacement, recordlookup, parameters)
+            return self._pub_combinations_axis0(
+                n, replacement, recordlookup, parameters
+            )
         else:
             _, nextcarry, outindex = self._nextcarry_outindex(self._backend)
 
             next = self._content._pub_carry(nextcarry, True)
-            out = next._combinations(
+            out = next._pub_combinations(
                 n, replacement, recordlookup, parameters, posaxis, depth
             )
             return ak.contents.IndexedOptionArray.simplified(

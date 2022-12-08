@@ -1214,8 +1214,8 @@ class ListArray(Content):
             order,
         )
 
-    def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
-        return ListOffsetArray._combinations(
+    def _pub_combinations(self, n, replacement, recordlookup, parameters, axis, depth):
+        return ListOffsetArray._pub_combinations(
             self, n, replacement, recordlookup, parameters, axis, depth
         )
 

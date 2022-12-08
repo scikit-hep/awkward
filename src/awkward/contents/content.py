@@ -1196,7 +1196,7 @@ class Content:
     ):
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def _combinations_axis0(
+    def _pub_combinations_axis0(
         self,
         n: Integral,
         replacement: bool,
@@ -1289,9 +1289,9 @@ class Content:
                 raise ak._errors.wrap_error(
                     ValueError("if provided, the length of 'fields' must be 'n'")
                 )
-        return self._combinations(n, replacement, recordlookup, parameters, axis, 0)
+        return self._pub_combinations(n, replacement, recordlookup, parameters, axis, 0)
 
-    def _combinations(
+    def _pub_combinations(
         self,
         n: Integral,
         replacement: bool,

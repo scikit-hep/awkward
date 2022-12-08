@@ -1080,16 +1080,18 @@ class NumpyArray(Content):
                 backend=self._backend,
             )
 
-    def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
+    def _pub_combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            return self._combinations_axis0(n, replacement, recordlookup, parameters)
+            return self._pub_combinations_axis0(
+                n, replacement, recordlookup, parameters
+            )
         elif len(self.shape) <= 1:
             raise ak._errors.wrap_error(
                 np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
             )
         else:
-            return self.to_RegularArray()._combinations(
+            return self.to_RegularArray()._pub_combinations(
                 n, replacement, recordlookup, parameters, posaxis, depth
             )
 

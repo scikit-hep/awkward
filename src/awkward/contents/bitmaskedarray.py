@@ -561,8 +561,8 @@ class BitMaskedArray(Content):
             order,
         )
 
-    def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
-        return self.to_ByteMaskedArray()._combinations(
+    def _pub_combinations(self, n, replacement, recordlookup, parameters, axis, depth):
+        return self.to_ByteMaskedArray()._pub_combinations(
             n, replacement, recordlookup, parameters, axis, depth
         )
 

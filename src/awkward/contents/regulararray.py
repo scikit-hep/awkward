@@ -862,10 +862,12 @@ class RegularArray(Content):
 
         return out
 
-    def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
+    def _pub_combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            return self._combinations_axis0(n, replacement, recordlookup, parameters)
+            return self._pub_combinations_axis0(
+                n, replacement, recordlookup, parameters
+            )
         elif posaxis == depth + 1:
             if (
                 self.parameter("__array__") == "string"
@@ -954,7 +956,7 @@ class RegularArray(Content):
         else:
             next = self._content._pub_getitem_range(
                 slice(0, self._length * self._size)
-            )._combinations(
+            )._pub_combinations(
                 n, replacement, recordlookup, parameters, posaxis, depth + 1
             )
             return ak.contents.RegularArray(

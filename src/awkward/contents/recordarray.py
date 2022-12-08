@@ -796,15 +796,17 @@ class RecordArray(Content):
             backend=self._backend,
         )
 
-    def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
+    def _pub_combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            return self._combinations_axis0(n, replacement, recordlookup, parameters)
+            return self._pub_combinations_axis0(
+                n, replacement, recordlookup, parameters
+            )
         else:
             contents = []
             for content in self._contents:
                 contents.append(
-                    content._combinations(
+                    content._pub_combinations(
                         n, replacement, recordlookup, parameters, posaxis, depth
                     )
                 )

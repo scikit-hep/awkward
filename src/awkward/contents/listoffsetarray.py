@@ -1317,10 +1317,12 @@ class ListOffsetArray(Content):
                 outoffsets, outcontent, parameters=self._parameters
             )
 
-    def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
+    def _pub_combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            return self._combinations_axis0(n, replacement, recordlookup, parameters)
+            return self._pub_combinations_axis0(
+                n, replacement, recordlookup, parameters
+            )
         elif posaxis == depth + 1:
             if (
                 self.parameter("__array__") == "string"
@@ -1429,7 +1431,7 @@ class ListOffsetArray(Content):
             )
         else:
             compact = self.to_ListOffsetArray64(True)
-            next = compact._content._combinations(
+            next = compact._content._pub_combinations(
                 n, replacement, recordlookup, parameters, posaxis, depth + 1
             )
             return ak.contents.ListOffsetArray(
