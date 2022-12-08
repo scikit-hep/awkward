@@ -1518,7 +1518,7 @@ class Content:
     ):
         if backend is None:
             backend = self._backend
-        arrays = self._completely_flatten(
+        arrays = self._pub_completely_flatten(
             backend,
             {
                 "flatten_records": flatten_records,
@@ -1528,7 +1528,7 @@ class Content:
         )
         return tuple(arrays)
 
-    def _completely_flatten(self, backend, options):
+    def _pub_completely_flatten(self, backend, options):
         raise ak._errors.wrap_error(NotImplementedError)
 
     def recursively_apply(

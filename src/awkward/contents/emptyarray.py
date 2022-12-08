@@ -332,7 +332,7 @@ class EmptyArray(Content):
     def _pub_to_numpy(self, allow_missing):
         return self._backend.nplike.empty(0, dtype=np.float64)
 
-    def _completely_flatten(self, backend, options):
+    def _pub_completely_flatten(self, backend, options):
         return []
 
     def _recursively_apply(

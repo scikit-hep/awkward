@@ -1282,7 +1282,7 @@ class NumpyArray(Content):
         else:
             return out
 
-    def _completely_flatten(self, backend, options):
+    def _pub_completely_flatten(self, backend, options):
         return [
             ak.contents.NumpyArray(
                 self.raw(backend.nplike).reshape(-1), backend=backend

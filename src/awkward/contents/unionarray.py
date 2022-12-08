@@ -1507,14 +1507,14 @@ class UnionArray(Content):
             out[mask] = content
         return out
 
-    def _completely_flatten(self, backend, options):
+    def _pub_completely_flatten(self, backend, options):
         out = []
         for i in range(len(self._contents)):
             index = self._index[self._tags.data == i]
             out.extend(
                 self._contents[i]
                 ._pub_carry(index, False)
-                ._completely_flatten(backend, options)
+                ._pub_completely_flatten(backend, options)
             )
         return out
 

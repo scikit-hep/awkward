@@ -1994,7 +1994,7 @@ class ListOffsetArray(Content):
             self.to_RegularArray(), allow_missing=allow_missing
         )
 
-    def _completely_flatten(self, backend, options):
+    def _pub_completely_flatten(self, backend, options):
         if (
             self.parameter("__array__") == "string"
             or self.parameter("__array__") == "bytestring"
@@ -2002,7 +2002,7 @@ class ListOffsetArray(Content):
             return [self]
         else:
             flat = self._content[self._offsets[0] : self._offsets[-1]]
-            return flat._completely_flatten(backend, options)
+            return flat._pub_completely_flatten(backend, options)
 
     def _recursively_apply(
         self, action, behavior, depth, depth_context, lateral_context, options

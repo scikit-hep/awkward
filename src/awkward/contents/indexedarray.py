@@ -1015,8 +1015,8 @@ class IndexedArray(Content):
     def _pub_to_numpy(self, allow_missing):
         return self.project()._pub_to_numpy(allow_missing)
 
-    def _completely_flatten(self, backend, options):
-        return self.project()._completely_flatten(backend, options)
+    def _pub_completely_flatten(self, backend, options):
+        return self.project()._pub_completely_flatten(backend, options)
 
     def _recursively_apply(
         self, action, behavior, depth, depth_context, lateral_context, options
