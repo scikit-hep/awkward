@@ -7,7 +7,14 @@ np = ak._nplikes.NumpyMetadata.instance()
 
 @ak._connect.numpy.implements("argmin")
 def argmin(
-    array, axis=None, *, keepdims=False, mask_identity=True, flatten_records=False
+    array,
+    axis=None,
+    *,
+    keepdims=False,
+    mask_identity=True,
+    flatten_records=False,
+    highlevel=True,
+    behavior=None
 ):
     """
     Args:
@@ -26,6 +33,10 @@ def argmin(
             results in the operation's identity.
         flatten_records (bool): If True, axis=None combines fields from different
             records; otherwise, records raise an error.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.contents.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
     Returns the index position of the minimum value in each group of elements
     from `array` (many types supported, including all Awkward Arrays and
@@ -54,14 +65,25 @@ def argmin(
             keepdims=keepdims,
             mask_identity=mask_identity,
             flatten_records=flatten_records,
+            highlevel=highlevel,
+            behavior=behavior,
         ),
     ):
-        return _impl(array, axis, keepdims, mask_identity, flatten_records)
+        return _impl(
+            array, axis, keepdims, mask_identity, flatten_records, highlevel, behavior
+        )
 
 
 @ak._connect.numpy.implements("nanargmin")
 def nanargmin(
-    array, axis=None, *, keepdims=False, mask_identity=True, flatten_records=False
+    array,
+    axis=None,
+    *,
+    keepdims=False,
+    mask_identity=True,
+    flatten_records=False,
+    highlevel=True,
+    behavior=None
 ):
     """
     Args:
@@ -75,6 +97,11 @@ def nanargmin(
             dimensions by 1; if True, the reduced values are wrapped in a new
             length-1 dimension so that the result of this operation may be
             broadcasted with the original array.
+        mask_identity (bool): If True, reducing over empty lists results in
+            None (an option type); otherwise, reducing over empty lists
+            results in the operation's identity.
+        flatten_records (bool): If True, axis=None combines fields from different
+            records; otherwise, records raise an error.
         mask_identity (bool): If True, reducing over empty lists results in
             None (an option type); otherwise, reducing over empty lists
             results in the operation's identity.
@@ -99,14 +126,18 @@ def nanargmin(
             keepdims=keepdims,
             mask_identity=mask_identity,
             flatten_records=flatten_records,
+            highlevel=highlevel,
+            behavior=behavior,
         ),
     ):
         array = ak.operations.ak_nan_to_none._impl(array, False, None)
 
-        return _impl(array, axis, keepdims, mask_identity, flatten_records)
+        return _impl(
+            array, axis, keepdims, mask_identity, flatten_records, highlevel, behavior
+        )
 
 
-def _impl(array, axis, keepdims, mask_identity, flatten_records):
+def _impl(array, axis, keepdims, mask_identity, flatten_records, highlevel, behavior):
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
     backend = layout.backend
     reducer = ak._reducers.ArgMin()
@@ -133,7 +164,7 @@ def _impl(array, axis, keepdims, mask_identity, flatten_records):
         return best_index
 
     else:
-        behavior = ak._util.behavior_of(array)
+        behavior = ak._util.behavior_of(array, behavior=behavior)
         out = ak._do.reduce(
             layout,
             reducer,
@@ -143,6 +174,6 @@ def _impl(array, axis, keepdims, mask_identity, flatten_records):
             behavior=behavior,
         )
         if isinstance(out, (ak.contents.Content, ak.record.Record)):
-            return ak._util.wrap(out, behavior)
+            return ak._util.wrap(out, behavior, highlevel=highlevel)
         else:
             return out

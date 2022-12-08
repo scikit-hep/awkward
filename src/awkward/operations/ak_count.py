@@ -6,7 +6,14 @@ np = ak._nplikes.NumpyMetadata.instance()
 
 
 def count(
-    array, axis=None, *, keepdims=False, mask_identity=False, flatten_records=False
+    array,
+    axis=None,
+    *,
+    keepdims=False,
+    mask_identity=False,
+    flatten_records=False,
+    highlevel=True,
+    behavior=None
 ):
     """
     Args:
@@ -25,6 +32,10 @@ def count(
             results in the operation's identity.
         flatten_records (bool): If True, axis=None combines fields from different
             records; otherwise, records raise an error.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.contents.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
     Counts elements of `array` (many types supported, including all
     Awkward Arrays and Records). The identity of counting is `0` and it is
@@ -89,12 +100,16 @@ def count(
             keepdims=keepdims,
             mask_identity=mask_identity,
             flatten_records=flatten_records,
+            highlevel=highlevel,
+            behavior=behavior,
         ),
     ):
-        return _impl(array, axis, keepdims, mask_identity, flatten_records)
+        return _impl(
+            array, axis, keepdims, mask_identity, flatten_records, highlevel, behavior
+        )
 
 
-def _impl(array, axis, keepdims, mask_identity, flatten_records):
+def _impl(array, axis, keepdims, mask_identity, flatten_records, highlevel, behavior):
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
     backend = layout.backend
     reducer = ak._reducers.Count()
@@ -128,7 +143,7 @@ def _impl(array, axis, keepdims, mask_identity, flatten_records):
         )
 
     else:
-        behavior = ak._util.behavior_of(array)
+        behavior = ak._util.behavior_of(array, behavior=behavior)
         out = ak._do.reduce(
             layout,
             reducer,
@@ -138,6 +153,6 @@ def _impl(array, axis, keepdims, mask_identity, flatten_records):
             behavior=behavior,
         )
         if isinstance(out, (ak.contents.Content, ak.record.Record)):
-            return ak._util.wrap(out, behavior)
+            return ak._util.wrap(out, behavior, highlevel=highlevel)
         else:
             return out
