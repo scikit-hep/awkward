@@ -5,25 +5,16 @@
     generated/ak.Record
 
 .. toctree::
-    :caption: Append-only data type
+    :caption: Append-only builder
 
     generated/ak.ArrayBuilder
-
-.. toctree::
-    :caption: Describing an array
-
-    generated/ak.fields
-    generated/ak.is_valid
-    generated/ak.parameters
-    generated/ak.is_tuple
-    generated/ak.type
-    generated/ak.validity_error
 
 .. toctree::
     :caption: Converting from other formats
 
     generated/ak.from_arrow
     generated/ak.from_arrow_schema
+    generated/ak.from_avro_file
     generated/ak.from_buffers
     generated/ak.from_cupy
     generated/ak.from_iter
@@ -31,8 +22,8 @@
     generated/ak.from_json
     generated/ak.from_numpy
     generated/ak.from_parquet
+    generated/ak.metadata_from_parquet
     generated/ak.from_rdataframe
-    generated/ak.from_avro_file
 
 .. toctree::
     :caption: Converting to other formats
@@ -50,44 +41,26 @@
     generated/ak.to_rdataframe
 
 .. toctree::
-    :caption: Number of elements in each list
+    :caption: Correctness checking
 
+    generated/ak.is_valid
+    generated/ak.validity_error
+
+.. toctree::
+    :caption: Lengths of lists
+
+    generated/ak.num
     generated/ak.count
     generated/ak.count_nonzero
-    generated/ak.num
 
 .. toctree::
-    :caption: Making and breaking arrays of records
+    :caption: Making and breaking records (columns)
 
-    generated/ak.unzip
     generated/ak.zip
+    generated/ak.unzip
 
 .. toctree::
-    :caption: Manipulating records
-
-    generated/ak.with_field
-    generated/ak.with_name
-
-.. toctree::
-    :caption: Behavior classes
-
-    ak.behavior
-    generated/ak.mixin_class
-    generated/ak.mixin_class_method
-
-.. toctree::
-    :caption: Manipulating parameters
-
-    generated/ak.with_parameter
-    generated/ak.without_parameters
-
-.. toctree::
-    :caption: Broadcasting
-
-    generated/ak.broadcast_arrays
-
-.. toctree::
-    :caption: Merging arrays
+    :caption: Merging arrays (rows)
 
     generated/ak.concatenate
     generated/ak.where
@@ -96,98 +69,93 @@
     :caption: Flattening lists and missing values
 
     generated/ak.flatten
-    generated/ak.ravel
     generated/ak.unflatten
+    generated/ak.ravel
 
 .. toctree::
-    :caption: Working with missing values
+    :caption: Functions that reduce dimension
+
+    generated/ak.all
+    generated/ak.any
+    generated/ak.sum
+    generated/ak.prod
+    generated/ak.max
+    generated/ak.min
+    generated/ak.argmax
+    generated/ak.argmin
+    generated/ak.nansum
+    generated/ak.nanprod
+    generated/ak.nanmax
+    generated/ak.nanmin
+    generated/ak.nanargmax
+    generated/ak.nanargmin
+
+.. toctree::
+    :caption: Statistics that reduce dimension
+
+    generated/ak.moment
+    generated/ak.mean
+    generated/ak.var
+    generated/ak.std
+    generated/ak.nanmean
+    generated/ak.nanvar
+    generated/ak.nanstd
+    generated/ak.covar
+    generated/ak.corr
+    generated/ak.linear_fit
+    generated/ak.ptp
+    generated/ak.softmax
+
+.. toctree::
+    :caption: Sorting
+
+    generated/ak.sort
+    generated/ak.argsort
+
+.. toctree::
+    :caption: Missing value handling
 
     generated/ak.mask
     generated/ak.is_none
-    generated/ak.fill_none
     generated/ak.pad_none
+    generated/ak.fill_none
     generated/ak.firsts
     generated/ak.singletons
 
 .. toctree::
-    :caption: Combinatorics
-
-    generated/ak.argcartesian
-    generated/ak.argcombinations
-    generated/ak.cartesian
-    generated/ak.combinations
-
-.. toctree::
-    :caption: NumPy compatibility
-
-    generated/ak.isclose
-    generated/ak.ones_like
-    generated/ak.zeros_like
-    generated/ak.full_like
-
-.. toctree::
-    :caption: Reducers
-
-    generated/ak.argsort
-    generated/ak.sort
-    generated/ak.all
-    generated/ak.any
-    generated/ak.argmax
-    generated/ak.argmin
-    generated/ak.max
-    generated/ak.min
-    generated/ak.nanargmax
-    generated/ak.nanargmin
-    generated/ak.nanmax
-    generated/ak.nanmin
-    generated/ak.nanprod
-    generated/ak.nansum
-    generated/ak.prod
-    generated/ak.sum
-
-.. toctree::
-    :caption: Non-reducers
-
-    generated/ak.corr
-    generated/ak.covar
-    generated/ak.linear_fit
-    generated/ak.mean
-    generated/ak.moment
-    generated/ak.nanmean
-    generated/ak.nanstd
-    generated/ak.nanvar
-    generated/ak.ptp
-    generated/ak.softmax
-    generated/ak.std
-    generated/ak.var
-
-.. toctree::
-    :caption: Working with categorical arrays
-
-    generated/ak.categories
-    generated/ak.is_categorical
-    generated/ak.to_categorical
-    generated/ak.from_categorical
-
-.. toctree::
-    :caption: Converting to/from ragged arrays
+    :caption: Ragged and regular dimensions
 
     generated/ak.to_regular
     generated/ak.from_regular
 
 .. toctree::
+    :caption: Broadcasting
+
+    generated/ak.broadcast_arrays
+
+.. toctree::
+    :caption: Combinatorics ("for loop" replacements)
+
+    generated/ak.cartesian
+    generated/ak.combinations
+    generated/ak.argcartesian
+    generated/ak.argcombinations
+
+.. toctree::
     :caption: Value and type conversions
 
-    generated/ak.strings_astype
-    generated/ak.values_astype
     generated/ak.nan_to_none
     generated/ak.nan_to_num
-    
-.. toctree::
-    :caption: Converting between backends
+    generated/ak.values_astype
+    generated/ak.strings_astype
 
-    generated/ak.backend
-    generated/ak.to_backend
+.. toctree::
+    :caption: Arrays of categorical data
+
+    generated/ak.to_categorical
+    generated/ak.from_categorical
+    generated/ak.is_categorical
+    generated/ak.categories
 
 .. toctree::
     :caption: Indexing and grouping
@@ -198,29 +166,66 @@
 .. toctree::
     :caption: Copying and packing arrays
 
-    generated/ak.packed
     generated/ak.copy
+    generated/ak.packed
 
 .. toctree::
-    :caption: Layout node transformations
+    :caption: Extracting metadata
 
-    generated/ak.transform
+    generated/ak.type
+    generated/ak.parameters
+    generated/ak.fields
+    generated/ak.is_tuple
+
+.. toctree::
+    :caption: Manipulating metadata
+
+    generated/ak.with_name
+    generated/ak.with_field
+    generated/ak.without_parameters
+    generated/ak.with_parameter
+
+.. toctree::
+    :caption: Overriding behavior
+
+    ak.behavior
+    generated/ak.mixin_class
+    generated/ak.mixin_class_method
+
+.. toctree::
+    :caption: Computational backends
+
+    generated/ak.to_backend
+    generated/ak.backend
+
+.. toctree::
+    :caption: NumPy compatibility
+
+    generated/ak.full_like
+    generated/ak.isclose
+    generated/ak.ones_like
+    generated/ak.zeros_like
     
 .. toctree::
     :caption: Third-party integration
 
     generated/ak.numba.register_and_check
-    generated/ak.jax.register_and_check
     generated/ak.jax.assert_registered
     generated/ak.jax.import_jax
+    generated/ak.jax.register_and_check
 
 .. toctree::
-    :caption: Low-level layouts
+    :caption: Array layout transformations
+
+    generated/ak.transform
+
+.. toctree::
+    :caption: Low-level array layouts
 
     generated/ak.to_layout
+    generated/ak.contents.Content
     generated/ak.contents.BitMaskedArray
     generated/ak.contents.ByteMaskedArray
-    generated/ak.contents.Content
     generated/ak.contents.EmptyArray
     generated/ak.contents.IndexedArray
     generated/ak.contents.IndexedOptionArray
@@ -237,48 +242,36 @@
     :caption: Index for layout nodes
 
     generated/ak.index.Index
-    generated/ak.index.Index32
-    generated/ak.index.Index64
     generated/ak.index.Index8
+    generated/ak.index.IndexU8
+    generated/ak.index.Index32
     generated/ak.index.IndexU32
-    generated/ak.index.IndexU8.
-
-.. toctree::
-    :caption: String behaviors
-
-    generated/ak.ByteBehavior
-    generated/ak.ByteStringBehavior
-    generated/ak.CategoricalBehavior
-    generated/ak.CharBehavior
-    generated/ak.StringBehavior
-
+    generated/ak.index.Index64
 
 .. toctree::
     :caption: High-level data types
 
+    generated/ak.types.from_datashape
+    generated/ak.types.Type
     generated/ak.types.ArrayType
     generated/ak.types.ListType
     generated/ak.types.NumpyType
     generated/ak.types.OptionType
     generated/ak.types.RecordType
     generated/ak.types.RegularType
-    generated/ak.types.Type
     generated/ak.types.UnionType
     generated/ak.types.UnknownType
-    generated/ak.types.dtype_to_primitive
-    generated/ak.types.from_datashape
     generated/ak.types.is_primitive
+    generated/ak.types.dtype_to_primitive
     generated/ak.types.primitive_to_dtype
 
 .. toctree::
-    :caption: Low-level array forms
-
-    generated/ak.forms.from_dict
-    generated/ak.forms.from_json
+    :caption: Low-level types: "forms"
+    
+    generated/ak.forms.Form
     generated/ak.forms.BitMaskedForm
     generated/ak.forms.ByteMaskedForm
     generated/ak.forms.EmptyForm
-    generated/ak.forms.Form
     generated/ak.forms.IndexedForm
     generated/ak.forms.IndexedOptionForm
     generated/ak.forms.ListForm
@@ -288,9 +281,20 @@
     generated/ak.forms.RegularForm
     generated/ak.forms.UnionForm
     generated/ak.forms.UnmaskedForm
+    generated/ak.forms.from_dict
+    generated/ak.forms.from_json
 
 .. toctree::
-    :caption: Forth virtual machine
+    :caption: Builtin behaviors
+
+    generated/ak.ByteBehavior
+    generated/ak.ByteStringBehavior
+    generated/ak.CharBehavior
+    generated/ak.StringBehavior
+    generated/ak.CategoricalBehavior
+
+.. toctree::
+    :caption: AwkwardForth for data ingest
     :maxdepth: 1
 
     awkwardforth

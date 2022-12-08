@@ -19,15 +19,10 @@ def genkerneldocs():
     prefix = """Kernel interface and specification
 ----------------------------------
 
-All array manipulation takes place in the lowest layer of the Awkward Array project, the "kernels." The primary implementation of these kernels are in ``libawkward-cpu-kernels.so`` (or similar names on MacOS and Windows), which has a pure C interface.
+All array manipulation that is not performed by NumPy/CuPy/etc. is executed in Awkward Array's low-level "kernels." These functions communicate entirely by side-effects, manipulating already-allocated arrays, and therefore can be implemented with a pure C interface. They're called "kernels" because their signatures are similar to GPU kernels, to make them easier to port to GPUs and similar devices.
 
-A second implementation, ``libawkward-cuda-kernels.so``, is provided as a separate package, ``awkward-cuda-kernels``, which handles arrays that reside on GPUs if CUDA is available. It satisfies the same C interface and implements the same behaviors.
+All of the kernel functions that Awkward Array uses are documented below. These are internal details of Awkward Array, subject to change at any time, not a public API. The reason that we are documenting the API is to ensure compatibility between the primary CPU-bound kernels and their equivalents, ported to GPUs (and similar devices). The definitions below are expressed in Python code, but the implementations used by Awkward Array are compiled.
 
-.. figure:: ../../image/awkward-1-0-layers.svg
-   :align: center
-
-
-The functions are implemented in C with templates for integer specializations (cpu-kernels) and as CUDA (cuda-kernels), but the function signatures and normative definitions are expressed below using a subset of the Python language. These normative definitions are used as a stable and easy-to-read standard that both implementations must reproduce in tests, regardless of how they are optimized.\n
 """
     generated_dir = os.path.join(CURRENT_DIR, "..", "docs", "reference", "generated")
     os.makedirs(generated_dir, exist_ok=True)
