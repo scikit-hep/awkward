@@ -646,7 +646,7 @@ class NumpyArray(Content):
 
         return out2, nextoffsets[: outlength[0]]
 
-    def numbers_to_type(self, name):
+    def _numbers_to_type(self, name):
         if (
             self.parameter("__array__") == "string"
             or self.parameter("__array__") == "bytestring"

@@ -1181,10 +1181,10 @@ class UnionArray(Content):
                 parameters=self._parameters,
             )
 
-    def numbers_to_type(self, name):
+    def _numbers_to_type(self, name):
         contents = []
         for x in self._contents:
-            contents.append(x.numbers_to_type(name))
+            contents.append(x._numbers_to_type(name))
         return ak.contents.UnionArray(
             self._tags,
             self._index,

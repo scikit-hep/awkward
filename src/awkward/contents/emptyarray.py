@@ -219,7 +219,7 @@ class EmptyArray(Content):
             backend=self._backend,
         )
 
-    def numbers_to_type(self, name):
+    def _numbers_to_type(self, name):
         return ak.contents.EmptyArray(
             parameters=self._parameters, backend=self._backend
         )

@@ -58,5 +58,5 @@ def _impl(array, to, highlevel, behavior):
     to_dtype = np.dtype(to)
     to_str = ak.types.numpytype.dtype_to_primitive(to_dtype)
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
-    out = layout.numbers_to_type(to_str)
+    out = ak._do.numbers_to_type(layout, to_str)
     return ak._util.wrap(out, behavior, highlevel, like=array)

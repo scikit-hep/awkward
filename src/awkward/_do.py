@@ -284,3 +284,7 @@ def completely_flatten(
 def flatten(layout: Content, axis: Integral = 1, depth: Integral = 0) -> Content:
     offsets, flattened = layout._offsets_and_flattened(axis, depth)
     return flattened
+
+
+def numbers_to_type(layout: Content, name: str) -> Content:
+    return layout._numbers_to_type(name)

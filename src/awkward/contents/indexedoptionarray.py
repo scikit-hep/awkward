@@ -853,10 +853,10 @@ class IndexedOptionArray(Content):
                 nextstarts, nextstops, nextstarts.length, False
             )
 
-    def numbers_to_type(self, name):
+    def _numbers_to_type(self, name):
         return ak.contents.IndexedOptionArray(
             self._index,
-            self._content.numbers_to_type(name),
+            self._content._numbers_to_type(name),
             parameters=self._parameters,
         )
 
