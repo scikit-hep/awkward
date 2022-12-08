@@ -108,9 +108,9 @@ def to_buffers(
         <Array [[1, 2, 3], [], [4, 5]] type='3 * var * int64'>
 
     If you intend to use this function for saving data, you may want to pack it
-    first with #ak.packed.
+    first with #ak.to_packed.
 
-    See also #ak.from_buffers and #ak.packed.
+    See also #ak.from_buffers and #ak.to_packed.
     """
     with ak._errors.OperationErrorContext(
         "ak.to_buffers",

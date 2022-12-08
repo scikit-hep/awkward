@@ -357,6 +357,7 @@ categories = [
         "ak.to_json",
         "ak.to_list",
         "ak.to_numpy",
+        "ak.to_packed",
         "ak.to_parquet",
         "ak.to_cupy",
         "ak.to_jax",
