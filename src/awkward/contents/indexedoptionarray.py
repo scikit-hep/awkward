@@ -137,22 +137,17 @@ class IndexedOptionArray(Content):
         container[key] = ak._util.little_endian(self._index.raw(backend.index_nplike))
         self._content._to_buffers(form.content, getkey, container, backend)
 
-    def to_typetracer(self):
-        tt = ak._typetracer.TypeTracer.instance()
+    def _to_typetracer(self, forget_length: bool) -> Self:
+        index = self._index.to_nplike(ak._typetracer.TypeTracer.instance())
         return IndexedOptionArray(
-            ak.index.Index(self._index.raw(tt)),
-            self._content.to_typetracer(),
+            index.forget_length() if forget_length else index,
+            self._content._to_typetracer(False),
             parameters=self._parameters,
         )
 
     @property
     def length(self):
         return self._index.length
-
-    def _forget_length(self):
-        return IndexedOptionArray(
-            self._index.forget_length(), self._content, parameters=self._parameters
-        )
 
     def __repr__(self):
         return self._repr("", "", "")

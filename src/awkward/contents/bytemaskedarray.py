@@ -153,11 +153,12 @@ class ByteMaskedArray(Content):
         container[key] = ak._util.little_endian(self._mask.raw(backend.index_nplike))
         self._content._to_buffers(form.content, getkey, container, backend)
 
-    def to_typetracer(self):
+    def _to_typetracer(self, forget_length: bool) -> Self:
         tt = ak._typetracer.TypeTracer.instance()
+        mask = self._mask.to_nplike(tt)
         return ByteMaskedArray(
-            ak.index.Index(self._mask.raw(tt)),
-            self._content.to_typetracer(),
+            mask.forget_length() if forget_length else mask,
+            self._content._to_typetracer(False),
             self._valid_when,
             parameters=self._parameters,
         )

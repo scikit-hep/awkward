@@ -130,25 +130,17 @@ class RegularArray(Content):
         assert isinstance(form, self.form_cls)
         self._content._to_buffers(form.content, getkey, container, backend)
 
-    def to_typetracer(self):
+    def _to_typetracer(self, forget_length: bool) -> Self:
         return RegularArray(
-            self._content.to_typetracer(),
+            self._content._to_typetracer(forget_length),
             self._size,
-            self._length,
+            ak._typetracer.UnknownLength if forget_length else self._length,
             parameters=self._parameters,
         )
 
     @property
     def length(self):
         return self._length
-
-    def _forget_length(self):
-        return RegularArray(
-            self._content._forget_length(),
-            self._size,
-            ak._typetracer.UnknownLength,
-            parameters=self._parameters,
-        )
 
     def __repr__(self):
         return self._repr("", "", "")

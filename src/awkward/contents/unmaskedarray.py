@@ -83,17 +83,15 @@ class UnmaskedArray(Content):
         assert isinstance(form, self.form_cls)
         self._content._to_buffers(form.content, getkey, container, backend)
 
-    def to_typetracer(self):
-        return UnmaskedArray(self._content.to_typetracer(), parameters=self._parameters)
+    def _to_typetracer(self, forget_length: bool) -> Self:
+        return UnmaskedArray(
+            self._content._to_typetracer(forget_length),
+            parameters=self._parameters,
+        )
 
     @property
     def length(self):
         return self._content.length
-
-    def _forget_length(self):
-        return UnmaskedArray(
-            self._content._forget_length(), parameters=self._parameters
-        )
 
     def __repr__(self):
         return self._repr("", "", "")

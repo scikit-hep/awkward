@@ -141,26 +141,19 @@ class ListArray(Content):
         container[key2] = ak._util.little_endian(self._stops.raw(backend.index_nplike))
         self._content._to_buffers(form.content, getkey, container, backend)
 
-    def to_typetracer(self):
+    def _to_typetracer(self, forget_length: bool) -> Self:
         tt = ak._typetracer.TypeTracer.instance()
+        starts = self._starts.to_nplike(tt)
         return ListArray(
-            ak.index.Index(self._starts.raw(tt)),
-            ak.index.Index(self._stops.raw(tt)),
-            self._content.to_typetracer(),
+            starts.forget_length() if forget_length else starts,
+            self._stops.to_nplike(tt),
+            self._content._to_typetracer(False),
             parameters=self._parameters,
         )
 
     @property
     def length(self):
         return self._starts.length
-
-    def _forget_length(self):
-        return ListArray(
-            self._starts.forget_length(),
-            self._stops,
-            self._content,
-            parameters=self._parameters,
-        )
 
     def __repr__(self):
         return self._repr("", "", "")

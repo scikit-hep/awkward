@@ -399,26 +399,19 @@ class UnionArray(Content):
         for i, content in enumerate(self._contents):
             content._to_buffers(form.content(i), getkey, container, backend)
 
-    def to_typetracer(self):
-        backend = ak._backends.TypeTracerBackend.instance()
+    def _to_typetracer(self, forget_length: bool) -> Self:
+        tt = ak._typetracer.TypeTracer.instance()
+        tags = self._tags.to_nplike(tt)
         return UnionArray(
-            ak.index.Index(self._tags.raw(backend.nplike)),
-            ak.index.Index(self._index.raw(backend.nplike)),
-            [x.to_typetracer() for x in self._contents],
+            tags.forget_length() if forget_length else tags,
+            self._index.to_nplike(tt),
+            [x._to_typetracer(False) for x in self._contents],
             parameters=self._parameters,
         )
 
     @property
     def length(self):
         return self._tags.length
-
-    def _forget_length(self):
-        return UnionArray(
-            self._tags.forget_length(),
-            self._index,
-            self._contents,
-            parameters=self._parameters,
-        )
 
     def __repr__(self):
         return self._repr("", "", "")

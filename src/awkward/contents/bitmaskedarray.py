@@ -205,13 +205,13 @@ class BitMaskedArray(Content):
         container[key] = ak._util.little_endian(self._mask.raw(backend.index_nplike))
         self._content._to_buffers(form.content, getkey, container, backend)
 
-    def to_typetracer(self):
+    def _to_typetracer(self, forget_length: bool) -> Self:
         tt = ak._typetracer.TypeTracer.instance()
         return BitMaskedArray(
-            ak.index.Index(self._mask.raw(tt)),
-            self._content.to_typetracer(),
+            self._mask.to_nplike(tt),
+            self._content._to_typetracer(False),
             self._valid_when,
-            self._length,
+            ak._typetracer.UnknownLength if forget_length else self.length,
             self._lsb_order,
             parameters=self._parameters,
         )
@@ -219,16 +219,6 @@ class BitMaskedArray(Content):
     @property
     def length(self):
         return self._length
-
-    def _forget_length(self):
-        return BitMaskedArray(
-            self._mask,
-            self._content.to_typetracer(),
-            self._valid_when,
-            ak._typetracer.UnknownLength,
-            self._lsb_order,
-            parameters=self._parameters,
-        )
 
     def __repr__(self):
         return self._repr("", "", "")

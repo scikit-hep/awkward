@@ -7,8 +7,7 @@ from collections.abc import Callable, Iterable, Mapping, MutableMapping, Sized
 from numbers import Complex, Integral, Real
 
 import awkward as ak
-import awkward._reducers
-from awkward._backends import Backend, TypeTracerBackend
+from awkward._backends import Backend
 from awkward.forms.form import Form, _parameters_equal
 from awkward.typing import Any, Self, TypeAlias, TypeVar
 
@@ -167,20 +166,14 @@ class Content:
     def form_cls(self) -> type[Form]:
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def to_typetracer(self) -> Self:
+    def to_typetracer(self, forget_length: bool = False) -> Self:
+        return self._to_typetracer(forget_length)
+
+    def _to_typetracer(self, forget_length: bool) -> Self:
         raise ak._errors.wrap_error(NotImplementedError)
 
     @property
     def length(self) -> int:
-        raise ak._errors.wrap_error(NotImplementedError)
-
-    def forget_length(self) -> Self:
-        if not isinstance(self._backend, TypeTracerBackend):
-            return self.to_typetracer()._forget_length()
-        else:
-            return self._forget_length()
-
-    def _forget_length(self) -> Self:
         raise ak._errors.wrap_error(NotImplementedError)
 
     def _to_buffers(

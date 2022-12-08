@@ -212,12 +212,13 @@ class RecordArray(Content):
             for field, content in zip(self._fields, self._contents):
                 content._to_buffers(form.content(field), getkey, container, backend)
 
-    def to_typetracer(self):
+    def _to_typetracer(self, forget_length: bool) -> Self:
         backend = ak._backends.TypeTracerBackend.instance()
+        contents = [x._to_typetracer(forget_length) for x in self._contents]
         return RecordArray(
-            [x.to_typetracer() for x in self._contents],
+            contents,
             self._fields,
-            self._length,
+            ak._typetracer.UnknownLength if forget_length else self._length,
             parameters=self._parameters,
             backend=backend,
         )
@@ -225,15 +226,6 @@ class RecordArray(Content):
     @property
     def length(self):
         return self._length
-
-    def _forget_length(self):
-        return RecordArray(
-            [x._forget_length() for x in self._contents],
-            self._fields,
-            ak._typetracer.UnknownLength,
-            parameters=self._parameters,
-            backend=self._backend,
-        )
 
     def __repr__(self):
         return self._repr("", "", "")

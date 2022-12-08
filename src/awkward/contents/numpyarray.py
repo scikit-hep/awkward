@@ -115,22 +115,18 @@ class NumpyArray(Content):
         key = getkey(self, form, "data")
         container[key] = ak._util.little_endian(self.raw(backend.nplike))
 
-    def to_typetracer(self):
+    def _to_typetracer(self, forget_length: bool) -> Self:
         backend = ak._backends.TypeTracerBackend.instance()
+        data = self.raw(backend.nplike)
         return NumpyArray(
-            self.raw(backend.nplike), parameters=self._parameters, backend=backend
+            data.forget_length() if forget_length else data,
+            parameters=self._parameters,
+            backend=backend,
         )
 
     @property
     def length(self):
         return self._data.shape[0]
-
-    def _forget_length(self):
-        return NumpyArray(
-            self._data.forget_length(),
-            parameters=self._parameters,
-            backend=self._backend,
-        )
 
     def __repr__(self):
         return self._repr("", "", "")

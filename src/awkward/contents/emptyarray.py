@@ -51,7 +51,7 @@ class EmptyArray(Content):
     def _to_buffers(self, form, getkey, container, backend):
         assert isinstance(form, self.form_cls)
 
-    def to_typetracer(self):
+    def _to_typetracer(self, forget_length: bool) -> Self:
         return EmptyArray(
             parameters=self._parameters,
             backend=ak._backends.TypeTracerBackend.instance(),
@@ -60,9 +60,6 @@ class EmptyArray(Content):
     @property
     def length(self):
         return 0
-
-    def _forget_length(self):
-        return EmptyArray(parameters=self._parameters, backend=self._backend)
 
     def __repr__(self):
         return self._repr("", "", "")
