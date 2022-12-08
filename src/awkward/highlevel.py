@@ -1528,7 +1528,7 @@ class Record(NDArrayOperatorsMixin):
             contents = []
             for k, v in data.items():
                 fields.append(k)
-                if not isinstance(v, str) and isinstance(v, Iterable):
+                if ak._util.is_non_string_iterable(v):
                     contents.append(Array(v).layout[np.newaxis])
                 else:
                     contents.append(Array([v]).layout)

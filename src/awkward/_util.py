@@ -38,24 +38,28 @@ def numpy_at_least(version):
     return parse_version(numpy.__version__) >= parse_version(version)
 
 
-def in_module(obj, modulename):
+def in_module(obj, modulename: str) -> bool:
     m = type(obj).__module__
     return m == modulename or m.startswith(modulename + ".")
 
 
-def is_file_path(x):
+def is_file_path(x) -> bool:
     try:
         return os.path.isfile(x)
     except ValueError:
         return False
 
 
-def is_sized_iterable(obj):
+def is_sized_iterable(obj) -> bool:
     return isinstance(obj, Iterable) and isinstance(obj, Sized)
 
 
-def is_integer(x):
+def is_integer(x) -> bool:
     return isinstance(x, numbers.Integral) and not isinstance(x, bool)
+
+
+def is_non_string_iterable(obj) -> bool:
+    return not isinstance(obj, str) and isinstance(obj, Iterable)
 
 
 def tobytes(array):
