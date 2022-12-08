@@ -10,7 +10,7 @@ from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.recordform import RecordForm
 from awkward.record import Record
-from awkward.typing import Self
+from awkward.typing import Final, Self
 
 np = ak._nplikes.NumpyMetadata.instance()
 numpy = ak._nplikes.Numpy.instance()
@@ -144,7 +144,7 @@ class RecordArray(Content):
         else:
             return self._fields
 
-    Form = RecordForm
+    form_cls: Final = RecordForm
 
     def copy(
         self,
@@ -197,7 +197,7 @@ class RecordArray(Content):
 
     def _form_with_key(self, getkey):
         form_key = getkey(self)
-        return self.Form(
+        return self.form_cls(
             [x._form_with_key(getkey) for x in self._contents],
             self._fields,
             parameters=self._parameters,
@@ -205,7 +205,7 @@ class RecordArray(Content):
         )
 
     def _to_buffers(self, form, getkey, container, backend):
-        assert isinstance(form, self.Form)
+        assert isinstance(form, self.form_cls)
         if self._fields is None:
             for i, content in enumerate(self._contents):
                 content._to_buffers(form.content(i), getkey, container, backend)
@@ -278,16 +278,16 @@ class RecordArray(Content):
         )
 
     def index_to_field(self, index):
-        return self.Form.index_to_field(self, index)
+        return self.form_cls.index_to_field(self, index)
 
     def field_to_index(self, field):
-        return self.Form.field_to_index(self, field)
+        return self.form_cls.field_to_index(self, field)
 
     def has_field(self, field):
-        return self.Form.has_field(self, field)
+        return self.form_cls.has_field(self, field)
 
     def content(self, index_or_field):
-        out = self.Form.content(self, index_or_field)
+        out = self.form_cls.content(self, index_or_field)
         if out.length == self._length:
             return out
         else:

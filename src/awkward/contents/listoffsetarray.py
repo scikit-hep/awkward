@@ -8,7 +8,7 @@ from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.listoffsetform import ListOffsetForm
 from awkward.index import Index
-from awkward.typing import Self
+from awkward.typing import Final, Self
 
 np = ak._nplikes.NumpyMetadata.instance()
 numpy = ak._nplikes.Numpy.instance()
@@ -79,7 +79,7 @@ class ListOffsetArray(Content):
     def content(self):
         return self._content
 
-    Form = ListOffsetForm
+    form_cls: Final = ListOffsetForm
 
     def copy(self, offsets=unset, content=unset, *, parameters=unset):
         return ListOffsetArray(
@@ -112,7 +112,7 @@ class ListOffsetArray(Content):
 
     def _form_with_key(self, getkey):
         form_key = getkey(self)
-        return self.Form(
+        return self.form_cls(
             self._offsets.form,
             self._content._form_with_key(getkey),
             parameters=self._parameters,
@@ -120,7 +120,7 @@ class ListOffsetArray(Content):
         )
 
     def _to_buffers(self, form, getkey, container, backend):
-        assert isinstance(form, self.Form)
+        assert isinstance(form, self.form_cls)
         key = getkey(self, form, "offsets")
         container[key] = ak._util.little_endian(self._offsets.raw(backend.index_nplike))
         self._content._to_buffers(form.content, getkey, container, backend)
