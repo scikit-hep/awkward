@@ -1466,7 +1466,7 @@ class ListArray(Content):
         stops = self._stops.to_nplike(backend.index_nplike)
         return ListArray(starts, stops, content, parameters=self._parameters)
 
-    def _is_equal_to(self, other, index_dtype=True, numpyarray=True):
+    def _is_equal_to(self, other, index_dtype, numpyarray):
         return (
             self.starts.is_equal_to(other.starts, index_dtype, numpyarray)
             and self.stops.is_equal_to(other.stops, index_dtype, numpyarray)

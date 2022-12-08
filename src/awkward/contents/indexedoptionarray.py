@@ -1639,7 +1639,7 @@ class IndexedOptionArray(Content):
         index = self._index.to_nplike(backend.index_nplike)
         return IndexedOptionArray(index, content, parameters=self._parameters)
 
-    def _is_equal_to(self, other, index_dtype=True, numpyarray=True):
+    def _is_equal_to(self, other, index_dtype, numpyarray):
         return self.index.is_equal_to(
             other.index, index_dtype, numpyarray
         ) and self.content.is_equal_to(other.content, index_dtype, numpyarray)

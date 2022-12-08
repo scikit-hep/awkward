@@ -1320,9 +1320,7 @@ class Content:
             and self._is_equal_to(other, index_dtype, numpyarray)
         )
 
-    def _is_equal_to(
-        self, other: Self, index_dtype: bool = True, numpyarray: bool = True
-    ) -> bool:
+    def _is_equal_to(self, other: Self, index_dtype: bool, numpyarray: bool) -> bool:
         raise ak._errors.wrap_error(NotImplementedError)
 
     def _repr(self, indent: str, pre: str, post: str) -> str:

@@ -719,7 +719,7 @@ class BitMaskedArray(Content):
             parameters=self._parameters,
         )
 
-    def _is_equal_to(self, other, index_dtype=True, numpyarray=True):
+    def _is_equal_to(self, other, index_dtype, numpyarray):
         return (
             self.valid_when == other.valid_when
             and self.lsb_order == other.lsb_order

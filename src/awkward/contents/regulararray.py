@@ -1373,7 +1373,7 @@ class RegularArray(Content):
             content, self._size, zeros_length=self._length, parameters=self._parameters
         )
 
-    def _is_equal_to(self, other, index_dtype=True, numpyarray=True):
+    def _is_equal_to(self, other, index_dtype, numpyarray):
         return self._size == other.size and self._content.is_equal_to(
             self._content, index_dtype, numpyarray
         )

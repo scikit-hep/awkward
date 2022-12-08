@@ -1373,7 +1373,7 @@ class NumpyArray(Content):
             backend=backend,
         )
 
-    def _is_equal_to(self, other, index_dtype=True, numpyarray=True):
+    def _is_equal_to(self, other, index_dtype, numpyarray):
         if numpyarray:
             return (
                 self._backend.nplike.array_equal(self.data, other.data)

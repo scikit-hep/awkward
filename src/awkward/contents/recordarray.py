@@ -1048,7 +1048,7 @@ class RecordArray(Content):
             backend=backend,
         )
 
-    def _is_equal_to(self, other, index_dtype=True, numpyarray=True):
+    def _is_equal_to(self, other, index_dtype, numpyarray):
         return (
             self.fields == other.fields
             and len(self.contents) == len(other.contents)
