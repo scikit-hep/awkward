@@ -1169,7 +1169,7 @@ class RegularArray(Content):
     def _nbytes_part(self):
         return self.content._nbytes_part()
 
-    def _pad_none(self, target, axis, depth, clip):
+    def _pub_pad_none(self, target, axis, depth, clip):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
             return self.pad_none_axis0(target, clip)
@@ -1179,7 +1179,7 @@ class RegularArray(Content):
                 if target < self._size:
                     return self
                 else:
-                    return self._pad_none(target, posaxis, depth, True)
+                    return self._pub_pad_none(target, posaxis, depth, True)
 
             else:
                 index = ak.index.Index64.empty(
@@ -1203,7 +1203,7 @@ class RegularArray(Content):
 
         else:
             return ak.contents.RegularArray(
-                self._content._pad_none(target, posaxis, depth + 1, clip),
+                self._content._pub_pad_none(target, posaxis, depth + 1, clip),
                 self._size,
                 self._length,
                 parameters=self._parameters,

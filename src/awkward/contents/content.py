@@ -1455,9 +1455,9 @@ class Content:
         )
 
     def pad_none(self, length: Integral, axis: Integral, clip: bool = False) -> Content:
-        return self._pad_none(length, axis, 0, clip)
+        return self._pub_pad_none(length, axis, 0, clip)
 
-    def _pad_none(
+    def _pub_pad_none(
         self, target: Integral, axis: Integral, depth: Integral, clip: bool
     ) -> Content:
         raise ak._errors.wrap_error(NotImplementedError)

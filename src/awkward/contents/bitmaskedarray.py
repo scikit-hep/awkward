@@ -601,8 +601,8 @@ class BitMaskedArray(Content):
     def _nbytes_part(self):
         return self.mask._nbytes_part() + self.content._nbytes_part()
 
-    def _pad_none(self, target, axis, depth, clip):
-        return self.to_ByteMaskedArray()._pad_none(target, axis, depth, clip)
+    def _pub_pad_none(self, target, axis, depth, clip):
+        return self.to_ByteMaskedArray()._pub_pad_none(target, axis, depth, clip)
 
     def _pub_to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         return self.to_ByteMaskedArray()._pub_to_arrow(

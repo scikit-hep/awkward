@@ -1279,7 +1279,7 @@ class ListArray(Content):
             + self.content._nbytes_part()
         )
 
-    def _pad_none(self, target, axis, depth, clip):
+    def _pub_pad_none(self, target, axis, depth, clip):
         if not clip:
             posaxis = self.axis_wrap_if_negative(axis)
             if posaxis == depth:
@@ -1377,11 +1377,11 @@ class ListArray(Content):
                 return ak.contents.ListArray(
                     self._starts,
                     self._stops,
-                    self._content._pad_none(target, posaxis, depth + 1, clip),
+                    self._content._pub_pad_none(target, posaxis, depth + 1, clip),
                     parameters=self._parameters,
                 )
         else:
-            return self.to_ListOffsetArray64(True)._pad_none(
+            return self.to_ListOffsetArray64(True)._pub_pad_none(
                 target, axis, depth, clip=True
             )
 

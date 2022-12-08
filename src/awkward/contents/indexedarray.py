@@ -951,16 +951,16 @@ class IndexedArray(Content):
     def _nbytes_part(self):
         return self.index._nbytes_part() + self.content._nbytes_part()
 
-    def _pad_none(self, target, axis, depth, clip):
+    def _pub_pad_none(self, target, axis, depth, clip):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
             return self.pad_none_axis0(target, clip)
         elif posaxis == depth + 1:
-            return self.project()._pad_none(target, posaxis, depth, clip)
+            return self.project()._pub_pad_none(target, posaxis, depth, clip)
         else:
             return ak.contents.IndexedArray(
                 self._index,
-                self._content._pad_none(target, posaxis, depth, clip),
+                self._content._pub_pad_none(target, posaxis, depth, clip),
                 parameters=self._parameters,
             )
 

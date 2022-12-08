@@ -296,7 +296,7 @@ class EmptyArray(Content):
     def _nbytes_part(self):
         return 0
 
-    def _pad_none(self, target, axis, depth, clip):
+    def _pub_pad_none(self, target, axis, depth, clip):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis != depth:
             raise ak._errors.wrap_error(
