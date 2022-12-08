@@ -902,7 +902,7 @@ class UnionArray(Content):
     def _mergeable_next(self, other, mergebool):
         return True
 
-    def merging_strategy(self, others):
+    def _merging_strategy(self, others):
         if len(others) == 0:
             raise ak._errors.wrap_error(
                 ValueError(
