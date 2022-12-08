@@ -99,7 +99,7 @@ class NumpyArray(Content):
     def dtype(self):
         return self._data.dtype
 
-    def raw(self, nplike):
+    def raw(self, nplike=None):
         return self._backend.nplike.raw(self.data, nplike)
 
     def _form_with_key(self, getkey):
