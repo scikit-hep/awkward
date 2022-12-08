@@ -184,60 +184,6 @@ class Content:
     def _forget_length(self) -> Self:
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def to_buffers(
-        self,
-        container: MutableMapping[str, Any] | None = None,
-        buffer_key="{form_key}-{attribute}",
-        form_key: str | None = "node{id}",
-        id_start: Integral = 0,
-        backend: Backend = None,
-    ) -> tuple[Form, int, Mapping[str, Any]]:
-        if container is None:
-            container = {}
-        if backend is None:
-            backend = self._backend
-        if not backend.nplike.known_data:
-            raise ak._errors.wrap_error(
-                TypeError("cannot call 'to_buffers' on an array without concrete data")
-            )
-
-        if isinstance(buffer_key, str):
-
-            def getkey(layout, form, attribute):
-                return buffer_key.format(form_key=form.form_key, attribute=attribute)
-
-        elif callable(buffer_key):
-
-            def getkey(layout, form, attribute):
-                return buffer_key(
-                    form_key=form.form_key,
-                    attribute=attribute,
-                    layout=layout,
-                    form=form,
-                )
-
-        else:
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "buffer_key must be a string or a callable, not {}".format(
-                        type(buffer_key)
-                    )
-                )
-            )
-
-        if form_key is None:
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "a 'form_key' must be supplied, to match Form elements to buffers in the 'container'"
-                )
-            )
-
-        form = self.form_with_key(form_key=form_key, id_start=id_start)
-
-        self._to_buffers(form, getkey, container, backend)
-
-        return form, len(self), container
-
     def _to_buffers(
         self,
         form: Form,
@@ -726,33 +672,6 @@ class Content:
         else:
             return None
 
-    def axis_wrap_if_negative(self, axis: AxisMaybeNone) -> AxisMaybeNone:
-        if axis is None or axis >= 0:
-            return axis
-
-        mindepth, maxdepth = self.minmax_depth
-        depth = self.purelist_depth
-        if mindepth == depth and maxdepth == depth:
-            posaxis = depth + axis
-            if posaxis < 0:
-                raise ak._errors.wrap_error(
-                    np.AxisError(
-                        f"axis={axis} exceeds the depth ({depth}) of this array"
-                    )
-                )
-            return posaxis
-
-        elif mindepth + axis == 0:
-            raise ak._errors.wrap_error(
-                np.AxisError(
-                    "axis={} exceeds the depth ({}) of at least one record field (or union possibility) of this array".format(
-                        axis, depth
-                    )
-                )
-            )
-
-        return axis
-
     def _local_index_axis0(self) -> ak.contents.NumpyArray:
         localindex = ak.index.Index64.empty(self.length, self._backend.index_nplike)
         self._handle_error(
@@ -765,11 +684,7 @@ class Content:
             localindex, parameters=None, backend=self._backend
         )
 
-    def merge(self, other: Content) -> Content:
-        others = [other]
-        return self.mergemany(others)
-
-    def mergeable(self, other: Content, mergebool: bool = True) -> bool:
+    def _mergeable(self, other: Content, mergebool: bool = True) -> bool:
         # Is the other content is an identity, or a union?
         if other.is_identity_like or other.is_union:
             return True
@@ -782,48 +697,13 @@ class Content:
             return False
         # Finally, fall back upon the per-content implementation
         else:
-            return self._mergeable(other, mergebool)
+            return self._mergeable_next(other, mergebool)
 
-    def _mergeable(self, other: Content, mergebool: bool) -> bool:
+    def _mergeable_next(self, other: Content, mergebool: bool) -> bool:
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def mergemany(self, others: list[Content]) -> Content:
+    def _mergemany(self, others: list[Content]) -> Content:
         raise ak._errors.wrap_error(NotImplementedError)
-
-    def merge_as_union(self, other: Content) -> ak.contents.UnionArray:
-        mylength = self.length
-        theirlength = other.length
-        tags = ak.index.Index8.empty(
-            (mylength + theirlength), self._backend.index_nplike
-        )
-        index = ak.index.Index64.empty(
-            (mylength + theirlength), self._backend.index_nplike
-        )
-        contents = [self, other]
-        assert tags.nplike is self._backend.index_nplike
-        self._handle_error(
-            self._backend["awkward_UnionArray_filltags_const", tags.dtype.type](
-                tags.data, 0, mylength, 0
-            )
-        )
-        assert index.nplike is self._backend.index_nplike
-        self._handle_error(
-            self._backend["awkward_UnionArray_fillindex_count", index.dtype.type](
-                index.data, 0, mylength
-            )
-        )
-        self._handle_error(
-            self._backend["awkward_UnionArray_filltags_const", tags.dtype.type](
-                tags.data, mylength, theirlength, 1
-            )
-        )
-        self._handle_error(
-            self._backend["awkward_UnionArray_fillindex_count", index.dtype.type](
-                index.data, mylength, theirlength
-            )
-        )
-
-        return ak.contents.UnionArray(tags, index, contents, parameters=None)
 
     def _merging_strategy(
         self, others: list[Content]
@@ -878,9 +758,6 @@ class Content:
             ]
 
         return (head, tail)
-
-    def local_index(self, axis: Integral):
-        return self._local_index(axis, 0)
 
     def _local_index(self, axis: Integral, depth: Integral):
         raise ak._errors.wrap_error(NotImplementedError)
@@ -1261,28 +1138,6 @@ class Content:
             contents, recordlookup, length, parameters=parameters, backend=self._backend
         )
 
-    def combinations(
-        self,
-        n: Integral,
-        replacement: bool = False,
-        axis: Integral = 1,
-        fields: list[str] | None = None,
-        parameters: dict | None = None,
-    ):
-        if n < 1:
-            raise ak._errors.wrap_error(
-                ValueError("in combinations, 'n' must be at least 1")
-            )
-
-        recordlookup = None
-        if fields is not None:
-            recordlookup = fields
-            if len(recordlookup) != n:
-                raise ak._errors.wrap_error(
-                    ValueError("if provided, the length of 'fields' must be 'n'")
-                )
-        return self._combinations(n, replacement, recordlookup, parameters, axis, 0)
-
     def _combinations(
         self,
         n: Integral,
@@ -1296,7 +1151,7 @@ class Content:
 
     def validity_error_parameters(self, path: str) -> str:
         if self.parameter("__array__") == "categorical":
-            if not self._content.is_unique():
+            if not ak._do.is_unique(self._content):
                 return 'at {} ("{}"): __array__ = "categorical" requires contents to be unique'.format(
                     path, type(self)
                 )
@@ -1318,12 +1173,6 @@ class Content:
     def purelist_parameter(self, key: str):
         return self.form_cls.purelist_parameter(self, key)
 
-    def is_unique(self, axis: Integral | None = None) -> bool:
-        negaxis = axis if axis is None else -axis
-        starts = ak.index.Index64.zeros(1, nplike=self._backend.index_nplike)
-        parents = ak.index.Index64.zeros(self.length, nplike=self._backend.index_nplike)
-        return self._is_unique(negaxis, starts, parents, 1)
-
     def _is_unique(
         self,
         negaxis: Integral | None,
@@ -1332,56 +1181,6 @@ class Content:
         outlength: Integral,
     ) -> bool:
         raise ak._errors.wrap_error(NotImplementedError)
-
-    def unique(self, axis=None):
-        if axis == -1 or axis is None:
-            negaxis = axis if axis is None else -axis
-            if negaxis is not None:
-                branch, depth = self.branch_depth
-                if branch:
-                    if negaxis <= 0:
-                        raise ak._errors.wrap_error(
-                            np.AxisError(
-                                "cannot use non-negative axis on a nested list structure "
-                                "of variable depth (negative axis counts from the leaves "
-                                "of the tree; non-negative from the root)"
-                            )
-                        )
-                    if negaxis > depth:
-                        raise ak._errors.wrap_error(
-                            np.AxisError(
-                                "cannot use axis={} on a nested list structure that splits into "
-                                "different depths, the minimum of which is depth={} from the leaves".format(
-                                    axis, depth
-                                )
-                            )
-                        )
-                else:
-                    if negaxis <= 0:
-                        negaxis = negaxis + depth
-                    if not (0 < negaxis and negaxis <= depth):
-                        raise ak._errors.wrap_error(
-                            np.AxisError(
-                                "axis={} exceeds the depth of this array ({})".format(
-                                    axis, depth
-                                )
-                            )
-                        )
-
-            starts = ak.index.Index64.zeros(1, nplike=self._backend.index_nplike)
-            parents = ak.index.Index64.zeros(
-                self.length, nplike=self._backend.index_nplike
-            )
-
-            return self._unique(negaxis, starts, parents, 1)
-
-        raise ak._errors.wrap_error(
-            np.AxisError(
-                "unique expects axis 'None' or '-1', got axis={} that is not supported yet".format(
-                    axis
-                )
-            )
-        )
 
     def _unique(
         self,
@@ -1424,7 +1223,7 @@ class Content:
     def dimension_optiontype(self) -> bool:
         return self.form_cls.dimension_optiontype.__get__(self)
 
-    def pad_none_axis0(self, target: Integral, clip: bool) -> Content:
+    def _pad_none_axis0(self, target: Integral, clip: bool) -> Content:
         if not clip and target < self.length:
             index = ak.index.Index64(
                 self._backend.index_nplike.arange(self.length, dtype=np.int64),
@@ -1445,9 +1244,6 @@ class Content:
         return ak.contents.IndexedOptionArray.simplified(
             index, self, parameters=self._parameters
         )
-
-    def pad_none(self, length: Integral, axis: Integral, clip: bool = False) -> Content:
-        return self._pad_none(length, axis, 0, clip)
 
     def _pad_none(
         self, target: Integral, axis: Integral, depth: Integral, clip: bool
@@ -1501,56 +1297,8 @@ class Content:
     def _to_numpy(self, allow_missing: bool):
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def completely_flatten(
-        self,
-        backend: ak._backends.Backend | None = None,
-        flatten_records: bool = True,
-        function_name: str | None = None,
-        drop_nones: bool = True,
-    ):
-        if backend is None:
-            backend = self._backend
-        arrays = self._completely_flatten(
-            backend,
-            {
-                "flatten_records": flatten_records,
-                "function_name": function_name,
-                "drop_nones": drop_nones,
-            },
-        )
-        return tuple(arrays)
-
     def _completely_flatten(self, backend, options):
         raise ak._errors.wrap_error(NotImplementedError)
-
-    def recursively_apply(
-        self,
-        action: ActionType,
-        behavior: dict | None = None,
-        depth_context: dict[str, Any] | None = None,
-        lateral_context: dict[str, Any] | None = None,
-        allow_records: bool = True,
-        keep_parameters: bool = True,
-        numpy_to_regular: bool = True,
-        return_simplified: bool = True,
-        return_array: bool = True,
-        function_name: str | None = None,
-    ) -> Content | None:
-        return self._recursively_apply(
-            action,
-            behavior,
-            1,
-            copy.copy(depth_context),
-            lateral_context,
-            {
-                "allow_records": allow_records,
-                "keep_parameters": keep_parameters,
-                "numpy_to_regular": numpy_to_regular,
-                "return_simplified": return_simplified,
-                "return_array": return_array,
-                "function_name": function_name,
-            },
-        )
 
     def _recursively_apply(
         self,
@@ -1712,10 +1460,6 @@ class Content:
 
             return out
 
-    def flatten(self, axis: Integral = 1, depth: Integral = 0) -> Content:
-        offsets, flattened = self._offsets_and_flattened(axis, depth)
-        return flattened
-
     def _offsets_and_flattened(
         self, axis: Integral, depth: Integral
     ) -> tuple[ak.index.Index, Content]:
@@ -1762,8 +1506,8 @@ class Content:
     def _repr(self, indent: str, pre: str, post: str) -> str:
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def numbers_to_type(self, name: str) -> Self:
+    def _numbers_to_type(self, name: str) -> Self:
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def fill_none(self, value: Content) -> Content:
+    def _fill_none(self, value: Content) -> Content:
         raise ak._errors.wrap_error(NotImplementedError)

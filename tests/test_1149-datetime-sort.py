@@ -47,8 +47,8 @@ def test_date_time_sort_argsort_unique():
         datetime.datetime(2020, 7, 27, 10, 41, 11),
     ]
     assert to_list(array.argsort()) == [1, 2, 0]
-    assert array.is_unique() is True
-    assert to_list(array.unique()) == [
+    assert ak._do.is_unique(array) is True
+    assert to_list(ak._do.unique(array)) == [
         datetime.datetime(2019, 1, 1, 0, 0),
         datetime.datetime(2020, 1, 1, 0, 0),
         datetime.datetime(2020, 7, 27, 10, 41, 11),
@@ -72,8 +72,8 @@ def test_time_delta_sort_argsort_unique():
         datetime.timedelta(days=41),
     ]
     assert to_list(array.argsort()) == [1, 2, 0]
-    assert array.is_unique() is True
-    assert to_list(array.unique()) == [
+    assert ak._do.is_unique(array) is True
+    assert to_list(ak._do.unique(array)) == [
         datetime.timedelta(days=1),
         datetime.timedelta(days=20),
         datetime.timedelta(days=41),

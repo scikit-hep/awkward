@@ -79,12 +79,6 @@ class EmptyArray(Content):
             out.append(post)
             return "".join(out)
 
-    def merge_parameters(self, parameters):
-        return EmptyArray(
-            parameters=ak._util.merge_parameters(self._parameters, parameters),
-            backend=self._backend,
-        )
-
     def to_NumpyArray(self, dtype, backend=None):
         backend = backend or self._backend
         return ak.contents.NumpyArray(
@@ -168,8 +162,8 @@ class EmptyArray(Content):
         else:
             raise ak._errors.wrap_error(AssertionError(repr(head)))
 
-    def num(self, axis, depth=0):
-        posaxis = self.axis_wrap_if_negative(axis)
+    def _num(self, axis, depth=0):
+        posaxis = ak._do.axis_wrap_if_negative(self, axis)
 
         if posaxis == depth:
             out = self.length
@@ -183,7 +177,7 @@ class EmptyArray(Content):
             return ak.contents.NumpyArray(out, parameters=None, backend=self._backend)
 
     def _offsets_and_flattened(self, axis, depth):
-        posaxis = self.axis_wrap_if_negative(axis)
+        posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:
             raise ak._errors.wrap_error(
                 np.AxisError(self, "axis=0 not allowed for flatten")
@@ -195,10 +189,10 @@ class EmptyArray(Content):
                 EmptyArray(parameters=self._parameters, backend=self._backend),
             )
 
-    def _mergeable(self, other, mergebool):
+    def _mergeable_next(self, other, mergebool):
         return True
 
-    def mergemany(self, others):
+    def _mergemany(self, others):
         if len(others) == 0:
             return self
 
@@ -207,9 +201,9 @@ class EmptyArray(Content):
 
         else:
             tail_others = others[1:]
-            return others[0].mergemany(tail_others)
+            return others[0]._mergemany(tail_others)
 
-    def fill_none(self, value: Content) -> Content:
+    def _fill_none(self, value: Content) -> Content:
         return EmptyArray(parameters=self._parameters, backend=self._backend)
 
     def _local_index(self, axis, depth):
@@ -219,7 +213,7 @@ class EmptyArray(Content):
             backend=self._backend,
         )
 
-    def numbers_to_type(self, name):
+    def _numbers_to_type(self, name):
         return ak.contents.EmptyArray(
             parameters=self._parameters, backend=self._backend
         )
@@ -297,13 +291,13 @@ class EmptyArray(Content):
         return 0
 
     def _pad_none(self, target, axis, depth, clip):
-        posaxis = self.axis_wrap_if_negative(axis)
+        posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis != depth:
             raise ak._errors.wrap_error(
                 np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
             )
         else:
-            return self.pad_none_axis0(target, True)
+            return self._pad_none_axis0(target, True)
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         if options["emptyarray_to"] is None:

@@ -14,6 +14,7 @@ import awkward.contents
 import awkward.record
 import awkward.types
 import awkward.forms
+import awkward._do
 import awkward._slicing
 import awkward._broadcasting
 

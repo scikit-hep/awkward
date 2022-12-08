@@ -13,26 +13,30 @@ def test_fillna_empty_array():
     value = ak.contents.NumpyArray(np.array([10]))
 
     assert to_list(empty) == []
-    array = empty.pad_none(5, 0)
+    array = ak._do.pad_none(empty, 5, 0)
     assert to_list(array) == [None, None, None, None, None]
-    assert to_list(array.fill_none(value)) == [10, 10, 10, 10, 10]
+    assert to_list(ak._do.fill_none(array, value)) == [10, 10, 10, 10, 10]
 
 
 def test_fillna_numpy_array():
     content = ak.contents.NumpyArray(np.array([[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]))
     value = ak.contents.NumpyArray(np.array([0]))
 
-    array = content.pad_none(3, 0)
+    array = ak._do.pad_none(content, 3, 0)
     assert to_list(array) == [[1.1, 2.2, 3.3], [4.4, 5.5, 6.6], None]
-    assert to_list(array.fill_none(value)) == [[1.1, 2.2, 3.3], [4.4, 5.5, 6.6], 0]
+    assert to_list(ak._do.fill_none(array, value)) == [
+        [1.1, 2.2, 3.3],
+        [4.4, 5.5, 6.6],
+        0,
+    ]
 
-    array = content.pad_none(5, 1)
+    array = ak._do.pad_none(content, 5, 1)
     assert to_list(array) == [
         [1.1, 2.2, 3.3, None, None],
         [4.4, 5.5, 6.6, None, None],
     ]
 
-    assert to_list(array.fill_none(value)) == [
+    assert to_list(ak._do.fill_none(array, value)) == [
         [1.1, 2.2, 3.3, 0, 0],
         [4.4, 5.5, 6.6, 0, 0],
     ]
@@ -73,7 +77,7 @@ def test_fillna_regular_array():
 
     assert to_list(regarray) == [[6.9, 3.9, 6.9], [2.2, 1.5, 1.6], [3.6, None, 6.7]]
 
-    assert to_list(regarray.fill_none(value)) == [
+    assert to_list(ak._do.fill_none(regarray, value)) == [
         [6.9, 3.9, 6.9],
         [2.2, 1.5, 1.6],
         [3.6, 666, 6.7],
@@ -97,7 +101,7 @@ def test_fillna_listarray_array():
         [8.8],
     ]
 
-    assert to_list(listarray.fill_none(value)) == [
+    assert to_list(ak._do.fill_none(listarray, value)) == [
         [0.0, 1.1, 2.2],
         [],
         [4.4, 5.5],
@@ -115,7 +119,7 @@ def test_fillna_unionarray():
 
     assert to_list(array) == [[], ["two", "two"], [1.1], ["one"], [2.2, 2.2], []]
 
-    padded_array = array.pad_none(2, 1)
+    padded_array = ak._do.pad_none(array, 2, 1)
     assert to_list(padded_array) == [
         [None, None],
         ["two", "two"],
@@ -126,7 +130,7 @@ def test_fillna_unionarray():
     ]
 
     value = ak.contents.NumpyArray(np.array([777]))
-    assert to_list(padded_array.fill_none(value)) == [
+    assert to_list(ak._do.fill_none(padded_array, value)) == [
         [777, 777],
         ["two", "two"],
         [1.1, 777],

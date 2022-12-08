@@ -103,7 +103,7 @@ def _impl(array, axis, keepdims, mask_identity, flatten_records):
                     out = ak.highlevel.Array(ak.operations.fill_none(out, 0, axis=-1))
 
                 if not keepdims:
-                    posaxis = out.layout.axis_wrap_if_negative(axis)
+                    posaxis = ak._do.axis_wrap_if_negative(out.layout, axis)
                     out = out[(slice(None, None),) * posaxis + (0,)]
 
         return out

@@ -108,7 +108,7 @@ def _impl(array, value, axis, highlevel, behavior):
 
     def maybe_fillna(layout):
         if layout.is_option:
-            return layout.fill_none(valuelayout)
+            return ak._do.fill_none(layout, valuelayout)
         else:
             return layout
 
@@ -120,7 +120,7 @@ def _impl(array, value, axis, highlevel, behavior):
     else:
 
         def action(layout, depth, depth_context, **kwargs):
-            posaxis = layout.axis_wrap_if_negative(depth_context["posaxis"])
+            posaxis = ak._do.axis_wrap_if_negative(layout, depth_context["posaxis"])
             depth_context["posaxis"] = posaxis
             if posaxis + 1 < depth:
                 return layout
@@ -128,6 +128,8 @@ def _impl(array, value, axis, highlevel, behavior):
                 return maybe_fillna(layout)
 
     depth_context = {"posaxis": axis}
-    out = arraylayout.recursively_apply(action, behavior, depth_context=depth_context)
+    out = ak._do.recursively_apply(
+        arraylayout, action, behavior, depth_context=depth_context
+    )
 
     return ak._util.wrap(out, behavior, highlevel)

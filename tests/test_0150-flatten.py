@@ -444,7 +444,7 @@ def test_flatten2():
         [5.5],
         [6.6, 7.7, 8.8, 9.9],
     ]
-    assert to_list(array.flatten(axis=1)) == [
+    assert to_list(ak._do.flatten(array, axis=1)) == [
         0.0,
         1.1,
         2.2,
@@ -456,7 +456,7 @@ def test_flatten2():
         8.8,
         9.9,
     ]
-    assert to_list(array.flatten(axis=-1)) == [
+    assert to_list(ak._do.flatten(array, axis=-1)) == [
         0.0,
         1.1,
         2.2,
@@ -469,12 +469,12 @@ def test_flatten2():
         9.9,
     ]
     with pytest.raises(ValueError) as err:
-        assert to_list(array.flatten(axis=-2))
+        assert to_list(ak._do.flatten(array, axis=-2))
         assert str(err.value).startswith("axis=0 not allowed for flatten")
 
     array2 = array[2:-1]
-    assert to_list(array2.flatten(axis=1)) == [3.3, 4.4, 5.5]
-    assert to_list(array2.flatten(axis=-1)) == [3.3, 4.4, 5.5]
+    assert to_list(ak._do.flatten(array2, axis=1)) == [3.3, 4.4, 5.5]
+    assert to_list(ak._do.flatten(array2, axis=-1)) == [3.3, 4.4, 5.5]
 
 
 def test_ByteMaskedArray_flatten():

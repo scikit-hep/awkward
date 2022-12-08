@@ -192,14 +192,6 @@ class ByteMaskedArray(Content):
         out.append(post)
         return "".join(out)
 
-    def merge_parameters(self, parameters):
-        return ByteMaskedArray(
-            self._mask,
-            self._content,
-            self._valid_when,
-            parameters=ak._util.merge_parameters(self._parameters, parameters),
-        )
-
     def to_IndexedOptionArray64(self):
         index = ak.index.Index64.empty(
             self._mask.length, nplike=self._backend.index_nplike
@@ -564,8 +556,8 @@ class ByteMaskedArray(Content):
 
             return self._content._carry(nextcarry, False)
 
-    def num(self, axis, depth=0):
-        posaxis = self.axis_wrap_if_negative(axis)
+    def _num(self, axis, depth=0):
+        posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:
             out = self.length
             if ak._util.is_integer(out):
@@ -576,14 +568,14 @@ class ByteMaskedArray(Content):
             _, nextcarry, outindex = self._nextcarry_outindex(self._backend)
 
             next = self._content._carry(nextcarry, False)
-            out = next.num(posaxis, depth)
+            out = next._num(posaxis, depth)
 
             return ak.contents.IndexedOptionArray.simplified(
                 outindex, out, parameters=self.parameters
             )
 
     def _offsets_and_flattened(self, axis, depth):
-        posaxis = self.axis_wrap_if_negative(axis)
+        posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:
             raise ak._errors.wrap_error(np.AxisError("axis=0 not allowed for flatten"))
         else:
@@ -629,7 +621,7 @@ class ByteMaskedArray(Content):
                 )
                 return (outoffsets, flattened)
 
-    def _mergeable(self, other, mergebool):
+    def _mergeable_next(self, other, mergebool):
         if isinstance(
             other,
             (
@@ -640,15 +632,15 @@ class ByteMaskedArray(Content):
                 ak.contents.UnmaskedArray,
             ),
         ):
-            return self._content.mergeable(other.content, mergebool)
+            return self._content._mergeable(other.content, mergebool)
 
         else:
-            return self._content.mergeable(other, mergebool)
+            return self._content._mergeable(other, mergebool)
 
     def _reverse_merge(self, other):
         return self.to_IndexedOptionArray64()._reverse_merge(other)
 
-    def mergemany(self, others):
+    def _mergemany(self, others):
         if len(others) == 0:
             return self
 
@@ -668,19 +660,19 @@ class ByteMaskedArray(Content):
 
             return ByteMaskedArray(
                 ak.index.Index8(self._backend.nplike.concatenate(masks)),
-                self._content[: self.length].mergemany(tail_contents),
+                self._content[: self.length]._mergemany(tail_contents),
                 self._valid_when,
                 parameters=parameters,
             )
 
         else:
-            return self.to_IndexedOptionArray64().mergemany(others)
+            return self.to_IndexedOptionArray64()._mergemany(others)
 
-    def fill_none(self, value: Content) -> Content:
-        return self.to_IndexedOptionArray64().fill_none(value)
+    def _fill_none(self, value: Content) -> Content:
+        return self.to_IndexedOptionArray64()._fill_none(value)
 
     def _local_index(self, axis, depth):
-        posaxis = self.axis_wrap_if_negative(axis)
+        posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:
             return self._local_index_axis0()
         else:
@@ -692,10 +684,10 @@ class ByteMaskedArray(Content):
                 outindex, out, parameters=self._parameters
             )
 
-    def numbers_to_type(self, name):
+    def _numbers_to_type(self, name):
         return ak.contents.ByteMaskedArray(
             self._mask,
-            self._content.numbers_to_type(name),
+            self._content._numbers_to_type(name),
             self._valid_when,
             parameters=self._parameters,
         )
@@ -757,7 +749,7 @@ class ByteMaskedArray(Content):
             raise ak._errors.wrap_error(
                 ValueError("in combinations, 'n' must be at least 1")
             )
-        posaxis = self.axis_wrap_if_negative(axis)
+        posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         else:
@@ -946,9 +938,9 @@ class ByteMaskedArray(Content):
         return self.mask._nbytes_part() + self.content._nbytes_part()
 
     def _pad_none(self, target, axis, depth, clip):
-        posaxis = self.axis_wrap_if_negative(axis)
+        posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:
-            return self.pad_none_axis0(target, clip)
+            return self._pad_none_axis0(target, clip)
         elif posaxis == depth + 1:
             mask = ak.index.Index8(self.mask_as_bool(valid_when=False))
             index = ak.index.Index64.empty(

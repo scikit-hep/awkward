@@ -170,13 +170,6 @@ class IndexedOptionArray(Content):
         out.append(post)
         return "".join(out)
 
-    def merge_parameters(self, parameters):
-        return IndexedOptionArray(
-            self._index,
-            self._content,
-            parameters=ak._util.merge_parameters(self._parameters, parameters),
-        )
-
     def to_IndexedOptionArray64(self):
         if self._index.dtype == np.dtype(np.int64):
             return self
@@ -488,8 +481,8 @@ class IndexedOptionArray(Content):
 
             return self._content._carry(nextcarry, False)
 
-    def num(self, axis, depth=0):
-        posaxis = self.axis_wrap_if_negative(axis)
+    def _num(self, axis, depth=0):
+        posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:
             out = self.length
             if ak._util.is_integer(out):
@@ -498,13 +491,13 @@ class IndexedOptionArray(Content):
                 return out
         _, nextcarry, outindex = self._nextcarry_outindex(self._backend)
         next = self._content._carry(nextcarry, False)
-        out = next.num(posaxis, depth)
+        out = next._num(posaxis, depth)
         return ak.contents.IndexedOptionArray.simplified(
             outindex, out, parameters=self.parameters
         )
 
     def _offsets_and_flattened(self, axis, depth):
-        posaxis = self.axis_wrap_if_negative(axis)
+        posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:
             raise ak._errors.wrap_error(np.AxisError("axis=0 not allowed for flatten"))
         else:
@@ -549,7 +542,7 @@ class IndexedOptionArray(Content):
                 )
                 return (outoffsets, flattened)
 
-    def _mergeable(self, other, mergebool):
+    def _mergeable_next(self, other, mergebool):
         if isinstance(
             other,
             (
@@ -560,10 +553,10 @@ class IndexedOptionArray(Content):
                 ak.contents.UnmaskedArray,
             ),
         ):
-            return self._content.mergeable(other.content, mergebool)
+            return self._content._mergeable(other.content, mergebool)
 
         else:
-            return self._content.mergeable(other, mergebool)
+            return self._content._mergeable(other, mergebool)
 
     def _merging_strategy(self, others):
         if len(others) == 0:
@@ -614,7 +607,7 @@ class IndexedOptionArray(Content):
             (theirlength + mylength), self._backend.index_nplike
         )
 
-        content = other.merge(self._content)
+        content = other._mergemany([self._content])
 
         assert index.nplike is self._backend.index_nplike
         self._handle_error(
@@ -653,7 +646,7 @@ class IndexedOptionArray(Content):
             index, content, parameters=parameters
         )
 
-    def mergemany(self, others):
+    def _mergemany(self, others):
         if len(others) == 0:
             return self
 
@@ -725,7 +718,7 @@ class IndexedOptionArray(Content):
                 length_so_far += array.length
 
         tail_contents = contents[1:]
-        nextcontent = contents[0].mergemany(tail_contents)
+        nextcontent = contents[0]._mergemany(tail_contents)
         next = ak.contents.IndexedOptionArray(
             nextindex, nextcontent, parameters=parameters
         )
@@ -737,15 +730,9 @@ class IndexedOptionArray(Content):
         if len(tail) == 1:
             return reversed
         else:
-            return reversed.mergemany(tail[1:])
+            return reversed._mergemany(tail[1:])
 
-        raise ak._errors.wrap_error(
-            NotImplementedError(
-                "not implemented: " + type(self).__name__ + " ::mergemany"
-            )
-        )
-
-    def fill_none(self, value: Content) -> Content:
+    def _fill_none(self, value: Content) -> Content:
         if value.backend.nplike.known_shape and value.length != 1:
             raise ak._errors.wrap_error(
                 ValueError(f"fill_none value length ({value.length}) is not equal to 1")
@@ -774,7 +761,7 @@ class IndexedOptionArray(Content):
         )
 
     def _local_index(self, axis, depth):
-        posaxis = self.axis_wrap_if_negative(axis)
+        posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:
             return self._local_index_axis0()
         else:
@@ -853,10 +840,10 @@ class IndexedOptionArray(Content):
                 nextstarts, nextstops, nextstarts.length, False
             )
 
-    def numbers_to_type(self, name):
+    def _numbers_to_type(self, name):
         return ak.contents.IndexedOptionArray(
             self._index,
-            self._content.numbers_to_type(name),
+            self._content._numbers_to_type(name),
             parameters=self._parameters,
         )
 
@@ -1166,8 +1153,8 @@ class IndexedOptionArray(Content):
         nulls_index_content = ak.contents.NumpyArray(
             nulls_index, parameters=None, backend=self._backend
         )
-        if out.mergeable(nulls_index_content, True):
-            out = out.merge(nulls_index_content)
+        if out._mergeable(nulls_index_content, True):
+            out = out._mergemany([nulls_index_content])
             nulls_merged = True
 
         nextoutindex = ak.index.Index64.empty(
@@ -1395,7 +1382,7 @@ class IndexedOptionArray(Content):
             )
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
-        posaxis = self.axis_wrap_if_negative(axis)
+        posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         else:
@@ -1430,9 +1417,9 @@ class IndexedOptionArray(Content):
         return self.index._nbytes_part() + self.content._nbytes_part()
 
     def _pad_none(self, target, axis, depth, clip):
-        posaxis = self.axis_wrap_if_negative(axis)
+        posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:
-            return self.pad_none_axis0(target, clip)
+            return self._pad_none_axis0(target, clip)
         elif posaxis == depth + 1:
             mask = ak.index.Index8(self.mask_as_bool(valid_when=False))
             index = ak.index.Index64.empty(mask.length, self._backend.index_nplike)

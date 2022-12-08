@@ -29,33 +29,33 @@ def test_bytemaskedarray_num():
         None,
         [[], [10.0, 11.1, 12.2]],
     ]
-    assert array.num(axis=0) == 5
-    assert array.num(axis=-3) == 5
-    assert to_list(array.num(axis=1)) == [3, 0, None, None, 2]
-    assert to_list(array.num(axis=-2)) == [3, 0, None, None, 2]
-    assert to_list(array.num(axis=2)) == [[3, 0, 2], [], None, None, [0, 3]]
-    assert to_list(array.num(axis=-1)) == [[3, 0, 2], [], None, None, [0, 3]]
+    assert ak._do.num(array, axis=0) == 5
+    assert ak._do.num(array, axis=-3) == 5
+    assert to_list(ak._do.num(array, axis=1)) == [3, 0, None, None, 2]
+    assert to_list(ak._do.num(array, axis=-2)) == [3, 0, None, None, 2]
+    assert to_list(ak._do.num(array, axis=2)) == [[3, 0, 2], [], None, None, [0, 3]]
+    assert to_list(ak._do.num(array, axis=-1)) == [[3, 0, 2], [], None, None, [0, 3]]
 
 
 def test_emptyarray():
     array = ak.contents.EmptyArray()
-    assert to_list(array.num(0)) == 0
-    assert to_list(array.num(1)) == []
-    assert to_list(array.num(2)) == []
+    assert to_list(ak._do.num(array, 0)) == 0
+    assert to_list(ak._do.num(array, 1)) == []
+    assert to_list(ak._do.num(array, 2)) == []
 
 
 def test_numpyarray():
     array = ak.contents.NumpyArray(np.arange(2 * 3 * 5 * 7).reshape(2, 3, 5, 7))
 
-    assert array.num(0) == 2
-    assert to_list(array.num(1)) == [3, 3]
-    assert to_list(array.num(axis=2)) == [[5, 5, 5], [5, 5, 5]]
-    assert to_list(array.num(3)) == [
+    assert ak._do.num(array, 0) == 2
+    assert to_list(ak._do.num(array, 1)) == [3, 3]
+    assert to_list(ak._do.num(array, axis=2)) == [[5, 5, 5], [5, 5, 5]]
+    assert to_list(ak._do.num(array, 3)) == [
         [[7, 7, 7, 7, 7], [7, 7, 7, 7, 7], [7, 7, 7, 7, 7]],
         [[7, 7, 7, 7, 7], [7, 7, 7, 7, 7], [7, 7, 7, 7, 7]],
     ]
     with pytest.raises(ValueError) as err:
-        array.num(4)
+        ak._do.num(array, 4)
     assert str(err.value).startswith("axis=4 exceeds the depth of this array (3)")
 
 
@@ -64,24 +64,24 @@ def test_regulararray():
         np.arange(2 * 3 * 5 * 7).reshape(2, 3, 5, 7)
     ).to_RegularArray()
 
-    assert array.num(0) == 2
-    assert to_list(array.num(1)) == [3, 3]
-    assert to_list(array.num(2)) == [[5, 5, 5], [5, 5, 5]]
-    assert to_list(array.num(3)) == [
+    assert ak._do.num(array, 0) == 2
+    assert to_list(ak._do.num(array, 1)) == [3, 3]
+    assert to_list(ak._do.num(array, 2)) == [[5, 5, 5], [5, 5, 5]]
+    assert to_list(ak._do.num(array, 3)) == [
         [[7, 7, 7, 7, 7], [7, 7, 7, 7, 7], [7, 7, 7, 7, 7]],
         [[7, 7, 7, 7, 7], [7, 7, 7, 7, 7], [7, 7, 7, 7, 7]],
     ]
     with pytest.raises(ValueError) as err:
-        array.num(4)
+        ak._do.num(array, 4)
     assert str(err.value).startswith("axis=4 exceeds the depth of this array (3)")
 
     empty = ak.contents.RegularArray(
         ak.highlevel.Array([[1, 2, 3], [], [4, 5]]).layout, 0, zeros_length=0
     )
 
-    assert empty.num(axis=0) == 0
-    assert to_list(empty.num(axis=1)) == []
-    assert to_list(empty.num(axis=2)) == []
+    assert ak._do.num(empty, axis=0) == 0
+    assert to_list(ak._do.num(empty, axis=1)) == []
+    assert to_list(ak._do.num(empty, axis=2)) == []
 
 
 def test_listarray():
@@ -100,16 +100,16 @@ def test_listarray():
         [[[18, 19], [20, 21], [22, 23]], [[24, 25], [26, 27], [28, 29]]],
     ]
 
-    assert to_list(array.num(0)) == 3
-    assert to_list(array.num(1)) == [3, 0, 2]
-    assert to_list(array.num(2)) == [[3, 3, 3], [], [3, 3]]
-    assert to_list(array.num(3)) == [
+    assert to_list(ak._do.num(array, 0)) == 3
+    assert to_list(ak._do.num(array, 1)) == [3, 0, 2]
+    assert to_list(ak._do.num(array, 2)) == [[3, 3, 3], [], [3, 3]]
+    assert to_list(ak._do.num(array, 3)) == [
         [[2, 2, 2], [2, 2, 2], [2, 2, 2]],
         [],
         [[2, 2, 2], [2, 2, 2]],
     ]
     with pytest.raises(ValueError) as err:
-        array.num(4)
+        ak._do.num(array, 4)
     assert str(err.value).startswith("axis=4 exceeds the depth of this array (3)")
 
 
@@ -128,16 +128,16 @@ def test_listoffsetarray():
         [[[18, 19], [20, 21], [22, 23]], [[24, 25], [26, 27], [28, 29]]],
     ]
 
-    assert to_list(array.num(0)) == 3
-    assert to_list(array.num(1)) == [3, 0, 2]
-    assert to_list(array.num(2)) == [[3, 3, 3], [], [3, 3]]
-    assert to_list(array.num(3)) == [
+    assert to_list(ak._do.num(array, 0)) == 3
+    assert to_list(ak._do.num(array, 1)) == [3, 0, 2]
+    assert to_list(ak._do.num(array, 2)) == [[3, 3, 3], [], [3, 3]]
+    assert to_list(ak._do.num(array, 3)) == [
         [[2, 2, 2], [2, 2, 2], [2, 2, 2]],
         [],
         [[2, 2, 2], [2, 2, 2]],
     ]
     with pytest.raises(ValueError) as err:
-        array.num(4)
+        ak._do.num(array, 4)
     assert str(err.value).startswith("axis=4 exceeds the depth of this array (3)")
 
 
@@ -159,10 +159,10 @@ def test_indexedarray():
         ],
     ]
 
-    assert to_list(array.num(0)) == 4
-    assert to_list(array.num(1)) == [2, 2, 0, 3]
-    assert to_list(array.num(2)) == [[3, 3], [3, 3], [], [3, 3, 3]]
-    assert to_list(array.num(3)) == [
+    assert to_list(ak._do.num(array, 0)) == 4
+    assert to_list(ak._do.num(array, 1)) == [2, 2, 0, 3]
+    assert to_list(ak._do.num(array, 2)) == [[3, 3], [3, 3], [], [3, 3, 3]]
+    assert to_list(ak._do.num(array, 3)) == [
         [[2, 2, 2], [2, 2, 2]],
         [[2, 2, 2], [2, 2, 2]],
         [],
@@ -170,7 +170,7 @@ def test_indexedarray():
     ]
 
     with pytest.raises(ValueError) as err:
-        array.num(4)
+        ak._do.num(array, 4)
     assert str(err.value).startswith("axis=4 exceeds the depth of this array (3)")
 
 
@@ -194,10 +194,10 @@ def test_indexedoptionarray():
         ],
     ]
 
-    assert to_list(array.num(0)) == 6
-    assert to_list(array.num(1)) == [2, None, 2, 0, None, 3]
-    assert to_list(array.num(2)) == [[3, 3], None, [3, 3], [], None, [3, 3, 3]]
-    assert to_list(array.num(3)) == [
+    assert to_list(ak._do.num(array, 0)) == 6
+    assert to_list(ak._do.num(array, 1)) == [2, None, 2, 0, None, 3]
+    assert to_list(ak._do.num(array, 2)) == [[3, 3], None, [3, 3], [], None, [3, 3, 3]]
+    assert to_list(ak._do.num(array, 3)) == [
         [[2, 2, 2], [2, 2, 2]],
         None,
         [[2, 2, 2], [2, 2, 2]],
@@ -207,7 +207,7 @@ def test_indexedoptionarray():
     ]
 
     with pytest.raises(ValueError) as err:
-        array.num(4)
+        ak._do.num(array, 4)
     assert str(err.value).startswith("axis=4 exceeds the depth of this array (3)")
 
 
@@ -222,7 +222,7 @@ def test_recordarray():
         highlevel=False,
     )
 
-    assert to_list(array.num(0)) == {"x": 4, "y": 4}
+    assert to_list(ak._do.num(array, 0)) == {"x": 4, "y": 4}
 
     array = ak.operations.from_iter(
         [
@@ -234,14 +234,14 @@ def test_recordarray():
         highlevel=False,
     )
 
-    assert to_list(array.num(0)) == {"x": 4, "y": 4}
-    assert to_list(array.num(1)) == [
+    assert to_list(ak._do.num(array, 0)) == {"x": 4, "y": 4}
+    assert to_list(ak._do.num(array, 1)) == [
         {"x": 3, "y": 0},
         {"x": 2, "y": 1},
         {"x": 1, "y": 2},
         {"x": 0, "y": 3},
     ]
-    assert to_list(array.num(1)[2]) == {"x": 1, "y": 2}
+    assert to_list(ak._do.num(array, 1)[2]) == {"x": 1, "y": 2}
 
     array = ak.operations.from_iter(
         [
@@ -253,14 +253,14 @@ def test_recordarray():
         highlevel=False,
     )
 
-    assert to_list(array.num(0)) == {"x": 4, "y": 4}
-    assert to_list(array.num(1)) == [
+    assert to_list(ak._do.num(array, 0)) == {"x": 4, "y": 4}
+    assert to_list(ak._do.num(array, 1)) == [
         {"x": 1, "y": 0},
         {"x": 1, "y": 1},
         {"x": 1, "y": 2},
         {"x": 1, "y": 3},
     ]
-    assert to_list(array.num(1)[2]) == {"x": 1, "y": 2}
+    assert to_list(ak._do.num(array, 1)[2]) == {"x": 1, "y": 2}
 
 
 def test_unionarray():
@@ -284,9 +284,9 @@ def test_unionarray():
         [],
     ]
 
-    assert array.num(0) == 8
-    assert isinstance(array.num(1), ak.contents.NumpyArray)
-    assert to_list(array.num(1)) == [0, 3, 1, 2, 2, 1, 3, 0]
+    assert ak._do.num(array, 0) == 8
+    assert isinstance(ak._do.num(array, 1), ak.contents.NumpyArray)
+    assert to_list(ak._do.num(array, 1)) == [0, 3, 1, 2, 2, 1, 3, 0]
 
 
 def test_highlevel():
@@ -302,25 +302,25 @@ def test_array_3d():
         [[10, 11], [12, 13], [14, 15], [16, 17], [18, 19]],
         [[20, 21], [22, 23], [24, 25], [26, 27], [28, 29]],
     ]
-    assert array.num(axis=0) == 3
-    assert to_list(array.num(axis=1)) == [5, 5, 5]
-    assert to_list(array.num(axis=2)) == [
+    assert ak._do.num(array, axis=0) == 3
+    assert to_list(ak._do.num(array, axis=1)) == [5, 5, 5]
+    assert to_list(ak._do.num(array, axis=2)) == [
         [2, 2, 2, 2, 2],
         [2, 2, 2, 2, 2],
         [2, 2, 2, 2, 2],
     ]
     with pytest.raises(ValueError) as err:
-        assert array.num(axis=3)
+        assert ak._do.num(array, axis=3)
         assert str(err.value).startswith("axis=3 exceeds the depth of this array (2)")
 
-    assert to_list(array.num(axis=-1)) == [
+    assert to_list(ak._do.num(array, axis=-1)) == [
         [2, 2, 2, 2, 2],
         [2, 2, 2, 2, 2],
         [2, 2, 2, 2, 2],
     ]
-    assert to_list(array.num(axis=-2)) == [5, 5, 5]
-    assert array.num(axis=-3) == 3
+    assert to_list(ak._do.num(array, axis=-2)) == [5, 5, 5]
+    assert ak._do.num(array, axis=-3) == 3
 
     with pytest.raises(ValueError) as err:
-        assert array.num(axis=-4)
+        assert ak._do.num(array, axis=-4)
         assert str(err.value).startswith("axis=-4 exceeds the depth of this array (3)")

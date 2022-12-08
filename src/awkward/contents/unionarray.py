@@ -77,7 +77,7 @@ class UnionArray(Content):
                 )
 
         for content in contents[1:]:
-            if contents[0].mergeable(content, mergebool=False):
+            if contents[0]._mergeable(content, mergebool=False):
                 raise ak._errors.wrap_error(
                     TypeError(
                         "{0} cannot contain mergeable 'contents' ({1} of {2} and {3} of {4}); try {0}.simplified instead".format(
@@ -215,7 +215,7 @@ class UnionArray(Content):
                 for j, inner_cont in enumerate(innercontents):
                     unmerged = True
                     for k in range(len(contents)):
-                        if merge and contents[k].mergeable(inner_cont, mergebool):
+                        if merge and contents[k]._mergeable(inner_cont, mergebool):
                             Content._selfless_handle_error(
                                 backend[
                                     "awkward_UnionArray_simplify",
@@ -242,7 +242,7 @@ class UnionArray(Content):
                             old_parameters = contents[k]._parameters
                             contents[k] = (
                                 contents[k]
-                                .merge(inner_cont)
+                                ._mergemany([inner_cont])
                                 .copy(
                                     parameters=ak._util.merge_parameters(
                                         old_parameters, inner_cont._parameters
@@ -303,7 +303,7 @@ class UnionArray(Content):
                         unmerged = False
                         break
 
-                    elif merge and contents[k].mergeable(self_cont, mergebool):
+                    elif merge and contents[k]._mergeable(self_cont, mergebool):
                         Content._selfless_handle_error(
                             backend[
                                 "awkward_UnionArray_simplify_one",
@@ -325,7 +325,7 @@ class UnionArray(Content):
                         old_parameters = contents[k]._parameters
                         contents[k] = (
                             contents[k]
-                            .merge(self_cont)
+                            ._mergemany([self_cont])
                             .copy(
                                 parameters=ak._util.merge_parameters(
                                     old_parameters, self_cont._parameters
@@ -441,14 +441,6 @@ class UnionArray(Content):
         out.append(indent + "</UnionArray>")
         out.append(post)
         return "".join(out)
-
-    def merge_parameters(self, parameters):
-        return UnionArray(
-            self._tags,
-            self._index,
-            self._contents,
-            parameters=ak._util.merge_parameters(self._parameters, parameters),
-        )
 
     def _getitem_nothing(self):
         return self._getitem_range(slice(0, 0))
@@ -775,8 +767,8 @@ class UnionArray(Content):
         else:
             raise ak._errors.wrap_error(AssertionError(repr(head)))
 
-    def num(self, axis, depth=0):
-        posaxis = self.axis_wrap_if_negative(axis)
+    def _num(self, axis, depth=0):
+        posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:
             out = self.length
             if ak._util.is_integer(out):
@@ -786,7 +778,7 @@ class UnionArray(Content):
         else:
             contents = []
             for content in self._contents:
-                contents.append(content.num(posaxis, depth))
+                contents.append(content._num(posaxis, depth))
             return UnionArray.simplified(
                 self._tags,
                 self._index,
@@ -795,7 +787,7 @@ class UnionArray(Content):
             )
 
     def _offsets_and_flattened(self, axis, depth):
-        posaxis = self.axis_wrap_if_negative(axis)
+        posaxis = ak._do.axis_wrap_if_negative(self, axis)
 
         if posaxis == depth:
             raise ak._errors.wrap_error(np.AxisError("axis=0 not allowed for flatten"))
@@ -907,10 +899,10 @@ class UnionArray(Content):
                     ),
                 )
 
-    def _mergeable(self, other, mergebool):
+    def _mergeable_next(self, other, mergebool):
         return True
 
-    def merging_strategy(self, others):
+    def _merging_strategy(self, others):
         if len(others) == 0:
             raise ak._errors.wrap_error(
                 ValueError(
@@ -1025,7 +1017,7 @@ class UnionArray(Content):
             tags, index, contents, parameters=parameters
         )
 
-    def mergemany(self, others):
+    def _mergemany(self, others):
         if len(others) == 0:
             return self
 
@@ -1134,12 +1126,12 @@ class UnionArray(Content):
         if len(tail) == 1:
             return reversed
         else:
-            return reversed.mergemany(tail[1:])
+            return reversed._mergemany(tail[1:])
 
-    def fill_none(self, value: Content) -> Content:
+    def _fill_none(self, value: Content) -> Content:
         contents = []
         for content in self._contents:
-            contents.append(content.fill_none(value))
+            contents.append(content._fill_none(value))
         return UnionArray.simplified(
             self._tags,
             self._index,
@@ -1148,7 +1140,7 @@ class UnionArray(Content):
         )
 
     def _local_index(self, axis, depth):
-        posaxis = self.axis_wrap_if_negative(axis)
+        posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:
             return self._local_index_axis0()
         else:
@@ -1163,7 +1155,7 @@ class UnionArray(Content):
             )
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
-        posaxis = self.axis_wrap_if_negative(axis)
+        posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         else:
@@ -1181,10 +1173,10 @@ class UnionArray(Content):
                 parameters=self._parameters,
             )
 
-    def numbers_to_type(self, name):
+    def _numbers_to_type(self, name):
         contents = []
         for x in self._contents:
-            contents.append(x.numbers_to_type(name))
+            contents.append(x._numbers_to_type(name))
         return ak.contents.UnionArray(
             self._tags,
             self._index,
@@ -1380,9 +1372,9 @@ class UnionArray(Content):
         return result
 
     def _pad_none(self, target, axis, depth, clip):
-        posaxis = self.axis_wrap_if_negative(axis)
+        posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:
-            return self.pad_none_axis0(target, clip)
+            return self._pad_none_axis0(target, clip)
         else:
             contents = []
             for content in self._contents:

@@ -165,16 +165,16 @@ def _impl(array, axis, highlevel, behavior):
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
 
     if axis is None:
-        out = layout.completely_flatten(function_name="ak.flatten")
+        out = ak._do.completely_flatten(layout, function_name="ak.flatten")
         assert isinstance(out, tuple) and all(
             isinstance(x, ak.contents.NumpyArray) for x in out
         )
 
-        result = out[0].mergemany(out[1:])
+        result = ak._do.mergemany(out)
 
         return ak._util.wrap(result, behavior, highlevel)
 
-    elif axis == 0 or layout.axis_wrap_if_negative(axis) == 0:
+    elif axis == 0 or ak._do.axis_wrap_if_negative(layout, axis) == 0:
 
         def apply(layout):
             backend = layout.backend
@@ -225,5 +225,5 @@ def _impl(array, axis, highlevel, behavior):
         return ak._util.wrap(out, behavior, highlevel, like=array)
 
     else:
-        out = layout.flatten(axis)
+        out = ak._do.flatten(layout, axis)
         return ak._util.wrap(out, behavior, highlevel, like=array)

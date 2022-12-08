@@ -100,7 +100,7 @@ def _impl(array, highlevel, behavior):
                 cls = ak.contents.IndexedArray
 
             content_list = ak.operations.to_list(content)
-            hashable = [ak.behaviors.categorical.as_hashable(x) for x in content_list]
+            hashable = [ak.behaviors.categorical._as_hashable(x) for x in content_list]
 
             lookup = {}
             is_first = ak._nplikes.numpy.empty(len(hashable), dtype=np.bool_)
@@ -140,5 +140,5 @@ def _impl(array, highlevel, behavior):
 
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
     behavior = ak._util.behavior_of(array, behavior=behavior)
-    out = layout.recursively_apply(action, behavior)
+    out = ak._do.recursively_apply(layout, action, behavior)
     return ak._util.wrap(out, behavior, highlevel)

@@ -158,13 +158,6 @@ class ListOffsetArray(Content):
         out.append(post)
         return "".join(out)
 
-    def merge_parameters(self, parameters):
-        return ListOffsetArray(
-            self._offsets,
-            self._content,
-            parameters=ak._util.merge_parameters(self._parameters, parameters),
-        )
-
     def to_ListOffsetArray64(self, start_at_zero=False):
         if issubclass(self._offsets.dtype.type, np.int64):
             if (
@@ -614,8 +607,8 @@ class ListOffsetArray(Content):
         else:
             raise ak._errors.wrap_error(AssertionError(repr(head)))
 
-    def num(self, axis, depth=0):
-        posaxis = self.axis_wrap_if_negative(axis)
+    def _num(self, axis, depth=0):
+        posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:
             out = self.length
             if ak._util.is_integer(out):
@@ -644,14 +637,14 @@ class ListOffsetArray(Content):
             )
             return ak.contents.NumpyArray(tonum, parameters=None, backend=self._backend)
         else:
-            next = self._content.num(posaxis, depth + 1)
+            next = self._content._num(posaxis, depth + 1)
             offsets = self._compact_offsets64(True)
             return ak.contents.ListOffsetArray(
                 offsets, next, parameters=self.parameters
             )
 
     def _offsets_and_flattened(self, axis, depth):
-        posaxis = self.axis_wrap_if_negative(axis)
+        posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:
             raise ak._errors.wrap_error(np.AxisError("axis=0 not allowed for flatten"))
 
@@ -716,7 +709,7 @@ class ListOffsetArray(Content):
                     ListOffsetArray(tooffsets, flattened, parameters=self._parameters),
                 )
 
-    def _mergeable(self, other, mergebool):
+    def _mergeable_next(self, other, mergebool):
         if isinstance(
             other,
             (
@@ -727,7 +720,7 @@ class ListOffsetArray(Content):
                 ak.contents.UnmaskedArray,
             ),
         ):
-            return self.mergeable(other.content, mergebool)
+            return self._mergeable(other.content, mergebool)
 
         if isinstance(
             other,
@@ -737,18 +730,18 @@ class ListOffsetArray(Content):
                 ak.contents.ListOffsetArray,
             ),
         ):
-            return self._content.mergeable(other.content, mergebool)
+            return self._content._mergeable(other.content, mergebool)
 
         else:
             return False
 
-    def mergemany(self, others):
+    def _mergemany(self, others):
         if len(others) == 0:
             return self
         listarray = ak.contents.ListArray(
             self.starts, self.stops, self._content, parameters=self._parameters
         )
-        out = listarray.mergemany(others)
+        out = listarray._mergemany(others)
 
         if all(
             isinstance(x, ListOffsetArray) and x._offsets.dtype == self._offsets.dtype
@@ -758,13 +751,13 @@ class ListOffsetArray(Content):
         else:
             return out
 
-    def fill_none(self, value: Content) -> Content:
+    def _fill_none(self, value: Content) -> Content:
         return ListOffsetArray(
-            self._offsets, self._content.fill_none(value), parameters=self._parameters
+            self._offsets, self._content._fill_none(value), parameters=self._parameters
         )
 
     def _local_index(self, axis, depth):
-        posaxis = self.axis_wrap_if_negative(axis)
+        posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:
             return self._local_index_axis0()
         elif posaxis == depth + 1:
@@ -797,10 +790,10 @@ class ListOffsetArray(Content):
                 self._offsets, self._content._local_index(posaxis, depth + 1)
             )
 
-    def numbers_to_type(self, name):
+    def _numbers_to_type(self, name):
         return ak.contents.ListOffsetArray(
             self._offsets,
-            self._content.numbers_to_type(name),
+            self._content._numbers_to_type(name),
             parameters=self._parameters,
         )
 
@@ -1318,7 +1311,7 @@ class ListOffsetArray(Content):
             )
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
-        posaxis = self.axis_wrap_if_negative(axis)
+        posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         elif posaxis == depth + 1:
@@ -1761,9 +1754,9 @@ class ListOffsetArray(Content):
         return self.offsets._nbytes_part() + self.content._nbytes_part()
 
     def _pad_none(self, target, axis, depth, clip):
-        posaxis = self.axis_wrap_if_negative(axis)
+        posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:
-            return self.pad_none_axis0(target, clip)
+            return self._pad_none_axis0(target, clip)
         if posaxis == depth + 1:
             if not clip:
                 tolength = ak.index.Index64.empty(1, self._backend.index_nplike)

@@ -185,13 +185,6 @@ class NumpyArray(Content):
         out.append(post)
         return "".join(out)
 
-    def merge_parameters(self, parameters):
-        return NumpyArray(
-            self._data,
-            parameters=ak._util.merge_parameters(self._parameters, parameters),
-            backend=self._backend,
-        )
-
     def to_RegularArray(self):
         shape = self._data.shape
         zeroslen = [1]
@@ -342,8 +335,8 @@ class NumpyArray(Content):
         else:
             raise ak._errors.wrap_error(AssertionError(repr(head)))
 
-    def num(self, axis, depth=0):
-        posaxis = self.axis_wrap_if_negative(axis)
+    def _num(self, axis, depth=0):
+        posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:
             out = self.length
             if ak._util.is_integer(out):
@@ -377,7 +370,7 @@ class NumpyArray(Content):
         )
 
     def _offsets_and_flattened(self, axis, depth):
-        posaxis = self.axis_wrap_if_negative(axis)
+        posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:
             raise ak._errors.wrap_error(np.AxisError("axis=0 not allowed for flatten"))
 
@@ -389,7 +382,7 @@ class NumpyArray(Content):
                 np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
             )
 
-    def _mergeable(self, other, mergebool):
+    def _mergeable_next(self, other, mergebool):
         if isinstance(
             other,
             (
@@ -400,7 +393,7 @@ class NumpyArray(Content):
                 ak.contents.UnmaskedArray,
             ),
         ):
-            return self.mergeable(other._content, mergebool)
+            return self._mergeable(other._content, mergebool)
 
         elif isinstance(other, ak.contents.NumpyArray):
             if self._data.ndim != other._data.ndim:
@@ -442,18 +435,18 @@ class NumpyArray(Content):
         elif isinstance(other, ak.contents.RegularArray) and self.purelist_depth > 1:
             as_regular_array = self.to_RegularArray()
             assert isinstance(as_regular_array, ak.contents.RegularArray)
-            return as_regular_array._content.mergeable(other._content, mergebool)
+            return as_regular_array._content._mergeable(other._content, mergebool)
 
         else:
             return False
 
-    def mergemany(self, others):
+    def _mergemany(self, others):
         if len(others) == 0:
             return self
 
         # Resolve merging against regular types by
         if any(isinstance(o, ak.contents.RegularArray) for o in others):
-            return self.to_RegularArray().mergemany(others)
+            return self.to_RegularArray()._mergemany(others)
 
         head, tail = self._merging_strategy(others)
 
@@ -489,13 +482,13 @@ class NumpyArray(Content):
         if len(tail) == 1:
             return reversed
         else:
-            return reversed.mergemany(tail[1:])
+            return reversed._mergemany(tail[1:])
 
-    def fill_none(self, value: Content) -> Content:
+    def _fill_none(self, value: Content) -> Content:
         return self
 
     def _local_index(self, axis, depth):
-        posaxis = self.axis_wrap_if_negative(axis)
+        posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:
             return self._local_index_axis0()
         elif len(self.shape) <= 1:
@@ -646,7 +639,7 @@ class NumpyArray(Content):
 
         return out2, nextoffsets[: outlength[0]]
 
-    def numbers_to_type(self, name):
+    def _numbers_to_type(self, name):
         if (
             self.parameter("__array__") == "string"
             or self.parameter("__array__") == "bytestring"
@@ -1081,7 +1074,7 @@ class NumpyArray(Content):
             )
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
-        posaxis = self.axis_wrap_if_negative(axis)
+        posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         elif len(self.shape) <= 1:
@@ -1227,7 +1220,7 @@ class NumpyArray(Content):
             )
         elif len(self.shape) > 1 or not self.is_contiguous:
             return self.to_RegularArray()._pad_none(target, axis, depth, clip)
-        posaxis = self.axis_wrap_if_negative(axis)
+        posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis != depth:
             raise ak._errors.wrap_error(
                 np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
@@ -1238,7 +1231,7 @@ class NumpyArray(Content):
             else:
                 return self._pad_none(target, posaxis, depth, clip=True)
         else:
-            return self.pad_none_axis0(target, clip=True)
+            return self._pad_none_axis0(target, clip=True)
 
     def _nbytes_part(self):
         return self.data.nbytes

@@ -235,11 +235,11 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
     else:
         new_arrays_values = new_arrays
 
-    posaxis = new_arrays_values[0].axis_wrap_if_negative(axis)
+    posaxis = ak._do.axis_wrap_if_negative(new_arrays_values[0], axis)
     if posaxis < 0:
         raise ak._errors.wrap_error(ValueError("negative axis depth is ambiguous"))
     for x in new_arrays_values[1:]:
-        if x.axis_wrap_if_negative(axis) != posaxis:
+        if ak._do.axis_wrap_if_negative(x, axis) != posaxis:
             raise ak._errors.wrap_error(
                 ValueError(
                     "arrays to cartesian-product do not have the same depth for negative axis"
@@ -339,8 +339,8 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
                                 "characters of a string; please split it into lists"
                             )
                         )
-                    nextlayout = layout.recursively_apply(
-                        getgetfunction1(inside), behavior
+                    nextlayout = ak._do.recursively_apply(
+                        layout, getgetfunction1(inside), behavior
                     )
                     return newaxis(nextlayout, outside)
                 else:
@@ -350,7 +350,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
 
         def apply(x, i):
             layout = ak.operations.to_layout(x, allow_record=False, allow_other=False)
-            return layout.recursively_apply(getgetfunction2(i), behavior)
+            return ak._do.recursively_apply(layout, getgetfunction2(i), behavior)
 
         toflatten = []
         if nested is None or nested is False:

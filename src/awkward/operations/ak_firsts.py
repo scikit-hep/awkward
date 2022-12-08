@@ -46,7 +46,7 @@ def firsts(array, axis=1, *, highlevel=True, behavior=None):
 def _impl(array, axis, highlevel, behavior):
     layout = ak.operations.to_layout(array)
     behavior = ak._util.behavior_of(array, behavior=behavior)
-    posaxis = layout.axis_wrap_if_negative(axis)
+    posaxis = ak._do.axis_wrap_if_negative(layout, axis)
 
     if not ak._util.is_integer(axis):
         raise ak._errors.wrap_error(
@@ -67,7 +67,7 @@ def _impl(array, axis, highlevel, behavior):
     else:
 
         def action(layout, depth, depth_context, **kwargs):
-            posaxis = layout.axis_wrap_if_negative(depth_context["posaxis"])
+            posaxis = ak._do.axis_wrap_if_negative(layout, depth_context["posaxis"])
             if posaxis == depth and layout.is_list:
                 nplike = layout._backend.index_nplike
 
@@ -94,8 +94,8 @@ def _impl(array, axis, highlevel, behavior):
             depth_context["posaxis"] = posaxis
 
         depth_context = {"posaxis": posaxis}
-        out = layout.recursively_apply(
-            action, behavior, depth_context, numpy_to_regular=True
+        out = ak._do.recursively_apply(
+            layout, action, behavior, depth_context, numpy_to_regular=True
         )
 
     return ak._util.wrap(out, behavior, highlevel)

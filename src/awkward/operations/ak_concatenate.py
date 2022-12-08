@@ -56,7 +56,7 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
         content = ak.operations.to_layout(arrays, allow_record=False, allow_other=False)
         # Only handle concatenation along `axis=0`
         # Let ambiguous depth arrays fall through
-        if content.axis_wrap_if_negative(axis) == 0:
+        if ak._do.axis_wrap_if_negative(content, axis) == 0:
             return ak.operations.ak_flatten._impl(content, 1, highlevel, behavior)
 
     content_or_others = [
@@ -72,7 +72,7 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
             ValueError("need at least one array to concatenate")
         )
 
-    posaxis = contents[0].axis_wrap_if_negative(axis)
+    posaxis = ak._do.axis_wrap_if_negative(contents[0], axis)
     maxdepth = max(
         x.minmax_depth[1]
         for x in content_or_others
@@ -87,7 +87,7 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
         )
     for x in content_or_others:
         if isinstance(x, ak.contents.Content):
-            if x.axis_wrap_if_negative(axis) != posaxis:
+            if ak._do.axis_wrap_if_negative(x, axis) != posaxis:
                 raise ak._errors.wrap_error(
                     ValueError(
                         "arrays to concatenate do not have the same depth for negative "
@@ -102,13 +102,13 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
         ]
         batch = [content_or_others[0]]
         for x in content_or_others[1:]:
-            if batch[-1].mergeable(x, mergebool=mergebool):
+            if ak._do.mergeable(batch[-1], x, mergebool=mergebool):
                 batch.append(x)
             else:
-                collapsed = batch[0].mergemany(batch[1:])
-                batch = [collapsed.merge_as_union(x)]
+                collapsed = ak._do.mergemany(batch)
+                batch = [ak._do.merge_as_union(collapsed, x)]
 
-        out = batch[0].mergemany(batch[1:])
+        out = ak._do.mergemany(batch)
 
         if isinstance(out, ak.contents.UnionArray):
             out = type(out).simplified(

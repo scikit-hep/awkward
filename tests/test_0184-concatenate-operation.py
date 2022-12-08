@@ -64,7 +64,7 @@ def test_list_offset_array_concatenate():
     three = ak.contents.ListOffsetArray(offsets_three, one)
     four = ak.contents.ListOffsetArray(offsets_four, two)
 
-    padded_one = one.pad_none(7, 0)
+    padded_one = ak._do.pad_none(one, 7, 0)
     assert to_list(padded_one) == [
         [0.0, 1.1, 2.2],
         [],
@@ -115,7 +115,7 @@ def test_list_offset_array_concatenate():
         [],
     ]
 
-    padded = three.pad_none(6, 0)
+    padded = ak._do.pad_none(three, 6, 0)
 
     assert to_list(ak.operations.concatenate([padded, four], 1)) == [
         [[0.0, 1.1, 2.2], [], [3.3, 4.4], [0.33], []],

@@ -110,12 +110,6 @@ class UnmaskedArray(Content):
         out.append(post)
         return "".join(out)
 
-    def merge_parameters(self, parameters):
-        return UnmaskedArray(
-            self._content,
-            parameters=ak._util.merge_parameters(self._parameters, parameters),
-        )
-
     def to_IndexedOptionArray64(self):
         arange = self._backend.index_nplike.arange(self._content.length, dtype=np.int64)
         return ak.contents.IndexedOptionArray(
@@ -242,8 +236,8 @@ class UnmaskedArray(Content):
         else:
             return self._content
 
-    def num(self, axis, depth=0):
-        posaxis = self.axis_wrap_if_negative(axis)
+    def _num(self, axis, depth=0):
+        posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:
             out = self.length
             if ak._util.is_integer(out):
@@ -252,11 +246,11 @@ class UnmaskedArray(Content):
                 return out
         else:
             return ak.contents.UnmaskedArray(
-                self._content.num(posaxis, depth), parameters=self._parameters
+                self._content._num(posaxis, depth), parameters=self._parameters
             )
 
     def _offsets_and_flattened(self, axis, depth):
-        posaxis = self.axis_wrap_if_negative(axis)
+        posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:
             raise ak._errors.wrap_error(np.AxisError("axis=0 not allowed for flatten"))
         else:
@@ -270,7 +264,7 @@ class UnmaskedArray(Content):
             else:
                 return (offsets, flattened)
 
-    def _mergeable(self, other, mergebool):
+    def _mergeable_next(self, other, mergebool):
         if isinstance(
             other,
             (
@@ -281,15 +275,15 @@ class UnmaskedArray(Content):
                 ak.contents.UnmaskedArray,
             ),
         ):
-            return self._content.mergeable(other.content, mergebool)
+            return self._content._mergeable(other.content, mergebool)
 
         else:
-            return self._content.mergeable(other, mergebool)
+            return self._content._mergeable(other, mergebool)
 
     def _reverse_merge(self, other):
         return self.to_IndexedOptionArray64()._reverse_merge(other)
 
-    def mergemany(self, others):
+    def _mergemany(self, others):
         if len(others) == 0:
             return self
 
@@ -301,17 +295,17 @@ class UnmaskedArray(Content):
                 tail_contents.append(x._content)
 
             return UnmaskedArray(
-                self._content.mergemany(tail_contents), parameters=parameters
+                self._content._mergemany(tail_contents), parameters=parameters
             )
 
         else:
-            return self.to_IndexedOptionArray64().mergemany(others)
+            return self.to_IndexedOptionArray64()._mergemany(others)
 
-    def fill_none(self, value: Content) -> Content:
-        return self._content.fill_none(value)
+    def _fill_none(self, value: Content) -> Content:
+        return self._content._fill_none(value)
 
     def _local_index(self, axis, depth):
-        posaxis = self.axis_wrap_if_negative(axis)
+        posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:
             return self._local_index_axis0()
         else:
@@ -319,9 +313,9 @@ class UnmaskedArray(Content):
                 self._content._local_index(posaxis, depth), parameters=self._parameters
             )
 
-    def numbers_to_type(self, name):
+    def _numbers_to_type(self, name):
         return ak.contents.UnmaskedArray(
-            self._content.numbers_to_type(name), parameters=self._parameters
+            self._content._numbers_to_type(name), parameters=self._parameters
         )
 
     def _is_unique(self, negaxis, starts, parents, outlength):
@@ -394,7 +388,7 @@ class UnmaskedArray(Content):
             return out
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
-        posaxis = self.axis_wrap_if_negative(axis)
+        posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         else:
@@ -436,9 +430,9 @@ class UnmaskedArray(Content):
         return self.content._nbytes_part()
 
     def _pad_none(self, target, axis, depth, clip):
-        posaxis = self.axis_wrap_if_negative(axis)
+        posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:
-            return self.pad_none_axis0(target, clip)
+            return self._pad_none_axis0(target, clip)
         elif posaxis == depth + 1:
             return self._content._pad_none(target, posaxis, depth, clip)
         else:

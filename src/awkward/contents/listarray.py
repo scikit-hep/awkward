@@ -179,14 +179,6 @@ class ListArray(Content):
         out.append(post)
         return "".join(out)
 
-    def merge_parameters(self, parameters):
-        return ListArray(
-            self._starts,
-            self._stops,
-            self._content,
-            parameters=ak._util.merge_parameters(self._parameters, parameters),
-        )
-
     def to_ListOffsetArray64(self, start_at_zero=False):
         starts = self._starts.data
         stops = self._stops.data
@@ -910,8 +902,8 @@ class ListArray(Content):
         else:
             raise ak._errors.wrap_error(AssertionError(repr(head)))
 
-    def num(self, axis, depth=0):
-        posaxis = self.axis_wrap_if_negative(axis)
+    def _num(self, axis, depth=0):
+        posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:
             out = self.length
             if ak._util.is_integer(out):
@@ -940,12 +932,12 @@ class ListArray(Content):
             )
             return ak.contents.NumpyArray(tonum, parameters=None, backend=self._backend)
         else:
-            return self.to_ListOffsetArray64(True).num(posaxis, depth)
+            return self.to_ListOffsetArray64(True)._num(posaxis, depth)
 
     def _offsets_and_flattened(self, axis, depth):
         return self.to_ListOffsetArray64(True)._offsets_and_flattened(axis, depth)
 
-    def _mergeable(self, other, mergebool):
+    def _mergeable_next(self, other, mergebool):
         if isinstance(
             other,
             (
@@ -956,7 +948,7 @@ class ListArray(Content):
                 ak.contents.UnmaskedArray,
             ),
         ):
-            return self.mergeable(other.content, mergebool)
+            return self._mergeable(other.content, mergebool)
 
         if isinstance(
             other,
@@ -966,12 +958,12 @@ class ListArray(Content):
                 ak.contents.ListOffsetArray,
             ),
         ):
-            return self._content.mergeable(other.content, mergebool)
+            return self._content._mergeable(other.content, mergebool)
 
         else:
             return False
 
-    def mergemany(self, others):
+    def _mergemany(self, others):
         if len(others) == 0:
             return self
 
@@ -1012,7 +1004,7 @@ class ListArray(Content):
                 )
 
         tail_contents = contents[1:]
-        nextcontent = contents[0].mergemany(tail_contents)
+        nextcontent = contents[0]._mergemany(tail_contents)
 
         nextstarts = ak.index.Index64.empty(total_length, self._backend.index_nplike)
         nextstops = ak.index.Index64.empty(total_length, self._backend.index_nplike)
@@ -1105,18 +1097,18 @@ class ListArray(Content):
         if len(tail) == 1:
             return reversed
         else:
-            return reversed.mergemany(tail[1:])
+            return reversed._mergemany(tail[1:])
 
-    def fill_none(self, value: Content) -> Content:
+    def _fill_none(self, value: Content) -> Content:
         return ListArray(
             self._starts,
             self._stops,
-            self._content.fill_none(value),
+            self._content._fill_none(value),
             parameters=self._parameters,
         )
 
     def _local_index(self, axis, depth):
-        posaxis = self.axis_wrap_if_negative(axis)
+        posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:
             return self._local_index_axis0()
         elif posaxis == depth + 1:
@@ -1151,11 +1143,11 @@ class ListArray(Content):
                 self._content._local_index(posaxis, depth + 1),
             )
 
-    def numbers_to_type(self, name):
+    def _numbers_to_type(self, name):
         return ak.contents.ListArray(
             self._starts,
             self._stops,
-            self._content.numbers_to_type(name),
+            self._content._numbers_to_type(name),
             parameters=self._parameters,
         )
 
@@ -1281,9 +1273,9 @@ class ListArray(Content):
 
     def _pad_none(self, target, axis, depth, clip):
         if not clip:
-            posaxis = self.axis_wrap_if_negative(axis)
+            posaxis = ak._do.axis_wrap_if_negative(self, axis)
             if posaxis == depth:
-                return self.pad_none_axis0(target, clip)
+                return self._pad_none_axis0(target, clip)
             elif posaxis == depth + 1:
                 min_ = ak.index.Index64.empty(1, self._backend.index_nplike)
                 assert (

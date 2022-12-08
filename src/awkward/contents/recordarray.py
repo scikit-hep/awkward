@@ -268,15 +268,6 @@ class RecordArray(Content):
         out.append(post)
         return "".join(out)
 
-    def merge_parameters(self, parameters):
-        return RecordArray(
-            self._contents,
-            self._fields,
-            self._length,
-            parameters=ak._util.merge_parameters(self._parameters, parameters),
-            backend=self._backend,
-        )
-
     def index_to_field(self, index):
         return self.form_cls.index_to_field(self, index)
 
@@ -462,8 +453,8 @@ class RecordArray(Content):
             )
             return next._getitem_next(nexthead, nexttail, advanced)
 
-    def num(self, axis, depth=0):
-        posaxis = self.axis_wrap_if_negative(axis)
+    def _num(self, axis, depth=0):
+        posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:
             npsingle = self._backend.index_nplike.full((1,), self.length, np.int64)
             single = ak.index.Index64(npsingle, nplike=self._backend.index_nplike)
@@ -482,7 +473,7 @@ class RecordArray(Content):
         else:
             contents = []
             for content in self._contents:
-                contents.append(content.num(posaxis, depth))
+                contents.append(content._num(posaxis, depth))
             return ak.contents.RecordArray(
                 contents,
                 self._fields,
@@ -492,7 +483,7 @@ class RecordArray(Content):
             )
 
     def _offsets_and_flattened(self, axis, depth):
-        posaxis = self.axis_wrap_if_negative(axis)
+        posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:
             raise ak._errors.wrap_error(np.AxisError("axis=0 not allowed for flatten"))
 
@@ -531,7 +522,7 @@ class RecordArray(Content):
                 ),
             )
 
-    def _mergeable(self, other, mergebool):
+    def _mergeable_next(self, other, mergebool):
         if isinstance(
             other,
             (
@@ -542,13 +533,13 @@ class RecordArray(Content):
                 ak.contents.UnmaskedArray,
             ),
         ):
-            return self.mergeable(other.content, mergebool)
+            return self._mergeable(other.content, mergebool)
 
         if isinstance(other, RecordArray):
             if self.is_tuple and other.is_tuple:
                 if len(self._contents) == len(other._contents):
                     for self_cont, other_cont in zip(self._contents, other._contents):
-                        if not self_cont.mergeable(other_cont, mergebool):
+                        if not self_cont._mergeable(other_cont, mergebool):
                             return False
 
                     return True
@@ -560,7 +551,7 @@ class RecordArray(Content):
                 for i, field in enumerate(self._fields):
                     x = self._contents[i]
                     y = other._contents[other.field_to_index(field)]
-                    if not x.mergeable(y, mergebool):
+                    if not x._mergeable(y, mergebool):
                         return False
                 return True
 
@@ -570,7 +561,7 @@ class RecordArray(Content):
         else:
             return False
 
-    def mergemany(self, others):
+    def _mergemany(self, others):
         if len(others) == 0:
             return self
 
@@ -664,7 +655,7 @@ class RecordArray(Content):
         nextcontents = []
         minlength = None
         for forfield in for_each_field:
-            merged = forfield[0].mergemany(forfield[1:])
+            merged = forfield[0]._mergemany(forfield[1:])
 
             nextcontents.append(merged)
 
@@ -691,18 +682,12 @@ class RecordArray(Content):
         if len(tail) == 1:
             return reversed
         else:
-            return reversed.mergemany(tail[1:])
+            return reversed._mergemany(tail[1:])
 
-        raise ak._errors.wrap_error(
-            NotImplementedError(
-                "not implemented: " + type(self).__name__ + " ::mergemany"
-            )
-        )
-
-    def fill_none(self, value: Content) -> Content:
+    def _fill_none(self, value: Content) -> Content:
         contents = []
         for content in self._contents:
-            contents.append(content.fill_none(value))
+            contents.append(content._fill_none(value))
         return RecordArray(
             contents,
             self._fields,
@@ -712,7 +697,7 @@ class RecordArray(Content):
         )
 
     def _local_index(self, axis, depth):
-        posaxis = self.axis_wrap_if_negative(axis)
+        posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:
             return self._local_index_axis0()
         else:
@@ -727,10 +712,10 @@ class RecordArray(Content):
                 backend=self._backend,
             )
 
-    def numbers_to_type(self, name):
+    def _numbers_to_type(self, name):
         contents = []
         for x in self._contents:
-            contents.append(x.numbers_to_type(name))
+            contents.append(x._numbers_to_type(name))
         return ak.contents.RecordArray(
             contents,
             self._fields,
@@ -795,7 +780,7 @@ class RecordArray(Content):
         )
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
-        posaxis = self.axis_wrap_if_negative(axis)
+        posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         else:
@@ -859,9 +844,9 @@ class RecordArray(Content):
         return result
 
     def _pad_none(self, target, axis, depth, clip):
-        posaxis = self.axis_wrap_if_negative(axis)
+        posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:
-            return self.pad_none_axis0(target, clip)
+            return self._pad_none_axis0(target, clip)
         else:
             contents = []
             for content in self._contents:

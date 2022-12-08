@@ -250,16 +250,6 @@ class BitMaskedArray(Content):
         out.append(post)
         return "".join(out)
 
-    def merge_parameters(self, parameters):
-        return BitMaskedArray(
-            self._mask,
-            self._content,
-            self._valid_when,
-            self._length,
-            self._lsb_order,
-            parameters=ak._util.merge_parameters(self._parameters, parameters),
-        )
-
     def to_IndexedOptionArray64(self):
         index = ak.index.Index64.empty(
             self._mask.length * 8, self._backend.index_nplike
@@ -455,13 +445,13 @@ class BitMaskedArray(Content):
     def project(self, mask=None):
         return self.to_ByteMaskedArray().project(mask)
 
-    def num(self, axis, depth=0):
-        return self.to_ByteMaskedArray().num(axis, depth)
+    def _num(self, axis, depth=0):
+        return self.to_ByteMaskedArray()._num(axis, depth)
 
     def _offsets_and_flattened(self, axis, depth):
         return self.to_ByteMaskedArray._offsets_and_flattened(axis, depth)
 
-    def _mergeable(self, other, mergebool):
+    def _mergeable_next(self, other, mergebool):
         if isinstance(
             other,
             (
@@ -472,19 +462,19 @@ class BitMaskedArray(Content):
                 ak.contents.UnmaskedArray,
             ),
         ):
-            return self._content.mergeable(other.content, mergebool)
+            return self._content._mergeable(other.content, mergebool)
 
         else:
-            return self._content.mergeable(other, mergebool)
+            return self._content._mergeable(other, mergebool)
 
     def _reverse_merge(self, other):
         return self.to_IndexedOptionArray64()._reverse_merge(other)
 
-    def mergemany(self, others):
+    def _mergemany(self, others):
         if len(others) == 0:
             return self
 
-        out = self.to_IndexedOptionArray64().mergemany(others)
+        out = self.to_IndexedOptionArray64()._mergemany(others)
 
         if all(
             isinstance(x, BitMaskedArray)
@@ -496,14 +486,14 @@ class BitMaskedArray(Content):
         else:
             return out
 
-    def fill_none(self, value: Content) -> Content:
-        return self.to_IndexedOptionArray64().fill_none(value)
+    def _fill_none(self, value: Content) -> Content:
+        return self.to_IndexedOptionArray64()._fill_none(value)
 
     def _local_index(self, axis, depth):
         return self.to_ByteMaskedArray()._local_index(axis, depth)
 
-    def numbers_to_type(self, name):
-        return self.to_ByteMaskedArray().numbers_to_type(name)
+    def _numbers_to_type(self, name):
+        return self.to_ByteMaskedArray()._numbers_to_type(name)
 
     def _is_unique(self, negaxis, starts, parents, outlength):
         if self._mask.length == 0:

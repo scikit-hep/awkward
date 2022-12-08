@@ -167,14 +167,6 @@ class RegularArray(Content):
         out.append(post)
         return "".join(out)
 
-    def merge_parameters(self, parameters):
-        return RegularArray(
-            self._content,
-            self._size,
-            self._length,
-            parameters=ak._util.merge_parameters(self._parameters, parameters),
-        )
-
     def to_ListOffsetArray64(self, start_at_zero=False):
         offsets = self._compact_offsets64(start_at_zero)
         return self._broadcast_tooffsets64(offsets)
@@ -638,8 +630,8 @@ class RegularArray(Content):
         else:
             raise ak._errors.wrap_error(AssertionError(repr(head)))
 
-    def num(self, axis, depth=0):
-        posaxis = self.axis_wrap_if_negative(axis)
+    def _num(self, axis, depth=0):
+        posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:
             out = self._length
             if ak._util.is_integer(out):
@@ -656,7 +648,7 @@ class RegularArray(Content):
             )
             return ak.contents.NumpyArray(tonum, parameters=None, backend=self._backend)
         else:
-            next = self._content.num(posaxis, depth + 1)
+            next = self._content._num(posaxis, depth + 1)
             return ak.contents.RegularArray(
                 next, self._size, self._length, parameters=self._parameters
             )
@@ -664,7 +656,7 @@ class RegularArray(Content):
     def _offsets_and_flattened(self, axis, depth):
         return self.to_ListOffsetArray64(True)._offsets_and_flattened(axis, depth)
 
-    def _mergeable(self, other, mergebool):
+    def _mergeable_next(self, other, mergebool):
         if isinstance(
             other,
             (
@@ -675,7 +667,7 @@ class RegularArray(Content):
                 ak.contents.UnmaskedArray,
             ),
         ):
-            return self.mergeable(other.content, mergebool)
+            return self._mergeable(other.content, mergebool)
 
         elif isinstance(
             other,
@@ -685,22 +677,22 @@ class RegularArray(Content):
                 ak.contents.ListOffsetArray,
             ),
         ):
-            return self._content.mergeable(other.content, mergebool)
+            return self._content._mergeable(other.content, mergebool)
 
         # For n-dimensional NumpyArrays, let's now convert them to RegularArray
         # We could add a special case that tries to first convert self to NumpyArray
         # and merge conventionally, but it's not worth it at this stage.
         elif isinstance(other, ak.contents.NumpyArray) and other.purelist_depth > 1:
-            return self._content.mergeable(other.to_RegularArray().content, mergebool)
+            return self._content._mergeable(other.to_RegularArray().content, mergebool)
         else:
             return False
 
-    def mergemany(self, others):
+    def _mergemany(self, others):
         if len(others) == 0:
             return self
 
         if any(x.is_option for x in others):
-            return ak.contents.UnmaskedArray(self).mergemany(others)
+            return ak.contents.UnmaskedArray(self)._mergemany(others)
 
         # Regularize NumpyArray into RegularArray (or NumpyArray if 1D)
         others = [
@@ -718,25 +710,25 @@ class RegularArray(Content):
                 zeros_length += x._length
 
             return RegularArray(
-                self._content[: self._length * self._size].mergemany(tail_contents),
+                self._content[: self._length * self._size]._mergemany(tail_contents),
                 self._size,
                 zeros_length,
                 parameters=parameters,
             )
 
         else:
-            return self.to_ListOffsetArray64(True).mergemany(others)
+            return self.to_ListOffsetArray64(True)._mergemany(others)
 
-    def fill_none(self, value: Content) -> Content:
+    def _fill_none(self, value: Content) -> Content:
         return RegularArray(
-            self._content.fill_none(value),
+            self._content._fill_none(value),
             self._size,
             self._length,
             parameters=self._parameters,
         )
 
     def _local_index(self, axis, depth):
-        posaxis = self.axis_wrap_if_negative(axis)
+        posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:
             return self._local_index_axis0()
         elif posaxis == depth + 1:
@@ -758,9 +750,9 @@ class RegularArray(Content):
                 self._content._local_index(posaxis, depth + 1), self._size, self._length
             )
 
-    def numbers_to_type(self, name):
+    def _numbers_to_type(self, name):
         return ak.contents.RegularArray(
-            self._content.numbers_to_type(name),
+            self._content._numbers_to_type(name),
             self._size,
             self._length,
             parameters=self._parameters,
@@ -863,7 +855,7 @@ class RegularArray(Content):
         return out
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
-        posaxis = self.axis_wrap_if_negative(axis)
+        posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         elif posaxis == depth + 1:
@@ -1168,9 +1160,9 @@ class RegularArray(Content):
         return self.content._nbytes_part()
 
     def _pad_none(self, target, axis, depth, clip):
-        posaxis = self.axis_wrap_if_negative(axis)
+        posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:
-            return self.pad_none_axis0(target, clip)
+            return self._pad_none_axis0(target, clip)
 
         elif posaxis == depth + 1:
             if not clip:

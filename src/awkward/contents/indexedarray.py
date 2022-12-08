@@ -183,13 +183,6 @@ class IndexedArray(Content):
         out.append(post)
         return "".join(out)
 
-    def merge_parameters(self, parameters):
-        return IndexedArray(
-            self._index,
-            self._content,
-            parameters=ak._util.merge_parameters(self._parameters, parameters),
-        )
-
     def to_IndexedOptionArray64(self):
         return ak.contents.IndexedOptionArray(
             self._index, self._content, parameters=self._parameters
@@ -401,8 +394,8 @@ class IndexedArray(Content):
                 )
             )
 
-    def num(self, axis, depth=0):
-        posaxis = self.axis_wrap_if_negative(axis)
+    def _num(self, axis, depth=0):
+        posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:
             out = self.length
             if ak._util.is_integer(out):
@@ -410,17 +403,17 @@ class IndexedArray(Content):
             else:
                 return out
         else:
-            return self.project().num(posaxis, depth)
+            return self.project()._num(posaxis, depth)
 
     def _offsets_and_flattened(self, axis, depth):
-        posaxis = self.axis_wrap_if_negative(axis)
+        posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:
             raise ak._errors.wrap_error(np.AxisError("axis=0 not allowed for flatten"))
 
         else:
             return self.project()._offsets_and_flattened(posaxis, depth)
 
-    def _mergeable(self, other, mergebool):
+    def _mergeable_next(self, other, mergebool):
         if isinstance(
             other,
             (
@@ -431,10 +424,10 @@ class IndexedArray(Content):
                 ak.contents.UnmaskedArray,
             ),
         ):
-            return self._content.mergeable(other.content, mergebool)
+            return self._content._mergeable(other.content, mergebool)
 
         else:
-            return self._content.mergeable(other, mergebool)
+            return self._content._mergeable(other, mergebool)
 
     def _merging_strategy(self, others):
         if len(others) == 0:
@@ -485,7 +478,7 @@ class IndexedArray(Content):
             (theirlength + mylength), self._backend.index_nplike
         )
 
-        content = other.merge(self._content)
+        content = other._mergemany([self._content])
 
         # Fill `index` with a range starting at zero, up to `theirlength`
         assert index.nplike is self._backend.index_nplike
@@ -519,7 +512,7 @@ class IndexedArray(Content):
             index, content, parameters=parameters
         )
 
-    def mergemany(self, others):
+    def _mergemany(self, others):
         if len(others) == 0:
             return self
 
@@ -593,7 +586,7 @@ class IndexedArray(Content):
                 length_so_far += array.length
 
         tail_contents = contents[1:]
-        nextcontent = contents[0].mergemany(tail_contents)
+        nextcontent = contents[0]._mergemany(tail_contents)
         next = ak.contents.IndexedArray(nextindex, nextcontent, parameters=parameters)
 
         if len(tail) == 0:
@@ -603,25 +596,19 @@ class IndexedArray(Content):
         if len(tail) == 1:
             return reversed
         else:
-            return reversed.mergemany(tail[1:])
+            return reversed._mergemany(tail[1:])
 
-        raise ak._errors.wrap_error(
-            NotImplementedError(
-                "not implemented: " + type(self).__name__ + " ::mergemany"
-            )
-        )
-
-    def fill_none(self, value: Content) -> Content:
+    def _fill_none(self, value: Content) -> Content:
         if value.backend.nplike.known_shape and value.length != 1:
             raise ak._errors.wrap_error(
                 ValueError(f"fill_none value length ({value.length}) is not equal to 1")
             )
         return IndexedArray(
-            self._index, self._content.fill_none(value), parameters=self._parameters
+            self._index, self._content._fill_none(value), parameters=self._parameters
         )
 
     def _local_index(self, axis, depth):
-        posaxis = self.axis_wrap_if_negative(axis)
+        posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:
             return self._local_index_axis0()
         else:
@@ -692,10 +679,10 @@ class IndexedArray(Content):
 
         return next[0 : length[0]]
 
-    def numbers_to_type(self, name):
+    def _numbers_to_type(self, name):
         return ak.contents.IndexedArray(
             self._index,
-            self._content.numbers_to_type(name),
+            self._content._numbers_to_type(name),
             parameters=self._parameters,
         )
 
@@ -890,7 +877,7 @@ class IndexedArray(Content):
         )
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
-        posaxis = self.axis_wrap_if_negative(axis)
+        posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         else:
@@ -946,9 +933,9 @@ class IndexedArray(Content):
         return self.index._nbytes_part() + self.content._nbytes_part()
 
     def _pad_none(self, target, axis, depth, clip):
-        posaxis = self.axis_wrap_if_negative(axis)
+        posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:
-            return self.pad_none_axis0(target, clip)
+            return self._pad_none_axis0(target, clip)
         elif posaxis == depth + 1:
             return self.project()._pad_none(target, posaxis, depth, clip)
         else:
@@ -1002,9 +989,10 @@ class IndexedArray(Content):
             else:
                 next = self._content._carry(ak.index.Index(index), False)
 
-            return next.merge_parameters(self._parameters)._to_arrow(
-                pyarrow, mask_node, validbytes, length, options
+            next2 = next.copy(
+                parameters=ak._util.merge_parameters(next._parameters, self._parameters)
             )
+            return next2._to_arrow(pyarrow, mask_node, validbytes, length, options)
 
     def _to_numpy(self, allow_missing):
         return self.project()._to_numpy(allow_missing)

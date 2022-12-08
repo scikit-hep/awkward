@@ -132,7 +132,8 @@ def _impl(array, container, buffer_key, form_key, id_start, backend):
     if backend is not None:
         backend = ak._backends.regularize_backend(backend)
 
-    return layout.to_buffers(
+    return ak._do.to_buffers(
+        layout,
         container=container,
         buffer_key=buffer_key,
         form_key=form_key,

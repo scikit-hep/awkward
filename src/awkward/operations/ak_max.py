@@ -152,8 +152,8 @@ def _impl(array, axis, keepdims, initial, mask_identity, flatten_records):
             else:
                 return backend.nplike.maximum(xs[0], reduce(xs[1:]))
 
-        tmp = layout.completely_flatten(
-            function_name="ak.max", flatten_records=flatten_records
+        tmp = ak._do.completely_flatten(
+            layout, function_name="ak.max", flatten_records=flatten_records
         )
         return reduce([map(x) for x in tmp if not x.shape[0] <= 0])
 
