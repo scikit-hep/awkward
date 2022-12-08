@@ -288,3 +288,7 @@ def flatten(layout: Content, axis: Integral = 1, depth: Integral = 0) -> Content
 
 def numbers_to_type(layout: Content, name: str) -> Content:
     return layout._numbers_to_type(name)
+
+
+def fill_none(layout: Content, value: Content) -> Content:
+    return layout._fill_none(value)

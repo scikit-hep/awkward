@@ -1548,5 +1548,5 @@ class Content:
     def _numbers_to_type(self, name: str) -> Self:
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def fill_none(self, value: Content) -> Content:
+    def _fill_none(self, value: Content) -> Content:
         raise ak._errors.wrap_error(NotImplementedError)

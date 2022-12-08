@@ -699,10 +699,10 @@ class RecordArray(Content):
             )
         )
 
-    def fill_none(self, value: Content) -> Content:
+    def _fill_none(self, value: Content) -> Content:
         contents = []
         for content in self._contents:
-            contents.append(content.fill_none(value))
+            contents.append(content._fill_none(value))
         return RecordArray(
             contents,
             self._fields,

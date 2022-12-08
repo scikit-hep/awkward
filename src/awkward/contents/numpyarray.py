@@ -491,7 +491,7 @@ class NumpyArray(Content):
         else:
             return reversed.mergemany(tail[1:])
 
-    def fill_none(self, value: Content) -> Content:
+    def _fill_none(self, value: Content) -> Content:
         return self
 
     def _local_index(self, axis, depth):

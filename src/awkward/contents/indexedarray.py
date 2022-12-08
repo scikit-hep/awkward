@@ -611,13 +611,13 @@ class IndexedArray(Content):
             )
         )
 
-    def fill_none(self, value: Content) -> Content:
+    def _fill_none(self, value: Content) -> Content:
         if value.backend.nplike.known_shape and value.length != 1:
             raise ak._errors.wrap_error(
                 ValueError(f"fill_none value length ({value.length}) is not equal to 1")
             )
         return IndexedArray(
-            self._index, self._content.fill_none(value), parameters=self._parameters
+            self._index, self._content._fill_none(value), parameters=self._parameters
         )
 
     def _local_index(self, axis, depth):

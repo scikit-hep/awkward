@@ -727,9 +727,9 @@ class RegularArray(Content):
         else:
             return self.to_ListOffsetArray64(True).mergemany(others)
 
-    def fill_none(self, value: Content) -> Content:
+    def _fill_none(self, value: Content) -> Content:
         return RegularArray(
-            self._content.fill_none(value),
+            self._content._fill_none(value),
             self._size,
             self._length,
             parameters=self._parameters,

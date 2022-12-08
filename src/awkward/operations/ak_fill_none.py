@@ -108,7 +108,7 @@ def _impl(array, value, axis, highlevel, behavior):
 
     def maybe_fillna(layout):
         if layout.is_option:
-            return layout.fill_none(valuelayout)
+            return ak._do.fill_none(layout, valuelayout)
         else:
             return layout
 

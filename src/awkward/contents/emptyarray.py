@@ -209,7 +209,7 @@ class EmptyArray(Content):
             tail_others = others[1:]
             return others[0].mergemany(tail_others)
 
-    def fill_none(self, value: Content) -> Content:
+    def _fill_none(self, value: Content) -> Content:
         return EmptyArray(parameters=self._parameters, backend=self._backend)
 
     def _local_index(self, axis, depth):

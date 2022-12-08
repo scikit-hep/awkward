@@ -307,8 +307,8 @@ class UnmaskedArray(Content):
         else:
             return self.to_IndexedOptionArray64().mergemany(others)
 
-    def fill_none(self, value: Content) -> Content:
-        return self._content.fill_none(value)
+    def _fill_none(self, value: Content) -> Content:
+        return self._content._fill_none(value)
 
     def _local_index(self, axis, depth):
         posaxis = ak._do.axis_wrap_if_negative(self, axis)

@@ -758,9 +758,9 @@ class ListOffsetArray(Content):
         else:
             return out
 
-    def fill_none(self, value: Content) -> Content:
+    def _fill_none(self, value: Content) -> Content:
         return ListOffsetArray(
-            self._offsets, self._content.fill_none(value), parameters=self._parameters
+            self._offsets, self._content._fill_none(value), parameters=self._parameters
         )
 
     def _local_index(self, axis, depth):

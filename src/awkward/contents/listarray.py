@@ -1107,11 +1107,11 @@ class ListArray(Content):
         else:
             return reversed.mergemany(tail[1:])
 
-    def fill_none(self, value: Content) -> Content:
+    def _fill_none(self, value: Content) -> Content:
         return ListArray(
             self._starts,
             self._stops,
-            self._content.fill_none(value),
+            self._content._fill_none(value),
             parameters=self._parameters,
         )
 

@@ -496,8 +496,8 @@ class BitMaskedArray(Content):
         else:
             return out
 
-    def fill_none(self, value: Content) -> Content:
-        return self.to_IndexedOptionArray64().fill_none(value)
+    def _fill_none(self, value: Content) -> Content:
+        return self.to_IndexedOptionArray64()._fill_none(value)
 
     def _local_index(self, axis, depth):
         return self.to_ByteMaskedArray()._local_index(axis, depth)
