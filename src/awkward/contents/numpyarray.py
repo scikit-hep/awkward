@@ -483,7 +483,7 @@ class NumpyArray(Content):
         else:
             return self.to_RegularArray()._local_index(posaxis, depth)
 
-    def contiguous(self):
+    def to_contiguous(self) -> Self:
         if self.is_contiguous:
             return self
         else:
@@ -494,7 +494,7 @@ class NumpyArray(Content):
             )
 
     @property
-    def is_contiguous(self):
+    def is_contiguous(self) -> bool:
         return self._backend.nplike.is_c_contiguous(self._data)
 
     def _subranges_equal(self, starts, stops, length, sorted=True):
@@ -645,7 +645,7 @@ class NumpyArray(Content):
             return True
 
         elif len(self.shape) != 1 or not self.is_contiguous:
-            contiguous_self = self if self.is_contiguous else self.contiguous()
+            contiguous_self = self.to_contiguous()
             return contiguous_self.to_RegularArray()._is_unique(
                 negaxis,
                 starts,
@@ -667,7 +667,7 @@ class NumpyArray(Content):
             return self
 
         if negaxis is None:
-            contiguous_self = self if self.is_contiguous else self.contiguous()
+            contiguous_self = self.to_contiguous()
             # Python 3.8 could use math.prod
             flattened_shape = 1
             for s in contiguous_self.shape:
@@ -722,7 +722,7 @@ class NumpyArray(Content):
 
         # axis is not None
         if len(self.shape) != 1 or not self.is_contiguous:
-            contiguous_self = self if self.is_contiguous else self.contiguous()
+            contiguous_self = self.to_contiguous()
             return contiguous_self.to_RegularArray()._unique(
                 negaxis,
                 starts,
@@ -856,7 +856,7 @@ class NumpyArray(Content):
                 TypeError(f"{type(self).__name__} attempting to argsort a scalar ")
             )
         elif len(self.shape) != 1 or not self.is_contiguous:
-            contiguous_self = self if self.is_contiguous else self.contiguous()
+            contiguous_self = self.to_contiguous()
             return contiguous_self.to_RegularArray()._argsort_next(
                 negaxis,
                 starts,
@@ -976,7 +976,7 @@ class NumpyArray(Content):
             )
 
         elif len(self.shape) != 1 or not self.is_contiguous:
-            contiguous_self = self if self.is_contiguous else self.contiguous()
+            contiguous_self = self.to_contiguous()
             return contiguous_self.to_RegularArray()._sort_next(
                 negaxis,
                 starts,
@@ -1096,7 +1096,7 @@ class NumpyArray(Content):
                 behavior,
             )
         elif not self.is_contiguous:
-            return self.contiguous()._reduce_next(
+            return self.to_contiguous()._reduce_next(
                 reducer,
                 negaxis,
                 starts,
@@ -1307,7 +1307,7 @@ class NumpyArray(Content):
             raise ak._errors.wrap_error(AssertionError(result))
 
     def packed(self):
-        return self.contiguous().to_RegularArray()
+        return self.to_contiguous().to_RegularArray()
 
     def _to_list(self, behavior, json_conversions):
         if self.parameter("__array__") == "byte":
