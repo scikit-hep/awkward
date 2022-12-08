@@ -64,7 +64,7 @@ def _impl(array, axis, highlevel, behavior):
                 return layout.to_ListOffsetArray64(False)
             elif posaxis == depth and layout.is_list:
                 return layout
-            elif posaxis == 0:
+            elif layout.is_leaf:
                 raise ak._errors.wrap_error(
                     np.AxisError(
                         f"axis={axis} exceeds the depth of this array ({depth})"

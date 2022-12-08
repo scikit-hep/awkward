@@ -58,7 +58,7 @@ def _impl(array, axis, highlevel, behavior):
                 ],
             )
 
-        elif layout.is_unknown or layout.is_list or layout.is_record or layout.is_numpy:
+        elif layout.is_numpy or layout.is_unknown or layout.is_list or layout.is_record:
             return ak.contents.NumpyArray(
                 backend.nplike.zeros(len(layout), dtype=np.bool_)
             )
@@ -75,7 +75,7 @@ def _impl(array, axis, highlevel, behavior):
     max_axis = layout.branch_depth[1] - 1
     if axis > max_axis:
         raise ak._errors.wrap_error(
-            np.AxisError(f"axis={axis} exceeds the depth ({max_axis}) of this array")
+            np.AxisError(f"axis={axis} exceeds the depth of this array ({max_axis})")
         )
     behavior = ak._util.behavior_of(array, behavior=behavior)
     depth_context = {"posaxis": axis}

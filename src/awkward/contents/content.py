@@ -40,6 +40,7 @@ class Content:
     is_indexed = False
     is_record = False
     is_union = False
+    is_leaf = False
 
     def _init(self, parameters: dict[str, Any] | None, backend: Backend):
         if parameters is None:
@@ -1531,6 +1532,7 @@ class Content:
         allow_records: bool = True,
         keep_parameters: bool = True,
         numpy_to_regular: bool = True,
+        return_simplified: bool = True,
         return_array: bool = True,
         function_name: str | None = None,
     ) -> Content | None:
@@ -1544,6 +1546,7 @@ class Content:
                 "allow_records": allow_records,
                 "keep_parameters": keep_parameters,
                 "numpy_to_regular": numpy_to_regular,
+                "return_simplified": return_simplified,
                 "return_array": return_array,
                 "function_name": function_name,
             },

@@ -105,6 +105,18 @@ class RegularArray(Content):
     def simplified(cls, content, size, zeros_length=0, *, parameters=None):
         return cls(content, size, zeros_length, parameters=parameters)
 
+    @property
+    def offsets(self):
+        return self._compact_offsets64(True)
+
+    @property
+    def starts(self):
+        return self._compact_offsets64(True)[:-1]
+
+    @property
+    def stops(self):
+        return self._compact_offsets64(True)[1:]
+
     def _form_with_key(self, getkey):
         form_key = getkey(self)
         return self.Form(

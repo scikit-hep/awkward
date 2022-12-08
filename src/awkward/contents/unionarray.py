@@ -1513,9 +1513,13 @@ class UnionArray(Content):
         self, action, behavior, depth, depth_context, lateral_context, options
     ):
         if options["return_array"]:
+            if options["return_simplified"]:
+                make = UnionArray.simplified
+            else:
+                make = UnionArray
 
             def continuation():
-                return UnionArray.simplified(
+                return make(
                     self._tags,
                     self._index,
                     [
