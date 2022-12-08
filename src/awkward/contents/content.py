@@ -1336,25 +1336,6 @@ class Content:
     def _to_numpy(self, allow_missing: bool):
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def completely_flatten(
-        self,
-        backend: ak._backends.Backend | None = None,
-        flatten_records: bool = True,
-        function_name: str | None = None,
-        drop_nones: bool = True,
-    ):
-        if backend is None:
-            backend = self._backend
-        arrays = self._completely_flatten(
-            backend,
-            {
-                "flatten_records": flatten_records,
-                "function_name": function_name,
-                "drop_nones": drop_nones,
-            },
-        )
-        return tuple(arrays)
-
     def _completely_flatten(self, backend, options):
         raise ak._errors.wrap_error(NotImplementedError)
 

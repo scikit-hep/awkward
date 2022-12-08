@@ -165,7 +165,7 @@ def _impl(array, axis, highlevel, behavior):
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
 
     if axis is None:
-        out = layout.completely_flatten(function_name="ak.flatten")
+        out = ak._do.completely_flatten(layout, function_name="ak.flatten")
         assert isinstance(out, tuple) and all(
             isinstance(x, ak.contents.NumpyArray) for x in out
         )

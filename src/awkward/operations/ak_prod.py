@@ -126,8 +126,8 @@ def _impl(array, axis, keepdims, mask_identity, flatten_records):
         return reduce(
             [
                 map(x)
-                for x in layout.completely_flatten(
-                    function_name="ak.prod", flatten_records=flatten_records
+                for x in ak._do.completely_flatten(
+                    layout, function_name="ak.prod", flatten_records=flatten_records
                 )
             ]
         )

@@ -63,13 +63,6 @@ class Record:
     def content(self, index_or_field):
         return self._array.content(index_or_field)[self._at]
 
-    def completely_flatten(
-        self, backend=None, flatten_records=True, function_name=None, drop_nones=True
-    ):
-        return self._array[self._at : self._at + 1].completely_flatten(
-            backend, flatten_records, function_name, drop_nones
-        )
-
     def __repr__(self):
         return self._repr("", "", "")
 

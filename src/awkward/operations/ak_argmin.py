@@ -121,8 +121,8 @@ def _impl(array, axis, keepdims, mask_identity, flatten_records):
 
         best_index = None
         best_value = None
-        for tmp in layout.completely_flatten(
-            function_name="ak.argmin", flatten_records=flatten_records
+        for tmp in ak._do.completely_flatten(
+            layout, function_name="ak.argmin", flatten_records=flatten_records
         ):
             tmp = backend.nplike.asarray(tmp)
             if len(tmp) > 0:

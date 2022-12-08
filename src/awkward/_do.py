@@ -249,3 +249,33 @@ def pad_none(
     layout: Content, length: Integral, axis: Integral, clip: bool = False
 ) -> Content:
     return layout._pad_none(length, axis, 0, clip)
+
+
+def completely_flatten(
+    layout: Content | Record,
+    backend: ak._backends.Backend | None = None,
+    flatten_records: bool = True,
+    function_name: str | None = None,
+    drop_nones: bool = True,
+):
+    if isinstance(layout, Record):
+        return completely_flatten(
+            layout._array[layout._at : layout._at + 1],
+            backend,
+            flatten_records,
+            function_name,
+            drop_nones,
+        )
+
+    else:
+        if backend is None:
+            backend = layout._backend
+        arrays = layout._completely_flatten(
+            backend,
+            {
+                "flatten_records": flatten_records,
+                "function_name": function_name,
+                "drop_nones": drop_nones,
+            },
+        )
+        return tuple(arrays)

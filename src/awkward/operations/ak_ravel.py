@@ -57,7 +57,7 @@ def ravel(array, *, highlevel=True, behavior=None):
 def _impl(array, highlevel, behavior):
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
 
-    out = layout.completely_flatten(function_name="ak.ravel", drop_nones=False)
+    out = ak._do.completely_flatten(layout, function_name="ak.ravel", drop_nones=False)
     assert isinstance(out, tuple) and all(
         isinstance(x, ak.contents.Content) for x in out
     )
