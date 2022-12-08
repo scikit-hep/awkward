@@ -58,7 +58,7 @@ def _impl(array):
         return array.to_list(None)
 
     elif isinstance(array, _ext.ArrayBuilder):
-        formstr, length, container = array.to_buffers()
+        formstr, length, container = array._pub_to_buffers()
         form = ak.forms.from_json(formstr)
         layout = ak.operations.from_buffers(form, length, container)
         return layout.to_list(None)

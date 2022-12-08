@@ -168,7 +168,7 @@ def _impl(
         out = array.array[array.at : array.at + 1]
 
     elif isinstance(array, _ext.ArrayBuilder):
-        formstr, length, buffers = array.to_buffers()
+        formstr, length, buffers = array._pub_to_buffers()
         form = ak.forms.from_json(formstr)
 
         out = ak.operations.from_buffers(form, length, buffers, highlevel=False)

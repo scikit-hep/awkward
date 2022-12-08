@@ -184,7 +184,7 @@ class Content:
     def _forget_length(self) -> Self:
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def to_buffers(
+    def _pub_to_buffers(
         self,
         container: MutableMapping[str, Any] | None = None,
         buffer_key="{form_key}-{attribute}",
@@ -198,7 +198,9 @@ class Content:
             backend = self._backend
         if not backend.nplike.known_data:
             raise ak._errors.wrap_error(
-                TypeError("cannot call 'to_buffers' on an array without concrete data")
+                TypeError(
+                    "cannot call '_pub_to_buffers' on an array without concrete data"
+                )
             )
 
         if isinstance(buffer_key, str):
