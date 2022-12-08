@@ -1748,7 +1748,7 @@ class ListOffsetArray(Content):
                 path, type(self), message, error.id, filename
             )
         else:
-            return self._content.validity_error(path + ".content")
+            return self._content._validity_error(path + ".content")
 
     def _nbytes_part(self):
         return self.offsets._nbytes_part() + self.content._nbytes_part()

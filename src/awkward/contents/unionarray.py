@@ -1359,7 +1359,7 @@ class UnionArray(Content):
                 )
 
             for i in range(len(self.contents)):
-                sub = self.contents[i].validity_error(path + f".content({i})")
+                sub = self.contents[i]._validity_error(path + f".content({i})")
                 if sub != "":
                     return sub
 

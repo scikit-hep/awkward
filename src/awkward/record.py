@@ -78,7 +78,7 @@ class Record:
         return "".join(out)
 
     def validity_error(self, path="layout.array"):
-        return self._array.validity_error(path)
+        return ak._do.validity_error(self._array, path)
 
     @property
     def parameters(self):

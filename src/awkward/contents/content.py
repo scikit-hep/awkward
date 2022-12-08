@@ -985,19 +985,13 @@ class Content:
     ):
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def validity_error_parameters(self, path: str) -> str:
+    def _validity_error_parameters(self, path: str) -> str:
         if self.parameter("__array__") == "categorical":
             if not ak._do.is_unique(self._content):
                 return 'at {} ("{}"): __array__ = "categorical" requires contents to be unique'.format(
                     path, type(self)
                 )
         return ""
-
-    def validity_error(self, path: str = "layout") -> str:
-        paramcheck = self.validity_error_parameters(path)
-        if paramcheck != "":
-            return paramcheck
-        return self._validity_error(path)
 
     def _validity_error(self, path: str) -> str:
         raise ak._errors.wrap_error(NotImplementedError)

@@ -831,7 +831,7 @@ class RecordArray(Content):
             if cont.length < self.length:
                 return f'at {path} ("{type(self)}"): len(field({i})) < len(recordarray)'
         for i, cont in enumerate(self.contents):
-            sub = cont.validity_error(f"{path}.field({i})")
+            sub = cont._validity_error(f"{path}.field({i})")
             if sub != "":
                 return sub
         return ""
