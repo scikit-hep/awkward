@@ -1245,9 +1245,9 @@ class NumpyArray(Content):
     def _nbytes_part(self):
         return self.data.nbytes
 
-    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
+    def _pub_to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         if self._data.ndim != 1:
-            return self.to_RegularArray()._to_arrow(
+            return self.to_RegularArray()._pub_to_arrow(
                 pyarrow, mask_node, validbytes, length, options
             )
 

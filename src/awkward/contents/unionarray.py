@@ -1402,7 +1402,7 @@ class UnionArray(Content):
                 parameters=self._parameters,
             )
 
-    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
+    def _pub_to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         nptags = self._tags.raw(numpy)
         npindex = self._index.raw(numpy)
         copied_index = False
@@ -1444,7 +1444,7 @@ class UnionArray(Content):
                 this_length = this_index.max() + 1
 
             values.append(
-                content._to_arrow(
+                content._pub_to_arrow(
                     pyarrow, mask_node, this_validbytes, this_length, options
                 )
             )

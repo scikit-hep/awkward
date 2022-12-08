@@ -887,9 +887,9 @@ class RecordArray(Content):
                     backend=self._backend,
                 )
 
-    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
+    def _pub_to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         values = [
-            (x if x.length == length else x[:length])._to_arrow(
+            (x if x.length == length else x[:length])._pub_to_arrow(
                 pyarrow, mask_node, validbytes, length, options
             )
             for x in self._contents

@@ -451,8 +451,8 @@ class UnmaskedArray(Content):
                 parameters=self._parameters,
             )
 
-    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
-        return self._content._to_arrow(pyarrow, self, None, length, options)
+    def _pub_to_arrow(self, pyarrow, mask_node, validbytes, length, options):
+        return self._content._pub_to_arrow(pyarrow, self, None, length, options)
 
     def _pub_to_numpy(self, allow_missing):
         content = self.content._pub_to_numpy(allow_missing)

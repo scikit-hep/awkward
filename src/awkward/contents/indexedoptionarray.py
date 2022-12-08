@@ -1464,7 +1464,7 @@ class IndexedOptionArray(Content):
                 parameters=self._parameters,
             )
 
-    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
+    def _pub_to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         index = numpy.array(self._index, copy=True)
         this_validbytes = self.mask_as_bool(valid_when=True)
         index[~this_validbytes] = 0
@@ -1479,7 +1479,7 @@ class IndexedOptionArray(Content):
         next = ak.contents.IndexedArray(
             ak.index.Index(index), self._content, parameters=next_parameters
         )
-        return next._to_arrow(
+        return next._pub_to_arrow(
             pyarrow,
             self,
             ak._connect.pyarrow.and_validbytes(validbytes, this_validbytes),

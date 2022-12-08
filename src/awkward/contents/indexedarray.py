@@ -964,7 +964,7 @@ class IndexedArray(Content):
                 parameters=self._parameters,
             )
 
-    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
+    def _pub_to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         if (
             not options["categorical_as_dictionary"]
             and self.parameter("__array__") == "categorical"
@@ -972,12 +972,12 @@ class IndexedArray(Content):
             next_parameters = dict(self._parameters)
             del next_parameters["__array__"]
             next = IndexedArray(self._index, self._content, parameters=next_parameters)
-            return next._to_arrow(pyarrow, mask_node, validbytes, length, options)
+            return next._pub_to_arrow(pyarrow, mask_node, validbytes, length, options)
 
         index = self._index.raw(numpy)
 
         if self.parameter("__array__") == "categorical":
-            dictionary = self._content._to_arrow(
+            dictionary = self._content._pub_to_arrow(
                 pyarrow, None, None, self._content.length, options
             )
             out = pyarrow.DictionaryArray.from_arrays(
@@ -1001,14 +1001,14 @@ class IndexedArray(Content):
 
         else:
             if self._content.length == 0:
-                # IndexedOptionArray._to_arrow replaces -1 in the index with 0. So behind
+                # IndexedOptionArray._pub_to_arrow replaces -1 in the index with 0. So behind
                 # every masked value is self._content[0], unless self._content.length == 0.
                 # In that case, don't call self._content[index]; it's empty anyway.
                 next = self._content
             else:
                 next = self._content._pub_carry(ak.index.Index(index), False)
 
-            return next.merge_parameters(self._parameters)._to_arrow(
+            return next.merge_parameters(self._parameters)._pub_to_arrow(
                 pyarrow, mask_node, validbytes, length, options
             )
 

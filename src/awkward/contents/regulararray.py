@@ -1218,9 +1218,9 @@ class RegularArray(Content):
         shape = (self._length, self._size) + out.shape[1:]
         return out[: self._length * self._size].reshape(shape)
 
-    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
+    def _pub_to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         if self.parameter("__array__") == "string":
-            return self.to_ListOffsetArray64(False)._to_arrow(
+            return self.to_ListOffsetArray64(False)._pub_to_arrow(
                 pyarrow, mask_node, validbytes, length, options
             )
 
@@ -1247,7 +1247,7 @@ class RegularArray(Content):
             )
 
         else:
-            paarray = akcontent._to_arrow(
+            paarray = akcontent._pub_to_arrow(
                 pyarrow, None, None, self._length * self._size, options
             )
 

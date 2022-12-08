@@ -1876,7 +1876,7 @@ class ListOffsetArray(Content):
                 parameters=self._parameters,
             )
 
-    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
+    def _pub_to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         is_string = self.parameter("__array__") == "string"
         is_bytestring = self.parameter("__array__") == "bytestring"
         if is_string:
@@ -1908,7 +1908,7 @@ class ListOffsetArray(Content):
                     self._content,
                     parameters=self._parameters,
                 )
-                return next.to_ListOffsetArray64(True)._to_arrow(
+                return next.to_ListOffsetArray64(True)._pub_to_arrow(
                     pyarrow, mask_node, validbytes, length, options
                 )
 
@@ -1953,7 +1953,7 @@ class ListOffsetArray(Content):
             )
 
         else:
-            paarray = akcontent._to_arrow(
+            paarray = akcontent._pub_to_arrow(
                 pyarrow, None, None, akcontent.length, options
             )
 

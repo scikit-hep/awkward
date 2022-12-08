@@ -987,10 +987,10 @@ class ByteMaskedArray(Content):
                 parameters=self._parameters,
             )
 
-    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
+    def _pub_to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         this_validbytes = self.mask_as_bool(valid_when=True)
 
-        return self._content._to_arrow(
+        return self._content._pub_to_arrow(
             pyarrow,
             self,
             ak._connect.pyarrow.and_validbytes(validbytes, this_validbytes),

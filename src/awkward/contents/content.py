@@ -1476,7 +1476,7 @@ class Content:
         import awkward._connect.pyarrow
 
         pyarrow = awkward._connect.pyarrow.import_pyarrow("to_arrow")
-        return self._to_arrow(
+        return self._pub_to_arrow(
             pyarrow,
             None,
             None,
@@ -1493,7 +1493,7 @@ class Content:
             },
         )
 
-    def _to_arrow(
+    def _pub_to_arrow(
         self,
         pyarrow: Any,
         mask_node: Any,
