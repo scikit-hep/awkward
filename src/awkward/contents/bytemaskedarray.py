@@ -1008,7 +1008,7 @@ class ByteMaskedArray(Content):
         else:
             return [self]
 
-    def _recursively_apply(
+    def _pub_recursively_apply(
         self, action, behavior, depth, depth_context, lateral_context, options
     ):
         if self._backend.nplike.known_shape:
@@ -1025,7 +1025,7 @@ class ByteMaskedArray(Content):
             def continuation():
                 return make(
                     self._mask,
-                    content._recursively_apply(
+                    content._pub_recursively_apply(
                         action,
                         behavior,
                         depth,
@@ -1040,7 +1040,7 @@ class ByteMaskedArray(Content):
         else:
 
             def continuation():
-                content._recursively_apply(
+                content._pub_recursively_apply(
                     action,
                     behavior,
                     depth,

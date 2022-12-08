@@ -501,7 +501,7 @@ def _impl(
                     )
                 )
 
-        out = layout._recursively_apply(
+        out = layout._pub_recursively_apply(
             action,
             behavior,
             1,

@@ -1545,7 +1545,7 @@ class IndexedOptionArray(Content):
         else:
             return [self]
 
-    def _recursively_apply(
+    def _pub_recursively_apply(
         self, action, behavior, depth, depth_context, lateral_context, options
     ):
         if (
@@ -1575,7 +1575,7 @@ class IndexedOptionArray(Content):
             def continuation():
                 return make(
                     index,
-                    content._recursively_apply(
+                    content._pub_recursively_apply(
                         action,
                         behavior,
                         depth,
@@ -1589,7 +1589,7 @@ class IndexedOptionArray(Content):
         else:
 
             def continuation():
-                content._recursively_apply(
+                content._pub_recursively_apply(
                     action,
                     behavior,
                     depth,

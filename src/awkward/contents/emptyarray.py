@@ -335,7 +335,7 @@ class EmptyArray(Content):
     def _pub_completely_flatten(self, backend, options):
         return []
 
-    def _recursively_apply(
+    def _pub_recursively_apply(
         self, action, behavior, depth, depth_context, lateral_context, options
     ):
         if options["return_array"]:

@@ -1544,7 +1544,7 @@ class Content:
         return_array: bool = True,
         function_name: str | None = None,
     ) -> Content | None:
-        return self._recursively_apply(
+        return self._pub_recursively_apply(
             action,
             behavior,
             1,
@@ -1560,7 +1560,7 @@ class Content:
             },
         )
 
-    def _recursively_apply(
+    def _pub_recursively_apply(
         self,
         action: ActionType,
         behavior: dict | None,

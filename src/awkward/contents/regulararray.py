@@ -1283,7 +1283,7 @@ class RegularArray(Content):
             flat = self._content[: self._length * self._size]
             return flat._pub_completely_flatten(backend, options)
 
-    def _recursively_apply(
+    def _pub_recursively_apply(
         self, action, behavior, depth, depth_context, lateral_context, options
     ):
         if self._backend.nplike.known_shape:
@@ -1295,7 +1295,7 @@ class RegularArray(Content):
 
             def continuation():
                 return RegularArray(
-                    content._recursively_apply(
+                    content._pub_recursively_apply(
                         action,
                         behavior,
                         depth + 1,
@@ -1311,7 +1311,7 @@ class RegularArray(Content):
         else:
 
             def continuation():
-                content._recursively_apply(
+                content._pub_recursively_apply(
                     action,
                     behavior,
                     depth + 1,
