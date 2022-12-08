@@ -824,7 +824,7 @@ class ListOffsetArray(Content):
             # FIXME: check validity error
 
             if isinstance(self._content, ak.contents.NumpyArray):
-                out, outoffsets = self._content._as_unique_strings(self._offsets)
+                out, outoffsets = self._content._as_pub_unique_strings(self._offsets)
                 out2 = ak.contents.ListOffsetArray(
                     outoffsets, out, parameters=self._parameters
                 )
@@ -859,7 +859,7 @@ class ListOffsetArray(Content):
 
             return self._content._is_unique(negaxis, starts, nextparents, outlength)
 
-    def _unique(self, negaxis, starts, parents, outlength):
+    def _pub_unique(self, negaxis, starts, parents, outlength):
         if self._offsets.length - 1 == 0:
             return self
 
@@ -877,7 +877,7 @@ class ListOffsetArray(Content):
             # FIXME: check validity error
 
             if isinstance(self._content, ak.contents.NumpyArray):
-                out, nextoffsets = self._content._as_unique_strings(self._offsets)
+                out, nextoffsets = self._content._as_pub_unique_strings(self._offsets)
                 return ak.contents.ListOffsetArray(
                     nextoffsets, out, parameters=self._parameters
                 )
@@ -904,7 +904,7 @@ class ListOffsetArray(Content):
             ) = self._rearrange_prepare_next(outlength, parents)
 
             nextcontent = self._content._pub_carry(nextcarry, False)
-            outcontent = nextcontent._unique(
+            outcontent = nextcontent._pub_unique(
                 negaxis - 1,
                 nextstarts,
                 nextparents,
@@ -958,7 +958,7 @@ class ListOffsetArray(Content):
             )
 
             trimmed = self._content[self._offsets[0] : self._offsets[-1]]
-            outcontent = trimmed._unique(
+            outcontent = trimmed._pub_unique(
                 negaxis,
                 self._offsets[:-1],
                 nextparents,

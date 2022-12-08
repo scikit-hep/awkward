@@ -777,10 +777,10 @@ class RegularArray(Content):
             outlength,
         )
 
-    def _unique(self, negaxis, starts, parents, outlength):
+    def _pub_unique(self, negaxis, starts, parents, outlength):
         if self._length == 0:
             return self
-        out = self.to_ListOffsetArray64(True)._unique(
+        out = self.to_ListOffsetArray64(True)._pub_unique(
             negaxis,
             starts,
             parents,

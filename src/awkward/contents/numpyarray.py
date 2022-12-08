@@ -591,7 +591,7 @@ class NumpyArray(Content):
 
         return True if is_equal[0] == 1 else False
 
-    def _as_unique_strings(self, offsets):
+    def _as_pub_unique_strings(self, offsets):
         offsets = ak.index.Index64(offsets.data, nplike=offsets.nplike)
         outoffsets = ak.index.Index64.empty(
             offsets.length, nplike=self._backend.index_nplike
@@ -675,13 +675,13 @@ class NumpyArray(Content):
                 outlength,
             )
         else:
-            out = self._unique(negaxis, starts, parents, outlength)
+            out = self._pub_unique(negaxis, starts, parents, outlength)
             if isinstance(out, ak.contents.ListOffsetArray):
                 return out.content.length == self.length
 
             return out.length == self.length
 
-    def _unique(self, negaxis, starts, parents, outlength):
+    def _pub_unique(self, negaxis, starts, parents, outlength):
         if self.shape[0] == 0:
             return self
 
@@ -745,7 +745,7 @@ class NumpyArray(Content):
         # axis is not None
         if len(self.shape) != 1 or not self.is_contiguous:
             contiguous_self = self if self.is_contiguous else self.contiguous()
-            return contiguous_self.to_RegularArray()._unique(
+            return contiguous_self.to_RegularArray()._pub_unique(
                 negaxis,
                 starts,
                 parents,

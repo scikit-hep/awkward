@@ -747,7 +747,7 @@ class RecordArray(Content):
                 return False
         return True
 
-    def _unique(self, negaxis, starts, parents, outlength):
+    def _pub_unique(self, negaxis, starts, parents, outlength):
         raise ak._errors.wrap_error(NotImplementedError)
 
     def _pub_argsort_next(

@@ -631,7 +631,7 @@ class IndexedArray(Content):
         else:
             return self.project()._local_index(posaxis, depth)
 
-    def _unique_index(self, index, sorted=True):
+    def _pub_unique_index(self, index, sorted=True):
         next = ak.index.Index64.zeros(self.length, nplike=self._backend.index_nplike)
         length = ak.index.Index64.zeros(1, nplike=self._backend.index_nplike)
 
@@ -707,7 +707,7 @@ class IndexedArray(Content):
         if self._index.length == 0:
             return True
 
-        nextindex = self._unique_index(self._index)
+        nextindex = self._pub_unique_index(self._index)
 
         if len(nextindex) != len(self._index):
             return False
@@ -715,7 +715,7 @@ class IndexedArray(Content):
         next = self._content._pub_carry(nextindex, False)
         return next._is_unique(negaxis, starts, parents, outlength)
 
-    def _unique(self, negaxis, starts, parents, outlength):
+    def _pub_unique(self, negaxis, starts, parents, outlength):
         if self._index.length == 0:
             return self
 
@@ -753,7 +753,7 @@ class IndexedArray(Content):
             )
         )
         next = self._content._pub_carry(nextcarry, False)
-        unique = next._unique(
+        unique = next._pub_unique(
             negaxis,
             starts,
             nextparents,

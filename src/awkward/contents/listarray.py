@@ -1167,10 +1167,10 @@ class ListArray(Content):
             negaxis, starts, parents, outlength
         )
 
-    def _unique(self, negaxis, starts, parents, outlength):
+    def _pub_unique(self, negaxis, starts, parents, outlength):
         if self._starts.length == 0:
             return self
-        return self.to_ListOffsetArray64(True)._unique(
+        return self.to_ListOffsetArray64(True)._pub_unique(
             negaxis, starts, parents, outlength
         )
 

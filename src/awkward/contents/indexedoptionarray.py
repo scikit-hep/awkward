@@ -871,7 +871,7 @@ class IndexedOptionArray(Content):
         projected = self.project()
         return projected._is_unique(negaxis, starts, parents, outlength)
 
-    def _unique(self, negaxis, starts, parents, outlength):
+    def _pub_unique(self, negaxis, starts, parents, outlength):
         branch, depth = self.branch_depth
 
         inject_nones = (
@@ -882,7 +882,7 @@ class IndexedOptionArray(Content):
 
         next, nextparents, numnull, outindex = self._rearrange_prepare_next(parents)
 
-        out = next._unique(
+        out = next._pub_unique(
             negaxis,
             starts,
             nextparents,

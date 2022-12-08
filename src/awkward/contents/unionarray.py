@@ -1216,7 +1216,7 @@ class UnionArray(Content):
 
         return simplified._is_unique(negaxis, starts, parents, outlength)
 
-    def _unique(self, negaxis, starts, parents, outlength):
+    def _pub_unique(self, negaxis, starts, parents, outlength):
         simplified = type(self).simplified(
             self._tags,
             self._index,
@@ -1230,7 +1230,7 @@ class UnionArray(Content):
                 ValueError("cannot make a unique irreducible UnionArray")
             )
 
-        return simplified._unique(negaxis, starts, parents, outlength)
+        return simplified._pub_unique(negaxis, starts, parents, outlength)
 
     def _pub_argsort_next(
         self,

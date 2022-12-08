@@ -1381,7 +1381,7 @@ class Content:
                 self.length, nplike=self._backend.index_nplike
             )
 
-            return self._unique(negaxis, starts, parents, 1)
+            return self._pub_unique(negaxis, starts, parents, 1)
 
         raise ak._errors.wrap_error(
             np.AxisError(
@@ -1391,7 +1391,7 @@ class Content:
             )
         )
 
-    def _unique(
+    def _pub_unique(
         self,
         negaxis: Integral | None,
         starts: ak.index.Index,

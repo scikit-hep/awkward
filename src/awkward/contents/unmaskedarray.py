@@ -329,10 +329,10 @@ class UnmaskedArray(Content):
             return True
         return self._content._is_unique(negaxis, starts, parents, outlength)
 
-    def _unique(self, negaxis, starts, parents, outlength):
+    def _pub_unique(self, negaxis, starts, parents, outlength):
         if self._content.length == 0:
             return self
-        return self._content._unique(negaxis, starts, parents, outlength)
+        return self._content._pub_unique(negaxis, starts, parents, outlength)
 
     def _pub_argsort_next(
         self,
