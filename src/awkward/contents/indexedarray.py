@@ -1012,8 +1012,8 @@ class IndexedArray(Content):
                 pyarrow, mask_node, validbytes, length, options
             )
 
-    def _to_numpy(self, allow_missing):
-        return self.project()._to_numpy(allow_missing)
+    def _pub_to_numpy(self, allow_missing):
+        return self.project()._pub_to_numpy(allow_missing)
 
     def _completely_flatten(self, backend, options):
         return self.project()._completely_flatten(backend, options)

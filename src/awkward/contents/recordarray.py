@@ -917,10 +917,10 @@ class RecordArray(Content):
             children=values,
         )
 
-    def _to_numpy(self, allow_missing):
+    def _pub_to_numpy(self, allow_missing):
         if self.fields is None:
             return self._backend.nplike.empty(self.length, dtype=[])
-        contents = [x._to_numpy(allow_missing) for x in self._contents]
+        contents = [x._pub_to_numpy(allow_missing) for x in self._contents]
         if any(len(x.shape) != 1 for x in contents):
             raise ak._errors.wrap_error(
                 ValueError(f"cannot convert {self} into np.ndarray")

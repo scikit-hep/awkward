@@ -1209,7 +1209,7 @@ class RegularArray(Content):
                 parameters=self._parameters,
             )
 
-    def _to_numpy(self, allow_missing):
+    def _pub_to_numpy(self, allow_missing):
         array_param = self.parameter("__array__")
         if array_param in {"bytestring", "string"}:
             return self._backend.nplike.array(self.to_list())

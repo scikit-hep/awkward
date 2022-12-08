@@ -179,7 +179,7 @@ if pyarrow is not None:
         pyarrow.large_binary(),
     )
 
-    _pyarrow_to_numpy_dtype = {
+    _pyarrow_pub_to_numpy_dtype = {
         pyarrow.date32(): (True, np.dtype("M8[D]")),
         pyarrow.date64(): (False, np.dtype("M8[ms]")),
         pyarrow.time32("s"): (True, np.dtype("M8[s]")),
@@ -675,7 +675,7 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
         validbits = buffers.pop(0)
         data = buffers.pop(0)
 
-        to64, dt = _pyarrow_to_numpy_dtype.get(str(storage_type), (False, None))
+        to64, dt = _pyarrow_pub_to_numpy_dtype.get(str(storage_type), (False, None))
         if to64:
             data = numpy.frombuffer(data, dtype=np.int32).astype(np.int64)
         if dt is None:
@@ -882,7 +882,7 @@ def form_popbuffers(awkwardarrow_type, storage_type):
         )
 
     elif isinstance(storage_type, pyarrow.lib.DataType):
-        _, dt = _pyarrow_to_numpy_dtype.get(str(storage_type), (False, None))
+        _, dt = _pyarrow_pub_to_numpy_dtype.get(str(storage_type), (False, None))
         if dt is None:
             dt = np.dtype(storage_type.to_pandas_dtype())
 

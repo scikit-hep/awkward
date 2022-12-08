@@ -1275,7 +1275,7 @@ class NumpyArray(Content):
             ),
         )
 
-    def _to_numpy(self, allow_missing):
+    def _pub_to_numpy(self, allow_missing):
         out = numpy.asarray(self._data)
         if type(out).__module__.startswith("cupy."):
             return out.get()

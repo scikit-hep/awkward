@@ -1487,8 +1487,8 @@ class IndexedOptionArray(Content):
             options,
         )
 
-    def _to_numpy(self, allow_missing):
-        content = self.project()._to_numpy(allow_missing)
+    def _pub_to_numpy(self, allow_missing):
+        content = self.project()._pub_to_numpy(allow_missing)
 
         shape = list(content.shape)
         shape[0] = self.length

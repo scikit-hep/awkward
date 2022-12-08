@@ -609,8 +609,8 @@ class BitMaskedArray(Content):
             pyarrow, mask_node, validbytes, length, options
         )
 
-    def _to_numpy(self, allow_missing):
-        return self.to_ByteMaskedArray()._to_numpy(allow_missing)
+    def _pub_to_numpy(self, allow_missing):
+        return self.to_ByteMaskedArray()._pub_to_numpy(allow_missing)
 
     def _completely_flatten(self, backend, options):
         branch, depth = self.branch_depth
