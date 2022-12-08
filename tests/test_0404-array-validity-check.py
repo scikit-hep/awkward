@@ -74,7 +74,7 @@ def test_BitMaskedArray():
         None,
         None,
     ]
-    assert array.is_unique(axis=None) is True
+    assert ak._do.is_unique(array, axis=None) is True
     assert to_list(array.unique(axis=None)) == [0, 1, 5, 7, 8, 9, None]
     assert to_list(array.unique(axis=-1)) == [0, 1, 5, 7, 8, 9, None]
 
@@ -86,7 +86,7 @@ def test_ByteMaskedArray_0():
     mask = ak.index.Index8(np.array([0, 0, 1, 1, 0], dtype=np.int8))
     array = ak.contents.ByteMaskedArray(mask, content, valid_when=False)
     assert to_list(array) == [[0.0, 1.1, 2.2], [], None, None, [6.6, 7.7, 8.8, 9.9]]
-    assert array.is_unique(axis=None) is True
+    assert ak._do.is_unique(array, axis=None) is True
     assert to_list(array.unique(axis=None)) == [
         0.0,
         1.1,
@@ -114,7 +114,7 @@ def test_ByteMaskedArray_1():
     array = ak.contents.ByteMaskedArray(mask, content, valid_when=False)
 
     assert to_list(array) == [[0.0, 1.1, 2.2], [], None, None, [6.6, 7.7, 8.8, 9.9]]
-    assert array.is_unique(axis=None) is True
+    assert ak._do.is_unique(array, axis=None) is True
     assert to_list(array.unique(axis=None)) == [
         0.0,
         1.1,
@@ -142,7 +142,7 @@ def test_ByteMaskedArray_2():
     array = ak.contents.ByteMaskedArray(mask, content, valid_when=False)
 
     assert to_list(array) == [[1.1, 1.1, 2.2], [], None, None, [1.1, 7.7, 8.8, 9.9]]
-    assert array.is_unique(axis=None) is False
+    assert ak._do.is_unique(array, axis=None) is False
     assert to_list(array.unique(axis=None)) == [1.1, 2.2, 7.7, 8.8, 9.9, None]
     assert to_list(array.unique(axis=-1)) == [
         [1.1, 2.2],
@@ -160,7 +160,7 @@ def test_UnmaskedArray():
     array = ak.contents.UnmaskedArray(content)
 
     assert to_list(array) == [1.1, 2.2, 3.3, 4.4, 5.5]
-    assert array.is_unique(axis=None) is True
+    assert ak._do.is_unique(array, axis=None) is True
     assert to_list(array.unique(axis=None)) == [1.1, 2.2, 3.3, 4.4, 5.5]
 
 
@@ -204,13 +204,13 @@ def test_categorical():
     categorical = ak.operations.ak_to_categorical.to_categorical(array)
 
     assert ak.operations.is_valid(categorical) is True
-    assert categorical.layout.is_unique() is False
+    assert ak._do.is_unique(categorical.layout) is False
 
 
 def test_NumpyArray():
     array = ak.contents.NumpyArray(np.array([5, 6, 1, 3, 4, 5]))
 
-    assert array.is_unique() is False
+    assert ak._do.is_unique(array) is False
     assert to_list(array.unique()) == [1, 3, 4, 5, 6]
 
 
@@ -255,8 +255,13 @@ def test_2d():
         )
     )
 
-    assert array.is_unique() is False
-    assert array.is_unique(axis=-1) is True
+    assert (
+        ak._do.is_unique(
+            array,
+        )
+        is False
+    )
+    assert ak._do.is_unique(array, axis=-1) is True
 
     assert to_list(array.unique()) == [1.1, 2.2, 3.3, 4.4, 5.5]
     assert to_list(array.unique(axis=-1)) == [
@@ -276,7 +281,7 @@ def test_2d_in_axis():
             ]
         )
     )
-    assert array.is_unique() is False
+    assert ak._do.is_unique(array) is False
     assert to_list(array.unique()) == [1.1, 2.2, 3.3, 4.4, 5.5]
 
     assert to_list(array.sort(axis=-1)) == [
@@ -310,7 +315,7 @@ def test_3d():
         )
     )  # 5
 
-    assert array.is_unique() is True
+    assert ak._do.is_unique(array) is True
 
     assert to_list(array.unique()) == [
         -15.15,
@@ -400,7 +405,7 @@ def test_ListOffsetArray():
         "three",
         "two",
     ]
-    assert array.is_unique() is True
+    assert ak._do.is_unique(array) is True
     assert to_list(array.unique(axis=-1)) == [
         "five",
         "four",
@@ -419,7 +424,7 @@ def test_ListOffsetArray():
         "two",
         "two",
     ]
-    assert array2.is_unique() is False
+    assert ak._do.is_unique(array2) is False
     assert to_list(array2.unique(axis=-1)) == [
         "four",
         "one",
@@ -440,7 +445,7 @@ def test_ListOffsetArray():
         [6.6, 7.7, 8.8, 5.5],
         [],
     ]
-    assert listoffsetarray.is_unique() is True
+    assert ak._do.is_unique(listoffsetarray) is True
     assert to_list(listoffsetarray.unique(axis=-1)) == [
         [1.1, 2.2, 3.3],
         [],
@@ -476,7 +481,7 @@ def test_ListOffsetArray():
         [2.2, 3.3, 1.1],
         [5.5],
     ]
-    assert listoffsetarray.is_unique() is False
+    assert ak._do.is_unique(listoffsetarray) is False
     assert to_list(listoffsetarray.unique(axis=-1)) == [
         [1.1, 2.2, 3.3],
         [],
@@ -499,7 +504,7 @@ def test_ListOffsetArray():
         [9.9],
         [5.5],
     ]
-    assert listoffsetarray1.is_unique() is False
+    assert ak._do.is_unique(listoffsetarray1) is False
     assert to_list(listoffsetarray1.unique(axis=-1)) == [
         [1.1, 2.2, 3.3],
         [1.1, 2.2, 3.3],
@@ -523,7 +528,7 @@ def test_ListOffsetArray():
         [5.5],
         [5.5],
     ]
-    assert listoffsetarray2.is_unique() is False
+    assert ak._do.is_unique(listoffsetarray2) is False
     assert to_list(listoffsetarray2.unique(axis=-1)) == [
         [1.1, 2.2, 3.3],
         [1.1, 2.2, 3.3],
@@ -555,7 +560,7 @@ def test_ListOffsetArray():
         [2.2, 6.6, 7.7, 9.9],
         [],
     ]
-    assert listoffsetarray2.is_unique(axis=-1) is True
+    assert ak._do.is_unique(listoffsetarray2, axis=-1) is True
     assert to_list(listoffsetarray2.unique(axis=-1)) == [
         [0.0, 1.1, 2.2],
         [],
@@ -583,7 +588,7 @@ def test_ListOffsetArray():
         [],
         [],
     ]
-    assert listoffsetarray.is_unique() is True
+    assert ak._do.is_unique(listoffsetarray) is True
     assert to_list(listoffsetarray.unique(axis=-1)) == [
         [],
         [],
@@ -636,7 +641,7 @@ def test_RegularArray():
         [2.2, 1.5, 1.6],
         [3.6, None, 6.7],
     ]
-    assert regular_array.is_unique() is False
+    assert ak._do.is_unique(regular_array) is False
     assert to_list(regular_array.unique(axis=-1)) == [
         [3.9, 6.9],
         [1.5, 1.6, 2.2],
@@ -664,7 +669,7 @@ def test_RegularArray():
         [3.9, 6.9, 6.9],
         [None, None, None],
     ]
-    assert regular_array2.is_unique() is False
+    assert ak._do.is_unique(regular_array2) is False
     assert to_list(regular_array2.unique(axis=None)) == [3.9, 6.9, None]
 
 
@@ -675,7 +680,7 @@ def test_IndexedArray():
     index = ak.index.Index64(np.array([4, 3, 2, 1, 0], dtype=np.int64))
     indexedarray = ak.contents.IndexedArray(index, content)
 
-    assert indexedarray.is_unique() is True
+    assert ak._do.is_unique(indexedarray) is True
 
     listoffsetarray = ak.operations.from_iter(
         [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], highlevel=False
@@ -690,9 +695,9 @@ def test_IndexedArray():
         [],
         [0.0, 1.1, 2.2],
     ]
-    assert indexedarray.is_unique() is True
+    assert ak._do.is_unique(indexedarray) is True
 
-    assert indexedarray.is_unique() is True
+    assert ak._do.is_unique(indexedarray) is True
     assert to_list(indexedarray.unique()) == [
         0.0,
         1.1,
@@ -723,8 +728,8 @@ def test_IndexedArray():
         None,
         [0.0, 1.1, 2.2],
     ]
-    assert indexedarray.is_unique() is False
-    assert indexedarray.is_unique(axis=-1) is True
+    assert ak._do.is_unique(indexedarray) is False
+    assert ak._do.is_unique(indexedarray, axis=-1) is True
     assert to_list(indexedarray.unique(axis=-1)) == [
         [6.6, 7.7, 8.8, 9.9],
         [6.6, 7.7, 8.8, 9.9],
@@ -750,9 +755,9 @@ def test_RecordArray():
         ]
     )
 
-    assert array.layout.is_unique() is False
-    assert array["x"].layout.is_unique() is True
-    assert array["y"].layout.is_unique() is False
+    assert ak._do.is_unique(array.layout) is False
+    assert ak._do.is_unique(array["x"].layout) is True
+    assert ak._do.is_unique(array["y"].layout) is False
 
 
 def test_same_categories():
@@ -778,9 +783,9 @@ def test_same_categories():
         "two",
         "two",
     ]
-    assert categorical1.is_unique() is False
-    assert categorical1.content.is_unique() is True
-    assert categorical2.is_unique() is False
+    assert ak._do.is_unique(categorical1) is False
+    assert ak._do.is_unique(categorical1.content) is True
+    assert ak._do.is_unique(categorical2) is False
 
     assert to_list(array1) == [
         "one",
@@ -835,7 +840,7 @@ def test_UnionArray():
         [3, 3, 3],
         [],
     ]
-    assert array.is_unique() is False
+    assert ak._do.is_unique(array) is False
     assert to_list(array.unique(axis=None)) == [1.0, 1.1, 2.0, 2.2, 3.0, 3.3]
     assert to_list(array.unique(axis=-1)) == [
         [],

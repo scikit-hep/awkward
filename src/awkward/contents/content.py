@@ -1190,7 +1190,7 @@ class Content:
 
     def validity_error_parameters(self, path: str) -> str:
         if self.parameter("__array__") == "categorical":
-            if not self._content.is_unique():
+            if not ak._do.is_unique(self._content):
                 return 'at {} ("{}"): __array__ = "categorical" requires contents to be unique'.format(
                     path, type(self)
                 )
@@ -1211,12 +1211,6 @@ class Content:
 
     def purelist_parameter(self, key: str):
         return self.Form.purelist_parameter(self, key)
-
-    def is_unique(self, axis: Integral | None = None) -> bool:
-        negaxis = axis if axis is None else -axis
-        starts = ak.index.Index64.zeros(1, nplike=self._backend.index_nplike)
-        parents = ak.index.Index64.zeros(self.length, nplike=self._backend.index_nplike)
-        return self._is_unique(negaxis, starts, parents, 1)
 
     def _is_unique(
         self,

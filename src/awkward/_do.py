@@ -185,3 +185,10 @@ def combinations(
                 ValueError("if provided, the length of 'fields' must be 'n'")
             )
     return layout._combinations(n, replacement, recordlookup, parameters, axis, 0)
+
+
+def is_unique(layout, axis: Integral | None = None) -> bool:
+    negaxis = axis if axis is None else -axis
+    starts = ak.index.Index64.zeros(1, nplike=layout._backend.index_nplike)
+    parents = ak.index.Index64.zeros(layout.length, nplike=layout._backend.index_nplike)
+    return layout._is_unique(negaxis, starts, parents, 1)
