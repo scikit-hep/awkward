@@ -244,7 +244,7 @@ def _load(
     else:
         # TODO: if each array is a record?
         return ak.operations.ak_concatenate._impl(
-            arrays, 0, True, True, highlevel, behavior
+            arrays, axis=0, mergebool=True, highlevel=highlevel, behavior=behavior
         )
 
 
