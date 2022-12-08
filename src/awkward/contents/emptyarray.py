@@ -79,12 +79,6 @@ class EmptyArray(Content):
             out.append(post)
             return "".join(out)
 
-    def merge_parameters(self, parameters):
-        return EmptyArray(
-            parameters=ak._util.merge_parameters(self._parameters, parameters),
-            backend=self._backend,
-        )
-
     def to_NumpyArray(self, dtype, backend=None):
         backend = backend or self._backend
         return ak.contents.NumpyArray(

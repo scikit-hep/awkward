@@ -170,13 +170,6 @@ class IndexedOptionArray(Content):
         out.append(post)
         return "".join(out)
 
-    def merge_parameters(self, parameters):
-        return IndexedOptionArray(
-            self._index,
-            self._content,
-            parameters=ak._util.merge_parameters(self._parameters, parameters),
-        )
-
     def to_IndexedOptionArray64(self):
         if self._index.dtype == np.dtype(np.int64):
             return self

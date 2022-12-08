@@ -185,13 +185,6 @@ class NumpyArray(Content):
         out.append(post)
         return "".join(out)
 
-    def merge_parameters(self, parameters):
-        return NumpyArray(
-            self._data,
-            parameters=ak._util.merge_parameters(self._parameters, parameters),
-            backend=self._backend,
-        )
-
     def to_RegularArray(self):
         shape = self._data.shape
         zeroslen = [1]

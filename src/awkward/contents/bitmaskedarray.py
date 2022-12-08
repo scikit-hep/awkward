@@ -250,16 +250,6 @@ class BitMaskedArray(Content):
         out.append(post)
         return "".join(out)
 
-    def merge_parameters(self, parameters):
-        return BitMaskedArray(
-            self._mask,
-            self._content,
-            self._valid_when,
-            self._length,
-            self._lsb_order,
-            parameters=ak._util.merge_parameters(self._parameters, parameters),
-        )
-
     def to_IndexedOptionArray64(self):
         index = ak.index.Index64.empty(
             self._mask.length * 8, self._backend.index_nplike

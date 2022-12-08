@@ -183,13 +183,6 @@ class IndexedArray(Content):
         out.append(post)
         return "".join(out)
 
-    def merge_parameters(self, parameters):
-        return IndexedArray(
-            self._index,
-            self._content,
-            parameters=ak._util.merge_parameters(self._parameters, parameters),
-        )
-
     def to_IndexedOptionArray64(self):
         return ak.contents.IndexedOptionArray(
             self._index, self._content, parameters=self._parameters
@@ -1002,9 +995,10 @@ class IndexedArray(Content):
             else:
                 next = self._content._carry(ak.index.Index(index), False)
 
-            return next.merge_parameters(self._parameters)._to_arrow(
-                pyarrow, mask_node, validbytes, length, options
+            next2 = next.copy(
+                parameters=ak._util.merge_parameters(next._parameters, self._parameters)
             )
+            return next2._to_arrow(pyarrow, mask_node, validbytes, length, options)
 
     def _to_numpy(self, allow_missing):
         return self.project()._to_numpy(allow_missing)

@@ -442,14 +442,6 @@ class UnionArray(Content):
         out.append(post)
         return "".join(out)
 
-    def merge_parameters(self, parameters):
-        return UnionArray(
-            self._tags,
-            self._index,
-            self._contents,
-            parameters=ak._util.merge_parameters(self._parameters, parameters),
-        )
-
     def _getitem_nothing(self):
         return self._getitem_range(slice(0, 0))
 
