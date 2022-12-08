@@ -207,7 +207,7 @@ class Content:
                 )
         return out
 
-    def maybe_to_array(self):
+    def maybe_to_NumpyArray(self):
         return None
 
     def _handle_error(self, error, slicer=None):
@@ -606,15 +606,8 @@ class Content:
 
         elif ak._util.is_sized_iterable(where):
             layout = ak.operations.to_layout(where)
-            as_array = layout.maybe_to_array()
-            if as_array is None:
-                return self._getitem(layout)
-            else:
-                return self._getitem(
-                    ak.contents.NumpyArray(
-                        as_array, parameters=None, backend=layout.backend
-                    )
-                )
+            as_numpy = layout.maybe_to_NumpyArray() or layout
+            return self._getitem(as_numpy)
 
         else:
             raise ak._errors.wrap_error(

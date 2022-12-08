@@ -174,22 +174,20 @@ class RegularArray(Content):
     def to_RegularArray(self):
         return self
 
-    def maybe_to_NumpyArray(self):
-        content = None
-        if isinstance(self._content, ak.contents.NumpyArray):
-            content = self._content[: self._length * self._size]
-        elif isinstance(self._content, RegularArray):
-            content = self._content[: self._length * self._size].maybe_to_NumpyArray()
+    def maybe_to_NumpyArray(self) -> ak.contents.NumpyArray | None:
+        content = self._content[: self._length * self._size].maybe_to_NumpyArray()
 
-        if isinstance(content, ak.contents.NumpyArray):
+        if content is not None:
             shape = (self._length, self._size) + content.data.shape[1:]
             return ak.contents.NumpyArray(
                 content.data.reshape(shape),
                 parameters=ak._util.merge_parameters(
-                    self._parameters, content.parameters, True
+                    self._parameters, content.parameters
                 ),
-                backend=self._backend,
+                backend=content.backend,
             )
+        else:
+            return None
 
     def _getitem_nothing(self):
         return self._content._getitem_range(slice(0, 0))
@@ -352,13 +350,6 @@ class RegularArray(Content):
     def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
         out = self.to_ListOffsetArray64(True)
         return out._getitem_next_jagged(slicestarts, slicestops, slicecontent, tail)
-
-    def maybe_to_array(self):
-        out = self._content.maybe_to_array()
-        if out is None:
-            return out
-        else:
-            return out.reshape((self._length, -1) + out.shape[1:])
 
     def _getitem_next(self, head, tail, advanced):
         if head == ():
