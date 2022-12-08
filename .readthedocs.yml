@@ -19,7 +19,7 @@ build:
       # Build Doxygen
       - env --chdir=awkward-cpp/docs -- doxygen
       # Copy doxygen to static
-      - mkdir -p docs/_static/doxygen
+      - mkdir -p docs/_static/
       - cp -r awkward-cpp/docs/html/ docs/_static/doxygen
 
 python:
