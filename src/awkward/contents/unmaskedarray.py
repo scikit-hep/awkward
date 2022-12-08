@@ -367,10 +367,10 @@ class UnmaskedArray(Content):
         else:
             return out
 
-    def _sort_next(
+    def _pub_sort_next(
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order
     ):
-        out = self._content._sort_next(
+        out = self._content._pub_sort_next(
             negaxis,
             starts,
             parents,

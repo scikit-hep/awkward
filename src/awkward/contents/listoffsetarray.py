@@ -1172,7 +1172,7 @@ class ListOffsetArray(Content):
                 outoffsets, outcontent, parameters=self._parameters
             )
 
-    def _sort_next(
+    def _pub_sort_next(
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order
     ):
         branch, depth = self.branch_depth
@@ -1245,7 +1245,7 @@ class ListOffsetArray(Content):
             ) = self._rearrange_prepare_next(outlength, parents)
 
             nextcontent = self._content._pub_carry(nextcarry, False)
-            outcontent = nextcontent._sort_next(
+            outcontent = nextcontent._pub_sort_next(
                 negaxis - 1,
                 nextstarts,
                 nextparents,
@@ -1302,7 +1302,7 @@ class ListOffsetArray(Content):
             )
 
             trimmed = self._content[self._offsets[0] : self._offsets[-1]]
-            outcontent = trimmed._sort_next(
+            outcontent = trimmed._pub_sort_next(
                 negaxis,
                 self._offsets[:-1],
                 nextparents,

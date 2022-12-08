@@ -764,7 +764,7 @@ class RecordArray(Content):
     ):
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def _sort_next(
+    def _pub_sort_next(
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order
     ):
         if self._fields is None or len(self._fields) == 0:
@@ -777,7 +777,7 @@ class RecordArray(Content):
         contents = []
         for content in self._contents:
             contents.append(
-                content._sort_next(
+                content._pub_sort_next(
                     negaxis,
                     starts,
                     parents,

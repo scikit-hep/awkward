@@ -989,7 +989,7 @@ class NumpyArray(Content):
             out = NumpyArray(nextcarry, parameters=None, backend=self._backend)
             return out
 
-    def _sort_next(
+    def _pub_sort_next(
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order
     ):
         if len(self.shape) == 0:
@@ -999,7 +999,7 @@ class NumpyArray(Content):
 
         elif len(self.shape) != 1 or not self.is_contiguous:
             contiguous_self = self if self.is_contiguous else self.contiguous()
-            return contiguous_self.to_RegularArray()._sort_next(
+            return contiguous_self.to_RegularArray()._pub_sort_next(
                 negaxis,
                 starts,
                 parents,

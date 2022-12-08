@@ -870,7 +870,7 @@ class IndexedArray(Content):
             order,
         )
 
-    def _sort_next(
+    def _pub_sort_next(
         self,
         negaxis,
         starts,
@@ -882,7 +882,7 @@ class IndexedArray(Content):
         order,
     ):
         next = self._content._pub_carry(self._index, False)
-        return next._sort_next(
+        return next._pub_sort_next(
             negaxis,
             starts,
             parents,

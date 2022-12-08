@@ -547,10 +547,10 @@ class BitMaskedArray(Content):
             order,
         )
 
-    def _sort_next(
+    def _pub_sort_next(
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order
     ):
-        return self.to_IndexedOptionArray64()._sort_next(
+        return self.to_IndexedOptionArray64()._pub_sort_next(
             negaxis,
             starts,
             parents,

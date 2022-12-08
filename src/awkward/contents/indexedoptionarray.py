@@ -1236,7 +1236,7 @@ class IndexedOptionArray(Content):
         else:
             return out
 
-    def _sort_next(
+    def _pub_sort_next(
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order
     ):
         assert (
@@ -1247,7 +1247,7 @@ class IndexedOptionArray(Content):
 
         next, nextparents, numnull, outindex = self._rearrange_prepare_next(parents)
 
-        out = next._sort_next(
+        out = next._pub_sort_next(
             negaxis,
             starts,
             nextparents,

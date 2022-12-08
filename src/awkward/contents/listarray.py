@@ -1200,10 +1200,10 @@ class ListArray(Content):
         )
         return out
 
-    def _sort_next(
+    def _pub_sort_next(
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order
     ):
-        return self.to_ListOffsetArray64(True)._sort_next(
+        return self.to_ListOffsetArray64(True)._pub_sort_next(
             negaxis,
             starts,
             parents,
