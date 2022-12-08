@@ -1156,7 +1156,7 @@ class Content:
         else:
             complex_real_string, complex_imag_string = None, None
 
-        return self.packed()._to_list(
+        return self.to_packed()._to_list(
             behavior,
             {
                 "nan_string": nan_string,
@@ -1168,14 +1168,14 @@ class Content:
             },
         )
 
-    def packed(self) -> Content:
+    def to_packed(self) -> Content:
         raise ak._errors.wrap_error(NotImplementedError)
 
     def tolist(self, behavior: dict | None = None) -> list:
         return self.to_list(behavior)
 
     def to_list(self, behavior: dict | None = None) -> list:
-        return self.packed()._to_list(behavior, None)
+        return self.to_packed()._to_list(behavior, None)
 
     def _to_list(
         self, behavior: dict | None, json_conversions: dict[str, Any] | None

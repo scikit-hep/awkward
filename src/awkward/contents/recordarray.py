@@ -1005,7 +1005,9 @@ class RecordArray(Content):
     def packed(self):
         return RecordArray(
             [
-                x.packed() if x.length == self._length else x[: self._length].packed()
+                x.to_packed()
+                if x.length == self._length
+                else x[: self._length].to_packed()
                 for x in self._contents
             ],
             self._fields,

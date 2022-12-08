@@ -2049,7 +2049,7 @@ class ListOffsetArray(Content):
 
     def packed(self):
         next = self.to_ListOffsetArray64(True)
-        content = next._content.packed()
+        content = next._content.to_packed()
         if content.length != next._offsets[-1]:
             content = content[: next._offsets[-1]]
         return ListOffsetArray(next._offsets, content, parameters=next._parameters)

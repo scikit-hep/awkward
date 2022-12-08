@@ -69,5 +69,5 @@ def packed(array, *, highlevel=True, behavior=None):
 
 def _impl(array, highlevel, behavior):
     layout = ak.operations.to_layout(array, allow_record=True, allow_other=False)
-    out = layout.packed()
+    out = layout.to_packed()
     return ak._util.wrap(out, behavior, highlevel, like=array)

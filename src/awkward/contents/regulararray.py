@@ -1313,9 +1313,9 @@ class RegularArray(Content):
     def packed(self):
         length = self._length * self._size
         if self._content.length == length:
-            content = self._content.packed()
+            content = self._content.to_packed()
         else:
-            content = self._content[:length].packed()
+            content = self._content[:length].to_packed()
 
         return RegularArray(
             content, self._size, self._length, parameters=self._parameters

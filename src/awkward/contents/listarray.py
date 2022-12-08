@@ -1455,7 +1455,7 @@ class ListArray(Content):
             raise ak._errors.wrap_error(AssertionError(result))
 
     def packed(self):
-        return self.to_ListOffsetArray64(True).packed()
+        return self.to_ListOffsetArray64(True).to_packed()
 
     def _to_list(self, behavior, json_conversions):
         return ListOffsetArray._to_list(self, behavior, json_conversions)

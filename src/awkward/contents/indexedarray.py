@@ -1064,10 +1064,10 @@ class IndexedArray(Content):
     def packed(self):
         if self.parameter("__array__") == "categorical":
             return IndexedArray(
-                self._index, self._content.packed(), parameters=self._parameters
+                self._index, self._content.to_packed(), parameters=self._parameters
             )
         else:
-            return self.project().packed()
+            return self.project().to_packed()
 
     def _to_list(self, behavior, json_conversions):
         out = self._to_list_custom(behavior, json_conversions)

@@ -185,9 +185,9 @@ class Record:
 
     def packed(self):
         if self._array.length == 1:
-            return Record(self._array.packed(), self._at)
+            return Record(self._array.to_packed(), self._at)
         else:
-            return Record(self._array[self._at : self._at + 1].packed(), 0)
+            return Record(self._array[self._at : self._at + 1].to_packed(), 0)
 
     def to_list(self, behavior=None):
         return self._to_list(behavior, None)

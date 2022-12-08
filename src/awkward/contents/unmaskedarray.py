@@ -508,7 +508,7 @@ class UnmaskedArray(Content):
             raise ak._errors.wrap_error(AssertionError(result))
 
     def packed(self):
-        return UnmaskedArray(self._content.packed(), parameters=self._parameters)
+        return UnmaskedArray(self._content.to_packed(), parameters=self._parameters)
 
     def _to_list(self, behavior, json_conversions):
         out = self._to_list_custom(behavior, json_conversions)

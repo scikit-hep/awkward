@@ -1569,7 +1569,7 @@ class UnionArray(Content):
                 )
                 contents[tag] = self.project(tag)
 
-            contents[tag] = contents[tag].packed()
+            contents[tag] = contents[tag].to_packed()
 
         return UnionArray(
             ak.index.Index8(tags, nplike=self._backend.index_nplike),

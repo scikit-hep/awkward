@@ -663,7 +663,7 @@ class BitMaskedArray(Content):
         if self._content.is_record:
             next = self.to_IndexedOptionArray64()
 
-            content = next._content.packed()
+            content = next._content.to_packed()
             if content.length > self._length:
                 content = content[: self._length]
 
@@ -678,7 +678,7 @@ class BitMaskedArray(Content):
             else:
                 mask = self._mask[:excess_length]
 
-            content = self._content.packed()
+            content = self._content.to_packed()
             if content.length > self._length:
                 content = content[: self._length]
 

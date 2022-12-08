@@ -1599,7 +1599,7 @@ class IndexedOptionArray(Content):
             len(original_index) - num_none
         ):
             return ak.contents.IndexedOptionArray(
-                self._index, self._content.packed(), parameters=self._parameters
+                self._index, self._content.to_packed(), parameters=self._parameters
             )
 
         else:
@@ -1613,7 +1613,7 @@ class IndexedOptionArray(Content):
             )
             return ak.contents.IndexedOptionArray(
                 ak.index.Index(new_index, nplike=self._backend.index_nplike),
-                self.project().packed(),
+                self.project().to_packed(),
                 parameters=self._parameters,
             )
 
