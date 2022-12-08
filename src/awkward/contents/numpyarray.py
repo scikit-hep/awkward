@@ -861,7 +861,7 @@ class NumpyArray(Content):
                 outoffsets, ak.contents.NumpyArray(out), parameters=self._parameters
             )
 
-    def _argsort_next(
+    def _pub_argsort_next(
         self,
         negaxis,
         starts,
@@ -879,7 +879,7 @@ class NumpyArray(Content):
             )
         elif len(self.shape) != 1 or not self.is_contiguous:
             contiguous_self = self if self.is_contiguous else self.contiguous()
-            return contiguous_self.to_RegularArray()._argsort_next(
+            return contiguous_self.to_RegularArray()._pub_argsort_next(
                 negaxis,
                 starts,
                 shifts,

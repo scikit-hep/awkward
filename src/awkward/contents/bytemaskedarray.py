@@ -718,7 +718,7 @@ class ByteMaskedArray(Content):
             negaxis, starts, parents, outlength
         )
 
-    def _argsort_next(
+    def _pub_argsort_next(
         self,
         negaxis,
         starts,
@@ -730,7 +730,7 @@ class ByteMaskedArray(Content):
         kind,
         order,
     ):
-        return self.to_IndexedOptionArray64()._argsort_next(
+        return self.to_IndexedOptionArray64()._pub_argsort_next(
             negaxis,
             starts,
             shifts,

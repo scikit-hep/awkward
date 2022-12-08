@@ -750,7 +750,7 @@ class RecordArray(Content):
     def _unique(self, negaxis, starts, parents, outlength):
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def _argsort_next(
+    def _pub_argsort_next(
         self,
         negaxis,
         starts,

@@ -334,7 +334,7 @@ class UnmaskedArray(Content):
             return self
         return self._content._unique(negaxis, starts, parents, outlength)
 
-    def _argsort_next(
+    def _pub_argsort_next(
         self,
         negaxis,
         starts,
@@ -346,7 +346,7 @@ class UnmaskedArray(Content):
         kind,
         order,
     ):
-        out = self._content._argsort_next(
+        out = self._content._pub_argsort_next(
             negaxis,
             starts,
             shifts,

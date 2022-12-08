@@ -523,7 +523,7 @@ class BitMaskedArray(Content):
         else:
             return out._content
 
-    def _argsort_next(
+    def _pub_argsort_next(
         self,
         negaxis,
         starts,
@@ -535,7 +535,7 @@ class BitMaskedArray(Content):
         kind,
         order,
     ):
-        return self.to_IndexedOptionArray64()._argsort_next(
+        return self.to_IndexedOptionArray64()._pub_argsort_next(
             negaxis,
             starts,
             shifts,

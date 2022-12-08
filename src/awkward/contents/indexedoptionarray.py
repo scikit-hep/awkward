@@ -1101,7 +1101,7 @@ class IndexedOptionArray(Content):
         next = self._content._pub_carry(nextcarry, False)
         return next, nextparents, numnull, outindex
 
-    def _argsort_next(
+    def _pub_argsort_next(
         self,
         negaxis,
         starts,
@@ -1128,7 +1128,7 @@ class IndexedOptionArray(Content):
         else:
             nextshifts = None
 
-        out = next._argsort_next(
+        out = next._pub_argsort_next(
             negaxis,
             starts,
             nextshifts,
@@ -1140,7 +1140,7 @@ class IndexedOptionArray(Content):
             order,
         )
 
-        # `next._argsort_next` is given the non-None values. We choose to
+        # `next._pub_argsort_next` is given the non-None values. We choose to
         # sort None values to the end of the list, meaning we need to grow `out`
         # to account for these None values. First, we locate these nones within
         # their sublists
@@ -1165,7 +1165,7 @@ class IndexedOptionArray(Content):
         # If we wrap a NumpyArray (i.e., axis=-1), then we want `argmax` to return
         # the indices of each `None` value, rather than `None` itself.
         # We can test for this condition by seeing whether the NumpyArray of indices
-        # is mergeable with our content (`out = next._argsort_next result`).
+        # is mergeable with our content (`out = next._pub_argsort_next result`).
         # If so, try to concatenate them at the end of `out`.`
         nulls_index_content = ak.contents.NumpyArray(
             nulls_index, parameters=None, backend=self._backend

@@ -1174,7 +1174,7 @@ class ListArray(Content):
             negaxis, starts, parents, outlength
         )
 
-    def _argsort_next(
+    def _pub_argsort_next(
         self,
         negaxis,
         starts,
@@ -1187,7 +1187,7 @@ class ListArray(Content):
         order,
     ):
         next = self.to_ListOffsetArray64(True)
-        out = next._argsort_next(
+        out = next._pub_argsort_next(
             negaxis,
             starts,
             shifts,

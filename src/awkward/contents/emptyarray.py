@@ -230,7 +230,7 @@ class EmptyArray(Content):
     def _unique(self, negaxis, starts, parents, outlength):
         return self
 
-    def _argsort_next(
+    def _pub_argsort_next(
         self,
         negaxis,
         starts,
@@ -243,7 +243,7 @@ class EmptyArray(Content):
         order,
     ):
         as_numpy = self.to_NumpyArray(np.float64)
-        return as_numpy._argsort_next(
+        return as_numpy._pub_argsort_next(
             negaxis,
             starts,
             shifts,

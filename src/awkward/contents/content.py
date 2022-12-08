@@ -1105,7 +1105,7 @@ class Content:
 
         starts = ak.index.Index64.zeros(1, nplike=self._backend.index_nplike)
         parents = ak.index.Index64.zeros(self.length, nplike=self._backend.index_nplike)
-        return self._argsort_next(
+        return self._pub_argsort_next(
             negaxis,
             starts,
             None,
@@ -1117,7 +1117,7 @@ class Content:
             order,
         )
 
-    def _argsort_next(
+    def _pub_argsort_next(
         self,
         negaxis: Integral,
         starts: ak.index.Index,

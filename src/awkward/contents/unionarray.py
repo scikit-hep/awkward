@@ -1230,7 +1230,7 @@ class UnionArray(Content):
 
         return simplified._unique(negaxis, starts, parents, outlength)
 
-    def _argsort_next(
+    def _pub_argsort_next(
         self,
         negaxis,
         starts,
@@ -1261,7 +1261,7 @@ class UnionArray(Content):
                 ValueError("cannot argsort an irreducible UnionArray")
             )
 
-        return simplified._argsort_next(
+        return simplified._pub_argsort_next(
             negaxis, starts, shifts, parents, outlength, ascending, stable, kind, order
         )
 

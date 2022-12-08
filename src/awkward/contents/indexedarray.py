@@ -845,7 +845,7 @@ class IndexedArray(Content):
 
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def _argsort_next(
+    def _pub_argsort_next(
         self,
         negaxis,
         starts,
@@ -858,7 +858,7 @@ class IndexedArray(Content):
         order,
     ):
         next = self._content._pub_carry(self._index, False)
-        return next._argsort_next(
+        return next._pub_argsort_next(
             negaxis,
             starts,
             shifts,

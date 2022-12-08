@@ -973,7 +973,7 @@ class ListOffsetArray(Content):
                 outoffsets, outcontent, parameters=self._parameters
             )
 
-    def _argsort_next(
+    def _pub_argsort_next(
         self,
         negaxis,
         starts,
@@ -1098,7 +1098,7 @@ class ListOffsetArray(Content):
             )
 
             nextcontent = self._content._pub_carry(nextcarry, False)
-            outcontent = nextcontent._argsort_next(
+            outcontent = nextcontent._pub_argsort_next(
                 negaxis - 1,
                 nextstarts,
                 nextshifts,
@@ -1156,7 +1156,7 @@ class ListOffsetArray(Content):
             )
 
             trimmed = self._content[self._offsets[0] : self._offsets[-1]]
-            outcontent = trimmed._argsort_next(
+            outcontent = trimmed._pub_argsort_next(
                 negaxis,
                 self._offsets[:-1],
                 shifts,
