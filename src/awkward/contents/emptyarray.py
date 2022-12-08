@@ -372,5 +372,5 @@ class EmptyArray(Content):
     def to_backend(self, backend: ak._backends.Backend) -> Self:
         return EmptyArray(parameters=self._parameters, backend=backend)
 
-    def _layout_equal(self, other, index_dtype=True, numpyarray=True):
+    def _is_equal_to(self, other, index_dtype=True, numpyarray=True):
         return True

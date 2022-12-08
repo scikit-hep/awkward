@@ -1474,9 +1474,9 @@ class ListArray(Content):
         stops = self._stops.to_nplike(backend.index_nplike)
         return ListArray(starts, stops, content, parameters=self._parameters)
 
-    def _layout_equal(self, other, index_dtype=True, numpyarray=True):
+    def _is_equal_to(self, other, index_dtype=True, numpyarray=True):
         return (
-            self.starts.layout_equal(other.starts, index_dtype, numpyarray)
-            and self.stops.layout_equal(other.stops, index_dtype, numpyarray)
-            and self.content.layout_equal(other.content, index_dtype, numpyarray)
+            self.starts.is_equal_to(other.starts, index_dtype, numpyarray)
+            and self.stops.is_equal_to(other.stops, index_dtype, numpyarray)
+            and self.content.is_equal_to(other.content, index_dtype, numpyarray)
         )

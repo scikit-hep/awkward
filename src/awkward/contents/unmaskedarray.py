@@ -524,5 +524,5 @@ class UnmaskedArray(Content):
         content = self._content.to_backend(backend)
         return UnmaskedArray(content, parameters=self.parameters)
 
-    def _layout_equal(self, other, index_dtype=True, numpyarray=True):
-        return self.content.layout_equal(other.content, index_dtype, numpyarray)
+    def _is_equal_to(self, other, index_dtype=True, numpyarray=True):
+        return self.content.is_equal_to(other.content, index_dtype, numpyarray)

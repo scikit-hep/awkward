@@ -142,7 +142,7 @@ class AuxData(Generic[T]):
         )
 
     def __eq__(self, other: AuxData) -> bool:
-        return self.layout.layout_equal(
+        return self.layout.is_equal_to(
             other.layout, index_dtype=False, numpyarray=False
         )
 

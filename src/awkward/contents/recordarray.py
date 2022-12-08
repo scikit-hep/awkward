@@ -1057,13 +1057,13 @@ class RecordArray(Content):
             backend=backend,
         )
 
-    def _layout_equal(self, other, index_dtype=True, numpyarray=True):
+    def _is_equal_to(self, other, index_dtype=True, numpyarray=True):
         return (
             self.fields == other.fields
             and len(self.contents) == len(other.contents)
             and all(
                 [
-                    self.contents[i].layout_equal(
+                    self.contents[i].is_equal_to(
                         other.contents[i], index_dtype, numpyarray
                     )
                     for i in range(len(self.contents))

@@ -1096,9 +1096,9 @@ class ByteMaskedArray(Content):
             mask, content, valid_when=self._valid_when, parameters=self._parameters
         )
 
-    def _layout_equal(self, other, index_dtype=True, numpyarray=True):
+    def _is_equal_to(self, other, index_dtype=True, numpyarray=True):
         return (
             self.valid_when == other.valid_when
-            and self.mask.layout_equal(other.mask, index_dtype, numpyarray)
-            and self.content.layout_equal(other.content, index_dtype, numpyarray)
+            and self.mask.is_equal_to(other.mask, index_dtype, numpyarray)
+            and self.content.is_equal_to(other.content, index_dtype, numpyarray)
         )

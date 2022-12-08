@@ -2162,7 +2162,7 @@ class ListOffsetArray(Content):
 
                 return content
 
-    def _layout_equal(self, other, index_dtype=True, numpyarray=True):
-        return self.offsets.layout_equal(
+    def _is_equal_to(self, other, index_dtype=True, numpyarray=True):
+        return self.offsets.is_equal_to(
             other.offsets, index_dtype, numpyarray
-        ) and self.content.layout_equal(other.content, index_dtype, numpyarray)
+        ) and self.content.is_equal_to(other.content, index_dtype, numpyarray)

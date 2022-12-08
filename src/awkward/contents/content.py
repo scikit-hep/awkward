@@ -1316,7 +1316,7 @@ class Content:
     def __deepcopy__(self, memo):
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def layout_equal(
+    def is_equal_to(
         self, other: Content, index_dtype: bool = True, numpyarray: bool = True
     ) -> bool:
         return (
@@ -1325,10 +1325,10 @@ class Content:
             and _parameters_equal(
                 self.parameters, other.parameters, only_array_record=False
             )
-            and self._layout_equal(other, index_dtype, numpyarray)
+            and self._is_equal_to(other, index_dtype, numpyarray)
         )
 
-    def _layout_equal(
+    def _is_equal_to(
         self, other: Self, index_dtype: bool = True, numpyarray: bool = True
     ) -> bool:
         raise ak._errors.wrap_error(NotImplementedError)
