@@ -114,7 +114,7 @@ class EmptyArray(Content):
             return self._pub_getitem_range(slice(0, 0))
         raise ak._errors.index_error(self, where, "not an array of records")
 
-    def _carry(self, carry, allow_lazy):
+    def _pub_carry(self, carry, allow_lazy):
         assert isinstance(carry, ak.index.Index)
 
         if not carry.nplike.known_shape or carry.length == 0:

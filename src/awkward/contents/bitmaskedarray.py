@@ -416,9 +416,9 @@ class BitMaskedArray(Content):
             parameters=None,
         )
 
-    def _carry(self, carry, allow_lazy):
+    def _pub_carry(self, carry, allow_lazy):
         assert isinstance(carry, ak.index.Index)
-        return self.to_ByteMaskedArray()._carry(carry, allow_lazy)
+        return self.to_ByteMaskedArray()._pub_carry(carry, allow_lazy)
 
     def _pub_getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
         return self.to_ByteMaskedArray()._pub_getitem_next_jagged(

@@ -325,7 +325,7 @@ class ByteMaskedArray(Content):
             parameters=None,
         )
 
-    def _carry(self, carry, allow_lazy):
+    def _pub_carry(self, carry, allow_lazy):
         assert isinstance(carry, ak.index.Index)
 
         try:
@@ -335,7 +335,7 @@ class ByteMaskedArray(Content):
 
         return ByteMaskedArray.simplified(
             nextmask,
-            self._content._carry(carry, allow_lazy),
+            self._content._pub_carry(carry, allow_lazy),
             self._valid_when,
             parameters=self._parameters,
         )
@@ -439,7 +439,7 @@ class ByteMaskedArray(Content):
             slicer=ak.contents.ListArray(slicestarts, slicestops, slicecontent),
         )
 
-        next = self._content._carry(nextcarry, True)
+        next = self._content._pub_carry(nextcarry, True)
         out = next._pub_getitem_next_jagged(
             reducedstarts, reducedstops, slicecontent, tail
         )
@@ -463,7 +463,7 @@ class ByteMaskedArray(Content):
             nexthead, nexttail = ak._slicing.headtail(tail)
             _, nextcarry, outindex = self._nextcarry_outindex(self._backend)
 
-            next = self._content._carry(nextcarry, True)
+            next = self._content._pub_carry(nextcarry, True)
             out = next._pub_getitem_next(head, tail, advanced)
             return ak.contents.IndexedOptionArray.simplified(
                 outindex, out, parameters=self._parameters
@@ -566,7 +566,7 @@ class ByteMaskedArray(Content):
                 )
             )
 
-            return self._content._carry(nextcarry, False)
+            return self._content._pub_carry(nextcarry, False)
 
     def num(self, axis, depth=0):
         posaxis = self.axis_wrap_if_negative(axis)
@@ -579,7 +579,7 @@ class ByteMaskedArray(Content):
         else:
             _, nextcarry, outindex = self._nextcarry_outindex(self._backend)
 
-            next = self._content._carry(nextcarry, False)
+            next = self._content._pub_carry(nextcarry, False)
             out = next.num(posaxis, depth)
 
             return ak.contents.IndexedOptionArray.simplified(
@@ -593,7 +593,7 @@ class ByteMaskedArray(Content):
         else:
             numnull, nextcarry, outindex = self._nextcarry_outindex(self._backend)
 
-            next = self._content._carry(nextcarry, False)
+            next = self._content._pub_carry(nextcarry, False)
 
             offsets, flattened = next._offsets_and_flattened(posaxis, depth)
 
@@ -690,7 +690,7 @@ class ByteMaskedArray(Content):
         else:
             _, nextcarry, outindex = self._nextcarry_outindex(self._backend)
 
-            next = self._content._carry(nextcarry, False)
+            next = self._content._pub_carry(nextcarry, False)
             out = next._local_index(posaxis, depth)
             return ak.contents.IndexedOptionArray.simplified(
                 outindex, out, parameters=self._parameters
@@ -767,7 +767,7 @@ class ByteMaskedArray(Content):
         else:
             _, nextcarry, outindex = self._nextcarry_outindex(self._backend)
 
-            next = self._content._carry(nextcarry, True)
+            next = self._content._pub_carry(nextcarry, True)
             out = next._combinations(
                 n, replacement, recordlookup, parameters, posaxis, depth
             )
@@ -888,7 +888,7 @@ class ByteMaskedArray(Content):
         else:
             nextshifts = None
 
-        next = self._content._carry(nextcarry, False)
+        next = self._content._pub_carry(nextcarry, False)
 
         out = next._reduce_next(
             reducer,

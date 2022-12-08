@@ -300,7 +300,7 @@ def normalise_item_nested(item):
         nextindex = item.index.data.astype(np.int64)  # this ALWAYS copies
         nonnull = nextindex >= 0
 
-        projected = item.content._carry(ak.index.Index64(nextindex[nonnull]), False)
+        projected = item.content._pub_carry(ak.index.Index64(nextindex[nonnull]), False)
 
         # content has been projected; index must agree
         nextindex[nonnull] = item.backend.index_nplike.arange(
@@ -325,7 +325,7 @@ def normalise_item_nested(item):
         positions_where_valid = item.backend.index_nplike.nonzero(is_valid)[0]
 
         nextcontent = normalise_item_nested(
-            item.content._carry(ak.index.Index64(positions_where_valid), False)
+            item.content._pub_carry(ak.index.Index64(positions_where_valid), False)
         )
 
         nextindex = item.backend.index_nplike.full(is_valid.shape[0], -1, np.int64)

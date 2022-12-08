@@ -267,7 +267,7 @@ class ListArray(Content):
             parameters=None,
         )
 
-    def _carry(self, carry, allow_lazy):
+    def _pub_carry(self, carry, allow_lazy):
         assert isinstance(carry, ak.index.Index)
 
         try:
@@ -425,7 +425,7 @@ class ListArray(Content):
                 ),
                 slicer=ak.contents.ListArray(slicestarts, slicestops, slicecontent),
             )
-            nextcontent = self._content._carry(nextcarry, True)
+            nextcontent = self._content._pub_carry(nextcarry, True)
             nexthead, nexttail = ak._slicing.headtail(tail)
             outcontent = nextcontent._pub_getitem_next(nexthead, nexttail, None)
 
@@ -515,7 +515,7 @@ class ListArray(Content):
 
                 # Generate ranges between starts and stops
                 as_list_offset_array = self.to_ListOffsetArray64(True)
-                nextcontent = as_list_offset_array._content._carry(nextcarry, True)
+                nextcontent = as_list_offset_array._content._pub_carry(nextcarry, True)
                 next = ak.contents.ListOffsetArray(
                     smalloffsets, nextcontent, parameters=self._parameters
                 )
@@ -594,7 +594,7 @@ class ListArray(Content):
                 ),
                 slicer=head,
             )
-            nextcontent = self._content._carry(nextcarry, True)
+            nextcontent = self._content._pub_carry(nextcarry, True)
             return nextcontent._pub_getitem_next(nexthead, nexttail, advanced)
 
         elif isinstance(head, slice):
@@ -679,7 +679,7 @@ class ListArray(Content):
                 slicer=head,
             )
 
-            nextcontent = self._content._carry(nextcarry, True)
+            nextcontent = self._content._pub_carry(nextcarry, True)
 
             if advanced is None or advanced.length == 0:
                 return ak.contents.ListOffsetArray(
@@ -793,7 +793,7 @@ class ListArray(Content):
                     ),
                     slicer=head,
                 )
-                nextcontent = self._content._carry(nextcarry, True)
+                nextcontent = self._content._pub_carry(nextcarry, True)
 
                 out = nextcontent._pub_getitem_next(nexthead, nexttail, nextadvanced)
                 if advanced is None:
@@ -841,7 +841,7 @@ class ListArray(Content):
                     ),
                     slicer=head,
                 )
-                nextcontent = self._content._carry(nextcarry, True)
+                nextcontent = self._content._pub_carry(nextcarry, True)
 
                 return nextcontent._pub_getitem_next(nexthead, nexttail, nextadvanced)
 
@@ -895,7 +895,7 @@ class ListArray(Content):
                 ),
                 slicer=head,
             )
-            carried = self._content._carry(nextcarry, True)
+            carried = self._content._pub_carry(nextcarry, True)
             down = carried._pub_getitem_next_jagged(
                 multistarts, multistops, head._content, tail
             )

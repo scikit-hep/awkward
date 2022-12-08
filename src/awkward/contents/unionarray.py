@@ -364,7 +364,7 @@ class UnionArray(Content):
             )
 
         if len(contents) == 1:
-            next = contents[0]._carry(index, True)
+            next = contents[0]._pub_carry(index, True)
             return next.copy(
                 parameters=ak._util.merge_parameters(next._parameters, parameters)
             )
@@ -495,7 +495,7 @@ class UnionArray(Content):
             parameters=None,
         )
 
-    def _carry(self, carry, allow_lazy):
+    def _pub_carry(self, carry, allow_lazy):
         assert isinstance(carry, ak.index.Index)
 
         try:
@@ -536,7 +536,7 @@ class UnionArray(Content):
                     contents.append(ak.contents.UnmaskedArray.simplified(content))
 
         else:
-            # like _carry, above
+            # like _pub_carry, above
             carry_data = index.raw(self._backend.nplike).copy()
             is_missing = carry_data < 0
 
@@ -616,7 +616,7 @@ class UnionArray(Content):
         nextcarry = ak.index.Index64(
             tmpcarry.data[: lenout[0]], nplike=self._backend.index_nplike
         )
-        return self._contents[index]._carry(nextcarry, False)
+        return self._contents[index]._pub_carry(nextcarry, False)
 
     @staticmethod
     def regular_index(
@@ -1510,7 +1510,7 @@ class UnionArray(Content):
             index = self._index[self._tags.data == i]
             out.extend(
                 self._contents[i]
-                ._carry(index, False)
+                ._pub_carry(index, False)
                 ._completely_flatten(backend, options)
             )
         return out

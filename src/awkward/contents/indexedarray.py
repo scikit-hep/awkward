@@ -89,7 +89,7 @@ class IndexedArray(Content):
         is_cat = parameters is not None and parameters.get("__array__") == "categorical"
 
         if content.is_union and not is_cat:
-            return content._carry(index, allow_lazy=False).copy(
+            return content._pub_carry(index, allow_lazy=False).copy(
                 parameters=ak._util.merge_parameters(content._parameters, parameters)
             )
 
@@ -238,7 +238,7 @@ class IndexedArray(Content):
             parameters=None,
         )
 
-    def _carry(self, carry, allow_lazy):
+    def _pub_carry(self, carry, allow_lazy):
         assert isinstance(carry, ak.index.Index)
 
         try:
@@ -281,7 +281,7 @@ class IndexedArray(Content):
             slicer=ak.contents.ListArray(slicestarts, slicestops, slicecontent),
         )
         # an eager carry (allow_lazy = false) to avoid infinite loop (unproven)
-        next = self._content._carry(nextcarry, False)
+        next = self._content._pub_carry(nextcarry, False)
         return next._pub_getitem_next_jagged(
             slicestarts, slicestops, slicecontent, tail
         )
@@ -321,7 +321,7 @@ class IndexedArray(Content):
                 slicer=head,
             )
 
-            next = self._content._carry(nextcarry, False)
+            next = self._content._pub_carry(nextcarry, False)
             return next._pub_getitem_next(head, tail, advanced)
 
         elif isinstance(head, str):
@@ -396,7 +396,7 @@ class IndexedArray(Content):
                     self._content.length,
                 )
             )
-            next = self._content._carry(nextcarry, False)
+            next = self._content._pub_carry(nextcarry, False)
             return next.copy(
                 parameters=ak._util.merge_parameters(
                     next._parameters,
@@ -712,7 +712,7 @@ class IndexedArray(Content):
         if len(nextindex) != len(self._index):
             return False
 
-        next = self._content._carry(nextindex, False)
+        next = self._content._pub_carry(nextindex, False)
         return next._is_unique(negaxis, starts, parents, outlength)
 
     def _unique(self, negaxis, starts, parents, outlength):
@@ -752,7 +752,7 @@ class IndexedArray(Content):
                 index_length,
             )
         )
-        next = self._content._carry(nextcarry, False)
+        next = self._content._pub_carry(nextcarry, False)
         unique = next._unique(
             negaxis,
             starts,
@@ -857,7 +857,7 @@ class IndexedArray(Content):
         kind,
         order,
     ):
-        next = self._content._carry(self._index, False)
+        next = self._content._pub_carry(self._index, False)
         return next._argsort_next(
             negaxis,
             starts,
@@ -881,7 +881,7 @@ class IndexedArray(Content):
         kind,
         order,
     ):
-        next = self._content._carry(self._index, False)
+        next = self._content._pub_carry(self._index, False)
         return next._sort_next(
             negaxis,
             starts,
@@ -914,7 +914,7 @@ class IndexedArray(Content):
         keepdims,
         behavior,
     ):
-        next = self._content._carry(self._index, False)
+        next = self._content._pub_carry(self._index, False)
         return next._reduce_next(
             reducer,
             negaxis,
@@ -1004,7 +1004,7 @@ class IndexedArray(Content):
                 # In that case, don't call self._content[index]; it's empty anyway.
                 next = self._content
             else:
-                next = self._content._carry(ak.index.Index(index), False)
+                next = self._content._pub_carry(ak.index.Index(index), False)
 
             return next.merge_parameters(self._parameters)._to_arrow(
                 pyarrow, mask_node, validbytes, length, options
@@ -1097,7 +1097,7 @@ class IndexedArray(Content):
             return out
 
         index = self._index.raw(numpy)
-        nextcontent = self._content._carry(ak.index.Index(index), False)
+        nextcontent = self._content._pub_carry(ak.index.Index(index), False)
         return nextcontent._to_list(behavior, json_conversions)
 
     def to_backend(self, backend: ak._backends.Backend) -> Self:

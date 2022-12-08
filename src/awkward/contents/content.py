@@ -639,7 +639,7 @@ class Content:
                 )
 
             out = ak._slicing.getitem_next_array_wrap(
-                self._carry(carry, allow_lazy), where.shape
+                self._pub_carry(carry, allow_lazy), where.shape
             )
             if out.length == 0:
                 return out._pub_getitem_nothing()
@@ -650,7 +650,7 @@ class Content:
             return self._pub_getitem((where,))
 
         elif ak._util.is_sized_iterable(where) and len(where) == 0:
-            return self._carry(
+            return self._pub_carry(
                 ak.index.Index64.empty(0, self._backend.index_nplike),
                 allow_lazy=True,
             )
@@ -698,10 +698,10 @@ class Content:
     def _pub_getitem_next(self, head, tail, advanced: ak.index.Index | None):
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def _carry(self, carry: ak.index.Index, allow_lazy: bool):
+    def _pub_carry(self, carry: ak.index.Index, allow_lazy: bool):
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def _carry_asrange(self, carry: ak.index.Index):
+    def _pub_carry_asrange(self, carry: ak.index.Index):
         assert isinstance(carry, ak.index.Index)
 
         result = self._backend.index_nplike.empty(1, dtype=np.bool_)

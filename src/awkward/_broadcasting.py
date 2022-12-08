@@ -685,7 +685,7 @@ def apply_step(
                         if isinstance(x, RegularArray):
                             if maxsize > 1 and x.size == 1:
                                 nextinputs.append(
-                                    x.content[: x.length * x.size]._carry(
+                                    x.content[: x.length * x.size]._pub_carry(
                                         tmpindex, allow_lazy=False
                                     )
                                 )

@@ -191,9 +191,9 @@ class UnmaskedArray(Content):
             self._content._pub_getitem_fields(where, only_fields), parameters=None
         )
 
-    def _carry(self, carry, allow_lazy):
+    def _pub_carry(self, carry, allow_lazy):
         return UnmaskedArray.simplified(
-            self._content._carry(carry, allow_lazy), parameters=self._parameters
+            self._content._pub_carry(carry, allow_lazy), parameters=self._parameters
         )
 
     def _pub_getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):

@@ -369,7 +369,7 @@ class RecordArray(Content):
             contents, fields, self._length, parameters=None, backend=self._backend
         )
 
-    def _carry(self, carry, allow_lazy):
+    def _pub_carry(self, carry, allow_lazy):
         assert isinstance(carry, ak.index.Index)
 
         if allow_lazy:
@@ -390,7 +390,7 @@ class RecordArray(Content):
 
         else:
             contents = [
-                self.content(i)._carry(carry, allow_lazy)
+                self.content(i)._pub_carry(carry, allow_lazy)
                 for i in range(len(self._contents))
             ]
 

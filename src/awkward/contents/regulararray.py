@@ -242,7 +242,7 @@ class RegularArray(Content):
             parameters=None,
         )
 
-    def _carry(self, carry, allow_lazy):
+    def _pub_carry(self, carry, allow_lazy):
         assert isinstance(carry, ak.index.Index)
 
         where = carry.data
@@ -282,7 +282,7 @@ class RegularArray(Content):
         )
 
         return RegularArray(
-            self._content._carry(nextcarry, allow_lazy),
+            self._content._pub_carry(nextcarry, allow_lazy),
             self._size,
             where.shape[0],
             parameters=self._parameters,
@@ -337,7 +337,7 @@ class RegularArray(Content):
                     offsets.length,
                 )
             )
-            nextcontent = self._content._carry(nextcarry, True)
+            nextcontent = self._content._pub_carry(nextcarry, True)
             return ak.contents.ListOffsetArray(
                 offsets, nextcontent, parameters=self._parameters
             )
@@ -387,7 +387,7 @@ class RegularArray(Content):
                 ),
                 slicer=head,
             )
-            nextcontent = self._content._carry(nextcarry, True)
+            nextcontent = self._content._pub_carry(nextcarry, True)
             return nextcontent._pub_getitem_next(nexthead, nexttail, advanced)
 
         elif isinstance(head, slice):
@@ -425,7 +425,7 @@ class RegularArray(Content):
                 slicer=head,
             )
 
-            nextcontent = self._content._carry(nextcarry, True)
+            nextcontent = self._content._pub_carry(nextcarry, True)
 
             if advanced is None or advanced.length == 0:
                 return RegularArray(
@@ -526,7 +526,7 @@ class RegularArray(Content):
                     ),
                     slicer=head,
                 )
-                nextcontent = self._content._carry(nextcarry, True)
+                nextcontent = self._content._pub_carry(nextcarry, True)
 
                 out = nextcontent._pub_getitem_next(nexthead, nexttail, nextadvanced)
                 if advanced is None:
@@ -541,7 +541,7 @@ class RegularArray(Content):
                 nextadvanced = ak.index.Index64.empty(
                     0, nplike=self._backend.index_nplike
                 )
-                nextcontent = self._content._carry(nextcarry, True)
+                nextcontent = self._content._pub_carry(nextcarry, True)
                 return nextcontent._pub_getitem_next(nexthead, nexttail, nextadvanced)
 
             else:
@@ -576,7 +576,7 @@ class RegularArray(Content):
                     ),
                     slicer=head,
                 )
-                nextcontent = self._content._carry(nextcarry, True)
+                nextcontent = self._content._pub_carry(nextcarry, True)
                 return nextcontent._pub_getitem_next(nexthead, nexttail, nextadvanced)
 
         elif isinstance(head, ak.contents.ListOffsetArray):
@@ -938,7 +938,7 @@ class RegularArray(Content):
             contents = []
             length = None
             for ptr in tocarry:
-                contents.append(self._content._carry(ptr, True))
+                contents.append(self._content._pub_carry(ptr, True))
                 length = contents[-1].length
             assert length is not None
             recordarray = ak.contents.RecordArray(
@@ -1024,7 +1024,7 @@ class RegularArray(Content):
             else:
                 nextshifts = None
 
-            nextcontent = self._content._carry(nextcarry, False)
+            nextcontent = self._content._pub_carry(nextcarry, False)
             outcontent = nextcontent._reduce_next(
                 reducer,
                 negaxis - 1,

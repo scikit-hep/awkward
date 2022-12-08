@@ -198,9 +198,9 @@ class IndexedOptionArray(Content):
         if self._content.length == 0:
             content = self._content.form.length_one_array(
                 backend=self._backend, highlevel=False
-            )._carry(carry, False)
+            )._pub_carry(carry, False)
         else:
-            content = self._content._carry(carry, False)
+            content = self._content._pub_carry(carry, False)
 
         return ak.contents.ByteMaskedArray(
             mask, content, valid_when, parameters=self._parameters
@@ -257,7 +257,7 @@ class IndexedOptionArray(Content):
             parameters=None,
         )
 
-    def _carry(self, carry, allow_lazy):
+    def _pub_carry(self, carry, allow_lazy):
         assert isinstance(carry, ak.index.Index)
 
         try:
@@ -366,7 +366,7 @@ class IndexedOptionArray(Content):
             ),
             slicer=ak.contents.ListArray(slicestarts, slicestops, slicecontent),
         )
-        next = self._content._carry(nextcarry, True)
+        next = self._content._pub_carry(nextcarry, True)
         out = next._pub_getitem_next_jagged(
             reducedstarts, reducedstops, slicecontent, tail
         )
@@ -391,7 +391,7 @@ class IndexedOptionArray(Content):
 
             numnull, nextcarry, outindex = self._nextcarry_outindex(self._backend)
 
-            next = self._content._carry(nextcarry, True)
+            next = self._content._pub_carry(nextcarry, True)
             out = next._pub_getitem_next(head, tail, advanced)
             return IndexedOptionArray.simplified(
                 outindex, out, parameters=self._parameters
@@ -490,7 +490,7 @@ class IndexedOptionArray(Content):
                 )
             )
 
-            return self._content._carry(nextcarry, False)
+            return self._content._pub_carry(nextcarry, False)
 
     def num(self, axis, depth=0):
         posaxis = self.axis_wrap_if_negative(axis)
@@ -501,7 +501,7 @@ class IndexedOptionArray(Content):
             else:
                 return out
         _, nextcarry, outindex = self._nextcarry_outindex(self._backend)
-        next = self._content._carry(nextcarry, False)
+        next = self._content._pub_carry(nextcarry, False)
         out = next.num(posaxis, depth)
         return ak.contents.IndexedOptionArray.simplified(
             outindex, out, parameters=self.parameters
@@ -513,7 +513,7 @@ class IndexedOptionArray(Content):
             raise ak._errors.wrap_error(np.AxisError("axis=0 not allowed for flatten"))
         else:
             numnull, nextcarry, outindex = self._nextcarry_outindex(self._backend)
-            next = self._content._carry(nextcarry, False)
+            next = self._content._pub_carry(nextcarry, False)
 
             offsets, flattened = next._offsets_and_flattened(posaxis, depth)
 
@@ -784,7 +784,7 @@ class IndexedOptionArray(Content):
         else:
             _, nextcarry, outindex = self._nextcarry_outindex(self._backend)
 
-            next = self._content._carry(nextcarry, False)
+            next = self._content._pub_carry(nextcarry, False)
             out = next._local_index(posaxis, depth)
             out2 = ak.contents.IndexedOptionArray(
                 outindex, out, parameters=self._parameters
@@ -849,7 +849,7 @@ class IndexedOptionArray(Content):
             )
         )
 
-        next = self._content._carry(nextcarry, False)
+        next = self._content._pub_carry(nextcarry, False)
         if nextstarts.length > 1:
             return next._is_subrange_equal(nextstarts, nextstops, nextstarts.length)
         else:
@@ -1098,7 +1098,7 @@ class IndexedOptionArray(Content):
                 index_length,
             )
         )
-        next = self._content._carry(nextcarry, False)
+        next = self._content._pub_carry(nextcarry, False)
         return next, nextparents, numnull, outindex
 
     def _argsort_next(
@@ -1404,7 +1404,7 @@ class IndexedOptionArray(Content):
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         else:
             _, nextcarry, outindex = self._nextcarry_outindex(self._backend)
-            next = self._content._carry(nextcarry, True)
+            next = self._content._pub_carry(nextcarry, True)
             out = next._combinations(
                 n, replacement, recordlookup, parameters, posaxis, depth
             )
@@ -1648,7 +1648,9 @@ class IndexedOptionArray(Content):
         index = self._index.raw(numpy)
         not_missing = index >= 0
 
-        nextcontent = self._content._carry(ak.index.Index(index[not_missing]), False)
+        nextcontent = self._content._pub_carry(
+            ak.index.Index(index[not_missing]), False
+        )
         out = nextcontent._to_list(behavior, json_conversions)
 
         for i, isvalid in enumerate(not_missing):
