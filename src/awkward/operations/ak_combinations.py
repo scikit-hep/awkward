@@ -210,7 +210,12 @@ def _impl(
         parameters["__record__"] = with_name
 
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
-    out = layout.combinations(
-        n, replacement=replacement, axis=axis, fields=fields, parameters=parameters
+    out = ak._do.combinations(
+        layout,
+        n,
+        replacement=replacement,
+        axis=axis,
+        fields=fields,
+        parameters=parameters,
     )
     return ak._util.wrap(out, behavior, highlevel, like=array)

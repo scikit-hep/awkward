@@ -162,3 +162,26 @@ def axis_wrap_if_negative(
 
 def local_index(layout: Content, axis: Integral):
     return layout._local_index(axis, 0)
+
+
+def combinations(
+    layout: Content,
+    n: Integral,
+    replacement: bool = False,
+    axis: Integral = 1,
+    fields: list[str] | None = None,
+    parameters: dict | None = None,
+):
+    if n < 1:
+        raise ak._errors.wrap_error(
+            ValueError("in combinations, 'n' must be at least 1")
+        )
+
+    recordlookup = None
+    if fields is not None:
+        recordlookup = fields
+        if len(recordlookup) != n:
+            raise ak._errors.wrap_error(
+                ValueError("if provided, the length of 'fields' must be 'n'")
+            )
+    return layout._combinations(n, replacement, recordlookup, parameters, axis, 0)

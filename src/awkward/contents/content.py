@@ -1177,28 +1177,6 @@ class Content:
             contents, recordlookup, length, parameters=parameters, backend=self._backend
         )
 
-    def combinations(
-        self,
-        n: Integral,
-        replacement: bool = False,
-        axis: Integral = 1,
-        fields: list[str] | None = None,
-        parameters: dict | None = None,
-    ):
-        if n < 1:
-            raise ak._errors.wrap_error(
-                ValueError("in combinations, 'n' must be at least 1")
-            )
-
-        recordlookup = None
-        if fields is not None:
-            recordlookup = fields
-            if len(recordlookup) != n:
-                raise ak._errors.wrap_error(
-                    ValueError("if provided, the length of 'fields' must be 'n'")
-                )
-        return self._combinations(n, replacement, recordlookup, parameters, axis, 0)
-
     def _combinations(
         self,
         n: Integral,
