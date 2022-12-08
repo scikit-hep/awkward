@@ -7,7 +7,7 @@ import awkward as ak
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.unmaskedform import UnmaskedForm
-from awkward.typing import Self
+from awkward.typing import Final, Self
 
 np = ak._nplikes.NumpyMetadata.instance()
 numpy = ak._nplikes.Numpy.instance()
@@ -40,7 +40,7 @@ class UnmaskedArray(Content):
     def content(self):
         return self._content
 
-    Form = UnmaskedForm
+    form_cls: Final = UnmaskedForm
 
     def copy(self, content=unset, *, parameters=unset):
         return UnmaskedArray(
@@ -73,14 +73,14 @@ class UnmaskedArray(Content):
 
     def _form_with_key(self, getkey):
         form_key = getkey(self)
-        return self.Form(
+        return self.form_cls(
             self._content._form_with_key(getkey),
             parameters=self._parameters,
             form_key=form_key,
         )
 
     def _to_buffers(self, form, getkey, container, backend):
-        assert isinstance(form, self.Form)
+        assert isinstance(form, self.form_cls)
         self._content._to_buffers(form.content, getkey, container, backend)
 
     @property

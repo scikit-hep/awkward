@@ -11,7 +11,7 @@ from awkward.contents.bytemaskedarray import ByteMaskedArray
 from awkward.contents.content import Content
 from awkward.forms.bitmaskedform import BitMaskedForm
 from awkward.index import Index
-from awkward.typing import Self
+from awkward.typing import Final, Self
 
 np = ak._nplikes.NumpyMetadata.instance()
 numpy = ak._nplikes.Numpy.instance()
@@ -114,7 +114,7 @@ class BitMaskedArray(Content):
     def lsb_order(self):
         return self._lsb_order
 
-    Form = BitMaskedForm
+    form_cls: Final = BitMaskedForm
 
     def copy(
         self,
@@ -190,7 +190,7 @@ class BitMaskedArray(Content):
 
     def _form_with_key(self, getkey):
         form_key = getkey(self)
-        return self.Form(
+        return self.form_cls(
             self._mask.form,
             self._content._form_with_key(getkey),
             self._valid_when,
@@ -200,7 +200,7 @@ class BitMaskedArray(Content):
         )
 
     def _to_buffers(self, form, getkey, container, backend):
-        assert isinstance(form, self.Form)
+        assert isinstance(form, self.form_cls)
         key = getkey(self, form, "mask")
         container[key] = ak._util.little_endian(self._mask.raw(backend.index_nplike))
         self._content._to_buffers(form.content, getkey, container, backend)

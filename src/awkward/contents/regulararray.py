@@ -7,7 +7,7 @@ import awkward as ak
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.regularform import RegularForm
-from awkward.typing import Self
+from awkward.typing import Final, Self
 
 np = ak._nplikes.NumpyMetadata.instance()
 numpy = ak._nplikes.Numpy.instance()
@@ -82,7 +82,7 @@ class RegularArray(Content):
     def size(self):
         return self._size
 
-    Form = RegularForm
+    form_cls: Final = RegularForm
 
     def copy(self, content=unset, size=unset, zeros_length=unset, *, parameters=unset):
         return RegularArray(
@@ -119,7 +119,7 @@ class RegularArray(Content):
 
     def _form_with_key(self, getkey):
         form_key = getkey(self)
-        return self.Form(
+        return self.form_cls(
             self._content._form_with_key(getkey),
             self._size,
             parameters=self._parameters,
@@ -127,7 +127,7 @@ class RegularArray(Content):
         )
 
     def _to_buffers(self, form, getkey, container, backend):
-        assert isinstance(form, self.Form)
+        assert isinstance(form, self.form_cls)
         self._content._to_buffers(form.content, getkey, container, backend)
 
     @property

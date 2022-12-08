@@ -8,7 +8,7 @@ from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.indexedoptionform import IndexedOptionForm
 from awkward.index import Index
-from awkward.typing import Self
+from awkward.typing import Final, Self
 
 np = ak._nplikes.NumpyMetadata.instance()
 numpy = ak._nplikes.Numpy.instance()
@@ -65,7 +65,7 @@ class IndexedOptionArray(Content):
     def content(self):
         return self._content
 
-    Form = IndexedOptionForm
+    form_cls: Final = IndexedOptionForm
 
     def copy(self, index=unset, content=unset, *, parameters=unset):
         return IndexedOptionArray(
@@ -124,7 +124,7 @@ class IndexedOptionArray(Content):
 
     def _form_with_key(self, getkey):
         form_key = getkey(self)
-        return self.Form(
+        return self.form_cls(
             self._index.form,
             self._content._form_with_key(getkey),
             parameters=self._parameters,
@@ -132,7 +132,7 @@ class IndexedOptionArray(Content):
         )
 
     def _to_buffers(self, form, getkey, container, backend):
-        assert isinstance(form, self.Form)
+        assert isinstance(form, self.form_cls)
         key = getkey(self, form, "index")
         container[key] = ak._util.little_endian(self._index.raw(backend.index_nplike))
         self._content._to_buffers(form.content, getkey, container, backend)

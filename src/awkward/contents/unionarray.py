@@ -12,7 +12,7 @@ from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.unionform import UnionForm
 from awkward.index import Index, Index8, Index64
-from awkward.typing import Self
+from awkward.typing import Final, Self
 
 np = ak._nplikes.NumpyMetadata.instance()
 numpy = ak._nplikes.Numpy.instance()
@@ -138,7 +138,7 @@ class UnionArray(Content):
     def contents(self):
         return self._contents
 
-    Form = UnionForm
+    form_cls: Final = UnionForm
 
     def copy(
         self,
@@ -382,7 +382,7 @@ class UnionArray(Content):
 
     def _form_with_key(self, getkey):
         form_key = getkey(self)
-        return self.Form(
+        return self.form_cls(
             self._tags.form,
             self._index.form,
             [x._form_with_key(getkey) for x in self._contents],
@@ -391,7 +391,7 @@ class UnionArray(Content):
         )
 
     def _to_buffers(self, form, getkey, container, backend):
-        assert isinstance(form, self.Form)
+        assert isinstance(form, self.form_cls)
         key1 = getkey(self, form, "tags")
         key2 = getkey(self, form, "index")
         container[key1] = ak._util.little_endian(self._tags.raw(backend.index_nplike))

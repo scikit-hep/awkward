@@ -9,7 +9,7 @@ from numbers import Complex, Integral, Real
 import awkward as ak
 import awkward._reducers
 from awkward._backends import Backend, TypeTracerBackend
-from awkward.forms import form
+from awkward.forms.form import Form, _parameters_equal
 from awkward.typing import Any, Self, TypeAlias, TypeVar
 
 np = ak._nplikes.NumpyMetadata.instance()
@@ -121,7 +121,7 @@ class Content:
         return self._backend
 
     @property
-    def form(self) -> form.Form:
+    def form(self) -> Form:
         return self.form_with_key(None)
 
     def form_with_key(self, form_key="node{id}", id_start=0):
@@ -159,12 +159,12 @@ class Content:
 
     def _form_with_key(
         self,
-        getkey: Callable[[Content], form.Form],
-    ) -> form.Form:
+        getkey: Callable[[Content], Form],
+    ) -> Form:
         raise ak._errors.wrap_error(NotImplementedError)
 
     @property
-    def Form(self) -> type[form.Form]:
+    def form_cls(self) -> type[Form]:
         raise ak._errors.wrap_error(NotImplementedError)
 
     @property
@@ -186,11 +186,11 @@ class Content:
 
     def _to_buffers(
         self,
-        form: form.Form,
-        getkey: Callable[[Content, form.Form, str], str],
+        form: Form,
+        getkey: Callable[[Content, Form, str], str],
         container: MutableMapping[str, Any] | None,
         backend: Backend,
-    ) -> tuple[form.Form, int, Mapping[str, Any]]:
+    ) -> tuple[Form, int, Mapping[str, Any]]:
         raise ak._errors.wrap_error(NotImplementedError)
 
     def __len__(self) -> int:
@@ -690,7 +690,7 @@ class Content:
             return True
         # Otherwise, do the parameters match? If not, we can't merge.
         elif not (
-            form._parameters_equal(
+            _parameters_equal(
                 self._parameters, other._parameters, only_array_record=True
             )
         ):
@@ -1171,7 +1171,7 @@ class Content:
         return self._nbytes_part()
 
     def purelist_parameter(self, key: str):
-        return self.Form.purelist_parameter(self, key)
+        return self.form_cls.purelist_parameter(self, key)
 
     def _is_unique(
         self,
@@ -1193,35 +1193,35 @@ class Content:
 
     @property
     def is_identity_like(self) -> bool:
-        return self.Form.is_identity_like.__get__(self)
+        return self.form_cls.is_identity_like.__get__(self)
 
     @property
     def purelist_isregular(self) -> bool:
-        return self.Form.purelist_isregular.__get__(self)
+        return self.form_cls.purelist_isregular.__get__(self)
 
     @property
     def purelist_depth(self) -> int:
-        return self.Form.purelist_depth.__get__(self)
+        return self.form_cls.purelist_depth.__get__(self)
 
     @property
     def minmax_depth(self) -> tuple[int, int]:
-        return self.Form.minmax_depth.__get__(self)
+        return self.form_cls.minmax_depth.__get__(self)
 
     @property
     def branch_depth(self) -> tuple[bool, int]:
-        return self.Form.branch_depth.__get__(self)
+        return self.form_cls.branch_depth.__get__(self)
 
     @property
     def fields(self) -> list[str]:
-        return self.Form.fields.__get__(self)
+        return self.form_cls.fields.__get__(self)
 
     @property
     def is_tuple(self) -> bool:
-        return self.Form.is_tuple.__get__(self)
+        return self.form_cls.is_tuple.__get__(self)
 
     @property
     def dimension_optiontype(self) -> bool:
-        return self.Form.dimension_optiontype.__get__(self)
+        return self.form_cls.dimension_optiontype.__get__(self)
 
     def _pad_none_axis0(self, target: Integral, clip: bool) -> Content:
         if not clip and target < self.length:
@@ -1492,7 +1492,7 @@ class Content:
         return (
             self.__class__ is other.__class__
             and len(self) == len(other)
-            and ak.forms.form._parameters_equal(
+            and _parameters_equal(
                 self.parameters, other.parameters, only_array_record=False
             )
             and self._layout_equal(other, index_dtype, numpyarray)

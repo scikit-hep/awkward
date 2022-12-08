@@ -7,7 +7,7 @@ import awkward as ak
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.emptyform import EmptyForm
-from awkward.typing import Self
+from awkward.typing import Final, Self
 
 np = ak._nplikes.NumpyMetadata.instance()
 numpy = ak._nplikes.Numpy.instance()
@@ -22,7 +22,7 @@ class EmptyArray(Content):
             backend = ak._backends.NumpyBackend.instance()
         self._init(parameters, backend)
 
-    Form = EmptyForm
+    form_cls: Final = EmptyForm
 
     def copy(
         self,
@@ -46,10 +46,10 @@ class EmptyArray(Content):
         return cls(parameters=parameters, backend=backend)
 
     def _form_with_key(self, getkey):
-        return self.Form(parameters=self._parameters, form_key=getkey(self))
+        return self.form_cls(parameters=self._parameters, form_key=getkey(self))
 
     def _to_buffers(self, form, getkey, container, backend):
-        assert isinstance(form, self.Form)
+        assert isinstance(form, self.form_cls)
 
     @property
     def typetracer(self):

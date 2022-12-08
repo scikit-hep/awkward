@@ -8,7 +8,7 @@ from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.numpyform import NumpyForm
 from awkward.types.numpytype import primitive_to_dtype
-from awkward.typing import Self
+from awkward.typing import Final, Self
 
 np = ak._nplikes.NumpyMetadata.instance()
 numpy = ak._nplikes.Numpy.instance()
@@ -55,7 +55,7 @@ class NumpyArray(Content):
     def data(self):
         return self._data
 
-    Form = NumpyForm
+    form_cls: Final = NumpyForm
 
     def copy(
         self,
@@ -118,7 +118,7 @@ class NumpyArray(Content):
         return self._backend.nplike.raw(self.data, nplike)
 
     def _form_with_key(self, getkey):
-        return self.Form(
+        return self.form_cls(
             ak.types.numpytype.dtype_to_primitive(self._data.dtype),
             self._data.shape[1:],
             parameters=self._parameters,
@@ -126,7 +126,7 @@ class NumpyArray(Content):
         )
 
     def _to_buffers(self, form, getkey, container, backend):
-        assert isinstance(form, self.Form)
+        assert isinstance(form, self.form_cls)
         key = getkey(self, form, "data")
         container[key] = ak._util.little_endian(self.raw(backend.nplike))
 

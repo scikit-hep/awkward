@@ -10,7 +10,7 @@ from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.bytemaskedform import ByteMaskedForm
 from awkward.index import Index
-from awkward.typing import Self
+from awkward.typing import Final, Self
 
 np = ak._nplikes.NumpyMetadata.instance()
 numpy = ak._nplikes.Numpy.instance()
@@ -84,7 +84,7 @@ class ByteMaskedArray(Content):
     def valid_when(self):
         return self._valid_when
 
-    Form = ByteMaskedForm
+    form_cls: Final = ByteMaskedForm
 
     def copy(self, mask=unset, content=unset, valid_when=unset, *, parameters=unset):
         return ByteMaskedArray(
@@ -139,7 +139,7 @@ class ByteMaskedArray(Content):
 
     def _form_with_key(self, getkey):
         form_key = getkey(self)
-        return self.Form(
+        return self.form_cls(
             self._mask.form,
             self._content._form_with_key(getkey),
             self._valid_when,
@@ -148,7 +148,7 @@ class ByteMaskedArray(Content):
         )
 
     def _to_buffers(self, form, getkey, container, backend):
-        assert isinstance(form, self.Form)
+        assert isinstance(form, self.form_cls)
         key = getkey(self, form, "mask")
         container[key] = ak._util.little_endian(self._mask.raw(backend.index_nplike))
         self._content._to_buffers(form.content, getkey, container, backend)
