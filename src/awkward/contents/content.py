@@ -1499,10 +1499,6 @@ class Content:
 
             return out
 
-    def flatten(self, axis: Integral = 1, depth: Integral = 0) -> Content:
-        offsets, flattened = self._offsets_and_flattened(axis, depth)
-        return flattened
-
     def _offsets_and_flattened(
         self, axis: Integral, depth: Integral
     ) -> tuple[ak.index.Index, Content]:
