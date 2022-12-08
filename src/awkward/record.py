@@ -203,9 +203,9 @@ class Record:
             return Record(self._array[self._at : self._at + 1].packed(), 0)
 
     def to_list(self, behavior=None):
-        return self._to_list(behavior, None)
+        return self._pub_to_list(behavior, None)
 
-    def _to_list(self, behavior, json_conversions):
+    def _pub_to_list(self, behavior, json_conversions):
         overloaded = (
             ak._util.recordclass(self._array, behavior).__getitem__
             is not ak.highlevel.Record.__getitem__
@@ -217,7 +217,7 @@ class Record:
             for field in self._array.fields:
                 contents.append(record[field])
                 if isinstance(contents[-1], (ak.highlevel.Array, ak.highlevel.Record)):
-                    contents[-1] = contents[-1]._layout._to_list(
+                    contents[-1] = contents[-1]._layout._pub_to_list(
                         behavior, json_conversions
                     )
                 elif hasattr(contents[-1], "tolist"):
@@ -225,7 +225,9 @@ class Record:
 
         else:
             contents = [
-                content[self._at : self._at + 1]._to_list(behavior, json_conversions)[0]
+                content[self._at : self._at + 1]._pub_to_list(
+                    behavior, json_conversions
+                )[0]
                 for content in self._array.contents
             ]
 

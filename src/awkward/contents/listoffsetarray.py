@@ -2069,7 +2069,7 @@ class ListOffsetArray(Content):
             content = content[: next._offsets[-1]]
         return ListOffsetArray(next._offsets, content, parameters=next._parameters)
 
-    def _to_list(self, behavior, json_conversions):
+    def _pub_to_list(self, behavior, json_conversions):
         starts, stops = self.starts, self.stops
         starts_data = starts.raw(numpy)
         stops_data = stops.raw(numpy)[: len(starts_data)]
@@ -2122,7 +2122,7 @@ class ListOffsetArray(Content):
             if out is not None:
                 return out
 
-            content = nextcontent._to_list(behavior, json_conversions)
+            content = nextcontent._pub_to_list(behavior, json_conversions)
             out = [None] * starts.length
 
             for i in range(starts.length):

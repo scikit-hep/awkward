@@ -1333,7 +1333,7 @@ class NumpyArray(Content):
     def packed(self):
         return self.contiguous().to_RegularArray()
 
-    def _to_list(self, behavior, json_conversions):
+    def _pub_to_list(self, behavior, json_conversions):
         if self.parameter("__array__") == "byte":
             convert_bytes = (
                 None if json_conversions is None else json_conversions["convert_bytes"]
@@ -1369,7 +1369,7 @@ class NumpyArray(Content):
                             self.length,
                             parameters=self._parameters,
                             backend=self._backend,
-                        )._to_list(behavior, json_conversions)
+                        )._pub_to_list(behavior, json_conversions)
 
             out = self._data.tolist()
 

@@ -1594,7 +1594,7 @@ class Content:
         else:
             complex_real_string, complex_imag_string = None, None
 
-        return self.packed()._to_list(
+        return self.packed()._pub_to_list(
             behavior,
             {
                 "nan_string": nan_string,
@@ -1613,9 +1613,9 @@ class Content:
         return self.to_list(behavior)
 
     def to_list(self, behavior: dict | None = None) -> list:
-        return self.packed()._to_list(behavior, None)
+        return self.packed()._pub_to_list(behavior, None)
 
-    def _to_list(
+    def _pub_to_list(
         self, behavior: dict | None, json_conversions: dict[str, Any] | None
     ) -> list:
         raise ak._errors.wrap_error(NotImplementedError)
@@ -1626,12 +1626,12 @@ class Content:
         if self.is_record:
             getitem = ak._util.recordclass(self, behavior).__getitem__
             overloaded = getitem is not ak.highlevel.Record.__getitem__ and not getattr(
-                getitem, "ignore_in_to_list", False
+                getitem, "ignore_in_pub_to_list", False
             )
         else:
             getitem = ak._util.arrayclass(self, behavior).__getitem__
             overloaded = getitem is not ak.highlevel.Array.__getitem__ and not getattr(
-                getitem, "ignore_in_to_list", False
+                getitem, "ignore_in_pub_to_list", False
             )
 
         if overloaded:
@@ -1640,7 +1640,7 @@ class Content:
             for i in range(self.length):
                 out[i] = array[i]
                 if isinstance(out[i], (ak.highlevel.Array, ak.highlevel.Record)):
-                    out[i] = out[i]._layout._to_list(behavior, json_conversions)
+                    out[i] = out[i]._layout._pub_to_list(behavior, json_conversions)
                 elif hasattr(out[i], "tolist"):
                     out[i] = out[i].tolist()
 

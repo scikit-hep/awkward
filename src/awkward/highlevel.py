@@ -2781,6 +2781,6 @@ class ArrayBuilder(Sized):
         return self.Record(self, name)
 
 
-def ignore_in_to_list(getitem_function):
-    getitem_function.ignore_in_to_list = True
+def ignore_in_pub_to_list(getitem_function):
+    getitem_function.ignore_in_pub_to_list = True
     return getitem_function

@@ -1642,7 +1642,7 @@ class IndexedOptionArray(Content):
                 parameters=self._parameters,
             )
 
-    def _to_list(self, behavior, json_conversions):
+    def _pub_to_list(self, behavior, json_conversions):
         out = self._to_list_custom(behavior, json_conversions)
         if out is not None:
             return out
@@ -1653,7 +1653,7 @@ class IndexedOptionArray(Content):
         nextcontent = self._content._pub_carry(
             ak.index.Index(index[not_missing]), False
         )
-        out = nextcontent._to_list(behavior, json_conversions)
+        out = nextcontent._pub_to_list(behavior, json_conversions)
 
         for i, isvalid in enumerate(not_missing):
             if not isvalid:

@@ -712,13 +712,13 @@ class BitMaskedArray(Content):
                 parameters=self._parameters,
             )
 
-    def _to_list(self, behavior, json_conversions):
+    def _pub_to_list(self, behavior, json_conversions):
         out = self._to_list_custom(behavior, json_conversions)
         if out is not None:
             return out
 
         mask = self.mask_as_bool(valid_when=True)[: self._length]
-        out = self._content._pub_getitem_range(slice(0, self._length))._to_list(
+        out = self._content._pub_getitem_range(slice(0, self._length))._pub_to_list(
             behavior, json_conversions
         )
 

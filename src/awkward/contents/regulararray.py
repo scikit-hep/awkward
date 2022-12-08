@@ -1349,7 +1349,7 @@ class RegularArray(Content):
             content, self._size, self._length, parameters=self._parameters
         )
 
-    def _to_list(self, behavior, json_conversions):
+    def _pub_to_list(self, behavior, json_conversions):
         if self.parameter("__array__") == "bytestring":
             convert_bytes = (
                 None if json_conversions is None else json_conversions["convert_bytes"]
@@ -1388,7 +1388,7 @@ class RegularArray(Content):
             if out is not None:
                 return out
 
-            content = self._content._to_list(behavior, json_conversions)
+            content = self._content._pub_to_list(behavior, json_conversions)
             length, size = self._length, self._size
             out = [None] * length
             for i in range(length):

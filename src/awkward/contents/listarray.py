@@ -1473,8 +1473,8 @@ class ListArray(Content):
     def packed(self):
         return self.to_ListOffsetArray64(True).packed()
 
-    def _to_list(self, behavior, json_conversions):
-        return ListOffsetArray._to_list(self, behavior, json_conversions)
+    def _pub_to_list(self, behavior, json_conversions):
+        return ListOffsetArray._pub_to_list(self, behavior, json_conversions)
 
     def to_backend(self, backend: ak._backends.Backend) -> Self:
         content = self._content.to_backend(backend)

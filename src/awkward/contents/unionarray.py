@@ -1603,14 +1603,14 @@ class UnionArray(Content):
             parameters=self._parameters,
         )
 
-    def _to_list(self, behavior, json_conversions):
+    def _pub_to_list(self, behavior, json_conversions):
         out = self._to_list_custom(behavior, json_conversions)
         if out is not None:
             return out
 
         tags = self._tags.raw(numpy)
         index = self._index.raw(numpy)
-        contents = [x._to_list(behavior, json_conversions) for x in self._contents]
+        contents = [x._pub_to_list(behavior, json_conversions) for x in self._contents]
 
         out = [None] * tags.shape[0]
         for i, tag in enumerate(tags):

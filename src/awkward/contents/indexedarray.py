@@ -1093,14 +1093,14 @@ class IndexedArray(Content):
         else:
             return self.project().packed()
 
-    def _to_list(self, behavior, json_conversions):
+    def _pub_to_list(self, behavior, json_conversions):
         out = self._to_list_custom(behavior, json_conversions)
         if out is not None:
             return out
 
         index = self._index.raw(numpy)
         nextcontent = self._content._pub_carry(ak.index.Index(index), False)
-        return nextcontent._to_list(behavior, json_conversions)
+        return nextcontent._pub_to_list(behavior, json_conversions)
 
     def to_backend(self, backend: ak._backends.Backend) -> Self:
         content = self._content.to_backend(backend)

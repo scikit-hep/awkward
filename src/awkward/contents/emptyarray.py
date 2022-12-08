@@ -372,7 +372,7 @@ class EmptyArray(Content):
     def packed(self):
         return self
 
-    def _to_list(self, behavior, json_conversions):
+    def _pub_to_list(self, behavior, json_conversions):
         return []
 
     def to_backend(self, backend: ak._backends.Backend) -> Self:
