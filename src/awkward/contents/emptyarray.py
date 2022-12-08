@@ -293,7 +293,7 @@ class EmptyArray(Content):
     def _validity_error(self, path):
         return ""
 
-    def _nbytes_part(self):
+    def _pub_nbytes_part(self):
         return 0
 
     def _pub_pad_none(self, target, axis, depth, clip):

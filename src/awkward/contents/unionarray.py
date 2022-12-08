@@ -1381,10 +1381,10 @@ class UnionArray(Content):
 
             return ""
 
-    def _nbytes_part(self):
-        result = self.tags._nbytes_part() + self.index._nbytes_part()
+    def _pub_nbytes_part(self):
+        result = self.tags._pub_nbytes_part() + self.index._pub_nbytes_part()
         for content in self.contents:
-            result = result + content._nbytes_part()
+            result = result + content._pub_nbytes_part()
         return result
 
     def _pub_pad_none(self, target, axis, depth, clip):

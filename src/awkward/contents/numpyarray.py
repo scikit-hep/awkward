@@ -1242,7 +1242,7 @@ class NumpyArray(Content):
         else:
             return self.pad_none_axis0(target, clip=True)
 
-    def _nbytes_part(self):
+    def _pub_nbytes_part(self):
         return self.data.nbytes
 
     def _pub_to_arrow(self, pyarrow, mask_node, validbytes, length, options):

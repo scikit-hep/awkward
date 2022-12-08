@@ -209,7 +209,7 @@ class Index:
             nplike=self._nplike,
         )
 
-    def _nbytes_part(self):
+    def _pub_nbytes_part(self):
         return self.data.nbytes
 
     def to_nplike(self, nplike: ak._nplikes.NumpyLike) -> Self:

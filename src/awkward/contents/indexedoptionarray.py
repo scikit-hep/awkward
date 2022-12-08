@@ -1432,8 +1432,8 @@ class IndexedOptionArray(Content):
         else:
             return self._content.validity_error(path + ".content")
 
-    def _nbytes_part(self):
-        return self.index._nbytes_part() + self.content._nbytes_part()
+    def _pub_nbytes_part(self):
+        return self.index._pub_nbytes_part() + self.content._pub_nbytes_part()
 
     def _pub_pad_none(self, target, axis, depth, clip):
         posaxis = self.axis_wrap_if_negative(axis)

@@ -1321,7 +1321,10 @@ class Content:
 
     @property
     def nbytes(self) -> int:
-        return self._nbytes_part()
+        return self._pub_nbytes_part()
+
+    def _pub_nbytes_part(self) -> int:
+        raise ak._errors.wrap_error(NotImplementedError)
 
     def purelist_parameter(self, key: str):
         return self.Form.purelist_parameter(self, key)

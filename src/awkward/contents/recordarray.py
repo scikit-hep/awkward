@@ -856,10 +856,10 @@ class RecordArray(Content):
                 return sub
         return ""
 
-    def _nbytes_part(self):
+    def _pub_nbytes_part(self):
         result = 0
         for content in self.contents:
-            result = result + content._nbytes_part()
+            result = result + content._pub_nbytes_part()
         return result
 
     def _pub_pad_none(self, target, axis, depth, clip):

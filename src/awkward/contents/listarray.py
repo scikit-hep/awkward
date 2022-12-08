@@ -1272,11 +1272,11 @@ class ListArray(Content):
         else:
             return self._content.validity_error(path + ".content")
 
-    def _nbytes_part(self):
+    def _pub_nbytes_part(self):
         return (
-            self.starts._nbytes_part()
-            + self.stops._nbytes_part()
-            + self.content._nbytes_part()
+            self.starts._pub_nbytes_part()
+            + self.stops._pub_nbytes_part()
+            + self.content._pub_nbytes_part()
         )
 
     def _pub_pad_none(self, target, axis, depth, clip):
