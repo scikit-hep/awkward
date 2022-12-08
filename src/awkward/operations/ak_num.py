@@ -74,7 +74,7 @@ def num(array, axis=1, *, highlevel=True, behavior=None):
 def _impl(array, axis, highlevel, behavior):
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
     behavior = ak._util.behavior_of(array, behavior=behavior)
-    out = layout.num(axis=axis)
+    out = ak._do.num(layout, axis=axis)
     if isinstance(out, (ak.contents.Content, ak.record.Record)):
         return ak._util.wrap(out, behavior, highlevel)
     else:

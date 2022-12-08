@@ -630,7 +630,7 @@ class RegularArray(Content):
         else:
             raise ak._errors.wrap_error(AssertionError(repr(head)))
 
-    def num(self, axis, depth=0):
+    def _num(self, axis, depth=0):
         posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:
             out = self._length
@@ -648,7 +648,7 @@ class RegularArray(Content):
             )
             return ak.contents.NumpyArray(tonum, parameters=None, backend=self._backend)
         else:
-            next = self._content.num(posaxis, depth + 1)
+            next = self._content._num(posaxis, depth + 1)
             return ak.contents.RegularArray(
                 next, self._size, self._length, parameters=self._parameters
             )

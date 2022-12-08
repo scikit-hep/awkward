@@ -902,7 +902,7 @@ class ListArray(Content):
         else:
             raise ak._errors.wrap_error(AssertionError(repr(head)))
 
-    def num(self, axis, depth=0):
+    def _num(self, axis, depth=0):
         posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:
             out = self.length
@@ -932,7 +932,7 @@ class ListArray(Content):
             )
             return ak.contents.NumpyArray(tonum, parameters=None, backend=self._backend)
         else:
-            return self.to_ListOffsetArray64(True).num(posaxis, depth)
+            return self.to_ListOffsetArray64(True)._num(posaxis, depth)
 
     def _offsets_and_flattened(self, axis, depth):
         return self.to_ListOffsetArray64(True)._offsets_and_flattened(axis, depth)

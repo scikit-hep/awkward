@@ -453,7 +453,7 @@ class RecordArray(Content):
             )
             return next._getitem_next(nexthead, nexttail, advanced)
 
-    def num(self, axis, depth=0):
+    def _num(self, axis, depth=0):
         posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:
             npsingle = self._backend.index_nplike.full((1,), self.length, np.int64)
@@ -473,7 +473,7 @@ class RecordArray(Content):
         else:
             contents = []
             for content in self._contents:
-                contents.append(content.num(posaxis, depth))
+                contents.append(content._num(posaxis, depth))
             return ak.contents.RecordArray(
                 contents,
                 self._fields,

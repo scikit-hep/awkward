@@ -292,3 +292,7 @@ def numbers_to_type(layout: Content, name: str) -> Content:
 
 def fill_none(layout: Content, value: Content) -> Content:
     return layout._fill_none(value)
+
+
+def num(layout, axis):
+    return layout._num(axis)

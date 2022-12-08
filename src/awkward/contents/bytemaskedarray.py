@@ -556,7 +556,7 @@ class ByteMaskedArray(Content):
 
             return self._content._carry(nextcarry, False)
 
-    def num(self, axis, depth=0):
+    def _num(self, axis, depth=0):
         posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:
             out = self.length
@@ -568,7 +568,7 @@ class ByteMaskedArray(Content):
             _, nextcarry, outindex = self._nextcarry_outindex(self._backend)
 
             next = self._content._carry(nextcarry, False)
-            out = next.num(posaxis, depth)
+            out = next._num(posaxis, depth)
 
             return ak.contents.IndexedOptionArray.simplified(
                 outindex, out, parameters=self.parameters

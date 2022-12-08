@@ -236,7 +236,7 @@ class UnmaskedArray(Content):
         else:
             return self._content
 
-    def num(self, axis, depth=0):
+    def _num(self, axis, depth=0):
         posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:
             out = self.length
@@ -246,7 +246,7 @@ class UnmaskedArray(Content):
                 return out
         else:
             return ak.contents.UnmaskedArray(
-                self._content.num(posaxis, depth), parameters=self._parameters
+                self._content._num(posaxis, depth), parameters=self._parameters
             )
 
     def _offsets_and_flattened(self, axis, depth):
