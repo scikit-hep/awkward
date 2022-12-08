@@ -79,7 +79,7 @@ def test_reproduce_numpy():
         [53 * 59 * 61 * 67 * 71, 73 * 79 * 83 * 89 * 97, 101 * 103 * 107 * 109 * 113],
     ]
     assert (
-        ak.prod(depth2.typetracer, axis=-1, highlevel=False).form
+        ak.prod(depth2.to_typetracer(), axis=-1, highlevel=False).form
         == ak.prod(depth2, axis=-1, highlevel=False).form
     )
     assert to_list(ak.prod(depth2, axis=2, highlevel=False)) == [
@@ -87,7 +87,7 @@ def test_reproduce_numpy():
         [53 * 59 * 61 * 67 * 71, 73 * 79 * 83 * 89 * 97, 101 * 103 * 107 * 109 * 113],
     ]
     assert (
-        ak.prod(depth2.typetracer, axis=2, highlevel=False).form
+        ak.prod(depth2.to_typetracer(), axis=2, highlevel=False).form
         == ak.prod(depth2, axis=2, highlevel=False).form
     )
 
@@ -96,7 +96,7 @@ def test_reproduce_numpy():
         [53 * 73 * 101, 59 * 79 * 103, 61 * 83 * 107, 67 * 89 * 109, 71 * 97 * 113],
     ]
     assert (
-        ak.prod(depth2.typetracer, axis=-2, highlevel=False).form
+        ak.prod(depth2.to_typetracer(), axis=-2, highlevel=False).form
         == ak.prod(depth2, axis=-2, highlevel=False).form
     )
     assert to_list(ak.prod(depth2, axis=1, highlevel=False)) == [
@@ -104,7 +104,7 @@ def test_reproduce_numpy():
         [53 * 73 * 101, 59 * 79 * 103, 61 * 83 * 107, 67 * 89 * 109, 71 * 97 * 113],
     ]
     assert (
-        ak.prod(depth2.typetracer, axis=1, highlevel=False).form
+        ak.prod(depth2.to_typetracer(), axis=1, highlevel=False).form
         == ak.prod(depth2, axis=1, highlevel=False).form
     )
 
@@ -114,7 +114,7 @@ def test_reproduce_numpy():
         [31 * 101, 37 * 103, 41 * 107, 43 * 109, 47 * 113],
     ]
     assert (
-        ak.prod(depth2.typetracer, axis=-3, highlevel=False).form
+        ak.prod(depth2.to_typetracer(), axis=-3, highlevel=False).form
         == ak.prod(depth2, axis=-3, highlevel=False).form
     )
     assert to_list(ak.prod(depth2, axis=0, highlevel=False)) == [
@@ -123,7 +123,7 @@ def test_reproduce_numpy():
         [31 * 101, 37 * 103, 41 * 107, 43 * 109, 47 * 113],
     ]
     assert (
-        ak.prod(depth2.typetracer, axis=0, highlevel=False).form
+        ak.prod(depth2.to_typetracer(), axis=0, highlevel=False).form
         == ak.prod(depth2, axis=0, highlevel=False).form
     )
 
@@ -136,7 +136,7 @@ def test_reproduce_numpy():
         23 * 29 * 31 * 37,
     ]
     assert (
-        ak.prod(depth1.typetracer, -1, highlevel=False).form
+        ak.prod(depth1.to_typetracer(), -1, highlevel=False).form
         == ak.prod(depth1, -1, highlevel=False).form
     )
     assert to_list(ak.prod(depth1, 1, highlevel=False)) == [
@@ -145,7 +145,7 @@ def test_reproduce_numpy():
         23 * 29 * 31 * 37,
     ]
     assert (
-        ak.prod(depth1.typetracer, 1, highlevel=False).form
+        ak.prod(depth1.to_typetracer(), 1, highlevel=False).form
         == ak.prod(depth1, 1, highlevel=False).form
     )
 
@@ -156,7 +156,7 @@ def test_reproduce_numpy():
         7 * 19 * 37,
     ]
     assert (
-        ak.prod(depth1.typetracer, -2, highlevel=False).form
+        ak.prod(depth1.to_typetracer(), -2, highlevel=False).form
         == ak.prod(depth1, -2, highlevel=False).form
     )
     assert to_list(ak.prod(depth1, 0, highlevel=False)) == [
@@ -166,7 +166,7 @@ def test_reproduce_numpy():
         7 * 19 * 37,
     ]
     assert (
-        ak.prod(depth1.typetracer, 0, highlevel=False).form
+        ak.prod(depth1.to_typetracer(), 0, highlevel=False).form
         == ak.prod(depth1, 0, highlevel=False).form
     )
 
@@ -192,7 +192,7 @@ def test_gaps():
         [3131, 3811, 4387, 4687, 5311],
     ]
     assert (
-        ak.prod(depth2.typetracer, -3, highlevel=False).form
+        ak.prod(depth2.to_typetracer(), -3, highlevel=False).form
         == ak.prod(depth2, -3, highlevel=False).form
     )
 
@@ -223,7 +223,7 @@ def test_gaps():
         [3131, 3811, 4387, 4687, 47],
     ]
     assert (
-        ak.prod(depth2.typetracer, -3, highlevel=False).form
+        ak.prod(depth2.to_typetracer(), -3, highlevel=False).form
         == ak.prod(depth2, -3, highlevel=False).form
     )
 
@@ -253,7 +253,7 @@ def test_gaps():
         [3131, 3811, 4387, 43, 47],
     ]
     assert (
-        ak.prod(depth2.typetracer, -3, highlevel=False).form
+        ak.prod(depth2.to_typetracer(), -3, highlevel=False).form
         == ak.prod(depth2, -3, highlevel=False).form
     )
 
@@ -318,7 +318,7 @@ def test_gaps():
         [3131, 3811, 4387, 4687, 47],
     ]
     assert (
-        ak.prod(depth2.typetracer, -3, highlevel=False).form
+        ak.prod(depth2.to_typetracer(), -3, highlevel=False).form
         == ak.prod(depth2, -3, highlevel=False).form
     )
 
@@ -340,7 +340,7 @@ def test_gaps():
         [3131, 3811, 4387, 4687, 5311],
     ]
     assert (
-        ak.prod(depth2.typetracer, -3, highlevel=False).form
+        ak.prod(depth2.to_typetracer(), -3, highlevel=False).form
         == ak.prod(depth2, -3, highlevel=False).form
     )
 
@@ -362,7 +362,7 @@ def test_gaps():
         [3131, 3811, 4387, 4687, 5311],
     ]
     assert (
-        ak.prod(depth2.typetracer, -3, highlevel=False).form
+        ak.prod(depth2.to_typetracer(), -3, highlevel=False).form
         == ak.prod(depth2, -3, highlevel=False).form
     )
 
@@ -426,7 +426,7 @@ def test_gaps():
         [3131, 3811, 4387, 4687, 5311],
     ]
     assert (
-        ak.prod(depth2.typetracer, -3, highlevel=False).form
+        ak.prod(depth2.to_typetracer(), -3, highlevel=False).form
         == ak.prod(depth2, -3, highlevel=False).form
     )
 
@@ -482,7 +482,7 @@ def test_gaps():
         [3131, 3811, 4387, 4687, 5311],
     ]
     assert (
-        ak.prod(depth2.typetracer, -3, highlevel=False).form
+        ak.prod(depth2.to_typetracer(), -3, highlevel=False).form
         == ak.prod(depth2, -3, highlevel=False).form
     )
 
@@ -538,7 +538,7 @@ def test_gaps():
         [3131, 3811, 4387, 4687],
     ]
     assert (
-        ak.prod(depth2.typetracer, -3, highlevel=False).form
+        ak.prod(depth2.to_typetracer(), -3, highlevel=False).form
         == ak.prod(depth2, -3, highlevel=False).form
     )
 
@@ -594,7 +594,7 @@ def test_gaps():
         [3131, 3811, 4387, 4687, 5311],
     ]
     assert (
-        ak.prod(depth2.typetracer, -3, highlevel=False).form
+        ak.prod(depth2.to_typetracer(), -3, highlevel=False).form
         == ak.prod(depth2, -3, highlevel=False).form
     )
 
@@ -612,7 +612,7 @@ def test_gaps():
         [7 * 19, 23],
     ]
     assert (
-        ak.prod(depth2.typetracer, -3, highlevel=False).form
+        ak.prod(depth2.to_typetracer(), -3, highlevel=False).form
         == ak.prod(depth2, -3, highlevel=False).form
     )
 
@@ -630,7 +630,7 @@ def test_gaps():
         [7 * 19, 23],
     ]
     assert (
-        ak.prod(depth2.typetracer, -3, highlevel=False).form
+        ak.prod(depth2.to_typetracer(), -3, highlevel=False).form
         == ak.prod(depth2, -3, highlevel=False).form
     )
 
@@ -649,7 +649,7 @@ def test_gaps():
         [377],
     ]
     assert (
-        ak.prod(depth2.typetracer, -3, highlevel=False).form
+        ak.prod(depth2.to_typetracer(), -3, highlevel=False).form
         == ak.prod(depth2, -3, highlevel=False).form
     )
 
@@ -669,7 +669,7 @@ def test_gaps():
         [13],
     ]
     assert (
-        ak.prod(depth2.typetracer, -3, highlevel=False).form
+        ak.prod(depth2.to_typetracer(), -3, highlevel=False).form
         == ak.prod(depth2, -3, highlevel=False).form
     )
 
@@ -689,7 +689,7 @@ def test_gaps():
         [13],
     ]
     assert (
-        ak.prod(depth2.typetracer, -3, highlevel=False).form
+        ak.prod(depth2.to_typetracer(), -3, highlevel=False).form
         == ak.prod(depth2, -3, highlevel=False).form
     )
 
@@ -710,7 +710,7 @@ def test_gaps():
         [53 * 59 * 61 * 67 * 71, 73 * 79 * 83 * 89 * 97, 101 * 103 * 107 * 109 * 113],
     ]
     assert (
-        ak.prod(depth2.typetracer, -1, highlevel=False).form
+        ak.prod(depth2.to_typetracer(), -1, highlevel=False).form
         == ak.prod(depth2, -1, highlevel=False).form
     )
 
@@ -719,7 +719,7 @@ def test_gaps():
         [53 * 73 * 101, 59 * 79 * 103, 61 * 83 * 107, 67 * 89 * 109, 71 * 97 * 113],
     ]
     assert (
-        ak.prod(depth2.typetracer, -2, highlevel=False).form
+        ak.prod(depth2.to_typetracer(), -2, highlevel=False).form
         == ak.prod(depth2, -2, highlevel=False).form
     )
 
@@ -742,7 +742,7 @@ def test_gaps():
         [17 * 19, 23],
     ]
     assert (
-        ak.prod(depth2.typetracer, -1, highlevel=False).form
+        ak.prod(depth2.to_typetracer(), -1, highlevel=False).form
         == ak.prod(depth2, -1, highlevel=False).form
     )
 
@@ -752,7 +752,7 @@ def test_gaps():
         [17 * 23, 19],
     ]
     assert (
-        ak.prod(depth2.typetracer, -2, highlevel=False).form
+        ak.prod(depth2.to_typetracer(), -2, highlevel=False).form
         == ak.prod(depth2, -2, highlevel=False).form
     )
 
@@ -763,7 +763,7 @@ def test_gaps():
         [13],
     ]
     assert (
-        ak.prod(depth2.typetracer, -3, highlevel=False).form
+        ak.prod(depth2.to_typetracer(), -3, highlevel=False).form
         == ak.prod(depth2, -3, highlevel=False).form
     )
 
@@ -793,19 +793,19 @@ def test_complicated():
     ]
 
     assert to_list(complicated["x"]) == [[[2, 3, 5]], [], [[], [7, 11]]]
-    assert complicated.typetracer["x"].form == complicated["x"].form
+    assert complicated.to_typetracer()["x"].form == complicated["x"].form
     assert to_list(complicated["y"]) == [
         [[[2, 3, 5], [], [7, 11], [13]]],
         [],
         [[], [[17, 19], [23]]],
     ]
-    assert complicated.typetracer["y"].form == complicated["y"].form
+    assert complicated.to_typetracer()["y"].form == complicated["y"].form
 
     with pytest.raises(TypeError):
         to_list(ak.prod(complicated, -1, highlevel=False))
 
     with pytest.raises(TypeError):
-        ak.prod(complicated.typetracer, -1, highlevel=False).form
+        ak.prod(complicated.to_typetracer(), -1, highlevel=False).form
 
     assert to_list(ak.prod(complicated["x"], -1, highlevel=False)) == [
         [30],
@@ -813,7 +813,7 @@ def test_complicated():
         [1, 77],
     ]
     assert (
-        ak.prod(complicated.typetracer["x"], -1, highlevel=False).form
+        ak.prod(complicated.to_typetracer()["x"], -1, highlevel=False).form
         == ak.prod(complicated["x"], -1, highlevel=False).form
     )
     assert to_list(ak.prod(complicated["y"], -1, highlevel=False)) == [
@@ -822,7 +822,7 @@ def test_complicated():
         [[], [323, 23]],
     ]
     assert (
-        ak.prod(complicated.typetracer["y"], -1, highlevel=False).form
+        ak.prod(complicated.to_typetracer()["y"], -1, highlevel=False).form
         == ak.prod(complicated["y"], -1, highlevel=False).form
     )
 
@@ -830,14 +830,14 @@ def test_complicated():
         to_list(ak.prod(complicated, -2, highlevel=False))
 
     with pytest.raises(TypeError):
-        ak.prod(complicated.typetracer, -2, highlevel=False).form
+        ak.prod(complicated.to_typetracer(), -2, highlevel=False).form
     assert to_list(ak.prod(complicated["x"], -2, highlevel=False)) == [
         [2, 3, 5],
         [],
         [7, 11],
     ]
     assert (
-        ak.prod(complicated.typetracer["x"], -2, highlevel=False).form
+        ak.prod(complicated.to_typetracer()["x"], -2, highlevel=False).form
         == ak.prod(complicated["x"], -2, highlevel=False).form
     )
     assert to_list(ak.prod(complicated["y"], -2, highlevel=False)) == [
@@ -846,20 +846,20 @@ def test_complicated():
         [[], [391, 19]],
     ]
     assert (
-        ak.prod(complicated.typetracer["y"], -2, highlevel=False).form
+        ak.prod(complicated.to_typetracer()["y"], -2, highlevel=False).form
         == ak.prod(complicated["y"], -2, highlevel=False).form
     )
 
     assert to_list(complicated[0]) == [
         {"x": [2, 3, 5], "y": [[2, 3, 5], [], [7, 11], [13]]}
     ]
-    assert complicated.typetracer[0].form == complicated[0].form
+    assert complicated.to_typetracer()[0].form == complicated[0].form
 
     with pytest.raises(TypeError):
         to_list(ak.prod(complicated[0], -1, highlevel=False))
 
     with pytest.raises(TypeError):
-        to_list(ak.prod(complicated.typetracer[0], -1, highlevel=False))
+        to_list(ak.prod(complicated.to_typetracer()[0], -1, highlevel=False))
 
 
 def test_EmptyArray():
@@ -870,7 +870,7 @@ def test_EmptyArray():
 
     assert to_list(ak.prod(array, -1, highlevel=False)) == [1, 1, 1]
     assert (
-        ak.prod(array.typetracer, -1, highlevel=False).form
+        ak.prod(array.to_typetracer(), -1, highlevel=False).form
         == ak.prod(array, -1, highlevel=False).form
     )
 
@@ -883,7 +883,7 @@ def test_EmptyArray():
 
     assert to_list(ak.prod(array, -1, highlevel=False)) == [1, 1, 1]
     assert (
-        ak.prod(array.typetracer, -1, highlevel=False).form
+        ak.prod(array.to_typetracer(), -1, highlevel=False).form
         == ak.prod(array, -1, highlevel=False).form
     )
 
@@ -907,7 +907,7 @@ def test_IndexedOptionArray():
         [31 * 37 * 41 * 43 * 47, 13 * 17 * 19 * 23 * 29, 2 * 3 * 5 * 7 * 11],
     ]
     assert (
-        ak.prod(depth2.typetracer, -1, highlevel=False).form
+        ak.prod(depth2.to_typetracer(), -1, highlevel=False).form
         == ak.prod(depth2, -1, highlevel=False).form
     )
 
@@ -916,7 +916,7 @@ def test_IndexedOptionArray():
         [31 * 13 * 2, 37 * 17 * 3, 41 * 19 * 5, 43 * 23 * 7, 47 * 29 * 11],
     ]
     assert (
-        ak.prod(depth2.typetracer, -2, highlevel=False).form
+        ak.prod(depth2.to_typetracer(), -2, highlevel=False).form
         == ak.prod(depth2, -2, highlevel=False).form
     )
 
@@ -926,7 +926,7 @@ def test_IndexedOptionArray():
         [53 * 2, 59 * 3, 61 * 5, 67 * 7, 71 * 11],
     ]
     assert (
-        ak.prod(depth2.typetracer, -3, highlevel=False).form
+        ak.prod(depth2.to_typetracer(), -3, highlevel=False).form
         == ak.prod(depth2, -3, highlevel=False).form
     )
 
@@ -974,7 +974,7 @@ def test_IndexedOptionArray():
         [31 * 37 * 41 * 43 * 47, None, 2 * 3 * 5 * 7 * 11],
     ]
     assert (
-        ak.prod(depth2.typetracer, -1, highlevel=False).form
+        ak.prod(depth2.to_typetracer(), -1, highlevel=False).form
         == ak.prod(depth2, -1, highlevel=False).form
     )
 
@@ -983,7 +983,7 @@ def test_IndexedOptionArray():
         [31 * 2, 37 * 3, 41 * 5, 43 * 7, 47 * 11],
     ]
     assert (
-        ak.prod(depth2.typetracer, -2, highlevel=False).form
+        ak.prod(depth2.to_typetracer(), -2, highlevel=False).form
         == ak.prod(depth2, -2, highlevel=False).form
     )
 
@@ -993,7 +993,7 @@ def test_IndexedOptionArray():
         [53 * 2, 59 * 3, 61 * 5, 67 * 7, 71 * 11],
     ]
     assert (
-        ak.prod(depth2.typetracer, -3, highlevel=False).form
+        ak.prod(depth2.to_typetracer(), -3, highlevel=False).form
         == ak.prod(depth2, -3, highlevel=False).form
     )
 
@@ -1081,7 +1081,7 @@ def test_IndexedOptionArray():
         [31 * 37 * 41 * 43 * 47, 1 * 1 * 1 * 1 * 1, 2 * 3 * 5 * 7 * 11],
     ]
     assert (
-        ak.prod(depth2.typetracer, -1, highlevel=False).form
+        ak.prod(depth2.to_typetracer(), -1, highlevel=False).form
         == ak.prod(depth2, -1, highlevel=False).form
     )
 
@@ -1090,7 +1090,7 @@ def test_IndexedOptionArray():
         [31 * 2, 37 * 3, 41 * 5, 43 * 7, 47 * 11],
     ]
     assert (
-        ak.prod(depth2.typetracer, -2, highlevel=False).form
+        ak.prod(depth2.to_typetracer(), -2, highlevel=False).form
         == ak.prod(depth2, -2, highlevel=False).form
     )
 
@@ -1100,7 +1100,7 @@ def test_IndexedOptionArray():
         [53 * 2, 59 * 3, 61 * 5, 67 * 7, 71 * 11],
     ]
     assert (
-        ak.prod(depth2.typetracer, -3, highlevel=False).form
+        ak.prod(depth2.to_typetracer(), -3, highlevel=False).form
         == ak.prod(depth2, -3, highlevel=False).form
     )
 
@@ -1176,7 +1176,7 @@ def test_IndexedOptionArray():
         [31 * 37 * 41 * 43 * 47, 1, 2 * 3 * 5 * 7 * 11],
     ]
     assert (
-        ak.prod(depth2.typetracer, -1, highlevel=False).form
+        ak.prod(depth2.to_typetracer(), -1, highlevel=False).form
         == ak.prod(depth2, -1, highlevel=False).form
     )
 
@@ -1185,7 +1185,7 @@ def test_IndexedOptionArray():
         [31 * 2, 37 * 3, 41 * 5, 43 * 7, 47 * 11],
     ]
     assert (
-        ak.prod(depth2.typetracer, -2, highlevel=False).form
+        ak.prod(depth2.to_typetracer(), -2, highlevel=False).form
         == ak.prod(depth2, -2, highlevel=False).form
     )
 
@@ -1195,7 +1195,7 @@ def test_IndexedOptionArray():
         [53 * 2, 59 * 3, 61 * 5, 67 * 7, 71 * 11],
     ]
     assert (
-        ak.prod(depth2.typetracer, -3, highlevel=False).form
+        ak.prod(depth2.to_typetracer(), -3, highlevel=False).form
         == ak.prod(depth2, -3, highlevel=False).form
     )
 
@@ -1227,7 +1227,7 @@ def test_UnionArray():
         [53 * 59 * 61 * 67 * 71, 73 * 79 * 83 * 89 * 97, 101 * 103 * 107 * 109 * 113],
     ]
     assert (
-        ak.prod(depth2.typetracer, axis=-1, highlevel=False).form
+        ak.prod(depth2.to_typetracer(), axis=-1, highlevel=False).form
         == ak.prod(depth2, axis=-1, highlevel=False).form
     )
     assert to_list(ak.prod(depth2, axis=2, highlevel=False)) == [
@@ -1235,7 +1235,7 @@ def test_UnionArray():
         [53 * 59 * 61 * 67 * 71, 73 * 79 * 83 * 89 * 97, 101 * 103 * 107 * 109 * 113],
     ]
     assert (
-        ak.prod(depth2.typetracer, axis=2, highlevel=False).form
+        ak.prod(depth2.to_typetracer(), axis=2, highlevel=False).form
         == ak.prod(depth2, axis=2, highlevel=False).form
     )
 
@@ -1244,7 +1244,7 @@ def test_UnionArray():
         [53 * 73 * 101, 59 * 79 * 103, 61 * 83 * 107, 67 * 89 * 109, 71 * 97 * 113],
     ]
     assert (
-        ak.prod(depth2.typetracer, axis=-2, highlevel=False).form
+        ak.prod(depth2.to_typetracer(), axis=-2, highlevel=False).form
         == ak.prod(depth2, axis=-2, highlevel=False).form
     )
     assert to_list(ak.prod(depth2, axis=1, highlevel=False)) == [
@@ -1252,7 +1252,7 @@ def test_UnionArray():
         [53 * 73 * 101, 59 * 79 * 103, 61 * 83 * 107, 67 * 89 * 109, 71 * 97 * 113],
     ]
     assert (
-        ak.prod(depth2.typetracer, axis=1, highlevel=False).form
+        ak.prod(depth2.to_typetracer(), axis=1, highlevel=False).form
         == ak.prod(depth2, axis=1, highlevel=False).form
     )
 
@@ -1262,7 +1262,7 @@ def test_UnionArray():
         [31 * 101, 37 * 103, 41 * 107, 43 * 109, 47 * 113],
     ]
     assert (
-        ak.prod(depth2.typetracer, axis=-3, highlevel=False).form
+        ak.prod(depth2.to_typetracer(), axis=-3, highlevel=False).form
         == ak.prod(depth2, axis=-3, highlevel=False).form
     )
     assert to_list(ak.prod(depth2, axis=0, highlevel=False)) == [
@@ -1271,7 +1271,7 @@ def test_UnionArray():
         [31 * 101, 37 * 103, 41 * 107, 43 * 109, 47 * 113],
     ]
     assert (
-        ak.prod(depth2.typetracer, axis=0, highlevel=False).form
+        ak.prod(depth2.to_typetracer(), axis=0, highlevel=False).form
         == ak.prod(depth2, axis=0, highlevel=False).form
     )
 
@@ -1301,7 +1301,7 @@ def test_UnionArray():
         [53 * 59 * 61 * 67 * 71, 73 * 79 * 83 * 89 * 97, 101 * 103 * 107 * 109 * 113],
     ]
     assert (
-        ak.prod(depth2.typetracer, axis=-1, highlevel=False).form
+        ak.prod(depth2.to_typetracer(), axis=-1, highlevel=False).form
         == ak.prod(depth2, axis=-1, highlevel=False).form
     )
     assert to_list(ak.prod(depth2, axis=2, highlevel=False)) == [
@@ -1309,7 +1309,7 @@ def test_UnionArray():
         [53 * 59 * 61 * 67 * 71, 73 * 79 * 83 * 89 * 97, 101 * 103 * 107 * 109 * 113],
     ]
     assert (
-        ak.prod(depth2.typetracer, axis=2, highlevel=False).form
+        ak.prod(depth2.to_typetracer(), axis=2, highlevel=False).form
         == ak.prod(depth2, axis=2, highlevel=False).form
     )
 
@@ -1318,7 +1318,7 @@ def test_UnionArray():
         [53 * 73 * 101, 59 * 79 * 103, 61 * 83 * 107, 67 * 89 * 109, 71 * 97 * 113],
     ]
     assert (
-        ak.prod(depth2.typetracer, axis=-2, highlevel=False).form
+        ak.prod(depth2.to_typetracer(), axis=-2, highlevel=False).form
         == ak.prod(depth2, axis=-2, highlevel=False).form
     )
     assert to_list(ak.prod(depth2, axis=1, highlevel=False)) == [
@@ -1326,7 +1326,7 @@ def test_UnionArray():
         [53 * 73 * 101, 59 * 79 * 103, 61 * 83 * 107, 67 * 89 * 109, 71 * 97 * 113],
     ]
     assert (
-        ak.prod(depth2.typetracer, axis=1, highlevel=False).form
+        ak.prod(depth2.to_typetracer(), axis=1, highlevel=False).form
         == ak.prod(depth2, axis=1, highlevel=False).form
     )
 
@@ -1336,7 +1336,7 @@ def test_UnionArray():
         [31 * 101, 37 * 103, 41 * 107, 43 * 109, 47 * 113],
     ]
     assert (
-        ak.prod(depth2.typetracer, axis=-3, highlevel=False).form
+        ak.prod(depth2.to_typetracer(), axis=-3, highlevel=False).form
         == ak.prod(depth2, axis=-3, highlevel=False).form
     )
     assert to_list(ak.prod(depth2, axis=0, highlevel=False)) == [
@@ -1345,7 +1345,7 @@ def test_UnionArray():
         [31 * 101, 37 * 103, 41 * 107, 43 * 109, 47 * 113],
     ]
     assert (
-        ak.prod(depth2.typetracer, axis=0, highlevel=False).form
+        ak.prod(depth2.to_typetracer(), axis=0, highlevel=False).form
         == ak.prod(depth2, axis=0, highlevel=False).form
     )
 
@@ -1363,7 +1363,7 @@ def test_sum():
         256 + 512 + 1024 + 2048,
     ]
     assert (
-        ak.sum(depth1.typetracer, -1, highlevel=False).form
+        ak.sum(depth1.to_typetracer(), -1, highlevel=False).form
         == ak.sum(depth1, -1, highlevel=False).form
     )
     assert to_list(ak.sum(depth1, 1, highlevel=False)) == [
@@ -1372,7 +1372,7 @@ def test_sum():
         256 + 512 + 1024 + 2048,
     ]
     assert (
-        ak.sum(depth1.typetracer, 1, highlevel=False).form
+        ak.sum(depth1.to_typetracer(), 1, highlevel=False).form
         == ak.sum(depth1, 1, highlevel=False).form
     )
 
@@ -1383,7 +1383,7 @@ def test_sum():
         8 + 128 + 2048,
     ]
     assert (
-        ak.sum(depth1.typetracer, -2, highlevel=False).form
+        ak.sum(depth1.to_typetracer(), -2, highlevel=False).form
         == ak.sum(depth1, -2, highlevel=False).form
     )
     assert to_list(ak.sum(depth1, 0, highlevel=False)) == [
@@ -1393,7 +1393,7 @@ def test_sum():
         8 + 128 + 2048,
     ]
     assert (
-        ak.sum(depth1.typetracer, 0, highlevel=False).form
+        ak.sum(depth1.to_typetracer(), 0, highlevel=False).form
         == ak.sum(depth1, 0, highlevel=False).form
     )
 
@@ -1608,23 +1608,23 @@ def test_any():
 
     assert to_list(ak.any(depth1, -1, highlevel=False)) == [True, True, False]
     assert (
-        ak.any(depth1.typetracer, -1, highlevel=False).form
+        ak.any(depth1.to_typetracer(), -1, highlevel=False).form
         == ak.any(depth1, -1, highlevel=False).form
     )
     assert to_list(ak.any(depth1, 1, highlevel=False)) == [True, True, False]
     assert (
-        ak.any(depth1.typetracer, 1, highlevel=False).form
+        ak.any(depth1.to_typetracer(), 1, highlevel=False).form
         == ak.any(depth1, 1, highlevel=False).form
     )
 
     assert to_list(ak.any(depth1, -2, highlevel=False)) == [True, True, True, False]
     assert (
-        ak.any(depth1.typetracer, -2, highlevel=False).form
+        ak.any(depth1.to_typetracer(), -2, highlevel=False).form
         == ak.any(depth1, -2, highlevel=False).form
     )
     assert to_list(ak.any(depth1, 0, highlevel=False)) == [True, True, True, False]
     assert (
-        ak.any(depth1.typetracer, 0, highlevel=False).form
+        ak.any(depth1.to_typetracer(), 0, highlevel=False).form
         == ak.any(depth1, 0, highlevel=False).form
     )
 
@@ -1644,23 +1644,23 @@ def test_all():
 
     assert to_list(ak.all(depth1, -1, highlevel=False)) == [True, False, False]
     assert (
-        ak.all(depth1.typetracer, -1, highlevel=False).form
+        ak.all(depth1.to_typetracer(), -1, highlevel=False).form
         == ak.all(depth1, -1, highlevel=False).form
     )
     assert to_list(ak.all(depth1, 1, highlevel=False)) == [True, False, False]
     assert (
-        ak.all(depth1.typetracer, 1, highlevel=False).form
+        ak.all(depth1.to_typetracer(), 1, highlevel=False).form
         == ak.all(depth1, 1, highlevel=False).form
     )
 
     assert to_list(ak.all(depth1, -2, highlevel=False)) == [False, True, False, True]
     assert (
-        ak.all(depth1.typetracer, -2, highlevel=False).form
+        ak.all(depth1.to_typetracer(), -2, highlevel=False).form
         == ak.all(depth1, -2, highlevel=False).form
     )
     assert to_list(ak.all(depth1, 0, highlevel=False)) == [False, True, False, True]
     assert (
-        ak.all(depth1.typetracer, 0, highlevel=False).form
+        ak.all(depth1.to_typetracer(), 0, highlevel=False).form
         == ak.all(depth1, 0, highlevel=False).form
     )
 
@@ -1680,23 +1680,23 @@ def test_count():
 
     assert to_list(ak.count(depth1, -1, highlevel=False)) == [3, 3, 4]
     assert (
-        ak.count(depth1.typetracer, -1, highlevel=False).form
+        ak.count(depth1.to_typetracer(), -1, highlevel=False).form
         == ak.count(depth1, -1, highlevel=False).form
     )
     assert to_list(ak.count(depth1, 1, highlevel=False)) == [3, 3, 4]
     assert (
-        ak.count(depth1.typetracer, 1, highlevel=False).form
+        ak.count(depth1.to_typetracer(), 1, highlevel=False).form
         == ak.count(depth1, 1, highlevel=False).form
     )
 
     assert to_list(ak.count(depth1, -2, highlevel=False)) == [3, 3, 3, 1]
     assert (
-        ak.count(depth1.typetracer, -2, highlevel=False).form
+        ak.count(depth1.to_typetracer(), -2, highlevel=False).form
         == ak.count(depth1, -2, highlevel=False).form
     )
     assert to_list(ak.count(depth1, 0, highlevel=False)) == [3, 3, 3, 1]
     assert (
-        ak.count(depth1.typetracer, 0, highlevel=False).form
+        ak.count(depth1.to_typetracer(), 0, highlevel=False).form
         == ak.count(depth1, 0, highlevel=False).form
     )
 
@@ -1716,23 +1716,23 @@ def test_count_nonzero():
 
     assert to_list(ak.count_nonzero(depth1, -1, highlevel=False)) == [3, 1, 2]
     assert (
-        ak.count_nonzero(depth1.typetracer, -1, highlevel=False).form
+        ak.count_nonzero(depth1.to_typetracer(), -1, highlevel=False).form
         == ak.count_nonzero(depth1, -1, highlevel=False).form
     )
     assert to_list(ak.count_nonzero(depth1, 1, highlevel=False)) == [3, 1, 2]
     assert (
-        ak.count_nonzero(depth1.typetracer, 1, highlevel=False).form
+        ak.count_nonzero(depth1.to_typetracer(), 1, highlevel=False).form
         == ak.count_nonzero(depth1, 1, highlevel=False).form
     )
 
     assert to_list(ak.count_nonzero(depth1, -2, highlevel=False)) == [1, 3, 1, 1]
     assert (
-        ak.count_nonzero(depth1.typetracer, -2, highlevel=False).form
+        ak.count_nonzero(depth1.to_typetracer(), -2, highlevel=False).form
         == ak.count_nonzero(depth1, -2, highlevel=False).form
     )
     assert to_list(ak.count_nonzero(depth1, 0, highlevel=False)) == [1, 3, 1, 1]
     assert (
-        ak.count_nonzero(depth1.typetracer, 0, highlevel=False).form
+        ak.count_nonzero(depth1.to_typetracer(), 0, highlevel=False).form
         == ak.count_nonzero(depth1, 0, highlevel=False).form
     )
 
@@ -1752,23 +1752,23 @@ def test_count_min():
 
     assert to_list(ak.min(depth1, -1, highlevel=False)) == [1.1, 0.0, 0.0]
     assert (
-        ak.min(depth1.typetracer, -1, highlevel=False).form
+        ak.min(depth1.to_typetracer(), -1, highlevel=False).form
         == ak.min(depth1, -1, highlevel=False).form
     )
     assert to_list(ak.min(depth1, 1, highlevel=False)) == [1.1, 0.0, 0.0]
     assert (
-        ak.min(depth1.typetracer, 1, highlevel=False).form
+        ak.min(depth1.to_typetracer(), 1, highlevel=False).form
         == ak.min(depth1, 1, highlevel=False).form
     )
 
     assert to_list(ak.min(depth1, -2, highlevel=False)) == [0.0, 2.2, 0.0, 4.4]
     assert (
-        ak.min(depth1.typetracer, -2, highlevel=False).form
+        ak.min(depth1.to_typetracer(), -2, highlevel=False).form
         == ak.min(depth1, -2, highlevel=False).form
     )
     assert to_list(ak.min(depth1, 0, highlevel=False)) == [0.0, 2.2, 0.0, 4.4]
     assert (
-        ak.min(depth1.typetracer, 0, highlevel=False).form
+        ak.min(depth1.to_typetracer(), 0, highlevel=False).form
         == ak.min(depth1, 0, highlevel=False).form
     )
 
@@ -1786,23 +1786,23 @@ def test_count_min():
 
     assert to_list(ak.min(depth1, -1, highlevel=False)) == [True, False, False]
     assert (
-        ak.min(depth1.typetracer, -1, highlevel=False).form
+        ak.min(depth1.to_typetracer(), -1, highlevel=False).form
         == ak.min(depth1, -1, highlevel=False).form
     )
     assert to_list(ak.min(depth1, 1, highlevel=False)) == [True, False, False]
     assert (
-        ak.min(depth1.typetracer, 1, highlevel=False).form
+        ak.min(depth1.to_typetracer(), 1, highlevel=False).form
         == ak.min(depth1, 1, highlevel=False).form
     )
 
     assert to_list(ak.min(depth1, -2, highlevel=False)) == [False, True, False, True]
     assert (
-        ak.min(depth1.typetracer, -2, highlevel=False).form
+        ak.min(depth1.to_typetracer(), -2, highlevel=False).form
         == ak.min(depth1, -2, highlevel=False).form
     )
     assert to_list(ak.min(depth1, 0, highlevel=False)) == [False, True, False, True]
     assert (
-        ak.min(depth1.typetracer, 0, highlevel=False).form
+        ak.min(depth1.to_typetracer(), 0, highlevel=False).form
         == ak.min(depth1, 0, highlevel=False).form
     )
 
@@ -1822,23 +1822,23 @@ def test_count_max():
 
     assert to_list(ak.max(depth1, -1, highlevel=False)) == [3.3, 2.2, 4.4]
     assert (
-        ak.max(depth1.typetracer, -1, highlevel=False).form
+        ak.max(depth1.to_typetracer(), -1, highlevel=False).form
         == ak.max(depth1, -1, highlevel=False).form
     )
     assert to_list(ak.max(depth1, 1, highlevel=False)) == [3.3, 2.2, 4.4]
     assert (
-        ak.max(depth1.typetracer, 1, highlevel=False).form
+        ak.max(depth1.to_typetracer(), 1, highlevel=False).form
         == ak.max(depth1, 1, highlevel=False).form
     )
 
     assert to_list(ak.max(depth1, -2, highlevel=False)) == [1.1, 2.2, 3.3, 4.4]
     assert (
-        ak.max(depth1.typetracer, -2, highlevel=False).form
+        ak.max(depth1.to_typetracer(), -2, highlevel=False).form
         == ak.max(depth1, -2, highlevel=False).form
     )
     assert to_list(ak.max(depth1, 0, highlevel=False)) == [1.1, 2.2, 3.3, 4.4]
     assert (
-        ak.max(depth1.typetracer, 0, highlevel=False).form
+        ak.max(depth1.to_typetracer(), 0, highlevel=False).form
         == ak.max(depth1, 0, highlevel=False).form
     )
 
@@ -1856,23 +1856,23 @@ def test_count_max():
 
     assert to_list(ak.max(depth1, -1, highlevel=False)) == [True, True, False]
     assert (
-        ak.max(depth1.typetracer, -1, highlevel=False).form
+        ak.max(depth1.to_typetracer(), -1, highlevel=False).form
         == ak.max(depth1, -1, highlevel=False).form
     )
     assert to_list(ak.max(depth1, 1, highlevel=False)) == [True, True, False]
     assert (
-        ak.max(depth1.typetracer, 1, highlevel=False).form
+        ak.max(depth1.to_typetracer(), 1, highlevel=False).form
         == ak.max(depth1, 1, highlevel=False).form
     )
 
     assert to_list(ak.max(depth1, -2, highlevel=False)) == [False, True, True, False]
     assert (
-        ak.max(depth1.typetracer, -2, highlevel=False).form
+        ak.max(depth1.to_typetracer(), -2, highlevel=False).form
         == ak.max(depth1, -2, highlevel=False).form
     )
     assert to_list(ak.max(depth1, 0, highlevel=False)) == [False, True, True, False]
     assert (
-        ak.max(depth1.typetracer, 0, highlevel=False).form
+        ak.max(depth1.to_typetracer(), 0, highlevel=False).form
         == ak.max(depth1, 0, highlevel=False).form
     )
 
@@ -1894,7 +1894,9 @@ def test_mask():
         7.7,
     ]
     assert (
-        ak.min(array.typetracer, axis=-1, mask_identity=False, highlevel=False).form
+        ak.min(
+            array.to_typetracer(), axis=-1, mask_identity=False, highlevel=False
+        ).form
         == ak.min(array, axis=-1, mask_identity=False, highlevel=False).form
     )
     assert to_list(ak.min(array, axis=-1, mask_identity=True, highlevel=False)) == [
@@ -1907,7 +1909,7 @@ def test_mask():
         7.7,
     ]
     assert (
-        ak.min(array.typetracer, axis=-1, mask_identity=True, highlevel=False).form
+        ak.min(array.to_typetracer(), axis=-1, mask_identity=True, highlevel=False).form
         == ak.min(array, axis=-1, mask_identity=True, highlevel=False).form
     )
 
@@ -1941,7 +1943,7 @@ def test_ByteMaskedArray():
         [None, 2],
     ]
     assert (
-        ak.argmin(v2_array.typetracer, axis=-1, highlevel=False).form
+        ak.argmin(v2_array.to_typetracer(), axis=-1, highlevel=False).form
         == ak.argmin(v2_array, axis=-1, highlevel=False).form
     )
 
@@ -1964,21 +1966,21 @@ def test_keepdims():
         ak.prod(depth2, axis=-1, keepdims=False, highlevel=False)
     ) == to_list(ak.prod(nparray, axis=-1, keepdims=False, highlevel=False))
     assert (
-        ak.prod(depth2.typetracer, axis=-1, keepdims=False, highlevel=False).form
+        ak.prod(depth2.to_typetracer(), axis=-1, keepdims=False, highlevel=False).form
         == ak.prod(depth2, axis=-1, keepdims=False, highlevel=False).form
     )
     assert to_list(
         ak.prod(depth2, axis=-2, keepdims=False, highlevel=False)
     ) == to_list(ak.prod(nparray, axis=-2, keepdims=False, highlevel=False))
     assert (
-        ak.prod(depth2.typetracer, axis=-2, keepdims=False, highlevel=False).form
+        ak.prod(depth2.to_typetracer(), axis=-2, keepdims=False, highlevel=False).form
         == ak.prod(depth2, axis=-2, keepdims=False, highlevel=False).form
     )
     assert to_list(
         ak.prod(depth2, axis=-3, keepdims=False, highlevel=False)
     ) == to_list(ak.prod(nparray, axis=-3, keepdims=False, highlevel=False))
     assert (
-        ak.prod(depth2.typetracer, axis=-3, keepdims=False, highlevel=False).form
+        ak.prod(depth2.to_typetracer(), axis=-3, keepdims=False, highlevel=False).form
         == ak.prod(depth2, axis=-3, keepdims=False, highlevel=False).form
     )
 
@@ -1986,21 +1988,21 @@ def test_keepdims():
         ak.prod(nparray, axis=-1, keepdims=True, highlevel=False)
     )
     assert (
-        ak.prod(depth2.typetracer, axis=-1, keepdims=True, highlevel=False).form
+        ak.prod(depth2.to_typetracer(), axis=-1, keepdims=True, highlevel=False).form
         == ak.prod(depth2, axis=-1, keepdims=True, highlevel=False).form
     )
     assert to_list(ak.prod(depth2, axis=-2, keepdims=True, highlevel=False)) == to_list(
         ak.prod(nparray, axis=-2, keepdims=True, highlevel=False)
     )
     assert (
-        ak.prod(depth2.typetracer, axis=-2, keepdims=True, highlevel=False).form
+        ak.prod(depth2.to_typetracer(), axis=-2, keepdims=True, highlevel=False).form
         == ak.prod(depth2, axis=-2, keepdims=True, highlevel=False).form
     )
     assert to_list(ak.prod(depth2, axis=-3, keepdims=True, highlevel=False)) == to_list(
         ak.prod(nparray, axis=-3, keepdims=True, highlevel=False)
     )
     assert (
-        ak.prod(depth2.typetracer, axis=-3, keepdims=True, highlevel=False).form
+        ak.prod(depth2.to_typetracer(), axis=-3, keepdims=True, highlevel=False).form
         == ak.prod(depth2, axis=-3, keepdims=True, highlevel=False).form
     )
 

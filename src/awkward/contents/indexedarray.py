@@ -150,12 +150,11 @@ class IndexedArray(Content):
         container[key] = ak._util.little_endian(self._index.raw(backend.index_nplike))
         self._content._to_buffers(form.content, getkey, container, backend)
 
-    @property
-    def typetracer(self):
+    def to_typetracer(self):
         tt = ak._typetracer.TypeTracer.instance()
         return IndexedArray(
             ak.index.Index(self._index.raw(tt)),
-            self._content.typetracer,
+            self._content.to_typetracer(),
             parameters=self._parameters,
         )
 
@@ -459,13 +458,13 @@ class IndexedArray(Content):
             head = [
                 x
                 if isinstance(x.backend.nplike, ak._typetracer.TypeTracer)
-                else x.typetracer
+                else x.to_typetracer()
                 for x in head
             ]
             tail = [
                 x
                 if isinstance(x.backend.nplike, ak._typetracer.TypeTracer)
-                else x.typetracer
+                else x.to_typetracer()
                 for x in tail
             ]
 

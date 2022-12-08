@@ -212,11 +212,10 @@ class RecordArray(Content):
             for field, content in zip(self._fields, self._contents):
                 content._to_buffers(form.content(field), getkey, container, backend)
 
-    @property
-    def typetracer(self):
+    def to_typetracer(self):
         backend = ak._backends.TypeTracerBackend.instance()
         return RecordArray(
-            [x.typetracer for x in self._contents],
+            [x.to_typetracer() for x in self._contents],
             self._fields,
             self._length,
             parameters=self._parameters,

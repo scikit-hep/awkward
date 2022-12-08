@@ -64,7 +64,7 @@ def test_listoffsetarrayA64():
             assert to_list(modelA[cuts]) == to_list(listoffsetarrayA64[cuts])
             if depth < 3:
                 assert (
-                    listoffsetarrayA64.typetracer[cuts].form
+                    listoffsetarrayA64.to_typetracer()[cuts].form
                     == listoffsetarrayA64[cuts].form
                 )
 
@@ -75,7 +75,7 @@ def test_listoffsetarrayA64():
             assert to_list(modelA[cuts]) == to_list(listoffsetarrayA64[cuts])
             if depth < 3:
                 assert (
-                    listoffsetarrayA64.typetracer[cuts].form
+                    listoffsetarrayA64.to_typetracer()[cuts].form
                     == listoffsetarrayA64[cuts].form
                 )
 
@@ -86,7 +86,7 @@ def test_listoffsetarrayA64():
             assert to_list(modelA[cuts]) == to_list(listoffsetarrayA64[cuts])
             if depth < 3:
                 assert (
-                    listoffsetarrayA64.typetracer[cuts].form
+                    listoffsetarrayA64.to_typetracer()[cuts].form
                     == listoffsetarrayA64[cuts].form
                 )
 
@@ -97,7 +97,7 @@ def test_listoffsetarrayA64():
             assert to_list(modelA[cuts]) == to_list(listoffsetarrayA64[cuts])
             if depth < 3:
                 assert (
-                    listoffsetarrayA64.typetracer[cuts].form
+                    listoffsetarrayA64.to_typetracer()[cuts].form
                     == listoffsetarrayA64[cuts].form
                 )
 
@@ -115,7 +115,7 @@ def test_listoffsetarrayA64():
             assert to_list(modelA[cuts]) == to_list(listoffsetarrayA64[cuts])
             if depth < 3:
                 assert (
-                    listoffsetarrayA64.typetracer[cuts].form
+                    listoffsetarrayA64.to_typetracer()[cuts].form
                     == listoffsetarrayA64[cuts].form
                 )
 
@@ -126,7 +126,7 @@ def test_listoffsetarrayA32():
             assert to_list(modelA[cuts]) == to_list(listoffsetarrayA32[cuts])
             if depth < 3:
                 assert (
-                    listoffsetarrayA32.typetracer[cuts].form
+                    listoffsetarrayA32.to_typetracer()[cuts].form
                     == listoffsetarrayA32[cuts].form
                 )
 
@@ -137,7 +137,7 @@ def test_listoffsetarrayA32():
             assert to_list(modelA[cuts]) == to_list(listoffsetarrayA32[cuts])
             if depth < 3:
                 assert (
-                    listoffsetarrayA32.typetracer[cuts].form
+                    listoffsetarrayA32.to_typetracer()[cuts].form
                     == listoffsetarrayA32[cuts].form
                 )
 
@@ -148,7 +148,7 @@ def test_listoffsetarrayA32():
             assert to_list(modelA[cuts]) == to_list(listoffsetarrayA32[cuts])
             if depth < 3:
                 assert (
-                    listoffsetarrayA32.typetracer[cuts].form
+                    listoffsetarrayA32.to_typetracer()[cuts].form
                     == listoffsetarrayA32[cuts].form
                 )
 
@@ -159,7 +159,7 @@ def test_listoffsetarrayA32():
             assert to_list(modelA[cuts]) == to_list(listoffsetarrayA32[cuts])
             if depth < 3:
                 assert (
-                    listoffsetarrayA32.typetracer[cuts].form
+                    listoffsetarrayA32.to_typetracer()[cuts].form
                     == listoffsetarrayA32[cuts].form
                 )
 
@@ -177,7 +177,7 @@ def test_listoffsetarrayA32():
             assert to_list(modelA[cuts]) == to_list(listoffsetarrayA32[cuts])
             if depth < 3:
                 assert (
-                    listoffsetarrayA32.typetracer[cuts].form
+                    listoffsetarrayA32.to_typetracer()[cuts].form
                     == listoffsetarrayA32[cuts].form
                 )
 
@@ -187,7 +187,9 @@ def test_listarrayA64():
         for cuts in itertools.permutations((0, 1, 4, -5), depth):
             assert to_list(modelA[cuts]) == to_list(listarrayA64[cuts])
             if depth < 3:
-                assert listarrayA64.typetracer[cuts].form == listarrayA64[cuts].form
+                assert (
+                    listarrayA64.to_typetracer()[cuts].form == listarrayA64[cuts].form
+                )
 
     for depth in 0, 1, 2, 3:
         for cuts in itertools.permutations(
@@ -195,7 +197,9 @@ def test_listarrayA64():
         ):
             assert to_list(modelA[cuts]) == to_list(listarrayA64[cuts])
             if depth < 3:
-                assert listarrayA64.typetracer[cuts].form == listarrayA64[cuts].form
+                assert (
+                    listarrayA64.to_typetracer()[cuts].form == listarrayA64[cuts].form
+                )
 
     for depth in 0, 1, 2, 3:
         for cuts in itertools.permutations(
@@ -203,7 +207,9 @@ def test_listarrayA64():
         ):
             assert to_list(modelA[cuts]) == to_list(listarrayA64[cuts])
             if depth < 3:
-                assert listarrayA64.typetracer[cuts].form == listarrayA64[cuts].form
+                assert (
+                    listarrayA64.to_typetracer()[cuts].form == listarrayA64[cuts].form
+                )
 
     for depth in 0, 1, 2, 3:
         for cuts in itertools.permutations(
@@ -211,7 +217,9 @@ def test_listarrayA64():
         ):
             assert to_list(modelA[cuts]) == to_list(listarrayA64[cuts])
             if depth < 3:
-                assert listarrayA64.typetracer[cuts].form == listarrayA64[cuts].form
+                assert (
+                    listarrayA64.to_typetracer()[cuts].form == listarrayA64[cuts].form
+                )
 
     for depth in 0, 1, 2, 3:
         for cuts in itertools.permutations(
@@ -226,7 +234,9 @@ def test_listarrayA64():
                 continue
             assert to_list(modelA[cuts]) == to_list(listarrayA64[cuts])
             if depth < 3:
-                assert listarrayA64.typetracer[cuts].form == listarrayA64[cuts].form
+                assert (
+                    listarrayA64.to_typetracer()[cuts].form == listarrayA64[cuts].form
+                )
 
 
 def test_listarrayA32():
@@ -234,7 +244,9 @@ def test_listarrayA32():
         for cuts in itertools.permutations((0, 1, 4, -5), depth):
             assert to_list(modelA[cuts]) == to_list(listarrayA32[cuts])
             if depth < 3:
-                assert listarrayA32.typetracer[cuts].form == listarrayA32[cuts].form
+                assert (
+                    listarrayA32.to_typetracer()[cuts].form == listarrayA32[cuts].form
+                )
 
     for depth in 0, 1, 2, 3:
         for cuts in itertools.permutations(
@@ -242,7 +254,9 @@ def test_listarrayA32():
         ):
             assert to_list(modelA[cuts]) == to_list(listarrayA32[cuts])
             if depth < 3:
-                assert listarrayA32.typetracer[cuts].form == listarrayA32[cuts].form
+                assert (
+                    listarrayA32.to_typetracer()[cuts].form == listarrayA32[cuts].form
+                )
 
     for depth in 0, 1, 2, 3:
         for cuts in itertools.permutations(
@@ -250,7 +264,9 @@ def test_listarrayA32():
         ):
             assert to_list(modelA[cuts]) == to_list(listarrayA32[cuts])
             if depth < 3:
-                assert listarrayA32.typetracer[cuts].form == listarrayA32[cuts].form
+                assert (
+                    listarrayA32.to_typetracer()[cuts].form == listarrayA32[cuts].form
+                )
 
     for depth in 0, 1, 2, 3:
         for cuts in itertools.permutations(
@@ -258,7 +274,9 @@ def test_listarrayA32():
         ):
             assert to_list(modelA[cuts]) == to_list(listarrayA32[cuts])
             if depth < 3:
-                assert listarrayA32.typetracer[cuts].form == listarrayA32[cuts].form
+                assert (
+                    listarrayA32.to_typetracer()[cuts].form == listarrayA32[cuts].form
+                )
 
     for depth in 0, 1, 2, 3:
         for cuts in itertools.permutations(
@@ -273,7 +291,9 @@ def test_listarrayA32():
                 continue
             assert to_list(modelA[cuts]) == to_list(listarrayA32[cuts])
             if depth < 3:
-                assert listarrayA32.typetracer[cuts].form == listarrayA32[cuts].form
+                assert (
+                    listarrayA32.to_typetracer()[cuts].form == listarrayA32[cuts].form
+                )
 
 
 def test_listoffsetarrayB64():
@@ -282,7 +302,7 @@ def test_listoffsetarrayB64():
             assert to_list(modelB[cuts]) == to_list(listoffsetarrayB64[cuts])
             if depth < 4:
                 assert (
-                    listoffsetarrayB64.typetracer[cuts].form
+                    listoffsetarrayB64.to_typetracer()[cuts].form
                     == listoffsetarrayB64[cuts].form
                 )
 
@@ -293,7 +313,7 @@ def test_listoffsetarrayB64():
             assert to_list(modelB[cuts]) == to_list(listoffsetarrayB64[cuts])
             if depth < 4:
                 assert (
-                    listoffsetarrayB64.typetracer[cuts].form
+                    listoffsetarrayB64.to_typetracer()[cuts].form
                     == listoffsetarrayB64[cuts].form
                 )
 
@@ -311,7 +331,7 @@ def test_listoffsetarrayB64():
             assert to_list(modelB[cuts]) == to_list(listoffsetarrayB64[cuts])
             if depth < 4:
                 assert (
-                    listoffsetarrayB64.typetracer[cuts].form
+                    listoffsetarrayB64.to_typetracer()[cuts].form
                     == listoffsetarrayB64[cuts].form
                 )
 
@@ -322,7 +342,7 @@ def test_listoffsetarrayB32():
             assert to_list(modelB[cuts]) == to_list(listoffsetarrayB64[cuts])
             if depth < 4:
                 assert (
-                    listoffsetarrayB32.typetracer[cuts].form
+                    listoffsetarrayB32.to_typetracer()[cuts].form
                     == listoffsetarrayB32[cuts].form
                 )
 
@@ -333,7 +353,7 @@ def test_listoffsetarrayB32():
             assert to_list(modelB[cuts]) == to_list(listoffsetarrayB64[cuts])
             if depth < 4:
                 assert (
-                    listoffsetarrayB32.typetracer[cuts].form
+                    listoffsetarrayB32.to_typetracer()[cuts].form
                     == listoffsetarrayB32[cuts].form
                 )
 
@@ -351,7 +371,7 @@ def test_listoffsetarrayB32():
             assert to_list(modelB[cuts]) == to_list(listoffsetarrayB64[cuts])
             if depth < 4:
                 assert (
-                    listoffsetarrayB32.typetracer[cuts].form
+                    listoffsetarrayB32.to_typetracer()[cuts].form
                     == listoffsetarrayB32[cuts].form
                 )
 
@@ -361,7 +381,9 @@ def test_listarrayB64():
         for cuts in itertools.permutations((-2, -1, 0, 1, 1), depth):
             assert to_list(modelB[cuts]) == to_list(listarrayB64[cuts])
             if depth < 4:
-                assert listarrayB64.typetracer[cuts].form == listarrayB64[cuts].form
+                assert (
+                    listarrayB64.to_typetracer()[cuts].form == listarrayB64[cuts].form
+                )
 
     for depth in 0, 1, 2, 3, 4:
         for cuts in itertools.permutations(
@@ -369,7 +391,9 @@ def test_listarrayB64():
         ):
             assert to_list(modelB[cuts]) == to_list(listarrayB64[cuts])
             if depth < 4:
-                assert listarrayB64.typetracer[cuts].form == listarrayB64[cuts].form
+                assert (
+                    listarrayB64.to_typetracer()[cuts].form == listarrayB64[cuts].form
+                )
 
     for depth in 0, 1, 2, 3, 4:
         for cuts in itertools.permutations(
@@ -384,7 +408,9 @@ def test_listarrayB64():
                 continue
             assert to_list(modelB[cuts]) == to_list(listarrayB64[cuts])
             if depth < 4:
-                assert listarrayB64.typetracer[cuts].form == listarrayB64[cuts].form
+                assert (
+                    listarrayB64.to_typetracer()[cuts].form == listarrayB64[cuts].form
+                )
 
 
 def test_listarrayB32():
@@ -392,7 +418,9 @@ def test_listarrayB32():
         for cuts in itertools.permutations((-2, -1, 0, 1, 1), depth):
             assert to_list(modelB[cuts]) == to_list(listarrayB64[cuts])
             if depth < 4:
-                assert listarrayB32.typetracer[cuts].form == listarrayB32[cuts].form
+                assert (
+                    listarrayB32.to_typetracer()[cuts].form == listarrayB32[cuts].form
+                )
 
     for depth in 0, 1, 2, 3, 4:
         for cuts in itertools.permutations(
@@ -400,7 +428,9 @@ def test_listarrayB32():
         ):
             assert to_list(modelB[cuts]) == to_list(listarrayB64[cuts])
             if depth < 4:
-                assert listarrayB32.typetracer[cuts].form == listarrayB32[cuts].form
+                assert (
+                    listarrayB32.to_typetracer()[cuts].form == listarrayB32[cuts].form
+                )
 
     for depth in 0, 1, 2, 3, 4:
         for cuts in itertools.permutations(
@@ -415,4 +445,6 @@ def test_listarrayB32():
                 continue
             assert to_list(modelB[cuts]) == to_list(listarrayB64[cuts])
             if depth < 4:
-                assert listarrayB32.typetracer[cuts].form == listarrayB32[cuts].form
+                assert (
+                    listarrayB32.to_typetracer()[cuts].form == listarrayB32[cuts].form
+                )

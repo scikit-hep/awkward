@@ -9,7 +9,7 @@ to_list = ak.operations.to_list
 
 
 def tt(highlevel):
-    return ak.highlevel.Array(highlevel.layout.typetracer)
+    return ak.highlevel.Array(highlevel.layout.to_typetracer())
 
 
 def test_basic():

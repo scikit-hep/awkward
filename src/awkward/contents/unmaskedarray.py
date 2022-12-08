@@ -83,9 +83,8 @@ class UnmaskedArray(Content):
         assert isinstance(form, self.form_cls)
         self._content._to_buffers(form.content, getkey, container, backend)
 
-    @property
-    def typetracer(self):
-        return UnmaskedArray(self._content.typetracer, parameters=self._parameters)
+    def to_typetracer(self):
+        return UnmaskedArray(self._content.to_typetracer(), parameters=self._parameters)
 
     @property
     def length(self):

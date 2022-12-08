@@ -167,8 +167,7 @@ class Content:
     def form_cls(self) -> type[Form]:
         raise ak._errors.wrap_error(NotImplementedError)
 
-    @property
-    def typetracer(self) -> Self:
+    def to_typetracer(self) -> Self:
         raise ak._errors.wrap_error(NotImplementedError)
 
     @property
@@ -177,7 +176,7 @@ class Content:
 
     def forget_length(self) -> Self:
         if not isinstance(self._backend, TypeTracerBackend):
-            return self.typetracer._forget_length()
+            return self.to_typetracer()._forget_length()
         else:
             return self._forget_length()
 
@@ -740,13 +739,13 @@ class Content:
             head = [
                 x
                 if isinstance(x.backend.nplike, ak._typetracer.TypeTracer)
-                else x.typetracer
+                else x.to_typetracer()
                 for x in head
             ]
             tail = [
                 x
                 if isinstance(x.backend.nplike, ak._typetracer.TypeTracer)
-                else x.typetracer
+                else x.to_typetracer()
                 for x in tail
             ]
 

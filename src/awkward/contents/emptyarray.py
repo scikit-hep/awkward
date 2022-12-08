@@ -51,8 +51,7 @@ class EmptyArray(Content):
     def _to_buffers(self, form, getkey, container, backend):
         assert isinstance(form, self.form_cls)
 
-    @property
-    def typetracer(self):
+    def to_typetracer(self):
         return EmptyArray(
             parameters=self._parameters,
             backend=ak._backends.TypeTracerBackend.instance(),

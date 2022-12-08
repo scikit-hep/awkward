@@ -141,13 +141,12 @@ class ListArray(Content):
         container[key2] = ak._util.little_endian(self._stops.raw(backend.index_nplike))
         self._content._to_buffers(form.content, getkey, container, backend)
 
-    @property
-    def typetracer(self):
+    def to_typetracer(self):
         tt = ak._typetracer.TypeTracer.instance()
         return ListArray(
             ak.index.Index(self._starts.raw(tt)),
             ak.index.Index(self._stops.raw(tt)),
-            self._content.typetracer,
+            self._content.to_typetracer(),
             parameters=self._parameters,
         )
 
@@ -530,7 +529,7 @@ class ListArray(Content):
                     missing_trim, content, parameters=self._parameters
                 )
                 if isinstance(self._backend.nplike, ak._typetracer.TypeTracer):
-                    out = out.typetracer
+                    out = out.to_typetracer()
                 return ak.contents.ListOffsetArray(
                     largeoffsets,
                     out,

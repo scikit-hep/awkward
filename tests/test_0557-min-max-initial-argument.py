@@ -14,22 +14,22 @@ def test():
     data = ak.highlevel.Array([[1, 3, 5, 4, 2], [], [2, 3, 1], [5]]).layout
     assert to_list(ak.min(data, axis=1, initial=4, highlevel=False)) == [1, None, 1, 4]
     assert (
-        ak.min(data.typetracer, axis=1, initial=4, highlevel=False).form
+        ak.min(data.to_typetracer(), axis=1, initial=4, highlevel=False).form
         == ak.min(data, axis=1, initial=4, highlevel=False).form
     )
     assert to_list(ak.min(data, axis=1, highlevel=False)) == [1, None, 1, 5]
     assert (
-        ak.min(data.typetracer, axis=1, highlevel=False).form
+        ak.min(data.to_typetracer(), axis=1, highlevel=False).form
         == ak.min(data, axis=1, highlevel=False).form
     )
     assert to_list(ak.max(data, axis=1, initial=4, highlevel=False)) == [5, None, 4, 5]
     assert (
-        ak.max(data.typetracer, axis=1, initial=4, highlevel=False).form
+        ak.max(data.to_typetracer(), axis=1, initial=4, highlevel=False).form
         == ak.max(data, axis=1, initial=4, highlevel=False).form
     )
     assert to_list(ak.max(data, axis=1, highlevel=False)) == [5, None, 3, 5]
     assert (
-        ak.max(data.typetracer, axis=1, highlevel=False).form
+        ak.max(data.to_typetracer(), axis=1, highlevel=False).form
         == ak.max(data, axis=1, highlevel=False).form
     )
 
@@ -43,12 +43,12 @@ def test():
         4,
     ]
     assert (
-        ak.min(data.typetracer, axis=1, initial=4, highlevel=False).form
+        ak.min(data.to_typetracer(), axis=1, initial=4, highlevel=False).form
         == ak.min(data, axis=1, initial=4, highlevel=False).form
     )
     assert to_list(ak.min(data, axis=1, highlevel=False)) == [1.1, None, 1.1, 5.5]
     assert (
-        ak.min(data.typetracer, axis=1, highlevel=False).form
+        ak.min(data.to_typetracer(), axis=1, highlevel=False).form
         == ak.min(data, axis=1, highlevel=False).form
     )
     assert to_list(ak.max(data, axis=1, initial=4, highlevel=False)) == [
@@ -58,12 +58,12 @@ def test():
         5.5,
     ]
     assert (
-        ak.max(data.typetracer, axis=1, initial=4, highlevel=False).form
+        ak.max(data.to_typetracer(), axis=1, initial=4, highlevel=False).form
         == ak.max(data, axis=1, initial=4, highlevel=False).form
     )
     assert to_list(ak.max(data, axis=1, highlevel=False)) == [5.5, None, 3.3, 5.5]
     assert (
-        ak.max(data.typetracer, axis=1, highlevel=False).form
+        ak.max(data.to_typetracer(), axis=1, highlevel=False).form
         == ak.max(data, axis=1, highlevel=False).form
     )
 

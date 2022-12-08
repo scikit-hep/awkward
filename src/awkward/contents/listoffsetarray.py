@@ -125,12 +125,11 @@ class ListOffsetArray(Content):
         container[key] = ak._util.little_endian(self._offsets.raw(backend.index_nplike))
         self._content._to_buffers(form.content, getkey, container, backend)
 
-    @property
-    def typetracer(self):
+    def to_typetracer(self):
         tt = ak._typetracer.TypeTracer.instance()
         return ListOffsetArray(
             ak.index.Index(self._offsets.raw(tt)),
-            self._content.typetracer,
+            self._content.to_typetracer(),
             parameters=self._parameters,
         )
 

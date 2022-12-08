@@ -19,7 +19,7 @@ def test_ListOffsetArray():
     a = ak.Array([[0.0, 1.1, 2.2], [], [3.3, 4.4]])
     b = ak.Array([[5.5], [6.6, 7.7, 8.8, 9.9]])
     c = ak.concatenate([a, b])
-    ctt = ak.concatenate([a.layout.typetracer, b.layout.typetracer])
+    ctt = ak.concatenate([a.layout.to_typetracer(), b.layout.to_typetracer()])
     assert c.tolist() == [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]]
     assert c.layout.form == ListOffsetForm("i64", NumpyForm("float64"))
     assert c.layout.form == ctt.layout.form
@@ -29,7 +29,7 @@ def test_ListOffsetArray_ListOffsetArray():
     a = ak.Array([[[0.0, 1.1, 2.2], []], [[3.3, 4.4]]])
     b = ak.Array([[[5.5], [6.6, 7.7, 8.8, 9.9]]])
     c = ak.concatenate([a, b])
-    ctt = ak.concatenate([a.layout.typetracer, b.layout.typetracer])
+    ctt = ak.concatenate([a.layout.to_typetracer(), b.layout.to_typetracer()])
     assert c.tolist() == [
         [[0.0, 1.1, 2.2], []],
         [[3.3, 4.4]],
@@ -90,7 +90,7 @@ def test_ByteMaskedArray():
         valid_when=True,
     )
     c = ak.concatenate([a, b])
-    ctt = ak.concatenate([a.typetracer, b.typetracer])
+    ctt = ak.concatenate([a.to_typetracer(), b.to_typetracer()])
 
     assert c.tolist() == [1.1, None, 3.3, None, 5.5, 7.7, 8.8, None]
     assert isinstance(c.layout, ak.contents.ByteMaskedArray)
@@ -133,7 +133,7 @@ def test_BitMaskedArray():
         lsb_order=False,
     )
     c = ak.concatenate([a, a])
-    ctt = ak.concatenate([a.typetracer, a.typetracer])
+    ctt = ak.concatenate([a.to_typetracer(), a.to_typetracer()])
 
     assert c.tolist() == [
         0.0,
@@ -178,7 +178,7 @@ def test_UnmaskedArray():
         ak.contents.numpyarray.NumpyArray(np.array([7.7, 8.8, 9.9])),
     )
     c = ak.concatenate([a, b])
-    ctt = ak.concatenate([a.typetracer, b.typetracer])
+    ctt = ak.concatenate([a.to_typetracer(), b.to_typetracer()])
 
     assert c.tolist() == [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]
     assert isinstance(c.layout, ak.contents.UnmaskedArray)
@@ -189,7 +189,7 @@ def test_UnmaskedArray():
 def test_EmptyArray():
     a = ak.contents.emptyarray.EmptyArray()
     c = ak.concatenate([a, a])
-    ctt = ak.concatenate([a.typetracer, a.typetracer])
+    ctt = ak.concatenate([a.to_typetracer(), a.to_typetracer()])
 
     assert c.tolist() == []
     assert isinstance(c.layout, ak.contents.EmptyArray)
@@ -207,7 +207,7 @@ def test_IndexedArray():
         ak.contents.numpyarray.NumpyArray(np.array([7.7, 8.8, 9.9])),
     )
     c = ak.concatenate([a, b])
-    ctt = ak.concatenate([a.typetracer, b.typetracer])
+    ctt = ak.concatenate([a.to_typetracer(), b.to_typetracer()])
 
     assert c.tolist() == [6.6, 5.5, 4.4, 3.3, 2.2, 1.1, 7.7, 8.8, 9.9]
     assert isinstance(c.layout, ak.contents.IndexedArray)

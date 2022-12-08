@@ -115,8 +115,7 @@ class NumpyArray(Content):
         key = getkey(self, form, "data")
         container[key] = ak._util.little_endian(self.raw(backend.nplike))
 
-    @property
-    def typetracer(self):
+    def to_typetracer(self):
         backend = ak._backends.TypeTracerBackend.instance()
         return NumpyArray(
             self.raw(backend.nplike), parameters=self._parameters, backend=backend

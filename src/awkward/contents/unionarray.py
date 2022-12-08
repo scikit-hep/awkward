@@ -399,13 +399,12 @@ class UnionArray(Content):
         for i, content in enumerate(self._contents):
             content._to_buffers(form.content(i), getkey, container, backend)
 
-    @property
-    def typetracer(self):
+    def to_typetracer(self):
         backend = ak._backends.TypeTracerBackend.instance()
         return UnionArray(
             ak.index.Index(self._tags.raw(backend.nplike)),
             ak.index.Index(self._index.raw(backend.nplike)),
-            [x.typetracer for x in self._contents],
+            [x.to_typetracer() for x in self._contents],
             parameters=self._parameters,
         )
 
@@ -922,13 +921,13 @@ class UnionArray(Content):
             head = [
                 x
                 if isinstance(x.backend.nplike, ak._typetracer.TypeTracer)
-                else x.typetracer
+                else x.to_typetracer()
                 for x in head
             ]
             tail = [
                 x
                 if isinstance(x.backend.nplike, ak._typetracer.TypeTracer)
-                else x.typetracer
+                else x.to_typetracer()
                 for x in tail
             ]
 
