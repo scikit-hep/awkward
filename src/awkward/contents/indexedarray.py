@@ -902,7 +902,7 @@ class IndexedArray(Content):
                 n, replacement, recordlookup, parameters, posaxis, depth
             )
 
-    def _reduce_next(
+    def _pub_reduce_next(
         self,
         reducer,
         negaxis,
@@ -915,7 +915,7 @@ class IndexedArray(Content):
         behavior,
     ):
         next = self._content._pub_carry(self._index, False)
-        return next._reduce_next(
+        return next._pub_reduce_next(
             reducer,
             negaxis,
             starts,

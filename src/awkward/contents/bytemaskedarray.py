@@ -775,7 +775,7 @@ class ByteMaskedArray(Content):
                 outindex, out, parameters=parameters
             )
 
-    def _reduce_next(
+    def _pub_reduce_next(
         self,
         reducer,
         negaxis,
@@ -890,7 +890,7 @@ class ByteMaskedArray(Content):
 
         next = self._content._pub_carry(nextcarry, False)
 
-        out = next._reduce_next(
+        out = next._pub_reduce_next(
             reducer,
             negaxis,
             starts,

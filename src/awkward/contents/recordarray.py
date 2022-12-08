@@ -816,7 +816,7 @@ class RecordArray(Content):
                 backend=self._backend,
             )
 
-    def _reduce_next(
+    def _pub_reduce_next(
         self,
         reducer,
         negaxis,

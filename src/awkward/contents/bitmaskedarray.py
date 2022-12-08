@@ -566,7 +566,7 @@ class BitMaskedArray(Content):
             n, replacement, recordlookup, parameters, axis, depth
         )
 
-    def _reduce_next(
+    def _pub_reduce_next(
         self,
         reducer,
         negaxis,
@@ -578,7 +578,7 @@ class BitMaskedArray(Content):
         keepdims,
         behavior,
     ):
-        return self.to_ByteMaskedArray()._reduce_next(
+        return self.to_ByteMaskedArray()._pub_reduce_next(
             reducer,
             negaxis,
             starts,

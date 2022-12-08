@@ -1290,7 +1290,7 @@ class UnionArray(Content):
             negaxis, starts, parents, outlength, ascending, stable, kind, order
         )
 
-    def _reduce_next(
+    def _pub_reduce_next(
         self,
         reducer,
         negaxis,
@@ -1316,7 +1316,7 @@ class UnionArray(Content):
                 )
             )
 
-        return simplified._reduce_next(
+        return simplified._pub_reduce_next(
             reducer,
             negaxis,
             starts,

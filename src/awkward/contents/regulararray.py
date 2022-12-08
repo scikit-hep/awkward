@@ -961,7 +961,7 @@ class RegularArray(Content):
                 next, self._size, self._length, parameters=self._parameters
             )
 
-    def _reduce_next(
+    def _pub_reduce_next(
         self,
         reducer,
         negaxis,
@@ -1025,7 +1025,7 @@ class RegularArray(Content):
                 nextshifts = None
 
             nextcontent = self._content._pub_carry(nextcarry, False)
-            outcontent = nextcontent._reduce_next(
+            outcontent = nextcontent._pub_reduce_next(
                 reducer,
                 negaxis - 1,
                 nextstarts,
@@ -1072,7 +1072,7 @@ class RegularArray(Content):
                     nplike=self._backend.index_nplike,
                 )
 
-            outcontent = self._content._reduce_next(
+            outcontent = self._content._pub_reduce_next(
                 reducer,
                 negaxis,
                 nextstarts,
@@ -1094,9 +1094,9 @@ class RegularArray(Content):
             # *disappears*, and is replaced by the bare reduction `NumpyArray`. Therefore, if
             # this layout is _directly_ above the reduction, it won't survive the reduction.
             #
-            # The `_reduce_next` mechanism returns its first result (by recursion) from the
+            # The `_pub_reduce_next` mechanism returns its first result (by recursion) from the
             # leaf `NumpyArray`. The parent `RegularArray` takes the `negaxis != depth` branch,
-            # and asks the `NumpyArray` to perform the reduction. The `_reduce_next` is such that the
+            # and asks the `NumpyArray` to perform the reduction. The `_pub_reduce_next` is such that the
             # callee must wrap the reduction result into a list whose length is given by the *caller*,
             # i.e. the parent. Therefore, the `RegularArray(..., size=3)` layout reduces its content with
             # `outlength=len(self)=5*4`. The parent of this `RegularArray` (with `size=4`)

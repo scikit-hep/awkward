@@ -1093,7 +1093,7 @@ class NumpyArray(Content):
                 n, replacement, recordlookup, parameters, posaxis, depth
             )
 
-    def _reduce_next(
+    def _pub_reduce_next(
         self,
         reducer,
         negaxis,
@@ -1106,7 +1106,7 @@ class NumpyArray(Content):
         behavior,
     ):
         if self._data.ndim > 1:
-            return self.to_RegularArray()._reduce_next(
+            return self.to_RegularArray()._pub_reduce_next(
                 reducer,
                 negaxis,
                 starts,
@@ -1118,7 +1118,7 @@ class NumpyArray(Content):
                 behavior,
             )
         elif not self.is_contiguous:
-            return self.contiguous()._reduce_next(
+            return self.contiguous()._pub_reduce_next(
                 reducer,
                 negaxis,
                 starts,

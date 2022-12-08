@@ -1436,7 +1436,7 @@ class ListOffsetArray(Content):
                 compact.offsets, next, parameters=self._parameters
             )
 
-    def _reduce_next(
+    def _pub_reduce_next(
         self,
         reducer,
         negaxis,
@@ -1452,7 +1452,7 @@ class ListOffsetArray(Content):
             self._offsets.nplike.known_data and self._offsets[0] != 0
         ):
             next = self.to_ListOffsetArray64(True)
-            return next._reduce_next(
+            return next._pub_reduce_next(
                 reducer,
                 negaxis,
                 starts,
@@ -1546,7 +1546,7 @@ class ListOffsetArray(Content):
                 nextshifts = None
 
             nextcontent = self._content._pub_carry(nextcarry, False)
-            outcontent = nextcontent._reduce_next(
+            outcontent = nextcontent._pub_reduce_next(
                 reducer,
                 negaxis - 1,
                 nextstarts,
@@ -1590,7 +1590,7 @@ class ListOffsetArray(Content):
             trimmed = self._content[self.offsets[0] : self.offsets[-1]]
             nextstarts = self.offsets[:-1]
 
-            outcontent = trimmed._reduce_next(
+            outcontent = trimmed._pub_reduce_next(
                 reducer,
                 negaxis,
                 nextstarts,

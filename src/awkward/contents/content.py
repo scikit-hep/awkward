@@ -887,7 +887,7 @@ class Content:
     def _local_index(self, axis: Integral, depth: Integral):
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def _reduce(
+    def _pub_reduce(
         self,
         reducer: type[ak._reducers.Reducer],
         axis: Integral = -1,
@@ -932,7 +932,7 @@ class Content:
         starts = ak.index.Index64.zeros(1, self._backend.index_nplike)
         parents = ak.index.Index64.zeros(self.length, self._backend.index_nplike)
         shifts = None
-        next = self._reduce_next(
+        next = self._pub_reduce_next(
             reducer,
             negaxis,
             starts,
@@ -946,7 +946,7 @@ class Content:
 
         return next[0]
 
-    def _reduce_next(
+    def _pub_reduce_next(
         self,
         reducer: type[ak._reducers.Reducer],
         negaxis: Integral,
@@ -967,7 +967,9 @@ class Content:
         keepdims: bool = False,
         behavior: dict | None = None,
     ):
-        return self._reduce(awkward._reducers.ArgMin, axis, mask, keepdims, behavior)
+        return self._pub_reduce(
+            awkward._reducers.ArgMin, axis, mask, keepdims, behavior
+        )
 
     def argmax(
         self,
@@ -976,7 +978,9 @@ class Content:
         keepdims: bool = False,
         behavior: dict | None = None,
     ):
-        return self._reduce(awkward._reducers.ArgMax, axis, mask, keepdims, behavior)
+        return self._pub_reduce(
+            awkward._reducers.ArgMax, axis, mask, keepdims, behavior
+        )
 
     def count(
         self,
@@ -985,7 +989,7 @@ class Content:
         keepdims: bool = False,
         behavior: dict | None = None,
     ):
-        return self._reduce(awkward._reducers.Count, axis, mask, keepdims, behavior)
+        return self._pub_reduce(awkward._reducers.Count, axis, mask, keepdims, behavior)
 
     def count_nonzero(
         self,
@@ -994,7 +998,7 @@ class Content:
         keepdims: bool = False,
         behavior: dict | None = None,
     ):
-        return self._reduce(
+        return self._pub_reduce(
             awkward._reducers.CountNonzero, axis, mask, keepdims, behavior
         )
 
@@ -1005,7 +1009,7 @@ class Content:
         keepdims: bool = False,
         behavior: dict | None = None,
     ):
-        return self._reduce(awkward._reducers.Sum, axis, mask, keepdims, behavior)
+        return self._pub_reduce(awkward._reducers.Sum, axis, mask, keepdims, behavior)
 
     def prod(
         self,
@@ -1014,7 +1018,7 @@ class Content:
         keepdims: bool = False,
         behavior: dict | None = None,
     ):
-        return self._reduce(awkward._reducers.Prod, axis, mask, keepdims, behavior)
+        return self._pub_reduce(awkward._reducers.Prod, axis, mask, keepdims, behavior)
 
     def any(
         self,
@@ -1023,7 +1027,7 @@ class Content:
         keepdims: bool = False,
         behavior: dict | None = None,
     ):
-        return self._reduce(awkward._reducers.Any, axis, mask, keepdims, behavior)
+        return self._pub_reduce(awkward._reducers.Any, axis, mask, keepdims, behavior)
 
     def all(
         self,
@@ -1032,7 +1036,7 @@ class Content:
         keepdims: bool = False,
         behavior: dict | None = None,
     ):
-        return self._reduce(awkward._reducers.All, axis, mask, keepdims, behavior)
+        return self._pub_reduce(awkward._reducers.All, axis, mask, keepdims, behavior)
 
     def min(
         self,
@@ -1042,7 +1046,7 @@ class Content:
         initial: dict | None = None,
         behavior=None,
     ):
-        return self._reduce(
+        return self._pub_reduce(
             awkward._reducers.Min(initial), axis, mask, keepdims, behavior
         )
 
@@ -1054,7 +1058,7 @@ class Content:
         initial: dict | None = None,
         behavior: dict = None,
     ):
-        return self._reduce(
+        return self._pub_reduce(
             awkward._reducers.Max(initial), axis, mask, keepdims, behavior
         )
 

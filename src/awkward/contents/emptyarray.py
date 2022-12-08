@@ -265,7 +265,7 @@ class EmptyArray(Content):
             parameters=self._parameters, backend=self._backend
         )
 
-    def _reduce_next(
+    def _pub_reduce_next(
         self,
         reducer,
         negaxis,
@@ -278,7 +278,7 @@ class EmptyArray(Content):
         behavior,
     ):
         as_numpy = self.to_NumpyArray(reducer.preferred_dtype)
-        return as_numpy._reduce_next(
+        return as_numpy._pub_reduce_next(
             reducer,
             negaxis,
             starts,

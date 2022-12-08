@@ -1299,7 +1299,7 @@ class IndexedOptionArray(Content):
         else:
             return out
 
-    def _reduce_next(
+    def _pub_reduce_next(
         self,
         reducer,
         negaxis,
@@ -1320,7 +1320,7 @@ class IndexedOptionArray(Content):
         else:
             nextshifts = None
 
-        out = next._reduce_next(
+        out = next._pub_reduce_next(
             reducer,
             negaxis,
             starts,
@@ -1361,11 +1361,11 @@ class IndexedOptionArray(Content):
                     )
                 )
             # In this branch, we're above the axis at which the reduction takes place.
-            # `next._reduce_next` is therefore expected to return a list/regular layout
-            # node. As detailed in `RegularArray._reduce_next`, `_reduce_next` wraps the
+            # `next._pub_reduce_next` is therefore expected to return a list/regular layout
+            # node. As detailed in `RegularArray._pub_reduce_next`, `_pub_reduce_next` wraps the
             # reduction in a list-type of length `outlength` before returning to the caller,
             # which effectively means that the reduction of *this* layout corresponds to the
-            # child of the returned `next._reduce_next(...)`, i.e. `out.content`. So, we unpack
+            # child of the returned `next._pub_reduce_next(...)`, i.e. `out.content`. So, we unpack
             # the returned list type and wrap its child by a new `IndexedOptionArray`, before
             # re-wrapping the result to have the length and starts requested by the caller.
             outoffsets = ak.index.Index64.empty(

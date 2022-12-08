@@ -405,7 +405,7 @@ class UnmaskedArray(Content):
                 parameters=self._parameters,
             )
 
-    def _reduce_next(
+    def _pub_reduce_next(
         self,
         reducer,
         negaxis,
@@ -417,7 +417,7 @@ class UnmaskedArray(Content):
         keepdims,
         behavior,
     ):
-        return self._content._reduce_next(
+        return self._content._pub_reduce_next(
             reducer,
             negaxis,
             starts,

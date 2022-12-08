@@ -1219,7 +1219,7 @@ class ListArray(Content):
             self, n, replacement, recordlookup, parameters, axis, depth
         )
 
-    def _reduce_next(
+    def _pub_reduce_next(
         self,
         reducer,
         negaxis,
@@ -1231,7 +1231,7 @@ class ListArray(Content):
         keepdims,
         behavior,
     ):
-        return self.to_ListOffsetArray64(True)._reduce_next(
+        return self.to_ListOffsetArray64(True)._pub_reduce_next(
             reducer,
             negaxis,
             starts,
