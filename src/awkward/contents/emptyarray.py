@@ -303,7 +303,7 @@ class EmptyArray(Content):
                 np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
             )
         else:
-            return self.pad_none_axis0(target, True)
+            return self._pad_none_axis0(target, True)
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         if options["emptyarray_to"] is None:

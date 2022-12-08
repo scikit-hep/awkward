@@ -1238,7 +1238,7 @@ class NumpyArray(Content):
             else:
                 return self._pad_none(target, posaxis, depth, clip=True)
         else:
-            return self.pad_none_axis0(target, clip=True)
+            return self._pad_none_axis0(target, clip=True)
 
     def _nbytes_part(self):
         return self.data.nbytes

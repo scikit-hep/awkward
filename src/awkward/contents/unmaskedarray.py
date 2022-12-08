@@ -438,7 +438,7 @@ class UnmaskedArray(Content):
     def _pad_none(self, target, axis, depth, clip):
         posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:
-            return self.pad_none_axis0(target, clip)
+            return self._pad_none_axis0(target, clip)
         elif posaxis == depth + 1:
             return self._content._pad_none(target, posaxis, depth, clip)
         else:

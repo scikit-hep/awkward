@@ -1763,7 +1763,7 @@ class ListOffsetArray(Content):
     def _pad_none(self, target, axis, depth, clip):
         posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:
-            return self.pad_none_axis0(target, clip)
+            return self._pad_none_axis0(target, clip)
         if posaxis == depth + 1:
             if not clip:
                 tolength = ak.index.Index64.empty(1, self._backend.index_nplike)

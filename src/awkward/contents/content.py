@@ -1262,7 +1262,7 @@ class Content:
     def dimension_optiontype(self) -> bool:
         return self.Form.dimension_optiontype.__get__(self)
 
-    def pad_none_axis0(self, target: Integral, clip: bool) -> Content:
+    def _pad_none_axis0(self, target: Integral, clip: bool) -> Content:
         if not clip and target < self.length:
             index = ak.index.Index64(
                 self._backend.index_nplike.arange(self.length, dtype=np.int64),

@@ -1382,7 +1382,7 @@ class UnionArray(Content):
     def _pad_none(self, target, axis, depth, clip):
         posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:
-            return self.pad_none_axis0(target, clip)
+            return self._pad_none_axis0(target, clip)
         else:
             contents = []
             for content in self._contents:

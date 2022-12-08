@@ -1283,7 +1283,7 @@ class ListArray(Content):
         if not clip:
             posaxis = ak._do.axis_wrap_if_negative(self, axis)
             if posaxis == depth:
-                return self.pad_none_axis0(target, clip)
+                return self._pad_none_axis0(target, clip)
             elif posaxis == depth + 1:
                 min_ = ak.index.Index64.empty(1, self._backend.index_nplike)
                 assert (
