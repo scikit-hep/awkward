@@ -1524,7 +1524,16 @@ class Record(NDArrayOperatorsMixin):
             layout = ak.operations.from_json(data, highlevel=False)
 
         elif isinstance(data, dict):
-            layout = ak.operations.from_iter([data], highlevel=False)[0]
+            fields = []
+            contents = []
+            for k, v in data.items():
+                fields.append(k)
+                if ak._util.is_non_string_iterable(v):
+                    contents.append(Array(v).layout[np.newaxis])
+                else:
+                    contents.append(Array([v]).layout)
+
+            layout = ak.record.Record(ak.contents.RecordArray(contents, fields), at=0)
 
         elif isinstance(data, Iterable):
             raise ak._errors.wrap_error(
