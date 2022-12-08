@@ -478,7 +478,7 @@ class IndexedArray(Content):
             (theirlength + mylength), self._backend.index_nplike
         )
 
-        content = other.merge(self._content)
+        content = other.mergemany([self._content])
 
         # Fill `index` with a range starting at zero, up to `theirlength`
         assert index.nplike is self._backend.index_nplike

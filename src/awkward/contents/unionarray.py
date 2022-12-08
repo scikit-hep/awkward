@@ -242,7 +242,7 @@ class UnionArray(Content):
                             old_parameters = contents[k]._parameters
                             contents[k] = (
                                 contents[k]
-                                .merge(inner_cont)
+                                .mergemany([inner_cont])
                                 .copy(
                                     parameters=ak._util.merge_parameters(
                                         old_parameters, inner_cont._parameters
@@ -325,7 +325,7 @@ class UnionArray(Content):
                         old_parameters = contents[k]._parameters
                         contents[k] = (
                             contents[k]
-                            .merge(self_cont)
+                            .mergemany([self_cont])
                             .copy(
                                 parameters=ak._util.merge_parameters(
                                     old_parameters, self_cont._parameters

@@ -607,7 +607,7 @@ class IndexedOptionArray(Content):
             (theirlength + mylength), self._backend.index_nplike
         )
 
-        content = other.merge(self._content)
+        content = other.mergemany([self._content])
 
         assert index.nplike is self._backend.index_nplike
         self._handle_error(
@@ -1160,7 +1160,7 @@ class IndexedOptionArray(Content):
             nulls_index, parameters=None, backend=self._backend
         )
         if out._mergeable(nulls_index_content, True):
-            out = out.merge(nulls_index_content)
+            out = out.mergemany([nulls_index_content])
             nulls_merged = True
 
         nextoutindex = ak.index.Index64.empty(
