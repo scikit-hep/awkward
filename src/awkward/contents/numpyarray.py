@@ -99,21 +99,6 @@ class NumpyArray(Content):
     def dtype(self):
         return self._data.dtype
 
-    @property
-    def ptr(self):
-        if isinstance(self._backend.nplike, ak._nplikes.Numpy):
-            return self._data.ctypes.data
-        elif isinstance(self._backend.nplike, ak._nplikes.Cupy):
-            return self._data.data.ptr
-        elif isinstance(self._backend.nplike, ak._nplikes.Jax):
-            return self._data.device_buffer.unsafe_buffer_pointer()
-        else:
-            raise ak._errors.wrap_error(
-                AssertionError(
-                    "Unrecognized nplike encountered while fetching ptr to raw data"
-                )
-            )
-
     def raw(self, nplike):
         return self._backend.nplike.raw(self.data, nplike)
 
