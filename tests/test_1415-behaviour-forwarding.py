@@ -133,7 +133,7 @@ def test_behavior_forwarding_structure(operation_behavior):
     )
 
     assert (
-        ak.operations.packed(one, behavior=operation_behavior)[0].behavior
+        ak.operations.to_packed(one, behavior=operation_behavior)[0].behavior
         == merged_behavior
     )
     assert (
