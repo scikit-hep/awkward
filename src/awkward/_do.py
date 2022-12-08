@@ -373,7 +373,7 @@ def reduce(
     else:
         if negaxis <= 0:
             negaxis += depth
-        if not (0 < negaxis <= depth):
+        if not 0 < negaxis <= depth:
             raise ak._errors.wrap_error(
                 ValueError(
                     "axis={} exceeds the depth of the nested list structure "
