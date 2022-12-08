@@ -57,7 +57,7 @@ def _impl(array, to, highlevel, behavior):
                 layout, highlevel=False, behavior=behavior
             )
             max_length = ak.operations.max(ak.operations.num(layout, behavior=behavior))
-            regulararray = layout.pad_none(max_length, 1)
+            regulararray = ak._do.pad_none(layout, max_length, 1)
             maskedarray = ak.operations.to_numpy(regulararray, allow_missing=True)
             npstrings = maskedarray.data
             if maskedarray.mask is not False:

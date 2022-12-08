@@ -1284,9 +1284,6 @@ class Content:
             index, self, parameters=self._parameters
         )
 
-    def pad_none(self, length: Integral, axis: Integral, clip: bool = False) -> Content:
-        return self._pad_none(length, axis, 0, clip)
-
     def _pad_none(
         self, target: Integral, axis: Integral, depth: Integral, clip: bool
     ) -> Content:
