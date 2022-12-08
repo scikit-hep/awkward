@@ -192,3 +192,54 @@ def is_unique(layout, axis: Integral | None = None) -> bool:
     starts = ak.index.Index64.zeros(1, nplike=layout._backend.index_nplike)
     parents = ak.index.Index64.zeros(layout.length, nplike=layout._backend.index_nplike)
     return layout._is_unique(negaxis, starts, parents, 1)
+
+
+def unique(layout: Content, axis=None):
+    if axis == -1 or axis is None:
+        negaxis = axis if axis is None else -axis
+        if negaxis is not None:
+            branch, depth = layout.branch_depth
+            if branch:
+                if negaxis <= 0:
+                    raise ak._errors.wrap_error(
+                        np.AxisError(
+                            "cannot use non-negative axis on a nested list structure "
+                            "of variable depth (negative axis counts from the leaves "
+                            "of the tree; non-negative from the root)"
+                        )
+                    )
+                if negaxis > depth:
+                    raise ak._errors.wrap_error(
+                        np.AxisError(
+                            "cannot use axis={} on a nested list structure that splits into "
+                            "different depths, the minimum of which is depth={} from the leaves".format(
+                                axis, depth
+                            )
+                        )
+                    )
+            else:
+                if negaxis <= 0:
+                    negaxis = negaxis + depth
+                if not (0 < negaxis and negaxis <= depth):
+                    raise ak._errors.wrap_error(
+                        np.AxisError(
+                            "axis={} exceeds the depth of this array ({})".format(
+                                axis, depth
+                            )
+                        )
+                    )
+
+        starts = ak.index.Index64.zeros(1, nplike=layout._backend.index_nplike)
+        parents = ak.index.Index64.zeros(
+            layout.length, nplike=layout._backend.index_nplike
+        )
+
+        return layout._unique(negaxis, starts, parents, 1)
+
+    raise ak._errors.wrap_error(
+        np.AxisError(
+            "unique expects axis 'None' or '-1', got axis={} that is not supported yet".format(
+                axis
+            )
+        )
+    )
