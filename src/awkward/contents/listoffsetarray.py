@@ -634,7 +634,7 @@ class ListOffsetArray(Content):
             next = self._content._num(posaxis, depth + 1)
             offsets = self._compact_offsets64(True)
             return ak.contents.ListOffsetArray(
-                offsets, next, parameters=self.parameters
+                offsets, next, parameters=self._parameters
             )
 
     def _offsets_and_flattened(self, axis, depth):

@@ -346,7 +346,9 @@ class NumpyArray(Content):
             )
         )
         return ak.contents.NumpyArray(
-            tonum.data.reshape(shape), parameters=self.parameters, backend=self._backend
+            tonum.data.reshape(shape),
+            parameters=self._parameters,
+            backend=self._backend,
         )
 
     def _offsets_and_flattened(self, axis, depth):
@@ -1367,7 +1369,7 @@ class NumpyArray(Content):
     def to_backend(self, backend: ak._backends.Backend) -> Self:
         return NumpyArray(
             self.raw(backend.nplike),
-            parameters=self.parameters,
+            parameters=self._parameters,
             backend=backend,
         )
 

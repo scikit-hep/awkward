@@ -519,7 +519,7 @@ class UnmaskedArray(Content):
 
     def to_backend(self, backend: ak._backends.Backend) -> Self:
         content = self._content.to_backend(backend)
-        return UnmaskedArray(content, parameters=self.parameters)
+        return UnmaskedArray(content, parameters=self._parameters)
 
     def _is_equal_to(self, other, index_dtype=True, numpyarray=True):
         return self.content.is_equal_to(other.content, index_dtype, numpyarray)

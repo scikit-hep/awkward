@@ -487,7 +487,7 @@ class IndexedOptionArray(Content):
         next = self._content._carry(nextcarry, False)
         out = next._num(posaxis, depth)
         return ak.contents.IndexedOptionArray.simplified(
-            outindex, out, parameters=self.parameters
+            outindex, out, parameters=self._parameters
         )
 
     def _offsets_and_flattened(self, axis, depth):
@@ -1637,7 +1637,7 @@ class IndexedOptionArray(Content):
     def to_backend(self, backend: ak._backends.Backend) -> Self:
         content = self._content.to_backend(backend)
         index = self._index.to_nplike(backend.index_nplike)
-        return IndexedOptionArray(index, content, parameters=self.parameters)
+        return IndexedOptionArray(index, content, parameters=self._parameters)
 
     def _is_equal_to(self, other, index_dtype=True, numpyarray=True):
         return self.index.is_equal_to(

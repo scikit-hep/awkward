@@ -571,7 +571,7 @@ class ByteMaskedArray(Content):
             out = next._num(posaxis, depth)
 
             return ak.contents.IndexedOptionArray.simplified(
-                outindex, out, parameters=self.parameters
+                outindex, out, parameters=self._parameters
             )
 
     def _offsets_and_flattened(self, axis, depth):
