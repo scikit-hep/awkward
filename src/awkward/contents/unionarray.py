@@ -800,7 +800,7 @@ class UnionArray(Content):
                 parameters=self._parameters,
             )
 
-    def _offsets_and_flattened(self, axis, depth):
+    def _pub_offsets_and_flattened(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
 
         if posaxis == depth:
@@ -814,7 +814,7 @@ class UnionArray(Content):
             contents = []
 
             for i in range(len(self._contents)):
-                offsets, flattened = self._contents[i]._offsets_and_flattened(
+                offsets, flattened = self._contents[i]._pub_offsets_and_flattened(
                     posaxis, depth
                 )
                 offsetsraws[i] = offsets.ptr

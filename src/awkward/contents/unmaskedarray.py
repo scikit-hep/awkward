@@ -255,12 +255,14 @@ class UnmaskedArray(Content):
                 self._content.num(posaxis, depth), parameters=self._parameters
             )
 
-    def _offsets_and_flattened(self, axis, depth):
+    def _pub_offsets_and_flattened(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
             raise ak._errors.wrap_error(np.AxisError("axis=0 not allowed for flatten"))
         else:
-            offsets, flattened = self._content._offsets_and_flattened(posaxis, depth)
+            offsets, flattened = self._content._pub_offsets_and_flattened(
+                posaxis, depth
+            )
             if offsets.length == 0:
                 return (
                     offsets,

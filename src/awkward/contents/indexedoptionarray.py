@@ -507,7 +507,7 @@ class IndexedOptionArray(Content):
             outindex, out, parameters=self.parameters
         )
 
-    def _offsets_and_flattened(self, axis, depth):
+    def _pub_offsets_and_flattened(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
             raise ak._errors.wrap_error(np.AxisError("axis=0 not allowed for flatten"))
@@ -515,7 +515,7 @@ class IndexedOptionArray(Content):
             numnull, nextcarry, outindex = self._nextcarry_outindex(self._backend)
             next = self._content._pub_carry(nextcarry, False)
 
-            offsets, flattened = next._offsets_and_flattened(posaxis, depth)
+            offsets, flattened = next._pub_offsets_and_flattened(posaxis, depth)
 
             if offsets.length == 0:
                 return (

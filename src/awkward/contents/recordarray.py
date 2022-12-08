@@ -493,7 +493,7 @@ class RecordArray(Content):
                 backend=self._backend,
             )
 
-    def _offsets_and_flattened(self, axis, depth):
+    def _pub_offsets_and_flattened(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
             raise ak._errors.wrap_error(np.AxisError("axis=0 not allowed for flatten"))
@@ -509,7 +509,7 @@ class RecordArray(Content):
             contents = []
             for content in self._contents:
                 trimmed = content._pub_getitem_range(slice(0, self.length))
-                offsets, flattened = trimmed._offsets_and_flattened(posaxis, depth)
+                offsets, flattened = trimmed._pub_offsets_and_flattened(posaxis, depth)
                 if self._backend.nplike.known_shape and offsets.length != 0:
                     raise ak._errors.wrap_error(
                         AssertionError(

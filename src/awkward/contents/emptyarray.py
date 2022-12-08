@@ -182,7 +182,7 @@ class EmptyArray(Content):
             out = ak.index.Index64.empty(0, nplike=self._backend.nplike)
             return ak.contents.NumpyArray(out, parameters=None, backend=self._backend)
 
-    def _offsets_and_flattened(self, axis, depth):
+    def _pub_offsets_and_flattened(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
             raise ak._errors.wrap_error(

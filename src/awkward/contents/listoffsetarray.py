@@ -650,7 +650,7 @@ class ListOffsetArray(Content):
                 offsets, next, parameters=self.parameters
             )
 
-    def _offsets_and_flattened(self, axis, depth):
+    def _pub_offsets_and_flattened(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
             raise ak._errors.wrap_error(np.AxisError("axis=0 not allowed for flatten"))
@@ -662,7 +662,7 @@ class ListOffsetArray(Content):
             return (listoffsetarray.offsets, content)
 
         else:
-            inneroffsets, flattened = self._content._offsets_and_flattened(
+            inneroffsets, flattened = self._content._pub_offsets_and_flattened(
                 posaxis, depth + 1
             )
             offsets = ak.index.Index64.zeros(

@@ -458,7 +458,7 @@ class BitMaskedArray(Content):
     def num(self, axis, depth=0):
         return self.to_ByteMaskedArray().num(axis, depth)
 
-    def _offsets_and_flattened(self, axis, depth):
+    def _pub_offsets_and_flattened(self, axis, depth):
         return self.to_ByteMaskedArray._offsets_and_flattened(axis, depth)
 
     def _mergeable(self, other, mergebool):

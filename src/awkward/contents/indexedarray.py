@@ -416,13 +416,13 @@ class IndexedArray(Content):
         else:
             return self.project().num(posaxis, depth)
 
-    def _offsets_and_flattened(self, axis, depth):
+    def _pub_offsets_and_flattened(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
             raise ak._errors.wrap_error(np.AxisError("axis=0 not allowed for flatten"))
 
         else:
-            return self.project()._offsets_and_flattened(posaxis, depth)
+            return self.project()._pub_offsets_and_flattened(posaxis, depth)
 
     def _mergeable(self, other, mergebool):
         if isinstance(
