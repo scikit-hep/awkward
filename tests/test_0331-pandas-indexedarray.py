@@ -23,7 +23,7 @@ def test():
 
     index = ak.index.Index64(np.array([3, 3, 1, 5], dtype=np.int64))
     indexed = ak.Array(ak.contents.IndexedArray(index, simple.layout))
-    assert indexed.tolist() == [3.3, 3.3, 1.1, 5.5]
+    assert indexed.to_list() == [3.3, 3.3, 1.1, 5.5]
 
     assert ak.operations.to_dataframe(indexed)["values"].values.tolist() == [
         3.3,

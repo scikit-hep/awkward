@@ -1171,9 +1171,6 @@ class Content:
     def to_packed(self) -> Content:
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def tolist(self, behavior: dict | None = None) -> list:
-        return self.to_list(behavior)
-
     def to_list(self, behavior: dict | None = None) -> list:
         return self.to_packed()._to_list(behavior, None)
 

@@ -576,7 +576,7 @@ def test_getitem_next():
 def test_builder_tuple():
     builder = ak.highlevel.ArrayBuilder()
     assert str(builder.type) == "0 * unknown"
-    assert builder.snapshot().tolist() == []
+    assert builder.snapshot().to_list() == []
 
     builder.begin_tuple(0)
     builder.end_tuple()
@@ -588,7 +588,7 @@ def test_builder_tuple():
     builder.end_tuple()
 
     assert str(builder.type) == "3 * ()"
-    assert builder.snapshot().tolist() == [(), (), ()]
+    assert builder.snapshot().to_list() == [(), (), ()]
 
     builder = ak.highlevel.ArrayBuilder()
 
@@ -629,7 +629,7 @@ def test_builder_tuple():
     builder.end_tuple()
 
     assert str(builder.type) == "3 * (bool, var * int64, float64)"
-    assert builder.snapshot().tolist() == [
+    assert builder.snapshot().to_list() == [
         (True, [1], 1.1),
         (False, [2, 2], 2.2),
         (True, [3, 3, 3], 3.3),
@@ -639,7 +639,7 @@ def test_builder_tuple():
 def test_builder_record():
     builder = ak.highlevel.ArrayBuilder()
     assert str(builder.type) == "0 * unknown"
-    assert builder.snapshot().tolist() == []
+    assert builder.snapshot().to_list() == []
 
     builder.begin_record()
     builder.end_record()
@@ -651,7 +651,7 @@ def test_builder_record():
     builder.end_record()
 
     assert str(builder.type) == "3 * {}"
-    assert builder.snapshot().tolist() == [{}, {}, {}]
+    assert builder.snapshot().to_list() == [{}, {}, {}]
 
     builder = ak.highlevel.ArrayBuilder()
 
@@ -677,7 +677,7 @@ def test_builder_record():
     builder.end_record()
 
     assert str(builder.type) == "3 * {one: int64, two: float64}"
-    assert builder.snapshot().tolist() == [
+    assert builder.snapshot().to_list() == [
         {"one": 1, "two": 1.1},
         {"one": 2, "two": 2.2},
         {"one": 3, "two": 3.3},

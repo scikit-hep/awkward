@@ -43,7 +43,7 @@ def test_review_examples():
             ),
         )
     )
-    assert ak.Array(ak.prod(array, axis=-2), check_valid=True).tolist() == [
+    assert ak.Array(ak.prod(array, axis=-2), check_valid=True).to_list() == [
         [182, 33, 5],
         [],
         [391, 19],
@@ -58,7 +58,7 @@ def test_review_examples():
             ),
         )
     )
-    assert ak.Array(ak.prod(array, axis=-2), check_valid=True).tolist() == [
+    assert ak.Array(ak.prod(array, axis=-2), check_valid=True).to_list() == [
         [182, 33, 5],
         [],
         [391, 19],
@@ -75,7 +75,7 @@ def test_review_examples():
             ),
         )
     )
-    assert ak.Array(ak.prod(array, axis=-2), check_valid=True).tolist() == [
+    assert ak.Array(ak.prod(array, axis=-2), check_valid=True).to_list() == [
         [182, 33, 5],
         [],
         [391, 19],
@@ -92,7 +92,7 @@ def test_review_examples():
             ),
         )
     )
-    assert ak.Array(ak.prod(array, axis=-2), check_valid=True).tolist() == [
+    assert ak.Array(ak.prod(array, axis=-2), check_valid=True).to_list() == [
         [182, 33, 5],
         [],
         [391, 19],
@@ -109,7 +109,7 @@ def test_review_examples():
             ),
         )
     )
-    assert ak.Array(ak.prod(array, axis=-2), check_valid=True).tolist() == [
+    assert ak.Array(ak.prod(array, axis=-2), check_valid=True).to_list() == [
         [182, 33, 5],
         [],
         [391, 19],
@@ -126,7 +126,7 @@ def test_review_examples():
             ),
         )
     )
-    assert ak.Array(ak.prod(array, axis=-2), check_valid=True).tolist() == [
+    assert ak.Array(ak.prod(array, axis=-2), check_valid=True).to_list() == [
         [182, 33, 5],
         [],
         [391, 19],

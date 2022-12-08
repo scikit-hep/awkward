@@ -19,4 +19,4 @@ def test():
         layout,
         ak.operations.flatten(ak.operations.run_lengths(layout)),
         axis=1,
-    ).tolist() == [[[3, 3, 3]], [[1, 1, 1]], [[0, 0, 0]], [[2, 2], [3]]]
+    ).to_list() == [[[3, 3, 3]], [[1, 1, 1]], [[0, 0, 0]], [[2, 2], [3]]]

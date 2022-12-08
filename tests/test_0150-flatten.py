@@ -585,22 +585,22 @@ def test_flatten_0198():
 def test_fix_flatten_of_sliced_array_0446():
     array = ak.highlevel.Array([[1, 2, 3], [], [4, 5], [6, 7, 8, 9]]).layout
 
-    assert ak.operations.flatten(array[:-1], axis=1).tolist() == [
+    assert ak.operations.flatten(array[:-1], axis=1).to_list() == [
         1,
         2,
         3,
         4,
         5,
     ]
-    assert ak.operations.flatten(array[:-2], axis=1).tolist() == [1, 2, 3]
-    assert ak.operations.flatten(array[:-1], axis=None).tolist() == [
+    assert ak.operations.flatten(array[:-2], axis=1).to_list() == [1, 2, 3]
+    assert ak.operations.flatten(array[:-1], axis=None).to_list() == [
         1,
         2,
         3,
         4,
         5,
     ]
-    assert ak.operations.flatten(array[:-2], axis=None).tolist() == [
+    assert ak.operations.flatten(array[:-2], axis=None).to_list() == [
         1,
         2,
         3,
@@ -618,12 +618,12 @@ def test_flatten_None_axis():
 def test_fix_corner_case_0585():
     array = ak.highlevel.Array([[1, 2, 3], [], [4, 5]]).layout
 
-    assert ak.operations.flatten(array, axis=0).tolist() == [
+    assert ak.operations.flatten(array, axis=0).to_list() == [
         [1, 2, 3],
         [],
         [4, 5],
     ]
-    assert ak.operations.flatten(array, axis=-2).tolist() == [
+    assert ak.operations.flatten(array, axis=-2).to_list() == [
         [1, 2, 3],
         [],
         [4, 5],
@@ -631,14 +631,14 @@ def test_fix_corner_case_0585():
 
     array = ak.highlevel.Array([1, 2, 3, 4, 5]).layout
 
-    assert ak.operations.flatten(array, axis=0).tolist() == [
+    assert ak.operations.flatten(array, axis=0).to_list() == [
         1,
         2,
         3,
         4,
         5,
     ]
-    assert ak.operations.flatten(array, axis=-1).tolist() == [
+    assert ak.operations.flatten(array, axis=-1).to_list() == [
         1,
         2,
         3,
@@ -653,9 +653,9 @@ def test_flatten_allow_regulararray_size_zero_0590():
         ak.highlevel.Array([[1, 2, 3], [], [4, 5]]).layout, 0, zeros_length=0
     )
 
-    assert ak.operations.flatten(empty, axis=0).tolist() == []
-    assert ak.operations.flatten(empty, axis=1).tolist() == []
-    assert ak.operations.flatten(empty, axis=2).tolist() == []
+    assert ak.operations.flatten(empty, axis=0).to_list() == []
+    assert ak.operations.flatten(empty, axis=1).to_list() == []
+    assert ak.operations.flatten(empty, axis=2).to_list() == []
 
 
 def test_0724():
@@ -667,7 +667,7 @@ def test_0724():
     idx = ak.index.Index64([175990832])
     a = ak.contents.ListOffsetArray(idx, a)
 
-    assert ak.operations.flatten(a, axis=2).tolist() == []
+    assert ak.operations.flatten(a, axis=2).to_list() == []
     assert str(ak.operations.flatten(a, axis=2).type) == "0 * var * ?float64"
 
 

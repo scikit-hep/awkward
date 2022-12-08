@@ -809,7 +809,7 @@ def test_same_categories():
         "two",
     ]
 
-    assert (array1 == array2).tolist() == [
+    assert (array1 == array2).to_list() == [
         False,
         False,
         True,

@@ -18,10 +18,10 @@ def test_mine():
         )
     )
     assert (
-        ak.operations.argmax(array, axis=-1).tolist()
+        ak.operations.argmax(array, axis=-1).to_list()
         == ak.operations.argmax(
             ak.highlevel.Array([[1.1], [2.2, 3.3], [4.4, 5.5, 6.6]]), axis=-1
-        ).tolist()
+        ).to_list()
     )
 
 

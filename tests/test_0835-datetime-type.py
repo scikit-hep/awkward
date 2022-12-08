@@ -698,7 +698,7 @@ def test_more():
     )
     akarray = ak.highlevel.Array(nparray)
 
-    assert (akarray[1:] - akarray[:-1]).tolist() == [np.timedelta64(60, "m")]
+    assert (akarray[1:] - akarray[:-1]).to_list() == [np.timedelta64(60, "m")]
     assert ak.operations.sum(akarray[1:] - akarray[:-1]) == np.timedelta64(60, "m")
     assert ak.operations.sum(akarray[1:] - akarray[:-1], axis=0) == [
         np.timedelta64(60, "m")

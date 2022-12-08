@@ -93,7 +93,7 @@ def test_date_time():
 
     array = ak.highlevel.Array(numpy_array)
     assert str(array.type) == "3 * datetime64[s]"
-    assert array.tolist() == [
+    assert array.to_list() == [
         np.datetime64("2020-07-27T10:41:11"),
         np.datetime64("2019-01-01T00:00:00"),
         np.datetime64("2020-01-01T00:00:00"),
