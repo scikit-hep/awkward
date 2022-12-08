@@ -100,7 +100,7 @@ def _impl(array, highlevel, behavior):
                 cls = ak.contents.IndexedArray
 
             content_list = ak.operations.to_list(content)
-            hashable = [ak.behaviors.categorical.as_hashable(x) for x in content_list]
+            hashable = [ak.behaviors.categorical._as_hashable(x) for x in content_list]
 
             lookup = {}
             is_first = ak._nplikes.numpy.empty(len(hashable), dtype=np.bool_)

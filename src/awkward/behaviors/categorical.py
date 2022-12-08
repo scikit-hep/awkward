@@ -14,7 +14,7 @@ class CategoricalBehavior(Array):
 class _HashableDict:
     def __init__(self, obj):
         self.keys = tuple(sorted(obj))
-        self.values = tuple(as_hashable(obj[k]) for k in self.keys)
+        self.values = tuple(_as_hashable(obj[k]) for k in self.keys)
         self.hash = hash((_HashableDict,) + self.keys, self.values)
 
     def __hash__(self):
@@ -40,11 +40,11 @@ class _HashableList:
         return isinstance(other, _HashableList) and self.values == other.values
 
 
-def as_hashable(obj):
+def _as_hashable(obj):
     if isinstance(obj, dict):
         return _HashableDict(obj)
     elif isinstance(obj, tuple):
-        return tuple(as_hashable(x) for x in obj)
+        return tuple(_as_hashable(x) for x in obj)
     elif isinstance(obj, list):
         return _HashableList(obj)
     else:
@@ -74,8 +74,8 @@ def _categorical_equal(one, two):
     else:
         one_list = ak.operations.to_list(one_content)
         two_list = ak.operations.to_list(two_content)
-        one_hashable = [as_hashable(x) for x in one_list]
-        two_hashable = [as_hashable(x) for x in two_list]
+        one_hashable = [_as_hashable(x) for x in one_list]
+        two_hashable = [_as_hashable(x) for x in two_list]
         two_lookup = {x: i for i, x in enumerate(two_hashable)}
 
         one_to_two = ak._nplikes.numpy.empty(len(one_hashable) + 1, dtype=np.int64)
