@@ -77,7 +77,7 @@ class UnionArray(Content):
                 )
 
         for content in contents[1:]:
-            if contents[0].mergeable(content, mergebool=False):
+            if contents[0]._mergeable(content, mergebool=False):
                 raise ak._errors.wrap_error(
                     TypeError(
                         "{0} cannot contain mergeable 'contents' ({1} of {2} and {3} of {4}); try {0}.simplified instead".format(
@@ -215,7 +215,7 @@ class UnionArray(Content):
                 for j, inner_cont in enumerate(innercontents):
                     unmerged = True
                     for k in range(len(contents)):
-                        if merge and contents[k].mergeable(inner_cont, mergebool):
+                        if merge and contents[k]._mergeable(inner_cont, mergebool):
                             Content._selfless_handle_error(
                                 backend[
                                     "awkward_UnionArray_simplify",
@@ -303,7 +303,7 @@ class UnionArray(Content):
                         unmerged = False
                         break
 
-                    elif merge and contents[k].mergeable(self_cont, mergebool):
+                    elif merge and contents[k]._mergeable(self_cont, mergebool):
                         Content._selfless_handle_error(
                             backend[
                                 "awkward_UnionArray_simplify_one",
@@ -899,7 +899,7 @@ class UnionArray(Content):
                     ),
                 )
 
-    def _mergeable(self, other, mergebool):
+    def _mergeable_next(self, other, mergebool):
         return True
 
     def merging_strategy(self, others):

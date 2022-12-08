@@ -542,7 +542,7 @@ class IndexedOptionArray(Content):
                 )
                 return (outoffsets, flattened)
 
-    def _mergeable(self, other, mergebool):
+    def _mergeable_next(self, other, mergebool):
         if isinstance(
             other,
             (
@@ -553,10 +553,10 @@ class IndexedOptionArray(Content):
                 ak.contents.UnmaskedArray,
             ),
         ):
-            return self._content.mergeable(other.content, mergebool)
+            return self._content._mergeable(other.content, mergebool)
 
         else:
-            return self._content.mergeable(other, mergebool)
+            return self._content._mergeable(other, mergebool)
 
     def _merging_strategy(self, others):
         if len(others) == 0:
@@ -1159,7 +1159,7 @@ class IndexedOptionArray(Content):
         nulls_index_content = ak.contents.NumpyArray(
             nulls_index, parameters=None, backend=self._backend
         )
-        if out.mergeable(nulls_index_content, True):
+        if out._mergeable(nulls_index_content, True):
             out = out.merge(nulls_index_content)
             nulls_merged = True
 

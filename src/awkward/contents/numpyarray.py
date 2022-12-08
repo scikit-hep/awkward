@@ -382,7 +382,7 @@ class NumpyArray(Content):
                 np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
             )
 
-    def _mergeable(self, other, mergebool):
+    def _mergeable_next(self, other, mergebool):
         if isinstance(
             other,
             (
@@ -393,7 +393,7 @@ class NumpyArray(Content):
                 ak.contents.UnmaskedArray,
             ),
         ):
-            return self.mergeable(other._content, mergebool)
+            return self._mergeable(other._content, mergebool)
 
         elif isinstance(other, ak.contents.NumpyArray):
             if self._data.ndim != other._data.ndim:
@@ -435,7 +435,7 @@ class NumpyArray(Content):
         elif isinstance(other, ak.contents.RegularArray) and self.purelist_depth > 1:
             as_regular_array = self.to_RegularArray()
             assert isinstance(as_regular_array, ak.contents.RegularArray)
-            return as_regular_array._content.mergeable(other._content, mergebool)
+            return as_regular_array._content._mergeable(other._content, mergebool)
 
         else:
             return False

@@ -102,7 +102,7 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
         ]
         batch = [content_or_others[0]]
         for x in content_or_others[1:]:
-            if batch[-1].mergeable(x, mergebool=mergebool):
+            if ak._do.mergeable(batch[-1], x, mergebool=mergebool):
                 batch.append(x)
             else:
                 collapsed = batch[0].mergemany(batch[1:])

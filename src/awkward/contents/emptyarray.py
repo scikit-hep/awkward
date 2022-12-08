@@ -189,7 +189,7 @@ class EmptyArray(Content):
                 EmptyArray(parameters=self._parameters, backend=self._backend),
             )
 
-    def _mergeable(self, other, mergebool):
+    def _mergeable_next(self, other, mergebool):
         return True
 
     def mergemany(self, others):

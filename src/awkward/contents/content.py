@@ -688,7 +688,7 @@ class Content:
         others = [other]
         return self.mergemany(others)
 
-    def mergeable(self, other: Content, mergebool: bool = True) -> bool:
+    def _mergeable(self, other: Content, mergebool: bool = True) -> bool:
         # Is the other content is an identity, or a union?
         if other.is_identity_like or other.is_union:
             return True
@@ -701,9 +701,9 @@ class Content:
             return False
         # Finally, fall back upon the per-content implementation
         else:
-            return self._mergeable(other, mergebool)
+            return self._mergeable_next(other, mergebool)
 
-    def _mergeable(self, other: Content, mergebool: bool) -> bool:
+    def _mergeable_next(self, other: Content, mergebool: bool) -> bool:
         raise ak._errors.wrap_error(NotImplementedError)
 
     def mergemany(self, others: list[Content]) -> Content:

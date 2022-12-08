@@ -296,3 +296,7 @@ def fill_none(layout: Content, value: Content) -> Content:
 
 def num(layout, axis):
     return layout._num(axis)
+
+
+def mergeable(one: Content, two: Content, mergebool: bool = True) -> bool:
+    return one._mergeable(two, mergebool=mergebool)

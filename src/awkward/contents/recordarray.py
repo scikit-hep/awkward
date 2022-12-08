@@ -522,7 +522,7 @@ class RecordArray(Content):
                 ),
             )
 
-    def _mergeable(self, other, mergebool):
+    def _mergeable_next(self, other, mergebool):
         if isinstance(
             other,
             (
@@ -533,13 +533,13 @@ class RecordArray(Content):
                 ak.contents.UnmaskedArray,
             ),
         ):
-            return self.mergeable(other.content, mergebool)
+            return self._mergeable(other.content, mergebool)
 
         if isinstance(other, RecordArray):
             if self.is_tuple and other.is_tuple:
                 if len(self._contents) == len(other._contents):
                     for self_cont, other_cont in zip(self._contents, other._contents):
-                        if not self_cont.mergeable(other_cont, mergebool):
+                        if not self_cont._mergeable(other_cont, mergebool):
                             return False
 
                     return True
@@ -551,7 +551,7 @@ class RecordArray(Content):
                 for i, field in enumerate(self._fields):
                     x = self._contents[i]
                     y = other._contents[other.field_to_index(field)]
-                    if not x.mergeable(y, mergebool):
+                    if not x._mergeable(y, mergebool):
                         return False
                 return True
 

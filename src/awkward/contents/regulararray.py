@@ -656,7 +656,7 @@ class RegularArray(Content):
     def _offsets_and_flattened(self, axis, depth):
         return self.to_ListOffsetArray64(True)._offsets_and_flattened(axis, depth)
 
-    def _mergeable(self, other, mergebool):
+    def _mergeable_next(self, other, mergebool):
         if isinstance(
             other,
             (
@@ -667,7 +667,7 @@ class RegularArray(Content):
                 ak.contents.UnmaskedArray,
             ),
         ):
-            return self.mergeable(other.content, mergebool)
+            return self._mergeable(other.content, mergebool)
 
         elif isinstance(
             other,
@@ -677,13 +677,13 @@ class RegularArray(Content):
                 ak.contents.ListOffsetArray,
             ),
         ):
-            return self._content.mergeable(other.content, mergebool)
+            return self._content._mergeable(other.content, mergebool)
 
         # For n-dimensional NumpyArrays, let's now convert them to RegularArray
         # We could add a special case that tries to first convert self to NumpyArray
         # and merge conventionally, but it's not worth it at this stage.
         elif isinstance(other, ak.contents.NumpyArray) and other.purelist_depth > 1:
-            return self._content.mergeable(other.to_RegularArray().content, mergebool)
+            return self._content._mergeable(other.to_RegularArray().content, mergebool)
         else:
             return False
 
