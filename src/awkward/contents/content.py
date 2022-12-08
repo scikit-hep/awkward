@@ -1330,9 +1330,9 @@ class Content:
         negaxis = axis if axis is None else -axis
         starts = ak.index.Index64.zeros(1, nplike=self._backend.index_nplike)
         parents = ak.index.Index64.zeros(self.length, nplike=self._backend.index_nplike)
-        return self._is_unique(negaxis, starts, parents, 1)
+        return self._pub_is_unique(negaxis, starts, parents, 1)
 
-    def _is_unique(
+    def _pub_is_unique(
         self,
         negaxis: Integral | None,
         starts: ak.index.Index,

@@ -766,11 +766,11 @@ class RegularArray(Content):
             parameters=self._parameters,
         )
 
-    def _is_unique(self, negaxis, starts, parents, outlength):
+    def _pub_is_unique(self, negaxis, starts, parents, outlength):
         if self._length == 0:
             return True
 
-        return self.to_ListOffsetArray64(True)._is_unique(
+        return self.to_ListOffsetArray64(True)._pub_is_unique(
             negaxis,
             starts,
             parents,

@@ -505,10 +505,10 @@ class BitMaskedArray(Content):
     def numbers_to_type(self, name):
         return self.to_ByteMaskedArray().numbers_to_type(name)
 
-    def _is_unique(self, negaxis, starts, parents, outlength):
+    def _pub_is_unique(self, negaxis, starts, parents, outlength):
         if self._mask.length == 0:
             return True
-        return self.to_IndexedOptionArray64()._is_unique(
+        return self.to_IndexedOptionArray64()._pub_is_unique(
             negaxis, starts, parents, outlength
         )
 

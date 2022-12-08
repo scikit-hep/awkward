@@ -741,9 +741,9 @@ class RecordArray(Content):
             backend=self._backend,
         )
 
-    def _is_unique(self, negaxis, starts, parents, outlength):
+    def _pub_is_unique(self, negaxis, starts, parents, outlength):
         for content in self._contents:
-            if not content._is_unique(negaxis, starts, parents, outlength):
+            if not content._pub_is_unique(negaxis, starts, parents, outlength):
                 return False
         return True
 

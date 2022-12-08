@@ -864,12 +864,12 @@ class IndexedOptionArray(Content):
             parameters=self._parameters,
         )
 
-    def _is_unique(self, negaxis, starts, parents, outlength):
+    def _pub_is_unique(self, negaxis, starts, parents, outlength):
         if self._index.length == 0:
             return True
 
         projected = self.project()
-        return projected._is_unique(negaxis, starts, parents, outlength)
+        return projected._pub_is_unique(negaxis, starts, parents, outlength)
 
     def _pub_unique(self, negaxis, starts, parents, outlength):
         branch, depth = self.branch_depth

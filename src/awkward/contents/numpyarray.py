@@ -662,13 +662,13 @@ class NumpyArray(Content):
                 backend=self._backend,
             )
 
-    def _is_unique(self, negaxis, starts, parents, outlength):
+    def _pub_is_unique(self, negaxis, starts, parents, outlength):
         if self.length == 0:
             return True
 
         elif len(self.shape) != 1 or not self.is_contiguous:
             contiguous_self = self if self.is_contiguous else self.contiguous()
-            return contiguous_self.to_RegularArray()._is_unique(
+            return contiguous_self.to_RegularArray()._pub_is_unique(
                 negaxis,
                 starts,
                 parents,

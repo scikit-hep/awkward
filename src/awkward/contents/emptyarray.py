@@ -224,7 +224,7 @@ class EmptyArray(Content):
             parameters=self._parameters, backend=self._backend
         )
 
-    def _is_unique(self, negaxis, starts, parents, outlength):
+    def _pub_is_unique(self, negaxis, starts, parents, outlength):
         return True
 
     def _pub_unique(self, negaxis, starts, parents, outlength):

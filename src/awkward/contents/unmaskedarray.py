@@ -324,10 +324,10 @@ class UnmaskedArray(Content):
             self._content.numbers_to_type(name), parameters=self._parameters
         )
 
-    def _is_unique(self, negaxis, starts, parents, outlength):
+    def _pub_is_unique(self, negaxis, starts, parents, outlength):
         if self._content.length == 0:
             return True
-        return self._content._is_unique(negaxis, starts, parents, outlength)
+        return self._content._pub_is_unique(negaxis, starts, parents, outlength)
 
     def _pub_unique(self, negaxis, starts, parents, outlength):
         if self._content.length == 0:

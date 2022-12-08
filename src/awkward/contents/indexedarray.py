@@ -703,7 +703,7 @@ class IndexedArray(Content):
             parameters=self._parameters,
         )
 
-    def _is_unique(self, negaxis, starts, parents, outlength):
+    def _pub_is_unique(self, negaxis, starts, parents, outlength):
         if self._index.length == 0:
             return True
 
@@ -713,7 +713,7 @@ class IndexedArray(Content):
             return False
 
         next = self._content._pub_carry(nextindex, False)
-        return next._is_unique(negaxis, starts, parents, outlength)
+        return next._pub_is_unique(negaxis, starts, parents, outlength)
 
     def _pub_unique(self, negaxis, starts, parents, outlength):
         if self._index.length == 0:
