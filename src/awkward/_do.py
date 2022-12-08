@@ -337,3 +337,63 @@ def merge_as_union(one: Content, two: Content) -> ak.contents.UnionArray:
 def mergemany(contents: list[Content]) -> Content:
     assert len(contents) != 0
     return contents[0]._mergemany(contents[1:])
+
+
+def reduce(
+    layout: Content,
+    reducer: ak._reducers.Reducer,
+    axis: int = -1,
+    mask: bool = True,
+    keepdims: bool = False,
+    behavior: dict | None = None,
+):
+    if axis is None:
+        raise ak._errors.wrap_error(NotImplementedError)
+
+    negaxis = -axis
+    branch, depth = layout.branch_depth
+
+    if branch:
+        if negaxis <= 0:
+            raise ak._errors.wrap_error(
+                ValueError(
+                    "cannot use non-negative axis on a nested list structure "
+                    "of variable depth (negative axis counts from the leaves of "
+                    "the tree; non-negative from the root)"
+                )
+            )
+        if negaxis > depth:
+            raise ak._errors.wrap_error(
+                ValueError(
+                    "cannot use axis={} on a nested list structure that splits into "
+                    "different depths, the minimum of which is depth={} "
+                    "from the leaves".format(axis, depth)
+                )
+            )
+    else:
+        if negaxis <= 0:
+            negaxis += depth
+        if not (0 < negaxis <= depth):
+            raise ak._errors.wrap_error(
+                ValueError(
+                    "axis={} exceeds the depth of the nested list structure "
+                    "(which is {})".format(axis, depth)
+                )
+            )
+
+    starts = ak.index.Index64.zeros(1, layout.backend.index_nplike)
+    parents = ak.index.Index64.zeros(layout.length, layout.backend.index_nplike)
+    shifts = None
+    next = layout._reduce_next(
+        reducer,
+        negaxis,
+        starts,
+        shifts,
+        parents,
+        1,
+        mask,
+        keepdims,
+        behavior,
+    )
+
+    return next[0]

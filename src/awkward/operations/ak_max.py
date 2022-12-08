@@ -127,15 +127,15 @@ def nanmax(
 def _impl(array, axis, keepdims, initial, mask_identity, flatten_records):
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
     backend = layout.backend
+    reducer = ak._reducers.Max(initial)
 
     if axis is None:
         if not backend.nplike.known_data or not backend.nplike.known_shape:
-            reducer_cls = ak._reducers.Max
 
             def map(x):
                 return ak._typetracer.MaybeNone(
                     ak._typetracer.UnknownScalar(
-                        np.dtype(reducer_cls.return_dtype(x.dtype))
+                        np.dtype(reducer.return_dtype(x.dtype))
                     )
                 )
 
@@ -159,11 +159,12 @@ def _impl(array, axis, keepdims, initial, mask_identity, flatten_records):
 
     else:
         behavior = ak._util.behavior_of(array)
-        out = layout.max(
+        out = ak._do.reduce(
+            layout,
+            reducer,
             axis=axis,
             mask=mask_identity,
             keepdims=keepdims,
-            initial=initial,
             behavior=behavior,
         )
         if isinstance(out, (ak.contents.Content, ak.record.Record)):

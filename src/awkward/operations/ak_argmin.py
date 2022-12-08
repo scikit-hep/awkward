@@ -109,12 +109,12 @@ def nanargmin(
 def _impl(array, axis, keepdims, mask_identity, flatten_records):
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
     backend = layout.backend
+    reducer = ak._reducers.ArgMin()
 
     if axis is None:
         if not backend.nplike.known_data or not backend.nplike.known_shape:
-            reducer_cls = ak._reducers.ArgMin
             return ak._typetracer.MaybeNone(
-                ak._typetracer.UnknownScalar(np.dtype(reducer_cls.return_dtype(None)))
+                ak._typetracer.UnknownScalar(np.dtype(reducer.return_dtype(None)))
             )
 
         layout = ak.operations.fill_none(layout, np.inf, axis=-1, highlevel=False)
@@ -134,8 +134,13 @@ def _impl(array, axis, keepdims, mask_identity, flatten_records):
 
     else:
         behavior = ak._util.behavior_of(array)
-        out = layout.argmin(
-            axis=axis, mask=mask_identity, keepdims=keepdims, behavior=behavior
+        out = ak._do.reduce(
+            layout,
+            reducer,
+            axis=axis,
+            mask=mask_identity,
+            keepdims=keepdims,
+            behavior=behavior,
         )
         if isinstance(out, (ak.contents.Content, ak.record.Record)):
             return ak._util.wrap(out, behavior)

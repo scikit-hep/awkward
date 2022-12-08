@@ -55,14 +55,14 @@ def any(
 def _impl(array, axis, keepdims, mask_identity, flatten_records):
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
     backend = layout.backend
+    reducer = ak._reducers.Any()
 
     if axis is None:
         if not backend.nplike.known_data or not backend.nplike.known_shape:
-            reducer_cls = ak._reducers.Any
 
             def map(x):
                 return ak._typetracer.UnknownScalar(
-                    np.dtype(reducer_cls.return_dtype(x.dtype))
+                    np.dtype(reducer.return_dtype(x.dtype))
                 )
 
         else:
@@ -87,8 +87,13 @@ def _impl(array, axis, keepdims, mask_identity, flatten_records):
 
     else:
         behavior = ak._util.behavior_of(array)
-        out = layout.any(
-            axis=axis, mask=mask_identity, keepdims=keepdims, behavior=behavior
+        out = ak._do.reduce(
+            layout,
+            reducer,
+            axis=axis,
+            mask=mask_identity,
+            keepdims=keepdims,
+            behavior=behavior,
         )
         if isinstance(out, (ak.contents.Content, ak.record.Record)):
             return ak._util.wrap(out, behavior)
