@@ -709,41 +709,6 @@ class Content:
     def mergemany(self, others: list[Content]) -> Content:
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def merge_as_union(self, other: Content) -> ak.contents.UnionArray:
-        mylength = self.length
-        theirlength = other.length
-        tags = ak.index.Index8.empty(
-            (mylength + theirlength), self._backend.index_nplike
-        )
-        index = ak.index.Index64.empty(
-            (mylength + theirlength), self._backend.index_nplike
-        )
-        contents = [self, other]
-        assert tags.nplike is self._backend.index_nplike
-        self._handle_error(
-            self._backend["awkward_UnionArray_filltags_const", tags.dtype.type](
-                tags.data, 0, mylength, 0
-            )
-        )
-        assert index.nplike is self._backend.index_nplike
-        self._handle_error(
-            self._backend["awkward_UnionArray_fillindex_count", index.dtype.type](
-                index.data, 0, mylength
-            )
-        )
-        self._handle_error(
-            self._backend["awkward_UnionArray_filltags_const", tags.dtype.type](
-                tags.data, mylength, theirlength, 1
-            )
-        )
-        self._handle_error(
-            self._backend["awkward_UnionArray_fillindex_count", index.dtype.type](
-                index.data, mylength, theirlength
-            )
-        )
-
-        return ak.contents.UnionArray(tags, index, contents, parameters=None)
-
     def _merging_strategy(
         self, others: list[Content]
     ) -> tuple[list[Content], list[Content]]:

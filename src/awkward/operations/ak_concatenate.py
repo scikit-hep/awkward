@@ -106,7 +106,7 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
                 batch.append(x)
             else:
                 collapsed = batch[0].mergemany(batch[1:])
-                batch = [collapsed.merge_as_union(x)]
+                batch = [ak._do.merge_as_union(collapsed, x)]
 
         out = batch[0].mergemany(batch[1:])
 
