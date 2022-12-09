@@ -202,13 +202,15 @@ jobs:
       run: sphinx-build -M linkcheck . _build/
       working-directory: docs
 
-    - name: Output annotations
+    - name: Output annotations on failure
+      if: ${{ failure() }}
       run: |
+        import pathlib
         import json
-        with open("_build/linkcheck/output.json") as f:
-          data = [
-            json.loads(l) for l in f
-          ]
+        output_path = pathlib.Path("_build", "linkcheck", "output.json)
+
+        with output_path.open() as f:
+          data = [json.loads(l) for l in f]
 
         for record in data:
           print(
