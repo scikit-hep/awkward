@@ -79,7 +79,7 @@ pip install awkward
 
 The `awkward` package is pure Python, and it will download the `awkward-cpp` compiled components as a dependency. If there is no `awkward-cpp` wheel for your platform and Python version, pip will attempt to compile it from source (which has additional dependencies, such as a C++ compiler).
 
-Awkward Array is also available as a binary (no compilation) on [conda-forge](https://conda-forge.org/docs/user/introduction.html#how-can-i-install-packages-from-conda-forge):
+Awkward Array is also available on [conda-forge](https://conda-forge.org/docs/user/introduction.html#how-can-i-install-packages-from-conda-forge):
 
 ```bash
 conda install -c conda-forge awkward
