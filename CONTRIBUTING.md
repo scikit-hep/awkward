@@ -2,11 +2,11 @@
 
 Thank you for your interest in contributing! We're eager to see your ideas and look forward to working with you.
 
-This document describes the technical procedures we follow in this project. Yet, it should also be stressed that as members of the Scikit-HEP community, we are all obliged to maintaining a welcoming, harassment-free environment. See the [Code of Conduct](https://scikit-hep.org/code-of-conduct) for details.
+This document describes the technical procedures we follow in this project. It should also be stressed that as members of the Scikit-HEP community, we are all obliged to maintaining a welcoming, harassment-free environment. See the [Code of Conduct](https://scikit-hep.org/code-of-conduct) for details.
 
 ### Where to start
 
-The front page for the Awkward Array project is its [GitHub README](https://github.com/scikit-hep/awkward#readme). This leads directly to tutorials and reference documentation that you may have already seen. It also includes instructions for [compiling for development](https://github.com/scikit-hep/awkward#installation-for-developers), using the localbuild.py script.
+The front page for the Awkward Array project is its [GitHub README](https://github.com/scikit-hep/awkward#readme). This leads directly to tutorials and reference documentation that you may have already seen. It also includes instructions for [compiling for development](https://github.com/scikit-hep/awkward#installation-for-developers).
 
 ### Reporting issues
 
@@ -28,7 +28,7 @@ Currently, we have three regular reviewers of pull requests:
 
 You can request a review from one of us or just comment in GitHub that you want a review and we'll see it. Only one review is required to be allowed to merge a pull request. We'll work with you to get it into shape.
 
-If you're waiting for a response and haven't heard in a few days, it's more likely that we forgot/got distracted/thought someone else was reviewing it/thought we were waiting on you, rather than the other way around—just write another comment to remind us.
+If you're waiting for a response and haven't heard in a few days, it's possible that we forgot/got distracted/thought someone else was reviewing it/thought we were waiting on you, rather than the other way around—just write another comment to remind us.
 
 ### Becoming a regular committer
 
@@ -62,7 +62,7 @@ It is unnecessary to manually edit (rebase) commit history within a pull request
 
 The [installation for developers](README.md#installation-for-developers) procedure is described in brief on the front page, and in more detail here.
 
-Awkward Array is shipped as two packages: `awkward` and `awkward-cpp`. The `awkward-cpp` package contains the compiled C++ components required for performance. If you do not need to frequently modify this code, then it can simply be installed using `pip`.
+Awkward Array is shipped as two packages: `awkward` and `awkward-cpp`. The `awkward-cpp` package contains the compiled C++ components required for performance, and `awkward` is only Python code. If you do not need to frequently modify the C++, then `awkward-cpp` can simply be installed using `pip` or `conda`.
 
 Subsequent steps require the generation of code and datafiles (kernel specification, header-only includes). This can be done with the `prepare` nox session:
 
@@ -163,11 +163,13 @@ To run pre-commit on all files. If you leave off the `-a`, it will run only on y
 
 ### Automated tests
 
-As stated above, we use [pytest](https://docs.pytest.org/) to verify the correctness of the code, and GitHub will reject a pull request if either pre-commit or pytest fails (red "X"). All tests must pass for a pull request to be accepted, though if a pull request doesn't modify code, some of the tests won't run (that's okay).
+As stated above, we use [pytest](https://docs.pytest.org/) to verify the correctness of the code, and GitHub will reject a pull request if either pre-commit or pytest fails (red "X"). All tests must pass for a pull request to be accepted.
+
+Note that if a pull request doesn't modify code, only the documentation tests will run. That's okay: documentation-only pull requests only need the documentation tests to pass.
 
 ### Testing practices
 
-Unless you're refactoring code, such that your changes are fully tested by the existing test suite, new code should be accompanied by new tests. Our testing suite is organized by GitHub issue or pull request number: test file names are
+Unless you're refactoring code, such that your changes are fully tested by the existing test suite, new code should be accompanied by new tests. Our testing suite is organized by GitHub issue or pull request number: that is, test file names are
 
 ```
 tests/test_XXXX-yyyy.py
@@ -179,13 +181,13 @@ where `XXXX` is either the number of the issue your pull request fixes or the nu
 python -m pytest tests/test_XXXX-yyyy.py
 ```
 
-and it makes it easier to figure out why a particular test was added. The easiest way to make a new testing file is to copy an existing one and replace its `test_zzzz` functions with your own.
+and it makes it easier to figure out why a particular test was added. The easiest way to make a new testing file is to copy an existing one and replace its `test_zzzz` functions with your own. The previous tests should also give you a sense of the way we test things and the kinds of things that are constrained in tests.
 
 ### Building documentation locally
 
-We use [Sphinx](https://pypi.org/project/Sphinx/) to generate documentation.
+Documentation is automatically built by each pull request. You usually won't need to build the documentation locally, but if you do, this section describes how.
 
-You need some additional packages installed on your system to build the documentation:
+We use [Sphinx](https://pypi.org/project/Sphinx/) to generate documentation. You may need to install some additional packages:
 
   * [Doxygen](https://www.doxygen.nl/download.html)
   * [pycparser](https://pypi.org/project/pycparser/)
@@ -262,3 +264,5 @@ Currently, only one person can deploy releases:
   * Jim Pivarski ([jpivarski](https://github.com/jpivarski))
 
 There are two kinds of releases: (1) `awkward-cpp` updates, which only occur when the C++ is updated (rare) and involves compilation on many platforms (takes hours), and (2) `awkward` updates, which can happen with any bug-fix.
+
+If you need your merged pull request to be deployed in a release, just ask!
