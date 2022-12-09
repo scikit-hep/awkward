@@ -208,7 +208,7 @@ def combinations(
             raise ak._errors.wrap_error(
                 ValueError("if provided, the length of 'fields' must be 'n'")
             )
-    return layout._combinations(n, replacement, recordlookup, parameters, axis, 0)
+    return layout._combinations(n, replacement, recordlookup, parameters, axis, 1)
 
 
 def is_unique(layout, axis: Integral | None = None) -> bool:

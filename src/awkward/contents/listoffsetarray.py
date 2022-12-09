@@ -1270,9 +1270,9 @@ class ListOffsetArray(Content):
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         posaxis = ak._do.axis_wrap_if_negative(self, axis)
-        if posaxis == depth:
+        if posaxis + 1 == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
-        elif posaxis == depth + 1:
+        elif posaxis + 1 == depth + 1:
             if (
                 self.parameter("__array__") == "string"
                 or self.parameter("__array__") == "bytestring"

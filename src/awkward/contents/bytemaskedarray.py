@@ -732,7 +732,7 @@ class ByteMaskedArray(Content):
                 ValueError("in combinations, 'n' must be at least 1")
             )
         posaxis = ak._do.axis_wrap_if_negative(self, axis)
-        if posaxis == depth:
+        if posaxis + 1 == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         else:
             _, nextcarry, outindex = self._nextcarry_outindex(self._backend)
