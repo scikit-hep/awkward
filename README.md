@@ -11,7 +11,7 @@
 [![Scikit-HEP](https://scikit-hep.org/assets/images/Scikit--HEP-Project-blue.svg)](https://scikit-hep.org/)
 [![NSF-1836650](https://img.shields.io/badge/NSF-1836650-blue.svg)](https://nsf.gov/awardsearch/showAward?AWD_ID=1836650)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4341376.svg)](https://doi.org/10.5281/zenodo.4341376)
-[![Documentation](https://img.shields.io/badge/docs-online-success)](https://awkward-array.readthedocs.io/)
+[![Documentation](https://img.shields.io/badge/docs-online-success)](https://awkward-array.org/)
 [![Gitter](https://img.shields.io/badge/chat-online-success)](https://gitter.im/Scikit-HEP/awkward-array)
 
 Awkward Array is a library for **nested, variable-sized data**, including arbitrary-length lists, records, mixed types, and missing data, using **NumPy-like idioms**.
@@ -60,16 +60,16 @@ for sublist in array:
     output.append(tmp1)
 ```
 
-Not only is the expression using Awkward Arrays more concise, using idioms familiar from NumPy, but it's much faster and uses less memory.
+Not only is the expression using Awkward Arrays more concise, using idioms familiar from NumPy, but it's much faster (about 100×) and uses less memory (about 10×).
 
 For a similar problem 10 million times larger than the one above (on a single-threaded 2.2 GHz processor),
 
-   * the Awkward Array one-liner takes **4.6 seconds** to run and uses **2.1 GB** of memory,
-   * the equivalent using Python lists and dicts takes **138 seconds** to run and uses **22 GB** of memory.
+   * the Awkward Array one-liner takes **1.5 seconds** to run and uses **2.1 GB** of memory,
+   * the equivalent using Python lists and dicts takes **140 seconds** to run and uses **22 GB** of memory.
 
-Speed and memory factors in the double digits are common because we're replacing Python's dynamically typed, pointer-chasing virtual machine with type-specialized, precompiled routines on contiguous data. (In other words, for the same reasons as NumPy.) Even higher speedups are possible when Awkward Array is paired with [Numba](https://numba.pydata.org/).
+Awkward Array is even more efficient when used in [Numba](https://numba.pydata.org/)'s JIT-compiled functions.
 
-Our [presentation at SciPy 2020](https://youtu.be/WlnUF3LRBj4) provides a good introduction, showing how to use these arrays in a real analysis.
+See the [Getting started](https://awkward-array.org/en/latest/getting-started/index.html) documentation on [awkward-array.org](https://awkward-array.org) for an introduction, including a no-install notebook you can try in your web browser.
 
 # Installation
 
@@ -79,9 +79,10 @@ Awkward Array can be installed [from PyPI](https://pypi.org/project/awkward) usi
 pip install awkward
 ```
 
-This will usually download and install a pure-Python wheel for the core `awkward` package, and a compiled binary wheel for the `awkward-cpp` C++ components, depending on your operating system and Python version. If not, pip attempts to compile from source (which requires a C++ compiler).
+The `awkward` package is pure Python, and it will download the `awkward-cpp` compiled components as a dependency. If there is no `awkward-cpp` wheel for your platform and Python version, pip will attempt to compile it from source (which has additional dependencies, such as a C++ compiler).
 
-Awkward Array is also available using [conda](https://anaconda.org/conda-forge/awkward), which always installs a binary:
+Awkward Array is also available using [conda](https://anaconda.org/conda-forge/awkward). It always installs a binary:
+
 ```bash
 conda install -c conda-forge awkward
 ```
@@ -94,7 +95,8 @@ conda update --all
 ```
 
 # Getting help
-   * View the documentation on [ReadTheDocs](https://awkward-array.readthedocs.io/).
+
+   * View the documentation on [awkward-array.org](https://awkward-array.org/).
    * Report bugs, request features, and ask for additional documentation on [GitHub Issues](https://github.com/scikit-hep/awkward/issues).
    * If you have a "How do I...?" question, start a [GitHub Discussion](https://github.com/scikit-hep/awkward/discussions) with category "Q&A".
    * Alternatively, ask about it on [StackOverflow with the [awkward-array] tag](https://stackoverflow.com/questions/tagged/awkward-array). Be sure to include tags for any other libraries that you use, such as Pandas or PyTorch.
@@ -104,68 +106,50 @@ conda update --all
 
 # Installation for developers
 
-Be sure to clone this repository recursively to get the header-only C++ dependencies.
+Be sure to clone this repository recursively to get the header-only C++ dependencies, generate some sources with [nox](https://nox.thea.codes/), compile and install `awkward-cpp` first, then install `awkward` as an editable installation.
 
 ```bash
 git clone --recursive https://github.com/scikit-hep/awkward.git
+cd awkward
+
+nox -s prepare
+
+python -m pip install -v ./awkward-cpp
+
+python -m pip install -e .
 ```
 
-Also be aware that the default branch is named `main`, not `master`, which could be important for pull requests from forks.
+Tests can be run in parallel with [pytest](https://docs.pytest.org/).
 
-You can install it on your system with pip, which uses exactly the same procedure as deployment. There are two packages to build and install, `awkward` and `awkward-cpp`. These can be build and installed in three steps:
-
-1. Prepare the generated code files: `nox -s prepare`
-2. Build and install `awkward-cpp`: `python -m pip install -v ./awkward-cpp`
-3. Build and install `awkward` in editable mode: `python -m pip install -e .`
-
-The installed packages can then be tested against our integration test suite:
 ```bash
 python -m pytest -n auto tests
 ```
 
-For more fine-grained testing, we also have tests of the low-level kernels, which can be invoked with
-
-```bash
-python -m pytest -vv -rs awkward-cpp/tests-spec
-python -m pytest -vv -rs awkward-cpp/tests-cpu-kernels
-```
+For more details, see [CONTRIBUTING.md](CONTRIBUTING.md), or one of the links below.
 
    * [Continuous integration](https://github.com/scikit-hep/awkward/actions/workflows/build-test.yml) and [continuous deployment](https://github.com/scikit-hep/awkward/actions/workflows/wheels.yml) are hosted by [GitHub Actions](https://github.com/features/actions/).
-   * [Release history](https://awkward-array.readthedocs.io/en/latest/_auto/changelog.html) (changelog) is hosted by [ReadTheDocs](https://readthedocs.org).
-   * [CONTRIBUTING.md](CONTRIBUTING.md) for technical information on how to contribute.
    * [Code of conduct](https://scikit-hep.org/code-of-conduct) for how we work together.
    * The [LICENSE](LICENSE) is BSD-3.
 
-# Release notes and Roadmap
+# Documentation, Release notes, Roadmap, Citations
 
-The [release notes/history/changelog](https://awkward-array.readthedocs.io/en/latest/_auto/changelog.html) is generated as part of the documentation.
+The documentation is on [awkward-array.org](https://awkward-array.org), including [tutorials](https://awkward-array.org/en/latest/getting-started/community-tutorials.html) and [papers and talks](https://awkward-array.org/en/latest/getting-started/papers-and-talks.html).
 
-The [roadmap, future version planning, issue prioritization, deprecation schedule, etc.](https://github.com/scikit-hep/awkward/wiki) are kept up-to-date on the wiki.
+Release notes are in [Releases](https://github.com/scikit-hep/awkward/releases).
 
-# Papers and talks about Awkward Array
+The roadmap and deprecation schedule are in [Wiki](https://github.com/scikit-hep/awkward/wiki).
 
-   * [Original motivations for Awkward 1.0](https://docs.google.com/document/d/1lj8ARTKV1_hqGTh0W_f01S6SsmpzZAXz9qqqWnEB3j4/edit?usp=sharing) from July 2019, now out-of-date.
-   * [StrangeLoop talk](https://youtu.be/2NxWpU7NArk) (video) on September 14, 2019.
-   * [PyHEP talk](https://indico.cern.ch/event/833895/contributions/3577882) on October 17, 2019.
-   * [CHEP talk](https://indico.cern.ch/event/773049/contributions/3473258) on November 7, 2019.
-   * [CHEP 2019 proceedings](https://arxiv.org/abs/2001.06307) (published in _EPJ Web of Conferences_).
-   * [Demo for Coffea developers](https://github.com/scikit-hep/awkward/blob/main/docs-jupyter/2019-12-20-coffea-demo.ipynb) on December 20, 2019.
-   * [Demo for Numba developers](https://github.com/scikit-hep/awkward/blob/main/docs-jupyter/2020-01-22-numba-demo-EVALUATED.ipynb) on January 22, 2020.
-   * [Summary poster](https://github.com/jpivarski/2020-02-27-irishep-poster/blob/master/pivarski-irishep-poster.pdf) on February 27, 2020.
-   * [Demo for Electron Ion Collider users](https://github.com/jpivarski/2020-04-08-eic-jlab#readme) ([video](https://www.youtube.com/watch?v=FoxNS6nlbD0)) on April 8, 2020.
-   * [Presentation at SciPy 2020](https://youtu.be/WlnUF3LRBj4) (video) on July 5, 2020.
-   * [Tutorial at PyHEP 2020](https://youtu.be/ea-zYLQBS4U) (video with [interactive notebook on Binder](https://mybinder.org/v2/gh/jpivarski/2020-07-13-pyhep2020-tutorial.git/1.1?urlpath=lab/tree/tutorial.ipynb)) on July 13, 2020.
-   * [Tutorial at PyHEP 2021](https://youtu.be/5aWAxvdrszw?t=9189) (video with [interactive notebook on Binder](https://mybinder.org/v2/gh/jpivarski-talks/2021-07-06-pyhep-uproot-awkward-tutorial/v1.2?urlpath=lab/tree/uproot-awkward-tutorial.ipynb) on July 6, 2021.
-   * [Tutorial for STAR collaboration meeting](https://youtu.be/NnU_zp5s1MY) on September 13, 2021 (video with [notebooks on GitHub](https://github.com/jpivarski-talks/2021-09-13-star-uproot-awkward-tutorial#readme)). This is the first tutorial with extensive exercises to test your understanding.
-   * [Lessons learned in Python-C++ integration](https://indico.cern.ch/event/855454/contributions/4605044/) ([video](https://videos.cern.ch/record/2295164) and [slides](https://indico.cern.ch/event/855454/contributions/4605044/attachments/2349193/4006676/main.pdf)) on December 1, 2021. This talk describes the motivation for Awkward version 2.0.
-   * [Awkward Array updates](https://indico.cern.ch/event/1140031/) on April 6, 2022. A demonstration and overview of Awkward version 2.0.
-   * [Summary poster](https://github.com/jpivarski-talks/2022-07-25-cssi-meeting-poster/blob/main/pivarski-awkward-cssi-poster.pdf) on July 5, 2022.
-   * [Tutorial at SciPy 2022](https://youtu.be/Dovyd72eD70) (video with [notebooks on GitHub](https://github.com/jpivarski-talks/2022-07-11-scipy-loopy-tutorial#readme)) on July 11, 2022. This is aimed at a general scientific audience, not particle physicists in particular. Features three long exercises.
-   * [Tutorial at CoDaS-HEP 2022](https://github.com/jpivarski-talks/2022-08-03-codas-hep-columnar-tutorial#readme) on August 3, 2022. Aimed at particle physicists; features a long exercise on Higgs decay combinatorics.
+To cite Awkward Array in a paper, see the "Cite this repository" drop-down menu on the top-right of the [GitHub front page](https://github.com/scikit-hep/awkward). The BibTeX is
 
-### Citing Awkward Array in a publication
-
-On the [GitHub README](https://github.com/scikit-hep/awkward), see the "Cite this repository" drop-down menu on the top-right of the page.
+```bibtex
+@software{Pivarski_Awkward_Array_2018,
+author = {Pivarski, Jim and Osborne, Ianna and Ifrim, Ioana and Schreiner, Henry and Hollands, Angus and Biswas, Anish and Das, Pratyush and Roy Choudhury, Santam and Smith, Nicholas and Goyal, Manasvi},
+doi = {10.5281/zenodo.4341376},
+month = {10},
+title = {{Awkward Array}},
+year = {2018}
+}
+```
 
 # Acknowledgements
 

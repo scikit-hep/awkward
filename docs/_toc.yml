@@ -12,6 +12,7 @@ subtrees:
             - entries:
               - file: getting-started/try-awkward-array
               - file: getting-started/community-tutorials
+              - file: getting-started/papers-and-talks
       - file: user-guide/index
         subtrees:
             - entries:
