@@ -1361,14 +1361,14 @@ class IndexedOptionArray(Content):
             )
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
-        posaxis = ak._do.axis_wrap_if_negative(self, axis)
-        if posaxis + 1 == depth:
+        posaxis = ak._do.maybe_posaxis(self, axis, depth)
+        if posaxis is not None and posaxis + 1 == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         else:
             _, nextcarry, outindex = self._nextcarry_outindex(self._backend)
             next = self._content._carry(nextcarry, True)
             out = next._combinations(
-                n, replacement, recordlookup, parameters, posaxis, depth
+                n, replacement, recordlookup, parameters, axis, depth
             )
             return IndexedOptionArray.simplified(outindex, out, parameters=parameters)
 

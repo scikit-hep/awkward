@@ -1269,10 +1269,10 @@ class ListOffsetArray(Content):
             )
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
-        posaxis = ak._do.axis_wrap_if_negative(self, axis)
-        if posaxis + 1 == depth:
+        posaxis = ak._do.maybe_posaxis(self, axis, depth)
+        if posaxis is not None and posaxis + 1 == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
-        elif posaxis + 1 == depth + 1:
+        elif posaxis is not None and posaxis + 1 == depth + 1:
             if (
                 self.parameter("__array__") == "string"
                 or self.parameter("__array__") == "bytestring"
@@ -1381,7 +1381,7 @@ class ListOffsetArray(Content):
         else:
             compact = self.to_ListOffsetArray64(True)
             next = compact._content._combinations(
-                n, replacement, recordlookup, parameters, posaxis, depth + 1
+                n, replacement, recordlookup, parameters, axis, depth + 1
             )
             return ak.contents.ListOffsetArray(
                 compact.offsets, next, parameters=self._parameters
