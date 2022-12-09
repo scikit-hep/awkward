@@ -74,7 +74,8 @@ def _impl(array, axis, highlevel, behavior):
             posaxis = ak._do.maybe_posaxis(layout, axis, depth)
             if posaxis == depth and layout.is_list:
                 return layout.to_RegularArray()
-            elif posaxis == 0:
+
+            elif layout.is_leaf:
                 raise ak._errors.wrap_error(
                     np.AxisError(
                         f"axis={axis} exceeds the depth of this array ({depth})"
