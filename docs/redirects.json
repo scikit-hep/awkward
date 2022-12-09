@@ -103,7 +103,7 @@
   "_auto/ak.num.any-ext": "../reference/generated/ak.num.html",
   "_auto/ak.numba.register.any-ext": "../reference/generated/ak.numba.register.html",
   "_auto/ak.ones_like.any-ext": "../reference/generated/ak.ones_like.html",
-  "_auto/ak.packed.any-ext": "../reference/generated/ak.packed.html",
+  "_auto/ak.packed.any-ext": "../reference/generated/ak.to_packed.html",
   "_auto/ak.pad_none.any-ext": "../reference/generated/ak.pad_none.html",
   "_auto/ak.parameters.any-ext": "../reference/generated/ak.parameters.html",
   "_auto/ak.prod.any-ext": "../reference/generated/ak.prod.html",

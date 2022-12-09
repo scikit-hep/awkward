@@ -747,7 +747,7 @@ layout
 ak.Array(layout)
 ```
 
-Because of its flexibility, most operations that output potentially missing values use an IndexedOptionArray. {func}`ak.packed` and conversions to/from Arrow or Parquet convert it back into a more compact type.
+Because of its flexibility, most operations that output potentially missing values use an IndexedOptionArray. {func}`ak.to_packed` and conversions to/from Arrow or Parquet convert it back into a more compact type.
 
 +++
 
