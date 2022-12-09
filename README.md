@@ -20,7 +20,7 @@ Arrays are **dynamically typed**, but operations on them are **compiled and fast
 
 # Motivating example
 
-Given an array of objects with `x`, `y` fields and variable-length nested lists like
+Given an array of lists of objects with `x`, `y` fields (with nested lists in the `y` field),
 
 ```python
 array = ak.Array([
@@ -67,11 +67,11 @@ The expression using Awkward Arrays is more concise, using idioms familiar from 
 
 Awkward Array is even faster when used in [Numba](https://numba.pydata.org/)'s JIT-compiled functions.
 
-See the [Getting started](https://awkward-array.org/en/latest/getting-started/index.html) documentation on [awkward-array.org](https://awkward-array.org) for an introduction, including a [no-install notebook](https://awkward-array.readthedocs.io/en/latest/getting-started/try-awkward-array.html) you can try in your web browser.
+See the [Getting started](https://awkward-array.org/en/latest/getting-started/index.html) documentation on [awkward-array.org](https://awkward-array.org) for an introduction, including a [no-install demo](https://awkward-array.readthedocs.io/en/latest/getting-started/try-awkward-array.html) you can try in your web browser.
 
 # Installation
 
-Awkward Array can be installed [from PyPI](https://pypi.org/project/awkward) using pip:
+Awkward Array can be installed from [PyPI](https://pypi.org/project/awkward) using pip:
 
 ```bash
 pip install awkward
@@ -120,7 +120,7 @@ For more details, see [CONTRIBUTING.md](CONTRIBUTING.md), or one of the links be
    * [Code of conduct](https://scikit-hep.org/code-of-conduct) for how we work together.
    * The [LICENSE](LICENSE) is BSD-3.
 
-# API reference, Release notes, Roadmap, Citations
+# Documentation, Release notes, Roadmap, Citations
 
 The documentation is on [awkward-array.org](https://awkward-array.org), including
 
@@ -129,9 +129,9 @@ The documentation is on [awkward-array.org](https://awkward-array.org), includin
    * [API reference](https://awkward-array.readthedocs.io/en/latest/reference/index.html)
    * [Papers and talks](https://awkward-array.org/en/latest/getting-started/papers-and-talks.html) about Awkward Array
 
-The Release notes are in the [GitHub Releases tab](https://github.com/scikit-hep/awkward/releases).
+The Release notes for each version are in the [GitHub Releases tab](https://github.com/scikit-hep/awkward/releases).
 
-The roadmap and deprecation schedule are in the [GitHub Wiki](https://github.com/scikit-hep/awkward/wiki).
+The Roadmap, Plans, and Deprecation Schedule are in the [GitHub Wiki](https://github.com/scikit-hep/awkward/wiki).
 
 To cite Awkward Array in a paper, see the "Cite this repository" drop-down menu on the top-right of the [GitHub front page](https://github.com/scikit-hep/awkward). The BibTeX is
 
