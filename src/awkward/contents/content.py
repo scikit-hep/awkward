@@ -761,59 +761,6 @@ class Content:
     ):
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def argsort(
-        self,
-        axis: Integral = -1,
-        ascending: bool = True,
-        stable: bool = False,
-        kind: Any = None,
-        order: Any = None,
-    ):
-        negaxis = -axis
-        branch, depth = self.branch_depth
-        if branch:
-            if negaxis <= 0:
-                raise ak._errors.wrap_error(
-                    ValueError(
-                        "cannot use non-negative axis on a nested list structure "
-                        "of variable depth (negative axis counts from the leaves "
-                        "of the tree; non-negative from the root)"
-                    )
-                )
-            if negaxis > depth:
-                raise ak._errors.wrap_error(
-                    ValueError(
-                        "cannot use axis={} on a nested list structure that splits into "
-                        "different depths, the minimum of which is depth={} from the leaves".format(
-                            axis, depth
-                        )
-                    )
-                )
-        else:
-            if negaxis <= 0:
-                negaxis = negaxis + depth
-            if not (0 < negaxis and negaxis <= depth):
-                raise ak._errors.wrap_error(
-                    ValueError(
-                        "axis={} exceeds the depth of the nested list structure "
-                        "(which is {})".format(axis, depth)
-                    )
-                )
-
-        starts = ak.index.Index64.zeros(1, nplike=self._backend.index_nplike)
-        parents = ak.index.Index64.zeros(self.length, nplike=self._backend.index_nplike)
-        return self._argsort_next(
-            negaxis,
-            starts,
-            None,
-            parents,
-            1,
-            ascending,
-            stable,
-            kind,
-            order,
-        )
-
     def _argsort_next(
         self,
         negaxis: Integral,
@@ -827,58 +774,6 @@ class Content:
         order: Any,
     ):
         raise ak._errors.wrap_error(NotImplementedError)
-
-    def sort(
-        self,
-        axis: Integral = -1,
-        ascending: bool = True,
-        stable: bool = False,
-        kind: Any = None,
-        order: Any = None,
-    ):
-        negaxis = -axis
-        branch, depth = self.branch_depth
-        if branch:
-            if negaxis <= 0:
-                raise ak._errors.wrap_error(
-                    ValueError(
-                        "cannot use non-negative axis on a nested list structure "
-                        "of variable depth (negative axis counts from the leaves "
-                        "of the tree; non-negative from the root)"
-                    )
-                )
-            if negaxis > depth:
-                raise ak._errors.wrap_error(
-                    ValueError(
-                        "cannot use axis={} on a nested list structure that splits into "
-                        "different depths, the minimum of which is depth={} from the leaves".format(
-                            axis, depth
-                        )
-                    )
-                )
-        else:
-            if negaxis <= 0:
-                negaxis = negaxis + depth
-            if not (0 < negaxis and negaxis <= depth):
-                raise ak._errors.wrap_error(
-                    ValueError(
-                        "axis={} exceeds the depth of the nested list structure "
-                        "(which is {})".format(axis, depth)
-                    )
-                )
-
-        starts = ak.index.Index64.zeros(1, nplike=self._backend.index_nplike)
-        parents = ak.index.Index64.zeros(self.length, nplike=self._backend.index_nplike)
-        return self._sort_next(
-            negaxis,
-            starts,
-            parents,
-            1,
-            ascending,
-            stable,
-            kind,
-            order,
-        )
 
     def _sort_next(
         self,

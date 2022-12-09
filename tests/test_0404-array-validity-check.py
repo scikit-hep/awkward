@@ -179,18 +179,30 @@ def test_subranges_equal():
     starts = ak.index.Index64(np.array([0, 5, 10]))
     stops = ak.index.Index64(np.array([5, 10, 15]))
 
-    result = array.sort(axis=-1).content._subranges_equal(starts, stops, 15)
+    result = ak.sort(array, axis=-1, highlevel=False).content._subranges_equal(
+        starts, stops, 15
+    )
     assert result is True
 
     starts = ak.index.Index64(np.array([0, 7]))
     stops = ak.index.Index64(np.array([7, 15]))
 
-    assert array.sort(axis=-1).content._subranges_equal(starts, stops, 15) is False
+    assert (
+        ak.sort(array, axis=-1, highlevel=False).content._subranges_equal(
+            starts, stops, 15
+        )
+        is False
+    )
 
     starts = ak.index.Index64(np.array([0]))
     stops = ak.index.Index64(np.array([15]))
 
-    assert array.sort(axis=-1).content._subranges_equal(starts, stops, 15) is False
+    assert (
+        ak.sort(array, axis=-1, highlevel=False).content._subranges_equal(
+            starts, stops, 15
+        )
+        is False
+    )
 
     # FIXME:
     # starts = ak.index.Index64(np.array([0]))
@@ -284,7 +296,7 @@ def test_2d_in_axis():
     assert ak._do.is_unique(array) is False
     assert to_list(ak._do.unique(array)) == [1.1, 2.2, 3.3, 4.4, 5.5]
 
-    assert to_list(array.sort(axis=-1)) == [
+    assert to_list(ak.sort(array, axis=-1, highlevel=False)) == [
         [1.1, 1.1, 2.2, 3.3, 4.4, 5.5],
         [1.1, 2.2, 3.3, 3.3, 4.4, 5.5],
         [1.1, 2.2, 2.2, 3.3, 4.4, 5.5],
@@ -398,7 +410,7 @@ def test_ListOffsetArray():
         ["one", "two", "three", "four", "five"], highlevel=False
     )
 
-    assert to_list(array.sort(0, True, True)) == [
+    assert to_list(ak.sort(array, 0, highlevel=False)) == [
         "five",
         "four",
         "one",
@@ -417,7 +429,7 @@ def test_ListOffsetArray():
     array2 = ak.operations.from_iter(
         ["one", "two", "one", "four", "two"], highlevel=False
     )
-    assert to_list(array2.sort(0, True, True)) == [
+    assert to_list(ak.sort(array2, 0, highlevel=False)) == [
         "four",
         "one",
         "one",
@@ -552,7 +564,7 @@ def test_ListOffsetArray():
         [6.6, 7.7, 2.2, 9.9],
         [],
     ]
-    assert to_list(listoffsetarray2.sort()) == [
+    assert to_list(ak.sort(listoffsetarray2, highlevel=False)) == [
         [0.0, 1.1, 2.2],
         [],
         [1.1, 3.3],
@@ -773,7 +785,7 @@ def test_same_categories():
     array1 = ak.highlevel.Array(categorical1)
     array2 = ak.highlevel.Array(categorical2)
 
-    assert to_list(categorical1.sort(0, True, True)) == [
+    assert to_list(ak.sort(categorical1, 0, highlevel=False)) == [
         "one",
         "one",
         "one",

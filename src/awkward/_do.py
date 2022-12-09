@@ -404,3 +404,110 @@ def validity_error(layout: Content, path: str = "layout") -> str:
     if paramcheck != "":
         return paramcheck
     return layout._validity_error(path)
+
+
+def argsort(
+    layout: Content,
+    axis: int = -1,
+    ascending: bool = True,
+    stable: bool = False,
+    kind: Any = None,
+    order: Any = None,
+) -> Content:
+    negaxis = -axis
+    branch, depth = layout.branch_depth
+    if branch:
+        if negaxis <= 0:
+            raise ak._errors.wrap_error(
+                ValueError(
+                    "cannot use non-negative axis on a nested list structure "
+                    "of variable depth (negative axis counts from the leaves "
+                    "of the tree; non-negative from the root)"
+                )
+            )
+        if negaxis > depth:
+            raise ak._errors.wrap_error(
+                ValueError(
+                    "cannot use axis={} on a nested list structure that splits into "
+                    "different depths, the minimum of which is depth={} from the leaves".format(
+                        axis, depth
+                    )
+                )
+            )
+    else:
+        if negaxis <= 0:
+            negaxis = negaxis + depth
+        if not 0 < negaxis <= depth:
+            raise ak._errors.wrap_error(
+                ValueError(
+                    "axis={} exceeds the depth of the nested list structure "
+                    "(which is {})".format(axis, depth)
+                )
+            )
+
+    starts = ak.index.Index64.zeros(1, nplike=layout.backend.index_nplike)
+    parents = ak.index.Index64.zeros(layout.length, nplike=layout.backend.index_nplike)
+    return layout._argsort_next(
+        negaxis,
+        starts,
+        None,
+        parents,
+        1,
+        ascending,
+        stable,
+        kind,
+        order,
+    )
+
+
+def sort(
+    layout: Content,
+    axis: int = -1,
+    ascending: bool = True,
+    stable: bool = False,
+    kind: Any = None,
+    order: Any = None,
+) -> Content:
+    negaxis = -axis
+    branch, depth = layout.branch_depth
+    if branch:
+        if negaxis <= 0:
+            raise ak._errors.wrap_error(
+                ValueError(
+                    "cannot use non-negative axis on a nested list structure "
+                    "of variable depth (negative axis counts from the leaves "
+                    "of the tree; non-negative from the root)"
+                )
+            )
+        if negaxis > depth:
+            raise ak._errors.wrap_error(
+                ValueError(
+                    "cannot use axis={} on a nested list structure that splits into "
+                    "different depths, the minimum of which is depth={} from the leaves".format(
+                        axis, depth
+                    )
+                )
+            )
+    else:
+        if negaxis <= 0:
+            negaxis = negaxis + depth
+        if not 0 < negaxis <= depth:
+            raise ak._errors.wrap_error(
+                ValueError(
+                    "axis={} exceeds the depth of the nested list structure "
+                    "(which is {})".format(axis, depth)
+                )
+            )
+
+    starts = ak.index.Index64.zeros(1, nplike=layout.backend.index_nplike)
+    parents = ak.index.Index64.zeros(layout.length, nplike=layout.backend.index_nplike)
+    return layout._sort_next(
+        negaxis,
+        starts,
+        parents,
+        1,
+        ascending,
+        stable,
+        kind,
+        order,
+    )

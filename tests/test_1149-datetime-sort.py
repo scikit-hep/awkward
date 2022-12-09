@@ -41,12 +41,12 @@ def test_date_time_sort_argsort_unique():
         ["2020-07-27T10:41:11", "2019-01-01", "2020-01-01"], "datetime64[s]"
     )
     array = ak.contents.NumpyArray(numpy_array)
-    assert to_list(array.sort()) == [
+    assert to_list(ak.sort(array, highlevel=False)) == [
         datetime.datetime(2019, 1, 1, 0, 0),
         datetime.datetime(2020, 1, 1, 0, 0),
         datetime.datetime(2020, 7, 27, 10, 41, 11),
     ]
-    assert to_list(array.argsort()) == [1, 2, 0]
+    assert to_list(ak.argsort(array, highlevel=False)) == [1, 2, 0]
     assert ak._do.is_unique(array) is True
     assert to_list(ak._do.unique(array)) == [
         datetime.datetime(2019, 1, 1, 0, 0),
@@ -66,12 +66,12 @@ def test_time_delta_sort_argsort_unique():
         np.timedelta64("1", "D"),
         np.timedelta64("20", "D"),
     ]
-    assert to_list(array.sort()) == [
+    assert to_list(ak.sort(array, highlevel=False)) == [
         datetime.timedelta(days=1),
         datetime.timedelta(days=20),
         datetime.timedelta(days=41),
     ]
-    assert to_list(array.argsort()) == [1, 2, 0]
+    assert to_list(ak.argsort(array, highlevel=False)) == [1, 2, 0]
     assert ak._do.is_unique(array) is True
     assert to_list(ak._do.unique(array)) == [
         datetime.timedelta(days=1),
