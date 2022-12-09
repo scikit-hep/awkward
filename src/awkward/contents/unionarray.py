@@ -760,9 +760,9 @@ class UnionArray(Content):
             raise ak._errors.wrap_error(AssertionError(repr(head)))
 
     def _offsets_and_flattened(self, axis, depth):
-        posaxis = ak._do.axis_wrap_if_negative(self, axis)
+        posaxis = ak._do.maybe_posaxis(self, axis, depth)
 
-        if posaxis + 1 == depth:
+        if posaxis is not None and posaxis + 1 == depth:
             raise ak._errors.wrap_error(np.AxisError("axis=0 not allowed for flatten"))
 
         else:
@@ -774,7 +774,7 @@ class UnionArray(Content):
 
             for i in range(len(self._contents)):
                 offsets, flattened = self._contents[i]._offsets_and_flattened(
-                    posaxis, depth
+                    axis, depth
                 )
                 offsetsraws[i] = offsets.ptr
                 contents.append(flattened)

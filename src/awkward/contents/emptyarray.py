@@ -159,8 +159,8 @@ class EmptyArray(Content):
             raise ak._errors.wrap_error(AssertionError(repr(head)))
 
     def _offsets_and_flattened(self, axis, depth):
-        posaxis = ak._do.axis_wrap_if_negative(self, axis)
-        if posaxis + 1 == depth:
+        posaxis = ak._do.maybe_posaxis(self, axis, depth)
+        if posaxis is not None and posaxis + 1 == depth:
             raise ak._errors.wrap_error(
                 np.AxisError(self, "axis=0 not allowed for flatten")
             )
