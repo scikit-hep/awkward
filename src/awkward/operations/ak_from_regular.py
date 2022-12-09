@@ -43,7 +43,6 @@ def from_regular(array, axis=1, *, highlevel=True, behavior=None):
 def _impl(array, axis, highlevel, behavior):
     layout = ak.operations.to_layout(array)
     behavior = ak._util.behavior_of(array, behavior=behavior)
-    posaxis = ak._do.axis_wrap_if_negative(layout, axis)
 
     if axis is None:
 
@@ -53,13 +52,13 @@ def _impl(array, axis, highlevel, behavior):
 
         out = ak._do.recursively_apply(layout, action, behavior, numpy_to_regular=True)
 
-    elif posaxis == 0:
+    elif ak._do.maybe_posaxis(layout, axis, 1) == 0:
         out = layout  # the top-level is already regular (ArrayType)
 
     else:
 
-        def action(layout, depth, depth_context, **kwargs):
-            posaxis = ak._do.axis_wrap_if_negative(layout, depth_context["posaxis"])
+        def action(layout, depth, **kwargs):
+            posaxis = ak._do.maybe_posaxis(layout, axis, depth)
             if posaxis == depth and layout.is_regular:
                 return layout.to_ListOffsetArray64(False)
             elif posaxis == depth and layout.is_list:
@@ -71,11 +70,6 @@ def _impl(array, axis, highlevel, behavior):
                     )
                 )
 
-            depth_context["posaxis"] = posaxis
-
-        depth_context = {"posaxis": posaxis}
-        out = ak._do.recursively_apply(
-            layout, action, behavior, depth_context, numpy_to_regular=True
-        )
+        out = ak._do.recursively_apply(layout, action, behavior, numpy_to_regular=True)
 
     return ak._util.wrap(out, behavior, highlevel)
