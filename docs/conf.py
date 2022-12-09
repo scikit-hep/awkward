@@ -56,8 +56,7 @@ exclude_patterns = ["_build", "_templates", "Thumbs.db", "jupyter_execute", ".*"
 html_context = {
     "github_user": "scikit-hep",
     "github_repo": "awkward",
-    # TODO: set this
-    "github_version": os.environ.get("READTHEDOCS_VERSION", "main"),
+    "github_version": "main",
     "doc_path": "docs",
 }
 html_theme = "pydata_sphinx_theme"
