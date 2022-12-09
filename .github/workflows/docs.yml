@@ -220,7 +220,7 @@ jobs:
     runs-on: ubuntu-22.04
     needs: [build-docs]
     # We can only deploy for PRs on host repo, or pushes to main
-    #if: ${{ github.event_name == 'push' }} # && github.event.push.ref == 'refs/heads/main'
+    if: ${{ github.event_name == 'push' && github.event.push.ref == 'refs/heads/main' }}
     steps:
     - uses: actions/checkout@v3
     - name: Setup Pages
