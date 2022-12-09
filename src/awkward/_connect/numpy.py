@@ -172,7 +172,7 @@ def array_ufunc(ufunc, method, inputs, kwargs):
                 args = []
                 for x in inputs:
                     if isinstance(x, NumpyArray):
-                        args.append(x.raw(nplike))
+                        args.append(x._raw(nplike))
                     else:
                         args.append(x)
 

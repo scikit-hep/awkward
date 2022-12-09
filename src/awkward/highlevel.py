@@ -516,7 +516,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         See also #ak.to_list.
         """
         if isinstance(self._layout, ak.contents.NumpyArray):
-            array = self._layout.raw(numpy)
+            array = self._layout._raw(numpy)
             array_param = self._layout.parameter("__array__")
             if array_param == "byte":
                 for x in ak._util.tobytes(array):
@@ -532,9 +532,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                 if isinstance(x, ak.contents.NumpyArray):
                     array_param = x.parameter("__array__")
                     if array_param == "byte":
-                        yield ak._util.tobytes(x.raw(numpy))
+                        yield ak._util.tobytes(x._raw(numpy))
                     elif array_param == "char":
-                        yield ak._util.tobytes(x.raw(numpy)).decode(
+                        yield ak._util.tobytes(x._raw(numpy)).decode(
                             errors="surrogateescape"
                         )
                     else:
@@ -978,9 +978,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             if isinstance(out, ak.contents.NumpyArray):
                 array_param = out.parameter("__array__")
                 if array_param == "byte":
-                    return ak._util.tobytes(out.raw(numpy))
+                    return ak._util.tobytes(out._raw(numpy))
                 elif array_param == "char":
-                    return ak._util.tobytes(out.raw(numpy)).decode(
+                    return ak._util.tobytes(out._raw(numpy)).decode(
                         errors="surrogateescape"
                     )
             if isinstance(out, (ak.contents.Content, ak.record.Record)):

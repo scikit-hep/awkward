@@ -99,7 +99,7 @@ class NumpyArray(Content):
     def dtype(self):
         return self._data.dtype
 
-    def raw(self, nplike=None):
+    def _raw(self, nplike=None):
         return self._backend.nplike.raw(self.data, nplike)
 
     def _form_with_key(self, getkey):
@@ -113,11 +113,11 @@ class NumpyArray(Content):
     def _to_buffers(self, form, getkey, container, backend):
         assert isinstance(form, self.form_cls)
         key = getkey(self, form, "data")
-        container[key] = ak._util.little_endian(self.raw(backend.nplike))
+        container[key] = ak._util.little_endian(self._raw(backend.nplike))
 
     def _to_typetracer(self, forget_length: bool) -> Self:
         backend = ak._backends.TypeTracerBackend.instance()
-        data = self.raw(backend.nplike)
+        data = self._raw(backend.nplike)
         return NumpyArray(
             data.forget_length() if forget_length else data,
             parameters=self._parameters,
@@ -1224,7 +1224,7 @@ class NumpyArray(Content):
                 pyarrow, mask_node, validbytes, length, options
             )
 
-        nparray = self.raw(numpy)
+        nparray = self._raw(numpy)
         storage_type = pyarrow.from_numpy_dtype(nparray.dtype)
 
         if issubclass(nparray.dtype.type, (bool, np.bool_)):
@@ -1258,7 +1258,7 @@ class NumpyArray(Content):
     def _completely_flatten(self, backend, options):
         return [
             ak.contents.NumpyArray(
-                self.raw(backend.nplike).reshape(-1), backend=backend
+                self._raw(backend.nplike).reshape(-1), backend=backend
             )
         ]
 
@@ -1368,7 +1368,7 @@ class NumpyArray(Content):
 
     def to_backend(self, backend: ak._backends.Backend) -> Self:
         return NumpyArray(
-            self.raw(backend.nplike),
+            self._raw(backend.nplike),
             parameters=self._parameters,
             backend=backend,
         )

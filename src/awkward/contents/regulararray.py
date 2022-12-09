@@ -1214,7 +1214,7 @@ class RegularArray(Content):
                 self._length,
                 [
                     ak._connect.pyarrow.to_validbits(validbytes),
-                    pyarrow.py_buffer(akcontent.raw(numpy)),
+                    pyarrow.py_buffer(akcontent._raw(numpy)),
                 ],
             )
 

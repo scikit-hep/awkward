@@ -11,7 +11,7 @@ typetracer = ak._typetracer.TypeTracer.instance()
 
 def test_getitem_at():
     concrete = ak.contents.NumpyArray(np.arange(2 * 3 * 5).reshape(2, 3, 5) * 0.1)
-    abstract = ak.contents.NumpyArray(concrete.raw(typetracer))
+    abstract = concrete.to_typetracer()
 
     assert concrete.shape == (2, 3, 5)
     assert abstract.shape[1:] == (3, 5)
