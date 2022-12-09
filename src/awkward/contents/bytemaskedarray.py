@@ -920,10 +920,10 @@ class ByteMaskedArray(Content):
         return self.mask._nbytes_part() + self.content._nbytes_part()
 
     def _pad_none(self, target, axis, depth, clip):
-        posaxis = ak._do.axis_wrap_if_negative(self, axis)
-        if posaxis + 1 == depth:
+        posaxis = ak._do.maybe_posaxis(self, axis, depth)
+        if posaxis is not None and posaxis + 1 == depth:
             return self._pad_none_axis0(target, clip)
-        elif posaxis + 1 == depth + 1:
+        elif posaxis is not None and posaxis + 1 == depth + 1:
             mask = ak.index.Index8(self.mask_as_bool(valid_when=False))
             index = ak.index.Index64.empty(
                 mask.length, nplike=self._backend.index_nplike
@@ -943,14 +943,14 @@ class ByteMaskedArray(Content):
                     self._mask.length,
                 )
             )
-            next = self.project()._pad_none(target, posaxis, depth, clip)
+            next = self.project()._pad_none(target, axis, depth, clip)
             return ak.contents.IndexedOptionArray.simplified(
                 index, next, parameters=self._parameters
             )
         else:
             return ak.contents.ByteMaskedArray(
                 self._mask,
-                self._content._pad_none(target, posaxis, depth, clip),
+                self._content._pad_none(target, axis, depth, clip),
                 self._valid_when,
                 parameters=self._parameters,
             )

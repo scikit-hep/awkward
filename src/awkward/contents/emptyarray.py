@@ -279,8 +279,8 @@ class EmptyArray(Content):
         return 0
 
     def _pad_none(self, target, axis, depth, clip):
-        posaxis = ak._do.axis_wrap_if_negative(self, axis)
-        if posaxis + 1 != depth:
+        posaxis = ak._do.maybe_posaxis(self, axis, depth)
+        if posaxis is not None and posaxis + 1 != depth:
             raise ak._errors.wrap_error(
                 np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
             )

@@ -1712,10 +1712,10 @@ class ListOffsetArray(Content):
         return self.offsets._nbytes_part() + self.content._nbytes_part()
 
     def _pad_none(self, target, axis, depth, clip):
-        posaxis = ak._do.axis_wrap_if_negative(self, axis)
-        if posaxis + 1 == depth:
+        posaxis = ak._do.maybe_posaxis(self, axis, depth)
+        if posaxis is not None and posaxis + 1 == depth:
             return self._pad_none_axis0(target, clip)
-        if posaxis + 1 == depth + 1:
+        if posaxis is not None and posaxis + 1 == depth + 1:
             if not clip:
                 tolength = ak.index.Index64.empty(1, self._backend.index_nplike)
                 offsets_ = ak.index.Index64.empty(
@@ -1821,7 +1821,7 @@ class ListOffsetArray(Content):
         else:
             return ak.contents.ListOffsetArray(
                 self._offsets,
-                self._content._pad_none(target, posaxis, depth + 1, clip),
+                self._content._pad_none(target, axis, depth + 1, clip),
                 parameters=self._parameters,
             )
 

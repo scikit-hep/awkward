@@ -805,13 +805,13 @@ class RecordArray(Content):
         return result
 
     def _pad_none(self, target, axis, depth, clip):
-        posaxis = ak._do.axis_wrap_if_negative(self, axis)
-        if posaxis + 1 == depth:
+        posaxis = ak._do.maybe_posaxis(self, axis, depth)
+        if posaxis is not None and posaxis + 1 == depth:
             return self._pad_none_axis0(target, clip)
         else:
             contents = []
             for content in self._contents:
-                contents.append(content._pad_none(target, posaxis, depth, clip))
+                contents.append(content._pad_none(target, axis, depth, clip))
             if len(contents) == 0:
                 return ak.contents.RecordArray(
                     contents,
