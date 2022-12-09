@@ -67,7 +67,7 @@ The expression using Awkward Arrays is more concise, using idioms familiar from 
 
 Awkward Array is even faster when used in [Numba](https://numba.pydata.org/)'s JIT-compiled functions.
 
-See the [Getting started](https://awkward-array.org/en/latest/getting-started/index.html) documentation on [awkward-array.org](https://awkward-array.org) for an introduction, including a [no-install demo](https://awkward-array.readthedocs.io/en/latest/getting-started/try-awkward-array.html) you can try in your web browser.
+See the [Getting started](https://awkward-array.org/en/latest/getting-started/index.html) documentation on [awkward-array.org](https://awkward-array.org) for an introduction, including a [no-install demo](https://awkward-array.org/en/latest/getting-started/try-awkward-array.html) you can try in your web browser.
 
 # Installation
 
@@ -124,9 +124,10 @@ For more details, see [CONTRIBUTING.md](CONTRIBUTING.md), or one of the links be
 
 The documentation is on [awkward-array.org](https://awkward-array.org), including
 
-   * [Getting started](https://awkward-array.readthedocs.io/en/main/getting-started/index.html)
-   * [User guide](https://awkward-array.readthedocs.io/en/main/user-guide/index.html)
-   * [API reference](https://awkward-array.readthedocs.io/en/latest/reference/index.html)
+   * [Getting started](https://awkward-array.org/en/latest/getting-started/index.html)
+   * [User guide](https://awkward-array.org/en/latest/user-guide/index.html)
+   * [API reference](https://awkward-array.org/en/latest/reference/index.html)
+   * [Tutorials (with videos)](https://awkward-array.org/en/latest/getting-started/community-tutorials.html)
    * [Papers and talks](https://awkward-array.org/en/latest/getting-started/papers-and-talks.html) about Awkward Array
 
 The Release notes for each version are in the [GitHub Releases tab](https://github.com/scikit-hep/awkward/releases).
