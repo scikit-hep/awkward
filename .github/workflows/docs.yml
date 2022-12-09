@@ -204,11 +204,19 @@ jobs:
       run: sphinx-build -M html . _build/
       working-directory: docs
 
+      # TODO HACK!
+    - name: Layout documentation
+      run: |
+        # Setup docs with `/doc/main` path
+        mkdir -p "/tmp/awkward-docs/doc"
+        cp -r docs/_build/html/* \
+                 "/tmp/awkward-docs/doc/main"
+
     - name: Upload Pages artefact
       uses: actions/upload-pages-artifact@v1
       with:
         # Upload entire repository
-        path: docs/_build/html
+        path: /tmp/awkward-docs
 
     - name: Upload Jupyter Book cache
       uses: actions/upload-artifact@v3
