@@ -198,7 +198,7 @@ jobs:
       run: sphinx-build -M html . _build/
       working-directory: docs
 
-    - name: Generate Python documentation
+    - name: Check links
       run: sphinx-build -M linkcheck . _build/
       working-directory: docs
 
