@@ -435,7 +435,7 @@ class NumpyArray(Content):
 
     def _local_index(self, axis, depth):
         posaxis = ak._do.axis_wrap_if_negative(self, axis)
-        if posaxis == depth:
+        if posaxis + 1 == depth:
             return self._local_index_axis0()
         elif len(self.shape) <= 1:
             raise ak._errors.wrap_error(

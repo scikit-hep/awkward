@@ -185,7 +185,7 @@ def axis_wrap_if_negative(
 
 
 def local_index(layout: Content, axis: Integral):
-    return layout._local_index(axis, 0)
+    return layout._local_index(axis, 1)
 
 
 def combinations(

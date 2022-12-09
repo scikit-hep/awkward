@@ -655,7 +655,7 @@ class ByteMaskedArray(Content):
 
     def _local_index(self, axis, depth):
         posaxis = ak._do.axis_wrap_if_negative(self, axis)
-        if posaxis == depth:
+        if posaxis + 1 == depth:
             return self._local_index_axis0()
         else:
             _, nextcarry, outindex = self._nextcarry_outindex(self._backend)
