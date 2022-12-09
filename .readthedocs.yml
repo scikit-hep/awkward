@@ -5,4 +5,4 @@ build:
     python: "3.10"
   commands:
     - mkdir --parents _readthedocs/html/
-    - python3 dev/generate-redirects.py _readthedocs/html/
+    - python3 dev/generate-redirects.py docs/redirects.json _readthedocs/html/
