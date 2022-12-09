@@ -272,7 +272,7 @@ def unique(layout: Content, axis=None):
 def pad_none(
     layout: Content, length: Integral, axis: Integral, clip: bool = False
 ) -> Content:
-    return layout._pad_none(length, axis, 0, clip)
+    return layout._pad_none(length, axis, 1, clip)
 
 
 def completely_flatten(

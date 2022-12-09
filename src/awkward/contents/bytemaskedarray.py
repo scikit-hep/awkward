@@ -921,9 +921,9 @@ class ByteMaskedArray(Content):
 
     def _pad_none(self, target, axis, depth, clip):
         posaxis = ak._do.axis_wrap_if_negative(self, axis)
-        if posaxis == depth:
+        if posaxis + 1 == depth:
             return self._pad_none_axis0(target, clip)
-        elif posaxis == depth + 1:
+        elif posaxis + 1 == depth + 1:
             mask = ak.index.Index8(self.mask_as_bool(valid_when=False))
             index = ak.index.Index64.empty(
                 mask.length, nplike=self._backend.index_nplike

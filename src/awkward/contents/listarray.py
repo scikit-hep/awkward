@@ -1234,9 +1234,9 @@ class ListArray(Content):
     def _pad_none(self, target, axis, depth, clip):
         if not clip:
             posaxis = ak._do.axis_wrap_if_negative(self, axis)
-            if posaxis == depth:
+            if posaxis + 1 == depth:
                 return self._pad_none_axis0(target, clip)
-            elif posaxis == depth + 1:
+            elif posaxis + 1 == depth + 1:
                 min_ = ak.index.Index64.empty(1, self._backend.index_nplike)
                 assert (
                     min_.nplike is self._backend.index_nplike
