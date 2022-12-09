@@ -125,10 +125,18 @@ def to_buffers(
 # FIXME: eventually, this should be in ak._util, but it's here to juxtapose axis_wrap_if_negative
 # This function must depend on 'depth'. I don't know how axis_wrap_if_negative was believed to work.
 def maybe_posaxis(
-    layout: Content, axis: AxisMaybeNone, depth: Integral
+    layout: Content | Record, axis: AxisMaybeNone, depth: Integral
 ) -> AxisMaybeNone:
+    if isinstance(layout, Record):
+        if axis == 0:
+            raise ak._errors.wrap_error(
+                np.AxisError("Record type at axis=0 is a scalar, not an array")
+            )
+        return maybe_posaxis(layout._array, axis, depth)
+
     if axis >= 0:
         return axis
+
     else:
         is_branching, additional_depth = layout.branch_depth
         if not is_branching:
