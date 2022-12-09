@@ -33,6 +33,7 @@
     generated/ak.from_parquet
     generated/ak.from_rdataframe
     generated/ak.from_avro_file
+    generated/ak.metadata_from_parquet
 
 .. toctree::
     :caption: Converting to other formats
@@ -46,6 +47,7 @@
     generated/ak.to_json
     generated/ak.to_list
     generated/ak.to_numpy
+    generated/ak.to_packed
     generated/ak.to_parquet
     generated/ak.to_rdataframe
 
