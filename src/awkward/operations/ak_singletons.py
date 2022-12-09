@@ -46,16 +46,16 @@ def singletons(array, axis=0, *, highlevel=True, behavior=None):
 def _impl(array, axis, highlevel, behavior):
     layout = ak.operations.to_layout(array)
     behavior = ak._util.behavior_of(array, behavior=behavior)
-    posaxis = ak._do.axis_wrap_if_negative(layout, axis)
 
     if not ak._util.is_integer(axis):
         raise ak._errors.wrap_error(
             TypeError(f"'axis' must be an integer, not {axis!r}")
         )
 
-    def action(layout, depth, depth_context, **kwargs):
-        posaxis = ak._do.axis_wrap_if_negative(layout, depth_context["posaxis"])
-        if posaxis >= 0 and posaxis + 1 == depth:
+    def action(layout, depth, **kwargs):
+        posaxis = ak._do.maybe_posaxis(layout, axis, depth)
+
+        if posaxis is not None and posaxis + 1 == depth:
             if layout.is_option:
                 nplike = layout._backend.index_nplike
 
@@ -76,11 +76,6 @@ def _impl(array, axis, highlevel, behavior):
                 np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
             )
 
-        depth_context["posaxis"] = posaxis
-
-    depth_context = {"posaxis": posaxis}
-    out = ak._do.recursively_apply(
-        layout, action, behavior, depth_context, numpy_to_regular=True
-    )
+    out = ak._do.recursively_apply(layout, action, behavior, numpy_to_regular=True)
 
     return ak._util.wrap(out, behavior, highlevel)

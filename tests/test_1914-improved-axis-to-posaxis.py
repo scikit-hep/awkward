@@ -65,3 +65,67 @@ def test_is_none():
 
     with pytest.raises(np.AxisError):
         ak.is_none(array, axis=-3)
+
+
+def test_singletons():
+    array = ak.Array(
+        [
+            None,
+            [None],
+            [{"x": None, "y": None}],
+            [{"x": [None], "y": [None]}],
+            [{"x": [1], "y": [[None]]}],
+            [{"x": [2], "y": [[1, 2, 3]]}],
+        ]
+    )
+
+    assert ak.singletons(array, axis=0).tolist() == [
+        [],
+        [[None]],
+        [[{"x": None, "y": None}]],
+        [[{"x": [None], "y": [None]}]],
+        [[{"x": [1], "y": [[None]]}]],
+        [[{"x": [2], "y": [[1, 2, 3]]}]],
+    ]
+
+    assert ak.singletons(array, axis=1).tolist() == [
+        None,
+        [[]],
+        [[{"x": None, "y": None}]],
+        [[{"x": [None], "y": [None]}]],
+        [[{"x": [1], "y": [[None]]}]],
+        [[{"x": [2], "y": [[1, 2, 3]]}]],
+    ]
+
+    assert ak.singletons(array, axis=2).tolist() == [
+        None,
+        [None],
+        [{"x": None, "y": None}],
+        [{"x": [[]], "y": [[]]}],
+        [{"x": [[1]], "y": [[[None]]]}],
+        [{"x": [[2]], "y": [[[1, 2, 3]]]}],
+    ]
+
+    with pytest.raises(np.AxisError):
+        ak.singletons(array, axis=3)
+
+    assert ak.singletons(array, axis=-1).tolist() == [
+        None,
+        [None],
+        [{"x": None, "y": None}],
+        [{"x": [[]], "y": [None]}],
+        [{"x": [[1]], "y": [[[]]]}],
+        [{"x": [[2]], "y": [[[1], [2], [3]]]}],
+    ]
+
+    assert ak.singletons(array, axis=-2).tolist() == [
+        None,
+        [None],
+        [{"x": [], "y": None}],
+        [{"x": [[None]], "y": [[]]}],
+        [{"x": [[1]], "y": [[[None]]]}],
+        [{"x": [[2]], "y": [[[1, 2, 3]]]}],
+    ]
+
+    with pytest.raises(np.AxisError):
+        ak.singletons(array, axis=-3)
