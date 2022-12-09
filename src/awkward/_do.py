@@ -305,8 +305,8 @@ def completely_flatten(
         return tuple(arrays)
 
 
-def flatten(layout: Content, axis: Integral = 1, depth: Integral = 0) -> Content:
-    offsets, flattened = layout._offsets_and_flattened(axis, depth)
+def flatten(layout: Content, axis: Integral = 1) -> Content:
+    offsets, flattened = layout._offsets_and_flattened(axis, 1)
     return flattened
 
 

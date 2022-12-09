@@ -226,7 +226,7 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
                 all_flatten = []
 
                 for x in nextinputs:
-                    o, f = x._offsets_and_flattened(1, 0)
+                    o, f = x._offsets_and_flattened(1, 1)
                     o = backend.index_nplike.asarray(o)
                     c = o[1:] - o[:-1]
                     backend.index_nplike.add(counts, c, out=counts)

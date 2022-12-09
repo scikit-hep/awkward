@@ -603,10 +603,10 @@ class ListOffsetArray(Content):
 
     def _offsets_and_flattened(self, axis, depth):
         posaxis = ak._do.axis_wrap_if_negative(self, axis)
-        if posaxis == depth:
+        if posaxis + 1 == depth:
             raise ak._errors.wrap_error(np.AxisError("axis=0 not allowed for flatten"))
 
-        elif posaxis == depth + 1:
+        elif posaxis + 1 == depth + 1:
             listoffsetarray = self.to_ListOffsetArray64(True)
             stop = listoffsetarray.offsets[-1]
             content = listoffsetarray.content._getitem_range(slice(0, stop))

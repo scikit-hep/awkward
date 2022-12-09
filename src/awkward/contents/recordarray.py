@@ -445,10 +445,10 @@ class RecordArray(Content):
 
     def _offsets_and_flattened(self, axis, depth):
         posaxis = ak._do.axis_wrap_if_negative(self, axis)
-        if posaxis == depth:
+        if posaxis + 1 == depth:
             raise ak._errors.wrap_error(np.AxisError("axis=0 not allowed for flatten"))
 
-        elif posaxis == depth + 1:
+        elif posaxis + 1 == depth + 1:
             raise ak._errors.wrap_error(
                 ValueError(
                     "arrays of records cannot be flattened (but their contents can be; try a different 'axis')"
