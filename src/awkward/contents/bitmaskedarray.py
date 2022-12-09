@@ -205,14 +205,13 @@ class BitMaskedArray(Content):
         container[key] = ak._util.little_endian(self._mask.raw(backend.index_nplike))
         self._content._to_buffers(form.content, getkey, container, backend)
 
-    @property
-    def typetracer(self):
+    def _to_typetracer(self, forget_length: bool) -> Self:
         tt = ak._typetracer.TypeTracer.instance()
         return BitMaskedArray(
-            ak.index.Index(self._mask.raw(tt)),
-            self._content.typetracer,
+            self._mask.to_nplike(tt),
+            self._content._to_typetracer(False),
             self._valid_when,
-            self._length,
+            ak._typetracer.UnknownLength if forget_length else self.length,
             self._lsb_order,
             parameters=self._parameters,
         )
@@ -220,16 +219,6 @@ class BitMaskedArray(Content):
     @property
     def length(self):
         return self._length
-
-    def _forget_length(self):
-        return BitMaskedArray(
-            self._mask,
-            self._content.typetracer,
-            self._valid_when,
-            ak._typetracer.UnknownLength,
-            self._lsb_order,
-            parameters=self._parameters,
-        )
 
     def __repr__(self):
         return self._repr("", "", "")
@@ -586,7 +575,7 @@ class BitMaskedArray(Content):
         elif self._content.length < self.length:
             return f'at {path} ("{type(self)}"): len(content) < length'
         else:
-            return self._content.validity_error(path + ".content")
+            return self._content._validity_error(path + ".content")
 
     def _nbytes_part(self):
         return self.mask._nbytes_part() + self.content._nbytes_part()
@@ -670,11 +659,11 @@ class BitMaskedArray(Content):
         else:
             raise ak._errors.wrap_error(AssertionError(result))
 
-    def packed(self):
+    def to_packed(self) -> Self:
         if self._content.is_record:
             next = self.to_IndexedOptionArray64()
 
-            content = next._content.packed()
+            content = next._content.to_packed()
             if content.length > self._length:
                 content = content[: self._length]
 
@@ -689,7 +678,7 @@ class BitMaskedArray(Content):
             else:
                 mask = self._mask[:excess_length]
 
-            content = self._content.packed()
+            content = self._content.to_packed()
             if content.length > self._length:
                 content = content[: self._length]
 
@@ -730,10 +719,10 @@ class BitMaskedArray(Content):
             parameters=self._parameters,
         )
 
-    def _layout_equal(self, other, index_dtype=True, numpyarray=True):
+    def _is_equal_to(self, other, index_dtype, numpyarray):
         return (
             self.valid_when == other.valid_when
             and self.lsb_order == other.lsb_order
-            and self.mask.layout_equal(other.mask, index_dtype, numpyarray)
-            and self.content.layout_equal(other.content, index_dtype, numpyarray)
+            and self.mask.is_equal_to(other.mask, index_dtype, numpyarray)
+            and self.content.is_equal_to(other.content, index_dtype, numpyarray)
         )

@@ -215,7 +215,7 @@ class Index:
     def to_nplike(self, nplike: ak._nplikes.NumpyLike) -> Self:
         return type(self)(self.raw(nplike), metadata=self.metadata, nplike=nplike)
 
-    def layout_equal(self, other, index_dtype=True, numpyarray=True):
+    def is_equal_to(self, other, index_dtype=True, numpyarray=True):
         if index_dtype:
             return (
                 self.nplike.array_equal(self.data, other.data)

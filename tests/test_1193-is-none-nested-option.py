@@ -18,4 +18,4 @@ def test():
     )
 
     mask = ak.operations.is_none(index_of_index)
-    assert mask.tolist() == [False, True, False, True]
+    assert mask.to_list() == [False, True, False, True]

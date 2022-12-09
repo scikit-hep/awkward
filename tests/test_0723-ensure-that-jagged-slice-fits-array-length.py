@@ -15,7 +15,7 @@ def test_first_issue():
     a = ak.Array(a)
     with pytest.raises(IndexError):
         a[[[0], None]]
-    assert a[[[0], None, [], [], [], [], [], []]].tolist() == [
+    assert a[[[0], None, [], [], [], [], [], []]].to_list() == [
         [0],
         None,
         [],
@@ -37,7 +37,7 @@ def test_second_issue():
     assert ak.operations.is_valid(a)
 
     assert ak.operations.is_valid(ak.operations.argsort(a))
-    assert a[ak.operations.argsort(a)].tolist() == [
+    assert a[ak.operations.argsort(a)].to_list() == [
         [0, 1],
         None,
         [2, 3],

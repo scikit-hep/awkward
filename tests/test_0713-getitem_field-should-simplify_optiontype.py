@@ -18,4 +18,4 @@ def test():
     assert isinstance(arr2.b.layout, ak.contents.IndexedOptionArray)
     assert isinstance(arr2.b.layout.content, ak.contents.NumpyArray)
 
-    assert ak.operations.is_none(arr2.b).tolist() == [False, True]
+    assert ak.operations.is_none(arr2.b).to_list() == [False, True]

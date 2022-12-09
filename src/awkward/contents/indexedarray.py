@@ -150,23 +150,17 @@ class IndexedArray(Content):
         container[key] = ak._util.little_endian(self._index.raw(backend.index_nplike))
         self._content._to_buffers(form.content, getkey, container, backend)
 
-    @property
-    def typetracer(self):
-        tt = ak._typetracer.TypeTracer.instance()
+    def _to_typetracer(self, forget_length: bool) -> Self:
+        index = self._index.to_nplike(ak._typetracer.TypeTracer.instance())
         return IndexedArray(
-            ak.index.Index(self._index.raw(tt)),
-            self._content.typetracer,
+            index.forget_length() if forget_length else index,
+            self._content._to_typetracer(False),
             parameters=self._parameters,
         )
 
     @property
     def length(self):
         return self._index.length
-
-    def _forget_length(self):
-        return IndexedArray(
-            self._index.forget_length(), self._content, parameters=self._parameters
-        )
 
     def __repr__(self):
         return self._repr("", "", "")
@@ -459,13 +453,13 @@ class IndexedArray(Content):
             head = [
                 x
                 if isinstance(x.backend.nplike, ak._typetracer.TypeTracer)
-                else x.typetracer
+                else x.to_typetracer()
                 for x in head
             ]
             tail = [
                 x
                 if isinstance(x.backend.nplike, ak._typetracer.TypeTracer)
-                else x.typetracer
+                else x.to_typetracer()
                 for x in tail
             ]
 
@@ -927,7 +921,7 @@ class IndexedArray(Content):
             )
 
         else:
-            return self._content.validity_error(path + ".content")
+            return self._content._validity_error(path + ".content")
 
     def _nbytes_part(self):
         return self.index._nbytes_part() + self.content._nbytes_part()
@@ -1067,13 +1061,13 @@ class IndexedArray(Content):
         else:
             raise ak._errors.wrap_error(AssertionError(result))
 
-    def packed(self):
+    def to_packed(self) -> Self:
         if self.parameter("__array__") == "categorical":
             return IndexedArray(
-                self._index, self._content.packed(), parameters=self._parameters
+                self._index, self._content.to_packed(), parameters=self._parameters
             )
         else:
-            return self.project().packed()
+            return self.project().to_packed()
 
     def _to_list(self, behavior, json_conversions):
         out = self._to_list_custom(behavior, json_conversions)
@@ -1089,7 +1083,7 @@ class IndexedArray(Content):
         index = self._index.to_nplike(backend.index_nplike)
         return IndexedArray(index, content, parameters=self._parameters)
 
-    def _layout_equal(self, other, index_dtype=True, numpyarray=True):
-        return self.index.layout_equal(
+    def _is_equal_to(self, other, index_dtype, numpyarray):
+        return self.index.is_equal_to(
             other.index, index_dtype, numpyarray
-        ) and self.content.layout_equal(other.content, index_dtype, numpyarray)
+        ) and self.content.is_equal_to(other.content, index_dtype, numpyarray)

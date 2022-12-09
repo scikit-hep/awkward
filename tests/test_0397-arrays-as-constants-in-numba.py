@@ -54,7 +54,7 @@ def test_Array():
         return array
 
     a = f2()
-    assert a.tolist() == [1, 2, 3]
+    assert a.to_list() == [1, 2, 3]
     assert (
         sys.getrefcount(array._numbaview),
         sys.getrefcount(array._numbaview.lookup),
@@ -65,8 +65,8 @@ def test_Array():
         return array, array
 
     b, c = f3()
-    assert b.tolist() == [1, 2, 3]
-    assert c.tolist() == [1, 2, 3]
+    assert b.to_list() == [1, 2, 3]
+    assert c.to_list() == [1, 2, 3]
     assert (
         sys.getrefcount(array._numbaview),
         sys.getrefcount(array._numbaview.lookup),
@@ -129,16 +129,16 @@ def test_ArrayBuilder():
         builder.append(3)
 
     b, c = f()
-    assert b.snapshot().tolist() == [1, 2, 3]
-    assert c.snapshot().tolist() == [1, 2, 3]
-    assert builder.snapshot().tolist() == [1, 2, 3]
+    assert b.snapshot().to_list() == [1, 2, 3]
+    assert c.snapshot().to_list() == [1, 2, 3]
+    assert builder.snapshot().to_list() == [1, 2, 3]
 
     assert sys.getrefcount(builder._layout) == 5
 
     g()
-    assert b.snapshot().tolist() == [1, 2, 3, 1, 2, 3]
-    assert c.snapshot().tolist() == [1, 2, 3, 1, 2, 3]
-    assert builder.snapshot().tolist() == [1, 2, 3, 1, 2, 3]
+    assert b.snapshot().to_list() == [1, 2, 3, 1, 2, 3]
+    assert c.snapshot().to_list() == [1, 2, 3, 1, 2, 3]
+    assert builder.snapshot().to_list() == [1, 2, 3, 1, 2, 3]
 
     assert sys.getrefcount(builder._layout) == 5
 

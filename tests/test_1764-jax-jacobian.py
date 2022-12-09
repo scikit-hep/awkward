@@ -22,4 +22,4 @@ def test():
     jac_np = jax.jacfwd(func)(array_np)
 
     jac = jax.jacfwd(func)(array)
-    assert jac.to_list() == jac_np.tolist()
+    assert jac.to_list() == jac_np.to_list()

@@ -125,23 +125,17 @@ class ListOffsetArray(Content):
         container[key] = ak._util.little_endian(self._offsets.raw(backend.index_nplike))
         self._content._to_buffers(form.content, getkey, container, backend)
 
-    @property
-    def typetracer(self):
-        tt = ak._typetracer.TypeTracer.instance()
+    def _to_typetracer(self, forget_length: bool) -> Self:
+        offsets = self._offsets.to_nplike(ak._typetracer.TypeTracer.instance())
         return ListOffsetArray(
-            ak.index.Index(self._offsets.raw(tt)),
-            self._content.typetracer,
+            offsets.forget_length() if forget_length else offsets,
+            self._content._to_typetracer(False),
             parameters=self._parameters,
         )
 
     @property
     def length(self):
         return self._offsets.length - 1
-
-    def _forget_length(self):
-        return ListOffsetArray(
-            self._offsets.forget_length(), self._content, parameters=self._parameters
-        )
 
     def __repr__(self):
         return self._repr("", "", "")
@@ -640,7 +634,7 @@ class ListOffsetArray(Content):
             next = self._content._num(posaxis, depth + 1)
             offsets = self._compact_offsets64(True)
             return ak.contents.ListOffsetArray(
-                offsets, next, parameters=self.parameters
+                offsets, next, parameters=self._parameters
             )
 
     def _offsets_and_flattened(self, axis, depth):
@@ -1748,7 +1742,7 @@ class ListOffsetArray(Content):
                 path, type(self), message, error.id, filename
             )
         else:
-            return self._content.validity_error(path + ".content")
+            return self._content._validity_error(path + ".content")
 
     def _nbytes_part(self):
         return self.offsets._nbytes_part() + self.content._nbytes_part()
@@ -1939,7 +1933,7 @@ class ListOffsetArray(Content):
                 [
                     ak._connect.pyarrow.to_validbits(validbytes),
                     pyarrow.py_buffer(npoffsets),
-                    pyarrow.py_buffer(akcontent.raw(numpy)),
+                    pyarrow.py_buffer(akcontent._raw(numpy)),
                 ],
             )
 
@@ -2053,9 +2047,9 @@ class ListOffsetArray(Content):
         else:
             raise ak._errors.wrap_error(AssertionError(result))
 
-    def packed(self):
+    def to_packed(self) -> Self:
         next = self.to_ListOffsetArray64(True)
-        content = next._content.packed()
+        content = next._content.to_packed()
         if content.length != next._offsets[-1]:
             content = content[: next._offsets[-1]]
         return ListOffsetArray(next._offsets, content, parameters=next._parameters)
@@ -2162,7 +2156,7 @@ class ListOffsetArray(Content):
 
                 return content
 
-    def _layout_equal(self, other, index_dtype=True, numpyarray=True):
-        return self.offsets.layout_equal(
+    def _is_equal_to(self, other, index_dtype, numpyarray):
+        return self.offsets.is_equal_to(
             other.offsets, index_dtype, numpyarray
-        ) and self.content.layout_equal(other.content, index_dtype, numpyarray)
+        ) and self.content.is_equal_to(other.content, index_dtype, numpyarray)

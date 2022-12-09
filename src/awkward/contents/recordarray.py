@@ -189,8 +189,7 @@ class RecordArray(Content):
     def is_tuple(self):
         return self._fields is None
 
-    @property
-    def as_tuple(self):
+    def to_tuple(self) -> Self:
         return RecordArray(
             self._contents, None, self._length, parameters=None, backend=self._backend
         )
@@ -213,13 +212,13 @@ class RecordArray(Content):
             for field, content in zip(self._fields, self._contents):
                 content._to_buffers(form.content(field), getkey, container, backend)
 
-    @property
-    def typetracer(self):
+    def _to_typetracer(self, forget_length: bool) -> Self:
         backend = ak._backends.TypeTracerBackend.instance()
+        contents = [x._to_typetracer(forget_length) for x in self._contents]
         return RecordArray(
-            [x.typetracer for x in self._contents],
+            contents,
             self._fields,
-            self._length,
+            ak._typetracer.UnknownLength if forget_length else self._length,
             parameters=self._parameters,
             backend=backend,
         )
@@ -227,15 +226,6 @@ class RecordArray(Content):
     @property
     def length(self):
         return self._length
-
-    def _forget_length(self):
-        return RecordArray(
-            [x._forget_length() for x in self._contents],
-            self._fields,
-            ak._typetracer.UnknownLength,
-            parameters=self._parameters,
-            backend=self._backend,
-        )
 
     def __repr__(self):
         return self._repr("", "", "")
@@ -832,7 +822,7 @@ class RecordArray(Content):
             if cont.length < self.length:
                 return f'at {path} ("{type(self)}"): len(field({i})) < len(recordarray)'
         for i, cont in enumerate(self.contents):
-            sub = cont.validity_error(f"{path}.field({i})")
+            sub = cont._validity_error(f"{path}.field({i})")
             if sub != "":
                 return sub
         return ""
@@ -1012,10 +1002,12 @@ class RecordArray(Content):
         else:
             raise ak._errors.wrap_error(AssertionError(result))
 
-    def packed(self):
+    def to_packed(self) -> Self:
         return RecordArray(
             [
-                x.packed() if x.length == self._length else x[: self._length].packed()
+                x.to_packed()
+                if x.length == self._length
+                else x[: self._length].to_packed()
                 for x in self._contents
             ],
             self._fields,
@@ -1058,13 +1050,13 @@ class RecordArray(Content):
             backend=backend,
         )
 
-    def _layout_equal(self, other, index_dtype=True, numpyarray=True):
+    def _is_equal_to(self, other, index_dtype, numpyarray):
         return (
             self.fields == other.fields
             and len(self.contents) == len(other.contents)
             and all(
                 [
-                    self.contents[i].layout_equal(
+                    self.contents[i].is_equal_to(
                         other.contents[i], index_dtype, numpyarray
                     )
                     for i in range(len(self.contents))

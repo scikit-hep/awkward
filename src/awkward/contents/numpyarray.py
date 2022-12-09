@@ -99,22 +99,7 @@ class NumpyArray(Content):
     def dtype(self):
         return self._data.dtype
 
-    @property
-    def ptr(self):
-        if isinstance(self._backend.nplike, ak._nplikes.Numpy):
-            return self._data.ctypes.data
-        elif isinstance(self._backend.nplike, ak._nplikes.Cupy):
-            return self._data.data.ptr
-        elif isinstance(self._backend.nplike, ak._nplikes.Jax):
-            return self._data.device_buffer.unsafe_buffer_pointer()
-        else:
-            raise ak._errors.wrap_error(
-                AssertionError(
-                    "Unrecognized nplike encountered while fetching ptr to raw data"
-                )
-            )
-
-    def raw(self, nplike):
+    def _raw(self, nplike=None):
         return self._backend.nplike.raw(self.data, nplike)
 
     def _form_with_key(self, getkey):
@@ -128,25 +113,20 @@ class NumpyArray(Content):
     def _to_buffers(self, form, getkey, container, backend):
         assert isinstance(form, self.form_cls)
         key = getkey(self, form, "data")
-        container[key] = ak._util.little_endian(self.raw(backend.nplike))
+        container[key] = ak._util.little_endian(self._raw(backend.nplike))
 
-    @property
-    def typetracer(self):
+    def _to_typetracer(self, forget_length: bool) -> Self:
         backend = ak._backends.TypeTracerBackend.instance()
+        data = self._raw(backend.nplike)
         return NumpyArray(
-            self.raw(backend.nplike), parameters=self._parameters, backend=backend
+            data.forget_length() if forget_length else data,
+            parameters=self._parameters,
+            backend=backend,
         )
 
     @property
     def length(self):
         return self._data.shape[0]
-
-    def _forget_length(self):
-        return NumpyArray(
-            self._data.forget_length(),
-            parameters=self._parameters,
-            backend=self._backend,
-        )
 
     def __repr__(self):
         return self._repr("", "", "")
@@ -197,8 +177,8 @@ class NumpyArray(Content):
         out._parameters = self._parameters
         return out
 
-    def maybe_to_array(self):
-        return self._backend.nplike.asarray(self._data)
+    def maybe_to_NumpyArray(self) -> Self:
+        return self
 
     def __array__(self, *args, **kwargs):
         return self._backend.nplike.asarray(self._data, *args, **kwargs)
@@ -366,7 +346,9 @@ class NumpyArray(Content):
             )
         )
         return ak.contents.NumpyArray(
-            tonum.data.reshape(shape), parameters=self.parameters, backend=self._backend
+            tonum.data.reshape(shape),
+            parameters=self._parameters,
+            backend=self._backend,
         )
 
     def _offsets_and_flattened(self, axis, depth):
@@ -498,7 +480,7 @@ class NumpyArray(Content):
         else:
             return self.to_RegularArray()._local_index(posaxis, depth)
 
-    def contiguous(self):
+    def to_contiguous(self) -> Self:
         if self.is_contiguous:
             return self
         else:
@@ -509,7 +491,7 @@ class NumpyArray(Content):
             )
 
     @property
-    def is_contiguous(self):
+    def is_contiguous(self) -> bool:
         return self._backend.nplike.is_c_contiguous(self._data)
 
     def _subranges_equal(self, starts, stops, length, sorted=True):
@@ -660,7 +642,7 @@ class NumpyArray(Content):
             return True
 
         elif len(self.shape) != 1 or not self.is_contiguous:
-            contiguous_self = self if self.is_contiguous else self.contiguous()
+            contiguous_self = self.to_contiguous()
             return contiguous_self.to_RegularArray()._is_unique(
                 negaxis,
                 starts,
@@ -682,7 +664,7 @@ class NumpyArray(Content):
             return self
 
         if negaxis is None:
-            contiguous_self = self if self.is_contiguous else self.contiguous()
+            contiguous_self = self.to_contiguous()
             # Python 3.8 could use math.prod
             flattened_shape = 1
             for s in contiguous_self.shape:
@@ -737,7 +719,7 @@ class NumpyArray(Content):
 
         # axis is not None
         if len(self.shape) != 1 or not self.is_contiguous:
-            contiguous_self = self if self.is_contiguous else self.contiguous()
+            contiguous_self = self.to_contiguous()
             return contiguous_self.to_RegularArray()._unique(
                 negaxis,
                 starts,
@@ -871,7 +853,7 @@ class NumpyArray(Content):
                 TypeError(f"{type(self).__name__} attempting to argsort a scalar ")
             )
         elif len(self.shape) != 1 or not self.is_contiguous:
-            contiguous_self = self if self.is_contiguous else self.contiguous()
+            contiguous_self = self.to_contiguous()
             return contiguous_self.to_RegularArray()._argsort_next(
                 negaxis,
                 starts,
@@ -991,7 +973,7 @@ class NumpyArray(Content):
             )
 
         elif len(self.shape) != 1 or not self.is_contiguous:
-            contiguous_self = self if self.is_contiguous else self.contiguous()
+            contiguous_self = self.to_contiguous()
             return contiguous_self.to_RegularArray()._sort_next(
                 negaxis,
                 starts,
@@ -1111,7 +1093,7 @@ class NumpyArray(Content):
                 behavior,
             )
         elif not self.is_contiguous:
-            return self.contiguous()._reduce_next(
+            return self.to_contiguous()._reduce_next(
                 reducer,
                 negaxis,
                 starts,
@@ -1242,7 +1224,7 @@ class NumpyArray(Content):
                 pyarrow, mask_node, validbytes, length, options
             )
 
-        nparray = self.raw(numpy)
+        nparray = self._raw(numpy)
         storage_type = pyarrow.from_numpy_dtype(nparray.dtype)
 
         if issubclass(nparray.dtype.type, (bool, np.bool_)):
@@ -1276,7 +1258,7 @@ class NumpyArray(Content):
     def _completely_flatten(self, backend, options):
         return [
             ak.contents.NumpyArray(
-                self.raw(backend.nplike).reshape(-1), backend=backend
+                self._raw(backend.nplike).reshape(-1), backend=backend
             )
         ]
 
@@ -1321,8 +1303,8 @@ class NumpyArray(Content):
         else:
             raise ak._errors.wrap_error(AssertionError(result))
 
-    def packed(self):
-        return self.contiguous().to_RegularArray()
+    def to_packed(self) -> Self:
+        return self.to_contiguous().to_RegularArray()
 
     def _to_list(self, behavior, json_conversions):
         if self.parameter("__array__") == "byte":
@@ -1386,12 +1368,12 @@ class NumpyArray(Content):
 
     def to_backend(self, backend: ak._backends.Backend) -> Self:
         return NumpyArray(
-            self.raw(backend.nplike),
-            parameters=self.parameters,
+            self._raw(backend.nplike),
+            parameters=self._parameters,
             backend=backend,
         )
 
-    def _layout_equal(self, other, index_dtype=True, numpyarray=True):
+    def _is_equal_to(self, other, index_dtype, numpyarray):
         if numpyarray:
             return (
                 self._backend.nplike.array_equal(self.data, other.data)

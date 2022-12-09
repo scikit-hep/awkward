@@ -16,7 +16,7 @@ def test():
     condition = ak.highlevel.Array(
         [[False, True, False], [], [True, False], [True], [False, False, True, True]]
     )
-    assert ak.operations.where(condition, one, two).tolist() == [
+    assert ak.operations.where(condition, one, two).to_list() == [
         [0, 1, 2.2],
         [],
         [3, 4.4],
@@ -30,15 +30,15 @@ def test_issue_334():
     b = ak.highlevel.Array([-1])
     c = ak.highlevel.Array([True, False, True, True])
 
-    assert ak.operations.where(c, a, b).tolist() == [1, -1, 3, 4]
-    assert ak.operations.where(*ak.operations.broadcast_arrays(c, a, b)).tolist() == [
+    assert ak.operations.where(c, a, b).to_list() == [1, -1, 3, 4]
+    assert ak.operations.where(*ak.operations.broadcast_arrays(c, a, b)).to_list() == [
         1,
         -1,
         3,
         4,
     ]
-    assert ak.operations.where(c, a, -1).tolist() == [1, -1, 3, 4]
-    assert ak.operations.where(*ak.operations.broadcast_arrays(c, a, -1)).tolist() == [
+    assert ak.operations.where(c, a, -1).to_list() == [1, -1, 3, 4]
+    assert ak.operations.where(*ak.operations.broadcast_arrays(c, a, -1)).to_list() == [
         1,
         -1,
         3,

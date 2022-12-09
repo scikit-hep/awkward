@@ -17,6 +17,7 @@ import awkward.forms
 import awkward._do
 import awkward._slicing
 import awkward._broadcasting
+import awkward._reducers
 
 # internal
 import awkward._util

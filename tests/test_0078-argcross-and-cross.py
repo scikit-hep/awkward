@@ -371,13 +371,13 @@ def test_argcartesian_negative_axis():
     one = ak.Array([[["a", "b"], []], [], [["c"]]])
     two = ak.Array([[[1.1], []], [], [[2.2, 3.3]]])
 
-    assert ak.cartesian([one, two], axis=-1).tolist() == [
+    assert ak.cartesian([one, two], axis=-1).to_list() == [
         [[("a", 1.1), ("b", 1.1)], []],
         [],
         [[("c", 2.2), ("c", 3.3)]],
     ]
 
-    assert ak.argcartesian([one, two], axis=-1).tolist() == [
+    assert ak.argcartesian([one, two], axis=-1).to_list() == [
         [[(0, 0), (1, 0)], []],
         [],
         [[(0, 0), (0, 1)]],
