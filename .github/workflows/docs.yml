@@ -211,6 +211,14 @@ jobs:
         mkdir -p "/tmp/awkward-docs/doc"
         cp -r docs/_build/html/* \
                  "/tmp/awkward-docs/doc/main"
+        # Redirect from doc/
+        cat <<- 'EOF' > /tmp/awkward-docs/index.html
+            <html>
+              <head>
+                <meta http-equiv="refresh" content="1; url=https://awkward-array.org/doc/main">
+              </head>
+            </html>
+        EOF
 
     - name: Upload Pages artefact
       uses: actions/upload-pages-artifact@v1
