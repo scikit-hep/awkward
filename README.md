@@ -69,7 +69,7 @@ For a similar problem 10 million times larger than the one above (on a single-th
 
 Awkward Array is even more efficient when used in [Numba](https://numba.pydata.org/)'s JIT-compiled functions.
 
-See the [Getting started](https://awkward-array.org/en/latest/getting-started/index.html) documentation on [awkward-array.org](https://awkward-array.org) for an introduction, including a no-install notebook you can try in your web browser.
+See the [Getting started](https://awkward-array.org/en/latest/getting-started/index.html) documentation on [awkward-array.org](https://awkward-array.org) for an introduction, including a [no-install notebook](https://awkward-array.readthedocs.io/en/latest/getting-started/try-awkward-array.html) you can try in your web browser.
 
 # Installation
 
