@@ -122,6 +122,22 @@ def to_buffers(
     return form, len(content), container
 
 
+# FIXME: eventually, this should be in ak._util, but it's here to juxtapose axis_wrap_if_negative
+# This function must depend on 'depth'. I don't know how axis_wrap_if_negative was believed to work.
+def maybe_posaxis(
+    layout: Content, axis: AxisMaybeNone, depth: Integral
+) -> AxisMaybeNone:
+    if axis >= 0:
+        return axis
+    else:
+        is_branching, additional_depth = layout.branch_depth
+        if not is_branching:
+            return axis + depth + additional_depth - 1
+        else:
+            return None
+
+
+# FIXME: eventually phase out the use of axis_wrap_if_negative in favor of maybe_posaxis
 def axis_wrap_if_negative(
     layout: Content | Record, axis: AxisMaybeNone
 ) -> AxisMaybeNone:
