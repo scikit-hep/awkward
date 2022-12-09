@@ -60,7 +60,7 @@ for sublist in array:
     output.append(tmp1)
 ```
 
-Not only is the expression using Awkward Arrays more concise, using idioms familiar from NumPy, but it's much faster (about 100×) and uses less memory (about 10×).
+The expression using Awkward Arrays is more concise, using idioms familiar from NumPy, and it also has NumPy-like performance.
 
 For a similar problem 10 million times larger than the one above (on a single-threaded 2.2 GHz processor),
 
