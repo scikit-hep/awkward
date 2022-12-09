@@ -60,9 +60,8 @@ jobs:
       - name: Build awkward-cpp sdist
         run: pipx run build --sdist awkward-cpp
 
-#       # The constraint is currently too tight: fails when PyPI is up-to-date
-#       - name: Check sdist matches PyPI
-#         run: pipx run nox -s check_cpp_sdist_released -- awkward-cpp/dist/awkward-cpp*.tar.gz
+      - name: Check sdist matches PyPI
+        run: pipx run nox -s check_cpp_sdist_released -- awkward-cpp/dist/awkward-cpp*.tar.gz
 
   build:
     name: "Build wheel & sdist"
