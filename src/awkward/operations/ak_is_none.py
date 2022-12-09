@@ -37,20 +37,12 @@ def _impl(array, axis, highlevel, behavior):
             TypeError(f"'axis' must be an integer, not {axis!r}")
         )
 
-    def action(layout, depth, **kwargs):
+    def action(layout, depth, lateral_context, **kwargs):
         posaxis = ak._util.maybe_posaxis(layout, axis, depth)
 
         if posaxis is not None and posaxis + 1 == depth:
-            if layout.is_union:
-                contents = [
-                    ak._do.recursively_apply(x, action, behavior, numpy_to_regular=True)
-                    for x in layout.contents
-                ]
-                return ak.contents.UnionArray.simplified(
-                    layout.tags,
-                    layout.index,
-                    contents,
-                )
+            if layout.is_union or layout.is_record:
+                return None
 
             elif layout.is_option:
                 return ak.contents.NumpyArray(layout.mask_as_bool(valid_when=False))

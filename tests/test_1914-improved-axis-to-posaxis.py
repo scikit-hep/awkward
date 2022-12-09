@@ -129,3 +129,14 @@ def test_singletons():
 
     with pytest.raises(np.AxisError):
         ak.singletons(array, axis=-3)
+
+
+def test_is_none_union():
+    left = ak.Array([[[{"x": 1, "y": None}]]])
+    right = ak.Array([[[{"a": 1, "b": None}]]])
+
+    array = ak.concatenate([left, right], axis=2)
+
+    assert ak.is_none(array, axis=-1).tolist() == [
+        [[{"x": False, "y": True}, {"a": False, "b": True}]]
+    ]

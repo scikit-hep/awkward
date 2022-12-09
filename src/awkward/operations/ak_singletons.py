@@ -56,16 +56,8 @@ def _impl(array, axis, highlevel, behavior):
         posaxis = ak._util.maybe_posaxis(layout, axis, depth)
 
         if posaxis is not None and posaxis + 1 == depth:
-            if layout.is_union:
-                contents = [
-                    ak._do.recursively_apply(x, action, behavior, numpy_to_regular=True)
-                    for x in layout.contents
-                ]
-                return ak.contents.UnionArray.simplified(
-                    layout.tags,
-                    layout.index,
-                    contents,
-                )
+            if layout.is_union or layout.is_record:
+                return None
 
             elif layout.is_option:
                 nplike = layout._backend.index_nplike
