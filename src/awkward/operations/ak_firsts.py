@@ -46,14 +46,13 @@ def firsts(array, axis=1, *, highlevel=True, behavior=None):
 def _impl(array, axis, highlevel, behavior):
     layout = ak.operations.to_layout(array)
     behavior = ak._util.behavior_of(array, behavior=behavior)
-    posaxis = ak._do.axis_wrap_if_negative(layout, axis)
 
     if not ak._util.is_integer(axis):
         raise ak._errors.wrap_error(
             TypeError(f"'axis' must be an integer, not {axis!r}")
         )
 
-    if posaxis == 0:
+    if ak._util.maybe_posaxis(layout, axis, 1) == 0:
         # specialized logic; it's tested in test_0582-propagate-context-in-broadcast_and_apply.py
         # Build an integer-typed slice array, so that we can
         # ensure we have advanced indexing for both length==0
@@ -67,7 +66,8 @@ def _impl(array, axis, highlevel, behavior):
     else:
 
         def action(layout, depth, depth_context, **kwargs):
-            posaxis = ak._do.axis_wrap_if_negative(layout, depth_context["posaxis"])
+            posaxis = ak._util.maybe_posaxis(layout, axis, depth)
+
             if posaxis == depth and layout.is_list:
                 nplike = layout._backend.index_nplike
 
@@ -91,11 +91,6 @@ def _impl(array, axis, highlevel, behavior):
                     )
                 )
 
-            depth_context["posaxis"] = posaxis
-
-        depth_context = {"posaxis": posaxis}
-        out = ak._do.recursively_apply(
-            layout, action, behavior, depth_context, numpy_to_regular=True
-        )
+        out = ak._do.recursively_apply(layout, action, behavior, numpy_to_regular=True)
 
     return ak._util.wrap(out, behavior, highlevel)

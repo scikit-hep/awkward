@@ -158,23 +158,9 @@ class EmptyArray(Content):
         else:
             raise ak._errors.wrap_error(AssertionError(repr(head)))
 
-    def _num(self, axis, depth=0):
-        posaxis = ak._do.axis_wrap_if_negative(self, axis)
-
-        if posaxis == depth:
-            out = self.length
-            if ak._util.is_integer(out):
-                return np.int64(out)
-            else:
-                return out
-        else:
-            # TODO: This was changed to use `nplike` instead of `index_nplike`. Is this OK?
-            out = ak.index.Index64.empty(0, nplike=self._backend.nplike)
-            return ak.contents.NumpyArray(out, parameters=None, backend=self._backend)
-
     def _offsets_and_flattened(self, axis, depth):
-        posaxis = ak._do.axis_wrap_if_negative(self, axis)
-        if posaxis == depth:
+        posaxis = ak._util.maybe_posaxis(self, axis, depth)
+        if posaxis is not None and posaxis + 1 == depth:
             raise ak._errors.wrap_error(
                 np.AxisError(self, "axis=0 not allowed for flatten")
             )
@@ -203,11 +189,17 @@ class EmptyArray(Content):
         return EmptyArray(parameters=self._parameters, backend=self._backend)
 
     def _local_index(self, axis, depth):
-        return ak.contents.NumpyArray(
-            self._backend.nplike.empty(0, np.int64),
-            parameters=None,
-            backend=self._backend,
-        )
+        posaxis = ak._util.maybe_posaxis(self, axis, depth)
+        if posaxis is not None and posaxis + 1 == depth:
+            return ak.contents.NumpyArray(
+                self._backend.nplike.empty(0, np.int64),
+                parameters=None,
+                backend=self._backend,
+            )
+        else:
+            raise ak._errors.wrap_error(
+                np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
+            )
 
     def _numbers_to_type(self, name):
         return ak.contents.EmptyArray(
@@ -287,8 +279,8 @@ class EmptyArray(Content):
         return 0
 
     def _pad_none(self, target, axis, depth, clip):
-        posaxis = ak._do.axis_wrap_if_negative(self, axis)
-        if posaxis != depth:
+        posaxis = ak._util.maybe_posaxis(self, axis, depth)
+        if posaxis is not None and posaxis + 1 != depth:
             raise ak._errors.wrap_error(
                 np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
             )

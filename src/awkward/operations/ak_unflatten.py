@@ -156,18 +156,18 @@ def _impl(array, counts, axis, highlevel, behavior):
 
         return out
 
-    if axis == 0 or ak._do.axis_wrap_if_negative(layout, axis) == 0:
+    if axis == 0 or ak._util.maybe_posaxis(layout, axis, 1) == 0:
         out = doit(layout)
 
     else:
 
-        def transform(layout, depth, posaxis):
+        def transform(layout, depth, axis):
             # Pack the current layout. This ensures that the `counts` array,
             # which is computed with these layouts applied, aligns with the
             # internal layout to be unflattened (#910)
             layout = layout.to_packed()
 
-            posaxis = ak._do.axis_wrap_if_negative(layout, posaxis)
+            posaxis = ak._util.maybe_posaxis(layout, axis, depth)
             if posaxis == depth and layout.is_list:
                 # We are one *above* the level where we want to apply this.
                 listoffsetarray = layout.to_ListOffsetArray64(True)
@@ -205,7 +205,7 @@ def _impl(array, counts, axis, highlevel, behavior):
             else:
                 return layout
 
-        out = transform(layout, depth=1, posaxis=axis)
+        out = transform(layout, depth=1, axis=axis)
 
     if current_offsets is not None and not (
         len(current_offsets[0]) == 1 and current_offsets[0][0] == 0

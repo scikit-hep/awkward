@@ -825,3 +825,22 @@ def to_arraylib(module, array, allow_missing):
         raise ak._errors.wrap_error(
             ValueError(f"{module.__name__} is not supported by to_arraylib")
         )
+
+
+def maybe_posaxis(layout, axis, depth):
+    if isinstance(layout, ak.record.Record):
+        if axis == 0:
+            raise ak._errors.wrap_error(
+                np.AxisError("Record type at axis=0 is a scalar, not an array")
+            )
+        return maybe_posaxis(layout._array, axis, depth)
+
+    if axis >= 0:
+        return axis
+
+    else:
+        is_branching, additional_depth = layout.branch_depth
+        if not is_branching:
+            return axis + depth + additional_depth - 1
+        else:
+            return None

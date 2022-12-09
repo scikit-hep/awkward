@@ -315,49 +315,13 @@ class NumpyArray(Content):
         else:
             raise ak._errors.wrap_error(AssertionError(repr(head)))
 
-    def _num(self, axis, depth=0):
-        posaxis = ak._do.axis_wrap_if_negative(self, axis)
-        if posaxis == depth:
-            out = self.length
-            if ak._util.is_integer(out):
-                return np.int64(out)
-            else:
-                return out
-        shape = []
-        reps = 1
-        size = self.length
-        i = 0
-        while i < self._data.ndim - 1 and depth < posaxis:
-            shape.append(self.shape[i])
-            reps *= self.shape[i]
-            size = self.shape[i + 1]
-            i += 1
-            depth += 1
-        if posaxis > depth:
-            raise ak._errors.wrap_error(
-                np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
-            )
-
-        tonum = ak.index.Index64.empty(reps, self._backend.index_nplike)
-        assert tonum.nplike is self._backend.index_nplike
-        self._handle_error(
-            self._backend["awkward_RegularArray_num", tonum.dtype.type](
-                tonum.data, size, reps
-            )
-        )
-        return ak.contents.NumpyArray(
-            tonum.data.reshape(shape),
-            parameters=self._parameters,
-            backend=self._backend,
-        )
-
     def _offsets_and_flattened(self, axis, depth):
-        posaxis = ak._do.axis_wrap_if_negative(self, axis)
-        if posaxis == depth:
+        posaxis = ak._util.maybe_posaxis(self, axis, depth)
+        if posaxis is not None and posaxis + 1 == depth:
             raise ak._errors.wrap_error(np.AxisError("axis=0 not allowed for flatten"))
 
         elif len(self.shape) != 1:
-            return self.to_RegularArray()._offsets_and_flattened(posaxis, depth)
+            return self.to_RegularArray()._offsets_and_flattened(axis, depth)
 
         else:
             raise ak._errors.wrap_error(
@@ -470,15 +434,15 @@ class NumpyArray(Content):
         return self
 
     def _local_index(self, axis, depth):
-        posaxis = ak._do.axis_wrap_if_negative(self, axis)
-        if posaxis == depth:
+        posaxis = ak._util.maybe_posaxis(self, axis, depth)
+        if posaxis is not None and posaxis + 1 == depth:
             return self._local_index_axis0()
         elif len(self.shape) <= 1:
             raise ak._errors.wrap_error(
                 np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
             )
         else:
-            return self.to_RegularArray()._local_index(posaxis, depth)
+            return self.to_RegularArray()._local_index(axis, depth)
 
     def to_contiguous(self) -> Self:
         if self.is_contiguous:
@@ -1056,8 +1020,8 @@ class NumpyArray(Content):
             )
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
-        posaxis = ak._do.axis_wrap_if_negative(self, axis)
-        if posaxis == depth:
+        posaxis = ak._util.maybe_posaxis(self, axis, depth)
+        if posaxis is not None and posaxis + 1 == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         elif len(self.shape) <= 1:
             raise ak._errors.wrap_error(
@@ -1065,7 +1029,7 @@ class NumpyArray(Content):
             )
         else:
             return self.to_RegularArray()._combinations(
-                n, replacement, recordlookup, parameters, posaxis, depth
+                n, replacement, recordlookup, parameters, axis, depth
             )
 
     def _reduce_next(
@@ -1202,8 +1166,8 @@ class NumpyArray(Content):
             )
         elif len(self.shape) > 1 or not self.is_contiguous:
             return self.to_RegularArray()._pad_none(target, axis, depth, clip)
-        posaxis = ak._do.axis_wrap_if_negative(self, axis)
-        if posaxis != depth:
+        posaxis = ak._util.maybe_posaxis(self, axis, depth)
+        if posaxis is not None and posaxis + 1 != depth:
             raise ak._errors.wrap_error(
                 np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
             )
@@ -1211,7 +1175,7 @@ class NumpyArray(Content):
             if target < self.length:
                 return self
             else:
-                return self._pad_none(target, posaxis, depth, clip=True)
+                return self._pad_none(target, axis, depth, clip=True)
         else:
             return self._pad_none_axis0(target, clip=True)
 
