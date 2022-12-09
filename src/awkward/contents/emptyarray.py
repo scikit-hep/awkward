@@ -189,11 +189,17 @@ class EmptyArray(Content):
         return EmptyArray(parameters=self._parameters, backend=self._backend)
 
     def _local_index(self, axis, depth):
-        return ak.contents.NumpyArray(
-            self._backend.nplike.empty(0, np.int64),
-            parameters=None,
-            backend=self._backend,
-        )
+        posaxis = ak._do.maybe_posaxis(self, axis, depth)
+        if posaxis is not None and posaxis + 1 == depth:
+            return ak.contents.NumpyArray(
+                self._backend.nplike.empty(0, np.int64),
+                parameters=None,
+                backend=self._backend,
+            )
+        else:
+            raise ak._errors.wrap_error(
+                np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
+            )
 
     def _numbers_to_type(self, name):
         return ak.contents.EmptyArray(

@@ -658,13 +658,13 @@ class RecordArray(Content):
         )
 
     def _local_index(self, axis, depth):
-        posaxis = ak._do.axis_wrap_if_negative(self, axis)
-        if posaxis + 1 == depth:
+        posaxis = ak._do.maybe_posaxis(self, axis, depth)
+        if posaxis is not None and posaxis + 1 == depth:
             return self._local_index_axis0()
         else:
             contents = []
             for content in self._contents:
-                contents.append(content._local_index(posaxis, depth))
+                contents.append(content._local_index(axis, depth))
             return RecordArray(
                 contents,
                 self._fields,

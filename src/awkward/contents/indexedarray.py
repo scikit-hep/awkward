@@ -591,11 +591,11 @@ class IndexedArray(Content):
         )
 
     def _local_index(self, axis, depth):
-        posaxis = ak._do.axis_wrap_if_negative(self, axis)
-        if posaxis + 1 == depth:
+        posaxis = ak._do.maybe_posaxis(self, axis, depth)
+        if posaxis is not None and posaxis + 1 == depth:
             return self._local_index_axis0()
         else:
-            return self.project()._local_index(posaxis, depth)
+            return self.project()._local_index(axis, depth)
 
     def _unique_index(self, index, sorted=True):
         next = ak.index.Index64.zeros(self.length, nplike=self._backend.index_nplike)

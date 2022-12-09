@@ -434,15 +434,15 @@ class NumpyArray(Content):
         return self
 
     def _local_index(self, axis, depth):
-        posaxis = ak._do.axis_wrap_if_negative(self, axis)
-        if posaxis + 1 == depth:
+        posaxis = ak._do.maybe_posaxis(self, axis, depth)
+        if posaxis is not None and posaxis + 1 == depth:
             return self._local_index_axis0()
         elif len(self.shape) <= 1:
             raise ak._errors.wrap_error(
                 np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
             )
         else:
-            return self.to_RegularArray()._local_index(posaxis, depth)
+            return self.to_RegularArray()._local_index(axis, depth)
 
     def to_contiguous(self) -> Self:
         if self.is_contiguous:

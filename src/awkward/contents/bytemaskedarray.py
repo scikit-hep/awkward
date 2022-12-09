@@ -654,14 +654,14 @@ class ByteMaskedArray(Content):
         return self.to_IndexedOptionArray64()._fill_none(value)
 
     def _local_index(self, axis, depth):
-        posaxis = ak._do.axis_wrap_if_negative(self, axis)
-        if posaxis + 1 == depth:
+        posaxis = ak._do.maybe_posaxis(self, axis, depth)
+        if posaxis is not None and posaxis + 1 == depth:
             return self._local_index_axis0()
         else:
             _, nextcarry, outindex = self._nextcarry_outindex(self._backend)
 
             next = self._content._carry(nextcarry, False)
-            out = next._local_index(posaxis, depth)
+            out = next._local_index(axis, depth)
             return ak.contents.IndexedOptionArray.simplified(
                 outindex, out, parameters=self._parameters
             )

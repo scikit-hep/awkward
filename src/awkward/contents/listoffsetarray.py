@@ -715,10 +715,10 @@ class ListOffsetArray(Content):
         )
 
     def _local_index(self, axis, depth):
-        posaxis = ak._do.axis_wrap_if_negative(self, axis)
-        if posaxis + 1 == depth:
+        posaxis = ak._do.maybe_posaxis(self, axis, depth)
+        if posaxis is not None and posaxis + 1 == depth:
             return self._local_index_axis0()
-        elif posaxis + 1 == depth + 1:
+        elif posaxis is not None and posaxis + 1 == depth + 1:
             offsets = self._compact_offsets64(True)
             if self._backend.nplike.known_data:
                 innerlength = offsets[offsets.length - 1]
@@ -745,7 +745,7 @@ class ListOffsetArray(Content):
             )
         else:
             return ak.contents.ListOffsetArray(
-                self._offsets, self._content._local_index(posaxis, depth + 1)
+                self._offsets, self._content._local_index(axis, depth + 1)
             )
 
     def _numbers_to_type(self, name):
