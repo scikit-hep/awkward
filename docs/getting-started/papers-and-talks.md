@@ -1,4 +1,4 @@
-# Papers and talks, citing
+# Papers and talks, citations
 
 ## Papers
 
@@ -8,7 +8,6 @@
 
 ## Talks
 
-   * [Original motivations for Awkward 1.0](https://docs.google.com/document/d/1lj8ARTKV1_hqGTh0W_f01S6SsmpzZAXz9qqqWnEB3j4/edit?usp=sharing) from July 2019, now out-of-date.
    * [StrangeLoop talk](https://youtu.be/2NxWpU7NArk) (video) on September 14, 2019.
    * [PyHEP talk](https://indico.cern.ch/event/833895/contributions/3577882) on October 17, 2019.
    * [CHEP talk](https://indico.cern.ch/event/773049/contributions/3473258) on November 7, 2019.
@@ -29,9 +28,9 @@
    * [Tutorial at PyHEP 2021](https://youtu.be/5aWAxvdrszw?t=9189) (video with [interactive notebook on Binder](https://mybinder.org/v2/gh/jpivarski-talks/2021-07-06-pyhep-uproot-awkward-tutorial/v1.2?urlpath=lab/tree/uproot-awkward-tutorial.ipynb) on July 6, 2021.
    * [Tutorial for STAR collaboration meeting](https://youtu.be/NnU_zp5s1MY) on September 13, 2021 (video with [notebooks on GitHub](https://github.com/jpivarski-talks/2021-09-13-star-uproot-awkward-tutorial#readme)). This is the first tutorial with extensive exercises to test your understanding.
 
-## Citing
+## Citations
 
-To cite Awkward Array, please use ![](https://zenodo.org/badge/DOI/10.5281/zenodo.4341376.svg)
+To cite Awkward Array, please use [![](https://zenodo.org/badge/DOI/10.5281/zenodo.4341376.svg)](https://doi.org/10.5281/zenodo.4341376)
 
 ```bibtex
 @software{Pivarski_Awkward_Array_2018,
