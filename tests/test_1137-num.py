@@ -40,6 +40,7 @@ def test_bytemaskedarray_num():
 def test_emptyarray():
     array = ak.contents.EmptyArray()
     assert to_list(ak.num(array, 0)) == 0
+    assert to_list(ak.num(array, -1)) == 0
     with pytest.raises(np.AxisError) as err:
         ak.num(array, 1)
     assert "axis=1 exceeds the depth" in str(err.value)
