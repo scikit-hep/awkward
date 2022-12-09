@@ -8,6 +8,12 @@ on:
     types: [released]
   workflow_dispatch:
 
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 concurrency:
   group: 'docs-${{ github.head_ref || github.run_id }}'
   cancel-in-progress: true
@@ -198,10 +204,10 @@ jobs:
       run: sphinx-build -M html . _build/
       working-directory: docs
 
-    - name: Upload documentation
-      uses: actions/upload-artifact@v3
+    - name: Upload Pages artefact
+      uses: actions/upload-pages-artifact@v1
       with:
-        name: docs
+        # Upload entire repository
         path: docs/_build/html
 
     - name: Upload Jupyter Book cache
@@ -214,39 +220,12 @@ jobs:
     runs-on: ubuntu-22.04
     needs: [build-docs]
     # We can only deploy for PRs on host repo, or pushes to main
-    if: ${{ !(github.event_name == 'pull_request' && (github.event.pull_request.head.repo.full_name != github.repository)) }}
+    #if: ${{ github.event_name == 'push' }} # && github.event.push.ref == 'refs/heads/main'
     steps:
     - uses: actions/checkout@v3
+    - name: Setup Pages
+      uses: actions/configure-pages@v2
 
-    - name: Activate RTD version
-      run: |
-        # Sanitise ref name
-        # NB: head_ref is only valid for PR triggers
-        export VERSION_SLUG=$(echo "${{ github.head_ref || github.ref_name }}" | sed -E "s@/@-@g" | sed -E 's/.*/\L&/')
-        # Export for subsequent steps
-        echo "VERSION_SLUG=$VERSION_SLUG" >> $GITHUB_ENV
-        # Activate version
-        curl \
-          -X PATCH \
-          -H "Authorization: Token ${{ secrets.RTD_TOKEN }}" \
-              "https://readthedocs.org/api/v3/projects/awkward-array/versions/$VERSION_SLUG/" \
-          -H "Content-Type: application/json" \
-          -d '{"active":true,"hidden":true}' \
-          --fail
-
-    - name: Trigger RTD build
-      run: |
-        # Trigger build
-        curl \
-          -X POST \
-          -H "Authorization: Token ${{ secrets.RTD_TOKEN }}" \
-              "https://readthedocs.org/api/v3/projects/awkward-array/versions/$VERSION_SLUG/builds/" \
-          --fail
-
-    - name: Edit PR description
-      if: github.event_name == 'pull_request'
-      uses: actions/github-script@v6
-      with:
-        script: |
-            const script = require('./dev/docs-edit-message.js');
-            console.log(script(github, context, "${{ env.VERSION_SLUG }}"));
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v1
