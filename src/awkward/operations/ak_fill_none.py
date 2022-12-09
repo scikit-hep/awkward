@@ -120,7 +120,7 @@ def _impl(array, value, axis, highlevel, behavior):
     else:
 
         def action(layout, depth, **kwargs):
-            posaxis = ak._do.maybe_posaxis(layout, axis, depth)
+            posaxis = ak._util.maybe_posaxis(layout, axis, depth)
             if posaxis is not None and posaxis + 1 < depth:
                 return layout
             elif posaxis is not None and posaxis + 1 == depth:

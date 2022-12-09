@@ -38,7 +38,7 @@ def _impl(array, axis, highlevel, behavior):
         )
 
     def action(layout, depth, **kwargs):
-        posaxis = ak._do.maybe_posaxis(layout, axis, depth)
+        posaxis = ak._util.maybe_posaxis(layout, axis, depth)
 
         if posaxis is not None and posaxis + 1 == depth:
             if layout.is_union:

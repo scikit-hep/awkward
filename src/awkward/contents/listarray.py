@@ -1068,7 +1068,7 @@ class ListArray(Content):
         )
 
     def _local_index(self, axis, depth):
-        posaxis = ak._do.maybe_posaxis(self, axis, depth)
+        posaxis = ak._util.maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 == depth:
             return self._local_index_axis0()
         elif posaxis is not None and posaxis + 1 == depth + 1:
@@ -1233,7 +1233,7 @@ class ListArray(Content):
 
     def _pad_none(self, target, axis, depth, clip):
         if not clip:
-            posaxis = ak._do.maybe_posaxis(self, axis, depth)
+            posaxis = ak._util.maybe_posaxis(self, axis, depth)
             if posaxis is not None and posaxis + 1 == depth:
                 return self._pad_none_axis0(target, clip)
             elif posaxis is not None and posaxis + 1 == depth + 1:

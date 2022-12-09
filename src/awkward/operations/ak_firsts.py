@@ -52,7 +52,7 @@ def _impl(array, axis, highlevel, behavior):
             TypeError(f"'axis' must be an integer, not {axis!r}")
         )
 
-    if ak._do.maybe_posaxis(layout, axis, 1) == 0:
+    if ak._util.maybe_posaxis(layout, axis, 1) == 0:
         # specialized logic; it's tested in test_0582-propagate-context-in-broadcast_and_apply.py
         # Build an integer-typed slice array, so that we can
         # ensure we have advanced indexing for both length==0
@@ -66,7 +66,7 @@ def _impl(array, axis, highlevel, behavior):
     else:
 
         def action(layout, depth, depth_context, **kwargs):
-            posaxis = ak._do.maybe_posaxis(layout, axis, depth)
+            posaxis = ak._util.maybe_posaxis(layout, axis, depth)
 
             if posaxis == depth and layout.is_list:
                 nplike = layout._backend.index_nplike

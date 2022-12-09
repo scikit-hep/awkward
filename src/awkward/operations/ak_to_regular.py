@@ -65,13 +65,13 @@ def _impl(array, axis, highlevel, behavior):
 
         out = ak._do.recursively_apply(layout, action, behavior)
 
-    elif ak._do.maybe_posaxis(layout, axis, 1) == 0:
+    elif ak._util.maybe_posaxis(layout, axis, 1) == 0:
         out = layout  # the top-level can only be regular (ArrayType)
 
     else:
 
         def action(layout, depth, **kwargs):
-            posaxis = ak._do.maybe_posaxis(layout, axis, depth)
+            posaxis = ak._util.maybe_posaxis(layout, axis, depth)
             if posaxis == depth and layout.is_list:
                 return layout.to_RegularArray()
 

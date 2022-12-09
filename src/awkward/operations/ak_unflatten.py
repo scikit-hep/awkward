@@ -156,7 +156,7 @@ def _impl(array, counts, axis, highlevel, behavior):
 
         return out
 
-    if axis == 0 or ak._do.maybe_posaxis(layout, axis, 1) == 0:
+    if axis == 0 or ak._util.maybe_posaxis(layout, axis, 1) == 0:
         out = doit(layout)
 
     else:
@@ -167,7 +167,7 @@ def _impl(array, counts, axis, highlevel, behavior):
             # internal layout to be unflattened (#910)
             layout = layout.to_packed()
 
-            posaxis = ak._do.maybe_posaxis(layout, axis, depth)
+            posaxis = ak._util.maybe_posaxis(layout, axis, depth)
             if posaxis == depth and layout.is_list:
                 # We are one *above* the level where we want to apply this.
                 listoffsetarray = layout.to_ListOffsetArray64(True)

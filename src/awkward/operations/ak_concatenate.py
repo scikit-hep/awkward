@@ -56,7 +56,7 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
         content = ak.operations.to_layout(arrays, allow_record=False, allow_other=False)
         # Only handle concatenation along `axis=0`
         # Let ambiguous depth arrays fall through
-        if ak._do.maybe_posaxis(content, axis, 1) == 0:
+        if ak._util.maybe_posaxis(content, axis, 1) == 0:
             return ak.operations.ak_flatten._impl(content, 1, highlevel, behavior)
 
     content_or_others = [
@@ -72,7 +72,7 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
             ValueError("need at least one array to concatenate")
         )
 
-    posaxis = ak._do.maybe_posaxis(contents[0], axis, 1)
+    posaxis = ak._util.maybe_posaxis(contents[0], axis, 1)
     maxdepth = max(
         x.minmax_depth[1]
         for x in content_or_others
@@ -87,7 +87,7 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
         )
     for x in content_or_others:
         if isinstance(x, ak.contents.Content):
-            if ak._do.maybe_posaxis(x, axis, 1) != posaxis:
+            if ak._util.maybe_posaxis(x, axis, 1) != posaxis:
                 raise ak._errors.wrap_error(
                     ValueError(
                         "arrays to concatenate do not have the same depth for negative "

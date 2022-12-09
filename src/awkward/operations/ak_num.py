@@ -80,14 +80,14 @@ def _impl(array, axis, highlevel, behavior):
             TypeError(f"'axis' must be an integer, not {axis!r}")
         )
 
-    if ak._do.maybe_posaxis(layout, axis, 1) == 0:
+    if ak._util.maybe_posaxis(layout, axis, 1) == 0:
         if isinstance(layout, ak.record.Record):
             return 1
         else:
             return layout.length
 
     def action(layout, depth, **kwargs):
-        posaxis = ak._do.maybe_posaxis(layout, axis, depth)
+        posaxis = ak._util.maybe_posaxis(layout, axis, depth)
 
         if posaxis == depth and layout.is_list:
             return ak.contents.NumpyArray(layout.stops.data - layout.starts.data)

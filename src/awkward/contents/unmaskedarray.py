@@ -234,7 +234,7 @@ class UnmaskedArray(Content):
             return self._content
 
     def _offsets_and_flattened(self, axis, depth):
-        posaxis = ak._do.maybe_posaxis(self, axis, depth)
+        posaxis = ak._util.maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 == depth:
             raise ak._errors.wrap_error(np.AxisError("axis=0 not allowed for flatten"))
         else:
@@ -289,7 +289,7 @@ class UnmaskedArray(Content):
         return self._content._fill_none(value)
 
     def _local_index(self, axis, depth):
-        posaxis = ak._do.maybe_posaxis(self, axis, depth)
+        posaxis = ak._util.maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 == depth:
             return self._local_index_axis0()
         else:
@@ -372,7 +372,7 @@ class UnmaskedArray(Content):
             return out
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
-        posaxis = ak._do.maybe_posaxis(self, axis, depth)
+        posaxis = ak._util.maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         else:
@@ -414,7 +414,7 @@ class UnmaskedArray(Content):
         return self.content._nbytes_part()
 
     def _pad_none(self, target, axis, depth, clip):
-        posaxis = ak._do.maybe_posaxis(self, axis, depth)
+        posaxis = ak._util.maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 == depth:
             return self._pad_none_axis0(target, clip)
         elif posaxis is not None and posaxis + 1 == depth + 1:
