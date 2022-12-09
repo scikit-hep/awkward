@@ -24,7 +24,7 @@ def test_array_3d():
     ]
     with pytest.raises(ValueError) as err:
         assert ak.operations.num(array, axis=3)
-    assert "axis=3 exceeds the depth of this array (2)" in str(err.value)
+    assert "axis=3 exceeds the depth of this array" in str(err.value)
 
     assert to_list(ak.operations.num(array, axis=-1)) == [
         [2, 2, 2, 2, 2],
@@ -51,7 +51,7 @@ def test_list_array():
 
     with pytest.raises(ValueError) as err:
         assert ak.operations.num(array, axis=3)
-        assert "axis=3 exceeds the depth of this array (2)" in str(err.value)
+        assert "axis=3 exceeds the depth of this array" in str(err.value)
 
     assert ak.operations.num(array, axis=-1).to_list() == [
         [2, 2, 2, 2, 2],
@@ -62,7 +62,7 @@ def test_list_array():
     assert ak.operations.num(array, axis=-3) == 3
     with pytest.raises(ValueError) as err:
         assert ak.operations.num(array, axis=-4)
-        assert "axis=-4 exceeds the depth of this array (3)" in str(err.value)
+        assert "axis=-4 exceeds the depth of this array" in str(err.value)
 
 
 def test_record_array():
@@ -82,7 +82,7 @@ def test_record_array():
     ]
     with pytest.raises(ValueError) as err:
         assert ak.operations.num(array, axis=2)
-        assert "axis=2 exceeds the depth of this array (1)" in str(err.value)
+        assert "axis=2 exceeds the depth of this array" in str(err.value)
 
     assert ak.operations.num(array, axis=-1).to_list() == [
         {"x": 1, "y": [0, 1]},
@@ -102,8 +102,8 @@ def test_record_array_axis_out_of_range():
 
     with pytest.raises(ValueError) as err:
         assert ak.operations.num(array, axis=-2)
-        assert "axis=-2 exceeds the depth of this array (2)" in str(err.value)
+        assert "axis=-2 exceeds the depth of this array" in str(err.value)
 
     with pytest.raises(ValueError) as err:
         assert ak.operations.num(array, axis=-3)
-        assert "axis=-3 exceeds the depth (2) of this array" in str(err.value)
+        assert "axis=-3 exceeds the depth" in str(err.value)

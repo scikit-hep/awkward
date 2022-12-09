@@ -612,15 +612,15 @@ class RegularArray(Content):
         else:
             raise ak._errors.wrap_error(AssertionError(repr(head)))
 
-    def _num(self, axis, depth=0):
+    def _num(self, axis, depth_m1):
         posaxis = ak._do.axis_wrap_if_negative(self, axis)
-        if posaxis == depth:
+        if posaxis == depth_m1:
             out = self._length
             if ak._util.is_integer(out):
                 return np.int64(out)
             else:
                 return out
-        elif posaxis == depth + 1:
+        elif posaxis == depth_m1 + 1:
             tonum = ak.index.Index64.empty(self._length, self._backend.index_nplike)
             assert tonum.nplike is self._backend.index_nplike
             self._handle_error(
@@ -630,7 +630,7 @@ class RegularArray(Content):
             )
             return ak.contents.NumpyArray(tonum, parameters=None, backend=self._backend)
         else:
-            next = self._content._num(posaxis, depth + 1)
+            next = self._content._num(posaxis, depth_m1 + 1)
             return ak.contents.RegularArray(
                 next, self._size, self._length, parameters=self._parameters
             )

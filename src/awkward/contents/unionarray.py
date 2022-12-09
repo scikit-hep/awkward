@@ -759,9 +759,9 @@ class UnionArray(Content):
         else:
             raise ak._errors.wrap_error(AssertionError(repr(head)))
 
-    def _num(self, axis, depth=0):
+    def _num(self, axis, depth_m1):
         posaxis = ak._do.axis_wrap_if_negative(self, axis)
-        if posaxis == depth:
+        if posaxis == depth_m1:
             out = self.length
             if ak._util.is_integer(out):
                 return np.int64(out)
@@ -770,7 +770,7 @@ class UnionArray(Content):
         else:
             contents = []
             for content in self._contents:
-                contents.append(content._num(posaxis, depth))
+                contents.append(content._num(posaxis, depth_m1))
             return UnionArray.simplified(
                 self._tags,
                 self._index,

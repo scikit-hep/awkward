@@ -158,10 +158,10 @@ class EmptyArray(Content):
         else:
             raise ak._errors.wrap_error(AssertionError(repr(head)))
 
-    def _num(self, axis, depth=0):
+    def _num(self, axis, depth_m1):
         posaxis = ak._do.axis_wrap_if_negative(self, axis)
 
-        if posaxis == depth:
+        if posaxis == depth_m1:
             out = self.length
             if ak._util.is_integer(out):
                 return np.int64(out)

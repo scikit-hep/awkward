@@ -434,8 +434,8 @@ class BitMaskedArray(Content):
     def project(self, mask=None):
         return self.to_ByteMaskedArray().project(mask)
 
-    def _num(self, axis, depth=0):
-        return self.to_ByteMaskedArray()._num(axis, depth)
+    def _num(self, axis, depth_m1):
+        return self.to_ByteMaskedArray()._num(axis, depth_m1)
 
     def _offsets_and_flattened(self, axis, depth):
         return self.to_ByteMaskedArray._offsets_and_flattened(axis, depth)
