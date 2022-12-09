@@ -174,7 +174,7 @@ def _impl(array, axis, highlevel, behavior):
 
         return ak._util.wrap(result, behavior, highlevel)
 
-    elif axis == 0 or ak._do.axis_wrap_if_negative(layout, axis) == 0:
+    elif axis == 0 or ak._do.maybe_posaxis(layout, axis, 1) == 0:
 
         def apply(layout):
             backend = layout.backend
