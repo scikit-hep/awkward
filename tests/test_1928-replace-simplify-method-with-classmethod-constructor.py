@@ -14,7 +14,7 @@ def test_indexed_of_union():
         ak.index.Index64(np.array([4, 3, 3, 8, 7, 6], np.int64)),
         unionarray,
     )
-    assert indexedarray.tolist() == ["one", 2.2, 2.2, 4.4, 3.3, "three"]
+    assert indexedarray.to_list() == ["one", 2.2, 2.2, 4.4, 3.3, "three"]
 
 
 def test_indexedoption_of_union():
@@ -26,7 +26,7 @@ def test_indexedoption_of_union():
         ak.index.Index64(np.array([-1, 4, 3, -1, 3, 8, 7, 6, -1], np.int64)),
         unionarray,
     )
-    assert indexedoptionarray.tolist() == [
+    assert indexedoptionarray.to_list() == [
         None,
         "one",
         2.2,
@@ -52,7 +52,7 @@ def test_indexedoption_of_union_of_option_1():
         ak.index.Index64(np.array([-1, 4, 3, -1, 3, 8, 7, 6, -1], np.int64)),
         unionarray,
     )
-    assert indexedoptionarray.tolist() == [
+    assert indexedoptionarray.to_list() == [
         None,
         "one",
         2.2,
@@ -78,7 +78,7 @@ def test_indexedoption_of_union_of_option_2():
         ak.index.Index64(np.array([-1, 4, 3, -1, 3, 8, 7, 6, -1], np.int64)),
         unionarray,
     )
-    assert indexedoptionarray.tolist() == [
+    assert indexedoptionarray.to_list() == [
         None,
         None,
         2.2,
@@ -104,7 +104,7 @@ def test_indexedoption_of_union_of_option_1_2():
         ak.index.Index64(np.array([-1, 4, 3, -1, 3, 8, 7, 6, -1], np.int64)),
         unionarray,
     )
-    assert indexedoptionarray.tolist() == [
+    assert indexedoptionarray.to_list() == [
         None,
         None,
         2.2,

@@ -44,7 +44,7 @@ def test():
 
     assert type(one).__name__ == "PointArray"
 
-    assert one.tolist() == [
+    assert one.to_list() == [
         [{"x": 0.0, "y": 0.0}, {"x": 0.0, "y": 0.0}],
         [{"x": 2.0, "y": 2.0}, {"x": 1.0, "y": 1.0}],
         [{"x": 4.0, "y": 4.0}, {"x": 2.0, "y": 2.0}],
@@ -56,7 +56,7 @@ def test():
 
     assert type(two).__name__ == "PointArray"
 
-    assert two.tolist() == [
+    assert two.to_list() == [
         [{"x": 0.0, "y": 0.0}],
         [{"x": 1.5, "y": 1.5}],
         [{"x": 3.0, "y": 3.0}],

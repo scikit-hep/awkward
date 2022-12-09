@@ -165,7 +165,7 @@ def _impl(array, counts, axis, highlevel, behavior):
             # Pack the current layout. This ensures that the `counts` array,
             # which is computed with these layouts applied, aligns with the
             # internal layout to be unflattened (#910)
-            layout = layout.packed()
+            layout = layout.to_packed()
 
             posaxis = ak._do.axis_wrap_if_negative(layout, posaxis)
             if posaxis == depth and layout.is_list:

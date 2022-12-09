@@ -73,7 +73,7 @@ def test_simplify_unionarray_with_name():
     outer = ak.contents.UnionArray.simplified(tags1, index1, [one, inner])
     one = ak.operations.with_name(outer, "James")
 
-    assert outer.tolist() == [
+    assert outer.to_list() == [
         5,
         4,
         [],

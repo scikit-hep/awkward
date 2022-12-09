@@ -18,4 +18,4 @@ def test():
     assert layout.backend.index_nplike.asarray(result.mask).tolist() == [1, 0, 1, 0, 1]
 
     # Check this works
-    layout.typetracer.to_ByteMaskedArray(False)
+    layout.to_typetracer().to_ByteMaskedArray(False)

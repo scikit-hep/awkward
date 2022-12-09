@@ -153,12 +153,12 @@ class ByteMaskedArray(Content):
         container[key] = ak._util.little_endian(self._mask.raw(backend.index_nplike))
         self._content._to_buffers(form.content, getkey, container, backend)
 
-    @property
-    def typetracer(self):
+    def _to_typetracer(self, forget_length: bool) -> Self:
         tt = ak._typetracer.TypeTracer.instance()
+        mask = self._mask.to_nplike(tt)
         return ByteMaskedArray(
-            ak.index.Index(self._mask.raw(tt)),
-            self._content.typetracer,
+            mask.forget_length() if forget_length else mask,
+            self._content._to_typetracer(False),
             self._valid_when,
             parameters=self._parameters,
         )
@@ -571,7 +571,7 @@ class ByteMaskedArray(Content):
             out = next._num(posaxis, depth)
 
             return ak.contents.IndexedOptionArray.simplified(
-                outindex, out, parameters=self.parameters
+                outindex, out, parameters=self._parameters
             )
 
     def _offsets_and_flattened(self, axis, depth):
@@ -932,7 +932,7 @@ class ByteMaskedArray(Content):
         if self._backend.nplike.known_shape and self._content.length < self.mask.length:
             return f'at {path} ("{type(self)}"): len(content) < len(mask)'
         else:
-            return self._content.validity_error(path + ".content")
+            return self._content._validity_error(path + ".content")
 
     def _nbytes_part(self):
         return self.mask._nbytes_part() + self.content._nbytes_part()
@@ -1053,10 +1053,10 @@ class ByteMaskedArray(Content):
         else:
             raise ak._errors.wrap_error(AssertionError(result))
 
-    def packed(self):
+    def to_packed(self) -> Self:
         if self._content.is_record:
             next = self.to_IndexedOptionArray64()
-            content = next._content.packed()
+            content = next._content.to_packed()
             if content.length > self._mask.length:
                 content = content[: self._mask.length]
 
@@ -1065,7 +1065,7 @@ class ByteMaskedArray(Content):
             )
 
         else:
-            content = self._content.packed()
+            content = self._content.to_packed()
             if content.length > self._mask.length:
                 content = content[: self._mask.length]
 
@@ -1096,9 +1096,9 @@ class ByteMaskedArray(Content):
             mask, content, valid_when=self._valid_when, parameters=self._parameters
         )
 
-    def _layout_equal(self, other, index_dtype=True, numpyarray=True):
+    def _is_equal_to(self, other, index_dtype, numpyarray):
         return (
             self.valid_when == other.valid_when
-            and self.mask.layout_equal(other.mask, index_dtype, numpyarray)
-            and self.content.layout_equal(other.content, index_dtype, numpyarray)
+            and self.mask.is_equal_to(other.mask, index_dtype, numpyarray)
+            and self.content.is_equal_to(other.content, index_dtype, numpyarray)
         )

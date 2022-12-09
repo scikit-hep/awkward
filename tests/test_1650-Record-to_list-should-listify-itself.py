@@ -17,9 +17,9 @@ def test_record_nochange():
         behavior={"point": Point},
     )
 
-    assert array.tolist() == [[{"rho": 1, "phi": 1.0}], [], [{"rho": 2, "phi": 2.0}]]
-    assert array[0].tolist() == [{"rho": 1, "phi": 1.0}]
-    assert array[0, 0].tolist() == {"rho": 1, "phi": 1.0}
+    assert array.to_list() == [[{"rho": 1, "phi": 1.0}], [], [{"rho": 2, "phi": 2.0}]]
+    assert array[0].to_list() == [{"rho": 1, "phi": 1.0}]
+    assert array[0, 0].to_list() == {"rho": 1, "phi": 1.0}
 
 
 def test_array_nochange():
@@ -33,9 +33,9 @@ def test_array_nochange():
         behavior={("*", "point"): PointArray},
     )
 
-    assert array.tolist() == [[{"rho": 1, "phi": 1.0}], [], [{"rho": 2, "phi": 2.0}]]
-    assert array[0].tolist() == [{"rho": 1, "phi": 1.0}]
-    assert array[0, 0].tolist() == {"rho": 1, "phi": 1.0}
+    assert array.to_list() == [[{"rho": 1, "phi": 1.0}], [], [{"rho": 2, "phi": 2.0}]]
+    assert array[0].to_list() == [{"rho": 1, "phi": 1.0}]
+    assert array[0, 0].to_list() == {"rho": 1, "phi": 1.0}
 
 
 def test_record_changed():
@@ -49,13 +49,13 @@ def test_record_changed():
         behavior={"point": Point},
     )
 
-    assert array.tolist() == [
+    assert array.to_list() == [
         [{"rho": "1", "phi": "1.0"}],
         [],
         [{"rho": "2", "phi": "2.0"}],
     ]
-    assert array[0].tolist() == [{"rho": "1", "phi": "1.0"}]
-    assert array[0, 0].tolist() == {"rho": "1", "phi": "1.0"}
+    assert array[0].to_list() == [{"rho": "1", "phi": "1.0"}]
+    assert array[0, 0].to_list() == {"rho": "1", "phi": "1.0"}
 
 
 def test_array_changed():
@@ -69,7 +69,7 @@ def test_array_changed():
         behavior={("*", "point"): PointArray},
     )
 
-    assert array.tolist() == ["[{rho: 1, phi: 1}]", "[]", "[{rho: 2, phi: 2}]"]
+    assert array.to_list() == ["[{rho: 1, phi: 1}]", "[]", "[{rho: 2, phi: 2}]"]
     assert array[0] == "[{rho: 1, phi: 1}]"
     assert array[0, 0] == "{rho: 1, phi: 1}"
 
@@ -85,13 +85,13 @@ def test_record_to_Array():
         behavior={"point": Point},
     )
 
-    assert array.tolist() == [
+    assert array.to_list() == [
         [{"rho": [1, 2, 3], "phi": [1, 2, 3]}],
         [],
         [{"rho": [1, 2, 3], "phi": [1, 2, 3]}],
     ]
-    assert array[0].tolist() == [{"rho": [1, 2, 3], "phi": [1, 2, 3]}]
-    assert array[0, 0].tolist() == {"rho": [1, 2, 3], "phi": [1, 2, 3]}
+    assert array[0].to_list() == [{"rho": [1, 2, 3], "phi": [1, 2, 3]}]
+    assert array[0, 0].to_list() == {"rho": [1, 2, 3], "phi": [1, 2, 3]}
 
 
 def test_array_to_Array():
@@ -105,9 +105,9 @@ def test_array_to_Array():
         behavior={("*", "point"): PointArray},
     )
 
-    assert array.tolist() == [[1, 2, 3], [1, 2, 3], [1, 2, 3]]
-    assert array[0].tolist() == [1, 2, 3]
-    assert array[0, 0].tolist() == [1, 2, 3]
+    assert array.to_list() == [[1, 2, 3], [1, 2, 3], [1, 2, 3]]
+    assert array[0].to_list() == [1, 2, 3]
+    assert array[0, 0].to_list() == [1, 2, 3]
 
 
 def test_record_to_ndarray():
@@ -121,13 +121,13 @@ def test_record_to_ndarray():
         behavior={"point": Point},
     )
 
-    assert array.tolist() == [
+    assert array.to_list() == [
         [{"rho": [1, 2, 3], "phi": [1, 2, 3]}],
         [],
         [{"rho": [1, 2, 3], "phi": [1, 2, 3]}],
     ]
-    assert array[0].tolist() == [{"rho": [1, 2, 3], "phi": [1, 2, 3]}]
-    assert array[0, 0].tolist() == {"rho": [1, 2, 3], "phi": [1, 2, 3]}
+    assert array[0].to_list() == [{"rho": [1, 2, 3], "phi": [1, 2, 3]}]
+    assert array[0, 0].to_list() == {"rho": [1, 2, 3], "phi": [1, 2, 3]}
 
 
 def test_array_to_ndarray():
@@ -141,6 +141,6 @@ def test_array_to_ndarray():
         behavior={("*", "point"): PointArray},
     )
 
-    assert array.tolist() == [[1, 2, 3], [1, 2, 3], [1, 2, 3]]
+    assert array.to_list() == [[1, 2, 3], [1, 2, 3], [1, 2, 3]]
     assert array[0].tolist() == [1, 2, 3]
     assert array[0, 0].tolist() == [1, 2, 3]

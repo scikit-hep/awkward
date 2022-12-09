@@ -137,23 +137,17 @@ class IndexedOptionArray(Content):
         container[key] = ak._util.little_endian(self._index.raw(backend.index_nplike))
         self._content._to_buffers(form.content, getkey, container, backend)
 
-    @property
-    def typetracer(self):
-        tt = ak._typetracer.TypeTracer.instance()
+    def _to_typetracer(self, forget_length: bool) -> Self:
+        index = self._index.to_nplike(ak._typetracer.TypeTracer.instance())
         return IndexedOptionArray(
-            ak.index.Index(self._index.raw(tt)),
-            self._content.typetracer,
+            index.forget_length() if forget_length else index,
+            self._content._to_typetracer(False),
             parameters=self._parameters,
         )
 
     @property
     def length(self):
         return self._index.length
-
-    def _forget_length(self):
-        return IndexedOptionArray(
-            self._index.forget_length(), self._content, parameters=self._parameters
-        )
 
     def __repr__(self):
         return self._repr("", "", "")
@@ -493,7 +487,7 @@ class IndexedOptionArray(Content):
         next = self._content._carry(nextcarry, False)
         out = next._num(posaxis, depth)
         return ak.contents.IndexedOptionArray.simplified(
-            outindex, out, parameters=self.parameters
+            outindex, out, parameters=self._parameters
         )
 
     def _offsets_and_flattened(self, axis, depth):
@@ -588,13 +582,13 @@ class IndexedOptionArray(Content):
             head = [
                 x
                 if isinstance(x.backend.nplike, ak._typetracer.TypeTracer)
-                else x.typetracer
+                else x.to_typetracer()
                 for x in head
             ]
             tail = [
                 x
                 if isinstance(x.backend.nplike, ak._typetracer.TypeTracer)
-                else x.typetracer
+                else x.to_typetracer()
                 for x in tail
             ]
 
@@ -1411,7 +1405,7 @@ class IndexedOptionArray(Content):
             )
 
         else:
-            return self._content.validity_error(path + ".content")
+            return self._content._validity_error(path + ".content")
 
     def _nbytes_part(self):
         return self.index._nbytes_part() + self.content._nbytes_part()
@@ -1597,7 +1591,7 @@ class IndexedOptionArray(Content):
         else:
             raise ak._errors.wrap_error(AssertionError(result))
 
-    def packed(self):
+    def to_packed(self) -> Self:
         original_index = self._index.raw(self._backend.nplike)
         is_none = original_index < 0
         num_none = self._backend.index_nplike.count_nonzero(is_none)
@@ -1605,7 +1599,7 @@ class IndexedOptionArray(Content):
             len(original_index) - num_none
         ):
             return ak.contents.IndexedOptionArray(
-                self._index, self._content.packed(), parameters=self._parameters
+                self._index, self._content.to_packed(), parameters=self._parameters
             )
 
         else:
@@ -1619,7 +1613,7 @@ class IndexedOptionArray(Content):
             )
             return ak.contents.IndexedOptionArray(
                 ak.index.Index(new_index, nplike=self._backend.index_nplike),
-                self.project().packed(),
+                self.project().to_packed(),
                 parameters=self._parameters,
             )
 
@@ -1643,9 +1637,9 @@ class IndexedOptionArray(Content):
     def to_backend(self, backend: ak._backends.Backend) -> Self:
         content = self._content.to_backend(backend)
         index = self._index.to_nplike(backend.index_nplike)
-        return IndexedOptionArray(index, content, parameters=self.parameters)
+        return IndexedOptionArray(index, content, parameters=self._parameters)
 
-    def _layout_equal(self, other, index_dtype=True, numpyarray=True):
-        return self.index.layout_equal(
+    def _is_equal_to(self, other, index_dtype, numpyarray):
+        return self.index.is_equal_to(
             other.index, index_dtype, numpyarray
-        ) and self.content.layout_equal(other.content, index_dtype, numpyarray)
+        ) and self.content.is_equal_to(other.content, index_dtype, numpyarray)

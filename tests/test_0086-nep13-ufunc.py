@@ -9,7 +9,7 @@ to_list = ak.operations.to_list
 
 
 def tt(highlevel):
-    return ak.highlevel.Array(highlevel.layout.typetracer)
+    return ak.highlevel.Array(highlevel.layout.to_typetracer())
 
 
 def test_basic():
@@ -168,5 +168,5 @@ def test_unionarray():
     two = ak.Array([[1.1], [2.2, 2.2], 3.3, 4.4, 5.5])
 
     uno, dos = ak.broadcast_arrays(one, two)
-    assert uno.tolist() == [[1], [2, 2], 3, [], [4, 5]]
-    assert dos.tolist() == [[1.1], [2.2, 2.2], 3.3, [], [5.5, 5.5]]
+    assert uno.to_list() == [[1], [2, 2], 3, [], [4, 5]]
+    assert dos.to_list() == [[1.1], [2.2, 2.2], 3.3, [], [5.5, 5.5]]

@@ -188,7 +188,7 @@ def test_0522():
     unionarray = ak.highlevel.Array(
         ak.contents.UnionArray(tags, index, [content1, content2])
     )
-    assert unionarray.tolist() == [
+    assert unionarray.to_list() == [
         0.0,
         1.1,
         2.2,
@@ -201,7 +201,7 @@ def test_0522():
         [400],
     ]
 
-    assert (unionarray + 10).tolist() == [
+    assert (unionarray + 10).to_list() == [
         10.0,
         11.1,
         12.2,
@@ -213,7 +213,7 @@ def test_0522():
         [310],
         [410],
     ]
-    assert (10 + unionarray).tolist() == [
+    assert (10 + unionarray).to_list() == [
         10.0,
         11.1,
         12.2,
@@ -226,7 +226,7 @@ def test_0522():
         [410],
     ]
 
-    assert (unionarray + range(0, 100, 10)).tolist() == [
+    assert (unionarray + range(0, 100, 10)).to_list() == [
         0.0,
         11.1,
         22.2,
@@ -238,7 +238,7 @@ def test_0522():
         [380],
         [490],
     ]
-    assert (range(0, 100, 10) + unionarray).tolist() == [
+    assert (range(0, 100, 10) + unionarray).to_list() == [
         0.0,
         11.1,
         22.2,
@@ -301,7 +301,7 @@ def test_0522():
         [490],
     ]
 
-    assert (unionarray + unionarray).tolist() == [
+    assert (unionarray + unionarray).to_list() == [
         0.0,
         2.2,
         4.4,

@@ -83,18 +83,15 @@ class UnmaskedArray(Content):
         assert isinstance(form, self.form_cls)
         self._content._to_buffers(form.content, getkey, container, backend)
 
-    @property
-    def typetracer(self):
-        return UnmaskedArray(self._content.typetracer, parameters=self._parameters)
+    def _to_typetracer(self, forget_length: bool) -> Self:
+        return UnmaskedArray(
+            self._content._to_typetracer(forget_length),
+            parameters=self._parameters,
+        )
 
     @property
     def length(self):
         return self._content.length
-
-    def _forget_length(self):
-        return UnmaskedArray(
-            self._content._forget_length(), parameters=self._parameters
-        )
 
     def __repr__(self):
         return self._repr("", "", "")
@@ -424,7 +421,7 @@ class UnmaskedArray(Content):
         )
 
     def _validity_error(self, path):
-        return self._content.validity_error(path + ".content")
+        return self._content._validity_error(path + ".content")
 
     def _nbytes_part(self):
         return self.content._nbytes_part()
@@ -510,8 +507,8 @@ class UnmaskedArray(Content):
         else:
             raise ak._errors.wrap_error(AssertionError(result))
 
-    def packed(self):
-        return UnmaskedArray(self._content.packed(), parameters=self._parameters)
+    def to_packed(self) -> Self:
+        return UnmaskedArray(self._content.to_packed(), parameters=self._parameters)
 
     def _to_list(self, behavior, json_conversions):
         out = self._to_list_custom(behavior, json_conversions)
@@ -522,7 +519,7 @@ class UnmaskedArray(Content):
 
     def to_backend(self, backend: ak._backends.Backend) -> Self:
         content = self._content.to_backend(backend)
-        return UnmaskedArray(content, parameters=self.parameters)
+        return UnmaskedArray(content, parameters=self._parameters)
 
-    def _layout_equal(self, other, index_dtype=True, numpyarray=True):
-        return self.content.layout_equal(other.content, index_dtype, numpyarray)
+    def _is_equal_to(self, other, index_dtype, numpyarray):
+        return self.content.is_equal_to(other.content, index_dtype, numpyarray)

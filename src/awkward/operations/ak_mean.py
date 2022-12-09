@@ -169,10 +169,22 @@ def _impl(x, weight, axis, keepdims, mask_identity, flatten_records):
     with np.errstate(invalid="ignore", divide="ignore"):
         if weight is None:
             sumw = ak.operations.ak_count._impl(
-                x, axis, keepdims, mask_identity, flatten_records
+                x,
+                axis,
+                keepdims,
+                mask_identity,
+                flatten_records,
+                highlevel=True,
+                behavior=None,
             )
             sumwx = ak.operations.ak_sum._impl(
-                x, axis, keepdims, mask_identity, flatten_records
+                x,
+                axis,
+                keepdims,
+                mask_identity,
+                flatten_records,
+                highlevel=True,
+                behavior=None,
             )
         else:
             sumw = ak.operations.ak_sum._impl(
@@ -181,8 +193,16 @@ def _impl(x, weight, axis, keepdims, mask_identity, flatten_records):
                 keepdims,
                 mask_identity,
                 flatten_records,
+                highlevel=True,
+                behavior=None,
             )
             sumwx = ak.operations.ak_sum._impl(
-                x * weight, axis, keepdims, mask_identity, flatten_records
+                x * weight,
+                axis,
+                keepdims,
+                mask_identity,
+                flatten_records,
+                highlevel=True,
+                behavior=None,
             )
         return ak._nplikes.nplike_of(sumwx, sumw).true_divide(sumwx, sumw)

@@ -41,8 +41,8 @@ def test_date_time_minmax():
         ["2020-07-27T10:41:11", "2019-01-01", "2020-01-01"], "datetime64[s]"
     )
     array = ak.contents.NumpyArray(numpy_array)
-    assert array.max() == numpy_array[0]
-    assert array.min() == numpy_array[1]
+    assert ak.max(array, axis=-1, highlevel=False) == numpy_array[0]
+    assert ak.min(array, axis=-1, highlevel=False) == numpy_array[1]
 
 
 def test_time_delta():
@@ -370,7 +370,7 @@ def test_argmin_argmax():
         ],
         highlevel=False,
     )
-    assert to_list(array.argmin(axis=2)) == [
+    assert to_list(ak.argmin(array, axis=2, highlevel=False)) == [
         [1],
         [None],
         [None, None, None],
@@ -480,12 +480,12 @@ def test_min_max():
             ],
         ]
     ).layout
-    assert to_list(array.min()) == [
+    assert to_list(ak.min(array, axis=-1, highlevel=False)) == [
         np.datetime64("2020-01-27T10:41:11"),
         np.datetime64("2020-01-27T10:41:11"),
         np.datetime64("2020-01-27T10:41:11"),
     ]
-    assert to_list(array.max()) == [
+    assert to_list(ak.max(array, axis=-1, highlevel=False)) == [
         datetime.datetime(2020, 5, 1, 0, 0),
         datetime.datetime(2020, 6, 27, 10, 41, 11),
         datetime.datetime(2020, 3, 27, 10, 41, 11),
@@ -662,25 +662,25 @@ def test_sum():
         depth = ak.contents.ListOffsetArray(offsets, content)
 
         if np.issubdtype(array.dtype, np.timedelta64):
-            assert to_list(depth.sum(-1)) == [
+            assert to_list(ak.sum(depth, -1, highlevel=False)) == [
                 datetime.timedelta(6),
                 datetime.timedelta(22),
                 datetime.timedelta(38),
             ]
 
-            assert to_list(depth.sum(1)) == [
+            assert to_list(ak.sum(depth, 1, highlevel=False)) == [
                 datetime.timedelta(6),
                 datetime.timedelta(22),
                 datetime.timedelta(38),
             ]
 
-            assert to_list(depth.sum(-2)) == [
+            assert to_list(ak.sum(depth, -2, highlevel=False)) == [
                 datetime.timedelta(12),
                 datetime.timedelta(15),
                 datetime.timedelta(18),
                 datetime.timedelta(21),
             ]
-            assert to_list(depth.sum(0)) == [
+            assert to_list(ak.sum(depth, 0, highlevel=False)) == [
                 datetime.timedelta(12),
                 datetime.timedelta(15),
                 datetime.timedelta(18),
@@ -689,7 +689,7 @@ def test_sum():
 
         else:
             with pytest.raises(ValueError):
-                depth.sum(-1)
+                ak.sum(depth, -1, highlevel=False)
 
 
 def test_more():
@@ -698,7 +698,7 @@ def test_more():
     )
     akarray = ak.highlevel.Array(nparray)
 
-    assert (akarray[1:] - akarray[:-1]).tolist() == [np.timedelta64(60, "m")]
+    assert (akarray[1:] - akarray[:-1]).to_list() == [np.timedelta64(60, "m")]
     assert ak.operations.sum(akarray[1:] - akarray[:-1]) == np.timedelta64(60, "m")
     assert ak.operations.sum(akarray[1:] - akarray[:-1], axis=0) == [
         np.timedelta64(60, "m")

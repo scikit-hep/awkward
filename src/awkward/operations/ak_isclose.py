@@ -49,8 +49,8 @@ def _impl(a, b, rtol, atol, equal_nan, highlevel, behavior):
             return (
                 ak.contents.NumpyArray(
                     backend.nplike.isclose(
-                        inputs[0].raw(backend.nplike),
-                        inputs[1].raw(backend.nplike),
+                        inputs[0]._raw(backend.nplike),
+                        inputs[1]._raw(backend.nplike),
                         rtol=rtol,
                         atol=atol,
                         equal_nan=equal_nan,

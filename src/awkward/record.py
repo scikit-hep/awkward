@@ -1,10 +1,12 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+from __future__ import annotations
 
 import copy
 from collections.abc import Iterable
 
 import awkward as ak
 from awkward.contents.content import Content
+from awkward.typing import Self
 
 np = ak._nplikes.NumpyMetadata.instance()
 
@@ -49,9 +51,8 @@ class Record:
     def is_tuple(self):
         return self._array.is_tuple
 
-    @property
-    def as_tuple(self):
-        return Record(self._array.as_tuple, self._at)
+    def to_tuple(self) -> Self:
+        return Record(self._array.to_tuple(), self._at)
 
     @property
     def contents(self):
@@ -77,7 +78,7 @@ class Record:
         return "".join(out)
 
     def validity_error(self, path="layout.array"):
-        return self._array.validity_error(path)
+        return ak._do.validity_error(self._array, path)
 
     @property
     def parameters(self):
@@ -182,11 +183,11 @@ class Record:
     def _getitem_fields(self, where):
         return self._array._getitem_fields(where)._getitem_at(self._at)
 
-    def packed(self):
+    def to_packed(self) -> Self:
         if self._array.length == 1:
-            return Record(self._array.packed(), self._at)
+            return Record(self._array.to_packed(), self._at)
         else:
-            return Record(self._array[self._at : self._at + 1].packed(), 0)
+            return Record(self._array[self._at : self._at + 1].to_packed(), 0)
 
     def to_list(self, behavior=None):
         return self._to_list(behavior, None)

@@ -43,9 +43,9 @@ def get_at(data, index):
     if isinstance(out, ak.contents.NumpyArray):
         array_param = out.parameter("__array__")
         if array_param == "byte":
-            return ak._util.tobytes(out.raw(numpy))
+            return ak._util.tobytes(out._raw(numpy))
         elif array_param == "char":
-            return ak._util.tobytes(out.raw(numpy)).decode(errors="surrogateescape")
+            return ak._util.tobytes(out._raw(numpy)).decode(errors="surrogateescape")
     if isinstance(out, (ak.contents.Content, ak.record.Record)):
         return ak._util.wrap(out, data._behavior)
     else:
@@ -57,9 +57,9 @@ def get_field(data, field):
     if isinstance(out, ak.contents.NumpyArray):
         array_param = out.parameter("__array__")
         if array_param == "byte":
-            return ak._util.tobytes(out.raw(numpy))
+            return ak._util.tobytes(out._raw(numpy))
         elif array_param == "char":
-            return ak._util.tobytes(out.raw(numpy)).decode(errors="surrogateescape")
+            return ak._util.tobytes(out._raw(numpy)).decode(errors="surrogateescape")
     if isinstance(out, (ak.contents.Content, ak.record.Record)):
         return ak._util.wrap(out, data._behavior)
     else:

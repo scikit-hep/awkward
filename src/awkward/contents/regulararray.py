@@ -130,26 +130,17 @@ class RegularArray(Content):
         assert isinstance(form, self.form_cls)
         self._content._to_buffers(form.content, getkey, container, backend)
 
-    @property
-    def typetracer(self):
+    def _to_typetracer(self, forget_length: bool) -> Self:
         return RegularArray(
-            self._content.typetracer,
+            self._content._to_typetracer(forget_length),
             self._size,
-            self._length,
+            ak._typetracer.UnknownLength if forget_length else self._length,
             parameters=self._parameters,
         )
 
     @property
     def length(self):
         return self._length
-
-    def _forget_length(self):
-        return RegularArray(
-            self._content._forget_length(),
-            self._size,
-            ak._typetracer.UnknownLength,
-            parameters=self._parameters,
-        )
 
     def __repr__(self):
         return self._repr("", "", "")
@@ -174,22 +165,20 @@ class RegularArray(Content):
     def to_RegularArray(self):
         return self
 
-    def maybe_to_NumpyArray(self):
-        content = None
-        if isinstance(self._content, ak.contents.NumpyArray):
-            content = self._content[: self._length * self._size]
-        elif isinstance(self._content, RegularArray):
-            content = self._content[: self._length * self._size].maybe_to_NumpyArray()
+    def maybe_to_NumpyArray(self) -> ak.contents.NumpyArray | None:
+        content = self._content[: self._length * self._size].maybe_to_NumpyArray()
 
-        if isinstance(content, ak.contents.NumpyArray):
+        if content is not None:
             shape = (self._length, self._size) + content.data.shape[1:]
             return ak.contents.NumpyArray(
                 content.data.reshape(shape),
                 parameters=ak._util.merge_parameters(
-                    self._parameters, content.parameters, True
+                    self._parameters, content.parameters
                 ),
-                backend=self._backend,
+                backend=content.backend,
             )
+        else:
+            return None
 
     def _getitem_nothing(self):
         return self._content._getitem_range(slice(0, 0))
@@ -352,13 +341,6 @@ class RegularArray(Content):
     def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
         out = self.to_ListOffsetArray64(True)
         return out._getitem_next_jagged(slicestarts, slicestops, slicecontent, tail)
-
-    def maybe_to_array(self):
-        out = self._content.maybe_to_array()
-        if out is None:
-            return out
-        else:
-            return out.reshape((self._length, -1) + out.shape[1:])
 
     def _getitem_next(self, head, tail, advanced):
         if head == ():
@@ -1154,7 +1136,7 @@ class RegularArray(Content):
         if self.size < 0:
             return f'at {path} ("{type(self)}"): size < 0'
 
-        return self._content.validity_error(path + ".content")
+        return self._content._validity_error(path + ".content")
 
     def _nbytes_part(self):
         return self.content._nbytes_part()
@@ -1232,7 +1214,7 @@ class RegularArray(Content):
                 self._length,
                 [
                     ak._connect.pyarrow.to_validbits(validbytes),
-                    pyarrow.py_buffer(akcontent.raw(numpy)),
+                    pyarrow.py_buffer(akcontent._raw(numpy)),
                 ],
             )
 
@@ -1328,12 +1310,12 @@ class RegularArray(Content):
         else:
             raise ak._errors.wrap_error(AssertionError(result))
 
-    def packed(self):
+    def to_packed(self) -> Self:
         length = self._length * self._size
         if self._content.length == length:
-            content = self._content.packed()
+            content = self._content.to_packed()
         else:
-            content = self._content[:length].packed()
+            content = self._content[:length].to_packed()
 
         return RegularArray(
             content, self._size, self._length, parameters=self._parameters
@@ -1391,7 +1373,7 @@ class RegularArray(Content):
             content, self._size, zeros_length=self._length, parameters=self._parameters
         )
 
-    def _layout_equal(self, other, index_dtype=True, numpyarray=True):
-        return self._size == other.size and self._content.layout_equal(
+    def _is_equal_to(self, other, index_dtype, numpyarray):
+        return self._size == other.size and self._content.is_equal_to(
             self._content, index_dtype, numpyarray
         )

@@ -7,8 +7,7 @@ from collections.abc import Callable, Iterable, Mapping, MutableMapping, Sized
 from numbers import Complex, Integral, Real
 
 import awkward as ak
-import awkward._reducers
-from awkward._backends import Backend, TypeTracerBackend
+from awkward._backends import Backend
 from awkward.forms.form import Form, _parameters_equal
 from awkward.typing import Any, Self, TypeAlias, TypeVar
 
@@ -167,21 +166,14 @@ class Content:
     def form_cls(self) -> type[Form]:
         raise ak._errors.wrap_error(NotImplementedError)
 
-    @property
-    def typetracer(self) -> Self:
+    def to_typetracer(self, forget_length: bool = False) -> Self:
+        return self._to_typetracer(forget_length)
+
+    def _to_typetracer(self, forget_length: bool) -> Self:
         raise ak._errors.wrap_error(NotImplementedError)
 
     @property
     def length(self) -> int:
-        raise ak._errors.wrap_error(NotImplementedError)
-
-    def forget_length(self) -> Self:
-        if not isinstance(self._backend, TypeTracerBackend):
-            return self.typetracer._forget_length()
-        else:
-            return self._forget_length()
-
-    def _forget_length(self) -> Self:
         raise ak._errors.wrap_error(NotImplementedError)
 
     def _to_buffers(
@@ -207,7 +199,7 @@ class Content:
                 )
         return out
 
-    def maybe_to_array(self):
+    def maybe_to_NumpyArray(self):
         return None
 
     def _handle_error(self, error, slicer=None):
@@ -606,15 +598,8 @@ class Content:
 
         elif ak._util.is_sized_iterable(where):
             layout = ak.operations.to_layout(where)
-            as_array = layout.maybe_to_array()
-            if as_array is None:
-                return self._getitem(layout)
-            else:
-                return self._getitem(
-                    ak.contents.NumpyArray(
-                        as_array, parameters=None, backend=layout.backend
-                    )
-                )
+            as_numpy = layout.maybe_to_NumpyArray() or layout
+            return self._getitem(as_numpy)
 
         else:
             raise ak._errors.wrap_error(
@@ -747,13 +732,13 @@ class Content:
             head = [
                 x
                 if isinstance(x.backend.nplike, ak._typetracer.TypeTracer)
-                else x.typetracer
+                else x.to_typetracer()
                 for x in head
             ]
             tail = [
                 x
                 if isinstance(x.backend.nplike, ak._typetracer.TypeTracer)
-                else x.typetracer
+                else x.to_typetracer()
                 for x in tail
             ]
 
@@ -762,68 +747,9 @@ class Content:
     def _local_index(self, axis: Integral, depth: Integral):
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def _reduce(
-        self,
-        reducer: type[ak._reducers.Reducer],
-        axis: Integral = -1,
-        mask: bool = True,
-        keepdims: bool = False,
-        behavior: dict | None = None,
-    ):
-        if axis is None:
-            raise ak._errors.wrap_error(NotImplementedError)
-
-        negaxis = -axis
-        branch, depth = self.branch_depth
-
-        if branch:
-            if negaxis <= 0:
-                raise ak._errors.wrap_error(
-                    ValueError(
-                        "cannot use non-negative axis on a nested list structure "
-                        "of variable depth (negative axis counts from the leaves of "
-                        "the tree; non-negative from the root)"
-                    )
-                )
-            if negaxis > depth:
-                raise ak._errors.wrap_error(
-                    ValueError(
-                        "cannot use axis={} on a nested list structure that splits into "
-                        "different depths, the minimum of which is depth={} "
-                        "from the leaves".format(axis, depth)
-                    )
-                )
-        else:
-            if negaxis <= 0:
-                negaxis += depth
-            if not (0 < negaxis and negaxis <= depth):
-                raise ak._errors.wrap_error(
-                    ValueError(
-                        "axis={} exceeds the depth of the nested list structure "
-                        "(which is {})".format(axis, depth)
-                    )
-                )
-
-        starts = ak.index.Index64.zeros(1, self._backend.index_nplike)
-        parents = ak.index.Index64.zeros(self.length, self._backend.index_nplike)
-        shifts = None
-        next = self._reduce_next(
-            reducer,
-            negaxis,
-            starts,
-            shifts,
-            parents,
-            1,
-            mask,
-            keepdims,
-            behavior,
-        )
-
-        return next[0]
-
     def _reduce_next(
         self,
-        reducer: type[ak._reducers.Reducer],
+        reducer: ak._reducers.Reducer,
         negaxis: Integral,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
@@ -834,157 +760,6 @@ class Content:
         behavior: dict | None,
     ):
         raise ak._errors.wrap_error(NotImplementedError)
-
-    def argmin(
-        self,
-        axis: Integral = -1,
-        mask: bool = True,
-        keepdims: bool = False,
-        behavior: dict | None = None,
-    ):
-        return self._reduce(awkward._reducers.ArgMin, axis, mask, keepdims, behavior)
-
-    def argmax(
-        self,
-        axis: Integral = -1,
-        mask: bool = True,
-        keepdims: bool = False,
-        behavior: dict | None = None,
-    ):
-        return self._reduce(awkward._reducers.ArgMax, axis, mask, keepdims, behavior)
-
-    def count(
-        self,
-        axis: Integral = -1,
-        mask: bool = False,
-        keepdims: bool = False,
-        behavior: dict | None = None,
-    ):
-        return self._reduce(awkward._reducers.Count, axis, mask, keepdims, behavior)
-
-    def count_nonzero(
-        self,
-        axis: Integral = -1,
-        mask: bool = False,
-        keepdims: bool = False,
-        behavior: dict | None = None,
-    ):
-        return self._reduce(
-            awkward._reducers.CountNonzero, axis, mask, keepdims, behavior
-        )
-
-    def sum(
-        self,
-        axis: Integral = -1,
-        mask: bool = False,
-        keepdims: bool = False,
-        behavior: dict | None = None,
-    ):
-        return self._reduce(awkward._reducers.Sum, axis, mask, keepdims, behavior)
-
-    def prod(
-        self,
-        axis: Integral = -1,
-        mask: bool = False,
-        keepdims: bool = False,
-        behavior: dict | None = None,
-    ):
-        return self._reduce(awkward._reducers.Prod, axis, mask, keepdims, behavior)
-
-    def any(
-        self,
-        axis: Integral = -1,
-        mask: bool = False,
-        keepdims: bool = False,
-        behavior: dict | None = None,
-    ):
-        return self._reduce(awkward._reducers.Any, axis, mask, keepdims, behavior)
-
-    def all(
-        self,
-        axis: Integral = -1,
-        mask: bool = False,
-        keepdims: bool = False,
-        behavior: dict | None = None,
-    ):
-        return self._reduce(awkward._reducers.All, axis, mask, keepdims, behavior)
-
-    def min(
-        self,
-        axis: Integral = -1,
-        mask: bool = True,
-        keepdims: bool = False,
-        initial: dict | None = None,
-        behavior=None,
-    ):
-        return self._reduce(
-            awkward._reducers.Min(initial), axis, mask, keepdims, behavior
-        )
-
-    def max(
-        self,
-        axis: Integral = -1,
-        mask: bool = True,
-        keepdims: bool = False,
-        initial: dict | None = None,
-        behavior: dict = None,
-    ):
-        return self._reduce(
-            awkward._reducers.Max(initial), axis, mask, keepdims, behavior
-        )
-
-    def argsort(
-        self,
-        axis: Integral = -1,
-        ascending: bool = True,
-        stable: bool = False,
-        kind: Any = None,
-        order: Any = None,
-    ):
-        negaxis = -axis
-        branch, depth = self.branch_depth
-        if branch:
-            if negaxis <= 0:
-                raise ak._errors.wrap_error(
-                    ValueError(
-                        "cannot use non-negative axis on a nested list structure "
-                        "of variable depth (negative axis counts from the leaves "
-                        "of the tree; non-negative from the root)"
-                    )
-                )
-            if negaxis > depth:
-                raise ak._errors.wrap_error(
-                    ValueError(
-                        "cannot use axis={} on a nested list structure that splits into "
-                        "different depths, the minimum of which is depth={} from the leaves".format(
-                            axis, depth
-                        )
-                    )
-                )
-        else:
-            if negaxis <= 0:
-                negaxis = negaxis + depth
-            if not (0 < negaxis and negaxis <= depth):
-                raise ak._errors.wrap_error(
-                    ValueError(
-                        "axis={} exceeds the depth of the nested list structure "
-                        "(which is {})".format(axis, depth)
-                    )
-                )
-
-        starts = ak.index.Index64.zeros(1, nplike=self._backend.index_nplike)
-        parents = ak.index.Index64.zeros(self.length, nplike=self._backend.index_nplike)
-        return self._argsort_next(
-            negaxis,
-            starts,
-            None,
-            parents,
-            1,
-            ascending,
-            stable,
-            kind,
-            order,
-        )
 
     def _argsort_next(
         self,
@@ -999,58 +774,6 @@ class Content:
         order: Any,
     ):
         raise ak._errors.wrap_error(NotImplementedError)
-
-    def sort(
-        self,
-        axis: Integral = -1,
-        ascending: bool = True,
-        stable: bool = False,
-        kind: Any = None,
-        order: Any = None,
-    ):
-        negaxis = -axis
-        branch, depth = self.branch_depth
-        if branch:
-            if negaxis <= 0:
-                raise ak._errors.wrap_error(
-                    ValueError(
-                        "cannot use non-negative axis on a nested list structure "
-                        "of variable depth (negative axis counts from the leaves "
-                        "of the tree; non-negative from the root)"
-                    )
-                )
-            if negaxis > depth:
-                raise ak._errors.wrap_error(
-                    ValueError(
-                        "cannot use axis={} on a nested list structure that splits into "
-                        "different depths, the minimum of which is depth={} from the leaves".format(
-                            axis, depth
-                        )
-                    )
-                )
-        else:
-            if negaxis <= 0:
-                negaxis = negaxis + depth
-            if not (0 < negaxis and negaxis <= depth):
-                raise ak._errors.wrap_error(
-                    ValueError(
-                        "axis={} exceeds the depth of the nested list structure "
-                        "(which is {})".format(axis, depth)
-                    )
-                )
-
-        starts = ak.index.Index64.zeros(1, nplike=self._backend.index_nplike)
-        parents = ak.index.Index64.zeros(self.length, nplike=self._backend.index_nplike)
-        return self._sort_next(
-            negaxis,
-            starts,
-            parents,
-            1,
-            ascending,
-            stable,
-            kind,
-            order,
-        )
 
     def _sort_next(
         self,
@@ -1149,19 +872,13 @@ class Content:
     ):
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def validity_error_parameters(self, path: str) -> str:
+    def _validity_error_parameters(self, path: str) -> str:
         if self.parameter("__array__") == "categorical":
             if not ak._do.is_unique(self._content):
                 return 'at {} ("{}"): __array__ = "categorical" requires contents to be unique'.format(
                     path, type(self)
                 )
         return ""
-
-    def validity_error(self, path: str = "layout") -> str:
-        paramcheck = self.validity_error_parameters(path)
-        if paramcheck != "":
-            return paramcheck
-        return self._validity_error(path)
 
     def _validity_error(self, path: str) -> str:
         raise ak._errors.wrap_error(NotImplementedError)
@@ -1334,7 +1051,7 @@ class Content:
         else:
             complex_real_string, complex_imag_string = None, None
 
-        return self.packed()._to_list(
+        return self.to_packed()._to_list(
             behavior,
             {
                 "nan_string": nan_string,
@@ -1346,14 +1063,11 @@ class Content:
             },
         )
 
-    def packed(self) -> Content:
+    def to_packed(self) -> Content:
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def tolist(self, behavior: dict | None = None) -> list:
-        return self.to_list(behavior)
-
     def to_list(self, behavior: dict | None = None) -> list:
-        return self.packed()._to_list(behavior, None)
+        return self.to_packed()._to_list(behavior, None)
 
     def _to_list(
         self, behavior: dict | None, json_conversions: dict[str, Any] | None
@@ -1486,7 +1200,7 @@ class Content:
     def __deepcopy__(self, memo):
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def layout_equal(
+    def is_equal_to(
         self, other: Content, index_dtype: bool = True, numpyarray: bool = True
     ) -> bool:
         return (
@@ -1495,12 +1209,10 @@ class Content:
             and _parameters_equal(
                 self.parameters, other.parameters, only_array_record=False
             )
-            and self._layout_equal(other, index_dtype, numpyarray)
+            and self._is_equal_to(other, index_dtype, numpyarray)
         )
 
-    def _layout_equal(
-        self, other: Self, index_dtype: bool = True, numpyarray: bool = True
-    ) -> bool:
+    def _is_equal_to(self, other: Self, index_dtype: bool, numpyarray: bool) -> bool:
         raise ak._errors.wrap_error(NotImplementedError)
 
     def _repr(self, indent: str, pre: str, post: str) -> str:

@@ -399,27 +399,19 @@ class UnionArray(Content):
         for i, content in enumerate(self._contents):
             content._to_buffers(form.content(i), getkey, container, backend)
 
-    @property
-    def typetracer(self):
-        backend = ak._backends.TypeTracerBackend.instance()
+    def _to_typetracer(self, forget_length: bool) -> Self:
+        tt = ak._typetracer.TypeTracer.instance()
+        tags = self._tags.to_nplike(tt)
         return UnionArray(
-            ak.index.Index(self._tags.raw(backend.nplike)),
-            ak.index.Index(self._index.raw(backend.nplike)),
-            [x.typetracer for x in self._contents],
+            tags.forget_length() if forget_length else tags,
+            self._index.to_nplike(tt),
+            [x._to_typetracer(False) for x in self._contents],
             parameters=self._parameters,
         )
 
     @property
     def length(self):
         return self._tags.length
-
-    def _forget_length(self):
-        return UnionArray(
-            self._tags.forget_length(),
-            self._index,
-            self._contents,
-            parameters=self._parameters,
-        )
 
     def __repr__(self):
         return self._repr("", "", "")
@@ -922,13 +914,13 @@ class UnionArray(Content):
             head = [
                 x
                 if isinstance(x.backend.nplike, ak._typetracer.TypeTracer)
-                else x.typetracer
+                else x.to_typetracer()
                 for x in head
             ]
             tail = [
                 x
                 if isinstance(x.backend.nplike, ak._typetracer.TypeTracer)
-                else x.typetracer
+                else x.to_typetracer()
                 for x in tail
             ]
 
@@ -1359,7 +1351,7 @@ class UnionArray(Content):
                 )
 
             for i in range(len(self.contents)):
-                sub = self.contents[i].validity_error(path + f".content({i})")
+                sub = self.contents[i]._validity_error(path + f".content({i})")
                 if sub != "":
                     return sub
 
@@ -1559,7 +1551,7 @@ class UnionArray(Content):
         else:
             raise ak._errors.wrap_error(AssertionError(result))
 
-    def packed(self):
+    def to_packed(self) -> Self:
         tags = self._tags.raw(self._backend.nplike)
         original_index = index = self._index.raw(self._backend.nplike)[: tags.shape[0]]
 
@@ -1577,7 +1569,7 @@ class UnionArray(Content):
                 )
                 contents[tag] = self.project(tag)
 
-            contents[tag] = contents[tag].packed()
+            contents[tag] = contents[tag].to_packed()
 
         return UnionArray(
             ak.index.Index8(tags, nplike=self._backend.index_nplike),
@@ -1608,17 +1600,17 @@ class UnionArray(Content):
             tags,
             index,
             contents,
-            parameters=self.parameters,
+            parameters=self._parameters,
         )
 
-    def _layout_equal(self, other, index_dtype=True, numpyarray=True):
+    def _is_equal_to(self, other, index_dtype, numpyarray):
         return (
             self.tags == other.tags
-            and self.index.layout_equal(other.index, index_dtype, numpyarray)
+            and self.index.is_equal_to(other.index, index_dtype, numpyarray)
             and len(self.contents) == len(other.contents)
             and all(
                 [
-                    self.contents[i].layout_equal(
+                    self.contents[i].is_equal_to(
                         other.contents[i], index_dtype, numpyarray
                     )
                     for i in range(len(self.contents))

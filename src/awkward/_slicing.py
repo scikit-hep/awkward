@@ -183,11 +183,11 @@ def normalise_item(item, backend: ak._backends.Backend):
 
     elif ak._util.is_sized_iterable(item):
         layout = ak.operations.to_layout(item)
-        as_array = layout.maybe_to_array()
-        if as_array is None:
+        as_numpy = layout.maybe_to_NumpyArray()
+        if as_numpy is None:
             return normalise_item(layout, backend)
         else:
-            return as_array
+            return as_numpy.data
 
     else:
         raise ak._errors.wrap_error(

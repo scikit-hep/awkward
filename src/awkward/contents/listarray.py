@@ -141,27 +141,19 @@ class ListArray(Content):
         container[key2] = ak._util.little_endian(self._stops.raw(backend.index_nplike))
         self._content._to_buffers(form.content, getkey, container, backend)
 
-    @property
-    def typetracer(self):
+    def _to_typetracer(self, forget_length: bool) -> Self:
         tt = ak._typetracer.TypeTracer.instance()
+        starts = self._starts.to_nplike(tt)
         return ListArray(
-            ak.index.Index(self._starts.raw(tt)),
-            ak.index.Index(self._stops.raw(tt)),
-            self._content.typetracer,
+            starts.forget_length() if forget_length else starts,
+            self._stops.to_nplike(tt),
+            self._content._to_typetracer(False),
             parameters=self._parameters,
         )
 
     @property
     def length(self):
         return self._starts.length
-
-    def _forget_length(self):
-        return ListArray(
-            self._starts.forget_length(),
-            self._stops,
-            self._content,
-            parameters=self._parameters,
-        )
 
     def __repr__(self):
         return self._repr("", "", "")
@@ -530,7 +522,7 @@ class ListArray(Content):
                     missing_trim, content, parameters=self._parameters
                 )
                 if isinstance(self._backend.nplike, ak._typetracer.TypeTracer):
-                    out = out.typetracer
+                    out = out.to_typetracer()
                 return ak.contents.ListOffsetArray(
                     largeoffsets,
                     out,
@@ -1262,7 +1254,7 @@ class ListArray(Content):
                 path, type(self), message, error.id, filename
             )
         else:
-            return self._content.validity_error(path + ".content")
+            return self._content._validity_error(path + ".content")
 
     def _nbytes_part(self):
         return (
@@ -1462,8 +1454,8 @@ class ListArray(Content):
         else:
             raise ak._errors.wrap_error(AssertionError(result))
 
-    def packed(self):
-        return self.to_ListOffsetArray64(True).packed()
+    def to_packed(self) -> Self:
+        return self.to_ListOffsetArray64(True).to_packed()
 
     def _to_list(self, behavior, json_conversions):
         return ListOffsetArray._to_list(self, behavior, json_conversions)
@@ -1474,9 +1466,9 @@ class ListArray(Content):
         stops = self._stops.to_nplike(backend.index_nplike)
         return ListArray(starts, stops, content, parameters=self._parameters)
 
-    def _layout_equal(self, other, index_dtype=True, numpyarray=True):
+    def _is_equal_to(self, other, index_dtype, numpyarray):
         return (
-            self.starts.layout_equal(other.starts, index_dtype, numpyarray)
-            and self.stops.layout_equal(other.stops, index_dtype, numpyarray)
-            and self.content.layout_equal(other.content, index_dtype, numpyarray)
+            self.starts.is_equal_to(other.starts, index_dtype, numpyarray)
+            and self.stops.is_equal_to(other.stops, index_dtype, numpyarray)
+            and self.content.is_equal_to(other.content, index_dtype, numpyarray)
         )

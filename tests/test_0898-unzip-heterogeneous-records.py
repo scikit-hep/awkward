@@ -22,7 +22,7 @@ def test():
 
     (tmp,) = ak.operations.unzip(c)
 
-    assert tmp.tolist() == [100, 90]
+    assert tmp.to_list() == [100, 90]
 
 
 def test_zip_and_unzip():

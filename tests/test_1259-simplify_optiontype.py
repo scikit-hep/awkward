@@ -14,7 +14,7 @@ def test_byte_masked_array():
         ),
         valid_when=True,
     )
-    assert layout.tolist() == [None, 1, None]
+    assert layout.to_list() == [None, 1, None]
 
     assert isinstance(layout, ak.contents.IndexedOptionArray)
     assert np.asarray(layout.index).tolist() == [-1, 1, -1]
@@ -30,7 +30,7 @@ def test_bit_masked_array():
         length=3,
         lsb_order=True,
     )
-    assert layout.tolist() == [None, 1, None]
+    assert layout.to_list() == [None, 1, None]
 
     assert isinstance(layout, ak.contents.IndexedOptionArray)
     assert np.asarray(layout.index).tolist() == [-1, 1, -1]

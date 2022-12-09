@@ -37,7 +37,7 @@ def test():
     assert np.isnan(ak.linear_fit(array, array, axis=1)["slope_error", 1])
 
     # defined in terms of reducers, but a map-like operation
-    assert ak.softmax(array, axis=1)[1].tolist() == []
+    assert ak.softmax(array, axis=1)[1].to_list() == []
     assert np.isnan(ak.softmax(array, axis=1)[2, 0])
 
     # defined in terms of reducers, computed from ak.min and ak.max

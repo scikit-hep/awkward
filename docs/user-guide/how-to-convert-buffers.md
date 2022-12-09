@@ -83,7 +83,7 @@ ak.from_buffers(form, length, container)
 Minimizing the size of the output buffers
 -----------------------------------------
 
-The {func}`ak.to_buffers`/{func}`ak.from_buffers` functions exactly preserve an array, warts and all. Often, you'll want to only write {func}`ak.packed` arrays. "Packing" replaces an array structure with an equivalent structure that has no unreachable elements—data that you can't see as part of the array, and therefore probably don't want to write.
+The {func}`ak.to_buffers`/{func}`ak.from_buffers` functions exactly preserve an array, warts and all. Often, you'll want to only write {func}`ak.to_packed` arrays. "Packing" replaces an array structure with an equivalent structure that has no unreachable elements—data that you can't see as part of the array, and therefore probably don't want to write.
 
 Here is an example of an array in need of packing:
 
@@ -106,10 +106,10 @@ The {func}`ak.to_buffers` function dutifully writes the `999` values into the ou
 ak.to_buffers(unpacked)
 ```
 
-If the intended purpose of calling {func}`ak.to_buffers` is to write to a file or send data over a network, this is wasted space. It can be trimmed by calling the {func}`ak.packed` function.
+If the intended purpose of calling {func}`ak.to_buffers` is to write to a file or send data over a network, this is wasted space. It can be trimmed by calling the {func}`ak.to_packed` function.
 
 ```{code-cell} ipython3
-packed = ak.packed(unpacked)
+packed = ak.to_packed(unpacked)
 packed
 ```
 
@@ -140,10 +140,10 @@ group = file.create_group("awkward")
 group
 ```
 
-We can fill this `group` as a `container` by passing it in to {func}`ak.to_buffers`. (See the previous section for more on {func}`ak.packed`.)
+We can fill this `group` as a `container` by passing it in to {func}`ak.to_buffers`. (See the previous section for more on {func}`ak.to_packed`.)
 
 ```{code-cell} ipython3
-form, length, container = ak.to_buffers(ak.packed(ak_array), container=group)
+form, length, container = ak.to_buffers(ak.to_packed(ak_array), container=group)
 ```
 
 ```{code-cell} ipython3

@@ -23,5 +23,5 @@ def test_in_place_wrapper_broadcasting():
     array = ak.Array({"x": np.arange(3)})
     array["unknown field"] = None
 
-    assert array["unknown field"].tolist() == [None, None, None]
+    assert array["unknown field"].to_list() == [None, None, None]
     assert ak.operations.fields(array) == ["x", "unknown field"]

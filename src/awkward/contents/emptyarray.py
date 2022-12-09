@@ -51,8 +51,7 @@ class EmptyArray(Content):
     def _to_buffers(self, form, getkey, container, backend):
         assert isinstance(form, self.form_cls)
 
-    @property
-    def typetracer(self):
+    def _to_typetracer(self, forget_length: bool) -> Self:
         return EmptyArray(
             parameters=self._parameters,
             backend=ak._backends.TypeTracerBackend.instance(),
@@ -61,9 +60,6 @@ class EmptyArray(Content):
     @property
     def length(self):
         return 0
-
-    def _forget_length(self):
-        return EmptyArray(parameters=self._parameters, backend=self._backend)
 
     def __repr__(self):
         return self._repr("", "", "")
@@ -363,7 +359,7 @@ class EmptyArray(Content):
         else:
             raise ak._errors.wrap_error(AssertionError(result))
 
-    def packed(self):
+    def to_packed(self) -> Self:
         return self
 
     def _to_list(self, behavior, json_conversions):
@@ -372,5 +368,5 @@ class EmptyArray(Content):
     def to_backend(self, backend: ak._backends.Backend) -> Self:
         return EmptyArray(parameters=self._parameters, backend=backend)
 
-    def _layout_equal(self, other, index_dtype=True, numpyarray=True):
+    def _is_equal_to(self, other, index_dtype, numpyarray):
         return True

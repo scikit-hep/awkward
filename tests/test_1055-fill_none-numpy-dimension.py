@@ -35,13 +35,13 @@ def test():
         == "2 * union[float32, 1 * 1 * float32]"
     )
 
-    assert ak.operations.fill_none(a, 0).tolist() == [1, 0]
+    assert ak.operations.fill_none(a, 0).to_list() == [1, 0]
     assert str(ak.operations.fill_none(a, 0).type) == "2 * float64"
 
-    assert ak.operations.fill_none(a, [0]).tolist() == [1, [0]]
+    assert ak.operations.fill_none(a, [0]).to_list() == [1, [0]]
     assert str(ak.operations.fill_none(a, [0]).type) == "2 * union[float32, 1 * int64]"
 
-    assert ak.operations.fill_none(a, [[0]]).tolist() == [1, [[0]]]
+    assert ak.operations.fill_none(a, [[0]]).to_list() == [1, [[0]]]
     assert (
         str(ak.operations.fill_none(a, [[0]]).type)
         == "2 * union[float32, 1 * var * int64]"
