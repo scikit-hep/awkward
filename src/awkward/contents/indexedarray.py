@@ -388,17 +388,6 @@ class IndexedArray(Content):
                 )
             )
 
-    def _num(self, axis, depth_m1):
-        posaxis = ak._do.axis_wrap_if_negative(self, axis)
-        if posaxis == depth_m1:
-            out = self.length
-            if ak._util.is_integer(out):
-                return np.int64(out)
-            else:
-                return out
-        else:
-            return self.project()._num(posaxis, depth_m1)
-
     def _offsets_and_flattened(self, axis, depth):
         posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:

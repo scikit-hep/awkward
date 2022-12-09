@@ -158,20 +158,6 @@ class EmptyArray(Content):
         else:
             raise ak._errors.wrap_error(AssertionError(repr(head)))
 
-    def _num(self, axis, depth_m1):
-        posaxis = ak._do.axis_wrap_if_negative(self, axis)
-
-        if posaxis == depth_m1:
-            out = self.length
-            if ak._util.is_integer(out):
-                return np.int64(out)
-            else:
-                return out
-        else:
-            # TODO: This was changed to use `nplike` instead of `index_nplike`. Is this OK?
-            out = ak.index.Index64.empty(0, nplike=self._backend.nplike)
-            return ak.contents.NumpyArray(out, parameters=None, backend=self._backend)
-
     def _offsets_and_flattened(self, axis, depth):
         posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:

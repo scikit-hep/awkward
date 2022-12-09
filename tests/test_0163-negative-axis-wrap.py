@@ -36,7 +36,7 @@ def test_array_3d():
 
     with pytest.raises(ValueError) as err:
         assert ak.operations.num(array, axis=-4)
-    assert "axis=-4 exceeds the depth (3) of this array" in str(err.value)
+    assert "axis=-4 exceeds the depth" in str(err.value)
 
 
 def test_list_array():
@@ -74,7 +74,7 @@ def test_record_array():
         ]
     )
 
-    assert ak.operations.num(array, axis=0).to_list() == {"x": 3, "y": 3}
+    assert ak.operations.num(array, axis=0) == 3
     assert ak.operations.num(array, axis=1).to_list() == [
         {"x": 1, "y": 2},
         {"x": 2, "y": 3},

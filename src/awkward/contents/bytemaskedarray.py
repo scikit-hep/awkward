@@ -556,24 +556,6 @@ class ByteMaskedArray(Content):
 
             return self._content._carry(nextcarry, False)
 
-    def _num(self, axis, depth_m1):
-        posaxis = ak._do.axis_wrap_if_negative(self, axis)
-        if posaxis == depth_m1:
-            out = self.length
-            if ak._util.is_integer(out):
-                return np.int64(out)
-            else:
-                return out
-        else:
-            _, nextcarry, outindex = self._nextcarry_outindex(self._backend)
-
-            next = self._content._carry(nextcarry, False)
-            out = next._num(posaxis, depth_m1)
-
-            return ak.contents.IndexedOptionArray.simplified(
-                outindex, out, parameters=self._parameters
-            )
-
     def _offsets_and_flattened(self, axis, depth):
         posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:

@@ -72,10 +72,31 @@ def num(array, axis=1, *, highlevel=True, behavior=None):
 
 
 def _impl(array, axis, highlevel, behavior):
-    layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
+    layout = ak.operations.to_layout(array)
     behavior = ak._util.behavior_of(array, behavior=behavior)
-    out = ak._do.num(layout, axis=axis)
-    if isinstance(out, (ak.contents.Content, ak.record.Record)):
-        return ak._util.wrap(out, behavior, highlevel)
-    else:
-        return out
+
+    if not ak._util.is_integer(axis):
+        raise ak._errors.wrap_error(
+            TypeError(f"'axis' must be an integer, not {axis!r}")
+        )
+
+    if ak._do.maybe_posaxis(layout, axis, 1) == 0:
+        if isinstance(layout, ak.record.Record):
+            return 1
+        else:
+            return layout.length
+
+    def action(layout, depth, **kwargs):
+        posaxis = ak._do.maybe_posaxis(layout, axis, depth)
+
+        if posaxis == depth and layout.is_list:
+            return ak.contents.NumpyArray(layout.stops.data - layout.starts.data)
+
+        elif layout.is_leaf:
+            raise ak._errors.wrap_error(
+                np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
+            )
+
+    out = ak._do.recursively_apply(layout, action, behavior, numpy_to_regular=True)
+
+    return ak._util.wrap(out, behavior, highlevel)

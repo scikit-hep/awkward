@@ -443,35 +443,6 @@ class RecordArray(Content):
             )
             return next._getitem_next(nexthead, nexttail, advanced)
 
-    def _num(self, axis, depth_m1):
-        posaxis = ak._do.axis_wrap_if_negative(self, axis)
-        if posaxis == depth_m1:
-            npsingle = self._backend.index_nplike.full((1,), self.length, np.int64)
-            single = ak.index.Index64(npsingle, nplike=self._backend.index_nplike)
-            singleton = ak.contents.NumpyArray(
-                single, parameters=None, backend=self._backend
-            )
-            contents = [singleton] * len(self._contents)
-            record = ak.contents.RecordArray(
-                contents,
-                self._fields,
-                1,
-                parameters=self._parameters,
-                backend=self._backend,
-            )
-            return record[0]
-        else:
-            contents = []
-            for content in self._contents:
-                contents.append(content._num(posaxis, depth_m1))
-            return ak.contents.RecordArray(
-                contents,
-                self._fields,
-                self._length,
-                parameters=self._parameters,
-                backend=self._backend,
-            )
-
     def _offsets_and_flattened(self, axis, depth):
         posaxis = ak._do.axis_wrap_if_negative(self, axis)
         if posaxis == depth:
