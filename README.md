@@ -79,17 +79,10 @@ pip install awkward
 
 The `awkward` package is pure Python, and it will download the `awkward-cpp` compiled components as a dependency. If there is no `awkward-cpp` wheel for your platform and Python version, pip will attempt to compile it from source (which has additional dependencies, such as a C++ compiler).
 
-Awkward Array is also available using [conda](https://anaconda.org/conda-forge/awkward). It always installs a binary:
+Awkward Array is also available as a binary (no compilation) on [conda-forge](https://conda-forge.org/docs/user/introduction.html#how-can-i-install-packages-from-conda-forge):
 
 ```bash
 conda install -c conda-forge awkward
-```
-
-If you have already added `conda-forge` as a channel, the `-c conda-forge` is unnecessary. Adding the channel is recommended because it ensures that all of your packages use compatible versions:
-
-```bash
-conda config --add channels conda-forge
-conda update --all
 ```
 
 # Getting help
@@ -104,20 +97,18 @@ conda update --all
 
 # Installation for developers
 
-Be sure to clone this repository recursively to get the header-only C++ dependencies, generate some sources with [nox](https://nox.thea.codes/), compile and install `awkward-cpp` first, then install `awkward` as an editable installation.
+Clone this repository _recursively_ to get the header-only C++ dependencies, then generate sources with [nox](https://nox.thea.codes/), compile and install `awkward-cpp`, and finally install `awkward` as an editable installation:
 
 ```bash
 git clone --recursive https://github.com/scikit-hep/awkward.git
 cd awkward
 
 nox -s prepare
-
 python -m pip install -v ./awkward-cpp
-
 python -m pip install -e .
 ```
 
-Tests can be run in parallel with [pytest](https://docs.pytest.org/).
+Tests can be run in parallel with [pytest](https://docs.pytest.org/):
 
 ```bash
 python -m pytest -n auto tests
