@@ -221,8 +221,11 @@ class Record:
         else:
             return dict(zip(self._array.fields, contents))
 
-    def __copy__(self):
-        return Record(self._array, self._at)
+    def __copy__(self) -> Self:
+        return self.copy()
 
     def __deepcopy__(self, memo):
         return Record(copy.deepcopy(self._array, memo), self._at)
+
+    def copy(self) -> Self:
+        return Record(self._array, self._at)

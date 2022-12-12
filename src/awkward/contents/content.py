@@ -1223,3 +1223,6 @@ class Content:
 
     def _fill_none(self, value: Content) -> Content:
         raise ak._errors.wrap_error(NotImplementedError)
+
+    def copy(self) -> Self:
+        raise ak._errors.wrap_error(NotImplementedError)
