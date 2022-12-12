@@ -388,24 +388,13 @@ class IndexedArray(Content):
                 )
             )
 
-    def _num(self, axis, depth=0):
-        posaxis = ak._do.axis_wrap_if_negative(self, axis)
-        if posaxis == depth:
-            out = self.length
-            if ak._util.is_integer(out):
-                return np.int64(out)
-            else:
-                return out
-        else:
-            return self.project()._num(posaxis, depth)
-
     def _offsets_and_flattened(self, axis, depth):
-        posaxis = ak._do.axis_wrap_if_negative(self, axis)
-        if posaxis == depth:
+        posaxis = ak._util.maybe_posaxis(self, axis, depth)
+        if posaxis is not None and posaxis + 1 == depth:
             raise ak._errors.wrap_error(np.AxisError("axis=0 not allowed for flatten"))
 
         else:
-            return self.project()._offsets_and_flattened(posaxis, depth)
+            return self.project()._offsets_and_flattened(axis, depth)
 
     def _mergeable_next(self, other, mergebool):
         if isinstance(
@@ -602,11 +591,11 @@ class IndexedArray(Content):
         )
 
     def _local_index(self, axis, depth):
-        posaxis = ak._do.axis_wrap_if_negative(self, axis)
-        if posaxis == depth:
+        posaxis = ak._util.maybe_posaxis(self, axis, depth)
+        if posaxis is not None and posaxis + 1 == depth:
             return self._local_index_axis0()
         else:
-            return self.project()._local_index(posaxis, depth)
+            return self.project()._local_index(axis, depth)
 
     def _unique_index(self, index, sorted=True):
         next = ak.index.Index64.zeros(self.length, nplike=self._backend.index_nplike)
@@ -871,12 +860,12 @@ class IndexedArray(Content):
         )
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
-        posaxis = ak._do.axis_wrap_if_negative(self, axis)
-        if posaxis == depth:
+        posaxis = ak._util.maybe_posaxis(self, axis)
+        if posaxis is not None and posaxis + 1 == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         else:
             return self.project()._combinations(
-                n, replacement, recordlookup, parameters, posaxis, depth
+                n, replacement, recordlookup, parameters, axis, depth
             )
 
     def _reduce_next(
@@ -927,15 +916,15 @@ class IndexedArray(Content):
         return self.index._nbytes_part() + self.content._nbytes_part()
 
     def _pad_none(self, target, axis, depth, clip):
-        posaxis = ak._do.axis_wrap_if_negative(self, axis)
-        if posaxis == depth:
+        posaxis = ak._util.maybe_posaxis(self, axis, depth)
+        if posaxis is not None and posaxis + 1 == depth:
             return self._pad_none_axis0(target, clip)
-        elif posaxis == depth + 1:
-            return self.project()._pad_none(target, posaxis, depth, clip)
+        elif posaxis is not None and posaxis + 1 == depth + 1:
+            return self.project()._pad_none(target, axis, depth, clip)
         else:
             return ak.contents.IndexedArray(
                 self._index,
-                self._content._pad_none(target, posaxis, depth, clip),
+                self._content._pad_none(target, axis, depth, clip),
                 parameters=self._parameters,
             )
 

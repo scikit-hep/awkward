@@ -556,34 +556,16 @@ class ByteMaskedArray(Content):
 
             return self._content._carry(nextcarry, False)
 
-    def _num(self, axis, depth=0):
-        posaxis = ak._do.axis_wrap_if_negative(self, axis)
-        if posaxis == depth:
-            out = self.length
-            if ak._util.is_integer(out):
-                return np.int64(out)
-            else:
-                return out
-        else:
-            _, nextcarry, outindex = self._nextcarry_outindex(self._backend)
-
-            next = self._content._carry(nextcarry, False)
-            out = next._num(posaxis, depth)
-
-            return ak.contents.IndexedOptionArray.simplified(
-                outindex, out, parameters=self._parameters
-            )
-
     def _offsets_and_flattened(self, axis, depth):
-        posaxis = ak._do.axis_wrap_if_negative(self, axis)
-        if posaxis == depth:
+        posaxis = ak._util.maybe_posaxis(self, axis, depth)
+        if posaxis is not None and posaxis + 1 == depth:
             raise ak._errors.wrap_error(np.AxisError("axis=0 not allowed for flatten"))
         else:
             numnull, nextcarry, outindex = self._nextcarry_outindex(self._backend)
 
             next = self._content._carry(nextcarry, False)
 
-            offsets, flattened = next._offsets_and_flattened(posaxis, depth)
+            offsets, flattened = next._offsets_and_flattened(axis, depth)
 
             if offsets.length == 0:
                 return (
@@ -672,14 +654,14 @@ class ByteMaskedArray(Content):
         return self.to_IndexedOptionArray64()._fill_none(value)
 
     def _local_index(self, axis, depth):
-        posaxis = ak._do.axis_wrap_if_negative(self, axis)
-        if posaxis == depth:
+        posaxis = ak._util.maybe_posaxis(self, axis, depth)
+        if posaxis is not None and posaxis + 1 == depth:
             return self._local_index_axis0()
         else:
             _, nextcarry, outindex = self._nextcarry_outindex(self._backend)
 
             next = self._content._carry(nextcarry, False)
-            out = next._local_index(posaxis, depth)
+            out = next._local_index(axis, depth)
             return ak.contents.IndexedOptionArray.simplified(
                 outindex, out, parameters=self._parameters
             )
@@ -749,15 +731,15 @@ class ByteMaskedArray(Content):
             raise ak._errors.wrap_error(
                 ValueError("in combinations, 'n' must be at least 1")
             )
-        posaxis = ak._do.axis_wrap_if_negative(self, axis)
-        if posaxis == depth:
+        posaxis = ak._util.maybe_posaxis(self, axis, depth)
+        if posaxis is not None and posaxis + 1 == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         else:
             _, nextcarry, outindex = self._nextcarry_outindex(self._backend)
 
             next = self._content._carry(nextcarry, True)
             out = next._combinations(
-                n, replacement, recordlookup, parameters, posaxis, depth
+                n, replacement, recordlookup, parameters, axis, depth
             )
             return ak.contents.IndexedOptionArray.simplified(
                 outindex, out, parameters=parameters
@@ -938,10 +920,10 @@ class ByteMaskedArray(Content):
         return self.mask._nbytes_part() + self.content._nbytes_part()
 
     def _pad_none(self, target, axis, depth, clip):
-        posaxis = ak._do.axis_wrap_if_negative(self, axis)
-        if posaxis == depth:
+        posaxis = ak._util.maybe_posaxis(self, axis, depth)
+        if posaxis is not None and posaxis + 1 == depth:
             return self._pad_none_axis0(target, clip)
-        elif posaxis == depth + 1:
+        elif posaxis is not None and posaxis + 1 == depth + 1:
             mask = ak.index.Index8(self.mask_as_bool(valid_when=False))
             index = ak.index.Index64.empty(
                 mask.length, nplike=self._backend.index_nplike
@@ -961,14 +943,14 @@ class ByteMaskedArray(Content):
                     self._mask.length,
                 )
             )
-            next = self.project()._pad_none(target, posaxis, depth, clip)
+            next = self.project()._pad_none(target, axis, depth, clip)
             return ak.contents.IndexedOptionArray.simplified(
                 index, next, parameters=self._parameters
             )
         else:
             return ak.contents.ByteMaskedArray(
                 self._mask,
-                self._content._pad_none(target, posaxis, depth, clip),
+                self._content._pad_none(target, axis, depth, clip),
                 self._valid_when,
                 parameters=self._parameters,
             )

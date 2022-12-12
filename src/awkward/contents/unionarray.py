@@ -759,29 +759,10 @@ class UnionArray(Content):
         else:
             raise ak._errors.wrap_error(AssertionError(repr(head)))
 
-    def _num(self, axis, depth=0):
-        posaxis = ak._do.axis_wrap_if_negative(self, axis)
-        if posaxis == depth:
-            out = self.length
-            if ak._util.is_integer(out):
-                return np.int64(out)
-            else:
-                return out
-        else:
-            contents = []
-            for content in self._contents:
-                contents.append(content._num(posaxis, depth))
-            return UnionArray.simplified(
-                self._tags,
-                self._index,
-                contents,
-                parameters=self._parameters,
-            )
-
     def _offsets_and_flattened(self, axis, depth):
-        posaxis = ak._do.axis_wrap_if_negative(self, axis)
+        posaxis = ak._util.maybe_posaxis(self, axis, depth)
 
-        if posaxis == depth:
+        if posaxis is not None and posaxis + 1 == depth:
             raise ak._errors.wrap_error(np.AxisError("axis=0 not allowed for flatten"))
 
         else:
@@ -793,7 +774,7 @@ class UnionArray(Content):
 
             for i in range(len(self._contents)):
                 offsets, flattened = self._contents[i]._offsets_and_flattened(
-                    posaxis, depth
+                    axis, depth
                 )
                 offsetsraws[i] = offsets.ptr
                 contents.append(flattened)
@@ -1132,13 +1113,13 @@ class UnionArray(Content):
         )
 
     def _local_index(self, axis, depth):
-        posaxis = ak._do.axis_wrap_if_negative(self, axis)
-        if posaxis == depth:
+        posaxis = ak._util.maybe_posaxis(self, axis, depth)
+        if posaxis is not None and posaxis + 1 == depth:
             return self._local_index_axis0()
         else:
             contents = []
             for content in self._contents:
-                contents.append(content._local_index(posaxis, depth))
+                contents.append(content._local_index(axis, depth))
             return UnionArray(
                 self._tags,
                 self._index,
@@ -1147,15 +1128,15 @@ class UnionArray(Content):
             )
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
-        posaxis = ak._do.axis_wrap_if_negative(self, axis)
-        if posaxis == depth:
+        posaxis = ak._util.maybe_posaxis(self, axis, depth)
+        if posaxis is not None and posaxis + 1 == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         else:
             contents = []
             for content in self._contents:
                 contents.append(
                     content._combinations(
-                        n, replacement, recordlookup, parameters, posaxis, depth
+                        n, replacement, recordlookup, parameters, axis, depth
                     )
                 )
             return ak.unionarray.UnionArray(
@@ -1364,13 +1345,13 @@ class UnionArray(Content):
         return result
 
     def _pad_none(self, target, axis, depth, clip):
-        posaxis = ak._do.axis_wrap_if_negative(self, axis)
-        if posaxis == depth:
+        posaxis = ak._util.maybe_posaxis(self, axis, depth)
+        if posaxis is not None and posaxis + 1 == depth:
             return self._pad_none_axis0(target, clip)
         else:
             contents = []
             for content in self._contents:
-                contents.append(content._pad_none(target, posaxis, depth, clip))
+                contents.append(content._pad_none(target, axis, depth, clip))
             return ak.contents.UnionArray.simplified(
                 self.tags,
                 self.index,

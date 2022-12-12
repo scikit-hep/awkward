@@ -7,7 +7,7 @@ from numbers import Integral
 
 import awkward as ak
 from awkward._backends import Backend
-from awkward.contents.content import ActionType, AxisMaybeNone, Content
+from awkward.contents.content import ActionType, Content
 from awkward.forms import form
 from awkward.record import Record
 from awkward.typing import Any
@@ -122,46 +122,8 @@ def to_buffers(
     return form, len(content), container
 
 
-def axis_wrap_if_negative(
-    layout: Content | Record, axis: AxisMaybeNone
-) -> AxisMaybeNone:
-    if isinstance(layout, Record):
-        if axis == 0:
-            raise ak._errors.wrap_error(
-                np.AxisError("Record type at axis=0 is a scalar, not an array")
-            )
-        return axis_wrap_if_negative(layout._array, axis)
-
-    else:
-        if axis is None or axis >= 0:
-            return axis
-
-        mindepth, maxdepth = layout.minmax_depth
-        depth = layout.purelist_depth
-        if mindepth == depth and maxdepth == depth:
-            posaxis = depth + axis
-            if posaxis < 0:
-                raise ak._errors.wrap_error(
-                    np.AxisError(
-                        f"axis={axis} exceeds the depth ({depth}) of this array"
-                    )
-                )
-            return posaxis
-
-        elif mindepth + axis == 0:
-            raise ak._errors.wrap_error(
-                np.AxisError(
-                    "axis={} exceeds the depth ({}) of at least one record field (or union possibility) of this array".format(
-                        axis, depth
-                    )
-                )
-            )
-
-        return axis
-
-
 def local_index(layout: Content, axis: Integral):
-    return layout._local_index(axis, 0)
+    return layout._local_index(axis, 1)
 
 
 def combinations(
@@ -184,7 +146,7 @@ def combinations(
             raise ak._errors.wrap_error(
                 ValueError("if provided, the length of 'fields' must be 'n'")
             )
-    return layout._combinations(n, replacement, recordlookup, parameters, axis, 0)
+    return layout._combinations(n, replacement, recordlookup, parameters, axis, 1)
 
 
 def is_unique(layout, axis: Integral | None = None) -> bool:
@@ -248,7 +210,7 @@ def unique(layout: Content, axis=None):
 def pad_none(
     layout: Content, length: Integral, axis: Integral, clip: bool = False
 ) -> Content:
-    return layout._pad_none(length, axis, 0, clip)
+    return layout._pad_none(length, axis, 1, clip)
 
 
 def completely_flatten(
@@ -281,8 +243,8 @@ def completely_flatten(
         return tuple(arrays)
 
 
-def flatten(layout: Content, axis: Integral = 1, depth: Integral = 0) -> Content:
-    offsets, flattened = layout._offsets_and_flattened(axis, depth)
+def flatten(layout: Content, axis: Integral = 1) -> Content:
+    offsets, flattened = layout._offsets_and_flattened(axis, 1)
     return flattened
 
 
@@ -295,7 +257,7 @@ def fill_none(layout: Content, value: Content) -> Content:
 
 
 def num(layout, axis):
-    return layout._num(axis)
+    return layout._num(axis, 0)
 
 
 def mergeable(one: Content, two: Content, mergebool: bool = True) -> bool:

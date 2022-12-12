@@ -233,25 +233,12 @@ class UnmaskedArray(Content):
         else:
             return self._content
 
-    def _num(self, axis, depth=0):
-        posaxis = ak._do.axis_wrap_if_negative(self, axis)
-        if posaxis == depth:
-            out = self.length
-            if ak._util.is_integer(out):
-                return np.int64(out)
-            else:
-                return out
-        else:
-            return ak.contents.UnmaskedArray(
-                self._content._num(posaxis, depth), parameters=self._parameters
-            )
-
     def _offsets_and_flattened(self, axis, depth):
-        posaxis = ak._do.axis_wrap_if_negative(self, axis)
-        if posaxis == depth:
+        posaxis = ak._util.maybe_posaxis(self, axis, depth)
+        if posaxis is not None and posaxis + 1 == depth:
             raise ak._errors.wrap_error(np.AxisError("axis=0 not allowed for flatten"))
         else:
-            offsets, flattened = self._content._offsets_and_flattened(posaxis, depth)
+            offsets, flattened = self._content._offsets_and_flattened(axis, depth)
             if offsets.length == 0:
                 return (
                     offsets,
@@ -302,12 +289,12 @@ class UnmaskedArray(Content):
         return self._content._fill_none(value)
 
     def _local_index(self, axis, depth):
-        posaxis = ak._do.axis_wrap_if_negative(self, axis)
-        if posaxis == depth:
+        posaxis = ak._util.maybe_posaxis(self, axis, depth)
+        if posaxis is not None and posaxis + 1 == depth:
             return self._local_index_axis0()
         else:
             return UnmaskedArray(
-                self._content._local_index(posaxis, depth), parameters=self._parameters
+                self._content._local_index(axis, depth), parameters=self._parameters
             )
 
     def _numbers_to_type(self, name):
@@ -385,13 +372,13 @@ class UnmaskedArray(Content):
             return out
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
-        posaxis = ak._do.axis_wrap_if_negative(self, axis)
-        if posaxis == depth:
+        posaxis = ak._util.maybe_posaxis(self, axis, depth)
+        if posaxis is not None and posaxis + 1 == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         else:
             return ak.contents.UnmaskedArray(
                 self._content._combinations(
-                    n, replacement, recordlookup, parameters, posaxis, depth
+                    n, replacement, recordlookup, parameters, axis, depth
                 ),
                 parameters=self._parameters,
             )
@@ -427,14 +414,14 @@ class UnmaskedArray(Content):
         return self.content._nbytes_part()
 
     def _pad_none(self, target, axis, depth, clip):
-        posaxis = ak._do.axis_wrap_if_negative(self, axis)
-        if posaxis == depth:
+        posaxis = ak._util.maybe_posaxis(self, axis, depth)
+        if posaxis is not None and posaxis + 1 == depth:
             return self._pad_none_axis0(target, clip)
-        elif posaxis == depth + 1:
-            return self._content._pad_none(target, posaxis, depth, clip)
+        elif posaxis is not None and posaxis + 1 == depth + 1:
+            return self._content._pad_none(target, axis, depth, clip)
         else:
             return ak.contents.UnmaskedArray(
-                self._content._pad_none(target, posaxis, depth, clip),
+                self._content._pad_none(target, axis, depth, clip),
                 parameters=self._parameters,
             )
 

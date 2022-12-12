@@ -119,17 +119,19 @@ def _impl(array, value, axis, highlevel, behavior):
 
     else:
 
-        def action(layout, depth, depth_context, **kwargs):
-            posaxis = ak._do.axis_wrap_if_negative(layout, depth_context["posaxis"])
-            depth_context["posaxis"] = posaxis
-            if posaxis + 1 < depth:
+        def action(layout, depth, **kwargs):
+            posaxis = ak._util.maybe_posaxis(layout, axis, depth)
+            if posaxis is not None and posaxis + 1 < depth:
                 return layout
-            elif posaxis + 1 == depth:
+            elif posaxis is not None and posaxis + 1 == depth:
                 return maybe_fillna(layout)
+            elif layout.is_leaf:
+                raise ak._errors.wrap_error(
+                    np.AxisError(
+                        f"axis={axis} exceeds the depth of this array ({depth})"
+                    )
+                )
 
-    depth_context = {"posaxis": axis}
-    out = ak._do.recursively_apply(
-        arraylayout, action, behavior, depth_context=depth_context
-    )
+    out = ak._do.recursively_apply(arraylayout, action, behavior)
 
     return ak._util.wrap(out, behavior, highlevel)

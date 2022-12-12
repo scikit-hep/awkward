@@ -443,41 +443,12 @@ class RecordArray(Content):
             )
             return next._getitem_next(nexthead, nexttail, advanced)
 
-    def _num(self, axis, depth=0):
-        posaxis = ak._do.axis_wrap_if_negative(self, axis)
-        if posaxis == depth:
-            npsingle = self._backend.index_nplike.full((1,), self.length, np.int64)
-            single = ak.index.Index64(npsingle, nplike=self._backend.index_nplike)
-            singleton = ak.contents.NumpyArray(
-                single, parameters=None, backend=self._backend
-            )
-            contents = [singleton] * len(self._contents)
-            record = ak.contents.RecordArray(
-                contents,
-                self._fields,
-                1,
-                parameters=self._parameters,
-                backend=self._backend,
-            )
-            return record[0]
-        else:
-            contents = []
-            for content in self._contents:
-                contents.append(content._num(posaxis, depth))
-            return ak.contents.RecordArray(
-                contents,
-                self._fields,
-                self._length,
-                parameters=self._parameters,
-                backend=self._backend,
-            )
-
     def _offsets_and_flattened(self, axis, depth):
-        posaxis = ak._do.axis_wrap_if_negative(self, axis)
-        if posaxis == depth:
+        posaxis = ak._util.maybe_posaxis(self, axis, depth)
+        if posaxis is not None and posaxis + 1 == depth:
             raise ak._errors.wrap_error(np.AxisError("axis=0 not allowed for flatten"))
 
-        elif posaxis == depth + 1:
+        elif posaxis is not None and posaxis + 1 == depth + 1:
             raise ak._errors.wrap_error(
                 ValueError(
                     "arrays of records cannot be flattened (but their contents can be; try a different 'axis')"
@@ -488,7 +459,7 @@ class RecordArray(Content):
             contents = []
             for content in self._contents:
                 trimmed = content._getitem_range(slice(0, self.length))
-                offsets, flattened = trimmed._offsets_and_flattened(posaxis, depth)
+                offsets, flattened = trimmed._offsets_and_flattened(axis, depth)
                 if self._backend.nplike.known_shape and offsets.length != 0:
                     raise ak._errors.wrap_error(
                         AssertionError(
@@ -687,13 +658,13 @@ class RecordArray(Content):
         )
 
     def _local_index(self, axis, depth):
-        posaxis = ak._do.axis_wrap_if_negative(self, axis)
-        if posaxis == depth:
+        posaxis = ak._util.maybe_posaxis(self, axis, depth)
+        if posaxis is not None and posaxis + 1 == depth:
             return self._local_index_axis0()
         else:
             contents = []
             for content in self._contents:
-                contents.append(content._local_index(posaxis, depth))
+                contents.append(content._local_index(axis, depth))
             return RecordArray(
                 contents,
                 self._fields,
@@ -770,15 +741,15 @@ class RecordArray(Content):
         )
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
-        posaxis = ak._do.axis_wrap_if_negative(self, axis)
-        if posaxis == depth:
+        posaxis = ak._util.maybe_posaxis(self, axis, depth)
+        if posaxis is not None and posaxis + 1 == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         else:
             contents = []
             for content in self._contents:
                 contents.append(
                     content._combinations(
-                        n, replacement, recordlookup, parameters, posaxis, depth
+                        n, replacement, recordlookup, parameters, axis, depth
                     )
                 )
             return ak.contents.RecordArray(
@@ -834,13 +805,13 @@ class RecordArray(Content):
         return result
 
     def _pad_none(self, target, axis, depth, clip):
-        posaxis = ak._do.axis_wrap_if_negative(self, axis)
-        if posaxis == depth:
+        posaxis = ak._util.maybe_posaxis(self, axis, depth)
+        if posaxis is not None and posaxis + 1 == depth:
             return self._pad_none_axis0(target, clip)
         else:
             contents = []
             for content in self._contents:
-                contents.append(content._pad_none(target, posaxis, depth, clip))
+                contents.append(content._pad_none(target, axis, depth, clip))
             if len(contents) == 0:
                 return ak.contents.RecordArray(
                     contents,

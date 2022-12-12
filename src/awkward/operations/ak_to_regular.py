@@ -56,7 +56,6 @@ def to_regular(array, axis=1, *, highlevel=True, behavior=None):
 def _impl(array, axis, highlevel, behavior):
     layout = ak.operations.to_layout(array)
     behavior = ak._util.behavior_of(array, behavior=behavior)
-    posaxis = ak._do.axis_wrap_if_negative(layout, axis)
 
     if axis is None:
 
@@ -66,25 +65,23 @@ def _impl(array, axis, highlevel, behavior):
 
         out = ak._do.recursively_apply(layout, action, behavior)
 
-    elif posaxis == 0:
+    elif ak._util.maybe_posaxis(layout, axis, 1) == 0:
         out = layout  # the top-level can only be regular (ArrayType)
 
     else:
 
-        def action(layout, depth, depth_context, **kwargs):
-            posaxis = ak._do.axis_wrap_if_negative(layout, depth_context["posaxis"])
+        def action(layout, depth, **kwargs):
+            posaxis = ak._util.maybe_posaxis(layout, axis, depth)
             if posaxis == depth and layout.is_list:
                 return layout.to_RegularArray()
-            elif posaxis == 0:
+
+            elif layout.is_leaf:
                 raise ak._errors.wrap_error(
                     np.AxisError(
                         f"axis={axis} exceeds the depth of this array ({depth})"
                     )
                 )
 
-            depth_context["posaxis"] = posaxis
-
-        depth_context = {"posaxis": posaxis}
-        out = ak._do.recursively_apply(layout, action, behavior, depth_context)
+        out = ak._do.recursively_apply(layout, action, behavior)
 
     return ak._util.wrap(out, behavior, highlevel)

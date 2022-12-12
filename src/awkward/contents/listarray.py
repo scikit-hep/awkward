@@ -894,38 +894,6 @@ class ListArray(Content):
         else:
             raise ak._errors.wrap_error(AssertionError(repr(head)))
 
-    def _num(self, axis, depth=0):
-        posaxis = ak._do.axis_wrap_if_negative(self, axis)
-        if posaxis == depth:
-            out = self.length
-            if ak._util.is_integer(out):
-                return np.int64(out)
-            else:
-                return out
-        elif posaxis == depth + 1:
-            tonum = ak.index.Index64.empty(self.length, self._backend.index_nplike)
-            assert (
-                tonum.nplike is self._backend.index_nplike
-                and self._starts.nplike is self._backend.index_nplike
-                and self._stops.nplike is self._backend.index_nplike
-            )
-            self._handle_error(
-                self._backend[
-                    "awkward_ListArray_num",
-                    tonum.dtype.type,
-                    self._starts.dtype.type,
-                    self._stops.dtype.type,
-                ](
-                    tonum.data,
-                    self._starts.data,
-                    self._stops.data,
-                    self.length,
-                )
-            )
-            return ak.contents.NumpyArray(tonum, parameters=None, backend=self._backend)
-        else:
-            return self.to_ListOffsetArray64(True)._num(posaxis, depth)
-
     def _offsets_and_flattened(self, axis, depth):
         return self.to_ListOffsetArray64(True)._offsets_and_flattened(axis, depth)
 
@@ -1100,10 +1068,10 @@ class ListArray(Content):
         )
 
     def _local_index(self, axis, depth):
-        posaxis = ak._do.axis_wrap_if_negative(self, axis)
-        if posaxis == depth:
+        posaxis = ak._util.maybe_posaxis(self, axis, depth)
+        if posaxis is not None and posaxis + 1 == depth:
             return self._local_index_axis0()
-        elif posaxis == depth + 1:
+        elif posaxis is not None and posaxis + 1 == depth + 1:
             offsets = self._compact_offsets64(True)
             if self._backend.nplike.known_data:
                 innerlength = offsets[offsets.length - 1]
@@ -1132,7 +1100,7 @@ class ListArray(Content):
             return ak.contents.ListArray(
                 self._starts,
                 self._stops,
-                self._content._local_index(posaxis, depth + 1),
+                self._content._local_index(axis, depth + 1),
             )
 
     def _numbers_to_type(self, name):
@@ -1265,10 +1233,10 @@ class ListArray(Content):
 
     def _pad_none(self, target, axis, depth, clip):
         if not clip:
-            posaxis = ak._do.axis_wrap_if_negative(self, axis)
-            if posaxis == depth:
+            posaxis = ak._util.maybe_posaxis(self, axis, depth)
+            if posaxis is not None and posaxis + 1 == depth:
                 return self._pad_none_axis0(target, clip)
-            elif posaxis == depth + 1:
+            elif posaxis is not None and posaxis + 1 == depth + 1:
                 min_ = ak.index.Index64.empty(1, self._backend.index_nplike)
                 assert (
                     min_.nplike is self._backend.index_nplike
@@ -1361,7 +1329,7 @@ class ListArray(Content):
                 return ak.contents.ListArray(
                     self._starts,
                     self._stops,
-                    self._content._pad_none(target, posaxis, depth + 1, clip),
+                    self._content._pad_none(target, axis, depth + 1, clip),
                     parameters=self._parameters,
                 )
         else:

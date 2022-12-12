@@ -1,28 +1,8 @@
 version: 2
-
-sphinx:
-  configuration: docs/conf.py
-
 build:
-  os: ubuntu-22.04
+  os: "ubuntu-22.04"
   tools:
     python: "3.10"
-  jobs:
-    pre_build:
-      - pip install requests pyyaml
-      # Generate required code / metadata
-      - python3 dev/generate-kernel-docs.py
-      # Download built artefacts
-      - python3 dev/download-github-artefact.py scikit-hep/awkward-1.0 "^jupyter-cache$" -d docs/_build/.jupyter_cache
-      - python3 dev/download-github-artefact.py scikit-hep/awkward-1.0 "^awkward-cpp-wasm$" -d docs/lite/pypi
-      - python3 dev/download-github-artefact.py scikit-hep/awkward-1.0 "^awkward$" -d docs/lite/pypi
-      # Build Doxygen
-      - env --chdir=awkward-cpp/docs -- doxygen
-      # Copy doxygen to static
-      - mkdir -p docs/_static/
-      - cp -r awkward-cpp/docs/html/ docs/_static/doxygen
-
-python:
-  install:
-    # Don't install the conda env, as we won't run any notebooks!
-    - requirements: docs/requirements.txt
+  commands:
+    - mkdir --parents _readthedocs/html/
+    - python3 dev/generate-redirects.py docs/redirects.json _readthedocs/html/

@@ -167,7 +167,7 @@ or
             return [(ak.operations.to_numpy(layout), row_arrays, col_names)]
 
         elif layout.purelist_depth > 1:
-            offsets, flattened = layout._offsets_and_flattened(axis=1, depth=0)
+            offsets, flattened = layout._offsets_and_flattened(axis=1, depth=1)
             offsets = numpy.asarray(offsets)
             starts, stops = offsets[:-1], offsets[1:]
             counts = stops - starts
