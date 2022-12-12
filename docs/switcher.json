@@ -1,0 +1,10 @@
+[
+    {
+        "name": "latest",
+        "url": "https://awkward-array.org/latest/"
+    },
+    {
+        "version": "2.0",
+        "url": "https://awkward-array.org/2.0/"
+    }
+]
