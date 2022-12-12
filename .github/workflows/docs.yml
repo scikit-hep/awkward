@@ -222,6 +222,7 @@ jobs:
       contents: read
     env:
       S3_BUCKET: "awkward-array.org-test"
+      S3_WEBSITE_URL: "http://awkward-array.org-test.s3-website.eu-west-2.amazonaws.com"
     steps:
     - uses: actions/checkout@v3
     - name: Configure AWS credentials
@@ -242,4 +243,5 @@ jobs:
       uses: actions/github-script@v6
       with:
         script: |
-            console.log("TODO");
+            const script = require('./dev/docs-edit-message.js');
+            console.log(script(github, context, "${S3_WEBSITE_URL}/${{ github.head_ref }}"));
