@@ -12,12 +12,6 @@ concurrency:
   group: 'docs-${{ github.head_ref || github.run_id }}'
   cancel-in-progress: true
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
 env:
   PYTHON_VERSION: "3.10.6"
   SOURCE_DATE_EPOCH: "1668811211"
@@ -280,6 +274,11 @@ jobs:
     needs: [build-docs]
     # We can only deploy for PRs on host repo, or pushes to main
     if: ${{ github.event_name == 'push' }}
+    # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
     steps:
     - uses: actions/checkout@v3
     - name: Setup Pages
