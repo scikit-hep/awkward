@@ -220,6 +220,8 @@ jobs:
     permissions:
       id-token: write
       contents: read
+    env:
+      S3_BUCKET: "awkward-array.org-test"
     steps:
     - uses: actions/checkout@v3
     - name: Configure AWS credentials
