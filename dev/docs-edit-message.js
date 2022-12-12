@@ -7,7 +7,7 @@ async function update_pr_description(github, context, preview_url) {
     });
     const MESSAGE_START = `<!-- docs-preview-start -->`;
     const MESSAGE_END = `<!-- docs-preview-end -->`;
-    const MESSAGE_BODY = `----\n:books: The documentation for this PR will be available at <${preview_url}/> once Read the Docs has finished building :hammer:`;
+    const MESSAGE_BODY = `----\n:books: The documentation for this PR is available at <${preview_url}/> :sparkles:`;
     const MESSAGE = `\r\n\r\n${MESSAGE_START}\r\n${MESSAGE_BODY}\r\n${MESSAGE_END}`
 
     // Only include message if this is the first time.
