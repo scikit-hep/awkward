@@ -216,7 +216,7 @@ jobs:
         for record in data:
           if record['status'] == "broken":
             print(
-              "::error file={filename},line={lineno}::{status} (code: {code})".format_map(record)
+              "::error file={output_path / filename},line={lineno}::{status} (code: {code})".format_map(record)
             )
       shell: python
 
