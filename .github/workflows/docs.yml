@@ -241,7 +241,6 @@ jobs:
     permissions:
       id-token: write
       contents: read
-      pull-requests: write
     env:
       S3_BUCKET: "awkward-array.org-test"
       S3_WEBSITE_URL: "http://awkward-array.org-test.s3-website.eu-west-2.amazonaws.com"
