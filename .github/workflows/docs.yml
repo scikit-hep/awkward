@@ -8,12 +8,6 @@ on:
     types: [released]
   workflow_dispatch:
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
 concurrency:
   group: 'docs-${{ github.head_ref || github.run_id }}'
   cancel-in-progress: true
@@ -133,6 +127,7 @@ jobs:
         name: awkward
         path: dist/awkward*.whl
 
+
   build-docs:
     runs-on: ubuntu-22.04
     needs: [awkward-cpp-wasm, awkward-cpp-x86-64, awkward]
@@ -217,7 +212,7 @@ jobs:
 
         with output_path.open() as f:
           data = [json.loads(l) for l in f]
-
+        print(data)
         for record in data:
           if record['status'] == "broken":
             print(
@@ -225,6 +220,11 @@ jobs:
             )
       shell: python
 
+    - name: Upload docs artefact
+      uses: actions/upload-artifact@v3
+      with:
+        name: docs
+        path: docs/_build/html
 
       # TODO HACK!
     - name: Layout documentation
@@ -260,11 +260,47 @@ jobs:
         name: jupyter-cache
         path: docs/_build/.jupyter_cache
 
+  branch-preview:
+    runs-on: ubuntu-22.04
+    needs: [build-docs]
+    # We can only deploy for PRs on host repo
+    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      S3_BUCKET: "awkward-array.org-test"
+      S3_WEBSITE_URL: "http://awkward-array.org-test.s3-website.eu-west-2.amazonaws.com"
+    environment:
+      name: docs-preview
+      url: ${{ env.S3_WEBSITE_URL }}/${{ github.head_ref }}
+    steps:
+    - uses: actions/checkout@v3
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-region: eu-west-2
+        role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE }}
+    - name: Download rendered docs
+      uses: actions/download-artifact@v3
+      with:
+        name: docs
+        path: built-docs
+    - name: Sync artefacts
+      run: |
+        aws s3 sync built-docs/ "s3://${S3_BUCKET}/${{ github.head_ref }}"
+        # TODO: invalidate cloudfront
+
   deploy-docs:
     runs-on: ubuntu-22.04
     needs: [build-docs]
     # We can only deploy for PRs on host repo, or pushes to main
     if: ${{ github.event_name == 'push' }}
+    # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
     steps:
     - uses: actions/checkout@v3
     - name: Setup Pages
