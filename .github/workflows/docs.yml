@@ -269,7 +269,7 @@ jobs:
       with:
         script: |
             const script = require('./dev/docs-edit-message.js');
-            console.log(script(github, context, "${{ environment.url }}"));
+            console.log(script(github, context, "${{ env.S3_WEBSITE_URL }}/${{ github.head_ref }}"));
 
   deploy-docs:
     runs-on: ubuntu-22.04
