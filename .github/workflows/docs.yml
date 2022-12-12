@@ -238,7 +238,6 @@ jobs:
     needs: [build-docs]
     # We can only deploy for PRs on host repo
     if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
-    environment: docs-preview
     permissions:
       id-token: write
       contents: read
@@ -246,6 +245,9 @@ jobs:
     env:
       S3_BUCKET: "awkward-array.org-test"
       S3_WEBSITE_URL: "http://awkward-array.org-test.s3-website.eu-west-2.amazonaws.com"
+    environment:
+      name: docs-preview
+      url: ${{ env.S3_WEBSITE_URL }}/${{ github.head_ref }}
     steps:
     - uses: actions/checkout@v3
     - name: Configure AWS credentials
@@ -267,7 +269,7 @@ jobs:
       with:
         script: |
             const script = require('./dev/docs-edit-message.js');
-            console.log(script(github, context, "${{ env.S3_WEBSITE_URL }}/${{ github.head_ref }}"));
+            console.log(script(github, context, "${{ environment.url }}"));
 
   deploy-docs:
     runs-on: ubuntu-22.04
