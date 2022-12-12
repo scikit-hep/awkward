@@ -264,12 +264,6 @@ jobs:
       run: |
         aws s3 sync built-docs/ "s3://${S3_BUCKET}/${{ github.head_ref }}"
         # TODO: invalidate cloudfront
-    - name: Edit PR description
-      uses: actions/github-script@v6
-      with:
-        script: |
-            const script = require('./dev/docs-edit-message.js');
-            console.log(script(github, context, "${{ env.S3_WEBSITE_URL }}/${{ github.head_ref }}"));
 
   deploy-docs:
     runs-on: ubuntu-22.04
