@@ -10,6 +10,7 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
+import awkward
 import os
 import json
 import datetime
@@ -21,6 +22,8 @@ import pathlib
 project = "Awkward Array"
 copyright = f"{datetime.datetime.now().year}, Awkward Array development team"
 author = "Jim Pivarski"
+version = ".".join(awkward.__version__.split(".", 2))
+release = awkward.__version__
 
 # -- General configuration ---------------------------------------------------
 
@@ -93,6 +96,12 @@ html_theme_options = {
     }
 }
 
+# Don't show version for offline builds by default
+if "DOCS_SHOW_VERSION" in os.environ:
+    html_theme_options["switcher"] = {
+        "json_url": "https://awkward-array.org/switcher.json",
+        "version_match": version,
+    }
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
