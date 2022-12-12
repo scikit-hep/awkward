@@ -219,9 +219,10 @@ jobs:
           data = [json.loads(l) for l in f]
 
         for record in data:
-          print(
-            "::error file={filename},line={lineno}::{status} (code: {code})".format_map(record)
-          )
+          if record['code'] == "broken":
+            print(
+              "::error file={filename},line={lineno}::{status} (code: {code})".format_map(record)
+            )
       shell: python
 
 
