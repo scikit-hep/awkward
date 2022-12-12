@@ -133,6 +133,7 @@ jobs:
         name: awkward
         path: dist/awkward*.whl
 
+
   build-docs:
     runs-on: ubuntu-22.04
     needs: [awkward-cpp-wasm, awkward-cpp-x86-64, awkward]
@@ -204,27 +205,11 @@ jobs:
       run: sphinx-build -M html . _build/
       working-directory: docs
 
-      # TODO HACK!
-    - name: Layout documentation
-      run: |
-        # Setup docs with `/doc/main` path
-        mkdir -p "/tmp/awkward-docs/doc"
-        cp -r docs/_build/html \
-                 "/tmp/awkward-docs/doc/main"
-        # Redirect from doc/
-        cat <<- 'EOF' > /tmp/awkward-docs/index.html
-            <html>
-              <head>
-                <meta http-equiv="refresh" content="1; url=https://awkward-array.org/doc/main">
-              </head>
-            </html>
-        EOF
-
     - name: Upload Pages artefact
-      uses: actions/upload-pages-artifact@v1
+      uses: actions/upload-artifact@v3
       with:
-        # Upload entire repository
-        path: /tmp/awkward-docs
+        name: docs
+        path: docs/_build/html
 
     - name: Upload Jupyter Book cache
       uses: actions/upload-artifact@v3
@@ -232,16 +217,59 @@ jobs:
         name: jupyter-cache
         path: docs/_build/.jupyter_cache
 
+  deploy-branch-preview:
+    runs-on: ubuntu-22.04
+    needs: [build-docs]
+    # We can only deploy for PRs on host repo
+    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
+    environment:
+      S3_BUCKET = "awkward-array.org-test"
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+    - uses: actions/checkout@v3
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        role-to-assume: arn:aws:iam::812503595850:oidc-provider/token.actions.githubusercontent.com
+        aws-region: eu-west-2
+    - name: Sync artefacts
+      run: |
+        aws s3 sync docs/_build/html "s3://${S3_BUCKET}/${{ github.ref_name }}"
+        # TODO: invalidate cloudfront
+    - name: Edit PR description
+      uses: actions/github-script@v6
+      with:
+        script: |
+            console.log("TODO");
+
   deploy-docs:
     runs-on: ubuntu-22.04
     needs: [build-docs]
     # We can only deploy for PRs on host repo, or pushes to main
     if: ${{ github.event_name == 'push' }}
+    environment:
+      S3_BUCKET = "awkward-array.org-test"
     steps:
     - uses: actions/checkout@v3
-    - name: Setup Pages
-      uses: actions/configure-pages@v2
-
-    - name: Deploy to GitHub Pages
-      id: deployment
-      uses: actions/deploy-pages@v1
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+    - name: Compute version
+      run: |
+        import os
+        import tomllib
+        with open("pyproject.toml") as f:
+          full_version = tomllib.load(f)['project']['version']
+        major, minor, _ = full_version.split(".", 2)
+        with open(os.environ['GITHUB_ENV'], "a") as f:
+          f.write(f"VERSION={major}.{minor}")
+      shell: python
+    - name: Sync artefacts
+      run: |
+        aws s3 sync docs/_build/html "s3://${S3_BUCKET}/docs/${VERSION}/"
+        aws s3 sync docs/_build/html "s3://${S3_BUCKET}/docs/latest/"
+        aws s3 cp docs/switcher.json "s3://${S3_BUCKET}/"
+        # TODO: invalidate cloudfront
