@@ -227,6 +227,11 @@ jobs:
       with:
         aws-region: eu-west-2
         role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE }}
+    - name: Download rendered docs
+      uses: actions/download-artifact@v3
+      with:
+        name: docs
+        path: docs
     - name: Sync artefacts
       run: |
         aws s3 sync docs/_build/html "s3://${S3_BUCKET}/${{ github.head_ref }}"
