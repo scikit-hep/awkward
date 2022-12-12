@@ -227,10 +227,9 @@ jobs:
       with:
         aws-region: eu-west-2
         role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE }}
-        role-session-name: OIDCSession
     - name: Sync artefacts
       run: |
-        aws s3 sync docs/_build/html "s3://${S3_BUCKET}/${{ github.ref_name }}"
+        aws s3 sync docs/_build/html "s3://${S3_BUCKET}/${{ github.head_ref }}"
         # TODO: invalidate cloudfront
     - name: Edit PR description
       uses: actions/github-script@v6
