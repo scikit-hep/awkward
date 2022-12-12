@@ -211,7 +211,7 @@ jobs:
         name: jupyter-cache
         path: docs/_build/.jupyter_cache
 
-  deploy-branch-preview:
+  branch-preview:
     runs-on: ubuntu-22.04
     needs: [build-docs]
     # We can only deploy for PRs on host repo
@@ -235,10 +235,10 @@ jobs:
       uses: actions/download-artifact@v3
       with:
         name: docs
-        path: docs
+        path: built-docs
     - name: Sync artefacts
       run: |
-        aws s3 sync docs/ "s3://${S3_BUCKET}/${{ github.head_ref }}"
+        aws s3 sync built-docs/ "s3://${S3_BUCKET}/${{ github.head_ref }}"
         # TODO: invalidate cloudfront
     - name: Edit PR description
       uses: actions/github-script@v6
@@ -246,3 +246,48 @@ jobs:
         script: |
             const script = require('./dev/docs-edit-message.js');
             console.log(script(github, context, "${{ env.S3_WEBSITE_URL }}/${{ github.head_ref }}"));
+
+  deploy:
+    runs-on: ubuntu-22.04
+    needs: [build-docs]
+    # We can only deploy for PRs on host repo
+    if: ${{ github.event_name == 'push' }}
+    environment: docs-deploy
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      S3_BUCKET: "awkward-array.org-test"
+      DOCS_SHOW_VERSION: 1
+    steps:
+    - uses: actions/checkout@v3
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-region: eu-west-2
+        role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE }}
+    - name: Download rendered docs
+      uses: actions/download-artifact@v3
+      with:
+        name: docs
+        path: built-docs
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+    - name: Compute version
+      run: |
+        import os
+        import tomllib
+        with open("pyproject.toml") as f:
+          full_version = tomllib.load(f)['project']['version']
+        major, minor, _ = full_version.split(".", 2)
+        with open(os.environ['GITHUB_ENV'], "a") as f:
+          f.write(f"VERSION={major}.{minor}")
+      shell: python
+    - name: Sync artefacts
+      run: |
+        aws s3 sync built-docs/ "s3://${S3_BUCKET}/docs/${VERSION}/"
+        aws s3 sync built-docs/ "s3://${S3_BUCKET}/docs/latest/"
+        aws s3 cp docs/switcher.json "s3://${S3_BUCKET}/docs/"
+        # TODO: invalidate cloudfront
