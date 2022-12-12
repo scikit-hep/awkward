@@ -208,7 +208,7 @@ jobs:
       run: |
         import pathlib
         import json
-        output_path = pathlib.Path("docs", "_build", "linkcheck", "output.json")
+        output_path = pathlib.Path("_build", "linkcheck", "output.json")
 
         with output_path.open() as f:
           data = [json.loads(l) for l in f]
@@ -216,9 +216,10 @@ jobs:
         for record in data:
           if record['status'] == "broken":
             print(
-              "::error file={output_path / filename},line={lineno}::{status} (code: {code})".format_map(record)
+              "::error file={filename},line={lineno}::{status} (code: {code})".format_map(record)
             )
       shell: python
+      working-directory: docs
 
     - name: Upload docs artefact
       uses: actions/upload-artifact@v3
