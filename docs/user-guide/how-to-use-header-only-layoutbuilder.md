@@ -235,4 +235,4 @@ Now you can pass everything over the border from C++ to Python using pybind11's 
 
 More Examples
 -------------
-The examples for other Layout Builders can be found [here](https://github.com/scikit-hep/awkward/blob/main/tests-cpp/test_1494-layout-builder.cpp).
+Examples for other Layout Builders can be found [here](https://github.com/scikit-hep/awkward/blob/main/tests-cpp/test_1494-layout-builder.cpp).
