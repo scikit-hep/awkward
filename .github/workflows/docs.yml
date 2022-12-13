@@ -221,7 +221,7 @@ jobs:
             continue
           record['path'] = (docs_path / record['filename'])
           print(
-            "::error file={path},line={lineno}::{uri} URI was {status} (code: {code})".format_map(record)
+            "::error file={path},line={lineno}::{uri} URI was {status} (code: {code}): {info}".format_map(record)
           )
       shell: python
 
