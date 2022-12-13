@@ -33,7 +33,7 @@ def from_json(
         source (bytes/str, pathlib.Path, or file-like object): Data source of the
             JSON-formatted string(s). If bytes/str, the string is parsed. If a
             `pathlib.Path`, a file with that name is opened, parsed, and closed.
-            If that path has a URI protocol (like "https://" or "s3://"), this
+            If that path has a URI protocol (like `"https://"` or `"s3://"`), this
             function attempts to open the file with the fsspec library. If a
             file-like object with a `read` method, this function reads from the
             object, but does not close it.
@@ -93,7 +93,7 @@ def from_json(
         <Array [[1.1, 2.2, 3.3], [], [4.4, 5.5]] type='3 * var * float64'>
 
     File names/paths need to be wrapped in `pathlib.Path`, and remote files are
-    recognized by URI protocol (like "https://" or "s3://") and handled by fsspec
+    recognized by URI protocol (like `"https://"` or `"s3://"`) and handled by fsspec
     (which must be installed).
 
         >>> import pathlib
