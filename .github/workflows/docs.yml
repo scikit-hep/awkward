@@ -216,11 +216,13 @@ jobs:
         with output_path.open() as f:
           data = [json.loads(l) for l in f]
 
-        for record in data: if record['status'] == "broken":
-            record['path'] = (docs_path / record['filename'])
-            print(
-              "::error file={path},line={lineno}::{uri} URI was {status} (code: {code})".format_map(record)
-            )
+        for record in data:
+          if record['status'] != "broken":
+            continue
+          record['path'] = (docs_path / record['filename'])
+          print(
+            "::error file={path},line={lineno}::{uri} URI was {status} (code: {code})".format_map(record)
+          )
       shell: python
 
     - name: Upload docs artefact
