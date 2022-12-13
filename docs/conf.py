@@ -144,7 +144,8 @@ jupyterlite_bind_ipynb_suffix = False
 jupyterlite_contents = ["getting-started/demo/*"]
 
 linkcheck_ignore = [
-    r"^https?:\/\/github\.com\/.*$"
+    r"^https?:\/\/github\.com\/.*$",
+    r"getting-started\/try-awkward-array\.html"  # Relative link won't resolve
 ]
 
 HERE = pathlib.Path(__file__).parent

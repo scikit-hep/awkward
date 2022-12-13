@@ -57,10 +57,8 @@ def from_json(
         buffersize (int): Number of bytes in each read from source: larger
             values use more memory but read less frequently. (Python GIL is
             released before and after read events.)
-        initial (int): Initial size (in bytes) of buffers used by the
-            [ak::ArrayBuilder](_static/classawkward_1_1ArrayBuilder.html).
-        resize (float): Resize multiplier for buffers used by the
-            [ak::ArrayBuilder](_static/classawkward_1_1ArrayBuilder.html);
+        initial (int): Initial size (in bytes) of buffers used by the `ak::ArrayBuilder`.
+        resize (float): Resize multiplier for buffers used by the `ak::ArrayBuilder`;
             should be strictly greater than 1.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
