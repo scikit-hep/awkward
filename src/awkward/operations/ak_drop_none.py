@@ -24,16 +24,16 @@ def drop_none(array, axis=None, highlevel=True, behavior=None):
 
     For example, in the following `array`,
 
-       a = ak.Array([[[0]], [[None]], [[1], None], [[2, None]]])
+        >>> array = ak.Array([[[0]], [[None]], [[1], None], [[2, None]]])
 
     The None value will be removed, resulting in
 
-        >>> ak.drop_none(a)
+        >>> ak.drop_none(array)
         <Array [[[0]], [[]], [[1]], [[2]]] type='4 * var * var * int64'>
 
     The default axis is None, however an axis can be specified:
 
-        >>> ak.drop_none(a,axis=1)
+        >>> ak.drop_none(array, axis=1)
         <Array [[[0]], [[None]], [[1]], [[2, None]]] type='4 * var * var * ?int64'>
 
     """
