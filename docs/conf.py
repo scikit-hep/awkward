@@ -143,7 +143,7 @@ jupyterlite_bind_ipynb_suffix = False
 # We've disabled localstorage, so we must provide the contents explicitly
 jupyterlite_contents = ["getting-started/demo/*"]
 
-linkcheck_anchors_ignore = [
+linkcheck_ignore = [
     r"^https?:\/\/github\.com\/.*$"
 ]
 
