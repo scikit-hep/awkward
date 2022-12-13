@@ -143,6 +143,10 @@ jupyterlite_bind_ipynb_suffix = False
 # We've disabled localstorage, so we must provide the contents explicitly
 jupyterlite_contents = ["getting-started/demo/*"]
 
+linkcheck_anchors_ignore = [
+    r"^https?:\/\/github\.com\/.*$"
+]
+
 HERE = pathlib.Path(__file__).parent
 
 # Generate Python docstrings
