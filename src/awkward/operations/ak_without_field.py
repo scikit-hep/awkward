@@ -48,9 +48,9 @@ def _impl(base, where, highlevel, behavior):
     behavior = ak._util.behavior_of(base, behavior=behavior)
     base = ak.operations.to_layout(base, allow_record=True, allow_other=False)
 
-    def action(layout, lateral_context, **kwargs):
+    def action(layout, depth_context, **kwargs):
         if isinstance(layout, ak.contents.RecordArray):
-            field, *next_where = lateral_context["where"]
+            field, *next_where = depth_context["where"]
 
             # For parent record arrays, we don't change the fields, just
             # modify the contents
@@ -64,7 +64,7 @@ def _impl(base, where, highlevel, behavior):
                             content,
                             action,
                             behavior,
-                            lateral_context={"where": next_where},
+                            depth_context={"where": next_where},
                         )
                         next_contents.append(next_content)
                     else:
@@ -88,6 +88,6 @@ def _impl(base, where, highlevel, behavior):
             return None
 
     out = ak._do.recursively_apply(
-        base, action, behavior, lateral_context={"where": where}
+        base, action, behavior, depth_context={"where": where}
     )
     return ak._util.wrap(out, behavior, highlevel)
