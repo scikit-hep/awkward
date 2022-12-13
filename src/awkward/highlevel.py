@@ -556,7 +556,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         All methods of selecting items described in
         [NumPy indexing](https://docs.scipy.org/doc/numpy/reference/arrays.indexing.html)
         are supported with one exception
-        ([combining advanced and basic indexing](https://docs.scipy.org/doc/numpy/reference/arrays.indexing.html#combining-advanced-and-basic-indexing)
+        ([combining advanced and basic indexing](https://numpy.org/doc/stable/user/basics.indexing.html#combining-advanced-and-basic-indexing)
         with basic indexes *between* two advanced indexes: the definition
         NumPy chose for the result does not have a generalization beyond
         rectilinear arrays).
@@ -583,7 +583,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
           position in the tuple is to the left of the dimension where the
           tuple/record is defined. (See <<projection>> below.) This is
           similar to NumPy's
-          [field access](https://docs.scipy.org/doc/numpy/reference/arrays.indexing.html#field-access),
+          [field access](https://numpy.org/doc/stable/user/basics.indexing.html#field-access),
           except that strings are allowed in the same tuple with other
           slice types. While record fields have names, tuple fields are
           integer strings, such as `"0"`, `"1"`, `"2"` (always
@@ -627,7 +627,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         A tuple of the above applies each slice item to a dimension of the
         data, which can be very expressive. More than one flat boolean/integer
         array are "iterated as one" as described in the
-        [NumPy documentation](https://docs.scipy.org/doc/numpy/reference/arrays.indexing.html#integer-array-indexing).
+        [NumPy documentation](https://numpy.org/doc/stable/user/basics.indexing.html#integer-array-indexing).
 
         Filtering
         *********
@@ -2095,10 +2095,8 @@ class ArrayBuilder(Sized):
     Args:
         behavior (None or dict): Custom #ak.behavior for arrays built by
             this ArrayBuilder.
-        initial (int): Initial size (in bytes) of buffers used by the
-            [ak::ArrayBuilder](../_static/doxygen/classawkward_1_1ArrayBuilder.html).
-        resize (float): Resize multiplier for buffers used by the
-            [ak::ArrayBuilder](../_static/doxygen/classawkward_1_1ArrayBuilder.html);
+        initial (int): Initial size (in bytes) of buffers used by the `ak::ArrayBuilder`.
+        resize (float): Resize multiplier for buffers used by the `ak::ArrayBuilder`;
             should be strictly greater than 1.
 
     General tool for building arrays of nested data structures from a sequence
