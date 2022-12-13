@@ -223,6 +223,9 @@ jobs:
           print(
             "::error file={path},line={lineno}::{uri} URI was {status} (code: {code}): {info}".format_map(record)
           )
+          print(
+            "??file={path},line={lineno}??{uri} URI was {status} (code: {code}): {info}".format_map(record)
+          )
       shell: python
 
     - name: Upload docs artefact
