@@ -212,6 +212,10 @@ jobs:
         mkdir -p "/tmp/awkward-docs/doc"
         cp -r docs/_build/html \
                  "/tmp/awkward-docs/doc/main"
+        cp -r docs/_build/html \
+                 "/tmp/awkward-docs/doc/stable"
+        cp -r docs/_build/html \
+                 "/tmp/awkward-docs/doc/2.0"
         # Redirect from doc/
         cat <<- 'EOF' > /tmp/awkward-docs/index.html
             <html>
