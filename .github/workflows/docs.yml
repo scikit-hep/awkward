@@ -271,8 +271,10 @@ jobs:
     runs-on: ubuntu-22.04
     needs: [ build-docs ]
     # We can only deploy for PRs on host repo
-    if: ${{ github.event_name == 'push' }}
-    environment: docs-prod
+    if: github.event_name == 'push' || github.event_name == 'release'
+    environment:
+      name: docs-prod
+      url: ${{ env.PREVIEW_URL }}/doc/latest
     permissions:
       id-token: write
       contents: read
@@ -306,12 +308,19 @@ jobs:
           with open(os.environ['GITHUB_ENV'], "a") as f:
             f.write(f"VERSION={major}.{minor}")
         shell: python
-      - name: Sync artefacts
+      # Pushes to main trigger latest
+      - name: Sync `latest`
+        if: github.event_name == 'push'
         run: |
-          aws s3 sync built-docs/ "s3://${S3_BUCKET}/docs/${VERSION}/"
-          aws s3 sync built-docs/ "s3://${S3_BUCKET}/docs/latest/"
-          aws s3 cp docs/switcher.json "s3://${S3_BUCKET}/docs/"
           # TODO: invalidate cloudfront
+          aws s3 sync built-docs/ "s3://${S3_BUCKET}/docs/latest/"
+      # Releases trigger versions
+      - name: Sync `release`
+        if: github.event_name == 'release'
+        run: |
+          # TODO: invalidate cloudfront
+          aws s3 sync built-docs/ "s3://${S3_BUCKET}/docs/${VERSION}/"
+          aws s3 cp docs/switcher.json "s3://${S3_BUCKET}/docs/"
 
   deploy-docs:
     runs-on: ubuntu-22.04
