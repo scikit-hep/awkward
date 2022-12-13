@@ -5,6 +5,7 @@ import copy
 from collections.abc import Iterable
 
 import awkward as ak
+from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.typing import Self
 
@@ -221,8 +222,13 @@ class Record:
         else:
             return dict(zip(self._array.fields, contents))
 
-    def __copy__(self):
-        return Record(self._array, self._at)
+    def __copy__(self) -> Self:
+        return self.copy()
 
     def __deepcopy__(self, memo):
         return Record(copy.deepcopy(self._array, memo), self._at)
+
+    def copy(self, array=unset, at=unset) -> Self:
+        return Record(
+            self._array if array is unset else array, self._at if at is unset else at
+        )
