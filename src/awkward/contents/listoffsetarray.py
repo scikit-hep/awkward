@@ -1979,31 +1979,34 @@ class ListOffsetArray(Content):
         if self._content.is_option:
             _, _, none_indexes = self._content._nextcarry_outindex(self._nplike)
             new_content = self._content._drop_none()
-            new_offsets = ak.index.Index64.empty(self._offsets.length, self._nplike)
-
-            assert (
-                new_offsets.nplike is self._nplike
-                and self._offsets.nplike is self._nplike
-                and none_indexes.nplike is self._nplike
-            )
-
-            self._handle_error(
-                self._nplike[
-                    "awkward_ListOffsetArray_drop_none_indexes",
-                    new_offsets.dtype.type,
-                    none_indexes.dtype.type,
-                    self._offsets.dtype.type,
-                ](
-                    new_offsets.data,
-                    none_indexes.data,
-                    self._offsets.data,
-                    self._offsets.length,
-                    none_indexes.length,
-                )
-            )
-            return ak.contents.ListOffsetArray(new_offsets, new_content)
+            return self._rebuild_without_nones(none_indexes, new_content)
         else:
             return self
+
+    def _rebuild_without_nones(self, none_indexes, new_content):
+        new_offsets = ak.index.Index64.empty(self._offsets.length, self._nplike)
+
+        assert (
+            new_offsets.nplike is self._nplike
+            and self._offsets.nplike is self._nplike
+            and none_indexes.nplike is self._nplike
+        )
+
+        self._handle_error(
+            self._nplike[
+                "awkward_ListOffsetArray_drop_none_indexes",
+                new_offsets.dtype.type,
+                none_indexes.dtype.type,
+                self._offsets.dtype.type,
+            ](
+                new_offsets.data,
+                none_indexes.data,
+                self._offsets.data,
+                self._offsets.length,
+                none_indexes.length,
+            )
+        )
+        return ak.contents.ListOffsetArray(new_offsets, new_content)
 
     def _recursively_apply(
         self, action, behavior, depth, depth_context, lateral_context, options

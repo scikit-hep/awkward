@@ -1380,6 +1380,11 @@ class ListArray(Content):
     def _drop_none(self):
         return self.toListOffsetArray64()._drop_none()
 
+    def _rebuild_without_nones(self, none_indexes, new_content):
+        return self.toListOffsetArray64()._rebuild_without_nones(
+            none_indexes, new_content
+        )
+
     def _recursively_apply(
         self, action, behavior, depth, depth_context, lateral_context, options
     ):

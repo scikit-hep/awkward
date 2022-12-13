@@ -70,15 +70,25 @@ def test_from_iter():
         == [[[1.0]], [[]], [[6.0]], [[7.8]]]
     )
 
-    a = ak.Array([[{"x": [1], "y": [[2]]}], [{"x": [None], "y": [[None]]}]])
-    assert to_list(a) == [[{"x": [1], "y": [[2]]}], [{"x": [None], "y": [[None]]}]]
+    a = ak.Array([[{"x": [1], "y": [[2]]}], [{"x": [None], "y": [[None]]}], None])
+    assert to_list(a) == [
+        [{"x": [1], "y": [[2]]}],
+        [{"x": [None], "y": [[None]]}],
+        None,
+    ]
     assert to_list(ak.drop_none(a)) == [
         [{"x": [1], "y": [[2]]}],
         [{"x": [], "y": [[]]}],
     ]
-    assert to_list(ak.drop_none(a, axis=2)) == [
+    assert (
+        to_list(ak.drop_none(a, axis=0))
+        == to_list(a[~ak.is_none(a, axis=0)])
+        == [[{"x": [1], "y": [[2]]}], [{"x": [None], "y": [[None]]}]]
+    )
+    assert to_list(ak.drop_none(a, axis=1)) == [
         [{"x": [1], "y": [[2]]}],
         [{"x": [], "y": [[None]]}],
+        None,
     ]
 
 
@@ -321,32 +331,6 @@ def test_ListOffsetArray_IndexedOptionArray_NumpyArray_outoforder():
     assert to_list(ak.drop_none(listoffset)) == [[0.0, 1.1, 5.5], [4.4], [2.2]]
 
 
-def test_UnionArray_RecordArray_ByteMaskedArray_NumpyArray_noNones():
-    v2a = ak.contents.unionarray.UnionArray(
-        ak.index.Index(np.array([1, 1, 0, 0, 1, 0, 1], np.int8)),
-        ak.index.Index(np.array([4, 3, 0, 1, 2, 2, 4, 100], np.int64)),
-        [
-            ak.contents.recordarray.RecordArray(
-                [ak.contents.numpyarray.NumpyArray(np.array([1, 2, 3], np.int64))],
-                ["nest"],
-            ),
-            ak.contents.recordarray.RecordArray(
-                [
-                    ak.contents.bytemaskedarray.ByteMaskedArray(
-                        ak.index.Index(np.array([1, 0, 1, 0, 1], np.int8)),
-                        ak.contents.numpyarray.NumpyArray(
-                            np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])
-                        ),
-                        valid_when=True,
-                    )
-                ],
-                ["nest"],
-            ),
-        ],
-    )
-    assert to_list(v2a) == to_list(ak.drop_none(v2a))
-
-
 def test_ListArray_IndexedOptionArray_RecordArray_NumpyArray():
     index = ak.index.Index64(np.asarray([0, -1, 1, -1, 4, -1, 5]))
     content = ak.contents.recordarray.RecordArray(
@@ -364,15 +348,7 @@ def test_ListArray_IndexedOptionArray_RecordArray_NumpyArray():
         [],
         [None, {"nest": 1.1}],
     ]
-    assert (
-        to_list(ak.drop_none(a))
-        == to_list(a[~ak.is_none(a, axis=1)])
-        == [
-            [{"nest": 4.4}, {"nest": 5.5}],
-            [],
-            [{"nest": 1.1}],
-        ]
-    )
+
     assert (
         to_list(ak.drop_none(a, axis=0))
         == to_list(a[~ak.is_none(a, axis=0)])
@@ -449,6 +425,70 @@ def test_incorect_axis():
         ak.drop_none(ak.Array([1, 2, None]), axis=2)
 
 
-# def test_RecordArray():
-#     a = ak.Array([[{"x": [1], "y": [[2]]}], None, [None], [{"x": None, "y": None}], [{"x": [None], "y": [None]}], [{"x": [11], "y": [[None]]}]])
-#     assert to_list(ak.drop_none(a, axis=0)) == to_list(a[~ak.is_none(a, axis=0)])
+def test_RecordArray():
+    a = ak.Array(
+        [
+            [{"x": [1], "y": [[2]]}],
+            None,
+            [None],
+            [{"x": None, "y": None}],
+            [{"x": [None], "y": [None]}],
+            [{"x": [11], "y": [[None]]}],
+        ]
+    )
+    assert to_list(ak.drop_none(a, axis=1)) == to_list(a[~ak.is_none(a, axis=1)])
+    assert to_list(ak.drop_none(a, axis=2)) == [
+        [{"x": [1], "y": [[2]]}],
+        None,
+        [None],
+        [{"x": None, "y": None}],
+        [{"x": [], "y": []}],
+        [{"x": [11], "y": [[None]]}],
+    ]
+
+
+def test_ListArray_and_axis_None():
+    index = ak.index.Index64(np.asarray([0, -1, 1, -1, 4, -1, 5]))
+    content = ak.contents.recordarray.RecordArray(
+        [ak.contents.numpyarray.NumpyArray([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7])],
+        ["nest"],
+    )
+    indexoptionarray = ak.contents.IndexedOptionArray(index, content)
+    a = ak.contents.listarray.ListArray(
+        ak.index.Index(np.array([4, 100, 1], np.int64)),
+        ak.index.Index(np.array([7, 100, 3, 200], np.int64)),
+        indexoptionarray,
+    )
+    assert (
+        to_list(ak.drop_none(a))
+        == to_list(a[~ak.is_none(a, axis=1)])
+        == [
+            [{"nest": 4.4}, {"nest": 5.5}],
+            [],
+            [{"nest": 1.1}],
+        ]
+    )
+
+    v2a = ak.contents.unionarray.UnionArray(
+        ak.index.Index(np.array([1, 1, 0, 0, 1, 0, 1], np.int8)),
+        ak.index.Index(np.array([4, 3, 0, 1, 2, 2, 4, 100], np.int64)),
+        [
+            ak.contents.recordarray.RecordArray(
+                [ak.contents.numpyarray.NumpyArray(np.array([1, 2, 3], np.int64))],
+                ["nest"],
+            ),
+            ak.contents.recordarray.RecordArray(
+                [
+                    ak.contents.bytemaskedarray.ByteMaskedArray(
+                        ak.index.Index(np.array([1, 0, 1, 0, 1], np.int8)),
+                        ak.contents.numpyarray.NumpyArray(
+                            np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])
+                        ),
+                        valid_when=True,
+                    )
+                ],
+                ["nest"],
+            ),
+        ],
+    )
+    assert to_list(v2a) == to_list(ak.drop_none(v2a))
