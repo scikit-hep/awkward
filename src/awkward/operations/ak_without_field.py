@@ -84,5 +84,7 @@ def _impl(base, where, highlevel, behavior):
         else:
             return None
 
-    out = base.recursively_apply(action, behavior, lateral_context={"where": where})
+    out = ak._do.recursively_apply(
+        base, action, behavior, lateral_context={"where": where}
+    )
     return ak._util.wrap(out, behavior, highlevel)
