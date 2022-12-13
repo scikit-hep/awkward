@@ -143,7 +143,7 @@ jupyterlite_contents = ["getting-started/demo/*"]
 
 linkcheck_ignore = [
     r"^https?:\/\/github\.com\/.*$",
-    r"getting-started\/try-awkward-array\.html"  # Relative link won't resolve
+    r"^getting-started\/try-awkward-array\.html$",  # Relative link won't resolve
     r"^https?:\/\/$",  # Bare https:// allowed
 ]
 # Eventually we need to revisit these
