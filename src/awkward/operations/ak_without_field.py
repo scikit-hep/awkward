@@ -60,8 +60,11 @@ def _impl(base, where, highlevel, behavior):
                 for i, content in enumerate(layout.contents):
                     if i == i_field:
                         # Visit this content to remove the next item in `where`
-                        next_content = content.recursively_apply(
-                            action, behavior, lateral_context={"where": next_where}
+                        next_content = ak._do.recursively_apply(
+                            content,
+                            action,
+                            behavior,
+                            lateral_context={"where": next_where},
                         )
                         next_contents.append(next_content)
                     else:
