@@ -124,11 +124,11 @@ For more details, see [CONTRIBUTING.md](CONTRIBUTING.md), or one of the links be
 
 The documentation is on [awkward-array.org](https://awkward-array.org), including
 
-   * [Getting started](https://awkward-array.org/en/latest/getting-started/index.html)
-   * [User guide](https://awkward-array.org/en/latest/user-guide/index.html)
-   * [API reference](https://awkward-array.org/en/latest/reference/index.html)
-   * [Tutorials (with videos)](https://awkward-array.org/en/latest/getting-started/community-tutorials.html)
-   * [Papers and talks](https://awkward-array.org/en/latest/getting-started/papers-and-talks.html) about Awkward Array
+   * [Getting started](https://awkward-array.org/doc/main/getting-started/index.html)
+   * [User guide](https://awkward-array.org/doc/main/user-guide/index.html)
+   * [API reference](https://awkward-array.org/doc/main/reference/index.html)
+   * [Tutorials (with videos)](https://awkward-array.org/doc/main/getting-started/community-tutorials.html)
+   * [Papers and talks](https://awkward-array.org/doc/main/getting-started/papers-and-talks.html) about Awkward Array
 
 The Release notes for each version are in the [GitHub Releases tab](https://github.com/scikit-hep/awkward/releases).
 
