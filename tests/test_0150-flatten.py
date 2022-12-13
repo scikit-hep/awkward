@@ -1,9 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import numpy as np  # noqa: F401
-import pytest  # noqa: F401
+import numpy as np
+import pytest
 
-import awkward as ak  # noqa: F401
+import awkward as ak
 
 to_list = ak.operations.to_list
 
@@ -327,6 +327,14 @@ def test_flatten_UnionArray():
     content2 = ak.operations.from_iter(
         [[[3, 3, 3], [3, 3, 3], [3, 3, 3]], [[2, 2], [2, 2]], [[1]]], highlevel=False
     )
+    content3 = ak.operations.from_iter(
+        [
+            [["3", "3", "3"], ["3", "3", "3"], ["3", "3", "3"]],
+            [["2", "2"], ["2", "2"]],
+            [["1"]],
+        ],
+        highlevel=False,
+    )
     tags = ak.index.Index8(np.array([0, 1, 0, 1, 0, 1], dtype=np.int8))
     index = ak.index.Index64(np.array([0, 0, 1, 1, 2, 2], dtype=np.int64))
     array = ak.contents.UnionArray(tags, index, [content1, content2])
@@ -374,36 +382,36 @@ def test_flatten_UnionArray():
         [1],
     ]
 
-    array = ak.contents.UnionArray(tags, index, [content2, content2])
+    array = ak.contents.UnionArray(tags, index, [content2, content3])
 
     assert to_list(array) == [
         [[3, 3, 3], [3, 3, 3], [3, 3, 3]],
-        [[3, 3, 3], [3, 3, 3], [3, 3, 3]],
+        [["3", "3", "3"], ["3", "3", "3"], ["3", "3", "3"]],
         [[2, 2], [2, 2]],
-        [[2, 2], [2, 2]],
+        [["2", "2"], ["2", "2"]],
         [[1]],
-        [[1]],
+        [["1"]],
     ]
     assert ak.operations.to_list(ak.operations.flatten(array, axis=2)) == [
         [3, 3, 3, 3, 3, 3, 3, 3, 3],
-        [3, 3, 3, 3, 3, 3, 3, 3, 3],
+        ["3", "3", "3", "3", "3", "3", "3", "3", "3"],
         [2, 2, 2, 2],
-        [2, 2, 2, 2],
+        ["2", "2", "2", "2"],
         [1],
-        [1],
+        ["1"],
     ]
     assert ak.operations.to_list(ak.operations.flatten(array[1:], axis=2)) == [
-        [3, 3, 3, 3, 3, 3, 3, 3, 3],
+        ["3", "3", "3", "3", "3", "3", "3", "3", "3"],
         [2, 2, 2, 2],
-        [2, 2, 2, 2],
+        ["2", "2", "2", "2"],
         [1],
-        [1],
+        ["1"],
     ]
     assert ak.operations.to_list(ak.operations.flatten(array[:, 1:], axis=2)) == [
         [3, 3, 3, 3, 3, 3],
-        [3, 3, 3, 3, 3, 3],
+        ["3", "3", "3", "3", "3", "3"],
         [2, 2],
-        [2, 2],
+        ["2", "2"],
         [],
         [],
     ]
@@ -436,7 +444,7 @@ def test_flatten2():
         [5.5],
         [6.6, 7.7, 8.8, 9.9],
     ]
-    assert to_list(array.flatten(axis=1)) == [
+    assert to_list(ak._do.flatten(array, axis=1)) == [
         0.0,
         1.1,
         2.2,
@@ -448,7 +456,7 @@ def test_flatten2():
         8.8,
         9.9,
     ]
-    assert to_list(array.flatten(axis=-1)) == [
+    assert to_list(ak._do.flatten(array, axis=-1)) == [
         0.0,
         1.1,
         2.2,
@@ -461,12 +469,12 @@ def test_flatten2():
         9.9,
     ]
     with pytest.raises(ValueError) as err:
-        assert to_list(array.flatten(axis=-2))
+        assert to_list(ak._do.flatten(array, axis=-2))
         assert str(err.value).startswith("axis=0 not allowed for flatten")
 
     array2 = array[2:-1]
-    assert to_list(array2.flatten(axis=1)) == [3.3, 4.4, 5.5]
-    assert to_list(array2.flatten(axis=-1)) == [3.3, 4.4, 5.5]
+    assert to_list(ak._do.flatten(array2, axis=1)) == [3.3, 4.4, 5.5]
+    assert to_list(ak._do.flatten(array2, axis=-1)) == [3.3, 4.4, 5.5]
 
 
 def test_ByteMaskedArray_flatten():
@@ -577,22 +585,22 @@ def test_flatten_0198():
 def test_fix_flatten_of_sliced_array_0446():
     array = ak.highlevel.Array([[1, 2, 3], [], [4, 5], [6, 7, 8, 9]]).layout
 
-    assert ak.operations.flatten(array[:-1], axis=1).tolist() == [
+    assert ak.operations.flatten(array[:-1], axis=1).to_list() == [
         1,
         2,
         3,
         4,
         5,
     ]
-    assert ak.operations.flatten(array[:-2], axis=1).tolist() == [1, 2, 3]
-    assert ak.operations.flatten(array[:-1], axis=None).tolist() == [
+    assert ak.operations.flatten(array[:-2], axis=1).to_list() == [1, 2, 3]
+    assert ak.operations.flatten(array[:-1], axis=None).to_list() == [
         1,
         2,
         3,
         4,
         5,
     ]
-    assert ak.operations.flatten(array[:-2], axis=None).tolist() == [
+    assert ak.operations.flatten(array[:-2], axis=None).to_list() == [
         1,
         2,
         3,
@@ -610,12 +618,12 @@ def test_flatten_None_axis():
 def test_fix_corner_case_0585():
     array = ak.highlevel.Array([[1, 2, 3], [], [4, 5]]).layout
 
-    assert ak.operations.flatten(array, axis=0).tolist() == [
+    assert ak.operations.flatten(array, axis=0).to_list() == [
         [1, 2, 3],
         [],
         [4, 5],
     ]
-    assert ak.operations.flatten(array, axis=-2).tolist() == [
+    assert ak.operations.flatten(array, axis=-2).to_list() == [
         [1, 2, 3],
         [],
         [4, 5],
@@ -623,14 +631,14 @@ def test_fix_corner_case_0585():
 
     array = ak.highlevel.Array([1, 2, 3, 4, 5]).layout
 
-    assert ak.operations.flatten(array, axis=0).tolist() == [
+    assert ak.operations.flatten(array, axis=0).to_list() == [
         1,
         2,
         3,
         4,
         5,
     ]
-    assert ak.operations.flatten(array, axis=-1).tolist() == [
+    assert ak.operations.flatten(array, axis=-1).to_list() == [
         1,
         2,
         3,
@@ -645,9 +653,9 @@ def test_flatten_allow_regulararray_size_zero_0590():
         ak.highlevel.Array([[1, 2, 3], [], [4, 5]]).layout, 0, zeros_length=0
     )
 
-    assert ak.operations.flatten(empty, axis=0).tolist() == []
-    assert ak.operations.flatten(empty, axis=1).tolist() == []
-    assert ak.operations.flatten(empty, axis=2).tolist() == []
+    assert ak.operations.flatten(empty, axis=0).to_list() == []
+    assert ak.operations.flatten(empty, axis=1).to_list() == []
+    assert ak.operations.flatten(empty, axis=2).to_list() == []
 
 
 def test_0724():
@@ -659,7 +667,7 @@ def test_0724():
     idx = ak.index.Index64([175990832])
     a = ak.contents.ListOffsetArray(idx, a)
 
-    assert ak.operations.flatten(a, axis=2).tolist() == []
+    assert ak.operations.flatten(a, axis=2).to_list() == []
     assert str(ak.operations.flatten(a, axis=2).type) == "0 * var * ?float64"
 
 

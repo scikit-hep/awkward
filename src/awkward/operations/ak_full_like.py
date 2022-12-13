@@ -3,26 +3,25 @@
 import awkward as ak
 from awkward.operations.ak_zeros_like import _ZEROS
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 @ak._connect.numpy.implements("full_like")
-def full_like(array, fill_value, highlevel=True, behavior=None, dtype=None):
+def full_like(array, fill_value, *, dtype=None, highlevel=True, behavior=None):
     """
     Args:
-        array: Array to use as a model for a replacement that contains only
-            `fill_value`.
-        fill_value: Value to fill new new array with.
+        array: Array-like data (anything #ak.to_layout recognizes).
+        fill_value: Value to fill the new array with.
+        dtype (None or NumPy dtype): Overrides the data type of the result.
         highlevel (bool, default is True): If True, return an #ak.Array;
             otherwise, return a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
-        dtype (None or NumPy dtype)): Overrides the data type of the result.
 
     This is the equivalent of NumPy's `np.full_like` for Awkward Arrays.
 
-    Although it's possible to produce an array of `fill_value` with the structure
-    of an `array` using #ak.broadcast_arrays:
+    Although it's possible to produce an array of `fill_value` with the
+    structure of an `array` using #ak.broadcast_arrays:
 
         >>> array = ak.Array([[1, 2, 3], [], [4, 5]])
         >>> ak.broadcast_arrays(array, 1)
@@ -48,16 +47,10 @@ def full_like(array, fill_value, highlevel=True, behavior=None, dtype=None):
         ...  False,
         ...  True,
         ...  {"x": 4.4, "y": [1, 2, None, 3, 4]}]])
-        >>> ak.to_list(ak.full_like(array, 12.3))
-        [[{"x": 12.3, "y": []},
-          {"x": 12.3, "y": [12]},
-          {"x": 12.3, "y": [12, 12]}],
+        >>> ak.full_like(array, 12.3).show()
+        [[{x: 12.3, y: []}, {x: 12.3, y: [12]}, {x: 12.3, y: [12, 12]}],
          [],
-         [{"x": 12.3, "y": [12, 12, None, 12]},
-          True,
-          True,
-          True,
-          {"x": 12.3, "y": [12, 12, None, 12, 12]}]]
+         [{x: 12.3, y: [12, 12, None, 12]}, True, ..., True, {x: 12.3, y: [12, ...]}]]
 
     The `"x"` values get filled in with `12.3` because they retain their type
     (`float64`) and the `"y"` list items get filled in with `12` because they
@@ -75,9 +68,9 @@ def full_like(array, fill_value, highlevel=True, behavior=None, dtype=None):
         dict(
             array=array,
             fill_value=fill_value,
+            dtype=dtype,
             highlevel=highlevel,
             behavior=behavior,
-            dtype=dtype,
         ),
     ):
         return _impl(array, fill_value, highlevel, behavior, dtype)
@@ -88,7 +81,7 @@ def _impl(array, fill_value, highlevel, behavior, dtype):
         # In the case of strings and byte strings,
         # converting the fill avoids a ValueError.
         dtype = np.dtype(dtype)
-        nplike = ak.nplikes.nplike_of(array)
+        nplike = ak._nplikes.nplike_of(array)
         fill_value = nplike.array([fill_value], dtype=dtype)[0]
         # Also, if the fill_value cannot be converted to the dtype
         # this should throw a clear, early, error.
@@ -100,24 +93,23 @@ def _impl(array, fill_value, highlevel, behavior, dtype):
     behavior = ak._util.behavior_of(array, behavior=behavior)
 
     def action(layout, **kwargs):
+        nplike = layout.backend.nplike
+        index_nplike = layout.backend.index_nplike
+
         if layout.parameter("__array__") == "bytestring" and fill_value is _ZEROS:
-            nplike = ak.nplikes.nplike_of(layout)
             asbytes = nplike.frombuffer(b"", dtype=np.uint8)
             return ak.contents.ListArray(
                 ak.index.Index64(
-                    nplike.index_nplike.zeros(len(layout), dtype=np.int64),
-                    nplike=nplike,
+                    index_nplike.zeros(len(layout), dtype=np.int64), nplike=index_nplike
                 ),
                 ak.index.Index64(
-                    nplike.index_nplike.zeros(len(layout), dtype=np.int64),
-                    nplike=nplike,
+                    index_nplike.zeros(len(layout), dtype=np.int64), nplike=index_nplike
                 ),
                 ak.contents.NumpyArray(asbytes, parameters={"__array__": "byte"}),
                 parameters={"__array__": "bytestring"},
             )
 
         elif layout.parameter("__array__") == "bytestring":
-            nplike = ak.nplikes.nplike_of(layout)
             if isinstance(fill_value, bytes):
                 asbytes = fill_value
             else:
@@ -126,73 +118,68 @@ def _impl(array, fill_value, highlevel, behavior, dtype):
 
             return ak.contents.ListArray(
                 ak.index.Index64(
-                    nplike.index_nplike.zeros(len(layout), dtype=np.int64),
-                    nplike=nplike,
+                    index_nplike.zeros(len(layout), dtype=np.int64), nplike=index_nplike
                 ),
                 ak.index.Index64(
-                    nplike.index_nplike.full(len(layout), len(asbytes), dtype=np.int64)
+                    index_nplike.full(len(layout), len(asbytes), dtype=np.int64)
                 ),
                 ak.contents.NumpyArray(asbytes, parameters={"__array__": "byte"}),
                 parameters={"__array__": "bytestring"},
             )
 
         elif layout.parameter("__array__") == "string" and fill_value is _ZEROS:
-            nplike = ak.nplikes.nplike_of(layout)
             asbytes = nplike.frombuffer(b"", dtype=np.uint8)
             return ak.contents.ListArray(
                 ak.index.Index64(
-                    nplike.index_nplike.zeros(len(layout), dtype=np.int64),
-                    nplike=nplike,
+                    index_nplike.zeros(len(layout), dtype=np.int64), nplike=index_nplike
                 ),
                 ak.index.Index64(
-                    nplike.index_nplike.zeros(len(layout), dtype=np.int64),
-                    nplike=nplike,
+                    index_nplike.zeros(len(layout), dtype=np.int64), nplike=index_nplike
                 ),
                 ak.contents.NumpyArray(asbytes, parameters={"__array__": "char"}),
                 parameters={"__array__": "string"},
             )
 
         elif layout.parameter("__array__") == "string":
-            nplike = ak.nplikes.nplike_of(layout)
             asstr = str(fill_value).encode("utf-8", "surrogateescape")
             asbytes = nplike.frombuffer(asstr, dtype=np.uint8)
             return ak.contents.ListArray(
                 ak.index.Index64(
-                    nplike.index_nplike.zeros(len(layout), dtype=np.int64),
-                    nplike=nplike,
+                    index_nplike.zeros(len(layout), dtype=np.int64), nplike=index_nplike
                 ),
                 ak.index.Index64(
-                    nplike.index_nplike.full(len(layout), len(asbytes), dtype=np.int64)
+                    index_nplike.full(len(layout), len(asbytes), dtype=np.int64)
                 ),
                 ak.contents.NumpyArray(asbytes, parameters={"__array__": "char"}),
                 parameters={"__array__": "string"},
             )
 
         elif isinstance(layout, ak.contents.NumpyArray):
-            nplike = ak.nplikes.nplike_of(layout)
             original = nplike.asarray(layout.data)
 
             if fill_value == 0 or fill_value is _ZEROS:
                 return ak.contents.NumpyArray(
-                    nplike.zeros_like(original),
-                    layout.parameters,
+                    nplike.zeros_like(original), parameters=layout.parameters
                 )
             elif fill_value == 1:
                 return ak.contents.NumpyArray(
-                    nplike.ones_like(original),
-                    layout.parameters,
+                    nplike.ones_like(original), parameters=layout.parameters
                 )
             else:
                 return ak.contents.NumpyArray(
-                    nplike.full_like(original, fill_value),
-                    layout.parameters,
+                    nplike.full_like(original, fill_value), parameters=layout.parameters
                 )
         else:
             return None
 
-    out = layout.recursively_apply(action, behavior)
+    out = ak._do.recursively_apply(layout, action, behavior)
     if dtype is not None:
-        out = ak.operations.strings_astype(out, dtype, highlevel, behavior)
-        out = ak.operations.values_astype(out, dtype, highlevel, behavior)
+        out = ak.operations.strings_astype(
+            out, dtype, highlevel=highlevel, behavior=behavior
+        )
+        out = ak.operations.values_astype(
+            out, dtype, highlevel=highlevel, behavior=behavior
+        )
         return out
-    return ak._util.wrap(out, behavior, highlevel)
+    else:
+        return ak._util.wrap(out, behavior, highlevel)

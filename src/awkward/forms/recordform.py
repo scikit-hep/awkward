@@ -4,6 +4,7 @@ import glob
 from collections.abc import Iterable
 
 import awkward as ak
+from awkward._util import unset
 from awkward.forms.form import Form, _parameters_equal
 
 
@@ -14,6 +15,7 @@ class RecordForm(Form):
         self,
         contents,
         fields,
+        *,
         parameters=None,
         form_key=None,
     ):
@@ -48,19 +50,45 @@ class RecordForm(Form):
         self._init(parameters, form_key)
 
     @property
+    def contents(self):
+        return self._contents
+
+    @property
     def fields(self):
         if self._fields is None:
             return [str(i) for i in range(len(self._contents))]
         else:
             return self._fields
 
+    def copy(
+        self,
+        contents=unset,
+        fields=unset,
+        *,
+        parameters=unset,
+        form_key=unset,
+    ):
+        return RecordForm(
+            self._contents if contents is unset else contents,
+            self._fields if fields is unset else fields,
+            parameters=self._parameters if parameters is unset else parameters,
+            form_key=self._form_key if form_key is unset else form_key,
+        )
+
+    @classmethod
+    def simplified(
+        cls,
+        contents,
+        fields,
+        *,
+        parameters=None,
+        form_key=None,
+    ):
+        return cls(contents, fields, parameters=parameters, form_key=form_key)
+
     @property
     def is_tuple(self):
         return self._fields is None
-
-    @property
-    def contents(self):
-        return self._contents
 
     def __repr__(self):
         args = [repr(self._contents), repr(self._fields)] + self._repr_args()
@@ -149,8 +177,8 @@ class RecordForm(Form):
         return ak.types.RecordType(
             [x._type(typestrs) for x in self._contents],
             self._fields,
-            self._parameters,
-            ak._util.gettypestr(self._parameters, typestrs),
+            parameters=self._parameters,
+            typestr=ak._util.gettypestr(self._parameters, typestrs),
         )
 
     def __eq__(self, other):
@@ -245,8 +273,8 @@ class RecordForm(Form):
         return RecordForm(
             contents,
             fields,
-            self._parameters,
-            self._form_key,
+            parameters=self._parameters,
+            form_key=self._form_key,
         )
 
     def _column_types(self):

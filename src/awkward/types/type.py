@@ -6,7 +6,7 @@ import sys
 import awkward as ak
 from awkward.types._awkward_datashape_parser import Lark_StandAlone, Transformer
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 class Type:
@@ -101,35 +101,35 @@ class _DataShapeTransformer(Transformer):
 
     def varlen_string(self, args):
         return ak.types.ListType(
-            ak.types.NumpyType("uint8", {"__array__": "char"}),
-            {"__array__": "string"},
+            ak.types.NumpyType("uint8", parameters={"__array__": "char"}),
+            parameters={"__array__": "string"},
         )
 
     def varlen_bytestring(self, args):
         return ak.types.ListType(
-            ak.types.NumpyType("uint8", {"__array__": "byte"}),
-            {"__array__": "bytestring"},
+            ak.types.NumpyType("uint8", parameters={"__array__": "byte"}),
+            parameters={"__array__": "bytestring"},
         )
 
     def fixedlen_string(self, args):
         return ak.types.RegularType(
-            ak.types.NumpyType("uint8", {"__array__": "char"}),
+            ak.types.NumpyType("uint8", parameters={"__array__": "char"}),
             int(args[0]),
-            {"__array__": "string"},
+            parameters={"__array__": "string"},
         )
 
     def fixedlen_bytestring(self, args):
         return ak.types.RegularType(
-            ak.types.NumpyType("uint8", {"__array__": "byte"}),
+            ak.types.NumpyType("uint8", parameters={"__array__": "byte"}),
             int(args[0]),
-            {"__array__": "bytestring"},
+            parameters={"__array__": "bytestring"},
         )
 
     def char(self, args):
-        return ak.types.NumpyType("uint8", {"__array__": "char"})
+        return ak.types.NumpyType("uint8", parameters={"__array__": "char"})
 
     def byte(self, args):
-        return ak.types.NumpyType("uint8", {"__array__": "byte"})
+        return ak.types.NumpyType("uint8", parameters={"__array__": "byte"})
 
     def option1(self, args):
         return ak.types.OptionType(args[0])
@@ -158,7 +158,7 @@ class _DataShapeTransformer(Transformer):
         else:
             parameters = {}
 
-        return ak.types.RecordType(types, None, parameters)
+        return ak.types.RecordType(types, None, parameters=parameters)
 
     def record(self, args):
         if len(args) == 0:
@@ -188,13 +188,13 @@ class _DataShapeTransformer(Transformer):
         else:
             parameters = {}
 
-        return ak.types.RecordType(types, fields, parameters)
+        return ak.types.RecordType(types, fields, parameters=parameters)
 
     def named0(self, args):
         parameters = {"__record__": str(args[0])}
         if 1 < len(args):
             parameters.update(args[1])
-        return ak.types.RecordType([], None, parameters)
+        return ak.types.RecordType([], None, parameters=parameters)
 
     def named(self, args):
         parameters = {"__record__": str(args[0])}
@@ -212,7 +212,7 @@ class _DataShapeTransformer(Transformer):
             fields = None
             contents = arguments
 
-        return ak.types.RecordType(contents, fields, parameters)
+        return ak.types.RecordType(contents, fields, parameters=parameters)
 
     def named_types(self, args):
         if len(args) == 2 and isinstance(args[1], list):
@@ -243,7 +243,7 @@ class _DataShapeTransformer(Transformer):
             arguments = args[0]
             parameters = None
 
-        return ak.types.UnionType(arguments, parameters)
+        return ak.types.UnionType(arguments, parameters=parameters)
 
     def list_parameters(self, args):
         # modify recently created type object

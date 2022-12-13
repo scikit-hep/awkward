@@ -1,9 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import numpy as np  # noqa: F401
+import numpy as np
 import pytest  # noqa: F401
 
-import awkward as ak  # noqa: F401
+import awkward as ak
 
 to_list = ak.operations.to_list
 
@@ -311,16 +311,22 @@ def test_localindex():
     array = ak.operations.from_iter(
         [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], highlevel=False
     )
-    assert to_list(array.local_index(0)) == [0, 1, 2, 3, 4]
-    assert to_list(array.local_index(1)) == [[0, 1, 2], [], [0, 1], [0], [0, 1, 2, 3]]
+    assert to_list(ak._do.local_index(array, 0)) == [0, 1, 2, 3, 4]
+    assert to_list(ak._do.local_index(array, 1)) == [
+        [0, 1, 2],
+        [],
+        [0, 1],
+        [0],
+        [0, 1, 2, 3],
+    ]
 
     array = ak.operations.from_iter(
         [[[0.0, 1.1, 2.2], [], [3.3, 4.4]], [], [[5.5]], [[6.6, 7.7, 8.8, 9.9]]],
         highlevel=False,
     )
-    assert to_list(array.local_index(0)) == [0, 1, 2, 3]
-    assert to_list(array.local_index(1)) == [[0, 1, 2], [], [0], [0]]
-    assert to_list(array.local_index(2)) == [
+    assert to_list(ak._do.local_index(array, 0)) == [0, 1, 2, 3]
+    assert to_list(ak._do.local_index(array, 1)) == [[0, 1, 2], [], [0], [0]]
+    assert to_list(ak._do.local_index(array, 2)) == [
         [[0, 1, 2], [], [0, 1]],
         [],
         [[0]],
@@ -330,9 +336,9 @@ def test_localindex():
     array = ak.operations.from_numpy(
         np.arange(2 * 3 * 5).reshape(2, 3, 5), regulararray=True, highlevel=False
     )
-    assert to_list(array.local_index(0)) == [0, 1]
-    assert to_list(array.local_index(1)) == [[0, 1, 2], [0, 1, 2]]
-    assert to_list(array.local_index(2)) == [
+    assert to_list(ak._do.local_index(array, 0)) == [0, 1]
+    assert to_list(ak._do.local_index(array, 1)) == [[0, 1, 2], [0, 1, 2]]
+    assert to_list(ak._do.local_index(array, 2)) == [
         [[0, 1, 2, 3, 4], [0, 1, 2, 3, 4], [0, 1, 2, 3, 4]],
         [[0, 1, 2, 3, 4], [0, 1, 2, 3, 4], [0, 1, 2, 3, 4]],
     ]
@@ -365,13 +371,13 @@ def test_argcartesian_negative_axis():
     one = ak.Array([[["a", "b"], []], [], [["c"]]])
     two = ak.Array([[[1.1], []], [], [[2.2, 3.3]]])
 
-    assert ak.cartesian([one, two], axis=-1).tolist() == [
+    assert ak.cartesian([one, two], axis=-1).to_list() == [
         [[("a", 1.1), ("b", 1.1)], []],
         [],
         [[("c", 2.2), ("c", 3.3)]],
     ]
 
-    assert ak.argcartesian([one, two], axis=-1).tolist() == [
+    assert ak.argcartesian([one, two], axis=-1).to_list() == [
         [[(0, 0), (1, 0)], []],
         [],
         [[(0, 0), (0, 1)]],

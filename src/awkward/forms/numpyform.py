@@ -3,9 +3,10 @@
 from collections.abc import Iterable
 
 import awkward as ak
+from awkward._util import unset
 from awkward.forms.form import Form, _parameters_equal
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 def from_dtype(dtype, parameters=None):
@@ -40,6 +41,7 @@ class NumpyForm(Form):
         self,
         primitive,
         inner_shape=(),
+        *,
         parameters=None,
         form_key=None,
     ):
@@ -66,6 +68,32 @@ class NumpyForm(Form):
     @property
     def inner_shape(self):
         return self._inner_shape
+
+    def copy(
+        self,
+        primitive=unset,
+        inner_shape=unset,
+        *,
+        parameters=unset,
+        form_key=unset,
+    ):
+        return NumpyForm(
+            self._primitive if primitive is unset else primitive,
+            self._inner_shape if inner_shape is unset else inner_shape,
+            parameters=self._parameters if parameters is unset else parameters,
+            form_key=self._form_key if form_key is unset else form_key,
+        )
+
+    @classmethod
+    def simplified(
+        cls,
+        primitive,
+        inner_shape=(),
+        *,
+        parameters=None,
+        form_key=None,
+    ):
+        return cls(primitive, inner_shape, parameters=parameters, form_key=form_key)
 
     @property
     def itemsize(self):
@@ -100,8 +128,8 @@ class NumpyForm(Form):
     def _type(self, typestrs):
         out = ak.types.NumpyType(
             self._primitive,
-            None,
-            ak._util.gettypestr(self._parameters, typestrs),
+            parameters=None,
+            typestr=ak._util.gettypestr(self._parameters, typestrs),
         )
         for x in self._inner_shape[::-1]:
             out = ak.types.RegularType(out, x)
@@ -123,10 +151,10 @@ class NumpyForm(Form):
         else:
             return False
 
-    def toRegularForm(self):
-        out = NumpyForm(self._primitive, (), None, None)
+    def to_RegularForm(self):
+        out = NumpyForm(self._primitive, (), parameters=None, form_key=None)
         for x in self._inner_shape[::-1]:
-            out = ak.forms.RegularForm(out, x, None, None)
+            out = ak.forms.RegularForm(out, x, parameters=None, form_key=None)
         out._parameters = self._parameters
         return out
 

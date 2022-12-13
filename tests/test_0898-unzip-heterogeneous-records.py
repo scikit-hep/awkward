@@ -1,9 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import numpy as np  # noqa: F401
-import pytest  # noqa: F401
+import pytest
 
-import awkward as ak  # noqa: F401
+import awkward as ak
 
 to_list = ak.operations.to_list
 
@@ -22,7 +22,7 @@ def test():
 
     (tmp,) = ak.operations.unzip(c)
 
-    assert tmp.tolist() == [100, 90]
+    assert tmp.to_list() == [100, 90]
 
 
 def test_zip_and_unzip():

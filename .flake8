@@ -7,17 +7,11 @@ exclude = studies, pybind11, rapidjson, docs-*, src/awkward/_typeparser/generate
 per-file-ignores =
     tests/*: T, AK1
     dev/*: T, T201, AK1
-    setup.py: T, T201, AK1
-    localbuild.py: T, T201, AK1
     src/awkward/__init__.py: E402, F401, F403, AK1
-    awkward/__init__.py: E402, F401, F403, AK1
     src/awkward/__init__.py: F401, F403
-    awkward/__init__.py: F401, F403
     src/awkward/operations/__init__.py: F401
-    awkward/operations/__init__.py: F401
     src/awkward/_connect/numba/*: AK1
-    src/awkward/[!_]*: AK1
-    src/awkward/_[!v]*: AK1
+    src/awkward/_errors.py: AK1
 
 [flake8:local-plugins]
 extension =

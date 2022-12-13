@@ -1,9 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import numpy as np  # noqa: F401
+import numpy as np
 import pytest  # noqa: F401
 
-import awkward as ak  # noqa: F401
+import awkward as ak
 
 to_list = ak.operations.to_list
 
@@ -70,7 +70,20 @@ def test_simplify_unionarray_with_name():
     index1 = ak.index.Index64(
         np.array([0, 1, 0, 1, 2, 2, 3, 4, 5, 3, 6, 4], dtype=np.int64)
     )
-    outer = ak.contents.UnionArray(tags1, index1, [one, inner])
+    outer = ak.contents.UnionArray.simplified(tags1, index1, [one, inner])
     one = ak.operations.with_name(outer, "James")
 
-    assert outer.contents[1].is_union != one.layout.contents[1].is_union
+    assert outer.to_list() == [
+        5,
+        4,
+        [],
+        {"x": 0.0, "y": []},
+        [1],
+        3,
+        {"x": 1.1, "y": [1]},
+        [2, 2],
+        [3, 3, 3],
+        2,
+        {"x": 2.2, "y": [2, 2]},
+        1,
+    ]

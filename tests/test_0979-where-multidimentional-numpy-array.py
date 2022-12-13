@@ -1,9 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import numpy as np  # noqa: F401
+import numpy as np
 import pytest  # noqa: F401
 
-import awkward as ak  # noqa: F401
+import awkward as ak
 
 
 def test():
@@ -18,7 +18,7 @@ def test():
         )
     )
 
-    assert ak.operations.where(condition == 2, array, 2 * array).tolist() == [
+    assert ak.operations.where(condition == 2, array, 2 * array).to_list() == [
         [2, 4, 6],
         [8, 10, 12],
         [14, 16, 18],

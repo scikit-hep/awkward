@@ -1,9 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import numpy as np  # noqa: F401
-import pytest  # noqa: F401
+import numpy as np
+import pytest
 
-import awkward as ak  # noqa: F401
+import awkward as ak
 
 jax = pytest.importorskip("jax")
 jax.config.update("jax_enable_x64", True)
@@ -33,7 +33,9 @@ def test_from_jax_2():
     )
     tags = ak.index.Index8(np.array([1, 1, 0, 0, 1, 0, 1, 1], dtype=np.int8))
     index = ak.index.Index32(np.array([0, 1, 0, 1, 2, 2, 4, 3], dtype=np.int32))
-    unionarray = ak.contents.unionarray.UnionArray(tags, index, [content0, content1])
+    unionarray = ak.contents.unionarray.UnionArray.simplified(
+        tags, index, [content0, content1]
+    )
 
     jax_array = ak.to_jax(unionarray)
 

@@ -2,7 +2,7 @@
 
 import pytest  # noqa: F401
 
-import awkward as ak  # noqa: F401
+import awkward as ak
 
 
 def test_all_options():
@@ -10,7 +10,7 @@ def test_all_options():
     two = ak.highlevel.Array([None, 5, None])
     result = ak.operations.zip([one, two], optiontype_outside_record=True)
     assert str(result.type) == "3 * ?(int64, int64)"
-    assert result.tolist() == [None, (2, 5), None]
+    assert result.to_list() == [None, (2, 5), None]
 
 
 def test_mixed_options():
@@ -18,7 +18,7 @@ def test_mixed_options():
     two = ak.highlevel.Array([4, 5, 6])
     result = ak.operations.zip([one, two], optiontype_outside_record=True)
     assert str(result.type) == "3 * ?(int64, int64)"
-    assert result.tolist() == [(1, 4), (2, 5), None]
+    assert result.to_list() == [(1, 4), (2, 5), None]
 
 
 def test_no_options():
@@ -26,7 +26,7 @@ def test_no_options():
     two = ak.highlevel.Array([4, 5, 6])
     result = ak.operations.zip([one, two], optiontype_outside_record=True)
     assert str(result.type) == "3 * (int64, int64)"
-    assert result.tolist() == [(1, 4), (2, 5), (3, 6)]
+    assert result.to_list() == [(1, 4), (2, 5), (3, 6)]
 
 
 def test_complex_inner():
@@ -34,7 +34,7 @@ def test_complex_inner():
     two = ak.highlevel.Array([[7, 5], [1, 2], [4, None]])
     result = ak.operations.zip([one, two], optiontype_outside_record=True)
     assert str(result.type) == "3 * var * ?(int64, int64)"
-    assert result.tolist() == [[(1, 7), (1, 5)], [(2, 1), (2, 2)], [(3, 4), None]]
+    assert result.to_list() == [[(1, 7), (1, 5)], [(2, 1), (2, 2)], [(3, 4), None]]
 
 
 def test_complex_outer():
@@ -42,4 +42,4 @@ def test_complex_outer():
     two = ak.highlevel.Array([[7, 5], [1, 2], [4, None]])
     result = ak.operations.zip([one, two], optiontype_outside_record=True)
     assert str(result.type) == "3 * option[var * ?(int64, int64)]"
-    assert result.tolist() == [[(1, 7), (1, 5)], None, [(3, 4), None]]
+    assert result.to_list() == [[(1, 7), (1, 5)], None, [(3, 4), None]]

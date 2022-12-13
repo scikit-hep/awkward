@@ -2,9 +2,9 @@
 
 import pytest  # noqa: F401
 
-import awkward as ak  # noqa: F401
+import awkward as ak
 
-numpy = ak.nplikes.Numpy.instance()
+numpy = ak._nplikes.Numpy.instance()
 
 
 class MyBehavior(ak.Array):

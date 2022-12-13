@@ -1,9 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import numpy as np  # noqa: F401
-import pytest  # noqa: F401
+import numpy as np
+import pytest
 
-import awkward as ak  # noqa: F401
+import awkward as ak
 
 to_list = ak.operations.to_list
 
@@ -23,7 +23,7 @@ def test():
 
     index = ak.index.Index64(np.array([3, 3, 1, 5], dtype=np.int64))
     indexed = ak.Array(ak.contents.IndexedArray(index, simple.layout))
-    assert indexed.tolist() == [3.3, 3.3, 1.1, 5.5]
+    assert indexed.to_list() == [3.3, 3.3, 1.1, 5.5]
 
     assert ak.operations.to_dataframe(indexed)["values"].values.tolist() == [
         3.3,

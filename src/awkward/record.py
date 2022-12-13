@@ -1,12 +1,15 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+from __future__ import annotations
 
 import copy
 from collections.abc import Iterable
 
 import awkward as ak
+from awkward._util import unset
 from awkward.contents.content import Content
+from awkward.typing import Self
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 class Record:
@@ -34,6 +37,10 @@ class Record:
         return self._array
 
     @property
+    def backend(self):
+        return self._array.backend
+
+    @property
     def at(self):
         return self._at
 
@@ -45,9 +52,8 @@ class Record:
     def is_tuple(self):
         return self._array.is_tuple
 
-    @property
-    def as_tuple(self):
-        return Record(self._array.as_tuple, self._at)
+    def to_tuple(self) -> Self:
+        return Record(self._array.to_tuple(), self._at)
 
     @property
     def contents(self):
@@ -58,13 +64,6 @@ class Record:
 
     def content(self, index_or_field):
         return self._array.content(index_or_field)[self._at]
-
-    def completely_flatten(
-        self, nplike=None, flatten_records=True, function_name=None, drop_nones=True
-    ):
-        return self._array[self._at : self._at + 1].completely_flatten(
-            nplike, flatten_records, function_name, drop_nones
-        )
 
     def __repr__(self):
         return self._repr("", "", "")
@@ -80,7 +79,7 @@ class Record:
         return "".join(out)
 
     def validity_error(self, path="layout.array"):
-        return self._array.validity_error(path)
+        return ak._do.validity_error(self._array, path)
 
     @property
     def parameters(self):
@@ -109,13 +108,6 @@ class Record:
     def branch_depth(self):
         branch, depth = self._array.branch_depth
         return branch, depth - 1
-
-    def axis_wrap_if_negative(self, axis):
-        if axis == 0:
-            raise ak._errors.wrap_error(
-                np.AxisError("Record type at axis=0 is a scalar, not an array")
-            )
-        return self._array.axis_wrap_if_negative(axis)
 
     def __getitem__(self, where):
         with ak._errors.SlicingErrorContext(self, where):
@@ -192,11 +184,11 @@ class Record:
     def _getitem_fields(self, where):
         return self._array._getitem_fields(where)._getitem_at(self._at)
 
-    def packed(self):
+    def to_packed(self) -> Self:
         if self._array.length == 1:
-            return Record(self._array.packed(), self._at)
+            return Record(self._array.to_packed(), self._at)
         else:
-            return Record(self._array[self._at : self._at + 1].packed(), 0)
+            return Record(self._array[self._at : self._at + 1].to_packed(), 0)
 
     def to_list(self, behavior=None):
         return self._to_list(behavior, None)
@@ -230,50 +222,13 @@ class Record:
         else:
             return dict(zip(self._array.fields, contents))
 
-    def __copy__(self):
-        return Record(self._array, self._at)
+    def __copy__(self) -> Self:
+        return self.copy()
 
     def __deepcopy__(self, memo):
         return Record(copy.deepcopy(self._array, memo), self._at)
 
-    def recursively_apply(
-        self,
-        action,
-        behavior=None,
-        depth_context=None,
-        lateral_context=None,
-        allow_records=True,
-        keep_parameters=True,
-        numpy_to_regular=True,
-        return_array=True,
-        function_name=None,
-    ):
-
-        out = self._array.recursively_apply(
-            action,
-            behavior,
-            depth_context,
-            lateral_context,
-            allow_records,
-            keep_parameters,
-            numpy_to_regular,
-            return_array,
-            function_name,
+    def copy(self, array=unset, at=unset) -> Self:
+        return Record(
+            self._array if array is unset else array, self._at if at is unset else at
         )
-
-        if return_array:
-            return Record(out, self._at)
-        else:
-            return None
-
-    def jax_flatten(self):
-        from awkward._connect.jax import AuxData, find_all_buffers
-
-        numpyarray_nodes = find_all_buffers(self)
-        return (numpyarray_nodes, AuxData(self))
-
-    @classmethod
-    def jax_unflatten(cls, aux_data, children):
-        from awkward._connect.jax import replace_all_buffers
-
-        return ak._util.wrap(replace_all_buffers(aux_data.layout, list(children)))

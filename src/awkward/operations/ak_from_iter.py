@@ -4,22 +4,28 @@ from awkward_cpp.lib import _ext
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 def from_iter(
-    iterable, highlevel=True, behavior=None, allow_record=True, initial=1024, resize=1.5
+    iterable,
+    *,
+    allow_record=True,
+    highlevel=True,
+    behavior=None,
+    initial=1024,
+    resize=1.5
 ):
     """
     Args:
         iterable (Python iterable): Data to convert into an Awkward Array.
+        allow_record (bool): If True, the outermost element may be a record
+            (returning #ak.Record or #ak.record.Record type, depending on
+            `highlevel`); if False, the outermost element must be an array.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
-        allow_record (bool): If True, the outermost element may be a record
-            (returning #ak.Record or #ak.record.Record type, depending on
-            `highlevel`); if False, the outermost element must be an array.
         initial (int): Initial size (in bytes) of buffers used by the
             [ak::ArrayBuilder](_static/classawkward_1_1ArrayBuilder.html).
         resize (float): Resize multiplier for buffers used by the
@@ -36,19 +42,19 @@ def from_iter(
 
     The following Python types are supported.
 
-       * bool, including `np.bool_`: converted into #ak.contents.NumpyArray.
-       * int, including `np.integer`: converted into #ak.contents.NumpyArray.
-       * float, including `np.floating`: converted into #ak.contents.NumpyArray.
-       * bytes: converted into #ak.contents.ListOffsetArray with parameter
-         `"__array__"` equal to `"bytestring"` (unencoded bytes).
-       * str: converted into #ak.contents.ListOffsetArray with parameter
-         `"__array__"` equal to `"string"` (UTF-8 encoded string).
-       * tuple: converted into #ak.contents.RecordArray without field names
-         (i.e. homogeneously typed, uniform sized tuples).
-       * dict: converted into #ak.contents.RecordArray with field names
-         (i.e. homogeneously typed records with the same sets of fields).
-       * iterable, including np.ndarray: converted into
-         #ak.contents.ListOffsetArray.
+    * bool, including `np.bool_`: converted into #ak.contents.NumpyArray.
+    * int, including `np.integer`: converted into #ak.contents.NumpyArray.
+    * float, including `np.floating`: converted into #ak.contents.NumpyArray.
+    * bytes: converted into #ak.contents.ListOffsetArray with parameter
+      `"__array__"` equal to `"bytestring"` (unencoded bytes).
+    * str: converted into #ak.contents.ListOffsetArray with parameter
+      `"__array__"` equal to `"string"` (UTF-8 encoded string).
+    * tuple: converted into #ak.contents.RecordArray without field names
+      (i.e. homogeneously typed, uniform sized tuples).
+    * dict: converted into #ak.contents.RecordArray with field names
+      (i.e. homogeneously typed records with the same sets of fields).
+    * iterable, including np.ndarray: converted into
+      #ak.contents.ListOffsetArray.
 
     See also #ak.to_list.
     """
@@ -56,9 +62,9 @@ def from_iter(
         "ak.from_iter",
         dict(
             iterable=iterable,
+            allow_record=allow_record,
             highlevel=highlevel,
             behavior=behavior,
-            allow_record=allow_record,
             initial=initial,
             resize=resize,
         ),
@@ -93,6 +99,13 @@ def _impl(iterable, highlevel, behavior, allow_record, initial, resize):
     formstr, length, buffers = builder.to_buffers()
     form = ak.forms.from_json(formstr)
 
-    return ak.operations.from_buffers(
-        form, length, buffers, highlevel=highlevel, behavior=behavior
+    return ak.operations.ak_from_buffers._impl(
+        form,
+        length,
+        buffers,
+        buffer_key="{form_key}-{attribute}",
+        backend="cpu",
+        highlevel=highlevel,
+        behavior=behavior,
+        simplify=True,
     )[0]

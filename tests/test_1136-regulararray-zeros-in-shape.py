@@ -1,19 +1,19 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import numpy as np  # noqa: F401
+import numpy as np
 import pytest  # noqa: F401
 
-import awkward as ak  # noqa: F401
+import awkward as ak
 
 
-def test_toRegularArray():
+def test_to_RegularArray():
     assert (
         str(
             ak.operations.type(
                 ak.highlevel.Array(
                     ak.operations.from_numpy(
                         np.empty((2, 3, 5, 7, 11), np.float64)
-                    ).layout.toRegularArray()
+                    ).layout.to_RegularArray()
                 )
             )
         )
@@ -25,7 +25,7 @@ def test_toRegularArray():
                 ak.highlevel.Array(
                     ak.operations.from_numpy(
                         np.empty((2, 3, 5, 7, 11, 0), np.float64)
-                    ).layout.toRegularArray()
+                    ).layout.to_RegularArray()
                 )
             )
         )
@@ -37,7 +37,7 @@ def test_toRegularArray():
                 ak.highlevel.Array(
                     ak.operations.from_numpy(
                         np.empty((2, 3, 5, 7, 0, 11), np.float64)
-                    ).layout.toRegularArray()
+                    ).layout.to_RegularArray()
                 )
             )
         )
@@ -49,7 +49,7 @@ def test_toRegularArray():
                 ak.highlevel.Array(
                     ak.operations.from_numpy(
                         np.empty((2, 3, 5, 0, 7, 11), np.float64)
-                    ).layout.toRegularArray()
+                    ).layout.to_RegularArray()
                 )
             )
         )
@@ -61,7 +61,7 @@ def test_toRegularArray():
                 ak.highlevel.Array(
                     ak.operations.from_numpy(
                         np.empty((2, 3, 0, 5, 7, 11), np.float64)
-                    ).layout.toRegularArray()
+                    ).layout.to_RegularArray()
                 )
             )
         )
@@ -73,7 +73,7 @@ def test_toRegularArray():
                 ak.highlevel.Array(
                     ak.operations.from_numpy(
                         np.empty((2, 0, 3, 5, 7, 11), np.float64)
-                    ).layout.toRegularArray()
+                    ).layout.to_RegularArray()
                 )
             )
         )
@@ -85,7 +85,7 @@ def test_toRegularArray():
                 ak.highlevel.Array(
                     ak.operations.from_numpy(
                         np.empty((0, 2, 3, 5, 7, 11), np.float64)
-                    ).layout.toRegularArray()
+                    ).layout.to_RegularArray()
                 )
             )
         )
@@ -98,7 +98,7 @@ def test_toRegularArray():
                 ak.highlevel.Array(
                     ak.operations.from_numpy(
                         np.empty((2, 3, 5, 7, 0, 11, 0), np.float64)
-                    ).layout.toRegularArray()
+                    ).layout.to_RegularArray()
                 )
             )
         )
@@ -110,7 +110,7 @@ def test_toRegularArray():
                 ak.highlevel.Array(
                     ak.operations.from_numpy(
                         np.empty((2, 3, 5, 0, 7, 11, 0), np.float64)
-                    ).layout.toRegularArray()
+                    ).layout.to_RegularArray()
                 )
             )
         )
@@ -122,7 +122,7 @@ def test_toRegularArray():
                 ak.highlevel.Array(
                     ak.operations.from_numpy(
                         np.empty((2, 3, 0, 5, 7, 0, 11), np.float64)
-                    ).layout.toRegularArray()
+                    ).layout.to_RegularArray()
                 )
             )
         )
@@ -134,7 +134,7 @@ def test_toRegularArray():
                 ak.highlevel.Array(
                     ak.operations.from_numpy(
                         np.empty((2, 0, 3, 5, 7, 0, 11), np.float64)
-                    ).layout.toRegularArray()
+                    ).layout.to_RegularArray()
                 )
             )
         )
@@ -146,7 +146,7 @@ def test_toRegularArray():
                 ak.highlevel.Array(
                     ak.operations.from_numpy(
                         np.empty((0, 2, 3, 5, 7, 0, 11), np.float64)
-                    ).layout.toRegularArray()
+                    ).layout.to_RegularArray()
                 )
             )
         )

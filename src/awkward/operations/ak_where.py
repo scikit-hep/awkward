@@ -2,19 +2,19 @@
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
+cpu = ak._backends.NumpyBackend.instance()
 
 
 @ak._connect.numpy.implements("where")
-def where(condition, *args, **kwargs):
+def where(condition, *args, mergebool=True, highlevel=True, behavior=None):
     """
     Args:
-        condition (np.ndarray or rectilinear #ak.Array of booleans): In the
-            three-argument form of this function (`condition`, `x`, `y`),
-            True values in `condition` select values from `x` and False
-            values in `condition` select values from `y`.
-        x: Data with the same length as `condition`.
-        y: Data with the same length as `condition`.
+        condition: Array-like data (anything #ak.to_layout recognizes) of booleans.
+        x: Optional array-like data (anything #ak.to_layout recognizes) with the same
+            length as `condition`.
+        y: Optional array-like data (anything #ak.to_layout recognizes) with the same
+            length as `condition`.
         mergebool (bool, default is True): If True, boolean and numeric data
             can be combined into the same buffer, losing information about
             False vs `0` and True vs `1`; otherwise, they are kept in separate
@@ -38,10 +38,6 @@ def where(condition, *args, **kwargs):
     for all `i`. The structure of `x` and `y` do not need to be the same; if
     they are incompatible types, the output will have #ak.type.UnionType.
     """
-    mergebool, highlevel, behavior = ak._util.extra(
-        (), kwargs, [("mergebool", True), ("highlevel", True), ("behavior", None)]
-    )
-
     if len(args) == 0:
         with ak._errors.OperationErrorContext(
             "ak.where",
@@ -77,10 +73,10 @@ def _impl1(condition, mergebool, highlevel, behavior):
     akcondition = ak.operations.to_layout(
         condition, allow_record=False, allow_other=False
     )
-    nplike = ak.nplikes.nplike_of(akcondition)
+    backend = ak._backends.backend_of(akcondition, default=cpu)
 
     akcondition = ak.contents.NumpyArray(ak.operations.to_numpy(akcondition))
-    out = nplike.nonzero(ak.operations.to_numpy(akcondition))
+    out = backend.nplike.nonzero(ak.operations.to_numpy(akcondition))
     if highlevel:
         return tuple(
             ak._util.wrap(
@@ -106,22 +102,29 @@ def _impl3(condition, x, y, mergebool, highlevel, behavior):
         good_arrays.append(left)
     if isinstance(right, ak.contents.Content):
         good_arrays.append(right)
-    nplike = ak.nplikes.nplike_of(*good_arrays)
+    backend = ak._backends.backend_of(*good_arrays, default=cpu)
 
     def action(inputs, **kwargs):
         akcondition, left, right = inputs
         if isinstance(akcondition, ak.contents.NumpyArray):
-            npcondition = nplike.index_nplike.asarray(akcondition)
+            npcondition = backend.index_nplike.asarray(akcondition)
             tags = ak.index.Index8((npcondition == 0).view(np.int8))
             index = ak.index.Index64(
-                nplike.index_nplike.arange(len(tags), dtype=np.int64), nplike=nplike
+                backend.index_nplike.arange(len(tags), dtype=np.int64),
+                nplike=backend.index_nplike,
             )
             if not isinstance(left, ak.contents.Content):
-                left = ak.contents.NumpyArray(nplike.repeat(left, len(tags)))
+                left = ak.contents.NumpyArray(backend.nplike.repeat(left, len(tags)))
             if not isinstance(right, ak.contents.Content):
-                right = ak.contents.NumpyArray(nplike.repeat(right, len(tags)))
-            tmp = ak.contents.UnionArray(tags, index, [left, right])
-            return (tmp.simplify_uniontype(mergebool=mergebool),)
+                right = ak.contents.NumpyArray(backend.nplike.repeat(right, len(tags)))
+            return (
+                ak.contents.UnionArray.simplified(
+                    tags,
+                    index,
+                    [left, right],
+                    mergebool=mergebool,
+                ),
+            )
         else:
             return None
 

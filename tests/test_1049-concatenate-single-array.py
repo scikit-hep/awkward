@@ -1,9 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import numpy as np
-import pytest  # noqa: F401
+import pytest
 
-import awkward as ak  # noqa: F401
+import awkward as ak
 
 
 def test_single_numpy_array():
@@ -28,7 +28,7 @@ def test_single_numpy_array():
 def test_single_awkward_array():
     array = ak.from_iter([[1, 2, 3], [4, 5, 6, 7], [8, 9]])
     result = ak.concatenate(array)
-    assert result.tolist() == [1, 2, 3, 4, 5, 6, 7, 8, 9]
+    assert result.to_list() == [1, 2, 3, 4, 5, 6, 7, 8, 9]
 
 
 def test_single_jax_array():
@@ -37,7 +37,7 @@ def test_single_jax_array():
 
     array = jnp.arange(4 * 3 * 2).reshape(4, 3, 2)
     result = ak.concatenate(array)
-    assert result.tolist() == [
+    assert result.to_list() == [
         [0, 1],
         [2, 3],
         [4, 5],

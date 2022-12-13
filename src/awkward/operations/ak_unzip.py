@@ -2,13 +2,13 @@
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
-def unzip(array, highlevel=True, behavior=None):
+def unzip(array, *, highlevel=True, behavior=None):
     """
     Args:
-        array: Array to unzip into individual fields.
+        array: Array-like data (anything #ak.to_layout recognizes).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
@@ -57,7 +57,7 @@ def _impl(array, highlevel, behavior):
         elif hasattr(layout, "content"):
             check_for_union(layout.content)
 
-    layout.recursively_apply(check_for_union, behavior, return_array=False)
+    ak._do.recursively_apply(layout, check_for_union, behavior, return_array=False)
 
     if len(fields) == 0:
         return (ak._util.wrap(layout, behavior, highlevel),)

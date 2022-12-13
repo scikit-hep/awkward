@@ -1,19 +1,22 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
-# v2: keep this file, but modernize the 'of' function; ptr_lib is gone.
+from __future__ import annotations
 
 import ctypes
 from collections.abc import Iterable
 
-import awkward_cpp.cpu_kernels
 import numpy
 from awkward_cpp.lib import _ext
 
 import awkward as ak
+from awkward.typing import TypeVar
 
 
 class Singleton:
     _instance = None
+
+    def __new__(cls, *args, **kwargs):
+        assert cls._instance is None
+        return super().__new__(cls, *args, **kwargs)
 
     @classmethod
     def instance(cls):
@@ -374,13 +377,13 @@ class NumpyLike(Singleton):
         Return `True` if the given object is a numpy buffer, otherwise `False`.
 
         """
-        raise NotImplementedError
+        raise ak._errors.wrap_error(NotImplementedError)
 
     def is_c_contiguous(self, array) -> bool:
         raise ak._errors.wrap_error(NotImplementedError)
 
 
-class NumpyKernel:
+class Kernel:
     def __init__(self, kernel, name_and_types):
         self._kernel = kernel
         self._name_and_types = name_and_types
@@ -392,37 +395,41 @@ class NumpyKernel:
             "".join(", " + str(numpy.dtype(x)) for x in self._name_and_types[1:]),
         )
 
-    @staticmethod
-    def _cast(x, t):
-        if issubclass(t, ctypes._Pointer):
 
+class NumpyKernel(Kernel):
+    @classmethod
+    def _cast(cls, x, t):
+        if issubclass(t, ctypes._Pointer):
+            # Do we have a NumPy-owned array?
             if Numpy.is_own_array(x):
                 return ctypes.cast(x.ctypes.data, t)
-            elif Cupy.is_own_array(x):
+            # Or, do we have a ctypes type
+            elif hasattr(x, "_b_base_"):
+                return ctypes.cast(x, t)
+            else:
                 raise ak._errors.wrap_error(
                     AssertionError("CuPy buffers shouldn't be passed to Numpy Kernels.")
                 )
-            elif Jax.is_own_array(x):
-                raise ak._errors.wrap_error(
-                    ValueError(
-                        "JAX Buffers can't be passed as function args for the C Kernels"
-                    )
-                )
-            else:
-                return ctypes.cast(x, t)
         else:
             return x
 
     def __call__(self, *args):
         assert len(args) == len(self._kernel.argtypes)
 
+        return self._kernel(
+            *(self._cast(x, t) for x, t in zip(args, self._kernel.argtypes))
+        )
+
+
+class JaxKernel(NumpyKernel):
+    def __call__(self, *args):
+        assert len(args) == len(self._kernel.argtypes)
+
         if not any(Jax.is_tracer(arg) for arg in args):
-            return self._kernel(
-                *(self._cast(x, t) for x, t in zip(args, self._kernel.argtypes))
-            )
+            return super().__call__(*args)
 
 
-class CupyKernel(NumpyKernel):
+class CupyKernel(Kernel):
     def max_length(self, args):
         cupy = ak._connect.cuda.import_cupy("Awkward Arrays with CUDA")
         max_length = numpy.iinfo(numpy.int64).min
@@ -474,10 +481,6 @@ class CupyKernel(NumpyKernel):
 
 
 class Numpy(NumpyLike):
-    @property
-    def index_nplike(self):
-        return self
-
     def to_rectilinear(self, array, *args, **kwargs):
         if isinstance(array, numpy.ndarray):
             return array
@@ -499,12 +502,9 @@ class Numpy(NumpyLike):
             return [self.to_rectilinear(x, *args, **kwargs) for x in array]
 
         else:
-            raise TypeError("to_rectilinear argument must be iterable")
-
-    def __getitem__(self, name_and_types):
-        return NumpyKernel(
-            awkward_cpp.cpu_kernels.kernel[name_and_types], name_and_types
-        )
+            raise ak._errors.wrap_error(
+                TypeError("to_rectilinear argument must be iterable")
+            )
 
     def __init__(self):
         self._module = numpy
@@ -533,8 +533,10 @@ class Numpy(NumpyLike):
             jax = Jax.instance()
             return jax.asarray(array, dtype=array.dtype)
         else:
-            raise TypeError(
-                "Invalid nplike, choose between nplike.Numpy, nplike.Cupy, Typetracer or Jax"
+            raise ak._errors.wrap_error(
+                TypeError(
+                    "Invalid nplike, choose between nplike.Numpy, nplike.Cupy, Typetracer or Jax"
+                )
             )
 
     @classmethod
@@ -555,25 +557,8 @@ class Numpy(NumpyLike):
 class Cupy(NumpyLike):
     is_eager = False
 
-    @property
-    def index_nplike(self):
-        return self
-
     def to_rectilinear(self, array, *args, **kwargs):
         return ak.operations.ak_to_cupy.to_cupy(array, *args, **kwargs)
-
-    def __getitem__(self, name_and_types):
-        cupy = ak._connect.cuda.import_cupy("Awkward Arrays with CUDA")
-        _cuda_kernels = ak._connect.cuda.initialize_cuda_kernels(cupy)  # noqa: F401
-
-        func = _cuda_kernels[name_and_types]
-        if func is not None:
-            return CupyKernel(func, name_and_types)
-        else:
-            raise NotImplementedError(
-                f"{name_and_types[0]} is not implemented for CUDA. Please transfer the array back to the Main Memory to "
-                "continue the operation."
-            )
 
     def __init__(self):
         import awkward._connect.cuda  # noqa: F401
@@ -582,16 +567,20 @@ class Cupy(NumpyLike):
 
     @property
     def ma(self):
-        raise ValueError(
-            "CUDA arrays cannot have missing values until CuPy implements "
-            "numpy.ma.MaskedArray"
+        raise ak._errors.wrap_error(
+            ValueError(
+                "CUDA arrays cannot have missing values until CuPy implements "
+                "numpy.ma.MaskedArray"
+            )
         )
 
     @property
     def char(self):
-        raise ValueError(
-            "CUDA arrays cannot do string manipulations until CuPy implements "
-            "numpy.char"
+        raise ak._errors.wrap_error(
+            ValueError(
+                "CUDA arrays cannot do string manipulations until CuPy implements "
+                "numpy.char"
+            )
         )
 
     @property
@@ -628,8 +617,10 @@ class Cupy(NumpyLike):
             jax = Jax.instance()
             return jax.asarray(array.get(), dtype=array.dtype)
         else:
-            raise TypeError(
-                "Invalid nplike, choose between nplike.Numpy, nplike.Cupy, Typetracer or Jax"
+            raise ak._errors.wrap_error(
+                TypeError(
+                    "Invalid nplike, choose between nplike.Numpy, nplike.Cupy, Typetracer or Jax"
+                )
             )
 
     def ascontiguousarray(self, array, dtype=None):
@@ -769,10 +760,6 @@ class Cupy(NumpyLike):
 
 
 class Jax(NumpyLike):
-    @property
-    def index_nplike(self):
-        return ak.nplikes.Numpy.instance()
-
     def to_rectilinear(self, array, *args, **kwargs):
         if isinstance(array, self._module.DeviceArray):
             return array
@@ -797,11 +784,6 @@ class Jax(NumpyLike):
             raise ak._errors.wrap_error(
                 ValueError("to_rectilinear argument must be iterable")
             )
-
-    def __getitem__(self, name_and_types):
-        return NumpyKernel(
-            awkward_cpp.cpu_kernels.kernel[name_and_types], name_and_types
-        )
 
     def __init__(self):
         jax = ak.jax.import_jax()
@@ -853,16 +835,16 @@ class Jax(NumpyLike):
     def raw(self, array, nplike):
         if isinstance(nplike, Jax):
             return array
-        elif isinstance(nplike, ak.nplikes.Cupy):
-            cupy = ak.nplikes.Cupy.instance()
+        elif isinstance(nplike, ak._nplikes.Cupy):
+            cupy = ak._nplikes.Cupy.instance()
             return cupy.asarray(array)
-        elif isinstance(nplike, ak.nplikes.Numpy):
-            numpy = ak.nplikes.Numpy.instance()
+        elif isinstance(nplike, ak._nplikes.Numpy):
+            numpy = ak._nplikes.Numpy.instance()
             return numpy.asarray(array)
         elif isinstance(nplike, ak._typetracer.TypeTracer):
             return ak._typetracer.TypeTracerArray(dtype=array.dtype, shape=array.shape)
         else:
-            ak._errors.wrap_error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "Invalid nplike, choose between nplike.Numpy, nplike.Cupy, Typetracer or Jax",
                 )
@@ -948,32 +930,39 @@ class Jax(NumpyLike):
 # Temporary sentinel marking "argument not given"
 _UNSET = object()
 
+D = TypeVar("D")
 
-def nplike_of(*arrays, default=_UNSET):
+
+def nplike_of(*arrays, default: D = _UNSET) -> NumpyLike | D:
     """
     Args:
         *arrays: iterable of possible array objects
         default: default NumpyLike instance if no array objects found
 
-    Return the #ak.nplikes.NumpyLike that is best-suited to operating upon the given
+    Return the #ak._nplikes.NumpyLike that is best-suited to operating upon the given
     iterable of arrays. Return an instance of the `default_cls` if no known array types
     are found.
     """
-    nplikes = set()
+    nplikes: set[NumpyLike] = set()
     nplike_classes = (Numpy, Cupy, Jax, ak._typetracer.TypeTracer)
-
     for array in arrays:
-        nplike = getattr(array, "nplike", None)
-        if nplike is not None:
-            nplikes.add(nplike)
+        if hasattr(array, "layout"):
+            array = array.layout
+
+        # Layout objects
+        if hasattr(array, "backend"):
+            nplikes.add(array.backend.nplike)
+
+        # Index objects
+        elif hasattr(array, "nplike"):
+            nplikes.add(array.nplike)
+
+        # Other e.g. nplike arrays
         else:
             for cls in nplike_classes:
                 if cls.is_own_array(array):
                     nplikes.add(cls.instance())
                     break
-
-    if any(isinstance(x, ak._typetracer.TypeTracer) for x in nplikes):
-        return ak._typetracer.TypeTracer.instance()
 
     if nplikes == set():
         if default is _UNSET:
@@ -983,12 +972,18 @@ def nplike_of(*arrays, default=_UNSET):
     elif len(nplikes) == 1:
         return next(iter(nplikes))
     else:
-        raise ValueError(
-            """attempting to use both a 'cpu' array and a 'cuda' array in the """
-            """same operation; use one of
+        # We allow typetracers to mix with other nplikes, and take precedence
+        for nplike in nplikes:
+            if not (nplike.known_data and nplike.known_shape):
+                return nplike
+
+        raise ak._errors.wrap_error(
+            ValueError(
+                """attempting to use both a 'cpu' array and a 'cuda' array in the same operation; use one of
 
     ak.to_backend(array, 'cpu')
     ak.to_backend(array, 'cuda')
 
 to move one or the other to main memory or the GPU(s)."""
+            )
         )

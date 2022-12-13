@@ -3,7 +3,7 @@
 import numpy as np  # noqa: F401
 import pytest  # noqa: F401
 
-import awkward as ak  # noqa: F401
+import awkward as ak
 
 
 def test():
@@ -17,7 +17,7 @@ def test():
         ]
     )
 
-    assert ak.operations.sum(array, axis=-1).tolist() == [
+    assert ak.operations.sum(array, axis=-1).to_list() == [
         1,  # 0 + 1
         3,  # 3
         0,  # list is empty
@@ -25,7 +25,7 @@ def test():
         15,  # 4 + 5 + 6
     ]
 
-    assert ak.operations.sum(array, axis=-2).tolist() == [
+    assert ak.operations.sum(array, axis=-2).to_list() == [
         4,
         9,
         0,
@@ -36,7 +36,7 @@ def test():
         #                     6
     ]
 
-    assert ak.operations.min(array, axis=-1).tolist() == [
+    assert ak.operations.min(array, axis=-1).to_list() == [
         0,  # min([0, 1])
         3,  # min([3])
         None,  # list is empty
@@ -44,7 +44,7 @@ def test():
         4,  # min([4, 5, 6])
     ]
 
-    assert ak.operations.min(array, axis=-2).tolist() == [
+    assert ak.operations.min(array, axis=-2).to_list() == [
         0,
         1,
         None,
@@ -59,14 +59,14 @@ def test():
     assert str(ak.operations.min(array, axis=-1).type) == "5 * ?int64"
 
     # second bug-fix: correct mask_identity=False behavior
-    assert ak.operations.ptp(array, axis=-1).tolist() == [
+    assert ak.operations.ptp(array, axis=-1).to_list() == [
         1,
         0,
         None,
         None,
         2,
     ]
-    assert ak.operations.ptp(array, axis=-1, mask_identity=False).tolist() == [
+    assert ak.operations.ptp(array, axis=-1, mask_identity=False).to_list() == [
         1,
         0,
         0,
@@ -74,8 +74,8 @@ def test():
         2,
     ]
 
-    assert ak.operations.ptp(array, axis=-2).tolist() == [4, 4, None, 0]
-    assert ak.operations.ptp(array, axis=-2, mask_identity=False).tolist() == [
+    assert ak.operations.ptp(array, axis=-2).to_list() == [4, 4, None, 0]
+    assert ak.operations.ptp(array, axis=-2, mask_identity=False).to_list() == [
         4,
         4,
         0,

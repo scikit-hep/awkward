@@ -3,7 +3,7 @@
 import numpy as np  # noqa: F401
 import pytest  # noqa: F401
 
-import awkward as ak  # noqa: F401
+import awkward as ak
 
 to_list = ak.operations.to_list
 
@@ -18,4 +18,4 @@ def test():
     assert isinstance(arr2.b.layout, ak.contents.IndexedOptionArray)
     assert isinstance(arr2.b.layout.content, ak.contents.NumpyArray)
 
-    assert ak.operations.is_none(arr2.b).tolist() == [False, True]
+    assert ak.operations.is_none(arr2.b).to_list() == [False, True]

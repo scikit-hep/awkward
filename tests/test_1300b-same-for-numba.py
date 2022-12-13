@@ -1,9 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import numpy as np  # noqa: F401
-import pytest  # noqa: F401
+import numpy as np
+import pytest
 
-import awkward as ak  # noqa: F401
+import awkward as ak
 
 numba = pytest.importorskip("numba")
 
@@ -81,7 +81,7 @@ def test_RegularArray_NumpyArray():
     assert out.tolist() == [2.0, 0.0, 1.1, 3.3, 4.4, 3.0]
 
     v2b = ak.contents.regulararray.RegularArray(
-        ak.contents.emptyarray.EmptyArray().toNumpyArray(np.dtype(np.float64)),
+        ak.contents.emptyarray.EmptyArray().to_NumpyArray(np.dtype(np.float64)),
         0,
         zeros_length=10,
     )
@@ -677,7 +677,7 @@ def test_nested_RegularArray_NumpyArray():
     v2b = ak.contents.ListOffsetArray(
         ak.index.Index64(np.array([0, 1, 11], dtype=np.int64)),
         ak.contents.regulararray.RegularArray(
-            ak.contents.emptyarray.EmptyArray().toNumpyArray(np.dtype(np.float64)),
+            ak.contents.emptyarray.EmptyArray().to_NumpyArray(np.dtype(np.float64)),
             0,
             zeros_length=11,
         ),

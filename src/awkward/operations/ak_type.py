@@ -8,15 +8,18 @@ from awkward_cpp.lib import _ext
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 def type(array):
     """
+    Args:
+        array: Array-like data (anything #ak.to_layout recognizes).
+
     The high-level type of an `array` (many types supported, including all
     Awkward Arrays and Records) as #ak.types.Type objects.
 
-    The high-level type ignores #layout differences like
+    The high-level type ignores layout differences like
     #ak.contents.ListArray versus #ak.contents.ListOffsetArray, but
     not differences like "regular-sized lists" (i.e.
     #ak.contents.RegularArray) versus "variable-sized lists" (i.e.
@@ -27,31 +30,41 @@ def type(array):
 
     For example,
 
-        ak.Array([[{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}],
-                  [],
-                  [{"x": 3.3, "y": [3, 3, 3]}]])
+        >>> array = ak.Array([[{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}],
+        ...                   [],
+        ...                   [{"x": 3.3, "y": [3, 3, 3]}]])
 
     has type
 
-        3 * var * {"x": float64, "y": var * int64}
+        >>> ak.type(array).show()
+        3 * var * {
+            x: float64,
+            y: var * int64
+        }
 
     but
 
-        ak.Array(np.arange(2*3*5).reshape(2, 3, 5))
+        >>> array = ak.Array(np.arange(2*3*5).reshape(2, 3, 5))
 
     has type
 
+        >>> ak.type(array).show()
         2 * 3 * 5 * int64
 
     Some cases, like heterogeneous data, require [extensions beyond the
     Datashape specification](https://github.com/blaze/datashape/issues/237).
     For example,
 
-        ak.Array([1, "two", [3, 3, 3]])
+        >>> array = ak.Array([1, "two", [3, 3, 3]])
 
     has type
 
-        3 * union[int64, string, var * int64]
+        >>> ak.type(array).show()
+        3 * union[
+            int64,
+            string,
+            var * int64
+        ]
 
     but "union" is not a Datashape type-constructor. (Its syntax is
     similar to existing type-constructors, so it's a plausible addition

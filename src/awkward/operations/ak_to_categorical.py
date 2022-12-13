@@ -2,15 +2,17 @@
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
-def to_categorical(array, highlevel=True):
+def to_categorical(array, *, highlevel=True, behavior=None):
     """
     Args:
-        array: Data convertible to an Awkward Array
+        array: Array-like data (anything #ak.to_layout recognizes).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
     Creates a categorical dataset, which has the following properties:
 
@@ -28,17 +30,17 @@ def to_categorical(array, highlevel=True):
         >>> array = ak.Array([["one", "two", "three"], [], ["three", "two"]])
         >>> categorical = ak.to_categorical(array)
         >>> categorical
-        <Array [['one', 'two', ... 'three', 'two']] type='3 * var * categorical[type=str...'>
-        >>> ak.type(categorical)
+        <Array [['one', 'two', 'three'], ..., [...]] type='3 * var * categorical[ty...'>
+        >>> categorical.type.show()
         3 * var * categorical[type=string]
-        >>> ak.to_list(categorical) == ak.to_list(array)
+        >>> categorical.to_list() == array.to_list()
         True
         >>> ak.categories(categorical)
         <Array ['one', 'two', 'three'] type='3 * string'>
         >>> ak.is_categorical(categorical)
         True
         >>> ak.from_categorical(categorical)
-        <Array [['one', 'two', ... 'three', 'two']] type='3 * var * string'>
+        <Array [['one', 'two', 'three'], ..., ['three', ...]] type='3 * var * string'>
 
     This function descends through nested lists, but not into the fields of
     records, so records can be categories. To make categorical record
@@ -53,16 +55,19 @@ def to_categorical(array, highlevel=True):
         ...     {"x": 1.1, "y": "one"}
         ... ])
         >>> records
-        <Array [{x: 1.1, y: 'one'}, ... y: 'one'}] type='5 * {"x": float64, "y": string}'>
+            <Array [{x: 1.1, y: 'one'}, ..., {x: 1.1, ...}] type='5 * {x: float64, y: s...'>
         >>> categorical_records = ak.zip({
         ...     "x": ak.to_categorical(records["x"]),
         ...     "y": ak.to_categorical(records["y"]),
         ... })
         >>> categorical_records
         <Array [{x: 1.1, y: 'one'}, ... y: 'one'}] type='5 * {"x": categorical[type=floa...'>
-        >>> ak.type(categorical_records)
-        5 * {"x": categorical[type=float64], "y": categorical[type=string]}
-        >>> ak.to_list(categorical_records) == ak.to_list(records)
+        >>> categorical_records.type.show()
+        5 * {
+            x: categorical[type=float64],
+            y: categorical[type=string]
+        }
+        >>> categorical_records.to_list() == records.to_list()
         True
 
     The check for uniqueness is currently implemented in a Python loop, so
@@ -73,16 +78,14 @@ def to_categorical(array, highlevel=True):
     """
     with ak._errors.OperationErrorContext(
         "ak.to_categorical",
-        dict(array=array, highlevel=highlevel),
+        dict(array=array, highlevel=highlevel, behavior=behavior),
     ):
-        return _impl(array, highlevel)
+        return _impl(array, highlevel, behavior)
 
 
-def _impl(array, highlevel):
+def _impl(array, highlevel, behavior):
     def action(layout, **kwargs):
         if layout.purelist_depth == 1:
-            if layout.is_option:
-                layout = layout.simplify_optiontype()
             if layout.is_indexed and layout.is_option:
                 content = layout.content
                 cls = ak.contents.IndexedOptionArray
@@ -97,11 +100,11 @@ def _impl(array, highlevel):
                 cls = ak.contents.IndexedArray
 
             content_list = ak.operations.to_list(content)
-            hashable = [ak.behaviors.categorical.as_hashable(x) for x in content_list]
+            hashable = [ak.behaviors.categorical._as_hashable(x) for x in content_list]
 
             lookup = {}
-            is_first = ak.nplikes.numpy.empty(len(hashable), dtype=np.bool_)
-            mapping = ak.nplikes.numpy.empty(len(hashable), dtype=np.int64)
+            is_first = ak._nplikes.numpy.empty(len(hashable), dtype=np.bool_)
+            mapping = ak._nplikes.numpy.empty(len(hashable), dtype=np.int64)
             for i, x in enumerate(hashable):
                 if x in lookup:
                     is_first[i] = False
@@ -112,17 +115,17 @@ def _impl(array, highlevel):
                     mapping[i] = j
 
             if layout.is_indexed and layout.is_option:
-                original_index = ak.nplikes.numpy.asarray(layout.index)
+                original_index = ak._nplikes.numpy.asarray(layout.index)
                 index = mapping[original_index]
                 index[original_index < 0] = -1
                 index = ak.index.Index64(index)
 
             elif layout.is_indexed:
-                original_index = ak.nplikes.numpy.asarray(layout.index)
+                original_index = ak._nplikes.numpy.asarray(layout.index)
                 index = ak.index.Index64(mapping[original_index])
 
             elif layout.is_option:
-                mask = ak.nplikes.numpy.asarray(layout.mask_as_bool(valid_when=False))
+                mask = ak._nplikes.numpy.asarray(layout.mask_as_bool(valid_when=False))
                 mapping[mask.view(np.bool_)] = -1
                 index = ak.index.Index64(mapping)
 
@@ -136,6 +139,6 @@ def _impl(array, highlevel):
             return None
 
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
-    behavior = ak._util.behavior_of(array)
-    out = layout.recursively_apply(action, behavior)
+    behavior = ak._util.behavior_of(array, behavior=behavior)
+    out = ak._do.recursively_apply(layout, action, behavior)
     return ak._util.wrap(out, behavior, highlevel)

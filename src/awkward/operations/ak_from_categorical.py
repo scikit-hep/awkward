@@ -3,10 +3,10 @@
 import awkward as ak
 
 
-def from_categorical(array, highlevel=True, behavior=None):
+def from_categorical(array, *, highlevel=True, behavior=None):
     """
     Args:
-        array: Awkward Array from which to remove the 'categorical' parameter.
+        array: Array-like data (anything #ak.to_layout recognizes).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
@@ -42,7 +42,7 @@ def _impl(array, highlevel, behavior):
 
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
     behavior = ak._util.behavior_of(array, behavior=behavior)
-    out = layout.recursively_apply(action, behavior=behavior)
+    out = ak._do.recursively_apply(layout, action, behavior=behavior)
     if highlevel:
         return ak._util.wrap(out, behavior)
     else:

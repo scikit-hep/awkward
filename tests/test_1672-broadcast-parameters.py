@@ -1,10 +1,10 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import pytest  # noqa: F401
+import pytest
 
-import awkward as ak  # noqa: F401
+import awkward as ak
 
-numpy = ak.nplikes.Numpy.instance()
+numpy = ak._nplikes.Numpy.instance()
 
 
 @pytest.mark.skip("string broadcasting is broken")
@@ -112,9 +112,7 @@ def test_broadcast_float_int_union():
     )
     that_2 = ak.contents.ByteMaskedArray(
         ak.index.Index8(numpy.array([0, 1, 0, 1], dtype="int8")),
-        ak.contents.NumpyArray(
-            numpy.arange(4, dtype="complex"),
-        ),
+        ak.from_iter(["1", "2", "3", "4"], highlevel=False),
         valid_when=True,
         parameters={"name": "other"},
     )

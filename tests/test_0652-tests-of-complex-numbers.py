@@ -2,19 +2,19 @@
 
 import json
 
-import numpy as np  # noqa: F401
-import pytest  # noqa: F401
+import numpy as np
+import pytest
 
-import awkward as ak  # noqa: F401
+import awkward as ak
 
 
 def test_from_iter():
-    assert ak.operations.from_iter([1 + 1j, 2 + 2j, 3 + 3j]).tolist() == [
+    assert ak.operations.from_iter([1 + 1j, 2 + 2j, 3 + 3j]).to_list() == [
         1 + 1j,
         2 + 2j,
         3 + 3j,
     ]
-    assert ak.operations.from_iter([[1 + 1j, 2 + 2j], [], [3 + 3j]]).tolist() == [
+    assert ak.operations.from_iter([[1 + 1j, 2 + 2j], [], [3 + 3j]]).to_list() == [
         [1 + 1j, 2 + 2j],
         [],
         [3 + 3j],
@@ -22,12 +22,12 @@ def test_from_iter():
 
     # First encounter of a complex number should promote previous integers and
     # reals into complex numbers:
-    assert ak.operations.from_iter([1, 2.2, 3 + 3j]).tolist() == [
+    assert ak.operations.from_iter([1, 2.2, 3 + 3j]).to_list() == [
         1.0 + 0j,
         2.2 + 0j,
         3.0 + 3j,
     ]
-    assert ak.operations.from_iter([1, 3 + 3j]).tolist() == [
+    assert ak.operations.from_iter([1, 3 + 3j]).to_list() == [
         1.0 + 0j,
         3.0 + 3j,
     ]
@@ -35,7 +35,7 @@ def test_from_iter():
     # Just as the first encounter of a real number promotes previous integers
     # into reals:
     assert str(ak.operations.from_iter([1, 2.2]).type) == "2 * float64"
-    assert ak.operations.from_iter([1, 2.2]).tolist() == [1.0, 2.2]
+    assert ak.operations.from_iter([1, 2.2]).to_list() == [1.0, 2.2]
     builder = ak.highlevel.ArrayBuilder()
     assert str(builder.type) == "0 * unknown"
     builder.integer(1)
@@ -50,21 +50,21 @@ def test_from_iter():
 
 def test_from_json():
     array = ak.operations.from_json('[{"r": 1.1, "i": 1.0}, {"r": 2.2, "i": 2.0}]')
-    assert array.tolist() == [
+    assert array.to_list() == [
         {"r": 1.1, "i": 1.0},
         {"r": 2.2, "i": 2.0},
     ]
     array = ak.operations.from_json(
         '[{"r": 1.1, "i": 1.0}, {"r": 2.2, "i": 2.0}]', complex_record_fields=("r", "i")
     )
-    assert array.tolist() == [(1.1 + 1j), (2.2 + 2j)]
+    assert array.to_list() == [(1.1 + 1j), (2.2 + 2j)]
 
     # Somewhere in from_json, a handler that turns integer record fields into
     # parts of a complex number is missing.
     array = ak.operations.from_json(
         '[{"r": 1, "i": 1}, {"r": 2, "i": 2}]', complex_record_fields=("r", "i")
     )
-    assert array.tolist() == [(1 + 1j), (2 + 2j)]
+    assert array.to_list() == [(1 + 1j), (2 + 2j)]
 
     # This should fail with some message like "complex number fields must be numbers,"
     # not "called 'end_record' without 'begin_record' at the same level before it."
@@ -78,16 +78,16 @@ def test_from_json():
     # only one of the two fields.
     assert ak.operations.from_json(
         '[{"r": 1}, {"r": 2}]', complex_record_fields=("r", "i")
-    ).tolist() == [{"r": 1}, {"r": 2}]
+    ).to_list() == [{"r": 1}, {"r": 2}]
     assert ak.operations.from_json(
         '[{"i": 1}, {"i": 2}]', complex_record_fields=("r", "i")
-    ).tolist() == [{"i": 1}, {"i": 2}]
+    ).to_list() == [{"i": 1}, {"i": 2}]
     assert ak.operations.from_json(
         '[{"r": 1.1}, {"r": 2.2}]', complex_record_fields=("r", "i")
-    ).tolist() == [{"r": 1.1}, {"r": 2.2}]
+    ).to_list() == [{"r": 1.1}, {"r": 2.2}]
     assert ak.operations.from_json(
         '[{"i": 1.1}, {"i": 2.2}]', complex_record_fields=("r", "i")
-    ).tolist() == [{"i": 1.1}, {"i": 2.2}]
+    ).to_list() == [{"i": 1.1}, {"i": 2.2}]
 
     # In this one, the extra field should simply be ignored. A record with *at least*
     # the two specified fields should be recognized as a complex number, so that
@@ -96,7 +96,7 @@ def test_from_json():
         '[{"r": 1.1, "i": 1.0, "another": []}, {"r": 2.2, "i": 2.0, "another": [1, 2, 3]}]',
         complex_record_fields=("r", "i"),
     )
-    assert array.tolist() == [(1.1 + 1j), (2.2 + 2j)]
+    assert array.to_list() == [(1.1 + 1j), (2.2 + 2j)]
 
 
 def test_to_json():
@@ -139,14 +139,14 @@ def test_reducers():
 
     assert ak.operations.sum(
         ak.operations.from_iter([[1 + 1j, 2 + 2j], [], [3 + 3j]]), axis=1
-    ).tolist() == [
+    ).to_list() == [
         3 + 3j,
         0 + 0j,
         3 + 3j,
     ]
     assert ak.operations.prod(
         ak.operations.from_iter([[1 + 1j, 2 + 2j], [], [3 + 3j]]), axis=1
-    ).tolist() == [
+    ).to_list() == [
         0 + 4j,
         1 + 0j,
         3 + 3j,
@@ -154,20 +154,20 @@ def test_reducers():
 
     assert ak.operations.count(
         ak.operations.from_iter([[1 + 1j, 2 + 2j], [], [3 + 3j]]), axis=1
-    ).tolist() == [2, 0, 1]
+    ).to_list() == [2, 0, 1]
     assert ak.operations.count_nonzero(
         ak.operations.from_iter([[1 + 1j, 2 + 2j], [], [3 + 3j]]), axis=1
-    ).tolist() == [2, 0, 1]
+    ).to_list() == [2, 0, 1]
     assert ak.operations.any(
         ak.operations.from_iter([[1 + 1j, 2 + 2j], [], [3 + 3j]]), axis=1
-    ).tolist() == [
+    ).to_list() == [
         True,
         False,
         True,
     ]
     assert ak.operations.all(
         ak.operations.from_iter([[1 + 1j, 2 + 2j], [], [3 + 3j]]), axis=1
-    ).tolist() == [
+    ).to_list() == [
         True,
         True,
         True,
@@ -175,11 +175,11 @@ def test_reducers():
     assert ak.operations.any(
         ak.operations.from_iter([[1 + 1j, 2 + 2j, 0 + 0j], [], [3 + 3j]]),
         axis=1,
-    ).tolist() == [True, False, True]
+    ).to_list() == [True, False, True]
     assert ak.operations.all(
         ak.operations.from_iter([[1 + 1j, 2 + 2j, 0 + 0j], [], [3 + 3j]]),
         axis=1,
-    ).tolist() == [False, True, True]
+    ).to_list() == [False, True, True]
 
 
 def test_minmax():
@@ -194,14 +194,14 @@ def test_minmax():
 
     assert ak.operations.min(
         ak.operations.from_iter([[1 + 5j, 2 + 4j], [], [3 + 3j]]), axis=1
-    ).tolist() == [
+    ).to_list() == [
         1 + 5j,
         None,
         3 + 3j,
     ]
     assert ak.operations.max(
         ak.operations.from_iter([[1 + 5j, 2 + 4j], [], [3 + 3j]]), axis=1
-    ).tolist() == [
+    ).to_list() == [
         2 + 4j,
         None,
         3 + 3j,
@@ -209,24 +209,24 @@ def test_minmax():
 
     assert ak.operations.argmin(
         ak.operations.from_iter([[1 + 5j, 2 + 4j], [], [3 + 3j]]), axis=1
-    ).tolist() == [0, None, 0]
+    ).to_list() == [0, None, 0]
     assert ak.operations.argmax(
         ak.operations.from_iter([[1 + 5j, 2 + 4j], [], [3 + 3j]]), axis=1
-    ).tolist() == [1, None, 0]
+    ).to_list() == [1, None, 0]
 
 
 @pytest.mark.skip(reason="Remember to implement sorting for complex numbers.")
 def test_sort():
     assert ak.operations.sort(
         ak.operations.from_iter([[2 + 4j, 1 + 5j], [], [3 + 3j]])
-    ).tolist() == [
+    ).to_list() == [
         [1 + 5j, 2 + 4j],
         [],
         [3 + 3j],
     ]
     assert ak.operations.argsort(
         ak.operations.from_iter([[2 + 4j, 1 + 5j], [], [3 + 3j]])
-    ).tolist() == [
+    ).to_list() == [
         [1, 0],
         [],
         [0],
@@ -250,7 +250,7 @@ def test_numpy():
     )
     assert ak.highlevel.Array(
         np.array([[1 + 1j, 2 + 2j], [3 + 3j, 4 + 4j]])
-    ).tolist() == [
+    ).to_list() == [
         [(1 + 1j), (2 + 2j)],
         [(3 + 3j), (4 + 4j)],
     ]

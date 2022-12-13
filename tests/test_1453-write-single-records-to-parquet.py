@@ -3,9 +3,9 @@
 import os
 
 import numpy as np  # noqa: F401
-import pytest  # noqa: F401
+import pytest
 
-import awkward as ak  # noqa: F401
+import awkward as ak
 
 pytest.importorskip("pyarrow")
 pytest.importorskip("pyarrow.parquet")
@@ -17,9 +17,9 @@ def test(tmp_path):
 
     original = ak.Record({"x": 1, "y": [1, 2, 3], "z": "THREE"})
 
-    assert ak.from_arrow(ak.to_arrow(original)).tolist() == original.tolist()
+    assert ak.from_arrow(ak.to_arrow(original)).to_list() == original.to_list()
 
-    assert ak.from_arrow(ak.to_arrow_table(original)).tolist() == original.tolist()
+    assert ak.from_arrow(ak.to_arrow_table(original)).to_list() == original.to_list()
 
     ak.to_parquet(original, filename)
-    assert ak.from_parquet(filename).tolist() == original.tolist()
+    assert ak.from_parquet(filename).to_list() == original.to_list()

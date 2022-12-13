@@ -8,7 +8,7 @@ from awkward.types.type import Type
 
 
 class UnionType(Type):
-    def __init__(self, contents, parameters=None, typestr=None):
+    def __init__(self, contents, *, parameters=None, typestr=None):
         if not isinstance(contents, Iterable):
             raise ak._errors.wrap_error(
                 TypeError(

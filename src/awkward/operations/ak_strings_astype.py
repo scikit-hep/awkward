@@ -2,13 +2,13 @@
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
-def strings_astype(array, to, highlevel=True, behavior=None):
+def strings_astype(array, to, *, highlevel=True, behavior=None):
     """
     Args:
-        array: Array whose strings should be converted to a new numeric type.
+        array: Array-like data (anything #ak.to_layout recognizes).
         to (dtype or dtype specifier): Type to convert the strings into.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
@@ -57,7 +57,7 @@ def _impl(array, to, highlevel, behavior):
                 layout, highlevel=False, behavior=behavior
             )
             max_length = ak.operations.max(ak.operations.num(layout, behavior=behavior))
-            regulararray = layout.pad_none(max_length, 1)
+            regulararray = ak._do.pad_none(layout, max_length, 1)
             maskedarray = ak.operations.to_numpy(regulararray, allow_missing=True)
             npstrings = maskedarray.data
             if maskedarray.mask is not False:
@@ -71,5 +71,5 @@ def _impl(array, to, highlevel, behavior):
 
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
     behavior = ak._util.behavior_of(array, behavior=behavior)
-    out = layout.recursively_apply(action, behavior)
+    out = ak._do.recursively_apply(layout, action, behavior)
     return ak._util.wrap(out, behavior, highlevel)

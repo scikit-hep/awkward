@@ -2,13 +2,13 @@
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
-def is_none(array, axis=0, highlevel=True, behavior=None):
+def is_none(array, axis=0, *, highlevel=True, behavior=None):
     """
     Args:
-        array: Data to check for missing values (None).
+        array: Array-like data (anything #ak.to_layout recognizes).
         axis (int): The dimension at which this operation is applied. The
             outermost dimension is `0`, followed by `1`, etc., and negative
             values count backward from the innermost: `-1` is the innermost
@@ -29,52 +29,35 @@ def is_none(array, axis=0, highlevel=True, behavior=None):
 
 
 def _impl(array, axis, highlevel, behavior):
-
-    # Determine the (potentially nested) bytemask
-    def getfunction_inner(layout, depth, **kwargs):
-
-        if not isinstance(layout, ak.contents.Content):
-            return
-
-        nplike = ak.nplikes.nplike_of(layout)
-
-        if layout.is_option:
-            layout = layout.toIndexedOptionArray64()
-
-            # Convert the option type into a union, using the mask
-            # as a tag.
-            tag = nplike.index_nplike.asarray(layout.mask_as_bool(valid_when=False))
-            index = nplike.index_nplike.where(tag, 0, nplike.asarray(layout.index))
-
-            return ak.contents.UnionArray(
-                ak.index.Index8(tag),
-                ak.index.Index64(index),
-                [
-                    layout.content.recursively_apply(getfunction_inner, behavior),
-                    ak.contents.NumpyArray(nplike.array([True], dtype=np.bool_)),
-                ],
-            ).simplify_uniontype()
-
-        elif layout.is_unknown or layout.is_list or layout.is_record or layout.is_numpy:
-            return ak.contents.NumpyArray(nplike.zeros(len(layout), dtype=np.bool_))
-
-    # Locate the axis
-    def getfunction_outer(layout, depth, depth_context, **kwargs):
-        depth_context["posaxis"] = layout.axis_wrap_if_negative(
-            depth_context["posaxis"]
-        )
-        if depth_context["posaxis"] == depth - 1:
-            return layout.recursively_apply(getfunction_inner, behavior)
-
     layout = ak.operations.to_layout(array)
-    max_axis = layout.branch_depth[1] - 1
-    if axis > max_axis:
-        raise ak._errors.wrap_error(
-            np.AxisError(f"axis={axis} exceeds the depth ({max_axis}) of this array")
-        )
     behavior = ak._util.behavior_of(array, behavior=behavior)
-    depth_context = {"posaxis": axis}
-    out = layout.recursively_apply(
-        getfunction_outer, behavior, depth_context=depth_context
-    )
+
+    if not ak._util.is_integer(axis):
+        raise ak._errors.wrap_error(
+            TypeError(f"'axis' must be an integer, not {axis!r}")
+        )
+
+    def action(layout, depth, lateral_context, **kwargs):
+        posaxis = ak._util.maybe_posaxis(layout, axis, depth)
+
+        if posaxis is not None and posaxis + 1 == depth:
+            if layout.is_union or layout.is_record:
+                return None
+
+            elif layout.is_option:
+                return ak.contents.NumpyArray(layout.mask_as_bool(valid_when=False))
+
+            else:
+                nplike = layout._backend.nplike
+                return ak.contents.NumpyArray(
+                    nplike.zeros(layout.length, dtype=np.bool_)
+                )
+
+        elif layout.is_leaf:
+            raise ak._errors.wrap_error(
+                np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
+            )
+
+    out = ak._do.recursively_apply(layout, action, behavior, numpy_to_regular=True)
+
     return ak._util.wrap(out, behavior, highlevel)

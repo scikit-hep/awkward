@@ -1,9 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import numpy as np  # noqa: F401
+import numpy as np
 import pytest  # noqa: F401
 
-import awkward as ak  # noqa: F401
+import awkward as ak
 
 to_list = ak.operations.to_list
 
@@ -86,7 +86,7 @@ def test_ufunc_afterward():
             ak.highlevel.Array([{"x": 1.1}, {"x": 3.3}]), np.float32
         )["x"]
         + 1
-    ).tolist() == [2.0999999046325684, 4.300000190734863]
+    ).to_list() == [2.0999999046325684, 4.300000190734863]
 
 
 def test_string():

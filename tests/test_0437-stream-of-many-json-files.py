@@ -2,10 +2,10 @@
 
 from pathlib import Path
 
-import numpy as np  # noqa: F401
-import pytest  # noqa: F401
+import numpy as np
+import pytest
 
-import awkward as ak  # noqa: F401
+import awkward as ak
 
 samples_path = Path(__file__).parent / "samples"
 
@@ -75,60 +75,60 @@ def test_two_arrays():
 
     str = """{"one": 1, "two": 2.2}\n{"one": 10, "two": 22}"""
     array = ak.operations.from_json(str, line_delimited=True)
-    assert array.tolist() == [{"one": 1, "two": 2.2}, {"one": 10, "two": 22.0}]
+    assert array.to_list() == [{"one": 1, "two": 2.2}, {"one": 10, "two": 22.0}]
 
     str = """{"one": 1, "two": 2.2}\n\r{"one": 10, "two": 22}"""
     array = ak.operations.from_json(str, line_delimited=True)
-    assert array.tolist() == [{"one": 1, "two": 2.2}, {"one": 10, "two": 22.0}]
+    assert array.to_list() == [{"one": 1, "two": 2.2}, {"one": 10, "two": 22.0}]
 
     str = """{"one": 1, "two": 2.2}     \n     {"one": 10, "two": 22}"""
     array = ak.operations.from_json(str, line_delimited=True)
-    assert array.tolist() == [{"one": 1, "two": 2.2}, {"one": 10, "two": 22.0}]
+    assert array.to_list() == [{"one": 1, "two": 2.2}, {"one": 10, "two": 22.0}]
 
     str = """{"one": 1, "two": 2.2}     \n\r     {"one": 10, "two": 22}"""
     array = ak.operations.from_json(str, line_delimited=True)
-    assert array.tolist() == [{"one": 1, "two": 2.2}, {"one": 10, "two": 22.0}]
+    assert array.to_list() == [{"one": 1, "two": 2.2}, {"one": 10, "two": 22.0}]
 
     str = """{"one": 1, "two": 2.2}\n{"one": 10, "two": 22}\n"""
     array = ak.operations.from_json(str, line_delimited=True)
-    assert array.tolist() == [{"one": 1, "two": 2.2}, {"one": 10, "two": 22.0}]
+    assert array.to_list() == [{"one": 1, "two": 2.2}, {"one": 10, "two": 22.0}]
 
     str = """{"one": 1, "two": 2.2}\n\r{"one": 10, "two": 22}\n\r"""
     array = ak.operations.from_json(str, line_delimited=True)
-    assert array.tolist() == [{"one": 1, "two": 2.2}, {"one": 10, "two": 22.0}]
+    assert array.to_list() == [{"one": 1, "two": 2.2}, {"one": 10, "two": 22.0}]
 
     str = """["one", "two"]\n["uno", "dos"]"""
     array = ak.operations.from_json(str, line_delimited=True)
-    assert array.tolist() == [["one", "two"], ["uno", "dos"]]
+    assert array.to_list() == [["one", "two"], ["uno", "dos"]]
 
     str = """["one", "two"]\n\r["uno", "dos"]"""
     array = ak.operations.from_json(str, line_delimited=True)
-    assert array.tolist() == [["one", "two"], ["uno", "dos"]]
+    assert array.to_list() == [["one", "two"], ["uno", "dos"]]
 
     str = """["one", "two"]  \n   ["uno", "dos"]"""
     array = ak.operations.from_json(str, line_delimited=True)
-    assert array.tolist() == [["one", "two"], ["uno", "dos"]]
+    assert array.to_list() == [["one", "two"], ["uno", "dos"]]
 
     str = """["one", "two"]  \n\r   ["uno", "dos"]"""
     array = ak.operations.from_json(str, line_delimited=True)
-    assert array.tolist() == [["one", "two"], ["uno", "dos"]]
+    assert array.to_list() == [["one", "two"], ["uno", "dos"]]
 
     str = '"one"\n"two"'
     array = ak.operations.from_json(str, line_delimited=True)
-    assert array.tolist() == ["one", "two"]
+    assert array.to_list() == ["one", "two"]
 
     str = '"one"\n\r"two"'
     array = ak.operations.from_json(str, line_delimited=True)
-    assert array.tolist() == ["one", "two"]
+    assert array.to_list() == ["one", "two"]
 
     str = '"one"  \n   "two"'
     array = ak.operations.from_json(str, line_delimited=True)
-    assert array.tolist() == ["one", "two"]
+    assert array.to_list() == ["one", "two"]
 
     array = ak.operations.from_json(
         samples_path / "test-two-arrays.json", line_delimited=True
     )
-    assert array.tolist() == [
+    assert array.to_list() == [
         {"one": 1, "two": 2.2},
         {"one": 10, "two": 22.0},
         {"one": 1, "two": 2.2},
@@ -183,21 +183,21 @@ def test_blanc_lines():
 
     {"one": 10, "two": 22}"""
     array = ak.operations.from_json(str, line_delimited=True)
-    assert array.tolist() == [{"one": 1, "two": 2.2}, {"one": 10, "two": 22.0}]
+    assert array.to_list() == [{"one": 1, "two": 2.2}, {"one": 10, "two": 22.0}]
 
     str = """{"one": 1, "two": 2.2}
 
     {"one": 10, "two": 22}
     """
     array = ak.operations.from_json(str, line_delimited=True)
-    assert array.tolist() == [{"one": 1, "two": 2.2}, {"one": 10, "two": 22.0}]
+    assert array.to_list() == [{"one": 1, "two": 2.2}, {"one": 10, "two": 22.0}]
 
     str = """ 1
     2
 
     3   """
     array = ak.operations.from_json(str, line_delimited=True)
-    assert array.tolist() == [1, 2, 3]
+    assert array.to_list() == [1, 2, 3]
 
     str = """
         1
@@ -206,7 +206,7 @@ def test_blanc_lines():
         3
         """
     array = ak.operations.from_json(str, line_delimited=True)
-    assert array.tolist() == [1, 2, 3]
+    assert array.to_list() == [1, 2, 3]
 
 
 def test_tostring():
@@ -220,7 +220,7 @@ def test_tostring():
              {"x": 6.6, "y": [1, 2, 3, 4, 5]}"""
 
     array = ak.operations.from_json(str, line_delimited=True)
-    assert array.tolist() == [
+    assert array.to_list() == [
         {"x": 1.1, "y": []},
         {"x": 2.2, "y": [1]},
         {"x": 3.3, "y": [1, 2]},
@@ -245,7 +245,7 @@ def test_fromstring():
              {"x": 6.6, "y": [1, 2, 3, 4, 5]}"""
 
     array = ak.operations.from_json(str, line_delimited=True)
-    assert array.tolist() == [
+    assert array.to_list() == [
         {"x": 1.1, "y": []},
         {"x": 2.2, "y": [1]},
         {"x": 3.3, "y": [1, 2]},
@@ -282,7 +282,7 @@ def test_fromfile():
     array = ak.operations.from_json(
         samples_path / "test-record-array.json", line_delimited=True
     )
-    assert array.tolist() == [
+    assert array.to_list() == [
         {"x": 1.1, "y": []},
         {"x": 2.2, "y": [1]},
         {"x": 3.3, "y": [1, 2]},
@@ -299,7 +299,7 @@ def test_fromfile():
         neginf_string="-inf",
     )
 
-    assert array.tolist() == [
+    assert array.to_list() == [
         1.1,
         2.2,
         3.3,
@@ -358,7 +358,7 @@ def test_fromfile():
     # read json file containing 'nan' and 'inf' user-defined strings
     array = ak.operations.from_json(samples_path / "test.json")
 
-    assert array.tolist() == [
+    assert array.to_list() == [
         1.1,
         2.2,
         3.3,
@@ -431,7 +431,7 @@ def test_fromfile():
         else:
             return obj
 
-    assert fix(array.tolist()) == fix(
+    assert fix(array.to_list()) == fix(
         [
             1.1,
             2.2,
@@ -498,7 +498,7 @@ def test_fromfile():
         nan_string="None at all",
     )
 
-    assert array.tolist() == [
+    assert array.to_list() == [
         1.1,
         2.2,
         3.3,
@@ -557,7 +557,7 @@ def test_fromfile():
 
 def test_three():
     array = ak.operations.from_json('["one", "two"] \n ["three"]', line_delimited=True)
-    assert array.tolist() == [["one", "two"], ["three"]]
+    assert array.to_list() == [["one", "two"], ["three"]]
 
 
 def test_jpivarski():

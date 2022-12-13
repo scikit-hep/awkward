@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._util import unset
 from awkward.forms.form import Form, _parameters_equal
 
 
@@ -12,6 +13,7 @@ class ListForm(Form):
         starts,
         stops,
         content,
+        *,
         parameters=None,
         form_key=None,
     ):
@@ -57,6 +59,35 @@ class ListForm(Form):
     def content(self):
         return self._content
 
+    def copy(
+        self,
+        starts=unset,
+        stops=unset,
+        content=unset,
+        *,
+        parameters=unset,
+        form_key=unset,
+    ):
+        return ListForm(
+            self._starts if starts is unset else starts,
+            self._stops if stops is unset else stops,
+            self._content if content is unset else content,
+            parameters=self._parameters if parameters is unset else parameters,
+            form_key=self._form_key if form_key is unset else form_key,
+        )
+
+    @classmethod
+    def simplified(
+        cls,
+        starts,
+        stops,
+        content,
+        *,
+        parameters=None,
+        form_key=None,
+    ):
+        return cls(starts, stops, content, parameters=parameters, form_key=form_key)
+
     def __repr__(self):
         args = [
             repr(self._starts),
@@ -79,8 +110,8 @@ class ListForm(Form):
     def _type(self, typestrs):
         return ak.types.ListType(
             self._content._type(typestrs),
-            self._parameters,
-            ak._util.gettypestr(self._parameters, typestrs),
+            parameters=self._parameters,
+            typestr=ak._util.gettypestr(self._parameters, typestrs),
         )
 
     def __eq__(self, other):
@@ -159,8 +190,8 @@ class ListForm(Form):
             self._starts,
             self._stops,
             self._content._select_columns(index, specifier, matches, output),
-            self._parameters,
-            self._form_key,
+            parameters=self._parameters,
+            form_key=self._form_key,
         )
 
     def _column_types(self):

@@ -5,9 +5,9 @@ import threading
 import warnings
 from collections.abc import Mapping, Sequence
 
-from awkward import nplikes
+from awkward import _nplikes
 
-np = nplikes.NumpyMetadata.instance()
+np = _nplikes.NumpyMetadata.instance()
 
 
 class PartialFunction:
@@ -128,7 +128,7 @@ class OperationErrorContext(ErrorContext):
 
     def __init__(self, name, arguments):
         if self.primary() is not None or all(
-            nplikes.nplike_of(x).is_eager for x in arguments
+            _nplikes.nplike_of(x).is_eager for x in arguments
         ):
             # if primary is not None: we won't be setting an ErrorContext
             # if all nplikes are eager: no accumulation of large arrays
@@ -185,9 +185,7 @@ class SlicingErrorContext(ErrorContext):
     _width = 80 - 4
 
     def __init__(self, array, where):
-        if self.primary() is not None or (
-            nplikes.nplike_of(array).is_eager and nplikes.nplike_of(where).is_eager
-        ):
+        if self.primary() is not None or _nplikes.nplike_of(array, where).is_eager:
             # if primary is not None: we won't be setting an ErrorContext
             # if all nplikes are eager: no accumulation of large arrays
             # --> in either case, delay string generation

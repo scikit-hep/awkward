@@ -2,11 +2,12 @@
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 def to_arrow(
     array,
+    *,
     list_to32=False,
     string_to32=False,
     bytestring_to32=False,

@@ -2,10 +2,10 @@
 
 import os.path
 
-import numpy as np  # noqa: F401
-import pytest  # noqa: F401
+import numpy as np
+import pytest
 
-import awkward as ak  # noqa: F401
+import awkward as ak
 
 pyarrow_parquet = pytest.importorskip("pyarrow.parquet")
 
@@ -719,7 +719,7 @@ def test_unionarray(tmp_path, through, extensionarray):
                 parameters={"which": "inner1"},
             ),
             ak.contents.NumpyArray(
-                np.array([0, 10, 20, 30], dtype=np.int32),
+                np.array([[0], [10], [20], [30]], dtype=np.int32),
                 parameters={"which": "inner2"},
             ),
         ],
@@ -744,7 +744,7 @@ def test_unionarray(tmp_path, through, extensionarray):
             ak.contents.ByteMaskedArray(
                 ak.index.Index8(np.array([False, False, True, False]).view(np.int8)),
                 ak.contents.NumpyArray(
-                    np.array([0, 10, 20, 30], dtype=np.int32),
+                    np.array([[0], [10], [20], [30]], dtype=np.int32),
                     parameters={"which": "inner2"},
                 ),
                 valid_when=False,
@@ -761,7 +761,7 @@ def test_unionarray(tmp_path, through, extensionarray):
         )
         assert predicted_form == array_form
 
-    akarray = ak.contents.ByteMaskedArray(
+    akarray = ak.contents.ByteMaskedArray.simplified(
         ak.index.Index8(
             np.array([False, True, False, True, False, True, True]).view(np.int8)
         ),
@@ -773,7 +773,7 @@ def test_unionarray(tmp_path, through, extensionarray):
                     np.array([0.0, 1.1, 2.2]), parameters={"which": "inner1"}
                 ),
                 ak.contents.NumpyArray(
-                    np.array([0, 10, 20, 30], dtype=np.int32),
+                    np.array([[0], [10], [20], [30]], dtype=np.int32),
                     parameters={"which": "inner2"},
                 ),
             ],
@@ -790,7 +790,7 @@ def test_unionarray(tmp_path, through, extensionarray):
         )
         assert predicted_form == array_form
 
-    akarray = ak.contents.ByteMaskedArray(
+    akarray = ak.contents.ByteMaskedArray.simplified(
         ak.index.Index8(
             np.array([False, True, False, True, False, True, True]).view(np.int8)
         ),
@@ -806,7 +806,7 @@ def test_unionarray(tmp_path, through, extensionarray):
                         np.array([False, False, True, False]).view(np.int8)
                     ),
                     ak.contents.NumpyArray(
-                        np.array([0, 10, 20, 30], dtype=np.int32),
+                        np.array([[0], [10], [20], [30]], dtype=np.int32),
                         parameters={"which": "inner2"},
                     ),
                     valid_when=False,

@@ -1,9 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import numpy as np  # noqa: F401
-import pytest  # noqa: F401
+import numpy as np
+import pytest
 
-import awkward as ak  # noqa: F401
+import awkward as ak
 
 numba = pytest.importorskip("numba")
 
@@ -73,7 +73,7 @@ def test_indexed_2():
     indexedarray = ak.contents.IndexedArray(index, content)
     array = ak.highlevel.Array(indexedarray)
 
-    assert f1(array, 100).tolist() == {"x": 100}
-    assert f1(array, 101).tolist() == {"x": 101}
-    assert f1(array, 102).tolist() == {"x": 102}
+    assert f1(array, 100).to_list() == {"x": 100}
+    assert f1(array, 101).to_list() == {"x": 101}
+    assert f1(array, 102).to_list() == {"x": 102}
     assert f1(array, 12345) is None

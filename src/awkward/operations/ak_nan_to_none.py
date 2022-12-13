@@ -2,14 +2,14 @@
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
-def nan_to_none(array, highlevel=True, behavior=None):
+def nan_to_none(array, *, highlevel=True, behavior=None):
 
     """
     Args:
-        array: Array whose `NaN` values should be converted to None (missing values).
+        array: Array-like data (anything #ak.to_layout recognizes).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
@@ -35,8 +35,9 @@ def _impl(array, highlevel, behavior):
         if isinstance(layout, ak.contents.NumpyArray) and issubclass(
             layout.dtype.type, np.floating
         ):
+            mask = layout.backend.nplike.isnan(layout.data)
             return ak.contents.ByteMaskedArray(
-                ak.index.Index8(layout.nplike.isnan(layout.data), nplike=layout.nplike),
+                ak.index.Index8(mask, nplike=layout.backend.index_nplike),
                 layout,
                 valid_when=False,
             )
@@ -45,12 +46,12 @@ def _impl(array, highlevel, behavior):
             isinstance(layout.content, ak.contents.NumpyArray)
             and issubclass(layout.content.dtype.type, np.floating)
         ):
-            return continuation().simplify_optiontype()
+            return continuation()
 
         else:
             return None
 
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
     behavior = ak._util.behavior_of(array, behavior=behavior)
-    out = layout.recursively_apply(action, behavior)
+    out = ak._do.recursively_apply(layout, action, behavior)
     return ak._util.wrap(out, behavior, highlevel)

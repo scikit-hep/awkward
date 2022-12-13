@@ -4,12 +4,15 @@ import copy as _copy
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 @ak._connect.numpy.implements("copy")
 def copy(array):
     """
+    Args:
+        array: Array-like data (anything #ak.to_layout recognizes).
+
     Returns a deep copy of the array (no memory shared with original).
 
     This is identical to `np.copy` and `copy.deepcopy`.
@@ -38,13 +41,14 @@ def copy(array):
     affecting the underlying layout data (it *replaces* its layout), so a
     shallow copy will do:
 
+        >>> import copy
         >>> original = ak.Array([{"x": 1}, {"x": 2}, {"x": 3}])
         >>> shallow_copy = copy.copy(original)
         >>> shallow_copy["y"] = original.x**2
         >>> shallow_copy
-        <Array [{x: 1, y: 1}, ... y: 4}, {x: 3, y: 9}] type='3 * {"x": int64, "y": int64}'>
+        <Array [{x: 1, y: 1}, {...}, {x: 3, y: 9}] type='3 * {x: int64, y: int64}'>
         >>> original
-        <Array [{x: 1}, {x: 2}, {x: 3}] type='3 * {"x": int64}'>
+        <Array [{x: 1}, {x: 2}, {x: 3}] type='3 * {x: int64}'>
 
     This is key to Awkward Array's efficiency (memory and speed): operations that
     only change part of a structure re-use pieces from the original ("structural

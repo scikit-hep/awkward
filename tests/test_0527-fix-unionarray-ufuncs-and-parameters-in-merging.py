@@ -1,9 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import numpy as np  # noqa: F401
+import numpy as np
 import pytest  # noqa: F401
 
-import awkward as ak  # noqa: F401
+import awkward as ak
 
 # https://github.com/scikit-hep/awkward-1.0/issues/459#issuecomment-694941328
 #
@@ -182,123 +182,134 @@ def test_0459():
 
 def test_0522():
     content1 = ak.highlevel.Array([0.0, 1.1, 2.2, 3.3, 4.4]).layout
-    content2 = ak.highlevel.Array([0, 100, 200, 300, 400]).layout
+    content2 = ak.highlevel.Array([[0], [100], [200], [300], [400]]).layout
     tags = ak.index.Index8(np.array([0, 0, 0, 1, 1, 0, 0, 1, 1, 1], np.int8))
     index = ak.index.Index64(np.array([0, 1, 2, 0, 1, 3, 4, 2, 3, 4], np.int64))
     unionarray = ak.highlevel.Array(
         ak.contents.UnionArray(tags, index, [content1, content2])
     )
-    assert unionarray.tolist() == [0.0, 1.1, 2.2, 0, 100, 3.3, 4.4, 200, 300, 400]
+    assert unionarray.to_list() == [
+        0.0,
+        1.1,
+        2.2,
+        [0],
+        [100],
+        3.3,
+        4.4,
+        [200],
+        [300],
+        [400],
+    ]
 
-    assert (unionarray + 10).tolist() == [
+    assert (unionarray + 10).to_list() == [
         10.0,
         11.1,
         12.2,
-        10,
-        110,
+        [10],
+        [110],
         13.3,
         14.4,
-        210,
-        310,
-        410,
+        [210],
+        [310],
+        [410],
     ]
-    assert (10 + unionarray).tolist() == [
+    assert (10 + unionarray).to_list() == [
         10.0,
         11.1,
         12.2,
-        10,
-        110,
+        [10],
+        [110],
         13.3,
         14.4,
-        210,
-        310,
-        410,
+        [210],
+        [310],
+        [410],
     ]
 
-    assert (unionarray + range(0, 100, 10)).tolist() == [
+    assert (unionarray + range(0, 100, 10)).to_list() == [
         0.0,
         11.1,
         22.2,
-        30,
-        140,
+        [30],
+        [140],
         53.3,
         64.4,
-        270,
-        380,
-        490,
+        [270],
+        [380],
+        [490],
     ]
-    assert (range(0, 100, 10) + unionarray).tolist() == [
+    assert (range(0, 100, 10) + unionarray).to_list() == [
         0.0,
         11.1,
         22.2,
-        30,
-        140,
+        [30],
+        [140],
         53.3,
         64.4,
-        270,
-        380,
-        490,
+        [270],
+        [380],
+        [490],
     ]
 
     assert (unionarray + np.arange(0, 100, 10)).tolist() == [
         0.0,
         11.1,
         22.2,
-        30,
-        140,
+        [30],
+        [140],
         53.3,
         64.4,
-        270,
-        380,
-        490,
+        [270],
+        [380],
+        [490],
     ]
     assert (np.arange(0, 100, 10) + unionarray).tolist() == [
         0.0,
         11.1,
         22.2,
-        30,
-        140,
+        [30],
+        [140],
         53.3,
         64.4,
-        270,
-        380,
-        490,
+        [270],
+        [380],
+        [490],
     ]
 
     assert (unionarray + ak.highlevel.Array(np.arange(0, 100, 10))).tolist() == [
         0.0,
         11.1,
         22.2,
-        30,
-        140,
+        [30],
+        [140],
         53.3,
         64.4,
-        270,
-        380,
-        490,
+        [270],
+        [380],
+        [490],
     ]
     assert (ak.highlevel.Array(np.arange(0, 100, 10)) + unionarray).tolist() == [
         0.0,
         11.1,
         22.2,
-        30,
-        140,
+        [30],
+        [140],
         53.3,
         64.4,
-        270,
-        380,
-        490,
+        [270],
+        [380],
+        [490],
     ]
 
-    assert (unionarray + unionarray).tolist() == [
+    assert (unionarray + unionarray).to_list() == [
         0.0,
         2.2,
         4.4,
-        0,
-        200,
+        [0],
+        [200],
         6.6,
         8.8,
-        400,
-        600,
-        800,
+        [400],
+        [600],
+        [800],
     ]

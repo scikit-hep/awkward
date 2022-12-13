@@ -7,7 +7,7 @@ import awkward as ak
 from awkward.forms.form import _parameters_equal
 from awkward.types.type import Type
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 def is_primitive(primitive):
@@ -93,7 +93,7 @@ for primitive, dtype in _primitive_to_dtype_dict.items():
 
 
 class NumpyType(Type):
-    def __init__(self, primitive, parameters=None, typestr=None):
+    def __init__(self, primitive, *, parameters=None, typestr=None):
         primitive = dtype_to_primitive(primitive_to_dtype(primitive))
         if parameters is not None and not isinstance(parameters, dict):
             raise ak._errors.wrap_error(

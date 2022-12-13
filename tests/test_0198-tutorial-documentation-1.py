@@ -1,9 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import numpy as np  # noqa: F401
-import pytest  # noqa: F401
+import numpy as np
+import pytest
 
-import awkward as ak  # noqa: F401
+import awkward as ak
 
 to_list = ak.operations.to_list
 
@@ -26,12 +26,13 @@ def test_singletons():
     ) == [[1.1], [2.2], [], [3.3], [], [], [4.4], [5.5]]
     assert to_list(
         ak.operations.singletons(
-            ak.Array([[1.1, 2.2, None], [3.3, None], [None], [4.4, 5.5]])
+            ak.Array([[1.1, 2.2, None], [3.3, None], [None], [4.4, 5.5]]), axis=1
         )
     ) == [[[1.1], [2.2], []], [[3.3], []], [[]], [[4.4], [5.5]]]
     assert to_list(
         ak.operations.singletons(
-            ak.Array([[[1.1, 2.2, None]], [[3.3, None]], [[None]], [[4.4, 5.5]]])
+            ak.Array([[[1.1, 2.2, None]], [[3.3, None]], [[None]], [[4.4, 5.5]]]),
+            axis=2,
         )
     ) == [[[[1.1], [2.2], []]], [[[3.3], []]], [[[]]], [[[4.4], [5.5]]]]
 
@@ -48,7 +49,7 @@ def test_firsts():
     assert to_list(
         ak.operations.firsts(
             ak.operations.singletons(
-                ak.Array([[1.1, 2.2, None], [3.3, None], [None], [4.4, 5.5]])
+                ak.Array([[1.1, 2.2, None], [3.3, None], [None], [4.4, 5.5]]), axis=1
             ),
             axis=2,
         )
@@ -56,7 +57,8 @@ def test_firsts():
     assert to_list(
         ak.operations.firsts(
             ak.operations.singletons(
-                ak.Array([[[1.1, 2.2, None]], [[3.3, None]], [[None]], [[4.4, 5.5]]])
+                ak.Array([[[1.1, 2.2, None]], [[3.3, None]], [[None]], [[4.4, 5.5]]]),
+                axis=2,
             ),
             axis=3,
         )

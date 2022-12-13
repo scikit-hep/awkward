@@ -3,7 +3,7 @@
 import awkward as ak
 
 
-def from_cupy(array, regulararray=False, highlevel=True, behavior=None):
+def from_cupy(array, *, regulararray=False, highlevel=True, behavior=None):
     """
     Args:
         array (cp.ndarray): The CuPy array to convert into an Awkward Array.
@@ -22,8 +22,8 @@ def from_cupy(array, regulararray=False, highlevel=True, behavior=None):
     The resulting layout may involve the following #ak.contents.Content types
     (only):
 
-       * #ak.contents.NumpyArray
-       * #ak.contents.RegularArray if `regulararray=True`.
+    * #ak.contents.NumpyArray
+    * #ak.contents.RegularArray if `regulararray=True`.
 
     See also #ak.to_cupy, #ak.from_numpy and #ak.from_jax.
     """

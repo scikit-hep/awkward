@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 class Lookup:
@@ -16,7 +16,7 @@ class Lookup:
             else:
                 return x.ctypes.data
 
-        self.nplike = layout.nplike
+        self.nplike = layout.backend.nplike
         self.generator = generator
         self.positions = positions
         self.arrayptrs = self.nplike.array(
@@ -26,13 +26,13 @@ class Lookup:
 
 def tolookup(layout, positions):
     if isinstance(layout, ak.contents.EmptyArray):
-        return tolookup(layout.toNumpyArray(np.dtype(np.float64)), positions)
+        return tolookup(layout.to_NumpyArray(np.dtype(np.float64)), positions)
 
     elif isinstance(layout, ak.contents.NumpyArray):
         if len(layout.shape) == 1:
             return NumpyLookup.tolookup(layout, positions)
         else:
-            return tolookup(layout.toRegularArray(), positions)
+            return tolookup(layout.to_RegularArray(), positions)
 
     elif isinstance(layout, ak.contents.RegularArray):
         return RegularLookup.tolookup(layout, positions)
@@ -80,7 +80,7 @@ class NumpyLookup(ContentLookup):
     @classmethod
     def tolookup(cls, layout, positions):
         pos = len(positions)
-        positions.append(layout.contiguous().data)
+        positions.append(layout.to_contiguous().data)
         return pos
 
     def tolayout(self, lookup, pos, fields):

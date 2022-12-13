@@ -54,7 +54,6 @@ from awkward.operations.ak_nan_to_none import nan_to_none
 from awkward.operations.ak_nan_to_num import nan_to_num
 from awkward.operations.ak_num import num
 from awkward.operations.ak_ones_like import ones_like
-from awkward.operations.ak_packed import packed
 from awkward.operations.ak_pad_none import pad_none
 from awkward.operations.ak_parameters import parameters
 from awkward.operations.ak_prod import nanprod, prod
@@ -79,6 +78,7 @@ from awkward.operations.ak_to_json import to_json
 from awkward.operations.ak_to_layout import to_layout
 from awkward.operations.ak_to_list import to_list
 from awkward.operations.ak_to_numpy import to_numpy
+from awkward.operations.ak_to_packed import to_packed
 from awkward.operations.ak_to_parquet import to_parquet
 from awkward.operations.ak_to_rdataframe import to_rdataframe
 from awkward.operations.ak_to_regular import to_regular

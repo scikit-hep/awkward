@@ -1,9 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import numpy as np  # noqa: F401
-import pytest  # noqa: F401
+import numpy as np
+import pytest
 
-import awkward as ak  # noqa: F401
+import awkward as ak
 
 to_list = ak.operations.to_list
 
@@ -26,7 +26,6 @@ def test_axis_wrap_if_negative_record_v2():
 
     with pytest.raises(np.AxisError):
         r = ak.operations.to_regular(r, 0)
-    r = ak.operations.to_regular(r, 2)
 
     list_cell_chain_field = [
         [["TRA", "TRAV1", 15], ["TRB", "TRBV1", 12]],

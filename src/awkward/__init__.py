@@ -4,7 +4,9 @@
 from awkward._version import __version__
 
 # NumPy-like alternatives
-import awkward.nplikes
+import awkward._nplikes
+import awkward._typetracer
+import awkward._backends
 
 # layout classes; functionality that used to be in C++ (in Awkward 1.x)
 import awkward.index
@@ -12,9 +14,10 @@ import awkward.contents
 import awkward.record
 import awkward.types
 import awkward.forms
+import awkward._do
 import awkward._slicing
 import awkward._broadcasting
-import awkward._typetracer
+import awkward._reducers
 
 # internal
 import awkward._util
@@ -42,8 +45,8 @@ import awkward.builder
 import awkward.forth
 
 behavior: dict = {}
-awkward.behaviors.string.register(behavior)  # noqa: F405
-awkward.behaviors.categorical.register(behavior)  # noqa: F405
+awkward.behaviors.string.register(behavior)
+awkward.behaviors.categorical.register(behavior)
 
 # operations
 from awkward.operations import *

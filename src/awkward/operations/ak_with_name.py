@@ -2,13 +2,13 @@
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
-def with_name(array, name, highlevel=True, behavior=None):
+def with_name(array, name, *, highlevel=True, behavior=None):
     """
     Args:
-        base: Data containing records or tuples.
+        array: Array-like data (anything #ak.to_layout recognizes).
         name (str or None): Name to give to the records or tuples; this assigns
             the `"__record__"` parameter. If None, any existing name is unset.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
@@ -44,22 +44,24 @@ def _impl(array, name, highlevel, behavior):
             parameters = dict(layout.parameters)
             parameters["__record__"] = name
             return ak.contents.RecordArray(
-                layout.contents,
-                layout.fields,
-                len(layout),
-                parameters,
+                layout.contents, layout.fields, len(layout), parameters=parameters
             )
         else:
             return None
 
-    out = layout.recursively_apply(action, behavior)
+    out = ak._do.recursively_apply(layout, action, behavior)
 
     def action2(layout, **ignore):
         if layout.is_union:
-            return layout.simplify_uniontype(merge=True, mergebool=False)
+            return ak.contents.UnionArray.simplified(
+                layout._tags,
+                layout._index,
+                layout._contents,
+                parameters=layout._parameters,
+            )
         else:
             return None
 
-    out2 = out.recursively_apply(action2, behavior)
+    out2 = ak._do.recursively_apply(out, action2, behavior)
 
     return ak._util.wrap(out2, behavior, highlevel)

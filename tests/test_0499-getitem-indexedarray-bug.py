@@ -1,9 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import numpy as np  # noqa: F401
+import numpy as np
 import pytest  # noqa: F401
 
-import awkward as ak  # noqa: F401
+import awkward as ak
 
 to_list = ak.operations.to_list
 
@@ -53,7 +53,7 @@ def test():
         [[6.6], [7.7, 8.8, 9.9, 10.0]],
     ]
     assert (
-        one.typetracer[[[[0, 1, 2], []], [[0, 1]], [], [[0], [0, 1, 2, 3]]]].form
+        one.to_typetracer()[[[[0, 1, 2], []], [[0, 1]], [], [[0], [0, 1, 2, 3]]]].form
         == one[[[[0, 1, 2], []], [[0, 1]], [], [[0], [0, 1, 2, 3]]]].form
     )
     assert to_list(two[[[[0, 1, 2], []], [[0, 1]], [], [[0], [0, 1, 2, 3]]]]) == [
@@ -63,6 +63,6 @@ def test():
         [[6.6], [7.7, 8.8, 9.9, 10.0]],
     ]
     assert (
-        two.typetracer[[[[0, 1, 2], []], [[0, 1]], [], [[0], [0, 1, 2, 3]]]].form
+        two.to_typetracer()[[[[0, 1, 2], []], [[0, 1]], [], [[0], [0, 1, 2, 3]]]].form
         == two[[[[0, 1, 2], []], [[0, 1]], [], [[0], [0, 1, 2, 3]]]].form
     )

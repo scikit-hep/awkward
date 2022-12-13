@@ -3,16 +3,16 @@ from __future__ import annotations
 import enum
 import threading
 import weakref
-from typing import TypeVar
 
 import awkward as ak
-from awkward import _errors, highlevel, nplikes
+from awkward import _errors, _nplikes, highlevel
+from awkward.typing import TypeVar
 
-numpy = nplikes.Numpy()
+numpy = _nplikes.Numpy.instance()
 
 
 def assert_never(arg) -> None:
-    raise AssertionError(f"this should never be run: {arg}")
+    raise ak._errors.wrap_error(AssertionError(f"this should never be run: {arg}"))
 
 
 class _RegistrationState(enum.Enum):
@@ -109,7 +109,7 @@ def _register():
                 jax_connect.register_pytree_class(cls)
         except Exception:
             _registration_state = _RegistrationState.FAILED
-            raise
+            raise  # noqa: AK101
         else:
             _registration_state = _RegistrationState.SUCCESS
 

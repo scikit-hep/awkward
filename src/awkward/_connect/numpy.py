@@ -26,26 +26,28 @@ implemented = {}
 
 def _to_rectilinear(arg):
     if isinstance(arg, tuple):
-        nplike = ak.nplikes.nplike_of(*arg)
+        nplike = ak._nplikes.nplike_of(*arg)
         return tuple(nplike.to_rectilinear(x) for x in arg)
     else:
-        nplike = ak.nplikes.nplike_of(arg)
-        nplike.to_rectilinear(arg)
+        nplike = ak._nplikes.nplike_of(arg)
+        return nplike.to_rectilinear(arg)
 
 
-def array_function(func, types, args, kwargs):
+def array_function(func, types, args, kwargs, behavior):
     function = implemented.get(func)
     if function is None:
-        args = tuple(_to_rectilinear(x) for x in args)
-        kwargs = {k: _to_rectilinear(v) for k, v in kwargs.items()}
-        out = func(*args, **kwargs)
-        nplike = ak.nplikes.nplike_of(out)
-        if isinstance(out, nplike.ndarray) and len(out.shape) != 0:
-            return ak.Array(out)
-        else:
-            return out
+        rectilinear_args = tuple(_to_rectilinear(x) for x in args)
+        rectilinear_kwargs = {k: _to_rectilinear(v) for k, v in kwargs.items()}
+        result = func(*rectilinear_args, **rectilinear_kwargs)
     else:
-        return function(*args, **kwargs)
+        result = function(*args, **kwargs)
+
+    # We want the result to be a layout
+    out = ak.operations.ak_to_layout._impl(result, allow_record=True, allow_other=True)
+    if isinstance(out, (ak.contents.Content, ak.record.Record)):
+        return ak._util.wrap(out, behavior=behavior)
+    else:
+        return out
 
 
 def implements(numpy_function):
@@ -57,8 +59,15 @@ def implements(numpy_function):
 
 
 def _array_ufunc_custom_cast(inputs, behavior):
+    args = [
+        ak._util.wrap(x, behavior)
+        if isinstance(x, (ak.contents.Content, ak.record.Record))
+        else x
+        for x in inputs
+    ]
+
     nextinputs = []
-    for x in inputs:
+    for x in args:
         cast_fcn = ak._util.custom_cast(x, behavior)
         if cast_fcn is not None:
             x = cast_fcn(x)
@@ -151,7 +160,8 @@ def array_ufunc(ufunc, method, inputs, kwargs):
             isinstance(x, NumpyArray) or not isinstance(x, ak.contents.Content)
             for x in inputs
         ):
-            nplike = ak.nplikes.nplike_of(*inputs)
+            backend = ak._backends.backend_of(*inputs)
+            nplike = backend.nplike
 
             # Broadcast parameters against one another
             parameters_factory = ak._broadcasting.intersection_parameters_factory(
@@ -162,11 +172,11 @@ def array_ufunc(ufunc, method, inputs, kwargs):
                 args = []
                 for x in inputs:
                     if isinstance(x, NumpyArray):
-                        args.append(x.raw(nplike))
+                        args.append(x._raw(nplike))
                     else:
                         args.append(x)
 
-                if isinstance(nplike, ak.nplikes.Jax):
+                if isinstance(nplike, ak._nplikes.Jax):
                     from awkward._connect.jax import get_jax_ufunc
 
                     jax_ufunc = get_jax_ufunc(ufunc)
@@ -186,7 +196,7 @@ def array_ufunc(ufunc, method, inputs, kwargs):
                 assert shape is not None
                 tmp = getattr(ufunc, method)(*args, **kwargs)
                 result = nplike.empty((shape[0],) + tmp.shape[1:], tmp.dtype)
-            return (NumpyArray(result, nplike=nplike, parameters=parameters),)
+            return (NumpyArray(result, backend=backend, parameters=parameters),)
 
         for x in inputs:
             if isinstance(x, ak.contents.Content):
@@ -244,8 +254,12 @@ def array_ufunc(ufunc, method, inputs, kwargs):
                 assert isinstance(result, tuple) and len(result) == 1
                 return result[0]
 
-        out = inputs[where].recursively_apply(
-            unary_action, behavior, function_name=ufunc.__name__, allow_records=False
+        out = ak._do.recursively_apply(
+            inputs[where],
+            unary_action,
+            behavior,
+            function_name=ufunc.__name__,
+            allow_records=False,
         )
 
     else:

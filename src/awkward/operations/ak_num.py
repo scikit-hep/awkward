@@ -2,13 +2,13 @@
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
-def num(array, axis=1, highlevel=True, behavior=None):
+def num(array, axis=1, *, highlevel=True, behavior=None):
     """
     Args:
-        array: Data containing nested lists to count.
+        array: Array-like data (anything #ak.to_layout recognizes).
         axis (int): The dimension at which this operation is applied. The
             outermost dimension is `0`, followed by `1`, etc., and negative
             values count backward from the innermost: `-1` is the innermost
@@ -23,17 +23,15 @@ def num(array, axis=1, highlevel=True, behavior=None):
 
     For instance, given the following doubly nested `array`,
 
-        ak.Array([[
-                   [1.1, 2.2, 3.3],
-                   [],
-                   [4.4, 5.5],
-                   [6.6]
-                  ],
-                  [],
-                  [
-                   [7.7],
-                   [8.8, 9.9]]
-                  ])
+        >>> array = ak.Array([[[1.1, 2.2, 3.3],
+        ...                    [],
+        ...                    [4.4, 5.5],
+        ...                    [6.6]
+        ...                   ],
+        ...                   [],
+        ...                   [[7.7],
+        ...                    [8.8, 9.9]]
+        ...                   ])
 
     The number of elements in `axis=1` is
 
@@ -63,7 +61,7 @@ def num(array, axis=1, highlevel=True, behavior=None):
     To keep a placeholder (None) in each place we do not want to select,
     consider using #ak.mask instead of a #ak.Array.__getitem__.
 
-        >>> ak.mask(array, ak.num(array) > 0)[:, 0]
+        >>> array.mask[ak.num(array) > 0][:, 0]
         <Array [[1.1, 2.2, 3.3], None, [7.7]] type='3 * option[var * float64]'>
     """
     with ak._errors.OperationErrorContext(
@@ -74,10 +72,31 @@ def num(array, axis=1, highlevel=True, behavior=None):
 
 
 def _impl(array, axis, highlevel, behavior):
-    layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
+    layout = ak.operations.to_layout(array)
     behavior = ak._util.behavior_of(array, behavior=behavior)
-    out = layout.num(axis=axis)
-    if isinstance(out, (ak.contents.Content, ak.record.Record)):
-        return ak._util.wrap(out, behavior, highlevel)
-    else:
-        return out
+
+    if not ak._util.is_integer(axis):
+        raise ak._errors.wrap_error(
+            TypeError(f"'axis' must be an integer, not {axis!r}")
+        )
+
+    if ak._util.maybe_posaxis(layout, axis, 1) == 0:
+        if isinstance(layout, ak.record.Record):
+            return 1
+        else:
+            return layout.length
+
+    def action(layout, depth, **kwargs):
+        posaxis = ak._util.maybe_posaxis(layout, axis, depth)
+
+        if posaxis == depth and layout.is_list:
+            return ak.contents.NumpyArray(layout.stops.data - layout.starts.data)
+
+        elif layout.is_leaf:
+            raise ak._errors.wrap_error(
+                np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
+            )
+
+    out = ak._do.recursively_apply(layout, action, behavior, numpy_to_regular=True)
+
+    return ak._util.wrap(out, behavior, highlevel)

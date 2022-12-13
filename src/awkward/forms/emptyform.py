@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._util import unset
 from awkward.forms.form import Form
 
 
@@ -8,8 +9,15 @@ class EmptyForm(Form):
     is_numpy = True
     is_unknown = True
 
-    def __init__(self, parameters=None, form_key=None):
+    def __init__(self, *, parameters=None, form_key=None):
         self._init(parameters, form_key)
+
+    def copy(self, *, parameters=unset, form_key=unset):
+        return EmptyForm(parameters=parameters, form_key=form_key)
+
+    @classmethod
+    def simplified(cls, *, parameters=None, form_key=None):
+        return cls(parameters=parameters, form_key=form_key)
 
     def __repr__(self):
         args = self._repr_args()
@@ -20,15 +28,15 @@ class EmptyForm(Form):
 
     def _type(self, typestrs):
         return ak.types.UnknownType(
-            self._parameters,
-            ak._util.gettypestr(self._parameters, typestrs),
+            parameters=self._parameters,
+            typestr=ak._util.gettypestr(self._parameters, typestrs),
         )
 
     def __eq__(self, other):
         return isinstance(other, EmptyForm) and self._form_key == other._form_key
 
-    def toNumpyForm(self, dtype):
-        return ak.forms.numpyform.from_dtype(dtype, self._parameters)
+    def to_NumpyForm(self, dtype):
+        return ak.forms.numpyform.from_dtype(dtype, parameters=self._parameters)
 
     def purelist_parameter(self, key):
         if self._parameters is None or key not in self._parameters:

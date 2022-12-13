@@ -325,7 +325,9 @@ ak.Array([[1.1, 2.2], [], [3.3]]) == ak.Array([[1.1, 200], [], [3.3]])
 ```
 
 ```{code-cell} ipython3
-ak.Array(["one", "two", "three", "four"]) == ak.Array(["one", "TWO", "thirty three", "four"])
+ak.Array(["one", "two", "three", "four"]) == ak.Array(
+    ["one", "TWO", "thirty three", "four"]
+)
 ```
 
 (Without this overloaded behavior, the string comparison would yield `[True, True, True]` for `"one" == "one"` and would fail to broadcast `"three"` and `"thirty three"`.)
@@ -457,21 +459,25 @@ Advanced topic: the rest of this section describes the equivalence of missing re
 As described above, fields that are absent from some records but not others are filled in with None. As a consequence, conversions from Python to Awkward Array back to Python don't necessarily result in the original expression:
 
 ```{code-cell} ipython3
-ak.Array([
-    {"x": 1.1, "y": [1]                    },
-    {"x": 2.2,                 "z": "two"  },
-    {"x": 3.3, "y": [1, 2, 3], "z": "three"}
-]).to_list()
+ak.Array(
+    [
+        {"x": 1.1, "y": [1]},
+        {"x": 2.2, "z": "two"},
+        {"x": 3.3, "y": [1, 2, 3], "z": "three"},
+    ]
+).to_list()
 ```
 
 This is a deliberate choice. It would have been possible to convert records with missing fields into arrays with union type (more on that below), for which {class}`ak.to_list` would result in the original expression,
 
 ```{code-cell} ipython3
-ak.concatenate([
-    ak.Array([{"x": 1.1, "y": [1]                    }]),
-    ak.Array([{"x": 2.2,                 "z": "two"  }]),
-    ak.Array([{"x": 3.3, "y": [1, 2, 3], "z": "three"}]),
-]).to_list()
+ak.concatenate(
+    [
+        ak.Array([{"x": 1.1, "y": [1]}]),
+        ak.Array([{"x": 2.2, "z": "two"}]),
+        ak.Array([{"x": 3.3, "y": [1, 2, 3], "z": "three"}]),
+    ]
+).to_list()
 ```
 
 But typical datasets of records with different sets of fields represent missing fields, rather than entirely different types of objects. (Even in particle physics applications that mix "electron objects" with "photon objects," both types of objects have the same trajectory fields `"x"`, `"y"`, `"z"` and differ in fields that exist for one and not the other, such as `"charge"` for electrons but not photons.)
@@ -481,11 +487,13 @@ The memory use of union arrays scales with the number of different types, up to 
 Tuples of different lengths, on the other hand, are assumed to be different types because mistaking slot $i$ for slot $i + 1$ would create unions anyway.
 
 ```{code-cell} ipython3
-ak.Array([
-    (1.1, [1]               ),
-    (2.2,            "two"  ),
-    (3.3, [1, 2, 3], "three"),
-]).to_list()
+ak.Array(
+    [
+        (1.1, [1]),
+        (2.2, "two"),
+        (3.3, [1, 2, 3], "three"),
+    ]
+).to_list()
 ```
 
 Union types: heterogeneous data
@@ -528,21 +536,29 @@ ak.Array([1, 2, 3, True, True, False, 4, 5])
 As described above, records with different sets of fields are presumed to be a single record type with missing values.
 
 ```{code-cell} ipython3
-ak.type(ak.Array([
-    {"x": 1.1, "y": [1]                    },
-    {"x": 2.2,                 "z": "two"  },
-    {"x": 3.3, "y": [1, 2, 3], "z": "three"}
-]))
+ak.type(
+    ak.Array(
+        [
+            {"x": 1.1, "y": [1]},
+            {"x": 2.2, "z": "two"},
+            {"x": 3.3, "y": [1, 2, 3], "z": "three"},
+        ]
+    )
+)
 ```
 
 But tuples with different lengths are presumed to be distinct types.
 
 ```{code-cell} ipython3
-ak.type(ak.Array([
-    (1.1, [1]               ),
-    (2.2,            "two"  ),
-    (3.3, [1, 2, 3], "three"),
-]))
+ak.type(
+    ak.Array(
+        [
+            (1.1, [1]),
+            (2.2, "two"),
+            (3.3, [1, 2, 3], "three"),
+        ]
+    )
+)
 ```
 
 More control over conversions

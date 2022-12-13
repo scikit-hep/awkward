@@ -541,8 +541,6 @@ def gencpukerneltests(specdict):
 
 
 cuda_kernels_tests = [
-    "awkward_ListArray_num",
-    "awkward_RegularArray_num",
     "awkward_ListArray_validity",
     "awkward_BitMaskedArray_to_ByteMaskedArray",
     "awkward_ListArray_compact_offsets",
@@ -679,7 +677,7 @@ def gencudakerneltests(specdict):
                 )
 
                 f.write(
-                    "import cupy\nimport pytest\n\nimport awkward as ak\nimport awkward._connect.cuda as ak_cu\n\ncupy_nplike = ak.nplikes.Cupy.instance()\n\n"
+                    "import cupy\nimport pytest\n\nimport awkward as ak\nimport awkward._connect.cuda as ak_cu\n\ncupy_backend = ak._backends.CupyBackend.instance()\n\n"
                 )
                 num = 1
                 if spec.tests == []:
@@ -728,7 +726,7 @@ def gencudakerneltests(specdict):
                                 #     )
                                 # )
                     cuda_string = (
-                        "funcC = cupy_nplike['"
+                        "funcC = cupy_backend['"
                         + spec.templatized_kernel_name
                         + "', {}]\n".format(", ".join(dtypes))
                     )

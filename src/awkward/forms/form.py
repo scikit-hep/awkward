@@ -3,12 +3,13 @@ from __future__ import annotations
 
 import json
 from collections.abc import Mapping
-from typing import Any
 
 import awkward as ak
 from awkward import _errors
+from awkward.typing import Any
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
+numpy_backend = ak._backends.NumpyBackend.instance()
 
 
 def from_dict(input: dict) -> Form:
@@ -25,10 +26,12 @@ def from_dict(input: dict) -> Form:
     if input["class"] == "NumpyArray":
         primitive = input["primitive"]
         inner_shape = input.get("inner_shape", [])
-        return ak.forms.NumpyForm(primitive, inner_shape, parameters, form_key)
+        return ak.forms.NumpyForm(
+            primitive, inner_shape, parameters=parameters, form_key=form_key
+        )
 
     elif input["class"] == "EmptyArray":
-        return ak.forms.EmptyForm(parameters, form_key)
+        return ak.forms.EmptyForm(parameters=parameters, form_key=form_key)
 
     elif input["class"] == "RegularArray":
         return ak.forms.RegularForm(
@@ -362,9 +365,6 @@ class Form:
     def type_from_behavior(self, behavior):
         return self._type(ak._util.typestrs(behavior))
 
-    def simplify_optiontype(self):
-        return self
-
     def columns(self, list_indicator=None, column_prefix=()):
         output = []
         self._columns(column_prefix, output, list_indicator)
@@ -406,7 +406,41 @@ class Form:
         raise _errors.wrap_error(NotImplementedError)
 
     def _to_dict_part(self, verbose, toplevel):
-        raise _errors._errors(NotImplementedError)
+        raise _errors.wrap_error(NotImplementedError)
 
     def _type(self, typestrs):
         raise _errors.wrap_error(NotImplementedError)
+
+    def length_zero_array(
+        self, *, backend=numpy_backend, highlevel=True, behavior=None
+    ):
+        return ak.operations.ak_from_buffers._impl(
+            form=self,
+            length=0,
+            container={"": b"\x00\x00\x00\x00\x00\x00\x00\x00"},
+            buffer_key="",
+            backend=backend,
+            highlevel=highlevel,
+            behavior=behavior,
+            simplify=False,
+        )
+
+    def length_one_array(self, *, backend=numpy_backend, highlevel=True, behavior=None):
+        # A length-1 array will need at least N bytes, where N is the largest dtype (e.g. 256 bit complex)
+        # Similarly, a length-1 array will need no more than 2*N bytes, as all contents need at most two
+        # index-types e.g. `ListOffsetArray.offsets` for their various index metadata. Therefore, we
+        # create a buffer of this length (2N) and instruct all contents to use it (via `buffer_key=""`).
+        # At the same time, with all index-like metadata set to 0, the list types will have zero lengths
+        # whilst unions, indexed, and option types will contain a single value.
+        return ak.operations.ak_from_buffers._impl(
+            form=self,
+            length=1,
+            container={
+                "": b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+            },
+            buffer_key="",
+            backend=backend,
+            highlevel=highlevel,
+            behavior=behavior,
+            simplify=False,
+        )

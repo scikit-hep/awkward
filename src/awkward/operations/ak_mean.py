@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 @ak._connect.numpy.implements("mean")
@@ -10,6 +10,7 @@ def mean(
     x,
     weight=None,
     axis=None,
+    *,
     keepdims=False,
     mask_identity=False,
     flatten_records=False,
@@ -51,14 +52,14 @@ def mean(
 
     For example, with an `array` like
 
-        ak.Array([[0, 1, 2, 3],
-                  [          ],
-                  [4, 5      ]])
+        >>> array = ak.Array([[0, 1, 2, 3],
+                              [          ],
+                              [4, 5      ]])
 
     The mean of the innermost lists is
 
         >>> ak.mean(array, axis=-1)
-        <Array [1.5, None, 4.5] type='3 * ?float64'>
+        <Array [1.5, nan, 4.5] type='3 * float64'>
 
     because there are three lists, the first has mean `1.5`, the second is
     empty, and the third has mean `4.5`.
@@ -66,7 +67,7 @@ def mean(
     The mean of the outermost lists is
 
         >>> ak.mean(array, axis=0)
-        <Array [2, 3, 2, 3] type='4 * ?float64'>
+        <Array [2, 3, 2, 3] type='4 * float64'>
 
     because the longest list has length 4, the mean of `0` and `4` is `2.0`,
     the mean of `1` and `5` is `3.0`, the mean of `2` (by itself) is `2.0`,
@@ -94,7 +95,13 @@ def mean(
 
 @ak._connect.numpy.implements("nanmean")
 def nanmean(
-    x, weight=None, axis=None, keepdims=False, mask_identity=True, flatten_records=False
+    x,
+    weight=None,
+    axis=None,
+    *,
+    keepdims=False,
+    mask_identity=True,
+    flatten_records=False,
 ):
     """
     Args:
@@ -148,21 +155,36 @@ def nanmean(
 
 
 def _impl(x, weight, axis, keepdims, mask_identity, flatten_records):
+    behavior = ak._util.behavior_of(x, weight)
     x = ak.highlevel.Array(
-        ak.operations.to_layout(x, allow_record=False, allow_other=False)
+        ak.operations.to_layout(x, allow_record=False, allow_other=False),
+        behavior=behavior,
     )
     if weight is not None:
         weight = ak.highlevel.Array(
-            ak.operations.to_layout(weight, allow_record=False, allow_other=False)
+            ak.operations.to_layout(weight, allow_record=False, allow_other=False),
+            behavior=behavior,
         )
 
     with np.errstate(invalid="ignore", divide="ignore"):
         if weight is None:
             sumw = ak.operations.ak_count._impl(
-                x, axis, keepdims, mask_identity, flatten_records
+                x,
+                axis,
+                keepdims,
+                mask_identity,
+                flatten_records,
+                highlevel=True,
+                behavior=None,
             )
             sumwx = ak.operations.ak_sum._impl(
-                x, axis, keepdims, mask_identity, flatten_records
+                x,
+                axis,
+                keepdims,
+                mask_identity,
+                flatten_records,
+                highlevel=True,
+                behavior=None,
             )
         else:
             sumw = ak.operations.ak_sum._impl(
@@ -171,8 +193,16 @@ def _impl(x, weight, axis, keepdims, mask_identity, flatten_records):
                 keepdims,
                 mask_identity,
                 flatten_records,
+                highlevel=True,
+                behavior=None,
             )
             sumwx = ak.operations.ak_sum._impl(
-                x * weight, axis, keepdims, mask_identity, flatten_records
+                x * weight,
+                axis,
+                keepdims,
+                mask_identity,
+                flatten_records,
+                highlevel=True,
+                behavior=None,
             )
-        return ak.nplikes.nplike_of(sumwx, sumw).true_divide(sumwx, sumw)
+        return ak._nplikes.nplike_of(sumwx, sumw).true_divide(sumwx, sumw)

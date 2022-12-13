@@ -1,9 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import numpy as np  # noqa: F401
+import numpy as np
 import pytest  # noqa: F401
 
-import awkward as ak  # noqa: F401
+import awkward as ak
 
 to_list = ak.operations.to_list
 
@@ -61,29 +61,29 @@ def test_numpyarray_getitem_next():
     c = np.array([7, 3, 3, 5])
 
     assert to_list(b[c]) == to_list(a[c])
-    assert b.typetracer[c].form == b[c].form
+    assert b.to_typetracer()[c].form == b[c].form
     c = np.array([0, 0, 0, 1, 1, 1, 0, 1, 0, 1])
     assert to_list(b[c]) == to_list(a[c])
-    assert b.typetracer[c].form == b[c].form
+    assert b.to_typetracer()[c].form == b[c].form
     c = np.array([False, False, False, True, True, True, False, True, False, True])
     assert to_list(b[c]) == to_list(a[c])
-    assert b.typetracer[c].form == b[c].form
+    assert b.to_typetracer()[c].form == b[c].form
     c = np.array([], dtype=np.int64)
     assert to_list(b[c]) == to_list(a[c])
-    assert b.typetracer[c].form == b[c].form
+    assert b.to_typetracer()[c].form == b[c].form
 
     a = np.arange(10 * 3).reshape(10, 3)
     b = ak.contents.NumpyArray(a)
     c = np.array([7, 3, 3, 5])
 
     assert to_list(b[c]) == to_list(a[c])
-    assert b.typetracer[c].form == b[c].form
+    assert b.to_typetracer()[c].form == b[c].form
     c = np.array([False, False, False, True, True, True, False, True, False, True])
     assert to_list(b[c]) == to_list(a[c])
-    assert b.typetracer[c].form == b[c].form
+    assert b.to_typetracer()[c].form == b[c].form
     c = np.array([], dtype=np.int64)
     assert to_list(b[c]) == to_list(a[c])
-    assert b.typetracer[c].form == b[c].form
+    assert b.to_typetracer()[c].form == b[c].form
 
     a = np.arange(7 * 5).reshape(7, 5)
     b = ak.contents.NumpyArray(a)
@@ -93,25 +93,25 @@ def test_numpyarray_getitem_next():
 
     assert to_list(b[c1, c2]) == to_list(a[c1, c2])
     assert a[c1, c2].ndim == 1
-    assert b.typetracer[c1, c2].form == b[c1, c2].form
+    assert b.to_typetracer()[c1, c2].form == b[c1, c2].form
 
     a = np.arange(7 * 5).reshape(7, 5)
     b = ak.contents.NumpyArray(a)
     c1 = np.array([4, 1, 1, 3])
     c2 = np.array([2, 2, 0, 1])
     assert to_list(b[c1, c2]) == to_list(a[c1, c2])
-    assert b.typetracer[c1, c2].form == b[c1, c2].form
+    assert b.to_typetracer()[c1, c2].form == b[c1, c2].form
 
     c = np.array([False, False, True, True, False, True, True])
     assert to_list(b[c]) == to_list(a[c])
-    assert b.typetracer[c].form == b[c].form
+    assert b.to_typetracer()[c].form == b[c].form
 
     c = np.array([], dtype=np.int64)
     assert to_list(b[c]) == to_list(a[c])
     c1 = np.array([], dtype=np.int64)
     c2 = np.array([], dtype=np.int64)
     assert to_list(b[c1, c2]) == to_list(a[c1, c2])
-    assert b.typetracer[c1, c2].form == b[c1, c2].form
+    assert b.to_typetracer()[c1, c2].form == b[c1, c2].form
 
     a = np.arange(7 * 5).reshape(7, 5)
     b = ak.contents.NumpyArray(a)

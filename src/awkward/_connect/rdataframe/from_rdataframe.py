@@ -7,8 +7,8 @@ import cppyy
 import ROOT
 
 import awkward as ak
-import awkward._connect.cling  # noqa: E402
-import awkward._lookup  # noqa: E402
+import awkward._connect.cling
+import awkward._lookup
 from awkward.types.numpytype import primitive_to_dtype
 
 cpp_type_of = {
@@ -29,8 +29,8 @@ cpp_type_of = {
     "timedelta64": "std::difftime",
 }
 
-np = ak.nplikes.NumpyMetadata.instance()
-numpy = ak.nplikes.Numpy.instance()
+np = ak._nplikes.NumpyMetadata.instance()
+numpy = ak._nplikes.Numpy.instance()
 
 
 cppyy.add_include_path(
@@ -71,7 +71,7 @@ def from_rdataframe(data_frame, columns):
     def empty_buffers(cpp_buffers_self, names_nbytes):
         buffers = {}
         for item in names_nbytes:
-            buffers[item.first] = ak.nplikes.numpy.empty(item.second)
+            buffers[item.first] = ak._nplikes.numpy.empty(item.second)
             cpp_buffers_self.append(
                 item.first,
                 buffers[item.first].ctypes.data_as(ctypes.POINTER(ctypes.c_ubyte)),
@@ -166,6 +166,12 @@ def from_rdataframe(data_frame, columns):
 
         else:  # Convert the C++ vectors to Awkward arrays
             form_str = ROOT.awkward.type_to_form[col_type](0)
+
+            if form_str == "unsupported type":
+                raise ak._errors.wrap_error(
+                    TypeError(f'"{col}" column\'s type "{col_type}" is not supported.')
+                )
+
             form = ak.forms.from_json(form_str)
 
             list_depth = form.purelist_depth

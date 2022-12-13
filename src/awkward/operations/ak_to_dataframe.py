@@ -2,17 +2,17 @@
 
 import awkward as ak
 
-numpy = ak.nplikes.Numpy.instance()
+numpy = ak._nplikes.Numpy.instance()
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 def to_dataframe(
-    array, how="inner", levelname=lambda i: "sub" * i + "entry", anonymous="values"
+    array, *, how="inner", levelname=lambda i: "sub" * i + "entry", anonymous="values"
 ):
     """
     Args:
-        array: Data to convert into one or more Pandas DataFrames.
+        array: Array-like data (anything #ak.to_layout recognizes).
         how (None or str): Passed to
             [pd.merge](https://pandas.pydata.org/pandas-docs/version/1.0.3/reference/api/pandas.merge.html)
             to combine DataFrames for each multiplicity into one DataFrame. If
@@ -121,7 +121,7 @@ def to_dataframe(
               3         4.0  NaN
     """
     with ak._errors.OperationErrorContext(
-        "ak.to_layout",
+        "ak.to_dataframe",
         dict(
             array=array,
             how=how,
@@ -167,7 +167,7 @@ or
             return [(ak.operations.to_numpy(layout), row_arrays, col_names)]
 
         elif layout.purelist_depth > 1:
-            offsets, flattened = layout._offsets_and_flattened(axis=1, depth=0)
+            offsets, flattened = layout._offsets_and_flattened(axis=1, depth=1)
             offsets = numpy.asarray(offsets)
             starts, stops = offsets[:-1], offsets[1:]
             counts = stops - starts

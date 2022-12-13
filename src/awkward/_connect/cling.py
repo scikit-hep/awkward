@@ -8,8 +8,8 @@ from awkward_cpp import libawkward
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
-numpy = ak.nplikes.Numpy.instance()
+np = ak._nplikes.NumpyMetadata.instance()
+numpy = ak._nplikes.Numpy.instance()
 
 
 cache = {}
@@ -444,13 +444,13 @@ namespace awkward {{
 
 def togenerator(form, flatlist_as_rvec):
     if isinstance(form, ak.forms.EmptyForm):
-        return togenerator(form.toNumpyForm(np.dtype(np.float64)), flatlist_as_rvec)
+        return togenerator(form.to_NumpyForm(np.dtype(np.float64)), flatlist_as_rvec)
 
     elif isinstance(form, ak.forms.NumpyForm):
         if len(form.inner_shape) == 0:
             return NumpyArrayGenerator.from_form(form, flatlist_as_rvec)
         else:
-            return togenerator(form.toRegularForm(), flatlist_as_rvec)
+            return togenerator(form.to_RegularForm(), flatlist_as_rvec)
 
     elif isinstance(form, ak.forms.RegularForm):
         return RegularArrayGenerator.from_form(form, flatlist_as_rvec)

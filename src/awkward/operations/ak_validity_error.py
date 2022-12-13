@@ -3,11 +3,10 @@
 import awkward as ak
 
 
-def validity_error(array, exception=False):
+def validity_error(array, *, exception=False):
     """
     Args:
-        array (#ak.Array, #ak.Record, #ak.contents.Content, #ak.record.Record, #ak.ArrayBuilder):
-            Array or record to check.
+        array: Array-like data (anything #ak.to_layout recognizes).
         exception (bool): If True, validity errors raise exceptions.
 
     Returns an empty string if there are no errors and a str containing the error message
@@ -28,7 +27,7 @@ def validity_error(array, exception=False):
 
 def _impl(array, exception):
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
-    out = layout.validity_error(path="highlevel")
+    out = ak._do.validity_error(layout, path="highlevel")
 
     if out not in (None, "") and exception:
         raise ak._errors.wrap_error(ValueError(out))

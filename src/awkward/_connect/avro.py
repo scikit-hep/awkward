@@ -39,7 +39,7 @@ class ReadAvroFT:
                 pos = self.cont_spec(pos)
                 break
 
-            except _ReachedEndofArrayError:  # noqa: AK101
+            except _ReachedEndofArrayError:
                 numbytes *= 2
 
         ind = 2
@@ -85,7 +85,7 @@ class ReadAvroFT:
                 if len(temp_data) < len_block:
                     raise _ReachedEndofArrayError  # noqa: AK101
                 self.update_pos(len_block)
-            except _ReachedEndofArrayError:  # noqa: AK101
+            except _ReachedEndofArrayError:
                 break
 
             if limit_entries is not None and self.blocks > limit_entries:
@@ -912,3 +912,8 @@ class ReadAvroFT:
             #         exec_code = exec_code+jj
             #         exec_code = exec_code+kk
             raise ak._errors.wrap_error(NotImplementedError)
+
+        else:
+            raise ak._errors.wrap_error(
+                AssertionError(f"unrecognized Avro type: {file['type']}")
+            )

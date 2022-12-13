@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._util import unset
 from awkward.forms.form import Form, _parameters_equal, _parameters_update
 
 
@@ -11,6 +12,7 @@ class IndexedForm(Form):
         self,
         index,
         content=None,
+        *,
         parameters=None,
         form_key=None,
     ):
@@ -42,6 +44,54 @@ class IndexedForm(Form):
     @property
     def content(self):
         return self._content
+
+    def copy(
+        self,
+        index=unset,
+        content=unset,
+        *,
+        parameters=unset,
+        form_key=unset,
+    ):
+        return IndexedForm(
+            self._index if index is unset else index,
+            self._content if content is unset else content,
+            parameters=self._parameters if parameters is unset else parameters,
+            form_key=self._form_key if form_key is unset else form_key,
+        )
+
+    @classmethod
+    def simplified(
+        cls,
+        index,
+        content,
+        *,
+        parameters=None,
+        form_key=None,
+    ):
+        is_cat = parameters is not None and parameters.get("__array__") == "categorical"
+
+        if content.is_union and not is_cat:
+            return content.copy(
+                parameters=ak._util.merge_parameters(content._parameters, parameters)
+            )
+
+        elif content.is_option:
+            return ak.forms.IndexedOptionForm.simplified(
+                "i64",
+                content.content,
+                parameters=ak._util.merge_parameters(content._parameters, parameters),
+            )
+
+        elif content.is_indexed:
+            return IndexedForm(
+                "i64",
+                content.content,
+                parameters=ak._util.merge_parameters(content._parameters, parameters),
+            )
+
+        else:
+            return cls(index, content, parameters=parameters, form_key=form_key)
 
     def __repr__(self):
         args = [repr(self._index), repr(self._content)] + self._repr_args()
@@ -139,8 +189,8 @@ class IndexedForm(Form):
         return IndexedForm(
             self._index,
             self._content._select_columns(index, specifier, matches, output),
-            self._parameters,
-            self._form_key,
+            parameters=self._parameters,
+            form_key=self._form_key,
         )
 
     def _column_types(self):

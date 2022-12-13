@@ -3,7 +3,7 @@
 import numpy as np  # noqa: F401
 import pytest  # noqa: F401
 
-import awkward as ak  # noqa: F401
+import awkward as ak
 
 
 def test():
@@ -24,4 +24,4 @@ def test():
         ak.operations.concatenate([a2, b2], axis=1), "Blah", behavior=behavior
     )
 
-    assert c2.blah.tolist() == [[2, -2], [-4]]
+    assert c2.blah.to_list() == [[2, -2], [-4]]

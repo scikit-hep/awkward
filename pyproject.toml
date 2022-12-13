@@ -7,7 +7,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "awkward"
-version = "2.0.0rc4"
+version = "2.0.0"
 description = "Manipulate JSON-like data with NumPy-like idioms."
 license = { text = "BSD-3-Clause" }
 requires-python = ">=3.7"
@@ -40,10 +40,11 @@ classifiers = [
     "Topic :: Utilities",
 ]
 dependencies = [
-    "awkward_cpp==1",
+    "awkward_cpp==2",
     "importlib_resources;python_version < \"3.9\"",
-    "numpy>=1.13.1",
+    "numpy>=1.14.5",
     "packaging",
+    "typing_extensions>=4.1.0; python_version < \"3.11\""
 ]
 dynamic = [
     "readme"

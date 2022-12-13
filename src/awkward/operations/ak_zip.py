@@ -2,24 +2,24 @@
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 def zip(
     arrays,
     depth_limit=None,
+    *,
     parameters=None,
     with_name=None,
-    highlevel=True,
-    behavior=None,
     right_broadcast=False,
     optiontype_outside_record=False,
+    highlevel=True,
+    behavior=None,
 ):
     """
     Args:
-        arrays (dict or iterable of arrays): Arrays to combine into a
-            record-containing structure (if a dict) or a tuple-containing
-            structure (if any other kind of iterable).
+        arrays (dict or iterable of arrays): Each value in this dict or iterable
+            can be any array-like data that #ak.to_layout recognizes.
         depth_limit (None or int): If None, attempt to fully broadcast the
             `array` to all levels. If an int, limit the number of dimensions
             that get broadcasted. The minimum value is `1`, for no
@@ -29,14 +29,14 @@ def zip(
         with_name (None or str): Assigns a `"__record__"` name to the new
             #ak.contents.RecordArray node that is created by this operation
             (overriding `parameters`, if necessary).
-        highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.contents.Content subclass.
-        behavior (None or dict): Custom #ak.behavior for the output array, if
-            high-level.
         right_broadcast (bool): If True, follow rules for implicit
             right-broadcasting, as described in #ak.broadcast_arrays.
         optiontype_outside_record (bool): If True, continue broadcasting past
             any option types before creating the new #ak.contents.RecordArray node.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.contents.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
     Combines `arrays` into a single structure as the fields of a collection
     of records or the slots of a collection of tuples. If the `arrays` have
@@ -56,36 +56,30 @@ def zip(
     Zipping them together using a dict creates a collection of records with
     the same nesting structure as `one` and `two`.
 
-        >>> ak.to_list(ak.zip({"x": one, "y": two}))
-        [
-         [{'x': 1.1, 'y': 'a'}, {'x': 2.2, 'y': 'b'}, {'x': 3.3, 'y': 'c'}],
+        >>> ak.zip({"x": one, "y": two}).show()
+        [[{x: 1.1, y: 'a'}, {x: 2.2, y: 'b'}, {x: 3.3, y: 'c'}],
          [],
-         [{'x': 4.4, 'y': 'd'}, {'x': 5.5, 'y': 'e'}],
-         [{'x': 6.6, 'y': 'f'}]
-        ]
+         [{x: 4.4, y: 'd'}, {x: 5.5, y: 'e'}],
+         [{x: 6.6, y: 'f'}]]
 
     Doing so with a list creates tuples, whose fields are not named.
 
-        >>> ak.to_list(ak.zip([one, two]))
-        [
-         [(1.1, 'a'), (2.2, 'b'), (3.3, 'c')],
+        >>> ak.zip([one, two]).show()
+        [[(1.1, 'a'), (2.2, 'b'), (3.3, 'c')],
          [],
          [(4.4, 'd'), (5.5, 'e')],
-         [(6.6, 'f')]
-        ]
+         [(6.6, 'f')]]
 
     Adding a third array with the same length as `one` and `two` but less
     internal structure is okay: it gets broadcasted to match the others.
     (See #ak.broadcast_arrays for broadcasting rules.)
 
         >>> three = ak.Array([100, 200, 300, 400])
-        >>> ak.to_list(ak.zip([one, two, three]))
-        [
-         [[(1.1, 97, 100)], [(2.2, 98, 100)], [(3.3, 99, 100)]],
+        >>> ak.zip([one, two, three]).show()
+        [[(1.1, 'a', 100), (2.2, 'b', 100), (3.3, 'c', 100)],
          [],
-         [[(4.4, 100, 300)], [(5.5, 101, 300)]],
-         [[(6.6, 102, 400)]]
-        ]
+         [(4.4, 'd', 300), (5.5, 'e', 300)],
+         [(6.6, 'f', 400)]]
 
     However, if arrays have the same depth but different lengths of nested
     lists, attempting to zip them together is a broadcasting error.
@@ -93,13 +87,24 @@ def zip(
         >>> one = ak.Array([[[1, 2, 3], [], [4, 5], [6]], [], [[7, 8]]])
         >>> two = ak.Array([[[1.1, 2.2], [3.3], [4.4], [5.5]], [], [[6.6]]])
         >>> ak.zip([one, two])
-        ValueError: in ListArray64, cannot broadcast nested list
+        ValueError: while calling
+            ak.zip(
+                arrays = [<Array [[[1, 2, 3], [], [4, ...], [6]], ...] type='3 * var ...
+                depth_limit = None
+                parameters = None
+                with_name = None
+                right_broadcast = False
+                optiontype_outside_record = False
+                highlevel = True
+                behavior = None
+            )
+        Error details: cannot broadcast nested list
 
     For this, one can set the `depth_limit` to prevent the operation from
     attempting to broadcast what can't be broadcasted.
 
-        >>> ak.to_list(ak.zip([one, two], depth_limit=1))
-        [([[1, 2, 3], [], [4, 5], [6]], [[1.1, 2.2], [3.3], [4.4], [5.5]]),
+        >>> ak.zip([one, two], depth_limit=1).show()
+        [([[1, 2, 3], [], [4, ...], [6]], [[1.1, ...], ...]),
          ([], []),
          ([[7, 8]], [[6.6]])]
 
@@ -130,10 +135,10 @@ def zip(
             depth_limit=depth_limit,
             parameters=parameters,
             with_name=with_name,
-            highlevel=highlevel,
-            behavior=behavior,
             right_broadcast=right_broadcast,
             optiontype_outside_record=optiontype_outside_record,
+            highlevel=highlevel,
+            behavior=behavior,
         ),
     ):
         return _impl(
@@ -141,10 +146,10 @@ def zip(
             depth_limit,
             parameters,
             with_name,
-            highlevel,
-            behavior,
             right_broadcast,
             optiontype_outside_record,
+            highlevel,
+            behavior,
         )
 
 
@@ -153,10 +158,10 @@ def _impl(
     depth_limit,
     parameters,
     with_name,
-    highlevel,
-    behavior,
     right_broadcast,
     optiontype_outside_record,
+    highlevel,
+    behavior,
 ):
     if depth_limit is not None and depth_limit <= 0:
         raise ak._errors.wrap_error(
@@ -215,8 +220,7 @@ def _impl(
                 x.purelist_depth == 1
                 or (
                     x.purelist_depth == 2
-                    and x.purelist_parameter("__array__")
-                    in ("string", "bytestring", "categorical")
+                    and x.purelist_parameter("__array__") in ("string", "bytestring")
                 )
                 for x in inputs
             )

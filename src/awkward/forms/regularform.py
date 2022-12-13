@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._util import unset
 from awkward.forms.form import Form, _parameters_equal
 
 
@@ -8,7 +9,7 @@ class RegularForm(Form):
     is_list = True
     is_regular = True
 
-    def __init__(self, content, size, parameters=None, form_key=None):
+    def __init__(self, content, size, *, parameters=None, form_key=None):
         if not isinstance(content, Form):
             raise ak._errors.wrap_error(
                 TypeError(
@@ -38,6 +39,18 @@ class RegularForm(Form):
     def size(self):
         return self._size
 
+    def copy(self, content=unset, size=unset, *, parameters=unset, form_key=unset):
+        return RegularForm(
+            self._content if content is unset else content,
+            self._size if size is unset else size,
+            parameters=self._parameters if parameters is unset else parameters,
+            form_key=self._form_key if form_key is unset else form_key,
+        )
+
+    @classmethod
+    def simplified(cls, content, size, *, parameters=None, form_key=None):
+        return cls(content, size, parameters=parameters, form_key=form_key)
+
     def __repr__(self):
         args = [repr(self._content), repr(self._size)] + self._repr_args()
         return "{}({})".format(type(self).__name__, ", ".join(args))
@@ -56,8 +69,8 @@ class RegularForm(Form):
         return ak.types.RegularType(
             self._content._type(typestrs),
             self._size,
-            self._parameters,
-            ak._util.gettypestr(self._parameters, typestrs),
+            parameters=self._parameters,
+            typestr=ak._util.gettypestr(self._parameters, typestrs),
         )
 
     def __eq__(self, other):
@@ -134,8 +147,8 @@ class RegularForm(Form):
         return RegularForm(
             self._content._select_columns(index, specifier, matches, output),
             self._size,
-            self._parameters,
-            self._form_key,
+            parameters=self._parameters,
+            form_key=self._form_key,
         )
 
     def _column_types(self):

@@ -3,7 +3,7 @@
 import numpy as np  # noqa: F401
 import pytest  # noqa: F401
 
-import awkward as ak  # noqa: F401
+import awkward as ak
 
 
 def test_but_first_fix_sort():
@@ -14,7 +14,7 @@ def test_but_first_fix_sort():
 
 def test_argsort():
     array = ak.Array(["one", "two", "three", "four", "five", "six", "seven", "eight"])
-    assert ak.operations.argsort(array, axis=-1).tolist() == [
+    assert ak.operations.argsort(array, axis=-1).to_list() == [
         7,
         4,
         3,
@@ -28,7 +28,7 @@ def test_argsort():
     array = ak.Array(
         [["twotwo", "two", "three"], ["four", "five"], [], ["six", "seven", "eight"]]
     )
-    assert ak.operations.argsort(array, axis=-1).tolist() == [
+    assert ak.operations.argsort(array, axis=-1).to_list() == [
         [2, 1, 0],
         [1, 0],
         [],
@@ -43,7 +43,7 @@ def test_argsort():
             [["six"], ["seven", "eight"]],
         ]
     )
-    assert ak.operations.argsort(array, axis=-1).tolist() == [
+    assert ak.operations.argsort(array, axis=-1).to_list() == [
         [[1, 0], [0]],
         [[1, 0]],
         [],
@@ -53,7 +53,7 @@ def test_argsort():
 
 def test_sort():
     array = ak.Array(["one", "two", "three", "four", "five", "six", "seven", "eight"])
-    assert ak.operations.sort(array, axis=-1).tolist() == [
+    assert ak.operations.sort(array, axis=-1).to_list() == [
         "eight",
         "five",
         "four",
@@ -67,7 +67,7 @@ def test_sort():
     array = ak.Array(
         [["twotwo", "two", "three"], ["four", "five"], [], ["six", "seven", "eight"]]
     )
-    assert ak.operations.sort(array, axis=-1).tolist() == [
+    assert ak.operations.sort(array, axis=-1).to_list() == [
         ["three", "two", "twotwo"],
         ["five", "four"],
         [],
@@ -82,7 +82,7 @@ def test_sort():
             [["six"], ["seven", "eight"]],
         ]
     )
-    assert ak.operations.sort(array, axis=-1).tolist() == [
+    assert ak.operations.sort(array, axis=-1).to_list() == [
         [["two", "twotwo"], ["three"]],
         [["five", "four"]],
         [],

@@ -1,11 +1,11 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import numpy as np  # noqa: F401
-import pytest  # noqa: F401
+import numpy as np
+import pytest
 
-import awkward as ak  # noqa: F401
-import awkward._connect.cling  # noqa: E402
-import awkward._lookup  # noqa: E402
+import awkward as ak
+import awkward._connect.cling
+import awkward._lookup
 
 ROOT = pytest.importorskip("ROOT")
 
@@ -271,7 +271,7 @@ def test_UnionArray_NumpyArray(flatlist_as_rvec):
         ak.index.Index(np.array([1, 1, 0, 0, 1, 0, 1], np.int8)),
         ak.index.Index(np.array([4, 3, 0, 1, 2, 2, 4, 100], np.int64)),
         [
-            ak.contents.NumpyArray(np.array([1, 2, 3], np.int64)),
+            ak.from_iter(["1", "2", "3"], highlevel=False),
             ak.contents.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5])),
         ],
     )

@@ -1,9 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import numpy as np  # noqa: F401
+import numpy as np
 import pytest  # noqa: F401
 
-import awkward as ak  # noqa: F401
+import awkward as ak
 
 to_list = ak.operations.to_list
 
@@ -575,17 +575,17 @@ def test_ByteMaskedArray_reduce():
         [[53, 59, 61, 67, 71], None, [101, 103, 107, 109, 113]],
     ]
 
-    assert to_list(depth2.prod(-1)) == [
+    assert to_list(ak.prod(depth2, -1, highlevel=False)) == [
         [2 * 3 * 5 * 7 * 11, None, 31 * 37 * 41 * 43 * 47],
         [53 * 59 * 61 * 67 * 71, None, 101 * 103 * 107 * 109 * 113],
     ]
 
-    assert to_list(depth2.prod(-2)) == [
+    assert to_list(ak.prod(depth2, -2, highlevel=False)) == [
         [31 * 2, 37 * 3, 41 * 5, 43 * 7, 47 * 11],
         [101 * 53, 103 * 59, 107 * 61, 109 * 67, 113 * 71],
     ]
 
-    assert to_list(depth2.prod(-3)) == [
+    assert to_list(ak.prod(depth2, -3, highlevel=False)) == [
         [53 * 2, 59 * 3, 61 * 5, 67 * 7, 71 * 11],
         [],
         [101 * 31, 103 * 37, 107 * 41, 109 * 43, 113 * 47],
@@ -681,17 +681,17 @@ def test_ByteMaskedArray_reduce():
         ],
     ]
 
-    assert to_list(depth2.prod(-1)) == [
+    assert to_list(ak.prod(depth2, -1, highlevel=False)) == [
         [2 * 3 * 5 * 7 * 11, 1 * 1 * 1 * 1 * 1, 31 * 37 * 41 * 43 * 47],
         [53 * 59 * 61 * 67 * 71, 1 * 1 * 1 * 1 * 1, 101 * 103 * 107 * 109 * 113],
     ]
 
-    assert to_list(depth2.prod(-2)) == [
+    assert to_list(ak.prod(depth2, -2, highlevel=False)) == [
         [31 * 2, 37 * 3, 41 * 5, 43 * 7, 47 * 11],
         [101 * 53, 103 * 59, 107 * 61, 109 * 67, 113 * 71],
     ]
 
-    assert to_list(depth2.prod(-3)) == [
+    assert to_list(ak.prod(depth2, -3, highlevel=False)) == [
         [53 * 2, 59 * 3, 61 * 5, 67 * 7, 71 * 11],
         [1, 1, 1, 1, 1],
         [101 * 31, 103 * 37, 107 * 41, 109 * 43, 113 * 47],
@@ -718,18 +718,30 @@ def test_ByteMaskedArray_localindex():
         None,
         [[], [10.0, 11.1, 12.2]],
     ]
-    assert to_list(array.local_index(axis=0)) == [0, 1, 2, 3, 4]
-    assert to_list(array.local_index(axis=-3)) == [0, 1, 2, 3, 4]
-    assert to_list(array.local_index(axis=1)) == [[0, 1, 2], [], None, None, [0, 1]]
-    assert to_list(array.local_index(axis=-2)) == [[0, 1, 2], [], None, None, [0, 1]]
-    assert to_list(array.local_index(axis=2)) == [
+    assert to_list(ak._do.local_index(array, axis=0)) == [0, 1, 2, 3, 4]
+    assert to_list(ak._do.local_index(array, axis=-3)) == [0, 1, 2, 3, 4]
+    assert to_list(ak._do.local_index(array, axis=1)) == [
+        [0, 1, 2],
+        [],
+        None,
+        None,
+        [0, 1],
+    ]
+    assert to_list(ak._do.local_index(array, axis=-2)) == [
+        [0, 1, 2],
+        [],
+        None,
+        None,
+        [0, 1],
+    ]
+    assert to_list(ak._do.local_index(array, axis=2)) == [
         [[0, 1, 2], [], [0, 1]],
         [],
         None,
         None,
         [[], [0, 1, 2]],
     ]
-    assert to_list(array.local_index(axis=-1)) == [
+    assert to_list(ak._do.local_index(array, axis=-1)) == [
         [[0, 1, 2], [], [0, 1]],
         [],
         None,
@@ -929,7 +941,7 @@ def test_BitMaskedArray():
     array = ak.contents.BitMaskedArray(
         mask, content, valid_when=False, length=13, lsb_order=False
     )
-    assert np.asarray(array.toByteMaskedArray().mask).tolist() == [
+    assert np.asarray(array.to_ByteMaskedArray().mask).tolist() == [
         0,
         0,
         1,
@@ -944,7 +956,7 @@ def test_BitMaskedArray():
         1,
         1,
     ]
-    assert np.asarray(array.toIndexedOptionArray64().index).tolist() == [
+    assert np.asarray(array.to_IndexedOptionArray64().index).tolist() == [
         0,
         1,
         -1,
@@ -996,7 +1008,7 @@ def test_BitMaskedArray():
     array = ak.contents.BitMaskedArray(
         mask, content, valid_when=False, length=13, lsb_order=True
     )
-    assert np.asarray(array.toByteMaskedArray().mask).tolist() == [
+    assert np.asarray(array.to_ByteMaskedArray().mask).tolist() == [
         0,
         1,
         0,
@@ -1011,7 +1023,7 @@ def test_BitMaskedArray():
         1,
         1,
     ]
-    assert np.asarray(array.toIndexedOptionArray64().index).tolist() == [
+    assert np.asarray(array.to_IndexedOptionArray64().index).tolist() == [
         0,
         -1,
         2,

@@ -3,10 +3,16 @@
 import numpy as np
 import pytest  # noqa: F401
 
-import awkward as ak  # noqa: F401
+import awkward as ak
 
 tuple = ak.contents.RecordArray([ak.contents.NumpyArray(np.arange(10))], None)
+tuple2 = ak.contents.RecordArray(
+    [ak.from_iter([str(x) for x in range(10)], highlevel=False)], None
+)
 record = ak.contents.RecordArray([ak.contents.NumpyArray(np.arange(10))], ["x"])
+record2 = ak.contents.RecordArray(
+    [ak.from_iter([str(x) for x in range(10)], highlevel=False)], ["x"]
+)
 
 
 def test_record():
@@ -159,7 +165,7 @@ def test_union():
         ak.contents.UnionArray(
             ak.index.Index8([0, 0, 1, 1]),
             ak.index.Index64([0, 1, 0, 1]),
-            [tuple, tuple],
+            [tuple, tuple2],
         )
     )
 
@@ -189,7 +195,7 @@ def test_union():
         ak.contents.UnionArray(
             ak.index.Index8([0, 0, 1, 1]),
             ak.index.Index64([0, 1, 0, 1]),
-            [record, record],
+            [record, record2],
         )
     )
 

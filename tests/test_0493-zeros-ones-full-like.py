@@ -2,10 +2,10 @@
 
 import datetime
 
-import numpy as np  # noqa: F401
+import numpy as np
 import pytest  # noqa: F401
 
-import awkward as ak  # noqa: F401
+import awkward as ak
 
 
 def test():
@@ -23,7 +23,7 @@ def test():
         ]
     )
 
-    assert ak.operations.full_like(array, 12.3).tolist() == [
+    assert ak.operations.full_like(array, 12.3).to_list() == [
         [{"x": 12.3, "y": []}, {"x": 12.3, "y": [12]}, {"x": 12.3, "y": [12, 12]}],
         [],
         [
@@ -35,7 +35,7 @@ def test():
         ],
     ]
 
-    assert ak.operations.zeros_like(array).tolist() == [
+    assert ak.operations.zeros_like(array).to_list() == [
         [{"x": 0.0, "y": []}, {"x": 0.0, "y": [0]}, {"x": 0.0, "y": [0, 0]}],
         [],
         [
@@ -47,7 +47,7 @@ def test():
         ],
     ]
 
-    assert ak.operations.ones_like(array).tolist() == [
+    assert ak.operations.ones_like(array).to_list() == [
         [{"x": 1.0, "y": []}, {"x": 1.0, "y": [1]}, {"x": 1.0, "y": [1, 1]}],
         [],
         [
@@ -60,54 +60,54 @@ def test():
     ]
 
     array = ak.Array([["one", "two", "three"], [], ["four", "five"]])
-    assert ak.operations.full_like(array, "hello").tolist() == [
+    assert ak.operations.full_like(array, "hello").to_list() == [
         ["hello", "hello", "hello"],
         [],
         ["hello", "hello"],
     ]
-    assert ak.operations.full_like(array, 1).tolist() == [
+    assert ak.operations.full_like(array, 1).to_list() == [
         ["1", "1", "1"],
         [],
         ["1", "1"],
     ]
-    assert ak.operations.full_like(array, 0).tolist() == [
+    assert ak.operations.full_like(array, 0).to_list() == [
         ["0", "0", "0"],
         [],
         ["0", "0"],
     ]
-    assert ak.operations.ones_like(array).tolist() == [
+    assert ak.operations.ones_like(array).to_list() == [
         ["1", "1", "1"],
         [],
         ["1", "1"],
     ]
-    assert ak.operations.zeros_like(array).tolist() == [
+    assert ak.operations.zeros_like(array).to_list() == [
         ["", "", ""],
         [],
         ["", ""],
     ]
 
     array = ak.Array([[b"one", b"two", b"three"], [], [b"four", b"five"]])
-    assert ak.operations.full_like(array, b"hello").tolist() == [
+    assert ak.operations.full_like(array, b"hello").to_list() == [
         [b"hello", b"hello", b"hello"],
         [],
         [b"hello", b"hello"],
     ]
-    assert ak.operations.full_like(array, 1).tolist() == [
+    assert ak.operations.full_like(array, 1).to_list() == [
         [b"1", b"1", b"1"],
         [],
         [b"1", b"1"],
     ]
-    assert ak.operations.full_like(array, 0).tolist() == [
+    assert ak.operations.full_like(array, 0).to_list() == [
         [b"0", b"0", b"0"],
         [],
         [b"0", b"0"],
     ]
-    assert ak.operations.ones_like(array).tolist() == [
+    assert ak.operations.ones_like(array).to_list() == [
         [b"1", b"1", b"1"],
         [],
         [b"1", b"1"],
     ]
-    assert ak.operations.zeros_like(array).tolist() == [
+    assert ak.operations.zeros_like(array).to_list() == [
         [b"", b"", b""],
         [],
         [b"", b""],
@@ -120,7 +120,7 @@ def test_full_like_types():
         np.array(["2020-07-27T10:41:11", "2019-01-01", "2020-01-01"], "datetime64[s]")
     )
 
-    assert ak.operations.full_like(array, "2020-07-27T10:41:11").tolist() == [
+    assert ak.operations.full_like(array, "2020-07-27T10:41:11").to_list() == [
         datetime.datetime(2020, 7, 27, 10, 41, 11),
         datetime.datetime(2020, 7, 27, 10, 41, 11),
         datetime.datetime(2020, 7, 27, 10, 41, 11),
@@ -130,7 +130,7 @@ def test_full_like_types():
         ["2020-07-27T10:41:11", "2019-01-01", "2020-01-01"], "datetime64[25s]"
     )
 
-    assert ak.operations.full_like(array, "2021-06-03T10:00").tolist() == [
+    assert ak.operations.full_like(array, "2021-06-03T10:00").to_list() == [
         datetime.datetime(2021, 6, 3, 10, 0),
         datetime.datetime(2021, 6, 3, 10, 0),
         datetime.datetime(2021, 6, 3, 10, 0),

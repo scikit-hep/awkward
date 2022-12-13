@@ -1,9 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import numpy as np  # noqa: F401
+import numpy as np
 import pytest  # noqa: F401
 
-import awkward as ak  # noqa: F401
+import awkward as ak
 
 
 def test_regular():
@@ -13,10 +13,10 @@ def test_regular():
     ak_data = ak.operations.from_numpy(np_data)
 
     assert (
-        ak.operations.ptp(ak_data, axis=1).tolist() == np.ptp(np_data, axis=1).tolist()
+        ak.operations.ptp(ak_data, axis=1).to_list() == np.ptp(np_data, axis=1).tolist()
     )
     assert (
-        ak.operations.ptp(ak_data, axis=0).tolist() == np.ptp(np_data, axis=0).tolist()
+        ak.operations.ptp(ak_data, axis=0).to_list() == np.ptp(np_data, axis=0).tolist()
     )
     assert ak.operations.ptp(ak_data) == np.ptp(np_data)
 
@@ -30,12 +30,12 @@ def test_jagged():
             [5],
         ]
     )
-    assert ak.operations.ptp(data, axis=1, mask_identity=False).tolist() == [
+    assert ak.operations.ptp(data, axis=1, mask_identity=False).to_list() == [
         4,
         0,
         2,
         0,
     ]
-    assert ak.operations.ptp(data, axis=1).tolist() == [4, None, 2, 0]
-    assert ak.operations.ptp(data, axis=0).tolist() == [4, 0, 4, 0, 0]
+    assert ak.operations.ptp(data, axis=1).to_list() == [4, None, 2, 0]
+    assert ak.operations.ptp(data, axis=0).to_list() == [4, 0, 4, 0, 0]
     assert ak.operations.ptp(data) == 4

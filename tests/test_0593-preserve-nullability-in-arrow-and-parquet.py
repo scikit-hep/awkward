@@ -2,10 +2,10 @@
 
 # import os
 
-import numpy as np  # noqa: F401
-import pytest  # noqa: F401
+import numpy as np
+import pytest
 
-import awkward as ak  # noqa: F401
+import awkward as ak
 
 pyarrow = pytest.importorskip("pyarrow")
 
@@ -55,12 +55,13 @@ def test_record_to_arrow():
 
 
 def test_union_to_arrow():
-    ak_array = ak.highlevel.Array([1.1, 2.2, None, [1, 2, 3], "hello"]).layout
+    ak_array = ak.highlevel.Array(
+        [1.1, 2.2, None, [1, 2, 3], "hello"], check_valid=True
+    ).layout
     pa_array = ak_array.to_arrow()
     assert isinstance(pa_array.type.storage_type, pyarrow.DenseUnionType)
     assert pa_array.to_pylist() == [1.1, 2.2, None, [1, 2, 3], "hello"]
-
-    ak_array = ak.contents.UnmaskedArray(
+    ak_array = ak.contents.UnmaskedArray.simplified(
         ak.highlevel.Array([1.1, 2.2, [1, 2, 3], "hello"]).layout
     )
     pa_array = ak_array.to_arrow()
