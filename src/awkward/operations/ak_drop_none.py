@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 def drop_none(array, axis=None, highlevel=True, behavior=None):
@@ -93,7 +93,7 @@ def _impl(array, axis, highlevel, behavior):
                 else:
                     return layout.drop_none()
             if posaxis == depth - 1 and layout.is_option:
-                _, _, new_offsets = layout._nextcarry_outindex(layout._nplike)
+                _, _, new_offsets = layout._nextcarry_outindex(layout.backend.nplike)
                 options.update(new_offsets=new_offsets)
                 return layout.drop_none()
             if posaxis == depth - 1 and layout.is_list and layout.content.is_option:
@@ -102,8 +102,8 @@ def _impl(array, axis, highlevel, behavior):
 
     depth_context = {"posaxis": axis, "max_branch_depth": layout.branch_depth[1]}
     options = {}
-    out = layout.recursively_apply(action, behavior, depth_context, options)
+    out = ak._do.recursively_apply(layout, action, behavior, depth_context, options)
     if "new_offsets" in options and axis is not None:
-        out = out.recursively_apply(recompute_offsets, behavior, depth_context, options)
+        out = ak._do.recursively_apply(out, recompute_offsets, behavior, depth_context, options)
 
     return ak._util.wrap(out, behavior, highlevel)
