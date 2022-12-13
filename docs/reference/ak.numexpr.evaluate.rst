@@ -9,8 +9,7 @@ the expression can contain references to :class:`ak.Array` objects as well as Nu
 
 The arrays are broadcasted according to rules described in :func:`ak.broadcast_arrays`. The
 expression applies to the numeric leaves of the data structure and the output maintains that
-structure, just as `ak.Array.__array_ufunc__ <_auto/ak.Array.html#ak-array-array-ufunc>`__
-preserves structure through NumPy
+structure, just as #ak.Array.__array_ufunc__ preserves structure through NumPy
 [universal functions](https://docs.scipy.org/doc/numpy/reference/ufuncs.html).
 
 To do: examples.
