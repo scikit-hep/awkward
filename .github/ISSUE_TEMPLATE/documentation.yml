@@ -9,11 +9,13 @@ body:
     attributes:
       label: "Which documentation?"
       description: |
-        On the [tutorials site](https://awkward-array.org/), in the [Python docstrings](https://awkward-array.readthedocs.io/), or in the [C++ doxygen API](https://awkward-array.readthedocs.io/en/latest/_static/index.html)?
+        In the [documentation website](https://awkward-array.org/), the [GitHub README.md](https://github.com/scikit-hep/awkward/blob/main/README.md), [CONTRIBUTING.md](https://github.com/scikit-hep/awkward/blob/main/CONTRIBUTING.md), Python docstrings, or C++ doxygen comments?
       options:
-        - Tutorials site
+        - Documentation website
+        - GitHub README.md
+        - CONTRIBUTING.md
         - Python docstrings
-        - C++ doxygen API
+        - C++ doxygen comments
         - Other (please explain)?
     validations:
       required: true
