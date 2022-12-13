@@ -468,27 +468,3 @@ def test_ListArray_and_axis_None():
             [{"nest": 1.1}],
         ]
     )
-
-    v2a = ak.contents.unionarray.UnionArray(
-        ak.index.Index(np.array([1, 1, 0, 0, 1, 0, 1], np.int8)),
-        ak.index.Index(np.array([4, 3, 0, 1, 2, 2, 4, 100], np.int64)),
-        [
-            ak.contents.recordarray.RecordArray(
-                [ak.contents.numpyarray.NumpyArray(np.array([1, 2, 3], np.int64))],
-                ["nest"],
-            ),
-            ak.contents.recordarray.RecordArray(
-                [
-                    ak.contents.bytemaskedarray.ByteMaskedArray(
-                        ak.index.Index(np.array([1, 0, 1, 0, 1], np.int8)),
-                        ak.contents.numpyarray.NumpyArray(
-                            np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])
-                        ),
-                        valid_when=True,
-                    )
-                ],
-                ["nest"],
-            ),
-        ],
-    )
-    assert to_list(v2a) == to_list(ak.drop_none(v2a))

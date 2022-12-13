@@ -443,7 +443,7 @@ class UnmaskedArray(Content):
             return [self]
 
     def _drop_none(self):
-        return self.toByteMaskedArray(True)._drop_none()
+        return self.to_ByteMaskedArray(True)._drop_none()
 
     def _recursively_apply(
         self, action, behavior, depth, depth_context, lateral_context, options

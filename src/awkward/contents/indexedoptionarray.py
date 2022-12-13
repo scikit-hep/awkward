@@ -255,7 +255,7 @@ class IndexedOptionArray(Content):
         return IndexedOptionArray(nextindex, self._content, parameters=self._parameters)
 
     def _nextcarry_outindex(self, backend):
-        numnull = ak.index.Index64.empty(1, backend.index_nplike)
+        numnull = ak.index.Index64.empty(1, nplike=backend.index_nplike)
 
         assert (
             numnull.nplike is self._backend.index_nplike

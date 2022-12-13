@@ -72,7 +72,7 @@ def _impl(array, axis, highlevel, behavior):
             )
 
         def recompute_offsets(layout, depth, depth_context, **kwargs):
-            posaxis = layout.axis_wrap_if_negative(depth_context["posaxis"])
+            posaxis = ak._util.maybe_posaxis(layout, axis, depth)
             if posaxis == 0 and posaxis == depth - 1 and layout.is_list:
                 out = layout._rebuild_without_nones(
                     options["new_offsets"], layout.content
@@ -83,24 +83,22 @@ def _impl(array, axis, highlevel, behavior):
                     options["new_offsets"], layout.content
                 )
                 return out
-            depth_context["posaxis"] = posaxis
 
         def action(layout, depth, depth_context, **kwargs):
-            posaxis = layout.axis_wrap_if_negative(depth_context["posaxis"])
+            posaxis = ak._util.maybe_posaxis(layout, axis, depth)
             if posaxis == 0:
                 if not layout.is_option:
                     return layout
                 else:
                     return layout.drop_none()
             if posaxis == depth - 1 and layout.is_option:
-                _, _, new_offsets = layout._nextcarry_outindex(layout.backend.nplike)
+                _, _, new_offsets = layout._nextcarry_outindex(layout.backend)
                 options.update(new_offsets=new_offsets)
                 return layout.drop_none()
             if posaxis == depth - 1 and layout.is_list and layout.content.is_option:
                 return layout.drop_none()
-            depth_context["posaxis"] = posaxis
 
-    depth_context = {"posaxis": axis, "max_branch_depth": layout.branch_depth[1]}
+    depth_context = {"max_branch_depth": layout.branch_depth[1]}
     options = {}
     out = ak._do.recursively_apply(layout, action, behavior, depth_context, options)
     if "new_offsets" in options and axis is not None:
