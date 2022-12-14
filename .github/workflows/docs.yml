@@ -198,6 +198,8 @@ jobs:
       run: cp -r awkward-cpp/docs/html/ docs/_static/doxygen
 
     - name: Generate Python documentation
+      env:
+        DOCS_SHOW_VERSION: 1
       run: sphinx-build -M html . _build/
       working-directory: docs
 
@@ -316,7 +318,6 @@ jobs:
     env:
       S3_BUCKET: "awkward-array.org-deploy"
       PREVIEW_URL: "http://awkward-array.org-deploy.s3-website.eu-west-2.amazonaws.com"
-      DOCS_SHOW_VERSION: 1
     steps:
       - uses: actions/checkout@v3
       - name: Configure AWS credentials
