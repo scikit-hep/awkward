@@ -284,7 +284,7 @@ jobs:
       contents: read
     env:
       S3_BUCKET: "preview.awkward-array.org"
-      PREVIEW_URL: "http://preview.awkward-array.org.s3-website.eu-east-1.amazonaws.com"
+      PREVIEW_URL: "http://preview.awkward-array.org.s3-website.us-east-1.amazonaws.com"
     environment:
       name: docs-preview
       url: ${{ env.PREVIEW_URL }}/${{ github.head_ref }}
@@ -317,7 +317,7 @@ jobs:
       contents: read
     env:
       S3_BUCKET: "awkward-array.org"
-      PREVIEW_URL: "http://awkward-array.org.s3-website.eu-east-1.amazonaws.com"
+      PREVIEW_URL: "http://awkward-array.org.s3-website.us-east-1.amazonaws.com"
     steps:
       - uses: actions/checkout@v3
       - name: Configure AWS credentials
