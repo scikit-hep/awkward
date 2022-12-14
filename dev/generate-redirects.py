@@ -6,7 +6,7 @@ REDIRECT_TEMPLATE = """
 <!doctype html>
 <html>
   <head>
-  <meta http-equiv="refresh" content="{delay}; url=https://awkward-array.org/doc/{version}/{dest}">
+  <meta http-equiv="refresh" content="{delay}; url={target}">
   </head>
 </html>"""
 
@@ -26,8 +26,13 @@ if __name__ == "__main__":
         src_file = src.replace("any-ext", "html")
         dst_file = dst.removeprefix("../")
 
+        if dst_file.startswith("http://") or dst_file.startswith("https://"):
+            target = dst_file
+        else:
+            target = f"https://awkward-array.org/doc/{args.version}/{dst_file}"
+
         src_content = REDIRECT_TEMPLATE.format(
-            version=args.version, delay=args.delay, dest=dst_file
+            version=args.version, delay=args.delay, target=target
         )
 
         output_path = args.output / src_file
