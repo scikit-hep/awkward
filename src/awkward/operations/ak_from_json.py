@@ -33,7 +33,7 @@ def from_json(
         source (bytes/str, pathlib.Path, or file-like object): Data source of the
             JSON-formatted string(s). If bytes/str, the string is parsed. If a
             `pathlib.Path`, a file with that name is opened, parsed, and closed.
-            If that path has a URI protocol (like "https://" or "s3://"), this
+            If that path has a URI protocol (like `"https://"` or `"s3://"`), this
             function attempts to open the file with the fsspec library. If a
             file-like object with a `read` method, this function reads from the
             object, but does not close it.
@@ -57,10 +57,8 @@ def from_json(
         buffersize (int): Number of bytes in each read from source: larger
             values use more memory but read less frequently. (Python GIL is
             released before and after read events.)
-        initial (int): Initial size (in bytes) of buffers used by the
-            [ak::ArrayBuilder](_static/classawkward_1_1ArrayBuilder.html).
-        resize (float): Resize multiplier for buffers used by the
-            [ak::ArrayBuilder](_static/classawkward_1_1ArrayBuilder.html);
+        initial (int): Initial size (in bytes) of buffers used by the `ak::ArrayBuilder`.
+        resize (float): Resize multiplier for buffers used by the `ak::ArrayBuilder`;
             should be strictly greater than 1.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
@@ -95,7 +93,7 @@ def from_json(
         <Array [[1.1, 2.2, 3.3], [], [4.4, 5.5]] type='3 * var * float64'>
 
     File names/paths need to be wrapped in `pathlib.Path`, and remote files are
-    recognized by URI protocol (like "https://" or "s3://") and handled by fsspec
+    recognized by URI protocol (like `"https://"` or `"s3://"`) and handled by fsspec
     (which must be installed).
 
         >>> import pathlib

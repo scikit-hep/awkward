@@ -83,6 +83,7 @@ jobs:
       with:
         # Cache invalidates daily by default
         cache-env: true
+        cache-downloads: true
         environment-file: docs/environment.yml
         extra-specs: |
            python=${{ env.PYTHON_VERSION }}
@@ -154,6 +155,7 @@ jobs:
       with:
         # Cache invalidates daily by default
         cache-env: true
+        cache-downloads: true
         environment-file: docs/environment.yml
         extra-specs: |
            python=${{ env.PYTHON_VERSION }}
@@ -199,6 +201,33 @@ jobs:
       run: sphinx-build -M html . _build/
       working-directory: docs
 
+    - name: Check links
+      run: sphinx-build -M linkcheck . _build/
+      working-directory: docs
+
+    - name: Output annotations on failure
+      if: ${{ failure() }}
+      run: |
+        import pathlib
+        import json
+
+        docs_path = pathlib.Path("docs")
+        output_path = docs_path / "_build" / "linkcheck" / "output.json"
+        with output_path.open() as f:
+          data = [json.loads(l) for l in f]
+
+        for record in data:
+          if record['status'] != "broken":
+            continue
+          record['path'] = (docs_path / record['filename'])
+          print(
+            "::error file={path},line={lineno}::{uri} URI was {status} (code: {code}): {info}".format_map(record)
+          )
+          print(
+            "??file={path},line={lineno}??{uri} URI was {status} (code: {code}): {info}".format_map(record)
+          )
+      shell: python
+
     - name: Upload docs artefact
       uses: actions/upload-artifact@v3
       with:
@@ -230,6 +259,12 @@ jobs:
       with:
         # Upload entire repository
         path: /tmp/awkward-docs
+
+    - name: Upload Jupyter Book cache
+      uses: actions/upload-artifact@v3
+      with:
+        name: doctrees
+        path: docs/_build/doctrees
 
     - name: Upload Jupyter Book cache
       uses: actions/upload-artifact@v3

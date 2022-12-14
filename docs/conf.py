@@ -151,6 +151,18 @@ jupyterlite_bind_ipynb_suffix = False
 # We've disabled localstorage, so we must provide the contents explicitly
 jupyterlite_contents = ["getting-started/demo/*"]
 
+linkcheck_ignore = [
+    r"^https?:\/\/github\.com\/.*$",
+    r"^getting-started\/try-awkward-array\.html$",  # Relative link won't resolve
+    r"^https?:\/\/$",  # Bare https:// allowed
+]
+# Eventually we need to revisit these
+if (datetime.date.today() - datetime.date(2022, 12, 13)) < datetime.timedelta(days=30):
+    linkcheck_ignore.extend([
+        r"^https:\/\/doi.org\/10\.1051\/epjconf\/202024505023$",
+        r"^https:\/\/doi.org\/10\.1051\/epjconf\/202125103002$",
+    ])
+
 HERE = pathlib.Path(__file__).parent
 
 # Generate Python docstrings

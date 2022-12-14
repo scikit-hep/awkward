@@ -556,7 +556,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         All methods of selecting items described in
         [NumPy indexing](https://docs.scipy.org/doc/numpy/reference/arrays.indexing.html)
         are supported with one exception
-        ([combining advanced and basic indexing](https://docs.scipy.org/doc/numpy/reference/arrays.indexing.html#combining-advanced-and-basic-indexing)
+        ([combining advanced and basic indexing](https://numpy.org/doc/stable/user/basics.indexing.html#combining-advanced-and-basic-indexing)
         with basic indexes *between* two advanced indexes: the definition
         NumPy chose for the result does not have a generalization beyond
         rectilinear arrays).
@@ -583,7 +583,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
           position in the tuple is to the left of the dimension where the
           tuple/record is defined. (See <<projection>> below.) This is
           similar to NumPy's
-          [field access](https://docs.scipy.org/doc/numpy/reference/arrays.indexing.html#field-access),
+          [field access](https://numpy.org/doc/stable/user/basics.indexing.html#field-access),
           except that strings are allowed in the same tuple with other
           slice types. While record fields have names, tuple fields are
           integer strings, such as `"0"`, `"1"`, `"2"` (always
@@ -627,7 +627,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         A tuple of the above applies each slice item to a dimension of the
         data, which can be very expressive. More than one flat boolean/integer
         array are "iterated as one" as described in the
-        [NumPy documentation](https://docs.scipy.org/doc/numpy/reference/arrays.indexing.html#integer-array-indexing).
+        [NumPy documentation](https://numpy.org/doc/stable/user/basics.indexing.html#integer-array-indexing).
 
         Filtering
         *********
@@ -1063,20 +1063,34 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     def __delitem__(self, where):
         """
         Args:
-            where (str): Field name to remove from records in the array.
+            where (str or tuple of str): Field name to remove from the array.
 
-        Removes a field from records in the array.
+        For example:
+
+            >>> array = ak.Array([{"x": 3.3, "y": {"this": 10, "that": 20}}])
+            >>> del array["y", "that"]
+            >>> array.show()
+            [{x: 3.3, y: {this: 10}}]
+
+        See #ak.without_field for a variant that does not change the #ak.Array
+        in-place. (Internally, this method uses #ak.without_field, so performance
+        is not a factor in choosing one over the other.)
         """
         with ak._errors.OperationErrorContext(
             "ak.Array.__delitem__",
             dict(self=self, field_name=where),
         ):
-            names = ak.operations.fields(self._layout)
-            if where not in names:
+            if not (
+                isinstance(where, str)
+                or (isinstance(where, tuple) and all(isinstance(x, str) for x in where))
+            ):
                 raise ak._errors.wrap_error(
-                    TypeError(f"array fields do not contain {where!r}")
+                    TypeError("only fields may be removed in-place (by field name)")
                 )
-            self._layout = self._layout[[x for x in names if x != where]]
+
+            self._layout = ak.operations.ak_without_field._impl(
+                self._layout, where, highlevel=False, behavior=self._behavior
+            )
             self._numbaview = None
 
     def __getattr__(self, where):
@@ -1788,28 +1802,43 @@ class Record(NDArrayOperatorsMixin):
                     TypeError("only fields may be assigned in-place (by field name)")
                 )
 
-            self._layout = ak.operations.with_field(
-                self._layout, what, where, highlevel=False
+            self._layout = ak.operations.ak_with_field._impl(
+                self._layout, what, where, highlevel=False, behavior=self._behavior
             )
             self._numbaview = None
 
     def __delitem__(self, where):
         """
         Args:
-            where (str): Field name to add to records in the array.
+            where (str or tuple of str): Field name to remove from the record.
 
-        Removes a field from records in the array.
+        For example:
+
+            >>> record = ak.Record({"x": 3.3, "y": {"this": 10, "that": 20}})
+            >>> del record["y", "that"]
+            >>> record.show()
+            {x: 3.3,
+             y: {this: 10}}
+
+        See #ak.without_field for a variant that does not change the #ak.Record
+        in-place. (Internally, this method uses #ak.without_field, so performance
+        is not a factor in choosing one over the other.)
         """
         with ak._errors.OperationErrorContext(
             "ak.Record.__delitem__",
             dict(self=self, field_name=where),
         ):
-            names = ak.operations.fields(self._layout)
-            if where not in names:
+            if not (
+                isinstance(where, str)
+                or (isinstance(where, tuple) and all(isinstance(x, str) for x in where))
+            ):
                 raise ak._errors.wrap_error(
-                    TypeError(f"array fields do not contain {where!r}")
+                    TypeError("only fields may be removed in-place (by field name)")
                 )
-            self._layout = self._layout[[x for x in names if x != where]]
+
+            self._layout = ak.operations.ak_without_field._impl(
+                self._layout, where, highlevel=False, behavior=self._behavior
+            )
             self._numbaview = None
 
     def __getattr__(self, where):
@@ -2095,10 +2124,8 @@ class ArrayBuilder(Sized):
     Args:
         behavior (None or dict): Custom #ak.behavior for arrays built by
             this ArrayBuilder.
-        initial (int): Initial size (in bytes) of buffers used by the
-            [ak::ArrayBuilder](../_static/doxygen/classawkward_1_1ArrayBuilder.html).
-        resize (float): Resize multiplier for buffers used by the
-            [ak::ArrayBuilder](../_static/doxygen/classawkward_1_1ArrayBuilder.html);
+        initial (int): Initial size (in bytes) of buffers used by the `ak::ArrayBuilder`.
+        resize (float): Resize multiplier for buffers used by the `ak::ArrayBuilder`;
             should be strictly greater than 1.
 
     General tool for building arrays of nested data structures from a sequence
