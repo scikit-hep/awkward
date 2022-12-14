@@ -101,8 +101,6 @@ def _impl(array, axis, highlevel, behavior):
     options = {}
     out = ak._do.recursively_apply(layout, action, behavior, options)
     if "new_offsets" in options and axis is not None:
-        out = ak._do.recursively_apply(
-            out, recompute_offsets, behavior, options
-        )
+        out = ak._do.recursively_apply(out, recompute_offsets, behavior, options)
 
     return ak._util.wrap(out, behavior, highlevel, like=behavior)
