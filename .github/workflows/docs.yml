@@ -245,14 +245,7 @@ jobs:
                  "/tmp/awkward-docs/doc/stable"
         cp -r docs/_build/html \
                  "/tmp/awkward-docs/doc/2.0"
-        # Redirect from doc/
-        cat <<- 'EOF' > /tmp/awkward-docs/index.html
-            <html>
-              <head>
-                <meta http-equiv="refresh" content="1; url=https://awkward-array.org/doc/main">
-              </head>
-            </html>
-        EOF
+        python3 dev/generate-redirects.py docs/redirects-user-guide.json /tmp/awkward-docs/
 
     - name: Upload Pages artefact
       uses: actions/upload-pages-artifact@v1

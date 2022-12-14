@@ -1,4 +1,5 @@
 {
+  "index.any-ext": "",
   "ak.behavior.any-ext": "reference/ak.behavior.html",
   "ak.forms.BitMaskedForm.any-ext": "reference/generated/ak.forms.BitMaskedForm.html",
   "ak.forms.ByteMaskedForm.any-ext": "reference/generated/ak.forms.ByteMaskedForm.html",
