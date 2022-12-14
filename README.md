@@ -85,6 +85,8 @@ Awkward Array is also available on [conda-forge](https://conda-forge.org/docs/us
 conda install -c conda-forge awkward
 ```
 
+Because of the two packages (`awkward-cpp` may be updated in GitHub but not on PyPI), pip install through git (`pip install git+https://...`) will not work. Instead, use the [Installation for developers](#installation-for-developers) section below.
+
 # Getting help
 
    * View the documentation on [awkward-array.org](https://awkward-array.org/).
