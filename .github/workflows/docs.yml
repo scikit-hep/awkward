@@ -316,8 +316,8 @@ jobs:
       id-token: write
       contents: read
     env:
-      S3_BUCKET: "awkward-array.org-deploy"
-      PREVIEW_URL: "http://awkward-array.org-deploy.s3-website.eu-west-2.amazonaws.com"
+      S3_BUCKET: "awkward-array.org"
+      PREVIEW_URL: "http://awkward-array.org.s3-website.eu-west-2.amazonaws.com"
     steps:
       - uses: actions/checkout@v3
       - name: Configure AWS credentials
