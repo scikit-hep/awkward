@@ -338,14 +338,14 @@ jobs:
         #if: github.event_name == 'push'
         run: |
           # TODO: invalidate cloudfront
-          aws s3 sync built-docs/ "s3://${S3_BUCKET}/docs/latest/"
+          aws s3 sync built-docs/ "s3://${S3_BUCKET}/doc/latest/"
       # Releases trigger versions
       - name: Sync `release`
         #if: github.event_name == 'release'
         run: |
           # TODO: invalidate cloudfront
-          aws s3 sync built-docs/ "s3://${S3_BUCKET}/docs/${GITHUB_REF_NAME:1}/"
-          aws s3 cp docs/switcher.json "s3://${S3_BUCKET}/docs/"
+          aws s3 sync built-docs/ "s3://${S3_BUCKET}/doc/${GITHUB_REF_NAME:1}/"
+          aws s3 cp docs/switcher.json "s3://${S3_BUCKET}/doc/"
 
   deploy-docs:
     runs-on: ubuntu-22.04
