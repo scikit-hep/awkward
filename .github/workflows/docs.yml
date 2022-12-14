@@ -271,7 +271,7 @@ jobs:
     runs-on: ubuntu-22.04
     needs: [ build-docs ]
     # We can only deploy for PRs on host repo
-    if: github.event_name == 'push' || github.event_name == 'release'
+    #if: github.event_name == 'push' || github.event_name == 'release'
     environment:
       name: docs-prod
       url: ${{ env.PREVIEW_URL }}/doc/latest
@@ -301,13 +301,13 @@ jobs:
         shell: python
       # Pushes to main trigger latest
       - name: Sync `latest`
-        if: github.event_name == 'push'
+        #if: github.event_name == 'push'
         run: |
           # TODO: invalidate cloudfront
           aws s3 sync built-docs/ "s3://${S3_BUCKET}/docs/latest/"
       # Releases trigger versions
       - name: Sync `release`
-        if: github.event_name == 'release'
+        #if: github.event_name == 'release'
         run: |
           # TODO: invalidate cloudfront
           aws s3 sync built-docs/ "s3://${S3_BUCKET}/docs/${GITHUB_REF_NAME:1}/"

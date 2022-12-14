@@ -110,9 +110,7 @@ html_static_path = ["_static"]
 html_css_files = ["css/awkward.css"]
 
 # MyST settings
-myst_enable_extensions = [
-    "colon_fence",
-]
+myst_enable_extensions = ["colon_fence"]
 
 nb_execution_mode = "cache"
 nb_execution_raise_on_error = True
