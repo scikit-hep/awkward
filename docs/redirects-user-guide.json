@@ -20,7 +20,7 @@
   "how-to-create-strings.any-ext": "user-guide/how-to-create-strings.html",
   "how-to-create-unflatten-group.any-ext": "user-guide/how-to-create-unflatten-group.html",
   "how-to-create.any-ext": "user-guide/how-to-create.html",
-  "how-to-differentiate-using-jax.any-ext": "user-guide/how-to-differentiate-using-jax.html",
+  "how-to-differentiate-using-jax.any-ext": "user-guide/how-to-specialize-differentiate-jax.html",
   "how-to-examine-checking-validity.any-ext": "user-guide/how-to-examine-checking-validity.html",
   "how-to-examine-list-fields.any-ext": "user-guide/how-to-examine-list-fields.html",
   "how-to-examine-simple-slicing.any-ext": "user-guide/how-to-examine-simple-slicing.html",
