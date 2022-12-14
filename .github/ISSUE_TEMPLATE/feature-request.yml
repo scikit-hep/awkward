@@ -9,13 +9,11 @@ body:
       value: |
         What you're looking for might already be possible as a combination of existing functions, but ask anyway. If what you want can be performed by a combination of existing features, we'll convert this issue into a [Discussion Q&A](https://github.com/scikit-hep/awkward-1.0/discussions/categories/q-a).
 
-        The following links to documentation might help:
+        The following links might help:
 
-           * The [tutorials site](https://awkward-array.org/).
-           * The [Python docstrings](https://awkward-array.readthedocs.io/en/latest/index.html).
-           * The [C++ doxygen API](https://awkward-array.readthedocs.io/en/latest/_static/index.html).
-           * [StackOverflow: [awkward-array] tag](https://stackoverflow.com/questions/tagged/awkward-array).
-           * [Gitter: Scikit-HEP/awkward-array room](https://gitter.im/Scikit-HEP/awkward-array).
+           * [awkward-array.org](https://awkward-array.org/)
+           * [StackOverflow: [awkward-array] tag](https://stackoverflow.com/questions/tagged/awkward-array)
+           * [Gitter: Scikit-HEP/awkward-array room](https://gitter.im/Scikit-HEP/awkward-array)
 
   - type: textarea
     id: feature
