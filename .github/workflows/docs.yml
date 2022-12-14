@@ -318,6 +318,7 @@ jobs:
     env:
       S3_BUCKET: "awkward-array.org"
       PREVIEW_URL: "http://awkward-array.org.s3-website.us-east-1.amazonaws.com"
+      CLOUDFRONT_ID: "EFM4QVENUIXHS"
     steps:
       - uses: actions/checkout@v3
       - name: Configure AWS credentials
@@ -335,18 +336,20 @@ jobs:
         with:
           python-version: "3.11"
       # Pushes to main trigger latest
-      - name: Sync `latest`
+      - name: Sync `main`
         if: github.event_name == 'push'
         run: |
-          # TODO: invalidate cloudfront
-          aws s3 sync built-docs/ "s3://${S3_BUCKET}/doc/latest/"
+          aws s3 sync built-docs/ "s3://${S3_BUCKET}/doc/main/"
+          aws cloudfront create-invalidation --distribution-id "${CLOUDFRONT_ID}" \
+            --paths "/doc/main/"
       # Releases trigger versions
       - name: Sync `release`
         if: github.event_name == 'release'
         run: |
-          # TODO: invalidate cloudfront
-          aws s3 sync built-docs/ "s3://${S3_BUCKET}/doc/${GITHUB_REF_NAME:1}/"
           aws s3 cp docs/switcher.json "s3://${S3_BUCKET}/doc/"
+          aws s3 sync built-docs/ "s3://${S3_BUCKET}/doc/${GITHUB_REF_NAME:1}/"
+          aws cloudfront create-invalidation --distribution-id "${CLOUDFRONT_ID}" \
+            --paths /"doc/${GITHUB_REF_NAME:1}" "docs/switcher.json"
 
   deploy-docs:
     runs-on: ubuntu-22.04
