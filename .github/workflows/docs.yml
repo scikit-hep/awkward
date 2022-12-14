@@ -298,7 +298,6 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: "3.11"
-        shell: python
       # Pushes to main trigger latest
       - name: Sync `latest`
         #if: github.event_name == 'push'
