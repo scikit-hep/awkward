@@ -1,6 +1,7 @@
 import argparse
 import json
 import pathlib
+import urllib.parse
 
 REDIRECT_TEMPLATE = """
 <!doctype html>
@@ -26,10 +27,7 @@ if __name__ == "__main__":
         src_file = src.replace("any-ext", "html")
         dst_file = dst.removeprefix("../")
 
-        if dst_file.startswith("http://") or dst_file.startswith("https://"):
-            target = dst_file
-        else:
-            target = f"{args.base}/{dst_file}"
+        target = urllib.parse.urljoin(args.base, dst_file)
 
         src_content = REDIRECT_TEMPLATE.format(delay=args.delay, target=target)
 
