@@ -153,28 +153,13 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     a standard for representing nested data structures in columnar arrays.
     See #ak.to_arrow and #ak.from_arrow.
 
-    NumExpr
-    *******
-
-    [NumExpr](https://numexpr.readthedocs.io/en/latest/user_guide.html) can
-    calculate expressions on a set of ak.Arrays, but only if the functions in
-    `ak.numexpr` are used, not the functions in the `numexpr` library directly.
-
-    Like NumPy ufuncs, the expression is evaluated on the numeric leaves of the
-    data structure, maintaining structure in the output.
-
-    See #ak.numexpr.evaluate to calculate an expression.
-
-    See #ak.numexpr.re_evaluate to recalculate an expression without
-    rebuilding its virtual machine.
-
     JAX
     ********
 
     Derivatives of a calculation on an #ak.Array (s) can be calculated with
-    [JAX](https://github.com/google/jax#readme), but only if the
-    function in `ak` / `numpy` are used, not the functions in the `jax`
-    library directly.
+    [JAX](https://github.com/google/jax#readme), but only if the array
+    functions in `ak` / `numpy` are used, not the functions in the `jax`
+    library directly (apart from e.g. `jax.grad`).
 
     Like NumPy ufuncs, the function and its derivatives are evaluated on the
     numeric leaves of the data structure, maintaining structure in the output.
