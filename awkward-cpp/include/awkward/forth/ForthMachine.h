@@ -34,6 +34,10 @@ namespace awkward {
     ~ForthMachineOf();
 
     /// @brief HERE
+    int64_t
+      abi_version() const noexcept;
+
+    /// @brief HERE
     const std::string
       source() const noexcept;
 
