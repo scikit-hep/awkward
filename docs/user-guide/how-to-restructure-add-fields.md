@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.14.0
+    jupytext_version: 1.14.1
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -27,19 +27,17 @@ import numpy as np
 
 +++
 
-{doc}`how-to-examine-simple-slicing` describes the wide variety of {class}`slice` types that can be used to pull values out of an Awkward Array. However, only single field-slicing is supported for _assignment_ of new values. 
+{doc}`how-to-examine-simple-slicing` describes the wide variety of {class}`slice` types that can be used to pull values out of an Awkward Array. However, only single field-slicing is supported for _assignment_ of new values.
 
 ```{code-cell} ipython3
-array = ak.Array({
-    "x": [1, 2, 3]
-})
+array = ak.Array({"x": [1, 2, 3]})
 array.show()
 ```
 
 To assign a new value to an existing array, we can simply use the subscript operator with the string name of the field. For example, to set the `x` field, we can write
 
 ```{code-cell} ipython3
-array['x'] = [-1, -2, 3]
+array["x"] = [-1, -2, 3]
 array.show()
 ```
 
@@ -55,21 +53,21 @@ An {class}`ak.Array` doesn't itself contain any data; it wraps a low-level {clas
 Using this syntax, we can assign to a _new_ field of an array:
 
 ```{code-cell} ipython3
-array['y'] = [9, 8, 7]
+array["y"] = [9, 8, 7]
 array.show()
 ```
 
 If necessary, the new field will be broadcasted to fit the array. For example, we can introduce a third field `z` that is set to the constant `0`:
 
 ```{code-cell} ipython3
-array['z'] = 0
+array["z"] = 0
 array.show()
 ```
 
 A field can also be assigned deeply into a nested record e.g.
 
 ```{code-cell} ipython3
-nested = ak.zip({"a" : ak.zip({"x" : [1, 2, 3]})})
+nested = ak.zip({"a": ak.zip({"x": [1, 2, 3]})})
 nested["a", "y"] = 2 * nested.a.x
 
 nested.show()
@@ -78,11 +76,11 @@ nested.show()
 Note that the following does **not** work:
 
 ```{code-cell} ipython3
-nested["a"]["y"] = 2 * nested.a.x # does not work, nested["a"] is a copy!
+nested["a"]["y"] = 2 * nested.a.x  # does not work, nested["a"] is a copy!
 nested.show()
 ```
 
-Why does this happen? Well, Python first evaluates `nested["a"]`, which returns a _new_ {class}`ak.Array` that is a (shallow) copy of the data in `nested.a`. Hence, the next step — to set `y` — operates on a _different_  {class}`ak.Array`, and `nested.a` remains unchanged. The {ref}`Advanced Users<admonition:immutable-arrays>` call-out provides a more detailed explanation for _why_ this does not work. 
+Why does this happen? Well, Python first evaluates `nested["a"]`, which returns a _new_ {class}`ak.Array` that is a (shallow) copy of the data in `nested.a`. Hence, the next step — to set `y` — operates on a _different_  {class}`ak.Array`, and `nested.a` remains unchanged. The {ref}`Advanced Users<admonition:immutable-arrays>` call-out provides a more detailed explanation for _why_ this does not work.
 
 +++
 
@@ -96,7 +94,7 @@ Sometimes you might not want to modify an existing array, but rather produce a n
 import copy
 
 copied = copy.copy(nested)
-copied['z'] = [10, 20, 30]
+copied["z"] = [10, 20, 30]
 
 copied.show()
 ```

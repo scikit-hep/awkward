@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.14.0
+    jupytext_version: 1.14.1
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -63,7 +63,7 @@ type: 3 * var * var * float64
 
 +++
 
-To produce this result, we need ragged indexing. 
+To produce this result, we need ragged indexing.
 
 +++
 
@@ -115,14 +115,16 @@ ak.local_index(["x", "y", "z"])
 The word "local" refers to the way that {func}`ak.local_index` computes the index of each item relative to the sublist in which it is found. e.g. for a two-dimensional array:
 
 ```{code-cell} ipython3
-ak.local_index([
-    ["up", "charm", "top"],
-    ["down", "strange"],
-    ["bottom"]
-])
+ak.local_index(
+    [
+        ["up", "charm", "top"],
+        ["down", "strange"],
+        ["bottom"],
+    ]
+)
 ```
 
- {func}`ak.local_index` also takes an `axis` parameter, but here we only need the default `axis=-1`. It can be seen that this local index has exactly the same _structure_ as `array`. 
+ {func}`ak.local_index` also takes an `axis` parameter, but here we only need the default `axis=-1`. It can be seen that this local index has exactly the same _structure_ as `array`.
 
 ```{code-cell} ipython3
 array
@@ -135,11 +137,13 @@ ak.local_index(array)
 To create our ragged index, all we need to do is create an array _like_ `ak.local_index(array)`, but with only the local indices that we want to keep, i.e.
 
 ```{code-cell} ipython3
-index = ak.Array([
-    [[], [0], [0]],
-    [],
-    [[2, 3, 4]],
-])
+index = ak.Array(
+    [
+        [[], [0], [0]],
+        [],
+        [[2, 3, 4]],
+    ]
+)
 ```
 
 We can see that this array matches the leading structure of `array`, and has at least one `var` dimension
@@ -154,7 +158,7 @@ Let's see what slicing `array` with this ragged index looks like:
 array[index]
 ```
 
-Clearly this index produces the result that we were aiming for! 
+Clearly this index produces the result that we were aiming for!
 
 +++
 
@@ -165,11 +169,13 @@ Clearly this index produces the result that we were aiming for!
 Ragged indexing is especially useful when combined with the positional {func}`ak.argmin` and {func}`ak.argmax` reducers. These functions accept an `keepdims=True` argument that can be used to keep _the same number of dimensions_ as the original array.
 
 ```{code-cell} ipython3
-array = ak.Array([
-    [10, 3, 2, 9],
-    [4, 5, 5, 12, 6],
-    [8, 9, -1],
-])
+array = ak.Array(
+    [
+        [10, 3, 2, 9],
+        [4, 5, 5, 12, 6],
+        [8, 9, -1],
+    ]
+)
 array
 ```
 
@@ -182,9 +188,7 @@ ak.argmin(array, axis=1)
 If we try and use this index to slice `array`, it will likely not produce the result we might initially expect:
 
 ```{code-cell} ipython3
-array[
-    ak.argmin(array, axis=1)
-]
+array[ak.argmin(array, axis=1)]
 ```
 
 Instead of pulling out the smallest items in `array` along `axis=1`, we have simply re-arranged the sublists of `array` along `axis=0`. Our index has only a single dimension, so for each value in `ak.argmin(array, axis=-1)`, Awkward pulls out the corresponding item from `array`. We want to pull values out of the _second_ dimension, so our index array needs to be two dimensional.
@@ -198,12 +202,10 @@ ak.argmin(array, axis=-1, keepdims=True)
 ```
 
 ```{code-cell} ipython3
-array[
-    ak.argmin(array, axis=-1, keepdims=True)
-]
+array[ak.argmin(array, axis=-1, keepdims=True)]
 ```
 
-This now produces the expected result! 
+This now produces the expected result!
 
 +++
 
@@ -214,12 +216,14 @@ This now produces the expected result!
 Ragged indexing supports using `None` in place of empty sublists within an index. For example
 
 ```{code-cell} ipython3
-array = ak.Array([
-    [10, 3, 2, 9],
-    [4, 5, 5, 12, 6],
-    [],
-    [8, 9, -1],
-])
+array = ak.Array(
+    [
+        [10, 3, 2, 9],
+        [4, 5, 5, 12, 6],
+        [],
+        [8, 9, -1],
+    ]
+)
 array
 ```
 
@@ -236,7 +240,7 @@ array[
 ]
 ```
 
-If we compare this with simply providing an empty sublist, 
+If we compare this with simply providing an empty sublist,
 
 ```{code-cell} ipython3
 array[
@@ -249,7 +253,7 @@ array[
 ]
 ```
 
-we can see that the `None` value introduces an 
+we can see that the `None` value introduces an
 
 +++
 
@@ -260,11 +264,13 @@ we can see that the `None` value introduces an
 Awkward Array's ragged indexing is a generalisation of the advanced indexing supported by NumPy. It is therefore reasonable to ask whether Awkward supports ragged indexing with boolean values, selecting only values for which the index is `True`. Let's create an array of integers:
 
 ```{code-cell} ipython3
-numbers = ak.Array([
-    [0, 1, 2, 3],
-    [4, 5, 6],
-    [8, 9, 10, 11, 12]
-])
+numbers = ak.Array(
+    [
+        [0, 1, 2, 3],
+        [4, 5, 6],
+        [8, 9, 10, 11, 12],
+    ]
+)
 ```
 
 We can use ragged indexing to keep only the even values. Let's generate a boolean mask with the same structure as `numbers`. In order for there to be a single boolean value for each item in `numbers`, the filter array must have exactly the same number of elements. Ufuncs are powerful means of generating boolean masks, as they directly preserve the exact structure of the original array:
@@ -284,25 +290,23 @@ is_even
 Now we can use `is_even` to slice `numbers`:
 
 ```{code-cell} ipython3
-numbers[
-    is_even
-]
+numbers[is_even]
 ```
 
 Note that this is different to what would happen with NumPy's boolean indexing:
 
 ```{code-cell} ipython3
-numbers_np = np.array([
-    [0, 1, 2, 3],
-    [4, 5, 6, 7],
-    [8, 9, 10, 11]
-])
+numbers_np = np.array(
+    [
+        [0, 1, 2, 3],
+        [4, 5, 6, 7],
+        [8, 9, 10, 11],
+    ]
+)
 ```
 
 ```{code-cell} ipython3
-numbers_np[
-    (numbers_np % 2) == 0
-]
+numbers_np[(numbers_np % 2) == 0]
 ```
 
 NumPy, lacking a ragged array structure, has to flatten the result whereas Awkward Array preserves the number of dimensions in the result.

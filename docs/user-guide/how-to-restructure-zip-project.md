@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.14.0
+    jupytext_version: 1.14.1
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -28,13 +28,15 @@ As discussed in {doc}`how-to-create-records`, in addition to primitive types lik
 import awkward as ak
 import numpy as np
 
-records = ak.Array([
-    {"x": 1, "y": 1.1, "z": "one"},
-    {"x": 2, "y": 2.2, "z": "two"},
-    {"x": 3, "y": 3.3, "z": "three"},
-    {"x": 4, "y": 4.4, "z": "four"},
-    {"x": 5, "y": 5.5, "z": "five"},
-])
+records = ak.Array(
+    [
+        {"x": 1, "y": 1.1, "z": "one"},
+        {"x": 2, "y": 2.2, "z": "two"},
+        {"x": 3, "y": 3.3, "z": "three"},
+        {"x": 4, "y": 4.4, "z": "four"},
+        {"x": 5, "y": 5.5, "z": "five"},
+    ]
+)
 ```
 
 Although it is useful to be able to create arrays from a sequence of records (as [arrays of structures](https://en.wikipedia.org/wiki/AoS_and_SoA#Array_of_structures)), Awkward Array implements arrays as [_structures of arrays_](https://en.wikipedia.org/wiki/AoS_and_SoA#Structure_of_arrays). It is therefore more natural to think about arrays in terms of their fields. 
@@ -63,13 +65,15 @@ ak.unzip(records)
 Records are not _required_ to have field names. A record without field names is known as a "tuple", e.g.
 
 ```{code-cell} ipython3
-tuples = ak.Array([
-    (1, 1.1, 'one'),
-    (2, 2.2, 'two'),
-    (3, 3.3, 'three'),
-    (4, 4.4, 'four'),
-    (5, 5.5, 'five')
-])
+tuples = ak.Array(
+    [
+        (1, 1.1, "one"),
+        (2, 2.2, "two"),
+        (3, 3.3, "three"),
+        (4, 4.4, "four"),
+        (5, 5.5, "five"),
+    ]
+)
 ```
 
 If we unzip an array of tuples, we obtain the same result as for records:
@@ -101,10 +105,7 @@ name = ak.Array(["Dorit", "Caitlin", "Theodor", "Albano"]);
 can we form an array of records? The {func}`ak.zip` function provides a way to join compatible arrays into a single array of records:
 
 ```{code-cell} ipython3
-people = ak.zip({
-    'age': age, 
-    'name': name
-})
+people = ak.zip({"age": age, "name": name})
 ```
 
 Similarly, we could also build an array of tuples by passing a sequence of arrays:
@@ -123,20 +124,24 @@ people[age > 35]
 So far, we've looked at simple arrays with the same dimension in each field. It is actually possible to build arrays with fields of _different_ dimensions, e.g.
 
 ```{code-cell} ipython3
-x = ak.Array([
-    103,
-    450,
-    33,
-    4
-])
+x = ak.Array(
+    [
+        103,
+        450,
+        33,
+        4,
+    ]
+)
 
-digits_of_x = ak.Array([
-    [1, 0, 3],
-    [4, 5, 0],
-    [3, 3],
-    [4]
-])
-x_and_digits = ak.zip({'x': x, 'digits': digits_of_x})
+digits_of_x = ak.Array(
+    [
+        [1, 0, 3],
+        [4, 5, 0],
+        [3, 3],
+        [4],
+    ]
+)
+x_and_digits = ak.zip({"x": x, "digits": digits_of_x})
 ```
 
 The type of this array is
@@ -158,7 +163,7 @@ x_and_digits.x.type
 In zipping the two arrays together, the `x` has been broadcast against `digits_of_x`. Sometimes you might want to limit the broadcasting to a particular depth (dimension). This can be done by passing the `depth_limit` parameter:
 
 ```{code-cell} ipython3
-x_and_digits = ak.zip({'x': x, 'digits': digits_of_x}, depth_limit=1)
+x_and_digits = ak.zip({"x": x, "digits": digits_of_x}, depth_limit=1)
 ```
 
 Now the `x` field has a single dimension
@@ -176,27 +181,31 @@ mystnb:
   execution_allow_errors: true
 tags: [raises-exception]
 ---
-x_and_y = ak.Array([
-    [103, 903],
-    [450, 83],
-    [33, 8],
-    [4, 109]
-])
+x_and_y = ak.Array(
+    [
+        [103, 903],
+        [450, 83],
+        [33, 8],
+        [4, 109],
+    ]
+)
 
-digits_of_x_and_y = ak.Array([
-    [1,0,3,9,0,3],
-    [4,5,0,8,3],
-    [3,3,8],
-    [4,1,0,9]
-])
+digits_of_x_and_y = ak.Array(
+    [
+        [1, 0, 3, 9, 0, 3],
+        [4, 5, 0, 8, 3],
+        [3, 3, 8],
+        [4, 1, 0, 9],
+    ]
+)
 
-ak.zip({'x_and_y': x_and_y, 'digits': digits_of_x_and_y})
+ak.zip({"x_and_y": x_and_y, "digits": digits_of_x_and_y})
 ```
 
 Arrays which cannot be broadcast against each other will raise a `ValueError`. In this case, we want to stop broadcasting at the first dimension (`depth_limit=1`)
 
 ```{code-cell} ipython3
-ak.zip({'x_and_y': x_and_y, 'digits': digits_of_x_and_y}, depth_limit=1)
+ak.zip({"x_and_y": x_and_y, "digits": digits_of_x_and_y}, depth_limit=1)
 ```
 
 ## Projecting arrays
@@ -204,11 +213,13 @@ ak.zip({'x_and_y': x_and_y, 'digits': digits_of_x_and_y}, depth_limit=1)
 Sometimes we are interested only in a subset of the fields of an array. For example, imagine that we have an array of coordinates on the {math}`\hat{x}\hat{y}` plane:
 
 ```{code-cell} ipython3
-triangle = ak.Array([
-    {"x": 1, "y": 6, "z": 0},
-    {"x": 2, "y": 7, "z": 0},
-    {"x": 3, "y": 8, "z": 0},
-])
+triangle = ak.Array(
+    [
+        {"x": 1, "y": 6, "z": 0},
+        {"x": 2, "y": 7, "z": 0},
+        {"x": 3, "y": 8, "z": 0},
+    ]
+)
 ```
 
 If we know that these points should lie on a plane, then we might wish to discard the {math}`\hat{z}` coordinate. We can do this by slicing only the {math}`\hat{x}` and {math}`\hat{y}` fields:
@@ -230,18 +241,20 @@ triangle_2d_first_2 = triangle[:2, ["x", "y"]]
 Let's now consider an array of triangles, i.e. a polygon:
 
 ```{code-cell} ipython3
-triangles = ak.Array([
+triangles = ak.Array(
     [
-        {"x": 1, "y": 6, "z": 0},
-        {"x": 2, "y": 7, "z": 0},
-        {"x": 3, "y": 8, "z": 0},
-    ],
-    [
-        {"x": 4, "y": 9, "z": 0},
-        {"x": 5, "y": 10, "z": 0},
-        {"x": 6, "y": 11, "z": 0},
+        [
+            {"x": 1, "y": 6, "z": 0},
+            {"x": 2, "y": 7, "z": 0},
+            {"x": 3, "y": 8, "z": 0},
+        ],
+        [
+            {"x": 4, "y": 9, "z": 0},
+            {"x": 5, "y": 10, "z": 0},
+            {"x": 6, "y": 11, "z": 0},
+        ],
     ]
-])
+)
 ```
 
 We can combine an {class}`int` index `0` with a {class}`str` projection to view the `"x"` coordinates of the first triangle vertices
@@ -328,17 +341,17 @@ polygon.vertex.x
 The `.` operator represents the simplest slice of a single string, i.e.
 
 ```{code-cell} ipython3
-polygon['vertex']
+polygon["vertex"]
 ```
 
 The slice corresponding to the nested lookup `.vertex.x` is given by a {class}`tuple` of {class}`str`:
 
 ```{code-cell} ipython3
-polygon[('vertex', 'x')]
+polygon[("vertex", "x")]
 ```
 
 It is even possible to combine multiple and single projections. Let's project the `"x"` field of the `"vertex"` and `"normal"` fields:
 
 ```{code-cell} ipython3
-polygon[['vertex', "normal"], 'x']
+polygon[["vertex", "normal"], "x"]
 ```
