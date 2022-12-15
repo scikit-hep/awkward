@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.14.0
+    jupytext_version: 1.14.1
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -31,13 +31,15 @@ import awkward as ak
 import numpy as np
 
 
-records = ak.Array([
-    {'x': 0.014309631995020777, 'y': 0.7077380205549498},
-    {'x': 0.44925764718311145, 'y': 0.11927022136408238},
-    {'x': 0.9870653236436898, 'y': 0.1543661194285082},
-    {'x': 0.7071893130949595, 'y': 0.3966721033002645},
-    {'x': 0.3059032831996634, 'y': 0.5094743992919755}
-])
+records = ak.Array(
+    [
+        {"x": 0.014309631995020777, "y": 0.7077380205549498},
+        {"x": 0.44925764718311145, "y": 0.11927022136408238},
+        {"x": 0.9870653236436898, "y": 0.1543661194285082},
+        {"x": 0.7071893130949595, "y": 0.3966721033002645},
+        {"x": 0.3059032831996634, "y": 0.5094743992919755},
+    ]
+)
 ```
 
 The type of an array gives an indication of the fields that it contains. We can see that the `records` array contains two fields `"x"` and `"y"`:
@@ -65,10 +67,12 @@ ak.fields(records)
 In addition to records, Awkward Array also has the concept of _tuples_.
 
 ```{code-cell} ipython3
-tuples = ak.Array([
-    (1, 2, 3),
-    (1, 2, 3),
-])
+tuples = ak.Array(
+    [
+        (1, 2, 3),
+        (1, 2, 3),
+    ]
+)
 ```
 
 These look very similar to records, but the fields are un-named:
@@ -90,11 +94,11 @@ tuples.fields
 The returned field names are string-quoted integers (`"0"`, `"1"`, ...) that refer to zero-indexed tuple _slots_, and can be used to project the array:
 
 ```{code-cell} ipython3
-tuples['0']
+tuples["0"]
 ```
 
 ```{code-cell} ipython3
-tuples['1']
+tuples["1"]
 ```
 
 Whilst the fields of records can be accessed as attributes of the array:
