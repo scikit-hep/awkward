@@ -63,7 +63,7 @@ subtrees:
                 subtrees:
                   - entries:
                       - file: user-guide/how-to-examine-type
-                        title: "Data type [todo]"
+                        title: "Data type"
                       - file: user-guide/how-to-examine-single-item
                         title: "Single item detail [todo]"
                       - file: user-guide/how-to-examine-list-fields
