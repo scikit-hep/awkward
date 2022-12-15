@@ -31,8 +31,6 @@
   "ak.layout.UnionArray.any-ext": "reference/generated/ak.contents.UnionArray.html",
   "ak.layout.UnmaskedArray.any-ext": "reference/generated/ak.contents.UnmaskedArray.html",
   "ak.numba.register.any-ext": "reference/generated/ak.numba.register_and_check.html",
-  "ak.numexpr.evaluate.any-ext": "reference/ak.numexpr.evaluate.html",
-  "ak.numexpr.re_evaluate.any-ext": "reference/ak.numexpr.re_evaluate.html",
   "ak.types.ArrayType.any-ext": "reference/generated/ak.types.ArrayType.html",
   "ak.types.ListType.any-ext": "reference/generated/ak.types.ListType.html",
   "ak.types.OptionType.any-ext": "reference/generated/ak.types.OptionType.html",
