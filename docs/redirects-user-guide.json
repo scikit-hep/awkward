@@ -1,5 +1,6 @@
 {
   "index.any-ext": "",
+  "quickstart.any-ext": "getting-started/index.html",
   "how-to-combinatorics-best-match.any-ext": "user-guide/how-to-combinatorics-best-match.html",
   "how-to-combinatorics-cartesian-combinations.any-ext": "user-guide/how-to-combinatorics-cartesian-combinations.html",
   "how-to-combinatorics.any-ext": "user-guide/how-to-combinatorics.html",
