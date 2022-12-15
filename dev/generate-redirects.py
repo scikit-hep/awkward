@@ -16,7 +16,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("input", type=pathlib.Path)
     parser.add_argument("output", type=pathlib.Path)
-    parser.add_argument("--base", default="https://awkward-array.org/doc/main")
+    parser.add_argument("--base", default="https://awkward-array.org/doc/main/")
     parser.add_argument("--delay", default=0)
     args = parser.parse_args()
 
