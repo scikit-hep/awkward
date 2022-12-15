@@ -67,7 +67,7 @@ subtrees:
                       - file: user-guide/how-to-examine-single-item
                         title: "Single item detail [todo]"
                       - file: user-guide/how-to-examine-list-fields
-                        title: "Listing fields/keys/columns [todo]"
+                        title: "Listing fields/keys/columns"
                       - file: user-guide/how-to-examine-simple-slicing
                         title: "Simple slicing [todo]"
                       - file: user-guide/how-to-examine-checking-validity
@@ -98,8 +98,8 @@ subtrees:
                         title: "By number of items [todo]"
                       - file: user-guide/how-to-filter-cut-mask
                         title: "Cuts vs. masks [todo]"
-                      - file: user-guide/how-to-filter-jagged
-                        title: "Slicing lists within arrays [todo]"
+                      - file: user-guide/how-to-filter-ragged
+                        title: "Slicing lists within arrays"
                       - file: user-guide/how-to-filter-masked
                         title: "Slices with missing values [todo]"
 
@@ -108,9 +108,9 @@ subtrees:
                 subtrees:
                   - entries:
                       - file: user-guide/how-to-restructure-zip-project
-                        title: "Zip/unzip and project [todo]"
+                        title: "Zip/unzip and project"
                       - file: user-guide/how-to-restructure-add-fields
-                        title: "Adding fields to records [todo]"
+                        title: "Adding fields to records"
                       - file: user-guide/how-to-restructure-rename-records
                         title: "Renaming records [todo]"
                       - file: user-guide/how-to-restructure-flatten

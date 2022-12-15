@@ -204,11 +204,12 @@ jobs:
       working-directory: docs
 
     - name: Check links
+      id: check-links
       run: sphinx-build -M linkcheck . _build/
       working-directory: docs
 
-    - name: Output annotations on failure
-      if: ${{ failure() }}
+    - name: Output annotations
+      if: success() || steps.check-links.outcome == 'failure'
       run: |
         import pathlib
         import json
