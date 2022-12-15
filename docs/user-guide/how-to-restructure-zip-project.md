@@ -78,6 +78,18 @@ If we unzip an array of tuples, we obtain the same result as for records:
 ak.unzip(tuples)
 ```
 
+{func}`ak.unzip` can be combined with {func}`ak.fields` to build a mapping from field name to field array:
+
+```{code-cell} ipython3
+dict(zip(ak.fields(records), ak.unzip(records)))
+```
+
+For tuples, the field names will be strings corresponding to the field index:
+
+```{code-cell} ipython3
+dict(zip(ak.fields(tuples), ak.unzip(tuples)))
+```
+
 ## Zipping together arrays
 Because Awkward Arrays unzip into distinct arrays, it is reasonable to ask whether the reverse is possible, i.e. given the following arrays
 
@@ -162,7 +174,7 @@ What happens if we zip together arrays with the same dimensions, but different l
 ---
 mystnb:
   execution_allow_errors: true
-tags: []
+tags: [raises-exception]
 ---
 x_and_y = ak.Array([
     [103, 903],
@@ -178,12 +190,7 @@ digits_of_x_and_y = ak.Array([
     [4,1,0,9]
 ])
 
-try:
-    ak.zip({'x_and_y': x_and_y, 'digits': digits_of_x_and_y})
-    
-except Exception as err:
-    import traceback
-    traceback.print_exception(err)
+ak.zip({'x_and_y': x_and_y, 'digits': digits_of_x_and_y})
 ```
 
 Arrays which cannot be broadcast against each other will raise a `ValueError`. In this case, we want to stop broadcasting at the first dimension (`depth_limit=1`)
@@ -309,7 +316,7 @@ polygon = ak.Array(
 Naturally we can access the `"vertex"` field with the `.` operator:
 
 ```{code-cell} ipython3
-polygon.vertex.tolist()
+polygon.vertex
 ```
 
 We can view the `"x"` field of the vertex array with an additional lookup
@@ -321,7 +328,7 @@ polygon.vertex.x
 The `.` operator represents the simplest slice of a single string, i.e.
 
 ```{code-cell} ipython3
-polygon['vertex'].tolist()
+polygon['vertex']
 ```
 
 The slice corresponding to the nested lookup `.vertex.x` is given by a {class}`tuple` of {class}`str`:
@@ -330,9 +337,8 @@ The slice corresponding to the nested lookup `.vertex.x` is given by a {class}`t
 polygon[('vertex', 'x')]
 ```
 
-
 It is even possible to combine multiple and single projections. Let's project the `"x"` field of the `"vertex"` and `"normal"` fields:
 
 ```{code-cell} ipython3
-polygon[['vertex', "normal"], 'x'].tolist()
+polygon[['vertex', "normal"], 'x']
 ```
