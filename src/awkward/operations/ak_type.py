@@ -141,4 +141,5 @@ def _impl(array):
         return array.form.type
 
     else:
-        raise ak._errors.wrap_error(TypeError(f"unrecognized array type: {array!r}"))
+        layout = ak.to_layout(array, allow_other=False)
+        return _impl(ak._util.wrap(layout))
