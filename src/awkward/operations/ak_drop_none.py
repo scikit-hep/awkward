@@ -84,6 +84,16 @@ def _impl(array, axis, highlevel, behavior):
                 return out
 
         def action(layout, depth, **kwargs):
+            if layout.is_record:
+                posaxises = {
+                    ak._util.maybe_posaxis(x, axis, depth) for x in layout.contents
+                }
+                if len(posaxises) > 1 and any(x < depth for x in posaxises):
+                    raise ak._errors.wrap_error(
+                        np.AxisError(
+                            f"axis={axis} implies different levels in records that might require part of a record to be dropped, which is impossible"
+                        )
+                    )
             posaxis = ak._util.maybe_posaxis(layout, axis, depth)
             if posaxis == 0:
                 if not layout.is_option:
