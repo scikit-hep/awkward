@@ -67,7 +67,15 @@ The expression using Awkward Arrays is more concise, using idioms familiar from 
 
 Awkward Array is even faster when used in [Numba](https://numba.pydata.org/)'s JIT-compiled functions.
 
-See the [Getting started](https://awkward-array.org/en/latest/getting-started/index.html) documentation on [awkward-array.org](https://awkward-array.org) for an introduction, including a [no-install demo](https://awkward-array.org/en/latest/getting-started/try-awkward-array.html) you can try in your web browser.
+See the [Getting started](https://awkward-array.org/doc/main/getting-started/index.html) documentation on [awkward-array.org](https://awkward-array.org) for an introduction, including a [no-install demo](https://awkward-array.org/doc/main/getting-started/try-awkward-array.html) you can try in your web browser.
+
+# Getting help
+
+   * View the documentation on [awkward-array.org](https://awkward-array.org/).
+   * Report bugs, request features, and ask for additional documentation on [GitHub Issues](https://github.com/scikit-hep/awkward/issues).
+   * If you have a "How do I...?" question, start a [GitHub Discussion](https://github.com/scikit-hep/awkward/discussions) with category "Q&A".
+   * Alternatively, ask about it on [StackOverflow with the [awkward-array] tag](https://stackoverflow.com/questions/tagged/awkward-array). Be sure to include tags for any other libraries that you use, such as Pandas or PyTorch.
+   * To ask questions in real time, try the Gitter [Scikit-HEP/awkward-array](https://gitter.im/Scikit-HEP/awkward-array) chat room.
 
 # Installation
 
@@ -85,15 +93,9 @@ Awkward Array is also available on [conda-forge](https://conda-forge.org/docs/us
 conda install -c conda-forge awkward
 ```
 
-# Getting help
-
-   * View the documentation on [awkward-array.org](https://awkward-array.org/).
-   * Report bugs, request features, and ask for additional documentation on [GitHub Issues](https://github.com/scikit-hep/awkward/issues).
-   * If you have a "How do I...?" question, start a [GitHub Discussion](https://github.com/scikit-hep/awkward/discussions) with category "Q&A".
-   * Alternatively, ask about it on [StackOverflow with the [awkward-array] tag](https://stackoverflow.com/questions/tagged/awkward-array). Be sure to include tags for any other libraries that you use, such as Pandas or PyTorch.
-   * To ask questions in real time, try the Gitter [Scikit-HEP/awkward-array](https://gitter.im/Scikit-HEP/awkward-array) chat room.
-
 <!-- readme-pypi-ignore-after -->
+
+Because of the two packages (`awkward-cpp` may be updated in GitHub but not on PyPI), pip install through git (`pip install git+https://...`) will not work. Instead, use the [Installation for developers](#installation-for-developers) section below.
 
 # Installation for developers
 
@@ -114,7 +116,7 @@ Tests can be run in parallel with [pytest](https://docs.pytest.org/):
 python -m pytest -n auto tests
 ```
 
-For more details, see [CONTRIBUTING.md](CONTRIBUTING.md), or one of the links below.
+For more details, see [CONTRIBUTING.md](https://github.com/scikit-hep/awkward/blob/main/CONTRIBUTING.md), or one of the links below.
 
    * [Continuous integration](https://github.com/scikit-hep/awkward/actions/workflows/build-test.yml) and [continuous deployment](https://github.com/scikit-hep/awkward/actions/workflows/wheels.yml) are hosted by [GitHub Actions](https://github.com/features/actions/).
    * [Code of conduct](https://scikit-hep.org/code-of-conduct) for how we work together.
@@ -124,11 +126,11 @@ For more details, see [CONTRIBUTING.md](CONTRIBUTING.md), or one of the links be
 
 The documentation is on [awkward-array.org](https://awkward-array.org), including
 
-   * [Getting started](https://awkward-array.org/en/latest/getting-started/index.html)
-   * [User guide](https://awkward-array.org/en/latest/user-guide/index.html)
-   * [API reference](https://awkward-array.org/en/latest/reference/index.html)
-   * [Tutorials (with videos)](https://awkward-array.org/en/latest/getting-started/community-tutorials.html)
-   * [Papers and talks](https://awkward-array.org/en/latest/getting-started/papers-and-talks.html) about Awkward Array
+   * [Getting started](https://awkward-array.org/doc/main/getting-started/index.html)
+   * [User guide](https://awkward-array.org/doc/main/user-guide/index.html)
+   * [API reference](https://awkward-array.org/doc/main/reference/index.html)
+   * [Tutorials (with videos)](https://awkward-array.org/doc/main/getting-started/community-tutorials.html)
+   * [Papers and talks](https://awkward-array.org/doc/main/getting-started/papers-and-talks.html) about Awkward Array
 
 The Release notes for each version are in the [GitHub Releases tab](https://github.com/scikit-hep/awkward/releases).
 

@@ -83,6 +83,7 @@ jobs:
       with:
         # Cache invalidates daily by default
         cache-env: true
+        cache-downloads: true
         environment-file: docs/environment.yml
         extra-specs: |
            python=${{ env.PYTHON_VERSION }}
@@ -154,6 +155,7 @@ jobs:
       with:
         # Cache invalidates daily by default
         cache-env: true
+        cache-downloads: true
         environment-file: docs/environment.yml
         extra-specs: |
            python=${{ env.PYTHON_VERSION }}
@@ -196,8 +198,38 @@ jobs:
       run: cp -r awkward-cpp/docs/html/ docs/_static/doxygen
 
     - name: Generate Python documentation
+      env:
+        DOCS_SHOW_VERSION: 1
       run: sphinx-build -M html . _build/
       working-directory: docs
+
+    - name: Check links
+      id: check-links
+      run: sphinx-build -M linkcheck . _build/
+      working-directory: docs
+
+    - name: Output annotations
+      if: success() || steps.check-links.outcome == 'failure'
+      run: |
+        import pathlib
+        import json
+
+        docs_path = pathlib.Path("docs")
+        output_path = docs_path / "_build" / "linkcheck" / "output.json"
+        with output_path.open() as f:
+          data = [json.loads(l) for l in f]
+
+        for record in data:
+          if record['status'] != "broken":
+            continue
+          record['path'] = (docs_path / record['filename'])
+          print(
+            "::error file={path},line={lineno}::{uri} URI was {status} (code: {code}): {info}".format_map(record)
+          )
+          print(
+            "??file={path},line={lineno}??{uri} URI was {status} (code: {code}): {info}".format_map(record)
+          )
+      shell: python
 
     - name: Upload docs artefact
       uses: actions/upload-artifact@v3
@@ -212,20 +244,23 @@ jobs:
         mkdir -p "/tmp/awkward-docs/doc"
         cp -r docs/_build/html \
                  "/tmp/awkward-docs/doc/main"
-        # Redirect from doc/
-        cat <<- 'EOF' > /tmp/awkward-docs/index.html
-            <html>
-              <head>
-                <meta http-equiv="refresh" content="1; url=https://awkward-array.org/doc/main">
-              </head>
-            </html>
-        EOF
+        cp -r docs/_build/html \
+                 "/tmp/awkward-docs/doc/stable"
+        cp -r docs/_build/html \
+                 "/tmp/awkward-docs/doc/2.0"
+        python3 dev/generate-redirects.py docs/redirects-user-guide.json /tmp/awkward-docs/
 
     - name: Upload Pages artefact
       uses: actions/upload-pages-artifact@v1
       with:
         # Upload entire repository
         path: /tmp/awkward-docs
+
+    - name: Upload Jupyter Book cache
+      uses: actions/upload-artifact@v3
+      with:
+        name: doctrees
+        path: docs/_build/doctrees
 
     - name: Upload Jupyter Book cache
       uses: actions/upload-artifact@v3
@@ -242,11 +277,11 @@ jobs:
       id-token: write
       contents: read
     env:
-      S3_BUCKET: "awkward-array.org-test"
-      S3_WEBSITE_URL: "http://awkward-array.org-test.s3-website.eu-west-2.amazonaws.com"
+      S3_BUCKET: "preview.awkward-array.org"
+      DEPLOY_URL: "http://preview.awkward-array.org.s3-website.us-east-1.amazonaws.com"
     environment:
       name: docs-preview
-      url: ${{ env.S3_WEBSITE_URL }}/${{ github.head_ref }}
+      url: ${{ env.DEPLOY_URL }}/${{ github.head_ref }}
     steps:
     - uses: actions/checkout@v3
     - name: Configure AWS credentials
@@ -262,7 +297,53 @@ jobs:
     - name: Sync artefacts
       run: |
         aws s3 sync built-docs/ "s3://${S3_BUCKET}/${{ github.head_ref }}"
-        # TODO: invalidate cloudfront
+
+  deploy:
+    runs-on: ubuntu-22.04
+    needs: [ build-docs ]
+    # We can only deploy for PRs on host repo
+    if: github.event_name == 'push' || github.event_name == 'release'
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      S3_BUCKET: "awkward-array.org"
+      DEPLOY_URL: "http://awkward-array.org.s3-website.us-east-1.amazonaws.com"
+      CLOUDFRONT_ID: "EFM4QVENUIXHS"
+    environment:
+      name: docs-prod
+      url: ${{ env.DEPLOY_URL }}/doc/latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: eu-west-2
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE }}
+      - name: Download rendered docs
+        uses: actions/download-artifact@v3
+        with:
+          name: docs
+          path: built-docs
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+      # Pushes to main trigger latest
+      - name: Sync `main`
+        if: github.event_name == 'push'
+        run: |
+          aws s3 sync built-docs/ "s3://${S3_BUCKET}/doc/main/"
+          aws cloudfront create-invalidation --distribution-id "${CLOUDFRONT_ID}" \
+            --paths "/doc/main/"
+      # Releases trigger versions
+      - name: Sync `release`
+        if: github.event_name == 'release'
+        run: |
+          aws s3 cp docs/switcher.json "s3://${S3_BUCKET}/doc/"
+          aws s3 sync built-docs/ "s3://${S3_BUCKET}/doc/${GITHUB_REF_NAME:1}/"
+          aws cloudfront create-invalidation --distribution-id "${CLOUDFRONT_ID}" \
+            --paths /"doc/${GITHUB_REF_NAME:1}" "docs/switcher.json"
 
   deploy-docs:
     runs-on: ubuntu-22.04

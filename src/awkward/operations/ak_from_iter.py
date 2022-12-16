@@ -26,19 +26,16 @@ def from_iter(
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
-        initial (int): Initial size (in bytes) of buffers used by the
-            [ak::ArrayBuilder](_static/classawkward_1_1ArrayBuilder.html).
-        resize (float): Resize multiplier for buffers used by the
-            [ak::ArrayBuilder](_static/classawkward_1_1ArrayBuilder.html);
+        initial (int): Initial size (in bytes) of buffers used by the `ak::ArrayBuilder`.
+        resize (float): Resize multiplier for buffers used by the `ak::ArrayBuilder`;
             should be strictly greater than 1.
 
     Converts Python data into an Awkward Array.
 
-    Internally, this function uses [ak::ArrayBuilder](_static/classawkward_1_1ArrayBuilder.html)
-    (see the high-level #ak.ArrayBuilder documentation for a more complete description),
-    so it has the same flexibility and the same constraints. Any heterogeneous
-    and deeply nested Python data can be converted, but the output will never
-    have regular-typed array lengths.
+    Any heterogeneous and deeply nested Python data can be converted, but the output
+    will never have regular-typed array lengths. Internally, this function uses
+    `ak::ArrayBuilder` (see the high-level #ak.ArrayBuilder documentation for a
+    more complete description).
 
     The following Python types are supported.
 

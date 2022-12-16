@@ -93,6 +93,7 @@ from awkward.operations.ak_where import where
 from awkward.operations.ak_with_field import with_field
 from awkward.operations.ak_with_name import with_name
 from awkward.operations.ak_with_parameter import with_parameter
+from awkward.operations.ak_without_field import without_field
 from awkward.operations.ak_without_parameters import without_parameters
 from awkward.operations.ak_zeros_like import zeros_like
 from awkward.operations.ak_zip import zip

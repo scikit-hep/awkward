@@ -10,9 +10,9 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-import os
-import json
+import awkward
 import datetime
+import os
 import runpy
 import pathlib
 
@@ -21,6 +21,10 @@ import pathlib
 project = "Awkward Array"
 copyright = f"{datetime.datetime.now().year}, Awkward Array development team"
 author = "Jim Pivarski"
+
+parts = awkward.__version__.split(".")
+version = ".".join(parts[:2])
+release = ".".join(parts)
 
 # -- General configuration ---------------------------------------------------
 
@@ -35,8 +39,8 @@ extensions = [
     "myst_nb",
     # Preserve old links
     "jupyterlite_sphinx",
-    'IPython.sphinxext.ipython_console_highlighting',
-    'IPython.sphinxext.ipython_directive'
+    "IPython.sphinxext.ipython_console_highlighting",
+    "IPython.sphinxext.ipython_directive",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -89,9 +93,15 @@ html_theme_options = {
     ],
     "analytics": {
         "plausible_analytics_domain": "awkward-array.org",
-        "plausible_analytics_url": "https://views.scientific-python.org/js/plausible.js"
-    }
+        "plausible_analytics_url": "https://views.scientific-python.org/js/plausible.js",
+    },
 }
+# Don't show version for offline builds by default
+if "DOCS_SHOW_VERSION" in os.environ:
+    html_theme_options["switcher"] = {
+        "json_url": "https://awkward-array.org/doc/switcher.json",
+        "version_match": version,
+    }
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -100,9 +110,7 @@ html_static_path = ["_static"]
 html_css_files = ["css/awkward.css"]
 
 # MyST settings
-myst_enable_extensions = [
-    "colon_fence",
-]
+myst_enable_extensions = ["colon_fence"]
 
 nb_execution_mode = "cache"
 nb_execution_raise_on_error = True
@@ -120,7 +128,7 @@ nb_ipywidgets_js = {
     },
 }
 nb_execution_show_tb = True
-    
+
 # Additional stuff
 master_doc = "index"
 
@@ -143,6 +151,18 @@ jupyterlite_bind_ipynb_suffix = False
 # We've disabled localstorage, so we must provide the contents explicitly
 jupyterlite_contents = ["getting-started/demo/*"]
 
+linkcheck_ignore = [
+    r"^https?:\/\/github\.com\/.*$",
+    r"^getting-started\/try-awkward-array\.html$",  # Relative link won't resolve
+    r"^https?:\/\/$",  # Bare https:// allowed
+]
+# Eventually we need to revisit these
+if (datetime.date.today() - datetime.date(2022, 12, 13)) < datetime.timedelta(days=30):
+    linkcheck_ignore.extend([
+        r"^https:\/\/doi.org\/10\.1051\/epjconf\/202024505023$",
+        r"^https:\/\/doi.org\/10\.1051\/epjconf\/202125103002$",
+    ])
+
 HERE = pathlib.Path(__file__).parent
 
 # Generate Python docstrings
@@ -158,4 +178,4 @@ def install_jupyterlite_styles(app, pagename, templatename, context, event_arg) 
 
 
 def setup(app):
-    app.connect('html-page-context', install_jupyterlite_styles)
+    app.connect("html-page-context", install_jupyterlite_styles)

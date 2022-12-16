@@ -24,7 +24,7 @@ latest_commit = (
     .strip()
 )
 
-toctree = ["ak.behavior.rst"]
+toctree = []
 
 
 def tostr(node):
@@ -276,7 +276,6 @@ def dofunction(link, linelink, shortname, name, astfcn):
         entry_path.write_text(out)
 
 
-done_extra = False
 for filename in glob.glob("../src/awkward/**/*.py", recursive=True):
 
     modulename = (
@@ -295,17 +294,6 @@ for filename in glob.glob("../src/awkward/**/*.py", recursive=True):
     )
     shortname = re.sub(r"\.operations\.ak_\w+", "", shortname)
     shortname = re.sub(r"\.(contents|types|forms)\.\w+", r".\1", shortname)
-
-    if not done_extra and modulename.startswith("awkward._"):
-        done_extra = True
-        toctree.extend(
-            [
-                "ak.numba.register.rst",
-                "ak.numexpr.evaluate.rst",
-                "ak.numexpr.re_evaluate.rst",
-                "awkwardforth.rst",
-            ]
-        )
 
     if (
         modulename.startswith("awkward._")

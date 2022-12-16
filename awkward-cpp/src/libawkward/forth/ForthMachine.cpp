@@ -9,6 +9,9 @@
 #include "awkward/forth/ForthMachine.h"
 
 namespace awkward {
+  // ABI version must be increased whenever any interpretation of the bytecode changes.
+  #define ABI_VERSION 1
+
   // Instruction values are preprocessor macros to be equally usable in 32-bit and
   // 64-bit instruction sets.
 
@@ -275,6 +278,12 @@ namespace awkward {
     delete [] do_recursion_depth_;
     delete [] do_stop_;
     delete [] do_i_;
+  }
+
+  template <typename T, typename I>
+  int64_t
+  ForthMachineOf<T, I>::abi_version() const noexcept {
+    return ABI_VERSION;
   }
 
   template <typename T, typename I>

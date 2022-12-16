@@ -185,8 +185,9 @@
 
     generated/ak.with_name
     generated/ak.with_field
-    generated/ak.without_parameters
     generated/ak.with_parameter
+    generated/ak.without_field
+    generated/ak.without_parameters
 
 .. toctree::
     :caption: Overriding behavior

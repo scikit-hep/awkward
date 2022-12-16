@@ -1324,7 +1324,7 @@ Variable-length integers
 
 Numbers less than ``2**7`` are encoded in 1 byte, other numbers less than ``2**14`` are encoded in 2 bytes, other numbers less than ``2**21`` are encoded in 3 bytes, etc.
 
-``zigzag->`` interprets the input as `zig-zag variable-length signed integers <https://code.google.com/apis/protocolbuffers/docs/encoding.html#types>`__, which is like the above except that the unsigned ``n`` computed from a variable-length encoding is mapped to ``(n >> 1) ^ (-(n & 1))``, which are signed integers that alternate with increasing distance from zero.
+``zigzag->`` interprets the input as `zig-zag variable-length signed integers <https://developers.google.com/protocol-buffers/docs/encoding?csw=1#varints>`__, which is like the above except that the unsigned ``n`` computed from a variable-length encoding is mapped to ``(n >> 1) ^ (-(n & 1))``, which are signed integers that alternate with increasing distance from zero.
 
 **Examples:**
 

@@ -868,7 +868,7 @@ class RecordArray(Content):
                 ValueError(f"cannot convert {self} into np.ndarray")
             )
         out = self._backend.nplike.empty(
-            contents[0].shape[0],
+            self.length,
             dtype=[(str(n), x.dtype) for n, x in zip(self.fields, contents)],
         )
         mask = None

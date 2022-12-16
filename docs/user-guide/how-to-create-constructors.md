@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.14.1
+    jupytext_version: 1.14.0
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -778,7 +778,7 @@ Content >: BitMaskedArray
 
 {class}`ak.contents.BitMaskedArray` is just like {class}`ak.contents.ByteMaskedArray` except that the booleans are bit-packed. It is motivated primarily by Apache Arrow, which uses bit-packed masks; supporting bit-packed masks in Awkward Array allows us to represent Arrow data directly. Most operations immediately convert BitMaskedArrays into ByteMaskedArrays.
 
-Since bits always come in groups of at least 8, an explicit `length` must be supplied to the constructor. Also, `lsb_order=True` or `False` determines whether the bytes are interpreted [least-significant bit](https://en.wikipedia.org/wiki/Bit_numbering#Least_significant_bit) first or [most-significant bit](https://en.wikipedia.org/wiki/Bit_numbering#Most_significant_bit) first, respectively.
+Since bits always come in groups of at least 8, an explicit `length` must be supplied to the constructor. Also, `lsb_order=True` or `False` determines whether the bytes are interpreted [least-significant bit](https://en.wikipedia.org/wiki/Bit_numbering#LSB_0_bit_numbering) first or [most-significant bit](https://en.wikipedia.org/wiki/Bit_numbering#MSB_0_bit_numbering) first, respectively.
 
 ```{code-cell} ipython3
 layout = ak.contents.BitMaskedArray(
