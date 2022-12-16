@@ -471,17 +471,87 @@ def test_ListArray_and_axis_None():
 
 
 def test_all_axes():
-    a = ak.Array(
+    array = ak.Array(
         [
             None,
             [None, {"x": [1], "y": [[2]]}],
             [{"x": [3], "y": [None]}, {"x": [None], "y": [[None]]}],
         ]
     )
+    assert array.tolist() == [
+        None,
+        [None, {"x": [1], "y": [[2]]}],
+        [{"x": [3], "y": [None]}, {"x": [None], "y": [[None]]}],
+    ]
+
     # assert to_list(ak.drop_none(a, axis=0)) == to_list(a[~ak.is_none(a, axis=0)])
     # assert to_list(ak.drop_none(a, axis=1)) == to_list(a[~ak.is_none(a, axis=1)])
-    assert to_list(ak.drop_none(a, axis=2)) == [
+    assert to_list(ak.drop_none(array, axis=2)) == [
         None,
         [None, {"x": [1], "y": [[2]]}],
         [{"x": [3], "y": []}, {"x": [], "y": [[None]]}],
     ]
+
+    assert ak.is_none(array, axis=0).tolist() == [True, False, False]
+    assert ak.drop_none(array, axis=0).tolist() == [
+        [None, {"x": [1], "y": [[2]]}],
+        [{"x": [3], "y": [None]}, {"x": [None], "y": [[None]]}],
+    ]
+
+    assert ak.is_none(array, axis=1).tolist() == [None, [True, False], [False, False]]
+    assert ak.drop_none(array, axis=1).tolist() == [
+        None,
+        [{"x": [1], "y": [[2]]}],
+        [{"x": [3], "y": [None]}, {"x": [None], "y": [[None]]}],
+    ]
+
+    assert ak.is_none(array, axis=2).tolist() == [
+        None,
+        [None, {"x": [False], "y": [False]}],
+        [{"x": [False], "y": [True]}, {"x": [True], "y": [False]}],
+    ]
+    assert ak.drop_none(array, axis=2).tolist() == [
+        None,
+        [None, {"x": [1], "y": [[2]]}],
+        [{"x": [3], "y": []}, {"x": [], "y": [[None]]}],
+    ]
+
+    assert ak.is_none(array, axis=-1).tolist() == [
+        None,
+        [None, {"x": [False], "y": [[False]]}],
+        [{"x": [False], "y": [None]}, {"x": [True], "y": [[True]]}],
+    ]
+    assert ak.drop_none(array, axis=-1).tolist() == [
+        None,
+        [None, {"x": [1], "y": [[2]]}],
+        [{"x": [3], "y": [None]}, {"x": [], "y": [[]]}],
+    ]
+
+    assert ak.is_none(array, axis=-2).tolist() == [
+        None,
+        [None, {"x": False, "y": [False]}],
+        [{"x": False, "y": [True]}, {"x": False, "y": [False]}],
+    ]
+    with pytest.raises(np.AxisError):
+        ak.drop_none(array, axis=-2).tolist()
+
+    array2 = ak.Array(
+        [
+            None,
+            [None, {"x": [1], "y": [[2]]}],
+            [{"x": None, "y": [None]}, {"x": [None], "y": [[None]]}],
+        ]
+    )
+    assert array2.tolist() == [
+        None,
+        [None, {"x": [1], "y": [[2]]}],
+        [{"x": None, "y": [None]}, {"x": [None], "y": [[None]]}],
+    ]
+
+    assert ak.is_none(array2, axis=-2).tolist() == [
+        None,
+        [None, {"x": False, "y": [False]}],
+        [{"x": True, "y": [True]}, {"x": False, "y": [False]}],
+    ]
+    with pytest.raises(np.AxisError):
+        ak.drop_none(array2, axis=-2).tolist()
