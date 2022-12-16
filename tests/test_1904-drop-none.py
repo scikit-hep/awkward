@@ -468,3 +468,20 @@ def test_ListArray_and_axis_None():
             [{"nest": 1.1}],
         ]
     )
+
+
+def test_all_axes():
+    a = ak.Array(
+        [
+            None,
+            [None, {"x": [1], "y": [[2]]}],
+            [{"x": [3], "y": [None]}, {"x": [None], "y": [[None]]}],
+        ]
+    )
+    # assert to_list(ak.drop_none(a, axis=0)) == to_list(a[~ak.is_none(a, axis=0)])
+    # assert to_list(ak.drop_none(a, axis=1)) == to_list(a[~ak.is_none(a, axis=1)])
+    assert to_list(ak.drop_none(a, axis=2)) == [
+        None,
+        [None, {"x": [1], "y": [[2]]}],
+        [{"x": [3], "y": []}, {"x": [], "y": [[None]]}],
+    ]

@@ -73,15 +73,14 @@ def _impl(array, axis, highlevel, behavior):
 
         def recompute_offsets(layout, depth, **kwargs):
             posaxis = ak._util.maybe_posaxis(layout, axis, depth)
-            if posaxis == 0 and posaxis == depth - 1 and layout.is_list:
-                out = layout._rebuild_without_nones(
-                    options["new_offsets"], layout.content
-                )
-                return out
-            if posaxis == depth and layout.is_list:
-                out = layout._rebuild_without_nones(
-                    options["new_offsets"], layout.content
-                )
+            if (
+                posaxis == 0
+                and posaxis == depth - 1
+                or posaxis == depth
+                and layout.is_list
+            ):
+                none_indexes = options["none_indexes"].pop(0)
+                out = layout._rebuild_without_nones(none_indexes, layout.content)
                 return out
 
         def action(layout, depth, **kwargs):
@@ -92,15 +91,16 @@ def _impl(array, axis, highlevel, behavior):
                 else:
                     return layout.drop_none()
             if posaxis == depth - 1 and layout.is_option:
-                _, _, new_offsets = layout._nextcarry_outindex(layout.backend)
-                options.update(new_offsets=new_offsets)
+                _, _, none_indexes = layout._nextcarry_outindex(layout.backend)
+                options["none_indexes"].append(none_indexes)
                 return layout.drop_none()
             if posaxis == depth - 1 and layout.is_list and layout.content.is_option:
                 return layout.drop_none()
 
-    options = {}
+    options = {"none_indexes": []}
     out = ak._do.recursively_apply(layout, action, behavior, options)
-    if "new_offsets" in options and axis is not None:
+
+    if len(options["none_indexes"]) > 0:
         out = ak._do.recursively_apply(out, recompute_offsets, behavior, options)
 
     return ak._util.wrap(out, behavior, highlevel, like=behavior)
