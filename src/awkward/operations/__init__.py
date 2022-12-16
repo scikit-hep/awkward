@@ -18,6 +18,7 @@ from awkward.operations.ak_corr import corr
 from awkward.operations.ak_count import count
 from awkward.operations.ak_count_nonzero import count_nonzero
 from awkward.operations.ak_covar import covar
+from awkward.operations.ak_drop_none import drop_none
 from awkward.operations.ak_fields import fields
 from awkward.operations.ak_fill_none import fill_none
 from awkward.operations.ak_firsts import firsts

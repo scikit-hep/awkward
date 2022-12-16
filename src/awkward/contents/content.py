@@ -1014,6 +1014,12 @@ class Content:
     def _to_numpy(self, allow_missing: bool):
         raise ak._errors.wrap_error(NotImplementedError)
 
+    def drop_none(self):
+        return self._drop_none()
+
+    def _drop_none(self) -> Content:
+        raise ak._errors.wrap_error(NotImplementedError)
+
     def _completely_flatten(self, backend, options):
         raise ak._errors.wrap_error(NotImplementedError)
 

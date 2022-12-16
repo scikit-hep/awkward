@@ -976,6 +976,9 @@ class ByteMaskedArray(Content):
         else:
             return [self]
 
+    def _drop_none(self):
+        return self.project()
+
     def _recursively_apply(
         self, action, behavior, depth, depth_context, lateral_context, options
     ):

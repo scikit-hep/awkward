@@ -1356,6 +1356,14 @@ class ListArray(Content):
             flat = next.content[next.offsets[0] : next.offsets[-1]]
             return flat._completely_flatten(backend, options)
 
+    def _drop_none(self):
+        return self.to_ListOffsetArray64()._drop_none()
+
+    def _rebuild_without_nones(self, none_indexes, new_content):
+        return self.to_ListOffsetArray64()._rebuild_without_nones(
+            none_indexes, new_content
+        )
+
     def _recursively_apply(
         self, action, behavior, depth, depth_context, lateral_context, options
     ):

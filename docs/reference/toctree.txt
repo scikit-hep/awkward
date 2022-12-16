@@ -118,6 +118,7 @@
     :caption: Missing value handling
 
     generated/ak.mask
+    generated/ak.drop_none
     generated/ak.is_none
     generated/ak.pad_none
     generated/ak.fill_none
