@@ -447,6 +447,18 @@ class TypeTracerArray:
         else:
             raise ak._errors.wrap_error(NotImplementedError(repr(where)))
 
+    def __eq__(self, other):
+        if isinstance(other, numbers.Real):
+            return TypeTracerArray(np.bool_, self._shape)
+        else:
+            return NotImplemented
+
+    def __ne__(self, other):
+        if isinstance(other, numbers.Real):
+            return TypeTracerArray(np.bool_, self._shape)
+        else:
+            return NotImplemented
+
     def __lt__(self, other):
         if isinstance(other, numbers.Real):
             return TypeTracerArray(np.bool_, self._shape)
@@ -484,6 +496,13 @@ class TypeTracerArray:
 
     def copy(self):
         return self
+
+    def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
+        replacements = [
+            numpy.empty(0, x.dtype) if hasattr(x, "dtype") else x for x in inputs
+        ]
+        result = getattr(ufunc, method)(*replacements, **kwargs)
+        return TypeTracerArray(result.dtype, shape=self._shape)
 
 
 class TypeTracer(ak._nplikes.NumpyLike):
