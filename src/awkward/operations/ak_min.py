@@ -156,48 +156,19 @@ def _impl(
     array, axis, keepdims, initial, mask_identity, flatten_records, highlevel, behavior
 ):
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
-    backend = layout.backend
+    behavior = ak._util.behavior_of(array, behavior=behavior)
     reducer = ak._reducers.Min(initial)
 
-    if axis is None:
-        if not backend.nplike.known_data or not backend.nplike.known_shape:
-
-            def map(x):
-                return ak._typetracer.MaybeNone(
-                    ak._typetracer.UnknownScalar(
-                        np.dtype(reducer.return_dtype(x.dtype))
-                    )
-                )
-
-        else:
-
-            def map(x):
-                return backend.nplike.min(x.data)
-
-        def reduce(xs):
-            if len(xs) == 0:
-                return None
-            elif len(xs) == 1:
-                return xs[0]
-            else:
-                return backend.nplike.minimum(xs[0], reduce(xs[1:]))
-
-        tmp = ak._do.completely_flatten(
-            layout, function_name="ak.min", flatten_records=flatten_records
-        )
-        return reduce([map(x) for x in tmp if not x.shape[0] <= 0])
-
+    out = ak._do.reduce(
+        layout,
+        reducer,
+        axis=axis,
+        mask=mask_identity,
+        keepdims=keepdims,
+        behavior=behavior,
+        flatten_records=flatten_records,
+    )
+    if isinstance(out, (ak.contents.Content, ak.record.Record)):
+        return ak._util.wrap(out, behavior, highlevel)
     else:
-        behavior = ak._util.behavior_of(array, behavior=behavior)
-        out = ak._do.reduce(
-            layout,
-            reducer,
-            axis=axis,
-            mask=mask_identity,
-            keepdims=keepdims,
-            behavior=behavior,
-        )
-        if isinstance(out, (ak.contents.Content, ak.record.Record)):
-            return ak._util.wrap(out, behavior, highlevel=highlevel)
-        else:
-            return out
+        return out
