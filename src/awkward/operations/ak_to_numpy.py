@@ -40,4 +40,5 @@ def to_numpy(array, *, allow_missing=True):
         "ak.to_numpy",
         dict(array=array, allow_missing=allow_missing),
     ):
-        return ak._util.to_arraylib(numpy, array, allow_missing)
+        with numpy.errstate(invalid="ignore"):
+            return ak._util.to_arraylib(numpy, array, allow_missing)
