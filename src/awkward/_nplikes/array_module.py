@@ -191,6 +191,9 @@ class ArrayModuleArray(Array):
         return f"<{self._nplike.__class__.__name__} :: {self._array!r}>"
 
 
+# TODO: make ArrayModuleArrayType and ArrayModuleArrayType_co
+
+
 class ArrayModuleNumpyLike(NumpyLike[ArrayModuleArray]):
     """
     An abstract class implementing NumpyLike support for a `numpy_api` module e.g. numpy, cupy
@@ -366,22 +369,6 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayModuleArray]):
         return ArrayModuleArray._new(
             self.array_module.broadcast_to(x._array, shape), nplike=self
         )
-
-    def result_type(
-        self, *arrays_and_dtypes: ArrayModuleArray | dtypes.dtype
-    ) -> dtypes.dtype:
-        all_dtypes: list[dtypes.dtype] = []
-        for item in arrays_and_dtypes:
-            if hasattr(item, "shape") and hasattr(item, "dtype"):
-                item = item.dtype
-            if isinstance(item, dtypes.dtype):
-                all_dtypes.append(item)
-            else:
-                raise _errors.wrap_error(
-                    TypeError("result_type() inputs must be array_api arrays or dtypes")
-                )
-
-        return numpy.result_type(*all_dtypes)
 
     ############################ searching functions
 
