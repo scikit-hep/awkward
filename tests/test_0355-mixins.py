@@ -1,39 +1,11 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import numbers
 
 import numpy as np
-import pytest
 
 import awkward as ak
 
 to_list = ak.operations.to_list
-
-
-def _assert_equal_enough(obtained, expected):
-    if isinstance(obtained, dict):
-        assert isinstance(expected, dict)
-        assert set(obtained.keys()) == set(expected.keys())
-        for key in obtained.keys():
-            _assert_equal_enough(obtained[key], expected[key])
-    elif isinstance(obtained, list):
-        assert isinstance(expected, list)
-        assert len(obtained) == len(expected)
-        for x, y in zip(obtained, expected):
-            _assert_equal_enough(x, y)
-    elif isinstance(obtained, tuple):
-        assert isinstance(expected, tuple)
-        assert len(obtained) == len(expected)
-        for x, y in zip(obtained, expected):
-            _assert_equal_enough(x, y)
-    elif isinstance(obtained, numbers.Real) and isinstance(expected, numbers.Real):
-        assert pytest.approx(obtained) == expected
-    else:
-        assert obtained == expected
-
-
-def assert_equal_enough(obtained, expected):
-    _assert_equal_enough(obtained.tolist(), expected)
 
 
 def test_make_mixins():
@@ -110,7 +82,7 @@ def test_make_mixins():
         [],
         [{"x": 8, "y": 8.8}, {"x": 10, "y": 11.0}],
     ]
-    assert_equal_enough(
+    ak._util.arrays_approx_equal(
         wone + wtwo,
         [
             [
@@ -137,7 +109,7 @@ def test_make_mixins():
             ],
         ],
     )
-    assert_equal_enough(
+    ak._util.arrays_approx_equal(
         abs(one),
         [
             [1.4866068747318506, 2.973213749463701, 4.459820624195552],
@@ -145,7 +117,7 @@ def test_make_mixins():
             [5.946427498927402, 7.433034373659253],
         ],
     )
-    assert_equal_enough(
+    ak._util.arrays_approx_equal(
         one.distance(wtwo),
         [
             [0.14142135623730953, 0.0, 0.31622776601683783],
