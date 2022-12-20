@@ -8,7 +8,7 @@ from typing import Any, Callable
 import numpy as metadata  # todo: implement this
 
 import awkward as ak
-from awkward._nplikes import JAX, Numpy, dtypes
+from awkward._nplikes import Jax, Numpy, dtypes
 from awkward.typing import Protocol, TypeAlias
 
 KernelKeyType: TypeAlias = tuple  # Tuple[str, Unpack[Tuple[dtypes.dtype, ...]]]
@@ -90,7 +90,7 @@ class JaxKernel(NumpyKernel):
     def __call__(self, *args) -> None:
         assert len(args) == len(self._impl.argtypes)  # type: ignore
 
-        if not any(JAX.is_tracer(arg) for arg in args):
+        if not any(Jax.is_tracer(arg) for arg in args):
             return super().__call__(*args)
 
 
