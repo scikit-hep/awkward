@@ -901,10 +901,11 @@ def arrays_approx_equal(
                 left.index.data < 0, right.index.data < 0
             ) and visitor(left.content, right.content)
         elif left.is_union:
-            return (
-                numpy.array_equal(left.tags, right.tags)
-                and numpy.array_equal(left.index, right.index)
-                and all([visitor(x, y) for x, y in zip(left.contents, right.contents)])
+            return (len(left.contents) == len(right.contents)) and all(
+                [
+                    visitor(left.project(i), right.project(i))
+                    for i, _ in enumerate(left.contents)
+                ]
             )
         elif left.is_record:
             record = left.parameter("__record__")
