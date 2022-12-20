@@ -300,7 +300,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayModuleArray]):
         dtype: dtypes.dtype | None = None,
     ) -> ArrayModuleArray:
         return ArrayModuleArray._new(
-            self.array_module.full(shape, dtype=dtype), nplike=self
+            self.array_module.full(shape, fill_value, dtype=dtype), nplike=self
         )
 
     def zeros_like(
@@ -321,7 +321,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayModuleArray]):
         self, x: ArrayModuleArray, fill_value, *, dtype: dtypes.dtype | None = None
     ) -> ArrayModuleArray:
         return ArrayModuleArray._new(
-            self.array_module.full_like(x._array, dtype=dtype), nplike=self
+            self.array_module.full_like(x._array, fill_value, dtype=dtype), nplike=self
         )
 
     def arange(
