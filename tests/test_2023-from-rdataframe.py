@@ -13,11 +13,12 @@ ROOT = pytest.importorskip("ROOT")
 compiler = ROOT.gInterpreter.Declare
 
 
-def test_Long64_t():
-    data_frame = ROOT.RDataFrame(10).Define("x", "return (Long64_t)gRandom->Rndm()")
+def test_rdf_column_of_Long64_t_type():
+    data_frame = ROOT.RDataFrame(10).Define("x", "(Long64_t)(gRandom->Rndm()*1000.)")
+    assert data_frame.GetColumnType("x") == "Long64_t"
 
-    out = ak.from_rdataframe(
+    ak_array = ak.from_rdataframe(
         data_frame,
         columns="x",
     )
-    assert data_frame.GetColumnType("x") == "Long64_t"
+    assert ak_array.layout.form == ak.forms.NumpyForm("int64")
