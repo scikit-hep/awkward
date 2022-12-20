@@ -10,10 +10,9 @@ import sys
 from collections.abc import Iterable, Mapping, Sequence, Sized
 
 import packaging.version
-from awkward.typing import Self, Protocol
-
 
 import awkward as ak
+from awkward.typing import Protocol, Self
 
 np = ak._nplikes.NumpyMetadata.instance()
 

@@ -11,7 +11,6 @@ from awkward._singleton import Singleton
 from awkward._typetracer import TypeTracer
 from awkward.typing import Callable, Final, Tuple, TypeAlias, TypeVar, Unpack
 
-
 T = TypeVar("T", covariant=True)
 KernelKeyType: TypeAlias = Tuple[str, Unpack[Tuple[dtypes.dtype, ...]]]
 KernelType: TypeAlias = Callable[..., None]
