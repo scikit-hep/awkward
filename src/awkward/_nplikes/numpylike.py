@@ -20,9 +20,19 @@ from __future__ import annotations
 from abc import abstractmethod
 from typing import Literal, SupportsIndex, SupportsInt, TypeVar, overload
 
-from awkward._nplikes.dtypes import dtype
-from awkward.typing import Protocol, Self, runtime_checkable
+import numpy
+
+import awkward as ak
+from awkward._nplikes import dtypes
+from awkward._nplikes.dtypes import (
+    complex_floating,
+    dtype,
+    real_floating,
+    signed_integer,
+    unsigned_integer,
+)
 from awkward._util import Singleton
+from awkward.typing import Protocol, Self, runtime_checkable
 
 ArrayType = TypeVar("ArrayType", bound="Array")
 ArrayType_co = TypeVar("ArrayType_co", bound="Array", covariant=True)
@@ -176,6 +186,9 @@ class Array(Protocol):
         ...
 
 
+T = TypeVar("T")
+
+
 @runtime_checkable
 class NumpyLike(Protocol[ArrayType], Singleton):
     @property
@@ -292,9 +305,60 @@ class NumpyLike(Protocol[ArrayType], Singleton):
     def broadcast_to(self, x: ArrayType, shape: tuple[SupportsInt, ...]) -> ArrayType:
         ...
 
-    @abstractmethod
-    def result_type(self, *arrays_and_dtypes: ArrayType | dtype):
-        ...
+    def isdtype(
+        self,
+        dtype: dtype,
+        kind: dtype | str | tuple[dtype | str, ...],
+    ) -> bool:
+        if isinstance(kind, str):
+            if kind == "bool":
+                return numpy.issubdtype(dtype, dtypes.bool_)
+            elif kind == "signed integer":
+                return any([numpy.issubdtype(dtype, c) for c in signed_integer])
+            elif kind == "unsigned integer":
+                return any([numpy.issubdtype(dtype, c) for c in unsigned_integer])
+            elif kind == "integral":
+                return self.isdtype(dtype, "signed integer") or self.isdtype(
+                    dtype, "unsigned integer"
+                )
+            elif kind == "real floating":
+                return any([numpy.issubdtype(dtype, c) for c in real_floating])
+            elif kind == "complex floating":
+                return any([numpy.issubdtype(dtype, c) for c in complex_floating])
+            elif kind == "numeric":
+                return (
+                    self.isdtype(dtype, "integral")
+                    or self.isdtype(dtype, "real floating")
+                    or self.isdtype(dtype, "complex floating")
+                )
+            ### Extensions to Array API ###
+            elif kind == "timelike":
+                return dtype.kind == "M" or dtype.kind == "m"
+            else:
+                raise ak._errors.wrap_error(ValueError(f"Invalid kind {kind} given"))
+        else:
+            assert isinstance(kind, tuple)
+            return any([self.isdtype(dtype, k) for k in kind])
+
+    def result_type(self, *arrays_and_dtypes: ArrayType | dtype) -> dtype:
+        all_dtypes: list[dtypes.dtype] = []
+        for item in arrays_and_dtypes:
+            if hasattr(item, "shape") and hasattr(item, "dtype"):
+                item = item.dtype
+            if isinstance(item, dtypes.dtype):
+                all_dtypes.append(item)
+            else:
+                raise ak._errors.wrap_error(
+                    TypeError("result_type() inputs must be array_api arrays or dtypes")
+                )
+
+        return numpy.result_type(*all_dtypes)
+
+    def iinfo(self, type: dtype | ArrayType) -> numpy.iinfo:
+        return numpy.iinfo(type)
+
+    def finfo(self, type: dtype | ArrayType) -> numpy.finfo:
+        return numpy.finfo(type)
 
     ############################ searching functions
 
