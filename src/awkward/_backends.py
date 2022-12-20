@@ -5,8 +5,8 @@ from abc import abstractmethod
 import awkward_cpp
 
 import awkward as ak
-from awkward._nplikes import Cupy, Jax, Numpy, NumpyLike, nplike_of, dtypes
 from awkward._kernels import CupyKernel, JaxKernel, NumpyKernel
+from awkward._nplikes import Cupy, Jax, Numpy, NumpyLike, dtypes, nplike_of
 from awkward._typetracer import NoKernel, TypeTracer
 from awkward._util import Singleton
 from awkward.typing import (
@@ -21,7 +21,6 @@ from awkward.typing import (
     Unpack,
     runtime_checkable,
 )
-
 
 T = TypeVar("T", covariant=True)
 KernelKeyType: TypeAlias = Tuple[str, Unpack[Tuple[dtypes.dtype, ...]]]
