@@ -22,6 +22,7 @@ from typing import Literal, SupportsIndex, SupportsInt, TypeVar, overload
 
 from awkward._nplikes.dtypes import dtype
 from awkward.typing import Protocol, Self, runtime_checkable
+from awkward._util import Singleton
 
 ArrayType = TypeVar("ArrayType", bound="Array")
 ArrayType_co = TypeVar("ArrayType_co", bound="Array", covariant=True)
@@ -176,7 +177,7 @@ class Array(Protocol):
 
 
 @runtime_checkable
-class NumpyLike(Protocol[ArrayType]):
+class NumpyLike(Protocol[ArrayType], Singleton):
     @property
     @abstractmethod
     def known_data(self) -> bool:
@@ -191,16 +192,6 @@ class NumpyLike(Protocol[ArrayType]):
     @abstractmethod
     def is_eager(self) -> bool:
         ...
-
-    _instance: NumpyLike[ArrayType]
-
-    @classmethod
-    def instance(cls: type[NumpyLike[ArrayType]]) -> NumpyLike[ArrayType]:
-        try:
-            return cls._instance
-        except AttributeError:
-            cls._instance = cls()
-            return cls._instance
 
     ############################ array creation
 

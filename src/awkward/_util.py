@@ -10,6 +10,8 @@ from collections.abc import Iterable, Mapping, Sized
 
 import packaging.version
 from awkward_cpp.lib import _ext
+from awkward.typing import Self, Protocol
+
 
 import awkward as ak
 
@@ -844,3 +846,15 @@ def maybe_posaxis(layout, axis, depth):
             return axis + depth + additional_depth - 1
         else:
             return None
+
+
+class Singleton(Protocol):
+    _instance: Self
+
+    @classmethod
+    def instance(cls) -> Self:
+        try:
+            return cls._instance
+        except AttributeError:
+            cls._instance = cls()
+            return cls._instance
