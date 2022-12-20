@@ -43,6 +43,10 @@ class Jax(ArrayModuleNumpyLike):
         return module == "jaxlib"
 
     @classmethod
+    def is_raw_array(cls, x) -> bool:
+        return cls.is_tracer(x) or cls.is_array(x)
+
+    @classmethod
     def is_tracer(cls, obj) -> bool:
         """
         Args:

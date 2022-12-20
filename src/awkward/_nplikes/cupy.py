@@ -15,3 +15,8 @@ class Cupy(ArrayModuleNumpyLike):
         import cupy
 
         return cupy
+
+    @classmethod
+    def is_raw_array(cls, x) -> bool:
+        module, _, suffix = type(x).__module__.partition(".")
+        return module == "cupy"

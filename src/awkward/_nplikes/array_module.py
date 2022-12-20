@@ -760,3 +760,10 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayModuleArray]):
 
         """
         raise _errors.wrap_error(NotImplementedError)
+
+    @classmethod
+    def is_raw_array(cls, x) -> bool:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def raw(self, array: ArrayModuleArray):
+        return array._array
