@@ -2,12 +2,11 @@
 
 from __future__ import annotations
 
-import awkward as ak
 from awkward._nplikes.array_module import ArrayModuleNumpyLike
 from awkward.typing import Final
 
 
-class JAX(ArrayModuleNumpyLike):
+class Jax(ArrayModuleNumpyLike):
     """
     A concrete class importing `NumpyModuleLike` for `JAX`
     """
@@ -21,5 +20,36 @@ class JAX(ArrayModuleNumpyLike):
         return jax.numpy
 
     @classmethod
-    def is_tracer(cls, obj: object) -> bool:
-        raise ak._errors.wrap_error(NotImplementedError)
+    def is_own_array(cls, obj) -> bool:
+        """
+        Args:
+            obj: object to test
+
+        Return `True` if the given object is a jax buffer, otherwise `False`.
+
+        """
+        return cls.is_array(obj) or cls.is_tracer(obj)
+
+    @classmethod
+    def is_array(cls, obj) -> bool:
+        """
+        Args:
+            obj: object to test
+
+        Return `True` if the given object is a jax buffer, otherwise `False`.
+
+        """
+        module, _, suffix = type(obj).__module__.partition(".")
+        return module == "jaxlib"
+
+    @classmethod
+    def is_tracer(cls, obj) -> bool:
+        """
+        Args:
+            obj: object to test
+
+        Return `True` if the given object is a jax tracer, otherwise `False`.
+
+        """
+        module, _, suffix = type(obj).__module__.partition(".")
+        return module == "jax"
