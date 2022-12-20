@@ -5,7 +5,7 @@ import pathlib
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 def from_avro_file(
@@ -13,13 +13,14 @@ def from_avro_file(
 ):
     """
     Args:
-        file (string or fileobject): Avro file to be read as Awkward Array.
+        file (string or file-like object): Avro file to be read as Awkward Array.
         limit_entries (int): The number of rows of the Avro file to be read into the Awkward Array.
         debug_forth (bool): If True, prints the generated Forth code for debugging.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
+
     Reads Avro files as Awkward Arrays.
 
     Internally this function uses AwkwardForth DSL. The function recursively parses the Avro schema, generates
@@ -42,21 +43,18 @@ def from_avro_file(
             file = str(file)
 
         if isinstance(file, str):
-            try:
-                with open(file, "rb") as opened_file:
-                    form, length, container = awkward._connect.avro.ReadAvroFT(
-                        opened_file, limit_entries, debug_forth
-                    ).outcontents
-                    return _impl(form, length, container, highlevel, behavior)
-            except ImportError as err:
-                raise ak._errors.wrap_error(
-                    "the filename is incorrect or the file does not exist"
-                ) from err
+            with open(file, "rb") as opened_file:
+                form, length, container = awkward._connect.avro.ReadAvroFT(
+                    opened_file, limit_entries, debug_forth
+                ).outcontents
+                return _impl(form, length, container, highlevel, behavior)
 
         else:
-            if not hasattr(file, "read"):
+            if not hasattr(file, "read") or not hasattr(file, "seek"):
                 raise ak._errors.wrap_error(
-                    TypeError("the fileobject provided is not of the correct type.")
+                    TypeError(
+                        "'file' must either be a filename string or be a file-like object with 'read' and 'seek' methods"
+                    )
                 )
             else:
                 form, length, container = awkward._connect.avro.ReadAvroFT(
@@ -67,10 +65,13 @@ def from_avro_file(
 
 def _impl(form, length, container, highlevel, behavior):
 
-    return ak.from_buffers(
+    return ak.operations.ak_from_buffers._impl(
         form=form,
         length=length,
         container=container,
+        buffer_key="{form_key}-{attribute}",
+        backend="cpu",
         highlevel=highlevel,
         behavior=behavior,
+        simplify=True,
     )

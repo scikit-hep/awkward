@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 @ak._connect.numpy.implements("ptp")
@@ -33,16 +33,16 @@ def ptp(array, axis=None, *, keepdims=False, mask_identity=True, flatten_records
     if all lists at a given dimension have the same length and no None values,
     but it generalizes to cases where they do not.
 
-    For example, with an `array` like
+    For example, with
 
-        ak.Array([[0, 1, 2, 3],
-                  [          ],
-                  [4, 5      ]])
+        >>> array = ak.Array([[0, 1, 2, 3],
+        ...                   [          ],
+        ...                   [4, 5      ]])
 
     The range of the innermost lists is
 
         >>> ak.ptp(array, axis=-1)
-        <Array [3, None, 1] type='3 * ?float64'>
+        <Array [3, None, 1] type='3 * ?int64'>
 
     because there are three lists, the first has a range of `3`, the second is
     `None` because the list is empty, and the third has a range of `1`. Similarly,
@@ -78,19 +78,47 @@ def _impl(array, axis, keepdims, mask_identity, flatten_records):
     with np.errstate(invalid="ignore", divide="ignore"):
         if axis is None:
             out = ak.operations.ak_max._impl(
-                array, axis, keepdims, None, mask_identity, flatten_records
+                array,
+                axis,
+                keepdims,
+                None,
+                mask_identity,
+                flatten_records,
+                highlevel=True,
+                behavior=None,
             ) - ak.operations.ak_min._impl(
-                array, axis, keepdims, None, mask_identity, flatten_records
+                array,
+                axis,
+                keepdims,
+                None,
+                mask_identity,
+                flatten_records,
+                highlevel=True,
+                behavior=None,
             )
             if not mask_identity and out is None:
                 out = 0
 
         else:
             maxi = ak.operations.ak_max._impl(
-                array, axis, True, None, mask_identity, flatten_records
+                array,
+                axis,
+                True,
+                None,
+                mask_identity,
+                flatten_records,
+                highlevel=True,
+                behavior=None,
             )
             mini = ak.operations.ak_min._impl(
-                array, axis, True, None, True, flatten_records
+                array,
+                axis,
+                True,
+                None,
+                True,
+                flatten_records,
+                highlevel=True,
+                behavior=None,
             )
 
             if maxi is None or mini is None:
@@ -103,7 +131,7 @@ def _impl(array, axis, keepdims, mask_identity, flatten_records):
                     out = ak.highlevel.Array(ak.operations.fill_none(out, 0, axis=-1))
 
                 if not keepdims:
-                    posaxis = out.layout.axis_wrap_if_negative(axis)
+                    posaxis = ak._util.maybe_posaxis(out.layout, axis, 1)
                     out = out[(slice(None, None),) * posaxis + (0,)]
 
         return out

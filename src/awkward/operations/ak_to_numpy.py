@@ -7,11 +7,15 @@ import awkward as ak
 
 def to_numpy(array, *, allow_missing=True):
     """
+    Args:
+        array: Array-like data (anything #ak.to_layout recognizes).
+        allow_missing (bool): allow missing (None) values.
+
     Converts `array` (many types supported, including all Awkward Arrays and
     Records) into a NumPy array, if possible.
 
     If the data are numerical and regular (nested lists have equal lengths
-    in each dimension, as described by the #type), they can be losslessly
+    in each dimension, as described by the #ak.Array.type), they can be losslessly
     converted to a NumPy array and this function returns without an error.
 
     Otherwise, the function raises an error. It does not create a NumPy
@@ -36,4 +40,5 @@ def to_numpy(array, *, allow_missing=True):
         "ak.to_numpy",
         dict(array=array, allow_missing=allow_missing),
     ):
-        return ak._util.to_arraylib(numpy, array, allow_missing)
+        with numpy.errstate(invalid="ignore"):
+            return ak._util.to_arraylib(numpy, array, allow_missing)

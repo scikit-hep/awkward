@@ -38,24 +38,24 @@ def test():
     )
     b, c = make("Point2"), make("Point")
 
-    assert (a + b).tolist() == [
+    assert (a + b).to_list() == [
         [{"x": 2, "y": 2}, {"x": 3, "y": 3}],
         [{"x": 4, "y": 4}],
     ]
-    assert (b + c).tolist() == [
+    assert (b + c).to_list() == [
         [{"x": 2, "y": 2}, {"x": 4, "y": 4}],
         [{"x": 6, "y": 6}],
     ]
-    assert (a + c).tolist() == [
+    assert (a + c).to_list() == [
         [{"x": 2, "y": 2}, {"x": 3, "y": 3}],
         [{"x": 4, "y": 4}],
     ]
     d = ak.operations.concatenate([b, c], axis=1)
-    assert (a + d).tolist() == [
+    assert (a + d).to_list() == [
         [{"x": 2, "y": 2}, {"x": 3, "y": 3}, {"x": 2, "y": 2}, {"x": 3, "y": 3}],
         [{"x": 4, "y": 4}, {"x": 4, "y": 4}],
     ]
 
     e = ak.operations.concatenate([b[b.x < 0], c[c.x < 0]], axis=1)
 
-    assert (a + e).tolist() == [[], []]
+    assert (a + e).to_list() == [[], []]

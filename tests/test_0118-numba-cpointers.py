@@ -290,10 +290,10 @@ def test_RegularArray_getitem():
     def f1(x, i):
         return x[i]
 
-    assert f1(array, -2).tolist() == [1.1, 2.2, 3.3]
-    assert f1(array, 0).tolist() == [1.1, 2.2, 3.3]
-    assert f1(array, 1).tolist() == [4.4, 5.5, 6.6]
-    assert f1(array, -1).tolist() == [4.4, 5.5, 6.6]
+    assert f1(array, -2).to_list() == [1.1, 2.2, 3.3]
+    assert f1(array, 0).to_list() == [1.1, 2.2, 3.3]
+    assert f1(array, 1).to_list() == [4.4, 5.5, 6.6]
+    assert f1(array, -1).to_list() == [4.4, 5.5, 6.6]
 
     @numba.njit
     def f2(x, i, j):
@@ -969,9 +969,9 @@ def test_IndexedArray_deep_at():
     index1 = ak.index.Index32(np.array([1, 2, 3, 4], dtype=np.int32))
     indexedarray1 = ak.contents.IndexedArray(index1, content)
     index2 = ak.index.Index64(np.array([1, 2, 3], dtype=np.int64))
-    indexedarray2 = ak.contents.IndexedArray(index2, indexedarray1)
+    indexedarray2 = ak.contents.IndexedArray.simplified(index2, indexedarray1)
     index3 = ak.index.Index32(np.array([1, 2], dtype=np.int32))
-    indexedarray3 = ak.contents.IndexedArray(index3, indexedarray2)
+    indexedarray3 = ak.contents.IndexedArray.simplified(index3, indexedarray2)
     # This is not a valid array (IndexedArray inside IndexedArray), but instructive!  :)
     array = ak.highlevel.Array(indexedarray3, check_valid=False)
 

@@ -4,13 +4,13 @@ import numbers
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 def unflatten(array, counts, axis=0, *, highlevel=True, behavior=None):
     """
     Args:
-        array: Data to create an array with an additional level from.
+        array: Array-like data (anything #ak.to_layout recognizes).
         counts (int or array): Number of elements the new level should have.
             If an integer, the new level will be regularly sized; otherwise,
             it will consist of variable-length lists with the given lengths.
@@ -37,7 +37,7 @@ def unflatten(array, counts, axis=0, *, highlevel=True, behavior=None):
         >>> array
         <Array [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] type='10 * int64'>
         >>> ak.unflatten(array, counts)
-        <Array [[0, 1, 2], [], ... [5], [6, 7, 8, 9]] type='5 * var * int64'>
+        <Array [[0, 1, 2], [], [3, ...], [5], [6, 7, 8, 9]] type='5 * var * int64'>
 
     An inner dimension can be unflattened by setting the `axis` parameter, but
     operations like this constrain the `counts` more tightly.
@@ -45,16 +45,25 @@ def unflatten(array, counts, axis=0, *, highlevel=True, behavior=None):
     For example, we can subdivide an already divided list:
 
         >>> original = ak.Array([[1, 2, 3, 4], [], [5, 6, 7], [8, 9]])
-        >>> print(ak.unflatten(original, [2, 2, 1, 2, 1, 1], axis=1))
-        [[[1, 2], [3, 4]], [], [[5], [6, 7]], [[8], [9]]]
+        >>> ak.unflatten(original, [2, 2, 1, 2, 1, 1], axis=1).show()
+        [[[1, 2], [3, 4]],
+         [],
+         [[5], [6, 7]],
+         [[8], [9]]]
 
     But the counts have to add up to the lengths of those lists. We can't mix
     values from the first `[1, 2, 3, 4]` with values from the next `[5, 6, 7]`.
 
-        >>> print(ak.unflatten(original, [2, 1, 2, 2, 1, 1], axis=1))
-        Traceback (most recent call last):
-        ...
-        ValueError: structure imposed by 'counts' does not fit in the array at axis=1
+        >>> ak.unflatten(original, [2, 1, 2, 2, 1, 1], axis=1).show()
+        ValueError: while calling
+            ak.unflatten(
+                array = <Array [[1, 2, 3, 4], [], ..., [8, 9]] type='4 * var * int64'>
+                counts = [2, 1, 2, 2, 1, 1]
+                axis = 1
+                highlevel = True
+                behavior = None
+            )
+        Error details: structure imposed by 'counts' does not fit in the array or partition at axis=1
 
     Also note that new lists created by this function cannot cross partitions
     (which is only possible at `axis=0`, anyway).
@@ -87,7 +96,7 @@ def _impl(array, counts, axis, highlevel, behavior):
         if counts.is_option:
             mask = counts.mask_as_bool(valid_when=False)
             counts = counts.to_numpy(allow_missing=True)
-            counts = ak.nplikes.numpy.ma.filled(counts, 0)
+            counts = ak._nplikes.numpy.ma.filled(counts, 0)
         elif counts.is_numpy or counts.is_unknown:
             counts = counts.to_numpy(allow_missing=False)
             mask = False
@@ -147,18 +156,18 @@ def _impl(array, counts, axis, highlevel, behavior):
 
         return out
 
-    if axis == 0 or layout.axis_wrap_if_negative(axis) == 0:
+    if axis == 0 or ak._util.maybe_posaxis(layout, axis, 1) == 0:
         out = doit(layout)
 
     else:
 
-        def transform(layout, depth, posaxis):
+        def transform(layout, depth, axis):
             # Pack the current layout. This ensures that the `counts` array,
             # which is computed with these layouts applied, aligns with the
             # internal layout to be unflattened (#910)
-            layout = layout.packed()
+            layout = layout.to_packed()
 
-            posaxis = layout.axis_wrap_if_negative(posaxis)
+            posaxis = ak._util.maybe_posaxis(layout, axis, depth)
             if posaxis == depth and layout.is_list:
                 # We are one *above* the level where we want to apply this.
                 listoffsetarray = layout.to_ListOffsetArray64(True)
@@ -196,7 +205,7 @@ def _impl(array, counts, axis, highlevel, behavior):
             else:
                 return layout
 
-        out = transform(layout, depth=1, posaxis=axis)
+        out = transform(layout, depth=1, axis=axis)
 
     if current_offsets is not None and not (
         len(current_offsets[0]) == 1 and current_offsets[0][0] == 0

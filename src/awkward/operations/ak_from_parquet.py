@@ -235,10 +235,7 @@ def _load(
         )
 
     if len(arrays) == 0:
-        numpy = ak.nplikes.Numpy.instance()
-        return ak.operations.ak_from_buffers._impl(
-            subform, 0, _DictOfEmptyBuffers(), "", numpy, highlevel, behavior
-        )
+        return subform.length_zero_array(highlevel=highlevel, behavior=behavior)
     elif len(arrays) == 1:
         # make high-level
         if isinstance(arrays[0], ak.record.Record):
@@ -247,7 +244,7 @@ def _load(
     else:
         # TODO: if each array is a record?
         return ak.operations.ak_concatenate._impl(
-            arrays, 0, True, True, highlevel, behavior
+            arrays, axis=0, mergebool=True, highlevel=highlevel, behavior=behavior
         )
 
 

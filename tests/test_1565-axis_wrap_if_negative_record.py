@@ -26,7 +26,6 @@ def test_axis_wrap_if_negative_record_v2():
 
     with pytest.raises(np.AxisError):
         r = ak.operations.to_regular(r, 0)
-    r = ak.operations.to_regular(r, 2)
 
     list_cell_chain_field = [
         [["TRA", "TRAV1", 15], ["TRB", "TRBV1", 12]],

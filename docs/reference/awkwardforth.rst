@@ -19,9 +19,9 @@ This part of the documentation is the most in flux, since we'll likely add featu
 
 In C++, there are three classes:
 
-- `ForthMachineOf<T, I> <https://awkward-array.readthedocs.io/en/latest/_static/classawkward_1_1ForthMachineOf.html>`__, where ``T`` is the stack type (``int32_t`` or ``int64_t``) and ``I`` is the instruction type (only ``int32_t`` has been instantiated).
-- `ForthInputBuffer <https://awkward-array.readthedocs.io/en/latest/_static/classawkward_1_1ForthInputBuffer.html>`__ is an untyped input buffer, which wraps a ``std::shared_ptr<void>``. (Note that one operation, copying multiple numbers from the input buffer to the stack (not directly to output buffers), will temporarily mutate data in the buffer if they need to be byte-swapped. This is a temporary mutation, so the buffer can be used by other functions afterward, but not at the same time as the ForthMachine. This thread-unsafety could be changed in the future.)
-- `ForthOutputBufferOf<OUT> <https://awkward-array.readthedocs.io/en/latest/_static/classawkward_1_1ForthOutputBuffer.html>`__ is a typed output buffer, specialized by ``OUT``. (The fact that the write methods are virtual is not a performance bottleneck: putting the output type information into Forth bytecodes and using a ``switch`` statement to go to specialized method calls has identical performance for small copies and is up to 2× worse for large copies. C++ vtables are hard to beat.)
+- `ForthMachineOf<T, I> <https://awkward-array.org/doc/main/_static/doxygen/classawkward_1_1ForthMachineOf.html>`__, where ``T`` is the stack type (``int32_t`` or ``int64_t``) and ``I`` is the instruction type (only ``int32_t`` has been instantiated).
+- `ForthInputBuffer <https://awkward-array.org/doc/main/_static/doxygen/classawkward_1_1ForthInputBuffer.html>`__ is an untyped input buffer, which wraps a ``std::shared_ptr<void>``. (Note that one operation, copying multiple numbers from the input buffer to the stack (not directly to output buffers), will temporarily mutate data in the buffer if they need to be byte-swapped. This is a temporary mutation, so the buffer can be used by other functions afterward, but not at the same time as the ForthMachine. This thread-unsafety could be changed in the future.)
+- `ForthOutputBufferOf<OUT> <https://awkward-array.org/doc/main/_static/doxygen/classawkward_1_1ForthOutputBuffer.html>`__ is a typed output buffer, specialized by ``OUT``. (The fact that the write methods are virtual is not a performance bottleneck: putting the output type information into Forth bytecodes and using a ``switch`` statement to go to specialized method calls has identical performance for small copies and is up to 2× worse for large copies. C++ vtables are hard to beat.)
 
 In Python, only the two instantiations of the ForthMachine are bound through pybind11:
 
@@ -1324,7 +1324,7 @@ Variable-length integers
 
 Numbers less than ``2**7`` are encoded in 1 byte, other numbers less than ``2**14`` are encoded in 2 bytes, other numbers less than ``2**21`` are encoded in 3 bytes, etc.
 
-``zigzag->`` interprets the input as `zig-zag variable-length signed integers <https://code.google.com/apis/protocolbuffers/docs/encoding.html#types>`__, which is like the above except that the unsigned ``n`` computed from a variable-length encoding is mapped to ``(n >> 1) ^ (-(n & 1))``, which are signed integers that alternate with increasing distance from zero.
+``zigzag->`` interprets the input as `zig-zag variable-length signed integers <https://developers.google.com/protocol-buffers/docs/encoding?csw=1#varints>`__, which is like the above except that the unsigned ``n`` computed from a variable-length encoding is mapped to ``(n >> 1) ^ (-(n & 1))``, which are signed integers that alternate with increasing distance from zero.
 
 **Examples:**
 

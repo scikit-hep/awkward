@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 def combinations(
@@ -19,7 +19,7 @@ def combinations(
 ):
     """
     Args:
-        array: Array from which to choose `n` items without replacement.
+        array: Array-like data (anything #ak.to_layout recognizes).
         n (int): The number of items to choose in each list: `2` chooses
             unique pairs, `3` chooses unique triples, etc.
         replacement (bool): If True, combinations that include the same
@@ -48,13 +48,13 @@ def combinations(
     represent the "upper triangle" of sets without repetition. If
     `replacement=True`, the diagonal of this "upper triangle" is included.
 
-    As a simple example with `axis=0`, consider the following `array`
+    As a simple example with `axis=0`, consider the following
 
-        ak.Array(["a", "b", "c", "d", "e"])
+        >>> array = ak.Array(["a", "b", "c", "d", "e"])
 
     The combinations choose `2` are:
 
-        >>> ak.to_list(ak.combinations(array, 2, axis=0))
+        >>> ak.combinations(array, 2, axis=0).show()
         [('a', 'b'), ('a', 'c'), ('a', 'd'), ('a', 'e'),
                      ('b', 'c'), ('b', 'd'), ('b', 'e'),
                                  ('c', 'd'), ('c', 'e'),
@@ -62,7 +62,7 @@ def combinations(
 
     Including the diagonal allows pairs like `('a', 'a')`.
 
-        >>> ak.to_list(ak.combinations(array, 2, axis=0, replacement=True))
+        >>> ak.combinations(array, 2, axis=0, replacement=True).show()
         [('a', 'a'), ('a', 'b'), ('a', 'c'), ('a', 'd'), ('a', 'e'),
                      ('b', 'b'), ('b', 'c'), ('b', 'd'), ('b', 'e'),
                                  ('c', 'c'), ('c', 'd'), ('c', 'e'),
@@ -72,41 +72,60 @@ def combinations(
     The combinations choose `3` can't be easily arranged as a triangle
     in two dimensions.
 
-        >>> ak.to_list(ak.combinations(array, 3, axis=0))
-        [('a', 'b', 'c'), ('a', 'b', 'd'), ('a', 'b', 'e'), ('a', 'c', 'd'), ('a', 'c', 'e'),
-         ('a', 'd', 'e'), ('b', 'c', 'd'), ('b', 'c', 'e'), ('b', 'd', 'e'), ('c', 'd', 'e')]
+        >>> ak.combinations(array, 3, axis=0).show()
+        [('a', 'b', 'c'),
+         ('a', 'b', 'd'),
+         ('a', 'b', 'e'),
+         ('a', 'c', 'd'),
+         ('a', 'c', 'e'),
+         ('a', 'd', 'e'),
+         ('b', 'c', 'd'),
+         ('b', 'c', 'e'),
+         ('b', 'd', 'e'),
+         ('c', 'd', 'e')]
 
     Including the (three-dimensional) diagonal allows triples like
     `('a', 'a', 'a')`, but also `('a', 'a', 'b')`, `('a', 'b', 'b')`, etc.,
     but not `('a', 'b', 'a')`. All combinations are in the same order as
     the original array.
 
-        >>> ak.to_list(ak.combinations(array, 3, axis=0, replacement=True))
-        [('a', 'a', 'a'), ('a', 'a', 'b'), ('a', 'a', 'c'), ('a', 'a', 'd'), ('a', 'a', 'e'),
-         ('a', 'b', 'b'), ('a', 'b', 'c'), ('a', 'b', 'd'), ('a', 'b', 'e'), ('a', 'c', 'c'),
-         ('a', 'c', 'd'), ('a', 'c', 'e'), ('a', 'd', 'd'), ('a', 'd', 'e'), ('a', 'e', 'e'),
-         ('b', 'b', 'b'), ('b', 'b', 'c'), ('b', 'b', 'd'), ('b', 'b', 'e'), ('b', 'c', 'c'),
-         ('b', 'c', 'd'), ('b', 'c', 'e'), ('b', 'd', 'd'), ('b', 'd', 'e'), ('b', 'e', 'e'),
-         ('c', 'c', 'c'), ('c', 'c', 'd'), ('c', 'c', 'e'), ('c', 'd', 'd'), ('c', 'd', 'e'),
-         ('c', 'e', 'e'), ('d', 'd', 'd'), ('d', 'd', 'e'), ('d', 'e', 'e'), ('e', 'e', 'e')]
+        >>> ak.combinations(array, 3, axis=0, replacement=True).show()
+        [('a', 'a', 'a'),
+         ('a', 'a', 'b'),
+         ('a', 'a', 'c'),
+         ('a', 'a', 'd'),
+         ('a', 'a', 'e'),
+         ('a', 'b', 'b'),
+         ('a', 'b', 'c'),
+         ('a', 'b', 'd'),
+         ('a', 'b', 'e'),
+         ('a', 'c', 'c'),
+         ...,
+         ('c', 'c', 'd'),
+         ('c', 'c', 'e'),
+         ('c', 'd', 'd'),
+         ('c', 'd', 'e'),
+         ('c', 'e', 'e'),
+         ('d', 'd', 'd'),
+         ('d', 'd', 'e'),
+         ('d', 'e', 'e'),
+         ('e', 'e', 'e')]
 
     The primary purpose of this function, however, is to compute a different
     set of combinations for each element of an array: in other words, `axis=1`.
-    The following `array` has a different number of items in each element.
+    The following has a different number of items in each element.
 
-        ak.Array([[1, 2, 3, 4], [], [5], [6, 7, 8]])
+        >>> array = ak.Array([[1, 2, 3, 4], [], [5], [6, 7, 8]])
 
     There are 6 ways to choose pairs from 4 elements, 0 ways to choose pairs
     from 0 elements, 0 ways to choose pairs from 1 element, and 3 ways to
     choose pairs from 3 elements.
 
-        >>> ak.to_list(ak.combinations(array, 2))
-        [
-         [(1, 2), (1, 3), (1, 4), (2, 3), (2, 4), (3, 4)],
+        >>> ak.combinations(array, 2).show()
+        [[(1, 2), (1, 3), (1, 4), (2, 3), (2, 4), (3, 4)],
          [],
          [],
-         [(6, 7), (6, 8), (7, 8)]
-        ]
+         [(6, 7), (6, 8), (7, 8)]]
 
     Note, however, that the combinatorics isn't determined by equality of
     the data themselves, but by their placement in the array. For example,
@@ -114,17 +133,15 @@ def combinations(
     structure.
 
         >>> same = ak.Array([[7, 7, 7, 7], [], [7], [7, 7, 7]])
-        >>> ak.to_list(ak.combinations(same, 2))
-        [
-         [(7, 7), (7, 7), (7, 7), (7, 7), (7, 7), (7, 7)],
+        >>> ak.combinations(same, 2).show()
+        [[(7, 7), (7, 7), (7, 7), (7, 7), (7, 7), (7, 7)],
          [],
          [],
-         [(7, 7), (7, 7), (7, 7)]
-        ]
+         [(7, 7), (7, 7), (7, 7)]]
 
     To get records instead of tuples, pass a set of field names to `fields`.
 
-        >>> ak.to_list(ak.combinations(array, 2, fields=["x", "y"]))
+        >>> ak.combinations(array, 2, fields=["x", "y"]).show()
         [
          [{'x': 1, 'y': 2}, {'x': 1, 'y': 3}, {'x': 1, 'y': 4},
                             {'x': 2, 'y': 3}, {'x': 2, 'y': 4},
@@ -140,7 +157,7 @@ def combinations(
         >>> left, right = ak.unzip(ak.argcartesian([array, array]))
         >>> keep = left < right
         >>> result = ak.zip([array[left][keep], array[right][keep]])
-        >>> ak.to_list(result)
+        >>> result.show()
         [
          [(1, 2), (1, 3), (1, 4), (2, 3), (2, 4), (3, 4)],
          [],
@@ -193,7 +210,12 @@ def _impl(
         parameters["__record__"] = with_name
 
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
-    out = layout.combinations(
-        n, replacement=replacement, axis=axis, fields=fields, parameters=parameters
+    out = ak._do.combinations(
+        layout,
+        n,
+        replacement=replacement,
+        axis=axis,
+        fields=fields,
+        parameters=parameters,
     )
     return ak._util.wrap(out, behavior, highlevel, like=array)

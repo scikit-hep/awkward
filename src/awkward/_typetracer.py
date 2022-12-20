@@ -8,10 +8,10 @@ import numpy
 from numpy.lib import stride_tricks
 
 import awkward as ak
-from awkward import index, nplikes
+from awkward import _nplikes, index
 from awkward.typing import TypeVar
 
-np = nplikes.NumpyMetadata.instance()
+np = _nplikes.NumpyMetadata.instance()
 
 
 class NoError:
@@ -479,6 +479,18 @@ class TypeTracerArray:
         else:
             raise ak._errors.wrap_error(NotImplementedError(repr(where)))
 
+    def __eq__(self, other):
+        if isinstance(other, numbers.Real):
+            return TypeTracerArray(np.bool_, self._shape)
+        else:
+            return NotImplemented
+
+    def __ne__(self, other):
+        if isinstance(other, numbers.Real):
+            return TypeTracerArray(np.bool_, self._shape)
+        else:
+            return NotImplemented
+
     def __lt__(self, other):
         if isinstance(other, numbers.Real):
             return TypeTracerArray(np.bool_, self._shape)
@@ -517,8 +529,15 @@ class TypeTracerArray:
     def copy(self):
         return self
 
+    def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
+        replacements = [
+            numpy.empty(0, x.dtype) if hasattr(x, "dtype") else x for x in inputs
+        ]
+        result = getattr(ufunc, method)(*replacements, **kwargs)
+        return TypeTracerArray(result.dtype, shape=self._shape)
 
-class TypeTracer(ak.nplikes.NumpyLike):
+
+class TypeTracer(ak._nplikes.NumpyLike):
     known_data = False
     known_shape = False
 
@@ -692,11 +711,7 @@ class TypeTracer(ak.nplikes.NumpyLike):
         ):
             length = max(0, (stop - start + (step - (1 if step > 0 else -1))) // step)
         else:
-            raise ak._errors.wrap_error(
-                ValueError(
-                    "internal error: calling arange without integer value for start, stop, or step"
-                )
-            )
+            length = UnknownLength
 
         return TypeTracerArray(kwargs["dtype"], (length,))
 

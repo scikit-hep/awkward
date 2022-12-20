@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 def to_regular(array, axis=1, *, highlevel=True, behavior=None):
@@ -23,20 +23,26 @@ def to_regular(array, axis=1, *, highlevel=True, behavior=None):
     Converts a variable-length axis into a regular one, if possible.
 
         >>> irregular = ak.from_iter(np.arange(2*3*5).reshape(2, 3, 5))
-        >>> print(irregular.type)
+        >>> irregular.type.show()
         2 * var * var * int64
-        >>> print(ak.to_regular(irregular).type)
+        >>> ak.to_regular(irregular).type.show()
         2 * 3 * var * int64
-        >>> print(ak.to_regular(irregular, axis=2).type)
+        >>> ak.to_regular(irregular, axis=2).type.show()
         2 * var * 5 * int64
-        >>> print(ak.to_regular(irregular, axis=-1).type)
+        >>> ak.to_regular(irregular, axis=-1).type.show()
         2 * var * 5 * int64
 
     But truly irregular data cannot be converted.
 
         >>> ak.to_regular(ak.Array([[1, 2, 3], [], [4, 5]]))
-        ValueError: in ListOffsetArray64, cannot convert to RegularArray because
-        subarray lengths are not regular
+        ValueError: while calling
+            ak.to_regular(
+                array = <Array [[1, 2, 3], [], [4, 5]] type='3 * var * int64'>
+                axis = 1
+                highlevel = True
+                behavior = None
+            )
+        Error details: cannot convert to RegularArray because subarray lengths are not regular
 
     See also #ak.from_regular.
     """
@@ -50,7 +56,6 @@ def to_regular(array, axis=1, *, highlevel=True, behavior=None):
 def _impl(array, axis, highlevel, behavior):
     layout = ak.operations.to_layout(array)
     behavior = ak._util.behavior_of(array, behavior=behavior)
-    posaxis = layout.axis_wrap_if_negative(axis)
 
     if axis is None:
 
@@ -58,27 +63,25 @@ def _impl(array, axis, highlevel, behavior):
             if layout.is_list:
                 return continuation().to_RegularArray()
 
-        out = layout.recursively_apply(action, behavior)
+        out = ak._do.recursively_apply(layout, action, behavior)
 
-    elif posaxis == 0:
+    elif ak._util.maybe_posaxis(layout, axis, 1) == 0:
         out = layout  # the top-level can only be regular (ArrayType)
 
     else:
 
-        def action(layout, depth, depth_context, **kwargs):
-            posaxis = layout.axis_wrap_if_negative(depth_context["posaxis"])
+        def action(layout, depth, **kwargs):
+            posaxis = ak._util.maybe_posaxis(layout, axis, depth)
             if posaxis == depth and layout.is_list:
                 return layout.to_RegularArray()
-            elif posaxis == 0:
+
+            elif layout.is_leaf:
                 raise ak._errors.wrap_error(
                     np.AxisError(
                         f"axis={axis} exceeds the depth of this array ({depth})"
                     )
                 )
 
-            depth_context["posaxis"] = posaxis
-
-        depth_context = {"posaxis": posaxis}
-        out = layout.recursively_apply(action, behavior, depth_context)
+        out = ak._do.recursively_apply(layout, action, behavior)
 
     return ak._util.wrap(out, behavior, highlevel)

@@ -4,7 +4,7 @@ import pytest  # noqa: F401
 
 import awkward as ak
 
-numpy = ak.nplikes.Numpy.instance()
+numpy = ak._nplikes.Numpy.instance()
 
 
 def test_numpy_1d():

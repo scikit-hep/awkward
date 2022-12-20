@@ -4,13 +4,14 @@ import numbers
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
+cpu = ak._backends.NumpyBackend.instance()
 
 
 def fill_none(array, value, axis=-1, *, highlevel=True, behavior=None):
     """
     Args:
-        array: Data in which to replace None with a given value.
+        array: Array-like data (anything #ak.to_layout recognizes).
         value: Data with which to replace None.
         axis (None or int): If None, replace all None values in the array
             with the given value; if an int, The dimension at which this
@@ -25,9 +26,9 @@ def fill_none(array, value, axis=-1, *, highlevel=True, behavior=None):
 
     Replaces missing values (None) with a given `value`.
 
-    For example, in the following `array`,
+    For example, in the following
 
-        ak.Array([[1.1, None, 2.2], [], [None, 3.3, 4.4]])
+        >>> array = ak.Array([[1.1, None, 2.2], [], [None, 3.3, 4.4]])
 
     The None values could be replaced with `0` by
 
@@ -39,12 +40,15 @@ def fill_none(array, value, axis=-1, *, highlevel=True, behavior=None):
     by a string.
 
         >>> ak.fill_none(array, "hi")
-        <Array [[1.1, 'hi', 2.2], ... ['hi', 3.3, 4.4]] type='3 * var * union[float64, s...'>
+        <Array [[1.1, 'hi', 2.2], [], ['hi', ...]] type='3 * var * union[float64, s...'>
 
     The list content now has a union type:
 
-        >>> ak.type(ak.fill_none(array, "hi"))
-        3 * var * union[float64, string]
+        >>> ak.fill_none(array, "hi").type.show()
+        3 * var * union[
+            float64,
+            string
+        ]
 
     The values could be floating-point numbers or strings.
     """
@@ -60,7 +64,7 @@ def fill_none(array, value, axis=-1, *, highlevel=True, behavior=None):
 def _impl(array, value, axis, highlevel, behavior):
     arraylayout = ak.operations.to_layout(array, allow_record=True, allow_other=False)
     behavior = ak._util.behavior_of(array, behavior=behavior)
-    backend = ak._backends.backend_of(arraylayout)
+    backend = ak._backends.backend_of(arraylayout, default=cpu)
 
     # Convert value type to appropriate layout
     if (
@@ -104,7 +108,7 @@ def _impl(array, value, axis, highlevel, behavior):
 
     def maybe_fillna(layout):
         if layout.is_option:
-            return layout.fill_none(valuelayout)
+            return ak._do.fill_none(layout, valuelayout)
         else:
             return layout
 
@@ -115,15 +119,19 @@ def _impl(array, value, axis, highlevel, behavior):
 
     else:
 
-        def action(layout, depth, depth_context, **kwargs):
-            posaxis = layout.axis_wrap_if_negative(depth_context["posaxis"])
-            depth_context["posaxis"] = posaxis
-            if posaxis + 1 < depth:
+        def action(layout, depth, **kwargs):
+            posaxis = ak._util.maybe_posaxis(layout, axis, depth)
+            if posaxis is not None and posaxis + 1 < depth:
                 return layout
-            elif posaxis + 1 == depth:
+            elif posaxis is not None and posaxis + 1 == depth:
                 return maybe_fillna(layout)
+            elif layout.is_leaf:
+                raise ak._errors.wrap_error(
+                    np.AxisError(
+                        f"axis={axis} exceeds the depth of this array ({depth})"
+                    )
+                )
 
-    depth_context = {"posaxis": axis}
-    out = arraylayout.recursively_apply(action, behavior, depth_context=depth_context)
+    out = ak._do.recursively_apply(arraylayout, action, behavior)
 
     return ak._util.wrap(out, behavior, highlevel)

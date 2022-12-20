@@ -2,13 +2,13 @@
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
-def packed(array, *, highlevel=True, behavior=None):
+def to_packed(array, *, highlevel=True, behavior=None):
     """
     Args:
-        array: Array whose internal structure will be packed.
+        array: Array-like data (anything #ak.to_layout recognizes).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
@@ -22,9 +22,12 @@ def packed(array, *, highlevel=True, behavior=None):
     - #ak.contents.ListOffsetArray starts at `offsets[0] == 0`, trimming unreachable content
     - #ak.contents.RecordArray trims unreachable contents
     - #ak.contents.IndexedArray gets projected
-    - #ak.contents.IndexedOptionArray remains an #ak.contents.IndexedOptionArray (with simplified `index`) if it contains records, becomes #ak.contents.ByteMaskedArray otherwise
-    - #ak.contents.ByteMaskedArray becomes an #ak.contents.IndexedOptionArray if it contains records, stays a #ak.contents.ByteMaskedArray otherwise
-    - #ak.contents.BitMaskedArray becomes an #ak.contents.IndexedOptionArray if it contains records, stays a #ak.contents.BitMaskedArray otherwise
+    - #ak.contents.IndexedOptionArray remains an #ak.contents.IndexedOptionArray (with simplified `index`)
+      if it contains records, becomes #ak.contents.ByteMaskedArray otherwise
+    - #ak.contents.ByteMaskedArray becomes an #ak.contents.IndexedOptionArray if it contains records,
+      stays a #ak.contents.ByteMaskedArray otherwise
+    - #ak.contents.BitMaskedArray becomes an #ak.contents.IndexedOptionArray if it contains records,
+      stays a #ak.contents.BitMaskedArray otherwise
     - #ak.contents.UnionArray gets projected contents
     - #ak.record.Record becomes a record over a single-item #ak.contents.RecordArray
 
@@ -32,22 +35,27 @@ def packed(array, *, highlevel=True, behavior=None):
 
         >>> a = ak.Array([[1, 2, 3], [], [4, 5], [6], [7, 8, 9, 10]])
         >>> b = a[::-1]
-        >>> b
-        <Array [[7, 8, 9, 10], [6, ... [], [1, 2, 3]] type='5 * var * int64'>
         >>> b.layout
-        <ListArray64>
-            <starts><Index64 i="[6 5 3 3 0]" offset="0" length="5" at="0x55e091c2b1f0"/></starts>
-            <stops><Index64 i="[10 6 5 3 3]" offset="0" length="5" at="0x55e091a6ce80"/></stops>
-            <content><NumpyArray format="l" shape="10" data="1 2 3 4 5 6 7 8 9 10" at="0x55e091c47260"/></content>
-        </ListArray64>
-        >>> c = ak.packed(b)
-        >>> c
-        <Array [[7, 8, 9, 10], [6, ... [], [1, 2, 3]] type='5 * var * int64'>
+        <ListArray len='5'>
+            <starts><Index dtype='int64' len='5'>
+                [6 5 3 3 0]
+            </Index></starts>
+            <stops><Index dtype='int64' len='5'>
+                [10  6  5  3  3]
+            </Index></stops>
+            <content><NumpyArray dtype='int64' len='10'>
+                [ 1  2  3  4  5  6  7  8  9 10]
+            </NumpyArray></content>
+        </ListArray>
+
+        >>> c = ak.to_packed(b)
         >>> c.layout
-        <ListOffsetArray64>
-            <offsets><Index64 i="[0 4 5 7 7 10]" offset="0" length="6" at="0x55e091b077a0"/></offsets>
-            <content><NumpyArray format="l" shape="10" data="7 8 9 10 6 4 5 1 2 3" at="0x55e091d04d30"/></content>
-        </ListOffsetArray64>
+        <ListOffsetArray len='5'>
+            <offsets><Index dtype='int64' len='6'>[ 0  4  5  7  7 10]</Index></offsets>
+            <content><NumpyArray dtype='int64' len='10'>
+                [ 7  8  9 10  6  4  5  1  2  3]
+            </NumpyArray></content>
+        </ListOffsetArray>
 
     Performing these operations will minimize the output size of data sent to
     #ak.to_buffers (though conversions through Arrow, #ak.to_arrow and
@@ -56,7 +64,7 @@ def packed(array, *, highlevel=True, behavior=None):
     See also #ak.to_buffers.
     """
     with ak._errors.OperationErrorContext(
-        "ak.packed",
+        "ak.to_packed",
         dict(array=array, highlevel=highlevel, behavior=behavior),
     ):
         return _impl(array, highlevel, behavior)
@@ -64,5 +72,5 @@ def packed(array, *, highlevel=True, behavior=None):
 
 def _impl(array, highlevel, behavior):
     layout = ak.operations.to_layout(array, allow_record=True, allow_other=False)
-    out = layout.packed()
+    out = layout.to_packed()
     return ak._util.wrap(out, behavior, highlevel, like=array)

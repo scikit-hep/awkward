@@ -2,14 +2,14 @@
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
+cpu = ak._backends.NumpyBackend.instance()
 
 
 def run_lengths(array, *, highlevel=True, behavior=None):
-
     """
     Args:
-        array: Data containing runs of numbers to count.
+        array: Array-like data (anything #ak.to_layout recognizes).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
@@ -57,10 +57,10 @@ def run_lengths(array, *, highlevel=True, behavior=None):
         <Array [1, 1, 1, 2, 2, 3] type='6 * int64'>
         >>> ak.run_lengths(sorted.x)
         <Array [3, 2, 1] type='3 * int64'>
-        >>> ak.unflatten(sorted, ak.run_lengths(sorted.x)).tolist()
-        [[{'x': 1, 'y': 1.1}, {'x': 1, 'y': 1.1}, {'x': 1, 'y': 1.1}],
-         [{'x': 2, 'y': 2.2}, {'x': 2, 'y': 2.2}],
-         [{'x': 3, 'y': 3.3}]]
+        >>> ak.unflatten(sorted, ak.run_lengths(sorted.x)).show()
+        [[{x: 1, y: 1.1}, {x: 1, y: 1.1}, {x: 1, y: 1.1}],
+         [{x: 2, y: 2.2}, {x: 2, y: 2.2}],
+         [{x: 3, y: 3.3}]]
 
     Unlike a database "group by," this operation can be applied in bulk to many sublists
     (though the run lengths need to be fully flattened to be used as `counts` for
@@ -74,12 +74,9 @@ def run_lengths(array, *, highlevel=True, behavior=None):
         >>> ak.run_lengths(sorted.x)
         <Array [[2, 1], [1, 1, 1]] type='2 * var * int64'>
         >>> counts = ak.flatten(ak.run_lengths(sorted.x), axis=None)
-        >>> ak.unflatten(sorted, counts, axis=-1).tolist()
-        [[[{'x': 1, 'y': 1.1}, {'x': 1, 'y': 1.1}],
-          [{'x': 2, 'y': 2.2}]],
-         [[{'x': 1, 'y': 1.1}],
-          [{'x': 2, 'y': 2.2}],
-          [{'x': 3, 'y': 3.3}]]]
+        >>> ak.unflatten(sorted, counts, axis=-1).show()
+        [[[{x: 1, y: 1.1}, {x: 1, y: 1.1}], [{x: 2, y: 2.2}]],
+         [[{x: 1, y: 1.1}], [{x: 2, y: 2.2}], [{x: 3, y: 3.3}]]]
 
     See also #ak.num, #ak.argsort, #ak.unflatten.
     """
@@ -95,9 +92,7 @@ def run_lengths(array, *, highlevel=True, behavior=None):
 
 
 def _impl(array, highlevel, behavior):
-    backend = ak._backends.backend_of(
-        array, default=ak._backends.NumpyBackend.instance()
-    )
+    backend = ak._backends.backend_of(array, default=cpu)
 
     def lengths_of(data, offsets):
         if len(data) == 0:
@@ -221,5 +216,5 @@ def _impl(array, highlevel, behavior):
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
     behavior = ak._util.behavior_of(array, behavior=behavior)
 
-    out = layout.recursively_apply(action, behavior)
+    out = ak._do.recursively_apply(layout, action, behavior)
     return ak._util.wrap(out, behavior, highlevel)

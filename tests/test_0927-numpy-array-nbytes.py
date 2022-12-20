@@ -155,7 +155,7 @@ def test_UnionArray_nbytes():
     np_tags = np.array([1, 1, 0, 0, 1, 0, 1], dtype=np.int8)
     np_index = np.array([4, 3, 0, 1, 2, 2, 4, 100])
     np_content1 = np.array([1, 2, 3])
-    np_content2 = np.array([1.1, 2.2, 3.3, 4.4, 5.5])
+    np_content2 = np.array([[1.1], [2.2], [3.3], [4.4], [5.5]])
     array = ak.contents.unionarray.UnionArray(
         ak.index.Index(np_tags),
         ak.index.Index(np_index),

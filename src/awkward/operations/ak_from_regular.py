@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 def from_regular(array, axis=1, *, highlevel=True, behavior=None):
@@ -22,13 +22,13 @@ def from_regular(array, axis=1, *, highlevel=True, behavior=None):
     Converts a regular axis into an irregular one.
 
         >>> regular = ak.Array(np.arange(2*3*5).reshape(2, 3, 5))
-        >>> print(regular.type)
+        >>> regular.type.show()
         2 * 3 * 5 * int64
-        >>> print(ak.from_regular(regular).type)
+        >>> ak.from_regular(regular).type.show()
         2 * var * 5 * int64
-        >>> print(ak.from_regular(regular, axis=2).type)
+        >>> ak.from_regular(regular, axis=2).type.show()
         2 * 3 * var * int64
-        >>> print(ak.from_regular(regular, axis=-1).type)
+        >>> ak.from_regular(regular, axis=-1).type.show()
         2 * 3 * var * int64
 
     See also #ak.to_regular.
@@ -43,7 +43,6 @@ def from_regular(array, axis=1, *, highlevel=True, behavior=None):
 def _impl(array, axis, highlevel, behavior):
     layout = ak.operations.to_layout(array)
     behavior = ak._util.behavior_of(array, behavior=behavior)
-    posaxis = layout.axis_wrap_if_negative(axis)
 
     if axis is None:
 
@@ -51,31 +50,26 @@ def _impl(array, axis, highlevel, behavior):
             if layout.is_regular:
                 return continuation().to_ListOffsetArray64(False)
 
-        out = layout.recursively_apply(action, behavior, numpy_to_regular=True)
+        out = ak._do.recursively_apply(layout, action, behavior, numpy_to_regular=True)
 
-    elif posaxis == 0:
+    elif ak._util.maybe_posaxis(layout, axis, 1) == 0:
         out = layout  # the top-level is already regular (ArrayType)
 
     else:
 
-        def action(layout, depth, depth_context, **kwargs):
-            posaxis = layout.axis_wrap_if_negative(depth_context["posaxis"])
+        def action(layout, depth, **kwargs):
+            posaxis = ak._util.maybe_posaxis(layout, axis, depth)
             if posaxis == depth and layout.is_regular:
                 return layout.to_ListOffsetArray64(False)
             elif posaxis == depth and layout.is_list:
                 return layout
-            elif posaxis == 0:
+            elif layout.is_leaf:
                 raise ak._errors.wrap_error(
                     np.AxisError(
                         f"axis={axis} exceeds the depth of this array ({depth})"
                     )
                 )
 
-            depth_context["posaxis"] = posaxis
-
-        depth_context = {"posaxis": posaxis}
-        out = layout.recursively_apply(
-            action, behavior, depth_context, numpy_to_regular=True
-        )
+        out = ak._do.recursively_apply(layout, action, behavior, numpy_to_regular=True)
 
     return ak._util.wrap(out, behavior, highlevel)

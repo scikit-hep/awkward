@@ -3,7 +3,7 @@
 import awkward as ak
 from awkward.typing import Sequence
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 def headtail(oldtail):
@@ -62,7 +62,7 @@ def prepare_advanced_indexing(items):
         )
 
     # Then broadcast the index items
-    nplike = ak.nplikes.nplike_of(*broadcastable)
+    nplike = ak._nplikes.nplike_of(*broadcastable)
     broadcasted = nplike.broadcast_arrays(*broadcastable)
 
     # And re-assemble the index with the broadcasted items
@@ -151,6 +151,23 @@ def normalise_item(item, backend: ak._backends.Backend):
     elif isinstance(item, ak.contents.NumpyArray):
         return item.data
 
+    elif isinstance(item, ak.contents.RegularArray):
+        # Pure NumPy arrays without masks follow NumPy advanced indexing
+        # If we can produce such a content, return the underlying NumPy array
+        # Otherwise, we probably have options or are not purelist_regular, etc.
+        # As such, we then follow Awkward indexing. This logic should follow
+        # the generic `isinstance(item, ak.contents.Content)` case below
+        as_numpy = item.maybe_to_NumpyArray()
+
+        if as_numpy is None:
+            out = normalise_item_bool_to_int(normalise_item_nested(item))
+            if isinstance(out, ak.contents.NumpyArray):
+                return out.data
+            else:
+                return out
+        else:
+            return as_numpy.data
+
     elif isinstance(item, ak.contents.Content):
         out = normalise_item_bool_to_int(normalise_item_nested(item))
         if isinstance(out, ak.contents.NumpyArray):
@@ -166,11 +183,11 @@ def normalise_item(item, backend: ak._backends.Backend):
 
     elif ak._util.is_sized_iterable(item):
         layout = ak.operations.to_layout(item)
-        as_array = layout.maybe_to_array()
-        if as_array is None:
+        as_numpy = layout.maybe_to_NumpyArray()
+        if as_numpy is None:
             return normalise_item(layout, backend)
         else:
-            return as_array
+            return as_numpy.data
 
     else:
         raise ak._errors.wrap_error(
@@ -191,7 +208,6 @@ def normalise_items(where: Sequence, backend: ak._backends.Backend) -> list:
 
 def normalise_item_RegularArray_to_ListOffsetArray64(item):
     if isinstance(item, ak.contents.RegularArray):
-
         next = item.to_ListOffsetArray64()
         return ak.contents.ListOffsetArray(
             next.offsets,
@@ -199,7 +215,7 @@ def normalise_item_RegularArray_to_ListOffsetArray64(item):
             parameters=item.parameters,
         )
 
-    elif isinstance(item, ak.contents.NumpyArray):
+    elif isinstance(item, ak.contents.NumpyArray) and item.purelist_depth == 1:
         return item
 
     else:
@@ -222,9 +238,11 @@ def normalise_item_nested(item):
                 parameters=item.parameters,
                 backend=item.backend,
             )
-        next = next.to_RegularArray()
-        next = normalise_item_RegularArray_to_ListOffsetArray64(next)
-        return next
+        # Any NumpyArray at this point is part of a non-Numpy indexing
+        # slice item. Therefore, we want to invoke ragged indexing by
+        # converting N-dimensional layouts to ListOffsetArray, and converting the
+        # dtype to int if not a supported index type
+        return normalise_item_RegularArray_to_ListOffsetArray64(next.to_RegularArray())
 
     elif isinstance(
         item,
@@ -266,8 +284,7 @@ def normalise_item_nested(item):
             ak.contents.UnmaskedArray,
         ),
     ):
-        next = item.simplify_optiontype()
-        return normalise_item_nested(next)
+        return normalise_item_nested(item)
 
     elif isinstance(
         item,
@@ -323,15 +340,11 @@ def normalise_item_nested(item):
         )
 
     elif isinstance(item, ak.contents.UnionArray):
-        attempt = item.simplify_uniontype()
-        if isinstance(attempt, ak.contents.UnionArray):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "irreducible unions (different types at the same level in an array) can't be used as slices"
-                )
+        raise ak._errors.wrap_error(
+            TypeError(
+                "irreducible unions (different types at the same level in an array) can't be used as slices"
             )
-
-        return normalise_item_nested(attempt)
+        )
 
     elif isinstance(item, ak.contents.RecordArray):
         raise ak._errors.wrap_error(TypeError("record arrays can't be used as slices"))
@@ -356,7 +369,7 @@ def normalise_item_bool_to_int(item):
         and issubclass(item.content.dtype.type, (bool, np.bool_))
     ):
         if item.backend.nplike.known_data or item.backend.nplike.known_shape:
-            localindex = item.local_index(axis=1)
+            localindex = ak._do.local_index(item, axis=1)
             nextcontent = localindex.content.data[item.content.data]
 
             cumsum = item.backend.index_nplike.empty(
@@ -386,7 +399,7 @@ def normalise_item_bool_to_int(item):
         and issubclass(item.content.content.dtype.type, (bool, np.bool_))
     ):
         if item.backend.nplike.known_data or item.backend.nplike.known_shape:
-            if isinstance(item.backend.nplike, ak.nplikes.Jax):
+            if isinstance(item.backend.nplike, ak._nplikes.Jax):
                 raise ak._errors.wrap_error(
                     "This slice is not supported for JAX differentiation."
                 )
@@ -406,7 +419,7 @@ def normalise_item_bool_to_int(item):
                     safeindex.shape[0], np.bool_
                 )
 
-            localindex = item.local_index(axis=1)
+            localindex = ak._do.local_index(item, axis=1)
 
             # nextcontent does not include missing values
             expanded[isnegative] = False
@@ -455,7 +468,7 @@ def normalise_item_bool_to_int(item):
             item.content.dtype.type, (bool, np.bool_)
         ):
             if item.backend.nplike.known_data or item.backend.nplike.known_shape:
-                if isinstance(item.backend.nplike, ak.nplikes.Jax):
+                if isinstance(item.backend.nplike, ak._nplikes.Jax):
                     raise ak._errors.wrap_error(
                         "This slice is not supported for JAX differentiation."
                     )

@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._util import unset
 from awkward.forms.form import Form, _parameters_equal
 
 
@@ -37,6 +38,18 @@ class RegularForm(Form):
     @property
     def size(self):
         return self._size
+
+    def copy(self, content=unset, size=unset, *, parameters=unset, form_key=unset):
+        return RegularForm(
+            self._content if content is unset else content,
+            self._size if size is unset else size,
+            parameters=self._parameters if parameters is unset else parameters,
+            form_key=self._form_key if form_key is unset else form_key,
+        )
+
+    @classmethod
+    def simplified(cls, content, size, *, parameters=None, form_key=None):
+        return cls(content, size, parameters=parameters, form_key=form_key)
 
     def __repr__(self):
         args = [repr(self._content), repr(self._size)] + self._repr_args()

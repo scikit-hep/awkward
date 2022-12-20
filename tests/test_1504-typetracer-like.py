@@ -12,9 +12,9 @@ def test_ones_like(dtype, like_dtype):
     array = ak.contents.numpyarray.NumpyArray(
         np.array([99, 88, 77, 66, 66], dtype=dtype)
     )
-    ones = ak.ones_like(array.typetracer, dtype=like_dtype, highlevel=False)
-    assert ones.typetracer.shape == array.shape
-    assert ones.typetracer.dtype == like_dtype or array.dtype
+    ones = ak.ones_like(array.to_typetracer(), dtype=like_dtype, highlevel=False)
+    assert ones.to_typetracer().shape == array.shape
+    assert ones.to_typetracer().dtype == like_dtype or array.dtype
 
 
 @pytest.mark.parametrize("dtype", [np.float64, np.int64, np.uint8, None])
@@ -24,9 +24,9 @@ def test_zeros_like(dtype, like_dtype):
         np.array([99, 88, 77, 66, 66], dtype=dtype)
     )
 
-    full = ak.zeros_like(array.typetracer, dtype=like_dtype, highlevel=False)
-    assert full.typetracer.shape == array.shape
-    assert full.typetracer.dtype == like_dtype or array.dtype
+    full = ak.zeros_like(array.to_typetracer(), dtype=like_dtype, highlevel=False)
+    assert full.to_typetracer().shape == array.shape
+    assert full.to_typetracer().dtype == like_dtype or array.dtype
 
 
 @pytest.mark.parametrize("dtype", [np.float64, np.int64, np.uint8, None])
@@ -36,9 +36,9 @@ def test_full_like(dtype, like_dtype, value):
     array = ak.contents.numpyarray.NumpyArray(
         np.array([99, 88, 77, 66, 66], dtype=dtype)
     )
-    full = ak.full_like(array.typetracer, value, dtype=like_dtype, highlevel=False)
-    assert full.typetracer.shape == array.shape
-    assert full.typetracer.dtype == like_dtype or array.dtype
+    full = ak.full_like(array.to_typetracer(), value, dtype=like_dtype, highlevel=False)
+    assert full.to_typetracer().shape == array.shape
+    assert full.to_typetracer().dtype == like_dtype or array.dtype
 
 
 def test_typetracer_array():

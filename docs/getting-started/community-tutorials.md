@@ -12,7 +12,7 @@ An HSF-provided tutorial aimed at High Energy Physics (HEP) researchers on using
 - Unzip arrays with {func}`ak.unzip`.
 - Ravel (flatten) ragged arrays with {func}`ak.ravel`.
 
-## Loopy and unloopy programming tchniques (SciPy 2022)
+## Loopy and unloopy programming techniques (SciPy 2022)
 A tutorial presented at the SciPy conference on July 11, 2022.
 
 ### Format

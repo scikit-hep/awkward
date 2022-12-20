@@ -10,7 +10,7 @@ from awkward.types import ArrayType, ListType, NumpyType, OptionType, RegularTyp
 def test_simple():
     a = ak.from_numpy(np.array([[1, 2], [3, 4], [5, 6]]), regulararray=True)
     b = ak.from_numpy(np.array([[7, 8], [9, 10]]), regulararray=True)
-    c = a.layout.merge(b.layout)
+    c = a.layout._mergemany([b.layout])
     assert isinstance(c, ak.contents.RegularArray)
     assert c.size == 2
     assert ak.operations.to_list(c) == [[1, 2], [3, 4], [5, 6], [7, 8], [9, 10]]
@@ -22,7 +22,7 @@ def test_regular_regular():
     a1 = ak.to_regular(a1, axis=1)
     a2 = ak.to_regular(a2, axis=1)
     c = ak.concatenate([a1, a2])
-    assert c.tolist() == [[0.0, 1.1], [2.2, 3.3], [4.4, 5.5], [6.6, 7.7], [8.8, 9.9]]
+    assert c.to_list() == [[0.0, 1.1], [2.2, 3.3], [4.4, 5.5], [6.6, 7.7], [8.8, 9.9]]
     assert c.type == ArrayType(RegularType(NumpyType("float64"), 2), 5)
 
 
@@ -32,7 +32,7 @@ def test_regular_option():
     a1 = ak.to_regular(a1, axis=1)
     a2 = ak.to_regular(a2, axis=1)
     c = ak.concatenate([a1, a2])
-    assert c.tolist() == [
+    assert c.to_list() == [
         [0.0, 1.1],
         [2.2, 3.3],
         [4.4, 5.5],
@@ -49,7 +49,7 @@ def test_option_regular():
     a1 = ak.to_regular(a1, axis=1)
     a2 = ak.to_regular(a2, axis=1)
     c = ak.concatenate([a1, a2])
-    assert c.tolist() == [
+    assert c.to_list() == [
         [0.0, 1.1],
         None,
         [2.2, 3.3],
@@ -66,7 +66,7 @@ def test_option_option():
     a1 = ak.to_regular(a1, axis=1)
     a2 = ak.to_regular(a2, axis=1)
     c = ak.concatenate([a1, a2])
-    assert c.tolist() == [
+    assert c.to_list() == [
         [0.0, 1.1],
         None,
         [2.2, 3.3],
@@ -84,7 +84,7 @@ def test_regular_numpy():
     a1 = ak.to_regular(a1, axis=1)
     assert isinstance(a2.layout, ak.contents.NumpyArray)
     c = ak.concatenate([a1, a2])
-    assert c.tolist() == [[0.0, 1.1], [2.2, 3.3], [4.4, 5.5], [6.6, 7.7], [8.8, 9.9]]
+    assert c.to_list() == [[0.0, 1.1], [2.2, 3.3], [4.4, 5.5], [6.6, 7.7], [8.8, 9.9]]
     assert c.type == ArrayType(RegularType(NumpyType("float64"), 2), 5)
 
 
@@ -94,7 +94,7 @@ def test_numpy_regular():
     assert isinstance(a1.layout, ak.contents.NumpyArray)
     a2 = ak.to_regular(a2, axis=1)
     c = ak.concatenate([a1, a2])
-    assert c.tolist() == [[0.0, 1.1], [2.2, 3.3], [4.4, 5.5], [6.6, 7.7], [8.8, 9.9]]
+    assert c.to_list() == [[0.0, 1.1], [2.2, 3.3], [4.4, 5.5], [6.6, 7.7], [8.8, 9.9]]
     assert c.type == ArrayType(RegularType(NumpyType("float64"), 2), 5)
 
 
@@ -104,7 +104,7 @@ def test_regular_regular_axis1():
     a1 = ak.to_regular(a1, axis=1)
     a2 = ak.to_regular(a2, axis=1)
     c = ak.concatenate([a1, a2], axis=1)
-    assert c.tolist() == [[0.0, 1.1, 4.4, 5.5, 6.6], [2.2, 3.3, 7.7, 8.8, 9.9]]
+    assert c.to_list() == [[0.0, 1.1, 4.4, 5.5, 6.6], [2.2, 3.3, 7.7, 8.8, 9.9]]
     assert c.type == ArrayType(RegularType(NumpyType("float64"), 5), 2)
 
 
@@ -114,7 +114,7 @@ def test_option_regular_axis1():
     a1 = ak.to_regular(a1, axis=1)
     a2 = ak.to_regular(a2, axis=1)
     c = ak.concatenate([a1, a2], axis=1)
-    assert c.tolist() == [
+    assert c.to_list() == [
         [0.0, 1.1, 4.4, 5.5, 6.6],
         [7, 8, 9],
         [2.2, 3.3, 7.7, 8.8, 9.9],
@@ -128,7 +128,7 @@ def test_regular_option_axis1():
     a1 = ak.to_regular(a1, axis=1)
     a2 = ak.to_regular(a2, axis=1)
     c = ak.concatenate([a1, a2], axis=1)
-    assert c.tolist() == [[0.0, 1.1, 4.4, 5.5, 6.6], [7, 8], [2.2, 3.3, 7.7, 8.8, 9.9]]
+    assert c.to_list() == [[0.0, 1.1, 4.4, 5.5, 6.6], [7, 8], [2.2, 3.3, 7.7, 8.8, 9.9]]
     assert c.type == ArrayType(ListType(NumpyType("float64")), 3)
 
 
@@ -138,7 +138,7 @@ def test_option_option_axis1():
     a1 = ak.to_regular(a1, axis=1)
     a2 = ak.to_regular(a2, axis=1)
     c = ak.concatenate([a1, a2], axis=1)
-    assert c.tolist() == [[0.0, 1.1, 4.4, 5.5, 6.6], [], [2.2, 3.3, 7.7, 8.8, 9.9]]
+    assert c.to_list() == [[0.0, 1.1, 4.4, 5.5, 6.6], [], [2.2, 3.3, 7.7, 8.8, 9.9]]
     assert c.type == ArrayType(ListType(NumpyType("float64")), 3)
 
 
@@ -148,7 +148,7 @@ def test_regular_numpy_axis1():
     a1 = ak.to_regular(a1, axis=1)
     assert isinstance(a2.layout, ak.contents.NumpyArray)
     c = ak.concatenate([a1, a2], axis=1)
-    assert c.tolist() == [[0.0, 1.1, 4.4, 5.5, 6.6], [2.2, 3.3, 7.7, 8.8, 9.9]]
+    assert c.to_list() == [[0.0, 1.1, 4.4, 5.5, 6.6], [2.2, 3.3, 7.7, 8.8, 9.9]]
     assert c.type == ArrayType(RegularType(NumpyType("float64"), 5), 2)
 
 
@@ -158,5 +158,5 @@ def test_numpy_regular_axis1():
     assert isinstance(a1.layout, ak.contents.NumpyArray)
     a2 = ak.to_regular(a2, axis=1)
     c = ak.concatenate([a1, a2], axis=1)
-    assert c.tolist() == [[0.0, 1.1, 4.4, 5.5, 6.6], [2.2, 3.3, 7.7, 8.8, 9.9]]
+    assert c.to_list() == [[0.0, 1.1, 4.4, 5.5, 6.6], [2.2, 3.3, 7.7, 8.8, 9.9]]
     assert c.type == ArrayType(RegularType(NumpyType("float64"), 5), 2)

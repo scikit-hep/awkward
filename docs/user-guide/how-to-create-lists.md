@@ -79,7 +79,7 @@ From NumPy arrays
 The {class}`ak.Array` constructor loads NumPy arrays differently from Python lists. The inner dimensions of a NumPy array are guaranteed to have the same lengths, so they are interpreted as a fixed-length list type.
 
 ```{code-cell} ipython3
-numpy_array = np.arange(2*3*5).reshape(2, 3, 5)
+numpy_array = np.arange(2 * 3 * 5).reshape(2, 3, 5)
 numpy_array
 ```
 
@@ -95,7 +95,10 @@ The type in this case has no "`var *`" in it, only "`2 *`", "`3 *`", and "`5 *`"
 Furthermore, if NumPy arrays are _nested within_ Python lists (or other iterables), they'll be treated as variable-length ("`var *`") because there's no guarantee at the start of a sequence that all NumPy arrays in the sequence will have the same shape.
 
 ```{code-cell} ipython3
-numpy_arrays = [np.arange(3*5).reshape(3, 5), np.arange(3*5, 2*3*5).reshape(3, 5)]
+numpy_arrays = [
+    np.arange(3 * 5).reshape(3, 5),
+    np.arange(3 * 5, 2 * 3 * 5).reshape(3, 5),
+]
 numpy_arrays
 ```
 
@@ -219,12 +222,14 @@ def append_list(builder, start, stop):
         builder.append(x)
     builder.end_list()
 
+
 @nb.jit
 def example(builder):
     append_list(builder, 1, 4)
     append_list(builder, 999, 999)
     append_list(builder, 4, 6)
     return builder
+
 
 builder = example(ak.ArrayBuilder())
 
@@ -242,6 +247,7 @@ def append_list(i, data, j, counts, start, stop):
     j += 1
     return i, j
 
+
 @nb.jit
 def example():
     data = np.empty(5, np.int64)
@@ -251,6 +257,7 @@ def example():
     i, j = append_list(i, data, j, counts, 999, 999)
     i, j = append_list(i, data, j, counts, 4, 6)
     return data, counts
+
 
 data, counts = example()
 

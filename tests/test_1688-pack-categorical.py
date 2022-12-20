@@ -4,20 +4,20 @@ import pytest  # noqa: F401
 
 import awkward as ak
 
-numpy = ak.nplikes.Numpy.instance()
+numpy = ak._nplikes.Numpy.instance()
 
 
 def test():
     this = ak.to_categorical(["one", "two", "one", "three", "one", "four"])
     assert ak.is_categorical(this)
     # Ensure packing by itself doesn't change the type
-    this_packed = ak.packed(this)
+    this_packed = ak.to_packed(this)
     assert this_packed.type == this.type
     # Ensure the categories match between the two
     assert ak.all(ak.categories(this_packed) == ak.categories(this))
 
     # Ensure the inner types match (ignoring the length change)
-    this_subset_packed = ak.packed(this[:-1])
+    this_subset_packed = ak.to_packed(this[:-1])
     assert ak.is_categorical(this_subset_packed)
     assert this_subset_packed.type.content == this.type.content
     # Ensure the categories match between the two

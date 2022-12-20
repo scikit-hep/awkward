@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 @ak._connect.numpy.implements("nan_to_num")
@@ -19,7 +19,7 @@ def nan_to_num(
 
     """
     Args:
-        array: Array whose `NaN` values should be converted to a number.
+        array: Array-like data (anything #ak.to_layout recognizes).
         copy (bool): Ignored (Awkward Arrays are immutable).
         nan (int, float, broadcastable array): Value to be used to fill `NaN` values.
         posinf (None, int, float, broadcastable array): Value to be used to fill positive infinity
@@ -75,7 +75,7 @@ def _impl(array, copy, nan, posinf, neginf, highlevel, behavior):
         broadcasting_ids[id(neginf)] = len(broadcasting)
         broadcasting.append(neginf_layout)
 
-    nplike = ak.nplikes.nplike_of(layout)
+    nplike = ak._nplikes.nplike_of(layout)
 
     if len(broadcasting) == 1:
 
@@ -92,7 +92,7 @@ def _impl(array, copy, nan, posinf, neginf, highlevel, behavior):
             else:
                 return None
 
-        out = layout.recursively_apply(action, behavior)
+        out = ak._do.recursively_apply(layout, action, behavior)
 
     else:
 

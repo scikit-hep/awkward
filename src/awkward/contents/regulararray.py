@@ -4,34 +4,18 @@ from __future__ import annotations
 import copy
 
 import awkward as ak
-from awkward.contents.content import Content, unset
+from awkward._util import unset
+from awkward.contents.content import Content
 from awkward.forms.regularform import RegularForm
-from awkward.typing import Self
+from awkward.typing import Final, Self
 
-np = ak.nplikes.NumpyMetadata.instance()
-numpy = ak.nplikes.Numpy.instance()
+np = ak._nplikes.NumpyMetadata.instance()
+numpy = ak._nplikes.Numpy.instance()
 
 
 class RegularArray(Content):
     is_list = True
     is_regular = True
-
-    def copy(self, content=unset, size=unset, zeros_length=unset, *, parameters=unset):
-        return RegularArray(
-            self._content if content is unset else content,
-            self._size if size is unset else size,
-            self._length if zeros_length is unset else zeros_length,
-            parameters=self._parameters if parameters is unset else parameters,
-        )
-
-    def __copy__(self):
-        return self.copy()
-
-    def __deepcopy__(self, memo):
-        return self.copy(
-            content=copy.deepcopy(self._content, memo),
-            parameters=copy.deepcopy(self._parameters, memo),
-        )
 
     def __init__(self, content, size, zeros_length=0, *, parameters=None):
         if not isinstance(content, Content):
@@ -63,6 +47,25 @@ class RegularArray(Content):
                     )
                 )
 
+        if parameters is not None and parameters.get("__array__") == "string":
+            if not content.is_numpy or not content.parameter("__array__") == "char":
+                raise ak._errors.wrap_error(
+                    ValueError(
+                        "{} is a string, so its 'content' must be uint8 NumpyArray of char, not {}".format(
+                            type(self).__name__, repr(content)
+                        )
+                    )
+                )
+        if parameters is not None and parameters.get("__array__") == "bytestring":
+            if not content.is_numpy or not content.parameter("__array__") == "byte":
+                raise ak._errors.wrap_error(
+                    ValueError(
+                        "{} is a bytestring, so its 'content' must be uint8 NumpyArray of byte, not {}".format(
+                            type(self).__name__, repr(content)
+                        )
+                    )
+                )
+
         self._content = content
         self._size = size
         if size != 0:
@@ -72,14 +75,47 @@ class RegularArray(Content):
         self._init(parameters, content.backend)
 
     @property
-    def size(self):
-        return self._size
-
-    @property
     def content(self):
         return self._content
 
-    form_cls = RegularForm
+    @property
+    def size(self):
+        return self._size
+
+    form_cls: Final = RegularForm
+
+    def copy(self, content=unset, size=unset, zeros_length=unset, *, parameters=unset):
+        return RegularArray(
+            self._content if content is unset else content,
+            self._size if size is unset else size,
+            self._length if zeros_length is unset else zeros_length,
+            parameters=self._parameters if parameters is unset else parameters,
+        )
+
+    def __copy__(self):
+        return self.copy()
+
+    def __deepcopy__(self, memo):
+        return self.copy(
+            content=copy.deepcopy(self._content, memo),
+            parameters=copy.deepcopy(self._parameters, memo),
+        )
+
+    @classmethod
+    def simplified(cls, content, size, zeros_length=0, *, parameters=None):
+        return cls(content, size, zeros_length, parameters=parameters)
+
+    @property
+    def offsets(self):
+        return self._compact_offsets64(True)
+
+    @property
+    def starts(self):
+        return self._compact_offsets64(True)[:-1]
+
+    @property
+    def stops(self):
+        return self._compact_offsets64(True)[1:]
 
     def _form_with_key(self, getkey):
         form_key = getkey(self)
@@ -90,30 +126,21 @@ class RegularArray(Content):
             form_key=form_key,
         )
 
-    def _to_buffers(self, form, getkey, container, nplike):
+    def _to_buffers(self, form, getkey, container, backend):
         assert isinstance(form, self.form_cls)
-        self._content._to_buffers(form.content, getkey, container, nplike)
+        self._content._to_buffers(form.content, getkey, container, backend)
 
-    @property
-    def typetracer(self):
+    def _to_typetracer(self, forget_length: bool) -> Self:
         return RegularArray(
-            self._content.typetracer,
+            self._content._to_typetracer(forget_length),
             self._size,
-            self._length,
+            ak._typetracer.UnknownLength if forget_length else self._length,
             parameters=self._parameters,
         )
 
     @property
     def length(self):
         return self._length
-
-    def _forget_length(self):
-        return RegularArray(
-            self._content._forget_length(),
-            self._size,
-            ak._typetracer.UnknownLength,
-            parameters=self._parameters,
-        )
 
     def __repr__(self):
         return self._repr("", "", "")
@@ -131,14 +158,6 @@ class RegularArray(Content):
         out.append(post)
         return "".join(out)
 
-    def merge_parameters(self, parameters):
-        return RegularArray(
-            self._content,
-            self._size,
-            self._length,
-            parameters=ak._util.merge_parameters(self._parameters, parameters),
-        )
-
     def to_ListOffsetArray64(self, start_at_zero=False):
         offsets = self._compact_offsets64(start_at_zero)
         return self._broadcast_tooffsets64(offsets)
@@ -146,22 +165,20 @@ class RegularArray(Content):
     def to_RegularArray(self):
         return self
 
-    def maybe_to_NumpyArray(self):
-        content = None
-        if isinstance(self._content, ak.contents.NumpyArray):
-            content = self._content[: self._length * self._size]
-        elif isinstance(self._content, RegularArray):
-            content = self._content[: self._length * self._size].maybe_to_NumpyArray()
+    def maybe_to_NumpyArray(self) -> ak.contents.NumpyArray | None:
+        content = self._content[: self._length * self._size].maybe_to_NumpyArray()
 
-        if isinstance(content, ak.contents.NumpyArray):
+        if content is not None:
             shape = (self._length, self._size) + content.data.shape[1:]
             return ak.contents.NumpyArray(
                 content.data.reshape(shape),
                 parameters=ak._util.merge_parameters(
-                    self._parameters, content.parameters, True
+                    self._parameters, content.parameters
                 ),
-                backend=self._backend,
+                backend=content.backend,
             )
+        else:
+            return None
 
     def _getitem_nothing(self):
         return self._content._getitem_range(slice(0, 0))
@@ -324,13 +341,6 @@ class RegularArray(Content):
     def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
         out = self.to_ListOffsetArray64(True)
         return out._getitem_next_jagged(slicestarts, slicestops, slicecontent, tail)
-
-    def maybe_to_array(self):
-        out = self._content.maybe_to_array()
-        if out is None:
-            return out
-        else:
-            return out.reshape((self._length, -1) + out.shape[1:])
 
     def _getitem_next(self, head, tail, advanced):
         if head == ():
@@ -602,33 +612,10 @@ class RegularArray(Content):
         else:
             raise ak._errors.wrap_error(AssertionError(repr(head)))
 
-    def num(self, axis, depth=0):
-        posaxis = self.axis_wrap_if_negative(axis)
-        if posaxis == depth:
-            out = self._length
-            if ak._util.is_integer(out):
-                return np.int64(out)
-            else:
-                return out
-        elif posaxis == depth + 1:
-            tonum = ak.index.Index64.empty(self._length, self._backend.index_nplike)
-            assert tonum.nplike is self._backend.index_nplike
-            self._handle_error(
-                self._backend["awkward_RegularArray_num", tonum.dtype.type](
-                    tonum.data, self._size, self._length
-                )
-            )
-            return ak.contents.NumpyArray(tonum, parameters=None, backend=self._backend)
-        else:
-            next = self._content.num(posaxis, depth + 1)
-            return ak.contents.RegularArray(
-                next, self._size, self._length, parameters=self._parameters
-            )
-
     def _offsets_and_flattened(self, axis, depth):
         return self.to_ListOffsetArray64(True)._offsets_and_flattened(axis, depth)
 
-    def _mergeable(self, other, mergebool):
+    def _mergeable_next(self, other, mergebool):
         if isinstance(
             other,
             (
@@ -639,7 +626,7 @@ class RegularArray(Content):
                 ak.contents.UnmaskedArray,
             ),
         ):
-            return self.mergeable(other.content, mergebool)
+            return self._mergeable(other.content, mergebool)
 
         elif isinstance(
             other,
@@ -649,22 +636,22 @@ class RegularArray(Content):
                 ak.contents.ListOffsetArray,
             ),
         ):
-            return self._content.mergeable(other.content, mergebool)
+            return self._content._mergeable(other.content, mergebool)
 
         # For n-dimensional NumpyArrays, let's now convert them to RegularArray
         # We could add a special case that tries to first convert self to NumpyArray
         # and merge conventionally, but it's not worth it at this stage.
         elif isinstance(other, ak.contents.NumpyArray) and other.purelist_depth > 1:
-            return self._content.mergeable(other.to_RegularArray().content, mergebool)
+            return self._content._mergeable(other.to_RegularArray().content, mergebool)
         else:
             return False
 
-    def mergemany(self, others):
+    def _mergemany(self, others):
         if len(others) == 0:
             return self
 
         if any(x.is_option for x in others):
-            return ak.contents.UnmaskedArray(self).mergemany(others)
+            return ak.contents.UnmaskedArray(self)._mergemany(others)
 
         # Regularize NumpyArray into RegularArray (or NumpyArray if 1D)
         others = [
@@ -682,28 +669,28 @@ class RegularArray(Content):
                 zeros_length += x._length
 
             return RegularArray(
-                self._content[: self._length * self._size].mergemany(tail_contents),
+                self._content[: self._length * self._size]._mergemany(tail_contents),
                 self._size,
                 zeros_length,
                 parameters=parameters,
             )
 
         else:
-            return self.to_ListOffsetArray64(True).mergemany(others)
+            return self.to_ListOffsetArray64(True)._mergemany(others)
 
-    def fill_none(self, value: Content) -> Content:
+    def _fill_none(self, value: Content) -> Content:
         return RegularArray(
-            self._content.fill_none(value),
+            self._content._fill_none(value),
             self._size,
             self._length,
             parameters=self._parameters,
         )
 
     def _local_index(self, axis, depth):
-        posaxis = self.axis_wrap_if_negative(axis)
-        if posaxis == depth:
+        posaxis = ak._util.maybe_posaxis(self, axis, depth)
+        if posaxis is not None and posaxis + 1 == depth:
             return self._local_index_axis0()
-        elif posaxis == depth + 1:
+        elif posaxis is not None and posaxis + 1 == depth + 1:
             localindex = ak.index.Index64.empty(
                 self._length * self._size, nplike=self._backend.index_nplike
             )
@@ -715,22 +702,16 @@ class RegularArray(Content):
                 )
             )
             return ak.contents.RegularArray(
-                ak.contents.NumpyArray(localindex),
-                self._size,
-                self._length,
-                parameters=self._parameters,
+                ak.contents.NumpyArray(localindex), self._size, self._length
             )
         else:
             return ak.contents.RegularArray(
-                self._content._local_index(posaxis, depth + 1),
-                self._size,
-                self._length,
-                parameters=self._parameters,
+                self._content._local_index(axis, depth + 1), self._size, self._length
             )
 
-    def numbers_to_type(self, name):
+    def _numbers_to_type(self, name):
         return ak.contents.RegularArray(
-            self._content.numbers_to_type(name),
+            self._content._numbers_to_type(name),
             self._size,
             self._length,
             parameters=self._parameters,
@@ -833,10 +814,10 @@ class RegularArray(Content):
         return out
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
-        posaxis = self.axis_wrap_if_negative(axis)
-        if posaxis == depth:
+        posaxis = ak._util.maybe_posaxis(self, axis, depth)
+        if posaxis is not None and posaxis + 1 == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
-        elif posaxis == depth + 1:
+        elif posaxis is not None and posaxis + 1 == depth + 1:
             if (
                 self.parameter("__array__") == "string"
                 or self.parameter("__array__") == "bytestring"
@@ -924,9 +905,7 @@ class RegularArray(Content):
         else:
             next = self._content._getitem_range(
                 slice(0, self._length * self._size)
-            )._combinations(
-                n, replacement, recordlookup, parameters, posaxis, depth + 1
-            )
+            )._combinations(n, replacement, recordlookup, parameters, axis, depth + 1)
             return ak.contents.RegularArray(
                 next, self._size, self._length, parameters=self._parameters
             )
@@ -1131,28 +1110,23 @@ class RegularArray(Content):
     def _validity_error(self, path):
         if self.size < 0:
             return f'at {path} ("{type(self)}"): size < 0'
-        if (
-            self.parameter("__array__") == "string"
-            or self.parameter("__array__") == "bytestring"
-        ):
-            return ""
-        else:
-            return self._content.validity_error(path + ".content")
+
+        return self._content._validity_error(path + ".content")
 
     def _nbytes_part(self):
         return self.content._nbytes_part()
 
     def _pad_none(self, target, axis, depth, clip):
-        posaxis = self.axis_wrap_if_negative(axis)
-        if posaxis == depth:
-            return self.pad_none_axis0(target, clip)
+        posaxis = ak._util.maybe_posaxis(self, axis, depth)
+        if posaxis is not None and posaxis + 1 == depth:
+            return self._pad_none_axis0(target, clip)
 
-        elif posaxis == depth + 1:
+        elif posaxis is not None and posaxis + 1 == depth + 1:
             if not clip:
                 if target < self._size:
                     return self
                 else:
-                    return self._pad_none(target, posaxis, depth, True)
+                    return self._pad_none(target, axis, depth, True)
 
             else:
                 index = ak.index.Index64.empty(
@@ -1164,11 +1138,11 @@ class RegularArray(Content):
                         "awkward_RegularArray_rpad_and_clip_axis1", index.dtype.type
                     ](index.data, target, self._size, self._length)
                 )
-                next = ak.contents.IndexedOptionArray(
+                next = ak.contents.IndexedOptionArray.simplified(
                     index, self._content, parameters=self._parameters
                 )
                 return ak.contents.RegularArray(
-                    next.simplify_optiontype(),
+                    next,
                     target,
                     self._length,
                     parameters=self._parameters,
@@ -1176,7 +1150,7 @@ class RegularArray(Content):
 
         else:
             return ak.contents.RegularArray(
-                self._content._pad_none(target, posaxis, depth + 1, clip),
+                self._content._pad_none(target, axis, depth + 1, clip),
                 self._size,
                 self._length,
                 parameters=self._parameters,
@@ -1215,7 +1189,7 @@ class RegularArray(Content):
                 self._length,
                 [
                     ak._connect.pyarrow.to_validbits(validbytes),
-                    pyarrow.py_buffer(akcontent.raw(numpy)),
+                    pyarrow.py_buffer(akcontent._raw(numpy)),
                 ],
             )
 
@@ -1251,10 +1225,13 @@ class RegularArray(Content):
             self.parameter("__array__") == "string"
             or self.parameter("__array__") == "bytestring"
         ):
-            return [ak.operations.to_numpy(self)]
+            return [self]
         else:
             flat = self._content[: self._length * self._size]
             return flat._completely_flatten(backend, options)
+
+    def _drop_none(self):
+        return self.toListOffsetArray64()._drop_none()
 
     def _recursively_apply(
         self, action, behavior, depth, depth_context, lateral_context, options
@@ -1311,12 +1288,12 @@ class RegularArray(Content):
         else:
             raise ak._errors.wrap_error(AssertionError(result))
 
-    def packed(self):
+    def to_packed(self) -> Self:
         length = self._length * self._size
         if self._content.length == length:
-            content = self._content.packed()
+            content = self._content.to_packed()
         else:
-            content = self._content[:length].packed()
+            content = self._content[:length].to_packed()
 
         return RegularArray(
             content, self._size, self._length, parameters=self._parameters
@@ -1374,7 +1351,7 @@ class RegularArray(Content):
             content, self._size, zeros_length=self._length, parameters=self._parameters
         )
 
-    def _layout_equal(self, other, index_dtype=True, numpyarray=True):
-        return self._size == other.size and self._content.layout_equal(
+    def _is_equal_to(self, other, index_dtype, numpyarray):
+        return self._size == other.size and self._content.is_equal_to(
             self._content, index_dtype, numpyarray
         )

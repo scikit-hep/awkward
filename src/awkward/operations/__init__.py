@@ -18,6 +18,7 @@ from awkward.operations.ak_corr import corr
 from awkward.operations.ak_count import count
 from awkward.operations.ak_count_nonzero import count_nonzero
 from awkward.operations.ak_covar import covar
+from awkward.operations.ak_drop_none import drop_none
 from awkward.operations.ak_fields import fields
 from awkward.operations.ak_fill_none import fill_none
 from awkward.operations.ak_firsts import firsts
@@ -53,7 +54,6 @@ from awkward.operations.ak_nan_to_none import nan_to_none
 from awkward.operations.ak_nan_to_num import nan_to_num
 from awkward.operations.ak_num import num
 from awkward.operations.ak_ones_like import ones_like
-from awkward.operations.ak_packed import packed
 from awkward.operations.ak_pad_none import pad_none
 from awkward.operations.ak_parameters import parameters
 from awkward.operations.ak_prod import nanprod, prod
@@ -78,6 +78,7 @@ from awkward.operations.ak_to_json import to_json
 from awkward.operations.ak_to_layout import to_layout
 from awkward.operations.ak_to_list import to_list
 from awkward.operations.ak_to_numpy import to_numpy
+from awkward.operations.ak_to_packed import to_packed
 from awkward.operations.ak_to_parquet import to_parquet
 from awkward.operations.ak_to_rdataframe import to_rdataframe
 from awkward.operations.ak_to_regular import to_regular
@@ -92,6 +93,7 @@ from awkward.operations.ak_where import where
 from awkward.operations.ak_with_field import with_field
 from awkward.operations.ak_with_name import with_name
 from awkward.operations.ak_with_parameter import with_parameter
+from awkward.operations.ak_without_field import without_field
 from awkward.operations.ak_without_parameters import without_parameters
 from awkward.operations.ak_zeros_like import zeros_like
 from awkward.operations.ak_zip import zip

@@ -11,8 +11,8 @@ def test_ListOffsetArray():
         [[0.0, 1.1, 2.2, 3.3], [], [4.4, 5.5, 6.6], [7.7], [8.8, 9.9, 10.0, 11.1, 12.2]]
     ).layout
 
-    assert v2_array.validity_error() == ""
-    assert v2_array.typetracer.validity_error() == ""
+    assert ak.validity_error(v2_array) == ""
+    assert ak.validity_error(v2_array.to_typetracer()) == ""
 
     v2_array = ak.highlevel.Array(
         [
@@ -22,8 +22,8 @@ def test_ListOffsetArray():
         ]
     ).layout
 
-    assert v2_array.validity_error() == ""
-    assert v2_array.typetracer.validity_error() == ""
+    assert ak.validity_error(v2_array) == ""
+    assert ak.validity_error(v2_array.to_typetracer()) == ""
 
 
 def test_RegularArray():
@@ -31,15 +31,15 @@ def test_RegularArray():
         np.array([[0.0, 1.1, 2.2, 3.3], [4.4, 5.5, 6.6, 7.7]])
     ).layout
 
-    assert v2_array.validity_error() == ""
-    assert v2_array.typetracer.validity_error() == ""
+    assert ak.validity_error(v2_array) == ""
+    assert ak.validity_error(v2_array.to_typetracer()) == ""
 
 
 def test_NumpyArray():
     v2_array = ak.highlevel.Array([0.0, 1.1, 2.2, 3.3]).layout
 
-    assert v2_array.validity_error() == ""
-    assert v2_array.typetracer.validity_error() == ""
+    assert ak.validity_error(v2_array) == ""
+    assert ak.validity_error(v2_array.to_typetracer()) == ""
 
 
 def test_IndexedArray():
@@ -55,8 +55,8 @@ def test_IndexedArray():
         ]
     ).layout
 
-    assert v2_array.validity_error() == ""
-    assert v2_array.typetracer.validity_error() == ""
+    assert ak.validity_error(v2_array) == ""
+    assert ak.validity_error(v2_array.to_typetracer()) == ""
 
 
 def test_ByteMaskedArray():
@@ -67,8 +67,8 @@ def test_ByteMaskedArray():
     mask = ak.index.Index8(np.array([0, 0, 1, 1, 0], dtype=np.int8))
     v2_array = ak.contents.ByteMaskedArray(mask, content, valid_when=False)
 
-    assert v2_array.validity_error() == ""
-    assert v2_array.typetracer.validity_error() == ""
+    assert ak.validity_error(v2_array) == ""
+    assert ak.validity_error(v2_array.to_typetracer()) == ""
 
 
 def test_IndexedOptionArray():
@@ -79,8 +79,8 @@ def test_IndexedOptionArray():
     index = ak.index.Index64(np.array([0, 1, -1, -1, 4], dtype=np.int64))
     v2_array = ak.contents.IndexedOptionArray(index, content)
 
-    assert v2_array.validity_error() == ""
-    assert v2_array.typetracer.validity_error() == ""
+    assert ak.validity_error(v2_array) == ""
+    assert ak.validity_error(v2_array.to_typetracer()) == ""
 
 
 def test_BitMaskedArray():
@@ -117,15 +117,15 @@ def test_BitMaskedArray():
         lsb_order=False,
     )
 
-    assert v2_array.validity_error() == ""
-    assert v2_array.typetracer.validity_error() == ""
+    assert ak.validity_error(v2_array) == ""
+    assert ak.validity_error(v2_array.to_typetracer()) == ""
 
 
 def test_EmptyArray():
     v2_array = ak.contents.emptyarray.EmptyArray()
 
-    assert v2_array.validity_error() == ""
-    assert v2_array.typetracer.validity_error() == ""
+    assert ak.validity_error(v2_array) == ""
+    assert ak.validity_error(v2_array.to_typetracer()) == ""
 
 
 def test_RecordArray():
@@ -142,8 +142,8 @@ def test_RecordArray():
         ),
     )
 
-    assert v2_array.validity_error() == ""
-    assert v2_array.typetracer.validity_error() == ""
+    assert ak.validity_error(v2_array) == ""
+    assert ak.validity_error(v2_array.to_typetracer()) == ""
 
 
 def test_UnionArray():
@@ -152,7 +152,7 @@ def test_UnionArray():
         ak.index.Index(np.array([4, 3, 0, 1, 2, 2, 4, 100])),
         [
             ak.contents.recordarray.RecordArray(
-                [ak.contents.numpyarray.NumpyArray(np.array([1, 2, 3]))], ["nest"]
+                [ak.from_iter(["1", "2", "3"], highlevel=False)], ["nest"]
             ),
             ak.contents.recordarray.RecordArray(
                 [
@@ -165,8 +165,8 @@ def test_UnionArray():
         ],
     )
 
-    assert v2_array.validity_error() == ""
-    assert v2_array.typetracer.validity_error() == ""
+    assert ak.validity_error(v2_array) == ""
+    assert ak.validity_error(v2_array.to_typetracer()) == ""
 
 
 def test_UnmaskedArray():
@@ -176,5 +176,5 @@ def test_UnmaskedArray():
         )
     )
 
-    assert v2_array.validity_error() == ""
-    assert v2_array.typetracer.validity_error() == ""
+    assert ak.validity_error(v2_array) == ""
+    assert ak.validity_error(v2_array.to_typetracer()) == ""

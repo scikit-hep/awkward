@@ -7,7 +7,7 @@ import awkward as ak
 
 def test():
     x = ak.from_iter([[{"x": 1, "y": 1.1}], [], [{"x": 2, "y": 2.2}]])
-    x_tt = ak.Array(x.layout.typetracer)
+    x_tt = ak.Array(x.layout.to_typetracer())
 
     assert str(ak.count(x_tt, flatten_records=True)) == "unknown-int64"
     assert str(ak.count_nonzero(x_tt, flatten_records=True)) == "unknown-int64"

@@ -3,23 +3,19 @@
 import awkward as ak
 from awkward.operations.ak_fill_none import fill_none
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
+cpu = ak._backends.NumpyBackend.instance()
 
 
 @ak._connect.numpy.implements("concatenate")
-def concatenate(
-    arrays, axis=0, *, merge=True, mergebool=True, highlevel=True, behavior=None
-):
+def concatenate(arrays, axis=0, *, mergebool=True, highlevel=True, behavior=None):
     """
     Args:
-        arrays: Arrays to concatenate along any dimension.
+        arrays: Array-like data (anything #ak.to_layout recognizes).
         axis (int): The dimension at which this operation is applied. The
             outermost dimension is `0`, followed by `1`, etc., and negative
             values count backward from the innermost: `-1` is the innermost
             dimension, `-2` is the next level up, etc.
-        merge (bool): If True, combine data into the same buffers wherever
-            possible, eliminating unnecessary #ak.contents.UnionArray8_64 types
-            at the expense of materializing #ak.contents.VirtualArray nodes.
         mergebool (bool): If True, boolean and numeric data can be combined
             into the same buffer, losing information about False vs `0` and
             True vs `1`; otherwise, they are kept in separate buffers with
@@ -39,29 +35,28 @@ def concatenate(
         dict(
             arrays=arrays,
             axis=axis,
-            merge=merge,
             mergebool=mergebool,
             highlevel=highlevel,
             behavior=behavior,
         ),
     ):
-        return _impl(arrays, axis, merge, mergebool, highlevel, behavior)
+        return _impl(arrays, axis, mergebool, highlevel, behavior)
 
 
-def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
+def _impl(arrays, axis, mergebool, highlevel, behavior):
     # Simple single-array, axis=0 fast-path
     behavior = ak._util.behavior_of(*arrays, behavior=behavior)
     if (
         # Is an Awkward Content
         isinstance(arrays, ak.contents.Content)
         # Is an array with a known NumpyLike
-        or ak.nplikes.nplike_of(arrays, default=None) is not None
+        or ak._nplikes.nplike_of(arrays, default=None) is not None
     ):
         # Convert the array to a layout object
         content = ak.operations.to_layout(arrays, allow_record=False, allow_other=False)
         # Only handle concatenation along `axis=0`
         # Let ambiguous depth arrays fall through
-        if content.axis_wrap_if_negative(axis) == 0:
+        if ak._util.maybe_posaxis(content, axis, 1) == 0:
             return ak.operations.ak_flatten._impl(content, 1, highlevel, behavior)
 
     content_or_others = [
@@ -77,13 +72,13 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
             ValueError("need at least one array to concatenate")
         )
 
-    posaxis = contents[0].axis_wrap_if_negative(axis)
+    posaxis = ak._util.maybe_posaxis(contents[0], axis, 1)
     maxdepth = max(
         x.minmax_depth[1]
         for x in content_or_others
         if isinstance(x, ak.contents.Content)
     )
-    if not 0 <= posaxis < maxdepth:
+    if posaxis is None or not 0 <= posaxis < maxdepth:
         raise ak._errors.wrap_error(
             ValueError(
                 "axis={} is beyond the depth of this array or the depth of this array "
@@ -92,7 +87,7 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
         )
     for x in content_or_others:
         if isinstance(x, ak.contents.Content):
-            if x.axis_wrap_if_negative(axis) != posaxis:
+            if ak._util.maybe_posaxis(x, axis, 1) != posaxis:
                 raise ak._errors.wrap_error(
                     ValueError(
                         "arrays to concatenate do not have the same depth for negative "
@@ -107,15 +102,22 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
         ]
         batch = [content_or_others[0]]
         for x in content_or_others[1:]:
-            if batch[-1].mergeable(x, mergebool=mergebool):
+            if ak._do.mergeable(batch[-1], x, mergebool=mergebool):
                 batch.append(x)
             else:
-                collapsed = batch[0].mergemany(batch[1:])
-                batch = [collapsed.merge_as_union(x)]
+                collapsed = ak._do.mergemany(batch)
+                batch = [ak._do.merge_as_union(collapsed, x)]
 
-        out = batch[0].mergemany(batch[1:])
+        out = ak._do.mergemany(batch)
+
         if isinstance(out, ak.contents.UnionArray):
-            out = out.simplify_uniontype(merge=merge, mergebool=mergebool)
+            out = type(out).simplified(
+                out._tags,
+                out._index,
+                out._contents,
+                parameters=out._parameters,
+                mergebool=mergebool,
+            )
 
     else:
 
@@ -132,7 +134,7 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
                 inputs = nextinputs
 
             if depth == posaxis:
-                backend = ak._backends.backend_of(*inputs)
+                backend = ak._backends.backend_of(*inputs, default=cpu)
 
                 length = ak._typetracer.UnknownLength
                 for x in inputs:
@@ -182,15 +184,14 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
 
                 tags = ak.index.Index8(backend.index_nplike.tile(prototype, length))
                 index = ak.contents.UnionArray.regular_index(tags, backend=backend)
-                inner = ak.contents.UnionArray(
-                    tags, index, [x._content for x in regulararrays]
+                inner = ak.contents.UnionArray.simplified(
+                    tags,
+                    index,
+                    [x._content for x in regulararrays],
+                    mergebool=mergebool,
                 )
 
-                out = ak.contents.RegularArray(
-                    inner.simplify_uniontype(merge=merge, mergebool=mergebool),
-                    len(prototype),
-                )
-                return (out,)
+                return (ak.contents.RegularArray(inner, len(prototype)),)
 
             elif depth == posaxis and all(
                 isinstance(x, ak.contents.Content)
@@ -225,7 +226,7 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
                 all_flatten = []
 
                 for x in nextinputs:
-                    o, f = x._offsets_and_flattened(1, 0)
+                    o, f = x._offsets_and_flattened(1, 1)
                     o = backend.index_nplike.asarray(o)
                     c = o[1:] - o[:-1]
                     backend.index_nplike.add(counts, c, out=counts)
@@ -240,29 +241,17 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
 
                 offsets = ak.index.Index64(offsets, nplike=backend.index_nplike)
 
-                inner = ak.contents.UnionArray(
-                    ak.index.Index8.empty(
-                        len(offsets) - 1, nplike=backend.index_nplike
-                    ),
-                    ak.index.Index64.empty(
-                        len(offsets) - 1, nplike=backend.index_nplike
-                    ),
-                    all_flatten,
-                )
-
-                tags, index = inner._nested_tags_index(
+                tags, index = ak.contents.UnionArray.nested_tags_index(
                     offsets,
                     [ak.index.Index64(x) for x in all_counts],
+                    backend=backend,
                 )
 
-                inner = ak.contents.UnionArray(tags, index, all_flatten)
-
-                out = ak.contents.ListOffsetArray(
-                    offsets,
-                    inner.simplify_uniontype(merge=merge, mergebool=mergebool),
+                inner = ak.contents.UnionArray.simplified(
+                    tags, index, all_flatten, mergebool=mergebool
                 )
 
-                return (out,)
+                return (ak.contents.ListOffsetArray(offsets, inner),)
 
             elif any(
                 x.minmax_depth == (1, 1)

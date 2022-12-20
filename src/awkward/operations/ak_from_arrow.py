@@ -2,15 +2,14 @@
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 def from_arrow(array, *, generate_bitmasks=False, highlevel=True, behavior=None):
     """
     Args:
-        array (`pyarrow.Array`, `pyarrow.ChunkedArray`, `pyarrow.RecordBatch`,
-            or `pyarrow.Table`): Apache Arrow array to convert into an
-            Awkward Array.
+        array (`pyarrow.Array`, `pyarrow.ChunkedArray`, `pyarrow.RecordBatch`, or `pyarrow.Table`):
+            Apache Arrow array to convert into an  Awkward Array.
         generate_bitmasks (bool): If enabled and Arrow/Parquet does not have Awkward
             metadata, `generate_bitmasks=True` creates empty bitmasks for nullable
             types that don't have bitmasks in the Arrow/Parquet data, so that the
@@ -67,5 +66,11 @@ def _impl(array, generate_bitmasks, highlevel, behavior):
 
             if awkwardarrow_type.record_is_scalar:
                 out = out._getitem_at(0)
+
+    def remove_revertable(layout, **kwargs):
+        if hasattr(layout, "__pyarrow_original"):
+            del layout.__pyarrow_original
+
+    ak._do.recursively_apply(out, remove_revertable)
 
     return ak._util.wrap(out, behavior, highlevel)

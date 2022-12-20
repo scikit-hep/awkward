@@ -30,8 +30,8 @@ from awkward.index import (  # IndexU8,  ; Index32,  ; IndexU32,  ; noqa: F401
 from awkward.record import Record
 from awkward.typing import Any, Callable, Dict, List, TypeAlias, Union
 
-np = ak.nplikes.NumpyMetadata.instance()
-numpy = ak.nplikes.Numpy.instance()
+np = ak._nplikes.NumpyMetadata.instance()
+numpy = ak._nplikes.Numpy.instance()
 
 optiontypes = (IndexedOptionArray, ByteMaskedArray, BitMaskedArray, UnmaskedArray)
 listtypes = (ListOffsetArray, ListArray, RegularArray)
@@ -48,7 +48,7 @@ def broadcast_pack(inputs: Sequence, isscalar: list[bool]) -> list:
     nextinputs = []
     for x in inputs:
         if isinstance(x, Record):
-            index = ak.nplikes.nplike_of(*inputs).full(maxlen, x.at, dtype=np.int64)
+            index = ak._nplikes.nplike_of(*inputs).full(maxlen, x.at, dtype=np.int64)
             nextinputs.append(RegularArray(x.array[index], maxlen, 1))
             isscalar.append(True)
         elif isinstance(x, Content):
@@ -581,12 +581,12 @@ def apply_step(
 
             parameters = parameters_factory(numoutputs)
             return tuple(
-                UnionArray(
+                UnionArray.simplified(
                     Index8(tags),
                     Index64(index),
                     [x[i] for x in outcontents],
                     parameters=p,
-                ).simplify_uniontype()
+                )
                 for i, p in enumerate(parameters)
             )
 
@@ -653,7 +653,7 @@ def apply_step(
             assert isinstance(outcontent, tuple)
             parameters = parameters_factory(len(outcontent))
             return tuple(
-                IndexedOptionArray(index, x, parameters=p).simplify_optiontype()
+                IndexedOptionArray.simplified(index, x, parameters=p)
                 for x, p in zip(outcontent, parameters)
             )
 
@@ -685,9 +685,9 @@ def apply_step(
                         if isinstance(x, RegularArray):
                             if maxsize > 1 and x.size == 1:
                                 nextinputs.append(
-                                    IndexedArray(
-                                        tmpindex, x.content[: x.length * x.size]
-                                    ).project()
+                                    x.content[: x.length * x.size]._carry(
+                                        tmpindex, allow_lazy=False
+                                    )
                                 )
                             elif x.size == maxsize:
                                 nextinputs.append(x.content[: x.length * x.size])

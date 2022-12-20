@@ -64,7 +64,7 @@ def test_list_offset_array_concatenate():
     three = ak.contents.ListOffsetArray(offsets_three, one)
     four = ak.contents.ListOffsetArray(offsets_four, two)
 
-    padded_one = one.pad_none(7, 0)
+    padded_one = ak._do.pad_none(one, 7, 0)
     assert to_list(padded_one) == [
         [0.0, 1.1, 2.2],
         [],
@@ -115,7 +115,7 @@ def test_list_offset_array_concatenate():
         [],
     ]
 
-    padded = three.pad_none(6, 0)
+    padded = ak._do.pad_none(three, 6, 0)
 
     assert to_list(ak.operations.concatenate([padded, four], 1)) == [
         [[0.0, 1.1, 2.2], [], [3.3, 4.4], [0.33], []],
@@ -400,7 +400,7 @@ def test_broadcast_and_apply_levels():
         ak.highlevel.Array([[[10, 20], [30]], [[40]], [[50, 60, 70], [80, 90]]]).layout,
     ]
     # nothing is required to have the same length
-    assert ak.operations.concatenate(arrays, axis=0).tolist() == [
+    assert ak.operations.concatenate(arrays, axis=0).to_list() == [
         [[0.0, 1.1, 2.2], []],
         [[3.3, 4.4]],
         [[5.5], [6.6, 7.7, 8.8, 9.9]],
@@ -409,13 +409,13 @@ def test_broadcast_and_apply_levels():
         [[50, 60, 70], [80, 90]],
     ]
     # the outermost arrays are required to have the same length, but nothing deeper than that
-    assert ak.operations.concatenate(arrays, axis=1).tolist() == [
+    assert ak.operations.concatenate(arrays, axis=1).to_list() == [
         [[0.0, 1.1, 2.2], [], [10, 20], [30]],
         [[3.3, 4.4], [40]],
         [[5.5], [6.6, 7.7, 8.8, 9.9], [50, 60, 70], [80, 90]],
     ]
     # the outermost arrays and the first level are required to have the same length, but nothing deeper
-    assert ak.operations.concatenate(arrays, axis=2).tolist() == [
+    assert ak.operations.concatenate(arrays, axis=2).to_list() == [
         [[0.0, 1.1, 2.2, 10, 20], [30]],
         [[3.3, 4.4, 40]],
         [[5.5, 50, 60, 70], [6.6, 7.7, 8.8, 9.9, 80, 90]],
@@ -431,19 +431,19 @@ def test_negative_axis_concatenate():
     ).layout
     arrays = [one, two]
 
-    assert ak.operations.concatenate(arrays, axis=-1).tolist() == [
+    assert ak.operations.concatenate(arrays, axis=-1).to_list() == [
         [[0.0, 1.1, 2.2, 10, 20], [30]],
         [[3.3, 4.4, 40]],
         [[5.5, 50, 60, 70], [6.6, 7.7, 8.8, 9.9, 80, 90]],
     ]
 
-    assert ak.operations.concatenate(arrays, axis=-2).tolist() == [
+    assert ak.operations.concatenate(arrays, axis=-2).to_list() == [
         [[0.0, 1.1, 2.2], [], [10, 20], [30]],
         [[3.3, 4.4], [40]],
         [[5.5], [6.6, 7.7, 8.8, 9.9], [50, 60, 70], [80, 90]],
     ]
 
-    assert ak.operations.concatenate(arrays, axis=-3).tolist() == [
+    assert ak.operations.concatenate(arrays, axis=-3).to_list() == [
         [[0.0, 1.1, 2.2], []],
         [[3.3, 4.4]],
         [[5.5], [6.6, 7.7, 8.8, 9.9]],
@@ -462,7 +462,7 @@ def test_even_more():
         [[[0, 1, 2], []], [[3, 4]], [], [[5], [6, 7, 8, 9]], []]
     ).layout
 
-    assert ak.operations.concatenate([dim1, 999]).tolist() == [
+    assert ak.operations.concatenate([dim1, 999]).to_list() == [
         1.1,
         2.2,
         3.3,
@@ -470,7 +470,7 @@ def test_even_more():
         5.5,
         999,
     ]
-    assert ak.operations.concatenate([999, dim1]).tolist() == [
+    assert ak.operations.concatenate([999, dim1]).to_list() == [
         999,
         1.1,
         2.2,
@@ -478,7 +478,7 @@ def test_even_more():
         4.4,
         5.5,
     ]
-    assert ak.operations.concatenate([dim1, dim2]).tolist() == [
+    assert ak.operations.concatenate([dim1, dim2]).to_list() == [
         1.1,
         2.2,
         3.3,
@@ -490,7 +490,7 @@ def test_even_more():
         [5],
         [6, 7, 8, 9],
     ]
-    assert ak.operations.concatenate([dim2, dim1]).tolist() == [
+    assert ak.operations.concatenate([dim2, dim1]).to_list() == [
         [0, 1, 2],
         [],
         [3, 4],
@@ -506,7 +506,7 @@ def test_even_more():
     with pytest.raises(ValueError):
         ak.operations.concatenate([dim1, 999], axis=1)
 
-    assert ak.operations.concatenate([dim2, 999], axis=1).tolist() == [
+    assert ak.operations.concatenate([dim2, 999], axis=1).to_list() == [
         [0, 1, 2, 999],
         [999],
         [3, 4, 999],
@@ -514,7 +514,7 @@ def test_even_more():
         [6, 7, 8, 9, 999],
     ]
 
-    assert ak.operations.concatenate([999, dim2], axis=1).tolist() == [
+    assert ak.operations.concatenate([999, dim2], axis=1).to_list() == [
         [999, 0, 1, 2],
         [999],
         [999, 3, 4],
@@ -526,28 +526,28 @@ def test_even_more():
         ak.operations.concatenate([dim1, dim2], axis=1)
     with pytest.raises(ValueError):
         ak.operations.concatenate([dim2, dim1], axis=1)
-    assert ak.operations.concatenate([dim1a, dim2], axis=1).tolist() == [
+    assert ak.operations.concatenate([dim1a, dim2], axis=1).to_list() == [
         [1.1, 0, 1, 2],
         [2.2],
         [3.3, 3, 4],
         [4.4, 5],
         [5.5, 6, 7, 8, 9],
     ]
-    assert ak.operations.concatenate([dim2, dim1a], axis=1).tolist() == [
+    assert ak.operations.concatenate([dim2, dim1a], axis=1).to_list() == [
         [0, 1, 2, 1.1],
         [2.2],
         [3, 4, 3.3],
         [5, 4.4],
         [6, 7, 8, 9, 5.5],
     ]
-    assert ak.operations.concatenate([dim1b, dim2], axis=1).tolist() == [
+    assert ak.operations.concatenate([dim1b, dim2], axis=1).to_list() == [
         [1.1, 0, 1, 2],
         [2.2],
         [3.3, 3, 4],
         [4.4, 5],
         [5.5, 6, 7, 8, 9],
     ]
-    assert ak.operations.concatenate([dim2, dim1b], axis=1).tolist() == [
+    assert ak.operations.concatenate([dim2, dim1b], axis=1).to_list() == [
         [0, 1, 2, 1.1],
         [2.2],
         [3, 4, 3.3],
@@ -555,7 +555,7 @@ def test_even_more():
         [6, 7, 8, 9, 5.5],
     ]
 
-    assert ak.operations.concatenate([123, dim1, dim2]).tolist() == [
+    assert ak.operations.concatenate([123, dim1, dim2]).to_list() == [
         123,
         1.1,
         2.2,
@@ -568,7 +568,7 @@ def test_even_more():
         [5],
         [6, 7, 8, 9],
     ]
-    assert ak.operations.concatenate([123, dim2, dim1]).tolist() == [
+    assert ak.operations.concatenate([123, dim2, dim1]).to_list() == [
         123,
         [0, 1, 2],
         [],
@@ -581,7 +581,7 @@ def test_even_more():
         4.4,
         5.5,
     ]
-    assert ak.operations.concatenate([dim1, 123, dim2]).tolist() == [
+    assert ak.operations.concatenate([dim1, 123, dim2]).to_list() == [
         1.1,
         2.2,
         3.3,
@@ -594,7 +594,7 @@ def test_even_more():
         [5],
         [6, 7, 8, 9],
     ]
-    assert ak.operations.concatenate([dim1, dim2, 123]).tolist() == [
+    assert ak.operations.concatenate([dim1, dim2, 123]).to_list() == [
         1.1,
         2.2,
         3.3,
@@ -607,7 +607,7 @@ def test_even_more():
         [6, 7, 8, 9],
         123,
     ]
-    assert ak.operations.concatenate([dim2, 123, dim1]).tolist() == [
+    assert ak.operations.concatenate([dim2, 123, dim1]).to_list() == [
         [0, 1, 2],
         [],
         [3, 4],
@@ -620,7 +620,7 @@ def test_even_more():
         4.4,
         5.5,
     ]
-    assert ak.operations.concatenate([dim2, dim1, 123]).tolist() == [
+    assert ak.operations.concatenate([dim2, dim1, 123]).to_list() == [
         [0, 1, 2],
         [],
         [3, 4],
@@ -647,42 +647,42 @@ def test_even_more():
     with pytest.raises(ValueError):
         ak.operations.concatenate([dim2, dim1, 123], axis=1)
 
-    assert ak.operations.concatenate([123, dim1a, dim2], axis=1).tolist() == [
+    assert ak.operations.concatenate([123, dim1a, dim2], axis=1).to_list() == [
         [123, 1.1, 0, 1, 2],
         [123, 2.2],
         [123, 3.3, 3, 4],
         [123, 4.4, 5],
         [123, 5.5, 6, 7, 8, 9],
     ]
-    assert ak.operations.concatenate([123, dim2, dim1a], axis=1).tolist() == [
+    assert ak.operations.concatenate([123, dim2, dim1a], axis=1).to_list() == [
         [123, 0, 1, 2, 1.1],
         [123, 2.2],
         [123, 3, 4, 3.3],
         [123, 5, 4.4],
         [123, 6, 7, 8, 9, 5.5],
     ]
-    assert ak.operations.concatenate([dim1a, 123, dim2], axis=1).tolist() == [
+    assert ak.operations.concatenate([dim1a, 123, dim2], axis=1).to_list() == [
         [1.1, 123, 0, 1, 2],
         [2.2, 123],
         [3.3, 123, 3, 4],
         [4.4, 123, 5],
         [5.5, 123, 6, 7, 8, 9],
     ]
-    assert ak.operations.concatenate([dim1a, dim2, 123], axis=1).tolist() == [
+    assert ak.operations.concatenate([dim1a, dim2, 123], axis=1).to_list() == [
         [1.1, 0, 1, 2, 123],
         [2.2, 123],
         [3.3, 3, 4, 123],
         [4.4, 5, 123],
         [5.5, 6, 7, 8, 9, 123],
     ]
-    assert ak.operations.concatenate([dim2, 123, dim1a], axis=1).tolist() == [
+    assert ak.operations.concatenate([dim2, 123, dim1a], axis=1).to_list() == [
         [0, 1, 2, 123, 1.1],
         [123, 2.2],
         [3, 4, 123, 3.3],
         [5, 123, 4.4],
         [6, 7, 8, 9, 123, 5.5],
     ]
-    assert ak.operations.concatenate([dim2, dim1a, 123], axis=1).tolist() == [
+    assert ak.operations.concatenate([dim2, dim1a, 123], axis=1).to_list() == [
         [0, 1, 2, 1.1, 123],
         [2.2, 123],
         [3, 4, 3.3, 123],
@@ -690,42 +690,42 @@ def test_even_more():
         [6, 7, 8, 9, 5.5, 123],
     ]
 
-    assert ak.operations.concatenate([123, dim1b, dim2], axis=1).tolist() == [
+    assert ak.operations.concatenate([123, dim1b, dim2], axis=1).to_list() == [
         [123, 1.1, 0, 1, 2],
         [123, 2.2],
         [123, 3.3, 3, 4],
         [123, 4.4, 5],
         [123, 5.5, 6, 7, 8, 9],
     ]
-    assert ak.operations.concatenate([123, dim2, dim1b], axis=1).tolist() == [
+    assert ak.operations.concatenate([123, dim2, dim1b], axis=1).to_list() == [
         [123, 0, 1, 2, 1.1],
         [123, 2.2],
         [123, 3, 4, 3.3],
         [123, 5, 4.4],
         [123, 6, 7, 8, 9, 5.5],
     ]
-    assert ak.operations.concatenate([dim1b, 123, dim2], axis=1).tolist() == [
+    assert ak.operations.concatenate([dim1b, 123, dim2], axis=1).to_list() == [
         [1.1, 123, 0, 1, 2],
         [2.2, 123],
         [3.3, 123, 3, 4],
         [4.4, 123, 5],
         [5.5, 123, 6, 7, 8, 9],
     ]
-    assert ak.operations.concatenate([dim1b, dim2, 123], axis=1).tolist() == [
+    assert ak.operations.concatenate([dim1b, dim2, 123], axis=1).to_list() == [
         [1.1, 0, 1, 2, 123],
         [2.2, 123],
         [3.3, 3, 4, 123],
         [4.4, 5, 123],
         [5.5, 6, 7, 8, 9, 123],
     ]
-    assert ak.operations.concatenate([dim2, 123, dim1b], axis=1).tolist() == [
+    assert ak.operations.concatenate([dim2, 123, dim1b], axis=1).to_list() == [
         [0, 1, 2, 123, 1.1],
         [123, 2.2],
         [3, 4, 123, 3.3],
         [5, 123, 4.4],
         [6, 7, 8, 9, 123, 5.5],
     ]
-    assert ak.operations.concatenate([dim2, dim1b, 123], axis=1).tolist() == [
+    assert ak.operations.concatenate([dim2, dim1b, 123], axis=1).to_list() == [
         [0, 1, 2, 1.1, 123],
         [2.2, 123],
         [3, 4, 3.3, 123],
@@ -733,7 +733,7 @@ def test_even_more():
         [6, 7, 8, 9, 5.5, 123],
     ]
 
-    assert ak.operations.concatenate([dim3, 123]).tolist() == [
+    assert ak.operations.concatenate([dim3, 123]).to_list() == [
         [[0, 1, 2], []],
         [[3, 4]],
         [],
@@ -741,7 +741,7 @@ def test_even_more():
         [],
         123,
     ]
-    assert ak.operations.concatenate([123, dim3]).tolist() == [
+    assert ak.operations.concatenate([123, dim3]).to_list() == [
         123,
         [[0, 1, 2], []],
         [[3, 4]],
@@ -750,14 +750,14 @@ def test_even_more():
         [],
     ]
 
-    assert ak.operations.concatenate([dim3, 123], axis=1).tolist() == [
+    assert ak.operations.concatenate([dim3, 123], axis=1).to_list() == [
         [[0, 1, 2], [], 123],
         [[3, 4], 123],
         [123],
         [[5], [6, 7, 8, 9], 123],
         [123],
     ]
-    assert ak.operations.concatenate([123, dim3], axis=1).tolist() == [
+    assert ak.operations.concatenate([123, dim3], axis=1).to_list() == [
         [123, [0, 1, 2], []],
         [123, [3, 4]],
         [123],
@@ -770,14 +770,14 @@ def test_even_more():
     with pytest.raises(ValueError):
         ak.operations.concatenate([dim1, dim3], axis=1)
 
-    assert ak.operations.concatenate([dim3, dim2], axis=1).tolist() == [
+    assert ak.operations.concatenate([dim3, dim2], axis=1).to_list() == [
         [[0, 1, 2], [], 0, 1, 2],
         [[3, 4]],
         [3, 4],
         [[5], [6, 7, 8, 9], 5],
         [6, 7, 8, 9],
     ]
-    assert ak.operations.concatenate([dim2, dim3], axis=1).tolist() == [
+    assert ak.operations.concatenate([dim2, dim3], axis=1).to_list() == [
         [0, 1, 2, [0, 1, 2], []],
         [[3, 4]],
         [3, 4],
@@ -785,14 +785,14 @@ def test_even_more():
         [6, 7, 8, 9],
     ]
 
-    assert ak.operations.concatenate([dim3, 123], axis=2).tolist() == [
+    assert ak.operations.concatenate([dim3, 123], axis=2).to_list() == [
         [[0, 1, 2, 123], [123]],
         [[3, 4, 123]],
         [],
         [[5, 123], [6, 7, 8, 9, 123]],
         [],
     ]
-    assert ak.operations.concatenate([123, dim3], axis=2).tolist() == [
+    assert ak.operations.concatenate([123, dim3], axis=2).to_list() == [
         [[123, 0, 1, 2], [123]],
         [[123, 3, 4]],
         [],
@@ -800,7 +800,7 @@ def test_even_more():
         [],
     ]
 
-    assert ak.operations.concatenate([dim3, dim3], axis=2).tolist() == [
+    assert ak.operations.concatenate([dim3, dim3], axis=2).to_list() == [
         [[0, 1, 2, 0, 1, 2], []],
         [[3, 4, 3, 4]],
         [],
@@ -827,7 +827,7 @@ def test_even_more():
         ]
     ).layout
 
-    assert ak.operations.concatenate([rec1, rec2]).tolist() == [
+    assert ak.operations.concatenate([rec1, rec2]).to_list() == [
         {"x": [1, 2], "y": [1.1]},
         {"x": [], "y": [2.2, 3.3]},
         {"x": [3], "y": []},
@@ -840,7 +840,7 @@ def test_even_more():
         {"x": [400, 500], "y": [60]},
     ]
 
-    assert ak.operations.concatenate([rec1, rec2], axis=1).tolist() == [
+    assert ak.operations.concatenate([rec1, rec2], axis=1).to_list() == [
         {"x": [1, 2, 100], "y": [1.1, 10, 20]},
         {"x": [200], "y": [2.2, 3.3]},
         {"x": [3, 300, 400], "y": [30]},

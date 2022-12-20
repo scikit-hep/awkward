@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._util import unset
 from awkward.forms.form import Form, _parameters_equal
 
 
@@ -29,6 +30,39 @@ class UnmaskedForm(Form):
     @property
     def content(self):
         return self._content
+
+    def copy(
+        self,
+        content=unset,
+        *,
+        parameters=unset,
+        form_key=unset,
+    ):
+        return UnmaskedForm(
+            self._content if content is unset else content,
+            parameters=self._parameters if parameters is unset else parameters,
+            form_key=self._form_key if form_key is unset else form_key,
+        )
+
+    @classmethod
+    def simplified(
+        cls,
+        content,
+        *,
+        parameters=None,
+        form_key=None,
+    ):
+        if content.is_union:
+            return content.copy(
+                contents=[cls.simplified(x) for x in content.contents],
+                parameters=ak._util.merge_parameters(content._parameters, parameters),
+            )
+        elif content.is_indexed or content.is_option:
+            return content.copy(
+                parameters=ak._util.merge_parameters(content._parameters, parameters)
+            )
+        else:
+            return cls(content, parameters=parameters, form_key=form_key)
 
     def __repr__(self):
         args = [repr(self._content)] + self._repr_args()
@@ -61,21 +95,6 @@ class UnmaskedForm(Form):
             )
         else:
             return False
-
-    def simplify_optiontype(self):
-        if isinstance(
-            self._content,
-            (
-                ak.forms.IndexedForm,
-                ak.forms.IndexedOptionForm,
-                ak.forms.ByteMaskedForm,
-                ak.forms.BitMaskedForm,
-                ak.forms.UnmaskedForm,
-            ),
-        ):
-            return self._content
-        else:
-            return self
 
     def purelist_parameter(self, key):
         if self._parameters is None or key not in self._parameters:

@@ -3,6 +3,7 @@
 from collections.abc import Iterable
 
 import awkward as ak
+from awkward._util import unset
 from awkward.forms.form import Form, _parameters_equal
 
 
@@ -68,6 +69,47 @@ class UnionForm(Form):
     @property
     def contents(self):
         return self._contents
+
+    def copy(
+        self,
+        tags=unset,
+        index=unset,
+        contents=unset,
+        *,
+        parameters=unset,
+        form_key=unset,
+    ):
+        return UnionForm(
+            self._tags if tags is unset else tags,
+            self._index if index is unset else index,
+            self._contents if contents is unset else contents,
+            parameters=self._parameters if parameters is unset else parameters,
+            form_key=self._form_key if form_key is unset else form_key,
+        )
+
+    @classmethod
+    def simplified(
+        cls,
+        tags,
+        index,
+        contents,
+        *,
+        parameters=None,
+        form_key=None,
+    ):
+        return ak.contents.UnionArray.simplified(
+            ak.index._form_to_zero_length(tags),
+            ak.index._form_to_zero_length(index),
+            [x.length_zero_array(highlevel=False) for x in contents],
+            parameters=parameters,
+        ).form
+
+    def _union_of_optionarrays(self, index, parameters):
+        return (
+            self.length_zero_array(highlevel=False)
+            ._union_of_optionarrays(ak.index._form_to_zero_length(index), parameters)
+            .form
+        )
 
     def content(self, index):
         return self._contents[index]

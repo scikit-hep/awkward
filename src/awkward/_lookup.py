@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 class Lookup:
@@ -80,7 +80,7 @@ class NumpyLookup(ContentLookup):
     @classmethod
     def tolookup(cls, layout, positions):
         pos = len(positions)
-        positions.append(layout.contiguous().data)
+        positions.append(layout.to_contiguous().data)
         return pos
 
     def tolayout(self, lookup, pos, fields):

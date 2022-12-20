@@ -6,7 +6,7 @@ import awkward as ak
 def categories(array, highlevel=True):
     """
     Args:
-        array: A possibly-categorical Awkward Array.
+        array: Array-like data (anything #ak.to_layout recognizes).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
 
@@ -36,6 +36,6 @@ def _impl(array, highlevel):
 
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
     behavior = ak._util.behavior_of(array)
-    layout.recursively_apply(action, behavior=behavior)
+    ak._do.recursively_apply(layout, action, behavior=behavior)
 
     return ak._util.wrap(output[0], behavior, highlevel)

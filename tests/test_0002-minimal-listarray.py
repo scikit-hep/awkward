@@ -37,11 +37,11 @@ def test():
 
     assert np.asarray(content).tolist() == [[0, 1, 2, 3], [4, 5, 6, 7], [8, 9, 10, 11]]
     assert np.asarray(content[0]).tolist() == [0, 1, 2, 3]
-    assert content.typetracer[0].form == content[0].form
+    assert content.to_typetracer()[0].form == content[0].form
     assert np.asarray(content[1]).tolist() == [4, 5, 6, 7]
-    assert content.typetracer[1].form == content[1].form
+    assert content.to_typetracer()[1].form == content[1].form
     assert np.asarray(content[2]).tolist() == [8, 9, 10, 11]
-    assert content.typetracer[2].form == content[2].form
+    assert content.to_typetracer()[2].form == content[2].form
     assert [content[i][j] for i in range(3) for j in range(4)] == [
         0,
         1,
@@ -58,17 +58,17 @@ def test():
     ]
 
     assert np.asarray(array[0]).tolist() == [[0, 1, 2, 3], [4, 5, 6, 7]]
-    assert array.typetracer[0].form == array[0].form
+    assert array.to_typetracer()[0].form == array[0].form
     assert np.asarray(array[1]).tolist() == []
-    assert array.typetracer[1].form == array[1].form
+    assert array.to_typetracer()[1].form == array[1].form
     assert np.asarray(array[2]).tolist() == [[8, 9, 10, 11]]
-    assert array.typetracer[2].form == array[2].form
+    assert array.to_typetracer()[2].form == array[2].form
     assert np.asarray(array[1:3][0]).tolist() == []
-    assert array.typetracer[1:3][0].form == array[1:3][0].form
+    assert array.to_typetracer()[1:3][0].form == array[1:3][0].form
     assert np.asarray(array[1:3][1]).tolist() == [[8, 9, 10, 11]]
-    assert array.typetracer[1:3][1].form == array[1:3][1].form
+    assert array.to_typetracer()[1:3][1].form == array[1:3][1].form
     assert np.asarray(array[2:3][0]).tolist() == [[8, 9, 10, 11]]
-    assert array.typetracer[2:3][0].form == array[2:3][0].form
+    assert array.to_typetracer()[2:3][0].form == array[2:3][0].form
 
 
 def test_len():

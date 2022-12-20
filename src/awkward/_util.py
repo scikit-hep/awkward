@@ -13,10 +13,10 @@ from awkward_cpp.lib import _ext
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 win = os.name == "nt"
-bits32 = ak.nplikes.numpy.iinfo(np.intp).bits == 32
+bits32 = ak._nplikes.numpy.iinfo(np.intp).bits == 32
 
 # matches include/awkward/common.h
 kMaxInt8 = 127  # 2**7  - 1
@@ -38,24 +38,28 @@ def numpy_at_least(version):
     return parse_version(numpy.__version__) >= parse_version(version)
 
 
-def in_module(obj, modulename):
+def in_module(obj, modulename: str) -> bool:
     m = type(obj).__module__
     return m == modulename or m.startswith(modulename + ".")
 
 
-def is_file_path(x):
+def is_file_path(x) -> bool:
     try:
         return os.path.isfile(x)
     except ValueError:
         return False
 
 
-def is_sized_iterable(obj):
+def is_sized_iterable(obj) -> bool:
     return isinstance(obj, Iterable) and isinstance(obj, Sized)
 
 
-def is_integer(x):
+def is_integer(x) -> bool:
     return isinstance(x, numbers.Integral) and not isinstance(x, bool)
+
+
+def is_non_string_iterable(obj) -> bool:
+    return not isinstance(obj, str) and isinstance(obj, Iterable)
 
 
 def tobytes(array):
@@ -80,6 +84,15 @@ def identifier_hash(str):
         .replace(b"/", b"")
         .decode("ascii")
     )
+
+
+# FIXME: introduce sentinel type for this
+class _Unset:
+    def __repr__(self):
+        return f"{__name__}.unset"
+
+
+unset = _Unset()
 
 
 # Sentinel object for catching pass-through values
@@ -432,20 +445,8 @@ def wrap(content, behavior=None, highlevel=True, like=None):
     return content
 
 
-def extra(args, kwargs, defaults):
-    out = []
-    for i, (name, default) in enumerate(defaults):
-        if i < len(args):
-            out.append(args[i])
-        elif name in kwargs:
-            out.append(kwargs[name])
-        else:
-            out.append(default)
-    return out
-
-
 def union_to_record(unionarray, anonymous):
-    nplike = ak.nplikes.nplike_of(unionarray)
+    nplike = ak._nplikes.nplike_of(unionarray)
 
     contents = []
     for layout in unionarray.contents:
@@ -505,12 +506,12 @@ def union_to_record(unionarray, anonymous):
                         union_contents.append(missingarray)
 
             all_fields.append(
-                ak.contents.UnionArray(
+                ak.contents.UnionArray.simplified(
                     unionarray.tags,
                     unionarray.index,
                     union_contents,
                     parameters=unionarray.parameters,
-                ).simplify_uniontype()
+                )
             )
 
         return ak.contents.RecordArray(all_fields, all_names, len(unionarray))
@@ -532,11 +533,29 @@ def direct_Content_subclass_name(node):
         return out.__name__
 
 
-def merge_parameters(one, two, merge_equal=False):
+meaningful_parameters = frozenset(
+    {
+        ("__array__", "string"),
+        ("__array__", "bytestring"),
+        ("__array__", "char"),
+        ("__array__", "byte"),
+        ("__array__", "sorted_map"),
+        ("__array__", "categorical"),
+    }
+)
+
+
+def merge_parameters(one, two, merge_equal=False, exclude=()):
     if one is None and two is None:
         return None
 
-    elif one is None:
+    if len(exclude) != 0:
+        if one is None:
+            one = {}
+        if two is None:
+            two = {}
+
+    if one is None:
         return two
 
     elif two is None:
@@ -546,15 +565,20 @@ def merge_parameters(one, two, merge_equal=False):
         out = {}
         for k, v in two.items():
             if k in one.keys():
-                if v == one[k]:
-                    out[k] = v
+                if len(exclude) == 0 or (k, v) not in exclude:
+                    if v == one[k]:
+                        out[k] = v
         return out
 
     else:
-        out = dict(one)
+        if len(exclude) != 0:
+            out = {k: v for k, v in one.items() if (k, v) not in exclude}
+        else:
+            out = dict(one)
         for k, v in two.items():
-            if v is not None:
-                out[k] = v
+            if len(exclude) == 0 or (k, v) not in exclude:
+                if v is not None:
+                    out[k] = v
         return out
 
 
@@ -582,11 +606,11 @@ expand_braces.regex = re.compile(r"\{[^\{\}]*\}")
 
 
 def from_arraylib(array, regulararray, recordarray, highlevel, behavior):
-    np = ak.nplikes.NumpyMetadata.instance()
-    numpy = ak.nplikes.Numpy.instance()
+    np = ak._nplikes.NumpyMetadata.instance()
+    numpy = ak._nplikes.Numpy.instance()
 
     def recurse(array, mask=None):
-        if ak.nplikes.Jax.is_tracer(array):
+        if ak._nplikes.Jax.is_tracer(array):
             raise ak._errors.wrap_error(
                 TypeError("Jax tracers cannot be used with `ak.from_arraylib`")
             )
@@ -738,7 +762,7 @@ def to_arraylib(module, array, allow_missing):
             tags = module.asarray(array.tags)
             for tag, content in enumerate(contents):
                 mask = tags == tag
-                if ak.nplikes.Jax.is_own_array(out):
+                if ak._nplikes.Jax.is_own_array(out):
                     out = out.at[mask].set(content)
                 else:
                     out[mask] = content
@@ -801,3 +825,22 @@ def to_arraylib(module, array, allow_missing):
         raise ak._errors.wrap_error(
             ValueError(f"{module.__name__} is not supported by to_arraylib")
         )
+
+
+def maybe_posaxis(layout, axis, depth):
+    if isinstance(layout, ak.record.Record):
+        if axis == 0:
+            raise ak._errors.wrap_error(
+                np.AxisError("Record type at axis=0 is a scalar, not an array")
+            )
+        return maybe_posaxis(layout._array, axis, depth)
+
+    if axis >= 0:
+        return axis
+
+    else:
+        is_branching, additional_depth = layout.branch_depth
+        if not is_branching:
+            return axis + depth + additional_depth - 1
+        else:
+            return None

@@ -2,13 +2,13 @@
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 def values_astype(array, to, *, highlevel=True, behavior=None):
     """
     Args:
-        array: Array whose numbers should be converted to a new numeric type.
+        array: Array-like data (anything #ak.to_layout recognizes).
         to (dtype or dtype specifier): Type to convert the numbers into.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
@@ -37,13 +37,13 @@ def values_astype(array, to, *, highlevel=True, behavior=None):
 
         >>> array = ak.Array([1567416600000])
         >>> ak.values_astype(array, "datetime64[ms]")
-        <Array [2019-09-02T09:30:00.000] type='1 * datetime64'>
+        <Array [2019-09-02T09:30:00.000] type='1 * datetime64[ms]'>
 
     or
 
         >>> array = ak.Array([1567416600000])
         >>> ak.values_astype(array, np.dtype("M8[ms]"))
-        <Array [2019-09-02T09:30:00.000] type='1 * datetime64'>
+        <Array [2019-09-02T09:30:00.000] type='1 * datetime64[ms]['>
 
     See also #ak.strings_astype.
     """
@@ -58,5 +58,5 @@ def _impl(array, to, highlevel, behavior):
     to_dtype = np.dtype(to)
     to_str = ak.types.numpytype.dtype_to_primitive(to_dtype)
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
-    out = layout.numbers_to_type(to_str)
+    out = ak._do.numbers_to_type(layout, to_str)
     return ak._util.wrap(out, behavior, highlevel, like=array)

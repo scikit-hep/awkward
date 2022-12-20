@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._util import unset
 from awkward.forms.form import Form, _parameters_equal
 
 
@@ -72,6 +73,54 @@ class BitMaskedForm(Form):
     def lsb_order(self):
         return self._lsb_order
 
+    def copy(
+        self,
+        mask=unset,
+        content=unset,
+        valid_when=unset,
+        lsb_order=unset,
+        *,
+        parameters=unset,
+        form_key=unset,
+    ):
+        return BitMaskedForm(
+            self._mask if mask is unset else mask,
+            self._content if content is unset else content,
+            self._valid_when if valid_when is unset else valid_when,
+            self._lsb_order if lsb_order is unset else lsb_order,
+            parameters=self._parameters if parameters is unset else parameters,
+            form_key=self._form_key if form_key is unset else form_key,
+        )
+
+    @classmethod
+    def simplified(
+        cls,
+        mask,
+        content,
+        valid_when,
+        lsb_order,
+        *,
+        parameters=None,
+        form_key=None,
+    ):
+        if content.is_union:
+            return content._union_of_optionarrays("i64", parameters)
+        elif content.is_indexed or content.is_option:
+            return ak.forms.IndexedOptionForm.simplified(
+                "i64",
+                content,
+                parameters=parameters,
+            )
+        else:
+            return cls(
+                mask,
+                content,
+                valid_when,
+                lsb_order,
+                parameters=parameters,
+                form_key=form_key,
+            )
+
     @property
     def is_identity_like(self):
         return False
@@ -118,25 +167,6 @@ class BitMaskedForm(Form):
             )
         else:
             return False
-
-    def simplify_optiontype(self):
-        if isinstance(
-            self._content,
-            (
-                ak.forms.IndexedForm,
-                ak.forms.IndexedOptionForm,
-                ak.forms.ByteMaskedForm,
-                ak.forms.BitMaskedForm,
-                ak.forms.UnmaskedForm,
-            ),
-        ):
-            return ak.forms.IndexedOptionForm(
-                "i64",
-                self._content,
-                parameters=self._parameters,
-            ).simplify_optiontype()
-        else:
-            return self
 
     def purelist_parameter(self, key):
         if self._parameters is None or key not in self._parameters:

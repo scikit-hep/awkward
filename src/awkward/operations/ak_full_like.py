@@ -3,17 +3,16 @@
 import awkward as ak
 from awkward.operations.ak_zeros_like import _ZEROS
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 @ak._connect.numpy.implements("full_like")
 def full_like(array, fill_value, *, dtype=None, highlevel=True, behavior=None):
     """
     Args:
-        array: Array to use as a model for a replacement that contains only
-            `fill_value`.
-        fill_value: Value to fill new new array with.
-        dtype (None or NumPy dtype)): Overrides the data type of the result.
+        array: Array-like data (anything #ak.to_layout recognizes).
+        fill_value: Value to fill the new array with.
+        dtype (None or NumPy dtype): Overrides the data type of the result.
         highlevel (bool, default is True): If True, return an #ak.Array;
             otherwise, return a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
@@ -21,8 +20,8 @@ def full_like(array, fill_value, *, dtype=None, highlevel=True, behavior=None):
 
     This is the equivalent of NumPy's `np.full_like` for Awkward Arrays.
 
-    Although it's possible to produce an array of `fill_value` with the structure
-    of an `array` using #ak.broadcast_arrays:
+    Although it's possible to produce an array of `fill_value` with the
+    structure of an `array` using #ak.broadcast_arrays:
 
         >>> array = ak.Array([[1, 2, 3], [], [4, 5]])
         >>> ak.broadcast_arrays(array, 1)
@@ -48,16 +47,10 @@ def full_like(array, fill_value, *, dtype=None, highlevel=True, behavior=None):
         ...  False,
         ...  True,
         ...  {"x": 4.4, "y": [1, 2, None, 3, 4]}]])
-        >>> ak.to_list(ak.full_like(array, 12.3))
-        [[{"x": 12.3, "y": []},
-          {"x": 12.3, "y": [12]},
-          {"x": 12.3, "y": [12, 12]}],
+        >>> ak.full_like(array, 12.3).show()
+        [[{x: 12.3, y: []}, {x: 12.3, y: [12]}, {x: 12.3, y: [12, 12]}],
          [],
-         [{"x": 12.3, "y": [12, 12, None, 12]},
-          True,
-          True,
-          True,
-          {"x": 12.3, "y": [12, 12, None, 12, 12]}]]
+         [{x: 12.3, y: [12, 12, None, 12]}, True, ..., True, {x: 12.3, y: [12, ...]}]]
 
     The `"x"` values get filled in with `12.3` because they retain their type
     (`float64`) and the `"y"` list items get filled in with `12` because they
@@ -88,7 +81,7 @@ def _impl(array, fill_value, highlevel, behavior, dtype):
         # In the case of strings and byte strings,
         # converting the fill avoids a ValueError.
         dtype = np.dtype(dtype)
-        nplike = ak.nplikes.nplike_of(array)
+        nplike = ak._nplikes.nplike_of(array)
         fill_value = nplike.asarray([fill_value], dtype=dtype)[0]
         # Also, if the fill_value cannot be converted to the dtype
         # this should throw a clear, early, error.
@@ -179,7 +172,7 @@ def _impl(array, fill_value, highlevel, behavior, dtype):
         else:
             return None
 
-    out = layout.recursively_apply(action, behavior)
+    out = ak._do.recursively_apply(layout, action, behavior)
     if dtype is not None:
         out = ak.operations.strings_astype(
             out, dtype, highlevel=highlevel, behavior=behavior

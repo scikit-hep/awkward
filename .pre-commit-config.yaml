@@ -20,7 +20,7 @@ repos:
   - id: trailing-whitespace
 
 - repo: https://github.com/PyCQA/isort
-  rev: "5.10.1"
+  rev: "v5.11.3"
   hooks:
     - id: isort
       exclude: ^src/(awkward|awkward/_v2)/__init__\.py$
@@ -32,13 +32,13 @@ repos:
     args: [--include-version-classifiers, --max-py-version=3.11]
 
 - repo: https://github.com/asottile/pyupgrade
-  rev: "v3.2.2"
+  rev: "v3.3.1"
   hooks:
   - id: pyupgrade
     args: ["--py37-plus"]
 
 - repo: https://github.com/psf/black
-  rev: 22.10.0
+  rev: 22.12.0
   hooks:
   - id: black
 
@@ -69,6 +69,6 @@ repos:
     exclude: .pre-commit-config.yaml
 
 - repo: https://github.com/shellcheck-py/shellcheck-py
-  rev: "v0.8.0.4"
+  rev: "v0.9.0.2"
   hooks:
   - id: shellcheck

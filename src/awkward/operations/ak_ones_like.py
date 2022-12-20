@@ -2,14 +2,14 @@
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 @ak._connect.numpy.implements("ones_like")
 def ones_like(array, *, dtype=None, highlevel=True, behavior=None):
     """
     Args:
-        array: Array to use as a model for a replacement that contains only `1`.
+        array: Array-like data (anything #ak.to_layout recognizes).
         dtype (None or NumPy dtype): Overrides the data type of the result.
         highlevel (bool, default is True): If True, return an #ak.Array;
             otherwise, return a low-level #ak.contents.Content subclass.

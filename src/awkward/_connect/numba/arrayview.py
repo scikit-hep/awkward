@@ -8,7 +8,7 @@ import numba.core.typing.ctypes_utils
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 def code_to_function(code, function_name, externals=None, debug=False):
@@ -109,7 +109,6 @@ class ArrayView:
             array,
             allow_record=False,
             allow_other=False,
-            numpytype=(np.number, np.bool_, np.datetime64, np.timedelta64),
         )
         return ArrayView(
             tonumbatype(layout.form),
@@ -496,12 +495,7 @@ class RecordView:
     @classmethod
     def fromrecord(cls, record):
         behavior = ak._util.behavior_of(record)
-        layout = ak.operations.to_layout(
-            record,
-            allow_record=True,
-            allow_other=False,
-            numpytype=(np.number, np.bool_, np.datetime64, np.timedelta64),
-        )
+        layout = ak.operations.to_layout(record, allow_record=True, allow_other=False)
         assert isinstance(layout, ak.record.Record)
         arraylayout = layout.array
         return RecordView(
@@ -871,7 +865,7 @@ def array_supported(dtype):
     ) or isinstance(dtype, (numba.types.NPDatetime, numba.types.NPTimedelta))
 
 
-@numba.extending.overload(ak.nplikes.numpy.array)
+@numba.extending.overload(ak._nplikes.numpy.array)
 def overload_np_array(array, dtype=None):
     if isinstance(array, ArrayViewType):
         ndim = array.type.ndim
@@ -936,11 +930,11 @@ def array_impl(array, dtype=None):
                     "\n    ".join(fill_array),
                 ),
                 "array_impl",
-                {"numpy": ak.nplikes.numpy},
+                {"numpy": ak._nplikes.numpy},
             )
 
 
-@numba.extending.type_callable(ak.nplikes.numpy.asarray)
+@numba.extending.type_callable(ak._nplikes.numpy.asarray)
 def type_asarray(context):
     def typer(arrayview):
         if (
@@ -954,7 +948,7 @@ def type_asarray(context):
     return typer
 
 
-@numba.extending.lower_builtin(ak.nplikes.numpy.asarray, ArrayViewType)
+@numba.extending.lower_builtin(ak._nplikes.numpy.asarray, ArrayViewType)
 def lower_asarray(context, builder, sig, args):
     rettype, (viewtype,) = sig.return_type, sig.args
     (viewval,) = args

@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 @ak._connect.numpy.implements("min")
@@ -14,6 +14,8 @@ def min(
     initial=None,
     mask_identity=True,
     flatten_records=False,
+    highlevel=True,
+    behavior=None
 ):
     """
     Args:
@@ -36,6 +38,10 @@ def min(
             results in the operation's identity.
         flatten_records (bool): If True, axis=None combines fields from different
             records; otherwise, records raise an error.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.contents.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
     Returns the minimum value in each group of elements from `array` (many
     types supported, including all Awkward Arrays and Records). The identity
@@ -63,7 +69,16 @@ def min(
             flatten_records=flatten_records,
         ),
     ):
-        return _impl(array, axis, keepdims, initial, mask_identity, flatten_records)
+        return _impl(
+            array,
+            axis,
+            keepdims,
+            initial,
+            mask_identity,
+            flatten_records,
+            highlevel,
+            behavior,
+        )
 
 
 @ak._connect.numpy.implements("nanmin")
@@ -75,6 +90,8 @@ def nanmin(
     initial=None,
     mask_identity=True,
     flatten_records=False,
+    highlevel=True,
+    behavior=None
 ):
     """
     Args:
@@ -117,25 +134,38 @@ def nanmin(
             initial=initial,
             mask_identity=mask_identity,
             flatten_records=flatten_records,
+            highlevel=highlevel,
+            behavior=behavior,
         ),
     ):
         array = ak.operations.ak_nan_to_none._impl(array, False, None)
 
-        return _impl(array, axis, keepdims, initial, mask_identity, flatten_records)
+        return _impl(
+            array,
+            axis,
+            keepdims,
+            initial,
+            mask_identity,
+            flatten_records,
+            highlevel,
+            behavior,
+        )
 
 
-def _impl(array, axis, keepdims, initial, mask_identity, flatten_records):
+def _impl(
+    array, axis, keepdims, initial, mask_identity, flatten_records, highlevel, behavior
+):
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
     backend = layout.backend
+    reducer = ak._reducers.Min(initial)
 
     if axis is None:
         if not backend.nplike.known_data or not backend.nplike.known_shape:
-            reducer_cls = ak._reducers.Min
 
             def map(x):
                 return ak._typetracer.MaybeNone(
                     ak._typetracer.UnknownScalar(
-                        np.dtype(reducer_cls.return_dtype(x.dtype))
+                        np.dtype(reducer.return_dtype(x.dtype))
                     )
                 )
 
@@ -152,21 +182,22 @@ def _impl(array, axis, keepdims, initial, mask_identity, flatten_records):
             else:
                 return backend.nplike.minimum(xs[0], reduce(xs[1:]))
 
-        tmp = layout.completely_flatten(
-            function_name="ak.min", flatten_records=flatten_records
+        tmp = ak._do.completely_flatten(
+            layout, function_name="ak.min", flatten_records=flatten_records
         )
         return reduce([map(x) for x in tmp if not x.shape[0] <= 0])
 
     else:
-        behavior = ak._util.behavior_of(array)
-        out = layout.min(
+        behavior = ak._util.behavior_of(array, behavior=behavior)
+        out = ak._do.reduce(
+            layout,
+            reducer,
             axis=axis,
             mask=mask_identity,
             keepdims=keepdims,
-            initial=initial,
             behavior=behavior,
         )
         if isinstance(out, (ak.contents.Content, ak.record.Record)):
-            return ak._util.wrap(out, behavior)
+            return ak._util.wrap(out, behavior, highlevel=highlevel)
         else:
             return out

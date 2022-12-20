@@ -5,10 +5,10 @@ import threading
 import weakref
 
 import awkward as ak
-from awkward import _errors, highlevel, nplikes
+from awkward import _errors, _nplikes, highlevel
 from awkward.typing import TypeVar
 
-numpy = nplikes.Numpy.instance()
+numpy = _nplikes.Numpy.instance()
 
 
 def assert_never(arg) -> None:

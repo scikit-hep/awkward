@@ -2,11 +2,14 @@
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 def fields(array):
     """
+    Args:
+        array: Array-like data (anything #ak.to_layout recognizes).
+
     Extracts record fields or tuple slot numbers from `array` (many types
     supported, including all Awkward Arrays and Records).
 

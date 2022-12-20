@@ -303,7 +303,7 @@ def test_IndexedArray():
     ]
 
     index2 = ak.index.Index(np.array([1, 2, 3], dtype=np.int64))
-    indexedarray2 = ak.contents.IndexedArray(index2, indexedarray1)
+    indexedarray2 = ak.contents.IndexedArray.simplified(index2, indexedarray1)
 
     assert to_list(
         ak.operations.sort(indexedarray2, axis=0, ascending=False, stable=False)
@@ -314,7 +314,7 @@ def test_IndexedArray():
     ]
 
     index3 = ak.index.Index32(np.array([1, 2], dtype=np.int32))
-    indexedarray3 = ak.contents.IndexedArray(index3, indexedarray2)
+    indexedarray3 = ak.contents.IndexedArray.simplified(index3, indexedarray2)
 
     assert to_list(
         ak.operations.sort(indexedarray3, axis=0, ascending=True, stable=False)

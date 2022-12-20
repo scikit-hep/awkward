@@ -2,8 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
-numpy = ak.nplikes.Numpy.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 def to_buffers(
@@ -13,7 +12,7 @@ def to_buffers(
     form_key="node{id}",
     *,
     id_start=0,
-    nplike=numpy,
+    backend=None,
 ):
     """
     Args:
@@ -37,11 +36,13 @@ def to_buffers(
         id_start (int): Starting `id` to use in `form_key` and hence `buffer_key`.
             This integer increases in a depth-first walk over the `array` nodes and
             can be used to generate unique keys for each Form.
-        nplike (#ak.nplikes.NumpyLike): Library to use to generate values that are
-            put into the `container`. The default, #ak.nplikes.Numpy, makes NumPy
-            arrays, which are in main memory (e.g. not GPU) and satisfy Python's
-            Buffer protocol. If all the buffers in `array` have the same `nplike`
-            as this, they won't be copied.
+        backend (`"cpu"`, `"cuda"`, `"jax"`, None): Backend to use to
+            generate values that are put into the `container`. The default,
+            `"cpu"`, makes NumPy arrays, which are in main memory
+            (e.g. not GPU) and satisfy Python's Buffer protocol. If all the
+            buffers in `array` have the same `backend` as this, they won't be
+            copied. If the backend is None, then the backend of the layout
+            will be used to generate the buffers.
 
     Decomposes an Awkward Array into a Form and a collection of memory buffers,
     so that data can be losslessly written to file formats and storage devices
@@ -99,8 +100,7 @@ def to_buffers(
         >>> length
         3
         >>> container
-        {'node0-offsets': array([0, 3, 3, 5], dtype=int64),
-         'node1-data': array([1, 2, 3, 4, 5])}
+        {'node0-offsets': array([0, 3, 3, 5]), 'node1-data': array([1, 2, 3, 4, 5])}
 
     which may be read back with
 
@@ -108,9 +108,9 @@ def to_buffers(
         <Array [[1, 2, 3], [], [4, 5]] type='3 * var * int64'>
 
     If you intend to use this function for saving data, you may want to pack it
-    first with #ak.packed.
+    first with #ak.to_packed.
 
-    See also #ak.from_buffers and #ak.packed.
+    See also #ak.from_buffers and #ak.to_packed.
     """
     with ak._errors.OperationErrorContext(
         "ak.to_buffers",
@@ -120,18 +120,23 @@ def to_buffers(
             buffer_key=buffer_key,
             form_key=form_key,
             id_start=id_start,
-            nplike=nplike,
+            backend=backend,
         ),
     ):
-        return _impl(array, container, buffer_key, form_key, id_start, nplike)
+        return _impl(array, container, buffer_key, form_key, id_start, backend)
 
 
-def _impl(array, container, buffer_key, form_key, id_start, nplike):
+def _impl(array, container, buffer_key, form_key, id_start, backend):
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
-    return layout.to_buffers(
+
+    if backend is not None:
+        backend = ak._backends.regularize_backend(backend)
+
+    return ak._do.to_buffers(
+        layout,
         container=container,
         buffer_key=buffer_key,
         form_key=form_key,
         id_start=id_start,
-        nplike=nplike,
+        backend=backend,
     )

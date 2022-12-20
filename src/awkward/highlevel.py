@@ -1,7 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import copy
+import html
 import io
+import itertools
 import keyword
 import re
 import sys
@@ -12,8 +14,8 @@ from awkward_cpp.lib import _ext
 import awkward as ak
 from awkward._connect.numpy import NDArrayOperatorsMixin
 
-np = ak.nplikes.NumpyMetadata.instance()
-numpy = ak.nplikes.Numpy.instance()
+np = ak._nplikes.NumpyMetadata.instance()
+numpy = ak._nplikes.Numpy.instance()
 
 _dir_pattern = re.compile(r"^[a-zA-Z_]\w*$")
 
@@ -38,13 +40,10 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         with_name (None or str): Gives tuples and records a name that can be
             used to override their behavior (see below).
         check_valid (bool): If True, verify that the #layout is valid.
-        backend (None, `"cpu"`, or `"cuda"`): If `"cpu"`, the Array will be placed in
+        backend (None, `"cpu"`, `"jax"`, `"cuda"`): If `"cpu"`, the Array will be placed in
             main memory for use with other `"cpu"` Arrays and Records; if `"cuda"`,
-            the Array will be placed in GPU global memory using CUDA; if None,
-            the `data` are left untouched. For `"cuda"`,
-            [awkward-cuda-kernels](https://pypi.org/project/awkward-cuda-kernels)
-            must be installed, which can be invoked with
-            `pip install awkward[cuda] --upgrade`.
+            the Array will be placed in GPU global memory using CUDA; if `"jax"`, the structure
+            is copied to the CPU for use with JAX. if None, the `data` are left untouched.
 
     High-level array that can contain data of any type.
 
@@ -154,28 +153,13 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     a standard for representing nested data structures in columnar arrays.
     See #ak.to_arrow and #ak.from_arrow.
 
-    NumExpr
-    *******
-
-    [NumExpr](https://numexpr.readthedocs.io/en/latest/user_guide.html) can
-    calculate expressions on a set of ak.Arrays, but only if the functions in
-    `ak.numexpr` are used, not the functions in the `numexpr` library directly.
-
-    Like NumPy ufuncs, the expression is evaluated on the numeric leaves of the
-    data structure, maintaining structure in the output.
-
-    See #ak.numexpr.evaluate to calculate an expression.
-
-    See #ak.numexpr.re_evaluate to recalculate an expression without
-    rebuilding its virtual machine.
-
     JAX
     ********
 
     Derivatives of a calculation on an #ak.Array (s) can be calculated with
-    [JAX](https://github.com/google/jax#readme), but only if the
-    function in `ak` / `numpy` are used, not the functions in the `jax`
-    library directly.
+    [JAX](https://github.com/google/jax#readme), but only if the array
+    functions in `ak` / `numpy` are used, not the functions in the `jax`
+    library directly (apart from e.g. `jax.grad`).
 
     Like NumPy ufuncs, the function and its derivatives are evaluated on the
     numeric leaves of the data structure, maintaining structure in the output.
@@ -200,10 +184,10 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         elif numpy.is_own_array(data) and data.dtype != np.dtype("O"):
             layout = ak.operations.from_numpy(data, highlevel=False)
 
-        elif ak.nplikes.Cupy.is_own_array(data):
+        elif ak._nplikes.Cupy.is_own_array(data):
             layout = ak.operations.from_cupy(data, highlevel=False)
 
-        elif ak.nplikes.Jax.is_own_array(data):
+        elif ak._nplikes.Jax.is_own_array(data):
             layout = ak.operations.from_jax(data, highlevel=False)
 
         elif ak._util.in_module(data, "pyarrow"):
@@ -273,11 +257,10 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         arrays that have the same logical meaning (i.e. same JSON output and
         high-level #type) but different
 
-           * node types, such as #ak.contents.ListArray and
+        * node types, such as #ak.contents.ListArray and
              #ak.contents.ListOffsetArray,
-           * integer type specialization, such as #ak.contents.ListArray
-             and #ak.contents.ListArray,
-           * or specific values, such as gaps in a #ak.contents.ListArray.
+        * integer type specialization, such as `int64` vs `int32`
+        * or specific values, such as gaps in a #ak.contents.ListArray.
 
         The #ak.contents.Content elements are fully composable, whereas an
         Array is not; the high-level Array is a single-layer "shell" around
@@ -294,14 +277,14 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         but `array.layout` is presented as
 
-            <ListOffsetArray64>
-                <offsets>
-                    <Index64 i="[0 3 3 5]" offset="0" length="4" at="0x55a26df62590"/>
-                </offsets>
+            <ListOffsetArray len='3'>
+                <offsets><Index dtype='int64' len='4'>
+                    [0 3 3 5]
+                </Index></offsets>
                 <content>
-                    <NumpyArray format="d" shape="5" data="1.1 2.2 3.3 4.4 5.5" at="0x55a26e0c5f50"/>
+                    <NumpyArray dtype='float64' len='5'>[1.1 2.2 3.3 4.4 5.5]</NumpyArray>
                 </content>
-            </ListOffsetArray64>
+            </ListOffsetArray>
 
         (with truncation for large arrays).
         """
@@ -322,14 +305,14 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         """
         The `behavior` parameter passed into this Array's constructor.
 
-           * If a dict, this `behavior` overrides the global #ak.behavior.
+        * If a dict, this `behavior` overrides the global #ak.behavior.
              Any keys in the global #ak.behavior but not this `behavior` are
              still valid, but any keys in both are overridden by this
              `behavior`. Keys with a None value are equivalent to missing keys,
              so this `behavior` can effectively remove keys from the
              global #ak.behavior.
 
-           * If None, the Array defaults to the global #ak.behavior.
+        * If None, the Array defaults to the global #ak.behavior.
 
         See #ak.behavior for a list of recognized key patterns and their
         meanings.
@@ -402,8 +385,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         It does not count buffers that must be kept in memory because
         of ownership, but are not directly used in the array. Nor does it count
-        the (small) C++ nodes or Python objects that reference the (large)
-        array buffers.
+        the (small) Python objects that reference the (large) array buffers.
         """
         return self._layout.nbytes
 
@@ -498,8 +480,8 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         In other words, do this:
 
-            >>> print(np.sqrt(ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])))
-            [[1.05, 1.48, 1.82], [], [2.1, 2.35]]
+            >>> np.sqrt(ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]))
+            <Array [[1.05, 1.48, 1.82], [], [2.1, 2.35]] type='3 * var * float64'>
 
         not this:
 
@@ -519,7 +501,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         See also #ak.to_list.
         """
         if isinstance(self._layout, ak.contents.NumpyArray):
-            array = self._layout.raw(numpy)
+            array = self._layout._raw(numpy)
             array_param = self._layout.parameter("__array__")
             if array_param == "byte":
                 for x in ak._util.tobytes(array):
@@ -535,9 +517,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                 if isinstance(x, ak.contents.NumpyArray):
                     array_param = x.parameter("__array__")
                     if array_param == "byte":
-                        yield ak._util.tobytes(x.raw(numpy))
+                        yield ak._util.tobytes(x._raw(numpy))
                     elif array_param == "char":
-                        yield ak._util.tobytes(x.raw(numpy)).decode(
+                        yield ak._util.tobytes(x._raw(numpy)).decode(
                             errors="surrogateescape"
                         )
                     else:
@@ -559,7 +541,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         All methods of selecting items described in
         [NumPy indexing](https://docs.scipy.org/doc/numpy/reference/arrays.indexing.html)
         are supported with one exception
-        ([combining advanced and basic indexing](https://docs.scipy.org/doc/numpy/reference/arrays.indexing.html#combining-advanced-and-basic-indexing)
+        ([combining advanced and basic indexing](https://numpy.org/doc/stable/user/basics.indexing.html#combining-advanced-and-basic-indexing)
         with basic indexes *between* two advanced indexes: the definition
         NumPy chose for the result does not have a generalization beyond
         rectilinear arrays).
@@ -567,78 +549,78 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         The `where` parameter can be any of the following or a tuple of
         the following.
 
-           * **An integer** selects one element. Like Python/NumPy, it is
-             zero-indexed: `0` is the first item, `1` is the second, etc.
-             Negative indexes count from the end of the list: `-1` is the
-             last, `-2` is the second-to-last, etc.
-             Indexes beyond the size of the array, either because they're too
-             large or because they're too negative, raise errors. In
-             particular, some nested lists might contain a desired element
-             while others don't; this would raise an error.
-           * **A slice** (either a Python `slice` object or the
-             `start:stop:step` syntax) selects a range of elements. The
-             `start` and `stop` values are zero-indexed; `start` is inclusive
-             and `stop` is exclusive, like Python/NumPy. Negative `step`
-             values are allowed, but a `step` of `0` is an error. Slices
-             beyond the size of the array are not errors but are truncated,
-             like Python/NumPy.
-           * **A string** selects a tuple or record field, even if its
-             position in the tuple is to the left of the dimension where the
-             tuple/record is defined. (See <<projection>> below.) This is
-             similar to NumPy's
-             [field access](https://docs.scipy.org/doc/numpy/reference/arrays.indexing.html#field-access),
-             except that strings are allowed in the same tuple with other
-             slice types. While record fields have names, tuple fields are
-             integer strings, such as `"0"`, `"1"`, `"2"` (always
-             non-negative). Be careful to distinguish these from non-string
-             integers.
-           * **An iterable of strings** (not the top-level tuple) selects
-             multiple tuple/record fields.
-           * **An ellipsis** (either the Python `Ellipsis` object or the
-             `...` syntax) skips as many dimensions as needed to put the
-             rest of the slice items to the innermost dimensions.
-           * **A np.newaxis** or its equivalent, None, does not select items
-             but introduces a new regular dimension in the output with size
-             `1`. This is a convenient way to explicitly choose a dimension
-             for broadcasting.
-           * **A boolean array** with the same length as the current dimension
-             (or any iterable, other than the top-level tuple) selects elements
-             corresponding to each True value in the array, dropping those
-             that correspond to each False. The behavior is similar to
-             NumPy's
-             [compress](https://docs.scipy.org/doc/numpy/reference/generated/numpy.compress.html)
-             function.
-           * **An integer array** (or any iterable, other than the top-level
-             tuple) selects elements like a single integer, but produces a
-             regular dimension of as many as are desired. The array can have
-             any length, any order, and it can have duplicates and incomplete
-             coverage. The behavior is similar to NumPy's
-             [take](https://docs.scipy.org/doc/numpy/reference/generated/numpy.take.html)
-             function.
-           * **An integer Array with missing (None) items** selects multiple
-             values by index, as above, but None values are passed through
-             to the output. This behavior matches pyarrow's
-             [Array.take](https://arrow.apache.org/docs/python/generated/pyarrow.Array.html#pyarrow.Array.take)
-             which also manages arrays with missing values. See
-             <<option indexing>> below.
-           * **An Array of nested lists**, ultimately containing booleans or
-             integers and having the same lengths of lists at each level as
-             the Array to which they're applied, selects by boolean or by
-             integer at the deeply nested level. Missing items at any level
-             above the deepest level must broadcast. See <<nested indexing>> below.
+        * **An integer** selects one element. Like Python/NumPy, it is
+          zero-indexed: `0` is the first item, `1` is the second, etc.
+          Negative indexes count from the end of the list: `-1` is the
+          last, `-2` is the second-to-last, etc.
+          Indexes beyond the size of the array, either because they're too
+          large or because they're too negative, raise errors. In
+          particular, some nested lists might contain a desired element
+          while others don't; this would raise an error.
+        * **A slice** (either a Python `slice` object or the
+          `start:stop:step` syntax) selects a range of elements. The
+          `start` and `stop` values are zero-indexed; `start` is inclusive
+          and `stop` is exclusive, like Python/NumPy. Negative `step`
+          values are allowed, but a `step` of `0` is an error. Slices
+          beyond the size of the array are not errors but are truncated,
+          like Python/NumPy.
+        * **A string** selects a tuple or record field, even if its
+          position in the tuple is to the left of the dimension where the
+          tuple/record is defined. (See <<projection>> below.) This is
+          similar to NumPy's
+          [field access](https://numpy.org/doc/stable/user/basics.indexing.html#field-access),
+          except that strings are allowed in the same tuple with other
+          slice types. While record fields have names, tuple fields are
+          integer strings, such as `"0"`, `"1"`, `"2"` (always
+          non-negative). Be careful to distinguish these from non-string
+          integers.
+        * **An iterable of strings** (not the top-level tuple) selects
+          multiple tuple/record fields.
+        * **An ellipsis** (either the Python `Ellipsis` object or the
+          `...` syntax) skips as many dimensions as needed to put the
+          rest of the slice items to the innermost dimensions.
+        * **A np.newaxis** or its equivalent, None, does not select items
+          but introduces a new regular dimension in the output with size
+          `1`. This is a convenient way to explicitly choose a dimension
+          for broadcasting.
+        * **A boolean array** with the same length as the current dimension
+          (or any iterable, other than the top-level tuple) selects elements
+          corresponding to each True value in the array, dropping those
+          that correspond to each False. The behavior is similar to
+          NumPy's
+          [compress](https://docs.scipy.org/doc/numpy/reference/generated/numpy.compress.html)
+          function.
+        * **An integer array** (or any iterable, other than the top-level
+          tuple) selects elements like a single integer, but produces a
+          regular dimension of as many as are desired. The array can have
+          any length, any order, and it can have duplicates and incomplete
+          coverage. The behavior is similar to NumPy's
+          [take](https://docs.scipy.org/doc/numpy/reference/generated/numpy.take.html)
+          function.
+        * **An integer Array with missing (None) items** selects multiple
+          values by index, as above, but None values are passed through
+          to the output. This behavior matches pyarrow's
+          [Array.take](https://arrow.apache.org/docs/python/generated/pyarrow.Array.html#pyarrow.Array.take)
+          which also manages arrays with missing values. See
+          <<option indexing>> below.
+        * **An Array of nested lists**, ultimately containing booleans or
+          integers and having the same lengths of lists at each level as
+          the Array to which they're applied, selects by boolean or by
+          integer at the deeply nested level. Missing items at any level
+          above the deepest level must broadcast. See <<nested indexing>> below.
 
         A tuple of the above applies each slice item to a dimension of the
         data, which can be very expressive. More than one flat boolean/integer
         array are "iterated as one" as described in the
-        [NumPy documentation](https://docs.scipy.org/doc/numpy/reference/arrays.indexing.html#integer-array-indexing).
+        [NumPy documentation](https://numpy.org/doc/stable/user/basics.indexing.html#integer-array-indexing).
 
         Filtering
         *********
 
         A common use of selection by boolean arrays is to filter a dataset by
-        some property. For instance, to get the odd values of the `array`
+        some property. For instance, to get the odd values of
 
-            ak.Array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+            >>> array = ak.Array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
 
         one can put an array expression with True for each odd value inside
         square brackets:
@@ -651,7 +633,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         The extension to nested arrays like
 
-            ak.Array([[[0, 1, 2], [], [3, 4], [5]], [[6, 7, 8], [9]]])
+            >>> array = ak.Array([[[0, 1, 2], [], [3, 4], [5]], [[6, 7, 8], [9]]])
 
         allows us to use the same syntax more generally.
 
@@ -662,7 +644,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         <<nested indexing>> below).
 
             >>> array % 2 == 1
-            <Array [[[False, True, False], ... [True]]] type='2 * var * var * bool'>
+            <Array [[[False, True, False], ..., [True]], ...] type='2 * var * var * bool'>
 
         This also applies to data with record structures.
 
@@ -689,8 +671,8 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         useful because it inserts None in positions that fail the filter,
         rather than removing them.
 
-            >>> print(ak.mask(array, ak.num(array) > 1))
-            [[1.1, 2.2, 3.3], None, [4.4, 5.5], None, None, [7.7, 8.8, 9.9]]
+            >>> ak.mask(array, ak.num(array) > 1)
+            <Array [[1.1, 2.2, 3.3], ..., [7.7, ..., 9.9]] type='6 * option[var * float64]'>
 
         Note, however, that the `0` or `1` to pick the first or second
         item of each nested list is in the second dimension, so the first
@@ -714,16 +696,19 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         Projection
         **********
 
-        The following `array`
+        The following
 
-            ak.Array([[{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}],
-                      [{"x": 3.3, "y": [3, 3, 3]}],
-                      [{"x": 0, "y": []}, {"x": 1.1, "y": [1, 1, 1]}]])
+            >>> array = ak.Array([[{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}],
+            ...                   [{"x": 3.3, "y": [3, 3, 3]}],
+            ...                   [{"x": 0, "y": []}, {"x": 1.1, "y": [1, 1, 1]}]])
 
         has records inside of nested lists:
 
-            >>> ak.type(array)
-            3 * var * {"x": float64, "y": var * int64}
+            >>> array.type.show()
+            3 * var * {
+                x: float64,
+                y: var * int64
+            }
 
         In principle, one should select nested lists before record fields,
 
@@ -775,7 +760,11 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         but it's not possible to move `"y"` to the right
 
             >>> array[0, :, 0, "y"]
-            ValueError: in NumpyArray, too many dimensions in slice
+            IndexError: while attempting to slice
+                <Array [[{x: 1.1, y: [1]}, {...}], ...] type='3 * var * {x: float64, y:...'>
+            with
+                (0, :, 0, 'y')
+            at inner NumpyArray of length 2, using sub-slice (0).
 
         because the `array[0, :, 0, ...]` slice applies to both `"x"` and
         `"y"` before `"y"` is selected, and `"x"` is a one-dimensional
@@ -788,18 +777,18 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             >>> array.x
             <Array [[1.1, 2.2], [3.3], [0, 1.1]] type='3 * var * float64'>
             >>> array.y
-            <Array [[[1], [2, 2]], ... [[], [1, 1, 1]]] type='3 * var * var * int64'>
+            <Array [[[1], [2, 2]], ..., [[], [1, ...]]] type='3 * var * var * int64'>
 
         Nested Projection
         *****************
 
         If records are nested within records, you can use a series of strings in
-        the selector to drill down. For instance, with the following `array`,
+        the selector to drill down. For instance, with the following
 
-            ak.Array([
-                {"a": {"x": 1, "y": 2}, "b": {"x": 10, "y": 20}, "c": {"x": 1.1, "y": 2.2}},
-                {"a": {"x": 1, "y": 2}, "b": {"x": 10, "y": 20}, "c": {"x": 1.1, "y": 2.2}},
-                {"a": {"x": 1, "y": 2}, "b": {"x": 10, "y": 20}, "c": {"x": 1.1, "y": 2.2}}])
+            >>> array = ak.Array([
+            ...     {"a": {"x": 1, "y": 2}, "b": {"x": 10, "y": 20}, "c": {"x": 1.1, "y": 2.2}},
+            ...     {"a": {"x": 1, "y": 2}, "b": {"x": 10, "y": 20}, "c": {"x": 1.1, "y": 2.2}},
+            ...     {"a": {"x": 1, "y": 2}, "b": {"x": 10, "y": 20}, "c": {"x": 1.1, "y": 2.2}}])
 
         we can go directly to the numerical data by specifying a string for the
         outer field and a string for the inner field.
@@ -824,24 +813,24 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         a list of field names for the outer record. The following selects the `"x"`
         field of `"a"`, `"b"`, and `"c"` records:
 
-            >>> array[["a", "b", "c"], "x"].tolist()
-            [{'a': 1, 'b': 10, 'c': 1.1},
-             {'a': 1, 'b': 10, 'c': 1.1},
-             {'a': 1, 'b': 10, 'c': 1.1}]
+            >>> array[["a", "b", "c"], "x"].show()
+            [{a: 1, b: 10, c: 1.1},
+             {a: 1, b: 10, c: 1.1},
+             {a: 1, b: 10, c: 1.1}]
 
         You don't need to get all fields:
 
-            >>> array[["a", "b"], "x"].tolist()
-            [{'a': 1, 'b': 10},
-             {'a': 1, 'b': 10},
-             {'a': 1, 'b': 10}]
+            >>> array[["a", "b"], "x"].show()
+            [{a: 1, b: 10},
+             {a: 1, b: 10},
+             {a: 1, b: 10}]
 
         And you can select lists of field names at all levels:
 
-            >>> array[["a", "b"], ["x", "y"]].tolist()
-            [{'a': {'x': 1, 'y': 2}, 'b': {'x': 10, 'y': 20}},
-             {'a': {'x': 1, 'y': 2}, 'b': {'x': 10, 'y': 20}},
-             {'a': {'x': 1, 'y': 2}, 'b': {'x': 10, 'y': 20}}]
+            >>> array[["a", "b"], ["x", "y"]].show()
+            [{a: {x: 1, y: 2}, b: {x: 10, y: 20}},
+             {a: {x: 1, y: 2}, b: {x: 10, y: 20}},
+             {a: {x: 1, y: 2}, b: {x: 10, y: 20}}]
 
         Option indexing
         ***************
@@ -852,9 +841,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         None in Python, are called option types (#ak.types.OptionType) in
         Awkward Array and can be used as a slice.
 
-        For example, an `array` like
+        For example,
 
-            ak.Array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
+            >>> array = ak.Array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
 
         can be sliced with a boolean array
 
@@ -895,9 +884,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         Awkward Array's nested lists can be used as slices as well, as long
         as the type at the deepest level of nesting is boolean or integer.
 
-        For example, the `array`
+        For example,
 
-            ak.Array([[[0.0, 1.1, 2.2], [], [3.3, 4.4]], [], [[5.5]]])
+            >>> array = ak.Array([[[0.0, 1.1, 2.2], [], [3.3, 4.4]], [], [[5.5]]])
 
         can be sliced at the top level with one-dimensional arrays:
 
@@ -930,18 +919,26 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         produce arrays with the same structure as the original array, which
         can then be used as filters.
 
-            >>> print((array * 10) % 2 == 1)
-            [[[False, True, False], [], [True, False]], [], [[True]]]
-            >>> print(array[(array * 10) % 2 == 1])
-            [[[1.1], [], [3.3]], [], [[5.5]]]
+            >>> ((array * 10) % 2 == 1).show()
+            [[[False, True, False], [], [True, False]],
+             [],
+             [[True]]]
+            >>> (array[(array * 10) % 2 == 1]).show()
+            [[[1.1], [], [3.3]],
+             [],
+             [[5.5]]]
 
         Functions whose names start with "arg" return index positions, which
         can be used with the integer form.
 
-            >>> print(np.argmax(array, axis=-1))
-            [[2, None, 1], [], [0]]
-            >>> print(array[np.argmax(array, axis=-1)])
-            [[[3.3, 4.4], None, []], [], [[5.5]]]
+            >>> np.argmax(array, axis=-1).show()
+            [[2, None, 1],
+             [],
+             [0]]
+            >>> array[np.argmax(array, axis=-1)].show()
+            [[[3.3, 4.4], None, []],
+             [],
+             [[5.5]]]
 
         Here, the `np.argmax` returns the integer position of the maximum
         element or None for empty arrays. It's a nice example of
@@ -952,8 +949,10 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         as the array being indexed, and the resulting output will have missing
         entries at the corresponding locations, e.g. for
 
-            >>> print(array[ [[[0, None, 2, None, None], None, [1]], None, [[0]]] ])
-            [[[0, None, 2.2, None, None], None, [4.4]], None, [[5.5]]]
+            >>> array[ [[[0, None, 2, None, None], None, [1]], None, [[0]]] ].show()
+            [[[0, None, 2.2, None, None], None, [4.4]],
+             None,
+             [[5.5]]]
 
         the sub-list at entry 0,0 is extended as the masked entries are
         acting at the last level, while the higher levels of the indexer all
@@ -964,9 +963,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             if isinstance(out, ak.contents.NumpyArray):
                 array_param = out.parameter("__array__")
                 if array_param == "byte":
-                    return ak._util.tobytes(out.raw(numpy))
+                    return ak._util.tobytes(out._raw(numpy))
                 elif array_param == "char":
-                    return ak._util.tobytes(out.raw(numpy)).decode(
+                    return ak._util.tobytes(out._raw(numpy)).decode(
                         errors="surrogateescape"
                     )
             if isinstance(out, (ak.contents.Content, ak.record.Record)):
@@ -989,8 +988,10 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
             >>> nested = ak.zip({"a" : ak.zip({"x" : [1, 2, 3]})})
             >>> nested["a", "y"] = 2 * nested.a.x
-            >>> ak.to_list(nested)
-            [{'a': {'x': 1, 'y': 2}}, {'a': {'x': 2, 'y': 4}}, {'a': {'x': 3, 'y': 6}}]
+            >>> nested.show()
+            [{a: {x: 1, y: 2}},
+             {a: {x: 2, y: 4}},
+             {a: {x: 3, y: 6}}]
 
         Note that the following does **not** work:
 
@@ -1001,9 +1002,11 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             >>> nested["a", "y"] = 2 * nested.a.x
 
         If necessary, the new field will be broadcasted to fit the array.
-        For example, given an `array` like
+        For example, given
 
-            ak.Array([[{"x": 1.1}, {"x": 2.2}, {"x": 3.3}], [], [{"x": 4.4}, {"x": 5.5}]])
+            >>> array = ak.Array([
+            ...     [{"x": 1.1}, {"x": 2.2}, {"x": 3.3}], [], [{"x": 4.4}, {"x": 5.5}]
+            ... ])
 
         which has three elements with nested data in each, assigning
 
@@ -1011,10 +1014,10 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         will result in
 
-            >>> ak.to_list(array)
-            [[{'x': 1.1, 'y': 100}, {'x': 2.2, 'y': 100}, {'x': 3.3, 'y': 100}],
+            >>> array.show()
+            [[{x: 1.1, y: 100}, {x: 2.2, y: 100}, {x: 3.3, y: 100}],
              [],
-             [{'x': 4.4, 'y': 300}, {'x': 5.5, 'y': 300}]]
+             [{x: 4.4, y: 300}, {x: 5.5, y: 300}]]
 
         because the `100` in `what[0]` is broadcasted to all three nested
         elements of `array[0]`, the `200` in `what[1]` is broadcasted to the
@@ -1045,20 +1048,34 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     def __delitem__(self, where):
         """
         Args:
-            where (str): Field name to remove from records in the array.
+            where (str or tuple of str): Field name to remove from the array.
 
-        Removes a field from records in the array.
+        For example:
+
+            >>> array = ak.Array([{"x": 3.3, "y": {"this": 10, "that": 20}}])
+            >>> del array["y", "that"]
+            >>> array.show()
+            [{x: 3.3, y: {this: 10}}]
+
+        See #ak.without_field for a variant that does not change the #ak.Array
+        in-place. (Internally, this method uses #ak.without_field, so performance
+        is not a factor in choosing one over the other.)
         """
         with ak._errors.OperationErrorContext(
             "ak.Array.__delitem__",
             dict(self=self, field_name=where),
         ):
-            names = ak.operations.fields(self._layout)
-            if where not in names:
+            if not (
+                isinstance(where, str)
+                or (isinstance(where, tuple) and all(isinstance(x, str) for x in where))
+            ):
                 raise ak._errors.wrap_error(
-                    TypeError(f"array fields do not contain {where!r}")
+                    TypeError("only fields may be removed in-place (by field name)")
                 )
-            self._layout = self._layout[[x for x in names if x != where]]
+
+            self._layout = ak.operations.ak_without_field._impl(
+                self._layout, where, highlevel=False, behavior=self._behavior
+            )
             self._numbaview = None
 
     def __getattr__(self, where):
@@ -1068,28 +1085,30 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         Whenever possible, fields can be accessed as attributes.
 
-        For example, the fields of an `array` like
+        For example, the fields of
 
-            ak.Array([[{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}],
-                      [],
-                      [{"x": 4.4, "y": [4, 4, 4, 4]}, {"x": 5.5, "y": [5, 5, 5, 5, 5]}]])
+            >>> array = ak.Array([
+            ...     [{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}],
+            ...     [],
+            ...     [{"x": 4.4, "y": [4, 4, 4, 4]}, {"x": 5.5, "y": [5, 5, 5, 5, 5]}]
+            ... ])
 
         can be accessed as
 
             >>> array.x
             <Array [[1.1, 2.2, 3.3], [], [4.4, 5.5]] type='3 * var * float64'>
             >>> array.y
-            <Array [[[1], [2, 2], ... [5, 5, 5, 5, 5]]] type='3 * var * var * int64'>
+            <Array [[[1], [2, 2], [3, 3, 3]], [], [...]] type='3 * var * var * int64'>
 
         which are equivalent to `array["x"]` and `array["y"]`. (See
         <<projection>>.)
 
         Fields can't be accessed as attributes when
 
-           * #ak.Array methods or properties take precedence,
-           * a domain-specific behavior has methods or properties that take
+        * #ak.Array methods or properties take precedence,
+        * a domain-specific behavior has methods or properties that take
              precedence, or
-           * the field name is not a valid Python identifier or is a Python
+        * the field name is not a valid Python identifier or is a Python
              keyword.
 
         Note that while fields can be accessed as attributes, they cannot be
@@ -1244,6 +1263,28 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         else:
             stream.write(out + "\n")
 
+    def _repr_mimebundle_(self, include=None, exclude=None):
+        value_buff = io.StringIO()
+        self.show(type=False, stream=value_buff)
+        header_lines = value_buff.getvalue().splitlines()
+
+        type_buff = io.StringIO()
+        self.type.show(stream=type_buff)
+        footer_lines = type_buff.getvalue().splitlines()
+        # Prepend a `type: ` prefix to the type information
+        footer_lines[0] = f"type: {footer_lines[0]}"
+
+        if header_lines[-1] == "":
+            del header_lines[-1]
+
+        n_cols = max(len(line) for line in itertools.chain(header_lines, footer_lines))
+        body = "\n".join([*header_lines, "-" * n_cols, *footer_lines])
+
+        return {
+            "text/html": f"<pre>{html.escape(body)}</pre>",
+            "text/plain": repr(self),
+        }
+
     def __array__(self, *args, **kwargs):
         """
         Intercepts attempts to convert this Array into a NumPy array and
@@ -1292,20 +1333,24 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         innermost level of structure and preserves the structure through the
         operation.
 
-        For example, with an `array` like
+        For example, with
 
-            ak.Array([[{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}], [], [{"x": 2.2, "y": [2, 2]}]])
+            >>> array = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
 
         applying `np.sqrt` would yield
 
-            >>> print(np.sqrt(array))
-            [[{x: 0, y: []}, {x: 1.05, y: [1]}], [], [{x: 1.48, y: [1.41, 1.41]}]]
+            >>> np.sqrt(array).show()
+            [[1.05, 1.48, 1.82],
+             [],
+             [2.1, 2.35]]
 
         In addition, many unary and binary operators implicitly call ufuncs,
         such as `np.power` in
 
-            >>> print(array**2)
-            [[{x: 0, y: []}, {x: 1.21, y: [1]}], [], [{x: 4.84, y: [4, 4]}]]
+            >>> (array**2).show()
+            [[1.21, 4.84, 10.9],
+             [],
+             [19.4, 30.2]]
 
         In the above example, `array` is a nested list of records and `2` is
         a scalar. Awkward Array applies the same broadcasting rules as NumPy
@@ -1313,8 +1358,10 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         broadcasting a scalar, as above, it is possible to broadcast
         arrays with less depth into arrays with more depth, such as
 
-            >>> print(array + ak.Array([10, 20, 30]))
-            [[{x: 10, y: []}, {x: 11.1, y: [11]}], [], [{x: 32.2, y: [32, 32]}]]
+            >>> (array + ak.Array([10, 20, 30])).show()
+            [[11.1, 12.2, 13.3],
+             [],
+             [34.4, 35.5]]
 
         See #ak.broadcast_arrays for details about broadcasting and the
         generalized set of broadcasting rules.
@@ -1328,8 +1375,10 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             ... def sqr(x):
             ...     return x * x
             ...
-            >>> print(sqr(array))
-            [[{x: 0, y: []}, {x: 1.21, y: [1]}], [], [{x: 4.84, y: [4, 4]}]]
+            >>> sqr(array).show()
+            [[1.21, 4.84, 10.9],
+             [],
+             [19.4, 30.2]]
 
         See also #__array_function__.
         """
@@ -1358,7 +1407,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         See also #__array_ufunc__.
         """
-        return ak._connect.numpy.array_function(func, types, args, kwargs)
+        return ak._connect.numpy.array_function(
+            func, types, args, kwargs, behavior=self._behavior
+        )
 
     @property
     def numba_type(self):
@@ -1379,9 +1430,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         return numba.typeof(self._numbaview)
 
     def __getstate__(self):
-        packed = ak.operations.packed(self._layout, highlevel=False)
+        packed = ak.operations.to_packed(self._layout, highlevel=False)
         form, length, container = ak.operations.to_buffers(
-            packed, buffer_key="part0-{form_key}-{attribute}", form_key="node{id}"
+            packed, buffer_key="{form_key}-{attribute}", form_key="node{id}"
         )
         if self._behavior is ak.behavior:
             behavior = None
@@ -1390,34 +1441,14 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         return form.to_dict(), length, container, behavior
 
     def __setstate__(self, state):
-        if isinstance(state[1], dict):
-            raise ak._errors.wrap_error(
-                ValueError(
-                    "Awkward 2.x and later can only unpickle arrays from 1.0.1 and later"
-                )
-            )
-        else:
-            form, length, container, behavior = state
-            if ak._util.is_integer(length):
-                layout = ak.operations.from_buffers(
-                    form,
-                    length,
-                    container,
-                    highlevel=False,
-                    buffer_key="part0-{form_key}-{attribute}",
-                )
-            else:
-                layouts = [
-                    ak.operations.from_buffers(
-                        form,
-                        length,
-                        container,
-                        highlevel=False,
-                        buffer_key=f"part{i}-{{form_key}}-{{attribute}}",
-                    )
-                    for i in length
-                ]
-                layout = ak.operations.concatenate(layouts, highlevel=False)
+        form, length, container, behavior = state
+        layout = ak.operations.from_buffers(
+            form,
+            length,
+            container,
+            highlevel=False,
+            buffer_key="{form_key}-{attribute}",
+        )
         self.layout = layout
         self.behavior = behavior
 
@@ -1454,13 +1485,10 @@ class Record(NDArrayOperatorsMixin):
         with_name (None or str): Gives the record type a name that can be
             used to override its behavior (see below).
         check_valid (bool): If True, verify that the #layout is valid.
-        kernels (None, `"cpu"`, or `"cuda"`): If `"cpu"`, the Record will be placed in
+        backend (None, `"cpu"`, `"jax"`, `"cuda"`): If `"cpu"`, the Array will be placed in
             main memory for use with other `"cpu"` Arrays and Records; if `"cuda"`,
-            the Record will be placed in GPU global memory using CUDA; if None,
-            the `data` are left untouched. For `"cuda"`,
-            [awkward-cuda-kernels](https://pypi.org/project/awkward-cuda-kernels)
-            must be installed, which can be invoked with
-            `pip install awkward[cuda] --upgrade`.
+            the Array will be placed in GPU global memory using CUDA; if `"jax"`, the structure
+            is copied to the CPU for use with JAX. if None, the `data` are left untouched.
 
     High-level record that can contain fields of any type.
 
@@ -1495,7 +1523,16 @@ class Record(NDArrayOperatorsMixin):
             layout = ak.operations.from_json(data, highlevel=False)
 
         elif isinstance(data, dict):
-            layout = ak.operations.from_iter([data], highlevel=False)[0]
+            fields = []
+            contents = []
+            for k, v in data.items():
+                fields.append(k)
+                if ak._util.is_non_string_iterable(v):
+                    contents.append(Array(v).layout[np.newaxis])
+                else:
+                    contents.append(Array([v]).layout)
+
+            layout = ak.record.Record(ak.contents.RecordArray(contents, fields), at=0)
 
         elif isinstance(data, Iterable):
             raise ak._errors.wrap_error(
@@ -1540,9 +1577,7 @@ class Record(NDArrayOperatorsMixin):
         See #ak.Array.layout for a more complete description.
 
         The #ak.record.Record is not a subclass of #ak.contents.Content in
-        Python (note: [Record](../_static/classawkward_1_1Record.html) *is* a
-        subclass of [Content](../_static/classawkward_1_1Content.html) in
-        C++!) and it is not composable with them: #ak.record.Record contains
+        Python and it is not composable with them: #ak.record.Record contains
         one #ak.contents.RecordArray (which is a #ak.contents.Content), but
         #ak.contents.Content nodes cannot contain a #ak.record.Record.
 
@@ -1553,20 +1588,19 @@ class Record(NDArrayOperatorsMixin):
             >>> vectors = ak.Array([{"x": 0.1, "y": 1.0, "z": 30.0},
             ...                     {"x": 0.2, "y": 2.0, "z": 20.0},
             ...                     {"x": 0.3, "y": 3.0, "z": 10.0}])
-
             >>> vectors[1].layout
-            <Record at="1">
-                <RecordArray>
-                    <field index="0" key="x">
-                        <NumpyArray format="d" shape="3" data="0.1 0.2 0.3" at="0x555660dfe7d0"/>
-                    </field>
-                    <field index="1" key="y">
-                        <NumpyArray format="d" shape="3" data="1 2 3" at="0x555660df4180"/>
-                    </field>
-                    <field index="2" key="z">
-                        <NumpyArray format="d" shape="3" data="30 20 10" at="0x555660df6190"/>
-                    </field>
-                </RecordArray>
+            <Record at='1'>
+                <array><RecordArray is_tuple='false' len='3'>
+                    <content index='0' field='x'>
+                        <NumpyArray dtype='float64' len='3'>[0.1 0.2 0.3]</NumpyArray>
+                    </content>
+                    <content index='1' field='y'>
+                        <NumpyArray dtype='float64' len='3'>[1. 2. 3.]</NumpyArray>
+                    </content>
+                    <content index='2' field='z'>
+                        <NumpyArray dtype='float64' len='3'>[30. 20. 10.]</NumpyArray>
+                    </content>
+                </RecordArray></array>
             </Record>
         """
         return self._layout
@@ -1586,14 +1620,14 @@ class Record(NDArrayOperatorsMixin):
         """
         The `behavior` parameter passed into this Record's constructor.
 
-           * If a dict, this `behavior` overrides the global #ak.behavior.
+        * If a dict, this `behavior` overrides the global #ak.behavior.
              Any keys in the global #ak.behavior but not this `behavior` are
              still valid, but any keys in both are overridden by this
              `behavior`. Keys with a None value are equivalent to missing keys,
              so this `behavior` can effectively remove keys from the
              global #ak.behavior.
 
-           * If None, the Record defaults to the global #ak.behavior.
+        * If None, the Record defaults to the global #ak.behavior.
 
         See #ak.behavior for a list of recognized key patterns and their
         meanings.
@@ -1630,7 +1664,7 @@ class Record(NDArrayOperatorsMixin):
 
         It does not count buffers that must be kept in memory because
         of ownership, but are not directly used in the array. Nor does it count
-        the (small) C++ nodes or Python objects that reference the (large)
+        the (small) Python objects that reference the (large)
         array buffers.
         """
         return self._layout.nbytes
@@ -1693,9 +1727,9 @@ class Record(NDArrayOperatorsMixin):
         this is a record, the first item in the slice tuple must be a
         string, selecting a field.
 
-        For example, with a `record` like
+        For example, with
 
-            ak.Record({"x": 3.3, "y": [1, 2, 3]})
+            >>> record = ak.Record({"x": 3.3, "y": [1, 2, 3]})
 
         we can select
 
@@ -1711,9 +1745,9 @@ class Record(NDArrayOperatorsMixin):
             if isinstance(out, ak.contents.NumpyArray):
                 array_param = out.parameter("__array__")
                 if array_param == "byte":
-                    return ak._util.tobytes(out.raw(numpy))
+                    return ak._util.tobytes(out._raw(numpy))
                 elif array_param == "char":
-                    return ak._util.tobytes(out.raw(numpy)).decode(
+                    return ak._util.tobytes(out._raw(numpy)).decode(
                         errors="surrogateescape"
                     )
             if isinstance(out, (ak.contents.Content, ak.record.Record)):
@@ -1732,8 +1766,10 @@ class Record(NDArrayOperatorsMixin):
             >>> record = ak.Record({"x": 3.3})
             >>> record["y"] = 4
             >>> record["z"] = {"another": "record"}
-            >>> print(record)
-            {x: 3.3, y: 4, z: {another: 'record'}}
+            >>> record.show()
+            {x: 3.3,
+             y: 4,
+             z: {another: 'record'}}
 
         See #ak.with_field for a variant that does not change the #ak.Record
         in-place. (Internally, this method uses #ak.with_field, so performance
@@ -1751,37 +1787,52 @@ class Record(NDArrayOperatorsMixin):
                     TypeError("only fields may be assigned in-place (by field name)")
                 )
 
-            self._layout = ak.operations.with_field(
-                self._layout, what, where, highlevel=False
+            self._layout = ak.operations.ak_with_field._impl(
+                self._layout, what, where, highlevel=False, behavior=self._behavior
             )
             self._numbaview = None
 
     def __delitem__(self, where):
         """
         Args:
-            where (str): Field name to add to records in the array.
+            where (str or tuple of str): Field name to remove from the record.
 
-        Removes a field from records in the array.
+        For example:
+
+            >>> record = ak.Record({"x": 3.3, "y": {"this": 10, "that": 20}})
+            >>> del record["y", "that"]
+            >>> record.show()
+            {x: 3.3,
+             y: {this: 10}}
+
+        See #ak.without_field for a variant that does not change the #ak.Record
+        in-place. (Internally, this method uses #ak.without_field, so performance
+        is not a factor in choosing one over the other.)
         """
         with ak._errors.OperationErrorContext(
             "ak.Record.__delitem__",
             dict(self=self, field_name=where),
         ):
-            names = ak.operations.fields(self._layout)
-            if where not in names:
+            if not (
+                isinstance(where, str)
+                or (isinstance(where, tuple) and all(isinstance(x, str) for x in where))
+            ):
                 raise ak._errors.wrap_error(
-                    TypeError(f"array fields do not contain {where!r}")
+                    TypeError("only fields may be removed in-place (by field name)")
                 )
-            self._layout = self._layout[[x for x in names if x != where]]
+
+            self._layout = ak.operations.ak_without_field._impl(
+                self._layout, where, highlevel=False, behavior=self._behavior
+            )
             self._numbaview = None
 
     def __getattr__(self, where):
         """
         Whenever possible, fields can be accessed as attributes.
 
-        For example, the fields of a record like
+        For example, the fields of
 
-            record = ak.Record({"x": 1.1, "y": [2, 2], "z": "three"})
+            >>> record = ak.Record({"x": 1.1, "y": [2, 2], "z": "three"})
 
         can be accessed as
 
@@ -1797,10 +1848,10 @@ class Record(NDArrayOperatorsMixin):
 
         Fields can't be accessed as attributes when
 
-           * #ak.Record methods or properties take precedence,
-           * a domain-specific behavior has methods or properties that take
+        * #ak.Record methods or properties take precedence,
+        * a domain-specific behavior has methods or properties that take
              precedence, or
-           * the field name is not a valid Python identifier or is a Python
+        * the field name is not a valid Python identifier or is a Python
              keyword.
         """
         if hasattr(type(self), where):
@@ -1949,6 +2000,28 @@ class Record(NDArrayOperatorsMixin):
         else:
             stream.write(out + "\n")
 
+    def _repr_mimebundle_(self, include=None, exclude=None):
+        value_buff = io.StringIO()
+        self.show(type=False, stream=value_buff)
+        header_lines = value_buff.getvalue().splitlines()
+
+        type_buff = io.StringIO()
+        self.type.show(stream=type_buff)
+        footer_lines = type_buff.getvalue().splitlines()
+        # Prepend a `type: ` prefix to the type information
+        footer_lines[0] = f"type: {footer_lines[0]}"
+
+        if header_lines[-1] == "":
+            del header_lines[-1]
+
+        n_cols = max(len(line) for line in itertools.chain(header_lines, footer_lines))
+        body = "\n".join([*header_lines, "-" * n_cols, *footer_lines])
+
+        return {
+            "text/html": f"<pre>{html.escape(body)}</pre>",
+            "text/plain": repr(self),
+        }
+
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         """
         Intercepts attempts to pass this Record to a NumPy
@@ -1990,9 +2063,9 @@ class Record(NDArrayOperatorsMixin):
         return numba.typeof(self._numbaview)
 
     def __getstate__(self):
-        packed = ak.operations.packed(self._layout, highlevel=False)
+        packed = ak.operations.to_packed(self._layout, highlevel=False)
         form, length, container = ak.operations.to_buffers(
-            packed.array, buffer_key="part0-{form_key}-{attribute}", form_key="node{id}"
+            packed.array, buffer_key="{form_key}-{attribute}", form_key="node{id}"
         )
         if self._behavior is ak.behavior:
             behavior = None
@@ -2001,34 +2074,14 @@ class Record(NDArrayOperatorsMixin):
         return form.to_dict(), length, container, behavior, packed.at
 
     def __setstate__(self, state):
-        if isinstance(state[1], dict):
-            raise ak._errors.wrap_error(
-                ValueError(
-                    "Awkward 2.x and later can only unpickle arrays from 1.0.1 and later"
-                )
-            )
-        else:
-            form, length, container, behavior, at = state
-            if ak._util.is_integer(length):
-                layout = ak.operations.from_buffers(
-                    form,
-                    length,
-                    container,
-                    highlevel=False,
-                    buffer_key="part0-{form_key}-{attribute}",
-                )
-            else:
-                layouts = [
-                    ak.operations.from_buffers(
-                        form,
-                        length,
-                        container,
-                        highlevel=False,
-                        buffer_key=f"part{i}-{{form_key}}-{{attribute}}",
-                    )
-                    for i in length
-                ]
-                layout = ak.operations.concatenate(layouts, highlevel=False)
+        form, length, container, behavior, at = state
+        layout = ak.operations.from_buffers(
+            form,
+            length,
+            container,
+            highlevel=False,
+            buffer_key="{form_key}-{attribute}",
+        )
         layout = ak.record.Record(layout, at)
         self.layout = layout
         self.behavior = behavior
@@ -2056,10 +2109,8 @@ class ArrayBuilder(Sized):
     Args:
         behavior (None or dict): Custom #ak.behavior for arrays built by
             this ArrayBuilder.
-        initial (int): Initial size (in bytes) of buffers used by the
-            [ak::ArrayBuilder](_static/classawkward_1_1ArrayBuilder.html).
-        resize (float): Resize multiplier for buffers used by the
-            [ak::ArrayBuilder](_static/classawkward_1_1ArrayBuilder.html);
+        initial (int): Initial size (in bytes) of buffers used by the `ak::ArrayBuilder`.
+        resize (float): Resize multiplier for buffers used by the `ak::ArrayBuilder`;
             should be strictly greater than 1.
 
     General tool for building arrays of nested data structures from a sequence
@@ -2076,59 +2127,64 @@ class ArrayBuilder(Sized):
         b.integer(1)      #   1,      # 0 * var * int64
         b.integer(2)      #   2,      # 0 * var * int64
         b.real(3)         #   3.0     # 0 * var * float64     (all the integers have become floats)
-        b.end_list()      # ],        # 1 * var * float64
+        b.end_list()      # ],        # 1 * var * float64     (closed first list; array length is 1)
         b.begin_list()    # [         # 1 * var * float64
-        b.end_list()      # ],        # 2 * var * float64
+        b.end_list()      # ],        # 2 * var * float64     (closed empty list; array length is 2)
         b.begin_list()    # [         # 2 * var * float64
         b.integer(4)      #   4,      # 2 * var * float64
         b.null()          #   null,   # 2 * var * ?float64    (now the floats are nullable)
         b.integer(5)      #   5       # 2 * var * ?float64
         b.end_list()      # ],        # 3 * var * ?float64
         b.begin_list()    # [         # 3 * var * ?float64
-        b.begin_record()  #   {       # 3 * var * ?union[float64, {}]
-        b.field("x")      #     "x":  # 3 * var * ?union[float64, {"x": unknown}]
-        b.integer(1)      #      1,   # 3 * var * ?union[float64, {"x": int64}]
-        b.field("y")      #      "y": # 3 * var * ?union[float64, {"x": int64, "y": unknown}]
-        b.begin_list()    #      [    # 3 * var * ?union[float64, {"x": int64, "y": var * unknown}]
-        b.integer(2)      #        2, # 3 * var * ?union[float64, {"x": int64, "y": var * int64}]
-        b.integer(3)      #        3  # 3 * var * ?union[float64, {"x": int64, "y": var * int64}]
-        b.end_list()      #      ]    # 3 * var * ?union[float64, {"x": int64, "y": var * int64}]
-        b.end_record()    #   }       # 3 * var * ?union[float64, {"x": int64, "y": var * int64}]
-        b.end_list()      # ]         # 4 * var * ?union[float64, {"x": int64, "y": var * int64}]
+        b.begin_record()  #   {       # 3 * var * union[?float64, ?{}]
+        b.field("x")      #     "x":  # 3 * var * union[?float64, ?{x: unknown}]
+        b.integer(1)      #      1,   # 3 * var * union[?float64, ?{x: int64}]
+        b.field("y")      #      "y": # 3 * var * union[?float64, ?{x: int64, y: unknown}]
+        b.begin_list()    #      [    # 3 * var * union[?float64, ?{x: int64, y: var * unknown}]
+        b.integer(2)      #        2, # 3 * var * union[?float64, ?{x: int64, y: var * int64}]
+        b.integer(3)      #        3  # 3 * var * union[?float64, ?{x: int64, y: var * int64}]
+        b.end_list()      #      ]    # 3 * var * union[?float64, ?{x: int64, y: var * int64}]
+        b.end_record()    #   }       # 3 * var * union[?float64, ?{x: int64, y: var * int64}]
+        b.end_list()      # ]         # 4 * var * union[?float64, ?{x: int64, y: var * int64}]
 
     To get an array, we take a #snapshot of the ArrayBuilder's current state.
 
-        >>> ak.to_list(b.snapshot())
-        [[1.0, 2.0, 3.0], [], [4.0, None, 5.0], [{'x': 1, 'y': [2, 3]}]]
+        >>> b.snapshot()
+        <Array [[1, 2, 3], ..., [{x: 1, y: ..., ...}]] type='4 * var * union[?float...'>
+        >>> b.snapshot().show()
+        [[1, 2, 3],
+         [],
+         [4, None, 5],
+         [{x: 1, y: [2, 3]}]]
 
     The full set of filling commands is the following.
 
-       * #null: appends a None value.
-       * #boolean: appends True or False.
-       * #integer: appends an integer.
-       * #real: appends a floating-point value.
-       * #complex: appends a complex value.
-       * #datetime: appends a datetime value.
-       * #timedelta: appends a timedelta value.
-       * #bytestring: appends an unencoded string (raw bytes).
-       * #string: appends a UTF-8 encoded string.
-       * #begin_list: begins filling a list; must be closed with #end_list.
-       * #end_list: ends a list.
-       * #begin_tuple: begins filling a tuple; must be closed with #end_tuple.
-       * #index: selects a tuple slot to fill; must be followed by a command
+    * #null: appends a None value.
+    * #boolean: appends True or False.
+    * #integer: appends an integer.
+    * #real: appends a floating-point value.
+    * #complex: appends a complex value.
+    * #datetime: appends a datetime value.
+    * #timedelta: appends a timedelta value.
+    * #bytestring: appends an unencoded string (raw bytes).
+    * #string: appends a UTF-8 encoded string.
+    * #begin_list: begins filling a list; must be closed with #end_list.
+    * #end_list: ends a list.
+    * #begin_tuple: begins filling a tuple; must be closed with #end_tuple.
+    * #index: selects a tuple slot to fill; must be followed by a command
          that actually fills that slot.
-       * #end_tuple: ends a tuple.
-       * #begin_record: begins filling a record; must be closed with
+    * #end_tuple: ends a tuple.
+    * #begin_record: begins filling a record; must be closed with
          #end_record.
-       * #field: selects a record field to fill; must be followed by a command
+    * #field: selects a record field to fill; must be followed by a command
          that actually fills that field.
-       * #end_record: ends a record.
-       * #append: generic method for filling #null, #boolean, #integer, #real,
+    * #end_record: ends a record.
+    * #append: generic method for filling #null, #boolean, #integer, #real,
          #bytestring, #string, #ak.Array, #ak.Record, or arbitrary Python data.
-       * #extend: appends all the items from an iterable.
-       * #list: context manager for #begin_list and #end_list.
-       * #tuple: context manager for #begin_tuple and #end_tuple.
-       * #record: context manager for #begin_record and #end_record.
+    * #extend: appends all the items from an iterable.
+    * #list: context manager for #begin_list and #end_list.
+    * #tuple: context manager for #begin_tuple and #end_tuple.
+    * #record: context manager for #begin_record and #end_record.
 
     ArrayBuilders can be used in [Numba](http://numba.pydata.org/): they can
     be passed as arguments to a Numba-compiled function or returned as return
@@ -2162,11 +2218,18 @@ class ArrayBuilder(Sized):
         >>> builder = ak.ArrayBuilder()
         >>> deepnesting(builder, 0.9)
         >>> builder.snapshot()
-        <Array [... 1.23, -0.498, 0.272], -0.0519]]]] type='1 * var * var * union[var * ...'>
-        >>> ak.to_list(builder)
-        [[[[2.05, 0.95], [[[0.25], 1.86, 0.89, 0.31], 0.38, -1.62, [[0.18], 0.46, 0.39], [-0.57, 1.39, -0.15, -0.20]], [[[-0.74, -0.34], -0.84], [-0.81, -0.72, -0.42, [1.04, 1.69, -0.18, 1.07]]], [[0.51]]], [[-1.97, 0.57], [-1.24, -2.14, -0.54, [[0.24, -2.31, [-0.68, 0.08], 1.80, 0.16], -0.63, [0.01, [-1.28, 0.38, 1.40, -0.26, -0.48]]], -0.62, -2.53], [-1.66, 0.58]], [0.62, [[-0.76, -0.67, -1.15], -0.50, [0.36, 0.48, -0.80, [1.15, -1.09], -1.39, 1.28]], 0.93, [1.35, [0.36, 1.09, -0.27, -0.79], [-0.41], [0.67, 0.89, 0.79]], [], [0.67, [-0.48, -0.39], 1.06, 0.80, -0.34], [[1.56, -1.60, [-0.69], -0.42], 0.33, -0.73, 0.50, -1.25, -1.15], [[0.64], [-0.01], -0.95], [[0.41, -0.68, 0.79], 0.51]], [[0.62, [0.58, -0.75]], [1.61, 0.52, 0.24], -1.09, [-1.11], 0.22], [-0.41, [[0.42], 0.78, [1.22, -0.49, 0.27], -0.05xs]]]]
-        >>> ak.type(builder.snapshot())
-        1 * var * var * union[var * union[float64, var * union[var * union[float64, var * float64], float64]], float64]
+        <Array [[[-0.523, ..., [[2.16, ...], ...]]]] type='1 * var * var * union[fl...'>
+        >>> builder.type.show()
+        1 * var * var * union[
+            float64,
+            var * union[
+                var * union[
+                    float64,
+                    var * unknown
+                ],
+                float64
+            ]
+        ]
 
     Note that this is a *general* method for building arrays; if the type is
     known in advance, more specialized procedures can be faster. This should
@@ -2203,14 +2266,14 @@ class ArrayBuilder(Sized):
         """
         The `behavior` parameter passed into this ArrayBuilder's constructor.
 
-           * If a dict, this `behavior` overrides the global #ak.behavior.
+        * If a dict, this `behavior` overrides the global #ak.behavior.
              Any keys in the global #ak.behavior but not this `behavior` are
              still valid, but any keys in both are overridden by this
              `behavior`. Keys with a None value are equivalent to missing keys,
              so this `behavior` can effectively remove keys from the
              global #ak.behavior.
 
-           * If None, the Array defaults to the global #ak.behavior.
+        * If None, the Array defaults to the global #ak.behavior.
 
         See #ak.behavior for a list of recognized key patterns and their
         meanings.
@@ -2362,7 +2425,18 @@ class ArrayBuilder(Sized):
         """
         formstr, length, container = self._layout.to_buffers()
         form = ak.forms.from_json(formstr)
-        return ak.operations.from_buffers(form, length, container, highlevel=True)
+
+        with ak._errors.OperationErrorContext("ak.ArrayBuilder.snapshot", {}):
+            return ak.operations.ak_from_buffers._impl(
+                form,
+                length,
+                container,
+                buffer_key="{form_key}-{attribute}",
+                backend="cpu",
+                highlevel=True,
+                behavior=self._behavior,
+                simplify=True,
+            )
 
     def null(self):
         """
@@ -2432,21 +2506,25 @@ class ArrayBuilder(Sized):
 
         For example,
 
-            builder.begin_list()
-            builder.real(1.1)
-            builder.real(2.2)
-            builder.real(3.3)
-            builder.end_list()
-            builder.begin_list()
-            builder.end_list()
-            builder.begin_list()
-            builder.real(4.4)
-            builder.real(5.5)
-            builder.end_list()
+            >>> builder = ak.ArrayBuilder()
+            >>> builder.begin_list()
+            >>> builder.real(1.1)
+            >>> builder.real(2.2)
+            >>> builder.real(3.3)
+            >>> builder.end_list()
+            >>> builder.begin_list()
+            >>> builder.end_list()
+            >>> builder.begin_list()
+            >>> builder.real(4.4)
+            >>> builder.real(5.5)
+            >>> builder.end_list()
 
         produces
 
-            [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
+            >>> builder.show()
+            [[1.1, 2.2, 3.3],
+             [],
+             [4.4, 5.5]]
         """
         self._layout.beginlist()
 
@@ -2463,20 +2541,23 @@ class ArrayBuilder(Sized):
 
         For example,
 
-            builder.begin_tuple(3)
-            builder.index(0).integer(1)
-            builder.index(1).real(1.1)
-            builder.index(2).string("one")
-            builder.end_tuple()
-            builder.begin_tuple(3)
-            builder.index(0).integer(2)
-            builder.index(1).real(2.2)
-            builder.index(2).string("two")
-            builder.end_tuple()
+            >>> builder = ak.ArrayBuilder()
+            >>> builder.begin_tuple(3)
+            >>> builder.index(0).integer(1)
+            >>> builder.index(1).real(1.1)
+            >>> builder.index(2).string("one")
+            >>> builder.end_tuple()
+            >>> builder.begin_tuple(3)
+            >>> builder.index(0).integer(2)
+            >>> builder.index(1).real(2.2)
+            >>> builder.index(2).string("two")
+            >>> builder.end_tuple()
 
         produces
 
-            [(1, 1.1, "one"), (2, 2.2, "two")]
+            >>> builder.show()
+            [(1, 1.1, 'one'),
+             (2, 2.2, 'two')]
         """
         self._layout.begintuple(numfields)
 
@@ -2518,13 +2599,17 @@ class ArrayBuilder(Sized):
 
         produces
 
-            >>> ak.to_list(builder.snapshot())
-            [{"x": 1.0, "y": 1.1}, {"x": 2.0, "y": 2.2}]
+            >>> builder.show()
+            [{x: 1, y: 1.1},
+             {x: 2, y: 2.2}]
 
         with type
 
-            >>> ak.type(builder.snapshot())
-            2 * points["x": float64, "y": float64]
+            >>> builder.type.show()
+            2 * points[
+                x: float64,
+                y: float64
+            ]
 
         The record type is named `"points"` because its `"__record__"`
         parameter is set to that value:
@@ -2610,19 +2695,26 @@ class ArrayBuilder(Sized):
         Context manager to prevent unpaired #begin_list and #end_list. The
         example in the #begin_list documentation can be rewritten as
 
-            with builder.list():
-                builder.real(1.1)
-                builder.real(2.2)
-                builder.real(3.3)
-            with builder.list():
-                pass
-            with builder.list():
-                builder.real(4.4)
-                builder.real(5.5)
+            >>> builder = ak.ArrayBuilder()
+            >>> with builder.list():
+            ...     builder.real(1.1)
+            ...     builder.real(2.2)
+            ...     builder.real(3.3)
+            ...
+            >>> with builder.list():
+            ...     pass
+            ...
+            >>> with builder.list():
+            ...     builder.real(4.4)
+            ...     builder.real(5.5)
+            ...
 
         to produce the same result.
 
-            [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
+            >>> builder.show()
+            [[1.1, 2.2, 3.3],
+             [],
+             [4.4, 5.5]]
 
         Since context managers aren't yet supported by Numba, this method
         can't be used in Numba.
@@ -2647,18 +2739,23 @@ class ArrayBuilder(Sized):
         Context manager to prevent unpaired #begin_tuple and #end_tuple. The
         example in the #begin_tuple documentation can be rewritten as
 
-            with builder.tuple(3):
-                builder.index(0).integer(1)
-                builder.index(1).real(1.1)
-                builder.index(2).string("one")
-            with builder.tuple(3):
-                builder.index(0).integer(2)
-                builder.index(1).real(2.2)
-                builder.index(2).string("two")
+            >>> builder = ak.ArrayBuilder()
+            >>> with builder.tuple(3):
+            ...     builder.index(0).integer(1)
+            ...     builder.index(1).real(1.1)
+            ...     builder.index(2).string("one")
+            ...
+            >>> with builder.tuple(3):
+            ...     builder.index(0).integer(2)
+            ...     builder.index(1).real(2.2)
+            ...     builder.index(2).string("two")
+            ...
 
         to produce the same result.
 
-            [(1, 1.1, "one"), (2, 2.2, "two")]
+            >>> builder.show()
+            [(1, 1.1, 'one'),
+             (2, 2.2, 'two')]
 
         Since context managers aren't yet supported by Numba, this method
         can't be used in Numba.
@@ -2683,16 +2780,21 @@ class ArrayBuilder(Sized):
         Context manager to prevent unpaired #begin_record and #end_record. The
         example in the #begin_record documentation can be rewritten as
 
-            with builder.record("points"):
-                builder.field("x").real(1)
-                builder.field("y").real(1.1)
-            with builder.record("points"):
-                builder.field("x").real(2)
-                builder.field("y").real(2.2)
+            >>> builder = ak.ArrayBuilder()
+            >>> with builder.record("points"):
+            ...     builder.field("x").real(1)
+            ...     builder.field("y").real(1.1)
+            ...
+            >>> with builder.record("points"):
+            ...     builder.field("x").real(2)
+            ...     builder.field("y").real(2.2)
+            ...
 
         to produce the same result.
 
-            [{"x": 1.0, "y": 1.1}, {"x": 2.0, "y": 2.2}]
+            >>> builder.show()
+            [{x: 1, y: 1.1},
+             {x: 2, y: 2.2}]
 
         Since context managers aren't yet supported by Numba, this method
         can't be used in Numba.

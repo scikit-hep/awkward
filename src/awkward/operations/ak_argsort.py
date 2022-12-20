@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 @ak._connect.numpy.implements("argsort")
@@ -11,8 +11,7 @@ def argsort(
 ):
     """
     Args:
-        array: Data for which to get a sorting index, possibly within nested
-            lists.
+        array: Array-like data (anything #ak.to_layout recognizes).
         axis (int): The dimension at which this operation is applied. The
             outermost dimension is `0`, followed by `1`, etc., and negative
             values count backward from the innermost: `-1` is the innermost
@@ -28,6 +27,9 @@ def argsort(
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
+
+    Returns an array of integer indexes that would sort the array if applied
+    as an integer-array slice.
 
     For example,
 
@@ -60,5 +62,5 @@ def argsort(
 
 def _impl(array, axis, ascending, stable, highlevel, behavior):
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
-    out = layout.argsort(axis, ascending, stable)
+    out = ak._do.argsort(layout, axis, ascending, stable)
     return ak._util.wrap(out, behavior, highlevel, like=array)

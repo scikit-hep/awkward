@@ -2,13 +2,13 @@
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 def flatten(array, axis=1, *, highlevel=True, behavior=None):
     """
     Args:
-        array: Data containing nested lists to flatten.
+        array: Array-like data (anything #ak.to_layout recognizes).
         axis (None or int): If None, the operation flattens all levels of
             nesting, returning a 1-dimensional array. Otherwise, it flattens
             at a specified depth. The outermost dimension is `0`, followed
@@ -25,37 +25,50 @@ def flatten(array, axis=1, *, highlevel=True, behavior=None):
     nesting, `axis=0` is a special case that only removes values at the
     top level that are equal to None.
 
-    Consider the following doubly nested `array`.
+    Consider the following.
 
-        ak.Array([[
-                   [1.1, 2.2, 3.3],
-                   [],
-                   [4.4, 5.5],
-                   [6.6]],
-                  [],
-                  [
-                   [7.7],
-                   [8.8, 9.9]
-                  ]])
+        >>> array = ak.Array([[[1.1, 2.2, 3.3],
+        ...                    [],
+        ...                    [4.4, 5.5],
+        ...                    [6.6]],
+        ...                   [],
+        ...                   [[7.7],
+        ...                    [8.8, 9.9]
+        ...                   ]])
 
     At `axis=1`, the outer lists (length 4, length 0, length 2) become a single
     list (of length 6).
 
-        >>> print(ak.flatten(array, axis=1))
-        [[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [7.7], [8.8, 9.9]]
+        >>> ak.flatten(array, axis=1).show()
+        [[1.1, 2.2, 3.3],
+         [],
+         [4.4, 5.5],
+         [6.6],
+         [7.7],
+         [8.8, 9.9]]
 
     At `axis=2`, the inner lists (lengths 3, 0, 2, 1, 1, and 2) become three
     lists (of lengths 6, 0, and 3).
 
-        >>> print(ak.flatten(array, axis=2))
-        [[1.1, 2.2, 3.3, 4.4, 5.5, 6.6], [], [7.7, 8.8, 9.9]]
+        >>> ak.flatten(array, axis=2).show()
+        [[1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
+         [],
+         [7.7, 8.8, 9.9]]
 
     There's also an option to completely flatten the array with `axis=None`.
     This is useful for passing the data to a function that doesn't care about
     nested structure, such as a plotting routine.
 
-        >>> print(ak.flatten(array, axis=None))
-        [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]
+        >>> ak.flatten(array, axis=None).show()
+        [1.1,
+         2.2,
+         3.3,
+         4.4,
+         5.5,
+         6.6,
+         7.7,
+         8.8,
+         9.9]
 
     Missing values are eliminated by flattening: there is no distinction
     between an empty list and a value of None at the level of flattening.
@@ -74,21 +87,72 @@ def flatten(array, axis=1, *, highlevel=True, behavior=None):
     case, #ak.contents.ListOffsetArray in which the first `offset` is `0`.
     In that case, the flattened data is simply the array node's `content`.
 
+        >>> array = ak.Array([[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]])
         >>> array.layout
-        <ListOffsetArray64>
-            <offsets><Index64 i="[0 4 4 6]" offset="0" length="4"/></offsets>
-            <content><ListOffsetArray64>
-                <offsets><Index64 i="[0 3 3 5 6 7 9]" offset="0" length="7"/></offsets>
-                <content>
-                    <NumpyArray format="d" shape="9" data="1.1 2.2 3.3 4.4 5.5 6.6 7.7 8.8 9.9"/>
-                </content>
-            </ListOffsetArray64></content>
-        </ListOffsetArray64>
-        >>> np.asarray(array.layout.content.content)
-        array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
+        <ListOffsetArray len='5'>
+            <offsets><Index dtype='int64' len='6'>
+                [ 0  3  3  5  6 10]
+            </Index></offsets>
+            <content><NumpyArray dtype='float64' len='10'>
+                [0.  1.1 2.2 3.3 4.4 5.5 6.6 7.7 8.8 9.9]
+            </NumpyArray></content>
+        </ListOffsetArray>
+
+        >>> ak.flatten(array).layout
+        <NumpyArray dtype='float64' len='10'>
+            [0.  1.1 2.2 3.3 4.4 5.5 6.6 7.7 8.8 9.9]
+        </NumpyArray>
+
+        >>> array.layout.content
+        <NumpyArray dtype='float64' len='10'>
+            [0.  1.1 2.2 3.3 4.4 5.5 6.6 7.7 8.8 9.9]
+        </NumpyArray>
 
     However, it is important to keep in mind that this is a special case:
     #ak.flatten and `content` are not interchangeable!
+
+        >>> array = ak.Array(
+        ...     ak.contents.ListArray(
+        ...         ak.index.Index64(np.array([ 9, 100, 5, 8, 1])),
+        ...         ak.index.Index64(np.array([12, 100, 7, 9, 5])),
+        ...         ak.contents.NumpyArray(
+        ...             np.array([999, 6.6, 7.7, 8.8, 9.9, 3.3, 4.4, 999, 5.5, 0., 1.1, 2.2, 999])
+        ...         ),
+        ...     )
+        ... )
+        >>> array.show()
+        [[0, 1.1, 2.2],
+         [],
+         [3.3, 4.4],
+         [5.5],
+         [6.6, 7.7, 8.8, 9.9]]
+
+        >>> ak.flatten(array).show()
+        [0,
+         1.1,
+         2.2,
+         3.3,
+         4.4,
+         5.5,
+         6.6,
+         7.7,
+         8.8,
+         9.9]
+
+        >>> ak.Array(array.layout.content).show()
+        [999,
+         6.6,
+         7.7,
+         8.8,
+         9.9,
+         3.3,
+         4.4,
+         999,
+         5.5,
+         0,
+         1.1,
+         2.2,
+         999]
     """
     with ak._errors.OperationErrorContext(
         "ak.flatten",
@@ -101,16 +165,16 @@ def _impl(array, axis, highlevel, behavior):
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
 
     if axis is None:
-        out = layout.completely_flatten(function_name="ak.flatten")
+        out = ak._do.completely_flatten(layout, function_name="ak.flatten")
         assert isinstance(out, tuple) and all(
             isinstance(x, ak.contents.NumpyArray) for x in out
         )
 
-        result = out[0].mergemany(out[1:])
+        result = ak._do.mergemany(out)
 
         return ak._util.wrap(result, behavior, highlevel)
 
-    elif axis == 0 or layout.axis_wrap_if_negative(axis) == 0:
+    elif axis == 0 or ak._util.maybe_posaxis(layout, axis, 1) == 0:
 
         def apply(layout):
             backend = layout.backend
@@ -159,5 +223,5 @@ def _impl(array, axis, highlevel, behavior):
         return ak._util.wrap(out, behavior, highlevel, like=array)
 
     else:
-        out = layout.flatten(axis)
+        out = ak._do.flatten(layout, axis)
         return ak._util.wrap(out, behavior, highlevel, like=array)

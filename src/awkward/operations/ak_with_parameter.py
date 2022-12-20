@@ -2,13 +2,13 @@
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 def with_parameter(array, parameter, value, *, highlevel=True, behavior=None):
     """
     Args:
-        array: Data convertible into an Awkward Array.
+        array: Array-like data (anything #ak.to_layout recognizes).
         parameter (str): Name of the parameter to set on that array.
         value (JSON): Value of the parameter to set on that array.
         highlevel (bool): If True, return an #ak.Array; otherwise, return

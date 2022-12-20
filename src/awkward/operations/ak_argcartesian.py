@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 def argcartesian(
@@ -17,8 +17,8 @@ def argcartesian(
 ):
     """
     Args:
-        arrays (dict or iterable of arrays): Arrays on which to compute the
-            Cartesian product.
+        arrays (dict or iterable of arrays): Each value in this dict or iterable
+            can be any array-like data that #ak.to_layout recognizes.
         axis (int): The dimension at which this operation is applied. The
             outermost dimension is `0`, followed by `1`, etc., and negative
             values count backward from the innermost: `-1` is the innermost
@@ -51,13 +51,23 @@ def argcartesian(
 
     is
 
-        >>> ak.to_list(ak.cartesian([one, two], axis=0))
-        [(1.1, 'a'), (1.1, 'b'), (2.2, 'a'), (2.2, 'b'), (3.3, 'a'), (3.3, 'b')]
+        >>> ak.cartesian([one, two], axis=0).show()
+        [(1.1, 'a'),
+         (1.1, 'b'),
+         (2.2, 'a'),
+         (2.2, 'b'),
+         (3.3, 'a'),
+         (3.3, 'b')]
 
     But with argcartesian, only the indexes are returned.
 
-        >>> ak.to_list(ak.argcartesian([one, two], axis=0))
-        [(0, 0), (0, 1), (1, 0), (1, 1), (2, 0), (2, 1)]
+        >>> ak.argcartesian([one, two], axis=0).show()
+        [(0, 0),
+         (0, 1),
+         (1, 0),
+         (1, 1),
+         (2, 0),
+         (2, 1)]
 
     These are the indexes that can select the items that go into the actual
     Cartesian product.
@@ -90,18 +100,20 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
     if isinstance(arrays, dict):
         behavior = ak._util.behavior_of(*arrays.values(), behavior=behavior)
         layouts = {
-            n: ak.operations.to_layout(
-                x, allow_record=False, allow_other=False
-            ).local_index(axis)
+            n: ak._do.local_index(
+                ak.operations.to_layout(x, allow_record=False, allow_other=False),
+                axis,
+            )
             for n, x in arrays.items()
         }
     else:
         arrays = list(arrays)
         behavior = ak._util.behavior_of(*arrays, behavior=behavior)
         layouts = [
-            ak.operations.to_layout(
-                x, allow_record=False, allow_other=False
-            ).local_index(axis)
+            ak._do.local_index(
+                ak.operations.to_layout(x, allow_record=False, allow_other=False),
+                axis,
+            )
             for x in arrays
         ]
 

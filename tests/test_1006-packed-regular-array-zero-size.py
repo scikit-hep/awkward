@@ -14,5 +14,5 @@ def test():
         size=0,
         zeros_length=1,
     )
-    packed = ak.operations.packed(array)
+    packed = ak.operations.to_packed(array)
     assert to_list(packed) == [[]]

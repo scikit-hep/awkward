@@ -2,12 +2,19 @@
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 @ak._connect.numpy.implements("sum")
 def sum(
-    array, axis=None, *, keepdims=False, mask_identity=False, flatten_records=False
+    array,
+    axis=None,
+    *,
+    keepdims=False,
+    mask_identity=False,
+    flatten_records=False,
+    highlevel=True,
+    behavior=None
 ):
     """
     Args:
@@ -26,6 +33,10 @@ def sum(
             results in the operation's identity.
         flatten_records (bool): If True, axis=None combines fields from different
             records; otherwise, records raise an error.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.contents.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
     Sums over `array` (many types supported, including all Awkward Arrays
     and Records). The identity of addition is `0` and it is usually not
@@ -37,10 +48,10 @@ def sum(
     For example, consider this `array`, in which all lists at a given dimension
     have the same length.
 
-        ak.Array([[ 0.1,  0.2,  0.3],
-                  [10.1, 10.2, 10.3],
-                  [20.1, 20.2, 20.3],
-                  [30.1, 30.2, 30.3]])
+        >>> array = ak.Array([[ 0.1,  0.2,  0.3],
+        ...                   [10.1, 10.2, 10.3],
+        ...                   [20.1, 20.2, 20.3],
+        ...                   [30.1, 30.2, 30.3]])
 
     A sum over `axis=-1` combines the inner lists, leaving one value per
     outer list:
@@ -56,10 +67,10 @@ def sum(
 
     Now with some values missing,
 
-        ak.Array([[ 0.1,  0.2      ],
-                  [10.1            ],
-                  [20.1, 20.2, 20.3],
-                  [30.1, 30.2      ]])
+        >>> array = ak.Array([[ 0.1,  0.2      ],
+        ...                   [10.1            ],
+        ...                   [20.1, 20.2, 20.3],
+        ...                   [30.1, 30.2      ]])
 
     The sum over `axis=-1` results in
 
@@ -90,10 +101,10 @@ def sum(
 
     The same is true if the values were None, rather than gaps:
 
-        ak.Array([[ 0.1,  0.2, None],
-                  [10.1, None, None],
-                  [20.1, 20.2, 20.3],
-                  [30.1, 30.2, None]])
+        >>> array = ak.Array([[ 0.1,  0.2, None],
+        ...                   [10.1, None, None],
+        ...                   [20.1, 20.2, 20.3],
+        ...                   [30.1, 30.2, None]])
 
         >>> ak.sum(array, axis=-1)
         <Array [0.3, 10.1, 60.6, 60.3] type='4 * float64'>
@@ -103,10 +114,10 @@ def sum(
     However, the missing value placeholder, None, allows us to align the
     remaining data differently:
 
-        ak.Array([[None,  0.1,  0.2],
-                  [None, None, 10.1],
-                  [20.1, 20.2, 20.3],
-                  [None, 30.1, 30.2]])
+        >>> array = ak.Array([[None,  0.1,  0.2],
+        ...                   [None, None, 10.1],
+        ...                   [20.1, 20.2, 20.3],
+        ...                   [None, 30.1, 30.2]])
 
     Now the `axis=-1` result is the same but the `axis=0` result has changed:
 
@@ -123,10 +134,10 @@ def sum(
 
     If, instead of missing numbers, we had missing lists,
 
-        ak.Array([[ 0.1,  0.2,  0.3],
-                  None,
-                  [20.1, 20.2, 20.3],
-                  [30.1, 30.2, 30.3]])
+        >>> array = ak.Array([[ 0.1,  0.2,  0.3],
+        ...                   None,
+        ...                   [20.1, 20.2, 20.3],
+        ...                   [30.1, 30.2, 30.3]])
 
     then the placeholder would pass through the `axis=-1` sum because summing
     over the inner dimension shouldn't change the length of the outer
@@ -191,14 +202,25 @@ def sum(
             keepdims=keepdims,
             mask_identity=mask_identity,
             flatten_records=flatten_records,
+            highlevel=highlevel,
+            behavior=behavior,
         ),
     ):
-        return _impl(array, axis, keepdims, mask_identity, flatten_records)
+        return _impl(
+            array, axis, keepdims, mask_identity, flatten_records, highlevel, behavior
+        )
 
 
 @ak._connect.numpy.implements("nansum")
 def nansum(
-    array, axis=None, *, keepdims=False, mask_identity=False, flatten_records=False
+    array,
+    axis=None,
+    *,
+    keepdims=False,
+    mask_identity=False,
+    flatten_records=False,
+    highlevel=True,
+    behavior=None
 ):
     """
     Args:
@@ -236,24 +258,28 @@ def nansum(
             keepdims=keepdims,
             mask_identity=mask_identity,
             flatten_records=flatten_records,
+            highlevel=highlevel,
+            behavior=behavior,
         ),
     ):
         array = ak.operations.ak_nan_to_none._impl(array, False, None)
 
-        return _impl(array, axis, keepdims, mask_identity, flatten_records)
+        return _impl(
+            array, axis, keepdims, mask_identity, flatten_records, highlevel, behavior
+        )
 
 
-def _impl(array, axis, keepdims, mask_identity, flatten_records):
+def _impl(array, axis, keepdims, mask_identity, flatten_records, highlevel, behavior):
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
     backend = layout.backend
+    reducer = ak._reducers.Sum()
 
     if axis is None:
         if not backend.nplike.known_data or not backend.nplike.known_shape:
-            reducer_cls = ak._reducers.Sum
 
             def map(x):
                 return ak._typetracer.UnknownScalar(
-                    np.dtype(reducer_cls.return_dtype(x.dtype))
+                    np.dtype(reducer.return_dtype(x.dtype))
                 )
 
         else:
@@ -270,18 +296,23 @@ def _impl(array, axis, keepdims, mask_identity, flatten_records):
         return reduce(
             [
                 map(x)
-                for x in layout.completely_flatten(
-                    function_name="ak.sum", flatten_records=flatten_records
+                for x in ak._do.completely_flatten(
+                    layout, function_name="ak.sum", flatten_records=flatten_records
                 )
             ]
         )
 
     else:
-        behavior = ak._util.behavior_of(array)
-        out = layout.sum(
-            axis=axis, mask=mask_identity, keepdims=keepdims, behavior=behavior
+        behavior = ak._util.behavior_of(array, behavior=behavior)
+        out = ak._do.reduce(
+            layout,
+            reducer,
+            axis=axis,
+            mask=mask_identity,
+            keepdims=keepdims,
+            behavior=behavior,
         )
         if isinstance(out, (ak.contents.Content, ak.record.Record)):
-            return ak._util.wrap(out, behavior)
+            return ak._util.wrap(out, behavior, highlevel=highlevel)
         else:
             return out

@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 def argcombinations(
@@ -19,7 +19,7 @@ def argcombinations(
 ):
     """
     Args:
-        array: Array from which to choose `n` items without replacement.
+        array: Array-like data (anything #ak.to_layout recognizes).
         n (int): The number of items to choose from each list: `2` chooses
             unique pairs, `3` chooses unique triples, etc.
         replacement (bool): If True, combinations that include the same
@@ -39,6 +39,8 @@ def argcombinations(
             (overriding `parameters`, if necessary).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
     Computes a Cartesian product (i.e. cross product) of `array` with itself
     that is restricted to combinations sampled without replacement,
@@ -91,10 +93,16 @@ def _impl(
             ValueError("the 'axis' for argcombinations must be non-negative")
         )
     else:
-        layout = ak.operations.to_layout(
-            array, allow_record=False, allow_other=False
-        ).local_index(axis)
-        out = layout.combinations(
-            n, replacement=replacement, axis=axis, fields=fields, parameters=parameters
+        layout = ak._do.local_index(
+            ak.operations.to_layout(array, allow_record=False, allow_other=False),
+            axis,
+        )
+        out = ak._do.combinations(
+            layout,
+            n,
+            replacement=replacement,
+            axis=axis,
+            fields=fields,
+            parameters=parameters,
         )
         return ak._util.wrap(out, behavior, highlevel, like=array)

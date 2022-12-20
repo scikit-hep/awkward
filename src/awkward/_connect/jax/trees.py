@@ -4,11 +4,11 @@ from __future__ import annotations
 import jax
 
 import awkward as ak
-from awkward import _errors, contents, highlevel, nplikes, record
+from awkward import _errors, _nplikes, contents, highlevel, record
 from awkward.typing import Generic, TypeVar, Union
 
-numpy = nplikes.Numpy.instance()
-np = nplikes.NumpyMetadata.instance()
+numpy = _nplikes.Numpy.instance()
+np = _nplikes.NumpyMetadata.instance()
 
 
 def find_all_buffers(
@@ -21,7 +21,9 @@ def find_all_buffers(
         if isinstance(node, ak.contents.NumpyArray):
             data_ptrs.append(node.data)
 
-    layout.recursively_apply(action=action, return_array=False, numpy_to_regular=False)
+    ak._do.recursively_apply(
+        layout, action=action, return_array=False, numpy_to_regular=False
+    )
 
     return data_ptrs
 
@@ -32,7 +34,7 @@ def replace_all_buffers(
     backend: ak._backends.Backend,
 ):
     def action(node, **kwargs):
-        jaxlike = nplikes.Jax.instance()
+        jaxlike = _nplikes.Jax.instance()
         if isinstance(node, ak.contents.NumpyArray):
             buffer = buffers.pop(0)
             # JAX might give us non-buffers, so ignore them
@@ -43,7 +45,7 @@ def replace_all_buffers(
                     buffer, parameters=node.parameters, backend=backend
                 )
 
-    return layout.recursively_apply(action=action, numpy_to_regular=False)
+    return ak._do.recursively_apply(layout, action=action, numpy_to_regular=False)
 
 
 T = TypeVar(
@@ -96,7 +98,7 @@ class AuxData(Generic[T]):
         # layout = replace_all_buffers(
         #     layout,
         #     [create_placeholder_like(n) for n in buffers],
-        #     nplike=nplikes.Numpy.instance(),
+        #     nplike=_nplikes.Numpy.instance(),
         # )
 
         return buffers, AuxData(
@@ -140,7 +142,7 @@ class AuxData(Generic[T]):
         )
 
     def __eq__(self, other: AuxData) -> bool:
-        return self.layout.layout_equal(
+        return self.layout.is_equal_to(
             other.layout, index_dtype=False, numpyarray=False
         )
 

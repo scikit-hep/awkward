@@ -2,11 +2,18 @@
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 def count(
-    array, axis=None, *, keepdims=False, mask_identity=False, flatten_records=False
+    array,
+    axis=None,
+    *,
+    keepdims=False,
+    mask_identity=False,
+    flatten_records=False,
+    highlevel=True,
+    behavior=None
 ):
     """
     Args:
@@ -25,6 +32,10 @@ def count(
             results in the operation's identity.
         flatten_records (bool): If True, axis=None combines fields from different
             records; otherwise, records raise an error.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.contents.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
     Counts elements of `array` (many types supported, including all
     Awkward Arrays and Records). The identity of counting is `0` and it is
@@ -35,13 +46,13 @@ def count(
     [shape](https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.shape.html).
 
     However, for nested lists of variable dimension and missing values, the
-    result of counting is non-trivial. For example, with this `array`,
+    result of counting is non-trivial. For example, with this
 
-        ak.Array([[ 0.1,  0.2      ],
-                  [None, 10.2, None],
-                  None,
-                  [20.1, 20.2, 20.3],
-                  [30.1, 30.2      ]])
+        >>> array = ak.Array([[ 0.1,  0.2      ],
+        ...                   [None, 10.2, None],
+        ...                   None,
+        ...                   [20.1, 20.2, 20.3],
+        ...                   [30.1, 30.2      ]])
 
     the result of counting over the innermost dimension is
 
@@ -89,22 +100,26 @@ def count(
             keepdims=keepdims,
             mask_identity=mask_identity,
             flatten_records=flatten_records,
+            highlevel=highlevel,
+            behavior=behavior,
         ),
     ):
-        return _impl(array, axis, keepdims, mask_identity, flatten_records)
+        return _impl(
+            array, axis, keepdims, mask_identity, flatten_records, highlevel, behavior
+        )
 
 
-def _impl(array, axis, keepdims, mask_identity, flatten_records):
+def _impl(array, axis, keepdims, mask_identity, flatten_records, highlevel, behavior):
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
     backend = layout.backend
+    reducer = ak._reducers.Count()
 
     if axis is None:
         if not backend.nplike.known_data or not backend.nplike.known_shape:
-            reducer_cls = ak._reducers.Count
 
             def map(x):
                 return ak._typetracer.UnknownScalar(
-                    np.dtype(reducer_cls.return_dtype(x.dtype))
+                    np.dtype(reducer.return_dtype(x.dtype))
                 )
 
         else:
@@ -121,18 +136,23 @@ def _impl(array, axis, keepdims, mask_identity, flatten_records):
         return reduce(
             [
                 map(x)
-                for x in layout.completely_flatten(
-                    function_name="ak.count", flatten_records=flatten_records
+                for x in ak._do.completely_flatten(
+                    layout, function_name="ak.count", flatten_records=flatten_records
                 )
             ]
         )
 
     else:
-        behavior = ak._util.behavior_of(array)
-        out = layout.count(
-            axis=axis, mask=mask_identity, keepdims=keepdims, behavior=behavior
+        behavior = ak._util.behavior_of(array, behavior=behavior)
+        out = ak._do.reduce(
+            layout,
+            reducer,
+            axis=axis,
+            mask=mask_identity,
+            keepdims=keepdims,
+            behavior=behavior,
         )
         if isinstance(out, (ak.contents.Content, ak.record.Record)):
-            return ak._util.wrap(out, behavior)
+            return ak._util.wrap(out, behavior, highlevel=highlevel)
         else:
             return out

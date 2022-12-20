@@ -2,13 +2,13 @@
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 def firsts(array, axis=1, *, highlevel=True, behavior=None):
     """
     Args:
-        array: Data from which to select the first elements from nested lists.
+        array: Array-like data (anything #ak.to_layout recognizes).
         axis (int): The dimension at which this operation is applied. The
             outermost dimension is `0`, followed by `1`, etc., and negative
             values count backward from the innermost: `-1` is the innermost
@@ -24,8 +24,15 @@ def firsts(array, axis=1, *, highlevel=True, behavior=None):
     For example,
 
         >>> array = ak.Array([[1.1], [2.2], [], [3.3], [], [], [4.4], [5.5]])
-        >>> print(ak.firsts(array))
-        [1.1, 2.2, None, 3.3, None, None, 4.4, 5.5]
+        >>> ak.firsts(array).show()
+        [1.1,
+         2.2,
+         None,
+         3.3,
+         None,
+         None,
+         4.4,
+         5.5]
 
     See #ak.singletons to invert this function.
     """
@@ -37,24 +44,53 @@ def firsts(array, axis=1, *, highlevel=True, behavior=None):
 
 
 def _impl(array, axis, highlevel, behavior):
-    layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
-    posaxis = layout.axis_wrap_if_negative(axis)
+    layout = ak.operations.to_layout(array)
+    behavior = ak._util.behavior_of(array, behavior=behavior)
 
-    if posaxis == 0:
-        if len(layout) == 0:
-            out = None
+    if not ak._util.is_integer(axis):
+        raise ak._errors.wrap_error(
+            TypeError(f"'axis' must be an integer, not {axis!r}")
+        )
+
+    if ak._util.maybe_posaxis(layout, axis, 1) == 0:
+        # specialized logic; it's tested in test_0582-propagate-context-in-broadcast_and_apply.py
+        # Build an integer-typed slice array, so that we can
+        # ensure we have advanced indexing for both length==0
+        # and length > 0 cases.
+        slicer = ak.from_iter([None, 0])
+        if layout.length == 0:
+            out = layout[slicer[[0]]][0]
         else:
-            out = layout[0]
-    else:
-        if posaxis < 0:
-            raise ak._errors.wrap_error(
-                NotImplementedError("ak.firsts with ambiguous negative axis")
-            )
-        toslice = (slice(None, None, None),) * posaxis + (0,)
-        out = ak.operations.mask(
-            layout,
-            ak.operations.num(layout, axis=posaxis) > 0,
-            highlevel=False,
-        )[toslice]
+            out = layout[slicer[[1]]][0]
 
-    return ak._util.wrap(out, behavior, highlevel, like=array)
+    else:
+
+        def action(layout, depth, depth_context, **kwargs):
+            posaxis = ak._util.maybe_posaxis(layout, axis, depth)
+
+            if posaxis == depth and layout.is_list:
+                nplike = layout._backend.index_nplike
+
+                # this is a copy of the raw array
+                index = starts = nplike.array(layout.starts.raw(nplike), dtype=np.int64)
+
+                # this might be a view
+                stops = layout.stops.raw(nplike)
+
+                empties = starts == stops
+                index[empties] = -1
+
+                return ak.contents.IndexedOptionArray.simplified(
+                    ak.index.Index64(index), layout._content
+                )
+
+            elif layout.is_leaf:
+                raise ak._errors.wrap_error(
+                    np.AxisError(
+                        f"axis={axis} exceeds the depth of this array ({depth})"
+                    )
+                )
+
+        out = ak._do.recursively_apply(layout, action, behavior, numpy_to_regular=True)
+
+    return ak._util.wrap(out, behavior, highlevel)

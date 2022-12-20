@@ -2,13 +2,13 @@
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = ak._nplikes.NumpyMetadata.instance()
 
 
 def pad_none(array, target, axis=1, *, clip=False, highlevel=True, behavior=None):
     """
     Args:
-        array: Data containing nested lists to pad to a target length.
+        array: Array-like data (anything #ak.to_layout recognizes).
         target (int): The intended length of the lists. If `clip=True`,
             the output lists will have exactly this length; otherwise,
             they will have *at least* this length.
@@ -27,77 +27,48 @@ def pad_none(array, target, axis=1, *, clip=False, highlevel=True, behavior=None
 
     Increase the lengths of lists to a target length by adding None values.
 
-    Consider the following doubly nested `array`.
+    Consider the following
 
-        ak.Array([[
-                   [1.1, 2.2, 3.3],
-                   [],
-                   [4.4, 5.5],
-                   [6.6]],
-                  [],
-                  [
-                   [7.7],
-                   [8.8, 9.9]
-                  ]])
+        >>> array = ak.Array([[[1.1, 2.2, 3.3],
+        ...                    [],
+        ...                    [4.4, 5.5],
+        ...                    [6.6]],
+        ...                   [],
+        ...                   [[7.7],
+        ...                    [8.8, 9.9]
+        ...                   ]])
 
     At `axis=0`, this operation pads the whole array, adding None at the
     outermost level:
 
-        >>> ak.to_list(ak.pad_none(array, 5, axis=0))
-        [[
-          [1.1, 2.2, 3.3],
-          [],
-          [4.4, 5.5],
-          [6.6]],
+        >>> ak.pad_none(array, 5, axis=0).show()
+        [[[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6]],
          [],
-         [
-          [7.7],
-          [8.8, 9.9]
-         ],
+         [[7.7], [8.8, 9.9]],
          None,
          None]
 
     At `axis=1`, this operation pads the first nested level:
 
-        >>> ak.to_list(ak.pad_none(array, 3, axis=1))
-        [[
-          [1.1, 2.2, 3.3],
-          [],
-          [4.4, 5.5],
-          [6.6]
-         ],
-         [
-          None,
-          None,
-          None],
-         [
-          [7.7],
-          [8.8, 9.9],
-          None
-         ]]
+        >>> ak.pad_none(array, 3, axis=1).show()
+        [[[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6]],
+         [None, None, None],
+         [[7.7], [8.8, 9.9], None]]
 
     And so on for higher values of `axis`:
 
-        >>> ak.to_list(ak.pad_none(array, 2, axis=2))
-        [[
-          [1.1, 2.2, 3.3],
-          [None, None],
-          [4.4, 5.5],
-          [6.6, None]
-         ],
+        >>> ak.pad_none(array, 2, axis=2).show()
+        [[[1.1, 2.2, 3.3], [None, None], [4.4, 5.5], [6.6, None]],
          [],
-         [
-          [7.7, None],
-          [8.8, 9.9]
-         ]]
+         [[7.7, None], [8.8, 9.9]]]
 
     Note that the `clip` parameter not only determines whether the lengths are
     at least `target` or exactly `target`, it also determines the type of the
     output:
 
-       * `clip=True` returns regular lists (#ak.types.RegularType), and
-       * `clip=False` returns in-principle variable lengths
-         (#ak.types.ListType).
+    * `clip=True` returns regular lists (#ak.types.RegularType), and
+    * `clip=False` returns in-principle variable lengths
+      (#ak.types.ListType).
 
     The in-principle variable-length lists might, in fact, all have the same
     length, but the type difference is significant, for instance in
@@ -106,19 +77,19 @@ def pad_none(array, target, axis=1, *, clip=False, highlevel=True, behavior=None
     The difference between
 
         >>> ak.pad_none(array, 2, axis=2)
-        <Array [[[1.1, 2.2, 3.3], ... [8.8, 9.9]]] type='3 * var * var * ?float64'>
+        <Array [[[1.1, 2.2, 3.3], ..., [...]], ...] type='3 * var * var * ?float64'>
 
     and
 
         >>> ak.pad_none(array, 2, axis=2, clip=True)
-        <Array [[[1.1, 2.2], [None, ... [8.8, 9.9]]] type='3 * var * 2 * ?float64'>
+        <Array [[[1.1, 2.2], ..., [6.6, None]], ...] type='3 * var * 2 * ?float64'>
 
     is not just in the length of `[1.1, 2.2, 3.3]` vs `[1.1, 2.2]`, but also
     in the distinction between the following types.
 
-        >>> ak.type(ak.pad_none(array, 2, axis=2))
+        >>> ak.pad_none(array, 2, axis=2).type.show()
         3 * var * var * ?float64
-        >>> ak.type(ak.pad_none(array, 2, axis=2, clip=True))
+        >>> ak.pad_none(array, 2, axis=2, clip=True).type.show()
         3 * var *   2 * ?float64
     """
     with ak._errors.OperationErrorContext(
@@ -137,6 +108,6 @@ def pad_none(array, target, axis=1, *, clip=False, highlevel=True, behavior=None
 
 def _impl(array, target, axis, clip, highlevel, behavior):
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
-    out = layout.pad_none(target, axis, clip=clip)
+    out = ak._do.pad_none(layout, target, axis, clip=clip)
 
     return ak._util.wrap(out, behavior, highlevel, like=array)

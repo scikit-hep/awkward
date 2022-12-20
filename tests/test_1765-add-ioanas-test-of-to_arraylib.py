@@ -7,9 +7,7 @@ import awkward as ak
 
 
 def test():
-    aa = ak.contents.NumpyArray(
-        np.frombuffer(b"hellothere", "u1"), parameters={"__array__": "bytestring"}
-    )
+    aa = ak.contents.NumpyArray(np.frombuffer(b"hellothere", "u1"))
     b = ak._util.to_arraylib(np, aa, False)
     assert b.tolist() == [104, 101, 108, 108, 111, 116, 104, 101, 114, 101]
     assert b.dtype == np.dtype(np.uint8)

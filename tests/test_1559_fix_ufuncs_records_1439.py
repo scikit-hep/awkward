@@ -54,4 +54,4 @@ def test_this_should_not():
         [{"x": 1.1}, {"x": 2.2}, {"x": 3.3}], with_name="Overload", behavior=behavior
     )
 
-    assert (one + two).tolist() == [{"x": 2.1}, {"x": 4.2}, {"x": 6.3}]
+    assert (one + two).to_list() == [{"x": 2.1}, {"x": 4.2}, {"x": 6.3}]

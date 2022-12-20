@@ -51,7 +51,9 @@ ak.from_arrow(pa_array)
 Here is an example of an Arrow Table, derived from CSV. (Printing a table shows its field types.)
 
 ```{code-cell} ipython3
-pokemon = urllib.request.urlopen("https://gist.githubusercontent.com/armgilles/194bcff35001e7eb53a2a8b441e8b2c6/raw/92200bc0a673d5ce2110aaad4544ed6c4010f687/pokemon.csv")
+pokemon = urllib.request.urlopen(
+    "https://gist.githubusercontent.com/armgilles/194bcff35001e7eb53a2a8b441e8b2c6/raw/92200bc0a673d5ce2110aaad4544ed6c4010f687/pokemon.csv"
+)
 table = pyarrow.csv.read_csv(pokemon)
 table
 ```
@@ -89,7 +91,9 @@ The function for Awkward → Arrow conversion is {func}`ak.to_arrow`. This funct
 type.
 
 ```{code-cell} ipython3
-ak_array = ak.Array([{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}, {"x": 3.3, "y": [1, 2, 3]}])
+ak_array = ak.Array(
+    [{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}, {"x": 3.3, "y": [1, 2, 3]}]
+)
 ak_array
 ```
 
@@ -109,10 +113,13 @@ isinstance(pa_array, pa.lib.Array)
 If you need {class}`pyarrow.lib.RecordBatch`, you can build this using pyarrow:
 
 ```{code-cell} ipython3
-pa_batch = pa.RecordBatch.from_arrays([
-    ak.to_arrow(ak_array.x),
-    ak.to_arrow(ak_array.y),
-], ["x", "y"])
+pa_batch = pa.RecordBatch.from_arrays(
+    [
+        ak.to_arrow(ak_array.x),
+        ak.to_arrow(ak_array.y),
+    ],
+    ["x", "y"],
+)
 pa_batch
 ```
 
@@ -147,15 +154,20 @@ When following those instructions, remember that {func}`ak.from_arrow` can accep
 For instance, when writing to an IPC stream, Arrow requires {class}`pyarrow.lib.RecordBatch`, so you need to build them:
 
 ```{code-cell} ipython3
-ak_array = ak.Array([{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}, {"x": 3.3, "y": [1, 2, 3]}])
+ak_array = ak.Array(
+    [{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}, {"x": 3.3, "y": [1, 2, 3]}]
+)
 ak_array
 ```
 
 ```{code-cell} ipython3
-first_batch = pa.RecordBatch.from_arrays([
-    ak.to_arrow(ak_array.x),
-    ak.to_arrow(ak_array.y),
-], ["x", "y"])
+first_batch = pa.RecordBatch.from_arrays(
+    [
+        ak.to_arrow(ak_array.x),
+        ak.to_arrow(ak_array.y),
+    ],
+    ["x", "y"],
+)
 first_batch.schema
 ```
 
@@ -166,11 +178,14 @@ writer = pa.ipc.new_stream(sink, first_batch.schema)
 writer.write_batch(first_batch)
 
 for i in range(5):
-    next_batch = pa.RecordBatch.from_arrays([
-        ak.to_arrow(ak_array.x),
-        ak.to_arrow(ak_array.y),
-    ], ["x", "y"])
-    
+    next_batch = pa.RecordBatch.from_arrays(
+        [
+            ak.to_arrow(ak_array.x),
+            ak.to_arrow(ak_array.y),
+        ],
+        ["x", "y"],
+    )
+
     writer.write_batch(next_batch)
 
 writer.close()
@@ -202,15 +217,20 @@ When following those instructions, remember that {func}`ak.from_arrow` can accep
 For instance, when writing to a Feather file, Arrow requires {class}`pyarrow.lib.Table`, so you need to build them:
 
 ```{code-cell} ipython3
-ak_array = ak.Array([{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}, {"x": 3.3, "y": [1, 2, 3]}])
+ak_array = ak.Array(
+    [{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}, {"x": 3.3, "y": [1, 2, 3]}]
+)
 ak_array
 ```
 
 ```{code-cell} ipython3
-pa_batch = pa.RecordBatch.from_arrays([
-    ak.to_arrow(ak_array.x),
-    ak.to_arrow(ak_array.y),
-], ["x", "y"])
+pa_batch = pa.RecordBatch.from_arrays(
+    [
+        ak.to_arrow(ak_array.x),
+        ak.to_arrow(ak_array.y),
+    ],
+    ["x", "y"],
+)
 
 pa_table = pa.Table.from_batches([pa_batch])
 pa_table
@@ -245,7 +265,9 @@ With data converted to and from Arrow, it can then be saved and loaded from Parq
 The {func}`ak.to_parquet` function writes Awkward Arrays as Parquet files. It has relatively few options.
 
 ```{code-cell} ipython3
-ak_array = ak.Array([{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}, {"x": 3.3, "y": [1, 2, 3]}])
+ak_array = ak.Array(
+    [{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}, {"x": 3.3, "y": [1, 2, 3]}]
+)
 ak_array
 ```
 

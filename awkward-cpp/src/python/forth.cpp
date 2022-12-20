@@ -213,6 +213,8 @@ make_ForthMachineOf(const py::handle& m, const std::string& name) {
                     + key + FILENAME(__LINE__));
             }
           })
+          .def_property_readonly("abi_version",
+              &ak::ForthMachineOf<T, I>::abi_version)
           .def_property_readonly("source",
               &ak::ForthMachineOf<T, I>::source)
           .def_property_readonly("bytecodes",

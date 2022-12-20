@@ -5,8 +5,7 @@ from abc import abstractmethod
 import awkward_cpp
 
 import awkward as ak
-from awkward._typetracer import NoKernel, TypeTracer
-from awkward.nplikes import (
+from awkward._nplikes import (
     Cupy,
     CupyKernel,
     Jax,
@@ -18,6 +17,7 @@ from awkward.nplikes import (
     Singleton,
     nplike_of,
 )
+from awkward._typetracer import NoKernel, TypeTracer
 from awkward.typing import (
     Any,
     Callable,
@@ -83,7 +83,7 @@ class NumpyBackend(Singleton, Backend[Any]):
 
 
 class CupyBackend(Singleton, Backend[Any]):
-    name: Final[str] = "cupy"
+    name: Final[str] = "cuda"
 
     _cupy: Cupy
 
@@ -155,7 +155,7 @@ class TypeTracerBackend(Singleton, Backend[Any]):
         return NoKernel(index)
 
 
-def _backend_for_nplike(nplike: ak.nplikes.NumpyLike) -> Backend:
+def _backend_for_nplike(nplike: ak._nplikes.NumpyLike) -> Backend:
     # Currently there exists a one-to-one relationship between the nplike
     # and the backend. In future, this might need refactoring
     if isinstance(nplike, Numpy):
@@ -198,10 +198,10 @@ _backends: Final[dict[str, type[Backend]]] = {
 }
 
 
-def regularize_backend(backend: str) -> Backend:
-    if backend in _backends:
+def regularize_backend(backend: str | Backend) -> Backend:
+    if isinstance(backend, Backend):
+        return backend
+    elif backend in _backends:
         return _backends[backend].instance()
     else:
-        raise ak._errors.wrap_error(
-            ValueError("The available backends for now are `cpu` and `cuda`.")
-        )
+        raise ak._errors.wrap_error(ValueError(f"No such backend {backend!r} exists."))

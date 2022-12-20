@@ -9,8 +9,8 @@ from awkward_cpp.lib import _ext
 
 import awkward as ak
 
-np = ak.nplikes.NumpyMetadata.instance()
-numpy = ak.nplikes.Numpy.instance()
+np = ak._nplikes.NumpyMetadata.instance()
+numpy = ak._nplikes.Numpy.instance()
 
 
 def from_json(
@@ -33,14 +33,14 @@ def from_json(
         source (bytes/str, pathlib.Path, or file-like object): Data source of the
             JSON-formatted string(s). If bytes/str, the string is parsed. If a
             `pathlib.Path`, a file with that name is opened, parsed, and closed.
-            If that path has a URI protocol (like "https://" or "s3://"), this
+            If that path has a URI protocol (like `"https://"` or `"s3://"`), this
             function attempts to open the file with the fsspec library. If a
             file-like object with a `read` method, this function reads from the
             object, but does not close it.
         line_delimited (bool): If False, a single JSON document is read as an
             entire array or record. If True, this function reads line-delimited
             JSON into an array (regardless of how many there are). The line
-            delimiter is not actually checked, so it may be `"\n"`, `"\r\n"`
+            delimiter is not actually checked, so it may be `"\\n"`, `"\\r\\n"`
             or anything else.
         schema (None, JSON str or equivalent lists/dicts): If None, the data type
             is discovered while parsing. If a JSONSchema
@@ -57,10 +57,8 @@ def from_json(
         buffersize (int): Number of bytes in each read from source: larger
             values use more memory but read less frequently. (Python GIL is
             released before and after read events.)
-        initial (int): Initial size (in bytes) of buffers used by the
-            [ak::ArrayBuilder](_static/classawkward_1_1ArrayBuilder.html).
-        resize (float): Resize multiplier for buffers used by the
-            [ak::ArrayBuilder](_static/classawkward_1_1ArrayBuilder.html);
+        initial (int): Initial size (in bytes) of buffers used by the `ak::ArrayBuilder`.
+        resize (float): Resize multiplier for buffers used by the `ak::ArrayBuilder`;
             should be strictly greater than 1.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
@@ -72,14 +70,14 @@ def from_json(
     There are a few different dichotomies in JSON-reading; all of the combinations
     are supported:
 
-      * Reading from in-memory str/bytes, on-disk or over-network file, or an
-        arbitrary Python object with a `read(num_bytes)` method.
-      * Reading a single JSON document or a sequence of line-delimited documents.
-      * Unknown schema (slow and general) or with a provided JSONSchema (fast, but
-        not all possible cases are supported).
-      * Conversion of strings representing not-a-number, plus and minus infinity
-        into the appropriate floating-point numbers.
-      * Conversion of records with a real and imaginary part into complex numbers.
+    * Reading from in-memory str/bytes, on-disk or over-network file, or an
+      arbitrary Python object with a `read(num_bytes)` method.
+    * Reading a single JSON document or a sequence of line-delimited documents.
+    * Unknown schema (slow and general) or with a provided JSONSchema (fast, but
+      not all possible cases are supported).
+    * Conversion of strings representing not-a-number, plus and minus infinity
+      into the appropriate floating-point numbers.
+    * Conversion of records with a real and imaginary part into complex numbers.
 
     Non-JSON features not allowed, including literals for not-a-number or infinite
     numbers; they must be quoted strings for `nan_string`, `posinf_string`, and
@@ -95,9 +93,10 @@ def from_json(
         <Array [[1.1, 2.2, 3.3], [], [4.4, 5.5]] type='3 * var * float64'>
 
     File names/paths need to be wrapped in `pathlib.Path`, and remote files are
-    recognized by URI protocol (like "https://" or "s3://") and handled by fsspec
+    recognized by URI protocol (like `"https://"` or `"s3://"`) and handled by fsspec
     (which must be installed).
 
+        >>> import pathlib
         >>> with open("tmp.json", "w") as file:
         ...     file.write("[[1.1, 2.2, 3.3], [], [4.4, 5.5]]")
         ...
@@ -136,6 +135,7 @@ def from_json(
 
     Consider
 
+        >>> import json
         >>> json_data = "[[1.1, 2.2, 3.3], [], [4.4, 5.5]]"
         >>> ak.from_iter(json.loads(json_data))
         <Array [[1.1, 2.2, 3.3], [], [4.4, 5.5]] type='3 * var * float64'>
@@ -144,17 +144,17 @@ def from_json(
 
     and
 
-        >>> json_data = '{"x": 1.1, "y": [1, 2, 3]}'
+        >>> json_data = '{"x": 1.1, "y": [1, 2]}'
         >>> ak.from_iter(json.loads(json_data))
-        <Record {x: 1.1, y: [1, 2, 3]} type='{"x": float64, "y": var * int64}'>
+        <Record {x: 1.1, y: [1, 2]} type='{x: float64, y: var * int64}'>
         >>> ak.from_json(json_data)
-        <Record {x: 1.1, y: [1, 2, 3]} type='{"x": float64, "y": var * int64}'>
+        <Record {x: 1.1, y: [1, 2]} type='{x: float64, y: var * int64}'>
 
     As shown above, reading JSON may result in #ak.Array or #ak.Record, but line-delimited
     (`line_delimited=True`) only results in #ak.Array:
 
         >>> ak.from_json(
-        ...     '{"x": 1.1, "y": [1]}\n{"x": 2.2, "y": [1, 2]}\n{"x": 3.3, "y": [1, 2, 3]}',
+        ...     '{"x": 1.1, "y": [1]}\\n{"x": 2.2, "y": [1, 2]}\\n{"x": 3.3, "y": [1, 2, 3]}',
         ...     line_delimited=True,
         ... )
         <Array [{x: 1.1, y: [1]}, ..., {x: 3.3, ...}] type='3 * {x: float64, y: var...'>
@@ -191,7 +191,7 @@ def from_json(
         <Record {x: 1.1, y: [1, ..., 3]} type='{x: float64, y: var * int64}'>
 
         >>> ak.from_json(
-        ...     '{"x": 1.1, "y": [1]}\n{"x": 2.2, "y": [1, 2]}\n{"x": 3.3, "y": [1, 2, 3]}',
+        ...     '{"x": 1.1, "y": [1]}\\n{"x": 2.2, "y": [1, 2]}\\n{"x": 3.3, "y": [1, 2, 3]}',
         ...     schema=schema,
         ...     line_delimited=True,
         ... )
@@ -207,29 +207,29 @@ def from_json(
     as JSON text or as Python lists and dicts representing JSON, but the following
     conditions apply:
 
-      * The root of the schema must be `"type": "array"` or `"type": "object"`.
-      * Every level must have a `"type"`, which can only name one type (as a string
-        or length-1 list) or one type and `"null"` (as a length-2 list).
-      * `"type": "boolean"` \u2192 1-byte boolean values.
-      * `"type": "integer"` \u2192 8-byte integer values. If a part of the schema
-        is declared to have integer type but the JSON numbers are expressed as
-        floating-point, such as `3.14`, `3.0`, or `3e0`, this function raises an
-        error.
-      * `"type": "number"` \u2192 8-byte floating-point values. If used with
-        this function's `nan_string`, `posinf_string`, and/or `neginf_string`, the
-        value in the JSON could be a string, as long as it matches one of these
-        three.
-      * `"type": "string"` \u2192 UTF-8 encoded strings. All JSON escape sequences are
-        supported. Remember that the `source` data are ASCII; Unicode is derived from
-        "`\\uXXXX`" escape sequences. If an `"enum"` is given, strings are represented
-        as categorical values (#ak.contents.IndexedArray or #ak.contents.IndexedOptionArray).
-      * `"type": "array"` \u2192 nested lists. The `"items"` must be specified. If
-        `"minItems"` and `"maxItems"` are specified and equal to each other, the
-        list has regular-type (#ak.types.RegularType); otherwise, it has variable-length
-        type (#ak.types.ListType).
-      * `"type": "object"` \u2192 nested records. The `"properties"` must be specified,
-        and any properties in the data not described by `"properties"` will not
-        appear in the output.
+    * The root of the schema must be `"type": "array"` or `"type": "object"`.
+    * Every level must have a `"type"`, which can only name one type (as a string
+      or length-1 list) or one type and `"null"` (as a length-2 list).
+    * `"type": "boolean"` \u2192 1-byte boolean values.
+    * `"type": "integer"` \u2192 8-byte integer values. If a part of the schema
+      is declared to have integer type but the JSON numbers are expressed as
+      floating-point, such as `3.14`, `3.0`, or `3e0`, this function raises an
+      error.
+    * `"type": "number"` \u2192 8-byte floating-point values. If used with
+      this function's `nan_string`, `posinf_string`, and/or `neginf_string`, the
+      value in the JSON could be a string, as long as it matches one of these
+      three.
+    * `"type": "string"` \u2192 UTF-8 encoded strings. All JSON escape sequences are
+      supported. Remember that the `source` data are ASCII; Unicode is derived from
+      "`\\uXXXX`" escape sequences. If an `"enum"` is given, strings are represented
+      as categorical values (#ak.contents.IndexedArray or #ak.contents.IndexedOptionArray).
+    * `"type": "array"` \u2192 nested lists. The `"items"` must be specified. If
+      `"minItems"` and `"maxItems"` are specified and equal to each other, the
+      list has regular-type (#ak.types.RegularType); otherwise, it has variable-length
+      type (#ak.types.ListType).
+    * `"type": "object"` \u2192 nested records. The `"properties"` must be specified,
+      and any properties in the data not described by `"properties"` will not
+      appear in the output.
 
     Substitutions for non-finite and complex numbers
     ================================================
@@ -451,7 +451,7 @@ def _record_to_complex(layout, complex_record_fields):
                             )
                         )
 
-        return layout.recursively_apply(action)
+        return ak._do.recursively_apply(layout, action)
 
     else:
         raise ak._errors.wrap_error(

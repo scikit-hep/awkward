@@ -83,6 +83,7 @@ jobs:
       with:
         # Cache invalidates daily by default
         cache-env: true
+        cache-downloads: true
         environment-file: docs/environment.yml
         extra-specs: |
            python=${{ env.PYTHON_VERSION }}
@@ -127,6 +128,7 @@ jobs:
         name: awkward
         path: dist/awkward*.whl
 
+
   build-docs:
     runs-on: ubuntu-22.04
     needs: [awkward-cpp-wasm, awkward-cpp-x86-64, awkward]
@@ -153,6 +155,7 @@ jobs:
       with:
         # Cache invalidates daily by default
         cache-env: true
+        cache-downloads: true
         environment-file: docs/environment.yml
         extra-specs: |
            python=${{ env.PYTHON_VERSION }}
@@ -195,14 +198,69 @@ jobs:
       run: cp -r awkward-cpp/docs/html/ docs/_static/doxygen
 
     - name: Generate Python documentation
+      env:
+        DOCS_SHOW_VERSION: 1
       run: sphinx-build -M html . _build/
       working-directory: docs
 
-    - name: Upload documentation
+    - name: Check links
+      id: check-links
+      run: sphinx-build -M linkcheck . _build/
+      working-directory: docs
+
+    - name: Output annotations
+      if: success() || steps.check-links.outcome == 'failure'
+      run: |
+        import pathlib
+        import json
+
+        docs_path = pathlib.Path("docs")
+        output_path = docs_path / "_build" / "linkcheck" / "output.json"
+        with output_path.open() as f:
+          data = [json.loads(l) for l in f]
+
+        for record in data:
+          if record['status'] != "broken":
+            continue
+          record['path'] = (docs_path / record['filename'])
+          print(
+            "::error file={path},line={lineno}::{uri} URI was {status} (code: {code}): {info}".format_map(record)
+          )
+          print(
+            "??file={path},line={lineno}??{uri} URI was {status} (code: {code}): {info}".format_map(record)
+          )
+      shell: python
+
+    - name: Upload docs artefact
       uses: actions/upload-artifact@v3
       with:
         name: docs
         path: docs/_build/html
+
+      # TODO HACK!
+    - name: Layout documentation
+      run: |
+        # Setup docs with `/doc/main` path
+        mkdir -p "/tmp/awkward-docs/doc"
+        cp -r docs/_build/html \
+                 "/tmp/awkward-docs/doc/main"
+        cp -r docs/_build/html \
+                 "/tmp/awkward-docs/doc/stable"
+        cp -r docs/_build/html \
+                 "/tmp/awkward-docs/doc/2.0"
+        python3 dev/generate-redirects.py docs/redirects-user-guide.json /tmp/awkward-docs/
+
+    - name: Upload Pages artefact
+      uses: actions/upload-pages-artifact@v1
+      with:
+        # Upload entire repository
+        path: /tmp/awkward-docs
+
+    - name: Upload Jupyter Book cache
+      uses: actions/upload-artifact@v3
+      with:
+        name: doctrees
+        path: docs/_build/doctrees
 
     - name: Upload Jupyter Book cache
       uses: actions/upload-artifact@v3
@@ -210,43 +268,100 @@ jobs:
         name: jupyter-cache
         path: docs/_build/.jupyter_cache
 
+  branch-preview:
+    runs-on: ubuntu-22.04
+    needs: [build-docs]
+    # We can only deploy for PRs on host repo
+    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      S3_BUCKET: "preview.awkward-array.org"
+      DEPLOY_URL: "http://preview.awkward-array.org.s3-website.us-east-1.amazonaws.com"
+    environment:
+      name: docs-preview
+      url: ${{ env.DEPLOY_URL }}/${{ github.head_ref }}
+    steps:
+    - uses: actions/checkout@v3
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-region: eu-west-2
+        role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE }}
+    - name: Download rendered docs
+      uses: actions/download-artifact@v3
+      with:
+        name: docs
+        path: built-docs
+    - name: Sync artefacts
+      run: |
+        aws s3 sync built-docs/ "s3://${S3_BUCKET}/${{ github.head_ref }}"
+
+  deploy:
+    runs-on: ubuntu-22.04
+    needs: [ build-docs ]
+    # We can only deploy for PRs on host repo
+    if: github.event_name == 'push' || github.event_name == 'release'
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      S3_BUCKET: "awkward-array.org"
+      DEPLOY_URL: "http://awkward-array.org.s3-website.us-east-1.amazonaws.com"
+      CLOUDFRONT_ID: "EFM4QVENUIXHS"
+    environment:
+      name: docs-prod
+      url: ${{ env.DEPLOY_URL }}/doc/latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: eu-west-2
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE }}
+      - name: Download rendered docs
+        uses: actions/download-artifact@v3
+        with:
+          name: docs
+          path: built-docs
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+      # Pushes to main trigger latest
+      - name: Sync `main`
+        if: github.event_name == 'push'
+        run: |
+          aws s3 sync built-docs/ "s3://${S3_BUCKET}/doc/main/"
+          aws cloudfront create-invalidation --distribution-id "${CLOUDFRONT_ID}" \
+            --paths "/doc/main/"
+      # Releases trigger versions
+      - name: Sync `release`
+        if: github.event_name == 'release'
+        run: |
+          # Take only leading version
+          version=$(echo "${GITHUB_REF_NAME}" | sed -n -E "s/([0-9]+\.[0-9]+)\.[0-9]+/\1/p")
+          aws s3 cp docs/switcher.json "s3://${S3_BUCKET}/doc/"
+          aws s3 sync built-docs/ "s3://${S3_BUCKET}/doc/$version/"
+          aws cloudfront create-invalidation --distribution-id "${CLOUDFRONT_ID}" \
+            --paths "/doc/$version/" "/doc/switcher.json"
+
   deploy-docs:
     runs-on: ubuntu-22.04
     needs: [build-docs]
     # We can only deploy for PRs on host repo, or pushes to main
-    if: ${{ !(github.event_name == 'pull_request' && (github.event.pull_request.head.repo.full_name != github.repository)) }}
+    if: ${{ github.event_name == 'push' }}
+    # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
     steps:
     - uses: actions/checkout@v3
+    - name: Setup Pages
+      uses: actions/configure-pages@v2
 
-    - name: Activate RTD version
-      run: |
-        # Sanitise ref name
-        # NB: head_ref is only valid for PR triggers
-        export VERSION_SLUG=$(echo "${{ github.head_ref || github.ref_name }}" | sed -E "s@/@-@g" | sed -E 's/.*/\L&/')
-        # Export for subsequent steps
-        echo "VERSION_SLUG=$VERSION_SLUG" >> $GITHUB_ENV
-        # Activate version
-        curl \
-          -X PATCH \
-          -H "Authorization: Token ${{ secrets.RTD_TOKEN }}" \
-              "https://readthedocs.org/api/v3/projects/awkward-array/versions/$VERSION_SLUG/" \
-          -H "Content-Type: application/json" \
-          -d '{"active":true,"hidden":true}' \
-          --fail
-
-    - name: Trigger RTD build
-      run: |
-        # Trigger build
-        curl \
-          -X POST \
-          -H "Authorization: Token ${{ secrets.RTD_TOKEN }}" \
-              "https://readthedocs.org/api/v3/projects/awkward-array/versions/$VERSION_SLUG/builds/" \
-          --fail
-
-    - name: Edit PR description
-      if: github.event_name == 'pull_request'
-      uses: actions/github-script@v6
-      with:
-        script: |
-            const script = require('./dev/docs-edit-message.js');
-            console.log(script(github, context, "${{ env.VERSION_SLUG }}"));
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v1

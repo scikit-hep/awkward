@@ -335,3 +335,18 @@ def test_to_from_data_frame_rvec_of_rvec_of_rvec():
     )
 
     assert ak_array_in.to_list() == ak_array_out["x"].to_list()
+
+
+def test_to_from_data_frame_columns_as_string():
+    ak_array_in = ak.Array(
+        [[[[1.1]]], [[[2.2], [3.3], [], [4.4]]], [[[], [5.5, 6.6], []]]]
+    )
+
+    data_frame = ak.to_rdataframe({"x": ak_array_in})
+
+    ak_array_out = ak.from_rdataframe(
+        data_frame,
+        columns="x",
+    )
+
+    assert ak_array_in.to_list() == ak_array_out.to_list()

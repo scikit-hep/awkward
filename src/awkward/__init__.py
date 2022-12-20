@@ -4,7 +4,7 @@
 from awkward._version import __version__
 
 # NumPy-like alternatives
-import awkward.nplikes
+import awkward._nplikes
 import awkward._typetracer
 import awkward._backends
 
@@ -14,8 +14,10 @@ import awkward.contents
 import awkward.record
 import awkward.types
 import awkward.forms
+import awkward._do
 import awkward._slicing
 import awkward._broadcasting
+import awkward._reducers
 
 # internal
 import awkward._util

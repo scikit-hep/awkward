@@ -24,7 +24,7 @@ def test_array_3d():
     ]
     with pytest.raises(ValueError) as err:
         assert ak.operations.num(array, axis=3)
-    assert "axis=3 exceeds the depth of this array (2)" in str(err.value)
+    assert "axis=3 exceeds the depth of this array" in str(err.value)
 
     assert to_list(ak.operations.num(array, axis=-1)) == [
         [2, 2, 2, 2, 2],
@@ -36,14 +36,14 @@ def test_array_3d():
 
     with pytest.raises(ValueError) as err:
         assert ak.operations.num(array, axis=-4)
-    assert "axis=-4 exceeds the depth (3) of this array" in str(err.value)
+    assert "axis=-4 exceeds the depth" in str(err.value)
 
 
 def test_list_array():
     array = ak.highlevel.Array(np.arange(3 * 5 * 2).reshape(3, 5, 2).tolist())
     assert ak.operations.num(array, axis=0) == 3
-    assert ak.operations.num(array, axis=1).tolist() == [5, 5, 5]
-    assert ak.operations.num(array, axis=2).tolist() == [
+    assert ak.operations.num(array, axis=1).to_list() == [5, 5, 5]
+    assert ak.operations.num(array, axis=2).to_list() == [
         [2, 2, 2, 2, 2],
         [2, 2, 2, 2, 2],
         [2, 2, 2, 2, 2],
@@ -51,18 +51,18 @@ def test_list_array():
 
     with pytest.raises(ValueError) as err:
         assert ak.operations.num(array, axis=3)
-        assert "axis=3 exceeds the depth of this array (2)" in str(err.value)
+        assert "axis=3 exceeds the depth of this array" in str(err.value)
 
-    assert ak.operations.num(array, axis=-1).tolist() == [
+    assert ak.operations.num(array, axis=-1).to_list() == [
         [2, 2, 2, 2, 2],
         [2, 2, 2, 2, 2],
         [2, 2, 2, 2, 2],
     ]
-    assert ak.operations.num(array, axis=-2).tolist() == [5, 5, 5]
+    assert ak.operations.num(array, axis=-2).to_list() == [5, 5, 5]
     assert ak.operations.num(array, axis=-3) == 3
     with pytest.raises(ValueError) as err:
         assert ak.operations.num(array, axis=-4)
-        assert "axis=-4 exceeds the depth of this array (3)" in str(err.value)
+        assert "axis=-4 exceeds the depth of this array" in str(err.value)
 
 
 def test_record_array():
@@ -74,17 +74,17 @@ def test_record_array():
         ]
     )
 
-    assert ak.operations.num(array, axis=0).tolist() == {"x": 3, "y": 3}
-    assert ak.operations.num(array, axis=1).tolist() == [
+    assert ak.operations.num(array, axis=0) == 3
+    assert ak.operations.num(array, axis=1).to_list() == [
         {"x": 1, "y": 2},
         {"x": 2, "y": 3},
         {"x": 3, "y": 4},
     ]
     with pytest.raises(ValueError) as err:
         assert ak.operations.num(array, axis=2)
-        assert "axis=2 exceeds the depth of this array (1)" in str(err.value)
+        assert "axis=2 exceeds the depth of this array" in str(err.value)
 
-    assert ak.operations.num(array, axis=-1).tolist() == [
+    assert ak.operations.num(array, axis=-1).to_list() == [
         {"x": 1, "y": [0, 1]},
         {"x": 2, "y": [0, 1, 2]},
         {"x": 3, "y": [0, 1, 2, 3]},
@@ -102,8 +102,8 @@ def test_record_array_axis_out_of_range():
 
     with pytest.raises(ValueError) as err:
         assert ak.operations.num(array, axis=-2)
-        assert "axis=-2 exceeds the depth of this array (2)" in str(err.value)
+        assert "axis=-2 exceeds the depth of this array" in str(err.value)
 
     with pytest.raises(ValueError) as err:
         assert ak.operations.num(array, axis=-3)
-        assert "axis=-3 exceeds the depth (2) of this array" in str(err.value)
+        assert "axis=-3 exceeds the depth" in str(err.value)
