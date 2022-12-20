@@ -854,8 +854,8 @@ def arrays_approx_equal(
 
     import awkward.forms.form
 
-    left_behavior = ak._util.behavior_of(left)
-    right_behavior = ak._util.behavior_of(right)
+    left_behavior = ak._util.behavior_of(left, behavior=ak.behavior)
+    right_behavior = ak._util.behavior_of(right, behavior=ak.behavior)
 
     left = ak.to_packed(ak.to_layout(left, allow_record=False), highlevel=False)
     right = ak.to_packed(ak.to_layout(right, allow_record=False), highlevel=False)
@@ -903,7 +903,7 @@ def arrays_approx_equal(
         elif left.is_union:
             return (len(left.contents) == len(right.contents)) and all(
                 [
-                    visitor(left.project(i), right.project(i))
+                    visitor(left.project(i).to_packed(), right.project(i).to_packed())
                     for i, _ in enumerate(left.contents)
                 ]
             )
