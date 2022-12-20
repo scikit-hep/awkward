@@ -18,3 +18,7 @@ class Numpy(ArrayModuleNumpyLike):
     is_eager: Final[bool] = True
 
     array_module: Final[Any] = numpy
+
+    @classmethod
+    def is_raw_array(cls, obj) -> bool:
+        return isinstance(obj, numpy.ndarray)

@@ -397,22 +397,6 @@ class TypeTracer(numpylike.NumpyLike[TypeTracerArray]):
     ) -> TypeTracerArray:
         raise _errors.wrap_error(NotImplementedError)
 
-    def result_type(
-        self, *arrays_and_dtypes: TypeTracerArray | dtypes.dtype
-    ) -> dtypes.dtype:
-        all_dtypes: list[dtypes.dtype] = []
-        for item in arrays_and_dtypes:
-            if hasattr(item, "shape") and hasattr(item, "dtype"):
-                item = item.dtype
-            if isinstance(item, dtypes.dtype):
-                all_dtypes.append(item)
-            else:
-                raise _errors.wrap_error(
-                    TypeError("result_type() inputs must be array_api arrays or dtypes")
-                )
-
-        return numpy.result_type(*all_dtypes)
-
     ############################ searching functions
 
     def nonzero(self, x: TypeTracerArray) -> TypeTracerArray:
