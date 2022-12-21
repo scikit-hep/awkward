@@ -5,6 +5,7 @@ pycparser
 lark-parser
 sphinx-copybutton
 sphinx-design
+sphinx-sitemap
 pydata-sphinx-theme
 myst-nb
 sphinx-external-toc
