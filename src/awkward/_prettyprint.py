@@ -222,8 +222,11 @@ def valuestr_horiz(data, limit_cols):
 
 
 def valuestr(data, limit_rows, limit_cols):
-    if isinstance(data, (ak.highlevel.Array, ak.highlevel.Record)):
-        data.layout._recursively_touch_data()
+    if (
+        isinstance(data, (ak.highlevel.Array, ak.highlevel.Record))
+        and not data.layout.backend.nplike.known_data
+    ):
+        data.layout._touch_data(recursive=True)
 
     if limit_rows <= 1:
         _, strs = valuestr_horiz(data, limit_cols)

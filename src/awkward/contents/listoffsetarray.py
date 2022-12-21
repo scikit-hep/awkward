@@ -133,9 +133,17 @@ class ListOffsetArray(Content):
             parameters=self._parameters,
         )
 
-    def _recursively_touch_data(self):
-        self._offsets.data.touch_data()
-        self._content._recursively_touch_data()
+    def _touch_data(self, recursive):
+        if not self._backend.index_nplike.known_data:
+            self._offsets.data.touch_data()
+        if recursive:
+            self._content._touch_data(recursive)
+
+    def _touch_shape(self, recursive):
+        if not self._backend.index_nplike.known_shape:
+            self._offsets.data.touch_shape()
+        if recursive:
+            self._content._touch_shape(recursive)
 
     @property
     def length(self):
@@ -157,6 +165,10 @@ class ListOffsetArray(Content):
         return "".join(out)
 
     def to_ListOffsetArray64(self, start_at_zero=False):
+        if not self._backend.nplike.known_data:
+            self._touch_data(recursive=False)
+            self._content._touch_data(recursive=False)
+
         if issubclass(self._offsets.dtype.type, np.int64):
             if (
                 not self._backend.nplike.known_data
@@ -209,6 +221,7 @@ class ListOffsetArray(Content):
 
     def _getitem_at(self, where):
         if not self._backend.nplike.known_data:
+            self._touch_data(recursive=False)
             return self._content._getitem_range(slice(0, 0))
 
         if where < 0:
@@ -220,6 +233,7 @@ class ListOffsetArray(Content):
 
     def _getitem_range(self, where):
         if not self._backend.nplike.known_shape:
+            self._touch_shape(recursive=False)
             return self
 
         start, stop, step = where.indices(self.length)
@@ -727,6 +741,7 @@ class ListOffsetArray(Content):
             if self._backend.nplike.known_data:
                 innerlength = offsets[offsets.length - 1]
             else:
+                self._touch_data(recursive=False)
                 innerlength = ak._typetracer.UnknownLength
             localindex = ak.index.Index64.empty(innerlength, self._backend.index_nplike)
             assert (
@@ -1335,6 +1350,8 @@ class ListOffsetArray(Content):
                 tocarry.append(ptr)
                 if self._backend.nplike.known_data:
                     tocarryraw[i] = ptr.ptr
+                else:
+                    self._touch_data(recursive=False)
 
             toindex = ak.index.Index64.empty(
                 n, self._backend.index_nplike, dtype=np.int64
@@ -2000,6 +2017,7 @@ class ListOffsetArray(Content):
             )
             content = self._content[offsetsmin : self._offsets[-1]]
         else:
+            self._touch_data(recursive=False)
             offsets, content = self._offsets, self._content
 
         if options["return_array"]:

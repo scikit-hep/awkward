@@ -124,8 +124,13 @@ class NumpyArray(Content):
             backend=backend,
         )
 
-    def _recursively_touch_data(self):
-        self._data.touch_data()
+    def _touch_data(self, recursive):
+        if not self._backend.nplike.known_data:
+            self._data.touch_data()
+
+    def _touch_shape(self, recursive):
+        if not self._backend.nplike.known_shape:
+            self._data.touch_shape()
 
     @property
     def length(self):
@@ -197,6 +202,7 @@ class NumpyArray(Content):
 
     def _getitem_at(self, where):
         if not self._backend.nplike.known_data and len(self._data.shape) == 1:
+            self._touch_data(recursive=False)
             return ak._typetracer.UnknownScalar(self._data.dtype)
 
         try:
@@ -211,6 +217,7 @@ class NumpyArray(Content):
 
     def _getitem_range(self, where):
         if not self._backend.nplike.known_shape:
+            self._touch_shape(recursive=False)
             return self
 
         start, stop, step = where.indices(self.length)

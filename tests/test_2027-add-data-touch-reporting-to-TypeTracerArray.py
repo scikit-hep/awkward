@@ -48,12 +48,44 @@ def test_prototypical_example():
         }
     )
 
-    assert len(report.data_touched) == 0
+    # the listoffsets, but not the numpys, have been touched because of broadcasting
+    assert report.data_touched == [
+        "listoffset-1",
+        "listoffset-2",
+        "listoffset-3",
+        "listoffset-4",
+    ]
 
     pz = restructured.muons.pt * np.sinh(restructured.muons.eta)  # noqa: F841
 
     # order is preserved: numpy-eta is used before numpy-pt (may or may not be important)
-    assert report.data_touched == ["numpy-eta", "numpy-pt"]
+    assert report.data_touched == [
+        "listoffset-1",
+        "listoffset-2",
+        "listoffset-3",
+        "listoffset-4",
+        "numpy-eta",
+        "numpy-pt",
+    ]
+
+    # slices are views, so they shouldn't trigger data access
+    sliced = restructured.muons[:1]  # noqa: F841
+    assert report.data_touched == [
+        "listoffset-1",
+        "listoffset-2",
+        "listoffset-3",
+        "listoffset-4",
+        "numpy-eta",
+        "numpy-pt",
+    ]
 
     print(restructured.muons.mass)  # noqa: T201
-    assert report.data_touched == ["numpy-eta", "numpy-pt", "numpy-mass"]
+    assert report.data_touched == [
+        "listoffset-1",
+        "listoffset-2",
+        "listoffset-3",
+        "listoffset-4",
+        "numpy-eta",
+        "numpy-pt",
+        "numpy-mass",
+    ]

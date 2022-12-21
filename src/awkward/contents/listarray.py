@@ -151,10 +151,19 @@ class ListArray(Content):
             parameters=self._parameters,
         )
 
-    def _recursively_touch_data(self):
-        self._starts.data.touch_data()
-        self._stops.data.touch_data()
-        self._content._recursively_touch_data()
+    def _touch_data(self, recursive):
+        if not self._backend.index_nplike.known_data:
+            self._starts.data.touch_data()
+            self._stops.data.touch_data()
+        if recursive:
+            self._content._touch_data(recursive)
+
+    def _touch_shape(self, recursive):
+        if not self._backend.index_nplike.known_shape:
+            self._starts.data.touch_shape()
+            self._stops.data.touch_shape()
+        if recursive:
+            self._content._touch_shape(recursive)
 
     @property
     def length(self):
@@ -181,6 +190,8 @@ class ListArray(Content):
         stops = self._stops.data
 
         if not self._backend.nplike.known_data:
+            self._touch_data(recursive=False)
+            self._content._touch_data(recursive=False)
             offsets = self._backend.index_nplike.empty(
                 starts.shape[0] + 1, dtype=starts.dtype
             )
@@ -218,6 +229,7 @@ class ListArray(Content):
 
     def _getitem_at(self, where):
         if not self._backend.nplike.known_data:
+            self._touch_data(recursive=False)
             return self._content._getitem_range(slice(0, 0))
 
         if where < 0:
@@ -229,6 +241,7 @@ class ListArray(Content):
 
     def _getitem_range(self, where):
         if not self._backend.nplike.known_shape:
+            self._touch_shape(recursive=False)
             return self
 
         start, stop, step = where.indices(self.length)
@@ -625,6 +638,7 @@ class ListArray(Content):
                     carrylength[0], self._backend.index_nplike
                 )
             else:
+                self._touch_data(recursive=False)
                 nextcarry = ak.index.Index64.empty(
                     ak._typetracer.UnknownLength, self._backend.index_nplike
                 )
@@ -699,6 +713,7 @@ class ListArray(Content):
                         total[0], self._backend.index_nplike
                     )
                 else:
+                    self._touch_data(recursive=False)
                     nextadvanced = ak.index.Index64.empty(
                         ak._typetracer.UnknownLength, self._backend.index_nplike
                     )
@@ -1081,6 +1096,7 @@ class ListArray(Content):
             if self._backend.nplike.known_data:
                 innerlength = offsets[offsets.length - 1]
             else:
+                self._touch_data(recursive=False)
                 innerlength = ak._typetracer.UnknownLength
             localindex = ak.index.Index64.empty(innerlength, self._backend.index_nplike)
             assert (
@@ -1386,6 +1402,7 @@ class ListArray(Content):
             )
             content = self._content[startsmin : self._stops.data.max()]
         else:
+            self._touch_data(recursive=False)
             starts, stops, content = self._starts, self._stops, self._content
 
         if options["return_array"]:

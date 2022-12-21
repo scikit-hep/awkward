@@ -1222,6 +1222,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             valuestr = " " + awkward._prettyprint.valuestr(self, 1, strwidth)
 
         else:
+            self._layout._touch_data(recursive=True)
             typestr = repr(
                 "?? * " + str(self._layout.form.type_from_behavior(self._behavior))
             )[1:-1]
@@ -1959,6 +1960,7 @@ class Record(NDArrayOperatorsMixin):
             valuestr = " " + awkward._prettyprint.valuestr(self, 1, strwidth)
 
         else:
+            self._layout._touch_data(recursive=True)
             typestr = repr(str(self._layout.form.type_from_behavior(self._behavior)))[
                 1:-1
             ]

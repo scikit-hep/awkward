@@ -216,9 +216,17 @@ class BitMaskedArray(Content):
             parameters=self._parameters,
         )
 
-    def _recursively_touch_data(self):
-        self._mask.data.touch_data()
-        self._content._recursively_touch_data()
+    def _touch_data(self, recursive):
+        if not self._backend.index_nplike.known_data:
+            self._mask.data.touch_data()
+        if recursive:
+            self._content._touch_data(recursive)
+
+    def _touch_shape(self, recursive):
+        if not self._backend.index_nplike.known_shape:
+            self._mask.data.touch_shape()
+        if recursive:
+            self._content._touch_shape(recursive)
 
     @property
     def length(self):
@@ -361,6 +369,7 @@ class BitMaskedArray(Content):
 
     def _getitem_at(self, where):
         if not self._backend.nplike.known_data:
+            self._touch_data(recursive=False)
             return ak._typetracer.MaybeNone(self._content._getitem_at(where))
 
         if where < 0:

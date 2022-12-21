@@ -172,7 +172,10 @@ class Content:
     def _to_typetracer(self, forget_length: bool) -> Self:
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def _recursively_touch_data(self):
+    def _touch_data(self, recursive):
+        raise ak._errors.wrap_error(NotImplementedError)
+
+    def _touch_shape(self, recursive):
         raise ak._errors.wrap_error(NotImplementedError)
 
     @property
@@ -826,6 +829,8 @@ class Content:
             tocarry.append(ptr)
             if self._backend.nplike.known_data:
                 tocarryraw[i] = ptr.ptr
+            else:
+                self._touch_data(recursive=False)
 
         toindex = ak.index.Index64.empty(n, self._backend.index_nplike, dtype=np.int64)
         fromindex = ak.index.Index64.empty(

@@ -76,6 +76,7 @@ def _impl(array, axis, keepdims, mask_identity, flatten_records, highlevel, beha
 
     if axis is None:
         if not backend.nplike.known_data or not backend.nplike.known_shape:
+            layout._touch_data(recursive=True)
 
             def map(x):
                 return ak._typetracer.UnknownScalar(

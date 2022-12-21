@@ -409,11 +409,21 @@ class UnionArray(Content):
             parameters=self._parameters,
         )
 
-    def _recursively_touch_data(self):
-        self._tags.data.touch_data()
-        self._index.data.touch_data()
-        for x in self._contents:
-            x._recursively_touch_data()
+    def _touch_data(self, recursive):
+        if not self._backend.index_nplike.known_data:
+            self._tags.data.touch_data()
+            self._index.data.touch_data()
+        if recursive:
+            for x in self._contents:
+                x._touch_data(recursive)
+
+    def _touch_shape(self, recursive):
+        if not self._backend.index_nplike.known_shape:
+            self._tags.data.touch_shape()
+            self._index.data.touch_shape()
+        if recursive:
+            for x in self._contents:
+                x._touch_shape(recursive)
 
     @property
     def length(self):
@@ -445,6 +455,7 @@ class UnionArray(Content):
 
     def _getitem_at(self, where):
         if not self._backend.nplike.known_data:
+            self._touch_data(recursive=False)
             return ak._typetracer.OneOf([x._getitem_at(where) for x in self._contents])
 
         if where < 0:
@@ -456,6 +467,7 @@ class UnionArray(Content):
 
     def _getitem_range(self, where):
         if not self._backend.nplike.known_shape:
+            self._touch_shape(recursive=False)
             return self
 
         start, stop, step = where.indices(self.length)
@@ -507,6 +519,7 @@ class UnionArray(Content):
                 break
 
         if not self._backend.nplike.known_data:
+            self._touch_data(recursive=False)
             nexttags = self._tags.data
             nextindex = self._index.data
             contents = []
