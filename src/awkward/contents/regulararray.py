@@ -138,6 +138,9 @@ class RegularArray(Content):
             parameters=self._parameters,
         )
 
+    def _recursively_touch_data(self):
+        self._content._recursively_touch_data()
+
     @property
     def length(self):
         return self._length

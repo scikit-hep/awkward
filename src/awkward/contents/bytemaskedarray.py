@@ -163,6 +163,10 @@ class ByteMaskedArray(Content):
             parameters=self._parameters,
         )
 
+    def _recursively_touch_data(self):
+        self._mask.data.touch_data()
+        self._content._recursively_touch_data()
+
     @property
     def length(self):
         return self._mask.length

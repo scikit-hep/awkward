@@ -57,6 +57,9 @@ class EmptyArray(Content):
             backend=ak._backends.TypeTracerBackend.instance(),
         )
 
+    def _recursively_touch_data(self):
+        pass
+
     @property
     def length(self):
         return 0

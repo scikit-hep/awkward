@@ -336,7 +336,7 @@ class Form:
 
     @form_key.setter
     def form_key(self, value):
-        if value is not None or not isinstance(value, str):
+        if value is not None and not isinstance(value, str):
             raise ak._errors.wrap_error(TypeError("form_key must be None or a string"))
         self._form_key = value
 

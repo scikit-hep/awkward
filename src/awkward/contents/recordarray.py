@@ -223,6 +223,10 @@ class RecordArray(Content):
             backend=backend,
         )
 
+    def _recursively_touch_data(self):
+        for x in self._contents:
+            x._recursively_touch_data()
+
     @property
     def length(self):
         return self._length

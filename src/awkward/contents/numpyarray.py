@@ -124,6 +124,9 @@ class NumpyArray(Content):
             backend=backend,
         )
 
+    def _recursively_touch_data(self):
+        self._data.touch_data()
+
     @property
     def length(self):
         return self._data.shape[0]

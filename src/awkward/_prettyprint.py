@@ -222,6 +222,9 @@ def valuestr_horiz(data, limit_cols):
 
 
 def valuestr(data, limit_rows, limit_cols):
+    if isinstance(data, (ak.highlevel.Array, ak.highlevel.Record)):
+        data.layout._recursively_touch_data()
+
     if limit_rows <= 1:
         _, strs = valuestr_horiz(data, limit_cols)
         return "".join(strs)

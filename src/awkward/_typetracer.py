@@ -209,6 +209,9 @@ class TypeTracerReport:
         self._data_touched_set = set()
         self._data_touched = []
 
+    def __repr__(self):
+        return f"<TypeTracerReport with {len(self._shape_touched)} shape_touched, {len(self._data_touched)} data_touched>"
+
     @property
     def shape_touched(self):
         return self._shape_touched
@@ -232,38 +235,38 @@ def _attach_report(layout, form, report):
     if isinstance(layout, (ak.contents.BitMaskedArray, ak.contents.ByteMaskedArray)):
         assert isinstance(form, (ak.forms.BitMaskedForm, ak.forms.ByteMaskedForm))
         layout.mask.data.form_key = form.form_key
-        layout.mask.data.report = form.report
+        layout.mask.data.report = report
         _attach_report(layout.content, form.content, report)
 
     elif isinstance(layout, ak.contents.EmptyArray):
         assert isinstance(form, ak.forms.EmptyForm)
         layout.mask.data.form_key = form.form_key
-        layout.mask.data.report = form.report
+        layout.mask.data.report = report
 
     elif isinstance(layout, (ak.contents.IndexedArray, ak.contents.IndexedOptionArray)):
         assert isinstance(form, (ak.forms.IndexedForm, ak.forms.IndexedOptionForm))
         layout.index.data.form_key = form.form_key
-        layout.index.data.report = form.report
+        layout.index.data.report = report
         _attach_report(layout.content, form.content, report)
 
     elif isinstance(layout, ak.contents.ListArray):
         assert isinstance(form, ak.forms.ListForm)
         layout.starts.data.form_key = form.form_key
-        layout.starts.data.report = form.report
+        layout.starts.data.report = report
         layout.stops.data.form_key = form.form_key
-        layout.stops.data.report = form.report
+        layout.stops.data.report = report
         _attach_report(layout.content, form.content, report)
 
     elif isinstance(layout, ak.contents.ListOffsetArray):
         assert isinstance(form, ak.forms.ListOffsetForm)
         layout.offsets.data.form_key = form.form_key
-        layout.offsets.data.report = form.report
+        layout.offsets.data.report = report
         _attach_report(layout.content, form.content, report)
 
     elif isinstance(layout, ak.contents.NumpyArray):
         assert isinstance(form, ak.forms.NumpyForm)
         layout.data.form_key = form.form_key
-        layout.data.report = form.report
+        layout.data.report = report
 
     elif isinstance(layout, ak.contents.RecordArray):
         assert isinstance(form, ak.forms.RecordForm)
@@ -277,18 +280,18 @@ def _attach_report(layout, form, report):
     elif isinstance(layout, ak.contents.UnionArray):
         assert isinstance(form, ak.forms.UnionForm)
         layout.tags.data.form_key = form.form_key
-        layout.tags.data.report = form.report
+        layout.tags.data.report = report
         layout.index.data.form_key = form.form_key
-        layout.index.data.report = form.report
+        layout.index.data.report = report
         for x, y in zip(layout.contents, form.contents):
             _attach_report(x, y, report)
 
 
 def typetracer_with_report(form):
-    layout = form.length_zero_array(backend=TypeTracer.instance(), highlevel=False)
+    layout = form.length_zero_array(highlevel=False).to_typetracer()
     report = TypeTracerReport()
     _attach_report(layout, form, report)
-    return report
+    return layout, report
 
 
 def _length_after_slice(slice, original_length):
@@ -401,11 +404,11 @@ class TypeTracerArray:
 
     def touch_shape(self):
         if self._report is not None:
-            self._report.shape_touched(self._form_key)
+            self._report.touch_shape(self._form_key)
 
     def touch_data(self):
         if self._report is not None:
-            self._report.data_touched(self._form_key)
+            self._report.touch_data(self._form_key)
 
     @property
     def strides(self):

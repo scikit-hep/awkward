@@ -158,6 +158,10 @@ class IndexedArray(Content):
             parameters=self._parameters,
         )
 
+    def _recursively_touch_data(self):
+        self._index.data.touch_data()
+        self._content._recursively_touch_data()
+
     @property
     def length(self):
         return self._index.length
