@@ -847,7 +847,7 @@ def maybe_posaxis(layout, axis, depth):
 
 
 def arrays_approx_equal(
-    left, right, rtol: float = 1e-5, atol: float = 1e-8, dtype_exact: bool = False
+    left, right, rtol: float = 1e-5, atol: float = 1e-8, dtype_exact: bool = True
 ) -> bool:
     # TODO: this should not be needed after refactoring nplike mechanism
     import numpy
