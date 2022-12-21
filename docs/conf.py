@@ -92,16 +92,25 @@ html_theme_options = {
         },
     ],
 }
+
+# Disable analytics for previews
 if "DOCS_REPORT_ANALYTICS" in os.environ:
     html_theme_options["analytics"] = {
         "plausible_analytics_domain": "awkward-array.org",
         "plausible_analytics_url": "https://views.scientific-python.org/js/plausible.js",
     }
+
+# Allow the CI to set version_match="main"
+if "DOCS_VERSION" in os.environ:
+    version_match = os.environ["DOCS_VERSION"]
+else:
+    version_match = version
+
 # Don't show version for offline builds by default
 if "DOCS_SHOW_VERSION" in os.environ:
     html_theme_options["switcher"] = {
         "json_url": "https://awkward-array.org/doc/switcher.json",
-        "version_match": version,
+        "version_match": version_match,
     }
     html_theme_options["navbar_start"] = ["navbar-logo", "version-switcher"]
 

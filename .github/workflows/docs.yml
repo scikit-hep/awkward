@@ -203,6 +203,11 @@ jobs:
         echo "DOCS_REPORT_ANALYTICS=1" >> $GITHUB_ENV
         echo "DOCS_SHOW_VERSION=1" >> $GITHUB_ENV
 
+    - name: Set version to main
+      if: github.event_name == 'push'
+      run: |
+        echo "DOCS_VERSION=main" >> $GITHUB_ENV
+
     - name: Generate Python documentation
       run: sphinx-build -M html . _build/
       working-directory: docs
