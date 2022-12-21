@@ -44,10 +44,8 @@ def nplike_of(*arrays, default: D = _UNSET) -> NumpyLike | D:
         # Other e.g. nplike arrays
         else:
             for cls in nplike_classes:
-                # ArrayModule-like nplikes can wrap arrays
-                if issubclass(cls, ArrayModuleNumpyLike) and cls.is_own_or_raw_array(
-                    array
-                ):
+                # ArrayModule-like nplikes wrap e.g. np.ndarray in another array type
+                if issubclass(cls, ArrayModuleNumpyLike) and cls.is_raw_array(array):
                     nplikes.add(cls.instance())
                     break
                 elif cls.is_own_array(array):
