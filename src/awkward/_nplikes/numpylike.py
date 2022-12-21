@@ -24,13 +24,7 @@ import numpy
 
 import awkward as ak
 from awkward._nplikes import dtypes
-from awkward._nplikes.dtypes import (
-    complex_floating,
-    dtype,
-    real_floating,
-    signed_integer,
-    unsigned_integer,
-)
+from awkward._nplikes.dtypes import dtype
 from awkward._util import Singleton
 from awkward.typing import Protocol, Self, runtime_checkable
 
@@ -186,25 +180,8 @@ class Array(Protocol):
         ...
 
 
-T = TypeVar("T")
-
-
 @runtime_checkable
 class NumpyLike(Protocol[ArrayType], Singleton):
-    @property
-    @abstractmethod
-    def known_data(self) -> bool:
-        ...
-
-    @property
-    @abstractmethod
-    def known_shape(self) -> bool:
-        ...
-
-    @property
-    @abstractmethod
-    def is_eager(self) -> bool:
-        ...
 
     ############################ array creation
 
@@ -305,6 +282,20 @@ class NumpyLike(Protocol[ArrayType], Singleton):
     def broadcast_to(self, x: ArrayType, shape: tuple[SupportsInt, ...]) -> ArrayType:
         ...
 
+    def result_type(self, *arrays_and_dtypes: ArrayType | dtype) -> dtype:
+        all_dtypes: list[dtype] = []
+        for item in arrays_and_dtypes:
+            if hasattr(item, "shape") and hasattr(item, "dtype"):
+                item = item.dtype
+            if isinstance(item, dtype):
+                all_dtypes.append(item)
+            else:
+                raise ak._errors.wrap_error(
+                    TypeError("result_type() inputs must be array_api arrays or dtypes")
+                )
+
+        return numpy.result_type(*all_dtypes)
+
     def isdtype(
         self,
         dtype: dtype,
@@ -314,17 +305,21 @@ class NumpyLike(Protocol[ArrayType], Singleton):
             if kind == "bool":
                 return numpy.issubdtype(dtype, dtypes.bool_)
             elif kind == "signed integer":
-                return any([numpy.issubdtype(dtype, c) for c in signed_integer])
+                return any([numpy.issubdtype(dtype, c) for c in dtypes._signed_integer])
             elif kind == "unsigned integer":
-                return any([numpy.issubdtype(dtype, c) for c in unsigned_integer])
+                return any(
+                    [numpy.issubdtype(dtype, c) for c in dtypes._unsigned_integer]
+                )
             elif kind == "integral":
                 return self.isdtype(dtype, "signed integer") or self.isdtype(
                     dtype, "unsigned integer"
                 )
             elif kind == "real floating":
-                return any([numpy.issubdtype(dtype, c) for c in real_floating])
+                return any([numpy.issubdtype(dtype, c) for c in dtypes._real_floating])
             elif kind == "complex floating":
-                return any([numpy.issubdtype(dtype, c) for c in complex_floating])
+                return any(
+                    [numpy.issubdtype(dtype, c) for c in dtypes._complex_floating]
+                )
             elif kind == "numeric":
                 return (
                     self.isdtype(dtype, "integral")
@@ -333,26 +328,16 @@ class NumpyLike(Protocol[ArrayType], Singleton):
                 )
             ### Extensions to Array API ###
             elif kind == "timelike":
-                return dtype.kind == "M" or dtype.kind == "m"
+                return self.isdtype(dtype, dtypes.timedelta64) or self.isdtype(
+                    dtype, dtypes.datetime64
+                )
             else:
                 raise ak._errors.wrap_error(ValueError(f"Invalid kind {kind} given"))
-        else:
-            assert isinstance(kind, tuple)
+        elif isinstance(kind, tuple):
             return any([self.isdtype(dtype, k) for k in kind])
-
-    def result_type(self, *arrays_and_dtypes: ArrayType | dtype) -> dtype:
-        all_dtypes: list[dtypes.dtype] = []
-        for item in arrays_and_dtypes:
-            if hasattr(item, "shape") and hasattr(item, "dtype"):
-                item = item.dtype
-            if isinstance(item, dtypes.dtype):
-                all_dtypes.append(item)
-            else:
-                raise ak._errors.wrap_error(
-                    TypeError("result_type() inputs must be array_api arrays or dtypes")
-                )
-
-        return numpy.result_type(*all_dtypes)
+        else:
+            assert isinstance(kind, dtypes.dtype)
+            return numpy.issubdtype(dtype, kind)
 
     def iinfo(self, type: dtype | ArrayType) -> numpy.iinfo:
         return numpy.iinfo(type)
@@ -634,6 +619,23 @@ class NumpyLike(Protocol[ArrayType], Singleton):
 
     @abstractmethod
     def to_rectilinear(self, array: ArrayType):
+        ...
+
+    ############################ Awkward features
+
+    @property
+    @abstractmethod
+    def known_data(self) -> bool:
+        ...
+
+    @property
+    @abstractmethod
+    def known_shape(self) -> bool:
+        ...
+
+    @property
+    @abstractmethod
+    def is_eager(self) -> bool:
         ...
 
     @classmethod
