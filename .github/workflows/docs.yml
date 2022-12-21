@@ -321,7 +321,7 @@ jobs:
         run: |
           aws s3 sync built-docs/ "s3://${S3_BUCKET}/doc/main/"
           aws cloudfront create-invalidation --distribution-id "${CLOUDFRONT_ID}" \
-            --paths "/doc/main/"
+            --paths "/doc/main*"
           echo "path=/doc/main" >> $GITHUB_OUTPUT
       # Releases trigger versions
       - name: Sync `stable`
@@ -332,6 +332,7 @@ jobs:
           version=$(echo "${GITHUB_REF_NAME}" | sed -n -E "s/([0-9]+\.[0-9]+)\.[0-9]+/\1/p")
           aws s3 cp docs/switcher.json "s3://${S3_BUCKET}/doc/"
           aws s3 sync built-docs/ "s3://${S3_BUCKET}/doc/$version/"
+          aws s3 sync built-docs/ "s3://${S3_BUCKET}/doc/stable/"
           aws cloudfront create-invalidation --distribution-id "${CLOUDFRONT_ID}" \
-            --paths "/doc/$version/" "/doc/switcher.json"
+            --paths "/doc/$version*" --paths "/doc/stable*" "/doc/switcher.json"
           echo "path=/doc/stable" >> $GITHUB_OUTPUT
