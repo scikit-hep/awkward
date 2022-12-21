@@ -84,7 +84,7 @@ def test_make_mixins():
             [],
             [{"x": 8, "y": 8.8}, {"x": 10, "y": 11.0}],
         ],
-        dtype_exact=False
+        dtype_exact=False,
     )
     assert ak._util.arrays_approx_equal(
         wone + wtwo,
@@ -112,7 +112,7 @@ def test_make_mixins():
                 {"x": 5.0, "y": 5.5, "weight": 14.866068747318506},
             ],
         ],
-        dtype_exact=False
+        dtype_exact=False,
     )
     assert ak._util.arrays_approx_equal(
         abs(one),
@@ -121,7 +121,7 @@ def test_make_mixins():
             [],
             [5.946427498927402, 7.433034373659253],
         ],
-        dtype_exact=False
+        dtype_exact=False,
     )
     assert ak._util.arrays_approx_equal(
         one.distance(wtwo),
@@ -130,5 +130,5 @@ def test_make_mixins():
             [],
             [0.4123105625617664, 0.0],
         ],
-        dtype_exact=False
+        dtype_exact=False,
     )
