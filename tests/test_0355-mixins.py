@@ -77,12 +77,16 @@ def test_make_mixins():
         with_name="WeightedPoint",
         behavior=behavior,
     )
-    assert to_list(one + wone) == [
-        [{"x": 2, "y": 2.2}, {"x": 4, "y": 4.4}, {"x": 6, "y": 6.6}],
-        [],
-        [{"x": 8, "y": 8.8}, {"x": 10, "y": 11.0}],
-    ]
-    ak._util.arrays_approx_equal(
+    assert ak._util.arrays_approx_equal(
+        one + wone,
+        [
+            [{"x": 2, "y": 2.2}, {"x": 4, "y": 4.4}, {"x": 6, "y": 6.6}],
+            [],
+            [{"x": 8, "y": 8.8}, {"x": 10, "y": 11.0}],
+        ],
+        dtype_exact=False
+    )
+    assert ak._util.arrays_approx_equal(
         wone + wtwo,
         [
             [
@@ -108,20 +112,23 @@ def test_make_mixins():
                 {"x": 5.0, "y": 5.5, "weight": 14.866068747318506},
             ],
         ],
+        dtype_exact=False
     )
-    ak._util.arrays_approx_equal(
+    assert ak._util.arrays_approx_equal(
         abs(one),
         [
             [1.4866068747318506, 2.973213749463701, 4.459820624195552],
             [],
             [5.946427498927402, 7.433034373659253],
         ],
+        dtype_exact=False
     )
-    ak._util.arrays_approx_equal(
+    assert ak._util.arrays_approx_equal(
         one.distance(wtwo),
         [
             [0.14142135623730953, 0.0, 0.31622776601683783],
             [],
             [0.4123105625617664, 0.0],
         ],
+        dtype_exact=False
     )
