@@ -103,6 +103,7 @@ if "DOCS_SHOW_VERSION" in os.environ:
         "json_url": "https://awkward-array.org/doc/switcher.json",
         "version_match": version,
     }
+    html_theme_options["navbar_start"] = ["navbar-logo", "version-switcher"]
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
