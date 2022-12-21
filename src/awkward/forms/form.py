@@ -334,6 +334,12 @@ class Form:
     def form_key(self):
         return self._form_key
 
+    @form_key.setter
+    def form_key(self, value):
+        if value is not None or not isinstance(value, str):
+            raise ak._errors.wrap_error(TypeError("form_key must be None or a string"))
+        self._form_key = value
+
     def __str__(self):
         return json.dumps(self.to_dict(verbose=False), indent=4)
 
