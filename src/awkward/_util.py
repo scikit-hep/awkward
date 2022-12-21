@@ -847,7 +847,12 @@ def maybe_posaxis(layout, axis, depth):
 
 
 def arrays_approx_equal(
-    left, right, rtol: float = 1e-5, atol: float = 1e-8, dtype_exact: bool = True
+    left,
+    right,
+    rtol: float = 1e-5,
+    atol: float = 1e-8,
+    dtype_exact: bool = True,
+    check_parameters=True,
 ) -> bool:
     # TODO: this should not be needed after refactoring nplike mechanism
     import numpy
@@ -874,7 +879,9 @@ def arrays_approx_equal(
         if left.length != right.length:
             return False
 
-        if not awkward.forms.form._parameters_equal(left.parameters, right.parameters):
+        if check_parameters and not awkward.forms.form._parameters_equal(
+            left.parameters, right.parameters
+        ):
             return False
 
         # Allow an `__array__` to be set with no value in `ak.behavior`;
@@ -882,7 +889,9 @@ def arrays_approx_equal(
         # array to have a behavior class and another to lack it.
         array = left.parameter("__array__")
         if not (
-            array is None or (left_behavior.get(array) is right_behavior.get(array))
+            array is None
+            or (left_behavior.get(array) is right_behavior.get(array))
+            or not check_parameters
         ):
             return False
 
@@ -913,6 +922,7 @@ def arrays_approx_equal(
                 (
                     record is None
                     or (left_behavior.get(record) is right_behavior.get(record))
+                    or not check_parameters
                 )
                 and (left.fields == right.fields)
                 and (left.is_tuple == right.is_tuple)
