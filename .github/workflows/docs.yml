@@ -293,11 +293,11 @@ jobs:
       contents: read
     env:
       S3_BUCKET: "awkward-array.org"
-      DEPLOY_URL: "http://awkward-array.org.s3-website.us-east-1.amazonaws.com"
+      PRODUCTION_URL: "http://awkward-array.org"
       CLOUDFRONT_ID: "EFM4QVENUIXHS"
     environment:
       name: docs-prod
-      url: ${{ env.DEPLOY_URL }}/doc/latest
+      url: ${{ env.PRODUCTION_URL }}${{ steps.sync-main.outputs.path || steps.sync-stable.outputs.path }}
     steps:
       - uses: actions/checkout@v3
       - name: Configure AWS credentials
@@ -317,13 +317,16 @@ jobs:
       # Pushes to main trigger latest
       - name: Sync `main`
         if: github.event_name == 'push'
+        id: sync-main
         run: |
           aws s3 sync built-docs/ "s3://${S3_BUCKET}/doc/main/"
           aws cloudfront create-invalidation --distribution-id "${CLOUDFRONT_ID}" \
             --paths "/doc/main/"
+          echo "path=/doc/main" >> $GITHUB_OUTPUT
       # Releases trigger versions
-      - name: Sync `release`
+      - name: Sync `stable`
         if: github.event_name == 'release'
+        id: sync-stable
         run: |
           # Take only leading version
           version=$(echo "${GITHUB_REF_NAME}" | sed -n -E "s/([0-9]+\.[0-9]+)\.[0-9]+/\1/p")
@@ -331,3 +334,4 @@ jobs:
           aws s3 sync built-docs/ "s3://${S3_BUCKET}/doc/$version/"
           aws cloudfront create-invalidation --distribution-id "${CLOUDFRONT_ID}" \
             --paths "/doc/$version/" "/doc/switcher.json"
+          echo "path=/doc/stable" >> $GITHUB_OUTPUT
