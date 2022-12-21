@@ -197,9 +197,13 @@ jobs:
     - name: Copy C++ documentation
       run: cp -r awkward-cpp/docs/html/ docs/_static/doxygen
 
+    - name: Enable analytics & version selector
+      if: github.event_name == 'push' || github.event_name == 'release'
+      run: |
+        echo "DOCS_REPORT_ANALYTICS=1" >> $GITHUB_ENV
+        echo "DOCS_SHOW_VERSION=1" >> $GITHUB_ENV
+
     - name: Generate Python documentation
-      env:
-        DOCS_SHOW_VERSION: 1
       run: sphinx-build -M html . _build/
       working-directory: docs
 
@@ -236,25 +240,6 @@ jobs:
       with:
         name: docs
         path: docs/_build/html
-
-      # TODO HACK!
-    - name: Layout documentation
-      run: |
-        # Setup docs with `/doc/main` path
-        mkdir -p "/tmp/awkward-docs/doc"
-        cp -r docs/_build/html \
-                 "/tmp/awkward-docs/doc/main"
-        cp -r docs/_build/html \
-                 "/tmp/awkward-docs/doc/stable"
-        cp -r docs/_build/html \
-                 "/tmp/awkward-docs/doc/2.0"
-        python3 dev/generate-redirects.py docs/redirects-user-guide.json /tmp/awkward-docs/
-
-    - name: Upload Pages artefact
-      uses: actions/upload-pages-artifact@v1
-      with:
-        # Upload entire repository
-        path: /tmp/awkward-docs
 
     - name: Upload Jupyter Book cache
       uses: actions/upload-artifact@v3
@@ -346,22 +331,3 @@ jobs:
           aws s3 sync built-docs/ "s3://${S3_BUCKET}/doc/$version/"
           aws cloudfront create-invalidation --distribution-id "${CLOUDFRONT_ID}" \
             --paths "/doc/$version/" "/doc/switcher.json"
-
-  deploy-docs:
-    runs-on: ubuntu-22.04
-    needs: [build-docs]
-    # We can only deploy for PRs on host repo, or pushes to main
-    if: ${{ github.event_name == 'push' }}
-    # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
-    steps:
-    - uses: actions/checkout@v3
-    - name: Setup Pages
-      uses: actions/configure-pages@v2
-
-    - name: Deploy to GitHub Pages
-      id: deployment
-      uses: actions/deploy-pages@v1
