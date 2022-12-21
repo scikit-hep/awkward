@@ -69,12 +69,8 @@ def nplike_of(*arrays, default: D = _UNSET) -> NumpyLike | D:
 
         raise ak._errors.wrap_error(
             ValueError(
-                """attempting to use both a 'cpu' array and a 'cuda' array in the same operation; use one of
-
-    ak.to_backend(array, 'cpu')
-    ak.to_backend(array, 'cuda')
-
-to move one or the other to main memory or the GPU(s)."""
+                """attempting to use arrays with more than one backend in the same operation; use
+#ak.to_backend to coerce the arrays to the same backend."""
             )
         )
 
