@@ -227,6 +227,11 @@ class TypeTracerReport:
 
     def touch_data(self, label):
         if label not in self._data_touched_set:
+            # touching data implies that the shape will be touched as well
+            # implemented here so that the codebase doesn't need to be filled
+            # with calls to both methods everywhere
+            self._shape_touched_set.add(label)
+            self._shape_touched.append(label)
             self._data_touched_set.add(label)
             self._data_touched.append(label)
 
