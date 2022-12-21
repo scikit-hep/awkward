@@ -36,6 +36,7 @@ extensions = [
     "sphinx_design",
     "sphinx_external_toc",
     "sphinx.ext.intersphinx",
+    "sphinx_sitemap",
     "myst_nb",
     # Preserve old links
     "jupyterlite_sphinx",
@@ -56,6 +57,7 @@ exclude_patterns = ["_build", "_templates", "Thumbs.db", "jupyter_execute", ".*"
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
+html_baseurl = 'https://awkward-array.org/doc/'
 html_context = {
     "github_user": "scikit-hep",
     "github_repo": "awkward",
