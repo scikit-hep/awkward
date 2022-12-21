@@ -197,9 +197,13 @@ jobs:
     - name: Copy C++ documentation
       run: cp -r awkward-cpp/docs/html/ docs/_static/doxygen
 
+    - name: Enable analytics & version selector
+      if: github.event_name == 'push' || github.event_name == 'release'
+      run: |
+        echo "DOCS_REPORT_ANALYTICS=1" >> $GITHUB_ENV
+        echo "DOCS_SHOW_VERSION=1" >> $GITHUB_ENV
+
     - name: Generate Python documentation
-      env:
-        DOCS_SHOW_VERSION: 1
       run: sphinx-build -M html . _build/
       working-directory: docs
 

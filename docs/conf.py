@@ -91,11 +91,12 @@ html_theme_options = {
             "url": "https://github.com/scikit-hep/awkward/releases",
         },
     ],
-    "analytics": {
+}
+if "DOCS_REPORT_ANALYTICS" in os.environ:
+    html_theme_options["analytics"] = {
         "plausible_analytics_domain": "awkward-array.org",
         "plausible_analytics_url": "https://views.scientific-python.org/js/plausible.js",
-    },
-}
+    }
 # Don't show version for offline builds by default
 if "DOCS_SHOW_VERSION" in os.environ:
     html_theme_options["switcher"] = {
@@ -158,10 +159,12 @@ linkcheck_ignore = [
 ]
 # Eventually we need to revisit these
 if (datetime.date.today() - datetime.date(2022, 12, 13)) < datetime.timedelta(days=30):
-    linkcheck_ignore.extend([
-        r"^https:\/\/doi.org\/10\.1051\/epjconf\/202024505023$",
-        r"^https:\/\/doi.org\/10\.1051\/epjconf\/202125103002$",
-    ])
+    linkcheck_ignore.extend(
+        [
+            r"^https:\/\/doi.org\/10\.1051\/epjconf\/202024505023$",
+            r"^https:\/\/doi.org\/10\.1051\/epjconf\/202125103002$",
+        ]
+    )
 
 HERE = pathlib.Path(__file__).parent
 
