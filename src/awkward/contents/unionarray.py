@@ -1269,10 +1269,6 @@ class UnionArray(Content):
 
     def _validity_error(self, path):
         for i in range(len(self.contents)):
-            if isinstance(self.contents[i], ak.contents.UnionArray):
-                return "{} contains {}, the operation that made it might have forgotten to call 'simplify_uniontype'".format(
-                    type(self), type(self.contents[i])
-                )
             if (
                 self._backend.nplike.known_shape
                 and self.index.length < self.tags.length
