@@ -306,34 +306,42 @@ def reduce(
     reducer: ak._reducers.Reducer,
     axis: int | None = -1,
     mask: bool = True,
-    flatten_records: bool = True,
     keepdims: bool = False,
     behavior: dict | None = None,
 ):
     if axis is None:
-        branch, depth = layout.branch_depth
-        parts = completely_flatten(
-            layout, flatten_records=flatten_records, drop_nones=False
-        )
+        parts = completely_flatten(layout, flatten_records=False, drop_nones=False)
 
-        if not parts:
+        if len(parts) > 1:
+            # We know that `flatten_records` must fail, so the only other type
+            # that can return multiple parts here is the union array
+            raise ak._errors.wrap_error(
+                ValueError(
+                    "cannot use axis=None with keepdims=True on an array containing "
+                    "irreducible unions"
+                )
+            )
+        elif len(parts) == 0:
             parts = [ak.contents.EmptyArray()]
 
-        # Reduce each part
-        layout = reducer.apply_many(parts, mask)
+        (layout,) = parts
 
-        if keepdims:
-            if branch:
-                raise ak._errors.wrap_error(
-                    ValueError(
-                        "cannot use axis=None with keepdims=True on a nested list structure "
-                        "of variable depth"
-                    )
-                )
-            for _ in range(depth):
-                layout = ak.contents.RegularArray(layout, size=1)
+        starts = ak.index.Index64.zeros(1, layout.backend.index_nplike)
+        parents = ak.index.Index64.zeros(layout.length, layout.backend.index_nplike)
+        shifts = None
+        next = layout._reduce_next(
+            reducer,
+            1,
+            starts,
+            shifts,
+            parents,
+            1,
+            mask,
+            keepdims,
+            behavior,
+        )
 
-        return layout[0]
+        return next[0]
     else:
         negaxis = -axis
         branch, depth = layout.branch_depth

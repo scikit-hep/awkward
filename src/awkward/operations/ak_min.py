@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._util import unset
 
 np = ak._nplikes.NumpyMetadata.instance()
 
@@ -13,7 +14,7 @@ def min(
     keepdims=False,
     initial=None,
     mask_identity=True,
-    flatten_records=False,
+    flatten_records=unset,
     highlevel=True,
     behavior=None
 ):
@@ -36,8 +37,6 @@ def min(
         mask_identity (bool): If True, reducing over empty lists results in
             None (an option type); otherwise, reducing over empty lists
             results in the operation's identity.
-        flatten_records (bool): If True, axis=None combines fields from different
-            records; otherwise, records raise an error.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
@@ -66,16 +65,22 @@ def min(
             keepdims=keepdims,
             initial=initial,
             mask_identity=mask_identity,
-            flatten_records=flatten_records,
         ),
     ):
+        if flatten_records is not unset:
+            raise ak._errors.wrap_error(
+                ValueError(
+                    "`flatten_records` is no longer a supported argument for reducers. "
+                    "Instead, use `ak.ravel(array)` first to remove the record structure "
+                    "and flatten the array."
+                )
+            )
         return _impl(
             array,
             axis,
             keepdims,
             initial,
             mask_identity,
-            flatten_records,
             highlevel,
             behavior,
         )
@@ -89,7 +94,7 @@ def nanmin(
     keepdims=False,
     initial=None,
     mask_identity=True,
-    flatten_records=False,
+    flatten_records=unset,
     highlevel=True,
     behavior=None
 ):
@@ -112,8 +117,6 @@ def nanmin(
         mask_identity (bool): If True, reducing over empty lists results in
             None (an option type); otherwise, reducing over empty lists
             results in the operation's identity.
-        flatten_records (bool): If True, axis=None combines fields from different
-            records; otherwise, records raise an error.
 
     Like #ak.min, but treating NaN ("not a number") values as missing.
 
@@ -133,11 +136,18 @@ def nanmin(
             keepdims=keepdims,
             initial=initial,
             mask_identity=mask_identity,
-            flatten_records=flatten_records,
             highlevel=highlevel,
             behavior=behavior,
         ),
     ):
+        if flatten_records is not unset:
+            raise ak._errors.wrap_error(
+                ValueError(
+                    "`flatten_records` is no longer a supported argument for reducers. "
+                    "Instead, use `ak.ravel(array)` first to remove the record structure "
+                    "and flatten the array."
+                )
+            )
         array = ak.operations.ak_nan_to_none._impl(array, False, None)
 
         return _impl(
@@ -146,15 +156,12 @@ def nanmin(
             keepdims,
             initial,
             mask_identity,
-            flatten_records,
             highlevel,
             behavior,
         )
 
 
-def _impl(
-    array, axis, keepdims, initial, mask_identity, flatten_records, highlevel, behavior
-):
+def _impl(array, axis, keepdims, initial, mask_identity, highlevel, behavior):
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
     behavior = ak._util.behavior_of(array, behavior=behavior)
     reducer = ak._reducers.Min(initial)
@@ -166,7 +173,6 @@ def _impl(
         mask=mask_identity,
         keepdims=keepdims,
         behavior=behavior,
-        flatten_records=flatten_records,
     )
     if isinstance(out, (ak.contents.Content, ak.record.Record)):
         return ak._util.wrap(out, behavior, highlevel)
