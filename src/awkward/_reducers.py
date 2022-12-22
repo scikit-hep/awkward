@@ -52,52 +52,6 @@ class Reducer:
     def apply(self, array, parents, outlength: Integral):
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def _apply_many_trivial(self, arrays, mask, partial_reducer=None):
-        if partial_reducer is None:
-            partial_reducer = self
-
-        backend = ak._backends.backend_of(*arrays)
-        partial_reductions = [
-            x._reduce_next(
-                self,
-                negaxis=1,
-                starts=ak.index.Index64.zeros(
-                    1, backend.index_nplike
-                ),  # TODO: add to result for positional?
-                parents=ak.index.Index64.zeros(x.length, backend.index_nplike),
-                shifts=None,
-                mask=mask,
-                outlength=1,
-                keepdims=True,
-                behavior=None,
-            )[0]
-            for x in arrays
-        ]
-        partial_reduction = partial_reductions[0]._mergemany(partial_reductions[1:])
-        return partial_reduction._reduce_next(
-            partial_reducer,
-            negaxis=1,
-            mask=mask,
-            keepdims=True,
-            starts=ak.index.Index64.zeros(1, backend.index_nplike),
-            parents=ak.index.Index64.zeros(
-                partial_reduction.length, backend.index_nplike
-            ),
-            shifts=None,
-            outlength=1,
-            behavior=None,
-        )[0]
-
-    def apply_many(self, arrays: list[ak.contents.Content], mask: bool):
-        """
-        Args:
-            arrays: arrays to be partially reduced
-
-        Combine a pair of partial reductions such that the result is equivalent to the reduction over
-        the array formed by merging the input arrays.
-        """
-        raise ak._errors.wrap_error(NotImplementedError)
-
 
 class ArgMin(Reducer):
     name = "argmin"
@@ -148,84 +102,6 @@ class ArgMin(Reducer):
                 )
             )
         return ak.contents.NumpyArray(result)
-
-    def apply_many(self, arrays, mask):
-        backend = ak._backends.backend_of(*arrays)
-
-        if backend.nplike.known_shape and backend.nplike.known_data:
-            partial_indices = [
-                part._reduce_next(
-                    self,
-                    negaxis=1,
-                    starts=ak.index.Index64.zeros(1, backend.index_nplike),
-                    parents=ak.index.Index64.zeros(part.length, backend.index_nplike),
-                    shifts=None,
-                    mask=True,
-                    outlength=1,
-                    keepdims=True,
-                    behavior=None,
-                )[0]
-                for part in arrays
-            ]
-            index = (
-                partial_indices[0]
-                ._mergemany(partial_indices[1:])
-                .to_ByteMaskedArray(True)
-            )
-
-            partial_values = [a[i] for a, i in zip(arrays, partial_indices)]
-            value = partial_values[0]._mergemany(partial_values[1:])
-
-            result_index = value._reduce_next(
-                self,
-                negaxis=1,
-                mask=True,
-                keepdims=True,
-                starts=ak.index.Index64.zeros(1, backend.index_nplike),
-                parents=ak.index.Index64.zeros(value.length, backend.index_nplike),
-                shifts=None,
-                outlength=1,
-                behavior=None,
-            )[0]
-            assert isinstance(result_index, ak.contents.ByteMaskedArray), type(value)
-
-            lengths = [0]
-            lengths.extend([len(x) for x in arrays[:-1]])
-            shifts = backend.index_nplike.where(
-                index.mask,
-                backend.index_nplike.cumsum(
-                    backend.index_nplike.array(lengths, dtype=np.int64)
-                ),
-                0,
-            )
-            absolute_index = ak.contents.NumpyArray(
-                backend.index_nplike.asarray(index.content) + shifts
-            )
-
-            result = absolute_index[result_index]
-            if mask:
-                return result
-            else:
-                raw_result = result.to_ByteMaskedArray(True)
-                return ak.contents.NumpyArray(
-                    backend.index_nplike.where(
-                        raw_result.mask,
-                        backend.index_nplike.asarray(raw_result.content),
-                        -1,
-                    )
-                )
-        else:
-            content = ak.contents.NumpyArray(
-                backend.nplike.empty(1, dtype=np.int64), backend=backend
-            )
-            if mask:
-                return ak.contents.ByteMaskedArray(
-                    ak.index.Index8(backend.index_nplike.empty(1, dtype=np.int8)),
-                    content,
-                    True,
-                )
-            else:
-                return content
 
 
 class ArgMax(Reducer):
@@ -278,84 +154,6 @@ class ArgMax(Reducer):
             )
         return ak.contents.NumpyArray(result)
 
-    def apply_many(self, arrays, mask):
-        backend = ak._backends.backend_of(*arrays)
-
-        if backend.nplike.known_shape and backend.nplike.known_data:
-            partial_indices = [
-                part._reduce_next(
-                    self,
-                    negaxis=1,
-                    starts=ak.index.Index64.zeros(1, backend.index_nplike),
-                    parents=ak.index.Index64.zeros(part.length, backend.index_nplike),
-                    shifts=None,
-                    mask=True,
-                    outlength=1,
-                    keepdims=True,
-                    behavior=None,
-                )[0]
-                for part in arrays
-            ]
-            index = (
-                partial_indices[0]
-                ._mergemany(partial_indices[1:])
-                .to_ByteMaskedArray(True)
-            )
-
-            partial_values = [a[i] for a, i in zip(arrays, partial_indices)]
-            value = partial_values[0]._mergemany(partial_values[1:])
-
-            result_index = value._reduce_next(
-                self,
-                negaxis=1,
-                mask=True,
-                keepdims=True,
-                starts=ak.index.Index64.zeros(1, backend.index_nplike),
-                parents=ak.index.Index64.zeros(value.length, backend.index_nplike),
-                shifts=None,
-                outlength=1,
-                behavior=None,
-            )[0]
-            assert isinstance(result_index, ak.contents.ByteMaskedArray), type(value)
-
-            lengths = [0]
-            lengths.extend([len(x) for x in arrays[:-1]])
-            shifts = backend.index_nplike.where(
-                index.mask,
-                backend.index_nplike.cumsum(
-                    backend.index_nplike.array(lengths, dtype=np.int64)
-                ),
-                0,
-            )
-            absolute_index = ak.contents.NumpyArray(
-                backend.index_nplike.asarray(index.content) + shifts
-            )
-
-            result = absolute_index[result_index]
-            if mask:
-                return result
-            else:
-                raw_result = result.to_ByteMaskedArray(True)
-                return ak.contents.NumpyArray(
-                    backend.index_nplike.where(
-                        raw_result.mask,
-                        backend.index_nplike.asarray(raw_result.content),
-                        -1,
-                    )
-                )
-        else:
-            content = ak.contents.NumpyArray(
-                backend.nplike.empty(1, dtype=np.int64), backend=backend
-            )
-            if mask:
-                return ak.contents.ByteMaskedArray(
-                    ak.index.Index8(backend.index_nplike.empty(1, dtype=np.int8)),
-                    content,
-                    True,
-                )
-            else:
-                return content
-
 
 class Count(Reducer):
     name = "count"
@@ -383,9 +181,6 @@ class Count(Reducer):
 
     def identity_for(self, dtype: np.dtype | None):
         return np.int64(0)
-
-    def apply_many(self, arrays, mask):
-        return self._apply_many_trivial(arrays, mask, partial_reducer=Sum())
 
 
 class CountNonzero(Reducer):
@@ -436,9 +231,6 @@ class CountNonzero(Reducer):
 
     def identity_for(self, dtype: np.dtype | None):
         return np.int64(0)
-
-    def apply_many(self, arrays, mask):
-        return self._apply_many_trivial(arrays, mask, partial_reducer=Sum())
 
 
 class Sum(Reducer):
@@ -544,9 +336,6 @@ class Sum(Reducer):
         else:
             return numpy.array(0, dtype=dtype)[()]
 
-    def apply_many(self, arrays, mask):
-        return self._apply_many_trivial(arrays, mask)
-
 
 class Prod(Reducer):
     name = "prod"
@@ -633,9 +422,6 @@ class Prod(Reducer):
         else:
             return numpy.array(1, dtype=dtype)[()]
 
-    def apply_many(self, arrays, mask):
-        return self._apply_many_trivial(arrays, mask)
-
 
 class Any(Reducer):
     name = "any"
@@ -686,9 +472,6 @@ class Any(Reducer):
     def identity_for(self, dtype: DTypeLike | None) -> Real:
         return False
 
-    def apply_many(self, arrays, mask):
-        return self._apply_many_trivial(arrays, mask)
-
 
 class All(Reducer):
     name = "all"
@@ -738,9 +521,6 @@ class All(Reducer):
 
     def identity_for(self, dtype: DTypeLike | None) -> Real:
         return True
-
-    def apply_many(self, arrays, mask):
-        return self._apply_many_trivial(arrays, mask)
 
 
 class Min(Reducer):
@@ -842,9 +622,6 @@ class Min(Reducer):
                 array.backend.nplike.array(result, array.dtype)
             )
 
-    def apply_many(self, arrays, mask):
-        return self._apply_many_trivial(arrays, mask)
-
 
 class Max(Reducer):
     name = "max"
@@ -944,6 +721,3 @@ class Max(Reducer):
             return ak.contents.NumpyArray(
                 array.backend.nplike.array(result, array.dtype)
             )
-
-    def apply_many(self, arrays, mask):
-        return self._apply_many_trivial(arrays, mask)
