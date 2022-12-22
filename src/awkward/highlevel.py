@@ -442,7 +442,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         wrapped by an #ak.types.ArrayType.
         """
         return ak.types.ArrayType(
-            self._layout.form.type_from_behavior(self._behavior), len(self._layout)
+            self._layout.form.type_from_behavior(self._behavior), self._layout.length
         )
 
     @property
@@ -468,7 +468,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         is `3`, not `5`.
         """
-        return len(self._layout)
+        return self._layout.length
 
     def __iter__(self):
         """
@@ -2320,7 +2320,7 @@ class ArrayBuilder(Sized):
         """
         form = ak.forms.from_json(self._layout.form())
         return ak.types.ArrayType(
-            form.type_from_behavior(self._behavior), len(self._layout)
+            form.type_from_behavior(self._behavior), self._layout.length
         )
 
     @property
