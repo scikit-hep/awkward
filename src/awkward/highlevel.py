@@ -2320,7 +2320,7 @@ class ArrayBuilder(Sized):
         """
         form = ak.forms.from_json(self._layout.form())
         return ak.types.ArrayType(
-            form.type_from_behavior(self._behavior), self._layout.length
+            form.type_from_behavior(self._behavior), len(self._layout)
         )
 
     @property
