@@ -1261,30 +1261,10 @@ class UnionArray(Content):
         keepdims,
         behavior,
     ):
-        simplified = type(self).simplified(
-            self._tags,
-            self._index,
-            self._contents,
-            parameters=self._parameters,
-            mergebool=True,
-        )
-        if isinstance(simplified, UnionArray):
-            raise ak._errors.wrap_error(
-                ValueError(
-                    f"cannot call ak.{reducer.name} on an irreducible UnionArray"
-                )
-            )
-
-        return simplified._reduce_next(
-            reducer,
-            negaxis,
-            starts,
-            shifts,
-            parents,
-            outlength,
-            mask,
-            keepdims,
-            behavior,
+        # If we have a UnionArray, it must be irreducible, thanks to the
+        # canonical checks in the constructor.
+        raise ak._errors.wrap_error(
+            ValueError(f"cannot call ak.{reducer.name} on an irreducible UnionArray")
         )
 
     def _validity_error(self, path):
