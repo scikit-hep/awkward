@@ -844,3 +844,91 @@ def maybe_posaxis(layout, axis, depth):
             return axis + depth + additional_depth - 1
         else:
             return None
+
+
+def arrays_approx_equal(
+    left,
+    right,
+    rtol: float = 1e-5,
+    atol: float = 1e-8,
+    dtype_exact: bool = True,
+    check_parameters=True,
+) -> bool:
+    # TODO: this should not be needed after refactoring nplike mechanism
+    import numpy
+
+    import awkward.forms.form
+
+    left_behavior = ak._util.behavior_of(left, behavior=ak.behavior)
+    right_behavior = ak._util.behavior_of(right, behavior=ak.behavior)
+
+    left = ak.to_packed(ak.to_layout(left, allow_record=False), highlevel=False)
+    right = ak.to_packed(ak.to_layout(right, allow_record=False), highlevel=False)
+
+    def is_approx_dtype(left, right) -> bool:
+        if not dtype_exact:
+            for family in numpy.integer, numpy.floating:
+                if numpy.issubdtype(left, family):
+                    return numpy.issubdtype(right, family)
+        return left == right
+
+    def visitor(left, right) -> bool:
+        if not type(left) is type(right):
+            return False
+
+        if left.length != right.length:
+            return False
+
+        if check_parameters and not awkward.forms.form._parameters_equal(
+            left.parameters, right.parameters
+        ):
+            return False
+
+        # Allow an `__array__` to be set with no value in `ak.behavior`;
+        # this is sometimes useful in testing. What we _don't_ want is for one
+        # array to have a behavior class and another to lack it.
+        array = left.parameter("__array__")
+        if not (
+            array is None
+            or (left_behavior.get(array) is right_behavior.get(array))
+            or not check_parameters
+        ):
+            return False
+
+        if left.is_list:
+            return numpy.array_equal(left.offsets, right.offsets) and visitor(
+                left.content, right.content
+            )
+        elif left.is_regular:
+            return (left.size == right.size) and visitor(left.content, right.content)
+        elif left.is_numpy:
+            return is_approx_dtype(left.dtype, right.dtype) and numpy.allclose(
+                left.data, right.data, rtol=rtol, atol=atol, equal_nan=False
+            )
+        elif left.is_option:
+            return numpy.array_equal(
+                left.index.data < 0, right.index.data < 0
+            ) and visitor(left.content, right.content)
+        elif left.is_union:
+            return (len(left.contents) == len(right.contents)) and all(
+                [
+                    visitor(left.project(i).to_packed(), right.project(i).to_packed())
+                    for i, _ in enumerate(left.contents)
+                ]
+            )
+        elif left.is_record:
+            record = left.parameter("__record__")
+            return (
+                (
+                    record is None
+                    or (left_behavior.get(record) is right_behavior.get(record))
+                    or not check_parameters
+                )
+                and (left.fields == right.fields)
+                and (left.is_tuple == right.is_tuple)
+                and all([visitor(x, y) for x, y in zip(left.contents, right.contents)])
+            )
+        elif left.is_empty:
+            return True
+
+    return visitor(left, right)
