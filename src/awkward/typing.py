@@ -5,7 +5,11 @@ import sys
 import typing
 from typing import *  # noqa: F401, F403
 
-__all__ = typing.__all__
+__all__ = [*typing.__all__, "AxisMaybeNone"]
+
+
+AxisMaybeNone = TypeVar("AxisMaybeNone", int, None)
+
 
 if sys.version_info < (3, 11):
     import typing_extensions

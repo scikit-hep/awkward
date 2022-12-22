@@ -873,6 +873,12 @@ def arrays_approx_equal(
         return left == right
 
     def visitor(left, right) -> bool:
+        # Enforce super-canonicalisation rules
+        if left.is_option:
+            left = left.to_IndexedOptionArray64()
+        if right.is_option:
+            right = right.to_IndexedOptionArray64()
+
         if not type(left) is type(right):
             return False
 
@@ -908,7 +914,7 @@ def arrays_approx_equal(
         elif left.is_option:
             return numpy.array_equal(
                 left.index.data < 0, right.index.data < 0
-            ) and visitor(left.content, right.content)
+            ) and visitor(left.project(), right.project())
         elif left.is_union:
             return (len(left.contents) == len(right.contents)) and all(
                 [

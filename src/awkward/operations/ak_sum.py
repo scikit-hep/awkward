@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._util import unset
 
 np = ak._nplikes.NumpyMetadata.instance()
 
@@ -12,7 +13,7 @@ def sum(
     *,
     keepdims=False,
     mask_identity=False,
-    flatten_records=False,
+    flatten_records=unset,
     highlevel=True,
     behavior=None
 ):
@@ -31,8 +32,6 @@ def sum(
         mask_identity (bool): If True, reducing over empty lists results in
             None (an option type); otherwise, reducing over empty lists
             results in the operation's identity.
-        flatten_records (bool): If True, axis=None combines fields from different
-            records; otherwise, records raise an error.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
@@ -201,14 +200,19 @@ def sum(
             axis=axis,
             keepdims=keepdims,
             mask_identity=mask_identity,
-            flatten_records=flatten_records,
             highlevel=highlevel,
             behavior=behavior,
         ),
     ):
-        return _impl(
-            array, axis, keepdims, mask_identity, flatten_records, highlevel, behavior
-        )
+        if flatten_records is not unset:
+            raise ak._errors.wrap_error(
+                ValueError(
+                    "`flatten_records` is no longer a supported argument for reducers. "
+                    "Instead, use `ak.ravel(array)` first to remove the record structure "
+                    "and flatten the array."
+                )
+            )
+        return _impl(array, axis, keepdims, mask_identity, highlevel, behavior)
 
 
 @ak._connect.numpy.implements("nansum")
@@ -218,7 +222,7 @@ def nansum(
     *,
     keepdims=False,
     mask_identity=False,
-    flatten_records=False,
+    flatten_records=unset,
     highlevel=True,
     behavior=None
 ):
@@ -237,8 +241,10 @@ def nansum(
         mask_identity (bool): If True, reducing over empty lists results in
             None (an option type); otherwise, reducing over empty lists
             results in the operation's identity.
-        flatten_records (bool): If True, axis=None combines fields from different
-            records; otherwise, records raise an error.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.contents.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
     Like #ak.sum, but treating NaN ("not a number") values as missing.
 
@@ -257,62 +263,37 @@ def nansum(
             axis=axis,
             keepdims=keepdims,
             mask_identity=mask_identity,
-            flatten_records=flatten_records,
             highlevel=highlevel,
             behavior=behavior,
         ),
     ):
+        if flatten_records is not unset:
+            raise ak._errors.wrap_error(
+                ValueError(
+                    "`flatten_records` is no longer a supported argument for reducers. "
+                    "Instead, use `ak.ravel(array)` first to remove the record structure "
+                    "and flatten the array."
+                )
+            )
         array = ak.operations.ak_nan_to_none._impl(array, False, None)
 
-        return _impl(
-            array, axis, keepdims, mask_identity, flatten_records, highlevel, behavior
-        )
+        return _impl(array, axis, keepdims, mask_identity, highlevel, behavior)
 
 
-def _impl(array, axis, keepdims, mask_identity, flatten_records, highlevel, behavior):
+def _impl(array, axis, keepdims, mask_identity, highlevel, behavior):
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
-    backend = layout.backend
+    behavior = ak._util.behavior_of(array, behavior=behavior)
     reducer = ak._reducers.Sum()
 
-    if axis is None:
-        if not backend.nplike.known_data or not backend.nplike.known_shape:
-
-            def map(x):
-                return ak._typetracer.UnknownScalar(
-                    np.dtype(reducer.return_dtype(x.dtype))
-                )
-
-        else:
-
-            def map(x):
-                return backend.nplike.sum(x.data)
-
-        def reduce(xs):
-            if len(xs) == 1:
-                return xs[0]
-            else:
-                return backend.nplike.add(xs[0], reduce(xs[1:]))
-
-        return reduce(
-            [
-                map(x)
-                for x in ak._do.completely_flatten(
-                    layout, function_name="ak.sum", flatten_records=flatten_records
-                )
-            ]
-        )
-
+    out = ak._do.reduce(
+        layout,
+        reducer,
+        axis=axis,
+        mask=mask_identity,
+        keepdims=keepdims,
+        behavior=behavior,
+    )
+    if isinstance(out, (ak.contents.Content, ak.record.Record)):
+        return ak._util.wrap(out, behavior, highlevel=highlevel)
     else:
-        behavior = ak._util.behavior_of(array, behavior=behavior)
-        out = ak._do.reduce(
-            layout,
-            reducer,
-            axis=axis,
-            mask=mask_identity,
-            keepdims=keepdims,
-            behavior=behavior,
-        )
-        if isinstance(out, (ak.contents.Content, ak.record.Record)):
-            return ak._util.wrap(out, behavior, highlevel=highlevel)
-        else:
-            return out
+        return out

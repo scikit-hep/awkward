@@ -1,12 +1,13 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._util import unset
 
 np = ak._nplikes.NumpyMetadata.instance()
 
 
 @ak._connect.numpy.implements("ptp")
-def ptp(array, axis=None, *, keepdims=False, mask_identity=True, flatten_records=False):
+def ptp(array, axis=None, *, keepdims=False, mask_identity=True, flatten_records=unset):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
@@ -22,8 +23,6 @@ def ptp(array, axis=None, *, keepdims=False, mask_identity=True, flatten_records
         mask_identity (bool): If True, reducing over empty lists results in
             None (an option type); otherwise, reducing over empty lists
             results in the operation's identity of 0.
-        flatten_records (bool): If True, axis=None combines fields from different
-            records; otherwise, records raise an error.
 
     Returns the range of values in each group of elements from `array` (many
     types supported, including all Awkward Arrays and Records). The range of
@@ -62,13 +61,20 @@ def ptp(array, axis=None, *, keepdims=False, mask_identity=True, flatten_records
             axis=axis,
             keepdims=keepdims,
             mask_identity=mask_identity,
-            flatten_records=flatten_records,
         ),
     ):
-        return _impl(array, axis, keepdims, mask_identity, flatten_records)
+        if flatten_records is not unset:
+            raise ak._errors.wrap_error(
+                ValueError(
+                    "`flatten_records` is no longer a supported argument for reducers. "
+                    "Instead, use `ak.ravel(array)` first to remove the record structure "
+                    "and flatten the array."
+                )
+            )
+        return _impl(array, axis, keepdims, mask_identity)
 
 
-def _impl(array, axis, keepdims, mask_identity, flatten_records):
+def _impl(array, axis, keepdims, mask_identity):
     behavior = ak._util.behavior_of(array)
     array = ak.highlevel.Array(
         ak.operations.to_layout(array, allow_record=False, allow_other=False),
@@ -83,7 +89,6 @@ def _impl(array, axis, keepdims, mask_identity, flatten_records):
                 keepdims,
                 None,
                 mask_identity,
-                flatten_records,
                 highlevel=True,
                 behavior=None,
             ) - ak.operations.ak_min._impl(
@@ -92,7 +97,6 @@ def _impl(array, axis, keepdims, mask_identity, flatten_records):
                 keepdims,
                 None,
                 mask_identity,
-                flatten_records,
                 highlevel=True,
                 behavior=None,
             )
@@ -106,7 +110,6 @@ def _impl(array, axis, keepdims, mask_identity, flatten_records):
                 True,
                 None,
                 mask_identity,
-                flatten_records,
                 highlevel=True,
                 behavior=None,
             )
@@ -116,7 +119,6 @@ def _impl(array, axis, keepdims, mask_identity, flatten_records):
                 True,
                 None,
                 True,
-                flatten_records,
                 highlevel=True,
                 behavior=None,
             )
