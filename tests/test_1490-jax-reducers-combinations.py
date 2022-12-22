@@ -31,7 +31,7 @@ test_regulararray_tangent_jax = jax.numpy.array(
 
 
 @pytest.mark.parametrize("axis", [0, 1, None])
-@pytest.mark.parametrize("func_ak", [ak.sum, ak.prod, ak.min, ak.max, ak.sum])
+@pytest.mark.parametrize("func_ak", [ak.sum, ak.prod, ak.min, ak.max])
 def test_reducer(func_ak, axis):
     func_jax = getattr(jax.numpy, func_ak.__name__)
 
