@@ -1,7 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 from __future__ import annotations
 
-from numbers import Integral, Real
 from typing import Any as AnyType
 
 import awkward as ak
@@ -33,7 +32,7 @@ class Reducer:
         return given_dtype
 
     @classmethod
-    def maybe_double_length(cls, type: DTypeLike, length: Integral) -> Integral:
+    def maybe_double_length(cls, type: DTypeLike, length: int) -> int:
         return 2 * length if type in (np.complex128, np.complex64) else length
 
     @classmethod
@@ -49,7 +48,7 @@ class Reducer:
     def identity_for(self, dtype: DTypeLike | None):
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def apply(self, array, parents, outlength: Integral):
+    def apply(self, array, parents, outlength: int):
         raise ak._errors.wrap_error(NotImplementedError)
 
 
@@ -469,7 +468,7 @@ class Any(Reducer):
             )
         return ak.contents.NumpyArray(result)
 
-    def identity_for(self, dtype: DTypeLike | None) -> Real:
+    def identity_for(self, dtype: DTypeLike | None) -> float:
         return False
 
 
@@ -519,7 +518,7 @@ class All(Reducer):
             )
         return ak.contents.NumpyArray(result)
 
-    def identity_for(self, dtype: DTypeLike | None) -> Real:
+    def identity_for(self, dtype: DTypeLike | None) -> float:
         return True
 
 
@@ -527,14 +526,14 @@ class Min(Reducer):
     name = "min"
     preferred_dtype = np.float64
 
-    def __init__(self, initial: Real | None):
+    def __init__(self, initial: float | None):
         self._initial = initial
 
     @property
-    def initial(self) -> Real | None:
+    def initial(self) -> float | None:
         return self._initial
 
-    def identity_for(self, dtype: DTypeLike | None) -> Real:
+    def identity_for(self, dtype: DTypeLike | None) -> float:
         dtype = np.dtype(dtype)
 
         assert (
