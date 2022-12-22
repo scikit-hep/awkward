@@ -4,6 +4,7 @@ from __future__ import annotations
 from typing import Any as AnyType
 
 import awkward as ak
+from awkward.typing import Final
 
 np = ak._nplikes.NumpyMetadata.instance()
 numpy = ak._nplikes.Numpy.instance()
@@ -15,7 +16,7 @@ class Reducer:
     name: str
 
     # Does the output correspond to array positions?
-    needs_position = False
+    needs_position: Final = False
 
     @classmethod
     def highlevel_function(cls):
@@ -53,9 +54,9 @@ class Reducer:
 
 
 class ArgMin(Reducer):
-    name = "argmin"
-    needs_position = True
-    preferred_dtype = np.int64
+    name: Final = "argmin"
+    needs_position: Final = True
+    preferred_dtype: Final = np.int64
 
     @classmethod
     def return_dtype(cls, given_dtype):
@@ -104,9 +105,9 @@ class ArgMin(Reducer):
 
 
 class ArgMax(Reducer):
-    name = "argmax"
-    needs_position = True
-    preferred_dtype = np.int64
+    name: Final = "argmax"
+    needs_position: Final = True
+    preferred_dtype: Final = np.int64
 
     @classmethod
     def return_dtype(cls, given_dtype):
@@ -155,8 +156,8 @@ class ArgMax(Reducer):
 
 
 class Count(Reducer):
-    name = "count"
-    preferred_dtype = np.int64
+    name: Final = "count"
+    preferred_dtype: Final = np.int64
 
     @classmethod
     def return_dtype(cls, given_dtype):
@@ -183,8 +184,8 @@ class Count(Reducer):
 
 
 class CountNonzero(Reducer):
-    name = "count_nonzero"
-    preferred_dtype = np.float64
+    name: Final = "count_nonzero"
+    preferred_dtype: Final = np.float64
 
     @classmethod
     def return_dtype(cls, given_dtype):
@@ -233,8 +234,8 @@ class CountNonzero(Reducer):
 
 
 class Sum(Reducer):
-    name = "sum"
-    preferred_dtype = np.float64
+    name: Final = "sum"
+    preferred_dtype: Final = np.float64
 
     def apply(self, array, parents, outlength):
         assert isinstance(array, ak.contents.NumpyArray)
@@ -337,8 +338,8 @@ class Sum(Reducer):
 
 
 class Prod(Reducer):
-    name = "prod"
-    preferred_dtype = np.int64
+    name: Final = "prod"
+    preferred_dtype: Final = np.int64
 
     def apply(self, array, parents, outlength):
         assert isinstance(array, ak.contents.NumpyArray)
@@ -423,8 +424,8 @@ class Prod(Reducer):
 
 
 class Any(Reducer):
-    name = "any"
-    preferred_dtype = np.bool_
+    name: Final = "any"
+    preferred_dtype: Final = np.bool_
 
     @classmethod
     def return_dtype(cls, given_dtype):
@@ -473,8 +474,8 @@ class Any(Reducer):
 
 
 class All(Reducer):
-    name = "all"
-    preferred_dtype = np.bool_
+    name: Final = "all"
+    preferred_dtype: Final = np.bool_
 
     @classmethod
     def return_dtype(cls, given_dtype):
@@ -523,8 +524,8 @@ class All(Reducer):
 
 
 class Min(Reducer):
-    name = "min"
-    preferred_dtype = np.float64
+    name: Final = "min"
+    preferred_dtype: Final = np.float64
 
     def __init__(self, initial: float | None):
         self._initial = initial
@@ -623,8 +624,8 @@ class Min(Reducer):
 
 
 class Max(Reducer):
-    name = "max"
-    preferred_dtype = np.float64
+    name: Final = "max"
+    preferred_dtype: Final = np.float64
 
     def __init__(self, initial):
         self._initial = initial
