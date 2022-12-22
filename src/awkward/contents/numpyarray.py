@@ -1044,16 +1044,6 @@ class NumpyArray(Content):
         keepdims,
         behavior,
     ):
-        # HACK: switch reducer for JAX equivalent
-        # NOTE: this really needs to stay here for now, i.e. can't go in
-        # ak._do (because internal code instantiates Reducer instances)
-        # Ideally we would use the kernel mechanism for this, but JAX arrays are immutable whilst out kernel API assumes
-        # that arrays are mutable and that the inputs/outputs have a common nplike. For JAX we would probably want
-        # both numpy/cupy and jax.numpy which are not directly compatible, so this "hack" will likely remain.
-        if isinstance(self.backend, ak._backends.JaxBackend):
-            from awkward._connect.jax.reducers import get_jax_reducer
-
-            reducer = get_jax_reducer(reducer)
 
         if self._data.ndim > 1:
             return self.to_RegularArray()._reduce_next(
@@ -1084,7 +1074,7 @@ class NumpyArray(Content):
         assert self.is_contiguous
         assert self._data.ndim == 1
 
-        out = reducer.apply(self, parents, outlength)
+        out = self._backend.apply_reducer(reducer, self, parents, outlength)
 
         if reducer.needs_position:
             if shifts is None:

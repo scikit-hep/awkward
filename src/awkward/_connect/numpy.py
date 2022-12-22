@@ -176,13 +176,7 @@ def array_ufunc(ufunc, method, inputs, kwargs):
                     else:
                         args.append(x)
 
-                if isinstance(nplike, ak._nplikes.Jax):
-                    from awkward._connect.jax import get_jax_ufunc
-
-                    jax_ufunc = get_jax_ufunc(ufunc)
-                    result = jax_ufunc(*args, **kwargs)
-                else:
-                    result = getattr(ufunc, method)(*args, **kwargs)
+                result = backend.apply_ufunc(ufunc, method, args, kwargs)
 
             else:
                 shape = None
