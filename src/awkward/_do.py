@@ -10,7 +10,7 @@ from awkward._backends import Backend
 from awkward.contents.content import ActionType, Content
 from awkward.forms import form
 from awkward.record import Record
-from awkward.typing import Any
+from awkward.typing import Any, AxisMaybeNone
 
 np = ak._nplikes.NumpyMetadata.instance()
 
@@ -304,7 +304,7 @@ def mergemany(contents: list[Content]) -> Content:
 def reduce(
     layout: Content,
     reducer: ak._reducers.Reducer,
-    axis: int | None = -1,
+    axis: AxisMaybeNone = -1,
     mask: bool = True,
     keepdims: bool = False,
     behavior: dict | None = None,

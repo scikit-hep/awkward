@@ -9,12 +9,11 @@ from numbers import Complex, Real
 import awkward as ak
 from awkward._backends import Backend
 from awkward.forms.form import Form, _parameters_equal
-from awkward.typing import Any, Self, TypeAlias, TypeVar
+from awkward.typing import Any, AxisMaybeNone, Self, TypeAlias
 
 np = ak._nplikes.NumpyMetadata.instance()
 numpy = ak._nplikes.Numpy.instance()
 
-AxisMaybeNone = TypeVar("AxisMaybeNone", int, None)
 ActionType: TypeAlias = """Callable[
     [
         Content,
@@ -892,7 +891,7 @@ class Content:
 
     def _is_unique(
         self,
-        negaxis: int | None,
+        negaxis: AxisMaybeNone,
         starts: ak.index.Index,
         parents: ak.index.Index,
         outlength: int,
@@ -901,7 +900,7 @@ class Content:
 
     def _unique(
         self,
-        negaxis: int | None,
+        negaxis: AxisMaybeNone,
         starts: ak.index.Index,
         parents: ak.index.Index,
         outlength: int,
