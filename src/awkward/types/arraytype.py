@@ -16,12 +16,12 @@ class ArrayType:
                 )
             )
         if not (
-            (ak._util.is_integer(length) and length > 0)
+            (ak._util.is_integer(length) and length >= 0)
             or length is ak._typetracer.UnknownLength
         ):
             raise ak._errors.wrap_error(
                 ValueError(
-                    "{} 'length' must be a positive integer or unknown length, not {}".format(
+                    "{} 'length' must be a non-negative integer or unknown length, not {}".format(
                         type(self).__name__, repr(length)
                     )
                 )
