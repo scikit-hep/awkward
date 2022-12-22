@@ -498,12 +498,12 @@ def test_highlevel_min_max_axis_None():
             [
                 np.datetime64("2020-03-27T10:41:11"),
                 np.datetime64("2020-01-27T10:41:11"),
-                np.datetime64("2020-05"),
+                np.datetime64("2020-05-27T10:41:11"),
                 np.datetime64("2020-01-27T10:41:11"),
                 np.datetime64("2020-04-27T10:41:11"),
             ],
             [
-                np.datetime64("2020-04-27"),
+                np.datetime64("2020-04-27T10:41:11"),
                 np.datetime64("2020-02-27T10:41:11"),
                 np.datetime64("2020-01-27T10:41:11"),
                 np.datetime64("2020-06-27T10:41:11"),
@@ -519,12 +519,12 @@ def test_highlevel_min_max_axis_None():
         [
             np.datetime64("2020-03-27T10:41:11"),
             np.datetime64("2020-01-27T10:41:11"),
-            np.datetime64("2020-05"),
+            np.datetime64("2020-05-27T10:41:11"),
             np.datetime64("2020-01-27T10:41:11"),
             np.datetime64("2020-04-27T10:41:11"),
         ],
         [
-            np.datetime64("2020-04-27"),
+            np.datetime64("2020-04-27T10:41:11"),
             np.datetime64("2020-02-27T10:41:11"),
             np.datetime64("2020-01-27T10:41:11"),
             np.datetime64("2020-06-27T10:41:11"),
