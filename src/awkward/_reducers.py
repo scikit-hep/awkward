@@ -2,14 +2,14 @@
 from __future__ import annotations
 
 from numbers import Integral, Real
-from typing import Any
+from typing import Any as AnyType
 
 import awkward as ak
 
 np = ak._nplikes.NumpyMetadata.instance()
 numpy = ak._nplikes.Numpy.instance()
 
-DTypeLike = Any
+DTypeLike = AnyType
 
 
 class Reducer:
