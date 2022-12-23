@@ -89,6 +89,14 @@ class UnmaskedArray(Content):
             parameters=self._parameters,
         )
 
+    def _touch_data(self, recursive):
+        if recursive:
+            self._content._touch_data(recursive)
+
+    def _touch_shape(self, recursive):
+        if recursive:
+            self._content._touch_shape(recursive)
+
     @property
     def length(self):
         return self._content.length
@@ -157,12 +165,14 @@ class UnmaskedArray(Content):
 
     def _getitem_at(self, where):
         if not self._backend.nplike.known_data:
+            self._touch_data(recursive=False)
             return ak._typetracer.MaybeNone(self._content._getitem_at(where))
 
         return self._content._getitem_at(where)
 
     def _getitem_range(self, where):
         if not self._backend.nplike.known_shape:
+            self._touch_shape(recursive=False)
             return self
 
         start, stop, step = where.indices(self.length)

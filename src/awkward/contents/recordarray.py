@@ -223,6 +223,16 @@ class RecordArray(Content):
             backend=backend,
         )
 
+    def _touch_data(self, recursive):
+        if recursive:
+            for x in self._contents:
+                x._touch_data(recursive)
+
+    def _touch_shape(self, recursive):
+        if recursive:
+            for x in self._contents:
+                x._touch_shape(recursive)
+
     @property
     def length(self):
         return self._length
@@ -278,7 +288,7 @@ class RecordArray(Content):
         return self._getitem_range(slice(0, 0))
 
     def _getitem_at(self, where):
-        if self._backend.nplike.known_data and where < 0:
+        if self._backend.nplike.known_shape and where < 0:
             where += self.length
 
         if where < 0 or where >= self.length:
@@ -287,6 +297,7 @@ class RecordArray(Content):
 
     def _getitem_range(self, where):
         if not self._backend.nplike.known_shape:
+            self._touch_shape(recursive=False)
             return self
 
         start, stop, step = where.indices(self.length)
@@ -913,6 +924,7 @@ class RecordArray(Content):
         if self._backend.nplike.known_shape:
             contents = [x[: self._length] for x in self._contents]
         else:
+            self._touch_data(recursive=False)
             contents = self._contents
 
         if options["return_array"]:

@@ -145,6 +145,18 @@ class IndexedOptionArray(Content):
             parameters=self._parameters,
         )
 
+    def _touch_data(self, recursive):
+        if not self._backend.index_nplike.known_data:
+            self._index.data.touch_data()
+        if recursive:
+            self._content._touch_data(recursive)
+
+    def _touch_shape(self, recursive):
+        if not self._backend.index_nplike.known_shape:
+            self._index.data.touch_shape()
+        if recursive:
+            self._content._touch_shape(recursive)
+
     @property
     def length(self):
         return self._index.length
@@ -209,6 +221,7 @@ class IndexedOptionArray(Content):
 
     def _getitem_at(self, where):
         if not self._backend.nplike.known_data:
+            self._touch_data(recursive=False)
             return ak._typetracer.MaybeNone(self._content._getitem_at(where))
 
         if where < 0:
@@ -222,6 +235,7 @@ class IndexedOptionArray(Content):
 
     def _getitem_range(self, where):
         if not self._backend.nplike.known_shape:
+            self._touch_shape(recursive=False)
             return self
 
         start, stop, step = where.indices(self.length)
@@ -1527,6 +1541,11 @@ class IndexedOptionArray(Content):
             else:
                 index, content = self._index, self._content
         else:
+            if (
+                not self._backend.nplike.known_shape
+                or not self._backend.nplike.known_data
+            ):
+                self._touch_data(recursive=False)
             index, content = self._index, self._content
 
         if options["return_array"]:

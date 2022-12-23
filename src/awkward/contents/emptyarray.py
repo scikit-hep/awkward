@@ -57,6 +57,12 @@ class EmptyArray(Content):
             backend=ak._backends.TypeTracerBackend.instance(),
         )
 
+    def _touch_data(self, recursive):
+        pass
+
+    def _touch_shape(self, recursive):
+        pass
+
     @property
     def length(self):
         return 0

@@ -382,6 +382,7 @@ def normalise_item_bool_to_int(item):
             nextoffsets = cumsum[item.offsets]
 
         else:
+            item._touch_data(recursive=False)
             nextoffsets = item.offsets
             nextcontent = item.backend.nplike.empty(
                 (ak._typetracer.UnknownLength,), dtype=np.int64
@@ -439,6 +440,7 @@ def normalise_item_bool_to_int(item):
             )
 
         else:
+            item._touch_data(recursive=False)
             nextoffsets = item.offsets
             outindex = item.content.index
             nextcontent = item.backend.nplike.empty(
@@ -503,6 +505,7 @@ def normalise_item_bool_to_int(item):
                 )
 
             else:
+                item._touch_data(recursive=False)
                 outindex = item.index
                 nextcontent = item.backend.nplike.empty(
                     (ak._typetracer.UnknownLength,), dtype=np.int64

@@ -163,6 +163,18 @@ class ByteMaskedArray(Content):
             parameters=self._parameters,
         )
 
+    def _touch_data(self, recursive):
+        if not self._backend.index_nplike.known_data:
+            self._mask.data.touch_data()
+        if recursive:
+            self._content._touch_data(recursive)
+
+    def _touch_shape(self, recursive):
+        if not self._backend.index_nplike.known_shape:
+            self._mask.data.touch_shape()
+        if recursive:
+            self._content._touch_shape(recursive)
+
     @property
     def length(self):
         return self._mask.length
@@ -233,6 +245,7 @@ class ByteMaskedArray(Content):
 
     def to_BitMaskedArray(self, valid_when, lsb_order):
         if not self._backend.nplike.known_data:
+            self._touch_data(recursive=False)
             if self._backend.nplike.known_shape:
                 excess_length = int(math.ceil(self.length / 8.0))
             else:
@@ -277,6 +290,7 @@ class ByteMaskedArray(Content):
 
     def _getitem_at(self, where):
         if not self._backend.nplike.known_data:
+            self._touch_data(recursive=False)
             return ak._typetracer.MaybeNone(self._content._getitem_at(where))
 
         if where < 0:
@@ -290,6 +304,7 @@ class ByteMaskedArray(Content):
 
     def _getitem_range(self, where):
         if not self._backend.nplike.known_shape:
+            self._touch_shape(recursive=False)
             return self
 
         start, stop, step = where.indices(self.length)

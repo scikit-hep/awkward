@@ -171,6 +171,12 @@ class Content:
     def _to_typetracer(self, forget_length: bool) -> Self:
         raise ak._errors.wrap_error(NotImplementedError)
 
+    def _touch_data(self, recursive):
+        raise ak._errors.wrap_error(NotImplementedError)
+
+    def _touch_shape(self, recursive):
+        raise ak._errors.wrap_error(NotImplementedError)
+
     @property
     def length(self) -> int:
         raise ak._errors.wrap_error(NotImplementedError)

@@ -398,6 +398,10 @@ def apply_step(
     # Now all lengths must agree.
     if backend.nplike.known_shape:
         checklength([x for x in inputs if isinstance(x, Content)], options)
+    else:
+        for x in inputs:
+            if isinstance(x, Content):
+                x._touch_shape(recursive=False)
 
     # Load the parameter broadcasting rule implementation
     rule = options["broadcast_parameters_rule"]
@@ -469,6 +473,7 @@ def apply_step(
                 numtags, length = [], None
                 for x in inputs:
                     if isinstance(x, UnionArray):
+                        x._touch_data(recursive=False)
                         numtags.append(len(x.contents))
                         if length is None:
                             length = x.tags.data.shape[0]
@@ -632,6 +637,7 @@ def apply_step(
                 nextinputs = []
                 for x in inputs:
                     if isinstance(x, optiontypes):
+                        x._touch_data(recursive=False)
                         index = Index64(
                             backend.index_nplike.empty((x.length,), np.int64)
                         )
@@ -707,6 +713,7 @@ def apply_step(
                     nextinputs = []
                     for x in inputs:
                         if isinstance(x, RegularArray):
+                            x._touch_data(recursive=False)
                             nextinputs.append(x.content)
                         else:
                             nextinputs.append(x)
@@ -742,6 +749,7 @@ def apply_step(
                 nextinputs = []
                 for x in inputs:
                     if isinstance(x, ListOffsetArray):
+                        x._touch_data(recursive=False)
                         offsets = Index64(
                             backend.index_nplike.empty(
                                 (x.offsets.data.shape[0],), np.int64
@@ -750,6 +758,7 @@ def apply_step(
                         )
                         nextinputs.append(x.content)
                     elif isinstance(x, ListArray):
+                        x._touch_data(recursive=False)
                         offsets = Index64(
                             backend.index_nplike.empty(
                                 (x.starts.data.shape[0] + 1,), np.int64
@@ -758,6 +767,7 @@ def apply_step(
                         )
                         nextinputs.append(x.content)
                     elif isinstance(x, RegularArray):
+                        x._touch_data(recursive=False)
                         nextinputs.append(x.content)
                     else:
                         nextinputs.append(x)

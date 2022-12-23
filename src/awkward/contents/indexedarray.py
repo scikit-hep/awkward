@@ -158,6 +158,18 @@ class IndexedArray(Content):
             parameters=self._parameters,
         )
 
+    def _touch_data(self, recursive):
+        if not self._backend.index_nplike.known_data:
+            self._index.data.touch_data()
+        if recursive:
+            self._content._touch_data(recursive)
+
+    def _touch_shape(self, recursive):
+        if not self._backend.index_nplike.known_shape:
+            self._index.data.touch_shape()
+        if recursive:
+            self._content._touch_shape(recursive)
+
     @property
     def length(self):
         return self._index.length
@@ -193,6 +205,7 @@ class IndexedArray(Content):
 
     def _getitem_at(self, where):
         if not self._backend.nplike.known_data:
+            self._touch_data(recursive=False)
             return self._content._getitem_at(where)
 
         if where < 0:
@@ -203,6 +216,7 @@ class IndexedArray(Content):
 
     def _getitem_range(self, where):
         if not self._backend.nplike.known_shape:
+            self._touch_shape(recursive=False)
             return self
 
         start, stop, step = where.indices(self.length)
@@ -998,6 +1012,11 @@ class IndexedArray(Content):
             )
             content = self._content[indexmin : npindex.max() + 1]
         else:
+            if (
+                not self._backend.nplike.known_shape
+                or not self._backend.nplike.known_data
+            ):
+                self._touch_data(recursive=False)
             index, content = self._index, self._content
 
         if options["return_array"]:

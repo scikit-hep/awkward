@@ -138,6 +138,14 @@ class RegularArray(Content):
             parameters=self._parameters,
         )
 
+    def _touch_data(self, recursive):
+        if recursive:
+            self._content._touch_data(recursive)
+
+    def _touch_shape(self, recursive):
+        if recursive:
+            self._content._touch_shape(recursive)
+
     @property
     def length(self):
         return self._length
@@ -184,7 +192,7 @@ class RegularArray(Content):
         return self._content._getitem_range(slice(0, 0))
 
     def _getitem_at(self, where):
-        if self._backend.nplike.known_data and where < 0:
+        if self._backend.nplike.known_shape and where < 0:
             where += self._length
 
         if where < 0 or where >= self._length:
@@ -194,6 +202,7 @@ class RegularArray(Content):
 
     def _getitem_range(self, where):
         if not self._backend.nplike.known_shape:
+            self._touch_shape(recursive=False)
             return self
 
         start, stop, step = where.indices(self._length)
@@ -1239,6 +1248,7 @@ class RegularArray(Content):
         if self._backend.nplike.known_shape:
             content = self._content[: self._length * self._size]
         else:
+            self._touch_data(recursive=False)
             content = self._content
 
         if options["return_array"]:
