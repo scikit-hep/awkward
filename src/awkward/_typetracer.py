@@ -290,6 +290,11 @@ def _attach_report(layout, form, report):
         for x, y in zip(layout.contents, form.contents):
             _attach_report(x, y, report)
 
+    else:
+        raise ak._errors.wrap_error(
+            AssertionError(f"unrecognized layout type {type(layout)}")
+        )
+
 
 def typetracer_with_report(form):
     layout = form.length_zero_array(highlevel=False).to_typetracer()
