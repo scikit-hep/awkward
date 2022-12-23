@@ -865,8 +865,6 @@ class RegularArray(Content):
                 tocarry.append(ptr)
                 if self._backend.nplike.known_data:
                     tocarryraw[i] = ptr.ptr
-                else:
-                    self._touch_data(recursive=False)
 
             toindex = ak.index.Index64.empty(
                 n, self._backend.index_nplike, dtype=np.int64
