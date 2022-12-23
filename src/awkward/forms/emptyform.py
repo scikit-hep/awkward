@@ -3,8 +3,10 @@
 import awkward as ak
 from awkward._util import unset
 from awkward.forms.form import Form
+from awkward.typing import final
 
 
+@final
 class EmptyForm(Form):
     is_numpy = True
     is_unknown = True

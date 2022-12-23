@@ -10,12 +10,13 @@ from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.recordform import RecordForm
 from awkward.record import Record
-from awkward.typing import Final, Self
+from awkward.typing import Final, Self, final
 
 np = ak._nplikes.NumpyMetadata.instance()
 numpy = ak._nplikes.Numpy.instance()
 
 
+@final
 class RecordArray(Content):
     is_record = True
 

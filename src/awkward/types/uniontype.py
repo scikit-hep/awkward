@@ -5,8 +5,10 @@ from collections.abc import Iterable
 import awkward as ak
 from awkward.forms.form import _parameters_equal
 from awkward.types.type import Type
+from awkward.typing import final
 
 
+@final
 class UnionType(Type):
     def __init__(self, contents, *, parameters=None, typestr=None):
         if not isinstance(contents, Iterable):
