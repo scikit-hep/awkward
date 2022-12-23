@@ -1154,16 +1154,15 @@ class TypeTracer(ak._nplikes.NumpyLike):
             return UnknownScalar(dtype)
 
     def logical_or(self, x, y, *, dtype=None):
-        if isinstance(x, TypeTracerArray):
-            x.touch_data()
-
         if dtype is None:
             dtype = np.bool_
 
         is_array = False
         if isinstance(x, TypeTracerArray):
+            x.touch_data()
             is_array = True
         if isinstance(y, TypeTracerArray):
+            y.touch_data()
             is_array = True
         if is_array:
             return TypeTracerArray(dtype)
