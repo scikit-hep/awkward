@@ -380,7 +380,6 @@ class TypeTracerArray:
 
     @shape.setter
     def shape(self, value):
-        self.touch_shape()
         if ak._util.is_integer(value):
             value = (value,)
         elif value is None or isinstance(value, (UnknownLengthType, UnknownScalar)):
