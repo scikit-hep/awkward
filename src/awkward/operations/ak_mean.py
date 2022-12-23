@@ -89,13 +89,15 @@ def mean(
         ),
     ):
         if flatten_records is not unset:
-            raise ak._errors.wrap_error(
-                ValueError(
-                    "`flatten_records` is no longer a supported argument for reducers. "
-                    "Instead, use `ak.ravel(array)` first to remove the record structure "
-                    "and flatten the array."
-                )
+            message = (
+                "`flatten_records` is no longer a supported argument for reducers. "
+                "Instead, use `ak.ravel(array)` first to remove the record structure "
+                "and flatten the array."
             )
+            if flatten_records:
+                raise ak._errors.wrap_error(ValueError(message))
+            else:
+                ak._errors.deprecate(message, "2.2.0")
         return _impl(x, weight, axis, keepdims, mask_identity)
 
 
@@ -151,13 +153,15 @@ def nanmean(
         ),
     ):
         if flatten_records is not unset:
-            raise ak._errors.wrap_error(
-                ValueError(
-                    "`flatten_records` is no longer a supported argument for reducers. "
-                    "Instead, use `ak.ravel(array)` first to remove the record structure "
-                    "and flatten the array."
-                )
+            message = (
+                "`flatten_records` is no longer a supported argument for reducers. "
+                "Instead, use `ak.ravel(array)` first to remove the record structure "
+                "and flatten the array."
             )
+            if flatten_records:
+                raise ak._errors.wrap_error(ValueError(message))
+            else:
+                ak._errors.deprecate(message, "2.2.0")
         x = ak.operations.ak_nan_to_none._impl(x, False, None)
         if weight is not None:
             weight = ak.operations.ak_nan_to_none._impl(weight, False, None)

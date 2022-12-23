@@ -70,13 +70,15 @@ def max(
         ),
     ):
         if flatten_records is not unset:
-            raise ak._errors.wrap_error(
-                ValueError(
-                    "`flatten_records` is no longer a supported argument for reducers. "
-                    "Instead, use `ak.ravel(array)` first to remove the record structure "
-                    "and flatten the array."
-                )
+            message = (
+                "`flatten_records` is no longer a supported argument for reducers. "
+                "Instead, use `ak.ravel(array)` first to remove the record structure "
+                "and flatten the array."
             )
+            if flatten_records:
+                raise ak._errors.wrap_error(ValueError(message))
+            else:
+                ak._errors.deprecate(message, "2.2.0")
         return _impl(
             array,
             axis,
@@ -143,13 +145,15 @@ def nanmax(
         ),
     ):
         if flatten_records is not unset:
-            raise ak._errors.wrap_error(
-                ValueError(
-                    "`flatten_records` is no longer a supported argument for reducers. "
-                    "Instead, use `ak.ravel(array)` first to remove the record structure "
-                    "and flatten the array."
-                )
+            message = (
+                "`flatten_records` is no longer a supported argument for reducers. "
+                "Instead, use `ak.ravel(array)` first to remove the record structure "
+                "and flatten the array."
             )
+            if flatten_records:
+                raise ak._errors.wrap_error(ValueError(message))
+            else:
+                ak._errors.deprecate(message, "2.2.0")
         array = ak.operations.ak_nan_to_none._impl(array, False, None)
 
         return _impl(
