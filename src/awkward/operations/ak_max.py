@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._util import unset
 
 np = ak._nplikes.NumpyMetadata.instance()
 
@@ -13,7 +14,7 @@ def max(
     keepdims=False,
     initial=None,
     mask_identity=True,
-    flatten_records=False,
+    flatten_records=unset,
     highlevel=True,
     behavior=None
 ):
@@ -36,8 +37,6 @@ def max(
         mask_identity (bool): If True, reducing over empty lists results in
             None (an option type); otherwise, reducing over empty lists
             results in the operation's identity.
-        flatten_records (bool): If True, axis=None combines fields from different
-            records; otherwise, records raise an error.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
@@ -66,18 +65,24 @@ def max(
             keepdims=keepdims,
             initial=initial,
             mask_identity=mask_identity,
-            flatten_records=flatten_records,
             highlevel=highlevel,
             behavior=behavior,
         ),
     ):
+        if flatten_records is not unset:
+            raise ak._errors.wrap_error(
+                ValueError(
+                    "`flatten_records` is no longer a supported argument for reducers. "
+                    "Instead, use `ak.ravel(array)` first to remove the record structure "
+                    "and flatten the array."
+                )
+            )
         return _impl(
             array,
             axis,
             keepdims,
             initial,
             mask_identity,
-            flatten_records,
             highlevel,
             behavior,
         )
@@ -91,7 +96,7 @@ def nanmax(
     keepdims=False,
     initial=None,
     mask_identity=True,
-    flatten_records=False,
+    flatten_records=unset,
     highlevel=True,
     behavior=None
 ):
@@ -114,8 +119,6 @@ def nanmax(
         mask_identity (bool): If True, reducing over empty lists results in
             None (an option type); otherwise, reducing over empty lists
             results in the operation's identity.
-        flatten_records (bool): If True, axis=None combines fields from different
-            records; otherwise, records raise an error.
 
     Like #ak.max, but treating NaN ("not a number") values as missing.
 
@@ -135,11 +138,18 @@ def nanmax(
             keepdims=keepdims,
             initial=initial,
             mask_identity=mask_identity,
-            flatten_records=flatten_records,
             highlevel=highlevel,
             behavior=behavior,
         ),
     ):
+        if flatten_records is not unset:
+            raise ak._errors.wrap_error(
+                ValueError(
+                    "`flatten_records` is no longer a supported argument for reducers. "
+                    "Instead, use `ak.ravel(array)` first to remove the record structure "
+                    "and flatten the array."
+                )
+            )
         array = ak.operations.ak_nan_to_none._impl(array, False, None)
 
         return _impl(
@@ -148,59 +158,25 @@ def nanmax(
             keepdims,
             initial,
             mask_identity,
-            flatten_records,
             highlevel,
             behavior,
         )
 
 
-def _impl(
-    array, axis, keepdims, initial, mask_identity, flatten_records, highlevel, behavior
-):
+def _impl(array, axis, keepdims, initial, mask_identity, highlevel, behavior):
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
-    backend = layout.backend
+    behavior = ak._util.behavior_of(array, behavior=behavior)
     reducer = ak._reducers.Max(initial)
 
-    if axis is None:
-        if not backend.nplike.known_data or not backend.nplike.known_shape:
-            layout._touch_data(recursive=True)
-
-            def map(x):
-                return ak._typetracer.MaybeNone(
-                    ak._typetracer.UnknownScalar(
-                        np.dtype(reducer.return_dtype(x.dtype))
-                    )
-                )
-
-        else:
-
-            def map(x):
-                return backend.nplike.max(x.data)
-
-        def reduce(xs):
-            if len(xs) == 0:
-                return None
-            elif len(xs) == 1:
-                return xs[0]
-            else:
-                return backend.nplike.maximum(xs[0], reduce(xs[1:]))
-
-        tmp = ak._do.completely_flatten(
-            layout, function_name="ak.max", flatten_records=flatten_records
-        )
-        return reduce([map(x) for x in tmp if not x.shape[0] <= 0])
-
+    out = ak._do.reduce(
+        layout,
+        reducer,
+        axis=axis,
+        mask=mask_identity,
+        keepdims=keepdims,
+        behavior=behavior,
+    )
+    if isinstance(out, (ak.contents.Content, ak.record.Record)):
+        return ak._util.wrap(out, behavior, highlevel)
     else:
-        behavior = ak._util.behavior_of(array, behavior=behavior)
-        out = ak._do.reduce(
-            layout,
-            reducer,
-            axis=axis,
-            mask=mask_identity,
-            keepdims=keepdims,
-            behavior=behavior,
-        )
-        if isinstance(out, (ak.contents.Content, ak.record.Record)):
-            return ak._util.wrap(out, behavior, highlevel=highlevel)
-        else:
-            return out
+        return out

@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._util import unset
 
 np = ak._nplikes.NumpyMetadata.instance()
 
@@ -13,7 +14,7 @@ def mean(
     *,
     keepdims=False,
     mask_identity=False,
-    flatten_records=False,
+    flatten_records=unset,
 ):
     """
     Args:
@@ -35,8 +36,6 @@ def mean(
             empty lists results in None (an option type); otherwise, the
             calculation is followed through with the reducers' identities,
             usually resulting in floating-point `nan`.
-        flatten_records (bool): If True, axis=None combines fields from different
-            records; otherwise, records raise an error.
 
     Computes the mean in each group of elements from `x` (many
     types supported, including all Awkward Arrays and Records). The grouping
@@ -87,10 +86,17 @@ def mean(
             axis=axis,
             keepdims=keepdims,
             mask_identity=mask_identity,
-            flatten_records=flatten_records,
         ),
     ):
-        return _impl(x, weight, axis, keepdims, mask_identity, flatten_records)
+        if flatten_records is not unset:
+            raise ak._errors.wrap_error(
+                ValueError(
+                    "`flatten_records` is no longer a supported argument for reducers. "
+                    "Instead, use `ak.ravel(array)` first to remove the record structure "
+                    "and flatten the array."
+                )
+            )
+        return _impl(x, weight, axis, keepdims, mask_identity)
 
 
 @ak._connect.numpy.implements("nanmean")
@@ -101,7 +107,7 @@ def nanmean(
     *,
     keepdims=False,
     mask_identity=True,
-    flatten_records=False,
+    flatten_records=unset,
 ):
     """
     Args:
@@ -123,8 +129,6 @@ def nanmean(
             empty lists results in None (an option type); otherwise, the
             calculation is followed through with the reducers' identities,
             usually resulting in floating-point `nan`.
-        flatten_records (bool): If True, axis=None combines fields from different
-            records; otherwise, records raise an error.
 
     Like #ak.mean, but treating NaN ("not a number") values as missing.
 
@@ -144,17 +148,24 @@ def nanmean(
             axis=axis,
             keepdims=keepdims,
             mask_identity=mask_identity,
-            flatten_records=flatten_records,
         ),
     ):
+        if flatten_records is not unset:
+            raise ak._errors.wrap_error(
+                ValueError(
+                    "`flatten_records` is no longer a supported argument for reducers. "
+                    "Instead, use `ak.ravel(array)` first to remove the record structure "
+                    "and flatten the array."
+                )
+            )
         x = ak.operations.ak_nan_to_none._impl(x, False, None)
         if weight is not None:
             weight = ak.operations.ak_nan_to_none._impl(weight, False, None)
 
-        return _impl(x, weight, axis, keepdims, mask_identity, flatten_records)
+        return _impl(x, weight, axis, keepdims, mask_identity)
 
 
-def _impl(x, weight, axis, keepdims, mask_identity, flatten_records):
+def _impl(x, weight, axis, keepdims, mask_identity):
     behavior = ak._util.behavior_of(x, weight)
     x = ak.highlevel.Array(
         ak.operations.to_layout(x, allow_record=False, allow_other=False),
@@ -173,7 +184,6 @@ def _impl(x, weight, axis, keepdims, mask_identity, flatten_records):
                 axis,
                 keepdims,
                 mask_identity,
-                flatten_records,
                 highlevel=True,
                 behavior=None,
             )
@@ -182,7 +192,6 @@ def _impl(x, weight, axis, keepdims, mask_identity, flatten_records):
                 axis,
                 keepdims,
                 mask_identity,
-                flatten_records,
                 highlevel=True,
                 behavior=None,
             )
@@ -192,7 +201,6 @@ def _impl(x, weight, axis, keepdims, mask_identity, flatten_records):
                 axis,
                 keepdims,
                 mask_identity,
-                flatten_records,
                 highlevel=True,
                 behavior=None,
             )
@@ -201,7 +209,6 @@ def _impl(x, weight, axis, keepdims, mask_identity, flatten_records):
                 axis,
                 keepdims,
                 mask_identity,
-                flatten_records,
                 highlevel=True,
                 behavior=None,
             )

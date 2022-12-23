@@ -1054,6 +1054,7 @@ class NumpyArray(Content):
         keepdims,
         behavior,
     ):
+
         if self._data.ndim > 1:
             return self.to_RegularArray()._reduce_next(
                 reducer,
@@ -1083,11 +1084,7 @@ class NumpyArray(Content):
         assert self.is_contiguous
         assert self._data.ndim == 1
 
-        if isinstance(self._backend.nplike, ak._nplikes.Jax):
-            from awkward._connect.jax.reducers import get_jax_reducer
-
-            reducer = get_jax_reducer(reducer)
-        out = reducer.apply(self, parents, outlength)
+        out = self._backend.apply_reducer(reducer, self, parents, outlength)
 
         if reducer.needs_position:
             if shifts is None:

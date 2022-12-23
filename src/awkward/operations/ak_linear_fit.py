@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._util import unset
 
 np = ak._nplikes.NumpyMetadata.instance()
 
@@ -13,7 +14,7 @@ def linear_fit(
     *,
     keepdims=False,
     mask_identity=False,
-    flatten_records=False,
+    flatten_records=unset,
 ):
     """
     Args:
@@ -78,13 +79,12 @@ def linear_fit(
             axis=axis,
             keepdims=keepdims,
             mask_identity=mask_identity,
-            flatten_records=flatten_records,
         ),
     ):
-        return _impl(x, y, weight, axis, keepdims, mask_identity, flatten_records)
+        return _impl(x, y, weight, axis, keepdims, mask_identity)
 
 
-def _impl(x, y, weight, axis, keepdims, mask_identity, flatten_records):
+def _impl(x, y, weight, axis, keepdims, mask_identity):
     behavior = ak._util.behavior_of(x, y, weight)
     x = ak.highlevel.Array(
         ak.operations.to_layout(x, allow_record=False, allow_other=False),
@@ -108,7 +108,6 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, flatten_records):
                 axis,
                 keepdims,
                 mask_identity,
-                flatten_records,
                 highlevel=True,
                 behavior=behavior,
             )
@@ -117,7 +116,6 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, flatten_records):
                 axis,
                 keepdims,
                 mask_identity,
-                flatten_records,
                 highlevel=True,
                 behavior=behavior,
             )
@@ -126,7 +124,6 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, flatten_records):
                 axis,
                 keepdims,
                 mask_identity,
-                flatten_records,
                 highlevel=True,
                 behavior=behavior,
             )
@@ -135,7 +132,6 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, flatten_records):
                 axis,
                 keepdims,
                 mask_identity,
-                flatten_records,
                 highlevel=True,
                 behavior=behavior,
             )
@@ -144,7 +140,6 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, flatten_records):
                 axis,
                 keepdims,
                 mask_identity,
-                flatten_records,
                 highlevel=True,
                 behavior=behavior,
             )
@@ -154,7 +149,6 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, flatten_records):
                 axis,
                 keepdims,
                 mask_identity,
-                flatten_records,
                 highlevel=True,
                 behavior=behavior,
             )
@@ -163,7 +157,6 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, flatten_records):
                 axis,
                 keepdims,
                 mask_identity,
-                flatten_records,
                 highlevel=True,
                 behavior=behavior,
             )
@@ -172,7 +165,6 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, flatten_records):
                 axis,
                 keepdims,
                 mask_identity,
-                flatten_records,
                 highlevel=True,
                 behavior=behavior,
             )
@@ -181,7 +173,6 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, flatten_records):
                 axis,
                 keepdims,
                 mask_identity,
-                flatten_records,
                 highlevel=True,
                 behavior=behavior,
             )
@@ -190,7 +181,6 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, flatten_records):
                 axis,
                 keepdims,
                 mask_identity,
-                flatten_records,
                 highlevel=True,
                 behavior=behavior,
             )

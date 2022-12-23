@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 
 import awkward_cpp
 
@@ -18,18 +18,7 @@ from awkward._nplikes import (
     nplike_of,
 )
 from awkward._typetracer import NoKernel, TypeTracer
-from awkward.typing import (
-    Any,
-    Callable,
-    Final,
-    Protocol,
-    Self,
-    Tuple,
-    TypeAlias,
-    TypeVar,
-    Unpack,
-    runtime_checkable,
-)
+from awkward.typing import Callable, Final, Tuple, TypeAlias, TypeVar, Unpack
 
 np = NumpyMetadata.instance()
 
@@ -39,8 +28,7 @@ KernelKeyType: TypeAlias = Tuple[str, Unpack[Tuple[np.dtype, ...]]]
 KernelType: TypeAlias = Callable[..., None]
 
 
-@runtime_checkable
-class Backend(Protocol[T]):
+class Backend(Singleton, ABC):
     name: str
 
     @property
@@ -53,16 +41,23 @@ class Backend(Protocol[T]):
     def index_nplike(self) -> NumpyLike:
         raise ak._errors.wrap_error(NotImplementedError)
 
-    @classmethod
-    @abstractmethod
-    def instance(cls) -> Self:
-        raise ak._errors.wrap_error(NotImplementedError)
-
     def __getitem__(self, key: KernelKeyType) -> KernelType:
         raise ak._errors.wrap_error(NotImplementedError)
 
+    def apply_reducer(
+        self,
+        reducer: ak._reducers.Reducer,
+        layout: ak.contents.NumpyArray,
+        parents: ak.index.Index,
+        outlength: int,
+    ) -> ak.contents.NumpyArray:
+        return reducer.apply(layout, parents, outlength)
 
-class NumpyBackend(Singleton, Backend[Any]):
+    def apply_ufunc(self, ufunc, method, args, kwargs):
+        return getattr(ufunc, method)(*args, **kwargs)
+
+
+class NumpyBackend(Backend):
     name: Final[str] = "cpu"
 
     _numpy: Numpy
@@ -82,7 +77,7 @@ class NumpyBackend(Singleton, Backend[Any]):
         return NumpyKernel(awkward_cpp.cpu_kernels.kernel[index], index)
 
 
-class CupyBackend(Singleton, Backend[Any]):
+class CupyBackend(Backend):
     name: Final[str] = "cuda"
 
     _cupy: Cupy
@@ -112,7 +107,7 @@ class CupyBackend(Singleton, Backend[Any]):
             )
 
 
-class JaxBackend(Singleton, Backend[Any]):
+class JaxBackend(Backend):
     name: Final[str] = "jax"
 
     _jax: Jax
@@ -134,8 +129,31 @@ class JaxBackend(Singleton, Backend[Any]):
         # JAX uses Awkward's C++ kernels for index-only operations
         return JaxKernel(awkward_cpp.cpu_kernels.kernel[index], index)
 
+    def apply_reducer(
+        self,
+        reducer: ak._reducers.Reducer,
+        layout: ak.contents.NumpyArray,
+        parents: ak.index.Index,
+        outlength: int,
+    ) -> ak.contents.NumpyArray:
+        from awkward._connect.jax import get_jax_reducer
 
-class TypeTracerBackend(Singleton, Backend[Any]):
+        jax_reducer = get_jax_reducer(reducer)
+        return jax_reducer.apply(layout, parents, outlength)
+
+    def apply_ufunc(self, ufunc, method, args, kwargs):
+        from awkward._connect.jax import get_jax_ufunc
+
+        if method != "__call__":
+            raise ak._errors.wrap_error(
+                ValueError(f"unsupported ufunc method {method} called")
+            )
+
+        jax_ufunc = get_jax_ufunc(ufunc)
+        return jax_ufunc(*args, **kwargs)
+
+
+class TypeTracerBackend(Backend):
     name: Final[str] = "typetracer"
 
     _typetracer: TypeTracer

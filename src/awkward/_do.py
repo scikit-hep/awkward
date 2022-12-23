@@ -10,7 +10,7 @@ from awkward._backends import Backend
 from awkward.contents.content import ActionType, Content
 from awkward.forms import form
 from awkward.record import Record
-from awkward.typing import Any
+from awkward.typing import Any, AxisMaybeNone
 
 np = ak._nplikes.NumpyMetadata.instance()
 
@@ -304,61 +304,92 @@ def mergemany(contents: list[Content]) -> Content:
 def reduce(
     layout: Content,
     reducer: ak._reducers.Reducer,
-    axis: int = -1,
+    axis: AxisMaybeNone = -1,
     mask: bool = True,
     keepdims: bool = False,
     behavior: dict | None = None,
 ):
     if axis is None:
-        raise ak._errors.wrap_error(NotImplementedError)
+        parts = completely_flatten(layout, flatten_records=False, drop_nones=False)
 
-    negaxis = -axis
-    branch, depth = layout.branch_depth
-
-    if branch:
-        if negaxis <= 0:
+        if len(parts) > 1:
+            # We know that `flatten_records` must fail, so the only other type
+            # that can return multiple parts here is the union array
             raise ak._errors.wrap_error(
                 ValueError(
-                    "cannot use non-negative axis on a nested list structure "
-                    "of variable depth (negative axis counts from the leaves of "
-                    "the tree; non-negative from the root)"
+                    "cannot use axis=None with keepdims=True on an array containing "
+                    "irreducible unions"
                 )
             )
-        if negaxis > depth:
-            raise ak._errors.wrap_error(
-                ValueError(
-                    "cannot use axis={} on a nested list structure that splits into "
-                    "different depths, the minimum of which is depth={} "
-                    "from the leaves".format(axis, depth)
-                )
-            )
+        elif len(parts) == 0:
+            parts = [ak.contents.EmptyArray()]
+
+        (layout,) = parts
+
+        starts = ak.index.Index64.zeros(1, layout.backend.index_nplike)
+        parents = ak.index.Index64.zeros(layout.length, layout.backend.index_nplike)
+        shifts = None
+        next = layout._reduce_next(
+            reducer,
+            1,
+            starts,
+            shifts,
+            parents,
+            1,
+            mask,
+            keepdims,
+            behavior,
+        )
+
+        return next[0]
     else:
-        if negaxis <= 0:
-            negaxis += depth
-        if not 0 < negaxis <= depth:
-            raise ak._errors.wrap_error(
-                ValueError(
-                    "axis={} exceeds the depth of the nested list structure "
-                    "(which is {})".format(axis, depth)
+        negaxis = -axis
+        branch, depth = layout.branch_depth
+
+        if branch:
+            if negaxis <= 0:
+                raise ak._errors.wrap_error(
+                    ValueError(
+                        "cannot use non-negative axis on a nested list structure "
+                        "of variable depth (negative axis counts from the leaves of "
+                        "the tree; non-negative from the root)"
+                    )
                 )
-            )
+            if negaxis > depth:
+                raise ak._errors.wrap_error(
+                    ValueError(
+                        "cannot use axis={} on a nested list structure that splits into "
+                        "different depths, the minimum of which is depth={} "
+                        "from the leaves".format(axis, depth)
+                    )
+                )
+        else:
+            if negaxis <= 0:
+                negaxis += depth
+            if not 0 < negaxis <= depth:
+                raise ak._errors.wrap_error(
+                    ValueError(
+                        "axis={} exceeds the depth of the nested list structure "
+                        "(which is {})".format(axis, depth)
+                    )
+                )
 
-    starts = ak.index.Index64.zeros(1, layout.backend.index_nplike)
-    parents = ak.index.Index64.zeros(layout.length, layout.backend.index_nplike)
-    shifts = None
-    next = layout._reduce_next(
-        reducer,
-        negaxis,
-        starts,
-        shifts,
-        parents,
-        1,
-        mask,
-        keepdims,
-        behavior,
-    )
+        starts = ak.index.Index64.zeros(1, layout.backend.index_nplike)
+        parents = ak.index.Index64.zeros(layout.length, layout.backend.index_nplike)
+        shifts = None
+        next = layout._reduce_next(
+            reducer,
+            negaxis,
+            starts,
+            shifts,
+            parents,
+            1,
+            mask,
+            keepdims,
+            behavior,
+        )
 
-    return next[0]
+        return next[0]
 
 
 def validity_error(layout: Content, path: str = "layout") -> str:
