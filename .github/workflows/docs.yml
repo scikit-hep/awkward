@@ -341,5 +341,5 @@ jobs:
           aws s3 sync built-docs/ "s3://${S3_BUCKET}/doc/$version/"
           aws s3 sync built-docs/ "s3://${S3_BUCKET}/doc/stable/"
           aws cloudfront create-invalidation --distribution-id "${CLOUDFRONT_ID}" \
-            --paths "/doc/$version*" --paths "/doc/stable*" "/doc/switcher.json"
+            --paths "/doc/$version*" "/doc/stable*" "/doc/switcher.json"
           echo "path=/doc/stable" >> $GITHUB_OUTPUT
