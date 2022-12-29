@@ -136,6 +136,8 @@ jobs:
       run:
         # Ensure conda env is activated
         shell: "bash -l {0}"
+    env:
+        DOCS_CANONICAL_VERSION: main
     steps:
     - uses: actions/checkout@v3
 
