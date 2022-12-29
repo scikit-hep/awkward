@@ -49,11 +49,17 @@ if "DOCS_VERSION" in os.environ:
 else:
     version_match = version
 
-# Build sitemap on main
-if version_match == "main":
-    extensions.append("sphinx_sitemap")
-    # Sitemap URLs are relative to `html_baseurl`
-    sitemap_url_scheme = "{link}"
+
+# Specify a canonical version
+if "DOCS_CANONICAL_VERSION" in os.environ:
+    canonical_version = os.environ["DOCS_CANONICAL_VERSION"]
+    html_baseurl = f"https://awkward-array.org/doc/{canonical_version}/"
+
+    # Build sitemap on main
+    if version_match == canonical_version:
+        extensions.append("sphinx_sitemap")
+        # Sitemap URLs are relative to `html_baseurl`
+        sitemap_url_scheme = "{link}"
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -68,7 +74,6 @@ exclude_patterns = ["_build", "_templates", "Thumbs.db", "jupyter_execute", ".*"
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 
-html_baseurl = f"https://awkward-array.org/doc/main/"
 html_context = {
     "github_user": "scikit-hep",
     "github_repo": "awkward",
