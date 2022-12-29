@@ -200,15 +200,9 @@ jobs:
       run: cp -r awkward-cpp/docs/html/ docs/_static/doxygen
 
     - name: Enable analytics & version selector
-      if: github.event_name == 'push' || github.event_name == 'release'
       run: |
         echo "DOCS_REPORT_ANALYTICS=1" >> $GITHUB_ENV
         echo "DOCS_SHOW_VERSION=1" >> $GITHUB_ENV
-
-    - name: Set version to main
-      if: github.event_name == 'push'
-      run: |
-        echo "DOCS_VERSION=main" >> $GITHUB_ENV
 
     - name: Generate Python documentation
       run: sphinx-build -M html . _build/
@@ -260,41 +254,10 @@ jobs:
         name: jupyter-cache
         path: docs/_build/.jupyter_cache
 
-  branch-preview:
-    runs-on: ubuntu-22.04
-    needs: [build-docs]
-    # We can only deploy for PRs on host repo
-    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
-    permissions:
-      id-token: write
-      contents: read
-    env:
-      S3_BUCKET: "preview.awkward-array.org"
-      DEPLOY_URL: "http://preview.awkward-array.org.s3-website.us-east-1.amazonaws.com"
-    environment:
-      name: docs-preview
-      url: ${{ env.DEPLOY_URL }}/${{ github.head_ref }}
-    steps:
-    - uses: actions/checkout@v3
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-region: eu-west-2
-        role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE }}
-    - name: Download rendered docs
-      uses: actions/download-artifact@v3
-      with:
-        name: docs
-        path: built-docs
-    - name: Sync artefacts
-      run: |
-        aws s3 sync built-docs/ "s3://${S3_BUCKET}/${{ github.head_ref }}"
-
   deploy:
     runs-on: ubuntu-22.04
     needs: [ build-docs ]
     # We can only deploy for PRs on host repo
-    if: github.event_name == 'push' || github.event_name == 'release'
     permissions:
       id-token: write
       contents: read
@@ -321,22 +284,12 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: "3.11"
-      # Pushes to main trigger latest
-      - name: Sync `main`
-        if: github.event_name == 'push'
-        id: sync-main
-        run: |
-          aws s3 sync built-docs/ "s3://${S3_BUCKET}/doc/main/"
-          aws cloudfront create-invalidation --distribution-id "${CLOUDFRONT_ID}" \
-            --paths "/doc/main*"
-          echo "path=/doc/main" >> $GITHUB_OUTPUT
       # Releases trigger versions
       - name: Sync `stable`
-        if: github.event_name == 'release'
         id: sync-stable
         run: |
           # Take only leading version
-          version=$(echo "${GITHUB_REF_NAME}" | sed -n -E "s/([0-9]+\.[0-9]+)\.[0-9]+/\1/p")
+          version="2.0" #$(echo "${GITHUB_REF_NAME}" | sed -n -E "s/([0-9]+\.[0-9]+)\.[0-9]+/\1/p")
           aws s3 cp docs/switcher.json "s3://${S3_BUCKET}/doc/"
           aws s3 sync built-docs/ "s3://${S3_BUCKET}/doc/$version/"
           aws s3 sync built-docs/ "s3://${S3_BUCKET}/doc/stable/"
