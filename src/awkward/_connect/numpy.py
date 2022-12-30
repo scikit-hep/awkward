@@ -25,10 +25,10 @@ implemented = {}
 
 
 def _to_rectilinear(arg):
-    nplike = ak._nplikes.nplike_of(arg, default=None)
-    # We have some array-like object that our nplike mechanism understands
-    if nplike is not None:
-        return nplike.to_rectilinear(arg)
+    backend = ak._backends.backend_of(arg, default=None)
+    # We have some array-like object that our backend mechanism understands
+    if backend is not None:
+        return backend.nplike.to_rectilinear(arg)
     elif isinstance(arg, tuple):
         return tuple(_to_rectilinear(x) for x in arg)
     elif isinstance(arg, list):
