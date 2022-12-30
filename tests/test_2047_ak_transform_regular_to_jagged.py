@@ -7,7 +7,7 @@ import awkward as ak
 
 
 def test():
-    array = ak.from_numpy(np.arange(2 * 3 * 4 * 5).reshape(2, 3, 4, 5))
+    array = ak.from_numpy(np.arange(2 * 3 * 4 * 5, dtype=np.int64).reshape(2, 3, 4, 5))
     assert array.type == ak.types.ArrayType(
         ak.types.RegularType(
             ak.types.RegularType(
