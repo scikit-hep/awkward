@@ -24,29 +24,24 @@ def convert_to_array(layout, args, kwargs):
 implemented = {}
 
 
-def _value_to_rectilinear(x):
-    if isinstance(
-        x,
-        (
-            ak.highlevel.Array,
-            ak.highlevel.Record,
-            ak.record.Record,
-            ak.contents.Content,
-        ),
-    ):
-        nplike = ak._nplikes.nplike_of(x)
-        return nplike.to_rectilinear(x)
-    else:
-        return x
-
-
 def _to_rectilinear(arg):
-    if isinstance(arg, tuple):
-        return tuple(_value_to_rectilinear(x) for x in arg)
+    nplike = ak._nplikes.nplike_of(arg, default=None)
+    # We have some array-like object that our nplike mechanism understands
+    if nplike is not None:
+        return nplike.to_rectilinear(arg)
+    elif isinstance(arg, tuple):
+        return tuple(_to_rectilinear(x) for x in arg)
     elif isinstance(arg, list):
-        return [_value_to_rectilinear(x) for x in arg]
+        return [_to_rectilinear(x) for x in arg]
+    elif ak._util.is_non_string_iterable(arg):
+        raise ak._errors.wrap_error(
+            TypeError(
+                f"encountered an unsupported iterable value {arg!r} whilst converting arguments to NumPy-friendly "
+                f"types. If this argument should be supported, please file a bug report."
+            )
+        )
     else:
-        return _value_to_rectilinear(arg)
+        return arg
 
 
 def array_function(func, types, args, kwargs, behavior):
