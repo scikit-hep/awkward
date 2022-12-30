@@ -27,6 +27,7 @@ def recursively_apply(
     return_simplified: bool = True,
     return_array: bool = True,
     function_name: str | None = None,
+    regular_to_jagged=False,
 ) -> Content | Record | None:
 
     if isinstance(layout, Content):
@@ -40,6 +41,7 @@ def recursively_apply(
                 "allow_records": allow_records,
                 "keep_parameters": keep_parameters,
                 "numpy_to_regular": numpy_to_regular,
+                "regular_to_jagged": regular_to_jagged,
                 "return_simplified": return_simplified,
                 "return_array": return_array,
                 "function_name": function_name,

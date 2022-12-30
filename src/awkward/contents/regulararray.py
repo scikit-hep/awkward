@@ -1245,6 +1245,11 @@ class RegularArray(Content):
     def _recursively_apply(
         self, action, behavior, depth, depth_context, lateral_context, options
     ):
+        if options["regular_to_jagged"]:
+            return self.to_ListOffsetArray64(False)._recursively_apply(
+                action, behavior, depth, depth_context, lateral_context, options
+            )
+
         if self._backend.nplike.known_shape:
             content = self._content[: self._length * self._size]
         else:
