@@ -19,7 +19,6 @@ def transform(
     right_broadcast=True,
     numpy_to_regular=False,
     regular_to_jagged=False,
-    return_simplified=True,
     return_value="simplified",
     highlevel=True,
     behavior=None,
