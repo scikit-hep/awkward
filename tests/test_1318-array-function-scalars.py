@@ -5,41 +5,40 @@ import awkward as ak
 
 
 def test_tuple():
-    result = np.ravel_multi_index((ak.Array([0, 1]), ak.Array([1, 0])), (2, 2))
-    assert isinstance(result, ak.Array)
-    assert ak._util.arrays_approx_equal(
-        result, np.ravel_multi_index((np.array([0, 1]), np.array([1, 0])), (2, 2))
+    data = (np.array([0, 1], dtype=np.int64), np.array([1, 0], dtype=np.int64))
+    result = np.ravel_multi_index(
+        (ak.from_numpy(data[0]), ak.from_numpy(data[1])), (2, 2)
     )
+    assert isinstance(result, ak.Array)
+    assert ak._util.arrays_approx_equal(result, np.ravel_multi_index(data, (2, 2)))
 
 
 def test_list():
-    result = np.partition(ak.Array([1, 2, 3, 4, 3, 2, 1, 2]), [4, 6])
+    data = np.array([1, 2, 3, 4, 3, 2, 1, 2], dtype=np.int64)
+    result = np.partition(ak.from_numpy(data), [4, 6])
     assert isinstance(result, ak.Array)
-    assert ak._util.arrays_approx_equal(
-        result, np.partition(np.array([1, 2, 3, 4, 3, 2, 1, 2]), [4, 6])
-    )
-
-
-def test_scalar():
-    result = np.partition(ak.Array([1, 2, 3, 4, 3, 2, 1, 2]), 4)
-    assert isinstance(result, ak.Array)
-    assert ak._util.arrays_approx_equal(
-        result, np.partition(np.array([1, 2, 3, 4, 3, 2, 1, 2]), 4)
-    )
+    assert ak._util.arrays_approx_equal(result, np.partition(data, [4, 6]))
 
 
 def test_array():
-    result = np.partition(ak.Array([1, 2, 3, 4, 3, 2, 1, 2]), ak.Array([4, 6]))
+    data = np.array([1, 2, 3, 4, 3, 2, 1, 2], dtype=np.int64)
+    result = np.partition(ak.from_numpy(data), ak.Array([4, 6]))
     assert isinstance(result, ak.Array)
-    assert ak._util.arrays_approx_equal(
-        result, np.partition(np.array([1, 2, 3, 4, 3, 2, 1, 2]), np.array([4, 6]))
-    )
+    assert ak._util.arrays_approx_equal(result, np.partition(data, np.array([4, 6])))
+
+
+def test_scalar():
+    data = np.array([1, 2, 3, 4, 3, 2, 1, 2], dtype=np.int64)
+    result = np.partition(ak.from_numpy(data), 4)
+    assert isinstance(result, ak.Array)
+    assert ak._util.arrays_approx_equal(result, np.partition(data, 4))
 
 
 def test_tuple_of_array():
-    result = np.lexsort((ak.Array([5, 4, 3, 2, 1]), ak.Array([1, 2, 3, 5, 0])))
-    assert isinstance(result, ak.Array)
-    assert ak._util.arrays_approx_equal(
-        result,
-        np.lexsort((np.array([5, 4, 3, 2, 1]), np.array([1, 2, 3, 5, 0]))),
+    data = (
+        np.array([5, 4, 3, 2, 1], dtype=np.int64),
+        np.array([1, 2, 3, 5, 0], dtype=np.int64),
     )
+    result = np.lexsort((ak.from_numpy(data[0]), ak.from_numpy(data[1])))
+    assert isinstance(result, ak.Array)
+    assert ak._util.arrays_approx_equal(result, np.lexsort(data))
