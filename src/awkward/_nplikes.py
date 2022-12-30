@@ -2,10 +2,8 @@
 from __future__ import annotations
 
 import ctypes
-from collections.abc import Iterable
 
 import numpy
-from awkward_cpp.lib import _ext
 
 import awkward as ak
 from awkward.typing import TypeVar
@@ -382,6 +380,9 @@ class NumpyLike(Singleton):
     def is_c_contiguous(self, array) -> bool:
         raise ak._errors.wrap_error(NotImplementedError)
 
+    def to_rectilinear(self, array):
+        raise ak._errors.wrap_error(NotImplementedError)
+
 
 class Kernel:
     def __init__(self, kernel, name_and_types):
@@ -482,29 +483,7 @@ class CupyKernel(Kernel):
 
 class Numpy(NumpyLike):
     def to_rectilinear(self, array, *args, **kwargs):
-        if isinstance(array, numpy.ndarray):
-            return array
-
-        elif isinstance(
-            array,
-            (
-                ak.Array,
-                ak.Record,
-                ak.ArrayBuilder,
-                ak.contents.Content,
-                ak.record.Record,
-                _ext.ArrayBuilder,
-            ),
-        ):
-            return ak.operations.ak_to_numpy.to_numpy(array, *args, **kwargs)
-
-        elif isinstance(array, Iterable):
-            return [self.to_rectilinear(x, *args, **kwargs) for x in array]
-
-        else:
-            raise ak._errors.wrap_error(
-                TypeError("to_rectilinear argument must be iterable")
-            )
+        return ak.operations.ak_to_numpy.to_numpy(array, *args, **kwargs)
 
     def __init__(self):
         self._module = numpy
@@ -761,29 +740,7 @@ class Cupy(NumpyLike):
 
 class Jax(NumpyLike):
     def to_rectilinear(self, array, *args, **kwargs):
-        if isinstance(array, self._module.DeviceArray):
-            return array
-
-        elif isinstance(
-            array,
-            (
-                ak.Array,
-                ak.Record,
-                ak.ArrayBuilder,
-                ak.contents.Content,
-                ak.record.Record,
-                _ext.ArrayBuilder,
-            ),
-        ):
-            return ak.operations.ak_to_jax.to_jax(array, *args, **kwargs)
-
-        elif isinstance(array, Iterable):
-            return [self.to_rectilinear(x, *args, **kwargs) for x in array]
-
-        else:
-            raise ak._errors.wrap_error(
-                ValueError("to_rectilinear argument must be iterable")
-            )
+        return ak.operations.ak_to_jax.to_jax(array, *args, **kwargs)
 
     def __init__(self):
         jax = ak.jax.import_jax()
