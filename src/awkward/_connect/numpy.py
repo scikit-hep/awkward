@@ -24,13 +24,29 @@ def convert_to_array(layout, args, kwargs):
 implemented = {}
 
 
+def _value_to_rectilinear(x):
+    if isinstance(
+        x,
+        (
+            ak.highlevel.Array,
+            ak.highlevel.Record,
+            ak.record.Record,
+            ak.contents.Content,
+        ),
+    ):
+        nplike = ak._nplikes.nplike_of(x)
+        return nplike.to_rectilinear(x)
+    else:
+        return x
+
+
 def _to_rectilinear(arg):
     if isinstance(arg, tuple):
-        nplike = ak._nplikes.nplike_of(*arg)
-        return tuple(nplike.to_rectilinear(x) for x in arg)
+        return tuple(_value_to_rectilinear(x) for x in arg)
+    elif isinstance(arg, list):
+        return [_value_to_rectilinear(x) for x in arg]
     else:
-        nplike = ak._nplikes.nplike_of(arg)
-        return nplike.to_rectilinear(arg)
+        return _value_to_rectilinear(arg)
 
 
 def array_function(func, types, args, kwargs, behavior):
