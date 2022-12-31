@@ -35,6 +35,7 @@ def metadata_from_parquet(
         scan_files (bool): TODO
 
     This function differs from ak.from_parquet._metadata as follows:
+
     * this function will always use a _metadata file, if present
     * if there is no _metadata, the schema comes from _common_metadata or
       the first data file
