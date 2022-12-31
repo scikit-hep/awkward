@@ -46,9 +46,10 @@ def metadata_from_parquet(
        (use `.type` to get a high-level type),
     * `fs`: the fsspec filesystem object,
     * `paths`: a list of matching path names,
-    * `metadata`: the Parquet metadata, which includes `.num_rows` for the length
-       of the array that would be read by #ak.from_parquet and `.num_row_groups`
-       for the units that can be filtered (for the #ak.from_parquet `row_groups`
+    * `col_counts`: the number of rows in each row group,
+    * `columns`: the columns defined by the schema,
+    * `num_rows`: the length of the array that would be read by #ak.from_parquet ,
+    * `num_row_groups`: the units that can be filtered (for the #ak.from_parquet `row_groups`
        argument).
 
     See also #ak.from_parquet, #ak.to_parquet.
@@ -81,14 +82,14 @@ def _impl(
 
     out = {
         "form": subform,
+        "fs": fs,
         "paths": actual_paths,
         "col_counts": col_counts,
         "columns": parquet_columns,
     }
     if col_counts:
-        out["num_row_groups"] = len(col_counts)
-        out["col_counts"] = col_counts
         out["num_rows"] = sum(col_counts)
+        out["num_row_groups"] = len(col_counts)
     else:
         out["num_rows"] = None
         out["num_row_groups"] = None
