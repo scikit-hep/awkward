@@ -859,8 +859,8 @@ def arrays_approx_equal(
 
     import awkward.forms.form
 
-    left_behavior = ak._util.behavior_of(left, behavior=ak.behavior)
-    right_behavior = ak._util.behavior_of(right, behavior=ak.behavior)
+    left_behavior = ak._util.behavior_of(left)
+    right_behavior = ak._util.behavior_of(right)
 
     left = ak.to_packed(ak.to_layout(left, allow_record=False), highlevel=False)
     right = ak.to_packed(ak.to_layout(right, allow_record=False), highlevel=False)
@@ -890,13 +890,9 @@ def arrays_approx_equal(
         ):
             return False
 
-        # Allow an `__array__` to be set with no value in `ak.behavior`;
-        # this is sometimes useful in testing. What we _don't_ want is for one
-        # array to have a behavior class and another to lack it.
-        array = left.parameter("__array__")
+        # Require that the arrays have the same evaluated types
         if not (
-            array is None
-            or (left_behavior.get(array) is right_behavior.get(array))
+            (arrayclass(left, left_behavior) is arrayclass(right, right_behavior))
             or not check_parameters
         ):
             return False
@@ -923,11 +919,10 @@ def arrays_approx_equal(
                 ]
             )
         elif left.is_record:
-            record = left.parameter("__record__")
             return (
                 (
-                    record is None
-                    or (left_behavior.get(record) is right_behavior.get(record))
+                    recordclass(left, left_behavior)
+                    is recordclass(right, right_behavior)
                     or not check_parameters
                 )
                 and (left.fields == right.fields)
