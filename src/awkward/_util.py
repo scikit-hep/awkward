@@ -892,7 +892,7 @@ def arrays_approx_equal(
 
         # Require that the arrays have the same evaluated types
         if not (
-            (arrayclass(left, left_behavior) is arrayclass(right, right_behavior))
+            arrayclass(left, left_behavior) is arrayclass(right, right_behavior)
             or not check_parameters
         ):
             return False
