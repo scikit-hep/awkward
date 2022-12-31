@@ -410,7 +410,7 @@ def behavior_of(*arrays, **kwargs):
     highs = (
         ak.highlevel.Array,
         ak.highlevel.Record,
-        # ak.highlevel.ArrayBuilder,
+        ak.highlevel.ArrayBuilder,
     )
     for x in arrays[::-1]:
         if isinstance(x, highs) and x.behavior is not None:
