@@ -1,10 +1,11 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import numpy as np
-import pytest  # noqa: F401
-from numba import njit
+import pytest
 
 import awkward as ak
+
+numba = pytest.importorskip("numba")
 
 
 def test_field_name():
@@ -13,7 +14,7 @@ def test_field_name():
     builder.field("time").real(0.0)
     builder.end_record()
 
-    @njit
+    @numba.njit
     def func(builder):
         builder.begin_record("x")
         builder.field("time").real(2.0)
@@ -36,7 +37,7 @@ def test_no_field_name():
     builder.field("time").real(0.0)
     builder.end_record()
 
-    @njit
+    @numba.njit
     def func(builder):
         builder.begin_record()
         builder.field("time").real(2.0)
