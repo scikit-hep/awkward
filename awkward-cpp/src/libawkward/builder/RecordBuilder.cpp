@@ -394,7 +394,7 @@ namespace awkward {
       else {
         name_ = std::string(name);
       }
-      nameptr_ = name;
+      nameptr_ = check ? nullptr : name;
       length_ = 0;
     }
 
@@ -403,6 +403,14 @@ namespace awkward {
       begun_ = true;
       nextindex_ = -1;
       nexttotry_ = 0;
+    } else if (!begun_  &&
+        ((!check && nameptr_ == nullptr && name_ == name))) {
+      begun_ = true;
+      nextindex_ = -1;
+      nexttotry_ = 0;
+
+      // Rebuild pointer for this name
+      nameptr_ = name;
     }
     else if (!begun_) {
       BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
@@ -457,6 +465,15 @@ namespace awkward {
           nextindex_ = i;
           nexttotry_ = i + 1;
           return;
+        }
+        // If we have yet to see this field with `field_fast`, rebuild the pointer
+        else if (pointers_[(size_t)i] == nullptr) {
+           if (keys_[(size_t)i].compare(key) == 0) {
+              nextindex_ = i;
+              nexttotry_ = i + 1;
+              pointers_[(size_t)i] = key;
+              return;
+            }
         }
         i++;
       } while (i != nexttotry_);
