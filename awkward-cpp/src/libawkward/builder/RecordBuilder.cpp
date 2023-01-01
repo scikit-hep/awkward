@@ -399,15 +399,18 @@ namespace awkward {
     }
 
     if (!begun_  &&
-        ((check  &&  name_ == name)  ||  (!check  &&  nameptr_ == name) || (!check && nameptr_ == nullptr && name_ == name))) {
+        ((check  &&  name_ == name)  ||  (!check  &&  nameptr_ == name))) {
+      begun_ = true;
+      nextindex_ = -1;
+      nexttotry_ = 0;
+    } else if (!begun_  &&
+        ((!check && nameptr_ == nullptr && name_ == name))) {
       begun_ = true;
       nextindex_ = -1;
       nexttotry_ = 0;
 
       // Rebuild pointer for this name
-      if (!check && nameptr_ == nullptr) {
-          nameptr_ = name;
-      }
+      nameptr_ = name;
     }
     else if (!begun_) {
       BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
