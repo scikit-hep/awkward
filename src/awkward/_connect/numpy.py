@@ -25,12 +25,23 @@ implemented = {}
 
 
 def _to_rectilinear(arg):
-    if isinstance(arg, tuple):
-        nplike = ak._nplikes.nplike_of(*arg)
-        return tuple(nplike.to_rectilinear(x) for x in arg)
+    backend = ak._backends.backend_of(arg, default=None)
+    # We have some array-like object that our backend mechanism understands
+    if backend is not None:
+        return backend.nplike.to_rectilinear(arg)
+    elif isinstance(arg, tuple):
+        return tuple(_to_rectilinear(x) for x in arg)
+    elif isinstance(arg, list):
+        return [_to_rectilinear(x) for x in arg]
+    elif ak._util.is_non_string_iterable(arg):
+        raise ak._errors.wrap_error(
+            TypeError(
+                f"encountered an unsupported iterable value {arg!r} whilst converting arguments to NumPy-friendly "
+                f"types. If this argument should be supported, please file a bug report."
+            )
+        )
     else:
-        nplike = ak._nplikes.nplike_of(arg)
-        return nplike.to_rectilinear(arg)
+        return arg
 
 
 def array_function(func, types, args, kwargs, behavior):
