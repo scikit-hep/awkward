@@ -5,16 +5,20 @@ import sys
 import typing
 from typing import *  # noqa: F403
 
-__all__ = [
-    "Final",
-    "Self",
-    "final",
-    "Protocol",
-    "Unpack",
-    "TypeAlias",
-    "runtime_checkable",
-    "AxisMaybeNone",
-] + typing.__all__
+__all__ = list(
+    {
+        "Final",
+        "Self",
+        "final",
+        "Protocol",
+        "Unpack",
+        "TypeAlias",
+        "runtime_checkable",
+        "AxisMaybeNone",
+        "TypedDict",
+        *typing.__all__,
+    }
+)
 
 
 AxisMaybeNone = TypeVar("AxisMaybeNone", int, None)
@@ -26,6 +30,7 @@ if sys.version_info < (3, 11):
         Protocol,
         Self,
         TypeAlias,
+        TypedDict,
         Unpack,
         final,
         runtime_checkable,
@@ -36,6 +41,7 @@ else:
         Protocol,
         Self,
         TypeAlias,
+        TypedDict,
         Unpack,
         final,
         runtime_checkable,
