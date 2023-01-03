@@ -218,6 +218,7 @@ exclude = ["^src/awkward/[^/]+\\.py$"]
 plugins = [
     "numpy.typing.mypy_plugin"
 ]
+python_version = "3.11"
 
 [[tool.mypy.overrides]]
 module = [

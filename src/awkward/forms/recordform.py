@@ -6,8 +6,10 @@ from collections.abc import Iterable
 import awkward as ak
 from awkward._util import unset
 from awkward.forms.form import Form, _parameters_equal
+from awkward.typing import final
 
 
+@final
 class RecordForm(Form):
     is_record = True
 
