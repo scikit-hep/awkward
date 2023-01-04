@@ -931,7 +931,7 @@ class ListArray(Content):
         ):
             return self._mergeable(other.content, mergebool)
 
-        if isinstance(
+        elif isinstance(
             other,
             (
                 ak.contents.RegularArray,
@@ -940,6 +940,9 @@ class ListArray(Content):
             ),
         ):
             return self._content._mergeable(other.content, mergebool)
+
+        elif isinstance(other, ak.contents.NumpyArray) and len(other.shape) > 1:
+            return self._mergeable(other._to_regular_primitive(), mergebool)
 
         else:
             return False

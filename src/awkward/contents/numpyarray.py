@@ -340,17 +340,9 @@ class NumpyArray(Content):
             )
 
     def _mergeable_next(self, other, mergebool):
-        if isinstance(
-            other,
-            (
-                ak.contents.IndexedArray,
-                ak.contents.IndexedOptionArray,
-                ak.contents.ByteMaskedArray,
-                ak.contents.BitMaskedArray,
-                ak.contents.UnmaskedArray,
-            ),
-        ):
-            return self._mergeable(other._content, mergebool)
+
+        if len(self.shape) > 1:
+            return self._to_regular_primitive()._mergeable(other, mergebool)
 
         elif isinstance(other, ak.contents.NumpyArray):
             if self._data.ndim != other._data.ndim:
@@ -401,8 +393,7 @@ class NumpyArray(Content):
         if len(others) == 0:
             return self
 
-        # Resolve merging against regular types by
-        if any(isinstance(o, ak.contents.RegularArray) for o in others):
+        if len(self.shape) > 1:
             return self.to_RegularArray()._mergemany(others)
 
         head, tail = self._merging_strategy(others)
@@ -1355,3 +1346,10 @@ class NumpyArray(Content):
             )
         else:
             return True
+
+    def _to_regular_primitive(self):
+        index = tuple([slice(None, 1)] * len(self.shape))
+        new_data = self.backend.nplike.broadcast_to(self._data[index], self.shape)
+        return NumpyArray(
+            new_data, backend=self.backend, parameters=self.parameters
+        ).to_RegularArray()
