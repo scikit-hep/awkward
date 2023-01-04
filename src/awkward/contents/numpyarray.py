@@ -348,10 +348,11 @@ class NumpyArray(Content):
             if self._data.ndim != other._data.ndim:
                 return False
 
+            # Obvious fast-path
             if self.dtype == other.dtype:
                 return True
 
-            # Merge booleans i.e. {bool, number}
+            # Special-case booleans i.e. {bool, number}
             elif mergebool and (
                 np.issubdtype(self.dtype, np.bool_)
                 and np.issubdtype(other.dtype, np.number)
@@ -360,13 +361,7 @@ class NumpyArray(Content):
             ):
                 return True
 
-            # Merge number e.g. {complex, float} etc.
-            elif np.issubdtype(self.dtype, np.number) and np.issubdtype(
-                other._data.dtype, np.number
-            ):
-                return True
-            # We should only be here with datetime dtypes, failed boolean
-            # merges, or obscure datetime
+            # Default merging (can we cast one to the other)
             else:
                 return self.backend.nplike.can_cast(
                     self.dtype, other.dtype, casting="same_kind"
