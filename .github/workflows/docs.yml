@@ -48,9 +48,12 @@ jobs:
       if: steps.cache-awkward-cpp-wasm-wheel.outputs.cache-hit != 'true'
       id: compute-emsdk-version
       run: |
+        # Prepare xbuild environment (side-effect)
+        pyodide config list
         # Save EMSDK version
         EMSCRIPTEN_VERSION=$(pyodide config get emscripten_version)
         echo "emsdk-version=$EMSCRIPTEN_VERSION" >> $GITHUB_OUTPUT
+      working-directory: awkward-cpp
 
     - name: Install EMSDK
       uses: mymindstorm/setup-emsdk@v12
