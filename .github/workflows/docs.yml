@@ -40,19 +40,30 @@ jobs:
         path: ./awkward-cpp/dist
         key: ${{ runner.os }}-${{ env.PYTHON_VERSION }}-awkward-cpp-wasm-${{ hashFiles('awkward-cpp/**') }}
 
+    - name: Install dependencies
+      if: steps.cache-awkward-cpp-wasm-wheel.outputs.cache-hit != 'true'
+      run: python3 -m pip install -r docs/requirements-wasm.txt
+
+    - name: Install dependencies
+      if: steps.cache-awkward-cpp-wasm-wheel.outputs.cache-hit != 'true'
+      id: compute-emsdk-version
+      run: |
+        # Save EMSDK version
+        EMSCRIPTEN_VERSION=$(pyodide config get emscripten_version)
+        echo "emsdk-version=$EMSCRIPTEN_VERSION" >> $GITHUB_OUTPUT
+
     - name: Install EMSDK
       uses: mymindstorm/setup-emsdk@v12
       if: steps.cache-awkward-cpp-wasm-wheel.outputs.cache-hit != 'true'
       with:
-        version: 3.1.14
+        version: ${{ steps.compute-emsdk-version.outputs.emsdk-version }}
 
     - name: Build wheel
       if: steps.cache-awkward-cpp-wasm-wheel.outputs.cache-hit != 'true'
+      id: build-awkward-cpp-wasm-wheel
       run: |
         # pyodide-build doesn't work out of the box with pipx
-        python3 -m pip install pyyaml pyodide-build==0.21.0
-        export CMAKE_ARGS="-DEMSCRIPTEN=1"
-        pyodide build --exports whole_archive
+        CMAKE_ARGS="-DEMSCRIPTEN=1" pyodide build --exports whole_archive
       working-directory: awkward-cpp
 
     - name: Upload wheel
