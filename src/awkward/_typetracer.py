@@ -989,7 +989,7 @@ class TypeTracer(ak._nplikes.NumpyLike):
             try_touch_data(x)
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def concatenate(self, arrays):
+    def concatenate(self, arrays, casting="same_kind"):
         for x in arrays:
             try_touch_data(x)
 
