@@ -348,43 +348,31 @@ class NumpyArray(Content):
             if self._data.ndim != other._data.ndim:
                 return False
 
-            matching_dtype = self._data.dtype == other._data.dtype
+            if self.dtype == other.dtype:
+                return True
 
-            if (
-                not mergebool
-                and not matching_dtype
-                and (
-                    self._data.dtype.type is np.bool_
-                    or other._data.dtype.type is np.bool_
+            # Merge booleans i.e. {bool, number}
+            elif mergebool and (
+                np.issubdtype(self.dtype, np.bool_)
+                and np.issubdtype(other.dtype, np.number)
+                or np.issubdtype(self.dtype, np.number)
+                and np.issubdtype(other.dtype, np.bool_)
+            ):
+                return True
+
+            # Merge number e.g. {complex, float} etc.
+            elif np.issubdtype(self.dtype, np.number) and np.issubdtype(
+                other._data.dtype, np.number
+            ):
+                return True
+            # We should only be here with datetime dtypes, failed boolean
+            # merges, or obscure datetime
+            else:
+                return self.backend.nplike.can_cast(
+                    self.dtype, other.dtype, casting="same_kind"
+                ) or self.backend.nplike.can_cast(
+                    other.dtype, self.dtype, casting="same_kind"
                 )
-            ):
-                return False
-
-            if not matching_dtype and np.datetime64 in (
-                self._data.dtype.type,
-                other._data.dtype.type,
-            ):
-                return False
-
-            if not matching_dtype and np.timedelta64 in (
-                self._data.dtype.type,
-                other._data.dtype.type,
-            ):
-                return False
-
-            if (
-                len(self._data.shape) > 1
-                and self._data.shape[1:] != other._data.shape[1:]
-            ):
-                return False
-
-            return True
-
-        # If we have >1 dimension, promote ourselves to `RegularArray` and attempt to merge.
-        elif isinstance(other, ak.contents.RegularArray) and self.purelist_depth > 1:
-            as_regular_array = self.to_RegularArray()
-            assert isinstance(as_regular_array, ak.contents.RegularArray)
-            return as_regular_array._content._mergeable(other._content, mergebool)
 
         else:
             return False
@@ -417,7 +405,9 @@ class NumpyArray(Content):
                     )
                 )
 
-        contiguous_arrays = self._backend.nplike.concatenate(contiguous_arrays)
+        contiguous_arrays = self._backend.nplike.concatenate(
+            contiguous_arrays, casting="same_kind"
+        )
 
         next = NumpyArray(
             contiguous_arrays, parameters=parameters, backend=self._backend
