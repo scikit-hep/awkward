@@ -49,7 +49,7 @@ jobs:
       if: steps.cache-awkward-cpp-wasm-wheel.outputs.cache-hit != 'true'
       run: |
         # pyodide-build doesn't work out of the box with pipx
-        python3 -m pip install pyyaml pyodide-build==0.22.0
+        python3 -m pip install pyyaml pyodide-build==0.21.0
         export CMAKE_ARGS="-DEMSCRIPTEN=1"
         pyodide build --exports whole_archive
       working-directory: awkward-cpp
