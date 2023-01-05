@@ -143,12 +143,19 @@ def dosig(node):
     if node is None:
         return "self"
     else:
-        argnames = [x.arg for x in node.args.posonlyargs + node.args.args + node.args.kwonlyargs]
-        defaults = ["=" + tostr(x) for x in node.args.defaults + node.args.kw_defaults if x is not None]
+        non_keword_args = node.args.posonlyargs + node.args.args
+        argnames = [x.arg for x in non_keword_args + node.args.kwonlyargs]
+        defaults = [
+            "=" + tostr(x)
+            for x in node.args.defaults + node.args.kw_defaults
+            if x is not None
+        ]
         defaults = [""] * (len(argnames) - len(defaults)) + defaults
         rendered = [x + y for x, y in zip(argnames, defaults)]
         if node.args.vararg is not None:
-            rendered.insert(len(node.args.posonlyargs + node.args.args), f"*{node.args.vararg.arg}")
+            rendered.insert(len(non_keword_args), f"*{node.args.vararg.arg}")
+        elif node.args.kwonlyargs:
+            rendered.insert(len(non_keword_args), "*")
         return ", ".join(rendered)
 
 
@@ -325,6 +332,32 @@ for filename in glob.glob("../src/awkward/**/*.py", recursive=True):
             doclass(link, linelink, shortname, toplevel.name, toplevel)
         if isinstance(toplevel, ast.FunctionDef):
             dofunction(link, linelink, shortname, toplevel.name, toplevel)
+
+
+def test_signature_vararg():
+    mod = ast.parse(
+        """
+def func(x, *y, z=None):
+    ...
+"""
+    )
+    node = mod.body[0]
+    assert dosig(node) == "x, *y, z=None"
+
+
+def test_signature_kwonly():
+    mod = ast.parse(
+        """
+def func(x, *, y, z=None):
+    ...
+"""
+    )
+    node = mod.body[0]
+    assert dosig(node) == "x, *, y, z=None"
+
+
+test_signature_vararg()
+test_signature_kwonly()
 
 
 toctree_path = reference_path / "toctree.txt"
