@@ -143,10 +143,13 @@ def dosig(node):
     if node is None:
         return "self"
     else:
-        argnames = [x.arg for x in node.args.args]
-        defaults = ["=" + tostr(x) for x in node.args.defaults]
+        argnames = [x.arg for x in node.args.posonlyargs + node.args.args + node.args.kwonlyargs]
+        defaults = ["=" + tostr(x) for x in node.args.defaults + node.args.kw_defaults if x is not None]
         defaults = [""] * (len(argnames) - len(defaults)) + defaults
-        return ", ".join(x + y for x, y in zip(argnames, defaults))
+        rendered = [x + y for x, y in zip(argnames, defaults)]
+        if node.args.vararg is not None:
+            rendered.insert(len(node.args.posonlyargs + node.args.args), f"*{node.args.vararg.arg}")
+        return ", ".join(rendered)
 
 
 def dodoc(docstring, qualname, names):
