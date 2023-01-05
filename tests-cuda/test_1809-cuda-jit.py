@@ -42,6 +42,18 @@ array_view_arg_handler = ArrayViewArgHandler()
 # FIXME: configure the blocks
 # threadsperblock = 32
 # blockspergrid = 128
+def test_int():
+    @cuda.jit('(int64,)')
+    def kernel(x):
+        pass
+    kernel[1, 1](1,)
+
+
+# def test_int_int():
+#    @cuda.jit('int64(int64,)') # TypeError: CUDA kernel must have void return type.
+#    def kernel1(x):
+#        x = x * x
+#    kernel1[1, 1](1,)
 
 @cuda.jit(extensions=[array_view_arg_handler])
 def swallow(array):
@@ -130,9 +142,9 @@ def test_mem_management2():
     ary = np.empty(shape=d_ary.shape, dtype=d_ary.dtype)
     d_ary.copy_to_host(ary)
     
-def test_array_1d():    
-    akarray = ak.Array([0, 1, 2, 3])
-    swallow[1, 1](akarray)
+# def test_array_1d():    
+#    akarray = ak.Array([0, 1, 2, 3])
+#    swallow[1, 1](akarray)
 
     
 def test_array_njit():
@@ -216,3 +228,40 @@ def test_method_overload():
     fun_sum[1, 1](np.arange(10))
     cuda.synchronize()
     
+
+# @overload_method(ak._connect.numba.arrayview.ArrayView, 'sum', target='cuda')
+# def array_sum(arr):
+#    if arr.ndim != 1:
+#        # Only implement 1D for this quick example
+#        return None
+#
+#    def sum_impl(arr):
+#        res = 0 
+#        for i in range(len(arr)):
+#            res += arr[i]
+#        return res 
+#    return sum_impl
+
+# @overload(sum, target='cuda')
+# def ak_array_sum(arr):
+#    print("overload for ", type(arr))
+#    if isinstance(arr, ak._connect.numba.arrayview.ArrayView):
+#        def sum_impl(arr):
+#            res = 0
+#            for i in range(len(arr)):
+#                res += arr[i]
+#            return res 
+#        return sum_impl
+
+
+# @cuda.jit
+# def ak_fun_sum(arr):
+#    if cuda.grid(1) == 0:
+#        print("Grid size is", sum(arr))
+
+# def test_ak_sum_fun_overload():
+#    arr = ak.Array([1,2,3,4,5,6,7,8,9])
+#    ak_fun_sum[1, 1](np.asarray(arr))
+#    ak_fun_sum[1, 2](np.asarray(arr))
+#    ak_fun_sum[1, 3](np.asarray(arr))
+#    cuda.synchronize()

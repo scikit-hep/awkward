@@ -133,6 +133,7 @@ namespace awkward {
   public:
     ArrayView(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs, PyObject* lookup)
       : start_(start), stop_(stop), which_(which), ptrs_(ptrs), lookup_(lookup) {
+        std::cout << "ArrayView constructed!!!" << std::endl;
       }
 
     size_t size() const noexcept {

@@ -285,6 +285,7 @@ class NumpyArray(Content):
         if hasattr(out, "shape") and len(out.shape) != 0:
             return NumpyArray(out, parameters=None, backend=self._backend)
         else:
+            print("RETURN:", out)
             return out
 
     def _getitem_range(self, start: SupportsIndex, stop: IndexType) -> Content:

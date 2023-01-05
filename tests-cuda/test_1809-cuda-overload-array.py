@@ -3,7 +3,7 @@
 import numpy as np  # noqa: F401
 import pytest  # noqa: F401
 
-        #import awkward as ak  # noqa: F401
+import awkward as ak  # noqa: F401
 
 numba = pytest.importorskip("numba")
 
@@ -13,6 +13,12 @@ from numba import cuda, types
 from numba import config
 config.CUDA_LOW_OCCUPANCY_WARNINGS = False
 config.CUDA_WARN_ON_IMPLICIT_COPY = False
+
+ak_numba = pytest.importorskip("awkward.numba")
+ak_numba_arrayview = pytest.importorskip("awkward._connect.numba.arrayview")
+ak_numba_layout = pytest.importorskip("awkward._connect.numba.layout")
+
+ak.numba.register_and_check()
 
 @overload_method(types.Array, 'sum', target='cuda')
 def array_sum(arr):
