@@ -1394,14 +1394,15 @@ class ListArray(Content):
             and self._backend.nplike.known_data
             and self._starts.length != 0
         ):
-            startsmin = self._starts.data.min()
+            # TypeError: slice indices must be integers or None or have an __index__ method
+            startsmin = self._starts.data.min().item()
             starts = ak.index.Index(
                 self._starts.data - startsmin, nplike=self._backend.index_nplike
             )
             stops = ak.index.Index(
                 self._stops.data - startsmin, nplike=self._backend.index_nplike
             )
-            content = self._content[startsmin : self._stops.data.max()]
+            content = self._content[startsmin : self._stops.data.max().item()]
         else:
             self._touch_data(recursive=False)
             starts, stops, content = self._starts, self._stops, self._content

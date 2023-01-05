@@ -127,7 +127,9 @@ def test_num_8():
     )
 
     cuda_recordarray = ak.to_backend(recordarray, "cuda")
-    assert ak.num(cuda_recordarray, 0).tolist() == ak.num(recordarray, 0).tolist()
+    
+    # AttributeError: 'int' object has no attribute 'tolist'
+    assert ak.num(cuda_recordarray, 0) == ak.num(recordarray, 0)
 
     content0 = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout
     content = ak.Array(
