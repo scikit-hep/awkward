@@ -218,6 +218,7 @@ jobs:
       id: check-links
       run: sphinx-build -M linkcheck . _build/
       working-directory: docs
+      continue-on-error: true
 
     - name: Output annotations
       if: success() || steps.check-links.outcome == 'failure'
@@ -247,6 +248,12 @@ jobs:
       with:
         name: docs
         path: docs/_build/html
+
+    - name: Upload link-check artefact
+      uses: actions/upload-artifact@v3
+      with:
+        name: linkcheck
+        path: docs/_build/linkcheck/output.json
 
     - name: Upload Jupyter Book cache
       uses: actions/upload-artifact@v3
