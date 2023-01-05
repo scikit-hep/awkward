@@ -1,8 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._nplikes import metadata
 
-np = ak._nplikes.NumpyMetadata.instance()
 cpu = ak._backends.NumpyBackend.instance()
 
 
@@ -108,9 +108,9 @@ def _impl3(condition, x, y, mergebool, highlevel, behavior):
         akcondition, left, right = inputs
         if isinstance(akcondition, ak.contents.NumpyArray):
             npcondition = backend.index_nplike.asarray(akcondition)
-            tags = ak.index.Index8((npcondition == 0).view(np.int8))
+            tags = ak.index.Index8((npcondition == 0).view(metadata.int8))
             index = ak.index.Index64(
-                backend.index_nplike.arange(len(tags), dtype=np.int64),
+                backend.index_nplike.arange(len(tags), dtype=metadata.int64),
                 nplike=backend.index_nplike,
             )
             if not isinstance(left, ak.contents.Content):

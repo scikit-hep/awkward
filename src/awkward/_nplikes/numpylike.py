@@ -18,7 +18,7 @@ We don't implement Device support, as it is not used in Awkward.
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import Literal, SupportsIndex, SupportsInt, overload
+from typing import ContextManager, Literal, SupportsIndex, SupportsInt, overload
 
 import numpy
 
@@ -27,6 +27,8 @@ from awkward._nplikes import metadata
 from awkward._nplikes.metadata import dtype
 from awkward._singleton import Singleton
 from awkward.typing import Protocol, Self, runtime_checkable
+
+ErrorStateLiteral = Literal["ignore", "warn", "raise", "call", "print", "log"]
 
 
 @runtime_checkable
@@ -515,6 +517,13 @@ class NumpyLike(Singleton, Protocol):
 
     @abstractmethod
     def to_rectilinear(self, array: Array):
+        ...
+
+    @abstractmethod
+    def error_state(
+        self,
+        **kwargs: ErrorStateLiteral,
+    ) -> ContextManager:
         ...
 
     ############################ Awkward features

@@ -2,8 +2,6 @@
 
 import awkward as ak
 
-np = ak._nplikes.NumpyMetadata.instance()
-
 
 def drop_none(array, axis=None, highlevel=True, behavior=None):
     """
@@ -66,7 +64,7 @@ def _impl(array, axis, highlevel, behavior):
         max_axis = layout.branch_depth[1] - 1
         if axis > max_axis:
             raise ak._errors.wrap_error(
-                np.AxisError(
+                ak._errors.AxisError(
                     f"axis={axis} exceeds the depth ({max_axis}) of this array"
                 )
             )
@@ -90,7 +88,7 @@ def _impl(array, axis, highlevel, behavior):
                 }
                 if len(posaxises) > 1 and any(x < depth for x in posaxises):
                     raise ak._errors.wrap_error(
-                        np.AxisError(
+                        ak._errors.AxisError(
                             f"axis={axis} implies different levels in records that might require part of a record to be dropped, which is impossible"
                         )
                     )

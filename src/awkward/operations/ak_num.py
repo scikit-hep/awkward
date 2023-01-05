@@ -2,8 +2,6 @@
 
 import awkward as ak
 
-np = ak._nplikes.NumpyMetadata.instance()
-
 
 def num(array, axis=1, *, highlevel=True, behavior=None):
     """
@@ -94,7 +92,9 @@ def _impl(array, axis, highlevel, behavior):
 
         elif layout.is_leaf:
             raise ak._errors.wrap_error(
-                np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
+                ak._errors.AxisError(
+                    f"axis={axis} exceeds the depth of this array ({depth})"
+                )
             )
 
     out = ak._do.recursively_apply(layout, action, behavior, numpy_to_regular=True)

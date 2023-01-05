@@ -4,8 +4,6 @@ import awkward as ak
 from awkward._connect.numpy import unsupported
 from awkward._util import unset
 
-np = ak._nplikes.NumpyMetadata.instance()
-
 
 def std(
     x,
@@ -167,8 +165,9 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity):
             ak.operations.to_layout(weight, allow_record=False, allow_other=False),
             behavior=behavior,
         )
+    nplike = ak._nplikes.nplike_of(x, weight)
 
-    with np.errstate(invalid="ignore", divide="ignore"):
+    with nplike.error_state(invalid="ignore", divide="ignore"):
         return ak._nplikes.nplike_of(x, weight).sqrt(
             ak.operations.ak_var._impl(
                 x,

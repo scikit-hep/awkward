@@ -1,96 +1,64 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import json
-import re
 
 import awkward as ak
+from awkward._nplikes import metadata
 from awkward.forms.form import _parameters_equal
 from awkward.types.type import Type
 from awkward.typing import final
 
-np = ak._nplikes.NumpyMetadata.instance()
+primitive_names = {
+    d.name for d in metadata.all_dtypes if not metadata.isdtype(d, "timelike")
+}
 
 
 def is_primitive(primitive):
-    if _primitive_to_dtype_datetime.match(primitive) is not None:
+    if primitive in primitive_names:
         return True
-    elif _primitive_to_dtype_timedelta.match(primitive) is not None:
-        return True
-    else:
-        return primitive in _primitive_to_dtype_dict
+
+    # TODO: is this maybe-timelike path too slow for from_buffers?
+    try:
+        dtype = metadata.dtype(primitive)
+    except TypeError:
+        return False
+
+    return metadata.isdtype(dtype, "timelike")
 
 
 def primitive_to_dtype(primitive):
-    if _primitive_to_dtype_datetime.match(primitive) is not None:
-        return np.dtype(primitive)
-    elif _primitive_to_dtype_timedelta.match(primitive) is not None:
-        return np.dtype(primitive)
+    try:
+        dtype = metadata.dtype(primitive)
+    except TypeError as err:
+        raise ak._errors.wrap_error(err) from None
     else:
-        out = _primitive_to_dtype_dict.get(primitive)
-        if out is None:
+        if metadata.isdtype(dtype, ("numeric", "bool", "timelike")):
+            return dtype
+        else:
             raise ak._errors.wrap_error(
                 TypeError(
                     "unrecognized primitive: {}. Must be one of\n\n    {}\n\nor a "
                     "datetime64/timedelta64 with units (e.g. 'datetime64[15us]')".format(
-                        repr(primitive), ", ".join(_primitive_to_dtype_dict)
+                        repr(primitive), ", ".join(primitive_names)
                     )
                 )
             )
-        return out
 
 
 def dtype_to_primitive(dtype):
-    if dtype.kind.upper() == "M" and dtype == dtype.newbyteorder("="):
-        return str(dtype)
+    primitive = dtype.name
+
+    if metadata.isdtype(dtype, ("numeric", "bool", "timelike")):
+        return primitive
     else:
-        out = _dtype_to_primitive_dict.get(dtype)
-        if out is None:
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "unsupported dtype: {}. Must be one of\n\n    {}\n\nor a "
-                    "datetime64/timedelta64 with units (e.g. 'datetime64[15us]')".format(
-                        repr(dtype), ", ".join(_primitive_to_dtype_dict)
-                    )
+        raise ak._errors.wrap_error(
+            TypeError(
+                "unrecognized dtype: {}. Must be one of\n\n    {}\n\nor a "
+                "datetime64/timedelta64 with units (e.g. 'datetime64[15us]')".format(
+                    repr(primitive), ", ".join(primitive_names)
                 )
             )
-        return out
-
-
-_primitive_to_dtype_datetime = re.compile(
-    r"datetime64\[(\s*-?[0-9]*)?(Y|M|W|D|h|m|s|ms|us|\u03bc|ns|ps|fs|as)\]"
-)
-_primitive_to_dtype_timedelta = re.compile(
-    r"timedelta64\[(\s*-?[0-9]*)?(Y|M|W|D|h|m|s|ms|us|\u03bc|ns|ps|fs|as)\]"
-)
-
-_primitive_to_dtype_dict = {
-    "bool": np.dtype(np.bool_),
-    "int8": np.dtype(np.int8),
-    "uint8": np.dtype(np.uint8),
-    "int16": np.dtype(np.int16),
-    "uint16": np.dtype(np.uint16),
-    "int32": np.dtype(np.int32),
-    "uint32": np.dtype(np.uint32),
-    "int64": np.dtype(np.int64),
-    "uint64": np.dtype(np.uint64),
-    "float32": np.dtype(np.float32),
-    "float64": np.dtype(np.float64),
-    "complex64": np.dtype(np.complex64),
-    "complex128": np.dtype(np.complex128),
-    "datetime64": np.dtype(np.datetime64),
-    "timedelta64": np.dtype(np.timedelta64),
-}
-
-if hasattr(np, "float16"):
-    _primitive_to_dtype_dict["float16"] = np.dtype(np.float16)
-if hasattr(np, "float128"):
-    _primitive_to_dtype_dict["float128"] = np.dtype(np.float128)
-if hasattr(np, "complex256"):
-    _primitive_to_dtype_dict["complex256"] = np.dtype(np.complex256)
-
-_dtype_to_primitive_dict = {}
-for primitive, dtype in _primitive_to_dtype_dict.items():
-    _dtype_to_primitive_dict[dtype] = primitive
+        )
 
 
 @final
@@ -135,7 +103,9 @@ class NumpyType(Type):
 
         else:
             if self.parameter("__unit__") is not None:
-                numpy_unit = str(np.dtype("M8[" + self._parameters["__unit__"] + "]"))
+                numpy_unit = str(
+                    metadata.dtype("M8[" + self._parameters["__unit__"] + "]")
+                )
                 bracket_index = numpy_unit.index("[")
                 units = "unit=" + json.dumps(numpy_unit[bracket_index + 1 : -1])
             else:

@@ -3,8 +3,6 @@
 import awkward as ak
 from awkward._util import unset
 
-np = ak._nplikes.NumpyMetadata.instance()
-
 
 def moment(
     x,
@@ -92,8 +90,8 @@ def _impl(x, n, weight, axis, keepdims, mask_identity):
             ak.operations.to_layout(weight, allow_record=False, allow_other=False),
             behavior=behavior,
         )
-
-    with np.errstate(invalid="ignore", divide="ignore"):
+    nplike = ak._nplikes.nplike_of(x, weight)
+    with nplike.error_state(invalid="ignore", divide="ignore"):
         if weight is None:
             sumw = ak.operations.ak_count._impl(
                 x,

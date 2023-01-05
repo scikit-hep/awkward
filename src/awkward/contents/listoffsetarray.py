@@ -4,13 +4,13 @@ from __future__ import annotations
 import copy
 
 import awkward as ak
+from awkward._nplikes import metadata
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.listoffsetform import ListOffsetForm
 from awkward.index import Index
 from awkward.typing import Final, Self, final
 
-np = ak._nplikes.NumpyMetadata.instance()
 numpy = ak._nplikes.Numpy.instance()
 
 
@@ -19,10 +19,8 @@ class ListOffsetArray(Content):
     is_list = True
 
     def __init__(self, offsets, content, *, parameters=None):
-        if not isinstance(offsets, Index) and offsets.dtype in (
-            np.dtype(np.int32),
-            np.dtype(np.uint32),
-            np.dtype(np.int64),
+        if not isinstance(offsets, Index) and metadata.isdtype(
+            offsets.dtype, (metadata.int32, metadata.uint32, metadata.int64)
         ):
             raise ak._errors.wrap_error(
                 TypeError(
@@ -169,12 +167,12 @@ class ListOffsetArray(Content):
 
     def to_ListOffsetArray64(self, start_at_zero=False):
         if not self._backend.nplike.known_data and (
-            start_at_zero or self._offsets.dtype != np.dtype(np.int64)
+            start_at_zero or self._offsets.dtype != metadata.int64
         ):
             self._touch_data(recursive=False)
             self._content._touch_data(recursive=False)
 
-        if issubclass(self._offsets.dtype.type, np.int64):
+        if metadata.isdtype(self._offsets.dtype, metadata.int64):
             if (
                 not self._backend.nplike.known_data
                 or not start_at_zero
@@ -521,7 +519,7 @@ class ListOffsetArray(Content):
         elif isinstance(head, list):
             return self._getitem_next_fields(head, tail, advanced)
 
-        elif head is np.newaxis:
+        elif head is metadata.newaxis:
             return self._getitem_next_newaxis(tail, advanced)
 
         elif head is Ellipsis:
@@ -627,7 +625,9 @@ class ListOffsetArray(Content):
     def _offsets_and_flattened(self, axis, depth):
         posaxis = ak._util.maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 == depth:
-            raise ak._errors.wrap_error(np.AxisError("axis=0 not allowed for flatten"))
+            raise ak._errors.wrap_error(
+                ak._errors.AxisError("axis=0 not allowed for flatten")
+            )
 
         elif posaxis is not None and posaxis + 1 == depth + 1:
             listoffsetarray = self.to_ListOffsetArray64(True)
@@ -642,7 +642,7 @@ class ListOffsetArray(Content):
             offsets = ak.index.Index64.zeros(
                 0,
                 nplike=self._backend.index_nplike,
-                dtype=np.int64,
+                dtype=metadata.int64,
             )
 
             if inneroffsets.length == 0:
@@ -664,7 +664,7 @@ class ListOffsetArray(Content):
                 tooffsets = ak.index.Index64.empty(
                     self._offsets.length,
                     self._backend.index_nplike,
-                    dtype=np.int64,
+                    dtype=metadata.int64,
                 )
                 assert (
                     tooffsets.nplike is self._backend.index_nplike
@@ -849,7 +849,9 @@ class ListOffsetArray(Content):
         ):
             if branch or (negaxis != depth):
                 raise ak._errors.wrap_error(
-                    np.AxisError("array with strings can only be sorted with axis=-1")
+                    ak._errors.AxisError(
+                        "array with strings can only be sorted with axis=-1"
+                    )
                 )
 
             # FIXME: check validity error
@@ -866,7 +868,9 @@ class ListOffsetArray(Content):
                 or self.parameter("__array__") == "bytestring"
             ):
                 raise ak._errors.wrap_error(
-                    np.AxisError("array with strings can only be sorted with axis=-1")
+                    ak._errors.AxisError(
+                        "array with strings can only be sorted with axis=-1"
+                    )
                 )
 
             if self._backend.nplike.known_shape and parents.nplike.known_shape:
@@ -969,7 +973,9 @@ class ListOffsetArray(Content):
         ):
             if branch or (negaxis != depth):
                 raise ak._errors.wrap_error(
-                    np.AxisError("array with strings can only be sorted with axis=-1")
+                    ak._errors.AxisError(
+                        "array with strings can only be sorted with axis=-1"
+                    )
                 )
 
             # FIXME: check validity error
@@ -1017,7 +1023,9 @@ class ListOffsetArray(Content):
                 or self.parameter("__array__") == "bytestring"
             ):
                 raise ak._errors.wrap_error(
-                    np.AxisError("array with strings can only be sorted with axis=-1")
+                    ak._errors.AxisError(
+                        "array with strings can only be sorted with axis=-1"
+                    )
                 )
 
             if self._backend.nplike.known_shape and parents.nplike.known_shape:
@@ -1153,7 +1161,9 @@ class ListOffsetArray(Content):
         ):
             if branch or (negaxis != depth):
                 raise ak._errors.wrap_error(
-                    np.AxisError("array with strings can only be sorted with axis=-1")
+                    ak._errors.AxisError(
+                        "array with strings can only be sorted with axis=-1"
+                    )
                 )
 
             # FIXME: check validity error
@@ -1199,7 +1209,9 @@ class ListOffsetArray(Content):
                 or self.parameter("__array__") == "bytestring"
             ):
                 raise ak._errors.wrap_error(
-                    np.AxisError("array with strings can only be sorted with axis=-1")
+                    ak._errors.AxisError(
+                        "array with strings can only be sorted with axis=-1"
+                    )
                 )
 
             if self._backend.nplike.known_shape and parents.nplike.known_shape:
@@ -1302,12 +1314,12 @@ class ListOffsetArray(Content):
             stops = self.stops
 
             totallen = ak.index.Index64.empty(
-                1, self._backend.index_nplike, dtype=np.int64
+                1, self._backend.index_nplike, dtype=metadata.int64
             )
             offsets = ak.index.Index64.empty(
                 self.length + 1,
                 self._backend.index_nplike,
-                dtype=np.int64,
+                dtype=metadata.int64,
             )
             assert (
                 offsets.nplike is self._backend.index_nplike
@@ -1333,7 +1345,7 @@ class ListOffsetArray(Content):
             )
 
             tocarryraw = ak.index.Index.empty(
-                n, dtype=np.intp, nplike=self._backend.index_nplike
+                n, dtype=metadata.intp, nplike=self._backend.index_nplike
             )
             tocarry = []
 
@@ -1341,17 +1353,17 @@ class ListOffsetArray(Content):
                 ptr = ak.index.Index64.empty(
                     totallen[0],
                     nplike=self._backend.index_nplike,
-                    dtype=np.int64,
+                    dtype=metadata.int64,
                 )
                 tocarry.append(ptr)
                 if self._backend.nplike.known_data:
                     tocarryraw[i] = ptr.ptr
 
             toindex = ak.index.Index64.empty(
-                n, self._backend.index_nplike, dtype=np.int64
+                n, self._backend.index_nplike, dtype=metadata.int64
             )
             fromindex = ak.index.Index64.empty(
-                n, self._backend.index_nplike, dtype=np.int64
+                n, self._backend.index_nplike, dtype=metadata.int64
             )
             assert (
                 toindex.nplike is self._backend.index_nplike
@@ -1362,7 +1374,7 @@ class ListOffsetArray(Content):
             self._handle_error(
                 self._backend[
                     "awkward_ListArray_combinations",
-                    np.int64,
+                    metadata.int64,
                     toindex.data.dtype.type,
                     fromindex.data.dtype.type,
                     starts.data.dtype.type,
@@ -1414,7 +1426,7 @@ class ListOffsetArray(Content):
         keepdims,
         behavior,
     ):
-        if self._offsets.dtype != np.dtype(np.int64) or (
+        if not metadata.isdtype(self._offsets.dtype, metadata.int64) or (
             self._offsets.nplike.known_data and self._offsets[0] != 0
         ):
             next = self.to_ListOffsetArray64(True)
@@ -1876,20 +1888,20 @@ class ListOffsetArray(Content):
                     pyarrow, mask_node, validbytes, length, options
                 )
 
-        if issubclass(npoffsets.dtype.type, np.int64):
-            if downsize and npoffsets[-1] < np.iinfo(np.int32).max:
-                npoffsets = npoffsets.astype(np.int32)
+        if metadata.isdtype(npoffsets.dtype, metadata.int64):
+            if downsize and npoffsets[-1] < metadata.iinfo(metadata.int32).max:
+                npoffsets = npoffsets.astype(metadata.int32)
 
-        if issubclass(npoffsets.dtype.type, np.uint32):
-            if npoffsets[-1] < np.iinfo(np.int32).max:
-                npoffsets = npoffsets.astype(np.int32)
+        if metadata.isdtype(npoffsets.dtype, metadata.uint32):
+            if npoffsets[-1] < metadata.iinfo(metadata.int32).max:
+                npoffsets = npoffsets.astype(metadata.int32)
             else:
-                npoffsets = npoffsets.astype(np.int64)
+                npoffsets = npoffsets.astype(metadata.int64)
 
         if is_string or is_bytestring:
             assert isinstance(akcontent, ak.contents.NumpyArray)
 
-            if issubclass(npoffsets.dtype.type, np.int32):
+            if metadata.isdtype(npoffsets.dtype, metadata.int32):
                 if is_string:
                     string_type = pyarrow.string()
                 else:
@@ -1925,7 +1937,7 @@ class ListOffsetArray(Content):
                 akcontent.is_option
             )
 
-            if issubclass(npoffsets.dtype.type, np.int32):
+            if metadata.isdtype(npoffsets.dtype, metadata.int32):
                 list_type = pyarrow.list_(content_type)
             else:
                 list_type = pyarrow.large_list(content_type)
@@ -2135,7 +2147,7 @@ class ListOffsetArray(Content):
             strings = self.to_list()
             if any(item in nonfinit_dict for item in strings):
                 numbers = self._backend.index_nplike.empty(
-                    self.starts.length, np.float64
+                    self.starts.length, metadata.float64
                 )
                 has_another_string = False
                 for i, val in enumerate(strings):
@@ -2154,7 +2166,7 @@ class ListOffsetArray(Content):
                     content.backend.nplike.isnan(content._data, union_tags._data)
                     union_index = ak.index.Index64(
                         self._backend.index_nplike.arange(
-                            content.length, dtype=np.int64
+                            content.length, dtype=metadata.int64
                         ),
                         nplike=self._backend.index_nplike,
                     )

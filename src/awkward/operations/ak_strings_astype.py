@@ -1,8 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
-
-np = ak._nplikes.NumpyMetadata.instance()
+from awkward._nplikes import metadata
 
 
 def strings_astype(array, to, *, highlevel=True, behavior=None):
@@ -46,7 +45,7 @@ def strings_astype(array, to, *, highlevel=True, behavior=None):
 
 
 def _impl(array, to, highlevel, behavior):
-    to_dtype = np.dtype(to)
+    to_dtype = metadata.dtype(to)
 
     def action(layout, **kwargs):
         if layout.is_list and (

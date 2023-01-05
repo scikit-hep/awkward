@@ -4,13 +4,13 @@ from __future__ import annotations
 import copy
 
 import awkward as ak
+from awkward._nplikes import metadata
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.numpyform import NumpyForm
 from awkward.types.numpytype import primitive_to_dtype
 from awkward.typing import Final, Self, final
 
-np = ak._nplikes.NumpyMetadata.instance()
 numpy = ak._nplikes.Numpy.instance()
 
 
@@ -41,7 +41,9 @@ class NumpyArray(Content):
             )
 
         if parameters is not None and parameters.get("__array__") in ("char", "byte"):
-            if data.dtype != np.dtype(np.uint8) or len(data.shape) != 1:
+            if not (
+                metadata.isdtype(data.dtype, metadata.uint8) and len(data.shape) == 1
+            ):
                 raise ak._errors.wrap_error(
                     ValueError(
                         "{} is a {}, so its 'data' must be 1-dimensional and uint8, not {}".format(
@@ -281,7 +283,7 @@ class NumpyArray(Content):
             else:
                 return out
 
-        elif isinstance(head, slice) or head is np.newaxis or head is Ellipsis:
+        elif isinstance(head, slice) or head is metadata.newaxis or head is Ellipsis:
             where = (slice(None), head) + tail
             try:
                 out = self._data[where]
@@ -331,14 +333,18 @@ class NumpyArray(Content):
     def _offsets_and_flattened(self, axis, depth):
         posaxis = ak._util.maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 == depth:
-            raise ak._errors.wrap_error(np.AxisError("axis=0 not allowed for flatten"))
+            raise ak._errors.wrap_error(
+                ak._errors.AxisError("axis=0 not allowed for flatten")
+            )
 
         elif len(self.shape) != 1:
             return self.to_RegularArray()._offsets_and_flattened(axis, depth)
 
         else:
             raise ak._errors.wrap_error(
-                np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
+                ak._errors.AxisError(
+                    f"axis={axis} exceeds the depth of this array ({depth})"
+                )
             )
 
     def _mergeable_next(self, other, mergebool):
@@ -362,27 +368,22 @@ class NumpyArray(Content):
                 return False
 
             # Obvious fast-path
-            if self.dtype == other.dtype:
+            elif self.dtype == other.dtype:
                 return True
 
             # Special-case booleans i.e. {bool, number}
             elif (
-                np.issubdtype(self.dtype, np.bool_)
-                and np.issubdtype(other.dtype, np.number)
-                or np.issubdtype(self.dtype, np.number)
-                and np.issubdtype(other.dtype, np.bool_)
+                    (metadata.isdtype(self.dtype, "bool") and metadata.isdtype(other.dtype, "numeric"))
+                 or (metadata.isdtype(other.dtype, "bool") and metadata.isdtype(self.dtype, "numeric"))
             ):
                 return mergebool
 
             # Currently we're less permissive than NumPy on merging datetimes / timedeltas
             elif (
-                np.issubdtype(self.dtype, np.datetime64)
-                or np.issubdtype(self.dtype, np.timedelta64)
-                or np.issubdtype(other.dtype, np.datetime64)
-                or np.issubdtype(other.dtype, np.timedelta64)
+                metadata.isdtype(self.dtype, "timelike")
+                or metadata.isdtype(other.dtype, "timelike")
             ):
                 return False
-
             # Default merging (can we cast one to the other)
             else:
                 return self.backend.nplike.can_cast(
@@ -448,7 +449,9 @@ class NumpyArray(Content):
             return self._local_index_axis0()
         elif len(self.shape) <= 1:
             raise ak._errors.wrap_error(
-                np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
+                ak._errors.AxisError(
+                    f"axis={axis} exceeds the depth of this array ({depth})"
+                )
             )
         else:
             return self.to_RegularArray()._local_index(axis, depth)
@@ -527,7 +530,7 @@ class NumpyArray(Content):
                 self.dtype.type,
                 starts.dtype.type,
                 stops.dtype.type,
-                np.bool_,
+                metadata.bool_,
             ](
                 tmp,
                 starts.data,
@@ -646,8 +649,8 @@ class NumpyArray(Content):
             offsets = ak.index.Index64.zeros(2, self._backend.index_nplike)
             offsets[1] = flattened_shape
             dtype = (
-                np.dtype(np.int64)
-                if self._data.dtype.kind.upper() == "M"
+                metadata.int64
+                if metadata.isdtype(self._data.dtype, "timelike")
                 else self._data.dtype
             )
             out = self._backend.nplike.empty(offsets[1], dtype)
@@ -861,8 +864,8 @@ class NumpyArray(Content):
             )
 
             dtype = (
-                np.dtype(np.int64)
-                if self._data.dtype.kind.upper() == "M"
+                metadata.int64
+                if metadata.isdtype(self._data.dtype, "timelike")
                 else self._data.dtype
             )
             nextcarry = ak.index.Index64.empty(
@@ -973,8 +976,8 @@ class NumpyArray(Content):
             )
 
             dtype = (
-                np.dtype(np.int64)
-                if self._data.dtype.kind.upper() == "M"
+                metadata.int64
+                if metadata.isdtype(self._data.dtype, "timelike")
                 else self._data.dtype
             )
             out = self._backend.nplike.empty(self.length, dtype)
@@ -1008,7 +1011,9 @@ class NumpyArray(Content):
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         elif len(self.shape) <= 1:
             raise ak._errors.wrap_error(
-                np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
+                ak._errors.AxisError(
+                    f"axis={axis} exceeds the depth of this array ({depth})"
+                )
             )
         else:
             return self.to_RegularArray()._combinations(
@@ -1149,7 +1154,9 @@ class NumpyArray(Content):
         posaxis = ak._util.maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 != depth:
             raise ak._errors.wrap_error(
-                np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
+                ak._errors.AxisError(
+                    f"axis={axis} exceeds the depth of this array ({depth})"
+                )
             )
         if not clip:
             if target < self.length:
@@ -1171,7 +1178,7 @@ class NumpyArray(Content):
         nparray = self._raw(numpy)
         storage_type = pyarrow.from_numpy_dtype(nparray.dtype)
 
-        if issubclass(nparray.dtype.type, (bool, np.bool_)):
+        if metadata.isdtype(nparray.dtype, "bool"):
             nparray = ak._connect.pyarrow.packbits(nparray)
 
         return pyarrow.Array.from_buffers(
@@ -1268,7 +1275,7 @@ class NumpyArray(Content):
                 complex_real_string = json_conversions["complex_real_string"]
                 complex_imag_string = json_conversions["complex_imag_string"]
                 if complex_real_string is not None:
-                    if issubclass(self.dtype.type, np.complexfloating):
+                    if metadata.isdtype(self.dtype, "complex floating"):
                         return ak.contents.RecordArray(
                             [
                                 ak.contents.NumpyArray(
@@ -1296,12 +1303,16 @@ class NumpyArray(Content):
 
                 posinf_string = json_conversions["posinf_string"]
                 if posinf_string is not None:
-                    for i in self._backend.nplike.nonzero(self._data == np.inf)[0]:
+                    for i in self._backend.nplike.nonzero(self._data == metadata.inf)[
+                        0
+                    ]:
                         out[i] = posinf_string
 
                 neginf_string = json_conversions["neginf_string"]
                 if neginf_string is not None:
-                    for i in self._backend.nplike.nonzero(self._data == -np.inf)[0]:
+                    for i in self._backend.nplike.nonzero(self._data == -metadata.inf)[
+                        0
+                    ]:
                         out[i] = neginf_string
 
             return out

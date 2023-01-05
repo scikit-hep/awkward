@@ -2,8 +2,6 @@
 
 import awkward as ak
 
-np = ak._nplikes.NumpyMetadata.instance()
-
 
 def to_regular(array, axis=1, *, highlevel=True, behavior=None):
     """
@@ -77,7 +75,7 @@ def _impl(array, axis, highlevel, behavior):
 
             elif layout.is_leaf:
                 raise ak._errors.wrap_error(
-                    np.AxisError(
+                    ak._errors.AxisError(
                         f"axis={axis} exceeds the depth of this array ({depth})"
                     )
                 )

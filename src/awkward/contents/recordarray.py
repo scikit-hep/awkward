@@ -6,13 +6,13 @@ import json
 from collections.abc import Iterable
 
 import awkward as ak
+from awkward._nplikes import metadata
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.recordform import RecordForm
 from awkward.record import Record
 from awkward.typing import Final, Self, final
 
-np = ak._nplikes.NumpyMetadata.instance()
 numpy = ak._nplikes.Numpy.instance()
 
 
@@ -393,7 +393,7 @@ class RecordArray(Content):
             #     length = carry.length
             # else:
             #     length = self.length
-            assert issubclass(carry.dtype.type, np.integer)
+            assert metadata.isdtype(carry.dtype, "integral")
             length = carry.length
 
             return RecordArray(
@@ -462,7 +462,9 @@ class RecordArray(Content):
     def _offsets_and_flattened(self, axis, depth):
         posaxis = ak._util.maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 == depth:
-            raise ak._errors.wrap_error(np.AxisError("axis=0 not allowed for flatten"))
+            raise ak._errors.wrap_error(
+                ak._errors.AxisError("axis=0 not allowed for flatten")
+            )
 
         elif posaxis is not None and posaxis + 1 == depth + 1:
             raise ak._errors.wrap_error(
@@ -486,7 +488,7 @@ class RecordArray(Content):
             offsets = ak.index.Index64.zeros(
                 1,
                 nplike=self._backend.index_nplike,
-                dtype=np.int64,
+                dtype=metadata.int64,
             )
             return (
                 offsets,
@@ -718,7 +720,7 @@ class RecordArray(Content):
     def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
         if self._fields is None or len(self._fields) == 0:
             return ak.contents.NumpyArray(
-                self._backend.nplike.instance().empty(0, np.int64),
+                self._backend.nplike.instance().empty(0, metadata.int64),
                 parameters=None,
                 backend=self._backend,
             )
@@ -874,7 +876,7 @@ class RecordArray(Content):
             if allow_missing and isinstance(x, self._backend.nplike.ma.MaskedArray):
                 if mask is None:
                     mask = backend.index_nplike.ma.zeros(
-                        self.length, [(n, np.bool_) for n in self.fields]
+                        self.length, [(n, metadata.bool_) for n in self.fields]
                     )
                 if x.mask is not None:
                     mask[n] |= x.mask

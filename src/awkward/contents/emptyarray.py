@@ -4,12 +4,12 @@ from __future__ import annotations
 import copy
 
 import awkward as ak
+from awkward._nplikes import metadata
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.emptyform import EmptyForm
 from awkward.typing import Final, Self, final
 
-np = ak._nplikes.NumpyMetadata.instance()
 numpy = ak._nplikes.Numpy.instance()
 
 
@@ -144,7 +144,7 @@ class EmptyArray(Content):
         elif isinstance(head, list):
             return self._getitem_next_fields(head, tail, advanced)
 
-        elif head is np.newaxis:
+        elif head is metadata.newaxis:
             return self._getitem_next_newaxis(tail, advanced)
 
         elif head is Ellipsis:
@@ -169,7 +169,7 @@ class EmptyArray(Content):
         posaxis = ak._util.maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 == depth:
             raise ak._errors.wrap_error(
-                np.AxisError(self, "axis=0 not allowed for flatten")
+                ak._errors.AxisError(self, "axis=0 not allowed for flatten")
             )
         else:
             offsets = ak.index.Index64.zeros(1, nplike=self._backend.index_nplike)
@@ -199,13 +199,15 @@ class EmptyArray(Content):
         posaxis = ak._util.maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 == depth:
             return ak.contents.NumpyArray(
-                self._backend.nplike.empty(0, np.int64),
+                self._backend.nplike.empty(0, metadata.int64),
                 parameters=None,
                 backend=self._backend,
             )
         else:
             raise ak._errors.wrap_error(
-                np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
+                ak._errors.AxisError(
+                    f"axis={axis} exceeds the depth of this array ({depth})"
+                )
             )
 
     def _numbers_to_type(self, name):
@@ -222,7 +224,7 @@ class EmptyArray(Content):
     def _argsort_next(
         self, negaxis, starts, shifts, parents, outlength, ascending, stable
     ):
-        as_numpy = self.to_NumpyArray(np.float64)
+        as_numpy = self.to_NumpyArray(metadata.float64)
         return as_numpy._argsort_next(
             negaxis, starts, shifts, parents, outlength, ascending, stable
         )
@@ -270,7 +272,9 @@ class EmptyArray(Content):
         posaxis = ak._util.maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 != depth:
             raise ak._errors.wrap_error(
-                np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
+                ak._errors.AxisError(
+                    f"axis={axis} exceeds the depth of this array ({depth})"
+                )
             )
         else:
             return self._pad_none_axis0(target, True)
@@ -293,7 +297,7 @@ class EmptyArray(Content):
             )
 
         else:
-            dtype = np.dtype(options["emptyarray_to"])
+            dtype = metadata.dtype(options["emptyarray_to"])
             next = ak.contents.NumpyArray(
                 numpy.empty(length, dtype),
                 parameters=self._parameters,
@@ -302,7 +306,7 @@ class EmptyArray(Content):
             return next._to_arrow(pyarrow, mask_node, validbytes, length, options)
 
     def _to_backend_array(self, allow_missing, backend):
-        return backend.nplike.empty(0, dtype=np.float64)
+        return backend.nplike.empty(0, dtype=metadata.float64)
 
     def _completely_flatten(self, backend, options):
         return []

@@ -13,9 +13,9 @@ from awkward_cpp.lib import _ext
 
 import awkward as ak
 from awkward._util import NDArrayOperatorsMixin
+from awkward._nplikes import Numpy, metadata
 
-np = ak._nplikes.NumpyMetadata.instance()
-numpy = ak._nplikes.Numpy.instance()
+numpy = Numpy.instance()
 
 _dir_pattern = re.compile(r"^[a-zA-Z_]\w*$")
 
@@ -181,7 +181,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             layout = data._layout
             behavior = ak._util.behavior_of(data, behavior=behavior)
 
-        elif numpy.is_own_array(data) and data.dtype != np.dtype("O"):
+        elif numpy.is_own_array(data) and metadata.isdtype(
+            data.dtype, ("numeric", "bool", "timelike")
+        ):
             layout = ak.operations.from_numpy(data, highlevel=False)
 
         elif ak._nplikes.Cupy.is_own_array(data):
@@ -1527,7 +1529,7 @@ class Record(NDArrayOperatorsMixin):
             for k, v in data.items():
                 fields.append(k)
                 if ak._util.is_non_string_like_iterable(v):
-                    contents.append(Array(v).layout[np.newaxis])
+                    contents.append(Array(v).layout[metadata.newaxis])
                 else:
                     contents.append(Array([v]).layout)
 

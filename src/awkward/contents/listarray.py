@@ -4,14 +4,13 @@ from __future__ import annotations
 import copy
 
 import awkward as ak
+from awkward._nplikes import metadata
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.contents.listoffsetarray import ListOffsetArray
 from awkward.forms.listform import ListForm
 from awkward.index import Index
 from awkward.typing import Final, Self, final
-
-np = ak._nplikes.NumpyMetadata.instance()
 
 
 @final
@@ -20,9 +19,9 @@ class ListArray(Content):
 
     def __init__(self, starts, stops, content, *, parameters=None):
         if not isinstance(starts, Index) and starts.dtype in (
-            np.dtype(np.int32),
-            np.dtype(np.uint32),
-            np.dtype(np.int64),
+            metadata.int32,
+            metadata.uint32,
+            metadata.int64,
         ):
             raise ak._errors.wrap_error(
                 TypeError(
@@ -754,7 +753,7 @@ class ListArray(Content):
         elif isinstance(head, list):
             return self._getitem_next_fields(head, tail, advanced)
 
-        elif head is np.newaxis:
+        elif head is metadata.newaxis:
             return self._getitem_next_newaxis(tail, advanced)
 
         elif head is Ellipsis:
@@ -1244,7 +1243,7 @@ class ListArray(Content):
                     nextcontent = ak.contents.IndexedOptionArray.simplified(
                         ak.index.Index64(
                             self._backend.index_nplike.empty(
-                                len(self._content), dtype=np.int64
+                                len(self._content), dtype=metadata.int64
                             )
                         ),
                         self._content,
@@ -1254,25 +1253,27 @@ class ListArray(Content):
                         self._starts,
                         self._stops,
                         nextcontent,
-                        parameters=self._parameters
+                        parameters=self._parameters,
                     )
 
-                min_ = self._backend.index_nplike.min(self._stops.data - self._starts.data)
+                min_ = self._backend.index_nplike.min(
+                    self._stops.data - self._starts.data
+                )
                 if target <= min_:
                     nextcontent = ak.contents.IndexedOptionArray.simplified(
                         ak.index.Index64(
                             self._backend.index_nplike.arange(
-                                len(self._content), dtype=np.int64
+                                len(self._content), dtype=metadata.int64
                             )
                         ),
                         self._content,
-                        parameters=None
+                        parameters=None,
                     )
                     return ak.contents.ListArray(
                         self._starts,
                         self._stops,
                         nextcontent,
-                        parameters=self._parameters
+                        parameters=self._parameters,
                     )
                 else:
                     tolength = ak.index.Index64.empty(1, self._backend.index_nplike)

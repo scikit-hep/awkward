@@ -1,9 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._nplikes import metadata
 from awkward.typing import Sequence
-
-np = ak._nplikes.NumpyMetadata.instance()
 
 
 def headtail(oldtail):
@@ -42,7 +41,7 @@ def prepare_advanced_indexing(items):
                     str,
                 ),
             )
-            or item is np.newaxis
+            or item is metadata.newaxis
             or item is Ellipsis
         ):
             broadcastable_index.append(None)
@@ -76,13 +75,17 @@ def prepare_advanced_indexing(items):
         x = broadcasted[i_broadcast]
         if len(x.shape) == 0:
             prepared.append(int(x))
-        elif issubclass(x.dtype.type, np.int64):
-            prepared.append(ak.index.Index64(x.reshape(-1)))
+        elif metadata.isdtype(x.dtype, metadata.int64):
+            prepared.append(ak.index.Index64(nplike.reshape(x, (-1,))))
             prepared[-1].metadata["shape"] = x.shape
-        elif issubclass(x.dtype.type, np.integer):
-            prepared.append(ak.index.Index64(x.astype(np.int64).reshape(-1)))
+        elif metadata.isdtype(x.dtype, metadata.integer):
+            prepared.append(
+                ak.index.Index64(
+                    nplike.reshape(nplike.astype(x, metadata.int64), (-1,))
+                )
+            )
             prepared[-1].metadata["shape"] = x.shape
-        elif issubclass(x.dtype.type, (np.bool_, bool)):
+        elif metadata.isdtype(x.dtype, "bool"):
             if len(x.shape) == 1:
                 current = ak.index.Index64(nplike.nonzero(x)[0])
                 prepared.append(current)
@@ -112,7 +115,7 @@ def prepare_advanced_indexing(items):
             break
     # Then find a separator
     for item in it:
-        if (item is np.newaxis) or (item is Ellipsis) or isinstance(item, slice):
+        if (item is metadata.newaxis) or (item is Ellipsis) or isinstance(item, slice):
             break
     # Now error if we find another array
     for item in it:
@@ -120,7 +123,7 @@ def prepare_advanced_indexing(items):
             raise ak._errors.wrap_error(
                 ValueError(
                     "NumPy advanced indexing with array indices separated by None "
-                    "(np.newaxis), Ellipsis, or slice are not permitted with Awkward Arrays"
+                    "(metadata.newaxis), Ellipsis, or slice are not permitted with Awkward Arrays"
                 )
             )
     return tuple(prepared)
@@ -136,7 +139,7 @@ def normalise_item(item, backend: ak._backends.Backend):
     elif isinstance(item, str):
         return item
 
-    elif item is np.newaxis:
+    elif item is metadata.newaxis:
         return item
 
     elif item is Ellipsis:
@@ -146,7 +149,7 @@ def normalise_item(item, backend: ak._backends.Backend):
         return normalise_item(item.layout, backend)
 
     elif isinstance(item, ak.contents.EmptyArray):
-        return normalise_item(item.to_NumpyArray(np.int64), backend)
+        return normalise_item(item.to_NumpyArray(metadata.int64), backend)
 
     elif isinstance(item, ak.contents.NumpyArray):
         return item.data
@@ -176,7 +179,7 @@ def normalise_item(item, backend: ak._backends.Backend):
             return out
 
     elif ak._util.is_sized_iterable(item) and len(item) == 0:
-        return backend.index_nplike.empty(0, dtype=np.int64)
+        return backend.index_nplike.empty(0, dtype=metadata.int64)
 
     elif ak._util.is_sized_iterable(item) and all(isinstance(x, str) for x in item):
         return list(item)
@@ -192,7 +195,7 @@ def normalise_item(item, backend: ak._backends.Backend):
     else:
         raise ak._errors.wrap_error(
             TypeError(
-                "only integers, slices (`:`), ellipsis (`...`), np.newaxis (`None`), "
+                "only integers, slices (`:`), ellipsis (`...`), metadata.newaxis (`None`), "
                 "integer/boolean arrays (possibly with variable-length nested "
                 "lists or missing values), field name (str) or names (non-tuple "
                 "iterable of str) are valid indices for slicing, not\n\n    "
@@ -225,16 +228,16 @@ def normalise_item_RegularArray_to_ListOffsetArray64(item):
 def normalise_item_nested(item):
     if isinstance(item, ak.contents.EmptyArray):
         # policy: unknown -> int
-        return normalise_item_nested(item.to_NumpyArray(np.int64))
+        return normalise_item_nested(item.to_NumpyArray(metadata.int64))
 
-    elif isinstance(item, ak.contents.NumpyArray) and issubclass(
-        item.dtype.type, (bool, np.bool_, np.integer)
+    elif isinstance(item, ak.contents.NumpyArray) and metadata.isdtype(
+        item.dtype, ("bool", "integral")
     ):
-        if issubclass(item.dtype.type, (bool, np.bool_, np.int64)):
+        if metadata.isdtype(item.dtype, ("bool", metadata.int64)):
             next = item
         else:
             next = ak.contents.NumpyArray(
-                item.data.astype(np.int64),
+                item.backend.nplike.astype(item.data, metadata.int64),
                 parameters=item.parameters,
                 backend=item.backend,
             )
@@ -247,7 +250,7 @@ def normalise_item_nested(item):
     elif isinstance(
         item,
         ak.contents.ListOffsetArray,
-    ) and issubclass(item.offsets.dtype.type, np.int64):
+    ) and metadata.isdtype(item.offsets.dtype, metadata.int64):
         return ak.contents.ListOffsetArray(
             item.offsets,
             normalise_item_nested(item.content),
@@ -297,14 +300,16 @@ def normalise_item_nested(item):
         item,
         ak.contents.IndexedOptionArray,
     ):
-        nextindex = item.index.data.astype(np.int64)  # this ALWAYS copies
+        nextindex = item.backend.nplike.astype(
+            item.index.data, metadata.int64
+        )  # this ALWAYS copies
         nonnull = nextindex >= 0
 
         projected = item.content._carry(ak.index.Index64(nextindex[nonnull]), False)
 
         # content has been projected; index must agree
         nextindex[nonnull] = item.backend.index_nplike.arange(
-            projected.length, dtype=np.int64
+            projected.length, dtype=metadata.int64
         )
 
         return ak.contents.IndexedOptionArray(
@@ -328,9 +333,11 @@ def normalise_item_nested(item):
             item.content._carry(ak.index.Index64(positions_where_valid), False)
         )
 
-        nextindex = item.backend.index_nplike.full(is_valid.shape[0], -1, np.int64)
+        nextindex = item.backend.index_nplike.full(
+            is_valid.shape[0], -1, metadata.int64
+        )
         nextindex[positions_where_valid] = item.backend.index_nplike.arange(
-            positions_where_valid.shape[0], dtype=np.int64
+            positions_where_valid.shape[0], dtype=metadata.int64
         )
 
         return ak.contents.IndexedOptionArray(
@@ -352,7 +359,7 @@ def normalise_item_nested(item):
     else:
         raise ak._errors.wrap_error(
             TypeError(
-                "only integers, slices (`:`), ellipsis (`...`), np.newaxis (`None`), "
+                "only integers, slices (`:`), ellipsis (`...`), metadata.newaxis (`None`), "
                 "integer/boolean arrays (possibly with variable-length nested "
                 "lists or missing values), field name (str) or names (non-tuple "
                 "iterable of str) are valid indices for slicing, not\n\n    "
@@ -366,14 +373,14 @@ def normalise_item_bool_to_int(item):
     if (
         isinstance(item, ak.contents.ListOffsetArray)
         and isinstance(item.content, ak.contents.NumpyArray)
-        and issubclass(item.content.dtype.type, (bool, np.bool_))
+        and metadata.isdtype(item.content.dtype, "bool")
     ):
         if item.backend.nplike.known_data or item.backend.nplike.known_shape:
             localindex = ak._do.local_index(item, axis=1)
             nextcontent = localindex.content.data[item.content.data]
 
             cumsum = item.backend.index_nplike.empty(
-                item.content.data.shape[0] + 1, np.int64
+                item.content.data.shape[0] + 1, metadata.int64
             )
             cumsum[0] = 0
             cumsum[1:] = item.backend.index_nplike.asarray(
@@ -385,7 +392,7 @@ def normalise_item_bool_to_int(item):
             item._touch_data(recursive=False)
             nextoffsets = item.offsets
             nextcontent = item.backend.nplike.empty(
-                (ak._typetracer.UnknownLength,), dtype=np.int64
+                (ak._typetracer.UnknownLength,), dtype=metadata.int64
             )
 
         return ak.contents.ListOffsetArray(
@@ -397,7 +404,7 @@ def normalise_item_bool_to_int(item):
         isinstance(item, ak.contents.ListOffsetArray)
         and isinstance(item.content, ak.contents.IndexedOptionArray)
         and isinstance(item.content.content, ak.contents.NumpyArray)
-        and issubclass(item.content.content.dtype.type, (bool, np.bool_))
+        and metadata.isdtype(item.content.content.dtype, "bool")
     ):
         if item.backend.nplike.known_data or item.backend.nplike.known_shape:
             if isinstance(item.backend.nplike, ak._nplikes.Jax):
@@ -417,7 +424,7 @@ def normalise_item_bool_to_int(item):
                 expanded = item.content.content.data[safeindex]
             else:
                 expanded = item.content.content.backend.nplike.ones(
-                    safeindex.shape[0], np.bool_
+                    safeindex.shape[0], metadata.bool_
                 )
 
             localindex = ak._do.local_index(item, axis=1)
@@ -428,15 +435,17 @@ def normalise_item_bool_to_int(item):
 
             # list offsets do include missing values
             expanded[isnegative] = True
-            cumsum = item.backend.nplike.empty(expanded.shape[0] + 1, np.int64)
+            cumsum = item.backend.nplike.empty(expanded.shape[0] + 1, metadata.int64)
             cumsum[0] = 0
             cumsum[1:] = item.backend.nplike.cumsum(expanded)
             nextoffsets = cumsum[item.offsets]
 
             # outindex fits into the lists; non-missing are sequential
-            outindex = item.backend.index_nplike.full(nextoffsets[-1], -1, np.int64)
+            outindex = item.backend.index_nplike.full(
+                nextoffsets[-1], -1, metadata.int64
+            )
             outindex[~isnegative[expanded]] = item.backend.index_nplike.arange(
-                nextcontent.shape[0], dtype=np.int64
+                nextcontent.shape[0], dtype=metadata.int64
             )
 
         else:
@@ -444,7 +453,7 @@ def normalise_item_bool_to_int(item):
             nextoffsets = item.offsets
             outindex = item.content.index
             nextcontent = item.backend.nplike.empty(
-                (ak._typetracer.UnknownLength,), dtype=np.int64
+                (ak._typetracer.UnknownLength,), dtype=metadata.int64
             )
 
         return ak.contents.ListOffsetArray(
@@ -467,7 +476,7 @@ def normalise_item_bool_to_int(item):
             )
 
         if isinstance(item.content, ak.contents.NumpyArray) and issubclass(
-            item.content.dtype.type, (bool, np.bool_)
+            item.content.dtype.type, (bool, metadata.bool_)
         ):
             if item.backend.nplike.known_data or item.backend.nplike.known_shape:
                 if isinstance(item.backend.nplike, ak._nplikes.Jax):
@@ -487,7 +496,7 @@ def normalise_item_bool_to_int(item):
                     expanded = item.content.data[safeindex]
                 else:
                     expanded = item.content.backend.nplike.ones(
-                        safeindex.shape[0], np.bool_
+                        safeindex.shape[0], metadata.bool_
                     )
 
                 # nextcontent does not include missing values
@@ -499,16 +508,16 @@ def normalise_item_bool_to_int(item):
                 lenoutindex = item.backend.nplike.count_nonzero(expanded)
 
                 # non-missing are sequential
-                outindex = item.backend.nplike.full(lenoutindex, -1, np.int64)
+                outindex = item.backend.nplike.full(lenoutindex, -1, metadata.int64)
                 outindex[~isnegative[expanded]] = item.backend.nplike.arange(
-                    nextcontent.shape[0], dtype=np.int64
+                    nextcontent.shape[0], dtype=metadata.int64
                 )
 
             else:
                 item._touch_data(recursive=False)
                 outindex = item.index
                 nextcontent = item.backend.nplike.empty(
-                    (ak._typetracer.UnknownLength,), dtype=np.int64
+                    (ak._typetracer.UnknownLength,), dtype=metadata.int64
                 )
 
             return ak.contents.IndexedOptionArray(

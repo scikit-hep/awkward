@@ -5,8 +5,8 @@ from __future__ import annotations
 import math
 
 import awkward as ak
+from awkward._nplikes import metadata
 
-np = ak._nplikes.NumpyMetadata.instance()
 numpy = ak._nplikes.Numpy.instance()
 
 
@@ -146,11 +146,11 @@ def _impl(
 
 
 _index_to_dtype = {
-    "i8": np.dtype("<i1"),
-    "u8": np.dtype("<u1"),
-    "i32": np.dtype("<i4"),
-    "u32": np.dtype("<u4"),
-    "i64": np.dtype("<i8"),
+    "i8": metadata.dtype("<i1"),
+    "u8": metadata.dtype("<u1"),
+    "i32": metadata.dtype("<i4"),
+    "u32": metadata.dtype("<u4"),
+    "i64": metadata.dtype("<i8"),
 }
 
 

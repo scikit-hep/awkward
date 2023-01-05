@@ -3,8 +3,8 @@
 import numbers
 
 import awkward as ak
+from awkward._nplikes import metadata
 
-np = ak._nplikes.NumpyMetadata.instance()
 cpu = ak._backends.NumpyBackend.instance()
 
 
@@ -64,22 +64,22 @@ def fill_none(array, value, axis=-1, *, highlevel=True, behavior=None):
 def _impl(array, value, axis, highlevel, behavior):
     arraylayout = ak.operations.to_layout(array, allow_record=True, allow_other=False)
     behavior = ak._util.behavior_of(array, value, behavior=behavior)
-    backend = ak._backends.backend_of(arraylayout, default=cpu)
+    backend = ak._backends.backend_of(arraylayout, value, default=cpu)
 
     # Convert value type to appropriate layout
     if (
-        isinstance(value, np.ndarray)
-        and issubclass(value.dtype.type, (np.bool_, np.number))
+        backend.nplike.is_own_array(value)
+        and metadata.isdtype(value.dtype, ("bool", "numeric"))
         and len(value.shape) != 0
     ):
         valuelayout = ak.operations.to_layout(
-            backend.nplike.asarray(value)[np.newaxis],
+            backend.nplike.asarray(value)[metadata.newaxis],
             allow_record=False,
             allow_other=False,
         )
-    elif isinstance(value, (bool, numbers.Number, np.bool_, np.number)) or (
-        isinstance(value, np.ndarray)
-        and issubclass(value.dtype.type, (np.bool_, np.number))
+    # TODO: is hasattr(value, dtype) too liberal?
+    elif isinstance(value, (bool, numbers.Number)) or (
+        hasattr(value, "dtype") and metadata.isdtype(value.dtype, ("bool", "numeric"))
     ):
         valuelayout = ak.operations.to_layout(
             backend.nplike.asarray(value), allow_record=False, allow_other=False
@@ -96,7 +96,7 @@ def _impl(array, value, axis, highlevel, behavior):
             valuelayout = valuelayout.array[valuelayout.at : valuelayout.at + 1]
         elif len(valuelayout) == 0:
             offsets = ak.index.Index64(
-                backend.index_nplike.asarray([0, 0], dtype=np.int64)
+                backend.index_nplike.asarray([0, 0], dtype=metadata.int64)
             )
             valuelayout = ak.contents.ListOffsetArray(offsets, valuelayout)
         else:
@@ -126,7 +126,7 @@ def _impl(array, value, axis, highlevel, behavior):
 
             elif layout.is_leaf:
                 raise ak._errors.wrap_error(
-                    np.AxisError(
+                    ak._errors.AxisError(
                         f"axis={axis} exceeds the depth of this array ({depth})"
                     )
                 )

@@ -2,8 +2,6 @@
 
 import awkward as ak
 
-np = ak._nplikes.NumpyMetadata.instance()
-
 
 def to_backend(array, backend, *, highlevel=True, behavior=None):
     """

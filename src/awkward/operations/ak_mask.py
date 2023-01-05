@@ -1,8 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
-
-np = ak._nplikes.NumpyMetadata.instance()
+from awkward._nplikes import metadata
 
 
 def mask(array, mask, *, valid_when=True, highlevel=True, behavior=None):
@@ -103,13 +102,13 @@ def _impl(array, mask, valid_when, highlevel, behavior):
         layoutarray, layoutmask = inputs
         if isinstance(layoutmask, ak.contents.NumpyArray):
             m = ak._nplikes.nplike_of(layoutmask).asarray(layoutmask)
-            if not issubclass(m.dtype.type, (bool, np.bool_)):
+            if not metadata.isdtype(m.dtype, "bool"):
                 raise ak._errors.wrap_error(
                     ValueError(
                         "mask must have boolean type, not " "{}".format(repr(m.dtype))
                     )
                 )
-            bytemask = ak.index.Index8(m.view(np.int8))
+            bytemask = ak.index.Index8(m.view(metadata.int8))
             return (
                 ak.contents.ByteMaskedArray.simplified(
                     bytemask, layoutarray, valid_when=valid_when

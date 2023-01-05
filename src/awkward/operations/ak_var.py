@@ -4,8 +4,6 @@ import awkward as ak
 from awkward._connect.numpy import unsupported
 from awkward._util import unset
 
-np = ak._nplikes.NumpyMetadata.instance()
-
 
 def var(
     x,
@@ -174,7 +172,9 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity):
             behavior=behavior,
         )
 
-    with np.errstate(invalid="ignore", divide="ignore"):
+    nplike = ak._nplikes.nplike_of(x, weight)
+
+    with nplike.error_state(invalid="ignore", divide="ignore"):
         xmean = ak.operations.ak_mean._impl(x, weight, axis, False, mask_identity)
         if weight is None:
             sumw = ak.operations.ak_count._impl(

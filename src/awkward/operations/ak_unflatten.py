@@ -3,8 +3,7 @@
 import numbers
 
 import awkward as ak
-
-np = ak._nplikes.NumpyMetadata.instance()
+from awkward._nplikes import metadata
 
 
 def unflatten(array, counts, axis=0, *, highlevel=True, behavior=None):
@@ -90,7 +89,7 @@ def _impl(array, counts, axis, highlevel, behavior):
     behavior = ak._util.behavior_of(array, behavior=behavior)
     backend = layout.backend
 
-    if isinstance(counts, (numbers.Integral, np.integer)):
+    if isinstance(counts, (numbers.Integral, metadata.integer)):
         current_offsets = None
     else:
         counts = ak.operations.to_layout(counts, allow_record=False, allow_other=False)
@@ -115,17 +114,17 @@ def _impl(array, counts, axis, highlevel, behavior):
         if counts.ndim != 1:
             raise ak._errors.wrap_error(ValueError("counts must be one-dimensional"))
 
-        if not issubclass(counts.dtype.type, np.integer):
+        if not issubclass(counts.dtype.type, metadata.integer):
             raise ak._errors.wrap_error(ValueError("counts must be integers"))
 
-        current_offsets = backend.index_nplike.empty(len(counts) + 1, np.int64)
+        current_offsets = backend.index_nplike.empty(len(counts) + 1, metadata.int64)
         current_offsets[0] = 0
         backend.index_nplike.cumsum(counts, out=current_offsets[1:])
 
     def unflatten_this_layout(layout):
         nonlocal current_offsets
 
-        if isinstance(counts, (numbers.Integral, np.integer)):
+        if isinstance(counts, (numbers.Integral, metadata.integer)):
             if counts < 0 or counts > len(layout):
                 raise ak._errors.wrap_error(
                     ValueError("too large counts for array or negative counts")
@@ -155,9 +154,10 @@ def _impl(array, counts, axis, highlevel, behavior):
             current_offsets = current_offsets[position:] - len(layout)
 
             out = ak.contents.ListOffsetArray(ak.index.Index64(offsets), layout)
-            if not isinstance(mask, (bool, np.bool_)):
+            if not isinstance(mask, (bool, metadata.bool_)):
                 index = ak.index.Index8(
-                    backend.nplike.asarray(mask).astype(np.int8), nplike=backend.nplike
+                    backend.nplike.asarray(mask).astype(metadata.int8),
+                    nplike=backend.nplike,
                 )
                 out = ak.contents.ByteMaskedArray(index, out, valid_when=False)
 

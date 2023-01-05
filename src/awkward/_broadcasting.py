@@ -9,6 +9,7 @@ import itertools
 from collections.abc import Sequence
 
 import awkward as ak
+from awkward._nplikes import metadata
 from awkward.contents.bitmaskedarray import BitMaskedArray
 from awkward.contents.bytemaskedarray import ByteMaskedArray
 from awkward.contents.content import Content
@@ -30,7 +31,6 @@ from awkward.index import (  # IndexU8,  ; Index32,  ; IndexU32,  ; noqa: F401
 from awkward.record import Record
 from awkward.typing import Any, Callable, Dict, List, TypeAlias, Union
 
-np = ak._nplikes.NumpyMetadata.instance()
 numpy = ak._nplikes.Numpy.instance()
 
 optiontypes = (IndexedOptionArray, ByteMaskedArray, BitMaskedArray, UnmaskedArray)
@@ -48,7 +48,9 @@ def broadcast_pack(inputs: Sequence, isscalar: list[bool]) -> list:
     nextinputs = []
     for x in inputs:
         if isinstance(x, Record):
-            index = ak._nplikes.nplike_of(*inputs).full(maxlen, x.at, dtype=np.int64)
+            index = ak._nplikes.nplike_of(*inputs).full(
+                maxlen, x.at, dtype=metadata.int64
+            )
             nextinputs.append(RegularArray(x.array[index], maxlen, 1))
             isscalar.append(True)
         elif isinstance(x, Content):
@@ -138,10 +140,10 @@ def all_same_offsets(backend: ak._backends.Backend, inputs: list) -> bool:
 
         elif isinstance(x, RegularArray):
             if x.size == 0:
-                my_offsets = index_nplike.empty(0, dtype=np.int64)
+                my_offsets = index_nplike.empty(0, dtype=metadata.int64)
             else:
                 my_offsets = index_nplike.arange(
-                    0, x.content.length, x.size, dtype=np.int64
+                    0, x.content.length, x.size, dtype=metadata.int64
                 )
 
             if offsets is None:
@@ -421,7 +423,9 @@ def apply_step(
         # Any EmptyArrays?
         if any(isinstance(x, EmptyArray) for x in inputs):
             nextinputs = [
-                x.to_NumpyArray(np.float64, backend) if isinstance(x, EmptyArray) else x
+                x.to_NumpyArray(metadata.float64, backend)
+                if isinstance(x, EmptyArray)
+                else x
                 for x in inputs
             ]
             return apply_step(
@@ -481,8 +485,8 @@ def apply_step(
 
                 all_combos = list(itertools.product(*[range(x) for x in numtags]))
 
-                tags = backend.index_nplike.empty(length, dtype=np.int8)
-                index = backend.index_nplike.empty(length, dtype=np.int64)
+                tags = backend.index_nplike.empty(length, dtype=metadata.int8)
+                index = backend.index_nplike.empty(length, dtype=metadata.int64)
                 numoutputs, outcontents = None, []
                 for combo in all_combos:
                     nextinputs = []
@@ -545,14 +549,14 @@ def apply_step(
                     [(str(i), combos.dtype) for i in range(len(tagslist))]
                 ).reshape(length)
 
-                tags = backend.index_nplike.empty(length, dtype=np.int8)
-                index = backend.index_nplike.empty(length, dtype=np.int64)
+                tags = backend.index_nplike.empty(length, dtype=metadata.int8)
+                index = backend.index_nplike.empty(length, dtype=metadata.int64)
                 numoutputs, outcontents = None, []
                 for tag, combo in enumerate(all_combos):
                     mask = combos == combo
                     tags[mask] = tag
                     index[mask] = backend.index_nplike.arange(
-                        backend.index_nplike.count_nonzero(mask), dtype=np.int64
+                        backend.index_nplike.count_nonzero(mask), dtype=metadata.int64
                     )
                     nextinputs = []
                     i = 0
@@ -607,16 +611,18 @@ def apply_step(
                         else:
                             mask = backend.index_nplike.logical_or(mask, m, out=mask)
 
-                nextmask = Index8(mask.view(np.int8))
-                index = backend.index_nplike.full(mask.shape[0], -1, dtype=np.int64)
+                nextmask = Index8(mask.view(metadata.int8))
+                index = backend.index_nplike.full(
+                    mask.shape[0], -1, dtype=metadata.int64
+                )
                 index[~mask] = backend.index_nplike.arange(
                     mask.shape[0] - backend.index_nplike.count_nonzero(mask),
-                    dtype=np.int64,
+                    dtype=metadata.int64,
                 )
                 index = Index64(index)
                 if any(not isinstance(x, optiontypes) for x in inputs):
                     nextindex = backend.index_nplike.arange(
-                        mask.shape[0], dtype=np.int64
+                        mask.shape[0], dtype=metadata.int64
                     )
                     nextindex[mask] = -1
                     nextindex = Index64(nextindex)
@@ -639,7 +645,7 @@ def apply_step(
                     if isinstance(x, optiontypes):
                         x._touch_data(recursive=False)
                         index = Index64(
-                            backend.index_nplike.empty((x.length,), np.int64)
+                            backend.index_nplike.empty((x.length,), metadata.int64)
                         )
                         nextinputs.append(x.content)
                     else:
@@ -693,7 +699,7 @@ def apply_step(
                                 tmpindex = Index64(
                                     backend.index_nplike.repeat(
                                         backend.index_nplike.arange(
-                                            x.length, dtype=np.int64
+                                            x.length, dtype=metadata.int64
                                         ),
                                         dimsize,
                                     ),
@@ -759,7 +765,7 @@ def apply_step(
                         x._touch_data(recursive=False)
                         offsets = Index64(
                             backend.index_nplike.empty(
-                                (x.offsets.data.shape[0],), np.int64
+                                (x.offsets.data.shape[0],), metadata.int64
                             ),
                             nplike=backend.index_nplike,
                         )
@@ -768,7 +774,7 @@ def apply_step(
                         x._touch_data(recursive=False)
                         offsets = Index64(
                             backend.index_nplike.empty(
-                                (x.starts.data.shape[0] + 1,), np.int64
+                                (x.starts.data.shape[0] + 1,), metadata.int64
                             ),
                             nplike=backend.index_nplike,
                         )

@@ -1,8 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._nplikes import metadata
 
-np = ak._nplikes.NumpyMetadata.instance()
 cpu = ak._backends.NumpyBackend.instance()
 
 
@@ -293,7 +293,10 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
         indexes = [
             ak.index.Index64(x.reshape(-1))
             for x in backend.index_nplike.meshgrid(
-                *[backend.index_nplike.arange(len(x), dtype=np.int64) for x in layouts],
+                *[
+                    backend.index_nplike.arange(len(x), dtype=metadata.int64)
+                    for x in layouts
+                ],
                 indexing="ij",
             )
         ]

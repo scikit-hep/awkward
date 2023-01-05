@@ -6,9 +6,16 @@ import awkward_cpp
 
 import awkward as ak
 from awkward._kernels import CupyKernel, JaxKernel, NumpyKernel, TypeTracerKernel
-from awkward._nplikes import Cupy, Jax, Numpy, NumpyLike, nplike_of, metadata
+from awkward._nplikes import (
+    Cupy,
+    Jax,
+    Numpy,
+    NumpyLike,
+    TypeTracer,
+    metadata,
+    nplike_of,
+)
 from awkward._singleton import Singleton
-from awkward._typetracer import TypeTracer
 from awkward.typing import Callable, Final, Tuple, TypeAlias, TypeVar, Unpack
 
 T = TypeVar("T", covariant=True)

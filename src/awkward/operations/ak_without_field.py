@@ -4,8 +4,6 @@ from collections.abc import Sequence
 
 import awkward as ak
 
-np = ak._nplikes.NumpyMetadata.instance()
-
 
 def without_field(array, where, *, highlevel=True, behavior=None):
     """

@@ -4,12 +4,12 @@ from __future__ import annotations
 import copy
 
 import awkward as ak
+from awkward._nplikes import metadata
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.regularform import RegularForm
 from awkward.typing import Final, Self, final
 
-np = ak._nplikes.NumpyMetadata.instance()
 numpy = ak._nplikes.Numpy.instance()
 
 
@@ -239,8 +239,8 @@ class RegularArray(Content):
         where = carry.data
 
         copied = allow_lazy == "copied"
-        if not issubclass(where.dtype.type, np.int64):
-            where = where.astype(np.int64)
+        if not metadata.isdtype(where.dtype, metadata.int64):
+            where = where.astype(metadata.int64)
             copied = True
 
         negative = where < 0
@@ -453,7 +453,7 @@ class RegularArray(Content):
         elif isinstance(head, list):
             return self._getitem_next_fields(head, tail, advanced)
 
-        elif head is np.newaxis:
+        elif head is metadata.newaxis:
             return self._getitem_next_newaxis(tail, advanced)
 
         elif head is Ellipsis:
@@ -703,7 +703,7 @@ class RegularArray(Content):
                 self._length * self._size, nplike=self._backend.index_nplike
             )
             self._handle_error(
-                self._backend["awkward_RegularArray_localindex", np.int64](
+                self._backend["awkward_RegularArray_localindex", metadata.int64](
                     localindex.data,
                     self._size,
                     self._length,
@@ -827,23 +827,23 @@ class RegularArray(Content):
                     combinationslen = combinationslen // j
 
             totallen = combinationslen * self._length
-            tocarryraw = self._backend.index_nplike.empty(n, dtype=np.intp)
+            tocarryraw = self._backend.index_nplike.empty(n, dtype=metadata.intp)
             tocarry = []
             for i in range(n):
                 ptr = ak.index.Index64.empty(
                     totallen,
                     nplike=self._backend.index_nplike,
-                    dtype=np.int64,
+                    dtype=metadata.int64,
                 )
                 tocarry.append(ptr)
                 if self._backend.nplike.known_data:
                     tocarryraw[i] = ptr.ptr
 
             toindex = ak.index.Index64.empty(
-                n, self._backend.index_nplike, dtype=np.int64
+                n, self._backend.index_nplike, dtype=metadata.int64
             )
             fromindex = ak.index.Index64.empty(
-                n, self._backend.index_nplike, dtype=np.int64
+                n, self._backend.index_nplike, dtype=metadata.int64
             )
 
             if self._size != 0:
@@ -854,7 +854,7 @@ class RegularArray(Content):
                 self._handle_error(
                     self._backend[
                         "awkward_RegularArray_combinations_64",
-                        np.int64,
+                        metadata.int64,
                         toindex.data.dtype.type,
                         fromindex.data.dtype.type,
                     ](

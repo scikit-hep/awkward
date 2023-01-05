@@ -8,11 +8,10 @@ from numbers import Complex, Real
 
 import awkward as ak
 from awkward._backends import Backend
-from awkward._nplikes import NumpyLike
+from awkward._nplikes import NumpyLike, metadata  # noqa: F401
 from awkward.forms.form import Form, _parameters_equal
 from awkward.typing import Any, AxisMaybeNone, Literal, Self, TypeAlias, TypedDict
 
-np = ak._nplikes.NumpyMetadata.instance()
 numpy = ak._nplikes.Numpy.instance()
 
 ActionType: TypeAlias = """Callable[
@@ -531,7 +530,7 @@ class Content:
         elif isinstance(where, str):
             return self._getitem_field(where)
 
-        elif where is np.newaxis:
+        elif where is metadata.newaxis:
             return self._getitem((where,))
 
         elif where is Ellipsis:
@@ -571,19 +570,19 @@ class Content:
             return self._getitem_fields(ak.operations.to_list(where))
 
         elif isinstance(where, ak.contents.EmptyArray):
-            return where.to_NumpyArray(np.int64)
+            return where.to_NumpyArray(metadata.int64)
 
         elif isinstance(where, ak.contents.NumpyArray):
-            if issubclass(where.dtype.type, np.int64):
+            if issubclass(where.dtype.type, metadata.int64):
                 carry = ak.index.Index64(where.data.reshape(-1))
                 allow_lazy = True
-            elif issubclass(where.dtype.type, np.integer):
+            elif metadata.isdtype(where.dtype, "integral"):
                 carry = ak.index.Index64(
-                    where.data.astype(np.int64).reshape(-1),
+                    where.data.astype(metadata.int64).reshape(-1),
                     nplike=self._backend.index_nplike,
                 )
                 allow_lazy = "copied"  # True, but also can be modified in-place
-            elif issubclass(where.dtype.type, (np.bool_, bool)):
+            elif metadata.isdtype(where.dtype, "bool"):
                 if len(where.data.shape) == 1:
                     where = self._backend.nplike.nonzero(where.data)[0]
                     carry = ak.index.Index64(where, nplike=self._backend.index_nplike)
@@ -661,12 +660,12 @@ class Content:
     def _carry_asrange(self, carry: ak.index.Index):
         assert isinstance(carry, ak.index.Index)
 
-        result = self._backend.index_nplike.empty(1, dtype=np.bool_)
+        result = self._backend.index_nplike.empty(1, dtype=metadata.bool_)
         assert carry.nplike is self._backend.index_nplike
         self._handle_error(
             self._backend[
                 "awkward_Index_iscontiguous",  # badly named
-                np.bool_,
+                metadata.bool_,
                 carry.dtype.type,
             ](
                 result,
@@ -688,7 +687,7 @@ class Content:
     def _local_index_axis0(self) -> ak.contents.NumpyArray:
         localindex = ak.index.Index64.empty(self.length, self._backend.index_nplike)
         self._handle_error(
-            self._backend["awkward_localindex", np.int64](
+            self._backend["awkward_localindex", metadata.int64](
                 localindex.data,
                 localindex.length,
             )
@@ -836,21 +835,23 @@ class Content:
                 combinationslen = combinationslen * (size - j + 1)
                 combinationslen = combinationslen // j
 
-        tocarryraw = self._backend.index_nplike.empty(n, dtype=np.intp)
+        tocarryraw = self._backend.index_nplike.empty(n, dtype=metadata.intp)
         tocarry = []
         for i in range(n):
             ptr = ak.index.Index64.empty(
                 combinationslen,
                 nplike=self._backend.index_nplike,
-                dtype=np.int64,
+                dtype=metadata.int64,
             )
             tocarry.append(ptr)
             if self._backend.nplike.known_data:
                 tocarryraw[i] = ptr.ptr
 
-        toindex = ak.index.Index64.empty(n, self._backend.index_nplike, dtype=np.int64)
+        toindex = ak.index.Index64.empty(
+            n, self._backend.index_nplike, dtype=metadata.int64
+        )
         fromindex = ak.index.Index64.empty(
-            n, self._backend.index_nplike, dtype=np.int64
+            n, self._backend.index_nplike, dtype=metadata.int64
         )
 
         assert (
@@ -860,7 +861,7 @@ class Content:
         self._handle_error(
             self._backend[
                 "awkward_RegularArray_combinations_64",
-                np.int64,
+                metadata.int64,
                 toindex.data.dtype.type,
                 fromindex.data.dtype.type,
             ](
@@ -970,7 +971,7 @@ class Content:
     def _pad_none_axis0(self, target: int, clip: bool) -> Content:
         if not clip and target < self.length:
             index = ak.index.Index64(
-                self._backend.index_nplike.arange(self.length, dtype=np.int64),
+                self._backend.index_nplike.arange(self.length, dtype=metadata.int64),
                 nplike=self._backend.index_nplike,
             )
 

@@ -6,7 +6,7 @@ nplike-agnostic metadata, such as dtypes and constants.
 from __future__ import annotations
 
 import numpy
-from numpy import dtype, finfo, iinfo
+from numpy import datetime_data, dtype, finfo, iinfo
 
 import awkward as ak
 
@@ -29,6 +29,8 @@ __all__ = [
     "complex128",
     "datetime64",
     "timedelta64",
+    "intp",
+    "datetime_data",
     "dtype",
     "iinfo",
     "finfo",
@@ -59,6 +61,7 @@ str_ = dtype("str_")
 bytes_ = dtype("bytes_")
 datetime64 = dtype("datetime64")
 timedelta64 = dtype("timedelta64")
+intp = dtype("intp")
 
 _signed_integer = (int8, int16, int32, int64)
 _unsigned_integer = (
@@ -89,7 +92,7 @@ if hasattr(numpy, "complex256"):
     _complex_floating = (*_complex_floating, dtype(numpy.complex256))  # type: ignore
 
 
-_all_dtypes = (
+all_dtypes = (
     *_signed_integer,
     *_unsigned_integer,
     *_real_floating,
@@ -104,37 +107,37 @@ _all_dtypes = (
 
 # DType inspection routines ###################################################
 def isdtype(
-    dtype: dtype,
+    dtype_: dtype,
     kind: dtype | str | tuple[dtype | str, ...],
 ) -> bool:
     if isinstance(kind, str):
         if kind == "bool":
-            return numpy.issubdtype(dtype, bool_)
+            return numpy.issubdtype(dtype_, bool_)
         elif kind == "signed integer":
-            return any([numpy.issubdtype(dtype, c) for c in _signed_integer])
+            return any([numpy.issubdtype(dtype_, c) for c in _signed_integer])
         elif kind == "unsigned integer":
-            return any([numpy.issubdtype(dtype, c) for c in _unsigned_integer])
+            return any([numpy.issubdtype(dtype_, c) for c in _unsigned_integer])
         elif kind == "integral":
-            return isdtype(dtype, "signed integer") or isdtype(
-                dtype, "unsigned integer"
+            return isdtype(dtype_, "signed integer") or isdtype(
+                dtype_, "unsigned integer"
             )
         elif kind == "real floating":
-            return any([numpy.issubdtype(dtype, c) for c in _real_floating])
+            return any([numpy.issubdtype(dtype_, c) for c in _real_floating])
         elif kind == "complex floating":
-            return any([numpy.issubdtype(dtype, c) for c in _complex_floating])
+            return any([numpy.issubdtype(dtype_, c) for c in _complex_floating])
         elif kind == "numeric":
             return (
-                isdtype(dtype, "integral")
-                or isdtype(dtype, "real floating")
-                or isdtype(dtype, "complex floating")
+                isdtype(dtype_, "integral")
+                or isdtype(dtype_, "real floating")
+                or isdtype(dtype_, "complex floating")
             )
         ### Extensions to Array API ###
         elif kind == "timelike":
-            return isdtype(dtype, timedelta64) or isdtype(dtype, datetime64)
+            return isdtype(dtype_, timedelta64) or isdtype(dtype_, datetime64)
         else:
             raise ak._errors.wrap_error(ValueError(f"Invalid kind {kind} given"))
     elif isinstance(kind, tuple):
-        return any([isdtype(dtype, k) for k in kind])
+        return any([isdtype(dtype_, k) for k in kind])
     else:
         assert isinstance(kind, dtype)
-        return numpy.issubdtype(dtype, kind)
+        return numpy.issubdtype(dtype_, kind)

@@ -5,8 +5,6 @@ import pathlib
 
 import awkward as ak
 
-np = ak._nplikes.NumpyMetadata.instance()
-
 
 def from_avro_file(
     file, limit_entries=None, *, debug_forth=False, highlevel=True, behavior=None

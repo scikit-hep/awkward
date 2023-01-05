@@ -8,13 +8,13 @@ import ctypes
 from collections.abc import Iterable, Sequence
 
 import awkward as ak
+from awkward._nplikes import metadata
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.unionform import UnionForm
 from awkward.index import Index, Index8, Index64
 from awkward.typing import Final, Self, final
 
-np = ak._nplikes.NumpyMetadata.instance()
 numpy = ak._nplikes.Numpy.instance()
 
 
@@ -23,7 +23,7 @@ class UnionArray(Content):
     is_union = True
 
     def __init__(self, tags, index, contents, *, parameters=None):
-        if not (isinstance(tags, Index) and tags.dtype == np.dtype(np.int8)):
+        if not (isinstance(tags, Index) and tags.dtype == metadata.int8):
             raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'tags' must be an Index with dtype=int8, not {}".format(
@@ -32,10 +32,9 @@ class UnionArray(Content):
                 )
             )
 
-        if not isinstance(index, Index) and index.dtype in (
-            np.dtype(np.int32),
-            np.dtype(np.uint32),
-            np.dtype(np.int64),
+        if not isinstance(index, Index) and metadata.isdtype(
+            index.dtype,
+            (metadata.int32, metadata.uint32, metadata.int64),
         ):
             raise ak._errors.wrap_error(
                 TypeError(
@@ -531,7 +530,7 @@ class UnionArray(Content):
             for tag, content in enumerate(self._contents):
                 if tag == tag_for_missing:
                     indexedoption_index = self._backend.index_nplike.arange(
-                        content.length + 1, dtype=np.int64
+                        content.length + 1, dtype=metadata.int64
                     )
                     contents.append(
                         ak.contents.IndexedOptionArray.simplified(
@@ -574,7 +573,7 @@ class UnionArray(Content):
             for tag, content in enumerate(self._contents):
                 if tag == tag_for_missing:
                     indexedoption_index = self._backend.index_nplike.arange(
-                        content.length + 1, dtype=np.int64
+                        content.length + 1, dtype=metadata.int64
                     )
                     indexedoption_index[content.length] = -1
                     contents.append(
@@ -771,7 +770,7 @@ class UnionArray(Content):
         elif isinstance(head, list):
             return self._getitem_next_fields(head, tail, advanced)
 
-        elif head is np.newaxis:
+        elif head is metadata.newaxis:
             return self._getitem_next_newaxis(tail, advanced)
 
         elif head is Ellipsis:
@@ -787,12 +786,14 @@ class UnionArray(Content):
         posaxis = ak._util.maybe_posaxis(self, axis, depth)
 
         if posaxis is not None and posaxis + 1 == depth:
-            raise ak._errors.wrap_error(np.AxisError("axis=0 not allowed for flatten"))
+            raise ak._errors.wrap_error(
+                ak._errors.AxisError("axis=0 not allowed for flatten")
+            )
 
         else:
             has_offsets = False
             offsetsraws = self._backend.index_nplike.empty(
-                len(self._contents), dtype=np.intp
+                len(self._contents), dtype=metadata.intp
             )
             contents = []
 
@@ -819,7 +820,7 @@ class UnionArray(Content):
                         total_length.dtype.type,
                         self._tags.dtype.type,
                         self._index.dtype.type,
-                        np.int64,
+                        metadata.int64,
                     ](
                         total_length.data,
                         self._tags.data,
@@ -856,7 +857,7 @@ class UnionArray(Content):
                         tooffsets.dtype.type,
                         self._tags.dtype.type,
                         self._index.dtype.type,
-                        np.int64,
+                        metadata.int64,
                     ](
                         totags.data,
                         toindex.data,
@@ -884,7 +885,7 @@ class UnionArray(Content):
                 offsets = ak.index.Index64.zeros(
                     0,
                     nplike=self._backend.index_nplike,
-                    dtype=np.int64,
+                    dtype=metadata.int64,
                 )
                 return (
                     offsets,
@@ -1225,7 +1226,7 @@ class UnionArray(Content):
         )
         if simplified.length == 0:
             return ak.contents.NumpyArray(
-                self._backend.nplike.empty(0, np.int64),
+                self._backend.nplike.empty(0, metadata.int64),
                 parameters=None,
                 backend=self._backend,
             )
@@ -1289,7 +1290,7 @@ class UnionArray(Content):
                 return f"at {path} ({type(self)!r}): len(index) < len(tags)"
 
             lencontents = self._backend.index_nplike.empty(
-                len(self.contents), dtype=np.int64
+                len(self.contents), dtype=metadata.int64
             )
             if self._backend.nplike.known_shape:
                 for i in range(len(self.contents)):
@@ -1299,7 +1300,7 @@ class UnionArray(Content):
                 "awkward_UnionArray_validity",
                 self.tags.dtype.type,
                 self.index.dtype.type,
-                np.int64,
+                metadata.int64,
             ](
                 self.tags.data,
                 self.index.data,
@@ -1363,7 +1364,9 @@ class UnionArray(Content):
                 # If this_index is a filtered permutation, we can just filter-permute
                 # the mask to have the same order the content.
                 if numpy.unique(this_index).shape[0] == this_index.shape[0]:
-                    this_validbytes = numpy.zeros(this_index.shape[0], dtype=np.int8)
+                    this_validbytes = numpy.zeros(
+                        this_index.shape[0], dtype=metadata.int8
+                    )
                     this_validbytes[this_index] = validbytes[selected_tags]
 
                 # If this_index is not a filtered permutation, then we can't modify
@@ -1406,8 +1409,8 @@ class UnionArray(Content):
             list(range(len(values))),
         )
 
-        if not issubclass(npindex.dtype.type, np.int32):
-            npindex = npindex.astype(np.int32)
+        if not metadata.isdtype(npindex.dtype, metadata.int32):
+            npindex = npindex.astype(metadata.int32)
 
         return pyarrow.Array.from_buffers(
             ak._connect.pyarrow.to_awkwardarrow_type(

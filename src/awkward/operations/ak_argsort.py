@@ -3,8 +3,6 @@
 import awkward as ak
 from awkward._connect.numpy import unsupported
 
-np = ak._nplikes.NumpyMetadata.instance()
-
 
 def argsort(
     array, axis=-1, *, ascending=True, stable=True, highlevel=True, behavior=None

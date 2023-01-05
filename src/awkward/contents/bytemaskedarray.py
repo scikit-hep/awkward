@@ -6,13 +6,13 @@ import json
 import math
 
 import awkward as ak
+from awkward._nplikes import metadata
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.bytemaskedform import ByteMaskedForm
 from awkward.index import Index
 from awkward.typing import Final, Self, final
 
-np = ak._nplikes.NumpyMetadata.instance()
 numpy = ak._nplikes.Numpy.instance()
 
 
@@ -21,7 +21,7 @@ class ByteMaskedArray(Content):
     is_option = True
 
     def __init__(self, mask, content, valid_when, *, parameters=None):
-        if not (isinstance(mask, Index) and mask.dtype == np.dtype(np.int8)):
+        if not (isinstance(mask, Index) and mask.dtype == metadata.int8):
             raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'mask' must be an Index with dtype=int8, not {}".format(
@@ -235,11 +235,15 @@ class ByteMaskedArray(Content):
         if valid_when == self._valid_when:
             return self
         else:
+            nplike = self._backend.index_nplike
             return ByteMaskedArray(
                 ak.index.Index8(
-                    self._backend.index_nplike.logical_not(
-                        self._mask.data.astype(np.bool_)
-                    ).astype(dtype=np.int8)
+                    nplike.astype(
+                        nplike.logical_not(
+                            nplike.astype(self._mask.data, metadata.bool_)
+                        ),
+                        dtype=metadata.int8,
+                    )
                 ),
                 self._content,
                 valid_when,
@@ -255,7 +259,7 @@ class ByteMaskedArray(Content):
                 excess_length = ak._typetracer.UnknownLength
             return ak.contents.BitMaskedArray(
                 ak.index.IndexU8(
-                    self._backend.nplike.empty(excess_length, dtype=np.uint8)
+                    self._backend.nplike.empty(excess_length, dtype=metadata.uint8)
                 ),
                 self._content,
                 valid_when,
@@ -267,7 +271,7 @@ class ByteMaskedArray(Content):
         else:
             import awkward._connect.pyarrow
 
-            bytearray = self.mask_as_bool(valid_when).view(np.uint8)
+            bytearray = self.mask_as_bool(valid_when).view(metadata.uint8)
             bitarray = awkward._connect.pyarrow.packbits(bytearray, lsb_order)
 
             return ak.contents.BitMaskedArray(
@@ -481,7 +485,7 @@ class ByteMaskedArray(Content):
         elif isinstance(head, list):
             return self._getitem_next_fields(head, tail, advanced)
 
-        elif head is np.newaxis:
+        elif head is metadata.newaxis:
             return self._getitem_next_newaxis(tail, advanced)
 
         elif head is Ellipsis:
@@ -577,7 +581,9 @@ class ByteMaskedArray(Content):
     def _offsets_and_flattened(self, axis, depth):
         posaxis = ak._util.maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 == depth:
-            raise ak._errors.wrap_error(np.AxisError("axis=0 not allowed for flatten"))
+            raise ak._errors.wrap_error(
+                ak._errors.AxisError("axis=0 not allowed for flatten")
+            )
         else:
             numnull, nextcarry, outindex = self._nextcarry_outindex(self._backend)
 
@@ -597,7 +603,7 @@ class ByteMaskedArray(Content):
                 outoffsets = ak.index.Index64.empty(
                     offsets.length + numnull,
                     nplike=self._backend.index_nplike,
-                    dtype=np.int64,
+                    dtype=metadata.int64,
                 )
 
                 assert (

@@ -3,11 +3,10 @@
 from collections.abc import Iterable
 
 import awkward as ak
+from awkward._nplikes import metadata
 from awkward._util import unset
 from awkward.forms.form import Form, _parameters_equal
 from awkward.typing import final
-
-np = ak._nplikes.NumpyMetadata.instance()
 
 
 def from_dtype(dtype, parameters=None):
@@ -17,8 +16,8 @@ def from_dtype(dtype, parameters=None):
         inner_shape = dtype.shape
         dtype = dtype.subdtype[0]
 
-    if issubclass(dtype.type, (np.datetime64, np.timedelta64)):
-        unit, step = np.datetime_data(dtype)
+    if metadata.isdtype(dtype.type, (metadata.datetime64, metadata.timedelta64)):
+        unit, step = metadata.datetime_data(dtype)
         if unit != "generic":
             unitstr = ("" if step == 1 else str(step)) + unit
             if parameters is None:
@@ -26,7 +25,7 @@ def from_dtype(dtype, parameters=None):
             else:
                 parameters = parameters.copy()
             parameters["__unit__"] = unitstr
-            dtype = np.dtype(dtype.type)
+            dtype = metadata.dtype(dtype.type)
 
     return NumpyForm(
         primitive=ak.types.numpytype.dtype_to_primitive(dtype),

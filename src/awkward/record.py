@@ -5,11 +5,10 @@ import copy
 from collections.abc import Iterable
 
 import awkward as ak
+from awkward._nplikes import metadata
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.typing import Self
-
-np = ak._nplikes.NumpyMetadata.instance()
 
 
 class Record:
@@ -133,7 +132,7 @@ class Record:
         elif isinstance(where, str):
             return self._getitem_field(where)
 
-        elif where is np.newaxis:
+        elif where is metadata.newaxis:
             raise ak._errors.wrap_error(
                 IndexError("scalar Record cannot be sliced by np.newaxis (`None`)")
             )

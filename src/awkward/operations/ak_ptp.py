@@ -4,8 +4,6 @@ import awkward as ak
 from awkward._connect.numpy import unsupported
 from awkward._util import unset
 
-np = ak._nplikes.NumpyMetadata.instance()
-
 
 def ptp(array, axis=None, *, keepdims=False, mask_identity=True, flatten_records=unset):
     """
@@ -83,7 +81,7 @@ def _impl(array, axis, keepdims, mask_identity):
         behavior=behavior,
     )
 
-    with np.errstate(invalid="ignore", divide="ignore"):
+    with array.backend.nplike.error_state(invalid="ignore", divide="ignore"):
         if axis is None:
             out = ak.operations.ak_max._impl(
                 array,

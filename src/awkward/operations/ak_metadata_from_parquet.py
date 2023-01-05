@@ -4,9 +4,6 @@ import collections
 
 import awkward as ak
 
-np = ak._nplikes.NumpyMetadata.instance()
-
-
 ParquetMetadata = collections.namedtuple(
     "ParquetMetadata",
     ["form", "fs", "paths", "metadata"],

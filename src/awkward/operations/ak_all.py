@@ -4,8 +4,6 @@ import awkward as ak
 from awkward._connect.numpy import unsupported
 from awkward._util import unset
 
-np = ak._nplikes.NumpyMetadata.instance()
-
 
 def all(
     array,

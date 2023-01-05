@@ -1,8 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
-
-np = ak._nplikes.NumpyMetadata.instance()
+from awkward._nplikes import metadata
 
 
 def to_categorical(array, *, highlevel=True, behavior=None):
@@ -103,8 +102,8 @@ def _impl(array, highlevel, behavior):
             hashable = [ak.behaviors.categorical._as_hashable(x) for x in content_list]
 
             lookup = {}
-            is_first = ak._nplikes.numpy.empty(len(hashable), dtype=np.bool_)
-            mapping = ak._nplikes.numpy.empty(len(hashable), dtype=np.int64)
+            is_first = ak._nplikes.numpy.empty(len(hashable), dtype=metadata.bool_)
+            mapping = ak._nplikes.numpy.empty(len(hashable), dtype=metadata.int64)
             for i, x in enumerate(hashable):
                 if x in lookup:
                     is_first[i] = False
@@ -126,7 +125,7 @@ def _impl(array, highlevel, behavior):
 
             elif layout.is_option:
                 mask = ak._nplikes.numpy.asarray(layout.mask_as_bool(valid_when=False))
-                mapping[mask.view(np.bool_)] = -1
+                mapping[mask.view(metadata.bool_)] = -1
                 index = ak.index.Index64(mapping)
 
             else:

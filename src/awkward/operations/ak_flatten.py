@@ -1,8 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
-
-np = ak._nplikes.NumpyMetadata.instance()
+from awkward._nplikes import metadata
 
 
 def flatten(array, axis=1, *, highlevel=True, behavior=None):
@@ -196,7 +195,7 @@ def _impl(array, axis, highlevel, behavior):
                 index = backend.index_nplike.asarray(
                     backend.nplike.asarray(layout.index), copy=True
                 )
-                bigmask = backend.index_nplike.empty(len(index), dtype=np.bool_)
+                bigmask = backend.index_nplike.empty(len(index), dtype=metadata.bool_)
                 for tag, content in enumerate(layout.contents):
                     if content.is_option and not isinstance(
                         content, ak.contents.UnmaskedArray
@@ -204,7 +203,7 @@ def _impl(array, axis, highlevel, behavior):
                         bigmask[:] = False
                         bigmask[tags == tag] = backend.index_nplike.asarray(
                             content.mask_as_bool(valid_when=False)
-                        ).view(np.bool_)
+                        ).view(metadata.bool_)
                         index[bigmask] = -1
 
                 good = index >= 0

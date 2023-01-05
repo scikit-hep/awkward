@@ -6,6 +6,7 @@ import json
 import math
 
 import awkward as ak
+from awkward._nplikes import metadata
 from awkward._util import unset
 from awkward.contents.bytemaskedarray import ByteMaskedArray
 from awkward.contents.content import Content
@@ -13,7 +14,6 @@ from awkward.forms.bitmaskedform import BitMaskedForm
 from awkward.index import Index
 from awkward.typing import Final, Self, final
 
-np = ak._nplikes.NumpyMetadata.instance()
 numpy = ak._nplikes.Numpy.instance()
 
 
@@ -24,7 +24,7 @@ class BitMaskedArray(Content):
     def __init__(
         self, mask, content, valid_when, length, lsb_order, *, parameters=None
     ):
-        if not (isinstance(mask, Index) and mask.dtype == np.dtype(np.uint8)):
+        if not (isinstance(mask, Index) and mask.dtype == metadata.uint8):
             raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'mask' must be an Index with dtype=uint8, not {}".format(
@@ -365,7 +365,7 @@ class BitMaskedArray(Content):
                 self._lsb_order,
             )
         )
-        return bytemask.data[: self._length].view(np.bool_)
+        return bytemask.data[: self._length].view(metadata.bool_)
 
     def _getitem_nothing(self):
         return self._content._getitem_range(slice(0, 0))
@@ -435,7 +435,7 @@ class BitMaskedArray(Content):
         elif isinstance(head, list):
             return self._getitem_next_fields(head, tail, advanced)
 
-        elif head is np.newaxis:
+        elif head is metadata.newaxis:
             return self._getitem_next_newaxis(tail, advanced)
 
         elif head is Ellipsis:

@@ -6,8 +6,7 @@ from datetime import datetime, timedelta
 from awkward_cpp.lib import _ext
 
 import awkward as ak
-
-np = ak._nplikes.NumpyMetadata.instance()
+from awkward._nplikes import metadata
 
 
 def type(array, *, behavior=None):
@@ -80,6 +79,7 @@ def type(array, *, behavior=None):
 
 def _impl(array, behavior):
     behavior = ak._util.behavior_of(array, behavior=behavior)
+    import numpy # TODO FIXME
 
     if isinstance(array, _ext.ArrayBuilder):
         form = ak.forms.from_json(array.form())
@@ -91,9 +91,9 @@ def _impl(array, behavior):
     elif isinstance(array, ak.contents.Content):
         return ak.types.ArrayType(array.form.type_from_behavior(behavior), array.length)
 
-    elif isinstance(array, (np.dtype, np.generic)):
+    elif isinstance(array, (metadata.dtype, numpy.generic)):
         return ak.types.ScalarType(
-            ak.types.NumpyType(ak.types.numpytype.dtype_to_primitive(np.dtype(array)))
+            ak.types.NumpyType(ak.types.numpytype.dtype_to_primitive(metadata.dtype(array)))
         )
 
     elif isinstance(array, bool):  # np.bool_ in np.generic (above)

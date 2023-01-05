@@ -1,10 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-
 import awkward as ak
+from awkward._nplikes import metadata
 from awkward.highlevel import Array
-
-np = ak._nplikes.NumpyMetadata.instance()
 
 
 class CategoricalBehavior(Array):
@@ -78,7 +76,9 @@ def _categorical_equal(one, two):
         two_hashable = [_as_hashable(x) for x in two_list]
         two_lookup = {x: i for i, x in enumerate(two_hashable)}
 
-        one_to_two = ak._nplikes.numpy.empty(len(one_hashable) + 1, dtype=np.int64)
+        one_to_two = ak._nplikes.numpy.empty(
+            len(one_hashable) + 1, dtype=metadata.int64
+        )
         for i, x in enumerate(one_hashable):
             one_to_two[i] = two_lookup.get(x, len(two_hashable))
         one_to_two[-1] = -1
@@ -104,6 +104,8 @@ def _apply_ufunc(ufunc, method, inputs, kwargs):
 
 
 def register(behavior):
+    import numpy
+
     behavior["categorical"] = CategoricalBehavior
-    behavior[ak._nplikes.numpy.equal, "categorical", "categorical"] = _categorical_equal
-    behavior[ak._nplikes.numpy.ufunc, "categorical"] = _apply_ufunc
+    behavior[numpy.equal, "categorical", "categorical"] = _categorical_equal
+    behavior[numpy.ufunc, "categorical"] = _apply_ufunc

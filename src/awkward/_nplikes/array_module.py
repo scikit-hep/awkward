@@ -12,7 +12,8 @@ import numpy
 
 from awkward import _errors
 from awkward._nplikes import Array, NumpyLike, metadata
-from awkward.typing import Final
+from awkward._nplikes.numpylike import ErrorStateLiteral
+from awkward.typing import ContextManager, Final
 
 
 class ArrayModuleNumpyLike(NumpyLike):
@@ -454,6 +455,12 @@ class ArrayModuleNumpyLike(NumpyLike):
         return x.flags["C_CONTIGUOUS"]  # type: ignore
 
     def to_rectilinear(self, array):
+        raise _errors.wrap_error(NotImplementedError)
+
+    def error_state(
+        self,
+        **kwargs: ErrorStateLiteral,
+    ) -> ContextManager:
         raise _errors.wrap_error(NotImplementedError)
 
     @classmethod

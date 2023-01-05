@@ -2,8 +2,6 @@
 
 import awkward as ak
 
-np = ak._nplikes.NumpyMetadata.instance()
-
 
 def with_parameter(array, parameter, value, *, highlevel=True, behavior=None):
     """

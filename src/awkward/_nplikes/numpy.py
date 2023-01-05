@@ -7,7 +7,8 @@ from typing import Any
 import numpy
 
 from awkward._nplikes.array_module import ArrayModuleNumpyLike
-from awkward.typing import Final
+from awkward._nplikes.numpylike import ErrorStateLiteral
+from awkward.typing import ContextManager, Final
 
 
 class Numpy(ArrayModuleNumpyLike):
@@ -22,3 +23,9 @@ class Numpy(ArrayModuleNumpyLike):
     @classmethod
     def is_raw_array(cls, obj) -> bool:
         return isinstance(obj, numpy.ndarray)
+
+    def error_state(
+        self,
+        **kwargs: ErrorStateLiteral,
+    ) -> ContextManager:
+        return numpy.errstate(**kwargs)

@@ -8,7 +8,6 @@ import awkward as ak
 from awkward import _errors
 from awkward.typing import Any
 
-np = ak._nplikes.NumpyMetadata.instance()
 numpy_backend = ak._backends.NumpyBackend.instance()
 
 

@@ -1,8 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
-
-np = ak._nplikes.NumpyMetadata.instance()
+from awkward._nplikes import metadata
 
 
 def is_none(array, axis=0, *, highlevel=True, behavior=None):
@@ -50,12 +49,14 @@ def _impl(array, axis, highlevel, behavior):
             else:
                 nplike = layout._backend.nplike
                 return ak.contents.NumpyArray(
-                    nplike.zeros(layout.length, dtype=np.bool_)
+                    nplike.zeros(layout.length, dtype=metadata.bool_)
                 )
 
         elif layout.is_leaf:
             raise ak._errors.wrap_error(
-                np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
+                ak._errors.AxisError(
+                    f"axis={axis} exceeds the depth of this array ({depth})"
+                )
             )
 
     out = ak._do.recursively_apply(layout, action, behavior, numpy_to_regular=True)

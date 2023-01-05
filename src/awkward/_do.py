@@ -12,8 +12,6 @@ from awkward.forms import form
 from awkward.record import Record
 from awkward.typing import Any, AxisMaybeNone, Literal
 
-np = ak._nplikes.NumpyMetadata.instance()
-
 
 def recursively_apply(
     layout: Content | Record,
@@ -167,7 +165,7 @@ def unique(layout: Content, axis=None):
             if branch:
                 if negaxis <= 0:
                     raise ak._errors.wrap_error(
-                        np.AxisError(
+                        ak._errors.AxisError(
                             "cannot use non-negative axis on a nested list structure "
                             "of variable depth (negative axis counts from the leaves "
                             "of the tree; non-negative from the root)"
@@ -175,7 +173,7 @@ def unique(layout: Content, axis=None):
                     )
                 if negaxis > depth:
                     raise ak._errors.wrap_error(
-                        np.AxisError(
+                        ak._errors.AxisError(
                             "cannot use axis={} on a nested list structure that splits into "
                             "different depths, the minimum of which is depth={} from the leaves".format(
                                 axis, depth
@@ -187,7 +185,7 @@ def unique(layout: Content, axis=None):
                     negaxis = negaxis + depth
                 if not (0 < negaxis and negaxis <= depth):
                     raise ak._errors.wrap_error(
-                        np.AxisError(
+                        ak._errors.AxisError(
                             "axis={} exceeds the depth of this array ({})".format(
                                 axis, depth
                             )
@@ -202,7 +200,7 @@ def unique(layout: Content, axis=None):
         return layout._unique(negaxis, starts, parents, 1)
 
     raise ak._errors.wrap_error(
-        np.AxisError(
+        ak._errors.AxisError(
             "unique expects axis 'None' or '-1', got axis={} that is not supported yet".format(
                 axis
             )

@@ -1,9 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._nplikes import metadata
 from awkward.operations.ak_fill_none import fill_none
 
-np = ak._nplikes.NumpyMetadata.instance()
 cpu = ak._backends.NumpyBackend.instance()
 
 
@@ -176,7 +176,7 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
                         )
                     sizes.append(regulararrays[-1].size)
 
-                prototype = backend.index_nplike.empty(sum(sizes), np.int8)
+                prototype = backend.index_nplike.empty(sum(sizes), metadata.int8)
                 start = 0
                 for tag, size in enumerate(sizes):
                     prototype[start : start + size] = tag
@@ -209,7 +209,7 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
                             ak.contents.ListOffsetArray(
                                 ak.index.Index64(
                                     backend.index_nplike.arange(
-                                        length + 1, dtype=np.int64
+                                        length + 1, dtype=metadata.int64
                                     ),
                                     nplike=backend.index_nplike,
                                 ),
@@ -221,7 +221,9 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
                             )
                         )
 
-                counts = backend.index_nplike.zeros(len(nextinputs[0]), dtype=np.int64)
+                counts = backend.index_nplike.zeros(
+                    len(nextinputs[0]), dtype=metadata.int64
+                )
                 all_counts = []
                 all_flatten = []
 
@@ -234,7 +236,7 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
                     all_flatten.append(f)
 
                 offsets = backend.index_nplike.empty(
-                    len(nextinputs[0]) + 1, dtype=np.int64
+                    len(nextinputs[0]) + 1, dtype=metadata.int64
                 )
                 offsets[0] = 0
                 backend.index_nplike.cumsum(counts, out=offsets[1:])

@@ -1,8 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
-
-np = ak._nplikes.NumpyMetadata.instance()
+from awkward._nplikes import metadata
 
 
 def singletons(array, axis=0, *, highlevel=True, behavior=None):
@@ -62,7 +61,7 @@ def _impl(array, axis, highlevel, behavior):
             elif layout.is_option:
                 nplike = layout._backend.index_nplike
 
-                offsets = nplike.empty(layout.length + 1, dtype=np.int64)
+                offsets = nplike.empty(layout.length + 1, dtype=metadata.int64)
                 offsets[0] = 0
 
                 nplike.cumsum(layout.mask_as_bool(valid_when=True), out=offsets[1:])
@@ -76,7 +75,9 @@ def _impl(array, axis, highlevel, behavior):
 
         elif layout.is_leaf:
             raise ak._errors.wrap_error(
-                np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
+                ak._errors.AxisError(
+                    f"axis={axis} exceeds the depth of this array ({depth})"
+                )
             )
 
     out = ak._do.recursively_apply(layout, action, behavior, numpy_to_regular=True)

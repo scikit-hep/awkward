@@ -2,8 +2,6 @@
 
 import awkward as ak
 
-np = ak._nplikes.NumpyMetadata.instance()
-
 
 def from_arrow(array, *, generate_bitmasks=False, highlevel=True, behavior=None):
     """

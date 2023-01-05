@@ -1,8 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
-
-np = ak._nplikes.NumpyMetadata.instance()
+from awkward._nplikes import metadata
 
 
 def nan_to_none(array, *, highlevel=True, behavior=None):
@@ -32,8 +31,8 @@ def nan_to_none(array, *, highlevel=True, behavior=None):
 
 def _impl(array, highlevel, behavior):
     def action(layout, continuation, **kwargs):
-        if isinstance(layout, ak.contents.NumpyArray) and issubclass(
-            layout.dtype.type, np.floating
+        if isinstance(layout, ak.contents.NumpyArray) and metadata.isdtype(
+            layout.dtype.type, "real floating"
         ):
             mask = layout.backend.nplike.isnan(layout.data)
             return ak.contents.ByteMaskedArray(
@@ -44,7 +43,7 @@ def _impl(array, highlevel, behavior):
 
         elif (layout.is_option or layout.is_indexed) and (
             isinstance(layout.content, ak.contents.NumpyArray)
-            and issubclass(layout.content.dtype.type, np.floating)
+            and metadata.isdtype(layout.content.dtype, "real floating")
         ):
             return continuation()
 

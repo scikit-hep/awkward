@@ -1,9 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._nplikes import metadata
 from awkward.highlevel import Array
-
-np = ak._nplikes.NumpyMetadata.instance()
 
 
 class ByteBehavior(Array):
@@ -155,7 +154,7 @@ def _string_broadcast(layout, offsets):
     offsets = nplike.asarray(offsets)
     counts = offsets[1:] - offsets[:-1]
     if ak._util.is_32_bit():
-        counts = counts.astype(np.int32)
+        counts = nplike.astype(counts, metadata.int32)
     parents = nplike.repeat(nplike.arange(len(counts), dtype=counts.dtype), counts)
     return ak.contents.IndexedArray(
         ak.index.Index64(parents, nplike=nplike), layout
@@ -251,6 +250,8 @@ def _cast_bytes_or_str_to_string(string):
 
 
 def register(behavior):
+    import numpy
+
     behavior["byte"] = ByteBehavior
     behavior["__typestr__", "byte"] = "byte"
     behavior["char"] = CharBehavior
@@ -261,10 +262,10 @@ def register(behavior):
     behavior["string"] = StringBehavior
     behavior["__typestr__", "string"] = "string"
 
-    behavior[ak._nplikes.numpy.equal, "bytestring", "bytestring"] = _string_equal
-    behavior[ak._nplikes.numpy.equal, "string", "string"] = _string_equal
-    behavior[ak._nplikes.numpy.not_equal, "bytestring", "bytestring"] = _string_notequal
-    behavior[ak._nplikes.numpy.not_equal, "string", "string"] = _string_notequal
+    behavior[numpy.equal, "bytestring", "bytestring"] = _string_equal
+    behavior[numpy.equal, "string", "string"] = _string_equal
+    behavior[numpy.not_equal, "bytestring", "bytestring"] = _string_notequal
+    behavior[numpy.not_equal, "string", "string"] = _string_notequal
 
     behavior["__broadcast__", "bytestring"] = _string_broadcast
     behavior["__broadcast__", "string"] = _string_broadcast

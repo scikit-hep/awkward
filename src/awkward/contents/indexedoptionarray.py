@@ -4,13 +4,13 @@ from __future__ import annotations
 import copy
 
 import awkward as ak
+from awkward._nplikes import metadata
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.indexedoptionform import IndexedOptionForm
 from awkward.index import Index
 from awkward.typing import Final, Self, final
 
-np = ak._nplikes.NumpyMetadata.instance()
 numpy = ak._nplikes.Numpy.instance()
 
 
@@ -22,11 +22,7 @@ class IndexedOptionArray(Content):
     def __init__(self, index, content, *, parameters=None):
         if not (
             isinstance(index, Index)
-            and index.dtype
-            in (
-                np.dtype(np.int32),
-                np.dtype(np.int64),
-            )
+            and metadata.isdtype(index.dtype, (metadata.int32, metadata.int64))
         ):
             raise ak._errors.wrap_error(
                 TypeError(
@@ -180,11 +176,13 @@ class IndexedOptionArray(Content):
         return "".join(out)
 
     def to_IndexedOptionArray64(self):
-        if self._index.dtype == np.dtype(np.int64):
+        if self._index.dtype == metadata.int64:
             return self
         else:
             return IndexedOptionArray(
-                self._index.astype(np.int64), self._content, parameters=self._parameters
+                self._backend.index_nplike.astype(self._index, metadata.int64),
+                self._content,
+                parameters=self._parameters,
             )
 
     def to_ByteMaskedArray(self, valid_when):
@@ -403,7 +401,7 @@ class IndexedOptionArray(Content):
         elif isinstance(head, list) and isinstance(head[0], str):
             return self._getitem_next_fields(head, tail, advanced)
 
-        elif head is np.newaxis:
+        elif head is metadata.newaxis:
             return self._getitem_next_newaxis(tail, advanced)
 
         elif head is Ellipsis:
@@ -495,7 +493,9 @@ class IndexedOptionArray(Content):
     def _offsets_and_flattened(self, axis, depth):
         posaxis = ak._util.maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 == depth:
-            raise ak._errors.wrap_error(np.AxisError("axis=0 not allowed for flatten"))
+            raise ak._errors.wrap_error(
+                ak._errors.AxisError("axis=0 not allowed for flatten")
+            )
         else:
             numnull, nextcarry, outindex = self._nextcarry_outindex(self._backend)
             next = self._content._carry(nextcarry, False)
@@ -514,7 +514,7 @@ class IndexedOptionArray(Content):
                 outoffsets = ak.index.Index64.empty(
                     offsets.length + numnull,
                     self._backend.index_nplike,
-                    dtype=np.int64,
+                    dtype=metadata.int64,
                 )
 
                 assert (
@@ -1448,7 +1448,7 @@ class IndexedOptionArray(Content):
         shape = [self.length, *content.shape[1:]]
         data = nplike.empty(shape, dtype=content.dtype)
         mask0 = backend.index_nplike.asarray(self.mask_as_bool(valid_when=False)).view(
-            np.bool_
+            metadata.bool_
         )
         if mask0.any():
             if allow_missing:
@@ -1462,18 +1462,18 @@ class IndexedOptionArray(Content):
 
                 data[~mask0] = content
 
-                if issubclass(content.dtype.type, (bool, np.bool_)):
+                if metadata.isdtype(content.dtype, "bool"):
                     data[mask0] = False
-                elif issubclass(content.dtype.type, np.floating):
-                    data[mask0] = np.nan
-                elif issubclass(content.dtype.type, np.complexfloating):
-                    data[mask0] = np.nan + np.nan * 1j
-                elif issubclass(content.dtype.type, np.integer):
-                    data[mask0] = np.iinfo(content.dtype).max
-                elif issubclass(content.dtype.type, (np.datetime64, np.timedelta64)):
-                    data[mask0] = nplike.asarray(
-                        [np.iinfo(np.int64).max], dtype=content.dtype
-                    )[0]
+                elif metadata.isdtype(content.dtype, "real floating"):
+                    data[mask0] = metadata.nan
+                elif metadata.isdtype(content.dtype, "complex floating"):
+                    data[mask0] = metadata.nan + metadata.nan * 1j
+                elif metadata.isdtype(content.dtype, "integral"):
+                    data[mask0] = metadata.iinfo(content.dtype).max
+                elif metadata.isdtype(content.dtype, "timelike"):
+                    data[mask0] = nplike.asarray([metadata.iinfo(metadata.int64).max], dtype=content.dtype)[
+                        0
+                    ]
                 else:
                     raise ak._errors.wrap_error(
                         AssertionError(f"unrecognized dtype: {content.dtype}")

@@ -1,10 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._nplikes import metadata
 
 numpy = ak._nplikes.Numpy.instance()
-
-np = ak._nplikes.NumpyMetadata.instance()
 
 
 def to_dataframe(
@@ -172,7 +171,7 @@ or
             starts, stops = offsets[:-1], offsets[1:]
             counts = stops - starts
             if ak._util.is_32_bit():
-                counts = counts.astype(np.int32)
+                counts = counts.astype(metadata.int32)
             if len(row_arrays) == 0:
                 newrows = [
                     numpy.repeat(numpy.arange(len(counts), dtype=counts.dtype), counts)

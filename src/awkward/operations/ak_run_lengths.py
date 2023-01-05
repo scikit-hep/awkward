@@ -1,8 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._nplikes import metadata
 
-np = ak._nplikes.NumpyMetadata.instance()
 cpu = ak._backends.NumpyBackend.instance()
 
 
@@ -96,7 +96,7 @@ def _impl(array, highlevel, behavior):
 
     def lengths_of(data, offsets):
         if len(data) == 0:
-            return backend.index_nplike.empty(0, np.int64), offsets
+            return backend.index_nplike.empty(0, metadata.int64), offsets
         else:
             diffs = data[1:] != data[:-1]
 
@@ -120,7 +120,9 @@ def _impl(array, highlevel, behavior):
                 interior_offsets = offsets[is_interior]
                 diffs[interior_offsets - 1] = True
             positions = backend.index_nplike.nonzero(diffs)[0]
-            full_positions = backend.index_nplike.empty(len(positions) + 2, np.int64)
+            full_positions = backend.index_nplike.empty(
+                len(positions) + 2, metadata.int64
+            )
             full_positions[0] = 0
             full_positions[-1] = len(data)
             full_positions[1:-1] = positions + 1

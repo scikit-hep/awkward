@@ -3,8 +3,6 @@
 import awkward as ak
 from awkward._util import unset
 
-np = ak._nplikes.NumpyMetadata.instance()
-
 
 def count_nonzero(
     array,

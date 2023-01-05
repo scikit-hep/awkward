@@ -3,8 +3,7 @@
 import copy
 
 import awkward as ak
-
-np = ak._nplikes.NumpyMetadata.instance()
+from awkward._nplikes import metadata
 
 
 def with_field(array, what, where=None, *, highlevel=True, behavior=None):
@@ -96,7 +95,7 @@ def _impl(base, what, where, highlevel, behavior):
                 if what is None:
                     what = ak.contents.IndexedOptionArray(
                         ak.index.Index64(
-                            backend.index_nplike.full(len(base), -1, np.int64),
+                            backend.index_nplike.full(len(base), -1, metadata.int64),
                             nplike=backend.index_nplike,
                         ),
                         ak.contents.EmptyArray(),

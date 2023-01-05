@@ -5,12 +5,12 @@ import copy
 import math
 
 import awkward as ak
+from awkward._nplikes import metadata
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.unmaskedform import UnmaskedForm
 from awkward.typing import Final, Self, final
 
-np = ak._nplikes.NumpyMetadata.instance()
 numpy = ak._nplikes.Numpy.instance()
 
 
@@ -118,7 +118,9 @@ class UnmaskedArray(Content):
         return "".join(out)
 
     def to_IndexedOptionArray64(self):
-        arange = self._backend.index_nplike.arange(self._content.length, dtype=np.int64)
+        arange = self._backend.index_nplike.arange(
+            self._content.length, dtype=metadata.int64
+        )
         return ak.contents.IndexedOptionArray(
             ak.index.Index64(arange, nplike=self._backend.index_nplike),
             self._content,
@@ -128,7 +130,7 @@ class UnmaskedArray(Content):
     def to_ByteMaskedArray(self, valid_when):
         return ak.contents.ByteMaskedArray(
             ak.index.Index8(
-                self.mask_as_bool(valid_when).view(np.int8),
+                self.mask_as_bool(valid_when).view(metadata.int8),
                 nplike=self._backend.index_nplike,
             ),
             self._content,
@@ -140,10 +142,10 @@ class UnmaskedArray(Content):
         bitlength = int(math.ceil(self._content.length / 8.0))
         if valid_when:
             bitmask = self._backend.index_nplike.full(
-                bitlength, np.uint8(255), dtype=np.uint8
+                bitlength, metadata.uint8(255), dtype=metadata.uint8
             )
         else:
-            bitmask = self._backend.index_nplike.zeros(bitlength, dtype=np.uint8)
+            bitmask = self._backend.index_nplike.zeros(bitlength, dtype=metadata.uint8)
 
         return ak.contents.BitMaskedArray(
             ak.index.IndexU8(bitmask),
@@ -156,10 +158,12 @@ class UnmaskedArray(Content):
 
     def mask_as_bool(self, valid_when=True):
         if valid_when:
-            return self._backend.index_nplike.ones(self._content.length, dtype=np.bool_)
+            return self._backend.index_nplike.ones(
+                self._content.length, dtype=metadata.bool_
+            )
         else:
             return self._backend.index_nplike.zeros(
-                self._content.length, dtype=np.bool_
+                self._content.length, dtype=metadata.bool_
             )
 
     def _getitem_nothing(self):
@@ -225,7 +229,7 @@ class UnmaskedArray(Content):
         elif isinstance(head, list):
             return self._getitem_next_fields(head, tail, advanced)
 
-        elif head is np.newaxis:
+        elif head is metadata.newaxis:
             return self._getitem_next_newaxis(tail, advanced)
 
         elif head is Ellipsis:
@@ -248,7 +252,9 @@ class UnmaskedArray(Content):
     def _offsets_and_flattened(self, axis, depth):
         posaxis = ak._util.maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 == depth:
-            raise ak._errors.wrap_error(np.AxisError("axis=0 not allowed for flatten"))
+            raise ak._errors.wrap_error(
+                ak._errors.AxisError("axis=0 not allowed for flatten")
+            )
         else:
             offsets, flattened = self._content._offsets_and_flattened(axis, depth)
             if offsets.length == 0:

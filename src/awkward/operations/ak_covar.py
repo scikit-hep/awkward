@@ -3,8 +3,6 @@
 import awkward as ak
 from awkward._util import unset
 
-np = ak._nplikes.NumpyMetadata.instance()
-
 
 def covar(
     x,
@@ -92,8 +90,9 @@ def _impl(x, y, weight, axis, keepdims, mask_identity):
             ak.operations.to_layout(weight, allow_record=False, allow_other=False),
             behavior=behavior,
         )
+    nplike = ak._nplikes.nplike_of(x, y, weight)
 
-    with np.errstate(invalid="ignore", divide="ignore"):
+    with nplike.error_state(invalid="ignore", divide="ignore"):
         xmean = ak.operations.ak_mean._impl(x, weight, axis, False, mask_identity)
         ymean = ak.operations.ak_mean._impl(y, weight, axis, False, mask_identity)
         if weight is None:

@@ -3,8 +3,6 @@
 import awkward as ak
 from awkward._util import unset
 
-np = ak._nplikes.NumpyMetadata.instance()
-
 
 def softmax(
     x, axis=None, *, keepdims=False, mask_identity=False, flatten_records=unset
@@ -70,7 +68,9 @@ def _impl(x, axis, keepdims, mask_identity):
         behavior=behavior,
     )
 
-    with np.errstate(invalid="ignore", divide="ignore"):
+    nplike = ak._nplikes.nplike_of(x)
+
+    with nplike.error_state(invalid="ignore", divide="ignore"):
         nplike = ak._nplikes.nplike_of(x)
         expx = nplike.exp(x)
         denom = ak.operations.ak_sum._impl(

@@ -8,8 +8,8 @@ from urllib.parse import urlparse
 from awkward_cpp.lib import _ext
 
 import awkward as ak
+from awkward._nplikes import metadata
 
-np = ak._nplikes.NumpyMetadata.instance()
 numpy = ak._nplikes.Numpy.instance()
 
 
@@ -434,10 +434,10 @@ def _record_to_complex(layout, complex_record_fields):
                     if (
                         isinstance(real, ak.contents.NumpyArray)
                         and len(real.shape) == 1
-                        and issubclass(real.dtype.type, (np.integer, np.floating))
+                        and metadata.isdtype(real.dtype, ("integral", "real floating"))
                         and isinstance(imag, ak.contents.NumpyArray)
                         and len(imag.shape) == 1
-                        and issubclass(imag.dtype.type, (np.integer, np.floating))
+                        and metadata.isdtype(imag.dtype, ("integral", "real floating"))
                     ):
                         with numpy._module.errstate(invalid="ignore"):
                             return ak.contents.NumpyArray(
@@ -654,7 +654,9 @@ def build_assembly(schema, container, instructions):
             index = f"node{len(container)}"
             container[index + "-index"] = None
             offsets = f"node{len(container)}"
-            container[offsets + "-offsets"] = numpy.empty(len(strings) + 1, np.int64)
+            container[offsets + "-offsets"] = numpy.empty(
+                len(strings) + 1, metadata.int64
+            )
             container[offsets + "-offsets"][0] = 0
             container[offsets + "-offsets"][1:] = numpy.cumsum(
                 [len(x) for x in bytestrings]

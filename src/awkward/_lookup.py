@@ -1,8 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
-
-np = ak._nplikes.NumpyMetadata.instance()
+from awkward._nplikes import metadata
 
 
 class Lookup:
@@ -20,13 +19,13 @@ class Lookup:
         self.generator = generator
         self.positions = positions
         self.arrayptrs = self.nplike.asarray(
-            [arrayptr(x) for x in positions], dtype=np.intp
+            [arrayptr(x) for x in positions], dtype=metadata.intp
         )
 
 
 def tolookup(layout, positions):
     if isinstance(layout, ak.contents.EmptyArray):
-        return tolookup(layout.to_NumpyArray(np.dtype(np.float64)), positions)
+        return tolookup(layout.to_NumpyArray(metadata.float64), positions)
 
     elif isinstance(layout, ak.contents.NumpyArray):
         if len(layout.shape) == 1:
