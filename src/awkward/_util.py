@@ -12,12 +12,6 @@ from collections.abc import Iterable, Mapping, Sequence, Sized
 import packaging.version
 
 import awkward as ak
-from awkward.typing import Protocol, Self
-
-np = ak._nplikes.NumpyMetadata.instance()
-
-win = os.name == "nt"
-bits32 = ak._nplikes.numpy.iinfo(np.intp).bits == 32
 
 # matches include/awkward/common.h
 kMaxInt8 = 127  # 2**7  - 1
@@ -27,6 +21,12 @@ kMaxUInt32 = 4294967295  # 2**32 - 1
 kMaxInt64 = 9223372036854775806  # 2**63 - 2: see below
 kSliceNone = kMaxInt64 + 1  # for Slice::none()
 kMaxLevels = 48
+
+
+def is_32_bit() -> bool:
+    import numpy
+
+    return os.name == "nt" or numpy.iinfo(numpy.intp).bits == 32
 
 
 def parse_version(version):
@@ -478,7 +478,9 @@ def union_to_record(unionarray, anonymous):
             contents.append(union_to_record(layout, anonymous))
         elif layout.is_option:
             contents.append(
-                ak.operations.fill_none(layout, np.nan, axis=0, highlevel=False)
+                ak.operations.fill_none(
+                    layout, ak._nplikes.metadata.nan, axis=0, highlevel=False
+                )
             )
         else:
             contents.append(layout)
@@ -506,7 +508,9 @@ def union_to_record(unionarray, anonymous):
                     all_names.append(anonymous)
 
         missingarray = ak.contents.IndexedOptionArray(
-            ak.index.Index64(nplike.full(len(unionarray), -1, dtype=np.int64)),
+            ak.index.Index64(
+                nplike.full(len(unionarray), -1, dtype=ak._nplikes.metadata.int64)
+            ),
             ak.contents.EmptyArray(),
         )
 
@@ -742,7 +746,7 @@ def maybe_posaxis(layout, axis, depth):
     if isinstance(layout, ak.record.Record):
         if axis == 0:
             raise ak._errors.wrap_error(
-                np.AxisError("Record type at axis=0 is a scalar, not an array")
+                ak._errors.AxisError("Record type at axis=0 is a scalar, not an array")
             )
         return maybe_posaxis(layout._array, axis, depth)
 
@@ -849,18 +853,6 @@ def arrays_approx_equal(
             raise ak._errors.wrap_error(AssertionError)
 
     return visitor(left, right)
-
-
-class Singleton(Protocol):
-    _instance: Self
-
-    @classmethod
-    def instance(cls) -> Self:
-        try:
-            return cls._instance
-        except AttributeError:
-            cls._instance = cls()
-            return cls._instance
 
 
 try:

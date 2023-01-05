@@ -4,32 +4,32 @@ from __future__ import annotations
 import copy
 
 import awkward as ak
+from awkward._nplikes import metadata
 from awkward.typing import Self
 
-np = ak._nplikes.NumpyMetadata.instance()
 numpy = ak._nplikes.Numpy.instance()
 
 
 _dtype_to_form = {
-    np.dtype(np.int8): "i8",
-    np.dtype(np.uint8): "u8",
-    np.dtype(np.int32): "i32",
-    np.dtype(np.uint32): "u32",
-    np.dtype(np.int64): "i64",
+    metadata.int8: "i8",
+    metadata.uint8: "u8",
+    metadata.int32: "i32",
+    metadata.uint32: "u32",
+    metadata.int64: "i64",
 }
 
 
 def _form_to_zero_length(form):
     if form == "i8":
-        return Index8(numpy.zeros(0, dtype=np.int8))
+        return Index8(numpy.zeros(0, dtype=metadata.int8))
     elif form == "u8":
-        return IndexU8(numpy.zeros(0, dtype=np.uint8))
+        return IndexU8(numpy.zeros(0, dtype=metadata.uint8))
     elif form == "i32":
-        return Index32(numpy.zeros(0, dtype=np.int32))
+        return Index32(numpy.zeros(0, dtype=metadata.int32))
     elif form == "u32":
-        return IndexU32(numpy.zeros(0, dtype=np.uint32))
+        return IndexU32(numpy.zeros(0, dtype=metadata.uint32))
     elif form == "i64":
-        return Index64(numpy.zeros(0, dtype=np.int64))
+        return Index64(numpy.zeros(0, dtype=metadata.int64))
     else:
         raise ak._errors.wrap_error(
             AssertionError(f"unrecognized Index form: {form!r}")
@@ -57,23 +57,21 @@ class Index:
         if len(self._data.shape) != 1:
             raise ak._errors.wrap_error(TypeError("Index data must be one-dimensional"))
 
-        if issubclass(self._data.dtype.type, np.longlong):
-            assert (
-                np.dtype(np.longlong).itemsize == 8
-            ), "longlong is always 64-bit, right?"
+        # TODO: remove this if never raised
+        from numpy import longlong
 
-            self._data = self._data.view(np.int64)
+        assert not issubclass(self._data.dtype.type, longlong)
 
         if self._expected_dtype is None:
-            if self._data.dtype == np.dtype(np.int8):
+            if self._data.dtype == metadata.int8:
                 self.__class__ = Index8
-            elif self._data.dtype == np.dtype(np.uint8):
+            elif self._data.dtype == metadata.uint8:
                 self.__class__ = IndexU8
-            elif self._data.dtype == np.dtype(np.int32):
+            elif self._data.dtype == metadata.int32:
                 self.__class__ = Index32
-            elif self._data.dtype == np.dtype(np.uint32):
+            elif self._data.dtype == metadata.uint32:
                 self.__class__ = IndexU32
-            elif self._data.dtype == np.dtype(np.int64):
+            elif self._data.dtype == metadata.int64:
                 self.__class__ = Index64
             else:
                 raise ak._errors.wrap_error(
@@ -202,7 +200,7 @@ class Index:
         self._data[where] = what
 
     def to64(self):
-        return Index(self._data.astype(np.int64))
+        return Index(self._nplike.astype(self._data, metadata.int64))
 
     def __copy__(self):
         return type(self)(self._data, metadata=self._metadata, nplike=self._nplike)
@@ -231,20 +229,20 @@ class Index:
 
 
 class Index8(Index):
-    _expected_dtype = np.dtype(np.int8)
+    _expected_dtype = metadata.int8
 
 
 class IndexU8(Index):
-    _expected_dtype = np.dtype(np.uint8)
+    _expected_dtype = metadata.uint8
 
 
 class Index32(Index):
-    _expected_dtype = np.dtype(np.int32)
+    _expected_dtype = metadata.int32
 
 
 class IndexU32(Index):
-    _expected_dtype = np.dtype(np.uint32)
+    _expected_dtype = metadata.uint32
 
 
 class Index64(Index):
-    _expected_dtype = np.dtype(np.int64)
+    _expected_dtype = metadata.int64

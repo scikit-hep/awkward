@@ -171,7 +171,7 @@ or
             offsets = numpy.asarray(offsets)
             starts, stops = offsets[:-1], offsets[1:]
             counts = stops - starts
-            if ak._util.win or ak._util.bits32:
+            if ak._util.is_32_bit():
                 counts = counts.astype(np.int32)
             if len(row_arrays) == 0:
                 newrows = [

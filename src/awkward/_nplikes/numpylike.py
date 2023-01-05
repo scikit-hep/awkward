@@ -18,18 +18,15 @@ We don't implement Device support, as it is not used in Awkward.
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import Literal, SupportsIndex, SupportsInt, TypeVar, overload
+from typing import Literal, SupportsIndex, SupportsInt, overload
 
 import numpy
 
 import awkward as ak
-from awkward._nplikes import dtypes
-from awkward._nplikes.dtypes import dtype
-from awkward._util import Singleton
+from awkward._nplikes import metadata
+from awkward._nplikes.metadata import dtype
+from awkward._singleton import Singleton
 from awkward.typing import Protocol, Self, runtime_checkable
-
-ArrayType = TypeVar("ArrayType", bound="Array")
-ArrayType_co = TypeVar("ArrayType_co", bound="Array", covariant=True)
 
 
 @runtime_checkable
@@ -56,7 +53,7 @@ class Array(Protocol):
 
     @property
     @abstractmethod
-    def T(self: ArrayType) -> ArrayType:
+    def T(self: Array) -> Array:
         ...
 
     @overload
@@ -76,98 +73,6 @@ class Array(Protocol):
         ...
 
     @abstractmethod
-    def __add__(self: ArrayType, other: int | float | complex | ArrayType) -> ArrayType:
-        ...
-
-    @abstractmethod
-    def __sub__(self: ArrayType, other: int | float | complex | ArrayType) -> ArrayType:
-        ...
-
-    @abstractmethod
-    def __truediv__(
-        self: ArrayType, other: int | float | complex | ArrayType
-    ) -> ArrayType:
-        ...
-
-    @abstractmethod
-    def __floordiv__(
-        self: ArrayType, other: int | float | complex | ArrayType
-    ) -> ArrayType:
-        ...
-
-    @abstractmethod
-    def __mod__(self: ArrayType, other: int | float | ArrayType) -> ArrayType:
-        ...
-
-    @abstractmethod
-    def __mul__(self: ArrayType, other: int | float | complex | ArrayType) -> ArrayType:
-        ...
-
-    @abstractmethod
-    def __pow__(self: ArrayType, other: int | float | complex | ArrayType) -> ArrayType:
-        ...
-
-    @abstractmethod
-    def __xor__(self: ArrayType, other: int | bool | ArrayType) -> ArrayType:
-        ...
-
-    @abstractmethod
-    def __and__(self: ArrayType, other: int | bool | ArrayType) -> ArrayType:
-        ...
-
-    @abstractmethod
-    def __or__(self: ArrayType, other: int | bool | ArrayType) -> ArrayType:
-        ...
-
-    @abstractmethod
-    def __lt__(
-        self: ArrayType, other: int | float | complex | str | bytes | ArrayType
-    ) -> ArrayType:
-        ...
-
-    @abstractmethod
-    def __le__(
-        self: ArrayType, other: int | float | complex | str | bytes | ArrayType
-    ) -> ArrayType:
-        ...
-
-    @abstractmethod
-    def __gt__(
-        self: ArrayType, other: int | float | complex | str | bytes | ArrayType
-    ) -> ArrayType:
-        ...
-
-    @abstractmethod
-    def __ge__(
-        self: ArrayType, other: int | float | complex | str | bytes | ArrayType
-    ) -> ArrayType:
-        ...
-
-    @abstractmethod
-    def __eq__(self: ArrayType, other: int | float | bool | complex | str | bytes | ArrayType) -> ArrayType:  # type: ignore
-        ...
-
-    @abstractmethod
-    def __ne__(self: ArrayType, other: int | float | bool | complex | str | bytes | ArrayType) -> ArrayType:  # type: ignore
-        ...
-
-    @abstractmethod
-    def __abs__(self: ArrayType) -> ArrayType:
-        ...
-
-    @abstractmethod
-    def __neg__(self: ArrayType) -> ArrayType:
-        ...
-
-    @abstractmethod
-    def __pos__(self: ArrayType) -> ArrayType:
-        ...
-
-    @abstractmethod
-    def __invert__(self: ArrayType) -> ArrayType:
-        ...
-
-    @abstractmethod
     def __bool__(self) -> bool:
         ...
 
@@ -179,9 +84,13 @@ class Array(Protocol):
     def __index__(self) -> int:
         ...
 
+    @abstractmethod
+    def view(self, dtype: dtype) -> Self:
+        ...
+
 
 @runtime_checkable
-class NumpyLike(Protocol[ArrayType], Singleton):
+class NumpyLike(Singleton, Protocol):
 
     ############################ array creation
 
@@ -192,7 +101,7 @@ class NumpyLike(Protocol[ArrayType], Singleton):
         *,
         dtype: dtype | None = None,
         copy: bool | None = None,
-    ) -> ArrayType:
+    ) -> Array:
         ...
 
     @abstractmethod
@@ -201,7 +110,7 @@ class NumpyLike(Protocol[ArrayType], Singleton):
         shape: int | tuple[int, ...],
         *,
         dtype: dtype | None = None,
-    ) -> ArrayType:
+    ) -> Array:
         ...
 
     @abstractmethod
@@ -210,7 +119,7 @@ class NumpyLike(Protocol[ArrayType], Singleton):
         shape: int | tuple[int, ...],
         *,
         dtype: dtype | None = None,
-    ) -> ArrayType:
+    ) -> Array:
         ...
 
     @abstractmethod
@@ -219,7 +128,7 @@ class NumpyLike(Protocol[ArrayType], Singleton):
         shape: int | tuple[int, ...],
         *,
         dtype: dtype | None = None,
-    ) -> ArrayType:
+    ) -> Array:
         ...
 
     @abstractmethod
@@ -229,25 +138,25 @@ class NumpyLike(Protocol[ArrayType], Singleton):
         fill_value,
         *,
         dtype: dtype | None = None,
-    ) -> ArrayType:
+    ) -> Array:
         ...
 
     @abstractmethod
-    def zeros_like(self, x: ArrayType, *, dtype: dtype | None = None) -> ArrayType:
+    def zeros_like(self, x: Array, *, dtype: dtype | None = None) -> Array:
         ...
 
     @abstractmethod
-    def ones_like(self, x: ArrayType, *, dtype: dtype | None = None) -> ArrayType:
+    def ones_like(self, x: Array, *, dtype: dtype | None = None) -> Array:
         ...
 
     @abstractmethod
     def full_like(
         self,
-        x: ArrayType,
+        x: Array,
         fill_value,
         *,
         dtype: dtype | None = None,
-    ) -> ArrayType:
+    ) -> Array:
         ...
 
     @abstractmethod
@@ -258,31 +167,29 @@ class NumpyLike(Protocol[ArrayType], Singleton):
         step: float | int = 1,
         *,
         dtype: dtype | None = None,
-    ) -> ArrayType:
+    ) -> Array:
         ...
 
     @abstractmethod
-    def meshgrid(
-        self, *arrays: ArrayType, indexing: Literal["xy", "ij"] = "xy"
-    ) -> ArrayType:
+    def meshgrid(self, *arrays: Array, indexing: Literal["xy", "ij"] = "xy") -> Array:
         ...
 
     ############################ data type functions
 
     @abstractmethod
-    def astype(self, x: ArrayType, dtype: dtype, *, copy: bool = True) -> ArrayType:
+    def astype(self, x: Array, dtype: dtype, *, copy: bool = True) -> Array:
         ...
 
     @abstractmethod
-    def broadcast_arrays(self, *arrays: ArrayType) -> list[ArrayType]:
+    def broadcast_arrays(self, *arrays: Array) -> list[Array]:
         ...
 
     # TODO better type signature for unknown shapes
     @abstractmethod
-    def broadcast_to(self, x: ArrayType, shape: tuple[SupportsInt, ...]) -> ArrayType:
+    def broadcast_to(self, x: Array, shape: tuple[SupportsInt, ...]) -> Array:
         ...
 
-    def result_type(self, *arrays_and_dtypes: ArrayType | dtype) -> dtype:
+    def result_type(self, *arrays_and_dtypes: Array | dtype) -> dtype:
         all_dtypes: list[dtype] = []
         for item in arrays_and_dtypes:
             if hasattr(item, "shape") and hasattr(item, "dtype"):
@@ -296,129 +203,120 @@ class NumpyLike(Protocol[ArrayType], Singleton):
 
         return numpy.result_type(*all_dtypes)
 
-    def isdtype(
-        self,
-        dtype: dtype,
-        kind: dtype | str | tuple[dtype | str, ...],
-    ) -> bool:
-        if isinstance(kind, str):
-            if kind == "bool":
-                return numpy.issubdtype(dtype, dtypes.bool_)
-            elif kind == "signed integer":
-                return any([numpy.issubdtype(dtype, c) for c in dtypes._signed_integer])
-            elif kind == "unsigned integer":
-                return any(
-                    [numpy.issubdtype(dtype, c) for c in dtypes._unsigned_integer]
-                )
-            elif kind == "integral":
-                return self.isdtype(dtype, "signed integer") or self.isdtype(
-                    dtype, "unsigned integer"
-                )
-            elif kind == "real floating":
-                return any([numpy.issubdtype(dtype, c) for c in dtypes._real_floating])
-            elif kind == "complex floating":
-                return any(
-                    [numpy.issubdtype(dtype, c) for c in dtypes._complex_floating]
-                )
-            elif kind == "numeric":
-                return (
-                    self.isdtype(dtype, "integral")
-                    or self.isdtype(dtype, "real floating")
-                    or self.isdtype(dtype, "complex floating")
-                )
-            ### Extensions to Array API ###
-            elif kind == "timelike":
-                return self.isdtype(dtype, dtypes.timedelta64) or self.isdtype(
-                    dtype, dtypes.datetime64
-                )
-            else:
-                raise ak._errors.wrap_error(ValueError(f"Invalid kind {kind} given"))
-        elif isinstance(kind, tuple):
-            return any([self.isdtype(dtype, k) for k in kind])
-        else:
-            assert isinstance(kind, dtypes.dtype)
-            return numpy.issubdtype(dtype, kind)
+    def iinfo(self, type: dtype | Array) -> metadata.iinfo:
+        if hasattr(type, "dtype"):
+            type = type.dtype
+        return metadata.iinfo(type)
 
-    def iinfo(self, type: dtype | ArrayType) -> numpy.iinfo:
-        return numpy.iinfo(type)
-
-    def finfo(self, type: dtype | ArrayType) -> numpy.finfo:
-        return numpy.finfo(type)
+    def finfo(self, type: dtype | Array) -> metadata.finfo:
+        if hasattr(type, "dtype"):
+            type = type.dtype
+        return metadata.finfo(type)
 
     ############################ searching functions
 
     @abstractmethod
-    def nonzero(self, x: ArrayType) -> ArrayType:
+    def nonzero(self, x: Array) -> Array:
         ...
 
     @abstractmethod
-    def where(self, condition: ArrayType, x1: ArrayType, x2: ArrayType) -> ArrayType:
+    def where(self, condition: Array, x1: Array, x2: Array) -> Array:
         ...
 
     ############################ set functions
 
     @abstractmethod
-    def unique_counts(self, x: ArrayType) -> ArrayType:
+    def unique_counts(self, x: Array) -> Array:
         ...
 
     @abstractmethod
-    def unique_values(self, x: ArrayType) -> ArrayType:
+    def unique_values(self, x: Array) -> Array:
         ...
 
     ############################ manipulation functions
 
     @abstractmethod
     def concat(
-        self, arrays: list[ArrayType] | tuple[ArrayType, ...], *, axis: int | None = 0
-    ) -> ArrayType:
+        self, arrays: list[Array] | tuple[Array, ...], *, axis: int | None = 0
+    ) -> Array:
         ...
 
     @abstractmethod
-    def stack(
-        self, arrays: list[ArrayType] | tuple[ArrayType, ...], *, axis: int = 0
-    ) -> ArrayType:
+    def stack(self, arrays: list[Array] | tuple[Array, ...], *, axis: int = 0) -> Array:
         ...
 
     ############################ ufuncs
 
     @abstractmethod
-    def add(self, x1: ArrayType, x2: ArrayType) -> ArrayType:
+    def add(self, x1: Array, x2: Array) -> Array:
         ...
 
     @abstractmethod
-    def multiply(self, x1: ArrayType, x2: ArrayType) -> ArrayType:
+    def subtract(self, x1: Array, x2: Array) -> Array:
         ...
 
     @abstractmethod
-    def logical_or(self, x1: ArrayType, x2: ArrayType) -> ArrayType:
+    def multiply(self, x1: Array, x2: Array) -> Array:
         ...
 
     @abstractmethod
-    def logical_and(self, x1: ArrayType, x2: ArrayType) -> ArrayType:
+    def sqrt(self, x: Array) -> Array:
         ...
 
     @abstractmethod
-    def logical_not(self, x: ArrayType) -> ArrayType:
+    def exp(self, x: Array) -> Array:
         ...
 
     @abstractmethod
-    def sqrt(self, x: ArrayType) -> ArrayType:
+    def negative(self, x: Array) -> Array:
         ...
 
     @abstractmethod
-    def exp(self, x: ArrayType) -> ArrayType:
+    def divide(self, x1: Array, x2: Array) -> Array:
         ...
 
     @abstractmethod
-    def divide(self, x1: ArrayType, x2: ArrayType) -> ArrayType:
+    def floor_divide(self, x1: Array, x2: Array) -> Array:
         ...
 
     @abstractmethod
-    def equal(self, x1: ArrayType, x2: ArrayType) -> ArrayType:
+    def power(self, x1: Array, x2: Array) -> Array:
         ...
 
     @abstractmethod
-    def isnan(self, x: ArrayType) -> ArrayType:
+    def isnan(self, x: Array) -> Array:
+        ...
+
+    @abstractmethod
+    def logical_or(self, x1: Array, x2: Array) -> Array:
+        ...
+
+    @abstractmethod
+    def logical_and(self, x1: Array, x2: Array) -> Array:
+        ...
+
+    @abstractmethod
+    def logical_not(self, x: Array) -> Array:
+        ...
+
+    @abstractmethod
+    def greater(self, x1: Array, x2: Array) -> Array:
+        ...
+
+    @abstractmethod
+    def greater_equal(self, x1: Array, x2: Array) -> Array:
+        ...
+
+    @abstractmethod
+    def lesser(self, x1: Array, x2: Array) -> Array:
+        ...
+
+    @abstractmethod
+    def lesser_equal(self, x1: Array, x2: Array) -> Array:
+        ...
+
+    @abstractmethod
+    def equal(self, x1: Array, x2: Array) -> Array:
         ...
 
     ############################ Utility functions
@@ -426,21 +324,21 @@ class NumpyLike(Protocol[ArrayType], Singleton):
     @abstractmethod
     def all(
         self,
-        x: ArrayType,
+        x: Array,
         *,
         axis: int | tuple[int, ...] | None = None,
         keepdims: bool = False,
-    ) -> ArrayType:
+    ) -> Array:
         ...
 
     @abstractmethod
     def any(
         self,
-        x: ArrayType,
+        x: Array,
         *,
         axis: int | tuple[int, ...] | None = None,
         keepdims: bool = False,
-    ) -> ArrayType:
+    ) -> Array:
         ...
 
     ############################ Statistical functions
@@ -448,169 +346,167 @@ class NumpyLike(Protocol[ArrayType], Singleton):
     @abstractmethod
     def sum(
         self,
-        x: ArrayType,
+        x: Array,
         *,
         axis: int | tuple[int, ...] | None = None,
         dtype: dtype | None = None,
         keepdims: bool = False,
-    ) -> ArrayType:
+    ) -> Array:
         ...
 
     @abstractmethod
     def prod(
         self,
-        x: ArrayType,
+        x: Array,
         *,
         axis: int | tuple[int, ...] | None = None,
         dtype: dtype | None = None,
         keepdims: bool = False,
-    ) -> ArrayType:
+    ) -> Array:
         ...
 
     @abstractmethod
     def min(
         self,
-        x: ArrayType,
+        x: Array,
         *,
         axis: int | tuple[int, ...] | None = None,
         keepdims: bool = False,
-    ) -> ArrayType:
+    ) -> Array:
         ...
 
     @abstractmethod
     def max(
         self,
-        x: ArrayType,
+        x: Array,
         *,
         axis: int | tuple[int, ...] | None = None,
         keepdims: bool = False,
-    ) -> ArrayType:
+    ) -> Array:
         ...
 
     ############################ Searching functions
 
     @abstractmethod
     def argmin(
-        self, x: ArrayType, *, axis: int | None = None, keepdims: bool = False
-    ) -> ArrayType:
+        self, x: Array, *, axis: int | None = None, keepdims: bool = False
+    ) -> Array:
         ...
 
     @abstractmethod
     def argmax(
-        self, x: ArrayType, *, axis: int | None = None, keepdims: bool = False
-    ) -> ArrayType:
+        self, x: Array, *, axis: int | None = None, keepdims: bool = False
+    ) -> Array:
         ...
 
-    ############################ extensions to ArrayType API
+    ############################ extensions to Array API
 
     @abstractmethod
-    def as_contiguous(self, x: ArrayType) -> ArrayType:
+    def as_contiguous(self, x: Array) -> Array:
         ...
 
     @abstractmethod
-    def cumsum(self, x: ArrayType, *, axis: int | None = None) -> ArrayType:
+    def cumsum(self, x: Array, *, axis: int | None = None) -> Array:
         ...
 
     @abstractmethod
     def from_buffer(
-        self, buffer: ArrayType, *, dtype: dtype | None = None, count: int = -1
-    ) -> ArrayType:  # TODO dtype: float?`
+        self, buffer: Array, *, dtype: dtype | None = None, count: int = -1
+    ) -> Array:  # TODO dtype: float?`
         ...
 
     @abstractmethod
-    def array_equal(
-        self, x1: ArrayType, x2: ArrayType, *, equal_nan: bool = False
-    ) -> bool:
+    def array_equal(self, x1: Array, x2: Array, *, equal_nan: bool = False) -> bool:
         ...
 
     @abstractmethod
     def search_sorted(
         self,
-        x: ArrayType,
-        values: ArrayType,
+        x: Array,
+        values: Array,
         *,
         side: Literal["left", "right"] = "left",
         sorter=None,
-    ) -> ArrayType:
+    ) -> Array:
         ...
 
     # TODO
     @abstractmethod
-    def repeat(self, x: ArrayType, repeats, *, axis=None) -> ArrayType:
+    def repeat(self, x: Array, repeats, *, axis=None) -> Array:
         ...
 
     @abstractmethod
-    def tile(self, x: ArrayType, reps: int) -> ArrayType:
+    def tile(self, x: Array, reps: int) -> Array:
         ...
 
     @abstractmethod
     def pack_bits(
         self,
-        x: ArrayType,
+        x: Array,
         *,
         axis: int | None = None,
         bitorder: Literal["big", "little"] = "big",
-    ) -> ArrayType:
+    ) -> Array:
         ...
 
     @abstractmethod
     def unpack_bits(
         self,
-        x: ArrayType,
+        x: Array,
         *,
         axis: int | None = None,
         count: int | None = None,
         bitorder: Literal["big", "little"] = "big",
-    ) -> ArrayType:
+    ) -> Array:
         ...
 
     @abstractmethod
-    def minimum(self, x1: ArrayType, x2: ArrayType) -> ArrayType:
+    def minimum(self, x1: Array, x2: Array) -> Array:
         ...
 
     @abstractmethod
-    def maximum(self, x1: ArrayType, x2: ArrayType) -> ArrayType:
+    def maximum(self, x1: Array, x2: Array) -> Array:
         ...
 
     @abstractmethod
     def nan_to_num(
         self,
-        x: ArrayType,
+        x: Array,
         *,
         copy: bool = True,
         nan: int | float | None = 0.0,
         posinf: int | float | None = None,
         neginf: int | float | None = None,
-    ) -> ArrayType:
+    ) -> Array:
         ...
 
     @abstractmethod
     def is_close(
         self,
-        x1: ArrayType,
-        x2: ArrayType,
+        x1: Array,
+        x2: Array,
         *,
         rtol: float = 1e-5,
         atol: float = 1e-8,
         equal_nan: bool = False,
-    ) -> ArrayType:
+    ) -> Array:
         ...
 
     @abstractmethod
     def count_nonzero(
-        self, x: ArrayType, *, axis: int | None = None, keepdims: bool = False
-    ) -> ArrayType:
+        self, x: Array, *, axis: int | None = None, keepdims: bool = False
+    ) -> Array:
         ...
 
     @abstractmethod
     def array_str(
         self,
-        x: ArrayType,
+        x: Array,
         *,
         max_line_width: int | None = None,
         precision: int | None = None,
         suppress_small: bool | None = None,
-    ) -> ArrayType:
+    ) -> Array:
         ...
 
     @abstractmethod
@@ -618,7 +514,7 @@ class NumpyLike(Protocol[ArrayType], Singleton):
         ...
 
     @abstractmethod
-    def to_rectilinear(self, array: ArrayType):
+    def to_rectilinear(self, array: Array):
         ...
 
     ############################ Awkward features

@@ -1,13 +1,5 @@
 import awkward as ak
-from awkward._nplikes import (
-    Array,
-    ArrayModuleNumpyLike,
-    Cupy,
-    Jax,
-    Numpy,
-    NumpyLike,
-    TypeTracer,
-)
+from awkward._nplikes import Array, Cupy, Jax, Numpy, NumpyLike, TypeTracer
 from awkward.typing import TypeVar
 
 # Temporary sentinel marking "argument not given"
@@ -45,10 +37,7 @@ def nplike_of(*arrays, default: D = _UNSET) -> NumpyLike | D:
         else:
             for cls in nplike_classes:
                 # ArrayModule-like nplikes wrap e.g. np.ndarray in another array type
-                if issubclass(cls, ArrayModuleNumpyLike) and cls.is_raw_array(array):
-                    nplikes.add(cls.instance())
-                    break
-                elif cls.is_own_array(array):
+                if cls.is_own_array(array):
                     nplikes.add(cls.instance())
                     break
 
@@ -67,12 +56,8 @@ def nplike_of(*arrays, default: D = _UNSET) -> NumpyLike | D:
 
         raise ak._errors.wrap_error(
             ValueError(
-                """attempting to use both a 'cpu' array and a 'cuda' array in the same operation; use one of
-
-    ak.to_backend(array, 'cpu')
-    ak.to_backend(array, 'cuda')
-
-to move one or the other to main memory or the GPU(s)."""
+                """attempting to use arrays with more than one backend in the same operation; use
+#ak.to_backend to coerce the arrays to the same backend."""
             )
         )
 
@@ -81,7 +66,7 @@ S = TypeVar("S", bound=Array)
 T = TypeVar("T", bound=Array)
 
 
-def convert(from_nplike: NumpyLike[S], to_nplike: NumpyLike[T], array: S) -> T:
+def convert(from_nplike: NumpyLike, to_nplike: NumpyLike, array: Array) -> Array:
     if isinstance(from_nplike, TypeTracer):
         raise ak._errors.wrap_error(
             TypeError("typetracer arrays cannot be converted to other nplikes")

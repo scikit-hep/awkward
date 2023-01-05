@@ -4,25 +4,16 @@ from __future__ import annotations
 
 import operator
 from functools import reduce
-from typing import (
-    Any,
-    Callable,
-    Literal,
-    SupportsIndex,
-    SupportsInt,
-    TypeVar,
-    cast,
-    overload,
-)
+from typing import Any, Callable, Literal, SupportsIndex, SupportsInt, TypeVar, overload
 
 import numpy
 
 from awkward import _errors
-from awkward._nplikes import dtypes, numpylike
+from awkward._nplikes import Array, NumpyLike, metadata
 from awkward.typing import Self
 
 
-def unknown_scalar(dtype: dtypes.dtype) -> TypeTracerArray:
+def unknown_scalar(dtype: metadata.dtype) -> TypeTracerArray:
     nplike: TypeTracer = TypeTracer.instance()  # type: ignore
     return TypeTracerArray._new_as_scalar(numpy.zeros(1, dtype=dtype), nplike=nplike)
 
@@ -38,13 +29,13 @@ M = TypeVar("M")
 K = TypeVar("K")
 
 
-class TypeTracerArray(numpylike.Array):
+class TypeTracerArray(Array):
     _array: numpy.ndarray
     _nplike: TypeTracer
     _shape: tuple[SupportsInt, ...]
 
     @property
-    def dtype(self) -> dtypes.dtype:
+    def dtype(self) -> metadata.dtype:
         return self._array.dtype
 
     @property
@@ -102,17 +93,17 @@ class TypeTracerArray(numpylike.Array):
     @classmethod
     def _promote_scalar(
         cls,
-        self: TypeTracerArray,
+        self: Array,
         x: bool | int | float | complex | TypeTracerArray,
     ) -> TypeTracerArray:
         if isinstance(x, float):
-            array = numpy.array([0], dtype=dtypes.float64)
+            array = numpy.array([0], dtype=metadata.float64)
         elif isinstance(x, bool):
-            array = numpy.array([0], dtype=dtypes.bool_)
+            array = numpy.array([0], dtype=metadata.bool_)
         elif isinstance(x, int):
-            array = numpy.array([0], dtype=dtypes.int64)
+            array = numpy.array([0], dtype=metadata.int64)
         elif isinstance(x, complex):
-            array = numpy.array([0], dtype=dtypes.complex128)
+            array = numpy.array([0], dtype=metadata.complex128)
         elif not isinstance(x, cls):
             raise _errors.wrap_error(
                 TypeError(f"Expected bool, int, float, or {cls.__name__}")
@@ -127,7 +118,7 @@ class TypeTracerArray(numpylike.Array):
         )  # TODO class for scalar primitives?
 
     def _invoke_binary_op(
-        self: TypeTracerArray, other, op: Callable[[Any, Any], numpy.ndarray]
+        self: Array, other, op: Callable[[Any, Any], numpy.ndarray]
     ) -> TypeTracerArray:
         other = self._promote_scalar(other, self)
         if not self._handles_operand(other):
@@ -146,8 +137,8 @@ class TypeTracerArray(numpylike.Array):
     @classmethod
     def _new_from_binary_op(
         cls,
-        self: TypeTracerArray,
-        other: TypeTracerArray,
+        self: Array,
+        other: Array,
         op: Callable[[Any, Any], numpy.ndarray],
     ) -> TypeTracerArray:
         shape = self._nplike.broadcast_shapes(self.shape, other.shape)
@@ -155,7 +146,7 @@ class TypeTracerArray(numpylike.Array):
 
     @classmethod
     def _new_from_unary_op(
-        cls, self: TypeTracerArray, op: Callable[[Any], numpy.ndarray]
+        cls, self: Array, op: Callable[[Any], numpy.ndarray]
     ) -> TypeTracerArray:
         return cls._new(op(self._array), shape=self._shape, nplike=self._nplike)
 
@@ -193,107 +184,108 @@ class TypeTracerArray(numpylike.Array):
         else:
             raise _errors.wrap_error(NotImplementedError)
 
-    def __add__(
-        self: TypeTracerArray, other: int | float | complex | TypeTracerArray
-    ) -> TypeTracerArray:
-        return cast(TypeTracerArray, self._invoke_binary_op(other, operator.__add__))
-
-    def __sub__(
-        self: TypeTracerArray, other: int | float | complex | TypeTracerArray
-    ) -> TypeTracerArray:
-        return cast(TypeTracerArray, self._invoke_binary_op(other, operator.__sub__))
-
-    def __truediv__(
-        self: TypeTracerArray, other: int | float | complex | TypeTracerArray
-    ) -> TypeTracerArray:
-        return cast(
-            TypeTracerArray, self._invoke_binary_op(other, operator.__truediv__)
-        )
-
-    def __floordiv__(
-        self: TypeTracerArray, other: int | float | complex | TypeTracerArray
-    ) -> TypeTracerArray:
-        return cast(
-            TypeTracerArray, self._invoke_binary_op(other, operator.__floordiv__)
-        )
-
-    def __mod__(
-        self: TypeTracerArray, other: int | float | complex | TypeTracerArray
-    ) -> TypeTracerArray:
-        return cast(TypeTracerArray, self._invoke_binary_op(other, operator.__mod__))
-
-    def __mul__(
-        self: TypeTracerArray, other: int | float | complex | TypeTracerArray
-    ) -> TypeTracerArray:
-        return cast(TypeTracerArray, self._invoke_binary_op(other, operator.__mul__))
-
-    def __pow__(
-        self: TypeTracerArray, other: int | float | complex | TypeTracerArray
-    ) -> TypeTracerArray:
-        return cast(TypeTracerArray, self._invoke_binary_op(other, operator.__pow__))
-
-    def __xor__(
-        self: TypeTracerArray, other: int | bool | TypeTracerArray
-    ) -> TypeTracerArray:
-        return cast(TypeTracerArray, self._invoke_binary_op(other, operator.__xor__))
-
-    def __and__(
-        self: TypeTracerArray, other: int | bool | TypeTracerArray
-    ) -> TypeTracerArray:
-        return cast(TypeTracerArray, self._invoke_binary_op(other, operator.__and__))
-
-    def __or__(
-        self: TypeTracerArray, other: int | bool | TypeTracerArray
-    ) -> TypeTracerArray:
-        return cast(TypeTracerArray, self._invoke_binary_op(other, operator.__or__))
-
-    def __lt__(
-        self: TypeTracerArray,
-        other: int | float | complex | str | bytes | TypeTracerArray,
-    ) -> TypeTracerArray:
-        return cast(TypeTracerArray, self._invoke_binary_op(other, operator.__lt__))
-
-    def __le__(
-        self: TypeTracerArray,
-        other: int | float | complex | str | bytes | TypeTracerArray,
-    ) -> TypeTracerArray:
-        return cast(TypeTracerArray, self._invoke_binary_op(other, operator.__le__))
-
-    def __gt__(
-        self: TypeTracerArray,
-        other: int | float | complex | str | bytes | TypeTracerArray,
-    ) -> TypeTracerArray:
-        return cast(TypeTracerArray, self._invoke_binary_op(other, operator.__gt__))
-
-    def __ge__(
-        self: TypeTracerArray,
-        other: int | float | complex | str | bytes | TypeTracerArray,
-    ) -> TypeTracerArray:
-        return cast(TypeTracerArray, self._invoke_binary_op(other, operator.__ge__))
-
-    def __eq__(  # type: ignore[override]
-        self: TypeTracerArray,
-        other: int | float | bool | complex | str | bytes | TypeTracerArray,
-    ) -> TypeTracerArray:
-        return cast(TypeTracerArray, self._invoke_binary_op(other, operator.__eq__))
-
-    def __ne__(  # type: ignore[override]
-        self: TypeTracerArray,
-        other: int | float | bool | complex | str | bytes | TypeTracerArray,
-    ) -> TypeTracerArray:
-        return cast(TypeTracerArray, self._invoke_binary_op(other, operator.__ne__))
-
-    def __abs__(self: TypeTracerArray) -> TypeTracerArray:
-        return cast(TypeTracerArray, self._new_from_unary_op(self, operator.__abs__))
-
-    def __neg__(self: TypeTracerArray) -> TypeTracerArray:
-        return cast(TypeTracerArray, self._new_from_unary_op(self, operator.__neg__))
-
-    def __pos__(self: TypeTracerArray) -> TypeTracerArray:
-        return cast(TypeTracerArray, self._new_from_unary_op(self, operator.__pos__))
-
-    def __invert__(self: TypeTracerArray) -> TypeTracerArray:
-        return cast(TypeTracerArray, self._new_from_unary_op(self, operator.__invert__))
+    #
+    # def __add__(
+    #     self: Array, other: int | float | complex | TypeTracerArray
+    # ) -> TypeTracerArray:
+    #     return cast(TypeTracerArray, self._invoke_binary_op(other, operator.__add__))
+    #
+    # def __sub__(
+    #     self: Array, other: int | float | complex | TypeTracerArray
+    # ) -> TypeTracerArray:
+    #     return cast(TypeTracerArray, self._invoke_binary_op(other, operator.__sub__))
+    #
+    # def __truediv__(
+    #     self: Array, other: int | float | complex | TypeTracerArray
+    # ) -> TypeTracerArray:
+    #     return cast(
+    #         TypeTracerArray, self._invoke_binary_op(other, operator.__truediv__)
+    #     )
+    #
+    # def __floordiv__(
+    #     self: Array, other: int | float | complex | TypeTracerArray
+    # ) -> TypeTracerArray:
+    #     return cast(
+    #         TypeTracerArray, self._invoke_binary_op(other, operator.__floordiv__)
+    #     )
+    #
+    # def __mod__(
+    #     self: Array, other: int | float | complex | TypeTracerArray
+    # ) -> TypeTracerArray:
+    #     return cast(TypeTracerArray, self._invoke_binary_op(other, operator.__mod__))
+    #
+    # def __mul__(
+    #     self: Array, other: int | float | complex | TypeTracerArray
+    # ) -> TypeTracerArray:
+    #     return cast(TypeTracerArray, self._invoke_binary_op(other, operator.__mul__))
+    #
+    # def __pow__(
+    #     self: Array, other: int | float | complex | TypeTracerArray
+    # ) -> TypeTracerArray:
+    #     return cast(TypeTracerArray, self._invoke_binary_op(other, operator.__pow__))
+    #
+    # def __xor__(
+    #     self: Array, other: int | bool | TypeTracerArray
+    # ) -> TypeTracerArray:
+    #     return cast(TypeTracerArray, self._invoke_binary_op(other, operator.__xor__))
+    #
+    # def __and__(
+    #     self: Array, other: int | bool | TypeTracerArray
+    # ) -> TypeTracerArray:
+    #     return cast(TypeTracerArray, self._invoke_binary_op(other, operator.__and__))
+    #
+    # def __or__(
+    #     self: Array, other: int | bool | TypeTracerArray
+    # ) -> TypeTracerArray:
+    #     return cast(TypeTracerArray, self._invoke_binary_op(other, operator.__or__))
+    #
+    # def __lt__(
+    #     self: Array,
+    #     other: int | float | complex | str | bytes | TypeTracerArray,
+    # ) -> TypeTracerArray:
+    #     return cast(TypeTracerArray, self._invoke_binary_op(other, operator.__lt__))
+    #
+    # def __le__(
+    #     self: Array,
+    #     other: int | float | complex | str | bytes | TypeTracerArray,
+    # ) -> TypeTracerArray:
+    #     return cast(TypeTracerArray, self._invoke_binary_op(other, operator.__le__))
+    #
+    # def __gt__(
+    #     self: Array,
+    #     other: int | float | complex | str | bytes | TypeTracerArray,
+    # ) -> TypeTracerArray:
+    #     return cast(TypeTracerArray, self._invoke_binary_op(other, operator.__gt__))
+    #
+    # def __ge__(
+    #     self: Array,
+    #     other: int | float | complex | str | bytes | TypeTracerArray,
+    # ) -> TypeTracerArray:
+    #     return cast(TypeTracerArray, self._invoke_binary_op(other, operator.__ge__))
+    #
+    # def __eq__(  # type: ignore[override]
+    #     self: Array,
+    #     other: int | float | bool | complex | str | bytes | TypeTracerArray,
+    # ) -> TypeTracerArray:
+    #     return cast(TypeTracerArray, self._invoke_binary_op(other, operator.__eq__))
+    #
+    # def __ne__(  # type: ignore[override]
+    #     self: Array,
+    #     other: int | float | bool | complex | str | bytes | TypeTracerArray,
+    # ) -> TypeTracerArray:
+    #     return cast(TypeTracerArray, self._invoke_binary_op(other, operator.__ne__))
+    #
+    # def __abs__(self: Array) -> TypeTracerArray:
+    #     return cast(TypeTracerArray, self._new_from_unary_op(self, operator.__abs__))
+    #
+    # def __neg__(self: Array) -> TypeTracerArray:
+    #     return cast(TypeTracerArray, self._new_from_unary_op(self, operator.__neg__))
+    #
+    # def __pos__(self: Array) -> TypeTracerArray:
+    #     return cast(TypeTracerArray, self._new_from_unary_op(self, operator.__pos__))
+    #
+    # def __invert__(self: Array) -> TypeTracerArray:
+    #     return cast(TypeTracerArray, self._new_from_unary_op(self, operator.__invert__))
 
     def __bool__(self) -> bool:
         raise _errors.wrap_error(RuntimeError("cannot realise an unknown value"))
@@ -305,7 +297,7 @@ class TypeTracerArray(numpylike.Array):
         raise _errors.wrap_error(RuntimeError("cannot realise an unknown value"))
 
 
-class TypeTracer(numpylike.NumpyLike[TypeTracerArray]):
+class TypeTracer(NumpyLike):
     is_eager = True
     known_data = False
     known_shape = False
@@ -314,7 +306,7 @@ class TypeTracer(numpylike.NumpyLike[TypeTracerArray]):
         self,
         obj,
         *,
-        dtype: dtypes.dtype | None = None,
+        dtype: metadata.dtype | None = None,
         copy: bool | None = None,
     ) -> TypeTracerArray:
         raise _errors.wrap_error(NotImplementedError)
@@ -323,7 +315,7 @@ class TypeTracer(numpylike.NumpyLike[TypeTracerArray]):
         self,
         shape: int | tuple[int, ...],
         *,
-        dtype: dtypes.dtype | None = None,
+        dtype: metadata.dtype | None = None,
     ) -> TypeTracerArray:
         raise _errors.wrap_error(NotImplementedError)
 
@@ -331,7 +323,7 @@ class TypeTracer(numpylike.NumpyLike[TypeTracerArray]):
         self,
         shape: int | tuple[int, ...],
         *,
-        dtype: dtypes.dtype | None = None,
+        dtype: metadata.dtype | None = None,
     ) -> TypeTracerArray:
         raise _errors.wrap_error(NotImplementedError)
 
@@ -339,7 +331,7 @@ class TypeTracer(numpylike.NumpyLike[TypeTracerArray]):
         self,
         shape: int | tuple[int, ...],
         *,
-        dtype: dtypes.dtype | None = None,
+        dtype: metadata.dtype | None = None,
     ) -> TypeTracerArray:
         raise _errors.wrap_error(NotImplementedError)
 
@@ -348,22 +340,22 @@ class TypeTracer(numpylike.NumpyLike[TypeTracerArray]):
         shape: int | tuple[int, ...],
         fill_value,
         *,
-        dtype: dtypes.dtype | None = None,
+        dtype: metadata.dtype | None = None,
     ) -> TypeTracerArray:
         raise _errors.wrap_error(NotImplementedError)
 
     def zeros_like(
-        self, x: TypeTracerArray, *, dtype: dtypes.dtype | None = None
+        self, x: Array, *, dtype: metadata.dtype | None = None
     ) -> TypeTracerArray:
         raise _errors.wrap_error(NotImplementedError)
 
     def ones_like(
-        self, x: TypeTracerArray, *, dtype: dtypes.dtype | None = None
+        self, x: Array, *, dtype: metadata.dtype | None = None
     ) -> TypeTracerArray:
         raise _errors.wrap_error(NotImplementedError)
 
     def full_like(
-        self, x: TypeTracerArray, fill_value, *, dtype: dtypes.dtype | None = None
+        self, x: Array, fill_value, *, dtype: metadata.dtype | None = None
     ) -> TypeTracerArray:
         raise _errors.wrap_error(NotImplementedError)
 
@@ -373,46 +365,42 @@ class TypeTracer(numpylike.NumpyLike[TypeTracerArray]):
         stop: float | int | None = None,
         step: float | int = 1,
         *,
-        dtype: dtypes.dtype | None = None,
+        dtype: metadata.dtype | None = None,
     ) -> TypeTracerArray:
         raise _errors.wrap_error(NotImplementedError)
 
     def meshgrid(
-        self, *arrays: TypeTracerArray, indexing: Literal["xy", "ij"] = "xy"
+        self, *arrays: Array, indexing: Literal["xy", "ij"] = "xy"
     ) -> TypeTracerArray:
         raise _errors.wrap_error(NotImplementedError)
 
     ############################ data type functions
 
     def astype(
-        self, x: TypeTracerArray, dtype: dtypes.dtype, *, copy: bool = True
+        self, x: Array, dtype: metadata.dtype, *, copy: bool = True
     ) -> TypeTracerArray:
         raise _errors.wrap_error(NotImplementedError)
 
-    def broadcast_arrays(self, *arrays: TypeTracerArray) -> list[TypeTracerArray]:
+    def broadcast_arrays(self, *arrays: Array) -> list[TypeTracerArray]:
         raise _errors.wrap_error(NotImplementedError)
 
-    def broadcast_to(
-        self, x: TypeTracerArray, shape: tuple[SupportsInt, ...]
-    ) -> TypeTracerArray:
+    def broadcast_to(self, x: Array, shape: tuple[SupportsInt, ...]) -> TypeTracerArray:
         raise _errors.wrap_error(NotImplementedError)
 
     ############################ searching functions
 
-    def nonzero(self, x: TypeTracerArray) -> TypeTracerArray:
+    def nonzero(self, x: Array) -> TypeTracerArray:
         raise _errors.wrap_error(NotImplementedError)
 
-    def where(
-        self, condition: TypeTracerArray, x1: TypeTracerArray, x2: TypeTracerArray
-    ) -> TypeTracerArray:
+    def where(self, condition: Array, x1: Array, x2: Array) -> TypeTracerArray:
         raise _errors.wrap_error(NotImplementedError)
 
     ############################ set functions
 
-    def unique_counts(self, x: TypeTracerArray) -> TypeTracerArray:
+    def unique_counts(self, x: Array) -> TypeTracerArray:
         raise _errors.wrap_error(NotImplementedError)
 
-    def unique_values(self, x: TypeTracerArray) -> TypeTracerArray:
+    def unique_values(self, x: Array) -> TypeTracerArray:
         raise _errors.wrap_error(NotImplementedError)
 
     ############################ manipulation functions
@@ -435,41 +423,56 @@ class TypeTracer(numpylike.NumpyLike[TypeTracerArray]):
 
     ############################ ufuncs
 
-    def add(self, x1: TypeTracerArray, x2: TypeTracerArray) -> TypeTracerArray:
+    def add(self, x1: Array, x2: Array) -> TypeTracerArray:
         raise _errors.wrap_error(NotImplementedError)
 
-    def multiply(self, x1: TypeTracerArray, x2: TypeTracerArray) -> TypeTracerArray:
+    def subtract(self, x1: Array, x2: Array) -> TypeTracerArray:
         raise _errors.wrap_error(NotImplementedError)
 
-    def logical_or(self, x1: TypeTracerArray, x2: TypeTracerArray) -> TypeTracerArray:
+    def multiply(self, x1: Array, x2: Array) -> TypeTracerArray:
         raise _errors.wrap_error(NotImplementedError)
 
-    def logical_and(self, x1: TypeTracerArray, x2: TypeTracerArray) -> TypeTracerArray:
+    def logical_or(self, x1: Array, x2: Array) -> TypeTracerArray:
         raise _errors.wrap_error(NotImplementedError)
 
-    def logical_not(self, x: TypeTracerArray) -> TypeTracerArray:
+    def logical_and(self, x1: Array, x2: Array) -> TypeTracerArray:
         raise _errors.wrap_error(NotImplementedError)
 
-    def sqrt(self, x: TypeTracerArray) -> TypeTracerArray:
+    def logical_not(self, x: Array) -> TypeTracerArray:
         raise _errors.wrap_error(NotImplementedError)
 
-    def exp(self, x: TypeTracerArray) -> TypeTracerArray:
+    def sqrt(self, x: Array) -> TypeTracerArray:
         raise _errors.wrap_error(NotImplementedError)
 
-    def divide(self, x1: TypeTracerArray, x2: TypeTracerArray) -> TypeTracerArray:
+    def exp(self, x: Array) -> TypeTracerArray:
         raise _errors.wrap_error(NotImplementedError)
 
-    def equal(self, x1: TypeTracerArray, x2: TypeTracerArray) -> TypeTracerArray:
+    def divide(self, x1: Array, x2: Array) -> TypeTracerArray:
         raise _errors.wrap_error(NotImplementedError)
 
-    def isnan(self, x: TypeTracerArray) -> TypeTracerArray:
+    def greater(self, x1: Array, x2: Array) -> Array:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def greater_equal(self, x1: Array, x2: Array) -> Array:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def lesser(self, x1: Array, x2: Array) -> Array:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def lesser_equal(self, x1: Array, x2: Array) -> Array:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def equal(self, x1: Array, x2: Array) -> Array:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def isnan(self, x: Array) -> TypeTracerArray:
         raise _errors.wrap_error(NotImplementedError)
 
     ############################ Utility functions
 
     def all(
         self,
-        x: TypeTracerArray,
+        x: Array,
         *,
         axis: int | tuple[int, ...] | None = None,
         keepdims: bool = False,
@@ -478,7 +481,7 @@ class TypeTracer(numpylike.NumpyLike[TypeTracerArray]):
 
     def any(
         self,
-        x: TypeTracerArray,
+        x: Array,
         *,
         axis: int | tuple[int, ...] | None = None,
         keepdims: bool = False,
@@ -489,27 +492,27 @@ class TypeTracer(numpylike.NumpyLike[TypeTracerArray]):
 
     def sum(
         self,
-        x: TypeTracerArray,
+        x: Array,
         *,
         axis: int | tuple[int, ...] | None = None,
-        dtype: dtypes.dtype | None = None,
+        dtype: metadata.dtype | None = None,
         keepdims: bool = False,
     ) -> TypeTracerArray:
         raise _errors.wrap_error(NotImplementedError)
 
     def prod(
         self,
-        x: TypeTracerArray,
+        x: Array,
         *,
         axis: int | tuple[int, ...] | None = None,
-        dtype: dtypes.dtype | None = None,
+        dtype: metadata.dtype | None = None,
         keepdims: bool = False,
     ) -> TypeTracerArray:
         raise _errors.wrap_error(NotImplementedError)
 
     def min(
         self,
-        x: TypeTracerArray,
+        x: Array,
         *,
         axis: int | tuple[int, ...] | None = None,
         keepdims: bool = False,
@@ -518,7 +521,7 @@ class TypeTracer(numpylike.NumpyLike[TypeTracerArray]):
 
     def max(
         self,
-        x: TypeTracerArray,
+        x: Array,
         *,
         axis: int | tuple[int, ...] | None = None,
         keepdims: bool = False,
@@ -528,37 +531,35 @@ class TypeTracer(numpylike.NumpyLike[TypeTracerArray]):
     ############################ Searching functions
 
     def argmin(
-        self, x: TypeTracerArray, *, axis: int | None = None, keepdims: bool = False
+        self, x: Array, *, axis: int | None = None, keepdims: bool = False
     ) -> TypeTracerArray:
         raise _errors.wrap_error(NotImplementedError)
 
     def argmax(
-        self, x: TypeTracerArray, *, axis: int | None = None, keepdims: bool = False
+        self, x: Array, *, axis: int | None = None, keepdims: bool = False
     ) -> TypeTracerArray:
         raise _errors.wrap_error(NotImplementedError)
 
     ############################ extensions to Array API
 
-    def as_contiguous(self, x: TypeTracerArray) -> TypeTracerArray:
+    def as_contiguous(self, x: Array) -> TypeTracerArray:
         raise _errors.wrap_error(NotImplementedError)
 
     def cumsum(
-        self, x: TypeTracerArray, *, axis: int | tuple[int, ...] | None = None
+        self, x: Array, *, axis: int | tuple[int, ...] | None = None
     ) -> TypeTracerArray:
         raise _errors.wrap_error(NotImplementedError)
 
     def from_buffer(self, buffer, *, dtype=None, count: int = -1) -> TypeTracerArray:
         raise _errors.wrap_error(NotImplementedError)
 
-    def array_equal(
-        self, x1: TypeTracerArray, x2: TypeTracerArray, *, equal_nan: bool = False
-    ) -> bool:
+    def array_equal(self, x1: Array, x2: Array, *, equal_nan: bool = False) -> bool:
         raise _errors.wrap_error(NotImplementedError)
 
     def search_sorted(
         self,
-        x: TypeTracerArray,
-        values: TypeTracerArray,
+        x: Array,
+        values: Array,
         *,
         side: Literal["left", "right"] = "left",
         sorter=None,
@@ -567,19 +568,19 @@ class TypeTracer(numpylike.NumpyLike[TypeTracerArray]):
 
     def repeat(
         self,
-        x: TypeTracerArray,
-        repeats: TypeTracerArray | int,
+        x: Array,
+        repeats: Array | int,
         *,
         axis: int | None = None,
     ) -> TypeTracerArray:
         raise _errors.wrap_error(NotImplementedError)
 
-    def tile(self, x: TypeTracerArray, reps: int) -> TypeTracerArray:
+    def tile(self, x: Array, reps: int) -> TypeTracerArray:
         raise _errors.wrap_error(NotImplementedError)
 
     def pack_bits(
         self,
-        x: TypeTracerArray,
+        x: Array,
         *,
         axis: int | None = None,
         bitorder: Literal["big", "little"] = "big",
@@ -588,7 +589,7 @@ class TypeTracer(numpylike.NumpyLike[TypeTracerArray]):
 
     def unpack_bits(
         self,
-        x: TypeTracerArray,
+        x: Array,
         *,
         axis: int | None = None,
         count: int | None = None,
@@ -596,15 +597,15 @@ class TypeTracer(numpylike.NumpyLike[TypeTracerArray]):
     ) -> TypeTracerArray:
         raise _errors.wrap_error(NotImplementedError)
 
-    def minimum(self, x1: TypeTracerArray, x2: TypeTracerArray) -> TypeTracerArray:
+    def minimum(self, x1: Array, x2: Array) -> TypeTracerArray:
         raise _errors.wrap_error(NotImplementedError)
 
-    def maximum(self, x1: TypeTracerArray, x2: TypeTracerArray) -> TypeTracerArray:
+    def maximum(self, x1: Array, x2: Array) -> TypeTracerArray:
         raise _errors.wrap_error(NotImplementedError)
 
     def nan_to_num(
         self,
-        x: TypeTracerArray,
+        x: Array,
         *,
         copy: bool = True,
         nan: int | float | None = 0.0,
@@ -615,8 +616,8 @@ class TypeTracer(numpylike.NumpyLike[TypeTracerArray]):
 
     def is_close(
         self,
-        x1: TypeTracerArray,
-        x2: TypeTracerArray,
+        x1: Array,
+        x2: Array,
         *,
         rtol: float = 1e-5,
         atol: float = 1e-8,
@@ -625,13 +626,13 @@ class TypeTracer(numpylike.NumpyLike[TypeTracerArray]):
         raise _errors.wrap_error(NotImplementedError)
 
     def count_nonzero(
-        self, x: TypeTracerArray, *, axis: int | None = None, keepdims: bool = False
+        self, x: Array, *, axis: int | None = None, keepdims: bool = False
     ) -> TypeTracerArray:
         raise _errors.wrap_error(NotImplementedError)
 
     def array_str(
         self,
-        x: TypeTracerArray,
+        x: Array,
         *,
         max_line_width: int | None = None,
         precision: int | None = None,
@@ -639,7 +640,7 @@ class TypeTracer(numpylike.NumpyLike[TypeTracerArray]):
     ):
         raise _errors.wrap_error(NotImplementedError)
 
-    def is_c_contiguous(self, x: TypeTracerArray) -> bool:
+    def is_c_contiguous(self, x: Array) -> bool:
         raise _errors.wrap_error(NotImplementedError)
 
     def to_rectilinear(self, array):
@@ -679,7 +680,7 @@ class TypeTracer(numpylike.NumpyLike[TypeTracerArray]):
         if result_is_known or assume_unknown_compatible:
             return True
         else:
-            return unknown_scalar(dtypes.bool_)
+            return unknown_scalar(metadata.bool_)
 
     @classmethod
     def broadcast_shapes(

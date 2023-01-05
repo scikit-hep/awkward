@@ -5,9 +5,13 @@ import threading
 import warnings
 from collections.abc import Mapping, Sequence
 
+import numpy
+
 from awkward import _nplikes
 
-np = _nplikes.NumpyMetadata.instance()
+
+class AxisError(numpy.AxisError):
+    ...
 
 
 class PartialFunction:
@@ -48,6 +52,8 @@ class ErrorContext:
             self._slate.__dict__.clear()
 
     def format_argument(self, width, value):
+        import numpy
+
         from awkward import contents, highlevel, record
 
         if isinstance(value, contents.Content):
@@ -84,14 +90,14 @@ class ErrorContext:
             except Exception as err:
                 valuestr = f"repr-raised-{type(err).__name__}"
 
-        elif isinstance(value, np.ndarray):
-            import numpy
+        # TODO use nplike here
+        elif isinstance(value, numpy.ndarray):
 
             if not numpy.__version__.startswith("1.13."):  # 'threshold' argument
                 prefix = f"{type(value).__module__}.{type(value).__name__}("
                 suffix = ")"
                 try:
-                    valuestr = numpy.array2string(
+                    valuestr = numpy.array_str(
                         value,
                         max_line_width=width - len(prefix) - len(suffix),
                         threshold=0,

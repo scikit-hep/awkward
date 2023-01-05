@@ -6,13 +6,13 @@ import awkward_cpp
 
 import awkward as ak
 from awkward._kernels import CupyKernel, JaxKernel, NumpyKernel, TypeTracerKernel
-from awkward._nplikes import Cupy, Jax, Numpy, NumpyLike, nplike_of, dtypes
+from awkward._nplikes import Cupy, Jax, Numpy, NumpyLike, nplike_of, metadata
 from awkward._singleton import Singleton
 from awkward._typetracer import TypeTracer
 from awkward.typing import Callable, Final, Tuple, TypeAlias, TypeVar, Unpack
 
 T = TypeVar("T", covariant=True)
-KernelKeyType: TypeAlias = Tuple[str, Unpack[Tuple[dtypes.dtype, ...]]]
+KernelKeyType: TypeAlias = Tuple[str, Unpack[Tuple[metadata.dtype, ...]]]
 KernelType: TypeAlias = Callable[..., None]
 
 
