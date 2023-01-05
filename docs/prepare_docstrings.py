@@ -143,8 +143,8 @@ def dosig(node):
     if node is None:
         return "self"
     else:
-        non_keword_args = node.args.posonlyargs + node.args.args
-        argnames = [x.arg for x in non_keword_args + node.args.kwonlyargs]
+        non_keyword_args = node.args.posonlyargs + node.args.args
+        argnames = [x.arg for x in non_keyword_args + node.args.kwonlyargs]
         defaults = [
             "=" + tostr(x)
             for x in node.args.defaults + node.args.kw_defaults
@@ -153,9 +153,9 @@ def dosig(node):
         defaults = [""] * (len(argnames) - len(defaults)) + defaults
         rendered = [x + y for x, y in zip(argnames, defaults)]
         if node.args.vararg is not None:
-            rendered.insert(len(non_keword_args), f"*{node.args.vararg.arg}")
+            rendered.insert(len(non_keyword_args), f"*{node.args.vararg.arg}")
         elif node.args.kwonlyargs:
-            rendered.insert(len(non_keword_args), "*")
+            rendered.insert(len(non_keyword_args), "*")
         return ", ".join(rendered)
 
 
