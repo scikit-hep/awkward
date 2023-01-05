@@ -8,8 +8,7 @@ import numba.core.typing.ctypes_utils
 import numpy
 
 import awkward as ak
-
-np = ak._nplikes.NumpyMetadata.instance()
+from awkward._nplikes import metadata
 
 
 def code_to_function(code, function_name, externals=None, debug=False):
@@ -23,7 +22,7 @@ def code_to_function(code, function_name, externals=None, debug=False):
 
 def tonumbatype(form):
     if isinstance(form, ak.forms.EmptyForm):
-        return tonumbatype(form.to_NumpyForm(np.dtype(np.float64)))
+        return tonumbatype(form.to_NumpyForm(metadata.float64))
 
     elif isinstance(form, ak.forms.NumpyForm):
         if len(form.inner_shape) == 0:

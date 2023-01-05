@@ -5,10 +5,10 @@ import jax
 
 import awkward as ak
 from awkward import _errors, _nplikes, contents, highlevel, record
+from awkward._nplikes import metadata
 from awkward.typing import Generic, TypeVar, Union
 
 numpy = _nplikes.Numpy.instance()
-np = _nplikes.NumpyMetadata.instance()
 
 
 def find_all_buffers(
@@ -123,7 +123,7 @@ class AuxData(Generic[T]):
         for buffer in buffers:
             # Check that JAX isn't trying to give us float0 types
             dtype = getattr(buffer, "dtype", None)
-            if dtype == np.dtype([("float0", "V")]):
+            if dtype == metadata.dtype([("float0", "V")]):
                 raise _errors.wrap_error(
                     TypeError(
                         f"a buffer with the dtype {buffer.dtype} was encountered during unflattening. "

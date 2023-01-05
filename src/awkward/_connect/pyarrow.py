@@ -6,8 +6,7 @@ from collections.abc import Iterable, Sized
 import numpy
 
 import awkward as ak
-
-np = ak._nplikes.NumpyMetadata.instance()
+from awkward._nplikes import metadata
 
 try:
     import pyarrow
@@ -180,20 +179,20 @@ if pyarrow is not None:
     )
 
     _pyarrow_to_numpy_dtype = {
-        pyarrow.date32(): (True, np.dtype("M8[D]")),
-        pyarrow.date64(): (False, np.dtype("M8[ms]")),
-        pyarrow.time32("s"): (True, np.dtype("M8[s]")),
-        pyarrow.time32("ms"): (True, np.dtype("M8[ms]")),
-        pyarrow.time64("us"): (False, np.dtype("M8[us]")),
-        pyarrow.time64("ns"): (False, np.dtype("M8[ns]")),
-        pyarrow.timestamp("s"): (False, np.dtype("M8[s]")),
-        pyarrow.timestamp("ms"): (False, np.dtype("M8[ms]")),
-        pyarrow.timestamp("us"): (False, np.dtype("M8[us]")),
-        pyarrow.timestamp("ns"): (False, np.dtype("M8[ns]")),
-        pyarrow.duration("s"): (False, np.dtype("m8[s]")),
-        pyarrow.duration("ms"): (False, np.dtype("m8[ms]")),
-        pyarrow.duration("us"): (False, np.dtype("m8[us]")),
-        pyarrow.duration("ns"): (False, np.dtype("m8[ns]")),
+        pyarrow.date32(): (True, metadata.dtype("M8[D]")),
+        pyarrow.date64(): (False, metadata.dtype("M8[ms]")),
+        pyarrow.time32("s"): (True, metadata.dtype("M8[s]")),
+        pyarrow.time32("ms"): (True, metadata.dtype("M8[ms]")),
+        pyarrow.time64("us"): (False, metadata.dtype("M8[us]")),
+        pyarrow.time64("ns"): (False, metadata.dtype("M8[ns]")),
+        pyarrow.timestamp("s"): (False, metadata.dtype("M8[s]")),
+        pyarrow.timestamp("ms"): (False, metadata.dtype("M8[ms]")),
+        pyarrow.timestamp("us"): (False, metadata.dtype("M8[us]")),
+        pyarrow.timestamp("ns"): (False, metadata.dtype("M8[ns]")),
+        pyarrow.duration("s"): (False, metadata.dtype("m8[s]")),
+        pyarrow.duration("ms"): (False, metadata.dtype("m8[ms]")),
+        pyarrow.duration("us"): (False, metadata.dtype("m8[us]")),
+        pyarrow.duration("ns"): (False, metadata.dtype("m8[ns]")),
     }
 
 if not ak._util.numpy_at_least("1.17.0"):
@@ -300,7 +299,7 @@ def popbuffers_finalize(
     if isinstance(awkwardarrow_type, AwkwardArrowType):
         if awkwardarrow_type.mask_type == "UnmaskedArray":
             assert validbits is None or numpy.all(
-                numpy.frombuffer(validbits, np.uint8)[: len(out) // 8] == 0xFF
+                numpy.frombuffer(validbits, metadata.uint8)[: len(out) // 8] == 0xFF
             )
             return revertable(
                 ak.contents.UnmaskedArray.simplified(
@@ -316,7 +315,7 @@ def popbuffers_finalize(
                         ak.contents.BitMaskedArray.simplified(
                             # ceildiv(len(out), 8) = -(len(out) // -8)
                             ak.index.IndexU8(
-                                numpy.full(-(len(out) // -8), np.uint8(0xFF))
+                                numpy.full(-(len(out) // -8), metadata.uint8(0xFF))
                             ),
                             out,
                             valid_when=True,
@@ -336,7 +335,9 @@ def popbuffers_finalize(
             else:
                 return revertable(
                     ak.contents.BitMaskedArray.simplified(
-                        ak.index.IndexU8(numpy.frombuffer(validbits, dtype=np.uint8)),
+                        ak.index.IndexU8(
+                            numpy.frombuffer(validbits, dtype=metadata.uint8)
+                        ),
                         out,
                         valid_when=True,
                         length=len(out),
@@ -349,14 +350,14 @@ def popbuffers_finalize(
     else:
         if validbits is None and generate_bitmasks:
             # ceildiv(len(out), 8) = -(len(out) // -8)
-            validbits = numpy.full(-(len(out) // -8), np.uint8(0xFF))
+            validbits = numpy.full(-(len(out) // -8), numpy.uint8(0xFF))
 
         if validbits is None:
             return revertable(ak.contents.UnmaskedArray.simplified(out), out)
         else:
             return revertable(
                 ak.contents.BitMaskedArray.simplified(
-                    ak.index.IndexU8(numpy.frombuffer(validbits, dtype=np.uint8)),
+                    ak.index.IndexU8(numpy.frombuffer(validbits, dtype=metadata.uint8)),
                     out,
                     valid_when=True,
                     length=len(out),
@@ -480,9 +481,13 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
         paoffsets = buffers.pop(0)
 
         if isinstance(storage_type, pyarrow.lib.LargeListType):
-            akoffsets = ak.index.Index64(numpy.frombuffer(paoffsets, dtype=np.int64))
+            akoffsets = ak.index.Index64(
+                numpy.frombuffer(paoffsets, dtype=metadata.int64)
+            )
         else:
-            akoffsets = ak.index.Index32(numpy.frombuffer(paoffsets, dtype=np.int32))
+            akoffsets = ak.index.Index32(
+                numpy.frombuffer(paoffsets, dtype=metadata.int32)
+            )
 
         a, b = to_awkwardarrow_storage_types(storage_type.value_type)
         akcontent = popbuffers(paarray.values, a, b, buffers, generate_bitmasks)
@@ -526,7 +531,7 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
 
         out = ak.contents.RegularArray(
             ak.contents.NumpyArray(
-                numpy.frombuffer(pacontent, dtype=np.uint8),
+                numpy.frombuffer(pacontent, dtype=metadata.uint8),
                 parameters=sub_parameters,
                 backend=ak._backends.NumpyBackend.instance(),
             ),
@@ -544,9 +549,13 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
         pacontent = buffers.pop(0)
 
         if storage_type in _string_like[::2]:
-            akoffsets = ak.index.Index32(numpy.frombuffer(paoffsets, dtype=np.int32))
+            akoffsets = ak.index.Index32(
+                numpy.frombuffer(paoffsets, dtype=metadata.int32)
+            )
         else:
-            akoffsets = ak.index.Index64(numpy.frombuffer(paoffsets, dtype=np.int64))
+            akoffsets = ak.index.Index64(
+                numpy.frombuffer(paoffsets, dtype=metadata.int64)
+            )
 
         parameters = node_parameters(awkwardarrow_type)
 
@@ -562,7 +571,7 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
         out = ak.contents.ListOffsetArray(
             akoffsets,
             ak.contents.NumpyArray(
-                numpy.frombuffer(pacontent, dtype=np.uint8),
+                numpy.frombuffer(pacontent, dtype=metadata.uint8),
                 parameters=sub_parameters,
                 backend=ak._backends.NumpyBackend.instance(),
             ),
@@ -614,13 +623,13 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
         if isinstance(storage_type, pyarrow.lib.SparseUnionType):
             assert storage_type.num_buffers == 2
             validbits = buffers.pop(0)
-            nptags = numpy.frombuffer(buffers.pop(0), dtype=np.int8)
-            npindex = numpy.arange(len(nptags), dtype=np.int32)
+            nptags = numpy.frombuffer(buffers.pop(0), dtype=metadata.int8)
+            npindex = numpy.arange(len(nptags), dtype=metadata.int32)
         else:
             assert storage_type.num_buffers == 3
             validbits = buffers.pop(0)
-            nptags = numpy.frombuffer(buffers.pop(0), dtype=np.int8)
-            npindex = numpy.frombuffer(buffers.pop(0), dtype=np.int32)
+            nptags = numpy.frombuffer(buffers.pop(0), dtype=metadata.int8)
+            npindex = numpy.frombuffer(buffers.pop(0), dtype=metadata.int32)
 
         akcontents = []
         for i in range(storage_type.num_fields):
@@ -649,7 +658,7 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
 
         # This is already an option-type and offsets-corrected, so no popbuffers_finalize.
         return ak.contents.IndexedOptionArray(
-            ak.index.Index64(numpy.full(len(paarray), -1, dtype=np.int64)),
+            ak.index.Index64(numpy.full(len(paarray), -1, dtype=metadata.int64)),
             ak.contents.EmptyArray(parameters=node_parameters(awkwardarrow_type)),
             parameters=mask_parameters(awkwardarrow_type),
         )
@@ -659,10 +668,10 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
         validbits = buffers.pop(0)
         bitdata = buffers.pop(0)
 
-        bytedata = unpackbits(numpy.frombuffer(bitdata, dtype=np.uint8))
+        bytedata = unpackbits(numpy.frombuffer(bitdata, dtype=metadata.uint8))
 
         out = ak.contents.NumpyArray(
-            bytedata.view(np.bool_),
+            bytedata.view(metadata.bool_),
             parameters=node_parameters(awkwardarrow_type),
             backend=ak._backends.NumpyBackend.instance(),
         )
@@ -677,7 +686,7 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
 
         to64, dt = _pyarrow_to_numpy_dtype.get(str(storage_type), (False, None))
         if to64:
-            data = numpy.frombuffer(data, dtype=np.int32).astype(np.int64)
+            data = numpy.frombuffer(data, dtype=metadata.int32).astype(metadata.int64)
         if dt is None:
             dt = storage_type.to_pandas_dtype()
 
@@ -714,11 +723,11 @@ def form_popbuffers(awkwardarrow_type, storage_type):
 
     elif isinstance(storage_type, pyarrow.lib.DictionaryType):
         index_type = storage_type.index_type.to_pandas_dtype()
-        if index_type is np.int64:
+        if index_type == metadata.int64:
             index = "i64"
-        elif index_type is np.uint32:
+        elif index_type == metadata.uint32:
             index = "u32"
-        elif index_type is np.int32:
+        elif index_type == metadata.int32:
             index = "i32"
         else:
             raise ak._errors.wrap_error(
@@ -884,7 +893,7 @@ def form_popbuffers(awkwardarrow_type, storage_type):
     elif isinstance(storage_type, pyarrow.lib.DataType):
         _, dt = _pyarrow_to_numpy_dtype.get(str(storage_type), (False, None))
         if dt is None:
-            dt = np.dtype(storage_type.to_pandas_dtype())
+            dt = metadata.dtype(storage_type.to_pandas_dtype())
 
         out = ak.forms.NumpyForm(
             ak.types.numpytype.dtype_to_primitive(dt),
@@ -1007,7 +1016,7 @@ def handle_arrow(obj, generate_bitmasks=False, pass_empty_field=False):
                 return out._getitem_at(0)
 
             if record_is_optiontype and record_mask is None and generate_bitmasks:
-                record_mask = numpy.zeros(len(out), dtype=np.bool_)
+                record_mask = numpy.zeros(len(out), dtype=metadata.bool_)
 
             if record_is_optiontype and record_mask is None:
                 return ak.contents.UnmaskedArray.simplified(

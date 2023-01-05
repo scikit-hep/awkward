@@ -7,8 +7,8 @@ import re
 from awkward_cpp import libawkward
 
 import awkward as ak
+from awkward._nplikes import metadata
 
-np = ak._nplikes.NumpyMetadata.instance()
 numpy = ak._nplikes.Numpy.instance()
 
 
@@ -444,7 +444,7 @@ namespace awkward {{
 
 def togenerator(form, flatlist_as_rvec):
     if isinstance(form, ak.forms.EmptyForm):
-        return togenerator(form.to_NumpyForm(np.dtype(np.float64)), flatlist_as_rvec)
+        return togenerator(form.to_NumpyForm(metadata.float64), flatlist_as_rvec)
 
     elif isinstance(form, ak.forms.NumpyForm):
         if len(form.inner_shape) == 0:

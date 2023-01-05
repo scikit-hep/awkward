@@ -29,7 +29,7 @@ cpp_type_of = {
     "timedelta64": "std::difftime",
 }
 
-np = ak._nplikes.NumpyMetadata.instance()
+
 numpy = ak._nplikes.Numpy.instance()
 
 

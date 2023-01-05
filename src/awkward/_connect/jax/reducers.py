@@ -3,19 +3,18 @@
 import jax
 
 import awkward as ak
+from awkward._nplikes import metadata
 from awkward._reducers import Reducer
-
-np = ak._nplikes.NumpyMetadata.instance()
 
 
 class ArgMin(Reducer):
     name = "argmin"
     needs_position = True
-    preferred_dtype = np.int64
+    preferred_dtype = metadata.int64
 
     @classmethod
     def return_dtype(cls, given_dtype):
-        return np.int64
+        return metadata.int64
 
     @classmethod
     def apply(cls, array, parents, outlength):
@@ -25,11 +24,11 @@ class ArgMin(Reducer):
 class ArgMax(Reducer):
     name = "argmax"
     needs_position = True
-    preferred_dtype = np.int64
+    preferred_dtype = metadata.int64
 
     @classmethod
     def return_dtype(cls, given_dtype):
-        return np.int64
+        return metadata.int64
 
     @classmethod
     def apply(cls, array, parents, outlength):
@@ -38,11 +37,11 @@ class ArgMax(Reducer):
 
 class Count(Reducer):
     name = "count"
-    preferred_dtype = np.float64
+    preferred_dtype = metadata.float64
 
     @classmethod
     def return_dtype(cls, given_dtype):
-        return np.int64
+        return metadata.int64
 
     @classmethod
     def apply(cls, array, parents, outlength):
@@ -53,11 +52,11 @@ class Count(Reducer):
 
 class CountNonzero(Reducer):
     name = "count_nonzero"
-    preferred_dtype = np.float64
+    preferred_dtype = metadata.float64
 
     @classmethod
     def return_dtype(cls, given_dtype):
-        return np.int64
+        return metadata.int64
 
     @classmethod
     def apply(cls, array, parents, outlength):
@@ -68,7 +67,7 @@ class CountNonzero(Reducer):
 
 class Sum(Reducer):
     name = "sum"
-    preferred_dtype = np.float64
+    preferred_dtype = metadata.float64
 
     @classmethod
     def apply(cls, array, parents, outlength):
@@ -85,7 +84,7 @@ class Sum(Reducer):
             return ak.contents.NumpyArray(
                 array.backend.nplike.asarray(result, dtype=array.dtype)
             )
-        elif array.dtype.type in (np.complex128, np.complex64):
+        elif metadata.isdtype(array.dtype, "complex floating"):
             return ak.contents.NumpyArray(result.view(array.dtype))
         else:
             return ak.contents.NumpyArray(result, backend=array.backend)
@@ -93,7 +92,7 @@ class Sum(Reducer):
 
 class Prod(Reducer):
     name = "prod"
-    preferred_dtype = np.int64
+    preferred_dtype = metadata.int64
 
     @classmethod
     def apply(cls, array, parents, outlength):
@@ -103,7 +102,7 @@ class Prod(Reducer):
             jax.ops.segment_sum(jax.numpy.log(array.data), parents.data)
         )
 
-        if array.dtype.type in (np.complex128, np.complex64):
+        if metadata.isdtype(array.dtype, "complex floating"):
             return ak.contents.NumpyArray(
                 result.view(array.dtype), backend=array.backend
             )
@@ -113,11 +112,11 @@ class Prod(Reducer):
 
 class Any(Reducer):
     name = "any"
-    preferred_dtype = np.bool_
+    preferred_dtype = metadata.bool_
 
     @classmethod
     def return_dtype(cls, given_dtype):
-        return np.bool_
+        return metadata.bool_
 
     @classmethod
     def apply(cls, array, parents, outlength):
@@ -130,11 +129,11 @@ class Any(Reducer):
 
 class All(Reducer):
     name = "all"
-    preferred_dtype = np.bool_
+    preferred_dtype = metadata.bool_
 
     @classmethod
     def return_dtype(cls, given_dtype):
-        return np.bool_
+        return metadata.bool_
 
     @classmethod
     def apply(cls, array, parents, outlength):
@@ -147,7 +146,7 @@ class All(Reducer):
 
 class Min(Reducer):
     name = "min"
-    preferred_dtype = np.float64
+    preferred_dtype = metadata.float64
     initial = None
 
     def __init__(self, initial):
@@ -159,19 +158,10 @@ class Min(Reducer):
     @staticmethod
     def _min_initial(initial, type):
         if initial is None:
-            if type in (
-                np.int8,
-                np.int16,
-                np.int32,
-                np.int64,
-                np.uint8,
-                np.uint16,
-                np.uint32,
-                np.uint64,
-            ):
-                return np.iinfo(type).max
+            if metadata.isdtype(type, "integral"):
+                return metadata.iinfo(type).max
             else:
-                return np.inf
+                return metadata.inf
 
         return initial
 
@@ -182,7 +172,7 @@ class Min(Reducer):
         result = jax.ops.segment_min(array.data, parents.data)
         result = jax.numpy.minimum(result, cls._min_initial(cls.initial, array.dtype))
 
-        if array.dtype.type in (np.complex128, np.complex64):
+        if metadata.isdtype(array.dtype, "complex floating"):
             return ak.contents.NumpyArray(
                 array.backend.nplike.asarray(
                     result.view(array.dtype), dtype=array.dtype
@@ -195,7 +185,7 @@ class Min(Reducer):
 
 class Max(Reducer):
     name = "max"
-    preferred_dtype = np.float64
+    preferred_dtype = metadata.float64
     initial = None
 
     def __init__(self, initial):
@@ -207,19 +197,10 @@ class Max(Reducer):
     @staticmethod
     def _max_initial(initial, type):
         if initial is None:
-            if type in (
-                np.int8,
-                np.int16,
-                np.int32,
-                np.int64,
-                np.uint8,
-                np.uint16,
-                np.uint32,
-                np.uint64,
-            ):
-                return np.iinfo(type).min
+            if metadata.isdtype(type, "integral"):
+                return metadata.iinfo(type).min
             else:
-                return -np.inf
+                return -metadata.inf
 
         return initial
 
@@ -230,7 +211,7 @@ class Max(Reducer):
         result = jax.ops.segment_max(array.data, parents.data)
 
         result = jax.numpy.maximum(result, cls._max_initial(cls.initial, array.dtype))
-        if array.dtype.type in (np.complex128, np.complex64):
+        if metadata.isdtype(array.dtype, "complex floating"):
             return ak.contents.NumpyArray(
                 array.backend.nplike.asarray(
                     result.view(array.dtype), dtype=array.dtype

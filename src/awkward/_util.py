@@ -632,7 +632,8 @@ expand_braces.regex = re.compile(r"\{[^\{\}]*\}")
 
 
 def from_arraylib(array, regulararray, recordarray, highlevel, behavior):
-    np = ak._nplikes.NumpyMetadata.instance()
+    from awkward._nplikes import metadata
+
     numpy = ak._nplikes.Numpy.instance()
 
     def recurse(array, mask=None):
@@ -654,7 +655,9 @@ def from_arraylib(array, regulararray, recordarray, highlevel, behavior):
         if array.dtype.kind == "S":
             asbytes = array.reshape(-1)
             itemsize = asbytes.dtype.itemsize
-            starts = numpy.arange(0, len(asbytes) * itemsize, itemsize, dtype=np.int64)
+            starts = numpy.arange(
+                0, len(asbytes) * itemsize, itemsize, dtype=metadata.int64
+            )
             stops = starts + numpy.char.str_len(asbytes)
             data = ak.contents.ListArray(
                 ak.index.Index64(starts),
@@ -674,7 +677,9 @@ def from_arraylib(array, regulararray, recordarray, highlevel, behavior):
         elif array.dtype.kind == "U":
             asbytes = numpy.char.encode(array.reshape(-1), "utf-8", "surrogateescape")
             itemsize = asbytes.dtype.itemsize
-            starts = numpy.arange(0, len(asbytes) * itemsize, itemsize, dtype=np.int64)
+            starts = numpy.arange(
+                0, len(asbytes) * itemsize, itemsize, dtype=metadata.int64
+            )
             stops = starts + numpy.char.str_len(asbytes)
             data = ak.contents.ListArray(
                 ak.index.Index64(starts),
@@ -697,7 +702,7 @@ def from_arraylib(array, regulararray, recordarray, highlevel, behavior):
         if mask is None:
             return data
 
-        elif mask is False or (isinstance(mask, np.bool_) and not mask):
+        elif mask is False or (isinstance(mask, metadata.bool_) and not mask):
             # NumPy's MaskedArray with mask == False is an UnmaskedArray
             if len(array.shape) == 1:
                 return ak.contents.UnmaskedArray(data)
@@ -724,7 +729,7 @@ def from_arraylib(array, regulararray, recordarray, highlevel, behavior):
     if isinstance(array, numpy.ma.MaskedArray):
         mask = numpy.ma.getmask(array)
         array = numpy.ma.getdata(array)
-        if isinstance(mask, np.ndarray) and len(mask.shape) > 1:
+        if isinstance(mask, numpy.ndarray) and len(mask.shape) > 1:
             regulararray = True
             mask = mask.reshape(-1)
     else:
