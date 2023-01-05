@@ -1332,9 +1332,12 @@ class NumpyArray(Content):
         else:
             return True
 
-    def _to_regular_primitive(self):
+    def _to_regular_primitive(self) -> ak.contents.RegularArray:
+        # A length-1 slice in each dimension
         index = tuple([slice(None, 1)] * len(self.shape))
+        # Broadcast this trivial slice to the true dimensions (zero-copy)
         new_data = self.backend.nplike.broadcast_to(self._data[index], self.shape)
+        # Convert contiguous array to `RegularArray`
         return NumpyArray(
             new_data, backend=self.backend, parameters=self.parameters
         ).to_RegularArray()
