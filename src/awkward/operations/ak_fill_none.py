@@ -111,8 +111,6 @@ def _impl(array, value, axis, highlevel, behavior):
         def action(layout, continuation, **kwargs):
             if layout.is_option:
                 return ak._do.fill_none(continuation(), valuelayout)
-            else:
-                return continuation()
 
     else:
 
