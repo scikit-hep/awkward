@@ -21,7 +21,7 @@ class Numpy(ArrayModuleNumpyLike):
     array_module: Final[Any] = numpy
 
     @classmethod
-    def is_raw_array(cls, obj) -> bool:
+    def is_own_array(cls, obj) -> bool:
         return isinstance(obj, numpy.ndarray)
 
     def error_state(

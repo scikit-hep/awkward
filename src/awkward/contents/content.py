@@ -754,17 +754,17 @@ class Content:
             i = i + 1
 
         if any(
-            isinstance(x.backend.nplike, ak._typetracer.TypeTracer) for x in head + tail
+            isinstance(x.backend, ak._backends.TypeTracerBackend) for x in head + tail
         ):
             head = [
                 x
-                if isinstance(x.backend.nplike, ak._typetracer.TypeTracer)
+                if isinstance(x.backend, ak._backends.TypeTracerBackend)
                 else x.to_typetracer()
                 for x in head
             ]
             tail = [
                 x
-                if isinstance(x.backend.nplike, ak._typetracer.TypeTracer)
+                if isinstance(x.backend, ak._backends.TypeTracerBackend)
                 else x.to_typetracer()
                 for x in tail
             ]

@@ -78,7 +78,7 @@ def _impl(array, allow_record, allow_other):
     elif ak._nplikes.Jax.is_own_array(array):
         return ak.operations.from_jax(array, regulararray=True, highlevel=False)
 
-    elif ak._typetracer.TypeTracer.is_own_array(array):
+    elif ak._nplikes.TypeTracer.is_own_array(array):
         backend = ak._backends.TypeTracerBackend.instance()
 
         if len(array.shape) == 0:

@@ -209,7 +209,7 @@ class BitMaskedArray(Content):
         self._content._to_buffers(form.content, getkey, container, backend, byteorder)
 
     def _to_typetracer(self, forget_length: bool) -> Self:
-        tt = ak._typetracer.TypeTracer.instance()
+        tt = ak._nplikes.TypeTracer.instance()
         return BitMaskedArray(
             self._mask.to_nplike(tt),
             self._content._to_typetracer(False),

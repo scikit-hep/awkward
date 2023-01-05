@@ -648,7 +648,7 @@ class TypeTracer(NumpyLike):
 
     @classmethod
     def is_own_array(cls, x) -> bool:
-        raise _errors.wrap_error(NotImplementedError)
+        return isinstance(x, TypeTracerArray)
 
     @classmethod
     def shapes_are_compatible(

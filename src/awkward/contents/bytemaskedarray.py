@@ -157,7 +157,7 @@ class ByteMaskedArray(Content):
         self._content._to_buffers(form.content, getkey, container, backend, byteorder)
 
     def _to_typetracer(self, forget_length: bool) -> Self:
-        tt = ak._typetracer.TypeTracer.instance()
+        tt = ak._nplikes.TypeTracer.instance()
         mask = self._mask.to_nplike(tt)
         return ByteMaskedArray(
             mask.forget_length() if forget_length else mask,

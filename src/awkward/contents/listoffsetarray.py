@@ -127,7 +127,7 @@ class ListOffsetArray(Content):
         self._content._to_buffers(form.content, getkey, container, backend, byteorder)
 
     def _to_typetracer(self, forget_length: bool) -> Self:
-        offsets = self._offsets.to_nplike(ak._typetracer.TypeTracer.instance())
+        offsets = self._offsets.to_nplike(ak._nplikes.TypeTracer.instance())
         return ListOffsetArray(
             offsets.forget_length() if forget_length else offsets,
             self._content._to_typetracer(False),

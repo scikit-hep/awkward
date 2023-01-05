@@ -146,7 +146,7 @@ class ListArray(Content):
         self._content._to_buffers(form.content, getkey, container, backend, byteorder)
 
     def _to_typetracer(self, forget_length: bool) -> Self:
-        tt = ak._typetracer.TypeTracer.instance()
+        tt = ak._nplikes.TypeTracer.instance()
         starts = self._starts.to_nplike(tt)
         return ListArray(
             starts.forget_length() if forget_length else starts,
@@ -543,7 +543,7 @@ class ListArray(Content):
                 out = ak.contents.IndexedOptionArray.simplified(
                     missing_trim, content, parameters=self._parameters
                 )
-                if isinstance(self._backend.nplike, ak._typetracer.TypeTracer):
+                if isinstance(self._backend, ak._backends.TypeTracerBackend):
                     out = out.to_typetracer()
                 return ak.contents.ListOffsetArray(
                     largeoffsets,

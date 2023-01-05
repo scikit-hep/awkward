@@ -6,7 +6,7 @@ import pytest
 import awkward as ak
 from awkward._typetracer import UnknownLength
 
-typetracer = ak._typetracer.TypeTracer.instance()
+typetracer = ak._nplikes.TypeTracer.instance()
 
 
 def test_getitem_at():

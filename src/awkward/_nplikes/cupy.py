@@ -17,6 +17,6 @@ class Cupy(ArrayModuleNumpyLike):
         return cupy
 
     @classmethod
-    def is_raw_array(cls, x) -> bool:
+    def is_own_array(cls, x) -> bool:
         module, _, suffix = type(x).__module__.partition(".")
         return module == "cupy"

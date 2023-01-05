@@ -1,5 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+import os
+
 import numpy as np
 import pytest
 
@@ -75,7 +77,7 @@ def test_ListOffsetArray_NumpyArray():
 
 
 @pytest.mark.skipif(
-    ak._util.win,
+    os.name == "nt",
     reason="unstable dict order. -- on Windows",
 )
 def test_RecordArray_NumpyArray():

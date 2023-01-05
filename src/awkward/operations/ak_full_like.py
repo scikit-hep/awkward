@@ -96,7 +96,7 @@ def _impl(array, fill_value, highlevel, behavior, dtype):
         index_nplike = layout.backend.index_nplike
 
         if layout.parameter("__array__") == "bytestring" and fill_value is _ZEROS:
-            asbytes = nplike.frombuffer(b"", dtype=metadata.uint8)
+            asbytes = nplike.from_buffer(b"", dtype=metadata.uint8)
             return ak.contents.ListArray(
                 ak.index.Index64(
                     index_nplike.zeros(len(layout), dtype=metadata.int64),
@@ -115,7 +115,7 @@ def _impl(array, fill_value, highlevel, behavior, dtype):
                 asbytes = fill_value
             else:
                 asbytes = str(fill_value).encode("utf-8", "surrogateescape")
-            asbytes = nplike.frombuffer(asbytes, dtype=metadata.uint8)
+            asbytes = nplike.from_buffer(asbytes, dtype=metadata.uint8)
 
             return ak.contents.ListArray(
                 ak.index.Index64(
@@ -130,7 +130,7 @@ def _impl(array, fill_value, highlevel, behavior, dtype):
             )
 
         elif layout.parameter("__array__") == "string" and fill_value is _ZEROS:
-            asbytes = nplike.frombuffer(b"", dtype=metadata.uint8)
+            asbytes = nplike.from_buffer(b"", dtype=metadata.uint8)
             return ak.contents.ListArray(
                 ak.index.Index64(
                     index_nplike.zeros(len(layout), dtype=metadata.int64),
@@ -146,7 +146,7 @@ def _impl(array, fill_value, highlevel, behavior, dtype):
 
         elif layout.parameter("__array__") == "string":
             asstr = str(fill_value).encode("utf-8", "surrogateescape")
-            asbytes = nplike.frombuffer(asstr, dtype=metadata.uint8)
+            asbytes = nplike.from_buffer(asstr, dtype=metadata.uint8)
             return ak.contents.ListArray(
                 ak.index.Index64(
                     index_nplike.zeros(len(layout), dtype=metadata.int64),

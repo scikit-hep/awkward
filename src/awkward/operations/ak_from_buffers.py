@@ -155,7 +155,7 @@ _index_to_dtype = {
 
 
 def _from_buffer(nplike, buffer, dtype, count, byteorder):
-    array = nplike.frombuffer(buffer, dtype=dtype, count=count)
+    array = nplike.from_buffer(buffer, dtype=dtype, count=count)
     if byteorder != ak._util.native_byteorder:
         return array.byteswap(inplace=False)
     else:

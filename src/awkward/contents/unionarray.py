@@ -404,7 +404,7 @@ class UnionArray(Content):
             content._to_buffers(form.content(i), getkey, container, backend, byteorder)
 
     def _to_typetracer(self, forget_length: bool) -> Self:
-        tt = ak._typetracer.TypeTracer.instance()
+        tt = ak._nplikes.TypeTracer.instance()
         tags = self._tags.to_nplike(tt)
         return UnionArray(
             tags.forget_length() if forget_length else tags,
@@ -915,17 +915,17 @@ class UnionArray(Content):
             head.append(others[i])
 
         if any(
-            isinstance(x.backend.nplike, ak._typetracer.TypeTracer) for x in head + tail
+            isinstance(x.backend, ak._backends.TypeTracerBackend) for x in head + tail
         ):
             head = [
                 x
-                if isinstance(x.backend.nplike, ak._typetracer.TypeTracer)
+                if isinstance(x.backend, ak._backends.TypeTracerBackend)
                 else x.to_typetracer()
                 for x in head
             ]
             tail = [
                 x
-                if isinstance(x.backend.nplike, ak._typetracer.TypeTracer)
+                if isinstance(x.backend, ak._backends.TypeTracerBackend)
                 else x.to_typetracer()
                 for x in tail
             ]
