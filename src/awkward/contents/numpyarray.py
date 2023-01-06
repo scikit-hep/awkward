@@ -353,13 +353,13 @@ class NumpyArray(Content):
                 return True
 
             # Special-case booleans i.e. {bool, number}
-            elif mergebool and (
+            elif (
                 np.issubdtype(self.dtype, np.bool_)
                 and np.issubdtype(other.dtype, np.number)
                 or np.issubdtype(self.dtype, np.number)
                 and np.issubdtype(other.dtype, np.bool_)
             ):
-                return True
+                return mergebool
 
             # Currently we're less permissive than NumPy on merging datetimes / timedeltas
             elif (
