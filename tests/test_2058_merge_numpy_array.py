@@ -26,3 +26,27 @@ def test_regular():
     assert ak.concatenate((x, y)).type == ak.types.ArrayType(
         ak.types.ListType(ak.types.NumpyType("int64")), 8
     )
+
+
+def test_regular_mergebool_false():
+    x = ak.from_numpy(np.zeros((4, 3), dtype=np.bool_), regulararray=True)
+    y = ak.from_numpy(np.ones((4, 2), dtype=np.int64), regulararray=True)
+
+    assert ak.concatenate((x, y), mergebool=False).type == ak.types.ArrayType(
+        ak.types.UnionType(
+            [
+                ak.types.RegularType(ak.types.NumpyType("bool"), 3),
+                ak.types.RegularType(ak.types.NumpyType("int64"), 2),
+            ]
+        ),
+        8,
+    )
+
+
+def test_regular_mergebool_true():
+    x = ak.from_numpy(np.zeros((4, 3), dtype=np.bool_), regulararray=True)
+    y = ak.from_numpy(np.ones((4, 2), dtype=np.int64), regulararray=True)
+
+    assert ak.concatenate((x, y), mergebool=True).type == ak.types.ArrayType(
+        ak.types.ListType(ak.types.NumpyType("int64")), 8
+    )
