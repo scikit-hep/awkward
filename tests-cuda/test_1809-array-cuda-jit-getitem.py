@@ -3,6 +3,7 @@
 import cupy as cp  # noqa: F401
 import numpy as np  # noqa: F401
 import pytest  # noqa: F401
+import ctypes  # noqa: F401
 
 import awkward as ak  # noqa: F401
 
@@ -117,7 +118,7 @@ class ArrayViewArgHandler:
                 pylookup = id(val._numbaview.lookup)
 
                 result_ptr = format(arrayptrs.item(), 'x')
-                print("ArrayViewArgHandler::prepare_args line 119: about to return from prepare args and arrayptrs is", result_ptr)
+                print("ArrayViewArgHandler::prepare_args line 119: about to return from prepare args and arrayptrs is", result_ptr, arrayptrs.item())
                 print("ArrayViewArgHandler::prepare_args line 120:", arrayptrs.ctypes.data_as(ctypes.POINTER(ctypes.c_uint64)).contents)
                 
                 return tys, (start, stop, pos, arrayptrs.item(), pylookup)
