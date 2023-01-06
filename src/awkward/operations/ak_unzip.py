@@ -60,6 +60,9 @@ def _impl(array, highlevel, behavior):
     ak._do.recursively_apply(layout, check_for_union, behavior, return_array=False)
 
     if len(fields) == 0:
-        return (ak._util.wrap(layout, behavior, highlevel),)
+        return (ak._util.wrap(layout, behavior, highlevel, allow_other=True),)
     else:
-        return tuple(ak._util.wrap(layout[n], behavior, highlevel) for n in fields)
+        return tuple(
+            ak._util.wrap(layout[n], behavior, highlevel, allow_other=True)
+            for n in fields
+        )
