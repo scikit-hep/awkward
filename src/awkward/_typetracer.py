@@ -1236,6 +1236,9 @@ class TypeTracer(ak._nplikes.NumpyLike):
         # array, max_line_width, precision=None, suppress_small=None
         return "[?? ... ??]"
 
+    def can_cast(self, *args, **kwargs):
+        return numpy.can_cast(*args, **kwargs)
+
     def datetime_as_string(self, *args, **kwargs):
         for x in args:
             try_touch_data(x)
