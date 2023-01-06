@@ -361,6 +361,15 @@ class NumpyArray(Content):
             ):
                 return True
 
+            # Currently we're less permissive than NumPy on merging datetimes / timedeltas
+            elif (
+                np.issubdtype(self.dtype, np.datetime64)
+                or np.issubdtype(self.dtype, np.timedelta64)
+                or np.issubdtype(other.dtype, np.datetime64)
+                or np.issubdtype(other.dtype, np.timedelta64)
+            ):
+                return False
+
             # Default merging (can we cast one to the other)
             else:
                 return self.backend.nplike.can_cast(
