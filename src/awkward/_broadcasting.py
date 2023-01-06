@@ -670,18 +670,32 @@ def apply_step(
                 isinstance(x, RegularArray) or not isinstance(x, listtypes)
                 for x in inputs
             ):
-                maxsize = max(x.size for x in inputs if isinstance(x, RegularArray))
+                # Ensure all layouts have same length
+                length = None
+                for x in inputs:
+                    if isinstance(x, Content):
+                        if length is None:
+                            length = x.length
+                        elif backend.nplike.known_shape:
+                            assert length == x.length
+                assert length is not None
+
+                if any(x.size == 0 for x in inputs if isinstance(x, RegularArray)):
+                    dimsize = 0
+                else:
+                    dimsize = max(x.size for x in inputs if isinstance(x, RegularArray))
 
                 if backend.nplike.known_data:
                     for x in inputs:
                         if isinstance(x, RegularArray):
-                            if maxsize > 1 and x.size == 1:
+                            if dimsize > 1 and x.size == 1:
+                                # For any (N, 1) array, we know we'll broadcast to (N, M) where M is maxsize
                                 tmpindex = Index64(
                                     backend.index_nplike.repeat(
                                         backend.index_nplike.arange(
                                             x.length, dtype=np.int64
                                         ),
-                                        maxsize,
+                                        dimsize,
                                     ),
                                     nplike=backend.index_nplike,
                                 )
@@ -689,20 +703,22 @@ def apply_step(
                     nextinputs = []
                     for x in inputs:
                         if isinstance(x, RegularArray):
-                            if maxsize > 1 and x.size == 1:
+                            if dimsize > 1 and x.size == 1:
                                 nextinputs.append(
                                     x.content[: x.length * x.size]._carry(
                                         tmpindex, allow_lazy=False
                                     )
                                 )
-                            elif x.size == maxsize:
+                            elif x.size == dimsize:
                                 nextinputs.append(x.content[: x.length * x.size])
+                            elif dimsize == 0:
+                                nextinputs.append(x.content[:0])
                             else:
                                 raise ak._errors.wrap_error(
                                     ValueError(
                                         "cannot broadcast RegularArray of size "
                                         "{} with RegularArray of size {} {}".format(
-                                            x.size, maxsize, in_function(options)
+                                            x.size, dimsize, in_function(options)
                                         )
                                     )
                                 )
@@ -718,15 +734,6 @@ def apply_step(
                         else:
                             nextinputs.append(x)
 
-                length = None
-                for x in inputs:
-                    if isinstance(x, Content):
-                        if length is None:
-                            length = x.length
-                        elif backend.nplike.known_shape:
-                            assert length == x.length
-                assert length is not None
-
                 outcontent = apply_step(
                     backend,
                     nextinputs,
@@ -740,7 +747,7 @@ def apply_step(
                 assert isinstance(outcontent, tuple)
                 parameters = parameters_factory(len(outcontent))
                 return tuple(
-                    RegularArray(x, maxsize, length, parameters=p)
+                    RegularArray(x, dimsize, length, parameters=p)
                     for x, p in zip(outcontent, parameters)
                 )
 

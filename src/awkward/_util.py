@@ -931,7 +931,10 @@ def arrays_approx_equal(
                 and (left.is_tuple == right.is_tuple)
                 and all([visitor(x, y) for x, y in zip(left.contents, right.contents)])
             )
-        elif left.is_empty:
+        elif left.is_unknown:
             return True
+
+        else:
+            raise ak._errors.wrap_error(AssertionError)
 
     return visitor(left, right)
