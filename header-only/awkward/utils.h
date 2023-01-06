@@ -62,14 +62,6 @@ namespace awkward {
     return "int64";
   }
 
-  /// @brief Returns `int64` string when the primitive type
-  /// is a 64-bit signed integer.
-  template <>
-  const std::string
-  type_to_name<Long64_t>() {
-    return "int64";
-  }
-
   /// @brief Returns `uint8` string when the primitive type
   /// is an 8-bit unsigned integer.
   template <>
