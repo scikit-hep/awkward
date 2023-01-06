@@ -340,59 +340,43 @@ class NumpyArray(Content):
             )
 
     def _mergeable_next(self, other, mergebool):
-        if isinstance(
-            other,
-            (
-                ak.contents.IndexedArray,
-                ak.contents.IndexedOptionArray,
-                ak.contents.ByteMaskedArray,
-                ak.contents.BitMaskedArray,
-                ak.contents.UnmaskedArray,
-            ),
-        ):
-            return self._mergeable(other._content, mergebool)
+
+        if len(self.shape) > 1:
+            return self._to_regular_primitive()._mergeable(other, mergebool)
 
         elif isinstance(other, ak.contents.NumpyArray):
             if self._data.ndim != other._data.ndim:
                 return False
 
-            matching_dtype = self._data.dtype == other._data.dtype
+            # Obvious fast-path
+            if self.dtype == other.dtype:
+                return True
 
-            if (
-                not mergebool
-                and not matching_dtype
-                and (
-                    self._data.dtype.type is np.bool_
-                    or other._data.dtype.type is np.bool_
+            # Special-case booleans i.e. {bool, number}
+            elif (
+                np.issubdtype(self.dtype, np.bool_)
+                and np.issubdtype(other.dtype, np.number)
+                or np.issubdtype(self.dtype, np.number)
+                and np.issubdtype(other.dtype, np.bool_)
+            ):
+                return mergebool
+
+            # Currently we're less permissive than NumPy on merging datetimes / timedeltas
+            elif (
+                np.issubdtype(self.dtype, np.datetime64)
+                or np.issubdtype(self.dtype, np.timedelta64)
+                or np.issubdtype(other.dtype, np.datetime64)
+                or np.issubdtype(other.dtype, np.timedelta64)
+            ):
+                return False
+
+            # Default merging (can we cast one to the other)
+            else:
+                return self.backend.nplike.can_cast(
+                    self.dtype, other.dtype, casting="same_kind"
+                ) or self.backend.nplike.can_cast(
+                    other.dtype, self.dtype, casting="same_kind"
                 )
-            ):
-                return False
-
-            if not matching_dtype and np.datetime64 in (
-                self._data.dtype.type,
-                other._data.dtype.type,
-            ):
-                return False
-
-            if not matching_dtype and np.timedelta64 in (
-                self._data.dtype.type,
-                other._data.dtype.type,
-            ):
-                return False
-
-            if (
-                len(self._data.shape) > 1
-                and self._data.shape[1:] != other._data.shape[1:]
-            ):
-                return False
-
-            return True
-
-        # If we have >1 dimension, promote ourselves to `RegularArray` and attempt to merge.
-        elif isinstance(other, ak.contents.RegularArray) and self.purelist_depth > 1:
-            as_regular_array = self.to_RegularArray()
-            assert isinstance(as_regular_array, ak.contents.RegularArray)
-            return as_regular_array._content._mergeable(other._content, mergebool)
 
         else:
             return False
@@ -401,8 +385,7 @@ class NumpyArray(Content):
         if len(others) == 0:
             return self
 
-        # Resolve merging against regular types by
-        if any(isinstance(o, ak.contents.RegularArray) for o in others):
+        if len(self.shape) > 1:
             return self.to_RegularArray()._mergemany(others)
 
         head, tail = self._merging_strategy(others)
@@ -426,7 +409,9 @@ class NumpyArray(Content):
                     )
                 )
 
-        contiguous_arrays = self._backend.nplike.concatenate(contiguous_arrays)
+        contiguous_arrays = self._backend.nplike.concatenate(
+            contiguous_arrays, casting="same_kind"
+        )
 
         next = NumpyArray(
             contiguous_arrays, parameters=parameters, backend=self._backend
@@ -1355,3 +1340,13 @@ class NumpyArray(Content):
             )
         else:
             return True
+
+    def _to_regular_primitive(self) -> ak.contents.RegularArray:
+        # A length-1 slice in each dimension
+        index = tuple([slice(None, 1)] * len(self.shape))
+        # Broadcast this trivial slice to the true dimensions (zero-copy)
+        new_data = self.backend.nplike.broadcast_to(self._data[index], self.shape)
+        # Convert contiguous array to `RegularArray`
+        return NumpyArray(
+            new_data, backend=self.backend, parameters=self.parameters
+        ).to_RegularArray()

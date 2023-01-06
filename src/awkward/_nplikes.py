@@ -64,7 +64,10 @@ class NumpyMetadata(Singleton):
 
     nat = numpy.datetime64("NaT")
     datetime_data = numpy.datetime_data
-    issubdtype = numpy.issubdtype
+
+    @property
+    def issubdtype(self):
+        return numpy.issubdtype
 
     AxisError = numpy.AxisError
 
@@ -365,6 +368,9 @@ class NumpyLike(Singleton):
 
     def datetime_as_string(self, *args, **kwargs):
         return self._module.datetime_as_string(*args, **kwargs)
+
+    def can_cast(self, *args, **kwargs):
+        return self._module.can_cast(*args, **kwargs)
 
     @classmethod
     def is_own_array(cls, obj) -> bool:
