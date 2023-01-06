@@ -82,7 +82,7 @@ class ContentType(numba.types.Type):
         wrapneg,
         checkbounds,
     ):
-        print("********** lower_getitem_at_check", viewtype.type, viewtype.behavior)
+        print("layout.py line 88: ********** lower_getitem_at_check", viewtype.type, viewtype.behavior)
         lower = ak._util.numba_array_lower(viewtype.type, viewtype.behavior)
         if lower is not None:
             atval = regularize_atval(
@@ -206,7 +206,7 @@ def posat(context, builder, pos, offset):
 
 
 def getat(context, builder, baseptr, offset, rettype=None):
-    print("in getat...", baseptr, offset)
+    print("layout.py line 212: in getat...", baseptr, offset)
     
     ptrtype = None
     if rettype is not None:
@@ -225,21 +225,21 @@ def getat(context, builder, baseptr, offset, rettype=None):
             context.get_constant(numba.int8, 0),
         )
     else:
-        print("...getat out", out)
+        print("layout.py line 231: ...getat out", out)
         return out
 
 
 def regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkbounds):
-    print("regularize_atval", atval)
+    print("layout.py line 236: regularize_atval", atval)
     atval = castint(context, builder, attype, numba.intp, atval)
-    print(atval)
+    print("layout.py line 238: ", atval)
     
     if not attype.signed:
         wrapneg = False
 
     if wrapneg or checkbounds:
         length = builder.sub(viewproxy.stop, viewproxy.start)
-        print("length", length)
+        print("layout.py line 245: length", length)
 
         if wrapneg:
             regular_atval = numba.core.cgutils.alloca_once_value(builder, atval)
@@ -258,7 +258,7 @@ def regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkb
                     builder.icmp_signed(">=", atval, length),
                 )
             ):
-                print("ValueError: slice index out of bounds???")
+                print("layout.py line 264: ValueError: slice index out of bounds???")
                 #context.call_conv.return_user_exc(
                 #    builder, ValueError, ("slice index out of bounds",)
                 #)
@@ -299,14 +299,14 @@ class NumpyArrayType(ContentType, ak._lookup.NumpyLookup):
         wrapneg,
         checkbounds,
     ):
-        print("lower_get_item_at")
+        print("layout.py line 305: lower_get_item_at")
         whichpos = posat(context, builder, viewproxy.pos, self.ARRAY)
         arrayptr = getat(context, builder, viewproxy.arrayptrs, whichpos)
         atval = regularize_atval(
             context, builder, viewproxy, attype, atval, wrapneg, checkbounds
         )
         arraypos = builder.add(viewproxy.start, atval)
-        print("arraypos >>>", arraypos)
+        print("layout.py line 312: arraypos >>>", arraypos)
         return getat(context, builder, arrayptr, arraypos, rettype=rettype)
 
     @property

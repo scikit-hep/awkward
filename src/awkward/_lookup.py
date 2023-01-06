@@ -18,14 +18,15 @@ class Lookup:
 
         def arrayptr(x):
             if isinstance(x, int):
-                print("INT", int)
+                print("_lookup.py line 21: INT", int)
                 return x
             elif isinstance(self.nplike, ak.nplikes.Cupy):
                 #val = ctypes.cast(x.data.ptr, ctypes.py_object).value
-                print("GPU arrayptr", x.data, dir(x.data), x.data.ptr, type(x.data))
+                print("_lookup.py line 25: GPU arrayptr: x.data", x.data, " and x.data.ptr", hex(x.data.ptr))
+                print("_lookup.py line 26: ")
                 return x.data
             else:
-                print("CPU arrayptr")
+                print("_lookup.py line 29: CPU arrayptr")
                 return x.ctypes.data
 
         self.nplike = layout.backend.nplike
@@ -34,10 +35,9 @@ class Lookup:
         self.arrayptrs = self.nplike.asarray(
             [arrayptr(x) for x in positions], dtype=np.intp
         )
-        print("Lookup::__init__ array ptrs", self.nplike, id(self.arrayptrs), format(id(self.arrayptrs), 'x'))
         for i in range(len(self.arrayptrs)):
             result = format(self.arrayptrs[i], 'x')
-            print("  data ptr", result)
+            print("_lookup.py line 41:   data ptr", result)
 
 
 def tolookup(layout, positions):

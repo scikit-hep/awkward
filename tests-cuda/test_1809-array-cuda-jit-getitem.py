@@ -78,10 +78,10 @@ pinned_mempool = cp.get_default_pinned_memory_pool()
 
 # access statistics of these memory pools.
 def print_mempool_stats(idx):
-    print("-------------------------")
-    print(idx, ": mempool.used_bytes", mempool.used_bytes())
-    print(idx, ": mempool.total_bytes", mempool.total_bytes())
-    print(idx, ": pinned_mempool.n_free_blocks", pinned_mempool.n_free_blocks())
+    print("print_mempool_stats: -------------------------")
+    print("print_mempool_stats:", idx, ": mempool.used_bytes", mempool.used_bytes())
+    print("print_mempool_stats:", idx, ": mempool.total_bytes", mempool.total_bytes())
+    print("print_mempool_stats:", idx, ": pinned_mempool.n_free_blocks", pinned_mempool.n_free_blocks())
 
 class ArrayViewArgHandler:
     print("class ArrayViewHandler: access statistics of the memory pools:")
@@ -90,11 +90,11 @@ class ArrayViewArgHandler:
     def prepare_args(self, ty, val, stream, retr):
         if isinstance(val, int):
             result = format(val, 'x')
-            print(result)
+            print("ArrayViewArgHandler::prepare_args line 93:", result)
         if isinstance(val, ak.Array):
-            print("______________________________________________")
-            print("ArrayViewArgHandler::prepare_args for ak.Array")
-            print("----------------------------------------------")
+            print("ArrayViewArgHandler::prepare_args line 95: ______________________________________________")
+            print("ArrayViewArgHandler::prepare_args line 96: ArrayViewArgHandler::prepare_args for ak.Array")
+            print("ArrayViewArgHandler::prepare_args line 97: ----------------------------------------------")
             #print(ty, dir(ty), ty.type)
             #print(val, dir(val), val._numbaview, dir(val._numbaview))
 
@@ -102,10 +102,10 @@ class ArrayViewArgHandler:
 
                 # Use uint64 for start, stop, pos, the array pointers value and the pylookup value
                 tys = types.UniTuple(types.uint64, 5)
-                print("ArrayViewArgHandler::prepare_args: Already has an ArrayView:", val._numbaview.lookup, val._numbaview.pos, val._numbaview.start, val._numbaview.stop)
+                print("ArrayViewArgHandler::prepare_args line 105: Already has an ArrayView:", val._numbaview.lookup, val._numbaview.pos, val._numbaview.start, val._numbaview.stop)
 
                 dev = cuda.current_context().device
-                print("ArrayViewArgHandler::prepare_args:", dev)
+                print("ArrayViewArgHandler::prepare_args line 108:", dev)
 
                 # access statistics of these memory pools.
                 print_mempool_stats(1)
@@ -113,11 +113,14 @@ class ArrayViewArgHandler:
                 start = id(val._numbaview.start)
                 stop = id(val._numbaview.stop)
                 pos = id(val._numbaview.pos)
-                arrayptrs = val._numbaview.lookup.arrayptrs.data.ptr
+                arrayptrs = val._numbaview.lookup.arrayptrs
                 pylookup = id(val._numbaview.lookup)
 
-                print("ArrayViewArgHandler::prepare_args: about to return from prepare args and arrayptrs is", arrayptrs)
-                return tys, (start, stop, pos, arrayptrs, pylookup)
+                result_ptr = format(arrayptrs.item(), 'x')
+                print("ArrayViewArgHandler::prepare_args line 119: about to return from prepare args and arrayptrs is", result_ptr)
+                print("ArrayViewArgHandler::prepare_args line 120:", arrayptrs.ctypes.data_as(ctypes.POINTER(ctypes.c_uint64)).contents)
+                
+                return tys, (start, stop, pos, arrayptrs.item(), pylookup)
             else:
                 raise ak._errors.wrap_error(NotImplementedError (
                     f"{repr(val.layout.nplike)} is not implemented for CUDA. Please transfer the array to CUDA backend to "

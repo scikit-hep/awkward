@@ -372,11 +372,12 @@ class type_getitem(numba.core.typing.templates.AbstractTemplate):
     print("arrayview.py line 371: type_getitem")
     def generic(self, args, kwargs):
         print("arrayview.py line 373: @numba.core.typing.templates.infer_global generic class type_getitem")
+        #printimpl.print_varargs(context, builder, sig, args)
         if len(args) == 2 and len(kwargs) == 0 and isinstance(args[0], ArrayViewType):
             viewtype, wheretype = args
             print("arrayview.py line 376: viewtype, wheretype", viewtype, wheretype)
             if isinstance(wheretype, numba.types.Integer):
-                print("arrayview.py line 378: viewtype.type.getitem_at_check->")
+                print("arrayview.py line 378: viewtype.type.getitem_at_check->", viewtype.type)
                 return viewtype.type.getitem_at_check(viewtype)(viewtype, wheretype)
             elif (
                 isinstance(wheretype, numba.types.SliceType) and not wheretype.has_step
