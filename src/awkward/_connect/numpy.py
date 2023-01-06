@@ -50,15 +50,16 @@ def array_function(func, types, args, kwargs, behavior):
         rectilinear_args = tuple(_to_rectilinear(x) for x in args)
         rectilinear_kwargs = {k: _to_rectilinear(v) for k, v in kwargs.items()}
         result = func(*rectilinear_args, **rectilinear_kwargs)
+        # We want the result to be a layout (this will fail for functions returning non-array convertibles)
+        out = ak.operations.ak_to_layout._impl(
+            result, allow_record=True, allow_other=True
+        )
+        if isinstance(out, (ak.contents.Content, ak.record.Record)):
+            return ak._util.wrap(out, behavior=behavior)
+        else:
+            return out
     else:
-        result = function(*args, **kwargs)
-
-    # We want the result to be a layout
-    out = ak.operations.ak_to_layout._impl(result, allow_record=True, allow_other=True)
-    if isinstance(out, (ak.contents.Content, ak.record.Record)):
-        return ak._util.wrap(out, behavior=behavior)
-    else:
-        return out
+        return function(*args, **kwargs)
 
 
 def implements(numpy_function):
