@@ -680,14 +680,12 @@ def apply_step(
                             assert length == x.length
                 assert length is not None
 
-                if backend.nplike.known_data:
-                    if any(x.size == 0 for x in inputs if isinstance(x, RegularArray)):
-                        dimsize = 0
-                    else:
-                        dimsize = max(
-                            x.size for x in inputs if isinstance(x, RegularArray)
-                        )
+                if any(x.size == 0 for x in inputs if isinstance(x, RegularArray)):
+                    dimsize = 0
+                else:
+                    dimsize = max(x.size for x in inputs if isinstance(x, RegularArray))
 
+                if backend.nplike.known_data:
                     for x in inputs:
                         if isinstance(x, RegularArray):
                             if dimsize > 1 and x.size == 1:
