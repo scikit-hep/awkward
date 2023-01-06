@@ -427,9 +427,11 @@ def behavior_of(*arrays, **kwargs):
     return behavior
 
 
-def wrap(content, behavior=None, highlevel=True, like=None):
-    assert content is None or isinstance(
-        content, (ak.contents.Content, ak.record.Record)
+def wrap(content, behavior=None, highlevel=True, like=None, allow_other=False):
+    assert (
+        content is None
+        or isinstance(content, (ak.contents.Content, ak.record.Record))
+        or allow_other
     )
     assert behavior is None or isinstance(behavior, Mapping)
     assert isinstance(highlevel, bool)

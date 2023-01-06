@@ -63,7 +63,7 @@ def fill_none(array, value, axis=-1, *, highlevel=True, behavior=None):
 
 def _impl(array, value, axis, highlevel, behavior):
     arraylayout = ak.operations.to_layout(array, allow_record=True, allow_other=False)
-    behavior = ak._util.behavior_of(array, behavior=behavior)
+    behavior = ak._util.behavior_of(array, value, behavior=behavior)
     backend = ak._backends.backend_of(arraylayout, default=cpu)
 
     # Convert value type to appropriate layout
@@ -106,25 +106,24 @@ def _impl(array, value, axis, highlevel, behavior):
             [value], allow_record=False, allow_other=False
         )
 
-    def maybe_fillna(layout):
-        if layout.is_option:
-            return ak._do.fill_none(layout, valuelayout)
-        else:
-            return layout
-
     if axis is None:
 
         def action(layout, continuation, **kwargs):
-            return maybe_fillna(continuation())
+            if layout.is_option:
+                return ak._do.fill_none(continuation(), valuelayout)
 
     else:
 
         def action(layout, depth, **kwargs):
             posaxis = ak._util.maybe_posaxis(layout, axis, depth)
-            if posaxis is not None and posaxis + 1 < depth:
-                return layout
-            elif posaxis is not None and posaxis + 1 == depth:
-                return maybe_fillna(layout)
+            if posaxis is not None and posaxis + 1 == depth:
+                if layout.is_union or layout.is_record:
+                    return None
+                elif layout.is_option:
+                    return ak._do.fill_none(layout, valuelayout)
+                else:
+                    return layout
+
             elif layout.is_leaf:
                 raise ak._errors.wrap_error(
                     np.AxisError(
@@ -133,5 +132,4 @@ def _impl(array, value, axis, highlevel, behavior):
                 )
 
     out = ak._do.recursively_apply(arraylayout, action, behavior)
-
     return ak._util.wrap(out, behavior, highlevel)
