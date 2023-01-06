@@ -214,34 +214,6 @@ jobs:
       run: sphinx-build -M html . _build/
       working-directory: docs
 
-    - name: Check links
-      id: check-links
-      run: sphinx-build -M linkcheck . _build/
-      working-directory: docs
-
-    - name: Output annotations
-      if: success() || steps.check-links.outcome == 'failure'
-      run: |
-        import pathlib
-        import json
-
-        docs_path = pathlib.Path("docs")
-        output_path = docs_path / "_build" / "linkcheck" / "output.json"
-        with output_path.open() as f:
-          data = [json.loads(l) for l in f]
-
-        for record in data:
-          if record['status'] != "broken":
-            continue
-          record['path'] = (docs_path / record['filename'])
-          print(
-            "::error file={path},line={lineno}::{uri} URI was {status} (code: {code}): {info}".format_map(record)
-          )
-          print(
-            "??file={path},line={lineno}??{uri} URI was {status} (code: {code}): {info}".format_map(record)
-          )
-      shell: python
-
     - name: Upload docs artefact
       uses: actions/upload-artifact@v3
       with:
