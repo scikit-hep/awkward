@@ -38,7 +38,7 @@ file(GLOB_RECURSE LIBAWKWARD_SOURCES CONFIGURE_DEPENDS "src/libawkward/*.cpp")
 
 # Shared properties
 add_library(awkward-parent INTERFACE)
-target_compile_definitions(awkward-parent INTERFACE VERSION_INFO="${VERSION_INFO}")
+target_compile_definitions(awkward-parent INTERFACE VERSION_INFO="${SKBUILD_PROJECT_VERSION}")
 target_include_directories(awkward-parent INTERFACE include)
 target_compile_features(awkward-parent INTERFACE cxx_std_11)
 
