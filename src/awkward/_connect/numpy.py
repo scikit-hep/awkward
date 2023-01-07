@@ -13,6 +13,15 @@ if not numpy_at_least("1.13.1"):
     raise ImportError("NumPy 1.13.1 or later required")
 
 
+# FIXME: introduce sentinel type for this
+class _Unsupported:
+    def __repr__(self):
+        return f"{__name__}.unsupported"
+
+
+unsupported = _Unsupported()
+
+
 def convert_to_array(layout, args, kwargs):
     out = ak.operations.to_numpy(layout, allow_missing=False)
     if args == () and kwargs == {}:
