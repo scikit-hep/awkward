@@ -76,6 +76,8 @@ def _nep_18_impl(a, axis=-1, kind=None, order=unsupported):
         stable = False
     else:
         raise ak._errors.wrap_error(
-            ValueError("unsupported argument passed to overloaded NumPy function")
+            ValueError(
+                f"unsupported value for 'kind' passed to overloaded NumPy function 'argsort': {kind!r}"
+            )
         )
     return argsort(a, axis=axis, stable=stable)
