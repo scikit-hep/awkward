@@ -958,8 +958,6 @@ class ListOffsetArray(Content):
         outlength,
         ascending,
         stable,
-        kind,
-        order,
     ):
         branch, depth = self.branch_depth
 
@@ -1082,8 +1080,6 @@ class ListOffsetArray(Content):
                 nextstarts.length,
                 ascending,
                 stable,
-                kind,
-                order,
             )
 
             outcarry = ak.index.Index64.empty(
@@ -1140,17 +1136,13 @@ class ListOffsetArray(Content):
                 self._offsets.length - 1,
                 ascending,
                 stable,
-                kind,
-                order,
             )
             outoffsets = self._compact_offsets64(True)
             return ak.contents.ListOffsetArray(
                 outoffsets, outcontent, parameters=self._parameters
             )
 
-    def _sort_next(
-        self, negaxis, starts, parents, outlength, ascending, stable, kind, order
-    ):
+    def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
         branch, depth = self.branch_depth
 
         if (
@@ -1228,8 +1220,6 @@ class ListOffsetArray(Content):
                 maxnextparents[0] + 1,
                 ascending,
                 stable,
-                kind,
-                order,
             )
 
             outcarry = ak.index.Index64.empty(
@@ -1285,8 +1275,6 @@ class ListOffsetArray(Content):
                 self._offsets.length - 1,
                 ascending,
                 stable,
-                kind,
-                order,
             )
             outoffsets = self._compact_offsets64(True)
             return ak.contents.ListOffsetArray(

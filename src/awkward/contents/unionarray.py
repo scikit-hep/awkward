@@ -1210,16 +1210,7 @@ class UnionArray(Content):
         return simplified._unique(negaxis, starts, parents, outlength)
 
     def _argsort_next(
-        self,
-        negaxis,
-        starts,
-        shifts,
-        parents,
-        outlength,
-        ascending,
-        stable,
-        kind,
-        order,
+        self, negaxis, starts, shifts, parents, outlength, ascending, stable
     ):
         simplified = type(self).simplified(
             self._tags,
@@ -1241,12 +1232,10 @@ class UnionArray(Content):
             )
 
         return simplified._argsort_next(
-            negaxis, starts, shifts, parents, outlength, ascending, stable, kind, order
+            negaxis, starts, shifts, parents, outlength, ascending, stable
         )
 
-    def _sort_next(
-        self, negaxis, starts, parents, outlength, ascending, stable, kind, order
-    ):
+    def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
         if self.length == 0:
             return self
 
@@ -1266,7 +1255,7 @@ class UnionArray(Content):
             )
 
         return simplified._sort_next(
-            negaxis, starts, parents, outlength, ascending, stable, kind, order
+            negaxis, starts, parents, outlength, ascending, stable
         )
 
     def _reduce_next(

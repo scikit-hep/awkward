@@ -827,52 +827,16 @@ class IndexedArray(Content):
         raise ak._errors.wrap_error(NotImplementedError)
 
     def _argsort_next(
-        self,
-        negaxis,
-        starts,
-        shifts,
-        parents,
-        outlength,
-        ascending,
-        stable,
-        kind,
-        order,
+        self, negaxis, starts, shifts, parents, outlength, ascending, stable
     ):
         next = self._content._carry(self._index, False)
         return next._argsort_next(
-            negaxis,
-            starts,
-            shifts,
-            parents,
-            outlength,
-            ascending,
-            stable,
-            kind,
-            order,
+            negaxis, starts, shifts, parents, outlength, ascending, stable
         )
 
-    def _sort_next(
-        self,
-        negaxis,
-        starts,
-        parents,
-        outlength,
-        ascending,
-        stable,
-        kind,
-        order,
-    ):
+    def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
         next = self._content._carry(self._index, False)
-        return next._sort_next(
-            negaxis,
-            starts,
-            parents,
-            outlength,
-            ascending,
-            stable,
-            kind,
-            order,
-        )
+        return next._sort_next(negaxis, starts, parents, outlength, ascending, stable)
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         posaxis = ak._util.maybe_posaxis(self, axis)
