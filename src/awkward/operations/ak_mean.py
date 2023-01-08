@@ -1,12 +1,12 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._connect.numpy import unsupported
 from awkward._util import unset
 
 np = ak._nplikes.NumpyMetadata.instance()
 
 
-@ak._connect.numpy.implements("mean")
 def mean(
     x,
     weight=None,
@@ -101,7 +101,6 @@ def mean(
         return _impl(x, weight, axis, keepdims, mask_identity)
 
 
-@ak._connect.numpy.implements("nanmean")
 def nanmean(
     x,
     weight=None,
@@ -217,3 +216,29 @@ def _impl(x, weight, axis, keepdims, mask_identity):
                 behavior=None,
             )
         return ak._nplikes.nplike_of(sumwx, sumw).true_divide(sumwx, sumw)
+
+
+@ak._connect.numpy.implements("mean")
+def _nep_18_impl_mean(
+    a,
+    axis=None,
+    dtype=unsupported,
+    out=unsupported,
+    keepdims=False,
+    *,
+    where=unsupported,
+):
+    return mean(a, axis=axis, keepdims=keepdims)
+
+
+@ak._connect.numpy.implements("nanmean")
+def _nep_18_impl_nanmean(
+    a,
+    axis=None,
+    dtype=unsupported,
+    out=unsupported,
+    keepdims=False,
+    *,
+    where=unsupported,
+):
+    return nanmean(a, axis=axis, keepdims=keepdims)

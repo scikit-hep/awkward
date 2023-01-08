@@ -6,7 +6,6 @@ from awkward._util import unset
 np = ak._nplikes.NumpyMetadata.instance()
 
 
-@ak._connect.numpy.implements("count_nonzero")
 def count_nonzero(
     array,
     axis=None,
@@ -92,3 +91,8 @@ def _impl(array, axis, keepdims, mask_identity, highlevel, behavior):
         return ak._util.wrap(out, behavior, highlevel)
     else:
         return out
+
+
+@ak._connect.numpy.implements("count_nonzero")
+def _nep_18_impl(a, axis=None, *, keepdims=False):
+    return count_nonzero(a, axis=axis, keepdims=keepdims)

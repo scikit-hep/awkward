@@ -1,12 +1,12 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._connect.numpy import unsupported
 from awkward._util import unset
 
 np = ak._nplikes.NumpyMetadata.instance()
 
 
-@ak._connect.numpy.implements("argmax")
 def argmax(
     array,
     axis=None,
@@ -80,7 +80,6 @@ def argmax(
         return _impl(array, axis, keepdims, mask_identity, highlevel, behavior)
 
 
-@ak._connect.numpy.implements("nanargmax")
 def nanargmax(
     array,
     axis=None,
@@ -164,3 +163,13 @@ def _impl(array, axis, keepdims, mask_identity, highlevel, behavior):
         return ak._util.wrap(out, behavior, highlevel)
     else:
         return out
+
+
+@ak._connect.numpy.implements("argmax")
+def _nep_18_impl_argmax(a, axis=None, out=unsupported, *, keepdims=False):
+    return argmax(a, axis=axis, keepdims=keepdims)
+
+
+@ak._connect.numpy.implements("nanargmax")
+def _nep_18_impl_nanargmax(a, axis=None, out=unsupported, *, keepdims=False):
+    return nanargmax(a, axis=axis, keepdims=keepdims)
