@@ -427,9 +427,11 @@ def behavior_of(*arrays, **kwargs):
     return behavior
 
 
-def wrap(content, behavior=None, highlevel=True, like=None):
-    assert content is None or isinstance(
-        content, (ak.contents.Content, ak.record.Record)
+def wrap(content, behavior=None, highlevel=True, like=None, allow_other=False):
+    assert (
+        content is None
+        or isinstance(content, (ak.contents.Content, ak.record.Record))
+        or allow_other
     )
     assert behavior is None or isinstance(behavior, Mapping)
     assert isinstance(highlevel, bool)
@@ -929,7 +931,10 @@ def arrays_approx_equal(
                 and (left.is_tuple == right.is_tuple)
                 and all([visitor(x, y) for x, y in zip(left.contents, right.contents)])
             )
-        elif left.is_empty:
+        elif left.is_unknown:
             return True
+
+        else:
+            raise ak._errors.wrap_error(AssertionError)
 
     return visitor(left, right)

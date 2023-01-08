@@ -13,7 +13,8 @@ def backend(*arrays) -> str:
     * `"cpu"` for arrays backed by NumPy;
     * `"cuda"` for arrays backed by CuPy;
     * `"jax"` for arrays backed by JAX;
-    * None if the objects are not Awkward, NumPy, JAX, or CuPy arrays (e.g.
+    * `"typetracer"` for arrays without any data;
+    * None if the objects are not Awkward, NumPy, JAX, CuPy, or typetracer arrays (e.g.
       Python numbers, booleans, strings).
 
     See #ak.to_backend.
@@ -27,12 +28,4 @@ def backend(*arrays) -> str:
 
 def _impl(arrays) -> str:
     backend_impl = ak._backends.backend_of(*arrays, default=None)
-    if isinstance(backend_impl, ak._backends.TypeTracerBackend):
-        raise ak._errors.wrap_error(
-            ValueError(
-                "at least one of the given arrays was a typetracer array. "
-                "This is an internal backend that you should not have encountered. "
-                "Please file a bug report at https://github.com/scikit-hep/awkward/issues/"
-            )
-        )
     return backend_impl.name

@@ -143,10 +143,20 @@ def dosig(node):
     if node is None:
         return "self"
     else:
-        argnames = [x.arg for x in node.args.args]
-        defaults = ["=" + tostr(x) for x in node.args.defaults]
+        non_keyword_args = node.args.posonlyargs + node.args.args
+        argnames = [x.arg for x in non_keyword_args + node.args.kwonlyargs]
+        defaults = [
+            "=" + tostr(x)
+            for x in node.args.defaults + node.args.kw_defaults
+            if x is not None
+        ]
         defaults = [""] * (len(argnames) - len(defaults)) + defaults
-        return ", ".join(x + y for x, y in zip(argnames, defaults))
+        rendered = [x + y for x, y in zip(argnames, defaults)]
+        if node.args.vararg is not None:
+            rendered.insert(len(non_keyword_args), f"*{node.args.vararg.arg}")
+        elif node.args.kwonlyargs:
+            rendered.insert(len(non_keyword_args), "*")
+        return ", ".join(rendered)
 
 
 def dodoc(docstring, qualname, names):
@@ -322,6 +332,56 @@ for filename in glob.glob("../src/awkward/**/*.py", recursive=True):
             doclass(link, linelink, shortname, toplevel.name, toplevel)
         if isinstance(toplevel, ast.FunctionDef):
             dofunction(link, linelink, shortname, toplevel.name, toplevel)
+
+
+def test_signature_pos_or_kw():
+    mod = ast.parse(
+        """
+def func(x, z):
+    ...
+"""
+    )
+    node = mod.body[0]
+    assert dosig(node) == "x, z"
+
+
+def test_signature_kwarg():
+    mod = ast.parse(
+        """
+def func(x, z=None):
+    ...
+"""
+    )
+    node = mod.body[0]
+    assert dosig(node) == "x, z=None"
+
+
+def test_signature_vararg():
+    mod = ast.parse(
+        """
+def func(x, *y, z=None):
+    ...
+"""
+    )
+    node = mod.body[0]
+    assert dosig(node) == "x, *y, z=None"
+
+
+def test_signature_kwonly():
+    mod = ast.parse(
+        """
+def func(x, *, y, z=None):
+    ...
+"""
+    )
+    node = mod.body[0]
+    assert dosig(node) == "x, *, y, z=None"
+
+
+test_signature_pos_or_kw()
+test_signature_kwarg()
+test_signature_vararg()
+test_signature_kwonly()
 
 
 toctree_path = reference_path / "toctree.txt"
