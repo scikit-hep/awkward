@@ -6,8 +6,4 @@ build:
   commands:
     - mkdir --parents _readthedocs/html/
     - python3 dev/generate-redirects.py docs/redirects.json _readthedocs/html/
-    - |
-      cat <<- 'EOF' > _readthedocs/html/robots.txt
-      User-agent: *
-      Allow: /
-      EOF
+    - cp dev/robots.txt _readthedocs/html/robots.txt
