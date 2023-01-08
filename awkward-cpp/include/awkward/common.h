@@ -31,7 +31,7 @@
 #define QUOTE(x) #x
 
 #define FILENAME_FOR_EXCEPTIONS_C(filename, line) "\n\n(https://github.com/scikit-hep/awkward-1.0/blob/awkward-cpp-" VERSION_INFO "/awkward-cpp/" filename "#L" #line ")"
-#define FILENAME_FOR_EXCEPTIONS(...) std::string ( FILENAME_FOR_EXCEPTIONS_C(__VA_ARGS__) )
+#define FILENAME_FOR_EXCEPTIONS(...) std::string(FILENAME_FOR_EXCEPTIONS_C(__VA_ARGS__))
 
 #ifdef __GNUC__
 // Silence a gcc warning: type attributes ignored after type is already defined
