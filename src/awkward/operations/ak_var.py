@@ -1,12 +1,12 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._connect.numpy import unsupported
 from awkward._util import unset
 
 np = ak._nplikes.NumpyMetadata.instance()
 
 
-@ak._connect.numpy.implements("var")
 def var(
     x,
     weight=None,
@@ -90,7 +90,6 @@ def var(
         return _impl(x, weight, ddof, axis, keepdims, mask_identity)
 
 
-@ak._connect.numpy.implements("nanvar")
 def nanvar(
     x,
     weight=None,
@@ -217,3 +216,31 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity):
             ) * ak._nplikes.nplike_of(sumw).true_divide(sumw, sumw - ddof)
         else:
             return ak._nplikes.nplike_of(sumwxx, sumw).true_divide(sumwxx, sumw)
+
+
+@ak._connect.numpy.implements("var")
+def _nep_18_impl_var(
+    a,
+    axis=None,
+    dtype=unsupported,
+    out=unsupported,
+    ddof=0,
+    keepdims=False,
+    *,
+    where=unsupported,
+):
+    return var(a, axis=axis, keepdims=keepdims, ddof=ddof)
+
+
+@ak._connect.numpy.implements("nanvar")
+def _nep_18_impl_nanvar(
+    a,
+    axis=None,
+    dtype=unsupported,
+    out=unsupported,
+    ddof=0,
+    keepdims=False,
+    *,
+    where=unsupported,
+):
+    return nanvar(a, axis=axis, keepdims=keepdims, ddof=ddof)

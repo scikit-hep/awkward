@@ -1,12 +1,12 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._connect.numpy import unsupported
 from awkward._util import unset
 
 np = ak._nplikes.NumpyMetadata.instance()
 
 
-@ak._connect.numpy.implements("std")
 def std(
     x,
     weight=None,
@@ -84,7 +84,6 @@ def std(
         return _impl(x, weight, ddof, axis, keepdims, mask_identity)
 
 
-@ak._connect.numpy.implements("nanstd")
 def nanstd(
     x,
     weight=None,
@@ -180,3 +179,31 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity):
                 mask_identity,
             )
         )
+
+
+@ak._connect.numpy.implements("std")
+def _nep_18_impl_std(
+    a,
+    axis=None,
+    dtype=unsupported,
+    out=unsupported,
+    ddof=0,
+    keepdims=False,
+    *,
+    where=unsupported,
+):
+    return std(a, axis=axis, keepdims=keepdims, ddof=ddof)
+
+
+@ak._connect.numpy.implements("nanstd")
+def _nep_18_impl_nanstd(
+    a,
+    axis=None,
+    dtype=unsupported,
+    out=unsupported,
+    ddof=0,
+    keepdims=False,
+    *,
+    where=unsupported,
+):
+    return nanstd(a, axis=axis, keepdims=keepdims, ddof=ddof)
