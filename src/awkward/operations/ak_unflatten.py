@@ -98,10 +98,11 @@ def _impl(array, counts, axis, highlevel, behavior):
         ).to_packed()
         if counts.is_option and (counts.content.is_numpy or counts.content.is_unknown):
             mask = counts.mask_as_bool(valid_when=False)
-            counts = counts.to_numpy(allow_missing=True)
-            counts = ak._nplikes.numpy.ma.filled(counts, 0)
+            counts = backend.nplike.to_rectilinear(
+                ak.operations.fill_none(counts, 0, axis=-1, highlevel=False)
+            )
         elif counts.is_numpy or counts.is_unknown:
-            counts = counts.to_numpy(allow_missing=False)
+            counts = backend.nplike.to_rectilinear(counts)
             mask = False
         else:
             raise ak._errors.wrap_error(
@@ -120,7 +121,7 @@ def _impl(array, counts, axis, highlevel, behavior):
         current_offsets[0] = 0
         backend.index_nplike.cumsum(counts, out=current_offsets[1:])
 
-    def doit(layout):
+    def unflatten_this_layout(layout):
         nonlocal current_offsets
 
         if isinstance(counts, (numbers.Integral, np.integer)):
@@ -162,7 +163,7 @@ def _impl(array, counts, axis, highlevel, behavior):
         return out
 
     if axis == 0 or ak._util.maybe_posaxis(layout, axis, 1) == 0:
-        out = doit(layout)
+        out = unflatten_this_layout(layout)
 
     else:
 
@@ -173,7 +174,9 @@ def _impl(array, counts, axis, highlevel, behavior):
                 listoffsetarray = layout.to_ListOffsetArray64(True)
                 outeroffsets = backend.index_nplike.asarray(listoffsetarray.offsets)
 
-                content = doit(listoffsetarray.content[: outeroffsets[-1]])
+                content = unflatten_this_layout(
+                    listoffsetarray.content[: outeroffsets[-1]]
+                )
                 if isinstance(content, ak.contents.ByteMaskedArray):
                     inneroffsets = backend.index_nplike.asarray(content.content.offsets)
                 elif isinstance(content, ak.contents.RegularArray):
