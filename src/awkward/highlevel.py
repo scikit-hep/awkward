@@ -2435,6 +2435,7 @@ class ArrayBuilder(Sized):
                 container,
                 buffer_key="{form_key}-{attribute}",
                 backend="cpu",
+                byteorder=ak._util.native_byteorder,
                 highlevel=True,
                 behavior=self._behavior,
                 simplify=True,
