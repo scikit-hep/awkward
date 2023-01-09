@@ -30,7 +30,7 @@
 
 #define QUOTE(x) #x
 
-#define FILENAME_FOR_EXCEPTIONS_C(filename, line) "\n\n(https://github.com/scikit-hep/awkward-1.0/blob/awkward-cpp-" VERSION_INFO "/awkward-cpp/" filename "#L" #line ")"
+#define FILENAME_FOR_EXCEPTIONS_C(filename, line) "\n\n(https://github.com/scikit-hep/awkward/blob/awkward-cpp-" VERSION_INFO "/awkward-cpp/" filename "#L" #line ")"
 #define FILENAME_FOR_EXCEPTIONS(filename, line) std::string(FILENAME_FOR_EXCEPTIONS_C(filename, line))
 
 #ifdef __GNUC__
