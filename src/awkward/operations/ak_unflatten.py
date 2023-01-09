@@ -205,7 +205,7 @@ def _impl(array, counts, axis, highlevel, behavior):
 
                 return ak.contents.ListOffsetArray(ak.index.Index64(positions), content)
 
-        out = ak._do.recursively_apply(apply, layout)
+        out = ak._do.recursively_apply(layout, apply)
 
     if current_offsets is not None and not (
         len(current_offsets) == 1 and current_offsets[0] == 0
