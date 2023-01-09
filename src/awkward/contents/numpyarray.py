@@ -114,7 +114,9 @@ class NumpyArray(Content):
     def _to_buffers(self, form, getkey, container, backend, byteorder):
         assert isinstance(form, self.form_cls)
         key = getkey(self, form, "data")
-        container[key] = ak._util.to_byteorder(self._raw(backend.nplike), byteorder)
+        container[key] = ak._util.native_to_byteorder(
+            self._raw(backend.nplike), byteorder
+        )
 
     def _to_typetracer(self, forget_length: bool) -> Self:
         backend = ak._backends.TypeTracerBackend.instance()

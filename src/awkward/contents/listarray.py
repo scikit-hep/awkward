@@ -138,10 +138,10 @@ class ListArray(Content):
         assert isinstance(form, self.form_cls)
         key1 = getkey(self, form, "starts")
         key2 = getkey(self, form, "stops")
-        container[key1] = ak._util.to_byteorder(
+        container[key1] = ak._util.native_to_byteorder(
             self._starts.raw(backend.index_nplike), byteorder
         )
-        container[key2] = ak._util.to_byteorder(
+        container[key2] = ak._util.native_to_byteorder(
             self._stops.raw(backend.index_nplike), byteorder
         )
         self._content._to_buffers(form.content, getkey, container, backend, byteorder)

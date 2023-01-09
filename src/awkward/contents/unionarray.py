@@ -395,10 +395,10 @@ class UnionArray(Content):
         assert isinstance(form, self.form_cls)
         key1 = getkey(self, form, "tags")
         key2 = getkey(self, form, "index")
-        container[key1] = ak._util.to_byteorder(
+        container[key1] = ak._util.native_to_byteorder(
             self._tags.raw(backend.index_nplike), byteorder
         )
-        container[key2] = ak._util.to_byteorder(
+        container[key2] = ak._util.native_to_byteorder(
             self._index.raw(backend.index_nplike), byteorder
         )
         for i, content in enumerate(self._contents):

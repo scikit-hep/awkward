@@ -73,7 +73,16 @@ def tobytes(array):
 native_byteorder = "<" if sys.byteorder == "little" else ">"
 
 
-def to_byteorder(array, byteorder):
+def native_to_byteorder(array, byteorder: str):
+    """
+    Args:
+        array: nplike array
+        byteorder (`"<"` or `">"`): desired byteorder
+
+    Return a copy of array. Swap the byteorder if `byteorder` does not match
+    `ak._util.native_byteorder`. This function is _not_ idempotent; no metadata
+    from `array` exists to determine its current byteorder.
+    """
     assert byteorder in "<>"
     if byteorder != native_byteorder:
         return array.byteswap(inplace=False)

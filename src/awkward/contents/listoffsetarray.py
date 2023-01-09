@@ -123,7 +123,7 @@ class ListOffsetArray(Content):
     def _to_buffers(self, form, getkey, container, backend, byteorder):
         assert isinstance(form, self.form_cls)
         key = getkey(self, form, "offsets")
-        container[key] = ak._util.to_byteorder(
+        container[key] = ak._util.native_to_byteorder(
             self._offsets.raw(backend.index_nplike), byteorder
         )
         self._content._to_buffers(form.content, getkey, container, backend, byteorder)
