@@ -45,6 +45,8 @@ def to_buffers(
             copied. If the backend is None, then the backend of the layout
             will be used to generate the buffers.
         byteorder (`"<"`, `">"`): Endianness of buffers written to `container`.
+            If the byteorder does not match the current system byteorder, the
+            arrays will be copied.
 
     Decomposes an Awkward Array into a Form and a collection of memory buffers,
     so that data can be losslessly written to file formats and storage devices
