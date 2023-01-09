@@ -69,8 +69,9 @@ def tobytes(array):
         return array.tostring()
 
 
-def little_endian(array):
-    return array.astype(array.dtype.newbyteorder("<"), copy=False)
+def to_byteorder(array, byteorder):
+    assert byteorder in "<>"
+    return array.astype(array.dtype.newbyteorder(byteorder), copy=False)
 
 
 def identifier_hash(str):

@@ -13,6 +13,7 @@ def to_buffers(
     *,
     id_start=0,
     backend=None,
+    byteorder="<",
 ):
     """
     Args:
@@ -43,6 +44,7 @@ def to_buffers(
             buffers in `array` have the same `backend` as this, they won't be
             copied. If the backend is None, then the backend of the layout
             will be used to generate the buffers.
+        byteorder (`"<"`, `">"`): Endianness of buffers written to `container`.
 
     Decomposes an Awkward Array into a Form and a collection of memory buffers,
     so that data can be losslessly written to file formats and storage devices
@@ -121,12 +123,15 @@ def to_buffers(
             form_key=form_key,
             id_start=id_start,
             backend=backend,
+            byteorder=byteorder,
         ),
     ):
-        return _impl(array, container, buffer_key, form_key, id_start, backend)
+        return _impl(
+            array, container, buffer_key, form_key, id_start, backend, byteorder
+        )
 
 
-def _impl(array, container, buffer_key, form_key, id_start, backend):
+def _impl(array, container, buffer_key, form_key, id_start, backend, byteorder):
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
 
     if backend is not None:
@@ -139,4 +144,5 @@ def _impl(array, container, buffer_key, form_key, id_start, backend):
         form_key=form_key,
         id_start=id_start,
         backend=backend,
+        byteorder=byteorder,
     )
