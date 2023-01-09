@@ -6,6 +6,7 @@ import itertools
 import numbers
 import os
 import re
+import sys
 from collections.abc import Iterable, Mapping, Sized
 
 import packaging.version
@@ -67,6 +68,9 @@ def tobytes(array):
         return array.tobytes()
     else:
         return array.tostring()
+
+
+native_byteorder = "<" if sys.byteorder == "little" else ">"
 
 
 def to_byteorder(array, byteorder):
