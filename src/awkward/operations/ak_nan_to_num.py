@@ -5,7 +5,6 @@ import awkward as ak
 np = ak._nplikes.NumpyMetadata.instance()
 
 
-@ak._connect.numpy.implements("nan_to_num")
 def nan_to_num(
     array,
     copy=True,
@@ -129,3 +128,8 @@ def _impl(array, copy, nan, posinf, neginf, highlevel, behavior):
         out = out[0]
 
     return ak._util.wrap(out, behavior, highlevel)
+
+
+@ak._connect.numpy.implements("nan_to_num")
+def _nep_18_impl(x, copy=True, nan=0.0, posinf=None, neginf=None):
+    return nan_to_num(x, copy=copy, nan=nan, posinf=posinf, neginf=neginf)

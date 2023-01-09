@@ -1,12 +1,12 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._connect.numpy import unsupported
 from awkward._util import unset
 
 np = ak._nplikes.NumpyMetadata.instance()
 
 
-@ak._connect.numpy.implements("ptp")
 def ptp(array, axis=None, *, keepdims=False, mask_identity=True, flatten_records=unset):
     """
     Args:
@@ -139,3 +139,8 @@ def _impl(array, axis, keepdims, mask_identity):
                     out = out[(slice(None, None),) * posaxis + (0,)]
 
         return out
+
+
+@ak._connect.numpy.implements("ptp")
+def _nep_18_impl(a, axis=None, out=unsupported, keepdims=False):
+    return ptp(a, axis=axis, keepdims=keepdims)

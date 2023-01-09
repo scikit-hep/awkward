@@ -1,4 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+import functools
+import inspect
 
 import numpy
 
@@ -11,6 +13,15 @@ from awkward.contents.numpyarray import NumpyArray
 # NumPy 1.17.0 introduced NEP18, which is optional (use ak.* instead of np.*).
 if not numpy_at_least("1.13.1"):
     raise ImportError("NumPy 1.13.1 or later required")
+
+
+# FIXME: introduce sentinel type for this
+class _Unsupported:
+    def __repr__(self):
+        return f"{__name__}.unsupported"
+
+
+unsupported = _Unsupported()
 
 
 def convert_to_array(layout, args, kwargs):
@@ -44,24 +55,45 @@ def _to_rectilinear(arg):
         return arg
 
 
+def _array_function_no_impl(func, types, args, kwargs, behavior):
+    rectilinear_args = tuple(_to_rectilinear(x) for x in args)
+    rectilinear_kwargs = {k: _to_rectilinear(v) for k, v in kwargs.items()}
+    result = func(*rectilinear_args, **rectilinear_kwargs)
+    # We want the result to be a layout (this will fail for functions returning non-array convertibles)
+    out = ak.operations.ak_to_layout._impl(result, allow_record=True, allow_other=True)
+    return ak._util.wrap(out, behavior=behavior, allow_other=True)
+
+
 def array_function(func, types, args, kwargs, behavior):
     function = implemented.get(func)
+    # Use NumPy's implementation
     if function is None:
-        rectilinear_args = tuple(_to_rectilinear(x) for x in args)
-        rectilinear_kwargs = {k: _to_rectilinear(v) for k, v in kwargs.items()}
-        result = func(*rectilinear_args, **rectilinear_kwargs)
-        # We want the result to be a layout (this will fail for functions returning non-array convertibles)
-        out = ak.operations.ak_to_layout._impl(
-            result, allow_record=True, allow_other=True
-        )
-        return ak._util.wrap(out, behavior=behavior, allow_other=True)
+        return _array_function_no_impl(func, types, args, kwargs, behavior)
     else:
         return function(*args, **kwargs)
 
 
 def implements(numpy_function):
     def decorator(function):
-        implemented[getattr(numpy, numpy_function)] = function
+        signature = inspect.signature(function)
+        unsupported_names = {
+            p.name for p in signature.parameters.values() if p.default is unsupported
+        }
+
+        @functools.wraps(function)
+        def ensure_valid_args(*args, **kwargs):
+            parameters = signature.bind(*args, **kwargs)
+            provided_invalid_names = parameters.arguments.keys() & unsupported_names
+            if provided_invalid_names:
+                names = ", ".join(provided_invalid_names)
+                raise ak._errors.wrap_error(
+                    TypeError(
+                        f"Awkward NEP-18 overload was provided with unsupported argument(s): {names}"
+                    )
+                )
+            return function(*args, **kwargs)
+
+        implemented[getattr(numpy, numpy_function)] = ensure_valid_args
         return function
 
     return decorator

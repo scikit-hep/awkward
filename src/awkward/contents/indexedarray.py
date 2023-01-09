@@ -875,7 +875,7 @@ class IndexedArray(Content):
         )
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
-        posaxis = ak._util.maybe_posaxis(self, axis)
+        posaxis = ak._util.maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         else:

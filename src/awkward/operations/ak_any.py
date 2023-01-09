@@ -1,12 +1,12 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._connect.numpy import unsupported
 from awkward._util import unset
 
 np = ak._nplikes.NumpyMetadata.instance()
 
 
-@ak._connect.numpy.implements("any")
 def any(
     array,
     axis=None,
@@ -90,3 +90,8 @@ def _impl(array, axis, keepdims, mask_identity, highlevel, behavior):
         return ak._util.wrap(out, behavior, highlevel)
     else:
         return out
+
+
+@ak._connect.numpy.implements("any")
+def _nep_18_impl(a, axis=None, out=unsupported, keepdims=False, *, where=unsupported):
+    return any(a, axis=axis, keepdims=keepdims)
