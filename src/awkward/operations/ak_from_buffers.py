@@ -154,7 +154,10 @@ _index_to_dtype = {
 
 def _from_buffer(nplike, buffer, dtype, count, byteorder):
     array = nplike.frombuffer(buffer, dtype=dtype, count=count)
-    return array.astype(array.dtype.newbyteorder(byteorder), copy=False)
+    if byteorder != ak._util.native_byteorder:
+        return array.byteswap(inplace=False)
+    else:
+        return array
 
 
 def reconstitute(form, length, container, getkey, backend, byteorder, simplify):

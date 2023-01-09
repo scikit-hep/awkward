@@ -75,7 +75,10 @@ native_byteorder = "<" if sys.byteorder == "little" else ">"
 
 def to_byteorder(array, byteorder):
     assert byteorder in "<>"
-    return array.astype(array.dtype.newbyteorder(byteorder), copy=False)
+    if byteorder != native_byteorder:
+        return array.byteswap(inplace=False)
+    else:
+        return array
 
 
 def identifier_hash(str):
