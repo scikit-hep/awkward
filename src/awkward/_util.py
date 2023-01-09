@@ -900,8 +900,10 @@ def arrays_approx_equal(
             return False
 
         if left.is_list:
-            return numpy.array_equal(left.offsets, right.offsets) and visitor(
-                left.content, right.content
+            return (
+                numpy.array_equal(left.starts, right.starts)
+                and numpy.array_equal(left.stops, right.stops)
+                and visitor(left.content, right.content)
             )
         elif left.is_regular:
             return (left.size == right.size) and visitor(left.content, right.content)
