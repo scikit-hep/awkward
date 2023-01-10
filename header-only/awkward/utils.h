@@ -12,13 +12,17 @@
 #include <stdexcept>
 #include <stdint.h>
 
+
 namespace awkward {
 
   /// @brief Returns the name of a primitive type as a string.
   template <typename T>
   const std::string
   type_to_name() {
-    return "int64";
+    if(std::is_same_v<T, long long>) {
+    	return "int64";
+    }
+    return "xxx";
   }
 
   /// @brief Returns `bool` string when the primitive type
