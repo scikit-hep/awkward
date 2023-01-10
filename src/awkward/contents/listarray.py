@@ -134,13 +134,17 @@ class ListArray(Content):
             form_key=form_key,
         )
 
-    def _to_buffers(self, form, getkey, container, backend):
+    def _to_buffers(self, form, getkey, container, backend, byteorder):
         assert isinstance(form, self.form_cls)
         key1 = getkey(self, form, "starts")
         key2 = getkey(self, form, "stops")
-        container[key1] = ak._util.little_endian(self._starts.raw(backend.index_nplike))
-        container[key2] = ak._util.little_endian(self._stops.raw(backend.index_nplike))
-        self._content._to_buffers(form.content, getkey, container, backend)
+        container[key1] = ak._util.native_to_byteorder(
+            self._starts.raw(backend.index_nplike), byteorder
+        )
+        container[key2] = ak._util.native_to_byteorder(
+            self._stops.raw(backend.index_nplike), byteorder
+        )
+        self._content._to_buffers(form.content, getkey, container, backend, byteorder)
 
     def _to_typetracer(self, forget_length: bool) -> Self:
         tt = ak._typetracer.TypeTracer.instance()

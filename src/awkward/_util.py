@@ -6,6 +6,7 @@ import itertools
 import numbers
 import os
 import re
+import sys
 from collections.abc import Iterable, Mapping, Sized
 
 import packaging.version
@@ -69,8 +70,24 @@ def tobytes(array):
         return array.tostring()
 
 
-def little_endian(array):
-    return array.astype(array.dtype.newbyteorder("<"), copy=False)
+native_byteorder = "<" if sys.byteorder == "little" else ">"
+
+
+def native_to_byteorder(array, byteorder: str):
+    """
+    Args:
+        array: nplike array
+        byteorder (`"<"` or `">"`): desired byteorder
+
+    Return a copy of array. Swap the byteorder if `byteorder` does not match
+    `ak._util.native_byteorder`. This function is _not_ idempotent; no metadata
+    from `array` exists to determine its current byteorder.
+    """
+    assert byteorder in "<>"
+    if byteorder != native_byteorder:
+        return array.byteswap(inplace=False)
+    else:
+        return array
 
 
 def identifier_hash(str):
