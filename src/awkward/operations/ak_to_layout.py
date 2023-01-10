@@ -1,7 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from collections.abc import Iterable
-
 from awkward_cpp.lib import _ext
 
 import awkward as ak
@@ -106,14 +104,7 @@ def _impl(array, allow_record, allow_other):
 
         return ak.contents.NumpyArray(array, parameters=None, backend=backend)
 
-    elif isinstance(array, (str, bytes)):
-        return _impl(
-            ak.operations.from_iter([array], highlevel=False),
-            allow_record,
-            allow_other,
-        )
-
-    elif isinstance(array, Iterable):
+    elif ak._util.is_non_string_iterable(array):
         return _impl(
             ak.operations.from_iter(array, highlevel=False),
             allow_record,
@@ -122,7 +113,9 @@ def _impl(array, allow_record, allow_other):
 
     elif not allow_other:
         raise _errors.wrap_error(
-            TypeError(f"{array} cannot be converted into an Awkward Array")
+            TypeError(
+                f"{array} cannot be converted into an Awkward Array, and non-array-like objects are not supported."
+            )
         )
 
     else:
