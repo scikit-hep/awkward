@@ -7,7 +7,7 @@ import numbers
 import os
 import re
 import sys
-from collections.abc import Iterable, Mapping, Sized
+from collections.abc import Iterable, Mapping, Sequence, Sized
 
 import packaging.version
 from awkward_cpp.lib import _ext
@@ -59,8 +59,12 @@ def is_integer(x) -> bool:
     return isinstance(x, numbers.Integral) and not isinstance(x, bool)
 
 
-def is_non_string_iterable(obj) -> bool:
-    return not isinstance(obj, str) and isinstance(obj, Iterable)
+def is_non_string_like_iterable(obj) -> bool:
+    return not isinstance(obj, (str, bytes)) and isinstance(obj, Iterable)
+
+
+def is_non_string_like_sequence(obj) -> bool:
+    return not isinstance(obj, (str, bytes)) and isinstance(obj, Sequence)
 
 
 def tobytes(array):
