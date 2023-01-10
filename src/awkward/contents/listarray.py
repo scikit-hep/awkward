@@ -134,13 +134,17 @@ class ListArray(Content):
             form_key=form_key,
         )
 
-    def _to_buffers(self, form, getkey, container, backend):
+    def _to_buffers(self, form, getkey, container, backend, byteorder):
         assert isinstance(form, self.form_cls)
         key1 = getkey(self, form, "starts")
         key2 = getkey(self, form, "stops")
-        container[key1] = ak._util.little_endian(self._starts.raw(backend.index_nplike))
-        container[key2] = ak._util.little_endian(self._stops.raw(backend.index_nplike))
-        self._content._to_buffers(form.content, getkey, container, backend)
+        container[key1] = ak._util.native_to_byteorder(
+            self._starts.raw(backend.index_nplike), byteorder
+        )
+        container[key2] = ak._util.native_to_byteorder(
+            self._stops.raw(backend.index_nplike), byteorder
+        )
+        self._content._to_buffers(form.content, getkey, container, backend, byteorder)
 
     def _to_typetracer(self, forget_length: bool) -> Self:
         tt = ak._typetracer.TypeTracer.instance()
@@ -1397,14 +1401,14 @@ class ListArray(Content):
             and self._backend.nplike.known_data
             and self._starts.length != 0
         ):
-            startsmin = self._starts.data.min()
+            startsmin = self._starts.data.min().item()
             starts = ak.index.Index(
                 self._starts.data - startsmin, nplike=self._backend.index_nplike
             )
             stops = ak.index.Index(
                 self._stops.data - startsmin, nplike=self._backend.index_nplike
             )
-            content = self._content[startsmin : self._stops.data.max()]
+            content = self._content[startsmin : self._stops.data.max().item()]
         else:
             self._touch_data(recursive=False)
             starts, stops, content = self._starts, self._stops, self._content

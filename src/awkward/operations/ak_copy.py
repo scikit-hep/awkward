@@ -3,11 +3,11 @@
 import copy as _copy
 
 import awkward as ak
+from awkward._connect.numpy import unsupported
 
 np = ak._nplikes.NumpyMetadata.instance()
 
 
-@ak._connect.numpy.implements("copy")
 def copy(array):
     """
     Args:
@@ -65,3 +65,8 @@ def copy(array):
 
 def _impl(array):
     return _copy.deepcopy(array)
+
+
+@ak._connect.numpy.implements("copy")
+def _nep_18_impl(a, order=unsupported, subok=unsupported):
+    return copy(a)

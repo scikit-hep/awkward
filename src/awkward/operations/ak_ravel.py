@@ -1,11 +1,11 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._connect.numpy import unsupported
 
 np = ak._nplikes.NumpyMetadata.instance()
 
 
-@ak._connect.numpy.implements("ravel")
 def ravel(array, *, highlevel=True, behavior=None):
     """
     Args:
@@ -65,3 +65,8 @@ def _impl(array, highlevel, behavior):
     result = ak._do.mergemany(out)
 
     return ak._util.wrap(result, behavior, highlevel, like=array)
+
+
+@ak._connect.numpy.implements("ravel")
+def _nep_18_impl(a, order=unsupported):
+    return ravel(a)

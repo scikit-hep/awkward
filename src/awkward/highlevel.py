@@ -1433,7 +1433,10 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     def __getstate__(self):
         packed = ak.operations.to_packed(self._layout, highlevel=False)
         form, length, container = ak.operations.to_buffers(
-            packed, buffer_key="{form_key}-{attribute}", form_key="node{id}"
+            packed,
+            buffer_key="{form_key}-{attribute}",
+            form_key="node{id}",
+            byteorder="<",
         )
         if self._behavior is ak.behavior:
             behavior = None
@@ -1449,6 +1452,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             container,
             highlevel=False,
             buffer_key="{form_key}-{attribute}",
+            byteorder="<",
         )
         self.layout = layout
         self.behavior = behavior
@@ -2067,7 +2071,10 @@ class Record(NDArrayOperatorsMixin):
     def __getstate__(self):
         packed = ak.operations.to_packed(self._layout, highlevel=False)
         form, length, container = ak.operations.to_buffers(
-            packed.array, buffer_key="{form_key}-{attribute}", form_key="node{id}"
+            packed.array,
+            buffer_key="{form_key}-{attribute}",
+            form_key="node{id}",
+            byteorder="<",
         )
         if self._behavior is ak.behavior:
             behavior = None
@@ -2083,6 +2090,7 @@ class Record(NDArrayOperatorsMixin):
             container,
             highlevel=False,
             buffer_key="{form_key}-{attribute}",
+            byteorder="<",
         )
         layout = ak.record.Record(layout, at)
         self.layout = layout
@@ -2435,6 +2443,7 @@ class ArrayBuilder(Sized):
                 container,
                 buffer_key="{form_key}-{attribute}",
                 backend="cpu",
+                byteorder=ak._util.native_byteorder,
                 highlevel=True,
                 behavior=self._behavior,
                 simplify=True,

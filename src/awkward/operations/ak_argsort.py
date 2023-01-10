@@ -1,11 +1,11 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._connect.numpy import unsupported
 
 np = ak._nplikes.NumpyMetadata.instance()
 
 
-@ak._connect.numpy.implements("argsort")
 def argsort(
     array, axis=-1, *, ascending=True, stable=True, highlevel=True, behavior=None
 ):
@@ -64,3 +64,20 @@ def _impl(array, axis, ascending, stable, highlevel, behavior):
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
     out = ak._do.argsort(layout, axis, ascending, stable)
     return ak._util.wrap(out, behavior, highlevel, like=array)
+
+
+@ak._connect.numpy.implements("argsort")
+def _nep_18_impl(a, axis=-1, kind=None, order=unsupported):
+    if kind is None:
+        stable = False
+    elif kind == "stable":
+        stable = True
+    elif kind == "heapsort":
+        stable = False
+    else:
+        raise ak._errors.wrap_error(
+            ValueError(
+                f"unsupported value for 'kind' passed to overloaded NumPy function 'argsort': {kind!r}"
+            )
+        )
+    return argsort(a, axis=axis, stable=stable)

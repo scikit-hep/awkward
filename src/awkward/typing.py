@@ -16,6 +16,7 @@ __all__ = list(
         "runtime_checkable",
         "AxisMaybeNone",
         "TypedDict",
+        "Literal",
         *typing.__all__,
     }
 )
@@ -27,6 +28,7 @@ AxisMaybeNone = TypeVar("AxisMaybeNone", int, None)
 if sys.version_info < (3, 11):
     from typing_extensions import (  # noqa: F401, F403
         Final,
+        Literal,
         Protocol,
         Self,
         TypeAlias,
@@ -38,6 +40,7 @@ if sys.version_info < (3, 11):
 else:
     from typing import (  # noqa: F401, F403
         Final,
+        Literal,
         Protocol,
         Self,
         TypeAlias,
