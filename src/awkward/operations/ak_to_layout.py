@@ -104,7 +104,7 @@ def _impl(array, allow_record, allow_other):
 
         return ak.contents.NumpyArray(array, parameters=None, backend=backend)
 
-    elif ak._util.is_non_string_iterable(array):
+    elif ak._util.is_non_string_like_iterable(array):
         return _impl(
             ak.operations.from_iter(array, highlevel=False),
             allow_record,
