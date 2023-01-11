@@ -373,15 +373,17 @@ class NumpyArray(Content):
 
             # Special-case booleans i.e. {bool, number}
             elif (
-                    (metadata.isdtype(self.dtype, "bool") and metadata.isdtype(other.dtype, "numeric"))
-                 or (metadata.isdtype(other.dtype, "bool") and metadata.isdtype(self.dtype, "numeric"))
+                metadata.isdtype(self.dtype, "bool")
+                and metadata.isdtype(other.dtype, "numeric")
+            ) or (
+                metadata.isdtype(other.dtype, "bool")
+                and metadata.isdtype(self.dtype, "numeric")
             ):
                 return mergebool
 
             # Currently we're less permissive than NumPy on merging datetimes / timedeltas
-            elif (
-                metadata.isdtype(self.dtype, "timelike")
-                or metadata.isdtype(other.dtype, "timelike")
+            elif metadata.isdtype(self.dtype, "timelike") or metadata.isdtype(
+                other.dtype, "timelike"
             ):
                 return False
             # Default merging (can we cast one to the other)

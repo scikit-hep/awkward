@@ -1,8 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
-from awkward._nplikes import metadata
 from awkward._connect.numpy import unsupported
+from awkward._nplikes import metadata
 from awkward.operations.ak_zeros_like import _ZEROS
 
 
