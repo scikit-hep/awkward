@@ -22,7 +22,7 @@ namespace awkward {
     if(std::is_same_v<T, long long>) {
     	return "int64";
     }
-    return "xxx";
+    return "unsupported_primitive_type";
   }
 
   /// @brief Returns `bool` string when the primitive type
