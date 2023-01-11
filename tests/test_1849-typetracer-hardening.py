@@ -12,12 +12,12 @@ def test_list_array_pad_none_option():
         ak.index.Index64(np.array([3, 6, 9, 11], dtype=np.int64)),
         ak.contents.NumpyArray(np.arange(11, dtype=np.int64)),
     )
-    result = layout.pad_none(1, axis=-1, clip=False)
+    result = ak._do.pad_none(layout, 1, axis=-1, clip=False)
     assert ak.type(result) == ak.types.ListType(
         ak.types.OptionType(ak.types.NumpyType("int64"))
     )
 
-    result_tt = layout.typetracer.pad_none(1, axis=-1, clip=False)
+    result_tt = ak._do.pad_none(layout.typetracer, 1, axis=-1, clip=False)
     assert ak.type(result_tt) == ak.types.ListType(
         ak.types.OptionType(ak.types.NumpyType("int64"))
     )
