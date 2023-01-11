@@ -14,6 +14,7 @@ from numba.core.typing.typeof import typeof, typeof_impl  # noqa: F401, E402
 from numba.extending import overload
 from numba.extending import overload_method
 from numba.cuda.args import wrap_arg
+from numba.cuda.cudaimpl import registry
 
 from numba import config
 config.CUDA_LOW_OCCUPANCY_WARNINGS = False
@@ -26,7 +27,16 @@ ak_numba_layout = pytest.importorskip("awkward._connect.numba.layout")
 ak.numba.register_and_check()
 
 # FIXME: do the same for ak.Array -> ArrayView
+#@cuda.extending.lower_builtin(operator.getitem, ArrayViewType, numba.types.Integer)
+#@registry.lower(ArrayViewType)
+
+#@registry.lower_constant(ArrayViewType)
+#def lower_const_Array(context, builder, viewtype, array):
+#    print("test_1809-array-cuda-jit-getitem.py line 35: lower_const_Array")
+#    return lower_const_view(context, builder, viewtype, array._numbaview)
+
 def lower_const_view(context, builder, viewtype, view):
+    print("YAYAYAYAYAYYAYAYAYYAYA")
     pos = view.pos
     start = view.start
     stop = view.stop

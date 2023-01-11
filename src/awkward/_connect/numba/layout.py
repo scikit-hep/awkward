@@ -207,6 +207,7 @@ def posat(context, builder, pos, offset):
 
 def getat(context, builder, baseptr, offset, rettype=None):
     print("layout.py line 212: in getat...", baseptr, offset)
+    #printimpl.print_varargs(context, builder, sig, args)
     
     ptrtype = None
     if rettype is not None:
