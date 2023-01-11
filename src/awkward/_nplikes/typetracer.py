@@ -10,7 +10,8 @@ import numpy
 
 from awkward import _errors
 from awkward._nplikes import Array, NumpyLike, metadata
-from awkward.typing import Self
+from awkward._nplikes.numpylike import ErrorStateLiteral
+from awkward.typing import ContextManager, Self
 
 
 def unknown_scalar(dtype: metadata.dtype) -> TypeTracerArray:
@@ -447,7 +448,16 @@ class TypeTracer(NumpyLike):
     def exp(self, x: Array) -> TypeTracerArray:
         raise _errors.wrap_error(NotImplementedError)
 
+    def negative(self, x: Array) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
     def divide(self, x1: Array, x2: Array) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def floor_divide(self, x1: Array, x2: Array) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def power(self, x1: Array, x2: Array) -> TypeTracerArray:
         raise _errors.wrap_error(NotImplementedError)
 
     def greater(self, x1: Array, x2: Array) -> Array:
@@ -648,6 +658,12 @@ class TypeTracer(NumpyLike):
 
     def byteswap(self, x: Array, copy: bool = False):
         return x
+
+    def error_state(
+        self,
+        **kwargs: ErrorStateLiteral,
+    ) -> ContextManager:
+        raise _errors.wrap_error(NotImplementedError)
 
     @classmethod
     def is_own_array(cls, x) -> bool:

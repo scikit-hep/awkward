@@ -4,7 +4,7 @@ import numpy as np  # noqa: F401
 import pytest  # noqa: F401
 
 import awkward as ak  # noqa: F401
-from awkward._nplikes import dtypes, typetracer
+from awkward._nplikes import metadata, typetracer
 
 
 def is_true_or_unknown(x):
@@ -25,51 +25,51 @@ def test_broadcast_shapes():
     assert is_true_or_unknown(
         nplike.shapes_are_compatible(
             nplike.broadcast_shapes(
-                (1, typetracer.unknown_scalar(dtypes.int64), 3),
+                (1, typetracer.unknown_scalar(metadata.int64), 3),
                 (2, 3),
             ),
-            (1, typetracer.unknown_scalar(dtypes.int64), 3),
+            (1, typetracer.unknown_scalar(metadata.int64), 3),
         )
     )
     assert is_true_or_unknown(
         nplike.shapes_are_compatible(
             nplike.broadcast_shapes(
-                (1, typetracer.unknown_scalar(dtypes.int64), 3),
+                (1, typetracer.unknown_scalar(metadata.int64), 3),
                 (3,),
             ),
-            (1, typetracer.unknown_scalar(dtypes.int64), 3),
+            (1, typetracer.unknown_scalar(metadata.int64), 3),
         )
     )
     assert is_true_or_unknown(
         nplike.shapes_are_compatible(
             nplike.broadcast_shapes(
-                (typetracer.unknown_scalar(dtypes.int64), 2, 3),
+                (typetracer.unknown_scalar(metadata.int64), 2, 3),
                 (2, 3),
             ),
-            (typetracer.unknown_scalar(dtypes.int64), 2, 3),
+            (typetracer.unknown_scalar(metadata.int64), 2, 3),
         )
     )
     assert is_true_or_unknown(
         nplike.shapes_are_compatible(
             nplike.broadcast_shapes(
-                (typetracer.unknown_scalar(dtypes.int64),),
+                (typetracer.unknown_scalar(metadata.int64),),
                 (2,),
             ),
-            (typetracer.unknown_scalar(dtypes.int64),),
+            (typetracer.unknown_scalar(metadata.int64),),
         )
     )
     assert is_true_or_unknown(
         nplike.shapes_are_compatible(
             nplike.broadcast_shapes(
                 (
-                    typetracer.unknown_scalar(dtypes.int64),
-                    typetracer.unknown_scalar(dtypes.int64),
+                    typetracer.unknown_scalar(metadata.int64),
+                    typetracer.unknown_scalar(metadata.int64),
                 ),
                 (1,),
             ),
             (
-                typetracer.unknown_scalar(dtypes.int64),
-                typetracer.unknown_scalar(dtypes.int64),
+                typetracer.unknown_scalar(metadata.int64),
+                typetracer.unknown_scalar(metadata.int64),
             ),
         )
     )
@@ -82,21 +82,21 @@ def test_typetracer_shapes():
     assert is_true_or_unknown(nplike.shapes_are_compatible(shape, (1, 2, 3)))
     assert is_true_or_unknown(
         nplike.shapes_are_compatible(
-            shape, (1, typetracer.unknown_scalar(dtypes.int64), 3)
+            shape, (1, typetracer.unknown_scalar(metadata.int64), 3)
         )
     )
     assert is_true_or_unknown(
         nplike.shapes_are_compatible(
-            (1, typetracer.unknown_scalar(dtypes.int64), 3), shape
+            (1, typetracer.unknown_scalar(metadata.int64), 3), shape
         )
     )
     assert is_true_or_unknown(
         nplike.shapes_are_compatible(
             shape,
             (
-                typetracer.unknown_scalar(dtypes.int64),
-                typetracer.unknown_scalar(dtypes.int64),
-                typetracer.unknown_scalar(dtypes.int64),
+                typetracer.unknown_scalar(metadata.int64),
+                typetracer.unknown_scalar(metadata.int64),
+                typetracer.unknown_scalar(metadata.int64),
             ),
         )
     )
@@ -104,9 +104,9 @@ def test_typetracer_shapes():
         nplike.shapes_are_compatible(
             shape,
             (
-                typetracer.unknown_scalar(dtypes.int64),
+                typetracer.unknown_scalar(metadata.int64),
                 2,
-                typetracer.unknown_scalar(dtypes.int64),
+                typetracer.unknown_scalar(metadata.int64),
             ),
         )
     )
@@ -116,9 +116,9 @@ def test_typetracer_shapes():
             nplike.shapes_are_compatible(
                 shape,
                 (
-                    typetracer.unknown_scalar(dtypes.int64),
+                    typetracer.unknown_scalar(metadata.int64),
                     1,
-                    typetracer.unknown_scalar(dtypes.int64),
+                    typetracer.unknown_scalar(metadata.int64),
                 ),
             )
         )
@@ -128,8 +128,8 @@ def test_typetracer_shapes():
             nplike.shapes_are_compatible(
                 shape,
                 (
-                    typetracer.unknown_scalar(dtypes.int64),
-                    typetracer.unknown_scalar(dtypes.int64),
+                    typetracer.unknown_scalar(metadata.int64),
+                    typetracer.unknown_scalar(metadata.int64),
                     8,
                 ),
             )
@@ -138,7 +138,7 @@ def test_typetracer_shapes():
     assert not (
         is_true_or_unknown(
             nplike.shapes_are_compatible(
-                shape, (typetracer.unknown_scalar(dtypes.int64), 3)
+                shape, (typetracer.unknown_scalar(metadata.int64), 3)
             )
         )
     )
