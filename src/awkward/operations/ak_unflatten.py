@@ -93,9 +93,10 @@ def _impl(array, counts, axis, highlevel, behavior):
     if isinstance(counts, (numbers.Integral, np.integer)):
         current_offsets = None
     else:
-        counts = ak.operations.to_layout(
-            counts, allow_record=False, allow_other=False
-        ).to_packed()
+        counts = ak.operations.to_layout(counts, allow_record=False, allow_other=False)
+        if counts.is_indexed and not counts.is_option:
+            counts = counts.project()
+
         if counts.is_option and (counts.content.is_numpy or counts.content.is_unknown):
             mask = counts.mask_as_bool(valid_when=False)
             counts = backend.nplike.to_rectilinear(

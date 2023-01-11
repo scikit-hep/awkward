@@ -246,6 +246,10 @@ def _string_numba_lower(
     return out
 
 
+def _cast_bytes_or_str_to_string(string):
+    return ak.to_layout([string])
+
+
 def register(behavior):
     behavior["byte"] = ByteBehavior
     behavior["__typestr__", "byte"] = "byte"
@@ -269,3 +273,6 @@ def register(behavior):
     behavior["__numba_lower__", "bytestring"] = _string_numba_lower
     behavior["__numba_typer__", "string"] = _string_numba_typer
     behavior["__numba_lower__", "string"] = _string_numba_lower
+
+    behavior["__cast__", str] = _cast_bytes_or_str_to_string
+    behavior["__cast__", bytes] = _cast_bytes_or_str_to_string
