@@ -87,8 +87,9 @@ def native_to_byteorder(array, byteorder: str):
     from `array` exists to determine its current byteorder.
     """
     assert byteorder in "<>"
+    nplike = ak._nplikes.nplike_of(array)
     if byteorder != native_byteorder:
-        return array.byteswap(inplace=False)
+        return nplike.byteswap(array, copy=True)
     else:
         return array
 

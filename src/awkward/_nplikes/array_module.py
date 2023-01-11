@@ -454,8 +454,11 @@ class ArrayModuleNumpyLike(NumpyLike):
     def is_c_contiguous(self, x: Array) -> bool:
         return x.flags["C_CONTIGUOUS"]  # type: ignore
 
-    def to_rectilinear(self, array):
+    def to_rectilinear(self, x: Array):
         raise _errors.wrap_error(NotImplementedError)
+
+    def byteswap(self, x: Array, copy: bool = False):
+        return x.byteswap(inplace=not copy)  # type: ignore
 
     def error_state(
         self,

@@ -643,8 +643,11 @@ class TypeTracer(NumpyLike):
     def is_c_contiguous(self, x: Array) -> bool:
         raise _errors.wrap_error(NotImplementedError)
 
-    def to_rectilinear(self, array):
+    def to_rectilinear(self, x: Array):
         raise _errors.wrap_error(NotImplementedError)
+
+    def byteswap(self, x: Array, copy: bool = False):
+        return x
 
     @classmethod
     def is_own_array(cls, x) -> bool:

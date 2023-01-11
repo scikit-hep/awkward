@@ -520,6 +520,10 @@ class NumpyLike(Singleton, Protocol):
         ...
 
     @abstractmethod
+    def byteswap(self, array: Array, copy: bool = False):
+        ...
+
+    @abstractmethod
     def error_state(
         self,
         **kwargs: ErrorStateLiteral,
