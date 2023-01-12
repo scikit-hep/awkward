@@ -109,7 +109,7 @@ def _impl(array, behavior):
         and issubclass(array, np.generic)
     ):
         primitive = ak.types.numpytype.dtype_to_primitive(np.dtype(array))
-        return ak.types.NumpyType(primitive)
+        return ak.types.ScalarType(ak.types.NumpyType(primitive))
 
     elif isinstance(array, _ext.ArrayBuilder):
         form = ak.forms.from_json(array.form())
