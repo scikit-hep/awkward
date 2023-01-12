@@ -786,8 +786,6 @@ class Content:
         outlength: int,
         ascending: bool,
         stable: bool,
-        kind: Any,
-        order: Any,
     ):
         raise ak._errors.wrap_error(NotImplementedError)
 
@@ -799,8 +797,6 @@ class Content:
         outlength: int,
         ascending: bool,
         stable: bool,
-        kind: Any,
-        order: Any,
     ):
         raise ak._errors.wrap_error(NotImplementedError)
 

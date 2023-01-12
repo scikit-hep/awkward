@@ -1081,16 +1081,7 @@ class IndexedOptionArray(Content):
         return next, nextparents, numnull, outindex
 
     def _argsort_next(
-        self,
-        negaxis,
-        starts,
-        shifts,
-        parents,
-        outlength,
-        ascending,
-        stable,
-        kind,
-        order,
+        self, negaxis, starts, shifts, parents, outlength, ascending, stable
     ):
         assert (
             starts.nplike is self._backend.index_nplike
@@ -1108,15 +1099,7 @@ class IndexedOptionArray(Content):
             nextshifts = None
 
         out = next._argsort_next(
-            negaxis,
-            starts,
-            nextshifts,
-            nextparents,
-            outlength,
-            ascending,
-            stable,
-            kind,
-            order,
+            negaxis, starts, nextshifts, nextparents, outlength, ascending, stable
         )
 
         # `next._argsort_next` is given the non-None values. We choose to
@@ -1215,9 +1198,7 @@ class IndexedOptionArray(Content):
         else:
             return out
 
-    def _sort_next(
-        self, negaxis, starts, parents, outlength, ascending, stable, kind, order
-    ):
+    def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
         assert (
             starts.nplike is self._backend.index_nplike
             and parents.nplike is self._backend.index_nplike
@@ -1227,14 +1208,7 @@ class IndexedOptionArray(Content):
         next, nextparents, numnull, outindex = self._rearrange_prepare_next(parents)
 
         out = next._sort_next(
-            negaxis,
-            starts,
-            nextparents,
-            outlength,
-            ascending,
-            stable,
-            kind,
-            order,
+            negaxis, starts, nextparents, outlength, ascending, stable
         )
 
         nextoutindex = ak.index.Index64.empty(

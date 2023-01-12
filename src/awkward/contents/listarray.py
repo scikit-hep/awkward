@@ -1156,43 +1156,17 @@ class ListArray(Content):
         )
 
     def _argsort_next(
-        self,
-        negaxis,
-        starts,
-        shifts,
-        parents,
-        outlength,
-        ascending,
-        stable,
-        kind,
-        order,
+        self, negaxis, starts, shifts, parents, outlength, ascending, stable
     ):
         next = self.to_ListOffsetArray64(True)
         out = next._argsort_next(
-            negaxis,
-            starts,
-            shifts,
-            parents,
-            outlength,
-            ascending,
-            stable,
-            kind,
-            order,
+            negaxis, starts, shifts, parents, outlength, ascending, stable
         )
         return out
 
-    def _sort_next(
-        self, negaxis, starts, parents, outlength, ascending, stable, kind, order
-    ):
+    def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
         return self.to_ListOffsetArray64(True)._sort_next(
-            negaxis,
-            starts,
-            parents,
-            outlength,
-            ascending,
-            stable,
-            kind,
-            order,
+            negaxis, starts, parents, outlength, ascending, stable
         )
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
