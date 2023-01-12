@@ -17,10 +17,8 @@ def sort(array, axis=-1, *, ascending=True, stable=True, highlevel=True, behavio
         ascending (bool): If True, the first value in each sorted group
             will be smallest, the last value largest; if False, the order
             is from largest to smallest.
-        stable (bool): If True, use a stable sorting algorithm (introsort:
-            a hybrid of quicksort, heapsort, and insertion sort); if False,
-            use a sorting algorithm that is not guaranteed to be stable
-            (heapsort).
+        stable (bool): If True, use a stable sorting algorithm; if False,
+            use a sorting algorithm that is not guaranteed to be stable.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
