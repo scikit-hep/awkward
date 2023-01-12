@@ -1430,7 +1430,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         return numba.typeof(self._numbaview)
 
-    def __getstate__(self):
+    def __reduce__(self):
         packed = ak.operations.to_packed(self._layout, highlevel=False)
         form, length, container = ak.operations.to_buffers(
             packed,
@@ -1442,7 +1442,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             behavior = None
         else:
             behavior = self._behavior
-        return form.to_dict(), length, container, behavior
+        return object.__new__, (Array,), (form.to_dict(), length, container, behavior)
 
     def __setstate__(self, state):
         form, length, container, behavior = state
@@ -2068,7 +2068,7 @@ class Record(NDArrayOperatorsMixin):
 
         return numba.typeof(self._numbaview)
 
-    def __getstate__(self):
+    def __reduce__(self):
         packed = ak.operations.to_packed(self._layout, highlevel=False)
         form, length, container = ak.operations.to_buffers(
             packed.array,
@@ -2080,7 +2080,11 @@ class Record(NDArrayOperatorsMixin):
             behavior = None
         else:
             behavior = self._behavior
-        return form.to_dict(), length, container, behavior, packed.at
+        return (
+            object.__new__,
+            (Record,),
+            (form.to_dict(), length, container, behavior, packed.at),
+        )
 
     def __setstate__(self, state):
         form, length, container, behavior, at = state
