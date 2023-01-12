@@ -12,7 +12,7 @@ from collections.abc import Iterable, Mapping, Sized
 from awkward_cpp.lib import _ext
 
 import awkward as ak
-from awkward._connect.numpy import NDArrayOperatorsMixin
+from awkward._util import NDArrayOperatorsMixin
 
 np = ak._nplikes.NumpyMetadata.instance()
 numpy = ak._nplikes.Numpy.instance()
