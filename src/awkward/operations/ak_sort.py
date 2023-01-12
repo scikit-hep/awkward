@@ -57,9 +57,9 @@ def _impl(array, axis, ascending, stable, highlevel, behavior):
 def _nep_18_impl(a, axis=-1, kind=None, order=unsupported):
     if kind is None:
         stable = False
-    elif kind == "stable" or kind == "mergesort":
+    elif kind in ("stable", "mergesort"):
         stable = True
-    elif kind == "heapsort" or kind == "quicksort":
+    elif kind in ("heapsort", "quicksort"):
         stable = False
     else:
         raise ak._errors.wrap_error(
