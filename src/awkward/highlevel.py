@@ -1445,7 +1445,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         return object.__new__, (Array,), (form.to_dict(), length, container, behavior)
 
     def __setstate__(self, state):
-        form, length, container, behavior = state
+        form, length, container, behavior, *_ = state
         layout = ak.operations.from_buffers(
             form,
             length,
@@ -2087,7 +2087,7 @@ class Record(NDArrayOperatorsMixin):
         )
 
     def __setstate__(self, state):
-        form, length, container, behavior, at = state
+        form, length, container, behavior, at, *_ = state
         layout = ak.operations.from_buffers(
             form,
             length,
