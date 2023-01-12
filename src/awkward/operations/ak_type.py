@@ -11,10 +11,12 @@ import awkward as ak
 np = ak._nplikes.NumpyMetadata.instance()
 
 
-def type(array, *, highlevel=True, behavior=None):
+def type(array, *, behavior=None):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
+        behavior (None or dict): Custom #ak.behavior for the output type, if
+            high-level.
 
     The high-level type of an `array` (many types supported, including all
     Awkward Arrays and Records) as #ak.types.Type objects.
@@ -72,50 +74,34 @@ def type(array, *, highlevel=True, behavior=None):
     """
     with ak._errors.OperationErrorContext(
         "ak.type",
-        dict(array=array, highlevel=highlevel, behavior=behavior),
+        dict(array=array, behavior=behavior),
     ):
-        return _impl(array, highlevel, behavior)
+        return _impl(array, behavior)
 
 
-def _impl(array, highlevel, behavior):
-    if highlevel:
-
-        def scalar_type(obj):
-            return ak.types.ScalarType(obj)
-
-        def array_type(obj, length):
-            return ak.types.ArrayType(obj, length)
-
-    else:
-
-        def scalar_type(obj):
-            return obj
-
-        def array_type(obj, length):
-            return obj
-
+def _impl(array, behavior):
     if isinstance(array, np.dtype):
-        return scalar_type(
+        return ak.types.ScalarType(
             ak.types.NumpyType(ak.types.numpytype.dtype_to_primitive(array))
         )
 
     elif isinstance(array, bool):  # np.bool_ in np.generic (above)
-        return scalar_type(ak.types.NumpyType("bool"))
+        return ak.types.ScalarType(ak.types.NumpyType("bool"))
 
     elif isinstance(array, numbers.Integral):
-        return scalar_type(ak.types.NumpyType("int64"))
+        return ak.types.ScalarType(ak.types.NumpyType("int64"))
 
     elif isinstance(array, numbers.Real):
-        return scalar_type(ak.types.NumpyType("float64"))
+        return ak.types.ScalarType(ak.types.NumpyType("float64"))
 
     elif isinstance(array, numbers.Complex):
-        return scalar_type(ak.types.NumpyType("complex128"))
+        return ak.types.ScalarType(ak.types.NumpyType("complex128"))
 
     elif isinstance(array, datetime):  # np.datetime64 in np.generic (above)
-        return scalar_type(ak.types.NumpyType("datetime64"))
+        return ak.types.ScalarType(ak.types.NumpyType("datetime64"))
 
     elif isinstance(array, timedelta):  # np.timedelta64 in np.generic (above)
-        return scalar_type(ak.types.NumpyType("timedelta"))
+        return ak.types.ScalarType(ak.types.NumpyType("timedelta"))
 
     elif (
         isinstance(array, np.generic)
@@ -127,24 +113,26 @@ def _impl(array, highlevel, behavior):
 
     elif isinstance(array, _ext.ArrayBuilder):
         form = ak.forms.from_json(array.form())
-        return array_type(form.type_from_behavior(behavior), len(array))
+        return ak.types.ArrayType(form.type_from_behavior(behavior), len(array))
 
     elif isinstance(array, ak.ArrayBuilder):
         behavior = ak._util.behavior_of(array, behavior=behavior)
         form = ak.forms.from_json(array._layout.form())
-        return array_type(form.type_from_behavior(behavior), len(array._layout))
+        return ak.types.ArrayType(form.type_from_behavior(behavior), len(array._layout))
 
     else:
         behavior = ak._util.behavior_of(array, behavior=behavior)
         layout = ak.to_layout(array, allow_other=True, allow_record=True)
         if layout is None:
-            return scalar_type(ak.types.UnknownType())
+            return ak.types.ScalarType(ak.types.UnknownType())
 
         elif isinstance(layout, ak.record.Record):
-            return scalar_type(layout.array.form.type_from_behavior(behavior))
+            return ak.types.ScalarType(layout.array.form.type_from_behavior(behavior))
 
         elif isinstance(layout, ak.contents.Content):
-            return array_type(layout.form.type_from_behavior(behavior), layout.length)
+            return ak.types.ArrayType(
+                layout.form.type_from_behavior(behavior), layout.length
+            )
 
         else:
             raise ak._errors.wrap_error(
