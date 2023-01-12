@@ -942,9 +942,9 @@ def test_rpad_listoffset_array():
         == ak._do.pad_none(listoffsetarray, 3, 0).form
     )
 
-    assert "option[" + str(ak.operations.type(listoffsetarray)) + "]" == str(
-        ak.operations.type(ak._do.pad_none(listoffsetarray, 3, 0))
-    )
+    assert ak.types.ArrayType(
+        ak.types.OptionType(ak.types.ListType(ak.types.NumpyType("float64"))), 6
+    ) == ak.operations.type(ak._do.pad_none(listoffsetarray, 3, 0))
 
     assert to_list(ak._do.pad_none(listoffsetarray, 7, 0)) == [
         [0.0, 1.1, 2.2],
@@ -960,9 +960,9 @@ def test_rpad_listoffset_array():
         == ak._do.pad_none(listoffsetarray, 7, 0).form
     )
 
-    assert "option[" + str(ak.operations.type(listoffsetarray)) + "]" == str(
-        ak.operations.type(ak._do.pad_none(listoffsetarray, 7, 0))
-    )
+    assert ak.types.ArrayType(
+        ak.types.OptionType(ak.types.ListType(ak.types.NumpyType("float64"))), 7
+    ) == ak.operations.type(ak._do.pad_none(listoffsetarray, 7, 0))
 
     assert to_list(ak._do.pad_none(listoffsetarray, 5, 1)) == [
         [0.0, 1.1, 2.2, None, None],
@@ -976,9 +976,10 @@ def test_rpad_listoffset_array():
         ak._do.pad_none(listoffsetarray.to_typetracer(), 5, 1).form
         == ak._do.pad_none(listoffsetarray, 5, 1).form
     )
-    assert (
-        str(ak.operations.type(ak._do.pad_none(listoffsetarray, 5, 1)))
-        == "var * ?float64"
+    assert ak.operations.type(
+        ak._do.pad_none(listoffsetarray, 5, 1)
+    ) == ak.types.ArrayType(
+        ak.types.ListType(ak.types.OptionType(ak.types.NumpyType("float64"))), 6
     )
 
     assert to_list(ak._do.pad_none(listoffsetarray, 1, 1)) == [
@@ -1053,9 +1054,12 @@ def test_rpad_listoffset_array():
         ak._do.pad_none(listoffsetarray.to_typetracer(), 1, 0).form
         == ak._do.pad_none(listoffsetarray, 1, 0).form
     )
-    assert f"option[{str(ak.operations.type(listoffsetarray))}]" == str(
-        ak.operations.type(ak._do.pad_none(listoffsetarray, 1, 0))
-    )
+    assert ak.types.ArrayType(
+        ak.types.OptionType(
+            ak.types.ListType(ak.types.OptionType(ak.types.NumpyType("float64")))
+        ),
+        6,
+    ) == ak.operations.type(ak._do.pad_none(listoffsetarray, 1, 0))
 
     assert to_list(ak._do.pad_none(listoffsetarray, 6, 0)) == [
         [3.3],
@@ -1069,9 +1073,12 @@ def test_rpad_listoffset_array():
         ak._do.pad_none(listoffsetarray.to_typetracer(), 6, 0).form
         == ak._do.pad_none(listoffsetarray, 6, 0).form
     )
-    assert "option[" + str(ak.operations.type(listoffsetarray)) + "]" == str(
-        ak.operations.type(ak._do.pad_none(listoffsetarray, 6, 0))
-    )
+    assert ak.types.ArrayType(
+        ak.types.OptionType(
+            ak.types.ListType(ak.types.OptionType(ak.types.NumpyType("float64")))
+        ),
+        6,
+    ) == ak.operations.type(ak._do.pad_none(listoffsetarray, 6, 0))
 
     assert to_list(ak._do.pad_none(listoffsetarray, 7, 0)) == [
         [3.3],
@@ -1086,9 +1093,9 @@ def test_rpad_listoffset_array():
         ak._do.pad_none(listoffsetarray.to_typetracer(), 7, 0).form
         == ak._do.pad_none(listoffsetarray, 7, 0).form
     )
-    assert "option[" + str(ak.operations.type(listoffsetarray)) + "]" == str(
-        ak.operations.type(ak._do.pad_none(listoffsetarray, 7, 0))
-    )
+    assert ak.types.ArrayType(
+        ak.types.OptionType(ak.operations.type(listoffsetarray).content), 7
+    ) == ak.operations.type(ak._do.pad_none(listoffsetarray, 7, 0))
 
     assert to_list(ak._do.pad_none(listoffsetarray, 9, 0)) == [
         [3.3],
@@ -1105,9 +1112,9 @@ def test_rpad_listoffset_array():
         ak._do.pad_none(listoffsetarray.to_typetracer(), 9, 0).form
         == ak._do.pad_none(listoffsetarray, 9, 0).form
     )
-    assert "option[" + str(ak.operations.type(listoffsetarray)) + "]" == str(
-        ak.operations.type(ak._do.pad_none(listoffsetarray, 9, 0))
-    )
+    assert ak.types.ArrayType(
+        ak.types.OptionType(ak.operations.type(listoffsetarray).content), 9
+    ) == ak.operations.type(ak._do.pad_none(listoffsetarray, 9, 0))
 
     assert to_list(ak._do.pad_none(listoffsetarray, 1, 1)) == [
         [3.3],
@@ -1121,9 +1128,9 @@ def test_rpad_listoffset_array():
         ak._do.pad_none(listoffsetarray.to_typetracer(), 1, 1).form
         == ak._do.pad_none(listoffsetarray, 1, 1).form
     )
-    assert str(ak.operations.type(listoffsetarray)) == str(
-        ak.operations.type(ak._do.pad_none(listoffsetarray, 1, 1))
-    )
+    assert ak.types.ArrayType(
+        ak.types.ListType(ak.types.OptionType(ak.types.NumpyType("float64"))), 6
+    ) == ak.operations.type(ak._do.pad_none(listoffsetarray, 1, 1))
 
     assert to_list(ak._do.pad_none(listoffsetarray, 4, 1)) == [
         [3.3, None, None, None],
@@ -1133,8 +1140,8 @@ def test_rpad_listoffset_array():
         [None, None, None, None],
         [None, None, None, None],
     ]
-    assert str(ak.operations.type(listoffsetarray)) == str(
-        ak.operations.type(ak._do.pad_none(listoffsetarray, 4, 1))
+    assert ak.operations.type(listoffsetarray) == ak.operations.type(
+        ak._do.pad_none(listoffsetarray, 4, 1)
     )
 
 
@@ -1160,9 +1167,9 @@ def test_rpad_list_array():
         [5.5, 6.6, 7.7],
         [8.8],
     ]
-    assert f"option[{str(ak.operations.type(array))}]" == str(
-        ak.operations.type(ak._do.pad_none(array, 1, 0))
-    )
+    assert ak.types.ArrayType(
+        ak.types.OptionType(ak.types.ListType(ak.types.NumpyType("float64"))), 5
+    ) == ak.operations.type(ak._do.pad_none(array, 1, 0))
 
     assert to_list(ak._do.pad_none(array, 2, 0)) == [
         [0.0, 1.1, 2.2],
@@ -1171,9 +1178,9 @@ def test_rpad_list_array():
         [5.5, 6.6, 7.7],
         [8.8],
     ]
-    assert f"option[{str(ak.operations.type(array))}]" == str(
-        ak.operations.type(ak._do.pad_none(array, 2, 0))
-    )
+    assert ak.types.ArrayType(
+        ak.types.OptionType(ak.types.ListType(ak.types.NumpyType("float64"))), 5
+    ) == ak.operations.type(ak._do.pad_none(array, 2, 0))
 
     assert to_list(ak._do.pad_none(array, 7, 0)) == [
         [0.0, 1.1, 2.2],
@@ -1184,9 +1191,9 @@ def test_rpad_list_array():
         None,
         None,
     ]
-    assert "option[" + str(ak.operations.type(array)) + "]" == str(
-        ak.operations.type(ak._do.pad_none(array, 7, 0))
-    )
+    assert ak.types.ArrayType(
+        ak.types.OptionType(ak.types.ListType(ak.types.NumpyType("float64"))), 7
+    ) == ak.operations.type(ak._do.pad_none(array, 7, 0))
 
     assert to_list(ak._do.pad_none(array, 1, 1)) == [
         [0.0, 1.1, 2.2],
@@ -1241,18 +1248,18 @@ def test_rpad_and_clip_list_array():
         ak._do.pad_none(array.to_typetracer(), 1, 0, clip=True).form
         == ak._do.pad_none(array, 1, 0, clip=True).form
     )
-    assert "option[" + str(array.form.type) + "]" == str(
-        ak._do.pad_none(array, 1, 0, clip=True).form.type
-    )
+    assert ak.types.ArrayType(
+        ak.types.OptionType(ak.types.ListType(ak.types.NumpyType("float64"))), 1
+    ) == ak.operations.type(ak._do.pad_none(array, 1, 0, clip=True))
 
     assert to_list(ak._do.pad_none(array, 2, 0, clip=True)) == [[0.0, 1.1, 2.2], []]
     assert (
         ak._do.pad_none(array.to_typetracer(), 2, 0, clip=True).form
         == ak._do.pad_none(array, 2, 0, clip=True).form
     )
-    assert "option[" + str(array.form.type) + "]" == str(
-        ak._do.pad_none(array, 2, 0, clip=True).form.type
-    )
+    assert ak.types.ArrayType(
+        ak.types.OptionType(ak.types.ListType(ak.types.NumpyType("float64"))), 2
+    ) == ak.operations.type(ak._do.pad_none(array, 2, 0, clip=True))
 
     assert to_list(ak._do.pad_none(array, 7, 0, clip=True)) == [
         [0.0, 1.1, 2.2],
@@ -1267,9 +1274,9 @@ def test_rpad_and_clip_list_array():
         ak._do.pad_none(array.to_typetracer(), 7, 0, clip=True).form
         == ak._do.pad_none(array, 7, 0, clip=True).form
     )
-    assert "option[" + str(array.form.type) + "]" == str(
-        ak._do.pad_none(array, 7, 0, clip=True).form.type
-    )
+    assert ak.types.ArrayType(
+        ak.types.OptionType(ak.types.ListType(ak.types.NumpyType("float64"))), 7
+    ) == ak.operations.type(ak._do.pad_none(array, 7, 0, clip=True))
 
     assert to_list(ak._do.pad_none(array, 1, 1, clip=True)) == [
         [0.0],
