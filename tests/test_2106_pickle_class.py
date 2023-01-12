@@ -1,41 +1,71 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
+import contextlib
 import pickle
+import sys
+import types
+import uuid
 
 import pytest  # noqa: F401
 
 import awkward as ak
 
 
+@contextlib.contextmanager
+def temporary_module():
+    name = str(uuid.uuid1()).replace("-", "_")
+    module = types.ModuleType(name)
+    sys.modules[name] = module
+    yield module
+    del sys.modules[name]
+
+
 def impl():
-    behavior = {}
+    with temporary_module() as module:
+        exec(
+            """
+import awkward as ak
 
-    @ak.mixin_class(behavior, "my_array")
-    class MyArray:
-        @property
-        def meaning_of_life(self):
-            return 42
+behavior = {}
+@ak.mixin_class(behavior, "my_array")
+class MyArray:
+    @property
+    def meaning_of_life(self):
+        return 42
+        """,
+            module.__dict__,
+        )
 
-    array = ak.Array(
-        [None, [{"x": [None, 1, "hi"]}]], with_name="my_array", behavior=behavior
-    )
-    return pickle.dumps(array)
+        array = ak.Array(
+            [None, [{"x": [None, 1, "hi"]}]],
+            with_name="my_array",
+            behavior=module.behavior,
+        )
+        return pickle.dumps(array)
 
 
 def global_impl():
-    @ak.mixin_class(ak.behavior, "my_array")
-    class MyArray:
-        @property
-        def meaning_of_life(self):
-            return 42
+    with temporary_module() as module:
+        exec(
+            """
+import awkward as ak
 
-    array = ak.Array([None, [{"x": [None, 1, "hi"]}]], with_name="my_array")
-    return pickle.dumps(array)
+@ak.mixin_class(ak.behavior, "my_array")
+class MyArray:
+    @property
+    def meaning_of_life(self):
+        return 42
+        """,
+            module.__dict__,
+        )
+
+        array = ak.Array([None, [{"x": [None, 1, "hi"]}]], with_name="my_array")
+        return pickle.dumps(array)
 
 
 def test():
-    other = pickle.loads(impl())
-    assert other.meaning_of_life == 42
+    data = impl()
+    with pytest.raises(ModuleNotFoundError):
+        pickle.loads(data)
 
 
 def test_global(monkeypatch):
@@ -44,4 +74,5 @@ def test_global(monkeypatch):
         data = global_impl()
 
     other = pickle.loads(data)
-    assert other.meaning_of_life == 42
+    with pytest.raises(AttributeError):
+        assert other.meaning_of_life == 42
