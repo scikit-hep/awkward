@@ -15,8 +15,11 @@ def test_repr():
 
     array = ak.Array(ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout.to_typetracer())
     assert repr(array) == "<Array-typetracer [...] type='?? * var * float64'>"
-    assert str(array) == '[...]'
+    assert str(array) == "[...]"
 
     record = ak.Array(ak.Array([{"x": 1.1, "y": [1, 2, 3]}]).layout.to_typetracer())[0]
-    assert repr(record) == "<Record-typetracer {x: unknown-float64, y: [...]} type='{x: float64, y: var...'>"
+    assert (
+        repr(record)
+        == "<Record-typetracer {x: unknown-float64, y: [...]} type='{x: float64, y: var...'>"
+    )
     assert str(record) == "{x: unknown-float64, y: [...]}"
