@@ -12,6 +12,7 @@ from numba.core import cgutils
 
 from numba.extending import overload_method, overload
 from numba.cuda.cudaimpl import registry as cuda_registry
+from numba import cuda, types
 
 import awkward as ak
 
@@ -1255,6 +1256,45 @@ def lower_asarray(context, builder, sig, args):
 
 
 ########## ArrayView Arguments Handler for CUDA JIT
+
+import ctypes  # noqa: F401
+
+#from numba import cuda, types  # noqa: F401, E402
+
+class ArrayViewArgHandler:
+    def prepare_args(self, ty, val, stream, retr):
+        if isinstance(val, int):
+            result = format(val, 'x')
+        if isinstance(val, ak.Array):
+
+            if isinstance(val.layout.nplike, ak.nplikes.Cupy):
+
+                # Use uint64 for start, stop, pos, the array pointers value and the pylookup value
+                tys = types.UniTuple(types.uint64, 5)
+
+                dev = cuda.current_context().device
+                print("ArrayViewArgHandler::prepare_args line 108:", dev)
+
+                start = id(val._numbaview.start)
+                stop = id(val._numbaview.stop)
+                pos = id(val._numbaview.pos)
+                arrayptrs = val._numbaview.lookup.arrayptrs
+                pylookup = id(val._numbaview.lookup)
+
+                result_ptr = format(arrayptrs.item(), 'x')
+                print("arrayview_cuda.py line 1280: ArrayViewArgHandler::prepare_args: about to return from prepare args and arrayptrs is", result_ptr, arrayptrs.item())
+                print("arrayview_cuda.py line 1281: ArrayViewArgHandler::prepare_args:", arrayptrs.ctypes.data_as(ctypes.POINTER(ctypes.c_uint64)).contents)
+                
+                return tys, (start, stop, pos, arrayptrs.item(), pylookup)
+            else:
+                raise ak._errors.wrap_error(NotImplementedError (
+                    f"{repr(val.layout.nplike)} is not implemented for CUDA. Please transfer the array to CUDA backend to "
+                    "continue the operation."))
+            
+        else:
+            return ty, val
+
+array_view_arg_handler = ArrayViewArgHandler()
 
 ###class ArrayViewArgHandler:
 #    def prepare_args(self, ty, val, stream, retr):

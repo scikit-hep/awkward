@@ -1406,7 +1406,10 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         ak.numba.register_and_check()
 
         if self._numbaview is None:
-            self._numbaview = ak._connect.numba.arrayview.ArrayView.fromarray(self)
+            if isinstance(self.layout.nplike, ak.nplikes.Cupy):
+                self._numbaview = ak._connect.numba.arrayview_cuda.ArrayView.fromarray(self)
+            else:
+                self._numbaview = ak._connect.numba.arrayview.ArrayView.fromarray(self)
         import numba
 
         return numba.typeof(self._numbaview)
