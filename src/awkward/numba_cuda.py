@@ -11,6 +11,7 @@ def register_and_check():
 
     try:
         import numba
+        import numba.cuda as nb_cuda
     except ImportError as err:
         raise ImportError(
             """install the 'numba' package with:
@@ -40,14 +41,14 @@ def _register():
     import numba
 
     import awkward._connect.numba.arrayview_cuda
-    import awkward._connect.numba.builder
+    import awkward._connect.numba.builder_cuda
     import awkward._connect.numba.layout
 
     n = ak.numba
-    n.ArrayViewType = awkward._connect.numba.arrayview.ArrayViewType
-    n.ArrayViewModel = awkward._connect.numba.arrayview.ArrayViewModel
-    n.RecordViewType = awkward._connect.numba.arrayview.RecordViewType
-    n.RecordViewModel = awkward._connect.numba.arrayview.RecordViewModel
+    n.ArrayViewType = awkward._connect.numba.arrayview_cuda.ArrayViewType
+    n.ArrayViewModel = awkward._connect.numba.arrayview_cuda.ArrayViewModel
+    n.RecordViewType = awkward._connect.numba.arrayview_cuda.RecordViewType
+    n.RecordViewModel = awkward._connect.numba.arrayview_cuda.RecordViewModel
     n.ContentType = awkward._connect.numba.layout.ContentType
     n.NumpyArrayType = awkward._connect.numba.layout.NumpyArrayType
     n.RegularArrayType = awkward._connect.numba.layout.RegularArrayType
@@ -59,8 +60,8 @@ def _register():
     n.UnmaskedArrayType = awkward._connect.numba.layout.UnmaskedArrayType
     n.RecordArrayType = awkward._connect.numba.layout.RecordArrayType
     n.UnionArrayType = awkward._connect.numba.layout.UnionArrayType
-    n.ArrayBuilderType = awkward._connect.numba.builder.ArrayBuilderType
-    n.ArrayBuilderModel = awkward._connect.numba.builder.ArrayBuilderModel
+    n.ArrayBuilderType = awkward._connect.numba.builder_cuda.ArrayBuilderType
+    n.ArrayBuilderModel = awkward._connect.numba.builder_cuda.ArrayBuilderModel
 
     @numba.extending.typeof_impl.register(ak.highlevel.Array)
     def typeof_Array(obj, c):

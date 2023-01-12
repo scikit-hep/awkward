@@ -161,7 +161,7 @@ def numba_cuda_DeviceNDArray_as_cupy_ndarray(nb_arr):
     import cupy
     return cupy.ndarray(nb_arr.shape, dtype=cupy.uint8,
                         strides=nb_arr.strides,
-                        memptr=cupy_cuda_MemoryPointer(nb_arr))
+                        memptr=numba_cuda_DeviceNDArray_as_cupy_cuda_MemoryPointer(nb_arr))
 
 
 def numba_cuda_DeviceNDArray_as_xnd_xnd_cuda(nb_arr):
