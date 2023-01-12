@@ -35,8 +35,6 @@ def parse_version(version):
 
 
 def numpy_at_least(version):
-    import numpy
-
     return parse_version(numpy.__version__) >= parse_version(version)
 
 
@@ -207,8 +205,6 @@ def custom_broadcast(layout, behavior):
 
 
 def custom_ufunc(ufunc, layout, behavior):
-    import numpy
-
     behavior = overlay_behavior(behavior)
     custom = layout.parameter("__array__")
     if not isinstance(custom, str):
@@ -631,6 +627,8 @@ expand_braces.regex = re.compile(r"\{[^\{\}]*\}")
 
 def from_arraylib(array, regulararray, recordarray, highlevel, behavior):
     np = ak._nplikes.NumpyMetadata.instance()
+
+    # overshadows global NumPy import for nplike-safety
     numpy = ak._nplikes.Numpy.instance()
 
     def recurse(array, mask=None):
@@ -879,8 +877,6 @@ def arrays_approx_equal(
     check_parameters=True,
 ) -> bool:
     # TODO: this should not be needed after refactoring nplike mechanism
-    import numpy
-
     import awkward.forms.form
 
     left_behavior = ak._util.behavior_of(left)
