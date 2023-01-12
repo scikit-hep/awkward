@@ -21,6 +21,17 @@ def test():
     ]
 
 
+def test_all_same():
+    array = ak.Array([[3, 3, 3, 3], [3], [], [3, 3, 3], [3]])
+    assert ak.operations.run_lengths(array).to_list() == [
+        [4],
+        [1],
+        [],
+        [3],
+        [1],
+    ]
+
+
 def test_groupby():
     array = ak.Array(
         [

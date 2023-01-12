@@ -10,7 +10,7 @@ from awkward._backends import Backend
 from awkward.contents.content import ActionType, Content
 from awkward.forms import form
 from awkward.record import Record
-from awkward.typing import Any, AxisMaybeNone
+from awkward.typing import Any, AxisMaybeNone, Literal
 
 np = ak._nplikes.NumpyMetadata.instance()
 
@@ -76,6 +76,7 @@ def to_buffers(
     form_key: str | None = "node{id}",
     id_start: Integral = 0,
     backend: Backend = None,
+    byteorder: Literal["<", ">"] = "<",
 ) -> tuple[form.Form, int, Mapping[str, Any]]:
     if container is None:
         container = {}
@@ -119,7 +120,7 @@ def to_buffers(
 
     form = content.form_with_key(form_key=form_key, id_start=id_start)
 
-    content._to_buffers(form, getkey, container, backend)
+    content._to_buffers(form, getkey, container, backend, byteorder)
 
     return form, len(content), container
 

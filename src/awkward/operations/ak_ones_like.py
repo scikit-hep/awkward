@@ -1,11 +1,11 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._connect.numpy import unsupported
 
 np = ak._nplikes.NumpyMetadata.instance()
 
 
-@ak._connect.numpy.implements("ones_like")
 def ones_like(array, *, dtype=None, highlevel=True, behavior=None):
     """
     Args:
@@ -32,3 +32,10 @@ def ones_like(array, *, dtype=None, highlevel=True, behavior=None):
 
 def _impl(array, highlevel, behavior, dtype):
     return ak.operations.ak_full_like._impl(array, 1, highlevel, behavior, dtype)
+
+
+@ak._connect.numpy.implements("ones_like")
+def _nep_18_impl(
+    a, dtype=None, order=unsupported, subok=unsupported, shape=unsupported
+):
+    return ones_like(a, dtype=dtype)

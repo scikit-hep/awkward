@@ -49,7 +49,7 @@ class EmptyArray(Content):
     def _form_with_key(self, getkey):
         return self.form_cls(parameters=self._parameters, form_key=getkey(self))
 
-    def _to_buffers(self, form, getkey, container, backend):
+    def _to_buffers(self, form, getkey, container, backend, byteorder):
         assert isinstance(form, self.form_cls)
 
     def _to_typetracer(self, forget_length: bool) -> Self:

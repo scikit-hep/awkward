@@ -6,7 +6,8 @@ import itertools
 import numbers
 import os
 import re
-from collections.abc import Iterable, Mapping, Sized
+import sys
+from collections.abc import Iterable, Mapping, Sequence, Sized
 
 import packaging.version
 from awkward_cpp.lib import _ext
@@ -58,8 +59,12 @@ def is_integer(x) -> bool:
     return isinstance(x, numbers.Integral) and not isinstance(x, bool)
 
 
-def is_non_string_iterable(obj) -> bool:
-    return not isinstance(obj, str) and isinstance(obj, Iterable)
+def is_non_string_like_iterable(obj) -> bool:
+    return not isinstance(obj, (str, bytes)) and isinstance(obj, Iterable)
+
+
+def is_non_string_like_sequence(obj) -> bool:
+    return not isinstance(obj, (str, bytes)) and isinstance(obj, Sequence)
 
 
 def tobytes(array):
@@ -69,8 +74,24 @@ def tobytes(array):
         return array.tostring()
 
 
-def little_endian(array):
-    return array.astype(array.dtype.newbyteorder("<"), copy=False)
+native_byteorder = "<" if sys.byteorder == "little" else ">"
+
+
+def native_to_byteorder(array, byteorder: str):
+    """
+    Args:
+        array: nplike array
+        byteorder (`"<"` or `">"`): desired byteorder
+
+    Return a copy of array. Swap the byteorder if `byteorder` does not match
+    `ak._util.native_byteorder`. This function is _not_ idempotent; no metadata
+    from `array` exists to determine its current byteorder.
+    """
+    assert byteorder in "<>"
+    if byteorder != native_byteorder:
+        return array.byteswap(inplace=False)
+    else:
+        return array
 
 
 def identifier_hash(str):
@@ -900,8 +921,10 @@ def arrays_approx_equal(
             return False
 
         if left.is_list:
-            return numpy.array_equal(left.offsets, right.offsets) and visitor(
-                left.content, right.content
+            return (
+                numpy.array_equal(left.starts, right.starts)
+                and numpy.array_equal(left.stops, right.stops)
+                and visitor(left.content, right.content)
             )
         elif left.is_regular:
             return (left.size == right.size) and visitor(left.content, right.content)
