@@ -64,6 +64,9 @@ class MyArray:
 
 def test():
     data = impl()
+
+    # Using a custom behavior dictionary will always break unpickling if
+    # the objects in the dictionary can't be resolved
     with pytest.raises(ModuleNotFoundError):
         pickle.loads(data)
 
@@ -73,6 +76,9 @@ def test_global(monkeypatch):
         m.setattr(ak, "behavior", {})
         data = global_impl()
 
+    # The global ak.behavior is not written to the pickle
+    # Awkward can create arrays with missing behavior classes
     other = pickle.loads(data)
+    # But it won't have their methods / properties when asked for
     with pytest.raises(AttributeError):
         assert other.meaning_of_life == 42
