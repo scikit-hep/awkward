@@ -1707,7 +1707,9 @@ class Record(NDArrayOperatorsMixin):
         Note that the outermost element of a Record's type is always a
         #ak.types.RecordType.
         """
-        return self._layout.array.form.type_from_behavior(self._behavior)
+        return ak.types.ScalarType(
+            self._layout.array.form.type_from_behavior(self._behavior)
+        )
 
     @property
     def typestr(self):
