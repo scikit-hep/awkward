@@ -19,123 +19,101 @@ namespace awkward {
   template <typename T>
   const std::string
   type_to_name() {
-    if(std::is_same_v<T, long long>) {
-    	return "int64";
+    if(std::is_same_v<T, bool>) {
+      /// @brief Returns `bool` string when the primitive type
+      /// is boolean.
+      return "bool";
+    } else if(std::is_same_v<T, char>) {
+      /// @brief Returns `char` string when the primitive type
+      /// is a character.
+      return "char";
+    } else if(std::is_same_v<T, int8_t> ||
+              std::is_same_v<T, signed char>) { // at least 8
+      /// @brief Returns `int8` string when the primitive type
+      /// is an 8-bit signed integer.
+      return "int8";
+    } else if(std::is_same_v<T, uint8_t> ||
+              std::is_same_v<T, unsigned char>) { // at least 8
+    /// @brief Returns `uint8` string when the primitive type
+    /// is an 8-bit unsigned integer.
+      return "uint8";
+    } else if(std::is_same_v<T, int16_t>) {
+      /// @brief Returns `int16` string when the primitive type
+      /// is a 16-bit signed integer.
+      return "int16";
+    } else if(std::is_same_v<T, uint16_t>) {
+      /// @brief Returns `uint16` string when the primitive type
+      /// is a 16-bit unsigned integer.
+      return "uint16";
+    } else if(std::is_same_v<T, int32_t>) {
+      /// @brief Returns `int32` string when the primitive type
+      /// is a 32-bit signed integer.
+      return "int32";
+    } else if(std::is_same_v<T, uint32_t>) {
+      /// @brief Returns `uint32` string when the primitive type
+      /// is a 32-bit unsigned integer.
+      return "uint32";
+    } else if(std::is_same_v<T, int64_t>) {
+      /// @brief Returns `int64` string when the primitive type
+      /// is a 64-bit signed integer.
+      return "int64";
+    } else if(std::is_same_v<T, uint64_t>) {
+      /// @brief Returns `uint64` string when the primitive type
+      /// is a 64-bit unsigned integer.
+      return "uint64";
+    } else if(std::is_same_v<T, float>) {
+      /// @brief Returns `float32` string when the primitive type
+      /// is a floating point.
+      return "float32";
+    } else if(std::is_same_v<T, double>) {
+      /// @brief Returns `float32` string when the primitive type
+      /// is a double floating point.
+      return "float64";
+    } else if (std::is_same_v<T, std::complex<float>>) {
+      /// @brief Returns `complex64` string when the primitive type is a
+      /// complex number with float32 real and float32 imaginary parts.
+      return "complex64";
+    } else if (std::is_same_v<T, std::complex<double>>) {
+      /// @brief Returns `complex128` string when the primitive type is a
+      /// complex number with float64 real and float64 imaginary parts.
+      return "complex128";
+    } else if(std::is_same_v<T, short int>) { // at least 16
+      /// @brief Returns `int16` string when the primitive type
+      /// is a 16-bit signed integer.
+      return "int16";
+    } else if(std::is_same_v<T, unsigned short int>) { // at least 16
+      /// @brief Returns `uint16` string when the primitive type
+      /// is a 16-bit unsigned integer.
+      return "uint16";
+    } else if(std::is_same_v<T, int>) { // at least 16
+      /// @brief Returns `int32` string when the primitive type
+      /// is a 32-bit signed integer.
+      return "int32";
+    } else if(std::is_same_v<T, unsigned int>) { // at least 16
+      /// @brief Returns `uint32` string when the primitive type
+      /// is a 32-bit unsigned integer.
+      return "uint32";
+    } else if(std::is_same_v<T, long int>) { // at least 32
+      /// @brief Returns `int64` string when the primitive type
+      /// is a 64-bit signed integer.
+      return "int64";
+    } else if(std::is_same_v<T, unsigned long int>) {
+      /// @brief Returns `uint64` string when the primitive type
+      /// is a 64-bit unsigned integer.
+      return "uint64";
+    } else if(std::is_same_v<T, long long int>) { // at least 64
+      /// @brief Returns `int64` string when the primitive type
+      /// is a 64-bit signed integer.
+      return "int64";
+    } else if(std::is_same_v<T, unsigned long long int>) {
+      /// @brief Returns `uint64` string when the primitive type
+      /// is a 64-bit unsigned integer.
+      return "uint64";
+    } else {
+      return "unsupported_primitive_type";
     }
-    return "unsupported_primitive_type";
   }
 
-  /// @brief Returns `bool` string when the primitive type
-  /// is boolean.
-  template <>
-  const std::string
-  type_to_name<bool>() {
-    return "bool";
-  }
-
-  /// @brief Returns `int8` string when the primitive type
-  /// is an 8-bit signed integer.
-  template <>
-  const std::string
-  type_to_name<int8_t>() {
-    return "int8";
-  }
-
-  /// @brief Returns `int16` string when the primitive type
-  /// is a 16-bit signed integer.
-  template <>
-  const std::string
-  type_to_name<int16_t>() {
-    return "int16";
-  }
-
-  /// @brief Returns `int32` string when the primitive type
-  /// is a 32-bit signed integer.
-  template <>
-  const std::string
-  type_to_name<int32_t>() {
-    return "int32";
-  }
-
-  /// @brief Returns `int64` string when the primitive type
-  /// is a 64-bit signed integer.
-  template <>
-  const std::string
-  type_to_name<int64_t>() {
-    return "int64";
-  }
-
-  /// @brief Returns `uint8` string when the primitive type
-  /// is an 8-bit unsigned integer.
-  template <>
-  const std::string
-  type_to_name<uint8_t>() {
-    return "uint8";
-  }
-
-  /// @brief Returns `uint16` string when the primitive type
-  /// is a 16-bit unsigned integer.
-  template <>
-  const std::string
-  type_to_name<uint16_t>() {
-    return "uint16";
-  }
-
-  /// @brief Returns `uint32` string when the primitive type
-  /// is a 32-bit unsigned integer.
-  template <>
-  const std::string
-  type_to_name<uint32_t>() {
-    return "uint32";
-  }
-
-  /// @brief Returns `uint64` string when the primitive type
-  /// is a 64-bit unsigned integer.
-  template <>
-  const std::string
-  type_to_name<uint64_t>() {
-    return "uint64";
-  }
-
-  /// @brief Returns `float32` string when the primitive type
-  /// is a floating point.
-  template <>
-  const std::string
-  type_to_name<float>() {
-    return "float32";
-  }
-
-  /// @brief Returns `float32` string when the primitive type
-  /// is a double floating point.
-  template <>
-  const std::string
-  type_to_name<double>() {
-    return "float64";
-  }
-
-  /// @brief Returns `char` string when the primitive type
-  /// is a character.
-  template <>
-  const std::string
-  type_to_name<char>() {
-    return "char";
-  }
-
-  /// @brief Returns `complex64` string when the primitive type is a
-  /// complex number with float32 real and float32 imaginary parts.
-  template <>
-  const std::string
-  type_to_name<std::complex<float>>() {
-    return "complex64";
-  }
-
-  /// @brief Returns `complex128` string when the primitive type is a
-  /// complex number with float64 real and float64 imaginary parts.
-  template <>
-  const std::string
-  type_to_name<std::complex<double>>() {
-    return "complex128";
-  }
 
   /// @brief Returns `char` string when the primitive type
   /// is a character.
