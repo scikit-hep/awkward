@@ -117,10 +117,10 @@ def _impl(array, value, axis, highlevel, behavior):
         def action(layout, depth, **kwargs):
             posaxis = ak._util.maybe_posaxis(layout, axis, depth)
             if posaxis is not None and posaxis + 1 == depth:
-                if layout.is_union or layout.is_record:
-                    return None
-                elif layout.is_option:
+                if layout.is_option:
                     return ak._do.fill_none(layout, valuelayout)
+                elif layout.is_union or layout.is_record or layout.is_indexed:
+                    return None
                 else:
                     return layout
 
