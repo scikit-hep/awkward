@@ -1,5 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+from collections.abc import Iterable
+
 from awkward_cpp.lib import _ext
 
 import awkward as ak
@@ -67,27 +69,15 @@ def _impl(array, allow_record, allow_other):
         return array.snapshot()
 
     elif numpy.is_own_array(array):
-        return _impl(
-            ak.operations.from_numpy(
-                array, regulararray=True, recordarray=True, highlevel=False
-            ),
-            allow_record,
-            allow_other,
+        return ak.operations.from_numpy(
+            array, regulararray=True, recordarray=True, highlevel=False
         )
 
     elif ak._nplikes.Cupy.is_own_array(array):
-        return _impl(
-            ak.operations.from_cupy(array, regulararray=True, highlevel=False),
-            allow_record,
-            allow_other,
-        )
+        return ak.operations.from_cupy(array, regulararray=True, highlevel=False)
 
     elif ak._nplikes.Jax.is_own_array(array):
-        return _impl(
-            ak.operations.from_jax(array, regulararray=True, highlevel=False),
-            allow_record,
-            allow_other,
-        )
+        return ak.operations.from_jax(array, regulararray=True, highlevel=False)
 
     elif ak._typetracer.TypeTracer.is_own_array(array):
         backend = ak._backends.TypeTracerBackend.instance()
@@ -104,7 +94,10 @@ def _impl(array, allow_record, allow_other):
 
         return ak.contents.NumpyArray(array, parameters=None, backend=backend)
 
-    elif ak._util.is_non_string_like_iterable(array):
+    elif isinstance(array, (str, bytes)):
+        return ak.operations.from_iter([array], highlevel=False)[0]
+
+    elif isinstance(array, Iterable):
         return _impl(
             ak.operations.from_iter(array, highlevel=False),
             allow_record,
