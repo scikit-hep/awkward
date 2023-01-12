@@ -1,8 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import numpy as np
-import pytest
-
 import awkward as ak
 
 
@@ -23,3 +20,10 @@ def test_repr():
         == "<Record-typetracer {x: unknown-float64, y: [...]} type='{x: float64, y: var...'>"
     )
     assert str(record) == "{x: unknown-float64, y: [...]}"
+
+
+def test_issue_1864():
+    a = ak.from_iter([[None, 1], None, [1, 2]])
+    tt = ak.Array(a.layout.to_typetracer())
+    assert str(ak.is_none(tt, axis=0).layout.form.type) == "bool"
+    assert str(ak.is_none(tt, axis=1).layout.form.type) == "option[var * bool]"
