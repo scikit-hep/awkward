@@ -342,9 +342,20 @@ class NumpyArray(Content):
             )
 
     def _mergeable_next(self, other, mergebool):
-
         if len(self.shape) > 1:
             return self._to_regular_primitive()._mergeable(other, mergebool)
+
+        if isinstance(
+            other,
+            (
+                ak.contents.IndexedArray,
+                ak.contents.IndexedOptionArray,
+                ak.contents.ByteMaskedArray,
+                ak.contents.BitMaskedArray,
+                ak.contents.UnmaskedArray,
+            ),
+        ):
+            return self._mergeable(other._content, mergebool)
 
         elif isinstance(other, ak.contents.NumpyArray):
             if self._data.ndim != other._data.ndim:
