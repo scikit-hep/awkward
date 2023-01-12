@@ -11,6 +11,7 @@
 #include <utility>
 #include <stdexcept>
 #include <stdint.h>
+#include <typeinfo>
 
 
 namespace awkward {
@@ -19,29 +20,35 @@ namespace awkward {
   template <typename T>
   const std::string
   type_to_name() {
-    if (std::is_same_v<T, int8_t>) {
-      return "int8";
-    }
-    else if (std::is_same_v<T, uint8_t>) {
-      return "uint8";
-    }
-    else if (std::is_same_v<T, int16_t>) {
-      return "int16";
-    }
-    else if (std::is_same_v<T, uint16_t>) {
-      return "uint16";
-    }
-    else if (std::is_same_v<T, int32_t>) {
-      return "int32";
-    }
-    else if (std::is_same_v<T, uint32_t>) {
-      return "uint32";
-    }
-    else if (std::is_same_v<T, int64_t>) {
-      return "int64";
-    }
-    else if (std::is_same_v<T, uint64_t>) {
-      return "uint64";
+    if (std::is_integral_v<T>) {
+      if (std::is_signed_v<T>) {
+        if (sizeof(T) == 1) {
+          return "int8";
+        }
+        else if (sizeof(T) == 2) {
+          return "int16";
+        }
+        else if (sizeof(T) == 4) {
+          return "int32";
+        }
+        else if (sizeof(T) == 8) {
+          return "int64";
+        }
+      }
+      else {
+        if (sizeof(T) == 1) {
+          return "uint8";
+        }
+        else if (sizeof(T) == 2) {
+          return "uint16";
+        }
+        else if (sizeof(T) == 4) {
+          return "uint32";
+        }
+        else if (sizeof(T) == 8) {
+          return "uint64";
+        }
+      }
     }
     else if (std::is_same_v<T, float>) {
       return "float32";
@@ -55,9 +62,10 @@ namespace awkward {
     else if (std::is_same_v<T, std::complex<double>>) {
       return "complex128";
     }
-    else {
-      return "unsupported_primitive_type";
-    }
+
+    // std::is_integral_v<T> and sizeof(T) not in (1, 2, 4, 8) can get here.
+    // Don't connect this line with the above as an 'else' clause.
+    return std::string("unsupported primitive type: ") + typeid(T).name();
   }
 
   template <>
