@@ -342,9 +342,20 @@ class NumpyArray(Content):
             )
 
     def _mergeable_next(self, other, mergebool):
-
         if len(self.shape) > 1:
             return self._to_regular_primitive()._mergeable(other, mergebool)
+
+        if isinstance(
+            other,
+            (
+                ak.contents.IndexedArray,
+                ak.contents.IndexedOptionArray,
+                ak.contents.ByteMaskedArray,
+                ak.contents.BitMaskedArray,
+                ak.contents.UnmaskedArray,
+            ),
+        ):
+            return self._mergeable(other._content, mergebool)
 
         elif isinstance(other, ak.contents.NumpyArray):
             if self._data.ndim != other._data.ndim:
@@ -799,16 +810,7 @@ class NumpyArray(Content):
             )
 
     def _argsort_next(
-        self,
-        negaxis,
-        starts,
-        shifts,
-        parents,
-        outlength,
-        ascending,
-        stable,
-        kind,
-        order,
+        self, negaxis, starts, shifts, parents, outlength, ascending, stable
     ):
         if len(self.shape) == 0:
             raise ak._errors.wrap_error(
@@ -817,15 +819,7 @@ class NumpyArray(Content):
         elif len(self.shape) != 1 or not self.is_contiguous:
             contiguous_self = self.to_contiguous()
             return contiguous_self.to_RegularArray()._argsort_next(
-                negaxis,
-                starts,
-                shifts,
-                parents,
-                outlength,
-                ascending,
-                stable,
-                kind,
-                order,
+                negaxis, starts, shifts, parents, outlength, ascending, stable
             )
 
         else:
@@ -926,9 +920,7 @@ class NumpyArray(Content):
             out = NumpyArray(nextcarry, parameters=None, backend=self._backend)
             return out
 
-    def _sort_next(
-        self, negaxis, starts, parents, outlength, ascending, stable, kind, order
-    ):
+    def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
         if len(self.shape) == 0:
             raise ak._errors.wrap_error(
                 TypeError(f"{type(self).__name__} attempting to sort a scalar ")
@@ -937,14 +929,7 @@ class NumpyArray(Content):
         elif len(self.shape) != 1 or not self.is_contiguous:
             contiguous_self = self.to_contiguous()
             return contiguous_self.to_RegularArray()._sort_next(
-                negaxis,
-                starts,
-                parents,
-                outlength,
-                ascending,
-                stable,
-                kind,
-                order,
+                negaxis, starts, parents, outlength, ascending, stable
             )
 
         else:
