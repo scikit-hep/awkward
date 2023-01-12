@@ -27,3 +27,8 @@ def test_issue_1864():
     tt = ak.Array(a.layout.to_typetracer())
     assert str(ak.is_none(tt, axis=0).layout.form.type) == "bool"
     assert str(ak.is_none(tt, axis=1).layout.form.type) == "option[var * bool]"
+
+
+def test_numpy_touch_data():
+    array = ak.Array(ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout.to_typetracer())
+    assert str((array - [100, 200, 300]).layout.form.type) == "var * float64"

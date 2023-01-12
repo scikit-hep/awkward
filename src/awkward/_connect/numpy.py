@@ -224,7 +224,10 @@ def array_ufunc(ufunc, method, inputs, kwargs):
                 args = []
                 for x in inputs:
                     if isinstance(x, NumpyArray):
-                        x.data.touch_data()
+                        # some ufuncs have multiple array arguments, and they might
+                        # not all be typetracers
+                        if isinstance(x.data, ak._typetracer.TypeTracerArray):
+                            x.data.touch_data()
                         shape = x.shape
                         args.append(numpy.empty((0,) + x.shape[1:], x.dtype))
                     else:
