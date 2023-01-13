@@ -109,6 +109,12 @@ class Record:
         branch, depth = self._array.branch_depth
         return branch, depth - 1
 
+    def _touch_data(self, recursive):
+        self._array._touch_data(recursive)
+
+    def _touch_shape(self, recursive):
+        self._array._touch_shape(recursive)
+
     def __getitem__(self, where):
         with ak._errors.SlicingErrorContext(self, where):
             return self._getitem(where)

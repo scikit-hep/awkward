@@ -6,6 +6,7 @@ import numpy
 
 import awkward as ak
 from awkward import _nplikes, index
+from awkward._util import NDArrayOperatorsMixin
 from awkward.typing import TypeVar
 
 np = _nplikes.NumpyMetadata.instance()
@@ -317,7 +318,7 @@ def _length_after_slice(slice, original_length):
 TTypeTracerArray = TypeVar("TTypeTracerArray", bound="TypeTracerArray")
 
 
-class TypeTracerArray:
+class TypeTracerArray(NDArrayOperatorsMixin):
     @classmethod
     def from_array(cls: TTypeTracerArray, array, dtype=None) -> TTypeTracerArray:
         """

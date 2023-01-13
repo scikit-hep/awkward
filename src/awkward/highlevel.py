@@ -12,7 +12,7 @@ from collections.abc import Iterable, Mapping, Sized
 from awkward_cpp.lib import _ext
 
 import awkward as ak
-from awkward._connect.numpy import NDArrayOperatorsMixin
+from awkward._util import NDArrayOperatorsMixin
 
 np = ak._nplikes.NumpyMetadata.instance()
 numpy = ak._nplikes.Numpy.instance()
@@ -1207,26 +1207,26 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             and self._layout.backend.nplike.known_data
         ):
             typestr = repr(str(self.type))[1:-1]
-            if len(typestr) + len(pytype) + len(" type=''") + 3 < limit_cols // 2:
-                strwidth = limit_cols - (
-                    len(typestr) + len(pytype) + len(" type=''") + 3
-                )
-            else:
-                strwidth = max(
-                    0,
-                    min(
-                        limit_cols // 2,
-                        limit_cols - len(pytype) - len(" type='...'") - 3,
-                    ),
-                )
-            valuestr = " " + awkward._prettyprint.valuestr(self, 1, strwidth)
+            valuestr = ""
 
         else:
-            self._layout._touch_data(recursive=True)
+            # awkward._prettyprint.valuestr touches the data
             typestr = repr(
                 "?? * " + str(self._layout.form.type_from_behavior(self._behavior))
             )[1:-1]
             valuestr = "-typetracer"
+
+        if len(typestr) + len(pytype) + len(" type=''") + 3 < limit_cols // 2:
+            strwidth = limit_cols - (len(typestr) + len(pytype) + len(" type=''") + 3)
+        else:
+            strwidth = max(
+                0,
+                min(
+                    limit_cols // 2,
+                    limit_cols - len(pytype) - len(" type='...'") - 3,
+                ),
+            )
+        valuestr = valuestr + " " + awkward._prettyprint.valuestr(self, 1, strwidth)
 
         length = max(3, limit_cols - len(pytype) - len("type='...'") - len(valuestr))
         if len(typestr) > length:
@@ -1949,26 +1949,26 @@ class Record(NDArrayOperatorsMixin):
             and self._layout.array.backend.nplike.known_data
         ):
             typestr = repr(str(self.type))[1:-1]
-            if len(typestr) + len(pytype) + len(" type=''") + 3 < limit_cols // 2:
-                strwidth = limit_cols - (
-                    len(typestr) + len(pytype) + len(" type=''") + 3
-                )
-            else:
-                strwidth = max(
-                    0,
-                    min(
-                        limit_cols // 2,
-                        limit_cols - len(pytype) - len(" type='...'") - 3,
-                    ),
-                )
-            valuestr = " " + awkward._prettyprint.valuestr(self, 1, strwidth)
+            valuestr = ""
 
         else:
-            self._layout._touch_data(recursive=True)
-            typestr = repr(str(self._layout.form.type_from_behavior(self._behavior)))[
-                1:-1
-            ]
+            # awkward._prettyprint.valuestr touches the data
+            typestr = repr(
+                str(self._layout._array.form.type_from_behavior(self._behavior))
+            )[1:-1]
             valuestr = "-typetracer"
+
+        if len(typestr) + len(pytype) + len(" type=''") + 3 < limit_cols // 2:
+            strwidth = limit_cols - (len(typestr) + len(pytype) + len(" type=''") + 3)
+        else:
+            strwidth = max(
+                0,
+                min(
+                    limit_cols // 2,
+                    limit_cols - len(pytype) - len(" type='...'") - 3,
+                ),
+            )
+        valuestr = valuestr + " " + awkward._prettyprint.valuestr(self, 1, strwidth)
 
         length = max(3, limit_cols - len(pytype) - len("type='...'") - len(valuestr))
         if len(typestr) > length:
