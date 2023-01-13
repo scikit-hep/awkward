@@ -6,8 +6,10 @@ from awkward.types.listtype import ListType
 from awkward.types.regulartype import RegularType
 from awkward.types.type import Type
 from awkward.types.uniontype import UnionType
+from awkward.typing import final
 
 
+@final
 class OptionType(Type):
     def __init__(self, content, *, parameters=None, typestr=None):
         if not isinstance(content, Type):

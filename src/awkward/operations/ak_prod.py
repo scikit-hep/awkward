@@ -1,12 +1,12 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._connect.numpy import unsupported
 from awkward._util import unset
 
 np = ak._nplikes.NumpyMetadata.instance()
 
 
-@ak._connect.numpy.implements("prod")
 def prod(
     array,
     axis=None,
@@ -73,7 +73,6 @@ def prod(
         return _impl(array, axis, keepdims, mask_identity, highlevel, behavior)
 
 
-@ak._connect.numpy.implements("nanprod")
 def nanprod(
     array,
     axis=None,
@@ -153,3 +152,29 @@ def _impl(array, axis, keepdims, mask_identity, highlevel, behavior):
         return ak._util.wrap(out, behavior, highlevel)
     else:
         return out
+
+
+@ak._connect.numpy.implements("prod")
+def _nep_18_impl_prod(
+    a,
+    axis=None,
+    dtype=unsupported,
+    out=unsupported,
+    keepdims=False,
+    initial=unsupported,
+    where=unsupported,
+):
+    return prod(a, axis=axis, keepdims=keepdims)
+
+
+@ak._connect.numpy.implements("nanprod")
+def _nep_18_impl_nanprod(
+    a,
+    axis=None,
+    dtype=unsupported,
+    out=unsupported,
+    keepdims=False,
+    initial=unsupported,
+    where=unsupported,
+):
+    return nanprod(a, axis=axis, keepdims=keepdims)

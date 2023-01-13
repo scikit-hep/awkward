@@ -1,4 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+import functools
+import inspect
 
 import numpy
 
@@ -13,6 +15,15 @@ if not numpy_at_least("1.13.1"):
     raise ImportError("NumPy 1.13.1 or later required")
 
 
+# FIXME: introduce sentinel type for this
+class _Unsupported:
+    def __repr__(self):
+        return f"{__name__}.unsupported"
+
+
+unsupported = _Unsupported()
+
+
 def convert_to_array(layout, args, kwargs):
     out = ak.operations.to_numpy(layout, allow_missing=False)
     if args == () and kwargs == {}:
@@ -25,34 +36,64 @@ implemented = {}
 
 
 def _to_rectilinear(arg):
-    if isinstance(arg, tuple):
-        nplike = ak._nplikes.nplike_of(*arg)
-        return tuple(nplike.to_rectilinear(x) for x in arg)
+    backend = ak._backends.backend_of(arg, default=None)
+    # We have some array-like object that our backend mechanism understands
+    if backend is not None:
+        return backend.nplike.to_rectilinear(arg)
+    elif isinstance(arg, tuple):
+        return tuple(_to_rectilinear(x) for x in arg)
+    elif isinstance(arg, list):
+        return [_to_rectilinear(x) for x in arg]
+    elif ak._util.is_non_string_like_iterable(arg):
+        raise ak._errors.wrap_error(
+            TypeError(
+                f"encountered an unsupported iterable value {arg!r} whilst converting arguments to NumPy-friendly "
+                f"types. If this argument should be supported, please file a bug report."
+            )
+        )
     else:
-        nplike = ak._nplikes.nplike_of(arg)
-        return nplike.to_rectilinear(arg)
+        return arg
+
+
+def _array_function_no_impl(func, types, args, kwargs, behavior):
+    rectilinear_args = tuple(_to_rectilinear(x) for x in args)
+    rectilinear_kwargs = {k: _to_rectilinear(v) for k, v in kwargs.items()}
+    result = func(*rectilinear_args, **rectilinear_kwargs)
+    # We want the result to be a layout (this will fail for functions returning non-array convertibles)
+    out = ak.operations.ak_to_layout._impl(result, allow_record=True, allow_other=True)
+    return ak._util.wrap(out, behavior=behavior, allow_other=True)
 
 
 def array_function(func, types, args, kwargs, behavior):
     function = implemented.get(func)
+    # Use NumPy's implementation
     if function is None:
-        rectilinear_args = tuple(_to_rectilinear(x) for x in args)
-        rectilinear_kwargs = {k: _to_rectilinear(v) for k, v in kwargs.items()}
-        result = func(*rectilinear_args, **rectilinear_kwargs)
+        return _array_function_no_impl(func, types, args, kwargs, behavior)
     else:
-        result = function(*args, **kwargs)
-
-    # We want the result to be a layout
-    out = ak.operations.ak_to_layout._impl(result, allow_record=True, allow_other=True)
-    if isinstance(out, (ak.contents.Content, ak.record.Record)):
-        return ak._util.wrap(out, behavior=behavior)
-    else:
-        return out
+        return function(*args, **kwargs)
 
 
 def implements(numpy_function):
     def decorator(function):
-        implemented[getattr(numpy, numpy_function)] = function
+        signature = inspect.signature(function)
+        unsupported_names = {
+            p.name for p in signature.parameters.values() if p.default is unsupported
+        }
+
+        @functools.wraps(function)
+        def ensure_valid_args(*args, **kwargs):
+            parameters = signature.bind(*args, **kwargs)
+            provided_invalid_names = parameters.arguments.keys() & unsupported_names
+            if provided_invalid_names:
+                names = ", ".join(provided_invalid_names)
+                raise ak._errors.wrap_error(
+                    TypeError(
+                        f"Awkward NEP-18 overload was provided with unsupported argument(s): {names}"
+                    )
+                )
+            return function(*args, **kwargs)
+
+        implemented[getattr(numpy, numpy_function)] = ensure_valid_args
         return function
 
     return decorator
@@ -183,7 +224,10 @@ def array_ufunc(ufunc, method, inputs, kwargs):
                 args = []
                 for x in inputs:
                     if isinstance(x, NumpyArray):
-                        x.data.touch_data()
+                        # some ufuncs have multiple array arguments, and they might
+                        # not all be typetracers
+                        if isinstance(x.data, ak._typetracer.TypeTracerArray):
+                            x.data.touch_data()
                         shape = x.shape
                         args.append(numpy.empty((0,) + x.shape[1:], x.dtype))
                     else:
@@ -269,92 +313,3 @@ def array_ufunc(ufunc, method, inputs, kwargs):
 
 def action_for_matmul(inputs):
     raise ak._errors.wrap_error(NotImplementedError)
-
-
-try:
-    NDArrayOperatorsMixin = numpy.lib.mixins.NDArrayOperatorsMixin
-
-except AttributeError:
-    from numpy.core import umath as um
-
-    def _disables_array_ufunc(obj):
-        try:
-            return obj.__array_ufunc__ is None
-        except AttributeError:
-            return False
-
-    def _binary_method(ufunc, name):
-        def func(self, other):
-            if _disables_array_ufunc(other):
-                return NotImplemented
-            return ufunc(self, other)
-
-        func.__name__ = f"__{name}__"
-        return func
-
-    def _reflected_binary_method(ufunc, name):
-        def func(self, other):
-            if _disables_array_ufunc(other):
-                return NotImplemented
-            return ufunc(other, self)
-
-        func.__name__ = f"__r{name}__"
-        return func
-
-    def _inplace_binary_method(ufunc, name):
-        def func(self, other):
-            return ufunc(self, other, out=(self,))
-
-        func.__name__ = f"__i{name}__"
-        return func
-
-    def _numeric_methods(ufunc, name):
-        return (
-            _binary_method(ufunc, name),
-            _reflected_binary_method(ufunc, name),
-            _inplace_binary_method(ufunc, name),
-        )
-
-    def _unary_method(ufunc, name):
-        def func(self):
-            return ufunc(self)
-
-        func.__name__ = f"__{name}__"
-        return func
-
-    class NDArrayOperatorsMixin:
-        __lt__ = _binary_method(um.less, "lt")
-        __le__ = _binary_method(um.less_equal, "le")
-        __eq__ = _binary_method(um.equal, "eq")
-        __ne__ = _binary_method(um.not_equal, "ne")
-        __gt__ = _binary_method(um.greater, "gt")
-        __ge__ = _binary_method(um.greater_equal, "ge")
-
-        __add__, __radd__, __iadd__ = _numeric_methods(um.add, "add")
-        __sub__, __rsub__, __isub__ = _numeric_methods(um.subtract, "sub")
-        __mul__, __rmul__, __imul__ = _numeric_methods(um.multiply, "mul")
-        __matmul__, __rmatmul__, __imatmul__ = _numeric_methods(um.matmul, "matmul")
-        __truediv__, __rtruediv__, __itruediv__ = _numeric_methods(
-            um.true_divide, "truediv"
-        )
-        __floordiv__, __rfloordiv__, __ifloordiv__ = _numeric_methods(
-            um.floor_divide, "floordiv"
-        )
-        __mod__, __rmod__, __imod__ = _numeric_methods(um.remainder, "mod")
-        if hasattr(um, "divmod"):
-            __divmod__ = _binary_method(um.divmod, "divmod")
-            __rdivmod__ = _reflected_binary_method(um.divmod, "divmod")
-        __pow__, __rpow__, __ipow__ = _numeric_methods(um.power, "pow")
-        __lshift__, __rlshift__, __ilshift__ = _numeric_methods(um.left_shift, "lshift")
-        __rshift__, __rrshift__, __irshift__ = _numeric_methods(
-            um.right_shift, "rshift"
-        )
-        __and__, __rand__, __iand__ = _numeric_methods(um.bitwise_and, "and")
-        __xor__, __rxor__, __ixor__ = _numeric_methods(um.bitwise_xor, "xor")
-        __or__, __ror__, __ior__ = _numeric_methods(um.bitwise_or, "or")
-
-        __neg__ = _unary_method(um.negative, "neg")
-        if hasattr(um, "positive"):
-            __pos__ = _unary_method(um.positive, "pos")
-        __abs__ = _unary_method(um.absolute, "abs")
-        __invert__ = _unary_method(um.invert, "invert")

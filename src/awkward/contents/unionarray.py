@@ -12,12 +12,13 @@ from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.unionform import UnionForm
 from awkward.index import Index, Index8, Index64
-from awkward.typing import Final, Self
+from awkward.typing import Final, Self, final
 
 np = ak._nplikes.NumpyMetadata.instance()
 numpy = ak._nplikes.Numpy.instance()
 
 
+@final
 class UnionArray(Content):
     is_union = True
 
@@ -390,14 +391,18 @@ class UnionArray(Content):
             form_key=form_key,
         )
 
-    def _to_buffers(self, form, getkey, container, backend):
+    def _to_buffers(self, form, getkey, container, backend, byteorder):
         assert isinstance(form, self.form_cls)
         key1 = getkey(self, form, "tags")
         key2 = getkey(self, form, "index")
-        container[key1] = ak._util.little_endian(self._tags.raw(backend.index_nplike))
-        container[key2] = ak._util.little_endian(self._index.raw(backend.index_nplike))
+        container[key1] = ak._util.native_to_byteorder(
+            self._tags.raw(backend.index_nplike), byteorder
+        )
+        container[key2] = ak._util.native_to_byteorder(
+            self._index.raw(backend.index_nplike), byteorder
+        )
         for i, content in enumerate(self._contents):
-            content._to_buffers(form.content(i), getkey, container, backend)
+            content._to_buffers(form.content(i), getkey, container, backend, byteorder)
 
     def _to_typetracer(self, forget_length: bool) -> Self:
         tt = ak._typetracer.TypeTracer.instance()
@@ -1209,16 +1214,7 @@ class UnionArray(Content):
         return simplified._unique(negaxis, starts, parents, outlength)
 
     def _argsort_next(
-        self,
-        negaxis,
-        starts,
-        shifts,
-        parents,
-        outlength,
-        ascending,
-        stable,
-        kind,
-        order,
+        self, negaxis, starts, shifts, parents, outlength, ascending, stable
     ):
         simplified = type(self).simplified(
             self._tags,
@@ -1240,12 +1236,10 @@ class UnionArray(Content):
             )
 
         return simplified._argsort_next(
-            negaxis, starts, shifts, parents, outlength, ascending, stable, kind, order
+            negaxis, starts, shifts, parents, outlength, ascending, stable
         )
 
-    def _sort_next(
-        self, negaxis, starts, parents, outlength, ascending, stable, kind, order
-    ):
+    def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
         if self.length == 0:
             return self
 
@@ -1265,7 +1259,7 @@ class UnionArray(Content):
             )
 
         return simplified._sort_next(
-            negaxis, starts, parents, outlength, ascending, stable, kind, order
+            negaxis, starts, parents, outlength, ascending, stable
         )
 
     def _reduce_next(

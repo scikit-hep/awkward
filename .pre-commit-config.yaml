@@ -18,12 +18,14 @@ repos:
   - id: mixed-line-ending
   - id: requirements-txt-fixer
   - id: trailing-whitespace
+  - id: name-tests-test
+    args: ["--pytest-test-first"]
 
 - repo: https://github.com/PyCQA/isort
-  rev: "v5.11.3"
+  rev: "5.11.4"
   hooks:
     - id: isort
-      exclude: ^src/(awkward|awkward/_v2)/__init__\.py$
+      exclude: ^src/awkward/__init__\.py$
 
 - repo: https://github.com/asottile/setup-cfg-fmt
   rev: v2.2.0
@@ -72,3 +74,12 @@ repos:
   rev: "v0.9.0.2"
   hooks:
   - id: shellcheck
+
+- repo: local
+  hooks:
+  - id: require-test-name-identifier
+    name: Require identifiers for test names
+    language: python
+    entry: python dev/validate-test-names.py
+    types: [file, python]
+    files: ^tests/

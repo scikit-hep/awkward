@@ -1,4 +1,4 @@
-sphinx>=4.5.0
+sphinx>=4.5.0,<5.0.0
 PyYAML
 black
 pycparser
@@ -11,7 +11,7 @@ myst-nb
 sphinx-external-toc
 jupyterlite-sphinx
 ipyleaflet
-jupyterlite>=0.1.0b12
+jupyterlite>=0.1.0b12,==0.1.0b16
 
 numpy>=1.13.1
 numba>=0.50.0

@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._connect.numpy import unsupported
 
 np = ak._nplikes.NumpyMetadata.instance()
 
@@ -8,7 +9,6 @@ np = ak._nplikes.NumpyMetadata.instance()
 _ZEROS = object()
 
 
-@ak._connect.numpy.implements("zeros_like")
 def zeros_like(array, *, dtype=None, highlevel=True, behavior=None):
     """
     Args:
@@ -37,3 +37,10 @@ def _impl(array, highlevel, behavior, dtype):
     if dtype is not None:
         return ak.operations.ak_full_like._impl(array, 0, highlevel, behavior, dtype)
     return ak.operations.ak_full_like._impl(array, _ZEROS, highlevel, behavior, dtype)
+
+
+@ak._connect.numpy.implements("zeros_like")
+def _nep_18_impl(
+    a, dtype=None, order=unsupported, subok=unsupported, shape=unsupported
+):
+    return zeros_like(a, dtype=dtype)

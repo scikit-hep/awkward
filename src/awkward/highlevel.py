@@ -12,7 +12,7 @@ from collections.abc import Iterable, Mapping, Sized
 from awkward_cpp.lib import _ext
 
 import awkward as ak
-from awkward._connect.numpy import NDArrayOperatorsMixin
+from awkward._util import NDArrayOperatorsMixin
 
 np = ak._nplikes.NumpyMetadata.instance()
 numpy = ak._nplikes.Numpy.instance()
@@ -449,12 +449,6 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     def typestr(self):
         """
         The high-level type of this Array, presented as a string.
-
-        Note that the outermost element of an Array's type is always an
-        #ak.types.ArrayType, which specifies the number of elements in the array.
-
-        The type of a #ak.contents.Content (from #ak.Array.layout) is not
-        wrapped by an #ak.types.ArrayType.
         """
         return str(self.type)
 
@@ -1207,26 +1201,26 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             and self._layout.backend.nplike.known_data
         ):
             typestr = repr(str(self.type))[1:-1]
-            if len(typestr) + len(pytype) + len(" type=''") + 3 < limit_cols // 2:
-                strwidth = limit_cols - (
-                    len(typestr) + len(pytype) + len(" type=''") + 3
-                )
-            else:
-                strwidth = max(
-                    0,
-                    min(
-                        limit_cols // 2,
-                        limit_cols - len(pytype) - len(" type='...'") - 3,
-                    ),
-                )
-            valuestr = " " + awkward._prettyprint.valuestr(self, 1, strwidth)
+            valuestr = ""
 
         else:
-            self._layout._touch_data(recursive=True)
+            # awkward._prettyprint.valuestr touches the data
             typestr = repr(
                 "?? * " + str(self._layout.form.type_from_behavior(self._behavior))
             )[1:-1]
             valuestr = "-typetracer"
+
+        if len(typestr) + len(pytype) + len(" type=''") + 3 < limit_cols // 2:
+            strwidth = limit_cols - (len(typestr) + len(pytype) + len(" type=''") + 3)
+        else:
+            strwidth = max(
+                0,
+                min(
+                    limit_cols // 2,
+                    limit_cols - len(pytype) - len(" type='...'") - 3,
+                ),
+            )
+        valuestr = valuestr + " " + awkward._prettyprint.valuestr(self, 1, strwidth)
 
         length = max(3, limit_cols - len(pytype) - len("type='...'") - len(valuestr))
         if len(typestr) > length:
@@ -1430,25 +1424,29 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         return numba.typeof(self._numbaview)
 
-    def __getstate__(self):
+    def __reduce__(self):
         packed = ak.operations.to_packed(self._layout, highlevel=False)
         form, length, container = ak.operations.to_buffers(
-            packed, buffer_key="{form_key}-{attribute}", form_key="node{id}"
+            packed,
+            buffer_key="{form_key}-{attribute}",
+            form_key="node{id}",
+            byteorder="<",
         )
         if self._behavior is ak.behavior:
             behavior = None
         else:
             behavior = self._behavior
-        return form.to_dict(), length, container, behavior
+        return object.__new__, (Array,), (form.to_dict(), length, container, behavior)
 
     def __setstate__(self, state):
-        form, length, container, behavior = state
+        form, length, container, behavior, *_ = state
         layout = ak.operations.from_buffers(
             form,
             length,
             container,
             highlevel=False,
             buffer_key="{form_key}-{attribute}",
+            byteorder="<",
         )
         self.layout = layout
         self.behavior = behavior
@@ -1528,7 +1526,7 @@ class Record(NDArrayOperatorsMixin):
             contents = []
             for k, v in data.items():
                 fields.append(k)
-                if ak._util.is_non_string_iterable(v):
+                if ak._util.is_non_string_like_iterable(v):
                     contents.append(Array(v).layout[np.newaxis])
                 else:
                     contents.append(Array([v]).layout)
@@ -1700,18 +1698,20 @@ class Record(NDArrayOperatorsMixin):
         """
         The high-level type of this Record; same as #ak.type.
 
-        Note that the outermost element of a Record's type is always a
-        #ak.types.RecordType.
+        Note that the outermost element of a Record's type is always an
+        #ak.types.ScalarType, which .
+
+        The type of a #ak.record.Record (from #ak.Array.layout) is not
+        wrapped by an #ak.types.ScalarType.
         """
-        return self._layout.array.form.type_from_behavior(self._behavior)
+        return ak.types.ScalarType(
+            self._layout.array.form.type_from_behavior(self._behavior)
+        )
 
     @property
     def typestr(self):
         """
         The high-level type of this Record, presented as a string.
-
-        Note that the outermost element of a Record's type is always a
-        #ak.types.RecordType.
         """
         return str(self.type)
 
@@ -1945,26 +1945,26 @@ class Record(NDArrayOperatorsMixin):
             and self._layout.array.backend.nplike.known_data
         ):
             typestr = repr(str(self.type))[1:-1]
-            if len(typestr) + len(pytype) + len(" type=''") + 3 < limit_cols // 2:
-                strwidth = limit_cols - (
-                    len(typestr) + len(pytype) + len(" type=''") + 3
-                )
-            else:
-                strwidth = max(
-                    0,
-                    min(
-                        limit_cols // 2,
-                        limit_cols - len(pytype) - len(" type='...'") - 3,
-                    ),
-                )
-            valuestr = " " + awkward._prettyprint.valuestr(self, 1, strwidth)
+            valuestr = ""
 
         else:
-            self._layout._touch_data(recursive=True)
-            typestr = repr(str(self._layout.form.type_from_behavior(self._behavior)))[
-                1:-1
-            ]
+            # awkward._prettyprint.valuestr touches the data
+            typestr = repr(
+                str(self._layout._array.form.type_from_behavior(self._behavior))
+            )[1:-1]
             valuestr = "-typetracer"
+
+        if len(typestr) + len(pytype) + len(" type=''") + 3 < limit_cols // 2:
+            strwidth = limit_cols - (len(typestr) + len(pytype) + len(" type=''") + 3)
+        else:
+            strwidth = max(
+                0,
+                min(
+                    limit_cols // 2,
+                    limit_cols - len(pytype) - len(" type='...'") - 3,
+                ),
+            )
+        valuestr = valuestr + " " + awkward._prettyprint.valuestr(self, 1, strwidth)
 
         length = max(3, limit_cols - len(pytype) - len("type='...'") - len(valuestr))
         if len(typestr) > length:
@@ -2064,25 +2064,33 @@ class Record(NDArrayOperatorsMixin):
 
         return numba.typeof(self._numbaview)
 
-    def __getstate__(self):
+    def __reduce__(self):
         packed = ak.operations.to_packed(self._layout, highlevel=False)
         form, length, container = ak.operations.to_buffers(
-            packed.array, buffer_key="{form_key}-{attribute}", form_key="node{id}"
+            packed.array,
+            buffer_key="{form_key}-{attribute}",
+            form_key="node{id}",
+            byteorder="<",
         )
         if self._behavior is ak.behavior:
             behavior = None
         else:
             behavior = self._behavior
-        return form.to_dict(), length, container, behavior, packed.at
+        return (
+            object.__new__,
+            (Record,),
+            (form.to_dict(), length, container, behavior, packed.at),
+        )
 
     def __setstate__(self, state):
-        form, length, container, behavior, at = state
+        form, length, container, behavior, at, *_ = state
         layout = ak.operations.from_buffers(
             form,
             length,
             container,
             highlevel=False,
             buffer_key="{form_key}-{attribute}",
+            byteorder="<",
         )
         layout = ak.record.Record(layout, at)
         self.layout = layout
@@ -2329,12 +2337,6 @@ class ArrayBuilder(Sized):
     def typestr(self):
         """
         The high-level type of this accumulated array, presented as a string.
-
-        Note that the outermost element of an Array's type is always an
-        #ak.types.ArrayType, which specifies the number of elements in the array.
-
-        The type of a #ak.contents.Content (from #ak.Array.layout) is not
-        wrapped by an #ak.types.ArrayType.
         """
         return str(self.type)
 
@@ -2435,6 +2437,7 @@ class ArrayBuilder(Sized):
                 container,
                 buffer_key="{form_key}-{attribute}",
                 backend="cpu",
+                byteorder=ak._util.native_byteorder,
                 highlevel=True,
                 behavior=self._behavior,
                 simplify=True,

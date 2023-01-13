@@ -3,8 +3,10 @@
 import awkward as ak
 from awkward._util import unset
 from awkward.forms.form import Form, _parameters_equal, _parameters_update
+from awkward.typing import final
 
 
+@final
 class IndexedForm(Form):
     is_indexed = True
 

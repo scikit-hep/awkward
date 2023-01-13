@@ -7,12 +7,13 @@ import awkward as ak
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.regularform import RegularForm
-from awkward.typing import Final, Self
+from awkward.typing import Final, Self, final
 
 np = ak._nplikes.NumpyMetadata.instance()
 numpy = ak._nplikes.Numpy.instance()
 
 
+@final
 class RegularArray(Content):
     is_list = True
     is_regular = True
@@ -126,9 +127,9 @@ class RegularArray(Content):
             form_key=form_key,
         )
 
-    def _to_buffers(self, form, getkey, container, backend):
+    def _to_buffers(self, form, getkey, container, backend, byteorder):
         assert isinstance(form, self.form_cls)
-        self._content._to_buffers(form.content, getkey, container, backend)
+        self._content._to_buffers(form.content, getkey, container, backend, byteorder)
 
     def _to_typetracer(self, forget_length: bool) -> Self:
         return RegularArray(
@@ -647,11 +648,9 @@ class RegularArray(Content):
         ):
             return self._content._mergeable(other.content, mergebool)
 
-        # For n-dimensional NumpyArrays, let's now convert them to RegularArray
-        # We could add a special case that tries to first convert self to NumpyArray
-        # and merge conventionally, but it's not worth it at this stage.
-        elif isinstance(other, ak.contents.NumpyArray) and other.purelist_depth > 1:
-            return self._content._mergeable(other.to_RegularArray().content, mergebool)
+        elif isinstance(other, ak.contents.NumpyArray) and len(other.shape) > 1:
+            return self._mergeable(other._to_regular_primitive(), mergebool)
+
         else:
             return False
 
@@ -759,28 +758,11 @@ class RegularArray(Content):
         return out
 
     def _argsort_next(
-        self,
-        negaxis,
-        starts,
-        shifts,
-        parents,
-        outlength,
-        ascending,
-        stable,
-        kind,
-        order,
+        self, negaxis, starts, shifts, parents, outlength, ascending, stable
     ):
         next = self.to_ListOffsetArray64(True)
         out = next._argsort_next(
-            negaxis,
-            starts,
-            shifts,
-            parents,
-            outlength,
-            ascending,
-            stable,
-            kind,
-            order,
+            negaxis, starts, shifts, parents, outlength, ascending, stable
         )
 
         if isinstance(out, ak.contents.RegularArray):
@@ -794,18 +776,9 @@ class RegularArray(Content):
 
         return out
 
-    def _sort_next(
-        self, negaxis, starts, parents, outlength, ascending, stable, kind, order
-    ):
+    def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
         out = self.to_ListOffsetArray64(True)._sort_next(
-            negaxis,
-            starts,
-            parents,
-            outlength,
-            ascending,
-            stable,
-            kind,
-            order,
+            negaxis, starts, parents, outlength, ascending, stable
         )
 
         # FIXME
@@ -1245,6 +1218,11 @@ class RegularArray(Content):
     def _recursively_apply(
         self, action, behavior, depth, depth_context, lateral_context, options
     ):
+        if options["regular_to_jagged"]:
+            return self.to_ListOffsetArray64(False)._recursively_apply(
+                action, behavior, depth, depth_context, lateral_context, options
+            )
+
         if self._backend.nplike.known_shape:
             content = self._content[: self._length * self._size]
         else:

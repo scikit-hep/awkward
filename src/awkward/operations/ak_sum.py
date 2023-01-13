@@ -1,12 +1,12 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._connect.numpy import unsupported
 from awkward._util import unset
 
 np = ak._nplikes.NumpyMetadata.instance()
 
 
-@ak._connect.numpy.implements("sum")
 def sum(
     array,
     axis=None,
@@ -217,7 +217,6 @@ def sum(
         return _impl(array, axis, keepdims, mask_identity, highlevel, behavior)
 
 
-@ak._connect.numpy.implements("nansum")
 def nansum(
     array,
     axis=None,
@@ -301,3 +300,29 @@ def _impl(array, axis, keepdims, mask_identity, highlevel, behavior):
         return ak._util.wrap(out, behavior, highlevel=highlevel)
     else:
         return out
+
+
+@ak._connect.numpy.implements("sum")
+def _nep_18_impl_sum(
+    a,
+    axis=None,
+    dtype=unsupported,
+    out=unsupported,
+    keepdims=False,
+    initial=unsupported,
+    where=unsupported,
+):
+    return sum(a, axis=axis, keepdims=keepdims)
+
+
+@ak._connect.numpy.implements("nansum")
+def _nep_18_impl_nansum(
+    a,
+    axis=None,
+    dtype=unsupported,
+    out=unsupported,
+    keepdims=False,
+    initial=unsupported,
+    where=unsupported,
+):
+    return nansum(a, axis=axis, keepdims=keepdims)

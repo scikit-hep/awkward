@@ -10,7 +10,7 @@ from awkward._backends import Backend
 from awkward.contents.content import ActionType, Content
 from awkward.forms import form
 from awkward.record import Record
-from awkward.typing import Any, AxisMaybeNone
+from awkward.typing import Any, AxisMaybeNone, Literal
 
 np = ak._nplikes.NumpyMetadata.instance()
 
@@ -27,6 +27,7 @@ def recursively_apply(
     return_simplified: bool = True,
     return_array: bool = True,
     function_name: str | None = None,
+    regular_to_jagged=False,
 ) -> Content | Record | None:
 
     if isinstance(layout, Content):
@@ -40,6 +41,7 @@ def recursively_apply(
                 "allow_records": allow_records,
                 "keep_parameters": keep_parameters,
                 "numpy_to_regular": numpy_to_regular,
+                "regular_to_jagged": regular_to_jagged,
                 "return_simplified": return_simplified,
                 "return_array": return_array,
                 "function_name": function_name,
@@ -74,6 +76,7 @@ def to_buffers(
     form_key: str | None = "node{id}",
     id_start: Integral = 0,
     backend: Backend = None,
+    byteorder: Literal["<", ">"] = "<",
 ) -> tuple[form.Form, int, Mapping[str, Any]]:
     if container is None:
         container = {}
@@ -117,7 +120,7 @@ def to_buffers(
 
     form = content.form_with_key(form_key=form_key, id_start=id_start)
 
-    content._to_buffers(form, getkey, container, backend)
+    content._to_buffers(form, getkey, container, backend, byteorder)
 
     return form, len(content), container
 
@@ -404,8 +407,6 @@ def argsort(
     axis: int = -1,
     ascending: bool = True,
     stable: bool = False,
-    kind: Any = None,
-    order: Any = None,
 ) -> Content:
     negaxis = -axis
     branch, depth = layout.branch_depth
@@ -448,18 +449,11 @@ def argsort(
         1,
         ascending,
         stable,
-        kind,
-        order,
     )
 
 
 def sort(
-    layout: Content,
-    axis: int = -1,
-    ascending: bool = True,
-    stable: bool = False,
-    kind: Any = None,
-    order: Any = None,
+    layout: Content, axis: int = -1, ascending: bool = True, stable: bool = False
 ) -> Content:
     negaxis = -axis
     branch, depth = layout.branch_depth
@@ -494,13 +488,4 @@ def sort(
 
     starts = ak.index.Index64.zeros(1, nplike=layout.backend.index_nplike)
     parents = ak.index.Index64.zeros(layout.length, nplike=layout.backend.index_nplike)
-    return layout._sort_next(
-        negaxis,
-        starts,
-        parents,
-        1,
-        ascending,
-        stable,
-        kind,
-        order,
-    )
+    return layout._sort_next(negaxis, starts, parents, 1, ascending, stable)

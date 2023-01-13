@@ -2,10 +2,8 @@
 from __future__ import annotations
 
 import ctypes
-from collections.abc import Iterable
 
 import numpy
-from awkward_cpp.lib import _ext
 
 import awkward as ak
 from awkward.typing import TypeVar
@@ -66,7 +64,10 @@ class NumpyMetadata(Singleton):
 
     nat = numpy.datetime64("NaT")
     datetime_data = numpy.datetime_data
-    issubdtype = numpy.issubdtype
+
+    @property
+    def issubdtype(self):
+        return numpy.issubdtype
 
     AxisError = numpy.AxisError
 
@@ -368,6 +369,9 @@ class NumpyLike(Singleton):
     def datetime_as_string(self, *args, **kwargs):
         return self._module.datetime_as_string(*args, **kwargs)
 
+    def can_cast(self, *args, **kwargs):
+        return self._module.can_cast(*args, **kwargs)
+
     @classmethod
     def is_own_array(cls, obj) -> bool:
         """
@@ -380,6 +384,9 @@ class NumpyLike(Singleton):
         raise ak._errors.wrap_error(NotImplementedError)
 
     def is_c_contiguous(self, array) -> bool:
+        raise ak._errors.wrap_error(NotImplementedError)
+
+    def to_rectilinear(self, array):
         raise ak._errors.wrap_error(NotImplementedError)
 
 
@@ -482,29 +489,7 @@ class CupyKernel(Kernel):
 
 class Numpy(NumpyLike):
     def to_rectilinear(self, array, *args, **kwargs):
-        if isinstance(array, numpy.ndarray):
-            return array
-
-        elif isinstance(
-            array,
-            (
-                ak.Array,
-                ak.Record,
-                ak.ArrayBuilder,
-                ak.contents.Content,
-                ak.record.Record,
-                _ext.ArrayBuilder,
-            ),
-        ):
-            return ak.operations.ak_to_numpy.to_numpy(array, *args, **kwargs)
-
-        elif isinstance(array, Iterable):
-            return [self.to_rectilinear(x, *args, **kwargs) for x in array]
-
-        else:
-            raise ak._errors.wrap_error(
-                TypeError("to_rectilinear argument must be iterable")
-            )
+        return ak.operations.ak_to_numpy.to_numpy(array, *args, **kwargs)
 
     def __init__(self):
         self._module = numpy
@@ -761,29 +746,7 @@ class Cupy(NumpyLike):
 
 class Jax(NumpyLike):
     def to_rectilinear(self, array, *args, **kwargs):
-        if isinstance(array, self._module.DeviceArray):
-            return array
-
-        elif isinstance(
-            array,
-            (
-                ak.Array,
-                ak.Record,
-                ak.ArrayBuilder,
-                ak.contents.Content,
-                ak.record.Record,
-                _ext.ArrayBuilder,
-            ),
-        ):
-            return ak.operations.ak_to_jax.to_jax(array, *args, **kwargs)
-
-        elif isinstance(array, Iterable):
-            return [self.to_rectilinear(x, *args, **kwargs) for x in array]
-
-        else:
-            raise ak._errors.wrap_error(
-                ValueError("to_rectilinear argument must be iterable")
-            )
+        return ak.operations.ak_to_jax.to_jax(array, *args, **kwargs)
 
     def __init__(self):
         jax = ak.jax.import_jax()
@@ -979,11 +942,7 @@ def nplike_of(*arrays, default: D = _UNSET) -> NumpyLike | D:
 
         raise ak._errors.wrap_error(
             ValueError(
-                """attempting to use both a 'cpu' array and a 'cuda' array in the same operation; use one of
-
-    ak.to_backend(array, 'cpu')
-    ak.to_backend(array, 'cuda')
-
-to move one or the other to main memory or the GPU(s)."""
+                """attempting to use arrays with more than one backend in the same operation; use
+#ak.to_backend to coerce the arrays to the same backend."""
             )
         )

@@ -71,6 +71,7 @@ def _impl(form, length, container, highlevel, behavior):
         container=container,
         buffer_key="{form_key}-{attribute}",
         backend="cpu",
+        byteorder=ak._util.native_byteorder,
         highlevel=highlevel,
         behavior=behavior,
         simplify=True,

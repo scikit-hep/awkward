@@ -115,7 +115,7 @@ def _impl(array, highlevel, behavior):
                 # To consider only the interior boundaries, we ignore the start and end
                 # offset values. These can be repeated with empty sublists, so we mask them out.
                 is_interior = backend.nplike.logical_and(
-                    0 < offsets, offsets < len(data) - 1
+                    0 < offsets, offsets < len(data)
                 )
                 interior_offsets = offsets[is_interior]
                 diffs[interior_offsets - 1] = True

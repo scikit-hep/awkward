@@ -9,7 +9,7 @@ from numbers import Complex, Real
 import awkward as ak
 from awkward._backends import Backend
 from awkward.forms.form import Form, _parameters_equal
-from awkward.typing import Any, AxisMaybeNone, Self, TypeAlias
+from awkward.typing import Any, AxisMaybeNone, Literal, Self, TypeAlias, TypedDict
 
 np = ak._nplikes.NumpyMetadata.instance()
 numpy = ak._nplikes.Numpy.instance()
@@ -27,6 +27,16 @@ ActionType: TypeAlias = """Callable[
     ],
     Content | None,
 ]"""
+
+
+class RecursivelyApplyOptionsType(TypedDict):
+    allow_records: bool
+    keep_parameters: bool
+    numpy_to_regular: bool
+    regular_to_jagged: bool
+    return_simplified: bool
+    return_array: bool
+    function_name: str | None
 
 
 class Content:
@@ -187,6 +197,7 @@ class Content:
         getkey: Callable[[Content, Form, str], str],
         container: MutableMapping[str, Any] | None,
         backend: Backend,
+        byteorder: Literal["<", ">"],
     ) -> tuple[Form, int, Mapping[str, Any]]:
         raise ak._errors.wrap_error(NotImplementedError)
 
@@ -775,8 +786,6 @@ class Content:
         outlength: int,
         ascending: bool,
         stable: bool,
-        kind: Any,
-        order: Any,
     ):
         raise ak._errors.wrap_error(NotImplementedError)
 
@@ -788,8 +797,6 @@ class Content:
         outlength: int,
         ascending: bool,
         stable: bool,
-        kind: Any,
-        order: Any,
     ):
         raise ak._errors.wrap_error(NotImplementedError)
 
@@ -1033,7 +1040,7 @@ class Content:
         depth: int,
         depth_context: dict | None,
         lateral_context: dict | None,
-        options: dict[str, Any],
+        options: RecursivelyApplyOptionsType,
     ) -> Content | None:
         raise ak._errors.wrap_error(NotImplementedError)
 

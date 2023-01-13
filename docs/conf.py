@@ -36,13 +36,30 @@ extensions = [
     "sphinx_design",
     "sphinx_external_toc",
     "sphinx.ext.intersphinx",
-    "sphinx_sitemap",
     "myst_nb",
     # Preserve old links
     "jupyterlite_sphinx",
     "IPython.sphinxext.ipython_console_highlighting",
     "IPython.sphinxext.ipython_directive",
 ]
+
+# Allow the CI to set version_match="main"
+if "DOCS_VERSION" in os.environ:
+    version_match = os.environ["DOCS_VERSION"]
+else:
+    version_match = version
+
+
+# Specify a canonical version
+if "DOCS_CANONICAL_VERSION" in os.environ:
+    canonical_version = os.environ["DOCS_CANONICAL_VERSION"]
+    html_baseurl = f"https://awkward-array.org/doc/{canonical_version}/"
+
+    # Build sitemap on main
+    if version_match == canonical_version:
+        extensions.append("sphinx_sitemap")
+        # Sitemap URLs are relative to `html_baseurl`
+        sitemap_url_scheme = "{link}"
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -56,8 +73,7 @@ exclude_patterns = ["_build", "_templates", "Thumbs.db", "jupyter_execute", ".*"
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-#
-html_baseurl = 'https://awkward-array.org/doc/'
+
 html_context = {
     "github_user": "scikit-hep",
     "github_repo": "awkward",
@@ -101,12 +117,6 @@ if "DOCS_REPORT_ANALYTICS" in os.environ:
         "plausible_analytics_domain": "awkward-array.org",
         "plausible_analytics_url": "https://views.scientific-python.org/js/plausible.js",
     }
-
-# Allow the CI to set version_match="main"
-if "DOCS_VERSION" in os.environ:
-    version_match = os.environ["DOCS_VERSION"]
-else:
-    version_match = version
 
 # Don't show version for offline builds by default
 if "DOCS_SHOW_VERSION" in os.environ:
@@ -178,9 +188,8 @@ if (datetime.date.today() - datetime.date(2022, 12, 13)) < datetime.timedelta(da
         ]
     )
 
-HERE = pathlib.Path(__file__).parent
-
 # Generate Python docstrings
+HERE = pathlib.Path(__file__).parent
 runpy.run_path(HERE / "prepare_docstrings.py", run_name="__main__")
 
 

@@ -6,6 +6,7 @@ import numpy
 
 import awkward as ak
 from awkward import _nplikes, index
+from awkward._util import NDArrayOperatorsMixin
 from awkward.typing import TypeVar
 
 np = _nplikes.NumpyMetadata.instance()
@@ -317,7 +318,7 @@ def _length_after_slice(slice, original_length):
 TTypeTracerArray = TypeVar("TTypeTracerArray", bound="TypeTracerArray")
 
 
-class TypeTracerArray:
+class TypeTracerArray(NDArrayOperatorsMixin):
     @classmethod
     def from_array(cls: TTypeTracerArray, array, dtype=None) -> TTypeTracerArray:
         """
@@ -989,7 +990,7 @@ class TypeTracer(ak._nplikes.NumpyLike):
             try_touch_data(x)
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def concatenate(self, arrays):
+    def concatenate(self, arrays, casting="same_kind"):
         for x in arrays:
             try_touch_data(x)
 
@@ -1235,6 +1236,9 @@ class TypeTracer(ak._nplikes.NumpyLike):
         try_touch_data(array)
         # array, max_line_width, precision=None, suppress_small=None
         return "[?? ... ??]"
+
+    def can_cast(self, *args, **kwargs):
+        return numpy.can_cast(*args, **kwargs)
 
     def datetime_as_string(self, *args, **kwargs):
         for x in args:

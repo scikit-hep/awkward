@@ -1,12 +1,12 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._connect.numpy import unsupported
 from awkward._util import unset
 
 np = ak._nplikes.NumpyMetadata.instance()
 
 
-@ak._connect.numpy.implements("argmin")
 def argmin(
     array,
     axis=None,
@@ -80,7 +80,6 @@ def argmin(
         return _impl(array, axis, keepdims, mask_identity, highlevel, behavior)
 
 
-@ak._connect.numpy.implements("nanargmin")
 def nanargmin(
     array,
     axis=None,
@@ -163,3 +162,13 @@ def _impl(array, axis, keepdims, mask_identity, highlevel, behavior):
         return ak._util.wrap(out, behavior, highlevel)
     else:
         return out
+
+
+@ak._connect.numpy.implements("argmin")
+def _nep_18_impl_argmin(a, axis=None, out=unsupported, *, keepdims=False):
+    return argmin(a, axis=axis, keepdims=keepdims)
+
+
+@ak._connect.numpy.implements("nanargmin")
+def _nep_18_impl_nanargmin(a, axis=None, out=unsupported, *, keepdims=False):
+    return nanargmin(a, axis=axis, keepdims=keepdims)

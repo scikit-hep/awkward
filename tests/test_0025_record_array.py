@@ -229,22 +229,25 @@ def test_type():
     fields = None
     listoffsetarray = ak.contents.ListOffsetArray(offsets, content2)
     recordarray = ak.contents.RecordArray([content1, listoffsetarray], fields)
-    assert str(ak.operations.type(recordarray)) == "(int64, var * float64)"
+    assert str(ak.operations.type(recordarray)) == "5 * (int64, var * float64)"
 
-    assert ak.operations.type(recordarray) == ak.types.RecordType(
-        (
-            ak.types.NumpyType("int64"),
-            ak.types.ListType(ak.types.NumpyType("float64")),
+    assert ak.operations.type(recordarray) == ak.types.ArrayType(
+        ak.types.RecordType(
+            (
+                ak.types.NumpyType("int64"),
+                ak.types.ListType(ak.types.NumpyType("float64")),
+            ),
+            fields,
         ),
-        fields,
+        5,
     )
 
     recordarray = ak.contents.RecordArray(
         [content1, listoffsetarray], fields=["one", "two"]
     )
     assert str(ak.operations.type(recordarray)) in (
-        "{one: int64, two: var * float64}",
-        "{two: var * float64, one: int64}",
+        "5 * {one: int64, two: var * float64}",
+        "5 * {two: var * float64, one: int64}",
     )
 
     assert (
@@ -268,12 +271,14 @@ def test_recordtype():
     listoffsetarray = ak.contents.ListOffsetArray(offsets, content2)
     recordarray = ak.contents.RecordArray([content1, listoffsetarray], fields)
 
-    assert ak.operations.type(recordarray[2]) == ak.types.RecordType(
-        (
-            ak.types.NumpyType("int64"),
-            ak.types.ListType(ak.types.NumpyType("float64")),
-        ),
-        None,
+    assert ak.operations.type(recordarray[2]) == ak.types.ScalarType(
+        ak.types.RecordType(
+            (
+                ak.types.NumpyType("int64"),
+                ak.types.ListType(ak.types.NumpyType("float64")),
+            ),
+            None,
+        )
     )
     assert str(
         ak.types.RecordType(
@@ -287,19 +292,24 @@ def test_recordtype():
 
     recordarray = ak.contents.RecordArray([content1, listoffsetarray], ["one", "two"])
 
-    assert ak.operations.type(recordarray) == ak.types.RecordType(
-        (
-            ak.types.NumpyType("int64"),
-            ak.types.ListType(ak.types.NumpyType("float64")),
+    assert ak.operations.type(recordarray) == ak.types.ArrayType(
+        ak.types.RecordType(
+            (
+                ak.types.NumpyType("int64"),
+                ak.types.ListType(ak.types.NumpyType("float64")),
+            ),
+            ["one", "two"],
         ),
-        ["one", "two"],
+        5,
     )
-    assert ak.operations.type(recordarray[2]) == ak.types.RecordType(
-        (
-            ak.types.NumpyType("int64"),
-            ak.types.ListType(ak.types.NumpyType("float64")),
-        ),
-        ["one", "two"],
+    assert ak.operations.type(recordarray[2]) == ak.types.ScalarType(
+        ak.types.RecordType(
+            (
+                ak.types.NumpyType("int64"),
+                ak.types.ListType(ak.types.NumpyType("float64")),
+            ),
+            ["one", "two"],
+        )
     )
 
 

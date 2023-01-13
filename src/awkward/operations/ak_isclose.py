@@ -5,7 +5,6 @@ import awkward as ak
 np = ak._nplikes.NumpyMetadata.instance()
 
 
-@ak._connect.numpy.implements("isclose")
 def isclose(
     a, b, rtol=1e-05, atol=1e-08, equal_nan=False, *, highlevel=True, behavior=None
 ):
@@ -63,3 +62,8 @@ def _impl(a, b, rtol, atol, equal_nan, highlevel, behavior):
     assert isinstance(out, tuple) and len(out) == 1
 
     return ak._util.wrap(out[0], behavior, highlevel)
+
+
+@ak._connect.numpy.implements("isclose")
+def _nep_18_impl(a, b, rtol=1e-05, atol=1e-08, equal_nan=False):
+    return isclose(a, b, rtol=rtol, atol=atol, equal_nan=equal_nan)
