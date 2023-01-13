@@ -128,7 +128,7 @@ class RecordForm(Form):
             else:
                 return i
         raise ak._errors.wrap_error(
-            IndexError(
+            ak._errors.FieldNotFoundError(
                 "no field {} in record with {} fields".format(
                     repr(field), len(self._contents)
                 )

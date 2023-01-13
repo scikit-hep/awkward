@@ -352,3 +352,7 @@ Issue: {}.""".format(
         version, date, will_be, message
     )
     warnings.warn(warning, category, stacklevel=stacklevel + 1)
+
+
+class FieldNotFoundError(IndexError):
+    ...
