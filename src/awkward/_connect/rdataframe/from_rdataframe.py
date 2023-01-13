@@ -171,6 +171,10 @@ def from_rdataframe(data_frame, columns):
                 raise ak._errors.wrap_error(
                     TypeError(f'"{col}" column\'s type "{col_type}" is not supported.')
                 )
+            elif form_str == "awkward type":
+                raise ak._errors.wrap_error(
+                    AssertionError("this code should not be reached.")
+                )
 
             form = ak.forms.from_json(form_str)
 
