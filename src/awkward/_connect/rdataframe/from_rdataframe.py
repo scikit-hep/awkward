@@ -173,7 +173,7 @@ def from_rdataframe(data_frame, columns):
                 )
             elif form_str == "awkward type":
                 raise ak._errors.wrap_error(
-                    RuntimeError("this code should not be reached.")
+                    AssertionError("this code should not be reached.")
                 )
 
             form = ak.forms.from_json(form_str)
