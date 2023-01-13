@@ -1,8 +1,40 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+import numpy as np
 import pytest  # noqa: F401
 
 import awkward as ak
+
+
+@pytest.mark.parametrize(
+    "array",
+    [
+        ak.contents.NumpyArray(np.arange(4)),
+        ak.contents.IndexedArray(
+            ak.index.Index64(np.arange(4, dtype=np.int64)),
+            ak.contents.NumpyArray(np.arange(4)),
+        ),
+        ak.contents.IndexedOptionArray(
+            ak.index.Index64(np.arange(4, dtype=np.int64)),
+            ak.contents.NumpyArray(np.arange(4)),
+        ),
+        ak.contents.ListOffsetArray(
+            ak.index.Index64(np.arange(4, dtype=np.int64)),
+            ak.contents.NumpyArray(np.arange(3)),
+        ),
+        ak.contents.ListArray(
+            ak.index.Index64(np.arange(3, dtype=np.int64)),
+            ak.index.Index64(np.arange(1, 4, dtype=np.int64)),
+            ak.contents.NumpyArray(np.arange(3)),
+        ),
+        ak.contents.RegularArray(ak.contents.NumpyArray(np.arange(12)), size=3),
+    ],
+)
+def test_highlevel_lowlevel(array):
+    layout = ak.to_layout(array)
+    assert isinstance(ak.type(layout), ak.types.ArrayType)
+    # Check that the highlevel of ak.Array yields low level from form
+    assert layout.form.type == ak.type(layout).content
 
 
 def test_array():
