@@ -212,10 +212,12 @@ def test_astype_complex():
 
     array_float64 = ak.contents.UnmaskedArray(content_float64)
     assert to_list(array_float64) == [0.25, 0.5, 3.5, 4.5, 5.5]
-    assert str(ak.operations.type(content_float64)) == "float64"
+    assert str(ak.operations.type(content_float64)) == "5 * float64"
     assert str(ak.operations.type(ak.highlevel.Array(content_float64))) == "5 * float64"
-    assert str(ak.operations.type(array_float64)) == "?float64"
+    assert str(ak.operations.type(array_float64)) == "5 * ?float64"
     assert str(ak.operations.type(ak.highlevel.Array(array_float64))) == "5 * ?float64"
+    assert str(content_float64.form.type) == "float64"
+    assert str(array_float64.form.type) == "?float64"
 
     assert np.can_cast(np.float32, np.float64) is True
     assert np.can_cast(np.float64, np.float32, "unsafe") is True
@@ -247,15 +249,18 @@ def test_astype_complex():
         (4.5 + 0.0j),
         (5.5 + 0.0j),
     ]
-    assert str(ak.operations.type(content_complex64)) == "complex64"
+    assert str(ak.operations.type(content_complex64)) == "5 * complex64"
     assert (
         str(ak.operations.type(ak.highlevel.Array(content_complex64)))
         == "5 * complex64"
     )
-    assert str(ak.operations.type(array_complex64)) == "?complex64"
+    assert str(ak.operations.type(array_complex64)) == "5 * ?complex64"
     assert (
         str(ak.operations.type(ak.highlevel.Array(array_complex64))) == "5 * ?complex64"
     )
+    assert str(content_complex64.form.type) == "complex64"
+    assert str(array_complex64.form.type) == "?complex64"
+
     content = ak.contents.NumpyArray(
         np.array([1, (2.2 + 0.1j), 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
     )

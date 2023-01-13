@@ -449,12 +449,6 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     def typestr(self):
         """
         The high-level type of this Array, presented as a string.
-
-        Note that the outermost element of an Array's type is always an
-        #ak.types.ArrayType, which specifies the number of elements in the array.
-
-        The type of a #ak.contents.Content (from #ak.Array.layout) is not
-        wrapped by an #ak.types.ArrayType.
         """
         return str(self.type)
 
@@ -1704,18 +1698,20 @@ class Record(NDArrayOperatorsMixin):
         """
         The high-level type of this Record; same as #ak.type.
 
-        Note that the outermost element of a Record's type is always a
-        #ak.types.RecordType.
+        Note that the outermost element of a Record's type is always an
+        #ak.types.ScalarType, which .
+
+        The type of a #ak.record.Record (from #ak.Array.layout) is not
+        wrapped by an #ak.types.ScalarType.
         """
-        return self._layout.array.form.type_from_behavior(self._behavior)
+        return ak.types.ScalarType(
+            self._layout.array.form.type_from_behavior(self._behavior)
+        )
 
     @property
     def typestr(self):
         """
         The high-level type of this Record, presented as a string.
-
-        Note that the outermost element of a Record's type is always a
-        #ak.types.RecordType.
         """
         return str(self.type)
 
@@ -2341,12 +2337,6 @@ class ArrayBuilder(Sized):
     def typestr(self):
         """
         The high-level type of this accumulated array, presented as a string.
-
-        Note that the outermost element of an Array's type is always an
-        #ak.types.ArrayType, which specifies the number of elements in the array.
-
-        The type of a #ak.contents.Content (from #ak.Array.layout) is not
-        wrapped by an #ak.types.ArrayType.
         """
         return str(self.type)
 

@@ -21,11 +21,11 @@ listarray = ak.contents.ListArray(starts, stops, regulararray)
 
 
 def test_simple_type():
-    assert str(ak.operations.type(content)) == "float64"
+    assert str(ak.operations.type(content)) == "10 * float64"
 
 
 def test_type():
-    assert str(ak.operations.type(regulararray)) == "2 * var * float64"
+    assert str(ak.operations.type(regulararray)) == "3 * 2 * var * float64"
 
 
 def test_iteration():
