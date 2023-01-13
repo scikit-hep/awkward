@@ -1,7 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import copy
-from collections.abc import Sequence
 
 import awkward as ak
 
@@ -45,8 +44,7 @@ def _impl(base, what, where, highlevel, behavior):
         where is None
         or isinstance(where, str)
         or (
-            ak._util.is_non_string_iterable(where)
-            and isinstance(where, Sequence)
+            ak._util.is_non_string_like_sequence(where)
             and all(isinstance(x, str) for x in where)
         )
     ):
@@ -57,7 +55,7 @@ def _impl(base, what, where, highlevel, behavior):
             )
         )
 
-    if ak._util.is_non_string_iterable(where) and len(where) > 1:
+    if ak._util.is_non_string_like_sequence(where) and len(where) > 1:
         return _impl(
             base,
             _impl(
@@ -73,7 +71,7 @@ def _impl(base, what, where, highlevel, behavior):
         )
     else:
         # If we have an iterable here, pull out the only ti
-        if ak._util.is_non_string_iterable(where):
+        if ak._util.is_non_string_like_sequence(where):
             where = where[0]
 
         behavior = ak._util.behavior_of(base, what, behavior=behavior)

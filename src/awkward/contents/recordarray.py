@@ -204,14 +204,18 @@ class RecordArray(Content):
             form_key=form_key,
         )
 
-    def _to_buffers(self, form, getkey, container, backend):
+    def _to_buffers(self, form, getkey, container, backend, byteorder):
         assert isinstance(form, self.form_cls)
         if self._fields is None:
             for i, content in enumerate(self._contents):
-                content._to_buffers(form.content(i), getkey, container, backend)
+                content._to_buffers(
+                    form.content(i), getkey, container, backend, byteorder
+                )
         else:
             for field, content in zip(self._fields, self._contents):
-                content._to_buffers(form.content(field), getkey, container, backend)
+                content._to_buffers(
+                    form.content(field), getkey, container, backend, byteorder
+                )
 
     def _to_typetracer(self, forget_length: bool) -> Self:
         backend = ak._backends.TypeTracerBackend.instance()
@@ -707,22 +711,11 @@ class RecordArray(Content):
         raise ak._errors.wrap_error(NotImplementedError)
 
     def _argsort_next(
-        self,
-        negaxis,
-        starts,
-        shifts,
-        parents,
-        outlength,
-        ascending,
-        stable,
-        kind,
-        order,
+        self, negaxis, starts, shifts, parents, outlength, ascending, stable
     ):
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def _sort_next(
-        self, negaxis, starts, parents, outlength, ascending, stable, kind, order
-    ):
+    def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
         if self._fields is None or len(self._fields) == 0:
             return ak.contents.NumpyArray(
                 self._backend.nplike.instance().empty(0, np.int64),
@@ -734,14 +727,7 @@ class RecordArray(Content):
         for content in self._contents:
             contents.append(
                 content._sort_next(
-                    negaxis,
-                    starts,
-                    parents,
-                    outlength,
-                    ascending,
-                    stable,
-                    kind,
-                    order,
+                    negaxis, starts, parents, outlength, ascending, stable
                 )
             )
         return RecordArray(

@@ -145,11 +145,13 @@ class IndexedArray(Content):
             form_key=form_key,
         )
 
-    def _to_buffers(self, form, getkey, container, backend):
+    def _to_buffers(self, form, getkey, container, backend, byteorder):
         assert isinstance(form, self.form_cls)
         key = getkey(self, form, "index")
-        container[key] = ak._util.little_endian(self._index.raw(backend.index_nplike))
-        self._content._to_buffers(form.content, getkey, container, backend)
+        container[key] = ak._util.native_to_byteorder(
+            self._index.raw(backend.index_nplike), byteorder
+        )
+        self._content._to_buffers(form.content, getkey, container, backend, byteorder)
 
     def _to_typetracer(self, forget_length: bool) -> Self:
         index = self._index.to_nplike(ak._typetracer.TypeTracer.instance())
@@ -827,52 +829,16 @@ class IndexedArray(Content):
         raise ak._errors.wrap_error(NotImplementedError)
 
     def _argsort_next(
-        self,
-        negaxis,
-        starts,
-        shifts,
-        parents,
-        outlength,
-        ascending,
-        stable,
-        kind,
-        order,
+        self, negaxis, starts, shifts, parents, outlength, ascending, stable
     ):
         next = self._content._carry(self._index, False)
         return next._argsort_next(
-            negaxis,
-            starts,
-            shifts,
-            parents,
-            outlength,
-            ascending,
-            stable,
-            kind,
-            order,
+            negaxis, starts, shifts, parents, outlength, ascending, stable
         )
 
-    def _sort_next(
-        self,
-        negaxis,
-        starts,
-        parents,
-        outlength,
-        ascending,
-        stable,
-        kind,
-        order,
-    ):
+    def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
         next = self._content._carry(self._index, False)
-        return next._sort_next(
-            negaxis,
-            starts,
-            parents,
-            outlength,
-            ascending,
-            stable,
-            kind,
-            order,
-        )
+        return next._sort_next(negaxis, starts, parents, outlength, ascending, stable)
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         posaxis = ak._util.maybe_posaxis(self, axis, depth)

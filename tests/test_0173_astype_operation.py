@@ -14,10 +14,12 @@ def test_UnmaskedArray():
     )
     array_float64 = ak.contents.UnmaskedArray(content_float64)
     assert to_list(array_float64) == [0.25, 0.5, 3.5, 4.5, 5.5]
-    assert str(ak.operations.type(content_float64)) == "float64"
+    assert str(ak.operations.type(content_float64)) == "5 * float64"
     assert str(ak.operations.type(ak.highlevel.Array(content_float64))) == "5 * float64"
-    assert str(ak.operations.type(array_float64)) == "?float64"
+    assert str(ak.operations.type(array_float64)) == "5 * ?float64"
     assert str(ak.operations.type(ak.highlevel.Array(array_float64))) == "5 * ?float64"
+    assert str(content_float64.form.type) == "float64"
+    assert str(array_float64.form.type) == "?float64"
 
     assert np.can_cast(np.float32, np.float64) is True
     assert np.can_cast(np.float64, np.float32, "unsafe") is True
@@ -28,32 +30,38 @@ def test_UnmaskedArray():
     )
     array_float32 = ak.contents.UnmaskedArray(content_float32)
     assert to_list(array_float32) == [0.25, 0.5, 3.5, 4.5, 5.5]
-    assert str(ak.operations.type(content_float32)) == "float32"
+    assert str(ak.operations.type(content_float32)) == "5 * float32"
     assert str(ak.operations.type(ak.highlevel.Array(content_float32))) == "5 * float32"
-    assert str(ak.operations.type(array_float32)) == "?float32"
+    assert str(ak.operations.type(array_float32)) == "5 * ?float32"
     assert str(ak.operations.type(ak.highlevel.Array(array_float32))) == "5 * ?float32"
+    assert str(content_float32.form.type) == "float32"
+    assert str(array_float32.form.type) == "?float32"
 
     content_int8 = ak.operations.values_astype(content_float64, "int8", highlevel=False)
     array_int8 = ak.contents.UnmaskedArray(content_int8)
     assert to_list(array_int8) == [0, 0, 3, 4, 5]
-    assert str(ak.operations.type(content_int8)) == "int8"
+    assert str(ak.operations.type(content_int8)) == "5 * int8"
     assert str(ak.operations.type(ak.highlevel.Array(content_int8))) == "5 * int8"
-    assert str(ak.operations.type(array_int8)) == "?int8"
+    assert str(ak.operations.type(array_int8)) == "5 * ?int8"
     assert str(ak.operations.type(ak.highlevel.Array(array_int8))) == "5 * ?int8"
+    assert str(content_int8.form.type) == "int8"
+    assert str(array_int8.form.type) == "?int8"
 
     content_from_int8 = ak.operations.values_astype(
         content_int8, "float64", highlevel=False
     )
     array_from_int8 = ak.contents.UnmaskedArray(content_from_int8)
     assert to_list(array_from_int8) == [0, 0, 3, 4, 5]
-    assert str(ak.operations.type(content_from_int8)) == "float64"
+    assert str(ak.operations.type(content_from_int8)) == "5 * float64"
     assert (
         str(ak.operations.type(ak.highlevel.Array(content_from_int8))) == "5 * float64"
     )
-    assert str(ak.operations.type(array_from_int8)) == "?float64"
+    assert str(ak.operations.type(array_from_int8)) == "5 * ?float64"
     assert (
         str(ak.operations.type(ak.highlevel.Array(array_from_int8))) == "5 * ?float64"
     )
+    assert str(content_from_int8.form.type) == "float64"
+    assert str(array_from_int8.form.type) == "?float64"
 
 
 def test_RegularArray_and_ListArray():
@@ -67,17 +75,17 @@ def test_RegularArray_and_ListArray():
     stops = ak.index.Index64(np.array([2, 3]))
     listarray = ak.contents.ListArray(starts, stops, regulararray)
 
-    assert str(ak.operations.type(content)) == "float64"
-    assert str(ak.operations.type(regulararray)) == "2 * var * float64"
-    assert str(ak.operations.type(listarray)) == "var * 2 * var * float64"
+    assert str(ak.operations.type(content)) == "10 * float64"
+    assert str(ak.operations.type(regulararray)) == "3 * 2 * var * float64"
+    assert str(ak.operations.type(listarray)) == "2 * var * 2 * var * float64"
 
     regulararray_int8 = ak.operations.values_astype(
         regulararray, "int8", highlevel=False
     )
-    assert str(ak.operations.type(regulararray_int8)) == "2 * var * int8"
+    assert str(ak.operations.type(regulararray_int8)) == "3 * 2 * var * int8"
 
     listarray_bool = ak.operations.values_astype(listarray, "bool", highlevel=False)
-    assert str(ak.operations.type(listarray_bool)) == "var * 2 * var * bool"
+    assert str(ak.operations.type(listarray_bool)) == "2 * var * 2 * var * bool"
 
 
 def test_ufunc_afterward():

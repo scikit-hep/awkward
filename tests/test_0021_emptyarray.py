@@ -13,9 +13,11 @@ def test_unknown():
     e = ak.contents.EmptyArray()
     a = ak.contents.ListOffsetArray(i, e)
     assert to_list(a) == [[], [], []]
-    assert str(ak.operations.type(a)) == "var * unknown"
-    assert ak.operations.type(a) == ak.types.ListType(ak.types.UnknownType())
-    assert not ak.operations.type(a) == ak.types.NumpyType("float64")
+    assert str(ak.operations.type(a)) == "3 * var * unknown"
+    assert ak.operations.type(a) == ak.types.ArrayType(
+        ak.types.ListType(ak.types.UnknownType()), 3
+    )
+    assert ak.operations.type(a) != ak.types.ArrayType(ak.types.NumpyType("float64"), 3)
 
     i = ak.index.Index64(np.array([0, 0, 0, 0, 0, 0], dtype=np.int64))
     ii = ak.index.Index64(np.array([0, 0, 2, 5], dtype=np.int64))
@@ -23,9 +25,9 @@ def test_unknown():
     a = ak.contents.ListOffsetArray(ii, a)
 
     assert to_list(a) == [[], [[], []], [[], [], []]]
-    assert str(ak.operations.type(a)) == "var * var * unknown"
-    assert ak.operations.type(a) == ak.types.ListType(
-        ak.types.ListType(ak.types.UnknownType())
+    assert str(ak.operations.type(a)) == "3 * var * var * unknown"
+    assert ak.operations.type(a) == ak.types.ArrayType(
+        ak.types.ListType(ak.types.ListType(ak.types.UnknownType())), 3
     )
 
 

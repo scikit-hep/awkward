@@ -120,11 +120,13 @@ class ListOffsetArray(Content):
             form_key=form_key,
         )
 
-    def _to_buffers(self, form, getkey, container, backend):
+    def _to_buffers(self, form, getkey, container, backend, byteorder):
         assert isinstance(form, self.form_cls)
         key = getkey(self, form, "offsets")
-        container[key] = ak._util.little_endian(self._offsets.raw(backend.index_nplike))
-        self._content._to_buffers(form.content, getkey, container, backend)
+        container[key] = ak._util.native_to_byteorder(
+            self._offsets.raw(backend.index_nplike), byteorder
+        )
+        self._content._to_buffers(form.content, getkey, container, backend, byteorder)
 
     def _to_typetracer(self, forget_length: bool) -> Self:
         offsets = self._offsets.to_nplike(ak._typetracer.TypeTracer.instance())
@@ -958,8 +960,6 @@ class ListOffsetArray(Content):
         outlength,
         ascending,
         stable,
-        kind,
-        order,
     ):
         branch, depth = self.branch_depth
 
@@ -1082,8 +1082,6 @@ class ListOffsetArray(Content):
                 nextstarts.length,
                 ascending,
                 stable,
-                kind,
-                order,
             )
 
             outcarry = ak.index.Index64.empty(
@@ -1140,17 +1138,13 @@ class ListOffsetArray(Content):
                 self._offsets.length - 1,
                 ascending,
                 stable,
-                kind,
-                order,
             )
             outoffsets = self._compact_offsets64(True)
             return ak.contents.ListOffsetArray(
                 outoffsets, outcontent, parameters=self._parameters
             )
 
-    def _sort_next(
-        self, negaxis, starts, parents, outlength, ascending, stable, kind, order
-    ):
+    def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
         branch, depth = self.branch_depth
 
         if (
@@ -1228,8 +1222,6 @@ class ListOffsetArray(Content):
                 maxnextparents[0] + 1,
                 ascending,
                 stable,
-                kind,
-                order,
             )
 
             outcarry = ak.index.Index64.empty(
@@ -1285,8 +1277,6 @@ class ListOffsetArray(Content):
                 self._offsets.length - 1,
                 ascending,
                 stable,
-                kind,
-                order,
             )
             outoffsets = self._compact_offsets64(True)
             return ak.contents.ListOffsetArray(

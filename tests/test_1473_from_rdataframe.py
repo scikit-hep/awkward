@@ -46,7 +46,6 @@ def test_to_from_data_frame_large():
     assert len(ak_array_in) == len(ak_array_out)
 
 
-@pytest.mark.skip(reason="FIXME: arrays of boolean are not supported yet")
 def test_data_frame_boolean():
     ak_array_in = ak.Array([True, False, True, True, True])
 
@@ -58,7 +57,7 @@ def test_data_frame_boolean():
         data_frame,
         columns=("x",),
     )
-    assert ak_array_in.to_list() == ak_array_out.to_list()
+    assert ak_array_in.to_list() == ak_array_out.x.to_list()
 
 
 def test_data_frame_integers():

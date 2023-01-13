@@ -14,17 +14,26 @@ def test_tuple():
 
 
 def test_list():
-    data = np.array([1, 2, 3, 4, 3, 2, 1, 2], dtype=np.int64)
-    result = np.partition(ak.from_numpy(data), [4, 6])
+    A = np.eye(2) * 2
+    B = np.eye(3) * 3
+    result = np.block(
+        [
+            [ak.from_numpy(A), ak.from_numpy(np.zeros((2, 3)))],
+            [ak.from_numpy(np.ones((3, 2))), ak.from_numpy(B)],
+        ]
+    )
     assert isinstance(result, ak.Array)
-    assert ak._util.arrays_approx_equal(result, np.partition(data, [4, 6]))
+    assert ak._util.arrays_approx_equal(
+        result, np.block([[A, np.zeros((2, 3))], [np.ones((3, 2)), B]])
+    )
 
 
 def test_array():
-    data = np.array([1, 2, 3, 4, 3, 2, 1, 2], dtype=np.int64)
-    result = np.partition(ak.from_numpy(data), ak.Array([4, 6]))
+    haystack = np.array([1, 2, 3, 4, 4, 5, 6, 7], dtype=np.int64)
+    needle = np.array([5, 0, 2], dtype=np.int64)
+    result = np.searchsorted(ak.from_numpy(haystack), ak.from_numpy(needle))
     assert isinstance(result, ak.Array)
-    assert ak._util.arrays_approx_equal(result, np.partition(data, np.array([4, 6])))
+    assert ak._util.arrays_approx_equal(result, np.searchsorted(haystack, needle))
 
 
 def test_scalar():
