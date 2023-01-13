@@ -40,7 +40,7 @@ jobs:
         key: ${{ runner.os }}-${{ env.PYTHON_VERSION }}-awkward-cpp-wasm-${{ hashFiles('awkward-cpp/**') }}
 
     - name: Install EMSDK
-      uses: mymindstorm/setup-emsdk@v11
+      uses: mymindstorm/setup-emsdk@v12
       if: steps.cache-awkward-cpp-wasm-wheel.outputs.cache-hit != 'true'
       with:
         version: 3.1.14
