@@ -102,6 +102,7 @@ def _impl(iterable, highlevel, behavior, allow_record, initial, resize):
         buffers,
         buffer_key="{form_key}-{attribute}",
         backend="cpu",
+        byteorder=ak._util.native_byteorder,
         highlevel=highlevel,
         behavior=behavior,
         simplify=True,

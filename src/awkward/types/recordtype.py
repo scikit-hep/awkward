@@ -7,8 +7,10 @@ import awkward as ak
 import awkward._prettyprint
 from awkward.forms.form import _parameters_equal
 from awkward.types.type import Type
+from awkward.typing import final
 
 
+@final
 class RecordType(Type):
     def __init__(self, contents, fields, *, parameters=None, typestr=None):
         if not isinstance(contents, Iterable):

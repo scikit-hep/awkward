@@ -1079,10 +1079,12 @@ def test_UnmaskedArray():
     )
     array = ak.contents.UnmaskedArray(content)
     assert to_list(array) == [1.1, 2.2, 3.3, 4.4, 5.5]
-    assert str(ak.operations.type(content)) == "float64"
+    assert str(ak.operations.type(content)) == "5 * float64"
     assert str(ak.operations.type(ak.highlevel.Array(content))) == "5 * float64"
-    assert str(ak.operations.type(array)) == "?float64"
+    assert str(ak.operations.type(array)) == "5 * ?float64"
     assert str(ak.operations.type(ak.highlevel.Array(array))) == "5 * ?float64"
+    assert str(content.form.type) == "float64"
+    assert str(array.form.type) == "?float64"
 
 
 def test_tomask():

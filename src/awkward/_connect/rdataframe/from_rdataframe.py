@@ -234,9 +234,7 @@ def from_rdataframe(data_frame, columns):
             cpp_buffers_self.to_char_buffers[builder_type](builder)
 
             array = ak.from_buffers(
-                form,
-                builder.length(),
-                buffers,
+                form, builder.length(), buffers, byteorder=ak._util.native_byteorder
             )
 
             if col == "awkward_index_":

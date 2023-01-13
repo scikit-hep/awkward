@@ -11,12 +11,13 @@ from awkward.contents.bytemaskedarray import ByteMaskedArray
 from awkward.contents.content import Content
 from awkward.forms.bitmaskedform import BitMaskedForm
 from awkward.index import Index
-from awkward.typing import Final, Self
+from awkward.typing import Final, Self, final
 
 np = ak._nplikes.NumpyMetadata.instance()
 numpy = ak._nplikes.Numpy.instance()
 
 
+@final
 class BitMaskedArray(Content):
     is_option = True
 
@@ -199,11 +200,13 @@ class BitMaskedArray(Content):
             form_key=form_key,
         )
 
-    def _to_buffers(self, form, getkey, container, backend):
+    def _to_buffers(self, form, getkey, container, backend, byteorder):
         assert isinstance(form, self.form_cls)
         key = getkey(self, form, "mask")
-        container[key] = ak._util.little_endian(self._mask.raw(backend.index_nplike))
-        self._content._to_buffers(form.content, getkey, container, backend)
+        container[key] = ak._util.native_to_byteorder(
+            self._mask.raw(backend.index_nplike), byteorder
+        )
+        self._content._to_buffers(form.content, getkey, container, backend, byteorder)
 
     def _to_typetracer(self, forget_length: bool) -> Self:
         tt = ak._typetracer.TypeTracer.instance()
@@ -513,41 +516,15 @@ class BitMaskedArray(Content):
             return out._content
 
     def _argsort_next(
-        self,
-        negaxis,
-        starts,
-        shifts,
-        parents,
-        outlength,
-        ascending,
-        stable,
-        kind,
-        order,
+        self, negaxis, starts, shifts, parents, outlength, ascending, stable
     ):
         return self.to_IndexedOptionArray64()._argsort_next(
-            negaxis,
-            starts,
-            shifts,
-            parents,
-            outlength,
-            ascending,
-            stable,
-            kind,
-            order,
+            negaxis, starts, shifts, parents, outlength, ascending, stable
         )
 
-    def _sort_next(
-        self, negaxis, starts, parents, outlength, ascending, stable, kind, order
-    ):
+    def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
         return self.to_IndexedOptionArray64()._sort_next(
-            negaxis,
-            starts,
-            parents,
-            outlength,
-            ascending,
-            stable,
-            kind,
-            order,
+            negaxis, starts, parents, outlength, ascending, stable
         )
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):

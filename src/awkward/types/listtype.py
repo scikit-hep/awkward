@@ -3,8 +3,10 @@
 import awkward as ak
 from awkward.forms.form import _parameters_equal
 from awkward.types.type import Type
+from awkward.typing import final
 
 
+@final
 class ListType(Type):
     def __init__(self, content, *, parameters=None, typestr=None):
         if not isinstance(content, Type):

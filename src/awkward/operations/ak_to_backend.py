@@ -19,8 +19,8 @@ def to_backend(array, backend, *, highlevel=True, behavior=None):
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
-    Converts an array from `"cpu"`, `"cuda"`, or `"jax"` kernels to `"cpu"`,
-    `"cuda"`, or `"jax"`.
+    Converts an array from `"cpu"`, `"cuda"`, `"jax"` kernels to `"cpu"`,
+    `"cuda"`, `"jax"`, or `"typetracer"` .
 
     Any components that are already in the desired backend are viewed,
     rather than copied, so this operation can be an inexpensive way to ensure

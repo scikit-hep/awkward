@@ -22,10 +22,10 @@ repos:
     args: ["--pytest-test-first"]
 
 - repo: https://github.com/PyCQA/isort
-  rev: "v5.11.3"
+  rev: "5.11.4"
   hooks:
     - id: isort
-      exclude: ^src/(awkward|awkward/_v2)/__init__\.py$
+      exclude: ^src/awkward/__init__\.py$
 
 - repo: https://github.com/asottile/setup-cfg-fmt
   rev: v2.2.0

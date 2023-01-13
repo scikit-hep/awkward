@@ -5,6 +5,7 @@ from collections.abc import Iterable
 import awkward as ak
 from awkward._util import unset
 from awkward.forms.form import Form, _parameters_equal
+from awkward.typing import final
 
 np = ak._nplikes.NumpyMetadata.instance()
 
@@ -34,6 +35,7 @@ def from_dtype(dtype, parameters=None):
     )
 
 
+@final
 class NumpyForm(Form):
     is_numpy = True
 

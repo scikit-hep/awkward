@@ -6,6 +6,7 @@ import re
 import awkward as ak
 from awkward.forms.form import _parameters_equal
 from awkward.types.type import Type
+from awkward.typing import final
 
 np = ak._nplikes.NumpyMetadata.instance()
 
@@ -92,6 +93,7 @@ for primitive, dtype in _primitive_to_dtype_dict.items():
     _dtype_to_primitive_dict[dtype] = primitive
 
 
+@final
 class NumpyType(Type):
     def __init__(self, primitive, *, parameters=None, typestr=None):
         primitive = dtype_to_primitive(primitive_to_dtype(primitive))

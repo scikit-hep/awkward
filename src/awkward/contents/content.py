@@ -9,7 +9,7 @@ from numbers import Complex, Real
 import awkward as ak
 from awkward._backends import Backend
 from awkward.forms.form import Form, _parameters_equal
-from awkward.typing import Any, AxisMaybeNone, Self, TypeAlias, TypedDict
+from awkward.typing import Any, AxisMaybeNone, Literal, Self, TypeAlias, TypedDict
 
 np = ak._nplikes.NumpyMetadata.instance()
 numpy = ak._nplikes.Numpy.instance()
@@ -197,6 +197,7 @@ class Content:
         getkey: Callable[[Content, Form, str], str],
         container: MutableMapping[str, Any] | None,
         backend: Backend,
+        byteorder: Literal["<", ">"],
     ) -> tuple[Form, int, Mapping[str, Any]]:
         raise ak._errors.wrap_error(NotImplementedError)
 
@@ -785,8 +786,6 @@ class Content:
         outlength: int,
         ascending: bool,
         stable: bool,
-        kind: Any,
-        order: Any,
     ):
         raise ak._errors.wrap_error(NotImplementedError)
 
@@ -798,8 +797,6 @@ class Content:
         outlength: int,
         ascending: bool,
         stable: bool,
-        kind: Any,
-        order: Any,
     ):
         raise ak._errors.wrap_error(NotImplementedError)
 

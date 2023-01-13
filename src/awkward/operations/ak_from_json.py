@@ -492,7 +492,9 @@ def _no_schema(
 
     formstr, length, buffers = builder.to_buffers()
     form = ak.forms.from_json(formstr)
-    layout = ak.operations.from_buffers(form, length, buffers, highlevel=False)
+    layout = ak.operations.from_buffers(
+        form, length, buffers, byteorder=ak._util.native_byteorder, highlevel=False
+    )
 
     layout = _record_to_complex(layout, complex_record_fields)
 
@@ -570,7 +572,9 @@ def _yes_schema(
         except Exception as err:
             raise ak._errors.wrap_error(ValueError(str(err))) from None
 
-    layout = ak.operations.from_buffers(form, length, container, highlevel=False)
+    layout = ak.operations.from_buffers(
+        form, length, container, byteorder=ak._util.native_byteorder, highlevel=False
+    )
     layout = _record_to_complex(layout, complex_record_fields)
 
     if is_record and read_one:

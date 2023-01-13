@@ -49,7 +49,7 @@ jobs:
       if: steps.cache-awkward-cpp-wasm-wheel.outputs.cache-hit != 'true'
       run: |
         # pyodide-build doesn't work out of the box with pipx
-        python3 -m pip install pyyaml pyodide-build==0.22.0
+        python3 -m pip install pyyaml pyodide-build==0.21.0
         export CMAKE_ARGS="-DEMSCRIPTEN=1"
         pyodide build --exports whole_archive
       working-directory: awkward-cpp
@@ -213,34 +213,6 @@ jobs:
     - name: Generate Python documentation
       run: sphinx-build -M html . _build/
       working-directory: docs
-
-    - name: Check links
-      id: check-links
-      run: sphinx-build -M linkcheck . _build/
-      working-directory: docs
-
-    - name: Output annotations
-      if: success() || steps.check-links.outcome == 'failure'
-      run: |
-        import pathlib
-        import json
-
-        docs_path = pathlib.Path("docs")
-        output_path = docs_path / "_build" / "linkcheck" / "output.json"
-        with output_path.open() as f:
-          data = [json.loads(l) for l in f]
-
-        for record in data:
-          if record['status'] != "broken":
-            continue
-          record['path'] = (docs_path / record['filename'])
-          print(
-            "::error file={path},line={lineno}::{uri} URI was {status} (code: {code}): {info}".format_map(record)
-          )
-          print(
-            "??file={path},line={lineno}??{uri} URI was {status} (code: {code}): {info}".format_map(record)
-          )
-      shell: python
 
     - name: Upload docs artefact
       uses: actions/upload-artifact@v3

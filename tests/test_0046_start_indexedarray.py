@@ -52,10 +52,12 @@ def test_type():
     content = ak.contents.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4]))
     index = ak.index.Index32(np.array([2, 2, 0, 3, 4], dtype=np.int32))
     array = ak.contents.IndexedArray(index, content)
-    assert ak.operations.type(array) == ak.types.NumpyType("float64")
+    assert ak.operations.type(array) == ak.types.ArrayType(
+        ak.types.NumpyType("float64"), 5
+    )
     array = ak.contents.IndexedOptionArray(index, content)
-    assert ak.operations.type(array) == ak.types.OptionType(
-        ak.types.NumpyType("float64")
+    assert ak.operations.type(array) == ak.types.ArrayType(
+        ak.types.OptionType(ak.types.NumpyType("float64")), 5
     )
 
 

@@ -1,11 +1,11 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._connect.numpy import unsupported
 
 np = ak._nplikes.NumpyMetadata.instance()
 
 
-@ak._connect.numpy.implements("broadcast_arrays")
 def broadcast_arrays(
     *arrays,
     depth_limit=None,
@@ -230,3 +230,8 @@ def _impl(
     )
     assert isinstance(out, tuple)
     return [ak._util.wrap(x, behavior, highlevel) for x in out]
+
+
+@ak._connect.numpy.implements("broadcast_arrays")
+def _nep_18_impl(*args, subok=unsupported):
+    return broadcast_arrays(*args)
