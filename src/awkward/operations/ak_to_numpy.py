@@ -50,4 +50,4 @@ def _impl(array, allow_missing):
         backend = ak._backends.NumpyBackend.instance()
         numpy_layout = layout.to_backend(backend)
 
-        return numpy_layout.to_backend_array(allow_missing=True)
+        return numpy_layout.to_backend_array(allow_missing=allow_missing)
