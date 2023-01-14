@@ -11,7 +11,6 @@ from collections.abc import Iterable, Mapping, Sequence, Sized
 
 import numpy
 import packaging.version
-from awkward_cpp.lib import _ext
 
 import awkward as ak
 
@@ -736,117 +735,6 @@ def from_arraylib(array, regulararray, recordarray, highlevel, behavior):
         layout = ak.contents.RecordArray(contents, array.dtype.names)
 
     return ak._util.wrap(layout, behavior, highlevel)
-
-
-def to_arraylib(module, array, allow_missing):
-    def _impl(array):
-        if isinstance(array, (bool, numbers.Number)):
-            return module.array(array)
-
-        elif isinstance(array, module.ndarray):
-            return array
-
-        elif isinstance(array, np.ndarray):
-            return module.asarray(array)
-
-        elif isinstance(array, ak.highlevel.Array):
-            return _impl(array.layout)
-
-        elif isinstance(array, ak.highlevel.Record):
-            raise ak._errors.wrap_error(
-                ValueError(f"{module.__name__} does not support record structures")
-            )
-
-        elif isinstance(array, ak.highlevel.ArrayBuilder):
-            return _impl(array.snapshot().layout)
-
-        elif isinstance(array, _ext.ArrayBuilder):
-            return _impl(array.snapshot())
-
-        elif ak.operations.parameters(array).get("__array__") in (
-            "bytestring",
-            "string",
-        ):
-            raise ak._errors.wrap_error(
-                ValueError(f"{module.__name__} does not support arrays of strings")
-            )
-
-        elif isinstance(array, ak.contents.EmptyArray):
-            return module.array([])
-
-        elif isinstance(array, ak.contents.IndexedArray):
-            return _impl(array.project())
-
-        elif isinstance(array, ak.contents.UnionArray):
-            contents = [_impl(array.project(i)) for i in range(len(array.contents))]
-            out = module.concatenate(contents)
-
-            tags = module.asarray(array.tags)
-            for tag, content in enumerate(contents):
-                mask = tags == tag
-                if ak._nplikes.Jax.is_own_array(out):
-                    out = out.at[mask].set(content)
-                else:
-                    out[mask] = content
-            return out
-
-        elif isinstance(array, ak.contents.UnmaskedArray):
-            return _impl(array.content)
-
-        elif isinstance(array, ak.contents.IndexedOptionArray):
-            content = _impl(array.project())
-
-            mask0 = array.mask_as_bool(valid_when=False)
-            if mask0.any():
-                raise ak._errors.wrap_error(
-                    ValueError(f"{module.__name__} does not support masked arrays")
-                )
-            else:
-                return content
-
-        elif isinstance(array, ak.contents.RegularArray):
-            out = _impl(array.content)
-            head, tail = out.shape[0], out.shape[1:]
-            shape = (head // array.size, array.size) + tail
-            return out[: shape[0] * array.size].reshape(shape)
-
-        elif isinstance(array, (ak.contents.ListArray, ak.contents.ListOffsetArray)):
-            return _impl(array.to_RegularArray())
-
-        elif isinstance(array, ak.contents.RecordArray):
-            raise ak._errors.wrap_error(
-                ValueError(f"{module.__name__} does not support record structures")
-            )
-
-        elif isinstance(array, ak.contents.NumpyArray):
-            return module.asarray(array.data)
-
-        elif isinstance(array, ak.contents.Content):
-            raise ak._errors.wrap_error(
-                AssertionError(f"unrecognized Content type: {type(array)}")
-            )
-
-        elif isinstance(array, Iterable):
-            return module.asarray(array)
-
-        else:
-            raise ak._errors.wrap_error(
-                ValueError(f"cannot convert {array} into {type(module.array([]))}")
-            )
-
-    if module.__name__ in ("jax.numpy", "cupy"):
-        return _impl(array)
-    elif module.__name__ == "numpy":
-        layout = ak.operations.to_layout(array, allow_record=True, allow_other=True)
-
-        if isinstance(layout, (ak.contents.Content, ak.record.Record)):
-            return layout.to_numpy(allow_missing=allow_missing)
-        else:
-            return module.asarray(array)
-    else:
-        raise ak._errors.wrap_error(
-            ValueError(f"{module.__name__} is not supported by to_arraylib")
-        )
 
 
 def maybe_posaxis(layout, axis, depth):

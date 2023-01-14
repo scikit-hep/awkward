@@ -1949,14 +1949,12 @@ class ListOffsetArray(Content):
                 ),
             )
 
-    def _to_numpy(self, allow_missing):
+    def _to_backend_array(self, allow_missing, backend):
         array_param = self.parameter("__array__")
         if array_param in {"bytestring", "string"}:
-            return self._backend.nplike.array(self.to_list())
+            return backend.nplike.array(self.to_list())
 
-        return ak.operations.to_numpy(
-            self.to_RegularArray(), allow_missing=allow_missing
-        )
+        return self.to_RegularArray()._to_backend_array(allow_missing, backend)
 
     def _completely_flatten(self, backend, options):
         if (

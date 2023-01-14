@@ -239,7 +239,9 @@ def from_rdataframe(data_frame, columns):
 
             if col == "awkward_index_":
                 contents_index = ak.index.Index64(
-                    array.layout.to_numpy(allow_missing=True)
+                    array.layout.to_backend_array(
+                        allow_missing=True, backend=ak._backends.NumpyBackend.instance()
+                    )
                 )
             else:
                 contents[col] = array.layout

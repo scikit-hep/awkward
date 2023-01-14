@@ -1345,8 +1345,8 @@ class ListArray(Content):
             pyarrow, mask_node, validbytes, length, options
         )
 
-    def _to_numpy(self, allow_missing):
-        return self.to_RegularArray()._to_numpy(allow_missing)
+    def _to_backend_array(self, allow_missing, backend):
+        return self.to_RegularArray()._to_backend_array(allow_missing, backend)
 
     def _completely_flatten(self, backend, options):
         if (
