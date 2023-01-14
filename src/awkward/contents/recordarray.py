@@ -1010,7 +1010,7 @@ class RecordArray(Content):
                 out[i] = dict(zip(fields, [x[i] for x in contents]))
             return out
 
-    def to_backend(self, backend: ak._backends.Backend) -> Self:
+    def _to_backend(self, backend: ak._backends.Backend) -> Self:
         contents = [content.to_backend(backend) for content in self._contents]
         return RecordArray(
             contents,

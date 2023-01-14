@@ -1440,7 +1440,7 @@ class ListArray(Content):
     def _to_list(self, behavior, json_conversions):
         return ListOffsetArray._to_list(self, behavior, json_conversions)
 
-    def to_backend(self, backend: ak._backends.Backend) -> Self:
+    def _to_backend(self, backend: ak._backends.Backend) -> Self:
         content = self._content.to_backend(backend)
         starts = self._starts.to_nplike(backend.index_nplike)
         stops = self._stops.to_nplike(backend.index_nplike)

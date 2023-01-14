@@ -1028,7 +1028,9 @@ class Content:
             allow_missing
         )
 
-    def to_backend_array(self, allow_missing: bool = True, *, backend=None):
+    def to_backend_array(
+        self, allow_missing: bool = True, *, backend: Backend | str | None = None
+    ):
         if backend is None:
             backend = self._backend
         else:
@@ -1209,7 +1211,14 @@ class Content:
     ) -> tuple[ak.index.Index, Content]:
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def to_backend(self, backend: Backend) -> Self:
+    def to_backend(self, backend: Backend | str | None = None) -> Self:
+        if backend is None:
+            backend = self._backend
+        else:
+            backend = ak._backends.regularize_backend(backend)
+        return self._to_backend(backend)
+
+    def _to_backend(self, backend: Backend) -> Self:
         raise ak._errors.wrap_error(NotImplementedError)
 
     def with_parameter(self, key: str, value: Any) -> Self:

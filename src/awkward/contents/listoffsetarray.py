@@ -2125,7 +2125,7 @@ class ListOffsetArray(Content):
                 out[i] = content[starts_data[i] : stops_data[i]]
             return out
 
-    def to_backend(self, backend: ak._backends.Backend) -> Self:
+    def _to_backend(self, backend: ak._backends.Backend) -> Self:
         content = self._content.to_backend(backend)
         offsets = self._offsets.to_nplike(backend.index_nplike)
         return ListOffsetArray(offsets, content, parameters=self._parameters)

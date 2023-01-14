@@ -169,6 +169,7 @@ class ArgMax(Reducer):
 class Count(Reducer):
     name: Final = "count"
     preferred_dtype: Final = np.int64
+    needs_position: Final = False
 
     @classmethod
     def return_dtype(cls, given_dtype):
@@ -197,6 +198,7 @@ class Count(Reducer):
 class CountNonzero(Reducer):
     name: Final = "count_nonzero"
     preferred_dtype: Final = np.float64
+    needs_position: Final = False
 
     @classmethod
     def return_dtype(cls, given_dtype):
@@ -247,6 +249,7 @@ class CountNonzero(Reducer):
 class Sum(Reducer):
     name: Final = "sum"
     preferred_dtype: Final = np.float64
+    needs_position: Final = False
 
     def apply(self, array, parents, outlength):
         assert isinstance(array, ak.contents.NumpyArray)
@@ -351,6 +354,7 @@ class Sum(Reducer):
 class Prod(Reducer):
     name: Final = "prod"
     preferred_dtype: Final = np.int64
+    needs_position: Final = False
 
     def apply(self, array, parents, outlength):
         assert isinstance(array, ak.contents.NumpyArray)
@@ -437,6 +441,7 @@ class Prod(Reducer):
 class Any(Reducer):
     name: Final = "any"
     preferred_dtype: Final = np.bool_
+    needs_position: Final = False
 
     @classmethod
     def return_dtype(cls, given_dtype):
@@ -487,6 +492,7 @@ class Any(Reducer):
 class All(Reducer):
     name: Final = "all"
     preferred_dtype: Final = np.bool_
+    needs_position: Final = False
 
     @classmethod
     def return_dtype(cls, given_dtype):
@@ -537,6 +543,7 @@ class All(Reducer):
 class Min(Reducer):
     name: Final = "min"
     preferred_dtype: Final = np.float64
+    needs_position: Final = False
 
     def __init__(self, initial: float | None):
         self._initial = initial
@@ -637,6 +644,7 @@ class Min(Reducer):
 class Max(Reducer):
     name: Final = "max"
     preferred_dtype: Final = np.float64
+    needs_position: Final = False
 
     def __init__(self, initial):
         self._initial = initial

@@ -492,7 +492,7 @@ class UnmaskedArray(Content):
 
         return self._content._to_list(behavior, json_conversions)
 
-    def to_backend(self, backend: ak._backends.Backend) -> Self:
+    def _to_backend(self, backend: ak._backends.Backend) -> Self:
         content = self._content.to_backend(backend)
         return UnmaskedArray(content, parameters=self._parameters)
 
