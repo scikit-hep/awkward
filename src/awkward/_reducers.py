@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 from typing import Any as AnyType
 
 import awkward as ak
@@ -12,11 +13,19 @@ numpy = ak._nplikes.Numpy.instance()
 DTypeLike = AnyType
 
 
-class Reducer:
+class Reducer(ABC):
     name: str
 
     # Does the output correspond to array positions?
-    needs_position: Final = False
+    @property
+    @abstractmethod
+    def needs_position(self) -> bool:
+        ...
+
+    @property
+    @abstractmethod
+    def preferred_dtype(self) -> DTypeLike:
+        ...
 
     @classmethod
     def highlevel_function(cls):
@@ -46,9 +55,11 @@ class Reducer:
             type = np.float32
         return type
 
+    @abstractmethod
     def identity_for(self, dtype: DTypeLike | None):
         raise ak._errors.wrap_error(NotImplementedError)
 
+    @abstractmethod
     def apply(self, array, parents, outlength: int):
         raise ak._errors.wrap_error(NotImplementedError)
 
