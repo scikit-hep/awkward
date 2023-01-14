@@ -20,7 +20,10 @@ KernelType: TypeAlias = Callable[..., None]
 
 
 class Backend(Singleton, ABC):
-    name: str
+    @property
+    @abstractmethod
+    def name(self) -> str:
+        raise ak._errors.wrap_error(NotImplementedError)
 
     @property
     @abstractmethod
@@ -162,6 +165,23 @@ class TypeTracerBackend(Backend):
 
     def __getitem__(self, index: KernelKeyType) -> TypeTracerKernel:
         return TypeTracerKernel(index)
+
+    def apply_ufunc(self, ufunc, method, args, kwargs):
+        numpy = ak._nplikes.Numpy.instance()
+
+        shape = None
+        numpy_args = []
+        for x in args:
+            if isinstance(x, ak._typetracer.TypeTracerArray):
+                x.touch_data()
+                shape = x.shape
+                numpy_args.append(numpy.empty((0,) + x.shape[1:], x.dtype))
+            else:
+                numpy_args.append(x)
+
+        assert shape is not None
+        tmp = getattr(ufunc, method)(*numpy_args, **kwargs)
+        return self._typetracer.empty((shape[0],) + tmp.shape[1:], tmp.dtype)
 
 
 def _backend_for_nplike(nplike: ak._nplikes.NumpyLike) -> Backend:
