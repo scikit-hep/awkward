@@ -86,11 +86,6 @@ def _impl(array, behavior):
         form = ak.forms.from_json(array.form())
         return ak.types.ArrayType(form.type_from_behavior(behavior), len(array))
 
-    elif isinstance(array, ak.ArrayBuilder):
-        behavior = ak._util.behavior_of(array, behavior=behavior)
-        form = ak.forms.from_json(array._layout.form())
-        return ak.types.ArrayType(form.type_from_behavior(behavior), len(array._layout))
-
     elif isinstance(array, ak.record.Record):
         return ak.types.ScalarType(array.array.form.type_from_behavior(behavior))
 
@@ -123,6 +118,10 @@ def _impl(array, behavior):
 
     elif isinstance(array, timedelta):  # np.timedelta64 in np.generic (above)
         return ak.types.ScalarType(ak.types.NumpyType("timedelta"))
+
+    elif isinstance(array, ak.highlevel.ArrayBuilder):
+        # Don't go through `to_layout`: we want to avoid snapshotting this array
+        return _impl(array._layout, behavior)
 
     else:
         layout = ak.to_layout(array, allow_other=True, allow_record=True)
