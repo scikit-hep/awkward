@@ -79,14 +79,6 @@ def type(array, *, behavior=None):
         return _impl(array, behavior)
 
 
-def _is_dtype_like(obj):
-    return (
-        isinstance(obj, np.dtype)
-        or isinstance(obj, np.generic)
-        or (inspect.isclass(obj) and issubclass(obj, np.generic))
-    )
-
-
 def _impl(array, behavior):
     behavior = ak._util.behavior_of(array, behavior=behavior)
 
@@ -105,7 +97,11 @@ def _impl(array, behavior):
     elif isinstance(array, ak.contents.Content):
         return ak.types.ArrayType(array.form.type_from_behavior(behavior), array.length)
 
-    elif _is_dtype_like(array):
+    elif (
+        isinstance(array, np.dtype)
+        or isinstance(array, np.generic)
+        or (inspect.isclass(array) and issubclass(array, np.generic))
+    ):
         return ak.types.ScalarType(
             ak.types.NumpyType(ak.types.numpytype.dtype_to_primitive(np.dtype(array)))
         )
