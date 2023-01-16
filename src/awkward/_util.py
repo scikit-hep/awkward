@@ -157,7 +157,7 @@ def overlay_behavior(behavior: dict | None) -> collections.abc.Mapping:
     on top of the global #ak.behavior
     """
     if behavior is None:
-        print("         overlay_behavior", ak.behavior)
+        print("_util.py line 137: overlay_behavior is None")
         return ak.behavior
     return collections.ChainMap(behavior, ak.behavior)
 
@@ -243,11 +243,14 @@ def numba_array_typer(layouttype, behavior):
 
 def numba_array_lower(layouttype, behavior):
     behavior = overlay_behavior(behavior)
-    print("    numba_array_lower ", behavior)
+    print("_util.py line 225: numba_array_lower")
+    print("                                     layouttype", layouttype)
     arr = layouttype.parameters.get("__array__")
+    print("                                     __array__", arr)
     if isinstance(arr, str):
         lower = behavior.get(("__numba_lower__", arr))
         if callable(lower):
+            print("                                     lower", lower)
             return lower
     deeprec = layouttype.parameters.get("__record__")
     if isinstance(deeprec, str):

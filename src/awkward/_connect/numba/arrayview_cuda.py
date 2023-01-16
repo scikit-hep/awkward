@@ -11,6 +11,10 @@ from numba.cuda import printimpl
 from numba.core import cgutils
 
 from numba.extending import overload_method, overload
+from numba.core.extending import intrinsic as _intrinsic
+
+intrinsic = _intrinsic(target='cuda')
+
 from numba.cuda.cudaimpl import registry as cuda_registry
 from numba import cuda, types
 
@@ -182,7 +186,7 @@ def numba_cuda_DeviceNDArray_as_cudf_Series(nb_arr):
 #####################################################################
 
 def code_to_function(code, function_name, externals=None, debug=True):
-    print("arrayview.py line 21: code_to_function")
+    print("arrayview_cuda.py line 21: code_to_function")
     if debug:
         print("################### " + function_name)  # noqa: T201
         print(code)  # noqa: T201
@@ -192,7 +196,7 @@ def code_to_function(code, function_name, externals=None, debug=True):
 
 
 def tonumbatype(form):
-    print("arrayview.py line 31: tonumbatype")
+    print("arrayview_cuda.py line 31: tonumbatype")
     if isinstance(form, ak.forms.EmptyForm):
         return tonumbatype(form.toNumpyForm(np.dtype(np.float64)))
 
@@ -238,7 +242,7 @@ def tonumbatype(form):
 
 @numba.extending.typeof_impl.register(ak._lookup.Lookup)
 def typeof_Lookup(obj, c):
-    print("arrayview.py line 77: typeof_Lookup")
+    print("arrayview_cuda.py line 77: typeof_Lookup")
     return LookupType()
 
 
@@ -246,21 +250,21 @@ class LookupType(numba.types.Type):
     arraytype = numba.types.Array(numba.intp, 1, "C")
 
     def __init__(self):
-        print("arrayview.py line 85: LookupType::__init__")
+        print("arrayview_cuda.py line 85: LookupType::__init__")
         super().__init__(name="ak.LookupType()")
 
 
 @numba.extending.register_model(LookupType)
 class LookupModel(numba.core.datamodel.models.StructModel):
     def __init__(self, dmm, fe_type):
-        print("arrayview.py line 92: LookupModel::__init__")
+        print("arrayview_cuda.py line 92: LookupModel::__init__")
         members = [("arrayptrs", fe_type.arraytype)]
         super().__init__(dmm, fe_type, members)
 
 
 @numba.extending.unbox(LookupType)
 def unbox_Lookup(lookuptype, lookupobj, c):
-    print("arrayview.py line 99: unbox_Lookup", lookuptype, lookupobj, c)
+    print("arrayview_cuda.py line 99: unbox_Lookup", lookuptype, lookupobj, c)
     arrayptrs_obj = c.pyapi.object_getattr_string(lookupobj, "arrayptrs")
 
     proxyout = c.context.make_helper(c.builder, lookuptype)
@@ -280,7 +284,7 @@ def unbox_Lookup(lookuptype, lookupobj, c):
 class ArrayView:
     @classmethod
     def fromarray(cls, array):
-        print("arrayview.py line 119: ArrayView::fromarray")
+        print("arrayview_cuda.py line 119: ArrayView::fromarray")
         behavior = ak._util.behavior_of(array)
         layout = ak.operations.to_layout(
             array,
@@ -300,7 +304,7 @@ class ArrayView:
         )
 
     def __init__(self, type, behavior, lookup, pos, start, stop, fields):
-        print("arrayview.py line 139: ArrayView::__init__")
+        print("arrayview_cuda.py line 139: ArrayView::__init__")
         self.type = type
         self.behavior = behavior
         self.lookup = lookup
@@ -308,10 +312,10 @@ class ArrayView:
         self.start = start
         self.stop = stop
         self.fields = fields
-        print("arrayview.py line 147: ArrayView __init__", self, self.lookup, self.pos, self.start, self.stop)
+        print("arrayview_cuda.py line 147: ArrayView __init__", self, self.lookup, self.pos, self.start, self.stop)
 
     def toarray(self):
-        print("arrayview.py line 150: ArrayView::toarray")
+        print("arrayview_cuda.py line 150: ArrayView::toarray")
         layout = self.type.tolayout(self.lookup, self.pos, self.fields)
         sliced = layout._getitem_range(slice(self.start, self.stop))
         return ak._util.wrap(sliced, self.behavior)
@@ -319,12 +323,12 @@ class ArrayView:
 
 @numba.extending.typeof_impl.register(ArrayView)
 def typeof_ArrayView(obj, c):
-    print("arrayview.py line 158: typeof_ArrayView", obj, c)
+    print("arrayview_cuda.py line 158: typeof_ArrayView", obj, c)
     return ArrayViewType(obj.type, obj.behavior, obj.fields)
 
 
 def wrap(type, viewtype, fields):
-    print("arrayview.py line 163: wrap")
+    print("arrayview_cuda.py line 163: wrap")
     if fields is None:
         return ArrayViewType(type, viewtype.behavior, viewtype.fields)
     else:
@@ -332,13 +336,13 @@ def wrap(type, viewtype, fields):
 
 
 def repr_behavior(behavior):
-    print("arrayview.py line 171: repr_behavior")
+    print("arrayview_cuda.py line 171: repr_behavior")
     return repr(behavior)
 
 
 class ArrayViewType(numba.types.IterableType, numba.types.Sized):
     def __init__(self, type, behavior, fields):
-        print("arrayview.py line 177: ArrayViewType::__init__")
+        print("arrayview_cuda.py line 177: ArrayViewType::__init__")
         super().__init__(
             name="ak.ArrayView({}, {}, {})".format(
                 type.name, repr_behavior(behavior), repr(fields)
@@ -350,14 +354,14 @@ class ArrayViewType(numba.types.IterableType, numba.types.Sized):
 
     @property
     def iterator_type(self):
-        print("arrayview.py line 189: iterator_type")
+        print("arrayview_cuda.py line 189: iterator_type")
         return IteratorType(self)
 
 
 @numba.extending.register_model(ArrayViewType)
 class ArrayViewModel(numba.core.datamodel.models.StructModel):
     def __init__(self, dmm, fe_type):
-        print("arrayview.py line 196: ArrayViewModel::__init__")
+        print("arrayview_cuda.py line 196: ArrayViewModel::__init__")
         members = [
             ("pos", numba.intp),
             ("start", numba.intp),
@@ -370,18 +374,18 @@ class ArrayViewModel(numba.core.datamodel.models.StructModel):
 
 @numba.core.imputils.lower_constant(ArrayViewType)
 def lower_const_Array(context, builder, viewtype, array):
-    print("arrayview.py line 209: lower_const_Array for CPU")
+    print("arrayview_cuda.py line 209: lower_const_Array for CPU")
     return lower_const_view(context, builder, viewtype, array._numbaview)
 
 
 @cuda_registry.lower_constant(ArrayViewType)
 def lower_const_Array(context, builder, viewtype, array):
-    print("arrayview.py line 216: lower_const_Array for CUDA")
+    print("arrayview_cuda.py line 216: lower_const_Array for CUDA")
     return lower_const_view(context, builder, viewtype, array._numbaview)
 
 
 def lower_const_view(context, builder, viewtype, view):
-    print("arrayview.py line 214: lower_const_view")
+    print("arrayview_cuda.py line 214: lower_const_view")
     pos = view.pos
     start = view.start
     stop = view.stop
@@ -408,7 +412,7 @@ def lower_const_view(context, builder, viewtype, view):
 
 @numba.extending.unbox(ArrayViewType)
 def unbox_Array(viewtype, arrayobj, c):
-    print("arrayview.py line 241: unbox_Array")
+    print("arrayview_cuda.py line 241: unbox_Array")
     view_obj = c.pyapi.object_getattr_string(arrayobj, "_numbaview")
     out = unbox_ArrayView(viewtype, view_obj, c)
     c.pyapi.decref(view_obj)
@@ -416,7 +420,7 @@ def unbox_Array(viewtype, arrayobj, c):
 
 
 def unbox_ArrayView(viewtype, view_obj, c):
-    print("arrayview.py line 249: unbox_ArrayView")
+    print("arrayview_cuda.py line 249: unbox_ArrayView")
     pos_obj = c.pyapi.object_getattr_string(view_obj, "pos")
     start_obj = c.pyapi.object_getattr_string(view_obj, "start")
     stop_obj = c.pyapi.object_getattr_string(view_obj, "stop")
@@ -448,7 +452,7 @@ def unbox_ArrayView(viewtype, view_obj, c):
 
 @numba.extending.box(ArrayViewType)
 def box_Array(viewtype, viewval, c):
-    print("arrayview.py line 281: box_Array")
+    print("arrayview_cuda.py line 281: box_Array")
     arrayview_obj = box_ArrayView(viewtype, viewval, c)
     out = c.pyapi.call_method(arrayview_obj, "toarray", ())
     c.pyapi.decref(arrayview_obj)
@@ -456,7 +460,7 @@ def box_Array(viewtype, viewval, c):
 
 
 def dict2serializable(obj):
-    print("arrayview.py line 289: ...")
+    print("arrayview_cuda.py line 289: ...")
     if obj is None:
         return None
     else:
@@ -464,7 +468,7 @@ def dict2serializable(obj):
 
 
 def serializable2dict(obj):
-    print("arrayview.py line 297: ...")
+    print("arrayview_cuda.py line 297: ...")
     if obj is None:
         return None
     else:
@@ -472,7 +476,7 @@ def serializable2dict(obj):
 
 
 def box_ArrayView(viewtype, viewval, c):
-    print("arrayview.py line 305: box_ArrayView")
+    print("arrayview_cuda.py line 305: box_ArrayView")
     serializable2dict_obj = c.pyapi.unserialize(
         c.pyapi.serialize_object(serializable2dict)
     )
@@ -512,21 +516,20 @@ def box_ArrayView(viewtype, viewval, c):
 
 @numba.core.typing.templates.infer_global(len)
 class type_len(numba.core.typing.templates.AbstractTemplate):
-    print("arrayview.py line 345: class type_len")
+    print("arrayview_cuda.py line 345: class type_len")
     def generic(self, args, kwargs):
-        print("arrayview.py line 347: type_len::generic @numba.core.typing.templates.infer_global(len)")
+        print("arrayview_cuda.py line 347: type_len::generic @numba.core.typing.templates.infer_global(len)")
         if len(args) == 1 and len(kwargs) == 0 and isinstance(args[0], ArrayViewType):
-            print("arrayview.py line 349: args[0]", args[0])
+            print("arrayview_cuda.py line 349: args[0]", args[0])
             return numba.intp(args[0])
 
 
 @numba.extending.lower_builtin(len, ArrayViewType)
 def lower_len(context, builder, sig, args):
-    print("arrayview.py line 355: >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>@numba.extending.lower_builtin(len, ArrayViewType)")
-    #cgutils.printf(builder, "printf.......")
+    print("arrayview_cuda.py line 355: @numba.extending.lower_builtin(len, ArrayViewType)", sig.args[0], args[0])
     proxyin = context.make_helper(builder, sig.args[0], args[0])
     #cgutils.printf(builder, "stop %d, start %d", proxyin.stop, proxyin.start)
-    #### printimpl.print_varargs(context, builder, sig, args)
+    #printimpl.print_varargs(context, builder, sig, args)
     return builder.sub(proxyin.stop, proxyin.start)
 
 #@overload_method(ArrayViewType, "len", target="cuda")
@@ -538,15 +541,15 @@ def lower_len(context, builder, sig, args):
 
 @numba.core.typing.templates.infer_global(operator.getitem)
 class type_getitem(numba.core.typing.templates.AbstractTemplate):
-    print("arrayview.py line 371: type_getitem")
+    print("arrayview_cuda.py line 371: type_getitem")
     def generic(self, args, kwargs):
-        print("arrayview.py line 373: @numba.core.typing.templates.infer_global generic class type_getitem")
+        print("arrayview_cuda.py line 373: @numba.core.typing.templates.infer_global generic class type_getitem")
         #printimpl.print_varargs(context, builder, sig, args)
         if len(args) == 2 and len(kwargs) == 0 and isinstance(args[0], ArrayViewType):
             viewtype, wheretype = args
-            print("arrayview.py line 376: viewtype, wheretype", viewtype, wheretype)
+            print("arrayview_cuda.py line 376: viewtype, wheretype", viewtype, wheretype)
             if isinstance(wheretype, numba.types.Integer):
-                print("arrayview.py line 378: viewtype.type.getitem_at_check->", viewtype.type)
+                print("arrayview_cuda.py line 378: viewtype.type.getitem_at_check->", viewtype.type)
                 return viewtype.type.getitem_at_check(viewtype)(viewtype, wheretype)
             elif (
                 isinstance(wheretype, numba.types.SliceType) and not wheretype.has_step
@@ -568,7 +571,7 @@ def lower_setitem_at(context, builder, sig, args):
     rettype, (viewtype, wheretype) = sig.return_type, sig.args
     viewval, whereval = args
     viewproxy = context.make_helper(builder, viewtype, viewval)
-    print("arrayview.py line 400:  ------->", viewval, whereval, viewtype, repr(viewtype), viewproxy)
+    print("arrayview_cuda.py line 400:  ------->", viewval, whereval, viewtype, repr(viewtype), viewproxy)
     return viewtype.type.lower_setitem_at_check(
         context,
         builder,
@@ -584,12 +587,17 @@ def lower_setitem_at(context, builder, sig, args):
 
 @numba.extending.lower_builtin(operator.getitem, ArrayViewType, numba.types.Integer)
 def lower_getitem_at(context, builder, sig, args):
-    print("arrayview.py line 416: ????? @numba.extending.lower_builtin lower_getitem_at")
+    print("arrayview_cuda.py line 416: @numba.extending.lower_builtin lower_getitem_at")
     
     rettype, (viewtype, wheretype) = sig.return_type, sig.args
     viewval, whereval = args
     viewproxy = context.make_helper(builder, viewtype, viewval)
-    print("arrayview.py line 421:  ------->", viewval, whereval, viewtype, repr(viewtype), viewproxy)
+    print("arrayview_cuda.py line 421:  -------> viewval        ", viewval)
+    print("                                      whereval       ", whereval)
+    print("                                      viewtype       ", viewtype)
+    print("                                      repr(viewtype) ", repr(viewtype))
+    print("                                      viewproxy      ", viewproxy)
+    print("-----------------------------------------------------")
     return viewtype.type.lower_getitem_at_check(
         context,
         builder,
@@ -606,7 +614,7 @@ def lower_getitem_at(context, builder, sig, args):
 
 @numba.extending.lower_builtin(operator.getitem, ArrayViewType, numba.types.slice2_type)
 def lower_getitem_range(context, builder, sig, args):
-    print("arrayview.py line 438: ...lower_getitem_range...")
+    print("arrayview_cuda.py line 438: ...lower_getitem_range...")
     rettype, (viewtype, wheretype) = sig.return_type, sig.args
     viewval, whereval = args
     viewproxy = context.make_helper(builder, viewtype, viewval)
@@ -628,7 +636,7 @@ def lower_getitem_range(context, builder, sig, args):
     operator.getitem, ArrayViewType, numba.types.StringLiteral
 )
 def lower_getitem_field(context, builder, sig, args):
-    print("arrayview.py line 460: ...lower_getitem_field...")
+    print("arrayview_cuda.py line 460: ...lower_getitem_field...")
     _, (viewtype, wheretype) = sig.return_type, sig.args
     viewval, whereval = args
     return viewtype.type.lower_getitem_field(
@@ -638,11 +646,11 @@ def lower_getitem_field(context, builder, sig, args):
 
 @numba.core.typing.templates.infer_getattr
 class type_getattr(numba.core.typing.templates.AttributeTemplate):
-    print("arrayview.py line 470: class type_getattr")
+    print("arrayview_cuda.py line 470: class type_getattr")
     key = ArrayViewType
 
     def generic_resolve(self, viewtype, attr):
-        print("arrayview.py line 474: type_getattr::generic_resolve")
+        print("arrayview_cuda.py line 474: type_getattr::generic_resolve")
         if attr == "ndim":
             return numba.intp
         else:
@@ -651,7 +659,7 @@ class type_getattr(numba.core.typing.templates.AttributeTemplate):
 
 @numba.extending.lower_getattr_generic(ArrayViewType)
 def lower_getattr_generic(context, builder, viewtype, viewval, attr):
-    print("arrayview.py line 483: ...")
+    print("arrayview_cuda.py line 483: ...")
     if attr == "ndim":
         return context.get_constant(numba.intp, viewtype.type.ndim)
     else:
@@ -661,9 +669,9 @@ def lower_getattr_generic(context, builder, viewtype, viewval, attr):
 
 
 class IteratorType(numba.types.common.SimpleIteratorType):
-    print("arrayview.py line 493: class IteratorType")
+    print("arrayview_cuda.py line 493: class IteratorType")
     def __init__(self, viewtype):
-        print("arrayview.py line 495: IteratorType::__init__")
+        print("arrayview_cuda.py line 495: IteratorType::__init__")
         super().__init__(
             f"ak.Iterator({viewtype.name})",
             viewtype.type.getitem_at_check(viewtype),
@@ -673,20 +681,20 @@ class IteratorType(numba.types.common.SimpleIteratorType):
 
 @numba.core.typing.templates.infer
 class type_getiter(numba.core.typing.templates.AbstractTemplate):
-    print("arrayview.py line 505: class type_getiter")
+    print("arrayview_cuda.py line 505: class type_getiter")
     key = "getiter"
 
     def generic(self, args, kwargs):
-        print("arrayview.py line 509: type_getiter::generic")
+        print("arrayview_cuda.py line 509: type_getiter::generic")
         if len(args) == 1 and len(kwargs) == 0 and isinstance(args[0], ArrayViewType):
             return IteratorType(args[0])(args[0])
 
 
 @numba.core.datamodel.registry.register_default(IteratorType)
 class IteratorModel(numba.core.datamodel.models.StructModel):
-    print("arrayview.py line 516: class IteratorModel")
+    print("arrayview_cuda.py line 516: class IteratorModel")
     def __init__(self, dmm, fe_type):
-        print("arrayview.py line 518: IteratorModel::__init__")
+        print("arrayview_cuda.py line 518: IteratorModel::__init__")
         members = [
             ("view", fe_type.viewtype),
             ("length", numba.intp),
@@ -697,7 +705,7 @@ class IteratorModel(numba.core.datamodel.models.StructModel):
 
 @numba.extending.lower_builtin("getiter", ArrayViewType)
 def lower_getiter(context, builder, sig, args):
-    print("arrayview.py line 529: ...")
+    print("arrayview_cuda.py line 529: ...")
     rettype, (viewtype,) = sig.return_type, sig.args
     (viewval,) = args
     viewproxy = context.make_helper(builder, viewtype, viewval)
@@ -720,7 +728,7 @@ def lower_getiter(context, builder, sig, args):
 @numba.extending.lower_builtin("iternext", IteratorType)
 @numba.core.imputils.iternext_impl(numba.core.imputils.RefType.BORROWED)
 def lower_iternext(context, builder, sig, args, result):
-    print("arrayview.py line 552: ...")
+    print("arrayview_cuda.py line 552: ...")
     (itertype,) = sig.args
     (iterval,) = args
     proxyin = context.make_helper(builder, itertype, iterval)
@@ -1258,6 +1266,9 @@ def lower_asarray(context, builder, sig, args):
 ########## ArrayView Arguments Handler for CUDA JIT
 
 import ctypes  # noqa: F401
+import numba.cuda as nb_cuda
+
+from ctypes import c_int, addressof
 
 #from numba import cuda, types  # noqa: F401, E402
 
@@ -1275,11 +1286,18 @@ class ArrayViewArgHandler:
                 dev = cuda.current_context().device
                 print("ArrayViewArgHandler::prepare_args line 108:", dev)
 
-                start = id(val._numbaview.start)
-                stop = id(val._numbaview.stop)
-                pos = id(val._numbaview.pos)
+                print("CuPy array???", val.layout.data)
+                #import numba.cuda as nb_cuda
+                array_data_view = nb_cuda.as_cuda_array(val.layout.data)
+                print("view --->", array_data_view, type(array_data_view))
+
+                c_intp = ctypes.c_ssize_t
+                
+                start = addressof(c_intp(val._numbaview.start))
+                stop = addressof(c_intp(val._numbaview.stop))
+                pos = addressof(c_intp(val._numbaview.pos))
                 arrayptrs = val._numbaview.lookup.arrayptrs
-                pylookup = id(val._numbaview.lookup)
+                pylookup = addressof(ctypes.c_void_p(0))
 
                 result_ptr = format(arrayptrs.item(), 'x')
                 print("arrayview_cuda.py line 1280: ArrayViewArgHandler::prepare_args: about to return from prepare args and arrayptrs is", result_ptr, arrayptrs.item())

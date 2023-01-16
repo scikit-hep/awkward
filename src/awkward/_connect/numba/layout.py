@@ -3,6 +3,7 @@
 import json
 
 import numba
+from numba.cuda import printimpl
 
 import awkward as ak
 
@@ -82,8 +83,9 @@ class ContentType(numba.types.Type):
         wrapneg,
         checkbounds,
     ):
-        print("layout.py line 88: ********** lower_getitem_at_check", viewtype.type, viewtype.behavior)
+        print("layout.py line 88: lower_getitem_at_check")
         lower = ak._util.numba_array_lower(viewtype.type, viewtype.behavior)
+        print("layout.py line 91: lower", lower)
         if lower is not None:
             atval = regularize_atval(
                 context, builder, viewproxy, attype, atval, wrapneg, checkbounds
@@ -206,8 +208,8 @@ def posat(context, builder, pos, offset):
 
 
 def getat(context, builder, baseptr, offset, rettype=None):
-    print("layout.py line 212: in getat...", baseptr, offset)
-    #printimpl.print_varargs(context, builder, sig, args)
+    print("layout.py line 212: in getat", baseptr, offset)
+    ###printimpl.int_print_impl(ty=numba.types.uint64, context=context, builder=builder, val=baseptr)
     
     ptrtype = None
     if rettype is not None:
@@ -226,7 +228,7 @@ def getat(context, builder, baseptr, offset, rettype=None):
             context.get_constant(numba.int8, 0),
         )
     else:
-        print("layout.py line 231: ...getat out", out)
+        print("layout.py line 231: return getat out", out)
         return out
 
 
@@ -260,9 +262,9 @@ def regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkb
                 )
             ):
                 print("layout.py line 264: ValueError: slice index out of bounds???")
-                #context.call_conv.return_user_exc(
-                #    builder, ValueError, ("slice index out of bounds",)
-                #)
+                context.call_conv.return_user_exc(
+                    builder, ValueError, ("slice index out of bounds",)
+                )
 
     return castint(context, builder, atval.type, numba.intp, atval)
 
