@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import inspect
 import numbers
 from datetime import datetime, timedelta
 
@@ -92,9 +91,7 @@ def _impl(array, behavior):
     elif isinstance(array, ak.contents.Content):
         return ak.types.ArrayType(array.form.type_from_behavior(behavior), array.length)
 
-    elif isinstance(array, (np.dtype, np.generic)) or (
-        inspect.isclass(array) and issubclass(array, np.generic)
-    ):
+    elif isinstance(array, (np.dtype, np.generic)):
         return ak.types.ScalarType(
             ak.types.NumpyType(ak.types.numpytype.dtype_to_primitive(np.dtype(array)))
         )

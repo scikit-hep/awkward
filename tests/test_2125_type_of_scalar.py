@@ -8,7 +8,9 @@ import awkward as ak
 
 def test():
     assert ak.type(np.int16()) == ak.types.ScalarType(ak.types.NumpyType("int16"))
-    assert ak.type(np.uint32) == ak.types.ScalarType(ak.types.NumpyType("uint32"))
+    with pytest.raises(TypeError):
+        assert ak.type(np.uint32) == ak.types.ScalarType(ak.types.UnknownType())
+    assert ak.type(None) == ak.types.ScalarType(ak.types.UnknownType())
     assert ak.type(np.dtype("complex128")) == ak.types.ScalarType(
         ak.types.NumpyType("complex128")
     )
