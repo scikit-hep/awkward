@@ -54,11 +54,11 @@ class RecordArray(Content):
             )
         elif length is None:
             lengths = [x.length for x in contents]
-            if any(isinstance(x, ak._typetracer.UnknownLengthType) for x in contents):
-                length = ak._typetracer.UnknownLength
+            if any(ak._nplikes.typetracer.is_unknown_scalar(x) for x in contents):
+                length = ak._nplikes.typetracer.unknown_scalar(metadata.int64)
             else:
                 length = min(lengths)
-        if not isinstance(length, ak._typetracer.UnknownLengthType) and not (
+        if not ak._nplikes.typetracer.is_unknown_scalar(length) and not (
             ak._util.is_integer(length) and length >= 0
         ):
             raise ak._errors.wrap_error(
@@ -223,7 +223,9 @@ class RecordArray(Content):
         return RecordArray(
             contents,
             self._fields,
-            ak._typetracer.UnknownLength if forget_length else self._length,
+            ak._nplikes.typetracer._unknown_scalar(metadata.int64)
+            if forget_length
+            else self._length,
             parameters=self._parameters,
             backend=backend,
         )

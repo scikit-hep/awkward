@@ -103,7 +103,7 @@ class NumpyArray(Content):
         return self._data.dtype
 
     def _raw(self, nplike=None):
-        return self._backend.nplike.raw(self.data, nplike)
+        return ak._nplikes.convert_array(self._backend.nplike, nplike, self._data)
 
     def _form_with_key(self, getkey):
         return self.form_cls(
@@ -208,7 +208,7 @@ class NumpyArray(Content):
     def _getitem_at(self, where):
         if not self._backend.nplike.known_data and len(self._data.shape) == 1:
             self._touch_data(recursive=False)
-            return ak._typetracer.UnknownScalar(self._data.dtype)
+            return ak._nplikes.typetracer.unknown_scalar(self._data.dtype)
 
         try:
             out = self._data[where]

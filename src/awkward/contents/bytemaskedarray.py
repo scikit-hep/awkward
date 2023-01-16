@@ -256,7 +256,7 @@ class ByteMaskedArray(Content):
             if self._backend.nplike.known_shape:
                 excess_length = int(math.ceil(self.length / 8.0))
             else:
-                excess_length = ak._typetracer.UnknownLength
+                excess_length = ak._nplikes.typetracer._unknown_scalar(metadata.int64)
             return ak.contents.BitMaskedArray(
                 ak.index.IndexU8(
                     self._backend.nplike.empty(excess_length, dtype=metadata.uint8)

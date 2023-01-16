@@ -750,7 +750,7 @@ class ListOffsetArray(Content):
                 innerlength = offsets[offsets.length - 1]
             else:
                 self._touch_data(recursive=False)
-                innerlength = ak._typetracer.UnknownLength
+                innerlength = ak._nplikes.typetracer._unknown_scalar(metadata.int64)
             localindex = ak.index.Index64.empty(innerlength, self._backend.index_nplike)
             assert (
                 localindex.nplike is self._backend.index_nplike

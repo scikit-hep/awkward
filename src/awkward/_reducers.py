@@ -47,9 +47,7 @@ class Reducer(ABC):
 
     @classmethod
     def maybe_double_length(cls, type: DTypeLike, length: int) -> int:
-        return (
-            2 * length if type in metadata.isdtype(type, "complex floating") else length
-        )
+        return 2 * length if metadata.isdtype(type, "complex floating") else length
 
     @classmethod
     def maybe_other_type(cls, dtype: DTypeLike) -> DTypeLike:

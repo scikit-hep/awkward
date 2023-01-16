@@ -17,7 +17,7 @@ class ArrayType:
             )
         if not (
             (ak._util.is_integer(length) and length >= 0)
-            or length is ak._typetracer.UnknownLength
+            or ak._nplikes.typetracer.is_unknown_scalar(length)
         ):
             raise ak._errors.wrap_error(
                 ValueError(

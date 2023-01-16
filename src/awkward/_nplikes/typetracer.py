@@ -20,10 +20,7 @@ def unknown_scalar(dtype: metadata.dtype) -> TypeTracerArray:
 
 
 def is_unknown_scalar(x) -> bool:
-    if isinstance(x, TypeTracerArray):
-        return x.ndim == 0
-    else:
-        return False
+    return isinstance(x, TypeTracerArray) and x.ndim == 0
 
 
 M = TypeVar("M")

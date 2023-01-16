@@ -27,7 +27,7 @@ class RegularArray(Content):
                     )
                 )
             )
-        if not isinstance(size, ak._typetracer.UnknownLengthType):
+        if not ak._nplikes.typetracer.is_unknown_scalar(size):
             if not (ak._util.is_integer(size) and size >= 0):
                 raise ak._errors.wrap_error(
                     TypeError(
@@ -38,7 +38,7 @@ class RegularArray(Content):
                 )
             else:
                 size = int(size)
-        if not isinstance(zeros_length, ak._typetracer.UnknownLengthType):
+        if not ak._nplikes.typetracer.is_unknown_scalar(zeros_length):
             if not (ak._util.is_integer(zeros_length) and zeros_length >= 0):
                 raise ak._errors.wrap_error(
                     TypeError(
@@ -135,7 +135,9 @@ class RegularArray(Content):
         return RegularArray(
             self._content._to_typetracer(forget_length),
             self._size,
-            ak._typetracer.UnknownLength if forget_length else self._length,
+            ak._nplikes.typetracer._unknown_scalar(metadata.int64)
+            if forget_length
+            else self._length,
             parameters=self._parameters,
         )
 

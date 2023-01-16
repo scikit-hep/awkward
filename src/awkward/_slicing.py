@@ -392,7 +392,8 @@ def normalise_item_bool_to_int(item):
             item._touch_data(recursive=False)
             nextoffsets = item.offsets
             nextcontent = item.backend.nplike.empty(
-                (ak._typetracer.UnknownLength,), dtype=metadata.int64
+                ak._nplikes.typetracer.unknown_scalar(metadata.int64),
+                dtype=metadata.int64,
             )
 
         return ak.contents.ListOffsetArray(
@@ -453,7 +454,8 @@ def normalise_item_bool_to_int(item):
             nextoffsets = item.offsets
             outindex = item.content.index
             nextcontent = item.backend.nplike.empty(
-                (ak._typetracer.UnknownLength,), dtype=metadata.int64
+                (ak._nplikes.typetracer._unknown_scalar(metadata.int64),),
+                dtype=metadata.int64,
             )
 
         return ak.contents.ListOffsetArray(
@@ -517,7 +519,8 @@ def normalise_item_bool_to_int(item):
                 item._touch_data(recursive=False)
                 outindex = item.index
                 nextcontent = item.backend.nplike.empty(
-                    (ak._typetracer.UnknownLength,), dtype=metadata.int64
+                    (ak._nplikes.typetracer._unknown_scalar(metadata.int64),),
+                    dtype=metadata.int64,
                 )
 
             return ak.contents.IndexedOptionArray(
@@ -542,7 +545,7 @@ def getitem_next_array_wrap(outcontent, shape, outer_length=0):
     for i in range(len(shape))[::-1]:
         length = shape[i - 1] if i > 0 else outer_length
         size = shape[i]
-        if isinstance(size, ak._typetracer.UnknownLengthType):
+        if ak._nplikes.typetracer.is_unknown_scalar(size):
             size = 1
         outcontent = ak.contents.RegularArray(outcontent, size, length, parameters=None)
     return outcontent

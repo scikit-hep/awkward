@@ -66,7 +66,7 @@ S = TypeVar("S", bound=Array)
 T = TypeVar("T", bound=Array)
 
 
-def convert(from_nplike: NumpyLike, to_nplike: NumpyLike, array: Array) -> Array:
+def convert_array(from_nplike: NumpyLike, to_nplike: NumpyLike, array: Array) -> Array:
     if isinstance(from_nplike, TypeTracer):
         raise ak._errors.wrap_error(
             TypeError("typetracer arrays cannot be converted to other nplikes")

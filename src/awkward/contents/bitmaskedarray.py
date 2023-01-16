@@ -56,7 +56,7 @@ class BitMaskedArray(Content):
                     )
                 )
             )
-        if not isinstance(length, ak._typetracer.UnknownLengthType):
+        if not ak._nplikes.typetracer.is_unknown_scalar(length):
             if not (ak._util.is_integer(length) and length >= 0):
                 raise ak._errors.wrap_error(
                     TypeError(
@@ -214,7 +214,9 @@ class BitMaskedArray(Content):
             self._mask.to_nplike(tt),
             self._content._to_typetracer(False),
             self._valid_when,
-            ak._typetracer.UnknownLength if forget_length else self.length,
+            ak._nplikes.typetracer._unknown_scalar(metadata.int64)
+            if forget_length
+            else self.length,
             self._lsb_order,
             parameters=self._parameters,
         )

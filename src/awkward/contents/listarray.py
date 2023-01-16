@@ -644,7 +644,8 @@ class ListArray(Content):
             else:
                 self._touch_data(recursive=False)
                 nextcarry = ak.index.Index64.empty(
-                    ak._typetracer.UnknownLength, self._backend.index_nplike
+                    ak._nplikes.typetracer._unknown_scalar(metadata.int64),
+                    self._backend.index_nplike,
                 )
 
             if self._starts.dtype == "int64":
@@ -719,7 +720,8 @@ class ListArray(Content):
                 else:
                     self._touch_data(recursive=False)
                     nextadvanced = ak.index.Index64.empty(
-                        ak._typetracer.UnknownLength, self._backend.index_nplike
+                        ak._nplikes.typetracer._unknown_scalar(metadata.int64),
+                        self._backend.index_nplike,
                     )
                 advanced = advanced.to_nplike(self._backend.index_nplike)
                 assert (
@@ -1104,7 +1106,7 @@ class ListArray(Content):
                 innerlength = offsets[offsets.length - 1]
             else:
                 self._touch_data(recursive=False)
-                innerlength = ak._typetracer.UnknownLength
+                innerlength = ak._nplikes.typetracer._unknown_scalar(metadata.int64)
             localindex = ak.index.Index64.empty(innerlength, self._backend.index_nplike)
             assert (
                 localindex.nplike is self._backend.index_nplike

@@ -136,7 +136,7 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
             if depth == posaxis:
                 backend = ak._backends.backend_of(*inputs, default=cpu)
 
-                length = ak._typetracer.UnknownLength
+                length = ak._nplikes.typetracer._unknown_scalar(metadata.int64)
                 for x in inputs:
                     if isinstance(x, ak.contents.Content):
                         if not ak._util.is_integer(length):

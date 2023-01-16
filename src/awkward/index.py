@@ -136,7 +136,7 @@ class Index:
         return type(self)(data.forget_length(), metadata=self._metadata, nplike=tt)
 
     def raw(self, nplike):
-        return self.nplike.raw(self.data, nplike)
+        return ak._nplikes.convert_array(self._nplike, nplike, self._data)
 
     def __len__(self):
         return self.length
