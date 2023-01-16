@@ -319,7 +319,7 @@ def from_datashape(datashape, highlevel=True):
         else:
             raise ak._errors.wrap_error(
                 ValueError(
-                    f"type '{type(out).__name__}' is not compatible with highlevel=True"
+                    f"type {type(out).__name__!r} is not compatible with highlevel=True"
                 )
             )
 

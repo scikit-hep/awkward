@@ -1130,13 +1130,13 @@ class NumpyArray(Content):
 
     def _validity_error(self, path):
         if len(self.shape) == 0:
-            return f'at {path} ("{type(self)}"): shape is zero-dimensional'
+            return f"at {path} ({type(self)!r}): shape is zero-dimensional"
         for i, dim in enumerate(self.shape):
             if dim < 0:
-                return f'at {path} ("{type(self)}"): shape[{i}] < 0'
+                return f"at {path} ({type(self)!r}): shape[{i}] < 0"
         for i, stride in enumerate(self.strides):
             if stride % self.dtype.itemsize != 0:
-                return f'at {path} ("{type(self)}"): shape[{i}] % itemsize != 0'
+                return f"at {path} ({type(self)!r}): shape[{i}] % itemsize != 0"
         return ""
 
     def _pad_none(self, target, axis, depth, clip):

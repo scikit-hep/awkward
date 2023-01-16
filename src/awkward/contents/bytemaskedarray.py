@@ -904,7 +904,7 @@ class ByteMaskedArray(Content):
 
     def _validity_error(self, path):
         if self._backend.nplike.known_shape and self._content.length < self.mask.length:
-            return f'at {path} ("{type(self)}"): len(content) < len(mask)'
+            return f"at {path} ({type(self)!r}): len(content) < len(mask)"
         else:
             return self._content._validity_error(path + ".content")
 

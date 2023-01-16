@@ -789,7 +789,7 @@ class RecordArray(Content):
     def _validity_error(self, path):
         for i, cont in enumerate(self.contents):
             if cont.length < self.length:
-                return f'at {path} ("{type(self)}"): len(field({i})) < len(recordarray)'
+                return f"at {path} ({type(self)!r}): len(field({i})) < len(recordarray)"
         for i, cont in enumerate(self.contents):
             sub = cont._validity_error(f"{path}.field({i})")
             if sub != "":

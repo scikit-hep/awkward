@@ -1091,7 +1091,7 @@ class RegularArray(Content):
 
     def _validity_error(self, path):
         if self.size < 0:
-            return f'at {path} ("{type(self)}"): size < 0'
+            return f"at {path} ({type(self)!r}): size < 0"
 
         return self._content._validity_error(path + ".content")
 

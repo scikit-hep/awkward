@@ -169,7 +169,7 @@ def from_rdataframe(data_frame, columns):
 
             if form_str == "unsupported type":
                 raise ak._errors.wrap_error(
-                    TypeError(f'"{col}" column\'s type "{col_type}" is not supported.')
+                    TypeError(f"{col!r} column's type {col_type!r} is not supported.")
                 )
             elif form_str == "awkward type":
                 raise ak._errors.wrap_error(

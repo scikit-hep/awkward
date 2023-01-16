@@ -1200,7 +1200,7 @@ class ListArray(Content):
 
     def _validity_error(self, path):
         if self._backend.nplike.known_shape and self.stops.length < self.starts.length:
-            return f'at {path} ("{type(self)}"): len(stops) < len(starts)'
+            return f"at {path} ({type(self)!r}): len(stops) < len(starts)"
         assert (
             self.starts.nplike is self._backend.index_nplike
             and self.stops.nplike is self._backend.index_nplike
