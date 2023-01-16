@@ -12,7 +12,6 @@ per-file-ignores =
     src/awkward/_connect/numba/*: AK1
     src/awkward/_errors.py: AK1
     src/awkward/typing.py: F405
-    src/awkward/typing.py: F405
     src/awkward/_connect/rdataframe/to_rdataframe.py: B028
 
 [flake8:local-plugins]
