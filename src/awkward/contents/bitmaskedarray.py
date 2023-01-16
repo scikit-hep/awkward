@@ -558,9 +558,9 @@ class BitMaskedArray(Content):
 
     def _validity_error(self, path):
         if self.mask.length * 8 < self.length:
-            return f'at {path} ("{type(self)}"): len(mask) * 8 < length'
+            return f"at {path} ({type(self)!r}): len(mask) * 8 < length"
         elif self._content.length < self.length:
-            return f'at {path} ("{type(self)}"): len(content) < length'
+            return f"at {path} ({type(self)!r}): len(content) < length"
         else:
             return self._content._validity_error(path + ".content")
 
@@ -575,8 +575,8 @@ class BitMaskedArray(Content):
             pyarrow, mask_node, validbytes, length, options
         )
 
-    def _to_numpy(self, allow_missing):
-        return self.to_ByteMaskedArray()._to_numpy(allow_missing)
+    def _to_backend_array(self, allow_missing, backend):
+        return self.to_ByteMaskedArray()._to_backend_array(allow_missing, backend)
 
     def _completely_flatten(self, backend, options):
         branch, depth = self.branch_depth
@@ -697,7 +697,7 @@ class BitMaskedArray(Content):
 
         return out
 
-    def to_backend(self, backend: ak._backends.Backend) -> Self:
+    def _to_backend(self, backend: ak._backends.Backend) -> Self:
         content = self._content.to_backend(backend)
         mask = self._mask.to_nplike(backend.index_nplike)
         return BitMaskedArray(

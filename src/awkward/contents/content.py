@@ -1019,9 +1019,25 @@ class Content:
         raise ak._errors.wrap_error(NotImplementedError)
 
     def to_numpy(self, allow_missing: bool = True):
-        return self._to_numpy(allow_missing)
+        ak._errors.deprecate(
+            "`Content.to_numpy` is deprecated. Please replace calls to "
+            "`Content.to_numpy(...)` with `Content.to_backend_array(..., backend='cpu')`.",
+            "2.2.0",
+        )
+        return self.to_backend(ak._backends.NumpyBackend.instance())._to_backend_array(
+            allow_missing
+        )
 
-    def _to_numpy(self, allow_missing: bool):
+    def to_backend_array(
+        self, allow_missing: bool = True, *, backend: Backend | str | None = None
+    ):
+        if backend is None:
+            backend = self._backend
+        else:
+            backend = ak._backends.regularize_backend(backend)
+        return self._to_backend_array(allow_missing, backend)
+
+    def _to_backend_array(self, allow_missing: bool, backend: ak._backends.Backend):
         raise ak._errors.wrap_error(NotImplementedError)
 
     def drop_none(self):
@@ -1195,7 +1211,14 @@ class Content:
     ) -> tuple[ak.index.Index, Content]:
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def to_backend(self, backend: Backend) -> Self:
+    def to_backend(self, backend: Backend | str | None = None) -> Self:
+        if backend is None:
+            backend = self._backend
+        else:
+            backend = ak._backends.regularize_backend(backend)
+        return self._to_backend(backend)
+
+    def _to_backend(self, backend: Backend) -> Self:
         raise ak._errors.wrap_error(NotImplementedError)
 
     def with_parameter(self, key: str, value: Any) -> Self:

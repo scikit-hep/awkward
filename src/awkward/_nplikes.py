@@ -372,6 +372,9 @@ class NumpyLike(Singleton):
     def can_cast(self, *args, **kwargs):
         return self._module.can_cast(*args, **kwargs)
 
+    def raw(self, array, nplike):
+        raise ak._errors.wrap_error(NotImplementedError)
+
     @classmethod
     def is_own_array(cls, obj) -> bool:
         """

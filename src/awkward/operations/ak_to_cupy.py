@@ -24,7 +24,13 @@ def to_cupy(array):
         "ak.to_cupy",
         dict(array=array),
     ):
-        from awkward._connect.cuda import import_cupy
+        return _impl(array)
 
-        cupy = import_cupy()
-        return ak._util.to_arraylib(cupy, array, True)
+
+def _impl(array):
+    layout = ak.to_layout(array, allow_record=False)
+
+    backend = ak._backends.CupyBackend.instance()
+    cupy_layout = layout.to_backend(backend)
+
+    return cupy_layout.to_backend_array(allow_missing=False)

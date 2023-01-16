@@ -1286,7 +1286,7 @@ class UnionArray(Content):
                 self._backend.nplike.known_shape
                 and self.index.length < self.tags.length
             ):
-                return f'at {path} ("{type(self)}"): len(index) < len(tags)'
+                return f"at {path} ({type(self)!r}): len(index) < len(tags)"
 
             lencontents = self._backend.index_nplike.empty(
                 len(self.contents), dtype=np.int64
@@ -1426,30 +1426,39 @@ class UnionArray(Content):
             children=values,
         )
 
-    def _to_numpy(self, allow_missing):
+    def _to_backend_array(self, allow_missing, backend):
+        ak._errors.deprecate(
+            "Conversion of irreducible unions to backend arrays is deprecated.", "2.2.0"
+        )
+
         contents = [
-            self.project(i)._to_numpy(allow_missing) for i in range(len(self.contents))
+            self.project(i)._to_backend_array(allow_missing, backend)
+            for i in range(len(self.contents))
         ]
 
-        if any(isinstance(x, self._backend.nplike.ma.MaskedArray) for x in contents):
+        if any(isinstance(x, backend.nplike.ma.MaskedArray) for x in contents):
             try:
-                out = self._backend.nplike.ma.concatenate(contents)
+                out = backend.nplike.ma.concatenate(contents)
             except Exception as err:
                 raise ak._errors.wrap_error(
                     ValueError(f"cannot convert {self} into numpy.ma.MaskedArray")
                 ) from err
         else:
             try:
-                out = numpy.concatenate(contents)
+                out = backend.nplike.concatenate(contents)
             except Exception as err:
                 raise ak._errors.wrap_error(
                     ValueError(f"cannot convert {self} into np.ndarray")
                 ) from err
 
-        tags = numpy.asarray(self.tags)
+        tags = backend.index_nplike.asarray(self.tags)
         for tag, content in enumerate(contents):
             mask = tags == tag
-            out[mask] = content
+            if ak._nplikes.Jax.is_own_array(out):
+                out = out.at[mask].set(content)
+            else:
+                out[mask] = content
+
         return out
 
     def _completely_flatten(self, backend, options):
@@ -1562,7 +1571,7 @@ class UnionArray(Content):
             out[i] = contents[tag][index[i]]
         return out
 
-    def to_backend(self, backend: ak._backends.Backend) -> Self:
+    def _to_backend(self, backend: ak._backends.Backend) -> Self:
         tags = self._tags.to_nplike(backend.index_nplike)
         index = self._index.to_nplike(backend.index_nplike)
         contents = [content.to_backend(backend) for content in self._contents]

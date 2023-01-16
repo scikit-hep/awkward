@@ -789,7 +789,7 @@ class RecordArray(Content):
     def _validity_error(self, path):
         for i, cont in enumerate(self.contents):
             if cont.length < self.length:
-                return f'at {path} ("{type(self)}"): len(field({i})) < len(recordarray)'
+                return f"at {path} ({type(self)!r}): len(field({i})) < len(recordarray)"
         for i, cont in enumerate(self.contents):
             sub = cont._validity_error(f"{path}.field({i})")
             if sub != "":
@@ -857,23 +857,23 @@ class RecordArray(Content):
             children=values,
         )
 
-    def _to_numpy(self, allow_missing):
+    def _to_backend_array(self, allow_missing, backend):
         if self.fields is None:
-            return self._backend.nplike.empty(self.length, dtype=[])
-        contents = [x._to_numpy(allow_missing) for x in self._contents]
+            return backend.nplike.empty(self.length, dtype=[])
+        contents = [x._to_backend_array(allow_missing, backend) for x in self._contents]
         if any(len(x.shape) != 1 for x in contents):
             raise ak._errors.wrap_error(
                 ValueError(f"cannot convert {self} into np.ndarray")
             )
-        out = self._backend.nplike.empty(
+        out = backend.nplike.empty(
             self.length,
             dtype=[(str(n), x.dtype) for n, x in zip(self.fields, contents)],
         )
         mask = None
         for n, x in zip(self.fields, contents):
-            if isinstance(x, self._backend.nplike.ma.MaskedArray):
+            if allow_missing and isinstance(x, self._backend.nplike.ma.MaskedArray):
                 if mask is None:
-                    mask = self._backend.index_nplike.ma.zeros(
+                    mask = backend.index_nplike.ma.zeros(
                         self.length, [(n, np.bool_) for n in self.fields]
                     )
                 if x.mask is not None:
@@ -881,7 +881,7 @@ class RecordArray(Content):
             out[n] = x
 
         if mask is not None:
-            out = self._backend.nplike.ma.MaskedArray(out, mask)
+            out = backend.nplike.ma.MaskedArray(out, mask)
 
         return out
 
@@ -1010,7 +1010,7 @@ class RecordArray(Content):
                 out[i] = dict(zip(fields, [x[i] for x in contents]))
             return out
 
-    def to_backend(self, backend: ak._backends.Backend) -> Self:
+    def _to_backend(self, backend: ak._backends.Backend) -> Self:
         contents = [content.to_backend(backend) for content in self._contents]
         return RecordArray(
             contents,

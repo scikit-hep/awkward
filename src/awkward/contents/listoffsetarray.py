@@ -1696,7 +1696,7 @@ class ListOffsetArray(Content):
 
     def _validity_error(self, path):
         if self.offsets.length < 1:
-            return f'at {path} ("{type(self)}"): len(offsets) < 1'
+            return f"at {path} ({type(self)!r}): len(offsets) < 1"
         assert (
             self.starts.nplike is self._backend.index_nplike
             and self.stops.nplike is self._backend.index_nplike
@@ -1949,14 +1949,12 @@ class ListOffsetArray(Content):
                 ),
             )
 
-    def _to_numpy(self, allow_missing):
+    def _to_backend_array(self, allow_missing, backend):
         array_param = self.parameter("__array__")
         if array_param in {"bytestring", "string"}:
-            return self._backend.nplike.array(self.to_list())
+            return backend.nplike.array(self.to_list())
 
-        return ak.operations.to_numpy(
-            self.to_RegularArray(), allow_missing=allow_missing
-        )
+        return self.to_RegularArray()._to_backend_array(allow_missing, backend)
 
     def _completely_flatten(self, backend, options):
         if (
@@ -2127,7 +2125,7 @@ class ListOffsetArray(Content):
                 out[i] = content[starts_data[i] : stops_data[i]]
             return out
 
-    def to_backend(self, backend: ak._backends.Backend) -> Self:
+    def _to_backend(self, backend: ak._backends.Backend) -> Self:
         content = self._content.to_backend(backend)
         offsets = self._offsets.to_nplike(backend.index_nplike)
         return ListOffsetArray(offsets, content, parameters=self._parameters)

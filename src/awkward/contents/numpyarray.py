@@ -1130,13 +1130,13 @@ class NumpyArray(Content):
 
     def _validity_error(self, path):
         if len(self.shape) == 0:
-            return f'at {path} ("{type(self)}"): shape is zero-dimensional'
+            return f"at {path} ({type(self)!r}): shape is zero-dimensional"
         for i, dim in enumerate(self.shape):
             if dim < 0:
-                return f'at {path} ("{type(self)}"): shape[{i}] < 0'
+                return f"at {path} ({type(self)!r}): shape[{i}] < 0"
         for i, stride in enumerate(self.strides):
             if stride % self.dtype.itemsize != 0:
-                return f'at {path} ("{type(self)}"): shape[{i}] % itemsize != 0'
+                return f"at {path} ({type(self)!r}): shape[{i}] % itemsize != 0"
         return ""
 
     def _pad_none(self, target, axis, depth, clip):
@@ -1192,12 +1192,8 @@ class NumpyArray(Content):
             ),
         )
 
-    def _to_numpy(self, allow_missing):
-        out = numpy.asarray(self._data)
-        if type(out).__module__.startswith("cupy."):
-            return out.get()
-        else:
-            return out
+    def _to_backend_array(self, allow_missing, backend):
+        return self._backend.nplike.raw(self.data, backend.nplike)
 
     def _completely_flatten(self, backend, options):
         return [
@@ -1310,7 +1306,7 @@ class NumpyArray(Content):
 
             return out
 
-    def to_backend(self, backend: ak._backends.Backend) -> Self:
+    def _to_backend(self, backend: ak._backends.Backend) -> Self:
         return NumpyArray(
             self._raw(backend.nplike),
             parameters=self._parameters,

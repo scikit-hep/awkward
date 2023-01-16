@@ -1091,7 +1091,7 @@ class RegularArray(Content):
 
     def _validity_error(self, path):
         if self.size < 0:
-            return f'at {path} ("{type(self)}"): size < 0'
+            return f"at {path} ({type(self)!r}): size < 0"
 
         return self._content._validity_error(path + ".content")
 
@@ -1138,12 +1138,12 @@ class RegularArray(Content):
                 parameters=self._parameters,
             )
 
-    def _to_numpy(self, allow_missing):
+    def _to_backend_array(self, allow_missing, backend):
         array_param = self.parameter("__array__")
         if array_param in {"bytestring", "string"}:
-            return self._backend.nplike.array(self.to_list())
+            return backend.nplike.array(self.to_list())
 
-        out = self._content.to_numpy(allow_missing)
+        out = self._content._to_backend_array(allow_missing, backend)
         shape = (self._length, self._size) + out.shape[1:]
         return out[: self._length * self._size].reshape(shape)
 
@@ -1333,7 +1333,7 @@ class RegularArray(Content):
                 out[i] = content[(i) * size : (i + 1) * size]
             return out
 
-    def to_backend(self, backend: ak._backends.Backend) -> Self:
+    def _to_backend(self, backend: ak._backends.Backend) -> Self:
         content = self._content.to_backend(backend)
         return RegularArray(
             content, self._size, zeros_length=self._length, parameters=self._parameters

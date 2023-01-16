@@ -44,14 +44,14 @@ def metadata_from_parquet(
     Returns dict containing
 
     * `form`: an Awkward Form representing the low-level type of the data
-       (use `.type` to get a high-level type),
+      (use `.type` to get a high-level type),
     * `fs`: the fsspec filesystem object,
     * `paths`: a list of matching path names,
     * `col_counts`: the number of rows in each row group,
     * `columns`: the columns defined by the schema,
-    * `num_rows`: the length of the array that would be read by #ak.from_parquet ,
+    * `num_rows`: the length of the array that would be read by #ak.from_parquet,
     * `num_row_groups`: the units that can be filtered (for the #ak.from_parquet `row_groups`
-       argument).
+      argument).
 
     See also #ak.from_parquet, #ak.to_parquet.
     """
