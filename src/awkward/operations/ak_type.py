@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import builtins
 import numbers
 from datetime import datetime, timedelta
 
@@ -80,9 +79,21 @@ def type(array, *, behavior=None):
 
 
 def _impl(array, behavior):
-    if isinstance(array, np.dtype):
+    behavior = ak._util.behavior_of(array, behavior=behavior)
+
+    if isinstance(array, _ext.ArrayBuilder):
+        form = ak.forms.from_json(array.form())
+        return ak.types.ArrayType(form.type_from_behavior(behavior), len(array))
+
+    elif isinstance(array, ak.record.Record):
+        return ak.types.ScalarType(array.array.form.type_from_behavior(behavior))
+
+    elif isinstance(array, ak.contents.Content):
+        return ak.types.ArrayType(array.form.type_from_behavior(behavior), array.length)
+
+    elif isinstance(array, (np.dtype, np.generic)):
         return ak.types.ScalarType(
-            ak.types.NumpyType(ak.types.numpytype.dtype_to_primitive(array))
+            ak.types.NumpyType(ak.types.numpytype.dtype_to_primitive(np.dtype(array)))
         )
 
     elif isinstance(array, bool):  # np.bool_ in np.generic (above)
@@ -103,36 +114,17 @@ def _impl(array, behavior):
     elif isinstance(array, timedelta):  # np.timedelta64 in np.generic (above)
         return ak.types.ScalarType(ak.types.NumpyType("timedelta"))
 
-    elif (
-        isinstance(array, np.generic)
-        or isinstance(array, builtins.type)
-        and issubclass(array, np.generic)
-    ):
-        primitive = ak.types.numpytype.dtype_to_primitive(np.dtype(array))
-        return ak.types.ScalarType(ak.types.NumpyType(primitive))
-
-    elif isinstance(array, _ext.ArrayBuilder):
-        form = ak.forms.from_json(array.form())
-        return ak.types.ArrayType(form.type_from_behavior(behavior), len(array))
-
-    elif isinstance(array, ak.ArrayBuilder):
-        behavior = ak._util.behavior_of(array, behavior=behavior)
-        form = ak.forms.from_json(array._layout.form())
-        return ak.types.ArrayType(form.type_from_behavior(behavior), len(array._layout))
+    elif isinstance(array, ak.highlevel.ArrayBuilder):
+        # Don't go through `to_layout`: we want to avoid snapshotting this array
+        return _impl(array._layout, behavior)
 
     else:
-        behavior = ak._util.behavior_of(array, behavior=behavior)
         layout = ak.to_layout(array, allow_other=True, allow_record=True)
         if layout is None:
             return ak.types.ScalarType(ak.types.UnknownType())
 
-        elif isinstance(layout, ak.record.Record):
-            return ak.types.ScalarType(layout.array.form.type_from_behavior(behavior))
-
-        elif isinstance(layout, ak.contents.Content):
-            return ak.types.ArrayType(
-                layout.form.type_from_behavior(behavior), layout.length
-            )
+        elif isinstance(layout, (ak.contents.Content, ak.record.Record)):
+            return _impl(layout, behavior)
 
         else:
             raise ak._errors.wrap_error(
