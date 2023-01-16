@@ -1345,8 +1345,8 @@ class ListArray(Content):
             pyarrow, mask_node, validbytes, length, options
         )
 
-    def _to_numpy(self, allow_missing):
-        return self.to_RegularArray()._to_numpy(allow_missing)
+    def _to_backend_array(self, allow_missing, backend):
+        return self.to_RegularArray()._to_backend_array(allow_missing, backend)
 
     def _completely_flatten(self, backend, options):
         if (
@@ -1440,7 +1440,7 @@ class ListArray(Content):
     def _to_list(self, behavior, json_conversions):
         return ListOffsetArray._to_list(self, behavior, json_conversions)
 
-    def to_backend(self, backend: ak._backends.Backend) -> Self:
+    def _to_backend(self, backend: ak._backends.Backend) -> Self:
         content = self._content.to_backend(backend)
         starts = self._starts.to_nplike(backend.index_nplike)
         stops = self._stops.to_nplike(backend.index_nplike)

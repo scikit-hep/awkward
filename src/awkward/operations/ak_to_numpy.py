@@ -40,5 +40,14 @@ def to_numpy(array, *, allow_missing=True):
         "ak.to_numpy",
         dict(array=array, allow_missing=allow_missing),
     ):
-        with numpy.errstate(invalid="ignore"):
-            return ak._util.to_arraylib(numpy, array, allow_missing)
+        return _impl(array, allow_missing)
+
+
+def _impl(array, allow_missing):
+    with numpy.errstate(invalid="ignore"):
+        layout = ak.to_layout(array, allow_record=False)
+
+        backend = ak._backends.NumpyBackend.instance()
+        numpy_layout = layout.to_backend(backend)
+
+        return numpy_layout.to_backend_array(allow_missing=allow_missing)

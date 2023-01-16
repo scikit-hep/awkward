@@ -958,8 +958,8 @@ class ByteMaskedArray(Content):
             options,
         )
 
-    def _to_numpy(self, allow_missing):
-        return self.to_IndexedOptionArray64()._to_numpy(allow_missing)
+    def _to_backend_array(self, allow_missing, backend):
+        return self.to_IndexedOptionArray64()._to_backend_array(allow_missing, backend)
 
     def _completely_flatten(self, backend, options):
         branch, depth = self.branch_depth
@@ -1066,7 +1066,7 @@ class ByteMaskedArray(Content):
 
         return out
 
-    def to_backend(self, backend: ak._backends.Backend) -> Self:
+    def _to_backend(self, backend: ak._backends.Backend) -> Self:
         content = self._content.to_backend(backend)
         mask = self._mask.to_nplike(backend.index_nplike)
         return ByteMaskedArray(

@@ -1192,12 +1192,8 @@ class NumpyArray(Content):
             ),
         )
 
-    def _to_numpy(self, allow_missing):
-        out = numpy.asarray(self._data)
-        if type(out).__module__.startswith("cupy."):
-            return out.get()
-        else:
-            return out
+    def _to_backend_array(self, allow_missing, backend):
+        return self._backend.nplike.raw(self.data, backend.nplike)
 
     def _completely_flatten(self, backend, options):
         return [
@@ -1310,7 +1306,7 @@ class NumpyArray(Content):
 
             return out
 
-    def to_backend(self, backend: ak._backends.Backend) -> Self:
+    def _to_backend(self, backend: ak._backends.Backend) -> Self:
         return NumpyArray(
             self._raw(backend.nplike),
             parameters=self._parameters,

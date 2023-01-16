@@ -1438,20 +1438,22 @@ class IndexedOptionArray(Content):
             options,
         )
 
-    def _to_numpy(self, allow_missing):
-        content = self.project()._to_numpy(allow_missing)
+    def _to_backend_array(self, allow_missing, backend):
+        nplike = backend.nplike
 
-        shape = list(content.shape)
-        shape[0] = self.length
-        data = numpy.empty(shape, dtype=content.dtype)
-        mask0 = numpy.asarray(self.mask_as_bool(valid_when=False)).view(np.bool_)
+        content = self.project()._to_backend_array(allow_missing, backend)
+        shape = [self.length, *content.shape[1:]]
+        data = nplike.empty(shape, dtype=content.dtype)
+        mask0 = backend.index_nplike.asarray(self.mask_as_bool(valid_when=False)).view(
+            np.bool_
+        )
         if mask0.any():
             if allow_missing:
-                mask = numpy.broadcast_to(
+                mask = backend.index_nplike.broadcast_to(
                     mask0.reshape((shape[0],) + (1,) * (len(shape) - 1)), shape
                 )
-                if isinstance(content, numpy.ma.MaskedArray):
-                    mask1 = numpy.ma.getmaskarray(content)
+                if isinstance(content, nplike.ma.MaskedArray):
+                    mask1 = nplike.ma.getmaskarray(content)
                     mask = mask.copy()
                     mask[~mask0] |= mask1
 
@@ -1466,7 +1468,7 @@ class IndexedOptionArray(Content):
                 elif issubclass(content.dtype.type, np.integer):
                     data[mask0] = np.iinfo(content.dtype).max
                 elif issubclass(content.dtype.type, (np.datetime64, np.timedelta64)):
-                    data[mask0] = numpy.array([np.iinfo(np.int64).max], content.dtype)[
+                    data[mask0] = nplike.array([np.iinfo(np.int64).max], content.dtype)[
                         0
                     ]
                 else:
@@ -1474,18 +1476,18 @@ class IndexedOptionArray(Content):
                         AssertionError(f"unrecognized dtype: {content.dtype}")
                     )
 
-                return numpy.ma.MaskedArray(data, mask)
+                return nplike.ma.MaskedArray(data, mask)
             else:
                 raise ak._errors.wrap_error(
                     ValueError(
-                        "ak.to_numpy cannot convert 'None' values to "
+                        "Content.to_nplike cannot convert 'None' values to "
                         "np.ma.MaskedArray unless the "
                         "'allow_missing' parameter is set to True"
                     )
                 )
         else:
             if allow_missing:
-                return numpy.ma.MaskedArray(content)
+                return nplike.ma.MaskedArray(content)
             else:
                 return content
 
@@ -1618,7 +1620,7 @@ class IndexedOptionArray(Content):
 
         return out
 
-    def to_backend(self, backend: ak._backends.Backend) -> Self:
+    def _to_backend(self, backend: ak._backends.Backend) -> Self:
         content = self._content.to_backend(backend)
         index = self._index.to_nplike(backend.index_nplike)
         return IndexedOptionArray(index, content, parameters=self._parameters)

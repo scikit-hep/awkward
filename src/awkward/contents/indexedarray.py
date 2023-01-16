@@ -958,8 +958,8 @@ class IndexedArray(Content):
             )
             return next2._to_arrow(pyarrow, mask_node, validbytes, length, options)
 
-    def _to_numpy(self, allow_missing):
-        return self.project()._to_numpy(allow_missing)
+    def _to_backend_array(self, allow_missing, backend):
+        return self.project()._to_backend_array(allow_missing, backend)
 
     def _completely_flatten(self, backend, options):
         return self.project()._completely_flatten(backend, options)
@@ -1053,7 +1053,7 @@ class IndexedArray(Content):
         nextcontent = self._content._carry(ak.index.Index(index), False)
         return nextcontent._to_list(behavior, json_conversions)
 
-    def to_backend(self, backend: ak._backends.Backend) -> Self:
+    def _to_backend(self, backend: ak._backends.Backend) -> Self:
         content = self._content.to_backend(backend)
         index = self._index.to_nplike(backend.index_nplike)
         return IndexedArray(index, content, parameters=self._parameters)

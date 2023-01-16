@@ -295,12 +295,14 @@ class EmptyArray(Content):
         else:
             dtype = np.dtype(options["emptyarray_to"])
             next = ak.contents.NumpyArray(
-                numpy.empty(length, dtype), self._parameters, backend=self._backend
+                numpy.empty(length, dtype),
+                parameters=self._parameters,
+                backend=self._backend,
             )
             return next._to_arrow(pyarrow, mask_node, validbytes, length, options)
 
-    def _to_numpy(self, allow_missing):
-        return self._backend.nplike.empty(0, dtype=np.float64)
+    def _to_backend_array(self, allow_missing, backend):
+        return backend.nplike.empty(0, dtype=np.float64)
 
     def _completely_flatten(self, backend, options):
         return []
@@ -345,7 +347,7 @@ class EmptyArray(Content):
     def _to_list(self, behavior, json_conversions):
         return []
 
-    def to_backend(self, backend: ak._backends.Backend) -> Self:
+    def _to_backend(self, backend: ak._backends.Backend) -> Self:
         return EmptyArray(parameters=self._parameters, backend=backend)
 
     def _is_equal_to(self, other, index_dtype, numpyarray):
