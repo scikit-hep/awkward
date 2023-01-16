@@ -1696,7 +1696,7 @@ class ListOffsetArray(Content):
 
     def _validity_error(self, path):
         if self.offsets.length < 1:
-            return f'at {path} ("{type(self)}"): len(offsets) < 1'
+            return f"at {path} ({type(self)!r}): len(offsets) < 1"
         assert (
             self.starts.nplike is self._backend.index_nplike
             and self.stops.nplike is self._backend.index_nplike

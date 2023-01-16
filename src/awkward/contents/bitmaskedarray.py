@@ -558,9 +558,9 @@ class BitMaskedArray(Content):
 
     def _validity_error(self, path):
         if self.mask.length * 8 < self.length:
-            return f'at {path} ("{type(self)}"): len(mask) * 8 < length'
+            return f"at {path} ({type(self)!r}): len(mask) * 8 < length"
         elif self._content.length < self.length:
-            return f'at {path} ("{type(self)}"): len(content) < length'
+            return f"at {path} ({type(self)!r}): len(content) < length"
         else:
             return self._content._validity_error(path + ".content")
 

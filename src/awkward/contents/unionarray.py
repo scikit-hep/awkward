@@ -1286,7 +1286,7 @@ class UnionArray(Content):
                 self._backend.nplike.known_shape
                 and self.index.length < self.tags.length
             ):
-                return f'at {path} ("{type(self)}"): len(index) < len(tags)'
+                return f"at {path} ({type(self)!r}): len(index) < len(tags)"
 
             lencontents = self._backend.index_nplike.empty(
                 len(self.contents), dtype=np.int64
