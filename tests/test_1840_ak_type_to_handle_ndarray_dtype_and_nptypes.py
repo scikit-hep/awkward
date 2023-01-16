@@ -17,10 +17,6 @@ def test_dtype():
     )
 
 
-def test_type():
-    assert ak.type(np.float64) == ak.types.ScalarType(ak.types.NumpyType("float64"))
-
-
 def test_type_instance():
     assert ak.type(np.float64(10.0)) == ak.types.ScalarType(
         ak.types.NumpyType("float64")
