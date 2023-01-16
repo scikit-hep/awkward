@@ -1,5 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+import inspect
 import numbers
 from datetime import datetime, timedelta
 
@@ -79,12 +80,11 @@ def type(array, *, behavior=None):
 
 
 def _is_dtype_like(obj):
-    try:
-        np.dtype(obj)
-    except TypeError:
-        return False
-    else:
-        return True
+    return (
+        isinstance(obj, np.dtype)
+        or isinstance(obj, np.generic)
+        or (inspect.isclass(obj) and issubclass(obj, np.generic))
+    )
 
 
 def _impl(array, behavior):
