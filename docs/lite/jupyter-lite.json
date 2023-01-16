@@ -3,6 +3,9 @@
   "jupyter-config-data": {
     "enableMemoryStorage": true,
     "settingsStorageDrivers": ["memoryStorageDriver"],
-    "contentsStorageDrivers": ["memoryStorageDriver"]
+    "contentsStorageDrivers": ["memoryStorageDriver"],
+    "disabledExtensions": [
+      "ipyparallel-labextension"
+    ]
   }
 }
