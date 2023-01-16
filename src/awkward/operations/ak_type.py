@@ -92,10 +92,8 @@ def _impl(array, behavior):
     elif isinstance(array, ak.contents.Content):
         return ak.types.ArrayType(array.form.type_from_behavior(behavior), array.length)
 
-    elif (
-        isinstance(array, np.dtype)
-        or isinstance(array, np.generic)
-        or (inspect.isclass(array) and issubclass(array, np.generic))
+    elif isinstance(array, (np.dtype, np.generic)) or (
+        inspect.isclass(array) and issubclass(array, np.generic)
     ):
         return ak.types.ScalarType(
             ak.types.NumpyType(ak.types.numpytype.dtype_to_primitive(np.dtype(array)))
