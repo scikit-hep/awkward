@@ -12,32 +12,6 @@ from awkward.typing import TypeVar
 np = _nplikes.NumpyMetadata.instance()
 
 
-class NoError:
-    def __init__(self):
-        self.str = None
-        self.filename = None
-        self.pass_through = False
-        self.attempt = ak._util.kSliceNone
-        self.id = ak._util.kSliceNone
-
-
-class NoKernel:
-    def __init__(self, index):
-        self._name_and_types = index
-
-    def __call__(self, *args):
-        for x in args:
-            try_touch_data(x)
-        return NoError()
-
-    def __repr__(self):
-        return "<{} {}{}>".format(
-            type(self).__name__,
-            self._name_and_types[0],
-            "".join(", " + str(numpy.dtype(x)) for x in self._name_and_types[1:]),
-        )
-
-
 class UnknownLengthType:
     def __repr__(self):
         return "UnknownLength"
@@ -711,9 +685,6 @@ class TypeTracer(ak._nplikes.NumpyLike):
     def to_rectilinear(self, array, *args, **kwargs):
         try_touch_shape(array)
         raise ak._errors.wrap_error(NotImplementedError)
-
-    def __getitem__(self, name_and_types):
-        return NoKernel(name_and_types)
 
     @property
     def ma(self):
