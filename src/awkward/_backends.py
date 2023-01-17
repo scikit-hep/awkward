@@ -6,14 +6,7 @@ import awkward_cpp
 
 import awkward as ak
 from awkward._kernels import CupyKernel, JaxKernel, NumpyKernel
-from awkward._nplikes import (
-    Cupy,
-    Jax,
-    Numpy,
-    NumpyLike,
-    NumpyMetadata,
-    nplike_of,
-)
+from awkward._nplikes import Cupy, Jax, Numpy, NumpyLike, NumpyMetadata, nplike_of
 from awkward._singleton import Singleton
 from awkward._typetracer import NoKernel, TypeTracer
 from awkward.typing import Callable, Final, Tuple, TypeAlias, TypeVar, Unpack
