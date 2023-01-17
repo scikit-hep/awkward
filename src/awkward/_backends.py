@@ -5,13 +5,11 @@ from abc import ABC, abstractmethod
 import awkward_cpp
 
 import awkward as ak
+from awkward._kernels import CupyKernel, JaxKernel, NumpyKernel
 from awkward._nplikes import (
     Cupy,
-    CupyKernel,
     Jax,
-    JaxKernel,
     Numpy,
-    NumpyKernel,
     NumpyLike,
     NumpyMetadata,
     Singleton,
