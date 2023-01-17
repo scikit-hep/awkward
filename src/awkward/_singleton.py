@@ -6,6 +6,9 @@ from awkward.typing import Protocol, Self
 class Singleton(Protocol):
     _instance: type[Self]
 
+    def __new__(cls, *args, **kwargs):
+        return super().__new__(cls, *args, **kwargs)
+
     @classmethod
     def instance(cls) -> Self:
         try:
