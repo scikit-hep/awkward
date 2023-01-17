@@ -723,10 +723,26 @@ class TypeTracer(ak._nplikes.NumpyLike):
         try_touch_data(data)
         return TypeTracerArray.from_array(data, dtype=dtype)
 
-    def asarray(self, array, dtype=None, **kwargs):
-        # array[, dtype=][, order=]
-        try_touch_data(array)
-        return TypeTracerArray.from_array(array, dtype=dtype)
+    def asarray(
+        self,
+        obj,
+        *,
+        dtype: numpy.dtype | None = None,
+        copy: bool | None = None,
+    ):
+        try_touch_data(obj)
+        result = TypeTracerArray.from_array(obj, dtype=dtype)
+        if copy or copy is None:
+            return result
+        else:
+            if getattr(obj, "dtype", dtype) != dtype:
+                raise ak._errors.wrap_error(
+                    ValueError(
+                        "asarray was called with copy=False for an array of a different dtype"
+                    )
+                )
+            else:
+                result
 
     def ascontiguousarray(self, array, dtype=None, **kwargs):
         # array[, dtype=]

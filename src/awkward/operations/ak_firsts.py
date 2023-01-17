@@ -72,7 +72,9 @@ def _impl(array, axis, highlevel, behavior):
                 nplike = layout._backend.index_nplike
 
                 # this is a copy of the raw array
-                index = starts = nplike.array(layout.starts.raw(nplike), dtype=np.int64)
+                index = starts = nplike.asarray(
+                    layout.starts.raw(nplike), dtype=np.int64, copy=True
+                )
 
                 # this might be a view
                 stops = layout.stops.raw(nplike)

@@ -180,7 +180,7 @@ def _impl(array, axis, highlevel, behavior):
             backend = layout.backend
 
             if layout.is_unknown:
-                return apply(ak.contents.NumpyArray(backend.nplike.array([])))
+                return apply(ak.contents.NumpyArray(backend.nplike.asarray([])))
 
             elif layout.is_indexed:
                 return apply(layout.project())

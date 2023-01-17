@@ -48,7 +48,12 @@ class Index:
                 TypeError("Index metadata must be None or a dict")
             )
         self._metadata = metadata
-        self._data = self._nplike.asarray(data, dtype=self._expected_dtype, order="C")
+        # We don't care about F, C (it's one dimensional), but we do need
+        # the array to be contiguous. This should _not_ return a copy if already
+        self._data = self._nplike.ascontiguousarray(
+            self._nplike.asarray(data, dtype=self._expected_dtype)
+        )
+
         if len(self._data.shape) != 1:
             raise ak._errors.wrap_error(TypeError("Index data must be one-dimensional"))
 
@@ -138,8 +143,8 @@ class Index:
     def __len__(self):
         return self.length
 
-    def __array__(self, *args, **kwargs):
-        return self._nplike.asarray(self._data, *args, **kwargs)
+    def __array__(self, dtype=None):
+        return self._nplike.asarray(self._data, dtype=dtype)
 
     def __repr__(self):
         return self._repr("", "", "")

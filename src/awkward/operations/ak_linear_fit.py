@@ -209,7 +209,7 @@ def _impl(x, y, weight, axis, keepdims, mask_identity):
                 ak.record.Record,
             ),
         ):
-            intercept = ak.contents.NumpyArray(nplike.array([intercept]))
+            intercept = ak.contents.NumpyArray(nplike.asarray([intercept]))
             scalar = True
         if not isinstance(
             slope,
@@ -218,7 +218,7 @@ def _impl(x, y, weight, axis, keepdims, mask_identity):
                 ak.record.Record,
             ),
         ):
-            slope = ak.contents.NumpyArray(nplike.array([slope]))
+            slope = ak.contents.NumpyArray(nplike.asarray([slope]))
             scalar = True
         if not isinstance(
             intercept_error,
@@ -227,7 +227,7 @@ def _impl(x, y, weight, axis, keepdims, mask_identity):
                 ak.record.Record,
             ),
         ):
-            intercept_error = ak.contents.NumpyArray(nplike.array([intercept_error]))
+            intercept_error = ak.contents.NumpyArray(nplike.asarray([intercept_error]))
             scalar = True
         if not isinstance(
             slope_error,
@@ -236,7 +236,7 @@ def _impl(x, y, weight, axis, keepdims, mask_identity):
                 ak.record.Record,
             ),
         ):
-            slope_error = ak.contents.NumpyArray(nplike.array([slope_error]))
+            slope_error = ak.contents.NumpyArray(nplike.asarray([slope_error]))
             scalar = True
 
         out = ak.contents.RecordArray(
