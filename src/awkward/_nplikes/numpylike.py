@@ -173,7 +173,9 @@ class NumpyLike(Singleton, Protocol):
         ...
 
     @abstractmethod
-    def meshgrid(self, *arrays: Array, indexing: Literal["xy", "ij"] = "xy") -> Array:
+    def meshgrid(
+        self, *arrays: Array, indexing: Literal["xy", "ij"] = "xy"
+    ) -> list[Array]:
         ...
 
     ############################ data type functions

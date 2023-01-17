@@ -2,9 +2,6 @@
 
 from __future__ import annotations
 
-import operator
-from functools import reduce
-
 import numpy
 
 from awkward import _errors
@@ -56,10 +53,13 @@ class TypeTracerArray(Array):
 
     @property
     def size(self) -> SupportsInt:
-        if not self._shape:
-            return 0
-        else:
-            return reduce(operator.mul, self._shape)
+        size = 1
+        for component in self._shape:
+            if is_unknown_scalar(component):
+                return unknown_scalar(metadata.int64)
+            else:
+                size *= component
+        return size
 
     @property
     def T(self) -> TypeTracerArray:
@@ -131,6 +131,101 @@ class TypeTracerArray(Array):
 
     def touch_shape(self):
         raise _errors.wrap_error(NotImplementedError)
+
+    def __add__(
+        self: Array, other: int | float | complex | TypeTracerArray
+    ) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def __sub__(
+        self: Array, other: int | float | complex | TypeTracerArray
+    ) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def __truediv__(
+        self: Array, other: int | float | complex | TypeTracerArray
+    ) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def __floordiv__(
+        self: Array, other: int | float | complex | TypeTracerArray
+    ) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def __mod__(
+        self: Array, other: int | float | complex | TypeTracerArray
+    ) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def __mul__(
+        self: Array, other: int | float | complex | TypeTracerArray
+    ) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def __pow__(
+        self: Array, other: int | float | complex | TypeTracerArray
+    ) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def __xor__(self: Array, other: int | bool | TypeTracerArray) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def __and__(self: Array, other: int | bool | TypeTracerArray) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def __or__(self: Array, other: int | bool | TypeTracerArray) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def __lt__(
+        self: Array,
+        other: int | float | complex | str | bytes | TypeTracerArray,
+    ) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def __le__(
+        self: Array,
+        other: int | float | complex | str | bytes | TypeTracerArray,
+    ) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def __gt__(
+        self: Array,
+        other: int | float | complex | str | bytes | TypeTracerArray,
+    ) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def __ge__(
+        self: Array,
+        other: int | float | complex | str | bytes | TypeTracerArray,
+    ) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def __eq__(  # type: ignore[override]
+        self: Array,
+        other: int | float | bool | complex | str | bytes | TypeTracerArray,
+    ) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def __ne__(  # type: ignore[override]
+        self: Array,
+        other: int | float | bool | complex | str | bytes | TypeTracerArray,
+    ) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def __abs__(self: Array) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def __neg__(self: Array) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def __pos__(self: Array) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def __invert__(self: Array) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+
+T = TypeVar("T")
 
 
 @final
@@ -238,7 +333,7 @@ class TypeTracer(NumpyLike):
 
     def meshgrid(
         self, *arrays: Array, indexing: Literal["xy", "ij"] = "xy"
-    ) -> TypeTracerArray:
+    ) -> list[TypeTracerArray]:
         if not all(x.ndim == 1 for x in arrays):
             raise _errors.wrap_error(ValueError)
 
@@ -289,13 +384,62 @@ class TypeTracer(NumpyLike):
 
     ############################ manipulation functions
 
+    def _add_maybe_unknown(self, x1, x2) -> TypeTracerArray | T:
+        if is_unknown_scalar(x1) or is_unknown_scalar(x2):
+            return unknown_scalar(self.result_type(x1, x2))
+        else:
+            return x1 + x2
+
+    def _compute_flattened_size(self, *arrays):
+        # Compute flat size
+        size = 0
+        for array in arrays:
+            size = self._add_maybe_unknown(size, array.size)
+        return size
+
+    @staticmethod
+    def _normalise_axis(array: Array, axis: int) -> int:
+        if axis >= 0:
+            return axis
+        else:
+            return array.ndim + axis
+
     def concat(
         self,
         arrays: list[TypeTracerArray] | tuple[TypeTracerArray, ...],
         *,
         axis: int | None = 0,
     ) -> TypeTracerArray:
-        raise _errors.wrap_error(NotImplementedError)
+        dtype = self.result_type(*arrays)
+        if axis is None:
+            size = self._compute_flattened_size(*arrays)
+            return TypeTracerArray._new(dtype, (size,), nplike=self)
+        else:
+            array, *others = arrays
+
+            # Check dimensions
+            if not all(o.ndim == array.ndim for o in others):
+                raise _errors.wrap_error(
+                    ValueError("arrays must have equal dimensions")
+                )
+
+            shape = array.shape
+            axis = self._normalise_axis(array, axis)
+
+            for other in others:
+                for ax, dim in other.shape:
+                    if ax == axis:
+                        shape[ax] = self._add_maybe_unknown(shape[ax], dim)
+                        continue
+                    elif is_unknown_scalar(shape[ax]) or is_unknown_scalar(dim):
+                        shape[ax] = unknown_scalar(metadata.int64)
+                        continue
+                    elif shape[ax] != dim:
+                        raise _errors.wrap_error(
+                            ValueError("arrays must have compatible shapes")
+                        )
+
+            return TypeTracerArray._new(dtype, tuple(shape), nplike=self)
 
     def stack(
         self,
@@ -303,7 +447,33 @@ class TypeTracer(NumpyLike):
         *,
         axis: int = 0,
     ) -> TypeTracerArray:
-        raise _errors.wrap_error(NotImplementedError)
+        dtype = self.result_type(*arrays)
+        if axis is None:
+            size = self._compute_flattened_size(*arrays)
+            return TypeTracerArray._new(dtype, (size,), nplike=self)
+        else:
+            array, *others = arrays
+
+            # Check dimensions
+            if not all(o.ndim == array.ndim for o in others):
+                raise _errors.wrap_error(
+                    ValueError("arrays must have equal dimensions")
+                )
+
+            shape = array.shape
+            axis = self._normalise_axis(array, axis)
+
+            for other in others:
+                for ax, dim in other.shape:
+                    if is_unknown_scalar(shape[ax]) or is_unknown_scalar(dim):
+                        shape[ax] = unknown_scalar(metadata.int64)
+                        continue
+                    elif shape[ax] != dim:
+                        raise _errors.wrap_error(
+                            ValueError("arrays must have compatible shapes")
+                        )
+            shape.insert(axis, len(arrays))
+            return TypeTracerArray._new(dtype, tuple(shape), nplike=self)
 
     ############################ ufuncs
 
@@ -557,7 +727,9 @@ class TypeTracer(NumpyLike):
         raise _errors.wrap_error(NotImplementedError)
 
     def is_c_contiguous(self, x: Array) -> bool:
-        return True
+        # TODO: should this return unknown, or should we store this
+        # information?
+        raise _errors.wrap_error(NotImplementedError)
 
     def to_rectilinear(self, x: Array):
         raise _errors.wrap_error(NotImplementedError)
@@ -565,10 +737,7 @@ class TypeTracer(NumpyLike):
     def byteswap(self, x: Array, copy: bool = False):
         return x
 
-    def error_state(
-        self,
-        **kwargs: ErrorStateLiteral,
-    ) -> ContextManager:
+    def error_state(self, **kwargs: ErrorStateLiteral) -> ContextManager:
         raise _errors.wrap_error(NotImplementedError)
 
     @classmethod
@@ -582,7 +751,7 @@ class TypeTracer(NumpyLike):
         s2: tuple[SupportsInt, ...],
         *,
         assume_unknown_compatible=True,
-    ) -> bool | TypeTracerArray:
+    ) -> bool:
         """
         Args:
             s1: first shape
@@ -591,21 +760,21 @@ class TypeTracer(NumpyLike):
 
         Return
         """
+        # TODO: this should be named "shapes_are_equal"
         if len(s1) != len(s2):
             return False
 
         result_is_known = True
         for this, that in zip(s1, s2):
-            components_are_equal = this == that
-            if is_unknown_scalar(components_are_equal):
+            if is_unknown_scalar(this) or is_unknown_scalar(that):
                 result_is_known = False
-            elif not components_are_equal:
+            elif this != that:
                 return False
 
         if result_is_known or assume_unknown_compatible:
             return True
         else:
-            return unknown_scalar(metadata.bool_)
+            return False
 
     @classmethod
     def broadcast_shapes(
