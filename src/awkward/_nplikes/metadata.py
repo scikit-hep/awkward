@@ -5,7 +5,9 @@ nplike-agnostic metadata, such as dtypes and constants.
 
 from __future__ import annotations
 
-import numpy
+import numbers
+
+import numpy as _numpy
 from numpy import datetime_data, dtype, finfo, iinfo
 
 import awkward as ak
@@ -39,9 +41,9 @@ __all__ = [
 
 
 # NumPy constants
-nan = numpy.nan
-inf = numpy.inf
-newaxis = numpy.newaxis
+nan = _numpy.nan
+inf = _numpy.inf
+newaxis = _numpy.newaxis
 
 # DTypes ######################################################################
 int8 = dtype("int8")
@@ -84,12 +86,12 @@ _complex_floating = (
 # Although we don't need them to be bound to names
 # (Awkward code can't rely on these being available)
 # we can still allow our code to test for them
-if hasattr(numpy, "float16"):
-    _real_floating = (dtype(numpy.float16), *_real_floating)  # type: ignore
-if hasattr(numpy, "float128"):
-    _real_floating = (*_real_floating, dtype(numpy.float128))  # type: ignore
-if hasattr(numpy, "complex256"):
-    _complex_floating = (*_complex_floating, dtype(numpy.complex256))  # type: ignore
+if hasattr(_numpy, "float16"):
+    _real_floating = (dtype(_numpy.float16), *_real_floating)  # type: ignore
+if hasattr(_numpy, "float128"):
+    _real_floating = (*_real_floating, dtype(_numpy.float128))  # type: ignore
+if hasattr(_numpy, "complex256"):
+    _complex_floating = (*_complex_floating, dtype(_numpy.complex256))  # type: ignore
 
 
 all_dtypes = (
@@ -112,19 +114,19 @@ def isdtype(
 ) -> bool:
     if isinstance(kind, str):
         if kind == "bool":
-            return numpy.issubdtype(dtype_, bool_)
+            return _numpy.issubdtype(dtype_, bool_)
         elif kind == "signed integer":
-            return any([numpy.issubdtype(dtype_, c) for c in _signed_integer])
+            return any([_numpy.issubdtype(dtype_, c) for c in _signed_integer])
         elif kind == "unsigned integer":
-            return any([numpy.issubdtype(dtype_, c) for c in _unsigned_integer])
+            return any([_numpy.issubdtype(dtype_, c) for c in _unsigned_integer])
         elif kind == "integral":
             return isdtype(dtype_, "signed integer") or isdtype(
                 dtype_, "unsigned integer"
             )
         elif kind == "real floating":
-            return any([numpy.issubdtype(dtype_, c) for c in _real_floating])
+            return any([_numpy.issubdtype(dtype_, c) for c in _real_floating])
         elif kind == "complex floating":
-            return any([numpy.issubdtype(dtype_, c) for c in _complex_floating])
+            return any([_numpy.issubdtype(dtype_, c) for c in _complex_floating])
         elif kind == "numeric":
             return (
                 isdtype(dtype_, "integral")
@@ -140,4 +142,27 @@ def isdtype(
         return any([isdtype(dtype_, k) for k in kind])
     else:
         assert isinstance(kind, dtype)
-        return numpy.issubdtype(dtype_, kind)
+        return _numpy.issubdtype(dtype_, kind)
+
+
+def default_dtype(value) -> dtype:
+    if isinstance(value, numbers.Integral):
+        return int64
+    elif isinstance(value, numbers.Real):
+        return float64
+    elif isinstance(value, numbers.Complex):
+        return complex128
+    elif isinstance(value, (bool, _numpy.bool_)):
+        return bool_
+    else:
+        raise ak._errors.wrap_error(TypeError("unsupported value"))
+
+
+def is_valid_dtype(dtype: dtype) -> bool:
+    return dtype in all_dtypes
+
+
+def ensure_valid_dtype(dtype: dtype, *, allow_none=False):
+    if is_valid_dtype(dtype) or (dtype is None and allow_none):
+        return
+    raise ak._errors.wrap_error(ValueError("dtype must be one of the supported dtypes"))
