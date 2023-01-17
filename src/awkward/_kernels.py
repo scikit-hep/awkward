@@ -15,7 +15,7 @@ KernelKeyType: TypeAlias = tuple  # Tuple[str, Unpack[Tuple[metadata.dtype, ...]
 
 
 class KernelError(Protocol):
-    filename: str | None
+    filename: str | None  # pylint: disable=E0602
     str: str | None
     pass_through: bool
     attempt: int
