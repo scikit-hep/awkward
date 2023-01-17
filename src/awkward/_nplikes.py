@@ -6,21 +6,8 @@ import ctypes
 import numpy
 
 import awkward as ak
+from awkward._singleton import Singleton
 from awkward.typing import TypeVar
-
-
-class Singleton:
-    _instance = None
-
-    def __new__(cls, *args, **kwargs):
-        assert cls._instance is None
-        return super().__new__(cls, *args, **kwargs)
-
-    @classmethod
-    def instance(cls):
-        if cls._instance is None:
-            cls._instance = cls()
-        return cls._instance
 
 
 class NumpyMetadata(Singleton):
