@@ -111,7 +111,7 @@ class NumpyLike(Singleton, Protocol):
         self,
         shape: int | tuple[int, ...],
         *,
-        dtype: dtype | None = None,
+        dtype: dtype,
     ) -> Array:
         ...
 
@@ -120,7 +120,7 @@ class NumpyLike(Singleton, Protocol):
         self,
         shape: int | tuple[int, ...],
         *,
-        dtype: dtype | None = None,
+        dtype: dtype,
     ) -> Array:
         ...
 
@@ -129,7 +129,7 @@ class NumpyLike(Singleton, Protocol):
         self,
         shape: int | tuple[int, ...],
         *,
-        dtype: dtype | None = None,
+        dtype: dtype,
     ) -> Array:
         ...
 
@@ -139,7 +139,7 @@ class NumpyLike(Singleton, Protocol):
         shape: int | tuple[int, ...],
         fill_value,
         *,
-        dtype: dtype | None = None,
+        dtype: dtype,
     ) -> Array:
         ...
 
@@ -218,7 +218,7 @@ class NumpyLike(Singleton, Protocol):
     ############################ searching functions
 
     @abstractmethod
-    def nonzero(self, x: Array) -> Array:
+    def nonzero(self, x: Array) -> tuple[Array, ...]:
         ...
 
     @abstractmethod
@@ -228,7 +228,7 @@ class NumpyLike(Singleton, Protocol):
     ############################ set functions
 
     @abstractmethod
-    def unique_counts(self, x: Array) -> Array:
+    def unique_counts(self, x: Array) -> tuple[Array, Array]:
         ...
 
     @abstractmethod
