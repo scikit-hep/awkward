@@ -1,8 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 from __future__ import annotations
 
-import ctypes
-
 import numpy
 
 import awkward as ak
@@ -378,103 +376,6 @@ class NumpyLike(Singleton):
 
     def to_rectilinear(self, array):
         raise ak._errors.wrap_error(NotImplementedError)
-
-
-class Kernel:
-    def __init__(self, kernel, name_and_types):
-        self._kernel = kernel
-        self._name_and_types = name_and_types
-
-    def __repr__(self):
-        return "<{} {}{}>".format(
-            type(self).__name__,
-            self._name_and_types[0],
-            "".join(", " + str(numpy.dtype(x)) for x in self._name_and_types[1:]),
-        )
-
-
-class NumpyKernel(Kernel):
-    @classmethod
-    def _cast(cls, x, t):
-        if issubclass(t, ctypes._Pointer):
-            # Do we have a NumPy-owned array?
-            if Numpy.is_own_array(x):
-                return ctypes.cast(x.ctypes.data, t)
-            # Or, do we have a ctypes type
-            elif hasattr(x, "_b_base_"):
-                return ctypes.cast(x, t)
-            else:
-                raise ak._errors.wrap_error(
-                    AssertionError("CuPy buffers shouldn't be passed to Numpy Kernels.")
-                )
-        else:
-            return x
-
-    def __call__(self, *args):
-        assert len(args) == len(self._kernel.argtypes)
-
-        return self._kernel(
-            *(self._cast(x, t) for x, t in zip(args, self._kernel.argtypes))
-        )
-
-
-class JaxKernel(NumpyKernel):
-    def __call__(self, *args):
-        assert len(args) == len(self._kernel.argtypes)
-
-        if not any(Jax.is_tracer(arg) for arg in args):
-            return super().__call__(*args)
-
-
-class CupyKernel(Kernel):
-    def max_length(self, args):
-        cupy = ak._connect.cuda.import_cupy("Awkward Arrays with CUDA")
-        max_length = numpy.iinfo(numpy.int64).min
-        for array in args:
-            if isinstance(array, cupy.ndarray):
-                max_length = max(max_length, len(array))
-        return max_length
-
-    def calc_grid(self, length):
-        if length > 1024:
-            return -(length // -1024), 1, 1
-        return 1, 1, 1
-
-    def calc_blocks(self, length):
-        if length > 1024:
-            return 1024, 1, 1
-        return length, 1, 1
-
-    def __call__(self, *args):
-        cupy = ak._connect.cuda.import_cupy("Awkward Arrays with CUDA")
-        maxlength = self.max_length(args)
-        grid, blocks = self.calc_grid(maxlength), self.calc_blocks(maxlength)
-        cupy_stream_ptr = cupy.cuda.get_current_stream().ptr
-
-        if cupy_stream_ptr not in ak._connect.cuda.cuda_streamptr_to_contexts:
-            ak._connect.cuda.cuda_streamptr_to_contexts[cupy_stream_ptr] = (
-                cupy.array(ak._connect.cuda.NO_ERROR),
-                [],
-            )
-
-        assert len(args) == len(self._kernel.dir)
-        # The first arg is the invocation index which raises itself by 8 in the kernel if there was no error before.
-        # The second arg is the error_code.
-        args = list(args)
-        args.extend(
-            [
-                len(ak._connect.cuda.cuda_streamptr_to_contexts[cupy_stream_ptr][1]),
-                ak._connect.cuda.cuda_streamptr_to_contexts[cupy_stream_ptr][0],
-            ]
-        )
-        ak._connect.cuda.cuda_streamptr_to_contexts[cupy_stream_ptr][1].append(
-            ak._connect.cuda.Invocation(
-                name=self._name_and_types[0],
-                error_context=ak._errors.ErrorContext.primary(),
-            )
-        )
-
-        self._kernel(grid, blocks, tuple(args))
 
 
 class Numpy(NumpyLike):
