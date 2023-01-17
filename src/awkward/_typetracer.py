@@ -743,7 +743,7 @@ class TypeTracer(ak._nplikes.NumpyLike):
                     )
                 )
             else:
-                result
+                return result
 
     def ascontiguousarray(self, array, dtype=None, **kwargs):
         # array[, dtype=]
