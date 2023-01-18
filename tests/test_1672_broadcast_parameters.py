@@ -1,10 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+import numpy as np
 import pytest
 
 import awkward as ak
-
-numpy = ak._nplikes.Numpy.instance()
 
 
 @pytest.mark.skip("string broadcasting is broken")
@@ -57,7 +56,7 @@ def test_broadcast_strings_2d():
 def test_broadcast_string_int():
     this = ak.Array(["one", "two", "one", "nine"])
     that = ak.contents.NumpyArray(
-        numpy.array([1, 2, 1, 9], dtype="int32"), parameters={"kind": "integer"}
+        np.array([1, 2, 1, 9], dtype="int32"), parameters={"kind": "integer"}
     )
     this_next, that_next = ak.operations.ak_broadcast_arrays.broadcast_arrays(
         this, that
@@ -69,10 +68,10 @@ def test_broadcast_string_int():
 
 def test_broadcast_float_int():
     this = ak.contents.NumpyArray(
-        numpy.array([1.0, 2.0, 3.0, 4.0], dtype="float64"), parameters={"name": "this"}
+        np.array([1.0, 2.0, 3.0, 4.0], dtype="float64"), parameters={"name": "this"}
     )
     that = ak.contents.NumpyArray(
-        numpy.array([1, 2, 1, 9], dtype="int32"), parameters={"name": "that"}
+        np.array([1, 2, 1, 9], dtype="int32"), parameters={"name": "that"}
     )
     this_next, that_next = ak.operations.ak_broadcast_arrays.broadcast_arrays(
         this, that, highlevel=False
@@ -83,11 +82,11 @@ def test_broadcast_float_int():
 
 
 def test_broadcast_float_int_option():
-    this = ak.contents.NumpyArray(numpy.arange(4), parameters={"name": "this"})
+    this = ak.contents.NumpyArray(np.arange(4), parameters={"name": "this"})
     that = ak.contents.ByteMaskedArray(
-        ak.index.Index8(numpy.array([0, 1, 0, 1])),
+        ak.index.Index8(np.array([0, 1, 0, 1])),
         ak.contents.NumpyArray(
-            numpy.arange(4),
+            np.arange(4),
         ),
         valid_when=True,
         parameters={"name": "that"},
@@ -101,24 +100,24 @@ def test_broadcast_float_int_option():
 
 
 def test_broadcast_float_int_union():
-    this = ak.contents.NumpyArray(numpy.arange(4), parameters={"name": "this"})
+    this = ak.contents.NumpyArray(np.arange(4), parameters={"name": "this"})
     that_1 = ak.contents.ByteMaskedArray(
-        ak.index.Index8(numpy.array([0, 1, 0, 1], dtype="int8")),
+        ak.index.Index8(np.array([0, 1, 0, 1], dtype="int8")),
         ak.contents.NumpyArray(
-            numpy.arange(4),
+            np.arange(4),
         ),
         valid_when=True,
         parameters={"name": "that"},
     )
     that_2 = ak.contents.ByteMaskedArray(
-        ak.index.Index8(numpy.array([0, 1, 0, 1], dtype="int8")),
+        ak.index.Index8(np.array([0, 1, 0, 1], dtype="int8")),
         ak.from_iter(["1", "2", "3", "4"], highlevel=False),
         valid_when=True,
         parameters={"name": "other"},
     )
     that = ak.contents.UnionArray(
-        ak.index.Index8(numpy.array([0, 1, 0, 1], dtype="int8")),
-        ak.index.Index32(numpy.array([0, 0, 1, 1], dtype="int32")),
+        ak.index.Index8(np.array([0, 1, 0, 1], dtype="int8")),
+        ak.index.Index32(np.array([0, 0, 1, 1], dtype="int32")),
         [that_1, that_2],
     )
     this_next, that_next = ak.operations.ak_broadcast_arrays.broadcast_arrays(
@@ -131,13 +130,13 @@ def test_broadcast_float_int_union():
 
 def test_broadcast_float_int_2d():
     this = ak.contents.ListOffsetArray(
-        ak.index.Index64(numpy.array([0, 3, 4], dtype="int64")),
-        ak.contents.NumpyArray(numpy.array([1.0, 2.0, 3.0, 4.0], dtype="float64")),
+        ak.index.Index64(np.array([0, 3, 4], dtype="int64")),
+        ak.contents.NumpyArray(np.array([1.0, 2.0, 3.0, 4.0], dtype="float64")),
         parameters={"name": "this"},
     )
     that = ak.contents.ListOffsetArray(
-        ak.index.Index64(numpy.array([0, 3, 4], dtype="int64")),
-        ak.contents.NumpyArray(numpy.array([1, 2, 1, 9], dtype="int64")),
+        ak.index.Index64(np.array([0, 3, 4], dtype="int64")),
+        ak.contents.NumpyArray(np.array([1, 2, 1, 9], dtype="int64")),
         parameters={"name": "that"},
     )
     this_next, that_next = ak.operations.ak_broadcast_arrays.broadcast_arrays(
@@ -153,12 +152,12 @@ def test_broadcast_float_int_2d():
 
 def test_broadcast_float_int_2d_right_broadcast():
     this = ak.contents.ListOffsetArray(
-        ak.index.Index64(numpy.array([0, 3, 4], dtype="int64")),
-        ak.contents.NumpyArray(numpy.array([1.0, 2.0, 3.0, 4.0], dtype="float64")),
+        ak.index.Index64(np.array([0, 3, 4], dtype="int64")),
+        ak.contents.NumpyArray(np.array([1.0, 2.0, 3.0, 4.0], dtype="float64")),
         parameters={"name": "this"},
     )
     that = ak.contents.RegularArray(
-        ak.contents.NumpyArray(numpy.array([1, 9], dtype="int64")),
+        ak.contents.NumpyArray(np.array([1, 9], dtype="int64")),
         size=1,
         parameters={"name": "that"},
     )
@@ -175,12 +174,12 @@ def test_broadcast_float_int_2d_right_broadcast():
 
 def test_broadcast_float_int_2d_regular():
     this = ak.contents.RegularArray(
-        ak.contents.NumpyArray(numpy.array([1.0, 2.0, 3.0, 4.0], dtype="float64")),
+        ak.contents.NumpyArray(np.array([1.0, 2.0, 3.0, 4.0], dtype="float64")),
         size=2,
         parameters={"name": "this"},
     )
     that = ak.contents.RegularArray(
-        ak.contents.NumpyArray(numpy.array([1, 9], dtype="int64")),
+        ak.contents.NumpyArray(np.array([1, 9], dtype="int64")),
         size=1,
         parameters={"name": "that"},
     )
@@ -209,13 +208,13 @@ def test_broadcast_string_self():
 
 def test_transform_float_int_2d_same():
     this = ak.contents.ListOffsetArray(
-        ak.index.Index64(numpy.array([0, 3, 4], dtype="int64")),
-        ak.contents.NumpyArray(numpy.array([1.0, 2.0, 3.0, 4.0], dtype="float64")),
+        ak.index.Index64(np.array([0, 3, 4], dtype="int64")),
+        ak.contents.NumpyArray(np.array([1.0, 2.0, 3.0, 4.0], dtype="float64")),
         parameters={"name": "this"},
     )
     that = ak.contents.ListOffsetArray(
-        ak.index.Index64(numpy.array([0, 3, 4], dtype="int64")),
-        ak.contents.NumpyArray(numpy.array([1, 2, 1, 9], dtype="int64")),
+        ak.index.Index64(np.array([0, 3, 4], dtype="int64")),
+        ak.contents.NumpyArray(np.array([1, 2, 1, 9], dtype="int64")),
         parameters={"name": "this"},
     )
     this_next, that_next = ak.operations.ak_transform.transform(
@@ -228,13 +227,13 @@ def test_transform_float_int_2d_same():
 
 def test_transform_float_int_2d_different_one_to_one():
     this = ak.contents.ListOffsetArray(
-        ak.index.Index64(numpy.array([0, 3, 4], dtype="int64")),
-        ak.contents.NumpyArray(numpy.array([1.0, 2.0, 3.0, 4.0], dtype="float64")),
+        ak.index.Index64(np.array([0, 3, 4], dtype="int64")),
+        ak.contents.NumpyArray(np.array([1.0, 2.0, 3.0, 4.0], dtype="float64")),
         parameters={"name": "this"},
     )
     that = ak.contents.ListOffsetArray(
-        ak.index.Index64(numpy.array([0, 3, 4], dtype="int64")),
-        ak.contents.NumpyArray(numpy.array([1, 2, 1, 9], dtype="int64")),
+        ak.index.Index64(np.array([0, 3, 4], dtype="int64")),
+        ak.contents.NumpyArray(np.array([1, 2, 1, 9], dtype="int64")),
         parameters={"name": "that"},
     )
     this_next, that_next = ak.operations.ak_transform.transform(
@@ -251,8 +250,8 @@ def test_transform_float_int_2d_different_one_to_one():
 
 def test_transform_float_int_2d_different_intersect():
     this = ak.contents.ListOffsetArray(
-        ak.index.Index64(numpy.array([0, 3, 4], dtype="int64")),
-        ak.contents.NumpyArray(numpy.array([1.0, 2.0, 3.0, 4.0], dtype="float64")),
+        ak.index.Index64(np.array([0, 3, 4], dtype="int64")),
+        ak.contents.NumpyArray(np.array([1.0, 2.0, 3.0, 4.0], dtype="float64")),
         parameters={
             "name": "this",
             "key": "value",
@@ -261,8 +260,8 @@ def test_transform_float_int_2d_different_intersect():
         },
     )
     that = ak.contents.ListOffsetArray(
-        ak.index.Index64(numpy.array([0, 3, 4], dtype="int64")),
-        ak.contents.NumpyArray(numpy.array([1, 2, 1, 9], dtype="int64")),
+        ak.index.Index64(np.array([0, 3, 4], dtype="int64")),
+        ak.contents.NumpyArray(np.array([1, 2, 1, 9], dtype="int64")),
         parameters={
             "name": "that",
             "key": "value",
@@ -284,13 +283,13 @@ def test_transform_float_int_2d_different_intersect():
 
 def test_transform_float_int_2d_one_to_one_error():
     this = ak.contents.ListOffsetArray(
-        ak.index.Index64(numpy.array([0, 3, 4], dtype="int64")),
-        ak.contents.NumpyArray(numpy.array([1.0, 2.0, 3.0, 4.0], dtype="float64")),
+        ak.index.Index64(np.array([0, 3, 4], dtype="int64")),
+        ak.contents.NumpyArray(np.array([1.0, 2.0, 3.0, 4.0], dtype="float64")),
         parameters={"name": "this"},
     )
     that = ak.contents.ListOffsetArray(
-        ak.index.Index64(numpy.array([0, 3, 4], dtype="int64")),
-        ak.contents.NumpyArray(numpy.array([1, 2, 1, 9], dtype="int64")),
+        ak.index.Index64(np.array([0, 3, 4], dtype="int64")),
+        ak.contents.NumpyArray(np.array([1, 2, 1, 9], dtype="int64")),
         parameters={"name": "that"},
     )
 
