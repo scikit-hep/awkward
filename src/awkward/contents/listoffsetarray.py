@@ -1862,8 +1862,8 @@ class ListOffsetArray(Content):
             nonzeros = npoffsets[1:] != npoffsets[:-1]
             maskedbytes = validbytes == 0
             if numpy.any(maskedbytes & nonzeros):  # null and count > 0
-                new_starts = numpy.array(npoffsets[:-1], copy=True)
-                new_stops = numpy.array(npoffsets[1:], copy=True)
+                new_starts = numpy.asarray(npoffsets[:-1], copy=True)
+                new_stops = numpy.asarray(npoffsets[1:], copy=True)
                 new_starts[maskedbytes] = 0
                 new_stops[maskedbytes] = 0
                 next = ak.contents.ListArray(

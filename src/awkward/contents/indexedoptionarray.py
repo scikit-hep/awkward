@@ -1416,7 +1416,7 @@ class IndexedOptionArray(Content):
             )
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
-        index = numpy.array(self._index, copy=True)
+        index = numpy.asarray(self._index, copy=True)
         this_validbytes = self.mask_as_bool(valid_when=True)
         index[~this_validbytes] = 0
 
