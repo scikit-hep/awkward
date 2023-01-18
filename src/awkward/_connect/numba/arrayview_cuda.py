@@ -22,6 +22,11 @@ import awkward as ak
 
 np = ak.nplikes.NumpyMetadata.instance()
 
+import _ctypes
+
+def di(obj_id):
+    """ Inverse of id() function. """
+    return _ctypes.PyObj_FromPtr(obj_id)
 
 def pyarrow_cuda_buffer_as_random(size):
     import numpy as np
@@ -526,10 +531,11 @@ class type_len(numba.core.typing.templates.AbstractTemplate):
 
 @numba.extending.lower_builtin(len, ArrayViewType)
 def lower_len(context, builder, sig, args):
-    print("arrayview_cuda.py line 355: @numba.extending.lower_builtin(len, ArrayViewType)", sig.args[0], args[0])
+    print("arrayview_cuda.py line 355: @numba.extending.lower_builtin(len, ArrayViewType)", sig, sig.args[0], args[0])
     proxyin = context.make_helper(builder, sig.args[0], args[0])
     #cgutils.printf(builder, "stop %d, start %d", proxyin.stop, proxyin.start)
-    #printimpl.print_varargs(context, builder, sig, args)
+    #val = ctypes.cast(x.data.ptr, ctypes.py_object).value
+    #printimpl.print_varargs(context, builder, sig, proxyin.stop) # 'LoadInstr' object is not iterable
     return builder.sub(proxyin.stop, proxyin.start)
 
 #@overload_method(ArrayViewType, "len", target="cuda")
@@ -1286,11 +1292,13 @@ class ArrayViewArgHandler:
                 dev = cuda.current_context().device
                 print("ArrayViewArgHandler::prepare_args line 108:", dev)
 
-                print("CuPy array???", val.layout.data)
+                print("CuPy array???", val.layout.data.data)
                 #import numba.cuda as nb_cuda
                 array_data_view = nb_cuda.as_cuda_array(val.layout.data)
                 print("view --->", array_data_view, type(array_data_view))
-
+                print("val._numbaview.start", val._numbaview.start, type(val._numbaview.start))
+                print("val._numbaview.stop", val._numbaview.stop, type(val._numbaview.stop))
+                print("val._numbaview.pos", val._numbaview.pos, type(val._numbaview.pos))
                 c_intp = ctypes.c_ssize_t
                 
                 start = addressof(c_intp(val._numbaview.start))
@@ -1301,8 +1309,10 @@ class ArrayViewArgHandler:
 
                 result_ptr = format(arrayptrs.item(), 'x')
                 print("arrayview_cuda.py line 1280: ArrayViewArgHandler::prepare_args: about to return from prepare args and arrayptrs is", result_ptr, arrayptrs.item())
-                print("arrayview_cuda.py line 1281: ArrayViewArgHandler::prepare_args:", arrayptrs.ctypes.data_as(ctypes.POINTER(ctypes.c_uint64)).contents)
-                
+                print("arrayview_cuda.py line 1281: ArrayViewArgHandler::prepare_args:", arrayptrs.data.ptr)
+                print("start = 0x", format(start, 'x')) 
+                print("stop = 0x", format(stop, 'x'))
+                print("pos = 0x", format(pos, 'x'))
                 return tys, (start, stop, pos, arrayptrs.item(), pylookup)
             else:
                 raise ak._errors.wrap_error(NotImplementedError (

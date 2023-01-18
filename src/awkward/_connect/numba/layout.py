@@ -233,7 +233,7 @@ def getat(context, builder, baseptr, offset, rettype=None):
 
 
 def regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkbounds):
-    print("layout.py line 236: regularize_atval", atval)
+    print("layout.py line 236: regularize_atval", context, builder, atval)
     atval = castint(context, builder, attype, numba.intp, atval)
     print("layout.py line 238: ", atval)
     
@@ -302,7 +302,7 @@ class NumpyArrayType(ContentType, ak._lookup.NumpyLookup):
         wrapneg,
         checkbounds,
     ):
-        print("layout.py line 305: lower_get_item_at")
+        print("layout.py line 305: lower_get_item_at", viewproxy, viewproxy.pos, viewproxy.arrayptrs, viewproxy.start)
         whichpos = posat(context, builder, viewproxy.pos, self.ARRAY)
         arrayptr = getat(context, builder, viewproxy.arrayptrs, whichpos)
         atval = regularize_atval(

@@ -5,11 +5,6 @@ from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
 
-import _ctypes
-
-def di(obj_id):
-    """ Inverse of id() function. """
-    return _ctypes.PyObj_FromPtr(obj_id)
 
 class Lookup:
     def __init__(self, layout, generator=None):
@@ -18,13 +13,11 @@ class Lookup:
 
         def arrayptr(x):
             if isinstance(x, int):
-                print("_lookup.py line 21: INT", int)
                 return x
             elif isinstance(self.nplike, ak.nplikes.Cupy):
-                #val = ctypes.cast(x.data.ptr, ctypes.py_object).value
                 print("_lookup.py line 25: GPU arrayptr: x.data", x.data, " and x.data.ptr", hex(x.data.ptr))
                 print("_lookup.py line 26: ")
-                return x.data
+                return x.data.ptr
             else:
                 print("_lookup.py line 29: CPU arrayptr")
                 return x.ctypes.data
