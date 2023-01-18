@@ -193,7 +193,7 @@ def _impl(array, axis, highlevel, behavior):
                     return layout
 
                 tags = backend.index_nplike.asarray(layout.tags)
-                index = backend.index_nplike.array(
+                index = backend.index_nplike.asarray(
                     backend.nplike.asarray(layout.index), copy=True
                 )
                 bigmask = backend.index_nplike.empty(len(index), dtype=np.bool_)
