@@ -5,10 +5,10 @@ from abc import ABC, abstractmethod
 import awkward_cpp
 
 import awkward as ak
-from awkward._kernels import CupyKernel, JaxKernel, NumpyKernel
+from awkward._kernels import CupyKernel, JaxKernel, NumpyKernel, TypeTracerKernel
 from awkward._nplikes import Cupy, Jax, Numpy, NumpyLike, NumpyMetadata, nplike_of
 from awkward._singleton import Singleton
-from awkward._typetracer import NoKernel, TypeTracer
+from awkward._typetracer import TypeTracer
 from awkward.typing import Callable, Final, Tuple, TypeAlias, TypeVar, Unpack
 
 np = NumpyMetadata.instance()
@@ -160,8 +160,8 @@ class TypeTracerBackend(Backend):
     def __init__(self):
         self._typetracer = TypeTracer.instance()
 
-    def __getitem__(self, index: KernelKeyType) -> NoKernel:
-        return NoKernel(index)
+    def __getitem__(self, index: KernelKeyType) -> TypeTracerKernel:
+        return TypeTracerKernel(index)
 
 
 def _backend_for_nplike(nplike: ak._nplikes.NumpyLike) -> Backend:

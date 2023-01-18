@@ -3,12 +3,10 @@
 import numba
 import numba.core.typing
 import numba.core.typing.ctypes_utils
+import numpy
 from awkward_cpp import libawkward
 
 import awkward as ak
-
-numpy = ak._nplikes.Numpy.instance()
-
 
 dynamic_addrs = {}
 

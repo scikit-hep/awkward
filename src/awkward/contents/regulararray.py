@@ -1141,7 +1141,7 @@ class RegularArray(Content):
     def _to_backend_array(self, allow_missing, backend):
         array_param = self.parameter("__array__")
         if array_param in {"bytestring", "string"}:
-            return backend.nplike.array(self.to_list())
+            return backend.nplike.asarray(self.to_list())
 
         out = self._content._to_backend_array(allow_missing, backend)
         shape = (self._length, self._size) + out.shape[1:]

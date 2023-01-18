@@ -1,4 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+from __future__ import annotations
 
 import numbers
 
@@ -10,32 +11,6 @@ from awkward._util import NDArrayOperatorsMixin
 from awkward.typing import TypeVar
 
 np = _nplikes.NumpyMetadata.instance()
-
-
-class NoError:
-    def __init__(self):
-        self.str = None
-        self.filename = None
-        self.pass_through = False
-        self.attempt = ak._util.kSliceNone
-        self.id = ak._util.kSliceNone
-
-
-class NoKernel:
-    def __init__(self, index):
-        self._name_and_types = index
-
-    def __call__(self, *args):
-        for x in args:
-            try_touch_data(x)
-        return NoError()
-
-    def __repr__(self):
-        return "<{} {}{}>".format(
-            type(self).__name__,
-            self._name_and_types[0],
-            "".join(", " + str(numpy.dtype(x)) for x in self._name_and_types[1:]),
-        )
 
 
 class UnknownLengthType:
@@ -712,9 +687,6 @@ class TypeTracer(ak._nplikes.NumpyLike):
         try_touch_shape(array)
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def __getitem__(self, name_and_types):
-        return NoKernel(name_and_types)
-
     @property
     def ma(self):
         raise ak._errors.wrap_error(NotImplementedError)
@@ -747,15 +719,28 @@ class TypeTracer(ak._nplikes.NumpyLike):
 
     ############################ array creation
 
-    def array(self, data, dtype=None, **kwargs):
-        # data[, dtype=[, copy=]]
-        try_touch_data(data)
-        return TypeTracerArray.from_array(data, dtype=dtype)
-
-    def asarray(self, array, dtype=None, **kwargs):
-        # array[, dtype=][, order=]
-        try_touch_data(array)
-        return TypeTracerArray.from_array(array, dtype=dtype)
+    def asarray(
+        self,
+        obj,
+        *,
+        dtype: numpy.dtype | None = None,
+        copy: bool | None = None,
+    ):
+        try_touch_data(obj)
+        result = TypeTracerArray.from_array(obj, dtype=dtype)
+        # If we want a copy, by the dtypes don't match
+        if (
+            not (copy is None or copy)
+            and dtype is not None
+            and getattr(obj, "dtype", dtype) != dtype
+        ):
+            raise ak._errors.wrap_error(
+                ValueError(
+                    "asarray was called with copy=False for an array of a different dtype"
+                )
+            )
+        else:
+            return result
 
     def ascontiguousarray(self, array, dtype=None, **kwargs):
         # array[, dtype=]

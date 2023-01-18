@@ -180,7 +180,7 @@ def _impl(array, axis, highlevel, behavior):
             backend = layout.backend
 
             if layout.is_unknown:
-                return apply(ak.contents.NumpyArray(backend.nplike.array([])))
+                return apply(ak.contents.NumpyArray(backend.nplike.asarray([])))
 
             elif layout.is_indexed:
                 return apply(layout.project())
@@ -193,7 +193,7 @@ def _impl(array, axis, highlevel, behavior):
                     return layout
 
                 tags = backend.index_nplike.asarray(layout.tags)
-                index = backend.index_nplike.array(
+                index = backend.index_nplike.asarray(
                     backend.nplike.asarray(layout.index), copy=True
                 )
                 bigmask = backend.index_nplike.empty(len(index), dtype=np.bool_)

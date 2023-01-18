@@ -191,8 +191,8 @@ class NumpyArray(Content):
     def maybe_to_NumpyArray(self) -> Self:
         return self
 
-    def __array__(self, *args, **kwargs):
-        return self._backend.nplike.asarray(self._data, *args, **kwargs)
+    def __array__(self, dtype=None):
+        return self._backend.nplike.asarray(self._data, dtype=dtype)
 
     def __iter__(self):
         return iter(self._data)
@@ -685,7 +685,7 @@ class NumpyArray(Content):
             )
 
             return ak.contents.NumpyArray(
-                self._backend.nplike.asarray(out[: nextlength[0]], self.dtype),
+                self._backend.nplike.asarray(out[: nextlength[0]], dtype=self.dtype),
                 parameters=None,
                 backend=self._backend,
             )
@@ -997,7 +997,7 @@ class NumpyArray(Content):
                 )
             )
             return ak.contents.NumpyArray(
-                self._backend.nplike.asarray(out, self.dtype),
+                self._backend.nplike.asarray(out, dtype=self.dtype),
                 parameters=None,
                 backend=self._backend,
             )

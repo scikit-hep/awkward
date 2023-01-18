@@ -1,22 +1,21 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+import numpy as np
 import pytest  # noqa: F401
 
 import awkward as ak
-
-numpy = ak._nplikes.Numpy.instance()
 
 
 def test_numpy_1d():
     x = ak.Array(
         ak.contents.NumpyArray(
-            numpy.array([1, 2, 3]),
+            np.asarray([1, 2, 3]),
             parameters={"attrs": {"not": "hashable"}, "name": "x"},
         )
     )
     y = ak.Array(
         ak.contents.NumpyArray(
-            numpy.array([1, 2, 3]),
+            np.asarray([1, 2, 3]),
             parameters={"attrs": {"not": "hashable"}, "name": "y"},
         )
     )
@@ -27,13 +26,13 @@ def test_numpy_1d():
 def test_numpy_2d():
     x = ak.Array(
         ak.contents.NumpyArray(
-            numpy.array([[1, 2, 3]]),
+            np.asarray([[1, 2, 3]]),
             parameters={"attrs": {"not": "hashable"}, "name": "x"},
         )
     )
     y = ak.Array(
         ak.contents.NumpyArray(
-            numpy.array([[1, 2, 3]]),
+            np.asarray([[1, 2, 3]]),
             parameters={"attrs": {"not": "hashable"}, "name": "y"},
         )
     )
@@ -45,7 +44,7 @@ def test_regular_array_numpy_1d():
     x = ak.Array(
         ak.contents.RegularArray(
             ak.contents.NumpyArray(
-                numpy.array([1, 2, 3, 4, 5, 6]),
+                np.asarray([1, 2, 3, 4, 5, 6]),
                 parameters={"attrs": {"not": "hashable"}, "name": "x"},
             ),
             3,
@@ -54,7 +53,7 @@ def test_regular_array_numpy_1d():
     y = ak.Array(
         ak.contents.RegularArray(
             ak.contents.NumpyArray(
-                numpy.array([7, 8, 9, 10, 11, 12]),
+                np.asarray([7, 8, 9, 10, 11, 12]),
                 parameters={"attrs": {"not": "hashable"}, "name": "y"},
             ),
             3,

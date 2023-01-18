@@ -1416,7 +1416,7 @@ class IndexedOptionArray(Content):
             )
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
-        index = numpy.array(self._index, copy=True)
+        index = numpy.asarray(self._index, copy=True)
         this_validbytes = self.mask_as_bool(valid_when=True)
         index[~this_validbytes] = 0
 
@@ -1468,9 +1468,9 @@ class IndexedOptionArray(Content):
                 elif issubclass(content.dtype.type, np.integer):
                     data[mask0] = np.iinfo(content.dtype).max
                 elif issubclass(content.dtype.type, (np.datetime64, np.timedelta64)):
-                    data[mask0] = nplike.array([np.iinfo(np.int64).max], content.dtype)[
-                        0
-                    ]
+                    data[mask0] = nplike.asarray(
+                        [np.iinfo(np.int64).max], dtype=content.dtype
+                    )[0]
                 else:
                     raise ak._errors.wrap_error(
                         AssertionError(f"unrecognized dtype: {content.dtype}")

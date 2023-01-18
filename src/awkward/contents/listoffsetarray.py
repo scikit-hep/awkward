@@ -245,7 +245,7 @@ class ListOffsetArray(Content):
         offsets = self._offsets[start : stop + 1]
         if offsets.length == 0:
             offsets = Index(
-                self._backend.index_nplike.array([0], dtype=self._offsets.dtype),
+                self._backend.index_nplike.asarray([0], dtype=self._offsets.dtype),
                 nplike=self._backend.index_nplike,
             )
         return ListOffsetArray(offsets, self._content, parameters=self._parameters)
@@ -1862,8 +1862,8 @@ class ListOffsetArray(Content):
             nonzeros = npoffsets[1:] != npoffsets[:-1]
             maskedbytes = validbytes == 0
             if numpy.any(maskedbytes & nonzeros):  # null and count > 0
-                new_starts = numpy.array(npoffsets[:-1], copy=True)
-                new_stops = numpy.array(npoffsets[1:], copy=True)
+                new_starts = numpy.asarray(npoffsets[:-1], copy=True)
+                new_stops = numpy.asarray(npoffsets[1:], copy=True)
                 new_starts[maskedbytes] = 0
                 new_stops[maskedbytes] = 0
                 next = ak.contents.ListArray(
@@ -1952,7 +1952,7 @@ class ListOffsetArray(Content):
     def _to_backend_array(self, allow_missing, backend):
         array_param = self.parameter("__array__")
         if array_param in {"bytestring", "string"}:
-            return backend.nplike.array(self.to_list())
+            return backend.nplike.asarray(self.to_list())
 
         return self.to_RegularArray()._to_backend_array(allow_missing, backend)
 

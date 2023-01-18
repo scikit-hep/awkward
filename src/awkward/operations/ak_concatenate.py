@@ -168,7 +168,7 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
                             ak.contents.RegularArray(
                                 ak.contents.NumpyArray(
                                     backend.nplike.broadcast_to(
-                                        backend.nplike.array([x]), (length,)
+                                        backend.nplike.asarray([x]), (length,)
                                     )
                                 ),
                                 1,
@@ -215,7 +215,7 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
                                 ),
                                 ak.contents.NumpyArray(
                                     backend.nplike.broadcast_to(
-                                        backend.nplike.array([x]), (length,)
+                                        backend.nplike.asarray([x]), (length,)
                                     )
                                 ),
                             )

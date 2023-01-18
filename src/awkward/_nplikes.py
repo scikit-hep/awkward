@@ -81,13 +81,26 @@ class NumpyLike(Singleton):
 
     ############################ array creation
 
-    def array(self, *args, **kwargs):
-        # data[, dtype=[, copy=]]
-        return self._module.array(*args, **kwargs)
-
-    def asarray(self, *args, **kwargs):
-        # array[, dtype=][, order=]
-        return self._module.asarray(*args, **kwargs)
+    def asarray(
+        self,
+        obj,
+        *,
+        dtype: numpy.dtype | None = None,
+        copy: bool | None = None,
+    ):
+        if copy:
+            return self._module.array(obj, dtype=dtype, copy=True)
+        elif copy is None:
+            return self._module.asarray(obj, dtype=dtype)
+        else:
+            if getattr(obj, "dtype", dtype) != dtype:
+                raise ak._errors.wrap_error(
+                    ValueError(
+                        "asarray was called with copy=False for an array of a different dtype"
+                    )
+                )
+            else:
+                return self._module.asarray(obj, dtype=dtype)
 
     def ascontiguousarray(self, *args, **kwargs):
         # array[, dtype=]
