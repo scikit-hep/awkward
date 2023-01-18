@@ -13,8 +13,7 @@ from awkward._nplikes.numpylike import NumpyMetadata
 np = NumpyMetadata.instance()
 
 
-def code_to_function(code, function_name, externals=None, debug=True):
-    print("arrayview.py line 21: code_to_function")
+def code_to_function(code, function_name, externals=None, debug=False):
     if debug:
         print("################### " + function_name)  # noqa: T201
         print(code)  # noqa: T201
@@ -998,4 +997,3 @@ def lower_asarray(context, builder, sig, args):
         parent=None,
     )
     return out._getvalue()
-
