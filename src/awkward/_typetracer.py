@@ -719,11 +719,6 @@ class TypeTracer(ak._nplikes.NumpyLike):
 
     ############################ array creation
 
-    def array(self, data, dtype=None, **kwargs):
-        # data[, dtype=[, copy=]]
-        try_touch_data(data)
-        return TypeTracerArray.from_array(data, dtype=dtype)
-
     def asarray(
         self,
         obj,
@@ -734,7 +729,11 @@ class TypeTracer(ak._nplikes.NumpyLike):
         try_touch_data(obj)
         result = TypeTracerArray.from_array(obj, dtype=dtype)
         # If we want a copy, by the dtypes don't match
-        if not copy and dtype is not None and getattr(obj, "dtype", dtype) != dtype:
+        if (
+            not (copy is None or copy)
+            and dtype is not None
+            and getattr(obj, "dtype", dtype) != dtype
+        ):
             raise ak._errors.wrap_error(
                 ValueError(
                     "asarray was called with copy=False for an array of a different dtype"
