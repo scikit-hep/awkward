@@ -85,11 +85,13 @@ class EmptyArray(Content):
     def to_NumpyArray(self, dtype, backend=None):
         backend = backend or self._backend
         return ak.contents.NumpyArray(
-            backend.nplike.empty(0, dtype), parameters=self._parameters, backend=backend
+            backend.nplike.empty(0, dtype=dtype),
+            parameters=self._parameters,
+            backend=backend,
         )
 
     def __array__(self, **kwargs):
-        return numpy.empty((0,))
+        return numpy.empty(0, dtype=np.float64)
 
     def __iter__(self):
         return iter([])
@@ -199,7 +201,7 @@ class EmptyArray(Content):
         posaxis = ak._util.maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 == depth:
             return ak.contents.NumpyArray(
-                self._backend.nplike.empty(0, np.int64),
+                self._backend.nplike.empty(0, dtype=np.int64),
                 parameters=None,
                 backend=self._backend,
             )
@@ -295,7 +297,7 @@ class EmptyArray(Content):
         else:
             dtype = np.dtype(options["emptyarray_to"])
             next = ak.contents.NumpyArray(
-                numpy.empty(length, dtype),
+                numpy.empty(length, dtype=dtype),
                 parameters=self._parameters,
                 backend=self._backend,
             )

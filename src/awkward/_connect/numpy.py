@@ -229,12 +229,12 @@ def array_ufunc(ufunc, method, inputs, kwargs):
                         if isinstance(x.data, ak._typetracer.TypeTracerArray):
                             x.data.touch_data()
                         shape = x.shape
-                        args.append(numpy.empty((0,) + x.shape[1:], x.dtype))
+                        args.append(numpy.empty((0,) + x.shape[1:], dtype=x.dtype))
                     else:
                         args.append(x)
                 assert shape is not None
                 tmp = getattr(ufunc, method)(*args, **kwargs)
-                result = nplike.empty((shape[0],) + tmp.shape[1:], tmp.dtype)
+                result = nplike.empty((shape[0],) + tmp.shape[1:], dtype=tmp.dtype)
             return (NumpyArray(result, backend=backend, parameters=parameters),)
 
         for x in inputs:
