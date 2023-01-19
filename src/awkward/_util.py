@@ -35,6 +35,7 @@ def parse_version(version):
 
 def numpy_at_least(version):
     import numpy
+
     return parse_version(numpy.__version__) >= parse_version(version)
 
 
@@ -863,6 +864,7 @@ def arrays_approx_equal(
 
 try:
     import numpy
+
     NDArrayOperatorsMixin = numpy.lib.mixins.NDArrayOperatorsMixin
 
 except AttributeError:

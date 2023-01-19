@@ -1471,9 +1471,9 @@ class IndexedOptionArray(Content):
                 elif metadata.isdtype(content.dtype, "integral"):
                     data[mask0] = metadata.iinfo(content.dtype).max
                 elif metadata.isdtype(content.dtype, "timelike"):
-                    data[mask0] = nplike.asarray([metadata.iinfo(metadata.int64).max], dtype=content.dtype)[
-                        0
-                    ]
+                    data[mask0] = nplike.asarray(
+                        [metadata.iinfo(metadata.int64).max], dtype=content.dtype
+                    )[0]
                 else:
                     raise ak._errors.wrap_error(
                         AssertionError(f"unrecognized dtype: {content.dtype}")

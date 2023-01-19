@@ -79,7 +79,7 @@ def type(array, *, behavior=None):
 
 def _impl(array, behavior):
     behavior = ak._util.behavior_of(array, behavior=behavior)
-    import numpy # TODO FIXME
+    import numpy  # TODO FIXME
 
     if isinstance(array, _ext.ArrayBuilder):
         form = ak.forms.from_json(array.form())
@@ -93,7 +93,9 @@ def _impl(array, behavior):
 
     elif isinstance(array, (metadata.dtype, numpy.generic)):
         return ak.types.ScalarType(
-            ak.types.NumpyType(ak.types.numpytype.dtype_to_primitive(metadata.dtype(array)))
+            ak.types.NumpyType(
+                ak.types.numpytype.dtype_to_primitive(metadata.dtype(array))
+            )
         )
 
     elif isinstance(array, bool):  # np.bool_ in np.generic (above)

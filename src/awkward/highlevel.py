@@ -12,8 +12,8 @@ from collections.abc import Iterable, Mapping, Sized
 from awkward_cpp.lib import _ext
 
 import awkward as ak
-from awkward._util import NDArrayOperatorsMixin
 from awkward._nplikes import Numpy, metadata
+from awkward._util import NDArrayOperatorsMixin
 
 numpy = Numpy.instance()
 
