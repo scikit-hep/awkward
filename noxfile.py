@@ -10,6 +10,16 @@ ALL_PYTHONS = ["3.7", "3.8", "3.9", "3.10", "3.11"]
 nox.options.sessions = ["lint", "tests"]
 
 
+requirements_dev = [
+    "build",
+    "numpy",
+    "packaging",
+    "PyYAML",
+    "requests",
+    "toml",
+]
+
+
 def remove_if_found(*paths):
     for path in paths:
         if os.path.isdir(path):
@@ -18,7 +28,7 @@ def remove_if_found(*paths):
             os.unlink(path)
 
 
-@nox.session(python=ALL_PYTHONS)
+@nox.session(python=ALL_PYTHONS, reuse_venv=True)
 def tests(session):
     """
     Run the unit and regular tests.
@@ -27,7 +37,7 @@ def tests(session):
     session.run("pytest", *session.posargs if session.posargs else ["tests"])
 
 
-@nox.session
+@nox.session(reuse_venv=True)
 def lint(session):
     """
     Run the linter.
@@ -36,7 +46,7 @@ def lint(session):
     session.run("pre-commit", "run", "--all-files", *session.posargs)
 
 
-@nox.session
+@nox.session(reuse_venv=True)
 def pylint(session):
     """
     Run the pylint process.
@@ -46,7 +56,7 @@ def pylint(session):
     session.run("pylint", "src", *session.posargs)
 
 
-@nox.session(python=ALL_PYTHONS)
+@nox.session(python=ALL_PYTHONS, reuse_venv=True)
 def coverage(session):
     """
     Run the unit and regular tests.
@@ -57,7 +67,7 @@ def coverage(session):
     )
 
 
-@nox.session
+@nox.session(reuse_venv=True)
 def docs(session):
     """
     Build the docs.
@@ -66,7 +76,7 @@ def docs(session):
     parser.add_argument("--serve", action="store_true")
     args = parser.parse_args(session.posargs)
 
-    session.install("-r", "requirements-dev.txt")
+    session.install(*requirements_dev)
 
     # Generate C++ documentation
     with session.chdir("awkward-cpp/docs"):
@@ -88,7 +98,7 @@ def docs(session):
             session.run("python", "-m", "http.server", "8000", "-d", "_build/html")
 
 
-@nox.session
+@nox.session(reuse_venv=True)
 def clean(session):
     """
     Clean generated artifacts.
@@ -124,7 +134,7 @@ def clean(session):
         remove_if_found(pathlib.Path("docs", "reference", "generated", "kernels.rst"))
 
 
-@nox.session
+@nox.session(reuse_venv=True)
 def prepare(session):
     """
     Prepare for package building.
@@ -136,7 +146,7 @@ def prepare(session):
     parser.add_argument("--docs", action="store_true")
     args = parser.parse_args(session.posargs)
 
-    session.install("-r", "requirements-dev.txt")
+    session.install(*requirements_dev)
 
     prepare_all = not session.posargs
 
@@ -150,30 +160,30 @@ def prepare(session):
         session.run("python", "dev/generate-kernel-docs.py")
 
 
-@nox.session
+@nox.session(reuse_venv=True)
 def check_cpp_constraint(session):
     """
     Check that the awkward-cpp version is compatible with awkward.
     """
-    session.install("-r", "requirements-dev.txt")
+    session.install(*requirements_dev)
     session.run("python", "dev/check-awkward-uses-awkward-cpp.py")
 
 
-@nox.session
+@nox.session(reuse_venv=True)
 def check_cpp_sdist_released(session):
     """
     Check that the awkward-cpp sdist is already on PyPI
     """
-    session.install("-r", "requirements-dev.txt")
+    session.install(*requirements_dev)
     session.run(
         "python", "dev/check-awkward-cpp-sdist-matches-pypi.py", *session.posargs
     )
 
 
-@nox.session
+@nox.session(reuse_venv=True)
 def diagnostics(session):
     """
     Check that the CPU kernels are defined correctly.
     """
-    session.install("-r", "requirements-dev.txt")
+    session.install(*requirements_dev)
     session.run("python", "dev/kernel-diagnostics.py", *session.posargs)

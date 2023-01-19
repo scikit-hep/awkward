@@ -152,7 +152,7 @@ def normalise_item(item, backend: ak._backends.Backend):
         return item.data
 
     elif isinstance(item, ak.contents.RegularArray):
-        # Pure NumPy arrays without masks follow NumPy advanced indexing
+        # Pure NumPy arrays (without masks) follow NumPy advanced indexing
         # If we can produce such a content, return the underlying NumPy array
         # Otherwise, we probably have options or are not purelist_regular, etc.
         # As such, we then follow Awkward indexing. This logic should follow
@@ -161,10 +161,8 @@ def normalise_item(item, backend: ak._backends.Backend):
 
         if as_numpy is None:
             out = normalise_item_bool_to_int(normalise_item_nested(item))
-            if isinstance(out, ak.contents.NumpyArray):
-                return out.data
-            else:
-                return out
+            assert not isinstance(out, ak.contents.NumpyArray)
+            return out
         else:
             return as_numpy.data
 
