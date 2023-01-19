@@ -272,7 +272,7 @@ def _attach_report(layout, form, report):
         )
 
 
-def typetracer_with_report(form, forget_length=False):
+def typetracer_with_report(form, forget_length=True):
     layout = form.length_zero_array(highlevel=False).to_typetracer(
         forget_length=forget_length
     )
