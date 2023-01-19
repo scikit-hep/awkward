@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import copy
+import math
 
 import awkward as ak
 from awkward._util import unset
@@ -136,7 +137,7 @@ class UnmaskedArray(Content):
         )
 
     def to_BitMaskedArray(self, valid_when, lsb_order):
-        bitlength = int(numpy.ceil(self._content.length / 8.0))
+        bitlength = int(math.ceil(self._content.length / 8.0))
         if valid_when:
             bitmask = self._backend.index_nplike.full(
                 bitlength, np.uint8(255), dtype=np.uint8

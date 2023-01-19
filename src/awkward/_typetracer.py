@@ -747,11 +747,6 @@ class TypeTracer(ak._nplikes.NumpyLike):
         try_touch_data(array)
         return TypeTracerArray.from_array(array, dtype=dtype)
 
-    def isscalar(self, *args, **kwargs):
-        for x in args:
-            try_touch_data(x)
-        raise ak._errors.wrap_error(NotImplementedError)
-
     def frombuffer(self, *args, **kwargs):
         # array[, dtype=]
         for x in args:
@@ -958,12 +953,6 @@ class TypeTracer(ak._nplikes.NumpyLike):
             try_touch_data(x)
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def cumprod(self, *args, **kwargs):
-        # arrays[, out=]
-        for x in args:
-            try_touch_data(x)
-        raise ak._errors.wrap_error(NotImplementedError)
-
     def nonzero(self, array):
         # array
         try_touch_data(array)
@@ -1022,12 +1011,6 @@ class TypeTracer(ak._nplikes.NumpyLike):
         # arrays
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def vstack(self, *args, **kwargs):
-        for x in args:
-            try_touch_data(x)
-        # arrays
-        raise ak._errors.wrap_error(NotImplementedError)
-
     def packbits(self, *args, **kwargs):
         for x in args:
             try_touch_data(x)
@@ -1040,22 +1023,10 @@ class TypeTracer(ak._nplikes.NumpyLike):
         # array
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def atleast_1d(self, *args, **kwargs):
-        for x in args:
-            try_touch_data(x)
-        # *arrays
-        raise ak._errors.wrap_error(NotImplementedError)
-
     def broadcast_to(self, *args, **kwargs):
         for x in args:
             try_touch_data(x)
         # array, shape
-        raise ak._errors.wrap_error(NotImplementedError)
-
-    def append(self, *args, **kwargs):
-        for x in args:
-            try_touch_data(x)
-        # array, element
         raise ak._errors.wrap_error(NotImplementedError)
 
     def where(self, *args, **kwargs):
@@ -1082,12 +1053,6 @@ class TypeTracer(ak._nplikes.NumpyLike):
         for x in args:
             try_touch_data(x)
         # array1, array2
-        raise ak._errors.wrap_error(NotImplementedError)
-
-    def bitwise_or(self, *args, **kwargs):
-        for x in args:
-            try_touch_data(x)
-        # array1, array2[, out=output]
         raise ak._errors.wrap_error(NotImplementedError)
 
     def logical_and(self, x, y, *, dtype=None):
@@ -1139,12 +1104,6 @@ class TypeTracer(ak._nplikes.NumpyLike):
         for x in args:
             try_touch_data(x)
         # array1, array2
-        raise ak._errors.wrap_error(NotImplementedError)
-
-    def ceil(self, *args, **kwargs):
-        for x in args:
-            try_touch_data(x)
-        # array
         raise ak._errors.wrap_error(NotImplementedError)
 
     ############################ almost-ufuncs
@@ -1224,11 +1183,6 @@ class TypeTracer(ak._nplikes.NumpyLike):
 
     def can_cast(self, *args, **kwargs):
         return numpy.can_cast(*args, **kwargs)
-
-    def datetime_as_string(self, *args, **kwargs):
-        for x in args:
-            try_touch_data(x)
-        raise ak._errors.wrap_error(NotImplementedError)
 
     @classmethod
     def is_own_array(cls, obj) -> bool:

@@ -106,9 +106,6 @@ class NumpyLike(Singleton):
         # array[, dtype=]
         return self._module.ascontiguousarray(*args, **kwargs)
 
-    def isscalar(self, *args, **kwargs):
-        return self._module.isscalar(*args, **kwargs)
-
     def frombuffer(self, *args, **kwargs):
         # array[, dtype=]
         return self._module.frombuffer(*args, **kwargs)
@@ -153,10 +150,6 @@ class NumpyLike(Singleton):
 
     ############################ testing
 
-    def shape(self, *args, **kwargs):
-        # array
-        return self._module.shape(*args, **kwargs)
-
     def array_equal(self, *args, **kwargs):
         # array1, array2
         return self._module.array_equal(*args, **kwargs)
@@ -183,10 +176,6 @@ class NumpyLike(Singleton):
         # arrays[, out=]
         return self._module.cumsum(*args, **kwargs)
 
-    def cumprod(self, *args, **kwargs):
-        # arrays[, out=]
-        return self._module.cumprod(*args, **kwargs)
-
     def nonzero(self, *args, **kwargs):
         # array
         return self._module.nonzero(*args, **kwargs)
@@ -212,10 +201,6 @@ class NumpyLike(Singleton):
         # arrays
         return self._module.stack(*args, **kwargs)
 
-    def vstack(self, *args, **kwargs):
-        # arrays
-        return self._module.vstack(*args, **kwargs)
-
     def packbits(self, *args, **kwargs):
         # array
         return self._module.packbits(*args, **kwargs)
@@ -224,17 +209,9 @@ class NumpyLike(Singleton):
         # array
         return self._module.unpackbits(*args, **kwargs)
 
-    def atleast_1d(self, *args, **kwargs):
-        # *arrays
-        return self._module.atleast_1d(*args, **kwargs)
-
     def broadcast_to(self, *args, **kwargs):
         # array, shape
         return self._module.broadcast_to(*args, **kwargs)
-
-    def append(self, *args, **kwargs):
-        # array, element
-        return self._module.append(*args, **kwargs)
 
     def where(self, *args, **kwargs):
         # array, element
@@ -274,17 +251,9 @@ class NumpyLike(Singleton):
         # array1, array2
         return self._module.true_divide(*args, **kwargs)
 
-    def bitwise_or(self, *args, **kwargs):
-        # array1, array2[, out=output]
-        return self._module.bitwise_or(*args, **kwargs)
-
     def equal(self, *args, **kwargs):
         # array1, array2
         return self._module.equal(*args, **kwargs)
-
-    def ceil(self, *args, **kwargs):
-        # array
-        return self._module.ceil(*args, **kwargs)
 
     def minimum(self, *args, **kwargs):
         # array1, array2
@@ -307,18 +276,6 @@ class NumpyLike(Singleton):
     def isnan(self, *args, **kwargs):
         # array
         return self._module.isnan(*args, **kwargs)
-
-    def isneginf(self, *args, **kwargs):
-        # array
-        return self._module.isneginf(*args, **kwargs)
-
-    def isposinf(self, *args, **kwargs):
-        # array
-        return self._module.isposinf(*args, **kwargs)
-
-    def isfinite(self, *args, **kwargs):
-        # array
-        return self._module.isfinite(*args, **kwargs)
 
     ############################ reducers
 
@@ -363,9 +320,6 @@ class NumpyLike(Singleton):
     def array_str(self, *args, **kwargs):
         # array, max_line_width, precision=None, suppress_small=None
         return self._module.array_str(*args, **kwargs)
-
-    def datetime_as_string(self, *args, **kwargs):
-        return self._module.datetime_as_string(*args, **kwargs)
 
     def can_cast(self, *args, **kwargs):
         return self._module.can_cast(*args, **kwargs)
