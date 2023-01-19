@@ -1172,7 +1172,7 @@ class NumpyArray(Content):
         storage_type = pyarrow.from_numpy_dtype(nparray.dtype)
 
         if issubclass(nparray.dtype.type, (bool, np.bool_)):
-            nparray = ak._connect.pyarrow.packbits(nparray)
+            nparray = numpy.packbits(nparray, bitorder="little")
 
         return pyarrow.Array.from_buffers(
             ak._connect.pyarrow.to_awkwardarrow_type(

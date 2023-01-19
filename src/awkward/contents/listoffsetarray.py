@@ -2074,8 +2074,8 @@ class ListOffsetArray(Content):
         if numpy.count_nonzero(nonempty) == 0:
             mini, maxi = 0, 0
         else:
-            mini = starts_data.min()
-            maxi = stops_data.max()
+            mini = self._backend.index_nplike.min(starts_data)
+            maxi = self._backend.index_nplike.max(stops_data)
 
         starts_data = starts_data - mini
         stops_data = stops_data - mini

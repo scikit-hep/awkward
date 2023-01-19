@@ -1512,7 +1512,7 @@ class IndexedOptionArray(Content):
             npindex = self._index.data
             npselect = npindex >= 0
             if self._backend.index_nplike.any(npselect):
-                indexmin = npindex[npselect].min()
+                indexmin = self._backend.index_nplike.min(npindex[npselect])
                 index = ak.index.Index(
                     npindex - indexmin, nplike=self._backend.index_nplike
                 )

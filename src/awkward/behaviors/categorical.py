@@ -104,6 +104,9 @@ def _apply_ufunc(ufunc, method, inputs, kwargs):
 
 
 def register(behavior):
+    # Import NumPy explicitly for registering behaviours
+    import numpy as _numpy
+
     behavior["categorical"] = CategoricalBehavior
-    behavior[ak._nplikes.numpy.equal, "categorical", "categorical"] = _categorical_equal
-    behavior[ak._nplikes.numpy.ufunc, "categorical"] = _apply_ufunc
+    behavior[_numpy.equal, "categorical", "categorical"] = _categorical_equal
+    behavior[_numpy.ufunc, "categorical"] = _apply_ufunc

@@ -1375,14 +1375,16 @@ class ListArray(Content):
             and self._backend.nplike.known_data
             and self._starts.length != 0
         ):
-            startsmin = self._starts.data.min().item()
+            startsmin = self._backend.index_nplike.min(self._starts.data).item()
             starts = ak.index.Index(
                 self._starts.data - startsmin, nplike=self._backend.index_nplike
             )
             stops = ak.index.Index(
                 self._stops.data - startsmin, nplike=self._backend.index_nplike
             )
-            content = self._content[startsmin : self._stops.data.max().item()]
+            content = self._content[
+                startsmin : self._backend.index_nplike.max(self._stops.data).item()
+            ]
         else:
             self._touch_data(recursive=False)
             starts, stops, content = self._starts, self._stops, self._content

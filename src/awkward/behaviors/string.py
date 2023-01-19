@@ -251,6 +251,9 @@ def _cast_bytes_or_str_to_string(string):
 
 
 def register(behavior):
+    # Import NumPy explicitly for registering behaviours
+    import numpy as _numpy
+
     behavior["byte"] = ByteBehavior
     behavior["__typestr__", "byte"] = "byte"
     behavior["char"] = CharBehavior
@@ -261,10 +264,10 @@ def register(behavior):
     behavior["string"] = StringBehavior
     behavior["__typestr__", "string"] = "string"
 
-    behavior[ak._nplikes.numpy.equal, "bytestring", "bytestring"] = _string_equal
-    behavior[ak._nplikes.numpy.equal, "string", "string"] = _string_equal
-    behavior[ak._nplikes.numpy.not_equal, "bytestring", "bytestring"] = _string_notequal
-    behavior[ak._nplikes.numpy.not_equal, "string", "string"] = _string_notequal
+    behavior[_numpy.equal, "bytestring", "bytestring"] = _string_equal
+    behavior[_numpy.equal, "string", "string"] = _string_equal
+    behavior[_numpy.not_equal, "bytestring", "bytestring"] = _string_notequal
+    behavior[_numpy.not_equal, "string", "string"] = _string_notequal
 
     behavior["__broadcast__", "bytestring"] = _string_broadcast
     behavior["__broadcast__", "string"] = _string_broadcast

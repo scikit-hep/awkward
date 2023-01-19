@@ -102,9 +102,9 @@ class NumpyLike(Singleton):
             else:
                 return self._module.asarray(obj, dtype=dtype)
 
-    def ascontiguousarray(self, *args, **kwargs):
+    def ascontiguousarray(self, array, *, dtype=None):
         # array[, dtype=]
-        return self._module.ascontiguousarray(*args, **kwargs)
+        return self._module.ascontiguousarray(array, dtype=dtype)
 
     def frombuffer(self, *args, **kwargs):
         # array[, dtype=]
@@ -154,17 +154,9 @@ class NumpyLike(Singleton):
         # array1, array2
         return self._module.array_equal(*args, **kwargs)
 
-    def size(self, *args, **kwargs):
-        # array
-        return self._module.size(*args, **kwargs)
-
     def searchsorted(self, *args, **kwargs):
         # haystack, needle, side="right"
         return self._module.searchsorted(*args, **kwargs)
-
-    def argsort(self, *args, **kwargs):
-        # array
-        return self._module.argsort(*args, **kwargs)
 
     ############################ manipulation
 
@@ -201,31 +193,23 @@ class NumpyLike(Singleton):
         # arrays
         return self._module.stack(*args, **kwargs)
 
-    def packbits(self, *args, **kwargs):
+    def packbits(self, array, *, axis=None, bitorder="big"):
         # array
-        return self._module.packbits(*args, **kwargs)
+        return self._module.packbits(array, axis=axis, bitorder=bitorder)
 
-    def unpackbits(self, *args, **kwargs):
+    def unpackbits(self, array, *, axis=None, count=None, bitorder="big"):
         # array
-        return self._module.unpackbits(*args, **kwargs)
+        return self._module.unpackbits(array, axis=axis, count=count, bitorder=bitorder)
 
     def broadcast_to(self, *args, **kwargs):
         # array, shape
         return self._module.broadcast_to(*args, **kwargs)
-
-    def where(self, *args, **kwargs):
-        # array, element
-        return self._module.where(*args, **kwargs)
 
     ############################ ufuncs
 
     def add(self, *args, **kwargs):
         # array1, array2
         return self._module.add(*args, **kwargs)
-
-    def multiply(self, *args, **kwargs):
-        # array1, array2
-        return self._module.multiply(*args, **kwargs)
 
     def logical_or(self, *args, **kwargs):
         # array1, array2
@@ -250,18 +234,6 @@ class NumpyLike(Singleton):
     def true_divide(self, *args, **kwargs):
         # array1, array2
         return self._module.true_divide(*args, **kwargs)
-
-    def equal(self, *args, **kwargs):
-        # array1, array2
-        return self._module.equal(*args, **kwargs)
-
-    def minimum(self, *args, **kwargs):
-        # array1, array2
-        return self._module.minimum(*args, **kwargs)
-
-    def maximum(self, *args, **kwargs):
-        # array1, array2
-        return self._module.maximum(*args, **kwargs)
 
     ############################ almost-ufuncs
 
@@ -293,14 +265,6 @@ class NumpyLike(Singleton):
         # array
         return self._module.count_nonzero(*args, **kwargs)
 
-    def sum(self, *args, **kwargs):
-        # array
-        return self._module.sum(*args, **kwargs)
-
-    def prod(self, *args, **kwargs):
-        # array
-        return self._module.prod(*args, **kwargs)
-
     def min(self, *args, **kwargs):
         # array
         return self._module.min(*args, **kwargs)
@@ -308,14 +272,6 @@ class NumpyLike(Singleton):
     def max(self, *args, **kwargs):
         # array
         return self._module.max(*args, **kwargs)
-
-    def argmin(self, *args, **kwargs):
-        # array[, axis=]
-        return self._module.argmin(*args, **kwargs)
-
-    def argmax(self, *args, **kwargs):
-        # array[, axis=]
-        return self._module.argmax(*args, **kwargs)
 
     def array_str(self, *args, **kwargs):
         # array, max_line_width, precision=None, suppress_small=None
@@ -430,24 +386,6 @@ class Cupy(NumpyLike):
     def ndarray(self):
         return self._module.ndarray
 
-    def asarray(self, array, dtype=None, order=None):
-        if isinstance(
-            array,
-            (
-                ak.highlevel.Array,
-                ak.highlevel.Record,
-                ak.contents.Content,
-                ak.record.Record,
-            ),
-        ):
-            out = ak.operations.ak_to_cupy.to_cupy(array)
-            if dtype is not None and out.dtype != dtype:
-                return self._module.asarray(out, dtype=dtype, order=order)
-            else:
-                return out
-        else:
-            return self._module.asarray(array, dtype=dtype, order=order)
-
     def raw(self, array, nplike):
         if isinstance(nplike, Cupy):
             return array
@@ -465,24 +403,6 @@ class Cupy(NumpyLike):
                     "Invalid nplike, choose between nplike.Numpy, nplike.Cupy, Typetracer or Jax"
                 )
             )
-
-    def ascontiguousarray(self, array, dtype=None):
-        if isinstance(
-            array,
-            (
-                ak.highlevel.Array,
-                ak.highlevel.Record,
-                ak.contents.Content,
-                ak.record.Record,
-            ),
-        ):
-            out = ak.operations.ak_to_cupy.to_cupy(array)
-            if dtype is not None and out.dtype != dtype:
-                return self._module.ascontiguousarray(out, dtype=dtype)
-            else:
-                return out
-        else:
-            return self._module.ascontiguousarray(array, dtype=dtype)
 
     def zeros(self, *args, **kwargs):
         return self._module.zeros(*args, **kwargs)
@@ -632,27 +552,6 @@ class Jax(NumpyLike):
     def ndarray(self):
         return self._module.ndarray
 
-    def asarray(self, array, dtype=None, order=None):
-        return self._module.asarray(array, dtype=dtype, order="K")
-
-    def ascontiguousarray(self, array, dtype=None):
-        if isinstance(
-            array,
-            (
-                ak.highlevel.Array,
-                ak.highlevel.Record,
-                ak.contents.Content,
-                ak.record.Record,
-            ),
-        ):
-            out = ak.operations.ak_to_jax.to_jax(array)
-            if dtype is not None and out.dtype != dtype:
-                return self._module.ascontiguousarray(out, dtype=dtype)
-            else:
-                return out
-        else:
-            return self._module.ascontiguousarray(array, dtype=dtype)
-
     def raw(self, array, nplike):
         if isinstance(nplike, Jax):
             return array
@@ -746,6 +645,12 @@ class Jax(NumpyLike):
 
     def is_c_contiguous(self, array) -> bool:
         return True
+
+    def ascontiguousarray(self, array, *, dtype=None):
+        if dtype is not None:
+            return array.astype(dtype)
+        else:
+            return array
 
 
 # Temporary sentinel marking "argument not given"

@@ -265,13 +265,12 @@ class ByteMaskedArray(Content):
             )
 
         else:
-            import awkward._connect.pyarrow
-
-            bytearray = self.mask_as_bool(valid_when).view(np.uint8)
-            bitarray = awkward._connect.pyarrow.packbits(bytearray, lsb_order)
+            bit_order = "little" if lsb_order else "big"
+            bytemask = self.mask_as_bool(valid_when).view(np.uint8)
+            bitmask = self.backend.index_nplike.packbits(bytemask, bitorder=bit_order)
 
             return ak.contents.BitMaskedArray(
-                ak.index.IndexU8(bitarray),
+                ak.index.IndexU8(bitmask),
                 self._content,
                 valid_when,
                 self.length,
