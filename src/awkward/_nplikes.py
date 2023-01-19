@@ -352,6 +352,39 @@ class Numpy(NumpyLike):
     def is_c_contiguous(self, array) -> bool:
         return array.flags["C_CONTIGUOUS"]
 
+    def packbits(self, array, *, axis=None, bitorder="big"):
+        if ak._util.numpy_at_least("1.17.0"):
+            return numpy.packbits(array, axis=axis, bitorder=bitorder)
+        else:
+            assert axis is None, "unsupported argument value for axis given"
+            if bitorder == "little":
+                if len(array) % 8 == 0:
+                    ready_to_pack = array
+                else:
+                    ready_to_pack = numpy.empty(
+                        int(numpy.ceil(len(array) / 8.0)) * 8,
+                        dtype=array.dtype,
+                    )
+                    ready_to_pack[: len(array)] = array
+                    ready_to_pack[len(array) :] = 0
+                return numpy.packbits(ready_to_pack.reshape(-1, 8)[:, ::-1].reshape(-1))
+            else:
+                assert bitorder == "bit"
+                return numpy.packbits(array)
+
+    def unpackbits(self, array, *, axis=None, count=None, bitorder="big"):
+        if ak._util.numpy_at_least("1.17.0"):
+            return numpy.unpackbits(array, axis=axis, count=count, bitorder=bitorder)
+        else:
+            assert axis is None, "unsupported argument value for axis given"
+            assert count is None, "unsupported argument value for count given"
+            ready_to_bitswap = numpy.unpackbits(array)
+            if bitorder == "little":
+                return ready_to_bitswap.reshape(-1, 8)[:, ::-1].reshape(-1)
+            else:
+                assert bitorder == "bit"
+                return ready_to_bitswap
+
 
 class Cupy(NumpyLike):
     is_eager = False
