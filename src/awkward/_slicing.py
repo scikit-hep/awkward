@@ -161,7 +161,7 @@ def normalise_item(item, backend: ak._backends.Backend):
 
         if as_numpy is None:
             out = normalise_item_bool_to_int(normalise_item_nested(item))
-            assert not isinstance(out, ak.contents.NumpyArray):
+            assert not isinstance(out, ak.contents.NumpyArray)
             return out
         else:
             return as_numpy.data
