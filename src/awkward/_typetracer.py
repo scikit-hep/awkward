@@ -662,7 +662,7 @@ class TypeTracerArray(NDArrayOperatorsMixin):
         if method != "__call__" or len(inputs) == 0 or "out" in kwargs:
             raise ak._errors.wrap_error(NotImplementedError)
 
-        return TypeTracer._module._generic_ufunc_func(ufunc)(*inputs, **kwargs)
+        return TypeTracer.instance()._module._generic_ufunc_func(ufunc)(*inputs, **kwargs)
 
 
 def try_touch_data(array):
