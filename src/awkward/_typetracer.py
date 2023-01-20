@@ -1048,7 +1048,7 @@ class TypeTracer(NumpyLike):
         # array
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def true_divide(
+    def divide(
         self,
         x1: TypeTracerArray,
         x2: TypeTracerArray,

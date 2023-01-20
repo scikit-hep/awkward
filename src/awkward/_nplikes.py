@@ -334,10 +334,10 @@ class NumpyLike(Singleton):
     def exp(self, x: ArrayLike, maybe_reuse: ArrayLike | None = None) -> ArrayLike:
         return self._module.exp(x, out=maybe_reuse)
 
-    def true_divide(
+    def divide(
         self, x1: ArrayLike, x2: ArrayLike, maybe_reuse: ArrayLike | None = None
     ) -> ArrayLike:
-        return self._module.true_divide(x1, x2, out=maybe_reuse)
+        return self._module.divide(x1, x2, out=maybe_reuse)
 
     ############################ almost-ufuncs
 
