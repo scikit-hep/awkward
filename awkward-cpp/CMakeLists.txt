@@ -16,9 +16,11 @@ if(NOT (EXISTS "header-only" AND EXISTS "include/awkward/kernels.h"))
   message(
     FATAL_ERROR
       "\
-awkward-cpp relies upon generated and copied artefacts such as the header-only libraries and generated kernel headers.\
-These could not be found, which indicates that the preparation step for building this package was skipped.\
-Please check CONTRIBUTING.md to learn more about this process.\
+awkward-cpp relies upon generated and copied artefacts such as the header-only libraries and generated kernel headers. \
+These could not be found, which indicates that\n\n\
+    nox -s prepare\
+\n\nwas skipped or failed. \
+Please check https://github.com/scikit-hep/awkward#installation-for-developers to learn more about this process.\
 ")
 endif()
 
