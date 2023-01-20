@@ -658,8 +658,43 @@ class TypeTracerArray(NDArrayOperatorsMixin):
         self.touch_data()
         return self
 
+    class _FakeModule:
+        def __init__(self, array):
+            self.array = array
+
+        def __getattr__(self, function_name):
+            ufunc = getattr(numpy, function_name, None)
+            if isinstance(ufunc, numpy.ufunc):
+
+                def generic_ufunc(*inputs, **kwargs):
+                    inputs = (self.array,) + inputs
+                    for x in inputs:
+                        getattr(x, "touch_data", lambda: None)()
+                    replacements = [
+                        numpy.empty(0, x.dtype) if hasattr(x, "dtype") else x
+                        for x in inputs
+                    ]
+                    result = ufunc(*replacements, **kwargs)
+                    return TypeTracerArray(result.dtype, shape=self.array._shape)
+
+                return generic_ufunc
+
+            else:
+                raise ak._errors.wrap_error(
+                    AttributeError(
+                        "only ufuncs have automatic TypeTracer implementations"
+                    )
+                )
+
+    @property
+    def _module(self):
+        # This is how ak._nplikes.NumpyLike calls functions that haven't been overloaded
+        return TypeTracerArray._FakeModule(self)
+
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         self.touch_data()
+        for x in inputs:
+            getattr(x, "touch_data", lambda: None)()
         replacements = [
             numpy.empty(0, x.dtype) if hasattr(x, "dtype") else x for x in inputs
         ]

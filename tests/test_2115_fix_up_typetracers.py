@@ -1,5 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+import numpy as np
+
 import awkward as ak
 
 
@@ -32,3 +34,17 @@ def test_issue_1864():
 def test_numpy_touch_data():
     array = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]], backend="typetracer")
     assert str((array - [100, 200, 300]).layout.form.type) == "var * float64"
+
+
+def test_typetracer_binary_operator():
+    a = ak._typetracer.TypeTracerArray.from_array(np.array([[1, 2], [3, 4], [5, 6]]))
+    b = ak._typetracer.TypeTracerArray.from_array(np.array([[1], [2], [3]]))
+    c = a / b
+    assert c.dtype == np.dtype(np.float64)
+
+
+def test_typetracer_formal_ufunc():
+    a = ak._typetracer.TypeTracerArray.from_array(np.array([[1, 2], [3, 4], [5, 6]]))
+    b = ak._typetracer.TypeTracerArray.from_array(np.array([[1], [2], [3]]))
+    c = ak._typetracer.TypeTracer.true_divide(a, b)
+    assert c.dtype == np.dtype(np.float64)
