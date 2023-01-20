@@ -1,11 +1,73 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 from __future__ import annotations
 
+from abc import abstractmethod
+from typing import overload
+
 import numpy
 
 import awkward as ak
 from awkward._singleton import Singleton
-from awkward.typing import TypeVar
+from awkward.typing import Protocol, Self, SupportsIndex, SupportsInt, TypeVar
+
+
+class Array(Protocol):
+    @property
+    @abstractmethod
+    def dtype(self) -> dtype:
+        ...
+
+    @property
+    @abstractmethod
+    def ndim(self) -> int:
+        ...
+
+    @property
+    @abstractmethod
+    def shape(self) -> tuple[SupportsInt, ...]:
+        ...
+
+    @property
+    @abstractmethod
+    def size(self) -> SupportsInt:
+        ...
+
+    @property
+    @abstractmethod
+    def T(self: Array) -> Array:
+        ...
+
+    @overload
+    def __getitem__(
+        self, index: SupportsIndex
+    ) -> int | float | complex | str | bytes | bytes:
+        ...
+
+    @overload
+    def __getitem__(
+        self, index: slice | Ellipsis | tuple[SupportsIndex | slice | Ellipsis, ...]
+    ) -> Self:
+        ...
+
+    @abstractmethod
+    def __getitem__(self, index) -> Self:
+        ...
+
+    @abstractmethod
+    def __bool__(self) -> bool:
+        ...
+
+    @abstractmethod
+    def __int__(self) -> int:
+        ...
+
+    @abstractmethod
+    def __index__(self) -> int:
+        ...
+
+    @abstractmethod
+    def view(self, dtype: dtype) -> Self:
+        ...
 
 
 class NumpyMetadata(Singleton):
