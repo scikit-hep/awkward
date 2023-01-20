@@ -175,13 +175,18 @@ class TypeTracerBackend(Backend):
             if isinstance(x, ak._typetracer.TypeTracerArray):
                 x.touch_data()
                 shape = x.shape
-                numpy_args.append(numpy.empty((0,) + x.shape[1:], x.dtype))
+                numpy_args.append(numpy.empty((0,) + x.shape[1:], dtype=x.dtype))
+            # Convert scalars to 0-d arrays
+            elif isinstance(x, ak._typetracer.UnknownScalar):
+                numpy_args.append(numpy.empty((0,), dtype=x.dtype))
+            elif x is ak._typetracer.UnknownLength:
+                numpy_args.append(numpy.empty((0,), dtype=np.int64))
             else:
                 numpy_args.append(x)
 
         assert shape is not None
         tmp = getattr(ufunc, method)(*numpy_args, **kwargs)
-        return self._typetracer.empty((shape[0],) + tmp.shape[1:], tmp.dtype)
+        return self._typetracer.empty((shape[0],) + tmp.shape[1:], dtype=tmp.dtype)
 
 
 def _backend_for_nplike(nplike: ak._nplikes.NumpyLike) -> Backend:
