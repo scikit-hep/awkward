@@ -374,11 +374,12 @@ class RecordArray(Content):
                 where = where.copy()
 
             negative = where < 0
-            if self._backend.index_nplike.any(negative, prefer=False):
-                where[negative] += self._length
+            if self._backend.index_nplike.known_data:
+                if self._backend.index_nplike.any(negative):
+                    where[negative] += self._length
 
-            if self._backend.index_nplike.any(where >= self._length, prefer=False):
-                raise ak._errors.index_error(self, where)
+                if self._backend.index_nplike.any(where >= self._length):
+                    raise ak._errors.index_error(self, where)
 
             nextindex = ak.index.Index64(where, nplike=self._backend.index_nplike)
             return ak.contents.IndexedArray(nextindex, self, parameters=None)

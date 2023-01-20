@@ -386,10 +386,8 @@ class NumpyArray(Content):
             # Default merging (can we cast one to the other)
             else:
                 return self.backend.nplike.can_cast(
-                    self.dtype, other.dtype, casting="same_kind"
-                ) or self.backend.nplike.can_cast(
-                    other.dtype, self.dtype, casting="same_kind"
-                )
+                    self.dtype, other.dtype
+                ) or self.backend.nplike.can_cast(other.dtype, self.dtype)
 
         else:
             return False
@@ -422,9 +420,7 @@ class NumpyArray(Content):
                     )
                 )
 
-        contiguous_arrays = self._backend.nplike.concatenate(
-            contiguous_arrays, casting="same_kind"
-        )
+        contiguous_arrays = self._backend.nplike.concat(contiguous_arrays)
 
         next = NumpyArray(
             contiguous_arrays, parameters=parameters, backend=self._backend
