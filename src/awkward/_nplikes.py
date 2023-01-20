@@ -309,35 +309,35 @@ class NumpyLike(Singleton):
     ############################ ufuncs
 
     def add(
-        self, x1: ArrayLike, x2: ArrayLike, maybe_reuse: ArrayLike | None = None
+        self, x1: ArrayLike, x2: ArrayLike, maybe_out: ArrayLike | None = None
     ) -> ArrayLike:
-        return self._module.add(x1, x2, out=maybe_reuse)
+        return self._module.add(x1, x2, out=maybe_out)
 
     def logical_or(
-        self, x1: ArrayLike, x2: ArrayLike, *, maybe_reuse: ArrayLike | None = None
+        self, x1: ArrayLike, x2: ArrayLike, *, maybe_out: ArrayLike | None = None
     ) -> ArrayLike:
-        return self._module.logical_or(x1, x2, out=maybe_reuse)
+        return self._module.logical_or(x1, x2, out=maybe_out)
 
     def logical_and(
-        self, x1: ArrayLike, x2: ArrayLike, *, maybe_reuse: ArrayLike | None = None
+        self, x1: ArrayLike, x2: ArrayLike, *, maybe_out: ArrayLike | None = None
     ) -> ArrayLike:
-        return self._module.logical_and(x1, x2, out=maybe_reuse)
+        return self._module.logical_and(x1, x2, out=maybe_out)
 
     def logical_not(
-        self, x: ArrayLike, maybe_reuse: ArrayLike | None = None
+        self, x: ArrayLike, maybe_out: ArrayLike | None = None
     ) -> ArrayLike:
-        return self._module.logical_not(x, out=maybe_reuse)
+        return self._module.logical_not(x, out=maybe_out)
 
-    def sqrt(self, x: ArrayLike, maybe_reuse: ArrayLike | None = None) -> ArrayLike:
-        return self._module.sqrt(x, out=maybe_reuse)
+    def sqrt(self, x: ArrayLike, maybe_out: ArrayLike | None = None) -> ArrayLike:
+        return self._module.sqrt(x, out=maybe_out)
 
-    def exp(self, x: ArrayLike, maybe_reuse: ArrayLike | None = None) -> ArrayLike:
-        return self._module.exp(x, out=maybe_reuse)
+    def exp(self, x: ArrayLike, maybe_out: ArrayLike | None = None) -> ArrayLike:
+        return self._module.exp(x, out=maybe_out)
 
     def divide(
-        self, x1: ArrayLike, x2: ArrayLike, maybe_reuse: ArrayLike | None = None
+        self, x1: ArrayLike, x2: ArrayLike, maybe_out: ArrayLike | None = None
     ) -> ArrayLike:
-        return self._module.divide(x1, x2, out=maybe_reuse)
+        return self._module.divide(x1, x2, out=maybe_out)
 
     ############################ almost-ufuncs
 
@@ -374,9 +374,9 @@ class NumpyLike(Singleton):
         *,
         axis: int | tuple[int, ...] | None = None,
         keepdims: bool = False,
-        maybe_reuse: ArrayLike | None = None,
+        maybe_out: ArrayLike | None = None,
     ) -> ArrayLike:
-        return self._module.all(x, axis=axis, keepdims=keepdims, out=maybe_reuse)
+        return self._module.all(x, axis=axis, keepdims=keepdims, out=maybe_out)
 
     def any(
         self,
@@ -384,9 +384,9 @@ class NumpyLike(Singleton):
         *,
         axis: int | tuple[int, ...] | None = None,
         keepdims: bool = False,
-        maybe_reuse: ArrayLike | None = None,
+        maybe_out: ArrayLike | None = None,
     ) -> ArrayLike:
-        return self._module.any(x, axis=axis, keepdims=keepdims, out=maybe_reuse)
+        return self._module.any(x, axis=axis, keepdims=keepdims, out=maybe_out)
 
     def min(
         self,
@@ -394,9 +394,9 @@ class NumpyLike(Singleton):
         *,
         axis: int | tuple[int, ...] | None = None,
         keepdims: bool = False,
-        maybe_reuse: ArrayLike | None = None,
+        maybe_out: ArrayLike | None = None,
     ) -> ArrayLike:
-        return self._module.min(x, axis=axis, keepdims=keepdims, out=maybe_reuse)
+        return self._module.min(x, axis=axis, keepdims=keepdims, out=maybe_out)
 
     def max(
         self,
@@ -404,9 +404,9 @@ class NumpyLike(Singleton):
         *,
         axis: int | tuple[int, ...] | None = None,
         keepdims: bool = False,
-        maybe_reuse: ArrayLike | None = None,
+        maybe_out: ArrayLike | None = None,
     ) -> ArrayLike:
-        return self._module.max(x, axis=axis, keepdims=keepdims, out=maybe_reuse)
+        return self._module.max(x, axis=axis, keepdims=keepdims, out=maybe_out)
 
     def count_nonzero(
         self, x: ArrayLike, *, axis: int | None = None, keepdims: bool = False
@@ -418,9 +418,9 @@ class NumpyLike(Singleton):
         x: ArrayLike,
         *,
         axis: int | None = None,
-        maybe_reuse: ArrayLike | None = None,
+        maybe_out: ArrayLike | None = None,
     ) -> ArrayLike:
-        return self._module.cumsum(x, axis=axis, out=maybe_reuse)
+        return self._module.cumsum(x, axis=axis, out=maybe_out)
 
     def array_str(
         self,
@@ -648,9 +648,9 @@ class Cupy(NumpyLike):
         *,
         axis: int | tuple[int, ...] | None = None,
         keepdims: bool = False,
-        maybe_reuse: ArrayLike | None = None,
+        maybe_out: ArrayLike | None = None,
     ) -> ArrayLike:
-        out = self._module.all(x, axis=axis, out=maybe_reuse)
+        out = self._module.all(x, axis=axis, out=maybe_out)
         if axis is None and isinstance(out, self._module.ndarray):
             return out.item()
         else:
@@ -662,9 +662,9 @@ class Cupy(NumpyLike):
         *,
         axis: int | tuple[int, ...] | None = None,
         keepdims: bool = False,
-        maybe_reuse: ArrayLike | None = None,
+        maybe_out: ArrayLike | None = None,
     ) -> ArrayLike:
-        out = self._module.any(x, axis=axis, out=maybe_reuse)
+        out = self._module.any(x, axis=axis, out=maybe_out)
         if axis is None and isinstance(out, self._module.ndarray):
             return out.item()
         else:
@@ -689,9 +689,9 @@ class Cupy(NumpyLike):
         *,
         axis: int | tuple[int, ...] | None = None,
         keepdims: bool = False,
-        maybe_reuse: ArrayLike | None = None,
+        maybe_out: ArrayLike | None = None,
     ) -> ArrayLike:
-        out = self._module.min(x, axis=axis, out=maybe_reuse)
+        out = self._module.min(x, axis=axis, out=maybe_out)
         if axis is None and isinstance(out, self._module.ndarray):
             return out.item()
         else:
@@ -703,9 +703,9 @@ class Cupy(NumpyLike):
         *,
         axis: int | tuple[int, ...] | None = None,
         keepdims: bool = False,
-        maybe_reuse: ArrayLike | None = None,
+        maybe_out: ArrayLike | None = None,
     ) -> ArrayLike:
-        out = self._module.max(x, axis=axis, out=maybe_reuse)
+        out = self._module.max(x, axis=axis, out=maybe_out)
         if axis is None and isinstance(out, self._module.ndarray):
             return out.item()
         else:

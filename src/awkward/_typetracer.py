@@ -917,7 +917,7 @@ class TypeTracer(NumpyLike):
         x1: TypeTracerArray,
         x2: TypeTracerArray,
         *,
-        maybe_reuse: TypeTracerArray | None = None,
+        maybe_out: TypeTracerArray | None = None,
     ) -> TypeTracerArray:
         try_touch_data(x1)
         try_touch_data(x2)
@@ -940,7 +940,7 @@ class TypeTracer(NumpyLike):
         x: TypeTracerArray,
         *,
         axis: int | None = None,
-        maybe_reuse: TypeTracerArray | None = None,
+        maybe_out: TypeTracerArray | None = None,
     ) -> TypeTracerArray:
         try_touch_data(x)
         raise ak._errors.wrap_error(NotImplementedError)
@@ -1035,14 +1035,14 @@ class TypeTracer(NumpyLike):
     ############################ ufuncs
 
     def sqrt(
-        self, x: TypeTracerArray, maybe_reuse: TypeTracerArray | None = None
+        self, x: TypeTracerArray, maybe_out: TypeTracerArray | None = None
     ) -> TypeTracerArray:
         try_touch_data(x)
         # array
         raise ak._errors.wrap_error(NotImplementedError)
 
     def exp(
-        self, x: TypeTracerArray, maybe_reuse: TypeTracerArray | None = None
+        self, x: TypeTracerArray, maybe_out: TypeTracerArray | None = None
     ) -> TypeTracerArray:
         try_touch_data(x)
         if np.issubdtype(x.dtype, np.integer):
@@ -1053,7 +1053,7 @@ class TypeTracer(NumpyLike):
         self,
         x1: TypeTracerArray,
         x2: TypeTracerArray,
-        maybe_reuse: TypeTracerArray | None = None,
+        maybe_out: TypeTracerArray | None = None,
     ) -> TypeTracerArray:
         try_touch_data(x1)
         try_touch_data(x2)
@@ -1064,7 +1064,7 @@ class TypeTracer(NumpyLike):
         self,
         x1: TypeTracerArray,
         x2: TypeTracerArray,
-        maybe_reuse: TypeTracerArray | None = None,
+        maybe_out: TypeTracerArray | None = None,
     ) -> TypeTracerArray:
         try_touch_data(x1)
         try_touch_data(x2)
@@ -1085,7 +1085,7 @@ class TypeTracer(NumpyLike):
         self,
         x1: TypeTracerArray,
         x2: TypeTracerArray,
-        maybe_reuse: TypeTracerArray | None = None,
+        maybe_out: TypeTracerArray | None = None,
     ) -> TypeTracerArray:
         try_touch_data(x1)
         try_touch_data(x2)
@@ -1102,7 +1102,7 @@ class TypeTracer(NumpyLike):
             return UnknownScalar(dtype)
 
     def logical_not(
-        self, x: TypeTracerArray, maybe_reuse: TypeTracerArray | None = None
+        self, x: TypeTracerArray, maybe_out: TypeTracerArray | None = None
     ) -> TypeTracerArray:
         try_touch_data(x)
         dtype = np.bool_
@@ -1152,7 +1152,7 @@ class TypeTracer(NumpyLike):
         *,
         axis: int | tuple[int, ...] | None = None,
         keepdims: bool = False,
-        maybe_reuse: TypeTracerArray | None = None,
+        maybe_out: TypeTracerArray | None = None,
     ) -> TypeTracerArray:
         try_touch_data(x)
         if axis is None:
@@ -1166,7 +1166,7 @@ class TypeTracer(NumpyLike):
         *,
         axis: int | tuple[int, ...] | None = None,
         keepdims: bool = False,
-        maybe_reuse: TypeTracerArray | None = None,
+        maybe_out: TypeTracerArray | None = None,
     ) -> TypeTracerArray:
         try_touch_data(x)
         if axis is None:
@@ -1186,7 +1186,7 @@ class TypeTracer(NumpyLike):
         *,
         axis: int | tuple[int, ...] | None = None,
         keepdims: bool = False,
-        maybe_reuse: TypeTracerArray | None = None,
+        maybe_out: TypeTracerArray | None = None,
     ) -> TypeTracerArray:
         try_touch_data(x)
         raise ak._errors.wrap_error(NotImplementedError)
@@ -1197,7 +1197,7 @@ class TypeTracer(NumpyLike):
         *,
         axis: int | tuple[int, ...] | None = None,
         keepdims: bool = False,
-        maybe_reuse: TypeTracerArray | None = None,
+        maybe_out: TypeTracerArray | None = None,
     ) -> TypeTracerArray:
         try_touch_data(x)
         raise ak._errors.wrap_error(NotImplementedError)

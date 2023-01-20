@@ -120,7 +120,7 @@ def _impl(array, counts, axis, highlevel, behavior):
 
         current_offsets = backend.index_nplike.empty(len(counts) + 1, dtype=np.int64)
         current_offsets[0] = 0
-        backend.index_nplike.cumsum(counts, maybe_reuse=current_offsets[1:])
+        backend.index_nplike.cumsum(counts, maybe_out=current_offsets[1:])
 
     def unflatten_this_layout(layout):
         nonlocal current_offsets

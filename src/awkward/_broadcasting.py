@@ -606,7 +606,7 @@ def apply_step(
                             mask = m
                         else:
                             mask = backend.index_nplike.logical_or(
-                                mask, m, maybe_reuse=mask
+                                mask, m, maybe_out=mask
                             )
 
                 nextmask = Index8(mask.view(np.int8))
