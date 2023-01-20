@@ -3,11 +3,10 @@
 import json
 from collections.abc import Iterable, Sized
 
-import numpy
-
 import awkward as ak
 
 np = ak._nplikes.NumpyMetadata.instance()
+numpy = ak._nplikes.Numpy.instance()
 
 try:
     import pyarrow
