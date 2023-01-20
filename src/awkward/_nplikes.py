@@ -172,9 +172,9 @@ class NumpyLike(Singleton):
                 return self._module.asarray(obj, dtype=dtype)
 
     def ascontiguousarray(
-        self, array: ArrayLike, *, dtype: np.dtype | None = None
+        self, x: ArrayLike, *, dtype: np.dtype | None = None
     ) -> ArrayLike:
-        return self._module.ascontiguousarray(array, dtype=dtype)
+        return self._module.ascontiguousarray(x, dtype=dtype)
 
     def frombuffer(
         self, buffer, *, dtype: np.dtype | None = None, count: int = -1
@@ -284,13 +284,24 @@ class NumpyLike(Singleton):
         arrays = [x for x in arrays]
         return self._module.stack(arrays, axis=axis)
 
-    def packbits(self, x: ArrayLike, *, axis=None, bitorder="big") -> ArrayLike:
+    def packbits(
+        self,
+        x: ArrayLike,
+        *,
+        axis: int | None = None,
+        bitorder: Literal["big", "little"] = "big",
+    ) -> ArrayLike:
         return self._module.packbits(x, axis=axis, bitorder=bitorder)
 
     def unpackbits(
-        self, array: ArrayLike, *, axis=None, count=None, bitorder="big"
+        self,
+        x: ArrayLike,
+        *,
+        axis: int | None = None,
+        count: int | None = None,
+        bitorder: Literal["big", "little"] = "big",
     ) -> ArrayLike:
-        return self._module.unpackbits(array, axis=axis, count=count, bitorder=bitorder)
+        return self._module.unpackbits(x, axis=axis, count=count, bitorder=bitorder)
 
     def broadcast_to(self, x: ArrayLike, shape: tuple[SupportsInt, ...]) -> ArrayLike:
         return self._module.broadcast_to(x, shape)
@@ -443,7 +454,7 @@ class NumpyLike(Singleton):
         """
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def is_c_contiguous(self, array: ArrayLike) -> bool:
+    def is_c_contiguous(self, x: ArrayLike) -> bool:
         raise ak._errors.wrap_error(NotImplementedError)
 
     def to_rectilinear(self, array: ArrayLike) -> ArrayLike:
@@ -498,8 +509,8 @@ class Numpy(NumpyLike):
         """
         return isinstance(obj, numpy.ndarray)
 
-    def is_c_contiguous(self, array: ArrayLike) -> bool:
-        return array.flags["C_CONTIGUOUS"]
+    def is_c_contiguous(self, x: ArrayLike) -> bool:
+        return x.flags["C_CONTIGUOUS"]
 
     def packbits(
         self,
@@ -529,18 +540,18 @@ class Numpy(NumpyLike):
 
     def unpackbits(
         self,
-        array: ArrayLike,
+        x: ArrayLike,
         *,
         axis: int | None = None,
         count: int | None = None,
         bitorder: Literal["big", "little"] = "big",
     ):
         if ak._util.numpy_at_least("1.17.0"):
-            return numpy.unpackbits(array, axis=axis, count=count, bitorder=bitorder)
+            return numpy.unpackbits(x, axis=axis, count=count, bitorder=bitorder)
         else:
             assert axis is None, "unsupported argument value for axis given"
             assert count is None, "unsupported argument value for count given"
-            ready_to_bitswap = numpy.unpackbits(array)
+            ready_to_bitswap = numpy.unpackbits(x)
             if bitorder == "little":
                 return ready_to_bitswap.reshape(-1, 8)[:, ::-1].reshape(-1)
             else:
@@ -801,16 +812,16 @@ class Jax(NumpyLike):
         module, _, suffix = type(obj).__module__.partition(".")
         return module == "jax"
 
-    def is_c_contiguous(self, array: ArrayLike) -> bool:
+    def is_c_contiguous(self, x: ArrayLike) -> bool:
         return True
 
     def ascontiguousarray(
-        self, array: ArrayLike, *, dtype: np.dtype | None = None
+        self, x: ArrayLike, *, dtype: np.dtype | None = None
     ) -> ArrayLike:
         if dtype is not None:
-            return array.astype(dtype)
+            return x.astype(dtype)
         else:
-            return array
+            return x
 
 
 # Temporary sentinel marking "argument not given"

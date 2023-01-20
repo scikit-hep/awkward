@@ -761,11 +761,9 @@ class TypeTracer(NumpyLike):
         else:
             return result
 
-    def ascontiguousarray(
-        self, array: TypeTracerArray, *, dtype=None
-    ) -> TypeTracerArray:
-        try_touch_data(array)
-        return TypeTracerArray.from_array(array, dtype=dtype)
+    def ascontiguousarray(self, x: TypeTracerArray, *, dtype=None) -> TypeTracerArray:
+        try_touch_data(x)
+        return TypeTracerArray.from_array(x, dtype=dtype)
 
     def frombuffer(
         self, buffer, *, dtype: np.dtype | None = None, count: int = -1
@@ -1014,15 +1012,24 @@ class TypeTracer(NumpyLike):
         raise ak._errors.wrap_error(NotImplementedError)
 
     def packbits(
-        self, array: TypeTracerArray, *, axis=None, bitorder="big"
+        self,
+        x: ArrayLike,
+        *,
+        axis: int | None = None,
+        bitorder: Literal["big", "little"] = "big",
     ) -> TypeTracerArray:
-        try_touch_data(array)
+        try_touch_data(x)
         raise ak._errors.wrap_error(NotImplementedError)
 
     def unpackbits(
-        self, array: TypeTracerArray, *, axis=None, count=None, bitorder="big"
+        self,
+        x: ArrayLike,
+        *,
+        axis: int | None = None,
+        count: int | None = None,
+        bitorder: Literal["big", "little"] = "big",
     ) -> TypeTracerArray:
-        try_touch_data(array)
+        try_touch_data(x)
         raise ak._errors.wrap_error(NotImplementedError)
 
     ############################ ufuncs
@@ -1214,5 +1221,5 @@ class TypeTracer(NumpyLike):
     def is_own_array(cls, obj) -> bool:
         return isinstance(obj, TypeTracerArray)
 
-    def is_c_contiguous(self, array: TypeTracerArray) -> bool:
+    def is_c_contiguous(self, x: TypeTracerArray) -> bool:
         return True
