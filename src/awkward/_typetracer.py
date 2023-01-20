@@ -665,20 +665,7 @@ class TypeTracerArray(NDArrayOperatorsMixin):
         def __getattr__(self, function_name):
             ufunc = getattr(numpy, function_name, None)
             if isinstance(ufunc, numpy.ufunc):
-
-                def generic_ufunc(*inputs, **kwargs):
-                    inputs = (self.array,) + inputs
-                    for x in inputs:
-                        getattr(x, "touch_data", lambda: None)()
-                    replacements = [
-                        numpy.empty(0, x.dtype) if hasattr(x, "dtype") else x
-                        for x in inputs
-                    ]
-                    result = ufunc(*replacements, **kwargs)
-                    return TypeTracerArray(result.dtype, shape=self.array._shape)
-
-                return generic_ufunc
-
+                return self._generic_ufunc_func(ufunc)
             else:
                 raise ak._errors.wrap_error(
                     AttributeError(
@@ -686,20 +673,30 @@ class TypeTracerArray(NDArrayOperatorsMixin):
                     )
                 )
 
+        def _generic_ufunc_func(self, ufunc):
+            def generic_ufunc(*inputs, **kwargs):
+                inputs = (self.array,) + inputs
+                for x in inputs:
+                    getattr(x, "touch_data", lambda: None)()
+                replacements = [
+                    numpy.empty(0, x.dtype) if hasattr(x, "dtype") else x
+                    for x in inputs
+                ]
+                result = ufunc(*replacements, **kwargs)
+                return TypeTracerArray(result.dtype, shape=self.array._shape)
+
+            return generic_ufunc
+
     @property
     def _module(self):
         # This is how ak._nplikes.NumpyLike calls functions that haven't been overloaded
         return TypeTracerArray._FakeModule(self)
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
-        self.touch_data()
-        for x in inputs:
-            getattr(x, "touch_data", lambda: None)()
-        replacements = [
-            numpy.empty(0, x.dtype) if hasattr(x, "dtype") else x for x in inputs
-        ]
-        result = getattr(ufunc, method)(*replacements, **kwargs)
-        return TypeTracerArray(result.dtype, shape=self._shape)
+        if method != "__call__" or len(inputs) == 0 or "out" in kwargs:
+            raise ak._errors.wrap_error(NotImplementedError)
+
+        return inputs[0]._module._generic_ufunc_func(ufunc)(*inputs[1:], **kwargs)
 
 
 def try_touch_data(array):
