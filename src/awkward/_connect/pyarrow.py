@@ -283,7 +283,9 @@ def popbuffers_finalize(
                         ak.contents.BitMaskedArray.simplified(
                             # ceildiv(len(out), 8) = -(len(out) // -8)
                             ak.index.IndexU8(
-                                numpy.full(-(len(out) // -8), np.uint8(0xFF))
+                                numpy.full(
+                                    -(len(out) // -8), np.uint8(0xFF), dtype=np.uint8
+                                )
                             ),
                             out,
                             valid_when=True,
@@ -316,7 +318,7 @@ def popbuffers_finalize(
     else:
         if validbits is None and generate_bitmasks:
             # ceildiv(len(out), 8) = -(len(out) // -8)
-            validbits = numpy.full(-(len(out) // -8), np.uint8(0xFF))
+            validbits = numpy.full(-(len(out) // -8), np.uint8(0xFF), dtype=np.uint8)
 
         if validbits is None:
             return revertable(ak.contents.UnmaskedArray.simplified(out), out)
