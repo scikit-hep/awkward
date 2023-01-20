@@ -17,6 +17,7 @@ __all__ = list(
         "AxisMaybeNone",
         "TypedDict",
         "Literal",
+        "SupportsIndex",
         *typing.__all__,
     }
 )
@@ -31,6 +32,7 @@ if sys.version_info < (3, 11):
         Literal,
         Protocol,
         Self,
+        SupportsIndex,
         TypeAlias,
         TypedDict,
         Unpack,
@@ -43,6 +45,7 @@ else:
         Literal,
         Protocol,
         Self,
+        SupportsIndex,
         TypeAlias,
         TypedDict,
         Unpack,

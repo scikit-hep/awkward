@@ -192,7 +192,9 @@ class IndexedOptionArray(Content):
 
         carry = self._index.data
         too_negative = carry < -1
-        if self._backend.nplike.any(too_negative, prefer=False):
+        if self._backend.index_nplike.known_data and self._backend.index_nplike.any(
+            too_negative
+        ):
             carry = carry.copy()
             carry[too_negative] = -1
         carry = ak.index.Index(carry)

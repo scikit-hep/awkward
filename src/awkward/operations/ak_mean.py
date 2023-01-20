@@ -215,7 +215,7 @@ def _impl(x, weight, axis, keepdims, mask_identity):
                 highlevel=True,
                 behavior=None,
             )
-        return ak._nplikes.nplike_of(sumwx, sumw).true_divide(sumwx, sumw)
+        return sumwx / sumw
 
 
 @ak._connect.numpy.implements("mean")

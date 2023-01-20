@@ -244,14 +244,15 @@ class RegularArray(Content):
             copied = True
 
         negative = where < 0
-        if self._backend.index_nplike.any(negative, prefer=False):
-            if not copied:
-                where = where.copy()
-                copied = True
-            where[negative] += self._length
+        if self._backend.index_nplike.known_data:
+            if self._backend.index_nplike.any(negative):
+                if not copied:
+                    where = where.copy()
+                    copied = True
+                where[negative] += self._length
 
-        if self._backend.index_nplike.any(where >= self._length, prefer=False):
-            raise ak._errors.index_error(self, where)
+            if self._backend.index_nplike.any(where >= self._length):
+                raise ak._errors.index_error(self, where)
 
         nextcarry = ak.index.Index64.empty(
             where.shape[0] * self._size, self._backend.index_nplike

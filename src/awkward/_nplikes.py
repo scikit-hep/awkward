@@ -1,11 +1,77 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 from __future__ import annotations
 
+from abc import abstractmethod
+from typing import overload
+
 import numpy
 
 import awkward as ak
 from awkward._singleton import Singleton
-from awkward.typing import TypeVar
+from awkward.typing import Literal, Protocol, Self, SupportsIndex, SupportsInt, TypeVar
+
+
+class ArrayLike(Protocol):
+    @property
+    @abstractmethod
+    def dtype(self) -> dtype:
+        ...
+
+    @property
+    @abstractmethod
+    def ndim(self) -> int:
+        ...
+
+    @property
+    @abstractmethod
+    def shape(self) -> tuple[SupportsInt, ...]:
+        ...
+
+    @property
+    @abstractmethod
+    def size(self) -> SupportsInt:
+        ...
+
+    @property
+    @abstractmethod
+    def T(self) -> Self:
+        ...
+
+    @overload
+    def __getitem__(
+        self, index: SupportsIndex
+    ) -> int | float | complex | str | bytes | bytes:
+        ...
+
+    @overload
+    def __getitem__(
+        self, index: slice | Ellipsis | tuple[SupportsIndex | slice | Ellipsis, ...]
+    ) -> Self:
+        ...
+
+    @abstractmethod
+    def __getitem__(self, index) -> Self:
+        ...
+
+    @abstractmethod
+    def __bool__(self) -> bool:
+        ...
+
+    @abstractmethod
+    def __int__(self) -> int:
+        ...
+
+    @abstractmethod
+    def __index__(self) -> int:
+        ...
+
+    @abstractmethod
+    def __len__(self) -> int:
+        ...
+
+    @abstractmethod
+    def view(self, dtype: dtype) -> Self:
+        ...
 
 
 class NumpyMetadata(Singleton):
@@ -90,7 +156,7 @@ class NumpyLike(Singleton):
         *,
         dtype: numpy.dtype | None = None,
         copy: bool | None = None,
-    ):
+    ) -> ArrayLike:
         if copy:
             return self._module.array(obj, dtype=dtype, copy=True)
         elif copy is None:
@@ -105,180 +171,276 @@ class NumpyLike(Singleton):
             else:
                 return self._module.asarray(obj, dtype=dtype)
 
-    def ascontiguousarray(self, array, *, dtype=None):
-        # array[, dtype=]
-        return self._module.ascontiguousarray(array, dtype=dtype)
+    def ascontiguousarray(
+        self, x: ArrayLike, *, dtype: np.dtype | None = None
+    ) -> ArrayLike:
+        return self._module.ascontiguousarray(x, dtype=dtype)
 
-    def frombuffer(self, *args, **kwargs):
-        # array[, dtype=]
-        return self._module.frombuffer(*args, **kwargs)
+    def frombuffer(
+        self, buffer, *, dtype: np.dtype | None = None, count: int = -1
+    ) -> ArrayLike:
+        return self._module.frombuffer(buffer, dtype=dtype, count=count)
 
-    def zeros(self, shape: int | tuple[int, ...], *, dtype: np.dtype):
-        # shape/len[, dtype=]
+    def zeros(self, shape: int | tuple[int, ...], *, dtype: np.dtype) -> ArrayLike:
         return self._module.zeros(shape, dtype=dtype)
 
-    def ones(self, shape: int | tuple[int, ...], *, dtype: np.dtype):
+    def ones(self, shape: int | tuple[int, ...], *, dtype: np.dtype) -> ArrayLike:
         return self._module.ones(shape, dtype=dtype)
 
-    def empty(self, shape: int | tuple[int, ...], *, dtype: np.dtype):
+    def empty(self, shape: int | tuple[int, ...], *, dtype: np.dtype) -> ArrayLike:
         return self._module.empty(shape, dtype=dtype)
 
-    def full(self, shape: int | tuple[int, ...], fill_value, *, dtype: np.dtype):
-        # shape/len, value[, dtype=]
+    def full(
+        self, shape: int | tuple[int, ...], fill_value, *, dtype: np.dtype
+    ) -> ArrayLike:
         return self._module.full(shape, fill_value, dtype=dtype)
 
-    def zeros_like(self, x, *, dtype: np.dtype | None = None):
+    def zeros_like(self, x: ArrayLike, *, dtype: np.dtype | None = None) -> ArrayLike:
         return self._module.zeros_like(x, dtype=dtype)
 
-    def ones_like(self, x, *, dtype: np.dtype | None = None):
+    def ones_like(self, x: ArrayLike, *, dtype: np.dtype | None = None) -> ArrayLike:
         return self._module.ones_like(x, dtype=dtype)
 
-    def full_like(self, x, fill_value, *, dtype: np.dtype | None = None):
+    def full_like(
+        self, x: ArrayLike, fill_value, *, dtype: np.dtype | None = None
+    ) -> ArrayLike:
         return self._module.full_like(x, fill_value, dtype=dtype)
 
-    def arange(self, *args, **kwargs):
-        # stop[, dtype=]
-        # start, stop[, dtype=]
-        # start, stop, step[, dtype=]
-        return self._module.arange(*args, **kwargs)
+    def arange(
+        self,
+        start: float | int,
+        stop: float | int | None = None,
+        step: float | int = 1,
+        *,
+        dtype: np.dtype | None = None,
+    ) -> ArrayLike:
+        return self._module.arange(start, stop, step, dtype=dtype)
 
-    def meshgrid(self, *args, **kwargs):
-        # *arrays, indexing="ij"
-        return self._module.meshgrid(*args, **kwargs)
+    def meshgrid(
+        self, *arrays: ArrayLike, indexing: Literal["xy", "ij"] = "xy"
+    ) -> list[ArrayLike]:
+        return self._module.meshgrid(*arrays, indexing=indexing)
 
     ############################ testing
 
-    def array_equal(self, *args, **kwargs):
-        # array1, array2
-        return self._module.array_equal(*args, **kwargs)
+    def array_equal(
+        self, x1: ArrayLike, x2: ArrayLike, *, equal_nan: bool = False
+    ) -> bool:
+        return self._module.array_equal(x1, x2, equal_nan=equal_nan)
 
-    def searchsorted(self, *args, **kwargs):
-        # haystack, needle, side="right"
-        return self._module.searchsorted(*args, **kwargs)
+    def searchsorted(
+        self,
+        x: ArrayLike,
+        values: ArrayLike,
+        *,
+        side: Literal["left", "right"] = "left",
+        sorter: ArrayLike | None = None,
+    ) -> ArrayLike:
+        return self._module.searchsorted(x, values, side=side, sorter=sorter)
 
     ############################ manipulation
 
-    def broadcast_arrays(self, *args, **kwargs):
-        # array1[, array2[, ...]]
-        return self._module.broadcast_arrays(*args, **kwargs)
+    def broadcast_arrays(self, *arrays: ArrayLike) -> list[ArrayLike]:
+        return self._module.broadcast_arrays(*arrays)
 
-    def cumsum(self, *args, **kwargs):
-        # arrays[, out=]
-        return self._module.cumsum(*args, **kwargs)
+    def nonzero(self, x: ArrayLike) -> tuple[ArrayLike, ...]:
+        return self._module.nonzero(x)
 
-    def nonzero(self, *args, **kwargs):
-        # array
-        return self._module.nonzero(*args, **kwargs)
+    def unique_values(self, x: ArrayLike) -> ArrayLike:
+        return self._module.unique(
+            x,
+            return_counts=False,
+            return_index=False,
+            return_inverse=False,
+            equal_nan=False,
+        )
 
-    def unique(self, *args, **kwargs):
-        # array
-        return self._module.unique(*args, **kwargs)
+    def concat(
+        self,
+        arrays: list[ArrayLike] | tuple[ArrayLike, ...],
+        *,
+        axis: int | None = 0,
+    ) -> ArrayLike:
+        return self._module.concatenate(arrays, axis=axis, casting="same_kind")
 
-    def concatenate(self, *args, **kwargs):
-        # arrays
-        return self._module.concatenate(*args, **kwargs)
+    def repeat(
+        self,
+        x: ArrayLike,
+        repeats: ArrayLike | int,
+        *,
+        axis: int | None = None,
+    ) -> ArrayLike:
+        return self._module.repeat(x, repeats=repeats, axis=axis)
 
-    def repeat(self, *args, **kwargs):
-        # array, int
-        # array1, array2
-        return self._module.repeat(*args, **kwargs)
+    def tile(self, x: ArrayLike, reps: int) -> ArrayLike:
+        return self._module.tile(x, reps)
 
-    def tile(self, *args, **kwargs):
-        # array, int
-        return self._module.tile(*args, **kwargs)
+    def stack(
+        self,
+        arrays: list[ArrayLike] | tuple[ArrayLike, ...],
+        *,
+        axis: int = 0,
+    ) -> ArrayLike:
+        arrays = [x for x in arrays]
+        return self._module.stack(arrays, axis=axis)
 
-    def stack(self, *args, **kwargs):
-        # arrays
-        return self._module.stack(*args, **kwargs)
+    def packbits(
+        self,
+        x: ArrayLike,
+        *,
+        axis: int | None = None,
+        bitorder: Literal["big", "little"] = "big",
+    ) -> ArrayLike:
+        return self._module.packbits(x, axis=axis, bitorder=bitorder)
 
-    def packbits(self, array, *, axis=None, bitorder="big"):
-        # array
-        return self._module.packbits(array, axis=axis, bitorder=bitorder)
+    def unpackbits(
+        self,
+        x: ArrayLike,
+        *,
+        axis: int | None = None,
+        count: int | None = None,
+        bitorder: Literal["big", "little"] = "big",
+    ) -> ArrayLike:
+        return self._module.unpackbits(x, axis=axis, count=count, bitorder=bitorder)
 
-    def unpackbits(self, array, *, axis=None, count=None, bitorder="big"):
-        # array
-        return self._module.unpackbits(array, axis=axis, count=count, bitorder=bitorder)
-
-    def broadcast_to(self, *args, **kwargs):
-        # array, shape
-        return self._module.broadcast_to(*args, **kwargs)
+    def broadcast_to(self, x: ArrayLike, shape: tuple[SupportsInt, ...]) -> ArrayLike:
+        return self._module.broadcast_to(x, shape)
 
     ############################ ufuncs
 
-    def add(self, *args, **kwargs):
-        # array1, array2
-        return self._module.add(*args, **kwargs)
+    def add(
+        self, x1: ArrayLike, x2: ArrayLike, maybe_out: ArrayLike | None = None
+    ) -> ArrayLike:
+        return self._module.add(x1, x2, out=maybe_out)
 
-    def logical_or(self, *args, **kwargs):
-        # array1, array2
-        return self._module.logical_or(*args, **kwargs)
+    def logical_or(
+        self, x1: ArrayLike, x2: ArrayLike, *, maybe_out: ArrayLike | None = None
+    ) -> ArrayLike:
+        return self._module.logical_or(x1, x2, out=maybe_out)
 
-    def logical_and(self, *args, **kwargs):
-        # array1, array2
-        return self._module.logical_and(*args, **kwargs)
+    def logical_and(
+        self, x1: ArrayLike, x2: ArrayLike, *, maybe_out: ArrayLike | None = None
+    ) -> ArrayLike:
+        return self._module.logical_and(x1, x2, out=maybe_out)
 
-    def logical_not(self, *args, **kwargs):
-        # array1, array2
-        return self._module.logical_not(*args, **kwargs)
+    def logical_not(
+        self, x: ArrayLike, maybe_out: ArrayLike | None = None
+    ) -> ArrayLike:
+        return self._module.logical_not(x, out=maybe_out)
 
-    def sqrt(self, *args, **kwargs):
-        # array
-        return self._module.sqrt(*args, **kwargs)
+    def sqrt(self, x: ArrayLike, maybe_out: ArrayLike | None = None) -> ArrayLike:
+        return self._module.sqrt(x, out=maybe_out)
 
-    def exp(self, *args, **kwargs):
-        # array
-        return self._module.exp(*args, **kwargs)
+    def exp(self, x: ArrayLike, maybe_out: ArrayLike | None = None) -> ArrayLike:
+        return self._module.exp(x, out=maybe_out)
 
-    def true_divide(self, *args, **kwargs):
-        # array1, array2
-        return self._module.true_divide(*args, **kwargs)
+    def divide(
+        self, x1: ArrayLike, x2: ArrayLike, maybe_out: ArrayLike | None = None
+    ) -> ArrayLike:
+        return self._module.divide(x1, x2, out=maybe_out)
 
     ############################ almost-ufuncs
 
-    def nan_to_num(self, *args, **kwargs):
-        # array, copy=True, nan=0.0, posinf=None, neginf=None
-        return self._module.nan_to_num(*args, **kwargs)
+    def nan_to_num(
+        self,
+        x: ArrayLike,
+        *,
+        copy: bool = True,
+        nan: int | float | None = 0.0,
+        posinf: int | float | None = None,
+        neginf: int | float | None = None,
+    ) -> ArrayLike:
+        return self._module.nan_to_num(
+            x, copy=copy, nan=nan, posinf=posinf, neginf=neginf
+        )
 
-    def isclose(self, *args, **kwargs):
-        # a, b, rtol=1e-05, atol=1e-08, equal_nan=False
-        return self._module.isclose(*args, **kwargs)
+    def isclose(
+        self,
+        x1: ArrayLike,
+        x2: ArrayLike,
+        *,
+        rtol: float = 1e-5,
+        atol: float = 1e-8,
+        equal_nan: bool = False,
+    ) -> ArrayLike:
+        return self._module.isclose(x1, x2, rtol=rtol, atol=atol, equal_nan=equal_nan)
 
-    def isnan(self, *args, **kwargs):
-        # array
-        return self._module.isnan(*args, **kwargs)
+    def isnan(self, x: ArrayLike) -> ArrayLike:
+        return self._module.isnan(x)
 
-    ############################ reducers
+    def all(
+        self,
+        x: ArrayLike,
+        *,
+        axis: int | tuple[int, ...] | None = None,
+        keepdims: bool = False,
+        maybe_out: ArrayLike | None = None,
+    ) -> ArrayLike:
+        return self._module.all(x, axis=axis, keepdims=keepdims, out=maybe_out)
 
-    def all(self, *args, **kwargs):
-        # array
-        kwargs.pop("prefer", None)
-        return self._module.all(*args, **kwargs)
+    def any(
+        self,
+        x: ArrayLike,
+        *,
+        axis: int | tuple[int, ...] | None = None,
+        keepdims: bool = False,
+        maybe_out: ArrayLike | None = None,
+    ) -> ArrayLike:
+        return self._module.any(x, axis=axis, keepdims=keepdims, out=maybe_out)
 
-    def any(self, *args, **kwargs):
-        # array
-        kwargs.pop("prefer", None)
-        return self._module.any(*args, **kwargs)
+    def min(
+        self,
+        x: ArrayLike,
+        *,
+        axis: int | tuple[int, ...] | None = None,
+        keepdims: bool = False,
+        maybe_out: ArrayLike | None = None,
+    ) -> ArrayLike:
+        return self._module.min(x, axis=axis, keepdims=keepdims, out=maybe_out)
 
-    def count_nonzero(self, *args, **kwargs):
-        # array
-        return self._module.count_nonzero(*args, **kwargs)
+    def max(
+        self,
+        x: ArrayLike,
+        *,
+        axis: int | tuple[int, ...] | None = None,
+        keepdims: bool = False,
+        maybe_out: ArrayLike | None = None,
+    ) -> ArrayLike:
+        return self._module.max(x, axis=axis, keepdims=keepdims, out=maybe_out)
 
-    def min(self, *args, **kwargs):
-        # array
-        return self._module.min(*args, **kwargs)
+    def count_nonzero(
+        self, x: ArrayLike, *, axis: int | None = None, keepdims: bool = False
+    ) -> ArrayLike:
+        return self._module.count_nonzero(x, axis=axis, keepdims=keepdims)
 
-    def max(self, *args, **kwargs):
-        # array
-        return self._module.max(*args, **kwargs)
+    def cumsum(
+        self,
+        x: ArrayLike,
+        *,
+        axis: int | None = None,
+        maybe_out: ArrayLike | None = None,
+    ) -> ArrayLike:
+        return self._module.cumsum(x, axis=axis, out=maybe_out)
 
-    def array_str(self, *args, **kwargs):
-        # array, max_line_width, precision=None, suppress_small=None
-        return self._module.array_str(*args, **kwargs)
+    def array_str(
+        self,
+        x: ArrayLike,
+        *,
+        max_line_width: int | None = None,
+        precision: int | None = None,
+        suppress_small: bool | None = None,
+    ):
+        return self._module.array_str(
+            x,
+            max_line_width=max_line_width,
+            precision=precision,
+            suppress_small=suppress_small,
+        )
 
-    def can_cast(self, *args, **kwargs):
-        return self._module.can_cast(*args, **kwargs)
+    def can_cast(self, from_: np.dtype | ArrayLike, to: np.dtype | ArrayLike) -> bool:
+        return self._module.can_cast(from_, to, casting="same_kind")
 
-    def raw(self, array, nplike):
+    def raw(self, array: ArrayLike, nplike: NumpyLike) -> ArrayLike:
         raise ak._errors.wrap_error(NotImplementedError)
 
     @classmethod
@@ -292,10 +454,10 @@ class NumpyLike(Singleton):
         """
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def is_c_contiguous(self, array) -> bool:
+    def is_c_contiguous(self, x: ArrayLike) -> bool:
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def to_rectilinear(self, array):
+    def to_rectilinear(self, array: ArrayLike) -> ArrayLike:
         raise ak._errors.wrap_error(NotImplementedError)
 
 
@@ -318,7 +480,7 @@ class Numpy(NumpyLike):
     def ndarray(self):
         return self._module.ndarray
 
-    def raw(self, array, nplike):
+    def raw(self, array: ArrayLike, nplike: NumpyLike) -> ArrayLike:
         if isinstance(nplike, Numpy):
             return array
         elif isinstance(nplike, Cupy):
@@ -347,36 +509,49 @@ class Numpy(NumpyLike):
         """
         return isinstance(obj, numpy.ndarray)
 
-    def is_c_contiguous(self, array) -> bool:
-        return array.flags["C_CONTIGUOUS"]
+    def is_c_contiguous(self, x: ArrayLike) -> bool:
+        return x.flags["C_CONTIGUOUS"]
 
-    def packbits(self, array, *, axis=None, bitorder="big"):
+    def packbits(
+        self,
+        x: ArrayLike,
+        *,
+        axis: int | None = None,
+        bitorder: Literal["big", "little"] = "big",
+    ):
         if ak._util.numpy_at_least("1.17.0"):
-            return numpy.packbits(array, axis=axis, bitorder=bitorder)
+            return numpy.packbits(x, axis=axis, bitorder=bitorder)
         else:
             assert axis is None, "unsupported argument value for axis given"
             if bitorder == "little":
-                if len(array) % 8 == 0:
-                    ready_to_pack = array
+                if len(x) % 8 == 0:
+                    ready_to_pack = x
                 else:
                     ready_to_pack = numpy.empty(
-                        int(numpy.ceil(len(array) / 8.0)) * 8,
-                        dtype=array.dtype,
+                        int(numpy.ceil(len(x) / 8.0)) * 8,
+                        dtype=x.dtype,
                     )
-                    ready_to_pack[: len(array)] = array
-                    ready_to_pack[len(array) :] = 0
+                    ready_to_pack[: len(x)] = x
+                    ready_to_pack[len(x) :] = 0
                 return numpy.packbits(ready_to_pack.reshape(-1, 8)[:, ::-1].reshape(-1))
             else:
                 assert bitorder == "bit"
-                return numpy.packbits(array)
+                return numpy.packbits(x)
 
-    def unpackbits(self, array, *, axis=None, count=None, bitorder="big"):
+    def unpackbits(
+        self,
+        x: ArrayLike,
+        *,
+        axis: int | None = None,
+        count: int | None = None,
+        bitorder: Literal["big", "little"] = "big",
+    ):
         if ak._util.numpy_at_least("1.17.0"):
-            return numpy.unpackbits(array, axis=axis, count=count, bitorder=bitorder)
+            return numpy.unpackbits(x, axis=axis, count=count, bitorder=bitorder)
         else:
             assert axis is None, "unsupported argument value for axis given"
             assert count is None, "unsupported argument value for count given"
-            ready_to_bitswap = numpy.unpackbits(array)
+            ready_to_bitswap = numpy.unpackbits(x)
             if bitorder == "little":
                 return ready_to_bitswap.reshape(-1, 8)[:, ::-1].reshape(-1)
             else:
@@ -417,7 +592,7 @@ class Cupy(NumpyLike):
     def ndarray(self):
         return self._module.ndarray
 
-    def raw(self, array, nplike):
+    def raw(self, array: ArrayLike, nplike: NumpyLike) -> ArrayLike:
         if isinstance(nplike, Cupy):
             return array
         elif isinstance(nplike, Numpy):
@@ -435,21 +610,25 @@ class Cupy(NumpyLike):
                 )
             )
 
-    def zeros(self, *args, **kwargs):
-        return self._module.zeros(*args, **kwargs)
+    def frombuffer(
+        self, buffer, *, dtype: np.dtype | None = None, count: int = -1
+    ) -> ArrayLike:
+        np_array = numpy.frombuffer(buffer, dtype=dtype, count=count)
+        return self._module.asarray(np_array)
 
-    def frombuffer(self, *args, **kwargs):
-        np_array = numpy.frombuffer(*args, **kwargs)
-        return self._module.array(np_array)
-
-    def array_equal(self, array1, array2):
-        # CuPy issue?
-        if array1.shape != array2.shape:
+    def array_equal(self, x1: ArrayLike, x2: ArrayLike, *, equal_nan: bool = False):
+        if x1.shape != x2.shape:
             return False
         else:
-            return self._module.all(array1 - array2 == 0)
+            return self._module.all(x1 - x2 == 0)
 
-    def repeat(self, array, repeats):
+    def repeat(
+        self, x: ArrayLike, repeats: ArrayLike | int, *, axis: int | None = None
+    ):
+        if axis is not None:
+            raise ak._errors.wrap_error(
+                NotImplementedError(f"repeat for CuPy with axis={axis!r}")
+            )
         # https://github.com/cupy/cupy/issues/3849
         if isinstance(repeats, self._module.ndarray):
             all_stops = self._module.cumsum(repeats)
@@ -457,75 +636,76 @@ class Cupy(NumpyLike):
             stops, stop_counts = self._module.unique(all_stops[:-1], return_counts=True)
             parents[stops] = stop_counts
             self._module.cumsum(parents, out=parents)
-            return array[parents]
+            return x[parents]
         else:
-            return self._module.repeat(array, repeats)
-
-    def nan_to_num(self, *args, **kwargs):
-        self._module.nan_to_num(*args, **kwargs)
+            return self._module.repeat(x, repeats=repeats)
 
     # For all reducers: https://github.com/cupy/cupy/issues/3819
 
-    def all(self, array, axis=None, **kwargs):
-        kwargs.pop("prefer", None)
-        out = self._module.all(array, axis=axis)
+    def all(
+        self,
+        x: ArrayLike,
+        *,
+        axis: int | tuple[int, ...] | None = None,
+        keepdims: bool = False,
+        maybe_out: ArrayLike | None = None,
+    ) -> ArrayLike:
+        out = self._module.all(x, axis=axis, out=maybe_out)
         if axis is None and isinstance(out, self._module.ndarray):
             return out.item()
         else:
             return out
 
-    def any(self, array, axis=None, **kwargs):
-        kwargs.pop("prefer", None)
-        out = self._module.any(array, axis=axis)
+    def any(
+        self,
+        x: ArrayLike,
+        *,
+        axis: int | tuple[int, ...] | None = None,
+        keepdims: bool = False,
+        maybe_out: ArrayLike | None = None,
+    ) -> ArrayLike:
+        out = self._module.any(x, axis=axis, out=maybe_out)
         if axis is None and isinstance(out, self._module.ndarray):
             return out.item()
         else:
             return out
 
-    def count_nonzero(self, array, axis=None):
-        out = self._module.count_nonzero(array, axis=axis)
+    def count_nonzero(
+        self,
+        x: ArrayLike,
+        *,
+        axis: int | tuple[int, ...] | None = None,
+        keepdims: bool = False,
+    ) -> ArrayLike:
+        out = self._module.count_nonzero(x, axis=axis)
         if axis is None and isinstance(out, self._module.ndarray):
             return out.item()
         else:
             return out
 
-    def sum(self, array, axis=None):
-        out = self._module.sum(array, axis=axis)
+    def min(
+        self,
+        x: ArrayLike,
+        *,
+        axis: int | tuple[int, ...] | None = None,
+        keepdims: bool = False,
+        maybe_out: ArrayLike | None = None,
+    ) -> ArrayLike:
+        out = self._module.min(x, axis=axis, out=maybe_out)
         if axis is None and isinstance(out, self._module.ndarray):
             return out.item()
         else:
             return out
 
-    def prod(self, array, axis=None):
-        out = self._module.prod(array, axis=axis)
-        if axis is None and isinstance(out, self._module.ndarray):
-            return out.item()
-        else:
-            return out
-
-    def min(self, array, axis=None):
-        out = self._module.min(array, axis=axis)
-        if axis is None and isinstance(out, self._module.ndarray):
-            return out.item()
-        else:
-            return out
-
-    def max(self, array, axis=None):
-        out = self._module.max(array, axis=axis)
-        if axis is None and isinstance(out, self._module.ndarray):
-            return out.item()
-        else:
-            return out
-
-    def argmin(self, array, axis=None):
-        out = self._module.argmin(array, axis=axis)
-        if axis is None and isinstance(out, self._module.ndarray):
-            return out.item()
-        else:
-            return out
-
-    def argmax(self, array, axis=None):
-        out = self._module.argmax(array, axis=axis)
+    def max(
+        self,
+        x: ArrayLike,
+        *,
+        axis: int | tuple[int, ...] | None = None,
+        keepdims: bool = False,
+        maybe_out: ArrayLike | None = None,
+    ) -> ArrayLike:
+        out = self._module.max(x, axis=axis, out=maybe_out)
         if axis is None and isinstance(out, self._module.ndarray):
             return out.item()
         else:
@@ -534,7 +714,6 @@ class Cupy(NumpyLike):
     def array_str(
         self, array, max_line_width=None, precision=None, suppress_small=None
     ):
-        # array, max_line_width, precision=None, suppress_small=None
         return self._module.array_str(array, max_line_width, precision, suppress_small)
 
     @classmethod
@@ -548,9 +727,6 @@ class Cupy(NumpyLike):
         """
         module, _, suffix = type(obj).__module__.partition(".")
         return module == "cupy"
-
-    def is_c_contiguous(self, array) -> bool:
-        return array.flags["C_CONTIGUOUS"]
 
 
 class Jax(NumpyLike):
@@ -583,7 +759,7 @@ class Jax(NumpyLike):
     def ndarray(self):
         return self._module.ndarray
 
-    def raw(self, array, nplike):
+    def raw(self, array: ArrayLike, nplike: NumpyLike) -> ArrayLike:
         if isinstance(nplike, Jax):
             return array
         elif isinstance(nplike, ak._nplikes.Cupy):
@@ -600,44 +776,6 @@ class Jax(NumpyLike):
                     "Invalid nplike, choose between nplike.Numpy, nplike.Cupy, Typetracer or Jax",
                 )
             )
-
-    # For all reducers: JAX returns zero-dimensional arrays like CuPy
-
-    def all(self, *args, **kwargs):
-        out = self._module.all(*args, **kwargs)
-        return out
-
-    def any(self, *args, **kwargs):
-        out = self._module.any(*args, **kwargs)
-        return out
-
-    def count_nonzero(self, *args, **kwargs):
-        out = self._module.count_nonzero(*args, **kwargs)
-        return out
-
-    def sum(self, *args, **kwargs):
-        out = self._module.sum(*args, **kwargs)
-        return out
-
-    def prod(self, *args, **kwargs):
-        out = self._module.prod(*args, **kwargs)
-        return out
-
-    def min(self, *args, **kwargs):
-        out = self._module.min(*args, **kwargs)
-        return out
-
-    def max(self, *args, **kwargs):
-        out = self._module.max(*args, **kwargs)
-        return out
-
-    def argmin(self, *args, **kwargs):
-        out = self._module.argmin(*args, **kwargs)
-        return out
-
-    def argmax(self, *args, **kwargs):
-        out = self._module.argmax(*args, **kwargs)
-        return out
 
     @classmethod
     def is_own_array(cls, obj) -> bool:
@@ -674,14 +812,16 @@ class Jax(NumpyLike):
         module, _, suffix = type(obj).__module__.partition(".")
         return module == "jax"
 
-    def is_c_contiguous(self, array) -> bool:
+    def is_c_contiguous(self, x: ArrayLike) -> bool:
         return True
 
-    def ascontiguousarray(self, array, *, dtype=None):
+    def ascontiguousarray(
+        self, x: ArrayLike, *, dtype: np.dtype | None = None
+    ) -> ArrayLike:
         if dtype is not None:
-            return array.astype(dtype)
+            return x.astype(dtype)
         else:
-            return array
+            return x
 
 
 # Temporary sentinel marking "argument not given"

@@ -267,7 +267,7 @@ def popbuffers_finalize(
     if isinstance(awkwardarrow_type, AwkwardArrowType):
         if awkwardarrow_type.mask_type == "UnmaskedArray":
             assert validbits is None or numpy.all(
-                numpy.frombuffer(validbits, np.uint8)[: len(out) // 8] == 0xFF
+                numpy.frombuffer(validbits, dtype=np.uint8)[: len(out) // 8] == 0xFF
             )
             return revertable(
                 ak.contents.UnmaskedArray.simplified(
