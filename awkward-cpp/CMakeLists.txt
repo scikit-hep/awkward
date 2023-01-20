@@ -11,6 +11,17 @@ project(
 message(STATUS "CMake version ${CMAKE_VERSION}")
 message(STATUS "CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE}")
 
+# Check for header-only libraries
+if(NOT (EXISTS "header-only" AND EXISTS "include/awkward/kernels.h"))
+  message(
+    FATAL_ERROR
+      "\
+awkward-cpp relies upon generated and copied artefacts such as the header-only libraries and generated kernel headers.\
+These could not be found, which indicates that the preparation step for building this package was skipped.\
+Please check CONTRIBUTING.md to learn more about this process.\
+")
+endif()
+
 # Defaults for properties in this directory (and below)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
