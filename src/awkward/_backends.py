@@ -12,6 +12,7 @@ from awkward._typetracer import TypeTracer
 from awkward.typing import Callable, Final, Tuple, TypeAlias, TypeVar, Unpack
 
 np = NumpyMetadata.instance()
+numpy = ak._nplikes.Numpy.instance()
 
 
 T = TypeVar("T", covariant=True)
@@ -166,23 +167,29 @@ class TypeTracerBackend(Backend):
     def __getitem__(self, index: KernelKeyType) -> TypeTracerKernel:
         return TypeTracerKernel(index)
 
-    def apply_ufunc(self, ufunc, method, args, kwargs):
-        numpy = ak._nplikes.Numpy.instance()
+    def _coerce_ufunc_argument(self, x):
+        if isinstance(x, ak._typetracer.TypeTracerArray):
+            return numpy.empty((0,) + x.shape[1:], dtype=x.dtype)
+        # Convert scalars to 0-d arrays
+        elif isinstance(x, ak._typetracer.UnknownScalar):
+            return numpy.empty((0,), dtype=x.dtype)
+        elif x is ak._typetracer.UnknownLength:
+            return numpy.empty((0,), dtype=np.int64)
+        elif isinstance(x, ak._typetracer.MaybeNone):
+            return self._coerce_ufunc_argument(x.content)
+        else:
+            return x
 
+    def apply_ufunc(self, ufunc, method, args, kwargs):
         shape = None
         numpy_args = []
+
         for x in args:
             if isinstance(x, ak._typetracer.TypeTracerArray):
                 x.touch_data()
                 shape = x.shape
-                numpy_args.append(numpy.empty((0,) + x.shape[1:], dtype=x.dtype))
-            # Convert scalars to 0-d arrays
-            elif isinstance(x, ak._typetracer.UnknownScalar):
-                numpy_args.append(numpy.empty((0,), dtype=x.dtype))
-            elif x is ak._typetracer.UnknownLength:
-                numpy_args.append(numpy.empty((0,), dtype=np.int64))
-            else:
-                numpy_args.append(x)
+
+            numpy_args.append(self._coerce_ufunc_argument(x))
 
         assert shape is not None
         tmp = getattr(ufunc, method)(*numpy_args, **kwargs)
