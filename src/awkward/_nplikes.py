@@ -365,8 +365,8 @@ class NumpyLike(Singleton):
     ) -> ArrayLike:
         return self._module.isclose(x1, x2, rtol=rtol, atol=atol, equal_nan=equal_nan)
 
-    def isnan(self, *args, **kwargs) -> ArrayLike:
-        return self._module.isnan(*args, **kwargs)
+    def isnan(self, x: ArrayLike) -> ArrayLike:
+        return self._module.isnan(x)
 
     def all(
         self,
