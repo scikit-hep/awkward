@@ -211,7 +211,7 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity):
                 behavior=None,
             )
         if ddof != 0:
-            return (sumwxx / sumw) * (sumw / sumw - ddof)
+            return (sumwxx / sumw) * (sumw / (sumw - ddof))
         else:
             return sumwxx / sumw
 
