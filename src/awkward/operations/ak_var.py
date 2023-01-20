@@ -211,11 +211,9 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity):
                 behavior=None,
             )
         if ddof != 0:
-            return ak._nplikes.nplike_of(sumwxx, sumw).true_divide(
-                sumwxx, sumw
-            ) * ak._nplikes.nplike_of(sumw).true_divide(sumw, sumw - ddof)
+            return (sumwxx / sumw) * (sumw / sumw - ddof)
         else:
-            return ak._nplikes.nplike_of(sumwxx, sumw).true_divide(sumwxx, sumw)
+            return sumwxx / sumw
 
 
 @ak._connect.numpy.implements("var")

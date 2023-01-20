@@ -1045,7 +1045,8 @@ class TypeTracer(NumpyLike):
         self, x: TypeTracerArray, maybe_reuse: TypeTracerArray | None = None
     ) -> TypeTracerArray:
         try_touch_data(x)
-        # array
+        if np.issubdtype(x.dtype, np.integer):
+            return
         raise ak._errors.wrap_error(NotImplementedError)
 
     def divide(
