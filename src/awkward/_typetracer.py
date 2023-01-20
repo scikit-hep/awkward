@@ -658,45 +658,11 @@ class TypeTracerArray(NDArrayOperatorsMixin):
         self.touch_data()
         return self
 
-    class _FakeModule:
-        def __init__(self, array):
-            self.array = array
-
-        def __getattr__(self, function_name):
-            ufunc = getattr(numpy, function_name, None)
-            if isinstance(ufunc, numpy.ufunc):
-                return self._generic_ufunc_func(ufunc)
-            else:
-                raise ak._errors.wrap_error(
-                    AttributeError(
-                        "only ufuncs have automatic TypeTracer implementations"
-                    )
-                )
-
-        def _generic_ufunc_func(self, ufunc):
-            def generic_ufunc(*inputs, **kwargs):
-                inputs = (self.array,) + inputs
-                for x in inputs:
-                    getattr(x, "touch_data", lambda: None)()
-                replacements = [
-                    numpy.empty(0, x.dtype) if hasattr(x, "dtype") else x
-                    for x in inputs
-                ]
-                result = ufunc(*replacements, **kwargs)
-                return TypeTracerArray(result.dtype, shape=self.array._shape)
-
-            return generic_ufunc
-
-    @property
-    def _module(self):
-        # This is how ak._nplikes.NumpyLike calls functions that haven't been overloaded
-        return TypeTracerArray._FakeModule(self)
-
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         if method != "__call__" or len(inputs) == 0 or "out" in kwargs:
             raise ak._errors.wrap_error(NotImplementedError)
 
-        return inputs[0]._module._generic_ufunc_func(ufunc)(*inputs[1:], **kwargs)
+        return TypeTracer._module._generic_ufunc_func(ufunc)(*inputs, **kwargs)
 
 
 def try_touch_data(array):
@@ -712,6 +678,42 @@ def try_touch_shape(array):
 class TypeTracer(ak._nplikes.NumpyLike):
     known_data = False
     known_shape = False
+
+    class _FakeModule:
+        def __getattr__(self, function_name):
+            ufunc = getattr(numpy, function_name, None)
+            if isinstance(ufunc, numpy.ufunc):
+                return self._generic_ufunc_func(ufunc)
+            else:
+                raise ak._errors.wrap_error(
+                    AttributeError(
+                        "only ufuncs have automatic TypeTracer implementations"
+                    )
+                )
+
+        @staticmethod
+        def _generic_ufunc_func(ufunc):
+            def generic_ufunc(*inputs, **kwargs):
+                for x in inputs:
+                    getattr(x, "touch_data", lambda: None)()
+
+                replacements = []
+                to_broadcast = []
+                for x in inputs:
+                    if hasattr(x, "dtype") and hasattr(x, "shape"):
+                        replacements.append(numpy.empty(0, x.dtype))
+                        to_broadcast.append(x)
+                    else:
+                        replacements.append(x)
+
+                broadcasted = TypeTracer.instance().broadcast_arrays(*to_broadcast)
+
+                result = ufunc(*replacements, **kwargs)
+                return TypeTracerArray(result.dtype, shape=broadcasted[0].shape)
+
+            return generic_ufunc
+
+    _module = _FakeModule()
 
     def to_rectilinear(self, array, *args, **kwargs):
         try_touch_shape(array)

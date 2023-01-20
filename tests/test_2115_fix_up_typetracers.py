@@ -41,10 +41,12 @@ def test_typetracer_binary_operator():
     b = ak._typetracer.TypeTracerArray.from_array(np.array([[1], [2], [3]]))
     c = a / b
     assert c.dtype == np.dtype(np.float64)
+    assert c.shape[1] == 2
 
 
 def test_typetracer_formal_ufunc():
     a = ak._typetracer.TypeTracerArray.from_array(np.array([[1, 2], [3, 4], [5, 6]]))
     b = ak._typetracer.TypeTracerArray.from_array(np.array([[1], [2], [3]]))
-    c = ak._typetracer.TypeTracer.true_divide(a, b)
+    c = ak._typetracer.TypeTracer.instance().true_divide(a, b)
     assert c.dtype == np.dtype(np.float64)
+    assert c.shape[1] == 2
