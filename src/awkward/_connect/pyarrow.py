@@ -397,7 +397,7 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
         if not isinstance(masked_index, ak.contents.UnmaskedArray):
             mask = masked_index.mask_as_bool(valid_when=False)
             if mask.any():
-                index = numpy.array(index, copy=True)
+                index = numpy.asarray(index, copy=True)
                 index[mask] = -1
 
         content = handle_arrow(paarray.dictionary, generate_bitmasks)
