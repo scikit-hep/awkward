@@ -102,12 +102,9 @@ class NumpyLike(Singleton):
             else:
                 return self._module.asarray(obj, dtype=dtype)
 
-    def ascontiguousarray(self, *args, **kwargs):
+    def ascontiguousarray(self, array, *, dtype=None):
         # array[, dtype=]
-        return self._module.ascontiguousarray(*args, **kwargs)
-
-    def isscalar(self, *args, **kwargs):
-        return self._module.isscalar(*args, **kwargs)
+        return self._module.ascontiguousarray(array, dtype=dtype)
 
     def frombuffer(self, *args, **kwargs):
         # array[, dtype=]
@@ -153,25 +150,13 @@ class NumpyLike(Singleton):
 
     ############################ testing
 
-    def shape(self, *args, **kwargs):
-        # array
-        return self._module.shape(*args, **kwargs)
-
     def array_equal(self, *args, **kwargs):
         # array1, array2
         return self._module.array_equal(*args, **kwargs)
 
-    def size(self, *args, **kwargs):
-        # array
-        return self._module.size(*args, **kwargs)
-
     def searchsorted(self, *args, **kwargs):
         # haystack, needle, side="right"
         return self._module.searchsorted(*args, **kwargs)
-
-    def argsort(self, *args, **kwargs):
-        # array
-        return self._module.argsort(*args, **kwargs)
 
     ############################ manipulation
 
@@ -182,10 +167,6 @@ class NumpyLike(Singleton):
     def cumsum(self, *args, **kwargs):
         # arrays[, out=]
         return self._module.cumsum(*args, **kwargs)
-
-    def cumprod(self, *args, **kwargs):
-        # arrays[, out=]
-        return self._module.cumprod(*args, **kwargs)
 
     def nonzero(self, *args, **kwargs):
         # array
@@ -212,43 +193,23 @@ class NumpyLike(Singleton):
         # arrays
         return self._module.stack(*args, **kwargs)
 
-    def vstack(self, *args, **kwargs):
-        # arrays
-        return self._module.vstack(*args, **kwargs)
-
-    def packbits(self, *args, **kwargs):
+    def packbits(self, array, *, axis=None, bitorder="big"):
         # array
-        return self._module.packbits(*args, **kwargs)
+        return self._module.packbits(array, axis=axis, bitorder=bitorder)
 
-    def unpackbits(self, *args, **kwargs):
+    def unpackbits(self, array, *, axis=None, count=None, bitorder="big"):
         # array
-        return self._module.unpackbits(*args, **kwargs)
-
-    def atleast_1d(self, *args, **kwargs):
-        # *arrays
-        return self._module.atleast_1d(*args, **kwargs)
+        return self._module.unpackbits(array, axis=axis, count=count, bitorder=bitorder)
 
     def broadcast_to(self, *args, **kwargs):
         # array, shape
         return self._module.broadcast_to(*args, **kwargs)
-
-    def append(self, *args, **kwargs):
-        # array, element
-        return self._module.append(*args, **kwargs)
-
-    def where(self, *args, **kwargs):
-        # array, element
-        return self._module.where(*args, **kwargs)
 
     ############################ ufuncs
 
     def add(self, *args, **kwargs):
         # array1, array2
         return self._module.add(*args, **kwargs)
-
-    def multiply(self, *args, **kwargs):
-        # array1, array2
-        return self._module.multiply(*args, **kwargs)
 
     def logical_or(self, *args, **kwargs):
         # array1, array2
@@ -274,26 +235,6 @@ class NumpyLike(Singleton):
         # array1, array2
         return self._module.true_divide(*args, **kwargs)
 
-    def bitwise_or(self, *args, **kwargs):
-        # array1, array2[, out=output]
-        return self._module.bitwise_or(*args, **kwargs)
-
-    def equal(self, *args, **kwargs):
-        # array1, array2
-        return self._module.equal(*args, **kwargs)
-
-    def ceil(self, *args, **kwargs):
-        # array
-        return self._module.ceil(*args, **kwargs)
-
-    def minimum(self, *args, **kwargs):
-        # array1, array2
-        return self._module.minimum(*args, **kwargs)
-
-    def maximum(self, *args, **kwargs):
-        # array1, array2
-        return self._module.maximum(*args, **kwargs)
-
     ############################ almost-ufuncs
 
     def nan_to_num(self, *args, **kwargs):
@@ -307,18 +248,6 @@ class NumpyLike(Singleton):
     def isnan(self, *args, **kwargs):
         # array
         return self._module.isnan(*args, **kwargs)
-
-    def isneginf(self, *args, **kwargs):
-        # array
-        return self._module.isneginf(*args, **kwargs)
-
-    def isposinf(self, *args, **kwargs):
-        # array
-        return self._module.isposinf(*args, **kwargs)
-
-    def isfinite(self, *args, **kwargs):
-        # array
-        return self._module.isfinite(*args, **kwargs)
 
     ############################ reducers
 
@@ -336,14 +265,6 @@ class NumpyLike(Singleton):
         # array
         return self._module.count_nonzero(*args, **kwargs)
 
-    def sum(self, *args, **kwargs):
-        # array
-        return self._module.sum(*args, **kwargs)
-
-    def prod(self, *args, **kwargs):
-        # array
-        return self._module.prod(*args, **kwargs)
-
     def min(self, *args, **kwargs):
         # array
         return self._module.min(*args, **kwargs)
@@ -352,20 +273,9 @@ class NumpyLike(Singleton):
         # array
         return self._module.max(*args, **kwargs)
 
-    def argmin(self, *args, **kwargs):
-        # array[, axis=]
-        return self._module.argmin(*args, **kwargs)
-
-    def argmax(self, *args, **kwargs):
-        # array[, axis=]
-        return self._module.argmax(*args, **kwargs)
-
     def array_str(self, *args, **kwargs):
         # array, max_line_width, precision=None, suppress_small=None
         return self._module.array_str(*args, **kwargs)
-
-    def datetime_as_string(self, *args, **kwargs):
-        return self._module.datetime_as_string(*args, **kwargs)
 
     def can_cast(self, *args, **kwargs):
         return self._module.can_cast(*args, **kwargs)
@@ -442,6 +352,39 @@ class Numpy(NumpyLike):
     def is_c_contiguous(self, array) -> bool:
         return array.flags["C_CONTIGUOUS"]
 
+    def packbits(self, array, *, axis=None, bitorder="big"):
+        if ak._util.numpy_at_least("1.17.0"):
+            return numpy.packbits(array, axis=axis, bitorder=bitorder)
+        else:
+            assert axis is None, "unsupported argument value for axis given"
+            if bitorder == "little":
+                if len(array) % 8 == 0:
+                    ready_to_pack = array
+                else:
+                    ready_to_pack = numpy.empty(
+                        int(numpy.ceil(len(array) / 8.0)) * 8,
+                        dtype=array.dtype,
+                    )
+                    ready_to_pack[: len(array)] = array
+                    ready_to_pack[len(array) :] = 0
+                return numpy.packbits(ready_to_pack.reshape(-1, 8)[:, ::-1].reshape(-1))
+            else:
+                assert bitorder == "bit"
+                return numpy.packbits(array)
+
+    def unpackbits(self, array, *, axis=None, count=None, bitorder="big"):
+        if ak._util.numpy_at_least("1.17.0"):
+            return numpy.unpackbits(array, axis=axis, count=count, bitorder=bitorder)
+        else:
+            assert axis is None, "unsupported argument value for axis given"
+            assert count is None, "unsupported argument value for count given"
+            ready_to_bitswap = numpy.unpackbits(array)
+            if bitorder == "little":
+                return ready_to_bitswap.reshape(-1, 8)[:, ::-1].reshape(-1)
+            else:
+                assert bitorder == "bit"
+                return ready_to_bitswap
+
 
 class Cupy(NumpyLike):
     is_eager = False
@@ -476,24 +419,6 @@ class Cupy(NumpyLike):
     def ndarray(self):
         return self._module.ndarray
 
-    def asarray(self, array, dtype=None, order=None):
-        if isinstance(
-            array,
-            (
-                ak.highlevel.Array,
-                ak.highlevel.Record,
-                ak.contents.Content,
-                ak.record.Record,
-            ),
-        ):
-            out = ak.operations.ak_to_cupy.to_cupy(array)
-            if dtype is not None and out.dtype != dtype:
-                return self._module.asarray(out, dtype=dtype, order=order)
-            else:
-                return out
-        else:
-            return self._module.asarray(array, dtype=dtype, order=order)
-
     def raw(self, array, nplike):
         if isinstance(nplike, Cupy):
             return array
@@ -511,24 +436,6 @@ class Cupy(NumpyLike):
                     "Invalid nplike, choose between nplike.Numpy, nplike.Cupy, Typetracer or Jax"
                 )
             )
-
-    def ascontiguousarray(self, array, dtype=None):
-        if isinstance(
-            array,
-            (
-                ak.highlevel.Array,
-                ak.highlevel.Record,
-                ak.contents.Content,
-                ak.record.Record,
-            ),
-        ):
-            out = ak.operations.ak_to_cupy.to_cupy(array)
-            if dtype is not None and out.dtype != dtype:
-                return self._module.ascontiguousarray(out, dtype=dtype)
-            else:
-                return out
-        else:
-            return self._module.ascontiguousarray(array, dtype=dtype)
 
     def zeros(self, *args, **kwargs):
         return self._module.zeros(*args, **kwargs)
@@ -678,27 +585,6 @@ class Jax(NumpyLike):
     def ndarray(self):
         return self._module.ndarray
 
-    def asarray(self, array, dtype=None, order=None):
-        return self._module.asarray(array, dtype=dtype, order="K")
-
-    def ascontiguousarray(self, array, dtype=None):
-        if isinstance(
-            array,
-            (
-                ak.highlevel.Array,
-                ak.highlevel.Record,
-                ak.contents.Content,
-                ak.record.Record,
-            ),
-        ):
-            out = ak.operations.ak_to_jax.to_jax(array)
-            if dtype is not None and out.dtype != dtype:
-                return self._module.ascontiguousarray(out, dtype=dtype)
-            else:
-                return out
-        else:
-            return self._module.ascontiguousarray(array, dtype=dtype)
-
     def raw(self, array, nplike):
         if isinstance(nplike, Jax):
             return array
@@ -792,6 +678,12 @@ class Jax(NumpyLike):
 
     def is_c_contiguous(self, array) -> bool:
         return True
+
+    def ascontiguousarray(self, array, *, dtype=None):
+        if dtype is not None:
+            return array.astype(dtype)
+        else:
+            return array
 
 
 # Temporary sentinel marking "argument not given"
