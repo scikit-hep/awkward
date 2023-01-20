@@ -65,7 +65,9 @@ def _impl(array, axis, highlevel, behavior):
                 offsets = nplike.empty(layout.length + 1, dtype=np.int64)
                 offsets[0] = 0
 
-                nplike.cumsum(layout.mask_as_bool(valid_when=True), out=offsets[1:])
+                nplike.cumsum(
+                    layout.mask_as_bool(valid_when=True), maybe_reuse=offsets[1:]
+                )
 
                 return ak.contents.ListOffsetArray(
                     ak.index.Index64(offsets), layout.project()

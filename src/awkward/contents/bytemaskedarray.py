@@ -658,7 +658,7 @@ class ByteMaskedArray(Content):
                 length += x.length
 
             return ByteMaskedArray(
-                ak.index.Index8(self._backend.nplike.concatenate(masks)),
+                ak.index.Index8(self._backend.nplike.concat(masks)),
                 self._content[: self.length]._mergemany(tail_contents),
                 self._valid_when,
                 parameters=parameters,

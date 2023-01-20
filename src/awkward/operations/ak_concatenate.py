@@ -229,7 +229,7 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
                     o, f = x._offsets_and_flattened(1, 1)
                     o = backend.index_nplike.asarray(o)
                     c = o[1:] - o[:-1]
-                    backend.index_nplike.add(counts, c, out=counts)
+                    backend.index_nplike.add(counts, c, maybe_reuse=counts)
                     all_counts.append(c)
                     all_flatten.append(f)
 
@@ -237,7 +237,7 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
                     len(nextinputs[0]) + 1, dtype=np.int64
                 )
                 offsets[0] = 0
-                backend.index_nplike.cumsum(counts, out=offsets[1:])
+                backend.index_nplike.cumsum(counts, maybe_reuse=offsets[1:])
 
                 offsets = ak.index.Index64(offsets, nplike=backend.index_nplike)
 

@@ -605,7 +605,9 @@ def apply_step(
                         if mask is None:
                             mask = m
                         else:
-                            mask = backend.index_nplike.logical_or(mask, m, out=mask)
+                            mask = backend.index_nplike.logical_or(
+                                mask, m, maybe_reuse=mask
+                            )
 
                 nextmask = Index8(mask.view(np.int8))
                 index = backend.index_nplike.full(mask.shape[0], -1, dtype=np.int64)
