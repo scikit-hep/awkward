@@ -176,7 +176,7 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
                         )
                     sizes.append(regulararrays[-1].size)
 
-                prototype = backend.index_nplike.empty(sum(sizes), np.int8)
+                prototype = backend.index_nplike.empty(sum(sizes), dtype=np.int8)
                 start = 0
                 for tag, size in enumerate(sizes):
                     prototype[start : start + size] = tag

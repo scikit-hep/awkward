@@ -2135,7 +2135,7 @@ class ListOffsetArray(Content):
             strings = self.to_list()
             if any(item in nonfinit_dict for item in strings):
                 numbers = self._backend.index_nplike.empty(
-                    self.starts.length, np.float64
+                    self.starts.length, dtype=np.float64
                 )
                 has_another_string = False
                 for i, val in enumerate(strings):

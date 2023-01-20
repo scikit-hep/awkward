@@ -470,7 +470,7 @@ class NumpyArray(Content):
     def _subranges_equal(self, starts, stops, length, sorted=True):
         is_equal = ak.index.Index64.zeros(1, nplike=self._backend.nplike)
 
-        tmp = self._backend.nplike.empty(length, self.dtype)
+        tmp = self._backend.nplike.empty(length, dtype=self.dtype)
         self._handle_error(
             self._backend[
                 "awkward_NumpyArray_fill",
@@ -544,7 +544,7 @@ class NumpyArray(Content):
         outoffsets = ak.index.Index64.empty(
             offsets.length, nplike=self._backend.index_nplike
         )
-        out = self._backend.nplike.empty(self.shape[0], self.dtype)
+        out = self._backend.nplike.empty(self.shape[0], dtype=self.dtype)
 
         assert (
             offsets.nplike is self._backend.index_nplike
@@ -650,7 +650,7 @@ class NumpyArray(Content):
                 if self._data.dtype.kind.upper() == "M"
                 else self._data.dtype
             )
-            out = self._backend.nplike.empty(offsets[1], dtype)
+            out = self._backend.nplike.empty(offsets[1], dtype=dtype)
             assert offsets.nplike is self._backend.index_nplike
             self._handle_error(
                 self._backend[
@@ -739,7 +739,7 @@ class NumpyArray(Content):
                 )
             )
 
-            out = self._backend.nplike.empty(self.length, self.dtype)
+            out = self._backend.nplike.empty(self.length, dtype=self.dtype)
             assert offsets.nplike is self._backend.index_nplike
             self._handle_error(
                 self._backend[
@@ -977,7 +977,7 @@ class NumpyArray(Content):
                 if self._data.dtype.kind.upper() == "M"
                 else self._data.dtype
             )
-            out = self._backend.nplike.empty(self.length, dtype)
+            out = self._backend.nplike.empty(self.length, dtype=dtype)
             assert offsets.nplike is self._backend.index_nplike
             self._handle_error(
                 self._backend[

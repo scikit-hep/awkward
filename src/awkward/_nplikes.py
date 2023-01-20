@@ -73,6 +73,9 @@ if hasattr(numpy, "timedelta64"):
     NumpyMetadata.timedelta64 = numpy.timedelta64
 
 
+np = NumpyMetadata.instance()
+
+
 class NumpyLike(Singleton):
     known_data = True
     known_shape = True
@@ -110,33 +113,28 @@ class NumpyLike(Singleton):
         # array[, dtype=]
         return self._module.frombuffer(*args, **kwargs)
 
-    def zeros(self, *args, **kwargs):
+    def zeros(self, shape: int | tuple[int, ...], *, dtype: np.dtype):
         # shape/len[, dtype=]
-        return self._module.zeros(*args, **kwargs)
+        return self._module.zeros(shape, dtype=dtype)
 
-    def ones(self, *args, **kwargs):
-        # shape/len[, dtype=]
-        return self._module.ones(*args, **kwargs)
+    def ones(self, shape: int | tuple[int, ...], *, dtype: np.dtype):
+        return self._module.ones(shape, dtype=dtype)
 
-    def empty(self, *args, **kwargs):
-        # shape/len[, dtype=]
-        return self._module.empty(*args, **kwargs)
+    def empty(self, shape: int | tuple[int, ...], *, dtype: np.dtype):
+        return self._module.empty(shape, dtype=dtype)
 
-    def full(self, *args, **kwargs):
+    def full(self, shape: int | tuple[int, ...], fill_value, *, dtype: np.dtype):
         # shape/len, value[, dtype=]
-        return self._module.full(*args, **kwargs)
+        return self._module.full(shape, fill_value, dtype=dtype)
 
-    def zeros_like(self, *args, **kwargs):
-        # array
-        return self._module.zeros_like(*args, **kwargs)
+    def zeros_like(self, x, *, dtype: np.dtype | None = None):
+        return self._module.zeros_like(x, dtype=dtype)
 
-    def ones_like(self, *args, **kwargs):
-        # array
-        return self._module.ones_like(*args, **kwargs)
+    def ones_like(self, x, *, dtype: np.dtype | None = None):
+        return self._module.ones_like(x, dtype=dtype)
 
-    def full_like(self, *args, **kwargs):
-        # array, fill_value
-        return self._module.full_like(*args, **kwargs)
+    def full_like(self, x, fill_value, *, dtype: np.dtype | None = None):
+        return self._module.full_like(x, fill_value, dtype=dtype)
 
     def arange(self, *args, **kwargs):
         # stop[, dtype=]

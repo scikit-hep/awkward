@@ -639,7 +639,7 @@ def apply_step(
                     if isinstance(x, optiontypes):
                         x._touch_data(recursive=False)
                         index = Index64(
-                            backend.index_nplike.empty((x.length,), np.int64)
+                            backend.index_nplike.empty(x.length, dtype=np.int64)
                         )
                         nextinputs.append(x.content)
                     else:
@@ -759,7 +759,7 @@ def apply_step(
                         x._touch_data(recursive=False)
                         offsets = Index64(
                             backend.index_nplike.empty(
-                                (x.offsets.data.shape[0],), np.int64
+                                x.offsets.data.shape[0], dtype=np.int64
                             ),
                             nplike=backend.index_nplike,
                         )
@@ -768,7 +768,7 @@ def apply_step(
                         x._touch_data(recursive=False)
                         offsets = Index64(
                             backend.index_nplike.empty(
-                                (x.starts.data.shape[0] + 1,), np.int64
+                                x.starts.data.shape[0] + 1, dtype=np.int64
                             ),
                             nplike=backend.index_nplike,
                         )

@@ -118,7 +118,7 @@ def _impl(array, counts, axis, highlevel, behavior):
         if not issubclass(counts.dtype.type, np.integer):
             raise ak._errors.wrap_error(ValueError("counts must be integers"))
 
-        current_offsets = backend.index_nplike.empty(len(counts) + 1, np.int64)
+        current_offsets = backend.index_nplike.empty(len(counts) + 1, dtype=np.int64)
         current_offsets[0] = 0
         backend.index_nplike.cumsum(counts, out=current_offsets[1:])
 
