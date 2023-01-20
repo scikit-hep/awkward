@@ -907,23 +907,6 @@ class TypeTracer(ak._nplikes.NumpyLike):
             TypeTracerArray(x.dtype, [UnknownLength] + shape) for x in [first] + rest
         ]
 
-    def add(self, x, y):
-        # array1, array2[, out=]
-        is_array = False
-        if isinstance(x, TypeTracerArray):
-            x.touch_data()
-            is_array = True
-            x = x[0]
-        if isinstance(y, TypeTracerArray):
-            y.touch_data()
-            is_array = True
-            y = y[0]
-        out = x + y
-        if is_array:
-            return TypeTracerArray(out.dtype)
-        else:
-            return out
-
     def cumsum(self, *args, **kwargs):
         # arrays[, out=]
         for x in args:
@@ -1005,71 +988,6 @@ class TypeTracer(ak._nplikes.NumpyLike):
             try_touch_data(x)
         # array, shape
         raise ak._errors.wrap_error(NotImplementedError)
-
-    ############################ ufuncs
-
-    def sqrt(self, *args, **kwargs):
-        for x in args:
-            try_touch_data(x)
-        # array
-        raise ak._errors.wrap_error(NotImplementedError)
-
-    def exp(self, *args, **kwargs):
-        for x in args:
-            try_touch_data(x)
-        # array
-        raise ak._errors.wrap_error(NotImplementedError)
-
-    def true_divide(self, *args, **kwargs):
-        for x in args:
-            try_touch_data(x)
-        # array1, array2
-        raise ak._errors.wrap_error(NotImplementedError)
-
-    def logical_and(self, x, y, *, dtype=None):
-        if dtype is None:
-            dtype = np.bool_
-
-        is_array = False
-        if isinstance(x, TypeTracerArray):
-            x.touch_data()
-            is_array = True
-        if isinstance(y, TypeTracerArray):
-            y.touch_data()
-            is_array = True
-        if is_array:
-            return TypeTracerArray(dtype)
-        else:
-            return UnknownScalar(dtype)
-
-    def logical_or(self, x, y, *, dtype=None):
-        if dtype is None:
-            dtype = np.bool_
-
-        is_array = False
-        if isinstance(x, TypeTracerArray):
-            x.touch_data()
-            is_array = True
-        if isinstance(y, TypeTracerArray):
-            y.touch_data()
-            is_array = True
-        if is_array:
-            return TypeTracerArray(dtype)
-        else:
-            return UnknownScalar(dtype)
-
-    def logical_not(self, x, *, dtype=None):
-        if dtype is None:
-            dtype = np.bool_
-
-        is_array = False
-        if isinstance(x, TypeTracerArray):
-            x.touch_data()
-            is_array = True
-        if is_array:
-            return TypeTracerArray(dtype)
-        else:
-            return UnknownScalar(dtype)
 
     ############################ almost-ufuncs
 
