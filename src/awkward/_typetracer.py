@@ -673,12 +673,12 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         return self
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
-        self.touch_data()
-        replacements = [
-            numpy.empty(0, x.dtype) if hasattr(x, "dtype") else x for x in inputs
-        ]
-        result = getattr(ufunc, method)(*replacements, **kwargs)
-        return TypeTracerArray(result.dtype, shape=self._shape)
+        if method != "__call__" or len(inputs) == 0 or "out" in kwargs:
+            raise ak._errors.wrap_error(NotImplementedError)
+
+        return TypeTracer.instance()._module._generic_ufunc_func(ufunc)(
+            *inputs, **kwargs
+        )
 
     def __bool__(self) -> bool:
         raise ak._errors.wrap_error(RuntimeError("cannot realise an unknown value"))
@@ -703,6 +703,42 @@ def try_touch_shape(array):
 class TypeTracer(NumpyLike):
     known_data: Final = False
     known_shape: Final = False
+
+    class _FakeModule:
+        def __getattr__(self, function_name):
+            ufunc = getattr(numpy, function_name, None)
+            if isinstance(ufunc, numpy.ufunc):
+                return self._generic_ufunc_func(ufunc)
+            else:
+                raise ak._errors.wrap_error(
+                    AttributeError(
+                        "only ufuncs have automatic TypeTracer implementations"
+                    )
+                )
+
+        @staticmethod
+        def _generic_ufunc_func(ufunc):
+            def generic_ufunc(*inputs, **kwargs):
+                for x in inputs:
+                    getattr(x, "touch_data", lambda: None)()
+
+                replacements = []
+                to_broadcast = []
+                for x in inputs:
+                    if hasattr(x, "dtype") and hasattr(x, "shape"):
+                        replacements.append(numpy.empty(0, x.dtype))
+                        to_broadcast.append(x)
+                    else:
+                        replacements.append(x)
+
+                broadcasted = TypeTracer.instance().broadcast_arrays(*to_broadcast)
+
+                result = ufunc(*replacements, **kwargs)
+                return TypeTracerArray(result.dtype, shape=broadcasted[0].shape)
+
+            return generic_ufunc
+
+    _module = _FakeModule()
 
     def to_rectilinear(self, array, *args, **kwargs):
         try_touch_shape(array)
@@ -912,29 +948,6 @@ class TypeTracer(NumpyLike):
             TypeTracerArray(x.dtype, [UnknownLength] + shape) for x in [first] + rest
         ]
 
-    def add(
-        self,
-        x1: TypeTracerArray,
-        x2: TypeTracerArray,
-        *,
-        maybe_out: TypeTracerArray | None = None,
-    ) -> TypeTracerArray:
-        try_touch_data(x1)
-        try_touch_data(x2)
-
-        is_array = False
-        if isinstance(x1, TypeTracerArray):
-            is_array = True
-            x1 = x1[0]
-        if isinstance(x2, TypeTracerArray):
-            is_array = True
-            x2 = x2[0]
-        out = x1 + x2
-        if is_array:
-            return TypeTracerArray(out.dtype)
-        else:
-            return out
-
     def cumsum(
         self,
         x: TypeTracerArray,
@@ -1031,89 +1044,6 @@ class TypeTracer(NumpyLike):
     ) -> TypeTracerArray:
         try_touch_data(x)
         raise ak._errors.wrap_error(NotImplementedError)
-
-    ############################ ufuncs
-
-    def sqrt(
-        self, x: TypeTracerArray, maybe_out: TypeTracerArray | None = None
-    ) -> TypeTracerArray:
-        try_touch_data(x)
-        # array
-        raise ak._errors.wrap_error(NotImplementedError)
-
-    def exp(
-        self, x: TypeTracerArray, maybe_out: TypeTracerArray | None = None
-    ) -> TypeTracerArray:
-        try_touch_data(x)
-        if np.issubdtype(x.dtype, np.integer):
-            return
-        raise ak._errors.wrap_error(NotImplementedError)
-
-    def divide(
-        self,
-        x1: TypeTracerArray,
-        x2: TypeTracerArray,
-        maybe_out: TypeTracerArray | None = None,
-    ) -> TypeTracerArray:
-        try_touch_data(x1)
-        try_touch_data(x2)
-        # array1, array2
-        raise ak._errors.wrap_error(NotImplementedError)
-
-    def logical_and(
-        self,
-        x1: TypeTracerArray,
-        x2: TypeTracerArray,
-        maybe_out: TypeTracerArray | None = None,
-    ) -> TypeTracerArray:
-        try_touch_data(x1)
-        try_touch_data(x2)
-
-        dtype = np.bool_
-
-        is_array = False
-        if isinstance(x1, TypeTracerArray):
-            is_array = True
-        if isinstance(x2, TypeTracerArray):
-            is_array = True
-        if is_array:
-            return TypeTracerArray(dtype)
-        else:
-            return UnknownScalar(dtype)
-
-    def logical_or(
-        self,
-        x1: TypeTracerArray,
-        x2: TypeTracerArray,
-        maybe_out: TypeTracerArray | None = None,
-    ) -> TypeTracerArray:
-        try_touch_data(x1)
-        try_touch_data(x2)
-        dtype = np.bool_
-
-        is_array = False
-        if isinstance(x1, TypeTracerArray):
-            is_array = True
-        if isinstance(x2, TypeTracerArray):
-            is_array = True
-        if is_array:
-            return TypeTracerArray(dtype)
-        else:
-            return UnknownScalar(dtype)
-
-    def logical_not(
-        self, x: TypeTracerArray, maybe_out: TypeTracerArray | None = None
-    ) -> TypeTracerArray:
-        try_touch_data(x)
-        dtype = np.bool_
-
-        is_array = False
-        if isinstance(x, TypeTracerArray):
-            is_array = True
-        if is_array:
-            return TypeTracerArray(dtype)
-        else:
-            return UnknownScalar(dtype)
 
     ############################ almost-ufuncs
 
