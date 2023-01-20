@@ -1442,7 +1442,7 @@ class IndexedOptionArray(Content):
         nplike = backend.nplike
 
         content = self.project()._to_backend_array(allow_missing, backend)
-        shape = [self.length, *content.shape[1:]]
+        shape = (self.length, *content.shape[1:])
         data = nplike.empty(shape, dtype=content.dtype)
         mask0 = backend.index_nplike.asarray(self.mask_as_bool(valid_when=False)).view(
             np.bool_
@@ -1512,7 +1512,7 @@ class IndexedOptionArray(Content):
             npindex = self._index.data
             npselect = npindex >= 0
             if self._backend.index_nplike.any(npselect):
-                indexmin = npindex[npselect].min()
+                indexmin = self._backend.index_nplike.min(npindex[npselect])
                 index = ak.index.Index(
                     npindex - indexmin, nplike=self._backend.index_nplike
                 )

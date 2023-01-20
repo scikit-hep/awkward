@@ -1225,7 +1225,7 @@ class UnionArray(Content):
         )
         if simplified.length == 0:
             return ak.contents.NumpyArray(
-                self._backend.nplike.empty(0, np.int64),
+                self._backend.nplike.empty(0, dtype=np.int64),
                 parameters=None,
                 backend=self._backend,
             )

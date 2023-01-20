@@ -96,7 +96,7 @@ def _impl(array, highlevel, behavior):
 
     def lengths_of(data, offsets):
         if len(data) == 0:
-            return backend.index_nplike.empty(0, np.int64), offsets
+            return backend.index_nplike.empty(0, dtype=np.int64), offsets
         else:
             diffs = data[1:] != data[:-1]
 
@@ -120,7 +120,9 @@ def _impl(array, highlevel, behavior):
                 interior_offsets = offsets[is_interior]
                 diffs[interior_offsets - 1] = True
             positions = backend.index_nplike.nonzero(diffs)[0]
-            full_positions = backend.index_nplike.empty(len(positions) + 2, np.int64)
+            full_positions = backend.index_nplike.empty(
+                len(positions) + 2, dtype=np.int64
+            )
             full_positions[0] = 0
             full_positions[-1] = len(data)
             full_positions[1:-1] = positions + 1

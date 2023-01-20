@@ -654,7 +654,9 @@ def build_assembly(schema, container, instructions):
             index = f"node{len(container)}"
             container[index + "-index"] = None
             offsets = f"node{len(container)}"
-            container[offsets + "-offsets"] = numpy.empty(len(strings) + 1, np.int64)
+            container[offsets + "-offsets"] = numpy.empty(
+                len(strings) + 1, dtype=np.int64
+            )
             container[offsets + "-offsets"][0] = 0
             container[offsets + "-offsets"][1:] = numpy.cumsum(
                 [len(x) for x in bytestrings]

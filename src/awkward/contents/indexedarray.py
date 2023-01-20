@@ -973,7 +973,7 @@ class IndexedArray(Content):
             and self._index.length != 0
         ):
             npindex = self._index.data
-            indexmin = npindex.min()
+            indexmin = self._backend.index_nplike.min(npindex)
             index = ak.index.Index(
                 npindex - indexmin, nplike=self._backend.index_nplike
             )

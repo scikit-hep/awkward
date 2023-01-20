@@ -2074,8 +2074,8 @@ class ListOffsetArray(Content):
         if numpy.count_nonzero(nonempty) == 0:
             mini, maxi = 0, 0
         else:
-            mini = starts_data.min()
-            maxi = stops_data.max()
+            mini = self._backend.index_nplike.min(starts_data)
+            maxi = self._backend.index_nplike.max(stops_data)
 
         starts_data = starts_data - mini
         stops_data = stops_data - mini
@@ -2135,7 +2135,7 @@ class ListOffsetArray(Content):
             strings = self.to_list()
             if any(item in nonfinit_dict for item in strings):
                 numbers = self._backend.index_nplike.empty(
-                    self.starts.length, np.float64
+                    self.starts.length, dtype=np.float64
                 )
                 has_another_string = False
                 for i, val in enumerate(strings):

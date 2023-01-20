@@ -3,11 +3,10 @@
 import json
 from collections.abc import Iterable, Sized
 
-import numpy
-
 import awkward as ak
 
 np = ak._nplikes.NumpyMetadata.instance()
+numpy = ak._nplikes.Numpy.instance()
 
 try:
     import pyarrow
@@ -196,38 +195,6 @@ if pyarrow is not None:
         pyarrow.duration("ns"): (False, np.dtype("m8[ns]")),
     }
 
-if not ak._util.numpy_at_least("1.17.0"):
-
-    def packbits(bytearray, lsb_order=True):
-        if lsb_order:
-            if len(bytearray) % 8 == 0:
-                ready_to_pack = bytearray
-            else:
-                ready_to_pack = numpy.empty(
-                    int(numpy.ceil(len(bytearray) / 8.0)) * 8,
-                    dtype=bytearray.dtype,
-                )
-                ready_to_pack[: len(bytearray)] = bytearray
-                ready_to_pack[len(bytearray) :] = 0
-            return numpy.packbits(ready_to_pack.reshape(-1, 8)[:, ::-1].reshape(-1))
-        else:
-            return numpy.packbits(bytearray)
-
-    def unpackbits(bitarray, lsb_order=True):
-        ready_to_bitswap = numpy.unpackbits(bitarray)
-        if lsb_order:
-            return ready_to_bitswap.reshape(-1, 8)[:, ::-1].reshape(-1)
-        else:
-            return ready_to_bitswap
-
-else:
-
-    def packbits(bytearray, lsb_order=True):
-        return numpy.packbits(bytearray, bitorder=("little" if lsb_order else "big"))
-
-    def unpackbits(bitarray, lsb_order=True):
-        return numpy.unpackbits(bitarray, bitorder=("little" if lsb_order else "big"))
-
 
 def and_validbytes(validbytes1, validbytes2):
     if validbytes1 is None:
@@ -242,7 +209,7 @@ def to_validbits(validbytes):
     if validbytes is None:
         return None
     else:
-        return pyarrow.py_buffer(packbits(validbytes))
+        return pyarrow.py_buffer(numpy.packbits(validbytes, bitorder="little"))
 
 
 def to_length(nparray, length):
@@ -316,7 +283,9 @@ def popbuffers_finalize(
                         ak.contents.BitMaskedArray.simplified(
                             # ceildiv(len(out), 8) = -(len(out) // -8)
                             ak.index.IndexU8(
-                                numpy.full(-(len(out) // -8), np.uint8(0xFF))
+                                numpy.full(
+                                    -(len(out) // -8), np.uint8(0xFF), dtype=np.uint8
+                                )
                             ),
                             out,
                             valid_when=True,
@@ -349,7 +318,7 @@ def popbuffers_finalize(
     else:
         if validbits is None and generate_bitmasks:
             # ceildiv(len(out), 8) = -(len(out) // -8)
-            validbits = numpy.full(-(len(out) // -8), np.uint8(0xFF))
+            validbits = numpy.full(-(len(out) // -8), np.uint8(0xFF), dtype=np.uint8)
 
         if validbits is None:
             return revertable(ak.contents.UnmaskedArray.simplified(out), out)
@@ -430,7 +399,7 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
         if not isinstance(masked_index, ak.contents.UnmaskedArray):
             mask = masked_index.mask_as_bool(valid_when=False)
             if mask.any():
-                index = numpy.array(index, copy=True)
+                index = numpy.asarray(index, copy=True)
                 index[mask] = -1
 
         content = handle_arrow(paarray.dictionary, generate_bitmasks)
@@ -659,7 +628,9 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
         validbits = buffers.pop(0)
         bitdata = buffers.pop(0)
 
-        bytedata = unpackbits(numpy.frombuffer(bitdata, dtype=np.uint8))
+        bytedata = numpy.unpackbits(
+            numpy.frombuffer(bitdata, dtype=np.uint8), bitorder="little"
+        )
 
         out = ak.contents.NumpyArray(
             bytedata.view(np.bool_),
