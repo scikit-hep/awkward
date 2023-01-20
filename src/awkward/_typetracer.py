@@ -947,16 +947,20 @@ class TypeTracer(NumpyLike):
         try_touch_data(x)
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def nonzero(self, array: TypeTracerArray) -> tuple[TypeTracerArray, ...]:
+    def nonzero(self, x: TypeTracerArray) -> tuple[TypeTracerArray, ...]:
         # array
-        try_touch_data(array)
-        return (TypeTracerArray(np.int64, (UnknownLength,)),) * len(array.shape)
+        try_touch_data(x)
+        return (TypeTracerArray(np.int64, (UnknownLength,)),) * len(x.shape)
 
     def unique_values(self, x: TypeTracerArray) -> TypeTracerArray:
         try_touch_data(x)
         return TypeTracerArray(x.dtype)
 
-    def concat(self, arrays, *, casting="same_kind") -> TypeTracerArray:
+    def concat(self, arrays, *, axis: int | None = 0) -> TypeTracerArray:
+        if axis is None:
+            assert all(x.ndim == 1 for x in arrays)
+        elif axis != 0:
+            raise ak._errors.wrap_error(NotImplementedError("concat with axis != 0"))
         for x in arrays:
             try_touch_data(x)
 

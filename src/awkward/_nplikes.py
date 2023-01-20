@@ -284,8 +284,8 @@ class NumpyLike(Singleton):
         arrays = [x for x in arrays]
         return self._module.stack(arrays, axis=axis)
 
-    def packbits(self, array: ArrayLike, *, axis=None, bitorder="big") -> ArrayLike:
-        return self._module.packbits(array, axis=axis, bitorder=bitorder)
+    def packbits(self, x: ArrayLike, *, axis=None, bitorder="big") -> ArrayLike:
+        return self._module.packbits(x, axis=axis, bitorder=bitorder)
 
     def unpackbits(
         self, array: ArrayLike, *, axis=None, count=None, bitorder="big"
