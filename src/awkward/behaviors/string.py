@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._nplikes import ufuncs
 from awkward.highlevel import Array
 
 np = ak._nplikes.NumpyMetadata.instance()
@@ -251,9 +252,6 @@ def _cast_bytes_or_str_to_string(string):
 
 
 def register(behavior):
-    # Import NumPy explicitly for registering behaviours
-    import numpy as _numpy
-
     behavior["byte"] = ByteBehavior
     behavior["__typestr__", "byte"] = "byte"
     behavior["char"] = CharBehavior
@@ -264,10 +262,10 @@ def register(behavior):
     behavior["string"] = StringBehavior
     behavior["__typestr__", "string"] = "string"
 
-    behavior[_numpy.equal, "bytestring", "bytestring"] = _string_equal
-    behavior[_numpy.equal, "string", "string"] = _string_equal
-    behavior[_numpy.not_equal, "bytestring", "bytestring"] = _string_notequal
-    behavior[_numpy.not_equal, "string", "string"] = _string_notequal
+    behavior[ufuncs.equal, "bytestring", "bytestring"] = _string_equal
+    behavior[ufuncs.equal, "string", "string"] = _string_equal
+    behavior[ufuncs.not_equal, "bytestring", "bytestring"] = _string_notequal
+    behavior[ufuncs.not_equal, "string", "string"] = _string_notequal
 
     behavior["__broadcast__", "bytestring"] = _string_broadcast
     behavior["__broadcast__", "string"] = _string_broadcast
