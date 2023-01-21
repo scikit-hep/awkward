@@ -101,7 +101,9 @@ class NumpyArray(Content):
         return self._data.dtype
 
     def _raw(self, nplike=None):
-        return self._backend.nplike.raw(self.data, nplike)
+        return ak._nplikes.to_nplike(
+            self.data, nplike, from_nplike=self._backend.nplike
+        )
 
     def _form_with_key(self, getkey):
         return self.form_cls(
@@ -1189,7 +1191,9 @@ class NumpyArray(Content):
         )
 
     def _to_backend_array(self, allow_missing, backend):
-        return self._backend.nplike.raw(self.data, backend.nplike)
+        return ak._nplikes.to_nplike(
+            self.data, backend.nplike, from_nplike=self._backend.nplike
+        )
 
     def _completely_flatten(self, backend, options):
         return [

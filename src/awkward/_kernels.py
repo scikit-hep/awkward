@@ -5,13 +5,14 @@ import ctypes
 from abc import abstractmethod
 from typing import Any, Callable
 
-import numpy as metadata  # todo: implement this
-
 import awkward as ak
-from awkward._nplikes import Jax, Numpy
+from awkward._nplikes import Jax, Numpy, NumpyMetadata
 from awkward.typing import Protocol, TypeAlias
 
 KernelKeyType: TypeAlias = tuple  # Tuple[str, Unpack[Tuple[metadata.dtype, ...]]]
+
+
+metadata = NumpyMetadata.instance()
 
 
 class KernelError(Protocol):

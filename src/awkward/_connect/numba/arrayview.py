@@ -931,7 +931,7 @@ def array_impl(array, dtype=None):
                     "\n    ".join(fill_array),
                 ),
                 "array_impl",
-                {"numpy": ak._nplikes.numpy},
+                {"numpy": numpy},
             )
 
 

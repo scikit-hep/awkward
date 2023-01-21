@@ -1,8 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import numpy as _numpy_ufuncs
 
 import awkward as ak
+from awkward._nplikes import ufuncs
 from awkward._util import unset
 
 np = ak._nplikes.NumpyMetadata.instance()
@@ -189,8 +189,8 @@ def _impl(x, y, weight, axis, keepdims, mask_identity):
         delta = (sumw * sumwxx) - (sumwx * sumwx)
         intercept = ((sumwxx * sumwy) - (sumwx * sumwxy)) / delta
         slope = ((sumw * sumwxy) - (sumwx * sumwy)) / delta
-        intercept_error = _numpy_ufuncs.sqrt(sumwxx / delta)
-        slope_error = _numpy_ufuncs.sqrt(sumw / delta)
+        intercept_error = ufuncs.sqrt(sumwxx / delta)
+        slope_error = ufuncs.sqrt(sumw / delta)
 
         intercept = ak.operations.to_layout(
             intercept, allow_record=True, allow_other=True
