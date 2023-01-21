@@ -718,6 +718,18 @@ class TypeTracer(NumpyLike):
 
         @staticmethod
         def _generic_ufunc_func(ufunc):
+            def coerce_argument(x):
+                if hasattr(x, "dtype") and hasattr(x, "shape"):
+                    return numpy.empty(0, dtype=x.dtype)
+                elif isinstance(x, UnknownScalar):
+                    return numpy.empty(0, dtype=x.dtype)
+                elif x is UnknownLength:
+                    return numpy.empty(0, dtype=np.int64)
+                elif isinstance(x, MaybeNone):
+                    return coerce_argument(x.content)
+                else:
+                    return x
+
             def generic_ufunc(*inputs, **kwargs):
                 for x in inputs:
                     getattr(x, "touch_data", lambda: None)()
@@ -726,15 +738,17 @@ class TypeTracer(NumpyLike):
                 to_broadcast = []
                 for x in inputs:
                     if hasattr(x, "dtype") and hasattr(x, "shape"):
-                        replacements.append(numpy.empty(0, x.dtype))
                         to_broadcast.append(x)
-                    else:
-                        replacements.append(x)
+                    replacements.append(coerce_argument(x))
 
-                broadcasted = TypeTracer.instance().broadcast_arrays(*to_broadcast)
+                if len(to_broadcast) > 0:
+                    broadcasted = TypeTracer.instance().broadcast_arrays(*to_broadcast)
+                    shape = broadcasted[0].shape
+                else:
+                    shape = (0,)
 
                 result = ufunc(*replacements, **kwargs)
-                return TypeTracerArray(result.dtype, shape=broadcasted[0].shape)
+                return TypeTracerArray(result.dtype, shape=shape)
 
             return generic_ufunc
 
