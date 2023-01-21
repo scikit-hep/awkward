@@ -818,8 +818,10 @@ def arrays_approx_equal(
         elif left.is_regular:
             return (left.size == right.size) and visitor(left.content, right.content)
         elif left.is_numpy:
-            return is_approx_dtype(left.dtype, right.dtype) and nplike.allclose(
-                left.data, right.data, rtol=rtol, atol=atol, equal_nan=False
+            return is_approx_dtype(left.dtype, right.dtype) and nplike.all(
+                nplike.isclose(
+                    left.data, right.data, rtol=rtol, atol=atol, equal_nan=False
+                )
             )
         elif left.is_option:
             return nplike.array_equal(
