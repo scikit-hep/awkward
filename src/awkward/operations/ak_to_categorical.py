@@ -3,6 +3,7 @@
 import awkward as ak
 
 np = ak._nplikes.NumpyMetadata.instance()
+numpy = ak._nplikes.Numpy.instance()
 
 
 def to_categorical(array, *, highlevel=True, behavior=None):
@@ -103,8 +104,8 @@ def _impl(array, highlevel, behavior):
             hashable = [ak.behaviors.categorical._as_hashable(x) for x in content_list]
 
             lookup = {}
-            is_first = ak._nplikes.numpy.empty(len(hashable), dtype=np.bool_)
-            mapping = ak._nplikes.numpy.empty(len(hashable), dtype=np.int64)
+            is_first = numpy.empty(len(hashable), dtype=np.bool_)
+            mapping = numpy.empty(len(hashable), dtype=np.int64)
             for i, x in enumerate(hashable):
                 if x in lookup:
                     is_first[i] = False
@@ -115,17 +116,17 @@ def _impl(array, highlevel, behavior):
                     mapping[i] = j
 
             if layout.is_indexed and layout.is_option:
-                original_index = ak._nplikes.numpy.asarray(layout.index)
+                original_index = numpy.asarray(layout.index)
                 index = mapping[original_index]
                 index[original_index < 0] = -1
                 index = ak.index.Index64(index)
 
             elif layout.is_indexed:
-                original_index = ak._nplikes.numpy.asarray(layout.index)
+                original_index = numpy.asarray(layout.index)
                 index = ak.index.Index64(mapping[original_index])
 
             elif layout.is_option:
-                mask = ak._nplikes.numpy.asarray(layout.mask_as_bool(valid_when=False))
+                mask = numpy.asarray(layout.mask_as_bool(valid_when=False))
                 mapping[mask.view(np.bool_)] = -1
                 index = ak.index.Index64(mapping)
 

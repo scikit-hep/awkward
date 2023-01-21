@@ -17,7 +17,7 @@ import awkward as ak
 np = ak._nplikes.NumpyMetadata.instance()
 
 win = os.name == "nt"
-bits32 = ak._nplikes.numpy.iinfo(np.intp).bits == 32
+bits32 = np.iinfo(np.intp).bits == 32
 
 # matches include/awkward/common.h
 kMaxInt8 = 127  # 2**7  - 1
