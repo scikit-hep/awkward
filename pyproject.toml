@@ -262,9 +262,7 @@ exclude = [
     "docs-*",
     "src/awkward/_typeparser/generated_parser.py",
 ]
-ignore = [
-    "E501", "C408", "E713", "E714",
-]
+ignore = ["E501", "C408", "E713", "E714", "UP030"]
 select = [
     "B0",
     "C",
@@ -272,6 +270,8 @@ select = [
     "F",
     "T20",
     "W",
+    "UP",
+    "I",
     "TID251"
 ]
 target-version = "py37"
@@ -293,6 +293,7 @@ mccabe.max-complexity = 100
     "F403",
     "F401",
     "F403",
+    "I001",
 ]
 "src/awkward/_connect/*" = [
     "TID251"
