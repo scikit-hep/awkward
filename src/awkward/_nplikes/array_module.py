@@ -47,17 +47,23 @@ class ArrayModuleNumpyLike(NumpyLike):
     ) -> ArrayLike:
         return self._module.frombuffer(buffer, dtype=dtype, count=count)
 
-    def zeros(self, shape: int | tuple[int, ...], *, dtype: np.dtype) -> ArrayLike:
+    def zeros(
+        self, shape: int | tuple[int, ...], *, dtype: np.dtype | None = None
+    ) -> ArrayLike:
         return self._module.zeros(shape, dtype=dtype)
 
-    def ones(self, shape: int | tuple[int, ...], *, dtype: np.dtype) -> ArrayLike:
+    def ones(
+        self, shape: int | tuple[int, ...], *, dtype: np.dtype | None = None
+    ) -> ArrayLike:
         return self._module.ones(shape, dtype=dtype)
 
-    def empty(self, shape: int | tuple[int, ...], *, dtype: np.dtype) -> ArrayLike:
+    def empty(
+        self, shape: int | tuple[int, ...], *, dtype: np.dtype | None = None
+    ) -> ArrayLike:
         return self._module.empty(shape, dtype=dtype)
 
     def full(
-        self, shape: int | tuple[int, ...], fill_value, *, dtype: np.dtype
+        self, shape: int | tuple[int, ...], fill_value, *, dtype: np.dtype | None = None
     ) -> ArrayLike:
         return self._module.full(shape, fill_value, dtype=dtype)
 

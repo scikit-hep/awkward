@@ -180,20 +180,30 @@ class NumpyLike(Singleton, Protocol):
         ...
 
     @abstractmethod
-    def zeros(self, shape: int | tuple[int, ...], *, dtype: numpy.dtype) -> ArrayLike:
+    def zeros(
+        self, shape: int | tuple[int, ...], *, dtype: numpy.dtype | None = None
+    ) -> ArrayLike:
         ...
 
     @abstractmethod
-    def ones(self, shape: int | tuple[int, ...], *, dtype: numpy.dtype) -> ArrayLike:
+    def ones(
+        self, shape: int | tuple[int, ...], *, dtype: numpy.dtype | None = None
+    ) -> ArrayLike:
         ...
 
     @abstractmethod
-    def empty(self, shape: int | tuple[int, ...], *, dtype: numpy.dtype) -> ArrayLike:
+    def empty(
+        self, shape: int | tuple[int, ...], *, dtype: numpy.dtype | None = None
+    ) -> ArrayLike:
         ...
 
     @abstractmethod
     def full(
-        self, shape: int | tuple[int, ...], fill_value, *, dtype: numpy.dtype
+        self,
+        shape: int | tuple[int, ...],
+        fill_value,
+        *,
+        dtype: numpy.dtype | None = None,
     ) -> ArrayLike:
         ...
 

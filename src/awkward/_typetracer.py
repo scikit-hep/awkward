@@ -784,20 +784,22 @@ class TypeTracer(NumpyLike):
         raise ak._errors.wrap_error(NotImplementedError)
 
     def zeros(
-        self, shape: int | tuple[int, ...], *, dtype: np.dtype
+        self, shape: int | tuple[int, ...], *, dtype: np.dtype | None = None
     ) -> TypeTracerArray:
         return TypeTracerArray(dtype, shape)
 
-    def ones(self, shape: int | tuple[int, ...], *, dtype: np.dtype) -> TypeTracerArray:
+    def ones(
+        self, shape: int | tuple[int, ...], *, dtype: np.dtype | None = None
+    ) -> TypeTracerArray:
         return TypeTracerArray(dtype, shape)
 
     def empty(
-        self, shape: int | tuple[int, ...], *, dtype: np.dtype
+        self, shape: int | tuple[int, ...], *, dtype: np.dtype | None = None
     ) -> TypeTracerArray:
         return TypeTracerArray(dtype, shape)
 
     def full(
-        self, shape: int | tuple[int, ...], fill_value, *, dtype: np.dtype
+        self, shape: int | tuple[int, ...], fill_value, *, dtype: np.dtype | None = None
     ) -> TypeTracerArray:
         array = TypeTracerArray.from_array(fill_value, dtype=dtype)
         return array.reshape(shape)
