@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import awkward as ak
 from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.jax import Jax
