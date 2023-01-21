@@ -772,7 +772,9 @@ class TypeTracer(NumpyLike):
         else:
             return result
 
-    def ascontiguousarray(self, x: TypeTracerArray, *, dtype=None) -> TypeTracerArray:
+    def ascontiguousarray(
+        self, x: ArrayLike, *, dtype: numpy.dtype | None = None
+    ) -> TypeTracerArray:
         try_touch_data(x)
         return TypeTracerArray.from_array(x, dtype=dtype)
 
@@ -805,7 +807,7 @@ class TypeTracer(NumpyLike):
         return array.reshape(shape)
 
     def zeros_like(
-        self, x: TypeTracerArray, *, dtype: np.dtype | None = None
+        self, x: ArrayLike, *, dtype: np.dtype | None = None
     ) -> TypeTracerArray:
         try_touch_shape(x)
         if isinstance(x, UnknownScalar):
@@ -813,13 +815,13 @@ class TypeTracer(NumpyLike):
         return TypeTracerArray.from_array(x, dtype=dtype)
 
     def ones_like(
-        self, x: TypeTracerArray, *, dtype: np.dtype | None = None
+        self, x: ArrayLike, *, dtype: np.dtype | None = None
     ) -> TypeTracerArray:
         try_touch_shape(x)
         return self.zeros_like(x, dtype=dtype)
 
     def full_like(
-        self, x: TypeTracerArray, fill_value, *, dtype: np.dtype | None = None
+        self, x: ArrayLike, fill_value, *, dtype: np.dtype | None = None
     ) -> TypeTracerArray:
         try_touch_shape(x)
         return self.zeros_like(x, dtype=dtype)
@@ -850,7 +852,7 @@ class TypeTracer(NumpyLike):
         return TypeTracerArray(dtype, (length,))
 
     def meshgrid(
-        self, *arrays: TypeTracerArray, indexing: Literal["xy", "ij"] = "xy"
+        self, *arrays: ArrayLike, indexing: Literal["xy", "ij"] = "xy"
     ) -> list[TypeTracerArray]:
         for x in arrays:
             try_touch_data(x)
@@ -859,7 +861,7 @@ class TypeTracer(NumpyLike):
     ############################ testing
 
     def array_equal(
-        self, x1: TypeTracerArray, x2: TypeTracerArray, *, equal_nan: bool = False
+        self, x1: ArrayLike, x2: ArrayLike, *, equal_nan: bool = False
     ) -> bool:
         try_touch_data(x1)
         try_touch_data(x2)
@@ -867,11 +869,11 @@ class TypeTracer(NumpyLike):
 
     def searchsorted(
         self,
-        x: TypeTracerArray,
-        values: TypeTracerArray,
+        x: ArrayLike,
+        values: ArrayLike,
         *,
         side: Literal["left", "right"] = "left",
-        sorter: TypeTracerArray | None = None,
+        sorter: ArrayLike | None = None,
     ) -> TypeTracerArray:
         try_touch_data(x)
         try_touch_data(values)
@@ -880,7 +882,7 @@ class TypeTracer(NumpyLike):
 
     ############################ manipulation
 
-    def broadcast_arrays(self, *arrays: TypeTracerArray) -> list[TypeTracerArray]:
+    def broadcast_arrays(self, *arrays: ArrayLike) -> list[TypeTracerArray]:
         for x in arrays:
             try_touch_data(x)
 
@@ -922,26 +924,26 @@ class TypeTracer(NumpyLike):
         ]
 
     def broadcast_to(
-        self, x: TypeTracerArray, shape: tuple[SupportsInt, ...]
+        self, x: ArrayLike, shape: tuple[SupportsInt, ...]
     ) -> TypeTracerArray:
         raise ak._errors.wrap_error(NotImplementedError)
 
     def cumsum(
         self,
-        x: TypeTracerArray,
+        x: ArrayLike,
         *,
         axis: int | None = None,
-        maybe_out: TypeTracerArray | None = None,
+        maybe_out: ArrayLike | None = None,
     ) -> TypeTracerArray:
         try_touch_data(x)
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def nonzero(self, x: TypeTracerArray) -> tuple[TypeTracerArray, ...]:
+    def nonzero(self, x: ArrayLike) -> tuple[TypeTracerArray, ...]:
         # array
         try_touch_data(x)
         return (TypeTracerArray(np.int64, (UnknownLength,)),) * len(x.shape)
 
-    def unique_values(self, x: TypeTracerArray) -> TypeTracerArray:
+    def unique_values(self, x: ArrayLike) -> TypeTracerArray:
         try_touch_data(x)
         return TypeTracerArray(x.dtype)
 
@@ -979,8 +981,8 @@ class TypeTracer(NumpyLike):
 
     def repeat(
         self,
-        x: TypeTracerArray,
-        repeats: TypeTracerArray | int,
+        x: ArrayLike,
+        repeats: ArrayLike | int,
         *,
         axis: int | None = None,
     ) -> TypeTracerArray:
@@ -988,13 +990,13 @@ class TypeTracer(NumpyLike):
         try_touch_data(repeats)
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def tile(self, x: TypeTracerArray, reps: int) -> TypeTracerArray:
+    def tile(self, x: ArrayLike, reps: int) -> TypeTracerArray:
         try_touch_data(x)
         raise ak._errors.wrap_error(NotImplementedError)
 
     def stack(
         self,
-        arrays: list[TypeTracerArray] | tuple[TypeTracerArray, ...],
+        arrays: list[ArrayLike] | tuple[ArrayLike, ...],
         *,
         axis: int = 0,
     ) -> TypeTracerArray:
@@ -1004,7 +1006,7 @@ class TypeTracer(NumpyLike):
 
     def packbits(
         self,
-        x: TypeTracerArray,
+        x: ArrayLike,
         *,
         axis: int | None = None,
         bitorder: Literal["big", "little"] = "big",
@@ -1014,7 +1016,7 @@ class TypeTracer(NumpyLike):
 
     def unpackbits(
         self,
-        x: TypeTracerArray,
+        x: ArrayLike,
         *,
         axis: int | None = None,
         count: int | None = None,
@@ -1027,48 +1029,44 @@ class TypeTracer(NumpyLike):
 
     def add(
         self,
-        x1: TypeTracerArray,
-        x2: TypeTracerArray,
-        maybe_out: TypeTracerArray | None = None,
+        x1: ArrayLike,
+        x2: ArrayLike,
+        maybe_out: ArrayLike | None = None,
     ) -> TypeTracerArray:
         return self._apply_ufunc(numpy.add, x1, x2)
 
     def logical_and(
         self,
-        x1: TypeTracerArray,
-        x2: TypeTracerArray,
-        maybe_out: TypeTracerArray | None = None,
+        x1: ArrayLike,
+        x2: ArrayLike,
+        maybe_out: ArrayLike | None = None,
     ) -> TypeTracerArray:
         return self._apply_ufunc(numpy.sqrt, x1, x2)
 
     def logical_or(
         self,
-        x1: TypeTracerArray,
-        x2: TypeTracerArray,
-        maybe_out: TypeTracerArray | None = None,
+        x1: ArrayLike,
+        x2: ArrayLike,
+        maybe_out: ArrayLike | None = None,
     ) -> TypeTracerArray:
         return self._apply_ufunc(numpy.sqrt, x1, x2)
 
     def logical_not(
-        self, x: TypeTracerArray, maybe_out: TypeTracerArray | None = None
+        self, x: ArrayLike, maybe_out: ArrayLike | None = None
     ) -> TypeTracerArray:
         return self._apply_ufunc(numpy.sqrt, x)
 
-    def sqrt(
-        self, x: TypeTracerArray, maybe_out: TypeTracerArray | None = None
-    ) -> TypeTracerArray:
+    def sqrt(self, x: ArrayLike, maybe_out: ArrayLike | None = None) -> TypeTracerArray:
         return self._apply_ufunc(numpy.sqrt, x)
 
-    def exp(
-        self, x: TypeTracerArray, maybe_out: TypeTracerArray | None = None
-    ) -> TypeTracerArray:
+    def exp(self, x: ArrayLike, maybe_out: ArrayLike | None = None) -> TypeTracerArray:
         return self._apply_ufunc(numpy.exp, x)
 
     def divide(
         self,
-        x1: TypeTracerArray,
-        x2: TypeTracerArray,
-        maybe_out: TypeTracerArray | None = None,
+        x1: ArrayLike,
+        x2: ArrayLike,
+        maybe_out: ArrayLike | None = None,
     ) -> TypeTracerArray:
         return self._apply_ufunc(numpy.sqrt, x1, x2)
 
@@ -1076,7 +1074,7 @@ class TypeTracer(NumpyLike):
 
     def nan_to_num(
         self,
-        x: TypeTracerArray,
+        x: ArrayLike,
         *,
         copy: bool = True,
         nan: int | float | None = 0.0,
@@ -1089,8 +1087,8 @@ class TypeTracer(NumpyLike):
 
     def isclose(
         self,
-        x1: TypeTracerArray,
-        x2: TypeTracerArray,
+        x1: ArrayLike,
+        x2: ArrayLike,
         *,
         rtol: float = 1e-5,
         atol: float = 1e-8,
@@ -1101,18 +1099,18 @@ class TypeTracer(NumpyLike):
         # a, b, rtol=1e-05, atol=1e-08, equal_nan=False
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def isnan(self, x: TypeTracerArray) -> TypeTracerArray:
+    def isnan(self, x: ArrayLike) -> TypeTracerArray:
         return TypeTracerArray(np.bool_, shape=x.shape)
 
     ############################ reducers
 
     def all(
         self,
-        x: TypeTracerArray,
+        x: ArrayLike,
         *,
         axis: int | tuple[int, ...] | None = None,
         keepdims: bool = False,
-        maybe_out: TypeTracerArray | None = None,
+        maybe_out: ArrayLike | None = None,
     ) -> TypeTracerArray:
         try_touch_data(x)
         if axis is None:
@@ -1122,11 +1120,11 @@ class TypeTracer(NumpyLike):
 
     def any(
         self,
-        x: TypeTracerArray,
+        x: ArrayLike,
         *,
         axis: int | tuple[int, ...] | None = None,
         keepdims: bool = False,
-        maybe_out: TypeTracerArray | None = None,
+        maybe_out: ArrayLike | None = None,
     ) -> TypeTracerArray:
         try_touch_data(x)
         if axis is None:
@@ -1135,36 +1133,36 @@ class TypeTracer(NumpyLike):
             raise ak._errors.wrap_error(NotImplementedError)
 
     def count_nonzero(
-        self, x: TypeTracerArray, *, axis: int | None = None, keepdims: bool = False
+        self, x: ArrayLike, *, axis: int | None = None, keepdims: bool = False
     ) -> TypeTracerArray:
         try_touch_data(x)
         raise ak._errors.wrap_error(NotImplementedError)
 
     def min(
         self,
-        x: TypeTracerArray,
+        x: ArrayLike,
         *,
         axis: int | tuple[int, ...] | None = None,
         keepdims: bool = False,
-        maybe_out: TypeTracerArray | None = None,
+        maybe_out: ArrayLike | None = None,
     ) -> TypeTracerArray:
         try_touch_data(x)
         raise ak._errors.wrap_error(NotImplementedError)
 
     def max(
         self,
-        x: TypeTracerArray,
+        x: ArrayLike,
         *,
         axis: int | tuple[int, ...] | None = None,
         keepdims: bool = False,
-        maybe_out: TypeTracerArray | None = None,
+        maybe_out: ArrayLike | None = None,
     ) -> TypeTracerArray:
         try_touch_data(x)
         raise ak._errors.wrap_error(NotImplementedError)
 
     def array_str(
         self,
-        x: TypeTracerArray,
+        x: ArrayLike,
         *,
         max_line_width: int | None = None,
         precision: int | None = None,
@@ -1182,5 +1180,5 @@ class TypeTracer(NumpyLike):
     def is_own_array(cls, obj) -> bool:
         return isinstance(obj, TypeTracerArray)
 
-    def is_c_contiguous(self, x: TypeTracerArray) -> bool:
+    def is_c_contiguous(self, x: ArrayLike) -> bool:
         return True
