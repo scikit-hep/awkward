@@ -1,8 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import numpy as _numpy_ufuncs
-
 import awkward as ak
+from awkward._nplikes import ufuncs
 from awkward._util import unset
 
 np = ak._nplikes.NumpyMetadata.instance()
@@ -73,7 +72,7 @@ def _impl(x, axis, keepdims, mask_identity):
     )
 
     with np.errstate(invalid="ignore", divide="ignore"):
-        expx = _numpy_ufuncs.exp(x)
+        expx = ufuncs.exp(x)
         denom = ak.operations.ak_sum._impl(
             expx,
             axis,

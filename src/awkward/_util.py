@@ -9,10 +9,10 @@ import re
 import sys
 from collections.abc import Iterable, Mapping, Sequence, Sized
 
-import numpy
 import packaging.version
 
 import awkward as ak
+from awkward._nplikes import ufuncs
 
 np = ak._nplikes.NumpyMetadata.instance()
 
@@ -34,6 +34,8 @@ def parse_version(version):
 
 
 def numpy_at_least(version):
+    import numpy  # noqa: I251
+
     return parse_version(numpy.__version__) >= parse_version(version)
 
 
@@ -213,7 +215,7 @@ def custom_ufunc(ufunc, layout, behavior):
             if (
                 isinstance(key, tuple)
                 and len(key) == 2
-                and (key[0] is ufunc or key[0] is numpy.ufunc)
+                and (key[0] is ufunc or key[0] is ufuncs.ufunc)
                 and key[1] == custom
             ):
                 return fcn
@@ -773,11 +775,13 @@ def arrays_approx_equal(
     left = ak.to_packed(ak.to_layout(left, allow_record=False), highlevel=False)
     right = ak.to_packed(ak.to_layout(right, allow_record=False), highlevel=False)
 
+    nplike = ak._nplikes.nplike_of(left, right)
+
     def is_approx_dtype(left, right) -> bool:
         if not dtype_exact:
-            for family in numpy.integer, numpy.floating:
-                if numpy.issubdtype(left, family):
-                    return numpy.issubdtype(right, family)
+            for family in np.integer, np.floating:
+                if np.issubdtype(left, family):
+                    return np.issubdtype(right, family)
         return left == right
 
     def visitor(left, right) -> bool:
@@ -807,18 +811,18 @@ def arrays_approx_equal(
 
         if left.is_list:
             return (
-                numpy.array_equal(left.starts, right.starts)
-                and numpy.array_equal(left.stops, right.stops)
+                nplike.array_equal(left.starts, right.starts)
+                and nplike.array_equal(left.stops, right.stops)
                 and visitor(left.content, right.content)
             )
         elif left.is_regular:
             return (left.size == right.size) and visitor(left.content, right.content)
         elif left.is_numpy:
-            return is_approx_dtype(left.dtype, right.dtype) and numpy.allclose(
+            return is_approx_dtype(left.dtype, right.dtype) and nplike.allclose(
                 left.data, right.data, rtol=rtol, atol=atol, equal_nan=False
             )
         elif left.is_option:
-            return numpy.array_equal(
+            return nplike.array_equal(
                 left.index.data < 0, right.index.data < 0
             ) and visitor(left.project(), right.project())
         elif left.is_union:
@@ -849,6 +853,8 @@ def arrays_approx_equal(
 
 
 try:
+    import numpy  # noqa: I251
+
     NDArrayOperatorsMixin = numpy.lib.mixins.NDArrayOperatorsMixin
 
 except AttributeError:
