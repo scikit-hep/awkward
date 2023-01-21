@@ -484,12 +484,13 @@ class Numpy(NumpyLike):
         if isinstance(nplike, Numpy):
             return array
         elif isinstance(nplike, Cupy):
-            return nplike.asarray(array, order="C")
+            cupy = Cupy.instance()
+            return cupy.asarray(array, dtype=array.dtype, order="C")
         elif isinstance(nplike, ak._typetracer.TypeTracer):
-            return nplike.asarray(array)
+            return ak._typetracer.TypeTracerArray(dtype=array.dtype, shape=array.shape)
         elif isinstance(nplike, Jax):
             jax = Jax.instance()
-            return jax.asarray(array)
+            return jax.asarray(array, dtype=array.dtype)
         else:
             raise ak._errors.wrap_error(
                 TypeError(
@@ -595,11 +596,13 @@ class Cupy(NumpyLike):
         if isinstance(nplike, Cupy):
             return array
         elif isinstance(nplike, Numpy):
-            return nplike.asarray(array.get(), dtype=array.dtype, order="C")
+            numpy = Numpy.instance()
+            return numpy.asarray(array.get(), dtype=array.dtype, order="C")
         elif isinstance(nplike, ak._typetracer.TypeTracer):
-            return nplike.asarray(array, dtype=array.dtype)
+            return ak._typetracer.TypeTracerArray(dtype=array.dtype, shape=array.shape)
         elif isinstance(nplike, Jax):
-            return nplike.asarray(array.get(), dtype=array.dtype)
+            jax = Jax.instance()
+            return jax.asarray(array.get(), dtype=array.dtype)
         else:
             raise ak._errors.wrap_error(
                 TypeError(
@@ -760,11 +763,13 @@ class Jax(NumpyLike):
         if isinstance(nplike, Jax):
             return array
         elif isinstance(nplike, ak._nplikes.Cupy):
-            return nplike.asarray(array)
+            cupy = ak._nplikes.Cupy.instance()
+            return cupy.asarray(array)
         elif isinstance(nplike, ak._nplikes.Numpy):
-            return nplike.asarray(array)
+            numpy = ak._nplikes.Numpy.instance()
+            return numpy.asarray(array)
         elif isinstance(nplike, ak._typetracer.TypeTracer):
-            return nplike.asarray(array, dtype=array.dtype)
+            return ak._typetracer.TypeTracerArray(dtype=array.dtype, shape=array.shape)
         else:
             raise ak._errors.wrap_error(
                 TypeError(
