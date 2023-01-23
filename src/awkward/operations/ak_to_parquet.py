@@ -3,7 +3,7 @@
 from collections.abc import Mapping, Sequence
 
 import awkward as ak
-from awkward._nplikes import NumpyMetadata
+from awkward._nplikes.numpylike import NumpyMetadata
 
 metadata = NumpyMetadata.instance()
 

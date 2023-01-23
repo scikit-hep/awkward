@@ -4,14 +4,19 @@ from __future__ import annotations
 import copy
 
 import awkward as ak
+from awkward._nplikes import to_nplike
+from awkward._nplikes.jax import Jax
+from awkward._nplikes.numpy import Numpy
+from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.typetracer import TypeTracerArray
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.numpyform import NumpyForm
 from awkward.types.numpytype import primitive_to_dtype
 from awkward.typing import Final, Self, final
 
-np = ak._nplikes.NumpyMetadata.instance()
-numpy = ak._nplikes.Numpy.instance()
+np = NumpyMetadata.instance()
+numpy = Numpy.instance()
 
 
 @final
@@ -28,7 +33,7 @@ class NumpyArray(Content):
             data = data.data
         self._data = backend.nplike.asarray(data)
 
-        if not isinstance(backend.nplike, ak._nplikes.Jax):
+        if not isinstance(backend.nplike, Jax):
             ak.types.numpytype.dtype_to_primitive(self._data.dtype)
 
         if len(self._data.shape) == 0:
@@ -101,9 +106,7 @@ class NumpyArray(Content):
         return self._data.dtype
 
     def _raw(self, nplike=None):
-        return ak._nplikes.to_nplike(
-            self.data, nplike, from_nplike=self._backend.nplike
-        )
+        return to_nplike(self.data, nplike, from_nplike=self._backend.nplike)
 
     def _form_with_key(self, getkey):
         return self.form_cls(
@@ -208,7 +211,7 @@ class NumpyArray(Content):
     def _getitem_at(self, where):
         if not self._backend.nplike.known_data and len(self._data.shape) == 1:
             self._touch_data(recursive=False)
-            return ak._typetracer.UnknownScalar(self._data.dtype)
+            return TypeTracerArray._new(self._data.dtype, shape=())
 
         try:
             out = self._data[where]
@@ -1191,9 +1194,7 @@ class NumpyArray(Content):
         )
 
     def _to_backend_array(self, allow_missing, backend):
-        return ak._nplikes.to_nplike(
-            self.data, backend.nplike, from_nplike=self._backend.nplike
-        )
+        return to_nplike(self.data, backend.nplike, from_nplike=self._backend.nplike)
 
     def _completely_flatten(self, backend, options):
         return [

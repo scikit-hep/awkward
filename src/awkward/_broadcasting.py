@@ -9,6 +9,10 @@ import itertools
 from collections.abc import Sequence
 
 import awkward as ak
+from awkward._nplikes import nplike_of
+from awkward._nplikes.numpy import Numpy
+from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.typetracer import TypeTracerArray, is_unknown_length
 from awkward.contents.bitmaskedarray import BitMaskedArray
 from awkward.contents.bytemaskedarray import ByteMaskedArray
 from awkward.contents.content import Content
@@ -30,25 +34,36 @@ from awkward.index import (  # IndexU8,  ; Index32,  ; IndexU32,  ; noqa: F401
 from awkward.record import Record
 from awkward.typing import Any, Callable, Dict, List, TypeAlias, Union
 
-np = ak._nplikes.NumpyMetadata.instance()
-numpy = ak._nplikes.Numpy.instance()
+np = NumpyMetadata.instance()
+numpy = Numpy.instance()
 
 optiontypes = (IndexedOptionArray, ByteMaskedArray, BitMaskedArray, UnmaskedArray)
 listtypes = (ListOffsetArray, ListArray, RegularArray)
 
 
-def broadcast_pack(inputs: Sequence, isscalar: list[bool]) -> list:
+def length_of_broadcast(inputs: Sequence) -> int | TypeTracerArray:
     maxlen = -1
+
     for x in inputs:
         if isinstance(x, Content):
+            if is_unknown_length(x.length):
+                return x.length
+
             maxlen = max(maxlen, x.length)
+
     if maxlen < 0:
         maxlen = 1
+
+    return maxlen
+
+
+def broadcast_pack(inputs: Sequence, isscalar: list[bool]) -> list:
+    maxlen = length_of_broadcast(inputs)
 
     nextinputs = []
     for x in inputs:
         if isinstance(x, Record):
-            index = ak._nplikes.nplike_of(*inputs).full(maxlen, x.at, dtype=np.int64)
+            index = nplike_of(*inputs).full(maxlen, x.at, dtype=np.int64)
             nextinputs.append(RegularArray(x.array[index], maxlen, 1))
             isscalar.append(True)
         elif isinstance(x, Content):

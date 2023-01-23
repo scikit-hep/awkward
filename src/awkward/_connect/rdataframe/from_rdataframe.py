@@ -9,6 +9,8 @@ import ROOT
 import awkward as ak
 import awkward._connect.cling
 import awkward._lookup
+from awkward._nplikes.numpy import Numpy
+from awkward._nplikes.numpylike import NumpyMetadata
 from awkward.types.numpytype import primitive_to_dtype
 
 cpp_type_of = {
@@ -29,8 +31,8 @@ cpp_type_of = {
     "timedelta64": "std::difftime",
 }
 
-np = ak._nplikes.NumpyMetadata.instance()
-numpy = ak._nplikes.Numpy.instance()
+np = NumpyMetadata.instance()
+numpy = Numpy.instance()
 
 
 cppyy.add_include_path(

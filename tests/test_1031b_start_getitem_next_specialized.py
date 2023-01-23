@@ -4,6 +4,7 @@ import numpy as np
 import pytest
 
 import awkward as ak
+from awkward._nplikes.typetracer import MaybeNone
 
 to_list = ak.operations.to_list
 
@@ -172,7 +173,7 @@ def test_UnmaskedArray():
     )
 
     assert to_list(new[0, 1:]) == [1.1, 2.2, 3.3]
-    assert isinstance(new.to_typetracer()[0, 1:], ak._typetracer.MaybeNone)
+    assert isinstance(new.to_typetracer()[0, 1:], MaybeNone)
     assert new.to_typetracer()[0, 1:].content.form == new[0, 1:].form
 
     with pytest.raises(IndexError):

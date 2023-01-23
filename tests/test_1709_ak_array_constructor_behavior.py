@@ -3,8 +3,9 @@
 import pytest  # noqa: F401
 
 import awkward as ak
+from awkward._nplikes.numpy import Numpy
 
-numpy = ak._nplikes.Numpy.instance()
+numpy = Numpy.instance()
 
 
 class MyBehavior(ak.Array):

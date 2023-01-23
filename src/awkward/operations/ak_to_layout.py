@@ -6,23 +6,30 @@ from awkward_cpp.lib import _ext
 
 import awkward as ak
 from awkward import _errors
+from awkward._nplikes.cupy import Cupy
+from awkward._nplikes.jax import Jax
+from awkward._nplikes.numpy import Numpy
+from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.typetracer import TypeTracer
 
-np = ak._nplikes.NumpyMetadata.instance()
-numpy = ak._nplikes.Numpy.instance()
+np = NumpyMetadata.instance()
+numpy = Numpy.instance()
 
 
-def to_layout(array, *, allow_record=True, allow_other=False):
+def to_layout(array, *, allow_record=True, allow_other=False, regulararray=True):
     """
     Args:
         array: Array-like data. May be a high level #ak.Array, #ak.Record (if `allow_record`),
             #ak.ArrayBuilder, or low-level #ak.contents.Content, #ak.record.Record (if `allow_record`),
             or a supported backend array (NumPy `ndarray`, CuPy `ndarray`,
-            JAX DeviceArray), dataless TypeTracer, or an arbitrary Python
+            JAX DeviceArray), data-less TypeTracer, Arrow object, or an arbitrary Python
             iterable (for #ak.from_iter to convert).
         allow_record (bool): If True, allow #ak.record.Record as an output;
             otherwise, if the output would be a scalar record, raise an error.
         allow_other (bool): If True, allow non-Awkward outputs; otherwise,
             if the output would be another type, raise an error.
+        regulararray (bool): Prefer to create #ak.contents.RegularArray nodes for
+            regular array objects.
 
     Converts `array` (many types supported, including all Awkward Arrays and
     Records) into a #ak.contents.Content and maybe #ak.record.Record or
@@ -34,12 +41,17 @@ def to_layout(array, *, allow_record=True, allow_other=False):
     """
     with _errors.OperationErrorContext(
         "ak.to_layout",
-        dict(array=array, allow_record=allow_record, allow_other=allow_other),
+        dict(
+            array=array,
+            allow_record=allow_record,
+            allow_other=allow_other,
+            regulararray=regulararray,
+        ),
     ):
-        return _impl(array, allow_record, allow_other)
+        return _impl(array, allow_record, allow_other, regulararray=regulararray)
 
 
-def _impl(array, allow_record, allow_other):
+def _impl(array, allow_record, allow_other, regulararray):
     if isinstance(array, ak.contents.Content):
         return array
 
@@ -70,16 +82,18 @@ def _impl(array, allow_record, allow_other):
 
     elif numpy.is_own_array(array):
         return ak.operations.from_numpy(
-            array, regulararray=True, recordarray=True, highlevel=False
+            array, regulararray=regulararray, recordarray=True, highlevel=False
         )
 
-    elif ak._nplikes.Cupy.is_own_array(array):
-        return ak.operations.from_cupy(array, regulararray=True, highlevel=False)
+    elif Cupy.is_own_array(array):
+        return ak.operations.from_cupy(
+            array, regulararray=regulararray, highlevel=False
+        )
 
-    elif ak._nplikes.Jax.is_own_array(array):
-        return ak.operations.from_jax(array, regulararray=True, highlevel=False)
+    elif Jax.is_own_array(array):
+        return ak.operations.from_jax(array, regulararray=regulararray, highlevel=False)
 
-    elif ak._typetracer.TypeTracer.is_own_array(array):
+    elif TypeTracer.is_own_array(array):
         backend = ak._backends.TypeTracerBackend.instance()
 
         if len(array.shape) == 0:
@@ -94,6 +108,9 @@ def _impl(array, allow_record, allow_other):
 
         return ak.contents.NumpyArray(array, parameters=None, backend=backend)
 
+    elif ak._util.in_module(array, "pyarrow"):
+        return ak.operations.from_arrow(array, highlevel=False)
+
     elif isinstance(array, (str, bytes)):
         return ak.operations.from_iter([array], highlevel=False)[0]
 
@@ -102,6 +119,7 @@ def _impl(array, allow_record, allow_other):
             ak.operations.from_iter(array, highlevel=False),
             allow_record,
             allow_other,
+            regulararray,
         )
 
     elif not allow_other:

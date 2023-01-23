@@ -3,6 +3,7 @@
 import sys
 
 import awkward as ak
+from awkward._nplikes.typetracer import is_unknown_length
 
 
 class ArrayType:
@@ -16,8 +17,7 @@ class ArrayType:
                 )
             )
         if not (
-            (ak._util.is_integer(length) and length >= 0)
-            or length is ak._typetracer.UnknownLength
+            (ak._util.is_integer(length) and length >= 0) or is_unknown_length(length)
         ):
             raise ak._errors.wrap_error(
                 ValueError(

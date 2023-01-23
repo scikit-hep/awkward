@@ -4,6 +4,7 @@ import numpy as np  # noqa: F401
 import pytest  # noqa: F401
 
 import awkward as ak
+from awkward._nplikes.typetracer import is_unknown_length
 
 
 def test():
@@ -13,4 +14,4 @@ def test():
 
     array_tt = ak.Array(array.layout.to_typetracer(forget_length=True))
     result_tt = ak.fill_none(array_tt, 0)
-    assert result_tt.layout.length is ak._typetracer.UnknownLength
+    assert is_unknown_length(result_tt.layout.length)

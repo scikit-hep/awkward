@@ -1,8 +1,10 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._nplikes import nplike_of
+from awkward._nplikes.numpylike import NumpyMetadata
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 
 
 def nan_to_num(
@@ -74,7 +76,7 @@ def _impl(array, copy, nan, posinf, neginf, highlevel, behavior):
         broadcasting_ids[id(neginf)] = len(broadcasting)
         broadcasting.append(neginf_layout)
 
-    nplike = ak._nplikes.nplike_of(layout)
+    nplike = nplike_of(layout)
 
     if len(broadcasting) == 1:
 

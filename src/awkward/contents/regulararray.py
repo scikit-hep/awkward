@@ -4,13 +4,20 @@ from __future__ import annotations
 import copy
 
 import awkward as ak
+from awkward._nplikes.numpy import Numpy
+from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.typetracer import (
+    UnknownLength,
+    ensure_known_scalar,
+    is_unknown_length,
+)
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.regularform import RegularForm
 from awkward.typing import Final, Self, final
 
-np = ak._nplikes.NumpyMetadata.instance()
-numpy = ak._nplikes.Numpy.instance()
+np = NumpyMetadata.instance()
+numpy = Numpy.instance()
 
 
 @final
@@ -27,7 +34,7 @@ class RegularArray(Content):
                     )
                 )
             )
-        if not isinstance(size, ak._typetracer.UnknownLengthType):
+        if not is_unknown_length(size):
             if not (ak._util.is_integer(size) and size >= 0):
                 raise ak._errors.wrap_error(
                     TypeError(
@@ -38,7 +45,7 @@ class RegularArray(Content):
                 )
             else:
                 size = int(size)
-        if not isinstance(zeros_length, ak._typetracer.UnknownLengthType):
+        if not is_unknown_length(zeros_length):
             if not (ak._util.is_integer(zeros_length) and zeros_length >= 0):
                 raise ak._errors.wrap_error(
                     TypeError(
@@ -135,7 +142,7 @@ class RegularArray(Content):
         return RegularArray(
             self._content._to_typetracer(forget_length),
             self._size,
-            ak._typetracer.UnknownLength if forget_length else self._length,
+            UnknownLength if forget_length else self._length,
             parameters=self._parameters,
         )
 
@@ -196,7 +203,7 @@ class RegularArray(Content):
         if self._backend.nplike.known_shape and where < 0:
             where += self._length
 
-        if where < 0 or where >= self._length:
+        if where < 0 or ensure_known_scalar(where >= self._length, False):
             raise ak._errors.index_error(self, where)
         start, stop = (where) * self._size, (where + 1) * self._size
         return self._content._getitem_range(slice(start, stop))
@@ -412,7 +419,9 @@ class RegularArray(Content):
 
             nextcontent = self._content._carry(nextcarry, True)
 
-            if advanced is None or advanced.length == 0:
+            if advanced is None or (
+                not is_unknown_length(advanced.length) and advanced.length == 0
+            ):
                 return RegularArray(
                     nextcontent._getitem_next(nexthead, nexttail, advanced),
                     nextsize,
@@ -483,7 +492,9 @@ class RegularArray(Content):
                 slicer=head,
             )
 
-            if advanced is None or advanced.length == 0:
+            if advanced is None or (
+                not is_unknown_length(advanced.length) and advanced.length == 0
+            ):
                 nextcarry = ak.index.Index64.empty(
                     self._length * flathead.shape[0], self._backend.index_nplike
                 )

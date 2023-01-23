@@ -12,9 +12,12 @@ from collections.abc import Iterable, Mapping, Sequence, Sized
 import packaging.version
 
 import awkward as ak
-from awkward._nplikes import ufuncs
+from awkward._nplikes import nplike_of, ufuncs
+from awkward._nplikes.jax import Jax
+from awkward._nplikes.numpy import Numpy
+from awkward._nplikes.numpylike import NumpyMetadata
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 
 win = os.name == "nt"
 bits32 = np.iinfo(np.intp).bits == 32
@@ -467,7 +470,7 @@ def wrap(content, behavior=None, highlevel=True, like=None, allow_other=False):
 
 
 def union_to_record(unionarray, anonymous):
-    nplike = ak._nplikes.nplike_of(unionarray)
+    nplike = nplike_of(unionarray)
 
     contents = []
     for layout in unionarray.contents:
@@ -627,13 +630,13 @@ expand_braces.regex = re.compile(r"\{[^\{\}]*\}")
 
 
 def from_arraylib(array, regulararray, recordarray, highlevel, behavior):
-    np = ak._nplikes.NumpyMetadata.instance()
 
+    np = NumpyMetadata.instance()
     # overshadows global NumPy import for nplike-safety
-    numpy = ak._nplikes.Numpy.instance()
+    numpy = Numpy.instance()
 
     def recurse(array, mask=None):
-        if ak._nplikes.Jax.is_tracer(array):
+        if Jax.is_tracer(array):
             raise ak._errors.wrap_error(
                 TypeError("Jax tracers cannot be used with `ak.from_arraylib`")
             )
@@ -775,7 +778,7 @@ def arrays_approx_equal(
     left = ak.to_packed(ak.to_layout(left, allow_record=False), highlevel=False)
     right = ak.to_packed(ak.to_layout(right, allow_record=False), highlevel=False)
 
-    nplike = ak._nplikes.nplike_of(left, right)
+    nplike = nplike_of(left, right)
 
     def is_approx_dtype(left, right) -> bool:
         if not dtype_exact:

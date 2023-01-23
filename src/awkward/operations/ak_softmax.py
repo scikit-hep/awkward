@@ -2,9 +2,10 @@
 
 import awkward as ak
 from awkward._nplikes import ufuncs
+from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._util import unset
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 
 
 def softmax(

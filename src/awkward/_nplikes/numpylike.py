@@ -36,19 +36,40 @@ class ArrayLike(Protocol):
         ...
 
     @overload
-    def __getitem__(
-        self, index: SupportsIndex
-    ) -> int | float | complex | str | bytes | bytes:
+    def __getitem__(self, key: SupportsIndex) -> int | float | complex | bool:
         ...
 
     @overload
     def __getitem__(  # noqa: F811
-        self, index: slice | Ellipsis | tuple[SupportsIndex | slice | Ellipsis, ...]
+        self,
+        key: slice
+        | Ellipsis
+        | tuple[SupportsIndex | slice | Ellipsis, ...]
+        | ArrayLike,
     ) -> Self:
         ...
 
     @abstractmethod
-    def __getitem__(self, index) -> Self:  # noqa: F811
+    def __getitem__(self, key):  # noqa: F811
+        ...
+
+    @overload
+    def __setitem__(self, key: SupportsIndex, value: int | float | bool | complex):
+        ...
+
+    @overload
+    def __setitem__(  # noqa: F811
+        self,
+        key: slice
+        | Ellipsis
+        | tuple[SupportsIndex | slice | Ellipsis, ...]
+        | ArrayLike,
+        value: int | float | bool | complex,
+    ):
+        ...
+
+    @abstractmethod
+    def __setitem__(self, key, value):  # noqa: F811
         ...
 
     @abstractmethod

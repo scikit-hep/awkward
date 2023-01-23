@@ -5,11 +5,13 @@ import copy
 from collections.abc import Iterable
 
 import awkward as ak
+from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.typetracer import ensure_known_scalar
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.typing import Self
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 
 
 class Record:
@@ -22,7 +24,7 @@ class Record:
             raise ak._errors.wrap_error(
                 TypeError(f"Record 'at' must be an integer, not {array!r}")
             )
-        if at < 0 or at >= array.length:
+        if ensure_known_scalar(at < 0 or at >= array.length, False):
             raise ak._errors.wrap_error(
                 ValueError(
                     f"Record 'at' must be >= 0 and < len(array) == {array.length}, not {at}"

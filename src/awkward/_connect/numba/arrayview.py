@@ -8,8 +8,9 @@ import numba.core.typing.ctypes_utils
 import numpy
 
 import awkward as ak
+from awkward._nplikes.numpylike import NumpyMetadata
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 
 
 def code_to_function(code, function_name, externals=None, debug=False):

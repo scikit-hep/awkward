@@ -6,8 +6,9 @@ from datetime import datetime, timedelta
 from awkward_cpp.lib import _ext
 
 import awkward as ak
+from awkward._nplikes.numpylike import NumpyMetadata
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 
 
 def type(array, *, behavior=None):

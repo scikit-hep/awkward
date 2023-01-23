@@ -4,9 +4,7 @@ import numpy as np
 import pytest
 
 import awkward as ak
-from awkward._typetracer import UnknownLength
-
-typetracer = ak._typetracer.TypeTracer.instance()
+from awkward._nplikes.typetracer import is_unknown_length
 
 
 def test_getitem_at():
@@ -35,13 +33,13 @@ def test_NumpyArray():
         np.array([0.0, 1.1, 2.2, 3.3], dtype=np.float64)
     )
     assert a.to_typetracer().form == a.to_typetracer(forget_length=True).form
-    assert a.to_typetracer(forget_length=True).length is UnknownLength
+    assert is_unknown_length(a.to_typetracer(forget_length=True).length)
 
     b = ak.contents.numpyarray.NumpyArray(
         np.arange(2 * 3 * 5, dtype=np.int64).reshape(2, 3, 5)
     )
     assert b.to_typetracer().form == b.to_typetracer(forget_length=True).form
-    assert b.to_typetracer(forget_length=True).length is UnknownLength
+    assert is_unknown_length(b.to_typetracer(forget_length=True).length)
     assert b.to_typetracer(forget_length=True).data.shape[1:] == (3, 5)
 
 
@@ -54,13 +52,13 @@ def test_RegularArray_NumpyArray():
         3,
     )
     assert a.to_typetracer().form == a.to_typetracer(forget_length=True).form
-    assert a.to_typetracer(forget_length=True).length is UnknownLength
+    assert is_unknown_length(a.to_typetracer(forget_length=True).length)
 
     b = ak.contents.regulararray.RegularArray(
         ak.contents.emptyarray.EmptyArray(), 0, zeros_length=10
     )
     assert b.to_typetracer().form == b.to_typetracer(forget_length=True).form
-    assert b.to_typetracer(forget_length=True).length is UnknownLength
+    assert is_unknown_length(b.to_typetracer(forget_length=True).length)
 
 
 def test_ListArray_NumpyArray():
@@ -74,7 +72,7 @@ def test_ListArray_NumpyArray():
         ),
     )
     assert a.to_typetracer().form == a.to_typetracer(forget_length=True).form
-    assert a.to_typetracer(forget_length=True).length is UnknownLength
+    assert is_unknown_length(a.to_typetracer(forget_length=True).length)
 
 
 def test_ListOffsetArray_NumpyArray():
@@ -84,7 +82,7 @@ def test_ListOffsetArray_NumpyArray():
         ak.contents.numpyarray.NumpyArray([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7]),
     )
     assert a.to_typetracer().form == a.to_typetracer(forget_length=True).form
-    assert a.to_typetracer(forget_length=True).length is UnknownLength
+    assert is_unknown_length(a.to_typetracer(forget_length=True).length)
 
 
 def test_RecordArray_NumpyArray():
@@ -97,7 +95,7 @@ def test_RecordArray_NumpyArray():
         ["x", "y"],
     )
     assert a.to_typetracer().form == a.to_typetracer(forget_length=True).form
-    assert a.to_typetracer(forget_length=True).length is UnknownLength
+    assert is_unknown_length(a.to_typetracer(forget_length=True).length)
 
     # 5.5 is inaccessible
     b = ak.contents.recordarray.RecordArray(
@@ -108,15 +106,15 @@ def test_RecordArray_NumpyArray():
         None,
     )
     assert b.to_typetracer().form == b.to_typetracer(forget_length=True).form
-    assert b.to_typetracer(forget_length=True).length is UnknownLength
+    assert is_unknown_length(b.to_typetracer(forget_length=True).length)
 
     c = ak.contents.recordarray.RecordArray([], [], 10)
     assert c.to_typetracer().form == c.to_typetracer(forget_length=True).form
-    assert c.to_typetracer(forget_length=True).length is UnknownLength
+    assert is_unknown_length(c.to_typetracer(forget_length=True).length)
 
     d = ak.contents.recordarray.RecordArray([], None, 10)
     assert d.to_typetracer().form == d.to_typetracer(forget_length=True).form
-    assert d.to_typetracer(forget_length=True).length is UnknownLength
+    assert is_unknown_length(d.to_typetracer(forget_length=True).length)
 
 
 def test_IndexedArray_NumpyArray():
@@ -126,7 +124,7 @@ def test_IndexedArray_NumpyArray():
         ak.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
     )
     assert a.to_typetracer().form == a.to_typetracer(forget_length=True).form
-    assert a.to_typetracer(forget_length=True).length is UnknownLength
+    assert is_unknown_length(a.to_typetracer(forget_length=True).length)
 
 
 def test_IndexedOptionArray_NumpyArray():
@@ -136,7 +134,7 @@ def test_IndexedOptionArray_NumpyArray():
         ak.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
     )
     assert a.to_typetracer().form == a.to_typetracer(forget_length=True).form
-    assert a.to_typetracer(forget_length=True).length is UnknownLength
+    assert is_unknown_length(a.to_typetracer(forget_length=True).length)
 
 
 def test_ByteMaskedArray_NumpyArray():
@@ -147,7 +145,7 @@ def test_ByteMaskedArray_NumpyArray():
         valid_when=True,
     )
     assert a.to_typetracer().form == a.to_typetracer(forget_length=True).form
-    assert a.to_typetracer(forget_length=True).length is UnknownLength
+    assert is_unknown_length(a.to_typetracer(forget_length=True).length)
 
     # 2.2, 4.4, and 6.6 are inaccessible
     b = ak.contents.bytemaskedarray.ByteMaskedArray(
@@ -156,7 +154,7 @@ def test_ByteMaskedArray_NumpyArray():
         valid_when=False,
     )
     assert b.to_typetracer().form == b.to_typetracer(forget_length=True).form
-    assert b.to_typetracer(forget_length=True).length is UnknownLength
+    assert is_unknown_length(b.to_typetracer(forget_length=True).length)
 
 
 def test_BitMaskedArray_NumpyArray():
@@ -194,7 +192,7 @@ def test_BitMaskedArray_NumpyArray():
         lsb_order=False,
     )
     assert a.to_typetracer().form == a.to_typetracer(forget_length=True).form
-    assert a.to_typetracer(forget_length=True).length is UnknownLength
+    assert is_unknown_length(a.to_typetracer(forget_length=True).length)
 
     # 4.0, 5.0, 6.0, 7.0, 2.2, 4.4, and 6.6 are inaccessible
     b = ak.contents.bitmaskedarray.BitMaskedArray(
@@ -230,7 +228,7 @@ def test_BitMaskedArray_NumpyArray():
         lsb_order=False,
     )
     assert b.to_typetracer().form == b.to_typetracer(forget_length=True).form
-    assert b.to_typetracer(forget_length=True).length is UnknownLength
+    assert is_unknown_length(b.to_typetracer(forget_length=True).length)
 
     # 4.0, 5.0, 6.0, 7.0, 2.2, 4.4, and 6.6 are inaccessible
     c = ak.contents.bitmaskedarray.BitMaskedArray(
@@ -269,7 +267,7 @@ def test_BitMaskedArray_NumpyArray():
         lsb_order=True,
     )
     assert c.to_typetracer().form == c.to_typetracer(forget_length=True).form
-    assert c.to_typetracer(forget_length=True).length is UnknownLength
+    assert is_unknown_length(c.to_typetracer(forget_length=True).length)
 
     # 4.0, 5.0, 6.0, 7.0, 2.2, 4.4, and 6.6 are inaccessible
     d = ak.contents.bitmaskedarray.BitMaskedArray(
@@ -308,7 +306,7 @@ def test_BitMaskedArray_NumpyArray():
         lsb_order=True,
     )
     assert d.to_typetracer().form == d.to_typetracer(forget_length=True).form
-    assert d.to_typetracer(forget_length=True).length is UnknownLength
+    assert is_unknown_length(d.to_typetracer(forget_length=True).length)
 
 
 def test_UnmaskedArray_NumpyArray():
@@ -333,7 +331,7 @@ def test_UnmaskedArray_NumpyArray():
     with pytest.raises(IndexError):
         a["bad"]
     assert a.to_typetracer().form == a.to_typetracer(forget_length=True).form
-    assert a.to_typetracer(forget_length=True).length is UnknownLength
+    assert is_unknown_length(a.to_typetracer(forget_length=True).length)
 
 
 def test_UnionArray_NumpyArray():
@@ -348,7 +346,7 @@ def test_UnionArray_NumpyArray():
         ],
     )
     assert a.to_typetracer().form == a.to_typetracer(forget_length=True).form
-    assert a.to_typetracer(forget_length=True).length is UnknownLength
+    assert is_unknown_length(a.to_typetracer(forget_length=True).length)
 
 
 def test_RegularArray_RecordArray_NumpyArray():
@@ -365,7 +363,7 @@ def test_RegularArray_RecordArray_NumpyArray():
         3,
     )
     assert a.to_typetracer().form == a.to_typetracer(forget_length=True).form
-    assert a.to_typetracer(forget_length=True).length is UnknownLength
+    assert is_unknown_length(a.to_typetracer(forget_length=True).length)
 
     b = ak.contents.regulararray.RegularArray(
         ak.contents.recordarray.RecordArray(
@@ -388,7 +386,7 @@ def test_RegularArray_RecordArray_NumpyArray():
     with pytest.raises(IndexError):
         b["nest"]["bad"]
     assert b.to_typetracer().form == b.to_typetracer(forget_length=True).form
-    assert b.to_typetracer(forget_length=True).length is UnknownLength
+    assert is_unknown_length(b.to_typetracer(forget_length=True).length)
 
 
 def test_ListArray_RecordArray_NumpyArray():
@@ -407,7 +405,7 @@ def test_ListArray_RecordArray_NumpyArray():
         ),
     )
     assert a.to_typetracer().form == a.to_typetracer(forget_length=True).form
-    assert a.to_typetracer(forget_length=True).length is UnknownLength
+    assert is_unknown_length(a.to_typetracer(forget_length=True).length)
 
 
 def test_ListOffsetArray_RecordArray_NumpyArray():
@@ -420,7 +418,7 @@ def test_ListOffsetArray_RecordArray_NumpyArray():
         ),
     )
     assert a.to_typetracer().form == a.to_typetracer(forget_length=True).form
-    assert a.to_typetracer(forget_length=True).length is UnknownLength
+    assert is_unknown_length(a.to_typetracer(forget_length=True).length)
 
 
 def test_IndexedArray_RecordArray_NumpyArray():
@@ -437,7 +435,7 @@ def test_IndexedArray_RecordArray_NumpyArray():
         ),
     )
     assert a.to_typetracer().form == a.to_typetracer(forget_length=True).form
-    assert a.to_typetracer(forget_length=True).length is UnknownLength
+    assert is_unknown_length(a.to_typetracer(forget_length=True).length)
 
 
 def test_IndexedOptionArray_RecordArray_NumpyArray():
@@ -454,7 +452,7 @@ def test_IndexedOptionArray_RecordArray_NumpyArray():
         ),
     )
     assert a.to_typetracer().form == a.to_typetracer(forget_length=True).form
-    assert a.to_typetracer(forget_length=True).length is UnknownLength
+    assert is_unknown_length(a.to_typetracer(forget_length=True).length)
 
 
 def test_ByteMaskedArray_RecordArray_NumpyArray():
@@ -472,7 +470,7 @@ def test_ByteMaskedArray_RecordArray_NumpyArray():
         valid_when=True,
     )
     assert a.to_typetracer().form == a.to_typetracer(forget_length=True).form
-    assert a.to_typetracer(forget_length=True).length is UnknownLength
+    assert is_unknown_length(a.to_typetracer(forget_length=True).length)
 
     # 2.2, 4.4, and 6.6 are inaccessible
     b = ak.contents.bytemaskedarray.ByteMaskedArray(
@@ -488,7 +486,7 @@ def test_ByteMaskedArray_RecordArray_NumpyArray():
         valid_when=False,
     )
     assert b.to_typetracer().form == b.to_typetracer(forget_length=True).form
-    assert b.to_typetracer(forget_length=True).length is UnknownLength
+    assert is_unknown_length(b.to_typetracer(forget_length=True).length)
 
 
 def test_BitMaskedArray_RecordArray_NumpyArray():
@@ -545,7 +543,7 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
         lsb_order=False,
     )
     assert a.to_typetracer().form == a.to_typetracer(forget_length=True).form
-    assert a.to_typetracer(forget_length=True).length is UnknownLength
+    assert is_unknown_length(a.to_typetracer(forget_length=True).length)
 
     # 4.0, 5.0, 6.0, 7.0, 2.2, 4.4, and 6.6 are inaccessible
     b = ak.contents.bitmaskedarray.BitMaskedArray(
@@ -601,7 +599,7 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
         lsb_order=False,
     )
     assert b.to_typetracer().form == b.to_typetracer(forget_length=True).form
-    assert b.to_typetracer(forget_length=True).length is UnknownLength
+    assert is_unknown_length(b.to_typetracer(forget_length=True).length)
 
     # 4.0, 5.0, 6.0, 7.0, 2.2, 4.4, and 6.6 are inaccessible
     c = ak.contents.bitmaskedarray.BitMaskedArray(
@@ -660,7 +658,7 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
         lsb_order=True,
     )
     assert c.to_typetracer().form == c.to_typetracer(forget_length=True).form
-    assert c.to_typetracer(forget_length=True).length is UnknownLength
+    assert is_unknown_length(c.to_typetracer(forget_length=True).length)
 
     # 4.0, 5.0, 6.0, 7.0, 2.2, 4.4, and 6.6 are inaccessible
     d = ak.contents.bitmaskedarray.BitMaskedArray(
@@ -719,7 +717,7 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
         lsb_order=True,
     )
     assert d.to_typetracer().form == d.to_typetracer(forget_length=True).form
-    assert d.to_typetracer(forget_length=True).length is UnknownLength
+    assert is_unknown_length(d.to_typetracer(forget_length=True).length)
 
 
 def test_UnmaskedArray_RecordArray_NumpyArray():
@@ -734,7 +732,7 @@ def test_UnmaskedArray_RecordArray_NumpyArray():
         )
     )
     assert a.to_typetracer().form == a.to_typetracer(forget_length=True).form
-    assert a.to_typetracer(forget_length=True).length is UnknownLength
+    assert is_unknown_length(a.to_typetracer(forget_length=True).length)
 
 
 def test_UnionArray_RecordArray_NumpyArray():
@@ -758,4 +756,4 @@ def test_UnionArray_RecordArray_NumpyArray():
         ],
     )
     assert a.to_typetracer().form == a.to_typetracer(forget_length=True).form
-    assert a.to_typetracer(forget_length=True).length is UnknownLength
+    assert is_unknown_length(a.to_typetracer(forget_length=True).length)

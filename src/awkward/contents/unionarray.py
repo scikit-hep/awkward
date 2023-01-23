@@ -8,14 +8,23 @@ import ctypes
 from collections.abc import Iterable, Sequence
 
 import awkward as ak
+from awkward._nplikes.jax import Jax
+from awkward._nplikes.numpy import Numpy
+from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.typetracer import (
+    OneOf,
+    TypeTracer,
+    ensure_known_scalar,
+    is_unknown_length,
+)
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.unionform import UnionForm
 from awkward.index import Index, Index8, Index64
 from awkward.typing import Final, Self, final
 
-np = ak._nplikes.NumpyMetadata.instance()
-numpy = ak._nplikes.Numpy.instance()
+np = NumpyMetadata.instance()
+numpy = Numpy.instance()
 
 
 @final
@@ -91,11 +100,7 @@ class UnionArray(Content):
                     )
                 )
 
-        if (
-            tags.nplike.known_shape
-            and index.nplike.known_shape
-            and tags.length > index.length
-        ):
+        if ensure_known_scalar(tags.length > index.length, False):
             raise ak._errors.wrap_error(
                 ValueError(
                     "{} len(tags) ({}) must be <= len(index) ({})".format(
@@ -405,7 +410,7 @@ class UnionArray(Content):
             content._to_buffers(form.content(i), getkey, container, backend, byteorder)
 
     def _to_typetracer(self, forget_length: bool) -> Self:
-        tt = ak._typetracer.TypeTracer.instance()
+        tt = TypeTracer.instance()
         tags = self._tags.to_nplike(tt)
         return UnionArray(
             tags.forget_length() if forget_length else tags,
@@ -461,7 +466,7 @@ class UnionArray(Content):
     def _getitem_at(self, where):
         if not self._backend.nplike.known_data:
             self._touch_data(recursive=False)
-            return ak._typetracer.OneOf([x._getitem_at(where) for x in self._contents])
+            return OneOf([x._getitem_at(where) for x in self._contents])
 
         if where < 0:
             where += self.length
@@ -594,7 +599,9 @@ class UnionArray(Content):
 
     def project(self, index):
         lentags = self._tags.length
-        assert not self._index.length < lentags
+        assert (
+            is_unknown_length(self._index.length) or is_unknown_length(lentags)
+        ) or self._index.length >= lentags
         lenout = ak.index.Index64.empty(1, self._backend.index_nplike)
         tmpcarry = ak.index.Index64.empty(lentags, self._backend.index_nplike)
         assert (
@@ -913,19 +920,13 @@ class UnionArray(Content):
         for i in range(len(others)):
             head.append(others[i])
 
-        if any(
-            isinstance(x.backend.nplike, ak._typetracer.TypeTracer) for x in head + tail
-        ):
+        if any(isinstance(x.backend.nplike, TypeTracer) for x in head + tail):
             head = [
-                x
-                if isinstance(x.backend.nplike, ak._typetracer.TypeTracer)
-                else x.to_typetracer()
+                x if isinstance(x.backend.nplike, TypeTracer) else x.to_typetracer()
                 for x in head
             ]
             tail = [
-                x
-                if isinstance(x.backend.nplike, ak._typetracer.TypeTracer)
-                else x.to_typetracer()
+                x if isinstance(x.backend.nplike, TypeTracer) else x.to_typetracer()
                 for x in tail
             ]
 
@@ -1454,7 +1455,7 @@ class UnionArray(Content):
         tags = backend.index_nplike.asarray(self.tags)
         for tag, content in enumerate(contents):
             mask = tags == tag
-            if ak._nplikes.Jax.is_own_array(out):
+            if Jax.is_own_array(out):
                 out = out.at[mask].set(content)
             else:
                 out[mask] = content

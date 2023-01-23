@@ -1,17 +1,18 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
-from awkward._nplikes import ufuncs
+from awkward._nplikes import nplike_of, ufuncs
+from awkward._nplikes.numpylike import NumpyMetadata
 from awkward.highlevel import Array
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 
 
 class ByteBehavior(Array):
     __name__ = "Array"
 
     def __bytes__(self):
-        tmp = ak._nplikes.nplike_of(self.layout).asarray(self.layout)
+        tmp = nplike_of(self.layout).asarray(self.layout)
         if hasattr(tmp, "tobytes"):
             return tmp.tobytes()
         else:
@@ -56,7 +57,7 @@ class CharBehavior(Array):
     __name__ = "Array"
 
     def __bytes__(self):
-        tmp = ak._nplikes.nplike_of(self.layout).asarray(self.layout)
+        tmp = nplike_of(self.layout).asarray(self.layout)
         if hasattr(tmp, "tobytes"):
             return tmp.tobytes()
         else:
@@ -110,7 +111,7 @@ class StringBehavior(Array):
 
 
 def _string_equal(one, two):
-    nplike = ak._nplikes.nplike_of(one, two)
+    nplike = nplike_of(one, two)
     behavior = ak._util.behavior_of(one, two)
 
     one, two = (
@@ -150,7 +151,7 @@ def _string_notequal(one, two):
 
 
 def _string_broadcast(layout, offsets):
-    nplike = ak._nplikes.nplike_of(offsets)
+    nplike = nplike_of(offsets)
     assert nplike is layout.backend.index_nplike
 
     offsets = nplike.asarray(offsets)

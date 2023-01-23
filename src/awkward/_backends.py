@@ -6,13 +6,17 @@ import awkward_cpp
 
 import awkward as ak
 from awkward._kernels import CupyKernel, JaxKernel, NumpyKernel, TypeTracerKernel
-from awkward._nplikes import Cupy, Jax, Numpy, NumpyLike, NumpyMetadata, nplike_of
+from awkward._nplikes import nplike_of
+from awkward._nplikes.cupy import Cupy
+from awkward._nplikes.jax import Jax
+from awkward._nplikes.numpy import Numpy
+from awkward._nplikes.numpylike import NumpyLike, NumpyMetadata
+from awkward._nplikes.typetracer import MaybeNone, TypeTracer, TypeTracerArray
 from awkward._singleton import Singleton
-from awkward._typetracer import TypeTracer
 from awkward.typing import Callable, Final, Tuple, TypeAlias, TypeVar, Unpack
 
 np = NumpyMetadata.instance()
-numpy = ak._nplikes.Numpy.instance()
+numpy = Numpy.instance()
 
 
 T = TypeVar("T", covariant=True)
@@ -168,14 +172,12 @@ class TypeTracerBackend(Backend):
         return TypeTracerKernel(index)
 
     def _coerce_ufunc_argument(self, x):
-        if isinstance(x, ak._typetracer.TypeTracerArray):
-            return numpy.empty((0,) + x.shape[1:], dtype=x.dtype)
-        # Convert scalars to 0-d arrays
-        elif isinstance(x, ak._typetracer.UnknownScalar):
-            return numpy.empty((0,), dtype=x.dtype)
-        elif x is ak._typetracer.UnknownLength:
-            return numpy.empty((0,), dtype=np.int64)
-        elif isinstance(x, ak._typetracer.MaybeNone):
+        if isinstance(x, TypeTracerArray):
+            if x.ndim == 0:
+                return numpy.empty((0,), dtype=x.dtype)
+            else:
+                return numpy.empty((0,) + x.shape[1:], dtype=x.dtype)
+        elif isinstance(x, MaybeNone):
             return self._coerce_ufunc_argument(x.content)
         else:
             return x
@@ -185,7 +187,7 @@ class TypeTracerBackend(Backend):
         numpy_args = []
 
         for x in args:
-            if isinstance(x, ak._typetracer.TypeTracerArray):
+            if isinstance(x, TypeTracerArray):
                 x.touch_data()
                 shape = x.shape
 
@@ -196,7 +198,7 @@ class TypeTracerBackend(Backend):
         return self._typetracer.empty((shape[0],) + tmp.shape[1:], dtype=tmp.dtype)
 
 
-def _backend_for_nplike(nplike: ak._nplikes.NumpyLike) -> Backend:
+def _backend_for_nplike(nplike: NumpyLike) -> Backend:
     # Currently there exists a one-to-one relationship between the nplike
     # and the backend. In future, this might need refactoring
     if isinstance(nplike, Numpy):
