@@ -27,11 +27,11 @@ def is_unknown_length(array: Any) -> bool:
 
 
 def is_unknown_scalar(array: Any) -> bool:
-    return isinstance(array, TypeTracerArray) and (array.ndim == 0)
+    return isinstance(array, TypeTracerArray) and array.ndim == 0
 
 
 def is_unknown_array(array: Any) -> bool:
-    return isinstance(array, TypeTracerArray) and (array.ndim > 0)
+    return isinstance(array, TypeTracerArray) and array.ndim > 0
 
 
 def ensure_known_scalar(value, default):
