@@ -272,7 +272,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
     def shape(self, value):
         if ak._util.is_integer(value):
             value = (value,)
-        elif value is None or is_unknown_scalar(value):
+        elif value is None or is_unknown_length(value):
             value = (UnknownLength,)
         elif not isinstance(value, tuple):
             value = tuple(value)
