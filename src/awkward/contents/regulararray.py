@@ -76,7 +76,7 @@ class RegularArray(Content):
 
         self._content = content
         self._size = size
-        if size != 0:
+        if ensure_known_scalar(size != 0, False):
             self._length = content.length // size  # floor division
         else:
             self._length = zeros_length
