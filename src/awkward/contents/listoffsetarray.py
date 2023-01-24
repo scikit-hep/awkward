@@ -251,7 +251,7 @@ class ListOffsetArray(Content):
 
         start, stop, step = where.indices(self.length)
         offsets = self._offsets[start : stop + 1]
-        if offsets.length == 0:
+        if ensure_known_scalar(offsets.length == 0, False):
             offsets = Index(
                 self._backend.index_nplike.asarray([0], dtype=self._offsets.dtype),
                 nplike=self._backend.index_nplike,
@@ -657,7 +657,7 @@ class ListOffsetArray(Content):
                 dtype=np.int64,
             )
 
-            if inneroffsets.length == 0:
+            if ensure_known_scalar(inneroffsets.length == 0, False):
                 return (
                     offsets,
                     ListOffsetArray(
@@ -665,7 +665,7 @@ class ListOffsetArray(Content):
                     ),
                 )
 
-            elif self._offsets.length == 1:
+            elif ensure_known_scalar(self._offsets.length == 1, False):
                 tooffsets = ak.index.Index64([inneroffsets[0]])
                 return (
                     offsets,
