@@ -229,10 +229,20 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
     def __repr__(self):
         dtype = repr(self._dtype)
         if self.ndim == 0:
-            shape = "??"
+            shape = ""
         else:
             shape = ", shape=" + repr(self._shape)
         return f"TypeTracerArray({dtype}{shape})"
+
+    def __str__(self):
+        if self.ndim == 0:
+            if self.dtype == np.int64:
+                return "??"
+            else:
+                return f"unknown-{str(self._dtype)}"
+
+        else:
+            return repr(self)
 
     @property
     def T(self) -> Self:
