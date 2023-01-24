@@ -2,9 +2,10 @@
 
 from collections.abc import Mapping, Sequence
 
-import numpy as np
-
 import awkward as ak
+from awkward._nplikes import NumpyMetadata
+
+metadata = NumpyMetadata.instance()
 
 
 def to_parquet(
@@ -225,7 +226,8 @@ def to_parquet(
                 return [
                     x
                     for x, y in zip(parquet_column_names, column_types)
-                    if isinstance(y, np.dtype) and issubclass(y.type, np.floating)
+                    if isinstance(y, metadata.dtype)
+                    and issubclass(y.type, metadata.floating)
                 ]
         else:
             return parquet_column_names

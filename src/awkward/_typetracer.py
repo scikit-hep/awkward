@@ -7,8 +7,9 @@ import numpy
 
 import awkward as ak
 from awkward import _nplikes, index
+from awkward._nplikes import ArrayLike, NumpyLike
 from awkward._util import NDArrayOperatorsMixin
-from awkward.typing import TypeVar
+from awkward.typing import Final, Literal, Self, SupportsInt
 
 np = _nplikes.NumpyMetadata.instance()
 
@@ -79,7 +80,7 @@ def _emptyarray(x):
 
 
 class UnknownScalar:
-    def __init__(self, dtype):
+    def __init__(self, dtype: np.dtype):
         self._dtype = np.dtype(dtype)
 
     @property
@@ -292,12 +293,9 @@ def _length_after_slice(slice, original_length):
         return 0
 
 
-TTypeTracerArray = TypeVar("TTypeTracerArray", bound="TypeTracerArray")
-
-
-class TypeTracerArray(NDArrayOperatorsMixin):
+class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
     @classmethod
-    def from_array(cls: TTypeTracerArray, array, dtype=None) -> TTypeTracerArray:
+    def from_array(cls, array, dtype: np.dtype | None = None) -> Self:
         """
         Args:
             array: array-like object, e.g. np.ndarray, #ak.index.Index
@@ -333,7 +331,7 @@ class TypeTracerArray(NDArrayOperatorsMixin):
 
         return cls(dtype, array.shape, form_key, report)
 
-    def __init__(self, dtype, shape=None, form_key=None, report=None):
+    def __init__(self, dtype: np.dtype, shape=None, form_key=None, report=None):
         self.form_key = form_key
         self.report = report
 
@@ -348,8 +346,24 @@ class TypeTracerArray(NDArrayOperatorsMixin):
         return f"TypeTracerArray({dtype}{shape})"
 
     @property
+    def T(self) -> Self:
+        return TypeTracerArray(
+            self.dtype, self._shape[::-1], self.form_key, self.report
+        )
+
+    @property
     def dtype(self):
         return self._dtype
+
+    @property
+    def size(self) -> int | UnknownLength:
+        size = 1
+        for item in self._shape:
+            if ak._util.is_integer(item):
+                size += item
+            else:
+                return UnknownLength
+        return size
 
     @property
     def shape(self):
@@ -413,11 +427,11 @@ class TypeTracerArray(NDArrayOperatorsMixin):
         self.touch_shape()
         return len(self._shape)
 
-    def astype(self, dtype):
+    def astype(self, dtype: np.dtype):
         self.touch_data()
         return self.__class__(np.dtype(dtype), self._shape)
 
-    def view(self, dtype):
+    def view(self, dtype: np.dtype):
         if (
             self.itemsize != np.dtype(dtype).itemsize
             and self._shape[-1] != UnknownLength
@@ -659,12 +673,28 @@ class TypeTracerArray(NDArrayOperatorsMixin):
         return self
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
-        self.touch_data()
-        replacements = [
-            numpy.empty(0, x.dtype) if hasattr(x, "dtype") else x for x in inputs
-        ]
-        result = getattr(ufunc, method)(*replacements, **kwargs)
-        return TypeTracerArray(result.dtype, shape=self._shape)
+        # raise ak._errors.wrap_error(
+        #     RuntimeError(
+        #         "TypeTracerArray objects should not be used directly with ufuncs"
+        #     )
+        # )
+        if method != "__call__" or len(inputs) == 0 or "out" in kwargs:
+            raise ak._errors.wrap_error(NotImplementedError)
+
+        if len(kwargs) > 0:
+            raise ak._errors.wrap_error(
+                ValueError("TypeTracerArray does not support kwargs for ufuncs")
+            )
+        return TypeTracer._apply_ufunc(ufunc, *inputs)
+
+    def __bool__(self) -> bool:
+        raise ak._errors.wrap_error(RuntimeError("cannot realise an unknown value"))
+
+    def __int__(self) -> int:
+        raise ak._errors.wrap_error(RuntimeError("cannot realise an unknown value"))
+
+    def __index__(self) -> int:
+        raise ak._errors.wrap_error(RuntimeError("cannot realise an unknown value"))
 
 
 def try_touch_data(array):
@@ -677,13 +707,29 @@ def try_touch_shape(array):
         array.touch_shape()
 
 
-class TypeTracer(ak._nplikes.NumpyLike):
-    known_data = False
-    known_shape = False
+class TypeTracer(NumpyLike):
+    known_data: Final = False
+    known_shape: Final = False
+    is_eager: Final = True
 
-    @property
-    def index_nplike(self):
-        return self
+    @staticmethod
+    def _apply_ufunc(ufunc, *inputs):
+        for x in inputs:
+            getattr(x, "touch_data", lambda: None)()
+
+        replacements = []
+        to_broadcast = []
+        for x in inputs:
+            if hasattr(x, "dtype") and hasattr(x, "shape"):
+                replacements.append(numpy.empty(0, x.dtype))
+                to_broadcast.append(x)
+            else:
+                replacements.append(x)
+
+        broadcasted = TypeTracer.instance().broadcast_arrays(*to_broadcast)
+
+        result = ufunc(*replacements)
+        return TypeTracerArray(result.dtype, shape=broadcasted[0].shape)
 
     def to_rectilinear(self, array, *args, **kwargs):
         try_touch_shape(array)
@@ -701,24 +747,6 @@ class TypeTracer(ak._nplikes.NumpyLike):
     def ndarray(self):
         return TypeTracerArray
 
-    def raw(self, array, nplike):
-        if isinstance(nplike, TypeTracer):
-            return TypeTracerArray.from_array(array)
-        elif isinstance(array, TypeTracerArray):
-            return self
-        elif hasattr(nplike, "known_data") and nplike.known_data:
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "Converting a TypeTracer nplike to a nplike with `known_data=True` is not possible"
-                )
-            )
-        else:
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "Invalid nplike, choose between nplike.Numpy, nplike.Cupy, Typetracer"
-                )
-            )
-
     ############################ array creation
 
     def asarray(
@@ -727,7 +755,7 @@ class TypeTracer(ak._nplikes.NumpyLike):
         *,
         dtype: numpy.dtype | None = None,
         copy: bool | None = None,
-    ):
+    ) -> TypeTracerArray:
         try_touch_data(obj)
         result = TypeTracerArray.from_array(obj, dtype=dtype)
         # If we want a copy, by the dtypes don't match
@@ -744,67 +772,73 @@ class TypeTracer(ak._nplikes.NumpyLike):
         else:
             return result
 
-    def ascontiguousarray(self, array, dtype=None, **kwargs):
-        # array[, dtype=]
-        try_touch_data(array)
-        return TypeTracerArray.from_array(array, dtype=dtype)
+    def ascontiguousarray(
+        self, x: ArrayLike, *, dtype: numpy.dtype | None = None
+    ) -> TypeTracerArray:
+        try_touch_data(x)
+        return TypeTracerArray.from_array(x, dtype=dtype)
 
-    def isscalar(self, *args, **kwargs):
-        for x in args:
+    def frombuffer(
+        self, buffer, *, dtype: np.dtype | None = None, count: int = -1
+    ) -> TypeTracerArray:
+        for x in (buffer, count):
             try_touch_data(x)
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def frombuffer(self, *args, **kwargs):
-        # array[, dtype=]
-        for x in args:
-            try_touch_data(x)
-        raise ak._errors.wrap_error(NotImplementedError)
-
-    def zeros(self, shape, dtype=np.float64, **kwargs):
-        # shape/len[, dtype=]
+    def zeros(
+        self, shape: int | tuple[int, ...], *, dtype: np.dtype | None = None
+    ) -> TypeTracerArray:
         return TypeTracerArray(dtype, shape)
 
-    def ones(self, shape, dtype=np.float64, **kwargs):
-        # shape/len[, dtype=]
+    def ones(
+        self, shape: int | tuple[int, ...], *, dtype: np.dtype | None = None
+    ) -> TypeTracerArray:
         return TypeTracerArray(dtype, shape)
 
-    def empty(self, shape, dtype=np.float64, **kwargs):
-        # shape/len[, dtype=]
+    def empty(
+        self, shape: int | tuple[int, ...], *, dtype: np.dtype | None = None
+    ) -> TypeTracerArray:
         return TypeTracerArray(dtype, shape)
 
-    def full(self, shape, value, dtype=None, **kwargs):
-        array = TypeTracerArray.from_array(value, dtype=dtype)
+    def full(
+        self, shape: int | tuple[int, ...], fill_value, *, dtype: np.dtype | None = None
+    ) -> TypeTracerArray:
+        array = TypeTracerArray.from_array(fill_value, dtype=dtype)
         return array.reshape(shape)
 
-    def zeros_like(self, a, dtype=None, **kwargs):
-        try_touch_shape(a)
-        if isinstance(a, UnknownScalar):
+    def zeros_like(
+        self, x: ArrayLike, *, dtype: np.dtype | None = None
+    ) -> TypeTracerArray:
+        try_touch_shape(x)
+        if isinstance(x, UnknownScalar):
             return UnknownScalar(dtype)
-        return TypeTracerArray.from_array(a, dtype=dtype)
+        return TypeTracerArray.from_array(x, dtype=dtype)
 
-    def ones_like(self, a, dtype=None, **kwargs):
-        try_touch_shape(a)
-        return self.zeros_like(a, dtype)
+    def ones_like(
+        self, x: ArrayLike, *, dtype: np.dtype | None = None
+    ) -> TypeTracerArray:
+        try_touch_shape(x)
+        return self.zeros_like(x, dtype=dtype)
 
-    def full_like(self, a, fill_value, dtype=None, **kwargs):
-        try_touch_shape(a)
-        return self.zeros_like(a, dtype)
+    def full_like(
+        self, x: ArrayLike, fill_value, *, dtype: np.dtype | None = None
+    ) -> TypeTracerArray:
+        try_touch_shape(x)
+        return self.zeros_like(x, dtype=dtype)
 
-    def arange(self, *args, **kwargs):
-        # stop[, dtype=]
-        # start, stop[, dtype=]
-        # start, stop, step[, dtype=]
-        assert 1 <= len(args) <= 3
-        assert (
-            "dtype" in kwargs
-        ), "internal error: calling arange without dtype (platform dependence)"
-
-        if len(args) == 1:
-            start, stop, step = 0, args[0], 1
-        elif len(args) == 2:
-            start, stop, step = args[0], args[1], 1
-        elif len(args) == 3:
-            start, stop, step = args[0], args[1], args[2]
+    def arange(
+        self,
+        start: float | int,
+        stop: float | int | None = None,
+        step: float | int = 1,
+        *,
+        dtype: np.dtype | None = None,
+    ) -> TypeTracerArray:
+        try_touch_data(start)
+        try_touch_data(stop)
+        try_touch_data(step)
+        if stop is None:
+            start, stop = 0, start
 
         if (
             ak._util.is_integer(start)
@@ -815,51 +849,40 @@ class TypeTracer(ak._nplikes.NumpyLike):
         else:
             length = UnknownLength
 
-        return TypeTracerArray(kwargs["dtype"], (length,))
+        return TypeTracerArray(dtype, (length,))
 
-    def meshgrid(self, *args, **kwargs):
-        # *arrays, indexing="ij"
-        for x in args:
+    def meshgrid(
+        self, *arrays: ArrayLike, indexing: Literal["xy", "ij"] = "xy"
+    ) -> list[TypeTracerArray]:
+        for x in arrays:
             try_touch_data(x)
         raise ak._errors.wrap_error(NotImplementedError)
 
     ############################ testing
 
-    def shape(self, *args, **kwargs):
-        # array
-        for x in args:
-            try_touch_shape(x)
-        raise ak._errors.wrap_error(NotImplementedError)
-
-    def array_equal(self, *args, **kwargs):
-        # array1, array2
-        for x in args:
-            try_touch_data(x)
+    def array_equal(
+        self, x1: ArrayLike, x2: ArrayLike, *, equal_nan: bool = False
+    ) -> bool:
+        try_touch_data(x1)
+        try_touch_data(x2)
         return False
 
-    def size(self, *args, **kwargs):
-        # array
-        for x in args:
-            try_touch_shape(x)
+    def searchsorted(
+        self,
+        x: ArrayLike,
+        values: ArrayLike,
+        *,
+        side: Literal["left", "right"] = "left",
+        sorter: ArrayLike | None = None,
+    ) -> TypeTracerArray:
+        try_touch_data(x)
+        try_touch_data(values)
+        try_touch_data(sorter)
         raise ak._errors.wrap_error(NotImplementedError)
-
-    def searchsorted(self, *args, **kwargs):
-        # haystack, needle, side="right"
-        for x in args:
-            try_touch_data(x)
-        raise ak._errors.wrap_error(NotImplementedError)
-
-    def argsort(self, array, *args, **kwargs):
-        # array
-        for x in args:
-            try_touch_data(x)
-        return TypeTracerArray(np.int64, array.shape)
 
     ############################ manipulation
 
-    def broadcast_arrays(self, *arrays):
-        # array1[, array2[, ...]]
-
+    def broadcast_arrays(self, *arrays: ArrayLike) -> list[TypeTracerArray]:
         for x in arrays:
             try_touch_data(x)
 
@@ -900,84 +923,35 @@ class TypeTracer(ak._nplikes.NumpyLike):
             TypeTracerArray(x.dtype, [UnknownLength] + shape) for x in [first] + rest
         ]
 
-    def add(self, x, y):
-        # array1, array2[, out=]
-        is_array = False
-        if isinstance(x, TypeTracerArray):
-            x.touch_data()
-            is_array = True
-            x = x[0]
-        if isinstance(y, TypeTracerArray):
-            y.touch_data()
-            is_array = True
-            y = y[0]
-        out = x + y
-        if is_array:
-            return TypeTracerArray(out.dtype)
-        else:
-            return out
-
-    def multiply(self, x, y):
-        try_touch_data(x)
-        try_touch_data(y)
-        # array1, array2[, out=]
-        return self.add(x, y)
-
-    def maximum(self, x, y):
-        try_touch_data(x)
-        try_touch_data(y)
-        # array1, array2[, out=]
-        is_array = False
-        if isinstance(x, TypeTracerArray):
-            is_array = True
-            x = x[0]
-        if isinstance(y, TypeTracerArray):
-            is_array = True
-            y = y[0]
-        is_maybenone = False
-        if isinstance(x, MaybeNone):
-            is_maybenone = True
-            x = x.content
-        if isinstance(y, MaybeNone):
-            is_maybenone = True
-            y = y.content
-        out = x + y
-        if is_array:
-            return TypeTracerArray(out.dtype)
-        elif is_maybenone:
-            return MaybeNone(out)
-        else:
-            return out
-
-    def minimum(self, x, y):
-        try_touch_data(x)
-        try_touch_data(y)
-        return self.maximum(x, y)
-
-    def cumsum(self, *args, **kwargs):
-        # arrays[, out=]
-        for x in args:
-            try_touch_data(x)
+    def broadcast_to(
+        self, x: ArrayLike, shape: tuple[SupportsInt, ...]
+    ) -> TypeTracerArray:
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def cumprod(self, *args, **kwargs):
-        # arrays[, out=]
-        for x in args:
-            try_touch_data(x)
+    def cumsum(
+        self,
+        x: ArrayLike,
+        *,
+        axis: int | None = None,
+        maybe_out: ArrayLike | None = None,
+    ) -> TypeTracerArray:
+        try_touch_data(x)
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def nonzero(self, array):
+    def nonzero(self, x: ArrayLike) -> tuple[TypeTracerArray, ...]:
         # array
-        try_touch_data(array)
-        return (TypeTracerArray(np.int64, (UnknownLength,)),) * len(array.shape)
+        try_touch_data(x)
+        return (TypeTracerArray(np.int64, (UnknownLength,)),) * len(x.shape)
 
-    def unique(self, *args, **kwargs):
-        # array
-        for x in args:
-            try_touch_data(x)
-        raise ak._errors.wrap_error(NotImplementedError)
+    def unique_values(self, x: ArrayLike) -> TypeTracerArray:
+        try_touch_data(x)
+        return TypeTracerArray(x.dtype)
 
-    def concatenate(self, arrays, casting="same_kind"):
+    def concat(self, arrays, *, axis: int | None = 0) -> TypeTracerArray:
+        if axis is None:
+            assert all(x.ndim == 1 for x in arrays)
+        elif axis != 0:
+            raise ak._errors.wrap_error(NotImplementedError("concat with axis != 0"))
         for x in arrays:
             try_touch_data(x)
 
@@ -1005,236 +979,206 @@ class TypeTracer(ak._nplikes.NumpyLike):
             numpy.concatenate(emptyarrays).dtype, (UnknownLength,) + inner_shape
         )
 
-    def repeat(self, *args, **kwargs):
-        for x in args:
-            try_touch_data(x)
-        # array, int
-        # array1, array2
+    def repeat(
+        self,
+        x: ArrayLike,
+        repeats: ArrayLike | int,
+        *,
+        axis: int | None = None,
+    ) -> TypeTracerArray:
+        try_touch_data(x)
+        try_touch_data(repeats)
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def tile(self, *args, **kwargs):
-        for x in args:
-            try_touch_data(x)
-        # array, int
+    def tile(self, x: ArrayLike, reps: int) -> TypeTracerArray:
+        try_touch_data(x)
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def stack(self, *args, **kwargs):
-        for x in args:
+    def stack(
+        self,
+        arrays: list[ArrayLike] | tuple[ArrayLike, ...],
+        *,
+        axis: int = 0,
+    ) -> TypeTracerArray:
+        for x in arrays:
             try_touch_data(x)
-        # arrays
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def vstack(self, *args, **kwargs):
-        for x in args:
-            try_touch_data(x)
-        # arrays
+    def packbits(
+        self,
+        x: ArrayLike,
+        *,
+        axis: int | None = None,
+        bitorder: Literal["big", "little"] = "big",
+    ) -> TypeTracerArray:
+        try_touch_data(x)
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def packbits(self, *args, **kwargs):
-        for x in args:
-            try_touch_data(x)
-        # array
-        raise ak._errors.wrap_error(NotImplementedError)
-
-    def unpackbits(self, *args, **kwargs):
-        for x in args:
-            try_touch_data(x)
-        # array
-        raise ak._errors.wrap_error(NotImplementedError)
-
-    def atleast_1d(self, *args, **kwargs):
-        for x in args:
-            try_touch_data(x)
-        # *arrays
-        raise ak._errors.wrap_error(NotImplementedError)
-
-    def broadcast_to(self, *args, **kwargs):
-        for x in args:
-            try_touch_data(x)
-        # array, shape
-        raise ak._errors.wrap_error(NotImplementedError)
-
-    def append(self, *args, **kwargs):
-        for x in args:
-            try_touch_data(x)
-        # array, element
-        raise ak._errors.wrap_error(NotImplementedError)
-
-    def where(self, *args, **kwargs):
-        for x in args:
-            try_touch_data(x)
-        # array, element
+    def unpackbits(
+        self,
+        x: ArrayLike,
+        *,
+        axis: int | None = None,
+        count: int | None = None,
+        bitorder: Literal["big", "little"] = "big",
+    ) -> TypeTracerArray:
+        try_touch_data(x)
         raise ak._errors.wrap_error(NotImplementedError)
 
     ############################ ufuncs
 
-    def sqrt(self, *args, **kwargs):
-        for x in args:
-            try_touch_data(x)
-        # array
-        raise ak._errors.wrap_error(NotImplementedError)
+    def add(
+        self,
+        x1: ArrayLike,
+        x2: ArrayLike,
+        maybe_out: ArrayLike | None = None,
+    ) -> TypeTracerArray:
+        return self._apply_ufunc(numpy.add, x1, x2)
 
-    def exp(self, *args, **kwargs):
-        for x in args:
-            try_touch_data(x)
-        # array
-        raise ak._errors.wrap_error(NotImplementedError)
+    def logical_and(
+        self,
+        x1: ArrayLike,
+        x2: ArrayLike,
+        maybe_out: ArrayLike | None = None,
+    ) -> TypeTracerArray:
+        return self._apply_ufunc(numpy.sqrt, x1, x2)
 
-    def true_divide(self, *args, **kwargs):
-        for x in args:
-            try_touch_data(x)
-        # array1, array2
-        raise ak._errors.wrap_error(NotImplementedError)
+    def logical_or(
+        self,
+        x1: ArrayLike,
+        x2: ArrayLike,
+        maybe_out: ArrayLike | None = None,
+    ) -> TypeTracerArray:
+        return self._apply_ufunc(numpy.sqrt, x1, x2)
 
-    def bitwise_or(self, *args, **kwargs):
-        for x in args:
-            try_touch_data(x)
-        # array1, array2[, out=output]
-        raise ak._errors.wrap_error(NotImplementedError)
+    def logical_not(
+        self, x: ArrayLike, maybe_out: ArrayLike | None = None
+    ) -> TypeTracerArray:
+        return self._apply_ufunc(numpy.sqrt, x)
 
-    def logical_and(self, x, y, *, dtype=None):
-        if dtype is None:
-            dtype = np.bool_
+    def sqrt(self, x: ArrayLike, maybe_out: ArrayLike | None = None) -> TypeTracerArray:
+        return self._apply_ufunc(numpy.sqrt, x)
 
-        is_array = False
-        if isinstance(x, TypeTracerArray):
-            x.touch_data()
-            is_array = True
-        if isinstance(y, TypeTracerArray):
-            y.touch_data()
-            is_array = True
-        if is_array:
-            return TypeTracerArray(dtype)
-        else:
-            return UnknownScalar(dtype)
+    def exp(self, x: ArrayLike, maybe_out: ArrayLike | None = None) -> TypeTracerArray:
+        return self._apply_ufunc(numpy.exp, x)
 
-    def logical_or(self, x, y, *, dtype=None):
-        if dtype is None:
-            dtype = np.bool_
-
-        is_array = False
-        if isinstance(x, TypeTracerArray):
-            x.touch_data()
-            is_array = True
-        if isinstance(y, TypeTracerArray):
-            y.touch_data()
-            is_array = True
-        if is_array:
-            return TypeTracerArray(dtype)
-        else:
-            return UnknownScalar(dtype)
-
-    def logical_not(self, x, *, dtype=None):
-        if dtype is None:
-            dtype = np.bool_
-
-        is_array = False
-        if isinstance(x, TypeTracerArray):
-            x.touch_data()
-            is_array = True
-        if is_array:
-            return TypeTracerArray(dtype)
-        else:
-            return UnknownScalar(dtype)
-
-    def equal(self, *args, **kwargs):
-        for x in args:
-            try_touch_data(x)
-        # array1, array2
-        raise ak._errors.wrap_error(NotImplementedError)
-
-    def ceil(self, *args, **kwargs):
-        for x in args:
-            try_touch_data(x)
-        # array
-        raise ak._errors.wrap_error(NotImplementedError)
+    def divide(
+        self,
+        x1: ArrayLike,
+        x2: ArrayLike,
+        maybe_out: ArrayLike | None = None,
+    ) -> TypeTracerArray:
+        return self._apply_ufunc(numpy.sqrt, x1, x2)
 
     ############################ almost-ufuncs
 
-    def nan_to_num(self, *args, **kwargs):
-        for x in args:
-            try_touch_data(x)
+    def nan_to_num(
+        self,
+        x: ArrayLike,
+        *,
+        copy: bool = True,
+        nan: int | float | None = 0.0,
+        posinf: int | float | None = None,
+        neginf: int | float | None = None,
+    ) -> TypeTracerArray:
+        try_touch_data(x)
         # array, copy=True, nan=0.0, posinf=None, neginf=None
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def isclose(self, *args, **kwargs):
-        for x in args:
-            try_touch_data(x)
+    def isclose(
+        self,
+        x1: ArrayLike,
+        x2: ArrayLike,
+        *,
+        rtol: float = 1e-5,
+        atol: float = 1e-8,
+        equal_nan: bool = False,
+    ) -> TypeTracerArray:
+        try_touch_data(x1)
+        try_touch_data(x2)
         # a, b, rtol=1e-05, atol=1e-08, equal_nan=False
         raise ak._errors.wrap_error(NotImplementedError)
 
+    def isnan(self, x: ArrayLike) -> TypeTracerArray:
+        return TypeTracerArray(np.bool_, shape=x.shape)
+
     ############################ reducers
 
-    def all(self, array, prefer):
-        try_touch_data(array)
-        # array
-        return prefer
+    def all(
+        self,
+        x: ArrayLike,
+        *,
+        axis: int | tuple[int, ...] | None = None,
+        keepdims: bool = False,
+        maybe_out: ArrayLike | None = None,
+    ) -> TypeTracerArray:
+        try_touch_data(x)
+        if axis is None:
+            return UnknownScalar(np.bool_)
+        else:
+            raise ak._errors.wrap_error(NotImplementedError)
 
-    def any(self, array, prefer):
-        try_touch_data(array)
-        # array
-        return prefer
+    def any(
+        self,
+        x: ArrayLike,
+        *,
+        axis: int | tuple[int, ...] | None = None,
+        keepdims: bool = False,
+        maybe_out: ArrayLike | None = None,
+    ) -> TypeTracerArray:
+        try_touch_data(x)
+        if axis is None:
+            return UnknownScalar(np.bool_)
+        else:
+            raise ak._errors.wrap_error(NotImplementedError)
 
-    def count_nonzero(self, *args, **kwargs):
-        for x in args:
-            try_touch_data(x)
-        # array
+    def count_nonzero(
+        self, x: ArrayLike, *, axis: int | None = None, keepdims: bool = False
+    ) -> TypeTracerArray:
+        try_touch_data(x)
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def sum(self, *args, **kwargs):
-        for x in args:
-            try_touch_data(x)
-        # array
+    def min(
+        self,
+        x: ArrayLike,
+        *,
+        axis: int | tuple[int, ...] | None = None,
+        keepdims: bool = False,
+        maybe_out: ArrayLike | None = None,
+    ) -> TypeTracerArray:
+        try_touch_data(x)
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def prod(self, *args, **kwargs):
-        for x in args:
-            try_touch_data(x)
-        # array
-        raise ak._errors.wrap_error(NotImplementedError)
-
-    def min(self, *args, **kwargs):
-        for x in args:
-            try_touch_data(x)
-        # array
-        raise ak._errors.wrap_error(NotImplementedError)
-
-    def max(self, *args, **kwargs):
-        for x in args:
-            try_touch_data(x)
-        # array
-        raise ak._errors.wrap_error(NotImplementedError)
-
-    def argmin(self, *args, **kwargs):
-        for x in args:
-            try_touch_data(x)
-        # array[, axis=]
-        raise ak._errors.wrap_error(NotImplementedError)
-
-    def argmax(self, *args, **kwargs):
-        for x in args:
-            try_touch_data(x)
-        # array[, axis=]
+    def max(
+        self,
+        x: ArrayLike,
+        *,
+        axis: int | tuple[int, ...] | None = None,
+        keepdims: bool = False,
+        maybe_out: ArrayLike | None = None,
+    ) -> TypeTracerArray:
+        try_touch_data(x)
         raise ak._errors.wrap_error(NotImplementedError)
 
     def array_str(
-        self, array, max_line_width=None, precision=None, suppress_small=None
+        self,
+        x: ArrayLike,
+        *,
+        max_line_width: int | None = None,
+        precision: int | None = None,
+        suppress_small: bool | None = None,
     ):
-        try_touch_data(array)
-        # array, max_line_width, precision=None, suppress_small=None
+        try_touch_data(x)
         return "[?? ... ??]"
 
-    def can_cast(self, *args, **kwargs):
-        return numpy.can_cast(*args, **kwargs)
-
-    def datetime_as_string(self, *args, **kwargs):
-        for x in args:
-            try_touch_data(x)
-        raise ak._errors.wrap_error(NotImplementedError)
+    def can_cast(
+        self, from_: np.dtype | TypeTracerArray, to: np.dtype | TypeTracerArray
+    ) -> bool:
+        return numpy.can_cast(from_, to, casting="same_kind")
 
     @classmethod
     def is_own_array(cls, obj) -> bool:
         return isinstance(obj, TypeTracerArray)
 
-    def is_c_contiguous(self, array) -> bool:
+    def is_c_contiguous(self, x: ArrayLike) -> bool:
         return True

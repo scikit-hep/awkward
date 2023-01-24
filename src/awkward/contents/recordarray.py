@@ -374,11 +374,12 @@ class RecordArray(Content):
                 where = where.copy()
 
             negative = where < 0
-            if self._backend.index_nplike.any(negative, prefer=False):
-                where[negative] += self._length
+            if self._backend.index_nplike.known_data:
+                if self._backend.index_nplike.any(negative):
+                    where[negative] += self._length
 
-            if self._backend.index_nplike.any(where >= self._length, prefer=False):
-                raise ak._errors.index_error(self, where)
+                if self._backend.index_nplike.any(where >= self._length):
+                    raise ak._errors.index_error(self, where)
 
             nextindex = ak.index.Index64(where, nplike=self._backend.index_nplike)
             return ak.contents.IndexedArray(nextindex, self, parameters=None)
@@ -718,7 +719,7 @@ class RecordArray(Content):
     def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
         if self._fields is None or len(self._fields) == 0:
             return ak.contents.NumpyArray(
-                self._backend.nplike.instance().empty(0, np.int64),
+                self._backend.nplike.instance().empty(0, dtype=np.int64),
                 parameters=None,
                 backend=self._backend,
             )

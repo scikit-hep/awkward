@@ -1225,7 +1225,7 @@ class UnionArray(Content):
         )
         if simplified.length == 0:
             return ak.contents.NumpyArray(
-                self._backend.nplike.empty(0, np.int64),
+                self._backend.nplike.empty(0, dtype=np.int64),
                 parameters=None,
                 backend=self._backend,
             )
@@ -1362,7 +1362,7 @@ class UnionArray(Content):
             if validbytes is not None:
                 # If this_index is a filtered permutation, we can just filter-permute
                 # the mask to have the same order the content.
-                if numpy.unique(this_index).shape[0] == this_index.shape[0]:
+                if numpy.unique_values(this_index).shape[0] == this_index.shape[0]:
                     this_validbytes = numpy.zeros(this_index.shape[0], dtype=np.int8)
                     this_validbytes[this_index] = validbytes[selected_tags]
 
@@ -1445,7 +1445,7 @@ class UnionArray(Content):
                 ) from err
         else:
             try:
-                out = backend.nplike.concatenate(contents)
+                out = backend.nplike.concat(contents)
             except Exception as err:
                 raise ak._errors.wrap_error(
                     ValueError(f"cannot convert {self} into np.ndarray")

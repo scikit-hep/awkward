@@ -128,4 +128,4 @@ def _impl(x, n, weight, axis, keepdims, mask_identity):
                 highlevel=True,
                 behavior=behavior,
             )
-        return ak._nplikes.nplike_of(sumwxn, sumw).true_divide(sumwxn, sumw)
+        return sumwxn / sumw

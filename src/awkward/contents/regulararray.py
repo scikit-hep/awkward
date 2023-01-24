@@ -244,14 +244,15 @@ class RegularArray(Content):
             copied = True
 
         negative = where < 0
-        if self._backend.index_nplike.any(negative, prefer=False):
-            if not copied:
-                where = where.copy()
-                copied = True
-            where[negative] += self._length
+        if self._backend.index_nplike.known_data:
+            if self._backend.index_nplike.any(negative):
+                if not copied:
+                    where = where.copy()
+                    copied = True
+                where[negative] += self._length
 
-        if self._backend.index_nplike.any(where >= self._length, prefer=False):
-            raise ak._errors.index_error(self, where)
+            if self._backend.index_nplike.any(where >= self._length):
+                raise ak._errors.index_error(self, where)
 
         nextcarry = ak.index.Index64.empty(
             where.shape[0] * self._size, self._backend.index_nplike
@@ -910,7 +911,7 @@ class RegularArray(Content):
         if not branch and negaxis == depth:
             if self.size == 0:
                 nextstarts = ak.index.Index64(
-                    self._backend.index_nplike.full(0, len(self)),
+                    self._backend.index_nplike.zeros(len(self), dtype=np.int64),
                     nplike=self._backend.index_nplike,
                 )
             else:
@@ -918,7 +919,7 @@ class RegularArray(Content):
                     self._backend.index_nplike.arange(0, nextlen, self.size),
                     nplike=self._backend.index_nplike,
                 )
-                assert nextstarts.length == len(self)
+            assert nextstarts.length == len(self)
 
             nextcarry = ak.index.Index64.empty(
                 nextlen, nplike=self._backend.index_nplike
@@ -993,13 +994,13 @@ class RegularArray(Content):
 
             if self._size > 0:
                 nextstarts = ak.index.Index64(
-                    self._backend.index_nplike.arange(0, len(nextparents), self._size),
+                    self._backend.index_nplike.arange(0, nextlen, self._size),
                     nplike=self._backend.index_nplike,
                 )
             else:
-                assert len(nextparents) == 0
+                assert nextlen == 0
                 nextstarts = ak.index.Index64(
-                    self._backend.index_nplike.zeros(0),
+                    self._backend.index_nplike.zeros(nextlen, dtype=np.int64),
                     nplike=self._backend.index_nplike,
                 )
 
