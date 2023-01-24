@@ -236,7 +236,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
 
     def __str__(self):
         if self.ndim == 0:
-            return f"unknown-{str(self._dtype)}"
+            return "##"
 
         else:
             return repr(self)
