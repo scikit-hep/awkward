@@ -1028,6 +1028,7 @@ class TypeTracer(NumpyLike):
         return TypeTracerArray._new(np.bool_, shape=out.shape)
 
     def isnan(self, x: ArrayLike) -> TypeTracerArray:
+        try_touch_data(x)
         return TypeTracerArray._new(np.bool_, shape=x.shape)
 
     ############################ reducers
