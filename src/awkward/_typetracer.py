@@ -4,6 +4,8 @@ Compatibility module for existing users of `_typetracer
 
 from __future__ import annotations
 
+from awkward._nplikes.typetracer import MaybeNone, OneOf  # noqa: F401
+
 __all__ = ["UnknownScalar"]
 
 
