@@ -573,7 +573,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
             raise ak._errors.wrap_error(
                 ValueError("TypeTracerArray does not support kwargs for ufuncs")
             )
-        return TypeTracer._apply_ufunc(ufunc, *inputs)
+        return self.nplike._apply_ufunc(ufunc, *inputs)
 
     def __bool__(self) -> bool:
         raise ak._errors.wrap_error(RuntimeError("cannot realise an unknown value"))
@@ -610,23 +610,14 @@ class TypeTracer(NumpyLike):
     known_shape: Final = False
     is_eager: Final = True
 
-    @staticmethod
-    def _apply_ufunc(ufunc, *inputs):
+    def _apply_ufunc(self, ufunc, *inputs):
         for x in inputs:
-            getattr(x, "touch_data", lambda: None)()
+            try_touch_data(x)
 
-        replacements = []
-        to_broadcast = []
-        for x in inputs:
-            if hasattr(x, "dtype") and hasattr(x, "shape"):
-                replacements.append(numpy.empty(0, x.dtype))
-                to_broadcast.append(x)
-            else:
-                replacements.append(x)
+        broadcasted = self.broadcast_arrays(*inputs)
+        placeholders = [numpy.empty(0, x.dtype) for x in broadcasted]
 
-        broadcasted = TypeTracer.instance().broadcast_arrays(*to_broadcast)
-
-        result = ufunc(*replacements)
+        result = ufunc(*placeholders)
         return TypeTracerArray._new(result.dtype, shape=broadcasted[0].shape)
 
     def to_rectilinear(self, array, *args, **kwargs):
@@ -696,7 +687,8 @@ class TypeTracer(NumpyLike):
                     return TypeTracerArray._new(obj.dtype, obj.shape)
             # Python objects
             elif isinstance(obj, (Number, bool)):
-                return TypeTracerArray._new(numpy.obj2sctype(obj), ())
+                as_array = numpy.asarray(obj)
+                return TypeTracerArray._new(as_array.dtype, ())
 
             elif is_non_string_like_sequence(obj):
                 assert not any(is_non_string_like_sequence(x) for x in obj)
@@ -817,6 +809,54 @@ class TypeTracer(NumpyLike):
 
     ############################ manipulation
 
+    def promote_scalar(self, obj) -> TypeTracerArray:
+        if is_unknown_scalar(obj):
+            return obj
+        elif isinstance(obj, (Number, bool)):
+            # TODO: statically define these types for all nplikes
+            as_array = numpy.asarray(obj)
+            return TypeTracerArray._new(as_array.dtype, ())
+        else:
+            raise wrap_error(TypeError(f"expected scalar type, received {obj}"))
+
+    def broadcast_shapes(
+        self, *shapes: tuple[SupportsInt, ...]
+    ) -> tuple[SupportsInt, ...]:
+        ndim = max([len(s) for s in shapes], default=0)
+        result: list[SupportsInt] = [1] * ndim
+
+        for shape in shapes:
+            # Right broadcasting
+            missing_dim = ndim - len(shape)
+            if missing_dim > 0:
+                head: tuple[int, ...] = (1,) * missing_dim
+                shape = head + shape
+
+            # Fail if we absolutely know the shapes aren't compatible
+            for i, item in enumerate(shape):
+                # Item is unknown, take it
+                if is_unknown_scalar(item):
+                    result[i] = item
+                # Existing item is unknown, keep it
+                elif is_unknown_scalar(result[i]):
+                    continue
+                # Items match, continue
+                elif result[i] == item:
+                    continue
+                # Item is broadcastable, take existing
+                elif item == 1:
+                    continue
+                # Existing is broadcastable, take it
+                elif result[i] == 1:
+                    result[i] = item
+                else:
+                    raise wrap_error(
+                        ValueError(
+                            "known component of shape does not match broadcast result"
+                        )
+                    )
+        return tuple(result)
+
     def broadcast_arrays(self, *arrays: ArrayLike) -> list[TypeTracerArray]:
         for x in arrays:
             try_touch_data(x)
@@ -824,40 +864,16 @@ class TypeTracer(NumpyLike):
         if len(arrays) == 0:
             return []
 
-        next = []
-        maxdim = 0
+        all_arrays = []
         for x in arrays:
             if not hasattr(x, "shape"):
-                next.append(numpy.array(x))
-            else:
-                next.append(x)
-                maxdim = max(maxdim, len(x.shape))
+                x = self.promote_scalar(x)
+            all_arrays.append(x)
 
-        if maxdim == 0:
-            return next
+        shapes = [x.shape for x in all_arrays]
+        shape = self.broadcast_shapes(*shapes)
 
-        first, *rest = next
-        shape = list(first.shape[1:])
-        for x in rest:
-            thisshape = x.shape[1:]
-            if len(shape) < len(thisshape):
-                shape = [1] * (len(thisshape) - len(shape)) + shape
-            elif len(shape) > len(thisshape):
-                thisshape = (1,) * (len(shape) - len(thisshape)) + thisshape
-            for i in range(len(shape)):  # pylint: disable=consider-using-enumerate
-                if shape[i] == 1 and thisshape[i] != 1:
-                    shape[i] = thisshape[i]
-                elif shape[i] != 1 and thisshape[i] != 1 and shape[i] != thisshape[i]:
-                    raise ak._errors.wrap_error(
-                        ValueError(
-                            "shape mismatch: objects cannot be broadcast to a single shape"
-                        )
-                    )
-
-        return [
-            TypeTracerArray._new(x.dtype, [UnknownLength] + shape)
-            for x in [first] + rest
-        ]
+        return [TypeTracerArray._new(x.dtype, shape=shape) for x in all_arrays]
 
     def broadcast_to(
         self, x: ArrayLike, shape: tuple[SupportsInt, ...]
