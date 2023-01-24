@@ -228,7 +228,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
 
     def __repr__(self):
         dtype = repr(self._dtype)
-        if self.ndim == 0:
+        if self.shape is None:
             shape = ""
         else:
             shape = ", shape=" + repr(self._shape)
