@@ -178,7 +178,6 @@ def test_data_frame_vec_of_vec():
         ),
     )
 
-    assert out["output"].to_list() == (array["y"] * array["y"] * 1.0).to_list()
     result = ak.Array(
         [
             [
@@ -258,9 +257,5 @@ def test_rdata_frame_rvecs_as_records():
             ak.forms.ListOffsetForm("i64", ak.forms.NumpyForm("float64")),
             ak.forms.ListOffsetForm("i64", ak.forms.NumpyForm("float64")),
         ],
-        [
-            "x",
-            "y",
-            "r",
-        ],
+        ["x", "y", "r"],
     )

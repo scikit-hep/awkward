@@ -240,26 +240,20 @@ def from_rdataframe(data_frame, columns):
             )
 
             if col == "awkward_index_":
-                contents_index = ak.index.Index64(
+                contents_index = ak.index.Index32(
                     array.layout.to_backend_array(
                         allow_missing=True, backend=ak._backends.NumpyBackend.instance()
                     )
                 )
             else:
-                contents[col] = array.layout
+                contents[col] = array
 
     for col, content in awkward_contents.items():
         # wrap Awkward array in IndexedArray only if needed
         if contents_index is not None and len(contents_index) < len(content):
-            array = ak._util.wrap(
-                ak.contents.IndexedArray(contents_index, content),
-                highlevel=True,
-            )
-            contents[col] = array.layout
+            array = ak.contents.IndexedArray(contents_index, content)
+            contents[col] = array
         else:
             contents[col] = content
 
-    return ak._util.wrap(
-        ak.contents.RecordArray(list(contents.values()), list(contents.keys())),
-        highlevel=True,
-    )
+    return ak.zip(contents, depth_limit=1)
