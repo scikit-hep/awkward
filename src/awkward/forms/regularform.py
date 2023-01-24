@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._nplikes.typetracer import ensure_known_scalar, is_unknown_length
 from awkward._util import unset
 from awkward.forms.form import Form, _parameters_equal
 from awkward.typing import final
@@ -20,7 +21,7 @@ class RegularForm(Form):
                     )
                 )
             )
-        if not ak._util.is_integer(size):
+        if not (is_unknown_length(size) or ak._util.is_integer(size)):
             raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'size' must be of type int, not {}".format(
@@ -30,7 +31,7 @@ class RegularForm(Form):
             )
 
         self._content = content
-        self._size = int(size)
+        self._size = size if is_unknown_length(size) else int(size)
         self._init(parameters, form_key)
 
     @property
@@ -79,7 +80,7 @@ class RegularForm(Form):
         if isinstance(other, RegularForm):
             return (
                 self._form_key == other._form_key
-                and self._size == other._size
+                and ensure_known_scalar(self._size == other._size, True)
                 and _parameters_equal(
                     self._parameters, other._parameters, only_array_record=True
                 )
