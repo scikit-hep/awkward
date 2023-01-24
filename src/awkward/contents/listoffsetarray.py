@@ -46,7 +46,7 @@ class ListOffsetArray(Content):
                     )
                 )
             )
-        if ensure_known_scalar(not offsets.length >= 1, False):
+        if ensure_known_scalar(offsets.length == 0, False):
             raise ak._errors.wrap_error(
                 ValueError(
                     "{} len(offsets) ({}) must be >= 1".format(
