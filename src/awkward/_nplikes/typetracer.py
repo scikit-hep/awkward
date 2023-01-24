@@ -315,19 +315,19 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         return out
 
     @property
-    def nplike(self):
+    def nplike(self) -> NumpyLike:
         return TypeTracer.instance()
 
     @property
-    def ndim(self):
+    def ndim(self) -> int:
         self.touch_shape()
         return len(self._shape)
 
-    def astype(self, dtype: np.dtype):
+    def astype(self, dtype: np.dtype) -> Self:
         self.touch_data()
         return self._new(np.dtype(dtype), self._shape)
 
-    def view(self, dtype: np.dtype):
+    def view(self, dtype: np.dtype) -> Self:
         if (
             self.itemsize != np.dtype(dtype).itemsize
             and self._shape[-1] != UnknownLength
@@ -343,7 +343,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
             dtype, shape=shape, form_key=self._form_key, report=self._report
         )
 
-    def forget_length(self):
+    def forget_length(self) -> Self:
         return self._new(
             self._dtype,
             (UnknownLength,) + self._shape[1:],
