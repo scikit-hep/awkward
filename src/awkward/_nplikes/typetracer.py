@@ -209,6 +209,8 @@ def _length_after_slice(slice, original_length):
 
 
 class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
+    _dtype: numpy.dtype
+
     def __new__(cls, *args, **kwargs):
         raise wrap_error(
             TypeError(
