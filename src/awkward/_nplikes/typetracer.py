@@ -66,7 +66,7 @@ class MaybeNone:
         return f"MaybeNone({self._content!r})"
 
     def __str__(self):
-        return f"maybe-{self._content}"
+        return f"?{self._content}"
 
 
 class OneOf:
