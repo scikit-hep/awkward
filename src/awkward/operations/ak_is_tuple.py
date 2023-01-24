@@ -20,7 +20,7 @@ def is_tuple(array):
 
 def _impl(array):
     layout = ak.operations.ak_to_layout._impl(
-        array, allow_record=True, allow_other=False
+        array, allow_record=True, allow_other=False, regulararray=True
     )
 
     return layout.is_tuple
