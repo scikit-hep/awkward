@@ -22,9 +22,9 @@ def test_repr():
     record = ak.Array(ak.Array([{"x": 1.1, "y": [1, 2, 3]}]).layout.to_typetracer())[0]
     assert (
         repr(record)
-        == "<Record-typetracer {x: ..., y: [...]} type='{x: float64, y: var...'>"
+        == "<Record-typetracer {x: unknown-float64, y: [...]} type='{x: float64, y: var...'>"
     )
-    assert str(record) == "{x: ..., y: [...]}"
+    assert str(record) == "{x: unknown-float64, y: [...]}"
 
 
 def test_issue_1864():
