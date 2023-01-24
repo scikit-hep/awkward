@@ -218,6 +218,10 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
             )
         )
 
+    def __reduce__(self):
+        # Fix pickling, as we ban `__new__`
+        return (object.__new__, (type(self),), vars(self))
+
     @classmethod
     def _new(cls, dtype: np.dtype, shape=None, form_key=None, report=None):
         self = super().__new__(cls)
