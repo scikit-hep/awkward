@@ -23,7 +23,7 @@ np = NumpyMetadata.instance()
 
 
 def is_unknown_length(array: Any) -> bool:
-    return is_unknown_scalar(array) and array.dtype == np.dtype(np.int64)
+    return is_unknown_scalar(array) and np.issubdtype(array.dtype, np.integer)
 
 
 def is_unknown_scalar(array: Any) -> bool:
