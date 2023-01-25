@@ -145,6 +145,9 @@ def normalise_item(item, backend: ak._backends.Backend):
     elif item is Ellipsis:
         return item
 
+    elif isinstance(item, ak.contents.Content) and item.backend is not backend:
+        return normalise_item(item.to_backend(backend), backend)
+
     elif isinstance(item, ak.highlevel.Array):
         return normalise_item(item.layout, backend)
 
@@ -163,14 +166,14 @@ def normalise_item(item, backend: ak._backends.Backend):
         as_numpy = item.maybe_to_NumpyArray()
 
         if as_numpy is None:
-            out = _normalise_item_bool_to_int(_normalise_item_nested(item, backend))
+            out = _normalise_item_bool_to_int(_normalise_item_nested(item))
             assert not isinstance(out, ak.contents.NumpyArray)
             return out
         else:
-            return to_nplike(item.data, backend.index_nplike)
+            return item.data
 
     elif isinstance(item, ak.contents.Content):
-        out = _normalise_item_bool_to_int(_normalise_item_nested(item, backend))
+        out = _normalise_item_bool_to_int(_normalise_item_nested(item))
         if isinstance(out, ak.contents.NumpyArray):
             return out.data
         else:
@@ -227,10 +230,10 @@ def _normalise_item_RegularArray_to_ListOffsetArray64(item):
         raise ak._errors.wrap_error(AssertionError(type(item)))
 
 
-def _normalise_item_nested(item, backend):
+def _normalise_item_nested(item):
     if isinstance(item, ak.contents.EmptyArray):
         # policy: unknown -> int
-        return _normalise_item_nested(item.to_NumpyArray(np.int64), backend)
+        return _normalise_item_nested(item.to_NumpyArray(np.int64))
 
     elif isinstance(item, ak.contents.NumpyArray) and issubclass(
         item.dtype.type, (bool, np.bool_, np.integer)
@@ -255,7 +258,7 @@ def _normalise_item_nested(item, backend):
     ) and issubclass(item.offsets.dtype.type, np.int64):
         return ak.contents.ListOffsetArray(
             item.offsets,
-            _normalise_item_nested(item.content, backend),
+            _normalise_item_nested(item.content),
             parameters=item.parameters,
         )
 
@@ -268,7 +271,7 @@ def _normalise_item_nested(item, backend):
         ),
     ):
         next = item.to_ListOffsetArray64(False)
-        return _normalise_item_nested(next, backend)
+        return _normalise_item_nested(next)
 
     elif isinstance(
         item,
@@ -289,14 +292,14 @@ def _normalise_item_nested(item, backend):
             ak.contents.UnmaskedArray,
         ),
     ):
-        return _normalise_item_nested(item, backend)
+        return _normalise_item_nested(item)
 
     elif isinstance(
         item,
         ak.contents.IndexedArray,
     ):
         next = item.project()
-        return _normalise_item_nested(next, backend)
+        return _normalise_item_nested(next)
 
     elif isinstance(
         item,
@@ -314,7 +317,7 @@ def _normalise_item_nested(item, backend):
 
         return ak.contents.IndexedOptionArray(
             ak.index.Index64(nextindex),
-            _normalise_item_nested(projected, backend),
+            _normalise_item_nested(projected),
             parameters=item.parameters,
         )
 
@@ -330,7 +333,7 @@ def _normalise_item_nested(item, backend):
         positions_where_valid = item.backend.index_nplike.nonzero(is_valid)[0]
 
         nextcontent = _normalise_item_nested(
-            item.content._carry(ak.index.Index64(positions_where_valid), False), backend
+            item.content._carry(ak.index.Index64(positions_where_valid), False)
         )
 
         nextindex = item.backend.index_nplike.full(
@@ -480,7 +483,6 @@ def _normalise_item_bool_to_int(item):
                         "This slice is not supported for JAX differentiation."
                     )
 
-                data = to_nplike(item.content, item.backend.index_nplike)
                 # missing values as any integer other than -1 are extremely rare
                 isnegative = item.index.data < 0
                 if item.backend.index_nplike.any(item.index.data < -1):

@@ -31,7 +31,9 @@ class NumpyArray(Content):
             )
         if isinstance(data, ak.index.Index):
             data = data.data
-        self._data = backend.nplike.asarray(data)
+
+        assert backend.nplike.is_own_array(data)
+        self._data = data
 
         if not isinstance(backend.nplike, Jax):
             ak.types.numpytype.dtype_to_primitive(self._data.dtype)
