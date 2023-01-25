@@ -1927,18 +1927,13 @@ class Record(NDArrayOperatorsMixin):
 
         pytype = type(self).__name__
 
+        typestr = repr(str(self.type))[1:-1]
         if (
             self._layout.array.backend.nplike.known_shape
             and self._layout.array.backend.nplike.known_data
         ):
-            typestr = repr(str(self.type))[1:-1]
             valuestr = ""
-
         else:
-            # awkward._prettyprint.valuestr touches the data
-            typestr = repr(
-                str(self._layout._array.form.type_from_behavior(self._behavior))
-            )[1:-1]
             valuestr = "-typetracer"
 
         if len(typestr) + len(pytype) + len(" type=''") + 3 < limit_cols // 2:
