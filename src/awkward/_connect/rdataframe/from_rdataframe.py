@@ -133,27 +133,17 @@ def from_rdataframe(data_frame, columns, offsets_type="int64_t"):
                 + "}\n"
             )
 
-    is_indexed = True if "awkward_index_" in data_frame.GetColumnNames() else False
-
     # Register Take action for each column
     # 'Take' is a lazy action:
     result_ptrs = {}
     column_types = {}
-    contents_index = None
-    columns = (
-        columns + ("awkward_index_",)
-        if (is_indexed and "awkward_index_" not in columns)
-        else columns
-    )
+    contents = {}
+
     for col in columns:
         column_types[col] = data_frame.GetColumnType(col)
         result_ptrs[col] = data_frame.Take[column_types[col]](col)
-
-    contents = {}
-    awkward_contents = {}
-    contents_index = {}
-    for col in columns:
         col_type = column_types[col]
+
         if ROOT.awkward.is_awkward_type[col_type]():  # Retrieve Awkward arrays
 
             # ROOT::RDF::RResultPtr<T>::begin Returns an iterator to the beginning of
@@ -164,7 +154,7 @@ def from_rdataframe(data_frame, columns, offsets_type="int64_t"):
             lookup = result_ptrs[col].begin().lookup()
             generator = lookup[col].generator
             layout = generator.tolayout(lookup[col], 0, ())
-            awkward_contents[col] = layout
+            contents[col] = layout
 
         else:  # Convert the C++ vectors to Awkward arrays
             form_str = ROOT.awkward.type_to_form[col_type, offsets_type](0)
@@ -173,10 +163,7 @@ def from_rdataframe(data_frame, columns, offsets_type="int64_t"):
                 raise ak._errors.wrap_error(
                     TypeError(f"{col!r} column's type {col_type!r} is not supported.")
                 )
-            elif form_str == "awkward type":
-                raise ak._errors.wrap_error(
-                    AssertionError("this code should not be reached.")
-                )
+
             form = ak.forms.from_json(form_str)
 
             list_depth = form.purelist_depth
@@ -234,25 +221,8 @@ def from_rdataframe(data_frame, columns, offsets_type="int64_t"):
             buffers = empty_buffers(cpp_buffers_self, names_nbytes)
             cpp_buffers_self.to_char_buffers[builder_type](builder)
 
-            array = ak.from_buffers(
+            contents[col] = ak.from_buffers(
                 form, builder.length(), buffers, byteorder=ak._util.native_byteorder
             )
-
-            if col == "awkward_index_":
-                contents_index = ak.index.Index32(
-                    array.layout.to_backend_array(
-                        allow_missing=True, backend=ak._backends.NumpyBackend.instance()
-                    )
-                )
-            else:
-                contents[col] = array
-
-    for col, content in awkward_contents.items():
-        # wrap Awkward array in IndexedArray only if needed
-        contents[col] = (
-            ak.contents.IndexedArray(contents_index, content)
-            if contents_index is not None and len(contents_index) < len(content)
-            else content
-        )
 
     return ak.zip(contents, depth_limit=1)
