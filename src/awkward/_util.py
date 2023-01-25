@@ -636,26 +636,30 @@ def from_arraylib(array, regulararray, recordarray, highlevel, behavior):
     numpy = Numpy.instance()
 
     def recurse(array, mask=None):
+        nplike = nplike_of(array)
+
         if Jax.is_tracer(array):
             raise ak._errors.wrap_error(
                 TypeError("Jax tracers cannot be used with `ak.from_arraylib`")
             )
 
         if regulararray and len(array.shape) > 1:
+            new_shape = (-1,) + array.shape[2:]
             return ak.contents.RegularArray(
-                recurse(array.reshape((-1,) + array.shape[2:]), mask),
+                recurse(nplike.reshape(array, new_shape), mask),
                 array.shape[1],
                 array.shape[0],
             )
 
         if len(array.shape) == 0:
-            array = ak.contents.NumpyArray(array.reshape(1))
+            array = ak.contents.NumpyArray(nplike.reshape(array, (1,)))
 
         if array.dtype.kind == "S":
+            assert nplike is numpy
             asbytes = array.reshape(-1)
             itemsize = asbytes.dtype.itemsize
             starts = numpy.arange(0, len(asbytes) * itemsize, itemsize, dtype=np.int64)
-            stops = starts + numpy.char.str_len(asbytes)
+            stops = numpy.add(starts, numpy.char.str_len(asbytes))
             data = ak.contents.ListArray(
                 ak.index.Index64(starts),
                 ak.index.Index64(stops),
@@ -672,10 +676,11 @@ def from_arraylib(array, regulararray, recordarray, highlevel, behavior):
                 )
 
         elif array.dtype.kind == "U":
+            assert nplike is numpy
             asbytes = numpy.char.encode(array.reshape(-1), "utf-8", "surrogateescape")
             itemsize = asbytes.dtype.itemsize
             starts = numpy.arange(0, len(asbytes) * itemsize, itemsize, dtype=np.int64)
-            stops = starts + numpy.char.str_len(asbytes)
+            stops = numpy.add(starts, numpy.char.str_len(asbytes))
             data = ak.contents.ListArray(
                 ak.index.Index64(starts),
                 ak.index.Index64(stops),
@@ -718,8 +723,6 @@ def from_arraylib(array, regulararray, recordarray, highlevel, behavior):
             return ak.contents.ByteMaskedArray(
                 ak.index.Index8(mask), data, valid_when=False
             )
-
-        return data
 
     if isinstance(array, numpy.ma.MaskedArray):
         mask = numpy.ma.getmask(array)

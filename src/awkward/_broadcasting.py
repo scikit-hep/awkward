@@ -556,9 +556,10 @@ def apply_step(
                     list(itertools.product(*[range(x) for x in numtags])),
                     dtype=[(str(i), combos.dtype) for i in range(len(tagslist))],
                 )
-                combos = combos.view(
-                    [(str(i), combos.dtype) for i in range(len(tagslist))]
-                ).reshape(length)
+                combos = backend.index_nplike.reshape(
+                    combos.view([(str(i), combos.dtype) for i in range(len(tagslist))]),
+                    (length,),
+                )
 
                 tags = backend.index_nplike.empty(length, dtype=np.int8)
                 index = backend.index_nplike.empty(length, dtype=np.int64)

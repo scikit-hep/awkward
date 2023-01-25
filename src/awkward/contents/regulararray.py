@@ -187,7 +187,7 @@ class RegularArray(Content):
         if content is not None:
             shape = (self._length, self._size) + content.data.shape[1:]
             return ak.contents.NumpyArray(
-                content.data.reshape(shape),
+                self._backend.nplike.reshape(content.data, shape),
                 parameters=ak._util.merge_parameters(
                     self._parameters, content.parameters
                 ),
@@ -247,7 +247,7 @@ class RegularArray(Content):
 
         copied = allow_lazy == "copied"
         if not issubclass(where.dtype.type, np.int64):
-            where = where.astype(np.int64)
+            where = self._backend.index_nplike.astype(where, dtype=np.int64)
             copied = True
 
         negative = where < 0
@@ -472,8 +472,9 @@ class RegularArray(Content):
         elif isinstance(head, ak.index.Index64):
             head = head.to_nplike(self._backend.index_nplike)
             nexthead, nexttail = ak._slicing.headtail(tail)
-            flathead = self._backend.index_nplike.asarray(head.data.reshape(-1))
-
+            flathead = self._backend.index_nplike.reshape(
+                self._backend.index_nplike.asarray(head.data), (-1,)
+            )
             regular_flathead = ak.index.Index64.empty(
                 flathead.shape[0], self._backend.index_nplike
             )
@@ -1157,7 +1158,7 @@ class RegularArray(Content):
 
         out = self._content._to_backend_array(allow_missing, backend)
         shape = (self._length, self._size) + out.shape[1:]
-        return out[: self._length * self._size].reshape(shape)
+        return backend.nplike.reshape(out[: self._length * self._size], shape)
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         if self.parameter("__array__") == "string":

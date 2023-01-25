@@ -291,6 +291,12 @@ class NumpyLike(Singleton, Protocol):
         ...
 
     @abstractmethod
+    def reshape(
+        self, x: ArrayLike, shape: tuple[int, ...], *, copy: bool | None = None
+    ) -> ArrayLike:
+        ...
+
+    @abstractmethod
     def nonzero(self, x: ArrayLike) -> tuple[ArrayLike, ...]:
         ...
 
@@ -490,6 +496,12 @@ class NumpyLike(Singleton, Protocol):
         precision: int | None = None,
         suppress_small: bool | None = None,
     ):
+        ...
+
+    @abstractmethod
+    def astype(
+        self, x: ArrayLike, dtype: numpy.dtype, *, copy: bool | None = True
+    ) -> ArrayLike:
         ...
 
     @abstractmethod

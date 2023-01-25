@@ -773,7 +773,9 @@ class ListArray(Content):
             lenstarts = self._starts.length
 
             nexthead, nexttail = ak._slicing.headtail(tail)
-            flathead = self._backend.index_nplike.asarray(head.data.reshape(-1))
+            flathead = self._backend.index_nplike.reshape(
+                self._backend.index_nplike.asarray(head.data), (-1,)
+            )
             regular_flathead = ak.index.Index64(
                 flathead, nplike=self._backend.index_nplike
             )

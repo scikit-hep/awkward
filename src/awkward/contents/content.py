@@ -572,11 +572,17 @@ class Content:
 
         elif isinstance(where, ak.contents.NumpyArray):
             if issubclass(where.dtype.type, np.int64):
-                carry = ak.index.Index64(where.data.reshape(-1))
+                carry = ak.index.Index64(
+                    self._backend.nplike.reshape(
+                        self._backend.nplike.asarray(where.data), (-1,)
+                    )
+                )
                 allow_lazy = True
             elif issubclass(where.dtype.type, np.integer):
                 carry = ak.index.Index64(
-                    where.data.astype(np.int64).reshape(-1),
+                    self._backend.nplike.reshape(
+                        self._backend.nplike.asarray(where.data, dtype=np.int64), (-1,)
+                    ),
                     nplike=self._backend.index_nplike,
                 )
                 allow_lazy = "copied"  # True, but also can be modified in-place

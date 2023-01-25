@@ -384,7 +384,9 @@ class Prod(Reducer):
                     outlength,
                 )
             )
-            result = result.astype(self.return_dtype(array.dtype))
+            result = array.backend.nplike.astype(
+                result, dtype=self.return_dtype(array.dtype)
+            )
         elif array.dtype.type in (np.complex128, np.complex64):
             result = array.backend.nplike.empty(
                 self.maybe_double_length(array.dtype.type, outlength),
