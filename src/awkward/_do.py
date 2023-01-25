@@ -219,7 +219,7 @@ def pad_none(
 
 def completely_flatten(
     layout: Content | Record,
-    backend: ak._backends.Backend | None = None,
+    backend: Backend | None = None,
     flatten_records: bool = True,
     function_name: str | None = None,
     drop_nones: bool = True,
@@ -247,7 +247,7 @@ def completely_flatten(
         return tuple(arrays)
 
 
-def flatten(layout: Content, axis: Integral = 1) -> Content:
+def flatten(layout: Content, axis: int = 1) -> Content:
     offsets, flattened = layout._offsets_and_flattened(axis, 1)
     return flattened
 
@@ -344,7 +344,6 @@ def reduce(
             keepdims,
             behavior,
         )
-
         return next[0]
     else:
         negaxis = -axis
