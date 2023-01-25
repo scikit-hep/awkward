@@ -16,8 +16,16 @@ def test_repr():
     # feel free to change these if the string format ever changes
 
     array = ak.Array(ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout.to_typetracer())
-    assert repr(array) == "<Array-typetracer [...] type='?? * var * float64'>"
+    assert repr(array) == "<Array-typetracer [...] type='3 * var * float64'>"
     assert str(array) == "[...]"
+
+    array2 = ak.Array(
+        ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout.to_typetracer(
+            forget_length=True
+        )
+    )
+    assert repr(array2) == "<Array-typetracer [...] type='## * var * float64'>"
+    assert str(array2) == "[...]"
 
     record = ak.Array(ak.Array([{"x": 1.1, "y": [1, 2, 3]}]).layout.to_typetracer())[0]
     assert (
