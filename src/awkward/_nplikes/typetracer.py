@@ -1127,7 +1127,7 @@ class TypeTracer(NumpyLike):
         suppress_small: bool | None = None,
     ):
         try_touch_data(x)
-        return "[?? ... ??]"
+        return "[## ... ##]"
 
     def can_cast(
         self, from_: np.dtype | TypeTracerArray, to: np.dtype | TypeTracerArray
