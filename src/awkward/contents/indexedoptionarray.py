@@ -187,7 +187,9 @@ class IndexedOptionArray(Content):
             return self
         else:
             return IndexedOptionArray(
-                self._index.astype(np.int64), self._content, parameters=self._parameters
+                self._backend.index_nplike.astype(self._index, dtype=np.int64),
+                self._content,
+                parameters=self._parameters,
             )
 
     def to_ByteMaskedArray(self, valid_when):
@@ -1473,24 +1475,24 @@ class IndexedOptionArray(Content):
 
     def _to_backend_array(self, allow_missing, backend):
         nplike = backend.nplike
+        index_nplike = backend.index_nplike
 
         content = self.project()._to_backend_array(allow_missing, backend)
         shape = (self.length, *content.shape[1:])
         data = nplike.empty(shape, dtype=content.dtype)
-        mask0 = backend.index_nplike.asarray(self.mask_as_bool(valid_when=False)).view(
-            np.bool_
-        )
-        if mask0.any():
+        mask0 = index_nplike.asarray(self.mask_as_bool(valid_when=False)).view(np.bool_)
+        if index_nplike.any(mask0):
             if allow_missing:
-                mask = backend.index_nplike.broadcast_to(
-                    mask0.reshape((shape[0],) + (1,) * (len(shape) - 1)), shape
+                mask = index_nplike.broadcast_to(
+                    index_nplike.reshape(mask0, (shape[0],) + (1,) * (len(shape) - 1)),
+                    shape,
                 )
                 if isinstance(content, nplike.ma.MaskedArray):
-                    mask1 = nplike.ma.getmaskarray(content)
-                    mask = mask.copy()
-                    mask[~mask0] |= mask1
+                    mask1 = index_nplike.ma.getmaskarray(content)
+                    mask = index_nplike.asarray(mask, copy=True)
+                    mask[index_nplike.logical_not(mask0)] |= mask1
 
-                data[~mask0] = content
+                data[index_nplike.logical_not(mask0)] = content
 
                 if issubclass(content.dtype.type, (bool, np.bool_)):
                     data[mask0] = False

@@ -93,10 +93,14 @@ def prepare_advanced_indexing(items):
         if len(x.shape) == 0:
             prepared.append(int(x))
         elif np.issubdtype(x.dtype, np.int64):
-            prepared.append(ak.index.Index64(x.reshape(-1)))
+            prepared.append(ak.index.Index64(nplike.reshape(x, (-1,))))
             prepared[-1].metadata["shape"] = x.shape
         elif np.issubdtype(x.dtype, np.integer):
-            prepared.append(ak.index.Index64(x.astype(dtype=np.int64).reshape(-1)))
+            prepared.append(
+                ak.index.Index64(
+                    nplike.reshape(nplike.astype(x, dtype=np.int64), (-1,))
+                )
+            )
             prepared[-1].metadata["shape"] = x.shape
         elif np.issubdtype(x.dtype, np.bool_):
             if len(x.shape) == 1:
@@ -292,7 +296,7 @@ def _normalise_item_nested(item: Content) -> Content:
             next = item
         else:
             next = ak.contents.NumpyArray(
-                item.data.astype(np.int64),
+                item.backend.nplike.astype(item.data, np.int64),
                 parameters=item.parameters,
                 backend=item.backend,
             )
@@ -355,7 +359,9 @@ def _normalise_item_nested(item: Content) -> Content:
         item,
         ak.contents.IndexedOptionArray,
     ):
-        nextindex = item.index.data.astype(np.int64)  # this ALWAYS copies
+        nextindex = item.backend.index_nplike.astype(
+            item.index.data, dtype=np.int64
+        )  # this ALWAYS copies
         nonnull = nextindex >= 0
 
         projected = item.content._carry(ak.index.Index64(nextindex[nonnull]), False)

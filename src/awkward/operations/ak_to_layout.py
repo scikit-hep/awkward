@@ -97,7 +97,7 @@ def _impl(array, allow_record, allow_other, regulararray):
         backend = ak._backends.TypeTracerBackend.instance()
 
         if len(array.shape) == 0:
-            array = array.reshape(1)
+            array = backend.nplike.reshape(array, (1,))
 
         if array.dtype.kind in {"S", "U"}:
             raise _errors.wrap_error(

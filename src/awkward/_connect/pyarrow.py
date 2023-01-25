@@ -650,7 +650,7 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
 
         to64, dt = _pyarrow_to_numpy_dtype.get(str(storage_type), (False, None))
         if to64:
-            data = numpy.frombuffer(data, dtype=np.int32).astype(np.int64)
+            data = numpy.astype(numpy.frombuffer(data, dtype=np.int32), dtype=np.int64)
         if dt is None:
             dt = storage_type.to_pandas_dtype()
 

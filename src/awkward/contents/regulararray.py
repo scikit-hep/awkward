@@ -184,7 +184,7 @@ class RegularArray(Content):
         if content is not None:
             shape = (self._length, self._size) + content.data.shape[1:]
             return ak.contents.NumpyArray(
-                content.data.reshape(shape),
+                self._backend.nplike.reshape(content.data, shape),
                 parameters=ak._util.merge_parameters(
                     self._parameters, content.parameters
                 ),
@@ -244,7 +244,7 @@ class RegularArray(Content):
 
         copied = allow_lazy == "copied"
         if not issubclass(where.dtype.type, np.int64):
-            where = where.astype(np.int64)
+            where = self._backend.index_nplike.astype(where, dtype=np.int64)
             copied = True
 
         negative = where < 0
@@ -475,8 +475,7 @@ class RegularArray(Content):
         elif isinstance(head, ak.index.Index64):
             head = head.to_nplike(index_nplike)
             nexthead, nexttail = ak._slicing.headtail(tail)
-            flathead = index_nplike.asarray(head.data.reshape(-1))
-
+            flathead = index_nplike.reshape(index_nplike.asarray(head.data), (-1,))
             regular_flathead = ak.index.Index64.empty(flathead.shape[0], index_nplike)
             assert regular_flathead.nplike is index_nplike
             self._handle_error(
@@ -1151,9 +1150,16 @@ class RegularArray(Content):
         out = self._content._to_backend_array(allow_missing, backend)
         shape = (self._length, self._size) + out.shape[1:]
 
-        index_nplike = self._backend.index_nplike
-        length = index_nplike.mul_shape_item(self._length, self._size)
-        return out[: index_nplike.shape_item_as_scalar(length)].reshape(shape)
+        # ShapeItem is a defined type, but some nplikes don't map onto the entire space; e.g.
+        # NumPy never has `None` shape items. We require that if a shape-item is used between nplikes
+        # they both be the same "known-shape-ness".
+        assert (
+            self._backend.index_nplike.known_shape == self._backend.nplike.known_shape
+        )
+        length = self._backend.index_nplike.mul_shape_item(self._length, self._size)
+        return self._backend.nplike.reshape(
+            out[: self._backend.nplike.shape_item_as_scalar(length)], shape
+        )
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         assert self._backend.nplike.known_data and self._backend.nplike.known_shape

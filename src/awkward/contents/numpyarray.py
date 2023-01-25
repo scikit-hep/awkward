@@ -187,7 +187,11 @@ class NumpyArray(Content):
         for x in shape:
             zeroslen.append(self._backend.index_nplike.mul_shape_item(zeroslen[-1], x))
 
-        out = NumpyArray(self._data.reshape(-1), parameters=None, backend=self._backend)
+        out = NumpyArray(
+            self._backend.nplike.reshape(self._data, (-1,)),
+            parameters=None,
+            backend=self._backend,
+        )
         for i in range(len(shape) - 1, 0, -1):
             out = ak.contents.RegularArray(out, shape[i], zeroslen[i], parameters=None)
         out._parameters = self._parameters
@@ -205,7 +209,9 @@ class NumpyArray(Content):
     def _getitem_nothing(self):
         tmp = self._data[0:0]
         return NumpyArray(
-            tmp.reshape((0,) + tmp.shape[2:]), parameters=None, backend=self._backend
+            self._backend.nplike.reshape(tmp, ((0,) + tmp.shape[2:])),
+            parameters=None,
+            backend=self._backend,
         )
 
     def _getitem_at(self, where):
@@ -1202,7 +1208,8 @@ class NumpyArray(Content):
     def _completely_flatten(self, backend, options):
         return [
             ak.contents.NumpyArray(
-                self._raw(backend.nplike).reshape(-1), backend=backend
+                backend.nplike.reshape(self._raw(backend.nplike), (-1,)),
+                backend=backend,
             )
         ]
 

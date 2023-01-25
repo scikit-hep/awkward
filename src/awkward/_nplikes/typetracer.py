@@ -332,10 +332,6 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         self.touch_shape()
         return len(self._shape)
 
-    def astype(self, dtype: np.dtype) -> Self:
-        self.touch_data()
-        return self._new(np.dtype(dtype), self._shape)
-
     def view(self, dtype: np.dtype) -> Self:
         if self.itemsize != np.dtype(dtype).itemsize and self._shape[-1] is not None:
             last = int(
@@ -543,21 +539,6 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
             AssertionError(
                 "bug in Awkward Array: attempt to set values of a TypeTracerArray"
             )
-        )
-
-    def reshape(self, *args):
-        self.touch_shape()
-
-        if len(args) == 1 and isinstance(args[0], tuple):
-            args = args[0]
-
-        assert len(args) != 0
-        assert ak._util.is_integer(args[0]) or args[0] is None
-        assert all(ak._util.is_integer(x) for x in args[1:])
-        assert all(x >= 0 for x in args[1:])
-
-        return TypeTracerArray._new(
-            self._dtype, (None,) + args[1:], self._form_key, self._report
         )
 
     def copy(self):
@@ -934,6 +915,45 @@ class TypeTracer(NumpyLike):
     ) -> TypeTracerArray:
         raise ak._errors.wrap_error(NotImplementedError)
 
+    def reshape(
+        self, x: ArrayLike, shape: tuple[int, ...], *, copy: bool | None = None
+    ) -> TypeTracerArray:
+        x.touch_shape()
+
+        size = x.size
+
+        # Validate new shape to ensure that it only contains at-most one placeholder
+        n_placeholders = 0
+        new_size = 1
+        for item in shape:
+            if is_unknown_length(item):
+                # Size is no longer defined
+                new_size = None
+            elif not ak._util.is_integer(item):
+                raise wrap_error(
+                    ValueError(
+                        "shape must be comprised of positive integers, -1 (for placeholders), or unknown lengths"
+                    )
+                )
+            elif item == -1:
+                if n_placeholders == 1:
+                    raise wrap_error(
+                        ValueError("only one placeholder dimension permitted per shape")
+                    )
+                n_placeholders += 1
+            elif item == 0:
+                raise wrap_error(ValueError("shape items cannot be zero"))
+            else:
+                new_size *= item
+
+        # Populate placeholders
+        new_shape = [*shape]
+        for i, item in enumerate(shape):
+            if item == -1:
+                new_shape[i] = size // new_size
+
+        return TypeTracerArray._new(x.dtype, new_shape, x.form_key, x.report)
+
     def cumsum(
         self,
         x: ArrayLike,
@@ -1177,9 +1197,13 @@ class TypeTracer(NumpyLike):
         try_touch_data(x)
         return "[## ... ##]"
 
-    def can_cast(
-        self, from_: np.dtype | TypeTracerArray, to: np.dtype | TypeTracerArray
-    ) -> bool:
+    def astype(
+        self, x: ArrayLike, dtype: numpy.dtype, *, copy: bool | None = True
+    ) -> TypeTracerArray:
+        x.touch_data()
+        return TypeTracerArray._new(np.dtype(dtype), x.shape)
+
+    def can_cast(self, from_: np.dtype | ArrayLike, to: np.dtype | ArrayLike) -> bool:
         return numpy.can_cast(from_, to, casting="same_kind")
 
     @classmethod
