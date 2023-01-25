@@ -60,7 +60,9 @@ def _array_function_no_impl(func, types, args, kwargs, behavior):
     rectilinear_kwargs = {k: _to_rectilinear(v) for k, v in kwargs.items()}
     result = func(*rectilinear_args, **rectilinear_kwargs)
     # We want the result to be a layout (this will fail for functions returning non-array convertibles)
-    out = ak.operations.ak_to_layout._impl(result, allow_record=True, allow_other=True)
+    out = ak.operations.ak_to_layout._impl(
+        result, allow_record=True, allow_other=True, regulararray=True
+    )
     return ak._util.wrap(out, behavior=behavior, allow_other=True)
 
 

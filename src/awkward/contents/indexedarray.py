@@ -4,14 +4,17 @@ from __future__ import annotations
 import copy
 
 import awkward as ak
+from awkward._nplikes.numpy import Numpy
+from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.typetracer import TypeTracer
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.indexedform import IndexedForm
 from awkward.index import Index
 from awkward.typing import Final, Self, final
 
-np = ak._nplikes.NumpyMetadata.instance()
-numpy = ak._nplikes.Numpy.instance()
+np = NumpyMetadata.instance()
+numpy = Numpy.instance()
 
 
 @final
@@ -154,7 +157,7 @@ class IndexedArray(Content):
         self._content._to_buffers(form.content, getkey, container, backend, byteorder)
 
     def _to_typetracer(self, forget_length: bool) -> Self:
-        index = self._index.to_nplike(ak._typetracer.TypeTracer.instance())
+        index = self._index.to_nplike(TypeTracer.instance())
         return IndexedArray(
             index.forget_length() if forget_length else index,
             self._content._to_typetracer(False),
@@ -453,19 +456,13 @@ class IndexedArray(Content):
             tail.append(others[i])
             i = i + 1
 
-        if any(
-            isinstance(x.backend.nplike, ak._typetracer.TypeTracer) for x in head + tail
-        ):
+        if any(isinstance(x.backend.nplike, TypeTracer) for x in head + tail):
             head = [
-                x
-                if isinstance(x.backend.nplike, ak._typetracer.TypeTracer)
-                else x.to_typetracer()
+                x if isinstance(x.backend.nplike, TypeTracer) else x.to_typetracer()
                 for x in head
             ]
             tail = [
-                x
-                if isinstance(x.backend.nplike, ak._typetracer.TypeTracer)
-                else x.to_typetracer()
+                x if isinstance(x.backend.nplike, TypeTracer) else x.to_typetracer()
                 for x in tail
             ]
 

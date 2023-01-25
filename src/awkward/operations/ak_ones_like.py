@@ -2,8 +2,9 @@
 
 import awkward as ak
 from awkward._connect.numpy import unsupported
+from awkward._nplikes.numpylike import NumpyMetadata
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 
 
 def ones_like(array, *, dtype=None, highlevel=True, behavior=None):

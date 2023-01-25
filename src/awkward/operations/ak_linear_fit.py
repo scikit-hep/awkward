@@ -2,10 +2,11 @@
 
 
 import awkward as ak
-from awkward._nplikes import ufuncs
+from awkward._nplikes import nplike_of, ufuncs
+from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._util import unset
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 
 
 def linear_fit(
@@ -103,7 +104,7 @@ def _impl(x, y, weight, axis, keepdims, mask_identity):
         )
 
     with np.errstate(invalid="ignore", divide="ignore"):
-        nplike = ak._nplikes.nplike_of(x, y, weight)
+        nplike = nplike_of(x, y, weight)
         if weight is None:
             sumw = ak.operations.ak_count._impl(
                 x,

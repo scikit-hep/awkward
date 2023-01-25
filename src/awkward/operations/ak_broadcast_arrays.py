@@ -2,8 +2,10 @@
 
 import awkward as ak
 from awkward._connect.numpy import unsupported
+from awkward._nplikes import nplike_of
+from awkward._nplikes.numpylike import NumpyMetadata
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 
 
 def broadcast_arrays(
@@ -206,7 +208,7 @@ def _impl(
     for x in arrays:
         y = ak.operations.to_layout(x, allow_record=True, allow_other=True)
         if not isinstance(y, (ak.contents.Content, ak.Record)):
-            y = ak.contents.NumpyArray(ak._nplikes.nplike_of(*arrays).asarray([y]))
+            y = ak.contents.NumpyArray(nplike_of(*arrays).asarray([y]))
         inputs.append(y)
 
     def action(inputs, depth, **kwargs):

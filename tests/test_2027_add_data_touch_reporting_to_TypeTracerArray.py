@@ -5,6 +5,7 @@ import copy
 import numpy as np
 
 import awkward as ak
+from awkward._nplikes.typetracer import typetracer_with_report
 
 
 def test_prototypical_example():
@@ -32,7 +33,7 @@ def test_prototypical_example():
     labeled_form.contents[3].form_key = "listoffset-4"
     labeled_form.contents[3].content.form_key = "numpy-mass"
 
-    layout_tt2, report = ak._typetracer.typetracer_with_report(labeled_form)
+    layout_tt2, report = typetracer_with_report(labeled_form)
     original = ak.Array(layout_tt2)
 
     restructured = ak.zip(

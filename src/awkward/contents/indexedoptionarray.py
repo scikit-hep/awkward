@@ -4,14 +4,22 @@ from __future__ import annotations
 import copy
 
 import awkward as ak
+from awkward._nplikes.numpy import Numpy
+from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.typetracer import (
+    MaybeNone,
+    TypeTracer,
+    ensure_known_scalar,
+    is_unknown_length,
+)
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.indexedoptionform import IndexedOptionForm
 from awkward.index import Index
 from awkward.typing import Final, Self, final
 
-np = ak._nplikes.NumpyMetadata.instance()
-numpy = ak._nplikes.Numpy.instance()
+np = NumpyMetadata.instance()
+numpy = Numpy.instance()
 
 
 @final
@@ -141,7 +149,7 @@ class IndexedOptionArray(Content):
         self._content._to_buffers(form.content, getkey, container, backend, byteorder)
 
     def _to_typetracer(self, forget_length: bool) -> Self:
-        index = self._index.to_nplike(ak._typetracer.TypeTracer.instance())
+        index = self._index.to_nplike(TypeTracer.instance())
         return IndexedOptionArray(
             index.forget_length() if forget_length else index,
             self._content._to_typetracer(False),
@@ -199,7 +207,7 @@ class IndexedOptionArray(Content):
             carry[too_negative] = -1
         carry = ak.index.Index(carry)
 
-        if self._content.length == 0:
+        if ensure_known_scalar(self._content.length == 0, False):
             content = self._content.form.length_one_array(
                 backend=self._backend, highlevel=False
             )._carry(carry, False)
@@ -227,7 +235,7 @@ class IndexedOptionArray(Content):
     def _getitem_at(self, where):
         if not self._backend.nplike.known_data:
             self._touch_data(recursive=False)
-            return ak._typetracer.MaybeNone(self._content._getitem_at(where))
+            return MaybeNone(self._content._getitem_at(where))
 
         if where < 0:
             where += self.length
@@ -580,19 +588,13 @@ class IndexedOptionArray(Content):
             tail.append(others[i])
             i = i + 1
 
-        if any(
-            isinstance(x.backend.nplike, ak._typetracer.TypeTracer) for x in head + tail
-        ):
+        if any(isinstance(x.backend.nplike, TypeTracer) for x in head + tail):
             head = [
-                x
-                if isinstance(x.backend.nplike, ak._typetracer.TypeTracer)
-                else x.to_typetracer()
+                x if isinstance(x.backend.nplike, TypeTracer) else x.to_typetracer()
                 for x in head
             ]
             tail = [
-                x
-                if isinstance(x.backend.nplike, ak._typetracer.TypeTracer)
-                else x.to_typetracer()
+                x if isinstance(x.backend.nplike, TypeTracer) else x.to_typetracer()
                 for x in tail
             ]
 
@@ -1183,7 +1185,13 @@ class IndexedOptionArray(Content):
         )
 
         inject_nones = (
-            True if (numnull[0] > 0 and not branch and negaxis != depth) else False
+            True
+            if (
+                (not is_unknown_length(numnull[0]) and numnull[0] > 0)
+                and not branch
+                and negaxis != depth
+            )
+            else False
         )
 
         # If we want the None's at this depth to be injected

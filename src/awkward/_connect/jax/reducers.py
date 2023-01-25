@@ -3,9 +3,10 @@
 import jax
 
 import awkward as ak
+from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._reducers import Reducer
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 
 
 class ArgMin(Reducer):

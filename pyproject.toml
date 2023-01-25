@@ -128,6 +128,10 @@ log_cli_level = "info"
 
 [tool.isort]
 profile = "black"
+skip_glob = [
+    "src/awkward/__init__.py",
+    "src/awkward/_nplikes/__init__.py",
+]
 
 [tool.pylint.master]
 py-version = "3.7"

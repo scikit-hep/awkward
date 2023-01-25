@@ -4,9 +4,11 @@ import json
 from collections.abc import Iterable, Sized
 
 import awkward as ak
+from awkward._nplikes.numpy import Numpy
+from awkward._nplikes.numpylike import NumpyMetadata
 
-np = ak._nplikes.NumpyMetadata.instance()
-numpy = ak._nplikes.Numpy.instance()
+np = NumpyMetadata.instance()
+numpy = Numpy.instance()
 
 try:
     import pyarrow

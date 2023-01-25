@@ -1,9 +1,12 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._nplikes import nplike_of
+from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.typetracer import UnknownLength
 from awkward.operations.ak_fill_none import fill_none
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 cpu = ak._backends.NumpyBackend.instance()
 
 
@@ -50,7 +53,7 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
         # Is an Awkward Content
         isinstance(arrays, ak.contents.Content)
         # Is an array with a known NumpyLike
-        or ak._nplikes.nplike_of(arrays, default=None) is not None
+        or nplike_of(arrays, default=None) is not None
     ):
         # Convert the array to a layout object
         content = ak.operations.to_layout(arrays, allow_record=False, allow_other=False)
@@ -136,7 +139,7 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
             if depth == posaxis:
                 backend = ak._backends.backend_of(*inputs, default=cpu)
 
-                length = ak._typetracer.UnknownLength
+                length = UnknownLength
                 for x in inputs:
                     if isinstance(x, ak.contents.Content):
                         if not ak._util.is_integer(length):

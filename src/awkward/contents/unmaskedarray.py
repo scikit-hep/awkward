@@ -5,13 +5,16 @@ import copy
 import math
 
 import awkward as ak
+from awkward._nplikes.numpy import Numpy
+from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.typetracer import MaybeNone
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.unmaskedform import UnmaskedForm
 from awkward.typing import Final, Self, final
 
-np = ak._nplikes.NumpyMetadata.instance()
-numpy = ak._nplikes.Numpy.instance()
+np = NumpyMetadata.instance()
+numpy = Numpy.instance()
 
 
 @final
@@ -168,7 +171,7 @@ class UnmaskedArray(Content):
     def _getitem_at(self, where):
         if not self._backend.nplike.known_data:
             self._touch_data(recursive=False)
-            return ak._typetracer.MaybeNone(self._content._getitem_at(where))
+            return MaybeNone(self._content._getitem_at(where))
 
         return self._content._getitem_at(where)
 

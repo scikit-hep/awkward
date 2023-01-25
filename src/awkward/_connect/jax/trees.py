@@ -4,15 +4,21 @@ from __future__ import annotations
 import jax
 
 import awkward as ak
-from awkward import _errors, _nplikes, contents, highlevel, record
+from awkward import contents, highlevel, record
+from awkward._errors import wrap_error
+from awkward._nplikes.jax import Jax
+from awkward._nplikes.numpy import Numpy
+from awkward._nplikes.numpylike import NumpyMetadata
+from awkward.contents import Content
+from awkward.record import Record
 from awkward.typing import Generic, TypeVar, Union
 
-numpy = _nplikes.Numpy.instance()
-np = _nplikes.NumpyMetadata.instance()
+numpy = Numpy.instance()
+np = NumpyMetadata.instance()
 
 
 def find_all_buffers(
-    layout: contents.Content | record.Record,
+    layout: Content | Record,
 ) -> list[numpy.ndarray]:
 
     data_ptrs = []
@@ -34,7 +40,7 @@ def replace_all_buffers(
     backend: ak._backends.Backend,
 ):
     def action(node, **kwargs):
-        jaxlike = _nplikes.Jax.instance()
+        jaxlike = Jax.instance()
         if isinstance(node, ak.contents.NumpyArray):
             buffer = buffers.pop(0)
             # JAX might give us non-buffers, so ignore them
@@ -72,7 +78,7 @@ class AuxData(Generic[T]):
         elif isinstance(obj, (contents.Content, record.Record)):
             layout = obj
         else:
-            raise _errors.wrap_error(TypeError)
+            raise wrap_error(TypeError)
 
         # First, make sure we're all JAX
         jax_backend = ak._backends.JaxBackend.instance()
@@ -98,7 +104,7 @@ class AuxData(Generic[T]):
         # layout = replace_all_buffers(
         #     layout,
         #     [create_placeholder_like(n) for n in buffers],
-        #     nplike=_nplikes.Numpy.instance(),
+        #     nplike=Numpy.instance(),
         # )
 
         return buffers, AuxData(
@@ -124,7 +130,7 @@ class AuxData(Generic[T]):
             # Check that JAX isn't trying to give us float0 types
             dtype = getattr(buffer, "dtype", None)
             if dtype == np.dtype([("float0", "V")]):
-                raise _errors.wrap_error(
+                raise wrap_error(
                     TypeError(
                         f"a buffer with the dtype {buffer.dtype} was encountered during unflattening. "
                         "JAX uses this dtype for the tangents of integer/boolean outputs; these cannot "

@@ -6,6 +6,15 @@ import json
 import math
 
 import awkward as ak
+from awkward._nplikes.numpy import Numpy
+from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.typetracer import (
+    MaybeNone,
+    TypeTracer,
+    UnknownLength,
+    ensure_known_scalar,
+    is_unknown_length,
+)
 from awkward._util import unset
 from awkward.contents.bytemaskedarray import ByteMaskedArray
 from awkward.contents.content import Content
@@ -13,8 +22,8 @@ from awkward.forms.bitmaskedform import BitMaskedForm
 from awkward.index import Index
 from awkward.typing import Final, Self, final
 
-np = ak._nplikes.NumpyMetadata.instance()
-numpy = ak._nplikes.Numpy.instance()
+np = NumpyMetadata.instance()
+numpy = Numpy.instance()
 
 
 @final
@@ -56,7 +65,7 @@ class BitMaskedArray(Content):
                     )
                 )
             )
-        if not isinstance(length, ak._typetracer.UnknownLengthType):
+        if not is_unknown_length(length):
             if not (ak._util.is_integer(length) and length >= 0):
                 raise ak._errors.wrap_error(
                     TypeError(
@@ -73,7 +82,7 @@ class BitMaskedArray(Content):
                     )
                 )
             )
-        if length > mask.length * 8:
+        if ensure_known_scalar(length > mask.length * 8, False):
             raise ak._errors.wrap_error(
                 ValueError(
                     "{} 'length' ({}) must be <= len(mask) * 8 ({})".format(
@@ -81,7 +90,7 @@ class BitMaskedArray(Content):
                     )
                 )
             )
-        if length > content.length:
+        if ensure_known_scalar(length > content.length, False):
             raise ak._errors.wrap_error(
                 ValueError(
                     "{} 'length' ({}) must be <= len(content) ({})".format(
@@ -209,12 +218,12 @@ class BitMaskedArray(Content):
         self._content._to_buffers(form.content, getkey, container, backend, byteorder)
 
     def _to_typetracer(self, forget_length: bool) -> Self:
-        tt = ak._typetracer.TypeTracer.instance()
+        tt = TypeTracer.instance()
         return BitMaskedArray(
             self._mask.to_nplike(tt),
             self._content._to_typetracer(False),
             self._valid_when,
-            ak._typetracer.UnknownLength if forget_length else self.length,
+            UnknownLength if forget_length else self.length,
             self._lsb_order,
             parameters=self._parameters,
         )
@@ -374,7 +383,7 @@ class BitMaskedArray(Content):
     def _getitem_at(self, where):
         if not self._backend.nplike.known_data:
             self._touch_data(recursive=False)
-            return ak._typetracer.MaybeNone(self._content._getitem_at(where))
+            return MaybeNone(self._content._getitem_at(where))
 
         if where < 0:
             where += self.length

@@ -8,11 +8,18 @@ from numbers import Complex, Real
 
 import awkward as ak
 from awkward._backends import Backend
+from awkward._nplikes.numpy import Numpy
+from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.typetracer import (
+    TypeTracer,
+    ensure_known_scalar,
+    is_unknown_length,
+)
 from awkward.forms.form import Form, _parameters_equal
 from awkward.typing import Any, AxisMaybeNone, Literal, Self, TypeAlias, TypedDict
 
-np = ak._nplikes.NumpyMetadata.instance()
-numpy = ak._nplikes.Numpy.instance()
+np = NumpyMetadata.instance()
+numpy = Numpy.instance()
 
 ActionType: TypeAlias = """Callable[
     [
@@ -348,7 +355,7 @@ class Content:
         length: int,
     ):
         # if this is in a tuple-slice and really should be 0, it will be trimmed later
-        length = 1 if length == 0 else length
+        length = 1 if ensure_known_scalar(length == 0, False) else length
         index = ak.index.Index64(head.index, nplike=self._backend.index_nplike)
         indexlength = index.length
         index = index.to_nplike(self._backend.index_nplike)
@@ -545,7 +552,7 @@ class Content:
 
             out = next._getitem_next(nextwhere[0], nextwhere[1:], None)
 
-            if out.length == 0:
+            if ensure_known_scalar(out.length == 0, False):
                 return out._getitem_nothing()
             else:
                 return out._getitem_at(0)
@@ -593,7 +600,7 @@ class Content:
             out = ak._slicing.getitem_next_array_wrap(
                 self._carry(carry, allow_lazy), where.shape
             )
-            if out.length == 0:
+            if ensure_known_scalar(out.length == 0, False):
                 return out._getitem_nothing()
             else:
                 return out._getitem_at(0)
@@ -742,19 +749,13 @@ class Content:
             tail.append(others[i])
             i = i + 1
 
-        if any(
-            isinstance(x.backend.nplike, ak._typetracer.TypeTracer) for x in head + tail
-        ):
+        if any(isinstance(x.backend.nplike, TypeTracer) for x in head + tail):
             head = [
-                x
-                if isinstance(x.backend.nplike, ak._typetracer.TypeTracer)
-                else x.to_typetracer()
+                x if isinstance(x.backend.nplike, TypeTracer) else x.to_typetracer()
                 for x in head
             ]
             tail = [
-                x
-                if isinstance(x.backend.nplike, ak._typetracer.TypeTracer)
-                else x.to_typetracer()
+                x if isinstance(x.backend.nplike, TypeTracer) else x.to_typetracer()
                 for x in tail
             ]
 
@@ -811,18 +812,20 @@ class Content:
         if replacement:
             size = size + (n - 1)
         thisn = n
-        combinationslen = 0
-        if thisn > size:
-            combinationslen = 0
-        elif thisn == size:
-            combinationslen = 1
+        if is_unknown_length(thisn) or is_unknown_length(size):
+            combinationslen = size  # not actually size, just an unknown value
         else:
-            if thisn * 2 > size:
-                thisn = size - thisn
-            combinationslen = size
-            for j in range(2, thisn + 1):
-                combinationslen = combinationslen * (size - j + 1)
-                combinationslen = combinationslen // j
+            if thisn > size:
+                combinationslen = 0
+            elif thisn == size:
+                combinationslen = 1
+            else:
+                if thisn * 2 > size:
+                    thisn = size - thisn
+                combinationslen = size
+                for j in range(2, thisn + 1):
+                    combinationslen = combinationslen * (size - j + 1)
+                    combinationslen = combinationslen // j
 
         tocarryraw = self._backend.index_nplike.empty(n, dtype=np.intp)
         tocarry = []
@@ -953,7 +956,7 @@ class Content:
         return self.form_cls.dimension_optiontype.__get__(self)
 
     def _pad_none_axis0(self, target: int, clip: bool) -> Content:
-        if not clip and target < self.length:
+        if not clip and ensure_known_scalar(target < self.length, False):
             index = ak.index.Index64(
                 self._backend.index_nplike.arange(self.length, dtype=np.int64),
                 nplike=self._backend.index_nplike,

@@ -6,9 +6,10 @@ from collections.abc import Mapping
 
 import awkward as ak
 from awkward import _errors
+from awkward._nplikes.numpylike import NumpyMetadata
 from awkward.typing import Any
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 numpy_backend = ak._backends.NumpyBackend.instance()
 
 

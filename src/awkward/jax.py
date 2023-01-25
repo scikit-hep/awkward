@@ -5,14 +5,16 @@ import threading
 import weakref
 
 import awkward as ak
-from awkward import _errors, _nplikes, highlevel
+from awkward import highlevel
+from awkward._errors import wrap_error
+from awkward._nplikes.numpy import Numpy
 from awkward.typing import TypeVar
 
-numpy = _nplikes.Numpy.instance()
+numpy = Numpy.instance()
 
 
 def assert_never(arg) -> None:
-    raise ak._errors.wrap_error(AssertionError(f"this should never be run: {arg}"))
+    raise wrap_error(AssertionError(f"this should never be run: {arg}"))
 
 
 class _RegistrationState(enum.Enum):
@@ -33,7 +35,7 @@ def register_and_check():
         import jax  # noqa: I251, F401
 
     except ModuleNotFoundError:
-        raise ak._errors.wrap_error(
+        raise wrap_error(
             ModuleNotFoundError(
                 """install the 'jax' package with:
 
@@ -118,11 +120,11 @@ def assert_registered():
     """Ensure that JAX integration is registered. Raise a RuntimeError if not."""
     with _registration_lock:
         if _registration_state == _RegistrationState.INIT:
-            raise _errors.wrap_error(
+            raise wrap_error(
                 RuntimeError("JAX features require `ak.jax.register_and_check()`")
             )
         elif _registration_state == _RegistrationState.FAILED:
-            raise _errors.wrap_error(
+            raise wrap_error(
                 RuntimeError(
                     "JAX features require `ak.jax.register_and_check()`, "
                     "but the last call to `ak.jax.register_and_check()` did not succeed. "

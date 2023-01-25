@@ -4,11 +4,12 @@ import json
 import re
 
 import awkward as ak
+from awkward._nplikes.numpylike import NumpyMetadata
 from awkward.forms.form import _parameters_equal
 from awkward.types.type import Type
 from awkward.typing import final
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 
 
 def is_primitive(primitive):

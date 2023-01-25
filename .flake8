@@ -10,6 +10,7 @@ per-file-ignores =
     src/awkward/__init__.py: E402, F401, F403, AK1, F401, F403
     src/awkward/operations/__init__.py: F401
     src/awkward/_connect/*: I251
+    src/awkward/_nplikes/__init__.py: F401
     src/awkward/_nplikes/*: I251
     src/awkward/_typetracer.py: I251
     src/awkward/_connect/numba/*: AK1, I25

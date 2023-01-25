@@ -3,7 +3,7 @@
 from collections.abc import Mapping, Sequence
 
 import awkward as ak
-from awkward._nplikes import NumpyMetadata
+from awkward._nplikes.numpylike import NumpyMetadata
 
 metadata = NumpyMetadata.instance()
 
@@ -175,8 +175,8 @@ def to_parquet(
     pyarrow_parquet = awkward._connect.pyarrow.import_pyarrow_parquet("ak.to_parquet")
     fsspec = awkward._connect.pyarrow.import_fsspec("ak.to_parquet")
 
-    layout = ak.operations.ak_to_layout.to_layout(
-        data, allow_record=True, allow_other=False
+    layout = ak.operations.ak_to_layout._impl(
+        data, allow_record=True, allow_other=False, regulararray=True
     )
     table = ak.operations.ak_to_arrow_table._impl(
         layout,

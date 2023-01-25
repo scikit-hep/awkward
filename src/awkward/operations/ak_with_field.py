@@ -3,8 +3,9 @@
 import copy
 
 import awkward as ak
+from awkward._nplikes.numpylike import NumpyMetadata
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 
 
 def with_field(array, what, where=None, *, highlevel=True, behavior=None):

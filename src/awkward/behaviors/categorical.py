@@ -3,10 +3,12 @@
 
 import awkward as ak
 from awkward._nplikes import ufuncs
+from awkward._nplikes.numpy import Numpy
+from awkward._nplikes.numpylike import NumpyMetadata
 from awkward.highlevel import Array
 
-np = ak._nplikes.NumpyMetadata.instance()
-numpy = ak._nplikes.Numpy.instance()
+np = NumpyMetadata.instance()
+numpy = Numpy.instance()
 
 
 class CategoricalBehavior(Array):

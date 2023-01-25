@@ -1,9 +1,13 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._nplikes import nplike_of
+from awkward._nplikes.jax import Jax
+from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.typetracer import UnknownLength, is_unknown_length
 from awkward.typing import Sequence
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 
 
 def headtail(oldtail):
@@ -62,7 +66,7 @@ def prepare_advanced_indexing(items):
         )
 
     # Then broadcast the index items
-    nplike = ak._nplikes.nplike_of(*broadcastable)
+    nplike = nplike_of(*broadcastable)
     broadcasted = nplike.broadcast_arrays(*broadcastable)
 
     # And re-assemble the index with the broadcasted items
@@ -384,9 +388,7 @@ def normalise_item_bool_to_int(item):
         else:
             item._touch_data(recursive=False)
             nextoffsets = item.offsets
-            nextcontent = item.backend.nplike.empty(
-                ak._typetracer.UnknownLength, dtype=np.int64
-            )
+            nextcontent = item.backend.nplike.empty(UnknownLength, dtype=np.int64)
 
         return ak.contents.ListOffsetArray(
             ak.index.Index64(nextoffsets),
@@ -400,7 +402,7 @@ def normalise_item_bool_to_int(item):
         and issubclass(item.content.content.dtype.type, (bool, np.bool_))
     ):
         if item.backend.nplike.known_data or item.backend.nplike.known_shape:
-            if isinstance(item.backend.nplike, ak._nplikes.Jax):
+            if isinstance(item.backend.nplike, Jax):
                 raise ak._errors.wrap_error(
                     "This slice is not supported for JAX differentiation."
                 )
@@ -445,9 +447,7 @@ def normalise_item_bool_to_int(item):
             item._touch_data(recursive=False)
             nextoffsets = item.offsets
             outindex = item.content.index
-            nextcontent = item.backend.nplike.empty(
-                ak._typetracer.UnknownLength, dtype=np.int64
-            )
+            nextcontent = item.backend.nplike.empty(UnknownLength, dtype=np.int64)
 
         return ak.contents.ListOffsetArray(
             ak.index.Index64(nextoffsets, nplike=item.backend.index_nplike),
@@ -472,7 +472,7 @@ def normalise_item_bool_to_int(item):
             item.content.dtype.type, (bool, np.bool_)
         ):
             if item.backend.nplike.known_data or item.backend.nplike.known_shape:
-                if isinstance(item.backend.nplike, ak._nplikes.Jax):
+                if isinstance(item.backend.nplike, Jax):
                     raise ak._errors.wrap_error(
                         "This slice is not supported for JAX differentiation."
                     )
@@ -509,9 +509,7 @@ def normalise_item_bool_to_int(item):
             else:
                 item._touch_data(recursive=False)
                 outindex = item.index
-                nextcontent = item.backend.nplike.empty(
-                    ak._typetracer.UnknownLength, dtype=np.int64
-                )
+                nextcontent = item.backend.nplike.empty(UnknownLength, dtype=np.int64)
 
             return ak.contents.IndexedOptionArray(
                 ak.index.Index(outindex, nplike=item.backend.index_nplike),
@@ -535,7 +533,7 @@ def getitem_next_array_wrap(outcontent, shape, outer_length=0):
     for i in range(len(shape))[::-1]:
         length = shape[i - 1] if i > 0 else outer_length
         size = shape[i]
-        if isinstance(size, ak._typetracer.UnknownLengthType):
+        if is_unknown_length(size):
             size = 1
         outcontent = ak.contents.RegularArray(outcontent, size, length, parameters=None)
     return outcontent
