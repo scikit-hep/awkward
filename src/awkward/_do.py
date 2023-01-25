@@ -271,28 +271,28 @@ def mergeable(one: Content, two: Content, mergebool: bool = True) -> bool:
 def merge_as_union(one: Content, two: Content) -> ak.contents.UnionArray:
     mylength = one.length
     theirlength = two.length
-    tags = ak.index.Index8.empty((mylength + theirlength), one._backend.index_nplike)
-    index = ak.index.Index64.empty((mylength + theirlength), one._backend.index_nplike)
+    tags = ak.index.Index8.empty((mylength + theirlength), one.backend.index_nplike)
+    index = ak.index.Index64.empty((mylength + theirlength), one.backend.index_nplike)
     contents = [one, two]
-    assert tags.nplike is one._backend.index_nplike
+    assert tags.nplike is one.backend.index_nplike
     one._handle_error(
-        one._backend["awkward_UnionArray_filltags_const", tags.dtype.type](
+        one.backend["awkward_UnionArray_filltags_const", tags.dtype.type](
             tags.data, 0, mylength, 0
         )
     )
-    assert index.nplike is one._backend.index_nplike
+    assert index.nplike is one.backend.index_nplike
     one._handle_error(
-        one._backend["awkward_UnionArray_fillindex_count", index.dtype.type](
+        one.backend["awkward_UnionArray_fillindex_count", index.dtype.type](
             index.data, 0, mylength
         )
     )
     one._handle_error(
-        one._backend["awkward_UnionArray_filltags_const", tags.dtype.type](
+        one.backend["awkward_UnionArray_filltags_const", tags.dtype.type](
             tags.data, mylength, theirlength, 1
         )
     )
     one._handle_error(
-        one._backend["awkward_UnionArray_fillindex_count", index.dtype.type](
+        one.backend["awkward_UnionArray_fillindex_count", index.dtype.type](
             index.data, mylength, theirlength
         )
     )
