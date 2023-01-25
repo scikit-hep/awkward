@@ -63,7 +63,7 @@ done = compiler(
 assert done is True
 
 
-def from_rdataframe(data_frame, columns):
+def from_rdataframe(data_frame, columns, offsets_type="int64_t"):
     def form_dtype(form):
         if isinstance(form, ak.forms.NumpyForm) and form.inner_shape == ():
             return primitive_to_dtype(form.primitive)
@@ -167,7 +167,7 @@ def from_rdataframe(data_frame, columns):
             awkward_contents[col] = layout
 
         else:  # Convert the C++ vectors to Awkward arrays
-            form_str = ROOT.awkward.type_to_form[col_type](0)
+            form_str = ROOT.awkward.type_to_form[col_type, offsets_type](0)
 
             if form_str == "unsupported type":
                 raise ak._errors.wrap_error(
@@ -177,7 +177,6 @@ def from_rdataframe(data_frame, columns):
                 raise ak._errors.wrap_error(
                     AssertionError("this code should not be reached.")
                 )
-
             form = ak.forms.from_json(form_str)
 
             list_depth = form.purelist_depth
@@ -208,7 +207,7 @@ def from_rdataframe(data_frame, columns):
                     list_depth = 2
 
                 ListOffsetBuilder = cppyy.gbl.awkward.LayoutBuilder.ListOffset[
-                    "int64_t",
+                    offsets_type,
                     cpp_builder_type(list_depth - 1, data_type),
                 ]
                 builder = ListOffsetBuilder()
