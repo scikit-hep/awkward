@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import awkward as ak
-from awkward.typing import TYPE_CHECKING, TypeVar
+from collections.abc import Collection
+from awkward.typing import TypeVar, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from awkward._nplikes.numpylike import ArrayLike, NumpyLike
@@ -10,6 +11,24 @@ if TYPE_CHECKING:
 _UNSET = object()
 
 D = TypeVar("D")
+
+
+def common_nplike(nplikes: Collection[NumpyLike]) -> NumpyLike:
+    # Either we have one nplike, or one + typetracer
+    if len(nplikes) == 1:
+        return next(iter(nplikes))
+    else:
+        # We allow typetracers to mix with other nplikes, and take precedence
+        for nplike in nplikes:
+            if not (nplike.known_data and nplike.known_shape):
+                return nplike
+
+        raise ak._errors.wrap_error(
+            ValueError(
+                "cannot operate on arrays with incompatible array libraries. Use #ak.to_backend to coerce the arrays "
+                "to the same backend"
+            )
+        )
 
 
 def nplike_of(*arrays, default: D = _UNSET) -> NumpyLike | D:
@@ -52,20 +71,8 @@ def nplike_of(*arrays, default: D = _UNSET) -> NumpyLike | D:
             return Numpy.instance()
         else:
             return default
-    elif len(nplikes) == 1:
-        return next(iter(nplikes))
     else:
-        # We allow typetracers to mix with other nplikes, and take precedence
-        for nplike in nplikes:
-            if not (nplike.known_data and nplike.known_shape):
-                return nplike
-
-        raise ak._errors.wrap_error(
-            ValueError(
-                """attempting to use arrays with more than one backend in the same operation; use
-#ak.to_backend to coerce the arrays to the same backend."""
-            )
-        )
+        return common_nplike(nplikes)
 
 
 def to_nplike(
