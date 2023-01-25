@@ -249,10 +249,10 @@ def from_rdataframe(data_frame, columns, offsets_type="int64_t"):
 
     for col, content in awkward_contents.items():
         # wrap Awkward array in IndexedArray only if needed
-        if contents_index is not None and len(contents_index) < len(content):
-            array = ak.contents.IndexedArray(contents_index, content)
-            contents[col] = array
-        else:
-            contents[col] = content
+        contents[col] = (
+            ak.contents.IndexedArray(contents_index, content)
+            if contents_index is not None and len(contents_index) < len(content)
+            else content
+        )
 
     return ak.zip(contents, depth_limit=1)
