@@ -649,7 +649,7 @@ def from_arraylib(array, regulararray, recordarray, highlevel, behavior):
             )
 
         if len(array.shape) == 0:
-            array = ak.contents.NumpyArray(array.reshape(1))
+            array = array.reshape(1)
 
         if array.dtype.kind == "S":
             asbytes = array.reshape(-1)
