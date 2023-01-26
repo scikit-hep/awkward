@@ -480,7 +480,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
                 else:
                     raise ak._errors.wrap_error(NotImplementedError(repr(wh)))
 
-            slicer_shape = numpy.broadcast_arrays(*shapes)[0].shape
+            slicer_shape = self.nplike.broadcast_shapes(*shapes)  # [0].shape
 
             shape = basic_shape + slicer_shape + self._shape[num_basic + len(shapes) :]
             assert len(shape) != 0
