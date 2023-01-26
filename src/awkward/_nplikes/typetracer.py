@@ -262,7 +262,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         size = 1
         for item in self._shape:
             if ak._util.is_integer(item):
-                size += item
+                size *= item
             else:
                 return UnknownLength
         return size
