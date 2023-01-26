@@ -29,10 +29,8 @@ class NumpyArray(Content):
             backend = ak._backends.backend_of(
                 data, default=ak._backends.NumpyBackend.instance()
             )
-        if isinstance(data, ak.index.Index):
-            data = data.data
 
-        assert backend.nplike.is_own_array(data)
+        assert backend.nplike.is_own_array(data), (backend, data)
         self._data = data
 
         if not isinstance(backend.nplike, Jax):
