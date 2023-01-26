@@ -298,8 +298,8 @@ class NumpyArray(Content):
                 out = self._data[where]
             except IndexError as err:
                 raise ak._errors.index_error(self, (head,) + tail, str(err)) from err
-            out2 = NumpyArray(out, parameters=self._parameters, backend=self._backend)
-            return out2
+
+            return NumpyArray(out, parameters=self._parameters, backend=self._backend)
 
         elif isinstance(head, str):
             return self._getitem_next_field(head, tail, advanced)
@@ -329,8 +329,8 @@ class NumpyArray(Content):
                 out = self._data[where]
             except IndexError as err:
                 raise ak._errors.index_error(self, (head,) + tail, str(err)) from err
-            out2 = NumpyArray(out, parameters=self._parameters, backend=self._backend)
-            return out2
+
+            return NumpyArray(out, parameters=self._parameters, backend=self._backend)
 
         elif isinstance(head, ak.contents.IndexedOptionArray):
             next = self.to_RegularArray()
