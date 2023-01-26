@@ -419,7 +419,10 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
             ):
                 n_basic_non_ellipsis += 1
             # Advanced indexing
-            elif isinstance(item, TypeTracerArray):
+            elif isinstance(item, TypeTracerArray) and (
+                np.issubdtype(item.dtype, np.integer)
+                or np.issubdtype(item.dtype, np.bool_)
+            ):
                 n_advanced += 1
             # Basic ellipsis
             elif item is Ellipsis:
@@ -441,12 +444,14 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
                     )
                 )
 
-        # 2. Normalise Ellipsis
+        # 2. Normalise Ellipsis and boolean arrays
         key_parts = []
         for item in key:
             if item is Ellipsis:
                 n_missing_dims = self.ndim - n_advanced - n_basic_non_ellipsis
                 key_parts.extend((slice(None),) * n_missing_dims)
+            elif is_unknown_array(item) and np.issubdtype(item, np.bool_):
+                key_parts.append(self.nplike.nonzero(item))
             else:
                 key_parts.append(item)
         key = tuple(key_parts)
@@ -458,54 +463,53 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         adjacent_advanced_shape = []
         result_shape_parts = []
         iter_shape = iter(self.shape)
-
         for item in key:
-            # Advanced index
-            if n_advanced and (
-                isinstance(item, int)
-                or (
-                    is_unknown_array(item)
-                    and (
-                        np.issubdtype(item.dtype, np.bool_)
-                        or np.issubdtype(item.dtype, np.integer)
-                    )
-                )
-            ):
-                if is_unknown_scalar(item):
-                    item = self.nplike.promote_scalar(item)
-
-                # If this is the first advanced index, insert the location
-                if not advanced_shapes:
-                    result_shape_parts.append(adjacent_advanced_shape)
-                # If a previous item was basic and we have an advanced shape
-                # we have a split index
-                elif previous_item_is_basic:
-                    advanced_is_at_front = True
-
-                advanced_shapes.append(item.shape)
-                previous_item_is_basic = False
-            # New axis
-            elif item is np.newaxis:
+            # New axes don't reference existing dimensions
+            if item is np.newaxis:
                 result_shape_parts.append((1,))
                 previous_item_is_basic = True
-            # Slice
-            elif isinstance(item, slice):
-                slice_length = self._resolve_slice_length(next(iter_shape), item)
-                result_shape_parts.append((slice_length,))
-                previous_item_is_basic = True
-            # Integer
-            elif isinstance(item, int) or (
-                is_unknown_scalar(item) and np.issubdtype(item.dtype, np.integer)
-            ):
-                item = self.nplike.promote_scalar(item)
-
+            # Otherwise, consume the dimension
+            else:
                 dimension_length = next(iter_shape)
-                if is_unknown_length(dimension_length) or (
+                # Advanced index
+                if n_advanced and (
+                    isinstance(item, int)
+                    or (
+                        is_unknown_scalar(item)
+                        and np.issubdtype(item.dtype, np.integer)
+                    )
+                    or is_unknown_array(item)
+                ):
+                    if is_unknown_scalar(item):
+                        item = self.nplike.promote_scalar(item)
+
+                    # If this is the first advanced index, insert the location
+                    if not advanced_shapes:
+                        result_shape_parts.append(adjacent_advanced_shape)
+                    # If a previous item was basic and we have an advanced shape
+                    # we have a split index
+                    elif previous_item_is_basic:
+                        advanced_is_at_front = True
+
+                    advanced_shapes.append(item.shape)
+                    previous_item_is_basic = False
+                # Slice
+                elif isinstance(item, slice):
+                    slice_length = self._resolve_slice_length(next(iter_shape), item)
+                    result_shape_parts.append((slice_length,))
+                    previous_item_is_basic = True
+                # Integer
+                elif isinstance(item, int) or (
                     is_unknown_scalar(item) and np.issubdtype(item.dtype, np.integer)
                 ):
-                    continue
-                elif not 0 <= item < dimension_length:
-                    raise wrap_error(NotImplementedError("integer index out of bounds"))
+                    item = self.nplike.promote_scalar(item)
+
+                    if is_unknown_length(dimension_length) or is_unknown_length(item):
+                        continue
+                    elif not 0 <= item < dimension_length:
+                        raise wrap_error(
+                            NotImplementedError("integer index out of bounds")
+                        )
 
         advanced_shape = self.nplike.broadcast_shapes(*advanced_shapes)
         if advanced_is_at_front:
@@ -513,7 +517,9 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         else:
             adjacent_advanced_shape[:] = advanced_shape
 
-        result_shape = tuple([i for p in result_shape_parts for i in p])
+        broadcast_shape = tuple([i for p in result_shape_parts for i in p])
+        result_shape = broadcast_shape + tuple(iter_shape)
+
         return self._new(
             self._dtype,
             result_shape,
