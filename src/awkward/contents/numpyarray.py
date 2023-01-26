@@ -7,7 +7,7 @@ import awkward as ak
 from awkward._nplikes import to_nplike
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpylike import ArrayLike, NumpyMetadata
 from awkward._nplikes.typetracer import TypeTracerArray
 from awkward._util import unset
 from awkward.contents.content import Content
@@ -24,7 +24,7 @@ class NumpyArray(Content):
     is_numpy = True
     is_leaf = True
 
-    def __init__(self, data, *, parameters=None, backend=None):
+    def __init__(self, data: ArrayLike, *, parameters=None, backend=None):
         if backend is None:
             backend = ak._backends.backend_of(
                 data, default=ak._backends.NumpyBackend.instance()
@@ -58,7 +58,7 @@ class NumpyArray(Content):
         self._init(parameters, backend)
 
     @property
-    def data(self):
+    def data(self) -> ArrayLike:
         return self._data
 
     form_cls: Final = NumpyForm

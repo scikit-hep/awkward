@@ -214,10 +214,6 @@ def _backend_for_nplike(nplike: NumpyLike) -> Backend:
         raise ak._errors.wrap_error(ValueError("unrecognised nplike", nplike))
 
 
-_UNSET = object()
-D = TypeVar("D")
-
-
 def common_backend(backends: Collection[Backend]) -> Backend:
     # Either we have one nplike, or one + typetracer
     if len(backends) == 1:
@@ -234,6 +230,10 @@ def common_backend(backends: Collection[Backend]) -> Backend:
                 "to the same backend"
             )
         )
+
+
+_UNSET = object()
+D = TypeVar("D")
 
 
 def backend_of(*objects, default: D = _UNSET) -> Backend | D:

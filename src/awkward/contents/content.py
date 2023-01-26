@@ -556,6 +556,13 @@ class Content:
         elif isinstance(where, ak.highlevel.Array):
             return self._getitem(where.layout)
 
+        elif isinstance(where, Content) and where.backend is not self._backend:
+            raise ak._errors.wrap_error(
+                ValueError(
+                    "array slice must have the same backend as the array being sliced"
+                )
+            )
+
         elif (
             isinstance(where, Content)
             and where._parameters is not None

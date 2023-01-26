@@ -1,10 +1,12 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._backends import Backend
+from awkward._errors import wrap_error
 from awkward._nplikes import nplike_of, to_nplike
 from awkward._nplikes.jax import Jax
-from awkward._nplikes.numpylike import NumpyMetadata
-from awkward.typing import Sequence
+from awkward._nplikes.numpylike import ArrayLike, NumpyMetadata
+from awkward.typing import Sequence, TypeVar
 
 np = NumpyMetadata.instance()
 
@@ -56,7 +58,7 @@ def prepare_advanced_indexing(items):
 
     # Now ensure that we don't have mixed Awkward-NumPy style indexing
     if n_awkward_contents > 1 or (n_awkward_contents == 1 and len(broadcastable) != 0):
-        raise ak._errors.wrap_error(
+        raise wrap_error(
             ValueError(
                 "cannot mix Awkward slicing (using an array with missing or variable-length lists in the slice) with "
                 "NumPy advanced slicing (using more than one broadcastable array or integer in the slice), "
@@ -94,7 +96,7 @@ def prepare_advanced_indexing(items):
                 for w in nplike.nonzero(x):
                     prepared.append(ak.index.Index64(w))
         else:
-            raise ak._errors.wrap_error(
+            raise wrap_error(
                 TypeError(
                     "array slice must be an array of integers or booleans, not\n\n    {}".format(
                         repr(x).replace("\n", "\n    ")
@@ -120,13 +122,29 @@ def prepare_advanced_indexing(items):
     # Now error if we find another array
     for item in it:
         if isinstance(item, ak.index.Index):
-            raise ak._errors.wrap_error(
+            raise wrap_error(
                 ValueError(
                     "NumPy advanced indexing with array indices separated by None "
                     "(np.newaxis), Ellipsis, or slice are not permitted with Awkward Arrays"
                 )
             )
     return tuple(prepared)
+
+
+T = TypeVar("T", bound=ArrayLike)
+
+
+def _ensure_index_backend(array: T, backend: Backend) -> T:
+    nplike = ak._nplikes.nplike_of(array)
+    if nplike is not backend.index_nplike:
+        raise wrap_error(
+            ValueError(
+                "slice argument has a different backend to the array being sliced. "
+                "`ak.to_backend` should be used to convert arrays to a common backend."
+            )
+        )
+    else:
+        return array
 
 
 def normalise_item(item, backend: ak._backends.Backend):
@@ -155,7 +173,7 @@ def normalise_item(item, backend: ak._backends.Backend):
         return normalise_item(item.to_NumpyArray(np.int64), backend)
 
     elif isinstance(item, ak.contents.NumpyArray):
-        return to_nplike(item.data, backend.index_nplike)
+        return _ensure_index_backend(item.data, backend)
 
     elif isinstance(item, ak.contents.RegularArray):
         # Pure NumPy arrays (without masks) follow NumPy advanced indexing
@@ -191,10 +209,10 @@ def normalise_item(item, backend: ak._backends.Backend):
         if as_numpy is None:
             return normalise_item(layout, backend)
         else:
-            return to_nplike(as_numpy.data, backend.index_nplike)
+            return _ensure_index_backend(as_numpy.data, backend)
 
     else:
-        raise ak._errors.wrap_error(
+        raise wrap_error(
             TypeError(
                 "only integers, slices (`:`), ellipsis (`...`), np.newaxis (`None`), "
                 "integer/boolean arrays (possibly with variable-length nested "
@@ -206,10 +224,8 @@ def normalise_item(item, backend: ak._backends.Backend):
 
 
 def normalise_items(where: Sequence, backend: ak._backends.Backend) -> list:
-    # Find the common backend between the layout and the slice items
-    common_backend = ak._backends.common_backend(
-        (ak._backends.backend_of(*where), backend)
-    )
+    where_backend = ak._backends.backend_of(*where, default=backend)
+    common_backend = ak._backends.common_backend([backend, where_backend])
     # First prepare items for broadcasting into like-types
     return [normalise_item(x, common_backend) for x in where]
 
@@ -227,7 +243,7 @@ def _normalise_item_RegularArray_to_ListOffsetArray64(item):
         return item
 
     else:
-        raise ak._errors.wrap_error(AssertionError(type(item)))
+        raise wrap_error(AssertionError(type(item)))
 
 
 def _normalise_item_nested(item):
@@ -350,17 +366,17 @@ def _normalise_item_nested(item):
         )
 
     elif isinstance(item, ak.contents.UnionArray):
-        raise ak._errors.wrap_error(
+        raise wrap_error(
             TypeError(
                 "irreducible unions (different types at the same level in an array) can't be used as slices"
             )
         )
 
     elif isinstance(item, ak.contents.RecordArray):
-        raise ak._errors.wrap_error(TypeError("record arrays can't be used as slices"))
+        raise wrap_error(TypeError("record arrays can't be used as slices"))
 
     else:
-        raise ak._errors.wrap_error(
+        raise wrap_error(
             TypeError(
                 "only integers, slices (`:`), ellipsis (`...`), np.newaxis (`None`), "
                 "integer/boolean arrays (possibly with variable-length nested "
@@ -409,9 +425,7 @@ def _normalise_item_bool_to_int(item):
     ):
         if item.backend.nplike.known_data or item.backend.nplike.known_shape:
             if isinstance(item.backend.nplike, Jax):
-                raise ak._errors.wrap_error(
-                    "This slice is not supported for JAX differentiation."
-                )
+                raise wrap_error("This slice is not supported for JAX differentiation.")
             # missing values as any integer other than -1 are extremely rare
             isnegative = item.content.index.data < 0
             if item.backend.index_nplike.any(item.content.index.data < -1):
@@ -479,7 +493,7 @@ def _normalise_item_bool_to_int(item):
         ):
             if item.backend.nplike.known_data or item.backend.nplike.known_shape:
                 if isinstance(item.backend.nplike, Jax):
-                    raise ak._errors.wrap_error(
+                    raise wrap_error(
                         "This slice is not supported for JAX differentiation."
                     )
 
@@ -538,7 +552,7 @@ def _normalise_item_bool_to_int(item):
         return item
 
     else:
-        raise ak._errors.wrap_error(AssertionError(type(item)))
+        raise wrap_error(AssertionError(type(item)))
 
 
 def getitem_next_array_wrap(outcontent, shape, outer_length=0):

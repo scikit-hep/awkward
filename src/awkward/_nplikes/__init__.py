@@ -14,6 +14,13 @@ D = TypeVar("D")
 
 
 def common_nplike(nplikes: Collection[NumpyLike]) -> NumpyLike:
+    """
+    Args:
+        nplikes: collection of nplikes from which to determine a common nplike
+
+    Return the common nplike for the give nplikes if such a result can be determined.
+    Otherwise, raise a ValueError.
+    """
     # Either we have one nplike, or one + typetracer
     if len(nplikes) == 1:
         return next(iter(nplikes))
