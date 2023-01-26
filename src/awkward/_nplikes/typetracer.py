@@ -220,10 +220,16 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
 
     def __reduce__(self):
         # Fix pickling, as we ban `__new__`
-        return (object.__new__, (type(self),), vars(self))
+        return object.__new__, (type(self),), vars(self)
 
     @classmethod
-    def _new(cls, dtype: np.dtype, shape=None, form_key=None, report=None):
+    def _new(
+        cls,
+        dtype: np.dtype,
+        shape: tuple[int | TypeTracerArray, ...] | None = None,
+        form_key: str | None = None,
+        report: TypeTracerReport | None = None,
+    ):
         self = super().__new__(cls)
         self.form_key = form_key
         self.report = report
@@ -905,7 +911,7 @@ class TypeTracer(NumpyLike):
             if item == -1:
                 new_shape[i] = size // new_size
 
-        return TypeTracerArray._new(x.dtype, new_shape, x.form_key, x.report)
+        return TypeTracerArray._new(x.dtype, tuple(new_shape), x.form_key, x.report)
 
     def cumsum(
         self,
