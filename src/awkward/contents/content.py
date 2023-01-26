@@ -560,25 +560,15 @@ class Content:
         elif isinstance(where, ak.highlevel.Array):
             return self._getitem(where.layout)
 
-        elif (
-            isinstance(where, Content)
-            and where._parameters is not None
-            and (where._parameters.get("__array__") in ("string", "bytestring"))
-        ):
-            return self._getitem_fields(ak.operations.to_list(where))
-
-        elif isinstance(where, ak.contents.EmptyArray):
-            return where.to_NumpyArray(np.int64)
-
         elif isinstance(where, ak.contents.NumpyArray):
-            if issubclass(where.dtype.type, np.int64):
+            if np.issubdtype(where.dtype, np.int64):
                 carry = ak.index.Index64(
                     self._backend.nplike.reshape(
                         self._backend.nplike.asarray(where.data), (-1,)
                     )
                 )
                 allow_lazy = True
-            elif issubclass(where.dtype.type, np.integer):
+            elif np.issubdtype(where.dtype, np.integer):
                 carry = ak.index.Index64(
                     self._backend.nplike.reshape(
                         self._backend.nplike.asarray(where.data, dtype=np.int64), (-1,)
@@ -586,7 +576,7 @@ class Content:
                     nplike=self._backend.index_nplike,
                 )
                 allow_lazy = "copied"  # True, but also can be modified in-place
-            elif issubclass(where.dtype.type, (np.bool_, bool)):
+            elif np.issubdtype(where.dtype, np.bool_):
                 if len(where.data.shape) == 1:
                     where = self._backend.nplike.nonzero(where.data)[0]
                     carry = ak.index.Index64(where, nplike=self._backend.index_nplike)
@@ -611,24 +601,43 @@ class Content:
             else:
                 return out._getitem_at(0)
 
+        elif isinstance(where, ak.contents.RegularArray):
+            maybe_numpy = where.maybe_to_NumpyArray()
+            if maybe_numpy is None:
+                return self._getitem((where,))
+            else:
+                return self._getitem(maybe_numpy)
+
+        elif (
+            isinstance(where, Content)
+            and where._parameters is not None
+            and (where._parameters.get("__array__") in ("string", "bytestring"))
+        ):
+            return self._getitem_fields(ak.operations.to_list(where))
+
+        elif isinstance(where, ak.contents.EmptyArray):
+            return where.to_NumpyArray(np.int64)
+
         elif isinstance(where, Content):
             return self._getitem((where,))
 
-        elif ak._util.is_sized_iterable(where) and len(where) == 0:
-            return self._carry(
-                ak.index.Index64.empty(0, self._backend.index_nplike),
-                allow_lazy=True,
-            )
-
-        elif ak._util.is_sized_iterable(where) and all(
-            isinstance(x, str) for x in where
-        ):
-            return self._getitem_fields(where)
+        elif self._backend.nplike.is_own_array(where):
+            layout = ak.operations.to_layout(where, regulararray=False)
+            return self._getitem(layout)
 
         elif ak._util.is_sized_iterable(where):
-            layout = ak.operations.to_layout(where)
-            as_numpy = layout.maybe_to_NumpyArray() or layout
-            return self._getitem(as_numpy)
+            if len(where) == 0:
+                return self._carry(
+                    ak.index.Index64.empty(0, self._backend.index_nplike),
+                    allow_lazy=True,
+                )
+
+            elif all(isinstance(x, str) for x in where):
+                return self._getitem_fields(where)
+
+            else:
+                layout = ak.operations.to_layout(where, regulararray=False)
+                return self._getitem(layout)
 
         else:
             raise ak._errors.wrap_error(
