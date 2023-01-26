@@ -324,7 +324,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         return out
 
     @property
-    def nplike(self) -> NumpyLike:
+    def nplike(self) -> TypeTracer:
         return TypeTracer.instance()
 
     @property
