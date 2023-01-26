@@ -84,7 +84,7 @@ namespace awkward {
   const std::string
   type_to_name<bool>() {
     // This takes precedence over the unspecialized template, and therefore any
-    // 8-bit data that is not named char will be mapped to "int8" or "uint8".
+    // 8-bit data that is not named bool will be mapped to "int8" or "uint8".
     return "bool";
   }
 
@@ -92,7 +92,7 @@ namespace awkward {
   const std::string
   type_to_name<char>() {
     // This takes precedence over the unspecialized template, and therefore any
-    // 8-bit data that is not named bool will be mapped to "int8" or "uint8".
+    // 8-bit data that is not named char will be mapped to "int8" or "uint8".
     return "char";
   }
 
