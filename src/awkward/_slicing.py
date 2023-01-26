@@ -80,17 +80,17 @@ def prepare_advanced_indexing(items):
         x = broadcasted[i_broadcast]
         if len(x.shape) == 0:
             prepared.append(int(x))
-        elif issubclass(x.dtype.type, np.int64):
+        elif np.issubdtype(x.dtype, np.int64):
             prepared.append(ak.index.Index64(nplike.reshape(x, (-1,))))
             prepared[-1].metadata["shape"] = x.shape
-        elif issubclass(x.dtype.type, np.integer):
+        elif np.issubdtype(x.dtype, np.integer):
             prepared.append(
                 ak.index.Index64(
                     nplike.reshape(nplike.astype(x, dtype=np.int64), (-1,))
                 )
             )
             prepared[-1].metadata["shape"] = x.shape
-        elif issubclass(x.dtype.type, (np.bool_, bool)):
+        elif np.issubdtype(x.dtype, np.bool_):
             if len(x.shape) == 1:
                 current = ak.index.Index64(nplike.nonzero(x)[0])
                 prepared.append(current)
@@ -181,19 +181,24 @@ def normalise_item(item, backend: ak._backends.Backend):
         else:
             return out
 
-    elif ak._util.is_sized_iterable(item) and len(item) == 0:
-        return backend.index_nplike.empty(0, dtype=np.int64)
-
-    elif ak._util.is_sized_iterable(item) and all(isinstance(x, str) for x in item):
-        return list(item)
+    elif backend.nplike.is_own_array(item):
+        layout = ak.operations.to_layout(item, regulararray=False)
+        return normalise_item(layout, backend)
 
     elif ak._util.is_sized_iterable(item):
-        layout = ak.operations.to_layout(item)
-        as_numpy = layout.maybe_to_NumpyArray()
-        if as_numpy is None:
-            return normalise_item(layout, backend)
-        else:
-            return as_numpy.data
+        if len(item) == 0:
+            return backend.index_nplike.empty(0, dtype=np.int64)
+
+        elif ak._util.is_sized_iterable(item) and all(isinstance(x, str) for x in item):
+            return list(item)
+
+        elif ak._util.is_sized_iterable(item):
+            layout = ak.operations.to_layout(item)
+            as_numpy = layout.maybe_to_NumpyArray()
+            if as_numpy is None:
+                return normalise_item(layout, backend)
+            else:
+                return as_numpy.data
 
     else:
         raise ak._errors.wrap_error(
