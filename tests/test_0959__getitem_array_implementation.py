@@ -67,7 +67,9 @@ def test_ListArray_NumpyArray():
 def test_ListOffsetArray_NumpyArray():
     v2a = ak.contents.listoffsetarray.ListOffsetArray(
         ak.index.Index(np.array([1, 4, 4, 6, 7], np.int64)),
-        ak.contents.numpyarray.NumpyArray([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7]),
+        ak.contents.numpyarray.NumpyArray(
+            np.array([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7])
+        ),
     )
     resultv2 = v2a[np.array([1, 2], np.int64)]
     assert to_list(resultv2) == [[], [4.4, 5.5]]
@@ -385,7 +387,11 @@ def test_ListOffsetArray_RecordArray_NumpyArray():
     v2a = ak.contents.listoffsetarray.ListOffsetArray(
         ak.index.Index(np.array([1, 4, 4, 6], np.int64)),
         ak.contents.recordarray.RecordArray(
-            [ak.contents.numpyarray.NumpyArray([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7])],
+            [
+                ak.contents.numpyarray.NumpyArray(
+                    np.array([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7])
+                )
+            ],
             ["nest"],
         ),
     )

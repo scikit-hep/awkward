@@ -90,7 +90,7 @@ def test_nested_ListOffsetArray_NumpyArray(flatlist_as_rvec):
         ak.index.Index64(np.array([0, 1, 5], dtype=np.int64)),
         ak.contents.ListOffsetArray(
             ak.index.Index(np.array([1, 1, 4, 4, 6, 7], np.int64)),
-            ak.contents.NumpyArray([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7]),
+            ak.contents.NumpyArray(np.array([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7])),
         ),
     )
 

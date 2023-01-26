@@ -81,13 +81,13 @@ def prepare_advanced_indexing(items):
         x = broadcasted[i_broadcast]
         if len(x.shape) == 0:
             prepared.append(int(x))
-        elif issubclass(x.dtype.type, np.int64):
+        elif np.issubdtype(x.dtype, np.int64):
             prepared.append(ak.index.Index64(x.reshape(-1)))
             prepared[-1].metadata["shape"] = x.shape
-        elif issubclass(x.dtype.type, np.integer):
-            prepared.append(ak.index.Index64(x.astype(np.int64).reshape(-1)))
+        elif np.issubdtype(x.dtype, np.integer):
+            prepared.append(ak.index.Index64(x.astype(dtype=np.int64).reshape(-1)))
             prepared[-1].metadata["shape"] = x.shape
-        elif issubclass(x.dtype.type, (np.bool_, bool)):
+        elif np.issubdtype(x.dtype, np.bool_):
             if len(x.shape) == 1:
                 current = ak.index.Index64(nplike.nonzero(x)[0])
                 prepared.append(current)
@@ -163,12 +163,13 @@ def normalise_item(item, backend: ak._backends.Backend):
     elif item is Ellipsis:
         return item
 
-    elif isinstance(item, ak.contents.Content) and item.backend is not backend:
-        return normalise_item(item.to_backend(backend), backend)
-
     elif isinstance(item, ak.highlevel.Array):
         return normalise_item(item.layout, backend)
 
+    elif isinstance(item, ak.contents.Content) and item.backend is not backend:
+        return normalise_item(item.to_backend(backend), backend)
+
+    # Below this point, any Content will have the correct backend
     elif isinstance(item, ak.contents.EmptyArray):
         return normalise_item(item.to_NumpyArray(np.int64), backend)
 
@@ -188,7 +189,7 @@ def normalise_item(item, backend: ak._backends.Backend):
             assert not isinstance(out, ak.contents.NumpyArray)
             return out
         else:
-            return item.data
+            return as_numpy.data
 
     elif isinstance(item, ak.contents.Content):
         out = _normalise_item_bool_to_int(_normalise_item_nested(item))
@@ -197,19 +198,36 @@ def normalise_item(item, backend: ak._backends.Backend):
         else:
             return out
 
-    elif ak._util.is_sized_iterable(item) and len(item) == 0:
-        return backend.index_nplike.empty(0, dtype=np.int64)
-
-    elif ak._util.is_sized_iterable(item) and all(isinstance(x, str) for x in item):
-        return list(item)
-
     elif ak._util.is_sized_iterable(item):
-        layout = ak.operations.to_layout(item)
-        as_numpy = layout.maybe_to_NumpyArray()
-        if as_numpy is None:
-            return normalise_item(layout, backend)
+        # Do we have an array
+        nplike = ak._nplikes.nplike_of(item, default=None)
+        if nplike is not None and nplike.is_own_array(item):
+            # Is it a scalar, not array?
+            if len(item.shape) == 0:
+                raise wrap_error(
+                    NotImplementedError("scalar objects in slice normalisation")
+                )
+            else:
+                layout = ak.operations.ak_to_layout._impl(
+                    item, allow_record=False, allow_other=True, regulararray=False
+                )
+                return normalise_item(layout, backend)
+
+        elif len(item) == 0:
+            return backend.index_nplike.empty(0, dtype=np.int64)
+
+        elif all(isinstance(x, str) for x in item):
+            return list(item)
+
         else:
-            return _ensure_index_backend(as_numpy.data, backend)
+            layout = ak.operations.ak_to_layout._impl(
+                item, allow_record=False, allow_other=True, regulararray=False
+            )
+            as_numpy = layout.maybe_to_NumpyArray()
+            if as_numpy is None:
+                return normalise_item(layout, backend)
+            else:
+                return _ensure_index_backend(as_numpy.data, backend)
 
     else:
         raise wrap_error(

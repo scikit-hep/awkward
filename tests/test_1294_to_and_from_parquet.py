@@ -309,7 +309,9 @@ def test_dictionary_encoding(
 ):
     akarray = ak.contents.IndexedArray(
         ak.index.Index64(np.array([3, 2, 2, 2, 0, 1, 3], dtype=np.uint64)),
-        ak.contents.NumpyArray([0.0, 1.1, 2.2, 3.3], parameters={"which": "inner"}),
+        ak.contents.NumpyArray(
+            np.array([0.0, 1.1, 2.2, 3.3]), parameters={"which": "inner"}
+        ),
         parameters={"__array__": "categorical", "which": "outer"},
     )
 

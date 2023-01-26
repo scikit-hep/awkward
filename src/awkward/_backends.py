@@ -215,12 +215,13 @@ def _backend_for_nplike(nplike: NumpyLike) -> Backend:
 
 
 def common_backend(backends: Collection[Backend]) -> Backend:
+    unique_backends = frozenset(backends)
     # Either we have one nplike, or one + typetracer
-    if len(backends) == 1:
-        return next(iter(backends))
+    if len(unique_backends) == 1:
+        return next(iter(unique_backends))
     else:
         # We allow typetracers to mix with other nplikes, and take precedence
-        for backend in backends:
+        for backend in unique_backends:
             if not (backend.nplike.known_data and backend.nplike.known_shape):
                 return backend
 

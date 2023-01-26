@@ -79,7 +79,9 @@ def test_ListOffsetArray_NumpyArray():
     # 6.6 and 7.7 are inaccessible
     a = ak.contents.listoffsetarray.ListOffsetArray(
         ak.index.Index(np.array([1, 4, 4, 6])),
-        ak.contents.numpyarray.NumpyArray([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7]),
+        ak.contents.numpyarray.NumpyArray(
+            np.array([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7])
+        ),
     )
     assert a.to_typetracer().form == a.to_typetracer(forget_length=True).form
     assert is_unknown_length(a.to_typetracer(forget_length=True).length)
@@ -413,7 +415,11 @@ def test_ListOffsetArray_RecordArray_NumpyArray():
     a = ak.contents.listoffsetarray.ListOffsetArray(
         ak.index.Index(np.array([1, 4, 4, 6])),
         ak.contents.recordarray.RecordArray(
-            [ak.contents.numpyarray.NumpyArray([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7])],
+            [
+                ak.contents.numpyarray.NumpyArray(
+                    np.array([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7])
+                )
+            ],
             ["nest"],
         ),
     )
