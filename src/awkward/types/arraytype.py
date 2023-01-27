@@ -3,7 +3,7 @@
 import sys
 
 import awkward as ak
-from awkward._nplikes.typetracer import ensure_known_scalar, is_unknown_length
+from awkward._nplikes.typetracer import ensure_known_scalar
 
 
 class ArrayType:
@@ -16,9 +16,7 @@ class ArrayType:
                     )
                 )
             )
-        if not (
-            (ak._util.is_integer(length) and length >= 0) or is_unknown_length(length)
-        ):
+        if not ((ak._util.is_integer(length) and length >= 0) or length is None):
             raise ak._errors.wrap_error(
                 ValueError(
                     "{} 'length' must be a non-negative integer or unknown length, not {}".format(
@@ -44,7 +42,7 @@ class ArrayType:
         stream.write("".join(self._str("", False) + ["\n"]))
 
     def _str(self, indent, compact):
-        length_str = "##" if is_unknown_length(self._length) else str(self._length)
+        length_str = "##" if self._length is None else str(self._length)
         return [f"{length_str} * "] + self._content._str(indent, compact)
 
     def __repr__(self):

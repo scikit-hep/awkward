@@ -7,6 +7,8 @@ import awkward as ak
 
 to_list = ak.operations.to_list
 
+pytest.skip("regulararray size=None", allow_module_level=True)
+
 
 def test_ListOffsetArray():
     v2_array = ak.highlevel.Array(

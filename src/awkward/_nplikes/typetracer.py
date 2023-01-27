@@ -7,7 +7,7 @@ import numpy
 
 import awkward as ak
 from awkward._errors import wrap_error
-from awkward._nplikes.numpylike import ArrayLike, NumpyLike, NumpyMetadata
+from awkward._nplikes.numpylike import ArrayLike, NumpyLike, NumpyMetadata, ShapeItem
 from awkward._util import NDArrayOperatorsMixin, is_non_string_like_sequence
 from awkward.typing import (
     Any,
@@ -23,7 +23,7 @@ np = NumpyMetadata.instance()
 
 
 def is_unknown_length(array: Any) -> bool:
-    return is_unknown_scalar(array) and np.issubdtype(array.dtype, np.integer)
+    return array is None
 
 
 def is_unknown_scalar(array: Any) -> bool:
@@ -276,7 +276,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
     def shape(self, value):
         if ak._util.is_integer(value):
             value = (value,)
-        elif value is None or is_unknown_length(value):
+        elif value is None or value is None:
             value = (UnknownLength,)
         elif not isinstance(value, tuple):
             value = tuple(value)
@@ -475,7 +475,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
                 if ak._util.is_integer(wh):
                     shapes.append(numpy.array(0))
                 elif hasattr(wh, "dtype") and hasattr(wh, "shape"):
-                    sh = [1 if is_unknown_length(x) else int(x) for x in wh.shape]
+                    sh = [1 if x is None else int(x) for x in wh.shape]
                     shapes.append(
                         numpy.lib.stride_tricks.as_strided(
                             numpy.array(0), shape=sh, strides=[0] * len(sh)
@@ -552,7 +552,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
             args = args[0]
 
         assert len(args) != 0
-        assert ak._util.is_integer(args[0]) or is_unknown_length(args[0])
+        assert ak._util.is_integer(args[0]) or args[0] is None
         assert all(ak._util.is_integer(x) for x in args[1:])
         assert all(x >= 0 for x in args[1:])
 
@@ -591,7 +591,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         raise ak._errors.wrap_error(RuntimeError("cannot realise an unknown value"))
 
 
-UnknownLength = TypeTracerArray._new(np.int64, shape=())
+UnknownLength = None
 
 
 def _scalar_type_of(obj) -> numpy.dtype:
@@ -824,6 +824,35 @@ class TypeTracer(NumpyLike):
             return TypeTracerArray._new(as_array.dtype, ())
         else:
             raise wrap_error(TypeError(f"expected scalar type, received {obj}"))
+
+    def as_shape_item(self, x1) -> ShapeItem:
+        if x1 is None:
+            return None
+        elif is_unknown_scalar(x1) and np.issubdtype(x1.dtype, np.integer):
+            return None
+        else:
+            return int(x1)
+
+    def sub_shape_item(self, x1: ShapeItem, x2: ShapeItem):
+        if x1 is None:
+            return None
+        if x2 is None:
+            return None
+        return x1 - x2
+
+    def add_shape_item(self, x1: ShapeItem, x2: ShapeItem):
+        if x1 is None:
+            return None
+        if x2 is None:
+            return None
+        return x1 + x2
+
+    def mul_shape_item(self, x1: ShapeItem, x2: ShapeItem):
+        if x1 is None:
+            return None
+        if x2 is None:
+            return None
+        return x1 * x2
 
     def broadcast_shapes(
         self, *shapes: tuple[SupportsInt, ...]

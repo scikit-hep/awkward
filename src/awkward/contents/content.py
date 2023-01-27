@@ -10,6 +10,8 @@ import awkward as ak
 from awkward._backends import Backend
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyLike, NumpyMetadata
+from awkward._nplikes.typetracer import TypeTracer, ensure_known_scalar
+from awkward._nplikes.numpylike import NumpyLike, NumpyMetadata
 from awkward._nplikes.typetracer import (
     TypeTracer,
     ensure_known_scalar,
@@ -355,13 +357,16 @@ class Content:
         length: int,
     ):
         # if this is in a tuple-slice and really should be 0, it will be trimmed later
-        length = 1 if ensure_known_scalar(length == 0, False) else length
+        length = 1 if length is not None and length == 0 else length
         index = ak.index.Index64(head.index, nplike=self._backend.index_nplike)
         indexlength = index.length
         index = index.to_nplike(self._backend.index_nplike)
-        outindex = ak.index.Index64.empty(
-            index.length * length, self._backend.index_nplike
-        )
+        if index.length is None or length is None:
+            outindex = ak.index.Index64.empty(None, self._backend.index_nplike)
+        else:
+            outindex = ak.index.Index64.empty(
+                index.length * length, self._backend.index_nplike
+            )
 
         assert (
             outindex.nplike is self._backend.index_nplike
@@ -812,7 +817,7 @@ class Content:
         if replacement:
             size = size + (n - 1)
         thisn = n
-        if is_unknown_length(thisn) or is_unknown_length(size):
+        if thisn is None or size is None:
             combinationslen = size  # not actually size, just an unknown value
         else:
             if thisn > size:
@@ -956,7 +961,7 @@ class Content:
         return self.form_cls.dimension_optiontype.__get__(self)
 
     def _pad_none_axis0(self, target: int, clip: bool) -> Content:
-        if not clip and ensure_known_scalar(target < self.length, False):
+        if not clip and (self.length is None or (target < self.length)):
             index = ak.index.Index64(
                 self._backend.index_nplike.arange(self.length, dtype=np.int64),
                 nplike=self._backend.index_nplike,

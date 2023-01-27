@@ -4,7 +4,7 @@ from __future__ import annotations
 import numpy
 
 import awkward as ak
-from awkward._nplikes.numpylike import ArrayLike, NumpyLike, NumpyMetadata
+from awkward._nplikes.numpylike import ArrayLike, NumpyLike, NumpyMetadata, ShapeItem
 from awkward.typing import Final, Literal, SupportsInt
 
 np = NumpyMetadata.instance()
@@ -114,6 +114,21 @@ class ArrayModuleNumpyLike(NumpyLike):
 
     def broadcast_arrays(self, *arrays: ArrayLike) -> list[ArrayLike]:
         return self._module.broadcast_arrays(*arrays)
+
+    def as_shape_item(self, x1) -> ShapeItem:
+        if x1 is None:
+            return None
+        else:
+            return int(x1)
+
+    def add_shape_item(self, x1: ShapeItem, x2: ShapeItem):
+        return x1 + x2
+
+    def sub_shape_item(self, x1: ShapeItem, x2: ShapeItem):
+        return x1 - x2
+
+    def mul_shape_item(self, x1: ShapeItem, x2: ShapeItem):
+        return x1 * x2
 
     def nonzero(self, x: ArrayLike) -> tuple[ArrayLike, ...]:
         return self._module.nonzero(x)

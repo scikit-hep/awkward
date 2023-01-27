@@ -8,6 +8,8 @@ import numpy
 from awkward._singleton import Singleton
 from awkward.typing import Literal, Protocol, Self, SupportsIndex, SupportsInt, overload
 
+ShapeItem = SupportsInt | None
+
 
 class ArrayLike(Protocol):
     @property
@@ -22,12 +24,12 @@ class ArrayLike(Protocol):
 
     @property
     @abstractmethod
-    def shape(self) -> tuple[SupportsInt, ...]:
+    def shape(self) -> tuple[ShapeItem, ...]:
         ...
 
     @property
     @abstractmethod
-    def size(self) -> SupportsInt:
+    def size(self) -> ShapeItem:
         ...
 
     @property
@@ -287,7 +289,23 @@ class NumpyLike(Singleton, Protocol):
         ...
 
     @abstractmethod
-    def broadcast_to(self, x: ArrayLike, shape: tuple[SupportsInt, ...]) -> ArrayLike:
+    def broadcast_to(self, x: ArrayLike, shape: tuple[ShapeItem, ...]) -> ArrayLike:
+        ...
+
+    @abstractmethod
+    def as_shape_item(self, x1) -> ShapeItem:
+        ...
+
+    @abstractmethod
+    def sub_shape_item(self, x1: ShapeItem, x2: ShapeItem):
+        ...
+
+    @abstractmethod
+    def add_shape_item(self, x1: ShapeItem, x2: ShapeItem):
+        ...
+
+    @abstractmethod
+    def mul_shape_item(self, x1: ShapeItem, x2: ShapeItem):
         ...
 
     @abstractmethod

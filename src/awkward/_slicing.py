@@ -4,7 +4,7 @@ import awkward as ak
 from awkward._nplikes import nplike_of
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpylike import NumpyMetadata
-from awkward._nplikes.typetracer import UnknownLength, is_unknown_length
+from awkward._nplikes.typetracer import UnknownLength
 from awkward.typing import Sequence
 
 np = NumpyMetadata.instance()
@@ -533,7 +533,7 @@ def getitem_next_array_wrap(outcontent, shape, outer_length=0):
     for i in range(len(shape))[::-1]:
         length = shape[i - 1] if i > 0 else outer_length
         size = shape[i]
-        if is_unknown_length(size):
+        if size is None:
             size = 1
         outcontent = ak.contents.RegularArray(outcontent, size, length, parameters=None)
     return outcontent

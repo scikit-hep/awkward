@@ -12,7 +12,7 @@ import awkward as ak
 from awkward._nplikes import nplike_of
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
-from awkward._nplikes.typetracer import TypeTracerArray, is_unknown_length
+from awkward._nplikes.typetracer import TypeTracerArray
 from awkward.contents.bitmaskedarray import BitMaskedArray
 from awkward.contents.bytemaskedarray import ByteMaskedArray
 from awkward.contents.content import Content
@@ -46,7 +46,7 @@ def length_of_broadcast(inputs: Sequence) -> int | TypeTracerArray:
 
     for x in inputs:
         if isinstance(x, Content):
-            if is_unknown_length(x.length):
+            if x.length is None:
                 return x.length
 
             maxlen = max(maxlen, x.length)
@@ -688,14 +688,14 @@ def apply_step(
                 for x in inputs
             ):
                 # Ensure all layouts have same length
-                length = None
+                length = ak._util.unset
                 for x in inputs:
                     if isinstance(x, Content):
-                        if length is None:
+                        if length is ak._util.unset:
                             length = x.length
                         elif backend.nplike.known_shape:
                             assert length == x.length
-                assert length is not None
+                # assert length is not None  TODO: validate this removal
 
                 if any(x.size == 0 for x in inputs if isinstance(x, RegularArray)):
                     dimsize = 0

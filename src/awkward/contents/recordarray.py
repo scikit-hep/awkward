@@ -8,11 +8,7 @@ from collections.abc import Iterable
 import awkward as ak
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
-from awkward._nplikes.typetracer import (
-    UnknownLength,
-    ensure_known_scalar,
-    is_unknown_length,
-)
+from awkward._nplikes.typetracer import UnknownLength, ensure_known_scalar
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.recordform import RecordForm
@@ -61,13 +57,11 @@ class RecordArray(Content):
             )
         elif length is None:
             lengths = [x.length for x in contents]
-            if any(is_unknown_length(x) for x in lengths):
-                length = UnknownLength
+            if any(x is None for x in lengths):
+                length = None
             else:
                 length = min(lengths)
-        if not is_unknown_length(length) and not (
-            ak._util.is_integer(length) and length >= 0
-        ):
+        if length is not None and not (ak._util.is_integer(length) and length >= 0):
             raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'length' must be a non-negative integer or None, not {}".format(
@@ -84,7 +78,10 @@ class RecordArray(Content):
                         )
                     )
                 )
-            if ensure_known_scalar(content.length < length, False):
+            if (
+                not (content.length is None or length is None)
+                and content.length < length
+            ):
                 raise ak._errors.wrap_error(
                     ValueError(
                         "{} len(content) ({}) must be >= length ({}) for all 'contents'".format(
@@ -303,7 +300,7 @@ class RecordArray(Content):
         if self._backend.nplike.known_shape and where < 0:
             where += self.length
 
-        if where < 0 or ensure_known_scalar(where >= self.length, False):
+        if not (self._length is None or (0 <= where < self._length)):
             raise ak._errors.index_error(self, where)
         return Record(self, where)
 
