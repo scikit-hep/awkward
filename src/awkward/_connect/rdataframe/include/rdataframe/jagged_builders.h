@@ -47,7 +47,7 @@ namespace awkward {
     template<class BUILDER, typename PRIMITIVE>
     void
     fill_from(BUILDER& builder, ROOT::RDF::RResultPtr<std::vector<PRIMITIVE>>& result) const {
-      for (auto it : result) {
+      for (auto const& it : result) {
         builder.append(it);
       }
     }
@@ -56,6 +56,7 @@ namespace awkward {
     void
     to_char_buffers(BUILDER& builder) {
       builder.to_char_buffers(buffers_uint8_ptr_);
+      builder.clear();
     }
 
   private:

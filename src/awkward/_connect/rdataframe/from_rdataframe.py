@@ -62,7 +62,7 @@ done = compiler(
 )
 assert done is True
 
-
+@profile
 def from_rdataframe(data_frame, columns, offsets_type="int64_t"):
     def form_dtype(form):
         if isinstance(form, ak.forms.NumpyForm) and form.inner_shape == ():
@@ -92,7 +92,7 @@ def from_rdataframe(data_frame, columns, offsets_type="int64_t"):
 
     def cpp_fill_offsets_and_flatten(depth):
         if depth == 1:
-            return "\nfor (auto it : vec1) {\n" + "  builder1.append(it);\n" + "}\n"
+            return "\nfor (auto const& it : vec1) {\n" + "  builder1.append(it);\n" + "}\n"
         else:
             return (
                 f"for (auto const& vec{depth - 1} : vec{depth}) "
@@ -111,7 +111,7 @@ def from_rdataframe(data_frame, columns, offsets_type="int64_t"):
                 "template<class BUILDER, typename PRIMITIVE>\n"
                 + "void\n"
                 + "fill_from(BUILDER& builder, ROOT::RDF::RResultPtr<std::vector<PRIMITIVE>>& result) {"
-                + "  for (auto it : result) {\n"
+                + "  for (auto const& it : result) {\n"
                 + "    builder.append(it);\n"
                 + "  }\n"
                 + "}\n"
@@ -199,6 +199,9 @@ def from_rdataframe(data_frame, columns, offsets_type="int64_t"):
                 ]
                 builder = ListOffsetBuilder()
                 builder_type = type(builder).__cpp_name__
+
+                cpp_function_str = "namespace awkward {" + cpp_fill_function(list_depth) + "}"
+                print(cpp_function_str)
 
                 if not hasattr(
                     cppyy.gbl.awkward, f"fill_offsets_and_flatten{list_depth}"
