@@ -6,9 +6,10 @@ from abc import abstractmethod
 import numpy
 
 from awkward._singleton import Singleton
-from awkward.typing import Literal, Protocol, Self, SupportsIndex, SupportsInt, overload
+from awkward.typing import SupportsInt  # noqa: F401
+from awkward.typing import Literal, Protocol, Self, SupportsIndex, TypeAlias, overload
 
-ShapeItem = SupportsInt | None
+ShapeItem: TypeAlias = "SupportsInt | None"
 
 
 class ArrayLike(Protocol):
