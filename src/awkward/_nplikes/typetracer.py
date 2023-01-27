@@ -210,6 +210,7 @@ def _length_after_slice(slice, original_length):
 
 class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
     _dtype: numpy.dtype
+    _shape: tuple[ShapeItem, ...]
 
     def __new__(cls, *args, **kwargs):
         raise wrap_error(
@@ -228,8 +229,15 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         self.form_key = form_key
         self.report = report
 
+        if ak._util.is_integer(shape):
+            shape = (shape,)
+        elif shape is None or shape is None:
+            shape = (None,)
+        elif not isinstance(shape, tuple):
+            shape = tuple(shape)
+        self._shape = shape
         self._dtype = np.dtype(dtype)
-        self.shape = shape
+
         return self
 
     def __repr__(self):
@@ -258,29 +266,19 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         return self._dtype
 
     @property
-    def size(self) -> int | UnknownLength:
+    def size(self) -> ShapeItem:
         size = 1
         for item in self._shape:
             if ak._util.is_integer(item):
-                size += item
+                size *= item
             else:
-                return UnknownLength
+                return None
         return size
 
     @property
-    def shape(self):
+    def shape(self) -> tuple[ShapeItem, ...]:
         self.touch_shape()
         return self._shape
-
-    @shape.setter
-    def shape(self, value):
-        if ak._util.is_integer(value):
-            value = (value,)
-        elif value is None or value is None:
-            value = (UnknownLength,)
-        elif not isinstance(value, tuple):
-            value = tuple(value)
-        self._shape = value
 
     @property
     def form_key(self):
