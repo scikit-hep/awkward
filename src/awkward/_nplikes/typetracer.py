@@ -834,7 +834,15 @@ class TypeTracer(NumpyLike):
         else:
             raise wrap_error(TypeError(f"expected scalar type, received {obj}"))
 
-    def as_shape_item(self, x1) -> ShapeItem:
+    def shape_item_as_scalar(self, x1: ShapeItem) -> TypeTracerArray:
+        if x1 is None:
+            return TypeTracerArray._new(np.int64, shape=())
+        elif isinstance(x1, int):
+            return TypeTracerArray._new(np.int64, shape=())
+        else:
+            raise wrap_error(TypeError(f"expected None or int type, received {x1}"))
+
+    def scalar_as_shape_item(self, x1) -> ShapeItem:
         if x1 is None:
             return None
         elif is_unknown_scalar(x1) and np.issubdtype(x1.dtype, np.integer):

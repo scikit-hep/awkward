@@ -115,7 +115,19 @@ class ArrayModuleNumpyLike(NumpyLike):
     def broadcast_arrays(self, *arrays: ArrayLike) -> list[ArrayLike]:
         return self._module.broadcast_arrays(*arrays)
 
-    def as_shape_item(self, x1) -> ShapeItem:
+    def shape_item_as_scalar(self, x1: ShapeItem):
+        if x1 is None:
+            raise ak._errors.wrap_error(
+                TypeError("array module nplikes do not support unknown lengths")
+            )
+        elif isinstance(x1, int):
+            return self._module.asarray(x1, dtype=np.int64)
+        else:
+            raise ak._errors.wrap_error(
+                TypeError(f"expected None or int type, received {x1}")
+            )
+
+    def scalar_as_shape_item(self, x1) -> ShapeItem:
         if x1 is None:
             return None
         else:

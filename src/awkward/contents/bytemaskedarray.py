@@ -370,7 +370,7 @@ class ByteMaskedArray(Content):
                 self._valid_when,
             )
         )
-        numnull = self._backend.index_nplike.as_shape_item(_numnull[0])
+        numnull = self._backend.index_nplike.scalar_as_shape_item(_numnull[0])
         nextcarry = ak.index.Index64.empty(
             self._backend.index_nplike.sub_shape_item(self.length, numnull),
             nplike=self._backend.index_nplike,
@@ -773,7 +773,7 @@ class ByteMaskedArray(Content):
                 self._valid_when,
             )
         )
-        numnull = self._backend.index_nplike.as_shape_item(_numnull[0])
+        numnull = self._backend.index_nplike.scalar_as_shape_item(_numnull[0])
 
         next_length = self._backend.index_nplike.sub_shape_item(mask_length, numnull)
         nextcarry = ak.index.Index64.empty(

@@ -294,7 +294,11 @@ class NumpyLike(Singleton, Protocol):
         ...
 
     @abstractmethod
-    def as_shape_item(self, x1) -> ShapeItem:
+    def shape_item_as_scalar(self, x1: ShapeItem):
+        ...
+
+    @abstractmethod
+    def scalar_as_shape_item(self, x1) -> ShapeItem:
         ...
 
     @abstractmethod
