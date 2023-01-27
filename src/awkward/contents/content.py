@@ -614,21 +614,23 @@ class Content:
         elif isinstance(where, Content):
             return self._getitem((where,))
 
-        elif ak._util.is_sized_iterable(where) and len(where) == 0:
-            return self._carry(
-                ak.index.Index64.empty(0, self._backend.index_nplike),
-                allow_lazy=True,
-            )
-
-        elif ak._util.is_sized_iterable(where) and all(
-            isinstance(x, str) for x in where
-        ):
-            return self._getitem_fields(where)
-
         elif ak._util.is_sized_iterable(where):
-            layout = ak.operations.to_layout(where)
-            as_numpy = layout.maybe_to_NumpyArray() or layout
-            return self._getitem(as_numpy)
+            # Normally we would be worried about np.array et al. being treated
+            # as sized iterables instead of arrays. However, the first two cases
+            # here will only iterate over the entire array if it contains strings,
+            # at which point we need to visit each item anyway
+            if len(where) == 0:
+                return self._carry(
+                    ak.index.Index64.empty(0, self._backend.index_nplike),
+                    allow_lazy=True,
+                )
+            elif all(isinstance(x, str) for x in where):
+                return self._getitem_fields(list(where))
+
+            else:
+                layout = ak.operations.to_layout(where)
+                as_numpy = layout.maybe_to_NumpyArray() or layout
+                return self._getitem(as_numpy)
 
         else:
             raise ak._errors.wrap_error(
