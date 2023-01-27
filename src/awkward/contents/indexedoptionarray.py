@@ -1153,7 +1153,7 @@ class IndexedOptionArray(Content):
         # is mergeable with our content (`out = next._argsort_next result`).
         # If so, try to concatenate them at the end of `out`.`
         nulls_index_content = ak.contents.NumpyArray(
-            nulls_index, parameters=None, backend=self._backend
+            nulls_index.data, parameters=None, backend=self._backend
         )
         if out._mergeable(nulls_index_content, True):
             out = out._mergemany([nulls_index_content])

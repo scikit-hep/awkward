@@ -724,7 +724,7 @@ class RegularArray(Content):
                 )
             )
             return ak.contents.RegularArray(
-                ak.contents.NumpyArray(localindex), self._size, self._length
+                ak.contents.NumpyArray(localindex.data), self._size, self._length
             )
         else:
             return ak.contents.RegularArray(

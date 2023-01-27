@@ -920,7 +920,7 @@ class NumpyArray(Content):
                         starts.length,
                     )
                 )
-            out = NumpyArray(nextcarry, parameters=None, backend=self._backend)
+            out = NumpyArray(nextcarry.data, parameters=None, backend=self._backend)
             return out
 
     def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):

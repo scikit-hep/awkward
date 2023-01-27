@@ -775,7 +775,7 @@ class ListOffsetArray(Content):
                 )
             )
             return ak.contents.ListOffsetArray(
-                offsets, ak.contents.NumpyArray(localindex)
+                offsets, ak.contents.NumpyArray(localindex.data)
             )
         else:
             return ak.contents.ListOffsetArray(
@@ -1015,7 +1015,7 @@ class ListOffsetArray(Content):
                     )
                 )
                 return ak.contents.NumpyArray(
-                    nextcarry, parameters=None, backend=self._backend
+                    nextcarry.data, parameters=None, backend=self._backend
                 )
 
         if not branch and (negaxis == depth):

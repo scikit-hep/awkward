@@ -1149,7 +1149,7 @@ class ListArray(Content):
                 )
             )
             return ak.contents.ListOffsetArray(
-                offsets, ak.contents.NumpyArray(localindex)
+                offsets, ak.contents.NumpyArray(localindex.data)
             )
         else:
             return ak.contents.ListArray(
