@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import copy
 import json
-from collections.abc import Iterable, Sequence
+from collections.abc import Iterable
 
 import awkward as ak
 from awkward._nplikes.numpy import Numpy
@@ -29,9 +29,9 @@ class RecordArray(Content):
 
     def __init__(
         self,
-        contents,
-        fields: Sequence[str] | None,
-        length: int | None = ak._util.unset,
+        contents: Iterable[Content],
+        fields: Iterable[str] | None,
+        length: int | None = unset,
         *,
         parameters=None,
         backend=None,
@@ -47,30 +47,6 @@ class RecordArray(Content):
         if not isinstance(contents, list):
             contents = list(contents)
 
-        if length is ak._util.unset:
-            if len(contents) == 0:
-                raise ak._errors.wrap_error(
-                    TypeError(
-                        "{} if len(contents) == 0, a 'length' must be specified".format(
-                            type(self).__name__
-                        )
-                    )
-                )
-            else:
-                lengths = [x.length for x in contents]
-                if any(x is None for x in lengths):
-                    length = None
-                else:
-                    length = min(lengths)
-
-        if length is not None and not (ak._util.is_integer(length) and length >= 0):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} 'length' must be a non-negative integer or unset, not {}".format(
-                        type(self).__name__, repr(length)
-                    )
-                )
-            )
         for content in contents:
             if not isinstance(content, Content):
                 raise ak._errors.wrap_error(
@@ -80,19 +56,76 @@ class RecordArray(Content):
                         )
                     )
                 )
-            if (
-                not (content.length is None or length is None)
-                and content.length < length
-            ):
+            if backend is None:
+                backend = content.backend
+            elif backend is not content.backend:
                 raise ak._errors.wrap_error(
-                    ValueError(
-                        "{} len(content) ({}) must be >= length ({}) for all 'contents'".format(
-                            type(self).__name__, content.length, length
+                    TypeError(
+                        "{} 'contents' must use the same array library (backend): {} vs {}".format(
+                            type(self).__name__,
+                            type(backend).__name__,
+                            type(content.backend).__name__,
+                        )
+                    )
+                )
+        if backend is None:
+            backend = ak._backends.NumpyBackend.instance()
+
+        if length is unset:
+            if len(contents) == 0:
+                raise ak._errors.wrap_error(
+                    TypeError(
+                        "{} if len(contents) == 0, a 'length' must be specified".format(
+                            type(self).__name__
                         )
                     )
                 )
 
-        if isinstance(fields, Sequence):
+            if backend.nplike.known_shape:
+                for content in contents:
+                    assert content.length is not None
+                    # First time we're setting length, and content.length is not None
+                    if length is unset:
+                        length = content.length
+                    # length is not None, content.length is not None
+                    else:
+                        length = min(length, content.length)
+            else:
+                for content in contents:
+                    # First time we're setting length, and content.length is not None
+                    if length is unset:
+                        length = content.length
+                        # Any None means all None
+                        if length is None:
+                            break
+                    # `length` is set, can't be None
+                    elif content.length is None:
+                        length = None
+                        break
+                    # `length` is set, can't be None
+                    else:
+                        length = min(length, content.length)
+        elif length is not None:
+            for content in contents:
+                if content.length is not None and content.length < length:
+                    raise ak._errors.wrap_error(
+                        ValueError(
+                            "{} len(content) ({}) must be >= length ({}) for all 'contents'".format(
+                                type(self).__name__, content.length, length
+                            )
+                        )
+                    )
+
+            if not (ak._util.is_integer(length) and length >= 0):
+                raise ak._errors.wrap_error(
+                    TypeError(
+                        "{} 'length' must be a non-negative integer or None, not {}".format(
+                            type(self).__name__, repr(length)
+                        )
+                    )
+                )
+
+        if isinstance(fields, Iterable):
             if not isinstance(fields, list):
                 fields = list(fields)
             if not all(isinstance(x, str) for x in fields):
@@ -114,26 +147,11 @@ class RecordArray(Content):
         elif fields is not None:
             raise ak._errors.wrap_error(
                 TypeError(
-                    "{} 'fields' must be sequence or None, not {}".format(
+                    "{} 'fields' must be an iterable or None, not {}".format(
                         type(self).__name__, repr(fields)
                     )
                 )
             )
-        for content in contents:
-            if backend is None:
-                backend = content.backend
-            elif backend is not content.backend:
-                raise ak._errors.wrap_error(
-                    TypeError(
-                        "{} 'contents' must use the same array library (backend): {} vs {}".format(
-                            type(self).__name__,
-                            type(backend).__name__,
-                            type(content.backend).__name__,
-                        )
-                    )
-                )
-        if backend is None:
-            backend = ak._backends.NumpyBackend.instance()
 
         self._contents = contents
         self._fields = fields
@@ -312,6 +330,8 @@ class RecordArray(Content):
             self._touch_shape(recursive=False)
             return self
 
+        if self._length is None:
+            return self
         start, stop, step = where.indices(self.length)
         assert step == 1
         if len(self._contents) == 0:
@@ -461,7 +481,6 @@ class RecordArray(Content):
             next = RecordArray(
                 contents,
                 self._fields,
-                None,
                 parameters=parameters,
                 backend=self._backend,
             )
@@ -1006,9 +1025,8 @@ class RecordArray(Content):
 
         if self.is_tuple and json_conversions is None:
             contents = [x._to_list(behavior, json_conversions) for x in self._contents]
-            length = self._length
-            out = [None] * length
-            for i in range(length):
+            out = [None] * self._length
+            for i in range(self._length):
                 out[i] = tuple(x[i] for x in contents)
             return out
 
@@ -1017,9 +1035,8 @@ class RecordArray(Content):
             if fields is None:
                 fields = [str(i) for i in range(len(self._contents))]
             contents = [x._to_list(behavior, json_conversions) for x in self._contents]
-            length = self._length
-            out = [None] * length
-            for i in range(length):
+            out = [None] * self._length
+            for i in range(self._length):
                 out[i] = dict(zip(fields, [x[i] for x in contents]))
             return out
 
