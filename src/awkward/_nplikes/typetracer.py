@@ -16,6 +16,7 @@ from awkward.typing import (
     Self,
     SupportsIndex,
     SupportsInt,
+    TypeVar,
     overload,
 )
 
@@ -34,7 +35,11 @@ def is_unknown_array(array: Any) -> bool:
     return isinstance(array, TypeTracerArray) and array.ndim > 0
 
 
-def ensure_known_scalar(value, default):
+T = TypeVar("T")
+S = TypeVar("S")
+
+
+def ensure_known_scalar(value: T, default: S) -> T | S:
     assert not is_unknown_scalar(default)
     return default if is_unknown_scalar(value) else value
 
