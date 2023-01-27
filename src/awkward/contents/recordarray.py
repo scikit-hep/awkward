@@ -8,7 +8,6 @@ from collections.abc import Iterable
 import awkward as ak
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
-from awkward._nplikes.typetracer import UnknownLength
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.recordform import RecordForm
@@ -247,7 +246,7 @@ class RecordArray(Content):
         return RecordArray(
             contents,
             self._fields,
-            UnknownLength if forget_length else self._length,
+            None if forget_length else self._length,
             parameters=self._parameters,
             backend=backend,
         )

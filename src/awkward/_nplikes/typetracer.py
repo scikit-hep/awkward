@@ -337,10 +337,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         return self._new(np.dtype(dtype), self._shape)
 
     def view(self, dtype: np.dtype) -> Self:
-        if (
-            self.itemsize != np.dtype(dtype).itemsize
-            and self._shape[-1] != UnknownLength
-        ):
+        if self.itemsize != np.dtype(dtype).itemsize and self._shape[-1] is not None:
             last = int(
                 round(self._shape[-1] * self.itemsize / np.dtype(dtype).itemsize)
             )
@@ -355,7 +352,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
     def forget_length(self) -> Self:
         return self._new(
             self._dtype,
-            (UnknownLength,) + self._shape[1:],
+            (None,) + self._shape[1:],
             self._form_key,
             self._report,
         )
@@ -434,7 +431,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
             self.touch_shape()
             return TypeTracerArray._new(
                 self._dtype,
-                (UnknownLength,) + self._shape[1:],
+                (None,) + self._shape[1:],
                 self._form_key,
                 self._report,
             )
@@ -455,7 +452,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         ):
             assert len(self._shape) != 0
             self.touch_data()
-            return TypeTracerArray._new(self._dtype, (UnknownLength,) + self._shape[1:])
+            return TypeTracerArray._new(self._dtype, (None,) + self._shape[1:])
 
         elif isinstance(key, tuple) and any(
             hasattr(x, "dtype") and hasattr(x, "shape") for x in key
@@ -492,7 +489,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
             shape = basic_shape + slicer_shape + self._shape[num_basic + len(shapes) :]
             assert len(shape) != 0
 
-            return TypeTracerArray._new(self._dtype, (UnknownLength,) + shape[1:])
+            return TypeTracerArray._new(self._dtype, (None,) + shape[1:])
 
         elif (
             isinstance(key, tuple)
@@ -560,7 +557,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         assert all(x >= 0 for x in args[1:])
 
         return TypeTracerArray._new(
-            self._dtype, (UnknownLength,) + args[1:], self._form_key, self._report
+            self._dtype, (None,) + args[1:], self._form_key, self._report
         )
 
     def copy(self):
@@ -592,9 +589,6 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
 
     def __index__(self) -> int:
         raise ak._errors.wrap_error(RuntimeError("cannot realise an unknown value"))
-
-
-UnknownLength = None
 
 
 def _scalar_type_of(obj) -> numpy.dtype:
@@ -795,7 +789,7 @@ class TypeTracer(NumpyLike):
         ):
             length = max(0, (stop - start + (step - (1 if step > 0 else -1))) // step)
         else:
-            length = UnknownLength
+            length = None
 
         return TypeTracerArray._new(dtype, (length,))
 
@@ -943,7 +937,7 @@ class TypeTracer(NumpyLike):
     def nonzero(self, x: ArrayLike) -> tuple[TypeTracerArray, ...]:
         # array
         try_touch_data(x)
-        return (TypeTracerArray._new(np.int64, (UnknownLength,)),) * len(x.shape)
+        return (TypeTracerArray._new(np.int64, (None,)),) * len(x.shape)
 
     def unique_values(self, x: ArrayLike) -> TypeTracerArray:
         try_touch_data(x)
@@ -978,7 +972,7 @@ class TypeTracer(NumpyLike):
             )
 
         return TypeTracerArray._new(
-            numpy.concatenate(emptyarrays).dtype, (UnknownLength,) + inner_shape
+            numpy.concatenate(emptyarrays).dtype, (None,) + inner_shape
         )
 
     def repeat(

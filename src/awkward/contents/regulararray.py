@@ -6,7 +6,6 @@ import copy
 import awkward as ak
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
-from awkward._nplikes.typetracer import UnknownLength
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.regularform import RegularForm
@@ -140,7 +139,7 @@ class RegularArray(Content):
         return RegularArray(
             self._content._to_typetracer(forget_length),
             self._size,
-            UnknownLength if forget_length else self._length,
+            None if forget_length else self._length,
             parameters=self._parameters,
         )
 

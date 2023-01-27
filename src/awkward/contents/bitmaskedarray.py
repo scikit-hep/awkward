@@ -8,7 +8,7 @@ import math
 import awkward as ak
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
-from awkward._nplikes.typetracer import MaybeNone, TypeTracer, UnknownLength
+from awkward._nplikes.typetracer import MaybeNone, TypeTracer
 from awkward._util import unset
 from awkward.contents.bytemaskedarray import ByteMaskedArray
 from awkward.contents.content import Content
@@ -220,7 +220,7 @@ class BitMaskedArray(Content):
             self._mask.to_nplike(tt),
             self._content._to_typetracer(False),
             self._valid_when,
-            UnknownLength if forget_length else self.length,
+            None if forget_length else self.length,
             self._lsb_order,
             parameters=self._parameters,
         )

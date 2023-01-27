@@ -5,7 +5,7 @@ import copy
 
 import awkward as ak
 from awkward._nplikes.numpylike import NumpyMetadata
-from awkward._nplikes.typetracer import TypeTracer, UnknownLength
+from awkward._nplikes.typetracer import TypeTracer
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.contents.listoffsetarray import ListOffsetArray
@@ -653,9 +653,7 @@ class ListArray(Content):
                 )
             else:
                 self._touch_data(recursive=False)
-                nextcarry = ak.index.Index64.empty(
-                    UnknownLength, self._backend.index_nplike
-                )
+                nextcarry = ak.index.Index64.empty(None, self._backend.index_nplike)
 
             lennextoffsets = self._backend.index_nplike.add_shape_item(lenstarts, 1)
             if self._starts.dtype == "int64":
@@ -732,7 +730,7 @@ class ListArray(Content):
                 else:
                     self._touch_data(recursive=False)
                     nextadvanced = ak.index.Index64.empty(
-                        UnknownLength, self._backend.index_nplike
+                        None, self._backend.index_nplike
                     )
                 advanced = advanced.to_nplike(self._backend.index_nplike)
                 assert (

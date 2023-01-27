@@ -8,7 +8,7 @@ import math
 import awkward as ak
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
-from awkward._nplikes.typetracer import MaybeNone, TypeTracer, UnknownLength
+from awkward._nplikes.typetracer import MaybeNone, TypeTracer
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.bytemaskedform import ByteMaskedForm
@@ -254,7 +254,7 @@ class ByteMaskedArray(Content):
             if self._backend.nplike.known_shape:
                 excess_length = int(math.ceil(self.length / 8.0))
             else:
-                excess_length = UnknownLength
+                excess_length = None
             return ak.contents.BitMaskedArray(
                 ak.index.IndexU8(
                     self._backend.nplike.empty(excess_length, dtype=np.uint8)

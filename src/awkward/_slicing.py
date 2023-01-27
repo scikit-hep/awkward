@@ -4,7 +4,6 @@ import awkward as ak
 from awkward._nplikes import nplike_of
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpylike import NumpyMetadata
-from awkward._nplikes.typetracer import UnknownLength
 from awkward.typing import Sequence
 
 np = NumpyMetadata.instance()
@@ -388,7 +387,7 @@ def normalise_item_bool_to_int(item):
         else:
             item._touch_data(recursive=False)
             nextoffsets = item.offsets
-            nextcontent = item.backend.nplike.empty(UnknownLength, dtype=np.int64)
+            nextcontent = item.backend.nplike.empty(None, dtype=np.int64)
 
         return ak.contents.ListOffsetArray(
             ak.index.Index64(nextoffsets),
@@ -447,7 +446,7 @@ def normalise_item_bool_to_int(item):
             item._touch_data(recursive=False)
             nextoffsets = item.offsets
             outindex = item.content.index
-            nextcontent = item.backend.nplike.empty(UnknownLength, dtype=np.int64)
+            nextcontent = item.backend.nplike.empty(None, dtype=np.int64)
 
         return ak.contents.ListOffsetArray(
             ak.index.Index64(nextoffsets, nplike=item.backend.index_nplike),
@@ -509,7 +508,7 @@ def normalise_item_bool_to_int(item):
             else:
                 item._touch_data(recursive=False)
                 outindex = item.index
-                nextcontent = item.backend.nplike.empty(UnknownLength, dtype=np.int64)
+                nextcontent = item.backend.nplike.empty(None, dtype=np.int64)
 
             return ak.contents.IndexedOptionArray(
                 ak.index.Index(outindex, nplike=item.backend.index_nplike),
