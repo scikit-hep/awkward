@@ -16,12 +16,24 @@
 
 namespace awkward {
 
+  // FIXME:
+  // The following helper variable templates are part of C++17,
+  // define it ourselves until we switch to it
+  template< class T >
+  constexpr bool is_integral_v = std::is_integral<T>::value;
+
+  template< class T >
+  constexpr bool is_signed_v = std::is_signed<T>::value;
+
+  template< class T, class U >
+  constexpr bool is_same_v = std::is_same<T, U>::value;
+
   /// @brief Returns the name of a primitive type as a string.
   template <typename T>
   const std::string
   type_to_name() {
-    if (std::is_integral_v<T>) {
-      if (std::is_signed_v<T>) {
+    if (is_integral_v<T>) {
+      if (is_signed_v<T>) {
         if (sizeof(T) == 1) {
           return "int8";
         }
@@ -50,16 +62,16 @@ namespace awkward {
         }
       }
     }
-    else if (std::is_same_v<T, float>) {
+    else if (is_same_v<T, float>) {
       return "float32";
     }
-    else if (std::is_same_v<T, double>) {
+    else if (is_same_v<T, double>) {
       return "float64";
     }
-    else if (std::is_same_v<T, std::complex<float>>) {
+    else if (is_same_v<T, std::complex<float>>) {
       return "complex64";
     }
-    else if (std::is_same_v<T, std::complex<double>>) {
+    else if (is_same_v<T, std::complex<double>>) {
       return "complex128";
     }
 
@@ -74,6 +86,14 @@ namespace awkward {
     // This takes precedence over the unspecialized template, and therefore any
     // 8-bit data that is not named bool will be mapped to "int8" or "uint8".
     return "bool";
+  }
+
+  template <>
+  const std::string
+  type_to_name<char>() {
+    // This takes precedence over the unspecialized template, and therefore any
+    // 8-bit data that is not named char will be mapped to "int8" or "uint8".
+    return "char";
   }
 
 
