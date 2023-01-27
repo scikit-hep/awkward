@@ -501,9 +501,7 @@ class RegularArray(Content):
                 advanced.length is not None and advanced.length == 0
             ):
                 nextcarry = ak.index.Index64.empty(
-                    None
-                    if (self._length is None or flathead.shape[0] is None)
-                    else (self._length * flathead.shape[0]),
+                    index_nplike.mul_shape_item(self._length, flathead.shape[0]),
                     index_nplike,
                 )
                 nextadvanced = ak.index.Index64.empty(nextcarry.length, index_nplike)

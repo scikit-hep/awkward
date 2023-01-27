@@ -355,12 +355,10 @@ class Content:
         index = ak.index.Index64(head.index, nplike=self._backend.index_nplike)
         indexlength = index.length
         index = index.to_nplike(self._backend.index_nplike)
-        if index.length is None or length is None:
-            outindex = ak.index.Index64.empty(None, self._backend.index_nplike)
-        else:
-            outindex = ak.index.Index64.empty(
-                index.length * length, self._backend.index_nplike
-            )
+        outindex = ak.index.Index64.empty(
+            self._backend.index_nplike.mul_shape_item(index.length, length),
+            self._backend.index_nplike,
+        )
 
         assert (
             outindex.nplike is self._backend.index_nplike
