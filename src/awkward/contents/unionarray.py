@@ -11,7 +11,7 @@ import awkward as ak
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
-from awkward._nplikes.typetracer import OneOf, TypeTracer, ensure_known_scalar
+from awkward._nplikes.typetracer import OneOf, TypeTracer
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.unionform import UnionForm
@@ -654,7 +654,7 @@ class UnionArray(Content):
                 lentags,
             )
         )
-        size = ensure_known_scalar(_size[0], None)
+        size = backend.index_nplike.as_shape_item(_size[0])
         current = index_cls.empty(size, nplike=backend.index_nplike)
         outindex = index_cls.empty(lentags, nplike=backend.index_nplike)
         assert (

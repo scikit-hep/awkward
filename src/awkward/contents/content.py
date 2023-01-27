@@ -10,13 +10,7 @@ import awkward as ak
 from awkward._backends import Backend
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyLike, NumpyMetadata
-from awkward._nplikes.typetracer import TypeTracer, ensure_known_scalar
-from awkward._nplikes.numpylike import NumpyLike, NumpyMetadata
-from awkward._nplikes.typetracer import (
-    TypeTracer,
-    ensure_known_scalar,
-    is_unknown_length,
-)
+from awkward._nplikes.typetracer import TypeTracer
 from awkward.forms.form import Form, _parameters_equal
 from awkward.typing import Any, AxisMaybeNone, Literal, Self, TypeAlias, TypedDict
 
@@ -557,7 +551,7 @@ class Content:
 
             out = next._getitem_next(nextwhere[0], nextwhere[1:], None)
 
-            if ensure_known_scalar(out.length == 0, False):
+            if out.length is not None and out.length == 0:
                 return out._getitem_nothing()
             else:
                 return out._getitem_at(0)
@@ -605,7 +599,7 @@ class Content:
             out = ak._slicing.getitem_next_array_wrap(
                 self._carry(carry, allow_lazy), where.shape
             )
-            if ensure_known_scalar(out.length == 0, False):
+            if out.length is not None and out.length == 0:
                 return out._getitem_nothing()
             else:
                 return out._getitem_at(0)

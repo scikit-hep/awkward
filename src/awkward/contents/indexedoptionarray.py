@@ -6,7 +6,7 @@ import copy
 import awkward as ak
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
-from awkward._nplikes.typetracer import MaybeNone, TypeTracer, ensure_known_scalar
+from awkward._nplikes.typetracer import MaybeNone, TypeTracer
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.indexedoptionform import IndexedOptionForm
@@ -202,7 +202,7 @@ class IndexedOptionArray(Content):
             carry[too_negative] = -1
         carry = ak.index.Index(carry)
 
-        if ensure_known_scalar(self._content.length == 0, False):
+        if self._content.length is not None and self._content.length == 0:
             content = self._content.form.length_one_array(
                 backend=self._backend, highlevel=False
             )._carry(carry, False)
@@ -916,28 +916,32 @@ class IndexedOptionArray(Content):
             newnulls = ak.index.Index64.empty(
                 self._index.length, self._backend.index_nplike
             )
-            len_newnulls = ak.index.Index64.empty(1, self._backend.index_nplike)
+            _len_newnulls = ak.index.Index64.empty(1, self._backend.index_nplike)
             assert (
                 newnulls.nplike is self._backend.index_nplike
-                and len_newnulls.nplike is self._backend.index_nplike
+                and _len_newnulls.nplike is self._backend.index_nplike
                 and self._index.nplike is self._backend.index_nplike
             )
             self._handle_error(
                 self._backend[
                     "awkward_IndexedArray_numnull_parents",
                     newnulls.dtype.type,
-                    len_newnulls.dtype.type,
+                    _len_newnulls.dtype.type,
                     self._index.dtype.type,
                 ](
                     newnulls.data,
-                    len_newnulls.data,
+                    _len_newnulls.data,
                     self._index.data,
                     index_length,
                 )
             )
+            len_newnulls = self._backend.index_nplike.as_shape_item(_len_newnulls[0])
 
             newindex = ak.index.Index64.empty(
-                ensure_known_scalar(out._offsets[-1] + len_newnulls[0], None),
+                self._backend.index_nplike.add_shape_item(
+                    self._backend.index_nplike.as_shape_item(out._offsets[-1]),
+                    len_newnulls,
+                ),
                 self._backend.index_nplike,
             )
             newoffsets = ak.index.Index64.empty(

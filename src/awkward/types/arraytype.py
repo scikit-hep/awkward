@@ -3,7 +3,6 @@
 import sys
 
 import awkward as ak
-from awkward._nplikes.typetracer import ensure_known_scalar
 
 
 class ArrayType:
@@ -52,8 +51,9 @@ class ArrayType:
     def __eq__(self, other):
         if isinstance(other, ArrayType):
             return (
-                ensure_known_scalar(self._length == other._length, True)
-                and self._content == other._content
-            )
+                self._length == other._length
+                or other._length is None
+                or self._length is None
+            ) and self._content == other._content
         else:
             return False

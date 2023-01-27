@@ -3,12 +3,12 @@ from __future__ import annotations
 
 import copy
 import json
-from collections.abc import Iterable
+from collections.abc import Iterable, Sequence
 
 import awkward as ak
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
-from awkward._nplikes.typetracer import UnknownLength, ensure_known_scalar
+from awkward._nplikes.typetracer import UnknownLength
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.recordform import RecordForm
@@ -30,8 +30,8 @@ class RecordArray(Content):
     def __init__(
         self,
         contents,
-        fields,
-        length=None,
+        fields: Sequence[str] | None,
+        length: int | None = ak._util.unset,
         *,
         parameters=None,
         backend=None,
@@ -47,24 +47,26 @@ class RecordArray(Content):
         if not isinstance(contents, list):
             contents = list(contents)
 
-        if len(contents) == 0 and length is None:
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} if len(contents) == 0, a 'length' must be specified".format(
-                        type(self).__name__
+        if length is ak._util.unset:
+            if len(contents) == 0:
+                raise ak._errors.wrap_error(
+                    TypeError(
+                        "{} if len(contents) == 0, a 'length' must be specified".format(
+                            type(self).__name__
+                        )
                     )
                 )
-            )
-        elif length is None:
-            lengths = [x.length for x in contents]
-            if any(x is None for x in lengths):
-                length = None
             else:
-                length = min(lengths)
+                lengths = [x.length for x in contents]
+                if any(x is None for x in lengths):
+                    length = None
+                else:
+                    length = min(lengths)
+
         if length is not None and not (ak._util.is_integer(length) and length >= 0):
             raise ak._errors.wrap_error(
                 TypeError(
-                    "{} 'length' must be a non-negative integer or None, not {}".format(
+                    "{} 'length' must be a non-negative integer or unset, not {}".format(
                         type(self).__name__, repr(length)
                     )
                 )
@@ -90,7 +92,7 @@ class RecordArray(Content):
                     )
                 )
 
-        if isinstance(fields, Iterable):
+        if isinstance(fields, Sequence):
             if not isinstance(fields, list):
                 fields = list(fields)
             if not all(isinstance(x, str) for x in fields):
@@ -112,7 +114,7 @@ class RecordArray(Content):
         elif fields is not None:
             raise ak._errors.wrap_error(
                 TypeError(
-                    "{} 'fields' must be iterable or None, not {}".format(
+                    "{} 'fields' must be sequence or None, not {}".format(
                         type(self).__name__, repr(fields)
                     )
                 )
@@ -288,9 +290,10 @@ class RecordArray(Content):
 
     def content(self, index_or_field):
         out = self.form_cls.content(self, index_or_field)
-        if ensure_known_scalar(out.length == self._length, False):
+        if out.length == self._length:
             return out
         else:
+            assert self._length is not None, "TODO: need to handle this"
             return out[: self._length]
 
     def _getitem_nothing(self):
@@ -635,21 +638,24 @@ class RecordArray(Content):
                     )
 
         nextcontents = []
-        minlength = None
+        minlength = ak._util.unset
         for forfield in for_each_field:
             merged = forfield[0]._mergemany(forfield[1:])
 
             nextcontents.append(merged)
 
-            if minlength is None or ensure_known_scalar(
-                merged.length < minlength, False
+            if minlength is ak._util.unset or (
+                not (merged.length is None or minlength is None)
+                and merged.length < minlength
             ):
                 minlength = merged.length
 
         if minlength is None:
             minlength = self.length
             for x in others:
-                minlength += x.length
+                minlength = self._backend.index_nplike.add_shape_item(
+                    minlength, x.length
+                )
 
         next = RecordArray(
             nextcontents,

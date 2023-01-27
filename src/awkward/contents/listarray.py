@@ -5,7 +5,7 @@ import copy
 
 import awkward as ak
 from awkward._nplikes.numpylike import NumpyMetadata
-from awkward._nplikes.typetracer import TypeTracer, UnknownLength, ensure_known_scalar
+from awkward._nplikes.typetracer import TypeTracer, UnknownLength
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.contents.listoffsetarray import ListOffsetArray
@@ -376,34 +376,34 @@ class ListArray(Content):
             )
 
         elif isinstance(slicecontent, ak.contents.NumpyArray):
-            carrylen = ak.index.Index64.empty(1, self._backend.index_nplike)
+            _carrylen = ak.index.Index64.empty(1, self._backend.index_nplike)
             assert (
-                carrylen.nplike is self._backend.index_nplike
+                _carrylen.nplike is self._backend.index_nplike
                 and slicestarts.nplike is self._backend.index_nplike
                 and slicestops.nplike is self._backend.index_nplike
             )
             self._handle_error(
                 self._backend[
                     "awkward_ListArray_getitem_jagged_carrylen",
-                    carrylen.dtype.type,
+                    _carrylen.dtype.type,
                     slicestarts.dtype.type,
                     slicestops.dtype.type,
                 ](
-                    carrylen.data,
+                    _carrylen.data,
                     slicestarts.data,
                     slicestops.data,
                     slicestarts.length,
                 ),
                 slicer=ak.contents.ListArray(slicestarts, slicestops, slicecontent),
             )
+            carrylen = self._backend.index_nplike.as_shape_item(_carrylen[0])
+
             sliceindex = ak.index.Index64(slicecontent._data)
             outoffsets = ak.index.Index64.empty(
                 self._backend.index_nplike.add_shape_item(slicestarts.length, 1),
                 self._backend.index_nplike,
             )
-            nextcarry = ak.index.Index64.empty(
-                ensure_known_scalar(carrylen[0], None), self._backend.index_nplike
-            )
+            nextcarry = ak.index.Index64.empty(carrylen, self._backend.index_nplike)
 
             assert (
                 outoffsets.nplike is self._backend.index_nplike
@@ -458,9 +458,9 @@ class ListArray(Content):
                 )
 
             missing = ak.index.Index64(slicecontent._index)
-            numvalid = ak.index.Index64.empty(1, self._backend.index_nplike)
+            _numvalid = ak.index.Index64.empty(1, self._backend.index_nplike)
             assert (
-                numvalid.nplike is self._backend.index_nplike
+                _numvalid.nplike is self._backend.index_nplike
                 and slicestarts.nplike is self._backend.index_nplike
                 and slicestops.nplike is self._backend.index_nplike
                 and missing.nplike is self._backend.index_nplike
@@ -468,12 +468,12 @@ class ListArray(Content):
             self._handle_error(
                 self._backend[
                     "awkward_ListArray_getitem_jagged_numvalid",
-                    numvalid.dtype.type,
+                    _numvalid.dtype.type,
                     slicestarts.dtype.type,
                     slicestops.dtype.type,
                     missing.dtype.type,
                 ](
-                    numvalid.data,
+                    _numvalid.data,
                     slicestarts.data,
                     slicestops.data,
                     slicestarts.length,
@@ -482,10 +482,9 @@ class ListArray(Content):
                 ),
                 slicer=ak.contents.ListArray(slicestarts, slicestops, slicecontent),
             )
+            numvalid = self._backend.index_nplike.as_shape_item(_numvalid[0])
 
-            nextcarry = ak.index.Index64.empty(
-                ensure_known_scalar(numvalid[0], None), self._backend.index_nplike
-            )
+            nextcarry = ak.index.Index64.empty(numvalid, self._backend.index_nplike)
 
             smalloffsets = ak.index.Index64.empty(
                 self._backend.index_nplike.add_shape_item(slicestarts.length, 1),

@@ -6,7 +6,7 @@ import copy
 import awkward as ak
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
-from awkward._nplikes.typetracer import TypeTracer, UnknownLength, ensure_known_scalar
+from awkward._nplikes.typetracer import TypeTracer, UnknownLength
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.listoffsetform import ListOffsetForm
@@ -41,7 +41,7 @@ class ListOffsetArray(Content):
                     )
                 )
             )
-        if ensure_known_scalar(offsets.length == 0, False):
+        if offsets.length is not None and offsets.length == 0:
             raise ak._errors.wrap_error(
                 ValueError(
                     "{} len(offsets) ({}) must be >= 1".format(
@@ -246,7 +246,7 @@ class ListOffsetArray(Content):
 
         start, stop, step = where.indices(self.length)
         offsets = self._offsets[start : stop + 1]
-        if ensure_known_scalar(offsets.length == 0, False):
+        if offsets.length is not None and offsets.length == 0:
             offsets = Index(
                 self._backend.index_nplike.asarray([0], dtype=self._offsets.dtype),
                 nplike=self._backend.index_nplike,
@@ -652,7 +652,7 @@ class ListOffsetArray(Content):
                 dtype=np.int64,
             )
 
-            if ensure_known_scalar(inneroffsets.length == 0, False):
+            if inneroffsets.length is not None and inneroffsets.length == 0:
                 return (
                     offsets,
                     ListOffsetArray(
@@ -660,7 +660,7 @@ class ListOffsetArray(Content):
                     ),
                 )
 
-            elif ensure_known_scalar(self._offsets.length == 1, False):
+            elif self._offsets.length is not None and self._offsets.length == 1:
                 tooffsets = ak.index.Index64([inneroffsets[0]])
                 return (
                     offsets,
@@ -1257,7 +1257,7 @@ class ListOffsetArray(Content):
             )
         else:
             nextparents = ak.index.Index64.empty(
-                ensure_known_scalar(self._offsets[-1] - self._offsets[0], None),
+                index_nplike.as_shape_item(self._offsets[-1] - self._offsets[0]),
                 index_nplike,
             )
             lenstarts = index_nplike.sub_shape_item(self._offsets.length, 1)
@@ -1475,7 +1475,7 @@ class ListOffsetArray(Content):
                 nextshifts = ak.index.Index64.empty(nextcarry.length, index_nplike)
                 nummissing = ak.index.Index64.empty(maxcount, index_nplike)
                 missing = ak.index.Index64.empty(
-                    ensure_known_scalar(self._offsets[-1], None),
+                    index_nplike.as_shape_item(self._offsets[-1]),
                     index_nplike,
                 )
                 assert (
@@ -1537,7 +1537,7 @@ class ListOffsetArray(Content):
             return out
 
         else:
-            nextlen = ensure_known_scalar(self._offsets[-1] - self._offsets[0], None)
+            nextlen = index_nplike.as_shape_item(self._offsets[-1] - self._offsets[0])
             nextparents = ak.index.Index64.empty(nextlen, index_nplike)
 
             assert (
@@ -1606,7 +1606,7 @@ class ListOffsetArray(Content):
 
     def _rearrange_prepare_next(self, outlength, parents):
         index_nplike = self._backend.index_nplike
-        nextlen = ensure_known_scalar(self._offsets[-1] - self._offsets[0], None)
+        nextlen = index_nplike.as_shape_item(self._offsets[-1] - self._offsets[0])
         lenstarts = index_nplike.sub_shape_item(self._offsets.length, 1)
         _maxcount = ak.index.Index64.empty(1, index_nplike)
         offsetscopy = ak.index.Index64.empty(self.offsets.length, index_nplike)
@@ -1628,7 +1628,7 @@ class ListOffsetArray(Content):
                 lenstarts,
             )
         )
-        maxcount = ensure_known_scalar(_maxcount[0], None)
+        maxcount = index_nplike.as_shape_item(_maxcount[0])
 
         # A "stable" sort is essential for the subsequent steps.
         nextcarry = ak.index.Index64.empty(nextlen, nplike=index_nplike)
@@ -1670,7 +1670,7 @@ class ListOffsetArray(Content):
                 maxcount,
             )
         )
-        maxnextparents = ensure_known_scalar(_maxnextparents[0], None)
+        maxnextparents = index_nplike.as_shape_item(_maxnextparents[0])
         nextstarts = ak.index.Index64.empty(
             index_nplike.add_shape_item(maxnextparents, 1), index_nplike
         )
