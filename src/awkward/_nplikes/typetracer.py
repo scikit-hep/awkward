@@ -227,17 +227,19 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         return (object.__new__, (type(self),), vars(self))
 
     @classmethod
-    def _new(cls, dtype: np.dtype, shape=None, form_key=None, report=None):
+    def _new(
+        cls,
+        dtype: np.dtype,
+        shape: tuple[ShapeItem, ...],
+        form_key: str | None = None,
+        report: TypeTracerReport | None = None,
+    ):
         self = super().__new__(cls)
         self.form_key = form_key
         self.report = report
 
-        if ak._util.is_integer(shape):
-            shape = (shape,)
-        elif shape is None or shape is None:
-            shape = (None,)
-        elif not isinstance(shape, tuple):
-            shape = tuple(shape)
+        if not isinstance(shape, tuple):
+            raise wrap_error(TypeError("typetracer shape must be a tuple"))
         self._shape = shape
         self._dtype = np.dtype(dtype)
 
@@ -719,23 +721,35 @@ class TypeTracer(NumpyLike):
         raise ak._errors.wrap_error(NotImplementedError)
 
     def zeros(
-        self, shape: int | tuple[int, ...], *, dtype: np.dtype | None = None
+        self, shape: ShapeItem | tuple[ShapeItem, ...], *, dtype: np.dtype | None = None
     ) -> TypeTracerArray:
+        if not isinstance(shape, tuple):
+            shape = (shape,)
         return TypeTracerArray._new(dtype, shape)
 
     def ones(
-        self, shape: int | tuple[int, ...], *, dtype: np.dtype | None = None
+        self, shape: ShapeItem | tuple[ShapeItem, ...], *, dtype: np.dtype | None = None
     ) -> TypeTracerArray:
+        if not isinstance(shape, tuple):
+            shape = (shape,)
         return TypeTracerArray._new(dtype, shape)
 
     def empty(
-        self, shape: int | tuple[int, ...], *, dtype: np.dtype | None = None
+        self, shape: ShapeItem | tuple[ShapeItem, ...], *, dtype: np.dtype | None = None
     ) -> TypeTracerArray:
+        if not isinstance(shape, tuple):
+            shape = (shape,)
         return TypeTracerArray._new(dtype, shape)
 
     def full(
-        self, shape: int | tuple[int, ...], fill_value, *, dtype: np.dtype | None = None
+        self,
+        shape: ShapeItem | tuple[ShapeItem, ...],
+        fill_value,
+        *,
+        dtype: np.dtype | None = None,
     ) -> TypeTracerArray:
+        if not isinstance(shape, tuple):
+            shape = (shape,)
         dtype = _scalar_type_of(fill_value) if dtype is None else dtype
         return TypeTracerArray._new(dtype, shape)
 
