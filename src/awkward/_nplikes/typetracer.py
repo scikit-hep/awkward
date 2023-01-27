@@ -127,7 +127,7 @@ class TypeTracerReport:
             self._data_touched.append(label)
 
 
-def _attach_report(layout, form, report):
+def _attach_report(layout, form, report: TypeTracerReport):
     if isinstance(layout, (ak.contents.BitMaskedArray, ak.contents.ByteMaskedArray)):
         assert isinstance(form, (ak.forms.BitMaskedForm, ak.forms.ByteMaskedForm))
         layout.mask.data.form_key = form.form_key
@@ -136,8 +136,6 @@ def _attach_report(layout, form, report):
 
     elif isinstance(layout, ak.contents.EmptyArray):
         assert isinstance(form, ak.forms.EmptyForm)
-        layout.mask.data.form_key = form.form_key
-        layout.mask.data.report = report
 
     elif isinstance(layout, (ak.contents.IndexedArray, ak.contents.IndexedOptionArray)):
         assert isinstance(form, (ak.forms.IndexedForm, ak.forms.IndexedOptionForm))
@@ -169,7 +167,7 @@ def _attach_report(layout, form, report):
         for x, y in zip(layout.contents, form.contents):
             _attach_report(x, y, report)
 
-    elif isinstance(layout, (ak.contents.RegularArray, ak.contents.UnmaskedForm)):
+    elif isinstance(layout, (ak.contents.RegularArray, ak.contents.UnmaskedArray)):
         assert isinstance(form, (ak.forms.RegularForm, ak.forms.UnmaskedForm))
         _attach_report(layout.content, form.content, report)
 
