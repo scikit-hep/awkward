@@ -497,7 +497,6 @@ class Content:
             return ak.contents.RecordArray(
                 contents,
                 nextcontent._fields,
-                None,
                 parameters=self._parameters,
                 backend=self._backend,
             )
@@ -862,13 +861,13 @@ class Content:
             )
         )
         contents = []
-        length = None
+        length = ak._util.unset
         for ptr in tocarry:
             contents.append(
                 ak.contents.IndexedArray.simplified(ptr, self, parameters=None)
             )
             length = contents[-1].length
-        assert length is not None
+        assert not (length is ak._util.unset and self._backend.nplike.known_shape)
         return ak.contents.RecordArray(
             contents, recordlookup, length, parameters=parameters, backend=self._backend
         )

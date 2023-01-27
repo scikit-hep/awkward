@@ -1390,7 +1390,6 @@ class ListOffsetArray(Content):
             recordarray = ak.contents.RecordArray(
                 contents,
                 recordlookup,
-                None,
                 parameters=parameters,
                 backend=self._backend,
             )

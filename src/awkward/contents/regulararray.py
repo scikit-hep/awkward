@@ -404,12 +404,9 @@ class RegularArray(Content):
                 if diff % step != 0:
                     nextsize += 1
 
-            if self._length is None:
-                nextcarry = ak.index.Index64.empty(None, index_nplike)
-            else:
-                nextcarry = ak.index.Index64.empty(
-                    index_nplike.mul_shape_item(self._length, nextsize), index_nplike
-                )
+            nextcarry = ak.index.Index64.empty(
+                index_nplike.mul_shape_item(self._length, nextsize), index_nplike
+            )
             assert nextcarry.nplike is index_nplike
             self._handle_error(
                 self._backend[
@@ -889,11 +886,11 @@ class RegularArray(Content):
                 )
 
             contents = []
-            length = None
+            length = unset
             for ptr in tocarry:
                 contents.append(self._content._carry(ptr, True))
                 length = contents[-1].length
-            assert length is not None
+            assert length is not unset
             recordarray = ak.contents.RecordArray(
                 contents,
                 recordlookup,
