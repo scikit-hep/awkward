@@ -85,7 +85,6 @@ def test_ListOffsetArray_NumpyArray():
     assert is_unknown_length(a.to_typetracer(forget_length=True).length)
 
 
-@pytest.mark.xfail()
 def test_RecordArray_NumpyArray():
     # 5.5 is inaccessible
     a = ak.contents.recordarray.RecordArray(
