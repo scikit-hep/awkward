@@ -134,20 +134,7 @@ def prepare_advanced_indexing(items):
 T = TypeVar("T", bound=ArrayLike)
 
 
-def _ensure_index_backend(array: T, backend: Backend) -> T:
-    nplike = ak._nplikes.nplike_of(array)
-    if nplike is not backend.index_nplike:
-        raise wrap_error(
-            ValueError(
-                "slice argument has a different backend to the array being sliced. "
-                "`ak.to_backend` should be used to convert arrays to a common backend."
-            )
-        )
-    else:
-        return array
-
-
-def normalise_item(item, backend: ak._backends.Backend):
+def normalise_item(item, backend: Backend):
     if ak._util.is_integer(item):
         return int(item)
 
@@ -174,7 +161,7 @@ def normalise_item(item, backend: ak._backends.Backend):
         return normalise_item(item.to_NumpyArray(np.int64), backend)
 
     elif isinstance(item, ak.contents.NumpyArray):
-        return _ensure_index_backend(item.data, backend)
+        return to_nplike(item.data, backend.index_nplike)
 
     elif isinstance(item, ak.contents.RegularArray):
         # Pure NumPy arrays (without masks) follow NumPy advanced indexing
@@ -227,7 +214,7 @@ def normalise_item(item, backend: ak._backends.Backend):
             if as_numpy is None:
                 return normalise_item(layout, backend)
             else:
-                return _ensure_index_backend(as_numpy.data, backend)
+                return to_nplike(as_numpy.data, backend.index_nplike)
 
     else:
         raise wrap_error(
@@ -241,7 +228,7 @@ def normalise_item(item, backend: ak._backends.Backend):
         )
 
 
-def normalise_items(where: Sequence, backend: ak._backends.Backend) -> list:
+def normalise_items(where: Sequence, backend: Backend) -> list:
     where_backend = ak._backends.backend_of(*where, default=backend)
     common_backend = ak._backends.common_backend([backend, where_backend])
     # First prepare items for broadcasting into like-types

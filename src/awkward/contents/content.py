@@ -695,7 +695,7 @@ class Content:
             )
         )
         return ak.contents.NumpyArray(
-            localindex, parameters=None, backend=self._backend
+            localindex.data, parameters=None, backend=self._backend
         )
 
     def _mergeable(self, other: Content, mergebool: bool = True) -> bool:

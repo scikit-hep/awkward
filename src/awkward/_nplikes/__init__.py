@@ -99,6 +99,9 @@ def to_nplike(
                 )
             )
 
+    if from_nplike is to_nplike:
+        return array
+
     if isinstance(from_nplike, TypeTracer) and nplike is not from_nplike:
         raise ak._errors.wrap_error(
             TypeError(
