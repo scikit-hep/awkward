@@ -534,12 +534,10 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         | tuple[SupportsIndex | slice | Ellipsis | ArrayLike, ...]
         | ArrayLike,
         value: int | float | bool | complex | ArrayLike,
-    ) -> Self:  # noqa: F811
-        raise ak._errors.wrap_error(
-            AssertionError(
-                "bug in Awkward Array: attempt to set values of a TypeTracerArray"
-            )
-        )
+    ):  # noqa: F811        existing_value = self.__getitem__(key)
+        existing_value = self.__getitem__(key)
+        if isinstance(value, TypeTracerArray) and value.ndim > existing_value.ndim:
+            raise wrap_error(ValueError("cannot assign shape larger than destination"))
 
     def copy(self):
         self.touch_data()
