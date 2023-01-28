@@ -896,7 +896,6 @@ class RegularArray(Content):
                 recordarray, combinationslen, self._length, parameters=self._parameters
             )
         else:
-            index_nplike = index_nplike
             length = index_nplike.mul_shape_item(self._length, self._size)
             next = self._content._getitem_range(
                 slice(0, index_nplike.shape_item_as_scalar(length))
