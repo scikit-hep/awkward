@@ -37,7 +37,7 @@ def parse_version(version):
 
 
 def numpy_at_least(version):
-    import numpy  # noqa: I251
+    import numpy  # noqa: TID251
 
     return parse_version(numpy.__version__) >= parse_version(version)
 
@@ -858,12 +858,12 @@ def arrays_approx_equal(
 
 
 try:
-    import numpy  # noqa: I251
+    import numpy  # noqa: TID251
 
     NDArrayOperatorsMixin = numpy.lib.mixins.NDArrayOperatorsMixin
 
 except AttributeError:
-    from numpy.core import umath as um
+    from numpy.core import umath as um  # noqa: TID251
 
     def _disables_array_ufunc(obj):
         try:

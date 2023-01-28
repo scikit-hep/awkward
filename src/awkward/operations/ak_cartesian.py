@@ -289,7 +289,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
             for x in new_arrays:
                 layouts.append(x)
 
-        layouts = [x for x in layouts]
+        layouts = list(layouts)
 
         indexes = [
             ak.index.Index64(x.reshape(-1))

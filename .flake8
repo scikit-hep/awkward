@@ -1,26 +1,6 @@
 [flake8]
-extend-select = C,B,B9,T,AK1,I25
-# B905 should be removed once python>=3.10
-extend-ignore = E203,E501,B950,E266,B905
-max-complexity = 100
-exclude = studies, pybind11, rapidjson, docs*, src/awkward/_typeparser/generated_parser.py
-per-file-ignores =
-    tests*/*: T, AK1, I25
-    dev/*: T, T201, AK1, I25
-    src/awkward/__init__.py: E402, F401, F403, AK1, F401, F403
-    src/awkward/operations/__init__.py: F401
-    src/awkward/_connect/*: I251
-    src/awkward/_nplikes/__init__.py: F401
-    src/awkward/_nplikes/*: I251
-    src/awkward/_typetracer.py: I251
-    src/awkward/_connect/numba/*: AK1, I25
-    src/awkward/_errors.py: AK1
-    src/awkward/typing.py: F405
-    src/awkward/_connect/rdataframe/to_rdataframe.py: B907, I25
-banned_modules =
-    numpy = "Use `numpy = ak._nplikes.Numpy.instance()` instead"
-    jax = "Use `jax = ak._nplikes.Jax.instance()` instead"
-    cupy = "Use `cupy = ak._nplikes.Cupy.instance()` instead"
+select = AK1
+exclude = studies, pybind11, rapidjson, docs-*, src/awkward/_typeparser/generated_parser.py, tests/*, dev/*, src/awkward/__init__.py, src/awkward/_connect/numba/*, src/awkward/_errors.py
 
 [flake8:local-plugins]
 extension =

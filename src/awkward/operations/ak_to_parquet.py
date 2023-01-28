@@ -260,7 +260,7 @@ def to_parquet(
     elif isinstance(parquet_metadata_statistics, Sequence):
         replacement = []
         for specifier in parquet_metadata_statistics:
-            replacement.extend([x for x in parquet_columns(specifier)])
+            replacement.extend(list(parquet_columns(specifier)))
         parquet_metadata_statistics = replacement
 
     if parquet_dictionary_encoding is True:
