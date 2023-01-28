@@ -416,11 +416,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         n_advanced = 0
         for item in key:
             # Basic indexing
-            if (
-                isinstance(item, slice)
-                or isinstance(item, int)
-                or is_unknown_integer(item)
-            ):
+            if isinstance(item, (slice, int)) or is_unknown_integer(item):
                 n_basic_non_ellipsis += 1
             # Advanced indexing
             elif isinstance(item, TypeTracerArray) and (
@@ -505,7 +501,8 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
 
                     if is_unknown_length(dimension_length) or is_unknown_integer(item):
                         continue
-                    elif not 0 <= item < dimension_length:
+
+                    if not 0 <= item < dimension_length:
                         raise wrap_error(
                             NotImplementedError("integer index out of bounds")
                         )
@@ -516,7 +513,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         else:
             adjacent_advanced_shape[:] = advanced_shape
 
-        broadcast_shape = tuple([i for p in result_shape_parts for i in p])
+        broadcast_shape = tuple(i for p in result_shape_parts for i in p)
         result_shape = broadcast_shape + tuple(iter_shape)
 
         return self._new(
