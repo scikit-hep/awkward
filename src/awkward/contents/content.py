@@ -541,7 +541,7 @@ class Content:
 
             next = ak.contents.RegularArray(
                 self,
-                self.length if self._backend.nplike.known_shape else 1,
+                self.length,
                 1,
                 parameters=None,
             )
