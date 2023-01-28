@@ -1469,6 +1469,11 @@ class ListArray(Content):
         return self.to_ListOffsetArray64(True).to_packed()
 
     def _to_list(self, behavior, json_conversions):
+        if not self._backend.nplike.known_data:
+            raise ak._errors.wrap_error(
+                TypeError("cannot convert typetracer arrays to Python lists")
+            )
+
         return ListOffsetArray._to_list(self, behavior, json_conversions)
 
     def _to_backend(self, backend: ak._backends.Backend) -> Self:

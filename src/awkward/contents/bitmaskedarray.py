@@ -689,6 +689,11 @@ class BitMaskedArray(Content):
             )
 
     def _to_list(self, behavior, json_conversions):
+        if not self._backend.nplike.known_data:
+            raise ak._errors.wrap_error(
+                TypeError("cannot convert typetracer arrays to Python lists")
+            )
+
         out = self._to_list_custom(behavior, json_conversions)
         if out is not None:
             return out

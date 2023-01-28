@@ -1303,6 +1303,11 @@ class RegularArray(Content):
         )
 
     def _to_list(self, behavior, json_conversions):
+        if not self._backend.nplike.known_data:
+            raise ak._errors.wrap_error(
+                TypeError("cannot convert typetracer arrays to Python lists")
+            )
+
         if self.parameter("__array__") == "bytestring":
             convert_bytes = (
                 None if json_conversions is None else json_conversions["convert_bytes"]

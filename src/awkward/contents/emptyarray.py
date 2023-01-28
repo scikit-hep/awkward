@@ -349,6 +349,10 @@ class EmptyArray(Content):
         return self
 
     def _to_list(self, behavior, json_conversions):
+        if not self._backend.nplike.known_data:
+            raise ak._errors.wrap_error(
+                TypeError("cannot convert typetracer arrays to Python lists")
+            )
         return []
 
     def _to_backend(self, backend: ak._backends.Backend) -> Self:

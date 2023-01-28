@@ -2072,6 +2072,11 @@ class ListOffsetArray(Content):
         return ListOffsetArray(next._offsets, content, parameters=next._parameters)
 
     def _to_list(self, behavior, json_conversions):
+        if not self._backend.nplike.known_data:
+            raise ak._errors.wrap_error(
+                TypeError("cannot convert typetracer arrays to Python lists")
+            )
+
         starts, stops = self.starts, self.stops
         starts_data = starts.raw(numpy)
         stops_data = stops.raw(numpy)[: len(starts_data)]
