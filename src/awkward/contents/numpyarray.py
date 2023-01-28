@@ -30,8 +30,7 @@ class NumpyArray(Content):
                 data, default=ak._backends.NumpyBackend.instance()
             )
 
-        assert backend.nplike.is_own_array(data), (backend, data)
-        self._data = data
+        self._data = backend.nplike.asarray(data)
 
         if not isinstance(backend.nplike, Jax):
             ak.types.numpytype.dtype_to_primitive(self._data.dtype)
