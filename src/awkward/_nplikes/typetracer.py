@@ -30,6 +30,10 @@ def is_unknown_scalar(array: Any) -> bool:
     return isinstance(array, TypeTracerArray) and array.ndim == 0
 
 
+def is_unknown_integer(array: Any) -> bool:
+    return is_unknown_scalar(array) and np.issubdtype(array.dtype, np.integer)
+
+
 def is_unknown_array(array: Any) -> bool:
     return isinstance(array, TypeTracerArray) and array.ndim > 0
 
@@ -415,7 +419,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
             if (
                 isinstance(item, slice)
                 or isinstance(item, int)
-                or (is_unknown_scalar(item) and np.issubdtype(item.dtype, np.int64))
+                or is_unknown_integer(item)
             ):
                 n_basic_non_ellipsis += 1
             # Advanced indexing
@@ -451,7 +455,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
                 n_missing_dims = self.ndim - n_advanced - n_basic_non_ellipsis
                 key_parts.extend((slice(None),) * n_missing_dims)
             elif is_unknown_array(item) and np.issubdtype(item, np.bool_):
-                key_parts.append(self.nplike.nonzero(item))
+                key_parts.append(self.nplike.nonzero(item)[0])
             else:
                 key_parts.append(item)
         key = tuple(key_parts)
@@ -474,10 +478,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
                 # Advanced index
                 if n_advanced and (
                     isinstance(item, int)
-                    or (
-                        is_unknown_scalar(item)
-                        and np.issubdtype(item.dtype, np.integer)
-                    )
+                    or is_unknown_integer(item)
                     or is_unknown_array(item)
                 ):
                     if is_unknown_scalar(item):
@@ -495,16 +496,14 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
                     previous_item_is_basic = False
                 # Slice
                 elif isinstance(item, slice):
-                    slice_length = self._resolve_slice_length(next(iter_shape), item)
+                    slice_length = self._resolve_slice_length(dimension_length, item)
                     result_shape_parts.append((slice_length,))
                     previous_item_is_basic = True
                 # Integer
-                elif isinstance(item, int) or (
-                    is_unknown_scalar(item) and np.issubdtype(item.dtype, np.integer)
-                ):
+                elif isinstance(item, int) or is_unknown_integer(item):
                     item = self.nplike.promote_scalar(item)
 
-                    if is_unknown_length(dimension_length) or is_unknown_length(item):
+                    if is_unknown_length(dimension_length) or is_unknown_integer(item):
                         continue
                     elif not 0 <= item < dimension_length:
                         raise wrap_error(
@@ -928,7 +927,7 @@ class TypeTracer(NumpyLike):
         n_placeholders = 0
         new_size = 1
         for item in shape:
-            if is_unknown_length(item):
+            if item is None:
                 # Size is no longer defined
                 new_size = None
             elif not ak._util.is_integer(item):
@@ -946,7 +945,7 @@ class TypeTracer(NumpyLike):
             elif item == 0:
                 raise wrap_error(ValueError("shape items cannot be zero"))
             else:
-                new_size *= item
+                new_size = self.mul_shape_item(new_size, item)
 
         # Populate placeholders
         new_shape = [*shape]
