@@ -4,6 +4,8 @@ import numpy as np
 import pytest  # noqa: F401
 
 import awkward as ak
+from awkward._nplikes.typetracer import typetracer_with_report
+from awkward.typetracer import empty_if_typetracer
 
 
 def test():
@@ -11,7 +13,7 @@ def test():
         assert ak.backend(array) == "typetracer"
 
         radius = np.sqrt(array.x**2 + array.y**2)
-        radius = ak._typetracer.empty_if_typetracer(radius)
+        radius = empty_if_typetracer(radius)
         assert ak.backend(radius) == "cpu"
 
         hist_contents, hist_edges = np.histogram(ak.flatten(radius, axis=None))
@@ -28,7 +30,7 @@ def test():
     layout = ak.to_layout(array)
     form = layout.form_with_key("node{id}")
 
-    meta, report = ak._typetracer.typetracer_with_report(form)
+    meta, report = typetracer_with_report(form)
     meta = ak._util.wrap(meta, ak._util.behavior_of(array))
 
     func(meta)
