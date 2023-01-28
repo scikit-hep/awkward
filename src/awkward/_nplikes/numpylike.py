@@ -302,15 +302,15 @@ class NumpyLike(Singleton, Protocol):
         ...
 
     @abstractmethod
-    def sub_shape_item(self, x1: ShapeItem, x2: ShapeItem):
+    def sub_shape_item(self, x1: ShapeItem, x2: ShapeItem) -> ShapeItem:
         ...
 
     @abstractmethod
-    def add_shape_item(self, x1: ShapeItem, x2: ShapeItem):
+    def add_shape_item(self, x1: ShapeItem, x2: ShapeItem) -> ShapeItem:
         ...
 
     @abstractmethod
-    def mul_shape_item(self, x1: ShapeItem, x2: ShapeItem):
+    def mul_shape_item(self, x1: ShapeItem, x2: ShapeItem) -> ShapeItem:
         ...
 
     @abstractmethod

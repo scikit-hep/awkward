@@ -133,13 +133,15 @@ class ArrayModuleNumpyLike(NumpyLike):
         else:
             return int(x1)
 
-    def add_shape_item(self, x1: ShapeItem, x2: ShapeItem):
+    def add_shape_item(self, x1: ShapeItem, x2: ShapeItem) -> ShapeItem:
         return x1 + x2
 
-    def sub_shape_item(self, x1: ShapeItem, x2: ShapeItem):
-        return x1 - x2
+    def sub_shape_item(self, x1: ShapeItem, x2: ShapeItem) -> ShapeItem:
+        result = x1 - x2
+        assert result >= 0
+        return result
 
-    def mul_shape_item(self, x1: ShapeItem, x2: ShapeItem):
+    def mul_shape_item(self, x1: ShapeItem, x2: ShapeItem) -> ShapeItem:
         return x1 * x2
 
     def nonzero(self, x: ArrayLike) -> tuple[ArrayLike, ...]:

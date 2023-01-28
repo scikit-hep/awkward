@@ -850,21 +850,23 @@ class TypeTracer(NumpyLike):
         else:
             return int(x1)
 
-    def sub_shape_item(self, x1: ShapeItem, x2: ShapeItem):
+    def sub_shape_item(self, x1: ShapeItem, x2: ShapeItem) -> ShapeItem:
         if x1 is None:
             return None
         if x2 is None:
             return None
-        return x1 - x2
+        result = x1 - x2
+        assert result >= 0
+        return result
 
-    def add_shape_item(self, x1: ShapeItem, x2: ShapeItem):
+    def add_shape_item(self, x1: ShapeItem, x2: ShapeItem) -> ShapeItem:
         if x1 is None:
             return None
         if x2 is None:
             return None
         return x1 + x2
 
-    def mul_shape_item(self, x1: ShapeItem, x2: ShapeItem):
+    def mul_shape_item(self, x1: ShapeItem, x2: ShapeItem) -> ShapeItem:
         if x1 is None:
             return None
         if x2 is None:
