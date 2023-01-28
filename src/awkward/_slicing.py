@@ -239,15 +239,7 @@ def normalise_item(item, backend: Backend) -> SliceItem:
             layout = ak.operations.ak_to_layout._impl(
                 item, allow_record=False, allow_other=True, regulararray=False
             )
-            as_numpy = layout.maybe_to_NumpyArray()
-            if as_numpy is None:
-                return normalise_item(layout, backend)
-            else:
-                return to_nplike(
-                    as_numpy.data,
-                    backend.index_nplike,
-                    from_nplike=as_numpy.backend.nplike,
-                )
+            return normalise_item(layout, backend)
 
     else:
         raise wrap_error(
