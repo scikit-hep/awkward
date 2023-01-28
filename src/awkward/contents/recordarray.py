@@ -67,8 +67,14 @@ class RecordArray(Content):
                         )
                     )
                 )
+
+        # If no content backend was found, then choose our own
         if backend is None:
             backend = ak._backends.NumpyBackend.instance()
+
+        # TODO: remove me in future version
+        if length is None and backend.nplike.known_shape:
+            length = unset
 
         if length is unset:
             if len(contents) == 0:
