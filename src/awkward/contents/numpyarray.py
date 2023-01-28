@@ -185,7 +185,7 @@ class NumpyArray(Content):
         shape = self._data.shape
         zeroslen = [1]
         for x in shape:
-            zeroslen.append(zeroslen[-1] * x)
+            zeroslen.append(self._backend.index_nplike.mul_shape_item(zeroslen[-1], x))
 
         out = NumpyArray(self._data.reshape(-1), parameters=None, backend=self._backend)
         for i in range(len(shape) - 1, 0, -1):
