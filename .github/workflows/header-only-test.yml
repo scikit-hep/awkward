@@ -31,12 +31,12 @@ jobs:
         cmake --build build/
 
     - name: Run tests
-      shell: python
       run: |
         import pathlib
         import subprocess
         for path in pathlib.Path("build").glob("test_*"):
-            print(f"Running {path.name}")
-            print("::group::Test output")
+            print(f"Running {path.name}", flush=True)
+            print("::group::Test output", flush=True)
             subprocess.run([path], check=True)
-            print("::endgroup::")
+            print("::endgroup::", flush=True)
+      shell: python3 {0}
