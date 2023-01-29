@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <tuple>
 #include <string>
+#include <functional>
 
 namespace awkward {
 
