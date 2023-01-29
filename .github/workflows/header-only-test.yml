@@ -1,0 +1,42 @@
+name: Lint
+
+on:
+  pull_request:
+    paths:
+      - 'header-only'
+
+  workflow_dispatch:
+
+
+concurrency:
+  group: header-only-test-${{ github.head_ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: "Test header-only library"
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: true
+
+    - name: Run CMake
+      run: |
+        cmake -B build -S header-only/tests
+        cmake --build build/
+
+    - name: Run tests
+      shell: python
+      run: |
+        import pathlib
+        import subprocess
+        for path in pathlib.Path("build").glob("test_*"):
+            print(f"Running {path.name}")
+            print("::group::Test output")
+            subprocess.run([path], check=True)
+            print("::endgroup::")
