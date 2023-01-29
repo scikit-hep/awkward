@@ -1,4 +1,4 @@
-name: Header-only tests
+name: Header-only Tests
 
 on:
   pull_request:
@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   test:
-    name: "Test header-only library"
+    name: "Run Tests"
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]

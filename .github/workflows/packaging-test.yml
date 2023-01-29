@@ -1,4 +1,4 @@
-name: Packaging tests
+name: Packaging Tests
 
 on:
   pull_request:
@@ -41,7 +41,7 @@ jobs:
 
 
   build_wheels:
-    name: "Wheel: ${{ matrix.os }}"
+    name: "Make Wheel: ${{ matrix.os }}"
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
