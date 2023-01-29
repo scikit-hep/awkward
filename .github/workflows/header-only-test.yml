@@ -1,4 +1,4 @@
-name: Lint
+name: Header-only tests
 
 on:
   pull_request:
