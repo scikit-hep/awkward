@@ -27,16 +27,20 @@ jobs:
 
     - name: Run CMake
       run: |
-        cmake -B build -S header-only/tests
+        cmake -B build -S header-only/tests \
+            -DCMAKE_RUNTIME_OUTPUT_DIRECTORY=bin \
+            -DCMAKE_BUILD_TYPE=Release
         cmake --build build/
 
     - name: Run tests
       run: |
+        import os
         import pathlib
         import subprocess
-        for path in pathlib.Path("build").glob("test_*"):
-            print(f"Running {path.name}", flush=True)
-            print("::group::Test output", flush=True)
-            subprocess.run([path], check=True)
-            print("::endgroup::", flush=True)
+        for path in pathlib.Path("build/bin").glob("test_*"):
+            if path.is_file():
+                print(f"Running {path.name}", flush=True)
+                print("::group::Test output", flush=True)
+                subprocess.run([path], check=True)
+                print("::endgroup::", flush=True)
       shell: python3 {0}
