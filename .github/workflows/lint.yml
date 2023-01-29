@@ -11,7 +11,7 @@ concurrency:
 
 jobs:
   pylint:
-    name: "PyLint"
+    name: "Run PyLint"
     runs-on: ubuntu-latest
 
     steps:

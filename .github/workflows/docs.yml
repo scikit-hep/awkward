@@ -18,6 +18,7 @@ env:
 
 jobs:
   awkward-cpp-wasm:
+    name: Build C++ WASM
     runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v3
@@ -62,6 +63,7 @@ jobs:
 
   awkward-cpp-x86-64:
     runs-on: ubuntu-22.04
+    name: Build C++ x86
     steps:
     - uses: actions/checkout@v3
       with:
@@ -111,6 +113,7 @@ jobs:
 
   awkward:
     runs-on: ubuntu-22.04
+    name: Build Python
     steps:
     - uses: actions/checkout@v3
       with:
@@ -132,6 +135,7 @@ jobs:
   build-docs:
     runs-on: ubuntu-22.04
     needs: [awkward-cpp-wasm, awkward-cpp-x86-64, awkward]
+    name: Build Docs
     defaults:
       run:
         # Ensure conda env is activated
@@ -235,6 +239,7 @@ jobs:
   branch-preview:
     runs-on: ubuntu-22.04
     needs: [build-docs]
+    name: Deploy Branch Preview
     # We can only deploy for PRs on host repo
     if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
     permissions:
@@ -267,6 +272,7 @@ jobs:
     needs: [ build-docs ]
     # We can only deploy for PRs on host repo
     if: github.event_name == 'push' || github.event_name == 'release'
+    name: Deploy
     permissions:
       id-token: write
       contents: read
