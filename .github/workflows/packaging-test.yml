@@ -6,28 +6,13 @@ on:
 
 
 concurrency:
-  group: wheels-${{ github.head_ref }}
+  group: packaging-test-${{ github.head_ref }}
   cancel-in-progress: true
 
 env:
   SOURCE_DATE_EPOCH: "1668811211"
 
 jobs:
-  pylint:
-    name: "PyLint"
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v3
-      with:
-        submodules: true
-
-    - name: Run PyLint
-      run: |
-        echo "::add-matcher::$GITHUB_WORKSPACE/.github/matchers/pylint.json"
-        pipx run nox -s pylint
-
-
   make_sdists:
     name: "Make SDists"
     runs-on: ubuntu-latest
