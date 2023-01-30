@@ -1205,9 +1205,13 @@ class NumpyArray(Content):
         return to_nplike(self.data, backend.nplike, from_nplike=self._backend.nplike)
 
     def _remove_structure(self, backend, options):
+        if options["keepdims"]:
+            shape = (1,) * (self._data.ndim - 1) + (-1,)
+        else:
+            shape = (-1,)
         return [
             ak.contents.NumpyArray(
-                backend.nplike.reshape(self._raw(backend.nplike), (-1,)),
+                backend.nplike.reshape(self._raw(backend.nplike), shape),
                 backend=backend,
             )
         ]
