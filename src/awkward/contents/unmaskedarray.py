@@ -2,15 +2,19 @@
 from __future__ import annotations
 
 import copy
+import math
 
 import awkward as ak
+from awkward._nplikes.numpy import Numpy
+from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.typetracer import MaybeNone
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.unmaskedform import UnmaskedForm
 from awkward.typing import Final, Self, final
 
-np = ak._nplikes.NumpyMetadata.instance()
-numpy = ak._nplikes.Numpy.instance()
+np = NumpyMetadata.instance()
+numpy = Numpy.instance()
 
 
 @final
@@ -136,7 +140,7 @@ class UnmaskedArray(Content):
         )
 
     def to_BitMaskedArray(self, valid_when, lsb_order):
-        bitlength = int(numpy.ceil(self._content.length / 8.0))
+        bitlength = int(math.ceil(self._content.length / 8.0))
         if valid_when:
             bitmask = self._backend.index_nplike.full(
                 bitlength, np.uint8(255), dtype=np.uint8
@@ -167,7 +171,7 @@ class UnmaskedArray(Content):
     def _getitem_at(self, where):
         if not self._backend.nplike.known_data:
             self._touch_data(recursive=False)
-            return ak._typetracer.MaybeNone(self._content._getitem_at(where))
+            return MaybeNone(self._content._getitem_at(where))
 
         return self._content._getitem_at(where)
 

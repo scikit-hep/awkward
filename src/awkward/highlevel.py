@@ -12,10 +12,12 @@ from collections.abc import Iterable, Mapping, Sized
 from awkward_cpp.lib import _ext
 
 import awkward as ak
+from awkward._nplikes.numpy import Numpy
+from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._util import NDArrayOperatorsMixin
 
-np = ak._nplikes.NumpyMetadata.instance()
-numpy = ak._nplikes.Numpy.instance()
+np = NumpyMetadata.instance()
+numpy = Numpy.instance()
 
 _dir_pattern = re.compile(r"^[a-zA-Z_]\w*$")
 
@@ -181,18 +183,6 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             layout = data._layout
             behavior = ak._util.behavior_of(data, behavior=behavior)
 
-        elif numpy.is_own_array(data) and data.dtype != np.dtype("O"):
-            layout = ak.operations.from_numpy(data, highlevel=False)
-
-        elif ak._nplikes.Cupy.is_own_array(data):
-            layout = ak.operations.from_cupy(data, highlevel=False)
-
-        elif ak._nplikes.Jax.is_own_array(data):
-            layout = ak.operations.from_jax(data, highlevel=False)
-
-        elif ak._util.in_module(data, "pyarrow"):
-            layout = ak.operations.from_arrow(data, highlevel=False)
-
         elif isinstance(data, dict):
             fields = []
             contents = []
@@ -217,7 +207,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             layout = ak.operations.from_json(data, highlevel=False)
 
         else:
-            layout = ak.operations.from_iter(data, highlevel=False, allow_record=False)
+            layout = ak.operations.to_layout(
+                data, allow_record=False, regulararray=False
+            )
 
         if not isinstance(layout, ak.contents.Content):
             raise ak._errors.wrap_error(
@@ -1196,18 +1188,13 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         except AttributeError:
             pytype = type(self).__name__
 
+        typestr = repr(str(self.type))[1:-1]
         if (
             self._layout.backend.nplike.known_shape
             and self._layout.backend.nplike.known_data
         ):
-            typestr = repr(str(self.type))[1:-1]
             valuestr = ""
-
         else:
-            # awkward._prettyprint.valuestr touches the data
-            typestr = repr(
-                "?? * " + str(self._layout.form.type_from_behavior(self._behavior))
-            )[1:-1]
             valuestr = "-typetracer"
 
         if len(typestr) + len(pytype) + len(" type=''") + 3 < limit_cols // 2:
@@ -1940,18 +1927,13 @@ class Record(NDArrayOperatorsMixin):
 
         pytype = type(self).__name__
 
+        typestr = repr(str(self.type))[1:-1]
         if (
             self._layout.array.backend.nplike.known_shape
             and self._layout.array.backend.nplike.known_data
         ):
-            typestr = repr(str(self.type))[1:-1]
             valuestr = ""
-
         else:
-            # awkward._prettyprint.valuestr touches the data
-            typestr = repr(
-                str(self._layout._array.form.type_from_behavior(self._behavior))
-            )[1:-1]
             valuestr = "-typetracer"
 
         if len(typestr) + len(pytype) + len(" type=''") + 3 < limit_cols // 2:

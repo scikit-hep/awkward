@@ -1,9 +1,10 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._util import unset
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 
 
 def moment(
@@ -128,4 +129,4 @@ def _impl(x, n, weight, axis, keepdims, mask_identity):
                 highlevel=True,
                 behavior=behavior,
             )
-        return ak._nplikes.nplike_of(sumwxn, sumw).true_divide(sumwxn, sumw)
+        return sumwxn / sumw

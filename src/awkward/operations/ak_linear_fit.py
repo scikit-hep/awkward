@@ -1,9 +1,12 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+
 import awkward as ak
+from awkward._nplikes import nplike_of, ufuncs
+from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._util import unset
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 
 
 def linear_fit(
@@ -101,7 +104,7 @@ def _impl(x, y, weight, axis, keepdims, mask_identity):
         )
 
     with np.errstate(invalid="ignore", divide="ignore"):
-        nplike = ak._nplikes.nplike_of(x, y, weight)
+        nplike = nplike_of(x, y, weight)
         if weight is None:
             sumw = ak.operations.ak_count._impl(
                 x,
@@ -185,10 +188,10 @@ def _impl(x, y, weight, axis, keepdims, mask_identity):
                 behavior=behavior,
             )
         delta = (sumw * sumwxx) - (sumwx * sumwx)
-        intercept = nplike.true_divide(((sumwxx * sumwy) - (sumwx * sumwxy)), delta)
-        slope = nplike.true_divide(((sumw * sumwxy) - (sumwx * sumwy)), delta)
-        intercept_error = nplike.sqrt(nplike.true_divide(sumwxx, delta))
-        slope_error = nplike.sqrt(nplike.true_divide(sumw, delta))
+        intercept = ((sumwxx * sumwy) - (sumwx * sumwxy)) / delta
+        slope = ((sumw * sumwxy) - (sumwx * sumwy)) / delta
+        intercept_error = ufuncs.sqrt(sumwxx / delta)
+        slope_error = ufuncs.sqrt(sumw / delta)
 
         intercept = ak.operations.to_layout(
             intercept, allow_record=True, allow_other=True
@@ -209,7 +212,7 @@ def _impl(x, y, weight, axis, keepdims, mask_identity):
                 ak.record.Record,
             ),
         ):
-            intercept = ak.contents.NumpyArray(nplike.array([intercept]))
+            intercept = ak.contents.NumpyArray(nplike.asarray([intercept]))
             scalar = True
         if not isinstance(
             slope,
@@ -218,7 +221,7 @@ def _impl(x, y, weight, axis, keepdims, mask_identity):
                 ak.record.Record,
             ),
         ):
-            slope = ak.contents.NumpyArray(nplike.array([slope]))
+            slope = ak.contents.NumpyArray(nplike.asarray([slope]))
             scalar = True
         if not isinstance(
             intercept_error,
@@ -227,7 +230,7 @@ def _impl(x, y, weight, axis, keepdims, mask_identity):
                 ak.record.Record,
             ),
         ):
-            intercept_error = ak.contents.NumpyArray(nplike.array([intercept_error]))
+            intercept_error = ak.contents.NumpyArray(nplike.asarray([intercept_error]))
             scalar = True
         if not isinstance(
             slope_error,
@@ -236,7 +239,7 @@ def _impl(x, y, weight, axis, keepdims, mask_identity):
                 ak.record.Record,
             ),
         ):
-            slope_error = ak.contents.NumpyArray(nplike.array([slope_error]))
+            slope_error = ak.contents.NumpyArray(nplike.asarray([slope_error]))
             scalar = True
 
         out = ak.contents.RecordArray(

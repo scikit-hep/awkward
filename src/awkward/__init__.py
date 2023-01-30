@@ -4,8 +4,6 @@
 from awkward._version import __version__
 
 # NumPy-like alternatives
-import awkward._nplikes
-import awkward._typetracer
 import awkward._backends
 
 # layout classes; functionality that used to be in C++ (in Awkward 1.x)
@@ -29,6 +27,8 @@ import awkward._connect.numpy
 import awkward._connect.numexpr
 import awkward.numba
 import awkward.jax
+import awkward.typetracer
+import awkward._typetracer  # todo: remove this after "deprecation" period
 
 # high-level interface
 from awkward.highlevel import Array

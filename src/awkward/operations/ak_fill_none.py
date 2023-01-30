@@ -3,8 +3,9 @@
 import numbers
 
 import awkward as ak
+from awkward._nplikes.numpylike import NumpyMetadata
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 cpu = ak._backends.NumpyBackend.instance()
 
 
@@ -96,7 +97,7 @@ def _impl(array, value, axis, highlevel, behavior):
             valuelayout = valuelayout.array[valuelayout.at : valuelayout.at + 1]
         elif len(valuelayout) == 0:
             offsets = ak.index.Index64(
-                backend.index_nplike.array([0, 0], dtype=np.int64)
+                backend.index_nplike.asarray([0, 0], dtype=np.int64)
             )
             valuelayout = ak.contents.ListOffsetArray(offsets, valuelayout)
         else:

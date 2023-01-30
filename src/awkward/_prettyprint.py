@@ -5,8 +5,9 @@ import numbers
 import re
 
 import awkward as ak
+from awkward._nplikes.numpy import Numpy
 
-numpy = ak._nplikes.Numpy.instance()
+numpy = Numpy.instance()
 
 
 def half(integer):

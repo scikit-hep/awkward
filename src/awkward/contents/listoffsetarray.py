@@ -4,14 +4,22 @@ from __future__ import annotations
 import copy
 
 import awkward as ak
+from awkward._nplikes.numpy import Numpy
+from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.typetracer import (
+    TypeTracer,
+    UnknownLength,
+    ensure_known_scalar,
+    is_unknown_length,
+)
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.listoffsetform import ListOffsetForm
 from awkward.index import Index
 from awkward.typing import Final, Self, final
 
-np = ak._nplikes.NumpyMetadata.instance()
-numpy = ak._nplikes.Numpy.instance()
+np = NumpyMetadata.instance()
+numpy = Numpy.instance()
 
 
 @final
@@ -38,7 +46,7 @@ class ListOffsetArray(Content):
                     )
                 )
             )
-        if offsets.nplike.known_shape and not offsets.length >= 1:
+        if ensure_known_scalar(offsets.length == 0, False):
             raise ak._errors.wrap_error(
                 ValueError(
                     "{} len(offsets) ({}) must be >= 1".format(
@@ -129,7 +137,7 @@ class ListOffsetArray(Content):
         self._content._to_buffers(form.content, getkey, container, backend, byteorder)
 
     def _to_typetracer(self, forget_length: bool) -> Self:
-        offsets = self._offsets.to_nplike(ak._typetracer.TypeTracer.instance())
+        offsets = self._offsets.to_nplike(TypeTracer.instance())
         return ListOffsetArray(
             offsets.forget_length() if forget_length else offsets,
             self._content._to_typetracer(False),
@@ -243,9 +251,9 @@ class ListOffsetArray(Content):
 
         start, stop, step = where.indices(self.length)
         offsets = self._offsets[start : stop + 1]
-        if offsets.length == 0:
+        if ensure_known_scalar(offsets.length == 0, False):
             offsets = Index(
-                self._backend.index_nplike.array([0], dtype=self._offsets.dtype),
+                self._backend.index_nplike.asarray([0], dtype=self._offsets.dtype),
                 nplike=self._backend.index_nplike,
             )
         return ListOffsetArray(offsets, self._content, parameters=self._parameters)
@@ -460,7 +468,9 @@ class ListOffsetArray(Content):
 
             nextcontent = self._content._carry(nextcarry, True)
 
-            if advanced is None or advanced.length == 0:
+            if advanced is None or (
+                not is_unknown_length(advanced.length) and advanced.length == 0
+            ):
                 return ak.contents.ListOffsetArray(
                     nextoffsets,
                     nextcontent._getitem_next(nexthead, nexttail, advanced),
@@ -532,7 +542,9 @@ class ListOffsetArray(Content):
             flathead = self._backend.index_nplike.asarray(head.data.reshape(-1))
             lenstarts = self.starts.length
             regular_flathead = ak.index.Index64(flathead)
-            if advanced is None or advanced.length == 0:
+            if advanced is None or (
+                not is_unknown_length(advanced.length) and advanced.length == 0
+            ):
                 nextcarry = ak.index.Index64.empty(
                     lenstarts * flathead.length, self._backend.index_nplike
                 )
@@ -645,7 +657,7 @@ class ListOffsetArray(Content):
                 dtype=np.int64,
             )
 
-            if inneroffsets.length == 0:
+            if ensure_known_scalar(inneroffsets.length == 0, False):
                 return (
                     offsets,
                     ListOffsetArray(
@@ -653,7 +665,7 @@ class ListOffsetArray(Content):
                     ),
                 )
 
-            elif self._offsets.length == 1:
+            elif ensure_known_scalar(self._offsets.length == 1, False):
                 tooffsets = ak.index.Index64([inneroffsets[0]])
                 return (
                     offsets,
@@ -750,7 +762,7 @@ class ListOffsetArray(Content):
                 innerlength = offsets[offsets.length - 1]
             else:
                 self._touch_data(recursive=False)
-                innerlength = ak._typetracer.UnknownLength
+                innerlength = UnknownLength
             localindex = ak.index.Index64.empty(innerlength, self._backend.index_nplike)
             assert (
                 localindex.nplike is self._backend.index_nplike
@@ -1862,8 +1874,8 @@ class ListOffsetArray(Content):
             nonzeros = npoffsets[1:] != npoffsets[:-1]
             maskedbytes = validbytes == 0
             if numpy.any(maskedbytes & nonzeros):  # null and count > 0
-                new_starts = numpy.array(npoffsets[:-1], copy=True)
-                new_stops = numpy.array(npoffsets[1:], copy=True)
+                new_starts = numpy.asarray(npoffsets[:-1], copy=True)
+                new_stops = numpy.asarray(npoffsets[1:], copy=True)
                 new_starts[maskedbytes] = 0
                 new_stops[maskedbytes] = 0
                 next = ak.contents.ListArray(
@@ -1952,7 +1964,7 @@ class ListOffsetArray(Content):
     def _to_backend_array(self, allow_missing, backend):
         array_param = self.parameter("__array__")
         if array_param in {"bytestring", "string"}:
-            return backend.nplike.array(self.to_list())
+            return backend.nplike.asarray(self.to_list())
 
         return self.to_RegularArray()._to_backend_array(allow_missing, backend)
 
@@ -2074,8 +2086,8 @@ class ListOffsetArray(Content):
         if numpy.count_nonzero(nonempty) == 0:
             mini, maxi = 0, 0
         else:
-            mini = starts_data.min()
-            maxi = stops_data.max()
+            mini = self._backend.index_nplike.min(starts_data)
+            maxi = self._backend.index_nplike.max(stops_data)
 
         starts_data = starts_data - mini
         stops_data = stops_data - mini
@@ -2135,7 +2147,7 @@ class ListOffsetArray(Content):
             strings = self.to_list()
             if any(item in nonfinit_dict for item in strings):
                 numbers = self._backend.index_nplike.empty(
-                    self.starts.length, np.float64
+                    self.starts.length, dtype=np.float64
                 )
                 has_another_string = False
                 for i, val in enumerate(strings):

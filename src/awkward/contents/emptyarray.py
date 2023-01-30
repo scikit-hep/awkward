@@ -4,13 +4,15 @@ from __future__ import annotations
 import copy
 
 import awkward as ak
+from awkward._nplikes.numpy import Numpy
+from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.emptyform import EmptyForm
 from awkward.typing import Final, Self, final
 
-np = ak._nplikes.NumpyMetadata.instance()
-numpy = ak._nplikes.Numpy.instance()
+np = NumpyMetadata.instance()
+numpy = Numpy.instance()
 
 
 @final
@@ -85,11 +87,13 @@ class EmptyArray(Content):
     def to_NumpyArray(self, dtype, backend=None):
         backend = backend or self._backend
         return ak.contents.NumpyArray(
-            backend.nplike.empty(0, dtype), parameters=self._parameters, backend=backend
+            backend.nplike.empty(0, dtype=dtype),
+            parameters=self._parameters,
+            backend=backend,
         )
 
     def __array__(self, **kwargs):
-        return numpy.empty((0,))
+        return numpy.empty(0, dtype=np.float64)
 
     def __iter__(self):
         return iter([])
@@ -199,7 +203,7 @@ class EmptyArray(Content):
         posaxis = ak._util.maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 == depth:
             return ak.contents.NumpyArray(
-                self._backend.nplike.empty(0, np.int64),
+                self._backend.nplike.empty(0, dtype=np.int64),
                 parameters=None,
                 backend=self._backend,
             )
@@ -295,7 +299,7 @@ class EmptyArray(Content):
         else:
             dtype = np.dtype(options["emptyarray_to"])
             next = ak.contents.NumpyArray(
-                numpy.empty(length, dtype),
+                numpy.empty(length, dtype=dtype),
                 parameters=self._parameters,
                 backend=self._backend,
             )

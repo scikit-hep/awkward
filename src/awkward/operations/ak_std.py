@@ -2,9 +2,11 @@
 
 import awkward as ak
 from awkward._connect.numpy import unsupported
+from awkward._nplikes import nplike_of
+from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._util import unset
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 
 
 def std(
@@ -169,7 +171,7 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity):
         )
 
     with np.errstate(invalid="ignore", divide="ignore"):
-        return ak._nplikes.nplike_of(x, weight).sqrt(
+        return nplike_of(x, weight).sqrt(
             ak.operations.ak_var._impl(
                 x,
                 weight,

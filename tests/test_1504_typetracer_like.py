@@ -2,8 +2,9 @@ import numpy as np
 import pytest
 
 import awkward as ak
+from awkward._nplikes.typetracer import TypeTracer
 
-typetracer = ak._typetracer.TypeTracer.instance()
+typetracer = TypeTracer.instance()
 
 
 @pytest.mark.parametrize("dtype", [np.float64, np.int64, np.uint8, None])
@@ -39,10 +40,3 @@ def test_full_like(dtype, like_dtype, value):
     full = ak.full_like(array.to_typetracer(), value, dtype=like_dtype, highlevel=False)
     assert full.to_typetracer().shape == array.shape
     assert full.to_typetracer().dtype == like_dtype or array.dtype
-
-
-def test_full_like_cast():
-    with pytest.raises(ValueError):
-        ak._typetracer.TypeTracerArray.from_array(
-            [1, ak._typetracer.UnknownScalar(np.uint8)]
-        )

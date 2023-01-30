@@ -9,15 +9,18 @@ import re
 import sys
 from collections.abc import Iterable, Mapping, Sequence, Sized
 
-import numpy
 import packaging.version
 
 import awkward as ak
+from awkward._nplikes import nplike_of, ufuncs
+from awkward._nplikes.jax import Jax
+from awkward._nplikes.numpy import Numpy
+from awkward._nplikes.numpylike import NumpyMetadata
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 
 win = os.name == "nt"
-bits32 = ak._nplikes.numpy.iinfo(np.intp).bits == 32
+bits32 = np.iinfo(np.intp).bits == 32
 
 # matches include/awkward/common.h
 kMaxInt8 = 127  # 2**7  - 1
@@ -34,6 +37,8 @@ def parse_version(version):
 
 
 def numpy_at_least(version):
+    import numpy  # noqa: TID251
+
     return parse_version(numpy.__version__) >= parse_version(version)
 
 
@@ -213,7 +218,7 @@ def custom_ufunc(ufunc, layout, behavior):
             if (
                 isinstance(key, tuple)
                 and len(key) == 2
-                and (key[0] is ufunc or key[0] is numpy.ufunc)
+                and (key[0] is ufunc or key[0] is ufuncs.ufunc)
                 and key[1] == custom
             ):
                 return fcn
@@ -465,7 +470,7 @@ def wrap(content, behavior=None, highlevel=True, like=None, allow_other=False):
 
 
 def union_to_record(unionarray, anonymous):
-    nplike = ak._nplikes.nplike_of(unionarray)
+    nplike = nplike_of(unionarray)
 
     contents = []
     for layout in unionarray.contents:
@@ -625,13 +630,13 @@ expand_braces.regex = re.compile(r"\{[^\{\}]*\}")
 
 
 def from_arraylib(array, regulararray, recordarray, highlevel, behavior):
-    np = ak._nplikes.NumpyMetadata.instance()
 
+    np = NumpyMetadata.instance()
     # overshadows global NumPy import for nplike-safety
-    numpy = ak._nplikes.Numpy.instance()
+    numpy = Numpy.instance()
 
     def recurse(array, mask=None):
-        if ak._nplikes.Jax.is_tracer(array):
+        if Jax.is_tracer(array):
             raise ak._errors.wrap_error(
                 TypeError("Jax tracers cannot be used with `ak.from_arraylib`")
             )
@@ -773,11 +778,13 @@ def arrays_approx_equal(
     left = ak.to_packed(ak.to_layout(left, allow_record=False), highlevel=False)
     right = ak.to_packed(ak.to_layout(right, allow_record=False), highlevel=False)
 
+    nplike = nplike_of(left, right)
+
     def is_approx_dtype(left, right) -> bool:
         if not dtype_exact:
-            for family in numpy.integer, numpy.floating:
-                if numpy.issubdtype(left, family):
-                    return numpy.issubdtype(right, family)
+            for family in np.integer, np.floating:
+                if np.issubdtype(left, family):
+                    return np.issubdtype(right, family)
         return left == right
 
     def visitor(left, right) -> bool:
@@ -807,18 +814,20 @@ def arrays_approx_equal(
 
         if left.is_list:
             return (
-                numpy.array_equal(left.starts, right.starts)
-                and numpy.array_equal(left.stops, right.stops)
+                nplike.array_equal(left.starts, right.starts)
+                and nplike.array_equal(left.stops, right.stops)
                 and visitor(left.content, right.content)
             )
         elif left.is_regular:
             return (left.size == right.size) and visitor(left.content, right.content)
         elif left.is_numpy:
-            return is_approx_dtype(left.dtype, right.dtype) and numpy.allclose(
-                left.data, right.data, rtol=rtol, atol=atol, equal_nan=False
+            return is_approx_dtype(left.dtype, right.dtype) and nplike.all(
+                nplike.isclose(
+                    left.data, right.data, rtol=rtol, atol=atol, equal_nan=False
+                )
             )
         elif left.is_option:
-            return numpy.array_equal(
+            return nplike.array_equal(
                 left.index.data < 0, right.index.data < 0
             ) and visitor(left.project(), right.project())
         elif left.is_union:
@@ -849,10 +858,12 @@ def arrays_approx_equal(
 
 
 try:
+    import numpy  # noqa: TID251
+
     NDArrayOperatorsMixin = numpy.lib.mixins.NDArrayOperatorsMixin
 
 except AttributeError:
-    from numpy.core import umath as um
+    from numpy.core import umath as um  # noqa: TID251
 
     def _disables_array_ufunc(obj):
         try:

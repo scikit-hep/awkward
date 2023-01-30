@@ -1,16 +1,18 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._nplikes import nplike_of, ufuncs
+from awkward._nplikes.numpylike import NumpyMetadata
 from awkward.highlevel import Array
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 
 
 class ByteBehavior(Array):
     __name__ = "Array"
 
     def __bytes__(self):
-        tmp = ak._nplikes.nplike_of(self.layout).asarray(self.layout)
+        tmp = nplike_of(self.layout).asarray(self.layout)
         if hasattr(tmp, "tobytes"):
             return tmp.tobytes()
         else:
@@ -55,7 +57,7 @@ class CharBehavior(Array):
     __name__ = "Array"
 
     def __bytes__(self):
-        tmp = ak._nplikes.nplike_of(self.layout).asarray(self.layout)
+        tmp = nplike_of(self.layout).asarray(self.layout)
         if hasattr(tmp, "tobytes"):
             return tmp.tobytes()
         else:
@@ -109,7 +111,7 @@ class StringBehavior(Array):
 
 
 def _string_equal(one, two):
-    nplike = ak._nplikes.nplike_of(one, two)
+    nplike = nplike_of(one, two)
     behavior = ak._util.behavior_of(one, two)
 
     one, two = (
@@ -149,7 +151,7 @@ def _string_notequal(one, two):
 
 
 def _string_broadcast(layout, offsets):
-    nplike = ak._nplikes.nplike_of(offsets)
+    nplike = nplike_of(offsets)
     assert nplike is layout.backend.index_nplike
 
     offsets = nplike.asarray(offsets)
@@ -261,10 +263,10 @@ def register(behavior):
     behavior["string"] = StringBehavior
     behavior["__typestr__", "string"] = "string"
 
-    behavior[ak._nplikes.numpy.equal, "bytestring", "bytestring"] = _string_equal
-    behavior[ak._nplikes.numpy.equal, "string", "string"] = _string_equal
-    behavior[ak._nplikes.numpy.not_equal, "bytestring", "bytestring"] = _string_notequal
-    behavior[ak._nplikes.numpy.not_equal, "string", "string"] = _string_notequal
+    behavior[ufuncs.equal, "bytestring", "bytestring"] = _string_equal
+    behavior[ufuncs.equal, "string", "string"] = _string_equal
+    behavior[ufuncs.not_equal, "bytestring", "bytestring"] = _string_notequal
+    behavior[ufuncs.not_equal, "string", "string"] = _string_notequal
 
     behavior["__broadcast__", "bytestring"] = _string_broadcast
     behavior["__broadcast__", "string"] = _string_broadcast

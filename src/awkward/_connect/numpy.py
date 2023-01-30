@@ -60,7 +60,9 @@ def _array_function_no_impl(func, types, args, kwargs, behavior):
     rectilinear_kwargs = {k: _to_rectilinear(v) for k, v in kwargs.items()}
     result = func(*rectilinear_args, **rectilinear_kwargs)
     # We want the result to be a layout (this will fail for functions returning non-array convertibles)
-    out = ak.operations.ak_to_layout._impl(result, allow_record=True, allow_other=True)
+    out = ak.operations.ak_to_layout._impl(
+        result, allow_record=True, allow_other=True, regulararray=True
+    )
     return ak._util.wrap(out, behavior=behavior, allow_other=True)
 
 
@@ -209,32 +211,16 @@ def array_ufunc(ufunc, method, inputs, kwargs):
                 inputs
             )
             (parameters,) = parameters_factory(1)
-            if nplike.known_data:
-                args = []
-                for x in inputs:
-                    if isinstance(x, NumpyArray):
-                        args.append(x._raw(nplike))
-                    else:
-                        args.append(x)
 
-                result = backend.apply_ufunc(ufunc, method, args, kwargs)
+            args = []
+            for x in inputs:
+                if isinstance(x, NumpyArray):
+                    args.append(x._raw(nplike))
+                else:
+                    args.append(x)
 
-            else:
-                shape = None
-                args = []
-                for x in inputs:
-                    if isinstance(x, NumpyArray):
-                        # some ufuncs have multiple array arguments, and they might
-                        # not all be typetracers
-                        if isinstance(x.data, ak._typetracer.TypeTracerArray):
-                            x.data.touch_data()
-                        shape = x.shape
-                        args.append(numpy.empty((0,) + x.shape[1:], x.dtype))
-                    else:
-                        args.append(x)
-                assert shape is not None
-                tmp = getattr(ufunc, method)(*args, **kwargs)
-                result = nplike.empty((shape[0],) + tmp.shape[1:], tmp.dtype)
+            result = backend.apply_ufunc(ufunc, method, args, kwargs)
+
             return (NumpyArray(result, backend=backend, parameters=parameters),)
 
         for x in inputs:

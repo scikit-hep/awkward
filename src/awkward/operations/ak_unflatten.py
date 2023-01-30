@@ -3,8 +3,9 @@
 import numbers
 
 import awkward as ak
+from awkward._nplikes.numpylike import NumpyMetadata
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 
 
 def unflatten(array, counts, axis=0, *, highlevel=True, behavior=None):
@@ -118,9 +119,9 @@ def _impl(array, counts, axis, highlevel, behavior):
         if not issubclass(counts.dtype.type, np.integer):
             raise ak._errors.wrap_error(ValueError("counts must be integers"))
 
-        current_offsets = backend.index_nplike.empty(len(counts) + 1, np.int64)
+        current_offsets = backend.index_nplike.empty(len(counts) + 1, dtype=np.int64)
         current_offsets[0] = 0
-        backend.index_nplike.cumsum(counts, out=current_offsets[1:])
+        backend.index_nplike.cumsum(counts, maybe_out=current_offsets[1:])
 
     def unflatten_this_layout(layout):
         nonlocal current_offsets
@@ -136,7 +137,7 @@ def _impl(array, counts, axis, highlevel, behavior):
             position = (
                 backend.index_nplike.searchsorted(
                     current_offsets,
-                    backend.index_nplike.array([len(layout)]),
+                    backend.index_nplike.asarray([len(layout)]),
                     side="right",
                 )[0]
                 - 1

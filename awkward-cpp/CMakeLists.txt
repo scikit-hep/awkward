@@ -11,6 +11,19 @@ project(
 message(STATUS "CMake version ${CMAKE_VERSION}")
 message(STATUS "CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE}")
 
+# Check for header-only libraries
+if(NOT (EXISTS "header-only" AND EXISTS "include/awkward/kernels.h"))
+  message(
+    FATAL_ERROR
+      "\
+awkward-cpp relies upon generated and copied artefacts such as the header-only libraries and generated kernel headers. \
+These could not be found, which indicates that\n\n\
+    nox -s prepare\
+\n\nwas skipped or failed. \
+Please check https://github.com/scikit-hep/awkward#installation-for-developers to learn more about this process.\
+")
+endif()
+
 # Defaults for properties in this directory (and below)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)

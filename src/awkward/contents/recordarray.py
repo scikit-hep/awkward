@@ -6,14 +6,21 @@ import json
 from collections.abc import Iterable
 
 import awkward as ak
+from awkward._nplikes.numpy import Numpy
+from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.typetracer import (
+    UnknownLength,
+    ensure_known_scalar,
+    is_unknown_length,
+)
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.recordform import RecordForm
 from awkward.record import Record
 from awkward.typing import Final, Self, final
 
-np = ak._nplikes.NumpyMetadata.instance()
-numpy = ak._nplikes.Numpy.instance()
+np = NumpyMetadata.instance()
+numpy = Numpy.instance()
 
 
 @final
@@ -54,11 +61,11 @@ class RecordArray(Content):
             )
         elif length is None:
             lengths = [x.length for x in contents]
-            if any(isinstance(x, ak._typetracer.UnknownLengthType) for x in contents):
-                length = ak._typetracer.UnknownLength
+            if any(is_unknown_length(x) for x in lengths):
+                length = UnknownLength
             else:
                 length = min(lengths)
-        if not isinstance(length, ak._typetracer.UnknownLengthType) and not (
+        if not is_unknown_length(length) and not (
             ak._util.is_integer(length) and length >= 0
         ):
             raise ak._errors.wrap_error(
@@ -77,7 +84,7 @@ class RecordArray(Content):
                         )
                     )
                 )
-            if content.length < length:
+            if ensure_known_scalar(content.length < length, False):
                 raise ak._errors.wrap_error(
                     ValueError(
                         "{} len(content) ({}) must be >= length ({}) for all 'contents'".format(
@@ -223,7 +230,7 @@ class RecordArray(Content):
         return RecordArray(
             contents,
             self._fields,
-            ak._typetracer.UnknownLength if forget_length else self._length,
+            UnknownLength if forget_length else self._length,
             parameters=self._parameters,
             backend=backend,
         )
@@ -284,7 +291,7 @@ class RecordArray(Content):
 
     def content(self, index_or_field):
         out = self.form_cls.content(self, index_or_field)
-        if out.length == self._length:
+        if ensure_known_scalar(out.length == self._length, False):
             return out
         else:
             return out[: self._length]
@@ -296,7 +303,7 @@ class RecordArray(Content):
         if self._backend.nplike.known_shape and where < 0:
             where += self.length
 
-        if where < 0 or where >= self.length:
+        if where < 0 or ensure_known_scalar(where >= self.length, False):
             raise ak._errors.index_error(self, where)
         return Record(self, where)
 
@@ -374,11 +381,12 @@ class RecordArray(Content):
                 where = where.copy()
 
             negative = where < 0
-            if self._backend.index_nplike.any(negative, prefer=False):
-                where[negative] += self._length
+            if self._backend.index_nplike.known_data:
+                if self._backend.index_nplike.any(negative):
+                    where[negative] += self._length
 
-            if self._backend.index_nplike.any(where >= self._length, prefer=False):
-                raise ak._errors.index_error(self, where)
+                if self._backend.index_nplike.any(where >= self._length):
+                    raise ak._errors.index_error(self, where)
 
             nextindex = ak.index.Index64(where, nplike=self._backend.index_nplike)
             return ak.contents.IndexedArray(nextindex, self, parameters=None)
@@ -636,7 +644,9 @@ class RecordArray(Content):
 
             nextcontents.append(merged)
 
-            if minlength is None or merged.length < minlength:
+            if minlength is None or ensure_known_scalar(
+                merged.length < minlength, False
+            ):
                 minlength = merged.length
 
         if minlength is None:
@@ -718,7 +728,7 @@ class RecordArray(Content):
     def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
         if self._fields is None or len(self._fields) == 0:
             return ak.contents.NumpyArray(
-                self._backend.nplike.instance().empty(0, np.int64),
+                self._backend.nplike.instance().empty(0, dtype=np.int64),
                 parameters=None,
                 backend=self._backend,
             )

@@ -1,9 +1,12 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._nplikes import nplike_of
+from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.typetracer import UnknownLength
 from awkward.operations.ak_fill_none import fill_none
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 cpu = ak._backends.NumpyBackend.instance()
 
 
@@ -50,7 +53,7 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
         # Is an Awkward Content
         isinstance(arrays, ak.contents.Content)
         # Is an array with a known NumpyLike
-        or ak._nplikes.nplike_of(arrays, default=None) is not None
+        or nplike_of(arrays, default=None) is not None
     ):
         # Convert the array to a layout object
         content = ak.operations.to_layout(arrays, allow_record=False, allow_other=False)
@@ -136,7 +139,7 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
             if depth == posaxis:
                 backend = ak._backends.backend_of(*inputs, default=cpu)
 
-                length = ak._typetracer.UnknownLength
+                length = UnknownLength
                 for x in inputs:
                     if isinstance(x, ak.contents.Content):
                         if not ak._util.is_integer(length):
@@ -168,7 +171,7 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
                             ak.contents.RegularArray(
                                 ak.contents.NumpyArray(
                                     backend.nplike.broadcast_to(
-                                        backend.nplike.array([x]), (length,)
+                                        backend.nplike.asarray([x]), (length,)
                                     )
                                 ),
                                 1,
@@ -176,7 +179,7 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
                         )
                     sizes.append(regulararrays[-1].size)
 
-                prototype = backend.index_nplike.empty(sum(sizes), np.int8)
+                prototype = backend.index_nplike.empty(sum(sizes), dtype=np.int8)
                 start = 0
                 for tag, size in enumerate(sizes):
                     prototype[start : start + size] = tag
@@ -215,7 +218,7 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
                                 ),
                                 ak.contents.NumpyArray(
                                     backend.nplike.broadcast_to(
-                                        backend.nplike.array([x]), (length,)
+                                        backend.nplike.asarray([x]), (length,)
                                     )
                                 ),
                             )
@@ -229,7 +232,7 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
                     o, f = x._offsets_and_flattened(1, 1)
                     o = backend.index_nplike.asarray(o)
                     c = o[1:] - o[:-1]
-                    backend.index_nplike.add(counts, c, out=counts)
+                    backend.index_nplike.add(counts, c, maybe_out=counts)
                     all_counts.append(c)
                     all_flatten.append(f)
 
@@ -237,7 +240,7 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
                     len(nextinputs[0]) + 1, dtype=np.int64
                 )
                 offsets[0] = 0
-                backend.index_nplike.cumsum(counts, out=offsets[1:])
+                backend.index_nplike.cumsum(counts, maybe_out=offsets[1:])
 
                 offsets = ak.index.Index64(offsets, nplike=backend.index_nplike)
 

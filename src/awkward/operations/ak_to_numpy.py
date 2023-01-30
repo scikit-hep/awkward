@@ -1,7 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import numpy
-
 import awkward as ak
 
 
@@ -44,6 +42,8 @@ def to_numpy(array, *, allow_missing=True):
 
 
 def _impl(array, allow_missing):
+    import numpy  # noqa: TID251
+
     with numpy.errstate(invalid="ignore"):
         layout = ak.to_layout(array, allow_record=False)
 

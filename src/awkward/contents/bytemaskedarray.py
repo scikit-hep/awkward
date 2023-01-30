@@ -6,14 +6,22 @@ import json
 import math
 
 import awkward as ak
+from awkward._nplikes.numpy import Numpy
+from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.typetracer import (
+    MaybeNone,
+    TypeTracer,
+    UnknownLength,
+    ensure_known_scalar,
+)
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.bytemaskedform import ByteMaskedForm
 from awkward.index import Index
 from awkward.typing import Final, Self, final
 
-np = ak._nplikes.NumpyMetadata.instance()
-numpy = ak._nplikes.Numpy.instance()
+np = NumpyMetadata.instance()
+numpy = Numpy.instance()
 
 
 @final
@@ -53,11 +61,7 @@ class ByteMaskedArray(Content):
                     )
                 )
             )
-        if (
-            mask.nplike.known_shape
-            and content.backend.nplike.known_shape
-            and mask.length > content.length
-        ):
+        if ensure_known_scalar(mask.length > content.length, False):
             raise ak._errors.wrap_error(
                 ValueError(
                     "{} len(mask) ({}) must be <= len(content) ({})".format(
@@ -157,7 +161,7 @@ class ByteMaskedArray(Content):
         self._content._to_buffers(form.content, getkey, container, backend, byteorder)
 
     def _to_typetracer(self, forget_length: bool) -> Self:
-        tt = ak._typetracer.TypeTracer.instance()
+        tt = TypeTracer.instance()
         mask = self._mask.to_nplike(tt)
         return ByteMaskedArray(
             mask.forget_length() if forget_length else mask,
@@ -252,7 +256,7 @@ class ByteMaskedArray(Content):
             if self._backend.nplike.known_shape:
                 excess_length = int(math.ceil(self.length / 8.0))
             else:
-                excess_length = ak._typetracer.UnknownLength
+                excess_length = UnknownLength
             return ak.contents.BitMaskedArray(
                 ak.index.IndexU8(
                     self._backend.nplike.empty(excess_length, dtype=np.uint8)
@@ -265,13 +269,12 @@ class ByteMaskedArray(Content):
             )
 
         else:
-            import awkward._connect.pyarrow
-
-            bytearray = self.mask_as_bool(valid_when).view(np.uint8)
-            bitarray = awkward._connect.pyarrow.packbits(bytearray, lsb_order)
+            bit_order = "little" if lsb_order else "big"
+            bytemask = self.mask_as_bool(valid_when).view(np.uint8)
+            bitmask = self.backend.index_nplike.packbits(bytemask, bitorder=bit_order)
 
             return ak.contents.BitMaskedArray(
-                ak.index.IndexU8(bitarray),
+                ak.index.IndexU8(bitmask),
                 self._content,
                 valid_when,
                 self.length,
@@ -294,7 +297,7 @@ class ByteMaskedArray(Content):
     def _getitem_at(self, where):
         if not self._backend.nplike.known_data:
             self._touch_data(recursive=False)
-            return ak._typetracer.MaybeNone(self._content._getitem_at(where))
+            return MaybeNone(self._content._getitem_at(where))
 
         if where < 0:
             where += self.length
@@ -659,7 +662,7 @@ class ByteMaskedArray(Content):
                 length += x.length
 
             return ByteMaskedArray(
-                ak.index.Index8(self._backend.nplike.concatenate(masks)),
+                ak.index.Index8(self._backend.nplike.concat(masks)),
                 self._content[: self.length]._mergemany(tail_contents),
                 self._valid_when,
                 parameters=parameters,

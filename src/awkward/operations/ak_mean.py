@@ -2,9 +2,10 @@
 
 import awkward as ak
 from awkward._connect.numpy import unsupported
+from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._util import unset
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 
 
 def mean(
@@ -215,7 +216,7 @@ def _impl(x, weight, axis, keepdims, mask_identity):
                 highlevel=True,
                 behavior=None,
             )
-        return ak._nplikes.nplike_of(sumwx, sumw).true_divide(sumwx, sumw)
+        return sumwx / sumw
 
 
 @ak._connect.numpy.implements("mean")

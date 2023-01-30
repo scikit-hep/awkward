@@ -4,6 +4,13 @@ from __future__ import annotations
 import copy
 
 import awkward as ak
+from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.typetracer import (
+    TypeTracer,
+    UnknownLength,
+    ensure_known_scalar,
+    is_unknown_length,
+)
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.contents.listoffsetarray import ListOffsetArray
@@ -11,7 +18,7 @@ from awkward.forms.listform import ListForm
 from awkward.index import Index
 from awkward.typing import Final, Self, final
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 
 
 @final
@@ -147,7 +154,7 @@ class ListArray(Content):
         self._content._to_buffers(form.content, getkey, container, backend, byteorder)
 
     def _to_typetracer(self, forget_length: bool) -> Self:
-        tt = ak._typetracer.TypeTracer.instance()
+        tt = TypeTracer.instance()
         starts = self._starts.to_nplike(tt)
         return ListArray(
             starts.forget_length() if forget_length else starts,
@@ -544,7 +551,7 @@ class ListArray(Content):
                 out = ak.contents.IndexedOptionArray.simplified(
                     missing_trim, content, parameters=self._parameters
                 )
-                if isinstance(self._backend.nplike, ak._typetracer.TypeTracer):
+                if isinstance(self._backend.nplike, TypeTracer):
                     out = out.to_typetracer()
                 return ak.contents.ListOffsetArray(
                     largeoffsets,
@@ -645,7 +652,7 @@ class ListArray(Content):
             else:
                 self._touch_data(recursive=False)
                 nextcarry = ak.index.Index64.empty(
-                    ak._typetracer.UnknownLength, self._backend.index_nplike
+                    UnknownLength, self._backend.index_nplike
                 )
 
             if self._starts.dtype == "int64":
@@ -689,7 +696,9 @@ class ListArray(Content):
 
             nextcontent = self._content._carry(nextcarry, True)
 
-            if advanced is None or advanced.length == 0:
+            if advanced is None or (
+                not is_unknown_length(advanced.length) and advanced.length == 0
+            ):
                 return ak.contents.ListOffsetArray(
                     nextoffsets,
                     nextcontent._getitem_next(nexthead, nexttail, advanced),
@@ -720,7 +729,7 @@ class ListArray(Content):
                 else:
                     self._touch_data(recursive=False)
                     nextadvanced = ak.index.Index64.empty(
-                        ak._typetracer.UnknownLength, self._backend.index_nplike
+                        UnknownLength, self._backend.index_nplike
                     )
                 advanced = advanced.to_nplike(self._backend.index_nplike)
                 assert (
@@ -768,7 +777,9 @@ class ListArray(Content):
             regular_flathead = ak.index.Index64(
                 flathead, nplike=self._backend.index_nplike
             )
-            if advanced is None or advanced.length == 0:
+            if advanced is None or (
+                not is_unknown_length(advanced.length) and advanced.length == 0
+            ):
                 nextcarry = ak.index.Index64.empty(
                     lenstarts * flathead.shape[0], self._backend.index_nplike
                 )
@@ -1105,7 +1116,7 @@ class ListArray(Content):
                 innerlength = offsets[offsets.length - 1]
             else:
                 self._touch_data(recursive=False)
-                innerlength = ak._typetracer.UnknownLength
+                innerlength = UnknownLength
             localindex = ak.index.Index64.empty(innerlength, self._backend.index_nplike)
             assert (
                 localindex.nplike is self._backend.index_nplike
@@ -1141,7 +1152,7 @@ class ListArray(Content):
         )
 
     def _is_unique(self, negaxis, starts, parents, outlength):
-        if self._starts.length == 0:
+        if ensure_known_scalar(self._starts.length == 0, False):
             return True
 
         return self.to_ListOffsetArray64(True)._is_unique(
@@ -1149,7 +1160,7 @@ class ListArray(Content):
         )
 
     def _unique(self, negaxis, starts, parents, outlength):
-        if self._starts.length == 0:
+        if ensure_known_scalar(self._starts.length == 0, False):
             return self
         return self.to_ListOffsetArray64(True)._unique(
             negaxis, starts, parents, outlength
@@ -1261,7 +1272,7 @@ class ListArray(Content):
                 )
                 # TODO: Replace the kernel call with below code once typtracer supports '-'
                 # min_ = self._backend.nplike.min(self._stops.data - self._starts.data)
-                if target < min_[0]:
+                if ensure_known_scalar(target < min_[0], False):
                     return self
                 else:
                     tolength = ak.index.Index64.empty(1, self._backend.index_nplike)
@@ -1375,14 +1386,16 @@ class ListArray(Content):
             and self._backend.nplike.known_data
             and self._starts.length != 0
         ):
-            startsmin = self._starts.data.min().item()
+            startsmin = self._backend.index_nplike.min(self._starts.data).item()
             starts = ak.index.Index(
                 self._starts.data - startsmin, nplike=self._backend.index_nplike
             )
             stops = ak.index.Index(
                 self._stops.data - startsmin, nplike=self._backend.index_nplike
             )
-            content = self._content[startsmin : self._stops.data.max().item()]
+            content = self._content[
+                startsmin : self._backend.index_nplike.max(self._stops.data).item()
+            ]
         else:
             self._touch_data(recursive=False)
             starts, stops, content = self._starts, self._stops, self._content

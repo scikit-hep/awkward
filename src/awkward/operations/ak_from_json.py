@@ -8,9 +8,11 @@ from urllib.parse import urlparse
 from awkward_cpp.lib import _ext
 
 import awkward as ak
+from awkward._nplikes.numpy import Numpy
+from awkward._nplikes.numpylike import NumpyMetadata
 
-np = ak._nplikes.NumpyMetadata.instance()
-numpy = ak._nplikes.Numpy.instance()
+np = NumpyMetadata.instance()
+numpy = Numpy.instance()
 
 
 def from_json(
@@ -654,7 +656,9 @@ def build_assembly(schema, container, instructions):
             index = f"node{len(container)}"
             container[index + "-index"] = None
             offsets = f"node{len(container)}"
-            container[offsets + "-offsets"] = numpy.empty(len(strings) + 1, np.int64)
+            container[offsets + "-offsets"] = numpy.empty(
+                len(strings) + 1, dtype=np.int64
+            )
             container[offsets + "-offsets"][0] = 0
             container[offsets + "-offsets"][1:] = numpy.cumsum(
                 [len(x) for x in bytestrings]

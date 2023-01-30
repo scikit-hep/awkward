@@ -9,6 +9,10 @@ import itertools
 from collections.abc import Sequence
 
 import awkward as ak
+from awkward._nplikes import nplike_of
+from awkward._nplikes.numpy import Numpy
+from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.typetracer import TypeTracerArray, is_unknown_length
 from awkward.contents.bitmaskedarray import BitMaskedArray
 from awkward.contents.bytemaskedarray import ByteMaskedArray
 from awkward.contents.content import Content
@@ -30,25 +34,36 @@ from awkward.index import (  # IndexU8,  ; Index32,  ; IndexU32,  ; noqa: F401
 from awkward.record import Record
 from awkward.typing import Any, Callable, Dict, List, TypeAlias, Union
 
-np = ak._nplikes.NumpyMetadata.instance()
-numpy = ak._nplikes.Numpy.instance()
+np = NumpyMetadata.instance()
+numpy = Numpy.instance()
 
 optiontypes = (IndexedOptionArray, ByteMaskedArray, BitMaskedArray, UnmaskedArray)
 listtypes = (ListOffsetArray, ListArray, RegularArray)
 
 
-def broadcast_pack(inputs: Sequence, isscalar: list[bool]) -> list:
+def length_of_broadcast(inputs: Sequence) -> int | TypeTracerArray:
     maxlen = -1
+
     for x in inputs:
         if isinstance(x, Content):
+            if is_unknown_length(x.length):
+                return x.length
+
             maxlen = max(maxlen, x.length)
+
     if maxlen < 0:
         maxlen = 1
+
+    return maxlen
+
+
+def broadcast_pack(inputs: Sequence, isscalar: list[bool]) -> list:
+    maxlen = length_of_broadcast(inputs)
 
     nextinputs = []
     for x in inputs:
         if isinstance(x, Record):
-            index = ak._nplikes.nplike_of(*inputs).full(maxlen, x.at, dtype=np.int64)
+            index = nplike_of(*inputs).full(maxlen, x.at, dtype=np.int64)
             nextinputs.append(RegularArray(x.array[index], maxlen, 1))
             isscalar.append(True)
         elif isinstance(x, Content):
@@ -537,7 +552,7 @@ def apply_step(
 
                 combos = backend.index_nplike.stack(tagslist, axis=-1)
 
-                all_combos = backend.index_nplike.array(
+                all_combos = backend.index_nplike.asarray(
                     list(itertools.product(*[range(x) for x in numtags])),
                     dtype=[(str(i), combos.dtype) for i in range(len(tagslist))],
                 )
@@ -605,7 +620,9 @@ def apply_step(
                         if mask is None:
                             mask = m
                         else:
-                            mask = backend.index_nplike.bitwise_or(mask, m, out=mask)
+                            mask = backend.index_nplike.logical_or(
+                                mask, m, maybe_out=mask
+                            )
 
                 nextmask = Index8(mask.view(np.int8))
                 index = backend.index_nplike.full(mask.shape[0], -1, dtype=np.int64)
@@ -639,7 +656,7 @@ def apply_step(
                     if isinstance(x, optiontypes):
                         x._touch_data(recursive=False)
                         index = Index64(
-                            backend.index_nplike.empty((x.length,), np.int64)
+                            backend.index_nplike.empty(x.length, dtype=np.int64)
                         )
                         nextinputs.append(x.content)
                     else:
@@ -759,7 +776,7 @@ def apply_step(
                         x._touch_data(recursive=False)
                         offsets = Index64(
                             backend.index_nplike.empty(
-                                (x.offsets.data.shape[0],), np.int64
+                                x.offsets.data.shape[0], dtype=np.int64
                             ),
                             nplike=backend.index_nplike,
                         )
@@ -768,7 +785,7 @@ def apply_step(
                         x._touch_data(recursive=False)
                         offsets = Index64(
                             backend.index_nplike.empty(
-                                (x.starts.data.shape[0] + 1,), np.int64
+                                x.starts.data.shape[0] + 1, dtype=np.int64
                             ),
                             nplike=backend.index_nplike,
                         )

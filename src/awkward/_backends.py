@@ -5,13 +5,18 @@ from abc import ABC, abstractmethod
 import awkward_cpp
 
 import awkward as ak
-from awkward._kernels import CupyKernel, JaxKernel, NumpyKernel
-from awkward._nplikes import Cupy, Jax, Numpy, NumpyLike, NumpyMetadata, nplike_of
+from awkward._kernels import CupyKernel, JaxKernel, NumpyKernel, TypeTracerKernel
+from awkward._nplikes import nplike_of
+from awkward._nplikes.cupy import Cupy
+from awkward._nplikes.jax import Jax
+from awkward._nplikes.numpy import Numpy
+from awkward._nplikes.numpylike import NumpyLike, NumpyMetadata
+from awkward._nplikes.typetracer import MaybeNone, TypeTracer, TypeTracerArray
 from awkward._singleton import Singleton
-from awkward._typetracer import NoKernel, TypeTracer
 from awkward.typing import Callable, Final, Tuple, TypeAlias, TypeVar, Unpack
 
 np = NumpyMetadata.instance()
+numpy = Numpy.instance()
 
 
 T = TypeVar("T", covariant=True)
@@ -20,7 +25,10 @@ KernelType: TypeAlias = Callable[..., None]
 
 
 class Backend(Singleton, ABC):
-    name: str
+    @property
+    @abstractmethod
+    def name(self) -> str:
+        raise ak._errors.wrap_error(NotImplementedError)
 
     @property
     @abstractmethod
@@ -160,11 +168,37 @@ class TypeTracerBackend(Backend):
     def __init__(self):
         self._typetracer = TypeTracer.instance()
 
-    def __getitem__(self, index: KernelKeyType) -> NoKernel:
-        return NoKernel(index)
+    def __getitem__(self, index: KernelKeyType) -> TypeTracerKernel:
+        return TypeTracerKernel(index)
+
+    def _coerce_ufunc_argument(self, x):
+        if isinstance(x, TypeTracerArray):
+            if x.ndim == 0:
+                return numpy.empty((0,), dtype=x.dtype)
+            else:
+                return numpy.empty((0,) + x.shape[1:], dtype=x.dtype)
+        elif isinstance(x, MaybeNone):
+            return self._coerce_ufunc_argument(x.content)
+        else:
+            return x
+
+    def apply_ufunc(self, ufunc, method, args, kwargs):
+        shape = None
+        numpy_args = []
+
+        for x in args:
+            if isinstance(x, TypeTracerArray):
+                x.touch_data()
+                shape = x.shape
+
+            numpy_args.append(self._coerce_ufunc_argument(x))
+
+        assert shape is not None
+        tmp = getattr(ufunc, method)(*numpy_args, **kwargs)
+        return self._typetracer.empty((shape[0],) + tmp.shape[1:], dtype=tmp.dtype)
 
 
-def _backend_for_nplike(nplike: ak._nplikes.NumpyLike) -> Backend:
+def _backend_for_nplike(nplike: NumpyLike) -> Backend:
     # Currently there exists a one-to-one relationship between the nplike
     # and the backend. In future, this might need refactoring
     if isinstance(nplike, Numpy):

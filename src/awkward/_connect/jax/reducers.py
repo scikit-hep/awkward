@@ -3,9 +3,10 @@
 import jax
 
 import awkward as ak
+from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._reducers import Reducer
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 
 
 class ArgMin(Reducer):
@@ -83,7 +84,7 @@ class Sum(Reducer):
 
         if array.dtype.kind == "m":
             return ak.contents.NumpyArray(
-                array.backend.nplike.asarray(result, array.dtype)
+                array.backend.nplike.asarray(result, dtype=array.dtype)
             )
         elif array.dtype.type in (np.complex128, np.complex64):
             return ak.contents.NumpyArray(result.view(array.dtype))
@@ -184,7 +185,9 @@ class Min(Reducer):
 
         if array.dtype.type in (np.complex128, np.complex64):
             return ak.contents.NumpyArray(
-                array.backend.nplike.array(result.view(array.dtype), array.dtype),
+                array.backend.nplike.asarray(
+                    result.view(array.dtype), dtype=array.dtype
+                ),
                 backend=array.backend,
             )
         else:
@@ -230,7 +233,9 @@ class Max(Reducer):
         result = jax.numpy.maximum(result, cls._max_initial(cls.initial, array.dtype))
         if array.dtype.type in (np.complex128, np.complex64):
             return ak.contents.NumpyArray(
-                array.backend.nplike.array(result.view(array.dtype), array.dtype),
+                array.backend.nplike.asarray(
+                    result.view(array.dtype), dtype=array.dtype
+                ),
                 backend=array.backend,
             )
         else:

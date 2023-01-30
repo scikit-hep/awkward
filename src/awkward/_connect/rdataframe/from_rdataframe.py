@@ -9,6 +9,8 @@ import ROOT
 import awkward as ak
 import awkward._connect.cling
 import awkward._lookup
+from awkward._nplikes.numpy import Numpy
+from awkward._nplikes.numpylike import NumpyMetadata
 from awkward.types.numpytype import primitive_to_dtype
 
 cpp_type_of = {
@@ -29,8 +31,8 @@ cpp_type_of = {
     "timedelta64": "std::difftime",
 }
 
-np = ak._nplikes.NumpyMetadata.instance()
-numpy = ak._nplikes.Numpy.instance()
+np = NumpyMetadata.instance()
+numpy = Numpy.instance()
 
 
 cppyy.add_include_path(
@@ -71,7 +73,7 @@ def from_rdataframe(data_frame, columns):
     def empty_buffers(cpp_buffers_self, names_nbytes):
         buffers = {}
         for item in names_nbytes:
-            buffers[item.first] = ak._nplikes.numpy.empty(item.second)
+            buffers[item.first] = numpy.empty(item.second, dtype=np.uint8)
             cpp_buffers_self.append(
                 item.first,
                 buffers[item.first].ctypes.data_as(ctypes.POINTER(ctypes.c_ubyte)),

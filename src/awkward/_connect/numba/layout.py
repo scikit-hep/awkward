@@ -6,9 +6,6 @@ import numba
 
 import awkward as ak
 
-np = ak._nplikes.NumpyMetadata.instance()
-numpy = ak._nplikes.Numpy.instance()
-
 
 @numba.extending.typeof_impl.register(ak.contents.Content)
 @numba.extending.typeof_impl.register(ak.index.Index)

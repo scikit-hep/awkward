@@ -5,13 +5,16 @@ import ctypes
 from abc import abstractmethod
 from typing import Any, Callable
 
-import numpy as metadata  # todo: implement this
-
 import awkward as ak
-from awkward._nplikes import Jax, Numpy
+from awkward._nplikes.jax import Jax
+from awkward._nplikes.numpy import Numpy
+from awkward._nplikes.numpylike import NumpyMetadata
 from awkward.typing import Protocol, TypeAlias
 
 KernelKeyType: TypeAlias = tuple  # Tuple[str, Unpack[Tuple[metadata.dtype, ...]]]
+
+
+metadata = NumpyMetadata.instance()
 
 
 class KernelError(Protocol):
@@ -133,12 +136,10 @@ class CupyKernel(BaseKernel):
         assert len(args) == len(self._impl.dir)  # type: ignore
         # The first arg is the invocation index which raises itself by 8 in the kernel if there was no error before.
         # The second arg is the error_code.
-        args = tuple(
-            [
-                *args,
-                len(ak_cuda.cuda_streamptr_to_contexts[cupy_stream_ptr][1]),
-                ak_cuda.cuda_streamptr_to_contexts[cupy_stream_ptr][0],
-            ]
+        args = (
+            *args,
+            len(ak_cuda.cuda_streamptr_to_contexts[cupy_stream_ptr][1]),
+            ak_cuda.cuda_streamptr_to_contexts[cupy_stream_ptr][0],
         )
         ak_cuda.cuda_streamptr_to_contexts[cupy_stream_ptr][1].append(
             ak_cuda.Invocation(

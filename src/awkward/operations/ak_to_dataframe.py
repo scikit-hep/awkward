@@ -1,10 +1,11 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._nplikes.numpy import Numpy
+from awkward._nplikes.numpylike import NumpyMetadata
 
-numpy = ak._nplikes.Numpy.instance()
-
-np = ak._nplikes.NumpyMetadata.instance()
+numpy = Numpy.instance()
+np = NumpyMetadata.instance()
 
 
 def to_dataframe(

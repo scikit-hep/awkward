@@ -4,14 +4,19 @@ from __future__ import annotations
 import copy
 
 import awkward as ak
+from awkward._nplikes import to_nplike
+from awkward._nplikes.jax import Jax
+from awkward._nplikes.numpy import Numpy
+from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.typetracer import TypeTracerArray
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.numpyform import NumpyForm
 from awkward.types.numpytype import primitive_to_dtype
 from awkward.typing import Final, Self, final
 
-np = ak._nplikes.NumpyMetadata.instance()
-numpy = ak._nplikes.Numpy.instance()
+np = NumpyMetadata.instance()
+numpy = Numpy.instance()
 
 
 @final
@@ -28,7 +33,7 @@ class NumpyArray(Content):
             data = data.data
         self._data = backend.nplike.asarray(data)
 
-        if not isinstance(backend.nplike, ak._nplikes.Jax):
+        if not isinstance(backend.nplike, Jax):
             ak.types.numpytype.dtype_to_primitive(self._data.dtype)
 
         if len(self._data.shape) == 0:
@@ -101,7 +106,7 @@ class NumpyArray(Content):
         return self._data.dtype
 
     def _raw(self, nplike=None):
-        return self._backend.nplike.raw(self.data, nplike)
+        return to_nplike(self.data, nplike, from_nplike=self._backend.nplike)
 
     def _form_with_key(self, getkey):
         return self.form_cls(
@@ -191,8 +196,8 @@ class NumpyArray(Content):
     def maybe_to_NumpyArray(self) -> Self:
         return self
 
-    def __array__(self, *args, **kwargs):
-        return self._backend.nplike.asarray(self._data, *args, **kwargs)
+    def __array__(self, dtype=None):
+        return self._backend.nplike.asarray(self._data, dtype=dtype)
 
     def __iter__(self):
         return iter(self._data)
@@ -206,7 +211,7 @@ class NumpyArray(Content):
     def _getitem_at(self, where):
         if not self._backend.nplike.known_data and len(self._data.shape) == 1:
             self._touch_data(recursive=False)
-            return ak._typetracer.UnknownScalar(self._data.dtype)
+            return TypeTracerArray._new(self._data.dtype, shape=())
 
         try:
             out = self._data[where]
@@ -386,10 +391,8 @@ class NumpyArray(Content):
             # Default merging (can we cast one to the other)
             else:
                 return self.backend.nplike.can_cast(
-                    self.dtype, other.dtype, casting="same_kind"
-                ) or self.backend.nplike.can_cast(
-                    other.dtype, self.dtype, casting="same_kind"
-                )
+                    self.dtype, other.dtype
+                ) or self.backend.nplike.can_cast(other.dtype, self.dtype)
 
         else:
             return False
@@ -422,9 +425,7 @@ class NumpyArray(Content):
                     )
                 )
 
-        contiguous_arrays = self._backend.nplike.concatenate(
-            contiguous_arrays, casting="same_kind"
-        )
+        contiguous_arrays = self._backend.nplike.concat(contiguous_arrays)
 
         next = NumpyArray(
             contiguous_arrays, parameters=parameters, backend=self._backend
@@ -470,7 +471,7 @@ class NumpyArray(Content):
     def _subranges_equal(self, starts, stops, length, sorted=True):
         is_equal = ak.index.Index64.zeros(1, nplike=self._backend.nplike)
 
-        tmp = self._backend.nplike.empty(length, self.dtype)
+        tmp = self._backend.nplike.empty(length, dtype=self.dtype)
         self._handle_error(
             self._backend[
                 "awkward_NumpyArray_fill",
@@ -544,7 +545,7 @@ class NumpyArray(Content):
         outoffsets = ak.index.Index64.empty(
             offsets.length, nplike=self._backend.index_nplike
         )
-        out = self._backend.nplike.empty(self.shape[0], self.dtype)
+        out = self._backend.nplike.empty(self.shape[0], dtype=self.dtype)
 
         assert (
             offsets.nplike is self._backend.index_nplike
@@ -650,7 +651,7 @@ class NumpyArray(Content):
                 if self._data.dtype.kind.upper() == "M"
                 else self._data.dtype
             )
-            out = self._backend.nplike.empty(offsets[1], dtype)
+            out = self._backend.nplike.empty(offsets[1], dtype=dtype)
             assert offsets.nplike is self._backend.index_nplike
             self._handle_error(
                 self._backend[
@@ -685,7 +686,7 @@ class NumpyArray(Content):
             )
 
             return ak.contents.NumpyArray(
-                self._backend.nplike.asarray(out[: nextlength[0]], self.dtype),
+                self._backend.nplike.asarray(out[: nextlength[0]], dtype=self.dtype),
                 parameters=None,
                 backend=self._backend,
             )
@@ -739,7 +740,7 @@ class NumpyArray(Content):
                 )
             )
 
-            out = self._backend.nplike.empty(self.length, self.dtype)
+            out = self._backend.nplike.empty(self.length, dtype=self.dtype)
             assert offsets.nplike is self._backend.index_nplike
             self._handle_error(
                 self._backend[
@@ -977,7 +978,7 @@ class NumpyArray(Content):
                 if self._data.dtype.kind.upper() == "M"
                 else self._data.dtype
             )
-            out = self._backend.nplike.empty(self.length, dtype)
+            out = self._backend.nplike.empty(self.length, dtype=dtype)
             assert offsets.nplike is self._backend.index_nplike
             self._handle_error(
                 self._backend[
@@ -997,7 +998,7 @@ class NumpyArray(Content):
                 )
             )
             return ak.contents.NumpyArray(
-                self._backend.nplike.asarray(out, self.dtype),
+                self._backend.nplike.asarray(out, dtype=self.dtype),
                 parameters=None,
                 backend=self._backend,
             )
@@ -1172,7 +1173,7 @@ class NumpyArray(Content):
         storage_type = pyarrow.from_numpy_dtype(nparray.dtype)
 
         if issubclass(nparray.dtype.type, (bool, np.bool_)):
-            nparray = ak._connect.pyarrow.packbits(nparray)
+            nparray = numpy.packbits(nparray, bitorder="little")
 
         return pyarrow.Array.from_buffers(
             ak._connect.pyarrow.to_awkwardarrow_type(
@@ -1193,7 +1194,7 @@ class NumpyArray(Content):
         )
 
     def _to_backend_array(self, allow_missing, backend):
-        return self._backend.nplike.raw(self.data, backend.nplike)
+        return to_nplike(self.data, backend.nplike, from_nplike=self._backend.nplike)
 
     def _completely_flatten(self, backend, options):
         return [
