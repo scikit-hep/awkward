@@ -79,65 +79,42 @@ def ptp(array, axis=None, *, keepdims=False, mask_identity=True, flatten_records
 
 def _impl(array, axis, keepdims, mask_identity):
     behavior = ak._util.behavior_of(array)
-    array = ak.highlevel.Array(
-        ak.operations.to_layout(array, allow_record=False, allow_other=False),
-        behavior=behavior,
-    )
+    layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
 
     with np.errstate(invalid="ignore", divide="ignore"):
+        maxi = ak.operations.ak_max._impl(
+            layout,
+            axis,
+            True,
+            None,
+            mask_identity,
+            highlevel=True,
+            behavior=behavior,
+        )
+        mini = ak.operations.ak_min._impl(
+            layout,
+            axis,
+            True,
+            None,
+            True,
+            highlevel=True,
+            behavior=behavior,
+        )
+        out = maxi - mini
+
+        # Check that removed code was not needed!
+        assert maxi is not None and mini is not None
+
+        if not mask_identity:
+            out = ak.highlevel.Array(ak.operations.fill_none(out, 0, axis=-1))
+
         if axis is None:
-            out = ak.operations.ak_max._impl(
-                array,
-                axis,
-                keepdims,
-                None,
-                mask_identity,
-                highlevel=True,
-                behavior=None,
-            ) - ak.operations.ak_min._impl(
-                array,
-                axis,
-                keepdims,
-                None,
-                mask_identity,
-                highlevel=True,
-                behavior=None,
-            )
-            if not mask_identity and out is None:
-                out = 0
-
+            if not keepdims:
+                out = out[(0,) * out.ndim]
         else:
-            maxi = ak.operations.ak_max._impl(
-                array,
-                axis,
-                True,
-                None,
-                mask_identity,
-                highlevel=True,
-                behavior=None,
-            )
-            mini = ak.operations.ak_min._impl(
-                array,
-                axis,
-                True,
-                None,
-                True,
-                highlevel=True,
-                behavior=None,
-            )
-
-            if maxi is None or mini is None:
-                out = None
-
-            else:
-                out = maxi - mini
-
-                if not mask_identity:
-                    out = ak.highlevel.Array(ak.operations.fill_none(out, 0, axis=-1))
-
-                if not keepdims:
-                    posaxis = ak._util.maybe_posaxis(out.layout, axis, 1)
-                    out = out[(slice(None, None),) * posaxis + (0,)]
+            if not keepdims:
+                posaxis = ak._util.maybe_posaxis(out.layout, axis, 1)
+                out = out[(slice(None, None),) * posaxis + (0,)]
 
         return out
 
