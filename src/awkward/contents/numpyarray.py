@@ -825,23 +825,25 @@ class NumpyArray(Content):
 
         else:
             parents_length = parents.length
-            offsets_length = ak.index.Index64.empty(1, self._backend.index_nplike)
+            _offsets_length = ak.index.Index64.empty(1, self._backend.index_nplike)
             assert (
-                offsets_length.nplike is self._backend.index_nplike
+                _offsets_length.nplike is self._backend.index_nplike
                 and parents.nplike is self._backend.index_nplike
             )
             self._handle_error(
                 self._backend[
                     "awkward_sorting_ranges_length",
-                    offsets_length.dtype.type,
+                    _offsets_length.dtype.type,
                     parents.dtype.type,
                 ](
-                    offsets_length.data,
+                    _offsets_length.data,
                     parents.data,
                     parents_length,
                 )
             )
-            offsets_length = offsets_length[0]
+            offsets_length = self._backend.index_nplike.scalar_as_shape_item(
+                _offsets_length[0]
+            )
 
             offsets = ak.index.Index64.empty(offsets_length, self._backend.index_nplike)
             assert (
@@ -935,26 +937,27 @@ class NumpyArray(Content):
 
         else:
             parents_length = parents.length
-            offsets_length = ak.index.Index64.empty(1, self._backend.index_nplike)
+            _offsets_length = ak.index.Index64.empty(1, self._backend.index_nplike)
             assert (
-                offsets_length.nplike is self._backend.index_nplike
+                _offsets_length.nplike is self._backend.index_nplike
                 and parents.nplike is self._backend.index_nplike
             )
             self._handle_error(
                 self._backend[
                     "awkward_sorting_ranges_length",
-                    offsets_length.dtype.type,
+                    _offsets_length.dtype.type,
                     parents.dtype.type,
                 ](
-                    offsets_length.data,
+                    _offsets_length.data,
                     parents.data,
                     parents_length,
                 )
             )
-
-            offsets = ak.index.Index64.empty(
-                offsets_length[0], self._backend.index_nplike
+            offsets_length = self._backend.index_nplike.scalar_as_shape_item(
+                _offsets_length[0]
             )
+
+            offsets = ak.index.Index64.empty(offsets_length, self._backend.index_nplike)
 
             assert (
                 offsets.nplike is self._backend.index_nplike
@@ -967,7 +970,7 @@ class NumpyArray(Content):
                     parents.dtype.type,
                 ](
                     offsets.data,
-                    offsets_length[0],
+                    offsets_length,
                     parents.data,
                     parents_length,
                 )
@@ -991,7 +994,7 @@ class NumpyArray(Content):
                     self._data,
                     self.shape[0],
                     offsets.data,
-                    offsets_length[0],
+                    offsets_length,
                     parents_length,
                     ascending,
                     stable,
@@ -1248,6 +1251,11 @@ class NumpyArray(Content):
         return self.to_contiguous().to_RegularArray()
 
     def _to_list(self, behavior, json_conversions):
+        if not self._backend.nplike.known_data:
+            raise ak._errors.wrap_error(
+                TypeError("cannot convert typetracer arrays to Python lists")
+            )
+
         if self.parameter("__array__") == "byte":
             convert_bytes = (
                 None if json_conversions is None else json_conversions["convert_bytes"]

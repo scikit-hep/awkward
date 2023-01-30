@@ -6,7 +6,10 @@ from __future__ import annotations
 
 from awkward._nplikes.typetracer import MaybeNone, OneOf  # noqa: F401
 
-__all__ = ["UnknownScalar"]
+__all__ = ["UnknownScalar", "UnknownLength"]
+
+
+UnknownLength = None
 
 
 class _UnknownScalarMeta(type):

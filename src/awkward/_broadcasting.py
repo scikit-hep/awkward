@@ -12,7 +12,8 @@ import awkward as ak
 from awkward._nplikes import nplike_of
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
-from awkward._nplikes.typetracer import TypeTracerArray, is_unknown_length
+from awkward._nplikes.typetracer import TypeTracerArray
+from awkward._util import unset
 from awkward.contents.bitmaskedarray import BitMaskedArray
 from awkward.contents.bytemaskedarray import ByteMaskedArray
 from awkward.contents.content import Content
@@ -46,7 +47,7 @@ def length_of_broadcast(inputs: Sequence) -> int | TypeTracerArray:
 
     for x in inputs:
         if isinstance(x, Content):
-            if is_unknown_length(x.length):
+            if x.length is None:
                 return x.length
 
             maxlen = max(maxlen, x.length)
@@ -688,14 +689,14 @@ def apply_step(
                 for x in inputs
             ):
                 # Ensure all layouts have same length
-                length = None
+                length = unset
                 for x in inputs:
                     if isinstance(x, Content):
-                        if length is None:
+                        if length is unset:
                             length = x.length
                         elif backend.nplike.known_shape:
                             assert length == x.length
-                assert length is not None
+                assert length is not unset
 
                 if any(x.size == 0 for x in inputs if isinstance(x, RegularArray)):
                     dimsize = 0
@@ -951,10 +952,10 @@ def apply_step(
                     ValueError(f"cannot broadcast records {in_function(options)}")
                 )
 
-            fields, length, istuple = None, None, True
+            fields, length, istuple = unset, unset, unset
             for x in inputs:
                 if isinstance(x, RecordArray):
-                    if fields is None:
+                    if fields is unset:
                         fields = x.fields
                     elif set(fields) != set(x.fields):
                         raise ak._errors.wrap_error(
@@ -967,7 +968,7 @@ def apply_step(
                                 )
                             )
                         )
-                    if length is None:
+                    if length is unset:
                         length = x.length
                     elif length != x.length:
                         raise ak._errors.wrap_error(
@@ -978,8 +979,10 @@ def apply_step(
                                 )
                             )
                         )
-                    if not x.is_tuple:
+                    # Records win over tuples
+                    if istuple is unset or not x.is_tuple:
                         istuple = False
+
             outcontents, numoutputs = [], None
             for field in fields:
                 outcontents.append(
