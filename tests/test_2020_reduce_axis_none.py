@@ -128,7 +128,6 @@ def test_std():
     assert np.isnan(ak.std(array[2], axis=None, mask_identity=False))
 
 
-@pytest.mark.xfail(reason="fix mask_identity=False")
 def test_std_no_mask_axis_none():
     assert ak._util.arrays_approx_equal(
         ak.std(array[-1:], axis=None, keepdims=True, mask_identity=True),
@@ -150,7 +149,6 @@ def test_var():
     assert np.isnan(ak.var(array[2], axis=None, mask_identity=False))
 
 
-@pytest.mark.xfail(reason="fix mask_identity=False")
 def test_var_no_mask_axis_none():
     assert ak._util.arrays_approx_equal(
         ak.var(array[-1:], axis=None, keepdims=True, mask_identity=True),
@@ -172,7 +170,6 @@ def test_mean():
     assert np.isnan(ak.mean(array[2], axis=None, mask_identity=False))
 
 
-@pytest.mark.xfail(reason="fix mask_identity=False")
 def test_mean_no_mask_axis_none():
     assert ak._util.arrays_approx_equal(
         ak.mean(array[-1:], axis=None, keepdims=True, mask_identity=True),
@@ -191,10 +188,9 @@ def test_ptp():
         ak.ptp(array, axis=None, keepdims=True, mask_identity=True),
         ak.Array([10.0]).mask[[True]],
     )
-    assert np.isinf(ak.ptp(array[2], axis=None, mask_identity=False))
+    assert ak.ptp(array[2], axis=None, mask_identity=False) == pytest.approx(0.0)
 
 
-@pytest.mark.xfail(reason="fix mask_identity=False")
 def test_ptp_no_mask_axis_none():
     assert ak._util.arrays_approx_equal(
         ak.ptp(array[-1:], axis=None, keepdims=True, mask_identity=True),

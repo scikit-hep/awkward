@@ -176,21 +176,23 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity):
         )
 
     with np.errstate(invalid="ignore", divide="ignore"):
-        xmean = ak.operations.ak_mean._impl(x, weight, axis, False, mask_identity)
+        xmean = ak.operations.ak_mean._impl(
+            x, weight, axis, keepdims=True, mask_identity=True
+        )
         if weight is None:
             sumw = ak.operations.ak_count._impl(
                 x,
                 axis,
-                keepdims,
-                mask_identity,
+                keepdims=True,
+                mask_identity=True,
                 highlevel=True,
                 behavior=None,
             )
             sumwxx = ak.operations.ak_sum._impl(
                 (x - xmean) ** 2,
                 axis,
-                keepdims,
-                mask_identity,
+                keepdims=True,
+                mask_identity=True,
                 highlevel=True,
                 behavior=None,
             )
@@ -198,23 +200,36 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity):
             sumw = ak.operations.ak_sum._impl(
                 x * 0 + weight,
                 axis,
-                keepdims,
-                mask_identity,
+                keepdims=True,
+                mask_identity=True,
                 highlevel=True,
                 behavior=None,
             )
             sumwxx = ak.operations.ak_sum._impl(
                 (x - xmean) ** 2 * weight,
                 axis,
-                keepdims,
-                mask_identity,
+                keepdims=True,
+                mask_identity=True,
                 highlevel=True,
                 behavior=None,
             )
         if ddof != 0:
-            return (sumwxx / sumw) * (sumw / (sumw - ddof))
+            out = (sumwxx / sumw) * (sumw / (sumw - ddof))
         else:
-            return sumwxx / sumw
+            out = sumwxx / sumw
+
+        if not mask_identity:
+            out = ak.highlevel.Array(ak.operations.fill_none(out, np.nan, axis=-1))
+
+        if axis is None:
+            if not keepdims:
+                out = out[(0,) * out.ndim]
+        else:
+            if not keepdims:
+                posaxis = ak._util.maybe_posaxis(out.layout, axis, 1)
+                out = out[(slice(None, None),) * posaxis + (0,)]
+
+        return out
 
 
 @ak._connect.numpy.implements("var")
