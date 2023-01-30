@@ -1379,7 +1379,7 @@ class ListArray(Content):
     def _to_backend_array(self, allow_missing, backend):
         return self.to_RegularArray()._to_backend_array(allow_missing, backend)
 
-    def _completely_flatten(self, backend, options):
+    def _remove_structure(self, backend, options):
         if (
             self.parameter("__array__") == "string"
             or self.parameter("__array__") == "bytestring"
@@ -1388,7 +1388,7 @@ class ListArray(Content):
         else:
             next = self.to_ListOffsetArray64(False)
             flat = next.content[next.offsets[0] : next.offsets[-1]]
-            return flat._completely_flatten(backend, options)
+            return flat._remove_structure(backend, options)
 
     def _drop_none(self):
         return self.to_ListOffsetArray64()._drop_none()

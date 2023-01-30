@@ -1469,14 +1469,14 @@ class UnionArray(Content):
 
         return out
 
-    def _completely_flatten(self, backend, options):
+    def _remove_structure(self, backend, options):
         out = []
         for i in range(len(self._contents)):
             index = self._index[self._tags.data == i]
             out.extend(
                 self._contents[i]
                 ._carry(index, False)
-                ._completely_flatten(backend, options)
+                ._remove_structure(backend, options)
             )
         return out
 

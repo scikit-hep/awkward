@@ -922,13 +922,11 @@ class RecordArray(Content):
 
         return out
 
-    def _completely_flatten(self, backend, options):
+    def _remove_structure(self, backend, options):
         if options["flatten_records"]:
             out = []
             for content in self._contents:
-                out.extend(
-                    content[: self._length]._completely_flatten(backend, options)
-                )
+                out.extend(content[: self._length]._remove_structure(backend, options))
             return out
         else:
             in_function = ""

@@ -1962,7 +1962,7 @@ class ListOffsetArray(Content):
 
         return self.to_RegularArray()._to_backend_array(allow_missing, backend)
 
-    def _completely_flatten(self, backend, options):
+    def _remove_structure(self, backend, options):
         if (
             self.parameter("__array__") == "string"
             or self.parameter("__array__") == "bytestring"
@@ -1970,7 +1970,7 @@ class ListOffsetArray(Content):
             return [self]
         else:
             flat = self._content[self._offsets[0] : self._offsets[-1]]
-            return flat._completely_flatten(backend, options)
+            return flat._remove_structure(backend, options)
 
     def _drop_none(self):
         if self._content.is_option:

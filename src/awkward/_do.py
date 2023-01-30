@@ -217,7 +217,7 @@ def pad_none(
     return layout._pad_none(length, axis, 1, clip)
 
 
-def completely_flatten(
+def remove_structure(
     layout: Content | Record,
     backend: Backend | None = None,
     flatten_records: bool = True,
@@ -225,7 +225,7 @@ def completely_flatten(
     drop_nones: bool = True,
 ):
     if isinstance(layout, Record):
-        return completely_flatten(
+        return remove_structure(
             layout._array[layout._at : layout._at + 1],
             backend,
             flatten_records,
@@ -236,7 +236,7 @@ def completely_flatten(
     else:
         if backend is None:
             backend = layout._backend
-        arrays = layout._completely_flatten(
+        arrays = layout._remove_structure(
             backend,
             {
                 "flatten_records": flatten_records,
@@ -314,7 +314,7 @@ def reduce(
     behavior: dict | None = None,
 ):
     if axis is None:
-        parts = completely_flatten(layout, flatten_records=False, drop_nones=False)
+        parts = remove_structure(layout, flatten_records=False, drop_nones=False)
 
         if len(parts) > 1:
             # We know that `flatten_records` must fail, so the only other type

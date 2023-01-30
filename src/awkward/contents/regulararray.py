@@ -1218,7 +1218,7 @@ class RegularArray(Content):
                 ),
             )
 
-    def _completely_flatten(self, backend, options):
+    def _remove_structure(self, backend, options):
         if (
             self.parameter("__array__") == "string"
             or self.parameter("__array__") == "bytestring"
@@ -1228,7 +1228,7 @@ class RegularArray(Content):
             index_nplike = self._backend.index_nplike
             length = index_nplike.mul_shape_item(self._length, self._size)
             flat = self._content[: index_nplike.shape_item_as_scalar(length)]
-            return flat._completely_flatten(backend, options)
+            return flat._remove_structure(backend, options)
 
     def _drop_none(self):
         return self.to_ListOffsetArray64()._drop_none()
