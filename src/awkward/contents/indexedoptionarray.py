@@ -1331,7 +1331,7 @@ class IndexedOptionArray(Content):
                         "reduce_next with unbranching depth > negaxis is only "
                         "expected to return RegularArray or ListOffsetArray or "
                         "IndexedOptionArray; "
-                        "instead, it returned " + out
+                        "instead, it returned {}".format(type(out).__name__)
                     )
                 )
 

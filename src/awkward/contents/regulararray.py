@@ -1227,8 +1227,15 @@ class RegularArray(Content):
         else:
             index_nplike = self._backend.index_nplike
             length = index_nplike.mul_shape_item(self._length, self._size)
-            flat = self._content[: index_nplike.shape_item_as_scalar(length)]
-            return flat._remove_structure(backend, options)
+            content = self._content[: index_nplike.shape_item_as_scalar(length)]
+            contents = content._remove_structure(backend, options)
+            if options["keepdims"]:
+                return [
+                    RegularArray(c, size=c.length, parameters=self._parameters)
+                    for c in contents
+                ]
+            else:
+                return contents
 
     def _drop_none(self):
         return self.to_ListOffsetArray64()._drop_none()

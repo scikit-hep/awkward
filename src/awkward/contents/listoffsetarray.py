@@ -1969,8 +1969,23 @@ class ListOffsetArray(Content):
         ):
             return [self]
         else:
-            flat = self._content[self._offsets[0] : self._offsets[-1]]
-            return flat._remove_structure(backend, options)
+            content = self._content[self._offsets[0] : self._offsets[-1]]
+            contents = content._remove_structure(backend, options)
+            if options["keepdims"]:
+                return [
+                    ListOffsetArray(
+                        ak.index.Index64(
+                            backend.index_nplike.asarray(
+                                [0, backend.index_nplike.shape_item_as_scalar(c.length)]
+                            )
+                        ),
+                        c,
+                        parameters=self._parameters,
+                    )
+                    for c in contents
+                ]
+            else:
+                return contents
 
     def _drop_none(self):
         if self._content.is_option:

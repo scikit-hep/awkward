@@ -771,6 +771,7 @@ def arrays_approx_equal(
     atol: float = 1e-8,
     dtype_exact: bool = True,
     check_parameters=True,
+    check_regular=True,
 ) -> bool:
     # TODO: this should not be needed after refactoring nplike mechanism
     import awkward.forms.form
@@ -798,7 +799,13 @@ def arrays_approx_equal(
             right = right.to_IndexedOptionArray64()
 
         if type(left) is not type(right):
-            return False
+            if not check_regular and (
+                left.is_list and right.is_regular or left.is_regular and right.is_list
+            ):
+                left = left.to_ListOffsetArray64()
+                right = right.to_ListOffsetArray64()
+            else:
+                return False
 
         if left.length != right.length:
             return False

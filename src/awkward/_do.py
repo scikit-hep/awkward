@@ -223,6 +223,7 @@ def remove_structure(
     flatten_records: bool = True,
     function_name: str | None = None,
     drop_nones: bool = True,
+    keepdims: bool = False,
 ):
     if isinstance(layout, Record):
         return remove_structure(
@@ -231,6 +232,7 @@ def remove_structure(
             flatten_records,
             function_name,
             drop_nones,
+            keepdims,
         )
 
     else:
@@ -242,6 +244,7 @@ def remove_structure(
                 "flatten_records": flatten_records,
                 "function_name": function_name,
                 "drop_nones": drop_nones,
+                "keepdims": keepdims,
             },
         )
         return tuple(arrays)
@@ -314,15 +317,16 @@ def reduce(
     behavior: dict | None = None,
 ):
     if axis is None:
-        parts = remove_structure(layout, flatten_records=False, drop_nones=False)
+        parts = remove_structure(
+            layout, flatten_records=False, drop_nones=False, keepdims=keepdims
+        )
 
         if len(parts) > 1:
             # We know that `flatten_records` must fail, so the only other type
             # that can return multiple parts here is the union array
             raise ak._errors.wrap_error(
                 ValueError(
-                    "cannot use axis=None with keepdims=True on an array containing "
-                    "irreducible unions"
+                    "cannot use axis=None on an array containing irreducible unions"
                 )
             )
         elif len(parts) == 0:
