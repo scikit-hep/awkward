@@ -4,7 +4,7 @@ from __future__ import annotations
 import numpy
 
 import awkward as ak
-from awkward._nplikes.numpylike import ArrayLike, NumpyLike, NumpyMetadata
+from awkward._nplikes.numpylike import ArrayLike, NumpyLike, NumpyMetadata, ShapeItem
 from awkward.typing import Final, Literal, SupportsInt
 
 np = NumpyMetadata.instance()
@@ -114,6 +114,35 @@ class ArrayModuleNumpyLike(NumpyLike):
 
     def broadcast_arrays(self, *arrays: ArrayLike) -> list[ArrayLike]:
         return self._module.broadcast_arrays(*arrays)
+
+    def shape_item_as_scalar(self, x1: ShapeItem):
+        if x1 is None:
+            raise ak._errors.wrap_error(
+                TypeError("array module nplikes do not support unknown lengths")
+            )
+        elif isinstance(x1, int):
+            return self._module.asarray(x1, dtype=np.int64)
+        else:
+            raise ak._errors.wrap_error(
+                TypeError(f"expected None or int type, received {x1}")
+            )
+
+    def scalar_as_shape_item(self, x1) -> ShapeItem:
+        if x1 is None:
+            return None
+        else:
+            return int(x1)
+
+    def add_shape_item(self, x1: ShapeItem, x2: ShapeItem) -> ShapeItem:
+        return x1 + x2
+
+    def sub_shape_item(self, x1: ShapeItem, x2: ShapeItem) -> ShapeItem:
+        result = x1 - x2
+        assert result >= 0
+        return result
+
+    def mul_shape_item(self, x1: ShapeItem, x2: ShapeItem) -> ShapeItem:
+        return x1 * x2
 
     def nonzero(self, x: ArrayLike) -> tuple[ArrayLike, ...]:
         return self._module.nonzero(x)

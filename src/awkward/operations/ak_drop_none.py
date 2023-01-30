@@ -102,7 +102,7 @@ def _impl(array, axis, highlevel, behavior):
                 else:
                     return layout.drop_none()
             if posaxis == depth - 1 and layout.is_option:
-                _, _, none_indexes = layout._nextcarry_outindex(layout.backend)
+                _, _, none_indexes = layout._nextcarry_outindex()
                 options["none_indexes"].append(none_indexes)
                 return layout.drop_none()
             if posaxis == depth - 1 and layout.is_list and layout.content.is_option:

@@ -3,7 +3,6 @@
 import awkward as ak
 from awkward._nplikes import nplike_of
 from awkward._nplikes.numpylike import NumpyMetadata
-from awkward._nplikes.typetracer import UnknownLength
 from awkward.operations.ak_fill_none import fill_none
 
 np = NumpyMetadata.instance()
@@ -139,7 +138,7 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
             if depth == posaxis:
                 backend = ak._backends.backend_of(*inputs, default=cpu)
 
-                length = UnknownLength
+                length = None
                 for x in inputs:
                     if isinstance(x, ak.contents.Content):
                         if not ak._util.is_integer(length):

@@ -10,11 +10,7 @@ import awkward as ak
 from awkward._backends import Backend
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyLike, NumpyMetadata
-from awkward._nplikes.typetracer import (
-    TypeTracer,
-    ensure_known_scalar,
-    is_unknown_length,
-)
+from awkward._nplikes.typetracer import TypeTracer
 from awkward.forms.form import Form, _parameters_equal
 from awkward.typing import Any, AxisMaybeNone, Literal, Self, TypeAlias, TypedDict
 
@@ -355,12 +351,13 @@ class Content:
         length: int,
     ):
         # if this is in a tuple-slice and really should be 0, it will be trimmed later
-        length = 1 if ensure_known_scalar(length == 0, False) else length
+        length = 1 if length is not None and length == 0 else length
         index = ak.index.Index64(head.index, nplike=self._backend.index_nplike)
         indexlength = index.length
         index = index.to_nplike(self._backend.index_nplike)
         outindex = ak.index.Index64.empty(
-            index.length * length, self._backend.index_nplike
+            self._backend.index_nplike.mul_shape_item(index.length, length),
+            self._backend.index_nplike,
         )
 
         assert (
@@ -500,7 +497,6 @@ class Content:
             return ak.contents.RecordArray(
                 contents,
                 nextcontent._fields,
-                None,
                 parameters=self._parameters,
                 backend=self._backend,
             )
@@ -552,7 +548,7 @@ class Content:
 
             out = next._getitem_next(nextwhere[0], nextwhere[1:], None)
 
-            if ensure_known_scalar(out.length == 0, False):
+            if out.length is not None and out.length == 0:
                 return out._getitem_nothing()
             else:
                 return out._getitem_at(0)
@@ -600,7 +596,7 @@ class Content:
             out = ak._slicing.getitem_next_array_wrap(
                 self._carry(carry, allow_lazy), where.shape
             )
-            if ensure_known_scalar(out.length == 0, False):
+            if out.length is not None and out.length == 0:
                 return out._getitem_nothing()
             else:
                 return out._getitem_at(0)
@@ -812,7 +808,7 @@ class Content:
         if replacement:
             size = size + (n - 1)
         thisn = n
-        if is_unknown_length(thisn) or is_unknown_length(size):
+        if thisn is None or size is None:
             combinationslen = size  # not actually size, just an unknown value
         else:
             if thisn > size:
@@ -865,13 +861,13 @@ class Content:
             )
         )
         contents = []
-        length = None
+        length = ak._util.unset
         for ptr in tocarry:
             contents.append(
                 ak.contents.IndexedArray.simplified(ptr, self, parameters=None)
             )
             length = contents[-1].length
-        assert length is not None
+        assert not (length is ak._util.unset and self._backend.nplike.known_shape)
         return ak.contents.RecordArray(
             contents, recordlookup, length, parameters=parameters, backend=self._backend
         )
@@ -956,7 +952,7 @@ class Content:
         return self.form_cls.dimension_optiontype.__get__(self)
 
     def _pad_none_axis0(self, target: int, clip: bool) -> Content:
-        if not clip and ensure_known_scalar(target < self.length, False):
+        if not clip and (self.length is None or (target < self.length)):
             index = ak.index.Index64(
                 self._backend.index_nplike.arange(self.length, dtype=np.int64),
                 nplike=self._backend.index_nplike,

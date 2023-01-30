@@ -538,7 +538,7 @@ def union_to_record(unionarray, anonymous):
                 )
             )
 
-        return ak.contents.RecordArray(all_fields, all_names, len(unionarray))
+        return ak.contents.RecordArray(all_fields, all_names, unionarray.length)
 
 
 def direct_Content_subclass(node):

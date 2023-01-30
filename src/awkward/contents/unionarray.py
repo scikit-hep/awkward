@@ -11,12 +11,7 @@ import awkward as ak
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
-from awkward._nplikes.typetracer import (
-    OneOf,
-    TypeTracer,
-    ensure_known_scalar,
-    is_unknown_length,
-)
+from awkward._nplikes.typetracer import OneOf, TypeTracer
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.unionform import UnionForm
@@ -100,7 +95,10 @@ class UnionArray(Content):
                     )
                 )
 
-        if ensure_known_scalar(tags.length > index.length, False):
+        if (
+            not (tags.length is None or index.length is None)
+            and tags.length > index.length
+        ):
             raise ak._errors.wrap_error(
                 ValueError(
                     "{} len(tags) ({}) must be <= len(index) ({})".format(
@@ -600,7 +598,7 @@ class UnionArray(Content):
     def project(self, index):
         lentags = self._tags.length
         assert (
-            is_unknown_length(self._index.length) or is_unknown_length(lentags)
+            self._index.length is None or lentags is None
         ) or self._index.length >= lentags
         lenout = ak.index.Index64.empty(1, self._backend.index_nplike)
         tmpcarry = ak.index.Index64.empty(lentags, self._backend.index_nplike)
@@ -641,22 +639,23 @@ class UnionArray(Content):
         tags = tags.to_nplike(backend.index_nplike)
 
         lentags = tags.length
-        size = ak.index.Index64.empty(1, nplike=backend.index_nplike)
+        _size = ak.index.Index64.empty(1, nplike=backend.index_nplike)
         assert (
-            size.nplike is backend.index_nplike and tags.nplike is backend.index_nplike
+            _size.nplike is backend.index_nplike and tags.nplike is backend.index_nplike
         )
         Content._selfless_handle_error(
             backend[
                 "awkward_UnionArray_regular_index_getsize",
-                size.dtype.type,
+                _size.dtype.type,
                 tags.dtype.type,
             ](
-                size.data,
+                _size.data,
                 tags.data,
                 lentags,
             )
         )
-        current = index_cls.empty(size[0], nplike=backend.index_nplike)
+        size = backend.index_nplike.scalar_as_shape_item(_size[0])
+        current = index_cls.empty(size, nplike=backend.index_nplike)
         outindex = index_cls.empty(lentags, nplike=backend.index_nplike)
         assert (
             outindex.nplike is backend.index_nplike
@@ -672,7 +671,7 @@ class UnionArray(Content):
             ](
                 outindex.data,
                 current.data,
-                size[0],
+                size,
                 tags.data,
                 lentags,
             )
@@ -937,10 +936,12 @@ class UnionArray(Content):
         mylength = self.length
 
         tags = ak.index.Index8.empty(
-            theirlength + mylength, nplike=self._backend.index_nplike
+            self._backend.index_nplike.add_shape_item(theirlength, mylength),
+            nplike=self._backend.index_nplike,
         )
         index = ak.index.Index64.empty(
-            theirlength + mylength, nplike=self._backend.index_nplike
+            self._backend.index_nplike.add_shape_item(theirlength, mylength),
+            nplike=self._backend.index_nplike,
         )
 
         contents = [other]
@@ -1023,7 +1024,9 @@ class UnionArray(Content):
 
         total_length = 0
         for array in head:
-            total_length += array.length
+            total_length = self._backend.index_nplike.add_shape_item(
+                total_length, array.length
+            )
 
         nexttags = ak.index.Index8.empty(
             total_length, nplike=self._backend.index_nplike
@@ -1075,7 +1078,9 @@ class UnionArray(Content):
                         array.length,
                     )
                 )
-                length_so_far += array.length
+                length_so_far = self._backend.index_nplike.add_shape_item(
+                    length_so_far, array.length
+                )
                 nextcontents.extend(union_contents)
 
             elif isinstance(array, ak.contents.EmptyArray):
@@ -1102,7 +1107,9 @@ class UnionArray(Content):
                     ](nextindex.data, length_so_far, array.length)
                 )
 
-                length_so_far += array.length
+                length_so_far = self._backend.index_nplike.add_shape_item(
+                    length_so_far, array.length
+                )
                 nextcontents.append(array)
 
         if len(nextcontents) > 127:
@@ -1559,6 +1566,11 @@ class UnionArray(Content):
         )
 
     def _to_list(self, behavior, json_conversions):
+        if not self._backend.nplike.known_data:
+            raise ak._errors.wrap_error(
+                TypeError("cannot convert typetracer arrays to Python lists")
+            )
+
         out = self._to_list_custom(behavior, json_conversions)
         if out is not None:
             return out
