@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from collections.abc import Collection
 
 import awkward_cpp
 
@@ -213,6 +214,25 @@ def _backend_for_nplike(nplike: NumpyLike) -> Backend:
         raise ak._errors.wrap_error(ValueError("unrecognised nplike", nplike))
 
 
+def common_backend(backends: Collection[Backend]) -> Backend:
+    unique_backends = frozenset(backends)
+    # Either we have one nplike, or one + typetracer
+    if len(unique_backends) == 1:
+        return next(iter(unique_backends))
+    else:
+        # We allow typetracers to mix with other nplikes, and take precedence
+        for backend in unique_backends:
+            if not (backend.nplike.known_data and backend.nplike.known_shape):
+                return backend
+
+        raise ak._errors.wrap_error(
+            ValueError(
+                "cannot operate on arrays with incompatible backends. Use #ak.to_backend to coerce the arrays "
+                "to the same backend"
+            )
+        )
+
+
 _UNSET = object()
 D = TypeVar("D")
 
@@ -227,6 +247,9 @@ def backend_of(*objects, default: D = _UNSET) -> Backend | D:
     suitable backend is found, return the `default` value, or raise a `ValueError` if
     no default is given.
     """
+    # Implementation detail: right now, we are one-to-one mapping `nplike` to a backend
+    # The distinction is still useful because nplikes are just the array abstraction,
+    # whilst backends incorporate more Awkward logic
     nplike = nplike_of(*objects, default=None)
     if nplike is not None:
         return _backend_for_nplike(nplike)

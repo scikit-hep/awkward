@@ -334,7 +334,11 @@ def test_ListOffsetArray_IndexedOptionArray_NumpyArray_outoforder():
 def test_ListArray_IndexedOptionArray_RecordArray_NumpyArray():
     index = ak.index.Index64(np.asarray([0, -1, 1, -1, 4, -1, 5]))
     content = ak.contents.recordarray.RecordArray(
-        [ak.contents.numpyarray.NumpyArray([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7])],
+        [
+            ak.contents.numpyarray.NumpyArray(
+                np.array([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7])
+            )
+        ],
         ["nest"],
     )
     indexoptionarray = ak.contents.IndexedOptionArray(index, content)
@@ -363,7 +367,11 @@ def test_ListArray_IndexedOptionArray_RecordArray_NumpyArray():
 def test_ListOffsetArray_IndexedOptionArray_RecordArray_NumpyArray():
     index = ak.index.Index64(np.asarray([0, -1, 1, -1, 4, -1, 5]))
     content = ak.contents.recordarray.RecordArray(
-        [ak.contents.numpyarray.NumpyArray([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7])],
+        [
+            ak.contents.numpyarray.NumpyArray(
+                np.array([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7])
+            )
+        ],
         ["nest"],
     )
     indexoptionarray = ak.contents.IndexedOptionArray(index, content)
@@ -450,7 +458,11 @@ def test_RecordArray():
 def test_ListArray_and_axis_None():
     index = ak.index.Index64(np.asarray([0, -1, 1, -1, 4, -1, 5]))
     content = ak.contents.recordarray.RecordArray(
-        [ak.contents.numpyarray.NumpyArray([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7])],
+        [
+            ak.contents.numpyarray.NumpyArray(
+                np.array([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7])
+            )
+        ],
         ["nest"],
     )
     indexoptionarray = ak.contents.IndexedOptionArray(index, content)

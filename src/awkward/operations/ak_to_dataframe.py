@@ -173,7 +173,7 @@ or
             starts, stops = offsets[:-1], offsets[1:]
             counts = stops - starts
             if ak._util.win or ak._util.bits32:
-                counts = counts.astype(np.int32)
+                counts = layout.backend.index_nplike.astype(counts, np.int32)
             if len(row_arrays) == 0:
                 newrows = [
                     numpy.repeat(numpy.arange(len(counts), dtype=counts.dtype), counts)

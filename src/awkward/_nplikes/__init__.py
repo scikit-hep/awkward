@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from collections.abc import Collection
+
 import awkward as ak
 from awkward.typing import TYPE_CHECKING, TypeVar
 
@@ -10,6 +12,31 @@ if TYPE_CHECKING:
 _UNSET = object()
 
 D = TypeVar("D")
+
+
+def common_nplike(nplikes: Collection[NumpyLike]) -> NumpyLike:
+    """
+    Args:
+        nplikes: collection of nplikes from which to determine a common nplike
+
+    Return the common nplike for the give nplikes if such a result can be determined.
+    Otherwise, raise a ValueError.
+    """
+    # Either we have one nplike, or one + typetracer
+    if len(nplikes) == 1:
+        return next(iter(nplikes))
+    else:
+        # We allow typetracers to mix with other nplikes, and take precedence
+        for nplike in nplikes:
+            if not (nplike.known_data and nplike.known_shape):
+                return nplike
+
+        raise ak._errors.wrap_error(
+            ValueError(
+                "cannot operate on arrays with incompatible array libraries. Use #ak.to_backend to coerce the arrays "
+                "to the same backend"
+            )
+        )
 
 
 def nplike_of(*arrays, default: D = _UNSET) -> NumpyLike | D:
@@ -52,20 +79,8 @@ def nplike_of(*arrays, default: D = _UNSET) -> NumpyLike | D:
             return Numpy.instance()
         else:
             return default
-    elif len(nplikes) == 1:
-        return next(iter(nplikes))
     else:
-        # We allow typetracers to mix with other nplikes, and take precedence
-        for nplike in nplikes:
-            if not (nplike.known_data and nplike.known_shape):
-                return nplike
-
-        raise ak._errors.wrap_error(
-            ValueError(
-                """attempting to use arrays with more than one backend in the same operation; use
-#ak.to_backend to coerce the arrays to the same backend."""
-            )
-        )
+        return common_nplike(nplikes)
 
 
 def to_nplike(
@@ -84,6 +99,9 @@ def to_nplike(
                     f"internal error: expected an array supported by an existing nplike, got {type(array).__name__!r}"
                 )
             )
+
+    if from_nplike is to_nplike:
+        return array
 
     if isinstance(from_nplike, TypeTracer) and nplike is not from_nplike:
         raise ak._errors.wrap_error(

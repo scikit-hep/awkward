@@ -1,9 +1,11 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
+numpy = Numpy.instance()
 
 
 def strings_astype(array, to, *, highlevel=True, behavior=None):
@@ -63,8 +65,9 @@ def _impl(array, to, highlevel, behavior):
             npstrings = maskedarray.data
             if maskedarray.mask is not False:
                 npstrings[maskedarray.mask] = 0
-            npnumbers = (
-                npstrings.reshape(-1).view("<S" + str(max_length)).astype(to_dtype)
+            npnumbers = numpy.astype(
+                numpy.reshape(npstrings, (-1,)).view("<S" + str(max_length)),
+                dtype=to_dtype,
             )
             return ak.contents.NumpyArray(npnumbers)
         else:

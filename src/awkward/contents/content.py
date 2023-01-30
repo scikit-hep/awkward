@@ -8,6 +8,7 @@ from numbers import Complex, Real
 
 import awkward as ak
 from awkward._backends import Backend
+from awkward._nplikes import to_nplike
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyLike, NumpyMetadata
 from awkward._nplikes.typetracer import TypeTracer
@@ -541,7 +542,7 @@ class Content:
 
             next = ak.contents.RegularArray(
                 self,
-                self.length if self._backend.nplike.known_shape else 1,
+                self.length,
                 1,
                 parameters=None,
             )
@@ -556,33 +557,46 @@ class Content:
         elif isinstance(where, ak.highlevel.Array):
             return self._getitem(where.layout)
 
+        # Convert between nplikes of different backends
         elif (
-            isinstance(where, Content)
-            and where._parameters is not None
-            and (where._parameters.get("__array__") in ("string", "bytestring"))
+            isinstance(where, ak.contents.Content)
+            and where.backend is not self._backend
         ):
-            return self._getitem_fields(ak.operations.to_list(where))
-
-        elif isinstance(where, ak.contents.EmptyArray):
-            return where.to_NumpyArray(np.int64)
+            common_backend = ak._backends.common_backend([where.backend, self._backend])
+            return self.to_backend(common_backend)._getitem(
+                where.to_backend(common_backend)
+            )
 
         elif isinstance(where, ak.contents.NumpyArray):
-            if issubclass(where.dtype.type, np.int64):
-                carry = ak.index.Index64(where.data.reshape(-1))
+            data_as_index = to_nplike(
+                where.data,
+                self._backend.index_nplike,
+                from_nplike=self._backend.nplike,
+            )
+            if np.issubdtype(where.dtype, np.int64):
                 allow_lazy = True
-            elif issubclass(where.dtype.type, np.integer):
                 carry = ak.index.Index64(
-                    where.data.astype(np.int64).reshape(-1),
+                    self._backend.index_nplike.reshape(data_as_index, (-1,)),
                     nplike=self._backend.index_nplike,
                 )
+            elif np.issubdtype(where.dtype, np.integer):
                 allow_lazy = "copied"  # True, but also can be modified in-place
-            elif issubclass(where.dtype.type, (np.bool_, bool)):
+                carry = ak.index.Index64(
+                    self._backend.index_nplike.reshape(
+                        self._backend.index_nplike.astype(
+                            data_as_index, dtype=np.int64, copy=True
+                        ),
+                        (-1,),
+                    ),
+                    nplike=self._backend.index_nplike,
+                )
+            elif np.issubdtype(where.dtype, np.bool_):
                 if len(where.data.shape) == 1:
-                    where = self._backend.nplike.nonzero(where.data)[0]
+                    where = self._backend.index_nplike.nonzero(data_as_index)[0]
                     carry = ak.index.Index64(where, nplike=self._backend.index_nplike)
                     allow_lazy = "copied"  # True, but also can be modified in-place
                 else:
-                    wheres = self._backend.nplike.nonzero(where.data)
+                    wheres = self._backend.index_nplike.nonzero(data_as_index)
                     return self._getitem(wheres)
             else:
                 raise ak._errors.wrap_error(
@@ -601,24 +615,60 @@ class Content:
             else:
                 return out._getitem_at(0)
 
+        elif isinstance(where, ak.contents.RegularArray):
+            maybe_numpy = where.maybe_to_NumpyArray()
+            if maybe_numpy is None:
+                return self._getitem((where,))
+            else:
+                return self._getitem(maybe_numpy)
+
+        # Awkward Array of strings
+        elif (
+            isinstance(where, Content)
+            and where._parameters is not None
+            and (where._parameters.get("__array__") in ("string", "bytestring"))
+        ):
+            return self._getitem_fields(ak.operations.to_list(where))
+
+        elif isinstance(where, ak.contents.EmptyArray):
+            return where.to_NumpyArray(np.int64)
+
         elif isinstance(where, Content):
             return self._getitem((where,))
 
-        elif ak._util.is_sized_iterable(where) and len(where) == 0:
-            return self._carry(
-                ak.index.Index64.empty(0, self._backend.index_nplike),
-                allow_lazy=True,
-            )
-
-        elif ak._util.is_sized_iterable(where) and all(
-            isinstance(x, str) for x in where
-        ):
-            return self._getitem_fields(where)
-
         elif ak._util.is_sized_iterable(where):
-            layout = ak.operations.to_layout(where)
-            as_numpy = layout.maybe_to_NumpyArray() or layout
-            return self._getitem(as_numpy)
+            # Do we have an array
+            nplike = ak._nplikes.nplike_of(where, default=None)
+            # We can end up with non-array objects associated with an nplike
+            if nplike is not None and nplike.is_own_array(where):
+                # Is it a scalar, not array?
+                if len(where.shape) == 0:
+                    raise ak._errors.wrap_error(
+                        NotImplementedError(
+                            "scalar arrays in slices are not currently supported"
+                        )
+                    )
+                else:
+                    layout = ak.operations.ak_to_layout._impl(
+                        where, allow_record=False, allow_other=True, regulararray=False
+                    )
+                    return self._getitem(layout)
+
+            elif len(where) == 0:
+                return self._carry(
+                    ak.index.Index64.empty(0, self._backend.index_nplike),
+                    allow_lazy=True,
+                )
+            # Normally we would be worried about np.array et al. being treated
+            # as sized iterables instead of arrays. However, the first two cases
+            # here will only iterate over the entire array if it contains strings,
+            # at which point we need to visit each item anyway
+            elif all(isinstance(x, str) for x in where):
+                return self._getitem_fields(list(where))
+
+            else:
+                layout = ak.operations.to_layout(where)
+                return self._getitem(layout)
 
         else:
             raise ak._errors.wrap_error(
@@ -685,7 +735,7 @@ class Content:
             )
         )
         return ak.contents.NumpyArray(
-            localindex, parameters=None, backend=self._backend
+            localindex.data, parameters=None, backend=self._backend
         )
 
     def _mergeable(self, other: Content, mergebool: bool = True) -> bool:
@@ -1215,7 +1265,10 @@ class Content:
             backend = self._backend
         else:
             backend = ak._backends.regularize_backend(backend)
-        return self._to_backend(backend)
+        if backend is self._backend:
+            return self
+        else:
+            return self._to_backend(backend)
 
     def _to_backend(self, backend: Backend) -> Self:
         raise ak._errors.wrap_error(NotImplementedError)

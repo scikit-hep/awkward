@@ -534,7 +534,9 @@ class ListOffsetArray(Content):
 
         elif isinstance(head, ak.index.Index64):
             nexthead, nexttail = ak._slicing.headtail(tail)
-            flathead = self._backend.index_nplike.asarray(head.data.reshape(-1))
+            flathead = self._backend.index_nplike.reshape(
+                self._backend.index_nplike.asarray(head.data), (-1,)
+            )
             lenstarts = self.starts.length
             regular_flathead = ak.index.Index64(flathead)
             if advanced is None or (
@@ -775,7 +777,7 @@ class ListOffsetArray(Content):
                 )
             )
             return ak.contents.ListOffsetArray(
-                offsets, ak.contents.NumpyArray(localindex)
+                offsets, ak.contents.NumpyArray(localindex.data)
             )
         else:
             return ak.contents.ListOffsetArray(
@@ -1015,7 +1017,7 @@ class ListOffsetArray(Content):
                     )
                 )
                 return ak.contents.NumpyArray(
-                    nextcarry, parameters=None, backend=self._backend
+                    nextcarry.data, parameters=None, backend=self._backend
                 )
 
         if not branch and (negaxis == depth):
@@ -1882,13 +1884,13 @@ class ListOffsetArray(Content):
 
         if issubclass(npoffsets.dtype.type, np.int64):
             if downsize and npoffsets[-1] < np.iinfo(np.int32).max:
-                npoffsets = npoffsets.astype(np.int32)
+                npoffsets = numpy.astype(npoffsets, np.int32)
 
         if issubclass(npoffsets.dtype.type, np.uint32):
             if npoffsets[-1] < np.iinfo(np.int32).max:
-                npoffsets = npoffsets.astype(np.int32)
+                npoffsets = numpy.astype(npoffsets, np.int32)
             else:
-                npoffsets = npoffsets.astype(np.int64)
+                npoffsets = numpy.astype(npoffsets, np.int64)
 
         if is_string or is_bytestring:
             assert isinstance(akcontent, ak.contents.NumpyArray)

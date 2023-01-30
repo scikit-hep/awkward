@@ -1415,7 +1415,7 @@ class UnionArray(Content):
         )
 
         if not issubclass(npindex.dtype.type, np.int32):
-            npindex = npindex.astype(np.int32)
+            npindex = numpy.astype(npindex, dtype=np.int32)
 
         return pyarrow.Array.from_buffers(
             ak._connect.pyarrow.to_awkwardarrow_type(

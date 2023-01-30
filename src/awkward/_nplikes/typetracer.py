@@ -17,7 +17,6 @@ from awkward.typing import (
     SupportsIndex,
     SupportsInt,
     TypeVar,
-    overload,
 )
 
 np = NumpyMetadata.instance()
@@ -29,6 +28,10 @@ def is_unknown_length(array: Any) -> bool:
 
 def is_unknown_scalar(array: Any) -> bool:
     return isinstance(array, TypeTracerArray) and array.ndim == 0
+
+
+def is_unknown_integer(array: Any) -> bool:
+    return is_unknown_scalar(array) and np.issubdtype(array.dtype, np.integer)
 
 
 def is_unknown_array(array: Any) -> bool:
@@ -224,7 +227,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
 
     def __reduce__(self):
         # Fix pickling, as we ban `__new__`
-        return (object.__new__, (type(self),), vars(self))
+        return object.__new__, (type(self),), vars(self)
 
     @classmethod
     def _new(
@@ -324,17 +327,13 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         return out
 
     @property
-    def nplike(self) -> NumpyLike:
+    def nplike(self) -> TypeTracer:
         return TypeTracer.instance()
 
     @property
     def ndim(self) -> int:
         self.touch_shape()
         return len(self._shape)
-
-    def astype(self, dtype: np.dtype) -> Self:
-        self.touch_data()
-        return self._new(np.dtype(dtype), self._shape)
 
     def view(self, dtype: np.dtype) -> Self:
         if self.itemsize != np.dtype(dtype).itemsize and self._shape[-1] is not None:
@@ -389,176 +388,153 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
             )
         )
 
-    @overload
-    def __getitem__(self, key: SupportsIndex) -> int | float | complex | bool:
-        ...
+    def _resolve_slice_length(self, length, slice_):
+        if length is None:
+            return None
+        elif any(
+            is_unknown_scalar(x) for x in (slice_.start, slice_.stop, slice_.step)
+        ):
+            return None
+        else:
+            start, stop, step = slice_.indices(length)
+            return min((stop - start) // step, length)
 
-    @overload
-    def __getitem__(  # noqa: F811
+    def __getitem__(
         self,
-        key: slice
+        key: SupportsIndex
+        | slice
         | Ellipsis
-        | tuple[SupportsIndex | slice | Ellipsis, ...]
+        | tuple[SupportsIndex | slice | Ellipsis | ArrayLike, ...]
         | ArrayLike,
-    ) -> Self:
-        ...
+    ) -> Self:  # noqa: F811
+        if not isinstance(key, tuple):
+            key = (key,)
 
-    def __getitem__(self, key) -> Self:  # noqa: F811
-        if isinstance(key, tuple):
-            for i, value in enumerate(key):
-                if value is not Ellipsis:
-                    continue
-
-                before, after = key[:i], key[i + 1 :]
-                missing = max(0, len(self._shape) - (len(before) + len(after)))
-                key = before + (slice(None, None, None),) * missing + after
-                break
-
-        if ak._util.is_integer(key):
-            if len(self._shape) == 1:
-                self.touch_data()
-                if key == 0:
-                    return TypeTracerArray._new(self._dtype, shape=())
+        # 1. Validate slice items
+        has_seen_ellipsis = 0
+        n_basic_non_ellipsis = 0
+        n_advanced = 0
+        for item in key:
+            # Basic indexing
+            if isinstance(item, (slice, int)) or is_unknown_integer(item):
+                n_basic_non_ellipsis += 1
+            # Advanced indexing
+            elif isinstance(item, TypeTracerArray) and (
+                np.issubdtype(item.dtype, np.integer)
+                or np.issubdtype(item.dtype, np.bool_)
+            ):
+                n_advanced += 1
+            # Basic ellipsis
+            elif item is Ellipsis:
+                if not has_seen_ellipsis:
+                    has_seen_ellipsis = True
                 else:
-                    return TypeTracerArray._new(self._dtype, shape=())
-            else:
-                self.touch_shape()
-                return TypeTracerArray._new(
-                    self._dtype, self._shape[1:], self._form_key, self._report
-                )
-
-        elif isinstance(key, slice):
-            self.touch_shape()
-            return TypeTracerArray._new(
-                self._dtype,
-                (None,) + self._shape[1:],
-                self._form_key,
-                self._report,
-            )
-
-        elif (
-            hasattr(key, "dtype")
-            and hasattr(key, "shape")
-            and issubclass(key.dtype.type, np.integer)
-        ):
-            assert len(self._shape) != 0
-            self.touch_data()
-            return TypeTracerArray._new(self._dtype, key.shape + self._shape[1:])
-
-        elif (
-            hasattr(key, "dtype")
-            and hasattr(key, "shape")
-            and issubclass(key.dtype.type, (np.bool_, bool))
-        ):
-            assert len(self._shape) != 0
-            self.touch_data()
-            return TypeTracerArray._new(self._dtype, (None,) + self._shape[1:])
-
-        elif isinstance(key, tuple) and any(
-            hasattr(x, "dtype") and hasattr(x, "shape") for x in key
-        ):
-            self.touch_data()
-
-            for num_basic, wh in enumerate(key):  # noqa: B007
-                if not isinstance(wh, slice):
-                    break
-
-            if num_basic != 0:
-                tmp = self.__getitem__(key[:num_basic])
-                basic_shape = tmp._shape[:num_basic]
-            else:
-                basic_shape = ()
-
-            shapes = []
-            for j in range(num_basic, len(key)):
-                wh = key[j]
-                if ak._util.is_integer(wh):
-                    shapes.append(numpy.array(0))
-                elif hasattr(wh, "dtype") and hasattr(wh, "shape"):
-                    sh = [1 if x is None else int(x) for x in wh.shape]
-                    shapes.append(
-                        numpy.lib.stride_tricks.as_strided(
-                            numpy.array(0), shape=sh, strides=[0] * len(sh)
+                    raise wrap_error(
+                        NotImplementedError(
+                            "only one ellipsis value permitted for advanced index"
                         )
                     )
-                else:
-                    raise ak._errors.wrap_error(NotImplementedError(repr(wh)))
+            # Basic newaxis
+            elif item is np.newaxis:
+                pass
+            else:
+                raise wrap_error(
+                    NotImplementedError(
+                        "only integer, unknown scalar, slice, ellipsis, or array indices are permitted"
+                    )
+                )
 
-            slicer_shape = numpy.broadcast_arrays(*shapes)[0].shape
+        # 2. Normalise Ellipsis and boolean arrays
+        key_parts = []
+        for item in key:
+            if item is Ellipsis:
+                n_missing_dims = self.ndim - n_advanced - n_basic_non_ellipsis
+                key_parts.extend((slice(None),) * n_missing_dims)
+            elif is_unknown_array(item) and np.issubdtype(item, np.bool_):
+                key_parts.append(self.nplike.nonzero(item)[0])
+            else:
+                key_parts.append(item)
+        key = tuple(key_parts)
 
-            shape = basic_shape + slicer_shape + self._shape[num_basic + len(shapes) :]
-            assert len(shape) != 0
+        # 3. Apply Indexing
+        advanced_is_at_front = False
+        previous_item_is_basic = True
+        advanced_shapes = []
+        adjacent_advanced_shape = []
+        result_shape_parts = []
+        iter_shape = iter(self.shape)
+        for item in key:
+            # New axes don't reference existing dimensions
+            if item is np.newaxis:
+                result_shape_parts.append((1,))
+                previous_item_is_basic = True
+            # Otherwise, consume the dimension
+            else:
+                dimension_length = next(iter_shape)
+                # Advanced index
+                if n_advanced and (
+                    isinstance(item, int)
+                    or is_unknown_integer(item)
+                    or is_unknown_array(item)
+                ):
+                    if is_unknown_scalar(item):
+                        item = self.nplike.promote_scalar(item)
 
-            return TypeTracerArray._new(self._dtype, (None,) + shape[1:])
+                    # If this is the first advanced index, insert the location
+                    if not advanced_shapes:
+                        result_shape_parts.append(adjacent_advanced_shape)
+                    # If a previous item was basic and we have an advanced shape
+                    # we have a split index
+                    elif previous_item_is_basic:
+                        advanced_is_at_front = True
 
-        elif (
-            isinstance(key, tuple)
-            and len(key) > 0
-            and (ak._util.is_integer(key[0]) or isinstance(key[0], slice))
-        ):
-            # If there are enough integer slices, this will terminate on the
-            # ak._util.is_integer(key) case and end up touching data.
-            self.touch_shape()
+                    advanced_shapes.append(item.shape)
+                    previous_item_is_basic = False
+                # Slice
+                elif isinstance(item, slice):
+                    slice_length = self._resolve_slice_length(dimension_length, item)
+                    result_shape_parts.append((slice_length,))
+                    previous_item_is_basic = True
+                # Integer
+                elif isinstance(item, int) or is_unknown_integer(item):
+                    item = self.nplike.promote_scalar(item)
 
-            head, tail = key[0], key[1:]
-            next = self.__getitem__(head)
+                    if is_unknown_length(dimension_length) or is_unknown_integer(item):
+                        continue
 
-            inner_shape = next.shape[1:]
-            after_shape = []
-            for i, wh in enumerate(tail):
-                if isinstance(wh, int):
-                    pass
-                elif isinstance(wh, slice):
-                    after_shape.append(_length_after_slice(wh, inner_shape[i]))
-                else:
-                    raise ak._errors.wrap_error(NotImplementedError(repr(wh)))
+                    if not 0 <= item < dimension_length:
+                        raise wrap_error(
+                            NotImplementedError("integer index out of bounds")
+                        )
 
-            shape = (next._shape[0],) + tuple(after_shape)
-            return TypeTracerArray._new(
-                self._dtype, shape, self._form_key, self._report
-            )
-
+        advanced_shape = self.nplike.broadcast_shapes(*advanced_shapes)
+        if advanced_is_at_front:
+            result_shape_parts.insert(0, advanced_shape)
         else:
-            raise ak._errors.wrap_error(NotImplementedError(repr(key)))
+            adjacent_advanced_shape[:] = advanced_shape
 
-    @overload
+        broadcast_shape = tuple(i for p in result_shape_parts for i in p)
+        result_shape = broadcast_shape + tuple(iter_shape)
+
+        return self._new(
+            self._dtype,
+            result_shape,
+            self._form_key,
+            self._report,
+        )
+
     def __setitem__(
-        self, key: SupportsIndex, value: int | float | bool | complex
-    ) -> int:
-        ...
-
-    @overload
-    def __setitem__(  # noqa: F811
         self,
-        key: slice
+        key: SupportsIndex
+        | slice
         | Ellipsis
-        | tuple[SupportsIndex | slice | Ellipsis, ...]
+        | tuple[SupportsIndex | slice | Ellipsis | ArrayLike, ...]
         | ArrayLike,
-        value: int | float | bool | complex,
-    ) -> Self:
-        ...
-
-    def __setitem__(self, key, value) -> Self:  # noqa: F811
-        raise ak._errors.wrap_error(
-            AssertionError(
-                "bug in Awkward Array: attempt to set values of a TypeTracerArray"
-            )
-        )
-
-    def reshape(self, *args):
-        self.touch_shape()
-
-        if len(args) == 1 and isinstance(args[0], tuple):
-            args = args[0]
-
-        assert len(args) != 0
-        assert ak._util.is_integer(args[0]) or args[0] is None
-        assert all(ak._util.is_integer(x) for x in args[1:])
-        assert all(x >= 0 for x in args[1:])
-
-        return TypeTracerArray._new(
-            self._dtype, (None,) + args[1:], self._form_key, self._report
-        )
+        value: int | float | bool | complex | ArrayLike,
+    ):  # noqa: F811        existing_value = self.__getitem__(key)
+        existing_value = self.__getitem__(key)
+        if isinstance(value, TypeTracerArray) and value.ndim > existing_value.ndim:
+            raise wrap_error(ValueError("cannot assign shape larger than destination"))
 
     def copy(self):
         self.touch_data()
@@ -791,7 +767,8 @@ class TypeTracer(NumpyLike):
         else:
             length = None
 
-        return TypeTracerArray._new(dtype, (length,))
+        default_int_type = np.int64 if (ak._util.win or ak._util.bits32) else np.int32
+        return TypeTracerArray._new(dtype or default_int_type, (length,))
 
     def meshgrid(
         self, *arrays: ArrayLike, indexing: Literal["xy", "ij"] = "xy"
@@ -855,6 +832,8 @@ class TypeTracer(NumpyLike):
             return None
         if x2 is None:
             return None
+        assert x1 >= 0
+        assert x2 >= 0
         result = x1 - x2
         assert result >= 0
         return result
@@ -864,14 +843,31 @@ class TypeTracer(NumpyLike):
             return None
         if x2 is None:
             return None
-        return x1 + x2
+        assert x1 >= 0
+        assert x2 >= 0
+        result = x1 + x2
+        return result
 
     def mul_shape_item(self, x1: ShapeItem, x2: ShapeItem) -> ShapeItem:
         if x1 is None:
             return None
         if x2 is None:
             return None
-        return x1 * x2
+        assert x1 >= 0
+        assert x2 >= 0
+        result = x1 * x2
+        return result
+
+    def div_shape_item(self, x1: ShapeItem, x2: ShapeItem) -> ShapeItem:
+        if x1 is None:
+            return None
+        if x2 is None:
+            return None
+        assert x1 >= 0
+        assert x2 >= 0
+        result = x1 // x2
+        assert result * x2 == x1
+        return result
 
     def broadcast_shapes(
         self, *shapes: tuple[SupportsInt, ...]
@@ -933,6 +929,46 @@ class TypeTracer(NumpyLike):
         self, x: ArrayLike, shape: tuple[SupportsInt, ...]
     ) -> TypeTracerArray:
         raise ak._errors.wrap_error(NotImplementedError)
+
+    def reshape(
+        self, x: ArrayLike, shape: tuple[int, ...], *, copy: bool | None = None
+    ) -> TypeTracerArray:
+        x.touch_shape()
+
+        size = x.size
+
+        # Validate new shape to ensure that it only contains at-most one placeholder
+        n_placeholders = 0
+        new_size = 1
+        for item in shape:
+            if item is None:
+                # Size is no longer defined
+                new_size = None
+            elif not ak._util.is_integer(item):
+                raise wrap_error(
+                    ValueError(
+                        "shape must be comprised of positive integers, -1 (for placeholders), or unknown lengths"
+                    )
+                )
+            elif item == -1:
+                if n_placeholders == 1:
+                    raise wrap_error(
+                        ValueError("only one placeholder dimension permitted per shape")
+                    )
+                n_placeholders += 1
+            elif item == 0:
+                raise wrap_error(ValueError("shape items cannot be zero"))
+            else:
+                new_size = self.mul_shape_item(new_size, item)
+
+        # Populate placeholders
+        new_shape = [*shape]
+        for i, item in enumerate(shape):
+            if item == -1:
+                new_shape[i] = self.div_shape_item(size, new_size)
+                break
+
+        return TypeTracerArray._new(x.dtype, tuple(new_shape), x.form_key, x.report)
 
     def cumsum(
         self,
@@ -1177,9 +1213,13 @@ class TypeTracer(NumpyLike):
         try_touch_data(x)
         return "[## ... ##]"
 
-    def can_cast(
-        self, from_: np.dtype | TypeTracerArray, to: np.dtype | TypeTracerArray
-    ) -> bool:
+    def astype(
+        self, x: ArrayLike, dtype: numpy.dtype, *, copy: bool | None = True
+    ) -> TypeTracerArray:
+        x.touch_data()
+        return TypeTracerArray._new(np.dtype(dtype), x.shape)
+
+    def can_cast(self, from_: np.dtype | ArrayLike, to: np.dtype | ArrayLike) -> bool:
         return numpy.can_cast(from_, to, casting="same_kind")
 
     @classmethod

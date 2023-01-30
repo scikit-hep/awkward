@@ -915,7 +915,7 @@ def test_indexedoptionarray_sort():
 
 def test_sort_zero_length_arrays():
     array = ak.contents.IndexedArray(
-        ak.index.Index64([]), ak.contents.NumpyArray([1, 2, 3])
+        ak.index.Index64([]), ak.contents.NumpyArray(np.array([1, 2, 3]))
     )
     assert to_list(array) == []
     assert to_list(ak.operations.sort(array)) == []
@@ -943,7 +943,7 @@ def test_sort_zero_length_arrays():
     assert to_list(ak.operations.sort(array)) == []
     assert to_list(ak.operations.argsort(array)) == []
 
-    array = ak.contents.NumpyArray([])
+    array = ak.contents.NumpyArray(np.zeros(0))
     assert to_list(array) == []
     assert to_list(ak.operations.sort(array)) == []
     assert to_list(ak.operations.argsort(array)) == []

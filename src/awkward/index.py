@@ -206,7 +206,7 @@ class Index:
         self._data[where] = what
 
     def to64(self):
-        return Index(self._data.astype(np.int64))
+        return Index(self._nplike.astype(self._data, dtype=np.int64))
 
     def __copy__(self):
         return type(self)(self._data, metadata=self._metadata, nplike=self._nplike)

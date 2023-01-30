@@ -115,6 +115,21 @@ class ArrayModuleNumpyLike(NumpyLike):
     def broadcast_arrays(self, *arrays: ArrayLike) -> list[ArrayLike]:
         return self._module.broadcast_arrays(*arrays)
 
+    def reshape(
+        self, x: ArrayLike, shape: tuple[int, ...], *, copy: bool | None = None
+    ) -> ArrayLike:
+        if copy is False:
+            raise ak._errors.wrap_error(
+                NotImplementedError(
+                    "reshape was called with copy=False, which is currently not supported"
+                )
+            )
+        result = x.reshape(shape)
+        if copy and self._module.shares_memory(x, result):
+            return self._module.copy(result)
+        else:
+            return result
+
     def shape_item_as_scalar(self, x1: ShapeItem):
         if x1 is None:
             raise ak._errors.wrap_error(
@@ -134,15 +149,28 @@ class ArrayModuleNumpyLike(NumpyLike):
             return int(x1)
 
     def add_shape_item(self, x1: ShapeItem, x2: ShapeItem) -> ShapeItem:
+        assert x1 >= 0
+        assert x2 >= 0
         return x1 + x2
 
     def sub_shape_item(self, x1: ShapeItem, x2: ShapeItem) -> ShapeItem:
+        assert x1 >= 0
+        assert x2 >= 0
         result = x1 - x2
         assert result >= 0
         return result
 
     def mul_shape_item(self, x1: ShapeItem, x2: ShapeItem) -> ShapeItem:
+        assert x1 >= 0
+        assert x2 >= 0
         return x1 * x2
+
+    def div_shape_item(self, x1: ShapeItem, x2: ShapeItem) -> ShapeItem:
+        assert x1 >= 0
+        assert x2 >= 0
+        result = x1 // x2
+        assert result * x2 == x1
+        return result
 
     def nonzero(self, x: ArrayLike) -> tuple[ArrayLike, ...]:
         return self._module.nonzero(x)
@@ -337,6 +365,11 @@ class ArrayModuleNumpyLike(NumpyLike):
             precision=precision,
             suppress_small=suppress_small,
         )
+
+    def astype(
+        self, x: ArrayLike, dtype: numpy.dtype, *, copy: bool | None = True
+    ) -> ArrayLike:
+        return x.astype(dtype, copy=copy)
 
     def can_cast(self, from_: np.dtype | ArrayLike, to: np.dtype | ArrayLike) -> bool:
         return self._module.can_cast(from_, to, casting="same_kind")

@@ -161,7 +161,9 @@ def test_ListArray_NumpyArray():
 def test_ListOffsetArray_NumpyArray():
     v2a = ak.contents.listoffsetarray.ListOffsetArray(
         ak.index.Index(np.array([1, 4, 4, 6, 7], np.int64)),
-        ak.contents.numpyarray.NumpyArray([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7]),
+        ak.contents.numpyarray.NumpyArray(
+            np.array([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7])
+        ),
     )
     roundtrip(v2a)
     array = ak.highlevel.Array(v2a)
@@ -538,7 +540,11 @@ def test_ListOffsetArray_RecordArray_NumpyArray():
     v2a = ak.contents.listoffsetarray.ListOffsetArray(
         ak.index.Index(np.array([1, 4, 4, 6], np.int64)),
         ak.contents.recordarray.RecordArray(
-            [ak.contents.numpyarray.NumpyArray([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7])],
+            [
+                ak.contents.numpyarray.NumpyArray(
+                    np.array([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7])
+                )
+            ],
             ["nest"],
         ),
     )

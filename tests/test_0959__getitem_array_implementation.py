@@ -4,6 +4,7 @@ import numpy as np
 import pytest
 
 import awkward as ak
+from awkward._nplikes.typetracer import TypeTracer
 
 to_list = ak.operations.to_list
 
@@ -67,7 +68,9 @@ def test_ListArray_NumpyArray():
 def test_ListOffsetArray_NumpyArray():
     v2a = ak.contents.listoffsetarray.ListOffsetArray(
         ak.index.Index(np.array([1, 4, 4, 6, 7], np.int64)),
-        ak.contents.numpyarray.NumpyArray([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7]),
+        ak.contents.numpyarray.NumpyArray(
+            np.array([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7])
+        ),
     )
     resultv2 = v2a[np.array([1, 2], np.int64)]
     assert to_list(resultv2) == [[], [4.4, 5.5]]
@@ -385,7 +388,11 @@ def test_ListOffsetArray_RecordArray_NumpyArray():
     v2a = ak.contents.listoffsetarray.ListOffsetArray(
         ak.index.Index(np.array([1, 4, 4, 6], np.int64)),
         ak.contents.recordarray.RecordArray(
-            [ak.contents.numpyarray.NumpyArray([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7])],
+            [
+                ak.contents.numpyarray.NumpyArray(
+                    np.array([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7])
+                )
+            ],
             ["nest"],
         ),
     )
@@ -441,12 +448,11 @@ def test_ByteMaskedArray_RecordArray_NumpyArray():
         ),
         valid_when=True,
     )
-    resultv2 = v2a._carry(ak.index.Index(np.array([0, 1, 4], np.int64)), False)
+    index = ak.index.Index(np.array([0, 1, 4], np.int64))
+    resultv2 = v2a._carry(index, False)
     assert to_list(resultv2) == [{"nest": 1.1}, None, {"nest": 5.5}]
     assert (
-        v2a.to_typetracer()
-        ._carry(ak.index.Index(np.array([0, 1, 4], np.int64)), False)
-        .form
+        v2a.to_typetracer()._carry(index.to_nplike(TypeTracer.instance()), False).form
         == resultv2.form
     )
 
@@ -462,12 +468,11 @@ def test_ByteMaskedArray_RecordArray_NumpyArray():
         ),
         valid_when=False,
     )
-    resultv2 = v2b._carry(ak.index.Index(np.array([3, 1, 4], np.int64)), False)
+    indexb = ak.index.Index(np.array([3, 1, 4], np.int64))
+    resultv2 = v2b._carry(indexb, False)
     assert to_list(resultv2) == [None, None, {"nest": 5.5}]
     assert (
-        v2b.to_typetracer()
-        ._carry(ak.index.Index(np.array([3, 1, 4], np.int64)), False)
-        .form
+        v2b.to_typetracer()._carry(indexb.to_nplike(TypeTracer.instance()), False).form
         == resultv2.form
     )
 
@@ -524,12 +529,11 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
         length=13,
         lsb_order=False,
     )
-    resultv2 = v2a._carry(ak.index.Index(np.array([0, 1, 4], np.int64)), False)
+    indexa = ak.index.Index(np.array([0, 1, 4], np.int64))
+    resultv2 = v2a._carry(indexa, False)
     assert to_list(resultv2) == [{"nest": 0.0}, {"nest": 1.0}, None]
     assert (
-        v2a.to_typetracer()
-        ._carry(ak.index.Index(np.array([0, 1, 4], np.int64)), False)
-        .form
+        v2a.to_typetracer()._carry(indexa.to_nplike(TypeTracer.instance()), False).form
         == resultv2.form
     )
 
@@ -585,12 +589,11 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
         length=13,
         lsb_order=False,
     )
-    resultv2 = v2b._carry(ak.index.Index(np.array([1, 1, 4], np.int64)), False)
+    indexb = ak.index.Index(np.array([1, 1, 4], np.int64))
+    resultv2 = v2b._carry(indexb, False)
     assert to_list(resultv2) == [{"nest": 1.0}, {"nest": 1.0}, None]
     assert (
-        v2b.to_typetracer()
-        ._carry(ak.index.Index(np.array([1, 1, 4], np.int64)), False)
-        .form
+        v2b.to_typetracer()._carry(indexb.to_nplike(TypeTracer.instance()), False).form
         == resultv2.form
     )
 
@@ -649,12 +652,11 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
         length=13,
         lsb_order=True,
     )
-    resultv2 = v2c._carry(ak.index.Index(np.array([0, 1, 4], np.int64)), False)
+    indexc = ak.index.Index(np.array([0, 1, 4], np.int64))
+    resultv2 = v2c._carry(indexc, False)
     assert to_list(resultv2) == [{"nest": 0.0}, {"nest": 1.0}, None]
     assert (
-        v2c.to_typetracer()
-        ._carry(ak.index.Index(np.array([0, 1, 4], np.int64)), False)
-        .form
+        v2c.to_typetracer()._carry(indexc.to_nplike(TypeTracer.instance()), False).form
         == resultv2.form
     )
 
@@ -713,12 +715,11 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
         length=13,
         lsb_order=True,
     )
-    resultv2 = v2d._carry(ak.index.Index(np.array([0, 0, 0], np.int64)), False)
+    indexd = ak.index.Index(np.array([0, 0, 0], np.int64))
+    resultv2 = v2d._carry(indexd, False)
     assert to_list(resultv2) == [{"nest": 0.0}, {"nest": 0.0}, {"nest": 0.0}]
     assert (
-        v2d.to_typetracer()
-        ._carry(ak.index.Index(np.array([0, 0, 0], np.int64)), False)
-        .form
+        v2d.to_typetracer()._carry(indexd.to_nplike(TypeTracer.instance()), False).form
         == resultv2.form
     )
 
@@ -730,7 +731,8 @@ def test_UnmaskedArray_RecordArray_NumpyArray():
             ["nest"],
         )
     )
-    resultv2 = v2a._carry(ak.index.Index(np.array([0, 1, 1, 1, 1], np.int64)), False)
+    index = ak.index.Index(np.array([0, 1, 1, 1, 1], np.int64))
+    resultv2 = v2a._carry(index, False)
     assert to_list(resultv2) == [
         {"nest": 0.0},
         {"nest": 1.1},
@@ -739,9 +741,7 @@ def test_UnmaskedArray_RecordArray_NumpyArray():
         {"nest": 1.1},
     ]
     assert (
-        v2a.to_typetracer()
-        ._carry(ak.index.Index(np.array([0, 1, 1, 1, 1], np.int64)), False)
-        .form
+        v2a.to_typetracer()._carry(index.to_nplike(TypeTracer.instance()), False).form
         == resultv2.form
     )
 
