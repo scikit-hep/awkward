@@ -54,6 +54,8 @@ namespace awkward {
           reserved_(reserved),
           next_(nullptr) {}
 
+    ~Panel() = default;
+
     /// @brief Overloads [] operator to access elements like an array.
     PRIMITIVE& operator[](size_t i) { return ptr_.get()[i]; }
 
