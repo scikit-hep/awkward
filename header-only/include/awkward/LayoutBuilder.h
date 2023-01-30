@@ -2248,7 +2248,7 @@ namespace awkward {
       clear() noexcept {
         mask_.clear();
         content_.clear();
-        current_index_ = 0;
+        current_byte_ = 0;
         current_byte_ref_ = mask_.append_and_get_ref(current_byte_);
         current_index_ = 0;
       }
