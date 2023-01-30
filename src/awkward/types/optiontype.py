@@ -56,7 +56,7 @@ class OptionType(Type):
             if params is None:
                 if isinstance(
                     self._content, (RegularType, ListType)
-                ) and not self._content.parameter("__array__") in (
+                ) and self._content.parameter("__array__") not in (
                     "string",
                     "bytestring",
                     "char",
