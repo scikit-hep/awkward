@@ -6,8 +6,15 @@ from abc import abstractmethod
 import numpy
 
 from awkward._singleton import Singleton
-from awkward.typing import SupportsInt  # noqa: F401
-from awkward.typing import Literal, Protocol, Self, SupportsIndex, TypeAlias, overload
+from awkward.typing import (
+    Literal,
+    Protocol,
+    Self,
+    SupportsIndex,
+    SupportsInt,  # noqa: F401
+    TypeAlias,
+    overload,
+)
 
 ShapeItem: TypeAlias = "SupportsInt | None"
 
