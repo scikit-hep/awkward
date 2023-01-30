@@ -455,7 +455,7 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
         else:
             item._touch_data(recursive=False)
             nextoffsets = item.offsets
-            nextcontent = item._backend.nplike.empty(None, dtype=np.int64)
+            nextcontent = item_backend.nplike.empty(None, dtype=np.int64)
 
         return ListOffsetArray(
             ak.index.Index64(nextoffsets),
