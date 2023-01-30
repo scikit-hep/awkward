@@ -30,6 +30,7 @@ env:
 jobs:
   coverage:
     runs-on: ubuntu-20.04
+    name: Run Codecov
 
     env:
       PIP_ONLY_BINARY: cmake

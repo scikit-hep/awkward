@@ -1,4 +1,4 @@
-name: Build Test
+name: Tests
 
 on:
   pull_request:
@@ -19,7 +19,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: 'build-test-${{ github.head_ref || github.run_id }}'
+  group: 'test-${{ github.head_ref || github.run_id }}'
   cancel-in-progress: true
 
 env:
