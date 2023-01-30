@@ -186,16 +186,16 @@ def _impl(x, weight, axis, keepdims, mask_identity):
             sumw = ak.operations.ak_count._impl(
                 x,
                 axis,
-                keepdims,
-                mask_identity,
+                keepdims=True,
+                mask_identity=True,
                 highlevel=True,
                 behavior=None,
             )
             sumwx = ak.operations.ak_sum._impl(
                 x,
                 axis,
-                keepdims,
-                mask_identity,
+                keepdims=True,
+                mask_identity=True,
                 highlevel=True,
                 behavior=None,
             )
@@ -211,12 +211,26 @@ def _impl(x, weight, axis, keepdims, mask_identity):
             sumwx = ak.operations.ak_sum._impl(
                 x * weight,
                 axis,
-                keepdims,
-                mask_identity,
+                keepdims=True,
+                mask_identity=True,
                 highlevel=True,
                 behavior=None,
             )
-        return sumwx / sumw
+
+        out = sumwx / sumw
+
+        if not mask_identity:
+            out = ak.highlevel.Array(ak.operations.fill_none(out, np.nan, axis=-1))
+
+        if axis is None:
+            if not keepdims:
+                out = out[(0,) * out.ndim]
+        else:
+            if not keepdims:
+                posaxis = ak._util.maybe_posaxis(out.layout, axis, 1)
+                out = out[(slice(None, None),) * posaxis + (0,)]
+
+        return out
 
 
 @ak._connect.numpy.implements("mean")
