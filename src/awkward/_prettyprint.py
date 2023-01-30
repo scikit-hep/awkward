@@ -70,19 +70,19 @@ def get_field(data, field):
 def custom_str(current):
     if (
         issubclass(type(current), ak.highlevel.Record)
-        and not type(current).__str__ is ak.highlevel.Record.__str__
+        and type(current).__str__ is not ak.highlevel.Record.__str__
     ) or (
         issubclass(type(current), ak.highlevel.Array)
-        and not type(current).__str__ is ak.highlevel.Array.__str__
+        and type(current).__str__ is not ak.highlevel.Array.__str__
     ):
         return str(current)
 
     elif (
         issubclass(type(current), ak.highlevel.Record)
-        and not type(current).__repr__ is ak.highlevel.Record.__repr__
+        and type(current).__repr__ is not ak.highlevel.Record.__repr__
     ) or (
         issubclass(type(current), ak.highlevel.Array)
-        and not type(current).__repr__ is ak.highlevel.Array.__repr__
+        and type(current).__repr__ is not ak.highlevel.Array.__repr__
     ):
         return repr(current)
 

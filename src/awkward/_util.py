@@ -794,7 +794,7 @@ def arrays_approx_equal(
         if right.is_option:
             right = right.to_IndexedOptionArray64()
 
-        if not type(left) is type(right):
+        if type(left) is not type(right):
             return False
 
         if left.length != right.length:

@@ -262,17 +262,18 @@ exclude = [
     "docs-*",
     "src/awkward/_typeparser/generated_parser.py",
 ]
-ignore = ["E501", "C408", "E713", "E714", "UP030"]
+ignore = [
+    "E501",
+    "C408",
+    "UP030",  # {0} -> {}
+]
 select = [
-    "B0",
-    "C",
-    "E",
-    "F",
-    "T20",
-    "W",
-    "UP",
-    "I",
-    "TID251"
+    "B0",                # flake8-bugbear
+    "C", "E", "F", "W",  # flake8
+    "I",                 # isort
+    "T20",               # flake8-print
+    "UP",                # pyupgrade
+    "TID251"             # flake8-tidy-imports
 ]
 target-version = "py37"
 typing-modules = ["awkward.typing"]
