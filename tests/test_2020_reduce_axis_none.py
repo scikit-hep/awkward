@@ -275,9 +275,9 @@ def test_prod_numpy():
     as_numpy = ak.from_numpy(np.arange(7 * 5 * 3).reshape((7, 5, 3)))
     assert ak.sum(as_numpy, axis=None) == 5460
     assert ak._util.arrays_approx_equal(
-        ak.sum(as_numpy, axis=None, keepdims=True), np.array([[[5460]]])
+        ak.sum(as_numpy, axis=None, keepdims=True), np.array([[[5460]]], dtype=np.int64)
     )
     assert ak._util.arrays_approx_equal(
         ak.sum(as_numpy, axis=None, keepdims=True, mask_identity=True),
-        ak.to_regular(ak.Array([[[5460]]]).mask[[[True]]], axis=None),
+        ak.to_regular(ak.Array([[[5460]]]).mask[[[[True]]]], axis=None),
     )
