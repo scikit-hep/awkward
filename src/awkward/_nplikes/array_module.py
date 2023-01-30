@@ -153,7 +153,7 @@ class ArrayModuleNumpyLike(NumpyLike):
         *,
         axis: int = 0,
     ) -> ArrayLike:
-        arrays = [x for x in arrays]
+        arrays = list(arrays)
         return self._module.stack(arrays, axis=axis)
 
     def packbits(

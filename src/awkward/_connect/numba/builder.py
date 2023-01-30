@@ -471,17 +471,17 @@ def lower_complex_from_integer_or_float(context, builder, sig, args):
 
     if isinstance(xtype, numba.types.Integer) and xtype.signed:
         z_real = builder.sitofp(xval, context.get_value_type(numba.types.float64))
-        z_imag = z_real.type(0)
+        z_imag = z_real.type(0)  # noqa: UP003
     elif isinstance(xtype, numba.types.Integer):
         z_real = builder.uitofp(xval, context.get_value_type(numba.types.float64))
-        z_imag = z_real.type(0)
+        z_imag = z_real.type(0)  # noqa: UP003
     elif xtype.bitwidth < 64:
         z_real = builder.fpext(xval, context.get_value_type(numba.types.float64))
     elif xtype.bitwidth > 64:
         z_real = builder.fptrunc(xval, context.get_value_type(numba.types.float64))
     else:
         z_real = xval
-    z_imag = z_real.type(0)
+    z_imag = z_real.type(0)  # noqa: UP003
 
     call(
         context,

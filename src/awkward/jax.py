@@ -32,7 +32,7 @@ def register_and_check():
     Register Awkward Array node types with JAX's tree mechanism.
     """
     try:
-        import jax  # noqa: I251, F401
+        import jax  # noqa: TID251, F401
 
     except ModuleNotFoundError:
         raise wrap_error(
@@ -140,6 +140,6 @@ def assert_registered():
 def import_jax():
     """Ensure that JAX integration is registered, and return the JAX module. Raise a RuntimeError if not."""
     assert_registered()
-    import jax  # noqa: I251
+    import jax  # noqa: TID251
 
     return jax

@@ -86,7 +86,7 @@ class ErrorContext:
                 valuestr = f"repr-raised-{type(err).__name__}"
 
         elif isinstance(value, np.ndarray):
-            import numpy  # noqa: I251
+            import numpy  # noqa: TID251
 
             if not numpy.__version__.startswith("1.13."):  # 'threshold' argument
                 prefix = f"{type(value).__module__}.{type(value).__name__}("

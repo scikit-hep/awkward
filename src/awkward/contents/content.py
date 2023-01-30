@@ -9,7 +9,7 @@ from numbers import Complex, Real
 import awkward as ak
 from awkward._backends import Backend
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpylike import NumpyLike, NumpyMetadata
 from awkward._nplikes.typetracer import (
     TypeTracer,
     ensure_known_scalar,
