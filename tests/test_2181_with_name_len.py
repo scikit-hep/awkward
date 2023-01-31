@@ -11,7 +11,7 @@ def test():
     assert ak.parameters(named) == {"__record__": "x_like"}
 
 
-@pytest.xfail("TypeTracer.frombuffer not implemented")
+@pytest.mark.xfail(reason="TypeTracer.frombuffer not implemented")
 def test_strings():
     layout = ak.to_layout(["hello", "world"]).to_typetracer(forget_length=True)
     ak.zeros_like(layout)
