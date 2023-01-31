@@ -66,16 +66,16 @@ def to_arrow_table(
     """
     with ak._errors.OperationErrorContext(
         "ak.to_arrow_table",
-        dict(
-            array=array,
-            list_to32=list_to32,
-            string_to32=string_to32,
-            bytestring_to32=bytestring_to32,
-            emptyarray_to=emptyarray_to,
-            categorical_as_dictionary=categorical_as_dictionary,
-            extensionarray=extensionarray,
-            count_nulls=count_nulls,
-        ),
+        {
+            "array": array,
+            "list_to32": list_to32,
+            "string_to32": string_to32,
+            "bytestring_to32": bytestring_to32,
+            "emptyarray_to": emptyarray_to,
+            "categorical_as_dictionary": categorical_as_dictionary,
+            "extensionarray": extensionarray,
+            "count_nulls": count_nulls,
+        },
     ):
         return _impl(
             array,

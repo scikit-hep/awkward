@@ -67,7 +67,7 @@ def num(array, axis=1, *, highlevel=True, behavior=None):
     """
     with ak._errors.OperationErrorContext(
         "ak.num",
-        dict(array=array, axis=axis, highlevel=highlevel, behavior=behavior),
+        {"array": array, "axis": axis, "highlevel": highlevel, "behavior": behavior},
     ):
         return _impl(array, axis, highlevel, behavior)
 

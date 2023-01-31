@@ -13,7 +13,7 @@ def is_tuple(array):
     """
     with ak._errors.OperationErrorContext(
         "ak.is_tuple",
-        dict(array=array),
+        {"array": array},
     ):
         return _impl(array)
 

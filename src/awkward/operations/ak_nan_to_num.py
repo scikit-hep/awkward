@@ -39,15 +39,15 @@ def nan_to_num(
     """
     with ak._errors.OperationErrorContext(
         "ak.nan_to_num",
-        dict(
-            array=array,
-            copy=copy,
-            nan=nan,
-            posinf=posinf,
-            neginf=neginf,
-            highlevel=highlevel,
-            behavior=behavior,
-        ),
+        {
+            "array": array,
+            "copy": copy,
+            "nan": nan,
+            "posinf": posinf,
+            "neginf": neginf,
+            "highlevel": highlevel,
+            "behavior": behavior,
+        },
     ):
         return _impl(array, copy, nan, posinf, neginf, highlevel, behavior)
 

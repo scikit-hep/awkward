@@ -45,12 +45,12 @@ def softmax(
     """
     with ak._errors.OperationErrorContext(
         "ak.softmax",
-        dict(
-            x=x,
-            axis=axis,
-            keepdims=keepdims,
-            mask_identity=mask_identity,
-        ),
+        {
+            "x": x,
+            "axis": axis,
+            "keepdims": keepdims,
+            "mask_identity": mask_identity,
+        },
     ):
         if flatten_records is not unset:
             message = (

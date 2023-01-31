@@ -191,15 +191,15 @@ def cartesian(
     """
     with ak._errors.OperationErrorContext(
         "ak.cartesian",
-        dict(
-            arrays=arrays,
-            axis=axis,
-            nested=nested,
-            parameters=parameters,
-            with_name=with_name,
-            highlevel=highlevel,
-            behavior=behavior,
-        ),
+        {
+            "arrays": arrays,
+            "axis": axis,
+            "nested": nested,
+            "parameters": parameters,
+            "with_name": with_name,
+            "highlevel": highlevel,
+            "behavior": behavior,
+        },
     ):
         return _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior)
 

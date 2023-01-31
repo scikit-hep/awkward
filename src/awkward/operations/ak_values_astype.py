@@ -50,7 +50,7 @@ def values_astype(array, to, *, highlevel=True, behavior=None):
     """
     with ak._errors.OperationErrorContext(
         "ak.values_astype",
-        dict(array=array, to=to, highlevel=highlevel, behavior=behavior),
+        {"array": array, "to": to, "highlevel": highlevel, "behavior": behavior},
     ):
         return _impl(array, to, highlevel, behavior)
 

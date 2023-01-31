@@ -34,13 +34,13 @@ def concatenate(arrays, axis=0, *, mergebool=True, highlevel=True, behavior=None
     """
     with ak._errors.OperationErrorContext(
         "ak.concatenate",
-        dict(
-            arrays=arrays,
-            axis=axis,
-            mergebool=mergebool,
-            highlevel=highlevel,
-            behavior=behavior,
-        ),
+        {
+            "arrays": arrays,
+            "axis": axis,
+            "mergebool": mergebool,
+            "highlevel": highlevel,
+            "behavior": behavior,
+        },
     ):
         return _impl(arrays, axis, mergebool, highlevel, behavior)
 

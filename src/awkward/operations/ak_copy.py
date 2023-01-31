@@ -59,7 +59,7 @@ def copy(array):
     """
     with ak._errors.OperationErrorContext(
         "ak.fill_none",
-        dict(array=array),
+        {"array": array},
     ):
         return _impl(array)
 

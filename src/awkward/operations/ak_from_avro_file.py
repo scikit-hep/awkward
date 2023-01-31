@@ -31,13 +31,13 @@ def from_avro_file(
 
     with ak._errors.OperationErrorContext(
         "ak.from_avro_file",
-        dict(
-            file=file,
-            highlevel=highlevel,
-            behavior=behavior,
-            limit_entries=limit_entries,
-            debug_forth=debug_forth,
-        ),
+        {
+            "file": file,
+            "highlevel": highlevel,
+            "behavior": behavior,
+            "limit_entries": limit_entries,
+            "debug_forth": debug_forth,
+        },
     ):
 
         if isinstance(file, pathlib.Path):

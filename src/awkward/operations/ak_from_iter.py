@@ -58,14 +58,14 @@ def from_iter(
     """
     with ak._errors.OperationErrorContext(
         "ak.from_iter",
-        dict(
-            iterable=iterable,
-            allow_record=allow_record,
-            highlevel=highlevel,
-            behavior=behavior,
-            initial=initial,
-            resize=resize,
-        ),
+        {
+            "iterable": iterable,
+            "allow_record": allow_record,
+            "highlevel": highlevel,
+            "behavior": behavior,
+            "initial": initial,
+            "resize": resize,
+        },
     ):
         return _impl(iterable, highlevel, behavior, allow_record, initial, resize)
 

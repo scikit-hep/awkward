@@ -19,7 +19,7 @@ def is_valid(array, *, exception=False):
     """
     with ak._errors.OperationErrorContext(
         "ak.is_valid",
-        dict(array=array, exception=exception),
+        {"array": array, "exception": exception},
     ):
         return _impl(array, exception)
 

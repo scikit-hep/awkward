@@ -36,7 +36,7 @@ def from_regular(array, axis=1, *, highlevel=True, behavior=None):
     """
     with ak._errors.OperationErrorContext(
         "ak.from_regular",
-        dict(array=array, axis=axis, highlevel=highlevel, behavior=behavior),
+        {"array": array, "axis": axis, "highlevel": highlevel, "behavior": behavior},
     ):
         return _impl(array, axis, highlevel, behavior)
 

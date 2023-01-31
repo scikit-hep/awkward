@@ -263,8 +263,7 @@ exclude = [
     "src/awkward/_typeparser/generated_parser.py",
 ]
 ignore = [
-    "E501",
-    "C408",
+    "E501",   # line too long
     "UP030",  # {0} -> {}
 ]
 select = [

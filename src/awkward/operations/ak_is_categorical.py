@@ -17,7 +17,7 @@ def is_categorical(array):
     """
     with ak._errors.OperationErrorContext(
         "ak.is_categorical",
-        dict(array=array),
+        {"array": array},
     ):
         return _impl(array)
 

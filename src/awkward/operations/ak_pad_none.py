@@ -95,14 +95,14 @@ def pad_none(array, target, axis=1, *, clip=False, highlevel=True, behavior=None
     """
     with ak._errors.OperationErrorContext(
         "ak.pad_none",
-        dict(
-            array=array,
-            target=target,
-            axis=axis,
-            clip=clip,
-            highlevel=highlevel,
-            behavior=behavior,
-        ),
+        {
+            "array": array,
+            "target": target,
+            "axis": axis,
+            "clip": clip,
+            "highlevel": highlevel,
+            "behavior": behavior,
+        },
     ):
         return _impl(array, target, axis, clip, highlevel, behavior)
 
