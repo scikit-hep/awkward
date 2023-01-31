@@ -9,6 +9,7 @@ from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.typetracer import MaybeNone, TypeTracer
 from awkward._util import unset
 from awkward.contents.content import Content
+from awkward.forms.form import _parameters_equal
 from awkward.forms.indexedoptionform import IndexedOptionForm
 from awkward.index import Index
 from awkward.typing import Final, Self, final
@@ -549,20 +550,18 @@ class IndexedOptionArray(Content):
                 return (outoffsets, flattened)
 
     def _mergeable_next(self, other, mergebool):
-        if isinstance(
-            other,
-            (
-                ak.contents.IndexedArray,
-                ak.contents.IndexedOptionArray,
-                ak.contents.ByteMaskedArray,
-                ak.contents.BitMaskedArray,
-                ak.contents.UnmaskedArray,
-            ),
-        ):
-            return self._content._mergeable(other.content, mergebool)
-
+        # Is the other content is an identity, or a union?
+        if other.is_identity_like or other.is_union:
+            return True
+        # We can only combine option types whose array-record parameters agree
+        elif other.is_option:
+            return self._content._mergeable_next(
+                other.content, mergebool
+            ) and _parameters_equal(
+                self._parameters, other._parameters, only_array_record=True
+            )
         else:
-            return self._content._mergeable(other, mergebool)
+            return self._content._mergeable_next(other, mergebool)
 
     def _merging_strategy(self, others):
         if len(others) == 0:
@@ -1157,7 +1156,7 @@ class IndexedOptionArray(Content):
         nulls_index_content = ak.contents.NumpyArray(
             nulls_index.data, parameters=None, backend=self._backend
         )
-        if out._mergeable(nulls_index_content, True):
+        if out._mergeable_next(nulls_index_content, True):
             out = out._mergemany([nulls_index_content])
             nulls_merged = True
 

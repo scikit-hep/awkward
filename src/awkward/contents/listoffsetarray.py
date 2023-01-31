@@ -9,6 +9,7 @@ from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.typetracer import TypeTracer
 from awkward._util import unset
 from awkward.contents.content import Content
+from awkward.forms.form import _parameters_equal
 from awkward.forms.listoffsetform import ListOffsetForm
 from awkward.index import Index
 from awkward.typing import Final, Self, final
@@ -700,7 +701,18 @@ class ListOffsetArray(Content):
                 )
 
     def _mergeable_next(self, other, mergebool):
-        if isinstance(
+        # Is the other content is an identity, or a union?
+        if other.is_identity_like or other.is_union:
+            return True
+        # Otherwise, do the parameters match? If not, we can't merge.
+        elif not (
+            _parameters_equal(
+                self._parameters, other._parameters, only_array_record=True
+            )
+        ):
+            return False
+        # Finally, fall back upon the per-content implementation
+        elif isinstance(
             other,
             (
                 ak.contents.IndexedArray,
@@ -710,7 +722,19 @@ class ListOffsetArray(Content):
                 ak.contents.UnmaskedArray,
             ),
         ):
-            return self._mergeable(other.content, mergebool)
+            return self._mergeable_next(other.content, mergebool)
+
+        elif isinstance(
+            other,
+            (
+                ak.contents.IndexedArray,
+                ak.contents.IndexedOptionArray,
+                ak.contents.ByteMaskedArray,
+                ak.contents.BitMaskedArray,
+                ak.contents.UnmaskedArray,
+            ),
+        ):
+            return self._mergeable_next(other.content, mergebool)
 
         elif isinstance(
             other,
@@ -720,10 +744,10 @@ class ListOffsetArray(Content):
                 ak.contents.ListOffsetArray,
             ),
         ):
-            return self._content._mergeable(other.content, mergebool)
+            return self._content._mergeable_next(other.content, mergebool)
 
         elif isinstance(other, ak.contents.NumpyArray) and len(other.shape) > 1:
-            return self._mergeable(other._to_regular_primitive(), mergebool)
+            return self._mergeable_next(other._to_regular_primitive(), mergebool)
 
         else:
             return False

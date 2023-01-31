@@ -268,7 +268,7 @@ def num(layout, axis):
 
 
 def mergeable(one: Content, two: Content, mergebool: bool = True) -> bool:
-    return one._mergeable(two, mergebool=mergebool)
+    return one._mergeable_next(two, mergebool=mergebool)
 
 
 def merge_as_union(one: Content, two: Content) -> ak.contents.UnionArray:

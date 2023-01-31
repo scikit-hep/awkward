@@ -738,21 +738,6 @@ class Content:
             localindex.data, parameters=None, backend=self._backend
         )
 
-    def _mergeable(self, other: Content, mergebool: bool = True) -> bool:
-        # Is the other content is an identity, or a union?
-        if other.is_identity_like or other.is_union:
-            return True
-        # Otherwise, do the parameters match? If not, we can't merge.
-        elif not (
-            _parameters_equal(
-                self._parameters, other._parameters, only_array_record=True
-            )
-        ):
-            return False
-        # Finally, fall back upon the per-content implementation
-        else:
-            return self._mergeable_next(other, mergebool)
-
     def _mergeable_next(self, other: Content, mergebool: bool) -> bool:
         raise ak._errors.wrap_error(NotImplementedError)
 

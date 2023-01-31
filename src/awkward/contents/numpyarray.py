@@ -11,6 +11,7 @@ from awkward._nplikes.numpylike import ArrayLike, NumpyMetadata
 from awkward._nplikes.typetracer import TypeTracerArray
 from awkward._util import unset
 from awkward.contents.content import Content
+from awkward.forms.form import _parameters_equal
 from awkward.forms.numpyform import NumpyForm
 from awkward.types.numpytype import primitive_to_dtype
 from awkward.typing import Final, Self, final
@@ -352,55 +353,67 @@ class NumpyArray(Content):
             )
 
     def _mergeable_next(self, other, mergebool):
-        if len(self.shape) > 1:
-            return self._to_regular_primitive()._mergeable(other, mergebool)
-
-        if isinstance(
-            other,
-            (
-                ak.contents.IndexedArray,
-                ak.contents.IndexedOptionArray,
-                ak.contents.ByteMaskedArray,
-                ak.contents.BitMaskedArray,
-                ak.contents.UnmaskedArray,
-            ),
+        # Is the other content is an identity, or a union?
+        if other.is_identity_like or other.is_union:
+            return True
+        # Otherwise, do the parameters match? If not, we can't merge.
+        elif not (
+            _parameters_equal(
+                self._parameters, other._parameters, only_array_record=True
+            )
         ):
-            return self._mergeable(other._content, mergebool)
-
-        elif isinstance(other, ak.contents.NumpyArray):
-            if self._data.ndim != other._data.ndim:
-                return False
-
-            # Obvious fast-path
-            if self.dtype == other.dtype:
-                return True
-
-            # Special-case booleans i.e. {bool, number}
-            elif (
-                np.issubdtype(self.dtype, np.bool_)
-                and np.issubdtype(other.dtype, np.number)
-                or np.issubdtype(self.dtype, np.number)
-                and np.issubdtype(other.dtype, np.bool_)
-            ):
-                return mergebool
-
-            # Currently we're less permissive than NumPy on merging datetimes / timedeltas
-            elif (
-                np.issubdtype(self.dtype, np.datetime64)
-                or np.issubdtype(self.dtype, np.timedelta64)
-                or np.issubdtype(other.dtype, np.datetime64)
-                or np.issubdtype(other.dtype, np.timedelta64)
-            ):
-                return False
-
-            # Default merging (can we cast one to the other)
-            else:
-                return self.backend.nplike.can_cast(
-                    self.dtype, other.dtype
-                ) or self.backend.nplike.can_cast(other.dtype, self.dtype)
-
-        else:
             return False
+        # Finally, fall back upon the per-content implementation
+        else:
+            if len(self.shape) > 1:
+                return self._to_regular_primitive()._mergeable_next(other, mergebool)
+
+            if isinstance(
+                other,
+                (
+                    ak.contents.IndexedArray,
+                    ak.contents.IndexedOptionArray,
+                    ak.contents.ByteMaskedArray,
+                    ak.contents.BitMaskedArray,
+                    ak.contents.UnmaskedArray,
+                ),
+            ):
+                return self._mergeable_next(other._content, mergebool)
+
+            elif isinstance(other, ak.contents.NumpyArray):
+                if self._data.ndim != other._data.ndim:
+                    return False
+
+                # Obvious fast-path
+                if self.dtype == other.dtype:
+                    return True
+
+                # Special-case booleans i.e. {bool, number}
+                elif (
+                    np.issubdtype(self.dtype, np.bool_)
+                    and np.issubdtype(other.dtype, np.number)
+                    or np.issubdtype(self.dtype, np.number)
+                    and np.issubdtype(other.dtype, np.bool_)
+                ):
+                    return mergebool
+
+                # Currently we're less permissive than NumPy on merging datetimes / timedeltas
+                elif (
+                    np.issubdtype(self.dtype, np.datetime64)
+                    or np.issubdtype(self.dtype, np.timedelta64)
+                    or np.issubdtype(other.dtype, np.datetime64)
+                    or np.issubdtype(other.dtype, np.timedelta64)
+                ):
+                    return False
+
+                # Default merging (can we cast one to the other)
+                else:
+                    return self.backend.nplike.can_cast(
+                        self.dtype, other.dtype
+                    ) or self.backend.nplike.can_cast(other.dtype, self.dtype)
+
+            else:
+                return False
 
     def _mergemany(self, others):
         if len(others) == 0:

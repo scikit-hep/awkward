@@ -9,6 +9,7 @@ from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.typetracer import TypeTracer
 from awkward._util import unset
 from awkward.contents.content import Content
+from awkward.forms.form import _parameters_equal
 from awkward.forms.indexedform import IndexedForm
 from awkward.index import Index
 from awkward.typing import Final, Self, final
@@ -417,7 +418,18 @@ class IndexedArray(Content):
             return self.project()._offsets_and_flattened(axis, depth)
 
     def _mergeable_next(self, other, mergebool):
-        if isinstance(
+        # Is the other content is an identity, or a union?
+        if other.is_identity_like or other.is_union:
+            return True
+        # Otherwise, do the parameters match? If not, we can't merge.
+        elif not (
+            _parameters_equal(
+                self._parameters, other._parameters, only_array_record=True
+            )
+        ):
+            return False
+        # Finally, fall back upon the per-content implementation
+        elif isinstance(
             other,
             (
                 ak.contents.IndexedArray,
@@ -427,10 +439,10 @@ class IndexedArray(Content):
                 ak.contents.UnmaskedArray,
             ),
         ):
-            return self._content._mergeable(other.content, mergebool)
+            return self._content._mergeable_next(other.content, mergebool)
 
         else:
-            return self._content._mergeable(other, mergebool)
+            return self._content._mergeable_next(other, mergebool)
 
     def _merging_strategy(self, others):
         if len(others) == 0:

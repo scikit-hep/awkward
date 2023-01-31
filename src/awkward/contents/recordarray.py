@@ -10,6 +10,7 @@ from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._util import unset
 from awkward.contents.content import Content
+from awkward.forms.form import _parameters_equal
 from awkward.forms.recordform import RecordForm
 from awkward.record import Record
 from awkward.typing import Final, Self, final
@@ -532,7 +533,18 @@ class RecordArray(Content):
             )
 
     def _mergeable_next(self, other, mergebool):
-        if isinstance(
+        # Is the other content is an identity, or a union?
+        if other.is_identity_like or other.is_union:
+            return True
+        # Otherwise, do the parameters match? If not, we can't merge.
+        elif not (
+            _parameters_equal(
+                self._parameters, other._parameters, only_array_record=True
+            )
+        ):
+            return False
+        # Finally, fall back upon the per-content implementation
+        elif isinstance(
             other,
             (
                 ak.contents.IndexedArray,
@@ -542,13 +554,25 @@ class RecordArray(Content):
                 ak.contents.UnmaskedArray,
             ),
         ):
-            return self._mergeable(other.content, mergebool)
+            return self._mergeable_next(other.content, mergebool)
+
+        elif isinstance(
+            other,
+            (
+                ak.contents.IndexedArray,
+                ak.contents.IndexedOptionArray,
+                ak.contents.ByteMaskedArray,
+                ak.contents.BitMaskedArray,
+                ak.contents.UnmaskedArray,
+            ),
+        ):
+            return self._mergeable_next(other.content, mergebool)
 
         if isinstance(other, RecordArray):
             if self.is_tuple and other.is_tuple:
                 if len(self._contents) == len(other._contents):
                     for self_cont, other_cont in zip(self._contents, other._contents):
-                        if not self_cont._mergeable(other_cont, mergebool):
+                        if not self_cont._mergeable_next(other_cont, mergebool):
                             return False
 
                     return True
@@ -560,7 +584,7 @@ class RecordArray(Content):
                 for i, field in enumerate(self._fields):
                     x = self._contents[i]
                     y = other._contents[other.field_to_index(field)]
-                    if not x._mergeable(y, mergebool):
+                    if not x._mergeable_next(y, mergebool):
                         return False
                 return True
 
