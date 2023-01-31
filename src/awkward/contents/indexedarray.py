@@ -515,7 +515,12 @@ class IndexedArray(Content):
                 theirlength,
             )
         )
-        parameters = ak._util.merge_parameters(self._parameters, other._parameters)
+        # We can directly merge with other options and indexed types, but we must merge parameters
+        if other.is_option or other.is_indexed:
+            parameters = ak._util.merge_parameters(self._parameters, other._parameters)
+        # Otherwise, this option parameters win out
+        else:
+            parameters = self._parameters
 
         return ak.contents.IndexedArray.simplified(
             index, content, parameters=parameters
@@ -543,8 +548,6 @@ class IndexedArray(Content):
             if isinstance(array, ak.contents.EmptyArray):
                 continue
 
-            parameters = ak._util.merge_parameters(parameters, array._parameters, True)
-
             if isinstance(
                 array,
                 (
@@ -556,6 +559,10 @@ class IndexedArray(Content):
                 array = array.to_IndexedOptionArray64()
 
             if isinstance(array, ak.contents.IndexedArray):
+                parameters = ak._util.merge_parameters(
+                    parameters, array._parameters, True
+                )
+
                 contents.append(array.content)
                 array_index = array.index
                 assert (
