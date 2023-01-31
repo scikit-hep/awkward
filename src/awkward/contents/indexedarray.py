@@ -429,16 +429,7 @@ class IndexedArray(Content):
         ):
             return False
         # Finally, fall back upon the per-content implementation
-        elif isinstance(
-            other,
-            (
-                ak.contents.IndexedArray,
-                ak.contents.IndexedOptionArray,
-                ak.contents.ByteMaskedArray,
-                ak.contents.BitMaskedArray,
-                ak.contents.UnmaskedArray,
-            ),
-        ):
+        elif other.is_option or other.is_indexed:
             return self._content._mergeable_next(other.content, mergebool)
 
         else:
@@ -558,7 +549,9 @@ class IndexedArray(Content):
             ):
                 array = array.to_IndexedOptionArray64()
 
-            if isinstance(array, ak.contents.IndexedArray):
+            if isinstance(
+                array, (ak.contents.IndexedOptionArray, ak.contents.IndexedArray)
+            ):
                 parameters = ak._util.merge_parameters(
                     parameters, array._parameters, True
                 )
@@ -603,7 +596,16 @@ class IndexedArray(Content):
 
         tail_contents = contents[1:]
         nextcontent = contents[0]._mergemany(tail_contents)
-        next = ak.contents.IndexedArray(nextindex, nextcontent, parameters=parameters)
+
+        # Options win out!
+        if any(x.is_option for x in head):
+            next = ak.contents.IndexedOptionArray(
+                nextindex, nextcontent, parameters=parameters
+            )
+        else:
+            next = ak.contents.IndexedArray(
+                nextindex, nextcontent, parameters=parameters
+            )
 
         if len(tail) == 0:
             return next

@@ -553,8 +553,8 @@ class IndexedOptionArray(Content):
         # Is the other content is an identity, or a union?
         if other.is_identity_like or other.is_union:
             return True
-        # We can only combine option types whose array-record parameters agree
-        elif other.is_option:
+        # We can only combine option/indexd types whose array-record parameters agree
+        elif other.is_option or other.is_indexed:
             return self._content._mergeable_next(
                 other.content, mergebool
             ) and _parameters_equal(
@@ -686,7 +686,9 @@ class IndexedOptionArray(Content):
             ):
                 array = array.to_IndexedOptionArray64()
 
-            if isinstance(array, ak.contents.IndexedOptionArray):
+            if isinstance(
+                array, (ak.contents.IndexedOptionArray, ak.contents.IndexedArray)
+            ):
                 # If we're merging an option, then merge parameters before pulling out `content`
                 parameters = ak._util.merge_parameters(
                     parameters, array._parameters, True
