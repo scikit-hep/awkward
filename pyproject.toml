@@ -257,7 +257,7 @@ ignore_errors = true
 ignore_missing_imports = true
 
 [tool.ruff]
-exclude = [
+extend-exclude = [
     "studies",
     "pybind11",
     "rapidjson",
@@ -277,7 +277,8 @@ select = [
     "I",                           # isort
     "UP",                          # pyupgrade
     "PGH002", "PGH003", "PGH004",  # pygrep-hooks
-    # "RUF",                         # Ruff-specific
+    "C4",                          # flake8-comprehensions
+    "YTT",                         # flake8-2020
 ]
 target-version = "py37"
 typing-modules = ["awkward.typing"]
