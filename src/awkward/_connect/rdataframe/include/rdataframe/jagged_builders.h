@@ -32,6 +32,11 @@ namespace awkward {
       buffers_uint8_ptr_[key] = ptr;
     }
 
+    void clear() {
+      map_names_nbytes_.clear();
+      buffers_uint8_ptr_.clear();
+    }
+
     void
     check_buffers() const {
       std::cout << "CPPBuffers check buffers: " << buffers_uint8_ptr_.size() << ".";
