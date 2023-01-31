@@ -72,15 +72,13 @@ class OptionType(Type):
                 tail = [f", {params}]"]
 
         return (
-            head
-            + [self._str_categorical_begin()]
-            + content_out
+            [*head, self._str_categorical_begin(), *content_out]
             + [self._str_categorical_end()]
             + tail
         )
 
     def __repr__(self):
-        args = [repr(self._content)] + self._repr_args()
+        args = [repr(self._content), *self._repr_args()]
         return "{}({})".format(type(self).__name__, ", ".join(args))
 
     def __eq__(self, other):

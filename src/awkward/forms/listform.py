@@ -95,7 +95,8 @@ class ListForm(Form):
             repr(self._starts),
             repr(self._stops),
             repr(self._content),
-        ] + self._repr_args()
+            *self._repr_args(),
+        ]
         return "{}({})".format(type(self).__name__, ", ".join(args))
 
     def _to_dict_part(self, verbose, toplevel):
@@ -182,7 +183,7 @@ class ListForm(Form):
             self.parameter("__array__") not in ("string", "bytestring")
             and list_indicator is not None
         ):
-            path = path + (list_indicator,)
+            path = (*path, list_indicator)
         self._content._columns(path, output, list_indicator)
 
     def _select_columns(self, index, specifier, matches, output):

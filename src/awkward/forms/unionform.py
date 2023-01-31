@@ -121,7 +121,8 @@ class UnionForm(Form):
             repr(self._tags),
             repr(self._index),
             repr(self._contents),
-        ] + self._repr_args()
+            *self._repr_args(),
+        ]
         return "{}({})".format(type(self).__name__, ", ".join(args))
 
     def _to_dict_part(self, verbose, toplevel):
@@ -235,7 +236,7 @@ class UnionForm(Form):
 
     def _columns(self, path, output, list_indicator):
         for content, field in zip(self._contents, self.fields):
-            content._columns(path + (field,), output, list_indicator)
+            content._columns((*path, field), output, list_indicator)
 
     def _select_columns(self, index, specifier, matches, output):
         contents = []

@@ -64,7 +64,7 @@ class ContentType(numba.types.Type):
     def getitem_field(self, viewtype, key):
         if self.has_field(key):
             return ak._connect.numba.arrayview.wrap(
-                self, viewtype, viewtype.fields + (key,)
+                self, viewtype, (*viewtype.fields, key)
             )
         else:
             raise TypeError(f"array does not have a field with key {repr(key)}")

@@ -126,7 +126,7 @@ def from_rdataframe(data_frame, columns, offsets_type="int64_t"):
     contents = {}
     awkward_type_cols = {}
 
-    columns = columns + ("rdfentry_",)
+    columns = (*columns, "rdfentry_")
     maybe_indexed = False
 
     # Important note: This loop is separate from the next one

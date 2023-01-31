@@ -312,7 +312,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         self.touch_shape()
         out = (self._dtype.itemsize,)
         for x in self._shape[:0:-1]:
-            out = (x * out[0],) + out
+            out = (x * out[0], *out)
         return out
 
     @property
@@ -1071,7 +1071,7 @@ class TypeTracer(NumpyLike):
             )
 
         return TypeTracerArray._new(
-            numpy.concatenate(emptyarrays).dtype, (unknown_length,) + inner_shape
+            numpy.concatenate(emptyarrays).dtype, (unknown_length, *inner_shape)
         )
 
     def repeat(

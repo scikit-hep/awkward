@@ -279,6 +279,7 @@ select = [
     "PGH002", "PGH003", "PGH004",  # pygrep-hooks
     "C4",                          # flake8-comprehensions
     "YTT",                         # flake8-2020
+    "RUF0",                        # Ruff-specific
 ]
 target-version = "py37"
 typing-modules = ["awkward.typing"]
