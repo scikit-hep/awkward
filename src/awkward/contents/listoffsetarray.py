@@ -180,9 +180,9 @@ class ListOffsetArray(Content):
 
         if issubclass(self._offsets.dtype.type, np.int64):
             if (
-                not self._backend.nplike.known_data
+                self._offsets[0] == 0
                 or not start_at_zero
-                or self._offsets[0] == 0
+                or not self._backend.nplike.known_data
             ):
                 return self
 

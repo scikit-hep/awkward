@@ -600,6 +600,9 @@ class IndexedOptionArray(Content):
         return (head, tail)
 
     def _reverse_merge(self, other):
+        if isinstance(other, ak.contents.EmptyArray):
+            return self
+
         theirlength = other.length
         mylength = self.length
         index = ak.index.Index64.empty(
@@ -640,7 +643,12 @@ class IndexedOptionArray(Content):
                 theirlength,
             )
         )
-        parameters = ak._util.merge_parameters(self._parameters, other._parameters)
+        # We can directly merge with other options, but we must merge parameters
+        if other.is_option:
+            parameters = ak._util.merge_parameters(self._parameters, other._parameters)
+        # Otherwise, this option parameters win out
+        else:
+            parameters = self._parameters
 
         return ak.contents.IndexedOptionArray.simplified(
             index, content, parameters=parameters
@@ -665,7 +673,8 @@ class IndexedOptionArray(Content):
         parameters = self._parameters
 
         for array in head:
-            parameters = ak._util.merge_parameters(parameters, array._parameters, True)
+            if isinstance(array, ak.contents.EmptyArray):
+                continue
 
             if isinstance(
                 array,
@@ -678,6 +687,10 @@ class IndexedOptionArray(Content):
                 array = array.to_IndexedOptionArray64()
 
             if isinstance(array, ak.contents.IndexedOptionArray):
+                # If we're merging an option, then merge parameters before pulling out `content`
+                parameters = ak._util.merge_parameters(
+                    parameters, array._parameters, True
+                )
                 contents.append(array.content)
                 array_index = array.index
                 assert (
@@ -703,9 +716,6 @@ class IndexedOptionArray(Content):
                 length_so_far = self._backend.index_nplike.add_shape_item(
                     length_so_far, array.length
                 )
-
-            elif isinstance(array, ak.contents.EmptyArray):
-                pass
             else:
                 contents.append(array)
                 assert nextindex.nplike is self._backend.index_nplike

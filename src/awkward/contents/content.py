@@ -10,7 +10,7 @@ import awkward as ak
 from awkward._backends import Backend
 from awkward._nplikes import to_nplike
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import NumpyLike, NumpyMetadata
+from awkward._nplikes.numpylike import NumpyLike, NumpyMetadata, ShapeItem
 from awkward._nplikes.typetracer import TypeTracer
 from awkward.forms.form import Form, _parameters_equal
 from awkward.typing import Any, AxisMaybeNone, Literal, Self, TypeAlias, TypedDict
@@ -192,7 +192,7 @@ class Content:
         raise ak._errors.wrap_error(NotImplementedError)
 
     @property
-    def length(self) -> int:
+    def length(self) -> ShapeItem:
         raise ak._errors.wrap_error(NotImplementedError)
 
     def _to_buffers(
@@ -206,7 +206,7 @@ class Content:
         raise ak._errors.wrap_error(NotImplementedError)
 
     def __len__(self) -> int:
-        return self.length
+        return int(self.length)
 
     def _repr_extra(self, indent: str) -> list[str]:
         out = []

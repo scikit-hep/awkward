@@ -1040,6 +1040,9 @@ class UnionArray(Content):
 
         parameters = self._parameters
         for array in head:
+            if isinstance(array, ak.contents.EmptyArray):
+                continue
+
             parameters = ak._util.merge_parameters(parameters, array._parameters, True)
             if isinstance(array, ak.contents.UnionArray):
                 union_tags = ak.index.Index(array.tags)
@@ -1082,9 +1085,6 @@ class UnionArray(Content):
                     length_so_far, array.length
                 )
                 nextcontents.extend(union_contents)
-
-            elif isinstance(array, ak.contents.EmptyArray):
-                pass
 
             else:
                 assert nexttags.nplike is self._backend.index_nplike

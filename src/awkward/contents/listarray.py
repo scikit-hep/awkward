@@ -1000,8 +1000,10 @@ class ListArray(Content):
         parameters = self._parameters
 
         for array in head:
-            parameters = ak._util.merge_parameters(parameters, array._parameters, True)
+            if isinstance(array, ak.contents.EmptyArray):
+                continue
 
+            parameters = ak._util.merge_parameters(parameters, array._parameters, True)
             if isinstance(
                 array,
                 (
@@ -1011,9 +1013,6 @@ class ListArray(Content):
                 ),
             ):
                 contents.append(array.content)
-
-            elif isinstance(array, ak.contents.EmptyArray):
-                pass
             else:
                 raise ak._errors.wrap_error(
                     ValueError(

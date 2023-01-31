@@ -540,6 +540,9 @@ class IndexedArray(Content):
 
         parameters = self._parameters
         for array in head:
+            if isinstance(array, ak.contents.EmptyArray):
+                continue
+
             parameters = ak._util.merge_parameters(parameters, array._parameters, True)
 
             if isinstance(
@@ -574,9 +577,6 @@ class IndexedArray(Content):
                 )
                 contentlength_so_far += array.content.length
                 length_so_far += array.length
-
-            elif isinstance(array, ak.contents.EmptyArray):
-                pass
             else:
                 contents.append(array)
                 assert nextindex.nplike is self._backend.index_nplike

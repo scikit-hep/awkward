@@ -658,18 +658,24 @@ class ByteMaskedArray(Content):
             for x in others
         ):
             parameters = self._parameters
-            masks = [self._mask.data[: self.length]]
+            self_length_scalar = self._backend.index_nplike.shape_item_as_scalar(
+                self.length
+            )
+            masks = [self._mask.data[:self_length_scalar]]
             tail_contents = []
             length = 0
             for x in others:
+                length_scalar = self._backend.index_nplike.shape_item_as_scalar(
+                    x.length
+                )
                 parameters = ak._util.merge_parameters(parameters, x._parameters, True)
-                masks.append(x._mask.data[: x.length])
-                tail_contents.append(x._content[: x.length])
-                length += x.length
+                masks.append(x._mask.data[:length_scalar])
+                tail_contents.append(x._content[:length_scalar])
+                length = self._backend.index_nplike.add_shape_item(length, x.length)
 
             return ByteMaskedArray(
                 ak.index.Index8(self._backend.nplike.concat(masks)),
-                self._content[: self.length]._mergemany(tail_contents),
+                self._content[:self_length_scalar]._mergemany(tail_contents),
                 self._valid_when,
                 parameters=parameters,
             )

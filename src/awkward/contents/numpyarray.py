@@ -428,10 +428,11 @@ class NumpyArray(Content):
 
         parameters = self._parameters
         for array in head:
-            parameters = ak._util.merge_parameters(parameters, array._parameters, True)
             if isinstance(array, ak.contents.EmptyArray):
-                pass
-            elif isinstance(array, ak.contents.NumpyArray):
+                continue
+
+            parameters = ak._util.merge_parameters(parameters, array._parameters, True)
+            if isinstance(array, ak.contents.NumpyArray):
                 contiguous_arrays.append(array.data)
             else:
                 raise ak._errors.wrap_error(

@@ -610,6 +610,9 @@ class RecordArray(Content):
 
         if self.is_tuple:
             for array in headless:
+                if isinstance(array, ak.contents.EmptyArray):
+                    continue
+
                 parameters = ak._util.merge_parameters(
                     parameters, array._parameters, True
                 )
@@ -630,8 +633,6 @@ class RecordArray(Content):
                         raise ak._errors.wrap_error(
                             ValueError("cannot merge tuple with non-tuple record")
                         )
-                elif isinstance(array, ak.contents.EmptyArray):
-                    pass
                 else:
                     raise ak._errors.wrap_error(
                         AssertionError(
