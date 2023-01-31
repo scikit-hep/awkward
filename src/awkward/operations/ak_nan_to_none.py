@@ -22,11 +22,11 @@ def nan_to_none(array, *, highlevel=True, behavior=None):
     """
     with ak._errors.OperationErrorContext(
         "ak.nan_to_none",
-        dict(
-            array=array,
-            highlevel=highlevel,
-            behavior=behavior,
-        ),
+        {
+            "array": array,
+            "highlevel": highlevel,
+            "behavior": behavior,
+        },
     ):
         return _impl(array, highlevel, behavior)
 

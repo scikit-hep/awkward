@@ -29,7 +29,7 @@ def parameters(array):
     """
     with ak._errors.OperationErrorContext(
         "ak.parameters",
-        dict(array=array),
+        {"array": array},
     ):
         return _impl(array)
 

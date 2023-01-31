@@ -407,22 +407,22 @@ def transform(
     """
     with ak._errors.OperationErrorContext(
         "ak.transform",
-        dict(
-            transformation=transformation,
-            array=array,
-            more_arrays=more_arrays,
-            depth_context=depth_context,
-            lateral_context=lateral_context,
-            allow_records=allow_records,
-            broadcast_parameters_rule=broadcast_parameters_rule,
-            left_broadcast=left_broadcast,
-            right_broadcast=right_broadcast,
-            numpy_to_regular=numpy_to_regular,
-            regular_to_jagged=regular_to_jagged,
-            return_value=return_value,
-            behavior=behavior,
-            highlevel=highlevel,
-        ),
+        {
+            "transformation": transformation,
+            "array": array,
+            "more_arrays": more_arrays,
+            "depth_context": depth_context,
+            "lateral_context": lateral_context,
+            "allow_records": allow_records,
+            "broadcast_parameters_rule": broadcast_parameters_rule,
+            "left_broadcast": left_broadcast,
+            "right_broadcast": right_broadcast,
+            "numpy_to_regular": numpy_to_regular,
+            "regular_to_jagged": regular_to_jagged,
+            "return_value": return_value,
+            "behavior": behavior,
+            "highlevel": highlevel,
+        },
     ):
         return _impl(
             transformation,

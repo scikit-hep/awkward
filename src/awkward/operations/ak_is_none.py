@@ -24,7 +24,7 @@ def is_none(array, axis=0, *, highlevel=True, behavior=None):
     """
     with ak._errors.OperationErrorContext(
         "ak.is_none",
-        dict(array=array, axis=axis, highlevel=highlevel, behavior=behavior),
+        {"array": array, "axis": axis, "highlevel": highlevel, "behavior": behavior},
     ):
         return _impl(array, axis, highlevel, behavior)
 

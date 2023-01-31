@@ -1016,7 +1016,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         """
         with ak._errors.OperationErrorContext(
             "ak.Array.__setitem__",
-            dict(self=self, field_name=where, field_value=what),
+            {"self": self, "field_name": where, "field_value": what},
         ):
             if not (
                 isinstance(where, str)
@@ -1049,7 +1049,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         """
         with ak._errors.OperationErrorContext(
             "ak.Array.__delitem__",
-            dict(self=self, field_name=where),
+            {"self": self, "field_name": where},
         ):
             if not (
                 isinstance(where, str)
@@ -1765,7 +1765,7 @@ class Record(NDArrayOperatorsMixin):
         """
         with ak._errors.OperationErrorContext(
             "ak.Record.__setitem__",
-            dict(self=self, field_name=where, field_value=what),
+            {"self": self, "field_name": where, "field_value": what},
         ):
             if not (
                 isinstance(where, str)
@@ -1799,7 +1799,7 @@ class Record(NDArrayOperatorsMixin):
         """
         with ak._errors.OperationErrorContext(
             "ak.Record.__delitem__",
-            dict(self=self, field_name=where),
+            {"self": self, "field_name": where},
         ):
             if not (
                 isinstance(where, str)

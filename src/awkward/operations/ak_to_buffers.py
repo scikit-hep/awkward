@@ -119,15 +119,15 @@ def to_buffers(
     """
     with ak._errors.OperationErrorContext(
         "ak.to_buffers",
-        dict(
-            array=array,
-            container=container,
-            buffer_key=buffer_key,
-            form_key=form_key,
-            id_start=id_start,
-            backend=backend,
-            byteorder=byteorder,
-        ),
+        {
+            "array": array,
+            "container": container,
+            "buffer_key": buffer_key,
+            "form_key": form_key,
+            "id_start": id_start,
+            "backend": backend,
+            "byteorder": byteorder,
+        },
     ):
         return _impl(
             array, container, buffer_key, form_key, id_start, backend, byteorder

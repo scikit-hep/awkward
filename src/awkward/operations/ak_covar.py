@@ -56,14 +56,14 @@ def covar(
     """
     with ak._errors.OperationErrorContext(
         "ak.covar",
-        dict(
-            x=x,
-            y=y,
-            weight=weight,
-            axis=axis,
-            keepdims=keepdims,
-            mask_identity=mask_identity,
-        ),
+        {
+            "x": x,
+            "y": y,
+            "weight": weight,
+            "axis": axis,
+            "keepdims": keepdims,
+            "mask_identity": mask_identity,
+        },
     ):
         if flatten_records is not unset:
             message = (

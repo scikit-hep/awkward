@@ -40,7 +40,7 @@ def drop_none(array, axis=None, highlevel=True, behavior=None):
     """
     with ak._errors.OperationErrorContext(
         "ak.drop_none",
-        dict(array=array, axis=axis, highlevel=highlevel, behavior=behavior),
+        {"array": array, "axis": axis, "highlevel": highlevel, "behavior": behavior},
     ):
         return _impl(array, axis, highlevel, behavior)
 

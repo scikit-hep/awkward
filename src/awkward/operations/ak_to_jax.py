@@ -22,7 +22,7 @@ def to_jax(array):
     """
     with ak._errors.OperationErrorContext(
         "ak.to_jax",
-        dict(array=array),
+        {"array": array},
     ):
         return _impl(array)
 

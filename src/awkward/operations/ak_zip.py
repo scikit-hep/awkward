@@ -131,16 +131,16 @@ def zip(
     """
     with ak._errors.OperationErrorContext(
         "ak.zip",
-        dict(
-            arrays=arrays,
-            depth_limit=depth_limit,
-            parameters=parameters,
-            with_name=with_name,
-            right_broadcast=right_broadcast,
-            optiontype_outside_record=optiontype_outside_record,
-            highlevel=highlevel,
-            behavior=behavior,
-        ),
+        {
+            "arrays": arrays,
+            "depth_limit": depth_limit,
+            "parameters": parameters,
+            "with_name": with_name,
+            "right_broadcast": right_broadcast,
+            "optiontype_outside_record": optiontype_outside_record,
+            "highlevel": highlevel,
+            "behavior": behavior,
+        },
     ):
         return _impl(
             arrays,

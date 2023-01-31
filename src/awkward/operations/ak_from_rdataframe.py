@@ -23,7 +23,7 @@ def from_rdataframe(rdf, columns):
     See also #ak.to_rdataframe.
     """
     with ak._errors.OperationErrorContext(
-        "ak.from_rdataframe", dict(rdf=rdf, columns=columns)
+        "ak.from_rdataframe", {"rdf": rdf, "columns": columns}
     ):
         return _impl(rdf, columns)
 

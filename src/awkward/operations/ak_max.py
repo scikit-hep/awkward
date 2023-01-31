@@ -60,15 +60,15 @@ def max(
     """
     with ak._errors.OperationErrorContext(
         "ak.max",
-        dict(
-            array=array,
-            axis=axis,
-            keepdims=keepdims,
-            initial=initial,
-            mask_identity=mask_identity,
-            highlevel=highlevel,
-            behavior=behavior,
-        ),
+        {
+            "array": array,
+            "axis": axis,
+            "keepdims": keepdims,
+            "initial": initial,
+            "mask_identity": mask_identity,
+            "highlevel": highlevel,
+            "behavior": behavior,
+        },
     ):
         if flatten_records is not unset:
             message = (
@@ -134,15 +134,15 @@ def nanmax(
     """
     with ak._errors.OperationErrorContext(
         "ak.nanmax",
-        dict(
-            array=array,
-            axis=axis,
-            keepdims=keepdims,
-            initial=initial,
-            mask_identity=mask_identity,
-            highlevel=highlevel,
-            behavior=behavior,
-        ),
+        {
+            "array": array,
+            "axis": axis,
+            "keepdims": keepdims,
+            "initial": initial,
+            "mask_identity": mask_identity,
+            "highlevel": highlevel,
+            "behavior": behavior,
+        },
     ):
         if flatten_records is not unset:
             message = (

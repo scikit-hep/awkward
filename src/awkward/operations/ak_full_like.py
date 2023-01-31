@@ -68,13 +68,13 @@ def full_like(array, fill_value, *, dtype=None, highlevel=True, behavior=None):
     """
     with ak._errors.OperationErrorContext(
         "ak.full_like",
-        dict(
-            array=array,
-            fill_value=fill_value,
-            dtype=dtype,
-            highlevel=highlevel,
-            behavior=behavior,
-        ),
+        {
+            "array": array,
+            "fill_value": fill_value,
+            "dtype": dtype,
+            "highlevel": highlevel,
+            "behavior": behavior,
+        },
     ):
         return _impl(array, fill_value, highlevel, behavior, dtype)
 

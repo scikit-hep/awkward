@@ -27,15 +27,15 @@ def isclose(
     """
     with ak._errors.OperationErrorContext(
         "ak.isclose",
-        dict(
-            a=a,
-            b=b,
-            rtol=rtol,
-            atol=atol,
-            equal_nan=equal_nan,
-            highlevel=highlevel,
-            behavior=behavior,
-        ),
+        {
+            "a": a,
+            "b": b,
+            "rtol": rtol,
+            "atol": atol,
+            "equal_nan": equal_nan,
+            "highlevel": highlevel,
+            "behavior": behavior,
+        },
     ):
         return _impl(a, b, rtol, atol, equal_nan, highlevel, behavior)
 

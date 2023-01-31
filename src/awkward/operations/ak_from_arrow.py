@@ -33,12 +33,12 @@ def from_arrow(array, *, generate_bitmasks=False, highlevel=True, behavior=None)
     """
     with ak._errors.OperationErrorContext(
         "ak.from_arrow",
-        dict(
-            array=array,
-            generate_bitmasks=generate_bitmasks,
-            highlevel=highlevel,
-            behavior=behavior,
-        ),
+        {
+            "array": array,
+            "generate_bitmasks": generate_bitmasks,
+            "highlevel": highlevel,
+            "behavior": behavior,
+        },
     ):
         return _impl(array, generate_bitmasks, highlevel, behavior)
 

@@ -31,7 +31,7 @@ def with_name(array, name, *, highlevel=True, behavior=None):
     """
     with ak._errors.OperationErrorContext(
         "ak.with_name",
-        dict(array=array, name=name, highlevel=highlevel, behavior=behavior),
+        {"array": array, "name": name, "highlevel": highlevel, "behavior": behavior},
     ):
         return _impl(array, name, highlevel, behavior)
 

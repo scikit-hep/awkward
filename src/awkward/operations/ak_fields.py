@@ -24,7 +24,7 @@ def fields(array):
     """
     with ak._errors.OperationErrorContext(
         "ak.fields",
-        dict(array=array),
+        {"array": array},
     ):
         return _impl(array)
 

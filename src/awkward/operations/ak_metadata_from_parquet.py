@@ -60,10 +60,10 @@ def metadata_from_parquet(
 
     with ak._errors.OperationErrorContext(
         "ak.metadata_from_parquet",
-        dict(
-            path=path,
-            storage_options=storage_options,
-        ),
+        {
+            "path": path,
+            "storage_options": storage_options,
+        },
     ):
         return _impl(
             path,

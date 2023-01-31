@@ -72,7 +72,7 @@ def local_index(array, axis=-1, *, highlevel=True, behavior=None):
     """
     with ak._errors.OperationErrorContext(
         "ak.local_index",
-        dict(array=array, axis=axis, highlevel=highlevel, behavior=behavior),
+        {"array": array, "axis": axis, "highlevel": highlevel, "behavior": behavior},
     ):
         return _impl(array, axis, highlevel, behavior)
 

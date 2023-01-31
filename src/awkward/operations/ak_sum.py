@@ -196,14 +196,14 @@ def sum(
     """
     with ak._errors.OperationErrorContext(
         "ak.sum",
-        dict(
-            array=array,
-            axis=axis,
-            keepdims=keepdims,
-            mask_identity=mask_identity,
-            highlevel=highlevel,
-            behavior=behavior,
-        ),
+        {
+            "array": array,
+            "axis": axis,
+            "keepdims": keepdims,
+            "mask_identity": mask_identity,
+            "highlevel": highlevel,
+            "behavior": behavior,
+        },
     ):
         if flatten_records is not unset:
             message = (
@@ -260,14 +260,14 @@ def nansum(
     """
     with ak._errors.OperationErrorContext(
         "ak.nansum",
-        dict(
-            array=array,
-            axis=axis,
-            keepdims=keepdims,
-            mask_identity=mask_identity,
-            highlevel=highlevel,
-            behavior=behavior,
-        ),
+        {
+            "array": array,
+            "axis": axis,
+            "keepdims": keepdims,
+            "mask_identity": mask_identity,
+            "highlevel": highlevel,
+            "behavior": behavior,
+        },
     ):
         if flatten_records is not unset:
             message = (

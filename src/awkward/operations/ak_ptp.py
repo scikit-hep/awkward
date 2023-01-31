@@ -57,12 +57,12 @@ def ptp(array, axis=None, *, keepdims=False, mask_identity=True, flatten_records
     """
     with ak._errors.OperationErrorContext(
         "ak.ptp",
-        dict(
-            array=array,
-            axis=axis,
-            keepdims=keepdims,
-            mask_identity=mask_identity,
-        ),
+        {
+            "array": array,
+            "axis": axis,
+            "keepdims": keepdims,
+            "mask_identity": mask_identity,
+        },
     ):
         if flatten_records is not unset:
             message = (

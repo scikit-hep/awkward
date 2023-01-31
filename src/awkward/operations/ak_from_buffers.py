@@ -69,16 +69,16 @@ def from_buffers(
     """
     with ak._errors.OperationErrorContext(
         "ak.from_buffers",
-        dict(
-            form=form,
-            length=length,
-            container=container,
-            buffer_key=buffer_key,
-            backend=backend,
-            byteorder=byteorder,
-            highlevel=highlevel,
-            behavior=behavior,
-        ),
+        {
+            "form": form,
+            "length": length,
+            "container": container,
+            "buffer_key": buffer_key,
+            "backend": backend,
+            "byteorder": byteorder,
+            "highlevel": highlevel,
+            "behavior": behavior,
+        },
     ):
         return _impl(
             form,

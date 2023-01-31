@@ -123,12 +123,12 @@ def to_dataframe(
     """
     with ak._errors.OperationErrorContext(
         "ak.to_dataframe",
-        dict(
-            array=array,
-            how=how,
-            levelname=levelname,
-            anonymous=anonymous,
-        ),
+        {
+            "array": array,
+            "how": how,
+            "levelname": levelname,
+            "anonymous": anonymous,
+        },
     ):
         return _impl(array, how, levelname, anonymous)
 

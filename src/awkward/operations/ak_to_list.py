@@ -39,7 +39,7 @@ def to_list(array):
     """
     with ak._errors.OperationErrorContext(
         "ak.to_list",
-        dict(array=array),
+        {"array": array},
     ):
         return _impl(array)
 

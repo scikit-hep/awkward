@@ -36,7 +36,7 @@ def to_numpy(array, *, allow_missing=True):
     """
     with ak._errors.OperationErrorContext(
         "ak.to_numpy",
-        dict(array=array, allow_missing=allow_missing),
+        {"array": array, "allow_missing": allow_missing},
     ):
         return _impl(array, allow_missing)
 

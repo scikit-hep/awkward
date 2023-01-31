@@ -20,7 +20,7 @@ def validity_error(array, *, exception=False):
     """
     with ak._errors.OperationErrorContext(
         "ak.validity_error",
-        dict(array=array, exception=exception),
+        {"array": array, "exception": exception},
     ):
         return _impl(array, exception)
 

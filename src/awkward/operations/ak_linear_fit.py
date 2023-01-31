@@ -75,14 +75,14 @@ def linear_fit(
     """
     with ak._errors.OperationErrorContext(
         "ak.linear_fit",
-        dict(
-            x=x,
-            y=y,
-            weight=weight,
-            axis=axis,
-            keepdims=keepdims,
-            mask_identity=mask_identity,
-        ),
+        {
+            "x": x,
+            "y": y,
+            "weight": weight,
+            "axis": axis,
+            "keepdims": keepdims,
+            "mask_identity": mask_identity,
+        },
     ):
         return _impl(x, y, weight, axis, keepdims, mask_identity)
 

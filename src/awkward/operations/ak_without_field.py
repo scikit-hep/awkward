@@ -31,7 +31,7 @@ def without_field(array, where, *, highlevel=True, behavior=None):
     """
     with ak._errors.OperationErrorContext(
         "ak.without_field",
-        dict(array=array, where=where, highlevel=highlevel, behavior=behavior),
+        {"array": array, "where": where, "highlevel": highlevel, "behavior": behavior},
     ):
         return _impl(array, where, highlevel, behavior)
 

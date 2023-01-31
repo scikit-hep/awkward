@@ -17,7 +17,7 @@ def from_arrow_schema(schema):
     """
     with ak._errors.OperationErrorContext(
         "ak.from_arrow_schema",
-        dict(schema=schema),
+        {"schema": schema},
     ):
         return _impl(schema)
 
