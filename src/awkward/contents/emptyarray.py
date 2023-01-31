@@ -9,6 +9,7 @@ from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.emptyform import EmptyForm
+from awkward.forms.form import _parameters_is_empty
 from awkward.typing import Final, Self, final
 
 np = NumpyMetadata.instance()
@@ -23,6 +24,10 @@ class EmptyArray(Content):
     def __init__(self, *, parameters=None, backend=None):
         if backend is None:
             backend = ak._backends.NumpyBackend.instance()
+        if not _parameters_is_empty(parameters):
+            raise ak._errors.wrap_error(
+                TypeError(f"{type(self).__name__} cannot contain parameters")
+            )
         self._init(parameters, backend)
 
     form_cls: Final = EmptyForm
