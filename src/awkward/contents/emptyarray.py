@@ -308,7 +308,7 @@ class EmptyArray(Content):
     def _to_backend_array(self, allow_missing, backend):
         return backend.nplike.empty(0, dtype=np.float64)
 
-    def _completely_flatten(self, backend, options):
+    def _remove_structure(self, backend, options):
         return []
 
     def _recursively_apply(

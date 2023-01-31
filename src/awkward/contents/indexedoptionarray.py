@@ -1331,7 +1331,7 @@ class IndexedOptionArray(Content):
                         "reduce_next with unbranching depth > negaxis is only "
                         "expected to return RegularArray or ListOffsetArray or "
                         "IndexedOptionArray; "
-                        "instead, it returned " + out
+                        "instead, it returned {}".format(type(out).__name__)
                     )
                 )
 
@@ -1526,10 +1526,10 @@ class IndexedOptionArray(Content):
             else:
                 return content
 
-    def _completely_flatten(self, backend, options):
+    def _remove_structure(self, backend, options):
         branch, depth = self.branch_depth
         if branch or options["drop_nones"] or depth > 1:
-            return self.project()._completely_flatten(backend, options)
+            return self.project()._remove_structure(backend, options)
         else:
             return [self]
 

@@ -1962,15 +1962,30 @@ class ListOffsetArray(Content):
 
         return self.to_RegularArray()._to_backend_array(allow_missing, backend)
 
-    def _completely_flatten(self, backend, options):
+    def _remove_structure(self, backend, options):
         if (
             self.parameter("__array__") == "string"
             or self.parameter("__array__") == "bytestring"
         ):
             return [self]
         else:
-            flat = self._content[self._offsets[0] : self._offsets[-1]]
-            return flat._completely_flatten(backend, options)
+            content = self._content[self._offsets[0] : self._offsets[-1]]
+            contents = content._remove_structure(backend, options)
+            if options["keepdims"]:
+                return [
+                    ListOffsetArray(
+                        ak.index.Index64(
+                            backend.index_nplike.asarray(
+                                [0, backend.index_nplike.shape_item_as_scalar(c.length)]
+                            )
+                        ),
+                        c,
+                        parameters=self._parameters,
+                    )
+                    for c in contents
+                ]
+            else:
+                return contents
 
     def _drop_none(self):
         if self._content.is_option:
