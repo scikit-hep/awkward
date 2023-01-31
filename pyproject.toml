@@ -269,12 +269,15 @@ ignore = [
     "UP030",  # {0} -> {}
 ]
 select = [
-    "B0",                # flake8-bugbear
-    "C", "E", "F", "W",  # flake8
-    "I",                 # isort
-    "T20",               # flake8-print
-    "UP",                # pyupgrade
-    "TID251"             # flake8-tidy-imports
+    "C", "E", "F", "W",            # flake8
+    "B0", "B904",                  # flake8-bugbear
+    "T20",                         # flake8-print
+    "TID251",                      # flake8-tidy-imports
+    "ISC",                         # flake8-implicit-str-concat
+    "I",                           # isort
+    "UP",                          # pyupgrade
+    "PGH002", "PGH003", "PGH004",  # pygrep-hooks
+    # "RUF",                         # Ruff-specific
 ]
 target-version = "py37"
 typing-modules = ["awkward.typing"]
@@ -291,8 +294,6 @@ mccabe.max-complexity = 100
 ]
 "src/awkward/__init__.py" = [
     "E402",
-    "F401",
-    "F403",
     "F401",
     "F403",
     "I001",
