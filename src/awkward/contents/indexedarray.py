@@ -421,17 +421,13 @@ class IndexedArray(Content):
         # Is the other content is an identity, or a union?
         if other.is_identity_like or other.is_union:
             return True
-        # Otherwise, do the parameters match? If not, we can't merge.
-        elif not (
-            _parameters_equal(
+        # We can only combine option/indexed types whose array-record parameters agree
+        elif other.is_option or other.is_indexed:
+            return self._content._mergeable_next(
+                other.content, mergebool
+            ) and _parameters_equal(
                 self._parameters, other._parameters, only_array_record=True
             )
-        ):
-            return False
-        # Finally, fall back upon the per-content implementation
-        elif other.is_option or other.is_indexed:
-            return self._content._mergeable_next(other.content, mergebool)
-
         else:
             return self._content._mergeable_next(other, mergebool)
 

@@ -633,6 +633,9 @@ class RegularArray(Content):
         # Is the other content is an identity, or a union?
         if other.is_identity_like or other.is_union:
             return True
+        # Check against option contents
+        elif other.is_option or other.is_indexed:
+            return self._mergeable_next(other.content, mergebool)
         # Otherwise, do the parameters match? If not, we can't merge.
         elif not (
             _parameters_equal(
@@ -640,31 +643,6 @@ class RegularArray(Content):
             )
         ):
             return False
-        # Finally, fall back upon the per-content implementation
-        elif isinstance(
-            other,
-            (
-                ak.contents.IndexedArray,
-                ak.contents.IndexedOptionArray,
-                ak.contents.ByteMaskedArray,
-                ak.contents.BitMaskedArray,
-                ak.contents.UnmaskedArray,
-            ),
-        ):
-            return self._mergeable_next(other.content, mergebool)
-
-        elif isinstance(
-            other,
-            (
-                ak.contents.IndexedArray,
-                ak.contents.IndexedOptionArray,
-                ak.contents.ByteMaskedArray,
-                ak.contents.BitMaskedArray,
-                ak.contents.UnmaskedArray,
-            ),
-        ):
-            return self._mergeable_next(other.content, mergebool)
-
         elif isinstance(
             other,
             (
@@ -674,10 +652,8 @@ class RegularArray(Content):
             ),
         ):
             return self._content._mergeable_next(other.content, mergebool)
-
         elif isinstance(other, ak.contents.NumpyArray) and len(other.shape) > 1:
             return self._mergeable_next(other._to_regular_primitive(), mergebool)
-
         else:
             return False
 

@@ -536,6 +536,9 @@ class RecordArray(Content):
         # Is the other content is an identity, or a union?
         if other.is_identity_like or other.is_union:
             return True
+        # Check against option contents
+        elif other.is_option or other.is_indexed:
+            return self._mergeable_next(other.content, mergebool)
         # Otherwise, do the parameters match? If not, we can't merge.
         elif not (
             _parameters_equal(
@@ -543,32 +546,7 @@ class RecordArray(Content):
             )
         ):
             return False
-        # Finally, fall back upon the per-content implementation
-        elif isinstance(
-            other,
-            (
-                ak.contents.IndexedArray,
-                ak.contents.IndexedOptionArray,
-                ak.contents.ByteMaskedArray,
-                ak.contents.BitMaskedArray,
-                ak.contents.UnmaskedArray,
-            ),
-        ):
-            return self._mergeable_next(other.content, mergebool)
-
-        elif isinstance(
-            other,
-            (
-                ak.contents.IndexedArray,
-                ak.contents.IndexedOptionArray,
-                ak.contents.ByteMaskedArray,
-                ak.contents.BitMaskedArray,
-                ak.contents.UnmaskedArray,
-            ),
-        ):
-            return self._mergeable_next(other.content, mergebool)
-
-        if isinstance(other, RecordArray):
+        elif isinstance(other, RecordArray):
             if self.is_tuple and other.is_tuple:
                 if len(self._contents) == len(other._contents):
                     for self_cont, other_cont in zip(self._contents, other._contents):

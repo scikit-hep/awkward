@@ -553,7 +553,7 @@ class IndexedOptionArray(Content):
         # Is the other content is an identity, or a union?
         if other.is_identity_like or other.is_union:
             return True
-        # We can only combine option/indexd types whose array-record parameters agree
+        # We can only combine option/indexed types whose array-record parameters agree
         elif other.is_option or other.is_indexed:
             return self._content._mergeable_next(
                 other.content, mergebool

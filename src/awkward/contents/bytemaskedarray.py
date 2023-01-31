@@ -637,7 +637,7 @@ class ByteMaskedArray(Content):
         if other.is_identity_like or other.is_union:
             return True
         # We can only combine option types whose array-record parameters agree
-        elif other.is_option:
+        elif other.is_option or other.is_indexed:
             return self._content._mergeable_next(
                 other.content, mergebool
             ) and _parameters_equal(
