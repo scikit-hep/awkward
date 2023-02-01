@@ -13,7 +13,7 @@ namespace awkward {
 
   class CppBuffers {
   public:
-    CppBuffers() {}
+    CppBuffers() = default;
 
     ~CppBuffers() = default;
 

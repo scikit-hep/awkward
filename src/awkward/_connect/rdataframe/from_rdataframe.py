@@ -63,17 +63,6 @@ done = compiler(
 assert done is True
 
 
-def empty_buffers(cpp_buffers, names_nbytes):
-    buffers = {}
-    for item in names_nbytes:
-        buffers[item.first] = numpy.empty(item.second, dtype=np.uint8)
-        cpp_buffers.append(
-            item.first,
-            buffers[item.first].ctypes.data_as(ctypes.POINTER(ctypes.c_ubyte)),
-        )
-    return buffers
-
-
 def cpp_builder_type(depth, data_type):
     if depth == 1:
         return f"awkward::LayoutBuilder::Numpy<{data_type}>>"
@@ -218,7 +207,15 @@ def from_rdataframe(data_frame, columns, offsets_type="int64_t"):
                 )
 
             names_nbytes = cpp_buffers_self.names_nbytes[builder_type](builder)
-            buffers = empty_buffers(cpp_buffers_self, names_nbytes)
+
+            buffers = {}
+            for item in names_nbytes:
+                buffers[item.first] = numpy.empty(item.second, dtype=np.uint8)
+                cpp_buffers_self.append(
+                    item.first,
+                    buffers[item.first].ctypes.data_as(ctypes.POINTER(ctypes.c_ubyte)),
+                )
+
             length = cpp_buffers_self.to_char_buffers[builder_type](builder)
 
             contents[col] = ak.from_buffers(
