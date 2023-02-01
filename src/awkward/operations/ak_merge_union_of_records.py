@@ -34,7 +34,7 @@ def merge_union_of_records(array, axis=-1, *, highlevel=True, behavior=None):
     """
     with ak._errors.OperationErrorContext(
         "ak.merge_union_of_records",
-        dict(array=array, axis=axis, highlevel=highlevel, behavior=behavior),
+        {"array": array, "axis": axis, "highlevel": highlevel, "behavior": behavior},
     ):
         return _impl(array, axis, highlevel, behavior)
 
