@@ -58,10 +58,15 @@ namespace awkward {
     }
 
     template<class BUILDER>
-    void
+    size_t
     to_char_buffers(BUILDER& builder) {
+      size_t length = builder.length();
+
       builder.to_char_buffers(buffers_uint8_ptr_);
       builder.clear();
+      clear();
+
+      return length;
     }
 
   private:

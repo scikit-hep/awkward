@@ -186,10 +186,6 @@ def from_rdataframe(data_frame, columns, offsets_type="int64_t"):
                     builder, result_ptrs[col]
                 )
 
-                names_nbytes = cpp_buffers_self.names_nbytes[builder_type](builder)
-                buffers = empty_buffers(cpp_buffers_self, names_nbytes)
-                cpp_buffers_self.to_char_buffers[builder_type](builder)
-
             elif isinstance(form, ak.forms.ListOffsetForm):
                 if isinstance(form.content, ak.forms.NumpyForm):
                     # NOTE: list_depth == 2 or 1 if its the list of strings
@@ -214,7 +210,6 @@ def from_rdataframe(data_frame, columns, offsets_type="int64_t"):
                     cppyy.gbl.awkward, f"fill_offsets_and_flatten{list_depth}"
                 )
                 fill_from_func[builder_type, col_type](builder, result_ptrs[col])
-                builder.clear()
             else:
                 raise ak._errors.wrap_error(
                     AssertionError(f"unrecognized Form: {type(form)}")
@@ -222,11 +217,10 @@ def from_rdataframe(data_frame, columns, offsets_type="int64_t"):
 
             names_nbytes = cpp_buffers_self.names_nbytes[builder_type](builder)
             buffers = empty_buffers(cpp_buffers_self, names_nbytes)
-            cpp_buffers_self.to_char_buffers[builder_type](builder)
-            cpp_buffers_self.clear()
+            length = cpp_buffers_self.to_char_buffers[builder_type](builder)
 
             contents[col] = ak.from_buffers(
-                form, builder.length(), buffers, byteorder=ak._util.native_byteorder
+                form, length, buffers, byteorder=ak._util.native_byteorder
             )
 
     return ak.zip(contents, depth_limit=1)

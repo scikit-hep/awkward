@@ -24,7 +24,8 @@ def from_rdataframe(rdf, columns, offsets_type="int64_t"):
     See also #ak.to_rdataframe.
     """
     with ak._errors.OperationErrorContext(
-        "ak.from_rdataframe", {"rdf": rdf, "columns": columns, "offsets_type": offsets_type}
+        "ak.from_rdataframe",
+        {"rdf": rdf, "columns": columns, "offsets_type": offsets_type},
     ):
         return _impl(rdf, columns, offsets_type)
 
