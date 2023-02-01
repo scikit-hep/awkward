@@ -28,7 +28,7 @@ def merge_option_of_records(array, axis=-1, *, highlevel=True, behavior=None):
     into records of options, i.e.
 
         >>> ak.merge_option_of_records(array)
-        <Array [{a: None}, {a: 1}] type='2 * {a: ?int64}'>
+        <Array [{a: None}, {a: 1}, {a: 2}] type='3 * {a: ?int64}'>
     """
     with ak._errors.OperationErrorContext(
         "ak.merge_option_of_records",
