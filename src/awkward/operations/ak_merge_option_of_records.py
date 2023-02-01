@@ -48,7 +48,12 @@ def _impl(array, axis, highlevel, behavior):
 
             # Transpose index-of-record to record-of-index
             return ak.contents.RecordArray(
-                [layout.copy(content=c) for c in record.contents],
+                [
+                    ak.contents.IndexedArray.simplified(
+                        layout.index, c, parameters=layout._parameters
+                    )
+                    for c in record.contents
+                ],
                 record.fields,
                 record.length,
                 backend=backend,
@@ -63,10 +68,17 @@ def _impl(array, axis, highlevel, behavior):
                 np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
             )
         elif depth == posaxis + 1 and layout.is_option and layout.content.is_record:
+            layout = layout.to_IndexedOptionArray64()
+
             record = layout.content
             # Transpose option-of-record to record-of-option
             return ak.contents.RecordArray(
-                [layout.copy(content=c) for c in record.contents],
+                [
+                    ak.contents.IndexedOptionArray.simplified(
+                        layout.index, c, parameters=layout._parameters
+                    )
+                    for c in record.contents
+                ],
                 record.fields,
                 record.length,
                 backend=backend,
