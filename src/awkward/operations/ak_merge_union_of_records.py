@@ -23,12 +23,13 @@ def merge_union_of_records(array, axis=-1, *, highlevel=True, behavior=None):
 
     Simplifies unions of records, e.g.
 
-        >>> ak.concatenate(([{"a": 1}], [{"b": 2}]))
+        >>> array = ak.concatenate(([{"a": 1}], [{"b": 2}]))
+        >>> array
         <Array [{a: 1}, {b: 2}] type='2 * union[{a: int64}, {b: int64}]'>
 
     into records of options, i.e.
 
-        >>> array = ak.Array([[1.1, None, 2.2], [], [None, 3.3, 4.4]])
+        >>> ak.merge_union_of_records(array)
         <Array [{a: 1, b: None}, {a: None, ...}] type='2 * {a: ?int64, b: ?int64}'>
     """
     with ak._errors.OperationErrorContext(
