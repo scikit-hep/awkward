@@ -26,13 +26,21 @@ def test_merge_union_of_records_2():
     a2 = ak.Array([{"b": 3.3, "c": 4.4}, {"b": None, "c": None}])
     c = ak.concatenate((a1, a2))
 
-    assert c.tolist() == [{"a": 1, "b": 2}, {"b": 3.3, "c": 4.4}, {"b": None, "c": None}]
+    assert c.tolist() == [
+        {"a": 1, "b": 2},
+        {"b": 3.3, "c": 4.4},
+        {"b": None, "c": None},
+    ]
 
     assert str(c.type) == "3 * union[{a: int64, b: int64}, {b: ?float64, c: ?float64}]"
 
     d = ak.merge_union_of_records(c)
 
-    assert d.tolist() == [{"a": 1, "b": 2, "c": None}, {"a": None, "b": 3.3, "c": 4.4}, {"a": None, "b": None, "c": None}]
+    assert d.tolist() == [
+        {"a": 1, "b": 2, "c": None},
+        {"a": None, "b": 3.3, "c": 4.4},
+        {"a": None, "b": None, "c": None},
+    ]
 
     assert str(d.type) == "3 * {a: ?int64, b: ?float64, c: ?float64}"
 
@@ -56,6 +64,10 @@ def test_merge_option_of_records_2():
 
     b = ak.merge_option_of_records(a)
 
-    assert b.tolist() == [{"a": None, "b": None}, {"a": 1, "b": 2}, {"a": None, "b": None}]
+    assert b.tolist() == [
+        {"a": None, "b": None},
+        {"a": 1, "b": 2},
+        {"a": None, "b": None},
+    ]
 
     assert str(b.type) == "3 * {a: ?int64, b: ?int64}"
