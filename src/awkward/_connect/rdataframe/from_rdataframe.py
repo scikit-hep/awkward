@@ -63,77 +63,79 @@ done = compiler(
 assert done is True
 
 
+def empty_buffers(cpp_buffers, names_nbytes):
+    buffers = {}
+    for item in names_nbytes:
+        buffers[item.first] = numpy.empty(item.second, dtype=np.uint8)
+        cpp_buffers.append(
+            item.first,
+            buffers[item.first].ctypes.data_as(ctypes.POINTER(ctypes.c_ubyte)),
+        )
+    return buffers
+
+
+def cpp_builder_type(depth, data_type):
+    if depth == 1:
+        return f"awkward::LayoutBuilder::Numpy<{data_type}>>"
+    else:
+        return (
+            "awkward::LayoutBuilder::ListOffset<int64_t, "
+            + cpp_builder_type(depth - 1, data_type)
+            + ">"
+        )
+
+
+def cpp_fill_offsets_and_flatten(depth):
+    if depth == 1:
+        return "\nfor (auto const& it : vec1) {\n" + "  builder1.append(it);\n" + "}\n"
+    else:
+        return (
+            f"for (auto const& vec{depth - 1} : vec{depth}) "
+            + "{\n"
+            + f"  auto& builder{depth - 1} = builder{depth}.begin_list();\n"
+            + "  "
+            + cpp_fill_offsets_and_flatten(depth - 1)
+            + "\n"
+            + f"  builder{depth}.end_list();\n"
+            + "}\n"
+        )
+
+
+def cpp_fill_function(depth):
+    if depth == 1:
+        return (
+            "template<class BUILDER, typename PRIMITIVE>\n"
+            + "void\n"
+            + "fill_from(BUILDER& builder, ROOT::RDF::RResultPtr<std::vector<PRIMITIVE>>& result) {"
+            + "  for (auto const& it : result) {\n"
+            + "    builder.append(it);\n"
+            + "  }\n"
+            + "}\n"
+        )
+    else:
+        return (
+            "template<class BUILDER, typename PRIMITIVE>\n"
+            + "void\n"
+            + f"fill_offsets_and_flatten{depth}(BUILDER& builder{depth}, ROOT::RDF::RResultPtr<std::vector<PRIMITIVE>>& result) "
+            + "{\n"
+            + f"  for (auto const& vec{depth - 1} : result) "
+            + "{\n"
+            + f"  auto& builder{depth - 1} = builder{depth}.begin_list();\n"
+            + "  "
+            + cpp_fill_offsets_and_flatten(depth - 1)
+            + "\n"
+            + f"  builder{depth}.end_list();\n"
+            + "}\n"
+            + "}\n"
+        )
+
+
 def from_rdataframe(data_frame, columns, offsets_type="int64_t"):
     def form_dtype(form):
         if isinstance(form, ak.forms.NumpyForm) and form.inner_shape == ():
             return primitive_to_dtype(form.primitive)
         elif isinstance(form, ak.forms.ListOffsetForm):
             return form_dtype(form.content)
-
-    def empty_buffers(cpp_buffers_self, names_nbytes):
-        buffers = {}
-        for item in names_nbytes:
-            buffers[item.first] = numpy.empty(item.second, dtype=np.uint8)
-            cpp_buffers_self.append(
-                item.first,
-                buffers[item.first].ctypes.data_as(ctypes.POINTER(ctypes.c_ubyte)),
-            )
-        return buffers
-
-    def cpp_builder_type(depth, data_type):
-        if depth == 1:
-            return f"awkward::LayoutBuilder::Numpy<{data_type}>>"
-        else:
-            return (
-                "awkward::LayoutBuilder::ListOffset<int64_t, "
-                + cpp_builder_type(depth - 1, data_type)
-                + ">"
-            )
-
-    def cpp_fill_offsets_and_flatten(depth):
-        if depth == 1:
-            return (
-                "\nfor (auto const& it : vec1) {\n" + "  builder1.append(it);\n" + "}\n"
-            )
-        else:
-            return (
-                f"for (auto const& vec{depth - 1} : vec{depth}) "
-                + "{\n"
-                + f"  auto& builder{depth - 1} = builder{depth}.begin_list();\n"
-                + "  "
-                + cpp_fill_offsets_and_flatten(depth - 1)
-                + "\n"
-                + f"  builder{depth}.end_list();\n"
-                + "}\n"
-            )
-
-    def cpp_fill_function(depth):
-        if depth == 1:
-            return (
-                "template<class BUILDER, typename PRIMITIVE>\n"
-                + "void\n"
-                + "fill_from(BUILDER& builder, ROOT::RDF::RResultPtr<std::vector<PRIMITIVE>>& result) {"
-                + "  for (auto const& it : result) {\n"
-                + "    builder.append(it);\n"
-                + "  }\n"
-                + "}\n"
-            )
-        else:
-            return (
-                "template<class BUILDER, typename PRIMITIVE>\n"
-                + "void\n"
-                + f"fill_offsets_and_flatten{depth}(BUILDER& builder{depth}, ROOT::RDF::RResultPtr<std::vector<PRIMITIVE>>& result) "
-                + "{\n"
-                + f"  for (auto const& vec{depth - 1} : result) "
-                + "{\n"
-                + f"  auto& builder{depth - 1} = builder{depth}.begin_list();\n"
-                + "  "
-                + cpp_fill_offsets_and_flatten(depth - 1)
-                + "\n"
-                + f"  builder{depth}.end_list();\n"
-                + "}\n"
-                + "}\n"
-            )
 
     # Register Take action for each column
     # 'Take' is a lazy action:
@@ -173,8 +175,8 @@ def from_rdataframe(data_frame, columns, offsets_type="int64_t"):
             data_type = cpp_type_of[form_dtype_name]
 
             # pull in the CppBuffers (after which we can import from it)
-            CppBuffers = cppyy.gbl.awkward.CppBuffers[col_type]
-            cpp_buffers_self = CppBuffers(result_ptrs[col])
+            CppBuffers = cppyy.gbl.awkward.CppBuffers
+            cpp_buffers_self = CppBuffers()
 
             if isinstance(form, ak.forms.NumpyForm):
 

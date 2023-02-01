@@ -3,7 +3,7 @@
 #ifndef AWKWARD_RDATAFRAME_JAGGED_BUILDERS_H_
 #define AWKWARD_RDATAFRAME_JAGGED_BUILDERS_H_
 
-#include <stdlib.h>
+#include <map>
 #include <string>
 #include "awkward/GrowableBuffer.h"
 #include "awkward/LayoutBuilder.h"
@@ -11,14 +11,11 @@
 
 namespace awkward {
 
-  template <typename T>
   class CppBuffers {
   public:
-    CppBuffers(ROOT::RDF::RResultPtr<std::vector<T>>& result)
-        : result_(result) {
-    }
+    CppBuffers() {}
 
-    ~CppBuffers() {}
+    ~CppBuffers() = default;
 
     template<class BUILDER>
     const std::map<std::string, size_t>&
@@ -35,18 +32,6 @@ namespace awkward {
     void clear() {
       map_names_nbytes_.clear();
       buffers_uint8_ptr_.clear();
-    }
-
-    void
-    check_buffers() const {
-      std::cout << "CPPBuffers check buffers: " << buffers_uint8_ptr_.size() << ".";
-      for (auto const& it : buffers_uint8_ptr_) {
-        uint8_t* data = it.second;
-        for (int i = 0; i < map_names_nbytes_[it.first]; i++) {
-          std::cout << (int64_t)data[i] << ",";
-        }
-      }
-      std::cout << std::endl;
     }
 
     template<class BUILDER, typename PRIMITIVE>
@@ -70,10 +55,8 @@ namespace awkward {
     }
 
   private:
-    ROOT::RDF::RResultPtr<std::vector<T>>& result_;
     std::map<std::string, size_t> map_names_nbytes_;
     std::map<std::string, uint8_t*> buffers_uint8_ptr_;
-
   };
 
 }  // namespace awkward
