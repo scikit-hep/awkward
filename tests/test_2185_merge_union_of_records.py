@@ -52,11 +52,16 @@ def test_merge_union_of_records_3():
 
     assert c.tolist() == [[[[{"a": 1, "b": 2}, {"b": 3.3, "c": 4.4}]]]]
 
-    assert str(c.type) == "1 * var * var * var * union[{a: int64, b: int64}, {b: float64, c: float64}]"
+    assert (
+        str(c.type)
+        == "1 * var * var * var * union[{a: int64, b: int64}, {b: float64, c: float64}]"
+    )
 
     d = ak.merge_union_of_records(c, axis=-1)
 
-    assert d.tolist() == [[[[{"a": 1, "b": 2, "c": None}, {"a": None, "b": 3.3, "c": 4.4}]]]]
+    assert d.tolist() == [
+        [[[{"a": 1, "b": 2, "c": None}, {"a": None, "b": 3.3, "c": 4.4}]]]
+    ]
 
     assert str(d.type) == "1 * var * var * var * {a: ?int64, b: float64, c: ?float64}"
 
@@ -89,7 +94,7 @@ def test_merge_option_of_records_2():
     assert str(b.type) == "3 * {a: ?int64, b: ?int64}"
 
 
-def test_merge_option_of_records():
+def test_merge_option_of_records_3():
     a = ak.Array([[[[None, {"a": 1, "b": 2}]]]])
 
     assert str(a.type) == "1 * var * var * var * ?{a: int64, b: int64}"
