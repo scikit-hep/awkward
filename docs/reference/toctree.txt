@@ -176,7 +176,7 @@
     :caption: Copying and packing arrays
 
     generated/ak.copy
-    generated/ak.packed
+    generated/ak.to_packed
 
 .. toctree::
     :caption: Extracting metadata
