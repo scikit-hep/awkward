@@ -105,7 +105,7 @@ def from_rdataframe(data_frame, columns, offsets_type="int64_t"):
                 template<class BUILDER, typename PRIMITIVE>
                 void fill_offsets_and_flatten{depth}(BUILDER& builder{depth}, ROOT::RDF::RResultPtr<std::vector<PRIMITIVE>>& result) {{
                     for (auto const& vec{depth - 1} : result) {{
-                      auto& builder{depth - 1} = builder{depth}.begin_list();\n"
+                      auto& builder{depth - 1} = builder{depth}.begin_list();
                       {cpp_fill_offsets_and_flatten(depth - 1)}
                       builder{depth}.end_list();
                     }}
