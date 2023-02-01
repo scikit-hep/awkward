@@ -70,7 +70,7 @@ def from_rdataframe(data_frame, columns, offsets_type="int64_t"):
     def cpp_fill_offsets_and_flatten(depth):
         if depth == 1:
             return textwrap.dedent(
-                """\
+                """
                 for (auto const& it : vec1) {
                     builder1.append(it);
                 }
@@ -78,7 +78,7 @@ def from_rdataframe(data_frame, columns, offsets_type="int64_t"):
             )
         else:
             return textwrap.dedent(
-                f"""\
+                f"""
                 for (auto const& vec{depth - 1} : vec{depth}) {{
                     auto& builder{depth - 1} = builder{depth}.begin_list();
                     {cpp_fill_offsets_and_flatten(depth - 1)}
@@ -90,7 +90,7 @@ def from_rdataframe(data_frame, columns, offsets_type="int64_t"):
     def cpp_fill_function(depth):
         if depth == 1:
             return textwrap.dedent(
-                """\
+                """
                 template<class BUILDER, typename PRIMITIVE>
                 void fill_from(BUILDER& builder, ROOT::RDF::RResultPtr<std::vector<PRIMITIVE>>& result) {
                     for (auto const& it : result) {
@@ -101,7 +101,7 @@ def from_rdataframe(data_frame, columns, offsets_type="int64_t"):
             )
         else:
             return textwrap.dedent(
-                """\
+                f"""
                 template<class BUILDER, typename PRIMITIVE>
                 void fill_offsets_and_flatten{depth}(BUILDER& builder{depth}, ROOT::RDF::RResultPtr<std::vector<PRIMITIVE>>& result) {{
                     for (auto const& vec{depth - 1} : result) {{

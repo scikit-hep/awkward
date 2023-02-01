@@ -5,7 +5,7 @@ import sys
 import types
 import uuid
 
-import pytest  # noqa: F401
+import pytest
 
 import awkward as ak
 

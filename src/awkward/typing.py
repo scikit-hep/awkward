@@ -27,7 +27,7 @@ AxisMaybeNone = TypeVar("AxisMaybeNone", int, None)
 
 
 if sys.version_info < (3, 11):
-    from typing_extensions import (  # noqa: F401, F403
+    from typing_extensions import (
         Final,
         Literal,
         Protocol,
@@ -40,7 +40,7 @@ if sys.version_info < (3, 11):
         runtime_checkable,
     )
 else:
-    from typing import (  # noqa: F401, F403
+    from typing import (  # noqa: F401
         Final,
         Literal,
         Protocol,

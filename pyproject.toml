@@ -279,12 +279,13 @@ select = [
     "PGH002", "PGH003", "PGH004",  # pygrep-hooks
     "C4",                          # flake8-comprehensions
     "YTT",                         # flake8-2020
-    "RUF0",                        # Ruff-specific
+    "RUF0", "RUF1"                 # Ruff-specific
 ]
 target-version = "py37"
 typing-modules = ["awkward.typing"]
 src = ["src"]
 unfixable = ["T20"]
+external = ["AK101"]
 
 mccabe.max-complexity = 100
 

@@ -742,11 +742,7 @@ class NumpyArray(Content):
             nextlength = ak.index.Index64.empty(1, self._backend.index_nplike)
             assert nextlength.nplike is self._backend.index_nplike
             self._handle_error(
-                self._backend[
-                    "awkward_unique",
-                    out.dtype.type,
-                    nextlength.dtype.type,
-                ](  # noqa: E231
+                self._backend["awkward_unique", out.dtype.type, nextlength.dtype.type,](
                     out,
                     out.shape[0],
                     nextlength.data,
