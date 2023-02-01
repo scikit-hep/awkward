@@ -54,20 +54,30 @@ def _impl(array, axis, highlevel, behavior):
                 )
             )
         elif layout.is_indexed and layout.content.is_record:
+            record = layout.content
             # Transpose index-of-record to record-of-index
             return ak.contents.RecordArray(
-                [layout.copy(content=c) for c in layout.content.contents],
-                layout.content.fields,
-                layout.content.length,
+                [
+                    ak.contents.IndexedArray.simplified(
+                        layout.index, c, parameters=layout._parameters
+                    )
+                    for c in record.contents
+                ],
+                record.fields,
+                record.length,
                 backend=backend,
             )
         else:
             raise ak._errors.wrap_error(TypeError(layout))
 
-    def apply(layout, depth, backend, continuation, **kwargs):
+    def apply(layout, depth, backend, **kwargs):
         posaxis = ak._util.maybe_posaxis(layout, axis, depth)
-        if posaxis + 1 == depth:
-            if layout.is_union:
+        if depth < posaxis + 1 and layout.is_leaf:
+            raise ak._errors.wrap_error(
+                np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
+            )
+        elif depth == posaxis + 1 and layout.is_union:
+            if all(x.is_record for x in layout.contents):
                 # First, find all ordered fields, regularising any index-of-record
                 # such that we have record-of-index
                 seen_fields = set()
@@ -155,16 +165,6 @@ def _impl(array, axis, highlevel, behavior):
                 return ak.contents.RecordArray(
                     outer_field_contents, all_fields, backend=backend
                 )
-            elif layout.is_option or layout.is_indexed or layout.is_record:
-                return continuation()
-            else:
-                return layout
-
-        # Can only hit this branch if we're above the action axis
-        elif layout.is_leaf:
-            raise ak._errors.wrap_error(
-                np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
-            )
 
     out = ak._do.recursively_apply(layout, apply)
     return ak._util.wrap(out, highlevel=highlevel, behavior=behavior)
