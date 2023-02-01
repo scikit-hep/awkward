@@ -55,7 +55,7 @@ def _impl(array, axis, highlevel, behavior):
                     for c in record.contents
                 ],
                 record.fields,
-                record.length,
+                layout.length,
                 backend=backend,
             )
 
@@ -80,7 +80,7 @@ def _impl(array, axis, highlevel, behavior):
                     for c in record.contents
                 ],
                 record.fields,
-                record.length,
+                layout.length,
                 backend=backend,
             )
 
