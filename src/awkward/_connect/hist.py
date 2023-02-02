@@ -31,5 +31,5 @@ def broadcast_and_flatten(args: Sequence[Any]) -> tuple[np.ndarray]:
             ValueError("cannot broadcast-and-flatten array with structure (fields)")
         )
     return tuple(
-        [ak.to_numpy(ak.flatten(x, axis=None)) for x in ak.broadcast_arrays(*arrays)]
+        ak.to_numpy(ak.flatten(x, axis=None)) for x in ak.broadcast_arrays(*arrays)
     )
