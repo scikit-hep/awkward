@@ -12,7 +12,7 @@ from awkward._nplikes import to_nplike
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyLike, NumpyMetadata, ShapeItem
 from awkward._nplikes.typetracer import TypeTracer
-from awkward.forms.form import Form, _parameters_equal
+from awkward.forms.form import Form, _type_parameters_equal
 from awkward.typing import Any, AxisMaybeNone, Literal, Self, TypeAlias, TypedDict
 
 np = NumpyMetadata.instance()
@@ -1282,9 +1282,7 @@ class Content:
         return (
             self.__class__ is other.__class__
             and len(self) == len(other)
-            and _parameters_equal(
-                self.parameters, other.parameters, only_array_record=False
-            )
+            and _type_parameters_equal(self.parameters, other.parameters)
             and self._is_equal_to(other, index_dtype, numpyarray)
         )
 

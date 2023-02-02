@@ -2,7 +2,7 @@
 
 import awkward as ak
 from awkward._util import unset
-from awkward.forms.form import Form, _parameters_equal
+from awkward.forms.form import Form, _type_parameters_equal
 from awkward.typing import final
 
 
@@ -80,9 +80,7 @@ class RegularForm(Form):
             return (
                 self._form_key == other._form_key
                 and self._size == other._size
-                and _parameters_equal(
-                    self._parameters, other._parameters, only_array_record=True
-                )
+                and _type_parameters_equal(self._parameters, other._parameters)
                 and self._content == other._content
             )
         else:

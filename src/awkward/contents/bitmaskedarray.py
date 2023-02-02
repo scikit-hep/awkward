@@ -13,7 +13,7 @@ from awkward._util import unset
 from awkward.contents.bytemaskedarray import ByteMaskedArray
 from awkward.contents.content import Content
 from awkward.forms.bitmaskedform import BitMaskedForm
-from awkward.forms.form import _parameters_equal
+from awkward.forms.form import _type_parameters_equal
 from awkward.index import Index
 from awkward.typing import Final, Self, final
 
@@ -469,9 +469,7 @@ class BitMaskedArray(Content):
         elif other.is_option or other.is_indexed:
             return self._content._mergeable_next(
                 other.content, mergebool
-            ) and _parameters_equal(
-                self._parameters, other._parameters, only_array_record=True
-            )
+            ) and _type_parameters_equal(self._parameters, other._parameters)
         else:
             return self._content._mergeable_next(other, mergebool)
 

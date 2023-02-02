@@ -248,7 +248,7 @@ class UnionArray(Content):
                                 contents[k]
                                 ._mergemany([inner_cont])
                                 .copy(
-                                    parameters=ak._util.merge_parameters(
+                                    parameters=ak.forms.form._merge_parameters(
                                         old_parameters, inner_cont._parameters
                                     )
                                 )
@@ -331,7 +331,7 @@ class UnionArray(Content):
                             contents[k]
                             ._mergemany([self_cont])
                             .copy(
-                                parameters=ak._util.merge_parameters(
+                                parameters=ak.forms.form._merge_parameters(
                                     old_parameters, self_cont._parameters
                                 )
                             )
@@ -370,7 +370,7 @@ class UnionArray(Content):
         if len(contents) == 1:
             next = contents[0]._carry(index, True)
             return next.copy(
-                parameters=ak._util.merge_parameters(next._parameters, parameters)
+                parameters=ak.forms.form._merge_parameters(next._parameters, parameters)
             )
 
         else:
@@ -592,7 +592,7 @@ class UnionArray(Content):
             ak.index.Index(nexttags),
             ak.index.Index(nextindex),
             contents,
-            parameters=ak._util.merge_parameters(self._parameters, parameters),
+            parameters=ak.forms.form._merge_parameters(self._parameters, parameters),
         )
 
     def project(self, index):
@@ -1006,7 +1006,7 @@ class UnionArray(Content):
                 AssertionError("FIXME: handle UnionArray with more than 127 contents")
             )
 
-        parameters = ak._util.merge_parameters(
+        parameters = ak.forms.form._merge_parameters(
             self._parameters,
             other._parameters,
             exclude=ak._util.meaningful_parameters,
@@ -1043,7 +1043,9 @@ class UnionArray(Content):
             if isinstance(array, ak.contents.EmptyArray):
                 continue
 
-            parameters = ak._util.merge_parameters(parameters, array._parameters, True)
+            parameters = ak.forms.form._merge_parameters(
+                parameters, array._parameters, True
+            )
             if isinstance(array, ak.contents.UnionArray):
                 union_tags = ak.index.Index(array.tags)
                 union_index = ak.index.Index(array.index)

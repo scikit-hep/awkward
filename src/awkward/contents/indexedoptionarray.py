@@ -9,7 +9,7 @@ from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.typetracer import MaybeNone, TypeTracer
 from awkward._util import unset
 from awkward.contents.content import Content
-from awkward.forms.form import _parameters_equal
+from awkward.forms.form import _type_parameters_equal
 from awkward.forms.indexedoptionform import IndexedOptionForm
 from awkward.index import Index
 from awkward.typing import Final, Self, final
@@ -121,7 +121,9 @@ class IndexedOptionArray(Content):
             return IndexedOptionArray(
                 result,
                 content.content,
-                parameters=ak._util.merge_parameters(content._parameters, parameters),
+                parameters=ak.forms.form._merge_parameters(
+                    content._parameters, parameters
+                ),
             )
 
         else:
@@ -557,9 +559,7 @@ class IndexedOptionArray(Content):
         elif other.is_option or other.is_indexed:
             return self._content._mergeable_next(
                 other.content, mergebool
-            ) and _parameters_equal(
-                self._parameters, other._parameters, only_array_record=True
-            )
+            ) and _type_parameters_equal(self._parameters, other._parameters)
         else:
             return self._content._mergeable_next(other, mergebool)
 
@@ -645,7 +645,9 @@ class IndexedOptionArray(Content):
         )
         # We can directly merge with other options, but we must merge parameters
         if other.is_option:
-            parameters = ak._util.merge_parameters(self._parameters, other._parameters)
+            parameters = ak.forms.form._merge_parameters(
+                self._parameters, other._parameters
+            )
         # Otherwise, this option parameters win out
         else:
             parameters = self._parameters
@@ -690,7 +692,7 @@ class IndexedOptionArray(Content):
                 array, (ak.contents.IndexedOptionArray, ak.contents.IndexedArray)
             ):
                 # If we're merging an option, then merge parameters before pulling out `content`
-                parameters = ak._util.merge_parameters(
+                parameters = ak.forms.form._merge_parameters(
                     parameters, array._parameters, True
                 )
                 contents.append(array.content)

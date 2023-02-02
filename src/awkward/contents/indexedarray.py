@@ -9,7 +9,7 @@ from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.typetracer import TypeTracer
 from awkward._util import unset
 from awkward.contents.content import Content
-from awkward.forms.form import _parameters_equal
+from awkward.forms.form import _type_parameters_equal
 from awkward.forms.indexedform import IndexedForm
 from awkward.index import Index
 from awkward.typing import Final, Self, final
@@ -95,7 +95,9 @@ class IndexedArray(Content):
 
         if content.is_union and not is_cat:
             return content._carry(index, allow_lazy=False).copy(
-                parameters=ak._util.merge_parameters(content._parameters, parameters)
+                parameters=ak.forms.form._merge_parameters(
+                    content._parameters, parameters
+                )
             )
 
         elif content.is_indexed or content.is_option:
@@ -124,7 +126,7 @@ class IndexedArray(Content):
                 return ak.contents.IndexedArray(
                     result,
                     content.content,
-                    parameters=ak._util.merge_parameters(
+                    parameters=ak.forms.form._merge_parameters(
                         content._parameters, parameters
                     ),
                 )
@@ -132,7 +134,7 @@ class IndexedArray(Content):
                 return ak.contents.IndexedOptionArray(
                     result,
                     content.content,
-                    parameters=ak._util.merge_parameters(
+                    parameters=ak.forms.form._merge_parameters(
                         content._parameters, parameters
                     ),
                 )
@@ -402,7 +404,7 @@ class IndexedArray(Content):
             )
             next = self._content._carry(nextcarry, False)
             return next.copy(
-                parameters=ak._util.merge_parameters(
+                parameters=ak.forms.form._merge_parameters(
                     next._parameters,
                     self._parameters,
                     exclude=(("__array__", "categorical"),),
@@ -425,9 +427,7 @@ class IndexedArray(Content):
         elif other.is_option or other.is_indexed:
             return self._content._mergeable_next(
                 other.content, mergebool
-            ) and _parameters_equal(
-                self._parameters, other._parameters, only_array_record=True
-            )
+            ) and _type_parameters_equal(self._parameters, other._parameters)
         else:
             return self._content._mergeable_next(other, mergebool)
 
@@ -504,7 +504,9 @@ class IndexedArray(Content):
         )
         # We can directly merge with other options and indexed types, but we must merge parameters
         if other.is_option or other.is_indexed:
-            parameters = ak._util.merge_parameters(self._parameters, other._parameters)
+            parameters = ak.forms.form._merge_parameters(
+                self._parameters, other._parameters
+            )
         # Otherwise, this option parameters win out
         else:
             parameters = self._parameters
@@ -548,7 +550,7 @@ class IndexedArray(Content):
             if isinstance(
                 array, (ak.contents.IndexedOptionArray, ak.contents.IndexedArray)
             ):
-                parameters = ak._util.merge_parameters(
+                parameters = ak.forms.form._merge_parameters(
                     parameters, array._parameters, True
                 )
 
@@ -968,7 +970,9 @@ class IndexedArray(Content):
                 next = self._content._carry(ak.index.Index(index), False)
 
             next2 = next.copy(
-                parameters=ak._util.merge_parameters(next._parameters, self._parameters)
+                parameters=ak.forms.form._merge_parameters(
+                    next._parameters, self._parameters
+                )
             )
             return next2._to_arrow(pyarrow, mask_node, validbytes, length, options)
 

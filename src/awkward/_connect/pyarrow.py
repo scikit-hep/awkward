@@ -406,7 +406,7 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
 
         content = handle_arrow(paarray.dictionary, generate_bitmasks)
 
-        parameters = ak._util.merge_parameters(
+        parameters = ak.forms.form._merge_parameters(
             mask_parameters(awkwardarrow_type), node_parameters(awkwardarrow_type)
         )
         if parameters is None:
@@ -701,7 +701,7 @@ def form_popbuffers(awkwardarrow_type, storage_type):
         a, b = to_awkwardarrow_storage_types(storage_type.value_type)
         content = form_popbuffers(a, b)
 
-        parameters = ak._util.merge_parameters(
+        parameters = ak.forms.form._merge_parameters(
             mask_parameters(awkwardarrow_type), node_parameters(awkwardarrow_type)
         )
         if parameters is None:

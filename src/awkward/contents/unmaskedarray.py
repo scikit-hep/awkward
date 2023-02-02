@@ -10,7 +10,7 @@ from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.typetracer import MaybeNone
 from awkward._util import unset
 from awkward.contents.content import Content
-from awkward.forms.form import _parameters_equal
+from awkward.forms.form import _type_parameters_equal
 from awkward.forms.unmaskedform import UnmaskedForm
 from awkward.typing import Final, Self, final
 
@@ -68,11 +68,15 @@ class UnmaskedArray(Content):
         if content.is_union:
             return content.copy(
                 contents=[cls.simplified(x) for x in content.contents],
-                parameters=ak._util.merge_parameters(content._parameters, parameters),
+                parameters=ak.forms.form._merge_parameters(
+                    content._parameters, parameters
+                ),
             )
         elif content.is_indexed or content.is_option:
             return content.copy(
-                parameters=ak._util.merge_parameters(content._parameters, parameters)
+                parameters=ak.forms.form._merge_parameters(
+                    content._parameters, parameters
+                )
             )
         else:
             return cls(content, parameters=parameters)
@@ -270,9 +274,9 @@ class UnmaskedArray(Content):
             return True
         # We can only combine option types whose array-record parameters agree
         elif other.is_option or other.is_indexed:
-            return self._mergeable_next(other.content, mergebool) and _parameters_equal(
-                self._parameters, other._parameters, only_array_record=True
-            )
+            return self._mergeable_next(
+                other.content, mergebool
+            ) and _type_parameters_equal(self._parameters, other._parameters)
         else:
             return self._content._mergeable_next(other, mergebool)
 
@@ -287,7 +291,9 @@ class UnmaskedArray(Content):
             parameters = self._parameters
             tail_contents = []
             for x in others:
-                parameters = ak._util.merge_parameters(parameters, x._parameters, True)
+                parameters = ak.forms.form._merge_parameters(
+                    parameters, x._parameters, True
+                )
                 tail_contents.append(x._content)
 
             return UnmaskedArray(

@@ -8,7 +8,7 @@ from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._util import unset
 from awkward.contents.content import Content
-from awkward.forms.form import _parameters_equal
+from awkward.forms.form import _type_parameters_equal
 from awkward.forms.regularform import RegularForm
 from awkward.typing import Final, Self, final
 
@@ -186,7 +186,7 @@ class RegularArray(Content):
             shape = (self._length, self._size) + content.data.shape[1:]
             return ak.contents.NumpyArray(
                 self._backend.nplike.reshape(content.data, shape),
-                parameters=ak._util.merge_parameters(
+                parameters=ak.forms.form._merge_parameters(
                     self._parameters, content.parameters
                 ),
                 backend=content.backend,
@@ -637,11 +637,7 @@ class RegularArray(Content):
         elif other.is_option or other.is_indexed:
             return self._mergeable_next(other.content, mergebool)
         # Otherwise, do the parameters match? If not, we can't merge.
-        elif not (
-            _parameters_equal(
-                self._parameters, other._parameters, only_array_record=True
-            )
-        ):
+        elif not (_type_parameters_equal(self._parameters, other._parameters)):
             return False
         elif isinstance(
             other,
@@ -675,7 +671,9 @@ class RegularArray(Content):
             tail_contents = []
             zeros_length = self._length
             for x in others:
-                parameters = ak._util.merge_parameters(parameters, x._parameters, True)
+                parameters = ak.forms.form._merge_parameters(
+                    parameters, x._parameters, True
+                )
                 tail_contents.append(
                     x._content[
                         : self._backend.index_nplike.mul_shape_item(x._length, x._size)

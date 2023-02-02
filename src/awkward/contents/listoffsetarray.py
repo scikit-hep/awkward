@@ -9,7 +9,7 @@ from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.typetracer import TypeTracer
 from awkward._util import unset
 from awkward.contents.content import Content
-from awkward.forms.form import _parameters_equal
+from awkward.forms.form import _type_parameters_equal
 from awkward.forms.listoffsetform import ListOffsetForm
 from awkward.index import Index
 from awkward.typing import Final, Self, final
@@ -708,11 +708,7 @@ class ListOffsetArray(Content):
         elif other.is_option or other.is_indexed:
             return self._mergeable_next(other.content, mergebool)
         # Otherwise, do the parameters match? If not, we can't merge.
-        elif not (
-            _parameters_equal(
-                self._parameters, other._parameters, only_array_record=True
-            )
-        ):
+        elif not (_type_parameters_equal(self._parameters, other._parameters)):
             return False
         elif isinstance(
             other,
