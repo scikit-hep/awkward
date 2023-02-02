@@ -621,7 +621,7 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
         # This is already an option-type and offsets-corrected, so no popbuffers_finalize.
         return ak.contents.IndexedOptionArray(
             ak.index.Index64(numpy.full(len(paarray), -1, dtype=np.int64)),
-            ak.contents.EmptyArray(),
+            ak.contents.EmptyArray(parameters=node_parameters(awkwardarrow_type)),
             parameters=mask_parameters(awkwardarrow_type),
         )
 

@@ -4,12 +4,12 @@ from __future__ import annotations
 import copy
 
 import awkward as ak
+from awkward._errors import deprecate
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.emptyform import EmptyForm
-from awkward.forms.form import _parameters_is_empty
 from awkward.typing import Final, Self, final
 
 np = NumpyMetadata.instance()
@@ -24,10 +24,6 @@ class EmptyArray(Content):
     def __init__(self, *, parameters=None, backend=None):
         if backend is None:
             backend = ak._backends.NumpyBackend.instance()
-        if not _parameters_is_empty(parameters):
-            raise ak._errors.wrap_error(
-                TypeError(f"{type(self).__name__} cannot contain parameters")
-            )
         self._init(parameters, backend)
 
     form_cls: Final = EmptyForm
@@ -38,7 +34,12 @@ class EmptyArray(Content):
         parameters=unset,
         backend=unset,
     ):
+        if parameters is not unset:
+            deprecate(
+                f"{type(self).__name__} cannot contain parameters", version="2.2.0"
+            )
         return EmptyArray(
+            parameters=self._parameters if parameters is unset else parameters,
             backend=self._backend if backend is unset else backend,
         )
 
@@ -49,7 +50,10 @@ class EmptyArray(Content):
         return self.copy(parameters=copy.deepcopy(self._parameters, memo))
 
     @classmethod
-    def simplified(cls, *, parameters=None, backend=None):
+    def simplified(cls, *, parameters=unset, backend=None):
+        if parameters is not unset:
+            parameters = None
+            deprecate(f"{cls.__name__} cannot contain parameters", version="2.2.0")
         return cls(parameters=parameters, backend=backend)
 
     def _form_with_key(self, getkey):
@@ -60,6 +64,7 @@ class EmptyArray(Content):
 
     def _to_typetracer(self, forget_length: bool) -> Self:
         return EmptyArray(
+            parameters=self._parameters,
             backend=ak._backends.TypeTracerBackend.instance(),
         )
 
@@ -182,7 +187,7 @@ class EmptyArray(Content):
             offsets = ak.index.Index64.zeros(1, nplike=self._backend.index_nplike)
             return (
                 offsets,
-                EmptyArray(backend=self._backend),
+                EmptyArray(parameters=self._parameters, backend=self._backend),
             )
 
     def _mergeable_next(self, other, mergebool):
@@ -197,7 +202,7 @@ class EmptyArray(Content):
             return others[0]._mergemany(tail_others)
 
     def _fill_none(self, value: Content) -> Content:
-        return EmptyArray(backend=self._backend)
+        return EmptyArray(parameters=self._parameters, backend=self._backend)
 
     def _local_index(self, axis, depth):
         posaxis = ak._util.maybe_posaxis(self, axis, depth)
@@ -213,7 +218,9 @@ class EmptyArray(Content):
             )
 
     def _numbers_to_type(self, name):
-        return ak.contents.EmptyArray(backend=self._backend)
+        return ak.contents.EmptyArray(
+            parameters=self._parameters, backend=self._backend
+        )
 
     def _is_unique(self, negaxis, starts, parents, outlength):
         return True
@@ -233,7 +240,9 @@ class EmptyArray(Content):
         return self
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
-        return ak.contents.EmptyArray(backend=self._backend)
+        return ak.contents.EmptyArray(
+            parameters=self._parameters, backend=self._backend
+        )
 
     def _reduce_next(
         self,
@@ -316,7 +325,7 @@ class EmptyArray(Content):
                 if options["keep_parameters"]:
                     return self
                 else:
-                    return EmptyArray(backend=self._backend)
+                    return EmptyArray(parameters=None, backend=self._backend)
 
         else:
 
@@ -352,7 +361,7 @@ class EmptyArray(Content):
         return []
 
     def _to_backend(self, backend: ak._backends.Backend) -> Self:
-        return EmptyArray(backend=backend)
+        return EmptyArray(parameters=self._parameters, backend=backend)
 
     def _is_equal_to(self, other, index_dtype, numpyarray):
         return True

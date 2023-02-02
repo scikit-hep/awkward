@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import awkward as ak
+from awkward._errors import deprecate
 from awkward._util import unset
 from awkward.forms.form import Form, JSONMapping
 from awkward.typing import final
@@ -13,20 +14,23 @@ class EmptyForm(Form):
     is_unknown = True
 
     def __init__(self, *, parameters: JSONMapping | None = None, form_key=None):
-        self._init(parameters=None, form_key=form_key)
-
-    @property
-    def parameters(self) -> JSONMapping:
-        return {}
+        self._init(parameters=parameters, form_key=form_key)
 
     def copy(
         self, *, parameters: JSONMapping | None = unset, form_key=unset
     ) -> EmptyForm:
-        return EmptyForm(form_key=form_key)
+        if parameters is not unset:
+            deprecate(
+                f"{type(self).__name__} cannot contain parameters", version="2.2.0"
+            )
+        return EmptyForm(parameters=parameters, form_key=form_key)
 
     @classmethod
-    def simplified(cls, *, parameters=None, form_key=None) -> Form:
-        return cls(form_key=form_key)
+    def simplified(cls, *, parameters=unset, form_key=None) -> Form:
+        if parameters is not unset:
+            parameters = None
+            deprecate(f"{cls.__name__} cannot contain parameters", version="2.2.0")
+        return cls(parameters=parameters, form_key=form_key)
 
     def __repr__(self):
         args = self._repr_args()
@@ -47,8 +51,11 @@ class EmptyForm(Form):
     def to_NumpyForm(self, dtype):
         return ak.forms.numpyform.from_dtype(dtype, parameters=self._parameters)
 
-    def purelist_parameter(self, key: str) -> None:
-        return None
+    def purelist_parameter(self, key):
+        if self._parameters is None or key not in self._parameters:
+            return None
+        else:
+            return self._parameters[key]
 
     @property
     def purelist_isregular(self) -> bool:
@@ -60,13 +67,7 @@ class EmptyForm(Form):
 
     @property
     def is_identity_like(self) -> bool:
-        if self._parameters is None:
-            return True
-
-        return (
-            self._parameters.get("__array__") is None
-            and self._parameters.get("__categorical__") is None
-        )
+        return True
 
     @property
     def minmax_depth(self) -> tuple[int, int]:
