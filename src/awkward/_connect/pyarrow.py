@@ -1001,8 +1001,13 @@ def handle_arrow(obj, generate_bitmasks=False, pass_empty_field=False):
     elif isinstance(obj, pyarrow.lib.Table):
         batches = obj.combine_chunks().to_batches()
         if len(batches) == 0:
-            # FIXME: create a zero-length array with the right type
-            raise ak._errors.wrap_error(NotImplementedError)
+            # create a RecordBatch of empty arrays following the schema
+            return handle_arrow(
+                pyarrow.lib.RecordBatch.from_arrays(
+                    [[] for _ in obj.schema.names],
+                    schema=obj.schema,
+                )
+            )
         elif len(batches) == 1:
             return handle_arrow(batches[0], generate_bitmasks, pass_empty_field)
         else:
