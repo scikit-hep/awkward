@@ -213,9 +213,7 @@ class EmptyArray(Content):
             )
 
     def _numbers_to_type(self, name):
-        return ak.contents.EmptyArray(
-            parameters=self._parameters, backend=self._backend
-        )
+        return self.to_NumpyArray(ak.types.numpytype.primitive_to_dtype(name))
 
     def _is_unique(self, negaxis, starts, parents, outlength):
         return True
