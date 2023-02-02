@@ -165,12 +165,18 @@
 
     generated/ak.local_index
     generated/ak.run_lengths
+    
+.. toctree::
+    :caption: Restructuring records
+
+    generated/ak.merge_union_of_records
+    generated/ak.merge_option_of_records
 
 .. toctree::
     :caption: Copying and packing arrays
 
     generated/ak.copy
-    generated/ak.packed
+    generated/ak.to_packed
 
 .. toctree::
     :caption: Extracting metadata
