@@ -58,7 +58,7 @@ class UnionForm(Form):
         self._tags = tags
         self._index = index
         self._contents = list(contents)
-        self._init(parameters, form_key)
+        self._init(parameters=parameters, form_key=form_key)
 
     @property
     def tags(self):
@@ -246,9 +246,7 @@ class UnionForm(Form):
                 contents.append(next_content)
 
         if len(contents) == 0:
-            return ak.forms.EmptyForm(
-                parameters=self._parameters, form_key=self._form_key
-            )
+            return ak.forms.EmptyForm(form_key=self._form_key)
         elif len(contents) == 1:
             return contents[0]
         else:

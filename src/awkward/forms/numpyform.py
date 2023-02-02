@@ -62,7 +62,7 @@ class NumpyForm(Form):
 
         self._primitive = primitive
         self._inner_shape = tuple(inner_shape)
-        self._init(parameters, form_key)
+        self._init(parameters=parameters, form_key=form_key)
 
     @property
     def primitive(self):

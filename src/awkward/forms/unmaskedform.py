@@ -27,7 +27,7 @@ class UnmaskedForm(Form):
             )
 
         self._content = content
-        self._init(parameters, form_key)
+        self._init(parameters=parameters, form_key=form_key)
 
     @property
     def content(self):

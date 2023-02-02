@@ -49,7 +49,7 @@ def from_dict(input: dict) -> Form:
         )
 
     elif input["class"] == "EmptyArray":
-        return ak.forms.EmptyForm(parameters=parameters, form_key=form_key)
+        return ak.forms.EmptyForm(form_key=form_key)
 
     elif input["class"] == "RegularArray":
         return ak.forms.RegularForm(
@@ -353,7 +353,7 @@ class Form:
     is_record = False
     is_union = False
 
-    def _init(self, parameters, form_key):
+    def _init(self, *, parameters, form_key):
         if parameters is not None and not isinstance(parameters, dict):
             raise _errors.wrap_error(
                 TypeError(

@@ -39,7 +39,6 @@ class EmptyArray(Content):
         backend=unset,
     ):
         return EmptyArray(
-            parameters=self._parameters if parameters is unset else parameters,
             backend=self._backend if backend is unset else backend,
         )
 
@@ -61,7 +60,6 @@ class EmptyArray(Content):
 
     def _to_typetracer(self, forget_length: bool) -> Self:
         return EmptyArray(
-            parameters=self._parameters,
             backend=ak._backends.TypeTracerBackend.instance(),
         )
 
@@ -184,7 +182,7 @@ class EmptyArray(Content):
             offsets = ak.index.Index64.zeros(1, nplike=self._backend.index_nplike)
             return (
                 offsets,
-                EmptyArray(parameters=self._parameters, backend=self._backend),
+                EmptyArray(backend=self._backend),
             )
 
     def _mergeable_next(self, other, mergebool):
@@ -199,7 +197,7 @@ class EmptyArray(Content):
             return others[0]._mergemany(tail_others)
 
     def _fill_none(self, value: Content) -> Content:
-        return EmptyArray(parameters=self._parameters, backend=self._backend)
+        return EmptyArray(backend=self._backend)
 
     def _local_index(self, axis, depth):
         posaxis = ak._util.maybe_posaxis(self, axis, depth)
@@ -215,9 +213,7 @@ class EmptyArray(Content):
             )
 
     def _numbers_to_type(self, name):
-        return ak.contents.EmptyArray(
-            parameters=self._parameters, backend=self._backend
-        )
+        return ak.contents.EmptyArray(backend=self._backend)
 
     def _is_unique(self, negaxis, starts, parents, outlength):
         return True
@@ -237,9 +233,7 @@ class EmptyArray(Content):
         return self
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
-        return ak.contents.EmptyArray(
-            parameters=self._parameters, backend=self._backend
-        )
+        return ak.contents.EmptyArray(backend=self._backend)
 
     def _reduce_next(
         self,
@@ -322,7 +316,7 @@ class EmptyArray(Content):
                 if options["keep_parameters"]:
                     return self
                 else:
-                    return EmptyArray(parameters=None, backend=self._backend)
+                    return EmptyArray(backend=self._backend)
 
         else:
 
@@ -358,7 +352,7 @@ class EmptyArray(Content):
         return []
 
     def _to_backend(self, backend: ak._backends.Backend) -> Self:
-        return EmptyArray(parameters=self._parameters, backend=backend)
+        return EmptyArray(backend=backend)
 
     def _is_equal_to(self, other, index_dtype, numpyarray):
         return True

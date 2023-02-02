@@ -49,7 +49,7 @@ class RecordForm(Form):
 
         self._fields = fields
         self._contents = list(contents)
-        self._init(parameters, form_key)
+        self._init(parameters=parameters, form_key=form_key)
 
     @property
     def contents(self):

@@ -38,7 +38,7 @@ class IndexedOptionForm(Form):
 
         self._index = index
         self._content = content
-        self._init(parameters, form_key)
+        self._init(parameters=parameters, form_key=form_key)
 
     @property
     def index(self):

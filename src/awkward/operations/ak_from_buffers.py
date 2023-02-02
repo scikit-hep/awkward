@@ -170,7 +170,7 @@ def reconstitute(form, length, container, getkey, backend, byteorder, simplify):
             raise ak._errors.wrap_error(
                 ValueError(f"EmptyForm node, but the expected length is {length}")
             )
-        return ak.contents.EmptyArray(parameters=form.parameters)
+        return ak.contents.EmptyArray()
 
     elif isinstance(form, ak.forms.NumpyForm):
         dtype = ak.types.numpytype.primitive_to_dtype(form.primitive)
