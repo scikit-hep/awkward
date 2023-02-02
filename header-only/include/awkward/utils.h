@@ -174,7 +174,7 @@ namespace awkward {
   ///
   /// Used in RDataFrame to generate the form of the Numpy Layout Builder
   /// and ListOffset Layout Builder.
-  template <typename T>
+  template <typename T, typename OFFSETS>
   std::string
   type_to_form(int64_t form_key_id) {
     if (std::string(typeid(T).name()).find("awkward") != std::string::npos) {
@@ -206,9 +206,10 @@ namespace awkward {
         parameters =
             std::string(" \"parameters\": { \"__array__\": \"string\" }, ");
       }
-      return "{\"class\": \"ListOffsetArray\", \"offsets\": \"i64\", "
+      return "{\"class\": \"ListOffsetArray\", \"offsets\": \"" +
+             type_to_numpy_like<OFFSETS>() + "\", "
              "\"content\":" +
-             type_to_form<value_type>(form_key_id) + ", " + parameters +
+             type_to_form<value_type, OFFSETS>(form_key_id) + ", " + parameters +
              "\"form_key\": \"" + form_key.str() + "\"}";
     }
     return "unsupported type";

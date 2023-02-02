@@ -283,10 +283,11 @@ def test_rdata_frame_rvecs_as_records():
     array = ak.from_rdataframe(
         data_frame_x_y_r,
         columns=("r",),
+        offsets_type="int32_t",
     )
 
     assert array.layout.form == ak.forms.RecordForm(
-        [ak.forms.ListOffsetForm("i64", ak.forms.NumpyForm("float64"))], ["r"]
+        [ak.forms.ListOffsetForm("i32", ak.forms.NumpyForm("float64"))], ["r"]
     )
 
 
