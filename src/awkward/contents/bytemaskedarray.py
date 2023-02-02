@@ -667,7 +667,7 @@ class ByteMaskedArray(Content):
                     x.length
                 )
                 parameters = ak.forms.form._merge_parameters(
-                    parameters, x._parameters, True
+                    parameters, x._parameters, merge_equal=True
                 )
                 masks.append(x._mask.data[:length_scalar])
                 tail_contents.append(x._content[:length_scalar])

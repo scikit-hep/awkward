@@ -55,8 +55,14 @@ class EmptyForm(Form):
         return 1
 
     @property
-    def is_identity_like(self):
-        return True
+    def is_identity_like(self) -> bool:
+        if self._parameters is None:
+            return True
+
+        return (
+            self._parameters.get("__array__") is None
+            and self._parameters.get("__categorical__") is None
+        )
 
     @property
     def minmax_depth(self):

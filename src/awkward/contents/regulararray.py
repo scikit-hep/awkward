@@ -672,7 +672,7 @@ class RegularArray(Content):
             zeros_length = self._length
             for x in others:
                 parameters = ak.forms.form._merge_parameters(
-                    parameters, x._parameters, True
+                    parameters, x._parameters, merge_equal=True
                 )
                 tail_contents.append(
                     x._content[

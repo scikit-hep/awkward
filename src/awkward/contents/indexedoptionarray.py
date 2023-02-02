@@ -693,7 +693,7 @@ class IndexedOptionArray(Content):
             ):
                 # If we're merging an option, then merge parameters before pulling out `content`
                 parameters = ak.forms.form._merge_parameters(
-                    parameters, array._parameters, True
+                    parameters, array._parameters, merge_equal=True
                 )
                 contents.append(array.content)
                 array_index = array.index

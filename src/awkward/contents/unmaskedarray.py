@@ -292,7 +292,7 @@ class UnmaskedArray(Content):
             tail_contents = []
             for x in others:
                 parameters = ak.forms.form._merge_parameters(
-                    parameters, x._parameters, True
+                    parameters, x._parameters, merge_equal=True
                 )
                 tail_contents.append(x._content)
 

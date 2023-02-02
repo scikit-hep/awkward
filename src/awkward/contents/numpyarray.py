@@ -418,7 +418,7 @@ class NumpyArray(Content):
                 continue
 
             parameters = ak.forms.form._merge_parameters(
-                parameters, array._parameters, True
+                parameters, array._parameters, merge_equal=True
             )
             if isinstance(array, ak.contents.NumpyArray):
                 contiguous_arrays.append(array.data)

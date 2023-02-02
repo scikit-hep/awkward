@@ -12,7 +12,8 @@ from awkward._nplikes import to_nplike
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyLike, NumpyMetadata, ShapeItem
 from awkward._nplikes.typetracer import TypeTracer
-from awkward.forms.form import Form, _type_parameters_equal
+from awkward._util import unset
+from awkward.forms.form import Form, JSONMapping, _type_parameters_equal
 from awkward.typing import Any, AxisMaybeNone, Literal, Self, TypeAlias, TypedDict
 
 np = NumpyMetadata.instance()
@@ -1298,5 +1299,5 @@ class Content:
     def _fill_none(self, value: Content) -> Content:
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def copy(self) -> Self:
+    def copy(self, *, parameters: JSONMapping | None = unset) -> Self:
         raise ak._errors.wrap_error(NotImplementedError)

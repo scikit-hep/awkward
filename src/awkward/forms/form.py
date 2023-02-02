@@ -7,7 +7,7 @@ from collections.abc import Mapping
 import awkward as ak
 from awkward import _errors
 from awkward._nplikes.numpylike import NumpyMetadata
-from awkward.typing import TypeAlias
+from awkward.typing import Final, TypeAlias
 
 np = NumpyMetadata.instance()
 numpy_backend = ak._backends.NumpyBackend.instance()
@@ -16,6 +16,18 @@ JSONSerialisable: TypeAlias = (
     "str | int | float | bool | None | list | tuple | JSONMapping"
 )
 JSONMapping: TypeAlias = "dict[str, JSONSerialisable]"
+
+
+reserved_nominal_parameters: Final = frozenset(
+    {
+        ("__array__", "string"),
+        ("__array__", "bytestring"),
+        ("__array__", "char"),
+        ("__array__", "byte"),
+        ("__array__", "sorted_map"),
+        ("__array__", "categorical"),
+    }
+)
 
 
 def from_dict(input: dict) -> Form:
@@ -291,6 +303,7 @@ def _parameters_is_empty(parameters: JSONMapping | None) -> bool:
 def _merge_parameters(
     one: JSONMapping | None,
     two: JSONMapping | None,
+    *,
     merge_equal: bool = False,
     exclude: tuple[str] = (),
 ) -> JSONMapping | None:

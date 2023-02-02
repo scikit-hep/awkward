@@ -551,7 +551,7 @@ class IndexedArray(Content):
                 array, (ak.contents.IndexedOptionArray, ak.contents.IndexedArray)
             ):
                 parameters = ak.forms.form._merge_parameters(
-                    parameters, array._parameters, True
+                    parameters, array._parameters, merge_equal=True
                 )
 
                 contents.append(array.content)

@@ -588,7 +588,7 @@ class RecordArray(Content):
                     continue
 
                 parameters = ak.forms.form._merge_parameters(
-                    parameters, array._parameters, True
+                    parameters, array._parameters, merge_equal=True
                 )
 
                 if isinstance(array, ak.contents.RecordArray):
@@ -623,7 +623,7 @@ class RecordArray(Content):
 
             for array in headless:
                 parameters = ak.forms.form._merge_parameters(
-                    parameters, array._parameters, True
+                    parameters, array._parameters, merge_equal=True
                 )
 
                 if isinstance(array, ak.contents.RecordArray):

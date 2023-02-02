@@ -1009,7 +1009,7 @@ class UnionArray(Content):
         parameters = ak.forms.form._merge_parameters(
             self._parameters,
             other._parameters,
-            exclude=ak._util.meaningful_parameters,
+            exclude=ak.forms.form.reserved_nominal_parameters,
         )
 
         return ak.contents.UnionArray.simplified(
@@ -1044,7 +1044,7 @@ class UnionArray(Content):
                 continue
 
             parameters = ak.forms.form._merge_parameters(
-                parameters, array._parameters, True
+                parameters, array._parameters, merge_equal=True
             )
             if isinstance(array, ak.contents.UnionArray):
                 union_tags = ak.index.Index(array.tags)

@@ -194,11 +194,8 @@ class EmptyArray(Content):
         if len(others) == 0:
             return self
 
-        elif len(others) == 1:
-            return others[0]
-
         else:
-            tail_others = others[1:]
+            tail_others = [self, *others[1:]]
             return others[0]._mergemany(tail_others)
 
     def _fill_none(self, value: Content) -> Content:
