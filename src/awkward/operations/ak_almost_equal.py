@@ -26,13 +26,13 @@ def almost_equal(
     Args:
         left: Array-like data (anything #ak.to_layout recognizes).
         right: Array-like data (anything #ak.to_layout recognizes).
-        rtol: the relative tolerance parameter
-        atol: the absolute tolerance parameter
-        dtype_exact: whether the dtypes must be exactly the same, or just same
-            family
-        check_parameters: whether to compare parameters
+        rtol: the relative tolerance parameter (see below).
+        atol: the absolute tolerance parameter (see below).
+        dtype_exact: whether the dtypes must be exactly the same, or just the
+            same family.
+        check_parameters: whether to compare parameters.
         check_regular: whether to consider ragged and regular dimensions as
-            unequal
+            unequal.
 
     Return True if the two array-like arguments are considered equal for the
     given options. Otherwise, return False.
