@@ -249,16 +249,7 @@ class UnionArray(Content):
                                     contents[k].length,
                                 )
                             )
-                            old_parameters = contents[k]._parameters
-                            contents[k] = (
-                                contents[k]
-                                ._mergemany([inner_cont])
-                                .copy(
-                                    parameters=ak.forms.form._parameters_union(
-                                        old_parameters, inner_cont._parameters
-                                    )
-                                )
-                            )
+                            contents[k] = contents[k]._mergemany([inner_cont])
                             unmerged = False
                             break
 
@@ -332,16 +323,7 @@ class UnionArray(Content):
                                 contents[k].length,
                             )
                         )
-                        old_parameters = contents[k]._parameters
-                        contents[k] = (
-                            contents[k]
-                            ._mergemany([self_cont])
-                            .copy(
-                                parameters=ak.forms.form._parameters_union(
-                                    old_parameters, self_cont._parameters
-                                )
-                            )
-                        )
+                        contents[k] = contents[k]._mergemany([self_cont])
                         unmerged = False
                         break
 
