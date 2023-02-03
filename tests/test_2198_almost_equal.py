@@ -106,7 +106,7 @@ def test_union():
 
 
 def test_empty():
-    array = ak.Array([None])
+    array = ak.Array([])
 
     assert not ak.almost_equal(array, [{"x": 1}, {"y": 3}])
     assert not ak.almost_equal(array, [1])
