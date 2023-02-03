@@ -167,8 +167,7 @@ def test_union_to_record():
         df_unionarray["z"].values, np.array([np.nan, 999, np.nan])
     )
 
-    with pytest.warns(DeprecationWarning):
-        df_unionarray2 = ak.operations.to_dataframe(unionarray2)
+    df_unionarray2 = ak.operations.to_dataframe(unionarray2)
     np.testing.assert_array_equal(
         df_unionarray2["x"].values, [1, np.nan, np.nan, np.nan, 3]
     )

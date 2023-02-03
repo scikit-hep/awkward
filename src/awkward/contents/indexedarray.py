@@ -9,6 +9,7 @@ from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.typetracer import TypeTracer
 from awkward._util import unset
 from awkward.contents.content import Content
+from awkward.forms.form import _type_parameters_equal
 from awkward.forms.indexedform import IndexedForm
 from awkward.index import Index
 from awkward.typing import Final, Self, final
@@ -94,7 +95,9 @@ class IndexedArray(Content):
 
         if content.is_union and not is_cat:
             return content._carry(index, allow_lazy=False).copy(
-                parameters=ak._util.merge_parameters(content._parameters, parameters)
+                parameters=ak.forms.form._parameters_union(
+                    content._parameters, parameters
+                )
             )
 
         elif content.is_indexed or content.is_option:
@@ -123,7 +126,7 @@ class IndexedArray(Content):
                 return ak.contents.IndexedArray(
                     result,
                     content.content,
-                    parameters=ak._util.merge_parameters(
+                    parameters=ak.forms.form._parameters_union(
                         content._parameters, parameters
                     ),
                 )
@@ -131,7 +134,7 @@ class IndexedArray(Content):
                 return ak.contents.IndexedOptionArray(
                     result,
                     content.content,
-                    parameters=ak._util.merge_parameters(
+                    parameters=ak.forms.form._parameters_union(
                         content._parameters, parameters
                     ),
                 )
@@ -401,7 +404,7 @@ class IndexedArray(Content):
             )
             next = self._content._carry(nextcarry, False)
             return next.copy(
-                parameters=ak._util.merge_parameters(
+                parameters=ak.forms.form._parameters_union(
                     next._parameters,
                     self._parameters,
                     exclude=(("__array__", "categorical"),),
@@ -417,20 +420,16 @@ class IndexedArray(Content):
             return self.project()._offsets_and_flattened(axis, depth)
 
     def _mergeable_next(self, other, mergebool):
-        if isinstance(
-            other,
-            (
-                ak.contents.IndexedArray,
-                ak.contents.IndexedOptionArray,
-                ak.contents.ByteMaskedArray,
-                ak.contents.BitMaskedArray,
-                ak.contents.UnmaskedArray,
-            ),
-        ):
-            return self._content._mergeable(other.content, mergebool)
-
+        # Is the other content is an identity, or a union?
+        if other.is_identity_like or other.is_union:
+            return True
+        # We can only combine option/indexed types whose array-record parameters agree
+        elif other.is_option or other.is_indexed:
+            return self._content._mergeable_next(
+                other.content, mergebool
+            ) and _type_parameters_equal(self._parameters, other._parameters)
         else:
-            return self._content._mergeable(other, mergebool)
+            return self._content._mergeable_next(other, mergebool)
 
     def _merging_strategy(self, others):
         if len(others) == 0:
@@ -503,7 +502,14 @@ class IndexedArray(Content):
                 theirlength,
             )
         )
-        parameters = ak._util.merge_parameters(self._parameters, other._parameters)
+        # We can directly merge with other options and indexed types, but we must merge parameters
+        if other.is_option or other.is_indexed:
+            parameters = ak.forms.form._parameters_union(
+                self._parameters, other._parameters
+            )
+        # Otherwise, this option parameters win out
+        else:
+            parameters = self._parameters
 
         return ak.contents.IndexedArray.simplified(
             index, content, parameters=parameters
@@ -528,7 +534,8 @@ class IndexedArray(Content):
 
         parameters = self._parameters
         for array in head:
-            parameters = ak._util.merge_parameters(parameters, array._parameters, True)
+            if isinstance(array, ak.contents.EmptyArray):
+                continue
 
             if isinstance(
                 array,
@@ -540,7 +547,13 @@ class IndexedArray(Content):
             ):
                 array = array.to_IndexedOptionArray64()
 
-            if isinstance(array, ak.contents.IndexedArray):
+            if isinstance(
+                array, (ak.contents.IndexedOptionArray, ak.contents.IndexedArray)
+            ):
+                parameters = ak.forms.form._parameters_intersect(
+                    parameters, array._parameters
+                )
+
                 contents.append(array.content)
                 array_index = array.index
                 assert (
@@ -562,9 +575,6 @@ class IndexedArray(Content):
                 )
                 contentlength_so_far += array.content.length
                 length_so_far += array.length
-
-            elif isinstance(array, ak.contents.EmptyArray):
-                pass
             else:
                 contents.append(array)
                 assert nextindex.nplike is self._backend.index_nplike
@@ -584,7 +594,16 @@ class IndexedArray(Content):
 
         tail_contents = contents[1:]
         nextcontent = contents[0]._mergemany(tail_contents)
-        next = ak.contents.IndexedArray(nextindex, nextcontent, parameters=parameters)
+
+        # Options win out!
+        if any(x.is_option for x in head):
+            next = ak.contents.IndexedOptionArray(
+                nextindex, nextcontent, parameters=parameters
+            )
+        else:
+            next = ak.contents.IndexedArray(
+                nextindex, nextcontent, parameters=parameters
+            )
 
         if len(tail) == 0:
             return next
@@ -951,7 +970,9 @@ class IndexedArray(Content):
                 next = self._content._carry(ak.index.Index(index), False)
 
             next2 = next.copy(
-                parameters=ak._util.merge_parameters(next._parameters, self._parameters)
+                parameters=ak.forms.form._parameters_union(
+                    next._parameters, self._parameters
+                )
             )
             return next2._to_arrow(pyarrow, mask_node, validbytes, length, options)
 

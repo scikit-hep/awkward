@@ -557,55 +557,6 @@ def direct_Content_subclass_name(node):
         return out.__name__
 
 
-meaningful_parameters = frozenset(
-    {
-        ("__array__", "string"),
-        ("__array__", "bytestring"),
-        ("__array__", "char"),
-        ("__array__", "byte"),
-        ("__array__", "sorted_map"),
-        ("__array__", "categorical"),
-    }
-)
-
-
-def merge_parameters(one, two, merge_equal=False, exclude=()):
-    if one is None and two is None:
-        return None
-
-    if len(exclude) != 0:
-        if one is None:
-            one = {}
-        if two is None:
-            two = {}
-
-    if one is None:
-        return two
-
-    elif two is None:
-        return one
-
-    elif merge_equal:
-        out = {}
-        for k, v in two.items():
-            if k in one.keys():
-                if len(exclude) == 0 or (k, v) not in exclude:
-                    if v == one[k]:
-                        out[k] = v
-        return out
-
-    else:
-        if len(exclude) != 0:
-            out = {k: v for k, v in one.items() if (k, v) not in exclude}
-        else:
-            out = dict(one)
-        for k, v in two.items():
-            if len(exclude) == 0 or (k, v) not in exclude:
-                if v is not None:
-                    out[k] = v
-        return out
-
-
 def expand_braces(text, seen=None):
     if seen is None:
         seen = set()

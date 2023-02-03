@@ -96,13 +96,14 @@ def test_forms():
         "form_key": "yowzers",
     }
 
-    form = ak.forms.EmptyForm(
-        parameters={"hey": ["you"]},
-        form_key="yowzers",
-    )
-    assert form == form
-    assert pickle.loads(pickle.dumps(form, -1)) == form
-    assert ak.forms.from_json(form.to_json()) == form
+    with pytest.warns(DeprecationWarning):
+        form = ak.forms.EmptyForm(
+            parameters={"hey": ["you"]},
+            form_key="yowzers",
+        )
+        assert form == form
+        assert pickle.loads(pickle.dumps(form, -1)) == form
+        assert ak.forms.from_json(form.to_json()) == form
     assert json.loads(form.to_json()) == {
         "class": "EmptyArray",
         "parameters": {"hey": ["you"]},

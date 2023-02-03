@@ -6,6 +6,7 @@ from collections.abc import Iterable, Sized
 import awkward as ak
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward.forms.form import _parameters_union
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
@@ -406,7 +407,7 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
 
         content = handle_arrow(paarray.dictionary, generate_bitmasks)
 
-        parameters = ak._util.merge_parameters(
+        parameters = ak.forms.form._parameters_union(
             mask_parameters(awkwardarrow_type), node_parameters(awkwardarrow_type)
         )
         if parameters is None:
@@ -701,7 +702,7 @@ def form_popbuffers(awkwardarrow_type, storage_type):
         a, b = to_awkwardarrow_storage_types(storage_type.value_type)
         content = form_popbuffers(a, b)
 
-        parameters = ak._util.merge_parameters(
+        parameters = _parameters_union(
             mask_parameters(awkwardarrow_type), node_parameters(awkwardarrow_type)
         )
         if parameters is None:
@@ -850,7 +851,7 @@ def form_popbuffers(awkwardarrow_type, storage_type):
         # This is already an option-type, so no form_popbuffers_finalize.
         return ak.forms.IndexedOptionForm(
             "i64",
-            ak.forms.EmptyForm(parameters=node_parameters(awkwardarrow_type)),
+            ak.forms.EmptyForm(),
             parameters=mask_parameters(awkwardarrow_type),
         )
 
