@@ -95,7 +95,7 @@ class IndexedArray(Content):
 
         if content.is_union and not is_cat:
             return content._carry(index, allow_lazy=False).copy(
-                parameters=ak.forms.form._merge_parameters(
+                parameters=ak.forms.form._parameters_union(
                     content._parameters, parameters
                 )
             )
@@ -126,7 +126,7 @@ class IndexedArray(Content):
                 return ak.contents.IndexedArray(
                     result,
                     content.content,
-                    parameters=ak.forms.form._merge_parameters(
+                    parameters=ak.forms.form._parameters_union(
                         content._parameters, parameters
                     ),
                 )
@@ -134,7 +134,7 @@ class IndexedArray(Content):
                 return ak.contents.IndexedOptionArray(
                     result,
                     content.content,
-                    parameters=ak.forms.form._merge_parameters(
+                    parameters=ak.forms.form._parameters_union(
                         content._parameters, parameters
                     ),
                 )
@@ -404,7 +404,7 @@ class IndexedArray(Content):
             )
             next = self._content._carry(nextcarry, False)
             return next.copy(
-                parameters=ak.forms.form._merge_parameters(
+                parameters=ak.forms.form._parameters_union(
                     next._parameters,
                     self._parameters,
                     exclude=(("__array__", "categorical"),),
@@ -504,7 +504,7 @@ class IndexedArray(Content):
         )
         # We can directly merge with other options and indexed types, but we must merge parameters
         if other.is_option or other.is_indexed:
-            parameters = ak.forms.form._merge_parameters(
+            parameters = ak.forms.form._parameters_union(
                 self._parameters, other._parameters
             )
         # Otherwise, this option parameters win out
@@ -550,8 +550,8 @@ class IndexedArray(Content):
             if isinstance(
                 array, (ak.contents.IndexedOptionArray, ak.contents.IndexedArray)
             ):
-                parameters = ak.forms.form._merge_parameters(
-                    parameters, array._parameters, merge_equal=True
+                parameters = ak.forms.form._parameters_intersect(
+                    parameters, array._parameters
                 )
 
                 contents.append(array.content)
@@ -970,7 +970,7 @@ class IndexedArray(Content):
                 next = self._content._carry(ak.index.Index(index), False)
 
             next2 = next.copy(
-                parameters=ak.forms.form._merge_parameters(
+                parameters=ak.forms.form._parameters_union(
                     next._parameters, self._parameters
                 )
             )

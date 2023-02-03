@@ -121,7 +121,7 @@ class IndexedOptionArray(Content):
             return IndexedOptionArray(
                 result,
                 content.content,
-                parameters=ak.forms.form._merge_parameters(
+                parameters=ak.forms.form._parameters_union(
                     content._parameters, parameters
                 ),
             )
@@ -645,7 +645,7 @@ class IndexedOptionArray(Content):
         )
         # We can directly merge with other options, but we must merge parameters
         if other.is_option:
-            parameters = ak.forms.form._merge_parameters(
+            parameters = ak.forms.form._parameters_union(
                 self._parameters, other._parameters
             )
         # Otherwise, this option parameters win out
@@ -692,8 +692,8 @@ class IndexedOptionArray(Content):
                 array, (ak.contents.IndexedOptionArray, ak.contents.IndexedArray)
             ):
                 # If we're merging an option, then merge parameters before pulling out `content`
-                parameters = ak.forms.form._merge_parameters(
-                    parameters, array._parameters, merge_equal=True
+                parameters = ak.forms.form._parameters_intersect(
+                    parameters, array._parameters
                 )
                 contents.append(array.content)
                 array_index = array.index

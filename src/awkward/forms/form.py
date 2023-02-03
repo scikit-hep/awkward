@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import json
-from collections.abc import Mapping
+from collections.abc import Collection, Mapping
 
 import awkward as ak
 from awkward import _errors
@@ -259,26 +259,91 @@ def _parameters_equal(
         return True
 
 
-def _parameters_intersect(left: JSONMapping, right: JSONMapping) -> JSONMapping:
+def _parameters_intersect(
+    left: JSONMapping | None,
+    right: JSONMapping | None,
+    *,
+    exclude: Collection[tuple[str, JSONSerialisable]] = (),
+) -> JSONMapping | None:
     """
     Args:
         left: first parameters mapping
         right: second parameters mapping
+        exclude: collection of (key, value) items to exclude
 
     Returns the intersected key-value pairs of `left` and `right` as a dictionary.
-
     """
-    result = {}
-    for key in left.keys() & right.keys():
-        if left[key] == right[key]:
-            result[key] = left[key]
+    if left is None:
+        return right
+    elif right is None:
+        return left
+
+    common_keys = iter(left.keys() & right.keys())
+    has_no_exclusions = len(exclude) == 0
+
+    # Avoid creating `result` unless we have to
+    for key in common_keys:
+        left_value = left[key]
+        # Do our keys match?
+        if (
+            left_value is not None
+            and left_value == right[key]
+            and (has_no_exclusions or (key, left_value) not in exclude)
+        ):
+            # Exit, indicating that we want to create `result`
+            break
+    else:
+        return None
+
+    # We found a meaningful key, so create a result dict
+    result = {key: left_value}
+    for key in common_keys:
+        left_value = left[key]
+        if (
+            left_value is not None
+            and left_value == right[key]
+            and (has_no_exclusions or (key, left_value) not in exclude)
+        ):
+            result[key] = left_value
+
     return result
 
 
-def _parameters_update(one: JSONMapping, two: JSONMapping):
-    for k, v in two.items():
-        if v is not None:
-            one[k] = v
+def _parameters_union(
+    left: JSONMapping,
+    right: JSONMapping,
+    *,
+    exclude: Collection[tuple[str, JSONSerialisable]] = (),
+) -> JSONMapping:
+    """
+    Args:
+        left: first parameters mapping
+        right: second parameters mapping
+        exclude: collection of (key, value) items to exclude
+
+    Returns the merged key-value pairs of `left` and `right` as a dictionary.
+
+    """
+    if left is None:
+        return right
+    elif right is None:
+        return left
+
+    has_no_exclusions = len(exclude) == 0
+    result = {
+        k: v
+        for k, v in left.items()
+        if v is not None and (has_no_exclusions or (k, v) not in exclude)
+    }
+
+    for key in right:
+        right_value = right[key]
+        if right_value is not None and (
+            has_no_exclusions or (key, right_value) not in exclude
+        ):
+            result[key] = right_value
+
+    return result
 
 
 def _parameters_is_empty(parameters: JSONMapping | None) -> bool:
@@ -298,49 +363,6 @@ def _parameters_is_empty(parameters: JSONMapping | None) -> bool:
             return False
 
     return True
-
-
-def _merge_parameters(
-    one: JSONMapping | None,
-    two: JSONMapping | None,
-    *,
-    merge_equal: bool = False,
-    exclude: tuple[str] = (),
-) -> JSONMapping | None:
-    if one is None and two is None:
-        return None
-
-    if len(exclude) != 0:
-        if one is None:
-            one = {}
-        if two is None:
-            two = {}
-
-    if one is None:
-        return two
-
-    elif two is None:
-        return one
-
-    elif merge_equal:
-        out = {}
-        for k, v in two.items():
-            if k in one.keys():
-                if len(exclude) == 0 or (k, v) not in exclude:
-                    if v == one[k]:
-                        out[k] = v
-        return out
-
-    else:
-        if len(exclude) != 0:
-            out = {k: v for k, v in one.items() if (k, v) not in exclude}
-        else:
-            out = dict(one)
-        for k, v in two.items():
-            if len(exclude) == 0 or (k, v) not in exclude:
-                if v is not None:
-                    out[k] = v
-        return out
 
 
 class Form:

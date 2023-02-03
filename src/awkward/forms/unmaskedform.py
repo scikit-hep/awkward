@@ -57,13 +57,13 @@ class UnmaskedForm(Form):
         if content.is_union:
             return content.copy(
                 contents=[cls.simplified(x) for x in content.contents],
-                parameters=ak.forms.form._merge_parameters(
+                parameters=ak.forms.form._parameters_union(
                     content._parameters, parameters
                 ),
             )
         elif content.is_indexed or content.is_option:
             return content.copy(
-                parameters=ak.forms.form._merge_parameters(
+                parameters=ak.forms.form._parameters_union(
                     content._parameters, parameters
                 )
             )

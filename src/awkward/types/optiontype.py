@@ -103,7 +103,7 @@ class OptionType(Type):
                     contents.append(
                         OptionType(
                             content.content,
-                            parameters=ak.forms.form._merge_parameters(
+                            parameters=ak.forms.form._parameters_union(
                                 self._parameters, content._parameters
                             ),
                             typestr=typestr,

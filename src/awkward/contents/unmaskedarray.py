@@ -68,13 +68,13 @@ class UnmaskedArray(Content):
         if content.is_union:
             return content.copy(
                 contents=[cls.simplified(x) for x in content.contents],
-                parameters=ak.forms.form._merge_parameters(
+                parameters=ak.forms.form._parameters_union(
                     content._parameters, parameters
                 ),
             )
         elif content.is_indexed or content.is_option:
             return content.copy(
-                parameters=ak.forms.form._merge_parameters(
+                parameters=ak.forms.form._parameters_union(
                     content._parameters, parameters
                 )
             )
@@ -291,8 +291,8 @@ class UnmaskedArray(Content):
             parameters = self._parameters
             tail_contents = []
             for x in others:
-                parameters = ak.forms.form._merge_parameters(
-                    parameters, x._parameters, merge_equal=True
+                parameters = ak.forms.form._intersect_parameters(
+                    parameters, x._parameters
                 )
                 tail_contents.append(x._content)
 

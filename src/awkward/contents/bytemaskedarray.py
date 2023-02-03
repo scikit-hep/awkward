@@ -666,8 +666,8 @@ class ByteMaskedArray(Content):
                 length_scalar = self._backend.index_nplike.shape_item_as_scalar(
                     x.length
                 )
-                parameters = ak.forms.form._merge_parameters(
-                    parameters, x._parameters, merge_equal=True
+                parameters = ak.forms.form._intersect_parameters(
+                    parameters, x._parameters
                 )
                 masks.append(x._mask.data[:length_scalar])
                 tail_contents.append(x._content[:length_scalar])

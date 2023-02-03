@@ -186,7 +186,7 @@ class RegularArray(Content):
             shape = (self._length, self._size) + content.data.shape[1:]
             return ak.contents.NumpyArray(
                 self._backend.nplike.reshape(content.data, shape),
-                parameters=ak.forms.form._merge_parameters(
+                parameters=ak.forms.form._parameters_union(
                     self._parameters, content.parameters
                 ),
                 backend=content.backend,
@@ -671,8 +671,8 @@ class RegularArray(Content):
             tail_contents = []
             zeros_length = self._length
             for x in others:
-                parameters = ak.forms.form._merge_parameters(
-                    parameters, x._parameters, merge_equal=True
+                parameters = ak.forms.form._intersect_parameters(
+                    parameters, x._parameters
                 )
                 tail_contents.append(
                     x._content[

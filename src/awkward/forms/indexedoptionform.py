@@ -81,7 +81,7 @@ class IndexedOptionForm(Form):
             return ak.forms.IndexedOptionForm.simplified(
                 "i64",
                 content.content,
-                parameters=ak.forms.form._merge_parameters(
+                parameters=ak.forms.form._parameters_union(
                     content._parameters, parameters
                 ),
             )

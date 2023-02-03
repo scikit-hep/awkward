@@ -2,7 +2,7 @@
 
 import awkward as ak
 from awkward._util import unset
-from awkward.forms.form import Form, _parameters_update, _type_parameters_equal
+from awkward.forms.form import Form, _parameters_union, _type_parameters_equal
 from awkward.typing import final
 
 
@@ -75,7 +75,7 @@ class IndexedForm(Form):
 
         if content.is_union and not is_cat:
             return content.copy(
-                parameters=ak.forms.form._merge_parameters(
+                parameters=ak.forms.form._parameters_union(
                     content._parameters, parameters
                 )
             )
@@ -84,7 +84,7 @@ class IndexedForm(Form):
             return ak.forms.IndexedOptionForm.simplified(
                 "i64",
                 content.content,
-                parameters=ak.forms.form._merge_parameters(
+                parameters=ak.forms.form._parameters_union(
                     content._parameters, parameters
                 ),
             )
@@ -93,7 +93,7 @@ class IndexedForm(Form):
             return IndexedForm(
                 "i64",
                 content.content,
-                parameters=ak.forms.form._merge_parameters(
+                parameters=ak.forms.form._parameters_union(
                     content._parameters, parameters
                 ),
             )
@@ -122,8 +122,7 @@ class IndexedForm(Form):
             if out._parameters is None:
                 out._parameters = self._parameters
             else:
-                out._parameters = dict(out._parameters)
-                _parameters_update(out._parameters, self._parameters)
+                out._parameters = _parameters_union(out._parameters, self._parameters)
 
             if self._parameters.get("__array__") == "categorical":
                 if out._parameters is self._parameters:

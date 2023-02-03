@@ -742,7 +742,10 @@ class Content:
     def _mergeable_next(self, other: Content, mergebool: bool) -> bool:
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def _mergemany(self, others: list[Content]) -> Content:
+    def _mergemany(
+        self,
+        others: list[Content],
+    ) -> Content:
         raise ak._errors.wrap_error(NotImplementedError)
 
     def _merging_strategy(

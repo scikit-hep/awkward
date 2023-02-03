@@ -587,8 +587,8 @@ class RecordArray(Content):
                 if isinstance(array, ak.contents.EmptyArray):
                     continue
 
-                parameters = ak.forms.form._merge_parameters(
-                    parameters, array._parameters, merge_equal=True
+                parameters = ak.forms.form._parameters_intersect(
+                    parameters, array._parameters
                 )
 
                 if isinstance(array, ak.contents.RecordArray):
@@ -622,8 +622,8 @@ class RecordArray(Content):
             these_fields.sort()
 
             for array in headless:
-                parameters = ak.forms.form._merge_parameters(
-                    parameters, array._parameters, merge_equal=True
+                parameters = ak.forms.form._parameters_intersect(
+                    parameters, array._parameters
                 )
 
                 if isinstance(array, ak.contents.RecordArray):

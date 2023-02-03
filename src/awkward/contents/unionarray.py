@@ -210,15 +210,21 @@ class UnionArray(Content):
         index = ak.index.Index64.empty(length, backend.index_nplike)
         contents = []
 
+        # For each outer union content
         for i, self_cont in enumerate(self_contents):
+            # Is one of our new contents also a union?
             if isinstance(self_cont, UnionArray):
                 innertags = self_cont._tags
                 innerindex = self_cont._index
                 innercontents = self_cont._contents
 
+                # For each inner union content
                 for j, inner_cont in enumerate(innercontents):
                     unmerged = True
+
+                    # For each "final" outer union content
                     for k in range(len(contents)):
+                        # Try and merge inner union content with running outer-union contentca
                         if merge and contents[k]._mergeable_next(inner_cont, mergebool):
                             Content._selfless_handle_error(
                                 backend[
@@ -248,7 +254,7 @@ class UnionArray(Content):
                                 contents[k]
                                 ._mergemany([inner_cont])
                                 .copy(
-                                    parameters=ak.forms.form._merge_parameters(
+                                    parameters=ak.forms.form._parameters_union(
                                         old_parameters, inner_cont._parameters
                                     )
                                 )
@@ -331,7 +337,7 @@ class UnionArray(Content):
                             contents[k]
                             ._mergemany([self_cont])
                             .copy(
-                                parameters=ak.forms.form._merge_parameters(
+                                parameters=ak.forms.form._parameters_union(
                                     old_parameters, self_cont._parameters
                                 )
                             )
@@ -370,7 +376,7 @@ class UnionArray(Content):
         if len(contents) == 1:
             next = contents[0]._carry(index, True)
             return next.copy(
-                parameters=ak.forms.form._merge_parameters(next._parameters, parameters)
+                parameters=ak.forms.form._parameters_union(next._parameters, parameters)
             )
 
         else:
@@ -592,7 +598,7 @@ class UnionArray(Content):
             ak.index.Index(nexttags),
             ak.index.Index(nextindex),
             contents,
-            parameters=ak.forms.form._merge_parameters(self._parameters, parameters),
+            parameters=ak.forms.form._parameters_union(self._parameters, parameters),
         )
 
     def project(self, index):
@@ -1006,7 +1012,7 @@ class UnionArray(Content):
                 AssertionError("FIXME: handle UnionArray with more than 127 contents")
             )
 
-        parameters = ak.forms.form._merge_parameters(
+        parameters = ak.forms.form._parameters_union(
             self._parameters,
             other._parameters,
             exclude=ak.forms.form.reserved_nominal_parameters,
@@ -1043,8 +1049,8 @@ class UnionArray(Content):
             if isinstance(array, ak.contents.EmptyArray):
                 continue
 
-            parameters = ak.forms.form._merge_parameters(
-                parameters, array._parameters, merge_equal=True
+            parameters = ak.forms.form._parameters_intersect(
+                parameters, array._parameters
             )
             if isinstance(array, ak.contents.UnionArray):
                 union_tags = ak.index.Index(array.tags)
