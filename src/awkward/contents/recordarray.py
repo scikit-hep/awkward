@@ -937,8 +937,7 @@ class RecordArray(Content):
                     (
                         "encountered a record whilst removing array structure{}, "
                         "but this operation does not support erasing records. "
-                        "Try calling `ak.ravel` or `ak.flatten(..., axis=None) first to "
-                        "remove the record"
+                        "Try first calling `ak.ravel` or `ak.flatten(..., axis=None)."
                     ).format(in_function)
                 )
             )
