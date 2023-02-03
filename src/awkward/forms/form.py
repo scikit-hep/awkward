@@ -49,7 +49,7 @@ def from_dict(input: dict) -> Form:
         )
 
     elif input["class"] == "EmptyArray":
-        return ak.forms.EmptyForm(form_key=form_key)
+        return ak.forms.EmptyForm(parameters=parameters, form_key=form_key)
 
     elif input["class"] == "RegularArray":
         return ak.forms.RegularForm(
@@ -273,10 +273,8 @@ def _parameters_intersect(
 
     Returns the intersected key-value pairs of `left` and `right` as a dictionary.
     """
-    if left is None:
-        return right
-    elif right is None:
-        return left
+    if left is None or right is None:
+        return None
 
     common_keys = iter(left.keys() & right.keys())
     has_no_exclusions = len(exclude) == 0
@@ -324,26 +322,33 @@ def _parameters_union(
     Returns the merged key-value pairs of `left` and `right` as a dictionary.
 
     """
-    if left is None:
-        return right
-    elif right is None:
-        return left
-
     has_no_exclusions = len(exclude) == 0
-    result = {
-        k: v
-        for k, v in left.items()
-        if v is not None and (has_no_exclusions or (k, v) not in exclude)
-    }
+    if left is None:
+        if right is None:
+            return None
+        else:
+            return {
+                k: v
+                for k, v in right.items()
+                if v is not None and (has_no_exclusions or (k, v) not in exclude)
+            }
+    else:
+        result = {
+            k: v
+            for k, v in left.items()
+            if v is not None and (has_no_exclusions or (k, v) not in exclude)
+        }
+        if right is None:
+            return result
+        else:
+            for key in right:
+                right_value = right[key]
+                if right_value is not None and (
+                    has_no_exclusions or (key, right_value) not in exclude
+                ):
+                    result[key] = right_value
 
-    for key in right:
-        right_value = right[key]
-        if right_value is not None and (
-            has_no_exclusions or (key, right_value) not in exclude
-        ):
-            result[key] = right_value
-
-    return result
+            return result
 
 
 def _parameters_is_empty(parameters: JSONMapping | None) -> bool:

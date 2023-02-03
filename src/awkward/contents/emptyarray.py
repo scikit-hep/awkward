@@ -22,6 +22,10 @@ class EmptyArray(Content):
     is_leaf = True
 
     def __init__(self, *, parameters=None, backend=None):
+        if not (parameters is None or len(parameters) == 0):
+            deprecate(
+                f"{type(self).__name__} cannot contain parameters", version="2.2.0"
+            )
         if backend is None:
             backend = ak._backends.NumpyBackend.instance()
         self._init(parameters, backend)
@@ -34,7 +38,7 @@ class EmptyArray(Content):
         parameters=unset,
         backend=unset,
     ):
-        if parameters is not unset:
+        if not (parameters is unset or parameters is None or len(parameters) == 0):
             deprecate(
                 f"{type(self).__name__} cannot contain parameters", version="2.2.0"
             )
@@ -50,9 +54,8 @@ class EmptyArray(Content):
         return self.copy(parameters=copy.deepcopy(self._parameters, memo))
 
     @classmethod
-    def simplified(cls, *, parameters=unset, backend=None):
-        if parameters is not unset:
-            parameters = None
+    def simplified(cls, *, parameters=None, backend=None):
+        if not (parameters is None or len(parameters) == 0):
             deprecate(f"{cls.__name__} cannot contain parameters", version="2.2.0")
         return cls(parameters=parameters, backend=backend)
 
@@ -196,10 +199,10 @@ class EmptyArray(Content):
     def _mergemany(self, others):
         if len(others) == 0:
             return self
-
+        elif len(others) == 1:
+            return others[0]
         else:
-            tail_others = [self, *others[1:]]
-            return others[0]._mergemany(tail_others)
+            return others[0]._mergemany(others[1:])
 
     def _fill_none(self, value: Content) -> Content:
         return EmptyArray(parameters=self._parameters, backend=self._backend)

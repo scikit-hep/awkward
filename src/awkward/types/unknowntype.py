@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._errors import deprecate
 from awkward.forms.form import _type_parameters_equal
 from awkward.types.type import Type
 from awkward.typing import final
@@ -9,6 +10,10 @@ from awkward.typing import final
 @final
 class UnknownType(Type):
     def __init__(self, *, parameters=None, typestr=None):
+        if parameters is not None:
+            deprecate(
+                f"{type(self).__name__} cannot contain parameters", version="2.2.0"
+            )
         if parameters is not None and not isinstance(parameters, dict):
             raise ak._errors.wrap_error(
                 TypeError(
