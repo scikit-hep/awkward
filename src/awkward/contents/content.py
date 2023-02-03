@@ -1296,7 +1296,7 @@ class Content:
     def _repr(self, indent: str, pre: str, post: str) -> str:
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def _numbers_to_type(self, name: str, including_unknown: bool) -> Self:
+    def _numbers_to_type(self, name: str, including_unknown: bool) -> Content:
         raise ak._errors.wrap_error(NotImplementedError)
 
     def _fill_none(self, value: Content) -> Content:
