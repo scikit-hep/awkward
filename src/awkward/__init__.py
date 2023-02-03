@@ -44,9 +44,6 @@ from awkward.behaviors.mixins import mixin_class, mixin_class_method
 import awkward.builder
 import awkward.forth
 
-# test helpers
-import awkward.testing
-
 behavior: dict = {}
 awkward.behaviors.string.register(behavior)
 awkward.behaviors.categorical.register(behavior)

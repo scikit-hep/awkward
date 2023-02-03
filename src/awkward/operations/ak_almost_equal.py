@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-__all__ = ["arrays_approx_equal"]
+__all__ = ["almost_equal"]
 
 from awkward._backends import backend_of
 from awkward._errors import wrap_error
@@ -12,7 +12,7 @@ from awkward.operations.ak_to_layout import to_layout
 np = NumpyMetadata.instance()
 
 
-def arrays_approx_equal(
+def almost_equal(
     left,
     right,
     *,
@@ -91,7 +91,9 @@ def arrays_approx_equal(
             return (
                 backend.index_nplike.array_equal(left.starts, right.starts)
                 and backend.index_nplike.array_equal(left.stops, right.stops)
-                and visitor(left.content, right.content)
+                and visitor(
+                    left.content[: left.stops[-1]], right.content[: right.stops[-1]]
+                )
             )
         elif left.is_regular:
             return (left.size == right.size) and visitor(left.content, right.content)
