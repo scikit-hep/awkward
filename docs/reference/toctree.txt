@@ -215,6 +215,11 @@
     generated/ak.isclose
     generated/ak.ones_like
     generated/ak.zeros_like
+
+.. toctree::
+    :caption: Array comparison
+
+    generated/ak.almost_equal
     
 .. toctree::
     :caption: Third-party integration
