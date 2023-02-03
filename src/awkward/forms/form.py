@@ -206,7 +206,7 @@ def _type_parameters_equal(
 
     elif two is None:
         for key in ("__array__", "__record__", "__categorical__"):
-            if two.get(key) is not None:
+            if one.get(key) is not None:
                 return allow_missing
         return True
 
