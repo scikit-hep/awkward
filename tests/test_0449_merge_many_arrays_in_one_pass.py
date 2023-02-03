@@ -453,7 +453,10 @@ def test_empty():
     assert to_list(one._mergemany([three, two, four])) == [1, 2, 3, 4, 5]
     assert to_list(one._mergemany([three, four, two])) == [1, 2, 3, 4, 5]
 
-    assert one()._mergemany([two.to_typetracer()]).form == one._mergemany([two]).form
+    assert (
+        one.to_typetracer()._mergemany([two.to_typetracer()]).form
+        == one._mergemany([two]).form
+    )
     assert (
         one.to_typetracer()._mergemany([two, one, two, one, two]).form
         == one._mergemany([two, one, two, one, two]).form
@@ -467,7 +470,8 @@ def test_empty():
         == one._mergemany([two, three, four]).form
     )
     assert (
-        one()._mergemany([three.to_typetracer()]).form == one._mergemany([three]).form
+        one.to_typetracer()._mergemany([three.to_typetracer()]).form
+        == one._mergemany([three]).form
     )
     assert (
         one.to_typetracer()._mergemany([three, four]).form

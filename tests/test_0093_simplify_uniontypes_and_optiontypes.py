@@ -19,7 +19,10 @@ def test_numpyarray_merge():
     assert to_list(ak1[1:, :-1, ::-1]._mergemany([ak2[1:, :-1, ::-1]])) == to_list(
         np.concatenate([np1[1:, :-1, ::-1], np2[1:, :-1, ::-1]])
     )
-    assert ak1()._mergemany([ak2.to_typetracer()]).form == ak1._mergemany([ak2]).form
+    assert (
+        ak1.to_typetracer()._mergemany([ak2.to_typetracer()]).form
+        == ak1._mergemany([ak2]).form
+    )
     assert (
         ak1[1:, :-1, ::-1].to_typetracer()._mergemany([ak2[1:, :-1, ::-1]]).form
         == ak1[1:, :-1, ::-1]._mergemany([ak2[1:, :-1, ::-1]]).form
@@ -67,11 +70,11 @@ def test_numpyarray_merge():
             assert to_list(emptyarray._mergemany([one])) == to_list(one)
 
             assert (
-                one()._mergemany([two.to_typetracer()]).form
+                one.to_typetracer()._mergemany([two.to_typetracer()]).form
                 == one._mergemany([two]).form
             )
             assert (
-                one()._mergemany([emptyarray.to_typetracer()]).form
+                one.to_typetracer()._mergemany([emptyarray.to_typetracer()]).form
                 == one._mergemany([emptyarray]).form
             )
             assert (
@@ -92,9 +95,12 @@ def test_regulararray_merge():
     assert to_list(ak1._mergemany([emptyarray])) == to_list(ak1)
     assert to_list(emptyarray._mergemany([ak1])) == to_list(ak1)
 
-    assert ak1()._mergemany([ak2.to_typetracer()]).form == ak1._mergemany([ak2]).form
     assert (
-        ak1()._mergemany([emptyarray.to_typetracer()]).form
+        ak1.to_typetracer()._mergemany([ak2.to_typetracer()]).form
+        == ak1._mergemany([ak2]).form
+    )
+    assert (
+        ak1.to_typetracer()._mergemany([emptyarray.to_typetracer()]).form
         == ak1._mergemany([emptyarray]).form
     )
     assert (
@@ -176,15 +182,15 @@ def test_listarray_merge():
         assert to_list(emptyarray._mergemany([array1])) == to_list(array1)
 
         assert (
-            array1()._mergemany([array2.to_typetracer()]).form
+            array1.to_typetracer()._mergemany([array2.to_typetracer()]).form
             == array1._mergemany([array2]).form
         )
         assert (
-            array2()._mergemany([array1.to_typetracer()]).form
+            array2.to_typetracer()._mergemany([array1.to_typetracer()]).form
             == array2._mergemany([array1]).form
         )
         assert (
-            array1()._mergemany([emptyarray.to_typetracer()]).form
+            array1.to_typetracer()._mergemany([emptyarray.to_typetracer()]).form
             == array1._mergemany([emptyarray]).form
         )
         assert (
@@ -297,15 +303,15 @@ def test_listoffsetarray_merge():
         assert to_list(emptyarray._mergemany([array1])) == to_list(array1)
 
         assert (
-            array1()._mergemany([array2.to_typetracer()]).form
+            array1.to_typetracer()._mergemany([array2.to_typetracer()]).form
             == array1._mergemany([array2]).form
         )
         assert (
-            array2()._mergemany([array1.to_typetracer()]).form
+            array2.to_typetracer()._mergemany([array1.to_typetracer()]).form
             == array2._mergemany([array1]).form
         )
         assert (
-            array1()._mergemany([emptyarray.to_typetracer()]).form
+            array1.to_typetracer()._mergemany([emptyarray.to_typetracer()]).form
             == array1._mergemany([emptyarray]).form
         )
         assert (
@@ -343,11 +349,11 @@ def test_listoffsetarray_merge():
         ]
 
         assert (
-            array1()._mergemany([regulararray.to_typetracer()]).form
+            array1.to_typetracer()._mergemany([regulararray.to_typetracer()]).form
             == array1._mergemany([regulararray]).form
         )
         assert (
-            regulararray()._mergemany([array1.to_typetracer()]).form
+            regulararray.to_typetracer()._mergemany([array1.to_typetracer()]).form
             == regulararray._mergemany([array1]).form
         )
 
@@ -500,35 +506,35 @@ def test_recordarray_merge():
     ]
 
     assert (
-        arrayr1()._mergemany([arrayr2.to_typetracer()]).form
+        arrayr1.to_typetracer()._mergemany([arrayr2.to_typetracer()]).form
         == arrayr1._mergemany([arrayr2]).form
     )
     assert (
-        arrayr2()._mergemany([arrayr1.to_typetracer()]).form
+        arrayr2.to_typetracer()._mergemany([arrayr1.to_typetracer()]).form
         == arrayr2._mergemany([arrayr1]).form
     )
     assert (
-        arrayr1()._mergemany([arrayr4.to_typetracer()]).form
+        arrayr1.to_typetracer()._mergemany([arrayr4.to_typetracer()]).form
         == arrayr1._mergemany([arrayr4]).form
     )
     assert (
-        arrayr4()._mergemany([arrayr1.to_typetracer()]).form
+        arrayr4.to_typetracer()._mergemany([arrayr1.to_typetracer()]).form
         == arrayr4._mergemany([arrayr1]).form
     )
     assert (
-        arrayr5()._mergemany([arrayr6.to_typetracer()]).form
+        arrayr5.to_typetracer()._mergemany([arrayr6.to_typetracer()]).form
         == arrayr5._mergemany([arrayr6]).form
     )
     assert (
-        arrayr6()._mergemany([arrayr5.to_typetracer()]).form
+        arrayr6.to_typetracer()._mergemany([arrayr5.to_typetracer()]).form
         == arrayr6._mergemany([arrayr5]).form
     )
     assert (
-        arrayt1()._mergemany([arrayt2.to_typetracer()]).form
+        arrayt1.to_typetracer()._mergemany([arrayt2.to_typetracer()]).form
         == arrayt1._mergemany([arrayt2]).form
     )
     assert (
-        arrayt2()._mergemany([arrayt1.to_typetracer()]).form
+        arrayt2.to_typetracer()._mergemany([arrayt1.to_typetracer()]).form
         == arrayt2._mergemany([arrayt1]).form
     )
 
@@ -565,31 +571,31 @@ def test_recordarray_merge():
     assert to_list(emptyarray._mergemany([arrayt7])) == to_list(arrayt7)
 
     assert (
-        arrayr1()._mergemany([emptyarray.to_typetracer()]).form
+        arrayr1.to_typetracer()._mergemany([emptyarray.to_typetracer()]).form
         == arrayr1._mergemany([emptyarray]).form
     )
     assert (
-        arrayr2()._mergemany([emptyarray.to_typetracer()]).form
+        arrayr2.to_typetracer()._mergemany([emptyarray.to_typetracer()]).form
         == arrayr2._mergemany([emptyarray]).form
     )
     assert (
-        arrayr3()._mergemany([emptyarray.to_typetracer()]).form
+        arrayr3.to_typetracer()._mergemany([emptyarray.to_typetracer()]).form
         == arrayr3._mergemany([emptyarray]).form
     )
     assert (
-        arrayr4()._mergemany([emptyarray.to_typetracer()]).form
+        arrayr4.to_typetracer()._mergemany([emptyarray.to_typetracer()]).form
         == arrayr4._mergemany([emptyarray]).form
     )
     assert (
-        arrayr5()._mergemany([emptyarray.to_typetracer()]).form
+        arrayr5.to_typetracer()._mergemany([emptyarray.to_typetracer()]).form
         == arrayr5._mergemany([emptyarray]).form
     )
     assert (
-        arrayr6()._mergemany([emptyarray.to_typetracer()]).form
+        arrayr6.to_typetracer()._mergemany([emptyarray.to_typetracer()]).form
         == arrayr6._mergemany([emptyarray]).form
     )
     assert (
-        arrayr7()._mergemany([emptyarray.to_typetracer()]).form
+        arrayr7.to_typetracer()._mergemany([emptyarray.to_typetracer()]).form
         == arrayr7._mergemany([emptyarray]).form
     )
 
@@ -623,31 +629,31 @@ def test_recordarray_merge():
     )
 
     assert (
-        arrayt1()._mergemany([emptyarray.to_typetracer()]).form
+        arrayt1.to_typetracer()._mergemany([emptyarray.to_typetracer()]).form
         == arrayt1._mergemany([emptyarray]).form
     )
     assert (
-        arrayt2()._mergemany([emptyarray.to_typetracer()]).form
+        arrayt2.to_typetracer()._mergemany([emptyarray.to_typetracer()]).form
         == arrayt2._mergemany([emptyarray]).form
     )
     assert (
-        arrayt3()._mergemany([emptyarray.to_typetracer()]).form
+        arrayt3.to_typetracer()._mergemany([emptyarray.to_typetracer()]).form
         == arrayt3._mergemany([emptyarray]).form
     )
     assert (
-        arrayt4()._mergemany([emptyarray.to_typetracer()]).form
+        arrayt4.to_typetracer()._mergemany([emptyarray.to_typetracer()]).form
         == arrayt4._mergemany([emptyarray]).form
     )
     assert (
-        arrayt5()._mergemany([emptyarray.to_typetracer()]).form
+        arrayt5.to_typetracer()._mergemany([emptyarray.to_typetracer()]).form
         == arrayt5._mergemany([emptyarray]).form
     )
     assert (
-        arrayt6()._mergemany([emptyarray.to_typetracer()]).form
+        arrayt6.to_typetracer()._mergemany([emptyarray.to_typetracer()]).form
         == arrayt6._mergemany([emptyarray]).form
     )
     assert (
-        arrayt7()._mergemany([emptyarray.to_typetracer()]).form
+        arrayt7.to_typetracer()._mergemany([emptyarray.to_typetracer()]).form
         == arrayt7._mergemany([emptyarray]).form
     )
 
@@ -736,15 +742,15 @@ def test_indexedarray_merge():
     ]
 
     assert (
-        indexedarray1()._mergemany([content2.to_typetracer()]).form
+        indexedarray1.to_typetracer()._mergemany([content2.to_typetracer()]).form
         == indexedarray1._mergemany([content2]).form
     )
     assert (
-        content2()._mergemany([indexedarray1.to_typetracer()]).form
+        content2.to_typetracer()._mergemany([indexedarray1.to_typetracer()]).form
         == content2._mergemany([indexedarray1]).form
     )
     assert (
-        indexedarray1()._mergemany([indexedarray1.to_typetracer()]).form
+        indexedarray1.to_typetracer()._mergemany([indexedarray1.to_typetracer()]).form
         == indexedarray1._mergemany([indexedarray1]).form
     )
 
@@ -827,10 +833,16 @@ def test_unionarray_merge():
         {"x": 2, "y": 2.2},
     ]
 
-    assert one()._mergemany([two.to_typetracer()]).form == one._mergemany([two]).form
-    assert two()._mergemany([one.to_typetracer()]).form == two._mergemany([one]).form
     assert (
-        one()._mergemany([emptyarray.to_typetracer()]).form
+        one.to_typetracer()._mergemany([two.to_typetracer()]).form
+        == one._mergemany([two]).form
+    )
+    assert (
+        two.to_typetracer()._mergemany([one.to_typetracer()]).form
+        == two._mergemany([one]).form
+    )
+    assert (
+        one.to_typetracer()._mergemany([emptyarray.to_typetracer()]).form
         == one._mergemany([emptyarray]).form
     )
     assert (
@@ -838,16 +850,20 @@ def test_unionarray_merge():
         == emptyarray._mergemany([one]).form
     )
     assert (
-        one()._mergemany([three.to_typetracer()]).form == one._mergemany([three]).form
+        one.to_typetracer()._mergemany([three.to_typetracer()]).form
+        == one._mergemany([three]).form
     )
     assert (
-        two()._mergemany([three.to_typetracer()]).form == two._mergemany([three]).form
+        two.to_typetracer()._mergemany([three.to_typetracer()]).form
+        == two._mergemany([three]).form
     )
     assert (
-        three()._mergemany([one.to_typetracer()]).form == three._mergemany([one]).form
+        three.to_typetracer()._mergemany([one.to_typetracer()]).form
+        == three._mergemany([one]).form
     )
     assert (
-        three()._mergemany([two.to_typetracer()]).form == three._mergemany([two]).form
+        three.to_typetracer()._mergemany([two.to_typetracer()]).form
+        == three._mergemany([two]).form
     )
 
 

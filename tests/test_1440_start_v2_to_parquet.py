@@ -211,12 +211,13 @@ def test_indexedoptionarray_numpyarray(tmp_path, extensionarray):
 
 @pytest.mark.parametrize("extensionarray", [False, True])
 def test_indexedoptionarray_emptyarray(tmp_path, extensionarray):
-    akarray = ak.contents.IndexedOptionArray(
-        ak.index.Index64(np.array([-1, -1, -1, -1, -1], dtype=np.int64)),
-        ak.contents.EmptyArray(parameters={"which": "inner"}),
-        parameters={"which": "outer"},
-    )
-    parquet_round_trip(ak.Array(akarray), extensionarray, tmp_path)
+    with pytest.warns(DeprecationWarning):
+        akarray = ak.contents.IndexedOptionArray(
+            ak.index.Index64(np.array([-1, -1, -1, -1, -1], dtype=np.int64)),
+            ak.contents.EmptyArray(parameters={"which": "inner"}),
+            parameters={"which": "outer"},
+        )
+        parquet_round_trip(ak.Array(akarray), extensionarray, tmp_path)
 
 
 @pytest.mark.skip(
