@@ -245,14 +245,14 @@ def from_rdataframe(data_frame, columns, offsets_type="int"):
                     )
                 )
 
-    for key in awkward_type_cols:
-        if len(contents["rdfentry_"]) < len(awkward_type_cols[key]):
+    for key, value in awkward_type_cols.items():
+        if len(contents["rdfentry_"]) < len(value):
             contents[key] = ak._util.wrap(
-                ak.contents.IndexedArray(contents["rdfentry_"], awkward_type_cols[key]),
+                ak.contents.IndexedArray(contents["rdfentry_"], value),
                 highlevel=True,
             )
         else:
-            contents[key] = awkward_type_cols[key]
+            contents[key] = value
 
     if maybe_indexed:
         del contents["rdfentry_"]
