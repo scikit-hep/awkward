@@ -268,14 +268,20 @@ def num(layout, axis):
 
 
 def mergeable(one: Content, two: Content, mergebool: bool = True) -> bool:
-    return one._mergeable(two, mergebool=mergebool)
+    return one._mergeable_next(two, mergebool=mergebool)
 
 
 def merge_as_union(one: Content, two: Content) -> ak.contents.UnionArray:
     mylength = one.length
     theirlength = two.length
-    tags = ak.index.Index8.empty((mylength + theirlength), one.backend.index_nplike)
-    index = ak.index.Index64.empty((mylength + theirlength), one.backend.index_nplike)
+    tags = ak.index.Index8.empty(
+        one.backend.index_nplike.add_shape_item(mylength, theirlength),
+        one.backend.index_nplike,
+    )
+    index = ak.index.Index64.empty(
+        one.backend.index_nplike.add_shape_item(mylength, theirlength),
+        one.backend.index_nplike,
+    )
     contents = [one, two]
     assert tags.nplike is one.backend.index_nplike
     one._handle_error(

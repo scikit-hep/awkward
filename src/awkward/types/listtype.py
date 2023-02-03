@@ -1,7 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
-from awkward.forms.form import _parameters_equal
+from awkward.forms.form import _type_parameters_equal
 from awkward.types.type import Type
 from awkward.typing import final
 
@@ -69,9 +69,7 @@ class ListType(Type):
     def __eq__(self, other):
         if isinstance(other, ListType):
             return (
-                _parameters_equal(
-                    self._parameters, other._parameters, only_array_record=True
-                )
+                _type_parameters_equal(self._parameters, other._parameters)
                 and self._content == other._content
             )
         else:

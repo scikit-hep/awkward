@@ -2,15 +2,32 @@
 from __future__ import annotations
 
 import json
-from collections.abc import Mapping
+from collections.abc import Collection, Mapping
 
 import awkward as ak
 from awkward import _errors
 from awkward._nplikes.numpylike import NumpyMetadata
-from awkward.typing import Any
+from awkward.typing import Final, TypeAlias
 
 np = NumpyMetadata.instance()
 numpy_backend = ak._backends.NumpyBackend.instance()
+
+JSONSerialisable: TypeAlias = (
+    "str | int | float | bool | None | list | tuple | JSONMapping"
+)
+JSONMapping: TypeAlias = "dict[str, JSONSerialisable]"
+
+
+reserved_nominal_parameters: Final = frozenset(
+    {
+        ("__array__", "string"),
+        ("__array__", "bytestring"),
+        ("__array__", "char"),
+        ("__array__", "byte"),
+        ("__array__", "sorted_map"),
+        ("__array__", "categorical"),
+    }
+)
 
 
 def from_dict(input: dict) -> Form:
@@ -173,7 +190,36 @@ def from_json(input: str) -> Form:
     return from_dict(json.loads(input))
 
 
-def _parameters_equal(one, two, only_array_record=False):
+def _type_parameters_equal(
+    one: JSONMapping | None, two: JSONMapping | None, *, allow_missing: bool = False
+) -> bool:
+    if one is None and two is None:
+        return True
+
+    elif one is None:
+        # NB: __categorical__ is currently a type-only parameter, but
+        # we check it here as types check this too.
+        for key in ("__array__", "__record__", "__categorical__"):
+            if two.get(key) is not None:
+                return allow_missing
+        return True
+
+    elif two is None:
+        for key in ("__array__", "__record__", "__categorical__"):
+            if one.get(key) is not None:
+                return allow_missing
+        return True
+
+    else:
+        for key in ("__array__", "__record__", "__categorical__"):
+            if one.get(key) != two.get(key):
+                return False
+        return True
+
+
+def _parameters_equal(
+    one: JSONMapping, two: JSONMapping, only_array_record=False
+) -> bool:
     if one is None and two is None:
         return True
     elif one is None:
@@ -214,30 +260,98 @@ def _parameters_equal(one, two, only_array_record=False):
 
 
 def _parameters_intersect(
-    left: Mapping[str, Any], right: Mapping[str, Any]
-) -> dict[str, Any]:
+    left: JSONMapping | None,
+    right: JSONMapping | None,
+    *,
+    exclude: Collection[tuple[str, JSONSerialisable]] = (),
+) -> JSONMapping | None:
     """
     Args:
         left: first parameters mapping
         right: second parameters mapping
+        exclude: collection of (key, value) items to exclude
 
     Returns the intersected key-value pairs of `left` and `right` as a dictionary.
-
     """
-    result = {}
-    for key in left.keys() & right.keys():
-        if left[key] == right[key]:
-            result[key] = left[key]
+    if left is None or right is None:
+        return None
+
+    common_keys = iter(left.keys() & right.keys())
+    has_no_exclusions = len(exclude) == 0
+
+    # Avoid creating `result` unless we have to
+    for key in common_keys:
+        left_value = left[key]
+        # Do our keys match?
+        if (
+            left_value is not None
+            and left_value == right[key]
+            and (has_no_exclusions or (key, left_value) not in exclude)
+        ):
+            # Exit, indicating that we want to create `result`
+            break
+    else:
+        return None
+
+    # We found a meaningful key, so create a result dict
+    result = {key: left_value}
+    for key in common_keys:
+        left_value = left[key]
+        if (
+            left_value is not None
+            and left_value == right[key]
+            and (has_no_exclusions or (key, left_value) not in exclude)
+        ):
+            result[key] = left_value
+
     return result
 
 
-def _parameters_update(one, two):
-    for k, v in two.items():
-        if v is not None:
-            one[k] = v
+def _parameters_union(
+    left: JSONMapping,
+    right: JSONMapping,
+    *,
+    exclude: Collection[tuple[str, JSONSerialisable]] = (),
+) -> JSONMapping:
+    """
+    Args:
+        left: first parameters mapping
+        right: second parameters mapping
+        exclude: collection of (key, value) items to exclude
+
+    Returns the merged key-value pairs of `left` and `right` as a dictionary.
+
+    """
+    has_no_exclusions = len(exclude) == 0
+    if left is None:
+        if right is None:
+            return None
+        else:
+            return {
+                k: v
+                for k, v in right.items()
+                if v is not None and (has_no_exclusions or (k, v) not in exclude)
+            }
+    else:
+        result = {
+            k: v
+            for k, v in left.items()
+            if v is not None and (has_no_exclusions or (k, v) not in exclude)
+        }
+        if right is None:
+            return result
+        else:
+            for key in right:
+                right_value = right[key]
+                if right_value is not None and (
+                    has_no_exclusions or (key, right_value) not in exclude
+                ):
+                    result[key] = right_value
+
+            return result
 
 
-def _parameters_is_empty(parameters: dict[str, Any] | None) -> bool:
+def _parameters_is_empty(parameters: JSONMapping | None) -> bool:
     """
     Args:
         parameters (dict or None): parameters dictionary, or None
@@ -266,7 +380,7 @@ class Form:
     is_record = False
     is_union = False
 
-    def _init(self, parameters, form_key):
+    def _init(self, *, parameters, form_key):
         if parameters is not None and not isinstance(parameters, dict):
             raise _errors.wrap_error(
                 TypeError(
@@ -288,7 +402,7 @@ class Form:
         self._form_key = form_key
 
     @property
-    def parameters(self):
+    def parameters(self) -> JSONMapping:
         if self._parameters is None:
             self._parameters = {}
         return self._parameters
@@ -298,13 +412,13 @@ class Form:
         """Return True if the content or its non-list descendents are an identity"""
         raise _errors.wrap_error(NotImplementedError)
 
-    def parameter(self, key):
+    def parameter(self, key: str) -> JSONSerialisable:
         if self._parameters is None:
             return None
         else:
             return self._parameters.get(key)
 
-    def purelist_parameter(self, key):
+    def purelist_parameter(self, key: str) -> JSONSerialisable:
         raise _errors.wrap_error(NotImplementedError)
 
     @property

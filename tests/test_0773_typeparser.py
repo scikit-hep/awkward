@@ -35,7 +35,8 @@ def test_unknown_1():
 
 def test_unknown_2():
     text = 'unknown[parameters={"wonky": ["parameter", 3.14]}]'
-    parsedtype = ak.types.from_datashape(text, highlevel=False)
+    with pytest.warns(DeprecationWarning):
+        parsedtype = ak.types.from_datashape(text, highlevel=False)
     assert isinstance(parsedtype, ak.types.UnknownType)
     assert str(parsedtype) == text
 
@@ -147,7 +148,8 @@ def test_option_unknown_1():
 
 def test_option_unknown_2():
     text = '?unknown[parameters={"foo": "bar"}]'
-    parsedtype = ak.types.from_datashape(text, highlevel=False)
+    with pytest.warns(DeprecationWarning):
+        parsedtype = ak.types.from_datashape(text, highlevel=False)
     assert isinstance(parsedtype, ak.types.OptionType)
     assert str(parsedtype) == text
 
@@ -487,18 +489,21 @@ def test_unknowntype():
 
 
 def test_unknowntype_parameter():
-    t = UnknownType(parameters={"__array__": "Something"})
-    assert str(ak.types.from_datashape(str(t), highlevel=False)) == str(t)
+    with pytest.warns(DeprecationWarning):
+        t = UnknownType(parameters={"__array__": "Something"})
+        assert str(ak.types.from_datashape(str(t), highlevel=False)) == str(t)
 
 
 def test_unknowntype_categorical():
-    t = UnknownType(parameters={"__categorical__": True})
-    assert str(ak.types.from_datashape(str(t), highlevel=False)) == str(t)
+    with pytest.warns(DeprecationWarning):
+        t = UnknownType(parameters={"__categorical__": True})
+        assert str(ak.types.from_datashape(str(t), highlevel=False)) == str(t)
 
 
 def test_unknowntype_categorical_parameter():
-    t = UnknownType(parameters={"__array__": "Something", "__categorical__": True})
-    assert str(ak.types.from_datashape(str(t), highlevel=False)) == str(t)
+    with pytest.warns(DeprecationWarning):
+        t = UnknownType(parameters={"__array__": "Something", "__categorical__": True})
+        assert str(ak.types.from_datashape(str(t), highlevel=False)) == str(t)
 
 
 def test_regulartype_numpytype():

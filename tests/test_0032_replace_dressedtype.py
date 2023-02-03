@@ -12,8 +12,9 @@ def test_types_with_parameters():
     t = ak.types.UnknownType()
     assert t.parameters == {}
 
-    t = ak.types.UnknownType(parameters={"__array__": ["val", "ue"]})
-    assert t.parameters == {"__array__": ["val", "ue"]}
+    with pytest.warns(DeprecationWarning):
+        t = ak.types.UnknownType(parameters={"__array__": ["val", "ue"]})
+        assert t.parameters == {"__array__": ["val", "ue"]}
 
     t = ak.types.NumpyType("int32", parameters={"__array__": ["val", "ue"]})
     assert t.parameters == {"__array__": ["val", "ue"]}
@@ -50,15 +51,16 @@ def test_types_with_parameters():
     )
     assert t.parameters == {"__array__": ["val", "ue"]}
 
-    t = ak.types.UnknownType(
-        parameters={"key1": ["val", "ue"], "__record__": "one \u2192 two"}
-    )
-    assert t.parameters == {"__record__": "one \u2192 two", "key1": ["val", "ue"]}
+    with pytest.warns(DeprecationWarning):
+        t = ak.types.UnknownType(
+            parameters={"key1": ["val", "ue"], "__record__": "one \u2192 two"}
+        )
+        assert t.parameters == {"__record__": "one \u2192 two", "key1": ["val", "ue"]}
 
-    assert t == ak.types.UnknownType(
-        parameters={"__record__": "one \u2192 two", "key1": ["val", "ue"]}
-    )
-    assert t != ak.types.UnknownType(parameters={"__array__": ["val", "ue"]})
+        assert t == ak.types.UnknownType(
+            parameters={"__record__": "one \u2192 two", "key1": ["val", "ue"]}
+        )
+        assert t != ak.types.UnknownType(parameters={"__array__": ["val", "ue"]})
 
 
 def test_dress():
