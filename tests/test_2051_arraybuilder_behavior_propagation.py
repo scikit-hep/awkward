@@ -14,4 +14,4 @@ def test():
         builder.field("y").real(2.0)
         builder.field("z").real(3.0)
 
-    assert ak._util.arrays_approx_equal(builder, builder.snapshot())
+    assert ak.almost_equal(builder, builder.snapshot())

@@ -40,9 +40,7 @@ def test_merge_optional_strings():
     b = ak.Array([{"a": None}])
 
     result = ak.concatenate([a, b])
-    assert ak._util.arrays_approx_equal(
-        result, [{"a": "foo"}, {"a": "bar"}, {"a": None}]
-    )
+    assert ak.almost_equal(result, [{"a": "foo"}, {"a": "bar"}, {"a": None}])
 
 
 def test_merge_permutations():

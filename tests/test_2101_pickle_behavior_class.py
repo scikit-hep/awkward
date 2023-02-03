@@ -31,7 +31,7 @@ def test():
         behavior=behavior,
     )
 
-    assert ak._util.arrays_approx_equal(
+    assert ak.almost_equal(
         (vec + vec),
         ak.Array(
             [
@@ -43,4 +43,4 @@ def test():
         ),
     )
 
-    assert ak._util.arrays_approx_equal(pickle.loads(pickle.dumps(vec)), vec)
+    assert ak.almost_equal(pickle.loads(pickle.dumps(vec)), vec)

@@ -10,7 +10,7 @@ def test_tuple():
         (ak.from_numpy(data[0]), ak.from_numpy(data[1])), (2, 2)
     )
     assert isinstance(result, ak.Array)
-    assert ak._util.arrays_approx_equal(result, np.ravel_multi_index(data, (2, 2)))
+    assert ak.almost_equal(result, np.ravel_multi_index(data, (2, 2)))
 
 
 def test_list():
@@ -23,7 +23,7 @@ def test_list():
         ]
     )
     assert isinstance(result, ak.Array)
-    assert ak._util.arrays_approx_equal(
+    assert ak.almost_equal(
         result, np.block([[A, np.zeros((2, 3))], [np.ones((3, 2)), B]])
     )
 
@@ -33,14 +33,14 @@ def test_array():
     needle = np.array([5, 0, 2], dtype=np.int64)
     result = np.searchsorted(ak.from_numpy(haystack), ak.from_numpy(needle))
     assert isinstance(result, ak.Array)
-    assert ak._util.arrays_approx_equal(result, np.searchsorted(haystack, needle))
+    assert ak.almost_equal(result, np.searchsorted(haystack, needle))
 
 
 def test_scalar():
     data = np.array([1, 2, 3, 4, 3, 2, 1, 2], dtype=np.int64)
     result = np.partition(ak.from_numpy(data), 4)
     assert isinstance(result, ak.Array)
-    assert ak._util.arrays_approx_equal(result, np.partition(data, 4))
+    assert ak.almost_equal(result, np.partition(data, 4))
 
 
 def test_tuple_of_array():
@@ -50,4 +50,4 @@ def test_tuple_of_array():
     )
     result = np.lexsort((ak.from_numpy(data[0]), ak.from_numpy(data[1])))
     assert isinstance(result, ak.Array)
-    assert ak._util.arrays_approx_equal(result, np.lexsort(data))
+    assert ak.almost_equal(result, np.lexsort(data))
