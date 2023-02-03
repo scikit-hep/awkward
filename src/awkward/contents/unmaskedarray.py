@@ -291,7 +291,7 @@ class UnmaskedArray(Content):
             parameters = self._parameters
             tail_contents = []
             for x in others:
-                parameters = ak.forms.form._intersect_parameters(
+                parameters = ak.forms.form._parameters_intersect(
                     parameters, x._parameters
                 )
                 tail_contents.append(x._content)

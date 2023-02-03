@@ -671,7 +671,7 @@ class RegularArray(Content):
             tail_contents = []
             zeros_length = self._length
             for x in others:
-                parameters = ak.forms.form._intersect_parameters(
+                parameters = ak.forms.form._parameters_intersect(
                     parameters, x._parameters
                 )
                 tail_contents.append(
