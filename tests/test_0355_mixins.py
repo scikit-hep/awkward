@@ -77,7 +77,7 @@ def test_make_mixins():
         with_name="WeightedPoint",
         behavior=behavior,
     )
-    assert ak._util.arrays_approx_equal(
+    assert ak.testing.arrays_approx_equal(
         one + wone,
         ak.Array(
             [
@@ -90,7 +90,7 @@ def test_make_mixins():
         ),
         dtype_exact=False,
     )
-    assert ak._util.arrays_approx_equal(
+    assert ak.testing.arrays_approx_equal(
         wone + wtwo,
         ak.Array(
             [
@@ -122,7 +122,7 @@ def test_make_mixins():
         ),
         dtype_exact=False,
     )
-    assert ak._util.arrays_approx_equal(
+    assert ak.testing.arrays_approx_equal(
         abs(one),
         ak.Array(
             [
@@ -135,7 +135,7 @@ def test_make_mixins():
         ),
         dtype_exact=False,
     )
-    assert ak._util.arrays_approx_equal(
+    assert ak.testing.arrays_approx_equal(
         one.distance(wtwo),
         [
             [0.14142135623730953, 0.0, 0.31622776601683783],
