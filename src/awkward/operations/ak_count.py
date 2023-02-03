@@ -94,14 +94,14 @@ def count(
     """
     with ak._errors.OperationErrorContext(
         "ak.count",
-        dict(
-            array=array,
-            axis=axis,
-            keepdims=keepdims,
-            mask_identity=mask_identity,
-            highlevel=highlevel,
-            behavior=behavior,
-        ),
+        {
+            "array": array,
+            "axis": axis,
+            "keepdims": keepdims,
+            "mask_identity": mask_identity,
+            "highlevel": highlevel,
+            "behavior": behavior,
+        },
     ):
         if flatten_records is not unset:
             message = (

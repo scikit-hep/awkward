@@ -89,13 +89,13 @@ def mask(array, mask, *, valid_when=True, highlevel=True, behavior=None):
     """
     with ak._errors.OperationErrorContext(
         "ak.mask",
-        dict(
-            array=array,
-            mask=mask,
-            valid_when=valid_when,
-            highlevel=highlevel,
-            behavior=behavior,
-        ),
+        {
+            "array": array,
+            "mask": mask,
+            "valid_when": valid_when,
+            "highlevel": highlevel,
+            "behavior": behavior,
+        },
     ):
         return _impl(array, mask, valid_when, highlevel, behavior)
 

@@ -66,7 +66,7 @@ def to_packed(array, *, highlevel=True, behavior=None):
     """
     with ak._errors.OperationErrorContext(
         "ak.to_packed",
-        dict(array=array, highlevel=highlevel, behavior=behavior),
+        {"array": array, "highlevel": highlevel, "behavior": behavior},
     ):
         return _impl(array, highlevel, behavior)
 

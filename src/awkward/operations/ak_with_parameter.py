@@ -28,13 +28,13 @@ def with_parameter(array, parameter, value, *, highlevel=True, behavior=None):
     """
     with ak._errors.OperationErrorContext(
         "ak.with_parameter",
-        dict(
-            array=array,
-            parameter=parameter,
-            value=value,
-            highlevel=highlevel,
-            behavior=behavior,
-        ),
+        {
+            "array": array,
+            "parameter": parameter,
+            "value": value,
+            "highlevel": highlevel,
+            "behavior": behavior,
+        },
     ):
         return _impl(array, parameter, value, highlevel, behavior)
 

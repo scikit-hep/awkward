@@ -47,14 +47,14 @@ def argsort(
     """
     with ak._errors.OperationErrorContext(
         "ak.argsort",
-        dict(
-            array=array,
-            axis=axis,
-            ascending=ascending,
-            stable=stable,
-            highlevel=highlevel,
-            behavior=behavior,
-        ),
+        {
+            "array": array,
+            "axis": axis,
+            "ascending": ascending,
+            "stable": stable,
+            "highlevel": highlevel,
+            "behavior": behavior,
+        },
     ):
         return _impl(array, axis, ascending, stable, highlevel, behavior)
 

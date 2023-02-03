@@ -41,12 +41,12 @@ def to_layout(array, *, allow_record=True, allow_other=False, regulararray=True)
     """
     with _errors.OperationErrorContext(
         "ak.to_layout",
-        dict(
-            array=array,
-            allow_record=allow_record,
-            allow_other=allow_other,
-            regulararray=regulararray,
-        ),
+        {
+            "array": array,
+            "allow_record": allow_record,
+            "allow_other": allow_other,
+            "regulararray": regulararray,
+        },
     ):
         return _impl(array, allow_record, allow_other, regulararray=regulararray)
 

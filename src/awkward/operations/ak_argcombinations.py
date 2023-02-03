@@ -54,17 +54,17 @@ def argcombinations(
     """
     with ak._errors.OperationErrorContext(
         "ak.argcombinations",
-        dict(
-            array=array,
-            n=n,
-            replacement=replacement,
-            axis=axis,
-            fields=fields,
-            parameters=parameters,
-            with_name=with_name,
-            highlevel=highlevel,
-            behavior=behavior,
-        ),
+        {
+            "array": array,
+            "n": n,
+            "replacement": replacement,
+            "axis": axis,
+            "fields": fields,
+            "parameters": parameters,
+            "with_name": with_name,
+            "highlevel": highlevel,
+            "behavior": behavior,
+        },
     ):
         return _impl(
             array,

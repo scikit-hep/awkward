@@ -60,13 +60,13 @@ def min(
     """
     with ak._errors.OperationErrorContext(
         "ak.min",
-        dict(
-            array=array,
-            axis=axis,
-            keepdims=keepdims,
-            initial=initial,
-            mask_identity=mask_identity,
-        ),
+        {
+            "array": array,
+            "axis": axis,
+            "keepdims": keepdims,
+            "initial": initial,
+            "mask_identity": mask_identity,
+        },
     ):
         if flatten_records is not unset:
             message = (
@@ -132,15 +132,15 @@ def nanmin(
     """
     with ak._errors.OperationErrorContext(
         "ak.nanmin",
-        dict(
-            array=array,
-            axis=axis,
-            keepdims=keepdims,
-            initial=initial,
-            mask_identity=mask_identity,
-            highlevel=highlevel,
-            behavior=behavior,
-        ),
+        {
+            "array": array,
+            "axis": axis,
+            "keepdims": keepdims,
+            "initial": initial,
+            "mask_identity": mask_identity,
+            "highlevel": highlevel,
+            "behavior": behavior,
+        },
     ):
         if flatten_records is not unset:
             message = (

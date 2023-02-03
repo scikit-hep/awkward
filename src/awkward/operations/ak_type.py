@@ -74,7 +74,7 @@ def type(array, *, behavior=None):
     """
     with ak._errors.OperationErrorContext(
         "ak.type",
-        dict(array=array, behavior=behavior),
+        {"array": array, "behavior": behavior},
     ):
         return _impl(array, behavior)
 

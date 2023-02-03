@@ -55,9 +55,13 @@ def fill_none(array, value, axis=-1, *, highlevel=True, behavior=None):
     """
     with ak._errors.OperationErrorContext(
         "ak.fill_none",
-        dict(
-            array=array, value=value, axis=axis, highlevel=highlevel, behavior=behavior
-        ),
+        {
+            "array": array,
+            "value": value,
+            "axis": axis,
+            "highlevel": highlevel,
+            "behavior": behavior,
+        },
     ):
         return _impl(array, value, axis, highlevel, behavior)
 
