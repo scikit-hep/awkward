@@ -725,10 +725,10 @@ class RecordArray(Content):
                 backend=self._backend,
             )
 
-    def _numbers_to_type(self, name):
+    def _numbers_to_type(self, name, including_unknown):
         contents = []
         for x in self._contents:
-            contents.append(x._numbers_to_type(name))
+            contents.append(x._numbers_to_type(name, including_unknown))
         return ak.contents.RecordArray(
             contents,
             self._fields,

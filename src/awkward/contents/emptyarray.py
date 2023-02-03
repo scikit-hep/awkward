@@ -220,8 +220,11 @@ class EmptyArray(Content):
                 np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
             )
 
-    def _numbers_to_type(self, name):
-        return self.to_NumpyArray(ak.types.numpytype.primitive_to_dtype(name))
+    def _numbers_to_type(self, name, including_unknown):
+        if including_unknown:
+            return self.to_NumpyArray(ak.types.numpytype.primitive_to_dtype(name))
+        else:
+            return self
 
     def _is_unique(self, negaxis, starts, parents, outlength):
         return True

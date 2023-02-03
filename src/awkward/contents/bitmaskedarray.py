@@ -498,8 +498,8 @@ class BitMaskedArray(Content):
     def _local_index(self, axis, depth):
         return self.to_ByteMaskedArray()._local_index(axis, depth)
 
-    def _numbers_to_type(self, name):
-        return self.to_ByteMaskedArray()._numbers_to_type(name)
+    def _numbers_to_type(self, name, including_unknown):
+        return self.to_ByteMaskedArray()._numbers_to_type(name, including_unknown)
 
     def _is_unique(self, negaxis, starts, parents, outlength):
         if self._mask.length == 0:

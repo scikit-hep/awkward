@@ -699,10 +699,10 @@ class ByteMaskedArray(Content):
                 outindex, out, parameters=self._parameters
             )
 
-    def _numbers_to_type(self, name):
+    def _numbers_to_type(self, name, including_unknown):
         return ak.contents.ByteMaskedArray(
             self._mask,
-            self._content._numbers_to_type(name),
+            self._content._numbers_to_type(name, including_unknown),
             self._valid_when,
             parameters=self._parameters,
         )

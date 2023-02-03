@@ -255,8 +255,8 @@ def flatten(layout: Content, axis: int = 1) -> Content:
     return flattened
 
 
-def numbers_to_type(layout: Content, name: str) -> Content:
-    return layout._numbers_to_type(name)
+def numbers_to_type(layout: Content, name: str, including_unknown: bool) -> Content:
+    return layout._numbers_to_type(name, including_unknown)
 
 
 def fill_none(layout: Content, value: Content) -> Content:

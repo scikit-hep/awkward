@@ -695,10 +695,10 @@ class IndexedArray(Content):
 
         return next[0 : length[0]]
 
-    def _numbers_to_type(self, name):
+    def _numbers_to_type(self, name, including_unknown):
         return ak.contents.IndexedArray(
             self._index,
-            self._content._numbers_to_type(name),
+            self._content._numbers_to_type(name, including_unknown),
             parameters=self._parameters,
         )
 
