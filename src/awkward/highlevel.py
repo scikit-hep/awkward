@@ -12,6 +12,7 @@ from collections.abc import Iterable, Mapping, Sized
 from awkward_cpp.lib import _ext
 
 import awkward as ak
+import awkward._connect.hist
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._util import NDArrayOperatorsMixin
@@ -238,6 +239,8 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         super().__init_subclass__(**kwargs)
 
         ak.jax.register_behavior_class(cls)
+
+    _histogram_module_ = awkward._connect.hist
 
     @property
     def layout(self):

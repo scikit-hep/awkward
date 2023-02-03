@@ -20,5 +20,5 @@ def test():
         parameters={"some": "other"},
     )
     assert array.parameter("some") == "other"
-    assert array.parameter("left") == "leftie"
-    assert array.parameter("right") == "rightie"
+    assert array.parameter("left") is None
+    assert array.parameter("right") is None

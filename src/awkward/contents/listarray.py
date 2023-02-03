@@ -9,6 +9,7 @@ from awkward._nplikes.typetracer import TypeTracer
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.contents.listoffsetarray import ListOffsetArray
+from awkward.forms.form import _type_parameters_equal
 from awkward.forms.listform import ListForm
 from awkward.index import Index
 from awkward.typing import Final, Self, final
@@ -943,18 +944,15 @@ class ListArray(Content):
         return self.to_ListOffsetArray64(True)._offsets_and_flattened(axis, depth)
 
     def _mergeable_next(self, other, mergebool):
-        if isinstance(
-            other,
-            (
-                ak.contents.IndexedArray,
-                ak.contents.IndexedOptionArray,
-                ak.contents.ByteMaskedArray,
-                ak.contents.BitMaskedArray,
-                ak.contents.UnmaskedArray,
-            ),
-        ):
-            return self._mergeable(other.content, mergebool)
-
+        # Is the other content is an identity, or a union?
+        if other.is_identity_like or other.is_union:
+            return True
+        # Check against option contents
+        elif other.is_option or other.is_indexed:
+            return self._mergeable_next(other.content, mergebool)
+        # Otherwise, do the parameters match? If not, we can't merge.
+        elif not _type_parameters_equal(self._parameters, other._parameters):
+            return False
         elif isinstance(
             other,
             (
@@ -963,11 +961,9 @@ class ListArray(Content):
                 ak.contents.ListOffsetArray,
             ),
         ):
-            return self._content._mergeable(other.content, mergebool)
-
+            return self._content._mergeable_next(other.content, mergebool)
         elif isinstance(other, ak.contents.NumpyArray) and len(other.shape) > 1:
-            return self._mergeable(other._to_regular_primitive(), mergebool)
-
+            return self._mergeable_next(other._to_regular_primitive(), mergebool)
         else:
             return False
 
@@ -988,8 +984,12 @@ class ListArray(Content):
         parameters = self._parameters
 
         for array in head:
-            parameters = ak._util.merge_parameters(parameters, array._parameters, True)
+            if isinstance(array, ak.contents.EmptyArray):
+                continue
 
+            parameters = ak.forms.form._parameters_intersect(
+                parameters, array._parameters
+            )
             if isinstance(
                 array,
                 (
@@ -999,9 +999,6 @@ class ListArray(Content):
                 ),
             ):
                 contents.append(array.content)
-
-            elif isinstance(array, ak.contents.EmptyArray):
-                pass
             else:
                 raise ak._errors.wrap_error(
                     ValueError(

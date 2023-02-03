@@ -2,7 +2,7 @@
 
 import awkward as ak
 from awkward._util import unset
-from awkward.forms.form import Form, _parameters_equal, _parameters_update
+from awkward.forms.form import Form, _parameters_union, _type_parameters_equal
 from awkward.typing import final
 
 
@@ -37,7 +37,7 @@ class IndexedForm(Form):
 
         self._index = index
         self._content = content
-        self._init(parameters, form_key)
+        self._init(parameters=parameters, form_key=form_key)
 
     @property
     def index(self):
@@ -75,21 +75,27 @@ class IndexedForm(Form):
 
         if content.is_union and not is_cat:
             return content.copy(
-                parameters=ak._util.merge_parameters(content._parameters, parameters)
+                parameters=ak.forms.form._parameters_union(
+                    content._parameters, parameters
+                )
             )
 
         elif content.is_option:
             return ak.forms.IndexedOptionForm.simplified(
                 "i64",
                 content.content,
-                parameters=ak._util.merge_parameters(content._parameters, parameters),
+                parameters=ak.forms.form._parameters_union(
+                    content._parameters, parameters
+                ),
             )
 
         elif content.is_indexed:
             return IndexedForm(
                 "i64",
                 content.content,
-                parameters=ak._util.merge_parameters(content._parameters, parameters),
+                parameters=ak.forms.form._parameters_union(
+                    content._parameters, parameters
+                ),
             )
 
         else:
@@ -116,8 +122,7 @@ class IndexedForm(Form):
             if out._parameters is None:
                 out._parameters = self._parameters
             else:
-                out._parameters = dict(out._parameters)
-                _parameters_update(out._parameters, self._parameters)
+                out._parameters = _parameters_union(out._parameters, self._parameters)
 
             if self._parameters.get("__array__") == "categorical":
                 if out._parameters is self._parameters:
@@ -138,9 +143,7 @@ class IndexedForm(Form):
             return (
                 self._form_key == other._form_key
                 and self._index == other._index
-                and _parameters_equal(
-                    self._parameters, other._parameters, only_array_record=True
-                )
+                and _type_parameters_equal(self._parameters, other._parameters)
                 and self._content == other._content
             )
         else:

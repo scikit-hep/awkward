@@ -1,8 +1,10 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+from __future__ import annotations
 
 import awkward as ak
+from awkward._errors import deprecate
 from awkward._util import unset
-from awkward.forms.form import Form
+from awkward.forms.form import Form, JSONMapping
 from awkward.typing import final
 
 
@@ -11,14 +13,29 @@ class EmptyForm(Form):
     is_numpy = True
     is_unknown = True
 
-    def __init__(self, *, parameters=None, form_key=None):
-        self._init(parameters, form_key)
+    def __init__(self, *, parameters: JSONMapping | None = None, form_key=None):
+        if not (parameters is None or len(parameters) == 0):
+            deprecate(
+                f"{type(self).__name__} cannot contain parameters", version="2.2.0"
+            )
+        self._init(parameters=parameters, form_key=form_key)
 
-    def copy(self, *, parameters=unset, form_key=unset):
-        return EmptyForm(parameters=parameters, form_key=form_key)
+    def copy(
+        self, *, parameters: JSONMapping | None = unset, form_key=unset
+    ) -> EmptyForm:
+        if not (parameters is unset or parameters is None or len(parameters) == 0):
+            deprecate(
+                f"{type(self).__name__} cannot contain parameters", version="2.2.0"
+            )
+        return EmptyForm(
+            parameters=self._parameters if parameters is unset else parameters,
+            form_key=self._form_key if form_key is unset else form_key,
+        )
 
     @classmethod
-    def simplified(cls, *, parameters=None, form_key=None):
+    def simplified(cls, *, parameters=None, form_key=None) -> Form:
+        if not (parameters is None or len(parameters) == 0):
+            deprecate(f"{cls.__name__} cannot contain parameters", version="2.2.0")
         return cls(parameters=parameters, form_key=form_key)
 
     def __repr__(self):
@@ -34,7 +51,7 @@ class EmptyForm(Form):
             typestr=ak._util.gettypestr(self._parameters, typestrs),
         )
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         return isinstance(other, EmptyForm) and self._form_key == other._form_key
 
     def to_NumpyForm(self, dtype):
@@ -47,35 +64,35 @@ class EmptyForm(Form):
             return self._parameters[key]
 
     @property
-    def purelist_isregular(self):
+    def purelist_isregular(self) -> bool:
         return True
 
     @property
-    def purelist_depth(self):
+    def purelist_depth(self) -> int:
         return 1
 
     @property
-    def is_identity_like(self):
+    def is_identity_like(self) -> bool:
         return True
 
     @property
-    def minmax_depth(self):
+    def minmax_depth(self) -> tuple[int, int]:
         return (1, 1)
 
     @property
-    def branch_depth(self):
+    def branch_depth(self) -> tuple[bool, int]:
         return (False, 1)
 
     @property
-    def fields(self):
+    def fields(self) -> list[str]:
         return []
 
     @property
-    def is_tuple(self):
+    def is_tuple(self) -> bool:
         return False
 
     @property
-    def dimension_optiontype(self):
+    def dimension_optiontype(self) -> bool:
         return False
 
     def _columns(self, path, output, list_indicator):
@@ -86,5 +103,5 @@ class EmptyForm(Form):
             output.append(None)
         return self
 
-    def _column_types(self):
+    def _column_types(self) -> tuple[str, ...]:
         return ("empty",)

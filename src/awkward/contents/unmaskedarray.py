@@ -10,6 +10,7 @@ from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.typetracer import MaybeNone
 from awkward._util import unset
 from awkward.contents.content import Content
+from awkward.forms.form import _type_parameters_equal
 from awkward.forms.unmaskedform import UnmaskedForm
 from awkward.typing import Final, Self, final
 
@@ -67,11 +68,15 @@ class UnmaskedArray(Content):
         if content.is_union:
             return content.copy(
                 contents=[cls.simplified(x) for x in content.contents],
-                parameters=ak._util.merge_parameters(content._parameters, parameters),
+                parameters=ak.forms.form._parameters_union(
+                    content._parameters, parameters
+                ),
             )
         elif content.is_indexed or content.is_option:
             return content.copy(
-                parameters=ak._util.merge_parameters(content._parameters, parameters)
+                parameters=ak.forms.form._parameters_union(
+                    content._parameters, parameters
+                )
             )
         else:
             return cls(content, parameters=parameters)
@@ -264,20 +269,16 @@ class UnmaskedArray(Content):
                 return (offsets, flattened)
 
     def _mergeable_next(self, other, mergebool):
-        if isinstance(
-            other,
-            (
-                ak.contents.IndexedArray,
-                ak.contents.IndexedOptionArray,
-                ak.contents.ByteMaskedArray,
-                ak.contents.BitMaskedArray,
-                ak.contents.UnmaskedArray,
-            ),
-        ):
-            return self._content._mergeable(other.content, mergebool)
-
+        # Is the other content is an identity, or a union?
+        if other.is_identity_like or other.is_union:
+            return True
+        # We can only combine option types whose array-record parameters agree
+        elif other.is_option or other.is_indexed:
+            return self._mergeable_next(
+                other.content, mergebool
+            ) and _type_parameters_equal(self._parameters, other._parameters)
         else:
-            return self._content._mergeable(other, mergebool)
+            return self._content._mergeable_next(other, mergebool)
 
     def _reverse_merge(self, other):
         return self.to_IndexedOptionArray64()._reverse_merge(other)
@@ -290,7 +291,9 @@ class UnmaskedArray(Content):
             parameters = self._parameters
             tail_contents = []
             for x in others:
-                parameters = ak._util.merge_parameters(parameters, x._parameters, True)
+                parameters = ak.forms.form._parameters_intersect(
+                    parameters, x._parameters
+                )
                 tail_contents.append(x._content)
 
             return UnmaskedArray(

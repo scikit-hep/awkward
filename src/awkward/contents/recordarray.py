@@ -10,6 +10,7 @@ from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._util import unset
 from awkward.contents.content import Content
+from awkward.forms.form import _type_parameters_equal
 from awkward.forms.recordform import RecordForm
 from awkward.record import Record
 from awkward.typing import Final, Self, final
@@ -532,23 +533,20 @@ class RecordArray(Content):
             )
 
     def _mergeable_next(self, other, mergebool):
-        if isinstance(
-            other,
-            (
-                ak.contents.IndexedArray,
-                ak.contents.IndexedOptionArray,
-                ak.contents.ByteMaskedArray,
-                ak.contents.BitMaskedArray,
-                ak.contents.UnmaskedArray,
-            ),
-        ):
-            return self._mergeable(other.content, mergebool)
-
-        if isinstance(other, RecordArray):
+        # Is the other content is an identity, or a union?
+        if other.is_identity_like or other.is_union:
+            return True
+        # Check against option contents
+        elif other.is_option or other.is_indexed:
+            return self._mergeable_next(other.content, mergebool)
+        # Otherwise, do the parameters match? If not, we can't merge.
+        elif not _type_parameters_equal(self._parameters, other._parameters):
+            return False
+        elif isinstance(other, RecordArray):
             if self.is_tuple and other.is_tuple:
                 if len(self._contents) == len(other._contents):
                     for self_cont, other_cont in zip(self._contents, other._contents):
-                        if not self_cont._mergeable(other_cont, mergebool):
+                        if not self_cont._mergeable_next(other_cont, mergebool):
                             return False
 
                     return True
@@ -560,7 +558,7 @@ class RecordArray(Content):
                 for i, field in enumerate(self._fields):
                     x = self._contents[i]
                     y = other._contents[other.field_to_index(field)]
-                    if not x._mergeable(y, mergebool):
+                    if not x._mergeable_next(y, mergebool):
                         return False
                 return True
 
@@ -586,8 +584,11 @@ class RecordArray(Content):
 
         if self.is_tuple:
             for array in headless:
-                parameters = ak._util.merge_parameters(
-                    parameters, array._parameters, True
+                if isinstance(array, ak.contents.EmptyArray):
+                    continue
+
+                parameters = ak.forms.form._parameters_intersect(
+                    parameters, array._parameters
                 )
 
                 if isinstance(array, ak.contents.RecordArray):
@@ -606,8 +607,6 @@ class RecordArray(Content):
                         raise ak._errors.wrap_error(
                             ValueError("cannot merge tuple with non-tuple record")
                         )
-                elif isinstance(array, ak.contents.EmptyArray):
-                    pass
                 else:
                     raise ak._errors.wrap_error(
                         AssertionError(
@@ -623,8 +622,8 @@ class RecordArray(Content):
             these_fields.sort()
 
             for array in headless:
-                parameters = ak._util.merge_parameters(
-                    parameters, array._parameters, True
+                parameters = ak.forms.form._parameters_intersect(
+                    parameters, array._parameters
                 )
 
                 if isinstance(array, ak.contents.RecordArray):
@@ -934,9 +933,11 @@ class RecordArray(Content):
                 in_function = " in " + options["function_name"]
             raise ak._errors.wrap_error(
                 TypeError(
-                    "cannot combine record fields{} unless flatten_records=True".format(
-                        in_function
-                    )
+                    (
+                        "encountered a record whilst removing array structure{}, "
+                        "but this operation does not support erasing records. "
+                        "Try first calling `ak.ravel` or `ak.flatten(..., axis=None)."
+                    ).format(in_function)
                 )
             )
 

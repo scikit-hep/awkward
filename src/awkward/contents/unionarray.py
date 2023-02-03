@@ -82,7 +82,7 @@ class UnionArray(Content):
                 )
 
         for content in contents[1:]:
-            if contents[0]._mergeable(content, mergebool=False):
+            if contents[0]._mergeable_next(content, mergebool=False):
                 raise ak._errors.wrap_error(
                     TypeError(
                         "{0} cannot contain mergeable 'contents' ({1} of {2} and {3} of {4}); try {0}.simplified instead".format(
@@ -210,16 +210,27 @@ class UnionArray(Content):
         index = ak.index.Index64.empty(length, backend.index_nplike)
         contents = []
 
+        # For each outer union content
         for i, self_cont in enumerate(self_contents):
+            # Is one of our new contents also a union?
             if isinstance(self_cont, UnionArray):
                 innertags = self_cont._tags
                 innerindex = self_cont._index
                 innercontents = self_cont._contents
 
+                # Update outermost parameters with this union's parameters
+                parameters = ak.forms.form._parameters_union(
+                    self_cont._parameters, parameters
+                )
+
+                # For each inner union content
                 for j, inner_cont in enumerate(innercontents):
                     unmerged = True
+
+                    # For each "final" outer union content
                     for k in range(len(contents)):
-                        if merge and contents[k]._mergeable(inner_cont, mergebool):
+                        # Try and merge inner union content with running outer-union contentca
+                        if merge and contents[k]._mergeable_next(inner_cont, mergebool):
                             Content._selfless_handle_error(
                                 backend[
                                     "awkward_UnionArray_simplify",
@@ -243,19 +254,11 @@ class UnionArray(Content):
                                     contents[k].length,
                                 )
                             )
-                            old_parameters = contents[k]._parameters
-                            contents[k] = (
-                                contents[k]
-                                ._mergemany([inner_cont])
-                                .copy(
-                                    parameters=ak._util.merge_parameters(
-                                        old_parameters, inner_cont._parameters
-                                    )
-                                )
-                            )
+                            contents[k] = contents[k]._mergemany([inner_cont])
                             unmerged = False
                             break
 
+                    # Did we fail to merge any of the final outer contents with this inner union content?
                     if unmerged:
                         Content._selfless_handle_error(
                             backend[
@@ -307,7 +310,7 @@ class UnionArray(Content):
                         unmerged = False
                         break
 
-                    elif merge and contents[k]._mergeable(self_cont, mergebool):
+                    elif merge and contents[k]._mergeable_next(self_cont, mergebool):
                         Content._selfless_handle_error(
                             backend[
                                 "awkward_UnionArray_simplify_one",
@@ -326,16 +329,7 @@ class UnionArray(Content):
                                 contents[k].length,
                             )
                         )
-                        old_parameters = contents[k]._parameters
-                        contents[k] = (
-                            contents[k]
-                            ._mergemany([self_cont])
-                            .copy(
-                                parameters=ak._util.merge_parameters(
-                                    old_parameters, self_cont._parameters
-                                )
-                            )
-                        )
+                        contents[k] = contents[k]._mergemany([self_cont])
                         unmerged = False
                         break
 
@@ -370,7 +364,7 @@ class UnionArray(Content):
         if len(contents) == 1:
             next = contents[0]._carry(index, True)
             return next.copy(
-                parameters=ak._util.merge_parameters(next._parameters, parameters)
+                parameters=ak.forms.form._parameters_union(next._parameters, parameters)
             )
 
         else:
@@ -592,7 +586,7 @@ class UnionArray(Content):
             ak.index.Index(nexttags),
             ak.index.Index(nextindex),
             contents,
-            parameters=ak._util.merge_parameters(self._parameters, parameters),
+            parameters=ak.forms.form._parameters_union(self._parameters, parameters),
         )
 
     def project(self, index):
@@ -1006,10 +1000,10 @@ class UnionArray(Content):
                 AssertionError("FIXME: handle UnionArray with more than 127 contents")
             )
 
-        parameters = ak._util.merge_parameters(
+        parameters = ak.forms.form._parameters_union(
             self._parameters,
             other._parameters,
-            exclude=ak._util.meaningful_parameters,
+            exclude=ak.forms.form.reserved_nominal_parameters,
         )
 
         return ak.contents.UnionArray.simplified(
@@ -1040,7 +1034,12 @@ class UnionArray(Content):
 
         parameters = self._parameters
         for array in head:
-            parameters = ak._util.merge_parameters(parameters, array._parameters, True)
+            if isinstance(array, ak.contents.EmptyArray):
+                continue
+
+            parameters = ak.forms.form._parameters_intersect(
+                parameters, array._parameters
+            )
             if isinstance(array, ak.contents.UnionArray):
                 union_tags = ak.index.Index(array.tags)
                 union_index = ak.index.Index(array.index)
@@ -1082,9 +1081,6 @@ class UnionArray(Content):
                     length_so_far, array.length
                 )
                 nextcontents.extend(union_contents)
-
-            elif isinstance(array, ak.contents.EmptyArray):
-                pass
 
             else:
                 assert nexttags.nplike is self._backend.index_nplike

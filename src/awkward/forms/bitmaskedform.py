@@ -2,7 +2,7 @@
 
 import awkward as ak
 from awkward._util import unset
-from awkward.forms.form import Form, _parameters_equal
+from awkward.forms.form import Form, _type_parameters_equal
 from awkward.typing import final
 
 
@@ -57,7 +57,7 @@ class BitMaskedForm(Form):
         self._content = content
         self._valid_when = valid_when
         self._lsb_order = lsb_order
-        self._init(parameters, form_key)
+        self._init(parameters=parameters, form_key=form_key)
 
     @property
     def mask(self):
@@ -162,9 +162,7 @@ class BitMaskedForm(Form):
                 and self._mask == other._mask
                 and self._valid_when == other._valid_when
                 and self._lsb_order == other._lsb_order
-                and _parameters_equal(
-                    self._parameters, other._parameters, only_array_record=True
-                )
+                and _type_parameters_equal(self._parameters, other._parameters)
                 and self._content == other._content
             )
         else:
