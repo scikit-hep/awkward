@@ -933,9 +933,11 @@ class RecordArray(Content):
                 in_function = " in " + options["function_name"]
             raise ak._errors.wrap_error(
                 TypeError(
-                    "cannot combine record fields{} unless flatten_records=True".format(
-                        in_function
-                    )
+                    (
+                        "encountered a record whilst removing array structure{}, "
+                        "but this operation does not support erasing records. "
+                        "Try first calling `ak.ravel` or `ak.flatten(..., axis=None)."
+                    ).format(in_function)
                 )
             )
 
