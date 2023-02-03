@@ -1,5 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+from itertools import permutations
+
 import numpy as np
 import pytest  # noqa: F401
 
@@ -41,3 +43,20 @@ def test_merge_optional_strings():
     assert ak._util.arrays_approx_equal(
         result, [{"a": "foo"}, {"a": "bar"}, {"a": None}]
     )
+
+
+def test_merge_permutations():
+    string_optional = ak.Array([{"a": "foo"}, {"a": None}])[0:0]
+    kinds = {
+        "optional": string_optional,
+        "empty": ak.Array([{"a": None}]),
+        "string": ak.Array([{"a": "baz"}]),
+    }
+    for perm in permutations(kinds, 3):
+        assert str(ak.concatenate([kinds[k] for k in perm]).type) == "2 * {a: ?string}"
+
+
+def test_merge_type_commutativity():
+    one = ak.concatenate((ak.with_parameter([1], "k", "v"), [None]))
+    two = ak.concatenate(([None], ak.with_parameter([1], "k", "v")))
+    assert type(one) == type(two)
