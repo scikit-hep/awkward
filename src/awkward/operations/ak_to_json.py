@@ -112,19 +112,19 @@ def to_json(
     """
     with ak._errors.OperationErrorContext(
         "ak.to_json",
-        dict(
-            array=array,
-            file=file,
-            line_delimited=line_delimited,
-            num_indent_spaces=num_indent_spaces,
-            num_readability_spaces=num_readability_spaces,
-            nan_string=nan_string,
-            posinf_string=posinf_string,
-            neginf_string=neginf_string,
-            complex_record_fields=complex_record_fields,
-            convert_bytes=convert_bytes,
-            convert_other=convert_other,
-        ),
+        {
+            "array": array,
+            "file": file,
+            "line_delimited": line_delimited,
+            "num_indent_spaces": num_indent_spaces,
+            "num_readability_spaces": num_readability_spaces,
+            "nan_string": nan_string,
+            "posinf_string": posinf_string,
+            "neginf_string": neginf_string,
+            "complex_record_fields": complex_record_fields,
+            "convert_bytes": convert_bytes,
+            "convert_other": convert_other,
+        },
     ):
         return _impl(
             array,

@@ -64,14 +64,14 @@ def std(
     """
     with ak._errors.OperationErrorContext(
         "ak.std",
-        dict(
-            x=x,
-            weight=weight,
-            ddof=ddof,
-            axis=axis,
-            keepdims=keepdims,
-            mask_identity=mask_identity,
-        ),
+        {
+            "x": x,
+            "weight": weight,
+            "ddof": ddof,
+            "axis": axis,
+            "keepdims": keepdims,
+            "mask_identity": mask_identity,
+        },
     ):
         if flatten_records is not unset:
             message = (
@@ -132,14 +132,14 @@ def nanstd(
     """
     with ak._errors.OperationErrorContext(
         "ak.nanstd",
-        dict(
-            x=x,
-            weight=weight,
-            ddof=ddof,
-            axis=axis,
-            keepdims=keepdims,
-            mask_identity=mask_identity,
-        ),
+        {
+            "x": x,
+            "weight": weight,
+            "ddof": ddof,
+            "axis": axis,
+            "keepdims": keepdims,
+            "mask_identity": mask_identity,
+        },
     ):
         if flatten_records is not unset:
             message = (

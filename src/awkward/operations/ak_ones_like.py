@@ -26,7 +26,7 @@ def ones_like(array, *, dtype=None, highlevel=True, behavior=None):
     """
     with ak._errors.OperationErrorContext(
         "ak.ones_like",
-        dict(array=array, dtype=dtype, highlevel=highlevel, behavior=behavior),
+        {"array": array, "dtype": dtype, "highlevel": highlevel, "behavior": behavior},
     ):
         return _impl(array, highlevel, behavior, dtype)
 

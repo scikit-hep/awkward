@@ -50,7 +50,7 @@ def ravel(array, *, highlevel=True, behavior=None):
     """
     with ak._errors.OperationErrorContext(
         "ak.ravel",
-        dict(array=array, highlevel=highlevel, behavior=behavior),
+        {"array": array, "highlevel": highlevel, "behavior": behavior},
     ):
         return _impl(array, highlevel, behavior)
 

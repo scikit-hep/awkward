@@ -73,13 +73,13 @@ def unflatten(array, counts, axis=0, *, highlevel=True, behavior=None):
     """
     with ak._errors.OperationErrorContext(
         "ak.unflatten",
-        dict(
-            array=array,
-            counts=counts,
-            axis=axis,
-            highlevel=highlevel,
-            behavior=behavior,
-        ),
+        {
+            "array": array,
+            "counts": counts,
+            "axis": axis,
+            "highlevel": highlevel,
+            "behavior": behavior,
+        },
     ):
         return _impl(array, counts, axis, highlevel, behavior)
 

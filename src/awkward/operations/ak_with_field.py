@@ -33,9 +33,13 @@ def with_field(array, what, where=None, *, highlevel=True, behavior=None):
     """
     with ak._errors.OperationErrorContext(
         "ak.with_field",
-        dict(
-            array=array, what=what, where=where, highlevel=highlevel, behavior=behavior
-        ),
+        {
+            "array": array,
+            "what": what,
+            "where": where,
+            "highlevel": highlevel,
+            "behavior": behavior,
+        },
     ):
         return _impl(array, what, where, highlevel, behavior)
 

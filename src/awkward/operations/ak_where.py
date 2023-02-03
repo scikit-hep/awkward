@@ -42,7 +42,7 @@ def where(condition, *args, mergebool=True, highlevel=True, behavior=None):
     if len(args) == 0:
         with ak._errors.OperationErrorContext(
             "ak.where",
-            dict(condition=condition, mergebool=mergebool, highlevel=highlevel),
+            {"condition": condition, "mergebool": mergebool, "highlevel": highlevel},
         ):
             return _impl1(condition, mergebool, highlevel, behavior)
 
@@ -55,9 +55,13 @@ def where(condition, *args, mergebool=True, highlevel=True, behavior=None):
         x, y = args
         with ak._errors.OperationErrorContext(
             "ak.where",
-            dict(
-                condition=condition, x=x, y=y, mergebool=mergebool, highlevel=highlevel
-            ),
+            {
+                "condition": condition,
+                "x": x,
+                "y": y,
+                "mergebool": mergebool,
+                "highlevel": highlevel,
+            },
         ):
             return _impl3(condition, x, y, mergebool, highlevel, behavior)
 

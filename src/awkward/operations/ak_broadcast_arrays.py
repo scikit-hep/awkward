@@ -174,15 +174,15 @@ def broadcast_arrays(
     """
     with ak._errors.OperationErrorContext(
         "ak.broadcast_arrays",
-        dict(
-            arrays=arrays,
-            depth_limit=depth_limit,
-            broadcast_parameters_rule=broadcast_parameters_rule,
-            left_broadcast=left_broadcast,
-            right_broadcast=right_broadcast,
-            highlevel=highlevel,
-            behavior=behavior,
-        ),
+        {
+            "arrays": arrays,
+            "depth_limit": depth_limit,
+            "broadcast_parameters_rule": broadcast_parameters_rule,
+            "left_broadcast": left_broadcast,
+            "right_broadcast": right_broadcast,
+            "highlevel": highlevel,
+            "behavior": behavior,
+        },
     ):
         return _impl(
             arrays,

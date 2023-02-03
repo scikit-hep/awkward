@@ -47,7 +47,12 @@ def to_backend(array, backend, *, highlevel=True, behavior=None):
     """
     with ak._errors.OperationErrorContext(
         "ak.to_backend",
-        dict(array=array, backend=backend, highlevel=highlevel, behavior=behavior),
+        {
+            "array": array,
+            "backend": backend,
+            "highlevel": highlevel,
+            "behavior": behavior,
+        },
     ):
         return _impl(array, backend, highlevel, behavior)
 

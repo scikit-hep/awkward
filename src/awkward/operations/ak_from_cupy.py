@@ -29,11 +29,11 @@ def from_cupy(array, *, regulararray=False, highlevel=True, behavior=None):
     """
     with ak._errors.OperationErrorContext(
         "ak.from_cupy",
-        dict(
-            array=array,
-            regulararray=regulararray,
-            highlevel=highlevel,
-            behavior=behavior,
-        ),
+        {
+            "array": array,
+            "regulararray": regulararray,
+            "highlevel": highlevel,
+            "behavior": behavior,
+        },
     ):
         return ak._util.from_arraylib(array, regulararray, False, highlevel, behavior)

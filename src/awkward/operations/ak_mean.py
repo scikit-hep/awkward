@@ -81,13 +81,13 @@ def mean(
     """
     with ak._errors.OperationErrorContext(
         "ak.mean",
-        dict(
-            x=x,
-            weight=weight,
-            axis=axis,
-            keepdims=keepdims,
-            mask_identity=mask_identity,
-        ),
+        {
+            "x": x,
+            "weight": weight,
+            "axis": axis,
+            "keepdims": keepdims,
+            "mask_identity": mask_identity,
+        },
     ):
         if flatten_records is not unset:
             message = (
@@ -144,13 +144,13 @@ def nanmean(
     """
     with ak._errors.OperationErrorContext(
         "ak.nanmean",
-        dict(
-            x=x,
-            weight=weight,
-            axis=axis,
-            keepdims=keepdims,
-            mask_identity=mask_identity,
-        ),
+        {
+            "x": x,
+            "weight": weight,
+            "axis": axis,
+            "keepdims": keepdims,
+            "mask_identity": mask_identity,
+        },
     ):
         if flatten_records is not unset:
             message = (

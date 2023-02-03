@@ -68,13 +68,13 @@ def full_like(array, fill_value, *, dtype=None, highlevel=True, behavior=None):
     """
     with ak._errors.OperationErrorContext(
         "ak.full_like",
-        dict(
-            array=array,
-            fill_value=fill_value,
-            dtype=dtype,
-            highlevel=highlevel,
-            behavior=behavior,
-        ),
+        {
+            "array": array,
+            "fill_value": fill_value,
+            "dtype": dtype,
+            "highlevel": highlevel,
+            "behavior": behavior,
+        },
     ):
         return _impl(array, fill_value, highlevel, behavior, dtype)
 
@@ -103,10 +103,12 @@ def _impl(array, fill_value, highlevel, behavior, dtype):
             asbytes = nplike.frombuffer(b"", dtype=np.uint8)
             return ak.contents.ListArray(
                 ak.index.Index64(
-                    index_nplike.zeros(len(layout), dtype=np.int64), nplike=index_nplike
+                    index_nplike.zeros(layout.length, dtype=np.int64),
+                    nplike=index_nplike,
                 ),
                 ak.index.Index64(
-                    index_nplike.zeros(len(layout), dtype=np.int64), nplike=index_nplike
+                    index_nplike.zeros(layout.length, dtype=np.int64),
+                    nplike=index_nplike,
                 ),
                 ak.contents.NumpyArray(asbytes, parameters={"__array__": "byte"}),
                 parameters={"__array__": "bytestring"},
@@ -121,10 +123,11 @@ def _impl(array, fill_value, highlevel, behavior, dtype):
 
             return ak.contents.ListArray(
                 ak.index.Index64(
-                    index_nplike.zeros(len(layout), dtype=np.int64), nplike=index_nplike
+                    index_nplike.zeros(layout.length, dtype=np.int64),
+                    nplike=index_nplike,
                 ),
                 ak.index.Index64(
-                    index_nplike.full(len(layout), len(asbytes), dtype=np.int64)
+                    index_nplike.full(layout.length, len(asbytes), dtype=np.int64)
                 ),
                 ak.contents.NumpyArray(asbytes, parameters={"__array__": "byte"}),
                 parameters={"__array__": "bytestring"},
@@ -134,10 +137,12 @@ def _impl(array, fill_value, highlevel, behavior, dtype):
             asbytes = nplike.frombuffer(b"", dtype=np.uint8)
             return ak.contents.ListArray(
                 ak.index.Index64(
-                    index_nplike.zeros(len(layout), dtype=np.int64), nplike=index_nplike
+                    index_nplike.zeros(layout.length, dtype=np.int64),
+                    nplike=index_nplike,
                 ),
                 ak.index.Index64(
-                    index_nplike.zeros(len(layout), dtype=np.int64), nplike=index_nplike
+                    index_nplike.zeros(layout.length, dtype=np.int64),
+                    nplike=index_nplike,
                 ),
                 ak.contents.NumpyArray(asbytes, parameters={"__array__": "char"}),
                 parameters={"__array__": "string"},
@@ -148,10 +153,11 @@ def _impl(array, fill_value, highlevel, behavior, dtype):
             asbytes = nplike.frombuffer(asstr, dtype=np.uint8)
             return ak.contents.ListArray(
                 ak.index.Index64(
-                    index_nplike.zeros(len(layout), dtype=np.int64), nplike=index_nplike
+                    index_nplike.zeros(layout.length, dtype=np.int64),
+                    nplike=index_nplike,
                 ),
                 ak.index.Index64(
-                    index_nplike.full(len(layout), len(asbytes), dtype=np.int64)
+                    index_nplike.full(layout.length, len(asbytes), dtype=np.int64)
                 ),
                 ak.contents.NumpyArray(asbytes, parameters={"__array__": "char"}),
                 parameters={"__array__": "string"},

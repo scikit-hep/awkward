@@ -91,6 +91,12 @@ namespace awkward {
       return reserved_;
     }
 
+    /// @brief Unique pointer to the panel data.
+    std::unique_ptr<PRIMITIVE[]>&
+    data() {
+      return ptr_;
+    }
+
     /// @brief Copies the data from a panel to one contiguously allocated `to_ptr`.
     ///
     /// @param to_ptr One contiguously allocated panel.
@@ -408,6 +414,7 @@ namespace awkward {
       panel_ = std::move(std::unique_ptr<Panel<PRIMITIVE>>(
           new Panel<PRIMITIVE>((size_t)options_.initial())));
       ptr_ = panel_.get();
+      length_ = 0;
     }
 
     /// @brief Last element in last panel
@@ -477,6 +484,24 @@ namespace awkward {
     concatenate(PRIMITIVE* external_pointer) const noexcept {
       if (external_pointer) {
         panel_->concatenate_to(external_pointer, 0);
+      }
+    }
+
+    /// @brief Moves all accumulated data from multiple panels to one
+    /// contiguously allocated `external_pointer`. The panels are deleted,
+    /// and a new #ptr is allocated.
+    void
+    move_to(PRIMITIVE* to_ptr, size_t offset = 0) noexcept {
+      memcpy(to_ptr + offset,
+             reinterpret_cast<void*>(panel_.get()->data().get()),
+             panel_.get()->current_length() * sizeof(PRIMITIVE));
+
+      // move to next panel
+      panel_ = std::move(panel_.get()->next());
+      if (panel_) {
+        move_to(to_ptr, offset + panel_.get()->current_length());
+      } else {
+        clear();
       }
     }
 

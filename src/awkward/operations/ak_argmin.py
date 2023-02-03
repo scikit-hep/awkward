@@ -59,14 +59,14 @@ def argmin(
     """
     with ak._errors.OperationErrorContext(
         "ak.argmin",
-        dict(
-            array=array,
-            axis=axis,
-            keepdims=keepdims,
-            mask_identity=mask_identity,
-            highlevel=highlevel,
-            behavior=behavior,
-        ),
+        {
+            "array": array,
+            "axis": axis,
+            "keepdims": keepdims,
+            "mask_identity": mask_identity,
+            "highlevel": highlevel,
+            "behavior": behavior,
+        },
     ):
         if flatten_records is not unset:
             message = (
@@ -122,14 +122,14 @@ def nanargmin(
     """
     with ak._errors.OperationErrorContext(
         "ak.nanargmin",
-        dict(
-            array=array,
-            axis=axis,
-            keepdims=keepdims,
-            mask_identity=mask_identity,
-            highlevel=highlevel,
-            behavior=behavior,
-        ),
+        {
+            "array": array,
+            "axis": axis,
+            "keepdims": keepdims,
+            "mask_identity": mask_identity,
+            "highlevel": highlevel,
+            "behavior": behavior,
+        },
     ):
         if flatten_records is not unset:
             message = (

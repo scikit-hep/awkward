@@ -23,7 +23,7 @@ def without_parameters(array, *, highlevel=True, behavior=None):
     """
     with ak._errors.OperationErrorContext(
         "ak.without_parameters",
-        dict(array=array, highlevel=highlevel, behavior=behavior),
+        {"array": array, "highlevel": highlevel, "behavior": behavior},
     ):
         return _impl(array, highlevel, behavior)
 

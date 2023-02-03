@@ -39,7 +39,7 @@ def to_rdataframe(arrays, *, flatlist_as_rvec=True):
     """
     with ak._errors.OperationErrorContext(
         "ak.to_rdataframe",
-        dict(arrays=arrays),
+        {"arrays": arrays},
     ):
         return _impl(
             arrays,

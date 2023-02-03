@@ -63,23 +63,7 @@ done = compiler(
 assert done is True
 
 
-def from_rdataframe(data_frame, columns):
-    def form_dtype(form):
-        if isinstance(form, ak.forms.NumpyForm) and form.inner_shape == ():
-            return primitive_to_dtype(form.primitive)
-        elif isinstance(form, ak.forms.ListOffsetForm):
-            return form_dtype(form.content)
-
-    def empty_buffers(cpp_buffers_self, names_nbytes):
-        buffers = {}
-        for item in names_nbytes:
-            buffers[item.first] = numpy.empty(item.second, dtype=np.uint8)
-            cpp_buffers_self.append(
-                item.first,
-                buffers[item.first].ctypes.data_as(ctypes.POINTER(ctypes.c_ubyte)),
-            )
-        return buffers
-
+def from_rdataframe(data_frame, columns, offsets_type="int64_t"):
     def cpp_builder_type(depth, data_type):
         if depth == 1:
             return f"awkward::LayoutBuilder::Numpy<{data_type}>>"
@@ -92,7 +76,9 @@ def from_rdataframe(data_frame, columns):
 
     def cpp_fill_offsets_and_flatten(depth):
         if depth == 1:
-            return "\nfor (auto it : vec1) {\n" + "  builder1.append(it);\n" + "}\n"
+            return (
+                "\nfor (auto const& it : vec1) {\n" + "  builder1.append(it);\n" + "}\n"
+            )
         else:
             return (
                 f"for (auto const& vec{depth - 1} : vec{depth}) "
@@ -111,7 +97,7 @@ def from_rdataframe(data_frame, columns):
                 "template<class BUILDER, typename PRIMITIVE>\n"
                 + "void\n"
                 + "fill_from(BUILDER& builder, ROOT::RDF::RResultPtr<std::vector<PRIMITIVE>>& result) {"
-                + "  for (auto it : result) {\n"
+                + "  for (auto const& it : result) {\n"
                 + "    builder.append(it);\n"
                 + "  }\n"
                 + "}\n"
@@ -133,28 +119,27 @@ def from_rdataframe(data_frame, columns):
                 + "}\n"
             )
 
-    is_indexed = True if "awkward_index_" in data_frame.GetColumnNames() else False
+    def form_dtype(form):
+        if isinstance(form, ak.forms.NumpyForm) and form.inner_shape == ():
+            return primitive_to_dtype(form.primitive)
+        elif isinstance(form, ak.forms.ListOffsetForm):
+            return form_dtype(form.content)
 
     # Register Take action for each column
     # 'Take' is a lazy action:
-    result_ptrs = {}
     column_types = {}
-    contents_index = None
-    columns = (
-        columns + ("awkward_index_",)
-        if (is_indexed and "awkward_index_" not in columns)
-        else columns
-    )
+    result_ptrs = {}
+    contents = {}
+
+    # Important note: This loop is separate from the next one
+    # in order not to trigger the additional RDataFrame
+    # Event loops
     for col in columns:
         column_types[col] = data_frame.GetColumnType(col)
         result_ptrs[col] = data_frame.Take[column_types[col]](col)
 
-    contents = {}
-    awkward_contents = {}
-    contents_index = {}
     for col in columns:
-        col_type = column_types[col]
-        if ROOT.awkward.is_awkward_type[col_type]():  # Retrieve Awkward arrays
+        if ROOT.awkward.is_awkward_type[column_types[col]]():  # Retrieve Awkward arrays
 
             # ROOT::RDF::RResultPtr<T>::begin Returns an iterator to the beginning of
             # the contained object if this makes sense, throw a compilation error otherwise.
@@ -164,18 +149,16 @@ def from_rdataframe(data_frame, columns):
             lookup = result_ptrs[col].begin().lookup()
             generator = lookup[col].generator
             layout = generator.tolayout(lookup[col], 0, ())
-            awkward_contents[col] = layout
+            contents[col] = layout
 
         else:  # Convert the C++ vectors to Awkward arrays
-            form_str = ROOT.awkward.type_to_form[col_type](0)
+            form_str = ROOT.awkward.type_to_form[column_types[col], offsets_type](0)
 
             if form_str == "unsupported type":
                 raise ak._errors.wrap_error(
-                    TypeError(f"{col!r} column's type {col_type!r} is not supported.")
-                )
-            elif form_str == "awkward type":
-                raise ak._errors.wrap_error(
-                    AssertionError("this code should not be reached.")
+                    TypeError(
+                        f"{col!r} column's type {column_types[col]!r} is not supported."
+                    )
                 )
 
             form = ak.forms.from_json(form_str)
@@ -185,8 +168,8 @@ def from_rdataframe(data_frame, columns):
             data_type = cpp_type_of[form_dtype_name]
 
             # pull in the CppBuffers (after which we can import from it)
-            CppBuffers = cppyy.gbl.awkward.CppBuffers[col_type]
-            cpp_buffers_self = CppBuffers(result_ptrs[col])
+            CppBuffers = cppyy.gbl.awkward.CppBuffers
+            cpp_buffers_self = CppBuffers()
 
             if isinstance(form, ak.forms.NumpyForm):
 
@@ -194,13 +177,9 @@ def from_rdataframe(data_frame, columns):
                 builder = NumpyBuilder()
                 builder_type = type(builder).__cpp_name__
 
-                cpp_buffers_self.fill_from[builder_type, col_type](
+                cpp_buffers_self.fill_from[builder_type, column_types[col]](
                     builder, result_ptrs[col]
                 )
-
-                names_nbytes = cpp_buffers_self.names_nbytes[builder_type](builder)
-                buffers = empty_buffers(cpp_buffers_self, names_nbytes)
-                cpp_buffers_self.to_char_buffers[builder_type](builder)
 
             elif isinstance(form, ak.forms.ListOffsetForm):
                 if isinstance(form.content, ak.forms.NumpyForm):
@@ -208,7 +187,7 @@ def from_rdataframe(data_frame, columns):
                     list_depth = 2
 
                 ListOffsetBuilder = cppyy.gbl.awkward.LayoutBuilder.ListOffset[
-                    "int64_t",
+                    offsets_type,
                     cpp_builder_type(list_depth - 1, data_type),
                 ]
                 builder = ListOffsetBuilder()
@@ -225,41 +204,28 @@ def from_rdataframe(data_frame, columns):
                 fill_from_func = getattr(
                     cppyy.gbl.awkward, f"fill_offsets_and_flatten{list_depth}"
                 )
-                fill_from_func[builder_type, col_type](builder, result_ptrs[col])
+                fill_from_func[builder_type, column_types[col]](
+                    builder, result_ptrs[col]
+                )
             else:
                 raise ak._errors.wrap_error(
                     AssertionError(f"unrecognized Form: {type(form)}")
                 )
 
             names_nbytes = cpp_buffers_self.names_nbytes[builder_type](builder)
-            buffers = empty_buffers(cpp_buffers_self, names_nbytes)
-            cpp_buffers_self.to_char_buffers[builder_type](builder)
 
-            array = ak.from_buffers(
-                form, builder.length(), buffers, byteorder=ak._util.native_byteorder
-            )
-
-            if col == "awkward_index_":
-                contents_index = ak.index.Index64(
-                    array.layout.to_backend_array(
-                        allow_missing=True, backend=ak._backends.NumpyBackend.instance()
-                    )
+            buffers = {}
+            for item in names_nbytes:
+                buffers[item.first] = numpy.empty(item.second, dtype=np.uint8)
+                cpp_buffers_self.append(
+                    item.first,
+                    buffers[item.first].ctypes.data_as(ctypes.POINTER(ctypes.c_ubyte)),
                 )
-            else:
-                contents[col] = array.layout
 
-    for col, content in awkward_contents.items():
-        # wrap Awkward array in IndexedArray only if needed
-        if contents_index is not None and len(contents_index) < len(content):
-            array = ak._util.wrap(
-                ak.contents.IndexedArray(contents_index, content),
-                highlevel=True,
+            length = cpp_buffers_self.to_char_buffers[builder_type](builder)
+
+            contents[col] = ak.from_buffers(
+                form, length, buffers, byteorder=ak._util.native_byteorder
             )
-            contents[col] = array.layout
-        else:
-            contents[col] = content
 
-    return ak._util.wrap(
-        ak.contents.RecordArray(list(contents.values()), list(contents.keys())),
-        highlevel=True,
-    )
+    return ak.zip(contents, depth_limit=1)

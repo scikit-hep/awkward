@@ -7,114 +7,139 @@
 #include <cassert>
 
 void test_full() {
-  size_t data_size = 100;
+  constexpr size_t data_size = 100;
   awkward::BuilderOptions options { 25, 1 };
 
   auto buffer = awkward::GrowableBuffer<int16_t>::full(options, -2, data_size);
+  assert(buffer.length() == data_size);
 
   std::unique_ptr<int16_t[]> ptr(new int16_t[buffer.length()]);
-  buffer.concatenate(ptr.get());
+  buffer.move_to(ptr.get());
+  assert(buffer.length() == 0);
+  buffer.clear();
+  assert(buffer.length() == 0);
 
-  for (size_t i = 0; i < buffer.length(); i++) {
+  for (size_t i = 0; i < data_size; i++) {
     assert(ptr.get()[i] == int16_t(-2));
   }
 }
 
 void test_arange() {
-  size_t data_size = 25;
+  constexpr size_t data_size = 25;
   awkward::BuilderOptions options { 50, 1 };
 
   auto buffer = awkward::GrowableBuffer<int64_t>::arange(options, data_size);
+  assert(buffer.length() == data_size);
 
   std::unique_ptr<int64_t[]> ptr(new int64_t[buffer.length()]);
   buffer.concatenate(ptr.get());
+  assert(buffer.length() == data_size);
+  buffer.clear();
+  assert(buffer.length() == 0);
 
-  for (size_t i = 0; i < buffer.length(); i++) {
+  for (size_t i = 0; i < data_size; i++) {
     assert(ptr.get()[i] == (int64_t)i);
   }
 }
 
 void test_zeros() {
-  size_t data_size = 100;
+  constexpr size_t data_size = 100;
   awkward::BuilderOptions options { 100, 1 };
 
   auto buffer = awkward::GrowableBuffer<uint32_t>::zeros(options, data_size);
+  assert(buffer.length() == data_size);
 
   std::unique_ptr<uint32_t[]> ptr(new uint32_t[buffer.length()]);
   buffer.concatenate(ptr.get());
+  assert(buffer.length() == data_size);
+  buffer.clear();
+  assert(buffer.length() == 0);
 
-  for (size_t i = 0; i < buffer.length(); i++) {
+  for (size_t i = 0; i < data_size; i++) {
     assert(ptr.get()[i] == (uint32_t)0);
   }
 }
 
 void test_float() {
-  size_t data_size = 18;
+  constexpr size_t data_size = 18;
   awkward::BuilderOptions options { 4, 1 };
 
-  float data[18] = {1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9,
-                    2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9};
+  float data[data_size] = {1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9,
+                           2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9};
 
   auto buffer = awkward::GrowableBuffer<float>::empty(options);
+  assert(buffer.length() == 0);
 
   for (size_t i = 0; i < data_size; i++) {
     buffer.append(data[i]);
   }
+  assert(buffer.length() == data_size);
 
   std::unique_ptr<float[]> ptr(new float[buffer.length()]);
   buffer.concatenate(ptr.get());
+  assert(buffer.length() == data_size);
+  buffer.clear();
+  assert(buffer.length() == 0);
 
-  for (size_t i = 0; i < buffer.length(); i++) {
+  for (size_t i = 0; i < data_size; i++) {
     assert(ptr.get()[i] == data[i]);
   }
 }
 
 void test_int64() {
-  size_t data_size = 10;
+  constexpr size_t data_size = 10;
   awkward::BuilderOptions options { 8, 1 };
 
-  int64_t data[10] = {-5, -4, -3, -2, -1, 0, 1, 2, 3, 4};
+  int64_t data[data_size] = {-5, -4, -3, -2, -1, 0, 1, 2, 3, 4};
 
   auto buffer = awkward::GrowableBuffer<int64_t>::empty(options);
 
   for (size_t i = 0; i < data_size; i++) {
     buffer.append(data[i]);
   }
+  assert(buffer.length() == data_size);
 
   std::unique_ptr<int64_t[]> ptr(new int64_t[buffer.length()]);
   buffer.concatenate(ptr.get());
+  assert(buffer.length() == data_size);
+  buffer.clear();
+  assert(buffer.length() == 0);
 
-  for (size_t i = 0; i < buffer.length(); i++) {
+  for (size_t i = 0; i < data_size; i++) {
     assert(ptr.get()[i] == data[i]);
   }
 }
 
 void test_bool() {
-  size_t data_size = 12;
+  constexpr size_t data_size = 12;
   awkward::BuilderOptions options {5, 1};
 
-  bool data[12] = {false, true, false, false, true, false, true,
-                   true, false, true, false, false};
+  bool data[data_size] = {false, true, false, false, true, false, true,
+                          true, false, true, false, false};
 
   auto buffer = awkward::GrowableBuffer<bool>(options);
 
   for (size_t i = 0; i < data_size; i++) {
     buffer.append(data[i]);
   }
+  assert(buffer.length() == data_size);
 
   std::unique_ptr<bool[]> ptr(new bool[buffer.length()]);
   buffer.concatenate(ptr.get());
+  assert(buffer.length() == data_size);
+  buffer.clear();
+  assert(buffer.length() == 0);
 
-  for (size_t i = 0; i < buffer.length(); i++) {
+  for (size_t i = 0; i < data_size; i++) {
     assert(ptr.get()[i] == data[i]);
   }
 }
 
 void test_double() {
-  size_t data_size = 9;
+  constexpr size_t data_size = 9;
   awkward::BuilderOptions options { 6, 1 };
 
-  double data[9] = {1.01, 2.02, 3.03, 4.04, 5.05, 6.06, 7.07, 8.08, 9.09};
+  double data[data_size] = {1.01, 2.02, 3.03, 4.04, 5.05, 6.06, 7.07, 8.08, 9.09};
 
   auto buffer = awkward::GrowableBuffer<double>::empty(options);
 
@@ -124,18 +149,21 @@ void test_double() {
 
   std::unique_ptr<double[]> ptr(new double[buffer.length()]);
   buffer.concatenate(ptr.get());
+  assert(buffer.length() == data_size);
+  buffer.clear();
+  assert(buffer.length() == 0);
 
-  for (size_t i = 0; i < buffer.length(); i++) {
+  for (size_t i = 0; i < data_size; i++) {
     assert(ptr.get()[i] == data[i]);
   }
 }
 
 void test_complex() {
-  size_t data_size = 10;
+  constexpr size_t data_size = 10;
   awkward::BuilderOptions options { 3, 1 };
 
-  std::complex<double> data[10] = {{0, 0}, {1.1, 0.1}, {2.2, 0.2}, {3.3, 0.3}, {4.4, 0.4},
-                                   {5.5, 0.5}, {6.6, 0.6}, {7.7, 0.7}, {8.8, 0.8}, {9.9, 0.9}};
+  std::complex<double> data[data_size] = {{0, 0}, {1.1, 0.1}, {2.2, 0.2}, {3.3, 0.3}, {4.4, 0.4},
+                                          {5.5, 0.5}, {6.6, 0.6}, {7.7, 0.7}, {8.8, 0.8}, {9.9, 0.9}};
 
   auto buffer = awkward::GrowableBuffer<std::complex<double>>::empty(options);
   for (size_t i = 0; i < data_size; i++) {
@@ -144,18 +172,21 @@ void test_complex() {
 
   std::complex<double>* ptr = new std::complex<double>[buffer.length()];
   buffer.concatenate(ptr);
+  assert(buffer.length() == data_size);
+  buffer.clear();
+  assert(buffer.length() == 0);
 
-  for (size_t i = 0; i < buffer.length(); i++) {
+  for (size_t i = 0; i < data_size; i++) {
     assert(ptr[i] == data[i]);
   }
 }
 
 void test_extend() {
-  size_t data_size = 15;
+  constexpr size_t data_size = 15;
   awkward::BuilderOptions options { 5, 1 };
 
-  double data[15] = {1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9,
-                     2.1, 2.2, 2.3, 2.4, 2.5, 2.6};
+  double data[data_size] = {1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9,
+                            2.1, 2.2, 2.3, 2.4, 2.5, 2.6};
 
   auto buffer = awkward::GrowableBuffer<double>::empty(options);
 
@@ -163,37 +194,44 @@ void test_extend() {
 
   std::unique_ptr<double[]> ptr(new double[buffer.length()]);
   buffer.concatenate(ptr.get());
+  assert(buffer.length() == data_size);
+  buffer.clear();
+  assert(buffer.length() == 0);
 
-  for (size_t i = 0; i < buffer.length(); i++) {
+  for (size_t i = 0; i < data_size; i++) {
     assert(ptr.get()[i] == data[i]);
   }
 }
 
 void test_append_and_get_ref() {
+  constexpr size_t data_size = 15;
   awkward::BuilderOptions options { 5, 1 };
 
-  double data[15] = {1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9,
-                     2.1, 2.2, 2.3, 2.4, 2.5, 2.6};
+  double data[data_size] = {1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9,
+                            2.1, 2.2, 2.3, 2.4, 2.5, 2.6};
 
-  int val;
-  int& ref = val;
+  double val;
+  double& ref = val;
 
   auto buffer = awkward::GrowableBuffer<double>::empty(options);
-
-  for (size_t i = 0; i < buffer.length(); i++) {
+  for (size_t i = 0; i < data_size; i++) {
     ref = buffer.append_and_get_ref(data[i]);
     assert(ref == data[i]);
     assert(val == data[i]);
   }
+
+  assert(buffer.length() == data_size);
+  buffer.clear();
+  assert(buffer.length() == 0);
 }
 
 template<typename FROM, typename TO>
 void test_copy_complex_as_complex() {
-  size_t data_size = 10;
+  constexpr size_t data_size = 10;
   awkward::BuilderOptions options { 5, 1 };
 
-  std::complex<FROM> data[10] = {{0, 0}, {1.1, 0.1}, {2.2, 0.2}, {3.3, 0.3}, {4.4, 0.4},
-                                   {5.5, 0.5}, {6.6, 0.6}, {7.7, 0.7}, {8.8, 0.8}, {9.9, 0.9}};
+  std::complex<FROM> data[data_size] = {{0, 0}, {1.1, 0.1}, {2.2, 0.2}, {3.3, 0.3}, {4.4, 0.4},
+                                        {5.5, 0.5}, {6.6, 0.6}, {7.7, 0.7}, {8.8, 0.8}, {9.9, 0.9}};
 
   auto buffer = awkward::GrowableBuffer<std::complex<FROM>>::empty(options);
   for (size_t i = 0; i < data_size; i++) {
@@ -216,15 +254,22 @@ void test_copy_complex_as_complex() {
     assert(ptr2[i].imag() == (TO)data[i].imag());
   }
 
+  assert(buffer.length() == data_size);
+  buffer.clear();
+  assert(buffer.length() == 0);
+
+  assert(to_buffer.length() == data_size);
+  to_buffer.clear();
+  assert(to_buffer.length() == 0);
 }
 
 template<typename FROM, typename TO>
 void test_copy_complex_as() {
-  size_t data_size = 10;
+  constexpr size_t data_size = 10;
   awkward::BuilderOptions options { 5, 1 };
 
-  std::complex<FROM> data[10] = {{0, 0}, {1.1, 0.1}, {2.2, 0.2}, {3.3, 0.3}, {4.4, 0.4},
-                                   {5.5, 0.5}, {6.6, 0.6}, {7.7, 0.7}, {8.8, 0.8}, {9.9, 0.9}};
+  std::complex<FROM> data[data_size] = {{0, 0}, {1.1, 0.1}, {2.2, 0.2}, {3.3, 0.3}, {4.4, 0.4},
+                                        {5.5, 0.5}, {6.6, 0.6}, {7.7, 0.7}, {8.8, 0.8}, {9.9, 0.9}};
 
   auto buffer = awkward::GrowableBuffer<std::complex<FROM>>::empty(options);
   for (size_t i = 0; i < data_size; i++) {
@@ -234,7 +279,7 @@ void test_copy_complex_as() {
   std::unique_ptr<std::complex<FROM>[]> ptr(new std::complex<FROM>[buffer.length()]);
   buffer.concatenate(ptr.get());
 
-  for (size_t i = 0; i < buffer.length(); i++) {
+  for (size_t i = 0; i < data_size; i++) {
     assert(ptr.get()[i] == data[i]);
   }
 
@@ -247,6 +292,13 @@ void test_copy_complex_as() {
     assert(ptr2.get()[j+1] == (TO)data[i].imag());
   }
 
+  assert(buffer.length() == data_size);
+  buffer.clear();
+  assert(buffer.length() == 0);
+
+  assert(to_buffer.length() == data_size << 1);
+  to_buffer.clear();
+  assert(to_buffer.length() == 0);
 }
 
 int main(int /* argc */, const char ** /* argv */) {

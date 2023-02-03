@@ -60,14 +60,14 @@ def moment(
     """
     with ak._errors.OperationErrorContext(
         "ak.moment",
-        dict(
-            x=x,
-            n=n,
-            weight=weight,
-            axis=axis,
-            keepdims=keepdims,
-            mask_identity=mask_identity,
-        ),
+        {
+            "x": x,
+            "n": n,
+            "weight": weight,
+            "axis": axis,
+            "keepdims": keepdims,
+            "mask_identity": mask_identity,
+        },
     ):
         if flatten_records is not unset:
             message = (

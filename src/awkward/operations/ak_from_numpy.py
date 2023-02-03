@@ -39,13 +39,13 @@ def from_numpy(
     """
     with ak._errors.OperationErrorContext(
         "ak.from_numpy",
-        dict(
-            array=array,
-            regulararray=regulararray,
-            recordarray=recordarray,
-            highlevel=highlevel,
-            behavior=behavior,
-        ),
+        {
+            "array": array,
+            "regulararray": regulararray,
+            "recordarray": recordarray,
+            "highlevel": highlevel,
+            "behavior": behavior,
+        },
     ):
         return ak._util.from_arraylib(
             array, regulararray, recordarray, highlevel, behavior
