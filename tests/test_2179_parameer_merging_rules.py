@@ -31,3 +31,13 @@ def test():
         [x, y],
     )
     assert result3.parameters == {"x": 100}
+
+
+def test_merge_optional_strings():
+    a = ak.Array([{"a": "foo"}, {"a": "bar"}])
+    b = ak.Array([{"a": None}])
+
+    result = ak.concatenate([a, b])
+    assert ak._util.arrays_approx_equal(
+        result, [{"a": "foo"}, {"a": "bar"}, {"a": None}]
+    )
