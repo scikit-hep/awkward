@@ -338,6 +338,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "dsavoiu",
+      "name": "Daniel Savoiu",
+      "avatar_url": "https://avatars.githubusercontent.com/u/17005255?v=4",
+      "profile": "https://github.com/dsavoiu",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
