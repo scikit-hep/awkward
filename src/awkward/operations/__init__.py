@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 from awkward.operations.ak_all import all
+from awkward.operations.ak_almost_equal import almost_equal
 from awkward.operations.ak_any import any
 from awkward.operations.ak_argcartesian import argcartesian
 from awkward.operations.ak_argcombinations import argcombinations

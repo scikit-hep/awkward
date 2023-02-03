@@ -10,10 +10,10 @@ array = ak.Array([[0, 2, 3.0], [4, 5, 6, 7, 8], [], [9, 8, None], [10, 1], []])
 
 def test_sum():
     assert ak.sum(array, axis=None) == pytest.approx(63.0)
-    assert ak._util.arrays_approx_equal(
+    assert ak.almost_equal(
         ak.sum(array, axis=None, keepdims=True), ak.to_regular([[63.0]])
     )
-    assert ak._util.arrays_approx_equal(
+    assert ak.almost_equal(
         ak.sum(array, axis=None, keepdims=True, mask_identity=True),
         ak.to_regular(ak.Array([[63.0]]).mask[[[True]]]),
     )
@@ -23,13 +23,13 @@ def test_sum():
 def test_prod():
     assert ak.prod(array[1:], axis=None) == pytest.approx(4838400.0)
     assert ak.prod(array, axis=None) == 0
-    assert ak._util.arrays_approx_equal(
+    assert ak.almost_equal(
         ak.prod(array, axis=None, keepdims=True), ak.to_regular([[0.0]])
     )
-    assert ak._util.arrays_approx_equal(
+    assert ak.almost_equal(
         ak.prod(array[1:], axis=None, keepdims=True), ak.to_regular([[4838400.0]])
     )
-    assert ak._util.arrays_approx_equal(
+    assert ak.almost_equal(
         ak.prod(array[1:], axis=None, keepdims=True, mask_identity=True),
         ak.to_regular(ak.Array([[4838400.0]]).mask[[[True]]]),
     )
@@ -38,20 +38,20 @@ def test_prod():
 
 def test_min():
     assert ak.min(array, axis=None) == pytest.approx(0.0)
-    assert ak._util.arrays_approx_equal(
+    assert ak.almost_equal(
         ak.min(array, axis=None, keepdims=True, mask_identity=False),
         ak.to_regular([[0.0]]),
     )
-    assert ak._util.arrays_approx_equal(
+    assert ak.almost_equal(
         ak.min(array, axis=None, keepdims=True, initial=-100, mask_identity=False),
         ak.to_regular([[-100.0]]),
     )
 
-    assert ak._util.arrays_approx_equal(
+    assert ak.almost_equal(
         ak.min(array, axis=None, keepdims=True, mask_identity=True),
         ak.to_regular(ak.Array([[0.0]]).mask[[[True]]]),
     )
-    assert ak._util.arrays_approx_equal(
+    assert ak.almost_equal(
         ak.min(array[-1:], axis=None, keepdims=True, mask_identity=True),
         ak.to_regular(ak.Array([[np.inf]]).mask[[[False]]]),
     )
@@ -60,19 +60,19 @@ def test_min():
 
 def test_max():
     assert ak.max(array, axis=None) == pytest.approx(10.0)
-    assert ak._util.arrays_approx_equal(
+    assert ak.almost_equal(
         ak.max(array, axis=None, keepdims=True, mask_identity=False),
         ak.to_regular([[10.0]]),
     )
-    assert ak._util.arrays_approx_equal(
+    assert ak.almost_equal(
         ak.max(array, axis=None, keepdims=True, initial=100, mask_identity=False),
         ak.to_regular([[100.0]]),
     )
-    assert ak._util.arrays_approx_equal(
+    assert ak.almost_equal(
         ak.max(array, axis=None, keepdims=True, mask_identity=True),
         ak.to_regular(ak.Array([[10.0]]).mask[[[True]]]),
     )
-    assert ak._util.arrays_approx_equal(
+    assert ak.almost_equal(
         ak.max(array[-1:], axis=None, keepdims=True, mask_identity=True),
         ak.to_regular(ak.Array([[np.inf]]).mask[[[False]]]),
     )
@@ -81,15 +81,15 @@ def test_max():
 
 def test_count():
     assert ak.count(array, axis=None) == 12
-    assert ak._util.arrays_approx_equal(
+    assert ak.almost_equal(
         ak.count(array, axis=None, keepdims=True, mask_identity=False),
         ak.to_regular([[12]]),
     )
-    assert ak._util.arrays_approx_equal(
+    assert ak.almost_equal(
         ak.count(array, axis=None, keepdims=True, mask_identity=True),
         ak.to_regular(ak.Array([[12]]).mask[[[True]]]),
     )
-    assert ak._util.arrays_approx_equal(
+    assert ak.almost_equal(
         ak.count(array[-1:], axis=None, keepdims=True, mask_identity=True),
         ak.to_regular(ak.Array([[0]]).mask[[[False]]]),
     )
@@ -99,15 +99,15 @@ def test_count():
 
 def test_count_nonzero():
     assert ak.count_nonzero(array, axis=None) == 11
-    assert ak._util.arrays_approx_equal(
+    assert ak.almost_equal(
         ak.count_nonzero(array, axis=None, keepdims=True, mask_identity=False),
         ak.to_regular([[11]]),
     )
-    assert ak._util.arrays_approx_equal(
+    assert ak.almost_equal(
         ak.count_nonzero(array, axis=None, keepdims=True, mask_identity=True),
         ak.to_regular(ak.Array([[11]]).mask[[[True]]]),
     )
-    assert ak._util.arrays_approx_equal(
+    assert ak.almost_equal(
         ak.count_nonzero(array[-1:], axis=None, keepdims=True, mask_identity=True),
         ak.to_regular(ak.Array([[0]]).mask[[[False]]]),
     )
@@ -117,11 +117,11 @@ def test_count_nonzero():
 
 def test_std():
     assert ak.std(array, axis=None) == pytest.approx(3.139134700306227)
-    assert ak._util.arrays_approx_equal(
+    assert ak.almost_equal(
         ak.std(array, axis=None, keepdims=True, mask_identity=False),
         ak.to_regular([[3.139134700306227]]),
     )
-    assert ak._util.arrays_approx_equal(
+    assert ak.almost_equal(
         ak.std(array, axis=None, keepdims=True, mask_identity=True),
         ak.to_regular(ak.Array([[3.139134700306227]]).mask[[[True]]]),
     )
@@ -129,7 +129,7 @@ def test_std():
 
 
 def test_std_no_mask_axis_none():
-    assert ak._util.arrays_approx_equal(
+    assert ak.almost_equal(
         ak.std(array[-1:], axis=None, keepdims=True, mask_identity=True),
         ak.to_regular(ak.Array([[0.0]]).mask[[[False]]]),
     )
@@ -138,11 +138,11 @@ def test_std_no_mask_axis_none():
 
 def test_var():
     assert ak.var(array, axis=None) == pytest.approx(9.854166666666666)
-    assert ak._util.arrays_approx_equal(
+    assert ak.almost_equal(
         ak.var(array, axis=None, keepdims=True, mask_identity=False),
         ak.to_regular([[9.854166666666666]]),
     )
-    assert ak._util.arrays_approx_equal(
+    assert ak.almost_equal(
         ak.var(array, axis=None, keepdims=True, mask_identity=True),
         ak.to_regular(ak.Array([[9.854166666666666]]).mask[[[True]]]),
     )
@@ -150,7 +150,7 @@ def test_var():
 
 
 def test_var_no_mask_axis_none():
-    assert ak._util.arrays_approx_equal(
+    assert ak.almost_equal(
         ak.var(array[-1:], axis=None, keepdims=True, mask_identity=True),
         ak.to_regular(ak.Array([[0.0]]).mask[[[False]]]),
     )
@@ -159,11 +159,11 @@ def test_var_no_mask_axis_none():
 
 def test_mean():
     assert ak.mean(array, axis=None) == pytest.approx(5.25)
-    assert ak._util.arrays_approx_equal(
+    assert ak.almost_equal(
         ak.mean(array, axis=None, keepdims=True, mask_identity=False),
         ak.to_regular([[5.25]]),
     )
-    assert ak._util.arrays_approx_equal(
+    assert ak.almost_equal(
         ak.mean(array, axis=None, keepdims=True, mask_identity=True),
         ak.to_regular(ak.Array([[5.25]]).mask[[[True]]]),
     )
@@ -171,7 +171,7 @@ def test_mean():
 
 
 def test_mean_no_mask_axis_none():
-    assert ak._util.arrays_approx_equal(
+    assert ak.almost_equal(
         ak.mean(array[-1:], axis=None, keepdims=True, mask_identity=True),
         ak.to_regular(ak.Array([[0.0]]).mask[[[False]]]),
     )
@@ -180,11 +180,11 @@ def test_mean_no_mask_axis_none():
 
 def test_ptp():
     assert ak.ptp(array, axis=None) == pytest.approx(10.0)
-    assert ak._util.arrays_approx_equal(
+    assert ak.almost_equal(
         ak.ptp(array, axis=None, keepdims=True, mask_identity=False),
         ak.to_regular([[10.0]]),
     )
-    assert ak._util.arrays_approx_equal(
+    assert ak.almost_equal(
         ak.ptp(array, axis=None, keepdims=True, mask_identity=True),
         ak.to_regular(ak.Array([[10.0]]).mask[[[True]]]),
     )
@@ -192,7 +192,7 @@ def test_ptp():
 
 
 def test_ptp_no_mask_axis_none():
-    assert ak._util.arrays_approx_equal(
+    assert ak.almost_equal(
         ak.ptp(array[-1:], axis=None, keepdims=True, mask_identity=True),
         ak.to_regular(ak.Array([[0.0]]).mask[[[False]]]),
     )
@@ -201,15 +201,15 @@ def test_ptp_no_mask_axis_none():
 
 def test_argmax():
     assert ak.argmax(array, axis=None) == 11
-    assert ak._util.arrays_approx_equal(
+    assert ak.almost_equal(
         ak.argmax(array, axis=None, keepdims=True, mask_identity=False),
         ak.to_regular([[11]]),
     )
-    assert ak._util.arrays_approx_equal(
+    assert ak.almost_equal(
         ak.argmax(array, axis=None, keepdims=True, mask_identity=True),
         ak.to_regular(ak.Array([[11]]).mask[[[True]]]),
     )
-    assert ak._util.arrays_approx_equal(
+    assert ak.almost_equal(
         ak.argmax(array[-1:], axis=None, keepdims=True, mask_identity=True),
         ak.to_regular(ak.Array([[0]]).mask[[[False]]]),
     )
@@ -219,15 +219,15 @@ def test_argmax():
 
 def test_argmin():
     assert ak.argmin(array, axis=None) == 0
-    assert ak._util.arrays_approx_equal(
+    assert ak.almost_equal(
         ak.argmin(array, axis=None, keepdims=True, mask_identity=False),
         ak.to_regular([[0]]),
     )
-    assert ak._util.arrays_approx_equal(
+    assert ak.almost_equal(
         ak.argmin(array, axis=None, keepdims=True, mask_identity=True),
         ak.to_regular(ak.Array([[0]]).mask[[[True]]]),
     )
-    assert ak._util.arrays_approx_equal(
+    assert ak.almost_equal(
         ak.argmin(array[-1:], axis=None, keepdims=True, mask_identity=True),
         ak.to_regular(ak.Array([[999]]).mask[[[False]]]),
     )
@@ -237,15 +237,15 @@ def test_argmin():
 
 def test_any():
     assert ak.any(array, axis=None)
-    assert ak._util.arrays_approx_equal(
+    assert ak.almost_equal(
         ak.any(array, axis=None, keepdims=True, mask_identity=False),
         ak.to_regular([[True]]),
     )
-    assert ak._util.arrays_approx_equal(
+    assert ak.almost_equal(
         ak.any(array, axis=None, keepdims=True, mask_identity=True),
         ak.to_regular(ak.Array([[True]]).mask[[[True]]]),
     )
-    assert ak._util.arrays_approx_equal(
+    assert ak.almost_equal(
         ak.any(array[-1:], axis=None, keepdims=True, mask_identity=True),
         ak.to_regular(ak.Array([[True]]).mask[[[False]]]),
     )
@@ -255,15 +255,15 @@ def test_any():
 
 def test_all():
     assert not ak.all(array, axis=None)
-    assert ak._util.arrays_approx_equal(
+    assert ak.almost_equal(
         ak.all(array, axis=None, keepdims=True, mask_identity=False),
         ak.to_regular([[False]]),
     )
-    assert ak._util.arrays_approx_equal(
+    assert ak.almost_equal(
         ak.all(array, axis=None, keepdims=True, mask_identity=True),
         ak.to_regular(ak.Array([[False]]).mask[[[True]]]),
     )
-    assert ak._util.arrays_approx_equal(
+    assert ak.almost_equal(
         ak.all(array[-1:], axis=None, keepdims=True, mask_identity=True),
         ak.to_regular(ak.Array([[False]]).mask[[[False]]]),
     )
@@ -276,10 +276,8 @@ def test_prod_numpy():
     result_reg = ak.from_numpy(np.array([[[5460]]], dtype=np.int64))
 
     assert ak.sum(array_reg, axis=None) == 5460
-    assert ak._util.arrays_approx_equal(
-        ak.sum(array_reg, axis=None, keepdims=True), result_reg
-    )
-    assert ak._util.arrays_approx_equal(
+    assert ak.almost_equal(ak.sum(array_reg, axis=None, keepdims=True), result_reg)
+    assert ak.almost_equal(
         ak.sum(array_reg, axis=None, keepdims=True, mask_identity=True),
         ak.to_regular(result_reg.mask[[[[True]]]], axis=None),
     )

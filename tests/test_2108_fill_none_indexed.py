@@ -21,6 +21,6 @@ def test():
             ["x"],
         ),
     )
-    assert ak._util.arrays_approx_equal(
+    assert ak.almost_equal(
         ak.fill_none(layout, 9, axis=0), ak.zip({"x": np.arange(10)})
     )
