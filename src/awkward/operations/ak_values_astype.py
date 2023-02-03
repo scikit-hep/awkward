@@ -6,7 +6,7 @@ from awkward._nplikes.numpylike import NumpyMetadata
 np = NumpyMetadata.instance()
 
 
-def values_astype(array, to, *, including_unknown=True, highlevel=True, behavior=None):
+def values_astype(array, to, *, including_unknown=False, highlevel=True, behavior=None):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).

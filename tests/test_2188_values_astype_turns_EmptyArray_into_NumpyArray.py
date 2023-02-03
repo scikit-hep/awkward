@@ -12,7 +12,12 @@ def test():
     assert a.tolist() == []
     assert str(a.type) == "0 * unknown"
 
-    b = ak.values_astype(a, np.uint16)
+    b = ak.values_astype(a, np.uint16, including_unknown=True)
 
     assert b.tolist() == []
     assert str(b.type) == "0 * uint16"
+
+    c = ak.values_astype(a, np.uint16, including_unknown=False)
+
+    assert c.tolist() == []
+    assert str(c.type) == "0 * unknown"
