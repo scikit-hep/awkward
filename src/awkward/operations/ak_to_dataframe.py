@@ -227,6 +227,12 @@ or
         else:
             columns = pandas.MultiIndex.from_tuples([col_names])
 
+        # Pandas can't handle masked strings
+        if np.issubdtype(column.dtype, np.str_):
+            column = numpy.ma.filled(column, "nan")
+        elif np.issubdtype(column.dtype, np.bytes_):
+            column = numpy.ma.filled(column, b"nan")
+
         if (
             last_row_arrays is not None
             and len(last_row_arrays) == len(row_arrays)

@@ -1507,18 +1507,24 @@ class IndexedOptionArray(Content):
 
                 data[index_nplike.logical_not(mask0)] = content
 
-                if issubclass(content.dtype.type, (bool, np.bool_)):
+                if np.issubdtype(content.dtype, np.bool_):
                     data[mask0] = False
-                elif issubclass(content.dtype.type, np.floating):
+                elif np.issubdtype(content.dtype, np.floating):
                     data[mask0] = np.nan
-                elif issubclass(content.dtype.type, np.complexfloating):
+                elif np.issubdtype(content.dtype, np.complexfloating):
                     data[mask0] = np.nan + np.nan * 1j
-                elif issubclass(content.dtype.type, np.integer):
+                elif np.issubdtype(content.dtype, np.integer):
                     data[mask0] = np.iinfo(content.dtype).max
-                elif issubclass(content.dtype.type, (np.datetime64, np.timedelta64)):
+                elif np.issubdtype(content.dtype.type, np.datetime64) or np.issubdtype(
+                    content.dtype.type, np.timedelta64
+                ):
                     data[mask0] = nplike.asarray(
                         [np.iinfo(np.int64).max], dtype=content.dtype
                     )[0]
+                elif np.issubdtype(content.dtype, np.str_):
+                    data[mask0] = ""
+                elif np.issubdtype(content.dtype, np.bytes_):
+                    data[mask0] = b""
                 else:
                     raise ak._errors.wrap_error(
                         AssertionError(f"unrecognized dtype: {content.dtype}")
