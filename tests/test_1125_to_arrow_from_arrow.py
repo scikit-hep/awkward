@@ -696,3 +696,11 @@ def test_unionarray(tmp_path, extensionarray):
     )
     paarray = akarray.to_arrow(extensionarray=extensionarray)
     arrow_round_trip(akarray, paarray, extensionarray)
+
+
+@pytest.mark.parametrize("extensionarray", [False, True])
+def test_empty_arrow(tmp_path, extensionarray):
+    akarray = ak.Array([{"x": 1, "y": 2.2}])[0:0]
+    paarray = ak.to_arrow_table(akarray, extensionarray=extensionarray)
+    arrow_round_trip(akarray, paarray, extensionarray)
+    parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
