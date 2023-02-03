@@ -218,6 +218,11 @@ class UnionArray(Content):
                 innerindex = self_cont._index
                 innercontents = self_cont._contents
 
+                # Update outermost parameters with this union's parameters
+                parameters = ak.forms.form._parameters_union(
+                    self_cont._parameters, parameters
+                )
+
                 # For each inner union content
                 for j, inner_cont in enumerate(innercontents):
                     unmerged = True
@@ -253,6 +258,7 @@ class UnionArray(Content):
                             unmerged = False
                             break
 
+                    # Did we fail to merge any of the final outer contents with this inner union content?
                     if unmerged:
                         Content._selfless_handle_error(
                             backend[
