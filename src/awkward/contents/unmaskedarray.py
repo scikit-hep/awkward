@@ -315,9 +315,10 @@ class UnmaskedArray(Content):
                 self._content._local_index(axis, depth), parameters=self._parameters
             )
 
-    def _numbers_to_type(self, name):
+    def _numbers_to_type(self, name, including_unknown):
         return ak.contents.UnmaskedArray(
-            self._content._numbers_to_type(name), parameters=self._parameters
+            self._content._numbers_to_type(name, including_unknown),
+            parameters=self._parameters,
         )
 
     def _is_unique(self, negaxis, starts, parents, outlength):
