@@ -63,7 +63,7 @@ done = compiler(
 assert done is True
 
 
-def from_rdataframe(data_frame, columns, offsets_type="int"):
+def from_rdataframe(data_frame, columns, offsets_type="int64_t"):
     def cpp_builder_type(depth, data_type):
         if depth == 1:
             return f"awkward::LayoutBuilder::Numpy<{data_type}>>"
