@@ -675,6 +675,11 @@ def from_arraylib(array, regulararray, recordarray, highlevel, behavior):
                 ak.index.Index8(mask), data, valid_when=False
             )
 
+    if array.dtype == np.dtype("O"):
+        raise ak._errors.wrap_error(
+            TypeError("Awkward Array does not support arrays with object dtypes.")
+        )
+
     if isinstance(array, numpy.ma.MaskedArray):
         mask = numpy.ma.getmask(array)
         array = numpy.ma.getdata(array)
