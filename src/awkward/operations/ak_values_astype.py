@@ -6,11 +6,14 @@ from awkward._nplikes.numpylike import NumpyMetadata
 np = NumpyMetadata.instance()
 
 
-def values_astype(array, to, *, highlevel=True, behavior=None):
+def values_astype(array, to, *, including_unknown=False, highlevel=True, behavior=None):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         to (dtype or dtype specifier): Type to convert the numbers into.
+        including_unknown (bool): If True, the `unknown` type is considered
+            a value type and is converted to the specified dtype; if False,
+            `unknown` will remain `unknown`.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
@@ -50,14 +53,20 @@ def values_astype(array, to, *, highlevel=True, behavior=None):
     """
     with ak._errors.OperationErrorContext(
         "ak.values_astype",
-        {"array": array, "to": to, "highlevel": highlevel, "behavior": behavior},
+        {
+            "array": array,
+            "to": to,
+            "including_unknown": including_unknown,
+            "highlevel": highlevel,
+            "behavior": behavior,
+        },
     ):
-        return _impl(array, to, highlevel, behavior)
+        return _impl(array, to, including_unknown, highlevel, behavior)
 
 
-def _impl(array, to, highlevel, behavior):
+def _impl(array, to, including_unknown, highlevel, behavior):
     to_dtype = np.dtype(to)
     to_str = ak.types.numpytype.dtype_to_primitive(to_dtype)
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
-    out = ak._do.numbers_to_type(layout, to_str)
+    out = ak._do.numbers_to_type(layout, to_str, including_unknown)
     return ak._util.wrap(out, behavior, highlevel, like=array)

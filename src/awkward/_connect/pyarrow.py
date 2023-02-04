@@ -6,6 +6,7 @@ from collections.abc import Iterable, Sized
 import awkward as ak
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward.forms.form import _parameters_union
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
@@ -406,7 +407,7 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
 
         content = handle_arrow(paarray.dictionary, generate_bitmasks)
 
-        parameters = ak._util.merge_parameters(
+        parameters = ak.forms.form._parameters_union(
             mask_parameters(awkwardarrow_type), node_parameters(awkwardarrow_type)
         )
         if parameters is None:
@@ -701,7 +702,7 @@ def form_popbuffers(awkwardarrow_type, storage_type):
         a, b = to_awkwardarrow_storage_types(storage_type.value_type)
         content = form_popbuffers(a, b)
 
-        parameters = ak._util.merge_parameters(
+        parameters = _parameters_union(
             mask_parameters(awkwardarrow_type), node_parameters(awkwardarrow_type)
         )
         if parameters is None:
@@ -850,7 +851,7 @@ def form_popbuffers(awkwardarrow_type, storage_type):
         # This is already an option-type, so no form_popbuffers_finalize.
         return ak.forms.IndexedOptionForm(
             "i64",
-            ak.forms.EmptyForm(parameters=node_parameters(awkwardarrow_type)),
+            ak.forms.EmptyForm(),
             parameters=mask_parameters(awkwardarrow_type),
         )
 
@@ -1001,8 +1002,11 @@ def handle_arrow(obj, generate_bitmasks=False, pass_empty_field=False):
     elif isinstance(obj, pyarrow.lib.Table):
         batches = obj.combine_chunks().to_batches()
         if len(batches) == 0:
-            # FIXME: create a zero-length array with the right type
-            raise ak._errors.wrap_error(NotImplementedError)
+            # create an empty array following the input schema
+            return form_handle_arrow(
+                obj.schema,
+                pass_empty_field=pass_empty_field,
+            ).length_zero_array(highlevel=False)
         elif len(batches) == 1:
             return handle_arrow(batches[0], generate_bitmasks, pass_empty_field)
         else:

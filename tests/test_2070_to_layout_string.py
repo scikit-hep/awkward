@@ -8,7 +8,7 @@ import awkward as ak
 
 @pytest.mark.parametrize("string", ["hello world!", b"hello world!"])
 def test(string):
-    assert ak._util.arrays_approx_equal(
+    assert ak.almost_equal(
         ak.to_layout(string),
         ak.contents.NumpyArray(
             np.array(

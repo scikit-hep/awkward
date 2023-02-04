@@ -4,7 +4,7 @@ from collections.abc import Iterable
 
 import awkward as ak
 from awkward._util import unset
-from awkward.forms.form import Form, _parameters_equal
+from awkward.forms.form import Form, _type_parameters_equal
 from awkward.typing import final
 
 
@@ -58,7 +58,7 @@ class UnionForm(Form):
         self._tags = tags
         self._index = index
         self._contents = list(contents)
-        self._init(parameters, form_key)
+        self._init(parameters=parameters, form_key=form_key)
 
     @property
     def tags(self):
@@ -152,9 +152,7 @@ class UnionForm(Form):
             and self._tags == other._tags
             and self._index == other._index
             and len(self._contents) == len(other._contents)
-            and _parameters_equal(
-                self._parameters, other._parameters, only_array_record=True
-            )
+            and _type_parameters_equal(self._parameters, other._parameters)
         ):
             return self._contents == other._contents
 
@@ -248,9 +246,7 @@ class UnionForm(Form):
                 contents.append(next_content)
 
         if len(contents) == 0:
-            return ak.forms.EmptyForm(
-                parameters=self._parameters, form_key=self._form_key
-            )
+            return ak.forms.EmptyForm(form_key=self._form_key)
         elif len(contents) == 1:
             return contents[0]
         else:

@@ -246,8 +246,8 @@ py_objects = [np.array([100, 200]), np.array([101, 201]), np.array([103, 203])]
 py_objects
 ```
 
+This is a list that contains NumPy arrays: constructor uses ak.from_iter to get an array of variable-length lists.
 ```{code-cell} ipython3
-# This is a list that contains NumPy arrays: constructor uses ak.from_iter to get an array of variable-length lists.
 ak.Array(py_objects)
 ```
 
@@ -256,9 +256,17 @@ np_array_dtype_O = np.array([[100, 200], [101, 201], [103, 203]], dtype="O")
 np_array_dtype_O
 ```
 
+This NumPy array has dtype="O", so it cannot be cast without iteration:
 ```{code-cell} ipython3
-# This NumPy array has dtype="O", so it cannot be cast without iteration: constructor uses ak.from_iter.
+:tags: [raises-exception]
+
 ak.Array(np_array_dtype_O)
+```
+
+{class}`ak.Array` knows that this is a NumPy array, but Awkward does not support object dtypes. Instead, one must use 
+`from_iter` to tell Awkward that this iteration is intentional.
+```{code-cell} ipython3
+ak.from_iter(np_array_dtype_O)
 ```
 
 The logic behind this policy is that only NumPy arrays with `dtype != "O"` are guaranteed to have fixed-size contents. Other cases must have `var` type lists.
@@ -278,7 +286,7 @@ np_array_dtype_O
 ```
 
 ```{code-cell} ipython3
-ak.Array(np_array_dtype_O)
+ak.from_iter(np_array_dtype_O)
 ```
 
 Conversion of strings and bytestrings

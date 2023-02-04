@@ -4,6 +4,7 @@ from __future__ import annotations
 import copy
 
 import awkward as ak
+from awkward._errors import deprecate
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._util import unset
@@ -21,6 +22,10 @@ class EmptyArray(Content):
     is_leaf = True
 
     def __init__(self, *, parameters=None, backend=None):
+        if not (parameters is None or len(parameters) == 0):
+            deprecate(
+                f"{type(self).__name__} cannot contain parameters", version="2.2.0"
+            )
         if backend is None:
             backend = ak._backends.NumpyBackend.instance()
         self._init(parameters, backend)
@@ -33,6 +38,10 @@ class EmptyArray(Content):
         parameters=unset,
         backend=unset,
     ):
+        if not (parameters is unset or parameters is None or len(parameters) == 0):
+            deprecate(
+                f"{type(self).__name__} cannot contain parameters", version="2.2.0"
+            )
         return EmptyArray(
             parameters=self._parameters if parameters is unset else parameters,
             backend=self._backend if backend is unset else backend,
@@ -46,6 +55,8 @@ class EmptyArray(Content):
 
     @classmethod
     def simplified(cls, *, parameters=None, backend=None):
+        if not (parameters is None or len(parameters) == 0):
+            deprecate(f"{cls.__name__} cannot contain parameters", version="2.2.0")
         return cls(parameters=parameters, backend=backend)
 
     def _form_with_key(self, getkey):
@@ -188,13 +199,10 @@ class EmptyArray(Content):
     def _mergemany(self, others):
         if len(others) == 0:
             return self
-
         elif len(others) == 1:
             return others[0]
-
         else:
-            tail_others = others[1:]
-            return others[0]._mergemany(tail_others)
+            return others[0]._mergemany(others[1:])
 
     def _fill_none(self, value: Content) -> Content:
         return EmptyArray(parameters=self._parameters, backend=self._backend)
@@ -212,10 +220,11 @@ class EmptyArray(Content):
                 np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
             )
 
-    def _numbers_to_type(self, name):
-        return ak.contents.EmptyArray(
-            parameters=self._parameters, backend=self._backend
-        )
+    def _numbers_to_type(self, name, including_unknown):
+        if including_unknown:
+            return self.to_NumpyArray(ak.types.numpytype.primitive_to_dtype(name))
+        else:
+            return self
 
     def _is_unique(self, negaxis, starts, parents, outlength):
         return True

@@ -557,55 +557,6 @@ def direct_Content_subclass_name(node):
         return out.__name__
 
 
-meaningful_parameters = frozenset(
-    {
-        ("__array__", "string"),
-        ("__array__", "bytestring"),
-        ("__array__", "char"),
-        ("__array__", "byte"),
-        ("__array__", "sorted_map"),
-        ("__array__", "categorical"),
-    }
-)
-
-
-def merge_parameters(one, two, merge_equal=False, exclude=()):
-    if one is None and two is None:
-        return None
-
-    if len(exclude) != 0:
-        if one is None:
-            one = {}
-        if two is None:
-            two = {}
-
-    if one is None:
-        return two
-
-    elif two is None:
-        return one
-
-    elif merge_equal:
-        out = {}
-        for k, v in two.items():
-            if k in one.keys():
-                if len(exclude) == 0 or (k, v) not in exclude:
-                    if v == one[k]:
-                        out[k] = v
-        return out
-
-    else:
-        if len(exclude) != 0:
-            out = {k: v for k, v in one.items() if (k, v) not in exclude}
-        else:
-            out = dict(one)
-        for k, v in two.items():
-            if len(exclude) == 0 or (k, v) not in exclude:
-                if v is not None:
-                    out[k] = v
-        return out
-
-
 def expand_braces(text, seen=None):
     if seen is None:
         seen = set()
@@ -724,6 +675,11 @@ def from_arraylib(array, regulararray, recordarray, highlevel, behavior):
                 ak.index.Index8(mask), data, valid_when=False
             )
 
+    if array.dtype == np.dtype("O"):
+        raise ak._errors.wrap_error(
+            TypeError("Awkward Array does not support arrays with object dtypes.")
+        )
+
     if isinstance(array, numpy.ma.MaskedArray):
         mask = numpy.ma.getmask(array)
         array = numpy.ma.getdata(array)
@@ -762,109 +718,6 @@ def maybe_posaxis(layout, axis, depth):
             return axis + depth + additional_depth - 1
         else:
             return None
-
-
-def arrays_approx_equal(
-    left,
-    right,
-    rtol: float = 1e-5,
-    atol: float = 1e-8,
-    dtype_exact: bool = True,
-    check_parameters=True,
-    check_regular=True,
-) -> bool:
-    # TODO: this should not be needed after refactoring nplike mechanism
-    import awkward.forms.form
-
-    left_behavior = ak._util.behavior_of(left)
-    right_behavior = ak._util.behavior_of(right)
-
-    left = ak.to_packed(ak.to_layout(left, allow_record=False), highlevel=False)
-    right = ak.to_packed(ak.to_layout(right, allow_record=False), highlevel=False)
-
-    nplike = nplike_of(left, right)
-
-    def is_approx_dtype(left, right) -> bool:
-        if not dtype_exact:
-            for family in np.integer, np.floating:
-                if np.issubdtype(left, family):
-                    return np.issubdtype(right, family)
-        return left == right
-
-    def visitor(left, right) -> bool:
-        # Enforce super-canonicalisation rules
-        if left.is_option:
-            left = left.to_IndexedOptionArray64()
-        if right.is_option:
-            right = right.to_IndexedOptionArray64()
-
-        if type(left) is not type(right):
-            if not check_regular and (
-                left.is_list and right.is_regular or left.is_regular and right.is_list
-            ):
-                left = left.to_ListOffsetArray64()
-                right = right.to_ListOffsetArray64()
-            else:
-                return False
-
-        if left.length != right.length:
-            return False
-
-        if check_parameters and not awkward.forms.form._parameters_equal(
-            left.parameters, right.parameters
-        ):
-            return False
-
-        # Require that the arrays have the same evaluated types
-        if not (
-            arrayclass(left, left_behavior) is arrayclass(right, right_behavior)
-            or not check_parameters
-        ):
-            return False
-
-        if left.is_list:
-            return (
-                nplike.array_equal(left.starts, right.starts)
-                and nplike.array_equal(left.stops, right.stops)
-                and visitor(left.content, right.content)
-            )
-        elif left.is_regular:
-            return (left.size == right.size) and visitor(left.content, right.content)
-        elif left.is_numpy:
-            return is_approx_dtype(left.dtype, right.dtype) and nplike.all(
-                nplike.isclose(
-                    left.data, right.data, rtol=rtol, atol=atol, equal_nan=False
-                )
-            )
-        elif left.is_option:
-            return nplike.array_equal(
-                left.index.data < 0, right.index.data < 0
-            ) and visitor(left.project(), right.project())
-        elif left.is_union:
-            return (len(left.contents) == len(right.contents)) and all(
-                [
-                    visitor(left.project(i).to_packed(), right.project(i).to_packed())
-                    for i, _ in enumerate(left.contents)
-                ]
-            )
-        elif left.is_record:
-            return (
-                (
-                    recordclass(left, left_behavior)
-                    is recordclass(right, right_behavior)
-                    or not check_parameters
-                )
-                and (left.fields == right.fields)
-                and (left.is_tuple == right.is_tuple)
-                and all([visitor(x, y) for x, y in zip(left.contents, right.contents)])
-            )
-        elif left.is_unknown:
-            return True
-
-        else:
-            raise ak._errors.wrap_error(AssertionError)
-
-    return visitor(left, right)
 
 
 try:

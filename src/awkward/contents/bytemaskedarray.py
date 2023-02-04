@@ -12,6 +12,7 @@ from awkward._nplikes.typetracer import MaybeNone, TypeTracer
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.bytemaskedform import ByteMaskedForm
+from awkward.forms.form import _type_parameters_equal
 from awkward.index import Index
 from awkward.typing import Final, Self, final
 
@@ -632,20 +633,16 @@ class ByteMaskedArray(Content):
                 return (outoffsets, flattened)
 
     def _mergeable_next(self, other, mergebool):
-        if isinstance(
-            other,
-            (
-                ak.contents.IndexedArray,
-                ak.contents.IndexedOptionArray,
-                ak.contents.ByteMaskedArray,
-                ak.contents.BitMaskedArray,
-                ak.contents.UnmaskedArray,
-            ),
-        ):
-            return self._content._mergeable(other.content, mergebool)
-
+        # Is the other content is an identity, or a union?
+        if other.is_identity_like or other.is_union:
+            return True
+        # We can only combine option types whose array-record parameters agree
+        elif other.is_option or other.is_indexed:
+            return self._content._mergeable_next(
+                other.content, mergebool
+            ) and _type_parameters_equal(self._parameters, other._parameters)
         else:
-            return self._content._mergeable(other, mergebool)
+            return self._content._mergeable_next(other, mergebool)
 
     def _reverse_merge(self, other):
         return self.to_IndexedOptionArray64()._reverse_merge(other)
@@ -659,18 +656,26 @@ class ByteMaskedArray(Content):
             for x in others
         ):
             parameters = self._parameters
-            masks = [self._mask.data[: self.length]]
+            self_length_scalar = self._backend.index_nplike.shape_item_as_scalar(
+                self.length
+            )
+            masks = [self._mask.data[:self_length_scalar]]
             tail_contents = []
             length = 0
             for x in others:
-                parameters = ak._util.merge_parameters(parameters, x._parameters, True)
-                masks.append(x._mask.data[: x.length])
-                tail_contents.append(x._content[: x.length])
-                length += x.length
+                length_scalar = self._backend.index_nplike.shape_item_as_scalar(
+                    x.length
+                )
+                parameters = ak.forms.form._parameters_intersect(
+                    parameters, x._parameters
+                )
+                masks.append(x._mask.data[:length_scalar])
+                tail_contents.append(x._content[:length_scalar])
+                length = self._backend.index_nplike.add_shape_item(length, x.length)
 
             return ByteMaskedArray(
                 ak.index.Index8(self._backend.nplike.concat(masks)),
-                self._content[: self.length]._mergemany(tail_contents),
+                self._content[:self_length_scalar]._mergemany(tail_contents),
                 self._valid_when,
                 parameters=parameters,
             )
@@ -694,10 +699,10 @@ class ByteMaskedArray(Content):
                 outindex, out, parameters=self._parameters
             )
 
-    def _numbers_to_type(self, name):
+    def _numbers_to_type(self, name, including_unknown):
         return ak.contents.ByteMaskedArray(
             self._mask,
-            self._content._numbers_to_type(name),
+            self._content._numbers_to_type(name, including_unknown),
             self._valid_when,
             parameters=self._parameters,
         )

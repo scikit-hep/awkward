@@ -11,6 +11,7 @@ from awkward._nplikes.numpylike import ArrayLike, NumpyMetadata
 from awkward._nplikes.typetracer import TypeTracerArray
 from awkward._util import unset
 from awkward.contents.content import Content
+from awkward.forms.form import _type_parameters_equal
 from awkward.forms.numpyform import NumpyForm
 from awkward.types.numpytype import primitive_to_dtype
 from awkward.typing import Final, Self, final
@@ -352,20 +353,18 @@ class NumpyArray(Content):
             )
 
     def _mergeable_next(self, other, mergebool):
-        if len(self.shape) > 1:
-            return self._to_regular_primitive()._mergeable(other, mergebool)
-
-        if isinstance(
-            other,
-            (
-                ak.contents.IndexedArray,
-                ak.contents.IndexedOptionArray,
-                ak.contents.ByteMaskedArray,
-                ak.contents.BitMaskedArray,
-                ak.contents.UnmaskedArray,
-            ),
-        ):
-            return self._mergeable(other._content, mergebool)
+        # Is the other content is an identity, or a union?
+        if other.is_identity_like or other.is_union:
+            return True
+        # Check against option contents
+        elif other.is_option or other.is_indexed:
+            return self._mergeable_next(other.content, mergebool)
+        # Otherwise, do the parameters match? If not, we can't merge.
+        elif not _type_parameters_equal(self._parameters, other._parameters):
+            return False
+        # Simplify *this* branch to be 1D self
+        elif len(self.shape) > 1:
+            return self._to_regular_primitive()._mergeable_next(other, mergebool)
 
         elif isinstance(other, ak.contents.NumpyArray):
             if self._data.ndim != other._data.ndim:
@@ -415,10 +414,13 @@ class NumpyArray(Content):
 
         parameters = self._parameters
         for array in head:
-            parameters = ak._util.merge_parameters(parameters, array._parameters, True)
             if isinstance(array, ak.contents.EmptyArray):
-                pass
-            elif isinstance(array, ak.contents.NumpyArray):
+                continue
+
+            parameters = ak.forms.form._parameters_intersect(
+                parameters, array._parameters
+            )
+            if isinstance(array, ak.contents.NumpyArray):
                 contiguous_arrays.append(array.data)
             else:
                 raise ak._errors.wrap_error(
@@ -600,7 +602,7 @@ class NumpyArray(Content):
 
         return out2, nextoffsets[: outlength[0]]
 
-    def _numbers_to_type(self, name):
+    def _numbers_to_type(self, name, including_unknown):
         if (
             self.parameter("__array__") == "string"
             or self.parameter("__array__") == "bytestring"

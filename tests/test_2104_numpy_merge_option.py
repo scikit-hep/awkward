@@ -7,7 +7,7 @@ import awkward as ak
 
 
 def test():
-    assert ak._util.arrays_approx_equal(
+    assert ak.almost_equal(
         ak.concatenate([ak.Array([1, 2, 3]), ak.Array([1, 2, None])]),
         ak.contents.ByteMaskedArray(
             ak.index.Index8(np.array([False, False, False, False, False, True])),

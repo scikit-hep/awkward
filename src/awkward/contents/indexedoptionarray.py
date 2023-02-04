@@ -9,6 +9,7 @@ from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.typetracer import MaybeNone, TypeTracer
 from awkward._util import unset
 from awkward.contents.content import Content
+from awkward.forms.form import _type_parameters_equal
 from awkward.forms.indexedoptionform import IndexedOptionForm
 from awkward.index import Index
 from awkward.typing import Final, Self, final
@@ -120,7 +121,9 @@ class IndexedOptionArray(Content):
             return IndexedOptionArray(
                 result,
                 content.content,
-                parameters=ak._util.merge_parameters(content._parameters, parameters),
+                parameters=ak.forms.form._parameters_union(
+                    content._parameters, parameters
+                ),
             )
 
         else:
@@ -549,20 +552,16 @@ class IndexedOptionArray(Content):
                 return (outoffsets, flattened)
 
     def _mergeable_next(self, other, mergebool):
-        if isinstance(
-            other,
-            (
-                ak.contents.IndexedArray,
-                ak.contents.IndexedOptionArray,
-                ak.contents.ByteMaskedArray,
-                ak.contents.BitMaskedArray,
-                ak.contents.UnmaskedArray,
-            ),
-        ):
-            return self._content._mergeable(other.content, mergebool)
-
+        # Is the other content is an identity, or a union?
+        if other.is_identity_like or other.is_union:
+            return True
+        # We can only combine option/indexed types whose array-record parameters agree
+        elif other.is_option or other.is_indexed:
+            return self._content._mergeable_next(
+                other.content, mergebool
+            ) and _type_parameters_equal(self._parameters, other._parameters)
         else:
-            return self._content._mergeable(other, mergebool)
+            return self._content._mergeable_next(other, mergebool)
 
     def _merging_strategy(self, others):
         if len(others) == 0:
@@ -601,6 +600,9 @@ class IndexedOptionArray(Content):
         return (head, tail)
 
     def _reverse_merge(self, other):
+        if isinstance(other, ak.contents.EmptyArray):
+            return self
+
         theirlength = other.length
         mylength = self.length
         index = ak.index.Index64.empty(
@@ -641,7 +643,14 @@ class IndexedOptionArray(Content):
                 theirlength,
             )
         )
-        parameters = ak._util.merge_parameters(self._parameters, other._parameters)
+        # We can directly merge with other options, but we must merge parameters
+        if other.is_option:
+            parameters = ak.forms.form._parameters_union(
+                self._parameters, other._parameters
+            )
+        # Otherwise, this option parameters win out
+        else:
+            parameters = self._parameters
 
         return ak.contents.IndexedOptionArray.simplified(
             index, content, parameters=parameters
@@ -666,7 +675,8 @@ class IndexedOptionArray(Content):
         parameters = self._parameters
 
         for array in head:
-            parameters = ak._util.merge_parameters(parameters, array._parameters, True)
+            if isinstance(array, ak.contents.EmptyArray):
+                continue
 
             if isinstance(
                 array,
@@ -678,7 +688,13 @@ class IndexedOptionArray(Content):
             ):
                 array = array.to_IndexedOptionArray64()
 
-            if isinstance(array, ak.contents.IndexedOptionArray):
+            if isinstance(
+                array, (ak.contents.IndexedOptionArray, ak.contents.IndexedArray)
+            ):
+                # If we're merging an option, then merge parameters before pulling out `content`
+                parameters = ak.forms.form._parameters_intersect(
+                    parameters, array._parameters
+                )
                 contents.append(array.content)
                 array_index = array.index
                 assert (
@@ -704,9 +720,6 @@ class IndexedOptionArray(Content):
                 length_so_far = self._backend.index_nplike.add_shape_item(
                     length_so_far, array.length
                 )
-
-            elif isinstance(array, ak.contents.EmptyArray):
-                pass
             else:
                 contents.append(array)
                 assert nextindex.nplike is self._backend.index_nplike
@@ -851,10 +864,10 @@ class IndexedOptionArray(Content):
                 nextstarts, nextstops, nextstarts.length, False
             )
 
-    def _numbers_to_type(self, name):
+    def _numbers_to_type(self, name, including_unknown):
         return ak.contents.IndexedOptionArray(
             self._index,
-            self._content._numbers_to_type(name),
+            self._content._numbers_to_type(name, including_unknown),
             parameters=self._parameters,
         )
 
@@ -1157,7 +1170,7 @@ class IndexedOptionArray(Content):
         nulls_index_content = ak.contents.NumpyArray(
             nulls_index.data, parameters=None, backend=self._backend
         )
-        if out._mergeable(nulls_index_content, True):
+        if out._mergeable_next(nulls_index_content, True):
             out = out._mergemany([nulls_index_content])
             nulls_merged = True
 
@@ -1494,18 +1507,24 @@ class IndexedOptionArray(Content):
 
                 data[index_nplike.logical_not(mask0)] = content
 
-                if issubclass(content.dtype.type, (bool, np.bool_)):
+                if np.issubdtype(content.dtype, np.bool_):
                     data[mask0] = False
-                elif issubclass(content.dtype.type, np.floating):
+                elif np.issubdtype(content.dtype, np.floating):
                     data[mask0] = np.nan
-                elif issubclass(content.dtype.type, np.complexfloating):
+                elif np.issubdtype(content.dtype, np.complexfloating):
                     data[mask0] = np.nan + np.nan * 1j
-                elif issubclass(content.dtype.type, np.integer):
+                elif np.issubdtype(content.dtype, np.integer):
                     data[mask0] = np.iinfo(content.dtype).max
-                elif issubclass(content.dtype.type, (np.datetime64, np.timedelta64)):
+                elif np.issubdtype(content.dtype.type, np.datetime64) or np.issubdtype(
+                    content.dtype.type, np.timedelta64
+                ):
                     data[mask0] = nplike.asarray(
                         [np.iinfo(np.int64).max], dtype=content.dtype
                     )[0]
+                elif np.issubdtype(content.dtype, np.str_):
+                    data[mask0] = ""
+                elif np.issubdtype(content.dtype, np.bytes_):
+                    data[mask0] = b""
                 else:
                     raise ak._errors.wrap_error(
                         AssertionError(f"unrecognized dtype: {content.dtype}")

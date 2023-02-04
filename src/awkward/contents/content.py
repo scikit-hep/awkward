@@ -10,9 +10,10 @@ import awkward as ak
 from awkward._backends import Backend
 from awkward._nplikes import to_nplike
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import NumpyLike, NumpyMetadata
+from awkward._nplikes.numpylike import NumpyLike, NumpyMetadata, ShapeItem
 from awkward._nplikes.typetracer import TypeTracer
-from awkward.forms.form import Form, _parameters_equal
+from awkward._util import unset
+from awkward.forms.form import Form, JSONMapping, _type_parameters_equal
 from awkward.typing import Any, AxisMaybeNone, Literal, Self, TypeAlias, TypedDict
 
 np = NumpyMetadata.instance()
@@ -192,7 +193,7 @@ class Content:
         raise ak._errors.wrap_error(NotImplementedError)
 
     @property
-    def length(self) -> int:
+    def length(self) -> ShapeItem:
         raise ak._errors.wrap_error(NotImplementedError)
 
     def _to_buffers(
@@ -206,7 +207,7 @@ class Content:
         raise ak._errors.wrap_error(NotImplementedError)
 
     def __len__(self) -> int:
-        return self.length
+        return int(self.length)
 
     def _repr_extra(self, indent: str) -> list[str]:
         out = []
@@ -738,25 +739,13 @@ class Content:
             localindex.data, parameters=None, backend=self._backend
         )
 
-    def _mergeable(self, other: Content, mergebool: bool = True) -> bool:
-        # Is the other content is an identity, or a union?
-        if other.is_identity_like or other.is_union:
-            return True
-        # Otherwise, do the parameters match? If not, we can't merge.
-        elif not (
-            _parameters_equal(
-                self._parameters, other._parameters, only_array_record=True
-            )
-        ):
-            return False
-        # Finally, fall back upon the per-content implementation
-        else:
-            return self._mergeable_next(other, mergebool)
-
     def _mergeable_next(self, other: Content, mergebool: bool) -> bool:
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def _mergemany(self, others: list[Content]) -> Content:
+    def _mergemany(
+        self,
+        others: list[Content],
+    ) -> Content:
         raise ak._errors.wrap_error(NotImplementedError)
 
     def _merging_strategy(
@@ -1297,9 +1286,7 @@ class Content:
         return (
             self.__class__ is other.__class__
             and len(self) == len(other)
-            and _parameters_equal(
-                self.parameters, other.parameters, only_array_record=False
-            )
+            and _type_parameters_equal(self.parameters, other.parameters)
             and self._is_equal_to(other, index_dtype, numpyarray)
         )
 
@@ -1309,11 +1296,11 @@ class Content:
     def _repr(self, indent: str, pre: str, post: str) -> str:
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def _numbers_to_type(self, name: str) -> Self:
+    def _numbers_to_type(self, name: str, including_unknown: bool) -> Content:
         raise ak._errors.wrap_error(NotImplementedError)
 
     def _fill_none(self, value: Content) -> Content:
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def copy(self) -> Self:
+    def copy(self, *, parameters: JSONMapping | None = unset) -> Self:
         raise ak._errors.wrap_error(NotImplementedError)

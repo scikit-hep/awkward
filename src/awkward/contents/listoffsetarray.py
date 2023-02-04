@@ -9,6 +9,7 @@ from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.typetracer import TypeTracer
 from awkward._util import unset
 from awkward.contents.content import Content
+from awkward.forms.form import _type_parameters_equal
 from awkward.forms.listoffsetform import ListOffsetForm
 from awkward.index import Index
 from awkward.typing import Final, Self, final
@@ -180,8 +181,8 @@ class ListOffsetArray(Content):
         if issubclass(self._offsets.dtype.type, np.int64):
             if (
                 not self._backend.nplike.known_data
-                or not start_at_zero
                 or self._offsets[0] == 0
+                or not start_at_zero
             ):
                 return self
 
@@ -700,18 +701,15 @@ class ListOffsetArray(Content):
                 )
 
     def _mergeable_next(self, other, mergebool):
-        if isinstance(
-            other,
-            (
-                ak.contents.IndexedArray,
-                ak.contents.IndexedOptionArray,
-                ak.contents.ByteMaskedArray,
-                ak.contents.BitMaskedArray,
-                ak.contents.UnmaskedArray,
-            ),
-        ):
-            return self._mergeable(other.content, mergebool)
-
+        # Is the other content is an identity, or a union?
+        if other.is_identity_like or other.is_union:
+            return True
+        # Check against option contents
+        elif other.is_option or other.is_indexed:
+            return self._mergeable_next(other.content, mergebool)
+        # Otherwise, do the parameters match? If not, we can't merge.
+        elif not _type_parameters_equal(self._parameters, other._parameters):
+            return False
         elif isinstance(
             other,
             (
@@ -720,11 +718,9 @@ class ListOffsetArray(Content):
                 ak.contents.ListOffsetArray,
             ),
         ):
-            return self._content._mergeable(other.content, mergebool)
-
+            return self._content._mergeable_next(other.content, mergebool)
         elif isinstance(other, ak.contents.NumpyArray) and len(other.shape) > 1:
-            return self._mergeable(other._to_regular_primitive(), mergebool)
-
+            return self._mergeable_next(other._to_regular_primitive(), mergebool)
         else:
             return False
 
@@ -784,10 +780,10 @@ class ListOffsetArray(Content):
                 self._offsets, self._content._local_index(axis, depth + 1)
             )
 
-    def _numbers_to_type(self, name):
+    def _numbers_to_type(self, name, including_unknown):
         return ak.contents.ListOffsetArray(
             self._offsets,
-            self._content._numbers_to_type(name),
+            self._content._numbers_to_type(name, including_unknown),
             parameters=self._parameters,
         )
 
