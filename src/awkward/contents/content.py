@@ -708,33 +708,6 @@ class Content:
     def _carry(self, carry: ak.index.Index, allow_lazy: bool):
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def _carry_asrange(self, carry: ak.index.Index):
-        assert isinstance(carry, ak.index.Index)
-
-        result = self._backend.index_nplike.empty(1, dtype=np.bool_)
-        assert carry.nplike is self._backend.index_nplike
-        self._handle_error(
-            self._backend[
-                "awkward_Index_iscontiguous",  # badly named
-                np.bool_,
-                carry.dtype.type,
-            ](
-                result,
-                carry.data,
-                carry.length,
-            ),
-            slicer=carry.data,
-        )
-        if result[0]:
-            if carry.length == self.length:
-                return self
-            elif carry.length < self.length:
-                return self._getitem_range(slice(0, carry.length))
-            else:
-                raise ak._errors.wrap_error(IndexError)
-        else:
-            return None
-
     def _local_index_axis0(self) -> ak.contents.NumpyArray:
         localindex = ak.index.Index64.empty(self.length, self._backend.index_nplike)
         self._handle_error(
