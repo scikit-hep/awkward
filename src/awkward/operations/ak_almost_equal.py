@@ -118,7 +118,7 @@ def almost_equal(
         elif left.is_option:
             return backend.index_nplike.array_equal(
                 left.index.data < 0, right.index.data < 0
-            ) and visitor(left.project(), right.project())
+            ) and visitor(left.project().to_packed(), right.project().to_packed())
         elif left.is_union:
             return (len(left.contents) == len(right.contents)) and all(
                 [
