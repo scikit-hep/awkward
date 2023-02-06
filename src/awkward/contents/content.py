@@ -696,16 +696,18 @@ class Content:
     def _getitem_range(self, where: slice):
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def _getitem_field(self, where: str):
+    def _getitem_field(self, where: str) -> Content:
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def _getitem_fields(self, where: list[str], only_fields: tuple[str, ...] = ()):
+    def _getitem_fields(
+        self, where: list[str], only_fields: tuple[str, ...] = ()
+    ) -> Content:
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def _getitem_next(self, head, tail, advanced: ak.index.Index | None):
+    def _getitem_next(self, head, tail, advanced: ak.index.Index | None) -> Content:
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def _carry(self, carry: ak.index.Index, allow_lazy: bool):
+    def _carry(self, carry: ak.index.Index, allow_lazy: bool) -> Content:
         raise ak._errors.wrap_error(NotImplementedError)
 
     def _local_index_axis0(self) -> ak.contents.NumpyArray:
