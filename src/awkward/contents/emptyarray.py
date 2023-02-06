@@ -10,7 +10,7 @@ from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.emptyform import EmptyForm
-from awkward.typing import Final, Self, final
+from awkward.typing import Final, Self, SupportsIndex, final
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
@@ -112,7 +112,7 @@ class EmptyArray(Content):
     def _getitem_nothing(self):
         return self
 
-    def _getitem_at(self, where):
+    def _getitem_at(self, where: SupportsIndex):
         raise ak._errors.index_error(self, where, "array is empty")
 
     def _getitem_range(self, where):

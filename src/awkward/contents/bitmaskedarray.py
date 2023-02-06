@@ -15,7 +15,7 @@ from awkward.contents.content import Content
 from awkward.forms.bitmaskedform import BitMaskedForm
 from awkward.forms.form import _type_parameters_equal
 from awkward.index import Index
-from awkward.typing import Final, Self, final
+from awkward.typing import Final, Self, SupportsIndex, final
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
@@ -378,7 +378,7 @@ class BitMaskedArray(Content):
     def _getitem_nothing(self):
         return self._content._getitem_range(slice(0, 0))
 
-    def _getitem_at(self, where):
+    def _getitem_at(self, where: SupportsIndex):
         if not self._backend.nplike.known_data:
             self._touch_data(recursive=False)
             return MaybeNone(self._content._getitem_at(where))

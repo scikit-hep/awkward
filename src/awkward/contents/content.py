@@ -14,7 +14,15 @@ from awkward._nplikes.numpylike import NumpyLike, NumpyMetadata, ShapeItem
 from awkward._nplikes.typetracer import TypeTracer
 from awkward._util import unset
 from awkward.forms.form import Form, JSONMapping, _type_parameters_equal
-from awkward.typing import Any, AxisMaybeNone, Literal, Self, TypeAlias, TypedDict
+from awkward.typing import (
+    Any,
+    AxisMaybeNone,
+    Literal,
+    Self,
+    SupportsIndex,
+    TypeAlias,
+    TypedDict,
+)
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
@@ -682,7 +690,7 @@ class Content:
                 )
             )
 
-    def _getitem_at(self, where: int):
+    def _getitem_at(self, where: SupportsIndex):
         raise ak._errors.wrap_error(NotImplementedError)
 
     def _getitem_range(self, where: slice):

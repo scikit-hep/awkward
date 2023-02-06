@@ -12,7 +12,7 @@ from awkward.contents.listoffsetarray import ListOffsetArray
 from awkward.forms.form import _type_parameters_equal
 from awkward.forms.listform import ListForm
 from awkward.index import Index
-from awkward.typing import Final, Self, final
+from awkward.typing import Final, Self, SupportsIndex, final
 
 np = NumpyMetadata.instance()
 
@@ -232,7 +232,7 @@ class ListArray(Content):
     def _getitem_nothing(self):
         return self._content._getitem_range(slice(0, 0))
 
-    def _getitem_at(self, where):
+    def _getitem_at(self, where: SupportsIndex):
         if not self._backend.nplike.known_data:
             self._touch_data(recursive=False)
             return self._content._getitem_range(slice(0, 0))

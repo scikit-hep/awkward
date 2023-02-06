@@ -10,7 +10,7 @@ from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.form import _type_parameters_equal
 from awkward.forms.regularform import RegularForm
-from awkward.typing import Final, Self, final
+from awkward.typing import Final, Self, SupportsIndex, final
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
@@ -197,7 +197,7 @@ class RegularArray(Content):
     def _getitem_nothing(self):
         return self._content._getitem_range(slice(0, 0))
 
-    def _getitem_at(self, where):
+    def _getitem_at(self, where: SupportsIndex):
         if self._backend.nplike.known_shape and where < 0:
             where += self._length
 

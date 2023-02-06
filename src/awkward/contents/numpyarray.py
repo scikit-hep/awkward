@@ -14,7 +14,7 @@ from awkward.contents.content import Content
 from awkward.forms.form import _type_parameters_equal
 from awkward.forms.numpyform import NumpyForm
 from awkward.types.numpytype import primitive_to_dtype
-from awkward.typing import Final, Self, final
+from awkward.typing import Final, Self, SupportsIndex, final
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
@@ -214,7 +214,7 @@ class NumpyArray(Content):
             backend=self._backend,
         )
 
-    def _getitem_at(self, where):
+    def _getitem_at(self, where: SupportsIndex):
         if not self._backend.nplike.known_data and len(self._data.shape) == 1:
             self._touch_data(recursive=False)
             return TypeTracerArray._new(self._data.dtype, shape=())

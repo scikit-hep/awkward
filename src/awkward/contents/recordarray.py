@@ -13,7 +13,7 @@ from awkward.contents.content import Content
 from awkward.forms.form import _type_parameters_equal
 from awkward.forms.recordform import RecordForm
 from awkward.record import Record
-from awkward.typing import Final, Self, final
+from awkward.typing import Final, Self, SupportsIndex, final
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
@@ -323,7 +323,7 @@ class RecordArray(Content):
     def _getitem_nothing(self):
         return self._getitem_range(slice(0, 0))
 
-    def _getitem_at(self, where):
+    def _getitem_at(self, where: SupportsIndex):
         if self._backend.nplike.known_shape and where < 0:
             where += self.length
 
