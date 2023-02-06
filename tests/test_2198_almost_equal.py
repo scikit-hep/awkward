@@ -129,3 +129,9 @@ def test_behavior():
     another_array = ak.Array([1, 2, 3], behavior=behavior)
     assert not ak.almost_equal(array, another_array)
     assert not ak.almost_equal(other_array, another_array)
+
+
+def test_empty_outer_ragged():
+    array = ak.Array([[1]])[0:0]
+    assert not ak.almost_equal(array, [])
+    assert ak.almost_equal(array, array)
