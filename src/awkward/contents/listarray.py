@@ -12,7 +12,10 @@ from awkward.contents.listoffsetarray import ListOffsetArray
 from awkward.forms.form import _type_parameters_equal
 from awkward.forms.listform import ListForm
 from awkward.index import Index
-from awkward.typing import Final, Self, SupportsIndex, final
+from awkward.typing import TYPE_CHECKING, Final, Self, SupportsIndex, final
+
+if TYPE_CHECKING:
+    from awkward._slicing import SliceItem
 
 np = NumpyMetadata.instance()
 
@@ -582,7 +585,12 @@ class ListArray(Content):
                 )
             )
 
-    def _getitem_next(self, head, tail, advanced):
+    def _getitem_next(
+        self,
+        head: SliceItem | tuple,
+        tail: tuple[SliceItem, ...],
+        advanced: Index | None,
+    ) -> Content:
         if head == ():
             return self
 

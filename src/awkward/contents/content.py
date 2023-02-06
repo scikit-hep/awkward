@@ -16,6 +16,7 @@ from awkward._util import unset
 from awkward.forms.form import Form, JSONMapping, _type_parameters_equal
 from awkward.index import Index
 from awkward.typing import (
+    TYPE_CHECKING,
     Any,
     AxisMaybeNone,
     Literal,
@@ -24,6 +25,10 @@ from awkward.typing import (
     TypeAlias,
     TypedDict,
 )
+
+if TYPE_CHECKING:
+    pass
+
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
