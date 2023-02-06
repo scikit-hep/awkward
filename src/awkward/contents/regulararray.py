@@ -10,6 +10,7 @@ from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.form import _type_parameters_equal
 from awkward.forms.regularform import RegularForm
+from awkward.index import Index
 from awkward.typing import Final, Self, SupportsIndex, final
 
 np = NumpyMetadata.instance()
@@ -238,7 +239,7 @@ class RegularArray(Content):
             parameters=None,
         )
 
-    def _carry(self, carry, allow_lazy):
+    def _carry(self, carry: Index, allow_lazy: bool) -> Content:
         assert isinstance(carry, ak.index.Index)
 
         where = carry.data

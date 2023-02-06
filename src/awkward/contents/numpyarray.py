@@ -13,6 +13,7 @@ from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.form import _type_parameters_equal
 from awkward.forms.numpyform import NumpyForm
+from awkward.index import Index
 from awkward.types.numpytype import primitive_to_dtype
 from awkward.typing import Final, Self, SupportsIndex, final
 
@@ -252,7 +253,7 @@ class NumpyArray(Content):
             return self._getitem_range(slice(0, 0))
         raise ak._errors.index_error(self, where, "not an array of records")
 
-    def _carry(self, carry, allow_lazy):
+    def _carry(self, carry: Index, allow_lazy: bool) -> Content:
         assert isinstance(carry, ak.index.Index)
         try:
             nextdata = self._data[carry.data]

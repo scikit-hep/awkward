@@ -248,7 +248,7 @@ class IndexedArray(Content):
             parameters=None,
         )
 
-    def _carry(self, carry, allow_lazy):
+    def _carry(self, carry: Index, allow_lazy: bool) -> IndexedArray:
         assert isinstance(carry, ak.index.Index)
 
         try:

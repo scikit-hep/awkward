@@ -14,6 +14,7 @@ from awkward._nplikes.numpylike import NumpyLike, NumpyMetadata, ShapeItem
 from awkward._nplikes.typetracer import TypeTracer
 from awkward._util import unset
 from awkward.forms.form import Form, JSONMapping, _type_parameters_equal
+from awkward.index import Index
 from awkward.typing import (
     Any,
     AxisMaybeNone,
@@ -707,7 +708,7 @@ class Content:
     def _getitem_next(self, head, tail, advanced: ak.index.Index | None) -> Content:
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def _carry(self, carry: ak.index.Index, allow_lazy: bool) -> Content:
+    def _carry(self, carry: Index, allow_lazy: bool) -> Content:
         raise ak._errors.wrap_error(NotImplementedError)
 
     def _local_index_axis0(self) -> ak.contents.NumpyArray:

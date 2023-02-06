@@ -10,6 +10,7 @@ from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.emptyform import EmptyForm
+from awkward.index import Index
 from awkward.typing import Final, Self, SupportsIndex, final
 
 np = NumpyMetadata.instance()
@@ -126,7 +127,7 @@ class EmptyArray(Content):
             return self._getitem_range(slice(0, 0))
         raise ak._errors.index_error(self, where, "not an array of records")
 
-    def _carry(self, carry, allow_lazy):
+    def _carry(self, carry: Index, allow_lazy: bool) -> EmptyArray:
         assert isinstance(carry, ak.index.Index)
 
         if not carry.nplike.known_shape or carry.length == 0:

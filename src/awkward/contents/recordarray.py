@@ -12,6 +12,7 @@ from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.form import _type_parameters_equal
 from awkward.forms.recordform import RecordForm
+from awkward.index import Index
 from awkward.record import Record
 from awkward.typing import Final, Self, SupportsIndex, final
 
@@ -397,7 +398,7 @@ class RecordArray(Content):
             contents, fields, self._length, parameters=None, backend=self._backend
         )
 
-    def _carry(self, carry, allow_lazy):
+    def _carry(self, carry: Index, allow_lazy: bool) -> Content:
         assert isinstance(carry, ak.index.Index)
 
         if allow_lazy:

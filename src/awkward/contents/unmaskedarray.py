@@ -12,6 +12,7 @@ from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.form import _type_parameters_equal
 from awkward.forms.unmaskedform import UnmaskedForm
+from awkward.index import Index
 from awkward.typing import Final, Self, SupportsIndex, final
 
 np = NumpyMetadata.instance()
@@ -202,7 +203,7 @@ class UnmaskedArray(Content):
             self._content._getitem_fields(where, only_fields), parameters=None
         )
 
-    def _carry(self, carry, allow_lazy):
+    def _carry(self, carry: Index, allow_lazy: bool) -> Content:
         return UnmaskedArray.simplified(
             self._content._carry(carry, allow_lazy), parameters=self._parameters
         )

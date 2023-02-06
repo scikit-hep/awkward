@@ -271,7 +271,7 @@ class IndexedOptionArray(Content):
             parameters=None,
         )
 
-    def _carry(self, carry, allow_lazy):
+    def _carry(self, carry: Index, allow_lazy: bool) -> IndexedOptionArray:
         assert isinstance(carry, ak.index.Index)
 
         try:
