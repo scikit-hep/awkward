@@ -30,7 +30,7 @@ def test_data_frame_filter():
     assert df.GetColumnType("y") == "int64_t"
     assert df.GetColumnType("z") == "ROOT::VecOps::RVec<double>"
 
-    df = df.Filter("y > 2")
+    df = df.Filter("y % 2 == 0")
 
     out = ak.from_rdataframe(
         df,
@@ -40,4 +40,7 @@ def test_data_frame_filter():
             "z",
         ),
     )
-    assert len(out) == 3
+    assert out["x"].tolist() == [{"x": [2.1, 2.2]}, {"x": [4.1, 4.2, 4.3, 4.4]}]
+    assert out["y"].tolist() == [2, 4]
+    assert out["z"].tolist() == [[2.1, 2.3, 2.4], [4.1, 4.2, 4.3]]
+    assert len(out) == 2
