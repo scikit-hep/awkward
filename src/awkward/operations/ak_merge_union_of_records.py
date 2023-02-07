@@ -23,7 +23,7 @@ def merge_union_of_records(array, axis=-1, *, highlevel=True, behavior=None):
 
     Simplifies unions of records, e.g.
 
-        >>> array = ak.Array([{"a": 1}, {"b": 2}])
+        >>> array = ak.concatenate(([{"a": 1}], [{"b": 2}]))
 
     into records of options, i.e.
 
