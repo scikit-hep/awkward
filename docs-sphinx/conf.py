@@ -60,7 +60,7 @@ html_logo = "../docs-img/logo/logo-300px-white.png"
 html_context = {
     "github_user": "scikit-hep",
     "github_repo": "awkward",
-    "github_version": "main",
+    "github_version": "main-v1",
     "doc_path": "docs-sphinx",
 }
 html_theme = "pydata_sphinx_theme"
