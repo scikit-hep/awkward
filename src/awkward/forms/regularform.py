@@ -20,17 +20,17 @@ class RegularForm(Form):
                     )
                 )
             )
-        if not ak._util.is_integer(size):
+        if not ((ak._util.is_integer(size) and size >= 0) or size is None):
             raise ak._errors.wrap_error(
                 TypeError(
-                    "{} 'size' must be of type int, not {}".format(
+                    "{} 'size' must be a non-negative int or None, not {}".format(
                         type(self).__name__, repr(size)
                     )
                 )
             )
 
         self._content = content
-        self._size = int(size)
+        self._size = size
         self._init(parameters=parameters, form_key=form_key)
 
     @property

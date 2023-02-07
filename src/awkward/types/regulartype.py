@@ -17,10 +17,10 @@ class RegularType(Type):
                     )
                 )
             )
-        if not ak._util.is_integer(size) or size < 0:
+        if not ((ak._util.is_integer(size) and size >= 0) or size is None):
             raise ak._errors.wrap_error(
                 ValueError(
-                    "{} 'size' must be of a positive integer, not {}".format(
+                    "{} 'size' must be a non-negative int or None, not {}".format(
                         type(self).__name__, repr(size)
                     )
                 )
