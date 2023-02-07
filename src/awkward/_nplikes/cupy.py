@@ -159,3 +159,6 @@ class Cupy(ArrayModuleNumpyLike):
         """
         module, _, suffix = type(obj).__module__.partition(".")
         return module == "cupy"
+
+    def is_c_contiguous(self, x: ArrayLike) -> bool:
+        return x.flags["C_CONTIGUOUS"]

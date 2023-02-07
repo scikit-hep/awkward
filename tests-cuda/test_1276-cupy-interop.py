@@ -8,8 +8,8 @@ import awkward as ak
 
 
 def test_cupy_interop():
-    cupy = ak._nplikes.Cupy.instance()
-    numpy = ak._nplikes.Numpy.instance()
+    cupy = ak._nplikes.cupy.Cupy.instance()
+    numpy = ak._nplikes.numpy.Numpy.instance()
 
     cupy_index_arr = ak.index.Index64(cp.arange(10))
     assert cupy_index_arr.nplike is cupy
