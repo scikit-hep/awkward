@@ -440,6 +440,7 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
         and np.issubdtype(item.content.dtype, np.bool_)
     ):
         if item_backend.nplike.known_data or item_backend.nplike.known_shape:
+            item = item.to_ListOffsetArray64(True)
             localindex = ak._do.local_index(item, axis=1)
             nextcontent = localindex.content.data[item.content.data]
 
