@@ -299,7 +299,7 @@ class ByteMaskedArray(Content):
             return self._mask.raw(self._backend.index_nplike) != 1
 
     def _getitem_nothing(self):
-        return self._content._getitem_range(slice(0, 0))
+        return self._content._getitem_range(0, 0)
 
     def _getitem_at(self, where: SupportsIndex):
         if not self._backend.nplike.known_data:
@@ -315,16 +315,14 @@ class ByteMaskedArray(Content):
         else:
             return None
 
-    def _getitem_range(self, where):
+    def _getitem_range(self, start: SupportsIndex, stop: SupportsIndex) -> Content:
         if not self._backend.nplike.known_data:
             self._touch_shape(recursive=False)
             return self
 
-        start, stop, step = where.indices(self.length)
-        assert step == 1
         return ByteMaskedArray(
             self._mask[start:stop],
-            self._content._getitem_range(slice(start, stop)),
+            self._content._getitem_range(start, stop),
             self._valid_when,
             parameters=self._parameters,
         )
@@ -1087,7 +1085,7 @@ class ByteMaskedArray(Content):
             return out
 
         mask = self.mask_as_bool(valid_when=True)
-        out = self._content._getitem_range(slice(0, len(mask)))._to_list(
+        out = self._content._getitem_range(0, mask.size)._to_list(
             behavior, json_conversions
         )
 

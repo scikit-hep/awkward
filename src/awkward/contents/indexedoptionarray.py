@@ -234,7 +234,7 @@ class IndexedOptionArray(Content):
             return self._index.raw(self._backend.index_nplike) < 0
 
     def _getitem_nothing(self):
-        return self._content._getitem_range(slice(0, 0))
+        return self._content._getitem_range(0, 0)
 
     def _getitem_at(self, where: SupportsIndex):
         if not self._backend.nplike.known_data:
@@ -250,13 +250,11 @@ class IndexedOptionArray(Content):
         else:
             return self._content._getitem_at(self._index[where])
 
-    def _getitem_range(self, where):
+    def _getitem_range(self, start: SupportsIndex, stop: SupportsIndex) -> Content:
         if not self._backend.nplike.known_data:
             self._touch_shape(recursive=False)
             return self
 
-        start, stop, step = where.indices(self.length)
-        assert step == 1
         return IndexedOptionArray(
             self._index[start:stop], self._content, parameters=self._parameters
         )

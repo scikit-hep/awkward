@@ -4,11 +4,7 @@ from __future__ import annotations
 import numpy
 
 import awkward as ak
-from awkward._nplikes.numpylike import (
-    ArrayLike,
-    NumpyLike,
-    NumpyMetadata,
-)
+from awkward._nplikes.numpylike import ArrayLike, NumpyLike, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward.typing import Final, Literal, SupportsInt
 
@@ -134,13 +130,13 @@ class ArrayModuleNumpyLike(NumpyLike):
         else:
             return result
 
-    def shape_item_as_index(self, x1: ShapeItem) -> int | ArrayLike:
+    def shape_item_as_index(self, x1: ShapeItem) -> int:
         if x1 is unknown_length:
             raise ak._errors.wrap_error(
                 TypeError("array module nplikes do not support unknown lengths")
             )
         elif isinstance(x1, int):
-            return self._module.asarray(x1, dtype=np.int64)
+            return x1
         else:
             raise ak._errors.wrap_error(
                 TypeError(f"expected None or int type, received {x1}")

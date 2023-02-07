@@ -12,7 +12,6 @@ from awkward.typing import (
     Protocol,
     Self,
     SupportsIndex,
-    # noqa: F401
     overload,
 )
 
@@ -295,11 +294,11 @@ class NumpyLike(Singleton, Protocol):
         ...
 
     @abstractmethod
-    def shape_item_as_index(self, x1: ShapeItem):
+    def shape_item_as_index(self, x1: ShapeItem) -> int | ArrayLike:
         ...
 
     @abstractmethod
-    def index_as_shape_item(self, x1) -> ShapeItem:
+    def index_as_shape_item(self, x1: int | ArrayLike) -> ShapeItem:
         ...
 
     @abstractmethod

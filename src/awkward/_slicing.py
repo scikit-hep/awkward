@@ -8,8 +8,9 @@ from awkward._errors import wrap_error
 from awkward._nplikes import nplike_of, to_nplike
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpylike import NumpyMetadata
-from awkward._nplikes.shape import unknown_length
-from awkward.typing import TYPE_CHECKING, Sequence, TypeAlias
+from awkward._nplikes.shape import ShapeItem, unknown_length
+from awkward._nplikes.typetracer import is_unknown_scalar
+from awkward.typing import TYPE_CHECKING, Sequence, SupportsIndex, TypeAlias
 
 if TYPE_CHECKING:
     from awkward._nplikes.numpylike import ArrayLike  # noqa: F401
@@ -19,6 +20,51 @@ np = NumpyMetadata.instance()
 
 
 SliceItem: TypeAlias = "int | slice | str | None | Ellipsis | ArrayLike | Content"
+
+
+def regularise_slice(
+    slice: slice, length: ShapeItem, *, backend: Backend
+) -> tuple[SupportsIndex, SupportsIndex, SupportsIndex]:
+    """
+    Args:
+        slice: slice object
+        length: length of layout
+        backend: backend of layout
+
+    Return a tuple of (start, stop, step) indices into a layout, suitable for
+    `_getitem_range` (if step == 1).
+    """
+    index_nplike = backend.index_nplike
+    start = slice.start
+    stop = slice.stop
+    step = slice.step
+
+    length_scalar = index_nplike.shape_item_as_scalar(length)
+    if slice.start is None:
+        start = 0
+    if slice.stop is None:
+        stop = length_scalar
+    if step is None:
+        step = 1
+
+    if not is_unknown_scalar(start) and start < 0:
+        start = start + length_scalar
+    if not is_unknown_scalar(stop) and stop < 0:
+        stop = stop + length_scalar
+
+    if not is_unknown_scalar(start):
+        if is_unknown_scalar(length_scalar):
+            start = length_scalar
+        else:
+            start = max(start, 0)
+
+    if not is_unknown_scalar(stop):
+        if is_unknown_scalar(length_scalar):
+            stop = length_scalar
+        else:
+            stop = max(stop, 0)
+
+    return start, stop, step
 
 
 def headtail(

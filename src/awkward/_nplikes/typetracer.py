@@ -48,6 +48,14 @@ def ensure_known_scalar(value: T, default: S) -> T | S:
     return default if is_unknown_scalar(value) else value
 
 
+K = TypeVar("K")
+
+
+def cast_known_scalar(value: T, cls: type[K], *, default: S) -> K | S:
+    assert not is_unknown_scalar(default)
+    return default if is_unknown_scalar(value) else cls(value)
+
+
 def _emptyarray(x):
     if is_unknown_scalar(x):
         return numpy.empty(0, x._dtype)
@@ -943,7 +951,7 @@ class TypeTracer(NumpyLike):
 
     def unique_values(self, x: ArrayLike) -> TypeTracerArray:
         try_touch_data(x)
-        return TypeTracerArray._new(x.dtype)
+        return TypeTracerArray._new(x.dtype, shape=(None,))
 
     def concat(self, arrays, *, axis: int | None = 0) -> TypeTracerArray:
         if axis is None:

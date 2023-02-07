@@ -213,7 +213,7 @@ class IndexedArray(Content):
             return self._index.data < 0
 
     def _getitem_nothing(self):
-        return self._content._getitem_range(slice(0, 0))
+        return self._content._getitem_range(0, 0)
 
     def _getitem_at(self, where: SupportsIndex):
         if not self._backend.nplike.known_data:
@@ -226,13 +226,11 @@ class IndexedArray(Content):
             raise ak._errors.index_error(self, where)
         return self._content._getitem_at(self._index[where])
 
-    def _getitem_range(self, where):
+    def _getitem_range(self, start: SupportsIndex, stop: SupportsIndex) -> Content:
         if not self._backend.nplike.known_data:
             self._touch_shape(recursive=False)
             return self
 
-        start, stop, step = where.indices(self.length)
-        assert step == 1
         return IndexedArray(
             self._index[start:stop], self._content, parameters=self._parameters
         )

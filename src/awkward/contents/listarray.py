@@ -234,27 +234,25 @@ class ListArray(Content):
         return self._broadcast_tooffsets64(offsets).to_RegularArray()
 
     def _getitem_nothing(self):
-        return self._content._getitem_range(slice(0, 0))
+        return self._content._getitem_range(0, 0)
 
     def _getitem_at(self, where: SupportsIndex):
         if not self._backend.nplike.known_data:
             self._touch_data(recursive=False)
-            return self._content._getitem_range(slice(0, 0))
+            return self._content._getitem_range(0, 0)
 
         if where < 0:
             where += self.length
         if not (0 <= where < self.length) and self._backend.nplike.known_data:
             raise ak._errors.index_error(self, where)
         start, stop = self._starts[where], self._stops[where]
-        return self._content._getitem_range(slice(start, stop))
+        return self._content._getitem_range(start, stop)
 
-    def _getitem_range(self, where):
+    def _getitem_range(self, start: SupportsIndex, stop: SupportsIndex) -> Content:
         if not self._backend.nplike.known_data:
             self._touch_shape(recursive=False)
             return self
 
-        start, stop, step = where.indices(self.length)
-        assert step == 1
         return ListArray(
             self._starts[start:stop],
             self._stops[start:stop],

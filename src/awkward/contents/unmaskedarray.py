@@ -175,7 +175,7 @@ class UnmaskedArray(Content):
             )
 
     def _getitem_nothing(self):
-        return self._content._getitem_range(slice(0, 0))
+        return self._content._getitem_range(0, 0)
 
     def _getitem_at(self, where: SupportsIndex):
         if not self._backend.nplike.known_data:
@@ -184,15 +184,13 @@ class UnmaskedArray(Content):
 
         return self._content._getitem_at(where)
 
-    def _getitem_range(self, where):
+    def _getitem_range(self, start: SupportsIndex, stop: SupportsIndex) -> Content:
         if not self._backend.nplike.known_data:
             self._touch_shape(recursive=False)
             return self
 
-        start, stop, step = where.indices(self.length)
-        assert step == 1
         return UnmaskedArray(
-            self._content._getitem_range(slice(start, stop)),
+            self._content._getitem_range(start, stop),
             parameters=self._parameters,
         )
 

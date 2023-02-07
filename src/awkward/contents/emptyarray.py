@@ -119,7 +119,7 @@ class EmptyArray(Content):
     def _getitem_at(self, where: SupportsIndex):
         raise ak._errors.index_error(self, where, "array is empty")
 
-    def _getitem_range(self, where):
+    def _getitem_range(self, start: SupportsIndex, stop: SupportsIndex) -> Content:
         return self
 
     def _getitem_field(
@@ -131,7 +131,7 @@ class EmptyArray(Content):
         self, where: list[str | SupportsIndex], only_fields: tuple[str, ...] = ()
     ) -> Content:
         if len(where) == 0:
-            return self._getitem_range(slice(0, 0))
+            return self._getitem_range(0, 0)
         raise ak._errors.index_error(self, where, "not an array of records")
 
     def _carry(self, carry: Index, allow_lazy: bool) -> EmptyArray:

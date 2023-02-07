@@ -207,7 +207,7 @@ class ListOffsetArray(Content):
 
     def to_RegularArray(self):
         start, stop = self._offsets[0], self._offsets[self._offsets.length - 1]
-        content = self._content._getitem_range(slice(start, stop))
+        content = self._content._getitem_range(start, stop)
         _size = ak.index.Index64.empty(1, self._backend.index_nplike)
         assert (
             _size.nplike is self._backend.index_nplike
@@ -231,26 +231,25 @@ class ListOffsetArray(Content):
         )
 
     def _getitem_nothing(self):
-        return self._content._getitem_range(slice(0, 0))
+        return self._content._getitem_range(0, 0)
 
     def _getitem_at(self, where: SupportsIndex):
         if not self._backend.nplike.known_data:
             self._touch_data(recursive=False)
-            return self._content._getitem_range(slice(0, 0))
+            return self._content._getitem_range(0, 0)
 
         if where < 0:
             where += self.length
         if not (0 <= where < self.length) and self._backend.nplike.known_data:
             raise ak._errors.index_error(self, where)
         start, stop = self._offsets[where], self._offsets[where + 1]
-        return self._content._getitem_range(slice(start, stop))
+        return self._content._getitem_range(start, stop)
 
-    def _getitem_range(self, where):
+    def _getitem_range(self, start: SupportsIndex, stop: SupportsIndex) -> Content:
         if not self._backend.nplike.known_data:
             self._touch_shape(recursive=False)
             return self
 
-        start, stop, step = where.indices(self.length)
         offsets = self._offsets[start : stop + 1]
         if offsets.length is not unknown_length and offsets.length == 0:
             offsets = Index(
@@ -656,7 +655,7 @@ class ListOffsetArray(Content):
         elif posaxis is not None and posaxis + 1 == depth + 1:
             listoffsetarray = self.to_ListOffsetArray64(True)
             stop = listoffsetarray.offsets[-1]
-            content = listoffsetarray.content._getitem_range(slice(0, stop))
+            content = listoffsetarray.content._getitem_range(0, stop)
             return (listoffsetarray.offsets, content)
 
         else:
@@ -2114,7 +2113,7 @@ class ListOffsetArray(Content):
         starts_data = starts_data - mini
         stops_data = stops_data - mini
 
-        nextcontent = self._content._getitem_range(slice(mini, maxi))
+        nextcontent = self._content._getitem_range(mini, maxi)
 
         if self.parameter("__array__") == "bytestring":
             convert_bytes = (
