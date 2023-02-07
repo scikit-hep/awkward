@@ -128,7 +128,7 @@ class EmptyArray(Content):
         raise ak._errors.index_error(self, where, "not an array of records")
 
     def _getitem_fields(
-        self, where: str | SupportsIndex, only_fields: tuple[str, ...] = ()
+        self, where: list[str | SupportsIndex], only_fields: tuple[str, ...] = ()
     ) -> Content:
         if len(where) == 0:
             return self._getitem_range(slice(0, 0))

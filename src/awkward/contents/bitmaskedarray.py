@@ -415,7 +415,7 @@ class BitMaskedArray(Content):
         )
 
     def _getitem_fields(
-        self, where: str | SupportsIndex, only_fields: tuple[str, ...] = ()
+        self, where: list[str | SupportsIndex], only_fields: tuple[str, ...] = ()
     ) -> Content:
         return BitMaskedArray.simplified(
             self._mask,

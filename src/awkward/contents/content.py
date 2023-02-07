@@ -325,16 +325,8 @@ class Content:
         return self._getitem_field(head)._getitem_next(nexthead, nexttail, advanced)
 
     def _getitem_next_fields(self, head, tail, advanced: Index | None) -> Content:
-        only_fields, not_fields = [], []
-        for x in tail:
-            if isinstance(x, (str, list)):
-                only_fields.append(x)
-            else:
-                not_fields.append(x)
-        nexthead, nexttail = ak._slicing.headtail(tuple(not_fields))
-        return self._getitem_fields(head, tuple(only_fields))._getitem_next(
-            nexthead, nexttail, advanced
-        )
+        nexthead, nexttail = ak._slicing.headtail(tuple(tail))
+        return self._getitem_fields(head)._getitem_next(nexthead, nexttail, advanced)
 
     def _getitem_next_newaxis(self, tail, advanced: Index | None):
         nexthead, nexttail = ak._slicing.headtail(tail)
@@ -711,7 +703,7 @@ class Content:
         raise ak._errors.wrap_error(NotImplementedError)
 
     def _getitem_fields(
-        self, where: list[str], only_fields: tuple[str, ...]
+        self, where: list[str], only_fields: tuple[str, ...] = ()
     ) -> Content:
         raise ak._errors.wrap_error(NotImplementedError)
 
