@@ -307,16 +307,16 @@ class RecordArray(Content):
         out.append(post)
         return "".join(out)
 
-    def index_to_field(self, index):
+    def index_to_field(self, index: SupportsIndex) -> str:
         return self.form_cls.index_to_field(self, index)
 
-    def field_to_index(self, field):
+    def field_to_index(self, field: str) -> SupportsIndex:
         return self.form_cls.field_to_index(self, field)
 
-    def has_field(self, field):
+    def has_field(self, field: str | SupportsIndex) -> bool:
         return self.form_cls.has_field(self, field)
 
-    def content(self, index_or_field):
+    def content(self, index_or_field: str | SupportsIndex) -> Content:
         out = self.form_cls.content(self, index_or_field)
         if out.length == self._length:
             return out
@@ -324,7 +324,7 @@ class RecordArray(Content):
             assert self._length is not None, "TODO: need to handle this"
             return out[: self._length]
 
-    def _getitem_nothing(self):
+    def _getitem_nothing(self) -> Content:
         return self._getitem_range(slice(0, 0))
 
     def _getitem_at(self, where: SupportsIndex):
@@ -366,7 +366,9 @@ class RecordArray(Content):
                 backend=self._backend,
             )
 
-    def _getitem_field(self, where, only_fields=()):
+    def _getitem_field(
+        self, where: str | SupportsIndex, only_fields: tuple[str, ...] = ()
+    ) -> Content:
         if len(only_fields) == 0:
             return self.content(where)
 

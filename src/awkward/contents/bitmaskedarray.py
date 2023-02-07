@@ -402,7 +402,9 @@ class BitMaskedArray(Content):
     def _getitem_range(self, where):
         return self.to_ByteMaskedArray()._getitem_range(where)
 
-    def _getitem_field(self, where, only_fields=()):
+    def _getitem_field(
+        self, where: str | SupportsIndex, only_fields: tuple[str, ...] = ()
+    ) -> Content:
         return BitMaskedArray.simplified(
             self._mask,
             self._content._getitem_field(where, only_fields),

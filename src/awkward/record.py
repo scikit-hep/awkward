@@ -185,10 +185,10 @@ class Record:
                 )
             )
 
-    def _getitem_field(self, where):
+    def _getitem_field(self, where, only_fields: tuple[str, ...] = ()) -> Content:
         return self._array._getitem_field(where)._getitem_at(self._at)
 
-    def _getitem_fields(self, where):
+    def _getitem_fields(self, where, only_fields: tuple[str, ...] = ()):
         return self._array._getitem_fields(where)._getitem_at(self._at)
 
     def to_packed(self) -> Self:

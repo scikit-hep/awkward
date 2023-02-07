@@ -324,7 +324,7 @@ class Content:
         nexthead, nexttail = ak._slicing.headtail(tail)
         return self._getitem_field(head)._getitem_next(nexthead, nexttail, advanced)
 
-    def _getitem_next_fields(self, head, tail, advanced: Index | None):
+    def _getitem_next_fields(self, head, tail, advanced: Index | None) -> Content:
         only_fields, not_fields = [], []
         for x in tail:
             if isinstance(x, (str, list)):
@@ -702,18 +702,25 @@ class Content:
     def _getitem_at(self, where: SupportsIndex):
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def _getitem_range(self, where: slice):
+    def _getitem_range(self, where: slice) -> Content:
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def _getitem_field(self, where: str) -> Content:
-        raise ak._errors.wrap_error(NotImplementedError)
-
-    def _getitem_fields(
-        self, where: list[str], only_fields: tuple[str, ...] = ()
+    def _getitem_field(
+        self, where: str | SupportsIndex, only_fields: tuple[str, ...] = ()
     ) -> Content:
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def _getitem_next(self, head, tail, advanced: Index | None) -> Content:
+    def _getitem_fields(
+        self, where: list[str], only_fields: tuple[str, ...]
+    ) -> Content:
+        raise ak._errors.wrap_error(NotImplementedError)
+
+    def _getitem_next(
+        self,
+        head: SliceItem | tuple,
+        tail: tuple[SliceItem, ...],
+        advanced: Index | None,
+    ) -> Content:
         raise ak._errors.wrap_error(NotImplementedError)
 
     def _carry(self, carry: Index, allow_lazy: bool) -> Content:

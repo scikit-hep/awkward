@@ -257,7 +257,9 @@ class ListOffsetArray(Content):
             )
         return ListOffsetArray(offsets, self._content, parameters=self._parameters)
 
-    def _getitem_field(self, where, only_fields=()):
+    def _getitem_field(
+        self, where: str | SupportsIndex, only_fields: tuple[str, ...] = ()
+    ) -> Content:
         return ListOffsetArray(
             self._offsets,
             self._content._getitem_field(where, only_fields),

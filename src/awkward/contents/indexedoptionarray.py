@@ -260,7 +260,9 @@ class IndexedOptionArray(Content):
             self._index[start:stop], self._content, parameters=self._parameters
         )
 
-    def _getitem_field(self, where, only_fields=()):
+    def _getitem_field(
+        self, where: str | SupportsIndex, only_fields: tuple[str, ...] = ()
+    ) -> Content:
         return IndexedOptionArray.simplified(
             self._index,
             self._content._getitem_field(where, only_fields),
