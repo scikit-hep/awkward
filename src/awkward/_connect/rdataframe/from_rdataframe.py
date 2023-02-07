@@ -130,6 +130,10 @@ def from_rdataframe(data_frame, columns, offsets_type="int64_t"):
     column_types = {}
     result_ptrs = {}
     contents = {}
+    awkward_type_cols = {}
+
+    columns = columns + ("rdfentry_",)
+    maybe_indexed = False
 
     # Important note: This loop is separate from the next one
     # in order not to trigger the additional RDataFrame
@@ -137,6 +141,12 @@ def from_rdataframe(data_frame, columns, offsets_type="int64_t"):
     for col in columns:
         column_types[col] = data_frame.GetColumnType(col)
         result_ptrs[col] = data_frame.Take[column_types[col]](col)
+
+        if ROOT.awkward.is_awkward_type[column_types[col]]():
+            maybe_indexed = True
+
+    if not maybe_indexed:
+        columns = columns[:-1]
 
     for col in columns:
         if ROOT.awkward.is_awkward_type[column_types[col]]():  # Retrieve Awkward arrays
@@ -149,7 +159,7 @@ def from_rdataframe(data_frame, columns, offsets_type="int64_t"):
             lookup = result_ptrs[col].begin().lookup()
             generator = lookup[col].generator
             layout = generator.tolayout(lookup[col], 0, ())
-            contents[col] = layout
+            awkward_type_cols[col] = layout
 
         else:  # Convert the C++ vectors to Awkward arrays
             form_str = ROOT.awkward.type_to_form[column_types[col], offsets_type](0)
@@ -227,5 +237,24 @@ def from_rdataframe(data_frame, columns, offsets_type="int64_t"):
             contents[col] = ak.from_buffers(
                 form, length, buffers, byteorder=ak._util.native_byteorder
             )
+
+            if col == "rdfentry_":
+                contents[col] = ak.index.Index64(
+                    contents[col].layout.to_backend_array(
+                        allow_missing=True, backend=ak._backends.NumpyBackend.instance()
+                    )
+                )
+
+    for key, value in awkward_type_cols.items():
+        if len(contents["rdfentry_"]) < len(value):
+            contents[key] = ak._util.wrap(
+                ak.contents.IndexedArray(contents["rdfentry_"], value),
+                highlevel=True,
+            )
+        else:
+            contents[key] = value
+
+    if maybe_indexed:
+        del contents["rdfentry_"]
 
     return ak.zip(contents, depth_limit=1)
