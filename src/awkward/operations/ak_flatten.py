@@ -168,7 +168,7 @@ def _impl(array, axis, highlevel, behavior):
     if axis is None:
         out = ak._do.remove_structure(layout, function_name="ak.flatten")
         assert isinstance(out, tuple) and all(
-            isinstance(x, ak.contents.NumpyArray) for x in out
+            isinstance(x, ak.contents.Content) for x in out
         )
 
         result = ak._do.mergemany(out)

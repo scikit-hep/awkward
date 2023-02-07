@@ -318,7 +318,7 @@ class EmptyArray(Content):
         return backend.nplike.empty(0, dtype=np.float64)
 
     def _remove_structure(self, backend, options):
-        return []
+        return [self]
 
     def _recursively_apply(
         self, action, behavior, depth, depth_context, lateral_context, options
