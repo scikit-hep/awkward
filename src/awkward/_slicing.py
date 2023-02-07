@@ -32,7 +32,8 @@ def regularise_slice(
         backend: backend of layout
 
     Return a tuple of (start, stop, step) indices into a layout, suitable for
-    `_getitem_range` (if step == 1).
+    `_getitem_range` (if step == 1). Normalise lengths to fit length of array,
+    and for arrays with unknown lengths, these offsets become none.
     """
     index_nplike = backend.index_nplike
     start = slice.start
