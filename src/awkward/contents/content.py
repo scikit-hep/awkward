@@ -325,8 +325,16 @@ class Content:
         return self._getitem_field(head)._getitem_next(nexthead, nexttail, advanced)
 
     def _getitem_next_fields(self, head, tail, advanced: Index | None) -> Content:
-        nexthead, nexttail = ak._slicing.headtail(tuple(tail))
-        return self._getitem_fields(head)._getitem_next(nexthead, nexttail, advanced)
+        only_fields, not_fields = [], []
+        for x in tail:
+            if isinstance(x, (str, list)):
+                only_fields.append(x)
+            else:
+                not_fields.append(x)
+        nexthead, nexttail = ak._slicing.headtail(tuple(not_fields))
+        return self._getitem_fields(head, tuple(only_fields))._getitem_next(
+            nexthead, nexttail, advanced
+        )
 
     def _getitem_next_newaxis(self, tail, advanced: Index | None):
         nexthead, nexttail = ak._slicing.headtail(tail)
