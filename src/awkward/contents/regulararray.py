@@ -34,7 +34,16 @@ class RegularArray(Content):
                     )
                 )
             )
-        if size is not None:
+        if size is None:
+            if content.backend.index_nplike.known_shape:
+                raise ak._errors.wrap_error(
+                    TypeError(
+                        "{} 'size' must be a non-negative integer for backends with known shapes, not None".format(
+                            type(self).__name__
+                        )
+                    )
+                )
+        else:
             if not (ak._util.is_integer(size) and size >= 0):
                 raise ak._errors.wrap_error(
                     TypeError(
@@ -43,9 +52,17 @@ class RegularArray(Content):
                         )
                     )
                 )
-            else:
-                size = int(size)
-        if zeros_length is not None:
+
+        if zeros_length is None:
+            if content.backend.index_nplike.known_shape:
+                raise ak._errors.wrap_error(
+                    TypeError(
+                        "{} 'zeros_length' must be a non-negative integer for backends with known shapes, not None".format(
+                            type(self).__name__
+                        )
+                    )
+                )
+        else:
             if not (ak._util.is_integer(zeros_length) and zeros_length >= 0):
                 raise ak._errors.wrap_error(
                     TypeError(
