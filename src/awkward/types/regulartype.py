@@ -17,10 +17,10 @@ class RegularType(Type):
                     )
                 )
             )
-        if not ak._util.is_integer(size) or size < 0:
+        if not ((ak._util.is_integer(size) and size >= 0) or size is None):
             raise ak._errors.wrap_error(
                 ValueError(
-                    "{} 'size' must be of a positive integer, not {}".format(
+                    "{} 'size' must be a non-negative int or None, not {}".format(
                         type(self).__name__, repr(size)
                     )
                 )
@@ -66,11 +66,16 @@ class RegularType(Type):
 
         else:
             params = self._str_parameters()
+            if self._size is None:
+                size_str = "##"
+            else:
+                size_str = str(self._size)
+
             if params is None:
-                out = [str(self._size), " * "] + self._content._str(indent, compact)
+                out = [size_str, " * "] + self._content._str(indent, compact)
             else:
                 out = (
-                    ["[", str(self._size), " * "]
+                    ["[", size_str, " * "]
                     + self._content._str(indent, compact)
                     + [", ", params, "]"]
                 )

@@ -207,25 +207,26 @@ class ListOffsetArray(Content):
     def to_RegularArray(self):
         start, stop = self._offsets[0], self._offsets[self._offsets.length - 1]
         content = self._content._getitem_range(slice(start, stop))
-        size = ak.index.Index64.empty(1, self._backend.index_nplike)
+        _size = ak.index.Index64.empty(1, self._backend.index_nplike)
         assert (
-            size.nplike is self._backend.index_nplike
+            _size.nplike is self._backend.index_nplike
             and self._offsets.nplike is self._backend.index_nplike
         )
         self._handle_error(
             self._backend[
                 "awkward_ListOffsetArray_toRegularArray",
-                size.dtype.type,
+                _size.dtype.type,
                 self._offsets.dtype.type,
             ](
-                size.data,
+                _size.data,
                 self._offsets.data,
                 self._offsets.length,
             )
         )
-
+        size = self._backend.index_nplike.scalar_as_shape_item(_size[0])
+        length = self._backend.index_nplike.sub_shape_item(self._offsets.length, 1)
         return ak.contents.RegularArray(
-            content, size[0], self._offsets.length - 1, parameters=self._parameters
+            content, size, length, parameters=self._parameters
         )
 
     def _getitem_nothing(self):
