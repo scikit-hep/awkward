@@ -98,14 +98,6 @@ ogp_custom_meta_tags = [
     '<meta name="robots" content="noindex,nofollow">',
 ]
 
-# Don't show version for offline builds by default
-if "DOCS_SHOW_VERSION" in os.environ:
-    html_theme_options["switcher"] = {
-        "json_url": "https://awkward-array.org/doc/switcher.json",
-        "version_match": version,
-    }
-    html_theme_options["navbar_start"] = ["navbar-logo", "version-switcher"]
-
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
