@@ -236,7 +236,9 @@ class RegularArray(Content):
             parameters=None,
         )
 
-    def _getitem_fields(self, where, only_fields=()):
+    def _getitem_fields(
+        self, where: str | SupportsIndex, only_fields: tuple[str, ...] = ()
+    ) -> Content:
         return RegularArray(
             self._content._getitem_fields(where, only_fields),
             self._size,

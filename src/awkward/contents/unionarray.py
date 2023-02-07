@@ -494,7 +494,9 @@ class UnionArray(Content):
             parameters=None,
         )
 
-    def _getitem_fields(self, where, only_fields=()):
+    def _getitem_fields(
+        self, where: str | SupportsIndex, only_fields: tuple[str, ...] = ()
+    ) -> Content:
         return UnionArray.simplified(
             self._tags,
             self._index,

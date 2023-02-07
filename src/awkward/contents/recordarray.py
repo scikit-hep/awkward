@@ -379,7 +379,9 @@ class RecordArray(Content):
             else:
                 return self.content(where)._getitem_fields(nexthead, nexttail)
 
-    def _getitem_fields(self, where, only_fields=()):
+    def _getitem_fields(
+        self, where: str | SupportsIndex, only_fields: tuple[str, ...] = ()
+    ) -> Content:
         indexes = [self.field_to_index(field) for field in where]
         if self._fields is None:
             fields = None

@@ -271,7 +271,9 @@ class ListArray(Content):
             parameters=None,
         )
 
-    def _getitem_fields(self, where, only_fields=()):
+    def _getitem_fields(
+        self, where: str | SupportsIndex, only_fields: tuple[str, ...] = ()
+    ) -> Content:
         return ListArray(
             self._starts,
             self._stops,

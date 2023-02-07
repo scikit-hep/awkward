@@ -203,7 +203,9 @@ class UnmaskedArray(Content):
             self._content._getitem_field(where, only_fields), parameters=None
         )
 
-    def _getitem_fields(self, where, only_fields=()):
+    def _getitem_fields(
+        self, where: str | SupportsIndex, only_fields: tuple[str, ...] = ()
+    ) -> Content:
         return UnmaskedArray.simplified(
             self._content._getitem_fields(where, only_fields), parameters=None
         )

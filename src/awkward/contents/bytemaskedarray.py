@@ -338,7 +338,9 @@ class ByteMaskedArray(Content):
             parameters=None,
         )
 
-    def _getitem_fields(self, where, only_fields=()):
+    def _getitem_fields(
+        self, where: str | SupportsIndex, only_fields: tuple[str, ...] = ()
+    ) -> Content:
         return ByteMaskedArray.simplified(
             self._mask,
             self._content._getitem_fields(where, only_fields),
