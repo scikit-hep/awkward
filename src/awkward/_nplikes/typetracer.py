@@ -212,17 +212,6 @@ def typetracer_with_report(form, forget_length=True):
     return layout, report
 
 
-def _length_after_slice(slice, original_length):
-    start, stop, step = slice.indices(original_length)
-    assert step != 0
-
-    if (step > 0 and stop - start > 0) or (step < 0 and stop - start < 0):
-        d, m = divmod(abs(start - stop), abs(step))
-        return d + (1 if m != 0 else 0)
-    else:
-        return 0
-
-
 class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
     _dtype: numpy.dtype
     _shape: tuple[ShapeItem, ...]
