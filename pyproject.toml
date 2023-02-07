@@ -64,7 +64,7 @@ init = "awkward.numba:_register"
 
 [tool.hatch.build]
 artifacts = [
-    "src/awkward/_connect/header-only"
+    "/src/awkward/_connect/header-only"
 ]
 
 [tool.hatch.build.targets.wheel]
@@ -78,13 +78,15 @@ include = [
     "/src",
     "/tests",
     "/tests-cuda",
-    "/tests-cuda-kernels",
     "/docs-img",
     "/docs",
     "/CITATION.cff",
     "/CONTRIBUTING.md",
     "/README.md",
     "/requirements-test.txt"
+]
+artefacts = [
+    "/tests-cuda-kernels",
 ]
 
 [tool.hatch.metadata.hooks.fancy-pypi-readme]
