@@ -388,7 +388,18 @@ class RecordArray(Content):
         else:
             fields = [self._fields[i] for i in indexes]
 
-        contents = [self.content(i) for i in indexes]
+        if len(only_fields) == 0:
+            contents = [self.content(i) for i in indexes]
+        else:
+            nexthead, nexttail = ak._slicing.headtail(only_fields)
+            if isinstance(nexthead, str):
+                contents = [
+                    self.content(i)._getitem_field(nexthead, nexttail) for i in indexes
+                ]
+            else:
+                contents = [
+                    self.content(i)._getitem_fields(nexthead, nexttail) for i in indexes
+                ]
         return RecordArray(
             contents, fields, self._length, parameters=None, backend=self._backend
         )
