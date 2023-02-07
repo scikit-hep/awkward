@@ -61,7 +61,7 @@ html_context = {
     "github_user": "scikit-hep",
     "github_repo": "awkward",
     "github_version": "main",
-    "doc_path": "docs",
+    "doc_path": "docs-sphinx",
 }
 html_theme = "pydata_sphinx_theme"
 html_show_sourcelink = True
