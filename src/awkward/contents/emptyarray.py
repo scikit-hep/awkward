@@ -10,7 +10,11 @@ from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.emptyform import EmptyForm
-from awkward.typing import Final, Self, final
+from awkward.index import Index
+from awkward.typing import TYPE_CHECKING, Final, Self, SupportsIndex, final
+
+if TYPE_CHECKING:
+    from awkward._slicing import SliceItem
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
@@ -112,21 +116,25 @@ class EmptyArray(Content):
     def _getitem_nothing(self):
         return self
 
-    def _getitem_at(self, where):
+    def _getitem_at(self, where: SupportsIndex):
         raise ak._errors.index_error(self, where, "array is empty")
 
     def _getitem_range(self, where):
         return self
 
-    def _getitem_field(self, where, only_fields=()):
+    def _getitem_field(
+        self, where: str | SupportsIndex, only_fields: tuple[str, ...] = ()
+    ) -> Content:
         raise ak._errors.index_error(self, where, "not an array of records")
 
-    def _getitem_fields(self, where, only_fields=()):
+    def _getitem_fields(
+        self, where: list[str | SupportsIndex], only_fields: tuple[str, ...] = ()
+    ) -> Content:
         if len(where) == 0:
             return self._getitem_range(slice(0, 0))
         raise ak._errors.index_error(self, where, "not an array of records")
 
-    def _carry(self, carry, allow_lazy):
+    def _carry(self, carry: Index, allow_lazy: bool) -> EmptyArray:
         assert isinstance(carry, ak.index.Index)
 
         if not carry.nplike.known_shape or carry.length == 0:
@@ -143,7 +151,12 @@ class EmptyArray(Content):
             "too many jagged slice dimensions for array",
         )
 
-    def _getitem_next(self, head, tail, advanced):
+    def _getitem_next(
+        self,
+        head: SliceItem | tuple,
+        tail: tuple[SliceItem, ...],
+        advanced: Index | None,
+    ) -> Content:
         if head == ():
             return self
 

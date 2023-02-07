@@ -12,8 +12,12 @@ from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.form import _type_parameters_equal
 from awkward.forms.recordform import RecordForm
+from awkward.index import Index
 from awkward.record import Record
-from awkward.typing import Final, Self, final
+from awkward.typing import TYPE_CHECKING, Final, Self, SupportsIndex, final
+
+if TYPE_CHECKING:
+    from awkward._slicing import SliceItem
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
@@ -303,16 +307,16 @@ class RecordArray(Content):
         out.append(post)
         return "".join(out)
 
-    def index_to_field(self, index):
+    def index_to_field(self, index: SupportsIndex) -> str:
         return self.form_cls.index_to_field(self, index)
 
-    def field_to_index(self, field):
+    def field_to_index(self, field: str) -> SupportsIndex:
         return self.form_cls.field_to_index(self, field)
 
-    def has_field(self, field):
+    def has_field(self, field: str | SupportsIndex) -> bool:
         return self.form_cls.has_field(self, field)
 
-    def content(self, index_or_field):
+    def content(self, index_or_field: str | SupportsIndex) -> Content:
         out = self.form_cls.content(self, index_or_field)
         if out.length == self._length:
             return out
@@ -320,10 +324,10 @@ class RecordArray(Content):
             assert self._length is not None, "TODO: need to handle this"
             return out[: self._length]
 
-    def _getitem_nothing(self):
+    def _getitem_nothing(self) -> Content:
         return self._getitem_range(slice(0, 0))
 
-    def _getitem_at(self, where):
+    def _getitem_at(self, where: SupportsIndex):
         if self._backend.nplike.known_shape and where < 0:
             where += self.length
 
@@ -362,7 +366,9 @@ class RecordArray(Content):
                 backend=self._backend,
             )
 
-    def _getitem_field(self, where, only_fields=()):
+    def _getitem_field(
+        self, where: str | SupportsIndex, only_fields: tuple[str, ...] = ()
+    ) -> Content:
         if len(only_fields) == 0:
             return self.content(where)
 
@@ -373,7 +379,9 @@ class RecordArray(Content):
             else:
                 return self.content(where)._getitem_fields(nexthead, nexttail)
 
-    def _getitem_fields(self, where, only_fields=()):
+    def _getitem_fields(
+        self, where: list[str | SupportsIndex], only_fields: tuple[str, ...] = ()
+    ) -> Content:
         indexes = [self.field_to_index(field) for field in where]
         if self._fields is None:
             fields = None
@@ -392,12 +400,11 @@ class RecordArray(Content):
                 contents = [
                     self.content(i)._getitem_fields(nexthead, nexttail) for i in indexes
                 ]
-
         return RecordArray(
             contents, fields, self._length, parameters=None, backend=self._backend
         )
 
-    def _carry(self, carry, allow_lazy):
+    def _carry(self, carry: Index, allow_lazy: bool) -> Content:
         assert isinstance(carry, ak.index.Index)
 
         if allow_lazy:
@@ -450,7 +457,12 @@ class RecordArray(Content):
             contents, self._fields, self._length, parameters=None, backend=self._backend
         )
 
-    def _getitem_next(self, head, tail, advanced):
+    def _getitem_next(
+        self,
+        head: SliceItem | tuple,
+        tail: tuple[SliceItem, ...],
+        advanced: Index | None,
+    ) -> Content:
         if head == ():
             return self
 
