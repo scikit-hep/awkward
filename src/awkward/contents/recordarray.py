@@ -366,22 +366,10 @@ class RecordArray(Content):
                 backend=self._backend,
             )
 
-    def _getitem_field(
-        self, where: str | SupportsIndex, only_fields: tuple[str, ...] = ()
-    ) -> Content:
-        if len(only_fields) == 0:
-            return self.content(where)
+    def _getitem_field(self, where: str | SupportsIndex) -> Content:
+        return self.content(where)
 
-        else:
-            nexthead, nexttail = ak._slicing.headtail(only_fields)
-            if isinstance(nexthead, str):
-                return self.content(where)._getitem_field(nexthead, nexttail)
-            else:
-                return self.content(where)._getitem_fields(nexthead, nexttail)
-
-    def _getitem_fields(
-        self, where: list[str | SupportsIndex], only_fields: tuple[str, ...] = ()
-    ) -> Content:
+    def _getitem_fields(self, where: list[str | SupportsIndex]) -> Content:
         indexes = [self.field_to_index(field) for field in where]
         if self._fields is None:
             fields = None

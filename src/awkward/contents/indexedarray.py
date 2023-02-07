@@ -237,21 +237,17 @@ class IndexedArray(Content):
             self._index[start:stop], self._content, parameters=self._parameters
         )
 
-    def _getitem_field(
-        self, where: str | SupportsIndex, only_fields: tuple[str, ...] = ()
-    ) -> Content:
+    def _getitem_field(self, where: str | SupportsIndex) -> Content:
         return IndexedArray.simplified(
             self._index,
-            self._content._getitem_field(where, only_fields),
+            self._content._getitem_field(where),
             parameters=None,
         )
 
-    def _getitem_fields(
-        self, where: list[str | SupportsIndex], only_fields: tuple[str, ...] = ()
-    ) -> Content:
+    def _getitem_fields(self, where: list[str | SupportsIndex]) -> Content:
         return IndexedArray.simplified(
             self._index,
-            self._content._getitem_fields(where, only_fields),
+            self._content._getitem_fields(where),
             parameters=None,
         )
 

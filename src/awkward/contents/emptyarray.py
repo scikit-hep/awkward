@@ -122,14 +122,10 @@ class EmptyArray(Content):
     def _getitem_range(self, where):
         return self
 
-    def _getitem_field(
-        self, where: str | SupportsIndex, only_fields: tuple[str, ...] = ()
-    ) -> Content:
+    def _getitem_field(self, where: str | SupportsIndex) -> Content:
         raise ak._errors.index_error(self, where, "not an array of records")
 
-    def _getitem_fields(
-        self, where: list[str | SupportsIndex], only_fields: tuple[str, ...] = ()
-    ) -> Content:
+    def _getitem_fields(self, where: list[str | SupportsIndex]) -> Content:
         if len(where) == 0:
             return self._getitem_range(slice(0, 0))
         raise ak._errors.index_error(self, where, "not an array of records")

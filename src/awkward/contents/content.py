@@ -697,14 +697,10 @@ class Content:
     def _getitem_range(self, where: slice) -> Content:
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def _getitem_field(
-        self, where: str | SupportsIndex, only_fields: tuple[str, ...] = ()
-    ) -> Content:
+    def _getitem_field(self, where: str | SupportsIndex) -> Content:
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def _getitem_fields(
-        self, where: list[str], only_fields: tuple[str, ...] = ()
-    ) -> Content:
+    def _getitem_fields(self, where: list[str]) -> Content:
         raise ak._errors.wrap_error(NotImplementedError)
 
     def _getitem_next(

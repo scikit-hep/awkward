@@ -226,21 +226,17 @@ class RegularArray(Content):
             parameters=self._parameters,
         )
 
-    def _getitem_field(
-        self, where: str | SupportsIndex, only_fields: tuple[str, ...] = ()
-    ) -> Content:
+    def _getitem_field(self, where: str | SupportsIndex) -> Content:
         return RegularArray(
-            self._content._getitem_field(where, only_fields),
+            self._content._getitem_field(where),
             self._size,
             self._length,
             parameters=None,
         )
 
-    def _getitem_fields(
-        self, where: list[str | SupportsIndex], only_fields: tuple[str, ...] = ()
-    ) -> Content:
+    def _getitem_fields(self, where: list[str | SupportsIndex]) -> Content:
         return RegularArray(
-            self._content._getitem_fields(where, only_fields),
+            self._content._getitem_fields(where),
             self._size,
             self._length,
             parameters=None,
