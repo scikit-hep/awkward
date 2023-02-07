@@ -402,20 +402,24 @@ class BitMaskedArray(Content):
     def _getitem_range(self, where):
         return self.to_ByteMaskedArray()._getitem_range(where)
 
-    def _getitem_field(self, where: str | SupportsIndex) -> Content:
+    def _getitem_field(
+        self, where: str | SupportsIndex, only_fields: tuple[str, ...] = ()
+    ) -> Content:
         return BitMaskedArray.simplified(
             self._mask,
-            self._content._getitem_field(where),
+            self._content._getitem_field(where, only_fields),
             self._valid_when,
             self._length,
             self._lsb_order,
             parameters=None,
         )
 
-    def _getitem_fields(self, where: list[str | SupportsIndex]) -> Content:
+    def _getitem_fields(
+        self, where: list[str | SupportsIndex], only_fields: tuple[str, ...] = ()
+    ) -> Content:
         return BitMaskedArray.simplified(
             self._mask,
-            self._content._getitem_fields(where),
+            self._content._getitem_fields(where, only_fields),
             self._valid_when,
             self._length,
             self._lsb_order,

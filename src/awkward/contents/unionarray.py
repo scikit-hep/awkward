@@ -484,19 +484,23 @@ class UnionArray(Content):
             parameters=self._parameters,
         )
 
-    def _getitem_field(self, where: str | SupportsIndex) -> Content:
+    def _getitem_field(
+        self, where: str | SupportsIndex, only_fields: tuple[str, ...] = ()
+    ) -> Content:
         return UnionArray.simplified(
             self._tags,
             self._index,
-            [x._getitem_field(where) for x in self._contents],
+            [x._getitem_field(where, only_fields) for x in self._contents],
             parameters=None,
         )
 
-    def _getitem_fields(self, where: list[str | SupportsIndex]) -> Content:
+    def _getitem_fields(
+        self, where: list[str | SupportsIndex], only_fields: tuple[str, ...] = ()
+    ) -> Content:
         return UnionArray.simplified(
             self._tags,
             self._index,
-            [x._getitem_fields(where) for x in self._contents],
+            [x._getitem_fields(where, only_fields) for x in self._contents],
             parameters=None,
         )
 

@@ -196,14 +196,18 @@ class UnmaskedArray(Content):
             parameters=self._parameters,
         )
 
-    def _getitem_field(self, where: str | SupportsIndex) -> Content:
+    def _getitem_field(
+        self, where: str | SupportsIndex, only_fields: tuple[str, ...] = ()
+    ) -> Content:
         return UnmaskedArray.simplified(
-            self._content._getitem_field(where), parameters=None
+            self._content._getitem_field(where, only_fields), parameters=None
         )
 
-    def _getitem_fields(self, where: list[str | SupportsIndex]) -> Content:
+    def _getitem_fields(
+        self, where: list[str | SupportsIndex], only_fields: tuple[str, ...] = ()
+    ) -> Content:
         return UnmaskedArray.simplified(
-            self._content._getitem_fields(where), parameters=None
+            self._content._getitem_fields(where, only_fields), parameters=None
         )
 
     def _carry(self, carry: Index, allow_lazy: bool) -> Content:

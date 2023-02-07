@@ -261,19 +261,23 @@ class ListArray(Content):
             parameters=self._parameters,
         )
 
-    def _getitem_field(self, where: str | SupportsIndex) -> Content:
+    def _getitem_field(
+        self, where: str | SupportsIndex, only_fields: tuple[str, ...] = ()
+    ) -> Content:
         return ListArray(
             self._starts,
             self._stops,
-            self._content._getitem_field(where),
+            self._content._getitem_field(where, only_fields),
             parameters=None,
         )
 
-    def _getitem_fields(self, where: list[str | SupportsIndex]) -> Content:
+    def _getitem_fields(
+        self, where: list[str | SupportsIndex], only_fields: tuple[str, ...] = ()
+    ) -> Content:
         return ListArray(
             self._starts,
             self._stops,
-            self._content._getitem_fields(where),
+            self._content._getitem_fields(where, only_fields),
             parameters=None,
         )
 
