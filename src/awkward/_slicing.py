@@ -35,14 +35,16 @@ def regularize_index(
 
     Returns regularized index that is guaranteed to be in-bounds.
     """
+    # Unknown indices are already regularized
     if is_unknown_scalar(index):
         return index
 
-    # Without a known length, the result is unbounded
+    # Without a known length the result must be unknown, as we cannot regularize the index
     length_scalar = backend.index_nplike.shape_item_as_scalar(length)
     if length is None:
         return length_scalar
 
+    # We have known length and index
     if index < 0:
         index = index + length
 
