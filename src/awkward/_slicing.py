@@ -50,7 +50,7 @@ def regularize_index(
         return index
     else:
         raise wrap_error(
-            ValueError(f"index value out of bounds (0, {length}): {index}")
+            IndexError(f"index value out of bounds (0, {length}): {index}")
         )
 
 
