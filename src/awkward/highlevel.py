@@ -1193,7 +1193,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         typestr = repr(str(self.type))[1:-1]
         if (
-            self._layout.backend.nplike.known_shape
+            self._layout.backend.nplike.known_data
             and self._layout.backend.nplike.known_data
         ):
             valuestr = ""
@@ -1932,7 +1932,7 @@ class Record(NDArrayOperatorsMixin):
 
         typestr = repr(str(self.type))[1:-1]
         if (
-            self._layout.array.backend.nplike.known_shape
+            self._layout.array.backend.nplike.known_data
             and self._layout.array.backend.nplike.known_data
         ):
             valuestr = ""

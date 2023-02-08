@@ -179,11 +179,6 @@ class NumpyLike(Singleton, Protocol):
 
     @property
     @abstractmethod
-    def known_shape(self) -> bool:
-        ...
-
-    @property
-    @abstractmethod
     def is_eager(self) -> bool:
         ...
 

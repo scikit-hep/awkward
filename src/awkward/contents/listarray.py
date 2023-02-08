@@ -54,8 +54,8 @@ class ListArray(Content):
                 )
             )
         if (
-            starts.nplike.known_shape
-            and stops.nplike.known_shape
+            starts.nplike.known_data
+            and stops.nplike.known_data
             and starts.length > stops.length
         ):
             raise ak._errors.wrap_error(
@@ -170,7 +170,7 @@ class ListArray(Content):
             self._content._touch_data(recursive)
 
     def _touch_shape(self, recursive):
-        if not self._backend.index_nplike.known_shape:
+        if not self._backend.index_nplike.known_data:
             self._starts.data.touch_shape()
             self._stops.data.touch_shape()
         if recursive:
@@ -242,13 +242,13 @@ class ListArray(Content):
 
         if where < 0:
             where += self.length
-        if not (0 <= where < self.length) and self._backend.nplike.known_shape:
+        if not (0 <= where < self.length) and self._backend.nplike.known_data:
             raise ak._errors.index_error(self, where)
         start, stop = self._starts[where], self._stops[where]
         return self._content._getitem_range(slice(start, stop))
 
     def _getitem_range(self, where):
-        if not self._backend.nplike.known_shape:
+        if not self._backend.nplike.known_data:
             self._touch_shape(recursive=False)
             return self
 
@@ -326,7 +326,7 @@ class ListArray(Content):
     def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
         slicestarts = slicestarts.to_nplike(self._backend.index_nplike)
         slicestops = slicestops.to_nplike(self._backend.index_nplike)
-        if self._backend.nplike.known_shape and slicestarts.length != self.length:
+        if self._backend.nplike.known_data and slicestarts.length != self.length:
             raise ak._errors.index_error(
                 self,
                 ak.contents.ListArray(
@@ -454,7 +454,7 @@ class ListArray(Content):
 
         elif isinstance(slicecontent, ak.contents.IndexedOptionArray):
             if (
-                self._backend.nplike.known_shape
+                self._backend.nplike.known_data
                 and self._starts.length < slicestarts.length
             ):
                 raise ak._errors.index_error(
@@ -637,7 +637,7 @@ class ListArray(Content):
             start = ak._util.kSliceNone if start is None else start
             stop = ak._util.kSliceNone if stop is None else stop
 
-            if self._backend.nplike.known_shape:
+            if self._backend.nplike.known_data:
                 carrylength = ak.index.Index64.empty(1, self._backend.index_nplike)
                 assert (
                     carrylength.nplike is self._backend.index_nplike
@@ -719,7 +719,7 @@ class ListArray(Content):
                     parameters=self._parameters,
                 )
             else:
-                if self._backend.nplike.known_shape:
+                if self._backend.nplike.known_data:
                     total = ak.index.Index64.empty(1, self._backend.index_nplike)
                     assert (
                         total.nplike is self._backend.index_nplike
@@ -1237,7 +1237,7 @@ class ListArray(Content):
         )
 
     def _validity_error(self, path):
-        if self._backend.nplike.known_shape and self.stops.length < self.starts.length:
+        if self._backend.nplike.known_data and self.stops.length < self.starts.length:
             return f"at {path} ({type(self)!r}): len(stops) < len(starts)"
         assert (
             self.starts.nplike is self._backend.index_nplike
@@ -1403,7 +1403,7 @@ class ListArray(Content):
         self, action, behavior, depth, depth_context, lateral_context, options
     ):
         if (
-            self._backend.nplike.known_shape
+            self._backend.nplike.known_data
             and self._backend.nplike.known_data
             and self._starts.length != 0
         ):

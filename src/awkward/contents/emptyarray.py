@@ -137,7 +137,7 @@ class EmptyArray(Content):
     def _carry(self, carry: Index, allow_lazy: bool) -> EmptyArray:
         assert isinstance(carry, ak.index.Index)
 
-        if not carry.nplike.known_shape or carry.length == 0:
+        if not carry.nplike.known_data or carry.length == 0:
             return self
         else:
             raise ak._errors.index_error(self, carry.data, "array is empty")
@@ -179,7 +179,7 @@ class EmptyArray(Content):
             return self._getitem_next_ellipsis(tail, advanced)
 
         elif isinstance(head, ak.index.Index64):
-            if not head.nplike.known_shape or head.length == 0:
+            if not head.nplike.known_data or head.length == 0:
                 return self
             else:
                 raise ak._errors.index_error(self, head.data, "array is empty")

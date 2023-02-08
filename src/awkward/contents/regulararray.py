@@ -35,7 +35,7 @@ class RegularArray(Content):
                 )
             )
         if size is None:
-            if content.backend.index_nplike.known_shape:
+            if content.backend.index_nplike.known_data:
                 raise ak._errors.wrap_error(
                     TypeError(
                         "{} 'size' must be a non-negative integer for backends with known shapes, not None".format(
@@ -54,7 +54,7 @@ class RegularArray(Content):
                 )
 
         if zeros_length is None:
-            if content.backend.index_nplike.known_shape:
+            if content.backend.index_nplike.known_data:
                 raise ak._errors.wrap_error(
                     TypeError(
                         "{} 'zeros_length' must be a non-negative integer for backends with known shapes, not None".format(
@@ -219,7 +219,7 @@ class RegularArray(Content):
         return self._content._getitem_range(slice(0, 0))
 
     def _getitem_at(self, where: SupportsIndex):
-        if self._backend.nplike.known_shape and where < 0:
+        if self._backend.nplike.known_data and where < 0:
             where += self._length
 
         if not (self._length is None or 0 <= where < self._length):
@@ -228,7 +228,7 @@ class RegularArray(Content):
         return self._content._getitem_range(slice(start, stop))
 
     def _getitem_range(self, where):
-        if not self._backend.nplike.known_shape:
+        if not self._backend.nplike.known_data:
             self._touch_shape(recursive=False)
             return self
 
@@ -338,7 +338,7 @@ class RegularArray(Content):
                 )
             )
 
-        if offsets.nplike.known_shape and offsets.length - 1 != self._length:
+        if offsets.nplike.known_data and offsets.length - 1 != self._length:
             raise ak._errors.wrap_error(
                 AssertionError(
                     "cannot broadcast RegularArray of length {} to length {}".format(
@@ -610,7 +610,7 @@ class RegularArray(Content):
                     "cannot mix jagged slice with NumPy-style advanced indexing",
                 )
 
-            if self._backend.nplike.known_shape and head.length != self._size:
+            if self._backend.nplike.known_data and head.length != self._size:
                 raise ak._errors.index_error(
                     self,
                     head,
@@ -1181,16 +1181,14 @@ class RegularArray(Content):
         # ShapeItem is a defined type, but some nplikes don't map onto the entire space; e.g.
         # NumPy never has `None` shape items. We require that if a shape-item is used between nplikes
         # they both be the same "known-shape-ness".
-        assert (
-            self._backend.index_nplike.known_shape == self._backend.nplike.known_shape
-        )
+        assert self._backend.index_nplike.known_data == self._backend.nplike.known_data
         length = self._backend.index_nplike.mul_shape_item(self._length, self._size)
         return self._backend.nplike.reshape(
             out[: self._backend.nplike.shape_item_as_scalar(length)], shape
         )
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
-        assert self._backend.nplike.known_data and self._backend.nplike.known_shape
+        assert self._backend.nplike.known_data
 
         if self.parameter("__array__") == "string":
             return self.to_ListOffsetArray64(False)._to_arrow(
@@ -1276,7 +1274,7 @@ class RegularArray(Content):
                 action, behavior, depth, depth_context, lateral_context, options
             )
 
-        if self._backend.nplike.known_shape:
+        if self._backend.nplike.known_data:
             content = self._content[: self._length * self._size]
         else:
             self._touch_data(recursive=False)

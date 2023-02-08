@@ -12,7 +12,6 @@ np = NumpyMetadata.instance()
 
 class ArrayModuleNumpyLike(NumpyLike):
     known_data: Final = True
-    known_shape: Final = True
 
     ############################ array creation
 

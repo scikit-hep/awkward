@@ -223,7 +223,7 @@ def common_backend(backends: Collection[Backend]) -> Backend:
     else:
         # We allow typetracers to mix with other nplikes, and take precedence
         for backend in unique_backends:
-            if not (backend.nplike.known_data and backend.nplike.known_shape):
+            if not backend.nplike.known_data:
                 return backend
 
         raise ak._errors.wrap_error(

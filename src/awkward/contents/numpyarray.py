@@ -141,7 +141,7 @@ class NumpyArray(Content):
             self._data.touch_data()
 
     def _touch_shape(self, recursive):
-        if not self._backend.nplike.known_shape:
+        if not self._backend.nplike.known_data:
             self._data.touch_shape()
 
     @property
@@ -234,7 +234,7 @@ class NumpyArray(Content):
             return out
 
     def _getitem_range(self, where):
-        if not self._backend.nplike.known_shape:
+        if not self._backend.nplike.known_data:
             self._touch_shape(recursive=False)
             return self
 
