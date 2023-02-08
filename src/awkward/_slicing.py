@@ -439,7 +439,7 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
         and isinstance(item.content, NumpyArray)
         and np.issubdtype(item.content.dtype, np.bool_)
     ):
-        if item_backend.nplike.known_data or item_backend.nplike.known_data:
+        if item_backend.nplike.known_data:
             item = item.to_ListOffsetArray64(True)
             localindex = ak._do.local_index(item, axis=1)
             nextcontent = localindex.content.data[item.content.data]
@@ -469,7 +469,7 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
         and isinstance(item.content.content, NumpyArray)
         and np.issubdtype(item.content.content.dtype, np.bool_)
     ):
-        if item_backend.nplike.known_data or item_backend.nplike.known_data:
+        if item_backend.nplike.known_data:
             if isinstance(item_backend.nplike, Jax):
                 raise wrap_error("This slice is not supported for JAX differentiation.")
             # missing values as any integer other than -1 are extremely rare
@@ -537,7 +537,7 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
         if isinstance(item.content, NumpyArray) and issubclass(
             item.content.dtype.type, (bool, np.bool_)
         ):
-            if item_backend.nplike.known_data or item_backend.nplike.known_data:
+            if item_backend.nplike.known_data:
                 if isinstance(item_backend.nplike, Jax):
                     raise wrap_error(
                         TypeError(
