@@ -1192,10 +1192,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             pytype = type(self).__name__
 
         typestr = repr(str(self.type))[1:-1]
-        if (
-            self._layout.backend.nplike.known_data
-            and self._layout.backend.nplike.known_data
-        ):
+        if self._layout.backend.nplike.known_data:
             valuestr = ""
         else:
             valuestr = "-typetracer"
