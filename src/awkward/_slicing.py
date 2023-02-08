@@ -46,12 +46,25 @@ def regularise_slice(
         return length_scalar, length_scalar, step
 
     # Normalise `None` values
-    if start is None:
-        start = 0
-    if stop is None:
-        stop = length_scalar
     if step is None:
         step = 1
+
+    if start is None:
+        # We need to know the step to choose appropriate start
+        if is_unknown_scalar(step):
+            start = step
+        elif step < 0:
+            start = length_scalar
+        else:
+            start = 0
+    if stop is None:
+        # We need to know the step to choose appropriate stop
+        if is_unknown_scalar(step):
+            stop = step
+        elif step < 0:
+            stop = 0
+        else:
+            stop = length_scalar
 
     # Normalise negative integers
     if not is_unknown_scalar(start) and start < 0:
