@@ -770,7 +770,7 @@ def apply_step(
                     for x, p in zip(outcontent, parameters)
                 )
 
-            elif not backend.nplike.known_data or not backend.nplike.known_data:
+            elif not backend.nplike.known_data:
                 offsets = None
                 nextinputs = []
                 for x in inputs:
