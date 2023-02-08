@@ -11,16 +11,47 @@ from awkward._nplikes import nplike_of, to_nplike
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
+from awkward._nplikes.typetracer import is_unknown_scalar
 from awkward.typing import TYPE_CHECKING, Sequence, TypeAlias
 
 if TYPE_CHECKING:
-    from awkward._nplikes.numpylike import ArrayLike  # noqa: F401
+    from awkward._nplikes.numpylike import ArrayLike, ShapeItem  # noqa: F401
     from awkward.contents.content import Content
 
 np = NumpyMetadata.instance()
 
 
 SliceItem: TypeAlias = "int | slice | str | None | Ellipsis | ArrayLike | Content"
+
+
+def regularize_index(
+    index: int | ArrayLike, length: ShapeItem, *, backend: Backend
+) -> int | ArrayLike:
+    """
+    Args:
+        index: index value
+        length: length of array
+        backend: backend of array
+
+    Returns regularized index that is guaranteed to be in-bounds.
+    """
+    if is_unknown_scalar(index):
+        return index
+
+    # Without a known length, the result is unbounded
+    length_scalar = backend.index_nplike.shape_item_as_scalar(length)
+    if length is None:
+        return length_scalar
+
+    if index < 0:
+        index = index + length
+
+    if 0 <= index < length:
+        return index
+    else:
+        raise wrap_error(
+            ValueError(f"index value out of bounds (0, {length}): {index}")
+        )
 
 
 def normalize_slice_item(item, *, backend: Backend):

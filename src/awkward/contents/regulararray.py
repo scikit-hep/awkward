@@ -222,14 +222,11 @@ class RegularArray(Content):
 
     def _getitem_at(self, where: IndexType):
         index_nplike = self._backend.index_nplike
-        if index_nplike.known_data and where < 0:
-            where += self._length
-
-        if not (self._length is unknown_length or 0 <= where < self._length):
-            raise ak._errors.index_error(self, where)
-        start, stop = where * index_nplike.shape_item_as_index(self._size), (
+        where = ak._slicing.regularize_index(where, self._length, backend=self._backend)
+        size_scalar = index_nplike.shape_item_as_index(self._size)
+        start, stop = where * size_scalar, (
             where + 1
-        ) * index_nplike.shape_item_as_index(self._size)
+        ) * size_scalar
         return self._content._getitem_range(start, stop)
 
     def _getitem_range(self, start: SupportsIndex, stop: IndexType) -> Content:
