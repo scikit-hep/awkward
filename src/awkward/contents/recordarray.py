@@ -36,7 +36,7 @@ class RecordArray(Content):
         self,
         contents: Iterable[Content],
         fields: Iterable[str] | None,
-        length: int | type[unknown_length] = unset,
+        length: int | type[unknown_length] | None = None,
         *,
         parameters=None,
         backend=None,
@@ -78,11 +78,7 @@ class RecordArray(Content):
         if backend is None:
             backend = ak._backends.NumpyBackend.instance()
 
-        # TODO: remove me in future version
-        if length is unknown_length and backend.nplike.known_data:
-            length = unset
-
-        if length is unset:
+        if length is None:
             if len(contents) == 0:
                 raise ak._errors.wrap_error(
                     TypeError(
@@ -96,7 +92,7 @@ class RecordArray(Content):
                 for content in contents:
                     assert content.length is not unknown_length
                     # First time we're setting length, and content.length is not unknown_length
-                    if length is unset:
+                    if length is None:
                         length = content.length
                     # length is not unknown_length, content.length is not unknown_length
                     else:
@@ -104,7 +100,7 @@ class RecordArray(Content):
             else:
                 for content in contents:
                     # First time we're setting length, and content.length is not unknown_length
-                    if length is unset:
+                    if length is None:
                         length = content.length
                         # Any unknown_length means all unknown_length
                         if length is unknown_length:
