@@ -93,7 +93,6 @@ def custom_str(current):
 def valuestr_horiz(data, limit_cols):
     if isinstance(data, (ak.highlevel.Array, ak.highlevel.Record)) and (
         not data.layout.backend.nplike.known_data
-        or not data.layout.backend.nplike.known_data
     ):
         if isinstance(data, ak.highlevel.Array):
             return 5, "[...]"
@@ -232,7 +231,6 @@ def valuestr_horiz(data, limit_cols):
 def valuestr(data, limit_rows, limit_cols):
     if isinstance(data, (ak.highlevel.Array, ak.highlevel.Record)) and (
         not data.layout.backend.nplike.known_data
-        or not data.layout.backend.nplike.known_data
     ):
         data.layout._touch_data(recursive=True)
         if isinstance(data, ak.highlevel.Array):
