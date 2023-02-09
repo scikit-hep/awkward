@@ -588,7 +588,15 @@ class TypeTracer(NumpyLike):
         placeholders = [numpy.empty(0, x.dtype) for x in broadcasted]
 
         result = ufunc(*placeholders)
-        return TypeTracerArray._new(result.dtype, shape=broadcasted[0].shape)
+        if isinstance(result, numpy.ndarray):
+            return TypeTracerArray._new(result.dtype, shape=broadcasted[0].shape)
+        elif isinstance(result, tuple):
+            return (
+                TypeTracerArray._new(x.dtype, shape=b.shape)
+                for x, b in zip(result, broadcasted)
+            )
+        else:
+            raise wrap_error(TypeError)
 
     def to_rectilinear(self, array, *args, **kwargs):
         try_touch_shape(array)
