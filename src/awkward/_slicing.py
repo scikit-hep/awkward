@@ -22,7 +22,7 @@ np = NumpyMetadata.instance()
 SliceItem: TypeAlias = "int | slice | str | None | Ellipsis | ArrayLike | Content"
 
 
-def regularise_slice(
+def regularize_slice(
     slice: slice, length: ShapeItem, *, backend: Backend
 ) -> tuple[SupportsIndex, SupportsIndex, SupportsIndex]:
     """
