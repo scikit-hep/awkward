@@ -23,6 +23,56 @@ numpy = Numpy.instance()
 
 @final
 class IndexedArray(Content):
+    """
+    IndexedArray is a general-purpose tool for *lazily* changing the order of
+    and/or duplicating some `content` with a
+    [np.take](https://docs.scipy.org/doc/numpy/reference/generated/numpy.take.html)
+    over the integer buffer `index.
+
+    It has many uses:
+
+    * representing a lazily applied slice.
+    * simulating pointers into another collection.
+    * emulating the dictionary encoding of Apache Arrow and Parquet.
+
+    If the `__array__` parameter is `"categorical"`, the contents must be unique.
+    Some operations are optimized (for instance, `==` only compares `index` integers)
+    and the array can be converted to and from Arrow/Parquet's dictionary encoding.
+
+    To illustrate how the constructor arguments are interpreted, the following is a
+    simplified implementation of `__init__`, `__len__`, and `__getitem__`:
+
+        class IndexedArray(Content):
+            def __init__(self, index, content):
+                assert isinstance(index, (Index32, IndexU32, Index64))
+                assert isinstance(content, Content)
+                for x in index:
+                    assert 0 <= x < len(content)  # index[i] must not be negative
+                self.index = index
+                self.content = content
+
+            def __len__(self):
+                return len(self.index)
+
+            def __getitem__(self, where):
+                if isinstance(where, int):
+                    if where < 0:
+                        where += len(self)
+                    assert 0 <= where < len(self)
+                    return self.content[self.index[where]]
+
+                elif isinstance(where, slice) and where.step is None:
+                    return IndexedArray(
+                        self.index[where.start : where.stop], self.content
+                    )
+
+                elif isinstance(where, str):
+                    return IndexedArray(self.index, self.content[where])
+
+                else:
+                    raise AssertionError(where)
+    """
+
     is_indexed = True
 
     def __init__(self, index, content, *, parameters=None):

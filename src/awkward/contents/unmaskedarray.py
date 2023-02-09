@@ -24,6 +24,38 @@ numpy = Numpy.instance()
 
 @final
 class UnmaskedArray(Content):
+    """
+    UnmaskedArray implements an #ak.types.OptionType for which the values are
+    never, in fact, missing. It exists to satisfy systems that formally require this
+    high-level type without the overhead of generating an array of all True or all
+    False values.
+
+    This is like NumPy's
+    [masked arrays](https://docs.scipy.org/doc/numpy/reference/maskedarray.html)
+    with `mask=None`.
+
+    It is also like Apache Arrow's
+    [validity bitmaps](https://arrow.apache.org/docs/format/Columnar.html#validity-bitmaps)
+    because the bitmap can be omitted when all values are valid.
+
+    To illustrate how the constructor arguments are interpreted, the following is a
+    simplified implementation of `__init__`, `__len__`, and `__getitem__`:
+
+        class UnmaskedArray(Content):
+            def __init__(self, content):
+                assert isinstance(content, Content)
+                self.content = content
+
+            def __len__(self):
+                return len(self.content)
+
+            def __getitem__(self, where):
+                if isinstance(where, int):
+                    return self.content[where]
+                else:
+                    return UnmaskedArray(self.content[where])
+    """
+
     is_option = True
 
     def __init__(self, content, *, parameters=None):

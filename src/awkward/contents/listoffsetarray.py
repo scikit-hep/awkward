@@ -24,6 +24,69 @@ numpy = Numpy.instance()
 
 @final
 class ListOffsetArray(Content):
+    """
+    ListOffsetArray describes unequal-length lists (often called a
+    "jagged" or "ragged" array). Like #ak.contents.RegularArray, the
+    underlying data for all lists are in a contiguous `content`. It is
+    subdivided into lists according to an `offsets` buffer, which specifies
+    the starting and stopping index of each list.
+
+    The `offsets` must have at least length 1 (corresponding to an empty array),
+    but it need not start with `0` or include all of the `content`. Just as
+    #ak.contents.RegularArray can have unreachable `content` if it is not
+    an integer multiple of `size`, a ListOffsetArray can have unreachable
+    content before the start of the first list and after the end of the last list.
+
+    Like #ak.contents.RegularArray and #ak.contents.ListArray, a ListOffsetArray can
+    represent strings if its `__array__` parameter is `"string"` (UTF-8 assumed) or
+    `"bytestring"` (no encoding assumed) and it contains an #ak.contents.NumpyArray
+    of `dtype=np.uint8` whose `__array__` parameter is `"char"` (UTF-8 assumed) or
+    `"byte"` (no encoding assumed).
+
+    ListOffsetArray corresponds to Apache Arrow
+    [List type](https://arrow.apache.org/docs/format/Columnar.html#variable-size-list-layout).
+
+    To illustrate how the constructor arguments are interpreted, the following is a
+    simplified implementation of `__init__`, `__len__`, and `__getitem__`:
+
+        class ListOffsetArray(Content):
+            def __init__(self, offsets, content):
+                assert isinstance(offsets, (Index32, IndexU32, Index64))
+                assert isinstance(content, Content)
+                assert len(offsets) != 0
+                for i in range(len(offsets) - 1):
+                    start = offsets[i]
+                    stop = offsets[i + 1]
+                    if start != stop:
+                        assert start < stop  # i.e. start <= stop
+                        assert start >= 0
+                        assert stop <= len(content)
+                self.offsets = offsets
+                self.content = content
+
+            def __len__(self):
+                return len(self.offsets) - 1
+
+            def __getitem__(self, where):
+                if isinstance(where, int):
+                    if where < 0:
+                        where += len(self)
+                    assert 0 <= where < len(self)
+                    return self.content[self.offsets[where] : self.offsets[where + 1]]
+
+                elif isinstance(where, slice) and where.step is None:
+                    offsets = self.offsets[where.start : where.stop + 1]
+                    if len(offsets) == 0:
+                        offsets = [0]
+                    return ListOffsetArray(offsets, self.content)
+
+                elif isinstance(where, str):
+                    return ListOffsetArray(self.offsets, self.content[where])
+
+                else:
+                    raise AssertionError(where)
+    """
+
     is_list = True
 
     def __init__(self, offsets, content, *, parameters=None):

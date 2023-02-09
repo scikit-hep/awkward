@@ -28,6 +28,59 @@ numpy = Numpy.instance()
 
 @final
 class UnionArray(Content):
+    """
+    UnionArray represents data drawn from an ordered list of `contents`,
+    which can have different types, using
+
+    * `tags`: buffer of integers indicating which content each array element draws from.
+    * `index`: buffer of integers indicating which element from the content to draw from.
+
+    UnionArrays correspond to Apache Arrow's
+    [dense union type](https://arrow.apache.org/docs/format/Columnar.html#dense-union).
+    Awkward Array has no direct equivalent for Apache Arrow's
+    [sparse union type](https://arrow.apache.org/docs/format/Columnar.html#sparse-union).
+
+    To illustrate how the constructor arguments are interpreted, the following is a
+    simplified implementation of `__init__`, `__len__`, and `__getitem__`:
+
+        class UnionArray(Content):
+            def __init__(self, tags, index, contents):
+                assert isinstance(tags, Index8)
+                assert isinstance(index, (Index32, IndexU32, Index64))
+                assert isinstance(contents, list)
+                assert len(index) >= len(tags)  # usually equal
+                for x in tags:
+                    assert 0 <= x < len(contents)
+                for i, x in enumerate(tags):
+                    assert 0 <= index[i] < len(contents[x])
+                self.tags = tags
+                self.index = index
+                self.contents = contents
+
+            def __len__(self):
+                return len(self.tags)
+
+            def __getitem__(self, where):
+                if isinstance(where, int):
+                    if where < 0:
+                        where += len(self)
+                    assert 0 <= where < len(self)
+                    return self.contents[self.tags[where]][self.index[where]]
+
+                elif isinstance(where, slice) and where.step is None:
+                    return UnionArray(
+                        self.tags[where], self.index[where], self.contents
+                    )
+
+                elif isinstance(where, str):
+                    return UnionArray(
+                        self.tags, self.index, [x[where] for x in self.contents]
+                    )
+
+                else:
+                    raise AssertionError(where)
+    """
+
     is_union = True
 
     def __init__(self, tags, index, contents, *, parameters=None):

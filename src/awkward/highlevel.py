@@ -348,7 +348,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         can be used in mathematical expressions with the original `array`
         because they are still aligned.
 
-        See <<filtering>> and #ak.mask.
+        See <<<filtering>>> and #ak.mask.
         """
         return self.Mask(self)
 
@@ -555,7 +555,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
           like Python/NumPy.
         * **A string** selects a tuple or record field, even if its
           position in the tuple is to the left of the dimension where the
-          tuple/record is defined. (See <<projection>> below.) This is
+          tuple/record is defined. (See <<<projection>>> below.) This is
           similar to NumPy's
           [field access](https://numpy.org/doc/stable/user/basics.indexing.html#field-access),
           except that strings are allowed in the same tuple with other
@@ -591,12 +591,12 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
           to the output. This behavior matches pyarrow's
           [Array.take](https://arrow.apache.org/docs/python/generated/pyarrow.Array.html#pyarrow.Array.take)
           which also manages arrays with missing values. See
-          <<option indexing>> below.
+          <<<option indexing>>> below.
         * **An Array of nested lists**, ultimately containing booleans or
           integers and having the same lengths of lists at each level as
           the Array to which they're applied, selects by boolean or by
           integer at the deeply nested level. Missing items at any level
-          above the deepest level must broadcast. See <<nested indexing>> below.
+          above the deepest level must broadcast. See <<<nested indexing>>> below.
 
         A tuple of the above applies each slice item to a dimension of the
         data, which can be very expressive. More than one flat boolean/integer
@@ -630,7 +630,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             <Array [[[1], [], [3], [5]], [[7], [9]]] type='2 * var * var * int64'>
 
         In this example, the boolean array is itself nested (see
-        <<nested indexing>> below).
+        <<<nested indexing>>> below).
 
             >>> array % 2 == 1
             <Array [[[False, True, False], ..., [True]], ...] type='2 * var * var * bool'>
@@ -931,7 +931,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         Here, the `np.argmax` returns the integer position of the maximum
         element or None for empty arrays. It's a nice example of
-        <<option indexing>> with <<nested indexing>>.
+        <<<option indexing>>> with <<<nested indexing>>>.
 
         When applying a nested index with missing (None) entries at levels
         higher than the last level, the indexer must have the same dimension
@@ -1090,7 +1090,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             <Array [[[1], [2, 2], [3, 3, 3]], [], [...]] type='3 * var * var * int64'>
 
         which are equivalent to `array["x"]` and `array["y"]`. (See
-        <<projection>>.)
+        <<<projection>>>.)
 
         Fields can't be accessed as attributes when
 

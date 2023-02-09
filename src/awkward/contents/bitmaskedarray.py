@@ -27,6 +27,89 @@ numpy = Numpy.instance()
 
 @final
 class BitMaskedArray(Content):
+    """
+    Like #ak.contents.ByteMaskedArray, BitMaskedArray implements an
+    #ak.types.OptionType with two buffers, `mask` and `content`.
+    However, the boolean `mask` values are packed into a bitmap.
+
+    BitMaskedArray has an additional parameter, `lsb_order`; if True,
+    the position of each bit is in
+    [Least-Significant Bit order](https://en.wikipedia.org/wiki/Bit_numbering)
+    (LSB):
+
+        is_valid[j] = bool(mask[j // 8] & (1 << (j % 8))) == valid_when
+
+    If False, the position of each bit is in Most-Significant Bit order
+    (MSB):
+
+        is_valid[j] = bool(mask[j // 8] & (128 >> (j % 8))) == valid_when
+
+    If the logical size of the buffer is not a multiple of 8, the `mask`
+    has to be padded. Thus, an explicit `length` is also part of the
+    class's definition.
+
+    This is equivalent to *all* of Apache Arrow's array types because they all
+    [use bitmaps](https://arrow.apache.org/docs/format/Columnar.html#validity-bitmaps)
+    to mask their data, with `valid_when=True` and `lsb_order=True`.
+
+    To illustrate how the constructor arguments are interpreted, the following is a
+    simplified implementation of `__init__`, `__len__`, and `__getitem__`:
+
+        class BitMaskedArray(Content):
+            def __init__(self, mask, content, valid_when, length, lsb_order):
+                assert isinstance(mask, IndexU8)
+                assert isinstance(content, Content)
+                assert isinstance(valid_when, bool)
+                assert isinstance(length, int) and length >= 0
+                assert isinstance(lsb_order, bool)
+                assert len(mask) <= len(content)
+                self.mask = mask
+                self.content = content
+                self.valid_when = valid_when
+                self.length = length
+                self.lsb_order = lsb_order
+
+            def __len__(self):
+                return self.length
+
+            def __getitem__(self, where):
+                if isinstance(where, int):
+                    if where < 0:
+                        where += len(self)
+                    assert 0 <= where < len(self)
+                    if self.lsb_order:
+                        bit = bool(self.mask[where // 8] & (1 << (where % 8)))
+                    else:
+                        bit = bool(self.mask[where // 8] & (128 >> (where % 8)))
+                    if bit == self.valid_when:
+                        return self.content[where]
+                    else:
+                        return None
+
+                elif isinstance(where, slice) and where.step is None:
+                    # In general, slices must convert BitMaskedArray to ByteMaskedArray.
+                    bytemask = np.unpackbits(
+                        self.mask, bitorder=("little" if self.lsb_order else "big")
+                    ).view(bool)
+                    return ByteMaskedArray(
+                        bytemask[where.start : where.stop],
+                        self.content[where.start : where.stop],
+                        valid_when=self.valid_when,
+                    )
+
+                elif isinstance(where, str):
+                    return BitMaskedArray(
+                        self.mask,
+                        self.content[where],
+                        valid_when=self.valid_when,
+                        length=self.length,
+                        lsb_order=self.lsb_order,
+                    )
+
+                else:
+                    raise AssertionError(where)
+    """
+
     is_option = True
 
     def __init__(

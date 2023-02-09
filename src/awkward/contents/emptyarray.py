@@ -22,6 +22,40 @@ numpy = Numpy.instance()
 
 @final
 class EmptyArray(Content):
+    """
+    An EmptyArray is used whenever an array's type is not known because it is empty
+    (such as data from #ak.ArrayBuilder without enough sample points to resolve the
+    type).
+
+    Unlike all other Content subclasses, EmptyArray cannot contain any parameters
+    (parameter values are always None).
+
+    EmptyArray has no equivalent in Apache Arrow.
+
+    To illustrate how the constructor arguments are interpreted, the following is a
+    simplified implementation of `__init__`, `__len__`, and `__getitem__`:
+
+        class EmptyArray(Content):
+            def __init__(self):
+                pass
+
+            def __len__(self):
+                return 0
+
+            def __getitem__(self, where):
+                if isinstance(where, int):
+                    assert False
+
+                elif isinstance(where, slice) and where.step is None:
+                    return EmptyArray()
+
+                elif isinstance(where, str):
+                    raise ValueError("field " + repr(where) + " not found")
+
+                else:
+                    raise AssertionError(where)
+    """
+
     is_unknown = True
     is_leaf = True
 

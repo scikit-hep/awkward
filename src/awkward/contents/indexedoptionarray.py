@@ -24,6 +24,53 @@ numpy = Numpy.instance()
 
 @final
 class IndexedOptionArray(Content):
+    """
+    IndexedOptionArray is an #ak.contents.IndexedArray for which
+    negative values in the index are interpreted as missing. It represents
+    #ak.types.OptionType data like #ak.contents.ByteMaskedArray,
+    #ak.contents.BitMaskedArray, and #ak.contents.UnmaskedArray, but
+    the flexibility of the arbitrary `index` makes it a common output of
+    many operations.
+
+    IndexedOptionArray doesn't have a direct equivalent in Apache Arrow.
+
+    To illustrate how the constructor arguments are interpreted, the following is a
+    simplified implementation of `__init__`, `__len__`, and `__getitem__`:
+
+        class IndexedOptionArray(Content):
+            def __init__(self, index, content):
+                assert isinstance(index, (Index32, Index64))
+                assert isinstance(content, Content)
+                for x in index:
+                    assert x < len(content)  # index[i] may be negative
+                self.index = index
+                self.content = content
+
+            def __len__(self):
+                return len(self.index)
+
+            def __getitem__(self, where):
+                if isinstance(where, int):
+                    if where < 0:
+                        where += len(self)
+                    assert 0 <= where < len(self)
+                    if self.index[where] < 0:
+                        return None
+                    else:
+                        return self.content[self.index[where]]
+
+                elif isinstance(where, slice) and where.step is None:
+                    return IndexedOptionArray(
+                        self.index[where.start : where.stop], self.content
+                    )
+
+                elif isinstance(where, str):
+                    return IndexedOptionArray(self.index, self.content[where])
+
+                else:
+                    raise AssertionError(where)
+    """
+
     is_option = True
     is_indexed = True
 
