@@ -62,7 +62,7 @@ class RegularForm(Form):
         return self._to_dict_extra(
             {
                 "class": "RegularArray",
-                "size": self._size,
+                "size": None if self._size is unknown_length else self._size,
                 "content": self._content._to_dict_part(verbose, toplevel=False),
             },
             verbose,
