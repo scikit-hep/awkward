@@ -7,7 +7,7 @@ import math
 
 import awkward as ak
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpylike import IndexType, NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._nplikes.typetracer import MaybeNone, TypeTracer
 from awkward._util import unset
@@ -385,7 +385,7 @@ class BitMaskedArray(Content):
     def _getitem_nothing(self):
         return self._content._getitem_range(0, 0)
 
-    def _getitem_at(self, where: SupportsIndex):
+    def _getitem_at(self, where: IndexType):
         if not self._backend.nplike.known_data:
             self._touch_data(recursive=False)
             return MaybeNone(self._content._getitem_at(where))
@@ -403,7 +403,7 @@ class BitMaskedArray(Content):
         else:
             return None
 
-    def _getitem_range(self, start: SupportsIndex, stop: SupportsIndex) -> Content:
+    def _getitem_range(self, start: IndexType, stop: IndexType) -> Content:
         return self.to_ByteMaskedArray()._getitem_range(start, stop)
 
     def _getitem_field(

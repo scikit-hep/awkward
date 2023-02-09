@@ -7,7 +7,7 @@ import awkward as ak
 from awkward._nplikes import to_nplike
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import ArrayLike, NumpyMetadata
+from awkward._nplikes.numpylike import ArrayLike, IndexType, NumpyMetadata
 from awkward._nplikes.typetracer import TypeTracerArray
 from awkward._util import unset
 from awkward.contents.content import Content
@@ -218,7 +218,7 @@ class NumpyArray(Content):
             backend=self._backend,
         )
 
-    def _getitem_at(self, where: SupportsIndex):
+    def _getitem_at(self, where: IndexType):
         if not self._backend.nplike.known_data and len(self._data.shape) == 1:
             self._touch_data(recursive=False)
             return TypeTracerArray._new(self._data.dtype, shape=())
@@ -233,7 +233,7 @@ class NumpyArray(Content):
         else:
             return out
 
-    def _getitem_range(self, start: SupportsIndex, stop: SupportsIndex) -> Content:
+    def _getitem_range(self, start: SupportsIndex, stop: IndexType) -> Content:
         try:
             out = self._data[start:stop]
         except IndexError as err:

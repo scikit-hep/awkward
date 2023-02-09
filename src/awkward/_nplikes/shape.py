@@ -1,13 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 from __future__ import annotations
 
-from awkward.typing import (
-    Self,
-    SupportsInt,  # noqa: F401
-    TypeAlias,
-)
+from awkward.typing import Self, TypeAlias
 
-ShapeItem: TypeAlias = "SupportsInt | _UnknownLength"
+ShapeItem: TypeAlias = "int | _UnknownLength"
 
 
 class _UnknownLength:

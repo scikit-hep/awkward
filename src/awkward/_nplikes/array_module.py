@@ -8,7 +8,7 @@ import numpy
 import awkward as ak
 from awkward._nplikes.numpylike import ArrayLike, IndexType, NumpyLike, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
-from awkward.typing import Final, Literal, SupportsInt
+from awkward.typing import Final, Literal
 
 np = NumpyMetadata.instance()
 
@@ -223,7 +223,7 @@ class ArrayModuleNumpyLike(NumpyLike):
     ) -> ArrayLike:
         return self._module.unpackbits(x, axis=axis, count=count, bitorder=bitorder)
 
-    def broadcast_to(self, x: ArrayLike, shape: tuple[SupportsInt, ...]) -> ArrayLike:
+    def broadcast_to(self, x: ArrayLike, shape: tuple[ShapeItem, ...]) -> ArrayLike:
         return self._module.broadcast_to(x, shape)
 
     ############################ ufuncs

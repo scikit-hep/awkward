@@ -6,7 +6,7 @@ import copy
 import awkward as ak
 from awkward._errors import deprecate
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpylike import IndexType, NumpyMetadata
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.emptyform import EmptyForm
@@ -116,10 +116,10 @@ class EmptyArray(Content):
     def _getitem_nothing(self):
         return self
 
-    def _getitem_at(self, where: SupportsIndex):
+    def _getitem_at(self, where: IndexType):
         raise ak._errors.index_error(self, where, "array is empty")
 
-    def _getitem_range(self, start: SupportsIndex, stop: SupportsIndex) -> Content:
+    def _getitem_range(self, start: SupportsIndex, stop: IndexType) -> Content:
         return self
 
     def _getitem_field(

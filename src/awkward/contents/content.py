@@ -10,7 +10,7 @@ import awkward as ak
 from awkward._backends import Backend
 from awkward._nplikes import to_nplike
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import NumpyLike, NumpyMetadata
+from awkward._nplikes.numpylike import IndexType, NumpyLike, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import TypeTracer
 from awkward._slicing import normalize_slice
@@ -705,10 +705,10 @@ class Content:
                 )
             )
 
-    def _getitem_at(self, where: SupportsIndex):
+    def _getitem_at(self, where: IndexType):
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def _getitem_range(self, start: SupportsIndex, stop: SupportsIndex) -> Content:
+    def _getitem_range(self, start: SupportsIndex, stop: IndexType) -> Content:
         raise ak._errors.wrap_error(NotImplementedError)
 
     def _getitem_field(

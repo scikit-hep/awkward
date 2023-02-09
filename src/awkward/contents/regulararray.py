@@ -5,7 +5,7 @@ import copy
 
 import awkward as ak
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpylike import IndexType, NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._nplikes.typetracer import is_unknown_scalar
 from awkward._util import unset
@@ -220,7 +220,7 @@ class RegularArray(Content):
     def _getitem_nothing(self):
         return self._content._getitem_range(0, 0)
 
-    def _getitem_at(self, where: SupportsIndex):
+    def _getitem_at(self, where: IndexType):
         index_nplike = self._backend.index_nplike
         if index_nplike.known_data and where < 0:
             where += self._length
@@ -232,7 +232,7 @@ class RegularArray(Content):
         ) * index_nplike.shape_item_as_index(self._size)
         return self._content._getitem_range(start, stop)
 
-    def _getitem_range(self, start: SupportsIndex, stop: SupportsIndex) -> Content:
+    def _getitem_range(self, start: SupportsIndex, stop: IndexType) -> Content:
         index_nplike = self._backend.index_nplike
         if not index_nplike.known_data:
             self._touch_shape(recursive=False)

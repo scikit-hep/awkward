@@ -7,7 +7,7 @@ from collections.abc import Iterable
 
 import awkward as ak
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpylike import IndexType, NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._util import unset
 from awkward.contents.content import Content
@@ -329,7 +329,7 @@ class RecordArray(Content):
     def _getitem_nothing(self) -> Content:
         return self._getitem_range(0, 0)
 
-    def _getitem_at(self, where: SupportsIndex):
+    def _getitem_at(self, where: IndexType):
         if self._backend.nplike.known_data and where < 0:
             where += self.length
 
@@ -337,7 +337,7 @@ class RecordArray(Content):
             raise ak._errors.index_error(self, where)
         return Record(self, where)
 
-    def _getitem_range(self, start: SupportsIndex, stop: SupportsIndex) -> Content:
+    def _getitem_range(self, start: SupportsIndex, stop: IndexType) -> Content:
         if not self._backend.nplike.known_data:
             self._touch_shape(recursive=False)
             return self

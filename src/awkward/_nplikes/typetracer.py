@@ -10,15 +10,7 @@ from awkward._errors import wrap_error
 from awkward._nplikes.numpylike import ArrayLike, IndexType, NumpyLike, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._util import NDArrayOperatorsMixin, is_non_string_like_sequence
-from awkward.typing import (
-    Any,
-    Final,
-    Literal,
-    Self,
-    SupportsIndex,
-    SupportsInt,
-    TypeVar,
-)
+from awkward.typing import Any, Final, Literal, Self, SupportsIndex, TypeVar
 
 np = NumpyMetadata.instance()
 
@@ -888,11 +880,9 @@ class TypeTracer(NumpyLike):
 
             return start, stop, step, self.index_as_shape_item(slice_length)
 
-    def broadcast_shapes(
-        self, *shapes: tuple[SupportsInt, ...]
-    ) -> tuple[SupportsInt, ...]:
+    def broadcast_shapes(self, *shapes: tuple[ShapeItem, ...]) -> tuple[ShapeItem, ...]:
         ndim = max([len(s) for s in shapes], default=0)
-        result: list[SupportsInt] = [1] * ndim
+        result: list[ShapeItem] = [1] * ndim
 
         for shape in shapes:
             # Right broadcasting
@@ -945,7 +935,7 @@ class TypeTracer(NumpyLike):
         return [TypeTracerArray._new(x.dtype, shape=shape) for x in all_arrays]
 
     def broadcast_to(
-        self, x: ArrayLike, shape: tuple[SupportsInt, ...]
+        self, x: ArrayLike, shape: tuple[ShapeItem, ...]
     ) -> TypeTracerArray:
         raise ak._errors.wrap_error(NotImplementedError)
 
