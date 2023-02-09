@@ -7,7 +7,6 @@ import awkward as ak
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import IndexType, NumpyMetadata
 from awkward._nplikes.shape import unknown_length
-from awkward._nplikes.typetracer import is_unknown_scalar
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.form import _type_parameters_equal
@@ -291,14 +290,9 @@ class RegularArray(Content):
 
     def _getitem_at(self, where: IndexType):
         index_nplike = self._backend.index_nplike
-        if index_nplike.known_data and where < 0:
-            where += self._length
-
-        if not (self._length is unknown_length or 0 <= where < self._length):
-            raise ak._errors.index_error(self, where)
-        start, stop = where * index_nplike.shape_item_as_index(self._size), (
-            where + 1
-        ) * index_nplike.shape_item_as_index(self._size)
+        where = index_nplike.regularize_index_for_length(where, self._length)
+        size_scalar = index_nplike.shape_item_as_index(self._size)
+        start, stop = where * size_scalar, (where + 1) * size_scalar
         return self._content._getitem_range(start, stop)
 
     def _getitem_range(self, start: SupportsIndex, stop: IndexType) -> Content:
@@ -500,26 +494,6 @@ class RegularArray(Content):
             start, stop, step, nextsize = index_nplike.derive_slice_for_length(
                 head, length=self._size
             )
-
-            if (
-                is_unknown_scalar(start)
-                or is_unknown_scalar(stop)
-                or is_unknown_scalar(step)
-            ):
-                nextsize = unknown_length
-            else:
-                if step > 0 and stop > start:
-                    diff = stop - start
-                    nextsize = diff // step
-                    if diff % step != 0:
-                        nextsize += 1
-                elif step < 0 and stop < start:
-                    diff = start - stop
-                    nextsize = diff // (step * -1)
-                    if diff % step != 0:
-                        nextsize += 1
-                else:
-                    nextsize = 0
 
             nextcarry = ak.index.Index64.empty(self._length * nextsize, index_nplike)
             assert nextcarry.nplike is index_nplike

@@ -319,6 +319,12 @@ class NumpyLike(Singleton, Protocol):
         ...
 
     @abstractmethod
+    def regularize_index_for_length(
+        self, index: IndexType, length: ShapeItem
+    ) -> IndexType:
+        ...
+
+    @abstractmethod
     def reshape(
         self, x: ArrayLike, shape: tuple[int, ...], *, copy: bool | None = None
     ) -> ArrayLike:

@@ -14,7 +14,7 @@ from awkward._nplikes.shape import unknown_length
 from awkward.typing import TYPE_CHECKING, Sequence, TypeAlias
 
 if TYPE_CHECKING:
-    from awkward._nplikes.numpylike import ArrayLike  # noqa: F401
+    from awkward._nplikes.numpylike import ArrayLike
     from awkward.contents.content import Content
 
 np = NumpyMetadata.instance()

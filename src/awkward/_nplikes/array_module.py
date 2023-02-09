@@ -5,7 +5,7 @@ import math
 
 import numpy
 
-import awkward as ak
+from awkward._errors import wrap_error
 from awkward._nplikes.numpylike import ArrayLike, IndexType, NumpyLike, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward.typing import Final, Literal
@@ -31,7 +31,7 @@ class ArrayModuleNumpyLike(NumpyLike):
             return self._module.asarray(obj, dtype=dtype)
         else:
             if getattr(obj, "dtype", dtype) != dtype:
-                raise ak._errors.wrap_error(
+                raise wrap_error(
                     ValueError(
                         "asarray was called with copy=False for an array of a different dtype"
                     )
@@ -121,7 +121,7 @@ class ArrayModuleNumpyLike(NumpyLike):
         self, x: ArrayLike, shape: tuple[int, ...], *, copy: bool | None = None
     ) -> ArrayLike:
         if copy is False:
-            raise ak._errors.wrap_error(
+            raise wrap_error(
                 NotImplementedError(
                     "reshape was called with copy=False, which is currently not supported"
                 )
@@ -134,15 +134,13 @@ class ArrayModuleNumpyLike(NumpyLike):
 
     def shape_item_as_index(self, x1: ShapeItem) -> int:
         if x1 is unknown_length:
-            raise ak._errors.wrap_error(
+            raise wrap_error(
                 TypeError("array module nplikes do not support unknown lengths")
             )
         elif isinstance(x1, int):
             return x1
         else:
-            raise ak._errors.wrap_error(
-                TypeError(f"expected None or int type, received {x1}")
-            )
+            raise wrap_error(TypeError(f"expected None or int type, received {x1}"))
 
     def index_as_shape_item(self, x1: IndexType) -> int:
         return int(x1)
@@ -162,6 +160,26 @@ class ArrayModuleNumpyLike(NumpyLike):
         start, stop, step = slice_.indices(length)
         slice_length = math.ceil((stop - start) / step)
         return start, stop, step, slice_length
+
+    def regularize_index_for_length(
+        self, index: IndexType, length: ShapeItem
+    ) -> IndexType:
+        """
+        Args:
+            index: index value
+            length: length of array
+
+        Returns regularized index that is guaranteed to be in-bounds.
+        """  # We have known length and index
+        if index < 0:
+            index = index + length
+
+        if 0 <= index < length:
+            return index
+        else:
+            raise wrap_error(
+                IndexError(f"index value out of bounds (0, {length}): {index}")
+            )
 
     def nonzero(self, x: ArrayLike) -> tuple[ArrayLike, ...]:
         return self._module.nonzero(x)
