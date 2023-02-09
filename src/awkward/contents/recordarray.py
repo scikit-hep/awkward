@@ -317,10 +317,13 @@ class RecordArray(Content):
 
     def content(self, index_or_field: str | SupportsIndex) -> Content:
         out = self.form_cls.content(self, index_or_field)
-        if out.length == self._length:
+        if (
+            self._length is unknown_length
+            or out.length is unknown_length
+            or out.length == self._length
+        ):
             return out
         else:
-            assert self._length is not unknown_length, "TODO: need to handle this"
             return out[: self._length]
 
     def _getitem_nothing(self) -> Content:
