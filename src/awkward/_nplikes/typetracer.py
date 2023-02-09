@@ -7,13 +7,8 @@ import numpy
 
 import awkward as ak
 from awkward._errors import wrap_error
-from awkward._nplikes.numpylike import (
-    ArrayLike,
-    NumpyLike,
-    NumpyMetadata,
-    ShapeItem,
-    unknown_length,
-)
+from awkward._nplikes.numpylike import ArrayLike, NumpyLike, NumpyMetadata
+from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._util import NDArrayOperatorsMixin, is_non_string_like_sequence
 from awkward.typing import (
     Any,

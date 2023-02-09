@@ -5,7 +5,8 @@ import copy
 from collections.abc import Iterable
 
 import awkward as ak
-from awkward._nplikes.numpylike import NumpyMetadata, unknown_length
+from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.shape import unknown_length
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.typing import Self

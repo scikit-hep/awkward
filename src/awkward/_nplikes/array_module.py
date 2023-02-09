@@ -8,9 +8,8 @@ from awkward._nplikes.numpylike import (
     ArrayLike,
     NumpyLike,
     NumpyMetadata,
-    ShapeItem,
-    unknown_length,
 )
+from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward.typing import Final, Literal, SupportsInt
 
 np = NumpyMetadata.instance()

@@ -7,7 +7,8 @@ from awkward._backends import Backend
 from awkward._errors import wrap_error
 from awkward._nplikes import nplike_of, to_nplike
 from awkward._nplikes.jax import Jax
-from awkward._nplikes.numpylike import NumpyMetadata, unknown_length
+from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.shape import unknown_length
 from awkward.typing import TYPE_CHECKING, Sequence, TypeAlias
 
 if TYPE_CHECKING:

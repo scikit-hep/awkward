@@ -3,7 +3,7 @@
 import sys
 
 import awkward as ak
-from awkward._nplikes.numpylike import unknown_length
+from awkward._nplikes.shape import unknown_length
 
 
 class ArrayType:

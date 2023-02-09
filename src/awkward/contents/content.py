@@ -10,12 +10,8 @@ import awkward as ak
 from awkward._backends import Backend
 from awkward._nplikes import to_nplike
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import (
-    NumpyLike,
-    NumpyMetadata,
-    ShapeItem,
-    unknown_length,
-)
+from awkward._nplikes.numpylike import NumpyLike, NumpyMetadata
+from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import TypeTracer
 from awkward._util import unset
 from awkward.forms.form import Form, JSONMapping, _type_parameters_equal

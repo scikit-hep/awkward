@@ -4,7 +4,7 @@ import numpy as np
 import pytest  # noqa: F401
 
 import awkward as ak
-from awkward._nplikes.numpylike import unknown_length
+from awkward._nplikes.shape import unknown_length
 from awkward._nplikes.typetracer import MaybeNone, is_unknown_scalar
 
 

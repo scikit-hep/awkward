@@ -1,7 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
-from awkward._nplikes.numpylike import unknown_length
+from awkward._nplikes.shape import unknown_length
 from awkward._util import unset
 from awkward.forms.form import Form, _type_parameters_equal
 from awkward.typing import final
