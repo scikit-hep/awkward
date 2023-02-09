@@ -25,6 +25,53 @@ numpy = Numpy.instance()
 
 @final
 class ByteMaskedArray(Content):
+    """
+    The ByteMaskedArray implements an #ak.types.OptionType with two aligned
+    buffers, a boolean `mask` and `content`. At any element `i` where
+    `mask[i] == valid_when`, the value can be found at `content[i]`. If
+    `mask[i] != valid_when`, the value is missing (None).
+
+    This is equivalent to NumPy's
+    [masked arrays](https://docs.scipy.org/doc/numpy/reference/maskedarray.html)
+    if `valid_when=False`.
+
+    There is no Apache Arrow equivalent because Arrow
+    [uses bitmaps](https://arrow.apache.org/docs/format/Columnar.html#validity-bitmaps)
+    to mask all node types.
+
+    To illustrate how the constructor arguments are interpreted, the following is a
+    simplified implementation of `__init__`, `__len__`, and `__getitem__`:
+
+        class ByteMaskedArray(Content):
+            def __init__(self, mask, content, valid_when):
+                assert isinstance(mask, Index8)
+                assert isinstance(content, Content)
+                assert isinstance(valid_when, bool)
+                assert len(mask) <= len(content)
+                self.mask = mask
+                self.content = content
+                self.valid_when = valid_when
+
+            def __len__(self):
+                return len(self.mask)
+
+            def __getitem__(self, where):
+                if isinstance(where, int):
+                    assert 0 <= where < len(self)
+                    if self.mask[where] == self.valid_when:
+                        return self.content[where]
+                    else:
+                        return None
+                elif isinstance(where, slice) and where.step is None:
+                    return ByteMaskedArray(self.mask[where.start:where.stop],
+                                           self.content[where.start:where.stop],
+                                           valid_when=self.valid_when)
+                elif isinstance(where, str):
+                    return ByteMaskedArray(self.mask, self.content[where], valid_when=self.valid_when)
+                else:
+                    raise AssertionError(where)
+    """
+
     is_option = True
 
     def __init__(self, mask, content, valid_when, *, parameters=None):

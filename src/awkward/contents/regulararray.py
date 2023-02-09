@@ -23,6 +23,68 @@ numpy = Numpy.instance()
 
 @final
 class RegularArray(Content):
+    """
+    RegularArray describes lists that all have the same length, the single
+    integer `size`. Its underlying `content` is a flattened view of the data;
+    that is, each list is not stored separately in memory, but is inferred as a
+    subinterval of the underlying data.
+
+    If the `content` length is not an integer multiple of `size`, then the length
+    of the RegularArray is truncated to the largest integer multiple.
+
+    An extra field `zeros_length` is ignored unless the `size` is zero. This sets the
+    length of the RegularArray in only those cases, so that it is possible for an
+    array to contain a non-zero number of zero-length lists with regular type.
+
+    A multidimensional #ak.contents.NumpyArray is equivalent to a one-dimensional
+    #ak.layout.NumpyArray nested within several RegularArrays, one for each
+    dimension. However, RegularArrays can be used to make lists of any other type.
+
+    Like #ak.contents.ListArray and #ak.contents.ListOffsetArray, a RegularArray can
+    represent strings if its `__array__` parameter is `"string"` (UTF-8 assumed) or
+    `"bytestring"` (no encoding assumed) and it contains an #ak.contents.NumpyArray
+    of `dtype=np.uint8` whose `__array__` parameter is `"char"` (UTF-8 assumed) or
+    `"byte"` (no encoding assumed).
+
+    RegularArray corresponds to an Apache Arrow
+    [FixedSizeList](https://arrow.apache.org/docs/format/Columnar.html#fixed-size-list-layout).
+
+    To illustrate how the constructor arguments are interpreted, the following is a
+    simplified implementation of `__init__`, `__len__`, and `__getitem__`:
+
+        class RegularArray(Content):
+            def __init__(self, content, size, zeros_length=0):
+                assert isinstance(content, Content)
+                assert isinstance(size, int)
+                assert isinstance(zeros_length, int)
+                assert size >= 0
+                if size != 0:
+                    length = len(content) // size   # floor division
+                else:
+                    assert zeros_length >= 0
+                    length = zeros_length
+                self.content = content
+                self.size = size
+                self.length = length
+
+            def __len__(self):
+                return self.length
+
+            def __getitem__(self, where):
+                if isinstance(where, int):
+                    assert 0 <= where < len(self)
+                    return self.content[(where) * self.size:(where + 1) * self.size]
+                elif isinstance(where, slice) and where.step is None:
+                    start = where.start * self.size
+                    stop = where.stop * self.size
+                    zeros_length = where.stop - where.start
+                    return RegularArray(self.content[start:stop], self.size, zeros_length)
+                elif isinstance(where, str):
+                    return RegularArray(self.content[where], self.size, self.length)
+                else:
+                    raise AssertionError(where)
+    """
+
     is_list = True
     is_regular = True
 

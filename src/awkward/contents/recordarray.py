@@ -26,6 +26,84 @@ numpy = Numpy.instance()
 
 @final
 class RecordArray(Content):
+    """
+    RecordArray represents an array of tuples or records, all with the
+    same type. Its `contents` is an ordered list of arrays.
+
+       * If `fields` is None, the data are tuples, indexed only by
+         their order.
+       * Otherwise, `fields` is an ordered list of names with the same length as
+         the `contents`, associating a field name to every content.
+
+    The length of the RecordArray, if not given, is the length of its shortest
+    content; all are aligned element-by-element. If a RecordArray has zero contents,
+    it may still represent a non-empty array. In that case, its length is specified
+    by a `length` parameter.
+
+    RecordArrays correspond to Apache Arrow's
+    [struct type](https://arrow.apache.org/docs/format/Columnar.html#struct-layout).
+
+    To illustrate how the constructor arguments are interpreted, the following is a
+    simplified implementation of `__init__`, `__len__`, and `__getitem__`:
+
+        class RecordArray(Content):
+            def __init__(self, contents, fields, length):
+                assert isinstance(contents, list)
+                assert isinstance(length, int)
+                for x in contents:
+                    assert isinstance(x, Content)
+                    assert len(x) >= length
+                assert fields is None or isinstance(fields, list)
+                if isinstance(fields, list):
+                    assert len(fields) == len(contents)
+                    for x in fields:
+                        assert isinstance(x, str)
+                self.contents = contents
+                self.fields = fields
+                self.length = length
+
+            def __len__(self):
+                return self.length
+
+            def __getitem__(self, where):
+                if isinstance(where, int):
+                    assert 0 <= where < len(self)
+                    record = [x[where] for x in self.contents]
+                    if self.fields is None:
+                        return tuple(record)
+                    else:
+                        return dict(zip(self.fields, record))
+                elif isinstance(where, slice) and where.step is None:
+                    if len(self.contents) == 0:
+                        start = min(max(where.start, 0), self.length)
+                        stop = min(max(where.stop, 0), self.length)
+                        if stop < start:
+                            stop = start
+                        return RecordArray([], self.fields, stop - start)
+                    else:
+                        return RecordArray([x[where] for x in self.contents], self.fields,
+                                           where.stop - where.start)
+                elif isinstance(where, str):
+                    if self.fields is None:
+                        try:
+                            i = int(where)
+                        except ValueError:
+                            pass
+                        else:
+                            if i < len(self.contents):
+                                return self.contents[i][0:len(self)]
+                    else:
+                        try:
+                            i = self.fields.index(where)
+                        except ValueError:
+                            pass
+                        else:
+                            return self.contents[i][0:len(self)]
+                    raise ValueError("field " + repr(where) + " not found")
+                else:
+                    raise AssertionError(where)
+    """
+
     is_record = True
 
     @property

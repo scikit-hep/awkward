@@ -23,6 +23,72 @@ np = NumpyMetadata.instance()
 
 @final
 class ListArray(Content):
+    """
+    ListArray generalizes #ak.contents.ListOffsetArray by not
+    requiring its `content` to be in increasing order and by allowing it to
+    have unreachable elements between lists. Instead of a single `offsets` buffer,
+    ListArray has
+
+       * `starts`: The starting index of each list.
+       * `stops`: The stopping index of each list.
+
+    #ak.contents.ListOffsetArray `offsets` may be related to `starts` and
+    `stops` by
+
+        starts = offsets[:-1]
+        stops = offsets[1:]
+
+    ListArrays are a common by-product of structure manipulation: as a result of
+    some operation, we might want to view slices or permutations of the `content`
+    without copying it to make a contiguous version of it. For that reason,
+    ListArrays are more useful in a data-manipulation library like Awkward Array
+    than in a data-representation library like Apache Arrow.
+
+    Like #ak.contents.ListOffsetArray and #ak.contents.RegularArray, a ListArray can
+    represent strings if its `__array__` parameter is `"string"` (UTF-8 assumed) or
+    `"bytestring"` (no encoding assumed) and it contains an #ak.contents.NumpyArray
+    of `dtype=np.uint8` whose `__array__` parameter is `"char"` (UTF-8 assumed) or
+    `"byte"` (no encoding assumed).
+
+    There is no equivalent of ListArray in Apache Arrow.
+
+    To illustrate how the constructor arguments are interpreted, the following is a
+    simplified implementation of `__init__`, `__len__`, and `__getitem__`:
+
+        class ListArray(Content):
+            def __init__(self, starts, stops, content):
+                assert isinstance(starts, (Index32, IndexU32, Index64))
+                assert isinstance(stops, type(starts))
+                assert isinstance(content, Content)
+                assert len(stops) >= len(starts)   # usually equal
+                for i in range(len(starts)):
+                    start = starts[i]
+                    stop = stops[i]
+                    if start != stop:
+                        assert start < stop   # i.e. start <= stop
+                        assert start >= 0
+                        assert stop <= len(content)
+                self.starts = starts
+                self.stops = stops
+                self.content = content
+
+            def __len__(self):
+                return len(self.starts)
+
+            def __getitem__(self, where):
+                if isinstance(where, int):
+                    assert 0 <= where < len(self)
+                    return self.content[self.starts[where]:self.stops[where]]
+                elif isinstance(where, slice) and where.step is None:
+                    starts = self.starts[where.start:where.stop]
+                    stops = self.stops[where.start:where.stop]
+                    return ListArray(starts, stops, self.content)
+                elif isinstance(where, str):
+                    return ListArray(self.starts, self.stops, self.content[where])
+                else:
+                    raise AssertionError(where)
+    """
+
     is_list = True
 
     def __init__(self, starts, stops, content, *, parameters=None):
