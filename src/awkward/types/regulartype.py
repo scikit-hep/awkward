@@ -67,16 +67,12 @@ class RegularType(Type):
 
         else:
             params = self._str_parameters()
-            if self._size is unknown_length:
-                size_str = "##"
-            else:
-                size_str = str(self._size)
 
             if params is None:
-                out = [size_str, " * "] + self._content._str(indent, compact)
+                out = [str(self._size), " * "] + self._content._str(indent, compact)
             else:
                 out = (
-                    ["[", size_str, " * "]
+                    ["[", str(self._size), " * "]
                     + self._content._str(indent, compact)
                     + [", ", params, "]"]
                 )
