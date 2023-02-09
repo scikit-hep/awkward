@@ -10,7 +10,7 @@ from collections.abc import Iterable, Sequence
 import awkward as ak
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpylike import IndexType, NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._nplikes.typetracer import OneOf, TypeTracer
 from awkward._util import unset
@@ -457,9 +457,9 @@ class UnionArray(Content):
         return "".join(out)
 
     def _getitem_nothing(self):
-        return self._getitem_range(slice(0, 0))
+        return self._getitem_range(0, 0)
 
-    def _getitem_at(self, where: SupportsIndex):
+    def _getitem_at(self, where: IndexType):
         if not self._backend.nplike.known_data:
             self._touch_data(recursive=False)
             return OneOf([x._getitem_at(where) for x in self._contents])
@@ -471,13 +471,11 @@ class UnionArray(Content):
         tag, index = self._tags[where], self._index[where]
         return self._contents[tag]._getitem_at(index)
 
-    def _getitem_range(self, where):
+    def _getitem_range(self, start: SupportsIndex, stop: IndexType) -> Content:
         if not self._backend.nplike.known_data:
             self._touch_shape(recursive=False)
             return self
 
-        start, stop, step = where.indices(self.length)
-        assert step == 1
         return UnionArray(
             self._tags[start:stop],
             self._index[start:stop],

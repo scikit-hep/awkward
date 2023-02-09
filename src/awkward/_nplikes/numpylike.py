@@ -5,16 +5,18 @@ from abc import abstractmethod
 
 import numpy
 
-from awkward._nplikes.shape import ShapeItem
+from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._singleton import Singleton
 from awkward.typing import (
     Literal,
     Protocol,
     Self,
     SupportsIndex,
-    # noqa: F401
+    TypeAlias,
     overload,
 )
+
+IndexType: TypeAlias = "int | ArrayLike"
 
 
 class ArrayLike(Protocol):
@@ -294,12 +296,26 @@ class NumpyLike(Singleton, Protocol):
     def broadcast_to(self, x: ArrayLike, shape: tuple[ShapeItem, ...]) -> ArrayLike:
         ...
 
-    @abstractmethod
-    def shape_item_as_index(self, x1: ShapeItem):
+    @overload
+    def shape_item_as_index(self, x1: int) -> int:
+        ...
+
+    @overload
+    def shape_item_as_index(self, x1: type[unknown_length]) -> ArrayLike:
         ...
 
     @abstractmethod
-    def index_as_shape_item(self, x1) -> ShapeItem:
+    def shape_item_as_index(self, x1):
+        ...
+
+    @abstractmethod
+    def index_as_shape_item(self, x1: IndexType) -> ShapeItem:
+        ...
+
+    @abstractmethod
+    def derive_slice_for_length(
+        self, slice_: slice, length: ShapeItem
+    ) -> tuple[IndexType, IndexType, IndexType, ShapeItem]:
         ...
 
     @abstractmethod

@@ -7,7 +7,7 @@ from collections.abc import Iterable
 
 import awkward as ak
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpylike import IndexType, NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._util import unset
 from awkward.contents.content import Content
@@ -41,6 +41,8 @@ class RecordArray(Content):
         parameters=None,
         backend=None,
     ):
+        if not (length is None or length is unknown_length):
+            length = int(length)  # TODO: this should not happen!
         if not isinstance(contents, Iterable):
             raise ak._errors.wrap_error(
                 TypeError(
@@ -315,16 +317,19 @@ class RecordArray(Content):
 
     def content(self, index_or_field: str | SupportsIndex) -> Content:
         out = self.form_cls.content(self, index_or_field)
-        if out.length == self._length:
+        if (
+            self._length is unknown_length
+            or out.length is unknown_length
+            or out.length == self._length
+        ):
             return out
         else:
-            assert self._length is not unknown_length, "TODO: need to handle this"
             return out[: self._length]
 
     def _getitem_nothing(self) -> Content:
-        return self._getitem_range(slice(0, 0))
+        return self._getitem_range(0, 0)
 
-    def _getitem_at(self, where: SupportsIndex):
+    def _getitem_at(self, where: IndexType):
         if self._backend.nplike.known_data and where < 0:
             where += self.length
 
@@ -332,33 +337,32 @@ class RecordArray(Content):
             raise ak._errors.index_error(self, where)
         return Record(self, where)
 
-    def _getitem_range(self, where):
+    def _getitem_range(self, start: SupportsIndex, stop: IndexType) -> Content:
         if not self._backend.nplike.known_data:
             self._touch_shape(recursive=False)
             return self
 
         if self._length is unknown_length:
             return self
-        start, stop, step = where.indices(self.length)
-        assert step == 1
+
+        start, stop, _, length = self._backend.index_nplike.derive_slice_for_length(
+            slice(start, stop), self._length
+        )
+
         if len(self._contents) == 0:
-            start = min(max(start, 0), self._length)
-            stop = min(max(stop, 0), self._length)
-            if stop < start:
-                stop = start
+
             return RecordArray(
                 [],
                 self._fields,
-                stop - start,
+                length,
                 parameters=self._parameters,
                 backend=self._backend,
             )
         else:
-            nextslice = slice(start, stop)
             return RecordArray(
-                [x._getitem_range(nextslice) for x in self._contents],
+                [x._getitem_range(start, stop) for x in self._contents],
                 self._fields,
-                stop - start,
+                length,
                 parameters=self._parameters,
                 backend=self._backend,
             )
@@ -516,7 +520,7 @@ class RecordArray(Content):
         else:
             contents = []
             for content in self._contents:
-                trimmed = content._getitem_range(slice(0, self.length))
+                trimmed = content._getitem_range(0, self.length)
                 offsets, flattened = trimmed._offsets_and_flattened(axis, depth)
                 if self._backend.nplike.known_data and offsets.length != 0:
                     raise ak._errors.wrap_error(

@@ -5,8 +5,9 @@ import copy
 
 import awkward as ak
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpylike import IndexType, NumpyMetadata
 from awkward._nplikes.shape import unknown_length
+from awkward._nplikes.typetracer import is_unknown_scalar
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.form import _type_parameters_equal
@@ -217,28 +218,32 @@ class RegularArray(Content):
             return None
 
     def _getitem_nothing(self):
-        return self._content._getitem_range(slice(0, 0))
+        return self._content._getitem_range(0, 0)
 
-    def _getitem_at(self, where: SupportsIndex):
-        if self._backend.nplike.known_data and where < 0:
+    def _getitem_at(self, where: IndexType):
+        index_nplike = self._backend.index_nplike
+        if index_nplike.known_data and where < 0:
             where += self._length
 
         if not (self._length is unknown_length or 0 <= where < self._length):
             raise ak._errors.index_error(self, where)
-        start, stop = (where) * self._size, (where + 1) * self._size
-        return self._content._getitem_range(slice(start, stop))
+        start, stop = where * index_nplike.shape_item_as_index(self._size), (
+            where + 1
+        ) * index_nplike.shape_item_as_index(self._size)
+        return self._content._getitem_range(start, stop)
 
-    def _getitem_range(self, where):
-        if not self._backend.nplike.known_data:
+    def _getitem_range(self, start: SupportsIndex, stop: IndexType) -> Content:
+        index_nplike = self._backend.index_nplike
+        if not index_nplike.known_data:
             self._touch_shape(recursive=False)
             return self
 
-        start, stop, step = where.indices(self._length)
-        assert step == 1
-        zeros_length = stop - start
-        substart, substop = start * self._size, stop * self._size
+        zeros_length = index_nplike.index_as_shape_item(stop - start)
+        substart, substop = start * index_nplike.shape_item_as_index(
+            self._size
+        ), stop * index_nplike.shape_item_as_index(self._size)
         return RegularArray(
-            self._content._getitem_range(slice(substart, substop)),
+            self._content._getitem_range(substart, substop),
             self._size,
             zeros_length,
             parameters=self._parameters,
@@ -423,19 +428,29 @@ class RegularArray(Content):
 
         elif isinstance(head, slice):
             nexthead, nexttail = ak._slicing.headtail(tail)
-            start, stop, step = head.indices(self._size)
+            start, stop, step, nextsize = index_nplike.derive_slice_for_length(
+                head, length=self._size
+            )
 
-            nextsize = 0
-            if step > 0 and stop - start > 0:
-                diff = stop - start
-                nextsize = diff // step
-                if diff % step != 0:
-                    nextsize += 1
-            elif step < 0 and stop - start < 0:
-                diff = start - stop
-                nextsize = diff // (step * -1)
-                if diff % step != 0:
-                    nextsize += 1
+            if (
+                is_unknown_scalar(start)
+                or is_unknown_scalar(stop)
+                or is_unknown_scalar(step)
+            ):
+                nextsize = unknown_length
+            else:
+                if step > 0 and stop > start:
+                    diff = stop - start
+                    nextsize = diff // step
+                    if diff % step != 0:
+                        nextsize += 1
+                elif step < 0 and stop < start:
+                    diff = start - stop
+                    nextsize = diff // (step * -1)
+                    if diff % step != 0:
+                        nextsize += 1
+                else:
+                    nextsize = 0
 
             nextcarry = ak.index.Index64.empty(self._length * nextsize, index_nplike)
             assert nextcarry.nplike is index_nplike
@@ -916,7 +931,7 @@ class RegularArray(Content):
         else:
             length = self._length * self._size
             next = self._content._getitem_range(
-                slice(0, index_nplike.shape_item_as_index(length))
+                0, index_nplike.shape_item_as_index(length)
             )._combinations(n, replacement, recordlookup, parameters, axis, depth + 1)
             return ak.contents.RegularArray(
                 next, self._size, self._length, parameters=self._parameters
@@ -1083,7 +1098,7 @@ class RegularArray(Content):
                         outcontent.offsets[outcontent.offsets.length - 1],
                     )
 
-                    trimmed = outcontent.content._getitem_range(slice(start, stop))
+                    trimmed = outcontent.content._getitem_range(start, stop)
                     assert len(trimmed) == self._size * outcontent.length
 
                     outcontent = ak.contents.RegularArray(

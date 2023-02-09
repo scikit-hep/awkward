@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import operator
+
 import awkward as ak
 from awkward._backends import Backend
 from awkward._errors import wrap_error
@@ -19,6 +21,54 @@ np = NumpyMetadata.instance()
 
 
 SliceItem: TypeAlias = "int | slice | str | None | Ellipsis | ArrayLike | Content"
+
+
+def normalize_slice_item(item, *, backend: Backend):
+    if backend.index_nplike.is_own_array(item):
+        if item.ndim != 0:
+            raise wrap_error(
+                ValueError(
+                    f"slice items must be 0D arrays or Python integers, not {item!r}"
+                )
+            )
+        else:
+            return item
+    else:
+        return operator.index(item)
+
+
+def normalize_slice(slice_: slice, *, backend: Backend) -> slice:
+    """
+    Args:
+        slice_: slice object
+        backend: backend of layout
+
+    Return a slice of (start, stop, step) for which the slice items have been
+    normalized into index types.
+    """
+    index_nplike = backend.index_nplike
+
+    start = slice_.start
+    stop = slice_.stop
+    step = slice_.step
+
+    if index_nplike.known_data:
+        return slice_
+    # Unknown lengths mean that the slice index is unknown
+    else:
+        start = (
+            index_nplike.shape_item_as_index(start)
+            if start is unknown_length
+            else start
+        )
+        stop = (
+            index_nplike.shape_item_as_index(stop) if stop is unknown_length else stop
+        )
+        step = (
+            index_nplike.shape_item_as_index(step) if step is unknown_length else step
+        )
+
+        return slice(start, stop, step)
 
 
 def headtail(
@@ -162,7 +212,7 @@ def normalise_item(item, backend: Backend) -> SliceItem:
         return int(item)
 
     elif isinstance(item, slice):
-        return item
+        return normalize_slice(item, backend=backend)
 
     elif isinstance(item, str):
         return item
