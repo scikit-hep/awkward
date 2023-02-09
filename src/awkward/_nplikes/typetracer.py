@@ -386,17 +386,6 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
             )
         )
 
-    def _resolve_slice_length(self, length: ShapeItem, slice_) -> ShapeItem:
-        if length is unknown_length:
-            return unknown_length
-        elif any(
-            is_unknown_scalar(x) for x in (slice_.start, slice_.stop, slice_.step)
-        ):
-            return unknown_length
-        else:
-            start, stop, step = slice_.indices(length)
-            return min((stop - start) // step, length)
-
     def __getitem__(
         self,
         key: SupportsIndex
@@ -490,7 +479,12 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
                     previous_item_is_basic = False
                 # Slice
                 elif isinstance(item, slice):
-                    slice_length = self._resolve_slice_length(dimension_length, item)
+                    (
+                        start,
+                        stop,
+                        step,
+                        slice_length,
+                    ) = self.nplike.derive_slice_for_length(item, dimension_length)
                     result_shape_parts.append((slice_length,))
                     previous_item_is_basic = True
                 # Integer
@@ -821,6 +815,78 @@ class TypeTracer(NumpyLike):
             return unknown_length
         else:
             return int(x1)
+
+    def derive_slice_for_length(
+        self, slice_: slice, length: ShapeItem
+    ) -> tuple[IndexType, IndexType, IndexType, ShapeItem]:
+        """
+        Args:
+            slice_: normalized slice object
+            length: length of layout
+
+        Return a tuple of (start, stop, step, length) indices into a layout, suitable for
+        `_getitem_range` (if step == 1). Normalize lengths to fit length of array,
+        and for arrays with unknown lengths, these offsets become none.
+        """
+        start = slice_.start
+        stop = slice_.stop
+        step = slice_.step
+
+        # Unknown lengths mean that the slice index is unknown
+        length_scalar = self.shape_item_as_index(length)
+        if length is unknown_length:
+            return length_scalar, length_scalar, step, length
+        else:
+            # Normalise `None` values
+            if step is None:
+                step = 1
+
+            if start is None:
+                # `step` is unknown → `start` is unknown
+                if is_unknown_scalar(step):
+                    start = step
+                elif step < 0:
+                    start = length_scalar - 1
+                else:
+                    start = 0
+            # Normalise negative integers
+            elif not is_unknown_scalar(start):
+                if start < 0:
+                    start = start + length_scalar
+                # Clamp values into length bounds
+                if is_unknown_scalar(length_scalar):
+                    start = length_scalar
+                else:
+                    start = min(max(start, 0), length_scalar)
+
+            if stop is None:
+                # `step` is unknown → `stop` is unknown
+                if is_unknown_scalar(step):
+                    stop = step
+                elif step < 0:
+                    stop = -1
+                else:
+                    stop = length_scalar
+            # Normalise negative integers
+            elif not is_unknown_scalar(stop):
+                if stop < 0:
+                    stop = stop + length_scalar
+                # Clamp values into length bounds
+                if is_unknown_scalar(length_scalar):
+                    stop = length_scalar
+                else:
+                    stop = min(max(stop, 0), length_scalar)
+
+            # Compute the length of the slice for downstream use
+            slice_length, remainder = divmod((stop - start), step)
+            if not is_unknown_scalar(slice_length):
+                # Take ceiling of division
+                if remainder != 0:
+                    slice_length += 1
+
+                slice_length = max(0, slice_length)
+
+            return start, stop, step, self.index_as_shape_item(slice_length)
 
     def broadcast_shapes(
         self, *shapes: tuple[SupportsInt, ...]

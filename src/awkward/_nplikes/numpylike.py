@@ -313,6 +313,12 @@ class NumpyLike(Singleton, Protocol):
         ...
 
     @abstractmethod
+    def derive_slice_for_length(
+        self, slice_: slice, length: ShapeItem
+    ) -> tuple[IndexType, IndexType, IndexType, ShapeItem]:
+        ...
+
+    @abstractmethod
     def reshape(
         self, x: ArrayLike, shape: tuple[int, ...], *, copy: bool | None = None
     ) -> ArrayLike:

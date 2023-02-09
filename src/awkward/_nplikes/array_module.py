@@ -145,6 +145,20 @@ class ArrayModuleNumpyLike(NumpyLike):
     def index_as_shape_item(self, x1: IndexType) -> ShapeItem:
         return int(x1)
 
+    def derive_slice_for_length(
+        self, slice_: slice, length: ShapeItem
+    ) -> tuple[IndexType, IndexType, IndexType, ShapeItem]:
+        """
+        Args:
+            slice_: normalized slice object
+            length: length of layout
+
+        Return a tuple of (start, stop, step) indices into a layout, suitable for
+        `_getitem_range` (if step == 1). Normalize lengths to fit length of array,
+        and for arrays with unknown lengths, these offsets become none.
+        """
+        return slice_.indices(length)
+
     def nonzero(self, x: ArrayLike) -> tuple[ArrayLike, ...]:
         return self._module.nonzero(x)
 

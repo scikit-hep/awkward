@@ -7,6 +7,7 @@ import awkward as ak
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
+from awkward._nplikes.typetracer import is_unknown_scalar
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.form import _type_parameters_equal
@@ -427,19 +428,29 @@ class RegularArray(Content):
 
         elif isinstance(head, slice):
             nexthead, nexttail = ak._slicing.headtail(tail)
-            start, stop, step = head.indices(self._size)
+            start, stop, step, nextsize = index_nplike.derive_slice_for_length(
+                head, length=self._size
+            )
 
-            nextsize = 0
-            if step > 0 and stop - start > 0:
-                diff = stop - start
-                nextsize = diff // step
-                if diff % step != 0:
-                    nextsize += 1
-            elif step < 0 and stop - start < 0:
-                diff = start - stop
-                nextsize = diff // (step * -1)
-                if diff % step != 0:
-                    nextsize += 1
+            if (
+                is_unknown_scalar(start)
+                or is_unknown_scalar(stop)
+                or is_unknown_scalar(step)
+            ):
+                nextsize = unknown_length
+            else:
+                if step > 0 and stop > start:
+                    diff = stop - start
+                    nextsize = diff // step
+                    if diff % step != 0:
+                        nextsize += 1
+                elif step < 0 and stop < start:
+                    diff = start - stop
+                    nextsize = diff // (step * -1)
+                    if diff % step != 0:
+                        nextsize += 1
+                else:
+                    nextsize = 0
 
             nextcarry = ak.index.Index64.empty(self._length * nextsize, index_nplike)
             assert nextcarry.nplike is index_nplike

@@ -234,10 +234,6 @@ class NumpyArray(Content):
             return out
 
     def _getitem_range(self, start: SupportsIndex, stop: SupportsIndex) -> Content:
-        if not self._backend.nplike.known_data:
-            self._touch_shape(recursive=False)
-            return self
-
         try:
             out = self._data[start:stop]
         except IndexError as err:

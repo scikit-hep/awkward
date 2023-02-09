@@ -2,15 +2,16 @@
 
 from __future__ import annotations
 
+import operator
+
 import awkward as ak
 from awkward._backends import Backend
 from awkward._errors import wrap_error
 from awkward._nplikes import nplike_of, to_nplike
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpylike import NumpyMetadata
-from awkward._nplikes.shape import ShapeItem, unknown_length
-from awkward._nplikes.typetracer import is_unknown_scalar
-from awkward.typing import TYPE_CHECKING, Sequence, SupportsIndex, TypeAlias
+from awkward._nplikes.shape import unknown_length
+from awkward.typing import TYPE_CHECKING, Sequence, TypeAlias
 
 if TYPE_CHECKING:
     from awkward._nplikes.numpylike import ArrayLike  # noqa: F401
@@ -22,74 +23,52 @@ np = NumpyMetadata.instance()
 SliceItem: TypeAlias = "int | slice | str | None | Ellipsis | ArrayLike | Content"
 
 
-def regularize_slice(
-    slice: slice, length: ShapeItem, *, backend: Backend
-) -> tuple[SupportsIndex, SupportsIndex, SupportsIndex]:
+def normalize_slice_item(item, *, backend: Backend):
+    if backend.index_nplike.is_own_array(item):
+        if item.ndim != 0:
+            raise wrap_error(
+                ValueError(
+                    f"slice items must be 0D arrays or Python integers, not {item!r}"
+                )
+            )
+        else:
+            return item
+    else:
+        return operator.index(item)
+
+
+def normalize_slice(slice_: slice, *, backend: Backend) -> slice:
     """
     Args:
-        slice: slice object
-        length: length of layout
+        slice_: slice object
         backend: backend of layout
 
-    Return a tuple of (start, stop, step) indices into a layout, suitable for
-    `_getitem_range` (if step == 1). Normalise lengths to fit length of array,
-    and for arrays with unknown lengths, these offsets become none.
+    Return a slice of (start, stop, step) for which the slice items have been
+    normalized into index types.
     """
     index_nplike = backend.index_nplike
-    start = slice.start
-    stop = slice.stop
-    step = slice.step
+
+    start = slice_.start
+    stop = slice_.stop
+    step = slice_.step
 
     if index_nplike.known_data:
-        return slice.indices(length)
-
+        return slice_
+    # Unknown lengths mean that the slice index is unknown
     else:
-        length_scalar = index_nplike.shape_item_as_index(length)
-        # Unknown lengths mean that the slice index is unknown
-        if length is unknown_length:
-            return length_scalar, length_scalar, step
+        start = (
+            index_nplike.shape_item_as_index(start)
+            if start is unknown_length
+            else start
+        )
+        stop = (
+            index_nplike.shape_item_as_index(stop) if stop is unknown_length else stop
+        )
+        step = (
+            index_nplike.shape_item_as_index(step) if step is unknown_length else step
+        )
 
-        # Normalise `None` values
-        if step is None:
-            step = 1
-
-        if start is None:
-            # We need to know the step to choose appropriate start
-            if is_unknown_scalar(step):
-                start = step
-            elif step < 0:
-                start = length_scalar
-            else:
-                start = 0
-        # Normalise negative integers
-        elif not is_unknown_scalar(start):
-            if start < 0:
-                start = start + length_scalar
-            # Clamp values into length bounds
-            if is_unknown_scalar(length_scalar):
-                start = length_scalar
-            else:
-                start = min(max(start, 0), length_scalar)
-
-        if stop is None:
-            # We need to know the step to choose appropriate stop
-            if is_unknown_scalar(step):
-                stop = step
-            elif step < 0:
-                stop = 0
-            else:
-                stop = length_scalar
-        # Normalise negative integers
-        elif not is_unknown_scalar(stop):
-            if stop < 0:
-                stop = stop + length_scalar
-            # Clamp values into length bounds
-            if is_unknown_scalar(length_scalar):
-                stop = length_scalar
-            else:
-                stop = min(max(stop, 0), length_scalar)
-
-        return start, stop, step
+        return slice(start, stop, step)
 
 
 def headtail(
@@ -233,7 +212,7 @@ def normalise_item(item, backend: Backend) -> SliceItem:
         return int(item)
 
     elif isinstance(item, slice):
-        return item
+        return normalize_slice(item, backend=backend)
 
     elif isinstance(item, str):
         return item

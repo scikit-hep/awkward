@@ -13,7 +13,7 @@ from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyLike, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import TypeTracer
-from awkward._slicing import regularize_slice
+from awkward._slicing import normalize_slice
 from awkward._util import unset
 from awkward.forms.form import Form, JSONMapping, _type_parameters_equal
 from awkward.index import Index, Index64
@@ -538,7 +538,9 @@ class Content:
 
         elif isinstance(where, slice) and where.step is None:
             # Ensure that start, stop are non-negative!
-            start, stop, _ = regularize_slice(where, self.length, backend=self._backend)
+            start, stop, _, _ = self._backend.index_nplike.derive_slice_for_length(
+                normalize_slice(where, backend=self._backend), self.length
+            )
             return self._getitem_range(start, stop)
 
         elif isinstance(where, slice):
