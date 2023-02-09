@@ -7,7 +7,7 @@ import numpy
 
 import awkward as ak
 from awkward._errors import wrap_error
-from awkward._nplikes.numpylike import ArrayLike, NumpyLike, NumpyMetadata
+from awkward._nplikes.numpylike import ArrayLike, IndexType, NumpyLike, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._util import NDArrayOperatorsMixin, is_non_string_like_sequence
 from awkward.typing import (
@@ -808,7 +808,7 @@ class TypeTracer(NumpyLike):
         else:
             raise wrap_error(TypeError(f"expected scalar type, received {obj}"))
 
-    def shape_item_as_index(self, x1: ShapeItem) -> int | TypeTracerArray:
+    def shape_item_as_index(self, x1: ShapeItem) -> IndexType:
         if x1 is unknown_length:
             return TypeTracerArray._new(np.int64, shape=())
         elif isinstance(x1, int):
@@ -816,7 +816,7 @@ class TypeTracer(NumpyLike):
         else:
             raise wrap_error(TypeError(f"expected None or int type, received {x1}"))
 
-    def index_as_shape_item(self, x1: int | ArrayLike) -> ShapeItem:
+    def index_as_shape_item(self, x1: IndexType) -> ShapeItem:
         if is_unknown_scalar(x1) and np.issubdtype(x1.dtype, np.integer):
             return unknown_length
         else:

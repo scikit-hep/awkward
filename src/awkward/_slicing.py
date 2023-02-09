@@ -40,9 +40,9 @@ def regularise_slice(
     stop = slice.stop
     step = slice.step
 
-    length_scalar = index_nplike.shape_item_as_scalar(length)
+    length_scalar = index_nplike.shape_item_as_index(length)
     # Unknown lengths mean that the slice index is unknown
-    if length is None:
+    if length is unknown_length:
         return length_scalar, length_scalar, step
 
     # Normalise `None` values

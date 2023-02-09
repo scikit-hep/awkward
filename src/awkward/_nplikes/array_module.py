@@ -4,7 +4,7 @@ from __future__ import annotations
 import numpy
 
 import awkward as ak
-from awkward._nplikes.numpylike import ArrayLike, NumpyLike, NumpyMetadata
+from awkward._nplikes.numpylike import ArrayLike, IndexType, NumpyLike, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward.typing import Final, Literal, SupportsInt
 
@@ -142,7 +142,7 @@ class ArrayModuleNumpyLike(NumpyLike):
                 TypeError(f"expected None or int type, received {x1}")
             )
 
-    def index_as_shape_item(self, x1: int | ArrayLike) -> ShapeItem:
+    def index_as_shape_item(self, x1: IndexType) -> ShapeItem:
         return int(x1)
 
     def nonzero(self, x: ArrayLike) -> tuple[ArrayLike, ...]:
