@@ -95,9 +95,9 @@ class NumpyLookup(ContentLookup):
     def tolookup(cls, layout, positions):
         print("_lookup.py line 99: positions", positions, type(positions))
         print(
-            "_lookup.py line 100: layout.contiguous().data type",
-            layout.contiguous().data,
-            type(layout.contiguous().data),
+            "_lookup.py line 100: layout.to_contiguous().data type",
+            layout.to_contiguous().data,
+            type(layout.to_contiguous().data),
         )
         pos = len(positions)
         positions.append(layout.to_contiguous().data)
