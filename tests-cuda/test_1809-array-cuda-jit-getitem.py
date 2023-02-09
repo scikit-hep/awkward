@@ -6,11 +6,10 @@ import pytest  # noqa: F401
 
 import awkward as ak  # noqa: F401
 from awkward._connect.numba.arrayview_cuda import array_view_arg_handler
-    
-numba = pytest.importorskip("numba")
-from numba import cuda
 
-from numba import config
+numba = pytest.importorskip("numba")
+from numba import config, cuda
+
 config.CUDA_LOW_OCCUPANCY_WARNINGS = False
 config.CUDA_WARN_ON_IMPLICIT_COPY = False
 
@@ -28,7 +27,13 @@ def print_mempool_stats(idx):
     print("print_mempool_stats: -------------------------")
     print("print_mempool_stats:", idx, ": mempool.used_bytes", mempool.used_bytes())
     print("print_mempool_stats:", idx, ": mempool.total_bytes", mempool.total_bytes())
-    print("print_mempool_stats:", idx, ": pinned_mempool.n_free_blocks", pinned_mempool.n_free_blocks())
+    print(
+        "print_mempool_stats:",
+        idx,
+        ": pinned_mempool.n_free_blocks",
+        pinned_mempool.n_free_blocks(),
+    )
+
 
 # FIXME: configure the blocks
 # threadsperblock = 32
@@ -43,7 +48,7 @@ def print_mempool_stats(idx):
 def multiply(array, n, out):
     tid = cuda.grid(1)
     print("     kernel multiply for tid...", tid, len(array))
-    out[tid] = array[tid]# * n
+    out[tid] = array[tid]  # * n
 
 
 def test_array_multiply():
@@ -52,7 +57,7 @@ def test_array_multiply():
         print("test_array_multiply line 150: CUDA GPU is available!")
     else:
         print("test_array_multiply line 152: NO CUDA GPU...")
-        
+
     numba.cuda.detect()
 
     print("test_array_multiply line 156: create an ak.Array with cuda backend:")

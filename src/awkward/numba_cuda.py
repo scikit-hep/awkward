@@ -11,7 +11,6 @@ def register_and_check():
 
     try:
         import numba
-        import numba.cuda as nb_cuda
     except ImportError as err:
         raise ImportError(
             """install the 'numba' package with:

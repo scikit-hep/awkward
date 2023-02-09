@@ -59,7 +59,7 @@ def lower_const_array_as_const_view(val):
     arrayptrs = id(val._numbaview.lookup.arrayptrs)
     print("arrayptrs", arrayptrs, hex(arrayptrs), format(arrayptrs, 'x'))
     pylookup = id(val._numbaview.lookup)
-    
+
     return (start, stop, pos, arrayptrs, pylookup)
 
 
@@ -103,7 +103,7 @@ class ArrayViewArgHandler:
 
                 # access statistics of these memory pools.
                 print_mempool_stats(1)
- 
+
                 start = val._numbaview.start
                 stop = val._numbaview.stop
                 pos = val._numbaview.pos
@@ -116,7 +116,7 @@ class ArrayViewArgHandler:
                 raise ak._errors.wrap_error(NotImplementedError (
                     f"{repr(val.layout.nplike)} is not implemented for CUDA. Please transfer the array to CUDA backend to "
                     "continue the operation."))
-            
+
         else:
             return ty, val
 

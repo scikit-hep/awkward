@@ -8,13 +8,9 @@ import awkward as ak  # noqa: F401
 
 numba = pytest.importorskip("numba")
 
-from numba import cuda, types  # noqa: F401, E402
+from numba import config, cuda, types  # noqa: F401, E402
 from numba.core.typing.typeof import typeof, typeof_impl  # noqa: F401, E402
-from numba.extending import overload
-from numba.extending import overload_method
-from numba.cuda.args import wrap_arg
 
-from numba import config
 config.CUDA_LOW_OCCUPANCY_WARNINGS = False
 config.CUDA_WARN_ON_IMPLICIT_COPY = False
 
@@ -49,6 +45,7 @@ def lower_const_view(context, builder, viewtype, view):
 
     return proxyout._getvalue()
 
+
 def lower_const_array_as_const_view(array):
     array_view = ak._connect.numba.arrayview.ArrayView.fromarray(array)
 
@@ -79,7 +76,7 @@ class ArrayViewArgHandler:
             print("val is ak.Array")
             # Use uint64 for start, stop, pos, the array pointers value and the pylookup value
             tys = types.UniTuple(types.uint64, 5)
-  
+
             # ... Copy data to device if necessary...
             # use similar to: wrap_arg(val).to_device(retr, stream) where
             #
@@ -88,28 +85,32 @@ class ArrayViewArgHandler:
 
             dev = cuda.current_context().device
             print(dev)
-            dev_array = ak.to_backend(val, "cuda") # check if it does copy to device?
-            print(">>>>>>>> COPY TO DEVICE! >>>>>>>", dev_array, repr(dev_array), type(dev_array))
-#            ary = np.arange(10)
-#            d_ary = cuda.to_device(ary)
-#            print(d_ary)
+            dev_array = ak.to_backend(val, "cuda")  # check if it does copy to device?
+            print(
+                ">>>>>>>> COPY TO DEVICE! >>>>>>>",
+                dev_array,
+                repr(dev_array),
+                type(dev_array),
+            )
+            #            ary = np.arange(10)
+            #            d_ary = cuda.to_device(ary)
+            #            print(d_ary)
             print(dev)
-
 
             start, stop, pos, arrayptrs, pylookup = lower_const_array_as_const_view(val)
 
             # Retrieve data back to host
             def retrieve():
                 # Copy dev_array back to host somehow
-                hary = ak.to_backend(dev_array, "cpu") ########d_ary.copy_to_host()
+                hary = ak.to_backend(dev_array, "cpu")  ########d_ary.copy_to_host()
                 print("retrieve", hary, repr(hary), type(hary))
-                return hary ###ak.to_backend(dev_array, "cpu") 
-            
+                return hary  ###ak.to_backend(dev_array, "cpu")
+
             # Append retrieve function if necessary
             retr.append(retrieve)
 
             return tys, (start, stop, pos, arrayptrs, pylookup)
-        
+
             # print("High level ak.Array to_numpy data pointer is", ak.to_numpy(val).ctypes.data)
             # A pointer to the memory area of the array as a Python integer.
             # return types.uint64, val.layout._data.ctypes.data
@@ -120,13 +121,14 @@ class ArrayViewArgHandler:
             print("ak.ArrayView")
 
             tys = types.UniTuple(types.uint64, 5)
-            
+
             start, stop, pos, arrayptrs, pylookup = lower_as_const_view(val)
             print("Got", start, stop, pos, arrayptrs, pylookup)
-            
+
             return tys, (start, stop, pos, arrayptrs, pylookup)
         else:
             return ty, val
+
 
 array_view_arg_handler = ArrayViewArgHandler()
 
@@ -134,9 +136,11 @@ array_view_arg_handler = ArrayViewArgHandler()
 # threadsperblock = 32
 # blockspergrid = 128
 
+
 @cuda.jit(extensions=[array_view_arg_handler])
 def swallow(array):
     pass
+
 
 @cuda.jit(extensions=[array_view_arg_handler])
 def multiply(array, out, n):
@@ -154,7 +158,9 @@ def mul(array, out, n):
         out[tid] = n * array[tid]
     return ak.Array(out)
 
+
 import math  # Note that for the CUDA target, we need to use the scalar functions from the math module, not NumPy
+
 
 @cuda.jit(device=True)
 def polar_to_cartesian(rho, theta):
@@ -162,14 +168,16 @@ def polar_to_cartesian(rho, theta):
     y = rho * math.sin(theta)
     return x, y  # This is Python, so let's return a tuple
 
+
 from numba import vectorize
 
-@vectorize(['float32(float32, float32, float32, float32)'], target='cuda')
+
+@vectorize(["float32(float32, float32, float32, float32)"], target="cuda")
 def polar_distance(rho1, theta1, rho2, theta2):
     x1, y1 = polar_to_cartesian(rho1, theta1)
     x2, y2 = polar_to_cartesian(rho2, theta2)
-    
-    return ((x1 - x2)**2 + (y1 - y2)**2)**0.5
+
+    return ((x1 - x2) ** 2 + (y1 - y2) ** 2) ** 0.5
 
 
 def test_numpy_array_1d():
@@ -205,11 +213,12 @@ def test_polar_distance_gpu():
     out = polar_distance(rho1, theta1, rho2, theta2)
     print(out)
 
-#def test_array_mul():
+
+# def test_array_mul():
 #    akarray = ak.Array([0, 1, 2, 3])
 #    out = np.zeros(4, dtype=int)
-    ###arr = np.zeros(4, dtype=int) ###np.arange(1000)
-    ###d_arr = cuda.to_device(arr)
+###arr = np.zeros(4, dtype=int) ###np.arange(1000)
+###d_arr = cuda.to_device(arr)
 
 #    result_array = mul(akarray, out, 3)
 #    print("Multiply (device func) awkward array", akarray, result_array)
@@ -218,12 +227,13 @@ def test_polar_distance_gpu():
 def test_array_multiply():
     akarray = ak.Array([0, 1, 2, 3])
     ###out = np.zeros(4, dtype=int)
-    arr = np.zeros(4, dtype=int) ###np.arange(1000)
+    arr = np.zeros(4, dtype=int)  ###np.arange(1000)
     d_arr = cuda.to_device(arr)
 
     multiply[1, 4](akarray, d_arr, 3)
     result_array = d_arr.copy_to_host()
     print("Multiply awkward array", akarray, result_array)
+
 
 def test_array_view_multiply():
     akarray = ak.Array([10, 1, 2, 3])
@@ -235,7 +245,7 @@ def test_array_view_multiply():
     print("Multiply awkward array view", akarray, result_array)
 
 
-#def test_list_array_multipy():
+# def test_list_array_multipy():
 #    akarray = ak.Array([[0, 1], [2], [3, 4,5]])
 #    multiply[1, 1](akarray, 3)
 #    print("Multiply list array", akarray)
@@ -261,12 +271,13 @@ def test_as_array_1d():
     print("8. Swallaw ak.Array", akarray)
     swallow[1, 1](akarray)
 
-          
-def test_NumpyArrayType_array():    
+
+def test_NumpyArrayType_array():
     akarray = ak.Array([0, 1, 2, 3])
     swallow[1, 1](akarray)
 
-def test_ListArrayType_array():    
+
+def test_ListArrayType_array():
     akarray0 = ak.Array([0, 1, 2, 3])
     swallow[1, 1](akarray0)
     akarray1 = ak.Array([[0, 1], [2], [3, 4, 5]])

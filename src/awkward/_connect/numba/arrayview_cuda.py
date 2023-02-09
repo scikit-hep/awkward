@@ -5,18 +5,12 @@ import operator
 import numba
 import numba.core.typing
 import numba.core.typing.ctypes_utils
-
-from numba.cuda import printimpl
-
-from numba.core import cgutils
-
-from numba.extending import overload_method, overload
 from numba.core.extending import intrinsic as _intrinsic
 
-intrinsic = _intrinsic(target='cuda')
+intrinsic = _intrinsic(target="cuda")
 
-from numba.cuda.cudaimpl import registry as cuda_registry
 from numba import cuda, types
+from numba.cuda.cudaimpl import registry as cuda_registry
 
 import awkward as ak
 
@@ -24,67 +18,71 @@ np = ak.nplikes.NumpyMetadata.instance()
 
 import _ctypes
 
+
 def di(obj_id):
-    """ Inverse of id() function. """
+    """Inverse of id() function."""
     return _ctypes.PyObj_FromPtr(obj_id)
+
 
 def pyarrow_cuda_buffer_as_random(size):
     import numpy as np
     import pyarrow as pa
     import pyarrow.cuda as cuda
+
     ctx = cuda.Context()
-    dtype = np.dtype('uint8')
-    buf = pa.allocate_buffer(size*dtype.itemsize)
+    dtype = np.dtype("uint8")
+    buf = pa.allocate_buffer(size * dtype.itemsize)
     arr = np.frombuffer(buf, dtype=dtype)
-    arr[:] = np.random.randint(low=0, high=255, size=size,
-                               dtype=np.uint8)
+    arr[:] = np.random.randint(low=0, high=255, size=size, dtype=np.uint8)
     cbuf = ctx.new_buffer(buf.size)
     cbuf.copy_from_host(buf, position=0, nbytes=buf.size)
     return cbuf
 
 
 def pyarrow_cuda_buffer_as_numpy_ndarray(cbuf):
-    """Return a copy of CudaBuffer data as a numpy.ndarray.
-    """
+    """Return a copy of CudaBuffer data as a numpy.ndarray."""
     import numpy as np
-    dtype = np.dtype('uint8')
+
+    dtype = np.dtype("uint8")
     return np.frombuffer(cbuf.copy_to_host(), dtype=dtype)
 
 
 def pyarrow_cuda_buffer_as_numba_cuda_DeviceNDArray(cbuf):
-    """Return numba DeviceNDArray view of a pyarrow.cuda.CudaBuffer.
-    """
+    """Return numba DeviceNDArray view of a pyarrow.cuda.CudaBuffer."""
     import numpy as np
     from numba.cuda.cudadrv.devicearray import DeviceNDArray
-    dtype = np.dtype('uint8')
-    return DeviceNDArray((cbuf.size,), (dtype.itemsize,), dtype,
-                         gpu_data=cbuf.to_numba())
+
+    dtype = np.dtype("uint8")
+    return DeviceNDArray(
+        (cbuf.size,), (dtype.itemsize,), dtype, gpu_data=cbuf.to_numba()
+    )
 
 
 def pyarrow_cuda_buffer_as_cupy_cuda_MemoryPointer(cbuf):
-    """Return cupy.cuda.MemoryPointer view of a pyarrow.cuda.CudaBuffer.
-    """
+    """Return cupy.cuda.MemoryPointer view of a pyarrow.cuda.CudaBuffer."""
     import cupy
-    #addr = cbuf.context.get_device_address(cbuf.address) # requires arrow>=0.12.1
+
+    # addr = cbuf.context.get_device_address(cbuf.address) # requires arrow>=0.12.1
     addr = cbuf.address
     mem = cupy.cuda.UnownedMemory(addr, cbuf.size, cbuf)
     return cupy.cuda.MemoryPointer(mem, 0)
 
 
 def pyarrow_cuda_buffer_as_cupy_ndarray(cbuf):
-    """Return cupy.ndarray view of a pyarrow.cuda.CudaBuffer.
-    """
+    """Return cupy.ndarray view of a pyarrow.cuda.CudaBuffer."""
     import cupy
-    return cupy.ndarray(cbuf.size, dtype=cupy.uint8,
-                        memptr=cupy_cuda_MemoryPointer(cbuf))
+
+    return cupy.ndarray(
+        cbuf.size, dtype=cupy.uint8, memptr=cupy_cuda_MemoryPointer(cbuf)
+    )
 
 
 def pyarrow_cuda_buffer_as_xnd_xnd_cuda(cbuf):
-    """Return xnd.xnd view of a pyarrow.cuda.CudaBuffer [EXPERIMENTAL].
-    """
-    import xnd
+    """Return xnd.xnd view of a pyarrow.cuda.CudaBuffer [EXPERIMENTAL]."""
     import pyarrow as pa
-    #addr = cbuf.context.get_device_address(cbuf.address) # requires arrow>=0.12.1
+    import xnd
+
+    # addr = cbuf.context.get_device_address(cbuf.address) # requires arrow>=0.12.1
     addr = cbuf.address
     # device = cbuf.context.device_number
     buf = pa.foreign_buffer(addr, cbuf.size, cbuf)
@@ -92,73 +90,72 @@ def pyarrow_cuda_buffer_as_xnd_xnd_cuda(cbuf):
 
 
 def cupy_ndarray_as_random(size):
-    """Return random cupy.ndarray instance of 8 bit insigned integers.
-    """
+    """Return random cupy.ndarray instance of 8 bit insigned integers."""
     import cupy
+
     return cupy.random.randint(0, 256, dtype=cupy.uint8, size=size)
 
 
 def cupy_ndarray_as_numpy_ndarray(cp_arr):
-    """Return a copy of CudaBuffer data as a numpy.ndarray.
-    """
+    """Return a copy of CudaBuffer data as a numpy.ndarray."""
     import cupy
+
     return cupy.asnumpy(cp_arr)
 
 
 def cupy_ndarray_as_numba_cuda_DeviceNDArray(cp_arr):
-    """Return numba DeviceNDArray view of cupy.ndarray.
-    """
+    """Return numba DeviceNDArray view of cupy.ndarray."""
     import numba.cuda as nb_cuda
+
     return nb_cuda.as_cuda_array(cp_arr)
 
 
 def cupy_ndarray_as_pyarrow_cuda_buffer(cp_arr):
-    """Return pyarrow.cuda.CudaBuffer view of cupy.ndarray.
-    """
+    """Return pyarrow.cuda.CudaBuffer view of cupy.ndarray."""
     import pyarrow.cuda as cuda
+
     ctx = cuda.Context(cp_arr.data.device.id)
     return ctx.foreign_buffer(cp_arr.data.ptr, cp_arr.nbytes)
 
 
 def cupy_ndarray_as_cupy_cuda_MemoryPointer(cp_arr):
-    """Return cupy.cuda.MemoryPointer view of cupy.ndarray.
-    """
+    """Return cupy.cuda.MemoryPointer view of cupy.ndarray."""
     return cp_arr.data
 
 
 def numba_cuda_DeviceNDArray_as_random(size):
     import numba.cuda as cuda
     import numpy as np
-    arr = np.random.randint(low=0, high=255, size=size,
-                            dtype=np.uint8)
+
+    arr = np.random.randint(low=0, high=255, size=size, dtype=np.uint8)
     return cuda.to_device(arr)
 
 
 def numba_cuda_DeviceNDArray_as_numpy_ndarray(nb_arr):
-    """Return a copy of numba DeviceNDArray data as a numpy.ndarray.
-    """
+    """Return a copy of numba DeviceNDArray data as a numpy.ndarray."""
     return nb_arr.copy_to_host()
 
 
 def numba_cuda_DeviceNDArray_as_pyarrow_cuda_buffer(nb_arr):
-    """Return pyarrow.cuda.CudaBuffer view of a numba DeviceNDArray.
-    """
+    """Return pyarrow.cuda.CudaBuffer view of a numba DeviceNDArray."""
     import pyarrow.cuda as cuda
+
     ctx = cuda.Context()
-    if hasattr(ctx, 'buffer_from_object'):
+    if hasattr(ctx, "buffer_from_object"):
         # buffer_from_object is defined in arrow>=0.12.1
         return ctx.buffer_from_object(nb_arr)
     desc = nb_arr.__cuda_array_interface__
-    addr = desc['data'][0]
+    addr = desc["data"][0]
     size = nb_arr.alloc_size
-    strides = desc.get('strides')
-    assert strides in [(1, ), None], repr(strides)
+    strides = desc.get("strides")
+    assert strides in [(1,), None], repr(strides)
     return ctx.foreign_buffer(addr, size)
 
+
 def numba_cuda_DeviceNDArray_as_cupy_cuda_MemoryPointer(nb_arr):
-    """Return cupy.cuda.MemoryPointer view of a numba DeviceNDArray.
-    """
+    """Return cupy.cuda.MemoryPointer view of a numba DeviceNDArray."""
     import cupy
+
     addr = nb_arr.device_ctypes_pointer.value
     size = nb_arr.alloc_size
     mem = cupy.cuda.UnownedMemory(addr, size, nb_arr)
@@ -166,29 +163,33 @@ def numba_cuda_DeviceNDArray_as_cupy_cuda_MemoryPointer(nb_arr):
 
 
 def numba_cuda_DeviceNDArray_as_cupy_ndarray(nb_arr):
-    """Return cupy.ndarray view of a numba DeviceNDArray.
-    """
+    """Return cupy.ndarray view of a numba DeviceNDArray."""
     import cupy
-    return cupy.ndarray(nb_arr.shape, dtype=cupy.uint8,
-                        strides=nb_arr.strides,
-                        memptr=numba_cuda_DeviceNDArray_as_cupy_cuda_MemoryPointer(nb_arr))
+
+    return cupy.ndarray(
+        nb_arr.shape,
+        dtype=cupy.uint8,
+        strides=nb_arr.strides,
+        memptr=numba_cuda_DeviceNDArray_as_cupy_cuda_MemoryPointer(nb_arr),
+    )
 
 
 def numba_cuda_DeviceNDArray_as_xnd_xnd_cuda(nb_arr):
-    """Return xnd.xnd view of a numba DeviceNDArray.
-    """
+    """Return xnd.xnd view of a numba DeviceNDArray."""
     cbuf = pyarrow_cuda_buffer(nb_arr)
     # DERIVED
     return pyarrow_cuda_buffer_as.xnd_xnd_cuda(cbuf)
 
 
 def numba_cuda_DeviceNDArray_as_cudf_Series(nb_arr):
-    """Return cudf.Series view of a numba DeviceNDArray.
-    """
+    """Return cudf.Series view of a numba DeviceNDArray."""
     import cudf
+
     return cudf.Series(nb_arr)
 
+
 #####################################################################
+
 
 def code_to_function(code, function_name, externals=None, debug=True):
     print("arrayview_cuda.py line 21: code_to_function")
@@ -297,7 +298,7 @@ class ArrayView:
             allow_other=False,
             numpytype=(np.number, np.bool_, np.datetime64, np.timedelta64),
         )
-        
+
         return ArrayView(
             tonumbatype(layout.form),
             behavior,
@@ -317,7 +318,14 @@ class ArrayView:
         self.start = start
         self.stop = stop
         self.fields = fields
-        print("arrayview_cuda.py line 147: ArrayView __init__", self, self.lookup, self.pos, self.start, self.stop)
+        print(
+            "arrayview_cuda.py line 147: ArrayView __init__",
+            self,
+            self.lookup,
+            self.pos,
+            self.start,
+            self.stop,
+        )
 
     def toarray(self):
         print("arrayview_cuda.py line 150: ArrayView::toarray")
@@ -522,8 +530,11 @@ def box_ArrayView(viewtype, viewval, c):
 @numba.core.typing.templates.infer_global(len)
 class type_len(numba.core.typing.templates.AbstractTemplate):
     print("arrayview_cuda.py line 345: class type_len")
+
     def generic(self, args, kwargs):
-        print("arrayview_cuda.py line 347: type_len::generic @numba.core.typing.templates.infer_global(len)")
+        print(
+            "arrayview_cuda.py line 347: type_len::generic @numba.core.typing.templates.infer_global(len)"
+        )
         if len(args) == 1 and len(kwargs) == 0 and isinstance(args[0], ArrayViewType):
             print("arrayview_cuda.py line 349: args[0]", args[0])
             return numba.intp(args[0])
@@ -531,31 +542,46 @@ class type_len(numba.core.typing.templates.AbstractTemplate):
 
 @numba.extending.lower_builtin(len, ArrayViewType)
 def lower_len(context, builder, sig, args):
-    print("arrayview_cuda.py line 355: @numba.extending.lower_builtin(len, ArrayViewType)", sig, sig.args[0], args[0])
+    print(
+        "arrayview_cuda.py line 355: @numba.extending.lower_builtin(len, ArrayViewType)",
+        sig,
+        sig.args[0],
+        args[0],
+    )
     proxyin = context.make_helper(builder, sig.args[0], args[0])
-    #cgutils.printf(builder, "stop %d, start %d", proxyin.stop, proxyin.start)
-    #val = ctypes.cast(x.data.ptr, ctypes.py_object).value
-    #printimpl.print_varargs(context, builder, sig, proxyin.stop) # 'LoadInstr' object is not iterable
+    # cgutils.printf(builder, "stop %d, start %d", proxyin.stop, proxyin.start)
+    # val = ctypes.cast(x.data.ptr, ctypes.py_object).value
+    # printimpl.print_varargs(context, builder, sig, proxyin.stop) # 'LoadInstr' object is not iterable
     return builder.sub(proxyin.stop, proxyin.start)
 
-#@overload_method(ArrayViewType, "len", target="cuda")
-#def ArrayViewType_len(array_view):
+
+# @overload_method(ArrayViewType, "len", target="cuda")
+# def ArrayViewType_len(array_view):
 #    if isinstance(array_view, ArrayViewType):
 #        def impl(array_view):
 #            return array_view.stop - array_view.start
 #        return impl
 
+
 @numba.core.typing.templates.infer_global(operator.getitem)
 class type_getitem(numba.core.typing.templates.AbstractTemplate):
     print("arrayview_cuda.py line 371: type_getitem")
+
     def generic(self, args, kwargs):
-        print("arrayview_cuda.py line 373: @numba.core.typing.templates.infer_global generic class type_getitem")
-        #printimpl.print_varargs(context, builder, sig, args)
+        print(
+            "arrayview_cuda.py line 373: @numba.core.typing.templates.infer_global generic class type_getitem"
+        )
+        # printimpl.print_varargs(context, builder, sig, args)
         if len(args) == 2 and len(kwargs) == 0 and isinstance(args[0], ArrayViewType):
             viewtype, wheretype = args
-            print("arrayview_cuda.py line 376: viewtype, wheretype", viewtype, wheretype)
+            print(
+                "arrayview_cuda.py line 376: viewtype, wheretype", viewtype, wheretype
+            )
             if isinstance(wheretype, numba.types.Integer):
-                print("arrayview_cuda.py line 378: viewtype.type.getitem_at_check->", viewtype.type)
+                print(
+                    "arrayview_cuda.py line 378: viewtype.type.getitem_at_check->",
+                    viewtype.type,
+                )
                 return viewtype.type.getitem_at_check(viewtype)(viewtype, wheretype)
             elif (
                 isinstance(wheretype, numba.types.SliceType) and not wheretype.has_step
@@ -572,12 +598,20 @@ class type_getitem(numba.core.typing.templates.AbstractTemplate):
                     "slices in compiled code"
                 )
 
+
 @numba.extending.lower_builtin(operator.setitem, ArrayViewType, numba.types.Integer)
 def lower_setitem_at(context, builder, sig, args):
     rettype, (viewtype, wheretype) = sig.return_type, sig.args
     viewval, whereval = args
     viewproxy = context.make_helper(builder, viewtype, viewval)
-    print("arrayview_cuda.py line 400:  ------->", viewval, whereval, viewtype, repr(viewtype), viewproxy)
+    print(
+        "arrayview_cuda.py line 400:  ------->",
+        viewval,
+        whereval,
+        viewtype,
+        repr(viewtype),
+        viewproxy,
+    )
     return viewtype.type.lower_setitem_at_check(
         context,
         builder,
@@ -591,10 +625,11 @@ def lower_setitem_at(context, builder, sig, args):
         True,
     )
 
+
 @numba.extending.lower_builtin(operator.getitem, ArrayViewType, numba.types.Integer)
 def lower_getitem_at(context, builder, sig, args):
     print("arrayview_cuda.py line 416: @numba.extending.lower_builtin lower_getitem_at")
-    
+
     rettype, (viewtype, wheretype) = sig.return_type, sig.args
     viewval, whereval = args
     viewproxy = context.make_helper(builder, viewtype, viewval)
@@ -676,6 +711,7 @@ def lower_getattr_generic(context, builder, viewtype, viewval, attr):
 
 class IteratorType(numba.types.common.SimpleIteratorType):
     print("arrayview_cuda.py line 493: class IteratorType")
+
     def __init__(self, viewtype):
         print("arrayview_cuda.py line 495: IteratorType::__init__")
         super().__init__(
@@ -699,6 +735,7 @@ class type_getiter(numba.core.typing.templates.AbstractTemplate):
 @numba.core.datamodel.registry.register_default(IteratorType)
 class IteratorModel(numba.core.datamodel.models.StructModel):
     print("arrayview_cuda.py line 516: class IteratorModel")
+
     def __init__(self, dmm, fe_type):
         print("arrayview_cuda.py line 518: IteratorModel::__init__")
         members = [
@@ -1272,16 +1309,17 @@ def lower_asarray(context, builder, sig, args):
 ########## ArrayView Arguments Handler for CUDA JIT
 
 import ctypes  # noqa: F401
+from ctypes import addressof
+
 import numba.cuda as nb_cuda
 
-from ctypes import c_int, addressof
+# from numba import cuda, types  # noqa: F401, E402
 
-#from numba import cuda, types  # noqa: F401, E402
 
 class ArrayViewArgHandler:
     def prepare_args(self, ty, val, stream, retr):
         if isinstance(val, int):
-            result = format(val, 'x')
+            format(val, "x")
         if isinstance(val, ak.Array):
 
             if isinstance(val.layout.nplike, ak.nplikes.Cupy):
@@ -1293,34 +1331,55 @@ class ArrayViewArgHandler:
                 print("ArrayViewArgHandler::prepare_args line 108:", dev)
 
                 print("CuPy array???", val.layout.data.data)
-                #import numba.cuda as nb_cuda
+                # import numba.cuda as nb_cuda
                 array_data_view = nb_cuda.as_cuda_array(val.layout.data)
                 print("view --->", array_data_view, type(array_data_view))
-                print("val._numbaview.start", val._numbaview.start, type(val._numbaview.start))
-                print("val._numbaview.stop", val._numbaview.stop, type(val._numbaview.stop))
-                print("val._numbaview.pos", val._numbaview.pos, type(val._numbaview.pos))
+                print(
+                    "val._numbaview.start",
+                    val._numbaview.start,
+                    type(val._numbaview.start),
+                )
+                print(
+                    "val._numbaview.stop",
+                    val._numbaview.stop,
+                    type(val._numbaview.stop),
+                )
+                print(
+                    "val._numbaview.pos", val._numbaview.pos, type(val._numbaview.pos)
+                )
                 c_intp = ctypes.c_ssize_t
-                
+
                 start = addressof(c_intp(val._numbaview.start))
                 stop = addressof(c_intp(val._numbaview.stop))
                 pos = addressof(c_intp(val._numbaview.pos))
                 arrayptrs = val._numbaview.lookup.arrayptrs
                 pylookup = addressof(ctypes.c_void_p(0))
 
-                result_ptr = format(arrayptrs.item(), 'x')
-                print("arrayview_cuda.py line 1280: ArrayViewArgHandler::prepare_args: about to return from prepare args and arrayptrs is", result_ptr, arrayptrs.item())
-                print("arrayview_cuda.py line 1281: ArrayViewArgHandler::prepare_args:", arrayptrs.data.ptr)
-                print("start = 0x", format(start, 'x')) 
-                print("stop = 0x", format(stop, 'x'))
-                print("pos = 0x", format(pos, 'x'))
+                result_ptr = format(arrayptrs.item(), "x")
+                print(
+                    "arrayview_cuda.py line 1280: ArrayViewArgHandler::prepare_args: about to return from prepare args and arrayptrs is",
+                    result_ptr,
+                    arrayptrs.item(),
+                )
+                print(
+                    "arrayview_cuda.py line 1281: ArrayViewArgHandler::prepare_args:",
+                    arrayptrs.data.ptr,
+                )
+                print("start = 0x", format(start, "x"))
+                print("stop = 0x", format(stop, "x"))
+                print("pos = 0x", format(pos, "x"))
                 return tys, (start, stop, pos, arrayptrs.item(), pylookup)
             else:
-                raise ak._errors.wrap_error(NotImplementedError (
-                    f"{repr(val.layout.nplike)} is not implemented for CUDA. Please transfer the array to CUDA backend to "
-                    "continue the operation."))
-            
+                raise ak._errors.wrap_error(
+                    NotImplementedError(
+                        f"{repr(val.layout.nplike)} is not implemented for CUDA. Please transfer the array to CUDA backend to "
+                        "continue the operation."
+                    )
+                )
+
         else:
             return ty, val
+
 
 array_view_arg_handler = ArrayViewArgHandler()
 
@@ -1329,7 +1388,7 @@ array_view_arg_handler = ArrayViewArgHandler()
 #        if isinstance(val, ak.Array):
 #            # Use uint64 for start, stop, pos, the array pointers value and the pylookup value
 #            tys = types.UniTuple(types.uint64, 5)
-#  
+#
 #            # ... Copy data to device if necessary...
 #            # use similar to: wrap_arg(val).to_device(retr, stream) where
 #            #
@@ -1347,35 +1406,33 @@ array_view_arg_handler = ArrayViewArgHandler()
 
 #            start, stop, pos, arrayptrs, pylookup = lower_const_array_as_const_view(val)
 
-            # Retrieve data back to host
+# Retrieve data back to host
 #            def retrieve():
 #                # Copy dev_array back to host somehow
 #                hary = ak.to_backend(dev_array, "cpu") ########d_ary.copy_to_host()
 #                print("retrieve", hary, repr(hary), type(hary))
-#                return hary ###ak.to_backend(dev_array, "cpu") 
-            
+#                return hary ###ak.to_backend(dev_array, "cpu")
+
 #            # Append retrieve function if necessary
 #            retr.append(retrieve)
 
 #            return tys, (start, stop, pos, arrayptrs, pylookup)
-        
-            # print("High level ak.Array to_numpy data pointer is", ak.to_numpy(val).ctypes.data)
-            # A pointer to the memory area of the array as a Python integer.
-            # return types.uint64, val.layout._data.ctypes.data
-            #
-            # return types.uint64, ak._connect.numba.arrayview.ArrayView.fromarray(val).lookup.arrayptrs.ctypes.data
+
+# print("High level ak.Array to_numpy data pointer is", ak.to_numpy(val).ctypes.data)
+# A pointer to the memory area of the array as a Python integer.
+# return types.uint64, val.layout._data.ctypes.data
+#
+# return types.uint64, ak._connect.numba.arrayview.ArrayView.fromarray(val).lookup.arrayptrs.ctypes.data
 
 #        elif isinstance(val, ak._connect.numba.arrayview.ArrayView):
 
 #            tys = types.UniTuple(types.uint64, 5)
-            
+
 #            start, stop, pos, arrayptrs, pylookup = lower_as_const_view(val)
 #            print("Got", start, stop, pos, arrayptrs, pylookup)
-            
+
 #            return tys, (start, stop, pos, arrayptrs, pylookup)
 #        else:
 #            return ty, val
 
-#arg_handler = ArrayViewArgHandler()
-
-
+# arg_handler = ArrayViewArgHandler()

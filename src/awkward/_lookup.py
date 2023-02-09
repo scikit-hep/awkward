@@ -15,7 +15,12 @@ class Lookup:
             if isinstance(x, int):
                 return x
             elif isinstance(self.nplike, ak.nplikes.Cupy):
-                print("_lookup.py line 25: GPU arrayptr: x.data", x.data, " and x.data.ptr", hex(x.data.ptr))
+                print(
+                    "_lookup.py line 25: GPU arrayptr: x.data",
+                    x.data,
+                    " and x.data.ptr",
+                    hex(x.data.ptr),
+                )
                 print("_lookup.py line 26: ")
                 return x.data.ptr
             else:
@@ -29,7 +34,7 @@ class Lookup:
             [arrayptr(x) for x in positions], dtype=np.intp
         )
         for i in range(len(self.arrayptrs)):
-            result = format(self.arrayptrs[i], 'x')
+            result = format(self.arrayptrs[i], "x")
             print("_lookup.py line 41:   data ptr", result)
 
 
@@ -89,7 +94,11 @@ class NumpyLookup(ContentLookup):
     @classmethod
     def tolookup(cls, layout, positions):
         print("_lookup.py line 99: positions", positions, type(positions))
-        print("_lookup.py line 100: layout.contiguous().data type", layout.contiguous().data, type(layout.contiguous().data))
+        print(
+            "_lookup.py line 100: layout.contiguous().data type",
+            layout.contiguous().data,
+            type(layout.contiguous().data),
+        )
         pos = len(positions)
         positions.append(layout.to_contiguous().data)
         return pos
