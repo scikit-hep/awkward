@@ -5,7 +5,7 @@ from abc import abstractmethod
 
 import numpy
 
-from awkward._nplikes.shape import ShapeItem
+from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._singleton import Singleton
 from awkward.typing import (
     Literal,
@@ -293,8 +293,16 @@ class NumpyLike(Singleton, Protocol):
     def broadcast_to(self, x: ArrayLike, shape: tuple[ShapeItem, ...]) -> ArrayLike:
         ...
 
+    @overload
+    def shape_item_as_index(self, x1: int) -> int:
+        ...
+
+    @overload
+    def shape_item_as_index(self, x1: type[unknown_length]) -> ArrayLike:
+        ...
+
     @abstractmethod
-    def shape_item_as_index(self, x1: ShapeItem) -> int | ArrayLike:
+    def shape_item_as_index(self, x1):
         ...
 
     @abstractmethod
