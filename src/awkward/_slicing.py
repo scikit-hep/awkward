@@ -40,51 +40,56 @@ def regularise_slice(
     stop = slice.stop
     step = slice.step
 
-    length_scalar = index_nplike.shape_item_as_index(length)
-    # Unknown lengths mean that the slice index is unknown
-    if length is unknown_length:
-        return length_scalar, length_scalar, step
+    if index_nplike.known_data:
+        return slice.indices(length)
 
-    # Normalise `None` values
-    if step is None:
-        step = 1
+    else:
+        length_scalar = index_nplike.shape_item_as_index(length)
+        # Unknown lengths mean that the slice index is unknown
+        if length is unknown_length:
+            return length_scalar, length_scalar, step
 
-    if start is None:
-        # We need to know the step to choose appropriate start
-        if is_unknown_scalar(step):
-            start = step
-        elif step < 0:
-            start = length_scalar
-        else:
-            start = 0
-    if stop is None:
-        # We need to know the step to choose appropriate stop
-        if is_unknown_scalar(step):
-            stop = step
-        elif step < 0:
-            stop = 0
-        else:
-            stop = length_scalar
+        # Normalise `None` values
+        if step is None:
+            step = 1
 
-    # Normalise negative integers
-    if not is_unknown_scalar(start) and start < 0:
-        start = start + length_scalar
-    if not is_unknown_scalar(stop) and stop < 0:
-        stop = stop + length_scalar
+        if start is None:
+            # We need to know the step to choose appropriate start
+            if is_unknown_scalar(step):
+                start = step
+            elif step < 0:
+                start = length_scalar
+            else:
+                start = 0
+        # Normalise negative integers
+        elif not is_unknown_scalar(start):
+            if start < 0:
+                start = start + length_scalar
+            # Clamp values into length bounds
+            if is_unknown_scalar(length_scalar):
+                start = length_scalar
+            else:
+                start = min(max(start, 0), length_scalar)
 
-    # Clamp values into length bounds
-    if not is_unknown_scalar(start):
-        if is_unknown_scalar(length_scalar):
-            start = length_scalar
-        else:
-            start = min(max(start, 0), length_scalar)
-    if not is_unknown_scalar(stop):
-        if is_unknown_scalar(length_scalar):
-            stop = length_scalar
-        else:
-            stop = min(max(stop, 0), length_scalar)
+        if stop is None:
+            # We need to know the step to choose appropriate stop
+            if is_unknown_scalar(step):
+                stop = step
+            elif step < 0:
+                stop = 0
+            else:
+                stop = length_scalar
+        # Normalise negative integers
+        elif not is_unknown_scalar(stop):
+            if stop < 0:
+                stop = stop + length_scalar
+            # Clamp values into length bounds
+            if is_unknown_scalar(length_scalar):
+                stop = length_scalar
+            else:
+                stop = min(max(stop, 0), length_scalar)
 
-    return start, stop, step
+        return start, stop, step
 
 
 def headtail(
