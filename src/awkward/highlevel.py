@@ -192,13 +192,13 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                 fields.append(k)
                 contents.append(Array(v).layout)
                 if length is None:
-                    length = len(contents[-1])
-                elif length != len(contents[-1]):
+                    length = contents[-1].length
+                elif length != contents[-1].length:
                     raise ak._errors.wrap_error(
                         ValueError(
                             "dict of arrays in ak.Array constructor must have arrays "
                             "of equal length ({} vs {})".format(
-                                length, len(contents[-1])
+                                length, contents[-1].length
                             )
                         )
                     )

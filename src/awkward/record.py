@@ -5,7 +5,7 @@ import copy
 from collections.abc import Iterable
 
 import awkward as ak
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpylike import NumpyMetadata, unknown_length
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.typing import Self
@@ -23,7 +23,7 @@ class Record:
             raise ak._errors.wrap_error(
                 TypeError(f"Record 'at' must be an integer, not {array!r}")
             )
-        if not (array.length is None or 0 <= at < array.length):
+        if not (array.length is unknown_length or 0 <= at < array.length):
             raise ak._errors.wrap_error(
                 ValueError(
                     f"Record 'at' must be >= 0 and < len(array) == {array.length}, not {at}"

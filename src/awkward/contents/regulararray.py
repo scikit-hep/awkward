@@ -5,7 +5,7 @@ import copy
 
 import awkward as ak
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpylike import NumpyMetadata, unknown_length
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.form import _type_parameters_equal
@@ -34,7 +34,7 @@ class RegularArray(Content):
                     )
                 )
             )
-        if size is None:
+        if size is unknown_length:
             if content.backend.index_nplike.known_data:
                 raise ak._errors.wrap_error(
                     TypeError(
@@ -53,7 +53,7 @@ class RegularArray(Content):
                     )
                 )
 
-        if zeros_length is None:
+        if zeros_length is unknown_length:
             if content.backend.index_nplike.known_data:
                 raise ak._errors.wrap_error(
                     TypeError(
@@ -93,8 +93,8 @@ class RegularArray(Content):
 
         self._content = content
         self._size = size
-        if content.length is None or size is None:
-            self._length = None
+        if content.length is unknown_length or size is unknown_length:
+            self._length = unknown_length
         elif size != 0:
             self._length = content.length // size  # floor division
         else:
@@ -161,7 +161,7 @@ class RegularArray(Content):
         return RegularArray(
             self._content._to_typetracer(forget_length),
             self._size,
-            None if forget_length else self._length,
+            unknown_length if forget_length else self._length,
             parameters=self._parameters,
         )
 
@@ -222,7 +222,7 @@ class RegularArray(Content):
         if self._backend.nplike.known_data and where < 0:
             where += self._length
 
-        if not (self._length is None or 0 <= where < self._length):
+        if not (self._length is unknown_length or 0 <= where < self._length):
             raise ak._errors.index_error(self, where)
         start, stop = (where) * self._size, (where + 1) * self._size
         return self._content._getitem_range(slice(start, stop))
@@ -284,8 +284,10 @@ class RegularArray(Content):
             if self._backend.index_nplike.any(where >= self._length):
                 raise ak._errors.index_error(self, where)
 
-        if where.shape[0] is None or self._size is None:
-            nextcarry = ak.index.Index64.empty(None, self._backend.index_nplike)
+        if where.shape[0] is unknown_length or self._size is unknown_length:
+            nextcarry = ak.index.Index64.empty(
+                unknown_length, self._backend.index_nplike
+            )
         else:
             nextcarry = ak.index.Index64.empty(
                 where.shape[0] * self._size, self._backend.index_nplike
@@ -315,7 +317,7 @@ class RegularArray(Content):
 
     def _compact_offsets64(self, start_at_zero):
         out = ak.index.Index64.empty(
-            self._backend.index_nplike.add_shape_item(self._length, 1),
+            self._length + 1,
             self._backend.index_nplike,
         )
         assert out.nplike is self._backend.index_nplike
@@ -348,7 +350,7 @@ class RegularArray(Content):
             )
 
         if self._size == 1:
-            carrylen = self._backend.index_nplike.scalar_as_shape_item(offsets[-1])
+            carrylen = self._backend.index_nplike.index_as_shape_item(offsets[-1])
             nextcarry = ak.index.Index64.empty(carrylen, self._backend.index_nplike)
             assert (
                 nextcarry.nplike is self._backend.index_nplike
@@ -434,9 +436,7 @@ class RegularArray(Content):
                 if diff % step != 0:
                     nextsize += 1
 
-            nextcarry = ak.index.Index64.empty(
-                index_nplike.mul_shape_item(self._length, nextsize), index_nplike
-            )
+            nextcarry = ak.index.Index64.empty(self._length * nextsize, index_nplike)
             assert nextcarry.nplike is index_nplike
             self._handle_error(
                 self._backend[
@@ -456,7 +456,7 @@ class RegularArray(Content):
             nextcontent = self._content._carry(nextcarry, True)
 
             if advanced is None or (
-                advanced.length is not None and advanced.length == 0
+                advanced.length is not unknown_length and advanced.length == 0
             ):
                 return RegularArray(
                     nextcontent._getitem_next(nexthead, nexttail, advanced),
@@ -524,10 +524,10 @@ class RegularArray(Content):
             )
 
             if advanced is None or (
-                advanced.length is not None and advanced.length == 0
+                advanced.length is not unknown_length and advanced.length == 0
             ):
                 nextcarry = ak.index.Index64.empty(
-                    index_nplike.mul_shape_item(self._length, flathead.shape[0]),
+                    self._length * flathead.shape[0],
                     index_nplike,
                 )
                 nextadvanced = ak.index.Index64.empty(nextcarry.length, index_nplike)
@@ -620,10 +620,10 @@ class RegularArray(Content):
                 )
 
             multistarts = ak.index.Index64.empty(
-                index_nplike.mul_shape_item(head.length, self._length), index_nplike
+                head.length * self._length, index_nplike
             )
             multistops = ak.index.Index64.empty(
-                index_nplike.mul_shape_item(head.length, self._length), index_nplike
+                head.length * self._length, index_nplike
             )
 
             assert head.offsets.nplike is index_nplike
@@ -704,21 +704,11 @@ class RegularArray(Content):
                 parameters = ak.forms.form._parameters_intersect(
                     parameters, x._parameters
                 )
-                tail_contents.append(
-                    x._content[
-                        : self._backend.index_nplike.mul_shape_item(x._length, x._size)
-                    ]
-                )
-                zeros_length = self._backend.index_nplike.add_shape_item(
-                    zeros_length, x._length
-                )
+                tail_contents.append(x._content[: x._length * x._size])
+                zeros_length += x._length
 
             return RegularArray(
-                self._content[
-                    : self._backend.index_nplike.mul_shape_item(
-                        self._length, self._size
-                    )
-                ]._mergemany(tail_contents),
+                self._content[: self._length * self._size]._mergemany(tail_contents),
                 self._size,
                 zeros_length,
                 parameters=parameters,
@@ -869,7 +859,7 @@ class RegularArray(Content):
                     combinationslen = combinationslen * (size - j + 1)
                     combinationslen = combinationslen // j
 
-            totallen = index_nplike.mul_shape_item(combinationslen, self._length)
+            totallen = combinationslen * self._length
             tocarryraw = index_nplike.empty(n, dtype=np.intp)
             tocarry = []
             for i in range(n):
@@ -923,9 +913,9 @@ class RegularArray(Content):
                 recordarray, combinationslen, self._length, parameters=self._parameters
             )
         else:
-            length = index_nplike.mul_shape_item(self._length, self._size)
+            length = self._length * self._size
             next = self._content._getitem_range(
-                slice(0, index_nplike.shape_item_as_scalar(length))
+                slice(0, index_nplike.shape_item_as_index(length))
             )._combinations(n, replacement, recordlookup, parameters, axis, depth + 1)
             return ak.contents.RegularArray(
                 next, self._size, self._length, parameters=self._parameters
@@ -945,7 +935,7 @@ class RegularArray(Content):
     ):
         index_nplike = self._backend.index_nplike
         branch, depth = self.branch_depth
-        nextlen = index_nplike.mul_shape_item(self._length, self._size)
+        nextlen = self._length * self._size
         if not branch and negaxis == depth:
             if self._size == 0:
                 nextstarts = ak.index.Index64(
@@ -991,7 +981,7 @@ class RegularArray(Content):
                 nextshifts = None
 
             nextcontent = self._content._carry(nextcarry, False)
-            nextoutlength = index_nplike.mul_shape_item(outlength, self._size)
+            nextoutlength = outlength * self._size
             outcontent = nextcontent._reduce_next(
                 reducer,
                 negaxis - 1,
@@ -1143,7 +1133,7 @@ class RegularArray(Content):
 
             else:
                 index = ak.index.Index64.empty(
-                    self._backend.index_nplike.mul_shape_item(self._length, target),
+                    self._length * target,
                     self._backend.index_nplike,
                 )
                 assert index.nplike is self._backend.index_nplike
@@ -1182,9 +1172,9 @@ class RegularArray(Content):
         # NumPy never has `None` shape items. We require that if a shape-item is used between nplikes
         # they both be the same "known-shape-ness".
         assert self._backend.index_nplike.known_data == self._backend.nplike.known_data
-        length = self._backend.index_nplike.mul_shape_item(self._length, self._size)
         return self._backend.nplike.reshape(
-            out[: self._backend.nplike.shape_item_as_scalar(length)], shape
+            out[: self._backend.nplike.shape_item_as_index(self._length * self._size)],
+            shape,
         )
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
@@ -1252,8 +1242,9 @@ class RegularArray(Content):
             return [self]
         else:
             index_nplike = self._backend.index_nplike
-            length = index_nplike.mul_shape_item(self._length, self._size)
-            content = self._content[: index_nplike.shape_item_as_scalar(length)]
+            content = self._content[
+                : index_nplike.shape_item_as_index(self._length * self._size)
+            ]
             contents = content._remove_structure(backend, options)
             if options["keepdims"]:
                 return [
@@ -1329,12 +1320,12 @@ class RegularArray(Content):
 
     def to_packed(self) -> Self:
         index_nplike = self._backend.index_nplike
-        length = index_nplike.mul_shape_item(self._length, self._size)
+        length = self._length * self._size
         if self._content.length == length:
             content = self._content.to_packed()
         else:
             content = self._content[
-                : index_nplike.shape_item_as_scalar(length)
+                : index_nplike.shape_item_as_index(length)
             ].to_packed()
 
         return RegularArray(

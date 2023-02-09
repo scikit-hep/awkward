@@ -7,7 +7,7 @@ import math
 
 import awkward as ak
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpylike import NumpyMetadata, unknown_length
 from awkward._nplikes.typetracer import MaybeNone, TypeTracer
 from awkward._util import unset
 from awkward.contents.bytemaskedarray import ByteMaskedArray
@@ -63,7 +63,7 @@ class BitMaskedArray(Content):
                     )
                 )
             )
-        if length is not None:
+        if length is not unknown_length:
             if not (ak._util.is_integer(length) and length >= 0):
                 raise ak._errors.wrap_error(
                     TypeError(
@@ -80,7 +80,10 @@ class BitMaskedArray(Content):
                     )
                 )
             )
-        if not (length is None or mask.length is None) and length > mask.length * 8:
+        if (
+            not (length is unknown_length or mask.length is unknown_length)
+            and length > mask.length * 8
+        ):
             raise ak._errors.wrap_error(
                 ValueError(
                     "{} 'length' ({}) must be <= len(mask) * 8 ({})".format(
@@ -89,7 +92,7 @@ class BitMaskedArray(Content):
                 )
             )
         if (
-            not (length is None or content.length is None)
+            not (length is unknown_length or content.length is unknown_length)
             and length > content.length * 8
         ):
             raise ak._errors.wrap_error(
@@ -224,7 +227,7 @@ class BitMaskedArray(Content):
             self._mask.to_nplike(tt),
             self._content._to_typetracer(False),
             self._valid_when,
-            None if forget_length else self.length,
+            unknown_length if forget_length else self.length,
             self._lsb_order,
             parameters=self._parameters,
         )

@@ -189,7 +189,7 @@ class NumpyArray(Content):
         shape = self._data.shape
         zeroslen = [1]
         for x in shape:
-            zeroslen.append(self._backend.index_nplike.mul_shape_item(zeroslen[-1], x))
+            zeroslen.append(zeroslen[-1] * x)
 
         out = NumpyArray(
             self._backend.nplike.reshape(self._data, (-1,)),
@@ -861,7 +861,7 @@ class NumpyArray(Content):
                     parents_length,
                 )
             )
-            offsets_length = self._backend.index_nplike.scalar_as_shape_item(
+            offsets_length = self._backend.index_nplike.index_as_shape_item(
                 _offsets_length[0]
             )
 
@@ -973,7 +973,7 @@ class NumpyArray(Content):
                     parents_length,
                 )
             )
-            offsets_length = self._backend.index_nplike.scalar_as_shape_item(
+            offsets_length = self._backend.index_nplike.index_as_shape_item(
                 _offsets_length[0]
             )
 

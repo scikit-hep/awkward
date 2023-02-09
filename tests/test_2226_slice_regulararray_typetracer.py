@@ -4,6 +4,7 @@ import numpy as np
 import pytest  # noqa: F401
 
 import awkward as ak
+from awkward._nplikes.numpylike import unknown_length
 
 
 def test():
@@ -15,6 +16,6 @@ def test():
     assert ak.backend(result) == "typetracer"
     layout = ak.to_layout(result)
     assert layout.length == 3
-    assert layout.content.length is None
-    assert layout.content.content.length is None
+    assert layout.content.length is unknown_length
+    assert layout.content.content.length is unknown_length
     assert layout.content.content.dtype == np.dtype(np.float64)

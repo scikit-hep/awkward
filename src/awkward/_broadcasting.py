@@ -11,8 +11,7 @@ from collections.abc import Sequence
 import awkward as ak
 from awkward._nplikes import nplike_of
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import NumpyMetadata
-from awkward._nplikes.typetracer import TypeTracerArray
+from awkward._nplikes.numpylike import NumpyMetadata, unknown_length
 from awkward._util import unset
 from awkward.contents.bitmaskedarray import BitMaskedArray
 from awkward.contents.bytemaskedarray import ByteMaskedArray
@@ -42,12 +41,12 @@ optiontypes = (IndexedOptionArray, ByteMaskedArray, BitMaskedArray, UnmaskedArra
 listtypes = (ListOffsetArray, ListArray, RegularArray)
 
 
-def length_of_broadcast(inputs: Sequence) -> int | TypeTracerArray:
+def length_of_broadcast(inputs: Sequence) -> int | type[unknown_length]:
     maxlen = -1
 
     for x in inputs:
         if isinstance(x, Content):
-            if x.length is None:
+            if x.length is unknown_length:
                 return x.length
 
             maxlen = max(maxlen, x.length)
@@ -493,7 +492,7 @@ def apply_step(
                         numtags.append(len(x.contents))
                         if length is None:
                             length = x.tags.data.shape[0]
-                assert length is not None
+                assert length is not unknown_length
 
                 all_combos = list(itertools.product(*[range(x) for x in numtags]))
 
@@ -524,9 +523,12 @@ def apply_step(
                     )
                     assert isinstance(outcontents[-1], tuple)
                     if numoutputs is None:
-                        numoutputs = len(outcontents[-1])
+                        numoutputs = outcontents[-1].length
                     else:
-                        assert numoutputs == len(outcontents[-1])
+                        assert (
+                            numoutputs is unknown_length
+                            or outcontents[-1].length is unknown_length
+                        ) or numoutputs == outcontents[-1].length
 
                 assert numoutputs is not None
 
@@ -549,7 +551,7 @@ def apply_step(
                                     )
                                 )
                             )
-                assert length is not None
+                assert length is not unknown_length
 
                 combos = backend.index_nplike.stack(tagslist, axis=-1)
 
