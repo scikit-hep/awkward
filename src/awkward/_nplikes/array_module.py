@@ -142,7 +142,7 @@ class ArrayModuleNumpyLike(NumpyLike):
                 TypeError(f"expected None or int type, received {x1}")
             )
 
-    def index_as_shape_item(self, x1: IndexType) -> ShapeItem:
+    def index_as_shape_item(self, x1: IndexType) -> int:
         return int(x1)
 
     def derive_slice_for_length(
