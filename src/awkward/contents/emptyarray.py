@@ -27,7 +27,7 @@ class EmptyArray(Content):
     (such as data from #ak.ArrayBuilder without enough sample points to resolve the
     type).
 
-    EmptyArray has no equivalent in Apache Arrow.
+    EmptyArray has no equivalent in Apache Arrow. It also cannot contain any parameters.
 
     To illustrate how the constructor arguments are interpreted, the following is a
     simplified implementation of `__init__`, `__len__`, and `__getitem__`:

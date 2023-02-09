@@ -35,7 +35,7 @@ class ListOffsetArray(Content):
     but it need not start with `0` or include all of the `content`. Just as
     #ak.contents.RegularArray can have unreachable `content` if it is not
     an integer multiple of `size`, a ListOffsetArray can have unreachable
-    content before the first list and after the last list.
+    content before the start of the first list and after the end of the last list.
 
     Like #ak.contents.RegularArray and #ak.contents.ListArray, a ListOffsetArray can
     represent strings if its `__array__` parameter is `"string"` (UTF-8 assumed) or
