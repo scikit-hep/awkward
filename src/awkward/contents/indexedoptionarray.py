@@ -1586,10 +1586,7 @@ class IndexedOptionArray(Content):
             else:
                 index, content = self._index, self._content
         else:
-            if (
-                not self._backend.nplike.known_data
-                or not self._backend.nplike.known_data
-            ):
+            if not self._backend.nplike.known_data:
                 self._touch_data(recursive=False)
             index, content = self._index, self._content
 
