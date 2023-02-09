@@ -881,9 +881,7 @@ class NumpyArray(Content):
                 if self._data.dtype.kind.upper() == "M"
                 else self._data.dtype
             )
-            nextcarry = ak.index.Index64.empty(
-                self.__len__(), self._backend.index_nplike
-            )
+            nextcarry = ak.index.Index64.empty(self.length, self._backend.index_nplike)
             assert (
                 nextcarry.nplike is self._backend.index_nplike
                 and offsets.nplike is self._backend.index_nplike
@@ -897,7 +895,7 @@ class NumpyArray(Content):
                 ](
                     nextcarry.data,
                     self._data,
-                    self.__len__(),
+                    self.length,
                     offsets.data,
                     offsets_length,
                     ascending,

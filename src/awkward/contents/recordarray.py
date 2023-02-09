@@ -41,7 +41,7 @@ class RecordArray(Content):
         parameters=None,
         backend=None,
     ):
-        if not (length is None or length is unset):
+        if not (length is None or length is unknown_length):
             length = int(length)  # TODO: this should not happen!
         if not isinstance(contents, Iterable):
             raise ak._errors.wrap_error(
@@ -344,17 +344,17 @@ class RecordArray(Content):
 
         if self._length is unknown_length:
             return self
-        from awkward._nplikes.typetracer import cast_known_scalar
+
+        start, stop, _, length = self._backend.index_nplike.derive_slice_for_length(
+            slice(start, stop), self._length
+        )
 
         if len(self._contents) == 0:
-            start = min(max(start, 0), self._length)
-            stop = min(max(stop, 0), self._length)
-            if stop < start:
-                stop = start
+
             return RecordArray(
                 [],
                 self._fields,
-                cast_known_scalar(stop - start, int, default=None),
+                length,
                 parameters=self._parameters,
                 backend=self._backend,
             )
@@ -362,7 +362,7 @@ class RecordArray(Content):
             return RecordArray(
                 [x._getitem_range(start, stop) for x in self._contents],
                 self._fields,
-                cast_known_scalar(stop - start, int, default=None),
+                length,
                 parameters=self._parameters,
                 backend=self._backend,
             )
