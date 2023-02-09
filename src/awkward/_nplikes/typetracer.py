@@ -808,6 +808,36 @@ class TypeTracer(NumpyLike):
         else:
             return int(x1)
 
+    def regularize_index_for_length(
+        self, index: IndexType, length: ShapeItem
+    ) -> IndexType:
+        """
+        Args:
+            index: index value
+            length: length of array
+
+        Returns regularized index that is guaranteed to be in-bounds.
+        """
+        # Unknown indices are already regularized
+        if is_unknown_scalar(index):
+            return index
+
+        # Without a known length the result must be unknown, as we cannot regularize the index
+        length_scalar = self.shape_item_as_index(length)
+        if length is unknown_length:
+            return length_scalar
+
+        # We have known length and index
+        if index < 0:
+            index = index + length
+
+        if 0 <= index < length:
+            return index
+        else:
+            raise wrap_error(
+                IndexError(f"index value out of bounds (0, {length}): {index}")
+            )
+
     def derive_slice_for_length(
         self, slice_: slice, length: ShapeItem
     ) -> tuple[IndexType, IndexType, IndexType, ShapeItem]:
