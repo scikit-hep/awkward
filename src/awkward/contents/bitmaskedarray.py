@@ -74,6 +74,8 @@ class BitMaskedArray(Content):
 
             def __getitem__(self, where):
                 if isinstance(where, int):
+                    if where < 0:
+                        where += len(self)
                     assert 0 <= where < len(self)
                     if self.lsb_order:
                         bit = bool(self.mask[where // 8] & (1 << (where % 8)))
@@ -83,6 +85,7 @@ class BitMaskedArray(Content):
                         return self.content[where]
                     else:
                         return None
+
                 elif isinstance(where, slice) and where.step is None:
                     # In general, slices must convert BitMaskedArray to ByteMaskedArray.
                     bytemask = np.unpackbits(
@@ -93,6 +96,7 @@ class BitMaskedArray(Content):
                         self.content[where.start : where.stop],
                         valid_when=self.valid_when,
                     )
+
                 elif isinstance(where, str):
                     return BitMaskedArray(
                         self.mask,
@@ -101,6 +105,7 @@ class BitMaskedArray(Content):
                         length=self.length,
                         lsb_order=self.lsb_order,
                     )
+
                 else:
                     raise AssertionError(where)
     """

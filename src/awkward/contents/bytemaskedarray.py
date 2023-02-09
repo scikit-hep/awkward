@@ -57,21 +57,26 @@ class ByteMaskedArray(Content):
 
             def __getitem__(self, where):
                 if isinstance(where, int):
+                    if where < 0:
+                        where += len(self)
                     assert 0 <= where < len(self)
                     if self.mask[where] == self.valid_when:
                         return self.content[where]
                     else:
                         return None
+
                 elif isinstance(where, slice) and where.step is None:
                     return ByteMaskedArray(
                         self.mask[where.start : where.stop],
                         self.content[where.start : where.stop],
                         valid_when=self.valid_when,
                     )
+
                 elif isinstance(where, str):
                     return ByteMaskedArray(
                         self.mask, self.content[where], valid_when=self.valid_when
                     )
+
                 else:
                     raise AssertionError(where)
     """

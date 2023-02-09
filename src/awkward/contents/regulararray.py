@@ -72,8 +72,11 @@ class RegularArray(Content):
 
             def __getitem__(self, where):
                 if isinstance(where, int):
+                    if where < 0:
+                        where += len(self)
                     assert 0 <= where < len(self)
                     return self.content[(where) * self.size : (where + 1) * self.size]
+
                 elif isinstance(where, slice) and where.step is None:
                     start = where.start * self.size
                     stop = where.stop * self.size
@@ -81,8 +84,10 @@ class RegularArray(Content):
                     return RegularArray(
                         self.content[start:stop], self.size, zeros_length
                     )
+
                 elif isinstance(where, str):
                     return RegularArray(self.content[where], self.size, self.length)
+
                 else:
                     raise AssertionError(where)
     """

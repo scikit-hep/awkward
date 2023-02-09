@@ -51,17 +51,22 @@ class IndexedOptionArray(Content):
 
             def __getitem__(self, where):
                 if isinstance(where, int):
+                    if where < 0:
+                        where += len(self)
                     assert 0 <= where < len(self)
                     if self.index[where] < 0:
                         return None
                     else:
                         return self.content[self.index[where]]
+
                 elif isinstance(where, slice) and where.step is None:
                     return IndexedOptionArray(
                         self.index[where.start : where.stop], self.content
                     )
+
                 elif isinstance(where, str):
                     return IndexedOptionArray(self.index, self.content[where])
+
                 else:
                     raise AssertionError(where)
     """

@@ -56,14 +56,19 @@ class IndexedArray(Content):
 
             def __getitem__(self, where):
                 if isinstance(where, int):
+                    if where < 0:
+                        where += len(self)
                     assert 0 <= where < len(self)
                     return self.content[self.index[where]]
+
                 elif isinstance(where, slice) and where.step is None:
                     return IndexedArray(
                         self.index[where.start : where.stop], self.content
                     )
+
                 elif isinstance(where, str):
                     return IndexedArray(self.index, self.content[where])
+
                 else:
                     raise AssertionError(where)
     """

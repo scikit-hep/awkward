@@ -77,14 +77,19 @@ class ListArray(Content):
 
             def __getitem__(self, where):
                 if isinstance(where, int):
+                    if where < 0:
+                        where += len(self)
                     assert 0 <= where < len(self)
                     return self.content[self.starts[where] : self.stops[where]]
+
                 elif isinstance(where, slice) and where.step is None:
                     starts = self.starts[where.start : where.stop]
                     stops = self.stops[where.start : where.stop]
                     return ListArray(starts, stops, self.content)
+
                 elif isinstance(where, str):
                     return ListArray(self.starts, self.stops, self.content[where])
+
                 else:
                     raise AssertionError(where)
     """

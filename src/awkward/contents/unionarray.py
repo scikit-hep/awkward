@@ -62,16 +62,21 @@ class UnionArray(Content):
 
             def __getitem__(self, where):
                 if isinstance(where, int):
+                    if where < 0:
+                        where += len(self)
                     assert 0 <= where < len(self)
                     return self.contents[self.tags[where]][self.index[where]]
+
                 elif isinstance(where, slice) and where.step is None:
                     return UnionArray(
                         self.tags[where], self.index[where], self.contents
                     )
+
                 elif isinstance(where, str):
                     return UnionArray(
                         self.tags, self.index, [x[where] for x in self.contents]
                     )
+
                 else:
                     raise AssertionError(where)
     """

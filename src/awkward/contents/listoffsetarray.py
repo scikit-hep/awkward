@@ -69,15 +69,20 @@ class ListOffsetArray(Content):
 
             def __getitem__(self, where):
                 if isinstance(where, int):
+                    if where < 0:
+                        where += len(self)
                     assert 0 <= where < len(self)
                     return self.content[self.offsets[where] : self.offsets[where + 1]]
+
                 elif isinstance(where, slice) and where.step is None:
                     offsets = self.offsets[where.start : where.stop + 1]
                     if len(offsets) == 0:
                         offsets = [0]
                     return ListOffsetArray(offsets, self.content)
+
                 elif isinstance(where, str):
                     return ListOffsetArray(self.offsets, self.content[where])
+
                 else:
                     raise AssertionError(where)
     """

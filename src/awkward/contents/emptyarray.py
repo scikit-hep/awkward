@@ -42,10 +42,13 @@ class EmptyArray(Content):
             def __getitem__(self, where):
                 if isinstance(where, int):
                     assert False
+
                 elif isinstance(where, slice) and where.step is None:
                     return EmptyArray()
+
                 elif isinstance(where, str):
                     raise ValueError("field " + repr(where) + " not found")
+
                 else:
                     raise AssertionError(where)
     """

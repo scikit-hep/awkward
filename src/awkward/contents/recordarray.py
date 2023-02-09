@@ -66,12 +66,15 @@ class RecordArray(Content):
 
             def __getitem__(self, where):
                 if isinstance(where, int):
+                    if where < 0:
+                        where += len(self)
                     assert 0 <= where < len(self)
                     record = [x[where] for x in self.contents]
                     if self.fields is None:
                         return tuple(record)
                     else:
                         return dict(zip(self.fields, record))
+
                 elif isinstance(where, slice) and where.step is None:
                     if len(self.contents) == 0:
                         start = min(max(where.start, 0), self.length)
@@ -85,6 +88,7 @@ class RecordArray(Content):
                             self.fields,
                             where.stop - where.start,
                         )
+
                 elif isinstance(where, str):
                     if self.fields is None:
                         try:
@@ -102,6 +106,7 @@ class RecordArray(Content):
                         else:
                             return self.contents[i][0 : len(self)]
                     raise ValueError("field " + repr(where) + " not found")
+
                 else:
                     raise AssertionError(where)
     """
