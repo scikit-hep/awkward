@@ -85,7 +85,7 @@ class _UnknownLength:
 
         raise wrap_error(TypeError("cannot order unknown lengths"))
 
-    def __index__(self):
+    def __index__(self):  # pylint: disable=invalid-index-returned
         from awkward._errors import wrap_error
 
         raise wrap_error(
