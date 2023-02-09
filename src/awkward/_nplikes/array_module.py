@@ -99,8 +99,10 @@ class ArrayModuleNumpyLike(NumpyLike):
 
     def array_equal(
         self, x1: ArrayLike, x2: ArrayLike, *, equal_nan: bool = False
-    ) -> bool:
-        return self._module.array_equal(x1, x2, equal_nan=equal_nan)
+    ) -> ArrayLike:
+        return self._module.asarray(
+            self._module.array_equal(x1, x2, equal_nan=equal_nan)
+        )
 
     def searchsorted(
         self,
@@ -118,7 +120,7 @@ class ArrayModuleNumpyLike(NumpyLike):
         return self._module.broadcast_arrays(*arrays)
 
     def reshape(
-        self, x: ArrayLike, shape: tuple[int, ...], *, copy: bool | None = None
+        self, x: ArrayLike, shape: tuple[ShapeItem, ...], *, copy: bool | None = None
     ) -> ArrayLike:
         if copy is False:
             raise ak._errors.wrap_error(
@@ -162,6 +164,11 @@ class ArrayModuleNumpyLike(NumpyLike):
         start, stop, step = slice_.indices(length)
         slice_length = math.ceil((stop - start) / step)
         return start, stop, step, slice_length
+
+    def shape_equals(
+        self, shape1: tuple[ShapeItem, ...], shape2: tuple[ShapeItem, ...]
+    ) -> bool:
+        return shape1 == shape2
 
     def nonzero(self, x: ArrayLike) -> tuple[ArrayLike, ...]:
         return self._module.nonzero(x)

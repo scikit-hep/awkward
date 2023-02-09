@@ -135,3 +135,10 @@ def test_empty_outer_ragged():
     array = ak.Array([[1]])[0:0]
     assert not ak.almost_equal(array, [])
     assert ak.almost_equal(array, array)
+
+
+def test_numpy_array():
+    left = np.arange(2 * 3 * 4, dtype=np.int64).reshape(4, 3, 2)
+    right = np.arange(2 * 3 * 4, dtype=np.int64).reshape(2, 3, 4)
+    assert not ak.almost_equal(left, right)
+    assert ak.almost_equal(left, left)

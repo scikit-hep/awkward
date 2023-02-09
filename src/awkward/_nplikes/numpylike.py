@@ -208,26 +208,35 @@ class NumpyLike(Singleton, Protocol):
 
     @abstractmethod
     def zeros(
-        self, shape: int | tuple[int, ...], *, dtype: numpy.dtype | None = None
+        self,
+        shape: ShapeItem | tuple[ShapeItem, ...],
+        *,
+        dtype: numpy.dtype | None = None,
     ) -> ArrayLike:
         ...
 
     @abstractmethod
     def ones(
-        self, shape: int | tuple[int, ...], *, dtype: numpy.dtype | None = None
+        self,
+        shape: ShapeItem | tuple[ShapeItem, ...],
+        *,
+        dtype: numpy.dtype | None = None,
     ) -> ArrayLike:
         ...
 
     @abstractmethod
     def empty(
-        self, shape: int | tuple[int, ...], *, dtype: numpy.dtype | None = None
+        self,
+        shape: ShapeItem | tuple[ShapeItem, ...],
+        *,
+        dtype: numpy.dtype | None = None,
     ) -> ArrayLike:
         ...
 
     @abstractmethod
     def full(
         self,
-        shape: int | tuple[int, ...],
+        shape: ShapeItem | tuple[ShapeItem, ...],
         fill_value,
         *,
         dtype: numpy.dtype | None = None,
@@ -272,7 +281,7 @@ class NumpyLike(Singleton, Protocol):
     @abstractmethod
     def array_equal(
         self, x1: ArrayLike, x2: ArrayLike, *, equal_nan: bool = False
-    ) -> bool:
+    ) -> ArrayLike:
         ...
 
     @abstractmethod
@@ -319,8 +328,14 @@ class NumpyLike(Singleton, Protocol):
         ...
 
     @abstractmethod
+    def shape_equals(
+        self, shape1: tuple[ShapeItem, ...], shape2: tuple[ShapeItem, ...]
+    ) -> bool | None:
+        ...
+
+    @abstractmethod
     def reshape(
-        self, x: ArrayLike, shape: tuple[int, ...], *, copy: bool | None = None
+        self, x: ArrayLike, shape: tuple[ShapeItem, ...], *, copy: bool | None = None
     ) -> ArrayLike:
         ...
 
