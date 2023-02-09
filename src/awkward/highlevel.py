@@ -1928,10 +1928,7 @@ class Record(NDArrayOperatorsMixin):
         pytype = type(self).__name__
 
         typestr = repr(str(self.type))[1:-1]
-        if (
-            self._layout.array.backend.nplike.known_data
-            and self._layout.array.backend.nplike.known_data
-        ):
+        if self._layout.array.backend.nplike.known_data:
             valuestr = ""
         else:
             valuestr = "-typetracer"
