@@ -830,48 +830,6 @@ class TypeTracer(NumpyLike):
         else:
             return int(x1)
 
-    def sub_shape_item(self, x1: ShapeItem, x2: ShapeItem) -> ShapeItem:
-        if x1 is unknown_length:
-            return unknown_length
-        if x2 is unknown_length:
-            return unknown_length
-        assert x1 >= 0
-        assert x2 >= 0
-        result = x1 - x2
-        assert result >= 0
-        return result
-
-    def add_shape_item(self, x1: ShapeItem, x2: ShapeItem) -> ShapeItem:
-        if x1 is unknown_length:
-            return unknown_length
-        if x2 is unknown_length:
-            return unknown_length
-        assert x1 >= 0
-        assert x2 >= 0
-        result = x1 + x2
-        return result
-
-    def mul_shape_item(self, x1: ShapeItem, x2: ShapeItem) -> ShapeItem:
-        if x1 is unknown_length:
-            return unknown_length
-        if x2 is unknown_length:
-            return unknown_length
-        assert x1 >= 0
-        assert x2 >= 0
-        result = x1 * x2
-        return result
-
-    def div_shape_item(self, x1: ShapeItem, x2: ShapeItem) -> ShapeItem:
-        if x1 is unknown_length:
-            return unknown_length
-        if x2 is unknown_length:
-            return unknown_length
-        assert x1 >= 0
-        assert x2 >= 0
-        result = x1 // x2
-        assert result * x2 == x1
-        return result
-
     def broadcast_shapes(
         self, *shapes: tuple[SupportsInt, ...]
     ) -> tuple[SupportsInt, ...]:

@@ -307,7 +307,7 @@ class IndexedOptionArray(Content):
         )
         numnull = index_nplike.index_as_shape_item(_numnull[0])
         nextcarry = ak.index.Index64.empty(
-            index_nplike.sub_shape_item(self._index.length, numnull),
+            self._index.length - numnull,
             index_nplike,
         )
         outindex = ak.index.Index.empty(
@@ -356,11 +356,11 @@ class IndexedOptionArray(Content):
         numnull, nextcarry, outindex = self._nextcarry_outindex()
 
         reducedstarts = ak.index.Index64.empty(
-            self._backend.index_nplike.sub_shape_item(self.length, numnull),
+            self.length - numnull,
             nplike=self._backend.index_nplike,
         )
         reducedstops = ak.index.Index64.empty(
-            self._backend.index_nplike.sub_shape_item(self.length, numnull),
+            self.length - numnull,
             nplike=self._backend.index_nplike,
         )
         assert (
@@ -494,7 +494,7 @@ class IndexedOptionArray(Content):
             )
             numnull = self._backend.index_nplike.index_as_shape_item(_numnull[0])
             nextcarry = ak.index.Index64.empty(
-                self._backend.index_nplike.sub_shape_item(self.length, numnull),
+                self.length - numnull,
                 self._backend.index_nplike,
             )
 
@@ -960,10 +960,8 @@ class IndexedOptionArray(Content):
             )
 
             newindex = ak.index.Index64.empty(
-                self._backend.index_nplike.add_shape_item(
-                    self._backend.index_nplike.index_as_shape_item(out._offsets[-1]),
-                    len_newnulls,
-                ),
+                self._backend.index_nplike.index_as_shape_item(out._offsets[-1])
+                + len_newnulls,
                 self._backend.index_nplike,
             )
             newoffsets = ak.index.Index64.empty(
@@ -1094,7 +1092,7 @@ class IndexedOptionArray(Content):
         )
         numnull = self._backend.index_nplike.index_as_shape_item(_numnull[0])
 
-        next_length = self._backend.index_nplike.sub_shape_item(index_length, numnull)
+        next_length = index_length - numnull
         nextparents = ak.index.Index64.empty(next_length, self._backend.index_nplike)
         nextcarry = ak.index.Index64.empty(next_length, self._backend.index_nplike)
         outindex = ak.index.Index64.empty(index_length, self._backend.index_nplike)

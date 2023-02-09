@@ -1146,7 +1146,7 @@ class ListArray(Content):
                 ](
                     localindex.data,
                     offsets.data,
-                    self._backend.index_nplike.sub_shape_item(offsets.length, 1),
+                    offsets.length - 1,
                 )
             )
             return ak.contents.ListOffsetArray(

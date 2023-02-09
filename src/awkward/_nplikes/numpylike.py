@@ -405,22 +405,6 @@ class NumpyLike(Singleton, Protocol):
         ...
 
     @abstractmethod
-    def sub_shape_item(self, x1: ShapeItem, x2: ShapeItem) -> ShapeItem:
-        ...
-
-    @abstractmethod
-    def add_shape_item(self, x1: ShapeItem, x2: ShapeItem) -> ShapeItem:
-        ...
-
-    @abstractmethod
-    def mul_shape_item(self, x1: ShapeItem, x2: ShapeItem) -> ShapeItem:
-        ...
-
-    @abstractmethod
-    def div_shape_item(self, x1: ShapeItem, x2: ShapeItem) -> ShapeItem:
-        ...
-
-    @abstractmethod
     def reshape(
         self, x: ArrayLike, shape: tuple[int, ...], *, copy: bool | None = None
     ) -> ArrayLike:

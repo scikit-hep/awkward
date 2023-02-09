@@ -384,7 +384,7 @@ class ByteMaskedArray(Content):
         )
         numnull = self._backend.index_nplike.index_as_shape_item(_numnull[0])
         nextcarry = ak.index.Index64.empty(
-            self._backend.index_nplike.sub_shape_item(self.length, numnull),
+            self.length - numnull,
             nplike=self._backend.index_nplike,
         )
         outindex = ak.index.Index64.empty(
@@ -430,11 +430,11 @@ class ByteMaskedArray(Content):
         numnull, nextcarry, outindex = self._nextcarry_outindex()
 
         reducedstarts = ak.index.Index64.empty(
-            self._backend.index_nplike.sub_shape_item(self.length, numnull),
+            self.length - numnull,
             nplike=self._backend.index_nplike,
         )
         reducedstops = ak.index.Index64.empty(
-            self._backend.index_nplike.sub_shape_item(self.length, numnull),
+            self.length - numnull,
             nplike=self._backend.index_nplike,
         )
 
@@ -794,7 +794,7 @@ class ByteMaskedArray(Content):
         )
         numnull = self._backend.index_nplike.index_as_shape_item(_numnull[0])
 
-        next_length = self._backend.index_nplike.sub_shape_item(mask_length, numnull)
+        next_length = mask_length - numnull
         nextcarry = ak.index.Index64.empty(
             next_length, nplike=self._backend.index_nplike
         )

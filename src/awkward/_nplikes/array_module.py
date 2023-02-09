@@ -150,30 +150,6 @@ class ArrayModuleNumpyLike(NumpyLike):
     def index_as_shape_item(self, x1: int | ArrayLike) -> ShapeItem:
         return int(x1)
 
-    def add_shape_item(self, x1: ShapeItem, x2: ShapeItem) -> ShapeItem:
-        assert x1 >= 0
-        assert x2 >= 0
-        return x1 + x2
-
-    def sub_shape_item(self, x1: ShapeItem, x2: ShapeItem) -> ShapeItem:
-        assert x1 >= 0
-        assert x2 >= 0
-        result = x1 - x2
-        assert result >= 0
-        return result
-
-    def mul_shape_item(self, x1: ShapeItem, x2: ShapeItem) -> ShapeItem:
-        assert x1 >= 0
-        assert x2 >= 0
-        return x1 * x2
-
-    def div_shape_item(self, x1: ShapeItem, x2: ShapeItem) -> ShapeItem:
-        assert x1 >= 0
-        assert x2 >= 0
-        result = x1 // x2
-        assert result * x2 == x1
-        return result
-
     def nonzero(self, x: ArrayLike) -> tuple[ArrayLike, ...]:
         return self._module.nonzero(x)
 
