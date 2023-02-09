@@ -133,7 +133,7 @@ class ArrayView:
 
     def toarray(self):
         layout = self.type.tolayout(self.lookup, self.pos, self.fields)
-        sliced = layout._getitem_range(slice(self.start, self.stop))
+        sliced = layout._getitem_range(self.start, self.stop)
         return ak._util.wrap(sliced, self.behavior)
 
 

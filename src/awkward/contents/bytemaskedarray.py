@@ -7,7 +7,7 @@ import math
 
 import awkward as ak
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpylike import IndexType, NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._nplikes.typetracer import MaybeNone, TypeTracer
 from awkward._util import unset
@@ -355,9 +355,9 @@ class ByteMaskedArray(Content):
             return self._mask.raw(self._backend.index_nplike) != 1
 
     def _getitem_nothing(self):
-        return self._content._getitem_range(slice(0, 0))
+        return self._content._getitem_range(0, 0)
 
-    def _getitem_at(self, where: SupportsIndex):
+    def _getitem_at(self, where: IndexType):
         if not self._backend.nplike.known_data:
             self._touch_data(recursive=False)
             return MaybeNone(self._content._getitem_at(where))
@@ -371,16 +371,14 @@ class ByteMaskedArray(Content):
         else:
             return None
 
-    def _getitem_range(self, where):
+    def _getitem_range(self, start: SupportsIndex, stop: IndexType) -> Content:
         if not self._backend.nplike.known_data:
             self._touch_shape(recursive=False)
             return self
 
-        start, stop, step = where.indices(self.length)
-        assert step == 1
         return ByteMaskedArray(
             self._mask[start:stop],
-            self._content._getitem_range(slice(start, stop)),
+            self._content._getitem_range(start, stop),
             self._valid_when,
             parameters=self._parameters,
         )
@@ -1143,7 +1141,7 @@ class ByteMaskedArray(Content):
             return out
 
         mask = self.mask_as_bool(valid_when=True)
-        out = self._content._getitem_range(slice(0, len(mask)))._to_list(
+        out = self._content._getitem_range(0, mask.size)._to_list(
             behavior, json_conversions
         )
 

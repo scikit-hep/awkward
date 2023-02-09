@@ -7,7 +7,7 @@ import awkward as ak
 from awkward._nplikes import to_nplike
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import ArrayLike, NumpyMetadata
+from awkward._nplikes.numpylike import ArrayLike, IndexType, NumpyMetadata
 from awkward._nplikes.typetracer import TypeTracerArray
 from awkward._util import unset
 from awkward.contents.content import Content
@@ -272,7 +272,7 @@ class NumpyArray(Content):
             backend=self._backend,
         )
 
-    def _getitem_at(self, where: SupportsIndex):
+    def _getitem_at(self, where: IndexType):
         if not self._backend.nplike.known_data and len(self._data.shape) == 1:
             self._touch_data(recursive=False)
             return TypeTracerArray._new(self._data.dtype, shape=())
@@ -287,18 +287,11 @@ class NumpyArray(Content):
         else:
             return out
 
-    def _getitem_range(self, where):
-        if not self._backend.nplike.known_data:
-            self._touch_shape(recursive=False)
-            return self
-
-        start, stop, step = where.indices(self.length)
-        assert step == 1
-
+    def _getitem_range(self, start: SupportsIndex, stop: IndexType) -> Content:
         try:
-            out = self._data[where]
+            out = self._data[start:stop]
         except IndexError as err:
-            raise ak._errors.index_error(self, where, str(err)) from err
+            raise ak._errors.index_error(self, slice(start, stop), str(err)) from err
 
         return NumpyArray(out, parameters=self._parameters, backend=self._backend)
 
@@ -311,7 +304,7 @@ class NumpyArray(Content):
         self, where: list[str | SupportsIndex], only_fields: tuple[str, ...] = ()
     ) -> Content:
         if len(where) == 0:
-            return self._getitem_range(slice(0, 0))
+            return self._getitem_range(0, 0)
         raise ak._errors.index_error(self, where, "not an array of records")
 
     def _carry(self, carry: Index, allow_lazy: bool) -> Content:
@@ -942,9 +935,7 @@ class NumpyArray(Content):
                 if self._data.dtype.kind.upper() == "M"
                 else self._data.dtype
             )
-            nextcarry = ak.index.Index64.empty(
-                self.__len__(), self._backend.index_nplike
-            )
+            nextcarry = ak.index.Index64.empty(self.length, self._backend.index_nplike)
             assert (
                 nextcarry.nplike is self._backend.index_nplike
                 and offsets.nplike is self._backend.index_nplike
@@ -958,7 +949,7 @@ class NumpyArray(Content):
                 ](
                     nextcarry.data,
                     self._data,
-                    self.__len__(),
+                    self.length,
                     offsets.data,
                     offsets_length,
                     ascending,

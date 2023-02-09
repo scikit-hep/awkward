@@ -10,9 +10,10 @@ import awkward as ak
 from awkward._backends import Backend
 from awkward._nplikes import to_nplike
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import NumpyLike, NumpyMetadata
+from awkward._nplikes.numpylike import IndexType, NumpyLike, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import TypeTracer
+from awkward._slicing import normalize_slice
 from awkward._util import unset
 from awkward.forms.form import Form, JSONMapping, _type_parameters_equal
 from awkward.index import Index, Index64
@@ -551,7 +552,11 @@ class Content:
             return self._getitem_at(where)
 
         elif isinstance(where, slice) and where.step is None:
-            return self._getitem_range(where)
+            # Ensure that start, stop are non-negative!
+            start, stop, _, _ = self._backend.index_nplike.derive_slice_for_length(
+                normalize_slice(where, backend=self._backend), self.length
+            )
+            return self._getitem_range(start, stop)
 
         elif isinstance(where, slice):
             return self._getitem((where,))
@@ -715,10 +720,10 @@ class Content:
                 )
             )
 
-    def _getitem_at(self, where: SupportsIndex):
+    def _getitem_at(self, where: IndexType):
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def _getitem_range(self, where: slice) -> Content:
+    def _getitem_range(self, start: SupportsIndex, stop: IndexType) -> Content:
         raise ak._errors.wrap_error(NotImplementedError)
 
     def _getitem_field(
