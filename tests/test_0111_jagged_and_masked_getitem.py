@@ -1,4 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+import itertools
 
 import numpy as np
 import pytest
@@ -485,20 +486,11 @@ def test_bool_missing():
     expected = [m if m is None else x for x, m in zip(data, mask) if m is not False]
     array2 = ak.highlevel.Array(mask, check_valid=True).layout
 
-    for x1 in [True, False, None]:
-        for x2 in [True, False, None]:
-            for x3 in [True, False, None]:
-                for x4 in [True, False, None]:
-                    for x5 in [True, False, None]:
-                        mask = [x1, x2, x3, x4, x5]
-                        expected = [
-                            m if m is None else x
-                            for x, m in zip(data, mask)
-                            if m is not False
-                        ]
-                        array2 = ak.highlevel.Array(mask, check_valid=True).layout
-                        assert to_list(array[array2]) == expected
-                        assert array.to_typetracer()[array2].form == array[array2].form
+    for mask in itertools.repeat([True, False, None], 5):
+        expected = [m if m is None else x for x, m in zip(data, mask) if m is not False]
+        array2 = ak.highlevel.Array(mask, check_valid=True).layout
+        assert to_list(array[array2]) == expected
+        assert array.to_typetracer()[array2].form == array[array2].form
 
 
 def test_bool_missing2():

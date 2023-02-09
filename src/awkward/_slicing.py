@@ -8,6 +8,7 @@ from awkward._errors import wrap_error
 from awkward._nplikes import nplike_of, to_nplike
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.shape import unknown_length
 from awkward.typing import TYPE_CHECKING, Sequence, TypeAlias
 
 if TYPE_CHECKING:
@@ -456,7 +457,7 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
         else:
             item._touch_data(recursive=False)
             nextoffsets = item.offsets
-            nextcontent = item_backend.nplike.empty(None, dtype=np.int64)
+            nextcontent = item_backend.nplike.empty(unknown_length, dtype=np.int64)
 
         return ListOffsetArray(
             ak.index.Index64(nextoffsets),
@@ -513,7 +514,7 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
             item._touch_data(recursive=False)
             nextoffsets = item.offsets
             outindex = item.content.index
-            nextcontent = item_backend.nplike.empty(None, dtype=np.int64)
+            nextcontent = item_backend.nplike.empty(unknown_length, dtype=np.int64)
 
         return ListOffsetArray(
             ak.index.Index64(nextoffsets, nplike=item_backend.index_nplike),
@@ -583,7 +584,7 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
             else:
                 item._touch_data(recursive=False)
                 outindex = item.index
-                nextcontent = item_backend.nplike.empty(None, dtype=np.int64)
+                nextcontent = item_backend.nplike.empty(unknown_length, dtype=np.int64)
 
             return IndexedOptionArray(
                 ak.index.Index(outindex, nplike=item_backend.index_nplike),

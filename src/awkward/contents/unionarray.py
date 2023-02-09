@@ -11,6 +11,7 @@ import awkward as ak
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.shape import unknown_length
 from awkward._nplikes.typetracer import OneOf, TypeTracer
 from awkward._util import unset
 from awkward.contents.content import Content
@@ -99,7 +100,7 @@ class UnionArray(Content):
                 )
 
         if (
-            not (tags.length is None or index.length is None)
+            not (tags.length is unknown_length or index.length is unknown_length)
             and tags.length > index.length
         ):
             raise ak._errors.wrap_error(
@@ -599,7 +600,7 @@ class UnionArray(Content):
     def project(self, index):
         lentags = self._tags.length
         assert (
-            self._index.length is None or lentags is None
+            self._index.length is unknown_length or lentags is unknown_length
         ) or self._index.length >= lentags
         lenout = ak.index.Index64.empty(1, self._backend.index_nplike)
         tmpcarry = ak.index.Index64.empty(lentags, self._backend.index_nplike)
@@ -655,7 +656,7 @@ class UnionArray(Content):
                 lentags,
             )
         )
-        size = backend.index_nplike.scalar_as_shape_item(_size[0])
+        size = backend.index_nplike.index_as_shape_item(_size[0])
         current = index_cls.empty(size, nplike=backend.index_nplike)
         outindex = index_cls.empty(lentags, nplike=backend.index_nplike)
         assert (
@@ -942,11 +943,11 @@ class UnionArray(Content):
         mylength = self.length
 
         tags = ak.index.Index8.empty(
-            self._backend.index_nplike.add_shape_item(theirlength, mylength),
+            theirlength + mylength,
             nplike=self._backend.index_nplike,
         )
         index = ak.index.Index64.empty(
-            self._backend.index_nplike.add_shape_item(theirlength, mylength),
+            theirlength + mylength,
             nplike=self._backend.index_nplike,
         )
 
@@ -1030,9 +1031,7 @@ class UnionArray(Content):
 
         total_length = 0
         for array in head:
-            total_length = self._backend.index_nplike.add_shape_item(
-                total_length, array.length
-            )
+            total_length += array.length
 
         nexttags = ak.index.Index8.empty(
             total_length, nplike=self._backend.index_nplike
@@ -1089,9 +1088,8 @@ class UnionArray(Content):
                         array.length,
                     )
                 )
-                length_so_far = self._backend.index_nplike.add_shape_item(
-                    length_so_far, array.length
-                )
+                length_so_far += array.length
+
                 nextcontents.extend(union_contents)
 
             else:
@@ -1115,9 +1113,8 @@ class UnionArray(Content):
                     ](nextindex.data, length_so_far, array.length)
                 )
 
-                length_so_far = self._backend.index_nplike.add_shape_item(
-                    length_so_far, array.length
-                )
+                length_so_far += array.length
+
                 nextcontents.append(array)
 
         if len(nextcontents) > 127:

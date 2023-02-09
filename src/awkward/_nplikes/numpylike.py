@@ -5,18 +5,16 @@ from abc import abstractmethod
 
 import numpy
 
+from awkward._nplikes.shape import ShapeItem
 from awkward._singleton import Singleton
 from awkward.typing import (
     Literal,
     Protocol,
     Self,
     SupportsIndex,
-    SupportsInt,  # noqa: F401
-    TypeAlias,
+    # noqa: F401
     overload,
 )
-
-ShapeItem: TypeAlias = "SupportsInt | None"
 
 
 class ArrayLike(Protocol):
@@ -297,27 +295,11 @@ class NumpyLike(Singleton, Protocol):
         ...
 
     @abstractmethod
-    def shape_item_as_scalar(self, x1: ShapeItem):
+    def shape_item_as_index(self, x1: ShapeItem):
         ...
 
     @abstractmethod
-    def scalar_as_shape_item(self, x1) -> ShapeItem:
-        ...
-
-    @abstractmethod
-    def sub_shape_item(self, x1: ShapeItem, x2: ShapeItem) -> ShapeItem:
-        ...
-
-    @abstractmethod
-    def add_shape_item(self, x1: ShapeItem, x2: ShapeItem) -> ShapeItem:
-        ...
-
-    @abstractmethod
-    def mul_shape_item(self, x1: ShapeItem, x2: ShapeItem) -> ShapeItem:
-        ...
-
-    @abstractmethod
-    def div_shape_item(self, x1: ShapeItem, x2: ShapeItem) -> ShapeItem:
+    def index_as_shape_item(self, x1) -> ShapeItem:
         ...
 
     @abstractmethod

@@ -275,11 +275,11 @@ def merge_as_union(one: Content, two: Content) -> ak.contents.UnionArray:
     mylength = one.length
     theirlength = two.length
     tags = ak.index.Index8.empty(
-        one.backend.index_nplike.add_shape_item(mylength, theirlength),
+        mylength + theirlength,
         one.backend.index_nplike,
     )
     index = ak.index.Index64.empty(
-        one.backend.index_nplike.add_shape_item(mylength, theirlength),
+        mylength + theirlength,
         one.backend.index_nplike,
     )
     contents = [one, two]

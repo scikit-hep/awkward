@@ -8,6 +8,7 @@ import math
 import awkward as ak
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.shape import unknown_length
 from awkward._nplikes.typetracer import MaybeNone, TypeTracer
 from awkward._util import unset
 from awkward.contents.content import Content
@@ -60,7 +61,7 @@ class ByteMaskedArray(Content):
                 )
             )
         if (
-            not (mask.length is None or content.length is None)
+            not (mask.length is unknown_length or content.length is unknown_length)
             and mask.length > content.length
         ):
             raise ak._errors.wrap_error(
@@ -262,7 +263,7 @@ class ByteMaskedArray(Content):
             if self._backend.nplike.known_data:
                 excess_length = int(math.ceil(self.length / 8.0))
             else:
-                excess_length = None
+                excess_length = unknown_length
             return ak.contents.BitMaskedArray(
                 ak.index.IndexU8(
                     self._backend.nplike.empty(excess_length, dtype=np.uint8)
@@ -382,9 +383,9 @@ class ByteMaskedArray(Content):
                 self._valid_when,
             )
         )
-        numnull = self._backend.index_nplike.scalar_as_shape_item(_numnull[0])
+        numnull = self._backend.index_nplike.index_as_shape_item(_numnull[0])
         nextcarry = ak.index.Index64.empty(
-            self._backend.index_nplike.sub_shape_item(self.length, numnull),
+            self.length - numnull,
             nplike=self._backend.index_nplike,
         )
         outindex = ak.index.Index64.empty(
@@ -430,11 +431,11 @@ class ByteMaskedArray(Content):
         numnull, nextcarry, outindex = self._nextcarry_outindex()
 
         reducedstarts = ak.index.Index64.empty(
-            self._backend.index_nplike.sub_shape_item(self.length, numnull),
+            self.length - numnull,
             nplike=self._backend.index_nplike,
         )
         reducedstops = ak.index.Index64.empty(
-            self._backend.index_nplike.sub_shape_item(self.length, numnull),
+            self.length - numnull,
             nplike=self._backend.index_nplike,
         )
 
@@ -667,22 +668,20 @@ class ByteMaskedArray(Content):
             for x in others
         ):
             parameters = self._parameters
-            self_length_scalar = self._backend.index_nplike.shape_item_as_scalar(
+            self_length_scalar = self._backend.index_nplike.shape_item_as_index(
                 self.length
             )
             masks = [self._mask.data[:self_length_scalar]]
             tail_contents = []
             length = 0
             for x in others:
-                length_scalar = self._backend.index_nplike.shape_item_as_scalar(
-                    x.length
-                )
+                length_scalar = self._backend.index_nplike.shape_item_as_index(x.length)
                 parameters = ak.forms.form._parameters_intersect(
                     parameters, x._parameters
                 )
                 masks.append(x._mask.data[:length_scalar])
                 tail_contents.append(x._content[:length_scalar])
-                length = self._backend.index_nplike.add_shape_item(length, x.length)
+                length += x.length
 
             return ByteMaskedArray(
                 ak.index.Index8(self._backend.nplike.concat(masks)),
@@ -794,9 +793,9 @@ class ByteMaskedArray(Content):
                 self._valid_when,
             )
         )
-        numnull = self._backend.index_nplike.scalar_as_shape_item(_numnull[0])
+        numnull = self._backend.index_nplike.index_as_shape_item(_numnull[0])
 
-        next_length = self._backend.index_nplike.sub_shape_item(mask_length, numnull)
+        next_length = mask_length - numnull
         nextcarry = ak.index.Index64.empty(
             next_length, nplike=self._backend.index_nplike
         )

@@ -8,6 +8,7 @@ from collections.abc import Iterable
 import awkward as ak
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.shape import unknown_length
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.form import _type_parameters_equal
@@ -35,7 +36,7 @@ class RecordArray(Content):
         self,
         contents: Iterable[Content],
         fields: Iterable[str] | None,
-        length: int | None = unset,
+        length: int | type[unknown_length] | None = None,
         *,
         parameters=None,
         backend=None,
@@ -77,11 +78,7 @@ class RecordArray(Content):
         if backend is None:
             backend = ak._backends.NumpyBackend.instance()
 
-        # TODO: remove me in future version
-        if length is None and backend.nplike.known_data:
-            length = unset
-
-        if length is unset:
+        if length is None:
             if len(contents) == 0:
                 raise ak._errors.wrap_error(
                     TypeError(
@@ -93,31 +90,31 @@ class RecordArray(Content):
 
             if backend.nplike.known_data:
                 for content in contents:
-                    assert content.length is not None
-                    # First time we're setting length, and content.length is not None
-                    if length is unset:
+                    assert content.length is not unknown_length
+                    # First time we're setting length, and content.length is not unknown_length
+                    if length is None:
                         length = content.length
-                    # length is not None, content.length is not None
+                    # length is not unknown_length, content.length is not unknown_length
                     else:
                         length = min(length, content.length)
             else:
                 for content in contents:
-                    # First time we're setting length, and content.length is not None
-                    if length is unset:
+                    # First time we're setting length, and content.length is not unknown_length
+                    if length is None:
                         length = content.length
-                        # Any None means all None
-                        if length is None:
+                        # Any unknown_length means all unknown_length
+                        if length is unknown_length:
                             break
-                    # `length` is set, can't be None
-                    elif content.length is None:
-                        length = None
+                    # `length` is set, can't be unknown_length
+                    elif content.length is unknown_length:
+                        length = unknown_length
                         break
-                    # `length` is set, can't be None
+                    # `length` is set, can't be unknown_length
                     else:
                         length = min(length, content.length)
-        elif length is not None:
+        elif length is not unknown_length:
             for content in contents:
-                if content.length is not None and content.length < length:
+                if content.length is not unknown_length and content.length < length:
                     raise ak._errors.wrap_error(
                         ValueError(
                             "{} len(content) ({}) must be >= length ({}) for all 'contents'".format(
@@ -257,7 +254,7 @@ class RecordArray(Content):
         return RecordArray(
             contents,
             self._fields,
-            None if forget_length else self._length,
+            unknown_length if forget_length else self._length,
             parameters=self._parameters,
             backend=backend,
         )
@@ -321,7 +318,7 @@ class RecordArray(Content):
         if out.length == self._length:
             return out
         else:
-            assert self._length is not None, "TODO: need to handle this"
+            assert self._length is not unknown_length, "TODO: need to handle this"
             return out[: self._length]
 
     def _getitem_nothing(self) -> Content:
@@ -331,7 +328,7 @@ class RecordArray(Content):
         if self._backend.nplike.known_data and where < 0:
             where += self.length
 
-        if not (self._length is None or (0 <= where < self._length)):
+        if not (self._length is unknown_length or (0 <= where < self._length)):
             raise ak._errors.index_error(self, where)
         return Record(self, where)
 
@@ -340,7 +337,7 @@ class RecordArray(Content):
             self._touch_shape(recursive=False)
             return self
 
-        if self._length is None:
+        if self._length is unknown_length:
             return self
         start, stop, step = where.indices(self.length)
         assert step == 1
@@ -680,17 +677,15 @@ class RecordArray(Content):
             nextcontents.append(merged)
 
             if minlength is ak._util.unset or (
-                not (merged.length is None or minlength is None)
+                not (merged.length is unknown_length or minlength is unknown_length)
                 and merged.length < minlength
             ):
                 minlength = merged.length
 
-        if minlength is None:
+        if minlength is unknown_length:
             minlength = self.length
             for x in others:
-                minlength = self._backend.index_nplike.add_shape_item(
-                    minlength, x.length
-                )
+                minlength += x.length
 
         next = RecordArray(
             nextcontents,

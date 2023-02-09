@@ -4,6 +4,7 @@ import numpy as np
 import pytest  # noqa: F401
 
 import awkward as ak
+from awkward._nplikes.shape import unknown_length
 from awkward._nplikes.typetracer import MaybeNone, is_unknown_scalar
 
 
@@ -13,7 +14,7 @@ def test():
     typetracer_result = np.sqrt(typetracer_array)
 
     assert typetracer_result.type == ak.types.ArrayType(
-        ak.types.NumpyType("float64"), None
+        ak.types.NumpyType("float64"), unknown_length
     )
 
 
@@ -25,7 +26,7 @@ def test_add():
     typetracer_result = np.add(typetracer_left, typetracer_right)
 
     assert typetracer_result.type == ak.types.ArrayType(
-        ak.types.NumpyType("float64"), None
+        ak.types.NumpyType("float64"), unknown_length
     )
 
 
@@ -37,7 +38,7 @@ def test_add_scalar():
 
     typetracer_result = np.add(typetracer_array, other)
     assert typetracer_result.type == ak.types.ArrayType(
-        ak.types.NumpyType("int64"), None
+        ak.types.NumpyType("int64"), unknown_length
     )
 
 
@@ -50,5 +51,5 @@ def test_add_none_scalar():
 
     typetracer_result = np.add(typetracer_array, other)
     assert typetracer_result.type == ak.types.ArrayType(
-        ak.types.NumpyType("int64"), None
+        ak.types.NumpyType("int64"), unknown_length
     )

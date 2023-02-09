@@ -4,7 +4,12 @@ from __future__ import annotations
 import numpy
 
 import awkward as ak
-from awkward._nplikes.numpylike import ArrayLike, NumpyLike, NumpyMetadata, ShapeItem
+from awkward._nplikes.numpylike import (
+    ArrayLike,
+    NumpyLike,
+    NumpyMetadata,
+)
+from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward.typing import Final, Literal, SupportsInt
 
 np = NumpyMetadata.instance()
@@ -129,8 +134,8 @@ class ArrayModuleNumpyLike(NumpyLike):
         else:
             return result
 
-    def shape_item_as_scalar(self, x1: ShapeItem):
-        if x1 is None:
+    def shape_item_as_index(self, x1: ShapeItem) -> int | ArrayLike:
+        if x1 is unknown_length:
             raise ak._errors.wrap_error(
                 TypeError("array module nplikes do not support unknown lengths")
             )
@@ -141,35 +146,8 @@ class ArrayModuleNumpyLike(NumpyLike):
                 TypeError(f"expected None or int type, received {x1}")
             )
 
-    def scalar_as_shape_item(self, x1) -> ShapeItem:
-        if x1 is None:
-            return None
-        else:
-            return int(x1)
-
-    def add_shape_item(self, x1: ShapeItem, x2: ShapeItem) -> ShapeItem:
-        assert x1 >= 0
-        assert x2 >= 0
-        return x1 + x2
-
-    def sub_shape_item(self, x1: ShapeItem, x2: ShapeItem) -> ShapeItem:
-        assert x1 >= 0
-        assert x2 >= 0
-        result = x1 - x2
-        assert result >= 0
-        return result
-
-    def mul_shape_item(self, x1: ShapeItem, x2: ShapeItem) -> ShapeItem:
-        assert x1 >= 0
-        assert x2 >= 0
-        return x1 * x2
-
-    def div_shape_item(self, x1: ShapeItem, x2: ShapeItem) -> ShapeItem:
-        assert x1 >= 0
-        assert x2 >= 0
-        result = x1 // x2
-        assert result * x2 == x1
-        return result
+    def index_as_shape_item(self, x1: int | ArrayLike) -> ShapeItem:
+        return int(x1)
 
     def nonzero(self, x: ArrayLike) -> tuple[ArrayLike, ...]:
         return self._module.nonzero(x)

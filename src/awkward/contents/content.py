@@ -10,7 +10,8 @@ import awkward as ak
 from awkward._backends import Backend
 from awkward._nplikes import to_nplike
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import NumpyLike, NumpyMetadata, ShapeItem
+from awkward._nplikes.numpylike import NumpyLike, NumpyMetadata
+from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import TypeTracer
 from awkward._util import unset
 from awkward.forms.form import Form, JSONMapping, _type_parameters_equal
@@ -370,12 +371,12 @@ class Content:
         length: int,
     ):
         # if this is in a tuple-slice and really should be 0, it will be trimmed later
-        length = 1 if length is not None and length == 0 else length
+        length = 1 if length is not unknown_length and length == 0 else length
         index = Index64(head.index, nplike=self._backend.index_nplike)
         indexlength = index.length
         index = index.to_nplike(self._backend.index_nplike)
         outindex = Index64.empty(
-            self._backend.index_nplike.mul_shape_item(index.length, length),
+            index.length * length,
             self._backend.index_nplike,
         )
 
@@ -567,7 +568,7 @@ class Content:
 
             out = next._getitem_next(nextwhere[0], nextwhere[1:], None)
 
-            if out.length is not None and out.length == 0:
+            if out.length is not unknown_length and out.length == 0:
                 return out._getitem_nothing()
             else:
                 return out._getitem_at(0)
@@ -628,7 +629,7 @@ class Content:
             out = ak._slicing.getitem_next_array_wrap(
                 self._carry(carry, allow_lazy), where.shape
             )
-            if out.length is not None and out.length == 0:
+            if out.length is not unknown_length and out.length == 0:
                 return out._getitem_nothing()
             else:
                 return out._getitem_at(0)
@@ -988,7 +989,7 @@ class Content:
         return self.form_cls.dimension_optiontype.__get__(self)
 
     def _pad_none_axis0(self, target: int, clip: bool) -> Content:
-        if not clip and (self.length is None or (target < self.length)):
+        if not clip and (self.length is unknown_length or (target < self.length)):
             index = Index64(
                 self._backend.index_nplike.arange(self.length, dtype=np.int64),
                 nplike=self._backend.index_nplike,
