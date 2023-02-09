@@ -1,6 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 from __future__ import annotations
 
+import math
+
 import numpy
 
 import awkward as ak
@@ -157,7 +159,9 @@ class ArrayModuleNumpyLike(NumpyLike):
         `_getitem_range` (if step == 1). Normalize lengths to fit length of array,
         and for arrays with unknown lengths, these offsets become none.
         """
-        return slice_.indices(length)
+        start, stop, step = slice_.indices(length)
+        slice_length = math.ceil((stop - start) / step)
+        return start, stop, step, slice_length
 
     def nonzero(self, x: ArrayLike) -> tuple[ArrayLike, ...]:
         return self._module.nonzero(x)
