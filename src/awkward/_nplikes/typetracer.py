@@ -880,20 +880,6 @@ class TypeTracer(NumpyLike):
 
             return start, stop, step, self.index_as_shape_item(slice_length)
 
-    def shape_equals(
-        self, shape1: tuple[ShapeItem, ...], shape2: tuple[ShapeItem, ...]
-    ) -> bool:
-        if len(shape1) != len(shape2):
-            return False
-
-        for x, y in zip(shape1, shape2):
-            if x is unknown_length or y is unknown_length:
-                continue
-            elif x != y:
-                return False
-
-        return True
-
     def broadcast_shapes(self, *shapes: tuple[ShapeItem, ...]) -> tuple[ShapeItem, ...]:
         ndim = max([len(s) for s in shapes], default=0)
         result: list[ShapeItem] = [1] * ndim

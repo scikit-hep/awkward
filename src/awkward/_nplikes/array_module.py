@@ -165,11 +165,6 @@ class ArrayModuleNumpyLike(NumpyLike):
         slice_length = math.ceil((stop - start) / step)
         return start, stop, step, slice_length
 
-    def shape_equals(
-        self, shape1: tuple[ShapeItem, ...], shape2: tuple[ShapeItem, ...]
-    ) -> bool:
-        return shape1 == shape2
-
     def nonzero(self, x: ArrayLike) -> tuple[ArrayLike, ...]:
         return self._module.nonzero(x)
 
