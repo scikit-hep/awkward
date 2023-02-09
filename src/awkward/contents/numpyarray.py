@@ -38,24 +38,24 @@ class NumpyArray(Content):
     Only a subset of `dtype` values are allowed, and only for your system's
     native endianness:
 
-      * `bool`: boolean, like NumPy's `np.bool_` (considered distinct from integers)
-      * `int8`: signed 8-bit
-      * `uint8`: unsigned 8-bit
-      * `int16`: signed 16-bit
-      * `uint16`: unsigned 16-bit
-      * `int32`: signed 32-bit
-      * `uint32`: unsigned 32-bit
-      * `int64`: signed 64-bit
-      * `uint64`: unsigned 64-bit
-      * `float16`: floating point 16-bit, if your system's NumPy supports it
-      * `float32`: floating point 32-bit
-      * `float64`: floating point 64-bit
-      * `float128`: floating point 128-bit, if your system's NumPy supports it
-      * `complex64`: floating complex numbers composed of 32-bit real/imag parts
-      * `complex128`: floating complex numbers composed of 64-bit real/imag parts
-      * `complex256`: floating complex numbers composed of 128-bit real/imag parts, if your system's NumPy supports it
-      * `datetime64`: date/time, origin is midnight on January 1, 1970, in any units NumPy supports
-      * `timedelta64`: time difference, in any units NumPy supports
+    * `bool`: boolean, like NumPy's `np.bool_` (considered distinct from integers)
+    * `int8`: signed 8-bit
+    * `uint8`: unsigned 8-bit
+    * `int16`: signed 16-bit
+    * `uint16`: unsigned 16-bit
+    * `int32`: signed 32-bit
+    * `uint32`: unsigned 32-bit
+    * `int64`: signed 64-bit
+    * `uint64`: unsigned 64-bit
+    * `float16`: floating point 16-bit, if your system's NumPy supports it
+    * `float32`: floating point 32-bit
+    * `float64`: floating point 64-bit
+    * `float128`: floating point 128-bit, if your system's NumPy supports it
+    * `complex64`: floating complex numbers composed of 32-bit real/imag parts
+    * `complex128`: floating complex numbers composed of 64-bit real/imag parts
+    * `complex256`: floating complex numbers composed of 128-bit real/imag parts, if your system's NumPy supports it
+    * `datetime64`: date/time, origin is midnight on January 1, 1970, in any units NumPy supports
+    * `timedelta64`: time difference, in any units NumPy supports
 
     If the `shape` is one-dimensional, a NumpyArray corresponds to an Apache
     Arrow [Primitive array](https://arrow.apache.org/docs/format/Columnar.html#fixed-size-primitive-layout).

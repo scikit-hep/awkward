@@ -15,6 +15,20 @@ np = NumpyMetadata.instance()
 
 
 class Record:
+    """
+    Represents a single value from a #ak.contents.RecordArray.
+
+    As this is a columnar representation, the Record contains a
+    #ak.layout.RecordArray, rather than the other way around.
+    Its two fields are
+
+    * `array`: the #ak.layout.RecordArray and
+    * `at`: the index posiion where this Record is found.
+
+    The Record shares a reference with its #ak.layout.RecordArray;
+    it is not a copy.
+    """
+
     def __init__(self, array, at):
         if not isinstance(array, ak.contents.RecordArray):
             raise ak._errors.wrap_error(

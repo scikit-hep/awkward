@@ -58,7 +58,7 @@ class ListOffsetArray(Content):
                     start = offsets[i]
                     stop = offsets[i + 1]
                     if start != stop:
-                        assert start < stop   # i.e. start <= stop
+                        assert start < stop  # i.e. start <= stop
                         assert start >= 0
                         assert stop <= len(content)
                 self.offsets = offsets
@@ -70,7 +70,7 @@ class ListOffsetArray(Content):
             def __getitem__(self, where):
                 if isinstance(where, int):
                     assert 0 <= where < len(self)
-                    return self.content[self.offsets[where]:self.offsets[where + 1]]
+                    return self.content[self.offsets[where] : self.offsets[where + 1]]
                 elif isinstance(where, slice) and where.step is None:
                     offsets = self.offsets[where.start : where.stop + 1]
                     if len(offsets) == 0:

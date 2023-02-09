@@ -32,10 +32,8 @@ class UnionArray(Content):
     UnionArray represents data drawn from an ordered list of `contents`,
     which can have different types, using
 
-       * `tags`: buffer of integers indicating which content each array element
-         draws from.
-       * `index`: buffer of integers indicating which element from the content
-         to draw from.
+    * `tags`: buffer of integers indicating which content each array element draws from.
+    * `index`: buffer of integers indicating which element from the content to draw from.
 
     UnionArrays correspond to Apache Arrow's
     [dense union type](https://arrow.apache.org/docs/format/Columnar.html#dense-union).
@@ -50,7 +48,7 @@ class UnionArray(Content):
                 assert isinstance(tags, Index8)
                 assert isinstance(index, (Index32, IndexU32, Index64))
                 assert isinstance(contents, list)
-                assert len(index) >= len(tags)   # usually equal
+                assert len(index) >= len(tags)  # usually equal
                 for x in tags:
                     assert 0 <= x < len(contents)
                 for i, x in enumerate(tags):
@@ -67,9 +65,13 @@ class UnionArray(Content):
                     assert 0 <= where < len(self)
                     return self.contents[self.tags[where]][self.index[where]]
                 elif isinstance(where, slice) and where.step is None:
-                    return UnionArray(self.tags[where], self.index[where], self.contents)
+                    return UnionArray(
+                        self.tags[where], self.index[where], self.contents
+                    )
                 elif isinstance(where, str):
-                    return UnionArray(self.tags, self.index, [x[where] for x in self.contents])
+                    return UnionArray(
+                        self.tags, self.index, [x[where] for x in self.contents]
+                    )
                 else:
                     raise AssertionError(where)
     """

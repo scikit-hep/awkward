@@ -59,7 +59,7 @@ class RegularArray(Content):
                 assert isinstance(zeros_length, int)
                 assert size >= 0
                 if size != 0:
-                    length = len(content) // size   # floor division
+                    length = len(content) // size  # floor division
                 else:
                     assert zeros_length >= 0
                     length = zeros_length
@@ -73,12 +73,14 @@ class RegularArray(Content):
             def __getitem__(self, where):
                 if isinstance(where, int):
                     assert 0 <= where < len(self)
-                    return self.content[(where) * self.size:(where + 1) * self.size]
+                    return self.content[(where) * self.size : (where + 1) * self.size]
                 elif isinstance(where, slice) and where.step is None:
                     start = where.start * self.size
                     stop = where.stop * self.size
                     zeros_length = where.stop - where.start
-                    return RegularArray(self.content[start:stop], self.size, zeros_length)
+                    return RegularArray(
+                        self.content[start:stop], self.size, zeros_length
+                    )
                 elif isinstance(where, str):
                     return RegularArray(self.content[where], self.size, self.length)
                 else:

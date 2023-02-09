@@ -42,7 +42,7 @@ class IndexedOptionArray(Content):
                 assert isinstance(index, (Index32, Index64))
                 assert isinstance(content, Content)
                 for x in index:
-                    assert x < len(content)   # index[i] may be negative
+                    assert x < len(content)  # index[i] may be negative
                 self.index = index
                 self.content = content
 
@@ -57,7 +57,9 @@ class IndexedOptionArray(Content):
                     else:
                         return self.content[self.index[where]]
                 elif isinstance(where, slice) and where.step is None:
-                    return IndexedOptionArray(self.index[where.start:where.stop], self.content)
+                    return IndexedOptionArray(
+                        self.index[where.start : where.stop], self.content
+                    )
                 elif isinstance(where, str):
                     return IndexedOptionArray(self.index, self.content[where])
                 else:

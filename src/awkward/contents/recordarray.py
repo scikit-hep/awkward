@@ -30,10 +30,9 @@ class RecordArray(Content):
     RecordArray represents an array of tuples or records, all with the
     same type. Its `contents` is an ordered list of arrays.
 
-       * If `fields` is None, the data are tuples, indexed only by
-         their order.
-       * Otherwise, `fields` is an ordered list of names with the same length as
-         the `contents`, associating a field name to every content.
+    * If `fields` is None, the data are tuples, indexed only by their order.
+    * Otherwise, `fields` is an ordered list of names with the same length as
+      the `contents`, associating a field name to every content.
 
     The length of the RecordArray, if not given, is the length of its shortest
     content; all are aligned element-by-element. If a RecordArray has zero contents,
@@ -81,8 +80,11 @@ class RecordArray(Content):
                             stop = start
                         return RecordArray([], self.fields, stop - start)
                     else:
-                        return RecordArray([x[where] for x in self.contents], self.fields,
-                                           where.stop - where.start)
+                        return RecordArray(
+                            [x[where] for x in self.contents],
+                            self.fields,
+                            where.stop - where.start,
+                        )
                 elif isinstance(where, str):
                     if self.fields is None:
                         try:
@@ -91,14 +93,14 @@ class RecordArray(Content):
                             pass
                         else:
                             if i < len(self.contents):
-                                return self.contents[i][0:len(self)]
+                                return self.contents[i][0 : len(self)]
                     else:
                         try:
                             i = self.fields.index(where)
                         except ValueError:
                             pass
                         else:
-                            return self.contents[i][0:len(self)]
+                            return self.contents[i][0 : len(self)]
                     raise ValueError("field " + repr(where) + " not found")
                 else:
                     raise AssertionError(where)

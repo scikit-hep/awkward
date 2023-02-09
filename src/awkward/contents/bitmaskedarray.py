@@ -85,17 +85,22 @@ class BitMaskedArray(Content):
                         return None
                 elif isinstance(where, slice) and where.step is None:
                     # In general, slices must convert BitMaskedArray to ByteMaskedArray.
-                    bytemask = np.unpackbits(self.mask,
-                                   bitorder=("little" if self.lsb_order else "big")).view(bool)
-                    return ByteMaskedArray(bytemask[where.start:where.stop],
-                                           self.content[where.start:where.stop],
-                                           valid_when=self.valid_when)
+                    bytemask = np.unpackbits(
+                        self.mask, bitorder=("little" if self.lsb_order else "big")
+                    ).view(bool)
+                    return ByteMaskedArray(
+                        bytemask[where.start : where.stop],
+                        self.content[where.start : where.stop],
+                        valid_when=self.valid_when,
+                    )
                 elif isinstance(where, str):
-                    return BitMaskedArray(self.mask,
-                                          self.content[where],
-                                          valid_when=self.valid_when,
-                                          length=self.length,
-                                          lsb_order=self.lsb_order)
+                    return BitMaskedArray(
+                        self.mask,
+                        self.content[where],
+                        valid_when=self.valid_when,
+                        length=self.length,
+                        lsb_order=self.lsb_order,
+                    )
                 else:
                     raise AssertionError(where)
     """

@@ -29,8 +29,8 @@ class ListArray(Content):
     have unreachable elements between lists. Instead of a single `offsets` buffer,
     ListArray has
 
-       * `starts`: The starting index of each list.
-       * `stops`: The stopping index of each list.
+    * `starts`: The starting index of each list.
+    * `stops`: The stopping index of each list.
 
     #ak.contents.ListOffsetArray `offsets` may be related to `starts` and
     `stops` by
@@ -60,12 +60,12 @@ class ListArray(Content):
                 assert isinstance(starts, (Index32, IndexU32, Index64))
                 assert isinstance(stops, type(starts))
                 assert isinstance(content, Content)
-                assert len(stops) >= len(starts)   # usually equal
+                assert len(stops) >= len(starts)  # usually equal
                 for i in range(len(starts)):
                     start = starts[i]
                     stop = stops[i]
                     if start != stop:
-                        assert start < stop   # i.e. start <= stop
+                        assert start < stop  # i.e. start <= stop
                         assert start >= 0
                         assert stop <= len(content)
                 self.starts = starts
@@ -78,10 +78,10 @@ class ListArray(Content):
             def __getitem__(self, where):
                 if isinstance(where, int):
                     assert 0 <= where < len(self)
-                    return self.content[self.starts[where]:self.stops[where]]
+                    return self.content[self.starts[where] : self.stops[where]]
                 elif isinstance(where, slice) and where.step is None:
-                    starts = self.starts[where.start:where.stop]
-                    stops = self.stops[where.start:where.stop]
+                    starts = self.starts[where.start : where.stop]
+                    stops = self.stops[where.start : where.stop]
                     return ListArray(starts, stops, self.content)
                 elif isinstance(where, str):
                     return ListArray(self.starts, self.stops, self.content[where])

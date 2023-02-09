@@ -63,11 +63,15 @@ class ByteMaskedArray(Content):
                     else:
                         return None
                 elif isinstance(where, slice) and where.step is None:
-                    return ByteMaskedArray(self.mask[where.start:where.stop],
-                                           self.content[where.start:where.stop],
-                                           valid_when=self.valid_when)
+                    return ByteMaskedArray(
+                        self.mask[where.start : where.stop],
+                        self.content[where.start : where.stop],
+                        valid_when=self.valid_when,
+                    )
                 elif isinstance(where, str):
-                    return ByteMaskedArray(self.mask, self.content[where], valid_when=self.valid_when)
+                    return ByteMaskedArray(
+                        self.mask, self.content[where], valid_when=self.valid_when
+                    )
                 else:
                     raise AssertionError(where)
     """

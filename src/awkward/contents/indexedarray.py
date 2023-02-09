@@ -31,9 +31,9 @@ class IndexedArray(Content):
 
     It has many uses:
 
-       * representing a lazily applied slice.
-       * simulating pointers into another collection.
-       * emulating the dictionary encoding of Apache Arrow and Parquet.
+    * representing a lazily applied slice.
+    * simulating pointers into another collection.
+    * emulating the dictionary encoding of Apache Arrow and Parquet.
 
     If the `__array__` parameter is `"categorical"`, the contents must be unique.
     Some operations are optimized (for instance, `==` only compares `index` integers)
@@ -47,7 +47,7 @@ class IndexedArray(Content):
                 assert isinstance(index, (Index32, IndexU32, Index64))
                 assert isinstance(content, Content)
                 for x in index:
-                    assert 0 <= x < len(content)   # index[i] must not be negative
+                    assert 0 <= x < len(content)  # index[i] must not be negative
                 self.index = index
                 self.content = content
 
@@ -59,7 +59,9 @@ class IndexedArray(Content):
                     assert 0 <= where < len(self)
                     return self.content[self.index[where]]
                 elif isinstance(where, slice) and where.step is None:
-                    return IndexedArray(self.index[where.start:where.stop], self.content)
+                    return IndexedArray(
+                        self.index[where.start : where.stop], self.content
+                    )
                 elif isinstance(where, str):
                     return IndexedArray(self.index, self.content[where])
                 else:
