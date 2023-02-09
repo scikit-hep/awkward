@@ -185,7 +185,7 @@ class UnmaskedArray(Content):
         return self._content._getitem_at(where)
 
     def _getitem_range(self, where):
-        if not self._backend.nplike.known_shape:
+        if not self._backend.nplike.known_data:
             self._touch_shape(recursive=False)
             return self
 

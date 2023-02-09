@@ -28,7 +28,7 @@ def common_nplike(nplikes: Collection[NumpyLike]) -> NumpyLike:
     else:
         # We allow typetracers to mix with other nplikes, and take precedence
         for nplike in nplikes:
-            if not (nplike.known_data and nplike.known_shape):
+            if not nplike.known_data:
                 return nplike
 
         raise ak._errors.wrap_error(

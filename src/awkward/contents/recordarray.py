@@ -78,7 +78,7 @@ class RecordArray(Content):
             backend = ak._backends.NumpyBackend.instance()
 
         # TODO: remove me in future version
-        if length is None and backend.nplike.known_shape:
+        if length is None and backend.nplike.known_data:
             length = unset
 
         if length is unset:
@@ -91,7 +91,7 @@ class RecordArray(Content):
                     )
                 )
 
-            if backend.nplike.known_shape:
+            if backend.nplike.known_data:
                 for content in contents:
                     assert content.length is not None
                     # First time we're setting length, and content.length is not None
@@ -328,7 +328,7 @@ class RecordArray(Content):
         return self._getitem_range(slice(0, 0))
 
     def _getitem_at(self, where: SupportsIndex):
-        if self._backend.nplike.known_shape and where < 0:
+        if self._backend.nplike.known_data and where < 0:
             where += self.length
 
         if not (self._length is None or (0 <= where < self._length)):
@@ -336,7 +336,7 @@ class RecordArray(Content):
         return Record(self, where)
 
     def _getitem_range(self, where):
-        if not self._backend.nplike.known_shape:
+        if not self._backend.nplike.known_data:
             self._touch_shape(recursive=False)
             return self
 
@@ -521,7 +521,7 @@ class RecordArray(Content):
             for content in self._contents:
                 trimmed = content._getitem_range(slice(0, self.length))
                 offsets, flattened = trimmed._offsets_and_flattened(axis, depth)
-                if self._backend.nplike.known_shape and offsets.length != 0:
+                if self._backend.nplike.known_data and offsets.length != 0:
                     raise ak._errors.wrap_error(
                         AssertionError(
                             "RecordArray content with axis > depth + 1 returned a non-empty offsets from offsets_and_flattened"
@@ -956,7 +956,7 @@ class RecordArray(Content):
     def _recursively_apply(
         self, action, behavior, depth, depth_context, lateral_context, options
     ):
-        if self._backend.nplike.known_shape:
+        if self._backend.nplike.known_data:
             contents = [x[: self._length] for x in self._contents]
         else:
             self._touch_data(recursive=False)

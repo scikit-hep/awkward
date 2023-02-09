@@ -178,7 +178,7 @@ class ByteMaskedArray(Content):
             self._content._touch_data(recursive)
 
     def _touch_shape(self, recursive):
-        if not self._backend.index_nplike.known_shape:
+        if not self._backend.index_nplike.known_data:
             self._mask.data.touch_shape()
         if recursive:
             self._content._touch_shape(recursive)
@@ -259,7 +259,7 @@ class ByteMaskedArray(Content):
     def to_BitMaskedArray(self, valid_when, lsb_order):
         if not self._backend.nplike.known_data:
             self._touch_data(recursive=False)
-            if self._backend.nplike.known_shape:
+            if self._backend.nplike.known_data:
                 excess_length = int(math.ceil(self.length / 8.0))
             else:
                 excess_length = None
@@ -307,7 +307,7 @@ class ByteMaskedArray(Content):
 
         if where < 0:
             where += self.length
-        if self._backend.nplike.known_shape and not 0 <= where < self.length:
+        if self._backend.nplike.known_data and not 0 <= where < self.length:
             raise ak._errors.index_error(self, where)
         if self._mask[where] == self._valid_when:
             return self._content._getitem_at(where)
@@ -315,7 +315,7 @@ class ByteMaskedArray(Content):
             return None
 
     def _getitem_range(self, where):
-        if not self._backend.nplike.known_shape:
+        if not self._backend.nplike.known_data:
             self._touch_shape(recursive=False)
             return self
 
@@ -413,8 +413,8 @@ class ByteMaskedArray(Content):
 
     def _getitem_next_jagged_generic(self, slicestarts, slicestops, slicecontent, tail):
         if (
-            slicestarts.nplike.known_shape
-            and self._backend.nplike.known_shape
+            slicestarts.nplike.known_data
+            and self._backend.nplike.known_data
             and slicestarts.length != self.length
         ):
             raise ak._errors.index_error(
@@ -520,7 +520,7 @@ class ByteMaskedArray(Content):
         numnull = ak.index.Index64.zeros(1, nplike=self._backend.index_nplike)
 
         if mask is not None:
-            if self._backend.nplike.known_shape and mask_length != mask.length:
+            if self._backend.nplike.known_data and mask_length != mask.length:
                 raise ak._errors.wrap_error(
                     ValueError(
                         "mask length ({}) is not equal to {} length ({})".format(
@@ -930,7 +930,7 @@ class ByteMaskedArray(Content):
             return ak.contents.ListOffsetArray(outoffsets, tmp, parameters=None)
 
     def _validity_error(self, path):
-        if self._backend.nplike.known_shape and self._content.length < self.mask.length:
+        if self._backend.nplike.known_data and self._content.length < self.mask.length:
             return f"at {path} ({type(self)!r}): len(content) < len(mask)"
         else:
             return self._content._validity_error(path + ".content")
@@ -1001,7 +1001,7 @@ class ByteMaskedArray(Content):
     def _recursively_apply(
         self, action, behavior, depth, depth_context, lateral_context, options
     ):
-        if self._backend.nplike.known_shape:
+        if self._backend.nplike.known_data:
             content = self._content[0 : self._mask.length]
         else:
             content = self._content

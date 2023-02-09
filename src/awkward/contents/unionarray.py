@@ -203,7 +203,7 @@ class UnionArray(Content):
                     )
                 )
 
-        if backend.nplike.known_shape and self_index.length < self_tags.length:
+        if backend.nplike.known_data and self_index.length < self_tags.length:
             raise ak._errors.wrap_error(
                 ValueError("invalid UnionArray: len(index) < len(tags)")
             )
@@ -423,7 +423,7 @@ class UnionArray(Content):
                 x._touch_data(recursive)
 
     def _touch_shape(self, recursive):
-        if not self._backend.index_nplike.known_shape:
+        if not self._backend.index_nplike.known_data:
             self._tags.data.touch_shape()
             self._index.data.touch_shape()
         if recursive:
@@ -465,13 +465,13 @@ class UnionArray(Content):
 
         if where < 0:
             where += self.length
-        if self._backend.nplike.known_shape and not 0 <= where < self.length:
+        if self._backend.nplike.known_data and not 0 <= where < self.length:
             raise ak._errors.index_error(self, where)
         tag, index = self._tags[where], self._index[where]
         return self._contents[tag]._getitem_at(index)
 
     def _getitem_range(self, where):
-        if not self._backend.nplike.known_shape:
+        if not self._backend.nplike.known_data:
             self._touch_shape(recursive=False)
             return self
 
@@ -1298,16 +1298,13 @@ class UnionArray(Content):
 
     def _validity_error(self, path):
         for i in range(len(self.contents)):
-            if (
-                self._backend.nplike.known_shape
-                and self.index.length < self.tags.length
-            ):
+            if self._backend.nplike.known_data and self.index.length < self.tags.length:
                 return f"at {path} ({type(self)!r}): len(index) < len(tags)"
 
             lencontents = self._backend.index_nplike.empty(
                 len(self.contents), dtype=np.int64
             )
-            if self._backend.nplike.known_shape:
+            if self._backend.nplike.known_data:
                 for i in range(len(self.contents)):
                     lencontents[i] = self.contents[i].length
 

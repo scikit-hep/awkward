@@ -177,7 +177,7 @@ class IndexedArray(Content):
             self._content._touch_data(recursive)
 
     def _touch_shape(self, recursive):
-        if not self._backend.index_nplike.known_shape:
+        if not self._backend.index_nplike.known_data:
             self._index.data.touch_shape()
         if recursive:
             self._content._touch_shape(recursive)
@@ -222,12 +222,12 @@ class IndexedArray(Content):
 
         if where < 0:
             where += self.length
-        if self._backend.nplike.known_shape and not 0 <= where < self.length:
+        if self._backend.nplike.known_data and not 0 <= where < self.length:
             raise ak._errors.index_error(self, where)
         return self._content._getitem_at(self._index[where])
 
     def _getitem_range(self, where):
-        if not self._backend.nplike.known_shape:
+        if not self._backend.nplike.known_data:
             self._touch_shape(recursive=False)
             return self
 
@@ -266,7 +266,7 @@ class IndexedArray(Content):
         return IndexedArray(nextindex, self._content, parameters=self._parameters)
 
     def _getitem_next_jagged_generic(self, slicestarts, slicestops, slicecontent, tail):
-        if self._backend.nplike.known_shape and slicestarts.length != self.length:
+        if self._backend.nplike.known_data and slicestarts.length != self.length:
             raise ak._errors.index_error(
                 self,
                 ak.contents.ListArray(
@@ -362,7 +362,7 @@ class IndexedArray(Content):
 
     def project(self, mask=None):
         if mask is not None:
-            if self._backend.nplike.known_shape and self._index.length != mask.length:
+            if self._backend.nplike.known_data and self._index.length != mask.length:
                 raise ak._errors.wrap_error(
                     ValueError(
                         "mask length ({}) is not equal to {} length ({})".format(
@@ -627,7 +627,7 @@ class IndexedArray(Content):
             return reversed._mergemany(tail[1:])
 
     def _fill_none(self, value: Content) -> Content:
-        if value.backend.nplike.known_shape and value.length != 1:
+        if value.backend.nplike.known_data and value.length != 1:
             raise ak._errors.wrap_error(
                 ValueError(f"fill_none value length ({value.length}) is not equal to 1")
             )
@@ -998,7 +998,7 @@ class IndexedArray(Content):
         self, action, behavior, depth, depth_context, lateral_context, options
     ):
         if (
-            self._backend.nplike.known_shape
+            self._backend.nplike.known_data
             and self._backend.nplike.known_data
             and self._index.length != 0
         ):
@@ -1009,10 +1009,7 @@ class IndexedArray(Content):
             )
             content = self._content[indexmin : npindex.max() + 1]
         else:
-            if (
-                not self._backend.nplike.known_shape
-                or not self._backend.nplike.known_data
-            ):
+            if not self._backend.nplike.known_data:
                 self._touch_data(recursive=False)
             index, content = self._index, self._content
 

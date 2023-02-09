@@ -236,7 +236,7 @@ class BitMaskedArray(Content):
             self._content._touch_data(recursive)
 
     def _touch_shape(self, recursive):
-        if not self._backend.index_nplike.known_shape:
+        if not self._backend.index_nplike.known_data:
             self._mask.data.touch_shape()
         if recursive:
             self._content._touch_shape(recursive)
@@ -388,7 +388,7 @@ class BitMaskedArray(Content):
 
         if where < 0:
             where += self.length
-        if not (0 <= where < self.length) and self._backend.nplike.known_shape:
+        if not (0 <= where < self.length) and self._backend.nplike.known_data:
             raise ak._errors.index_error(self, where)
         if self._lsb_order:
             bit = bool(self._mask[where // 8] & (1 << (where % 8)))
@@ -607,7 +607,7 @@ class BitMaskedArray(Content):
     def _recursively_apply(
         self, action, behavior, depth, depth_context, lateral_context, options
     ):
-        if self._backend.nplike.known_shape:
+        if self._backend.nplike.known_data:
             content = self._content[0 : self._length]
         else:
             content = self._content

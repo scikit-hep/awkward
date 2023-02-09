@@ -586,7 +586,6 @@ def try_touch_shape(array):
 
 class TypeTracer(NumpyLike):
     known_data: Final = False
-    known_shape: Final = False
     is_eager: Final = True
 
     def _apply_ufunc(self, ufunc, *inputs):

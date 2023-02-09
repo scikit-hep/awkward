@@ -150,7 +150,7 @@ class ListOffsetArray(Content):
             self._content._touch_data(recursive)
 
     def _touch_shape(self, recursive):
-        if not self._backend.index_nplike.known_shape:
+        if not self._backend.index_nplike.known_data:
             self._offsets.data.touch_shape()
         if recursive:
             self._content._touch_shape(recursive)
@@ -239,13 +239,13 @@ class ListOffsetArray(Content):
 
         if where < 0:
             where += self.length
-        if not (0 <= where < self.length) and self._backend.nplike.known_shape:
+        if not (0 <= where < self.length) and self._backend.nplike.known_data:
             raise ak._errors.index_error(self, where)
         start, stop = self._offsets[where], self._offsets[where + 1]
         return self._content._getitem_range(slice(start, stop))
 
     def _getitem_range(self, where):
-        if not self._backend.nplike.known_shape:
+        if not self._backend.nplike.known_data:
             self._touch_shape(recursive=False)
             return self
 
@@ -315,7 +315,7 @@ class ListOffsetArray(Content):
                 )
             )
 
-        if offsets.nplike.known_shape and offsets.length - 1 != self.length:
+        if offsets.nplike.known_data and offsets.length - 1 != self.length:
             raise ak._errors.wrap_error(
                 AssertionError(
                     "cannot broadcast {} of length {} to length {}".format(
@@ -887,7 +887,7 @@ class ListOffsetArray(Content):
                     np.AxisError("array with strings can only be sorted with axis=-1")
                 )
 
-            if self._backend.nplike.known_shape and parents.nplike.known_shape:
+            if self._backend.nplike.known_data and parents.nplike.known_data:
                 assert self._offsets.length - 1 == parents.length
 
             (
@@ -1038,7 +1038,7 @@ class ListOffsetArray(Content):
                     np.AxisError("array with strings can only be sorted with axis=-1")
                 )
 
-            if self._backend.nplike.known_shape and parents.nplike.known_shape:
+            if self._backend.nplike.known_data and parents.nplike.known_data:
                 assert self._offsets.length - 1 == parents.length
 
             (
@@ -1225,7 +1225,7 @@ class ListOffsetArray(Content):
                     np.AxisError("array with strings can only be sorted with axis=-1")
                 )
 
-            if self._backend.nplike.known_shape and parents.nplike.known_shape:
+            if self._backend.nplike.known_data and parents.nplike.known_data:
                 assert self._offsets.length - 1 == parents.length
 
             (
@@ -2032,7 +2032,7 @@ class ListOffsetArray(Content):
     def _recursively_apply(
         self, action, behavior, depth, depth_context, lateral_context, options
     ):
-        if self._backend.nplike.known_shape and self._backend.nplike.known_data:
+        if self._backend.nplike.known_data:
             offsetsmin = self._offsets[0]
             offsets = ak.index.Index(
                 self._offsets.data - offsetsmin, nplike=self._backend.index_nplike

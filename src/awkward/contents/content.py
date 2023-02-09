@@ -411,7 +411,7 @@ class Content:
 
         index = Index64(head._index, nplike=self._backend.index_nplike)
         content = that._getitem_at(0)
-        if self._backend.nplike.known_shape and content.length < index.length:
+        if self._backend.nplike.known_data and content.length < index.length:
             raise ak._errors.index_error(
                 self,
                 head,
@@ -474,7 +474,7 @@ class Content:
             )
 
         if isinstance(head.content, ak.contents.ListOffsetArray):
-            if self._backend.nplike.known_shape and self.length != 1:
+            if self._backend.nplike.known_data and self.length != 1:
                 raise ak._errors.wrap_error(
                     NotImplementedError("reached a not-well-considered code path")
                 )
@@ -903,7 +903,7 @@ class Content:
                 ak.contents.IndexedArray.simplified(ptr, self, parameters=None)
             )
             length = contents[-1].length
-        assert not (length is ak._util.unset and self._backend.nplike.known_shape)
+        assert not (length is ak._util.unset and self._backend.nplike.known_data)
         return ak.contents.RecordArray(
             contents, recordlookup, length, parameters=parameters, backend=self._backend
         )
