@@ -49,7 +49,7 @@ def print_mempool_stats(idx):
 def multiply(array, n, out):
     tid = cuda.grid(1)
     print("     kernel multiply for tid...", tid, len(array))
-    out[tid] = array[tid]  # * n
+    out[tid] = array[tid]  * n
 
 
 def test_array_multiply():

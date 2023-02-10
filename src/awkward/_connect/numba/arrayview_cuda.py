@@ -1330,6 +1330,33 @@ class ArrayViewArgHandler:
                 # import numba.cuda as nb_cuda
                 array_data_view = nb_cuda.as_cuda_array(val.layout.data)
                 print("view --->", array_data_view, type(array_data_view))
+                print("val._numbaview.start", val._numbaview.start, type(val._numbaview.start))
+                print("val._numbaview.stop", val._numbaview.stop, type(val._numbaview.stop))
+                print("val._numbaview.pos", val._numbaview.pos, type(val._numbaview.pos))
+                c_intp = ctypes.c_ssize_t
+                
+                start = val._numbaview.start
+                stop = val._numbaview.stop
+                pos = val._numbaview.pos
+                arrayptrs = val._numbaview.lookup.arrayptrs.data.ptr #ctypes.cast(val._numbaview.lookup.arrayptrs.data.ptr, ctypes.POINTER(ctypes.c_int64))
+                pylookup = 0
+
+                #result_ptr = format(arrayptrs, 'x')
+                #print("arrayview_cuda.py line 1280: ArrayViewArgHandler::prepare_args: about to return from prepare args and arrayptrs is", result_ptr, arrayptrs)
+                #print("arrayview_cuda.py line 1281: ArrayViewArgHandler::prepare_args:", arrayptrs.item(), array_data_view.gpu_data)
+                print("start = ", start) 
+                print("stop = ", stop)
+                print("pos = ", pos)
+#            ("pos", numba.intp),
+#            ("start", numba.intp),
+#            ("stop", numba.intp),
+#            ("arrayptrs", numba.types.CPointer(numba.intp)),
+#            ("pylookup", numba.types.pyobject),
+
+                return tys, (pos, start, stop, arrayptrs, pylookup)
+
+                array_data_view = nb_cuda.as_cuda_array(val.layout.data)
+                print("view --->", array_data_view, type(array_data_view))
                 print(
                     "val._numbaview.start",
                     val._numbaview.start,
