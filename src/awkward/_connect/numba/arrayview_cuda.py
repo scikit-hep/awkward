@@ -1318,7 +1318,7 @@ class ArrayViewArgHandler:
             format(val, "x")
         if isinstance(val, ak.Array):
 
-            if isinstance(val.layout.nplike, ak._nplikes.cupy.Cupy):
+            if isinstance(val.layout.backend, ak._backends.CupyBackend):
 
                 # Use uint64 for start, stop, pos, the array pointers value and the pylookup value
                 tys = types.UniTuple(types.uint64, 5)

@@ -43,8 +43,9 @@ def print_mempool_stats(idx):
 # blocks = 64
 # nthreads = blocks * threads
 
+#@cuda.jit(debug=True, opt=False, extensions=[array_view_arg_handler])
 
-@cuda.jit(debug=True, opt=False, extensions=[array_view_arg_handler])
+@cuda.jit(extensions=[array_view_arg_handler])
 def multiply(array, n, out):
     tid = cuda.grid(1)
     print("     kernel multiply for tid...", tid, len(array))
