@@ -157,7 +157,6 @@ def overlay_behavior(behavior: dict | None) -> collections.abc.Mapping:
     on top of the global #ak.behavior
     """
     if behavior is None:
-        print("_util.py line 137: overlay_behavior is None")
         return ak.behavior
     return collections.ChainMap(behavior, ak.behavior)
 
