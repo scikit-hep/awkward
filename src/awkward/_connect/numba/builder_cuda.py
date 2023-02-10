@@ -6,7 +6,7 @@ import numba.core.typing.ctypes_utils
 
 import awkward as ak
 
-numpy = ak.nplikes.Numpy.instance()
+numpy = ak._nplikes.numpy.Numpy.instance()
 
 
 dynamic_addrs = {}

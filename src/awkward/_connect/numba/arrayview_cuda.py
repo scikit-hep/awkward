@@ -9,12 +9,14 @@ from numba.core.extending import intrinsic as _intrinsic
 
 intrinsic = _intrinsic(target="cuda")
 
+import numpy
 from numba import cuda, types
 from numba.cuda.cudaimpl import registry as cuda_registry
 
 import awkward as ak
+from awkward._nplikes.numpylike import NumpyMetadata
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 
 import _ctypes
 
@@ -296,7 +298,6 @@ class ArrayView:
             array,
             allow_record=False,
             allow_other=False,
-            numpytype=(np.number, np.bool_, np.datetime64, np.timedelta64),
         )
 
         return ArrayView(
@@ -800,12 +801,7 @@ class RecordView:
     @classmethod
     def fromrecord(cls, record):
         behavior = ak._util.behavior_of(record)
-        layout = ak.operations.to_layout(
-            record,
-            allow_record=True,
-            allow_other=False,
-            numpytype=(np.number, np.bool_, np.datetime64, np.timedelta64),
-        )
+        layout = ak.operations.to_layout(record, allow_record=True, allow_other=False)
         assert isinstance(layout, ak.record.Record)
         arraylayout = layout.array
         return RecordView(
@@ -1175,7 +1171,7 @@ def array_supported(dtype):
     ) or isinstance(dtype, (numba.types.NPDatetime, numba.types.NPTimedelta))
 
 
-@numba.extending.overload(ak.nplikes.numpy.array)
+@numba.extending.overload(numpy.array)
 def overload_np_array(array, dtype=None):
     if isinstance(array, ArrayViewType):
         ndim = array.type.ndim
@@ -1240,11 +1236,11 @@ def array_impl(array, dtype=None):
                     "\n    ".join(fill_array),
                 ),
                 "array_impl",
-                {"numpy": ak.nplikes.numpy},
+                {"numpy": numpy},
             )
 
 
-@numba.extending.type_callable(ak.nplikes.numpy.asarray)
+@numba.extending.type_callable(numpy.asarray)
 def type_asarray(context):
     def typer(arrayview):
         if (
@@ -1258,7 +1254,7 @@ def type_asarray(context):
     return typer
 
 
-@numba.extending.lower_builtin(ak.nplikes.numpy.asarray, ArrayViewType)
+@numba.extending.lower_builtin(numpy.asarray, ArrayViewType)
 def lower_asarray(context, builder, sig, args):
     rettype, (viewtype,) = sig.return_type, sig.args
     (viewval,) = args
@@ -1322,7 +1318,7 @@ class ArrayViewArgHandler:
             format(val, "x")
         if isinstance(val, ak.Array):
 
-            if isinstance(val.layout.nplike, ak.nplikes.Cupy):
+            if isinstance(val.layout.nplike, ak._nplikes.cupy.Cupy):
 
                 # Use uint64 for start, stop, pos, the array pointers value and the pylookup value
                 tys = types.UniTuple(types.uint64, 5)

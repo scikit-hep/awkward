@@ -14,7 +14,7 @@ class Lookup:
         def arrayptr(x):
             if isinstance(x, int):
                 return x
-            elif isinstance(self.nplike, ak.nplikes.Cupy):
+            elif isinstance(self.nplike, ak._nplikes.cupy.Cupy):
                 print(
                     "_lookup.py line 25: GPU arrayptr: x.data",
                     x.data,
