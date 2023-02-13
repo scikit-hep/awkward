@@ -238,6 +238,8 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
                 offsets = backend.index_nplike.empty(
                     len(nextinputs[0]) + 1, dtype=np.int64
                 )
+                # TODO `maybe_out` is supposed to be allowed to make a copy
+                # but we don't anticipate that here.
                 offsets[0] = 0
                 backend.index_nplike.cumsum(counts, maybe_out=offsets[1:])
 
