@@ -130,10 +130,10 @@ def _impl(array, axis, highlevel, behavior):
         # This is in trivial order: the re-arranging is done by the union (below)
         is_none = index < 0
         num_none = backend.index_nplike.count_nonzero(is_none)
-        dense_index = backend.index_nplike.empty(len(index), dtype=index.dtype)
+        dense_index = backend.index_nplike.empty(index.size, dtype=index.dtype)
         dense_index[is_none] = -1
         dense_index[~is_none] = backend.index_nplike.arange(
-            len(index) - num_none,
+            index.size - num_none,
             dtype=index.dtype,
         )
         return dense_index
