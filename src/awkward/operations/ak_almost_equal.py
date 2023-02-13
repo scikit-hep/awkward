@@ -53,8 +53,8 @@ def almost_equal(
     backend = backend_of(left, right)
     if not backend.nplike.known_data:
         raise wrap_error(
-            TypeError(
-                "Awkward Arrays with typetracer backends cannot be compared with `ak.almost_equal`."
+            NotImplementedError(
+                "Awkward Arrays with typetracer backends cannot yet be compared with `ak.almost_equal`."
             )
         )
 
