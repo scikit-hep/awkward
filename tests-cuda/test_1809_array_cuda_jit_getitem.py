@@ -56,27 +56,22 @@ def multiply(array, n, out):
 def test_array_multiply():
 
     if numba.cuda.is_available():
-        print("test_array_multiply line 150: CUDA GPU is available!")
+        print("CUDA GPU is available!")
     else:
-        print("test_array_multiply line 152: NO CUDA GPU...")
+        print("NO CUDA GPU...")
 
     numba.cuda.detect()
 
-    print("test_array_multiply line 156: create an ak.Array with cuda backend:")
+    # create an ak.Array with cuda backend:
     akarray = ak.Array([0, 1, 2, 3], backend="cuda")
-    print("test_array_multiply line 158: access statistics of the memory pools:")
-    print_mempool_stats(1)
-
-    print("test_array_multiply line 161: allocate the result:")
+ 
+    # allocate the result:
     nthreads = 4
     results = cuda.to_device(np.zeros(nthreads, dtype=np.int32))
-    print("test_array_multiply line 164: access statistics of the memory pools:")
-    print_mempool_stats(2)
-
-    print("test_array_multiply line 167: CALL kernel multiply...")
+ 
     multiply[1, 4](akarray, 3, results)
-    print("test_array_multiply line 169: ...done.")
+
     cuda.synchronize()
     host_results = results.copy_to_host()
 
-    print("test_array_multiply line 173: multiplied Awkward Array", host_results)
+    assert (ak.Array(host_results).tolist() == [0,3,6,9])

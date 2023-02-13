@@ -11,7 +11,6 @@ intrinsic = _intrinsic(target="cuda")
 
 import numpy
 from numba import cuda, types
-from numba.cuda.cudaimpl import registry as cuda_registry
 
 import awkward as ak
 from awkward._nplikes.numpylike import NumpyMetadata
@@ -364,11 +363,6 @@ class ArrayViewModel(numba.core.datamodel.models.StructModel):
 
 
 @numba.core.imputils.lower_constant(ArrayViewType)
-def lower_const_Array(context, builder, viewtype, array):
-    return lower_const_view(context, builder, viewtype, array._numbaview)
-
-
-@cuda_registry.lower_constant(ArrayViewType)
 def lower_const_Array(context, builder, viewtype, array):
     return lower_const_view(context, builder, viewtype, array._numbaview)
 

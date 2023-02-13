@@ -242,14 +242,10 @@ def numba_array_typer(layouttype, behavior):
 
 def numba_array_lower(layouttype, behavior):
     behavior = overlay_behavior(behavior)
-    print("_util.py line 225: numba_array_lower")
-    print("                                     layouttype", layouttype)
     arr = layouttype.parameters.get("__array__")
-    print("                                     __array__", arr)
     if isinstance(arr, str):
         lower = behavior.get(("__numba_lower__", arr))
         if callable(lower):
-            print("                                     lower", lower)
             return lower
     deeprec = layouttype.parameters.get("__record__")
     if isinstance(deeprec, str):
