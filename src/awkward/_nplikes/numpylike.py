@@ -103,6 +103,59 @@ class ArrayLike(Protocol):
     def view(self, dtype: dtype) -> Self:
         ...
 
+    # Scalar UFUNCS
+    @abstractmethod
+    def __add__(self, other: int | complex | float | Self) -> Self:
+        ...
+
+    @abstractmethod
+    def __sub__(self, other: int | complex | float | Self) -> Self:
+        ...
+
+    @abstractmethod
+    def __mul__(self, other: int | complex | float | Self) -> Self:
+        ...
+
+    @abstractmethod
+    def __truediv__(self, other: int | complex | float | Self) -> Self:
+        ...
+
+    @abstractmethod
+    def __floordiv__(self, other: int | complex | float | Self) -> Self:
+        ...
+
+    @abstractmethod
+    def __gt__(self, other: int | complex | float | Self) -> Self:
+        ...
+
+    @abstractmethod
+    def __lt__(self, other: int | complex | float | Self) -> Self:
+        ...
+
+    @abstractmethod
+    def __ge__(self, other: int | complex | float | Self) -> Self:
+        ...
+
+    @abstractmethod
+    def __le__(self, other: int | complex | float | Self) -> Self:
+        ...
+
+    @abstractmethod
+    def __eq__(self, other: int | complex | float | bool | Self) -> Self:
+        ...
+
+    @abstractmethod
+    def __and__(self, other: int | bool | Self) -> Self:
+        ...
+
+    @abstractmethod
+    def __or__(self, other: int | bool | Self) -> Self:
+        ...
+
+    @abstractmethod
+    def __invert__(self) -> Self:
+        ...
+
 
 class NumpyMetadata(Singleton):
     bool_ = numpy.bool_
@@ -208,26 +261,35 @@ class NumpyLike(Singleton, Protocol):
 
     @abstractmethod
     def zeros(
-        self, shape: int | tuple[int, ...], *, dtype: numpy.dtype | None = None
+        self,
+        shape: ShapeItem | tuple[ShapeItem, ...],
+        *,
+        dtype: numpy.dtype | None = None,
     ) -> ArrayLike:
         ...
 
     @abstractmethod
     def ones(
-        self, shape: int | tuple[int, ...], *, dtype: numpy.dtype | None = None
+        self,
+        shape: ShapeItem | tuple[ShapeItem, ...],
+        *,
+        dtype: numpy.dtype | None = None,
     ) -> ArrayLike:
         ...
 
     @abstractmethod
     def empty(
-        self, shape: int | tuple[int, ...], *, dtype: numpy.dtype | None = None
+        self,
+        shape: ShapeItem | tuple[ShapeItem, ...],
+        *,
+        dtype: numpy.dtype | None = None,
     ) -> ArrayLike:
         ...
 
     @abstractmethod
     def full(
         self,
-        shape: int | tuple[int, ...],
+        shape: ShapeItem | tuple[ShapeItem, ...],
         fill_value,
         *,
         dtype: numpy.dtype | None = None,
@@ -272,7 +334,7 @@ class NumpyLike(Singleton, Protocol):
     @abstractmethod
     def array_equal(
         self, x1: ArrayLike, x2: ArrayLike, *, equal_nan: bool = False
-    ) -> bool:
+    ) -> ArrayLike:
         ...
 
     @abstractmethod
@@ -326,7 +388,7 @@ class NumpyLike(Singleton, Protocol):
 
     @abstractmethod
     def reshape(
-        self, x: ArrayLike, shape: tuple[int, ...], *, copy: bool | None = None
+        self, x: ArrayLike, shape: tuple[ShapeItem, ...], *, copy: bool | None = None
     ) -> ArrayLike:
         ...
 
