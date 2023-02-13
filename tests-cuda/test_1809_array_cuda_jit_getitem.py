@@ -8,10 +8,7 @@ import awkward as ak  # noqa: F401
 from awkward._connect.numba.arrayview_cuda import array_view_arg_handler
 
 numba = pytest.importorskip("numba")
-from numba import config, cuda
-
-config.CUDA_LOW_OCCUPANCY_WARNINGS = False
-config.CUDA_WARN_ON_IMPLICIT_COPY = False
+from numba import config, cuda  # noqa: F401
 
 ak_numba_cuda = pytest.importorskip("awkward.numba_cuda")
 ak_numba_cuda_arrayview = pytest.importorskip("awkward._connect.numba.arrayview_cuda")
@@ -33,6 +30,10 @@ def print_mempool_stats(idx):
         ": pinned_mempool.n_free_blocks",
         pinned_mempool.n_free_blocks(),
     )
+
+
+config.CUDA_LOW_OCCUPANCY_WARNINGS = False
+config.CUDA_WARN_ON_IMPLICIT_COPY = False
 
 
 # FIXME: configure the blocks

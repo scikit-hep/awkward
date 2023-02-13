@@ -1,21 +1,22 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+import ctypes  # noqa: F401
 import operator
 
 import numba
 import numba.core.typing
 import numba.core.typing.ctypes_utils
-from numba.core.extending import intrinsic as _intrinsic
-
-intrinsic = _intrinsic(target="cuda")
-
+import numba.cuda as nb_cuda
 import numpy
 from numba import cuda, types
+from numba.core.extending import intrinsic as _intrinsic
 
 import awkward as ak
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
+
+intrinsic = _intrinsic(target="cuda")
 
 
 def code_to_function(code, function_name, externals=None, debug=True):
@@ -1037,10 +1038,6 @@ def lower_asarray(context, builder, sig, args):
 
 ########## ArrayView Arguments Handler for CUDA JIT
 
-import ctypes  # noqa: F401
-
-import numba.cuda as nb_cuda
-
 
 class ArrayViewArgHandler:
     def prepare_args(self, ty, val, stream, retr):
@@ -1050,12 +1047,11 @@ class ArrayViewArgHandler:
 
             if isinstance(val.layout.backend, ak._backends.CupyBackend):
 
-                # Use uint64 for start, stop, pos, the array pointers value and the pylookup value
+                # Use uint64 for pos, start, stop, the array pointers values, and the pylookup value
                 tys = types.UniTuple(types.uint64, 5)
 
                 cuda.current_context().device
 
-                # import numba.cuda as nb_cuda
                 nb_cuda.as_cuda_array(val.layout.data)
 
                 start = val._numbaview.start

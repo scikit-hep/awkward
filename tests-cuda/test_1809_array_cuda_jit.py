@@ -159,7 +159,8 @@ def mul(array, out, n):
     return ak.Array(out)
 
 
-import math  # Note that for the CUDA target, we need to use the scalar functions from the math module, not NumPy
+import math  # noqa: F401 
+# Note that for the CUDA target, we need to use the scalar functions from the math module, not NumPy
 
 
 @cuda.jit(device=True)
@@ -169,7 +170,7 @@ def polar_to_cartesian(rho, theta):
     return x, y  # This is Python, so let's return a tuple
 
 
-from numba import vectorize
+from numba import vectorize   # noqa: F401
 
 
 @vectorize(["float32(float32, float32, float32, float32)"], target="cuda")
