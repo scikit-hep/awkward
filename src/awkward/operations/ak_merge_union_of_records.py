@@ -152,14 +152,6 @@ def _impl(array, axis, highlevel, behavior):
 
             # Any option types need to be re-written
             if any(x.is_option for x in layout.contents):
-                # We'll create an outermost indexed-option type, which re-instates the missing values
-                # The values of this don't matter; we'll compute them as a dense index (0 ... N)
-                # where N is the number of non-null items. This indexes into the record-of-unions, which
-                # already handles the item ordering
-                outer_option_dense_index = backend.index_nplike.empty(
-                    layout.length, dtype=np.int64
-                )
-
                 # We'll rebuild the union to include only the non-null items.
                 inner_union_index_parts = []
                 next_contents = []
@@ -180,7 +172,7 @@ def _impl(array, axis, highlevel, behavior):
                         if content.is_option:
                             content = content.to_IndexedOptionArray64()
 
-                        # Now find the inner index that actually re-arranges the (non-null) items
+                        # First, find the inner index that actually re-arranges the (non-null) items
                         content_index = backend.index_nplike.asarray(content.index)
                         merged_index = content_index[tag_index]
                         is_non_null = merged_index >= 0
@@ -190,23 +182,19 @@ def _impl(array, axis, highlevel, behavior):
                             is_non_null, tag, -1
                         )
 
-                        # Find dense index into non-null items of this content for the outer optiontype.
-                        outer_option_dense_index[
-                            is_this_tag
-                        ] = backend.index_nplike.where(is_non_null, 0, -1)
-
-                        # outer_index has same length as layout, so union index should align
-                        # union items that are null are set to -1, and those that are not are densified
+                        # The length of this index/option content is irrelevant; the union provides the length
                         next_contents.append(content.content)
                     # Non-indexed/option types are trivially included as-is
                     else:
                         next_contents.append(content)
                         inner_union_index_parts.append(tag_index)
 
-                # Until this point, `outer_option_dense_index` contains either zero or -1.
-                # We now compute a proper index starting at 0.
+                # We'll create an outermost indexed-option type, which re-instates the missing values.
+                # This should have the same length as the original union, and its index should be "dense"
+                # (contiguous, monotonic integers; or -1). Therefore, we can directly compute it from the "sparse"
+                # tags index, which has the same length as the original union, and has only missing items set to -1.
                 outer_option_dense_index = compact_option_index(
-                    outer_option_dense_index, backend=backend
+                    next_tags_sparse, backend=backend
                 )
 
                 # Find length of the new (dense) tags array of the inner union
