@@ -200,7 +200,9 @@ void roottest_ListArray_NumpyArray_v2a_{flatlist_as_rvec}(double* out, ssize_t l
 def test_ListOffsetArray_NumpyArray(flatlist_as_rvec):
     v2a = ak.contents.listoffsetarray.ListOffsetArray(
         ak.index.Index(np.array([1, 4, 4, 6, 7], np.int64)),
-        ak.contents.numpyarray.NumpyArray([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7]),
+        ak.contents.numpyarray.NumpyArray(
+            np.array([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7])
+        ),
     )
 
     layout = v2a
@@ -1038,7 +1040,9 @@ def test_nested_ListOffsetArray_NumpyArray(flatlist_as_rvec):
         ak.index.Index64(np.array([0, 1, 5], dtype=np.int64)),
         ak.contents.listoffsetarray.ListOffsetArray(
             ak.index.Index(np.array([1, 1, 4, 4, 6, 7], np.int64)),
-            ak.contents.numpyarray.NumpyArray([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7]),
+            ak.contents.numpyarray.NumpyArray(
+                np.array([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7])
+            ),
         ),
     )
 

@@ -6,18 +6,111 @@ import json
 from collections.abc import Iterable
 
 import awkward as ak
+from awkward._nplikes.numpy import Numpy
+from awkward._nplikes.numpylike import IndexType, NumpyMetadata
+from awkward._nplikes.shape import unknown_length
 from awkward._util import unset
 from awkward.contents.content import Content
+from awkward.forms.form import _type_parameters_equal
 from awkward.forms.recordform import RecordForm
+from awkward.index import Index
 from awkward.record import Record
-from awkward.typing import Final, Self, final
+from awkward.typing import TYPE_CHECKING, Final, Self, SupportsIndex, final
 
-np = ak._nplikes.NumpyMetadata.instance()
-numpy = ak._nplikes.Numpy.instance()
+if TYPE_CHECKING:
+    from awkward._slicing import SliceItem
+
+np = NumpyMetadata.instance()
+numpy = Numpy.instance()
 
 
 @final
 class RecordArray(Content):
+    """
+    RecordArray represents an array of tuples or records, all with the
+    same type. Its `contents` is an ordered list of arrays.
+
+    * If `fields` is None, the data are tuples, indexed only by their order.
+    * Otherwise, `fields` is an ordered list of names with the same length as
+      the `contents`, associating a field name to every content.
+
+    The length of the RecordArray, if not given, is the length of its shortest
+    content; all are aligned element-by-element. If a RecordArray has zero contents,
+    it may still represent a non-empty array. In that case, its length is specified
+    by a `length` parameter.
+
+    RecordArrays correspond to Apache Arrow's
+    [struct type](https://arrow.apache.org/docs/format/Columnar.html#struct-layout).
+
+    To illustrate how the constructor arguments are interpreted, the following is a
+    simplified implementation of `__init__`, `__len__`, and `__getitem__`:
+
+        class RecordArray(Content):
+            def __init__(self, contents, fields, length):
+                assert isinstance(contents, list)
+                assert isinstance(length, int)
+                for x in contents:
+                    assert isinstance(x, Content)
+                    assert len(x) >= length
+                assert fields is None or isinstance(fields, list)
+                if isinstance(fields, list):
+                    assert len(fields) == len(contents)
+                    for x in fields:
+                        assert isinstance(x, str)
+                self.contents = contents
+                self.fields = fields
+                self.length = length
+
+            def __len__(self):
+                return self.length
+
+            def __getitem__(self, where):
+                if isinstance(where, int):
+                    if where < 0:
+                        where += len(self)
+                    assert 0 <= where < len(self)
+                    record = [x[where] for x in self.contents]
+                    if self.fields is None:
+                        return tuple(record)
+                    else:
+                        return dict(zip(self.fields, record))
+
+                elif isinstance(where, slice) and where.step is None:
+                    if len(self.contents) == 0:
+                        start = min(max(where.start, 0), self.length)
+                        stop = min(max(where.stop, 0), self.length)
+                        if stop < start:
+                            stop = start
+                        return RecordArray([], self.fields, stop - start)
+                    else:
+                        return RecordArray(
+                            [x[where] for x in self.contents],
+                            self.fields,
+                            where.stop - where.start,
+                        )
+
+                elif isinstance(where, str):
+                    if self.fields is None:
+                        try:
+                            i = int(where)
+                        except ValueError:
+                            pass
+                        else:
+                            if i < len(self.contents):
+                                return self.contents[i][0 : len(self)]
+                    else:
+                        try:
+                            i = self.fields.index(where)
+                        except ValueError:
+                            pass
+                        else:
+                            return self.contents[i][0 : len(self)]
+                    raise ValueError("field " + repr(where) + " not found")
+
+                else:
+                    raise AssertionError(where)
+    """
+
     is_record = True
 
     @property
@@ -26,13 +119,15 @@ class RecordArray(Content):
 
     def __init__(
         self,
-        contents,
-        fields,
-        length=None,
+        contents: Iterable[Content],
+        fields: Iterable[str] | None,
+        length: int | type[unknown_length] | None = None,
         *,
         parameters=None,
         backend=None,
     ):
+        if not (length is None or length is unknown_length):
+            length = int(length)  # TODO: this should not happen!
         if not isinstance(contents, Iterable):
             raise ak._errors.wrap_error(
                 TypeError(
@@ -44,30 +139,6 @@ class RecordArray(Content):
         if not isinstance(contents, list):
             contents = list(contents)
 
-        if len(contents) == 0 and length is None:
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} if len(contents) == 0, a 'length' must be specified".format(
-                        type(self).__name__
-                    )
-                )
-            )
-        elif length is None:
-            lengths = [x.length for x in contents]
-            if any(isinstance(x, ak._typetracer.UnknownLengthType) for x in contents):
-                length = ak._typetracer.UnknownLength
-            else:
-                length = min(lengths)
-        if not isinstance(length, ak._typetracer.UnknownLengthType) and not (
-            ak._util.is_integer(length) and length >= 0
-        ):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} 'length' must be a non-negative integer or None, not {}".format(
-                        type(self).__name__, repr(length)
-                    )
-                )
-            )
         for content in contents:
             if not isinstance(content, Content):
                 raise ak._errors.wrap_error(
@@ -77,11 +148,73 @@ class RecordArray(Content):
                         )
                     )
                 )
-            if content.length < length:
+            if backend is None:
+                backend = content.backend
+            elif backend is not content.backend:
                 raise ak._errors.wrap_error(
-                    ValueError(
-                        "{} len(content) ({}) must be >= length ({}) for all 'contents'".format(
-                            type(self).__name__, content.length, length
+                    TypeError(
+                        "{} 'contents' must use the same array library (backend): {} vs {}".format(
+                            type(self).__name__,
+                            type(backend).__name__,
+                            type(content.backend).__name__,
+                        )
+                    )
+                )
+
+        # If no content backend was found, then choose our own
+        if backend is None:
+            backend = ak._backends.NumpyBackend.instance()
+
+        if length is None:
+            if len(contents) == 0:
+                raise ak._errors.wrap_error(
+                    TypeError(
+                        "{} if len(contents) == 0, a 'length' must be specified".format(
+                            type(self).__name__
+                        )
+                    )
+                )
+
+            if backend.nplike.known_data:
+                for content in contents:
+                    assert content.length is not unknown_length
+                    # First time we're setting length, and content.length is not unknown_length
+                    if length is None:
+                        length = content.length
+                    # length is not unknown_length, content.length is not unknown_length
+                    else:
+                        length = min(length, content.length)
+            else:
+                for content in contents:
+                    # First time we're setting length, and content.length is not unknown_length
+                    if length is None:
+                        length = content.length
+                        # Any unknown_length means all unknown_length
+                        if length is unknown_length:
+                            break
+                    # `length` is set, can't be unknown_length
+                    elif content.length is unknown_length:
+                        length = unknown_length
+                        break
+                    # `length` is set, can't be unknown_length
+                    else:
+                        length = min(length, content.length)
+        elif length is not unknown_length:
+            for content in contents:
+                if content.length is not unknown_length and content.length < length:
+                    raise ak._errors.wrap_error(
+                        ValueError(
+                            "{} len(content) ({}) must be >= length ({}) for all 'contents'".format(
+                                type(self).__name__, content.length, length
+                            )
+                        )
+                    )
+
+            if not (ak._util.is_integer(length) and length >= 0):
+                raise ak._errors.wrap_error(
+                    TypeError(
+                        "{} 'length' must be a non-negative integer or None, not {}".format(
+                            type(self).__name__, repr(length)
                         )
                     )
                 )
@@ -108,26 +241,11 @@ class RecordArray(Content):
         elif fields is not None:
             raise ak._errors.wrap_error(
                 TypeError(
-                    "{} 'fields' must be iterable or None, not {}".format(
+                    "{} 'fields' must be an iterable or None, not {}".format(
                         type(self).__name__, repr(fields)
                     )
                 )
             )
-        for content in contents:
-            if backend is None:
-                backend = content.backend
-            elif backend is not content.backend:
-                raise ak._errors.wrap_error(
-                    TypeError(
-                        "{} 'contents' must use the same array library (backend): {} vs {}".format(
-                            type(self).__name__,
-                            type(backend).__name__,
-                            type(content.backend).__name__,
-                        )
-                    )
-                )
-        if backend is None:
-            backend = ak._backends.NumpyBackend.instance()
 
         self._contents = contents
         self._fields = fields
@@ -204,14 +322,18 @@ class RecordArray(Content):
             form_key=form_key,
         )
 
-    def _to_buffers(self, form, getkey, container, backend):
+    def _to_buffers(self, form, getkey, container, backend, byteorder):
         assert isinstance(form, self.form_cls)
         if self._fields is None:
             for i, content in enumerate(self._contents):
-                content._to_buffers(form.content(i), getkey, container, backend)
+                content._to_buffers(
+                    form.content(i), getkey, container, backend, byteorder
+                )
         else:
             for field, content in zip(self._fields, self._contents):
-                content._to_buffers(form.content(field), getkey, container, backend)
+                content._to_buffers(
+                    form.content(field), getkey, container, backend, byteorder
+                )
 
     def _to_typetracer(self, forget_length: bool) -> Self:
         backend = ak._backends.TypeTracerBackend.instance()
@@ -219,7 +341,7 @@ class RecordArray(Content):
         return RecordArray(
             contents,
             self._fields,
-            ak._typetracer.UnknownLength if forget_length else self._length,
+            unknown_length if forget_length else self._length,
             parameters=self._parameters,
             backend=backend,
         )
@@ -269,63 +391,70 @@ class RecordArray(Content):
         out.append(post)
         return "".join(out)
 
-    def index_to_field(self, index):
+    def index_to_field(self, index: SupportsIndex) -> str:
         return self.form_cls.index_to_field(self, index)
 
-    def field_to_index(self, field):
+    def field_to_index(self, field: str) -> SupportsIndex:
         return self.form_cls.field_to_index(self, field)
 
-    def has_field(self, field):
+    def has_field(self, field: str | SupportsIndex) -> bool:
         return self.form_cls.has_field(self, field)
 
-    def content(self, index_or_field):
+    def content(self, index_or_field: str | SupportsIndex) -> Content:
         out = self.form_cls.content(self, index_or_field)
-        if out.length == self._length:
+        if (
+            self._length is unknown_length
+            or out.length is unknown_length
+            or out.length == self._length
+        ):
             return out
         else:
             return out[: self._length]
 
-    def _getitem_nothing(self):
-        return self._getitem_range(slice(0, 0))
+    def _getitem_nothing(self) -> Content:
+        return self._getitem_range(0, 0)
 
-    def _getitem_at(self, where):
-        if self._backend.nplike.known_shape and where < 0:
+    def _getitem_at(self, where: IndexType):
+        if self._backend.nplike.known_data and where < 0:
             where += self.length
 
-        if where < 0 or where >= self.length:
+        if not (self._length is unknown_length or (0 <= where < self._length)):
             raise ak._errors.index_error(self, where)
         return Record(self, where)
 
-    def _getitem_range(self, where):
-        if not self._backend.nplike.known_shape:
+    def _getitem_range(self, start: SupportsIndex, stop: IndexType) -> Content:
+        if not self._backend.nplike.known_data:
             self._touch_shape(recursive=False)
             return self
 
-        start, stop, step = where.indices(self.length)
-        assert step == 1
+        if self._length is unknown_length:
+            return self
+
+        start, stop, _, length = self._backend.index_nplike.derive_slice_for_length(
+            slice(start, stop), self._length
+        )
+
         if len(self._contents) == 0:
-            start = min(max(start, 0), self._length)
-            stop = min(max(stop, 0), self._length)
-            if stop < start:
-                stop = start
+
             return RecordArray(
                 [],
                 self._fields,
-                stop - start,
+                length,
                 parameters=self._parameters,
                 backend=self._backend,
             )
         else:
-            nextslice = slice(start, stop)
             return RecordArray(
-                [x._getitem_range(nextslice) for x in self._contents],
+                [x._getitem_range(start, stop) for x in self._contents],
                 self._fields,
-                stop - start,
+                length,
                 parameters=self._parameters,
                 backend=self._backend,
             )
 
-    def _getitem_field(self, where, only_fields=()):
+    def _getitem_field(
+        self, where: str | SupportsIndex, only_fields: tuple[str, ...] = ()
+    ) -> Content:
         if len(only_fields) == 0:
             return self.content(where)
 
@@ -336,7 +465,9 @@ class RecordArray(Content):
             else:
                 return self.content(where)._getitem_fields(nexthead, nexttail)
 
-    def _getitem_fields(self, where, only_fields=()):
+    def _getitem_fields(
+        self, where: list[str | SupportsIndex], only_fields: tuple[str, ...] = ()
+    ) -> Content:
         indexes = [self.field_to_index(field) for field in where]
         if self._fields is None:
             fields = None
@@ -355,12 +486,11 @@ class RecordArray(Content):
                 contents = [
                     self.content(i)._getitem_fields(nexthead, nexttail) for i in indexes
                 ]
-
         return RecordArray(
             contents, fields, self._length, parameters=None, backend=self._backend
         )
 
-    def _carry(self, carry, allow_lazy):
+    def _carry(self, carry: Index, allow_lazy: bool) -> Content:
         assert isinstance(carry, ak.index.Index)
 
         if allow_lazy:
@@ -370,11 +500,12 @@ class RecordArray(Content):
                 where = where.copy()
 
             negative = where < 0
-            if self._backend.index_nplike.any(negative, prefer=False):
-                where[negative] += self._length
+            if self._backend.index_nplike.known_data:
+                if self._backend.index_nplike.any(negative):
+                    where[negative] += self._length
 
-            if self._backend.index_nplike.any(where >= self._length, prefer=False):
-                raise ak._errors.index_error(self, where)
+                if self._backend.index_nplike.any(where >= self._length):
+                    raise ak._errors.index_error(self, where)
 
             nextindex = ak.index.Index64(where, nplike=self._backend.index_nplike)
             return ak.contents.IndexedArray(nextindex, self, parameters=None)
@@ -412,7 +543,12 @@ class RecordArray(Content):
             contents, self._fields, self._length, parameters=None, backend=self._backend
         )
 
-    def _getitem_next(self, head, tail, advanced):
+    def _getitem_next(
+        self,
+        head: SliceItem | tuple,
+        tail: tuple[SliceItem, ...],
+        advanced: Index | None,
+    ) -> Content:
         if head == ():
             return self
 
@@ -449,7 +585,6 @@ class RecordArray(Content):
             next = RecordArray(
                 contents,
                 self._fields,
-                None,
                 parameters=parameters,
                 backend=self._backend,
             )
@@ -470,9 +605,9 @@ class RecordArray(Content):
         else:
             contents = []
             for content in self._contents:
-                trimmed = content._getitem_range(slice(0, self.length))
+                trimmed = content._getitem_range(0, self.length)
                 offsets, flattened = trimmed._offsets_and_flattened(axis, depth)
-                if self._backend.nplike.known_shape and offsets.length != 0:
+                if self._backend.nplike.known_data and offsets.length != 0:
                     raise ak._errors.wrap_error(
                         AssertionError(
                             "RecordArray content with axis > depth + 1 returned a non-empty offsets from offsets_and_flattened"
@@ -496,23 +631,20 @@ class RecordArray(Content):
             )
 
     def _mergeable_next(self, other, mergebool):
-        if isinstance(
-            other,
-            (
-                ak.contents.IndexedArray,
-                ak.contents.IndexedOptionArray,
-                ak.contents.ByteMaskedArray,
-                ak.contents.BitMaskedArray,
-                ak.contents.UnmaskedArray,
-            ),
-        ):
-            return self._mergeable(other.content, mergebool)
-
-        if isinstance(other, RecordArray):
+        # Is the other content is an identity, or a union?
+        if other.is_identity_like or other.is_union:
+            return True
+        # Check against option contents
+        elif other.is_option or other.is_indexed:
+            return self._mergeable_next(other.content, mergebool)
+        # Otherwise, do the parameters match? If not, we can't merge.
+        elif not _type_parameters_equal(self._parameters, other._parameters):
+            return False
+        elif isinstance(other, RecordArray):
             if self.is_tuple and other.is_tuple:
                 if len(self._contents) == len(other._contents):
                     for self_cont, other_cont in zip(self._contents, other._contents):
-                        if not self_cont._mergeable(other_cont, mergebool):
+                        if not self_cont._mergeable_next(other_cont, mergebool):
                             return False
 
                     return True
@@ -524,7 +656,7 @@ class RecordArray(Content):
                 for i, field in enumerate(self._fields):
                     x = self._contents[i]
                     y = other._contents[other.field_to_index(field)]
-                    if not x._mergeable(y, mergebool):
+                    if not x._mergeable_next(y, mergebool):
                         return False
                 return True
 
@@ -550,8 +682,11 @@ class RecordArray(Content):
 
         if self.is_tuple:
             for array in headless:
-                parameters = ak._util.merge_parameters(
-                    parameters, array._parameters, True
+                if isinstance(array, ak.contents.EmptyArray):
+                    continue
+
+                parameters = ak.forms.form._parameters_intersect(
+                    parameters, array._parameters
                 )
 
                 if isinstance(array, ak.contents.RecordArray):
@@ -570,8 +705,6 @@ class RecordArray(Content):
                         raise ak._errors.wrap_error(
                             ValueError("cannot merge tuple with non-tuple record")
                         )
-                elif isinstance(array, ak.contents.EmptyArray):
-                    pass
                 else:
                     raise ak._errors.wrap_error(
                         AssertionError(
@@ -587,8 +720,8 @@ class RecordArray(Content):
             these_fields.sort()
 
             for array in headless:
-                parameters = ak._util.merge_parameters(
-                    parameters, array._parameters, True
+                parameters = ak.forms.form._parameters_intersect(
+                    parameters, array._parameters
                 )
 
                 if isinstance(array, ak.contents.RecordArray):
@@ -626,16 +759,19 @@ class RecordArray(Content):
                     )
 
         nextcontents = []
-        minlength = None
+        minlength = ak._util.unset
         for forfield in for_each_field:
             merged = forfield[0]._mergemany(forfield[1:])
 
             nextcontents.append(merged)
 
-            if minlength is None or merged.length < minlength:
+            if minlength is ak._util.unset or (
+                not (merged.length is unknown_length or minlength is unknown_length)
+                and merged.length < minlength
+            ):
                 minlength = merged.length
 
-        if minlength is None:
+        if minlength is unknown_length:
             minlength = self.length
             for x in others:
                 minlength += x.length
@@ -685,10 +821,10 @@ class RecordArray(Content):
                 backend=self._backend,
             )
 
-    def _numbers_to_type(self, name):
+    def _numbers_to_type(self, name, including_unknown):
         contents = []
         for x in self._contents:
-            contents.append(x._numbers_to_type(name))
+            contents.append(x._numbers_to_type(name, including_unknown))
         return ak.contents.RecordArray(
             contents,
             self._fields,
@@ -707,25 +843,14 @@ class RecordArray(Content):
         raise ak._errors.wrap_error(NotImplementedError)
 
     def _argsort_next(
-        self,
-        negaxis,
-        starts,
-        shifts,
-        parents,
-        outlength,
-        ascending,
-        stable,
-        kind,
-        order,
+        self, negaxis, starts, shifts, parents, outlength, ascending, stable
     ):
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def _sort_next(
-        self, negaxis, starts, parents, outlength, ascending, stable, kind, order
-    ):
+    def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
         if self._fields is None or len(self._fields) == 0:
             return ak.contents.NumpyArray(
-                self._backend.nplike.instance().empty(0, np.int64),
+                self._backend.nplike.instance().empty(0, dtype=np.int64),
                 parameters=None,
                 backend=self._backend,
             )
@@ -734,14 +859,7 @@ class RecordArray(Content):
         for content in self._contents:
             contents.append(
                 content._sort_next(
-                    negaxis,
-                    starts,
-                    parents,
-                    outlength,
-                    ascending,
-                    stable,
-                    kind,
-                    order,
+                    negaxis, starts, parents, outlength, ascending, stable
                 )
             )
         return RecordArray(
@@ -803,7 +921,7 @@ class RecordArray(Content):
     def _validity_error(self, path):
         for i, cont in enumerate(self.contents):
             if cont.length < self.length:
-                return f'at {path} ("{type(self)}"): len(field({i})) < len(recordarray)'
+                return f"at {path} ({type(self)!r}): len(field({i})) < len(recordarray)"
         for i, cont in enumerate(self.contents):
             sub = cont._validity_error(f"{path}.field({i})")
             if sub != "":
@@ -871,23 +989,23 @@ class RecordArray(Content):
             children=values,
         )
 
-    def _to_numpy(self, allow_missing):
+    def _to_backend_array(self, allow_missing, backend):
         if self.fields is None:
-            return self._backend.nplike.empty(self.length, dtype=[])
-        contents = [x._to_numpy(allow_missing) for x in self._contents]
+            return backend.nplike.empty(self.length, dtype=[])
+        contents = [x._to_backend_array(allow_missing, backend) for x in self._contents]
         if any(len(x.shape) != 1 for x in contents):
             raise ak._errors.wrap_error(
                 ValueError(f"cannot convert {self} into np.ndarray")
             )
-        out = self._backend.nplike.empty(
+        out = backend.nplike.empty(
             self.length,
             dtype=[(str(n), x.dtype) for n, x in zip(self.fields, contents)],
         )
         mask = None
         for n, x in zip(self.fields, contents):
-            if isinstance(x, self._backend.nplike.ma.MaskedArray):
+            if allow_missing and isinstance(x, self._backend.nplike.ma.MaskedArray):
                 if mask is None:
-                    mask = self._backend.index_nplike.ma.zeros(
+                    mask = backend.index_nplike.ma.zeros(
                         self.length, [(n, np.bool_) for n in self.fields]
                     )
                 if x.mask is not None:
@@ -895,17 +1013,15 @@ class RecordArray(Content):
             out[n] = x
 
         if mask is not None:
-            out = self._backend.nplike.ma.MaskedArray(out, mask)
+            out = backend.nplike.ma.MaskedArray(out, mask)
 
         return out
 
-    def _completely_flatten(self, backend, options):
+    def _remove_structure(self, backend, options):
         if options["flatten_records"]:
             out = []
             for content in self._contents:
-                out.extend(
-                    content[: self._length]._completely_flatten(backend, options)
-                )
+                out.extend(content[: self._length]._remove_structure(backend, options))
             return out
         else:
             in_function = ""
@@ -913,16 +1029,18 @@ class RecordArray(Content):
                 in_function = " in " + options["function_name"]
             raise ak._errors.wrap_error(
                 TypeError(
-                    "cannot combine record fields{} unless flatten_records=True".format(
-                        in_function
-                    )
+                    (
+                        "encountered a record whilst removing array structure{}, "
+                        "but this operation does not support erasing records. "
+                        "Try first calling `ak.ravel` or `ak.flatten(..., axis=None)."
+                    ).format(in_function)
                 )
             )
 
     def _recursively_apply(
         self, action, behavior, depth, depth_context, lateral_context, options
     ):
-        if self._backend.nplike.known_shape:
+        if self._backend.nplike.known_data:
             contents = [x[: self._length] for x in self._contents]
         else:
             self._touch_data(recursive=False)
@@ -1001,15 +1119,19 @@ class RecordArray(Content):
         )
 
     def _to_list(self, behavior, json_conversions):
+        if not self._backend.nplike.known_data:
+            raise ak._errors.wrap_error(
+                TypeError("cannot convert typetracer arrays to Python lists")
+            )
+
         out = self._to_list_custom(behavior, json_conversions)
         if out is not None:
             return out
 
         if self.is_tuple and json_conversions is None:
             contents = [x._to_list(behavior, json_conversions) for x in self._contents]
-            length = self._length
-            out = [None] * length
-            for i in range(length):
+            out = [None] * self._length
+            for i in range(self._length):
                 out[i] = tuple(x[i] for x in contents)
             return out
 
@@ -1018,13 +1140,12 @@ class RecordArray(Content):
             if fields is None:
                 fields = [str(i) for i in range(len(self._contents))]
             contents = [x._to_list(behavior, json_conversions) for x in self._contents]
-            length = self._length
-            out = [None] * length
-            for i in range(length):
+            out = [None] * self._length
+            for i in range(self._length):
                 out[i] = dict(zip(fields, [x[i] for x in contents]))
             return out
 
-    def to_backend(self, backend: ak._backends.Backend) -> Self:
+    def _to_backend(self, backend: ak._backends.Backend) -> Self:
         contents = [content.to_backend(backend) for content in self._contents]
         return RecordArray(
             contents,

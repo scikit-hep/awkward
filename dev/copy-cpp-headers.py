@@ -3,7 +3,7 @@ import pathlib
 import shutil
 
 root_path = pathlib.Path(__file__).absolute().parents[1]
-source_path = root_path / "header-only"
+source_path = root_path / "header-only" / "include"
 dest_paths = (
     root_path / "awkward-cpp" / "header-only",
     root_path / "src" / "awkward" / "_connect" / "header-only",

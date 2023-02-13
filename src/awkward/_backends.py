@@ -1,26 +1,24 @@
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from collections.abc import Collection
 
 import awkward_cpp
 
 import awkward as ak
-from awkward._nplikes import (
-    Cupy,
-    CupyKernel,
-    Jax,
-    JaxKernel,
-    Numpy,
-    NumpyKernel,
-    NumpyLike,
-    NumpyMetadata,
-    Singleton,
-    nplike_of,
-)
-from awkward._typetracer import NoKernel, TypeTracer
+from awkward._kernels import CupyKernel, JaxKernel, NumpyKernel, TypeTracerKernel
+from awkward._nplikes import nplike_of
+from awkward._nplikes.cupy import Cupy
+from awkward._nplikes.jax import Jax
+from awkward._nplikes.numpy import Numpy
+from awkward._nplikes.numpylike import NumpyLike, NumpyMetadata
+from awkward._nplikes.typetracer import MaybeNone, TypeTracer, TypeTracerArray
+from awkward._singleton import Singleton
 from awkward.typing import Callable, Final, Tuple, TypeAlias, TypeVar, Unpack
 
 np = NumpyMetadata.instance()
+numpy = Numpy.instance()
 
 
 T = TypeVar("T", covariant=True)
@@ -29,7 +27,10 @@ KernelType: TypeAlias = Callable[..., None]
 
 
 class Backend(Singleton, ABC):
-    name: str
+    @property
+    @abstractmethod
+    def name(self) -> str:
+        raise ak._errors.wrap_error(NotImplementedError)
 
     @property
     @abstractmethod
@@ -169,11 +170,37 @@ class TypeTracerBackend(Backend):
     def __init__(self):
         self._typetracer = TypeTracer.instance()
 
-    def __getitem__(self, index: KernelKeyType) -> NoKernel:
-        return NoKernel(index)
+    def __getitem__(self, index: KernelKeyType) -> TypeTracerKernel:
+        return TypeTracerKernel(index)
+
+    def _coerce_ufunc_argument(self, x):
+        if isinstance(x, TypeTracerArray):
+            if x.ndim == 0:
+                return numpy.empty((0,), dtype=x.dtype)
+            else:
+                return numpy.empty((0,) + x.shape[1:], dtype=x.dtype)
+        elif isinstance(x, MaybeNone):
+            return self._coerce_ufunc_argument(x.content)
+        else:
+            return x
+
+    def apply_ufunc(self, ufunc, method, args, kwargs):
+        shape = None
+        numpy_args = []
+
+        for x in args:
+            if isinstance(x, TypeTracerArray):
+                x.touch_data()
+                shape = x.shape
+
+            numpy_args.append(self._coerce_ufunc_argument(x))
+
+        assert shape is not None
+        tmp = getattr(ufunc, method)(*numpy_args, **kwargs)
+        return self._typetracer.empty((shape[0],) + tmp.shape[1:], dtype=tmp.dtype)
 
 
-def _backend_for_nplike(nplike: ak._nplikes.NumpyLike) -> Backend:
+def _backend_for_nplike(nplike: NumpyLike) -> Backend:
     # Currently there exists a one-to-one relationship between the nplike
     # and the backend. In future, this might need refactoring
     if isinstance(nplike, Numpy):
@@ -186,6 +213,25 @@ def _backend_for_nplike(nplike: ak._nplikes.NumpyLike) -> Backend:
         return TypeTracerBackend.instance()
     else:
         raise ak._errors.wrap_error(ValueError("unrecognised nplike", nplike))
+
+
+def common_backend(backends: Collection[Backend]) -> Backend:
+    unique_backends = frozenset(backends)
+    # Either we have one nplike, or one + typetracer
+    if len(unique_backends) == 1:
+        return next(iter(unique_backends))
+    else:
+        # We allow typetracers to mix with other nplikes, and take precedence
+        for backend in unique_backends:
+            if not backend.nplike.known_data:
+                return backend
+
+        raise ak._errors.wrap_error(
+            ValueError(
+                "cannot operate on arrays with incompatible backends. Use #ak.to_backend to coerce the arrays "
+                "to the same backend"
+            )
+        )
 
 
 _UNSET = object()
@@ -202,6 +248,9 @@ def backend_of(*objects, default: D = _UNSET) -> Backend | D:
     suitable backend is found, return the `default` value, or raise a `ValueError` if
     no default is given.
     """
+    # Implementation detail: right now, we are one-to-one mapping `nplike` to a backend
+    # The distinction is still useful because nplikes are just the array abstraction,
+    # whilst backends incorporate more Awkward logic
     nplike = nplike_of(*objects, default=None)
     if nplike is not None:
         return _backend_for_nplike(nplike)

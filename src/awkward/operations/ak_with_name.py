@@ -1,8 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._nplikes.numpylike import NumpyMetadata
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 
 
 def with_name(array, name, *, highlevel=True, behavior=None):
@@ -30,7 +31,7 @@ def with_name(array, name, *, highlevel=True, behavior=None):
     """
     with ak._errors.OperationErrorContext(
         "ak.with_name",
-        dict(array=array, name=name, highlevel=highlevel, behavior=behavior),
+        {"array": array, "name": name, "highlevel": highlevel, "behavior": behavior},
     ):
         return _impl(array, name, highlevel, behavior)
 
@@ -44,7 +45,7 @@ def _impl(array, name, highlevel, behavior):
             parameters = dict(layout.parameters)
             parameters["__record__"] = name
             return ak.contents.RecordArray(
-                layout.contents, layout.fields, len(layout), parameters=parameters
+                layout.contents, layout.fields, layout.length, parameters=parameters
             )
         else:
             return None

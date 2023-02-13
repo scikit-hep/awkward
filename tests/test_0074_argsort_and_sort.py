@@ -513,7 +513,7 @@ def test_sort_bytestrings():
 
 def test_sort_zero_length_arrays():
     array = ak.contents.IndexedArray(
-        ak.index.Index64([]), ak.contents.NumpyArray([1, 2, 3])
+        ak.index.Index64([]), ak.contents.NumpyArray(np.array([1, 2, 3]))
     )
     assert to_list(array) == []
     assert to_list(ak.operations.sort(array)) == []

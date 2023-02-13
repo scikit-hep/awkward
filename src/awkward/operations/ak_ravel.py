@@ -2,8 +2,9 @@
 
 import awkward as ak
 from awkward._connect.numpy import unsupported
+from awkward._nplikes.numpylike import NumpyMetadata
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 
 
 def ravel(array, *, highlevel=True, behavior=None):
@@ -49,7 +50,7 @@ def ravel(array, *, highlevel=True, behavior=None):
     """
     with ak._errors.OperationErrorContext(
         "ak.ravel",
-        dict(array=array, highlevel=highlevel, behavior=behavior),
+        {"array": array, "highlevel": highlevel, "behavior": behavior},
     ):
         return _impl(array, highlevel, behavior)
 
@@ -57,7 +58,7 @@ def ravel(array, *, highlevel=True, behavior=None):
 def _impl(array, highlevel, behavior):
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
 
-    out = ak._do.completely_flatten(layout, function_name="ak.ravel", drop_nones=False)
+    out = ak._do.remove_structure(layout, function_name="ak.ravel", drop_nones=False)
     assert isinstance(out, tuple) and all(
         isinstance(x, ak.contents.Content) for x in out
     )

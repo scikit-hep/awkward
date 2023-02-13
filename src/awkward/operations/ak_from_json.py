@@ -8,9 +8,11 @@ from urllib.parse import urlparse
 from awkward_cpp.lib import _ext
 
 import awkward as ak
+from awkward._nplikes.numpy import Numpy
+from awkward._nplikes.numpylike import NumpyMetadata
 
-np = ak._nplikes.NumpyMetadata.instance()
-numpy = ak._nplikes.Numpy.instance()
+np = NumpyMetadata.instance()
+numpy = Numpy.instance()
 
 
 def from_json(
@@ -317,20 +319,20 @@ def from_json(
     """
     with ak._errors.OperationErrorContext(
         "ak.from_json",
-        dict(
-            source=source,
-            line_delimited=line_delimited,
-            schema=schema,
-            nan_string=nan_string,
-            posinf_string=posinf_string,
-            neginf_string=neginf_string,
-            complex_record_fields=complex_record_fields,
-            buffersize=buffersize,
-            initial=initial,
-            resize=resize,
-            highlevel=highlevel,
-            behavior=behavior,
-        ),
+        {
+            "source": source,
+            "line_delimited": line_delimited,
+            "schema": schema,
+            "nan_string": nan_string,
+            "posinf_string": posinf_string,
+            "neginf_string": neginf_string,
+            "complex_record_fields": complex_record_fields,
+            "buffersize": buffersize,
+            "initial": initial,
+            "resize": resize,
+            "highlevel": highlevel,
+            "behavior": behavior,
+        },
     ):
         if schema is None:
             return _no_schema(
@@ -492,7 +494,9 @@ def _no_schema(
 
     formstr, length, buffers = builder.to_buffers()
     form = ak.forms.from_json(formstr)
-    layout = ak.operations.from_buffers(form, length, buffers, highlevel=False)
+    layout = ak.operations.from_buffers(
+        form, length, buffers, byteorder=ak._util.native_byteorder, highlevel=False
+    )
 
     layout = _record_to_complex(layout, complex_record_fields)
 
@@ -570,7 +574,9 @@ def _yes_schema(
         except Exception as err:
             raise ak._errors.wrap_error(ValueError(str(err))) from None
 
-    layout = ak.operations.from_buffers(form, length, container, highlevel=False)
+    layout = ak.operations.from_buffers(
+        form, length, container, byteorder=ak._util.native_byteorder, highlevel=False
+    )
     layout = _record_to_complex(layout, complex_record_fields)
 
     if is_record and read_one:
@@ -650,7 +656,9 @@ def build_assembly(schema, container, instructions):
             index = f"node{len(container)}"
             container[index + "-index"] = None
             offsets = f"node{len(container)}"
-            container[offsets + "-offsets"] = numpy.empty(len(strings) + 1, np.int64)
+            container[offsets + "-offsets"] = numpy.empty(
+                len(strings) + 1, dtype=np.int64
+            )
             container[offsets + "-offsets"][0] = 0
             container[offsets + "-offsets"][1:] = numpy.cumsum(
                 [len(x) for x in bytestrings]

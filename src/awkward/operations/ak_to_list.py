@@ -5,8 +5,9 @@ from collections.abc import Iterable, Mapping
 from awkward_cpp.lib import _ext
 
 import awkward as ak
+from awkward._nplikes.numpylike import NumpyMetadata
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 
 
 def to_list(array):
@@ -38,7 +39,7 @@ def to_list(array):
     """
     with ak._errors.OperationErrorContext(
         "ak.to_list",
-        dict(array=array),
+        {"array": array},
     ):
         return _impl(array)
 
@@ -60,7 +61,9 @@ def _impl(array):
     elif isinstance(array, _ext.ArrayBuilder):
         formstr, length, container = array.to_buffers()
         form = ak.forms.from_json(formstr)
-        layout = ak.operations.from_buffers(form, length, container)
+        layout = ak.operations.from_buffers(
+            form, length, container, byteorder=ak._util.native_byteorder
+        )
         return layout.to_list(None)
 
     elif hasattr(array, "tolist"):

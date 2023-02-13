@@ -3,8 +3,9 @@
 import numbers
 
 import awkward as ak
+from awkward._nplikes.numpylike import NumpyMetadata
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 
 
 def unflatten(array, counts, axis=0, *, highlevel=True, behavior=None):
@@ -72,19 +73,21 @@ def unflatten(array, counts, axis=0, *, highlevel=True, behavior=None):
     """
     with ak._errors.OperationErrorContext(
         "ak.unflatten",
-        dict(
-            array=array,
-            counts=counts,
-            axis=axis,
-            highlevel=highlevel,
-            behavior=behavior,
-        ),
+        {
+            "array": array,
+            "counts": counts,
+            "axis": axis,
+            "highlevel": highlevel,
+            "behavior": behavior,
+        },
     ):
         return _impl(array, counts, axis, highlevel, behavior)
 
 
 def _impl(array, counts, axis, highlevel, behavior):
-    layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
+    layout = ak.operations.to_layout(
+        array, allow_record=False, allow_other=False
+    ).to_packed()
     behavior = ak._util.behavior_of(array, behavior=behavior)
     backend = layout.backend
 
@@ -92,13 +95,16 @@ def _impl(array, counts, axis, highlevel, behavior):
         current_offsets = None
     else:
         counts = ak.operations.to_layout(counts, allow_record=False, allow_other=False)
+        if counts.is_indexed and not counts.is_option:
+            counts = counts.project()
 
-        if counts.is_option:
+        if counts.is_option and (counts.content.is_numpy or counts.content.is_unknown):
             mask = counts.mask_as_bool(valid_when=False)
-            counts = counts.to_numpy(allow_missing=True)
-            counts = ak._nplikes.numpy.ma.filled(counts, 0)
+            counts = backend.nplike.to_rectilinear(
+                ak.operations.fill_none(counts, 0, axis=-1, highlevel=False)
+            )
         elif counts.is_numpy or counts.is_unknown:
-            counts = counts.to_numpy(allow_missing=False)
+            counts = backend.nplike.to_rectilinear(counts)
             mask = False
         else:
             raise ak._errors.wrap_error(
@@ -113,11 +119,13 @@ def _impl(array, counts, axis, highlevel, behavior):
         if not issubclass(counts.dtype.type, np.integer):
             raise ak._errors.wrap_error(ValueError("counts must be integers"))
 
-        current_offsets = [backend.index_nplike.empty(len(counts) + 1, np.int64)]
-        current_offsets[0][0] = 0
-        backend.index_nplike.cumsum(counts, out=current_offsets[0][1:])
+        current_offsets = backend.index_nplike.empty(len(counts) + 1, dtype=np.int64)
+        current_offsets[0] = 0
+        backend.index_nplike.cumsum(counts, maybe_out=current_offsets[1:])
 
-    def doit(layout):
+    def unflatten_this_layout(layout):
+        nonlocal current_offsets
+
         if isinstance(counts, (numbers.Integral, np.integer)):
             if counts < 0 or counts > len(layout):
                 raise ak._errors.wrap_error(
@@ -128,15 +136,15 @@ def _impl(array, counts, axis, highlevel, behavior):
         else:
             position = (
                 backend.index_nplike.searchsorted(
-                    current_offsets[0],
-                    backend.index_nplike.array([len(layout)]),
+                    current_offsets,
+                    backend.index_nplike.asarray([len(layout)]),
                     side="right",
                 )[0]
                 - 1
             )
-            if position >= len(current_offsets[0]) or current_offsets[0][
-                position
-            ] != len(layout):
+            if position >= len(current_offsets) or current_offsets[position] != len(
+                layout
+            ):
                 raise ak._errors.wrap_error(
                     ValueError(
                         "structure imposed by 'counts' does not fit in the array or partition "
@@ -144,36 +152,34 @@ def _impl(array, counts, axis, highlevel, behavior):
                     )
                 )
 
-            offsets = current_offsets[0][: position + 1]
-            current_offsets[0] = current_offsets[0][position:] - len(layout)
+            offsets = current_offsets[: position + 1]
+            current_offsets = current_offsets[position:] - len(layout)
 
             out = ak.contents.ListOffsetArray(ak.index.Index64(offsets), layout)
             if not isinstance(mask, (bool, np.bool_)):
                 index = ak.index.Index8(
-                    backend.nplike.asarray(mask).astype(np.int8), nplike=backend.nplike
+                    backend.index_nplike.asarray(mask, dtype=np.int8),
+                    nplike=backend.nplike,
                 )
                 out = ak.contents.ByteMaskedArray(index, out, valid_when=False)
 
         return out
 
     if axis == 0 or ak._util.maybe_posaxis(layout, axis, 1) == 0:
-        out = doit(layout)
+        out = unflatten_this_layout(layout)
 
     else:
 
-        def transform(layout, depth, axis):
-            # Pack the current layout. This ensures that the `counts` array,
-            # which is computed with these layouts applied, aligns with the
-            # internal layout to be unflattened (#910)
-            layout = layout.to_packed()
-
+        def apply(layout, depth, **kwargs):
             posaxis = ak._util.maybe_posaxis(layout, axis, depth)
             if posaxis == depth and layout.is_list:
                 # We are one *above* the level where we want to apply this.
                 listoffsetarray = layout.to_ListOffsetArray64(True)
                 outeroffsets = backend.index_nplike.asarray(listoffsetarray.offsets)
 
-                content = doit(listoffsetarray.content[: outeroffsets[-1]])
+                content = unflatten_this_layout(
+                    listoffsetarray.content[: outeroffsets[-1]]
+                )
                 if isinstance(content, ak.contents.ByteMaskedArray):
                     inneroffsets = backend.index_nplike.asarray(content.content.offsets)
                 elif isinstance(content, ak.contents.RegularArray):
@@ -202,13 +208,10 @@ def _impl(array, counts, axis, highlevel, behavior):
 
                 return ak.contents.ListOffsetArray(ak.index.Index64(positions), content)
 
-            else:
-                return layout
-
-        out = transform(layout, depth=1, axis=axis)
+        out = ak._do.recursively_apply(layout, apply)
 
     if current_offsets is not None and not (
-        len(current_offsets[0]) == 1 and current_offsets[0][0] == 0
+        len(current_offsets) == 1 and current_offsets[0] == 0
     ):
         raise ak._errors.wrap_error(
             ValueError(

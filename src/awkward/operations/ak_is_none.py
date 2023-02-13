@@ -1,8 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._nplikes.numpylike import NumpyMetadata
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 
 
 def is_none(array, axis=0, *, highlevel=True, behavior=None):
@@ -23,7 +24,7 @@ def is_none(array, axis=0, *, highlevel=True, behavior=None):
     """
     with ak._errors.OperationErrorContext(
         "ak.is_none",
-        dict(array=array, axis=axis, highlevel=highlevel, behavior=behavior),
+        {"array": array, "axis": axis, "highlevel": highlevel, "behavior": behavior},
     ):
         return _impl(array, axis, highlevel, behavior)
 

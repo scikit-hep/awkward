@@ -1,9 +1,12 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+
 import awkward as ak
+from awkward._nplikes import ufuncs
+from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._util import unset
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 
 
 def corr(
@@ -57,14 +60,14 @@ def corr(
     """
     with ak._errors.OperationErrorContext(
         "ak.corr",
-        dict(
-            x=x,
-            y=y,
-            weight=weight,
-            axis=axis,
-            keepdims=keepdims,
-            mask_identity=mask_identity,
-        ),
+        {
+            "x": x,
+            "y": y,
+            "weight": weight,
+            "axis": axis,
+            "keepdims": keepdims,
+            "mask_identity": mask_identity,
+        },
     ):
         if flatten_records is not unset:
             message = (
@@ -150,5 +153,4 @@ def _impl(x, y, weight, axis, keepdims, mask_identity):
                 highlevel=True,
                 behavior=behavior,
             )
-        nplike = ak._nplikes.nplike_of(sumwxy, sumwxx, sumwyy)
-        return nplike.true_divide(sumwxy, nplike.sqrt(sumwxx * sumwyy))
+        return sumwxy / ufuncs.sqrt(sumwxx * sumwyy)

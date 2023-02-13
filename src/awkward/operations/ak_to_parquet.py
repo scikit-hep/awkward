@@ -2,9 +2,10 @@
 
 from collections.abc import Mapping, Sequence
 
-import numpy as np
-
 import awkward as ak
+from awkward._nplikes.numpylike import NumpyMetadata
+
+metadata = NumpyMetadata.instance()
 
 
 def to_parquet(
@@ -174,8 +175,8 @@ def to_parquet(
     pyarrow_parquet = awkward._connect.pyarrow.import_pyarrow_parquet("ak.to_parquet")
     fsspec = awkward._connect.pyarrow.import_fsspec("ak.to_parquet")
 
-    layout = ak.operations.ak_to_layout.to_layout(
-        data, allow_record=True, allow_other=False
+    layout = ak.operations.ak_to_layout._impl(
+        data, allow_record=True, allow_other=False, regulararray=True
     )
     table = ak.operations.ak_to_arrow_table._impl(
         layout,
@@ -225,7 +226,8 @@ def to_parquet(
                 return [
                     x
                     for x, y in zip(parquet_column_names, column_types)
-                    if isinstance(y, np.dtype) and issubclass(y.type, np.floating)
+                    if isinstance(y, metadata.dtype)
+                    and issubclass(y.type, metadata.floating)
                 ]
         else:
             return parquet_column_names
@@ -258,7 +260,7 @@ def to_parquet(
     elif isinstance(parquet_metadata_statistics, Sequence):
         replacement = []
         for specifier in parquet_metadata_statistics:
-            replacement.extend([x for x in parquet_columns(specifier)])
+            replacement.extend(list(parquet_columns(specifier)))
         parquet_metadata_statistics = replacement
 
     if parquet_dictionary_encoding is True:

@@ -11,136 +11,91 @@
 #include <utility>
 #include <stdexcept>
 #include <stdint.h>
+#include <typeinfo>
+
 
 namespace awkward {
+
+  // FIXME:
+  // The following helper variable templates are part of C++17,
+  // define it ourselves until we switch to it
+  template< class T >
+  constexpr bool is_integral_v = std::is_integral<T>::value;
+
+  template< class T >
+  constexpr bool is_signed_v = std::is_signed<T>::value;
+
+  template< class T, class U >
+  constexpr bool is_same_v = std::is_same<T, U>::value;
 
   /// @brief Returns the name of a primitive type as a string.
   template <typename T>
   const std::string
   type_to_name() {
-    std::cout << "Type " << typeid(T).name() << " is not recognized." << std::endl;
-    return typeid(T).name();
+    if (is_integral_v<T>) {
+      if (is_signed_v<T>) {
+        if (sizeof(T) == 1) {
+          return "int8";
+        }
+        else if (sizeof(T) == 2) {
+          return "int16";
+        }
+        else if (sizeof(T) == 4) {
+          return "int32";
+        }
+        else if (sizeof(T) == 8) {
+          return "int64";
+        }
+      }
+      else {
+        if (sizeof(T) == 1) {
+          return "uint8";
+        }
+        else if (sizeof(T) == 2) {
+          return "uint16";
+        }
+        else if (sizeof(T) == 4) {
+          return "uint32";
+        }
+        else if (sizeof(T) == 8) {
+          return "uint64";
+        }
+      }
+    }
+    else if (is_same_v<T, float>) {
+      return "float32";
+    }
+    else if (is_same_v<T, double>) {
+      return "float64";
+    }
+    else if (is_same_v<T, std::complex<float>>) {
+      return "complex64";
+    }
+    else if (is_same_v<T, std::complex<double>>) {
+      return "complex128";
+    }
+
+    // std::is_integral_v<T> and sizeof(T) not in (1, 2, 4, 8) can get here.
+    // Don't connect this line with the above as an 'else' clause.
+    return std::string("unsupported primitive type: ") + typeid(T).name();
   }
 
-  /// @brief Returns `bool` string when the primitive type
-  /// is boolean.
   template <>
   const std::string
   type_to_name<bool>() {
+    // This takes precedence over the unspecialized template, and therefore any
+    // 8-bit data that is not named bool will be mapped to "int8" or "uint8".
     return "bool";
   }
 
-  /// @brief Returns `int8` string when the primitive type
-  /// is an 8-bit signed integer.
-  template <>
-  const std::string
-  type_to_name<int8_t>() {
-    return "int8";
-  }
-
-  /// @brief Returns `int16` string when the primitive type
-  /// is a 16-bit signed integer.
-  template <>
-  const std::string
-  type_to_name<int16_t>() {
-    return "int16";
-  }
-
-  /// @brief Returns `int32` string when the primitive type
-  /// is a 32-bit signed integer.
-  template <>
-  const std::string
-  type_to_name<int32_t>() {
-    return "int32";
-  }
-
-  /// @brief Returns `int64` string when the primitive type
-  /// is a 64-bit signed integer.
-  template <>
-  const std::string
-  type_to_name<int64_t>() {
-    return "int64";
-  }
-
-  /// @brief Returns `int64` string when the primitive type
-  /// is a 64-bit signed integer.
-  template <>
-  const std::string
-  type_to_name<Long64_t>() {
-    return "int64";
-  }
-
-  /// @brief Returns `uint8` string when the primitive type
-  /// is an 8-bit unsigned integer.
-  template <>
-  const std::string
-  type_to_name<uint8_t>() {
-    return "uint8";
-  }
-
-  /// @brief Returns `uint16` string when the primitive type
-  /// is a 16-bit unsigned integer.
-  template <>
-  const std::string
-  type_to_name<uint16_t>() {
-    return "uint16";
-  }
-
-  /// @brief Returns `uint32` string when the primitive type
-  /// is a 32-bit unsigned integer.
-  template <>
-  const std::string
-  type_to_name<uint32_t>() {
-    return "uint32";
-  }
-
-  /// @brief Returns `uint64` string when the primitive type
-  /// is a 64-bit unsigned integer.
-  template <>
-  const std::string
-  type_to_name<uint64_t>() {
-    return "uint64";
-  }
-
-  /// @brief Returns `float32` string when the primitive type
-  /// is a floating point.
-  template <>
-  const std::string
-  type_to_name<float>() {
-    return "float32";
-  }
-
-  /// @brief Returns `float32` string when the primitive type
-  /// is a double floating point.
-  template <>
-  const std::string
-  type_to_name<double>() {
-    return "float64";
-  }
-
-  /// @brief Returns `char` string when the primitive type
-  /// is a character.
   template <>
   const std::string
   type_to_name<char>() {
+    // This takes precedence over the unspecialized template, and therefore any
+    // 8-bit data that is not named char will be mapped to "int8" or "uint8".
     return "char";
   }
 
-  /// @brief Returns `complex64` string when the primitive type is a
-  /// complex number with float32 real and float32 imaginary parts.
-  template <>
-  const std::string
-  type_to_name<std::complex<float>>() {
-    return "complex64";
-  }
-
-  /// @brief Returns `complex128` string when the primitive type is a
-  /// complex number with float64 real and float64 imaginary parts.
-  template <>
-  const std::string
-  type_to_name<std::complex<double>>() {
-    return "complex128";
-  }
 
   /// @brief Returns `char` string when the primitive type
   /// is a character.
@@ -219,7 +174,7 @@ namespace awkward {
   ///
   /// Used in RDataFrame to generate the form of the Numpy Layout Builder
   /// and ListOffset Layout Builder.
-  template <typename T>
+  template <typename T, typename OFFSETS>
   std::string
   type_to_form(int64_t form_key_id) {
     if (std::string(typeid(T).name()).find("awkward") != std::string::npos) {
@@ -251,9 +206,10 @@ namespace awkward {
         parameters =
             std::string(" \"parameters\": { \"__array__\": \"string\" }, ");
       }
-      return "{\"class\": \"ListOffsetArray\", \"offsets\": \"i64\", "
+      return "{\"class\": \"ListOffsetArray\", \"offsets\": \"" +
+             type_to_numpy_like<OFFSETS>() + "\", "
              "\"content\":" +
-             type_to_form<value_type>(form_key_id) + ", " + parameters +
+             type_to_form<value_type, OFFSETS>(form_key_id) + ", " + parameters +
              "\"form_key\": \"" + form_key.str() + "\"}";
     }
     return "unsupported type";

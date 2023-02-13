@@ -18,7 +18,7 @@ def categories(array, highlevel=True):
     """
     with ak._errors.OperationErrorContext(
         "ak.categories",
-        dict(array=array, highlevel=highlevel),
+        {"array": array, "highlevel": highlevel},
     ):
         return _impl(array, highlevel)
 

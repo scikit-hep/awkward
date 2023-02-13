@@ -4,8 +4,9 @@
 import pathlib
 
 import awkward as ak
+from awkward._nplikes.numpylike import NumpyMetadata
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 
 
 def from_avro_file(
@@ -30,13 +31,13 @@ def from_avro_file(
 
     with ak._errors.OperationErrorContext(
         "ak.from_avro_file",
-        dict(
-            file=file,
-            highlevel=highlevel,
-            behavior=behavior,
-            limit_entries=limit_entries,
-            debug_forth=debug_forth,
-        ),
+        {
+            "file": file,
+            "highlevel": highlevel,
+            "behavior": behavior,
+            "limit_entries": limit_entries,
+            "debug_forth": debug_forth,
+        },
     ):
 
         if isinstance(file, pathlib.Path):
@@ -71,6 +72,7 @@ def _impl(form, length, container, highlevel, behavior):
         container=container,
         buffer_key="{form_key}-{attribute}",
         backend="cpu",
+        byteorder=ak._util.native_byteorder,
         highlevel=highlevel,
         behavior=behavior,
         simplify=True,

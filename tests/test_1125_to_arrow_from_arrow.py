@@ -240,14 +240,15 @@ def test_indexedoptionarray_numpyarray(tmp_path, extensionarray):
 
 @pytest.mark.parametrize("extensionarray", [False, True])
 def test_indexedoptionarray_emptyarray(tmp_path, extensionarray):
-    akarray = ak.contents.IndexedOptionArray(
-        ak.index.Index64(np.array([-1, -1, -1, -1, -1], dtype=np.int64)),
-        ak.contents.EmptyArray(parameters={"which": "inner"}),
-        parameters={"which": "outer"},
-    )
-    paarray = akarray.to_arrow(extensionarray=extensionarray)
-    arrow_round_trip(akarray, paarray, extensionarray)
-    parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+    with pytest.warns(DeprecationWarning):
+        akarray = ak.contents.IndexedOptionArray(
+            ak.index.Index64(np.array([-1, -1, -1, -1, -1], dtype=np.int64)),
+            ak.contents.EmptyArray(parameters={"which": "inner"}),
+            parameters={"which": "outer"},
+        )
+        paarray = akarray.to_arrow(extensionarray=extensionarray)
+        arrow_round_trip(akarray, paarray, extensionarray)
+        parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
 
 
 @pytest.mark.parametrize("categorical_as_dictionary", [False, True])
@@ -255,7 +256,9 @@ def test_indexedoptionarray_emptyarray(tmp_path, extensionarray):
 def test_dictionary_encoding(tmp_path, categorical_as_dictionary, extensionarray):
     akarray = ak.contents.IndexedArray(
         ak.index.Index64(np.array([3, 2, 2, 2, 0, 1, 3], dtype=np.uint64)),
-        ak.contents.NumpyArray([0.0, 1.1, 2.2, 3.3], parameters={"which": "inner"}),
+        ak.contents.NumpyArray(
+            np.array([0.0, 1.1, 2.2, 3.3]), parameters={"which": "inner"}
+        ),
         parameters={"__array__": "categorical", "which": "outer"},
     )
     paarray = akarray.to_arrow(
@@ -693,3 +696,11 @@ def test_unionarray(tmp_path, extensionarray):
     )
     paarray = akarray.to_arrow(extensionarray=extensionarray)
     arrow_round_trip(akarray, paarray, extensionarray)
+
+
+@pytest.mark.parametrize("extensionarray", [False, True])
+def test_empty_arrow(tmp_path, extensionarray):
+    akarray = ak.Array([{"x": 1, "y": 2.2}])[0:0]
+    paarray = ak.to_arrow_table(akarray, extensionarray=extensionarray)
+    arrow_round_trip(akarray, paarray, extensionarray)
+    parquet_round_trip(akarray, paarray, extensionarray, tmp_path)

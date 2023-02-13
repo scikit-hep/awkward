@@ -16,4 +16,4 @@ def test_axis(axis):
     y = ak.from_numpy(x)
     result_ak = ak.broadcast_arrays(y[this_slice], y[that_slice])
 
-    assert ak._util.arrays_approx_equal(result, result_ak)
+    assert ak.almost_equal(result, result_ak)

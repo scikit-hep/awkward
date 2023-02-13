@@ -39,7 +39,7 @@ def to_rdataframe(arrays, *, flatlist_as_rvec=True):
     """
     with ak._errors.OperationErrorContext(
         "ak.to_rdataframe",
-        dict(arrays=arrays),
+        {"arrays": arrays},
     ):
         return _impl(
             arrays,
@@ -71,8 +71,8 @@ def _impl(
     layouts = {}
     length = None
     for name, array in arrays.items():
-        layouts[name] = ak.operations.ak_to_layout.to_layout(
-            array, allow_record=False, allow_other=False
+        layouts[name] = ak.operations.ak_to_layout._impl(
+            array, allow_record=False, allow_other=False, regulararray=True
         )
         if length is None:
             length = layouts[name].length

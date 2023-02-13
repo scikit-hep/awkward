@@ -2,9 +2,13 @@
 
 
 import awkward as ak
+from awkward._nplikes import ufuncs
+from awkward._nplikes.numpy import Numpy
+from awkward._nplikes.numpylike import NumpyMetadata
 from awkward.highlevel import Array
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
+numpy = Numpy.instance()
 
 
 class CategoricalBehavior(Array):
@@ -61,8 +65,8 @@ def _categorical_equal(one, two):
     assert one.parameter("__array__") == "categorical"
     assert two.parameter("__array__") == "categorical"
 
-    one_index = ak._nplikes.numpy.asarray(one.index)
-    two_index = ak._nplikes.numpy.asarray(two.index)
+    one_index = numpy.asarray(one.index)
+    two_index = numpy.asarray(two.index)
     one_content = ak._util.wrap(one.content, behavior)
     two_content = ak._util.wrap(two.content, behavior)
 
@@ -78,7 +82,7 @@ def _categorical_equal(one, two):
         two_hashable = [_as_hashable(x) for x in two_list]
         two_lookup = {x: i for i, x in enumerate(two_hashable)}
 
-        one_to_two = ak._nplikes.numpy.empty(len(one_hashable) + 1, dtype=np.int64)
+        one_to_two = numpy.empty(len(one_hashable) + 1, dtype=np.int64)
         for i, x in enumerate(one_hashable):
             one_to_two[i] = two_lookup.get(x, len(two_hashable))
         one_to_two[-1] = -1
@@ -105,5 +109,5 @@ def _apply_ufunc(ufunc, method, inputs, kwargs):
 
 def register(behavior):
     behavior["categorical"] = CategoricalBehavior
-    behavior[ak._nplikes.numpy.equal, "categorical", "categorical"] = _categorical_equal
-    behavior[ak._nplikes.numpy.ufunc, "categorical"] = _apply_ufunc
+    behavior[ufuncs.equal, "categorical", "categorical"] = _categorical_equal
+    behavior[ufuncs.ufunc, "categorical"] = _apply_ufunc

@@ -14,7 +14,7 @@ set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
 
 # C++ dependencies (header-only): GrowableBuffer
 add_library(awkward-parent INTERFACE)
-target_include_directories(awkward-parent INTERFACE ../header-only)
+target_include_directories(awkward-parent INTERFACE ../include)
 target_compile_features(awkward-parent INTERFACE cxx_std_11)
 
 macro(addtest name filename)

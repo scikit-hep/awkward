@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 from awkward.operations.ak_all import all
+from awkward.operations.ak_almost_equal import almost_equal
 from awkward.operations.ak_any import any
 from awkward.operations.ak_argcartesian import argcartesian
 from awkward.operations.ak_argcombinations import argcombinations
@@ -47,6 +48,8 @@ from awkward.operations.ak_local_index import local_index
 from awkward.operations.ak_mask import mask
 from awkward.operations.ak_max import max, nanmax
 from awkward.operations.ak_mean import mean, nanmean
+from awkward.operations.ak_merge_option_of_records import merge_option_of_records
+from awkward.operations.ak_merge_union_of_records import merge_union_of_records
 from awkward.operations.ak_metadata_from_parquet import metadata_from_parquet
 from awkward.operations.ak_min import min, nanmin
 from awkward.operations.ak_moment import moment

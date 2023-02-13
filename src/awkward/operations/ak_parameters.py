@@ -6,8 +6,9 @@ import numbers
 from awkward_cpp.lib import _ext
 
 import awkward as ak
+from awkward._nplikes.numpylike import NumpyMetadata
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 
 
 def parameters(array):
@@ -28,7 +29,7 @@ def parameters(array):
     """
     with ak._errors.OperationErrorContext(
         "ak.parameters",
-        dict(array=array),
+        {"array": array},
     ):
         return _impl(array)
 

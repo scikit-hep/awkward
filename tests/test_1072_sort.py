@@ -348,10 +348,10 @@ def test_emptyarray_sort():
 
 def test_listarray_sort():
     v2_array = ak.contents.listarray.ListArray(
-        ak.index.Index(np.array([4, 100, 1])),
-        ak.index.Index(np.array([7, 100, 3, 200])),
+        ak.index.Index(np.array([4, 100, 1], dtype=np.int32)),
+        ak.index.Index(np.array([7, 100, 3, 200], dtype=np.int32)),
         ak.contents.numpyarray.NumpyArray(
-            np.array([6.6, 4.4, 5.5, 7.7, 3.3, 2.2, 1.1, 8.8])
+            np.array([6.6, 4.4, 5.5, 7.7, 3.3, 2.2, 1.1, 8.8], dtype=np.float64)
         ),
     )
 
@@ -915,7 +915,7 @@ def test_indexedoptionarray_sort():
 
 def test_sort_zero_length_arrays():
     array = ak.contents.IndexedArray(
-        ak.index.Index64([]), ak.contents.NumpyArray([1, 2, 3])
+        ak.index.Index64([]), ak.contents.NumpyArray(np.array([1, 2, 3]))
     )
     assert to_list(array) == []
     assert to_list(ak.operations.sort(array)) == []
@@ -943,7 +943,7 @@ def test_sort_zero_length_arrays():
     assert to_list(ak.operations.sort(array)) == []
     assert to_list(ak.operations.argsort(array)) == []
 
-    array = ak.contents.NumpyArray([])
+    array = ak.contents.NumpyArray(np.zeros(0))
     assert to_list(array) == []
     assert to_list(ak.operations.sort(array)) == []
     assert to_list(ak.operations.argsort(array)) == []

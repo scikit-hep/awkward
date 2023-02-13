@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 
+import functools
 import sys
 
 import awkward as ak
@@ -63,6 +64,10 @@ def mixin_class(registry, name=None):
     return register
 
 
+def _call_transposed(func, left, right):
+    return func(right, left)
+
+
 def mixin_class_method(ufunc, rhs=None, *, transpose=True):
     """
     Args:
@@ -70,7 +75,8 @@ def mixin_class_method(ufunc, rhs=None, *, transpose=True):
             hooked in Awkward Array, i.e. it can be the first argument of a behavior.
         rhs (Set[type] or None): Set of right-hand side argument types, optional
             if wrapping a unary function. The left-hand side is expected to
-            always be `self` of the parent class.
+            always be `self` of the parent class. The current class is implicitly
+            included in this set.
         transpose (bool): If true, automatically create a transpose signature
             (only makes sense for binary ufuncs).
 
@@ -86,12 +92,13 @@ def mixin_class_method(ufunc, rhs=None, *, transpose=True):
                 ValueError("expected a set of right-hand-side argument types")
             )
         if transpose and rhs is not None:
-
-            def transposed(left, right):
-                return method(right, left)
-
             # make a copy of rhs, we will edit it later
-            method._awkward_mixin = (ufunc, set(rhs), transposed)
+            # use partial & a module-scoped function so that this is pickleable
+            method._awkward_mixin = (
+                ufunc,
+                set(rhs),
+                functools.partial(_call_transposed, method),
+            )
         else:
             method._awkward_mixin = (ufunc, rhs, None)
         return method

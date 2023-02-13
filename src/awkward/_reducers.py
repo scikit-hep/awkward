@@ -1,22 +1,33 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 from typing import Any as AnyType
 
 import awkward as ak
+from awkward._nplikes.numpy import Numpy
+from awkward._nplikes.numpylike import NumpyMetadata
 from awkward.typing import Final
 
-np = ak._nplikes.NumpyMetadata.instance()
-numpy = ak._nplikes.Numpy.instance()
+np = NumpyMetadata.instance()
+numpy = Numpy.instance()
 
 DTypeLike = AnyType
 
 
-class Reducer:
+class Reducer(ABC):
     name: str
 
     # Does the output correspond to array positions?
-    needs_position: Final = False
+    @property
+    @abstractmethod
+    def needs_position(self) -> bool:
+        ...
+
+    @property
+    @abstractmethod
+    def preferred_dtype(self) -> DTypeLike:
+        ...
 
     @classmethod
     def highlevel_function(cls):
@@ -46,9 +57,11 @@ class Reducer:
             type = np.float32
         return type
 
+    @abstractmethod
     def identity_for(self, dtype: DTypeLike | None):
         raise ak._errors.wrap_error(NotImplementedError)
 
+    @abstractmethod
     def apply(self, array, parents, outlength: int):
         raise ak._errors.wrap_error(NotImplementedError)
 
@@ -158,6 +171,7 @@ class ArgMax(Reducer):
 class Count(Reducer):
     name: Final = "count"
     preferred_dtype: Final = np.int64
+    needs_position: Final = False
 
     @classmethod
     def return_dtype(cls, given_dtype):
@@ -186,6 +200,7 @@ class Count(Reducer):
 class CountNonzero(Reducer):
     name: Final = "count_nonzero"
     preferred_dtype: Final = np.float64
+    needs_position: Final = False
 
     @classmethod
     def return_dtype(cls, given_dtype):
@@ -236,6 +251,7 @@ class CountNonzero(Reducer):
 class Sum(Reducer):
     name: Final = "sum"
     preferred_dtype: Final = np.float64
+    needs_position: Final = False
 
     def apply(self, array, parents, outlength):
         assert isinstance(array, ak.contents.NumpyArray)
@@ -320,7 +336,7 @@ class Sum(Reducer):
 
         if array.dtype.kind == "m":
             return ak.contents.NumpyArray(
-                array.backend.nplike.asarray(result, array.dtype)
+                array.backend.nplike.asarray(result, dtype=array.dtype)
             )
         elif array.dtype.type in (np.complex128, np.complex64):
             return ak.contents.NumpyArray(result.view(array.dtype))
@@ -334,12 +350,13 @@ class Sum(Reducer):
         if dtype in {np.timedelta64, np.datetime64}:
             return np.timedelta64(0)
         else:
-            return numpy.array(0, dtype=dtype)[()]
+            return numpy.asarray(0, dtype=dtype)[()]
 
 
 class Prod(Reducer):
     name: Final = "prod"
     preferred_dtype: Final = np.int64
+    needs_position: Final = False
 
     def apply(self, array, parents, outlength):
         assert isinstance(array, ak.contents.NumpyArray)
@@ -367,7 +384,9 @@ class Prod(Reducer):
                     outlength,
                 )
             )
-            result = result.astype(self.return_dtype(array.dtype))
+            result = array.backend.nplike.astype(
+                result, dtype=self.return_dtype(array.dtype)
+            )
         elif array.dtype.type in (np.complex128, np.complex64):
             result = array.backend.nplike.empty(
                 self.maybe_double_length(array.dtype.type, outlength),
@@ -420,12 +439,13 @@ class Prod(Reducer):
         if dtype in {np.timedelta64, np.datetime64}:
             return np.timedelta64(0)
         else:
-            return numpy.array(1, dtype=dtype)[()]
+            return numpy.asarray(1, dtype=dtype)[()]
 
 
 class Any(Reducer):
     name: Final = "any"
     preferred_dtype: Final = np.bool_
+    needs_position: Final = False
 
     @classmethod
     def return_dtype(cls, given_dtype):
@@ -476,6 +496,7 @@ class Any(Reducer):
 class All(Reducer):
     name: Final = "all"
     preferred_dtype: Final = np.bool_
+    needs_position: Final = False
 
     @classmethod
     def return_dtype(cls, given_dtype):
@@ -526,6 +547,7 @@ class All(Reducer):
 class Min(Reducer):
     name: Final = "min"
     preferred_dtype: Final = np.float64
+    needs_position: Final = False
 
     def __init__(self, initial: float | None):
         self._initial = initial
@@ -615,17 +637,20 @@ class Min(Reducer):
             )
         if array.dtype.type in (np.complex128, np.complex64):
             return ak.contents.NumpyArray(
-                array.backend.nplike.array(result.view(array.dtype), array.dtype)
+                array.backend.nplike.asarray(
+                    result.view(array.dtype), dtype=array.dtype
+                )
             )
         else:
             return ak.contents.NumpyArray(
-                array.backend.nplike.array(result, array.dtype)
+                array.backend.nplike.asarray(result, dtype=array.dtype)
             )
 
 
 class Max(Reducer):
     name: Final = "max"
     preferred_dtype: Final = np.float64
+    needs_position: Final = False
 
     def __init__(self, initial):
         self._initial = initial
@@ -715,9 +740,11 @@ class Max(Reducer):
             )
         if array.dtype.type in (np.complex128, np.complex64):
             return ak.contents.NumpyArray(
-                array.backend.nplike.array(result.view(array.dtype), array.dtype)
+                array.backend.nplike.asarray(
+                    result.view(array.dtype), dtype=array.dtype
+                )
             )
         else:
             return ak.contents.NumpyArray(
-                array.backend.nplike.array(result, array.dtype)
+                array.backend.nplike.asarray(result, dtype=array.dtype)
             )

@@ -1,8 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._nplikes.numpylike import NumpyMetadata
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 
 
 def singletons(array, axis=0, *, highlevel=True, behavior=None):
@@ -38,7 +39,7 @@ def singletons(array, axis=0, *, highlevel=True, behavior=None):
     """
     with ak._errors.OperationErrorContext(
         "ak.singletons",
-        dict(array=array, axis=axis, highlevel=highlevel, behavior=behavior),
+        {"array": array, "axis": axis, "highlevel": highlevel, "behavior": behavior},
     ):
         return _impl(array, axis, highlevel, behavior)
 
@@ -65,7 +66,9 @@ def _impl(array, axis, highlevel, behavior):
                 offsets = nplike.empty(layout.length + 1, dtype=np.int64)
                 offsets[0] = 0
 
-                nplike.cumsum(layout.mask_as_bool(valid_when=True), out=offsets[1:])
+                nplike.cumsum(
+                    layout.mask_as_bool(valid_when=True), maybe_out=offsets[1:]
+                )
 
                 return ak.contents.ListOffsetArray(
                     ak.index.Index64(offsets), layout.project()

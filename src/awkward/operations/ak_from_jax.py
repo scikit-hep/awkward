@@ -29,12 +29,12 @@ def from_jax(array, *, regulararray=False, highlevel=True, behavior=None):
     """
     with _errors.OperationErrorContext(
         "ak.from_jax",
-        dict(
-            array=array,
-            regulararray=regulararray,
-            highlevel=highlevel,
-            behavior=behavior,
-        ),
+        {
+            "array": array,
+            "regulararray": regulararray,
+            "highlevel": highlevel,
+            "behavior": behavior,
+        },
     ):
         jax.assert_registered()
         return _util.from_arraylib(array, regulararray, False, highlevel, behavior)

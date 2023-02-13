@@ -4,10 +4,16 @@ from __future__ import annotations
 import copy
 
 import awkward as ak
+from awkward._nplikes import nplike_of, to_nplike
+from awkward._nplikes.cupy import Cupy
+from awkward._nplikes.jax import Jax
+from awkward._nplikes.numpy import Numpy
+from awkward._nplikes.numpylike import NumpyLike, NumpyMetadata
+from awkward._nplikes.typetracer import TypeTracer
 from awkward.typing import Self
 
-np = ak._nplikes.NumpyMetadata.instance()
-numpy = ak._nplikes.Numpy.instance()
+np = NumpyMetadata.instance()
+numpy = Numpy.instance()
 
 
 _dtype_to_form = {
@@ -41,14 +47,19 @@ class Index:
 
     def __init__(self, data, *, metadata=None, nplike=None):
         if nplike is None:
-            nplike = ak._nplikes.nplike_of(data)
+            nplike = nplike_of(data)
         self._nplike = nplike
         if metadata is not None and not isinstance(metadata, dict):
             raise ak._errors.wrap_error(
                 TypeError("Index metadata must be None or a dict")
             )
         self._metadata = metadata
-        self._data = self._nplike.asarray(data, dtype=self._expected_dtype, order="C")
+        # We don't care about F, C (it's one dimensional), but we do need
+        # the array to be contiguous. This should _not_ return a copy if already
+        self._data = self._nplike.ascontiguousarray(
+            self._nplike.asarray(data, dtype=self._expected_dtype)
+        )
+
         if len(self._data.shape) != 1:
             raise ak._errors.wrap_error(TypeError("Index data must be one-dimensional"))
 
@@ -125,7 +136,7 @@ class Index:
         return self._data.shape[0]
 
     def forget_length(self):
-        tt = ak._typetracer.TypeTracer.instance()
+        tt = TypeTracer.instance()
         if isinstance(self._nplike, type(tt)):
             data = self._data
         else:
@@ -133,13 +144,13 @@ class Index:
         return type(self)(data.forget_length(), metadata=self._metadata, nplike=tt)
 
     def raw(self, nplike):
-        return self.nplike.raw(self.data, nplike)
+        return to_nplike(self.data, nplike, from_nplike=self._nplike)
 
     def __len__(self):
         return self.length
 
-    def __array__(self, *args, **kwargs):
-        return self._nplike.asarray(self._data, *args, **kwargs)
+    def __array__(self, dtype=None):
+        return self._nplike.asarray(self._data, dtype=dtype)
 
     def __repr__(self):
         return self._repr("", "", "")
@@ -186,9 +197,7 @@ class Index:
 
         if hasattr(out, "shape") and len(out.shape) != 0:
             return Index(out, metadata=self.metadata, nplike=self._nplike)
-        elif (
-            ak._nplikes.Jax.is_own_array(out) or ak._nplikes.Cupy.is_own_array(out)
-        ) and len(out.shape) == 0:
+        elif (Jax.is_own_array(out) or Cupy.is_own_array(out)) and len(out.shape) == 0:
             return out.item()
         else:
             return out
@@ -197,7 +206,7 @@ class Index:
         self._data[where] = what
 
     def to64(self):
-        return Index(self._data.astype(np.int64))
+        return Index(self._nplike.astype(self._data, dtype=np.int64))
 
     def __copy__(self):
         return type(self)(self._data, metadata=self._metadata, nplike=self._nplike)
@@ -212,7 +221,7 @@ class Index:
     def _nbytes_part(self):
         return self.data.nbytes
 
-    def to_nplike(self, nplike: ak._nplikes.NumpyLike) -> Self:
+    def to_nplike(self, nplike: NumpyLike) -> Self:
         return type(self)(self.raw(nplike), metadata=self.metadata, nplike=nplike)
 
     def is_equal_to(self, other, index_dtype=True, numpyarray=True):

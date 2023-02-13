@@ -12,10 +12,13 @@ from collections.abc import Iterable, Mapping, Sized
 from awkward_cpp.lib import _ext
 
 import awkward as ak
-from awkward._connect.numpy import NDArrayOperatorsMixin
+import awkward._connect.hist
+from awkward._nplikes.numpy import Numpy
+from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._util import NDArrayOperatorsMixin
 
-np = ak._nplikes.NumpyMetadata.instance()
-numpy = ak._nplikes.Numpy.instance()
+np = NumpyMetadata.instance()
+numpy = Numpy.instance()
 
 _dir_pattern = re.compile(r"^[a-zA-Z_]\w*$")
 
@@ -181,18 +184,6 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             layout = data._layout
             behavior = ak._util.behavior_of(data, behavior=behavior)
 
-        elif numpy.is_own_array(data) and data.dtype != np.dtype("O"):
-            layout = ak.operations.from_numpy(data, highlevel=False)
-
-        elif ak._nplikes.Cupy.is_own_array(data):
-            layout = ak.operations.from_cupy(data, highlevel=False)
-
-        elif ak._nplikes.Jax.is_own_array(data):
-            layout = ak.operations.from_jax(data, highlevel=False)
-
-        elif ak._util.in_module(data, "pyarrow"):
-            layout = ak.operations.from_arrow(data, highlevel=False)
-
         elif isinstance(data, dict):
             fields = []
             contents = []
@@ -201,13 +192,13 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                 fields.append(k)
                 contents.append(Array(v).layout)
                 if length is None:
-                    length = len(contents[-1])
-                elif length != len(contents[-1]):
+                    length = contents[-1].length
+                elif length != contents[-1].length:
                     raise ak._errors.wrap_error(
                         ValueError(
                             "dict of arrays in ak.Array constructor must have arrays "
                             "of equal length ({} vs {})".format(
-                                length, len(contents[-1])
+                                length, contents[-1].length
                             )
                         )
                     )
@@ -217,7 +208,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             layout = ak.operations.from_json(data, highlevel=False)
 
         else:
-            layout = ak.operations.from_iter(data, highlevel=False, allow_record=False)
+            layout = ak.operations.to_layout(
+                data, allow_record=False, regulararray=False
+            )
 
         if not isinstance(layout, ak.contents.Content):
             raise ak._errors.wrap_error(
@@ -246,6 +239,8 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         super().__init_subclass__(**kwargs)
 
         ak.jax.register_behavior_class(cls)
+
+    _histogram_module_ = awkward._connect.hist
 
     @property
     def layout(self):
@@ -353,7 +348,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         can be used in mathematical expressions with the original `array`
         because they are still aligned.
 
-        See <<filtering>> and #ak.mask.
+        See <<<filtering>>> and #ak.mask.
         """
         return self.Mask(self)
 
@@ -449,12 +444,6 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     def typestr(self):
         """
         The high-level type of this Array, presented as a string.
-
-        Note that the outermost element of an Array's type is always an
-        #ak.types.ArrayType, which specifies the number of elements in the array.
-
-        The type of a #ak.contents.Content (from #ak.Array.layout) is not
-        wrapped by an #ak.types.ArrayType.
         """
         return str(self.type)
 
@@ -566,7 +555,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
           like Python/NumPy.
         * **A string** selects a tuple or record field, even if its
           position in the tuple is to the left of the dimension where the
-          tuple/record is defined. (See <<projection>> below.) This is
+          tuple/record is defined. (See <<<projection>>> below.) This is
           similar to NumPy's
           [field access](https://numpy.org/doc/stable/user/basics.indexing.html#field-access),
           except that strings are allowed in the same tuple with other
@@ -602,12 +591,12 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
           to the output. This behavior matches pyarrow's
           [Array.take](https://arrow.apache.org/docs/python/generated/pyarrow.Array.html#pyarrow.Array.take)
           which also manages arrays with missing values. See
-          <<option indexing>> below.
+          <<<option indexing>>> below.
         * **An Array of nested lists**, ultimately containing booleans or
           integers and having the same lengths of lists at each level as
           the Array to which they're applied, selects by boolean or by
           integer at the deeply nested level. Missing items at any level
-          above the deepest level must broadcast. See <<nested indexing>> below.
+          above the deepest level must broadcast. See <<<nested indexing>>> below.
 
         A tuple of the above applies each slice item to a dimension of the
         data, which can be very expressive. More than one flat boolean/integer
@@ -641,7 +630,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             <Array [[[1], [], [3], [5]], [[7], [9]]] type='2 * var * var * int64'>
 
         In this example, the boolean array is itself nested (see
-        <<nested indexing>> below).
+        <<<nested indexing>>> below).
 
             >>> array % 2 == 1
             <Array [[[False, True, False], ..., [True]], ...] type='2 * var * var * bool'>
@@ -942,7 +931,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         Here, the `np.argmax` returns the integer position of the maximum
         element or None for empty arrays. It's a nice example of
-        <<option indexing>> with <<nested indexing>>.
+        <<<option indexing>>> with <<<nested indexing>>>.
 
         When applying a nested index with missing (None) entries at levels
         higher than the last level, the indexer must have the same dimension
@@ -1030,7 +1019,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         """
         with ak._errors.OperationErrorContext(
             "ak.Array.__setitem__",
-            dict(self=self, field_name=where, field_value=what),
+            {"self": self, "field_name": where, "field_value": what},
         ):
             if not (
                 isinstance(where, str)
@@ -1063,7 +1052,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         """
         with ak._errors.OperationErrorContext(
             "ak.Array.__delitem__",
-            dict(self=self, field_name=where),
+            {"self": self, "field_name": where},
         ):
             if not (
                 isinstance(where, str)
@@ -1101,7 +1090,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             <Array [[[1], [2, 2], [3, 3, 3]], [], [...]] type='3 * var * var * int64'>
 
         which are equivalent to `array["x"]` and `array["y"]`. (See
-        <<projection>>.)
+        <<<projection>>>.)
 
         Fields can't be accessed as attributes when
 
@@ -1202,31 +1191,23 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         except AttributeError:
             pytype = type(self).__name__
 
-        if (
-            self._layout.backend.nplike.known_shape
-            and self._layout.backend.nplike.known_data
-        ):
-            typestr = repr(str(self.type))[1:-1]
-            if len(typestr) + len(pytype) + len(" type=''") + 3 < limit_cols // 2:
-                strwidth = limit_cols - (
-                    len(typestr) + len(pytype) + len(" type=''") + 3
-                )
-            else:
-                strwidth = max(
-                    0,
-                    min(
-                        limit_cols // 2,
-                        limit_cols - len(pytype) - len(" type='...'") - 3,
-                    ),
-                )
-            valuestr = " " + awkward._prettyprint.valuestr(self, 1, strwidth)
-
+        typestr = repr(str(self.type))[1:-1]
+        if self._layout.backend.nplike.known_data:
+            valuestr = ""
         else:
-            self._layout._touch_data(recursive=True)
-            typestr = repr(
-                "?? * " + str(self._layout.form.type_from_behavior(self._behavior))
-            )[1:-1]
             valuestr = "-typetracer"
+
+        if len(typestr) + len(pytype) + len(" type=''") + 3 < limit_cols // 2:
+            strwidth = limit_cols - (len(typestr) + len(pytype) + len(" type=''") + 3)
+        else:
+            strwidth = max(
+                0,
+                min(
+                    limit_cols // 2,
+                    limit_cols - len(pytype) - len(" type='...'") - 3,
+                ),
+            )
+        valuestr = valuestr + " " + awkward._prettyprint.valuestr(self, 1, strwidth)
 
         length = max(3, limit_cols - len(pytype) - len("type='...'") - len(valuestr))
         if len(typestr) > length:
@@ -1430,25 +1411,29 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         return numba.typeof(self._numbaview)
 
-    def __getstate__(self):
+    def __reduce__(self):
         packed = ak.operations.to_packed(self._layout, highlevel=False)
         form, length, container = ak.operations.to_buffers(
-            packed, buffer_key="{form_key}-{attribute}", form_key="node{id}"
+            packed,
+            buffer_key="{form_key}-{attribute}",
+            form_key="node{id}",
+            byteorder="<",
         )
         if self._behavior is ak.behavior:
             behavior = None
         else:
             behavior = self._behavior
-        return form.to_dict(), length, container, behavior
+        return object.__new__, (Array,), (form.to_dict(), length, container, behavior)
 
     def __setstate__(self, state):
-        form, length, container, behavior = state
+        form, length, container, behavior, *_ = state
         layout = ak.operations.from_buffers(
             form,
             length,
             container,
             highlevel=False,
             buffer_key="{form_key}-{attribute}",
+            byteorder="<",
         )
         self.layout = layout
         self.behavior = behavior
@@ -1528,7 +1513,7 @@ class Record(NDArrayOperatorsMixin):
             contents = []
             for k, v in data.items():
                 fields.append(k)
-                if ak._util.is_non_string_iterable(v):
+                if ak._util.is_non_string_like_iterable(v):
                     contents.append(Array(v).layout[np.newaxis])
                 else:
                     contents.append(Array([v]).layout)
@@ -1700,18 +1685,20 @@ class Record(NDArrayOperatorsMixin):
         """
         The high-level type of this Record; same as #ak.type.
 
-        Note that the outermost element of a Record's type is always a
-        #ak.types.RecordType.
+        Note that the outermost element of a Record's type is always an
+        #ak.types.ScalarType, which .
+
+        The type of a #ak.record.Record (from #ak.Array.layout) is not
+        wrapped by an #ak.types.ScalarType.
         """
-        return self._layout.array.form.type_from_behavior(self._behavior)
+        return ak.types.ScalarType(
+            self._layout.array.form.type_from_behavior(self._behavior)
+        )
 
     @property
     def typestr(self):
         """
         The high-level type of this Record, presented as a string.
-
-        Note that the outermost element of a Record's type is always a
-        #ak.types.RecordType.
         """
         return str(self.type)
 
@@ -1778,7 +1765,7 @@ class Record(NDArrayOperatorsMixin):
         """
         with ak._errors.OperationErrorContext(
             "ak.Record.__setitem__",
-            dict(self=self, field_name=where, field_value=what),
+            {"self": self, "field_name": where, "field_value": what},
         ):
             if not (
                 isinstance(where, str)
@@ -1812,7 +1799,7 @@ class Record(NDArrayOperatorsMixin):
         """
         with ak._errors.OperationErrorContext(
             "ak.Record.__delitem__",
-            dict(self=self, field_name=where),
+            {"self": self, "field_name": where},
         ):
             if not (
                 isinstance(where, str)
@@ -1940,31 +1927,23 @@ class Record(NDArrayOperatorsMixin):
 
         pytype = type(self).__name__
 
-        if (
-            self._layout.array.backend.nplike.known_shape
-            and self._layout.array.backend.nplike.known_data
-        ):
-            typestr = repr(str(self.type))[1:-1]
-            if len(typestr) + len(pytype) + len(" type=''") + 3 < limit_cols // 2:
-                strwidth = limit_cols - (
-                    len(typestr) + len(pytype) + len(" type=''") + 3
-                )
-            else:
-                strwidth = max(
-                    0,
-                    min(
-                        limit_cols // 2,
-                        limit_cols - len(pytype) - len(" type='...'") - 3,
-                    ),
-                )
-            valuestr = " " + awkward._prettyprint.valuestr(self, 1, strwidth)
-
+        typestr = repr(str(self.type))[1:-1]
+        if self._layout.array.backend.nplike.known_data:
+            valuestr = ""
         else:
-            self._layout._touch_data(recursive=True)
-            typestr = repr(str(self._layout.form.type_from_behavior(self._behavior)))[
-                1:-1
-            ]
             valuestr = "-typetracer"
+
+        if len(typestr) + len(pytype) + len(" type=''") + 3 < limit_cols // 2:
+            strwidth = limit_cols - (len(typestr) + len(pytype) + len(" type=''") + 3)
+        else:
+            strwidth = max(
+                0,
+                min(
+                    limit_cols // 2,
+                    limit_cols - len(pytype) - len(" type='...'") - 3,
+                ),
+            )
+        valuestr = valuestr + " " + awkward._prettyprint.valuestr(self, 1, strwidth)
 
         length = max(3, limit_cols - len(pytype) - len("type='...'") - len(valuestr))
         if len(typestr) > length:
@@ -2064,25 +2043,33 @@ class Record(NDArrayOperatorsMixin):
 
         return numba.typeof(self._numbaview)
 
-    def __getstate__(self):
+    def __reduce__(self):
         packed = ak.operations.to_packed(self._layout, highlevel=False)
         form, length, container = ak.operations.to_buffers(
-            packed.array, buffer_key="{form_key}-{attribute}", form_key="node{id}"
+            packed.array,
+            buffer_key="{form_key}-{attribute}",
+            form_key="node{id}",
+            byteorder="<",
         )
         if self._behavior is ak.behavior:
             behavior = None
         else:
             behavior = self._behavior
-        return form.to_dict(), length, container, behavior, packed.at
+        return (
+            object.__new__,
+            (Record,),
+            (form.to_dict(), length, container, behavior, packed.at),
+        )
 
     def __setstate__(self, state):
-        form, length, container, behavior, at = state
+        form, length, container, behavior, at, *_ = state
         layout = ak.operations.from_buffers(
             form,
             length,
             container,
             highlevel=False,
             buffer_key="{form_key}-{attribute}",
+            byteorder="<",
         )
         layout = ak.record.Record(layout, at)
         self.layout = layout
@@ -2329,12 +2316,6 @@ class ArrayBuilder(Sized):
     def typestr(self):
         """
         The high-level type of this accumulated array, presented as a string.
-
-        Note that the outermost element of an Array's type is always an
-        #ak.types.ArrayType, which specifies the number of elements in the array.
-
-        The type of a #ak.contents.Content (from #ak.Array.layout) is not
-        wrapped by an #ak.types.ArrayType.
         """
         return str(self.type)
 
@@ -2435,6 +2416,7 @@ class ArrayBuilder(Sized):
                 container,
                 buffer_key="{form_key}-{attribute}",
                 backend="cpu",
+                byteorder=ak._util.native_byteorder,
                 highlevel=True,
                 behavior=self._behavior,
                 simplify=True,

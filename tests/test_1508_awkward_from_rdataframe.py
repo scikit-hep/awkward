@@ -147,7 +147,9 @@ def test_data_frame_NumpyArray():
 def test_data_frame_ListOffsetArray_NumpyArray():
     array = ak.contents.listoffsetarray.ListOffsetArray(
         ak.index.Index(np.array([1, 4, 4, 6, 7], np.int64)),
-        ak.contents.numpyarray.NumpyArray([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7]),
+        ak.contents.numpyarray.NumpyArray(
+            np.array([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7])
+        ),
     )
 
     layout = array
@@ -164,7 +166,9 @@ def test_nested_ListOffsetArray_NumpyArray():
         ak.index.Index64(np.array([0, 1, 5], dtype=np.int64)),
         ak.contents.listoffsetarray.ListOffsetArray(
             ak.index.Index(np.array([1, 1, 4, 4, 6, 7], np.int64)),
-            ak.contents.numpyarray.NumpyArray([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7]),
+            ak.contents.numpyarray.NumpyArray(
+                np.array([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7])
+            ),
         ),
     )
 

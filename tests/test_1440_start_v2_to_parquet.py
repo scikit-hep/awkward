@@ -211,12 +211,13 @@ def test_indexedoptionarray_numpyarray(tmp_path, extensionarray):
 
 @pytest.mark.parametrize("extensionarray", [False, True])
 def test_indexedoptionarray_emptyarray(tmp_path, extensionarray):
-    akarray = ak.contents.IndexedOptionArray(
-        ak.index.Index64(np.array([-1, -1, -1, -1, -1], dtype=np.int64)),
-        ak.contents.EmptyArray(parameters={"which": "inner"}),
-        parameters={"which": "outer"},
-    )
-    parquet_round_trip(ak.Array(akarray), extensionarray, tmp_path)
+    with pytest.warns(DeprecationWarning):
+        akarray = ak.contents.IndexedOptionArray(
+            ak.index.Index64(np.array([-1, -1, -1, -1, -1], dtype=np.int64)),
+            ak.contents.EmptyArray(parameters={"which": "inner"}),
+            parameters={"which": "outer"},
+        )
+        parquet_round_trip(ak.Array(akarray), extensionarray, tmp_path)
 
 
 @pytest.mark.skip(
@@ -227,7 +228,9 @@ def test_indexedoptionarray_emptyarray(tmp_path, extensionarray):
 def test_dictionary_encoding(tmp_path, categorical_as_dictionary, extensionarray):
     akarray = ak.contents.IndexedArray(
         ak.index.Index64(np.array([3, 2, 2, 2, 0, 1, 3], dtype=np.uint64)),
-        ak.contents.NumpyArray([0.0, 1.1, 2.2, 3.3], parameters={"which": "inner"}),
+        ak.contents.NumpyArray(
+            np.array([0.0, 1.1, 2.2, 3.3]), parameters={"which": "inner"}
+        ),
         parameters={"__array__": "categorical", "which": "outer"},
     )
 

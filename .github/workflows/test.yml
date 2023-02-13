@@ -1,4 +1,4 @@
-name: Build Test
+name: Tests
 
 on:
   pull_request:
@@ -19,7 +19,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: 'build-test-${{ github.head_ref || github.run_id }}'
+  group: 'test-${{ github.head_ref || github.run_id }}'
   cancel-in-progress: true
 
 env:
@@ -192,7 +192,7 @@ jobs:
           - "numpy"
         include:
           - python-version: '3.7'
-            numpy-package: "numpy>=1.17"
+            numpy-package: "numpy==1.14.5"
 
     runs-on: ubuntu-20.04
 

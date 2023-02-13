@@ -1,8 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._nplikes.shape import unknown_length
 from awkward._util import unset
-from awkward.forms.form import Form, _parameters_equal
+from awkward.forms.form import Form, _type_parameters_equal
 from awkward.typing import final
 
 
@@ -20,18 +21,18 @@ class RegularForm(Form):
                     )
                 )
             )
-        if not ak._util.is_integer(size):
+        if not (size is unknown_length or (ak._util.is_integer(size) and size >= 0)):
             raise ak._errors.wrap_error(
                 TypeError(
-                    "{} 'size' must be of type int, not {}".format(
+                    "{} 'size' must be a non-negative int or None, not {}".format(
                         type(self).__name__, repr(size)
                     )
                 )
             )
 
         self._content = content
-        self._size = int(size)
-        self._init(parameters, form_key)
+        self._size = size
+        self._init(parameters=parameters, form_key=form_key)
 
     @property
     def content(self):
@@ -61,7 +62,7 @@ class RegularForm(Form):
         return self._to_dict_extra(
             {
                 "class": "RegularArray",
-                "size": self._size,
+                "size": None if self._size is unknown_length else self._size,
                 "content": self._content._to_dict_part(verbose, toplevel=False),
             },
             verbose,
@@ -80,9 +81,7 @@ class RegularForm(Form):
             return (
                 self._form_key == other._form_key
                 and self._size == other._size
-                and _parameters_equal(
-                    self._parameters, other._parameters, only_array_record=True
-                )
+                and _type_parameters_equal(self._parameters, other._parameters)
                 and self._content == other._content
             )
         else:

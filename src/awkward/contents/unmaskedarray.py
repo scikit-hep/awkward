@@ -2,19 +2,60 @@
 from __future__ import annotations
 
 import copy
+import math
 
 import awkward as ak
+from awkward._nplikes.numpy import Numpy
+from awkward._nplikes.numpylike import IndexType, NumpyMetadata
+from awkward._nplikes.typetracer import MaybeNone
 from awkward._util import unset
 from awkward.contents.content import Content
+from awkward.forms.form import _type_parameters_equal
 from awkward.forms.unmaskedform import UnmaskedForm
-from awkward.typing import Final, Self, final
+from awkward.index import Index
+from awkward.typing import TYPE_CHECKING, Final, Self, SupportsIndex, final
 
-np = ak._nplikes.NumpyMetadata.instance()
-numpy = ak._nplikes.Numpy.instance()
+if TYPE_CHECKING:
+    from awkward._slicing import SliceItem
+
+np = NumpyMetadata.instance()
+numpy = Numpy.instance()
 
 
 @final
 class UnmaskedArray(Content):
+    """
+    UnmaskedArray implements an #ak.types.OptionType for which the values are
+    never, in fact, missing. It exists to satisfy systems that formally require this
+    high-level type without the overhead of generating an array of all True or all
+    False values.
+
+    This is like NumPy's
+    [masked arrays](https://docs.scipy.org/doc/numpy/reference/maskedarray.html)
+    with `mask=None`.
+
+    It is also like Apache Arrow's
+    [validity bitmaps](https://arrow.apache.org/docs/format/Columnar.html#validity-bitmaps)
+    because the bitmap can be omitted when all values are valid.
+
+    To illustrate how the constructor arguments are interpreted, the following is a
+    simplified implementation of `__init__`, `__len__`, and `__getitem__`:
+
+        class UnmaskedArray(Content):
+            def __init__(self, content):
+                assert isinstance(content, Content)
+                self.content = content
+
+            def __len__(self):
+                return len(self.content)
+
+            def __getitem__(self, where):
+                if isinstance(where, int):
+                    return self.content[where]
+                else:
+                    return UnmaskedArray(self.content[where])
+    """
+
     is_option = True
 
     def __init__(self, content, *, parameters=None):
@@ -63,11 +104,15 @@ class UnmaskedArray(Content):
         if content.is_union:
             return content.copy(
                 contents=[cls.simplified(x) for x in content.contents],
-                parameters=ak._util.merge_parameters(content._parameters, parameters),
+                parameters=ak.forms.form._parameters_union(
+                    content._parameters, parameters
+                ),
             )
         elif content.is_indexed or content.is_option:
             return content.copy(
-                parameters=ak._util.merge_parameters(content._parameters, parameters)
+                parameters=ak.forms.form._parameters_union(
+                    content._parameters, parameters
+                )
             )
         else:
             return cls(content, parameters=parameters)
@@ -80,9 +125,9 @@ class UnmaskedArray(Content):
             form_key=form_key,
         )
 
-    def _to_buffers(self, form, getkey, container, backend):
+    def _to_buffers(self, form, getkey, container, backend, byteorder):
         assert isinstance(form, self.form_cls)
-        self._content._to_buffers(form.content, getkey, container, backend)
+        self._content._to_buffers(form.content, getkey, container, backend, byteorder)
 
     def _to_typetracer(self, forget_length: bool) -> Self:
         return UnmaskedArray(
@@ -136,7 +181,7 @@ class UnmaskedArray(Content):
         )
 
     def to_BitMaskedArray(self, valid_when, lsb_order):
-        bitlength = int(numpy.ceil(self._content.length / 8.0))
+        bitlength = int(math.ceil(self._content.length / 8.0))
         if valid_when:
             bitmask = self._backend.index_nplike.full(
                 bitlength, np.uint8(255), dtype=np.uint8
@@ -162,38 +207,40 @@ class UnmaskedArray(Content):
             )
 
     def _getitem_nothing(self):
-        return self._content._getitem_range(slice(0, 0))
+        return self._content._getitem_range(0, 0)
 
-    def _getitem_at(self, where):
+    def _getitem_at(self, where: IndexType):
         if not self._backend.nplike.known_data:
             self._touch_data(recursive=False)
-            return ak._typetracer.MaybeNone(self._content._getitem_at(where))
+            return MaybeNone(self._content._getitem_at(where))
 
         return self._content._getitem_at(where)
 
-    def _getitem_range(self, where):
-        if not self._backend.nplike.known_shape:
+    def _getitem_range(self, start: SupportsIndex, stop: IndexType) -> Content:
+        if not self._backend.nplike.known_data:
             self._touch_shape(recursive=False)
             return self
 
-        start, stop, step = where.indices(self.length)
-        assert step == 1
         return UnmaskedArray(
-            self._content._getitem_range(slice(start, stop)),
+            self._content._getitem_range(start, stop),
             parameters=self._parameters,
         )
 
-    def _getitem_field(self, where, only_fields=()):
+    def _getitem_field(
+        self, where: str | SupportsIndex, only_fields: tuple[str, ...] = ()
+    ) -> Content:
         return UnmaskedArray.simplified(
             self._content._getitem_field(where, only_fields), parameters=None
         )
 
-    def _getitem_fields(self, where, only_fields=()):
+    def _getitem_fields(
+        self, where: list[str | SupportsIndex], only_fields: tuple[str, ...] = ()
+    ) -> Content:
         return UnmaskedArray.simplified(
             self._content._getitem_fields(where, only_fields), parameters=None
         )
 
-    def _carry(self, carry, allow_lazy):
+    def _carry(self, carry: Index, allow_lazy: bool) -> Content:
         return UnmaskedArray.simplified(
             self._content._carry(carry, allow_lazy), parameters=self._parameters
         )
@@ -206,7 +253,12 @@ class UnmaskedArray(Content):
             parameters=self._parameters,
         )
 
-    def _getitem_next(self, head, tail, advanced):
+    def _getitem_next(
+        self,
+        head: SliceItem | tuple,
+        tail: tuple[SliceItem, ...],
+        advanced: Index | None,
+    ) -> Content:
         if head == ():
             return self
 
@@ -260,20 +312,16 @@ class UnmaskedArray(Content):
                 return (offsets, flattened)
 
     def _mergeable_next(self, other, mergebool):
-        if isinstance(
-            other,
-            (
-                ak.contents.IndexedArray,
-                ak.contents.IndexedOptionArray,
-                ak.contents.ByteMaskedArray,
-                ak.contents.BitMaskedArray,
-                ak.contents.UnmaskedArray,
-            ),
-        ):
-            return self._content._mergeable(other.content, mergebool)
-
+        # Is the other content is an identity, or a union?
+        if other.is_identity_like or other.is_union:
+            return True
+        # We can only combine option types whose array-record parameters agree
+        elif other.is_option or other.is_indexed:
+            return self._mergeable_next(
+                other.content, mergebool
+            ) and _type_parameters_equal(self._parameters, other._parameters)
         else:
-            return self._content._mergeable(other, mergebool)
+            return self._content._mergeable_next(other, mergebool)
 
     def _reverse_merge(self, other):
         return self.to_IndexedOptionArray64()._reverse_merge(other)
@@ -286,7 +334,9 @@ class UnmaskedArray(Content):
             parameters = self._parameters
             tail_contents = []
             for x in others:
-                parameters = ak._util.merge_parameters(parameters, x._parameters, True)
+                parameters = ak.forms.form._parameters_intersect(
+                    parameters, x._parameters
+                )
                 tail_contents.append(x._content)
 
             return UnmaskedArray(
@@ -308,9 +358,10 @@ class UnmaskedArray(Content):
                 self._content._local_index(axis, depth), parameters=self._parameters
             )
 
-    def _numbers_to_type(self, name):
+    def _numbers_to_type(self, name, including_unknown):
         return ak.contents.UnmaskedArray(
-            self._content._numbers_to_type(name), parameters=self._parameters
+            self._content._numbers_to_type(name, including_unknown),
+            parameters=self._parameters,
         )
 
     def _is_unique(self, negaxis, starts, parents, outlength):
@@ -324,27 +375,10 @@ class UnmaskedArray(Content):
         return self._content._unique(negaxis, starts, parents, outlength)
 
     def _argsort_next(
-        self,
-        negaxis,
-        starts,
-        shifts,
-        parents,
-        outlength,
-        ascending,
-        stable,
-        kind,
-        order,
+        self, negaxis, starts, shifts, parents, outlength, ascending, stable
     ):
         out = self._content._argsort_next(
-            negaxis,
-            starts,
-            shifts,
-            parents,
-            outlength,
-            ascending,
-            stable,
-            kind,
-            order,
+            negaxis, starts, shifts, parents, outlength, ascending, stable
         )
 
         if isinstance(out, ak.contents.RegularArray):
@@ -356,18 +390,9 @@ class UnmaskedArray(Content):
         else:
             return out
 
-    def _sort_next(
-        self, negaxis, starts, parents, outlength, ascending, stable, kind, order
-    ):
+    def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
         out = self._content._sort_next(
-            negaxis,
-            starts,
-            parents,
-            outlength,
-            ascending,
-            stable,
-            kind,
-            order,
+            negaxis, starts, parents, outlength, ascending, stable
         )
 
         if isinstance(out, ak.contents.RegularArray):
@@ -439,17 +464,17 @@ class UnmaskedArray(Content):
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         return self._content._to_arrow(pyarrow, self, None, length, options)
 
-    def _to_numpy(self, allow_missing):
-        content = self.content._to_numpy(allow_missing)
+    def _to_backend_array(self, allow_missing, backend):
+        content = self.content._to_backend_array(allow_missing, backend)
         if allow_missing:
-            return self._backend.nplike.ma.MaskedArray(content)
+            return backend.nplike.ma.MaskedArray(content)
         else:
             return content
 
-    def _completely_flatten(self, backend, options):
+    def _remove_structure(self, backend, options):
         branch, depth = self.branch_depth
         if branch or options["drop_nones"] or depth > 1:
-            return self.project()._completely_flatten(backend, options)
+            return self.project()._remove_structure(backend, options)
         else:
             return [self]
 
@@ -512,13 +537,18 @@ class UnmaskedArray(Content):
         return UnmaskedArray(self._content.to_packed(), parameters=self._parameters)
 
     def _to_list(self, behavior, json_conversions):
+        if not self._backend.nplike.known_data:
+            raise ak._errors.wrap_error(
+                TypeError("cannot convert typetracer arrays to Python lists")
+            )
+
         out = self._to_list_custom(behavior, json_conversions)
         if out is not None:
             return out
 
         return self._content._to_list(behavior, json_conversions)
 
-    def to_backend(self, backend: ak._backends.Backend) -> Self:
+    def _to_backend(self, backend: ak._backends.Backend) -> Self:
         content = self._content.to_backend(backend)
         return UnmaskedArray(content, parameters=self._parameters)
 

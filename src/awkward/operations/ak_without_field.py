@@ -3,8 +3,9 @@
 from collections.abc import Sequence
 
 import awkward as ak
+from awkward._nplikes.numpylike import NumpyMetadata
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 
 
 def without_field(array, where, *, highlevel=True, behavior=None):
@@ -30,7 +31,7 @@ def without_field(array, where, *, highlevel=True, behavior=None):
     """
     with ak._errors.OperationErrorContext(
         "ak.without_field",
-        dict(array=array, where=where, highlevel=highlevel, behavior=behavior),
+        {"array": array, "where": where, "highlevel": highlevel, "behavior": behavior},
     ):
         return _impl(array, where, highlevel, behavior)
 

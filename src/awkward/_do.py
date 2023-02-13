@@ -7,12 +7,13 @@ from numbers import Integral
 
 import awkward as ak
 from awkward._backends import Backend
+from awkward._nplikes.numpylike import NumpyMetadata
 from awkward.contents.content import ActionType, Content
 from awkward.forms import form
 from awkward.record import Record
-from awkward.typing import Any, AxisMaybeNone
+from awkward.typing import Any, AxisMaybeNone, Literal
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 
 
 def recursively_apply(
@@ -76,6 +77,7 @@ def to_buffers(
     form_key: str | None = "node{id}",
     id_start: Integral = 0,
     backend: Backend = None,
+    byteorder: Literal["<", ">"] = "<",
 ) -> tuple[form.Form, int, Mapping[str, Any]]:
     if container is None:
         container = {}
@@ -119,7 +121,7 @@ def to_buffers(
 
     form = content.form_with_key(form_key=form_key, id_start=id_start)
 
-    content._to_buffers(form, getkey, container, backend)
+    content._to_buffers(form, getkey, container, backend, byteorder)
 
     return form, len(content), container
 
@@ -215,43 +217,46 @@ def pad_none(
     return layout._pad_none(length, axis, 1, clip)
 
 
-def completely_flatten(
+def remove_structure(
     layout: Content | Record,
-    backend: ak._backends.Backend | None = None,
+    backend: Backend | None = None,
     flatten_records: bool = True,
     function_name: str | None = None,
     drop_nones: bool = True,
+    keepdims: bool = False,
 ):
     if isinstance(layout, Record):
-        return completely_flatten(
+        return remove_structure(
             layout._array[layout._at : layout._at + 1],
             backend,
             flatten_records,
             function_name,
             drop_nones,
+            keepdims,
         )
 
     else:
         if backend is None:
             backend = layout._backend
-        arrays = layout._completely_flatten(
+        arrays = layout._remove_structure(
             backend,
             {
                 "flatten_records": flatten_records,
                 "function_name": function_name,
                 "drop_nones": drop_nones,
+                "keepdims": keepdims,
             },
         )
         return tuple(arrays)
 
 
-def flatten(layout: Content, axis: Integral = 1) -> Content:
+def flatten(layout: Content, axis: int = 1) -> Content:
     offsets, flattened = layout._offsets_and_flattened(axis, 1)
     return flattened
 
 
-def numbers_to_type(layout: Content, name: str) -> Content:
-    return layout._numbers_to_type(name)
+def numbers_to_type(layout: Content, name: str, including_unknown: bool) -> Content:
+    return layout._numbers_to_type(name, including_unknown)
 
 
 def fill_none(layout: Content, value: Content) -> Content:
@@ -263,34 +268,40 @@ def num(layout, axis):
 
 
 def mergeable(one: Content, two: Content, mergebool: bool = True) -> bool:
-    return one._mergeable(two, mergebool=mergebool)
+    return one._mergeable_next(two, mergebool=mergebool)
 
 
 def merge_as_union(one: Content, two: Content) -> ak.contents.UnionArray:
     mylength = one.length
     theirlength = two.length
-    tags = ak.index.Index8.empty((mylength + theirlength), one._backend.index_nplike)
-    index = ak.index.Index64.empty((mylength + theirlength), one._backend.index_nplike)
+    tags = ak.index.Index8.empty(
+        mylength + theirlength,
+        one.backend.index_nplike,
+    )
+    index = ak.index.Index64.empty(
+        mylength + theirlength,
+        one.backend.index_nplike,
+    )
     contents = [one, two]
-    assert tags.nplike is one._backend.index_nplike
+    assert tags.nplike is one.backend.index_nplike
     one._handle_error(
-        one._backend["awkward_UnionArray_filltags_const", tags.dtype.type](
+        one.backend["awkward_UnionArray_filltags_const", tags.dtype.type](
             tags.data, 0, mylength, 0
         )
     )
-    assert index.nplike is one._backend.index_nplike
+    assert index.nplike is one.backend.index_nplike
     one._handle_error(
-        one._backend["awkward_UnionArray_fillindex_count", index.dtype.type](
+        one.backend["awkward_UnionArray_fillindex_count", index.dtype.type](
             index.data, 0, mylength
         )
     )
     one._handle_error(
-        one._backend["awkward_UnionArray_filltags_const", tags.dtype.type](
+        one.backend["awkward_UnionArray_filltags_const", tags.dtype.type](
             tags.data, mylength, theirlength, 1
         )
     )
     one._handle_error(
-        one._backend["awkward_UnionArray_fillindex_count", index.dtype.type](
+        one.backend["awkward_UnionArray_fillindex_count", index.dtype.type](
             index.data, mylength, theirlength
         )
     )
@@ -312,15 +323,16 @@ def reduce(
     behavior: dict | None = None,
 ):
     if axis is None:
-        parts = completely_flatten(layout, flatten_records=False, drop_nones=False)
+        parts = remove_structure(
+            layout, flatten_records=False, drop_nones=False, keepdims=keepdims
+        )
 
         if len(parts) > 1:
             # We know that `flatten_records` must fail, so the only other type
             # that can return multiple parts here is the union array
             raise ak._errors.wrap_error(
                 ValueError(
-                    "cannot use axis=None with keepdims=True on an array containing "
-                    "irreducible unions"
+                    "cannot use axis=None on an array containing irreducible unions"
                 )
             )
         elif len(parts) == 0:
@@ -342,7 +354,6 @@ def reduce(
             keepdims,
             behavior,
         )
-
         return next[0]
     else:
         negaxis = -axis
@@ -406,8 +417,6 @@ def argsort(
     axis: int = -1,
     ascending: bool = True,
     stable: bool = False,
-    kind: Any = None,
-    order: Any = None,
 ) -> Content:
     negaxis = -axis
     branch, depth = layout.branch_depth
@@ -450,18 +459,11 @@ def argsort(
         1,
         ascending,
         stable,
-        kind,
-        order,
     )
 
 
 def sort(
-    layout: Content,
-    axis: int = -1,
-    ascending: bool = True,
-    stable: bool = False,
-    kind: Any = None,
-    order: Any = None,
+    layout: Content, axis: int = -1, ascending: bool = True, stable: bool = False
 ) -> Content:
     negaxis = -axis
     branch, depth = layout.branch_depth
@@ -496,13 +498,4 @@ def sort(
 
     starts = ak.index.Index64.zeros(1, nplike=layout.backend.index_nplike)
     parents = ak.index.Index64.zeros(layout.length, nplike=layout.backend.index_nplike)
-    return layout._sort_next(
-        negaxis,
-        starts,
-        parents,
-        1,
-        ascending,
-        stable,
-        kind,
-        order,
-    )
+    return layout._sort_next(negaxis, starts, parents, 1, ascending, stable)

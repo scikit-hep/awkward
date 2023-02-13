@@ -5,11 +5,13 @@ import numpy as np
 import pytest  # noqa: F401
 
 import awkward as ak
+from awkward._nplikes.cupy import Cupy
+from awkward._nplikes.numpy import Numpy
 
 
 def test_cupy_interop():
-    cupy = ak._nplikes.Cupy.instance()
-    numpy = ak._nplikes.Numpy.instance()
+    cupy = Cupy.instance()
+    numpy = Numpy.instance()
 
     cupy_index_arr = ak.index.Index64(cp.arange(10))
     assert cupy_index_arr.nplike is cupy

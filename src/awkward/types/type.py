@@ -4,9 +4,10 @@ import json
 import sys
 
 import awkward as ak
+from awkward._nplikes.numpylike import NumpyMetadata
 from awkward.types._awkward_datashape_parser import Lark_StandAlone, Transformer
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 
 
 class Type:
@@ -319,7 +320,7 @@ def from_datashape(datashape, highlevel=True):
         else:
             raise ak._errors.wrap_error(
                 ValueError(
-                    f"type '{type(out).__name__}' is not compatible with highlevel=True"
+                    f"type {type(out).__name__!r} is not compatible with highlevel=True"
                 )
             )
 

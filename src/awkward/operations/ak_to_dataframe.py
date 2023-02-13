@@ -1,10 +1,11 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._nplikes.numpy import Numpy
+from awkward._nplikes.numpylike import NumpyMetadata
 
-numpy = ak._nplikes.Numpy.instance()
-
-np = ak._nplikes.NumpyMetadata.instance()
+numpy = Numpy.instance()
+np = NumpyMetadata.instance()
 
 
 def to_dataframe(
@@ -122,12 +123,12 @@ def to_dataframe(
     """
     with ak._errors.OperationErrorContext(
         "ak.to_dataframe",
-        dict(
-            array=array,
-            how=how,
-            levelname=levelname,
-            anonymous=anonymous,
-        ),
+        {
+            "array": array,
+            "how": how,
+            "levelname": levelname,
+            "anonymous": anonymous,
+        },
     ):
         return _impl(array, how, levelname, anonymous)
 
@@ -172,7 +173,7 @@ or
             starts, stops = offsets[:-1], offsets[1:]
             counts = stops - starts
             if ak._util.win or ak._util.bits32:
-                counts = counts.astype(np.int32)
+                counts = layout.backend.index_nplike.astype(counts, np.int32)
             if len(row_arrays) == 0:
                 newrows = [
                     numpy.repeat(numpy.arange(len(counts), dtype=counts.dtype), counts)
@@ -225,6 +226,12 @@ or
             columns = [anonymous]
         else:
             columns = pandas.MultiIndex.from_tuples([col_names])
+
+        # Pandas can't handle masked strings
+        if np.issubdtype(column.dtype, np.str_):
+            column = numpy.ma.filled(column, "nan")
+        elif np.issubdtype(column.dtype, np.bytes_):
+            column = numpy.ma.filled(column, b"nan")
 
         if (
             last_row_arrays is not None

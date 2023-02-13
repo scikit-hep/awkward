@@ -2,9 +2,10 @@
 
 import awkward as ak
 from awkward._connect.numpy import unsupported
+from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._util import unset
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 
 
 def sum(
@@ -195,14 +196,14 @@ def sum(
     """
     with ak._errors.OperationErrorContext(
         "ak.sum",
-        dict(
-            array=array,
-            axis=axis,
-            keepdims=keepdims,
-            mask_identity=mask_identity,
-            highlevel=highlevel,
-            behavior=behavior,
-        ),
+        {
+            "array": array,
+            "axis": axis,
+            "keepdims": keepdims,
+            "mask_identity": mask_identity,
+            "highlevel": highlevel,
+            "behavior": behavior,
+        },
     ):
         if flatten_records is not unset:
             message = (
@@ -259,14 +260,14 @@ def nansum(
     """
     with ak._errors.OperationErrorContext(
         "ak.nansum",
-        dict(
-            array=array,
-            axis=axis,
-            keepdims=keepdims,
-            mask_identity=mask_identity,
-            highlevel=highlevel,
-            behavior=behavior,
-        ),
+        {
+            "array": array,
+            "axis": axis,
+            "keepdims": keepdims,
+            "mask_identity": mask_identity,
+            "highlevel": highlevel,
+            "behavior": behavior,
+        },
     ):
         if flatten_records is not unset:
             message = (

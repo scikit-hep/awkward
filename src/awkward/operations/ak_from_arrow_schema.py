@@ -1,8 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._nplikes.numpylike import NumpyMetadata
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 
 
 def from_arrow_schema(schema):
@@ -16,7 +17,7 @@ def from_arrow_schema(schema):
     """
     with ak._errors.OperationErrorContext(
         "ak.from_arrow_schema",
-        dict(schema=schema),
+        {"schema": schema},
     ):
         return _impl(schema)
 

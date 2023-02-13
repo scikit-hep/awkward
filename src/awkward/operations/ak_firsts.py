@@ -1,8 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._nplikes.numpylike import NumpyMetadata
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 
 
 def firsts(array, axis=1, *, highlevel=True, behavior=None):
@@ -38,7 +39,7 @@ def firsts(array, axis=1, *, highlevel=True, behavior=None):
     """
     with ak._errors.OperationErrorContext(
         "ak.firsts",
-        dict(array=array, axis=axis, highlevel=highlevel, behavior=behavior),
+        {"array": array, "axis": axis, "highlevel": highlevel, "behavior": behavior},
     ):
         return _impl(array, axis, highlevel, behavior)
 
@@ -72,7 +73,9 @@ def _impl(array, axis, highlevel, behavior):
                 nplike = layout._backend.index_nplike
 
                 # this is a copy of the raw array
-                index = starts = nplike.array(layout.starts.raw(nplike), dtype=np.int64)
+                index = starts = nplike.asarray(
+                    layout.starts.raw(nplike), dtype=np.int64, copy=True
+                )
 
                 # this might be a view
                 stops = layout.stops.raw(nplike)

@@ -39,7 +39,7 @@ def test_review_examples():
             ak.index.Index64([0, 4, 4, 6]),
             ak.contents.ListOffsetArray(
                 ak.index.Index64([0, 3, 3, 5, 6, 8, 9]),
-                ak.contents.NumpyArray([2, 3, 5, 7, 11, 13, 17, 19, 23]),
+                ak.contents.NumpyArray(np.array([2, 3, 5, 7, 11, 13, 17, 19, 23])),
             ),
         )
     )
@@ -54,7 +54,9 @@ def test_review_examples():
             ak.index.Index64(np.array([0, 4, 4, 6]) + 2),
             ak.contents.ListOffsetArray(
                 ak.index.Index64(np.array([123, 321, 0, 3, 3, 5, 6, 8, 9]) + 1),
-                ak.contents.NumpyArray([9999, 2, 3, 5, 7, 11, 13, 17, 19, 23]),
+                ak.contents.NumpyArray(
+                    np.array([9999, 2, 3, 5, 7, 11, 13, 17, 19, 23])
+                ),
             ),
         )
     )
@@ -71,7 +73,7 @@ def test_review_examples():
             ak.contents.ListArray(
                 ak.index.Index64([0, 3, 3, 5, 6, 8]),
                 ak.index.Index64([3, 3, 5, 6, 8, 9]),
-                ak.contents.NumpyArray([2, 3, 5, 7, 11, 13, 17, 19, 23]),
+                ak.contents.NumpyArray(np.array([2, 3, 5, 7, 11, 13, 17, 19, 23])),
             ),
         )
     )
@@ -88,7 +90,7 @@ def test_review_examples():
             ak.contents.ListArray(
                 ak.index.Index64([0, 1000, 3, 5, 6, 8]),
                 ak.index.Index64([3, 1000, 5, 6, 8, 9]),
-                ak.contents.NumpyArray([2, 3, 5, 7, 11, 13, 17, 19, 23]),
+                ak.contents.NumpyArray(np.array([2, 3, 5, 7, 11, 13, 17, 19, 23])),
             ),
         )
     )
@@ -105,7 +107,7 @@ def test_review_examples():
             ak.contents.ListArray(
                 ak.index.Index64([0, 1000, 3, 5, 60, 80, 6, 8]),
                 ak.index.Index64([3, 1000, 5, 6, 80, 90, 8, 9]),
-                ak.contents.NumpyArray([2, 3, 5, 7, 11, 13, 17, 19, 23]),
+                ak.contents.NumpyArray(np.array([2, 3, 5, 7, 11, 13, 17, 19, 23])),
             ),
         )
     )
@@ -122,7 +124,9 @@ def test_review_examples():
             ak.contents.ListArray(
                 ak.index.Index64([9, 1000, 3, 5, 60, 80, 6, 8]),
                 ak.index.Index64([12, 1000, 5, 6, 80, 90, 8, 9]),
-                ak.contents.NumpyArray([20, 30, 50, 7, 11, 13, 17, 19, 23, 2, 3, 5]),
+                ak.contents.NumpyArray(
+                    np.array([20, 30, 50, 7, 11, 13, 17, 19, 23, 2, 3, 5])
+                ),
             ),
         )
     )

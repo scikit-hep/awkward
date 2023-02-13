@@ -1,4 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+import itertools
 
 import numpy as np
 import pytest
@@ -485,20 +486,11 @@ def test_bool_missing():
     expected = [m if m is None else x for x, m in zip(data, mask) if m is not False]
     array2 = ak.highlevel.Array(mask, check_valid=True).layout
 
-    for x1 in [True, False, None]:
-        for x2 in [True, False, None]:
-            for x3 in [True, False, None]:
-                for x4 in [True, False, None]:
-                    for x5 in [True, False, None]:
-                        mask = [x1, x2, x3, x4, x5]
-                        expected = [
-                            m if m is None else x
-                            for x, m in zip(data, mask)
-                            if m is not False
-                        ]
-                        array2 = ak.highlevel.Array(mask, check_valid=True).layout
-                        assert to_list(array[array2]) == expected
-                        assert array.to_typetracer()[array2].form == array[array2].form
+    for mask in itertools.repeat([True, False, None], 5):
+        expected = [m if m is None else x for x, m in zip(data, mask) if m is not False]
+        array2 = ak.highlevel.Array(mask, check_valid=True).layout
+        assert to_list(array[array2]) == expected
+        assert array.to_typetracer()[array2].form == array[array2].form
 
 
 def test_bool_missing2():
@@ -1348,7 +1340,7 @@ def test_array_boolean_to_int():
         [[True, True, True], [], [True, True], [True], [True, True, True, True]],
         highlevel=False,
     )
-    b = ak._slicing.normalise_item_bool_to_int(a)
+    b = ak._slicing._normalise_item_bool_to_int(a, backend=a.backend)
     assert to_list(b) == [[0, 1, 2], [], [0, 1], [0], [0, 1, 2, 3]]
 
     a = ak.operations.from_iter(
@@ -1361,7 +1353,7 @@ def test_array_boolean_to_int():
         ],
         highlevel=False,
     )
-    b = ak._slicing.normalise_item_bool_to_int(a)
+    b = ak._slicing._normalise_item_bool_to_int(a, backend=a.backend)
     assert to_list(b) == [[0, 1], [], [0], [], [0, 1, 2]]
 
     a = ak.operations.from_iter(
@@ -1374,14 +1366,14 @@ def test_array_boolean_to_int():
         ],
         highlevel=False,
     )
-    b = ak._slicing.normalise_item_bool_to_int(a)
+    b = ak._slicing._normalise_item_bool_to_int(a, backend=a.backend)
     assert to_list(b) == [[1, 2], [], [1], [], [1, 2, 3]]
 
     a = ak.operations.from_iter(
         [[True, True, None], [], [True, None], [None], [True, True, True, None]],
         highlevel=False,
     )
-    b = ak._slicing.normalise_item_bool_to_int(a)
+    b = ak._slicing._normalise_item_bool_to_int(a, backend=a.backend)
     assert to_list(b) == [[0, 1, None], [], [0, None], [None], [0, 1, 2, None]]
     assert (
         b.content.index.data[b.content.index.data >= 0].tolist()
@@ -1392,7 +1384,7 @@ def test_array_boolean_to_int():
         [[None, True, True], [], [None, True], [None], [None, True, True, True]],
         highlevel=False,
     )
-    b = ak._slicing.normalise_item_bool_to_int(a)
+    b = ak._slicing._normalise_item_bool_to_int(a, backend=a.backend)
     assert to_list(b) == [[None, 1, 2], [], [None, 1], [None], [None, 1, 2, 3]]
     assert (
         b.content.index.data[b.content.index.data >= 0].tolist()
@@ -1403,7 +1395,7 @@ def test_array_boolean_to_int():
         [[False, True, None], [], [False, None], [None], [False, True, True, None]],
         highlevel=False,
     )
-    b = ak._slicing.normalise_item_bool_to_int(a)
+    b = ak._slicing._normalise_item_bool_to_int(a, backend=a.backend)
     assert to_list(b) == [[1, None], [], [None], [None], [1, 2, None]]
     assert (
         b.content.index.data[b.content.index.data >= 0].tolist()
@@ -1414,7 +1406,7 @@ def test_array_boolean_to_int():
         [[None, True, False], [], [None, False], [None], [None, True, True, False]],
         highlevel=False,
     )
-    b = ak._slicing.normalise_item_bool_to_int(a)
+    b = ak._slicing._normalise_item_bool_to_int(a, backend=a.backend)
     assert to_list(b) == [[None, 1], [], [None], [None], [None, 1, 2]]
     assert (
         b.content.index.data[b.content.index.data >= 0].tolist()

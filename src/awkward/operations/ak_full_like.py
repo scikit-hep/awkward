@@ -2,9 +2,12 @@
 
 import awkward as ak
 from awkward._connect.numpy import unsupported
+from awkward._nplikes import nplike_of
+from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.typetracer import ensure_known_scalar
 from awkward.operations.ak_zeros_like import _ZEROS
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 
 
 def full_like(array, fill_value, *, dtype=None, highlevel=True, behavior=None):
@@ -65,13 +68,13 @@ def full_like(array, fill_value, *, dtype=None, highlevel=True, behavior=None):
     """
     with ak._errors.OperationErrorContext(
         "ak.full_like",
-        dict(
-            array=array,
-            fill_value=fill_value,
-            dtype=dtype,
-            highlevel=highlevel,
-            behavior=behavior,
-        ),
+        {
+            "array": array,
+            "fill_value": fill_value,
+            "dtype": dtype,
+            "highlevel": highlevel,
+            "behavior": behavior,
+        },
     ):
         return _impl(array, fill_value, highlevel, behavior, dtype)
 
@@ -81,8 +84,8 @@ def _impl(array, fill_value, highlevel, behavior, dtype):
         # In the case of strings and byte strings,
         # converting the fill avoids a ValueError.
         dtype = np.dtype(dtype)
-        nplike = ak._nplikes.nplike_of(array)
-        fill_value = nplike.array([fill_value], dtype=dtype)[0]
+        nplike = nplike_of(array)
+        fill_value = nplike.asarray([fill_value], dtype=dtype)[0]
         # Also, if the fill_value cannot be converted to the dtype
         # this should throw a clear, early, error.
         if dtype == np.dtype(np.bool_):
@@ -100,10 +103,12 @@ def _impl(array, fill_value, highlevel, behavior, dtype):
             asbytes = nplike.frombuffer(b"", dtype=np.uint8)
             return ak.contents.ListArray(
                 ak.index.Index64(
-                    index_nplike.zeros(len(layout), dtype=np.int64), nplike=index_nplike
+                    index_nplike.zeros(layout.length, dtype=np.int64),
+                    nplike=index_nplike,
                 ),
                 ak.index.Index64(
-                    index_nplike.zeros(len(layout), dtype=np.int64), nplike=index_nplike
+                    index_nplike.zeros(layout.length, dtype=np.int64),
+                    nplike=index_nplike,
                 ),
                 ak.contents.NumpyArray(asbytes, parameters={"__array__": "byte"}),
                 parameters={"__array__": "bytestring"},
@@ -118,10 +123,11 @@ def _impl(array, fill_value, highlevel, behavior, dtype):
 
             return ak.contents.ListArray(
                 ak.index.Index64(
-                    index_nplike.zeros(len(layout), dtype=np.int64), nplike=index_nplike
+                    index_nplike.zeros(layout.length, dtype=np.int64),
+                    nplike=index_nplike,
                 ),
                 ak.index.Index64(
-                    index_nplike.full(len(layout), len(asbytes), dtype=np.int64)
+                    index_nplike.full(layout.length, len(asbytes), dtype=np.int64)
                 ),
                 ak.contents.NumpyArray(asbytes, parameters={"__array__": "byte"}),
                 parameters={"__array__": "bytestring"},
@@ -131,10 +137,12 @@ def _impl(array, fill_value, highlevel, behavior, dtype):
             asbytes = nplike.frombuffer(b"", dtype=np.uint8)
             return ak.contents.ListArray(
                 ak.index.Index64(
-                    index_nplike.zeros(len(layout), dtype=np.int64), nplike=index_nplike
+                    index_nplike.zeros(layout.length, dtype=np.int64),
+                    nplike=index_nplike,
                 ),
                 ak.index.Index64(
-                    index_nplike.zeros(len(layout), dtype=np.int64), nplike=index_nplike
+                    index_nplike.zeros(layout.length, dtype=np.int64),
+                    nplike=index_nplike,
                 ),
                 ak.contents.NumpyArray(asbytes, parameters={"__array__": "char"}),
                 parameters={"__array__": "string"},
@@ -145,10 +153,11 @@ def _impl(array, fill_value, highlevel, behavior, dtype):
             asbytes = nplike.frombuffer(asstr, dtype=np.uint8)
             return ak.contents.ListArray(
                 ak.index.Index64(
-                    index_nplike.zeros(len(layout), dtype=np.int64), nplike=index_nplike
+                    index_nplike.zeros(layout.length, dtype=np.int64),
+                    nplike=index_nplike,
                 ),
                 ak.index.Index64(
-                    index_nplike.full(len(layout), len(asbytes), dtype=np.int64)
+                    index_nplike.full(layout.length, len(asbytes), dtype=np.int64)
                 ),
                 ak.contents.NumpyArray(asbytes, parameters={"__array__": "char"}),
                 parameters={"__array__": "string"},
@@ -157,11 +166,11 @@ def _impl(array, fill_value, highlevel, behavior, dtype):
         elif isinstance(layout, ak.contents.NumpyArray):
             original = nplike.asarray(layout.data)
 
-            if fill_value == 0 or fill_value is _ZEROS:
+            if fill_value is _ZEROS or (ensure_known_scalar(fill_value == 0, False)):
                 return ak.contents.NumpyArray(
                     nplike.zeros_like(original), parameters=layout.parameters
                 )
-            elif fill_value == 1:
+            elif ensure_known_scalar(fill_value == 1, False):
                 return ak.contents.NumpyArray(
                     nplike.ones_like(original), parameters=layout.parameters
                 )

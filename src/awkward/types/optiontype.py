@@ -1,7 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
-from awkward.forms.form import _parameters_equal
+from awkward.forms.form import _type_parameters_equal
 from awkward.types.listtype import ListType
 from awkward.types.regulartype import RegularType
 from awkward.types.type import Type
@@ -56,7 +56,7 @@ class OptionType(Type):
             if params is None:
                 if isinstance(
                     self._content, (RegularType, ListType)
-                ) and not self._content.parameter("__array__") in (
+                ) and self._content.parameter("__array__") not in (
                     "string",
                     "bytestring",
                     "char",
@@ -86,9 +86,7 @@ class OptionType(Type):
     def __eq__(self, other):
         if isinstance(other, OptionType):
             return (
-                _parameters_equal(
-                    self._parameters, other._parameters, only_array_record=True
-                )
+                _type_parameters_equal(self._parameters, other._parameters)
                 and self._content == other._content
             )
         else:
@@ -105,7 +103,7 @@ class OptionType(Type):
                     contents.append(
                         OptionType(
                             content.content,
-                            parameters=ak._util.merge_parameters(
+                            parameters=ak.forms.form._parameters_union(
                                 self._parameters, content._parameters
                             ),
                             typestr=typestr,

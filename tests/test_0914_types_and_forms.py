@@ -8,48 +8,55 @@ import awkward as ak
 
 def test_UnknownType():
     assert str(ak.types.unknowntype.UnknownType()) == "unknown"
-    assert (
-        str(ak.types.unknowntype.UnknownType(parameters={"x": 123}))
-        == 'unknown[parameters={"x": 123}]'
-    )
+    with pytest.warns(DeprecationWarning):
+        assert (
+            str(ak.types.unknowntype.UnknownType(parameters={"x": 123}))
+            == 'unknown[parameters={"x": 123}]'
+        )
     assert (
         str(ak.types.unknowntype.UnknownType(parameters=None, typestr="override"))
         == "override"
     )
-    assert (
-        str(ak.types.unknowntype.UnknownType(parameters={"x": 123}, typestr="override"))
-        == "override"
-    )
-    assert (
-        str(ak.types.unknowntype.UnknownType(parameters={"__categorical__": True}))
-        == "categorical[type=unknown]"
-    )
-    assert (
-        str(
-            ak.types.unknowntype.UnknownType(
-                parameters={"__categorical__": True, "x": 123}
+    with pytest.warns(DeprecationWarning):
+        assert (
+            str(
+                ak.types.unknowntype.UnknownType(
+                    parameters={"x": 123}, typestr="override"
+                )
             )
+            == "override"
         )
-        == 'categorical[type=unknown[parameters={"x": 123}]]'
-    )
-    assert (
-        str(
-            ak.types.unknowntype.UnknownType(
-                parameters={"__categorical__": True}, typestr="override"
+        assert (
+            str(ak.types.unknowntype.UnknownType(parameters={"__categorical__": True}))
+            == "categorical[type=unknown]"
+        )
+        assert (
+            str(
+                ak.types.unknowntype.UnknownType(
+                    parameters={"__categorical__": True, "x": 123}
+                )
             )
+            == 'categorical[type=unknown[parameters={"x": 123}]]'
         )
-        == "categorical[type=override]"
-    )
+        assert (
+            str(
+                ak.types.unknowntype.UnknownType(
+                    parameters={"__categorical__": True}, typestr="override"
+                )
+            )
+            == "categorical[type=override]"
+        )
 
     assert repr(ak.types.unknowntype.UnknownType()) == "UnknownType()"
-    assert (
-        repr(
-            ak.types.unknowntype.UnknownType(
-                parameters={"__categorical__": True}, typestr="override"
+    with pytest.warns(DeprecationWarning):
+        assert (
+            repr(
+                ak.types.unknowntype.UnknownType(
+                    parameters={"__categorical__": True}, typestr="override"
+                )
             )
+            == "UnknownType(parameters={'__categorical__': True}, typestr='override')"
         )
-        == "UnknownType(parameters={'__categorical__': True}, typestr='override')"
-    )
 
 
 @pytest.mark.skipif(
@@ -1478,21 +1485,23 @@ def test_EmptyForm():
     "class": "EmptyArray"
 }"""
     )
-    assert (
-        str(ak.forms.emptyform.EmptyForm(parameters={"x": 123}, form_key="hello"))
-        == """{
+    with pytest.warns(DeprecationWarning):
+        assert (
+            str(ak.forms.emptyform.EmptyForm(parameters={"x": 123}, form_key="hello"))
+            == """{
     "class": "EmptyArray",
     "parameters": {
         "x": 123
     },
     "form_key": "hello"
 }"""
-    )
+        )
     assert repr(ak.forms.emptyform.EmptyForm()) == "EmptyForm()"
-    assert (
-        repr(ak.forms.emptyform.EmptyForm(parameters={"x": 123}, form_key="hello"))
-        == "EmptyForm(parameters={'x': 123}, form_key='hello')"
-    )
+    with pytest.warns(DeprecationWarning):
+        assert (
+            repr(ak.forms.emptyform.EmptyForm(parameters={"x": 123}, form_key="hello"))
+            == "EmptyForm(parameters={'x': 123}, form_key='hello')"
+        )
 
     assert ak.forms.emptyform.EmptyForm().to_dict(verbose=False) == {
         "class": "EmptyArray"
@@ -1502,29 +1511,31 @@ def test_EmptyForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak.forms.emptyform.EmptyForm(
-        parameters={"x": 123}, form_key="hello"
-    ).to_dict(verbose=False) == {
-        "class": "EmptyArray",
-        "parameters": {"x": 123},
-        "form_key": "hello",
-    }
+    with pytest.warns(DeprecationWarning):
+        assert ak.forms.emptyform.EmptyForm(
+            parameters={"x": 123}, form_key="hello"
+        ).to_dict(verbose=False) == {
+            "class": "EmptyArray",
+            "parameters": {"x": 123},
+            "form_key": "hello",
+        }
     assert ak.forms.from_dict({"class": "EmptyArray"}).to_dict() == {
         "class": "EmptyArray",
         "parameters": {},
         "form_key": None,
     }
-    assert ak.forms.from_dict(
-        {
+    with pytest.warns(DeprecationWarning):
+        assert ak.forms.from_dict(
+            {
+                "class": "EmptyArray",
+                "parameters": {"x": 123},
+                "form_key": "hello",
+            }
+        ).to_dict() == {
             "class": "EmptyArray",
             "parameters": {"x": 123},
             "form_key": "hello",
         }
-    ).to_dict() == {
-        "class": "EmptyArray",
-        "parameters": {"x": 123},
-        "form_key": "hello",
-    }
 
 
 @pytest.mark.skipif(

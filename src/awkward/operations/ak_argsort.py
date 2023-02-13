@@ -2,8 +2,9 @@
 
 import awkward as ak
 from awkward._connect.numpy import unsupported
+from awkward._nplikes.numpylike import NumpyMetadata
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 
 
 def argsort(
@@ -19,10 +20,8 @@ def argsort(
         ascending (bool): If True, the first value in each sorted group
             will be smallest, the last value largest; if False, the order
             is from largest to smallest.
-        stable (bool): If True, use a stable sorting algorithm (introsort:
-            a hybrid of quicksort, heapsort, and insertion sort); if False,
-            use a sorting algorithm that is not guaranteed to be stable
-            (heapsort).
+        stable (bool): If True, use a stable sorting algorithm; if False,
+            use a sorting algorithm that is not guaranteed to be stable.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
@@ -48,14 +47,14 @@ def argsort(
     """
     with ak._errors.OperationErrorContext(
         "ak.argsort",
-        dict(
-            array=array,
-            axis=axis,
-            ascending=ascending,
-            stable=stable,
-            highlevel=highlevel,
-            behavior=behavior,
-        ),
+        {
+            "array": array,
+            "axis": axis,
+            "ascending": ascending,
+            "stable": stable,
+            "highlevel": highlevel,
+            "behavior": behavior,
+        },
     ):
         return _impl(array, axis, ascending, stable, highlevel, behavior)
 
@@ -70,9 +69,9 @@ def _impl(array, axis, ascending, stable, highlevel, behavior):
 def _nep_18_impl(a, axis=-1, kind=None, order=unsupported):
     if kind is None:
         stable = False
-    elif kind == "stable":
+    elif kind in ("stable", "mergesort"):
         stable = True
-    elif kind == "heapsort":
+    elif kind in ("heapsort", "quicksort"):
         stable = False
     else:
         raise ak._errors.wrap_error(

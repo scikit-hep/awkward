@@ -1,8 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._nplikes.numpylike import NumpyMetadata
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 
 
 def argcartesian(
@@ -83,15 +84,15 @@ def argcartesian(
     """
     with ak._errors.OperationErrorContext(
         "ak.argcartesian",
-        dict(
-            arrays=arrays,
-            axis=axis,
-            nested=nested,
-            parameters=parameters,
-            with_name=with_name,
-            highlevel=highlevel,
-            behavior=behavior,
-        ),
+        {
+            "arrays": arrays,
+            "axis": axis,
+            "nested": nested,
+            "parameters": parameters,
+            "with_name": with_name,
+            "highlevel": highlevel,
+            "behavior": behavior,
+        },
     ):
         return _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior)
 

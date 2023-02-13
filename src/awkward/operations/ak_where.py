@@ -1,8 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._nplikes.numpylike import NumpyMetadata
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 cpu = ak._backends.NumpyBackend.instance()
 
 
@@ -41,7 +42,7 @@ def where(condition, *args, mergebool=True, highlevel=True, behavior=None):
     if len(args) == 0:
         with ak._errors.OperationErrorContext(
             "ak.where",
-            dict(condition=condition, mergebool=mergebool, highlevel=highlevel),
+            {"condition": condition, "mergebool": mergebool, "highlevel": highlevel},
         ):
             return _impl1(condition, mergebool, highlevel, behavior)
 
@@ -54,9 +55,13 @@ def where(condition, *args, mergebool=True, highlevel=True, behavior=None):
         x, y = args
         with ak._errors.OperationErrorContext(
             "ak.where",
-            dict(
-                condition=condition, x=x, y=y, mergebool=mergebool, highlevel=highlevel
-            ),
+            {
+                "condition": condition,
+                "x": x,
+                "y": y,
+                "mergebool": mergebool,
+                "highlevel": highlevel,
+            },
         ):
             return _impl3(condition, x, y, mergebool, highlevel, behavior)
 
@@ -110,13 +115,15 @@ def _impl3(condition, x, y, mergebool, highlevel, behavior):
             npcondition = backend.index_nplike.asarray(akcondition)
             tags = ak.index.Index8((npcondition == 0).view(np.int8))
             index = ak.index.Index64(
-                backend.index_nplike.arange(len(tags), dtype=np.int64),
+                backend.index_nplike.arange(tags.length, dtype=np.int64),
                 nplike=backend.index_nplike,
             )
             if not isinstance(left, ak.contents.Content):
-                left = ak.contents.NumpyArray(backend.nplike.repeat(left, len(tags)))
+                left = ak.contents.NumpyArray(backend.nplike.repeat(left, tags.length))
             if not isinstance(right, ak.contents.Content):
-                right = ak.contents.NumpyArray(backend.nplike.repeat(right, len(tags)))
+                right = ak.contents.NumpyArray(
+                    backend.nplike.repeat(right, tags.length)
+                )
             return (
                 ak.contents.UnionArray.simplified(
                     tags,

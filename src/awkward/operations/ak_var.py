@@ -2,9 +2,10 @@
 
 import awkward as ak
 from awkward._connect.numpy import unsupported
+from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._util import unset
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 
 
 def var(
@@ -68,14 +69,14 @@ def var(
     """
     with ak._errors.OperationErrorContext(
         "ak.var",
-        dict(
-            x=x,
-            weight=weight,
-            ddof=ddof,
-            axis=axis,
-            keepdims=keepdims,
-            mask_identity=mask_identity,
-        ),
+        {
+            "x": x,
+            "weight": weight,
+            "ddof": ddof,
+            "axis": axis,
+            "keepdims": keepdims,
+            "mask_identity": mask_identity,
+        },
     ):
         if flatten_records is not unset:
             message = (
@@ -136,14 +137,14 @@ def nanvar(
     """
     with ak._errors.OperationErrorContext(
         "ak.nanvar",
-        dict(
-            x=x,
-            weight=weight,
-            ddof=ddof,
-            axis=axis,
-            keepdims=keepdims,
-            mask_identity=mask_identity,
-        ),
+        {
+            "x": x,
+            "weight": weight,
+            "ddof": ddof,
+            "axis": axis,
+            "keepdims": keepdims,
+            "mask_identity": mask_identity,
+        },
     ):
         if flatten_records is not unset:
             message = (
@@ -175,21 +176,23 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity):
         )
 
     with np.errstate(invalid="ignore", divide="ignore"):
-        xmean = ak.operations.ak_mean._impl(x, weight, axis, False, mask_identity)
+        xmean = ak.operations.ak_mean._impl(
+            x, weight, axis, keepdims=True, mask_identity=True
+        )
         if weight is None:
             sumw = ak.operations.ak_count._impl(
                 x,
                 axis,
-                keepdims,
-                mask_identity,
+                keepdims=True,
+                mask_identity=True,
                 highlevel=True,
                 behavior=None,
             )
             sumwxx = ak.operations.ak_sum._impl(
                 (x - xmean) ** 2,
                 axis,
-                keepdims,
-                mask_identity,
+                keepdims=True,
+                mask_identity=True,
                 highlevel=True,
                 behavior=None,
             )
@@ -197,25 +200,36 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity):
             sumw = ak.operations.ak_sum._impl(
                 x * 0 + weight,
                 axis,
-                keepdims,
-                mask_identity,
+                keepdims=True,
+                mask_identity=True,
                 highlevel=True,
                 behavior=None,
             )
             sumwxx = ak.operations.ak_sum._impl(
                 (x - xmean) ** 2 * weight,
                 axis,
-                keepdims,
-                mask_identity,
+                keepdims=True,
+                mask_identity=True,
                 highlevel=True,
                 behavior=None,
             )
         if ddof != 0:
-            return ak._nplikes.nplike_of(sumwxx, sumw).true_divide(
-                sumwxx, sumw
-            ) * ak._nplikes.nplike_of(sumw).true_divide(sumw, sumw - ddof)
+            out = (sumwxx / sumw) * (sumw / (sumw - ddof))
         else:
-            return ak._nplikes.nplike_of(sumwxx, sumw).true_divide(sumwxx, sumw)
+            out = sumwxx / sumw
+
+        if not mask_identity:
+            out = ak.highlevel.Array(ak.operations.fill_none(out, np.nan, axis=-1))
+
+        if axis is None:
+            if not keepdims:
+                out = out[(0,) * out.ndim]
+        else:
+            if not keepdims:
+                posaxis = ak._util.maybe_posaxis(out.layout, axis, 1)
+                out = out[(slice(None, None),) * posaxis + (0,)]
+
+        return out
 
 
 @ak._connect.numpy.implements("var")

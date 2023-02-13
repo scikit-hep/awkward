@@ -4,21 +4,66 @@ from __future__ import annotations
 import copy
 
 import awkward as ak
+from awkward._errors import deprecate
+from awkward._nplikes.numpy import Numpy
+from awkward._nplikes.numpylike import IndexType, NumpyMetadata
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.emptyform import EmptyForm
-from awkward.typing import Final, Self, final
+from awkward.index import Index
+from awkward.typing import TYPE_CHECKING, Final, Self, SupportsIndex, final
 
-np = ak._nplikes.NumpyMetadata.instance()
-numpy = ak._nplikes.Numpy.instance()
+if TYPE_CHECKING:
+    from awkward._slicing import SliceItem
+
+np = NumpyMetadata.instance()
+numpy = Numpy.instance()
 
 
 @final
 class EmptyArray(Content):
+    """
+    An EmptyArray is used whenever an array's type is not known because it is empty
+    (such as data from #ak.ArrayBuilder without enough sample points to resolve the
+    type).
+
+    Unlike all other Content subclasses, EmptyArray cannot contain any parameters
+    (parameter values are always None).
+
+    EmptyArray has no equivalent in Apache Arrow.
+
+    To illustrate how the constructor arguments are interpreted, the following is a
+    simplified implementation of `__init__`, `__len__`, and `__getitem__`:
+
+        class EmptyArray(Content):
+            def __init__(self):
+                pass
+
+            def __len__(self):
+                return 0
+
+            def __getitem__(self, where):
+                if isinstance(where, int):
+                    assert False
+
+                elif isinstance(where, slice) and where.step is None:
+                    return EmptyArray()
+
+                elif isinstance(where, str):
+                    raise ValueError("field " + repr(where) + " not found")
+
+                else:
+                    raise AssertionError(where)
+    """
+
     is_unknown = True
     is_leaf = True
 
     def __init__(self, *, parameters=None, backend=None):
+        if not (parameters is None or len(parameters) == 0):
+            deprecate(
+                f"{type(self).__name__} cannot contain parameters", version="2.2.0"
+            )
         if backend is None:
             backend = ak._backends.NumpyBackend.instance()
         self._init(parameters, backend)
@@ -31,6 +76,10 @@ class EmptyArray(Content):
         parameters=unset,
         backend=unset,
     ):
+        if not (parameters is unset or parameters is None or len(parameters) == 0):
+            deprecate(
+                f"{type(self).__name__} cannot contain parameters", version="2.2.0"
+            )
         return EmptyArray(
             parameters=self._parameters if parameters is unset else parameters,
             backend=self._backend if backend is unset else backend,
@@ -44,12 +93,14 @@ class EmptyArray(Content):
 
     @classmethod
     def simplified(cls, *, parameters=None, backend=None):
+        if not (parameters is None or len(parameters) == 0):
+            deprecate(f"{cls.__name__} cannot contain parameters", version="2.2.0")
         return cls(parameters=parameters, backend=backend)
 
     def _form_with_key(self, getkey):
         return self.form_cls(parameters=self._parameters, form_key=getkey(self))
 
-    def _to_buffers(self, form, getkey, container, backend):
+    def _to_buffers(self, form, getkey, container, backend, byteorder):
         assert isinstance(form, self.form_cls)
 
     def _to_typetracer(self, forget_length: bool) -> Self:
@@ -85,11 +136,13 @@ class EmptyArray(Content):
     def to_NumpyArray(self, dtype, backend=None):
         backend = backend or self._backend
         return ak.contents.NumpyArray(
-            backend.nplike.empty(0, dtype), parameters=self._parameters, backend=backend
+            backend.nplike.empty(0, dtype=dtype),
+            parameters=self._parameters,
+            backend=backend,
         )
 
     def __array__(self, **kwargs):
-        return numpy.empty((0,))
+        return numpy.empty(0, dtype=np.float64)
 
     def __iter__(self):
         return iter([])
@@ -97,24 +150,28 @@ class EmptyArray(Content):
     def _getitem_nothing(self):
         return self
 
-    def _getitem_at(self, where):
+    def _getitem_at(self, where: IndexType):
         raise ak._errors.index_error(self, where, "array is empty")
 
-    def _getitem_range(self, where):
+    def _getitem_range(self, start: SupportsIndex, stop: IndexType) -> Content:
         return self
 
-    def _getitem_field(self, where, only_fields=()):
+    def _getitem_field(
+        self, where: str | SupportsIndex, only_fields: tuple[str, ...] = ()
+    ) -> Content:
         raise ak._errors.index_error(self, where, "not an array of records")
 
-    def _getitem_fields(self, where, only_fields=()):
+    def _getitem_fields(
+        self, where: list[str | SupportsIndex], only_fields: tuple[str, ...] = ()
+    ) -> Content:
         if len(where) == 0:
-            return self._getitem_range(slice(0, 0))
+            return self._getitem_range(0, 0)
         raise ak._errors.index_error(self, where, "not an array of records")
 
-    def _carry(self, carry, allow_lazy):
+    def _carry(self, carry: Index, allow_lazy: bool) -> EmptyArray:
         assert isinstance(carry, ak.index.Index)
 
-        if not carry.nplike.known_shape or carry.length == 0:
+        if not carry.nplike.known_data or carry.length == 0:
             return self
         else:
             raise ak._errors.index_error(self, carry.data, "array is empty")
@@ -128,7 +185,12 @@ class EmptyArray(Content):
             "too many jagged slice dimensions for array",
         )
 
-    def _getitem_next(self, head, tail, advanced):
+    def _getitem_next(
+        self,
+        head: SliceItem | tuple,
+        tail: tuple[SliceItem, ...],
+        advanced: Index | None,
+    ) -> Content:
         if head == ():
             return self
 
@@ -151,7 +213,7 @@ class EmptyArray(Content):
             return self._getitem_next_ellipsis(tail, advanced)
 
         elif isinstance(head, ak.index.Index64):
-            if not head.nplike.known_shape or head.length == 0:
+            if not head.nplike.known_data or head.length == 0:
                 return self
             else:
                 raise ak._errors.index_error(self, head.data, "array is empty")
@@ -184,13 +246,10 @@ class EmptyArray(Content):
     def _mergemany(self, others):
         if len(others) == 0:
             return self
-
         elif len(others) == 1:
             return others[0]
-
         else:
-            tail_others = others[1:]
-            return others[0]._mergemany(tail_others)
+            return others[0]._mergemany(others[1:])
 
     def _fill_none(self, value: Content) -> Content:
         return EmptyArray(parameters=self._parameters, backend=self._backend)
@@ -199,7 +258,7 @@ class EmptyArray(Content):
         posaxis = ak._util.maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 == depth:
             return ak.contents.NumpyArray(
-                self._backend.nplike.empty(0, np.int64),
+                self._backend.nplike.empty(0, dtype=np.int64),
                 parameters=None,
                 backend=self._backend,
             )
@@ -208,10 +267,11 @@ class EmptyArray(Content):
                 np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
             )
 
-    def _numbers_to_type(self, name):
-        return ak.contents.EmptyArray(
-            parameters=self._parameters, backend=self._backend
-        )
+    def _numbers_to_type(self, name, including_unknown):
+        if including_unknown:
+            return self.to_NumpyArray(ak.types.numpytype.primitive_to_dtype(name))
+        else:
+            return self
 
     def _is_unique(self, negaxis, starts, parents, outlength):
         return True
@@ -220,33 +280,14 @@ class EmptyArray(Content):
         return self
 
     def _argsort_next(
-        self,
-        negaxis,
-        starts,
-        shifts,
-        parents,
-        outlength,
-        ascending,
-        stable,
-        kind,
-        order,
+        self, negaxis, starts, shifts, parents, outlength, ascending, stable
     ):
         as_numpy = self.to_NumpyArray(np.float64)
         return as_numpy._argsort_next(
-            negaxis,
-            starts,
-            shifts,
-            parents,
-            outlength,
-            ascending,
-            stable,
-            kind,
-            order,
+            negaxis, starts, shifts, parents, outlength, ascending, stable
         )
 
-    def _sort_next(
-        self, negaxis, starts, parents, outlength, ascending, stable, kind, order
-    ):
+    def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
         return self
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
@@ -314,15 +355,17 @@ class EmptyArray(Content):
         else:
             dtype = np.dtype(options["emptyarray_to"])
             next = ak.contents.NumpyArray(
-                numpy.empty(length, dtype), self._parameters, backend=self._backend
+                numpy.empty(length, dtype=dtype),
+                parameters=self._parameters,
+                backend=self._backend,
             )
             return next._to_arrow(pyarrow, mask_node, validbytes, length, options)
 
-    def _to_numpy(self, allow_missing):
-        return self._backend.nplike.empty(0, dtype=np.float64)
+    def _to_backend_array(self, allow_missing, backend):
+        return backend.nplike.empty(0, dtype=np.float64)
 
-    def _completely_flatten(self, backend, options):
-        return []
+    def _remove_structure(self, backend, options):
+        return [self]
 
     def _recursively_apply(
         self, action, behavior, depth, depth_context, lateral_context, options
@@ -362,9 +405,13 @@ class EmptyArray(Content):
         return self
 
     def _to_list(self, behavior, json_conversions):
+        if not self._backend.nplike.known_data:
+            raise ak._errors.wrap_error(
+                TypeError("cannot convert typetracer arrays to Python lists")
+            )
         return []
 
-    def to_backend(self, backend: ak._backends.Backend) -> Self:
+    def _to_backend(self, backend: ak._backends.Backend) -> Self:
         return EmptyArray(parameters=self._parameters, backend=backend)
 
     def _is_equal_to(self, other, index_dtype, numpyarray):

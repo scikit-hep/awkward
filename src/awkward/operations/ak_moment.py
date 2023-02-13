@@ -1,9 +1,10 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._util import unset
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 
 
 def moment(
@@ -59,14 +60,14 @@ def moment(
     """
     with ak._errors.OperationErrorContext(
         "ak.moment",
-        dict(
-            x=x,
-            n=n,
-            weight=weight,
-            axis=axis,
-            keepdims=keepdims,
-            mask_identity=mask_identity,
-        ),
+        {
+            "x": x,
+            "n": n,
+            "weight": weight,
+            "axis": axis,
+            "keepdims": keepdims,
+            "mask_identity": mask_identity,
+        },
     ):
         if flatten_records is not unset:
             message = (
@@ -128,4 +129,4 @@ def _impl(x, n, weight, axis, keepdims, mask_identity):
                 highlevel=True,
                 behavior=behavior,
             )
-        return ak._nplikes.nplike_of(sumwxn, sumw).true_divide(sumwxn, sumw)
+        return sumwxn / sumw

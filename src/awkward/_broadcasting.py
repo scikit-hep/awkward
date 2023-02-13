@@ -9,6 +9,11 @@ import itertools
 from collections.abc import Sequence
 
 import awkward as ak
+from awkward._nplikes import nplike_of
+from awkward._nplikes.numpy import Numpy
+from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.shape import unknown_length
+from awkward._util import unset
 from awkward.contents.bitmaskedarray import BitMaskedArray
 from awkward.contents.bytemaskedarray import ByteMaskedArray
 from awkward.contents.content import Content
@@ -30,32 +35,43 @@ from awkward.index import (  # IndexU8,  ; Index32,  ; IndexU32,  ; noqa: F401
 from awkward.record import Record
 from awkward.typing import Any, Callable, Dict, List, TypeAlias, Union
 
-np = ak._nplikes.NumpyMetadata.instance()
-numpy = ak._nplikes.Numpy.instance()
+np = NumpyMetadata.instance()
+numpy = Numpy.instance()
 
 optiontypes = (IndexedOptionArray, ByteMaskedArray, BitMaskedArray, UnmaskedArray)
 listtypes = (ListOffsetArray, ListArray, RegularArray)
 
 
-def broadcast_pack(inputs: Sequence, isscalar: list[bool]) -> list:
+def length_of_broadcast(inputs: Sequence) -> int | type[unknown_length]:
     maxlen = -1
+
     for x in inputs:
         if isinstance(x, Content):
+            if x.length is unknown_length:
+                return x.length
+
             maxlen = max(maxlen, x.length)
+
     if maxlen < 0:
         maxlen = 1
+
+    return maxlen
+
+
+def broadcast_pack(inputs: Sequence, isscalar: list[bool]) -> list:
+    maxlen = length_of_broadcast(inputs)
 
     nextinputs = []
     for x in inputs:
         if isinstance(x, Record):
-            index = ak._nplikes.nplike_of(*inputs).full(maxlen, x.at, dtype=np.int64)
+            index = nplike_of(*inputs).full(maxlen, x.at, dtype=np.int64)
             nextinputs.append(RegularArray(x.array[index], maxlen, 1))
             isscalar.append(True)
         elif isinstance(x, Content):
             nextinputs.append(
                 RegularArray(
                     x,
-                    x.length if x.backend.nplike.known_shape else 1,
+                    x.length if x.backend.nplike.known_data else 1,
                     1,
                     parameters=None,
                 )
@@ -70,12 +86,12 @@ def broadcast_pack(inputs: Sequence, isscalar: list[bool]) -> list:
 
 def broadcast_unpack(x, isscalar: list[bool], backend: ak._backends.Backend):
     if all(isscalar):
-        if not backend.nplike.known_shape or x.length == 0:
+        if not backend.nplike.known_data or x.length == 0:
             return x._getitem_nothing()._getitem_nothing()
         else:
             return x[0][0]
     else:
-        if not backend.nplike.known_shape or x.length == 0:
+        if not backend.nplike.known_data or x.length == 0:
             return x._getitem_nothing()
         else:
             return x[0]
@@ -396,7 +412,7 @@ def apply_step(
                 )
 
     # Now all lengths must agree.
-    if backend.nplike.known_shape:
+    if backend.nplike.known_data:
         checklength([x for x in inputs if isinstance(x, Content)], options)
     else:
         for x in inputs:
@@ -477,7 +493,7 @@ def apply_step(
                         numtags.append(len(x.contents))
                         if length is None:
                             length = x.tags.data.shape[0]
-                assert length is not None
+                assert length is not unknown_length
 
                 all_combos = list(itertools.product(*[range(x) for x in numtags]))
 
@@ -508,9 +524,12 @@ def apply_step(
                     )
                     assert isinstance(outcontents[-1], tuple)
                     if numoutputs is None:
-                        numoutputs = len(outcontents[-1])
+                        numoutputs = outcontents[-1].length
                     else:
-                        assert numoutputs == len(outcontents[-1])
+                        assert (
+                            numoutputs is unknown_length
+                            or outcontents[-1].length is unknown_length
+                        ) or numoutputs == outcontents[-1].length
 
                 assert numoutputs is not None
 
@@ -533,17 +552,18 @@ def apply_step(
                                     )
                                 )
                             )
-                assert length is not None
+                assert length is not unknown_length
 
                 combos = backend.index_nplike.stack(tagslist, axis=-1)
 
-                all_combos = backend.index_nplike.array(
+                all_combos = backend.index_nplike.asarray(
                     list(itertools.product(*[range(x) for x in numtags])),
                     dtype=[(str(i), combos.dtype) for i in range(len(tagslist))],
                 )
-                combos = combos.view(
-                    [(str(i), combos.dtype) for i in range(len(tagslist))]
-                ).reshape(length)
+                combos = backend.index_nplike.reshape(
+                    combos.view([(str(i), combos.dtype) for i in range(len(tagslist))]),
+                    (length,),
+                )
 
                 tags = backend.index_nplike.empty(length, dtype=np.int8)
                 index = backend.index_nplike.empty(length, dtype=np.int64)
@@ -605,7 +625,9 @@ def apply_step(
                         if mask is None:
                             mask = m
                         else:
-                            mask = backend.index_nplike.bitwise_or(mask, m, out=mask)
+                            mask = backend.index_nplike.logical_or(
+                                mask, m, maybe_out=mask
+                            )
 
                 nextmask = Index8(mask.view(np.int8))
                 index = backend.index_nplike.full(mask.shape[0], -1, dtype=np.int64)
@@ -639,7 +661,7 @@ def apply_step(
                     if isinstance(x, optiontypes):
                         x._touch_data(recursive=False)
                         index = Index64(
-                            backend.index_nplike.empty((x.length,), np.int64)
+                            backend.index_nplike.empty(x.length, dtype=np.int64)
                         )
                         nextinputs.append(x.content)
                     else:
@@ -671,14 +693,14 @@ def apply_step(
                 for x in inputs
             ):
                 # Ensure all layouts have same length
-                length = None
+                length = unset
                 for x in inputs:
                     if isinstance(x, Content):
-                        if length is None:
+                        if length is unset:
                             length = x.length
-                        elif backend.nplike.known_shape:
+                        elif backend.nplike.known_data:
                             assert length == x.length
-                assert length is not None
+                assert length is not unset
 
                 if any(x.size == 0 for x in inputs if isinstance(x, RegularArray)):
                     dimsize = 0
@@ -751,7 +773,7 @@ def apply_step(
                     for x, p in zip(outcontent, parameters)
                 )
 
-            elif not backend.nplike.known_data or not backend.nplike.known_shape:
+            elif not backend.nplike.known_data:
                 offsets = None
                 nextinputs = []
                 for x in inputs:
@@ -759,7 +781,7 @@ def apply_step(
                         x._touch_data(recursive=False)
                         offsets = Index64(
                             backend.index_nplike.empty(
-                                (x.offsets.data.shape[0],), np.int64
+                                x.offsets.data.shape[0], dtype=np.int64
                             ),
                             nplike=backend.index_nplike,
                         )
@@ -768,7 +790,7 @@ def apply_step(
                         x._touch_data(recursive=False)
                         offsets = Index64(
                             backend.index_nplike.empty(
-                                (x.starts.data.shape[0] + 1,), np.int64
+                                x.starts.data.shape[0] + 1, dtype=np.int64
                             ),
                             nplike=backend.index_nplike,
                         )
@@ -934,10 +956,10 @@ def apply_step(
                     ValueError(f"cannot broadcast records {in_function(options)}")
                 )
 
-            fields, length, istuple = None, None, True
+            fields, length, istuple = unset, unset, unset
             for x in inputs:
                 if isinstance(x, RecordArray):
-                    if fields is None:
+                    if fields is unset:
                         fields = x.fields
                     elif set(fields) != set(x.fields):
                         raise ak._errors.wrap_error(
@@ -950,7 +972,7 @@ def apply_step(
                                 )
                             )
                         )
-                    if length is None:
+                    if length is unset:
                         length = x.length
                     elif length != x.length:
                         raise ak._errors.wrap_error(
@@ -961,8 +983,10 @@ def apply_step(
                                 )
                             )
                         )
-                    if not x.is_tuple:
+                    # Records win over tuples
+                    if istuple is unset or not x.is_tuple:
                         istuple = False
+
             outcontents, numoutputs = [], None
             for field in fields:
                 outcontents.append(

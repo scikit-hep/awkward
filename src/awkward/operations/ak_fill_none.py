@@ -3,8 +3,9 @@
 import numbers
 
 import awkward as ak
+from awkward._nplikes.numpylike import NumpyMetadata
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 cpu = ak._backends.NumpyBackend.instance()
 
 
@@ -54,9 +55,13 @@ def fill_none(array, value, axis=-1, *, highlevel=True, behavior=None):
     """
     with ak._errors.OperationErrorContext(
         "ak.fill_none",
-        dict(
-            array=array, value=value, axis=axis, highlevel=highlevel, behavior=behavior
-        ),
+        {
+            "array": array,
+            "value": value,
+            "axis": axis,
+            "highlevel": highlevel,
+            "behavior": behavior,
+        },
     ):
         return _impl(array, value, axis, highlevel, behavior)
 
@@ -96,7 +101,7 @@ def _impl(array, value, axis, highlevel, behavior):
             valuelayout = valuelayout.array[valuelayout.at : valuelayout.at + 1]
         elif len(valuelayout) == 0:
             offsets = ak.index.Index64(
-                backend.index_nplike.array([0, 0], dtype=np.int64)
+                backend.index_nplike.asarray([0, 0], dtype=np.int64)
             )
             valuelayout = ak.contents.ListOffsetArray(offsets, valuelayout)
         else:
@@ -117,10 +122,10 @@ def _impl(array, value, axis, highlevel, behavior):
         def action(layout, depth, **kwargs):
             posaxis = ak._util.maybe_posaxis(layout, axis, depth)
             if posaxis is not None and posaxis + 1 == depth:
-                if layout.is_union or layout.is_record:
-                    return None
-                elif layout.is_option:
+                if layout.is_option:
                     return ak._do.fill_none(layout, valuelayout)
+                elif layout.is_union or layout.is_record or layout.is_indexed:
+                    return None
                 else:
                     return layout
 

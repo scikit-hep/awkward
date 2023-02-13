@@ -1,8 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._nplikes.numpylike import NumpyMetadata
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 
 
 class Lookup:
@@ -19,7 +20,7 @@ class Lookup:
         self.nplike = layout.backend.nplike
         self.generator = generator
         self.positions = positions
-        self.arrayptrs = self.nplike.array(
+        self.arrayptrs = self.nplike.asarray(
             [arrayptr(x) for x in positions], dtype=np.intp
         )
 

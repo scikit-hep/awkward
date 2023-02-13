@@ -2,9 +2,10 @@
 
 import awkward as ak
 from awkward._connect.numpy import unsupported
+from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._util import unset
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 
 
 def any(
@@ -51,14 +52,14 @@ def any(
     """
     with ak._errors.OperationErrorContext(
         "ak.any",
-        dict(
-            array=array,
-            axis=axis,
-            keepdims=keepdims,
-            mask_identity=mask_identity,
-            highlevel=highlevel,
-            behavior=behavior,
-        ),
+        {
+            "array": array,
+            "axis": axis,
+            "keepdims": keepdims,
+            "mask_identity": mask_identity,
+            "highlevel": highlevel,
+            "behavior": behavior,
+        },
     ):
         if flatten_records is not unset:
             message = (

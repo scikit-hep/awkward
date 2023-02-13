@@ -1,0 +1,25 @@
+name: Lint
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+
+concurrency:
+  group: lint-${{ github.head_ref }}
+  cancel-in-progress: true
+
+jobs:
+  pylint:
+    name: "Run PyLint"
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: true
+
+    - name: Run PyLint
+      run: |
+        echo "::add-matcher::$GITHUB_WORKSPACE/.github/matchers/pylint.json"
+        pipx run nox -s pylint

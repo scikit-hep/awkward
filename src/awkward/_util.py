@@ -6,17 +6,21 @@ import itertools
 import numbers
 import os
 import re
-from collections.abc import Iterable, Mapping, Sized
+import sys
+from collections.abc import Iterable, Mapping, Sequence, Sized
 
 import packaging.version
-from awkward_cpp.lib import _ext
 
 import awkward as ak
+from awkward._nplikes import nplike_of, ufuncs
+from awkward._nplikes.jax import Jax
+from awkward._nplikes.numpy import Numpy
+from awkward._nplikes.numpylike import NumpyMetadata
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 
 win = os.name == "nt"
-bits32 = ak._nplikes.numpy.iinfo(np.intp).bits == 32
+bits32 = np.iinfo(np.intp).bits == 32
 
 # matches include/awkward/common.h
 kMaxInt8 = 127  # 2**7  - 1
@@ -33,7 +37,7 @@ def parse_version(version):
 
 
 def numpy_at_least(version):
-    import numpy
+    import numpy  # noqa: TID251
 
     return parse_version(numpy.__version__) >= parse_version(version)
 
@@ -58,8 +62,12 @@ def is_integer(x) -> bool:
     return isinstance(x, numbers.Integral) and not isinstance(x, bool)
 
 
-def is_non_string_iterable(obj) -> bool:
-    return not isinstance(obj, str) and isinstance(obj, Iterable)
+def is_non_string_like_iterable(obj) -> bool:
+    return not isinstance(obj, (str, bytes)) and isinstance(obj, Iterable)
+
+
+def is_non_string_like_sequence(obj) -> bool:
+    return not isinstance(obj, (str, bytes)) and isinstance(obj, Sequence)
 
 
 def tobytes(array):
@@ -69,8 +77,24 @@ def tobytes(array):
         return array.tostring()
 
 
-def little_endian(array):
-    return array.astype(array.dtype.newbyteorder("<"), copy=False)
+native_byteorder = "<" if sys.byteorder == "little" else ">"
+
+
+def native_to_byteorder(array, byteorder: str):
+    """
+    Args:
+        array: nplike array
+        byteorder (`"<"` or `">"`): desired byteorder
+
+    Return a copy of array. Swap the byteorder if `byteorder` does not match
+    `ak._util.native_byteorder`. This function is _not_ idempotent; no metadata
+    from `array` exists to determine its current byteorder.
+    """
+    assert byteorder in "<>"
+    if byteorder != native_byteorder:
+        return array.byteswap(inplace=False)
+    else:
+        return array
 
 
 def identifier_hash(str):
@@ -185,8 +209,6 @@ def custom_broadcast(layout, behavior):
 
 
 def custom_ufunc(ufunc, layout, behavior):
-    import numpy
-
     behavior = overlay_behavior(behavior)
     custom = layout.parameter("__array__")
     if not isinstance(custom, str):
@@ -196,7 +218,7 @@ def custom_ufunc(ufunc, layout, behavior):
             if (
                 isinstance(key, tuple)
                 and len(key) == 2
-                and (key[0] is ufunc or key[0] is numpy.ufunc)
+                and (key[0] is ufunc or key[0] is ufuncs.ufunc)
                 and key[1] == custom
             ):
                 return fcn
@@ -448,7 +470,7 @@ def wrap(content, behavior=None, highlevel=True, like=None, allow_other=False):
 
 
 def union_to_record(unionarray, anonymous):
-    nplike = ak._nplikes.nplike_of(unionarray)
+    nplike = nplike_of(unionarray)
 
     contents = []
     for layout in unionarray.contents:
@@ -516,7 +538,7 @@ def union_to_record(unionarray, anonymous):
                 )
             )
 
-        return ak.contents.RecordArray(all_fields, all_names, len(unionarray))
+        return ak.contents.RecordArray(all_fields, all_names, unionarray.length)
 
 
 def direct_Content_subclass(node):
@@ -533,55 +555,6 @@ def direct_Content_subclass_name(node):
         return None
     else:
         return out.__name__
-
-
-meaningful_parameters = frozenset(
-    {
-        ("__array__", "string"),
-        ("__array__", "bytestring"),
-        ("__array__", "char"),
-        ("__array__", "byte"),
-        ("__array__", "sorted_map"),
-        ("__array__", "categorical"),
-    }
-)
-
-
-def merge_parameters(one, two, merge_equal=False, exclude=()):
-    if one is None and two is None:
-        return None
-
-    if len(exclude) != 0:
-        if one is None:
-            one = {}
-        if two is None:
-            two = {}
-
-    if one is None:
-        return two
-
-    elif two is None:
-        return one
-
-    elif merge_equal:
-        out = {}
-        for k, v in two.items():
-            if k in one.keys():
-                if len(exclude) == 0 or (k, v) not in exclude:
-                    if v == one[k]:
-                        out[k] = v
-        return out
-
-    else:
-        if len(exclude) != 0:
-            out = {k: v for k, v in one.items() if (k, v) not in exclude}
-        else:
-            out = dict(one)
-        for k, v in two.items():
-            if len(exclude) == 0 or (k, v) not in exclude:
-                if v is not None:
-                    out[k] = v
-        return out
 
 
 def expand_braces(text, seen=None):
@@ -608,30 +581,36 @@ expand_braces.regex = re.compile(r"\{[^\{\}]*\}")
 
 
 def from_arraylib(array, regulararray, recordarray, highlevel, behavior):
-    np = ak._nplikes.NumpyMetadata.instance()
-    numpy = ak._nplikes.Numpy.instance()
+
+    np = NumpyMetadata.instance()
+    # overshadows global NumPy import for nplike-safety
+    numpy = Numpy.instance()
 
     def recurse(array, mask=None):
-        if ak._nplikes.Jax.is_tracer(array):
+        nplike = nplike_of(array)
+
+        if Jax.is_tracer(array):
             raise ak._errors.wrap_error(
                 TypeError("Jax tracers cannot be used with `ak.from_arraylib`")
             )
 
         if regulararray and len(array.shape) > 1:
+            new_shape = (-1,) + array.shape[2:]
             return ak.contents.RegularArray(
-                recurse(array.reshape((-1,) + array.shape[2:]), mask),
+                recurse(nplike.reshape(array, new_shape), mask),
                 array.shape[1],
                 array.shape[0],
             )
 
         if len(array.shape) == 0:
-            array = ak.contents.NumpyArray(array.reshape(1))
+            array = nplike.reshape(array, (1,))
 
         if array.dtype.kind == "S":
+            assert nplike is numpy
             asbytes = array.reshape(-1)
             itemsize = asbytes.dtype.itemsize
             starts = numpy.arange(0, len(asbytes) * itemsize, itemsize, dtype=np.int64)
-            stops = starts + numpy.char.str_len(asbytes)
+            stops = numpy.add(starts, numpy.char.str_len(asbytes))
             data = ak.contents.ListArray(
                 ak.index.Index64(starts),
                 ak.index.Index64(stops),
@@ -648,10 +627,11 @@ def from_arraylib(array, regulararray, recordarray, highlevel, behavior):
                 )
 
         elif array.dtype.kind == "U":
+            assert nplike is numpy
             asbytes = numpy.char.encode(array.reshape(-1), "utf-8", "surrogateescape")
             itemsize = asbytes.dtype.itemsize
             starts = numpy.arange(0, len(asbytes) * itemsize, itemsize, dtype=np.int64)
-            stops = starts + numpy.char.str_len(asbytes)
+            stops = numpy.add(starts, numpy.char.str_len(asbytes))
             data = ak.contents.ListArray(
                 ak.index.Index64(starts),
                 ak.index.Index64(stops),
@@ -695,7 +675,10 @@ def from_arraylib(array, regulararray, recordarray, highlevel, behavior):
                 ak.index.Index8(mask), data, valid_when=False
             )
 
-        return data
+    if array.dtype == np.dtype("O"):
+        raise ak._errors.wrap_error(
+            TypeError("Awkward Array does not support arrays with object dtypes.")
+        )
 
     if isinstance(array, numpy.ma.MaskedArray):
         mask = numpy.ma.getmask(array)
@@ -718,117 +701,6 @@ def from_arraylib(array, regulararray, recordarray, highlevel, behavior):
     return ak._util.wrap(layout, behavior, highlevel)
 
 
-def to_arraylib(module, array, allow_missing):
-    def _impl(array):
-        if isinstance(array, (bool, numbers.Number)):
-            return module.array(array)
-
-        elif isinstance(array, module.ndarray):
-            return array
-
-        elif isinstance(array, np.ndarray):
-            return module.asarray(array)
-
-        elif isinstance(array, ak.highlevel.Array):
-            return _impl(array.layout)
-
-        elif isinstance(array, ak.highlevel.Record):
-            raise ak._errors.wrap_error(
-                ValueError(f"{module.__name__} does not support record structures")
-            )
-
-        elif isinstance(array, ak.highlevel.ArrayBuilder):
-            return _impl(array.snapshot().layout)
-
-        elif isinstance(array, _ext.ArrayBuilder):
-            return _impl(array.snapshot())
-
-        elif ak.operations.parameters(array).get("__array__") in (
-            "bytestring",
-            "string",
-        ):
-            raise ak._errors.wrap_error(
-                ValueError(f"{module.__name__} does not support arrays of strings")
-            )
-
-        elif isinstance(array, ak.contents.EmptyArray):
-            return module.array([])
-
-        elif isinstance(array, ak.contents.IndexedArray):
-            return _impl(array.project())
-
-        elif isinstance(array, ak.contents.UnionArray):
-            contents = [_impl(array.project(i)) for i in range(len(array.contents))]
-            out = module.concatenate(contents)
-
-            tags = module.asarray(array.tags)
-            for tag, content in enumerate(contents):
-                mask = tags == tag
-                if ak._nplikes.Jax.is_own_array(out):
-                    out = out.at[mask].set(content)
-                else:
-                    out[mask] = content
-            return out
-
-        elif isinstance(array, ak.contents.UnmaskedArray):
-            return _impl(array.content)
-
-        elif isinstance(array, ak.contents.IndexedOptionArray):
-            content = _impl(array.project())
-
-            mask0 = array.mask_as_bool(valid_when=False)
-            if mask0.any():
-                raise ak._errors.wrap_error(
-                    ValueError(f"{module.__name__} does not support masked arrays")
-                )
-            else:
-                return content
-
-        elif isinstance(array, ak.contents.RegularArray):
-            out = _impl(array.content)
-            head, tail = out.shape[0], out.shape[1:]
-            shape = (head // array.size, array.size) + tail
-            return out[: shape[0] * array.size].reshape(shape)
-
-        elif isinstance(array, (ak.contents.ListArray, ak.contents.ListOffsetArray)):
-            return _impl(array.to_RegularArray())
-
-        elif isinstance(array, ak.contents.RecordArray):
-            raise ak._errors.wrap_error(
-                ValueError(f"{module.__name__} does not support record structures")
-            )
-
-        elif isinstance(array, ak.contents.NumpyArray):
-            return module.asarray(array.data)
-
-        elif isinstance(array, ak.contents.Content):
-            raise ak._errors.wrap_error(
-                AssertionError(f"unrecognized Content type: {type(array)}")
-            )
-
-        elif isinstance(array, Iterable):
-            return module.asarray(array)
-
-        else:
-            raise ak._errors.wrap_error(
-                ValueError(f"cannot convert {array} into {type(module.array([]))}")
-            )
-
-    if module.__name__ in ("jax.numpy", "cupy"):
-        return _impl(array)
-    elif module.__name__ == "numpy":
-        layout = ak.operations.to_layout(array, allow_record=True, allow_other=True)
-
-        if isinstance(layout, (ak.contents.Content, ak.record.Record)):
-            return layout.to_numpy(allow_missing=allow_missing)
-        else:
-            return module.asarray(array)
-    else:
-        raise ak._errors.wrap_error(
-            ValueError(f"{module.__name__} is not supported by to_arraylib")
-        )
-
-
 def maybe_posaxis(layout, axis, depth):
     if isinstance(layout, ak.record.Record):
         if axis == 0:
@@ -848,93 +720,92 @@ def maybe_posaxis(layout, axis, depth):
             return None
 
 
-def arrays_approx_equal(
-    left,
-    right,
-    rtol: float = 1e-5,
-    atol: float = 1e-8,
-    dtype_exact: bool = True,
-    check_parameters=True,
-) -> bool:
-    # TODO: this should not be needed after refactoring nplike mechanism
-    import numpy
+try:
+    import numpy  # noqa: TID251
 
-    import awkward.forms.form
+    NDArrayOperatorsMixin = numpy.lib.mixins.NDArrayOperatorsMixin
 
-    left_behavior = ak._util.behavior_of(left)
-    right_behavior = ak._util.behavior_of(right)
+except AttributeError:
+    from numpy.core import umath as um  # noqa: TID251
 
-    left = ak.to_packed(ak.to_layout(left, allow_record=False), highlevel=False)
-    right = ak.to_packed(ak.to_layout(right, allow_record=False), highlevel=False)
-
-    def is_approx_dtype(left, right) -> bool:
-        if not dtype_exact:
-            for family in numpy.integer, numpy.floating:
-                if numpy.issubdtype(left, family):
-                    return numpy.issubdtype(right, family)
-        return left == right
-
-    def visitor(left, right) -> bool:
-        # Enforce super-canonicalisation rules
-        if left.is_option:
-            left = left.to_IndexedOptionArray64()
-        if right.is_option:
-            right = right.to_IndexedOptionArray64()
-
-        if not type(left) is type(right):
+    def _disables_array_ufunc(obj):
+        try:
+            return obj.__array_ufunc__ is None
+        except AttributeError:
             return False
 
-        if left.length != right.length:
-            return False
+    def _binary_method(ufunc, name):
+        def func(self, other):
+            if _disables_array_ufunc(other):
+                return NotImplemented
+            return ufunc(self, other)
 
-        if check_parameters and not awkward.forms.form._parameters_equal(
-            left.parameters, right.parameters
-        ):
-            return False
+        func.__name__ = f"__{name}__"
+        return func
 
-        # Require that the arrays have the same evaluated types
-        if not (
-            arrayclass(left, left_behavior) is arrayclass(right, right_behavior)
-            or not check_parameters
-        ):
-            return False
+    def _reflected_binary_method(ufunc, name):
+        def func(self, other):
+            if _disables_array_ufunc(other):
+                return NotImplemented
+            return ufunc(other, self)
 
-        if left.is_list:
-            return numpy.array_equal(left.offsets, right.offsets) and visitor(
-                left.content, right.content
-            )
-        elif left.is_regular:
-            return (left.size == right.size) and visitor(left.content, right.content)
-        elif left.is_numpy:
-            return is_approx_dtype(left.dtype, right.dtype) and numpy.allclose(
-                left.data, right.data, rtol=rtol, atol=atol, equal_nan=False
-            )
-        elif left.is_option:
-            return numpy.array_equal(
-                left.index.data < 0, right.index.data < 0
-            ) and visitor(left.project(), right.project())
-        elif left.is_union:
-            return (len(left.contents) == len(right.contents)) and all(
-                [
-                    visitor(left.project(i).to_packed(), right.project(i).to_packed())
-                    for i, _ in enumerate(left.contents)
-                ]
-            )
-        elif left.is_record:
-            return (
-                (
-                    recordclass(left, left_behavior)
-                    is recordclass(right, right_behavior)
-                    or not check_parameters
-                )
-                and (left.fields == right.fields)
-                and (left.is_tuple == right.is_tuple)
-                and all([visitor(x, y) for x, y in zip(left.contents, right.contents)])
-            )
-        elif left.is_unknown:
-            return True
+        func.__name__ = f"__r{name}__"
+        return func
 
-        else:
-            raise ak._errors.wrap_error(AssertionError)
+    def _inplace_binary_method(ufunc, name):
+        def func(self, other):
+            return ufunc(self, other, out=(self,))
 
-    return visitor(left, right)
+        func.__name__ = f"__i{name}__"
+        return func
+
+    def _numeric_methods(ufunc, name):
+        return (
+            _binary_method(ufunc, name),
+            _reflected_binary_method(ufunc, name),
+            _inplace_binary_method(ufunc, name),
+        )
+
+    def _unary_method(ufunc, name):
+        def func(self):
+            return ufunc(self)
+
+        func.__name__ = f"__{name}__"
+        return func
+
+    class NDArrayOperatorsMixin:
+        __lt__ = _binary_method(um.less, "lt")
+        __le__ = _binary_method(um.less_equal, "le")
+        __eq__ = _binary_method(um.equal, "eq")
+        __ne__ = _binary_method(um.not_equal, "ne")
+        __gt__ = _binary_method(um.greater, "gt")
+        __ge__ = _binary_method(um.greater_equal, "ge")
+
+        __add__, __radd__, __iadd__ = _numeric_methods(um.add, "add")
+        __sub__, __rsub__, __isub__ = _numeric_methods(um.subtract, "sub")
+        __mul__, __rmul__, __imul__ = _numeric_methods(um.multiply, "mul")
+        __matmul__, __rmatmul__, __imatmul__ = _numeric_methods(um.matmul, "matmul")
+        __truediv__, __rtruediv__, __itruediv__ = _numeric_methods(
+            um.true_divide, "truediv"
+        )
+        __floordiv__, __rfloordiv__, __ifloordiv__ = _numeric_methods(
+            um.floor_divide, "floordiv"
+        )
+        __mod__, __rmod__, __imod__ = _numeric_methods(um.remainder, "mod")
+        if hasattr(um, "divmod"):
+            __divmod__ = _binary_method(um.divmod, "divmod")
+            __rdivmod__ = _reflected_binary_method(um.divmod, "divmod")
+        __pow__, __rpow__, __ipow__ = _numeric_methods(um.power, "pow")
+        __lshift__, __rlshift__, __ilshift__ = _numeric_methods(um.left_shift, "lshift")
+        __rshift__, __rrshift__, __irshift__ = _numeric_methods(
+            um.right_shift, "rshift"
+        )
+        __and__, __rand__, __iand__ = _numeric_methods(um.bitwise_and, "and")
+        __xor__, __rxor__, __ixor__ = _numeric_methods(um.bitwise_xor, "xor")
+        __or__, __ror__, __ior__ = _numeric_methods(um.bitwise_or, "or")
+
+        __neg__ = _unary_method(um.negative, "neg")
+        if hasattr(um, "positive"):
+            __pos__ = _unary_method(um.positive, "pos")
+        __abs__ = _unary_method(um.absolute, "abs")
+        __invert__ = _unary_method(um.invert, "invert")

@@ -1,8 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._nplikes.numpylike import NumpyMetadata
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 
 
 def combinations(
@@ -174,17 +175,17 @@ def combinations(
     """
     with ak._errors.OperationErrorContext(
         "ak.combinations",
-        dict(
-            array=array,
-            n=n,
-            replacement=replacement,
-            axis=axis,
-            fields=fields,
-            parameters=parameters,
-            with_name=with_name,
-            highlevel=highlevel,
-            behavior=behavior,
-        ),
+        {
+            "array": array,
+            "n": n,
+            "replacement": replacement,
+            "axis": axis,
+            "fields": fields,
+            "parameters": parameters,
+            "with_name": with_name,
+            "highlevel": highlevel,
+            "behavior": behavior,
+        },
     ):
         return _impl(
             array,

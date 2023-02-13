@@ -288,17 +288,18 @@ def test_indexedoptionarray_numpyarray(tmp_path, through, extensionarray):
 @pytest.mark.parametrize("through", [through_arrow, through_parquet])
 @pytest.mark.parametrize("extensionarray", [False, True])
 def test_indexedoptionarray_emptyarray(tmp_path, through, extensionarray):
-    akarray = ak.contents.IndexedOptionArray(
-        ak.index.Index64(np.array([-1, -1, -1, -1, -1], dtype=np.int64)),
-        ak.contents.EmptyArray(parameters={"which": "inner"}),
-        parameters={"which": "outer"},
-    )
+    with pytest.warns(DeprecationWarning):
+        akarray = ak.contents.IndexedOptionArray(
+            ak.index.Index64(np.array([-1, -1, -1, -1, -1], dtype=np.int64)),
+            ak.contents.EmptyArray(parameters={"which": "inner"}),
+            parameters={"which": "outer"},
+        )
 
-    schema_arrow, array_form = through(akarray, extensionarray, tmp_path)
-    predicted_form = ak._connect.pyarrow.form_handle_arrow(
-        schema_arrow, pass_empty_field=True
-    )
-    assert predicted_form == array_form
+        schema_arrow, array_form = through(akarray, extensionarray, tmp_path)
+        predicted_form = ak._connect.pyarrow.form_handle_arrow(
+            schema_arrow, pass_empty_field=True
+        )
+        assert predicted_form == array_form
 
 
 @pytest.mark.parametrize("categorical_as_dictionary", [False, True])
@@ -309,7 +310,9 @@ def test_dictionary_encoding(
 ):
     akarray = ak.contents.IndexedArray(
         ak.index.Index64(np.array([3, 2, 2, 2, 0, 1, 3], dtype=np.uint64)),
-        ak.contents.NumpyArray([0.0, 1.1, 2.2, 3.3], parameters={"which": "inner"}),
+        ak.contents.NumpyArray(
+            np.array([0.0, 1.1, 2.2, 3.3]), parameters={"which": "inner"}
+        ),
         parameters={"__array__": "categorical", "which": "outer"},
     )
 

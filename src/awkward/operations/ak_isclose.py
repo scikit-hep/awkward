@@ -1,8 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._nplikes.numpylike import NumpyMetadata
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 
 
 def isclose(
@@ -26,15 +27,15 @@ def isclose(
     """
     with ak._errors.OperationErrorContext(
         "ak.isclose",
-        dict(
-            a=a,
-            b=b,
-            rtol=rtol,
-            atol=atol,
-            equal_nan=equal_nan,
-            highlevel=highlevel,
-            behavior=behavior,
-        ),
+        {
+            "a": a,
+            "b": b,
+            "rtol": rtol,
+            "atol": atol,
+            "equal_nan": equal_nan,
+            "highlevel": highlevel,
+            "behavior": behavior,
+        },
     ):
         return _impl(a, b, rtol, atol, equal_nan, highlevel, behavior)
 

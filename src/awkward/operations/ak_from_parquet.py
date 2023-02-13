@@ -51,18 +51,18 @@ def from_parquet(
     """
     with ak._errors.OperationErrorContext(
         "ak.from_parquet",
-        dict(
-            path=path,
-            columns=columns,
-            row_groups=row_groups,
-            storage_options=storage_options,
-            max_gap=max_gap,
-            max_block=max_block,
-            footer_sample_size=footer_sample_size,
-            generate_bitmasks=generate_bitmasks,
-            highlevel=highlevel,
-            behavior=behavior,
-        ),
+        {
+            "path": path,
+            "columns": columns,
+            "row_groups": row_groups,
+            "storage_options": storage_options,
+            "max_gap": max_gap,
+            "max_block": max_block,
+            "footer_sample_size": footer_sample_size,
+            "generate_bitmasks": generate_bitmasks,
+            "highlevel": highlevel,
+            "behavior": behavior,
+        },
     ):
         import awkward._connect.pyarrow  # noqa: F401
 

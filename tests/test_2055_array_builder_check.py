@@ -47,7 +47,7 @@ def test_no_field_name():
     func(builder)
 
     result = builder.snapshot()
-    assert ak._util.arrays_approx_equal(
+    assert ak.almost_equal(
         result,
         ak.contents.RecordArray(
             fields=["time"],

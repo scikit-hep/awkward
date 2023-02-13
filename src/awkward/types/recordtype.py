@@ -5,7 +5,7 @@ from collections.abc import Iterable
 
 import awkward as ak
 import awkward._prettyprint
-from awkward.forms.form import _parameters_equal
+from awkward.forms.form import _type_parameters_equal
 from awkward.types.type import Type
 from awkward.typing import final
 
@@ -181,9 +181,7 @@ class RecordType(Type):
 
     def __eq__(self, other):
         if isinstance(other, RecordType):
-            if not _parameters_equal(
-                self._parameters, other._parameters, only_array_record=True
-            ):
+            if not _type_parameters_equal(self._parameters, other._parameters):
                 return False
 
             if self._fields is None and other._fields is None:

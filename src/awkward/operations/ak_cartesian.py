@@ -1,8 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._nplikes.numpylike import NumpyMetadata
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 cpu = ak._backends.NumpyBackend.instance()
 
 
@@ -190,15 +191,15 @@ def cartesian(
     """
     with ak._errors.OperationErrorContext(
         "ak.cartesian",
-        dict(
-            arrays=arrays,
-            axis=axis,
-            nested=nested,
-            parameters=parameters,
-            with_name=with_name,
-            highlevel=highlevel,
-            behavior=behavior,
-        ),
+        {
+            "arrays": arrays,
+            "axis": axis,
+            "nested": nested,
+            "parameters": parameters,
+            "with_name": with_name,
+            "highlevel": highlevel,
+            "behavior": behavior,
+        },
     ):
         return _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior)
 
@@ -288,10 +289,10 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
             for x in new_arrays:
                 layouts.append(x)
 
-        layouts = [x for x in layouts]
+        layouts = list(layouts)
 
         indexes = [
-            ak.index.Index64(x.reshape(-1))
+            ak.index.Index64(backend.index_nplike.reshape(x, (-1,)))
             for x in backend.index_nplike.meshgrid(
                 *[backend.index_nplike.arange(len(x), dtype=np.int64) for x in layouts],
                 indexing="ij",

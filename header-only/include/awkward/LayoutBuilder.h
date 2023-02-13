@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <tuple>
 #include <string>
+#include <functional>
 
 namespace awkward {
 
@@ -1066,14 +1067,14 @@ namespace awkward {
       clear() noexcept {
         for (size_t i = 0; i < fields_count_; i++)
           visit_at(contents, i, [](auto& content) {
-            content.builder.clear();
+            content.clear();
           });
       }
 
       /// @brief Current number of records in the first index of the tuple.
       size_t
       length() const noexcept {
-        return (std::get<0>(contents).builder.length());
+        return (std::get<0>(contents).length());
       }
 
       /// @brief Checks for validity and consistency.
@@ -2247,12 +2248,16 @@ namespace awkward {
       clear() noexcept {
         mask_.clear();
         content_.clear();
+        current_byte_ = 0;
+        current_byte_ref_ = mask_.append_and_get_ref(current_byte_);
+        current_index_ = 0;
       }
 
       /// @brief Current length of the `mask` buffer.
       size_t
       length() const noexcept {
-        return (mask_.length() - 1) * 8 + current_index_;
+        return mask_.length() > 0 ?
+          (mask_.length() - 1) * 8 + current_index_ : current_index_;
       }
 
       /// @brief Checks for validity and consistency.
@@ -2494,7 +2499,7 @@ namespace awkward {
         tags_.clear();
         index_.clear();
         auto clear_contents = [](auto& content) {
-          content.builder.clear();
+          content.clear();
         };
         for (size_t i = 0; i < contents_count_; i++)
           visit_at(contents_, i, clear_contents);

@@ -7,7 +7,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "awkward"
-version = "2.0.5"
+version = "2.0.7"
 description = "Manipulate JSON-like data with NumPy-like idioms."
 license = { text = "BSD-3-Clause" }
 requires-python = ">=3.7"
@@ -40,7 +40,7 @@ classifiers = [
     "Topic :: Utilities",
 ]
 dependencies = [
-    "awkward_cpp==6",
+    "awkward_cpp==8",
     "importlib_resources;python_version < \"3.9\"",
     "numpy>=1.14.5",
     "packaging",
@@ -64,7 +64,7 @@ init = "awkward.numba:_register"
 
 [tool.hatch.build]
 artifacts = [
-    "src/awkward/_connect/header-only"
+    "/src/awkward/_connect/header-only"
 ]
 
 [tool.hatch.build.targets.wheel]
@@ -78,13 +78,15 @@ include = [
     "/src",
     "/tests",
     "/tests-cuda",
-    "/tests-cuda-kernels",
     "/docs-img",
     "/docs",
     "/CITATION.cff",
     "/CONTRIBUTING.md",
     "/README.md",
     "/requirements-test.txt"
+]
+artefacts = [
+    "/tests-cuda-kernels",
 ]
 
 [tool.hatch.metadata.hooks.fancy-pypi-readme]
@@ -128,6 +130,10 @@ log_cli_level = "info"
 
 [tool.isort]
 profile = "black"
+skip_glob = [
+    "src/awkward/__init__.py",
+    "src/awkward/_nplikes/__init__.py",
+]
 
 [tool.pylint.master]
 py-version = "3.7"
@@ -249,3 +255,62 @@ module = [
 ]
 ignore_errors = true
 ignore_missing_imports = true
+
+[tool.ruff]
+exclude = [
+    "studies",
+    "pybind11",
+    "rapidjson",
+    "docs-*",
+    "src/awkward/_typeparser/generated_parser.py",
+]
+ignore = [
+    "E501",   # line too long
+    "UP030",  # {0} -> {}
+]
+select = [
+    "B0",                # flake8-bugbear
+    "C", "E", "F", "W",  # flake8
+    "I",                 # isort
+    "T20",               # flake8-print
+    "UP",                # pyupgrade
+    "TID251"             # flake8-tidy-imports
+]
+target-version = "py37"
+typing-modules = ["awkward.typing"]
+src = ["src"]
+unfixable = ["T20"]
+
+mccabe.max-complexity = 100
+
+[tool.ruff.per-file-ignores]
+"src/awkward/typing.py" = ["F405"]
+"dev/*" = [
+    "T20",
+    "TID251"
+]
+"src/awkward/__init__.py" = [
+    "E402",
+    "F401",
+    "F403",
+    "F401",
+    "F403",
+    "I001",
+]
+"src/awkward/_connect/*" = [
+    "TID251"
+]
+"src/awkward/_nplikes/*" = [
+    "TID251"
+]
+"rc/awkward/_connect/rdataframe/to_rdataframe.py" = [
+    "TID251"
+]
+"tests*/*" = ["T20", "TID251"]
+"src/awkward/operations/__init__.py" = ["F401"]
+
+
+[tool.ruff.flake8-tidy-imports.banned-api]
+"numpy".msg = "Use `numpy = ak._nplikes.Numpy.instance()` instead"
+"jax".msg = "Use `jax = ak._nplikes.Jax.instance()` instead"
+"cupy".msg = "Use `cupy = ak._nplikes.Cupy.instance()` instead"

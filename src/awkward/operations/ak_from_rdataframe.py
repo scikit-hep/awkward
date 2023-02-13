@@ -3,13 +3,14 @@
 import awkward as ak
 
 
-def from_rdataframe(rdf, columns):
+def from_rdataframe(rdf, columns, offsets_type="int64_t"):
     """
     Args:
         rdf (`ROOT.RDataFrame`): ROOT RDataFrame to convert into an
             Awkward Array.
         columns (str or iterable of str): A column or multiple columns to be
             converted to Awkward Array.
+        offsets_type (str): A C++ type of the ListOffsetArray offsets.
 
     Converts ROOT RDataFrame columns into an Awkward Array.
 
@@ -23,12 +24,13 @@ def from_rdataframe(rdf, columns):
     See also #ak.to_rdataframe.
     """
     with ak._errors.OperationErrorContext(
-        "ak.from_rdataframe", dict(rdf=rdf, columns=columns)
+        "ak.from_rdataframe",
+        {"rdf": rdf, "columns": columns, "offsets_type": offsets_type},
     ):
-        return _impl(rdf, columns)
+        return _impl(rdf, columns, offsets_type)
 
 
-def _impl(data_frame, columns):
+def _impl(data_frame, columns, offsets_type):
     import awkward._connect.rdataframe.from_rdataframe  # noqa: F401
 
     if isinstance(columns, str):
@@ -48,6 +50,7 @@ def _impl(data_frame, columns):
     out = ak._connect.rdataframe.from_rdataframe.from_rdataframe(
         data_frame,
         columns,
+        offsets_type,
     )
 
     if project:

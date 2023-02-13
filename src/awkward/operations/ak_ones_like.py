@@ -2,8 +2,9 @@
 
 import awkward as ak
 from awkward._connect.numpy import unsupported
+from awkward._nplikes.numpylike import NumpyMetadata
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 
 
 def ones_like(array, *, dtype=None, highlevel=True, behavior=None):
@@ -25,7 +26,7 @@ def ones_like(array, *, dtype=None, highlevel=True, behavior=None):
     """
     with ak._errors.OperationErrorContext(
         "ak.ones_like",
-        dict(array=array, dtype=dtype, highlevel=highlevel, behavior=behavior),
+        {"array": array, "dtype": dtype, "highlevel": highlevel, "behavior": behavior},
     ):
         return _impl(array, highlevel, behavior, dtype)
 

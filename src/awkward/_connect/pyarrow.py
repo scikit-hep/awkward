@@ -3,11 +3,13 @@
 import json
 from collections.abc import Iterable, Sized
 
-import numpy
-
 import awkward as ak
+from awkward._nplikes.numpy import Numpy
+from awkward._nplikes.numpylike import NumpyMetadata
+from awkward.forms.form import _parameters_union
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
+numpy = Numpy.instance()
 
 try:
     import pyarrow
@@ -196,38 +198,6 @@ if pyarrow is not None:
         pyarrow.duration("ns"): (False, np.dtype("m8[ns]")),
     }
 
-if not ak._util.numpy_at_least("1.17.0"):
-
-    def packbits(bytearray, lsb_order=True):
-        if lsb_order:
-            if len(bytearray) % 8 == 0:
-                ready_to_pack = bytearray
-            else:
-                ready_to_pack = numpy.empty(
-                    int(numpy.ceil(len(bytearray) / 8.0)) * 8,
-                    dtype=bytearray.dtype,
-                )
-                ready_to_pack[: len(bytearray)] = bytearray
-                ready_to_pack[len(bytearray) :] = 0
-            return numpy.packbits(ready_to_pack.reshape(-1, 8)[:, ::-1].reshape(-1))
-        else:
-            return numpy.packbits(bytearray)
-
-    def unpackbits(bitarray, lsb_order=True):
-        ready_to_bitswap = numpy.unpackbits(bitarray)
-        if lsb_order:
-            return ready_to_bitswap.reshape(-1, 8)[:, ::-1].reshape(-1)
-        else:
-            return ready_to_bitswap
-
-else:
-
-    def packbits(bytearray, lsb_order=True):
-        return numpy.packbits(bytearray, bitorder=("little" if lsb_order else "big"))
-
-    def unpackbits(bitarray, lsb_order=True):
-        return numpy.unpackbits(bitarray, bitorder=("little" if lsb_order else "big"))
-
 
 def and_validbytes(validbytes1, validbytes2):
     if validbytes1 is None:
@@ -242,7 +212,7 @@ def to_validbits(validbytes):
     if validbytes is None:
         return None
     else:
-        return pyarrow.py_buffer(packbits(validbytes))
+        return pyarrow.py_buffer(numpy.packbits(validbytes, bitorder="little"))
 
 
 def to_length(nparray, length):
@@ -300,7 +270,7 @@ def popbuffers_finalize(
     if isinstance(awkwardarrow_type, AwkwardArrowType):
         if awkwardarrow_type.mask_type == "UnmaskedArray":
             assert validbits is None or numpy.all(
-                numpy.frombuffer(validbits, np.uint8)[: len(out) // 8] == 0xFF
+                numpy.frombuffer(validbits, dtype=np.uint8)[: len(out) // 8] == 0xFF
             )
             return revertable(
                 ak.contents.UnmaskedArray.simplified(
@@ -316,7 +286,9 @@ def popbuffers_finalize(
                         ak.contents.BitMaskedArray.simplified(
                             # ceildiv(len(out), 8) = -(len(out) // -8)
                             ak.index.IndexU8(
-                                numpy.full(-(len(out) // -8), np.uint8(0xFF))
+                                numpy.full(
+                                    -(len(out) // -8), np.uint8(0xFF), dtype=np.uint8
+                                )
                             ),
                             out,
                             valid_when=True,
@@ -349,7 +321,7 @@ def popbuffers_finalize(
     else:
         if validbits is None and generate_bitmasks:
             # ceildiv(len(out), 8) = -(len(out) // -8)
-            validbits = numpy.full(-(len(out) // -8), np.uint8(0xFF))
+            validbits = numpy.full(-(len(out) // -8), np.uint8(0xFF), dtype=np.uint8)
 
         if validbits is None:
             return revertable(ak.contents.UnmaskedArray.simplified(out), out)
@@ -430,12 +402,12 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
         if not isinstance(masked_index, ak.contents.UnmaskedArray):
             mask = masked_index.mask_as_bool(valid_when=False)
             if mask.any():
-                index = numpy.array(index, copy=True)
+                index = numpy.asarray(index, copy=True)
                 index[mask] = -1
 
         content = handle_arrow(paarray.dictionary, generate_bitmasks)
 
-        parameters = ak._util.merge_parameters(
+        parameters = ak.forms.form._parameters_union(
             mask_parameters(awkwardarrow_type), node_parameters(awkwardarrow_type)
         )
         if parameters is None:
@@ -659,7 +631,9 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
         validbits = buffers.pop(0)
         bitdata = buffers.pop(0)
 
-        bytedata = unpackbits(numpy.frombuffer(bitdata, dtype=np.uint8))
+        bytedata = numpy.unpackbits(
+            numpy.frombuffer(bitdata, dtype=np.uint8), bitorder="little"
+        )
 
         out = ak.contents.NumpyArray(
             bytedata.view(np.bool_),
@@ -677,7 +651,7 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
 
         to64, dt = _pyarrow_to_numpy_dtype.get(str(storage_type), (False, None))
         if to64:
-            data = numpy.frombuffer(data, dtype=np.int32).astype(np.int64)
+            data = numpy.astype(numpy.frombuffer(data, dtype=np.int32), dtype=np.int64)
         if dt is None:
             dt = storage_type.to_pandas_dtype()
 
@@ -728,7 +702,7 @@ def form_popbuffers(awkwardarrow_type, storage_type):
         a, b = to_awkwardarrow_storage_types(storage_type.value_type)
         content = form_popbuffers(a, b)
 
-        parameters = ak._util.merge_parameters(
+        parameters = _parameters_union(
             mask_parameters(awkwardarrow_type), node_parameters(awkwardarrow_type)
         )
         if parameters is None:
@@ -877,7 +851,7 @@ def form_popbuffers(awkwardarrow_type, storage_type):
         # This is already an option-type, so no form_popbuffers_finalize.
         return ak.forms.IndexedOptionForm(
             "i64",
-            ak.forms.EmptyForm(parameters=node_parameters(awkwardarrow_type)),
+            ak.forms.EmptyForm(),
             parameters=mask_parameters(awkwardarrow_type),
         )
 
@@ -1028,8 +1002,11 @@ def handle_arrow(obj, generate_bitmasks=False, pass_empty_field=False):
     elif isinstance(obj, pyarrow.lib.Table):
         batches = obj.combine_chunks().to_batches()
         if len(batches) == 0:
-            # FIXME: create a zero-length array with the right type
-            raise ak._errors.wrap_error(NotImplementedError)
+            # create an empty array following the input schema
+            return form_handle_arrow(
+                obj.schema,
+                pass_empty_field=pass_empty_field,
+            ).length_zero_array(highlevel=False)
         elif len(batches) == 1:
             return handle_arrow(batches[0], generate_bitmasks, pass_empty_field)
         else:

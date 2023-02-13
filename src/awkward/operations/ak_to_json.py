@@ -8,9 +8,11 @@ from urllib.parse import urlparse
 from awkward_cpp.lib import _ext
 
 import awkward as ak
+from awkward._nplikes.numpy import Numpy
+from awkward._nplikes.numpylike import NumpyMetadata
 
-np = ak._nplikes.NumpyMetadata.instance()
-numpy = ak._nplikes.Numpy.instance()
+np = NumpyMetadata.instance()
+numpy = Numpy.instance()
 
 
 def to_json(
@@ -110,19 +112,19 @@ def to_json(
     """
     with ak._errors.OperationErrorContext(
         "ak.to_json",
-        dict(
-            array=array,
-            file=file,
-            line_delimited=line_delimited,
-            num_indent_spaces=num_indent_spaces,
-            num_readability_spaces=num_readability_spaces,
-            nan_string=nan_string,
-            posinf_string=posinf_string,
-            neginf_string=neginf_string,
-            complex_record_fields=complex_record_fields,
-            convert_bytes=convert_bytes,
-            convert_other=convert_other,
-        ),
+        {
+            "array": array,
+            "file": file,
+            "line_delimited": line_delimited,
+            "num_indent_spaces": num_indent_spaces,
+            "num_readability_spaces": num_readability_spaces,
+            "nan_string": nan_string,
+            "posinf_string": posinf_string,
+            "neginf_string": neginf_string,
+            "complex_record_fields": complex_record_fields,
+            "convert_bytes": convert_bytes,
+            "convert_other": convert_other,
+        },
     ):
         return _impl(
             array,
@@ -171,7 +173,9 @@ def _impl(
         formstr, length, buffers = array.to_buffers()
         form = ak.forms.from_json(formstr)
 
-        out = ak.operations.from_buffers(form, length, buffers, highlevel=False)
+        out = ak.operations.from_buffers(
+            form, length, buffers, byteorder=ak._util.native_byteorder, highlevel=False
+        )
 
     elif isinstance(array, ak.contents.Content):
         out = array

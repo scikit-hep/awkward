@@ -5,8 +5,9 @@ import numbers
 import re
 
 import awkward as ak
+from awkward._nplikes.numpy import Numpy
 
-numpy = ak._nplikes.Numpy.instance()
+numpy = Numpy.instance()
 
 
 def half(integer):
@@ -69,19 +70,19 @@ def get_field(data, field):
 def custom_str(current):
     if (
         issubclass(type(current), ak.highlevel.Record)
-        and not type(current).__str__ is ak.highlevel.Record.__str__
+        and type(current).__str__ is not ak.highlevel.Record.__str__
     ) or (
         issubclass(type(current), ak.highlevel.Array)
-        and not type(current).__str__ is ak.highlevel.Array.__str__
+        and type(current).__str__ is not ak.highlevel.Array.__str__
     ):
         return str(current)
 
     elif (
         issubclass(type(current), ak.highlevel.Record)
-        and not type(current).__repr__ is ak.highlevel.Record.__repr__
+        and type(current).__repr__ is not ak.highlevel.Record.__repr__
     ) or (
         issubclass(type(current), ak.highlevel.Array)
-        and not type(current).__repr__ is ak.highlevel.Array.__repr__
+        and type(current).__repr__ is not ak.highlevel.Array.__repr__
     ):
         return repr(current)
 
@@ -90,6 +91,12 @@ def custom_str(current):
 
 
 def valuestr_horiz(data, limit_cols):
+    if isinstance(data, (ak.highlevel.Array, ak.highlevel.Record)) and (
+        not data.layout.backend.nplike.known_data
+    ):
+        if isinstance(data, ak.highlevel.Array):
+            return 5, "[...]"
+
     original_limit_cols = limit_cols
 
     if isinstance(data, ak.highlevel.Array):
@@ -222,11 +229,12 @@ def valuestr_horiz(data, limit_cols):
 
 
 def valuestr(data, limit_rows, limit_cols):
-    if (
-        isinstance(data, (ak.highlevel.Array, ak.highlevel.Record))
-        and not data.layout.backend.nplike.known_data
+    if isinstance(data, (ak.highlevel.Array, ak.highlevel.Record)) and (
+        not data.layout.backend.nplike.known_data
     ):
         data.layout._touch_data(recursive=True)
+        if isinstance(data, ak.highlevel.Array):
+            return "[...]"
 
     if limit_rows <= 1:
         _, strs = valuestr_horiz(data, limit_cols)

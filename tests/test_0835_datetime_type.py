@@ -728,13 +728,6 @@ def test_ufunc_mul():
 
 
 def test_NumpyArray_layout_as_objects():
-    with pytest.raises(TypeError):
-        ak.highlevel.Array(
-            ak.contents.NumpyArray(
-                ["2019-09-02T09:30:00", "2019-09-13T09:30:00", "2019-09-21T20:00:00"]
-            )
-        )
-
     array0 = ak.contents.NumpyArray(
         np.array(
             ["2019-09-02T09:30:00", "2019-09-13T09:30:00", "2019-09-21T20:00:00"],
@@ -751,11 +744,13 @@ def test_NumpyArray_layout_as_objects():
 
 def test_NumpyArray_layout():
     array = ak.contents.NumpyArray(
-        [
-            np.datetime64("2019-09-02T09:30:00"),
-            np.datetime64("2019-09-13T09:30:00"),
-            np.datetime64("2019-09-21T20:00:00"),
-        ]
+        np.asarray(
+            [
+                np.datetime64("2019-09-02T09:30:00"),
+                np.datetime64("2019-09-13T09:30:00"),
+                np.datetime64("2019-09-21T20:00:00"),
+            ]
+        )
     )
 
     assert to_list(array) == [

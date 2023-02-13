@@ -3,8 +3,9 @@
 from awkward_cpp.lib import _ext
 
 import awkward as ak
+from awkward._nplikes.numpylike import NumpyMetadata
 
-np = ak._nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 
 
 def from_iter(
@@ -57,14 +58,14 @@ def from_iter(
     """
     with ak._errors.OperationErrorContext(
         "ak.from_iter",
-        dict(
-            iterable=iterable,
-            allow_record=allow_record,
-            highlevel=highlevel,
-            behavior=behavior,
-            initial=initial,
-            resize=resize,
-        ),
+        {
+            "iterable": iterable,
+            "allow_record": allow_record,
+            "highlevel": highlevel,
+            "behavior": behavior,
+            "initial": initial,
+            "resize": resize,
+        },
     ):
         return _impl(iterable, highlevel, behavior, allow_record, initial, resize)
 
@@ -102,6 +103,7 @@ def _impl(iterable, highlevel, behavior, allow_record, initial, resize):
         buffers,
         buffer_key="{form_key}-{attribute}",
         backend="cpu",
+        byteorder=ak._util.native_byteorder,
         highlevel=highlevel,
         behavior=behavior,
         simplify=True,

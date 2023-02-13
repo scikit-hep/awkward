@@ -1,0 +1,44 @@
+name: Header-only Tests
+
+on:
+  pull_request:
+    # paths:
+      # - 'header-only'
+
+  workflow_dispatch:
+
+
+concurrency:
+  group: header-only-test-${{ github.head_ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: "Run Tests"
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: true
+
+    - name: Run CMake
+      run: |
+        cmake -B build -S header-only/tests -DCMAKE_RUNTIME_OUTPUT_DIRECTORY=bin -DCMAKE_BUILD_TYPE=Release
+        cmake --build build/
+
+    - name: Run tests
+      run: |
+        import os
+        import pathlib
+        import subprocess
+        for path in pathlib.Path("build/bin").glob("test_*"):
+            if path.is_file():
+                print(f"Running {path.name}", flush=True)
+                print("::group::Test output", flush=True)
+                subprocess.run([path], check=True)
+                print("::endgroup::", flush=True)
+      shell: python3 {0}

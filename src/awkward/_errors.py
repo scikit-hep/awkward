@@ -5,9 +5,10 @@ import threading
 import warnings
 from collections.abc import Mapping, Sequence
 
-from awkward import _nplikes
+from awkward._nplikes import nplike_of
+from awkward._nplikes.numpylike import NumpyMetadata
 
-np = _nplikes.NumpyMetadata.instance()
+np = NumpyMetadata.instance()
 
 
 class PartialFunction:
@@ -85,7 +86,7 @@ class ErrorContext:
                 valuestr = f"repr-raised-{type(err).__name__}"
 
         elif isinstance(value, np.ndarray):
-            import numpy
+            import numpy  # noqa: TID251
 
             if not numpy.__version__.startswith("1.13."):  # 'threshold' argument
                 prefix = f"{type(value).__module__}.{type(value).__name__}("
@@ -127,9 +128,7 @@ class OperationErrorContext(ErrorContext):
     _width = 80 - 8
 
     def __init__(self, name, arguments):
-        if self.primary() is not None or all(
-            _nplikes.nplike_of(x).is_eager for x in arguments
-        ):
+        if self.primary() is not None or all(nplike_of(x).is_eager for x in arguments):
             # if primary is not None: we won't be setting an ErrorContext
             # if all nplikes are eager: no accumulation of large arrays
             # --> in either case, delay string generation
@@ -185,7 +184,7 @@ class SlicingErrorContext(ErrorContext):
     _width = 80 - 4
 
     def __init__(self, array, where):
-        if self.primary() is not None or _nplikes.nplike_of(array, where).is_eager:
+        if self.primary() is not None or nplike_of(array, where).is_eager:
             # if primary is not None: we won't be setting an ErrorContext
             # if all nplikes are eager: no accumulation of large arrays
             # --> in either case, delay string generation
@@ -352,3 +351,7 @@ Issue: {}.""".format(
         version, date, will_be, message
     )
     warnings.warn(warning, category, stacklevel=stacklevel + 1)
+
+
+class FieldNotFoundError(IndexError):
+    ...
