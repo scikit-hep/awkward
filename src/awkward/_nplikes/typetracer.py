@@ -15,7 +15,6 @@ from awkward.typing import (
     Final,
     Literal,
     Self,
-    SupportsBool,
     SupportsIndex,
     TypeVar,
 )
@@ -887,25 +886,6 @@ class TypeTracer(NumpyLike):
                 slice_length = max(0, slice_length)
 
             return start, stop, step, self.index_as_shape_item(slice_length)
-
-    def shape_equals(
-        self, shape1: tuple[ShapeItem, ...], shape2: tuple[ShapeItem, ...]
-    ) -> SupportsBool:
-        if len(shape1) != len(shape2):
-            return False
-
-        result_is_known = True
-        for x, y in zip(shape1, shape2):
-            if x is unknown_length or y is unknown_length:
-                result_is_known = False
-                continue
-            elif x != y:
-                return False
-
-        if result_is_known:
-            return True
-        else:
-            return TypeTracerArray._new(np.bool_, shape=())
 
     def broadcast_shapes(self, *shapes: tuple[ShapeItem, ...]) -> tuple[ShapeItem, ...]:
         ndim = max([len(s) for s in shapes], default=0)

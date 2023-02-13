@@ -11,7 +11,6 @@ from awkward.typing import (
     Literal,
     Protocol,
     Self,
-    SupportsBool,
     SupportsIndex,
     TypeAlias,
     overload,
@@ -379,12 +378,6 @@ class NumpyLike(Singleton, Protocol):
     def derive_slice_for_length(
         self, slice_: slice, length: ShapeItem
     ) -> tuple[IndexType, IndexType, IndexType, ShapeItem]:
-        ...
-
-    @abstractmethod
-    def shape_equals(
-        self, shape1: tuple[ShapeItem, ...], shape2: tuple[ShapeItem, ...]
-    ) -> SupportsBool:
         ...
 
     @abstractmethod
