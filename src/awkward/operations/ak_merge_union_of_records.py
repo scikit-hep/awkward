@@ -154,7 +154,8 @@ def _impl(array, axis, highlevel, behavior):
             if any(x.is_option for x in layout.contents):
                 # We'll create an outermost indexed-option type, which re-instates the missing values
                 # The values of this don't matter; we'll compute them as a dense index (0 ... N)
-                # where N is the number of non-null items
+                # where N is the number of non-null items. This indexes into the record-of-unions, which
+                # already handles the item ordering
                 outer_option_dense_index = backend.index_nplike.empty(
                     layout.length, dtype=np.int64
                 )
@@ -202,7 +203,8 @@ def _impl(array, axis, highlevel, behavior):
                         next_contents.append(content)
                         inner_union_index_parts.append(tag_index)
 
-                # Drop the options from the outer most index
+                # Until this point, `outer_option_dense_index` contains either zero or -1.
+                # We now compute a proper index starting at 0.
                 outer_option_dense_index = compact_option_index(
                     outer_option_dense_index, backend=backend
                 )
