@@ -497,8 +497,7 @@ namespace awkward {
              panel_.get()->current_length() * sizeof(PRIMITIVE));
 
       // move to next panel
-      panel_ = std::move(panel_.get()->next());
-      if (panel_) {
+      if ((panel_ = std::move(panel_.get()->next()))) {
         move_to(to_ptr, offset + panel_.get()->current_length());
       } else {
         clear();
