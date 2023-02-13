@@ -10,7 +10,15 @@ from awkward._errors import wrap_error
 from awkward._nplikes.numpylike import ArrayLike, IndexType, NumpyLike, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._util import NDArrayOperatorsMixin, is_non_string_like_sequence
-from awkward.typing import Any, Final, Literal, Self, SupportsIndex, TypeVar
+from awkward.typing import (
+    Any,
+    Final,
+    Literal,
+    Self,
+    SupportsBool,
+    SupportsIndex,
+    TypeVar,
+)
 
 np = NumpyMetadata.instance()
 
@@ -882,17 +890,22 @@ class TypeTracer(NumpyLike):
 
     def shape_equals(
         self, shape1: tuple[ShapeItem, ...], shape2: tuple[ShapeItem, ...]
-    ) -> bool:
+    ) -> SupportsBool:
         if len(shape1) != len(shape2):
             return False
 
+        result_is_known = True
         for x, y in zip(shape1, shape2):
             if x is unknown_length or y is unknown_length:
+                result_is_known = False
                 continue
             elif x != y:
                 return False
 
-        return True
+        if result_is_known:
+            return True
+        else:
+            return TypeTracerArray._new(np.bool_, shape=())
 
     def broadcast_shapes(self, *shapes: tuple[ShapeItem, ...]) -> tuple[ShapeItem, ...]:
         ndim = max([len(s) for s in shapes], default=0)
@@ -1106,7 +1119,7 @@ class TypeTracer(NumpyLike):
         x2: ArrayLike,
         maybe_out: ArrayLike | None = None,
     ) -> TypeTracerArray:
-        return self._apply_ufunc(numpy.sqrt, x1, x2)
+        return self._apply_ufunc(numpy.logical_and, x1, x2)
 
     def logical_or(
         self,
@@ -1114,12 +1127,12 @@ class TypeTracer(NumpyLike):
         x2: ArrayLike,
         maybe_out: ArrayLike | None = None,
     ) -> TypeTracerArray:
-        return self._apply_ufunc(numpy.sqrt, x1, x2)
+        return self._apply_ufunc(numpy.logical_or, x1, x2)
 
     def logical_not(
         self, x: ArrayLike, maybe_out: ArrayLike | None = None
     ) -> TypeTracerArray:
-        return self._apply_ufunc(numpy.sqrt, x)
+        return self._apply_ufunc(numpy.logical_not, x)
 
     def sqrt(self, x: ArrayLike, maybe_out: ArrayLike | None = None) -> TypeTracerArray:
         return self._apply_ufunc(numpy.sqrt, x)
@@ -1133,7 +1146,7 @@ class TypeTracer(NumpyLike):
         x2: ArrayLike,
         maybe_out: ArrayLike | None = None,
     ) -> TypeTracerArray:
-        return self._apply_ufunc(numpy.sqrt, x1, x2)
+        return self._apply_ufunc(numpy.divide, x1, x2)
 
     ############################ almost-ufuncs
 

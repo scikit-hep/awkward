@@ -11,6 +11,7 @@ from awkward.typing import (
     Literal,
     Protocol,
     Self,
+    SupportsBool,
     SupportsIndex,
     TypeAlias,
     overload,
@@ -101,6 +102,59 @@ class ArrayLike(Protocol):
 
     @abstractmethod
     def view(self, dtype: dtype) -> Self:
+        ...
+
+    # Scalar UFUNCS
+    @abstractmethod
+    def __add__(self, other: int | complex | float | Self) -> Self:
+        ...
+
+    @abstractmethod
+    def __sub__(self, other: int | complex | float | Self) -> Self:
+        ...
+
+    @abstractmethod
+    def __mul__(self, other: int | complex | float | Self) -> Self:
+        ...
+
+    @abstractmethod
+    def __truediv__(self, other: int | complex | float | Self) -> Self:
+        ...
+
+    @abstractmethod
+    def __floordiv__(self, other: int | complex | float | Self) -> Self:
+        ...
+
+    @abstractmethod
+    def __gt__(self, other: int | complex | float | Self) -> Self:
+        ...
+
+    @abstractmethod
+    def __lt__(self, other: int | complex | float | Self) -> Self:
+        ...
+
+    @abstractmethod
+    def __ge__(self, other: int | complex | float | Self) -> Self:
+        ...
+
+    @abstractmethod
+    def __le__(self, other: int | complex | float | Self) -> Self:
+        ...
+
+    @abstractmethod
+    def __eq__(self, other: int | complex | float | bool | Self) -> Self:
+        ...
+
+    @abstractmethod
+    def __and__(self, other: int | bool | Self) -> Self:
+        ...
+
+    @abstractmethod
+    def __or__(self, other: int | bool | Self) -> Self:
+        ...
+
+    @abstractmethod
+    def __invert__(self) -> Self:
         ...
 
 
@@ -330,7 +384,7 @@ class NumpyLike(Singleton, Protocol):
     @abstractmethod
     def shape_equals(
         self, shape1: tuple[ShapeItem, ...], shape2: tuple[ShapeItem, ...]
-    ) -> bool | None:
+    ) -> SupportsBool:
         ...
 
     @abstractmethod
