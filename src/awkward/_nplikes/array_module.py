@@ -186,6 +186,9 @@ class ArrayModuleNumpyLike(NumpyLike):
     def nonzero(self, x: ArrayLike) -> tuple[ArrayLike, ...]:
         return self._module.nonzero(x)
 
+    def where(self, condition: ArrayLike, x1: ArrayLike, x2: ArrayLike) -> ArrayLike:
+        return self._module.where(condition, x1, x2)
+
     def unique_values(self, x: ArrayLike) -> ArrayLike:
         return self._module.unique(
             x,

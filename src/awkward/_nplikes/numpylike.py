@@ -397,6 +397,10 @@ class NumpyLike(Singleton, Protocol):
         ...
 
     @abstractmethod
+    def where(self, condition: ArrayLike, x1: ArrayLike, x2: ArrayLike) -> ArrayLike:
+        ...
+
+    @abstractmethod
     def unique_values(self, x: ArrayLike) -> ArrayLike:
         ...
 
