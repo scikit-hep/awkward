@@ -328,6 +328,12 @@ class NumpyLike(Singleton, Protocol):
         ...
 
     @abstractmethod
+    def shape_equals(
+        self, shape1: tuple[ShapeItem, ...], shape2: tuple[ShapeItem, ...]
+    ) -> bool | None:
+        ...
+
+    @abstractmethod
     def reshape(
         self, x: ArrayLike, shape: tuple[ShapeItem, ...], *, copy: bool | None = None
     ) -> ArrayLike:

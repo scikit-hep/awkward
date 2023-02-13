@@ -112,7 +112,7 @@ def almost_equal(
                         left.data, right.data, rtol=rtol, atol=atol, equal_nan=False
                     )
                 )
-                and left.shape == right.shape
+                and backend.nplike.shape_equals(left.shape, right.shape)
             )
 
         elif left.is_option:
