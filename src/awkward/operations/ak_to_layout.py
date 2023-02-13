@@ -53,7 +53,6 @@ def to_layout(array, *, allow_record=True, allow_other=False, regulararray=True)
 
 def _impl(array, allow_record, allow_other, regulararray):
     if isinstance(array, ak.contents.Content):
-        print("ak_to_layout.py line 50: ak.Content is", type(array))
         return array
 
     elif isinstance(array, ak.record.Record):
