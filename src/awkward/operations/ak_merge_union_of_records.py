@@ -176,7 +176,8 @@ def _impl(array, axis, highlevel, behavior):
                         next_union_dense_index_parts.append(tag_index)
 
                     else:
-                        content = content.to_IndexedOptionArray64()
+                        if content.is_option:
+                            content = content.to_IndexedOptionArray64()
 
                         # Find dense (outer) index into non-null items.
                         outer_option_index[is_this_tag] = compact_option_index(
