@@ -7,6 +7,7 @@ from collections.abc import Collection, Mapping
 import awkward as ak
 from awkward import _errors
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.shape import unknown_length
 from awkward.typing import Final, TypeAlias
 
 np = NumpyMetadata.instance()
@@ -31,9 +32,7 @@ reserved_nominal_parameters: Final = frozenset(
 
 
 def from_dict(input: dict) -> Form:
-    if input is None:
-        return None
-
+    assert input is not None
     if isinstance(input, str):
         return ak.forms.NumpyForm(primitive=input)
 
@@ -54,7 +53,7 @@ def from_dict(input: dict) -> Form:
     elif input["class"] == "RegularArray":
         return ak.forms.RegularForm(
             content=from_dict(input["content"]),
-            size=input["size"],
+            size=unknown_length if input["size"] is None else input["size"],
             parameters=parameters,
             form_key=form_key,
         )

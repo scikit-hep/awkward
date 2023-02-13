@@ -161,7 +161,7 @@ def dosig(node):
 
 def dodoc(docstring, qualname, names):
     out = docstring.replace("`", "``")
-    out = re.sub(r"<<([^>]*)>>", r"`\1`_", out)
+    out = re.sub(r"<<<([^>]*)>>>", r"`\1`_", out)
     out = re.sub(r"#(ak\.[A-Za-z0-9_\.]*[A-Za-z0-9_])", r":py:obj:`\1`", out)
     for x in names:
         out = out.replace("#" + x, ":py:meth:`{1} <{0}.{1}>`".format(qualname, x))

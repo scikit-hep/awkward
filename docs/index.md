@@ -86,7 +86,13 @@ Contributor's guide
 Spotted a typo in the documentation? Want to add to the codebase? The contributing guidelines will guide you through the process of improving Awkward Array.
 
 :::
+
+:::{grid-item-card} 
+:columns: 12
+:link: https://awkward-array.org/doc/1.10/api-reference.html
+:class-card: admonition warning
+
+{fas}`history` Need the documentation for version 1 of Awkward Array? Click this card.
+::::
     
 :::::
-
-

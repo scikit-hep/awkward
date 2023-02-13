@@ -1,18 +1,20 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 from __future__ import annotations
 
+import math
+
 import numpy
 
-import awkward as ak
-from awkward._nplikes.numpylike import ArrayLike, NumpyLike, NumpyMetadata, ShapeItem
-from awkward.typing import Final, Literal, SupportsInt
+from awkward._errors import wrap_error
+from awkward._nplikes.numpylike import ArrayLike, IndexType, NumpyLike, NumpyMetadata
+from awkward._nplikes.shape import ShapeItem, unknown_length
+from awkward.typing import Final, Literal
 
 np = NumpyMetadata.instance()
 
 
 class ArrayModuleNumpyLike(NumpyLike):
     known_data: Final = True
-    known_shape: Final = True
 
     ############################ array creation
 
@@ -29,7 +31,7 @@ class ArrayModuleNumpyLike(NumpyLike):
             return self._module.asarray(obj, dtype=dtype)
         else:
             if getattr(obj, "dtype", dtype) != dtype:
-                raise ak._errors.wrap_error(
+                raise wrap_error(
                     ValueError(
                         "asarray was called with copy=False for an array of a different dtype"
                     )
@@ -119,7 +121,7 @@ class ArrayModuleNumpyLike(NumpyLike):
         self, x: ArrayLike, shape: tuple[int, ...], *, copy: bool | None = None
     ) -> ArrayLike:
         if copy is False:
-            raise ak._errors.wrap_error(
+            raise wrap_error(
                 NotImplementedError(
                     "reshape was called with copy=False, which is currently not supported"
                 )
@@ -130,47 +132,54 @@ class ArrayModuleNumpyLike(NumpyLike):
         else:
             return result
 
-    def shape_item_as_scalar(self, x1: ShapeItem):
-        if x1 is None:
-            raise ak._errors.wrap_error(
+    def shape_item_as_index(self, x1: ShapeItem) -> int:
+        if x1 is unknown_length:
+            raise wrap_error(
                 TypeError("array module nplikes do not support unknown lengths")
             )
         elif isinstance(x1, int):
-            return self._module.asarray(x1, dtype=np.int64)
+            return x1
         else:
-            raise ak._errors.wrap_error(
-                TypeError(f"expected None or int type, received {x1}")
+            raise wrap_error(TypeError(f"expected None or int type, received {x1}"))
+
+    def index_as_shape_item(self, x1: IndexType) -> int:
+        return int(x1)
+
+    def derive_slice_for_length(
+        self, slice_: slice, length: ShapeItem
+    ) -> tuple[IndexType, IndexType, IndexType, ShapeItem]:
+        """
+        Args:
+            slice_: normalized slice object
+            length: length of layout
+
+        Return a tuple of (start, stop, step) indices into a layout, suitable for
+        `_getitem_range` (if step == 1). Normalize lengths to fit length of array,
+        and for arrays with unknown lengths, these offsets become none.
+        """
+        start, stop, step = slice_.indices(length)
+        slice_length = math.ceil((stop - start) / step)
+        return start, stop, step, slice_length
+
+    def regularize_index_for_length(
+        self, index: IndexType, length: ShapeItem
+    ) -> IndexType:
+        """
+        Args:
+            index: index value
+            length: length of array
+
+        Returns regularized index that is guaranteed to be in-bounds.
+        """  # We have known length and index
+        if index < 0:
+            index = index + length
+
+        if 0 <= index < length:
+            return index
+        else:
+            raise wrap_error(
+                IndexError(f"index value out of bounds (0, {length}): {index}")
             )
-
-    def scalar_as_shape_item(self, x1) -> ShapeItem:
-        if x1 is None:
-            return None
-        else:
-            return int(x1)
-
-    def add_shape_item(self, x1: ShapeItem, x2: ShapeItem) -> ShapeItem:
-        assert x1 >= 0
-        assert x2 >= 0
-        return x1 + x2
-
-    def sub_shape_item(self, x1: ShapeItem, x2: ShapeItem) -> ShapeItem:
-        assert x1 >= 0
-        assert x2 >= 0
-        result = x1 - x2
-        assert result >= 0
-        return result
-
-    def mul_shape_item(self, x1: ShapeItem, x2: ShapeItem) -> ShapeItem:
-        assert x1 >= 0
-        assert x2 >= 0
-        return x1 * x2
-
-    def div_shape_item(self, x1: ShapeItem, x2: ShapeItem) -> ShapeItem:
-        assert x1 >= 0
-        assert x2 >= 0
-        result = x1 // x2
-        assert result * x2 == x1
-        return result
 
     def nonzero(self, x: ArrayLike) -> tuple[ArrayLike, ...]:
         return self._module.nonzero(x)
@@ -232,7 +241,7 @@ class ArrayModuleNumpyLike(NumpyLike):
     ) -> ArrayLike:
         return self._module.unpackbits(x, axis=axis, count=count, bitorder=bitorder)
 
-    def broadcast_to(self, x: ArrayLike, shape: tuple[SupportsInt, ...]) -> ArrayLike:
+    def broadcast_to(self, x: ArrayLike, shape: tuple[ShapeItem, ...]) -> ArrayLike:
         return self._module.broadcast_to(x, shape)
 
     ############################ ufuncs

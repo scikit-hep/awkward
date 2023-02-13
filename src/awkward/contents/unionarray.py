@@ -10,13 +10,17 @@ from collections.abc import Iterable, Sequence
 import awkward as ak
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpylike import IndexType, NumpyMetadata
+from awkward._nplikes.shape import unknown_length
 from awkward._nplikes.typetracer import OneOf, TypeTracer
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.unionform import UnionForm
 from awkward.index import Index, Index8, Index64
-from awkward.typing import Final, Self, final
+from awkward.typing import TYPE_CHECKING, Final, Self, SupportsIndex, final
+
+if TYPE_CHECKING:
+    from awkward._slicing import SliceItem
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
@@ -24,6 +28,59 @@ numpy = Numpy.instance()
 
 @final
 class UnionArray(Content):
+    """
+    UnionArray represents data drawn from an ordered list of `contents`,
+    which can have different types, using
+
+    * `tags`: buffer of integers indicating which content each array element draws from.
+    * `index`: buffer of integers indicating which element from the content to draw from.
+
+    UnionArrays correspond to Apache Arrow's
+    [dense union type](https://arrow.apache.org/docs/format/Columnar.html#dense-union).
+    Awkward Array has no direct equivalent for Apache Arrow's
+    [sparse union type](https://arrow.apache.org/docs/format/Columnar.html#sparse-union).
+
+    To illustrate how the constructor arguments are interpreted, the following is a
+    simplified implementation of `__init__`, `__len__`, and `__getitem__`:
+
+        class UnionArray(Content):
+            def __init__(self, tags, index, contents):
+                assert isinstance(tags, Index8)
+                assert isinstance(index, (Index32, IndexU32, Index64))
+                assert isinstance(contents, list)
+                assert len(index) >= len(tags)  # usually equal
+                for x in tags:
+                    assert 0 <= x < len(contents)
+                for i, x in enumerate(tags):
+                    assert 0 <= index[i] < len(contents[x])
+                self.tags = tags
+                self.index = index
+                self.contents = contents
+
+            def __len__(self):
+                return len(self.tags)
+
+            def __getitem__(self, where):
+                if isinstance(where, int):
+                    if where < 0:
+                        where += len(self)
+                    assert 0 <= where < len(self)
+                    return self.contents[self.tags[where]][self.index[where]]
+
+                elif isinstance(where, slice) and where.step is None:
+                    return UnionArray(
+                        self.tags[where], self.index[where], self.contents
+                    )
+
+                elif isinstance(where, str):
+                    return UnionArray(
+                        self.tags, self.index, [x[where] for x in self.contents]
+                    )
+
+                else:
+                    raise AssertionError(where)
+    """
+
     is_union = True
 
     def __init__(self, tags, index, contents, *, parameters=None):
@@ -96,7 +153,7 @@ class UnionArray(Content):
                 )
 
         if (
-            not (tags.length is None or index.length is None)
+            not (tags.length is unknown_length or index.length is unknown_length)
             and tags.length > index.length
         ):
             raise ak._errors.wrap_error(
@@ -200,7 +257,7 @@ class UnionArray(Content):
                     )
                 )
 
-        if backend.nplike.known_shape and self_index.length < self_tags.length:
+        if backend.nplike.known_data and self_index.length < self_tags.length:
             raise ak._errors.wrap_error(
                 ValueError("invalid UnionArray: len(index) < len(tags)")
             )
@@ -420,7 +477,7 @@ class UnionArray(Content):
                 x._touch_data(recursive)
 
     def _touch_shape(self, recursive):
-        if not self._backend.index_nplike.known_shape:
+        if not self._backend.index_nplike.known_data:
             self._tags.data.touch_shape()
             self._index.data.touch_shape()
         if recursive:
@@ -453,27 +510,25 @@ class UnionArray(Content):
         return "".join(out)
 
     def _getitem_nothing(self):
-        return self._getitem_range(slice(0, 0))
+        return self._getitem_range(0, 0)
 
-    def _getitem_at(self, where):
+    def _getitem_at(self, where: IndexType):
         if not self._backend.nplike.known_data:
             self._touch_data(recursive=False)
             return OneOf([x._getitem_at(where) for x in self._contents])
 
         if where < 0:
             where += self.length
-        if self._backend.nplike.known_shape and not 0 <= where < self.length:
+        if self._backend.nplike.known_data and not 0 <= where < self.length:
             raise ak._errors.index_error(self, where)
         tag, index = self._tags[where], self._index[where]
         return self._contents[tag]._getitem_at(index)
 
-    def _getitem_range(self, where):
-        if not self._backend.nplike.known_shape:
+    def _getitem_range(self, start: SupportsIndex, stop: IndexType) -> Content:
+        if not self._backend.nplike.known_data:
             self._touch_shape(recursive=False)
             return self
 
-        start, stop, step = where.indices(self.length)
-        assert step == 1
         return UnionArray(
             self._tags[start:stop],
             self._index[start:stop],
@@ -481,7 +536,9 @@ class UnionArray(Content):
             parameters=self._parameters,
         )
 
-    def _getitem_field(self, where, only_fields=()):
+    def _getitem_field(
+        self, where: str | SupportsIndex, only_fields: tuple[str, ...] = ()
+    ) -> Content:
         return UnionArray.simplified(
             self._tags,
             self._index,
@@ -489,7 +546,9 @@ class UnionArray(Content):
             parameters=None,
         )
 
-    def _getitem_fields(self, where, only_fields=()):
+    def _getitem_fields(
+        self, where: list[str | SupportsIndex], only_fields: tuple[str, ...] = ()
+    ) -> Content:
         return UnionArray.simplified(
             self._tags,
             self._index,
@@ -497,7 +556,7 @@ class UnionArray(Content):
             parameters=None,
         )
 
-    def _carry(self, carry, allow_lazy):
+    def _carry(self, carry: Index, allow_lazy: bool) -> Content:
         assert isinstance(carry, ak.index.Index)
 
         try:
@@ -592,7 +651,7 @@ class UnionArray(Content):
     def project(self, index):
         lentags = self._tags.length
         assert (
-            self._index.length is None or lentags is None
+            self._index.length is unknown_length or lentags is unknown_length
         ) or self._index.length >= lentags
         lenout = ak.index.Index64.empty(1, self._backend.index_nplike)
         tmpcarry = ak.index.Index64.empty(lentags, self._backend.index_nplike)
@@ -648,7 +707,7 @@ class UnionArray(Content):
                 lentags,
             )
         )
-        size = backend.index_nplike.scalar_as_shape_item(_size[0])
+        size = backend.index_nplike.index_as_shape_item(_size[0])
         current = index_cls.empty(size, nplike=backend.index_nplike)
         outindex = index_cls.empty(lentags, nplike=backend.index_nplike)
         assert (
@@ -745,7 +804,12 @@ class UnionArray(Content):
             slicestarts, slicestops, slicecontent, tail
         )
 
-    def _getitem_next(self, head, tail, advanced):
+    def _getitem_next(
+        self,
+        head: SliceItem | tuple,
+        tail: tuple[SliceItem, ...],
+        advanced: Index | None,
+    ) -> Content:
         if head == ():
             return self
 
@@ -930,11 +994,11 @@ class UnionArray(Content):
         mylength = self.length
 
         tags = ak.index.Index8.empty(
-            self._backend.index_nplike.add_shape_item(theirlength, mylength),
+            theirlength + mylength,
             nplike=self._backend.index_nplike,
         )
         index = ak.index.Index64.empty(
-            self._backend.index_nplike.add_shape_item(theirlength, mylength),
+            theirlength + mylength,
             nplike=self._backend.index_nplike,
         )
 
@@ -1018,9 +1082,7 @@ class UnionArray(Content):
 
         total_length = 0
         for array in head:
-            total_length = self._backend.index_nplike.add_shape_item(
-                total_length, array.length
-            )
+            total_length += array.length
 
         nexttags = ak.index.Index8.empty(
             total_length, nplike=self._backend.index_nplike
@@ -1077,9 +1139,8 @@ class UnionArray(Content):
                         array.length,
                     )
                 )
-                length_so_far = self._backend.index_nplike.add_shape_item(
-                    length_so_far, array.length
-                )
+                length_so_far += array.length
+
                 nextcontents.extend(union_contents)
 
             else:
@@ -1103,9 +1164,8 @@ class UnionArray(Content):
                     ](nextindex.data, length_so_far, array.length)
                 )
 
-                length_so_far = self._backend.index_nplike.add_shape_item(
-                    length_so_far, array.length
-                )
+                length_so_far += array.length
+
                 nextcontents.append(array)
 
         if len(nextcontents) > 127:
@@ -1286,16 +1346,13 @@ class UnionArray(Content):
 
     def _validity_error(self, path):
         for i in range(len(self.contents)):
-            if (
-                self._backend.nplike.known_shape
-                and self.index.length < self.tags.length
-            ):
+            if self._backend.nplike.known_data and self.index.length < self.tags.length:
                 return f"at {path} ({type(self)!r}): len(index) < len(tags)"
 
             lencontents = self._backend.index_nplike.empty(
                 len(self.contents), dtype=np.int64
             )
-            if self._backend.nplike.known_shape:
+            if self._backend.nplike.known_data:
                 for i in range(len(self.contents)):
                     lencontents[i] = self.contents[i].length
 

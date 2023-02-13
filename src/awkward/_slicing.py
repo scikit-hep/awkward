@@ -2,22 +2,73 @@
 
 from __future__ import annotations
 
+import operator
+
 import awkward as ak
 from awkward._backends import Backend
 from awkward._errors import wrap_error
 from awkward._nplikes import nplike_of, to_nplike
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.shape import unknown_length
 from awkward.typing import TYPE_CHECKING, Sequence, TypeAlias
 
 if TYPE_CHECKING:
-    from awkward._nplikes.numpylike import ArrayLike  # noqa: F401
+    from awkward._nplikes.numpylike import ArrayLike
     from awkward.contents.content import Content
 
 np = NumpyMetadata.instance()
 
 
 SliceItem: TypeAlias = "int | slice | str | None | Ellipsis | ArrayLike | Content"
+
+
+def normalize_slice_item(item, *, backend: Backend):
+    if backend.index_nplike.is_own_array(item):
+        if item.ndim != 0:
+            raise wrap_error(
+                ValueError(
+                    f"slice items must be 0D arrays or Python integers, not {item!r}"
+                )
+            )
+        else:
+            return item
+    else:
+        return operator.index(item)
+
+
+def normalize_slice(slice_: slice, *, backend: Backend) -> slice:
+    """
+    Args:
+        slice_: slice object
+        backend: backend of layout
+
+    Return a slice of (start, stop, step) for which the slice items have been
+    normalized into index types.
+    """
+    index_nplike = backend.index_nplike
+
+    start = slice_.start
+    stop = slice_.stop
+    step = slice_.step
+
+    if index_nplike.known_data:
+        return slice_
+    # Unknown lengths mean that the slice index is unknown
+    else:
+        start = (
+            index_nplike.shape_item_as_index(start)
+            if start is unknown_length
+            else start
+        )
+        stop = (
+            index_nplike.shape_item_as_index(stop) if stop is unknown_length else stop
+        )
+        step = (
+            index_nplike.shape_item_as_index(step) if step is unknown_length else step
+        )
+
+        return slice(start, stop, step)
 
 
 def headtail(
@@ -161,7 +212,7 @@ def normalise_item(item, backend: Backend) -> SliceItem:
         return int(item)
 
     elif isinstance(item, slice):
-        return item
+        return normalize_slice(item, backend=backend)
 
     elif isinstance(item, str):
         return item
@@ -439,7 +490,8 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
         and isinstance(item.content, NumpyArray)
         and np.issubdtype(item.content.dtype, np.bool_)
     ):
-        if item_backend.nplike.known_data or item_backend.nplike.known_shape:
+        if item_backend.nplike.known_data:
+            item = item.to_ListOffsetArray64(True)
             localindex = ak._do.local_index(item, axis=1)
             nextcontent = localindex.content.data[item.content.data]
 
@@ -455,7 +507,7 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
         else:
             item._touch_data(recursive=False)
             nextoffsets = item.offsets
-            nextcontent = item_backend.nplike.empty(None, dtype=np.int64)
+            nextcontent = item_backend.nplike.empty(unknown_length, dtype=np.int64)
 
         return ListOffsetArray(
             ak.index.Index64(nextoffsets),
@@ -468,7 +520,7 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
         and isinstance(item.content.content, NumpyArray)
         and np.issubdtype(item.content.content.dtype, np.bool_)
     ):
-        if item_backend.nplike.known_data or item_backend.nplike.known_shape:
+        if item_backend.nplike.known_data:
             if isinstance(item_backend.nplike, Jax):
                 raise wrap_error("This slice is not supported for JAX differentiation.")
             # missing values as any integer other than -1 are extremely rare
@@ -512,7 +564,7 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
             item._touch_data(recursive=False)
             nextoffsets = item.offsets
             outindex = item.content.index
-            nextcontent = item_backend.nplike.empty(None, dtype=np.int64)
+            nextcontent = item_backend.nplike.empty(unknown_length, dtype=np.int64)
 
         return ListOffsetArray(
             ak.index.Index64(nextoffsets, nplike=item_backend.index_nplike),
@@ -536,7 +588,7 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
         if isinstance(item.content, NumpyArray) and issubclass(
             item.content.dtype.type, (bool, np.bool_)
         ):
-            if item_backend.nplike.known_data or item_backend.nplike.known_shape:
+            if item_backend.nplike.known_data:
                 if isinstance(item_backend.nplike, Jax):
                     raise wrap_error(
                         TypeError(
@@ -582,7 +634,7 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
             else:
                 item._touch_data(recursive=False)
                 outindex = item.index
-                nextcontent = item_backend.nplike.empty(None, dtype=np.int64)
+                nextcontent = item_backend.nplike.empty(unknown_length, dtype=np.int64)
 
             return IndexedOptionArray(
                 ak.index.Index(outindex, nplike=item_backend.index_nplike),

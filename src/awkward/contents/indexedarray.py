@@ -5,14 +5,17 @@ import copy
 
 import awkward as ak
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpylike import IndexType, NumpyMetadata
 from awkward._nplikes.typetracer import TypeTracer
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.form import _type_parameters_equal
 from awkward.forms.indexedform import IndexedForm
 from awkward.index import Index
-from awkward.typing import Final, Self, final
+from awkward.typing import TYPE_CHECKING, Final, Self, SupportsIndex, final
+
+if TYPE_CHECKING:
+    from awkward._slicing import SliceItem
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
@@ -20,6 +23,56 @@ numpy = Numpy.instance()
 
 @final
 class IndexedArray(Content):
+    """
+    IndexedArray is a general-purpose tool for *lazily* changing the order of
+    and/or duplicating some `content` with a
+    [np.take](https://docs.scipy.org/doc/numpy/reference/generated/numpy.take.html)
+    over the integer buffer `index.
+
+    It has many uses:
+
+    * representing a lazily applied slice.
+    * simulating pointers into another collection.
+    * emulating the dictionary encoding of Apache Arrow and Parquet.
+
+    If the `__array__` parameter is `"categorical"`, the contents must be unique.
+    Some operations are optimized (for instance, `==` only compares `index` integers)
+    and the array can be converted to and from Arrow/Parquet's dictionary encoding.
+
+    To illustrate how the constructor arguments are interpreted, the following is a
+    simplified implementation of `__init__`, `__len__`, and `__getitem__`:
+
+        class IndexedArray(Content):
+            def __init__(self, index, content):
+                assert isinstance(index, (Index32, IndexU32, Index64))
+                assert isinstance(content, Content)
+                for x in index:
+                    assert 0 <= x < len(content)  # index[i] must not be negative
+                self.index = index
+                self.content = content
+
+            def __len__(self):
+                return len(self.index)
+
+            def __getitem__(self, where):
+                if isinstance(where, int):
+                    if where < 0:
+                        where += len(self)
+                    assert 0 <= where < len(self)
+                    return self.content[self.index[where]]
+
+                elif isinstance(where, slice) and where.step is None:
+                    return IndexedArray(
+                        self.index[where.start : where.stop], self.content
+                    )
+
+                elif isinstance(where, str):
+                    return IndexedArray(self.index, self.content[where])
+
+                else:
+                    raise AssertionError(where)
+    """
+
     is_indexed = True
 
     def __init__(self, index, content, *, parameters=None):
@@ -174,7 +227,7 @@ class IndexedArray(Content):
             self._content._touch_data(recursive)
 
     def _touch_shape(self, recursive):
-        if not self._backend.index_nplike.known_shape:
+        if not self._backend.index_nplike.known_data:
             self._index.data.touch_shape()
         if recursive:
             self._content._touch_shape(recursive)
@@ -210,45 +263,47 @@ class IndexedArray(Content):
             return self._index.data < 0
 
     def _getitem_nothing(self):
-        return self._content._getitem_range(slice(0, 0))
+        return self._content._getitem_range(0, 0)
 
-    def _getitem_at(self, where):
+    def _getitem_at(self, where: IndexType):
         if not self._backend.nplike.known_data:
             self._touch_data(recursive=False)
             return self._content._getitem_at(where)
 
         if where < 0:
             where += self.length
-        if self._backend.nplike.known_shape and not 0 <= where < self.length:
+        if self._backend.nplike.known_data and not 0 <= where < self.length:
             raise ak._errors.index_error(self, where)
         return self._content._getitem_at(self._index[where])
 
-    def _getitem_range(self, where):
-        if not self._backend.nplike.known_shape:
+    def _getitem_range(self, start: SupportsIndex, stop: IndexType) -> Content:
+        if not self._backend.nplike.known_data:
             self._touch_shape(recursive=False)
             return self
 
-        start, stop, step = where.indices(self.length)
-        assert step == 1
         return IndexedArray(
             self._index[start:stop], self._content, parameters=self._parameters
         )
 
-    def _getitem_field(self, where, only_fields=()):
+    def _getitem_field(
+        self, where: str | SupportsIndex, only_fields: tuple[str, ...] = ()
+    ) -> Content:
         return IndexedArray.simplified(
             self._index,
             self._content._getitem_field(where, only_fields),
             parameters=None,
         )
 
-    def _getitem_fields(self, where, only_fields=()):
+    def _getitem_fields(
+        self, where: list[str | SupportsIndex], only_fields: tuple[str, ...] = ()
+    ) -> Content:
         return IndexedArray.simplified(
             self._index,
             self._content._getitem_fields(where, only_fields),
             parameters=None,
         )
 
-    def _carry(self, carry, allow_lazy):
+    def _carry(self, carry: Index, allow_lazy: bool) -> IndexedArray:
         assert isinstance(carry, ak.index.Index)
 
         try:
@@ -259,7 +314,7 @@ class IndexedArray(Content):
         return IndexedArray(nextindex, self._content, parameters=self._parameters)
 
     def _getitem_next_jagged_generic(self, slicestarts, slicestops, slicecontent, tail):
-        if self._backend.nplike.known_shape and slicestarts.length != self.length:
+        if self._backend.nplike.known_data and slicestarts.length != self.length:
             raise ak._errors.index_error(
                 self,
                 ak.contents.ListArray(
@@ -297,7 +352,12 @@ class IndexedArray(Content):
             slicestarts, slicestops, slicecontent, tail
         )
 
-    def _getitem_next(self, head, tail, advanced):
+    def _getitem_next(
+        self,
+        head: SliceItem | tuple,
+        tail: tuple[SliceItem, ...],
+        advanced: Index | None,
+    ) -> Content:
         if head == ():
             return self
 
@@ -350,7 +410,7 @@ class IndexedArray(Content):
 
     def project(self, mask=None):
         if mask is not None:
-            if self._backend.nplike.known_shape and self._index.length != mask.length:
+            if self._backend.nplike.known_data and self._index.length != mask.length:
                 raise ak._errors.wrap_error(
                     ValueError(
                         "mask length ({}) is not equal to {} length ({})".format(
@@ -615,7 +675,7 @@ class IndexedArray(Content):
             return reversed._mergemany(tail[1:])
 
     def _fill_none(self, value: Content) -> Content:
-        if value.backend.nplike.known_shape and value.length != 1:
+        if value.backend.nplike.known_data and value.length != 1:
             raise ak._errors.wrap_error(
                 ValueError(f"fill_none value length ({value.length}) is not equal to 1")
             )
@@ -986,7 +1046,7 @@ class IndexedArray(Content):
         self, action, behavior, depth, depth_context, lateral_context, options
     ):
         if (
-            self._backend.nplike.known_shape
+            self._backend.nplike.known_data
             and self._backend.nplike.known_data
             and self._index.length != 0
         ):
@@ -997,10 +1057,7 @@ class IndexedArray(Content):
             )
             content = self._content[indexmin : npindex.max() + 1]
         else:
-            if (
-                not self._backend.nplike.known_shape
-                or not self._backend.nplike.known_data
-            ):
+            if not self._backend.nplike.known_data:
                 self._touch_data(recursive=False)
             index, content = self._index, self._content
 

@@ -7,14 +7,18 @@ import awkward as ak
 from awkward._nplikes import to_nplike
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import ArrayLike, NumpyMetadata
+from awkward._nplikes.numpylike import ArrayLike, IndexType, NumpyMetadata
 from awkward._nplikes.typetracer import TypeTracerArray
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.form import _type_parameters_equal
 from awkward.forms.numpyform import NumpyForm
+from awkward.index import Index
 from awkward.types.numpytype import primitive_to_dtype
-from awkward.typing import Final, Self, final
+from awkward.typing import TYPE_CHECKING, Final, Self, SupportsIndex, final
+
+if TYPE_CHECKING:
+    from awkward._slicing import SliceItem
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
@@ -22,6 +26,60 @@ numpy = Numpy.instance()
 
 @final
 class NumpyArray(Content):
+    """
+    A NumpyArray describes 1-dimensional or rectilinear data using a NumPy
+    `np.ndarray`, a CuPy `cp.ndarray`, etc., depending on the backend.
+
+    This class is aware of the rectilinear array's `shape` and `strides`, and
+    allows for arbitrary `strides`, such as Fortran-ordered data. However, many
+    operations require C-contiguous data, so derivatives of Fortran-ordered
+    arrays may not be Fortran-ordered.
+
+    Only a subset of `dtype` values are allowed, and only for your system's
+    native endianness:
+
+    * `bool`: boolean, like NumPy's `np.bool_` (considered distinct from integers)
+    * `int8`: signed 8-bit
+    * `uint8`: unsigned 8-bit
+    * `int16`: signed 16-bit
+    * `uint16`: unsigned 16-bit
+    * `int32`: signed 32-bit
+    * `uint32`: unsigned 32-bit
+    * `int64`: signed 64-bit
+    * `uint64`: unsigned 64-bit
+    * `float16`: floating point 16-bit, if your system's NumPy supports it
+    * `float32`: floating point 32-bit
+    * `float64`: floating point 64-bit
+    * `float128`: floating point 128-bit, if your system's NumPy supports it
+    * `complex64`: floating complex numbers composed of 32-bit real/imag parts
+    * `complex128`: floating complex numbers composed of 64-bit real/imag parts
+    * `complex256`: floating complex numbers composed of 128-bit real/imag parts, if your system's NumPy supports it
+    * `datetime64`: date/time, origin is midnight on January 1, 1970, in any units NumPy supports
+    * `timedelta64`: time difference, in any units NumPy supports
+
+    If the `shape` is one-dimensional, a NumpyArray corresponds to an Apache
+    Arrow [Primitive array](https://arrow.apache.org/docs/format/Columnar.html#fixed-size-primitive-layout).
+
+    To illustrate how the constructor arguments are interpreted, the following is a
+    simplified implementation of `__init__`, `__len__`, and `__getitem__`:
+
+        class NumpyArray(Content):
+            def __init__(self, data):
+                assert isinstance(data, numpy_like_array)
+                assert data.dtype in allowed_dtypes
+                self.data = data
+
+            def __len__(self):
+                return len(self.data)
+
+            def __getitem__(self, where):
+                result = self.data[where]
+                if isinstance(result, numpy_like_array):
+                    return NumpyArray(result)
+                else:
+                    return result
+    """
+
     is_numpy = True
     is_leaf = True
 
@@ -137,7 +195,7 @@ class NumpyArray(Content):
             self._data.touch_data()
 
     def _touch_shape(self, recursive):
-        if not self._backend.nplike.known_shape:
+        if not self._backend.nplike.known_data:
             self._data.touch_shape()
 
     @property
@@ -185,7 +243,7 @@ class NumpyArray(Content):
         shape = self._data.shape
         zeroslen = [1]
         for x in shape:
-            zeroslen.append(self._backend.index_nplike.mul_shape_item(zeroslen[-1], x))
+            zeroslen.append(zeroslen[-1] * x)
 
         out = NumpyArray(
             self._backend.nplike.reshape(self._data, (-1,)),
@@ -214,7 +272,7 @@ class NumpyArray(Content):
             backend=self._backend,
         )
 
-    def _getitem_at(self, where):
+    def _getitem_at(self, where: IndexType):
         if not self._backend.nplike.known_data and len(self._data.shape) == 1:
             self._touch_data(recursive=False)
             return TypeTracerArray._new(self._data.dtype, shape=())
@@ -229,30 +287,27 @@ class NumpyArray(Content):
         else:
             return out
 
-    def _getitem_range(self, where):
-        if not self._backend.nplike.known_shape:
-            self._touch_shape(recursive=False)
-            return self
-
-        start, stop, step = where.indices(self.length)
-        assert step == 1
-
+    def _getitem_range(self, start: SupportsIndex, stop: IndexType) -> Content:
         try:
-            out = self._data[where]
+            out = self._data[start:stop]
         except IndexError as err:
-            raise ak._errors.index_error(self, where, str(err)) from err
+            raise ak._errors.index_error(self, slice(start, stop), str(err)) from err
 
         return NumpyArray(out, parameters=self._parameters, backend=self._backend)
 
-    def _getitem_field(self, where, only_fields=()):
+    def _getitem_field(
+        self, where: str | SupportsIndex, only_fields: tuple[str, ...] = ()
+    ) -> Content:
         raise ak._errors.index_error(self, where, "not an array of records")
 
-    def _getitem_fields(self, where, only_fields=()):
+    def _getitem_fields(
+        self, where: list[str | SupportsIndex], only_fields: tuple[str, ...] = ()
+    ) -> Content:
         if len(where) == 0:
-            return self._getitem_range(slice(0, 0))
+            return self._getitem_range(0, 0)
         raise ak._errors.index_error(self, where, "not an array of records")
 
-    def _carry(self, carry, allow_lazy):
+    def _carry(self, carry: Index, allow_lazy: bool) -> Content:
         assert isinstance(carry, ak.index.Index)
         try:
             nextdata = self._data[carry.data]
@@ -275,7 +330,12 @@ class NumpyArray(Content):
                 slicestarts, slicestops, slicecontent, tail
             )
 
-    def _getitem_next(self, head, tail, advanced):
+    def _getitem_next(
+        self,
+        head: SliceItem | tuple,
+        tail: tuple[SliceItem, ...],
+        advanced: Index | None,
+    ) -> Content:
         if head == ():
             return self
 
@@ -848,7 +908,7 @@ class NumpyArray(Content):
                     parents_length,
                 )
             )
-            offsets_length = self._backend.index_nplike.scalar_as_shape_item(
+            offsets_length = self._backend.index_nplike.index_as_shape_item(
                 _offsets_length[0]
             )
 
@@ -875,9 +935,7 @@ class NumpyArray(Content):
                 if self._data.dtype.kind.upper() == "M"
                 else self._data.dtype
             )
-            nextcarry = ak.index.Index64.empty(
-                self.__len__(), self._backend.index_nplike
-            )
+            nextcarry = ak.index.Index64.empty(self.length, self._backend.index_nplike)
             assert (
                 nextcarry.nplike is self._backend.index_nplike
                 and offsets.nplike is self._backend.index_nplike
@@ -891,7 +949,7 @@ class NumpyArray(Content):
                 ](
                     nextcarry.data,
                     self._data,
-                    self.__len__(),
+                    self.length,
                     offsets.data,
                     offsets_length,
                     ascending,
@@ -960,7 +1018,7 @@ class NumpyArray(Content):
                     parents_length,
                 )
             )
-            offsets_length = self._backend.index_nplike.scalar_as_shape_item(
+            offsets_length = self._backend.index_nplike.index_as_shape_item(
                 _offsets_length[0]
             )
 

@@ -5,18 +5,18 @@ from abc import abstractmethod
 
 import numpy
 
+from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._singleton import Singleton
 from awkward.typing import (
     Literal,
     Protocol,
     Self,
     SupportsIndex,
-    SupportsInt,  # noqa: F401
     TypeAlias,
     overload,
 )
 
-ShapeItem: TypeAlias = "SupportsInt | None"
+IndexType: TypeAlias = "int | ArrayLike"
 
 
 class ArrayLike(Protocol):
@@ -179,11 +179,6 @@ class NumpyLike(Singleton, Protocol):
 
     @property
     @abstractmethod
-    def known_shape(self) -> bool:
-        ...
-
-    @property
-    @abstractmethod
     def is_eager(self) -> bool:
         ...
 
@@ -301,28 +296,32 @@ class NumpyLike(Singleton, Protocol):
     def broadcast_to(self, x: ArrayLike, shape: tuple[ShapeItem, ...]) -> ArrayLike:
         ...
 
-    @abstractmethod
-    def shape_item_as_scalar(self, x1: ShapeItem):
+    @overload
+    def shape_item_as_index(self, x1: int) -> int:
+        ...
+
+    @overload
+    def shape_item_as_index(self, x1: type[unknown_length]) -> ArrayLike:
         ...
 
     @abstractmethod
-    def scalar_as_shape_item(self, x1) -> ShapeItem:
+    def shape_item_as_index(self, x1):
         ...
 
     @abstractmethod
-    def sub_shape_item(self, x1: ShapeItem, x2: ShapeItem) -> ShapeItem:
+    def index_as_shape_item(self, x1: IndexType) -> ShapeItem:
         ...
 
     @abstractmethod
-    def add_shape_item(self, x1: ShapeItem, x2: ShapeItem) -> ShapeItem:
+    def derive_slice_for_length(
+        self, slice_: slice, length: ShapeItem
+    ) -> tuple[IndexType, IndexType, IndexType, ShapeItem]:
         ...
 
     @abstractmethod
-    def mul_shape_item(self, x1: ShapeItem, x2: ShapeItem) -> ShapeItem:
-        ...
-
-    @abstractmethod
-    def div_shape_item(self, x1: ShapeItem, x2: ShapeItem) -> ShapeItem:
+    def regularize_index_for_length(
+        self, index: IndexType, length: ShapeItem
+    ) -> IndexType:
         ...
 
     @abstractmethod

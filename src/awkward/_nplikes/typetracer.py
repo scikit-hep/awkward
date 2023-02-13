@@ -7,23 +7,16 @@ import numpy
 
 import awkward as ak
 from awkward._errors import wrap_error
-from awkward._nplikes.numpylike import ArrayLike, NumpyLike, NumpyMetadata, ShapeItem
+from awkward._nplikes.numpylike import ArrayLike, IndexType, NumpyLike, NumpyMetadata
+from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._util import NDArrayOperatorsMixin, is_non_string_like_sequence
-from awkward.typing import (
-    Any,
-    Final,
-    Literal,
-    Self,
-    SupportsIndex,
-    SupportsInt,
-    TypeVar,
-)
+from awkward.typing import Any, Final, Literal, Self, SupportsIndex, TypeVar
 
 np = NumpyMetadata.instance()
 
 
 def is_unknown_length(array: Any) -> bool:
-    return array is None
+    return array is unknown_length
 
 
 def is_unknown_scalar(array: Any) -> bool:
@@ -203,17 +196,6 @@ def typetracer_with_report(form, forget_length=True):
     return layout, report
 
 
-def _length_after_slice(slice, original_length):
-    start, stop, step = slice.indices(original_length)
-    assert step != 0
-
-    if (step > 0 and stop - start > 0) or (step < 0 and stop - start < 0):
-        d, m = divmod(abs(start - stop), abs(step))
-        return d + (1 if m != 0 else 0)
-    else:
-        return 0
-
-
 class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
     _dtype: numpy.dtype
     _shape: tuple[ShapeItem, ...]
@@ -280,7 +262,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
             if ak._util.is_integer(item):
                 size *= item
             else:
-                return None
+                return unknown_length
         return size
 
     @property
@@ -351,7 +333,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
     def forget_length(self) -> Self:
         return self._new(
             self._dtype,
-            (None,) + self._shape[1:],
+            (unknown_length,) + self._shape[1:],
             self._form_key,
             self._report,
         )
@@ -387,17 +369,6 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
                 "bug in Awkward Array: attempt to get length of a TypeTracerArray"
             )
         )
-
-    def _resolve_slice_length(self, length, slice_):
-        if length is None:
-            return None
-        elif any(
-            is_unknown_scalar(x) for x in (slice_.start, slice_.stop, slice_.step)
-        ):
-            return None
-        else:
-            start, stop, step = slice_.indices(length)
-            return min((stop - start) // step, length)
 
     def __getitem__(
         self,
@@ -492,7 +463,12 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
                     previous_item_is_basic = False
                 # Slice
                 elif isinstance(item, slice):
-                    slice_length = self._resolve_slice_length(dimension_length, item)
+                    (
+                        start,
+                        stop,
+                        step,
+                        slice_length,
+                    ) = self.nplike.derive_slice_for_length(item, dimension_length)
                     result_shape_parts.append((slice_length,))
                     previous_item_is_basic = True
                 # Integer
@@ -586,7 +562,6 @@ def try_touch_shape(array):
 
 class TypeTracer(NumpyLike):
     known_data: Final = False
-    known_shape: Final = False
     is_eager: Final = True
 
     def _apply_ufunc(self, ufunc, *inputs):
@@ -597,7 +572,15 @@ class TypeTracer(NumpyLike):
         placeholders = [numpy.empty(0, x.dtype) for x in broadcasted]
 
         result = ufunc(*placeholders)
-        return TypeTracerArray._new(result.dtype, shape=broadcasted[0].shape)
+        if isinstance(result, numpy.ndarray):
+            return TypeTracerArray._new(result.dtype, shape=broadcasted[0].shape)
+        elif isinstance(result, tuple):
+            return (
+                TypeTracerArray._new(x.dtype, shape=b.shape)
+                for x, b in zip(result, broadcasted)
+            )
+        else:
+            raise wrap_error(TypeError)
 
     def to_rectilinear(self, array, *args, **kwargs):
         try_touch_shape(array)
@@ -765,7 +748,7 @@ class TypeTracer(NumpyLike):
         ):
             length = max(0, (stop - start + (step - (1 if step > 0 else -1))) // step)
         else:
-            length = None
+            length = unknown_length
 
         default_int_type = np.int64 if (ak._util.win or ak._util.bits32) else np.int32
         return TypeTracerArray._new(dtype or default_int_type, (length,))
@@ -811,69 +794,125 @@ class TypeTracer(NumpyLike):
         else:
             raise wrap_error(TypeError(f"expected scalar type, received {obj}"))
 
-    def shape_item_as_scalar(self, x1: ShapeItem) -> TypeTracerArray:
-        if x1 is None:
+    def shape_item_as_index(self, x1: ShapeItem) -> IndexType:
+        if x1 is unknown_length:
             return TypeTracerArray._new(np.int64, shape=())
         elif isinstance(x1, int):
-            return TypeTracerArray._new(np.int64, shape=())
+            return x1
         else:
             raise wrap_error(TypeError(f"expected None or int type, received {x1}"))
 
-    def scalar_as_shape_item(self, x1) -> ShapeItem:
-        if x1 is None:
-            return None
-        elif is_unknown_scalar(x1) and np.issubdtype(x1.dtype, np.integer):
-            return None
+    def index_as_shape_item(self, x1: IndexType) -> ShapeItem:
+        if is_unknown_scalar(x1) and np.issubdtype(x1.dtype, np.integer):
+            return unknown_length
         else:
             return int(x1)
 
-    def sub_shape_item(self, x1: ShapeItem, x2: ShapeItem) -> ShapeItem:
-        if x1 is None:
-            return None
-        if x2 is None:
-            return None
-        assert x1 >= 0
-        assert x2 >= 0
-        result = x1 - x2
-        assert result >= 0
-        return result
+    def regularize_index_for_length(
+        self, index: IndexType, length: ShapeItem
+    ) -> IndexType:
+        """
+        Args:
+            index: index value
+            length: length of array
 
-    def add_shape_item(self, x1: ShapeItem, x2: ShapeItem) -> ShapeItem:
-        if x1 is None:
-            return None
-        if x2 is None:
-            return None
-        assert x1 >= 0
-        assert x2 >= 0
-        result = x1 + x2
-        return result
+        Returns regularized index that is guaranteed to be in-bounds.
+        """
+        # Unknown indices are already regularized
+        if is_unknown_scalar(index):
+            return index
 
-    def mul_shape_item(self, x1: ShapeItem, x2: ShapeItem) -> ShapeItem:
-        if x1 is None:
-            return None
-        if x2 is None:
-            return None
-        assert x1 >= 0
-        assert x2 >= 0
-        result = x1 * x2
-        return result
+        # Without a known length the result must be unknown, as we cannot regularize the index
+        length_scalar = self.shape_item_as_index(length)
+        if length is unknown_length:
+            return length_scalar
 
-    def div_shape_item(self, x1: ShapeItem, x2: ShapeItem) -> ShapeItem:
-        if x1 is None:
-            return None
-        if x2 is None:
-            return None
-        assert x1 >= 0
-        assert x2 >= 0
-        result = x1 // x2
-        assert result * x2 == x1
-        return result
+        # We have known length and index
+        if index < 0:
+            index = index + length
 
-    def broadcast_shapes(
-        self, *shapes: tuple[SupportsInt, ...]
-    ) -> tuple[SupportsInt, ...]:
+        if 0 <= index < length:
+            return index
+        else:
+            raise wrap_error(
+                IndexError(f"index value out of bounds (0, {length}): {index}")
+            )
+
+    def derive_slice_for_length(
+        self, slice_: slice, length: ShapeItem
+    ) -> tuple[IndexType, IndexType, IndexType, ShapeItem]:
+        """
+        Args:
+            slice_: normalized slice object
+            length: length of layout
+
+        Return a tuple of (start, stop, step, length) indices into a layout, suitable for
+        `_getitem_range` (if step == 1). Normalize lengths to fit length of array,
+        and for arrays with unknown lengths, these offsets become none.
+        """
+        start = slice_.start
+        stop = slice_.stop
+        step = slice_.step
+
+        # Unknown lengths mean that the slice index is unknown
+        length_scalar = self.shape_item_as_index(length)
+        if length is unknown_length:
+            return length_scalar, length_scalar, step, length
+        else:
+            # Normalise `None` values
+            if step is None:
+                step = 1
+
+            if start is None:
+                # `step` is unknown → `start` is unknown
+                if is_unknown_scalar(step):
+                    start = step
+                elif step < 0:
+                    start = length_scalar - 1
+                else:
+                    start = 0
+            # Normalise negative integers
+            elif not is_unknown_scalar(start):
+                if start < 0:
+                    start = start + length_scalar
+                # Clamp values into length bounds
+                if is_unknown_scalar(length_scalar):
+                    start = length_scalar
+                else:
+                    start = min(max(start, 0), length_scalar)
+
+            if stop is None:
+                # `step` is unknown → `stop` is unknown
+                if is_unknown_scalar(step):
+                    stop = step
+                elif step < 0:
+                    stop = -1
+                else:
+                    stop = length_scalar
+            # Normalise negative integers
+            elif not is_unknown_scalar(stop):
+                if stop < 0:
+                    stop = stop + length_scalar
+                # Clamp values into length bounds
+                if is_unknown_scalar(length_scalar):
+                    stop = length_scalar
+                else:
+                    stop = min(max(stop, 0), length_scalar)
+
+            # Compute the length of the slice for downstream use
+            slice_length, remainder = divmod((stop - start), step)
+            if not is_unknown_scalar(slice_length):
+                # Take ceiling of division
+                if remainder != 0:
+                    slice_length += 1
+
+                slice_length = max(0, slice_length)
+
+            return start, stop, step, self.index_as_shape_item(slice_length)
+
+    def broadcast_shapes(self, *shapes: tuple[ShapeItem, ...]) -> tuple[ShapeItem, ...]:
         ndim = max([len(s) for s in shapes], default=0)
-        result: list[SupportsInt] = [1] * ndim
+        result: list[ShapeItem] = [1] * ndim
 
         for shape in shapes:
             # Right broadcasting
@@ -885,10 +924,10 @@ class TypeTracer(NumpyLike):
             # Fail if we absolutely know the shapes aren't compatible
             for i, item in enumerate(shape):
                 # Item is unknown, take it
-                if is_unknown_scalar(item):
+                if is_unknown_length(item):
                     result[i] = item
                 # Existing item is unknown, keep it
-                elif is_unknown_scalar(result[i]):
+                elif is_unknown_length(result[i]):
                     continue
                 # Items match, continue
                 elif result[i] == item:
@@ -926,7 +965,7 @@ class TypeTracer(NumpyLike):
         return [TypeTracerArray._new(x.dtype, shape=shape) for x in all_arrays]
 
     def broadcast_to(
-        self, x: ArrayLike, shape: tuple[SupportsInt, ...]
+        self, x: ArrayLike, shape: tuple[ShapeItem, ...]
     ) -> TypeTracerArray:
         raise ak._errors.wrap_error(NotImplementedError)
 
@@ -941,9 +980,9 @@ class TypeTracer(NumpyLike):
         n_placeholders = 0
         new_size = 1
         for item in shape:
-            if item is None:
+            if item is unknown_length:
                 # Size is no longer defined
-                new_size = None
+                new_size = unknown_length
             elif not ak._util.is_integer(item):
                 raise wrap_error(
                     ValueError(
@@ -959,13 +998,13 @@ class TypeTracer(NumpyLike):
             elif item == 0:
                 raise wrap_error(ValueError("shape items cannot be zero"))
             else:
-                new_size = self.mul_shape_item(new_size, item)
+                new_size *= item
 
         # Populate placeholders
         new_shape = [*shape]
         for i, item in enumerate(shape):
             if item == -1:
-                new_shape[i] = self.div_shape_item(size, new_size)
+                new_shape[i] = size // new_size
                 break
 
         return TypeTracerArray._new(x.dtype, tuple(new_shape), x.form_key, x.report)
@@ -983,11 +1022,11 @@ class TypeTracer(NumpyLike):
     def nonzero(self, x: ArrayLike) -> tuple[TypeTracerArray, ...]:
         # array
         try_touch_data(x)
-        return (TypeTracerArray._new(np.int64, (None,)),) * len(x.shape)
+        return (TypeTracerArray._new(np.int64, (unknown_length,)),) * len(x.shape)
 
     def unique_values(self, x: ArrayLike) -> TypeTracerArray:
         try_touch_data(x)
-        return TypeTracerArray._new(x.dtype)
+        return TypeTracerArray._new(x.dtype, shape=(None,))
 
     def concat(self, arrays, *, axis: int | None = 0) -> TypeTracerArray:
         if axis is None:
@@ -1018,7 +1057,7 @@ class TypeTracer(NumpyLike):
             )
 
         return TypeTracerArray._new(
-            numpy.concatenate(emptyarrays).dtype, (None,) + inner_shape
+            numpy.concatenate(emptyarrays).dtype, (unknown_length,) + inner_shape
         )
 
     def repeat(

@@ -4,7 +4,8 @@ from __future__ import annotations
 import copy
 
 import awkward as ak
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpylike import IndexType, NumpyMetadata
+from awkward._nplikes.shape import unknown_length
 from awkward._nplikes.typetracer import TypeTracer
 from awkward._util import unset
 from awkward.contents.content import Content
@@ -12,13 +13,87 @@ from awkward.contents.listoffsetarray import ListOffsetArray
 from awkward.forms.form import _type_parameters_equal
 from awkward.forms.listform import ListForm
 from awkward.index import Index
-from awkward.typing import Final, Self, final
+from awkward.typing import TYPE_CHECKING, Final, Self, SupportsIndex, final
+
+if TYPE_CHECKING:
+    from awkward._slicing import SliceItem
 
 np = NumpyMetadata.instance()
 
 
 @final
 class ListArray(Content):
+    """
+    ListArray generalizes #ak.contents.ListOffsetArray by not
+    requiring its `content` to be in increasing order and by allowing it to
+    have unreachable elements between lists. Instead of a single `offsets` buffer,
+    ListArray has
+
+    * `starts`: The starting index of each list.
+    * `stops`: The stopping index of each list.
+
+    #ak.contents.ListOffsetArray `offsets` may be related to `starts` and
+    `stops` by
+
+        starts = offsets[:-1]
+        stops = offsets[1:]
+
+    ListArrays are a common by-product of structure manipulation: as a result of
+    some operation, we might want to view slices or permutations of the `content`
+    without copying it to make a contiguous version of it. For that reason,
+    ListArrays are more useful in a data-manipulation library like Awkward Array
+    than in a data-representation library like Apache Arrow.
+
+    Like #ak.contents.ListOffsetArray and #ak.contents.RegularArray, a ListArray can
+    represent strings if its `__array__` parameter is `"string"` (UTF-8 assumed) or
+    `"bytestring"` (no encoding assumed) and it contains an #ak.contents.NumpyArray
+    of `dtype=np.uint8` whose `__array__` parameter is `"char"` (UTF-8 assumed) or
+    `"byte"` (no encoding assumed).
+
+    There is no equivalent of ListArray in Apache Arrow.
+
+    To illustrate how the constructor arguments are interpreted, the following is a
+    simplified implementation of `__init__`, `__len__`, and `__getitem__`:
+
+        class ListArray(Content):
+            def __init__(self, starts, stops, content):
+                assert isinstance(starts, (Index32, IndexU32, Index64))
+                assert isinstance(stops, type(starts))
+                assert isinstance(content, Content)
+                assert len(stops) >= len(starts)  # usually equal
+                for i in range(len(starts)):
+                    start = starts[i]
+                    stop = stops[i]
+                    if start != stop:
+                        assert start < stop  # i.e. start <= stop
+                        assert start >= 0
+                        assert stop <= len(content)
+                self.starts = starts
+                self.stops = stops
+                self.content = content
+
+            def __len__(self):
+                return len(self.starts)
+
+            def __getitem__(self, where):
+                if isinstance(where, int):
+                    if where < 0:
+                        where += len(self)
+                    assert 0 <= where < len(self)
+                    return self.content[self.starts[where] : self.stops[where]]
+
+                elif isinstance(where, slice) and where.step is None:
+                    starts = self.starts[where.start : where.stop]
+                    stops = self.stops[where.start : where.stop]
+                    return ListArray(starts, stops, self.content)
+
+                elif isinstance(where, str):
+                    return ListArray(self.starts, self.stops, self.content[where])
+
+                else:
+                    raise AssertionError(where)
+    """
+
     is_list = True
 
     def __init__(self, starts, stops, content, *, parameters=None):
@@ -51,8 +126,8 @@ class ListArray(Content):
                 )
             )
         if (
-            starts.nplike.known_shape
-            and stops.nplike.known_shape
+            starts.nplike.known_data
+            and stops.nplike.known_data
             and starts.length > stops.length
         ):
             raise ak._errors.wrap_error(
@@ -167,7 +242,7 @@ class ListArray(Content):
             self._content._touch_data(recursive)
 
     def _touch_shape(self, recursive):
-        if not self._backend.index_nplike.known_shape:
+        if not self._backend.index_nplike.known_data:
             self._starts.data.touch_shape()
             self._stops.data.touch_shape()
         if recursive:
@@ -230,27 +305,25 @@ class ListArray(Content):
         return self._broadcast_tooffsets64(offsets).to_RegularArray()
 
     def _getitem_nothing(self):
-        return self._content._getitem_range(slice(0, 0))
+        return self._content._getitem_range(0, 0)
 
-    def _getitem_at(self, where):
+    def _getitem_at(self, where: IndexType):
         if not self._backend.nplike.known_data:
             self._touch_data(recursive=False)
-            return self._content._getitem_range(slice(0, 0))
+            return self._content._getitem_range(0, 0)
 
         if where < 0:
             where += self.length
-        if not (0 <= where < self.length) and self._backend.nplike.known_shape:
+        if not (0 <= where < self.length) and self._backend.nplike.known_data:
             raise ak._errors.index_error(self, where)
         start, stop = self._starts[where], self._stops[where]
-        return self._content._getitem_range(slice(start, stop))
+        return self._content._getitem_range(start, stop)
 
-    def _getitem_range(self, where):
-        if not self._backend.nplike.known_shape:
+    def _getitem_range(self, start: SupportsIndex, stop: IndexType) -> Content:
+        if not self._backend.nplike.known_data:
             self._touch_shape(recursive=False)
             return self
 
-        start, stop, step = where.indices(self.length)
-        assert step == 1
         return ListArray(
             self._starts[start:stop],
             self._stops[start:stop],
@@ -258,7 +331,9 @@ class ListArray(Content):
             parameters=self._parameters,
         )
 
-    def _getitem_field(self, where, only_fields=()):
+    def _getitem_field(
+        self, where: str | SupportsIndex, only_fields: tuple[str, ...] = ()
+    ) -> Content:
         return ListArray(
             self._starts,
             self._stops,
@@ -266,7 +341,9 @@ class ListArray(Content):
             parameters=None,
         )
 
-    def _getitem_fields(self, where, only_fields=()):
+    def _getitem_fields(
+        self, where: list[str | SupportsIndex], only_fields: tuple[str, ...] = ()
+    ) -> Content:
         return ListArray(
             self._starts,
             self._stops,
@@ -274,7 +351,7 @@ class ListArray(Content):
             parameters=None,
         )
 
-    def _carry(self, carry, allow_lazy):
+    def _carry(self, carry: Index, allow_lazy: bool) -> Content:
         assert isinstance(carry, ak.index.Index)
 
         try:
@@ -290,7 +367,7 @@ class ListArray(Content):
     def _compact_offsets64(self, start_at_zero):
         starts_len = self._starts.length
         out = ak.index.Index64.empty(
-            self._backend.index_nplike.add_shape_item(starts_len, 1),
+            starts_len + 1,
             self._backend.index_nplike,
         )
         assert (
@@ -319,7 +396,7 @@ class ListArray(Content):
     def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
         slicestarts = slicestarts.to_nplike(self._backend.index_nplike)
         slicestops = slicestops.to_nplike(self._backend.index_nplike)
-        if self._backend.nplike.known_shape and slicestarts.length != self.length:
+        if self._backend.nplike.known_data and slicestarts.length != self.length:
             raise ak._errors.index_error(
                 self,
                 ak.contents.ListArray(
@@ -332,7 +409,7 @@ class ListArray(Content):
 
         if isinstance(slicecontent, ak.contents.ListOffsetArray):
             outoffsets = ak.index.Index64.empty(
-                self._backend.index_nplike.add_shape_item(slicestarts.length, 1),
+                slicestarts.length + 1,
                 self._backend.index_nplike,
             )
             assert (
@@ -397,11 +474,11 @@ class ListArray(Content):
                 ),
                 slicer=ak.contents.ListArray(slicestarts, slicestops, slicecontent),
             )
-            carrylen = self._backend.index_nplike.scalar_as_shape_item(_carrylen[0])
+            carrylen = self._backend.index_nplike.index_as_shape_item(_carrylen[0])
 
             sliceindex = ak.index.Index64(slicecontent._data)
             outoffsets = ak.index.Index64.empty(
-                self._backend.index_nplike.add_shape_item(slicestarts.length, 1),
+                slicestarts.length + 1,
                 self._backend.index_nplike,
             )
             nextcarry = ak.index.Index64.empty(carrylen, self._backend.index_nplike)
@@ -447,7 +524,7 @@ class ListArray(Content):
 
         elif isinstance(slicecontent, ak.contents.IndexedOptionArray):
             if (
-                self._backend.nplike.known_shape
+                self._backend.nplike.known_data
                 and self._starts.length < slicestarts.length
             ):
                 raise ak._errors.index_error(
@@ -483,16 +560,16 @@ class ListArray(Content):
                 ),
                 slicer=ak.contents.ListArray(slicestarts, slicestops, slicecontent),
             )
-            numvalid = self._backend.index_nplike.scalar_as_shape_item(_numvalid[0])
+            numvalid = self._backend.index_nplike.index_as_shape_item(_numvalid[0])
 
             nextcarry = ak.index.Index64.empty(numvalid, self._backend.index_nplike)
 
             smalloffsets = ak.index.Index64.empty(
-                self._backend.index_nplike.add_shape_item(slicestarts.length, 1),
+                slicestarts.length + 1,
                 self._backend.index_nplike,
             )
             largeoffsets = ak.index.Index64.empty(
-                self._backend.index_nplike.add_shape_item(slicestarts.length, 1),
+                slicestarts.length + 1,
                 self._backend.index_nplike,
             )
 
@@ -582,7 +659,12 @@ class ListArray(Content):
                 )
             )
 
-    def _getitem_next(self, head, tail, advanced):
+    def _getitem_next(
+        self,
+        head: SliceItem | tuple,
+        tail: tuple[SliceItem, ...],
+        advanced: Index | None,
+    ) -> Content:
         if head == ():
             return self
 
@@ -625,7 +707,7 @@ class ListArray(Content):
             start = ak._util.kSliceNone if start is None else start
             stop = ak._util.kSliceNone if stop is None else stop
 
-            if self._backend.nplike.known_shape:
+            if self._backend.nplike.known_data:
                 carrylength = ak.index.Index64.empty(1, self._backend.index_nplike)
                 assert (
                     carrylength.nplike is self._backend.index_nplike
@@ -654,9 +736,11 @@ class ListArray(Content):
                 )
             else:
                 self._touch_data(recursive=False)
-                nextcarry = ak.index.Index64.empty(None, self._backend.index_nplike)
+                nextcarry = ak.index.Index64.empty(
+                    unknown_length, self._backend.index_nplike
+                )
 
-            lennextoffsets = self._backend.index_nplike.add_shape_item(lenstarts, 1)
+            lennextoffsets = lenstarts + 1
             if self._starts.dtype == "int64":
                 nextoffsets = ak.index.Index64.empty(
                     lennextoffsets, self._backend.index_nplike
@@ -699,7 +783,7 @@ class ListArray(Content):
             nextcontent = self._content._carry(nextcarry, True)
 
             if advanced is None or (
-                advanced.length is not None and advanced.length == 0
+                advanced.length is not unknown_length and advanced.length == 0
             ):
                 return ak.contents.ListOffsetArray(
                     nextoffsets,
@@ -707,7 +791,7 @@ class ListArray(Content):
                     parameters=self._parameters,
                 )
             else:
-                if self._backend.nplike.known_shape:
+                if self._backend.nplike.known_data:
                     total = ak.index.Index64.empty(1, self._backend.index_nplike)
                     assert (
                         total.nplike is self._backend.index_nplike
@@ -731,7 +815,7 @@ class ListArray(Content):
                 else:
                     self._touch_data(recursive=False)
                     nextadvanced = ak.index.Index64.empty(
-                        None, self._backend.index_nplike
+                        unknown_length, self._backend.index_nplike
                     )
                 advanced = advanced.to_nplike(self._backend.index_nplike)
                 assert (
@@ -782,18 +866,14 @@ class ListArray(Content):
                 flathead, nplike=self._backend.index_nplike
             )
             if advanced is None or (
-                advanced.length is not None and advanced.length == 0
+                advanced.length is not unknown_length and advanced.length == 0
             ):
                 nextcarry = ak.index.Index64.empty(
-                    self._backend.index_nplike.mul_shape_item(
-                        lenstarts, flathead.shape[0]
-                    ),
+                    lenstarts * flathead.shape[0],
                     self._backend.index_nplike,
                 )
                 nextadvanced = ak.index.Index64.empty(
-                    self._backend.index_nplike.mul_shape_item(
-                        lenstarts, flathead.shape[0]
-                    ),
+                    lenstarts * flathead.shape[0],
                     self._backend.index_nplike,
                 )
                 assert (
@@ -975,9 +1055,7 @@ class ListArray(Content):
 
         total_length = 0
         for array in head:
-            total_length = self._backend.index_nplike.add_shape_item(
-                total_length, array.length
-            )
+            total_length += array.length
 
         contents = []
 
@@ -1054,12 +1132,9 @@ class ListArray(Content):
                         contentlength_so_far,
                     )
                 )
-                contentlength_so_far = self._backend.index_nplike.add_shape_item(
-                    contentlength_so_far, array.content.length
-                )
-                length_so_far = self._backend.index_nplike.add_shape_item(
-                    length_so_far, array.length
-                )
+                contentlength_so_far += array.content.length
+
+                length_so_far += array.length
 
             elif isinstance(array, ak.contents.RegularArray):
                 listoffsetarray = array.to_ListOffsetArray64(True)
@@ -1091,12 +1166,9 @@ class ListArray(Content):
                         contentlength_so_far,
                     )
                 )
-                contentlength_so_far = self._backend.index_nplike.add_shape_item(
-                    contentlength_so_far, array.content.length
-                )
-                length_so_far = self._backend.index_nplike.add_shape_item(
-                    length_so_far, array.length
-                )
+                contentlength_so_far += array.content.length
+
+                length_so_far += array.length
 
             elif isinstance(array, ak.contents.EmptyArray):
                 pass
@@ -1128,7 +1200,7 @@ class ListArray(Content):
             return self._local_index_axis0()
         elif posaxis is not None and posaxis + 1 == depth + 1:
             offsets = self._compact_offsets64(True)
-            innerlength = self._backend.index_nplike.scalar_as_shape_item(
+            innerlength = self._backend.index_nplike.index_as_shape_item(
                 offsets[-1]
             )  # todo: removed touch_data?
             localindex = ak.index.Index64.empty(innerlength, self._backend.index_nplike)
@@ -1144,7 +1216,7 @@ class ListArray(Content):
                 ](
                     localindex.data,
                     offsets.data,
-                    self._backend.index_nplike.sub_shape_item(offsets.length, 1),
+                    offsets.length - 1,
                 )
             )
             return ak.contents.ListOffsetArray(
@@ -1166,7 +1238,7 @@ class ListArray(Content):
         )
 
     def _is_unique(self, negaxis, starts, parents, outlength):
-        if self._starts.length is not None and self._starts.length == 0:
+        if self._starts.length is not unknown_length and self._starts.length == 0:
             return True
 
         return self.to_ListOffsetArray64(True)._is_unique(
@@ -1174,7 +1246,7 @@ class ListArray(Content):
         )
 
     def _unique(self, negaxis, starts, parents, outlength):
-        if self._starts.length is not None and self._starts.length == 0:
+        if self._starts.length is not unknown_length and self._starts.length == 0:
             return self
 
         return self.to_ListOffsetArray64(True)._unique(
@@ -1225,7 +1297,7 @@ class ListArray(Content):
         )
 
     def _validity_error(self, path):
-        if self._backend.nplike.known_shape and self.stops.length < self.starts.length:
+        if self._backend.nplike.known_data and self.stops.length < self.starts.length:
             return f"at {path} ({type(self)!r}): len(stops) < len(starts)"
         assert (
             self.starts.nplike is self._backend.index_nplike
@@ -1285,10 +1357,10 @@ class ListArray(Content):
                         self._starts.length,
                     )
                 )
-                min_ = self._backend.index_nplike.scalar_as_shape_item(_min[0])
+                min_ = self._backend.index_nplike.index_as_shape_item(_min[0])
                 # TODO: Replace the kernel call with below code once typtracer supports '-'
                 # min_ = self._backend.nplike.min(self._stops.data - self._starts.data)
-                if min_ is not None and target < min_:
+                if min_ is not unknown_length and target < min_:
                     return self
                 else:
                     _tolength = ak.index.Index64.empty(1, self._backend.index_nplike)
@@ -1311,7 +1383,7 @@ class ListArray(Content):
                             self._starts.length,
                         )
                     )
-                    tolength = self._backend.index_nplike.scalar_as_shape_item(
+                    tolength = self._backend.index_nplike.index_as_shape_item(
                         _tolength[0]
                     )
 
@@ -1391,11 +1463,11 @@ class ListArray(Content):
         self, action, behavior, depth, depth_context, lateral_context, options
     ):
         if (
-            self._backend.nplike.known_shape
+            self._backend.nplike.known_data
             and self._backend.nplike.known_data
             and self._starts.length != 0
         ):
-            startsmin = self._backend.index_nplike.min(self._starts.data).item()
+            startsmin = self._backend.index_nplike.min(self._starts.data)
             starts = ak.index.Index(
                 self._starts.data - startsmin, nplike=self._backend.index_nplike
             )
@@ -1403,7 +1475,7 @@ class ListArray(Content):
                 self._stops.data - startsmin, nplike=self._backend.index_nplike
             )
             content = self._content[
-                startsmin : self._backend.index_nplike.max(self._stops.data).item()
+                startsmin : self._backend.index_nplike.max(self._stops.data)
             ]
         else:
             self._touch_data(recursive=False)

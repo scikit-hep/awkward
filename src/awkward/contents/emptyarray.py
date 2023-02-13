@@ -6,11 +6,15 @@ import copy
 import awkward as ak
 from awkward._errors import deprecate
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpylike import IndexType, NumpyMetadata
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.emptyform import EmptyForm
-from awkward.typing import Final, Self, final
+from awkward.index import Index
+from awkward.typing import TYPE_CHECKING, Final, Self, SupportsIndex, final
+
+if TYPE_CHECKING:
+    from awkward._slicing import SliceItem
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
@@ -18,6 +22,40 @@ numpy = Numpy.instance()
 
 @final
 class EmptyArray(Content):
+    """
+    An EmptyArray is used whenever an array's type is not known because it is empty
+    (such as data from #ak.ArrayBuilder without enough sample points to resolve the
+    type).
+
+    Unlike all other Content subclasses, EmptyArray cannot contain any parameters
+    (parameter values are always None).
+
+    EmptyArray has no equivalent in Apache Arrow.
+
+    To illustrate how the constructor arguments are interpreted, the following is a
+    simplified implementation of `__init__`, `__len__`, and `__getitem__`:
+
+        class EmptyArray(Content):
+            def __init__(self):
+                pass
+
+            def __len__(self):
+                return 0
+
+            def __getitem__(self, where):
+                if isinstance(where, int):
+                    assert False
+
+                elif isinstance(where, slice) and where.step is None:
+                    return EmptyArray()
+
+                elif isinstance(where, str):
+                    raise ValueError("field " + repr(where) + " not found")
+
+                else:
+                    raise AssertionError(where)
+    """
+
     is_unknown = True
     is_leaf = True
 
@@ -112,24 +150,28 @@ class EmptyArray(Content):
     def _getitem_nothing(self):
         return self
 
-    def _getitem_at(self, where):
+    def _getitem_at(self, where: IndexType):
         raise ak._errors.index_error(self, where, "array is empty")
 
-    def _getitem_range(self, where):
+    def _getitem_range(self, start: SupportsIndex, stop: IndexType) -> Content:
         return self
 
-    def _getitem_field(self, where, only_fields=()):
+    def _getitem_field(
+        self, where: str | SupportsIndex, only_fields: tuple[str, ...] = ()
+    ) -> Content:
         raise ak._errors.index_error(self, where, "not an array of records")
 
-    def _getitem_fields(self, where, only_fields=()):
+    def _getitem_fields(
+        self, where: list[str | SupportsIndex], only_fields: tuple[str, ...] = ()
+    ) -> Content:
         if len(where) == 0:
-            return self._getitem_range(slice(0, 0))
+            return self._getitem_range(0, 0)
         raise ak._errors.index_error(self, where, "not an array of records")
 
-    def _carry(self, carry, allow_lazy):
+    def _carry(self, carry: Index, allow_lazy: bool) -> EmptyArray:
         assert isinstance(carry, ak.index.Index)
 
-        if not carry.nplike.known_shape or carry.length == 0:
+        if not carry.nplike.known_data or carry.length == 0:
             return self
         else:
             raise ak._errors.index_error(self, carry.data, "array is empty")
@@ -143,7 +185,12 @@ class EmptyArray(Content):
             "too many jagged slice dimensions for array",
         )
 
-    def _getitem_next(self, head, tail, advanced):
+    def _getitem_next(
+        self,
+        head: SliceItem | tuple,
+        tail: tuple[SliceItem, ...],
+        advanced: Index | None,
+    ) -> Content:
         if head == ():
             return self
 
@@ -166,7 +213,7 @@ class EmptyArray(Content):
             return self._getitem_next_ellipsis(tail, advanced)
 
         elif isinstance(head, ak.index.Index64):
-            if not head.nplike.known_shape or head.length == 0:
+            if not head.nplike.known_data or head.length == 0:
                 return self
             else:
                 raise ak._errors.index_error(self, head.data, "array is empty")
@@ -318,7 +365,7 @@ class EmptyArray(Content):
         return backend.nplike.empty(0, dtype=np.float64)
 
     def _remove_structure(self, backend, options):
-        return []
+        return [self]
 
     def _recursively_apply(
         self, action, behavior, depth, depth_context, lateral_context, options

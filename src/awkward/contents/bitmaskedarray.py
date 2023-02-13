@@ -7,7 +7,8 @@ import math
 
 import awkward as ak
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpylike import IndexType, NumpyMetadata
+from awkward._nplikes.shape import unknown_length
 from awkward._nplikes.typetracer import MaybeNone, TypeTracer
 from awkward._util import unset
 from awkward.contents.bytemaskedarray import ByteMaskedArray
@@ -15,7 +16,10 @@ from awkward.contents.content import Content
 from awkward.forms.bitmaskedform import BitMaskedForm
 from awkward.forms.form import _type_parameters_equal
 from awkward.index import Index
-from awkward.typing import Final, Self, final
+from awkward.typing import TYPE_CHECKING, Final, Self, SupportsIndex, final
+
+if TYPE_CHECKING:
+    from awkward._slicing import SliceItem
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
@@ -23,6 +27,89 @@ numpy = Numpy.instance()
 
 @final
 class BitMaskedArray(Content):
+    """
+    Like #ak.contents.ByteMaskedArray, BitMaskedArray implements an
+    #ak.types.OptionType with two buffers, `mask` and `content`.
+    However, the boolean `mask` values are packed into a bitmap.
+
+    BitMaskedArray has an additional parameter, `lsb_order`; if True,
+    the position of each bit is in
+    [Least-Significant Bit order](https://en.wikipedia.org/wiki/Bit_numbering)
+    (LSB):
+
+        is_valid[j] = bool(mask[j // 8] & (1 << (j % 8))) == valid_when
+
+    If False, the position of each bit is in Most-Significant Bit order
+    (MSB):
+
+        is_valid[j] = bool(mask[j // 8] & (128 >> (j % 8))) == valid_when
+
+    If the logical size of the buffer is not a multiple of 8, the `mask`
+    has to be padded. Thus, an explicit `length` is also part of the
+    class's definition.
+
+    This is equivalent to *all* of Apache Arrow's array types because they all
+    [use bitmaps](https://arrow.apache.org/docs/format/Columnar.html#validity-bitmaps)
+    to mask their data, with `valid_when=True` and `lsb_order=True`.
+
+    To illustrate how the constructor arguments are interpreted, the following is a
+    simplified implementation of `__init__`, `__len__`, and `__getitem__`:
+
+        class BitMaskedArray(Content):
+            def __init__(self, mask, content, valid_when, length, lsb_order):
+                assert isinstance(mask, IndexU8)
+                assert isinstance(content, Content)
+                assert isinstance(valid_when, bool)
+                assert isinstance(length, int) and length >= 0
+                assert isinstance(lsb_order, bool)
+                assert len(mask) <= len(content)
+                self.mask = mask
+                self.content = content
+                self.valid_when = valid_when
+                self.length = length
+                self.lsb_order = lsb_order
+
+            def __len__(self):
+                return self.length
+
+            def __getitem__(self, where):
+                if isinstance(where, int):
+                    if where < 0:
+                        where += len(self)
+                    assert 0 <= where < len(self)
+                    if self.lsb_order:
+                        bit = bool(self.mask[where // 8] & (1 << (where % 8)))
+                    else:
+                        bit = bool(self.mask[where // 8] & (128 >> (where % 8)))
+                    if bit == self.valid_when:
+                        return self.content[where]
+                    else:
+                        return None
+
+                elif isinstance(where, slice) and where.step is None:
+                    # In general, slices must convert BitMaskedArray to ByteMaskedArray.
+                    bytemask = np.unpackbits(
+                        self.mask, bitorder=("little" if self.lsb_order else "big")
+                    ).view(bool)
+                    return ByteMaskedArray(
+                        bytemask[where.start : where.stop],
+                        self.content[where.start : where.stop],
+                        valid_when=self.valid_when,
+                    )
+
+                elif isinstance(where, str):
+                    return BitMaskedArray(
+                        self.mask,
+                        self.content[where],
+                        valid_when=self.valid_when,
+                        length=self.length,
+                        lsb_order=self.lsb_order,
+                    )
+
+                else:
+                    raise AssertionError(where)
+    """
+
     is_option = True
 
     def __init__(
@@ -60,7 +147,7 @@ class BitMaskedArray(Content):
                     )
                 )
             )
-        if length is not None:
+        if length is not unknown_length:
             if not (ak._util.is_integer(length) and length >= 0):
                 raise ak._errors.wrap_error(
                     TypeError(
@@ -77,7 +164,10 @@ class BitMaskedArray(Content):
                     )
                 )
             )
-        if not (length is None or mask.length is None) and length > mask.length * 8:
+        if (
+            not (length is unknown_length or mask.length is unknown_length)
+            and length > mask.length * 8
+        ):
             raise ak._errors.wrap_error(
                 ValueError(
                     "{} 'length' ({}) must be <= len(mask) * 8 ({})".format(
@@ -86,7 +176,7 @@ class BitMaskedArray(Content):
                 )
             )
         if (
-            not (length is None or content.length is None)
+            not (length is unknown_length or content.length is unknown_length)
             and length > content.length * 8
         ):
             raise ak._errors.wrap_error(
@@ -221,7 +311,7 @@ class BitMaskedArray(Content):
             self._mask.to_nplike(tt),
             self._content._to_typetracer(False),
             self._valid_when,
-            None if forget_length else self.length,
+            unknown_length if forget_length else self.length,
             self._lsb_order,
             parameters=self._parameters,
         )
@@ -233,7 +323,7 @@ class BitMaskedArray(Content):
             self._content._touch_data(recursive)
 
     def _touch_shape(self, recursive):
-        if not self._backend.index_nplike.known_shape:
+        if not self._backend.index_nplike.known_data:
             self._mask.data.touch_shape()
         if recursive:
             self._content._touch_shape(recursive)
@@ -376,16 +466,16 @@ class BitMaskedArray(Content):
         return bytemask.data[: self._length].view(np.bool_)
 
     def _getitem_nothing(self):
-        return self._content._getitem_range(slice(0, 0))
+        return self._content._getitem_range(0, 0)
 
-    def _getitem_at(self, where):
+    def _getitem_at(self, where: IndexType):
         if not self._backend.nplike.known_data:
             self._touch_data(recursive=False)
             return MaybeNone(self._content._getitem_at(where))
 
         if where < 0:
             where += self.length
-        if not (0 <= where < self.length) and self._backend.nplike.known_shape:
+        if not (0 <= where < self.length) and self._backend.nplike.known_data:
             raise ak._errors.index_error(self, where)
         if self._lsb_order:
             bit = bool(self._mask[where // 8] & (1 << (where % 8)))
@@ -396,10 +486,12 @@ class BitMaskedArray(Content):
         else:
             return None
 
-    def _getitem_range(self, where):
-        return self.to_ByteMaskedArray()._getitem_range(where)
+    def _getitem_range(self, start: IndexType, stop: IndexType) -> Content:
+        return self.to_ByteMaskedArray()._getitem_range(start, stop)
 
-    def _getitem_field(self, where, only_fields=()):
+    def _getitem_field(
+        self, where: str | SupportsIndex, only_fields: tuple[str, ...] = ()
+    ) -> Content:
         return BitMaskedArray.simplified(
             self._mask,
             self._content._getitem_field(where, only_fields),
@@ -409,7 +501,9 @@ class BitMaskedArray(Content):
             parameters=None,
         )
 
-    def _getitem_fields(self, where, only_fields=()):
+    def _getitem_fields(
+        self, where: list[str | SupportsIndex], only_fields: tuple[str, ...] = ()
+    ) -> Content:
         return BitMaskedArray.simplified(
             self._mask,
             self._content._getitem_fields(where, only_fields),
@@ -419,7 +513,7 @@ class BitMaskedArray(Content):
             parameters=None,
         )
 
-    def _carry(self, carry, allow_lazy):
+    def _carry(self, carry: Index, allow_lazy: bool) -> Content:
         assert isinstance(carry, ak.index.Index)
         return self.to_ByteMaskedArray()._carry(carry, allow_lazy)
 
@@ -428,7 +522,12 @@ class BitMaskedArray(Content):
             slicestarts, slicestops, slicecontent, tail
         )
 
-    def _getitem_next(self, head, tail, advanced):
+    def _getitem_next(
+        self,
+        head: SliceItem | tuple,
+        tail: tuple[SliceItem, ...],
+        advanced: Index | None,
+    ) -> Content:
         if head == ():
             return self
 
@@ -595,7 +694,7 @@ class BitMaskedArray(Content):
     def _recursively_apply(
         self, action, behavior, depth, depth_context, lateral_context, options
     ):
-        if self._backend.nplike.known_shape:
+        if self._backend.nplike.known_data:
             content = self._content[0 : self._length]
         else:
             content = self._content
@@ -696,7 +795,7 @@ class BitMaskedArray(Content):
             return out
 
         mask = self.mask_as_bool(valid_when=True)[: self._length]
-        out = self._content._getitem_range(slice(0, self._length))._to_list(
+        out = self._content._getitem_range(0, self._length)._to_list(
             behavior, json_conversions
         )
 

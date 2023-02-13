@@ -5,14 +5,18 @@ import copy
 
 import awkward as ak
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpylike import IndexType, NumpyMetadata
+from awkward._nplikes.shape import unknown_length
 from awkward._nplikes.typetracer import MaybeNone, TypeTracer
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.form import _type_parameters_equal
 from awkward.forms.indexedoptionform import IndexedOptionForm
 from awkward.index import Index
-from awkward.typing import Final, Self, final
+from awkward.typing import TYPE_CHECKING, Final, Self, SupportsIndex, final
+
+if TYPE_CHECKING:
+    from awkward._slicing import SliceItem
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
@@ -20,6 +24,53 @@ numpy = Numpy.instance()
 
 @final
 class IndexedOptionArray(Content):
+    """
+    IndexedOptionArray is an #ak.contents.IndexedArray for which
+    negative values in the index are interpreted as missing. It represents
+    #ak.types.OptionType data like #ak.contents.ByteMaskedArray,
+    #ak.contents.BitMaskedArray, and #ak.contents.UnmaskedArray, but
+    the flexibility of the arbitrary `index` makes it a common output of
+    many operations.
+
+    IndexedOptionArray doesn't have a direct equivalent in Apache Arrow.
+
+    To illustrate how the constructor arguments are interpreted, the following is a
+    simplified implementation of `__init__`, `__len__`, and `__getitem__`:
+
+        class IndexedOptionArray(Content):
+            def __init__(self, index, content):
+                assert isinstance(index, (Index32, Index64))
+                assert isinstance(content, Content)
+                for x in index:
+                    assert x < len(content)  # index[i] may be negative
+                self.index = index
+                self.content = content
+
+            def __len__(self):
+                return len(self.index)
+
+            def __getitem__(self, where):
+                if isinstance(where, int):
+                    if where < 0:
+                        where += len(self)
+                    assert 0 <= where < len(self)
+                    if self.index[where] < 0:
+                        return None
+                    else:
+                        return self.content[self.index[where]]
+
+                elif isinstance(where, slice) and where.step is None:
+                    return IndexedOptionArray(
+                        self.index[where.start : where.stop], self.content
+                    )
+
+                elif isinstance(where, str):
+                    return IndexedOptionArray(self.index, self.content[where])
+
+                else:
+                    raise AssertionError(where)
+    """
+
     is_option = True
     is_indexed = True
 
@@ -161,7 +212,7 @@ class IndexedOptionArray(Content):
             self._content._touch_data(recursive)
 
     def _touch_shape(self, recursive):
-        if not self._backend.index_nplike.known_shape:
+        if not self._backend.index_nplike.known_data:
             self._index.data.touch_shape()
         if recursive:
             self._content._touch_shape(recursive)
@@ -207,7 +258,7 @@ class IndexedOptionArray(Content):
             carry[too_negative] = -1
         carry = ak.index.Index(carry)
 
-        if self._content.length is not None and self._content.length == 0:
+        if self._content.length is not unknown_length and self._content.length == 0:
             content = self._content.form.length_one_array(
                 backend=self._backend, highlevel=False
             )._carry(carry, False)
@@ -230,48 +281,50 @@ class IndexedOptionArray(Content):
             return self._index.raw(self._backend.index_nplike) < 0
 
     def _getitem_nothing(self):
-        return self._content._getitem_range(slice(0, 0))
+        return self._content._getitem_range(0, 0)
 
-    def _getitem_at(self, where):
+    def _getitem_at(self, where: IndexType):
         if not self._backend.nplike.known_data:
             self._touch_data(recursive=False)
             return MaybeNone(self._content._getitem_at(where))
 
         if where < 0:
             where += self.length
-        if self._backend.nplike.known_shape and not 0 <= where < self.length:
+        if self._backend.nplike.known_data and not 0 <= where < self.length:
             raise ak._errors.index_error(self, where)
         if self._index[where] < 0:
             return None
         else:
             return self._content._getitem_at(self._index[where])
 
-    def _getitem_range(self, where):
-        if not self._backend.nplike.known_shape:
+    def _getitem_range(self, start: SupportsIndex, stop: IndexType) -> Content:
+        if not self._backend.nplike.known_data:
             self._touch_shape(recursive=False)
             return self
 
-        start, stop, step = where.indices(self.length)
-        assert step == 1
         return IndexedOptionArray(
             self._index[start:stop], self._content, parameters=self._parameters
         )
 
-    def _getitem_field(self, where, only_fields=()):
+    def _getitem_field(
+        self, where: str | SupportsIndex, only_fields: tuple[str, ...] = ()
+    ) -> Content:
         return IndexedOptionArray.simplified(
             self._index,
             self._content._getitem_field(where, only_fields),
             parameters=None,
         )
 
-    def _getitem_fields(self, where, only_fields=()):
+    def _getitem_fields(
+        self, where: list[str | SupportsIndex], only_fields: tuple[str, ...] = ()
+    ) -> Content:
         return IndexedOptionArray.simplified(
             self._index,
             self._content._getitem_fields(where, only_fields),
             parameters=None,
         )
 
-    def _carry(self, carry, allow_lazy):
+    def _carry(self, carry: Index, allow_lazy: bool) -> IndexedOptionArray:
         assert isinstance(carry, ak.index.Index)
 
         try:
@@ -298,9 +351,9 @@ class IndexedOptionArray(Content):
                 self._index.length,
             )
         )
-        numnull = index_nplike.scalar_as_shape_item(_numnull[0])
+        numnull = index_nplike.index_as_shape_item(_numnull[0])
         nextcarry = ak.index.Index64.empty(
-            index_nplike.sub_shape_item(self._index.length, numnull),
+            self._index.length - numnull,
             index_nplike,
         )
         outindex = ak.index.Index.empty(
@@ -335,7 +388,7 @@ class IndexedOptionArray(Content):
         slicestarts = slicestarts.to_nplike(self._backend.index_nplike)
         slicestops = slicestops.to_nplike(self._backend.index_nplike)
 
-        if self._backend.nplike.known_shape and slicestarts.length != self.length:
+        if self._backend.nplike.known_data and slicestarts.length != self.length:
             raise ak._errors.index_error(
                 self,
                 ak.contents.ListArray(
@@ -349,11 +402,11 @@ class IndexedOptionArray(Content):
         numnull, nextcarry, outindex = self._nextcarry_outindex()
 
         reducedstarts = ak.index.Index64.empty(
-            self._backend.index_nplike.sub_shape_item(self.length, numnull),
+            self.length - numnull,
             nplike=self._backend.index_nplike,
         )
         reducedstops = ak.index.Index64.empty(
-            self._backend.index_nplike.sub_shape_item(self.length, numnull),
+            self.length - numnull,
             nplike=self._backend.index_nplike,
         )
         assert (
@@ -393,7 +446,12 @@ class IndexedOptionArray(Content):
             slicestarts, slicestops, slicecontent, tail
         )
 
-    def _getitem_next(self, head, tail, advanced):
+    def _getitem_next(
+        self,
+        head: SliceItem | tuple,
+        tail: tuple[SliceItem, ...],
+        advanced: Index | None,
+    ) -> Content:
         if head == ():
             return self
 
@@ -430,7 +488,7 @@ class IndexedOptionArray(Content):
 
     def project(self, mask=None):
         if mask is not None:
-            if self._backend.nplike.known_shape and self._index.length != mask.length:
+            if self._backend.nplike.known_data and self._index.length != mask.length:
                 raise ak._errors.wrap_error(
                     ValueError(
                         "mask length ({}) is not equal to {} length ({})".format(
@@ -480,9 +538,9 @@ class IndexedOptionArray(Content):
                     self._index.length,
                 )
             )
-            numnull = self._backend.index_nplike.scalar_as_shape_item(_numnull[0])
+            numnull = self._backend.index_nplike.index_as_shape_item(_numnull[0])
             nextcarry = ak.index.Index64.empty(
-                self._backend.index_nplike.sub_shape_item(self.length, numnull),
+                self.length - numnull,
                 self._backend.index_nplike,
             )
 
@@ -525,7 +583,7 @@ class IndexedOptionArray(Content):
 
             else:
                 outoffsets = ak.index.Index64.empty(
-                    self._backend.index_nplike.add_shape_item(offsets.length, numnull),
+                    offsets.length + numnull,
                     self._backend.index_nplike,
                     dtype=np.int64,
                 )
@@ -606,7 +664,7 @@ class IndexedOptionArray(Content):
         theirlength = other.length
         mylength = self.length
         index = ak.index.Index64.empty(
-            self._backend.index_nplike.add_shape_item(theirlength, mylength),
+            theirlength + mylength,
             self._backend.index_nplike,
         )
 
@@ -664,9 +722,7 @@ class IndexedOptionArray(Content):
 
         total_length = 0
         for array in head:
-            total_length = self._backend.index_nplike.add_shape_item(
-                total_length, array.length
-            )
+            total_length += array.length
 
         contents = []
         contentlength_so_far = 0
@@ -714,12 +770,10 @@ class IndexedOptionArray(Content):
                         contentlength_so_far,
                     )
                 )
-                contentlength_so_far = self._backend.index_nplike.add_shape_item(
-                    contentlength_so_far, array.content.length
-                )
-                length_so_far = self._backend.index_nplike.add_shape_item(
-                    length_so_far, array.length
-                )
+                contentlength_so_far += array.content.length
+
+                length_so_far += array.length
+
             else:
                 contents.append(array)
                 assert nextindex.nplike is self._backend.index_nplike
@@ -734,12 +788,9 @@ class IndexedOptionArray(Content):
                         contentlength_so_far,
                     )
                 )
-                contentlength_so_far = self._backend.index_nplike.add_shape_item(
-                    contentlength_so_far, array.length
-                )
-                length_so_far = self._backend.index_nplike.add_shape_item(
-                    length_so_far, array.length
-                )
+                contentlength_so_far += array.length
+
+                length_so_far += array.length
 
         tail_contents = contents[1:]
         nextcontent = contents[0]._mergemany(tail_contents)
@@ -757,7 +808,7 @@ class IndexedOptionArray(Content):
             return reversed._mergemany(tail[1:])
 
     def _fill_none(self, value: Content) -> Content:
-        if value.backend.nplike.known_shape and value.length != 1:
+        if value.backend.nplike.known_data and value.length != 1:
             raise ak._errors.wrap_error(
                 ValueError(f"fill_none value length ({value.length}) is not equal to 1")
             )
@@ -857,7 +908,7 @@ class IndexedOptionArray(Content):
         )
 
         next = self._content._carry(nextcarry, False)
-        if nextstarts.length is not None and nextstarts.length > 1:
+        if nextstarts.length is not unknown_length and nextstarts.length > 1:
             return next._is_subrange_equal(nextstarts, nextstops, nextstarts.length)
         else:
             return next._subranges_equal(
@@ -872,7 +923,7 @@ class IndexedOptionArray(Content):
         )
 
     def _is_unique(self, negaxis, starts, parents, outlength):
-        if self._index.length is not None and self._index.length == 0:
+        if self._index.length is not unknown_length and self._index.length == 0:
             return True
 
         projected = self.project()
@@ -950,15 +1001,13 @@ class IndexedOptionArray(Content):
                     index_length,
                 )
             )
-            len_newnulls = self._backend.index_nplike.scalar_as_shape_item(
+            len_newnulls = self._backend.index_nplike.index_as_shape_item(
                 _len_newnulls[0]
             )
 
             newindex = ak.index.Index64.empty(
-                self._backend.index_nplike.add_shape_item(
-                    self._backend.index_nplike.scalar_as_shape_item(out._offsets[-1]),
-                    len_newnulls,
-                ),
+                self._backend.index_nplike.index_as_shape_item(out._offsets[-1])
+                + len_newnulls,
                 self._backend.index_nplike,
             )
             newoffsets = ak.index.Index64.empty(
@@ -999,7 +1048,7 @@ class IndexedOptionArray(Content):
             # values in the result. We do this by creating an IndexedOptionArray
             # and tacking the index -1 onto the end
             nextoutindex = ak.index.Index64.empty(
-                self._backend.index_nplike.add_shape_item(out.length, 1),
+                out.length + 1,
                 self._backend.index_nplike,
             )
             assert nextoutindex.nplike is self._backend.index_nplike
@@ -1087,9 +1136,9 @@ class IndexedOptionArray(Content):
                 index_length,
             )
         )
-        numnull = self._backend.index_nplike.scalar_as_shape_item(_numnull[0])
+        numnull = self._backend.index_nplike.index_as_shape_item(_numnull[0])
 
-        next_length = self._backend.index_nplike.sub_shape_item(index_length, numnull)
+        next_length = index_length - numnull
         nextparents = ak.index.Index64.empty(next_length, self._backend.index_nplike)
         nextcarry = ak.index.Index64.empty(next_length, self._backend.index_nplike)
         outindex = ak.index.Index64.empty(index_length, self._backend.index_nplike)
@@ -1221,7 +1270,7 @@ class IndexedOptionArray(Content):
         inject_nones = (
             True
             if (
-                (numnull is not None and numnull > 0)
+                (numnull is not unknown_length and numnull > 0)
                 and not branch
                 and negaxis != depth
             )
@@ -1365,11 +1414,13 @@ class IndexedOptionArray(Content):
             # child of the returned `next._reduce_next(...)`, i.e. `out.content`. So, we unpack
             # the returned list type and wrap its child by a new `IndexedOptionArray`, before
             # re-wrapping the result to have the length and starts requested by the caller.
-            if starts.length is None:
-                outoffsets = ak.index.Index64.empty(None, self._backend.index_nplike)
+            if starts.length is unknown_length:
+                outoffsets = ak.index.Index64.empty(
+                    unknown_length, self._backend.index_nplike
+                )
             else:
                 outoffsets = ak.index.Index64.empty(
-                    self._backend.index_nplike.add_shape_item(starts.length, 1),
+                    starts.length + 1,
                     self._backend.index_nplike,
                 )
             assert (
@@ -1559,7 +1610,7 @@ class IndexedOptionArray(Content):
         self, action, behavior, depth, depth_context, lateral_context, options
     ):
         if (
-            self._backend.nplike.known_shape
+            self._backend.nplike.known_data
             and self._backend.nplike.known_data
             and self._index.length != 0
         ):
@@ -1574,10 +1625,7 @@ class IndexedOptionArray(Content):
             else:
                 index, content = self._index, self._content
         else:
-            if (
-                not self._backend.nplike.known_shape
-                or not self._backend.nplike.known_data
-            ):
+            if not self._backend.nplike.known_data:
                 self._touch_data(recursive=False)
             index, content = self._index, self._content
 

@@ -12,7 +12,7 @@ import awkward as ak
 from awkward._nplikes import nplike_of
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
-from awkward._nplikes.typetracer import TypeTracerArray
+from awkward._nplikes.shape import unknown_length
 from awkward._util import unset
 from awkward.contents.bitmaskedarray import BitMaskedArray
 from awkward.contents.bytemaskedarray import ByteMaskedArray
@@ -42,12 +42,12 @@ optiontypes = (IndexedOptionArray, ByteMaskedArray, BitMaskedArray, UnmaskedArra
 listtypes = (ListOffsetArray, ListArray, RegularArray)
 
 
-def length_of_broadcast(inputs: Sequence) -> int | TypeTracerArray:
+def length_of_broadcast(inputs: Sequence) -> int | type[unknown_length]:
     maxlen = -1
 
     for x in inputs:
         if isinstance(x, Content):
-            if x.length is None:
+            if x.length is unknown_length:
                 return x.length
 
             maxlen = max(maxlen, x.length)
@@ -71,7 +71,7 @@ def broadcast_pack(inputs: Sequence, isscalar: list[bool]) -> list:
             nextinputs.append(
                 RegularArray(
                     x,
-                    x.length if x.backend.nplike.known_shape else 1,
+                    x.length if x.backend.nplike.known_data else 1,
                     1,
                     parameters=None,
                 )
@@ -86,12 +86,12 @@ def broadcast_pack(inputs: Sequence, isscalar: list[bool]) -> list:
 
 def broadcast_unpack(x, isscalar: list[bool], backend: ak._backends.Backend):
     if all(isscalar):
-        if not backend.nplike.known_shape or x.length == 0:
+        if not backend.nplike.known_data or x.length == 0:
             return x._getitem_nothing()._getitem_nothing()
         else:
             return x[0][0]
     else:
-        if not backend.nplike.known_shape or x.length == 0:
+        if not backend.nplike.known_data or x.length == 0:
             return x._getitem_nothing()
         else:
             return x[0]
@@ -412,7 +412,7 @@ def apply_step(
                 )
 
     # Now all lengths must agree.
-    if backend.nplike.known_shape:
+    if backend.nplike.known_data:
         checklength([x for x in inputs if isinstance(x, Content)], options)
     else:
         for x in inputs:
@@ -493,7 +493,7 @@ def apply_step(
                         numtags.append(len(x.contents))
                         if length is None:
                             length = x.tags.data.shape[0]
-                assert length is not None
+                assert length is not unknown_length
 
                 all_combos = list(itertools.product(*[range(x) for x in numtags]))
 
@@ -524,9 +524,12 @@ def apply_step(
                     )
                     assert isinstance(outcontents[-1], tuple)
                     if numoutputs is None:
-                        numoutputs = len(outcontents[-1])
+                        numoutputs = outcontents[-1].length
                     else:
-                        assert numoutputs == len(outcontents[-1])
+                        assert (
+                            numoutputs is unknown_length
+                            or outcontents[-1].length is unknown_length
+                        ) or numoutputs == outcontents[-1].length
 
                 assert numoutputs is not None
 
@@ -549,7 +552,7 @@ def apply_step(
                                     )
                                 )
                             )
-                assert length is not None
+                assert length is not unknown_length
 
                 combos = backend.index_nplike.stack(tagslist, axis=-1)
 
@@ -695,7 +698,7 @@ def apply_step(
                     if isinstance(x, Content):
                         if length is unset:
                             length = x.length
-                        elif backend.nplike.known_shape:
+                        elif backend.nplike.known_data:
                             assert length == x.length
                 assert length is not unset
 
@@ -770,7 +773,7 @@ def apply_step(
                     for x, p in zip(outcontent, parameters)
                 )
 
-            elif not backend.nplike.known_data or not backend.nplike.known_shape:
+            elif not backend.nplike.known_data:
                 offsets = None
                 nextinputs = []
                 for x in inputs:
