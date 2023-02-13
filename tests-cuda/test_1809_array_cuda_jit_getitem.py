@@ -64,14 +64,14 @@ def test_array_multiply():
 
     # create an ak.Array with cuda backend:
     akarray = ak.Array([0, 1, 2, 3], backend="cuda")
- 
+
     # allocate the result:
     nthreads = 4
     results = cuda.to_device(np.zeros(nthreads, dtype=np.int32))
- 
+
     multiply[1, 4](akarray, 3, results)
 
     cuda.synchronize()
     host_results = results.copy_to_host()
 
-    assert (ak.Array(host_results).tolist() == [0,3,6,9])
+    assert ak.Array(host_results).tolist() == [0, 3, 6, 9]
