@@ -7,7 +7,7 @@ import awkward as ak  # noqa: F401
 
 numba = pytest.importorskip("numba")
 
-import math
+import math  # noqa: E402
 
 from numba import cuda, vectorize  # noqa: F401, E402
 

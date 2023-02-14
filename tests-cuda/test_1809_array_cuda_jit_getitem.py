@@ -8,7 +8,7 @@ import awkward as ak  # noqa: F401
 from awkward._connect.numba.arrayview_cuda import array_view_arg_handler
 
 numba = pytest.importorskip("numba")
-from numba import config, cuda  # noqa: F401
+from numba import config, cuda  # noqa: E402
 
 ak_numba_cuda = pytest.importorskip("awkward.numba_cuda")
 ak_numba_cuda_arrayview = pytest.importorskip("awkward._connect.numba.arrayview_cuda")
