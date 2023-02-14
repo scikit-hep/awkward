@@ -197,15 +197,10 @@ def _impl(array, axis, highlevel, behavior):
                     next_tags_sparse, backend=backend
                 )
 
-                # Find length of the new (dense) tags array of the inner union
-                total_length = 0
-                for array in inner_union_index_parts:
-                    total_length += array.size
-
                 # Ignore missing items for inner union, creating a dense array of tags
                 next_tags = next_tags_sparse[next_tags_sparse >= 0]
                 # Build dense index from parts for each tag
-                next_index = backend.index_nplike.empty(total_length, dtype=np.int64)
+                next_index = backend.index_nplike.empty(next_tags.size, dtype=np.int64)
                 for tag, content_index in enumerate(inner_union_index_parts):
                     next_index[next_tags == tag] = content_index
 
