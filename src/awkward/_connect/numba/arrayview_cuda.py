@@ -7,7 +7,7 @@ import numba.core.typing
 import numba.core.typing.ctypes_utils
 import numba.cuda as nb_cuda
 import numpy
-from numba import cuda, types
+from numba import types
 
 import awkward as ak
 from awkward._nplikes.numpylike import NumpyMetadata
@@ -1015,8 +1015,6 @@ class ArrayViewArgHandler:
 
                 # Use uint64 for pos, start, stop, the array pointers values, and the pylookup value
                 tys = types.UniTuple(types.uint64, 5)
-
-                cuda.current_context().device
 
                 nb_cuda.as_cuda_array(val.layout.data)
 
