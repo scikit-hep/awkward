@@ -205,7 +205,6 @@ def posat(context, builder, pos, offset):
 
 
 def getat(context, builder, baseptr, offset, rettype=None):
-
     ptrtype = None
     if rettype is not None:
         ptrtype = context.get_value_type(numba.types.CPointer(rettype))
