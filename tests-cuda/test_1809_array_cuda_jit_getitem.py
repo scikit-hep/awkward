@@ -17,11 +17,11 @@ numbatest = pytest.mark.skipif(
     nb is None or nb_cuda is None, reason="requires the numba and numba.cuda packages"
 )
 
-ak_numba_cuda = pytest.importorskip("awkward.numba_cuda")
+ak_numba_cuda = pytest.importorskip("awkward.numba")
 ak_numba_cuda_arrayview = pytest.importorskip("awkward._connect.numba.arrayview_cuda")
 ak_numba_layout = pytest.importorskip("awkward._connect.numba.layout")
 
-ak.numba_cuda.register_and_check()
+ak.numba.register_and_check()
 
 threadsperblock = 128
 blockspergrid = 1
