@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import ctypes  # noqa: F401
 import operator
 
 import numba
@@ -9,14 +8,11 @@ import numba.core.typing.ctypes_utils
 import numba.cuda as nb_cuda
 import numpy
 from numba import cuda, types
-from numba.core.extending import intrinsic as _intrinsic
 
 import awkward as ak
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
-
-intrinsic = _intrinsic(target="cuda")
 
 
 def code_to_function(code, function_name, externals=None, debug=True):
@@ -327,18 +323,7 @@ class type_len(numba.core.typing.templates.AbstractTemplate):
 @numba.extending.lower_builtin(len, ArrayViewType)
 def lower_len(context, builder, sig, args):
     proxyin = context.make_helper(builder, sig.args[0], args[0])
-    # cgutils.printf(builder, "stop %d, start %d", proxyin.stop, proxyin.start)
-    # val = ctypes.cast(x.data.ptr, ctypes.py_object).value
-    # printimpl.print_varargs(context, builder, sig, proxyin.stop) # 'LoadInstr' object is not iterable
     return builder.sub(proxyin.stop, proxyin.start)
-
-
-# @overload_method(ArrayViewType, "len", target="cuda")
-# def ArrayViewType_len(array_view):
-#    if isinstance(array_view, ArrayViewType):
-#        def impl(array_view):
-#            return array_view.stop - array_view.start
-#        return impl
 
 
 @numba.core.typing.templates.infer_global(operator.getitem)
@@ -362,25 +347,6 @@ class type_getitem(numba.core.typing.templates.AbstractTemplate):
                     "field name string may be used as ak.Array "
                     "slices in compiled code"
                 )
-
-
-@numba.extending.lower_builtin(operator.setitem, ArrayViewType, numba.types.Integer)
-def lower_setitem_at(context, builder, sig, args):
-    rettype, (viewtype, wheretype) = sig.return_type, sig.args
-    viewval, whereval = args
-    viewproxy = context.make_helper(builder, viewtype, viewval)
-    return viewtype.type.lower_setitem_at_check(
-        context,
-        builder,
-        rettype,
-        viewtype,
-        viewval,
-        viewproxy,
-        wheretype,
-        whereval,
-        True,
-        True,
-    )
 
 
 @numba.extending.lower_builtin(operator.getitem, ArrayViewType, numba.types.Integer)
