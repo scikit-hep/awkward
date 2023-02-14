@@ -25,8 +25,8 @@ class Lookup:
         self.arrayptrs = self.nplike.asarray(
             [arrayptr(x) for x in positions], dtype=np.intp
         )
-        for i in range(len(self.arrayptrs)):
-            format(self.arrayptrs[i], "x")
+#        for i, ptr in enumerate(self.arrayptrs):
+#            format(self.arrayptrs[i], "x")
 
 
 def tolookup(layout, positions):
