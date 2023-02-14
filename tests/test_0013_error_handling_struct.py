@@ -18,18 +18,12 @@ def test_numpyarray():
     array[-20:20]
 
     with pytest.raises(IndexError):
-        array[
-            20,
-        ]
+        array[20,]
 
     with pytest.raises(IndexError):
-        array[
-            -20,
-        ]
+        array[-20,]
 
-    array[
-        -20:20,
-    ]
+    array[-20:20,]
 
     with pytest.raises(IndexError):
         array[2, 3]
@@ -49,18 +43,12 @@ def test_numpyarray():
     array[-20:20]
 
     with pytest.raises(IndexError):
-        array[
-            20,
-        ]
+        array[20,]
 
     with pytest.raises(IndexError):
-        array[
-            -20,
-        ]
+        array[-20,]
 
-    array[
-        -20:20,
-    ]
+    array[-20:20,]
 
     with pytest.raises(IndexError):
         array[2, 3]
@@ -94,18 +82,12 @@ def test_listarray_numpyarray():
     array[-20:20]
 
     with pytest.raises(IndexError):
-        array[
-            20,
-        ]
+        array[20,]
 
     with pytest.raises(IndexError):
-        array[
-            -20,
-        ]
+        array[-20,]
 
-    array[
-        -20:20,
-    ]
+    array[-20:20,]
 
     with pytest.raises(IndexError):
         array[2, 1, 0]
@@ -162,9 +144,7 @@ def test_listarray_listarray_numpyarray():
         array2[20]
 
     with pytest.raises(IndexError):
-        array2[
-            20,
-        ]
+        array2[20,]
 
     with pytest.raises(IndexError):
         array2[2, 20]
@@ -173,9 +153,7 @@ def test_listarray_listarray_numpyarray():
         array2[-20]
 
     with pytest.raises(IndexError):
-        array2[
-            -20,
-        ]
+        array2[-20,]
 
     with pytest.raises(IndexError):
         array2[2, -20]
@@ -187,9 +165,7 @@ def test_listarray_listarray_numpyarray():
         array2[20]
 
     with pytest.raises(IndexError):
-        array2[
-            20,
-        ]
+        array2[20,]
 
     with pytest.raises(IndexError):
         array2[2, 20]
@@ -201,9 +177,7 @@ def test_listarray_listarray_numpyarray():
         array2[-20]
 
     with pytest.raises(IndexError):
-        array2[
-            -20,
-        ]
+        array2[-20,]
 
     with pytest.raises(IndexError):
         array2[2, -20]

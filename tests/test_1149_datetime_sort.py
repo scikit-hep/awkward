@@ -56,7 +56,6 @@ def test_date_time_sort_argsort_unique():
 
 
 def test_time_delta_sort_argsort_unique():
-
     numpy_array = np.array(["41", "1", "20"], "timedelta64[D]")
 
     array = ak.highlevel.Array(numpy_array).layout

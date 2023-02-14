@@ -15,15 +15,9 @@ def test():
 
     v2_array_cuda = ak.to_backend(v2_array, "cuda")
     with cp.cuda.Stream() as stream:
-        v2_array_cuda[
-            10,
-        ]
-        v2_array_cuda[
-            11,
-        ]
-        v2_array_cuda[
-            12,
-        ]
+        v2_array_cuda[10,]
+        v2_array_cuda[11,]
+        v2_array_cuda[12,]
 
     with pytest.raises(ValueError) as err:
         awkward._connect.cuda.synchronize_cuda(stream)

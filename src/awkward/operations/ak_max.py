@@ -17,7 +17,7 @@ def max(
     mask_identity=True,
     flatten_records=unset,
     highlevel=True,
-    behavior=None
+    behavior=None,
 ):
     """
     Args:
@@ -100,7 +100,7 @@ def nanmax(
     mask_identity=True,
     flatten_records=unset,
     highlevel=True,
-    behavior=None
+    behavior=None,
 ):
     """
     Args:

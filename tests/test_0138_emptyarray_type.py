@@ -22,17 +22,6 @@ def test():
     assert ak.operations.to_numpy(empty1).dtype.type is np.float64
 
     assert to_list(array[empty1]) == []
-    assert (
-        to_list(
-            array[
-                empty1,
-            ]
-        )
-        == []
-    )
+    assert to_list(array[empty1,]) == []
     assert to_list(array[empty2]) == [[], [], []]
-    assert to_list(
-        array[
-            empty2,
-        ]
-    ) == [[], [], []]
+    assert to_list(array[empty2,]) == [[], [], []]

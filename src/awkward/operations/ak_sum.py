@@ -16,7 +16,7 @@ def sum(
     mask_identity=False,
     flatten_records=unset,
     highlevel=True,
-    behavior=None
+    behavior=None,
 ):
     """
     Args:
@@ -226,7 +226,7 @@ def nansum(
     mask_identity=False,
     flatten_records=unset,
     highlevel=True,
-    behavior=None
+    behavior=None,
 ):
     """
     Args:

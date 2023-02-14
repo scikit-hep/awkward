@@ -94,9 +94,7 @@ def test_combinations():
 
 def test_getitem():
     with pytest.raises(IndexError):
-        empty[
-            0,
-        ]
+        empty[0,]
 
     jagged = ak.highlevel.Array([[]])[0:0]
     assert empty[jagged].to_list() == []

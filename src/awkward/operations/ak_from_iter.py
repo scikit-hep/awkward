@@ -15,7 +15,7 @@ def from_iter(
     highlevel=True,
     behavior=None,
     initial=1024,
-    resize=1.5
+    resize=1.5,
 ):
     """
     Args:

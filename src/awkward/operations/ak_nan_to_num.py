@@ -15,9 +15,8 @@ def nan_to_num(
     neginf=None,
     *,
     highlevel=True,
-    behavior=None
+    behavior=None,
 ):
-
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
