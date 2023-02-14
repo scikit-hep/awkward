@@ -8,7 +8,7 @@ import awkward as ak
 def test_indexed():
     x = ak.to_layout([{"a": 1, "b": 2}])
     y = ak.contents.IndexedArray(
-        ak.index.Index64([0]), ak.to_layout([{"c": 3, "b": 5}])
+        ak.index.Index64([1]), ak.to_layout([{"c": 13, "b": 15}, {"c": 3, "b": 5}])
     )
 
     z = ak.concatenate((x, y))

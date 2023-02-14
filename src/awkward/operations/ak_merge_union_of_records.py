@@ -228,8 +228,8 @@ def _impl(array, axis, highlevel, behavior):
                     # Rewrite union index of indexed types
                     if content.is_indexed:
                         content_index = backend.index_nplike.asarray(content.index)
-                        next_index[is_this_tag] = current_index[is_this_tag][
-                            content_index
+                        next_index[is_this_tag] = content_index[
+                            current_index[is_this_tag]
                         ]
                         next_contents.append(content.content)
 
