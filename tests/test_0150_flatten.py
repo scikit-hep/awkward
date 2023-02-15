@@ -648,7 +648,6 @@ def test_fix_corner_case_0585():
 
 
 def test_flatten_allow_regulararray_size_zero_0590():
-
     empty = ak.contents.RegularArray(
         ak.highlevel.Array([[1, 2, 3], [], [4, 5]]).layout, 0, zeros_length=0
     )

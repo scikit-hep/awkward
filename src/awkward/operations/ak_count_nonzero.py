@@ -15,7 +15,7 @@ def count_nonzero(
     mask_identity=False,
     flatten_records=unset,
     highlevel=True,
-    behavior=None
+    behavior=None,
 ):
     """
     Args:

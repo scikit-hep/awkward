@@ -16,7 +16,7 @@ def prod(
     mask_identity=False,
     flatten_records=unset,
     highlevel=True,
-    behavior=None
+    behavior=None,
 ):
     """
     Args:
@@ -82,7 +82,7 @@ def nanprod(
     mask_identity=False,
     flatten_records=unset,
     highlevel=True,
-    behavior=None
+    behavior=None,
 ):
     """
     Args:

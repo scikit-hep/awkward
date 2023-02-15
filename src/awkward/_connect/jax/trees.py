@@ -20,7 +20,6 @@ np = NumpyMetadata.instance()
 def find_all_buffers(
     layout: Content | Record,
 ) -> list[numpy.ndarray]:
-
     data_ptrs = []
 
     def action(node, **kwargs):

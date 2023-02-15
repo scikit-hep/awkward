@@ -768,7 +768,6 @@ class NumpyArray(Content):
                 outlength,
             )
         else:
-
             parents_length = parents.length
             offsets_length = ak.index.Index64.empty(1, self._backend.index_nplike)
             assert (
@@ -1096,7 +1095,6 @@ class NumpyArray(Content):
         keepdims,
         behavior,
     ):
-
         if self._data.ndim > 1:
             return self.to_RegularArray()._reduce_next(
                 reducer,

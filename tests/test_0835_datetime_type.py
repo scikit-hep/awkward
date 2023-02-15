@@ -46,7 +46,6 @@ def test_date_time_minmax():
 
 
 def test_time_delta():
-
     numpy_array = np.array(["41", "1", "20"], "timedelta64[D]")
 
     array = ak.highlevel.Array(numpy_array).layout
@@ -652,7 +651,6 @@ def test_date_time_units():
 
 
 def test_sum():
-
     dtypes = ["datetime64[s]", "timedelta64[D]"]
 
     arrays = (np.arange(0, 12, dtype=dtype) for dtype in dtypes)

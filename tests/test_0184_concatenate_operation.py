@@ -283,7 +283,6 @@ def test_numpyarray_concatenate_axis0():
 
 
 def test_numpyarray_concatenate():
-
     np1 = np.arange(2 * 7 * 5, dtype=np.float64).reshape(2, 7, 5)
     np2 = np.arange(2 * 7 * 5, dtype=np.int64).reshape(2, 7, 5)
     ak1 = ak.contents.NumpyArray(np1)

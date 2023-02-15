@@ -42,7 +42,6 @@ class DataSourceGenerator:
         self.lookups = {}
 
     def class_type(self):
-
         class_type_suffix = ""
         for key, value in self.generators.items():
             class_type_suffix = class_type_suffix + "_" + key + "_" + value.class_type()

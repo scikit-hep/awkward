@@ -8,7 +8,6 @@ THIS_FILE = pathlib.Path(__file__)
 
 
 def main():
-
     # Get the dependencies of `awkward`
     awkward_path = THIS_FILE.parents[1]
     with open(awkward_path / "pyproject.toml") as f:
