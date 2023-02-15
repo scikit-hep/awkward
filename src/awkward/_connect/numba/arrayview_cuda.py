@@ -16,8 +16,6 @@ np = NumpyMetadata.instance()
 
 class ArrayViewArgHandler:
     def prepare_args(self, ty, val, stream, retr):
-        if isinstance(val, int):
-            format(val, "x")
         if isinstance(val, ak.Array):
 
             if isinstance(val.layout.backend, ak._backends.CupyBackend):
