@@ -111,7 +111,10 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
                 batches.append([x])
 
         contents = [ak._do.mergemany(b) for b in batches]
-        out = ak._do.merge_as_union(contents)
+        if len(contents) > 1:
+            out = ak._do.merge_as_union(contents)
+        else:
+            out = contents[0]
 
         if isinstance(out, ak.contents.UnionArray):
             out = type(out).simplified(
