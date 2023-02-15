@@ -197,7 +197,7 @@ array.type
 array.type.show()
 ```
 
-## Record types
+## Scalar types
 
 In {ref}`how-to-examine-type:array-types` it was discussed that all {class}`ak.type.Type` objects are array-types, e.g. {class}`ak.types.NumpyType` is the type of a NumPy (or CuPy, etc.) array of a fixed dtype:
 
