@@ -271,7 +271,9 @@ def mergeable(one: Content, two: Content, mergebool: bool = True) -> bool:
     return one._mergeable_next(two, mergebool=mergebool)
 
 
-def merge_as_union(contents: Sequence[Content]) -> ak.contents.UnionArray:
+def merge_as_union(
+    contents: Sequence[Content], parameters=None
+) -> ak.contents.UnionArray:
     length = sum([c.length for c in contents])
     first = contents[0]
     tags = ak.index.Index8.empty(length, first.backend.index_nplike)
@@ -291,7 +293,7 @@ def merge_as_union(contents: Sequence[Content]) -> ak.contents.UnionArray:
         )
         offset += content.length
 
-    return ak.contents.UnionArray(tags, index, contents, parameters=None)
+    return ak.contents.UnionArray(tags, index, contents, parameters=parameters)
 
 
 def mergemany(contents: list[Content]) -> Content:
