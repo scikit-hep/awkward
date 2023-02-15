@@ -1,7 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 
-import numba.cuda as nb_cuda
 from numba import types
 
 import awkward as ak
@@ -19,8 +18,6 @@ class ArrayViewArgHandler:
 
                 # Use uint64 for pos, start, stop, the array pointers values, and the pylookup value
                 tys = types.UniTuple(types.uint64, 5)
-
-                nb_cuda.as_cuda_array(val.layout.data)
 
                 start = val._numbaview.start
                 stop = val._numbaview.stop

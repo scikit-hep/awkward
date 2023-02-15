@@ -29,6 +29,13 @@ def multiply(array, n, out):
         out[tid] = array[tid] * n
 
 
+@nb_cuda.jit(extensions=[array_view_arg_handler])
+def pass_through(array, out):
+    tid = nb_cuda.grid(1)
+    if tid < len(array):
+        out[tid] = len(array[tid])
+
+
 @numbatest
 def test_array_multiply():
 
@@ -44,3 +51,18 @@ def test_array_multiply():
     host_results = results.copy_to_host()
 
     assert ak.Array(host_results).tolist() == [0, 3, 6, 9]
+
+
+@numbatest
+def test_ListOffsetArray_multiply():
+
+    array = ak.Array([[0, 1], [2], [3, 4, 5]], backend="cuda")
+
+    results = nb_cuda.to_device(np.empty(len(array), dtype=np.int32))
+
+    pass_through[threads_per_block, blocks_per_grid](array, results)
+
+    nb_cuda.synchronize()
+    host_results = results.copy_to_host()
+
+    assert ak.Array(host_results).tolist() == [2, 1, 3]
