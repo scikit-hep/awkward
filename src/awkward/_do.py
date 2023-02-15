@@ -306,7 +306,7 @@ def merge_as_union(one: Content, two: Content) -> ak.contents.UnionArray:
         )
     )
 
-    return ak.contents.UnionArray(tags, index, contents, parameters=None)
+    return ak.contents.UnionArray.simplified(tags, index, contents, parameters=None)
 
 
 def mergemany(contents: list[Content]) -> Content:
