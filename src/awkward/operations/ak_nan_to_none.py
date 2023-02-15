@@ -7,7 +7,6 @@ np = NumpyMetadata.instance()
 
 
 def nan_to_none(array, *, highlevel=True, behavior=None):
-
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).

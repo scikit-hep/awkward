@@ -704,7 +704,6 @@ def gencudakerneltests(specdict):
                         if "List" not in typename:
                             f.write(" " * 4 + arg + " = " + str(val) + "\n")
                         if "List" in typename:
-
                             count = typename.count("List")
                             typename = gettypename(typename)
                             if typename == "bool" or typename == "float":

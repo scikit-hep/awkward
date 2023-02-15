@@ -21,7 +21,6 @@ class Vector:
 
 
 def test():
-
     vec = ak.Array(
         [
             {"x": 1, "y": 2, "z": 3},

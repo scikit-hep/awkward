@@ -17,7 +17,7 @@ def min(
     mask_identity=True,
     flatten_records=unset,
     highlevel=True,
-    behavior=None
+    behavior=None,
 ):
     """
     Args:
@@ -98,7 +98,7 @@ def nanmin(
     mask_identity=True,
     flatten_records=unset,
     highlevel=True,
-    behavior=None
+    behavior=None,
 ):
     """
     Args:

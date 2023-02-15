@@ -14,7 +14,6 @@ compiler = ROOT.gInterpreter.Declare
 
 
 def test_unknown_column_type():
-
     example1 = ak.Array([1.1, 2.2, 3.3, 4.4, 5.5])
     data_frame = ak.to_rdataframe(
         {

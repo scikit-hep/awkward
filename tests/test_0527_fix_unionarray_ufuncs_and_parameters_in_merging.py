@@ -15,7 +15,6 @@ import awkward as ak
 
 
 def test_0459_types():
-
     plain_plain = ak.highlevel.Array([0.0, 1.1, 2.2, 3.3, 4.4])
     array_plain = ak.operations.with_parameter(plain_plain, "__array__", "zoinks")
     plain_isdoc = ak.operations.with_parameter(

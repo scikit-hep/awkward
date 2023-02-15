@@ -9,7 +9,6 @@ to_list = ak.operations.to_list
 
 
 def test():
-
     assert isinstance(
         ak.operations.zip({"x": 1, "y": 0, "z": 0}),
         ak.highlevel.Record,

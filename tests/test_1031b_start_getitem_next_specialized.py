@@ -75,22 +75,8 @@ def test_RegularArray():
         [[15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]],
         [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14]],
     ]
-    assert (
-        to_list(
-            new[
-                [1, 0],
-            ]
-        )
-        == expectation
-    )
-    assert (
-        new.to_typetracer()[
-            [1, 0],
-        ].form
-        == new[
-            [1, 0],
-        ].form
-    )
+    assert to_list(new[[1, 0],]) == expectation
+    assert new.to_typetracer()[[1, 0],].form == new[[1, 0],].form
     assert to_list(new[[1, 0]]) == expectation
 
     assert to_list(new[1, [2, 0]]) == [[25, 26, 27, 28, 29], [15, 16, 17, 18, 19]]
@@ -146,22 +132,8 @@ def test_RecordArray():
         {"x": [0, 1, 2, 3, 4], "y": [0.0, 1.1, 2.2, 3.3, 4.4, 5.5]},
         {"x": [0, 1, 2, 3, 4], "y": [0.0, 1.1, 2.2, 3.3, 4.4, 5.5]},
     ]
-    assert (
-        to_list(
-            new[
-                [1, 0],
-            ]
-        )
-        == expectation
-    )
-    assert (
-        new.to_typetracer()[
-            [1, 0],
-        ].form
-        == new[
-            [1, 0],
-        ].form
-    )
+    assert to_list(new[[1, 0],]) == expectation
+    assert new.to_typetracer()[[1, 0],].form == new[[1, 0],].form
     assert to_list(new[[1, 0]]) == expectation
 
     assert to_list(new[1, [1, 0]]) == [{"x": 1, "y": 1.1}, {"x": 0, "y": 0.0}]
@@ -191,24 +163,10 @@ def test_UnmaskedArray():
     assert to_list(new[1, ..., -2]) == 2.2
 
     expectation = [[0.0, 1.1, 2.2, 3.3], [0.0, 1.1, 2.2, 3.3]]
-    assert (
-        to_list(
-            new[
-                [1, 0],
-            ]
-        )
-        == expectation
-    )
+    assert to_list(new[[1, 0],]) == expectation
     assert to_list(new[[1, 0]]) == expectation
     assert to_list(new[1, [1, 0]]) == [1.1, 0.0]
-    assert (
-        new.to_typetracer()[
-            [1, 0],
-        ].form
-        == new[
-            [1, 0],
-        ].form
-    )
+    assert new.to_typetracer()[[1, 0],].form == new[[1, 0],].form
 
 
 def test_UnionArray():
@@ -256,22 +214,8 @@ def test_UnionArray():
         [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14]],
         [[15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]],
     ]
-    assert (
-        to_list(
-            new[
-                [1, 0],
-            ]
-        )
-        == expectation
-    )
-    assert (
-        new.to_typetracer()[
-            [1, 0],
-        ].form
-        == new[
-            [1, 0],
-        ].form
-    )
+    assert to_list(new[[1, 0],]) == expectation
+    assert new.to_typetracer()[[1, 0],].form == new[[1, 0],].form
     assert to_list(new[[1, 0]]) == expectation
     assert to_list(new[1, [1, 0]]) == [[5, 6, 7, 8, 9], [0, 1, 2, 3, 4]]
 
@@ -312,22 +256,8 @@ def test_IndexedArray():
         [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14]],
         [[15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]],
     ]
-    assert (
-        to_list(
-            new[
-                [1, 0],
-            ]
-        )
-        == expectation
-    )
-    assert (
-        new.to_typetracer()[
-            [1, 0],
-        ].form
-        == new[
-            [1, 0],
-        ].form
-    )
+    assert to_list(new[[1, 0],]) == expectation
+    assert new.to_typetracer()[[1, 0],].form == new[[1, 0],].form
     assert to_list(new[[1, 0]]) == expectation
 
     assert to_list(new[1, [1, 0]]) == [[5, 6, 7, 8, 9], [0, 1, 2, 3, 4]]
@@ -443,22 +373,8 @@ def test_BitMaskedArray():
         [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
         [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
     ]
-    assert (
-        to_list(
-            new[
-                [1, 0],
-            ]
-        )
-        == expectation
-    )
-    assert (
-        new.to_typetracer()[
-            [1, 0],
-        ].form
-        == new[
-            [1, 0],
-        ].form
-    )
+    assert to_list(new[[1, 0],]) == expectation
+    assert new.to_typetracer()[[1, 0],].form == new[[1, 0],].form
     assert to_list(new[[1, 0]]) == expectation
 
     assert to_list(new[1, [1, 0]]) == [1.0, 0.0]
@@ -497,22 +413,8 @@ def test_ByteMaskedArray():
     assert to_list(new[0, ..., 0]) == 1.1
 
     expectation = [[1.1, 2.2, 3.3, 4.4, 5.5, 6.6], [1.1, 2.2, 3.3, 4.4, 5.5, 6.6]]
-    assert (
-        to_list(
-            new[
-                [1, 0],
-            ]
-        )
-        == expectation
-    )
-    assert (
-        new.to_typetracer()[
-            [1, 0],
-        ].form
-        == new[
-            [1, 0],
-        ].form
-    )
+    assert to_list(new[[1, 0],]) == expectation
+    assert new.to_typetracer()[[1, 0],].form == new[[1, 0],].form
     assert to_list(new[[1, 0]]) == expectation
 
     assert to_list(new[1, [1, 0]]) == [2.2, 1.1]
@@ -543,22 +445,8 @@ def test_IndexedOptionArray():
     assert to_list(new[0, ..., 0]) == 1.1
 
     expectation = [[1.1, 2.2, 3.3, 4.4, 5.5, 6.6], [1.1, 2.2, 3.3, 4.4, 5.5, 6.6]]
-    assert (
-        to_list(
-            new[
-                [1, 0],
-            ]
-        )
-        == expectation
-    )
-    assert (
-        new.to_typetracer()[
-            [1, 0],
-        ].form
-        == new[
-            [1, 0],
-        ].form
-    )
+    assert to_list(new[[1, 0],]) == expectation
+    assert new.to_typetracer()[[1, 0],].form == new[[1, 0],].form
     assert to_list(new[[1, 0]]) == expectation
 
     assert to_list(new[1, [1, 0]]) == [2.2, 1.1]
@@ -620,22 +508,8 @@ def test_ListArray():
             [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
         ],
     ]
-    assert (
-        to_list(
-            new[
-                [1, 0],
-            ]
-        )
-        == expectation
-    )
-    assert (
-        new.to_typetracer()[
-            [1, 0],
-        ].form
-        == new[
-            [1, 0],
-        ].form
-    )
+    assert to_list(new[[1, 0],]) == expectation
+    assert new.to_typetracer()[[1, 0],].form == new[[1, 0],].form
     assert to_list(new[[1, 0]]) == expectation
 
     assert to_list(new[0, [1, 0]]) == [
@@ -682,22 +556,8 @@ def test_ListOffsetArray_NumpyArray():
         [[11.1, 22.2, 33.3, 44.4, 55.5, 66.6]],
         [[1.1, 2.2, 3.3, 4.4, 5.5, 6.6]],
     ]
-    assert (
-        to_list(
-            new[
-                [1, 0],
-            ]
-        )
-        == expectation
-    )
-    assert (
-        new.to_typetracer()[
-            [1, 0],
-        ].form
-        == new[
-            [1, 0],
-        ].form
-    )
+    assert to_list(new[[1, 0],]) == expectation
+    assert new.to_typetracer()[[1, 0],].form == new[[1, 0],].form
     assert to_list(new[[1, 0]]) == expectation
 
     assert to_list(new[0, [0, 0]]) == [

@@ -287,8 +287,6 @@ def test_maybe_to_Numpy():
     assert len(a) == 2
     a = a.maybe_to_NumpyArray()
     assert isinstance(
-        a[
-            1,
-        ],
+        a[1,],
         ak.contents.numpyarray.NumpyArray,
     )

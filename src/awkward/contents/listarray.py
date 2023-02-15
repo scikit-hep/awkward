@@ -606,7 +606,6 @@ class ListArray(Content):
                 slicecontent._content,
                 ak.contents.ListOffsetArray,
             ):
-
                 # Generate ranges between starts and stops
                 as_list_offset_array = self.to_ListOffsetArray64(True)
                 nextcontent = as_list_offset_array._content._carry(nextcarry, True)

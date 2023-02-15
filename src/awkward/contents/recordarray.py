@@ -435,7 +435,6 @@ class RecordArray(Content):
         )
 
         if len(self._contents) == 0:
-
             return RecordArray(
                 [],
                 self._fields,

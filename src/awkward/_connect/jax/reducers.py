@@ -73,7 +73,6 @@ class Sum(Reducer):
 
     @classmethod
     def apply(cls, array, parents, outlength):
-
         assert isinstance(array, ak.contents.NumpyArray)
         if array.dtype.kind == "M":
             raise ak._errors.wrap_error(

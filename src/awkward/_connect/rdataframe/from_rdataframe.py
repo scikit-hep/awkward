@@ -150,7 +150,6 @@ def from_rdataframe(data_frame, columns, offsets_type="int64_t"):
 
     for col in columns:
         if ROOT.awkward.is_awkward_type[column_types[col]]():  # Retrieve Awkward arrays
-
             # ROOT::RDF::RResultPtr<T>::begin Returns an iterator to the beginning of
             # the contained object if this makes sense, throw a compilation error otherwise.
             #
@@ -182,7 +181,6 @@ def from_rdataframe(data_frame, columns, offsets_type="int64_t"):
             cpp_buffers_self = CppBuffers()
 
             if isinstance(form, ak.forms.NumpyForm):
-
                 NumpyBuilder = cppyy.gbl.awkward.LayoutBuilder.Numpy[data_type]
                 builder = NumpyBuilder()
                 builder_type = type(builder).__cpp_name__

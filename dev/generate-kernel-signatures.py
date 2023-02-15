@@ -101,7 +101,6 @@ cuda_kernels_impl = [
 
 
 def reproducible_datetime():
-
     build_date = datetime.datetime.utcfromtimestamp(
         int(os.environ.get("SOURCE_DATE_EPOCH", time.time()))
     )
@@ -419,7 +418,6 @@ def by_signature(cuda_kernel_templates):
                                 )
                             )
                         else:
-
                             python_code = code[
                                 code.find("// BEGIN PYTHON") : code.find(
                                     "// END PYTHON"
