@@ -54,7 +54,7 @@ def test_array_multiply():
 
 
 @numbatest
-def test_ListOffsetArray_multiply():
+def test_ListOffsetArray():
 
     array = ak.Array([[0, 1], [2], [3, 4, 5]], backend="cuda")
 
