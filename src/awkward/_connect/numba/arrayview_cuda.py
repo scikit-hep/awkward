@@ -5,11 +5,6 @@ import numba.cuda as nb_cuda
 from numba import types
 
 import awkward as ak
-from awkward._connect.numba.arrayview import *  # noqa: F403
-from awkward._nplikes.numpylike import NumpyMetadata
-
-np = NumpyMetadata.instance()
-
 
 ########## ArrayView Arguments Handler for CUDA JIT
 
