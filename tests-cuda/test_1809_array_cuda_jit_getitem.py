@@ -23,8 +23,8 @@ ak_numba_layout = pytest.importorskip("awkward._connect.numba.layout")
 
 ak.numba.register_and_check()
 
-threadsperblock = 128
-blockspergrid = 1
+threads_per_block = 128
+blocks_per_grid = 1
 
 
 @nb_cuda.jit(extensions=[array_view_arg_handler])
@@ -50,7 +50,7 @@ def test_array_multiply():
     # allocate the result:
     results = nb_cuda.to_device(np.empty(4, dtype=np.int32))
 
-    multiply[threadsperblock, blockspergrid](akarray, 3, results)
+    multiply[threads_per_block, blocks_per_grid](akarray, 3, results)
 
     nb_cuda.synchronize()
     host_results = results.copy_to_host()
