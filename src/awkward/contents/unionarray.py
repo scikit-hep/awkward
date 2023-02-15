@@ -1180,14 +1180,9 @@ class UnionArray(Content):
             parameters=parameters,
         )
 
-        if len(tail) == 0:
-            return next
-
-        reversed = tail[0]._reverse_merge(next)
-        if len(tail) == 1:
-            return reversed
-        else:
-            return reversed._mergemany(tail[1:])
+        # `tail` should always be empty for UnionArray's merging strategy
+        assert len(tail) == 0
+        return next
 
     def _fill_none(self, value: Content) -> Content:
         contents = []
