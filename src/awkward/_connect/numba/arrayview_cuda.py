@@ -8,6 +8,8 @@ import awkward as ak
 
 ########## ArrayView Arguments Handler for CUDA JIT
 
+ak.numba.register_and_check()
+
 
 class ArrayViewArgHandler:
     def prepare_args(self, ty, val, stream, retr):

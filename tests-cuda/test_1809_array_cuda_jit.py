@@ -5,11 +5,12 @@ import numpy as np  # noqa: F401
 import pytest  # noqa: F401
 
 import awkward as ak  # noqa: F401
-from awkward._connect.numba.arrayview_cuda import array_view_arg_handler
 
 try:
     import numba as nb  # noqa: E402
     import numba.cuda as nb_cuda  # noqa: E402
+
+    from awkward._connect.numba.arrayview_cuda import array_view_arg_handler
 except ImportError:
     nb = nb_cuda = None
 
@@ -17,14 +18,8 @@ numbatest = pytest.mark.skipif(
     nb is None or nb_cuda is None, reason="requires the numba and numba.cuda packages"
 )
 
-ak_numba_cuda = pytest.importorskip("awkward.numba")
-ak_numba_cuda_arrayview = pytest.importorskip("awkward._connect.numba.arrayview_cuda")
-ak_numba_layout = pytest.importorskip("awkward._connect.numba.layout")
-
-ak.numba.register_and_check()
-
 threads_per_block = 128
-blocks_per_grid = 1
+blocks_per_grid = 12
 
 
 @nb_cuda.jit(extensions=[array_view_arg_handler])
@@ -36,13 +31,6 @@ def multiply(array, n, out):
 
 @numbatest
 def test_array_multiply():
-
-    if nb_cuda.is_available():
-        print("CUDA GPU is available!")
-    else:
-        print("NO CUDA GPU...")
-
-    nb_cuda.detect()
 
     # create an ak.Array with cuda backend:
     akarray = ak.Array([0, 1, 2, 3], backend="cuda")
