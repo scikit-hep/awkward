@@ -25,15 +25,13 @@ blocks_per_grid = 12
 @nb_cuda.jit(extensions=[array_view_arg_handler])
 def multiply(array, n, out):
     tid = nb_cuda.grid(1)
-    if tid < len(array):
-        out[tid] = array[tid] * n
+    out[tid] = array[tid] * n
 
 
 @nb_cuda.jit(extensions=[array_view_arg_handler])
 def pass_through(array, out):
-    tid = nb_cuda.grid(1)
-    if tid < len(array):
-        out[tid] = len(array[tid])
+    x, y = nb_cuda.grid(2)
+    out[x] = array[x][y]
 
 
 @numbatest
@@ -58,11 +56,11 @@ def test_ListOffsetArray():
 
     array = ak.Array([[0, 1], [2], [3, 4, 5]], backend="cuda")
 
-    results = nb_cuda.to_device(np.empty(len(array), dtype=np.int32))
+    results = nb_cuda.to_device(np.empty(3, dtype=np.int32))
 
     pass_through[threads_per_block, blocks_per_grid](array, results)
 
     nb_cuda.synchronize()
     host_results = results.copy_to_host()
 
-    assert ak.Array(host_results).tolist() == [2, 1, 3]
+    assert ak.Array(host_results).tolist() == [0, 2, 3]
