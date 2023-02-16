@@ -493,14 +493,19 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
         if item_backend.nplike.known_data:
             item = item.to_ListOffsetArray64(True)
             localindex = ak._do.local_index(item, axis=1)
-            nextcontent = localindex.content.data[item.content.data]
+
+            flat_index = ak._do.flatten(localindex, axis=1)
+            flat_mask = ak._do.flatten(item, axis=1)
+
+            assert flat_index.is_numpy and flat_mask.is_numpy
+            nextcontent = flat_index.data[flat_mask.data]
 
             cumsum = item_backend.index_nplike.empty(
-                item.content.data.shape[0] + 1, dtype=np.int64
+                flat_mask.data.shape[0] + 1, dtype=np.int64
             )
             cumsum[0] = 0
             cumsum[1:] = item_backend.index_nplike.asarray(
-                item_backend.nplike.cumsum(item.content.data)
+                item_backend.nplike.cumsum(flat_mask.data)
             )
             nextoffsets = cumsum[item.offsets]
 
@@ -522,7 +527,9 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
     ):
         if item_backend.nplike.known_data:
             if isinstance(item_backend.nplike, Jax):
-                raise wrap_error("This slice is not supported for JAX differentiation.")
+                raise wrap_error(
+                    TypeError("This slice is not supported for JAX differentiation.")
+                )
             # missing values as any integer other than -1 are extremely rare
             isnegative = item.content.index.data < 0
             if item_backend.index_nplike.any(item.content.index.data < -1):
