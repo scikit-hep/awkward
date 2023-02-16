@@ -99,9 +99,9 @@ subtrees:
                       - file: user-guide/how-to-filter-cut-mask
                         title: "Cuts vs. masks [todo]"
                       - file: user-guide/how-to-filter-ragged
-                        title: "Slicing lists within arrays"
+                        title: "Using ragged arrays"
                       - file: user-guide/how-to-filter-masked
-                        title: "Slices with missing values [todo]"
+                        title: "Using arrays with missing values"
 
               - file: user-guide/how-to-restructure
                 title: "Restructuring data"
