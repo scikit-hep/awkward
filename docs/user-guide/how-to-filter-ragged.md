@@ -4,15 +4,15 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.14.1
+    jupytext_version: 1.14.4
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
   name: python3
 ---
 
-How to filter lists within arrays using ragged slicing
-======================================================
+How to filter with a ragged index array
+=======================================
 
 ```{code-cell} ipython3
 import awkward as ak
@@ -20,8 +20,6 @@ import numpy as np
 ```
 
 ## What is ragged slicing?
-
-+++
 
 One of the most powerful features of NumPy is the expressiveness of its indexing system. A NumPy array [can be sliced in many different ways](https://numpy.org/doc/stable/user/basics.indexing.html#basic-indexing), such as with a single integer, or an array of integers. Awkward Array implements most of these indexing styles, but adds an additional variant: _ragged indexing_.
 
@@ -67,13 +65,14 @@ To produce this result, we need ragged indexing.
 
 +++
 
+(how-to-filter-masked:building-a-ragged-index)=
 ## Building a ragged index
 
 +++
 
 Ragged indexing requires an index array that
 1. has a structure matching the array being sliced **up to** (but not including) the final dimension of the index
-2. has at _least_ one ragged (`var`) dimension.
+2. has at _least_ one ragged (`var`) dimension **or** contain missing values
 
 By structure, we mean the number of sublists in each dimension, which can be seen with {func}`ak.num`:
 
@@ -162,11 +161,12 @@ Clearly this index produces the result that we were aiming for!
 
 +++
 
+(how-to-filter-ragged:indexing-with-argmin-and-argmax)=
 ## Indexing with `argmin` and `argmax`
 
 +++
 
-Ragged indexing is especially useful when combined with the positional {func}`ak.argmin` and {func}`ak.argmax` reducers. These functions accept an `keepdims=True` argument that can be used to keep _the same number of dimensions_ as the original array.
+Ragged indexing is especially useful when combined with the positional {func}`ak.argmin` and {func}`ak.argmax` reducers. These functions accept an `keepdims=True` argument that can be used to keep _the same number of dimensions_ as the original array. There is also a `mask_identity` argument is explained in {ref}`how-to-filter-ragged:indexing-with-missing-values`. For now, we will set it to `False`.
 
 ```{code-cell} ipython3
 array = ak.Array(
@@ -179,41 +179,117 @@ array = ak.Array(
 array
 ```
 
-Without `keepdims=True`, all reducers collapse a dimension of the original array
+With `keepdims=False`, all reducers collapse a dimension of the original array:
 
 ```{code-cell} ipython3
-ak.argmin(array, axis=1)
+ak.argmin(array, axis=1, keepdims=False, mask_identity=False)
 ```
 
 If we try and use this index to slice `array`, it will likely not produce the result we might initially expect:
 
 ```{code-cell} ipython3
-array[ak.argmin(array, axis=1)]
+array[ak.argmin(array, axis=1, keepdims=False, mask_identity=False)]
 ```
 
 Instead of pulling out the smallest items in `array` along `axis=1`, we have simply re-arranged the sublists of `array` along `axis=0`. Our index has only a single dimension, so for each value in `ak.argmin(array, axis=-1)`, Awkward pulls out the corresponding item from `array`. We want to pull values out of the _second_ dimension, so our index array needs to be two dimensional.
 
 +++
 
-Let's now look at what happens with `keepdims=True`:
+Let's now look at what happens with `keepdims=True`. The result is a two dimensional, fully regular array, with no missing values:
 
 ```{code-cell} ipython3
-ak.argmin(array, axis=-1, keepdims=True)
+ak.argmin(array, axis=-1, keepdims=True, mask_identity=False)
 ```
+
+Before we can use this as an index array, we need to convert _at least_ one dimension to a ragged dimension. This follows from rule (2) described in {ref}`how-to-filter-masked:building-a-ragged-index`.
 
 ```{code-cell} ipython3
-array[ak.argmin(array, axis=-1, keepdims=True)]
+ak.from_regular(
+    ak.argmin(array, axis=-1, keepdims=True, mask_identity=False)
+)
 ```
 
-This now produces the expected result!
+We can now use this array to index into `array`:
+
+```{code-cell} ipython3
+array[
+    ak.from_regular(
+        ak.argmin(array, axis=-1, keepdims=True, mask_identity=False)
+    )
+]
+```
+
+it produces the expected result!
 
 +++
 
-## Filtering with missing sublists
+(how-to-filter-ragged:indexing-with-missing-values)=
+## Indexing with missing values
+
+The `keepdims` argument of {func}`ak.argmin` and {func}`ak.argmax` is very useful for creating index arrays. However, what happens when it is not possible to define a minimum value, i.e. for empty sublists? Let's first create an array that contains empty sublists:
+
+```{code-cell} ipython3
+array = ak.Array(
+    [
+        [],
+        [10, 3, 2, 9],
+        [4, 5, 5, 12, 6],
+        [],
+        [8, 9, -1],
+    ]
+)
+array
+```
+
+Awkward reducers accept a `mask_identity` argument that yields the identity value for the reducer instead of `None` when reducing empty lists. Computing {func}`ak.argmax`, we find that the identity for the {func}`ak.argmax` is `-1`:
+
+```{code-cell} ipython3
+ak.argmax(array, keepdims=True, axis=-1, mask_identity=False)
+```
+
+```{code-cell} ipython3
+ak.argmax(array, keepdims=True, axis=-1, mask_identity=True)
+```
+
+What happens if we try and use the array produced with `mask_identity=False` to index into `array`?
+
+As discussed in {ref}`how-to-filter-ragged:indexing-with-argmin-and-argmax`, we first need to convert _at least_ one dimension to a ragged dimension
+
+```{code-cell} ipython3
+index = ak.from_regular(
+    ak.argmax(array, keepdims=True, axis=-1, mask_identity=False)
+)
+```
+
+Now, if we try and index into `array` with `index`, it will raise an exception
+
+```{code-cell} ipython3
+:tags: [raises-exception]
+
+array[index]
+```
+
+From the error message, it is clear that for some sublist(s) the index `-1` is out of range. This makes sense; some of our sublists are empty, meaning that there is no valid integer to index into them. 
+
+Now let's look at the result of indexing with `mask_identity=True`. 
+
+```{code-cell} ipython3
+index = ak.argmax(array, keepdims=True, axis=-1, mask_identity=True)
+```
+
+Because it contains an option type, we do not need to convert the index array to a ragged array. We can see that this index succeeds:
+
+```{code-cell} ipython3
+array[index]
+```
+
+Here, the missing values in the index array correspond to missing values _in the output array_.
 
 +++
 
-Ragged indexing supports using `None` in place of empty sublists within an index. For example
+## Indexing with missing sublists
+
+Ragged indexing also supports using `None` in place of _empty sublists_ within an index. For example, given the following array
 
 ```{code-cell} ipython3
 array = ak.Array(
@@ -227,7 +303,7 @@ array = ak.Array(
 array
 ```
 
-Let's use build a ragged index to pull some values out of `array`. Rather than using empty lists, we can use `None` to mask out sublists that we don't care about:
+let's use build a ragged index to pull out some particular values. Rather than using empty lists, we can use `None` to mask out sublists that we don't care about:
 
 ```{code-cell} ipython3
 array[
@@ -253,60 +329,4 @@ array[
 ]
 ```
 
-we can see that the `None` value introduces an
-
-+++
-
-## Filtering with booleans
-
-+++
-
-Awkward Array's ragged indexing is a generalisation of the advanced indexing supported by NumPy. It is therefore reasonable to ask whether Awkward supports ragged indexing with boolean values, selecting only values for which the index is `True`. Let's create an array of integers:
-
-```{code-cell} ipython3
-numbers = ak.Array(
-    [
-        [0, 1, 2, 3],
-        [4, 5, 6],
-        [8, 9, 10, 11, 12],
-    ]
-)
-```
-
-We can use ragged indexing to keep only the even values. Let's generate a boolean mask with the same structure as `numbers`. In order for there to be a single boolean value for each item in `numbers`, the filter array must have exactly the same number of elements. Ufuncs are powerful means of generating boolean masks, as they directly preserve the exact structure of the original array:
-
-```{code-cell} ipython3
-is_even = (numbers % 2) == 0
-```
-
-```{code-cell} ipython3
-numbers
-```
-
-```{code-cell} ipython3
-is_even
-```
-
-Now we can use `is_even` to slice `numbers`:
-
-```{code-cell} ipython3
-numbers[is_even]
-```
-
-Note that this is different to what would happen with NumPy's boolean indexing:
-
-```{code-cell} ipython3
-numbers_np = np.array(
-    [
-        [0, 1, 2, 3],
-        [4, 5, 6, 7],
-        [8, 9, 10, 11],
-    ]
-)
-```
-
-```{code-cell} ipython3
-numbers_np[(numbers_np % 2) == 0]
-```
-
-NumPy, lacking a ragged array structure, has to flatten the result whereas Awkward Array preserves the number of dimensions in the result.
+we can see that the `None` value introduces an option-type into the final result. `None` values can be used at _any_ level in the index array to introduce an option-type at that depth in the result.
