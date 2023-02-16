@@ -102,7 +102,7 @@ def _impl(array, fill_value, highlevel, behavior, dtype):
         if layout.is_numpy:
             original = nplike.asarray(layout.data)
 
-            if fill_value is _ZEROS or (ensure_known_scalar(fill_value == 0, False)):
+            if fill_value is _ZEROS or ensure_known_scalar(fill_value == 0, False):
                 return ak.contents.NumpyArray(
                     nplike.zeros_like(original, dtype=dtype),
                     parameters=layout.parameters,
@@ -182,14 +182,16 @@ def _impl(array, fill_value, highlevel, behavior, dtype):
                     ak.contents.NumpyArray(asbytes, parameters={"__array__": "char"}),
                     parameters={"__array__": "string"},
                 )
-            # Interpret strings as numeric/bool types
-            result = ak.operations.strings_astype(
-                result, dtype, highlevel=highlevel, behavior=behavior
-            )
-            # Convert dtype
-            return ak.operations.values_astype(
-                result, dtype, highlevel=False, behavior=behavior
-            )
+            if dtype is not None:
+                # Interpret strings as numeric/bool types
+                result = ak.operations.strings_astype(
+                    result, dtype, highlevel=highlevel, behavior=behavior
+                )
+                # Convert dtype
+                result = ak.operations.values_astype(
+                    result, dtype, highlevel=False, behavior=behavior
+                )
+            return result
         else:
             return None
 
