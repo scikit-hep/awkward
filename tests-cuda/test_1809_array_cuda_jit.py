@@ -35,7 +35,6 @@ def multiply(array, n, out):
 
 @nb_cuda.jit(extensions=[ak.numba.array_view_arg_handler])
 def pass_through(array, out):
-    nb_cuda.grid(1)
     index = 0
     for x in range(len(array)):
         ilen = len(array[x])
@@ -44,9 +43,15 @@ def pass_through(array, out):
             index = index + 1
 
 
+@nb_cuda.jit(extensions=[ak.numba.array_view_arg_handler])
+def pass_record_through(array, out):
+    for i in range(len(array)):
+        out[i] = array["x"][i]
+
+
 @numbatest
 def test_array_multiply():
-    # create an ak.Array with cuda backend:
+    # create an ak.Array with a cuda backend:
     akarray = ak.Array([0, 1, 2, 3], backend="cuda")
 
     # allocate the result:
@@ -67,6 +72,22 @@ def test_ListOffsetArray():
     results = nb_cuda.to_device(np.empty(6, dtype=np.int32))
 
     pass_through[1, 1](array, results)
+
+    nb_cuda.synchronize()
+    host_results = results.copy_to_host()
+
+    assert ak.Array(host_results).tolist() == [0, 1, 2, 3, 4, 5]
+
+
+@numbatest
+def test_RecordArray():
+    array = ak.Array(
+        [{"x": 0}, {"x": 1}, {"x": 2}, {"x": 3}, {"x": 4}, {"x": 5}], backend="cuda"
+    )
+
+    results = nb_cuda.to_device(np.empty(6, dtype=np.int32))
+
+    pass_record_through[1, 1](array, results)
 
     nb_cuda.synchronize()
     host_results = results.copy_to_host()
