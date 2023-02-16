@@ -99,65 +99,7 @@ def _impl(array, fill_value, highlevel, behavior, dtype):
         nplike = layout.backend.nplike
         index_nplike = layout.backend.index_nplike
 
-        if fill_value is _ZEROS and (
-            layout.parameter("__array__") in {"bytestring", "string"}
-        ):
-            name = layout.parameter("__array__")
-
-            asbytes = nplike.frombuffer(b"", dtype=np.uint8)
-            return ak.contents.ListArray(
-                ak.index.Index64(
-                    index_nplike.zeros(layout.length, dtype=np.int64),
-                    nplike=index_nplike,
-                ),
-                ak.index.Index64(
-                    index_nplike.zeros(layout.length, dtype=np.int64),
-                    nplike=index_nplike,
-                ),
-                ak.contents.NumpyArray(
-                    asbytes,
-                    parameters={
-                        "__array__": "byte" if name == "bytestring" else "char"
-                    },
-                ),
-                parameters={"__array__": name},
-            )
-
-        elif layout.parameter("__array__") == "bytestring":
-            if isinstance(fill_value, bytes):
-                asbytes = fill_value
-            else:
-                asbytes = str(fill_value).encode("utf-8", "surrogateescape")
-            asbytes = nplike.frombuffer(asbytes, dtype=np.uint8)
-
-            return ak.contents.ListArray(
-                ak.index.Index64(
-                    index_nplike.zeros(layout.length, dtype=np.int64),
-                    nplike=index_nplike,
-                ),
-                ak.index.Index64(
-                    index_nplike.full(layout.length, len(asbytes), dtype=np.int64)
-                ),
-                ak.contents.NumpyArray(asbytes, parameters={"__array__": "byte"}),
-                parameters={"__array__": "bytestring"},
-            )
-
-        elif layout.parameter("__array__") == "string":
-            asstr = str(fill_value).encode("utf-8", "surrogateescape")
-            asbytes = nplike.frombuffer(asstr, dtype=np.uint8)
-            return ak.contents.ListArray(
-                ak.index.Index64(
-                    index_nplike.zeros(layout.length, dtype=np.int64),
-                    nplike=index_nplike,
-                ),
-                ak.index.Index64(
-                    index_nplike.full(layout.length, len(asbytes), dtype=np.int64)
-                ),
-                ak.contents.NumpyArray(asbytes, parameters={"__array__": "char"}),
-                parameters={"__array__": "string"},
-            )
-
-        elif layout.is_numpy:
+        if layout.is_numpy:
             original = nplike.asarray(layout.data)
 
             if fill_value is _ZEROS or (ensure_known_scalar(fill_value == 0, False)):
@@ -182,6 +124,72 @@ def _impl(array, fill_value, highlevel, behavior, dtype):
             else:
                 return layout.to_NumpyArray(dtype=dtype)
 
+        elif layout.parameter("__array__") in {"bytestring", "string"}:
+            stringlike_type = layout.parameter("__array__")
+            if fill_value is _ZEROS:
+                asbytes = nplike.frombuffer(b"", dtype=np.uint8)
+                result = ak.contents.ListArray(
+                    ak.index.Index64(
+                        index_nplike.zeros(layout.length, dtype=np.int64),
+                        nplike=index_nplike,
+                    ),
+                    ak.index.Index64(
+                        index_nplike.zeros(layout.length, dtype=np.int64),
+                        nplike=index_nplike,
+                    ),
+                    ak.contents.NumpyArray(
+                        asbytes,
+                        parameters={
+                            "__array__": "byte"
+                            if stringlike_type == "bytestring"
+                            else "char"
+                        },
+                    ),
+                    parameters={"__array__": stringlike_type},
+                )
+
+            elif stringlike_type == "bytestring":
+                if isinstance(fill_value, bytes):
+                    asbytes = fill_value
+                else:
+                    asbytes = str(fill_value).encode("utf-8", "surrogateescape")
+                asbytes = nplike.frombuffer(asbytes, dtype=np.uint8)
+
+                result = ak.contents.ListArray(
+                    ak.index.Index64(
+                        index_nplike.zeros(layout.length, dtype=np.int64),
+                        nplike=index_nplike,
+                    ),
+                    ak.index.Index64(
+                        index_nplike.full(layout.length, len(asbytes), dtype=np.int64)
+                    ),
+                    ak.contents.NumpyArray(asbytes, parameters={"__array__": "byte"}),
+                    parameters={"__array__": "bytestring"},
+                )
+
+            else:
+                assert stringlike_type == "string"
+                asstr = str(fill_value).encode("utf-8", "surrogateescape")
+                asbytes = nplike.frombuffer(asstr, dtype=np.uint8)
+                result = ak.contents.ListArray(
+                    ak.index.Index64(
+                        index_nplike.zeros(layout.length, dtype=np.int64),
+                        nplike=index_nplike,
+                    ),
+                    ak.index.Index64(
+                        index_nplike.full(layout.length, len(asbytes), dtype=np.int64)
+                    ),
+                    ak.contents.NumpyArray(asbytes, parameters={"__array__": "char"}),
+                    parameters={"__array__": "string"},
+                )
+            # Interpret strings as numeric/bool types
+            result = ak.operations.strings_astype(
+                result, dtype, highlevel=highlevel, behavior=behavior
+            )
+            # Convert dtype
+            return ak.operations.values_astype(
+                result, dtype, highlevel=False, behavior=behavior
+            )
         else:
             return None
 
