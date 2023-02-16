@@ -112,7 +112,7 @@ class ArrayView:
             allow_record=False,
             allow_other=False,
         )
-        
+
         return ArrayView(
             tonumbatype(layout.form),
             behavior,

@@ -46,7 +46,6 @@ def pass_through(array, out):
 
 @numbatest
 def test_array_multiply():
-
     # create an ak.Array with cuda backend:
     akarray = ak.Array([0, 1, 2, 3], backend="cuda")
 
@@ -63,7 +62,6 @@ def test_array_multiply():
 
 @numbatest
 def test_ListOffsetArray():
-
     array = ak.Array([[0, 1], [2], [3, 4, 5]], backend="cuda")
 
     results = nb_cuda.to_device(np.empty(6, dtype=np.int32))
@@ -78,7 +76,6 @@ def test_ListOffsetArray():
 
 @numbatest
 def test_array_on_cpu_multiply():
-
     # create an ak.Array with a cpu backend:
     array = ak.Array([0, 1, 2, 3])
 
