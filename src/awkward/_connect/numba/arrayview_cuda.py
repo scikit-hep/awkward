@@ -35,6 +35,3 @@ class ArrayViewArgHandler:
 
         else:
             return ty, val
-
-
-# array_view_arg_handler = ArrayViewArgHandler()

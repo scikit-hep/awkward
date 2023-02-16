@@ -27,13 +27,13 @@ config.CUDA_LOW_OCCUPANCY_WARNINGS = False
 config.CUDA_WARN_ON_IMPLICIT_COPY = False
 
 
-@nb_cuda.jit(extensions=[ak.numba.ArrayViewArgHandler()])
+@nb_cuda.jit(extensions=[ak.numba.array_view_arg_handler])
 def multiply(array, n, out):
     tid = nb_cuda.grid(1)
     out[tid] = array[tid] * n
 
 
-@nb_cuda.jit(extensions=[ak.numba.ArrayViewArgHandler()])
+@nb_cuda.jit(extensions=[ak.numba.array_view_arg_handler])
 def pass_through(array, out):
     nb_cuda.grid(1)
     index = 0
