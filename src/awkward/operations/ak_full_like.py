@@ -115,7 +115,10 @@ def _impl(array, fill_value, highlevel, behavior, dtype):
                     nplike=index_nplike,
                 ),
                 ak.contents.NumpyArray(
-                    asbytes, parameters="byte" if name == "bytestring" else "char"
+                    asbytes,
+                    parameters={
+                        "__array__": "byte" if name == "bytestring" else "char"
+                    },
                 ),
                 parameters={"__array__": name},
             )
