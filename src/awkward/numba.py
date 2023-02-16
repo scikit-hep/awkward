@@ -42,6 +42,7 @@ def _register():
     import awkward._connect.numba.arrayview
     import awkward._connect.numba.builder
     import awkward._connect.numba.layout
+    from awkward._connect.numba.arrayview_cuda import array_view_arg_handler
 
     n = ak.numba
     n.ArrayViewType = awkward._connect.numba.arrayview.ArrayViewType
@@ -61,6 +62,7 @@ def _register():
     n.UnionArrayType = awkward._connect.numba.layout.UnionArrayType
     n.ArrayBuilderType = awkward._connect.numba.builder.ArrayBuilderType
     n.ArrayBuilderModel = awkward._connect.numba.builder.ArrayBuilderModel
+    n.array_view_arg_handler = array_view_arg_handler
 
     @numba.extending.typeof_impl.register(ak.highlevel.Array)
     def typeof_Array(obj, c):
