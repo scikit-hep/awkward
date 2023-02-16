@@ -26,9 +26,10 @@ class ArrayViewArgHandler:
                 return tys, (pos, start, stop, arrayptrs, pylookup)
             else:
                 raise ak._errors.wrap_error(
-                    NotImplementedError(
-                        f"{repr(val.layout.nplike)} is not implemented for CUDA. Please transfer the array to CUDA backend to "
-                        "continue the operation."
+                    TypeError(
+                        '`ak.to_backend` should be called with `backend="cuda"` to put '
+                        "the array on the GPU before using it: "
+                        'ak.to_backend(array, backend="cuda")'
                     )
                 )
 

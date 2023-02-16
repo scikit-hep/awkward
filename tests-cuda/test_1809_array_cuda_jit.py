@@ -74,3 +74,25 @@ def test_ListOffsetArray():
     host_results = results.copy_to_host()
 
     assert ak.Array(host_results).tolist() == [0, 1, 2, 3, 4, 5]
+
+
+@numbatest
+def test_array_on_cpu_multiply():
+
+    # create an ak.Array with a cpu backend:
+    array = ak.Array([0, 1, 2, 3])
+
+    # allocate the result:
+    results = nb_cuda.to_device(np.empty(4, dtype=np.int32))
+
+    with pytest.raises(TypeError):
+        multiply[threads_per_block, blocks_per_grid](array, 3, results)
+
+    multiply[threads_per_block, blocks_per_grid](
+        ak.to_backend(array, backend="cuda"), 3, results
+    )
+
+    nb_cuda.synchronize()
+    host_results = results.copy_to_host()
+
+    assert ak.Array(host_results).tolist() == [0, 3, 6, 9]
