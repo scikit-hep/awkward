@@ -51,7 +51,7 @@ def mixin_class(registry, name=None):
                     if rhs is None:
                         registry.setdefault((ufunc, behavior_name), method)
                         continue
-                    for rhs_name in list(rhs) + [behavior_name]:
+                    for rhs_name in [*list(rhs), behavior_name]:
                         registry.setdefault((ufunc, behavior_name, rhs_name), method)
                         if transpose is not None and rhs_name != behavior_name:
                             registry.setdefault(

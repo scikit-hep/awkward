@@ -376,7 +376,7 @@ class Content:
             )
 
         else:
-            return self._getitem_next(slice(None), (Ellipsis,) + tail, advanced)
+            return self._getitem_next(slice(None), (Ellipsis, *tail), advanced)
 
     def _getitem_next_regular_missing(
         self,

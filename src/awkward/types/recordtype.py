@@ -89,9 +89,9 @@ class RecordType(Type):
             for i, x in enumerate(self._contents):
                 if i + 1 < len(self._contents):
                     if compact:
-                        y = x._str(indent, compact) + [", "]
+                        y = [*x._str(indent, compact), ", "]
                     else:
-                        y = x._str(indent + "    ", compact) + [",\n", indent, "    "]
+                        y = [*x._str(indent + "    ", compact), ",\n", indent, "    "]
                 else:
                     if compact:
                         y = x._str(indent, compact)
@@ -136,47 +136,51 @@ class RecordType(Type):
                         key_str = json.dumps(k)
                     else:
                         key_str = k
-                    pairs.append([key_str, ": "] + v)
+                    pairs.append([key_str, ": ", *v])
                 flat_pairs = [y for x in pairs for y in x]
 
             if params is None:
                 if self.is_tuple:
                     flat_children = [y for x in children for y in x]
                     if name is None:
-                        out = ["(", pre] + flat_children + [post, ")"]
+                        out = ["(", pre, *flat_children] + [post, ")"]
                     else:
-                        out = [name, "[", pre] + flat_children + [post, "]"]
+                        out = [name, "[", pre, *flat_children] + [post, "]"]
                 else:
                     if name is None:
-                        out = ["{", pre] + flat_pairs + [post, "}"]
+                        out = ["{", pre, *flat_pairs] + [post, "}"]
                     else:
-                        out = [name, "[", pre] + flat_pairs + [post, "]"]
+                        out = [name, "[", pre, *flat_pairs] + [post, "]"]
 
             else:
                 if self.is_tuple:
                     flat_children = [y for x in children for y in x]
                     if name is None:
-                        out = (
-                            ["tuple[[", pre]
-                            + flat_children
-                            + [post, "], ", params, "]"]
-                        )
+                        out = ["tuple[[", pre, *flat_children] + [
+                            post,
+                            "], ",
+                            params,
+                            "]",
+                        ]
                     else:
                         c = "" if len(self._contents) == 0 else ", "
-                        out = [name, "[", pre] + flat_children + [c, post, params, "]"]
+                        out = [name, "[", pre, *flat_children] + [c, post, params, "]"]
                 else:
                     if name is None:
-                        out = (
-                            ["struct[{", pre] + flat_pairs + [post, "}, ", params, "]"]
-                        )
+                        out = ["struct[{", pre, *flat_pairs] + [
+                            post,
+                            "}, ",
+                            params,
+                            "]",
+                        ]
                     else:
                         c = "" if len(self._contents) == 0 else ", "
-                        out = [name, "[", pre] + flat_pairs + [c, post, params, "]"]
+                        out = [name, "[", pre, *flat_pairs] + [c, post, params, "]"]
 
-        return [self._str_categorical_begin()] + out + [self._str_categorical_end()]
+        return [self._str_categorical_begin(), *out] + [self._str_categorical_end()]
 
     def __repr__(self):
-        args = [repr(self._contents), repr(self._fields)] + self._repr_args()
+        args = [repr(self._contents), repr(self._fields), *self._repr_args()]
         return "{}({})".format(type(self).__name__, ", ".join(args))
 
     def __eq__(self, other):

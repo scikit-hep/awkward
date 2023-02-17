@@ -1,9 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import numpy as np  # noqa: F401
-import pytest  # noqa: F401
+import numpy as np
+import pytest
 
-import awkward as ak  # noqa: F401
+import awkward as ak
 
 
 def test_EmptyArray():
@@ -64,7 +64,7 @@ def test_NumpyArray():
         a[2:,],
         ak.contents.numpyarray.NumpyArray,
     )
-    assert a[2:,][0,] == 2.2  # noqa: E231
+    assert a[2:,][0,] == 2.2
     assert len(a[2:,]) == 2
     with pytest.raises(IndexError):
         a["bad",]
@@ -82,9 +82,9 @@ def test_NumpyArray():
     assert len(b[1,]) == 3
     with pytest.raises(IndexError):
         b[2,]
-    assert b[1,][2,][0,] == 25  # noqa: E231
-    assert len(b[1,][2,][1:,]) == 4  # noqa: E231
-    assert b[1,][2,][1:,][2,] == 28  # noqa: E231
+    assert b[1,][2,][0,] == 25
+    assert len(b[1,][2,][1:,]) == 4
+    assert b[1,][2,][1:,][2,] == 28
     with pytest.raises(IndexError):
         b["bad",]
     with pytest.raises(IndexError):
@@ -106,8 +106,8 @@ def test_RegularArray_NumpyArray():
     )
     assert a.to_typetracer()[1,].form == a[1,].form
     assert len(a[1,]) == 3
-    assert a[1,][2,] == 5.5  # noqa: E231
-    assert a[-1,][2,] == 5.5  # noqa: E231
+    assert a[1,][2,] == 5.5
+    assert a[-1,][2,] == 5.5
     assert isinstance(
         a[1:2,],
         ak.contents.regulararray.RegularArray,
@@ -120,7 +120,7 @@ def test_RegularArray_NumpyArray():
     with pytest.raises(IndexError):
         a[-3,]
     with pytest.raises(IndexError):
-        a[1,][3,]  # noqa: E231
+        a[1,][3,]
     with pytest.raises(IndexError):
         a["bad",]
     with pytest.raises(IndexError):
@@ -175,8 +175,8 @@ def test_ListArray_NumpyArray():
     assert len(a[-3,]) == 3
     assert len(a[-2,]) == 0
     assert len(a[-1,]) == 2
-    assert a[0,][-1,] == 3.3  # noqa: E231
-    assert a[2,][-1,] == 5.5  # noqa: E231
+    assert a[0,][-1,] == 3.3
+    assert a[2,][-1,] == 5.5
     assert isinstance(
         a[1:,],
         ak.contents.listarray.ListArray,
@@ -216,8 +216,8 @@ def test_ListOffsetArray_NumpyArray():
     assert len(a[-3,]) == 3
     assert len(a[-2,]) == 0
     assert len(a[-1,]) == 2
-    assert a[0,][-1,] == 3.3  # noqa: E231
-    assert a[2,][-1,] == 5.5  # noqa: E231
+    assert a[0,][-1,] == 3.3
+    assert a[2,][-1,] == 5.5
     assert isinstance(
         a[1:,],
         ak.contents.listarray.ListArray,
@@ -268,8 +268,8 @@ def test_RecordArray_NumpyArray():
         ak.contents.numpyarray.NumpyArray,
     )
     assert a.to_typetracer()["y",].form == a["y",].form
-    assert a["y",][2,] == 2.2  # noqa: E231
-    assert a["y",][-3,] == 2.2  # noqa: E231
+    assert a["y",][2,] == 2.2
+    assert a["y",][-3,] == 2.2
     with pytest.raises(IndexError):
         a["z",]
     with pytest.raises(IndexError):
@@ -294,8 +294,8 @@ def test_RecordArray_NumpyArray():
         ak.record.Record,
     )
     assert b.to_typetracer()[2,].array.form == b[2,].array.form
-    assert b[2,]["1",] == 2.2  # noqa: E231
-    assert b[-3,]["1",] == 2.2  # noqa: E231
+    assert b[2,]["1",] == 2.2
+    assert b[-3,]["1",] == 2.2
     assert isinstance(
         b[2:,],
         ak.contents.indexedarray.IndexedArray,
@@ -310,8 +310,8 @@ def test_RecordArray_NumpyArray():
         ak.contents.numpyarray.NumpyArray,
     )
     assert b.to_typetracer()["1",].form == b["1",].form
-    assert b["1",][2,] == 2.2  # noqa: E231
-    assert b["1",][-3,] == 2.2  # noqa: E231
+    assert b["1",][2,] == 2.2
+    assert b["1",][-3,] == 2.2
     with pytest.raises(IndexError):
         a["2",]
     assert len(b[["0", "1"],]) == 5
@@ -385,8 +385,8 @@ def test_IndexedArray_NumpyArray():
     assert len(a[-4:,]) == 4
     assert len(a[3:100,]) == 4
     assert len(a[-4:100,]) == 4
-    assert a[3:,][1,] == 5.5  # noqa: E231
-    assert a[-4:,][1,] == 5.5  # noqa: E231
+    assert a[3:,][1,] == 5.5
+    assert a[-4:,][1,] == 5.5
     with pytest.raises(IndexError):
         a["bad",]
     with pytest.raises(IndexError):
@@ -427,10 +427,10 @@ def test_IndexedOptionArray_NumpyArray():
     assert len(a[-4:,]) == 4
     assert len(a[3:100,]) == 4
     assert len(a[-4:100,]) == 4
-    assert a[3:,][1,] is None  # noqa: E231
-    assert a[-4:,][1,] is None  # noqa: E231
-    assert a[3:,][2,] == 6.6  # noqa: E231
-    assert a[-4:,][2,] == 6.6  # noqa: E231
+    assert a[3:,][1,] is None
+    assert a[-4:,][1,] is None
+    assert a[3:,][2,] == 6.6
+    assert a[-4:,][2,] == 6.6
     with pytest.raises(IndexError):
         a["bad",]
     with pytest.raises(IndexError):
@@ -468,10 +468,10 @@ def test_ByteMaskedArray_NumpyArray():
     assert len(a[-3:,]) == 3
     assert len(a[2:100,]) == 3
     assert len(a[-3:100,]) == 3
-    assert a[2:,][1,] is None  # noqa: E231
-    assert a[-3:,][1,] is None  # noqa: E231
-    assert a[2:,][2,] == 5.5  # noqa: E231
-    assert a[-3:,][2,] == 5.5  # noqa: E231
+    assert a[2:,][1,] is None
+    assert a[-3:,][1,] is None
+    assert a[2:,][2,] == 5.5
+    assert a[-3:,][2,] == 5.5
     with pytest.raises(IndexError):
         a["bad",]
     with pytest.raises(IndexError):
@@ -507,10 +507,10 @@ def test_ByteMaskedArray_NumpyArray():
     assert len(b[-3:,]) == 3
     assert len(b[2:100,]) == 3
     assert len(b[-3:100,]) == 3
-    assert b[2:,][1,] is None  # noqa: E231
-    assert b[-3:,][1,] is None  # noqa: E231
-    assert b[2:,][2,] == 5.5  # noqa: E231
-    assert b[-3:,][2,] == 5.5  # noqa: E231
+    assert b[2:,][1,] is None
+    assert b[-3:,][1,] is None
+    assert b[2:,][2,] == 5.5
+    assert b[-3:,][2,] == 5.5
     with pytest.raises(IndexError):
         b["bad",]
     with pytest.raises(IndexError):
@@ -592,10 +592,10 @@ def test_BitMaskedArray_NumpyArray():
     assert len(a[-8:,]) == 8
     assert len(a[5:100,]) == 8
     assert len(a[-8:100,]) == 8
-    assert a[5:,][2,] is None  # noqa: E231
-    assert a[5:,][3,] == 1.1  # noqa: E231
-    assert a[-8:,][2,] is None  # noqa: E231
-    assert a[-8:,][3,] == 1.1  # noqa: E231
+    assert a[5:,][2,] is None
+    assert a[5:,][3,] == 1.1
+    assert a[-8:,][2,] is None
+    assert a[-8:,][3,] == 1.1
     with pytest.raises(IndexError):
         a["bad",]
 
@@ -672,10 +672,10 @@ def test_BitMaskedArray_NumpyArray():
     assert len(b[-8:,]) == 8
     assert len(b[5:100,]) == 8
     assert len(b[-8:100,]) == 8
-    assert b[5:,][2,] is None  # noqa: E231
-    assert b[5:,][3,] == 1.1  # noqa: E231
-    assert b[-8:,][2,] is None  # noqa: E231
-    assert b[-8:,][3,] == 1.1  # noqa: E231
+    assert b[5:,][2,] is None
+    assert b[5:,][3,] == 1.1
+    assert b[-8:,][2,] is None
+    assert b[-8:,][3,] == 1.1
     with pytest.raises(IndexError):
         b["bad",]
 
@@ -755,10 +755,10 @@ def test_BitMaskedArray_NumpyArray():
     assert len(c[-8:,]) == 8
     assert len(c[5:100,]) == 8
     assert len(c[-8:100,]) == 8
-    assert c[5:,][2,] is None  # noqa: E231
-    assert c[5:,][3,] == 1.1  # noqa: E231
-    assert c[-8:,][2,] is None  # noqa: E231
-    assert c[-8:,][3,] == 1.1  # noqa: E231
+    assert c[5:,][2,] is None
+    assert c[5:,][3,] == 1.1
+    assert c[-8:,][2,] is None
+    assert c[-8:,][3,] == 1.1
     with pytest.raises(IndexError):
         c["bad",]
 
@@ -838,10 +838,10 @@ def test_BitMaskedArray_NumpyArray():
     assert len(d[-8:,]) == 8
     assert len(d[5:100,]) == 8
     assert len(d[-8:100,]) == 8
-    assert d[5:,][2,] is None  # noqa: E231
-    assert d[5:,][3,] == 1.1  # noqa: E231
-    assert d[-8:,][2,] is None  # noqa: E231
-    assert d[-8:,][3,] == 1.1  # noqa: E231
+    assert d[5:,][2,] is None
+    assert d[5:,][3,] == 1.1
+    assert d[-8:,][2,] is None
+    assert d[-8:,][3,] == 1.1
     with pytest.raises(IndexError):
         d["bad",]
 
@@ -865,7 +865,7 @@ def test_UnmaskedArray_NumpyArray():
         ak.contents.unmaskedarray.UnmaskedArray,
     )
     assert a.to_typetracer()[2:,].form == a[2:,].form
-    assert a[2:,][0,] == 2.2  # noqa: E231
+    assert a[2:,][0,] == 2.2
     assert len(a[2:,]) == 2
     with pytest.raises(IndexError):
         a["bad",]
@@ -906,10 +906,10 @@ def test_UnionArray_NumpyArray():
     assert len(a[-4:,]) == 4
     assert len(a[3:100,]) == 4
     assert len(a[-4:100,]) == 4
-    assert a[3:,][1,] == 3.3  # noqa: E231
-    assert a[3:,][2,] == 3.0  # noqa: E231
-    assert a[-4:,][1,] == 3.3  # noqa: E231
-    assert a[-4:,][2,] == 3.0  # noqa: E231
+    assert a[3:,][1,] == 3.3
+    assert a[3:,][2,] == 3.0
+    assert a[-4:,][1,] == 3.3
+    assert a[-4:,][2,] == 3.0
     with pytest.raises(IndexError):
         a["bad",]
     with pytest.raises(IndexError):
@@ -918,7 +918,7 @@ def test_UnionArray_NumpyArray():
 
 def test_RegularArray_RecordArray_NumpyArray():
     # 6.6 is inaccessible
-    a = ak.contents.regulararray.RegularArray(  # noqa: F841
+    a = ak.contents.regulararray.RegularArray(
         ak.contents.recordarray.RecordArray(
             [
                 ak.contents.numpyarray.NumpyArray(
@@ -931,36 +931,30 @@ def test_RegularArray_RecordArray_NumpyArray():
     )
     assert len(a["nest",]) == 2
     assert isinstance(
-        a["nest",][1,],  # noqa: E231
+        a["nest",][1,],
         ak.contents.numpyarray.NumpyArray,
     )
-    assert (
-        a.to_typetracer()["nest",][1,].form  # noqa: E231
-        == a["nest",][1,].form  # noqa: E231
-    )
-    assert len(a["nest",][1,]) == 3  # noqa: E231
-    assert a["nest",][1,][2,] == 5.5  # noqa: E231
-    assert a["nest",][-1,][2,] == 5.5  # noqa: E231
+    assert a.to_typetracer()["nest",][1,].form == a["nest",][1,].form
+    assert len(a["nest",][1,]) == 3
+    assert a["nest",][1,][2,] == 5.5
+    assert a["nest",][-1,][2,] == 5.5
     assert isinstance(
-        a["nest",][1:2,],  # noqa: E231
+        a["nest",][1:2,],
         ak.contents.regulararray.RegularArray,
     )
-    assert (
-        a.to_typetracer()["nest",][1:2,].form  # noqa: E231
-        == a["nest",][1:2,].form  # noqa: E231
-    )
-    assert len(a["nest",][1:,]) == 1  # noqa: E231
-    assert len(a["nest",][1:100,]) == 1  # noqa: E231
+    assert a.to_typetracer()["nest",][1:2,].form == a["nest",][1:2,].form
+    assert len(a["nest",][1:,]) == 1
+    assert len(a["nest",][1:100,]) == 1
     with pytest.raises(IndexError):
-        a["nest",][2,]  # noqa: E231
+        a["nest",][2,]
     with pytest.raises(IndexError):
-        a["nest",][-3,]  # noqa: E231
+        a["nest",][-3,]
     with pytest.raises(IndexError):
-        a["nest",][1,][3,]  # noqa: E231
+        a["nest",][1,][3,]
     with pytest.raises(IndexError):
-        a["nest",]["bad",]  # noqa: E231
+        a["nest",]["bad",]
 
-    b = ak.contents.regulararray.RegularArray(  # noqa: F841
+    b = ak.contents.regulararray.RegularArray(
         ak.contents.recordarray.RecordArray(
             [ak.contents.emptyarray.EmptyArray()], ["nest"]
         ),
@@ -969,32 +963,26 @@ def test_RegularArray_RecordArray_NumpyArray():
     )
     assert len(b["nest",]) == 10
     assert isinstance(
-        b["nest",][5,],  # noqa: E231
+        b["nest",][5,],
         ak.contents.emptyarray.EmptyArray,
     )
-    assert (
-        b.to_typetracer()["nest",][5,].form  # noqa: E231
-        == b["nest",][5,].form  # noqa: E231
-    )
-    assert len(b["nest",][5,]) == 0  # noqa: E231
+    assert b.to_typetracer()["nest",][5,].form == b["nest",][5,].form
+    assert len(b["nest",][5,]) == 0
     assert isinstance(
-        b["nest",][7:,],  # noqa: E231
+        b["nest",][7:,],
         ak.contents.regulararray.RegularArray,
     )
-    assert (
-        b.to_typetracer()["nest",][7:,].form  # noqa: E231
-        == b["nest",][7:,].form  # noqa: E231
-    )
-    assert len(b["nest",][7:,]) == 3  # noqa: E231
-    assert len(b["nest",][7:100,]) == 3  # noqa: E231
+    assert b.to_typetracer()["nest",][7:,].form == b["nest",][7:,].form
+    assert len(b["nest",][7:,]) == 3
+    assert len(b["nest",][7:100,]) == 3
     with pytest.raises(IndexError):
-        b["nest",]["bad",]  # noqa: E231
+        b["nest",]["bad",]
 
 
 def test_ListArray_RecordArray_NumpyArray():
     # 200 is inaccessible in stops
     # 6.6, 7.7, and 8.8 are inaccessible in content
-    a = ak.contents.listarray.ListArray(  # noqa: F841
+    a = ak.contents.listarray.ListArray(
         ak.index.Index(np.array([4, 100, 1])),
         ak.index.Index(np.array([7, 100, 3, 200])),
         ak.contents.recordarray.RecordArray(
@@ -1008,40 +996,37 @@ def test_ListArray_RecordArray_NumpyArray():
     )
     assert len(a["nest",]) == 3
     with pytest.raises(IndexError):
-        a["nest",][3,]  # noqa: E231
+        a["nest",][3,]
     with pytest.raises(IndexError):
-        a["nest",][-4,]  # noqa: E231
+        a["nest",][-4,]
     assert isinstance(
-        a["nest",][2,],  # noqa: E231
+        a["nest",][2,],
         ak.contents.numpyarray.NumpyArray,
     )
-    assert (
-        a.to_typetracer()["nest",][2,].form  # noqa: E231
-        == a["nest",][2,].form  # noqa: E231
-    )
-    assert len(a["nest",][0,]) == 3  # noqa: E231
-    assert len(a["nest",][1,]) == 0  # noqa: E231
-    assert len(a["nest",][2,]) == 2  # noqa: E231
-    assert len(a["nest",][-3,]) == 3  # noqa: E231
-    assert len(a["nest",][-2,]) == 0  # noqa: E231
-    assert len(a["nest",][-1,]) == 2  # noqa: E231
-    assert a["nest",][0,][-1,] == 3.3  # noqa: E231
-    assert a["nest",][2,][-1,] == 5.5  # noqa: E231
+    assert a.to_typetracer()["nest",][2,].form == a["nest",][2,].form
+    assert len(a["nest",][0,]) == 3
+    assert len(a["nest",][1,]) == 0
+    assert len(a["nest",][2,]) == 2
+    assert len(a["nest",][-3,]) == 3
+    assert len(a["nest",][-2,]) == 0
+    assert len(a["nest",][-1,]) == 2
+    assert a["nest",][0,][-1,] == 3.3
+    assert a["nest",][2,][-1,] == 5.5
     assert isinstance(
-        a["nest",][1:,],  # noqa: E231
+        a["nest",][1:,],
         ak.contents.listarray.ListArray,
     )
-    assert len(a["nest",][1:,]) == 2  # noqa: E231
-    assert len(a["nest",][-2:,]) == 2  # noqa: E231
-    assert len(a["nest",][1:100,]) == 2  # noqa: E231
-    assert len(a["nest",][-2:100,]) == 2  # noqa: E231
+    assert len(a["nest",][1:,]) == 2
+    assert len(a["nest",][-2:,]) == 2
+    assert len(a["nest",][1:100,]) == 2
+    assert len(a["nest",][-2:100,]) == 2
     with pytest.raises(IndexError):
-        a["nest",]["bad",]  # noqa: E231
+        a["nest",]["bad",]
 
 
 def test_ListOffsetArray_RecordArray_NumpyArray():
     # 6.6 and 7.7 are inaccessible
-    a = ak.contents.listoffsetarray.ListOffsetArray(  # noqa: F841
+    a = ak.contents.listoffsetarray.ListOffsetArray(
         ak.index.Index(np.array([1, 4, 4, 6])),
         ak.contents.recordarray.RecordArray(
             [
@@ -1054,44 +1039,38 @@ def test_ListOffsetArray_RecordArray_NumpyArray():
     )
     assert len(a["nest",]) == 3
     with pytest.raises(IndexError):
-        a["nest",][3,]  # noqa: E231
+        a["nest",][3,]
     with pytest.raises(IndexError):
-        a["nest",][-4,]  # noqa: E231
+        a["nest",][-4,]
     assert isinstance(
-        a["nest",][2,],  # noqa: E231
+        a["nest",][2,],
         ak.contents.numpyarray.NumpyArray,
     )
-    assert (
-        a.to_typetracer()["nest",][2,].form  # noqa: E231
-        == a["nest",][2,].form  # noqa: E231
-    )
-    assert len(a["nest",][0,]) == 3  # noqa: E231
-    assert len(a["nest",][1,]) == 0  # noqa: E231
-    assert len(a["nest",][2,]) == 2  # noqa: E231
-    assert len(a["nest",][-3,]) == 3  # noqa: E231
-    assert len(a["nest",][-2,]) == 0  # noqa: E231
-    assert len(a["nest",][-1,]) == 2  # noqa: E231
-    assert a["nest",][0,][-1,] == 3.3  # noqa: E231
-    assert a["nest",][2,][-1,] == 5.5  # noqa: E231
+    assert a.to_typetracer()["nest",][2,].form == a["nest",][2,].form
+    assert len(a["nest",][0,]) == 3
+    assert len(a["nest",][1,]) == 0
+    assert len(a["nest",][2,]) == 2
+    assert len(a["nest",][-3,]) == 3
+    assert len(a["nest",][-2,]) == 0
+    assert len(a["nest",][-1,]) == 2
+    assert a["nest",][0,][-1,] == 3.3
+    assert a["nest",][2,][-1,] == 5.5
     assert isinstance(
-        a["nest",][1:,],  # noqa: E231
+        a["nest",][1:,],
         ak.contents.listarray.ListArray,
     )
-    assert (
-        a.to_typetracer()["nest",][1:,].form  # noqa: E231
-        == a["nest",][1:,].form  # noqa: E231
-    )
-    assert len(a["nest",][1:,]) == 2  # noqa: E231
-    assert len(a["nest",][-2:,]) == 2  # noqa: E231
-    assert len(a["nest",][1:100,]) == 2  # noqa: E231
-    assert len(a["nest",][-2:100,]) == 2  # noqa: E231
+    assert a.to_typetracer()["nest",][1:,].form == a["nest",][1:,].form
+    assert len(a["nest",][1:,]) == 2
+    assert len(a["nest",][-2:,]) == 2
+    assert len(a["nest",][1:100,]) == 2
+    assert len(a["nest",][-2:100,]) == 2
     with pytest.raises(IndexError):
-        a["nest",]["bad",]  # noqa: E231
+        a["nest",]["bad",]
 
 
 def test_IndexedArray_RecordArray_NumpyArray():
     # 4.4 is inaccessible; 3.3 and 5.5 appear twice
-    a = ak.contents.indexedarray.IndexedArray(  # noqa: F841
+    a = ak.contents.indexedarray.IndexedArray(
         ak.index.Index(np.array([2, 2, 0, 1, 4, 5, 4])),
         ak.contents.recordarray.RecordArray(
             [
@@ -1103,45 +1082,42 @@ def test_IndexedArray_RecordArray_NumpyArray():
         ),
     )
     assert len(a["nest",]) == 7
-    assert a["nest",][0,] == 3.3  # noqa: E231
-    assert a["nest",][1,] == 3.3  # noqa: E231
-    assert a["nest",][2,] == 1.1  # noqa: E231
-    assert a["nest",][3,] == 2.2  # noqa: E231
-    assert a["nest",][4,] == 5.5  # noqa: E231
-    assert a["nest",][5,] == 6.6  # noqa: E231
-    assert a["nest",][6,] == 5.5  # noqa: E231
-    assert a["nest",][-7,] == 3.3  # noqa: E231
-    assert a["nest",][-6,] == 3.3  # noqa: E231
-    assert a["nest",][-5,] == 1.1  # noqa: E231
-    assert a["nest",][-4,] == 2.2  # noqa: E231
-    assert a["nest",][-3,] == 5.5  # noqa: E231
-    assert a["nest",][-2,] == 6.6  # noqa: E231
-    assert a["nest",][-1,] == 5.5  # noqa: E231
+    assert a["nest",][0,] == 3.3
+    assert a["nest",][1,] == 3.3
+    assert a["nest",][2,] == 1.1
+    assert a["nest",][3,] == 2.2
+    assert a["nest",][4,] == 5.5
+    assert a["nest",][5,] == 6.6
+    assert a["nest",][6,] == 5.5
+    assert a["nest",][-7,] == 3.3
+    assert a["nest",][-6,] == 3.3
+    assert a["nest",][-5,] == 1.1
+    assert a["nest",][-4,] == 2.2
+    assert a["nest",][-3,] == 5.5
+    assert a["nest",][-2,] == 6.6
+    assert a["nest",][-1,] == 5.5
     with pytest.raises(IndexError):
-        a["nest",][7,]  # noqa: E231
+        a["nest",][7,]
     with pytest.raises(IndexError):
-        a["nest",][-8,]  # noqa: E231
+        a["nest",][-8,]
     assert isinstance(
-        a["nest",][3:,],  # noqa: E231
+        a["nest",][3:,],
         ak.contents.indexedarray.IndexedArray,
     )
-    assert (
-        a.to_typetracer()["nest",][3:,].form  # noqa: E231
-        == a["nest",][3:,].form  # noqa: E231
-    )
-    assert len(a["nest",][3:,]) == 4  # noqa: E231
-    assert len(a["nest",][-4:,]) == 4  # noqa: E231
-    assert len(a["nest",][3:100,]) == 4  # noqa: E231
-    assert len(a["nest",][-4:100,]) == 4  # noqa: E231
-    assert a["nest",][3:,][1,] == 5.5  # noqa: E231
-    assert a["nest",][-4:,][1,] == 5.5  # noqa: E231
+    assert a.to_typetracer()["nest",][3:,].form == a["nest",][3:,].form
+    assert len(a["nest",][3:,]) == 4
+    assert len(a["nest",][-4:,]) == 4
+    assert len(a["nest",][3:100,]) == 4
+    assert len(a["nest",][-4:100,]) == 4
+    assert a["nest",][3:,][1,] == 5.5
+    assert a["nest",][-4:,][1,] == 5.5
     with pytest.raises(IndexError):
-        a["nest",]["bad",]  # noqa: E231
+        a["nest",]["bad",]
 
 
 def test_IndexedOptionArray_RecordArray_NumpyArray():
     # 1.1 and 4.4 are inaccessible; 3.3 appears twice
-    a = ak.contents.indexedoptionarray.IndexedOptionArray(  # noqa: F841
+    a = ak.contents.indexedoptionarray.IndexedOptionArray(
         ak.index.Index(np.array([2, 2, -1, 1, -1, 5, 4])),
         ak.contents.recordarray.RecordArray(
             [
@@ -1153,47 +1129,44 @@ def test_IndexedOptionArray_RecordArray_NumpyArray():
         ),
     )
     assert len(a["nest",]) == 7
-    assert a["nest",][0,] == 3.3  # noqa: E231
-    assert a["nest",][1,] == 3.3  # noqa: E231
-    assert a["nest",][2,] is None  # noqa: E231
-    assert a["nest",][3,] == 2.2  # noqa: E231
-    assert a["nest",][4,] is None  # noqa: E231
-    assert a["nest",][5,] == 6.6  # noqa: E231
-    assert a["nest",][6,] == 5.5  # noqa: E231
-    assert a["nest",][-7,] == 3.3  # noqa: E231
-    assert a["nest",][-6,] == 3.3  # noqa: E231
-    assert a["nest",][-5,] is None  # noqa: E231
-    assert a["nest",][-4,] == 2.2  # noqa: E231
-    assert a["nest",][-3,] is None  # noqa: E231
-    assert a["nest",][-2,] == 6.6  # noqa: E231
-    assert a["nest",][-1,] == 5.5  # noqa: E231
+    assert a["nest",][0,] == 3.3
+    assert a["nest",][1,] == 3.3
+    assert a["nest",][2,] is None
+    assert a["nest",][3,] == 2.2
+    assert a["nest",][4,] is None
+    assert a["nest",][5,] == 6.6
+    assert a["nest",][6,] == 5.5
+    assert a["nest",][-7,] == 3.3
+    assert a["nest",][-6,] == 3.3
+    assert a["nest",][-5,] is None
+    assert a["nest",][-4,] == 2.2
+    assert a["nest",][-3,] is None
+    assert a["nest",][-2,] == 6.6
+    assert a["nest",][-1,] == 5.5
     with pytest.raises(IndexError):
-        a["nest",][7,]  # noqa: E231
+        a["nest",][7,]
     with pytest.raises(IndexError):
-        a["nest",][-8,]  # noqa: E231
+        a["nest",][-8,]
     assert isinstance(
-        a["nest",][3:,],  # noqa: E231
+        a["nest",][3:,],
         ak.contents.indexedoptionarray.IndexedOptionArray,
     )
-    assert (
-        a.to_typetracer()["nest",][3:,].form  # noqa: E231
-        == a["nest",][3:,].form  # noqa: E231
-    )
-    assert len(a["nest",][3:,]) == 4  # noqa: E231
-    assert len(a["nest",][-4:,]) == 4  # noqa: E231
-    assert len(a["nest",][3:100,]) == 4  # noqa: E231
-    assert len(a["nest",][-4:100,]) == 4  # noqa: E231
-    assert a["nest",][3:,][1,] is None  # noqa: E231
-    assert a["nest",][-4:,][1,] is None  # noqa: E231
-    assert a["nest",][3:,][2,] == 6.6  # noqa: E231
-    assert a["nest",][-4:,][2,] == 6.6  # noqa: E231
+    assert a.to_typetracer()["nest",][3:,].form == a["nest",][3:,].form
+    assert len(a["nest",][3:,]) == 4
+    assert len(a["nest",][-4:,]) == 4
+    assert len(a["nest",][3:100,]) == 4
+    assert len(a["nest",][-4:100,]) == 4
+    assert a["nest",][3:,][1,] is None
+    assert a["nest",][-4:,][1,] is None
+    assert a["nest",][3:,][2,] == 6.6
+    assert a["nest",][-4:,][2,] == 6.6
     with pytest.raises(IndexError):
-        a["nest",]["bad",]  # noqa: E231
+        a["nest",]["bad",]
 
 
 def test_ByteMaskedArray_RecordArray_NumpyArray():
     # 2.2, 4.4, and 6.6 are inaccessible
-    a = ak.contents.bytemaskedarray.ByteMaskedArray(  # noqa: F841
+    a = ak.contents.bytemaskedarray.ByteMaskedArray(
         ak.index.Index(np.array([1, 0, 1, 0, 1], dtype=np.int8)),
         ak.contents.recordarray.RecordArray(
             [
@@ -1207,40 +1180,37 @@ def test_ByteMaskedArray_RecordArray_NumpyArray():
     )
     assert len(a["nest",]) == 5
     with pytest.raises(IndexError):
-        a["nest",][5,]  # noqa: E231
+        a["nest",][5,]
     with pytest.raises(IndexError):
-        a["nest",][-6,]  # noqa: E231
-    assert a["nest",][0,] == 1.1  # noqa: E231
-    assert a["nest",][1,] is None  # noqa: E231
-    assert a["nest",][2,] == 3.3  # noqa: E231
-    assert a["nest",][3,] is None  # noqa: E231
-    assert a["nest",][4,] == 5.5  # noqa: E231
-    assert a["nest",][-5,] == 1.1  # noqa: E231
-    assert a["nest",][-4,] is None  # noqa: E231
-    assert a["nest",][-3,] == 3.3  # noqa: E231
-    assert a["nest",][-2,] is None  # noqa: E231
-    assert a["nest",][-1,] == 5.5  # noqa: E231
+        a["nest",][-6,]
+    assert a["nest",][0,] == 1.1
+    assert a["nest",][1,] is None
+    assert a["nest",][2,] == 3.3
+    assert a["nest",][3,] is None
+    assert a["nest",][4,] == 5.5
+    assert a["nest",][-5,] == 1.1
+    assert a["nest",][-4,] is None
+    assert a["nest",][-3,] == 3.3
+    assert a["nest",][-2,] is None
+    assert a["nest",][-1,] == 5.5
     assert isinstance(
-        a["nest",][2:,],  # noqa: E231
+        a["nest",][2:,],
         ak.contents.bytemaskedarray.ByteMaskedArray,
     )
-    assert (
-        a.to_typetracer()["nest",][2:,].form  # noqa: E231
-        == a["nest",][2:,].form  # noqa: E231
-    )
-    assert len(a["nest",][2:,]) == 3  # noqa: E231
-    assert len(a["nest",][-3:,]) == 3  # noqa: E231
-    assert len(a["nest",][2:100,]) == 3  # noqa: E231
-    assert len(a["nest",][-3:100,]) == 3  # noqa: E231
-    assert a["nest",][2:,][1,] is None  # noqa: E231
-    assert a["nest",][-3:,][1,] is None  # noqa: E231
-    assert a["nest",][2:,][2,] == 5.5  # noqa: E231
-    assert a["nest",][-3:,][2,] == 5.5  # noqa: E231
+    assert a.to_typetracer()["nest",][2:,].form == a["nest",][2:,].form
+    assert len(a["nest",][2:,]) == 3
+    assert len(a["nest",][-3:,]) == 3
+    assert len(a["nest",][2:100,]) == 3
+    assert len(a["nest",][-3:100,]) == 3
+    assert a["nest",][2:,][1,] is None
+    assert a["nest",][-3:,][1,] is None
+    assert a["nest",][2:,][2,] == 5.5
+    assert a["nest",][-3:,][2,] == 5.5
     with pytest.raises(IndexError):
-        a["nest",]["bad",]  # noqa: E231
+        a["nest",]["bad",]
 
     # 2.2, 4.4, and 6.6 are inaccessible
-    b = ak.contents.bytemaskedarray.ByteMaskedArray(  # noqa: F841
+    b = ak.contents.bytemaskedarray.ByteMaskedArray(
         ak.index.Index(np.array([0, 1, 0, 1, 0], dtype=np.int8)),
         ak.contents.recordarray.RecordArray(
             [
@@ -1254,37 +1224,34 @@ def test_ByteMaskedArray_RecordArray_NumpyArray():
     )
     assert len(b["nest",]) == 5
     with pytest.raises(IndexError):
-        b["nest",][5,]  # noqa: E231
+        b["nest",][5,]
     with pytest.raises(IndexError):
-        b["nest",][-6,]  # noqa: E231
-    assert b["nest",][0,] == 1.1  # noqa: E231
-    assert b["nest",][1,] is None  # noqa: E231
-    assert b["nest",][2,] == 3.3  # noqa: E231
-    assert b["nest",][3,] is None  # noqa: E231
-    assert b["nest",][4,] == 5.5  # noqa: E231
-    assert b["nest",][-5,] == 1.1  # noqa: E231
-    assert b["nest",][-4,] is None  # noqa: E231
-    assert b["nest",][-3,] == 3.3  # noqa: E231
-    assert b["nest",][-2,] is None  # noqa: E231
-    assert b["nest",][-1,] == 5.5  # noqa: E231
+        b["nest",][-6,]
+    assert b["nest",][0,] == 1.1
+    assert b["nest",][1,] is None
+    assert b["nest",][2,] == 3.3
+    assert b["nest",][3,] is None
+    assert b["nest",][4,] == 5.5
+    assert b["nest",][-5,] == 1.1
+    assert b["nest",][-4,] is None
+    assert b["nest",][-3,] == 3.3
+    assert b["nest",][-2,] is None
+    assert b["nest",][-1,] == 5.5
     assert isinstance(
-        b["nest",][2:,],  # noqa: E231
+        b["nest",][2:,],
         ak.contents.bytemaskedarray.ByteMaskedArray,
     )
-    assert (
-        b.to_typetracer()["nest",][2:,].form  # noqa: E231
-        == b["nest",][2:,].form  # noqa: E231
-    )
-    assert len(b["nest",][2:,]) == 3  # noqa: E231
-    assert len(b["nest",][-3:,]) == 3  # noqa: E231
-    assert len(b["nest",][2:100,]) == 3  # noqa: E231
-    assert len(b["nest",][-3:100,]) == 3  # noqa: E231
-    assert b["nest",][2:,][1,] is None  # noqa: E231
-    assert b["nest",][-3:,][1,] is None  # noqa: E231
-    assert b["nest",][2:,][2,] == 5.5  # noqa: E231
-    assert b["nest",][-3:,][2,] == 5.5  # noqa: E231
+    assert b.to_typetracer()["nest",][2:,].form == b["nest",][2:,].form
+    assert len(b["nest",][2:,]) == 3
+    assert len(b["nest",][-3:,]) == 3
+    assert len(b["nest",][2:100,]) == 3
+    assert len(b["nest",][-3:100,]) == 3
+    assert b["nest",][2:,][1,] is None
+    assert b["nest",][-3:,][1,] is None
+    assert b["nest",][2:,][2,] == 5.5
+    assert b["nest",][-3:,][2,] == 5.5
     with pytest.raises(IndexError):
-        b["nest",]["bad",]  # noqa: E231
+        b["nest",]["bad",]
 
 
 def test_BitMaskedArray_RecordArray_NumpyArray():
@@ -1342,56 +1309,53 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
     )
     assert len(a["nest"]) == 13
     with pytest.raises(IndexError):
-        a["nest",][13,]  # noqa: E231
+        a["nest",][13,]
     with pytest.raises(IndexError):
-        a["nest",][-14,]  # noqa: E231
-    assert a["nest",][0,] == 0.0  # noqa: E231
-    assert a["nest",][1,] == 1.0  # noqa: E231
-    assert a["nest",][2,] == 2.0  # noqa: E231
-    assert a["nest",][3,] == 3.0  # noqa: E231
-    assert a["nest",][4,] is None  # noqa: E231
-    assert a["nest",][5,] is None  # noqa: E231
-    assert a["nest",][6,] is None  # noqa: E231
-    assert a["nest",][7,] is None  # noqa: E231
-    assert a["nest",][8,] == 1.1  # noqa: E231
-    assert a["nest",][9,] is None  # noqa: E231
-    assert a["nest",][10,] == 3.3  # noqa: E231
-    assert a["nest",][11,] is None  # noqa: E231
-    assert a["nest",][12,] == 5.5  # noqa: E231
-    assert a["nest",][-13,] == 0.0  # noqa: E231
-    assert a["nest",][-12,] == 1.0  # noqa: E231
-    assert a["nest",][-11,] == 2.0  # noqa: E231
-    assert a["nest",][-10,] == 3.0  # noqa: E231
-    assert a["nest",][-9,] is None  # noqa: E231
-    assert a["nest",][-8,] is None  # noqa: E231
-    assert a["nest",][-7,] is None  # noqa: E231
-    assert a["nest",][-6,] is None  # noqa: E231
-    assert a["nest",][-5,] == 1.1  # noqa: E231
-    assert a["nest",][-4,] is None  # noqa: E231
-    assert a["nest",][-3,] == 3.3  # noqa: E231
-    assert a["nest",][-2,] is None  # noqa: E231
-    assert a["nest",][-1,] == 5.5  # noqa: E231
+        a["nest",][-14,]
+    assert a["nest",][0,] == 0.0
+    assert a["nest",][1,] == 1.0
+    assert a["nest",][2,] == 2.0
+    assert a["nest",][3,] == 3.0
+    assert a["nest",][4,] is None
+    assert a["nest",][5,] is None
+    assert a["nest",][6,] is None
+    assert a["nest",][7,] is None
+    assert a["nest",][8,] == 1.1
+    assert a["nest",][9,] is None
+    assert a["nest",][10,] == 3.3
+    assert a["nest",][11,] is None
+    assert a["nest",][12,] == 5.5
+    assert a["nest",][-13,] == 0.0
+    assert a["nest",][-12,] == 1.0
+    assert a["nest",][-11,] == 2.0
+    assert a["nest",][-10,] == 3.0
+    assert a["nest",][-9,] is None
+    assert a["nest",][-8,] is None
+    assert a["nest",][-7,] is None
+    assert a["nest",][-6,] is None
+    assert a["nest",][-5,] == 1.1
+    assert a["nest",][-4,] is None
+    assert a["nest",][-3,] == 3.3
+    assert a["nest",][-2,] is None
+    assert a["nest",][-1,] == 5.5
     assert isinstance(
-        a["nest",][5:,],  # noqa: E231
+        a["nest",][5:,],
         ak.contents.bytemaskedarray.ByteMaskedArray,
     )
-    assert (
-        a.to_typetracer()["nest",][5:,].form  # noqa: E231
-        == a["nest",][5:,].form  # noqa: E231
-    )
-    assert len(a["nest",][5:,]) == 8  # noqa: E231
-    assert len(a["nest",][-8:,]) == 8  # noqa: E231
-    assert len(a["nest",][5:100,]) == 8  # noqa: E231
-    assert len(a["nest",][-8:100,]) == 8  # noqa: E231
-    assert a["nest",][5:,][2,] is None  # noqa: E231
-    assert a["nest",][5:,][3,] == 1.1  # noqa: E231
-    assert a["nest",][-8:,][2,] is None  # noqa: E231
-    assert a["nest",][-8:,][3,] == 1.1  # noqa: E231
+    assert a.to_typetracer()["nest",][5:,].form == a["nest",][5:,].form
+    assert len(a["nest",][5:,]) == 8
+    assert len(a["nest",][-8:,]) == 8
+    assert len(a["nest",][5:100,]) == 8
+    assert len(a["nest",][-8:100,]) == 8
+    assert a["nest",][5:,][2,] is None
+    assert a["nest",][5:,][3,] == 1.1
+    assert a["nest",][-8:,][2,] is None
+    assert a["nest",][-8:,][3,] == 1.1
     with pytest.raises(IndexError):
-        a["nest",]["bad",]  # noqa: E231
+        a["nest",]["bad",]
 
     # 4.0, 5.0, 6.0, 7.0, 2.2, 4.4, and 6.6 are inaccessible
-    b = ak.contents.bitmaskedarray.BitMaskedArray(  # noqa: F841
+    b = ak.contents.bitmaskedarray.BitMaskedArray(
         ak.index.Index(
             np.packbits(
                 np.array(
@@ -1445,56 +1409,53 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
     )
     assert len(b["nest",]) == 13
     with pytest.raises(IndexError):
-        b["nest",][13,]  # noqa: E231
+        b["nest",][13,]
     with pytest.raises(IndexError):
-        b["nest",][-14,]  # noqa: E231
-    assert b["nest",][0,] == 0.0  # noqa: E231
-    assert b["nest",][1,] == 1.0  # noqa: E231
-    assert b["nest",][2,] == 2.0  # noqa: E231
-    assert b["nest",][3,] == 3.0  # noqa: E231
-    assert b["nest",][4,] is None  # noqa: E231
-    assert b["nest",][5,] is None  # noqa: E231
-    assert b["nest",][6,] is None  # noqa: E231
-    assert b["nest",][7,] is None  # noqa: E231
-    assert b["nest",][8,] == 1.1  # noqa: E231
-    assert b["nest",][9,] is None  # noqa: E231
-    assert b["nest",][10,] == 3.3  # noqa: E231
-    assert b["nest",][11,] is None  # noqa: E231
-    assert b["nest",][12,] == 5.5  # noqa: E231
-    assert b["nest",][-13,] == 0.0  # noqa: E231
-    assert b["nest",][-12,] == 1.0  # noqa: E231
-    assert b["nest",][-11,] == 2.0  # noqa: E231
-    assert b["nest",][-10,] == 3.0  # noqa: E231
-    assert b["nest",][-9,] is None  # noqa: E231
-    assert b["nest",][-8,] is None  # noqa: E231
-    assert b["nest",][-7,] is None  # noqa: E231
-    assert b["nest",][-6,] is None  # noqa: E231
-    assert b["nest",][-5,] == 1.1  # noqa: E231
-    assert b["nest",][-4,] is None  # noqa: E231
-    assert b["nest",][-3,] == 3.3  # noqa: E231
-    assert b["nest",][-2,] is None  # noqa: E231
-    assert b["nest",][-1,] == 5.5  # noqa: E231
+        b["nest",][-14,]
+    assert b["nest",][0,] == 0.0
+    assert b["nest",][1,] == 1.0
+    assert b["nest",][2,] == 2.0
+    assert b["nest",][3,] == 3.0
+    assert b["nest",][4,] is None
+    assert b["nest",][5,] is None
+    assert b["nest",][6,] is None
+    assert b["nest",][7,] is None
+    assert b["nest",][8,] == 1.1
+    assert b["nest",][9,] is None
+    assert b["nest",][10,] == 3.3
+    assert b["nest",][11,] is None
+    assert b["nest",][12,] == 5.5
+    assert b["nest",][-13,] == 0.0
+    assert b["nest",][-12,] == 1.0
+    assert b["nest",][-11,] == 2.0
+    assert b["nest",][-10,] == 3.0
+    assert b["nest",][-9,] is None
+    assert b["nest",][-8,] is None
+    assert b["nest",][-7,] is None
+    assert b["nest",][-6,] is None
+    assert b["nest",][-5,] == 1.1
+    assert b["nest",][-4,] is None
+    assert b["nest",][-3,] == 3.3
+    assert b["nest",][-2,] is None
+    assert b["nest",][-1,] == 5.5
     assert isinstance(
-        b["nest",][5:,],  # noqa: E231
+        b["nest",][5:,],
         ak.contents.bytemaskedarray.ByteMaskedArray,
     )
-    assert (
-        b.to_typetracer()["nest",][5:,].form  # noqa: E231
-        == b["nest",][5:,].form  # noqa: E231
-    )
-    assert len(b["nest",][5:,]) == 8  # noqa: E231
-    assert len(b["nest",][-8:,]) == 8  # noqa: E231
-    assert len(b["nest",][5:100,]) == 8  # noqa: E231
-    assert len(b["nest",][-8:100,]) == 8  # noqa: E231
-    assert b["nest",][5:,][2,] is None  # noqa: E231
-    assert b["nest",][5:,][3,] == 1.1  # noqa: E231
-    assert b["nest",][-8:,][2,] is None  # noqa: E231
-    assert b["nest",][-8:,][3,] == 1.1  # noqa: E231
+    assert b.to_typetracer()["nest",][5:,].form == b["nest",][5:,].form
+    assert len(b["nest",][5:,]) == 8
+    assert len(b["nest",][-8:,]) == 8
+    assert len(b["nest",][5:100,]) == 8
+    assert len(b["nest",][-8:100,]) == 8
+    assert b["nest",][5:,][2,] is None
+    assert b["nest",][5:,][3,] == 1.1
+    assert b["nest",][-8:,][2,] is None
+    assert b["nest",][-8:,][3,] == 1.1
     with pytest.raises(IndexError):
-        b["nest",]["bad",]  # noqa: E231
+        b["nest",]["bad",]
 
     # 4.0, 5.0, 6.0, 7.0, 2.2, 4.4, and 6.6 are inaccessible
-    c = ak.contents.bitmaskedarray.BitMaskedArray(  # noqa: F841
+    c = ak.contents.bitmaskedarray.BitMaskedArray(
         ak.index.Index(
             np.packbits(
                 np.array(
@@ -1551,56 +1512,53 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
     )
     assert len(c["nest",]) == 13
     with pytest.raises(IndexError):
-        c["nest",][13,]  # noqa: E231
+        c["nest",][13,]
     with pytest.raises(IndexError):
-        c["nest",][-14,]  # noqa: E231
-    assert c["nest",][0,] == 0.0  # noqa: E231
-    assert c["nest",][1,] == 1.0  # noqa: E231
-    assert c["nest",][2,] == 2.0  # noqa: E231
-    assert c["nest",][3,] == 3.0  # noqa: E231
-    assert c["nest",][4,] is None  # noqa: E231
-    assert c["nest",][5,] is None  # noqa: E231
-    assert c["nest",][6,] is None  # noqa: E231
-    assert c["nest",][7,] is None  # noqa: E231
-    assert c["nest",][8,] == 1.1  # noqa: E231
-    assert c["nest",][9,] is None  # noqa: E231
-    assert c["nest",][10,] == 3.3  # noqa: E231
-    assert c["nest",][11,] is None  # noqa: E231
-    assert c["nest",][12,] == 5.5  # noqa: E231
-    assert c["nest",][-13,] == 0.0  # noqa: E231
-    assert c["nest",][-12,] == 1.0  # noqa: E231
-    assert c["nest",][-11,] == 2.0  # noqa: E231
-    assert c["nest",][-10,] == 3.0  # noqa: E231
-    assert c["nest",][-9,] is None  # noqa: E231
-    assert c["nest",][-8,] is None  # noqa: E231
-    assert c["nest",][-7,] is None  # noqa: E231
-    assert c["nest",][-6,] is None  # noqa: E231
-    assert c["nest",][-5,] == 1.1  # noqa: E231
-    assert c["nest",][-4,] is None  # noqa: E231
-    assert c["nest",][-3,] == 3.3  # noqa: E231
-    assert c["nest",][-2,] is None  # noqa: E231
-    assert c["nest",][-1,] == 5.5  # noqa: E231
+        c["nest",][-14,]
+    assert c["nest",][0,] == 0.0
+    assert c["nest",][1,] == 1.0
+    assert c["nest",][2,] == 2.0
+    assert c["nest",][3,] == 3.0
+    assert c["nest",][4,] is None
+    assert c["nest",][5,] is None
+    assert c["nest",][6,] is None
+    assert c["nest",][7,] is None
+    assert c["nest",][8,] == 1.1
+    assert c["nest",][9,] is None
+    assert c["nest",][10,] == 3.3
+    assert c["nest",][11,] is None
+    assert c["nest",][12,] == 5.5
+    assert c["nest",][-13,] == 0.0
+    assert c["nest",][-12,] == 1.0
+    assert c["nest",][-11,] == 2.0
+    assert c["nest",][-10,] == 3.0
+    assert c["nest",][-9,] is None
+    assert c["nest",][-8,] is None
+    assert c["nest",][-7,] is None
+    assert c["nest",][-6,] is None
+    assert c["nest",][-5,] == 1.1
+    assert c["nest",][-4,] is None
+    assert c["nest",][-3,] == 3.3
+    assert c["nest",][-2,] is None
+    assert c["nest",][-1,] == 5.5
     assert isinstance(
-        c["nest",][5:,],  # noqa: E231
+        c["nest",][5:,],
         ak.contents.bytemaskedarray.ByteMaskedArray,
     )
-    assert (
-        c.to_typetracer()["nest",][5:,].form  # noqa: E231
-        == c["nest",][5:,].form  # noqa: E231
-    )
-    assert len(c["nest",][5:,]) == 8  # noqa: E231
-    assert len(c["nest",][-8:,]) == 8  # noqa: E231
-    assert len(c["nest",][5:100,]) == 8  # noqa: E231
-    assert len(c["nest",][-8:100,]) == 8  # noqa: E231
-    assert c["nest",][5:,][2,] is None  # noqa: E231
-    assert c["nest",][5:,][3,] == 1.1  # noqa: E231
-    assert c["nest",][-8:,][2,] is None  # noqa: E231
-    assert c["nest",][-8:,][3,] == 1.1  # noqa: E231
+    assert c.to_typetracer()["nest",][5:,].form == c["nest",][5:,].form
+    assert len(c["nest",][5:,]) == 8
+    assert len(c["nest",][-8:,]) == 8
+    assert len(c["nest",][5:100,]) == 8
+    assert len(c["nest",][-8:100,]) == 8
+    assert c["nest",][5:,][2,] is None
+    assert c["nest",][5:,][3,] == 1.1
+    assert c["nest",][-8:,][2,] is None
+    assert c["nest",][-8:,][3,] == 1.1
     with pytest.raises(IndexError):
-        c["nest",]["bad",]  # noqa: E231
+        c["nest",]["bad",]
 
     # 4.0, 5.0, 6.0, 7.0, 2.2, 4.4, and 6.6 are inaccessible
-    d = ak.contents.bitmaskedarray.BitMaskedArray(  # noqa: F841
+    d = ak.contents.bitmaskedarray.BitMaskedArray(
         ak.index.Index(
             np.packbits(
                 np.array(
@@ -1657,57 +1615,54 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
     )
     assert len(d["nest",]) == 13
     with pytest.raises(IndexError):
-        d["nest",][13,]  # noqa: E231
+        d["nest",][13,]
     with pytest.raises(IndexError):
-        d["nest",][-14,]  # noqa: E231
-    assert d["nest",][0,] == 0.0  # noqa: E231
-    assert d["nest",][1,] == 1.0  # noqa: E231
-    assert d["nest",][2,] == 2.0  # noqa: E231
-    assert d["nest",][3,] == 3.0  # noqa: E231
-    assert d["nest",][4,] is None  # noqa: E231
-    assert d["nest",][5,] is None  # noqa: E231
-    assert d["nest",][6,] is None  # noqa: E231
-    assert d["nest",][7,] is None  # noqa: E231
-    assert d["nest",][8,] == 1.1  # noqa: E231
-    assert d["nest",][9,] is None  # noqa: E231
-    assert d["nest",][10,] == 3.3  # noqa: E231
-    assert d["nest",][11,] is None  # noqa: E231
-    assert d["nest",][12,] == 5.5  # noqa: E231
-    assert d["nest",][-13,] == 0.0  # noqa: E231
-    assert d["nest",][-12,] == 1.0  # noqa: E231
-    assert d["nest",][-11,] == 2.0  # noqa: E231
-    assert d["nest",][-10,] == 3.0  # noqa: E231
-    assert d["nest",][-9,] is None  # noqa: E231
-    assert d["nest",][-8,] is None  # noqa: E231
-    assert d["nest",][-7,] is None  # noqa: E231
-    assert d["nest",][-6,] is None  # noqa: E231
-    assert d["nest",][-5,] == 1.1  # noqa: E231
-    assert d["nest",][-4,] is None  # noqa: E231
-    assert d["nest",][-3,] == 3.3  # noqa: E231
-    assert d["nest",][-2,] is None  # noqa: E231
-    assert d["nest",][-1,] == 5.5  # noqa: E231
+        d["nest",][-14,]
+    assert d["nest",][0,] == 0.0
+    assert d["nest",][1,] == 1.0
+    assert d["nest",][2,] == 2.0
+    assert d["nest",][3,] == 3.0
+    assert d["nest",][4,] is None
+    assert d["nest",][5,] is None
+    assert d["nest",][6,] is None
+    assert d["nest",][7,] is None
+    assert d["nest",][8,] == 1.1
+    assert d["nest",][9,] is None
+    assert d["nest",][10,] == 3.3
+    assert d["nest",][11,] is None
+    assert d["nest",][12,] == 5.5
+    assert d["nest",][-13,] == 0.0
+    assert d["nest",][-12,] == 1.0
+    assert d["nest",][-11,] == 2.0
+    assert d["nest",][-10,] == 3.0
+    assert d["nest",][-9,] is None
+    assert d["nest",][-8,] is None
+    assert d["nest",][-7,] is None
+    assert d["nest",][-6,] is None
+    assert d["nest",][-5,] == 1.1
+    assert d["nest",][-4,] is None
+    assert d["nest",][-3,] == 3.3
+    assert d["nest",][-2,] is None
+    assert d["nest",][-1,] == 5.5
     assert isinstance(
-        d["nest",][5:,],  # noqa: E231
+        d["nest",][5:,],
         ak.contents.bytemaskedarray.ByteMaskedArray,
     )
-    assert (
-        d.to_typetracer()["nest",][5:,].form  # noqa: E231
-        == d["nest",][5:,].form  # noqa: E231
-    )
-    assert len(d["nest",][5:,]) == 8  # noqa: E231
-    assert len(d["nest",][-8:,]) == 8  # noqa: E231
-    assert len(d["nest",][5:100,]) == 8  # noqa: E231
-    assert len(d["nest",][-8:100,]) == 8  # noqa: E231
-    assert d["nest",][5:,][2,] is None  # noqa: E231
-    assert d["nest",][5:,][3,] == 1.1  # noqa: E231
-    assert d["nest",][-8:,][2,] is None  # noqa: E231
-    assert d["nest",][-8:,][3,] == 1.1  # noqa: E231
+    assert d.to_typetracer()["nest",][5:,].form == d["nest",][5:,].form
+    assert len(d["nest",][5:,]) == 8
+    assert len(d["nest",][-8:,]) == 8
+    assert len(d["nest",][5:100,]) == 8
+    assert len(d["nest",][-8:100,]) == 8
+    assert d["nest",][5:,][2,] is None
+    assert d["nest",][5:,][3,] == 1.1
+    assert d["nest",][-8:,][2,] is None
+    assert d["nest",][-8:,][3,] == 1.1
     with pytest.raises(IndexError):
-        d["nest",]["bad",]  # noqa: E231
+        d["nest",]["bad",]
 
 
 def test_UnmaskedArray_RecordArray_NumpyArray():
-    a = ak.contents.unmaskedarray.UnmaskedArray(  # noqa: F841
+    a = ak.contents.unmaskedarray.UnmaskedArray(
         ak.contents.recordarray.RecordArray(
             [
                 ak.contents.numpyarray.NumpyArray(
@@ -1718,31 +1673,28 @@ def test_UnmaskedArray_RecordArray_NumpyArray():
         )
     )
     assert len(a["nest",]) == 4
-    assert a["nest",][2,] == 2.2  # noqa: E231
-    assert a["nest",][-2,] == 2.2  # noqa: E231
-    assert type(a["nest",][2,]) is np.float64  # noqa: E231
+    assert a["nest",][2,] == 2.2
+    assert a["nest",][-2,] == 2.2
+    assert type(a["nest",][2,]) is np.float64
     with pytest.raises(IndexError):
-        a["nest",][4,]  # noqa: E231
+        a["nest",][4,]
     with pytest.raises(IndexError):
-        a["nest",][-5,]  # noqa: E231
+        a["nest",][-5,]
     assert isinstance(
-        a["nest",][2:,],  # noqa: E231
+        a["nest",][2:,],
         ak.contents.unmaskedarray.UnmaskedArray,
     )
-    assert (
-        a.to_typetracer()["nest",][2:,].form  # noqa: E231
-        == a["nest",][2:,].form  # noqa: E231
-    )
-    assert a["nest",][2:,][0,] == 2.2  # noqa: E231
-    assert len(a["nest",][2:,]) == 2  # noqa: E231
+    assert a.to_typetracer()["nest",][2:,].form == a["nest",][2:,].form
+    assert a["nest",][2:,][0,] == 2.2
+    assert len(a["nest",][2:,]) == 2
     with pytest.raises(IndexError):
-        a["nest",]["bad",]  # noqa: E231
+        a["nest",]["bad",]
 
 
 def test_UnionArray_RecordArray_NumpyArray():
     # 100 is inaccessible in index
     # 1.1 is inaccessible in contents[1]
-    a = ak.contents.unionarray.UnionArray.simplified(  # noqa: F841
+    a = ak.contents.unionarray.UnionArray.simplified(
         ak.index.Index(np.array([1, 1, 0, 0, 1, 0, 1], dtype=np.int8)),
         ak.index.Index(np.array([4, 3, 0, 1, 2, 2, 4, 100])),
         [
@@ -1761,34 +1713,31 @@ def test_UnionArray_RecordArray_NumpyArray():
     )
     assert len(a["nest",]) == 7
     with pytest.raises(IndexError):
-        a["nest",][7,]  # noqa: E231
+        a["nest",][7,]
     with pytest.raises(IndexError):
-        a["nest",][-8,]  # noqa: E231
-    assert a["nest",][0,] == 5.5  # noqa: E231
-    assert a["nest",][1,] == 4.4  # noqa: E231
-    assert a["nest",][2,] == 1.0  # noqa: E231
-    assert a["nest",][3,] == 2.0  # noqa: E231
-    assert a["nest",][4,] == 3.3  # noqa: E231
-    assert a["nest",][5,] == 3.0  # noqa: E231
-    assert a["nest",][6,] == 5.5  # noqa: E231
-    assert a["nest",][-7,] == 5.5  # noqa: E231
-    assert a["nest",][-6,] == 4.4  # noqa: E231
-    assert a["nest",][-5,] == 1.0  # noqa: E231
-    assert a["nest",][-4,] == 2.0  # noqa: E231
-    assert a["nest",][-3,] == 3.3  # noqa: E231
-    assert a["nest",][-2,] == 3.0  # noqa: E231
-    assert a["nest",][-1,] == 5.5  # noqa: E231
-    assert (
-        a.to_typetracer()["nest",][3:,].form  # noqa: E231
-        == a["nest",][3:,].form  # noqa: E231
-    )
-    assert len(a["nest",][3:,]) == 4  # noqa: E231
-    assert len(a["nest",][-4:,]) == 4  # noqa: E231
-    assert len(a["nest",][3:100,]) == 4  # noqa: E231
-    assert len(a["nest",][-4:100,]) == 4  # noqa: E231
-    assert a["nest",][3:,][1,] == 3.3  # noqa: E231
-    assert a["nest",][3:,][2,] == 3.0  # noqa: E231
-    assert a["nest",][-4:,][1,] == 3.3  # noqa: E231
-    assert a["nest",][-4:,][2,] == 3.0  # noqa: E231
+        a["nest",][-8,]
+    assert a["nest",][0,] == 5.5
+    assert a["nest",][1,] == 4.4
+    assert a["nest",][2,] == 1.0
+    assert a["nest",][3,] == 2.0
+    assert a["nest",][4,] == 3.3
+    assert a["nest",][5,] == 3.0
+    assert a["nest",][6,] == 5.5
+    assert a["nest",][-7,] == 5.5
+    assert a["nest",][-6,] == 4.4
+    assert a["nest",][-5,] == 1.0
+    assert a["nest",][-4,] == 2.0
+    assert a["nest",][-3,] == 3.3
+    assert a["nest",][-2,] == 3.0
+    assert a["nest",][-1,] == 5.5
+    assert a.to_typetracer()["nest",][3:,].form == a["nest",][3:,].form
+    assert len(a["nest",][3:,]) == 4
+    assert len(a["nest",][-4:,]) == 4
+    assert len(a["nest",][3:100,]) == 4
+    assert len(a["nest",][-4:100,]) == 4
+    assert a["nest",][3:,][1,] == 3.3
+    assert a["nest",][3:,][2,] == 3.0
+    assert a["nest",][-4:,][1,] == 3.3
+    assert a["nest",][-4:,][2,] == 3.0
     with pytest.raises(IndexError):
-        a["nest",]["bad",]  # noqa: E231
+        a["nest",]["bad",]

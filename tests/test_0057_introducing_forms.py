@@ -4,7 +4,7 @@ import json
 import pickle
 
 import numpy as np  # noqa: F401
-import pytest  # noqa: F401
+import pytest
 
 import awkward as ak
 

@@ -15,7 +15,7 @@ cpp17 = hasattr(ROOT.std, "optional")
 
 
 def debug_compiler(code):
-    print(code)  # noqa: T201
+    print(code)
     ROOT.gInterpreter.Declare(code)
 
 
