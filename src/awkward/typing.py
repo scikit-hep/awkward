@@ -40,7 +40,7 @@ if sys.version_info < (3, 11):
         runtime_checkable,
     )
 else:
-    from typing import (  # noqa: F401
+    from typing import (
         Final,
         Literal,
         Protocol,
