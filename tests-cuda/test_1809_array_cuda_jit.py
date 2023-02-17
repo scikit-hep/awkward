@@ -20,9 +20,6 @@ numbatest = pytest.mark.skipif(
     nb is None or nb_cuda is None, reason="requires the numba and numba.cuda packages"
 )
 
-threads_per_block = 128
-blocks_per_grid = 12
-
 config.CUDA_LOW_OCCUPANCY_WARNINGS = False
 config.CUDA_WARN_ON_IMPLICIT_COPY = False
 
@@ -35,18 +32,17 @@ def multiply(array, n, out):
 
 @nb_cuda.jit(extensions=[ak.numba.array_view_arg_handler])
 def pass_through(array, out):
-    index = 0
-    for x in range(len(array)):
-        ilen = len(array[x])
-        for i in range(ilen):
-            out[index] = array[x][i]
-            index = index + 1
+    x, y = nb_cuda.grid(2)
+    if x < len(array) and y < len(array[x]):
+        out[x][y] = array[x][y]
+    else:
+        out[x][y] = np.nan
 
 
 @nb_cuda.jit(extensions=[ak.numba.array_view_arg_handler])
 def pass_record_through(array, out):
-    for i in range(len(array)):
-        out[i] = array["x"][i]
+    tid = nb_cuda.grid(1)
+    out[tid] = array["x"][tid]
 
 
 @numbatest
@@ -57,7 +53,7 @@ def test_array_multiply():
     # allocate the result:
     results = nb_cuda.to_device(np.empty(4, dtype=np.int32))
 
-    multiply[threads_per_block, blocks_per_grid](akarray, 3, results)
+    multiply[1, 4](akarray, 3, results)
 
     nb_cuda.synchronize()
     host_results = results.copy_to_host()
@@ -69,14 +65,17 @@ def test_array_multiply():
 def test_ListOffsetArray():
     array = ak.Array([[0, 1], [2], [3, 4, 5]], backend="cuda")
 
-    results = nb_cuda.to_device(np.empty(6, dtype=np.int32))
+    results = nb_cuda.to_device(np.empty(9, dtype=np.float32).reshape((3, 3)))
 
-    pass_through[1, 1](array, results)
+    pass_through[(3, 1), (1, 3)](array, results)
 
     nb_cuda.synchronize()
     host_results = results.copy_to_host()
 
-    assert ak.Array(host_results).tolist() == [0, 1, 2, 3, 4, 5]
+    assert (
+        str(ak.to_list(host_results))
+        == "[[0.0, 1.0, nan], [2.0, nan, nan], [3.0, 4.0, 5.0]]"
+    )
 
 
 @numbatest
@@ -87,7 +86,7 @@ def test_RecordArray():
 
     results = nb_cuda.to_device(np.empty(6, dtype=np.int32))
 
-    pass_record_through[1, 1](array, results)
+    pass_record_through[1, 6](array, results)
 
     nb_cuda.synchronize()
     host_results = results.copy_to_host()
@@ -104,11 +103,9 @@ def test_array_on_cpu_multiply():
     results = nb_cuda.to_device(np.empty(4, dtype=np.int32))
 
     with pytest.raises(TypeError):
-        multiply[threads_per_block, blocks_per_grid](array, 3, results)
+        multiply[1, 4](array, 3, results)
 
-    multiply[threads_per_block, blocks_per_grid](
-        ak.to_backend(array, backend="cuda"), 3, results
-    )
+    multiply[1, 4](ak.to_backend(array, backend="cuda"), 3, results)
 
     nb_cuda.synchronize()
     host_results = results.copy_to_host()
