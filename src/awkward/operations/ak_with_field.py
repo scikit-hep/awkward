@@ -116,12 +116,12 @@ def _impl(base, what, where, highlevel, behavior):
                         fields = None
                     # Otherwise the tuple becomes a record
                     else:
-                        fields = keys + [where]
+                        fields = [*keys, where]
                 # Records with `where=None` will create a tuple-like key
                 elif where is None:
-                    fields = keys + [str(len(keys))]
+                    fields = [*keys, str(len(keys))]
                 else:
-                    fields = keys + [where]
+                    fields = [*keys, where]
                 out = ak.contents.RecordArray(
                     [base[k] for k in keys] + [what],
                     fields,

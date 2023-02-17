@@ -82,16 +82,16 @@ class NumpyKernel(BaseKernel):
             return x
 
     def __call__(self, *args) -> None:
-        assert len(args) == len(self._impl.argtypes)  # type: ignore
+        assert len(args) == len(self._impl.argtypes)
 
         return self._impl(
-            *(self._cast(x, t) for x, t in zip(args, self._impl.argtypes))  # type: ignore
+            *(self._cast(x, t) for x, t in zip(args, self._impl.argtypes))
         )
 
 
 class JaxKernel(NumpyKernel):
     def __call__(self, *args) -> None:
-        assert len(args) == len(self._impl.argtypes)  # type: ignore
+        assert len(args) == len(self._impl.argtypes)
 
         if not any(Jax.is_tracer(arg) for arg in args):
             return super().__call__(*args)
@@ -133,7 +133,7 @@ class CupyKernel(BaseKernel):
                 [],
             )
 
-        assert len(args) == len(self._impl.dir)  # type: ignore
+        assert len(args) == len(self._impl.dir)
         # The first arg is the invocation index which raises itself by 8 in the kernel if there was no error before.
         # The second arg is the error_code.
         args = (

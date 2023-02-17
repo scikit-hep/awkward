@@ -340,12 +340,12 @@ class NumpyArray(Content):
             return self
 
         elif isinstance(head, int):
-            where = (slice(None), head) + tail
+            where = (slice(None), head, *tail)
 
             try:
                 out = self._data[where]
             except IndexError as err:
-                raise ak._errors.index_error(self, (head,) + tail, str(err)) from err
+                raise ak._errors.index_error(self, (head, *tail), str(err)) from err
 
             if hasattr(out, "shape") and len(out.shape) != 0:
                 return NumpyArray(out, parameters=None, backend=self._backend)
@@ -353,11 +353,11 @@ class NumpyArray(Content):
                 return out
 
         elif isinstance(head, slice) or head is np.newaxis or head is Ellipsis:
-            where = (slice(None), head) + tail
+            where = (slice(None), head, *tail)
             try:
                 out = self._data[where]
             except IndexError as err:
-                raise ak._errors.index_error(self, (head,) + tail, str(err)) from err
+                raise ak._errors.index_error(self, (head, *tail), str(err)) from err
 
             return NumpyArray(out, parameters=self._parameters, backend=self._backend)
 
@@ -369,26 +369,27 @@ class NumpyArray(Content):
 
         elif isinstance(head, ak.index.Index64):
             if advanced is None:
-                where = (slice(None), head.data) + tail
+                where = (slice(None), head.data, *tail)
             else:
                 where = (
                     self._backend.index_nplike.asarray(advanced.data),
                     head.data,
-                ) + tail
+                    *tail,
+                )
 
             try:
                 out = self._data[where]
             except IndexError as err:
-                raise ak._errors.index_error(self, (head,) + tail, str(err)) from err
+                raise ak._errors.index_error(self, (head, *tail), str(err)) from err
 
             return NumpyArray(out, parameters=self._parameters, backend=self._backend)
 
         elif isinstance(head, ak.contents.ListOffsetArray):
-            where = (slice(None), head) + tail
+            where = (slice(None), head, *tail)
             try:
                 out = self._data[where]
             except IndexError as err:
-                raise ak._errors.index_error(self, (head,) + tail, str(err)) from err
+                raise ak._errors.index_error(self, (head, *tail), str(err)) from err
 
             return NumpyArray(out, parameters=self._parameters, backend=self._backend)
 
@@ -745,7 +746,7 @@ class NumpyArray(Content):
                     "awkward_unique",
                     out.dtype.type,
                     nextlength.dtype.type,
-                ](  # noqa: E231
+                ](
                     out,
                     out.shape[0],
                     nextlength.data,

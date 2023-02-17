@@ -80,7 +80,7 @@ def test_prototypical_example():
         "numpy-pt",
     ]
 
-    print(restructured.muons.mass)  # noqa: T201
+    print(restructured.muons.mass)
     assert report.data_touched == [
         "listoffset-1",
         "listoffset-2",

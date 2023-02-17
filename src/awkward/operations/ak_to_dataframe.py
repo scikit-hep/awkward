@@ -193,7 +193,7 @@ or
             else:
                 return sum(
                     (
-                        recurse(layout._getitem_field(n), row_arrays, col_names + (n,))
+                        recurse(layout._getitem_field(n), row_arrays, (*col_names, n))
                         for n in layout.fields
                     ),
                     [],
@@ -202,7 +202,7 @@ or
         elif isinstance(layout, ak.contents.RecordArray):
             return sum(
                 (
-                    recurse(layout._getitem_field(n), row_arrays, col_names + (n,))
+                    recurse(layout._getitem_field(n), row_arrays, (*col_names, n))
                     for n in layout.fields
                 ),
                 [],

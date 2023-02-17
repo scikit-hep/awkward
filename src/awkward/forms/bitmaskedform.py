@@ -133,7 +133,8 @@ class BitMaskedForm(Form):
             repr(self._content),
             repr(self._valid_when),
             repr(self._lsb_order),
-        ] + self._repr_args()
+            *self._repr_args(),
+        ]
         return "{}({})".format(type(self).__name__, ", ".join(args))
 
     def _to_dict_part(self, verbose, toplevel):

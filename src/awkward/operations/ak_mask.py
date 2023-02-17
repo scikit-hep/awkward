@@ -107,9 +107,7 @@ def _impl(array, mask, valid_when, highlevel, behavior):
             m = nplike_of(layoutmask).asarray(layoutmask)
             if not issubclass(m.dtype.type, (bool, np.bool_)):
                 raise ak._errors.wrap_error(
-                    ValueError(
-                        "mask must have boolean type, not " "{}".format(repr(m.dtype))
-                    )
+                    ValueError(f"mask must have boolean type, not {repr(m.dtype)}")
                 )
             bytemask = ak.index.Index8(m.view(np.int8))
             return (

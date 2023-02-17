@@ -35,7 +35,7 @@ def test_unknown_column_type():
     """
     )
 
-    data_frame_transformed = ROOT.MyTransformation_to_TwoInts[  # noqa: F841
+    data_frame_transformed = ROOT.MyTransformation_to_TwoInts[
         data_frame.GetColumnType("one_float")
     ](ROOT.RDF.AsRNode(data_frame))
 
