@@ -1,14 +1,14 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import cupy as cp  # noqa: F401
-import numpy as np  # noqa: F401
-import pytest  # noqa: F401
+import numpy as np
+import pytest
 
-import awkward as ak  # noqa: F401
+import awkward as ak
 
 try:
-    import numba as nb  # noqa: E402
-    import numba.cuda as nb_cuda  # noqa: E402
+    import numba as nb
+    import numba.cuda as nb_cuda
     from numba import config
 
     ak.numba.register_and_check()
