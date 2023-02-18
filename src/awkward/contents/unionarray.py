@@ -138,20 +138,6 @@ class UnionArray(Content):
                     )
                 )
 
-        for content in contents[1:]:
-            if contents[0]._mergeable_next(content, mergebool=False):
-                raise ak._errors.wrap_error(
-                    TypeError(
-                        "{0} cannot contain mergeable 'contents' ({1} of {2} and {3} of {4}); try {0}.simplified instead".format(
-                            type(self).__name__,
-                            type(contents[0]).__name__,
-                            repr(str(contents[0].form.type)),
-                            type(content).__name__,
-                            repr(str(content.form.type)),
-                        )
-                    )
-                )
-
         if (
             not (tags.length is unknown_length or index.length is unknown_length)
             and tags.length > index.length
@@ -1340,48 +1326,54 @@ class UnionArray(Content):
         )
 
     def _validity_error(self, path):
-        for i in range(len(self.contents)):
-            if self._backend.nplike.known_data and self.index.length < self.tags.length:
-                return f"at {path} ({type(self)!r}): len(index) < len(tags)"
+        if self._backend.nplike.known_data and self.index.length < self.tags.length:
+            return f"at {path} ({type(self)!r}): len(index) < len(tags)"
 
-            lencontents = self._backend.index_nplike.empty(
-                len(self.contents), dtype=np.int64
+        lencontents = self._backend.index_nplike.empty(
+            len(self.contents), dtype=np.int64
+        )
+        if self._backend.nplike.known_data:
+            for j, _content_j in enumerate(self._contents):
+                lencontents[j] = _content_j.length
+
+        error = self._backend[
+            "awkward_UnionArray_validity",
+            self.tags.dtype.type,
+            self.index.dtype.type,
+            np.int64,
+        ](
+            self.tags.data,
+            self.index.data,
+            self.tags.length,
+            len(self.contents),
+            lencontents,
+        )
+
+        if error.str is not None:
+            if error.filename is None:
+                filename = ""
+            else:
+                filename = " (in compiled code: " + error.filename.decode(
+                    errors="surrogateescape"
+                ).lstrip("\n").lstrip("(")
+            message = error.str.decode(errors="surrogateescape")
+            return 'at {} ("{}"): {} at i={}{}'.format(
+                path, type(self), message, error.id, filename
             )
-            if self._backend.nplike.known_data:
-                for i in range(len(self.contents)):
-                    lencontents[i] = self.contents[i].length
 
-            error = self._backend[
-                "awkward_UnionArray_validity",
-                self.tags.dtype.type,
-                self.index.dtype.type,
-                np.int64,
-            ](
-                self.tags.data,
-                self.index.data,
-                self.tags.length,
-                len(self.contents),
-                lencontents,
-            )
+        # Check triangular pairs (i, j) are not mergeable
+        for i, content_i in enumerate(self._contents):
+            for j in range(0, i):
+                content_j = self._contents[j]
+                if ak._do.mergeable(content_i, content_j, mergebool=False):
+                    return f"at {path}: content({i}) is mergeable with content({j})"
 
-            if error.str is not None:
-                if error.filename is None:
-                    filename = ""
-                else:
-                    filename = " (in compiled code: " + error.filename.decode(
-                        errors="surrogateescape"
-                    ).lstrip("\n").lstrip("(")
-                message = error.str.decode(errors="surrogateescape")
-                return 'at {} ("{}"): {} at i={}{}'.format(
-                    path, type(self), message, error.id, filename
-                )
+        for i, content in enumerate(self._contents):
+            sub = content._validity_error(path + f".content({i})")
+            if sub != "":
+                return sub
 
-            for i in range(len(self.contents)):
-                sub = self.contents[i]._validity_error(path + f".content({i})")
-                if sub != "":
-                    return sub
-
-            return ""
+        return ""
 
     def _nbytes_part(self):
         result = self.tags._nbytes_part() + self.index._nbytes_part()
