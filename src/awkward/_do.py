@@ -293,7 +293,9 @@ def merge_as_union(
         )
         offset += content.length
 
-    return ak.contents.UnionArray(tags, index, contents, parameters=parameters)
+    return ak.contents.UnionArray.simplified(
+        tags, index, contents, parameters=parameters
+    )
 
 
 def mergemany(contents: list[Content]) -> Content:
