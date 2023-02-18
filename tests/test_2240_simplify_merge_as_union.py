@@ -1,7 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 
-import numpy as np  # noqa: F401
+import numpy as np
 
 import awkward as ak
 
