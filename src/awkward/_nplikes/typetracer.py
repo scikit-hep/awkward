@@ -312,7 +312,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         self.touch_shape()
         out = (self._dtype.itemsize,)
         for x in self._shape[:0:-1]:
-            out = (x * out[0],) + out
+            out = (x * out[0], *out)
         return out
 
     @property
@@ -384,7 +384,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         | Ellipsis
         | tuple[SupportsIndex | slice | Ellipsis | ArrayLike, ...]
         | ArrayLike,
-    ) -> Self:  # noqa: F811
+    ) -> Self:
         if not isinstance(key, tuple):
             key = (key,)
 
@@ -514,7 +514,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         | tuple[SupportsIndex | slice | Ellipsis | ArrayLike, ...]
         | ArrayLike,
         value: int | float | bool | complex | ArrayLike,
-    ):  # noqa: F811        existing_value = self.__getitem__(key)
+    ):
         existing_value = self.__getitem__(key)
         if isinstance(value, TypeTracerArray) and value.ndim > existing_value.ndim:
             raise wrap_error(ValueError("cannot assign shape larger than destination"))
@@ -1071,7 +1071,7 @@ class TypeTracer(NumpyLike):
             )
 
         return TypeTracerArray._new(
-            numpy.concatenate(emptyarrays).dtype, (unknown_length,) + inner_shape
+            numpy.concatenate(emptyarrays).dtype, (unknown_length, *inner_shape)
         )
 
     def repeat(

@@ -63,7 +63,6 @@ def test_success_remove_option_type():
 
 
 def test_success_start_offset0():
-
     array = ak.Array(
         ak.contents.ListOffsetArray(
             ak.index.Index64(np.array([0, 2], dtype=np.int64)),

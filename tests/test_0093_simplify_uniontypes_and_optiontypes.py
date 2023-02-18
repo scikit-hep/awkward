@@ -203,7 +203,7 @@ def test_listarray_merge():
     assert to_list(regulararray._mergemany([emptyarray])) == to_list(regulararray)
     assert to_list(emptyarray._mergemany([regulararray])) == to_list(regulararray)
 
-    for (dtype1, Index1, ListArray1) in [
+    for dtype1, Index1, ListArray1 in [
         (np.int32, ak.index.Index32, ak.contents.ListArray),
         (np.uint32, ak.index.IndexU32, ak.contents.ListArray),
         (np.int64, ak.index.Index64, ak.contents.ListArray),
@@ -322,7 +322,7 @@ def test_listoffsetarray_merge():
     regulararray = ak.contents.RegularArray(content2, 2, zeros_length=0)
     assert to_list(regulararray) == [[1, 2], [3, 4], [5, 6]]
 
-    for (dtype1, Index1, ListArray1) in [
+    for dtype1, Index1, ListArray1 in [
         (np.int32, ak.index.Index32, ak.contents.ListArray),
         (np.uint32, ak.index.IndexU32, ak.contents.ListArray),
         (np.int64, ak.index.Index64, ak.contents.ListArray),

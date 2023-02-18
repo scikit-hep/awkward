@@ -1050,14 +1050,8 @@ class UnionArray(Content):
                 AssertionError("FIXME: handle UnionArray with more than 127 contents")
             )
 
-        parameters = ak.forms.form._parameters_union(
-            self._parameters,
-            other._parameters,
-            exclude=ak.forms.form.reserved_nominal_parameters,
-        )
-
         return ak.contents.UnionArray.simplified(
-            tags, index, contents, parameters=parameters
+            tags, index, contents, parameters=self._parameters
         )
 
     def _mergemany(self, others):

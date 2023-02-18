@@ -69,18 +69,19 @@ class RegularType(Type):
             params = self._str_parameters()
 
             if params is None:
-                out = [str(self._size), " * "] + self._content._str(indent, compact)
+                out = [str(self._size), " * ", *self._content._str(indent, compact)]
             else:
-                out = (
-                    ["[", str(self._size), " * "]
-                    + self._content._str(indent, compact)
-                    + [", ", params, "]"]
-                )
+                out = [
+                    "[",
+                    str(self._size),
+                    " * ",
+                    *self._content._str(indent, compact),
+                ] + [", ", params, "]"]
 
-        return [self._str_categorical_begin()] + out + [self._str_categorical_end()]
+        return [self._str_categorical_begin(), *out] + [self._str_categorical_end()]
 
     def __repr__(self):
-        args = [repr(self._content), repr(self._size)] + self._repr_args()
+        args = [repr(self._content), repr(self._size), *self._repr_args()]
         return "{}({})".format(type(self).__name__, ", ".join(args))
 
     def __eq__(self, other):

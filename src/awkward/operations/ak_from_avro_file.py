@@ -39,7 +39,6 @@ def from_avro_file(
             "debug_forth": debug_forth,
         },
     ):
-
         if isinstance(file, pathlib.Path):
             file = str(file)
 
@@ -65,7 +64,6 @@ def from_avro_file(
 
 
 def _impl(form, length, container, highlevel, behavior):
-
     return ak.operations.ak_from_buffers._impl(
         form=form,
         length=length,

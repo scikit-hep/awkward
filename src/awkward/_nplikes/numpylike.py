@@ -46,7 +46,7 @@ class ArrayLike(Protocol):
         ...
 
     @abstractmethod
-    def __getitem__(  # noqa: F811
+    def __getitem__(
         self,
         key: SupportsIndex
         | slice
@@ -69,7 +69,7 @@ class ArrayLike(Protocol):
         ...
 
     @overload
-    def __setitem__(  # noqa: F811
+    def __setitem__(
         self,
         key: slice
         | Ellipsis
@@ -80,7 +80,7 @@ class ArrayLike(Protocol):
         ...
 
     @abstractmethod
-    def __setitem__(self, key, value):  # noqa: F811
+    def __setitem__(self, key, value):
         ...
 
     @abstractmethod

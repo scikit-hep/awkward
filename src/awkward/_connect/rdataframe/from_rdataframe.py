@@ -2,6 +2,7 @@
 
 import ctypes
 import os
+import textwrap
 
 import cppyy
 import ROOT
@@ -55,11 +56,7 @@ cppyy.add_include_path(
 compiler = ROOT.gInterpreter.Declare
 
 
-done = compiler(
-    """
-#include "rdataframe/jagged_builders.h"
-"""
-)
+done = compiler('\n#include "rdataframe/jagged_builders.h"\n')
 assert done is True
 
 
@@ -68,55 +65,52 @@ def from_rdataframe(data_frame, columns, offsets_type="int64_t"):
         if depth == 1:
             return f"awkward::LayoutBuilder::Numpy<{data_type}>>"
         else:
-            return (
-                "awkward::LayoutBuilder::ListOffset<int64_t, "
-                + cpp_builder_type(depth - 1, data_type)
-                + ">"
-            )
+            return f"awkward::LayoutBuilder::ListOffset<int64_t, {cpp_builder_type(depth - 1, data_type)}>"
 
     def cpp_fill_offsets_and_flatten(depth):
         if depth == 1:
-            return (
-                "\nfor (auto const& it : vec1) {\n" + "  builder1.append(it);\n" + "}\n"
+            return textwrap.dedent(
+                """
+                for (auto const& it : vec1) {
+                    builder1.append(it);
+                }
+                """
             )
         else:
-            return (
-                f"for (auto const& vec{depth - 1} : vec{depth}) "
-                + "{\n"
-                + f"  auto& builder{depth - 1} = builder{depth}.begin_list();\n"
-                + "  "
-                + cpp_fill_offsets_and_flatten(depth - 1)
-                + "\n"
-                + f"  builder{depth}.end_list();\n"
-                + "}\n"
+            return textwrap.dedent(
+                f"""
+                for (auto const& vec{depth - 1} : vec{depth}) {{
+                    auto& builder{depth - 1} = builder{depth}.begin_list();
+                    {cpp_fill_offsets_and_flatten(depth - 1)}
+                    builder{depth}.end_list();
+                }}
+                """
             )
 
     def cpp_fill_function(depth):
         if depth == 1:
-            return (
-                "template<class BUILDER, typename PRIMITIVE>\n"
-                + "void\n"
-                + "fill_from(BUILDER& builder, ROOT::RDF::RResultPtr<std::vector<PRIMITIVE>>& result) {"
-                + "  for (auto const& it : result) {\n"
-                + "    builder.append(it);\n"
-                + "  }\n"
-                + "}\n"
+            return textwrap.dedent(
+                """
+                template<class BUILDER, typename PRIMITIVE>
+                void fill_from(BUILDER& builder, ROOT::RDF::RResultPtr<std::vector<PRIMITIVE>>& result) {
+                    for (auto const& it : result) {
+                        builder.append(it);
+                    }
+                }
+                """
             )
         else:
-            return (
-                "template<class BUILDER, typename PRIMITIVE>\n"
-                + "void\n"
-                + f"fill_offsets_and_flatten{depth}(BUILDER& builder{depth}, ROOT::RDF::RResultPtr<std::vector<PRIMITIVE>>& result) "
-                + "{\n"
-                + f"  for (auto const& vec{depth - 1} : result) "
-                + "{\n"
-                + f"  auto& builder{depth - 1} = builder{depth}.begin_list();\n"
-                + "  "
-                + cpp_fill_offsets_and_flatten(depth - 1)
-                + "\n"
-                + f"  builder{depth}.end_list();\n"
-                + "}\n"
-                + "}\n"
+            return textwrap.dedent(
+                f"""
+                template<class BUILDER, typename PRIMITIVE>
+                void fill_offsets_and_flatten{depth}(BUILDER& builder{depth}, ROOT::RDF::RResultPtr<std::vector<PRIMITIVE>>& result) {{
+                    for (auto const& vec{depth - 1} : result) {{
+                      auto& builder{depth - 1} = builder{depth}.begin_list();
+                      {cpp_fill_offsets_and_flatten(depth - 1)}
+                      builder{depth}.end_list();
+                    }}
+                }}
+                """
             )
 
     def form_dtype(form):
@@ -132,7 +126,7 @@ def from_rdataframe(data_frame, columns, offsets_type="int64_t"):
     contents = {}
     awkward_type_cols = {}
 
-    columns = columns + ("rdfentry_",)
+    columns = (*columns, "rdfentry_")
     maybe_indexed = False
 
     # Important note: This loop is separate from the next one
@@ -150,7 +144,6 @@ def from_rdataframe(data_frame, columns, offsets_type="int64_t"):
 
     for col in columns:
         if ROOT.awkward.is_awkward_type[column_types[col]]():  # Retrieve Awkward arrays
-
             # ROOT::RDF::RResultPtr<T>::begin Returns an iterator to the beginning of
             # the contained object if this makes sense, throw a compilation error otherwise.
             #
@@ -182,7 +175,6 @@ def from_rdataframe(data_frame, columns, offsets_type="int64_t"):
             cpp_buffers_self = CppBuffers()
 
             if isinstance(form, ak.forms.NumpyForm):
-
                 NumpyBuilder = cppyy.gbl.awkward.LayoutBuilder.Numpy[data_type]
                 builder = NumpyBuilder()
                 builder_type = type(builder).__cpp_name__

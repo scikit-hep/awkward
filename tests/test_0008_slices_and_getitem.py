@@ -140,8 +140,4 @@ def test_numpyarray_getitem_next_2():
 
     c = a % 2 == 0  # two dimensional
     assert to_list(b[c]) == to_list(a[c])
-    assert to_list(b[c,]) == to_list(  # noqa: E231
-        a[
-            c,
-        ]
-    )
+    assert to_list(b[c,]) == to_list(a[c,])

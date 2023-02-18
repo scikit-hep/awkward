@@ -115,7 +115,6 @@ def test():
 
 
 def test_full_like_types():
-
     array = ak.highlevel.Array(
         np.array(["2020-07-27T10:41:11", "2019-01-01", "2020-01-01"], "datetime64[s]")
     )

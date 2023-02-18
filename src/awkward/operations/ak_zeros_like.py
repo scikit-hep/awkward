@@ -10,11 +10,16 @@ np = NumpyMetadata.instance()
 _ZEROS = object()
 
 
-def zeros_like(array, *, dtype=None, highlevel=True, behavior=None):
+def zeros_like(
+    array, *, dtype=None, including_unknown=False, highlevel=True, behavior=None
+):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         dtype (None or NumPy dtype): Overrides the data type of the result.
+        including_unknown (bool): If True, the `unknown` type is considered
+            a value type and is converted to a zero-length array of the
+            specified dtype; if False, `unknown` will remain `unknown`.
         highlevel (bool, default is True): If True, return an #ak.Array;
             otherwise, return a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
@@ -29,15 +34,25 @@ def zeros_like(array, *, dtype=None, highlevel=True, behavior=None):
     """
     with ak._errors.OperationErrorContext(
         "ak.zeros_like",
-        {"array": array, "dtype": dtype, "highlevel": highlevel, "behavior": behavior},
+        {
+            "array": array,
+            "dtype": dtype,
+            "including_unknown": including_unknown,
+            "highlevel": highlevel,
+            "behavior": behavior,
+        },
     ):
-        return _impl(array, highlevel, behavior, dtype)
+        return _impl(array, highlevel, behavior, dtype, including_unknown)
 
 
-def _impl(array, highlevel, behavior, dtype):
+def _impl(array, highlevel, behavior, dtype, including_unknown):
     if dtype is not None:
-        return ak.operations.ak_full_like._impl(array, 0, highlevel, behavior, dtype)
-    return ak.operations.ak_full_like._impl(array, _ZEROS, highlevel, behavior, dtype)
+        return ak.operations.ak_full_like._impl(
+            array, 0, highlevel, behavior, dtype, including_unknown
+        )
+    return ak.operations.ak_full_like._impl(
+        array, _ZEROS, highlevel, behavior, dtype, including_unknown
+    )
 
 
 @ak._connect.numpy.implements("zeros_like")

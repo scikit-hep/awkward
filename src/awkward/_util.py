@@ -581,7 +581,6 @@ expand_braces.regex = re.compile(r"\{[^\{\}]*\}")
 
 
 def from_arraylib(array, regulararray, recordarray, highlevel, behavior):
-
     np = NumpyMetadata.instance()
     # overshadows global NumPy import for nplike-safety
     numpy = Numpy.instance()
