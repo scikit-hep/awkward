@@ -14,6 +14,8 @@ class Lookup:
         def arrayptr(x):
             if isinstance(x, int):
                 return x
+            elif isinstance(self.nplike, ak._nplikes.cupy.Cupy):
+                return x.data.ptr
             else:
                 return x.ctypes.data
 
