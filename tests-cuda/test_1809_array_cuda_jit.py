@@ -60,8 +60,8 @@ def pass_record_through(array, out):
 @nb_cuda.jit(extensions=[ak.numba.array_view_arg_handler])
 def count_records(array, out):
     tid = nb_cuda.grid(1)
-    array[tid]
-    out[tid] = tid
+    record = array[tid]
+    out[tid] = np.nan if record is None else tid
 
 
 @nb_cuda.jit(extensions=[ak.numba.array_view_arg_handler])
