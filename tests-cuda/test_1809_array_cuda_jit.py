@@ -347,7 +347,15 @@ def test_IndexedArray_NumpyArray():
         backend="cuda",
     )
     assert array.to_list() == [3.3, 3.3, 1.1, 2.2, 5.5, 6.6, 5.5]
+    results = nb_cuda.to_device(np.empty(7, dtype=np.float64))
 
+    pass_through[1, 7](array, results)
+
+    nb_cuda.synchronize()
+    host_results = results.copy_to_host()
+
+    assert ak.Array(host_results).tolist() == [3.3, 3.3, 1.1, 2.2, 5.5, 6.6, 5.5]
+    
 
 @pytest.mark.skip(
     "AssertionError: CuPyKernel not found: ('awkward_IndexedArray_numnull', <class 'numpy.int64'>, <class 'numpy.int64'>)"
