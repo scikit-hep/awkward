@@ -202,7 +202,7 @@ def test_ListArray_NumpyArray():
         ),
         backend="cuda",
     )
-    print(array.to_list())
+    assert array.to_list() == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
 
 
 @numbatest
@@ -214,7 +214,7 @@ def test_ListOffsetArray_NumpyArray():
         ),
         backend="cuda",
     )
-    print(array.to_list())
+    assert array.to_list() == [[1.1, 2.2, 3.3], [], [4.4, 5.5], [7.7]]
 
 
 @numbatest
@@ -229,7 +229,13 @@ def test_RecordArray_NumpyArray():
         ),
         backend="cuda",
     )
-    print(array.to_list())
+    assert array.to_list() == [
+        {"x": 0, "y": 0.0},
+        {"x": 1, "y": 1.1},
+        {"x": 2, "y": 2.2},
+        {"x": 3, "y": 3.3},
+        {"x": 4, "y": 4.4},
+    ]
 
     array = ak.Array(
         ak.contents.RecordArray(
@@ -241,19 +247,19 @@ def test_RecordArray_NumpyArray():
         ),
         backend="cuda",
     )
-    print(array.to_list())
+    assert array.to_list() == [(0, 0.0), (1, 1.1), (2, 2.2), (3, 3.3), (4, 4.4)]
 
     array = ak.Array(
         ak.contents.RecordArray([], [], 10),
         backend="cuda",
     )
-    print(array.to_list())
+    assert array.to_list() == [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}]
 
     array = ak.Array(
         ak.contents.RecordArray([], None, 10),
         backend="cuda",
     )
-    print(array.to_list())
+    assert array.to_list() == [(), (), (), (), (), (), (), (), (), ()]
 
 
 @numbatest
@@ -265,7 +271,7 @@ def test_IndexedArray_NumpyArray():
         ),
         backend="cuda",
     )
-    print(array.to_list())
+    assert array.to_list() == [3.3, 3.3, 1.1, 2.2, 5.5, 6.6, 5.5]
 
 
 @pytest.mark.skip(
@@ -280,7 +286,7 @@ def test_IndexedOptionArray_NumpyArray():
         ),
         backend="cuda",
     )
-    print(array.to_list())
+    assert array.to_list() == [3.3, 3.3, None, 2.2, None, 6.6, 5.5]
 
 
 @numbatest
@@ -293,7 +299,7 @@ def test_ByteMaskedArray_NumpyArray():
         ),
         backend="cuda",
     )
-    print(array.to_list())
+    assert array.to_list() == [1.1, None, 3.3, None, 5.5]
 
     array = ak.Array(
         ak.contents.ByteMaskedArray(
@@ -303,4 +309,4 @@ def test_ByteMaskedArray_NumpyArray():
         ),
         backend="cuda",
     )
-    print(array.to_list())
+    assert array.to_list() == [1.1, None, 3.3, None, 5.5]
