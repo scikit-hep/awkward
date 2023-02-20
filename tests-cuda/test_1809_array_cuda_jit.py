@@ -57,6 +57,27 @@ def pass_record_through(array, out):
     out[tid] = array.x[tid]
 
 
+@nb_cuda.jit(extensions=[ak.numba.array_view_arg_handler])
+def count_records(array, out):
+    tid = nb_cuda.grid(1)
+    array[tid]
+    out[tid] = tid
+
+
+@nb_cuda.jit(extensions=[ak.numba.array_view_arg_handler])
+def pass_two_records_through(array, out):
+    tid = nb_cuda.grid(1)
+    out[tid][0] = array.x[tid]
+    out[tid][1] = array.y[tid]
+
+
+@nb_cuda.jit(extensions=[ak.numba.array_view_arg_handler])
+def pass_two_tuple_through(array, out):
+    tid = nb_cuda.grid(1)
+    out[tid][0] = array["0"][tid]
+    out[tid][1] = array["1"][tid]
+
+
 @numbatest
 def test_array_multiply():
     # create an ak.Array with a cuda backend:
@@ -216,6 +237,18 @@ def test_ListOffsetArray_NumpyArray():
     )
     assert array.to_list() == [[1.1, 2.2, 3.3], [], [4.4, 5.5], [7.7]]
 
+    results = nb_cuda.to_device(np.empty(12, dtype=np.float64).reshape((4, 3)))
+
+    pass_through_2d[(4, 1), (1, 3)](array, results)
+
+    nb_cuda.synchronize()
+    host_results = results.copy_to_host()
+
+    assert (
+        str(ak.to_list(host_results))
+        == "[[1.1, 2.2, 3.3], [nan, nan, nan], [4.4, 5.5, nan], [7.7, nan, nan]]"
+    )
+
 
 @numbatest
 def test_RecordArray_NumpyArray():
@@ -236,6 +269,20 @@ def test_RecordArray_NumpyArray():
         {"x": 3, "y": 3.3},
         {"x": 4, "y": 4.4},
     ]
+    results = nb_cuda.to_device(np.empty(10, dtype=np.float64).reshape((5, 2)))
+
+    pass_two_records_through[5, 1](array, results)
+
+    nb_cuda.synchronize()
+    host_results = results.copy_to_host()
+
+    assert ak.to_list(host_results) == [
+        [0.0, 0.0],
+        [1.0, 1.1],
+        [2.0, 2.2],
+        [3.0, 3.3],
+        [4.0, 4.4],
+    ]
 
     array = ak.Array(
         ak.contents.RecordArray(
@@ -248,18 +295,46 @@ def test_RecordArray_NumpyArray():
         backend="cuda",
     )
     assert array.to_list() == [(0, 0.0), (1, 1.1), (2, 2.2), (3, 3.3), (4, 4.4)]
+    results = nb_cuda.to_device(np.empty(10, dtype=np.float64).reshape((5, 2)))
+
+    pass_two_tuple_through[5, 1](array, results)
+
+    nb_cuda.synchronize()
+    host_results = results.copy_to_host()
+
+    assert ak.to_list(host_results) == [
+        [0.0, 0.0],
+        [1.0, 1.1],
+        [2.0, 2.2],
+        [3.0, 3.3],
+        [4.0, 4.4],
+    ]
 
     array = ak.Array(
         ak.contents.RecordArray([], [], 10),
         backend="cuda",
     )
     assert array.to_list() == [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}]
+    results = nb_cuda.to_device(np.empty(10, dtype=np.int32))
+    count_records[1, 10](array, results)
+
+    nb_cuda.synchronize()
+    host_results = results.copy_to_host()
+
+    assert ak.Array(host_results).tolist() == [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
     array = ak.Array(
         ak.contents.RecordArray([], None, 10),
         backend="cuda",
     )
     assert array.to_list() == [(), (), (), (), (), (), (), (), (), ()]
+    results = nb_cuda.to_device(np.empty(10, dtype=np.int32))
+    count_records[1, 10](array, results)
+
+    nb_cuda.synchronize()
+    host_results = results.copy_to_host()
+
+    assert ak.Array(host_results).tolist() == [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
 
 @numbatest
