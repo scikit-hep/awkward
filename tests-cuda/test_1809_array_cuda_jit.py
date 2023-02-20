@@ -187,3 +187,120 @@ def test_RegularArray_EmptyArray():
         str(ak.Array(host_results).tolist())
         == "[[nan], [nan], [nan], [nan], [nan], [nan], [nan], [nan], [nan], [nan]]"
     )
+
+
+@pytest.mark.skip(
+    "AssertionError: CuPyKernel not found: ('awkward_ListArray_broadcast_tooffsets', <class 'numpy.int64'>, <class 'numpy.int64'>, <class 'numpy.int64'>, <class 'numpy.int64'>)"
+)
+@numbatest
+def test_ListArray_NumpyArray():
+    array = ak.Array(
+        ak.contents.ListArray(
+            ak.index.Index(np.array([4, 100, 1], np.int64)),
+            ak.index.Index(np.array([7, 100, 3, 200], np.int64)),
+            ak.contents.NumpyArray(np.array([6.6, 4.4, 5.5, 7.7, 1.1, 2.2, 3.3, 8.8])),
+        ),
+        backend="cuda",
+    )
+    print(array.to_list())
+
+
+@numbatest
+def test_ListOffsetArray_NumpyArray():
+    array = ak.Array(
+        ak.contents.ListOffsetArray(
+            ak.index.Index(np.array([1, 4, 4, 6, 7], np.int64)),
+            ak.contents.NumpyArray(np.array([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7])),
+        ),
+        backend="cuda",
+    )
+    print(array.to_list())
+
+
+@numbatest
+def test_RecordArray_NumpyArray():
+    array = ak.Array(
+        ak.contents.RecordArray(
+            [
+                ak.contents.NumpyArray(np.array([0, 1, 2, 3, 4], np.int64)),
+                ak.contents.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])),
+            ],
+            ["x", "y"],
+        ),
+        backend="cuda",
+    )
+    print(array.to_list())
+
+    array = ak.Array(
+        ak.contents.RecordArray(
+            [
+                ak.contents.NumpyArray(np.array([0, 1, 2, 3, 4], np.int64)),
+                ak.contents.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])),
+            ],
+            None,
+        ),
+        backend="cuda",
+    )
+    print(array.to_list())
+
+    array = ak.Array(
+        ak.contents.RecordArray([], [], 10),
+        backend="cuda",
+    )
+    print(array.to_list())
+
+    array = ak.Array(
+        ak.contents.RecordArray([], None, 10),
+        backend="cuda",
+    )
+    print(array.to_list())
+
+
+@numbatest
+def test_IndexedArray_NumpyArray():
+    array = ak.Array(
+        ak.contents.IndexedArray(
+            ak.index.Index(np.array([2, 2, 0, 1, 4, 5, 4], np.int64)),
+            ak.contents.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
+        ),
+        backend="cuda",
+    )
+    print(array.to_list())
+
+
+@pytest.mark.skip(
+    "AssertionError: CuPyKernel not found: ('awkward_IndexedArray_numnull', <class 'numpy.int64'>, <class 'numpy.int64'>)"
+)
+@numbatest
+def test_IndexedOptionArray_NumpyArray():
+    array = ak.Array(
+        ak.contents.IndexedOptionArray(
+            ak.index.Index(np.array([2, 2, -1, 1, -1, 5, 4], np.int64)),
+            ak.contents.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
+        ),
+        backend="cuda",
+    )
+    print(array.to_list())
+
+
+@numbatest
+def test_ByteMaskedArray_NumpyArray():
+    array = ak.Array(
+        ak.contents.ByteMaskedArray(
+            ak.index.Index(np.array([1, 0, 1, 0, 1], np.int8)),
+            ak.contents.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
+            valid_when=True,
+        ),
+        backend="cuda",
+    )
+    print(array.to_list())
+
+    array = ak.Array(
+        ak.contents.ByteMaskedArray(
+            ak.index.Index(np.array([0, 1, 0, 1, 0], np.int8)),
+            ak.contents.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
+            valid_when=False,
+        ),
+        backend="cuda",
+    )
+    print(array.to_list())
