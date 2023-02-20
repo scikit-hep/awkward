@@ -96,7 +96,7 @@ def _impl(array, highlevel, behavior):
     backend = ak._backends.backend_of(array, default=cpu)
 
     def lengths_of(data, offsets):
-        if len(data) == 0:
+        if backend.nplike.known_data and data.size == 0:
             return backend.index_nplike.empty(0, dtype=np.int64), offsets
         else:
             diffs = data[1:] != data[:-1]
@@ -116,16 +116,17 @@ def _impl(array, highlevel, behavior):
                 # To consider only the interior boundaries, we ignore the start and end
                 # offset values. These can be repeated with empty sublists, so we mask them out.
                 is_interior = backend.nplike.logical_and(
-                    0 < offsets, offsets < len(data)
+                    0 < offsets,
+                    offsets < backend.index_nplike.shape_item_as_index(data.size),
                 )
                 interior_offsets = offsets[is_interior]
                 diffs[interior_offsets - 1] = True
             positions = backend.index_nplike.nonzero(diffs)[0]
             full_positions = backend.index_nplike.empty(
-                len(positions) + 2, dtype=np.int64
+                positions.size + 2, dtype=np.int64
             )
             full_positions[0] = 0
-            full_positions[-1] = len(data)
+            full_positions[-1] = backend.index_nplike.shape_item_as_index(data.size)
             full_positions[1:-1] = positions + 1
 
             nextcontent = full_positions[1:] - full_positions[:-1]
