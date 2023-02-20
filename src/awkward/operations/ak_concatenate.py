@@ -102,15 +102,19 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
             x if isinstance(x, ak.contents.Content) else ak.operations.to_layout([x])
             for x in content_or_others
         ]
-        batch = [content_or_others[0]]
+        batches = [[content_or_others[0]]]
         for x in content_or_others[1:]:
+            batch = batches[-1]
             if ak._do.mergeable(batch[-1], x, mergebool=mergebool):
                 batch.append(x)
             else:
-                collapsed = ak._do.mergemany(batch)
-                batch = [ak._do.merge_as_union(collapsed, x)]
+                batches.append([x])
 
-        out = ak._do.mergemany(batch)
+        contents = [ak._do.mergemany(b) for b in batches]
+        if len(contents) > 1:
+            out = ak._do.merge_as_union(contents)
+        else:
+            out = contents[0]
 
         if isinstance(out, ak.contents.UnionArray):
             out = type(out).simplified(
