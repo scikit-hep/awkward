@@ -133,9 +133,6 @@ def test_data_frame_filter():
         ),
         keep_order=True,
     )
-    print(out["x"].tolist())
-    print(out["y"].tolist())
-    print(out["z"].tolist())
 
     assert out["x"].tolist() == [
         {"x": [2.1, 2.2]},

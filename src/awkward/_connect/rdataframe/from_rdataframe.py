@@ -133,7 +133,7 @@ def from_rdataframe(data_frame, columns, offsets_type="int64_t", keep_order=Fals
     awkward_type_cols = {}
 
     columns = columns + ("rdfentry_",)
-    maybe_indexed = False
+    maybe_indexed = keep_order
 
     # Important note: This loop is separate from the next one
     # in order not to trigger the additional RDataFrame
@@ -254,7 +254,16 @@ def from_rdataframe(data_frame, columns, offsets_type="int64_t", keep_order=Fals
         else:
             contents[key] = value
 
+    out = ak.zip(contents, depth_limit=1)
+
+    if keep_order:
+        sorted = ak.index.Index64(contents["rdfentry_"].data.argsort())
+        out = ak._util.wrap(
+            ak.contents.IndexedArray(sorted, out.layout),
+            highlevel=True,
+        )
+
     if maybe_indexed:
         del contents["rdfentry_"]
 
-    return ak.zip(contents, depth_limit=1)
+    return out

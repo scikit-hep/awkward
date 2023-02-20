@@ -297,7 +297,6 @@ namespace awkward {{
 
         bool SetEntry(unsigned int slot, ULong64_t entry) {{
             {cpp_code_entries}
-            std::cout << "slot " << slot << "; entry " << entry << std::endl;
             return true;
         }}
 
