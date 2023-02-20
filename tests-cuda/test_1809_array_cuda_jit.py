@@ -32,6 +32,12 @@ def multiply(array, n, out):
 
 @nb_cuda.jit(extensions=[ak.numba.array_view_arg_handler])
 def pass_through(array, out):
+    x = nb_cuda.grid(1)
+    out[x] = array[x]
+
+
+@nb_cuda.jit(extensions=[ak.numba.array_view_arg_handler])
+def pass_through_2d(array, out):
     x, y = nb_cuda.grid(2)
     if x < len(array) and y < len(array[x]):
         out[x][y] = array[x][y]
@@ -40,9 +46,15 @@ def pass_through(array, out):
 
 
 @nb_cuda.jit(extensions=[ak.numba.array_view_arg_handler])
+def pass_regular_through_2d(array, out):
+    x, y = nb_cuda.grid(2)
+    out[x][y] = array[x][y]
+
+
+@nb_cuda.jit(extensions=[ak.numba.array_view_arg_handler])
 def pass_record_through(array, out):
     tid = nb_cuda.grid(1)
-    out[tid] = array["x"][tid]
+    out[tid] = array.x[tid]
 
 
 @numbatest
@@ -62,12 +74,31 @@ def test_array_multiply():
 
 
 @numbatest
+def test_array_on_cpu_multiply():
+    # create an ak.Array with a cpu backend:
+    array = ak.Array([0, 1, 2, 3])
+
+    # allocate the result:
+    results = nb_cuda.to_device(np.empty(4, dtype=np.int32))
+
+    with pytest.raises(TypeError):
+        multiply[1, 4](array, 3, results)
+
+    multiply[1, 4](ak.to_backend(array, backend="cuda"), 3, results)
+
+    nb_cuda.synchronize()
+    host_results = results.copy_to_host()
+
+    assert ak.Array(host_results).tolist() == [0, 3, 6, 9]
+
+
+@numbatest
 def test_ListOffsetArray():
     array = ak.Array([[0, 1], [2], [3, 4, 5]], backend="cuda")
 
     results = nb_cuda.to_device(np.empty(9, dtype=np.float32).reshape((3, 3)))
 
-    pass_through[(3, 1), (1, 3)](array, results)
+    pass_through_2d[(3, 1), (1, 3)](array, results)
 
     nb_cuda.synchronize()
     host_results = results.copy_to_host()
@@ -95,19 +126,64 @@ def test_RecordArray():
 
 
 @numbatest
-def test_array_on_cpu_multiply():
-    # create an ak.Array with a cpu backend:
-    array = ak.Array([0, 1, 2, 3])
+def test_EmptyArray():
+    array = ak.Array(ak.contents.EmptyArray(), backend="cuda")
 
-    # allocate the result:
-    results = nb_cuda.to_device(np.empty(4, dtype=np.int32))
-
-    with pytest.raises(TypeError):
-        multiply[1, 4](array, 3, results)
-
-    multiply[1, 4](ak.to_backend(array, backend="cuda"), 3, results)
+    results = nb_cuda.to_device(np.empty(len(array), dtype=np.int32))
+    pass_through[1, 1](array, results)
 
     nb_cuda.synchronize()
     host_results = results.copy_to_host()
 
-    assert ak.Array(host_results).tolist() == [0, 3, 6, 9]
+    assert ak.Array(host_results).tolist() == []
+
+
+@numbatest
+def test_NumpyArray():
+    array = ak.Array(ak.contents.NumpyArray([0, 1, 2, 3]), backend="cuda")
+
+    results = nb_cuda.to_device(np.empty(len(array), dtype=np.int32))
+    pass_through[1, 4](array, results)
+
+    nb_cuda.synchronize()
+    host_results = results.copy_to_host()
+
+    assert ak.Array(host_results).tolist() == [0, 1, 2, 3]
+
+
+@numbatest
+def test_RegularArray_NumpyArray():
+    array = ak.Array(
+        ak.contents.RegularArray(
+            ak.contents.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])),
+            3,
+        ),
+        backend="cuda",
+    )
+
+    results = nb_cuda.to_device(np.empty(6, dtype=np.float64).reshape((2, 3)))
+    pass_through_2d[(2, 1), (1, 3)](array, results)
+
+    nb_cuda.synchronize()
+    host_results = results.copy_to_host()
+
+    assert ak.Array(host_results).tolist() == [[0.0, 1.1, 2.2], [3.3, 4.4, 5.5]]
+
+
+@numbatest
+def test_RegularArray_EmptyArray():
+    array = ak.Array(
+        ak.contents.RegularArray(ak.contents.EmptyArray(), 0, zeros_length=10),
+        backend="cuda",
+    )
+
+    results = nb_cuda.to_device(np.empty(10, dtype=np.float64).reshape((10, 1)))
+    pass_through_2d[(10, 1), (1, 1)](array, results)
+
+    nb_cuda.synchronize()
+    host_results = results.copy_to_host()
+
+    assert (
+        str(ak.Array(host_results).tolist())
+        == "[[nan], [nan], [nan], [nan], [nan], [nan], [nan], [nan], [nan], [nan]]"
+    )
