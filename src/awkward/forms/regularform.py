@@ -55,7 +55,7 @@ class RegularForm(Form):
         return cls(content, size, parameters=parameters, form_key=form_key)
 
     def __repr__(self):
-        args = [repr(self._content), repr(self._size)] + self._repr_args()
+        args = [repr(self._content), repr(self._size), *self._repr_args()]
         return "{}({})".format(type(self).__name__, ", ".join(args))
 
     def _to_dict_part(self, verbose, toplevel):
@@ -141,7 +141,7 @@ class RegularForm(Form):
             self.parameter("__array__") not in ("string", "bytestring")
             and list_indicator is not None
         ):
-            path = path + (list_indicator,)
+            path = (*path, list_indicator)
         self._content._columns(path, output, list_indicator)
 
     def _select_columns(self, index, specifier, matches, output):

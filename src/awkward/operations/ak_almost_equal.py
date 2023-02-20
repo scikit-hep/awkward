@@ -40,6 +40,9 @@ def almost_equal(
     The relative difference (`rtol * abs(b)`) and the absolute difference `atol`
     are added together to compare against the absolute difference between `left`
     and `right`.
+
+    TypeTracer arrays are not supported, as there is very little information to
+    be compared.
     """
     left_behavior = behavior_of(left)
     right_behavior = behavior_of(right)
@@ -48,6 +51,12 @@ def almost_equal(
     right = to_layout(right, allow_record=False).to_packed()
 
     backend = backend_of(left, right)
+    if not backend.nplike.known_data:
+        raise wrap_error(
+            NotImplementedError(
+                "Awkward Arrays with typetracer backends cannot yet be compared with `ak.almost_equal`."
+            )
+        )
 
     def is_approx_dtype(left, right) -> bool:
         if not dtype_exact:
@@ -88,25 +97,28 @@ def almost_equal(
             return False
 
         if left.is_list:
-            return (
-                backend.index_nplike.array_equal(left.starts, right.starts)
-                and backend.index_nplike.array_equal(left.stops, right.stops)
-                and visitor(
-                    left.content[: left.stops[-1]], right.content[: right.stops[-1]]
-                )
+            return backend.index_nplike.array_equal(
+                left.offsets, right.offsets
+            ) and visitor(
+                left.content[: left.offsets[-1]], right.content[: right.offsets[-1]]
             )
         elif left.is_regular:
             return (left.size == right.size) and visitor(left.content, right.content)
         elif left.is_numpy:
-            return is_approx_dtype(left.dtype, right.dtype) and backend.nplike.all(
-                backend.nplike.isclose(
-                    left.data, right.data, rtol=rtol, atol=atol, equal_nan=False
+            return (
+                is_approx_dtype(left.dtype, right.dtype)
+                and backend.nplike.all(
+                    backend.nplike.isclose(
+                        left.data, right.data, rtol=rtol, atol=atol, equal_nan=False
+                    )
                 )
+                and left.shape == right.shape
             )
+
         elif left.is_option:
             return backend.index_nplike.array_equal(
                 left.index.data < 0, right.index.data < 0
-            ) and visitor(left.project(), right.project())
+            ) and visitor(left.project().to_packed(), right.project().to_packed())
         elif left.is_union:
             return (len(left.contents) == len(right.contents)) and all(
                 [

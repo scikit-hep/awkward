@@ -10,7 +10,14 @@ from awkward._errors import wrap_error
 from awkward._nplikes.numpylike import ArrayLike, IndexType, NumpyLike, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._util import NDArrayOperatorsMixin, is_non_string_like_sequence
-from awkward.typing import Any, Final, Literal, Self, SupportsIndex, TypeVar
+from awkward.typing import (
+    Any,
+    Final,
+    Literal,
+    Self,
+    SupportsIndex,
+    TypeVar,
+)
 
 np = NumpyMetadata.instance()
 
@@ -305,7 +312,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         self.touch_shape()
         out = (self._dtype.itemsize,)
         for x in self._shape[:0:-1]:
-            out = (x * out[0],) + out
+            out = (x * out[0], *out)
         return out
 
     @property
@@ -377,7 +384,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         | Ellipsis
         | tuple[SupportsIndex | slice | Ellipsis | ArrayLike, ...]
         | ArrayLike,
-    ) -> Self:  # noqa: F811
+    ) -> Self:
         if not isinstance(key, tuple):
             key = (key,)
 
@@ -507,7 +514,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         | tuple[SupportsIndex | slice | Ellipsis | ArrayLike, ...]
         | ArrayLike,
         value: int | float | bool | complex | ArrayLike,
-    ):  # noqa: F811        existing_value = self.__getitem__(key)
+    ):
         existing_value = self.__getitem__(key)
         if isinstance(value, TypeTracerArray) and value.ndim > existing_value.ndim:
             raise wrap_error(ValueError("cannot assign shape larger than destination"))
@@ -764,10 +771,10 @@ class TypeTracer(NumpyLike):
 
     def array_equal(
         self, x1: ArrayLike, x2: ArrayLike, *, equal_nan: bool = False
-    ) -> bool:
+    ) -> TypeTracerArray:
         try_touch_data(x1)
         try_touch_data(x2)
-        return False
+        return TypeTracerArray._new(np.bool_, shape=())
 
     def searchsorted(
         self,
@@ -970,7 +977,7 @@ class TypeTracer(NumpyLike):
         raise ak._errors.wrap_error(NotImplementedError)
 
     def reshape(
-        self, x: ArrayLike, shape: tuple[int, ...], *, copy: bool | None = None
+        self, x: ArrayLike, shape: tuple[ShapeItem, ...], *, copy: bool | None = None
     ) -> TypeTracerArray:
         x.touch_shape()
 
@@ -1024,9 +1031,16 @@ class TypeTracer(NumpyLike):
         try_touch_data(x)
         return (TypeTracerArray._new(np.int64, (unknown_length,)),) * len(x.shape)
 
+    def where(
+        self, condition: ArrayLike, x1: ArrayLike, x2: ArrayLike
+    ) -> TypeTracerArray:
+        condition, x1, x2 = self.broadcast_arrays(condition, x1, x2)
+        result_dtype = numpy.result_type(x1, x2)
+        return TypeTracerArray._new(result_dtype, shape=condition.shape)
+
     def unique_values(self, x: ArrayLike) -> TypeTracerArray:
         try_touch_data(x)
-        return TypeTracerArray._new(x.dtype, shape=(None,))
+        return TypeTracerArray._new(x.dtype, shape=(unknown_length,))
 
     def concat(self, arrays, *, axis: int | None = 0) -> TypeTracerArray:
         if axis is None:
@@ -1057,7 +1071,7 @@ class TypeTracer(NumpyLike):
             )
 
         return TypeTracerArray._new(
-            numpy.concatenate(emptyarrays).dtype, (unknown_length,) + inner_shape
+            numpy.concatenate(emptyarrays).dtype, (unknown_length, *inner_shape)
         )
 
     def repeat(
@@ -1122,7 +1136,7 @@ class TypeTracer(NumpyLike):
         x2: ArrayLike,
         maybe_out: ArrayLike | None = None,
     ) -> TypeTracerArray:
-        return self._apply_ufunc(numpy.sqrt, x1, x2)
+        return self._apply_ufunc(numpy.logical_and, x1, x2)
 
     def logical_or(
         self,
@@ -1130,12 +1144,12 @@ class TypeTracer(NumpyLike):
         x2: ArrayLike,
         maybe_out: ArrayLike | None = None,
     ) -> TypeTracerArray:
-        return self._apply_ufunc(numpy.sqrt, x1, x2)
+        return self._apply_ufunc(numpy.logical_or, x1, x2)
 
     def logical_not(
         self, x: ArrayLike, maybe_out: ArrayLike | None = None
     ) -> TypeTracerArray:
-        return self._apply_ufunc(numpy.sqrt, x)
+        return self._apply_ufunc(numpy.logical_not, x)
 
     def sqrt(self, x: ArrayLike, maybe_out: ArrayLike | None = None) -> TypeTracerArray:
         return self._apply_ufunc(numpy.sqrt, x)
@@ -1149,7 +1163,7 @@ class TypeTracer(NumpyLike):
         x2: ArrayLike,
         maybe_out: ArrayLike | None = None,
     ) -> TypeTracerArray:
-        return self._apply_ufunc(numpy.sqrt, x1, x2)
+        return self._apply_ufunc(numpy.divide, x1, x2)
 
     ############################ almost-ufuncs
 

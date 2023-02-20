@@ -30,7 +30,6 @@ def recursively_apply(
     function_name: str | None = None,
     regular_to_jagged=False,
 ) -> Content | Record | None:
-
     if isinstance(layout, Content):
         return layout._recursively_apply(
             action,

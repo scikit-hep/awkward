@@ -71,7 +71,7 @@ class UnmaskedForm(Form):
             return cls(content, parameters=parameters, form_key=form_key)
 
     def __repr__(self):
-        args = [repr(self._content)] + self._repr_args()
+        args = [repr(self._content), *self._repr_args()]
         return "{}({})".format(type(self).__name__, ", ".join(args))
 
     def _to_dict_part(self, verbose, toplevel):

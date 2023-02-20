@@ -25,7 +25,7 @@ class ScalarType:
         return "".join(self._str("", True))
 
     def show(self, stream=sys.stdout):
-        stream.write("".join(self._str("", False) + ["\n"]))
+        stream.write("".join([*self._str("", False), "\n"]))
 
     def _str(self, indent, compact):
         return self._content._str(indent, compact)

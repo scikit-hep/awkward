@@ -93,7 +93,7 @@ class RecordForm(Form):
         return self._fields is None
 
     def __repr__(self):
-        args = [repr(self._contents), repr(self._fields)] + self._repr_args()
+        args = [repr(self._contents), repr(self._fields), *self._repr_args()]
         return "{}({})".format(type(self).__name__, ", ".join(args))
 
     def index_to_field(self, index):
@@ -250,7 +250,7 @@ class RecordForm(Form):
 
     def _columns(self, path, output, list_indicator):
         for content, field in zip(self._contents, self.fields):
-            content._columns(path + (field,), output, list_indicator)
+            content._columns((*path, field), output, list_indicator)
 
     def _select_columns(self, index, specifier, matches, output):
         contents = []

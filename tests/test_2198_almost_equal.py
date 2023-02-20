@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import numpy as np  # noqa: F401
+import numpy as np
+import pytest
 
 import awkward as ak
 
@@ -129,3 +130,22 @@ def test_behavior():
     another_array = ak.Array([1, 2, 3], behavior=behavior)
     assert not ak.almost_equal(array, another_array)
     assert not ak.almost_equal(other_array, another_array)
+
+
+def test_empty_outer_ragged():
+    array = ak.Array([[1]])[0:0]
+    assert not ak.almost_equal(array, [])
+    assert ak.almost_equal(array, array)
+
+
+def test_numpy_array():
+    left = np.arange(2 * 3 * 4, dtype=np.int64).reshape(4, 3, 2)
+    right = np.arange(2 * 3 * 4, dtype=np.int64).reshape(2, 3, 4)
+    assert not ak.almost_equal(left, right)
+    assert ak.almost_equal(left, left)
+
+
+def test_typetracer():
+    array = ak.Array([[[1, 2, 3]], [[5, 4]]], backend="typetracer")
+    with pytest.raises(TypeError):
+        ak.almost_equal(array, 2 * array)

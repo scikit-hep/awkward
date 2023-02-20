@@ -16,7 +16,7 @@ def argmin(
     mask_identity=True,
     flatten_records=unset,
     highlevel=True,
-    behavior=None
+    behavior=None,
 ):
     """
     Args:
@@ -89,7 +89,7 @@ def nanargmin(
     mask_identity=True,
     flatten_records=unset,
     highlevel=True,
-    behavior=None
+    behavior=None,
 ):
     """
     Args:

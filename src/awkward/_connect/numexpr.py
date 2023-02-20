@@ -99,7 +99,7 @@ def evaluate(
                         {},
                         order=order,
                         casting=casting,
-                        **kwargs
+                        **kwargs,
                     )
                 ),
             )

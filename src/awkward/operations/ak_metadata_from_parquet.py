@@ -20,7 +20,7 @@ def metadata_from_parquet(
     storage_options=None,
     row_groups=None,
     ignore_metadata=False,
-    scan_files=True
+    scan_files=True,
 ):
     """
     Args:

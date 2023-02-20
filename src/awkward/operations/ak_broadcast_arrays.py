@@ -15,7 +15,7 @@ def broadcast_arrays(
     left_broadcast=True,
     right_broadcast=True,
     highlevel=True,
-    behavior=None
+    behavior=None,
 ):
     """
     Args:

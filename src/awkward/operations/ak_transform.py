@@ -458,7 +458,7 @@ def _impl(
     behavior,
     highlevel,
 ):
-    behavior = ak._util.behavior_of(*((array,) + more_arrays), behavior=behavior)
+    behavior = ak._util.behavior_of(*((array, *more_arrays)), behavior=behavior)
 
     layout = ak.operations.ak_to_layout._impl(
         array, allow_record=False, allow_other=False, regulararray=True
@@ -547,7 +547,7 @@ def _impl(
                     )
                 )
 
-        inputs = [layout] + more_layouts
+        inputs = [layout, *more_layouts]
         isscalar = []
         out = ak._broadcasting.apply_step(
             backend,

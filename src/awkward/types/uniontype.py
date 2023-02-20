@@ -68,9 +68,9 @@ class UnionType(Type):
             for i, x in enumerate(self._contents):
                 if i + 1 < len(self._contents):
                     if compact:
-                        y = x._str(indent, compact) + [", "]
+                        y = [*x._str(indent, compact), ", "]
                     else:
-                        y = x._str(indent + "    ", compact) + [",\n", indent, "    "]
+                        y = [*x._str(indent + "    ", compact), ",\n", indent, "    "]
                 else:
                     if compact:
                         y = x._str(indent, compact)
@@ -82,14 +82,14 @@ class UnionType(Type):
             params = self._str_parameters()
 
             if params is None:
-                out = ["union[", pre] + flat_children + [post, "]"]
+                out = ["union[", pre, *flat_children] + [post, "]"]
             else:
-                out = ["union[", pre] + flat_children + [", ", post, params, "]"]
+                out = ["union[", pre, *flat_children] + [", ", post, params, "]"]
 
-        return [self._str_categorical_begin()] + out + [self._str_categorical_end()]
+        return [self._str_categorical_begin(), *out] + [self._str_categorical_end()]
 
     def __repr__(self):
-        args = [repr(self._contents)] + self._repr_args()
+        args = [repr(self._contents), *self._repr_args()]
         return "{}({})".format(type(self).__name__, ", ".join(args))
 
     def __eq__(self, other):

@@ -27,7 +27,7 @@ AxisMaybeNone = TypeVar("AxisMaybeNone", int, None)
 
 
 if sys.version_info < (3, 11):
-    from typing_extensions import (  # noqa: F401, F403
+    from typing_extensions import (
         Final,
         Literal,
         Protocol,
@@ -40,7 +40,7 @@ if sys.version_info < (3, 11):
         runtime_checkable,
     )
 else:
-    from typing import (  # noqa: F401, F403
+    from typing import (
         Final,
         Literal,
         Protocol,
@@ -52,3 +52,8 @@ else:
         final,
         runtime_checkable,
     )
+
+
+class SupportsBool(Protocol):
+    def __bool__(self) -> bool:
+        ...

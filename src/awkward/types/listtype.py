@@ -54,16 +54,16 @@ class ListType(Type):
         else:
             params = self._str_parameters()
             if params is None:
-                out = ["var * "] + self._content._str(indent, compact)
+                out = ["var * ", *self._content._str(indent, compact)]
             else:
-                out = (
-                    ["[var * "] + self._content._str(indent, compact) + [f", {params}]"]
-                )
+                out = ["[var * ", *self._content._str(indent, compact)] + [
+                    f", {params}]"
+                ]
 
-        return [self._str_categorical_begin()] + out + [self._str_categorical_end()]
+        return [self._str_categorical_begin(), *out] + [self._str_categorical_end()]
 
     def __repr__(self):
-        args = [repr(self._content)] + self._repr_args()
+        args = [repr(self._content), *self._repr_args()]
         return "{}({})".format(type(self).__name__, ", ".join(args))
 
     def __eq__(self, other):
