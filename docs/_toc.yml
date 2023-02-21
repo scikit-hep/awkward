@@ -139,6 +139,8 @@ subtrees:
                         title: "Supported features [todo]"
                       - file: user-guide/how-to-use-in-numba-arraybuilder
                         title: "Building array output [todo]"
+                      - file: user-guide/how-to-use-in-numba-cuda.md
+                        title: "Working with CUDA"
 
               - file: user-guide/how-to-specialize
                 title: "Specialized behavior"
