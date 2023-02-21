@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import cupy as cp  # noqa: F401
 import numpy as np
 import pytest
 
@@ -24,19 +23,19 @@ config.CUDA_LOW_OCCUPANCY_WARNINGS = False
 config.CUDA_WARN_ON_IMPLICIT_COPY = False
 
 
-@nb_cuda.jit(extensions=[ak.numba.array_view_arg_handler])
+@nb_cuda.jit(extensions=[ak.numba.cuda])
 def multiply(array, n, out):
     tid = nb_cuda.grid(1)
     out[tid] = array[tid] * n
 
 
-@nb_cuda.jit(extensions=[ak.numba.array_view_arg_handler])
+@nb_cuda.jit(extensions=[ak.numba.cuda])
 def pass_through(array, out):
     x = nb_cuda.grid(1)
     out[x] = array[x]
 
 
-@nb_cuda.jit(extensions=[ak.numba.array_view_arg_handler])
+@nb_cuda.jit(extensions=[ak.numba.cuda])
 def pass_through_2d(array, out):
     x, y = nb_cuda.grid(2)
     if x < len(array) and y < len(array[x]):
@@ -45,33 +44,33 @@ def pass_through_2d(array, out):
         out[x][y] = np.nan
 
 
-@nb_cuda.jit(extensions=[ak.numba.array_view_arg_handler])
+@nb_cuda.jit(extensions=[ak.numba.cuda])
 def pass_regular_through_2d(array, out):
     x, y = nb_cuda.grid(2)
     out[x][y] = array[x][y]
 
 
-@nb_cuda.jit(extensions=[ak.numba.array_view_arg_handler])
+@nb_cuda.jit(extensions=[ak.numba.cuda])
 def pass_record_through(array, out):
     tid = nb_cuda.grid(1)
     out[tid] = array.x[tid]
 
 
-@nb_cuda.jit(extensions=[ak.numba.array_view_arg_handler])
+@nb_cuda.jit(extensions=[ak.numba.cuda])
 def count_records(array, out):
     tid = nb_cuda.grid(1)
     record = array[tid]
     out[tid] = np.nan if record is None else tid
 
 
-@nb_cuda.jit(extensions=[ak.numba.array_view_arg_handler])
+@nb_cuda.jit(extensions=[ak.numba.cuda])
 def pass_two_records_through(array, out):
     tid = nb_cuda.grid(1)
     out[tid][0] = array.x[tid]
     out[tid][1] = array.y[tid]
 
 
-@nb_cuda.jit(extensions=[ak.numba.array_view_arg_handler])
+@nb_cuda.jit(extensions=[ak.numba.cuda])
 def pass_two_tuple_through(array, out):
     tid = nb_cuda.grid(1)
     out[tid][0] = array["0"][tid]
