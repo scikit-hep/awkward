@@ -42,10 +42,10 @@ def from_rdataframe(
         {
             "rdf": rdf,
             "columns": columns,
+            "keep_order": keep_order,
+            "offsets_type": offsets_type,
             "highlevel": highlevel,
             "behavior": behavior,
-            "offsets_type": offsets_type,
-            "keep_order": keep_order,
         },
     ):
         return _impl(rdf, columns, highlevel, behavior, offsets_type, keep_order)
