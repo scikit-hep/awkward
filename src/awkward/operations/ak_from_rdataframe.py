@@ -6,9 +6,9 @@ import awkward as ak
 def from_rdataframe(
     rdf,
     columns,
-    offsets_type="int64_t",
-    keep_order=False,
     *,
+    keep_order=False,
+    offsets_type="int64_t",
     highlevel=True,
     behavior=None,
 ):
