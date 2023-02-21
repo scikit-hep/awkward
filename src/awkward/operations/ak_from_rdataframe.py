@@ -18,13 +18,13 @@ def from_rdataframe(
             Awkward Array.
         columns (str or iterable of str): A column or multiple columns to be
             converted to Awkward Array.
+        offsets_type (str): A C++ type of the ListOffsetArray offsets.
+        keep_order (bool): If set to `True` the columns with Awkward type will
+            keep order after filtering.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
-        offsets_type (str): A C++ type of the ListOffsetArray offsets.
-        keep_order (bool): If set to `True` the columns with Awkward type will
-            keep order after filtering.
 
     Converts ROOT RDataFrame columns into an Awkward Array.
 
