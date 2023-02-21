@@ -6,10 +6,11 @@ import awkward as ak
 def from_rdataframe(
     rdf,
     columns,
-    highlevel=True,
-    behavior=None,
     offsets_type="int64_t",
     keep_order=False,
+    *,
+    highlevel=True,
+    behavior=None,
 ):
     """
     Args:
