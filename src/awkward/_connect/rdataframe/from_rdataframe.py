@@ -227,7 +227,12 @@ def from_rdataframe(data_frame, columns, highlevel, behavior, offsets_type, keep
             length = cpp_buffers_self.to_char_buffers[builder_type](builder)
 
             contents[col] = ak.from_buffers(
-                form, length, buffers, byteorder=ak._util.native_byteorder
+                form,
+                length,
+                buffers,
+                byteorder=ak._util.native_byteorder,
+                highlevel=highlevel,
+                behavior=behavior,
             )
 
             if col == "rdfentry_":
@@ -241,7 +246,8 @@ def from_rdataframe(data_frame, columns, highlevel, behavior, offsets_type, keep
         if len(contents["rdfentry_"]) < len(value):
             contents[key] = ak._util.wrap(
                 ak.contents.IndexedArray(contents["rdfentry_"], value),
-                highlevel=True,
+                highlevel=highlevel,
+                behavior=behavior,
             )
         else:
             contents[key] = value
@@ -257,7 +263,8 @@ def from_rdataframe(data_frame, columns, highlevel, behavior, offsets_type, keep
         sorted = ak.index.Index64(contents["rdfentry_"].data.argsort())
         out = ak._util.wrap(
             ak.contents.IndexedArray(sorted, out.layout),
-            highlevel=True,
+            highlevel=highlevel,
+            behavior=behavior,
         )
 
     if maybe_indexed:
