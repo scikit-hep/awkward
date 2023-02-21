@@ -60,7 +60,7 @@ done = compiler('\n#include "rdataframe/jagged_builders.h"\n')
 assert done is True
 
 
-def from_rdataframe(data_frame, columns, offsets_type="int64_t", keep_order=False):
+def from_rdataframe(data_frame, columns, highlevel, behavior, offsets_type, keep_order):
     def cpp_builder_type(depth, data_type):
         if depth == 1:
             return f"awkward::LayoutBuilder::Numpy<{data_type}>>"
@@ -246,7 +246,12 @@ def from_rdataframe(data_frame, columns, offsets_type="int64_t", keep_order=Fals
         else:
             contents[key] = value
 
-    out = ak.zip(contents, depth_limit=1)
+    out = ak.zip(
+        contents,
+        depth_limit=1,
+        highlevel=highlevel,
+        behavior=behavior,
+    )
 
     if keep_order:
         sorted = ak.index.Index64(contents["rdfentry_"].data.argsort())

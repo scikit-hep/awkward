@@ -3,13 +3,24 @@
 import awkward as ak
 
 
-def from_rdataframe(rdf, columns, offsets_type="int64_t", keep_order=False):
+def from_rdataframe(
+    rdf,
+    columns,
+    highlevel=True,
+    behavior=None,
+    offsets_type="int64_t",
+    keep_order=False,
+):
     """
     Args:
         rdf (`ROOT.RDataFrame`): ROOT RDataFrame to convert into an
             Awkward Array.
         columns (str or iterable of str): A column or multiple columns to be
             converted to Awkward Array.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.contents.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
         offsets_type (str): A C++ type of the ListOffsetArray offsets.
         keep_order (bool): If set to `True` the columns with Awkward type will
             keep order after filtering.
@@ -30,14 +41,16 @@ def from_rdataframe(rdf, columns, offsets_type="int64_t", keep_order=False):
         {
             "rdf": rdf,
             "columns": columns,
+            "highlevel": highlevel,
+            "behavior": behavior,
             "offsets_type": offsets_type,
             "keep_order": keep_order,
         },
     ):
-        return _impl(rdf, columns, offsets_type, keep_order)
+        return _impl(rdf, columns, highlevel, behavior, offsets_type, keep_order)
 
 
-def _impl(data_frame, columns, offsets_type, keep_order):
+def _impl(data_frame, columns, highlevel, behavior, offsets_type, keep_order):
     import awkward._connect.rdataframe.from_rdataframe  # noqa: F401
 
     if isinstance(columns, str):
@@ -57,8 +70,10 @@ def _impl(data_frame, columns, offsets_type, keep_order):
     out = ak._connect.rdataframe.from_rdataframe.from_rdataframe(
         data_frame,
         columns,
-        offsets_type,
-        keep_order,
+        highlevel=highlevel,
+        behavior=behavior,
+        offsets_type=offsets_type,
+        keep_order=keep_order,
     )
 
     if project:
