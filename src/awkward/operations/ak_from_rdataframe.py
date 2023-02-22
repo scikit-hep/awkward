@@ -14,6 +14,7 @@ def from_rdataframe(
     offsets_type="int64",
     highlevel=True,
     behavior=None,
+    with_name=None,
 ):
     """
     Args:
@@ -29,6 +30,8 @@ def from_rdataframe(
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
+        with_name (None or str): Gives tuples and records a name that can be
+            used to override their behavior (see #ak.Array).
 
     Converts ROOT RDataFrame columns into an Awkward Array.
 
@@ -50,12 +53,13 @@ def from_rdataframe(
             "offsets_type": offsets_type,
             "highlevel": highlevel,
             "behavior": behavior,
+            "with_name": with_name,
         },
     ):
-        return _impl(rdf, columns, highlevel, behavior, offsets_type, keep_order)
+        return _impl(rdf, columns, highlevel, behavior, with_name, offsets_type, keep_order)
 
 
-def _impl(data_frame, columns, highlevel, behavior, offsets_type, keep_order):
+def _impl(data_frame, columns, highlevel, behavior, with_name, offsets_type, keep_order):
     import awkward._connect.rdataframe.from_rdataframe  # noqa: F401
 
     if isinstance(columns, str):
@@ -91,6 +95,7 @@ def _impl(data_frame, columns, highlevel, behavior, offsets_type, keep_order):
         columns,
         highlevel=highlevel,
         behavior=behavior,
+        with_name=with_name,
         offsets_type=offsets_type,
         keep_order=keep_order,
     )
