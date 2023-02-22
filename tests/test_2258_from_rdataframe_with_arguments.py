@@ -46,6 +46,7 @@ def test_to_from_data_frame_large():
     assert isinstance(ak_array_out, ak.contents.RecordArray)
     assert len(ak_array_in) == len(ak_array_out)
 
+
 def test_data_frame_integers():
     ak_array_in = ak.Array([1, 2, 3, 4, 5])
 
@@ -66,4 +67,10 @@ def test_data_frame_integers():
         with_name="Overload",
     )
     assert ak_array_in.to_list() == ak_array_out["x"].to_list()
-    assert (ak_array_out + ak_array_out).to_list() == [{"x": 2}, {"x": 4}, {"x": 6}, {'x': 8}, {"x": 10}]
+    assert (ak_array_out + ak_array_out).to_list() == [
+        {"x": 2},
+        {"x": 4},
+        {"x": 6},
+        {"x": 8},
+        {"x": 10},
+    ]

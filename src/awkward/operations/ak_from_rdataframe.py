@@ -56,10 +56,14 @@ def from_rdataframe(
             "with_name": with_name,
         },
     ):
-        return _impl(rdf, columns, highlevel, behavior, with_name, offsets_type, keep_order)
+        return _impl(
+            rdf, columns, highlevel, behavior, with_name, offsets_type, keep_order
+        )
 
 
-def _impl(data_frame, columns, highlevel, behavior, with_name, offsets_type, keep_order):
+def _impl(
+    data_frame, columns, highlevel, behavior, with_name, offsets_type, keep_order
+):
     import awkward._connect.rdataframe.from_rdataframe  # noqa: F401
 
     if isinstance(columns, str):

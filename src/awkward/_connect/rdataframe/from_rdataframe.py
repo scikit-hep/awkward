@@ -60,7 +60,9 @@ done = compiler('\n#include "rdataframe/jagged_builders.h"\n')
 assert done is True
 
 
-def from_rdataframe(data_frame, columns, highlevel, behavior, with_name, offsets_type, keep_order):
+def from_rdataframe(
+    data_frame, columns, highlevel, behavior, with_name, offsets_type, keep_order
+):
     def cpp_builder_type(depth, data_type):
         if depth == 1:
             return f"awkward::LayoutBuilder::Numpy<{data_type}>>"
