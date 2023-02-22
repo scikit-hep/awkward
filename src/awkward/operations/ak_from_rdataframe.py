@@ -12,9 +12,9 @@ def from_rdataframe(
     *,
     keep_order=False,
     offsets_type="int64",
+    with_name=None,
     highlevel=True,
     behavior=None,
-    with_name=None,
 ):
     """
     Args:
@@ -26,12 +26,12 @@ def from_rdataframe(
             keep order after filtering.
         offsets_type (str): A `NumpyType.primitive` type of the ListOffsetArray
             offsets: `"int32"`, `"uint32"` or `"int64"`.
+        with_name (None or str): Gives tuples and records a name that can be
+            used to override their behavior (see #ak.Array).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
-        with_name (None or str): Gives tuples and records a name that can be
-            used to override their behavior (see #ak.Array).
 
     Converts ROOT RDataFrame columns into an Awkward Array.
 
@@ -51,9 +51,9 @@ def from_rdataframe(
             "columns": columns,
             "keep_order": keep_order,
             "offsets_type": offsets_type,
+            "with_name": with_name,
             "highlevel": highlevel,
             "behavior": behavior,
-            "with_name": with_name,
         },
     ):
         return _impl(
