@@ -235,7 +235,6 @@ def from_rdataframe(
                 byteorder=ak._util.native_byteorder,
                 highlevel=highlevel,
                 behavior=behavior,
-                # FIXME: with_name=with_name,
             )
 
             if col == "rdfentry_":
@@ -251,7 +250,6 @@ def from_rdataframe(
                 ak.contents.IndexedArray(contents["rdfentry_"], value),
                 highlevel=highlevel,
                 behavior=behavior,
-                with_name=with_name,
             )
         else:
             contents[key] = value
@@ -270,7 +268,6 @@ def from_rdataframe(
             ak.contents.IndexedArray(sorted, out.layout),
             highlevel=highlevel,
             behavior=behavior,
-            with_name=with_name,
         )
 
     if maybe_indexed:
