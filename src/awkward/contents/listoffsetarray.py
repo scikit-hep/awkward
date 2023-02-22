@@ -2148,10 +2148,13 @@ class ListOffsetArray(Content):
     def to_packed(self) -> Self:
         next = self.to_ListOffsetArray64(True)
         content = next._content.to_packed()
+        packed_length = self._backend.index_nplike.index_as_shape_item(
+            next._offsets[-1]
+        )
         if (
             content.length is not unknown_length
-            and content.length
-            != self._backend.index_nplike.index_as_shape_item(next._offsets[-1])
+            and packed_length is not unknown_length
+            and content.length != packed_length
         ):
             content = content[: next._offsets[-1]]
         return ListOffsetArray(next._offsets, content, parameters=next._parameters)
