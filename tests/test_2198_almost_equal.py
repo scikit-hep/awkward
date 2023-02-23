@@ -147,5 +147,5 @@ def test_numpy_array():
 
 def test_typetracer():
     array = ak.Array([[[1, 2, 3]], [[5, 4]]], backend="typetracer")
-    with pytest.raises(TypeError):
+    with pytest.raises(NotImplementedError):
         ak.almost_equal(array, 2 * array)

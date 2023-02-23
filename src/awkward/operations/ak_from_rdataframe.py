@@ -1,18 +1,37 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._nplikes.numpylike import NumpyMetadata
+
+np = NumpyMetadata.instance()
 
 
-def from_rdataframe(rdf, columns, offsets_type="int64_t", keep_order=False):
+def from_rdataframe(
+    rdf,
+    columns,
+    *,
+    keep_order=False,
+    offsets_type="int64",
+    with_name=None,
+    highlevel=True,
+    behavior=None,
+):
     """
     Args:
         rdf (`ROOT.RDataFrame`): ROOT RDataFrame to convert into an
             Awkward Array.
         columns (str or iterable of str): A column or multiple columns to be
             converted to Awkward Array.
-        offsets_type (str): A C++ type of the ListOffsetArray offsets.
         keep_order (bool): If set to `True` the columns with Awkward type will
             keep order after filtering.
+        offsets_type (str): A `NumpyType.primitive` type of the ListOffsetArray
+            offsets: `"int32"`, `"uint32"` or `"int64"`.
+        with_name (None or str): Gives tuples and records a name that can be
+            used to override their behavior (see #ak.Array).
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.contents.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
     Converts ROOT RDataFrame columns into an Awkward Array.
 
@@ -30,14 +49,21 @@ def from_rdataframe(rdf, columns, offsets_type="int64_t", keep_order=False):
         {
             "rdf": rdf,
             "columns": columns,
-            "offsets_type": offsets_type,
             "keep_order": keep_order,
+            "offsets_type": offsets_type,
+            "with_name": with_name,
+            "highlevel": highlevel,
+            "behavior": behavior,
         },
     ):
-        return _impl(rdf, columns, offsets_type, keep_order)
+        return _impl(
+            rdf, columns, highlevel, behavior, with_name, offsets_type, keep_order
+        )
 
 
-def _impl(data_frame, columns, offsets_type, keep_order):
+def _impl(
+    data_frame, columns, highlevel, behavior, with_name, offsets_type, keep_order
+):
     import awkward._connect.rdataframe.from_rdataframe  # noqa: F401
 
     if isinstance(columns, str):
@@ -54,11 +80,28 @@ def _impl(data_frame, columns, offsets_type, keep_order):
             )
         )
 
+    if not isinstance(offsets_type, str) or offsets_type not in (
+        "int32",
+        "uint32",
+        "int64",
+    ):
+        raise ak._errors.wrap_error(
+            TypeError(
+                "'offsets_type' must be a string in (int32, uint32, int64), "
+                "not {}".format(repr(offsets_type))
+            )
+        )
+    else:
+        offsets_type = f"{offsets_type}_t"
+
     out = ak._connect.rdataframe.from_rdataframe.from_rdataframe(
         data_frame,
         columns,
-        offsets_type,
-        keep_order,
+        highlevel=highlevel,
+        behavior=behavior,
+        with_name=with_name,
+        offsets_type=offsets_type,
+        keep_order=keep_order,
     )
 
     if project:
