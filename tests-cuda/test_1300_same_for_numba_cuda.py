@@ -13,9 +13,7 @@ config = nb.config
 try:
     ak.numba.register_and_check()
 except ImportError:
-    pytest.skip(
-        reason="too old Numba version", allow_module_level=True
-    )
+    pytest.skip(reason="too old Numba version", allow_module_level=True)
 
 config.CUDA_LOW_OCCUPANCY_WARNINGS = False
 config.CUDA_WARN_ON_IMPLICIT_COPY = False
