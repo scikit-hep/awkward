@@ -220,8 +220,8 @@ class UnionForm(Form):
 
     @property
     def fields(self):
-        fieldslists = [cont.fields for cont in self._contents]
-        return list(set.intersection(*[set(x) for x in fieldslists]))
+        all_fields = [f for cont in self._contents for f in cont.fields]
+        return ak._util.unique_list(all_fields)
 
     @property
     def is_tuple(self):
