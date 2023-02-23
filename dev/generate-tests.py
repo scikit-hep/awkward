@@ -144,7 +144,7 @@ class Specification:
                     origtemp[key] = value
 
             temp = copy.deepcopy(origtemp)
-            funcPy = eval(self.name, globals(), locals())
+            funcPy = eval(self.name, globals(), locals())  # noqa: PGH001
 
             intests = OrderedDict()
             outtests = OrderedDict()

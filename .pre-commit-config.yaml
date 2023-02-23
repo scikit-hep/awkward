@@ -44,10 +44,10 @@ repos:
   - id: flake8
 
 - repo: https://github.com/charliermarsh/ruff-pre-commit
-  rev: v0.0.249
+  rev: v0.0.252
   hooks:
   - id: ruff
-    args: ["--fix"]
+    args: ["--fix", "--show-fixes"]
 
 - repo: https://github.com/codespell-project/codespell
   rev: v2.2.2
