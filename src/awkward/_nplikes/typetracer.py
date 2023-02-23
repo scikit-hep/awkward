@@ -1187,7 +1187,7 @@ class TypeTracer(NumpyLike):
         neginf: int | float | None = None,
     ) -> TypeTracerArray:
         try_touch_data(x)
-        raise ak._errors.wrap_error(NotImplementedError)
+        return TypeTracerArray._new(x.dtype, shape=x.shape)
 
     def isclose(
         self,
