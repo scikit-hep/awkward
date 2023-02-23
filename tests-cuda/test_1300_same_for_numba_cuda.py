@@ -5,19 +5,17 @@ import pytest
 
 import awkward as ak
 
+nb = pytest.importorskip("numba")
+nb_cuda = pytest.importorskip("numba.cuda")
+pytest.importorskip("numba.config")
+config = nb.config
+
 try:
-    import numba as nb
-    import numba.cuda as nb_cuda
-    from numba import config
-
     ak.numba.register_and_check()
-
 except ImportError:
-    nb = nb_cuda = None
-
-numbatest = pytest.mark.skipif(
-    nb is None or nb_cuda is None, reason="requires the numba and numba.cuda packages"
-)
+    pytest.skip(
+        reason="too old Numba version", allow_module_level=True
+    )
 
 config.CUDA_LOW_OCCUPANCY_WARNINGS = False
 config.CUDA_WARN_ON_IMPLICIT_COPY = False
@@ -26,7 +24,6 @@ threadsperblock = 32
 blockspergrid = 128
 
 
-@numbatest
 def test_NumpyArray():
     v2a = ak.contents.numpyarray.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3]),
@@ -44,7 +41,6 @@ def test_NumpyArray():
     assert out.tolist() == [4.0, 1.1, 3.3]
 
 
-@numbatest
 def test_EmptyArray():
     v2a = ak.contents.emptyarray.EmptyArray()
 
@@ -57,7 +53,6 @@ def test_EmptyArray():
     assert out[0] == 0
 
 
-@numbatest
 def test_NumpyArray_shape():
     v2a = ak.contents.numpyarray.NumpyArray(
         np.arange(2 * 3 * 5, dtype=np.int64).reshape(2, 3, 5)
@@ -80,7 +75,6 @@ def test_NumpyArray_shape():
     assert out.tolist() == [2.0, 3.0, 5.0, 0.0, 1.0, 5.0, 6.0, 15.0, 21.0]
 
 
-@numbatest
 def test_RegularArray_NumpyArray():
     v2a = ak.contents.regulararray.RegularArray(
         ak.contents.numpyarray.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])),
@@ -117,7 +111,6 @@ def test_RegularArray_NumpyArray():
     assert out.tolist() == [10.0, 0.0, 0.0]
 
 
-@numbatest
 def test_ListArray_NumpyArray():
     v2a = ak.contents.listarray.ListArray(
         ak.index.Index(np.array([4, 100, 1], np.int64)),
@@ -144,7 +137,6 @@ def test_ListArray_NumpyArray():
     assert out.tolist() == [3.0, 3.0, 1.1, 2.2, 3.3, 0.0, 2.0, 4.4, 5.5]
 
 
-@numbatest
 def test_ListOffsetArray_NumpyArray():
     v2a = ak.contents.listoffsetarray.ListOffsetArray(
         ak.index.Index(np.array([1, 4, 4, 6, 7], np.int64)),
@@ -172,7 +164,6 @@ def test_ListOffsetArray_NumpyArray():
     assert out.tolist() == [4.0, 3.0, 1.1, 2.2, 3.3, 0.0, 2.0, 4.4, 5.5, 1.0, 7.7]
 
 
-@numbatest
 def test_RecordArray_NumpyArray():
     v2a = ak.contents.recordarray.RecordArray(
         [
@@ -242,7 +233,6 @@ def test_RecordArray_NumpyArray():
     assert out.tolist() == [10.0]
 
 
-@numbatest
 def test_IndexedArray_NumpyArray():
     v2a = ak.contents.indexedarray.IndexedArray(
         ak.index.Index(np.array([2, 2, 0, 1, 4, 5, 4], np.int64)),
@@ -265,7 +255,6 @@ def test_IndexedArray_NumpyArray():
     assert out.tolist() == [7.0, 2.2, 2.2, 0.0, 1.1, 4.4, 5.5, 4.4]
 
 
-@numbatest
 def test_IndexedOptionArray_NumpyArray():
     v2a = ak.contents.indexedoptionarray.IndexedOptionArray(
         ak.index.Index(np.array([2, 2, -1, 1, -1, 5, 4], np.int64)),
@@ -288,7 +277,6 @@ def test_IndexedOptionArray_NumpyArray():
     assert out.tolist() == [7.0, 2.2, 2.2, 999.0, 1.1, 999.0, 5.5, 4.4]
 
 
-@numbatest
 def test_ByteMaskedArray_NumpyArray():
     v2a = ak.contents.bytemaskedarray.ByteMaskedArray(
         ak.index.Index(np.array([1, 0, 1, 0, 1], np.int8)),
@@ -329,7 +317,6 @@ def test_ByteMaskedArray_NumpyArray():
     assert out.tolist() == [5.0, 1.1, 999.0, 3.3, 999.0, 5.5]
 
 
-@numbatest
 def test_BitMaskedArray_NumpyArray():
     v2a = ak.contents.bitmaskedarray.BitMaskedArray(
         ak.index.Index(
@@ -614,7 +601,6 @@ def test_BitMaskedArray_NumpyArray():
     ]
 
 
-@numbatest
 def test_UnmaskedArray_NumpyArray():
     v2a = ak.contents.unmaskedarray.UnmaskedArray(
         ak.contents.numpyarray.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3]))
@@ -631,7 +617,6 @@ def test_UnmaskedArray_NumpyArray():
     assert out.tolist() == [4.0, 1.1, 3.3]
 
 
-@numbatest
 def test_nested_NumpyArray():
     v2a = ak.contents.ListOffsetArray(
         ak.index.Index64(np.array([0, 1, 5], dtype=np.int64)),
@@ -653,7 +638,6 @@ def test_nested_NumpyArray():
     assert out.tolist() == [4.0, 1.1, 3.3]
 
 
-@numbatest
 def test_nested_NumpyArray_shape():
     data = np.full((3, 3, 5), 999, dtype=np.int64)
     data[1:3] = np.arange(2 * 3 * 5, dtype=np.int64).reshape(2, 3, 5)
@@ -681,7 +665,6 @@ def test_nested_NumpyArray_shape():
     assert out.tolist() == [2.0, 3.0, 5.0, 0.0, 1.0, 5.0, 6.0, 15.0, 21.0]
 
 
-@numbatest
 def test_nested_RegularArray_NumpyArray():
     v2a = ak.contents.ListOffsetArray(
         ak.index.Index64(np.array([0, 1, 3], dtype=np.int64)),
@@ -728,7 +711,6 @@ def test_nested_RegularArray_NumpyArray():
     assert out.tolist() == [10.0, 0.0, 0.0]
 
 
-@numbatest
 def test_nested_ListArray_NumpyArray():
     v2a = ak.contents.ListOffsetArray(
         ak.index.Index64(np.array([0, 1, 4], dtype=np.int64)),
@@ -759,7 +741,6 @@ def test_nested_ListArray_NumpyArray():
     assert out.tolist() == [3.0, 3.0, 1.1, 2.2, 3.3, 0.0, 2.0, 4.4, 5.5]
 
 
-@numbatest
 def test_nested_ListOffsetArray_NumpyArray():
     v2a = ak.contents.ListOffsetArray(
         ak.index.Index64(np.array([0, 1, 5], dtype=np.int64)),
@@ -791,7 +772,6 @@ def test_nested_ListOffsetArray_NumpyArray():
     assert out.tolist() == [4.0, 3.0, 1.1, 2.2, 3.3, 0.0, 2.0, 4.4, 5.5, 1.0, 7.7]
 
 
-@numbatest
 def test_nested_RecordArray_NumpyArray():
     v2a = ak.contents.ListOffsetArray(
         ak.index.Index64(np.array([0, 1, 6], dtype=np.int64)),
@@ -885,7 +865,6 @@ def test_nested_RecordArray_NumpyArray():
     assert out.tolist() == [10.0]
 
 
-@numbatest
 def test_nested_IndexedArray_NumpyArray():
     v2a = ak.contents.ListOffsetArray(
         ak.index.Index64(np.array([0, 1, 8], dtype=np.int64)),
@@ -912,7 +891,6 @@ def test_nested_IndexedArray_NumpyArray():
     assert out.tolist() == [7.0, 2.2, 2.2, 0.0, 1.1, 4.4, 5.5, 4.4]
 
 
-@numbatest
 def test_nested_IndexedOptionArray_NumpyArray():
     v2a = ak.contents.ListOffsetArray(
         ak.index.Index64(np.array([0, 1, 8], dtype=np.int64)),
@@ -939,7 +917,6 @@ def test_nested_IndexedOptionArray_NumpyArray():
     assert out.tolist() == [7.0, 2.2, 2.2, 999.0, 1.1, 999.0, 5.5, 4.4]
 
 
-@numbatest
 def test_nested_ByteMaskedArray_NumpyArray():
     v2a = ak.contents.ListOffsetArray(
         ak.index.Index64(np.array([0, 1, 6], dtype=np.int64)),
@@ -992,7 +969,6 @@ def test_nested_ByteMaskedArray_NumpyArray():
     assert out.tolist() == [5.0, 1.1, 999.0, 3.3, 999.0, 5.5]
 
 
-@numbatest
 def test_nested_BitMaskedArray_NumpyArray():
     v2a = ak.contents.ListOffsetArray(
         ak.index.Index64(np.array([0, 1, 14], dtype=np.int64)),
@@ -1361,7 +1337,6 @@ def test_nested_BitMaskedArray_NumpyArray():
     ]
 
 
-@numbatest
 def test_nested_UnmaskedArray_NumpyArray():
     v2a = ak.contents.ListOffsetArray(
         ak.index.Index64(np.array([0, 1, 5], dtype=np.int64)),
