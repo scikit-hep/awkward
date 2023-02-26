@@ -154,7 +154,7 @@ nb_ipywidgets_js = {
 nb_execution_show_tb = True
 
 if not run_cuda_notebooks:
-    nb_excution_excludepatterns = [
+    nb_execution_excludepatterns = [
         # We have no CUDA executors, so disable this
         "user-guide/how-to-use-in-numba-cuda.ipynb"
     ]
