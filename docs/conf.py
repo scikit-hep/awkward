@@ -32,6 +32,7 @@ version_match = os.environ.get("DOCS_VERSION", version)
 canonical_version = os.environ.get("DOCS_CANONICAL_VERSION")
 report_analytics = os.environ.get("DOCS_REPORT_ANALYTICS", False)
 show_version_switcher = os.environ.get("DOCS_SHOW_VERSION", False)
+run_cuda_notebooks = os.environ.get("DOCS_RUN_CUDA", False)
 
 # -- General configuration ---------------------------------------------------
 
@@ -151,6 +152,12 @@ nb_ipywidgets_js = {
     },
 }
 nb_execution_show_tb = True
+
+if run_cuda_notebooks:
+    nb_excution_excludepatterns = [
+        # We have no CUDA executors, so disable this
+        "user-guide/how-to-use-in-numba-cuda.ipynb"
+    ]
 
 # Additional stuff
 master_doc = "index"
