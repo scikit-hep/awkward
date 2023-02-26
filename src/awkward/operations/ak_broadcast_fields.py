@@ -1,9 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
-from awkward._nplikes.numpylike import NumpyMetadata
-
-np = NumpyMetadata.instance()
 
 
 def broadcast_fields(
@@ -35,70 +32,98 @@ def broadcast_fields(
 
 
 def _impl(arrays, highlevel, behavior):
-    def descend_to_record(layout):
-        if layout.is_list:
-            return layout.copy(content=descend_to_record(layout.content))
-        elif layout.is_record:
-            return layout
-        elif layout.is_option:
-            return layout.copy(content=descend_to_record(layout.content))
-        elif layout.is_indexed:
-            return layout.copy(content=descend_to_record(layout.content))
+    layouts = [ak.to_layout(x) for x in arrays]
+    behavior = ak._util.behavior_of(*arrays, behavior=behavior)
+
+    def identity(content):
+        return content
+
+    def descend_to_record_or_identity(layout, pullback=identity):
+        assert layout is not None
+        if layout.is_record or layout.is_identity_like:
+            return pullback, layout
+        elif layout.is_option or layout.is_indexed or layout.is_list:
+
+            def next_pull(content):
+                return pullback(layout.copy(content=content))
+
+            return descend_to_record_or_identity(layout.content, next_pull)
         elif layout.is_leaf:
-            return layout
+            return pullback, layout
         elif layout.is_union:
-            raise ak._errors.wrap_error(TypeError("encountered union"))
+            raise ak._errors.wrap_error(TypeError("unions are not supported"))
         else:
             raise ak._errors.wrap_error(AssertionError("unexpected content type"))
 
     def recurse(inputs):
-        records = [descend_to_record(x) for x in inputs]
-
-        if not all(layout.is_record for layout in records):
-            return records
-
-        fields = ak._util.unique_list([f for layout in records for f in layout.fields])
-
-        # For each field, build a union over the zero-length arrays of all layouts
-        field_unions = []
-        for field in fields:
-            field_contents = []
-            for layout in records:
-                field_content = layout.maybe_content(field)
-                field_contents.append(
-                    field_content.form.length_zero_array(
-                        backend=field_content.backend, highlevel=False
+        # Descend to records, identities, or leaves
+        pullbacks, next_inputs = zip(
+            *[descend_to_record_or_identity(x) for x in inputs]
+        )
+        # We can only work with all non-record, or all record/identity
+        if any(c.is_record for c in next_inputs):
+            if not all(c.is_record or c.is_identity_like for c in next_inputs):
+                raise ak._errors.wrap_error(
+                    AssertionError(
+                        "if any inputs are records, all inputs must be records or identities"
                     )
                 )
-            field_unions.append(ak._do.merge_as_union(field_contents))
+        # With no records, we can exit here
+        else:
+            return [pull(layout) for pull, layout in zip(pullbacks, next_inputs)]
 
-        # For each layout, build a record built from unions. Each union is formed over
-        # the full-length field layout and the zero-length field union
-        next_layouts = []
-        for layout in records:
-            if layout.fields == fields:
-                next_layouts.append(layout)
-            else:
-                index_nplike = layout.backend.index_nplike
-                tags = ak.index.Index8(index_nplike.zeros(layout.length, dtype=np.int8))
-                index = ak.index.Index64(
-                    index_nplike.arange(layout.length, dtype=np.int64)
-                )
-                next_layout = layout.copy(
-                    fields=fields,
-                    contents=[
-                        ak.contents.UnionArray.simplified(
-                            tags=tags,
-                            index=index,
-                            contents=[layout.maybe_content(field), field_union],
-                        )
-                        for field, field_union in zip(fields, field_unions)
-                    ],
-                )
-                next_layouts.append(next_layout)
-        return next_layouts
+        # Broadcast the fields of only the records
+        records = [r for r in next_inputs if r.is_record]
+        all_fields = ak._util.unique_list(
+            [f for layout in records for f in layout.fields]
+        )
 
-    layouts = [ak.to_layout(x) for x in arrays]
+        # Build a list of layouts for each field, i.e. [{x: aaaa, y: aaaa}, {x: bbbb, y: bbbb}] becomes
+        # [[aaaa, bbbb], [aaaa, bbbb]], where fields = [x, y]
+        # These layouts will be "broadcast" against each other, hence the per-field ordering
+        layouts_by_field = []
+        for field in all_fields:
+            layouts_to_recurse = []
+            layouts_for_field = []
+            for layout in records:
+                if layout.has_field(field):
+                    layouts_for_field.append(None)
+                    layouts_to_recurse.append(layout.content(field))
+                else:
+                    layouts_for_field.append(layout.maybe_content(field))
+
+            # We only want to recurse into non-missing fields, so we build this list separately as a generator
+            recursed_field_layouts = iter(recurse(layouts_to_recurse))
+            # Now we build the final list of layouts for this field, choosing between the recursion result and the
+            # original layout according to whether the layout was recursed into
+            layouts_by_field.append(
+                [
+                    next(recursed_field_layouts) if layout is None else layout
+                    for layout in layouts_for_field
+                ]
+            )
+
+        # Now we transpose the list-of-lists to group layouts by original record, instead of by the field
+        layouts_by_record = list(zip(*layouts_by_field))
+        # Rebuild the original records with the new fields
+        _nr = [
+            record.copy(
+                fields=all_fields,
+                contents=contents,
+            )
+            for record, contents in zip(records, layouts_by_record)
+        ]
+        next_records = iter(_nr)
+
+        # Merge the records and identities
+        inner_layouts = [
+            (layout if layout.is_identity_like else next(next_records))
+            for layout in next_inputs
+        ]
+
+        # Rebuild the outermost layouts using pull-back functions
+        return [pull(layout) for pull, layout in zip(pullbacks, inner_layouts)]
+
     return [
         ak._util.wrap(x, highlevel=highlevel, behavior=behavior)
         for x in recurse(layouts)
