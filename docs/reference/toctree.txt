@@ -228,6 +228,7 @@
     generated/ak.jax.assert_registered
     generated/ak.jax.import_jax
     generated/ak.jax.register_and_check
+    generated/ak.jax.register_behavior_class
 
 .. toctree::
     :caption: Array layout transformations
@@ -269,6 +270,7 @@
     generated/ak.types.from_datashape
     generated/ak.types.Type
     generated/ak.types.ArrayType
+    generated/ak.types.ScalarType
     generated/ak.types.ListType
     generated/ak.types.NumpyType
     generated/ak.types.OptionType
