@@ -18,7 +18,31 @@ def broadcast_fields(
 
     Return a list of arrays whose types contain the same number of fields. Unlike
     #ak.broadcast_arrays, this function does not require record types to occur at the
-    same depths. Where fields are missing from a record ...
+    same depths. Where fields are missing from one record, they are inserted at the same
+    position with an `option[unknown]` type. This type is easily erased by ufunc and
+    concatenation operations.
+
+        >>> x, y = ak.broadcast_fields(
+        ...     [{"x": {"y": 1, "z": 2, "w": [1]}}],
+        ...     [{"x": [{"y": 1}]}],
+        ... )
+        >>> x.type.show()
+        1 * {
+            x: {
+                y: int64,
+                z: int64,
+                w: var * int64
+            }
+        }
+        >>> y.type.show()
+        1 * {
+            x: var * {
+                y: int64,
+                z: ?unknown,
+                w: ?unknown
+            }
+        }
+
     """
     with ak._errors.OperationErrorContext(
         "ak.broadcast_fields",
