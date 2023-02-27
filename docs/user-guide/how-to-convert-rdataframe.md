@@ -58,7 +58,7 @@ The dictionary key defines a column name in RDataFrame.
 df = ak.to_rdataframe({"x": array_x, "y": array_y, "z": array_z})
 ```
 
-The {func} `ak.to_rdataframe` function presents a generated on demand Awkward Array view as an `RDataFrame` source. There is a small overhead of generating Awkward RDataSource C++ code. This operation does not execute the `RDataFrame` event loop. The array data are not copied.
+The {func}`ak.to_rdataframe` function presents a generated on demand Awkward Array view as an `RDataFrame` source. There is a small overhead of generating Awkward RDataSource C++ code. This operation does not execute the `RDataFrame` event loop. The array data are not copied.
 
 The column readers are generated based on the run-time type of the views. Here is a description of the `RDataFrame` columns:
 
@@ -74,7 +74,7 @@ Awkward Arrays are dynamically typed, so in a C++ context, the type name is hash
 From RDataFrame to Awkward
 --------------------------
 
-The function for `RDataFrame`  → Awkward conversion is {func}`ak.from_rdataframe`. The argument to this function requires a tuple of strings that are the `RDataFrame` column names. This function always returns
+The function for `RDataFrame`  → Awkward conversion is {func}`ak.from_rdataframe`. The argument to this function requires a tuple of strings that are the `RDataFrame` column names. By default this function returns
 
    * {class}`ak.Array`
 
@@ -88,6 +88,29 @@ array = ak.from_rdataframe(
         "y",
         "z",
     ),
+)
+array
+```
+
+When `RDataFrame` runs multi-threaded event loops, the entry processing order is not guaranteed:
+
+```{code-cell} ipython3
+ROOT.ROOT.EnableImplicitMT()
+```
+
+If the `keep_order` parameter set to `True`, the columns will keep order after filtering:
+
+```{code-cell} ipython3
+df = df.Filter("y % 2 == 0")
+
+array = ak.from_rdataframe(
+    df,
+    columns=(
+        "x",
+        "y",
+        "z",
+    ),
+    keep_order=True,
 )
 array
 ```
