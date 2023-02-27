@@ -79,8 +79,8 @@ jobs:
 
       - name: Run dask-awkward tests
         env:
-          - DASK_AWKWARD__RAISE_FAILED_META: 1
-          - DASK_AWKWARD__OPTIMIZATION__ON_FAIL: raise
+          DASK_AWKWARD__RAISE_FAILED_META: 1
+          DASK_AWKWARD__OPTIMIZATION__ON_FAIL: raise
         run: python -m pytest -vv -rs tests
         working-directory: dask-awkward
 
