@@ -1,5 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+from collections import Counter
 from collections.abc import Iterable
 
 import awkward as ak
@@ -220,8 +221,8 @@ class UnionForm(Form):
 
     @property
     def fields(self):
-        all_fields = [f for cont in self._contents for f in cont.fields]
-        return ak._util.unique_list(all_fields)
+        field_counts = Counter([f for c in self._contents for f in c.fields])
+        return [f for f, n in field_counts.items() if n == len(self._contents)]
 
     @property
     def is_tuple(self):
