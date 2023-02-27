@@ -19,7 +19,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: 'test-${{ github.head_ref || github.run_id }}'
+  group: 'downstream-test-${{ github.head_ref || github.run_id }}'
   cancel-in-progress: true
 
 env:
