@@ -83,7 +83,6 @@ jobs:
           - DASK_AWKWARD__OPTIMIZATION__ON_FAIL: raise
         run: python -m pytest -vv -rs tests
         working-directory: dask-awkward
-        continue-on-error: true
 
       - name: Clone coffea
         uses: actions/checkout@v3
