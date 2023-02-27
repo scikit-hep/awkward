@@ -215,7 +215,7 @@ jobs:
         echo "DOCS_VERSION=main" >> $GITHUB_ENV
 
     - name: Generate Python documentation
-      run: sphinx-build -M html . _build/
+      run: sphinx-build -M html . _build/ -T
       working-directory: docs
 
     - name: Upload docs artefact
