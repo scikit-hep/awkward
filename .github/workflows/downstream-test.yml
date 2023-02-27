@@ -41,10 +41,10 @@ jobs:
         with:
           submodules: true
 
-      - name: 'Python ${{ PYTHON_VERSION }}'
+      - name: 'Python ${{ env.PYTHON_VERSION }}'
         uses: actions/setup-python@v4
         with:
-          python-version: '${{ PYTHON_VERSION }}'
+          python-version: '${{ env.PYTHON_VERSION }}'
 
       - name: Generate build files
         run: pipx run nox -s prepare -- --headers --signatures --tests
