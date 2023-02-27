@@ -79,6 +79,9 @@ def _impl(arrays, highlevel, behavior):
         else:
             raise ak._errors.wrap_error(AssertionError("unexpected content type"))
 
+    # Like broadcast_and_apply, we want to walk into each layout, correct the structure, and then rebuilt the arrays
+    # We do this using "pull back" functions that accept a child content, and return the top-level layout. Unlike
+    # layout.copy, the pull-back functions can be arbitrarily deep: the closures maintain the structure of the array
     def recurse(inputs):
         # Descend to records, identities, or leaves
         pullbacks, next_inputs = zip(
@@ -118,8 +121,12 @@ def _impl(arrays, highlevel, behavior):
 
             # We only want to recurse into non-missing fields, so we build this list separately as a generator
             recursed_field_layouts = iter(recurse(layouts_to_recurse))
+
             # Now we build the final list of layouts for this field, choosing between the recursion result and the
             # original layout according to whether the layout was recursed into
+            # The pattern here is that `layouts_for_field` maintains positional correspondence with the `records`,
+            # but uses `None` as a token for "recursed". In this case, we take the layout from `recursed_field_layouts`
+            # using the knowledge that `len(layouts_to_recurse)` corresponds to the number of `None`s
             layouts_by_field.append(
                 [
                     next(recursed_field_layouts) if layout is None else layout
@@ -130,14 +137,15 @@ def _impl(arrays, highlevel, behavior):
         # Now we transpose the list-of-lists to group layouts by original record, instead of by the field
         layouts_by_record = list(zip(*layouts_by_field))
         # Rebuild the original records with the new fields
-        _nr = [
-            record.copy(
-                fields=all_fields,
-                contents=contents,
-            )
-            for record, contents in zip(records, layouts_by_record)
-        ]
-        next_records = iter(_nr)
+        next_records = iter(
+            [
+                record.copy(
+                    fields=all_fields,
+                    contents=contents,
+                )
+                for record, contents in zip(records, layouts_by_record)
+            ]
+        )
 
         # Merge the records and identities
         inner_layouts = [
