@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import cupy as cp  # noqa: F401
 import numpy as np
 import pytest
 
@@ -24,19 +23,19 @@ config.CUDA_LOW_OCCUPANCY_WARNINGS = False
 config.CUDA_WARN_ON_IMPLICIT_COPY = False
 
 
-@nb_cuda.jit(extensions=[ak.numba.array_view_arg_handler])
+@nb_cuda.jit(extensions=[ak.numba.cuda])
 def multiply(array, n, out):
     tid = nb_cuda.grid(1)
     out[tid] = array[tid] * n
 
 
-@nb_cuda.jit(extensions=[ak.numba.array_view_arg_handler])
+@nb_cuda.jit(extensions=[ak.numba.cuda])
 def pass_through(array, out):
     x = nb_cuda.grid(1)
-    out[x] = array[x]
+    out[x] = array[x] if array[x] is not None else np.nan
 
 
-@nb_cuda.jit(extensions=[ak.numba.array_view_arg_handler])
+@nb_cuda.jit(extensions=[ak.numba.cuda])
 def pass_through_2d(array, out):
     x, y = nb_cuda.grid(2)
     if x < len(array) and y < len(array[x]):
@@ -45,33 +44,33 @@ def pass_through_2d(array, out):
         out[x][y] = np.nan
 
 
-@nb_cuda.jit(extensions=[ak.numba.array_view_arg_handler])
+@nb_cuda.jit(extensions=[ak.numba.cuda])
 def pass_regular_through_2d(array, out):
     x, y = nb_cuda.grid(2)
     out[x][y] = array[x][y]
 
 
-@nb_cuda.jit(extensions=[ak.numba.array_view_arg_handler])
+@nb_cuda.jit(extensions=[ak.numba.cuda])
 def pass_record_through(array, out):
     tid = nb_cuda.grid(1)
     out[tid] = array.x[tid]
 
 
-@nb_cuda.jit(extensions=[ak.numba.array_view_arg_handler])
+@nb_cuda.jit(extensions=[ak.numba.cuda])
 def count_records(array, out):
     tid = nb_cuda.grid(1)
     record = array[tid]
     out[tid] = np.nan if record is None else tid
 
 
-@nb_cuda.jit(extensions=[ak.numba.array_view_arg_handler])
+@nb_cuda.jit(extensions=[ak.numba.cuda])
 def pass_two_records_through(array, out):
     tid = nb_cuda.grid(1)
     out[tid][0] = array.x[tid]
     out[tid][1] = array.y[tid]
 
 
-@nb_cuda.jit(extensions=[ak.numba.array_view_arg_handler])
+@nb_cuda.jit(extensions=[ak.numba.cuda])
 def pass_two_tuple_through(array, out):
     tid = nb_cuda.grid(1)
     out[tid][0] = array["0"][tid]
@@ -125,8 +124,7 @@ def test_ListOffsetArray():
     host_results = results.copy_to_host()
 
     assert (
-        str(ak.to_list(host_results))
-        == "[[0.0, 1.0, nan], [2.0, nan, nan], [3.0, 4.0, 5.0]]"
+        ak.drop_none(ak.nan_to_none(ak.Array(host_results))).tolist() == array.tolist()
     )
 
 
@@ -143,7 +141,7 @@ def test_RecordArray():
     nb_cuda.synchronize()
     host_results = results.copy_to_host()
 
-    assert ak.Array(host_results).tolist() == [0, 1, 2, 3, 4, 5]
+    assert ak.Array(host_results).tolist() == array.x.to_list()
 
 
 @numbatest
@@ -156,7 +154,7 @@ def test_EmptyArray():
     nb_cuda.synchronize()
     host_results = results.copy_to_host()
 
-    assert ak.Array(host_results).tolist() == []
+    assert ak.Array(host_results).tolist() == array.to_list()
 
 
 @numbatest
@@ -169,7 +167,7 @@ def test_NumpyArray():
     nb_cuda.synchronize()
     host_results = results.copy_to_host()
 
-    assert ak.Array(host_results).tolist() == [0, 1, 2, 3]
+    assert ak.Array(host_results).tolist() == array.to_list()
 
 
 @numbatest
@@ -188,7 +186,7 @@ def test_RegularArray_NumpyArray():
     nb_cuda.synchronize()
     host_results = results.copy_to_host()
 
-    assert ak.Array(host_results).tolist() == [[0.0, 1.1, 2.2], [3.3, 4.4, 5.5]]
+    assert ak.Array(host_results).tolist() == array.to_list()
 
 
 @numbatest
@@ -205,14 +203,10 @@ def test_RegularArray_EmptyArray():
     host_results = results.copy_to_host()
 
     assert (
-        str(ak.Array(host_results).tolist())
-        == "[[nan], [nan], [nan], [nan], [nan], [nan], [nan], [nan], [nan], [nan]]"
+        ak.drop_none(ak.nan_to_none(ak.Array(host_results))).tolist() == array.to_list()
     )
 
 
-@pytest.mark.skip(
-    "AssertionError: CuPyKernel not found: ('awkward_ListArray_broadcast_tooffsets', <class 'numpy.int64'>, <class 'numpy.int64'>, <class 'numpy.int64'>, <class 'numpy.int64'>)"
-)
 @numbatest
 def test_ListArray_NumpyArray():
     array = ak.Array(
@@ -223,7 +217,18 @@ def test_ListArray_NumpyArray():
         ),
         backend="cuda",
     )
-    assert array.to_list() == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
+    results = nb_cuda.to_device(np.empty(9, dtype=np.float64).reshape((3, 3)))
+
+    pass_through_2d[(3, 1), (1, 3)](array, results)
+
+    nb_cuda.synchronize()
+    host_results = results.copy_to_host()
+
+    assert ak.drop_none(ak.nan_to_none(ak.Array(host_results))).tolist() == [
+        [1.1, 2.2, 3.3],
+        [],
+        [4.4, 5.5],
+    ]
 
 
 @numbatest
@@ -235,8 +240,6 @@ def test_ListOffsetArray_NumpyArray():
         ),
         backend="cuda",
     )
-    assert array.to_list() == [[1.1, 2.2, 3.3], [], [4.4, 5.5], [7.7]]
-
     results = nb_cuda.to_device(np.empty(12, dtype=np.float64).reshape((4, 3)))
 
     pass_through_2d[(4, 1), (1, 3)](array, results)
@@ -245,8 +248,7 @@ def test_ListOffsetArray_NumpyArray():
     host_results = results.copy_to_host()
 
     assert (
-        str(ak.to_list(host_results))
-        == "[[1.1, 2.2, 3.3], [nan, nan, nan], [4.4, 5.5, nan], [7.7, nan, nan]]"
+        ak.drop_none(ak.nan_to_none(ak.Array(host_results))).tolist() == array.to_list()
     )
 
 
@@ -302,7 +304,7 @@ def test_RecordArray_NumpyArray():
     nb_cuda.synchronize()
     host_results = results.copy_to_host()
 
-    assert ak.to_list(host_results) == [
+    assert ak.Array(host_results).to_list() == [
         [0.0, 0.0],
         [1.0, 1.1],
         [2.0, 2.2],
@@ -346,7 +348,6 @@ def test_IndexedArray_NumpyArray():
         ),
         backend="cuda",
     )
-    assert array.to_list() == [3.3, 3.3, 1.1, 2.2, 5.5, 6.6, 5.5]
     results = nb_cuda.to_device(np.empty(7, dtype=np.float64))
 
     pass_through[1, 7](array, results)
@@ -354,12 +355,9 @@ def test_IndexedArray_NumpyArray():
     nb_cuda.synchronize()
     host_results = results.copy_to_host()
 
-    assert ak.Array(host_results).tolist() == [3.3, 3.3, 1.1, 2.2, 5.5, 6.6, 5.5]
+    assert ak.Array(host_results).tolist() == array.to_list()
 
 
-@pytest.mark.skip(
-    "AssertionError: CuPyKernel not found: ('awkward_IndexedArray_numnull', <class 'numpy.int64'>, <class 'numpy.int64'>)"
-)
 @numbatest
 def test_IndexedOptionArray_NumpyArray():
     array = ak.Array(
@@ -369,7 +367,22 @@ def test_IndexedOptionArray_NumpyArray():
         ),
         backend="cuda",
     )
-    assert array.to_list() == [3.3, 3.3, None, 2.2, None, 6.6, 5.5]
+    results = nb_cuda.to_device(np.empty(7, dtype=np.float64))
+
+    pass_through[1, 7](array, results)
+
+    nb_cuda.synchronize()
+    host_results = results.copy_to_host()
+
+    assert ak.nan_to_none(ak.Array(host_results)).tolist() == [
+        3.3,
+        3.3,
+        None,
+        2.2,
+        None,
+        6.6,
+        5.5,
+    ]
 
 
 @numbatest
@@ -382,7 +395,6 @@ def test_ByteMaskedArray_NumpyArray():
         ),
         backend="cuda",
     )
-    assert array.to_list() == [1.1, None, 3.3, None, 5.5]
     results = nb_cuda.to_device(np.empty(5, dtype=np.float64))
 
     pass_through[1, 5](array, results)
@@ -390,13 +402,7 @@ def test_ByteMaskedArray_NumpyArray():
     nb_cuda.synchronize()
     host_results = results.copy_to_host()
 
-    assert ak.Array(host_results).tolist() == [
-        1.1,
-        2.2,
-        3.3,
-        4.4,
-        5.5,
-    ]  # FIXME: [1.1, None, 3.3, None, 5.5]
+    assert ak.nan_to_none(ak.Array(host_results)).tolist() == array.to_list()
 
     array = ak.Array(
         ak.contents.ByteMaskedArray(
@@ -406,7 +412,6 @@ def test_ByteMaskedArray_NumpyArray():
         ),
         backend="cuda",
     )
-    assert array.to_list() == [1.1, None, 3.3, None, 5.5]
     results = nb_cuda.to_device(np.empty(5, dtype=np.float64))
 
     pass_through[1, 5](array, results)
@@ -414,10 +419,4 @@ def test_ByteMaskedArray_NumpyArray():
     nb_cuda.synchronize()
     host_results = results.copy_to_host()
 
-    assert ak.Array(host_results).tolist() == [
-        1.1,
-        2.2,
-        3.3,
-        4.4,
-        5.5,
-    ]  # FIXME: [1.1, None, 3.3, None, 5.5]
+    assert ak.nan_to_none(ak.Array(host_results)).tolist() == array.to_list()
