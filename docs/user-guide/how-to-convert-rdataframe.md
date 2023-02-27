@@ -58,7 +58,7 @@ The dictionary key defines a column name in RDataFrame.
 df = ak.to_rdataframe({"x": array_x, "y": array_y, "z": array_z})
 ```
 
-The {func}`ak.to_rdataframe` function presents a generated on demand Awkward Array view as an `RDataFrame` source. There is a small overhead of generating Awkward RDataSource C++ code. This operation does not execute the `RDataFrame` event loop. The array data are not copied.
+The {func}`ak.to_rdataframe` function presents a generated-on-demand Awkward Array view as an `RDataFrame` source. There is a small overhead of generating Awkward RDataSource C++ code. This operation does not execute the `RDataFrame` event loop. The array data are not copied.
 
 The column readers are generated based on the run-time type of the views. Here is a description of the `RDataFrame` columns:
 
