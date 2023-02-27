@@ -74,7 +74,7 @@ Awkward Arrays are dynamically typed, so in a C++ context, the type name is hash
 From RDataFrame to Awkward
 --------------------------
 
-The function for `RDataFrame`  → Awkward conversion is {func}`ak.from_rdataframe`. The argument to this function requires a tuple of strings that are the `RDataFrame` column names. By default this function returns
+The function for `RDataFrame`  → Awkward conversion is {func}`ak.from_rdataframe`. The argument to this function accepts a tuple of strings that are the `RDataFrame` column names. By default this function returns
 
    * {class}`ak.Array`
 
