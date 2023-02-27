@@ -98,6 +98,16 @@ When `RDataFrame` runs multi-threaded event loops, the entry processing order is
 ROOT.ROOT.EnableImplicitMT()
 ```
 
++++
+
+Let's recreate the dataframe, to reflect the new multi-threading mode
+
+```{code-cell} ipython3
+df = ak.to_rdataframe({"x": array_x, "y": array_y, "z": array_z})
+```
+
++++
+
 If the `keep_order` parameter set to `True`, the columns will keep order after filtering:
 
 ```{code-cell} ipython3
