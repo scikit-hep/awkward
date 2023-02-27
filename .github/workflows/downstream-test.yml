@@ -30,25 +30,21 @@ env:
 
 jobs:
   Linux:
-    strategy:
-      matrix:
-        python-version:
-          - '3.10'
-
     runs-on: ubuntu-20.04
 
     env:
       PIP_ONLY_BINARY: cmake
+      PYTHON_VERSION: "3.10"
 
     steps:
       - uses: actions/checkout@v3
         with:
           submodules: true
 
-      - name: 'Python ${{ matrix.python-version }}'
+      - name: 'Python ${{ PYTHON_VERSION }}'
         uses: actions/setup-python@v4
         with:
-          python-version: '${{ matrix.python-version }}'
+          python-version: '${{ PYTHON_VERSION }}'
 
       - name: Generate build files
         run: pipx run nox -s prepare -- --headers --signatures --tests
@@ -58,7 +54,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ./awkward-cpp/dist
-          key: ${{ github.job }}-${{ matrix.python-version }}-${{ hashFiles('awkward-cpp/**') }}
+          key: ${{ github.job }}-${{ hashFiles('awkward-cpp/**') }}
 
       - name: Build awkward-cpp wheel
         if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
