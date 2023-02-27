@@ -1,0 +1,97 @@
+name: Downstream Tests
+
+on:
+  pull_request:
+    paths-ignore:
+      - README.md
+      - CONTRIBUTING.md
+      - CITATION.cff
+      - LICENSE
+      - .readthedocs.yml
+      - docs-img/**
+      - docs/**
+      - awkward-cpp/docs/**
+      - studies/**
+
+  schedule:
+    - cron: 0 12 1 * *
+
+  workflow_dispatch:
+
+concurrency:
+  group: 'test-${{ github.head_ref || github.run_id }}'
+  cancel-in-progress: true
+
+env:
+  # Leverage reproducible builds by setting a constant SOURCE_DATE_EPOCH
+  # This will ensure that the hash of the awkward-cpp directory remains
+  # constant for unchanged files, meaning that it can be used for caching
+  SOURCE_DATE_EPOCH: "1668811211"
+
+jobs:
+  Linux:
+    strategy:
+      matrix:
+        python-version:
+          - '3.10'
+
+    runs-on: ubuntu-20.04
+
+    env:
+      PIP_ONLY_BINARY: cmake
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+
+      - name: 'Python ${{ matrix.python-version }}'
+        uses: actions/setup-python@v4
+        with:
+          python-version: '${{ matrix.python-version }}'
+
+      - name: Generate build files
+        run: pipx run nox -s prepare -- --headers --signatures --tests
+
+      - name: Cache awkward-cpp wheel
+        id: cache-awkward-cpp-wheel
+        uses: actions/cache@v3
+        with:
+          path: ./awkward-cpp/dist
+          key: ${{ github.job }}-${{ matrix.python-version }}-${{ hashFiles('awkward-cpp/**') }}
+
+      - name: Build awkward-cpp wheel
+        if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
+        run: |
+          python -m pip install build
+          python -m build -w ./awkward-cpp
+
+      - name: Install awkward-cpp
+        run: python -m pip install -v ./awkward-cpp/dist/*.whl
+
+      - name: Build & install awkward
+        run: python -m pip install -v .
+
+      - name: Clone dask-awkward
+        uses: actions/checkout@v3
+        with:
+          repository: dask-contrib/dask-awkward
+          path: dask-awkward
+
+      - name: Install dask-awkward
+        run: python -m pip install -v "./dask-awkward[test]"
+
+      - name: Run dask-awkward tests
+        run: python -m pytest -vv -rs dask-awkward/tests
+
+      - name: Clone coffea
+        uses: actions/checkout@v3
+        with:
+          repository: CoffeaTeam/coffea
+          path: coffea
+
+      - name: Install coffea
+        run: python -m pip install -v "./coffea[dev,dask]"
+
+      - name: Run coffea tests
+        run: python -m pytest -vv -rs coffea/tests
