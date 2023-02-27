@@ -91,5 +91,5 @@ jobs:
         run: python -m pip install -v "./coffea[dev,dask]"
 
       - name: Run coffea tests
-        run: python -m pytest -vv -rs tests/dask*
+        run: python -m pytest -vv -rs tests/test_dask*
         working-directory: coffea
