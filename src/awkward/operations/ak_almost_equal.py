@@ -121,10 +121,8 @@ def almost_equal(
             ) and visitor(left.project().to_packed(), right.project().to_packed())
         elif left.is_union:
             return (len(left.contents) == len(right.contents)) and all(
-                [
-                    visitor(left.project(i).to_packed(), right.project(i).to_packed())
-                    for i, _ in enumerate(left.contents)
-                ]
+                visitor(left.project(i).to_packed(), right.project(i).to_packed())
+                for i, _ in enumerate(left.contents)
             )
         elif left.is_record:
             return (
@@ -135,7 +133,7 @@ def almost_equal(
                 )
                 and (left.fields == right.fields)
                 and (left.is_tuple == right.is_tuple)
-                and all([visitor(x, y) for x, y in zip(left.contents, right.contents)])
+                and all(visitor(x, y) for x, y in zip(left.contents, right.contents))
             )
         elif left.is_unknown:
             return True

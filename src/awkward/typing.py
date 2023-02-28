@@ -1,4 +1,5 @@
 # pylint: disable=wildcard-import, unused-wildcard-import
+# ruff: noqa: PLE0604
 from __future__ import annotations
 
 import sys
@@ -23,8 +24,7 @@ __all__ = list(
 )
 
 
-AxisMaybeNone = TypeVar("AxisMaybeNone", int, None)
-
+AxisMaybeNone = TypeVar("AxisMaybeNone", int, None)  # noqa: F405
 
 if sys.version_info < (3, 11):
     from typing_extensions import (
