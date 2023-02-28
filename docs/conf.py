@@ -84,8 +84,8 @@ html_theme = "pydata_sphinx_theme"
 html_show_sourcelink = True
 html_theme_options = {
     "logo": {
-        "image_light": "image/logo-300px.png",
-        "image_dark": "image/logo-300px-white.png",
+        "image_light": "_static/image/logo-300px.png",
+        "image_dark": "_static/image/logo-300px-white.png",
     },
     "github_url": "https://github.com/scikit-hep/awkward",
     # Add light/dark mode and documentation version switcher:
