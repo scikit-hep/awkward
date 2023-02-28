@@ -1,4 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# ruff: noqa: E402 F401 F403 I001
 
 # Versioning
 from awkward._version import __version__
