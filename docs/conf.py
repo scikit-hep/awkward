@@ -90,7 +90,7 @@ html_theme_options = {
     "github_url": "https://github.com/scikit-hep/awkward",
     # Add light/dark mode and documentation version switcher:
     "navbar_end": ["theme-switcher", "navbar-icon-links"],
-    "footer_items": ["copyright", "sphinx-version", "funding"],
+    "footer_start": ["copyright", "sphinx-version", "funding"],
     "icon_links": [
         {
             "name": "PyPI",
