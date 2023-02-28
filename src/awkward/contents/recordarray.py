@@ -411,6 +411,17 @@ class RecordArray(Content):
         else:
             return out[: self._length]
 
+    def maybe_content(self, index_or_field) -> Content:
+        if self.has_field(index_or_field):
+            return self.content(index_or_field)
+        else:
+            return ak.contents.IndexedOptionArray(
+                ak.index.Index64(
+                    self._backend.index_nplike.full(self.length, -1, dtype=np.int64)
+                ),
+                ak.contents.EmptyArray(),
+            )
+
     def _getitem_nothing(self) -> Content:
         return self._getitem_range(0, 0)
 
@@ -1159,11 +1170,7 @@ class RecordArray(Content):
             self.fields == other.fields
             and len(self.contents) == len(other.contents)
             and all(
-                [
-                    self.contents[i].is_equal_to(
-                        other.contents[i], index_dtype, numpyarray
-                    )
-                    for i in range(len(self.contents))
-                ]
+                self.contents[i].is_equal_to(other.contents[i], index_dtype, numpyarray)
+                for i in range(len(self.contents))
             )
         )
