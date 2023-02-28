@@ -264,14 +264,6 @@ extend-exclude = [
     "docs-*",
     "src/awkward/_typeparser/generated_parser.py",
 ]
-extend-ignore = [
-    "E501",    # Line too long
-    "UP030",   # {0} -> {}
-    "PLR",     # Design related pylint codes
-    "PT011",   # Exception too broad
-    "NPY002",  # Replace legacy `np.random` call with `np.random.Generator`
-    "PLW2901", #  Outer for loop variable  overwritten by inner assignment target
-]
 select = [
     "E", "F", "W", # flake8
     "B", "B904",   # flake8-bugbear
@@ -289,6 +281,15 @@ select = [
     "EXE",         # flake8-executable
     "NPY",         # NumPy specific rules
     "TID251",      # flake8-tidy-imports
+]
+extend-ignore = [
+    "E501",    # Line too long
+    "UP030",   # {0} -> {}
+    "PLR",     # Design related pylint codes
+    "PT011",   # Exception too broad
+    "NPY002",  # Replace legacy `np.random` call with `np.random.Generator`
+    "PLW2901", # Outer for loop variable  overwritten by inner assignment target
+    "PLW0603", # Using the global statement to update is discouraged
 ]
 target-version = "py37"
 typing-modules = ["awkward.typing"]
