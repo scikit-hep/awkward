@@ -1170,11 +1170,7 @@ class RecordArray(Content):
             self.fields == other.fields
             and len(self.contents) == len(other.contents)
             and all(
-                [
-                    self.contents[i].is_equal_to(
-                        other.contents[i], index_dtype, numpyarray
-                    )
-                    for i in range(len(self.contents))
-                ]
+                self.contents[i].is_equal_to(other.contents[i], index_dtype, numpyarray)
+                for i in range(len(self.contents))
             )
         )
