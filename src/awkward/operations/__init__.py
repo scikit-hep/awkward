@@ -11,6 +11,7 @@ from awkward.operations.ak_argmin import argmin, nanargmin
 from awkward.operations.ak_argsort import argsort
 from awkward.operations.ak_backend import backend
 from awkward.operations.ak_broadcast_arrays import broadcast_arrays
+from awkward.operations.ak_broadcast_fields import broadcast_fields
 from awkward.operations.ak_cartesian import cartesian
 from awkward.operations.ak_categories import categories
 from awkward.operations.ak_combinations import combinations
