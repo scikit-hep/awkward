@@ -787,7 +787,17 @@ class TypeTracer(NumpyLike):
         try_touch_data(x)
         try_touch_data(values)
         try_touch_data(sorter)
-        raise ak._errors.wrap_error(NotImplementedError)
+        if (
+            not (
+                is_unknown_length(x.size)
+                or sorter is None
+                or is_unknown_length(sorter.size)
+            )
+            and x.size != sorter.size
+        ):
+            raise wrap_error(ValueError("x.size should equal sorter.size"))
+
+        return TypeTracerArray._new(x.dtype, (values.size,))
 
     ############################ manipulation
 
@@ -1177,7 +1187,7 @@ class TypeTracer(NumpyLike):
         neginf: int | float | None = None,
     ) -> TypeTracerArray:
         try_touch_data(x)
-        raise ak._errors.wrap_error(NotImplementedError)
+        return TypeTracerArray._new(x.dtype, shape=x.shape)
 
     def isclose(
         self,

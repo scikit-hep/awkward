@@ -7,7 +7,7 @@ import numbers
 import os
 import re
 import sys
-from collections.abc import Iterable, Mapping, Sequence, Sized
+from collections.abc import Collection, Iterable, Mapping, Sequence, Sized
 
 import packaging.version
 
@@ -16,6 +16,7 @@ from awkward._nplikes import nplike_of, ufuncs
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward.typing import TypeVar
 
 np = NumpyMetadata.instance()
 
@@ -808,3 +809,17 @@ except AttributeError:
             __pos__ = _unary_method(um.positive, "pos")
         __abs__ = _unary_method(um.absolute, "abs")
         __invert__ = _unary_method(um.invert, "invert")
+
+
+T = TypeVar("T")
+
+
+def unique_list(items: Collection[T]) -> list[T]:
+    seen = set()
+    result = []
+    for item in items:
+        if item in seen:
+            continue
+        seen.add(item)
+        result.append(item)
+    return result
