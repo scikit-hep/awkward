@@ -48,21 +48,7 @@ The following cpp-headers are needed to use Layout Builders to use the header-on
 3. LayoutBuilder.h
 4. utils.h
 
-It is recommended to download these headers from the [release artifacts on GitHub](https://github.com/scikit-hep/awkward/releases)
-
-Awkward Array can be installed from PyPI using pip:
-
-```shell
-pip install awkward
-```
-
-To get the `-I` compiler flags needed to pick up the LayoutBuilder from this installation:
-
-```shell
-python -m awkward.config --cflags
-```
-
-A user would need to pass these options to the compiler in order to use it.
+It is recommended to download these headers from the [repository on GitHub](https://github.com/scikit-hep/awkward/tree/main/header-only).
 
 Three phases of using Layout Builder
 ------------------------------------
