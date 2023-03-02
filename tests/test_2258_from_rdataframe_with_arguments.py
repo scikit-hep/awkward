@@ -9,6 +9,7 @@ import awkward._lookup
 
 ROOT = pytest.importorskip("ROOT")
 
+ROOT.ROOT.EnableImplicitMT(1)
 
 compiler = ROOT.gInterpreter.Declare
 
@@ -63,6 +64,7 @@ def test_data_frame_integers():
     ak_array_out = ak.from_rdataframe(
         data_frame,
         columns=("x",),
+        keep_order=True,
         behavior=behavior,
         with_name="Overload",
     )

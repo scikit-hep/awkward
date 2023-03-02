@@ -9,6 +9,7 @@ import awkward as ak
 
 ROOT = pytest.importorskip("ROOT")
 
+ROOT.ROOT.EnableImplicitMT(1)
 
 compiler = ROOT.gInterpreter.Declare
 
@@ -35,6 +36,8 @@ def test_data_frame_integers(tmp_path):
 
 
 def test_data_frame_vec_of_vec_of_real(tmp_path):
+    import warnings
+
     filename = os.path.join(tmp_path, "test-listarray.root")
 
     ak_array_in = ak.Array([[[1.1], [2.2]], [[3.3], [4.4, 5.5]]])
@@ -49,7 +52,11 @@ def test_data_frame_vec_of_vec_of_real(tmp_path):
     )
     assert ak_array_in.to_list() == ak_array_out["x"].to_list()
 
-    with pytest.raises(SystemError):
+    # With `ROOT.ROOT.EnableImplicitMT(1)` a SystemError becomes a Warning:
+    with warnings.catch_warnings(record=True):
+        # Warning in <TStreamerInfo::Build>: awkward::ListArray_jEomw7jWD1w:
+        # base class awkward::ArrayView has no streamer or dictionary
+        # it will not be saved
         data_frame.Snapshot("ListArray", filename, ("x",))
 
 
