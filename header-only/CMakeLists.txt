@@ -12,17 +12,16 @@ include(GNUInstallDirs)
 add_library(${PROJECT_NAME} INTERFACE)
 set_target_properties(
   ${PROJECT_NAME}
-  PROPERTIES CXX_STANDARD 11
+  PROPERTIES CXX_STANDARD 17
              CXX_STANDARD_REQUIRED YES
              CXX_EXTENSIONS NO)
-target_compile_features(${PROJECT_NAME} INTERFACE cxx_std_17)
 target_include_directories(
   ${PROJECT_NAME} INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
                             $<INSTALL_INTERFACE:include>)
 
 # For `add_subdirectory`
 set(NAMESPACE "awkward::")
-add_library(${NAMESPACE}awkward-headers ALIAS ${PROJECT_NAME})
+add_library(${NAMESPACE}header-only ALIAS ${PROJECT_NAME})
 
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/awkward"
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
