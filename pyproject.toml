@@ -42,7 +42,7 @@ classifiers = [
 dependencies = [
     "awkward_cpp==10",
     "importlib_resources;python_version < \"3.9\"",
-    "numpy>=1.14.5",
+    "numpy>=1.17.0",
     "packaging",
     "typing_extensions>=4.1.0; python_version < \"3.11\""
 ]
