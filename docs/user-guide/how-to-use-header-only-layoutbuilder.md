@@ -47,22 +47,27 @@ The following cpp-headers are needed to use Layout Builders to use the header-on
 2. GrowableBuffer.h
 3. LayoutBuilder.h
 4. utils.h
+ 
+If you are using the CMake project generator, then the `awkward-headers` library can be installed using `FetchContent` for a particular version:
+```cmake
+include(FetchContent)
 
-It is recommended to download these headers from the [release artifacts on GitHub](https://github.com/scikit-hep/awkward/releases)
+set(AWKWARD_VERSION "v2.1.0")
 
-Awkward Array can be installed from PyPI using pip:
-
-```shell
-pip install awkward
+FetchContent_Declare(
+  awkward-headers
+  URL      https://github.com/scikit-hep/awkward/releases/download/${AWKWARD_VERSION}/header-only.zip
+)
+FetchContent_MakeAvailable(awkward-headers)
 ```
 
-To get the `-I` compiler flags needed to pick up the LayoutBuilder from this installation:
-
-```shell
-python -m awkward.config --cflags
+The loaded targets can then be linked against, e.g. to link `my_application` against the header-only library:
+```cmake
+target_link_libraries(my_application awkward::header-only)
 ```
 
-A user would need to pass these options to the compiler in order to use it.
+If you are using a different generator, it is recommended to download these headers from the [release artifacts on GitHub](https://github.com/scikit-hep/awkward/releases).
+
 
 Three phases of using Layout Builder
 ------------------------------------
