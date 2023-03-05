@@ -54,10 +54,6 @@ if(BUILD_TESTS)
 endif(BUILD_TESTS)
 
 # Installation
-install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/growable-buffer/awkward"
-        DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/growable-buffer")
-install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/builder-options/awkward"
-        DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/builder-options")
 install(
   TARGETS layout-builder growable-buffer builder-options
   EXPORT ${PROJECT_NAME}Targets
