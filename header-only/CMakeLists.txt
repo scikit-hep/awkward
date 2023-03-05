@@ -12,9 +12,13 @@ include(GNUInstallDirs)
 # Build tests?
 option(BUILD_TESTS OFF)
 
+# Add aliases for `add_subdirectory`
+set(NAMESPACE "awkward::")
+
 # We want to specify different compile options, so we split the headers into "components"
 macro(add_component name)
   add_library(${name} INTERFACE)
+  add_library(${NAMESPACE}${name} ALIAS ${name})
   target_include_directories(
     ${name} INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${name}>
                       $<INSTALL_INTERFACE:include/${name}>)
@@ -48,12 +52,6 @@ set_target_properties(
 if(BUILD_TESTS)
   add_subdirectory(tests)
 endif(BUILD_TESTS)
-
-# Add aliases for `add_subdirectory`
-set(NAMESPACE "awkward::")
-add_library(${NAMESPACE}layout-builder ALIAS layout-builder)
-add_library(${NAMESPACE}growable-buffer ALIAS growable-buffer)
-add_library(${NAMESPACE}builder-options ALIAS builder-options)
 
 # Installation
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/growable-buffer/awkward"
