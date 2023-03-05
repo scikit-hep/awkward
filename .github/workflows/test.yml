@@ -192,13 +192,12 @@ jobs:
           - "numpy"
         include:
           - python-version: '3.7'
-            numpy-package: "numpy==1.14.5"
+            numpy-package: "numpy==1.17.0"
 
     runs-on: ubuntu-20.04
 
     env:
       PIP_ONLY_BINARY: cmake
-      NUMPY_VERSION: '${{ matrix.numpy-version }}'
 
     steps:
       - uses: actions/checkout@v3
