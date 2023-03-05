@@ -9,24 +9,59 @@ project(
 
 include(GNUInstallDirs)
 
-add_library(${PROJECT_NAME} INTERFACE)
+# Build tests?
+option(BUILD_TESTS OFF)
+
+# We want to specify different compile options, so we split the headers into "components"
+macro(add_component name)
+  add_library(${name} INTERFACE)
+  target_include_directories(
+    ${name} INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${name}>
+                      $<INSTALL_INTERFACE:include/${name}>)
+
+  install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${name}/awkward"
+          DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${name}")
+endmacro(add_component)
+
+# Component: Builder Options
+add_component(builder-options)
+# Component: Growable Buffer
+add_component(growable-buffer)
+target_link_libraries(growable-buffer INTERFACE builder-options)
+# Component: Layout Builder
+add_component(layout-builder)
+target_link_libraries(layout-builder INTERFACE growable-buffer builder-options)
+
+# Set target compile properties
 set_target_properties(
-  ${PROJECT_NAME}
+  layout-builder
   PROPERTIES CXX_STANDARD 17
              CXX_STANDARD_REQUIRED YES
              CXX_EXTENSIONS NO)
-target_include_directories(
-  ${PROJECT_NAME} INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-                            $<INSTALL_INTERFACE:include>)
+set_target_properties(
+  builder-options growable-buffer
+  PROPERTIES CXX_STANDARD 11
+             CXX_STANDARD_REQUIRED YES
+             CXX_EXTENSIONS NO)
 
-# For `add_subdirectory`
+# Build test suite?
+if(BUILD_TESTS)
+  add_subdirectory(tests)
+endif(BUILD_TESTS)
+
+# Add aliases for `add_subdirectory`
 set(NAMESPACE "awkward::")
-add_library(${NAMESPACE}header-only ALIAS ${PROJECT_NAME})
+add_library(${NAMESPACE}layout-builder ALIAS layout-builder)
+add_library(${NAMESPACE}growable-buffer ALIAS growable-buffer)
+add_library(${NAMESPACE}builder-options ALIAS builder-options)
 
-install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/awkward"
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+# Installation
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/growable-buffer/awkward"
+        DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/growable-buffer")
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/builder-options/awkward"
+        DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/builder-options")
 install(
-  TARGETS ${PROJECT_NAME}
+  TARGETS layout-builder growable-buffer builder-options
   EXPORT ${PROJECT_NAME}Targets
   INCLUDES
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})

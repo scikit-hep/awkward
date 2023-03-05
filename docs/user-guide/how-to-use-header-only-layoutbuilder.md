@@ -17,7 +17,8 @@ How to use the header-only LayoutBuilder in C++
 ```{code-cell}
 :tags: [hide-cell]
 
-// Make Awkward headers available in this notebook
+// Make Awkward headers available in this notebook, because we know these headers are available from the Python sources
+// Don't refer to the Git repo location, because they do not exist in sdist
 #pragma cling add_include_path("../../src/awkward/_connect/header-only")
 ```
 
@@ -61,9 +62,9 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(awkward-headers)
 ```
 
-The loaded targets can then be linked against, e.g. to link `my_application` against the header-only library:
+The loaded targets can then be linked against, e.g. to link `my_application` against the layout-builder target library:
 ```cmake
-target_link_libraries(my_application awkward::header-only)
+target_link_libraries(my_application awkward::layout-builder)
 ```
 
 If you are using a different generator, it is recommended to download these headers from the [release artifacts on GitHub](https://github.com/scikit-hep/awkward/releases).
