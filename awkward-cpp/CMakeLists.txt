@@ -59,7 +59,7 @@ target_compile_features(awkward-parent INTERFACE cxx_std_11)
 target_include_directories(awkward-parent INTERFACE rapidjson/include)
 
 # C++ dependencies (header-only): GrowableBuffer
-add_subdirectory(header-only)
+add_subdirectory(header-only EXCLUDE_FROM_ALL)
 target_link_libraries(awkward-parent INTERFACE awkward::growable-buffer)
 
 # First tier: cpu-kernels (object files, static library, and dynamic library).
