@@ -232,6 +232,10 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
 
         if not isinstance(shape, tuple):
             raise wrap_error(TypeError("typetracer shape must be a tuple"))
+        if any(is_unknown_scalar(x) for x in shape):
+            raise wrap_error(
+                TypeError("typetracer shape must be integers or unknown-length")
+            )
         self._shape = shape
         self._dtype = np.dtype(dtype)
 
