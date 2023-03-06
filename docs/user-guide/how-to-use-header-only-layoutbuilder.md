@@ -271,7 +271,8 @@ py::object snapshot_builder(const T& builder)
 
         // Adopt the memory filled by `to_buffers` as a NumPy array
         // We only need to return a "buffer" here, but py::array_t let's
-        // us associate a capsule for destruction, so we use that!
+        // us associate a capsule for destruction, which means that 
+        // Python can own this memory. Therefore, we use py::array_t
         uint8_t* data = reinterpret_cast<uint8_t*>(it.second);
         container[py::str(it.first)] = py::array_t<uint8_t>(
             {names_nbytes[it.first]},
