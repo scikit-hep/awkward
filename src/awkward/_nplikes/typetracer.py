@@ -232,6 +232,10 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
 
         if not isinstance(shape, tuple):
             raise wrap_error(TypeError("typetracer shape must be a tuple"))
+        if any(is_unknown_scalar(x) for x in shape):
+            raise wrap_error(
+                TypeError("typetracer shape must be integers or unknown-length")
+            )
         self._shape = shape
         self._dtype = np.dtype(dtype)
 
@@ -266,10 +270,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
     def size(self) -> ShapeItem:
         size = 1
         for item in self._shape:
-            if ak._util.is_integer(item):
-                size *= item
-            else:
-                return unknown_length
+            size *= item
         return size
 
     @property
@@ -589,9 +590,10 @@ class TypeTracer(NumpyLike):
         else:
             raise wrap_error(TypeError)
 
-    def to_rectilinear(self, array, *args, **kwargs):
-        try_touch_shape(array)
-        raise ak._errors.wrap_error(NotImplementedError)
+    def _axis_is_valid(self, axis: int, ndim: int) -> bool:
+        if axis < 0:
+            axis = axis + ndim
+        return 0 <= axis < ndim
 
     @property
     def ma(self):
@@ -1034,7 +1036,11 @@ class TypeTracer(NumpyLike):
         maybe_out: ArrayLike | None = None,
     ) -> TypeTracerArray:
         try_touch_data(x)
-        raise ak._errors.wrap_error(NotImplementedError)
+        if axis is None:
+            return TypeTracerArray._new(x.dtype, (x.size,))
+        else:
+            assert self._axis_is_valid(axis, x.ndim)
+            return TypeTracerArray._new(x.dtype, x.shape)
 
     def nonzero(self, x: ArrayLike) -> tuple[TypeTracerArray, ...]:
         # array

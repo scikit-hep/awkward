@@ -614,10 +614,6 @@ class NumpyLike(Singleton, Protocol):
     def is_c_contiguous(self, x: ArrayLike) -> bool:
         ...
 
-    @abstractmethod
-    def to_rectilinear(self, array: ArrayLike) -> ArrayLike:
-        ...
-
     @classmethod
     @abstractmethod
     def is_own_array(cls, obj) -> bool:

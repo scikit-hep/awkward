@@ -12,9 +12,6 @@ from awkward.typing import Final
 class Jax(ArrayModuleNumpyLike):
     is_eager: Final = True
 
-    def to_rectilinear(self, array, *args, **kwargs):
-        return ak.operations.ak_to_jax.to_jax(array, *args, **kwargs)
-
     def __init__(self):
         jax = ak.jax.import_jax()
         self._module = jax.numpy
