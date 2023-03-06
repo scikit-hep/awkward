@@ -731,21 +731,25 @@ class UnionArray(Content):
         tags_cls: type[Index] = Index8,
         index_cls: type[Index] = Index64,
     ) -> tuple[Index, Index]:
-        offsets = offsets.to_nplike(backend.index_nplike)
-        counts = [c.to_nplike(backend.index_nplike) for c in counts]
+        index_nplike = backend.index_nplike
 
-        f_offsets = ak.index.Index64(copy.deepcopy(offsets.data))
-        contentlen = f_offsets[f_offsets.length - 1]
+        offsets = offsets.to_nplike(index_nplike)
+        counts = [c.to_nplike(index_nplike) for c in counts]
 
-        tags = tags_cls.empty(contentlen, nplike=backend.index_nplike)
-        index = index_cls.empty(contentlen, nplike=backend.index_nplike)
+        f_offsets = ak.index.Index64(index_nplike.asarray(offsets.data, copy=True))
+        contentlen = index_nplike.index_as_shape_item(
+            f_offsets[index_nplike.shape_item_as_index(f_offsets.length - 1)]
+        )
+
+        tags = tags_cls.empty(contentlen, nplike=index_nplike)
+        index = index_cls.empty(contentlen, nplike=index_nplike)
 
         for tag, count in enumerate(counts):
             assert (
-                tags.nplike is backend.index_nplike
-                and index.nplike is backend.index_nplike
-                and f_offsets.nplike is backend.index_nplike
-                and count.nplike is backend.index_nplike
+                tags.nplike is index_nplike
+                and index.nplike is index_nplike
+                and f_offsets.nplike is index_nplike
+                and count.nplike is index_nplike
             )
             Content._selfless_handle_error(
                 backend[
