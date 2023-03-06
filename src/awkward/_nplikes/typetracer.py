@@ -590,6 +590,11 @@ class TypeTracer(NumpyLike):
         else:
             raise wrap_error(TypeError)
 
+    def _axis_is_valid(self, axis: int, ndim: int) -> bool:
+        if axis < 0:
+            axis = axis + ndim
+        return 0 <= axis < ndim
+
     def to_rectilinear(self, array, *args, **kwargs):
         try_touch_shape(array)
         raise ak._errors.wrap_error(NotImplementedError)
@@ -1035,7 +1040,11 @@ class TypeTracer(NumpyLike):
         maybe_out: ArrayLike | None = None,
     ) -> TypeTracerArray:
         try_touch_data(x)
-        raise ak._errors.wrap_error(NotImplementedError)
+        if axis is None:
+            return TypeTracerArray._new(x.dtype, (x.size,))
+        else:
+            assert self._axis_is_valid(axis, x.ndim)
+            return TypeTracerArray._new(x.dtype, x.shape)
 
     def nonzero(self, x: ArrayLike) -> tuple[TypeTracerArray, ...]:
         # array
