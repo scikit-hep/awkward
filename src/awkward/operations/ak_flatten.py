@@ -163,6 +163,8 @@ def flatten(array, axis=1, *, highlevel=True, behavior=None):
 
 
 def _impl(array, axis, highlevel, behavior):
+    axis = None if axis is None else int(axis)
+
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
 
     if axis is None:

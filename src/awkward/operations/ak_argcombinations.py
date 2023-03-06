@@ -82,6 +82,8 @@ def argcombinations(
 def _impl(
     array, n, replacement, axis, fields, parameters, with_name, highlevel, behavior
 ):
+    axis = None if axis is None else int(axis)
+
     if parameters is None:
         parameters = {}
     else:

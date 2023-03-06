@@ -170,6 +170,8 @@ def nanmean(
 
 
 def _impl(x, weight, axis, keepdims, mask_identity):
+    axis = None if axis is None else int(axis)
+
     behavior = ak._util.behavior_of(x, weight)
     x = ak.highlevel.Array(
         ak.operations.to_layout(x, allow_record=False, allow_other=False),

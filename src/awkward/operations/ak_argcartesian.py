@@ -98,6 +98,8 @@ def argcartesian(
 
 
 def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
+    axis = None if axis is None else int(axis)
+
     if isinstance(arrays, dict):
         behavior = ak._util.behavior_of(*arrays.values(), behavior=behavior)
         layouts = {
