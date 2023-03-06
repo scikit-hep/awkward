@@ -270,10 +270,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
     def size(self) -> ShapeItem:
         size = 1
         for item in self._shape:
-            if ak._util.is_integer(item):
-                size *= item
-            else:
-                return unknown_length
+            size *= item
         return size
 
     @property
