@@ -227,7 +227,9 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
                             )
                         )
 
-                counts = backend.index_nplike.zeros(len(nextinputs[0]), dtype=np.int64)
+                counts = backend.index_nplike.zeros(
+                    nextinputs[0].length, dtype=np.int64
+                )
                 all_counts = []
                 all_flatten = []
 
@@ -240,7 +242,7 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
                     all_flatten.append(f)
 
                 offsets = backend.index_nplike.empty(
-                    len(nextinputs[0]) + 1, dtype=np.int64
+                    nextinputs[0].length + 1, dtype=np.int64
                 )
                 offsets[0] = 0
                 backend.index_nplike.cumsum(counts, maybe_out=offsets[1:])
