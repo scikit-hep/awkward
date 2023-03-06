@@ -596,8 +596,7 @@ class TypeTracer(NumpyLike):
         return 0 <= axis < ndim
 
     def to_rectilinear(self, array, *args, **kwargs):
-        try_touch_shape(array)
-        raise ak._errors.wrap_error(NotImplementedError)
+        ...
 
     @property
     def ma(self):

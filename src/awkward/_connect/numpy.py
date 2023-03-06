@@ -39,7 +39,7 @@ def _to_rectilinear(arg):
     backend = ak._backends.backend_of(arg, default=None)
     # We have some array-like object that our backend mechanism understands
     if backend is not None:
-        return backend.nplike.to_rectilinear(arg)
+        return ak.operations.to_numpy(arg)
     elif isinstance(arg, tuple):
         return tuple(_to_rectilinear(x) for x in arg)
     elif isinstance(arg, list):

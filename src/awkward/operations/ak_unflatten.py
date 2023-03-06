@@ -100,11 +100,11 @@ def _impl(array, counts, axis, highlevel, behavior):
 
         if counts.is_option and (counts.content.is_numpy or counts.content.is_unknown):
             mask = counts.mask_as_bool(valid_when=False)
-            counts = backend.nplike.to_rectilinear(
-                ak.operations.fill_none(counts, 0, axis=-1, highlevel=False)
-            )
+            counts = ak.operations.fill_none(
+                counts, 0, axis=-1, highlevel=False
+            ).to_backend_array()
         elif counts.is_numpy or counts.is_unknown:
-            counts = backend.nplike.to_rectilinear(counts)
+            counts = counts.to_backend_array()
             mask = False
         else:
             raise ak._errors.wrap_error(
