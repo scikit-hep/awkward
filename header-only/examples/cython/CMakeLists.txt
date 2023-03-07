@@ -24,7 +24,16 @@ include(UsePythonExtensions)
 
 # Build demo module
 add_cython_target(_demo _demo.pyx PY3 CXX)
-add_python_library(_demo MODULE SOURCES ${_demo} LINK_LIBRARIES awkward::layout-builder)
+add_python_library(
+  _demo
+  MODULE
+  SOURCES
+  ${_demo}
+  demo_impl.cpp
+  LINK_LIBRARIES
+  awkward::layout-builder
+  INCLUDE_DIRECTORIES
+  include)
 python_extension_module(_demo)
 
 install(
