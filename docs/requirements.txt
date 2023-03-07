@@ -24,6 +24,7 @@ fsspec
 s3fs
 h5py
 matplotlib
+awkward
 uproot
 uproot3
 jax>=0.2.7;python_version>="3.6" and sys_platform != "win32"

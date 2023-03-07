@@ -96,13 +96,10 @@ jobs:
       with:
         submodules: true
 
-    - name: Create archive
-      run: tar -czvf header-only.tar.gz header-only
-
     - uses: actions/upload-artifact@v3
       with:
-        name: headers
-        path: header-only.tar.gz
+        name: header-only
+        path: header-only
 
   upload:
     needs: [build, check-requirements, check-cpp-on-pypi]

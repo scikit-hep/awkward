@@ -17,7 +17,8 @@ How to use the header-only LayoutBuilder in C++
 ```{code-cell}
 :tags: [hide-cell]
 
-// Make Awkward headers available in this notebook
+// Make Awkward headers available in this notebook, because we know these headers are available from the Python sources
+// Don't refer to the Git repo location, because they do not exist in sdist
 #pragma cling add_include_path("../../src/awkward/_connect/header-only")
 ```
 
@@ -47,22 +48,27 @@ The following cpp-headers are needed to use Layout Builders to use the header-on
 2. GrowableBuffer.h
 3. LayoutBuilder.h
 4. utils.h
+ 
+If you are using the CMake project generator, then the `awkward-headers` library can be installed using `FetchContent` for a particular version:
+```cmake
+include(FetchContent)
 
-It is recommended to download these headers from the [release artifacts on GitHub](https://github.com/scikit-hep/awkward/releases)
+set(AWKWARD_VERSION "v2.1.0")
 
-Awkward Array can be installed from PyPI using pip:
-
-```shell
-pip install awkward
+FetchContent_Declare(
+  awkward-headers
+  URL      https://github.com/scikit-hep/awkward/releases/download/${AWKWARD_VERSION}/header-only.zip
+)
+FetchContent_MakeAvailable(awkward-headers)
 ```
 
-To get the `-I` compiler flags needed to pick up the LayoutBuilder from this installation:
-
-```shell
-python -m awkward.config --cflags
+The loaded targets can then be linked against, e.g. to link `my_application` against the layout-builder target library:
+```cmake
+target_link_libraries(my_application awkward::layout-builder)
 ```
 
-A user would need to pass these options to the compiler in order to use it.
+If you are using a different generator, it is recommended to download these headers from the [release artifacts on GitHub](https://github.com/scikit-hep/awkward/releases).
+
 
 Three phases of using Layout Builder
 ------------------------------------
@@ -229,12 +235,58 @@ std::cout << builder.form() << std::endl;
 Passing from C++ to Python
 --------------------------
 
-We want NumPy to own the array buffers, so that they get deleted when the Awkward Array goes out of Python scope, not when the LayoutBuilder goes out of C++ scope. For the hand-off, you can allocate memory for those buffers in Python, presumably with `np.empty(nbytes, dtype=np.uint8)` and get void* pointers to these buffers by casting the output of `numpy_array.ctypes.data` (pointer as integer).
+We want NumPy to own the array buffers, so that they get deleted when the Awkward Array goes out of Python scope, not when the LayoutBuilder goes out of C++ scope. For the hand-off, one can allocate memory for those buffers in Python, presumably with `np.empty(nbytes, dtype=np.uint8)` and get `void*` pointers to these buffers by casting the output of `numpy_array.ctypes.data` (pointer as integer). Then we can pass everything over the border from C++ to Python using e.g. `pybind11`'s `py::buffer_protocol` for the buffers.  
 
-Now you can pass everything over the border from C++ to Python using pybind11's `py::buffer_protocol` for the buffers, as well as an integer for the length and a string for the Form.
+Alternatively, the Python _capsule_ system can be used to tie the lifetime of the allocated buffers to the calling Python scope. `pybind11` makes this fairly trivial, and also permits us to invoke Python code _from_ C++. We can use this approach to call `ak.from_buffers` in order to build an `ak.Array`:
+```cpp
+template <typename T>
+py::object snapshot_builder(const T& builder)
+{
+    // How much memory to allocate?
+    std::map<std::string, size_t> names_nbytes = {};
+    builder.buffer_nbytes(names_nbytes);
+
+    // Allocate memory
+    std::map<std::string, void*> buffers = {};
+    for(auto it : names_nbytes) {
+        uint8_t* ptr = new uint8_t[it.second];
+        buffers[it.first] = (void*)ptr;
+    }
+
+    // Write non-contiguous contents to memory
+    builder.to_buffers(buffers);
+    auto from_buffers = py::module::import("awkward").attr("from_buffers");
+
+    // Build Python dictionary containing arrays
+    // dtypes not important here as long as they match the underlying buffer
+    // as Awkward Array calls `frombuffer` to convert to the correct type
+    py::dict container;
+    for (auto it: buffers) {
+        
+        // Create capsule that frees the allocated data when out of scope
+        py::capsule free_when_done(it.second, [](void *data) {
+            uint8_t* dataPtr = reinterpret_cast<uint8_t*>(data);
+            delete[] dataPtr;
+        });
+
+        // Adopt the memory filled by `to_buffers` as a NumPy array
+        // We only need to return a "buffer" here, but py::array_t let's
+        // us associate a capsule for destruction, which means that 
+        // Python can own this memory. Therefore, we use py::array_t
+        uint8_t* data = reinterpret_cast<uint8_t*>(it.second);
+        container[py::str(it.first)] = py::array_t<uint8_t>(
+            {names_nbytes[it.first]},
+            {sizeof(uint8_t)},
+            data,
+            free_when_done
+        );
+    }
+    return from_buffers(builder.form(), builder.length(), container);
+    
+}
+```
+
 
 More Examples
 -------------
-Examples for other Layout Builders can be found [here](https://github.com/scikit-hep/awkward/blob/main/tests-cpp/test_1494-layout-builder.cpp).
-
-<!-- this is just a comment, please remove -->
+Examples for other LayoutBuilders can be found [here](https://github.com/scikit-hep/awkward/blob/main/header-only/tests/test_1494-layout-builder.cpp).

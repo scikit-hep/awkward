@@ -205,7 +205,7 @@ jobs:
         path: dist
 
     - name: Install awkward and awkward-cpp wheels
-      run: python -m pip install dist/awkward*.whl
+      run: python -m pip install dist/awkward*.whl --force-reinstall --no-deps
 
     - name: Generate build files
       run: pipx run nox -s prepare -- --docs --headers
@@ -229,7 +229,7 @@ jobs:
         echo "DOCS_VERSION=main" >> $GITHUB_ENV
 
     - name: Generate Python documentation
-      run: sphinx-build -M html . _build/
+      run: sphinx-build -M html . _build/ -T
       working-directory: docs
 
     - name: Upload docs artefact

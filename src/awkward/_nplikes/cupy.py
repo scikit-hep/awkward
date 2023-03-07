@@ -12,9 +12,6 @@ from awkward.typing import Final
 class Cupy(ArrayModuleNumpyLike):
     is_eager: Final = False
 
-    def to_rectilinear(self, array, *args, **kwargs):
-        return ak.operations.ak_to_cupy.to_cupy(array, *args, **kwargs)
-
     def __init__(self):
         import awkward._connect.cuda  # noqa: F401
 

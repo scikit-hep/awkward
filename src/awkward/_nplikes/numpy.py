@@ -14,9 +14,6 @@ np = NumpyMetadata.instance()
 class Numpy(ArrayModuleNumpyLike):
     is_eager: Final = True
 
-    def to_rectilinear(self, array, *args, **kwargs):
-        return ak.operations.ak_to_numpy.to_numpy(array, *args, **kwargs)
-
     def __init__(self):
         self._module = numpy
 
