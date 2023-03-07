@@ -1,5 +1,5 @@
 from demo_impl cimport ArrayBuffers, create_demo_array as create_demo_array_impl
-from cython.operator cimport dereference as deref, preincrement as inc
+from cython.operator cimport dereference as deref
 
 # Import both types and functions
 cimport numpy as np
@@ -12,13 +12,11 @@ def create_demo_array():
 
     buffers = {}
     # Convert from raw buffers to NumPy arrays
-    it = array_buffers.buffers.begin();
-    while (it != array_buffers.buffers.end()):
+    for it in array_buffers.buffers:
         # Pull out name, buffer, and lookup length of buffer
-        name = deref(it).first
-        buffer = deref(it).second
+        name = it.first
+        buffer = it.second
         nbytes = array_buffers.buffer_nbytes[name]
-        inc(it)
 
         # Store buffer in Python dict
         buffers[name.decode('UTF-8')] = np.asarray(<np.uint8_t[:nbytes]>buffer)
