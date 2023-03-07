@@ -41,13 +41,6 @@ The code is minimal; it does not include all of the code needed to use Awkward A
 
 How to use Layout Builders?
 -----------------------------
-
-The following cpp-headers are needed to use Layout Builders to use the header-only `LayoutBuilder`.
-
-1. BuilderOptions.h
-2. GrowableBuffer.h
-3. LayoutBuilder.h
-4. utils.h
  
 If you are using the CMake project generator, then the `awkward-headers` library can be installed using `FetchContent` for a particular version:
 ```cmake
@@ -68,12 +61,12 @@ if(NOT awkward-headers_POPULATED)
 endif()
 ```
 
-The loaded targets can then be linked against, e.g. to link `my_application` against the layout-builder target library:
+The loaded targets can then be linked against, e.g. to link `my_application` against the `layout-builder` target:
 ```cmake
 target_link_libraries(my_application awkward::layout-builder)
 ```
 
-If you are using a different generator, it is recommended to download these headers from the [release artifacts on GitHub](https://github.com/scikit-hep/awkward/releases).
+If you are using a different generator, it is recommended to download these headers from the [release artifacts on GitHub](https://github.com/scikit-hep/awkward/releases). Each of the targets enumerated in `CMakeLists.txt` should be added to the include path that is passed to the compiler.
 
 
 Three phases of using Layout Builder
