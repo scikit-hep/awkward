@@ -2,11 +2,13 @@ cmake_minimum_required(VERSION 3.15...3.26)
 
 project(demo)
 
-# Download headers include(FetchContent) set(AWKWARD_VERSION "v2.1.0") FetchContent_Declare(
-# awkward-headers URL
-# https://github.com/scikit-hep/awkward/releases/download/${AWKWARD_VERSION}/header-only.zip )
-# FetchContent_MakeAvailable(awkward-headers)
-add_subdirectory(/home/angus/Git/awkward/header-only header-only EXCLUDE_FROM_ALL)
+# Download headers
+include(FetchContent)
+set(AWKWARD_VERSION "v2.1.0")
+FetchContent_Declare(
+  awkward-headers
+  URL https://github.com/scikit-hep/awkward/releases/download/${AWKWARD_VERSION}/header-only.zip)
+FetchContent_MakeAvailable(awkward-headers)
 
 find_package(Cython REQUIRED)
 find_package(Python COMPONENTS Interpreter Development.Module)
