@@ -16,7 +16,7 @@ from awkward._nplikes import nplike_of, ufuncs
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
-from awkward.typing import SupportsInt, TypeVar
+from awkward.typing import TypeVar
 
 np = NumpyMetadata.instance()
 
@@ -76,7 +76,7 @@ def is_integer_like(x) -> bool:
         return np.issubdtype(x.dtype, np.integer) and x.ndim == 0
     # Other things that support integers
     else:
-        return isinstance(x, SupportsInt)
+        return hasattr(x, "__int__")
 
 
 def is_non_string_like_iterable(obj) -> bool:
