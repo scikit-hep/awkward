@@ -23,4 +23,17 @@ if __name__ == "__main__":
     cpp_path = root_path / "awkward-cpp" / "header-only"
     if cpp_path.exists():
         shutil.rmtree(cpp_path)
-    shutil.copytree(header_only_path, cpp_path)
+    components = (
+        "builder-options",
+        "growable-buffer",
+        "layout-builder",
+        "tests",
+        "CMakeLists.txt",
+        "README.md",
+    )
+    for component in components:
+        src_path = header_only_path / component
+        if src_path.is_file():
+            shutil.copy(src_path, cpp_path / component)
+        else:
+            shutil.copytree(src_path, cpp_path / component)
