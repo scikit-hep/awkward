@@ -41,7 +41,11 @@ The code is minimal; it does not include all of the code needed to use Awkward A
 
 How to use Layout Builders?
 -----------------------------
- 
+
+:::{note}
+A set of example projects that use the header-only layout-builder can be found [in Awkward Array's repository](https://github.com/scikit-hep/awkward/tree/main/header-only/examples).
+:::
+
 If you are using the CMake project generator, then the `awkward-headers` library can be installed using `FetchContent` for a particular version:
 ```cmake
 include(FetchContent)
