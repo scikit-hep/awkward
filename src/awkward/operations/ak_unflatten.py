@@ -95,6 +95,8 @@ def _impl(array, counts, axis, highlevel, behavior):
         # Regularize unknown values to unknown lengths
         if not backend.index_nplike.known_data:
             counts = unknown_length
+        else:
+            counts = int(counts)
         current_offsets = None
     else:
         counts = ak.operations.to_layout(counts, allow_record=False, allow_other=False)
@@ -129,7 +131,7 @@ def _impl(array, counts, axis, highlevel, behavior):
     def unflatten_this_layout(layout):
         nonlocal current_offsets
 
-        if ak._util.is_integer_like(counts):
+        if isinstance(counts, int) or counts is unknown_length:
             if (
                 counts is not unknown_length
                 and layout.length is not unknown_length
