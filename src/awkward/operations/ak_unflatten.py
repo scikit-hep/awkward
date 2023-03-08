@@ -4,6 +4,7 @@
 import awkward as ak
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
+from awkward._nplikes.typetracer import is_unknown_scalar
 
 np = NumpyMetadata.instance()
 
@@ -156,6 +157,7 @@ def _impl(array, counts, axis, highlevel, behavior):
             if (
                 current_offsets.size is not unknown_length
                 and layout.length is not unknown_length
+                and not is_unknown_scalar(position)
                 and (
                     position >= current_offsets.size
                     or current_offsets[position] != layout.length
