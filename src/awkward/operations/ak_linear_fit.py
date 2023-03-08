@@ -88,7 +88,7 @@ def linear_fit(
 
 
 def _impl(x, y, weight, axis, keepdims, mask_identity):
-    axis = None if axis is None else int(axis)
+    axis = ak._util.regularize_axis(axis)
 
     behavior = ak._util.behavior_of(x, y, weight)
     x = ak.highlevel.Array(

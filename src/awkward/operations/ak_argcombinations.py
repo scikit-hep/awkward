@@ -82,7 +82,7 @@ def argcombinations(
 def _impl(
     array, n, replacement, axis, fields, parameters, with_name, highlevel, behavior
 ):
-    axis = None if axis is None else int(axis)
+    axis = ak._util.regularize_axis(axis)
 
     if parameters is None:
         parameters = {}

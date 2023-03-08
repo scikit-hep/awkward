@@ -67,7 +67,7 @@ def fill_none(array, value, axis=-1, *, highlevel=True, behavior=None):
 
 
 def _impl(array, value, axis, highlevel, behavior):
-    axis = None if axis is None else int(axis)
+    axis = ak._util.regularize_axis(axis)
 
     arraylayout = ak.operations.to_layout(array, allow_record=True, allow_other=False)
     behavior = ak._util.behavior_of(array, value, behavior=behavior)

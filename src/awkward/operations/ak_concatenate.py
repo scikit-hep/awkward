@@ -46,7 +46,7 @@ def concatenate(arrays, axis=0, *, mergebool=True, highlevel=True, behavior=None
 
 
 def _impl(arrays, axis, mergebool, highlevel, behavior):
-    axis = None if axis is None else int(axis)
+    axis = ak._util.regularize_axis(axis)
 
     # Simple single-array, axis=0 fast-path
     behavior = ak._util.behavior_of(*arrays, behavior=behavior)

@@ -46,7 +46,7 @@ def drop_none(array, axis=None, highlevel=True, behavior=None):
 
 
 def _impl(array, axis, highlevel, behavior):
-    axis = None if axis is None else int(axis)
+    axis = ak._util.regularize_axis(axis)
 
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
 

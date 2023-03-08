@@ -38,7 +38,7 @@ def merge_option_of_records(array, axis=-1, *, highlevel=True, behavior=None):
 
 
 def _impl(array, axis, highlevel, behavior):
-    axis = None if axis is None else int(axis)
+    axis = ak._util.regularize_axis(axis)
 
     behavior = ak._util.behavior_of(array, behavior=behavior)
     layout = ak.to_layout(array, allow_record=False)

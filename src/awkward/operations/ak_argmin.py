@@ -147,7 +147,7 @@ def nanargmin(
 
 
 def _impl(array, axis, keepdims, mask_identity, highlevel, behavior):
-    axis = None if axis is None else int(axis)
+    axis = ak._util.regularize_axis(axis)
 
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
     behavior = ak._util.behavior_of(array, behavior=behavior)

@@ -66,7 +66,7 @@ def softmax(
 
 
 def _impl(x, axis, keepdims, mask_identity):
-    axis = None if axis is None else int(axis)
+    axis = ak._util.regularize_axis(axis)
 
     behavior = ak._util.behavior_of(x)
     x = ak.highlevel.Array(
