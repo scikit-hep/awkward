@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "awkward/LayoutBuilder.h"
 #include "demo_impl.h"
 
@@ -37,8 +38,7 @@ ArrayBuffers snapshot_builder(const T &builder) {
     // Allocate memory
     std::map<std::string, void *> buffers = {};
     for (auto it: names_nbytes) {
-        uint8_t *ptr = new uint8_t[it.second];
-        buffers[it.first] = (void *) ptr;
+        buffers[it.first] = malloc(it.second);
     }
 
     // Write non-contiguous contents to memory
