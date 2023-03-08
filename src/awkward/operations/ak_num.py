@@ -74,7 +74,6 @@ def num(array, axis=1, *, highlevel=True, behavior=None):
 
 def _impl(array, axis, highlevel, behavior):
     axis = ak._util.regularize_axis(axis)
-
     layout = ak.operations.to_layout(array)
     behavior = ak._util.behavior_of(array, behavior=behavior)
 

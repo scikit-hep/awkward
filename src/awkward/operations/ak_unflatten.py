@@ -86,7 +86,6 @@ def unflatten(array, counts, axis=0, *, highlevel=True, behavior=None):
 
 def _impl(array, counts, axis, highlevel, behavior):
     axis = ak._util.regularize_axis(axis)
-
     layout = ak.operations.to_layout(
         array, allow_record=False, allow_other=False
     ).to_packed()

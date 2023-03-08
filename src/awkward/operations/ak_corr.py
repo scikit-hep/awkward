@@ -84,7 +84,6 @@ def corr(
 
 def _impl(x, y, weight, axis, keepdims, mask_identity):
     axis = ak._util.regularize_axis(axis)
-
     behavior = ak._util.behavior_of(x, y, weight)
     x = ak.highlevel.Array(
         ak.operations.to_layout(x, allow_record=False, allow_other=False),
