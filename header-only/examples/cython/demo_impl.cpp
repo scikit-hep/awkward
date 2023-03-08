@@ -45,10 +45,10 @@ ArrayBuffers snapshot_builder(const T &builder) {
     builder.to_buffers(buffers);
 
     return {
-        .buffers = buffers,
-        .buffer_nbytes = names_nbytes,
-        .form = builder.form(),
-        .length = builder.length()
+        buffers,
+        names_nbytes,
+        builder.form(),
+        builder.length()
     };
 }
 

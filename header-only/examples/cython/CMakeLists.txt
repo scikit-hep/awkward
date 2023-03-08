@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.15...3.26)
 
-project(demo)
+project(demo LANGUAGES CXX)
+
+# Set required standards
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Download headers
 include(FetchContent)
