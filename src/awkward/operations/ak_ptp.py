@@ -78,6 +78,7 @@ def ptp(array, axis=None, *, keepdims=False, mask_identity=True, flatten_records
 
 
 def _impl(array, axis, keepdims, mask_identity):
+    axis = ak._util.regularize_axis(axis)
     behavior = ak._util.behavior_of(array)
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
 

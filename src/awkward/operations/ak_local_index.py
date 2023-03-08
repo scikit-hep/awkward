@@ -78,6 +78,7 @@ def local_index(array, axis=-1, *, highlevel=True, behavior=None):
 
 
 def _impl(array, axis, highlevel, behavior):
+    axis = ak._util.regularize_axis(axis)
     layout = ak.operations.to_layout(array, allow_record=True, allow_other=False)
     out = ak._do.local_index(layout, axis)
     return ak._util.wrap(out, behavior, highlevel, like=array)
