@@ -1,0 +1,17 @@
+[build-system]
+requires = ["scikit-build-core[pyproject]", "pybind11"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "demo"
+version = "0.0.1"
+
+dependencies = [
+  'awkward>=2.0',
+  "numpy"
+]
+
+
+[tool.scikit-build]
+minimum-version = "0.2"
+build-dir = "build/{cache_tag}"
