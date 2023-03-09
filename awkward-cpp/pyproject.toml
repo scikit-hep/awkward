@@ -69,3 +69,9 @@ sdist.include = [
     "tests-spec-explicit",
     "tests-cpu-kernels"
 ]
+
+# This activates verbose builds
+cmake.verbose = true
+
+# Display logs at or above this level.
+logging.level = "DEBUG"
