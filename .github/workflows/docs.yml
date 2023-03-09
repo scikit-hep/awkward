@@ -314,7 +314,7 @@ jobs:
         id: sync-stable
         run: |
           # Take only leading version
-          version=$(echo "${GITHUB_REF_NAME}" | sed -n -E "s/([0-9]+\.[0-9]+)\.[0-9]+/\1/p")
+          version=$(echo "${GITHUB_REF_NAME}" | sed -n -E "s/v?([0-9]+\.[0-9]+)\.[0-9]+/\1/p")
           aws s3 cp docs/switcher.json "s3://${S3_BUCKET}/doc/"
           aws s3 sync built-docs/ "s3://${S3_BUCKET}/doc/$version/"
           aws s3 sync built-docs/ "s3://${S3_BUCKET}/doc/stable/"
