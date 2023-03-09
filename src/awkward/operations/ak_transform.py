@@ -458,18 +458,17 @@ def _impl(
     behavior,
     highlevel,
 ):
-    behavior = ak._util.behavior_of(*((array, *more_arrays)), behavior=behavior)
-
+    behavior = ak._util.behavior_of(array, *more_arrays, behavior=behavior)
+    backend = ak._backends.backend_of(array, *more_arrays, default=cpu)
     layout = ak.operations.ak_to_layout._impl(
         array, allow_record=False, allow_other=False, regulararray=True
-    )
+    ).to_backend(backend)
     more_layouts = [
         ak.operations.ak_to_layout._impl(
             x, allow_record=False, allow_other=False, regulararray=True
-        )
+        ).to_backend(backend)
         for x in more_arrays
     ]
-    backend = ak._backends.backend_of(layout, *more_layouts, default=cpu)
 
     options = {
         "allow_records": allow_records,

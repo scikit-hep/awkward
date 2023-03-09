@@ -2,6 +2,8 @@
 
 import awkward as ak
 
+cpu = ak._backends.NumpyBackend.instance()
+
 
 def broadcast_fields(
     *arrays,
@@ -56,7 +58,8 @@ def broadcast_fields(
 
 
 def _impl(arrays, highlevel, behavior):
-    layouts = [ak.to_layout(x) for x in arrays]
+    backend = ak._backends.backend_of(*arrays, default=cpu)
+    layouts = [ak.to_layout(x).to_backend(backend) for x in arrays]
     behavior = ak._util.behavior_of(*arrays, behavior=behavior)
 
     def identity(content):
