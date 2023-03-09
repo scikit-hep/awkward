@@ -4,7 +4,6 @@ import awkward as ak
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
-cpu = ak._backends.NumpyBackend.instance()
 
 
 def cartesian(
@@ -207,8 +206,8 @@ def cartesian(
 def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
     axis = ak._util.regularize_axis(axis)
     if isinstance(arrays, dict):
+        backend = ak._backends.backend_of(*arrays.values(), default=None)
         behavior = ak._util.behavior_of(*arrays.values(), behavior=behavior)
-        backend = ak._backends.backend_of(*arrays.values(), default=cpu)
         new_arrays = {}
         for n, x in arrays.items():
             new_arrays[n] = ak.operations.to_layout(
@@ -217,8 +216,8 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
 
     else:
         arrays = list(arrays)
+        backend = ak._backends.backend_of(*arrays, default=None)
         behavior = ak._util.behavior_of(*arrays, behavior=behavior)
-        backend = ak._backends.backend_of(*arrays, default=cpu)
         new_arrays = []
         for x in arrays:
             new_arrays.append(

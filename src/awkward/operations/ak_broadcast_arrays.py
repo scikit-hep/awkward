@@ -204,12 +204,14 @@ def _impl(
     highlevel,
     behavior,
 ):
+    backend = ak._backends.backend_of(*arrays, default=None)
+
     inputs = []
     for x in arrays:
         y = ak.operations.to_layout(x, allow_record=True, allow_other=True)
         if not isinstance(y, (ak.contents.Content, ak.Record)):
             y = ak.contents.NumpyArray(nplike_of(*arrays).asarray([y]))
-        inputs.append(y)
+        inputs.append(y.to_backend(backend))
 
     def action(inputs, depth, **kwargs):
         if depth == depth_limit or (

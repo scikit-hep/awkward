@@ -48,6 +48,7 @@ def concatenate(arrays, axis=0, *, mergebool=True, highlevel=True, behavior=None
 def _impl(arrays, axis, mergebool, highlevel, behavior):
     axis = ak._util.regularize_axis(axis)
     # Simple single-array, axis=0 fast-path
+    backend = ak._backends.backend_of(*arrays, default=None)
     behavior = ak._util.behavior_of(*arrays, behavior=behavior)
     if (
         # Is an Awkward Content
@@ -63,10 +64,13 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
             return ak.operations.ak_flatten._impl(content, 1, highlevel, behavior)
 
     content_or_others = [
-        ak.operations.to_layout(
-            x, allow_record=False if axis == 0 else True, allow_other=True
+        x.to_backend(backend) if isinstance(x, ak.contents.Content) else x
+        for x in (
+            ak.operations.to_layout(
+                x, allow_record=False if axis == 0 else True, allow_other=True
+            )
+            for x in arrays
         )
-        for x in arrays
     ]
 
     contents = [x for x in content_or_others if isinstance(x, ak.contents.Content)]
