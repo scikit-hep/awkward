@@ -6,6 +6,7 @@ from awkward._nplikes import nplike_of
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
+cpu = ak._backends.NumpyBackend.instance()
 
 
 def broadcast_arrays(
@@ -204,7 +205,7 @@ def _impl(
     highlevel,
     behavior,
 ):
-    backend = ak._backends.backend_of(*arrays, default=None)
+    backend = ak._backends.backend_of(*arrays, default=cpu)
 
     inputs = []
     for x in arrays:
