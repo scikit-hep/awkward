@@ -774,7 +774,7 @@ class TypeTracer(NumpyLike):
 
             assert x.ndim == 1
 
-        shape = tuple([x.size for x in arrays])
+        shape = tuple(x.size for x in arrays)
         if indexing == "xy":
             shape[:2] = shape[1], shape[0]
 
