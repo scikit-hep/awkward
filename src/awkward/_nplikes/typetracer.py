@@ -326,14 +326,18 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         return len(self._shape)
 
     def view(self, dtype: np.dtype) -> Self:
-        if self.itemsize != np.dtype(dtype).itemsize and self._shape[-1] is not None:
+        dtype = np.dtype(dtype)
+        if (
+            self.itemsize != dtype.itemsize
+            and self.ndim >= 1
+            and self._shape[-1] is not None
+        ):
             last = int(
                 round(self._shape[-1] * self.itemsize / np.dtype(dtype).itemsize)
             )
             shape = self._shape[:-1] + (last,)
         else:
             shape = self._shape
-        dtype = np.dtype(dtype)
         return self._new(
             dtype, shape=shape, form_key=self._form_key, report=self._report
         )
