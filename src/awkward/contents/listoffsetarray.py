@@ -7,7 +7,7 @@ import awkward as ak
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import IndexType, NumpyMetadata
 from awkward._nplikes.shape import unknown_length
-from awkward._nplikes.typetracer import TypeTracer
+from awkward._nplikes.typetracer import TypeTracer, is_unknown_scalar
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.form import _type_parameters_equal
@@ -297,13 +297,16 @@ class ListOffsetArray(Content):
         return self._content._getitem_range(0, 0)
 
     def _getitem_at(self, where: IndexType):
-        if not self._backend.nplike.known_data:
-            self._touch_data(recursive=False)
-            return self._content._getitem_range(0, 0)
-
-        if where < 0:
-            where += self.length
-        if not (0 <= where < self.length) and self._backend.nplike.known_data:
+        # Wrap `where` by length
+        if not is_unknown_scalar(where) and where < 0:
+            length_index = self._backend.index_nplike.shape_item_as_index(self.length)
+            where += length_index
+        # Validate `where`
+        if not (
+            is_unknown_scalar(where)
+            or self.length is unknown_length
+            or (0 <= where < self.length)
+        ):
             raise ak._errors.index_error(self, where)
         start, stop = self._offsets[where], self._offsets[where + 1]
         return self._content._getitem_range(start, stop)

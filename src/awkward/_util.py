@@ -16,7 +16,7 @@ from awkward._nplikes import nplike_of, ufuncs
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
-from awkward.typing import TypeVar
+from awkward.typing import AxisMaybeNone, SupportsInt, TypeVar
 
 np = NumpyMetadata.instance()
 
@@ -61,6 +61,22 @@ def is_sized_iterable(obj) -> bool:
 
 def is_integer(x) -> bool:
     return isinstance(x, numbers.Integral) and not isinstance(x, bool)
+
+
+def is_array_like(x) -> bool:
+    return hasattr(x, "shape") and hasattr(x, "dtype")
+
+
+def is_integer_like(x) -> bool:
+    # Integral types
+    if isinstance(x, numbers.Integral):
+        return not isinstance(x, bool)
+    # Scalar arrays
+    elif is_array_like(x):
+        return np.issubdtype(x.dtype, np.integer) and x.ndim == 0
+    # Other things that support integers
+    else:
+        return hasattr(x, "__int__")
 
 
 def is_non_string_like_iterable(obj) -> bool:
@@ -823,3 +839,10 @@ def unique_list(items: Collection[T]) -> list[T]:
         seen.add(item)
         result.append(item)
     return result
+
+
+def regularize_axis(axis: SupportsInt | None) -> AxisMaybeNone:
+    if axis is None:
+        return None
+    else:
+        return int(axis)

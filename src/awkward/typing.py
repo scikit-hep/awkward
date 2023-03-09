@@ -52,8 +52,3 @@ else:
         final,
         runtime_checkable,
     )
-
-
-class SupportsBool(Protocol):
-    def __bool__(self) -> bool:
-        ...

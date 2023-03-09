@@ -60,6 +60,7 @@ def argsort(
 
 
 def _impl(array, axis, ascending, stable, highlevel, behavior):
+    axis = ak._util.regularize_axis(axis)
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
     out = ak._do.argsort(layout, axis, ascending, stable)
     return ak._util.wrap(out, behavior, highlevel, like=array)

@@ -42,13 +42,10 @@ The code is minimal; it does not include all of the code needed to use Awkward A
 How to use Layout Builders?
 -----------------------------
 
-The following cpp-headers are needed to use Layout Builders to use the header-only `LayoutBuilder`.
+:::{note}
+A set of example projects that use the header-only layout-builder can be found [in Awkward Array's repository](https://github.com/scikit-hep/awkward/tree/main/header-only/examples).
+:::
 
-1. BuilderOptions.h
-2. GrowableBuffer.h
-3. LayoutBuilder.h
-4. utils.h
- 
 If you are using the CMake project generator, then the `awkward-headers` library can be installed using `FetchContent` for a particular version:
 ```cmake
 include(FetchContent)
@@ -59,15 +56,21 @@ FetchContent_Declare(
   awkward-headers
   URL      https://github.com/scikit-hep/awkward/releases/download/${AWKWARD_VERSION}/header-only.zip
 )
-FetchContent_MakeAvailable(awkward-headers)
+# Instead of using `FetchContent_MakeAvailable(awkward-headers)`, we manually load the target so
+# that we can EXCLUDE_FROM_ALL
+FetchContent_GetProperties(awkward-headers)
+if(NOT awkward-headers_POPULATED)
+  FetchContent_Populate(awkward-headers)
+  add_subdirectory(${awkward-headers_SOURCE_DIR} ${awkward-headers_BINARY_DIR} EXCLUDE_FROM_ALL)
+endif()
 ```
 
-The loaded targets can then be linked against, e.g. to link `my_application` against the layout-builder target library:
+The loaded targets can then be linked against, e.g. to link `my_application` against the `layout-builder` target:
 ```cmake
 target_link_libraries(my_application awkward::layout-builder)
 ```
 
-If you are using a different generator, it is recommended to download these headers from the [release artifacts on GitHub](https://github.com/scikit-hep/awkward/releases).
+If you are using a different generator, it is recommended to download these headers from the [release artifacts on GitHub](https://github.com/scikit-hep/awkward/releases). Each of the targets enumerated in `CMakeLists.txt` should be added to the include path that is passed to the compiler.
 
 
 Three phases of using Layout Builder

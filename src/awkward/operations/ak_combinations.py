@@ -203,6 +203,7 @@ def combinations(
 def _impl(
     array, n, replacement, axis, fields, parameters, with_name, highlevel, behavior
 ):
+    axis = ak._util.regularize_axis(axis)
     if parameters is None:
         parameters = {}
     else:
