@@ -94,7 +94,7 @@ def _impl(array, counts, axis, highlevel, behavior):
 
     if ak._util.is_integer_like(counts):
         # Regularize unknown values to unknown lengths
-        if not backend.index_nplike.known_data:
+        if is_unknown_scalar(counts) or counts is unknown_length:
             counts = unknown_length
         else:
             counts = int(counts)
