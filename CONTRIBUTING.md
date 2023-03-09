@@ -269,6 +269,11 @@ There are two kinds of releases: (1) `awkward-cpp` updates, which only occur whe
 
 If you need your merged pull request to be deployed in a release, just ask!
 
+#### Awkward-cpp releases
+When making an `awkward-cpp` release (1), the following manual steps must also be taken:
+- Creating a `git` tag `awkward-cpp-{version}` for the new version epoch.
+
+#### Awkward releases
 When making an `awkward` release (2), the following manual steps must also be taken:
 - Attaching the `headers.zip` from the `deploy.yml` workflow to the release artefacts.
 - Adding a `doc/switcher.json` entry for new minor/major versions.
