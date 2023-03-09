@@ -771,7 +771,15 @@ class TypeTracer(NumpyLike):
     ) -> list[TypeTracerArray]:
         for x in arrays:
             try_touch_data(x)
-        raise ak._errors.wrap_error(NotImplementedError)
+
+            assert x.ndim == 1
+
+        shape = tuple([x.size for x in arrays])
+        if indexing == "xy":
+            shape[:2] = shape[1], shape[0]
+
+        dtype = numpy.result_type(*arrays)
+        return [TypeTracerArray._new(dtype, shape=shape) for _ in arrays]
 
     ############################ testing
 
