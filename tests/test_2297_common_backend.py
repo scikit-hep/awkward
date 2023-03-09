@@ -60,3 +60,18 @@ def test_to_rdataframe():
         match="Converting a TypeTracer nplike to an nplike with `known_data=True`",
     ):
         ak.to_rdataframe({"array": array})
+
+
+def test_transform():
+    def apply(layouts, backend, **kwargs):
+        if not all(x.is_numpy for x in layouts):
+            return
+        return tuple(x.copy(data=backend.nplike.asarray(x) * 2) for x in layouts)
+
+    with pytest.raises(
+        ValueError, match="cannot operate on arrays with incompatible array libraries"
+    ):
+        ak.transform(apply, left, right)
+
+    result = ak.transform(apply, left, typetracer)
+    assert all(ak.backend(x) == "typetracer" for x in result)
