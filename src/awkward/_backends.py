@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from collections.abc import Collection
+from collections.abc import Iterable
 
 import awkward_cpp
 
@@ -215,7 +215,7 @@ def _backend_for_nplike(nplike: NumpyLike) -> Backend:
         raise ak._errors.wrap_error(ValueError("unrecognised nplike", nplike))
 
 
-def common_backend(backends: Collection[Backend]) -> Backend:
+def common_backend(backends: Iterable[Backend]) -> Backend:
     unique_backends = frozenset(backends)
     # Either we have one nplike, or one + typetracer
     if len(unique_backends) == 1:
@@ -226,12 +226,19 @@ def common_backend(backends: Collection[Backend]) -> Backend:
             if not backend.nplike.known_data:
                 return backend
 
-        raise ak._errors.wrap_error(
-            ValueError(
-                "cannot operate on arrays with incompatible backends. Use #ak.to_backend to coerce the arrays "
-                "to the same backend"
+        if len(unique_backends) > 1:
+            raise ak._errors.wrap_error(
+                ValueError(
+                    "cannot operate on arrays with incompatible backends. Use #ak.to_backend to coerce the arrays "
+                    "to the same backend"
+                )
             )
-        )
+        else:
+            raise ak._errors.wrap_error(
+                ValueError(
+                    "no backends were given in order to determine a common backend."
+                )
+            )
 
 
 _UNSET = object()
