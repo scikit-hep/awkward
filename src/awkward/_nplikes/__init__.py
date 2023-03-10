@@ -49,6 +49,8 @@ def nplike_of(*arrays, default: D = _UNSET) -> NumpyLike | D:
     iterable of arrays. If no known array types are found, return `default`
     if it is set, otherwise `Numpy.instance()`.
     """
+    from awkward_cpp.lib import _ext
+
     from awkward._nplikes.cupy import Cupy
     from awkward._nplikes.jax import Jax
     from awkward._nplikes.numpy import Numpy
@@ -73,6 +75,10 @@ def nplike_of(*arrays, default: D = _UNSET) -> NumpyLike | D:
                 if cls.is_own_array(array):
                     nplikes.add(cls.instance())
                     break
+            else:
+                # Explicitly test non-layout ArrayBuilder types
+                if isinstance(array, (_ext.ArrayBuilder, ak.highlevel.ArrayBuilder)):
+                    nplikes.add(Numpy.instance())
 
     if nplikes == set():
         if default is _UNSET:
