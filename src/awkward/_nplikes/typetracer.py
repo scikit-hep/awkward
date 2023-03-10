@@ -427,11 +427,20 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
                     )
                 )
 
+        n_dim_index = n_basic_non_ellipsis + n_advanced
+        if n_dim_index > self.ndim:
+            raise wrap_error(
+                IndexError(
+                    f"too many indices for array: array is {self.ndim}-dimensional, but {n_dim_index} were indexed"
+                )
+            )
+
         # 2. Normalise Ellipsis and boolean arrays
         key_parts = []
         for item in key:
             if item is Ellipsis:
-                n_missing_dims = self.ndim - n_advanced - n_basic_non_ellipsis
+                # How many more dimensions do we have than the index provides
+                n_missing_dims = self.ndim - n_dim_index
                 key_parts.extend((slice(None),) * n_missing_dims)
             elif is_unknown_array(item) and np.issubdtype(item, np.bool_):
                 key_parts.append(self.nplike.nonzero(item)[0])
