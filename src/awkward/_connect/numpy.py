@@ -36,10 +36,16 @@ implemented = {}
 
 
 def _to_rectilinear(arg):
+    # Is this object something we already associate with a backend?
     backend = ak._backends.backend_of(arg, default=None)
-    # We have some array-like object that our backend mechanism understands
     if backend is not None:
-        return ak.operations.to_numpy(arg)
+        # Is this argument already in a backend-supported form?
+        if backend.nplike.is_own_array(arg):
+            return arg
+        # Otherwise, cast to layout and convert
+        else:
+            layout = ak.to_layout(arg, allow_record=False, allow_other=False)
+            return layout.to_backend_array(allow_missing=True)
     elif isinstance(arg, tuple):
         return tuple(_to_rectilinear(x) for x in arg)
     elif isinstance(arg, list):
