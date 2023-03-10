@@ -1,11 +1,15 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+import collections
 import functools
 import inspect
+from collections.abc import Iterable
+from itertools import chain
 
 import numpy
 
 import awkward as ak
-from awkward._nplikes import nplike_of
+from awkward._backends import Backend, backend_of, common_backend
+from awkward._nplikes import to_nplike
 from awkward._util import numpy_at_least
 from awkward.contents.numpyarray import NumpyArray
 
@@ -36,42 +40,63 @@ def convert_to_array(layout, args, kwargs):
 implemented = {}
 
 
-def _to_rectilinear(arg):
-    if isinstance(
-        arg,
-        (
-            ak.contents.Content,
-            ak.record.Record,
-            ak.highlevel.Array,
-            ak.highlevel.Record,
-            ak.highlevel.ArrayBuilder,
-        ),
-    ):
-        layout = ak.to_layout(arg)
-        return layout.to_backend_array(allow_missing=True)
-    else:
+def _find_backends(args: Iterable) -> Backend:
+    """
+    Args:
+        args: iterable of objects to visit
+
+    Returns the backend of the first layout or high-level Awkward object encountered.
+    """
+    stack = collections.deque(args)
+    while stack:
+        arg = stack.popleft()
+        # If the argument declares a backend, easy!
+        backend = backend_of(arg, default=None)
+        if backend is not None:
+            yield backend
         # Is this object something we already associate with an nplike?
-        nplike = nplike_of(arg, default=None)
-        if nplike is not None:
-            return nplike.asarray(arg)
-        elif isinstance(arg, tuple):
-            return tuple(_to_rectilinear(x) for x in arg)
-        elif isinstance(arg, list):
-            return [_to_rectilinear(x) for x in arg]
-        elif ak._util.is_non_string_like_iterable(arg):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    f"encountered an unsupported iterable value {arg!r} whilst converting arguments to NumPy-friendly "
-                    f"types. If this argument should be supported, please file a bug report."
-                )
+        elif isinstance(arg, (tuple, list)):
+            stack.extend(arg)
+
+
+def _to_rectilinear(arg, backend: Backend):
+    # Is this object something we already associate with a backend?
+    arg_backend = backend_of(arg, default=None)
+    if arg_backend is not None:
+        arg_nplike = arg_backend.nplike
+        # Is the object an nplike array already?
+        if arg_nplike.is_own_array(arg):
+            # Convert to the appropriate nplike
+            return to_nplike(
+                arg_nplike.asarray(arg), backend.nplike, from_nplike=arg_nplike
             )
+        # If we don't have an nplike array, it is something that awkward associates with a backend
+        # i.e. a layout. In future, this might not be a layout? But the case that we want to
+        # disambiguate is "already an nplike array", so that the `else` branch can safely assume
+        # that it can convert to a layout.
         else:
-            return arg
+            layout = ak.to_layout(arg)
+            return layout.to_backend_array(allow_missing=True, backend=backend)
+    elif isinstance(arg, tuple):
+        return tuple(_to_rectilinear(x, backend) for x in arg)
+    elif isinstance(arg, list):
+        return [_to_rectilinear(x, backend) for x in arg]
+    elif ak._util.is_non_string_like_iterable(arg):
+        raise ak._errors.wrap_error(
+            TypeError(
+                f"encountered an unsupported iterable value {arg!r} whilst converting arguments to NumPy-friendly "
+                f"types. If this argument should be supported, please file a bug report."
+            )
+        )
+    else:
+        return arg
 
 
 def _array_function_no_impl(func, types, args, kwargs, behavior):
-    rectilinear_args = tuple(_to_rectilinear(x) for x in args)
-    rectilinear_kwargs = {k: _to_rectilinear(v) for k, v in kwargs.items()}
+    backend = common_backend(_find_backends(chain(args, kwargs.values())))
+
+    rectilinear_args = tuple(_to_rectilinear(x, backend) for x in args)
+    rectilinear_kwargs = {k: _to_rectilinear(v, backend) for k, v in kwargs.items()}
     result = func(*rectilinear_args, **rectilinear_kwargs)
     # We want the result to be a layout (this will fail for functions returning non-array convertibles)
     out = ak.operations.ak_to_layout._impl(
