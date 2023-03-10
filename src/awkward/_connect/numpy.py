@@ -1,17 +1,22 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+import collections
 import functools
 import inspect
+from collections.abc import Iterable
+from itertools import chain
 
 import numpy
 
 import awkward as ak
-from awkward._backends.dispatch import backend_of
+from awkward._backends.dispatch import backend_of, common_backend
+from awkward._backends.backend import Backend
 from awkward._behavior import (
     behavior_of,
     find_custom_cast,
     find_ufunc,
     find_ufunc_generic,
 )
+from awkward._nplikes import to_nplike
 from awkward._layout import wrap_layout
 from awkward._regularize import is_non_string_like_iterable
 from awkward._util import numpy_at_least
@@ -44,13 +49,36 @@ def convert_to_array(layout, args, kwargs):
 implemented = {}
 
 
-def _to_rectilinear(arg):
+def _find_backends(args: Iterable) -> Backend:
+    """
+    Args:
+        args: iterable of objects to visit
+
+    Returns the backend of the first layout or high-level Awkward object encountered.
+    """
+    stack = collections.deque(args)
+    while stack:
+        arg = stack.popleft()
+        # If the argument declares a backend, easy!
+        backend = backend_of(arg, default=None)
+        if backend is not None:
+            yield backend
+        # Is this object something we already associate with an nplike?
+        elif isinstance(arg, (tuple, list)):
+            stack.extend(arg)
+
+
+def _to_rectilinear(arg, backend: Backend):
     # Is this object something we already associate with a backend?
-    backend = backend_of(arg, default=None)
-    if backend is not None:
+    arg_backend = backend_of(arg, default=None)
+    if arg_backend is not None:
+        arg_nplike = arg_backend.nplike
         # Is this argument already in a backend-supported form?
-        if backend.nplike.is_own_array(arg):
-            return arg
+        if arg_nplike.is_own_array(arg):
+            # Convert to the appropriate nplike
+            return to_nplike(
+                arg_nplike.asarray(arg), backend.nplike, from_nplike=arg_nplike
+            )
         # Otherwise, cast to layout and convert
         else:
             layout = ak.to_layout(arg, allow_record=False, allow_other=False)
@@ -69,8 +97,10 @@ def _to_rectilinear(arg):
 
 
 def _array_function_no_impl(func, types, args, kwargs, behavior):
-    rectilinear_args = tuple(_to_rectilinear(x) for x in args)
-    rectilinear_kwargs = {k: _to_rectilinear(v) for k, v in kwargs.items()}
+    backend = common_backend(_find_backends(chain(args, kwargs.values())))
+
+    rectilinear_args = tuple(_to_rectilinear(x, backend) for x in args)
+    rectilinear_kwargs = {k: _to_rectilinear(v, backend) for k, v in kwargs.items()}
     result = func(*rectilinear_args, **rectilinear_kwargs)
     # We want the result to be a layout (this will fail for functions returning non-array convertibles)
     out = ak.operations.ak_to_layout._impl(
