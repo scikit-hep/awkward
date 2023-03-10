@@ -5,6 +5,7 @@ import inspect
 import numpy
 
 import awkward as ak
+from awkward._nplikes import nplike_of
 from awkward._util import numpy_at_least
 from awkward.contents.numpyarray import NumpyArray
 
@@ -36,29 +37,36 @@ implemented = {}
 
 
 def _to_rectilinear(arg):
-    # Is this object something we already associate with a backend?
-    backend = ak._backends.backend_of(arg, default=None)
-    if backend is not None:
-        # Is this argument already in a backend-supported form?
-        if backend.nplike.is_own_array(arg):
-            return arg
-        # Otherwise, cast to layout and convert
-        else:
-            layout = ak.to_layout(arg, allow_record=False, allow_other=False)
-            return layout.to_backend_array(allow_missing=True)
-    elif isinstance(arg, tuple):
-        return tuple(_to_rectilinear(x) for x in arg)
-    elif isinstance(arg, list):
-        return [_to_rectilinear(x) for x in arg]
-    elif ak._util.is_non_string_like_iterable(arg):
-        raise ak._errors.wrap_error(
-            TypeError(
-                f"encountered an unsupported iterable value {arg!r} whilst converting arguments to NumPy-friendly "
-                f"types. If this argument should be supported, please file a bug report."
-            )
-        )
+    if isinstance(
+        arg,
+        (
+            ak.contents.Content,
+            ak.record.Record,
+            ak.highlevel.Array,
+            ak.highlevel.Record,
+            ak.highlevel.ArrayBuilder,
+        ),
+    ):
+        layout = ak.to_layout(arg)
+        return layout.to_backend_array(allow_missing=True)
     else:
-        return arg
+        # Is this object something we already associate with an nplike?
+        nplike = nplike_of(arg, default=None)
+        if nplike is not None:
+            return nplike.asarray(arg)
+        elif isinstance(arg, tuple):
+            return tuple(_to_rectilinear(x) for x in arg)
+        elif isinstance(arg, list):
+            return [_to_rectilinear(x) for x in arg]
+        elif ak._util.is_non_string_like_iterable(arg):
+            raise ak._errors.wrap_error(
+                TypeError(
+                    f"encountered an unsupported iterable value {arg!r} whilst converting arguments to NumPy-friendly "
+                    f"types. If this argument should be supported, please file a bug report."
+                )
+            )
+        else:
+            return arg
 
 
 def _array_function_no_impl(func, types, args, kwargs, behavior):
