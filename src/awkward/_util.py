@@ -487,8 +487,6 @@ def wrap(content, behavior=None, highlevel=True, like=None, allow_other=False):
 
 
 def union_to_record(unionarray, anonymous):
-    nplike = nplike_of(unionarray)
-
     contents = []
     for layout in unionarray.contents:
         if layout.is_indexed and not layout.is_option:
@@ -525,7 +523,11 @@ def union_to_record(unionarray, anonymous):
                     all_names.append(anonymous)
 
         missingarray = ak.contents.IndexedOptionArray(
-            ak.index.Index64(nplike.full(len(unionarray), -1, dtype=np.int64)),
+            ak.index.Index64(
+                unionarray.backend.index_nplike.full(
+                    unionarray.length, -1, dtype=np.int64
+                )
+            ),
             ak.contents.EmptyArray(),
         )
 
