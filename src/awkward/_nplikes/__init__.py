@@ -3,6 +3,7 @@ from __future__ import annotations
 from collections.abc import Collection
 
 import awkward as ak
+from awkward._nplikes.finder import find_nplike_for
 from awkward.typing import TYPE_CHECKING, TypeVar
 
 if TYPE_CHECKING:
@@ -49,32 +50,11 @@ def nplike_of(*arrays, default: D = _UNSET) -> NumpyLike | D:
     iterable of arrays. If no known array types are found, return `default`
     if it is set, otherwise `Numpy.instance()`.
     """
-    from awkward._nplikes.cupy import Cupy
-    from awkward._nplikes.jax import Jax
     from awkward._nplikes.numpy import Numpy
-    from awkward._nplikes.typetracer import TypeTracer
 
-    nplikes: set[NumpyLike] = set()
-    for array in arrays:
-        if hasattr(array, "layout"):
-            array = array.layout
+    nplikes = {n for n in (find_nplike_for(array) for array in arrays) if n is not None}
 
-        # Layout objects
-        if hasattr(array, "backend"):
-            nplikes.add(array.backend.nplike)
-
-        # Index objects
-        elif hasattr(array, "nplike"):
-            nplikes.add(array.nplike)
-
-        # Other e.g. nplike arrays
-        else:
-            for cls in (Numpy, Cupy, Jax, TypeTracer):
-                if cls.is_own_array(array):
-                    nplikes.add(cls.instance())
-                    break
-
-    if nplikes == set():
+    if len(nplikes) == 0:
         if default is _UNSET:
             return Numpy.instance()
         else:
