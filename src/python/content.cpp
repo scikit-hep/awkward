@@ -1740,10 +1740,10 @@ parameters2dict(const ak::util::Parameters& in) {
   for (auto pair : in) {
     std::string cppkey = pair.first;
     std::string cppvalue = pair.second;
-    py::str pykey = reinterpret_steal<py::str>(PyUnicode_DecodeUTF8(cppkey.data(),
+    py::str pykey = py::reinterpret_steal<py::str>(PyUnicode_DecodeUTF8(cppkey.data(),
                                           cppkey.length(),
                                           "surrogateescape"));
-    py::str pyvalue = reinterpret_steal<py::str>(PyUnicode_DecodeUTF8(cppvalue.data(),
+    py::str pyvalue = py::reinterpret_steal<py::str>(PyUnicode_DecodeUTF8(cppvalue.data(),
                                           cppvalue.length(),
                                           "surrogateescape"));
     out[pykey] = py::module::import("json").attr("loads")(pyvalue);
