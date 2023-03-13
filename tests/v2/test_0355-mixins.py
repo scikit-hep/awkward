@@ -54,20 +54,8 @@ def test_make_mixins():
         ],
         with_name="Point",
     )
-    two = ak._v2.Array(
-        [
-            [{"x": 0.9, "y": 1}, {"x": 2, "y": 2.2}, {"x": 2.9, "y": 3}],
-            [],
-            [{"x": 3.9, "y": 4}, {"x": 5, "y": 5.5}],
-        ],
-        with_name="Point",
-    )
     wone = ak._v2.Array(
         ak._v2.operations.with_field(one, abs(one), "weight"),
-        with_name="WeightedPoint",
-    )
-    wtwo = ak._v2.Array(
-        ak._v2.operations.with_field(two, abs(two), "weight"),
         with_name="WeightedPoint",
     )
 
