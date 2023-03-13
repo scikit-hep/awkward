@@ -603,10 +603,9 @@ def from_arraylib(array, regulararray, recordarray, highlevel, behavior):
     np = NumpyMetadata.instance()
     # overshadows global NumPy import for nplike-safety
     numpy = Numpy.instance()
+    nplike = nplike_of(array)
 
     def recurse(array, mask=None):
-        nplike = nplike_of(array)
-
         if Jax.is_tracer(array):
             raise ak._errors.wrap_error(
                 TypeError("Jax tracers cannot be used with `ak.from_arraylib`")

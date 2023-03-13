@@ -12,7 +12,7 @@ class ByteBehavior(Array):
     __name__ = "Array"
 
     def __bytes__(self):
-        tmp = nplike_of(self.layout).asarray(self.layout)
+        tmp = self.layout.backend.nplike.asarray(self.layout)
         if hasattr(tmp, "tobytes"):
             return tmp.tobytes()
         else:
@@ -57,7 +57,7 @@ class CharBehavior(Array):
     __name__ = "Array"
 
     def __bytes__(self):
-        tmp = nplike_of(self.layout).asarray(self.layout)
+        tmp = self.layout.backend.nplike.asarray(self.layout)
         if hasattr(tmp, "tobytes"):
             return tmp.tobytes()
         else:
@@ -151,16 +151,16 @@ def _string_notequal(one, two):
 
 
 def _string_broadcast(layout, offsets):
-    nplike = nplike_of(offsets)
-    assert nplike is layout.backend.index_nplike
-
-    offsets = nplike.asarray(offsets)
+    index_nplike = layout.backend.index_nplike
+    offsets = index_nplike.asarray(offsets)
     counts = offsets[1:] - offsets[:-1]
     if ak._util.win or ak._util.bits32:
-        counts = nplike.astype(counts, dtype=np.int32)
-    parents = nplike.repeat(nplike.arange(len(counts), dtype=counts.dtype), counts)
+        counts = index_nplike.astype(counts, dtype=np.int32)
+    parents = index_nplike.repeat(
+        index_nplike.arange(counts.size, dtype=counts.dtype), counts
+    )
     return ak.contents.IndexedArray(
-        ak.index.Index64(parents, nplike=nplike), layout
+        ak.index.Index64(parents, nplike=index_nplike), layout
     ).project()
 
 
