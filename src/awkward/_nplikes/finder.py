@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from awkward.typing import Callable, TypeAlias, TypeVar
 
 from .numpylike import NumpyLike
