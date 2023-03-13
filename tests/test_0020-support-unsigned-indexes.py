@@ -7,42 +7,42 @@ import awkward as ak  # noqa: F401
 
 def test_index():
     array_i1 = np.array([np.iinfo("i1").min, -1, 0, 1, np.iinfo("i1").max], dtype="i1")
-    array_u1 = np.array([np.iinfo("u1").min, -1, 0, 1, np.iinfo("u1").max], dtype="u1")
+    array_u1 = np.array([np.iinfo("u1").min, 0, 0, 1, np.iinfo("u1").max], dtype="u1")
     array_li2 = np.array(
         [np.iinfo("<i2").min, -1, 0, 1, np.iinfo("<i2").max], dtype="<i2"
     )
     array_lu2 = np.array(
-        [np.iinfo("<u2").min, -1, 0, 1, np.iinfo("<u2").max], dtype="<u2"
+        [np.iinfo("<u2").min, 0, 0, 1, np.iinfo("<u2").max], dtype="<u2"
     )
     array_li4 = np.array(
         [np.iinfo("<i4").min, -1, 0, 1, np.iinfo("<i4").max], dtype="<i4"
     )
     array_lu4 = np.array(
-        [np.iinfo("<u4").min, -1, 0, 1, np.iinfo("<u4").max], dtype="<u4"
+        [np.iinfo("<u4").min, 0, 0, 1, np.iinfo("<u4").max], dtype="<u4"
     )
     array_li8 = np.array(
         [np.iinfo("<i8").min, -1, 0, 1, np.iinfo("<i8").max], dtype="<i8"
     )
     array_lu8 = np.array(
-        [np.iinfo("<u8").min, -1, 0, 1, np.iinfo("<u8").max], dtype="<u8"
+        [np.iinfo("<u8").min, 0, 0, 1, np.iinfo("<u8").max], dtype="<u8"
     )
     array_bi2 = np.array(
         [np.iinfo(">i2").min, -1, 0, 1, np.iinfo(">i2").max], dtype=">i2"
     )
     array_bu2 = np.array(
-        [np.iinfo(">u2").min, -1, 0, 1, np.iinfo(">u2").max], dtype=">u2"
+        [np.iinfo(">u2").min, 0, 0, 1, np.iinfo(">u2").max], dtype=">u2"
     )
     array_bi4 = np.array(
         [np.iinfo(">i4").min, -1, 0, 1, np.iinfo(">i4").max], dtype=">i4"
     )
     array_bu4 = np.array(
-        [np.iinfo(">u4").min, -1, 0, 1, np.iinfo(">u4").max], dtype=">u4"
+        [np.iinfo(">u4").min, 0, 0, 1, np.iinfo(">u4").max], dtype=">u4"
     )
     array_bi8 = np.array(
         [np.iinfo(">i8").min, -1, 0, 1, np.iinfo(">i8").max], dtype=">i8"
     )
     array_bu8 = np.array(
-        [np.iinfo(">u8").min, -1, 0, 1, np.iinfo(">u8").max], dtype=">u8"
+        [np.iinfo(">u8").min, 0, 0, 1, np.iinfo(">u8").max], dtype=">u8"
     )
 
     index_i1 = ak.layout.Index8(array_i1)

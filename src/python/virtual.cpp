@@ -426,9 +426,9 @@ PyArrayCache::mutablemapping() const {
 
 ak::ContentPtr
 PyArrayCache::get(const std::string& key) const {
-  py::str pykey(PyUnicode_DecodeUTF8(key.data(),
-                                     key.length(),
-                                     "surrogateescape"));
+  py::str pykey = py::reinterpret_steal<py::str>(PyUnicode_DecodeUTF8(key.data(),
+                                        key.length(),
+                                        "surrogateescape"));
   py::object out;
   try {
     out = mutablemapping().attr("__getitem__")(pykey);
@@ -441,9 +441,9 @@ PyArrayCache::get(const std::string& key) const {
 
 void
 PyArrayCache::set(const std::string& key, const ak::ContentPtr& value) {
-  py::str pykey(PyUnicode_DecodeUTF8(key.data(),
-                                     key.length(),
-                                     "surrogateescape"));
+  py::str pykey = py::reinterpret_steal<py::str>(PyUnicode_DecodeUTF8(key.data(),
+                                        key.length(),
+                                        "surrogateescape"));
   const py::object mapping = mutablemapping();
   if ( ! mapping.is(py::none()) ) {
     mapping.attr("__setitem__")(pykey, box(value));

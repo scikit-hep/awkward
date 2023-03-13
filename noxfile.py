@@ -10,7 +10,7 @@ def tests(session):
     """
     Run the unit and regular tests.
     """
-    session.install(".[test]", "numba", "pandas", "pyarrow", "jax", "numexpr", "uproot")
+    session.install(".[test]", "numba", "pandas", "pyarrow", "numexpr", "uproot")
     session.run("pytest", *session.posargs if session.posargs else ["tests"])
 
 
