@@ -1740,13 +1740,17 @@ parameters2dict(const ak::util::Parameters& in) {
   for (auto pair : in) {
     std::string cppkey = pair.first;
     std::string cppvalue = pair.second;
-    py::str pykey(PyUnicode_DecodeUTF8(cppkey.data(),
-                                       cppkey.length(),
-                                       "surrogateescape"));
-    py::str pyvalue(PyUnicode_DecodeUTF8(cppvalue.data(),
-                                         cppvalue.length(),
-                                         "surrogateescape"));
+    PyObject* tmp1 = PyUnicode_DecodeUTF8(cppkey.data(),
+                                          cppkey.length(),
+                                          "surrogateescape");
+    PyObject* tmp2 = PyUnicode_DecodeUTF8(cppvalue.data(),
+                                          cppvalue.length(),
+                                          "surrogateescape");
+    py::str pykey(tmp1);
+    py::str pyvalue(tmp2);
     out[pykey] = py::module::import("json").attr("loads")(pyvalue);
+    Py_DECREF(tmp1);
+    Py_DECREF(tmp2);
   }
   return out;
 }
@@ -1761,20 +1765,26 @@ template <typename T>
 py::object
 parameter(const T& self, const std::string& key) {
   std::string cppvalue = self.parameter(key);
-  py::str pyvalue(PyUnicode_DecodeUTF8(cppvalue.data(),
-                                       cppvalue.length(),
-                                       "surrogateescape"));
-  return py::module::import("json").attr("loads")(pyvalue);
+  PyObject* tmp1 = PyUnicode_DecodeUTF8(cppvalue.data(),
+                                        cppvalue.length(),
+                                        "surrogateescape");
+  py::str pyvalue(tmp1);
+  py::object out = py::module::import("json").attr("loads")(pyvalue);
+  Py_DECREF(tmp1);
+  return out;
 }
 
 template <typename T>
 py::object
 purelist_parameter(const T& self, const std::string& key) {
   std::string cppvalue = self.purelist_parameter(key);
-  py::str pyvalue(PyUnicode_DecodeUTF8(cppvalue.data(),
-                                       cppvalue.length(),
-                                       "surrogateescape"));
-  return py::module::import("json").attr("loads")(pyvalue);
+  PyObject* tmp1 = PyUnicode_DecodeUTF8(cppvalue.data(),
+                                        cppvalue.length(),
+                                        "surrogateescape");
+  py::str pyvalue(tmp1);
+  py::object out = py::module::import("json").attr("loads")(pyvalue);
+  Py_DECREF(tmp1);
+  return out;
 }
 
 template <typename T>
@@ -1932,9 +1942,11 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
               return py::none();
             }
             else {
-              py::str pyvalue(PyUnicode_DecodeUTF8(out.data(),
-                                                   out.length(),
-                                                   "surrogateescape"));
+              PyObject* tmp1 = PyUnicode_DecodeUTF8(out.data(),
+                                                    out.length(),
+                                                    "surrogateescape");
+              py::str pyvalue(tmp1);
+              Py_DECREF(tmp1);
               return pyvalue;
             }
           })
@@ -3217,10 +3229,12 @@ make_RecordArray(const py::handle& m, const std::string& name) {
         else {
           py::list out;
           for (auto x : *recordlookup.get()) {
-            py::str pyvalue(PyUnicode_DecodeUTF8(x.data(),
-                                                 x.length(),
-                                                 "surrogateescape"));
+            PyObject* tmp1 = PyUnicode_DecodeUTF8(x.data(),
+                                                  x.length(),
+                                                  "surrogateescape");
+            py::str pyvalue(tmp1);
             out.append(pyvalue);
+            Py_DECREF(tmp1);
           }
           return out;
         }

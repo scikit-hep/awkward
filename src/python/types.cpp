@@ -115,20 +115,26 @@ template <typename T>
 py::object
 parameter(const T& self, const std::string& key) {
   std::string cppvalue = self.parameter(key);
-  py::str pyvalue(PyUnicode_DecodeUTF8(cppvalue.data(),
-                                       cppvalue.length(),
-                                       "surrogateescape"));
-  return py::module::import("json").attr("loads")(pyvalue);
+  PyObject* tmp1 = PyUnicode_DecodeUTF8(cppvalue.data(),
+                                        cppvalue.length(),
+                                        "surrogateescape");
+  py::str pyvalue(tmp1);
+  py::object out = py::module::import("json").attr("loads")(pyvalue);
+  Py_DECREF(tmp1);
+  return out;
 }
 
 template <typename T>
 py::object
 purelist_parameter(const T& self, const std::string& key) {
   std::string cppvalue = self.purelist_parameter(key);
-  py::str pyvalue(PyUnicode_DecodeUTF8(cppvalue.data(),
-                                       cppvalue.length(),
-                                       "surrogateescape"));
-  return py::module::import("json").attr("loads")(pyvalue);
+  PyObject* tmp1 = PyUnicode_DecodeUTF8(cppvalue.data(),
+                                        cppvalue.length(),
+                                        "surrogateescape");
+  py::str pyvalue(tmp1);
+  py::object out = py::module::import("json").attr("loads")(pyvalue);
+  Py_DECREF(tmp1);
+  return out;
 }
 
 template <typename T>
@@ -160,9 +166,11 @@ str2typestr(const std::string& in) {
     return py::none();
   }
   else {
-    py::str pyvalue(PyUnicode_DecodeUTF8(in.data(),
-                                         in.length(),
-                                         "surrogateescape"));
+    PyObject* tmp1 = PyUnicode_DecodeUTF8(in.data(),
+                                          in.length(),
+                                          "surrogateescape");
+    py::str pyvalue(tmp1);
+    Py_DECREF(tmp1);
     return pyvalue;
   }
 }
