@@ -24,7 +24,7 @@ def register_nplike_finder_factory(finder: NumpyLikeFinderFactory):
     return finder
 
 
-N = TypeVar("N", bound=type[NumpyLike])
+N = TypeVar("N", bound="type[NumpyLike]")
 
 
 def register_nplike(cls: N) -> N:
