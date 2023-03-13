@@ -1740,17 +1740,13 @@ parameters2dict(const ak::util::Parameters& in) {
   for (auto pair : in) {
     std::string cppkey = pair.first;
     std::string cppvalue = pair.second;
-    PyObject* tmp1 = PyUnicode_DecodeUTF8(cppkey.data(),
+    py::str pykey = reinterpret_steal<py::str>(PyUnicode_DecodeUTF8(cppkey.data(),
                                           cppkey.length(),
-                                          "surrogateescape");
-    PyObject* tmp2 = PyUnicode_DecodeUTF8(cppvalue.data(),
+                                          "surrogateescape"));
+    py::str pyvalue = reinterpret_steal<py::str>(PyUnicode_DecodeUTF8(cppvalue.data(),
                                           cppvalue.length(),
-                                          "surrogateescape");
-    py::str pykey(tmp1);
-    py::str pyvalue(tmp2);
+                                          "surrogateescape"));
     out[pykey] = py::module::import("json").attr("loads")(pyvalue);
-    Py_DECREF(tmp1);
-    Py_DECREF(tmp2);
   }
   return out;
 }
