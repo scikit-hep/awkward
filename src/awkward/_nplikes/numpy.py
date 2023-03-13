@@ -5,12 +5,14 @@ import numpy
 
 import awkward as ak
 from awkward._nplikes.array_module import ArrayModuleNumpyLike
+from awkward._nplikes.finder import register_nplike
 from awkward._nplikes.numpylike import ArrayLike, NumpyMetadata
 from awkward.typing import Final, Literal
 
 np = NumpyMetadata.instance()
 
 
+@register_nplike
 class Numpy(ArrayModuleNumpyLike):
     is_eager: Final = True
 
@@ -30,15 +32,15 @@ class Numpy(ArrayModuleNumpyLike):
         return self._module.ndarray
 
     @classmethod
-    def is_own_array(cls, obj) -> bool:
+    def is_own_array_type(cls, type_: type) -> bool:
         """
         Args:
             obj: object to test
 
-        Return `True` if the given object is a numpy buffer, otherwise `False`.
+        Return `True` if the given object is a numpy ndarray subclass, otherwise `False`.
 
         """
-        return isinstance(obj, numpy.ndarray)
+        return issubclass(type_, numpy.ndarray)
 
     def is_c_contiguous(self, x: ArrayLike) -> bool:
         return x.flags["C_CONTIGUOUS"]

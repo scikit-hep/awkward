@@ -11,6 +11,7 @@ from awkward._backends import Backend
 from awkward._behavior import get_array_class, get_record_class
 from awkward._layout import wrap_layout
 from awkward._nplikes import to_nplike
+from awkward._nplikes.finder import NumpyLikeFinder, register_nplike_finder_factory
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import IndexType, NumpyLike, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
@@ -1343,3 +1344,13 @@ class Content:
 
     def copy(self, *, parameters: JSONMapping | None = unset) -> Self:
         raise ak._errors.wrap_error(NotImplementedError)
+
+
+@register_nplike_finder_factory
+def _content_nplike_finder_factory(cls: type) -> NumpyLikeFinder:
+    if issubclass(cls, Content):
+
+        def finder(obj: cls) -> NumpyLike:
+            return obj.backend.nplike
+
+        return finder

@@ -616,5 +616,9 @@ class NumpyLike(Singleton, Protocol):
 
     @classmethod
     @abstractmethod
-    def is_own_array(cls, obj) -> bool:
+    def is_own_array_type(cls, type_: type) -> bool:
         ...
+
+    @classmethod
+    def is_own_array(cls, obj) -> bool:
+        return cls.is_own_array_type(type(obj))

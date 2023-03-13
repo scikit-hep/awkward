@@ -5,10 +5,12 @@ import numpy
 
 import awkward as ak
 from awkward._nplikes.array_module import ArrayModuleNumpyLike
+from awkward._nplikes.finder import register_nplike
 from awkward._nplikes.numpylike import ArrayLike
 from awkward.typing import Final
 
 
+@register_nplike
 class Jax(ArrayModuleNumpyLike):
     is_eager: Final = True
 
@@ -39,39 +41,47 @@ class Jax(ArrayModuleNumpyLike):
         return self._module.ndarray
 
     @classmethod
-    def is_own_array(cls, obj) -> bool:
+    def is_own_array_type(cls, type_: type) -> bool:
         """
         Args:
-            obj: object to test
+            type_: class to test
 
         Return `True` if the given object is a jax buffer, otherwise `False`.
 
         """
-        return cls.is_array(obj) or cls.is_tracer(obj)
+        return cls.is_array(type_) or cls.is_tracer(type_)
 
     @classmethod
-    def is_array(cls, obj) -> bool:
+    def is_array_type(cls, type_: type) -> bool:
         """
         Args:
-            obj: object to test
+            type_: class to test
 
-        Return `True` if the given object is a jax buffer, otherwise `False`.
+        Return `True` if the given object is a jax buffer subclass, otherwise `False`.
 
         """
-        module, _, suffix = type(obj).__module__.partition(".")
+        module, _, suffix = type_.__module__.partition(".")
         return module == "jaxlib"
 
     @classmethod
-    def is_tracer(cls, obj) -> bool:
+    def is_array(cls, obj):
+        return cls.is_array_type(type(obj))
+
+    @classmethod
+    def is_tracer_type(cls, type_: type) -> bool:
         """
         Args:
-            obj: object to test
+            type_: class to test
 
-        Return `True` if the given object is a jax tracer, otherwise `False`.
+        Return `True` if the given object is a jax tracer subclass, otherwise `False`.
 
         """
-        module, _, suffix = type(obj).__module__.partition(".")
+        module, _, suffix = type_.__module__.partition(".")
         return module == "jax"
+
+    @classmethod
+    def is_tracer(cls, obj):
+        return cls.is_tracer_type(type(obj))
 
     def is_c_contiguous(self, x: ArrayLike) -> bool:
         return True

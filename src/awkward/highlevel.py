@@ -1,4 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+from __future__ import annotations
+
 __all__ = ("Array", "ArrayBuilder", "Record")
 
 import copy
@@ -15,6 +17,7 @@ from numpy.lib.mixins import NDArrayOperatorsMixin  # noqa: TID251
 
 import awkward as ak
 import awkward._connect.hist
+from awkward._nplikes.finder import NumpyLikeFinder, register_nplike_finder_factory
 from awkward._behavior import behavior_of, get_array_class, get_record_class
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpy import Numpy
@@ -2791,3 +2794,21 @@ class ArrayBuilder(Sized):
 def ignore_in_to_list(getitem_function):
     getitem_function.ignore_in_to_list = True
     return getitem_function
+
+
+@register_nplike_finder_factory
+def _highlevel_nplike_finder(cls) -> NumpyLikeFinder | None:
+    if issubclass(cls, (Array, Record)):
+
+        def finder(obj):
+            return obj.layout.backend.nplike
+
+    elif issubclass(cls, (ArrayBuilder, _ext.ArrayBuilder)):
+
+        def finder(_):
+            return Numpy.instance()
+
+    else:
+        return None
+
+    return finder
