@@ -58,13 +58,10 @@ template <typename T>
 py::object
 parameter(const T& self, const std::string& key) {
   std::string cppvalue = self.parameter(key);
-  PyObject* tmp1 = PyUnicode_DecodeUTF8(cppvalue.data(),
+  py::str pyvalue = py::reinterpret_steal<py::str>(PyUnicode_DecodeUTF8(cppvalue.data(),
                                         cppvalue.length(),
-                                        "surrogateescape");
-  py::str pyvalue(tmp1);
-  py::object out = py::module::import("json").attr("loads")(pyvalue);
-  Py_DECREF(tmp1);
-  return out;
+                                        "surrogateescape"));
+  return py::module::import("json").attr("loads")(pyvalue);
 }
 
 const ak::FormKey

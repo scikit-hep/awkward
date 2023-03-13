@@ -1761,26 +1761,20 @@ template <typename T>
 py::object
 parameter(const T& self, const std::string& key) {
   std::string cppvalue = self.parameter(key);
-  PyObject* tmp1 = PyUnicode_DecodeUTF8(cppvalue.data(),
+  py::str pyvalue = py::reinterpret_steal<py::str>(PyUnicode_DecodeUTF8(cppvalue.data(),
                                         cppvalue.length(),
-                                        "surrogateescape");
-  py::str pyvalue(tmp1);
-  py::object out = py::module::import("json").attr("loads")(pyvalue);
-  Py_DECREF(tmp1);
-  return out;
+                                        "surrogateescape"));
+  return py::module::import("json").attr("loads")(pyvalue);
 }
 
 template <typename T>
 py::object
 purelist_parameter(const T& self, const std::string& key) {
   std::string cppvalue = self.purelist_parameter(key);
-  PyObject* tmp1 = PyUnicode_DecodeUTF8(cppvalue.data(),
+  py::str pyvalue = py::reinterpret_steal<py::str>(PyUnicode_DecodeUTF8(cppvalue.data(),
                                         cppvalue.length(),
-                                        "surrogateescape");
-  py::str pyvalue(tmp1);
-  py::object out = py::module::import("json").attr("loads")(pyvalue);
-  Py_DECREF(tmp1);
-  return out;
+                                        "surrogateescape"));
+  return py::module::import("json").attr("loads")(pyvalue);
 }
 
 template <typename T>
@@ -1938,11 +1932,9 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
               return py::none();
             }
             else {
-              PyObject* tmp1 = PyUnicode_DecodeUTF8(out.data(),
+              py::str pyvalue = py::reinterpret_steal<py::str>(PyUnicode_DecodeUTF8(out.data(),
                                                     out.length(),
-                                                    "surrogateescape");
-              py::str pyvalue(tmp1);
-              Py_DECREF(tmp1);
+                                                    "surrogateescape"));
               return pyvalue;
             }
           })
@@ -3225,12 +3217,10 @@ make_RecordArray(const py::handle& m, const std::string& name) {
         else {
           py::list out;
           for (auto x : *recordlookup.get()) {
-            PyObject* tmp1 = PyUnicode_DecodeUTF8(x.data(),
+            py::str pyvalue = py::reinterpret_steal<py::str>(PyUnicode_DecodeUTF8(x.data(),
                                                   x.length(),
-                                                  "surrogateescape");
-            py::str pyvalue(tmp1);
+                                                  "surrogateescape"));
             out.append(pyvalue);
-            Py_DECREF(tmp1);
           }
           return out;
         }
