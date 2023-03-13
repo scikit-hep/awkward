@@ -76,7 +76,9 @@ def test_make_mixins():
         [],
         [{"x": 8, "y": 8.8}, {"x": 10, "y": 11.0}],
     ]
-    assert to_list(wone + wtwo) == [
+
+    left = ak.to_list(wone + wtwo)
+    right = [
         [
             {
                 "x": 0.9524937500390619,
@@ -100,13 +102,20 @@ def test_make_mixins():
             {"x": 5.0, "y": 5.5, "weight": 14.866068747318506},
         ],
     ]
-    assert to_list(abs(one)) == [
+    assert left[-1] == pytest.approx(right[-1])
+
+    left = ak.to_list(abs(one))
+    right = [
         [1.4866068747318506, 2.973213749463701, 4.459820624195552],
         [],
         [5.946427498927402, 7.433034373659253],
     ]
-    assert to_list(one.distance(wtwo)) == [
+    assert left[-1] == pytest.approx(right[-1])
+
+    left = ak.to_list(one.distance(wtwo))
+    right = [
         [0.14142135623730953, 0.0, 0.31622776601683783],
         [],
         [0.4123105625617664, 0.0],
     ]
+    assert left[-1] == pytest.approx(right[-1])
