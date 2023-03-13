@@ -172,6 +172,6 @@ jobs:
         name: artifact
         path: dist
 
-    - uses: pypa/gh-action-pypi-publish@v1.6.4
+    - uses: pypa/gh-action-pypi-publish@v1.7.1
       with:
         password: ${{ secrets.PYPI_PASSWORD_CPP }}
