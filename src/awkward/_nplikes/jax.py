@@ -49,7 +49,7 @@ class Jax(ArrayModuleNumpyLike):
         Return `True` if the given object is a jax buffer, otherwise `False`.
 
         """
-        return cls.is_array(type_) or cls.is_tracer(type_)
+        return cls.is_array_type(type_) or cls.is_tracer_type(type_)
 
     @classmethod
     def is_array_type(cls, type_: type) -> bool:

@@ -6,6 +6,7 @@ import copy
 import awkward as ak
 from awkward._nplikes import nplike_of, to_nplike
 from awkward._nplikes.cupy import Cupy
+from awkward._nplikes.finder import NumpyLikeFinder, register_nplike_finder_factory
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyLike, NumpyMetadata
@@ -137,7 +138,7 @@ class Index:
 
     def forget_length(self):
         tt = TypeTracer.instance()
-        if isinstance(self._nplike, type(tt)):
+        if isinstance(self._nplike, TypeTracer):
             data = self._data
         else:
             data = self.raw(tt)
@@ -252,3 +253,13 @@ class IndexU32(Index):
 
 class Index64(Index):
     _expected_dtype = np.dtype(np.int64)
+
+
+@register_nplike_finder_factory
+def _index_nplike_finder_factory(cls) -> NumpyLikeFinder:
+    if issubclass(cls, Index):
+
+        def finder(index: Index) -> NumpyLike:
+            return index.nplike
+
+        return finder

@@ -7,7 +7,8 @@ from collections.abc import Iterable
 import awkward as ak
 from awkward._behavior import get_record_class
 from awkward._layout import wrap_layout
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.finder import NumpyLikeFinder, register_nplike_finder_factory
+from awkward._nplikes.numpylike import NumpyLike, NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._regularize import is_integer
 from awkward._util import unset
@@ -257,3 +258,13 @@ class Record:
         return Record(
             self._array if array is unset else array, self._at if at is unset else at
         )
+
+
+@register_nplike_finder_factory
+def _record_nplike_finder_factory(cls: type) -> NumpyLikeFinder:
+    if issubclass(cls, Record):
+
+        def finder(obj: cls) -> NumpyLike:
+            return obj.array.backend.nplike
+
+        return finder
