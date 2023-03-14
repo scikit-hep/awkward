@@ -68,7 +68,6 @@ class NumpyKernel(BaseKernel):
     def _cast(cls, x, t):
         if issubclass(t, ctypes._Pointer):
             # Do we have a NumPy-owned array?
-            # TODO should kernels strip nplike wrapper? Probably
             if Numpy.is_own_array(x):
                 if x.ndim > 0:
                     return ctypes.cast(x.ctypes.data, t)
