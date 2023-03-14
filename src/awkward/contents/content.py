@@ -15,7 +15,7 @@ from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import IndexType, NumpyLike, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import TypeTracer
-from awkward._regularize import is_integer, is_integer_like, is_sized_iterable
+from awkward._regularize import is_integer_like, is_sized_iterable
 from awkward._slicing import normalize_slice
 from awkward._util import unset
 from awkward.forms.form import Form, JSONMapping, _type_parameters_equal
@@ -554,7 +554,7 @@ class Content:
         return self._getitem(where)
 
     def _getitem(self, where):
-        if is_integer(where):
+        if is_integer_like(where):
             return self._getitem_at(where)
 
         elif isinstance(where, slice) and where.step is None:
@@ -691,13 +691,13 @@ class Content:
                 # Is it a scalar, not array?
                 if len(where.shape) == 0:
                     raise ak._errors.wrap_error(
-                        NotImplementedError(
-                            "scalar arrays in slices are not currently supported"
+                        AssertionError(
+                            "scalar arrays should be handled by integer-like indexing"
                         )
                     )
                 else:
                     layout = ak.operations.ak_to_layout._impl(
-                        where, allow_record=False, allow_other=True, regulararray=False
+                        where, allow_record=False, allow_other=False, regulararray=False
                     )
                     return self._getitem(layout)
 
@@ -714,7 +714,9 @@ class Content:
                 return self._getitem_fields(list(where))
 
             else:
-                layout = ak.operations.to_layout(where)
+                layout = ak.operations.ak_to_layout._impl(
+                    where, allow_record=False, allow_other=False, regulararray=False
+                )
                 return self._getitem(layout)
 
         else:

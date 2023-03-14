@@ -483,11 +483,11 @@ class RegularArray(Content):
                     "awkward_RegularArray_getitem_next_at", nextcarry.dtype.type
                 ](
                     nextcarry.data,
-                    int(head) if index_nplike.known_data else head,
+                    head,
                     self._length,
                     self._size,
                 ),
-                slicer=int(head) if index_nplike.known_data else head,
+                slicer=head,
             )
             nextcontent = self._content._carry(nextcarry, True)
             return nextcontent._getitem_next(nexthead, nexttail, advanced)

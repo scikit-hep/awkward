@@ -462,9 +462,9 @@ class ListOffsetArray(Content):
                     starts.data,
                     stops.data,
                     lenstarts,
-                    int(head) if self._backend.index_nplike.known_data else head,
+                    head,
                 ),
-                slicer=int(head) if self._backend.index_nplike.known_data else head,
+                slicer=head,
             )
             nextcontent = self._content._carry(nextcarry, True)
             return nextcontent._getitem_next(nexthead, nexttail, advanced)

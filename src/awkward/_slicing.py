@@ -10,7 +10,7 @@ from awkward._nplikes import to_nplike
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
-from awkward._regularize import is_integer, is_sized_iterable
+from awkward._regularize import is_integer_like, is_sized_iterable
 from awkward.typing import TYPE_CHECKING, Sequence, TypeAlias, TypeVar
 
 if TYPE_CHECKING:
@@ -219,8 +219,8 @@ def normalise_item(item, backend: Backend) -> SliceItem:
     of integers.
     """
     # Basic indices
-    if is_integer(item):
-        return int(item)
+    if is_integer_like(item):
+        return item
 
     elif isinstance(item, slice):
         return normalize_slice(item, backend=backend)
@@ -280,7 +280,9 @@ def normalise_item(item, backend: Backend) -> SliceItem:
             # Is it a scalar, not array?
             if len(item.shape) == 0:
                 raise wrap_error(
-                    NotImplementedError("scalar objects in slice normalisation")
+                    AssertionError(
+                        "scalar arrays should be handled by integer-like indexing"
+                    )
                 )
             else:
                 layout = ak.operations.ak_to_layout._impl(
