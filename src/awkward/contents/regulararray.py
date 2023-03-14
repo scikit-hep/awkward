@@ -9,6 +9,7 @@ from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import IndexType, NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._regularize import is_integer
+from awkward._slicing import NO_HEAD
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.form import _type_parameters_equal
@@ -470,11 +471,11 @@ class RegularArray(Content):
     ) -> Content:
         index_nplike = self._backend.index_nplike
 
-        if head == ():
+        if head is NO_HEAD:
             return self
 
         elif isinstance(head, int):
-            nexthead, nexttail = ak._slicing.headtail(tail)
+            nexthead, nexttail = ak._slicing.head_tail(tail)
             nextcarry = ak.index.Index64.empty(self._length, index_nplike)
             assert nextcarry.nplike is index_nplike
             self._handle_error(
@@ -492,7 +493,7 @@ class RegularArray(Content):
             return nextcontent._getitem_next(nexthead, nexttail, advanced)
 
         elif isinstance(head, slice):
-            nexthead, nexttail = ak._slicing.headtail(tail)
+            nexthead, nexttail = ak._slicing.head_tail(tail)
             start, stop, step, nextsize = index_nplike.derive_slice_for_length(
                 head, length=self._size
             )
@@ -566,7 +567,6 @@ class RegularArray(Content):
 
         elif isinstance(head, ak.index.Index64):
             head = head.to_nplike(index_nplike)
-            nexthead, nexttail = ak._slicing.headtail(tail)
             flathead = index_nplike.reshape(index_nplike.asarray(head.data), (-1,))
             regular_flathead = ak.index.Index64.empty(flathead.shape[0], index_nplike)
             assert regular_flathead.nplike is index_nplike
@@ -584,6 +584,7 @@ class RegularArray(Content):
                 slicer=head,
             )
 
+            nexthead, nexttail = ak._slicing.head_tail(tail)
             if advanced is None or (
                 advanced.length is not unknown_length and advanced.length == 0
             ):

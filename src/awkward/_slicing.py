@@ -11,7 +11,7 @@ from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._regularize import is_integer, is_sized_iterable
-from awkward.typing import TYPE_CHECKING, Sequence, TypeAlias
+from awkward.typing import TYPE_CHECKING, Sequence, TypeAlias, TypeVar
 
 if TYPE_CHECKING:
     from awkward._nplikes.numpylike import ArrayLike
@@ -71,13 +71,23 @@ def normalize_slice(slice_: slice, *, backend: Backend) -> slice:
         return slice(start, stop, step)
 
 
-def headtail(
-    oldtail: tuple[SliceItem, ...]
-) -> tuple[SliceItem | tuple, tuple[SliceItem, ...]]:
-    if len(oldtail) == 0:
-        return (), ()
+T = TypeVar("T")
+
+
+class _NoHead:
+    def __repr__(self):
+        return f"{__name__}.NO_HEAD"
+
+
+NO_HEAD = _NoHead()
+S = TypeVar("S", bound=Sequence)
+
+
+def head_tail(sequence: S[T]) -> tuple[T | type(NO_HEAD), S[T]]:
+    if len(sequence) == 0:
+        return NO_HEAD, ()
     else:
-        return oldtail[0], oldtail[1:]
+        return sequence[0], sequence[1:]
 
 
 def prepare_advanced_indexing(items):

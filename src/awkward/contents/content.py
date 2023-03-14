@@ -341,7 +341,7 @@ class Content:
         tail: tuple[SliceItem, ...],
         advanced: Index | None,
     ):
-        nexthead, nexttail = ak._slicing.headtail(tail)
+        nexthead, nexttail = ak._slicing.head_tail(tail)
         return self._getitem_field(head)._getitem_next(nexthead, nexttail, advanced)
 
     def _getitem_next_fields(self, head, tail, advanced: Index | None) -> Content:
@@ -351,13 +351,13 @@ class Content:
                 only_fields.append(x)
             else:
                 not_fields.append(x)
-        nexthead, nexttail = ak._slicing.headtail(tuple(not_fields))
+        nexthead, nexttail = ak._slicing.head_tail(tuple(not_fields))
         return self._getitem_fields(head, tuple(only_fields))._getitem_next(
             nexthead, nexttail, advanced
         )
 
     def _getitem_next_newaxis(self, tail, advanced: Index | None):
-        nexthead, nexttail = ak._slicing.headtail(tail)
+        nexthead, nexttail = ak._slicing.head_tail(tail)
         return ak.contents.RegularArray(
             self._getitem_next(nexthead, nexttail, advanced), 1, 0, parameters=None
         )
@@ -368,7 +368,7 @@ class Content:
         dimlength = sum(1 if isinstance(x, (int, slice, Index64)) else 0 for x in tail)
 
         if len(tail) == 0 or mindepth - 1 == maxdepth - 1 == dimlength:
-            nexthead, nexttail = ak._slicing.headtail(tail)
+            nexthead, nexttail = ak._slicing.head_tail(tail)
             return self._getitem_next(nexthead, nexttail, advanced)
 
         elif dimlength in {mindepth - 1, maxdepth - 1}:

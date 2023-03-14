@@ -9,6 +9,7 @@ from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import IndexType, NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._nplikes.typetracer import TypeTracer, is_unknown_scalar
+from awkward._slicing import NO_HEAD
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.form import _type_parameters_equal
@@ -434,14 +435,14 @@ class ListOffsetArray(Content):
         advanced: Index | None,
     ) -> Content:
         advanced = advanced.to_nplike(self._backend.nplike)
-        if head == ():
+        if head is NO_HEAD:
             return self
 
         elif isinstance(head, int):
             assert advanced is None
             lenstarts = self._offsets.length - 1
             starts, stops = self.starts, self.stops
-            nexthead, nexttail = ak._slicing.headtail(tail)
+            nexthead, nexttail = ak._slicing.head_tail(tail)
             nextcarry = ak.index.Index64.empty(lenstarts, self._backend.index_nplike)
 
             assert (
@@ -468,7 +469,7 @@ class ListOffsetArray(Content):
             return nextcontent._getitem_next(nexthead, nexttail, advanced)
 
         elif isinstance(head, slice):
-            nexthead, nexttail = ak._slicing.headtail(tail)
+            nexthead, nexttail = ak._slicing.head_tail(tail)
             lenstarts = self._offsets.length - 1
             start, stop, step = head.start, head.stop, head.step
 
@@ -614,7 +615,7 @@ class ListOffsetArray(Content):
             return self._getitem_next_ellipsis(tail, advanced)
 
         elif isinstance(head, ak.index.Index64):
-            nexthead, nexttail = ak._slicing.headtail(tail)
+            nexthead, nexttail = ak._slicing.head_tail(tail)
             flathead = self._backend.index_nplike.reshape(
                 self._backend.index_nplike.asarray(head.data), (-1,)
             )

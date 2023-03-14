@@ -11,6 +11,7 @@ from awkward._layout import maybe_posaxis
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import IndexType, NumpyMetadata
 from awkward._nplikes.shape import unknown_length
+from awkward._slicing import NO_HEAD
 from awkward._regularize import is_integer
 from awkward._util import unset
 from awkward.contents.content import Content
@@ -472,7 +473,7 @@ class RecordArray(Content):
             return self.content(where)
 
         else:
-            nexthead, nexttail = ak._slicing.headtail(only_fields)
+            nexthead, nexttail = ak._slicing.head_tail(only_fields)
             if isinstance(nexthead, str):
                 return self.content(where)._getitem_field(nexthead, nexttail)
             else:
@@ -490,7 +491,7 @@ class RecordArray(Content):
         if len(only_fields) == 0:
             contents = [self.content(i) for i in indexes]
         else:
-            nexthead, nexttail = ak._slicing.headtail(only_fields)
+            nexthead, nexttail = ak._slicing.head_tail(only_fields)
             if isinstance(nexthead, str):
                 contents = [
                     self.content(i)._getitem_field(nexthead, nexttail) for i in indexes
@@ -562,7 +563,7 @@ class RecordArray(Content):
         tail: tuple[SliceItem, ...],
         advanced: Index | None,
     ) -> Content:
-        if head == ():
+        if head is NO_HEAD:
             return self
 
         elif isinstance(head, str):
@@ -575,7 +576,7 @@ class RecordArray(Content):
             return self._getitem_next_missing(head, tail, advanced)
 
         else:
-            nexthead, nexttail = ak._slicing.headtail(tail)
+            nexthead, nexttail = ak._slicing.head_tail(tail)
 
             contents = []
             for i in range(len(self._contents)):
