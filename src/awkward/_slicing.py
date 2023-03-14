@@ -6,7 +6,7 @@ import operator
 import awkward as ak
 from awkward._backends import Backend
 from awkward._errors import wrap_error
-from awkward._nplikes import nplike_of, to_nplike
+from awkward._nplikes import to_nplike
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
@@ -90,11 +90,12 @@ def head_tail(sequence: S[T]) -> tuple[T | type(NO_HEAD), S[T]]:
         return sequence[0], sequence[1:]
 
 
-def prepare_advanced_indexing(items):
+def prepare_advanced_indexing(items, backend: Backend):
     """Broadcast index objects to satisfy NumPy indexing rules
 
     Args:
         items: iterable of index items.
+        backend: backend of items
 
     Returns a tuple of broadcasted index items.
 
@@ -139,7 +140,7 @@ def prepare_advanced_indexing(items):
         )
 
     # Then broadcast the index items
-    nplike = nplike_of(*broadcastable)
+    nplike = backend.index_nplike
     broadcasted = nplike.broadcast_arrays(*broadcastable)
 
     # And re-assemble the index with the broadcasted items
@@ -152,7 +153,7 @@ def prepare_advanced_indexing(items):
 
         x = broadcasted[i_broadcast]
         if len(x.shape) == 0:
-            prepared.append(int(x))
+            prepared.append(int(x) if nplike.known_data else x)
         elif np.issubdtype(x.dtype, np.int64):
             prepared.append(ak.index.Index64(nplike.reshape(x, (-1,))))
             prepared[-1].metadata["shape"] = x.shape
@@ -315,10 +316,8 @@ def normalise_item(item, backend: Backend) -> SliceItem:
 
 
 def normalise_items(where: Sequence, backend: Backend) -> list:
-    where_backend = ak._backends.backend_of(*where, default=backend)
-    common_backend = ak._backends.common_backend([backend, where_backend])
     # First prepare items for broadcasting into like-types
-    return [normalise_item(x, backend=common_backend) for x in where]
+    return [normalise_item(x, backend=backend) for x in where]
 
 
 def _normalise_item_RegularArray_to_ListOffsetArray64(item: Content) -> Content:

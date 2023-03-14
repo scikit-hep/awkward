@@ -577,14 +577,18 @@ class Content:
             if len(where) == 0:
                 return self
 
+            # Backend may change if index contains typetracers
+            backend = ak._backends.backend_of(self, *where)
+            this = self.to_backend(backend)
+
             # Normalise valid indices onto well-defined basis
-            items = ak._slicing.normalise_items(where, self._backend)
+            items = ak._slicing.normalise_items(where, backend)
             # Prepare items for advanced indexing (e.g. via broadcasting)
-            nextwhere = ak._slicing.prepare_advanced_indexing(items)
+            nextwhere = ak._slicing.prepare_advanced_indexing(items, backend)
 
             next = ak.contents.RegularArray(
-                self,
-                self.length,
+                this,
+                this.length,
                 1,
                 parameters=None,
             )
@@ -604,10 +608,8 @@ class Content:
             isinstance(where, ak.contents.Content)
             and where.backend is not self._backend
         ):
-            common_backend = ak._backends.common_backend([where.backend, self._backend])
-            return self.to_backend(common_backend)._getitem(
-                where.to_backend(common_backend)
-            )
+            backend = ak._backends.backend_of(self, where)
+            return self.to_backend(backend)._getitem(where.to_backend(backend))
 
         elif isinstance(where, ak.contents.NumpyArray):
             data_as_index = to_nplike(
