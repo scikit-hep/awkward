@@ -8,7 +8,7 @@ from awkward._layout import maybe_posaxis
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import IndexType, NumpyMetadata
 from awkward._nplikes.shape import unknown_length
-from awkward._regularize import is_integer
+from awkward._regularize import is_integer, is_integer_like
 from awkward._slicing import NO_HEAD
 from awkward._util import unset
 from awkward.contents.content import Content
@@ -474,7 +474,7 @@ class RegularArray(Content):
         if head is NO_HEAD:
             return self
 
-        elif isinstance(head, int):
+        elif is_integer_like(head):
             nexthead, nexttail = ak._slicing.head_tail(tail)
             nextcarry = ak.index.Index64.empty(self._length, index_nplike)
             assert nextcarry.nplike is index_nplike
@@ -483,11 +483,11 @@ class RegularArray(Content):
                     "awkward_RegularArray_getitem_next_at", nextcarry.dtype.type
                 ](
                     nextcarry.data,
-                    head,
+                    int(head) if index_nplike.known_data else head,
                     self._length,
                     self._size,
                 ),
-                slicer=head,
+                slicer=int(head) if index_nplike.known_data else head,
             )
             nextcontent = self._content._carry(nextcarry, True)
             return nextcontent._getitem_next(nexthead, nexttail, advanced)

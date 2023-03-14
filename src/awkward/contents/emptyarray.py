@@ -8,6 +8,7 @@ from awkward._errors import deprecate
 from awkward._layout import maybe_posaxis
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import IndexType, NumpyMetadata
+from awkward._regularize import is_integer_like
 from awkward._slicing import NO_HEAD
 from awkward._util import unset
 from awkward.contents.content import Content
@@ -196,7 +197,7 @@ class EmptyArray(Content):
         if head is NO_HEAD:
             return self
 
-        elif isinstance(head, int):
+        elif is_integer_like(head):
             raise ak._errors.index_error(self, head, "array is empty")
 
         elif isinstance(head, slice):

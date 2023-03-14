@@ -15,7 +15,7 @@ from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import IndexType, NumpyLike, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import TypeTracer
-from awkward._regularize import is_integer, is_sized_iterable
+from awkward._regularize import is_integer, is_integer_like, is_sized_iterable
 from awkward._slicing import normalize_slice
 from awkward._util import unset
 from awkward.forms.form import Form, JSONMapping, _type_parameters_equal
@@ -365,7 +365,10 @@ class Content:
     def _getitem_next_ellipsis(self, tail, advanced: Index | None):
         mindepth, maxdepth = self.minmax_depth
 
-        dimlength = sum(1 if isinstance(x, (int, slice, Index64)) else 0 for x in tail)
+        dimlength = sum(
+            1 if is_integer_like(x) or isinstance(x, (slice, Index64)) else 0
+            for x in tail
+        )
 
         if len(tail) == 0 or mindepth - 1 == maxdepth - 1 == dimlength:
             nexthead, nexttail = ak._slicing.head_tail(tail)

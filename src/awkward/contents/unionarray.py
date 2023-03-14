@@ -13,6 +13,7 @@ from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import IndexType, NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._nplikes.typetracer import OneOf, TypeTracer
+from awkward._regularize import is_integer_like
 from awkward._slicing import NO_HEAD
 from awkward._util import unset
 from awkward.contents.content import Content
@@ -804,8 +805,8 @@ class UnionArray(Content):
         if head is NO_HEAD:
             return self
 
-        elif isinstance(
-            head, (int, slice, ak.index.Index64, ak.contents.ListOffsetArray)
+        elif is_integer_like(head) or isinstance(
+            head, (slice, ak.index.Index64, ak.contents.ListOffsetArray)
         ):
             outcontents = []
             for i in range(len(self._contents)):
