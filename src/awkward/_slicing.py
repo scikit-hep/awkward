@@ -153,7 +153,7 @@ def prepare_advanced_indexing(items, backend: Backend):
 
         x = broadcasted[i_broadcast]
         if len(x.shape) == 0:
-            prepared.append(int(x) if nplike.known_data else x)
+            prepared.append(x)
         elif np.issubdtype(x.dtype, np.int64):
             prepared.append(ak.index.Index64(nplike.reshape(x, (-1,))))
             prepared[-1].metadata["shape"] = x.shape
@@ -208,6 +208,18 @@ def prepare_advanced_indexing(items, backend: Backend):
     return tuple(prepared)
 
 
+def normalize_integer_like(x) -> int | ArrayLike:
+    if ak._util.is_array_like(x):
+        if np.issubdtype(x.dtype, np.integer) and x.ndim == 0:
+            return x
+        else:
+            raise wrap_error(
+                TypeError("only 0D integer arrays are considered integral")
+            )
+    else:
+        return int(x)
+
+
 def normalise_item(item, backend: Backend) -> SliceItem:
     """
     Args:
@@ -220,7 +232,7 @@ def normalise_item(item, backend: Backend) -> SliceItem:
     """
     # Basic indices
     if is_integer_like(item):
-        return item
+        return normalize_integer_like(item)
 
     elif isinstance(item, slice):
         return normalize_slice(item, backend=backend)

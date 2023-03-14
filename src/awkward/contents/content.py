@@ -555,7 +555,7 @@ class Content:
 
     def _getitem(self, where):
         if is_integer_like(where):
-            return self._getitem_at(where)
+            return self._getitem_at(ak._slicing.normalize_integer_like(where))
 
         elif isinstance(where, slice) and where.step is None:
             # Ensure that start, stop are non-negative!
