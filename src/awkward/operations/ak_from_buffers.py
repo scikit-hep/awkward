@@ -160,13 +160,13 @@ _index_to_dtype = {
 
 def _from_buffer(nplike, buffer, dtype, count, byteorder):
     if nplike.is_own_array(buffer):
-        array = buffer.view(dtype).reshape(-1)
+        array = nplike.reshape(buffer.view(dtype), shape=(-1,), copy=False)
 
         # Require 1D
         if array.size < count:
             raise ak._errors.wrap_error(
                 TypeError(
-                    f"size of array ({array.size}) is less than size of form {count}"
+                    f"size of array ({array.size}) is less than size of form ({count})"
                 )
             )
 
