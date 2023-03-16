@@ -129,7 +129,7 @@ def _impl(array, copy, nan, posinf, neginf, highlevel, behavior):
         assert isinstance(out, tuple) and len(out) == 1
         out = out[0]
 
-    return ak._util.wrap(out, behavior, highlevel)
+    return ak._util.wrap_layout(out, behavior, highlevel)
 
 
 @ak._connect.numpy.implements("nan_to_num")

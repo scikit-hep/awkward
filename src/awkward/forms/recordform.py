@@ -180,7 +180,7 @@ class RecordForm(Form):
             [x._type(typestrs) for x in self._contents],
             self._fields,
             parameters=self._parameters,
-            typestr=ak._util.gettypestr(self._parameters, typestrs),
+            typestr=ak._util.find_typestr(self._parameters, typestrs),
         )
 
     def __eq__(self, other):

@@ -74,4 +74,4 @@ def _impl(array, generate_bitmasks, highlevel, behavior):
 
     ak._do.recursively_apply(out, remove_revertable)
 
-    return ak._util.wrap(out, behavior, highlevel)
+    return ak._util.wrap_layout(out, behavior, highlevel)

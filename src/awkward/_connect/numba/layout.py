@@ -52,7 +52,7 @@ class ContentType(numba.types.Type):
             )
 
     def getitem_at_check(self, viewtype):
-        typer = ak._util.numba_array_typer(viewtype.type, viewtype.behavior)
+        typer = ak._util.find_numba_array_typer(viewtype.type, viewtype.behavior)
         if typer is None:
             return self.getitem_at(viewtype)
         else:
@@ -82,7 +82,7 @@ class ContentType(numba.types.Type):
         wrapneg,
         checkbounds,
     ):
-        lower = ak._util.numba_array_lower(viewtype.type, viewtype.behavior)
+        lower = ak._util.find_numba_array_lower(viewtype.type, viewtype.behavior)
         if lower is not None:
             atval = regularize_atval(
                 context, builder, viewproxy, attype, atval, wrapneg, checkbounds
@@ -1062,7 +1062,7 @@ class RecordArrayType(ContentType, ak._lookup.RecordLookup):
     def getitem_at_check(self, viewtype):
         out = self.getitem_at(viewtype)
         if isinstance(out, ak._connect.numba.arrayview.RecordViewType):
-            typer = ak._util.numba_record_typer(
+            typer = ak._util.find_numba_record_typer(
                 out.arrayviewtype.type, out.arrayviewtype.behavior
             )
             if typer is not None:
@@ -1161,7 +1161,7 @@ class RecordArrayType(ContentType, ak._lookup.RecordLookup):
         )
         baretype = self.getitem_at(viewtype)
         if isinstance(baretype, ak._connect.numba.arrayview.RecordViewType):
-            lower = ak._util.numba_record_lower(
+            lower = ak._util.find_numba_record_lower(
                 baretype.arrayviewtype.type, baretype.arrayviewtype.behavior
             )
             if lower is not None:

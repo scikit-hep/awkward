@@ -45,4 +45,6 @@ def _impl(array, parameter, value, highlevel, behavior):
 
     out = layout.with_parameter(parameter, value)
 
-    return ak._util.wrap(out, ak._util.behavior_of(array, behavior=behavior), highlevel)
+    return ak._util.wrap_layout(
+        out, ak._util.behavior_of(array, behavior=behavior), highlevel
+    )

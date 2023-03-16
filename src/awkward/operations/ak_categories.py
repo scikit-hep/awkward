@@ -38,4 +38,4 @@ def _impl(array, highlevel):
     behavior = ak._util.behavior_of(array)
     ak._do.recursively_apply(layout, action, behavior=behavior)
 
-    return ak._util.wrap(output[0], behavior, highlevel)
+    return ak._util.wrap_layout(output[0], behavior, highlevel)

@@ -144,7 +144,7 @@ def _impl(
         )
 
     out = reconstitute(form, length, container, getkey, backend, byteorder, simplify)
-    return ak._util.wrap(out, behavior, highlevel)
+    return ak._util.wrap_layout(out, behavior, highlevel)
 
 
 _index_to_dtype = {

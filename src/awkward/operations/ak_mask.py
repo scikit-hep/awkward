@@ -129,4 +129,4 @@ def _impl(array, mask, valid_when, highlevel, behavior):
         right_broadcast=False,
     )
     assert isinstance(out, tuple) and len(out) == 1
-    return ak._util.wrap(out[0], behavior, highlevel)
+    return ak._util.wrap_layout(out[0], behavior, highlevel)

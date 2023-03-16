@@ -246,4 +246,4 @@ def _impl(
         out = out[0]
         assert isinstance(out, ak.record.Record)
 
-    return ak._util.wrap(out, behavior, highlevel)
+    return ak._util.wrap_layout(out, behavior, highlevel)

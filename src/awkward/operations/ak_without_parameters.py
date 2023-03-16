@@ -38,4 +38,4 @@ def _impl(array, highlevel, behavior):
         keep_parameters=False,
     )
 
-    return ak._util.wrap(out, behavior, highlevel)
+    return ak._util.wrap_layout(out, behavior, highlevel)

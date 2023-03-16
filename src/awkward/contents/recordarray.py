@@ -912,7 +912,7 @@ class RecordArray(Content):
         keepdims,
         behavior,
     ):
-        reducer_recordclass = ak._util.reducer_recordclass(reducer, self, behavior)
+        reducer_recordclass = ak._util.find_record_reducer(reducer, self, behavior)
         if reducer_recordclass is None:
             raise ak._errors.wrap_error(
                 TypeError(

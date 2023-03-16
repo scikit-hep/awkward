@@ -160,6 +160,6 @@ def _impl(arrays, highlevel, behavior):
         return [pull(layout) for pull, layout in zip(pullbacks, inner_layouts)]
 
     return [
-        ak._util.wrap(x, highlevel=highlevel, behavior=behavior)
+        ak._util.wrap_layout(x, highlevel=highlevel, behavior=behavior)
         for x in recurse(layouts)
     ]

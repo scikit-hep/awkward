@@ -254,4 +254,6 @@ def _impl(x, y, weight, axis, keepdims, mask_identity):
         if scalar:
             out = out[0]
 
-        return ak._util.wrap(out, highlevel=True, behavior=behavior, allow_other=scalar)
+        return ak._util.wrap_layout(
+            out, highlevel=True, behavior=behavior, allow_other=scalar
+        )

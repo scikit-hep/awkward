@@ -48,7 +48,7 @@ class EmptyForm(Form):
     def _type(self, typestrs):
         return ak.types.UnknownType(
             parameters=self._parameters,
-            typestr=ak._util.gettypestr(self._parameters, typestrs),
+            typestr=ak._util.find_typestr(self._parameters, typestrs),
         )
 
     def __eq__(self, other) -> bool:

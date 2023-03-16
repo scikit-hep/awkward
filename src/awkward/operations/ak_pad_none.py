@@ -112,4 +112,4 @@ def _impl(array, target, axis, clip, highlevel, behavior):
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
     out = ak._do.pad_none(layout, target, axis, clip=clip)
 
-    return ak._util.wrap(out, behavior, highlevel, like=array)
+    return ak._util.wrap_layout(out, behavior, highlevel, like=array)

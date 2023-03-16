@@ -424,4 +424,4 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
                 result, axis=flatten_axis, highlevel=False, behavior=behavior
             )
 
-    return ak._util.wrap(result, behavior, highlevel)
+    return ak._util.wrap_layout(result, behavior, highlevel)

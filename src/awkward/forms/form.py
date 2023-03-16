@@ -483,7 +483,7 @@ class Form:
         return self._type({})
 
     def type_from_behavior(self, behavior):
-        return self._type(ak._util.typestrs(behavior))
+        return self._type(ak._util.find_typestrs(behavior))
 
     def columns(self, list_indicator=None, column_prefix=()):
         output = []

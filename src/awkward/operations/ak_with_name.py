@@ -65,4 +65,4 @@ def _impl(array, name, highlevel, behavior):
 
     out2 = ak._do.recursively_apply(out, action2, behavior)
 
-    return ak._util.wrap(out2, behavior, highlevel)
+    return ak._util.wrap_layout(out2, behavior, highlevel)

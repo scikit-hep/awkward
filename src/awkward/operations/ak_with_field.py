@@ -140,4 +140,4 @@ def _impl(base, what, where, highlevel, behavior):
 
         assert isinstance(out, tuple) and len(out) == 1
 
-        return ak._util.wrap(out[0], behavior, highlevel)
+        return ak._util.wrap_layout(out[0], behavior, highlevel)

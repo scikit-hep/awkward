@@ -62,7 +62,7 @@ def _impl(a, b, rtol, atol, equal_nan, highlevel, behavior):
     out = ak._broadcasting.broadcast_and_apply([one, two], action, behavior)
     assert isinstance(out, tuple) and len(out) == 1
 
-    return ak._util.wrap(out[0], behavior, highlevel)
+    return ak._util.wrap_layout(out[0], behavior, highlevel)
 
 
 @ak._connect.numpy.implements("isclose")

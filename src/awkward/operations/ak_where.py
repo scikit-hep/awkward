@@ -84,7 +84,7 @@ def _impl1(condition, mergebool, highlevel, behavior):
     out = backend.nplike.nonzero(ak.operations.to_numpy(akcondition))
     if highlevel:
         return tuple(
-            ak._util.wrap(
+            ak._util.wrap_layout(
                 ak.contents.NumpyArray(x),
                 ak._util.behavior_of(condition, behavior=behavior),
             )
@@ -143,4 +143,4 @@ def _impl3(condition, x, y, mergebool, highlevel, behavior):
         numpy_to_regular=True,
     )
 
-    return ak._util.wrap(out[0], behavior, highlevel)
+    return ak._util.wrap_layout(out[0], behavior, highlevel)

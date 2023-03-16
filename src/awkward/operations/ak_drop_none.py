@@ -115,4 +115,4 @@ def _impl(array, axis, highlevel, behavior):
     if len(options["none_indexes"]) > 0:
         out = ak._do.recursively_apply(out, recompute_offsets, behavior, options)
 
-    return ak._util.wrap(out, behavior, highlevel, like=behavior)
+    return ak._util.wrap_layout(out, behavior, highlevel, like=behavior)

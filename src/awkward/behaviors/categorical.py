@@ -67,8 +67,8 @@ def _categorical_equal(one, two):
 
     one_index = numpy.asarray(one.index)
     two_index = numpy.asarray(two.index)
-    one_content = ak._util.wrap(one.content, behavior)
-    two_content = ak._util.wrap(two.content, behavior)
+    one_content = ak._util.wrap_layout(one.content, behavior)
+    two_content = ak._util.wrap_layout(two.content, behavior)
 
     if len(one_content) == len(two_content) and ak.operations.all(
         one_content == two_content, axis=None
@@ -90,7 +90,9 @@ def _categorical_equal(one, two):
         one_mapped = one_to_two[one_index]
 
     out = one_mapped == two_index
-    out = ak._util.wrap(ak.contents.NumpyArray(out), ak._util.behavior_of(one, two))
+    out = ak._util.wrap_layout(
+        ak.contents.NumpyArray(out), ak._util.behavior_of(one, two)
+    )
     return out
 
 

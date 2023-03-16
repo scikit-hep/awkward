@@ -65,7 +65,7 @@ def _impl(array, highlevel, behavior):
 
     result = ak._do.mergemany(out)
 
-    return ak._util.wrap(result, behavior, highlevel, like=array)
+    return ak._util.wrap_layout(result, behavior, highlevel, like=array)
 
 
 @ak._connect.numpy.implements("ravel")

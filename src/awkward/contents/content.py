@@ -1186,18 +1186,18 @@ class Content:
         self, behavior: dict | None, json_conversions: dict[str, Any] | None
     ):
         if self.is_record:
-            getitem = ak._util.recordclass(self, behavior).__getitem__
+            getitem = ak._util.get_record_class(self, behavior).__getitem__
             overloaded = getitem is not ak.highlevel.Record.__getitem__ and not getattr(
                 getitem, "ignore_in_to_list", False
             )
         else:
-            getitem = ak._util.arrayclass(self, behavior).__getitem__
+            getitem = ak._util.get_array_class(self, behavior).__getitem__
             overloaded = getitem is not ak.highlevel.Array.__getitem__ and not getattr(
                 getitem, "ignore_in_to_list", False
             )
 
         if overloaded:
-            array = ak._util.wrap(self, behavior=behavior)
+            array = ak._util.wrap_layout(self, behavior=behavior)
             out = [None] * self.length
             for i in range(self.length):
                 out[i] = array[i]

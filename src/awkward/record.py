@@ -217,12 +217,12 @@ class Record:
 
     def _to_list(self, behavior, json_conversions):
         overloaded = (
-            ak._util.recordclass(self._array, behavior).__getitem__
+            ak._util.get_record_class(self._array, behavior).__getitem__
             is not ak.highlevel.Record.__getitem__
         )
 
         if overloaded:
-            record = ak._util.wrap(self, behavior=behavior)
+            record = ak._util.wrap_layout(self, behavior=behavior)
             contents = []
             for field in self._array.fields:
                 contents.append(record[field])

@@ -288,4 +288,4 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
             right_broadcast=False,
         )[0]
 
-    return ak._util.wrap(out, behavior, highlevel)
+    return ak._util.wrap_layout(out, behavior, highlevel)

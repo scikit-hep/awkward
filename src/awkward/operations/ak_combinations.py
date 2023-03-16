@@ -220,4 +220,4 @@ def _impl(
         fields=fields,
         parameters=parameters,
     )
-    return ak._util.wrap(out, behavior, highlevel, like=array)
+    return ak._util.wrap_layout(out, behavior, highlevel, like=array)

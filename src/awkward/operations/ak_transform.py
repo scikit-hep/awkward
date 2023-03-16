@@ -513,7 +513,7 @@ def _impl(
         )
 
         if return_value != "none":
-            return ak._util.wrap(out, behavior, highlevel)
+            return ak._util.wrap_layout(out, behavior, highlevel)
 
     else:
 
@@ -563,6 +563,6 @@ def _impl(
 
         if return_value != "none":
             if len(out) == 1:
-                return ak._util.wrap(out[0], behavior, highlevel)
+                return ak._util.wrap_layout(out[0], behavior, highlevel)
             else:
-                return tuple(ak._util.wrap(x, behavior, highlevel) for x in out)
+                return tuple(ak._util.wrap_layout(x, behavior, highlevel) for x in out)

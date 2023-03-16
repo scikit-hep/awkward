@@ -65,4 +65,4 @@ def _impl(array, backend, highlevel, behavior):
     )
     behavior = ak._util.behavior_of(array, behavior=behavior)
     backend_layout = layout.to_backend(ak._backends.regularize_backend(backend))
-    return ak._util.wrap(backend_layout, behavior, highlevel)
+    return ak._util.wrap_layout(backend_layout, behavior, highlevel)

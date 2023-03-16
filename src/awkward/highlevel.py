@@ -317,7 +317,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     @behavior.setter
     def behavior(self, behavior):
         if behavior is None or isinstance(behavior, Mapping):
-            self.__class__ = ak._util.arrayclass(self._layout, behavior)
+            self.__class__ = ak._util.get_array_class(self._layout, behavior)
             self._behavior = behavior
         else:
             raise ak._errors.wrap_error(TypeError("behavior must be None or a dict"))
@@ -512,9 +512,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                             errors="surrogateescape"
                         )
                     else:
-                        yield ak._util.wrap(x, self._behavior)
+                        yield ak._util.wrap_layout(x, self._behavior)
                 elif isinstance(x, (ak.contents.Content, ak.record.Record)):
-                    yield ak._util.wrap(x, self._behavior)
+                    yield ak._util.wrap_layout(x, self._behavior)
                 else:
                     yield x
 
@@ -958,7 +958,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                         errors="surrogateescape"
                     )
             if isinstance(out, (ak.contents.Content, ak.record.Record)):
-                return ak._util.wrap(out, self._behavior)
+                return ak._util.wrap_layout(out, self._behavior)
             else:
                 return out
 
@@ -1623,7 +1623,7 @@ class Record(NDArrayOperatorsMixin):
     @behavior.setter
     def behavior(self, behavior):
         if behavior is None or isinstance(behavior, Mapping):
-            self.__class__ = ak._util.recordclass(self._layout, behavior)
+            self.__class__ = ak._util.get_record_class(self._layout, behavior)
             self._behavior = behavior
         else:
             raise ak._errors.wrap_error(TypeError("behavior must be None or a dict"))
@@ -1739,7 +1739,7 @@ class Record(NDArrayOperatorsMixin):
                         errors="surrogateescape"
                     )
             if isinstance(out, (ak.contents.Content, ak.record.Record)):
-                return ak._util.wrap(out, self._behavior)
+                return ak._util.wrap_layout(out, self._behavior)
             else:
                 return out
 

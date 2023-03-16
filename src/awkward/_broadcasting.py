@@ -879,7 +879,7 @@ def apply_step(
             # General list-handling case: the offsets of each list may be different.
             else:
                 fcns = [
-                    ak._util.custom_broadcast(x, behavior)
+                    ak._util.find_custom_broadcast(x, behavior)
                     if isinstance(x, Content)
                     else None
                     for x in inputs

@@ -139,4 +139,4 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
         behavior=behavior,
     )
 
-    return ak._util.wrap(result, behavior, highlevel)
+    return ak._util.wrap_layout(result, behavior, highlevel)

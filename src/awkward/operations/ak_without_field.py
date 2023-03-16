@@ -91,4 +91,4 @@ def _impl(base, where, highlevel, behavior):
     out = ak._do.recursively_apply(
         base, action, behavior, depth_context={"where": where}
     )
-    return ak._util.wrap(out, behavior, highlevel)
+    return ak._util.wrap_layout(out, behavior, highlevel)

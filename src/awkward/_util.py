@@ -178,7 +178,7 @@ def overlay_behavior(behavior: dict | None) -> collections.abc.Mapping:
     return collections.ChainMap(behavior, ak.behavior)
 
 
-def arrayclass(layout, behavior):
+def get_array_class(layout, behavior):
     behavior = overlay_behavior(behavior)
     arr = layout.parameter("__array__")
     if isinstance(arr, str):
@@ -193,7 +193,24 @@ def arrayclass(layout, behavior):
     return ak.highlevel.Array
 
 
-def custom_cast(obj, behavior):
+def get_record_class(layout, behavior):
+    behavior = overlay_behavior(behavior)
+    rec = layout.parameter("__record__")
+    if isinstance(rec, str):
+        cls = behavior.get(rec)
+        if isinstance(cls, type) and issubclass(cls, ak.highlevel.Record):
+            return cls
+    return ak.highlevel.Record
+
+
+def find_record_reducer(reducer, layout, behavior):
+    behavior = overlay_behavior(behavior)
+    rec = layout.parameter("__record__")
+    if isinstance(rec, str):
+        return behavior.get((reducer.highlevel_function(), rec))
+
+
+def find_custom_cast(obj, behavior):
     behavior = overlay_behavior(behavior)
     for key, fcn in behavior.items():
         if (
@@ -206,7 +223,7 @@ def custom_cast(obj, behavior):
     return None
 
 
-def custom_broadcast(layout, behavior):
+def find_custom_broadcast(layout, behavior):
     behavior = overlay_behavior(behavior)
     custom = layout.parameter("__array__")
     if not isinstance(custom, str):
@@ -225,7 +242,7 @@ def custom_broadcast(layout, behavior):
     return None
 
 
-def custom_ufunc(ufunc, layout, behavior):
+def find_ufunc_generic(ufunc, layout, behavior):
     behavior = overlay_behavior(behavior)
     custom = layout.parameter("__array__")
     if not isinstance(custom, str):
@@ -242,104 +259,7 @@ def custom_ufunc(ufunc, layout, behavior):
     return None
 
 
-def numba_array_typer(layouttype, behavior):
-    behavior = overlay_behavior(behavior)
-    arr = layouttype.parameters.get("__array__")
-    if isinstance(arr, str):
-        typer = behavior.get(("__numba_typer__", arr))
-        if callable(typer):
-            return typer
-    deeprec = layouttype.parameters.get("__record__")
-    if isinstance(deeprec, str):
-        typer = behavior.get(("__numba_typer__", "*", deeprec))
-        if callable(typer):
-            return typer
-    return None
-
-
-def numba_array_lower(layouttype, behavior):
-    behavior = overlay_behavior(behavior)
-    arr = layouttype.parameters.get("__array__")
-    if isinstance(arr, str):
-        lower = behavior.get(("__numba_lower__", arr))
-        if callable(lower):
-            return lower
-    deeprec = layouttype.parameters.get("__record__")
-    if isinstance(deeprec, str):
-        lower = behavior.get(("__numba_lower__", "*", deeprec))
-        if callable(lower):
-            return lower
-    return None
-
-
-def recordclass(layout, behavior):
-    behavior = overlay_behavior(behavior)
-    rec = layout.parameter("__record__")
-    if isinstance(rec, str):
-        cls = behavior.get(rec)
-        if isinstance(cls, type) and issubclass(cls, ak.highlevel.Record):
-            return cls
-    return ak.highlevel.Record
-
-
-def reducer_recordclass(reducer, layout, behavior):
-    behavior = overlay_behavior(behavior)
-    rec = layout.parameter("__record__")
-    if isinstance(rec, str):
-        return behavior.get((reducer.highlevel_function(), rec))
-
-
-def typestrs(behavior):
-    behavior = overlay_behavior(behavior)
-    out = {}
-    for key, typestr in behavior.items():
-        if (
-            isinstance(key, tuple)
-            and len(key) == 2
-            and key[0] == "__typestr__"
-            and isinstance(key[1], str)
-            and isinstance(typestr, str)
-        ):
-            out[key[1]] = typestr
-    return out
-
-
-def gettypestr(parameters, typestrs):
-    if parameters is not None:
-        record = parameters.get("__record__")
-        if record is not None:
-            typestr = typestrs.get(record)
-            if typestr is not None:
-                return typestr
-        array = parameters.get("__array__")
-        if array is not None:
-            typestr = typestrs.get(array)
-            if typestr is not None:
-                return typestr
-    return None
-
-
-def numba_record_typer(layouttype, behavior):
-    behavior = overlay_behavior(behavior)
-    rec = layouttype.parameters.get("__record__")
-    if isinstance(rec, str):
-        typer = behavior.get(("__numba_typer__", rec))
-        if callable(typer):
-            return typer
-    return None
-
-
-def numba_record_lower(layouttype, behavior):
-    behavior = overlay_behavior(behavior)
-    rec = layouttype.parameters.get("__record__")
-    if isinstance(rec, str):
-        lower = behavior.get(("__numba_lower__", rec))
-        if callable(lower):
-            return lower
-    return None
-
-
-def overload(behavior, signature):
+def find_ufunc(behavior, signature):
     if not any(s is None for s in signature):
         behavior = overlay_behavior(behavior)
         for key, custom in behavior.items():
@@ -358,7 +278,87 @@ def overload(behavior, signature):
                 return custom
 
 
-def numba_attrs(layouttype, behavior):
+def find_numba_array_typer(layouttype, behavior):
+    behavior = overlay_behavior(behavior)
+    arr = layouttype.parameters.get("__array__")
+    if isinstance(arr, str):
+        typer = behavior.get(("__numba_typer__", arr))
+        if callable(typer):
+            return typer
+    deeprec = layouttype.parameters.get("__record__")
+    if isinstance(deeprec, str):
+        typer = behavior.get(("__numba_typer__", "*", deeprec))
+        if callable(typer):
+            return typer
+    return None
+
+
+def find_numba_array_lower(layouttype, behavior):
+    behavior = overlay_behavior(behavior)
+    arr = layouttype.parameters.get("__array__")
+    if isinstance(arr, str):
+        lower = behavior.get(("__numba_lower__", arr))
+        if callable(lower):
+            return lower
+    deeprec = layouttype.parameters.get("__record__")
+    if isinstance(deeprec, str):
+        lower = behavior.get(("__numba_lower__", "*", deeprec))
+        if callable(lower):
+            return lower
+    return None
+
+
+def find_typestrs(behavior):
+    behavior = overlay_behavior(behavior)
+    out = {}
+    for key, typestr in behavior.items():
+        if (
+            isinstance(key, tuple)
+            and len(key) == 2
+            and key[0] == "__typestr__"
+            and isinstance(key[1], str)
+            and isinstance(typestr, str)
+        ):
+            out[key[1]] = typestr
+    return out
+
+
+def find_typestr(parameters, typestrs):
+    if parameters is not None:
+        record = parameters.get("__record__")
+        if record is not None:
+            typestr = typestrs.get(record)
+            if typestr is not None:
+                return typestr
+        array = parameters.get("__array__")
+        if array is not None:
+            typestr = typestrs.get(array)
+            if typestr is not None:
+                return typestr
+    return None
+
+
+def find_numba_record_typer(layouttype, behavior):
+    behavior = overlay_behavior(behavior)
+    rec = layouttype.parameters.get("__record__")
+    if isinstance(rec, str):
+        typer = behavior.get(("__numba_typer__", rec))
+        if callable(typer):
+            return typer
+    return None
+
+
+def find_numba_record_lower(layouttype, behavior):
+    behavior = overlay_behavior(behavior)
+    rec = layouttype.parameters.get("__record__")
+    if isinstance(rec, str):
+        lower = behavior.get(("__numba_lower__", rec))
+        if callable(lower):
+            return lower
+    return None
+
+
+def find_numba_attrs(layouttype, behavior):
     behavior = overlay_behavior(behavior)
     rec = layouttype.parameters.get("__record__")
     if isinstance(rec, str):
@@ -373,7 +373,7 @@ def numba_attrs(layouttype, behavior):
                 yield key[2], typer, lower
 
 
-def numba_methods(layouttype, behavior):
+def find_numba_methods(layouttype, behavior):
     behavior = overlay_behavior(behavior)
     rec = layouttype.parameters.get("__record__")
     if isinstance(rec, str):
@@ -389,7 +389,7 @@ def numba_methods(layouttype, behavior):
                 yield key[2], typer, lower
 
 
-def numba_unaryops(unaryop, left, behavior):
+def find_numba_unaryops(unaryop, left, behavior):
     behavior = overlay_behavior(behavior)
     done = False
 
@@ -411,7 +411,7 @@ def numba_unaryops(unaryop, left, behavior):
                 yield typer, lower
 
 
-def numba_binops(binop, left, right, behavior):
+def find_numba_binops(binop, left, right, behavior):
     behavior = overlay_behavior(behavior)
     done = False
 
@@ -466,7 +466,7 @@ def behavior_of(*arrays, **kwargs):
     return behavior
 
 
-def wrap(content, behavior=None, highlevel=True, like=None, allow_other=False):
+def wrap_layout(content, behavior=None, highlevel=True, like=None, allow_other=False):
     assert (
         content is None
         or isinstance(content, (ak.contents.Content, ak.record.Record))
@@ -715,7 +715,7 @@ def from_arraylib(array, regulararray, recordarray, highlevel, behavior):
             contents.append(recurse(array[name], mask))
         layout = ak.contents.RecordArray(contents, array.dtype.names)
 
-    return ak._util.wrap(layout, behavior, highlevel)
+    return ak._util.wrap_layout(layout, behavior, highlevel)
 
 
 def maybe_posaxis(layout, axis, depth):

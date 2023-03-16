@@ -69,4 +69,4 @@ def _impl(array, to, including_unknown, highlevel, behavior):
     to_str = ak.types.numpytype.dtype_to_primitive(to_dtype)
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
     out = ak._do.numbers_to_type(layout, to_str, including_unknown)
-    return ak._util.wrap(out, behavior, highlevel, like=array)
+    return ak._util.wrap_layout(out, behavior, highlevel, like=array)

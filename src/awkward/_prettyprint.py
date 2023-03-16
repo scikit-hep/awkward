@@ -48,7 +48,7 @@ def get_at(data, index):
         elif array_param == "char":
             return ak._util.tobytes(out._raw(numpy)).decode(errors="surrogateescape")
     if isinstance(out, (ak.contents.Content, ak.record.Record)):
-        return ak._util.wrap(out, data._behavior)
+        return ak._util.wrap_layout(out, data._behavior)
     else:
         return out
 
@@ -62,7 +62,7 @@ def get_field(data, field):
         elif array_param == "char":
             return ak._util.tobytes(out._raw(numpy)).decode(errors="surrogateescape")
     if isinstance(out, (ak.contents.Content, ak.record.Record)):
-        return ak._util.wrap(out, data._behavior)
+        return ak._util.wrap_layout(out, data._behavior)
     else:
         return out
 

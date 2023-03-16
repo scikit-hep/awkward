@@ -111,7 +111,7 @@ def evaluate(
         arrays, action, behavior, allow_records=False
     )
     assert isinstance(out, tuple) and len(out) == 1
-    return ak._util.wrap(out[0], behavior)
+    return ak._util.wrap_layout(out[0], behavior)
 
 
 evaluate.evaluate = evaluate
@@ -151,4 +151,4 @@ def re_evaluate(local_dict=None):
         arrays, action, behavior, allow_records=False
     )
     assert isinstance(out, tuple) and len(out) == 1
-    return ak._util.wrap(out[0], behavior)
+    return ak._util.wrap_layout(out[0], behavior)

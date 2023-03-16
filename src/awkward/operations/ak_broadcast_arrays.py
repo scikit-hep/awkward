@@ -233,7 +233,7 @@ def _impl(
         numpy_to_regular=True,
     )
     assert isinstance(out, tuple)
-    return [ak._util.wrap(x, behavior, highlevel) for x in out]
+    return [ak._util.wrap_layout(x, behavior, highlevel) for x in out]
 
 
 @ak._connect.numpy.implements("broadcast_arrays")

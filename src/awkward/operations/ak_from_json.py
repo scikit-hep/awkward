@@ -504,7 +504,7 @@ def _no_schema(
         layout = layout[0]
 
     if highlevel and isinstance(layout, (ak.contents.Content, ak.record.Record)):
-        return ak._util.wrap(layout, behavior, highlevel)
+        return ak._util.wrap_layout(layout, behavior, highlevel)
     else:
         return layout
 
@@ -583,7 +583,7 @@ def _yes_schema(
         layout = layout[0]
 
     if highlevel and isinstance(layout, (ak.contents.Content, ak.record.Record)):
-        return ak._util.wrap(layout, behavior, highlevel)
+        return ak._util.wrap_layout(layout, behavior, highlevel)
     else:
         return layout
 

@@ -180,7 +180,7 @@ def _impl(array, axis, keepdims, initial, mask_identity, highlevel, behavior):
         behavior=behavior,
     )
     if isinstance(out, (ak.contents.Content, ak.record.Record)):
-        return ak._util.wrap(out, behavior, highlevel)
+        return ak._util.wrap_layout(out, behavior, highlevel)
     else:
         return out
 

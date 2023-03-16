@@ -143,7 +143,7 @@ def _string_equal(one, two):
         # update same-length strings with a verdict about their characters
         out[possible] = reduced.data
 
-    return ak._util.wrap(ak.contents.NumpyArray(out), behavior)
+    return ak._util.wrap_layout(ak.contents.NumpyArray(out), behavior)
 
 
 def _string_notequal(one, two):

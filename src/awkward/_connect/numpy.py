@@ -63,7 +63,7 @@ def _array_function_no_impl(func, types, args, kwargs, behavior):
     out = ak.operations.ak_to_layout._impl(
         result, allow_record=True, allow_other=True, regulararray=True
     )
-    return ak._util.wrap(out, behavior=behavior, allow_other=True)
+    return ak._util.wrap_layout(out, behavior=behavior, allow_other=True)
 
 
 def array_function(func, types, args, kwargs, behavior):
@@ -103,7 +103,7 @@ def implements(numpy_function):
 
 def _array_ufunc_custom_cast(inputs, behavior):
     args = [
-        ak._util.wrap(x, behavior)
+        ak._util.wrap_layout(x, behavior)
         if isinstance(x, (ak.contents.Content, ak.record.Record))
         else x
         for x in inputs
@@ -111,7 +111,7 @@ def _array_ufunc_custom_cast(inputs, behavior):
 
     nextinputs = []
     for x in args:
-        cast_fcn = ak._util.custom_cast(x, behavior)
+        cast_fcn = ak._util.find_custom_cast(x, behavior)
         if cast_fcn is not None:
             x = cast_fcn(x)
         nextinputs.append(
@@ -122,7 +122,7 @@ def _array_ufunc_custom_cast(inputs, behavior):
 
 def _array_ufunc_adjust(custom, inputs, kwargs, behavior):
     args = [
-        ak._util.wrap(x, behavior)
+        ak._util.wrap_layout(x, behavior)
         if isinstance(x, (ak.contents.Content, ak.record.Record))
         else x
         for x in inputs
@@ -138,7 +138,7 @@ def _array_ufunc_adjust(custom, inputs, kwargs, behavior):
 
 
 def _array_ufunc_adjust_apply(apply_ufunc, ufunc, method, inputs, kwargs, behavior):
-    nextinputs = [ak._util.wrap(x, behavior, allow_other=True) for x in inputs]
+    nextinputs = [ak._util.wrap_layout(x, behavior, allow_other=True) for x in inputs]
     out = apply_ufunc(ufunc, method, nextinputs, kwargs)
 
     if out is NotImplemented:
@@ -181,8 +181,8 @@ def array_ufunc(ufunc, method, inputs, kwargs):
 
     def action(inputs, **ignore):
         signature = _array_ufunc_signature(ufunc, inputs)
-
-        custom = ak._util.overload(behavior, signature)
+        custom = ak._util.find_ufunc(behavior, signature)
+        # Do we have a custom ufunc (an override of the given ufunc)?
         if custom is not None:
             return _array_ufunc_adjust(custom, inputs, kwargs, behavior)
 
@@ -217,9 +217,10 @@ def array_ufunc(ufunc, method, inputs, kwargs):
 
             return (NumpyArray(result, backend=backend, parameters=parameters),)
 
+        # Do we have a custom generic ufunc override (a function that accepts _all_ ufuncs)?
         for x in inputs:
             if isinstance(x, ak.contents.Content):
-                apply_ufunc = ak._util.custom_ufunc(ufunc, x, behavior)
+                apply_ufunc = ak._util.find_ufunc_generic(ufunc, x, behavior)
                 if apply_ufunc is not None:
                     out = _array_ufunc_adjust_apply(
                         apply_ufunc, ufunc, method, inputs, kwargs, behavior
@@ -288,7 +289,7 @@ def array_ufunc(ufunc, method, inputs, kwargs):
         assert isinstance(out, tuple) and len(out) == 1
         out = out[0]
 
-    return ak._util.wrap(out, behavior)
+    return ak._util.wrap_layout(out, behavior)
 
 
 def action_for_matmul(inputs):

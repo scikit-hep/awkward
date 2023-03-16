@@ -246,7 +246,7 @@ def from_rdataframe(
 
     for key, value in awkward_type_cols.items():
         if len(contents["rdfentry_"]) < len(value):
-            contents[key] = ak._util.wrap(
+            contents[key] = ak._util.wrap_layout(
                 ak.contents.IndexedArray(contents["rdfentry_"], value),
                 highlevel=highlevel,
                 behavior=behavior,
@@ -264,7 +264,7 @@ def from_rdataframe(
 
     if keep_order:
         sorted = ak.index.Index64(contents["rdfentry_"].data.argsort())
-        out = ak._util.wrap(
+        out = ak._util.wrap_layout(
             ak.contents.IndexedArray(sorted, out.layout),
             highlevel=highlevel,
             behavior=behavior,

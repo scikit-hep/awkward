@@ -135,7 +135,7 @@ class ArrayView:
     def toarray(self):
         layout = self.type.tolayout(self.lookup, self.pos, self.fields)
         sliced = layout._getitem_range(self.start, self.stop)
-        return ak._util.wrap(sliced, self.behavior)
+        return ak._util.wrap_layout(sliced, self.behavior)
 
 
 @numba.extending.typeof_impl.register(ArrayView)
@@ -520,7 +520,7 @@ class RecordView:
 
     def torecord(self):
         arraylayout = self.arrayview.toarray().layout
-        return ak._util.wrap(
+        return ak._util.wrap_layout(
             ak.record.Record(arraylayout, self.at), self.arrayview.behavior
         )
 
@@ -650,7 +650,7 @@ class type_getattr_record(numba.core.typing.templates.AttributeTemplate):
     key = RecordViewType
 
     def generic_resolve(self, recordviewtype, attr):
-        for methodname, typer, lower in ak._util.numba_methods(
+        for methodname, typer, lower in ak._util.find_numba_methods(
             recordviewtype.arrayviewtype.type, recordviewtype.arrayviewtype.behavior
         ):
             if attr == methodname:
@@ -680,7 +680,7 @@ class type_getattr_record(numba.core.typing.templates.AttributeTemplate):
 
                 return numba.types.BoundFunction(type_method, recordviewtype)
 
-        for attrname, typer, _ in ak._util.numba_attrs(
+        for attrname, typer, _ in ak._util.find_numba_attrs(
             recordviewtype.arrayviewtype.type, recordviewtype.arrayviewtype.behavior
         ):
             if attr == attrname:
@@ -691,7 +691,7 @@ class type_getattr_record(numba.core.typing.templates.AttributeTemplate):
 
 @numba.extending.lower_getattr_generic(RecordViewType)
 def lower_getattr_generic_record(context, builder, recordviewtype, recordviewval, attr):
-    for attrname, typer, lower in ak._util.numba_attrs(
+    for attrname, typer, lower in ak._util.find_numba_attrs(
         recordviewtype.arrayviewtype.type, recordviewtype.arrayviewtype.behavior
     ):
         if attr == attrname:
@@ -716,7 +716,7 @@ def register_unary_operator(unaryop):
                     left = args[0].arrayviewtype.type
                     behavior = args[0].arrayviewtype.behavior
 
-                    for typer, lower in ak._util.numba_unaryops(
+                    for typer, lower in ak._util.find_numba_unaryops(
                         unaryop, left, behavior
                     ):
                         numba.extending.lower_builtin(unaryop, *args)(lower)
@@ -752,7 +752,7 @@ def register_binary_operator(binop):
                         behavior = args[1].arrayviewtype.behavior
 
                 if left is not None or right is not None:
-                    for typer, lower in ak._util.numba_binops(
+                    for typer, lower in ak._util.find_numba_binops(
                         binop, left, right, behavior
                     ):
                         numba.extending.lower_builtin(binop, *args)(lower)

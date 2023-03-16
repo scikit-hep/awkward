@@ -174,7 +174,7 @@ def _impl(array, axis, highlevel, behavior):
 
         result = ak._do.mergemany(out)
 
-        return ak._util.wrap(result, behavior, highlevel)
+        return ak._util.wrap_layout(result, behavior, highlevel)
 
     elif axis == 0 or ak._util.maybe_posaxis(layout, axis, 1) == 0:
 
@@ -224,8 +224,8 @@ def _impl(array, axis, highlevel, behavior):
 
         out = apply(layout)
 
-        return ak._util.wrap(out, behavior, highlevel, like=array)
+        return ak._util.wrap_layout(out, behavior, highlevel, like=array)
 
     else:
         out = ak._do.flatten(layout, axis)
-        return ak._util.wrap(out, behavior, highlevel, like=array)
+        return ak._util.wrap_layout(out, behavior, highlevel, like=array)
