@@ -6,6 +6,7 @@ from collections.abc import Iterable
 
 import awkward as ak
 from awkward._behavior import get_record_class
+from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._regularize import is_integer
@@ -224,7 +225,7 @@ class Record:
         )
 
         if overloaded:
-            record = ak._util.wrap_layout(self, behavior=behavior)
+            record = wrap_layout(self, behavior=behavior)
             contents = []
             for field in self._array.fields:
                 contents.append(record[field])

@@ -14,6 +14,7 @@ from numpy.lib.mixins import NDArrayOperatorsMixin  # noqa: TID251
 import awkward as ak
 import awkward._connect.hist
 from awkward._behavior import behavior_of, get_array_class, get_record_class
+from awkward._layout import wrap_layout
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import is_non_string_like_iterable
@@ -513,9 +514,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                             errors="surrogateescape"
                         )
                     else:
-                        yield ak._util.wrap_layout(x, self._behavior)
+                        yield wrap_layout(x, self._behavior)
                 elif isinstance(x, (ak.contents.Content, ak.record.Record)):
-                    yield ak._util.wrap_layout(x, self._behavior)
+                    yield wrap_layout(x, self._behavior)
                 else:
                     yield x
 
@@ -959,7 +960,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                         errors="surrogateescape"
                     )
             if isinstance(out, (ak.contents.Content, ak.record.Record)):
-                return ak._util.wrap_layout(out, self._behavior)
+                return wrap_layout(out, self._behavior)
             else:
                 return out
 
@@ -1740,7 +1741,7 @@ class Record(NDArrayOperatorsMixin):
                         errors="surrogateescape"
                     )
             if isinstance(out, (ak.contents.Content, ak.record.Record)):
-                return ak._util.wrap_layout(out, self._behavior)
+                return wrap_layout(out, self._behavior)
             else:
                 return out
 

@@ -4,6 +4,7 @@ from __future__ import annotations
 import math
 
 import awkward as ak
+from awkward._layout import wrap_layout
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import is_integer
@@ -144,7 +145,7 @@ def _impl(
         )
 
     out = reconstitute(form, length, container, getkey, backend, byteorder, simplify)
-    return ak._util.wrap_layout(out, behavior, highlevel)
+    return wrap_layout(out, behavior, highlevel)
 
 
 _index_to_dtype = {

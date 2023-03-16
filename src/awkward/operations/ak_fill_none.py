@@ -3,6 +3,7 @@ import numbers
 
 import awkward as ak
 from awkward._behavior import behavior_of
+from awkward._layout import maybe_posaxis, wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import is_sized_iterable, regularize_axis
 
@@ -122,7 +123,7 @@ def _impl(array, value, axis, highlevel, behavior):
     else:
 
         def action(layout, depth, **kwargs):
-            posaxis = ak._util.maybe_posaxis(layout, axis, depth)
+            posaxis = maybe_posaxis(layout, axis, depth)
             if posaxis is not None and posaxis + 1 == depth:
                 if layout.is_option:
                     return ak._do.fill_none(layout, valuelayout)
@@ -139,4 +140,4 @@ def _impl(array, value, axis, highlevel, behavior):
                 )
 
     out = ak._do.recursively_apply(arraylayout, action, behavior)
-    return ak._util.wrap_layout(out, behavior, highlevel)
+    return wrap_layout(out, behavior, highlevel)

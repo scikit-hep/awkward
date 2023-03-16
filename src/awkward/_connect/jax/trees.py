@@ -7,6 +7,7 @@ import awkward as ak
 from awkward import contents, highlevel, record
 from awkward._behavior import behavior_of
 from awkward._errors import wrap_error
+from awkward._layout import wrap_layout
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
@@ -143,7 +144,7 @@ class AuxData(Generic[T]):
         layout = replace_all_buffers(
             self._layout, list(buffers), backend=ak._backends.JaxBackend.instance()
         )
-        return ak._util.wrap_layout(
+        return wrap_layout(
             layout, behavior=self._behavior, highlevel=self._is_highlevel
         )
 

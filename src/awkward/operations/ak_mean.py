@@ -2,6 +2,7 @@
 import awkward as ak
 from awkward._behavior import behavior_of
 from awkward._connect.numpy import unsupported
+from awkward._layout import maybe_posaxis
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
 from awkward._util import unset
@@ -229,7 +230,7 @@ def _impl(x, weight, axis, keepdims, mask_identity):
                 out = out[(0,) * out.ndim]
         else:
             if not keepdims:
-                posaxis = ak._util.maybe_posaxis(out.layout, axis, 1)
+                posaxis = maybe_posaxis(out.layout, axis, 1)
                 out = out[(slice(None, None),) * posaxis + (0,)]
 
         return out

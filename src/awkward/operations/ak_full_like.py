@@ -2,6 +2,7 @@
 import awkward as ak
 from awkward._behavior import behavior_of
 from awkward._connect.numpy import unsupported
+from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.typetracer import ensure_known_scalar
 from awkward.operations.ak_zeros_like import _ZEROS
@@ -206,7 +207,7 @@ def _impl(array, fill_value, highlevel, behavior, dtype, including_unknown):
             return None
 
     out = ak._do.recursively_apply(layout, action, behavior)
-    return ak._util.wrap_layout(out, behavior, highlevel)
+    return wrap_layout(out, behavior, highlevel)
 
 
 @ak._connect.numpy.implements("full_like")

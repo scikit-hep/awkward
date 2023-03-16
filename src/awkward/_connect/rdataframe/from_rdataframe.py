@@ -1,5 +1,4 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
 import ctypes
 import os
 import textwrap
@@ -10,6 +9,7 @@ import ROOT
 import awkward as ak
 import awkward._connect.cling
 import awkward._lookup
+from awkward._layout import wrap_layout
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward.types.numpytype import primitive_to_dtype
@@ -246,7 +246,7 @@ def from_rdataframe(
 
     for key, value in awkward_type_cols.items():
         if len(contents["rdfentry_"]) < len(value):
-            contents[key] = ak._util.wrap_layout(
+            contents[key] = wrap_layout(
                 ak.contents.IndexedArray(contents["rdfentry_"], value),
                 highlevel=highlevel,
                 behavior=behavior,
@@ -264,7 +264,7 @@ def from_rdataframe(
 
     if keep_order:
         sorted = ak.index.Index64(contents["rdfentry_"].data.argsort())
-        out = ak._util.wrap_layout(
+        out = wrap_layout(
             ak.contents.IndexedArray(sorted, out.layout),
             highlevel=highlevel,
             behavior=behavior,

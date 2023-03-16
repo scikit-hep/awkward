@@ -1,5 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 import awkward as ak
+from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
 
@@ -112,4 +113,4 @@ def _impl(array, target, axis, clip, highlevel, behavior):
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
     out = ak._do.pad_none(layout, target, axis, clip=clip)
 
-    return ak._util.wrap_layout(out, behavior, highlevel, like=array)
+    return wrap_layout(out, behavior, highlevel, like=array)

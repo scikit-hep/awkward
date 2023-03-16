@@ -8,6 +8,7 @@ import numpy
 
 import awkward as ak
 from awkward._behavior import behavior_of, overlay_behavior
+from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
@@ -216,7 +217,7 @@ class ArrayView:
     def toarray(self):
         layout = self.type.tolayout(self.lookup, self.pos, self.fields)
         sliced = layout._getitem_range(self.start, self.stop)
-        return ak._util.wrap_layout(sliced, self.behavior)
+        return wrap_layout(sliced, self.behavior)
 
 
 @numba.extending.typeof_impl.register(ArrayView)
@@ -601,7 +602,7 @@ class RecordView:
 
     def torecord(self):
         arraylayout = self.arrayview.toarray().layout
-        return ak._util.wrap_layout(
+        return wrap_layout(
             ak.record.Record(arraylayout, self.at), self.arrayview.behavior
         )
 

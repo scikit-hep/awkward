@@ -11,6 +11,7 @@ from awkward._behavior import (
     find_ufunc,
     find_ufunc_generic,
 )
+from awkward._layout import wrap_layout
 from awkward._regularize import is_non_string_like_iterable
 from awkward._util import numpy_at_least
 from awkward.contents.numpyarray import NumpyArray
@@ -70,7 +71,7 @@ def _array_function_no_impl(func, types, args, kwargs, behavior):
     out = ak.operations.ak_to_layout._impl(
         result, allow_record=True, allow_other=True, regulararray=True
     )
-    return ak._util.wrap_layout(out, behavior=behavior, allow_other=True)
+    return wrap_layout(out, behavior=behavior, allow_other=True)
 
 
 def array_function(func, types, args, kwargs, behavior):
@@ -110,7 +111,7 @@ def implements(numpy_function):
 
 def _array_ufunc_custom_cast(inputs, behavior):
     args = [
-        ak._util.wrap_layout(x, behavior)
+        wrap_layout(x, behavior)
         if isinstance(x, (ak.contents.Content, ak.record.Record))
         else x
         for x in inputs
@@ -129,7 +130,7 @@ def _array_ufunc_custom_cast(inputs, behavior):
 
 def _array_ufunc_adjust(custom, inputs, kwargs, behavior):
     args = [
-        ak._util.wrap_layout(x, behavior)
+        wrap_layout(x, behavior)
         if isinstance(x, (ak.contents.Content, ak.record.Record))
         else x
         for x in inputs
@@ -145,7 +146,7 @@ def _array_ufunc_adjust(custom, inputs, kwargs, behavior):
 
 
 def _array_ufunc_adjust_apply(apply_ufunc, ufunc, method, inputs, kwargs, behavior):
-    nextinputs = [ak._util.wrap_layout(x, behavior, allow_other=True) for x in inputs]
+    nextinputs = [wrap_layout(x, behavior, allow_other=True) for x in inputs]
     out = apply_ufunc(ufunc, method, nextinputs, kwargs)
 
     if out is NotImplemented:
@@ -296,7 +297,7 @@ def array_ufunc(ufunc, method, inputs, kwargs):
         assert isinstance(out, tuple) and len(out) == 1
         out = out[0]
 
-    return ak._util.wrap_layout(out, behavior)
+    return wrap_layout(out, behavior)
 
 
 def action_for_matmul(inputs):

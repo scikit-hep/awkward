@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 import awkward as ak
 from awkward._behavior import behavior_of
+from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
 from awkward._util import unset
@@ -91,7 +92,7 @@ def _impl(array, axis, keepdims, mask_identity, highlevel, behavior):
         behavior=behavior,
     )
     if isinstance(out, (ak.contents.Content, ak.record.Record)):
-        return ak._util.wrap_layout(out, behavior, highlevel)
+        return wrap_layout(out, behavior, highlevel)
     else:
         return out
 

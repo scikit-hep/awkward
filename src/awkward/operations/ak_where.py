@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 import awkward as ak
 from awkward._behavior import behavior_of
+from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
@@ -84,7 +85,7 @@ def _impl1(condition, mergebool, highlevel, behavior):
     out = backend.nplike.nonzero(ak.operations.to_numpy(akcondition))
     if highlevel:
         return tuple(
-            ak._util.wrap_layout(
+            wrap_layout(
                 ak.contents.NumpyArray(x),
                 behavior_of(condition, behavior=behavior),
             )
@@ -143,4 +144,4 @@ def _impl3(condition, x, y, mergebool, highlevel, behavior):
         numpy_to_regular=True,
     )
 
-    return ak._util.wrap_layout(out[0], behavior, highlevel)
+    return wrap_layout(out[0], behavior, highlevel)

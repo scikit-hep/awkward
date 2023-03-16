@@ -1,7 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
 import awkward as ak
 from awkward._connect.numpy import unsupported
+from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
@@ -65,7 +65,7 @@ def _impl(array, highlevel, behavior):
 
     result = ak._do.mergemany(out)
 
-    return ak._util.wrap_layout(result, behavior, highlevel, like=array)
+    return wrap_layout(result, behavior, highlevel, like=array)
 
 
 @ak._connect.numpy.implements("ravel")

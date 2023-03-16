@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 import awkward as ak
 from awkward._behavior import behavior_of
+from awkward._layout import wrap_layout
 
 cpu = ak._backends.NumpyBackend.instance()
 
@@ -160,6 +161,5 @@ def _impl(arrays, highlevel, behavior):
         return [pull(layout) for pull, layout in zip(pullbacks, inner_layouts)]
 
     return [
-        ak._util.wrap_layout(x, highlevel=highlevel, behavior=behavior)
-        for x in recurse(layouts)
+        wrap_layout(x, highlevel=highlevel, behavior=behavior) for x in recurse(layouts)
     ]

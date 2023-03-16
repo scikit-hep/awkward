@@ -3,6 +3,7 @@ from collections.abc import Sequence
 
 import awkward as ak
 from awkward._behavior import behavior_of
+from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
@@ -91,4 +92,4 @@ def _impl(base, where, highlevel, behavior):
     out = ak._do.recursively_apply(
         base, action, behavior, depth_context={"where": where}
     )
-    return ak._util.wrap_layout(out, behavior, highlevel)
+    return wrap_layout(out, behavior, highlevel)

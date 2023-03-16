@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 import awkward as ak
 from awkward._behavior import behavior_of
+from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
@@ -65,4 +66,4 @@ def _impl(array, name, highlevel, behavior):
 
     out2 = ak._do.recursively_apply(out, action2, behavior)
 
-    return ak._util.wrap_layout(out2, behavior, highlevel)
+    return wrap_layout(out2, behavior, highlevel)

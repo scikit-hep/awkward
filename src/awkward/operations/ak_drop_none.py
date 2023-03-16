@@ -1,5 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 import awkward as ak
+from awkward._layout import maybe_posaxis, wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
 
@@ -74,7 +75,7 @@ def _impl(array, axis, highlevel, behavior):
             )
 
         def recompute_offsets(layout, depth, **kwargs):
-            posaxis = ak._util.maybe_posaxis(layout, axis, depth)
+            posaxis = maybe_posaxis(layout, axis, depth)
             if (
                 posaxis == 0
                 and posaxis == depth - 1
@@ -87,16 +88,14 @@ def _impl(array, axis, highlevel, behavior):
 
         def action(layout, depth, **kwargs):
             if layout.is_record:
-                posaxises = {
-                    ak._util.maybe_posaxis(x, axis, depth) for x in layout.contents
-                }
+                posaxises = {maybe_posaxis(x, axis, depth) for x in layout.contents}
                 if len(posaxises) > 1 and any(x < depth for x in posaxises):
                     raise ak._errors.wrap_error(
                         np.AxisError(
                             f"axis={axis} implies different levels in records that might require part of a record to be dropped, which is impossible"
                         )
                     )
-            posaxis = ak._util.maybe_posaxis(layout, axis, depth)
+            posaxis = maybe_posaxis(layout, axis, depth)
             if posaxis == 0:
                 if not layout.is_option:
                     return layout
@@ -115,4 +114,4 @@ def _impl(array, axis, highlevel, behavior):
     if len(options["none_indexes"]) > 0:
         out = ak._do.recursively_apply(out, recompute_offsets, behavior, options)
 
-    return ak._util.wrap_layout(out, behavior, highlevel, like=behavior)
+    return wrap_layout(out, behavior, highlevel, like=behavior)

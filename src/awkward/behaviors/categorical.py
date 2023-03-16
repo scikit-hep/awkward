@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 import awkward as ak
 from awkward._behavior import behavior_of
+from awkward._layout import wrap_layout
 from awkward._nplikes import ufuncs
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
@@ -66,8 +67,8 @@ def _categorical_equal(one, two):
 
     one_index = numpy.asarray(one.index)
     two_index = numpy.asarray(two.index)
-    one_content = ak._util.wrap_layout(one.content, behavior)
-    two_content = ak._util.wrap_layout(two.content, behavior)
+    one_content = wrap_layout(one.content, behavior)
+    two_content = wrap_layout(two.content, behavior)
 
     if len(one_content) == len(two_content) and ak.operations.all(
         one_content == two_content, axis=None
@@ -89,7 +90,7 @@ def _categorical_equal(one, two):
         one_mapped = one_to_two[one_index]
 
     out = one_mapped == two_index
-    out = ak._util.wrap_layout(ak.contents.NumpyArray(out), behavior_of(one, two))
+    out = wrap_layout(ak.contents.NumpyArray(out), behavior_of(one, two))
     return out
 
 

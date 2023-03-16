@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 import awkward as ak
 from awkward._behavior import behavior_of
+from awkward._layout import maybe_posaxis, wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._nplikes.typetracer import is_unknown_scalar
@@ -186,13 +187,13 @@ def _impl(array, counts, axis, highlevel, behavior):
 
         return out
 
-    if axis == 0 or ak._util.maybe_posaxis(layout, axis, 1) == 0:
+    if axis == 0 or maybe_posaxis(layout, axis, 1) == 0:
         out = unflatten_this_layout(layout)
 
     else:
 
         def apply(layout, depth, **kwargs):
-            posaxis = ak._util.maybe_posaxis(layout, axis, depth)
+            posaxis = maybe_posaxis(layout, axis, depth)
             if posaxis == depth and layout.is_list:
                 # We are one *above* the level where we want to apply this.
                 listoffsetarray = layout.to_ListOffsetArray64(True)
@@ -243,4 +244,4 @@ def _impl(array, counts, axis, highlevel, behavior):
             )
         )
 
-    return ak._util.wrap_layout(out, behavior, highlevel)
+    return wrap_layout(out, behavior, highlevel)

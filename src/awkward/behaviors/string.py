@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 import awkward as ak
 from awkward._behavior import behavior_of
+from awkward._layout import wrap_layout
 from awkward._nplikes import ufuncs
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward.highlevel import Array
@@ -143,7 +144,7 @@ def _string_equal(one, two):
         # update same-length strings with a verdict about their characters
         out[possible] = reduced.data
 
-    return ak._util.wrap_layout(ak.contents.NumpyArray(out), behavior)
+    return wrap_layout(ak.contents.NumpyArray(out), behavior)
 
 
 def _string_notequal(one, two):

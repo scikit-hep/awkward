@@ -4,6 +4,7 @@ from __future__ import annotations
 import copy
 
 import awkward as ak
+from awkward._layout import maybe_posaxis
 from awkward._nplikes.numpylike import IndexType, NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._nplikes.typetracer import TypeTracer
@@ -1194,7 +1195,7 @@ class ListArray(Content):
         )
 
     def _local_index(self, axis, depth):
-        posaxis = ak._util.maybe_posaxis(self, axis, depth)
+        posaxis = maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 == depth:
             return self._local_index_axis0()
         elif posaxis is not None and posaxis + 1 == depth + 1:
@@ -1333,7 +1334,7 @@ class ListArray(Content):
 
     def _pad_none(self, target, axis, depth, clip):
         if not clip:
-            posaxis = ak._util.maybe_posaxis(self, axis, depth)
+            posaxis = maybe_posaxis(self, axis, depth)
             if posaxis is not None and posaxis + 1 == depth:
                 return self._pad_none_axis0(target, clip)
             elif posaxis is not None and posaxis + 1 == depth + 1:

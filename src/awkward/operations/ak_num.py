@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 import awkward as ak
 from awkward._behavior import behavior_of
+from awkward._layout import maybe_posaxis, wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import is_integer, regularize_axis
 
@@ -83,14 +84,14 @@ def _impl(array, axis, highlevel, behavior):
             TypeError(f"'axis' must be an integer, not {axis!r}")
         )
 
-    if ak._util.maybe_posaxis(layout, axis, 1) == 0:
+    if maybe_posaxis(layout, axis, 1) == 0:
         if isinstance(layout, ak.record.Record):
             return 1
         else:
             return layout.length
 
     def action(layout, depth, **kwargs):
-        posaxis = ak._util.maybe_posaxis(layout, axis, depth)
+        posaxis = maybe_posaxis(layout, axis, depth)
 
         if posaxis == depth and layout.is_list:
             return ak.contents.NumpyArray(layout.stops.data - layout.starts.data)
@@ -102,4 +103,4 @@ def _impl(array, axis, highlevel, behavior):
 
     out = ak._do.recursively_apply(layout, action, behavior, numpy_to_regular=True)
 
-    return ak._util.wrap_layout(out, behavior, highlevel)
+    return wrap_layout(out, behavior, highlevel)

@@ -9,6 +9,7 @@ from numbers import Complex, Real
 import awkward as ak
 from awkward._backends import Backend
 from awkward._behavior import get_array_class, get_record_class
+from awkward._layout import wrap_layout
 from awkward._nplikes import to_nplike
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import IndexType, NumpyLike, NumpyMetadata
@@ -1199,7 +1200,7 @@ class Content:
             )
 
         if overloaded:
-            array = ak._util.wrap_layout(self, behavior=behavior)
+            array = wrap_layout(self, behavior=behavior)
             out = [None] * self.length
             for i in range(self.length):
                 out[i] = array[i]

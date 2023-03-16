@@ -3,6 +3,7 @@ import copy
 
 import awkward as ak
 from awkward._behavior import behavior_of
+from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import is_non_string_like_sequence
 
@@ -141,4 +142,4 @@ def _impl(base, what, where, highlevel, behavior):
 
         assert isinstance(out, tuple) and len(out) == 1
 
-        return ak._util.wrap_layout(out[0], behavior, highlevel)
+        return wrap_layout(out[0], behavior, highlevel)

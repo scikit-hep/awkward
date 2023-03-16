@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 import awkward as ak
 from awkward._behavior import behavior_of
+from awkward._layout import maybe_posaxis, wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import is_integer, regularize_axis
 
@@ -55,7 +56,7 @@ def _impl(array, axis, highlevel, behavior):
             TypeError(f"'axis' must be an integer, not {axis!r}")
         )
 
-    if ak._util.maybe_posaxis(layout, axis, 1) == 0:
+    if maybe_posaxis(layout, axis, 1) == 0:
         # specialized logic; it's tested in test_0582-propagate-context-in-broadcast_and_apply.py
         # Build an integer-typed slice array, so that we can
         # ensure we have advanced indexing for both length==0
@@ -69,7 +70,7 @@ def _impl(array, axis, highlevel, behavior):
     else:
 
         def action(layout, depth, depth_context, **kwargs):
-            posaxis = ak._util.maybe_posaxis(layout, axis, depth)
+            posaxis = maybe_posaxis(layout, axis, depth)
 
             if posaxis == depth and layout.is_list:
                 nplike = layout._backend.index_nplike
@@ -98,4 +99,4 @@ def _impl(array, axis, highlevel, behavior):
 
         out = ak._do.recursively_apply(layout, action, behavior, numpy_to_regular=True)
 
-    return ak._util.wrap_layout(out, behavior, highlevel)
+    return wrap_layout(out, behavior, highlevel)

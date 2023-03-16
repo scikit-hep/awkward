@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 import awkward as ak
 from awkward._behavior import behavior_of
+from awkward._layout import maybe_posaxis, wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
 
@@ -240,11 +241,11 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
     else:
         new_arrays_values = new_arrays
 
-    posaxis = ak._util.maybe_posaxis(new_arrays_values[0], axis, 1)
+    posaxis = maybe_posaxis(new_arrays_values[0], axis, 1)
     if posaxis is None or posaxis < 0:
         raise ak._errors.wrap_error(ValueError("negative axis depth is ambiguous"))
     for x in new_arrays_values[1:]:
-        if ak._util.maybe_posaxis(x, axis, 1) != posaxis:
+        if maybe_posaxis(x, axis, 1) != posaxis:
             raise ak._errors.wrap_error(
                 ValueError(
                     "arrays to cartesian-product do not have the same depth for negative axis"
@@ -425,4 +426,4 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
                 result, axis=flatten_axis, highlevel=False, behavior=behavior
             )
 
-    return ak._util.wrap_layout(result, behavior, highlevel)
+    return wrap_layout(result, behavior, highlevel)

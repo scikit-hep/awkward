@@ -2,6 +2,7 @@
 import awkward as ak
 from awkward._backends import backend_of
 from awkward._behavior import behavior_of
+from awkward._layout import wrap_layout
 from awkward._nplikes import ufuncs
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
@@ -254,6 +255,4 @@ def _impl(x, y, weight, axis, keepdims, mask_identity):
         if scalar:
             out = out[0]
 
-        return ak._util.wrap_layout(
-            out, highlevel=True, behavior=behavior, allow_other=scalar
-        )
+        return wrap_layout(out, highlevel=True, behavior=behavior, allow_other=scalar)

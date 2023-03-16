@@ -1,5 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 import awkward as ak
+from awkward._layout import maybe_posaxis, wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
 
@@ -174,9 +175,9 @@ def _impl(array, axis, highlevel, behavior):
 
         result = ak._do.mergemany(out)
 
-        return ak._util.wrap_layout(result, behavior, highlevel)
+        return wrap_layout(result, behavior, highlevel)
 
-    elif axis == 0 or ak._util.maybe_posaxis(layout, axis, 1) == 0:
+    elif axis == 0 or maybe_posaxis(layout, axis, 1) == 0:
 
         def apply(layout):
             backend = layout.backend
@@ -224,8 +225,8 @@ def _impl(array, axis, highlevel, behavior):
 
         out = apply(layout)
 
-        return ak._util.wrap_layout(out, behavior, highlevel, like=array)
+        return wrap_layout(out, behavior, highlevel, like=array)
 
     else:
         out = ak._do.flatten(layout, axis)
-        return ak._util.wrap_layout(out, behavior, highlevel, like=array)
+        return wrap_layout(out, behavior, highlevel, like=array)

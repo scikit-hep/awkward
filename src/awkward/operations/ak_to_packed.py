@@ -1,6 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
 import awkward as ak
+from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
@@ -74,4 +74,4 @@ def to_packed(array, *, highlevel=True, behavior=None):
 def _impl(array, highlevel, behavior):
     layout = ak.operations.to_layout(array, allow_record=True, allow_other=False)
     out = layout.to_packed()
-    return ak._util.wrap_layout(out, behavior, highlevel, like=array)
+    return wrap_layout(out, behavior, highlevel, like=array)

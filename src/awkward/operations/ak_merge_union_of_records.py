@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 import awkward as ak
 from awkward._behavior import behavior_of
+from awkward._layout import maybe_posaxis, wrap_layout
 from awkward._nplikes.numpylike import ArrayLike, NumpyMetadata
 from awkward._regularize import regularize_axis
 
@@ -150,7 +151,7 @@ def _impl(array, axis, highlevel, behavior):
         return dense_index
 
     def apply(layout, depth, backend, **kwargs):
-        posaxis = ak._util.maybe_posaxis(layout, axis, depth)
+        posaxis = maybe_posaxis(layout, axis, depth)
         if depth < posaxis + 1 and layout.is_leaf:
             raise ak._errors.wrap_error(
                 np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
@@ -264,4 +265,4 @@ def _impl(array, axis, highlevel, behavior):
                 )
 
     out = ak._do.recursively_apply(layout, apply)
-    return ak._util.wrap_layout(out, highlevel=highlevel, behavior=behavior)
+    return wrap_layout(out, highlevel=highlevel, behavior=behavior)

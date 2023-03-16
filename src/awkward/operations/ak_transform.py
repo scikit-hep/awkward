@@ -3,6 +3,7 @@ import copy
 
 import awkward as ak
 from awkward._behavior import behavior_of
+from awkward._layout import wrap_layout
 
 cpu = ak._backends.NumpyBackend.instance()
 
@@ -513,7 +514,7 @@ def _impl(
         )
 
         if return_value != "none":
-            return ak._util.wrap_layout(out, behavior, highlevel)
+            return wrap_layout(out, behavior, highlevel)
 
     else:
 
@@ -563,6 +564,6 @@ def _impl(
 
         if return_value != "none":
             if len(out) == 1:
-                return ak._util.wrap_layout(out[0], behavior, highlevel)
+                return wrap_layout(out[0], behavior, highlevel)
             else:
-                return tuple(ak._util.wrap_layout(x, behavior, highlevel) for x in out)
+                return tuple(wrap_layout(x, behavior, highlevel) for x in out)

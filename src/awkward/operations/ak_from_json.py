@@ -7,6 +7,7 @@ from urllib.parse import urlparse
 from awkward_cpp.lib import _ext
 
 import awkward as ak
+from awkward._layout import wrap_layout
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import is_integer
@@ -504,7 +505,7 @@ def _no_schema(
         layout = layout[0]
 
     if highlevel and isinstance(layout, (ak.contents.Content, ak.record.Record)):
-        return ak._util.wrap_layout(layout, behavior, highlevel)
+        return wrap_layout(layout, behavior, highlevel)
     else:
         return layout
 
@@ -583,7 +584,7 @@ def _yes_schema(
         layout = layout[0]
 
     if highlevel and isinstance(layout, (ak.contents.Content, ak.record.Record)):
-        return ak._util.wrap_layout(layout, behavior, highlevel)
+        return wrap_layout(layout, behavior, highlevel)
     else:
         return layout
 
