@@ -144,3 +144,12 @@ def test_round_trip():
     result = ak.from_buffers(*ak.to_buffers(array), highlevel=False)
     assert np.shares_memory(result.data, data)
     assert ak.almost_equal(array, result)
+
+
+def test_round_strided():
+    data = np.array([101], dtype=np.int32)
+    array = np.lib.stride_tricks.as_strided(data, (100,), strides=(0,))
+
+    result = ak.from_buffers(*ak.to_buffers(array), highlevel=False)
+    assert np.shares_memory(result.data, data)
+    assert ak.almost_equal(array, result)
