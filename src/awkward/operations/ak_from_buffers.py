@@ -160,21 +160,17 @@ _index_to_dtype = {
 
 def _from_buffer(nplike, buffer, dtype, count, byteorder):
     if nplike.is_own_array(buffer):
-        array = buffer.view(dtype)
+        array = buffer.view(dtype).reshape(-1)
 
-        if array.ndim != 1:
-            raise ak._errors.wrap_error(
-                TypeError(f"dimensionality of array should be 1, not ({array.ndim})")
-            )
         # Require 1D
-        if array.size != count:
+        if array.size < count:
             raise ak._errors.wrap_error(
                 TypeError(
-                    f"size of array ({array.size}) does not match size of form {count}"
+                    f"size of array ({array.size}) is less than size of form {count}"
                 )
             )
 
-        return array
+        return array[:count]
     else:
         array = nplike.frombuffer(buffer, dtype=dtype, count=count)
         if byteorder != ak._util.native_byteorder:
@@ -304,7 +300,13 @@ def reconstitute(form, length, container, getkey, backend, byteorder, simplify):
             count=length,
             byteorder=byteorder,
         )
-        next_length = 0 if len(index) == 0 else backend.index_nplike.max(index) + 1
+        next_length = (
+            0
+            if len(index) == 0
+            else backend.index_nplike.index_as_shape_item(
+                backend.index_nplike.max(index) + 1
+            )
+        )
         content = reconstitute(
             form.content, next_length, container, getkey, backend, byteorder, simplify
         )
