@@ -526,7 +526,7 @@ class Form:
         if expand_braces:
             next_specifier = []
             for item in specifier:
-                for result in ak._util.expand_braces(item):
+                for result in _expand_braces(item):
                     next_specifier.append(result)
             specifier = next_specifier
 
