@@ -1,7 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
-from awkward._nplikes import nplike_of
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
@@ -75,15 +74,13 @@ def _impl(array, copy, nan, posinf, neginf, highlevel, behavior):
         broadcasting_ids[id(neginf)] = len(broadcasting)
         broadcasting.append(neginf_layout)
 
-    nplike = nplike_of(layout)
-
     if len(broadcasting) == 1:
 
-        def action(layout, **kwargs):
+        def action(layout, backend, **kwargs):
             if isinstance(layout, ak.contents.NumpyArray):
                 return ak.contents.NumpyArray(
-                    nplike.nan_to_num(
-                        nplike.asarray(layout),
+                    backend.nplike.nan_to_num(
+                        layout.data,
                         nan=nan,
                         posinf=posinf,
                         neginf=neginf,
@@ -96,24 +93,28 @@ def _impl(array, copy, nan, posinf, neginf, highlevel, behavior):
 
     else:
 
-        def action(inputs, **kwargs):
+        def action(inputs, backend, **kwargs):
             if all(isinstance(x, ak.contents.NumpyArray) for x in inputs):
-                tmp_layout = nplike.asarray(inputs[0])
+                tmp_layout = backend.nplike.asarray(inputs[0])
                 if id(nan) in broadcasting_ids:
-                    tmp_nan = nplike.asarray(inputs[broadcasting_ids[id(nan)]])
+                    tmp_nan = backend.nplike.asarray(inputs[broadcasting_ids[id(nan)]])
                 else:
                     tmp_nan = nan
                 if id(posinf) in broadcasting_ids:
-                    tmp_posinf = nplike.asarray(inputs[broadcasting_ids[id(posinf)]])
+                    tmp_posinf = backend.nplike.asarray(
+                        inputs[broadcasting_ids[id(posinf)]]
+                    )
                 else:
                     tmp_posinf = posinf
                 if id(neginf) in broadcasting_ids:
-                    tmp_neginf = nplike.asarray(inputs[broadcasting_ids[id(neginf)]])
+                    tmp_neginf = backend.nplike.asarray(
+                        inputs[broadcasting_ids[id(neginf)]]
+                    )
                 else:
                     tmp_neginf = neginf
                 return (
                     ak.contents.NumpyArray(
-                        nplike.nan_to_num(
+                        backend.nplike.nan_to_num(
                             tmp_layout,
                             nan=tmp_nan,
                             posinf=tmp_posinf,
