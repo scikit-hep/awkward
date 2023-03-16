@@ -3,7 +3,6 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 
-import awkward.highlevel
 from awkward._backends import NumpyBackend
 from awkward._behavior import behavior_of
 from awkward._errors import wrap_error
@@ -11,17 +10,6 @@ from awkward._nplikes import nplike_of
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
-from awkward.contents import (
-    ByteMaskedArray,
-    Content,
-    ListArray,
-    NumpyArray,
-    RecordArray,
-    RegularArray,
-    UnmaskedArray,
-)
-from awkward.index import Index8, Index64
-from awkward.record import Record
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
@@ -29,6 +17,10 @@ numpy_backend = NumpyBackend.instance()
 
 
 def wrap_layout(content, behavior=None, highlevel=True, like=None, allow_other=False):
+    import awkward.highlevel
+    from awkward.contents import Content
+    from awkward.record import Record
+
     assert content is None or isinstance(content, (Content, Record)) or allow_other
     assert behavior is None or isinstance(behavior, Mapping)
     assert isinstance(highlevel, bool)
@@ -44,7 +36,17 @@ def wrap_layout(content, behavior=None, highlevel=True, like=None, allow_other=F
     return content
 
 
-def from_arraylib(array, regulararray, recordarray, highlevel, behavior):
+def from_arraylib(array, regulararray, recordarray):
+    from awkward.contents import (
+        ByteMaskedArray,
+        ListArray,
+        NumpyArray,
+        RecordArray,
+        RegularArray,
+        UnmaskedArray,
+    )
+    from awkward.index import Index8, Index64
+
     # overshadows global NumPy import for nplike-safety
     nplike = nplike_of(array)
 
@@ -150,10 +152,12 @@ def from_arraylib(array, regulararray, recordarray, highlevel, behavior):
             contents.append(recurse(array[name], mask))
         layout = RecordArray(contents, array.dtype.names)
 
-    return wrap_layout(layout, behavior, highlevel)
+    return layout
 
 
 def maybe_posaxis(layout, axis, depth):
+    from awkward.record import Record
+
     if isinstance(layout, Record):
         if axis == 0:
             raise wrap_error(

@@ -515,10 +515,8 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                         )
                     else:
                         yield wrap_layout(x, self._behavior)
-                elif isinstance(x, (ak.contents.Content, ak.record.Record)):
-                    yield wrap_layout(x, self._behavior)
                 else:
-                    yield x
+                    yield wrap_layout(x, self._behavior, allow_other=True)
 
     def __getitem__(self, where):
         """
@@ -959,10 +957,10 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                     return ak._util.tobytes(out._raw(numpy)).decode(
                         errors="surrogateescape"
                     )
-            if isinstance(out, (ak.contents.Content, ak.record.Record)):
-                return wrap_layout(out, self._behavior)
+                else:
+                    return wrap_layout(out, self._behavior)
             else:
-                return out
+                return wrap_layout(out, self._behavior, allow_other=True)
 
     def __setitem__(self, where, what):
         """
@@ -1740,10 +1738,10 @@ class Record(NDArrayOperatorsMixin):
                     return ak._util.tobytes(out._raw(numpy)).decode(
                         errors="surrogateescape"
                     )
-            if isinstance(out, (ak.contents.Content, ak.record.Record)):
-                return wrap_layout(out, self._behavior)
+                else:
+                    return wrap_layout(out, self._behavior)
             else:
-                return out
+                return wrap_layout(out, self._behavior, allow_other=True)
 
     def __setitem__(self, where, what):
         """

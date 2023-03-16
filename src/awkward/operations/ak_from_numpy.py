@@ -1,6 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 import awkward as ak
-from awkward._layout import from_arraylib
+from awkward._layout import from_arraylib, wrap_layout
 
 
 def from_numpy(
@@ -47,4 +47,8 @@ def from_numpy(
             "behavior": behavior,
         },
     ):
-        return from_arraylib(array, regulararray, recordarray, highlevel, behavior)
+        return wrap_layout(
+            from_arraylib(array, regulararray, False),
+            highlevel=highlevel,
+            behavior=behavior,
+        )
