@@ -4,6 +4,7 @@ import copy
 import awkward as ak
 from awkward._behavior import behavior_of
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._regularize import is_non_string_like_sequence
 
 np = NumpyMetadata.instance()
 
@@ -49,7 +50,7 @@ def _impl(base, what, where, highlevel, behavior):
         where is None
         or isinstance(where, str)
         or (
-            ak._util.is_non_string_like_sequence(where)
+            is_non_string_like_sequence(where)
             and all(isinstance(x, str) for x in where)
         )
     ):
@@ -60,7 +61,7 @@ def _impl(base, what, where, highlevel, behavior):
             )
         )
 
-    if ak._util.is_non_string_like_sequence(where) and len(where) > 1:
+    if is_non_string_like_sequence(where) and len(where) > 1:
         return _impl(
             base,
             _impl(
@@ -76,7 +77,7 @@ def _impl(base, what, where, highlevel, behavior):
         )
     else:
         # If we have an iterable here, pull out the only ti
-        if ak._util.is_non_string_like_sequence(where):
+        if is_non_string_like_sequence(where):
             where = where[0]
 
         behavior = behavior_of(base, what, behavior=behavior)

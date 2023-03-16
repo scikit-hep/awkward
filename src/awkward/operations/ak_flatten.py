@@ -1,7 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
 import awkward as ak
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._regularize import regularize_axis
 
 np = NumpyMetadata.instance()
 
@@ -163,7 +163,7 @@ def flatten(array, axis=1, *, highlevel=True, behavior=None):
 
 
 def _impl(array, axis, highlevel, behavior):
-    axis = ak._util.regularize_axis(axis)
+    axis = regularize_axis(axis)
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
 
     if axis is None:

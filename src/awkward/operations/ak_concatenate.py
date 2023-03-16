@@ -3,6 +3,7 @@ import awkward as ak
 from awkward._backends import NumpyBackend, backend_of
 from awkward._behavior import behavior_of
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._regularize import is_integer, regularize_axis
 from awkward.operations.ak_fill_none import fill_none
 
 np = NumpyMetadata.instance()
@@ -46,7 +47,7 @@ def concatenate(arrays, axis=0, *, mergebool=True, highlevel=True, behavior=None
 
 
 def _impl(arrays, axis, mergebool, highlevel, behavior):
-    axis = ak._util.regularize_axis(axis)
+    axis = regularize_axis(axis)
     # Simple single-array, axis=0 fast-path
     backend = ak._backends.backend_of(*arrays, default=cpu)
     behavior = behavior_of(*arrays, behavior=behavior)
@@ -149,9 +150,9 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
                 length = None
                 for x in inputs:
                     if isinstance(x, ak.contents.Content):
-                        if not ak._util.is_integer(length):
+                        if not is_integer(length):
                             length = x.length
-                        elif length != x.length and ak._util.is_integer(x.length):
+                        elif length != x.length and is_integer(x.length):
                             raise ak._errors.wrap_error(
                                 ValueError(
                                     "all arrays must have the same length for "

@@ -14,6 +14,7 @@ from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import IndexType, NumpyLike, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import TypeTracer
+from awkward._regularize import is_integer, is_sized_iterable
 from awkward._slicing import normalize_slice
 from awkward._util import unset
 from awkward.forms.form import Form, JSONMapping, _type_parameters_equal
@@ -549,7 +550,7 @@ class Content:
         return self._getitem(where)
 
     def _getitem(self, where):
-        if ak._util.is_integer(where):
+        if is_integer(where):
             return self._getitem_at(where)
 
         elif isinstance(where, slice) and where.step is None:
@@ -676,7 +677,7 @@ class Content:
         elif isinstance(where, Content):
             return self._getitem((where,))
 
-        elif ak._util.is_sized_iterable(where):
+        elif is_sized_iterable(where):
             # Do we have an array
             nplike = ak._nplikes.nplike_of(where, default=None)
             # We can end up with non-array objects associated with an nplike

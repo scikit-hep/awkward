@@ -11,6 +11,7 @@ from awkward._behavior import (
     find_ufunc,
     find_ufunc_generic,
 )
+from awkward._regularize import is_non_string_like_iterable
 from awkward._util import numpy_at_least
 from awkward.contents.numpyarray import NumpyArray
 
@@ -50,7 +51,7 @@ def _to_rectilinear(arg):
         return tuple(_to_rectilinear(x) for x in arg)
     elif isinstance(arg, list):
         return [_to_rectilinear(x) for x in arg]
-    elif ak._util.is_non_string_like_iterable(arg):
+    elif is_non_string_like_iterable(arg):
         raise ak._errors.wrap_error(
             TypeError(
                 f"encountered an unsupported iterable value {arg!r} whilst converting arguments to NumPy-friendly "

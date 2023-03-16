@@ -7,6 +7,7 @@ import awkward as ak
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import IndexType, NumpyMetadata
 from awkward._nplikes.shape import unknown_length
+from awkward._regularize import is_integer
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.form import _type_parameters_equal
@@ -114,7 +115,7 @@ class RegularArray(Content):
                     )
                 )
         else:
-            if not (ak._util.is_integer(size) and size >= 0):
+            if not (is_integer(size) and size >= 0):
                 raise ak._errors.wrap_error(
                     TypeError(
                         "{} 'size' must be a non-negative integer, not {}".format(
@@ -133,7 +134,7 @@ class RegularArray(Content):
                     )
                 )
         else:
-            if not (ak._util.is_integer(zeros_length) and zeros_length >= 0):
+            if not (is_integer(zeros_length) and zeros_length >= 0):
                 raise ak._errors.wrap_error(
                     TypeError(
                         "{} 'zeros_length' must be a non-negative integer, not {}".format(

@@ -9,6 +9,7 @@ from awkward_cpp.lib import _ext
 import awkward as ak
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._regularize import is_integer
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
@@ -728,7 +729,7 @@ def build_assembly(schema, container, instructions):
             )
 
         if schema.get("minItems") == schema.get("maxItems") != None:  # noqa: E711
-            assert ak._util.is_integer(schema.get("minItems"))
+            assert is_integer(schema.get("minItems"))
 
             if is_optional:
                 mask = f"node{len(container)}"

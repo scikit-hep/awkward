@@ -1,5 +1,4 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
 from __future__ import annotations
 
 import math
@@ -7,6 +6,7 @@ import math
 import awkward as ak
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._regularize import is_integer
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
@@ -114,7 +114,7 @@ def _impl(
     elif isinstance(form, dict):
         form = ak.forms.from_dict(form)
 
-    if not (ak._util.is_integer(length) and length >= 0):
+    if not (is_integer(length) and length >= 0):
         raise ak._errors.wrap_error(
             TypeError("'length' argument must be a non-negative integer")
         )

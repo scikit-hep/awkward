@@ -16,6 +16,7 @@ import awkward._connect.hist
 from awkward._behavior import behavior_of, get_array_class, get_record_class
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._regularize import is_non_string_like_iterable
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
@@ -1513,7 +1514,7 @@ class Record(NDArrayOperatorsMixin):
             contents = []
             for k, v in data.items():
                 fields.append(k)
-                if ak._util.is_non_string_like_iterable(v):
+                if is_non_string_like_iterable(v):
                     contents.append(Array(v).layout[np.newaxis])
                 else:
                     contents.append(Array([v]).layout)

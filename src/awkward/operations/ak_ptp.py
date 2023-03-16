@@ -3,6 +3,7 @@ import awkward as ak
 from awkward._behavior import behavior_of
 from awkward._connect.numpy import unsupported
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._regularize import regularize_axis
 from awkward._util import unset
 
 np = NumpyMetadata.instance()
@@ -78,7 +79,7 @@ def ptp(array, axis=None, *, keepdims=False, mask_identity=True, flatten_records
 
 
 def _impl(array, axis, keepdims, mask_identity):
-    axis = ak._util.regularize_axis(axis)
+    axis = regularize_axis(axis)
     behavior = behavior_of(array)
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
 

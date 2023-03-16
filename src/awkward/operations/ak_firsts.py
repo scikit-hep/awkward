@@ -2,6 +2,7 @@
 import awkward as ak
 from awkward._behavior import behavior_of
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._regularize import is_integer, regularize_axis
 
 np = NumpyMetadata.instance()
 
@@ -45,11 +46,11 @@ def firsts(array, axis=1, *, highlevel=True, behavior=None):
 
 
 def _impl(array, axis, highlevel, behavior):
-    axis = ak._util.regularize_axis(axis)
+    axis = regularize_axis(axis)
     layout = ak.operations.to_layout(array)
     behavior = behavior_of(array, behavior=behavior)
 
-    if not ak._util.is_integer(axis):
+    if not is_integer(axis):
         raise ak._errors.wrap_error(
             TypeError(f"'axis' must be an integer, not {axis!r}")
         )

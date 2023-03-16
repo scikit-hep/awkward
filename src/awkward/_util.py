@@ -2,11 +2,10 @@
 from __future__ import annotations
 
 import itertools
-import numbers
 import os
 import re
 import sys
-from collections.abc import Collection, Iterable, Mapping, Sequence, Sized
+from collections.abc import Collection, Mapping
 
 import packaging.version
 
@@ -16,7 +15,7 @@ from awkward._nplikes import nplike_of
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
-from awkward.typing import AxisMaybeNone, SupportsInt, TypeVar
+from awkward.typing import TypeVar
 
 np = NumpyMetadata.instance()
 
@@ -46,45 +45,6 @@ def numpy_at_least(version):
 def in_module(obj, modulename: str) -> bool:
     m = type(obj).__module__
     return m == modulename or m.startswith(modulename + ".")
-
-
-def is_file_path(x) -> bool:
-    try:
-        return os.path.isfile(x)
-    except ValueError:
-        return False
-
-
-def is_sized_iterable(obj) -> bool:
-    return isinstance(obj, Iterable) and isinstance(obj, Sized)
-
-
-def is_integer(x) -> bool:
-    return isinstance(x, numbers.Integral) and not isinstance(x, bool)
-
-
-def is_array_like(x) -> bool:
-    return hasattr(x, "shape") and hasattr(x, "dtype")
-
-
-def is_integer_like(x) -> bool:
-    # Integral types
-    if isinstance(x, numbers.Integral):
-        return not isinstance(x, bool)
-    # Scalar arrays
-    elif is_array_like(x):
-        return np.issubdtype(x.dtype, np.integer) and x.ndim == 0
-    # Other things that support integers
-    else:
-        return hasattr(x, "__int__")
-
-
-def is_non_string_like_iterable(obj) -> bool:
-    return not isinstance(obj, (str, bytes)) and isinstance(obj, Iterable)
-
-
-def is_non_string_like_sequence(obj) -> bool:
-    return not isinstance(obj, (str, bytes)) and isinstance(obj, Sequence)
 
 
 def tobytes(array):
@@ -139,30 +99,6 @@ unset = _Unset()
 # Sentinel object for catching pass-through values
 class Unspecified:
     pass
-
-
-def regularize_path(path):
-    """
-    Converts pathlib Paths into plain string paths (for all versions of Python).
-    """
-    is_path = False
-
-    if isinstance(path, getattr(os, "PathLike", ())):
-        is_path = True
-        path = os.fspath(path)
-
-    elif hasattr(path, "__fspath__"):
-        is_path = True
-        path = path.__fspath__()
-
-    elif path.__class__.__module__ == "pathlib":
-        import pathlib
-
-        if isinstance(path, pathlib.Path):
-            is_path = True
-            path = str(path)
-
-    return is_path, path
 
 
 def wrap_layout(content, behavior=None, highlevel=True, like=None, allow_other=False):
@@ -257,22 +193,6 @@ def union_to_record(unionarray, anonymous):
             )
 
         return ak.contents.RecordArray(all_fields, all_names, unionarray.length)
-
-
-def direct_Content_subclass(node):
-    if node is None:
-        return None
-    else:
-        mro = type(node).mro()
-        return mro[mro.index(ak.contents.Content) - 1]
-
-
-def direct_Content_subclass_name(node):
-    out = direct_Content_subclass(node)
-    if out is None:
-        return None
-    else:
-        return out.__name__
 
 
 def expand_braces(text, seen=None):
@@ -448,10 +368,3 @@ def unique_list(items: Collection[T]) -> list[T]:
         seen.add(item)
         result.append(item)
     return result
-
-
-def regularize_axis(axis: SupportsInt | None) -> AxisMaybeNone:
-    if axis is None:
-        return None
-    else:
-        return int(axis)

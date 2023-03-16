@@ -4,6 +4,7 @@ from collections.abc import Iterable
 
 import awkward as ak
 from awkward._behavior import find_typestr
+from awkward._regularize import is_integer
 from awkward._util import unset
 from awkward.forms.form import Form, _type_parameters_equal
 from awkward.typing import final
@@ -147,7 +148,7 @@ class RecordForm(Form):
             return field in self._fields
 
     def content(self, index_or_field):
-        if ak._util.is_integer(index_or_field):
+        if is_integer(index_or_field):
             index = index_or_field
         elif isinstance(index_or_field, str):
             index = self.field_to_index(index_or_field)

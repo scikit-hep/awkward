@@ -2,6 +2,7 @@
 import awkward as ak
 from awkward._behavior import find_typestr
 from awkward._nplikes.shape import unknown_length
+from awkward._regularize import is_integer
 from awkward._util import unset
 from awkward.forms.form import Form, _type_parameters_equal
 from awkward.typing import final
@@ -21,7 +22,7 @@ class RegularForm(Form):
                     )
                 )
             )
-        if not (size is unknown_length or (ak._util.is_integer(size) and size >= 0)):
+        if not (size is unknown_length or (is_integer(size) and size >= 0)):
             raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'size' must be a non-negative int or None, not {}".format(

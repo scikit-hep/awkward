@@ -2,6 +2,7 @@
 import awkward as ak
 from awkward._behavior import behavior_of
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._regularize import regularize_axis
 
 np = NumpyMetadata.instance()
 cpu = ak._backends.NumpyBackend.instance()
@@ -37,7 +38,7 @@ def merge_option_of_records(array, axis=-1, *, highlevel=True, behavior=None):
 
 
 def _impl(array, axis, highlevel, behavior):
-    axis = ak._util.regularize_axis(axis)
+    axis = regularize_axis(axis)
     behavior = behavior_of(array, behavior=behavior)
     layout = ak.to_layout(array, allow_record=False)
 

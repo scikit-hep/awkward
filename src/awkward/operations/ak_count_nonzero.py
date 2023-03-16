@@ -2,6 +2,7 @@
 import awkward as ak
 from awkward._behavior import behavior_of
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._regularize import regularize_axis
 from awkward._util import unset
 
 np = NumpyMetadata.instance()
@@ -76,7 +77,7 @@ def count_nonzero(
 
 
 def _impl(array, axis, keepdims, mask_identity, highlevel, behavior):
-    axis = ak._util.regularize_axis(axis)
+    axis = regularize_axis(axis)
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
     behavior = behavior_of(array, behavior=behavior)
     reducer = ak._reducers.CountNonzero()

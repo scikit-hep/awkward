@@ -170,3 +170,19 @@ def _impl(
         return out
     else:
         return out.replace_schema_metadata({"ak:parameters": json.dumps(parameters)})
+
+
+def _direct_Content_subclass(node):
+    if node is None:
+        return None
+    else:
+        mro = type(node).mro()
+        return mro[mro.index(ak.contents.Content) - 1]
+
+
+def _direct_Content_subclass_name(node):
+    out = _direct_Content_subclass(node)
+    if out is None:
+        return None
+    else:
+        return out.__name__

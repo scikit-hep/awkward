@@ -4,6 +4,7 @@ import numbers
 import awkward as ak
 from awkward._behavior import behavior_of
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._regularize import is_sized_iterable, regularize_axis
 
 np = NumpyMetadata.instance()
 cpu = ak._backends.NumpyBackend.instance()
@@ -67,7 +68,7 @@ def fill_none(array, value, axis=-1, *, highlevel=True, behavior=None):
 
 
 def _impl(array, value, axis, highlevel, behavior):
-    axis = ak._util.regularize_axis(axis)
+    axis = regularize_axis(axis)
     arraylayout = ak.operations.to_layout(array, allow_record=True, allow_other=False)
     behavior = behavior_of(array, value, behavior=behavior)
     backend = ak._backends.backend_of(arraylayout, default=cpu)
@@ -91,7 +92,7 @@ def _impl(array, value, axis, highlevel, behavior):
             backend.nplike.asarray(value), allow_record=False, allow_other=False
         )
     elif (
-        ak._util.is_sized_iterable(value)
+        is_sized_iterable(value)
         and not (isinstance(value, (str, bytes)))
         or isinstance(value, (ak.highlevel.Record, ak.record.Record))
     ):

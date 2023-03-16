@@ -2,6 +2,7 @@
 import awkward as ak
 from awkward._behavior import behavior_of
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._regularize import regularize_axis
 
 np = NumpyMetadata.instance()
 cpu = ak._backends.NumpyBackend.instance()
@@ -205,7 +206,7 @@ def cartesian(
 
 
 def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
-    axis = ak._util.regularize_axis(axis)
+    axis = regularize_axis(axis)
     if isinstance(arrays, dict):
         backend = ak._backends.backend_of(*arrays.values(), default=cpu)
         behavior = behavior_of(*arrays.values(), behavior=behavior)

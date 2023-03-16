@@ -4,6 +4,7 @@ from awkward._behavior import behavior_of
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._nplikes.typetracer import is_unknown_scalar
+from awkward._regularize import is_integer_like, regularize_axis
 
 np = NumpyMetadata.instance()
 
@@ -85,14 +86,14 @@ def unflatten(array, counts, axis=0, *, highlevel=True, behavior=None):
 
 
 def _impl(array, counts, axis, highlevel, behavior):
-    axis = ak._util.regularize_axis(axis)
+    axis = regularize_axis(axis)
     layout = ak.operations.to_layout(
         array, allow_record=False, allow_other=False
     ).to_packed()
     behavior = behavior_of(array, behavior=behavior)
     backend = layout.backend
 
-    if ak._util.is_integer_like(counts):
+    if is_integer_like(counts):
         # Regularize unknown values to unknown lengths
         if is_unknown_scalar(counts) or counts is unknown_length:
             counts = unknown_length
