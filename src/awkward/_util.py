@@ -1,9 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 from __future__ import annotations
 
-import itertools
 import os
-import re
 import sys
 from collections.abc import Collection, Mapping
 
@@ -119,29 +117,6 @@ def wrap_layout(content, behavior=None, highlevel=True, like=None, allow_other=F
             return ak.highlevel.Record(content, behavior=behavior)
 
     return content
-
-
-def expand_braces(text, seen=None):
-    if seen is None:
-        seen = set()
-
-    spans = [m.span() for m in expand_braces.regex.finditer(text)][::-1]
-    alts = [text[start + 1 : stop - 1].split(",") for start, stop in spans]
-
-    if len(spans) == 0:
-        if text not in seen:
-            yield text
-        seen.add(text)
-
-    else:
-        for combo in itertools.product(*alts):
-            replaced = list(text)
-            for (start, stop), replacement in zip(spans, combo):
-                replaced[start:stop] = replacement
-            yield from expand_braces("".join(replaced), seen)
-
-
-expand_braces.regex = re.compile(r"\{[^\{\}]*\}")
 
 
 def from_arraylib(array, regulararray, recordarray, highlevel, behavior):

@@ -1,7 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 from __future__ import annotations
 
+import itertools
 import json
+import re
 from collections.abc import Collection, Mapping
 
 import awkward as ak
@@ -368,6 +370,26 @@ def _parameters_is_empty(parameters: JSONMapping | None) -> bool:
             return False
 
     return True
+
+
+def _expand_braces(text, seen=None):
+    if seen is None:
+        seen = set()
+
+    spans = [m.span() for m in re.finditer(r"\{[^\{\}]*\}", text)][::-1]
+    alts = [text[start + 1 : stop - 1].split(",") for start, stop in spans]
+
+    if len(spans) == 0:
+        if text not in seen:
+            yield text
+        seen.add(text)
+
+    else:
+        for combo in itertools.product(*alts):
+            replaced = list(text)
+            for (start, stop), replacement in zip(spans, combo):
+                replaced[start:stop] = replacement
+            yield from _expand_braces("".join(replaced), seen)
 
 
 class Form:
