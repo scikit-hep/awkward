@@ -62,6 +62,8 @@ def from_buffers(
     the `container` dropped NumPy's `dtype` and `shape` information, leaving
     raw bytes, since `dtype` and `shape` can be reconstituted from the
     #ak.forms.NumpyForm.
+    If the values of `container` are recognised as arrays by the given backend,
+    a view over their existing data will be used, where possible.
 
     The `buffer_key` should be the same as the one used in #ak.to_buffers.
 
@@ -157,11 +159,35 @@ _index_to_dtype = {
 
 
 def _from_buffer(nplike, buffer, dtype, count, byteorder):
-    array = nplike.frombuffer(buffer, dtype=dtype, count=count)
-    if byteorder != ak._util.native_byteorder:
-        return array.byteswap(inplace=False)
-    else:
+    if nplike.is_own_array(buffer):
+        array = buffer.view(dtype)
+
+        # Require same dtype
+        if array.dtype != dtype:
+            raise ak._errors.wrap_error(
+                TypeError(
+                    f"dtype of array ({array.dtype}) does not match dtype of form {dtype}"
+                )
+            )
+        if array.ndim != 1:
+            raise ak._errors.wrap_error(
+                TypeError(f"dimensionality of array should be 1, not ({array.ndim})")
+            )
+        # Require 1D
+        if array.size != count:
+            raise ak._errors.wrap_error(
+                TypeError(
+                    f"size of array ({array.size}) does not match size of form {count}"
+                )
+            )
+
         return array
+    else:
+        array = nplike.frombuffer(buffer, dtype=dtype, count=count)
+        if byteorder != ak._util.native_byteorder:
+            return array.byteswap(inplace=False)
+        else:
+            return array
 
 
 def reconstitute(form, length, container, getkey, backend, byteorder, simplify):
