@@ -2,7 +2,6 @@
 
 import awkward as ak
 from awkward._connect.numpy import unsupported
-from awkward._nplikes import nplike_of
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.typetracer import ensure_known_scalar
 from awkward.operations.ak_zeros_like import _ZEROS
@@ -92,24 +91,23 @@ def full_like(
 
 
 def _impl(array, fill_value, highlevel, behavior, dtype, including_unknown):
+    behavior = ak._util.behavior_of(array, behavior=behavior)
+    layout = ak.operations.to_layout(array, allow_record=True, allow_other=False)
+
     if dtype is not None:
         # In the case of strings and byte strings,
         # converting the fill avoids a ValueError.
         dtype = np.dtype(dtype)
-        nplike = nplike_of(array)
-        fill_value = nplike.asarray([fill_value], dtype=dtype)[0]
+        fill_value = layout.backend.nplike.asarray([fill_value], dtype=dtype)[0]
         # Also, if the fill_value cannot be converted to the dtype
         # this should throw a clear, early, error.
         if dtype == np.dtype(np.bool_):
             # then for bools, only 0 and 1 give correct string behavior
             fill_value = fill_value.view(np.uint8)
 
-    layout = ak.operations.to_layout(array, allow_record=True, allow_other=False)
-    behavior = ak._util.behavior_of(array, behavior=behavior)
-
-    def action(layout, **kwargs):
-        nplike = layout.backend.nplike
-        index_nplike = layout.backend.index_nplike
+    def action(layout, backend, **kwargs):
+        nplike = backend.nplike
+        index_nplike = backend.index_nplike
 
         if layout.is_numpy:
             original = nplike.asarray(layout.data)

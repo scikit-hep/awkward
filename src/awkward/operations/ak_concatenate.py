@@ -1,12 +1,12 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
-from awkward._nplikes import nplike_of
+from awkward._backends import NumpyBackend, backend_of
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward.operations.ak_fill_none import fill_none
 
 np = NumpyMetadata.instance()
-cpu = ak._backends.NumpyBackend.instance()
+cpu = NumpyBackend.instance()
 
 
 @ak._connect.numpy.implements("concatenate")
@@ -51,10 +51,9 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
     backend = ak._backends.backend_of(*arrays, default=cpu)
     behavior = ak._util.behavior_of(*arrays, behavior=behavior)
     if (
-        # Is an Awkward Content
-        isinstance(arrays, ak.contents.Content)
-        # Is an array with a known NumpyLike
-        or nplike_of(arrays, default=None) is not None
+        # Is an array with a known backend
+        backend_of(arrays, default=None)
+        is not None
     ):
         # Convert the array to a layout object
         content = ak.operations.to_layout(arrays, allow_record=False, allow_other=False)
