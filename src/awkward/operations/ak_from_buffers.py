@@ -5,6 +5,7 @@ from __future__ import annotations
 import math
 
 import awkward as ak
+from awkward._nplikes import to_nplike
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
 
@@ -32,6 +33,9 @@ def from_buffers(
         container (Mapping, such as dict): The str \u2192 Python buffers that
             represent the decomposed Awkward Array. This `container` is only
             assumed to have a `__getitem__` method that accepts strings as keys.
+            The values of this mapping may be objects that support the buffer
+            protocol, or callables that accept a series of options and return
+            an array.
         buffer_key (str or callable): Python format string containing
             `"{form_key}"` and/or `"{attribute}"` or a function that takes these
             as keyword arguments and returns a string to use as a key for a buffer
@@ -63,8 +67,30 @@ def from_buffers(
     raw bytes, since `dtype` and `shape` can be reconstituted from the
     #ak.forms.NumpyForm.
 
-    The `buffer_key` should be the same as the one used in #ak.to_buffers.
+    If the values of `container` are callables, then they must return array-like
+    objects, and accept the following keyword-only arguments:
+    * dtype (dtype or dtype specifier): Required dtype of the array.
+    * count (int): Required number of elements in the array.
 
+    An example callable might be:
+
+        >>> def generate_buffer(*, dtype, count):
+        ...     return np.arange(count, dtype=dtype)
+        ...
+        >>> container = {"node0-data": generate_buffer}
+        >>> form = '''
+        ...     {
+        ...         "class": "NumpyArray",
+        ...         "primitive": "int64",
+        ...         "form_key": "node0"
+        ...     }
+        ... '''
+        >>> array = ak.from_buffers(form, 3, container)
+        >>> array
+        [0, 1, 2]
+
+
+    The `buffer_key` should be the same as the one used in #ak.to_buffers.
     See #ak.to_buffers for examples.
     """
     with ak._errors.OperationErrorContext(
@@ -157,11 +183,35 @@ _index_to_dtype = {
 
 
 def _from_buffer(nplike, buffer, dtype, count, byteorder):
-    array = nplike.frombuffer(buffer, dtype=dtype, count=count)
-    if byteorder != ak._util.native_byteorder:
-        return array.byteswap(inplace=False)
-    else:
+    if callable(buffer):
+        array = to_nplike(buffer(dtype=dtype, count=count), nplike)
+
+        # Require same dtype
+        if array.dtype != dtype:
+            raise ak._errors.wrap_error(
+                TypeError(
+                    f"dtype of array ({array.dtype}) does not match dtype of form {dtype}"
+                )
+            )
+        if array.ndim != 1:
+            raise ak._errors.wrap_error(
+                TypeError(f"dimensionality of array should be 1, not ({array.ndim})")
+            )
+        # Require 1D
+        if array.size != count:
+            raise ak._errors.wrap_error(
+                TypeError(
+                    f"size of array ({array.size}) does not match size of form {count}"
+                )
+            )
+
         return array
+    else:
+        array = nplike.frombuffer(buffer, dtype=dtype, count=count)
+        if byteorder != ak._util.native_byteorder:
+            return array.byteswap(inplace=False)
+        else:
+            return array
 
 
 def reconstitute(form, length, container, getkey, backend, byteorder, simplify):
