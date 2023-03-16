@@ -115,7 +115,7 @@ def test_2d_2d_stride_trick():
     assert np.shares_memory(result.data, array)
 
 
-def test_2d_3d_stride_trick():
+def test_2d_2d_different_stride_trick():
     data = np.array([101], dtype=np.int32)
     array = np.lib.stride_tricks.as_strided(data, (40, 3), strides=(0, 0))
 
@@ -135,3 +135,12 @@ def test_2d_3d_stride_trick():
     # Read less than we have available
     result = ak.from_buffers(form, array.size // 8 - 4, container, highlevel=False)
     assert np.shares_memory(result.data, array)
+
+
+def test_round_trip():
+    data = np.arange(9 * 5 * 3).reshape((5, 9, 3))
+    array = ak.from_numpy(data)
+
+    result = ak.from_buffers(*ak.to_buffers(array), highlevel=False)
+    assert np.shares_memory(result.data, data)
+    assert ak.almost_equal(array, result)
