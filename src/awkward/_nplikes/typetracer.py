@@ -4,12 +4,13 @@ from __future__ import annotations
 from numbers import Number
 
 import numpy
+from numpy.lib.mixins import NDArrayOperatorsMixin
 
 import awkward as ak
 from awkward._errors import wrap_error
 from awkward._nplikes.numpylike import ArrayLike, IndexType, NumpyLike, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
-from awkward._util import NDArrayOperatorsMixin, is_non_string_like_sequence
+from awkward._util import is_non_string_like_sequence
 from awkward.typing import (
     Any,
     Final,
