@@ -1,11 +1,14 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 from __future__ import annotations
 
+import itertools
 import json
+import re
 from collections.abc import Collection, Mapping
 
 import awkward as ak
 from awkward import _errors
+from awkward._behavior import find_typestrs
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward.typing import Final, TypeAlias
@@ -369,6 +372,26 @@ def _parameters_is_empty(parameters: JSONMapping | None) -> bool:
     return True
 
 
+def _expand_braces(text, seen=None):
+    if seen is None:
+        seen = set()
+
+    spans = [m.span() for m in re.finditer(r"\{[^\{\}]*\}", text)][::-1]
+    alts = [text[start + 1 : stop - 1].split(",") for start, stop in spans]
+
+    if len(spans) == 0:
+        if text not in seen:
+            yield text
+        seen.add(text)
+
+    else:
+        for combo in itertools.product(*alts):
+            replaced = list(text)
+            for (start, stop), replacement in zip(spans, combo):
+                replaced[start:stop] = replacement
+            yield from _expand_braces("".join(replaced), seen)
+
+
 class Form:
     is_numpy = False
     is_unknown = False
@@ -483,7 +506,7 @@ class Form:
         return self._type({})
 
     def type_from_behavior(self, behavior):
-        return self._type(ak._util.typestrs(behavior))
+        return self._type(find_typestrs(behavior))
 
     def columns(self, list_indicator=None, column_prefix=()):
         output = []
@@ -503,7 +526,7 @@ class Form:
         if expand_braces:
             next_specifier = []
             for item in specifier:
-                for result in ak._util.expand_braces(item):
+                for result in _expand_braces(item):
                     next_specifier.append(result)
             specifier = next_specifier
 

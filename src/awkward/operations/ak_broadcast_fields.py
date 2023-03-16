@@ -1,6 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
+__all__ = ("broadcast_fields",)
 import awkward as ak
+from awkward._behavior import behavior_of
+from awkward._layout import wrap_layout
 
 cpu = ak._backends.NumpyBackend.instance()
 
@@ -60,7 +62,7 @@ def broadcast_fields(
 def _impl(arrays, highlevel, behavior):
     backend = ak._backends.backend_of(*arrays, default=cpu)
     layouts = [ak.to_layout(x).to_backend(backend) for x in arrays]
-    behavior = ak._util.behavior_of(*arrays, behavior=behavior)
+    behavior = behavior_of(*arrays, behavior=behavior)
 
     def identity(content):
         return content
@@ -160,6 +162,5 @@ def _impl(arrays, highlevel, behavior):
         return [pull(layout) for pull, layout in zip(pullbacks, inner_layouts)]
 
     return [
-        ak._util.wrap(x, highlevel=highlevel, behavior=behavior)
-        for x in recurse(layouts)
+        wrap_layout(x, highlevel=highlevel, behavior=behavior) for x in recurse(layouts)
     ]

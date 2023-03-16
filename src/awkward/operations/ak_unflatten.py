@@ -1,10 +1,12 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
-
+__all__ = ("unflatten",)
 import awkward as ak
+from awkward._behavior import behavior_of
+from awkward._layout import maybe_posaxis, wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._nplikes.typetracer import is_unknown_scalar
+from awkward._regularize import is_integer_like, regularize_axis
 
 np = NumpyMetadata.instance()
 
@@ -86,14 +88,14 @@ def unflatten(array, counts, axis=0, *, highlevel=True, behavior=None):
 
 
 def _impl(array, counts, axis, highlevel, behavior):
-    axis = ak._util.regularize_axis(axis)
+    axis = regularize_axis(axis)
     layout = ak.operations.to_layout(
         array, allow_record=False, allow_other=False
     ).to_packed()
-    behavior = ak._util.behavior_of(array, behavior=behavior)
+    behavior = behavior_of(array, behavior=behavior)
     backend = layout.backend
 
-    if ak._util.is_integer_like(counts):
+    if is_integer_like(counts):
         # Regularize unknown values to unknown lengths
         if is_unknown_scalar(counts) or counts is unknown_length:
             counts = unknown_length
@@ -186,13 +188,13 @@ def _impl(array, counts, axis, highlevel, behavior):
 
         return out
 
-    if axis == 0 or ak._util.maybe_posaxis(layout, axis, 1) == 0:
+    if axis == 0 or maybe_posaxis(layout, axis, 1) == 0:
         out = unflatten_this_layout(layout)
 
     else:
 
         def apply(layout, depth, **kwargs):
-            posaxis = ak._util.maybe_posaxis(layout, axis, depth)
+            posaxis = maybe_posaxis(layout, axis, depth)
             if posaxis == depth and layout.is_list:
                 # We are one *above* the level where we want to apply this.
                 listoffsetarray = layout.to_ListOffsetArray64(True)
@@ -243,4 +245,4 @@ def _impl(array, counts, axis, highlevel, behavior):
             )
         )
 
-    return ak._util.wrap(out, behavior, highlevel)
+    return wrap_layout(out, behavior, highlevel)

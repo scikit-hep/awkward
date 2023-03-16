@@ -1,8 +1,10 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
+__all__ = ("softmax",)
 import awkward as ak
+from awkward._behavior import behavior_of
 from awkward._nplikes import ufuncs
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._regularize import regularize_axis
 from awkward._util import unset
 
 np = NumpyMetadata.instance()
@@ -66,8 +68,8 @@ def softmax(
 
 
 def _impl(x, axis, keepdims, mask_identity):
-    axis = ak._util.regularize_axis(axis)
-    behavior = ak._util.behavior_of(x)
+    axis = regularize_axis(axis)
+    behavior = behavior_of(x)
     x = ak.highlevel.Array(
         ak.operations.to_layout(x, allow_record=False, allow_other=False),
         behavior=behavior,

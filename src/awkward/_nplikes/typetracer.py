@@ -4,12 +4,13 @@ from __future__ import annotations
 from numbers import Number
 
 import numpy
+from numpy.lib.mixins import NDArrayOperatorsMixin
 
 import awkward as ak
 from awkward._errors import wrap_error
 from awkward._nplikes.numpylike import ArrayLike, IndexType, NumpyLike, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
-from awkward._util import NDArrayOperatorsMixin, is_non_string_like_sequence
+from awkward._regularize import is_integer, is_non_string_like_sequence
 from awkward.typing import (
     Any,
     Final,
@@ -763,11 +764,7 @@ class TypeTracer(NumpyLike):
         if stop is None:
             start, stop = 0, start
 
-        if (
-            ak._util.is_integer(start)
-            and ak._util.is_integer(stop)
-            and ak._util.is_integer(step)
-        ):
+        if is_integer(start) and is_integer(stop) and is_integer(step):
             length = max(0, (stop - start + (step - (1 if step > 0 else -1))) // step)
         else:
             length = unknown_length
@@ -1023,7 +1020,7 @@ class TypeTracer(NumpyLike):
             if item is unknown_length:
                 # Size is no longer defined
                 new_size = unknown_length
-            elif not ak._util.is_integer(item):
+            elif not is_integer(item):
                 raise wrap_error(
                     ValueError(
                         "shape must be comprised of positive integers, -1 (for placeholders), or unknown lengths"

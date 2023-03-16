@@ -1,8 +1,11 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
+__all__ = ("prod",)
 import awkward as ak
+from awkward._behavior import behavior_of
 from awkward._connect.numpy import unsupported
+from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._regularize import regularize_axis
 from awkward._util import unset
 
 np = NumpyMetadata.instance()
@@ -137,9 +140,9 @@ def nanprod(
 
 
 def _impl(array, axis, keepdims, mask_identity, highlevel, behavior):
-    axis = ak._util.regularize_axis(axis)
+    axis = regularize_axis(axis)
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
-    behavior = ak._util.behavior_of(array, behavior=behavior)
+    behavior = behavior_of(array, behavior=behavior)
     reducer = ak._reducers.Prod()
 
     out = ak._do.reduce(
@@ -151,7 +154,7 @@ def _impl(array, axis, keepdims, mask_identity, highlevel, behavior):
         behavior=behavior,
     )
     if isinstance(out, (ak.contents.Content, ak.record.Record)):
-        return ak._util.wrap(out, behavior, highlevel)
+        return wrap_layout(out, behavior, highlevel)
     else:
         return out
 

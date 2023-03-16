@@ -1,6 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
+__all__ = ("from_categorical",)
 import awkward as ak
+from awkward._behavior import behavior_of
+from awkward._layout import wrap_layout
 
 
 def from_categorical(array, *, highlevel=True, behavior=None):
@@ -41,9 +43,9 @@ def _impl(array, highlevel, behavior):
             return None
 
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
-    behavior = ak._util.behavior_of(array, behavior=behavior)
+    behavior = behavior_of(array, behavior=behavior)
     out = ak._do.recursively_apply(layout, action, behavior=behavior)
     if highlevel:
-        return ak._util.wrap(out, behavior)
+        return wrap_layout(out, behavior)
     else:
         return out

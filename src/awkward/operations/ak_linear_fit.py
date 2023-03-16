@@ -1,10 +1,12 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
-
+__all__ = ("linear_fit",)
 import awkward as ak
 from awkward._backends import backend_of
+from awkward._behavior import behavior_of
+from awkward._layout import wrap_layout
 from awkward._nplikes import ufuncs
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._regularize import regularize_axis
 from awkward._util import unset
 
 np = NumpyMetadata.instance()
@@ -89,8 +91,8 @@ def linear_fit(
 
 
 def _impl(x, y, weight, axis, keepdims, mask_identity):
-    axis = ak._util.regularize_axis(axis)
-    behavior = ak._util.behavior_of(x, y, weight)
+    axis = regularize_axis(axis)
+    behavior = behavior_of(x, y, weight)
     x = ak.highlevel.Array(
         ak.operations.to_layout(x, allow_record=False, allow_other=False),
         behavior=behavior,
@@ -254,4 +256,4 @@ def _impl(x, y, weight, axis, keepdims, mask_identity):
         if scalar:
             out = out[0]
 
-        return ak._util.wrap(out, highlevel=True, behavior=behavior, allow_other=scalar)
+        return wrap_layout(out, highlevel=True, behavior=behavior, allow_other=scalar)
