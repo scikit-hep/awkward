@@ -162,13 +162,6 @@ def _from_buffer(nplike, buffer, dtype, count, byteorder):
     if nplike.is_own_array(buffer):
         array = buffer.view(dtype)
 
-        # Require same dtype
-        if array.dtype != dtype:
-            raise ak._errors.wrap_error(
-                TypeError(
-                    f"dtype of array ({array.dtype}) does not match dtype of form {dtype}"
-                )
-            )
         if array.ndim != 1:
             raise ak._errors.wrap_error(
                 TypeError(f"dimensionality of array should be 1, not ({array.ndim})")
