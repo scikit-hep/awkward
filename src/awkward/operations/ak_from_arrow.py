@@ -1,4 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+__all__ = ("from_arrow",)
 import awkward as ak
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata

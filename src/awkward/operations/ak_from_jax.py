@@ -1,4 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+__all__ = ("from_jax",)
 
 from awkward import _errors, jax
 from awkward._layout import from_arraylib, wrap_layout

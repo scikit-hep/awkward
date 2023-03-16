@@ -1,6 +1,8 @@
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 from __future__ import annotations
 
-__all__ = ["almost_equal"]
+__all__ = ("almost_equal",)
+
 
 from awkward._backends import backend_of
 from awkward._behavior import behavior_of, get_array_class, get_record_class

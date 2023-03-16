@@ -1,4 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+__all__ = ("from_parquet",)
 import awkward as ak
 from awkward._regularize import is_integer
 

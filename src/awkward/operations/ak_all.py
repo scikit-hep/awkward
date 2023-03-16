@@ -1,4 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+__all__ = ("all",)
 import awkward as ak
 from awkward._behavior import behavior_of
 from awkward._connect.numpy import unsupported
