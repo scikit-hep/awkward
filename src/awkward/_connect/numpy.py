@@ -138,13 +138,7 @@ def _array_ufunc_adjust(custom, inputs, kwargs, behavior):
 
 
 def _array_ufunc_adjust_apply(apply_ufunc, ufunc, method, inputs, kwargs, behavior):
-    nextinputs = [
-        ak._util.wrap(x, behavior)
-        if isinstance(x, (ak.contents.Content, ak.record.Record))
-        else x
-        for x in inputs
-    ]
-
+    nextinputs = [ak._util.wrap(x, behavior, allow_other=True) for x in inputs]
     out = apply_ufunc(ufunc, method, nextinputs, kwargs)
 
     if out is NotImplemented:

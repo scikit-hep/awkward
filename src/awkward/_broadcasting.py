@@ -9,7 +9,6 @@ import itertools
 from collections.abc import Sequence
 
 import awkward as ak
-from awkward._nplikes import nplike_of
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
@@ -60,11 +59,10 @@ def length_of_broadcast(inputs: Sequence) -> int | type[unknown_length]:
 
 def broadcast_pack(inputs: Sequence, isscalar: list[bool]) -> list:
     maxlen = length_of_broadcast(inputs)
-
     nextinputs = []
     for x in inputs:
         if isinstance(x, Record):
-            index = nplike_of(*inputs).full(maxlen, x.at, dtype=np.int64)
+            index = x.backend.index_nplike.full(maxlen, x.at, dtype=np.int64)
             nextinputs.append(RegularArray(x.array[index], maxlen, 1))
             isscalar.append(True)
         elif isinstance(x, Content):
