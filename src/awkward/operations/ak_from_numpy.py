@@ -49,7 +49,7 @@ def from_numpy(
         },
     ):
         return wrap_layout(
-            from_arraylib(array, regulararray, False),
+            from_arraylib(array, regulararray, recordarray),
             highlevel=highlevel,
             behavior=behavior,
         )
