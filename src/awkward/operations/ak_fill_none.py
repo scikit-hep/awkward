@@ -1,8 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
 import numbers
 
 import awkward as ak
+from awkward._behavior import behavior_of
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
@@ -69,7 +69,7 @@ def fill_none(array, value, axis=-1, *, highlevel=True, behavior=None):
 def _impl(array, value, axis, highlevel, behavior):
     axis = ak._util.regularize_axis(axis)
     arraylayout = ak.operations.to_layout(array, allow_record=True, allow_other=False)
-    behavior = ak._util.behavior_of(array, value, behavior=behavior)
+    behavior = behavior_of(array, value, behavior=behavior)
     backend = ak._backends.backend_of(arraylayout, default=cpu)
 
     # Convert value type to appropriate layout

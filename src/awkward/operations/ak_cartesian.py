@@ -1,6 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
 import awkward as ak
+from awkward._behavior import behavior_of
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
@@ -208,7 +208,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
     axis = ak._util.regularize_axis(axis)
     if isinstance(arrays, dict):
         backend = ak._backends.backend_of(*arrays.values(), default=cpu)
-        behavior = ak._util.behavior_of(*arrays.values(), behavior=behavior)
+        behavior = behavior_of(*arrays.values(), behavior=behavior)
         new_arrays = {}
         for n, x in arrays.items():
             new_arrays[n] = ak.operations.to_layout(
@@ -218,7 +218,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
     else:
         arrays = list(arrays)
         backend = ak._backends.backend_of(*arrays, default=cpu)
-        behavior = ak._util.behavior_of(*arrays, behavior=behavior)
+        behavior = behavior_of(*arrays, behavior=behavior)
         new_arrays = []
         for x in arrays:
             new_arrays.append(

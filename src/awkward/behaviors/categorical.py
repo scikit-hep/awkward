@@ -1,7 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
-
 import awkward as ak
+from awkward._behavior import behavior_of
 from awkward._nplikes import ufuncs
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
@@ -56,7 +55,7 @@ def _as_hashable(obj):
 
 
 def _categorical_equal(one, two):
-    behavior = ak._util.behavior_of(one, two)
+    behavior = behavior_of(one, two)
 
     one, two = one.layout, two.layout
 
@@ -90,9 +89,7 @@ def _categorical_equal(one, two):
         one_mapped = one_to_two[one_index]
 
     out = one_mapped == two_index
-    out = ak._util.wrap_layout(
-        ak.contents.NumpyArray(out), ak._util.behavior_of(one, two)
-    )
+    out = ak._util.wrap_layout(ak.contents.NumpyArray(out), behavior_of(one, two))
     return out
 
 
@@ -101,7 +98,7 @@ def _apply_ufunc(ufunc, method, inputs, kwargs):
     for x in inputs:
         if isinstance(x, ak.highlevel.Array) and x.layout.is_indexed:
             nextinputs.append(
-                ak.highlevel.Array(x.layout.project(), behavior=ak._util.behavior_of(x))
+                ak.highlevel.Array(x.layout.project(), behavior=behavior_of(x))
             )
         else:
             nextinputs.append(x)

@@ -1,5 +1,4 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
 import copy
 import html
 import io
@@ -14,6 +13,7 @@ from numpy.lib.mixins import NDArrayOperatorsMixin  # noqa: TID251
 
 import awkward as ak
 import awkward._connect.hist
+from awkward._behavior import behavior_of, get_array_class, get_record_class
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
 
@@ -182,7 +182,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         elif isinstance(data, Array):
             layout = data._layout
-            behavior = ak._util.behavior_of(data, behavior=behavior)
+            behavior = behavior_of(data, behavior=behavior)
 
         elif isinstance(data, dict):
             fields = []
@@ -317,7 +317,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     @behavior.setter
     def behavior(self, behavior):
         if behavior is None or isinstance(behavior, Mapping):
-            self.__class__ = ak._util.get_array_class(self._layout, behavior)
+            self.__class__ = get_array_class(self._layout, behavior)
             self._behavior = behavior
         else:
             raise ak._errors.wrap_error(TypeError("behavior must be None or a dict"))
@@ -1623,7 +1623,7 @@ class Record(NDArrayOperatorsMixin):
     @behavior.setter
     def behavior(self, behavior):
         if behavior is None or isinstance(behavior, Mapping):
-            self.__class__ = ak._util.get_record_class(self._layout, behavior)
+            self.__class__ = get_record_class(self._layout, behavior)
             self._behavior = behavior
         else:
             raise ak._errors.wrap_error(TypeError("behavior must be None or a dict"))

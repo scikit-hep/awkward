@@ -1,8 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
 from collections.abc import Sequence
 
 import awkward as ak
+from awkward._behavior import behavior_of
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
@@ -46,7 +46,7 @@ def _impl(base, where, highlevel, behavior):
             )
         )
 
-    behavior = ak._util.behavior_of(base, behavior=behavior)
+    behavior = behavior_of(base, behavior=behavior)
     base = ak.operations.to_layout(base, allow_record=True, allow_other=False)
 
     def action(layout, depth_context, **kwargs):

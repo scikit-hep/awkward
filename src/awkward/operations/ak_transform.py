@@ -1,8 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
 import copy
 
 import awkward as ak
+from awkward._behavior import behavior_of
 
 cpu = ak._backends.NumpyBackend.instance()
 
@@ -458,7 +458,7 @@ def _impl(
     behavior,
     highlevel,
 ):
-    behavior = ak._util.behavior_of(array, *more_arrays, behavior=behavior)
+    behavior = behavior_of(array, *more_arrays, behavior=behavior)
     backend = ak._backends.backend_of(array, *more_arrays, default=cpu)
     layout = ak.operations.ak_to_layout._impl(
         array, allow_record=False, allow_other=False, regulararray=True

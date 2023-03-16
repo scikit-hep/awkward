@@ -3,9 +3,9 @@ from __future__ import annotations
 __all__ = ["almost_equal"]
 
 from awkward._backends import backend_of
+from awkward._behavior import behavior_of, get_array_class, get_record_class
 from awkward._errors import wrap_error
 from awkward._nplikes.numpylike import NumpyMetadata
-from awkward._util import behavior_of, get_array_class, get_record_class
 from awkward.forms.form import _parameters_equal
 from awkward.operations.ak_to_layout import to_layout
 

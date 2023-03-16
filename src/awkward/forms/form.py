@@ -6,6 +6,7 @@ from collections.abc import Collection, Mapping
 
 import awkward as ak
 from awkward import _errors
+from awkward._behavior import find_typestrs
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward.typing import Final, TypeAlias
@@ -483,7 +484,7 @@ class Form:
         return self._type({})
 
     def type_from_behavior(self, behavior):
-        return self._type(ak._util.find_typestrs(behavior))
+        return self._type(find_typestrs(behavior))
 
     def columns(self, list_indicator=None, column_prefix=()):
         output = []

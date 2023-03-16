@@ -1,5 +1,4 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
 import operator
 
 import numba
@@ -8,8 +7,8 @@ import numba.core.typing.ctypes_utils
 import numpy
 
 import awkward as ak
+from awkward._behavior import behavior_of, overlay_behavior
 from awkward._nplikes.numpylike import NumpyMetadata
-from awkward._util import overlay_behavior
 
 np = NumpyMetadata.instance()
 
@@ -188,7 +187,7 @@ def unbox_Lookup(lookuptype, lookupobj, c):
 class ArrayView:
     @classmethod
     def fromarray(cls, array):
-        behavior = ak._util.behavior_of(array)
+        behavior = behavior_of(array)
         layout = ak.operations.to_layout(
             array,
             allow_record=False,
@@ -579,7 +578,7 @@ def lower_iternext(context, builder, sig, args, result):
 class RecordView:
     @classmethod
     def fromrecord(cls, record):
-        behavior = ak._util.behavior_of(record)
+        behavior = behavior_of(record)
         layout = ak.operations.to_layout(record, allow_record=True, allow_other=False)
         assert isinstance(layout, ak.record.Record)
         arraylayout = layout.array

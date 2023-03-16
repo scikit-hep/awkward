@@ -1,5 +1,4 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
 from __future__ import annotations
 
 import copy
@@ -9,6 +8,7 @@ import itertools
 from collections.abc import Sequence
 
 import awkward as ak
+from awkward._behavior import find_custom_broadcast
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
@@ -879,7 +879,7 @@ def apply_step(
             # General list-handling case: the offsets of each list may be different.
             else:
                 fcns = [
-                    ak._util.find_custom_broadcast(x, behavior)
+                    find_custom_broadcast(x, behavior)
                     if isinstance(x, Content)
                     else None
                     for x in inputs

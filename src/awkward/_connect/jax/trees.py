@@ -5,6 +5,7 @@ import jax
 
 import awkward as ak
 from awkward import contents, highlevel, record
+from awkward._behavior import behavior_of
 from awkward._errors import wrap_error
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
@@ -109,7 +110,7 @@ class AuxData(Generic[T]):
         return buffers, AuxData(
             layout=layout,
             is_highlevel=is_highlevel,
-            behavior=ak._util.behavior_of(obj),
+            behavior=behavior_of(obj),
         )
 
     @property

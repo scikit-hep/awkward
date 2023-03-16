@@ -1,7 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
-
 import awkward as ak
+from awkward._behavior import behavior_of
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
@@ -39,7 +38,7 @@ def merge_option_of_records(array, axis=-1, *, highlevel=True, behavior=None):
 
 def _impl(array, axis, highlevel, behavior):
     axis = ak._util.regularize_axis(axis)
-    behavior = ak._util.behavior_of(array, behavior=behavior)
+    behavior = behavior_of(array, behavior=behavior)
     layout = ak.to_layout(array, allow_record=False)
 
     # First, normalise type-invsible "index-of-records" to "record-of-index"

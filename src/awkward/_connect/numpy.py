@@ -5,6 +5,12 @@ import inspect
 import numpy
 
 import awkward as ak
+from awkward._behavior import (
+    behavior_of,
+    find_custom_cast,
+    find_ufunc,
+    find_ufunc_generic,
+)
 from awkward._util import numpy_at_least
 from awkward.contents.numpyarray import NumpyArray
 
@@ -111,7 +117,7 @@ def _array_ufunc_custom_cast(inputs, behavior):
 
     nextinputs = []
     for x in args:
-        cast_fcn = ak._util.find_custom_cast(x, behavior)
+        cast_fcn = find_custom_cast(x, behavior)
         if cast_fcn is not None:
             x = cast_fcn(x)
         nextinputs.append(
@@ -175,13 +181,13 @@ def array_ufunc(ufunc, method, inputs, kwargs):
     if method != "__call__" or len(inputs) == 0 or "out" in kwargs:
         return NotImplemented
 
-    behavior = ak._util.behavior_of(*inputs)
+    behavior = behavior_of(*inputs)
 
     inputs = _array_ufunc_custom_cast(inputs, behavior)
 
     def action(inputs, **ignore):
         signature = _array_ufunc_signature(ufunc, inputs)
-        custom = ak._util.find_ufunc(behavior, signature)
+        custom = find_ufunc(behavior, signature)
         # Do we have a custom ufunc (an override of the given ufunc)?
         if custom is not None:
             return _array_ufunc_adjust(custom, inputs, kwargs, behavior)
@@ -220,7 +226,7 @@ def array_ufunc(ufunc, method, inputs, kwargs):
         # Do we have a custom generic ufunc override (a function that accepts _all_ ufuncs)?
         for x in inputs:
             if isinstance(x, ak.contents.Content):
-                apply_ufunc = ak._util.find_ufunc_generic(ufunc, x, behavior)
+                apply_ufunc = find_ufunc_generic(ufunc, x, behavior)
                 if apply_ufunc is not None:
                     out = _array_ufunc_adjust_apply(
                         apply_ufunc, ufunc, method, inputs, kwargs, behavior

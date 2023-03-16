@@ -1,6 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
 import awkward as ak
+from awkward._behavior import behavior_of
 from awkward._connect.numpy import unsupported
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._util import unset
@@ -150,7 +150,7 @@ def nanargmax(
 def _impl(array, axis, keepdims, mask_identity, highlevel, behavior):
     axis = ak._util.regularize_axis(axis)
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
-    behavior = ak._util.behavior_of(array, behavior=behavior)
+    behavior = behavior_of(array, behavior=behavior)
     reducer = ak._reducers.ArgMax()
 
     out = ak._do.reduce(

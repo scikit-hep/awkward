@@ -8,6 +8,7 @@ from numbers import Complex, Real
 
 import awkward as ak
 from awkward._backends import Backend
+from awkward._behavior import get_array_class, get_record_class
 from awkward._nplikes import to_nplike
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import IndexType, NumpyLike, NumpyMetadata
@@ -1186,12 +1187,12 @@ class Content:
         self, behavior: dict | None, json_conversions: dict[str, Any] | None
     ):
         if self.is_record:
-            getitem = ak._util.get_record_class(self, behavior).__getitem__
+            getitem = get_record_class(self, behavior).__getitem__
             overloaded = getitem is not ak.highlevel.Record.__getitem__ and not getattr(
                 getitem, "ignore_in_to_list", False
             )
         else:
-            getitem = ak._util.get_array_class(self, behavior).__getitem__
+            getitem = get_array_class(self, behavior).__getitem__
             overloaded = getitem is not ak.highlevel.Array.__getitem__ and not getattr(
                 getitem, "ignore_in_to_list", False
             )

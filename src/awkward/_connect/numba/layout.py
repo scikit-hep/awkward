@@ -5,7 +5,7 @@ import json
 import numba
 
 import awkward as ak
-from awkward._util import overlay_behavior
+from awkward._behavior import overlay_behavior
 
 
 def find_numba_array_typer(layouttype, behavior):

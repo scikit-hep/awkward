@@ -5,6 +5,7 @@ import copy
 from collections.abc import Iterable
 
 import awkward as ak
+from awkward._behavior import get_record_class
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._util import unset
@@ -217,7 +218,7 @@ class Record:
 
     def _to_list(self, behavior, json_conversions):
         overloaded = (
-            ak._util.get_record_class(self._array, behavior).__getitem__
+            get_record_class(self._array, behavior).__getitem__
             is not ak.highlevel.Record.__getitem__
         )
 

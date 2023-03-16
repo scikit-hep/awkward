@@ -1,6 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
 import awkward as ak
+from awkward._behavior import behavior_of
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
@@ -40,11 +40,9 @@ def with_parameter(array, parameter, value, *, highlevel=True, behavior=None):
 
 
 def _impl(array, parameter, value, highlevel, behavior):
-    behavior = ak._util.behavior_of(array, behavior=behavior)
+    behavior = behavior_of(array, behavior=behavior)
     layout = ak.operations.to_layout(array, allow_record=True, allow_other=False)
 
     out = layout.with_parameter(parameter, value)
 
-    return ak._util.wrap_layout(
-        out, ak._util.behavior_of(array, behavior=behavior), highlevel
-    )
+    return ak._util.wrap_layout(out, behavior_of(array, behavior=behavior), highlevel)

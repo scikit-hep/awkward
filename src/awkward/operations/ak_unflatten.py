@@ -1,7 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
-
 import awkward as ak
+from awkward._behavior import behavior_of
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._nplikes.typetracer import is_unknown_scalar
@@ -90,7 +89,7 @@ def _impl(array, counts, axis, highlevel, behavior):
     layout = ak.operations.to_layout(
         array, allow_record=False, allow_other=False
     ).to_packed()
-    behavior = ak._util.behavior_of(array, behavior=behavior)
+    behavior = behavior_of(array, behavior=behavior)
     backend = layout.backend
 
     if ak._util.is_integer_like(counts):

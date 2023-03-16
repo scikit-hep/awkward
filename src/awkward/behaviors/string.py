@@ -1,6 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
 import awkward as ak
+from awkward._behavior import behavior_of
 from awkward._nplikes import ufuncs
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward.highlevel import Array
@@ -111,7 +111,7 @@ class StringBehavior(Array):
 
 
 def _string_equal(one, two):
-    behavior = ak._util.behavior_of(one, two)
+    behavior = behavior_of(one, two)
 
     one, two = (
         ak.operations.without_parameters(one).layout,

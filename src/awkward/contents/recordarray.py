@@ -6,6 +6,7 @@ import json
 from collections.abc import Iterable
 
 import awkward as ak
+from awkward._behavior import find_record_reducer
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import IndexType, NumpyMetadata
 from awkward._nplikes.shape import unknown_length
@@ -912,7 +913,7 @@ class RecordArray(Content):
         keepdims,
         behavior,
     ):
-        reducer_recordclass = ak._util.find_record_reducer(reducer, self, behavior)
+        reducer_recordclass = find_record_reducer(reducer, self, behavior)
         if reducer_recordclass is None:
             raise ak._errors.wrap_error(
                 TypeError(

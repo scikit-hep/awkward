@@ -1,7 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
 import awkward as ak
 from awkward._backends import NumpyBackend, backend_of
+from awkward._behavior import behavior_of
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward.operations.ak_fill_none import fill_none
 
@@ -49,7 +49,7 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
     axis = ak._util.regularize_axis(axis)
     # Simple single-array, axis=0 fast-path
     backend = ak._backends.backend_of(*arrays, default=cpu)
-    behavior = ak._util.behavior_of(*arrays, behavior=behavior)
+    behavior = behavior_of(*arrays, behavior=behavior)
     if (
         # Is an array with a known backend
         backend_of(arrays, default=None)

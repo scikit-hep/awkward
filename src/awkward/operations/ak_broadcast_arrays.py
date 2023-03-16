@@ -1,6 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
 import awkward as ak
+from awkward._behavior import behavior_of
 from awkward._connect.numpy import unsupported
 from awkward._nplikes.numpylike import NumpyMetadata
 
@@ -222,7 +222,7 @@ def _impl(
         else:
             return None
 
-    behavior = ak._util.behavior_of(*arrays, behavior=behavior)
+    behavior = behavior_of(*arrays, behavior=behavior)
     out = ak._broadcasting.broadcast_and_apply(
         inputs,
         action,
