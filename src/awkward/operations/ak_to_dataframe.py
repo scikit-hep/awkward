@@ -1,4 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+__all__ = ("to_dataframe",)
 
 import awkward as ak
 from awkward._nplikes.numpy import Numpy
@@ -187,7 +188,7 @@ or
             return recurse(flattened, newrows, col_names)
 
         elif layout.is_union:
-            layout = ak._util.union_to_record(layout, anonymous)
+            layout = _union_to_record(layout, anonymous)
             if layout.is_union:
                 return [(ak.operations.to_numpy(layout), row_arrays, col_names)]
             else:
@@ -278,3 +279,77 @@ or
             table.columns = table.columns.get_level_values(0)
 
     return tables
+
+
+def _union_to_record(unionarray, anonymous):
+    contents = []
+    for layout in unionarray.contents:
+        if layout.is_indexed and not layout.is_option:
+            contents.append(layout.project())
+        elif layout.is_union:
+            contents.append(_union_to_record(layout, anonymous))
+        elif layout.is_option:
+            contents.append(
+                ak.operations.fill_none(layout, np.nan, axis=0, highlevel=False)
+            )
+        else:
+            contents.append(layout)
+
+    if not any(isinstance(x, ak.contents.RecordArray) for x in contents):
+        return ak.contents.UnionArray(
+            unionarray.tags,
+            unionarray.index,
+            contents,
+            parameters=unionarray.parameters,
+        )
+
+    else:
+        seen = set()
+        all_names = []
+        for layout in contents:
+            if isinstance(layout, ak.contents.RecordArray):
+                for field in layout.fields:
+                    if field not in seen:
+                        seen.add(field)
+                        all_names.append(field)
+            else:
+                if anonymous not in seen:
+                    seen.add(anonymous)
+                    all_names.append(anonymous)
+
+        missingarray = ak.contents.IndexedOptionArray(
+            ak.index.Index64(
+                unionarray.backend.index_nplike.full(
+                    unionarray.length, -1, dtype=np.int64
+                )
+            ),
+            ak.contents.EmptyArray(),
+        )
+
+        all_fields = []
+        for name in all_names:
+            union_contents = []
+            for layout in contents:
+                if isinstance(layout, ak.contents.RecordArray):
+                    for field in layout.fields:
+                        if name == field:
+                            union_contents.append(layout._getitem_field(field))
+                            break
+                    else:
+                        union_contents.append(missingarray)
+                else:
+                    if name == anonymous:
+                        union_contents.append(layout)
+                    else:
+                        union_contents.append(missingarray)
+
+            all_fields.append(
+                ak.contents.UnionArray.simplified(
+                    unionarray.tags,
+                    unionarray.index,
+                    union_contents,
+                    parameters=unionarray.parameters,
+                )
+            )
+
+        return ak.contents.RecordArray(all_fields, all_names, unionarray.length)

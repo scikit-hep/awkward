@@ -1,5 +1,4 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
 import operator
 
 import numba
@@ -8,9 +7,92 @@ import numba.core.typing.ctypes_utils
 import numpy
 
 import awkward as ak
+from awkward._behavior import behavior_of, overlay_behavior
+from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
+
+
+def find_numba_attrs(layouttype, behavior):
+    behavior = overlay_behavior(behavior)
+    rec = layouttype.parameters.get("__record__")
+    if isinstance(rec, str):
+        for key, typer in behavior.items():
+            if (
+                isinstance(key, tuple)
+                and len(key) == 3
+                and key[0] == "__numba_typer__"
+                and key[1] == rec
+            ):
+                lower = behavior["__numba_lower__", key[1], key[2]]
+                yield key[2], typer, lower
+
+
+def find_numba_methods(layouttype, behavior):
+    behavior = overlay_behavior(behavior)
+    rec = layouttype.parameters.get("__record__")
+    if isinstance(rec, str):
+        for key, typer in behavior.items():
+            if (
+                isinstance(key, tuple)
+                and len(key) == 4
+                and key[0] == "__numba_typer__"
+                and key[1] == rec
+                and key[3] == ()
+            ):
+                lower = behavior["__numba_lower__", key[1], key[2], ()]
+                yield key[2], typer, lower
+
+
+def find_numba_unaryops(unaryop, left, behavior):
+    behavior = overlay_behavior(behavior)
+    done = False
+
+    if isinstance(left, ak._connect.numba.layout.ContentType):
+        left = left.parameters.get("__record__")
+        if not isinstance(left, str):
+            done = True
+
+    if not done:
+        for key, typer in behavior.items():
+            if (
+                isinstance(key, tuple)
+                and len(key) == 3
+                and key[0] == "__numba_typer__"
+                and key[1] == unaryop
+                and key[2] == left
+            ):
+                lower = behavior["__numba_lower__", key[1], key[2]]
+                yield typer, lower
+
+
+def find_numba_binops(binop, left, right, behavior):
+    behavior = overlay_behavior(behavior)
+    done = False
+
+    if isinstance(left, ak._connect.numba.layout.ContentType):
+        left = left.parameters.get("__record__")
+        if not isinstance(left, str):
+            done = True
+
+    if isinstance(right, ak._connect.numba.layout.ContentType):
+        right = right.parameters.get("__record__")
+        if not isinstance(right, str):
+            done = True
+
+    if not done:
+        for key, typer in behavior.items():
+            if (
+                isinstance(key, tuple)
+                and len(key) == 4
+                and key[0] == "__numba_typer__"
+                and key[1] == left
+                and key[2] == binop
+                and key[3] == right
+            ):
+                lower = behavior["__numba_lower__", key[1], key[2], key[3]]
+                yield typer, lower
 
 
 def code_to_function(code, function_name, externals=None, debug=False):
@@ -106,7 +188,7 @@ def unbox_Lookup(lookuptype, lookupobj, c):
 class ArrayView:
     @classmethod
     def fromarray(cls, array):
-        behavior = ak._util.behavior_of(array)
+        behavior = behavior_of(array)
         layout = ak.operations.to_layout(
             array,
             allow_record=False,
@@ -135,7 +217,7 @@ class ArrayView:
     def toarray(self):
         layout = self.type.tolayout(self.lookup, self.pos, self.fields)
         sliced = layout._getitem_range(self.start, self.stop)
-        return ak._util.wrap(sliced, self.behavior)
+        return wrap_layout(sliced, self.behavior)
 
 
 @numba.extending.typeof_impl.register(ArrayView)
@@ -497,7 +579,7 @@ def lower_iternext(context, builder, sig, args, result):
 class RecordView:
     @classmethod
     def fromrecord(cls, record):
-        behavior = ak._util.behavior_of(record)
+        behavior = behavior_of(record)
         layout = ak.operations.to_layout(record, allow_record=True, allow_other=False)
         assert isinstance(layout, ak.record.Record)
         arraylayout = layout.array
@@ -520,7 +602,7 @@ class RecordView:
 
     def torecord(self):
         arraylayout = self.arrayview.toarray().layout
-        return ak._util.wrap(
+        return wrap_layout(
             ak.record.Record(arraylayout, self.at), self.arrayview.behavior
         )
 
@@ -650,7 +732,7 @@ class type_getattr_record(numba.core.typing.templates.AttributeTemplate):
     key = RecordViewType
 
     def generic_resolve(self, recordviewtype, attr):
-        for methodname, typer, lower in ak._util.numba_methods(
+        for methodname, typer, lower in find_numba_methods(
             recordviewtype.arrayviewtype.type, recordviewtype.arrayviewtype.behavior
         ):
             if attr == methodname:
@@ -680,7 +762,7 @@ class type_getattr_record(numba.core.typing.templates.AttributeTemplate):
 
                 return numba.types.BoundFunction(type_method, recordviewtype)
 
-        for attrname, typer, _ in ak._util.numba_attrs(
+        for attrname, typer, _ in find_numba_attrs(
             recordviewtype.arrayviewtype.type, recordviewtype.arrayviewtype.behavior
         ):
             if attr == attrname:
@@ -691,7 +773,7 @@ class type_getattr_record(numba.core.typing.templates.AttributeTemplate):
 
 @numba.extending.lower_getattr_generic(RecordViewType)
 def lower_getattr_generic_record(context, builder, recordviewtype, recordviewval, attr):
-    for attrname, typer, lower in ak._util.numba_attrs(
+    for attrname, typer, lower in find_numba_attrs(
         recordviewtype.arrayviewtype.type, recordviewtype.arrayviewtype.behavior
     ):
         if attr == attrname:
@@ -716,9 +798,7 @@ def register_unary_operator(unaryop):
                     left = args[0].arrayviewtype.type
                     behavior = args[0].arrayviewtype.behavior
 
-                    for typer, lower in ak._util.numba_unaryops(
-                        unaryop, left, behavior
-                    ):
+                    for typer, lower in find_numba_unaryops(unaryop, left, behavior):
                         numba.extending.lower_builtin(unaryop, *args)(lower)
                         return typer(unaryop, args[0])
 
@@ -752,9 +832,7 @@ def register_binary_operator(binop):
                         behavior = args[1].arrayviewtype.behavior
 
                 if left is not None or right is not None:
-                    for typer, lower in ak._util.numba_binops(
-                        binop, left, right, behavior
-                    ):
+                    for typer, lower in find_numba_binops(binop, left, right, behavior):
                         numba.extending.lower_builtin(binop, *args)(lower)
                         return typer(binop, args[0], args[1])
 

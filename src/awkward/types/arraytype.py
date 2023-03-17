@@ -1,9 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
 import sys
 
 import awkward as ak
 from awkward._nplikes.shape import unknown_length
+from awkward._regularize import is_integer
 
 
 class ArrayType:
@@ -16,9 +16,7 @@ class ArrayType:
                     )
                 )
             )
-        if not (
-            (ak._util.is_integer(length) and length >= 0) or length is unknown_length
-        ):
+        if not ((is_integer(length) and length >= 0) or length is unknown_length):
             raise ak._errors.wrap_error(
                 ValueError(
                     "{} 'length' must be a non-negative integer or unknown length, not {}".format(

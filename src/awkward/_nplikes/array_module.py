@@ -122,16 +122,18 @@ class ArrayModuleNumpyLike(NumpyLike):
     def reshape(
         self, x: ArrayLike, shape: tuple[ShapeItem, ...], *, copy: bool | None = None
     ) -> ArrayLike:
-        if copy is False:
-            raise wrap_error(
-                NotImplementedError(
-                    "reshape was called with copy=False, which is currently not supported"
-                )
-            )
-        result = x.reshape(shape)
-        if copy and self._module.shares_memory(x, result):
-            return self._module.copy(result)
+        if copy is None:
+            return self._module.reshape(x, shape)
+        elif copy:
+            return self._module.reshape(self._module.copy(x, order="C"), shape)
         else:
+            result = self._module.asarray(x)
+            try:
+                result.shape = shape
+            except AttributeError:
+                raise wrap_error(
+                    ValueError("cannot reshape array without copying")
+                ) from None
             return result
 
     def shape_item_as_index(self, x1: ShapeItem) -> int:

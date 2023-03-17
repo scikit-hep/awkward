@@ -1,7 +1,10 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
+__all__ = ("argcartesian",)
 import awkward as ak
+from awkward._behavior import behavior_of
+from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._regularize import regularize_axis
 
 np = NumpyMetadata.instance()
 cpu = ak._backends.NumpyBackend.instance()
@@ -99,11 +102,11 @@ def argcartesian(
 
 
 def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
-    axis = ak._util.regularize_axis(axis)
+    axis = regularize_axis(axis)
 
     if isinstance(arrays, dict):
         backend = ak._backends.backend_of(*arrays.values(), default=cpu)
-        behavior = ak._util.behavior_of(*arrays.values(), behavior=behavior)
+        behavior = behavior_of(*arrays.values(), behavior=behavior)
         layouts = {
             n: ak._do.local_index(
                 ak.operations.to_layout(x, allow_record=False, allow_other=False),
@@ -114,7 +117,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
     else:
         arrays = list(arrays)
         backend = ak._backends.backend_of(*arrays, default=cpu)
-        behavior = ak._util.behavior_of(*arrays, behavior=behavior)
+        behavior = behavior_of(*arrays, behavior=behavior)
         layouts = [
             ak._do.local_index(
                 ak.operations.to_layout(x, allow_record=False, allow_other=False),
@@ -139,4 +142,4 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
         behavior=behavior,
     )
 
-    return ak._util.wrap(result, behavior, highlevel)
+    return wrap_layout(result, behavior, highlevel)

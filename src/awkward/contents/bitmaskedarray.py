@@ -10,6 +10,7 @@ from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import IndexType, NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._nplikes.typetracer import MaybeNone, TypeTracer
+from awkward._regularize import is_integer
 from awkward._util import unset
 from awkward.contents.bytemaskedarray import ByteMaskedArray
 from awkward.contents.content import Content
@@ -148,7 +149,7 @@ class BitMaskedArray(Content):
                 )
             )
         if length is not unknown_length:
-            if not (ak._util.is_integer(length) and length >= 0):
+            if not (is_integer(length) and length >= 0):
                 raise ak._errors.wrap_error(
                     TypeError(
                         "{} 'length' must be a non-negative integer, not {}".format(

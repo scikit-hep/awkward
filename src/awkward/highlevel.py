@@ -1,4 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+__all__ = ("Array", "ArrayBuilder", "Record")
 
 import copy
 import html
@@ -10,12 +11,15 @@ import sys
 from collections.abc import Iterable, Mapping, Sized
 
 from awkward_cpp.lib import _ext
+from numpy.lib.mixins import NDArrayOperatorsMixin  # noqa: TID251
 
 import awkward as ak
 import awkward._connect.hist
+from awkward._behavior import behavior_of, get_array_class, get_record_class
+from awkward._layout import wrap_layout
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
-from awkward._util import NDArrayOperatorsMixin
+from awkward._regularize import is_non_string_like_iterable
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
@@ -182,7 +186,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         elif isinstance(data, Array):
             layout = data._layout
-            behavior = ak._util.behavior_of(data, behavior=behavior)
+            behavior = behavior_of(data, behavior=behavior)
 
         elif isinstance(data, dict):
             fields = []
@@ -317,7 +321,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     @behavior.setter
     def behavior(self, behavior):
         if behavior is None or isinstance(behavior, Mapping):
-            self.__class__ = ak._util.arrayclass(self._layout, behavior)
+            self.__class__ = get_array_class(self._layout, behavior)
             self._behavior = behavior
         else:
             raise ak._errors.wrap_error(TypeError("behavior must be None or a dict"))
@@ -512,11 +516,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                             errors="surrogateescape"
                         )
                     else:
-                        yield ak._util.wrap(x, self._behavior)
-                elif isinstance(x, (ak.contents.Content, ak.record.Record)):
-                    yield ak._util.wrap(x, self._behavior)
+                        yield wrap_layout(x, self._behavior)
                 else:
-                    yield x
+                    yield wrap_layout(x, self._behavior, allow_other=True)
 
     def __getitem__(self, where):
         """
@@ -957,10 +959,10 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                     return ak._util.tobytes(out._raw(numpy)).decode(
                         errors="surrogateescape"
                     )
-            if isinstance(out, (ak.contents.Content, ak.record.Record)):
-                return ak._util.wrap(out, self._behavior)
+                else:
+                    return wrap_layout(out, self._behavior)
             else:
-                return out
+                return wrap_layout(out, self._behavior, allow_other=True)
 
     def __setitem__(self, where, what):
         """
@@ -1513,7 +1515,7 @@ class Record(NDArrayOperatorsMixin):
             contents = []
             for k, v in data.items():
                 fields.append(k)
-                if ak._util.is_non_string_like_iterable(v):
+                if is_non_string_like_iterable(v):
                     contents.append(Array(v).layout[np.newaxis])
                 else:
                     contents.append(Array([v]).layout)
@@ -1623,7 +1625,7 @@ class Record(NDArrayOperatorsMixin):
     @behavior.setter
     def behavior(self, behavior):
         if behavior is None or isinstance(behavior, Mapping):
-            self.__class__ = ak._util.recordclass(self._layout, behavior)
+            self.__class__ = get_record_class(self._layout, behavior)
             self._behavior = behavior
         else:
             raise ak._errors.wrap_error(TypeError("behavior must be None or a dict"))
@@ -1738,10 +1740,10 @@ class Record(NDArrayOperatorsMixin):
                     return ak._util.tobytes(out._raw(numpy)).decode(
                         errors="surrogateescape"
                     )
-            if isinstance(out, (ak.contents.Content, ak.record.Record)):
-                return ak._util.wrap(out, self._behavior)
+                else:
+                    return wrap_layout(out, self._behavior)
             else:
-                return out
+                return wrap_layout(out, self._behavior, allow_other=True)
 
     def __setitem__(self, where, what):
         """

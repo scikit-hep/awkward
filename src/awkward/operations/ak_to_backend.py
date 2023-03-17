@@ -1,6 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
+__all__ = ("to_backend",)
 import awkward as ak
+from awkward._behavior import behavior_of
+from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
@@ -63,6 +65,6 @@ def _impl(array, backend, highlevel, behavior):
         allow_record=True,
         allow_other=True,
     )
-    behavior = ak._util.behavior_of(array, behavior=behavior)
+    behavior = behavior_of(array, behavior=behavior)
     backend_layout = layout.to_backend(ak._backends.regularize_backend(backend))
-    return ak._util.wrap(backend_layout, behavior, highlevel)
+    return wrap_layout(backend_layout, behavior, highlevel)

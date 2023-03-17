@@ -1,7 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
+__all__ = ("full_like",)
 import awkward as ak
+from awkward._behavior import behavior_of
 from awkward._connect.numpy import unsupported
+from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.typetracer import ensure_known_scalar
 from awkward.operations.ak_zeros_like import _ZEROS
@@ -91,7 +93,7 @@ def full_like(
 
 
 def _impl(array, fill_value, highlevel, behavior, dtype, including_unknown):
-    behavior = ak._util.behavior_of(array, behavior=behavior)
+    behavior = behavior_of(array, behavior=behavior)
     layout = ak.operations.to_layout(array, allow_record=True, allow_other=False)
 
     if dtype is not None:
@@ -206,7 +208,7 @@ def _impl(array, fill_value, highlevel, behavior, dtype, including_unknown):
             return None
 
     out = ak._do.recursively_apply(layout, action, behavior)
-    return ak._util.wrap(out, behavior, highlevel)
+    return wrap_layout(out, behavior, highlevel)
 
 
 @ak._connect.numpy.implements("full_like")
