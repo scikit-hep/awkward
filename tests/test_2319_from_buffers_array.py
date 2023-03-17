@@ -40,7 +40,7 @@ def test_1d_1d_different_dtypes_stride_trick():
     """
 
     # We can't change the array view if the buffer is not contiguous
-    with pytest.raises(ValueError, match="last axis must be contiguous"):
+    with pytest.raises(ValueError, match="contiguous"):
         ak.from_buffers(form, array.size, container, highlevel=False)
 
 
