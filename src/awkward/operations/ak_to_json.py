@@ -1,5 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
+__all__ = ("to_json",)
 import json
 import pathlib
 from numbers import Number
@@ -8,6 +8,7 @@ from urllib.parse import urlparse
 from awkward_cpp.lib import _ext
 
 import awkward as ak
+from awkward._behavior import behavior_of
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
 
@@ -194,7 +195,7 @@ def _impl(
         neginf_string=neginf_string,
         complex_record_fields=complex_record_fields,
         convert_bytes=convert_bytes,
-        behavior=ak._util.behavior_of(array),
+        behavior=behavior_of(array),
     )
 
     if line_delimited and not isinstance(line_delimited, str):

@@ -4,9 +4,11 @@ from __future__ import annotations
 import copy
 
 import awkward as ak
+from awkward._layout import maybe_posaxis
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import IndexType, NumpyMetadata
 from awkward._nplikes.shape import unknown_length
+from awkward._regularize import is_integer
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.form import _type_parameters_equal
@@ -114,7 +116,7 @@ class RegularArray(Content):
                     )
                 )
         else:
-            if not (ak._util.is_integer(size) and size >= 0):
+            if not (is_integer(size) and size >= 0):
                 raise ak._errors.wrap_error(
                     TypeError(
                         "{} 'size' must be a non-negative integer, not {}".format(
@@ -133,7 +135,7 @@ class RegularArray(Content):
                     )
                 )
         else:
-            if not (ak._util.is_integer(zeros_length) and zeros_length >= 0):
+            if not (is_integer(zeros_length) and zeros_length >= 0):
                 raise ak._errors.wrap_error(
                     TypeError(
                         "{} 'zeros_length' must be a non-negative integer, not {}".format(
@@ -785,7 +787,7 @@ class RegularArray(Content):
         )
 
     def _local_index(self, axis, depth):
-        posaxis = ak._util.maybe_posaxis(self, axis, depth)
+        posaxis = maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 == depth:
             return self._local_index_axis0()
         elif posaxis is not None and posaxis + 1 == depth + 1:
@@ -888,7 +890,7 @@ class RegularArray(Content):
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         index_nplike = self._backend.index_nplike
 
-        posaxis = ak._util.maybe_posaxis(self, axis, depth)
+        posaxis = maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         elif posaxis is not None and posaxis + 1 == depth + 1:
@@ -1179,7 +1181,7 @@ class RegularArray(Content):
         return self.content._nbytes_part()
 
     def _pad_none(self, target, axis, depth, clip):
-        posaxis = ak._util.maybe_posaxis(self, axis, depth)
+        posaxis = maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 == depth:
             return self._pad_none_axis0(target, clip)
 

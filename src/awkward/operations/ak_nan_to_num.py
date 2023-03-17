@@ -1,6 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
+__all__ = ("nan_to_num",)
 import awkward as ak
+from awkward._behavior import behavior_of
+from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
@@ -51,7 +53,7 @@ def nan_to_num(
 
 
 def _impl(array, copy, nan, posinf, neginf, highlevel, behavior):
-    behavior = ak._util.behavior_of(array, behavior=behavior)
+    behavior = behavior_of(array, behavior=behavior)
 
     broadcasting_ids = {}
     broadcasting = []
@@ -129,7 +131,7 @@ def _impl(array, copy, nan, posinf, neginf, highlevel, behavior):
         assert isinstance(out, tuple) and len(out) == 1
         out = out[0]
 
-    return ak._util.wrap(out, behavior, highlevel)
+    return wrap_layout(out, behavior, highlevel)
 
 
 @ak._connect.numpy.implements("nan_to_num")

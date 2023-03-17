@@ -1,6 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
+__all__ = ("isclose",)
 import awkward as ak
+from awkward._behavior import behavior_of
+from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
@@ -58,11 +60,11 @@ def _impl(a, b, rtol, atol, equal_nan, highlevel, behavior):
                 ),
             )
 
-    behavior = ak._util.behavior_of(a, b, behavior=behavior)
+    behavior = behavior_of(a, b, behavior=behavior)
     out = ak._broadcasting.broadcast_and_apply([one, two], action, behavior)
     assert isinstance(out, tuple) and len(out) == 1
 
-    return ak._util.wrap(out[0], behavior, highlevel)
+    return wrap_layout(out[0], behavior, highlevel)
 
 
 @ak._connect.numpy.implements("isclose")
