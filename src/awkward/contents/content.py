@@ -8,11 +8,14 @@ from numbers import Complex, Real
 
 import awkward as ak
 from awkward._backends import Backend
+from awkward._behavior import get_array_class, get_record_class
+from awkward._layout import wrap_layout
 from awkward._nplikes import to_nplike
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import IndexType, NumpyLike, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import TypeTracer
+from awkward._regularize import is_integer, is_sized_iterable
 from awkward._slicing import normalize_slice
 from awkward._util import unset
 from awkward.forms.form import Form, JSONMapping, _type_parameters_equal
@@ -548,7 +551,7 @@ class Content:
         return self._getitem(where)
 
     def _getitem(self, where):
-        if ak._util.is_integer(where):
+        if is_integer(where):
             return self._getitem_at(where)
 
         elif isinstance(where, slice) and where.step is None:
@@ -675,7 +678,7 @@ class Content:
         elif isinstance(where, Content):
             return self._getitem((where,))
 
-        elif ak._util.is_sized_iterable(where):
+        elif is_sized_iterable(where):
             # Do we have an array
             nplike = ak._nplikes.nplike_of(where, default=None)
             # We can end up with non-array objects associated with an nplike
@@ -1186,18 +1189,18 @@ class Content:
         self, behavior: dict | None, json_conversions: dict[str, Any] | None
     ):
         if self.is_record:
-            getitem = ak._util.recordclass(self, behavior).__getitem__
+            getitem = get_record_class(self, behavior).__getitem__
             overloaded = getitem is not ak.highlevel.Record.__getitem__ and not getattr(
                 getitem, "ignore_in_to_list", False
             )
         else:
-            getitem = ak._util.arrayclass(self, behavior).__getitem__
+            getitem = get_array_class(self, behavior).__getitem__
             overloaded = getitem is not ak.highlevel.Array.__getitem__ and not getattr(
                 getitem, "ignore_in_to_list", False
             )
 
         if overloaded:
-            array = ak._util.wrap(self, behavior=behavior)
+            array = wrap_layout(self, behavior=behavior)
             out = [None] * self.length
             for i in range(self.length):
                 out[i] = array[i]

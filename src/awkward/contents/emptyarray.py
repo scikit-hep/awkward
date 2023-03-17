@@ -5,6 +5,7 @@ import copy
 
 import awkward as ak
 from awkward._errors import deprecate
+from awkward._layout import maybe_posaxis
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import IndexType, NumpyMetadata
 from awkward._util import unset
@@ -228,7 +229,7 @@ class EmptyArray(Content):
             raise ak._errors.wrap_error(AssertionError(repr(head)))
 
     def _offsets_and_flattened(self, axis, depth):
-        posaxis = ak._util.maybe_posaxis(self, axis, depth)
+        posaxis = maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 == depth:
             raise ak._errors.wrap_error(
                 np.AxisError(self, "axis=0 not allowed for flatten")
@@ -255,7 +256,7 @@ class EmptyArray(Content):
         return EmptyArray(parameters=self._parameters, backend=self._backend)
 
     def _local_index(self, axis, depth):
-        posaxis = ak._util.maybe_posaxis(self, axis, depth)
+        posaxis = maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 == depth:
             return ak.contents.NumpyArray(
                 self._backend.nplike.empty(0, dtype=np.int64),
@@ -327,7 +328,7 @@ class EmptyArray(Content):
         return 0
 
     def _pad_none(self, target, axis, depth, clip):
-        posaxis = ak._util.maybe_posaxis(self, axis, depth)
+        posaxis = maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 != depth:
             raise ak._errors.wrap_error(
                 np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")

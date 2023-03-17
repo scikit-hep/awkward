@@ -1,5 +1,4 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
 from __future__ import annotations
 
 import operator
@@ -11,6 +10,7 @@ from awkward._nplikes import nplike_of, to_nplike
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
+from awkward._regularize import is_integer, is_sized_iterable
 from awkward.typing import TYPE_CHECKING, Sequence, TypeAlias
 
 if TYPE_CHECKING:
@@ -208,7 +208,7 @@ def normalise_item(item, backend: Backend) -> SliceItem:
     of integers.
     """
     # Basic indices
-    if ak._util.is_integer(item):
+    if is_integer(item):
         return int(item)
 
     elif isinstance(item, slice):
@@ -261,7 +261,7 @@ def normalise_item(item, backend: Backend) -> SliceItem:
             return out
 
     # Fallback for sized objects
-    elif ak._util.is_sized_iterable(item):
+    elif is_sized_iterable(item):
         # Do we have an array
         nplike = ak._nplikes.nplike_of(item, default=None)
         # We can end up with non-array objects associated with an nplike

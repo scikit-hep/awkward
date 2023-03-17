@@ -254,7 +254,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
+      uses: aws-actions/configure-aws-credentials@v2
       with:
         aws-region: eu-west-2
         role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE }}
@@ -286,7 +286,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-region: eu-west-2
           role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE }}

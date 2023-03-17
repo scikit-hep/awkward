@@ -117,6 +117,8 @@ def test_broken():
 
 
 def test_union_to_record():
+    from awkward.operations.ak_to_dataframe import _union_to_record as union_to_record
+
     recordarray1 = ak.Array([{"x": 1, "y": 1.1}, {"x": 3, "y": 3.3}]).layout
     recordarray2 = ak.Array([{"y": 2.2, "z": 999}]).layout
     tags = ak.index.Index8(np.array([0, 1, 0], dtype=np.int8))
@@ -128,7 +130,7 @@ def test_union_to_record():
         {"x": 3, "y": 3.3},
     ]
 
-    converted = ak._util.union_to_record(unionarray, "values")
+    converted = union_to_record(unionarray, "values")
     assert isinstance(converted, ak.contents.RecordArray)
     assert to_list(converted) == [
         {"x": 1, "y": 1.1, "z": None},
@@ -150,7 +152,7 @@ def test_union_to_record():
         {"x": 3, "y": 3.3},
     ]
 
-    converted2 = ak._util.union_to_record(unionarray2, "values")
+    converted2 = union_to_record(unionarray2, "values")
     assert isinstance(converted2, ak.contents.RecordArray)
     assert to_list(converted2) == [
         {"x": 1, "y": 1.1, "z": None, "values": None},

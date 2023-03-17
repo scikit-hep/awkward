@@ -1,6 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
+__all__ = ("mask",)
 import awkward as ak
+from awkward._behavior import behavior_of
+from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
@@ -120,7 +122,7 @@ def _impl(array, mask, valid_when, highlevel, behavior):
     layoutarray = ak.operations.to_layout(array, allow_record=False, allow_other=False)
     layoutmask = ak.operations.to_layout(mask, allow_record=False, allow_other=False)
 
-    behavior = ak._util.behavior_of(array, mask, behavior=behavior)
+    behavior = behavior_of(array, mask, behavior=behavior)
     out = ak._broadcasting.broadcast_and_apply(
         [layoutarray, layoutmask],
         action,
@@ -129,4 +131,4 @@ def _impl(array, mask, valid_when, highlevel, behavior):
         right_broadcast=False,
     )
     assert isinstance(out, tuple) and len(out) == 1
-    return ak._util.wrap(out[0], behavior, highlevel)
+    return wrap_layout(out[0], behavior, highlevel)
