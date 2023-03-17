@@ -1,6 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
+__all__ = ("zip",)
 import awkward as ak
+from awkward._behavior import behavior_of
+from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
@@ -170,7 +172,7 @@ def _impl(
         )
 
     if isinstance(arrays, dict):
-        behavior = ak._util.behavior_of(*arrays.values(), behavior=behavior)
+        behavior = behavior_of(*arrays.values(), behavior=behavior)
         recordlookup = []
         layouts = []
         num_scalars = 0
@@ -189,7 +191,7 @@ def _impl(
 
     else:
         arrays = list(arrays)
-        behavior = ak._util.behavior_of(*arrays, behavior=behavior)
+        behavior = behavior_of(*arrays, behavior=behavior)
         recordlookup = None
         layouts = []
         num_scalars = 0
@@ -246,4 +248,4 @@ def _impl(
         out = out[0]
         assert isinstance(out, ak.record.Record)
 
-    return ak._util.wrap(out, behavior, highlevel)
+    return wrap_layout(out, behavior, highlevel)

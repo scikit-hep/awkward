@@ -1,10 +1,10 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
 import math
 import numbers
 import re
 
 import awkward as ak
+from awkward._layout import wrap_layout
 from awkward._nplikes.numpy import Numpy
 
 numpy = Numpy.instance()
@@ -48,7 +48,7 @@ def get_at(data, index):
         elif array_param == "char":
             return ak._util.tobytes(out._raw(numpy)).decode(errors="surrogateescape")
     if isinstance(out, (ak.contents.Content, ak.record.Record)):
-        return ak._util.wrap(out, data._behavior)
+        return wrap_layout(out, data._behavior)
     else:
         return out
 
@@ -62,7 +62,7 @@ def get_field(data, field):
         elif array_param == "char":
             return ak._util.tobytes(out._raw(numpy)).decode(errors="surrogateescape")
     if isinstance(out, (ak.contents.Content, ak.record.Record)):
-        return ak._util.wrap(out, data._behavior)
+        return wrap_layout(out, data._behavior)
     else:
         return out
 

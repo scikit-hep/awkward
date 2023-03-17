@@ -1,8 +1,10 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
-
+__all__ = ("merge_union_of_records",)
 import awkward as ak
+from awkward._behavior import behavior_of
+from awkward._layout import maybe_posaxis, wrap_layout
 from awkward._nplikes.numpylike import ArrayLike, NumpyMetadata
+from awkward._regularize import regularize_axis
 
 np = NumpyMetadata.instance()
 cpu = ak._backends.NumpyBackend.instance()
@@ -48,8 +50,8 @@ def merge_union_of_records(array, axis=-1, *, highlevel=True, behavior=None):
 
 
 def _impl(array, axis, highlevel, behavior):
-    axis = ak._util.regularize_axis(axis)
-    behavior = ak._util.behavior_of(array, behavior=behavior)
+    axis = regularize_axis(axis)
+    behavior = behavior_of(array, behavior=behavior)
     layout = ak.to_layout(array, allow_record=False)
 
     def invert_record_union(
@@ -150,7 +152,7 @@ def _impl(array, axis, highlevel, behavior):
         return dense_index
 
     def apply(layout, depth, backend, **kwargs):
-        posaxis = ak._util.maybe_posaxis(layout, axis, depth)
+        posaxis = maybe_posaxis(layout, axis, depth)
         if depth < posaxis + 1 and layout.is_leaf:
             raise ak._errors.wrap_error(
                 np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
@@ -264,4 +266,4 @@ def _impl(array, axis, highlevel, behavior):
                 )
 
     out = ak._do.recursively_apply(layout, apply)
-    return ak._util.wrap(out, highlevel=highlevel, behavior=behavior)
+    return wrap_layout(out, highlevel=highlevel, behavior=behavior)

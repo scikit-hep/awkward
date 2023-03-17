@@ -1,7 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
+__all__ = ("broadcast_arrays",)
 import awkward as ak
+from awkward._behavior import behavior_of
 from awkward._connect.numpy import unsupported
+from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
@@ -222,7 +224,7 @@ def _impl(
         else:
             return None
 
-    behavior = ak._util.behavior_of(*arrays, behavior=behavior)
+    behavior = behavior_of(*arrays, behavior=behavior)
     out = ak._broadcasting.broadcast_and_apply(
         inputs,
         action,
@@ -233,7 +235,7 @@ def _impl(
         numpy_to_regular=True,
     )
     assert isinstance(out, tuple)
-    return [ak._util.wrap(x, behavior, highlevel) for x in out]
+    return [wrap_layout(x, behavior, highlevel) for x in out]
 
 
 @ak._connect.numpy.implements("broadcast_arrays")

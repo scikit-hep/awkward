@@ -1,9 +1,10 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
 import sys
 import warnings
 
 import awkward as ak
+from awkward._behavior import behavior_of
+from awkward._layout import wrap_layout
 
 _has_checked_version = False
 
@@ -106,12 +107,12 @@ def evaluate(
         else:
             return None
 
-    behavior = ak._util.behavior_of(*arrays)
+    behavior = behavior_of(*arrays)
     out = ak._broadcasting.broadcast_and_apply(
         arrays, action, behavior, allow_records=False
     )
     assert isinstance(out, tuple) and len(out) == 1
-    return ak._util.wrap(out[0], behavior)
+    return wrap_layout(out[0], behavior)
 
 
 evaluate.evaluate = evaluate
@@ -146,9 +147,9 @@ def re_evaluate(local_dict=None):
         else:
             return None
 
-    behavior = ak._util.behavior_of(*arrays)
+    behavior = behavior_of(*arrays)
     out = ak._broadcasting.broadcast_and_apply(
         arrays, action, behavior, allow_records=False
     )
     assert isinstance(out, tuple) and len(out) == 1
-    return ak._util.wrap(out[0], behavior)
+    return wrap_layout(out[0], behavior)
