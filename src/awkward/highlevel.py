@@ -177,6 +177,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         check_valid=False,
         backend=None,
     ):
+        self._cpptype = None
         if isinstance(data, ak.contents.Content):
             layout = data
 
@@ -1457,6 +1458,32 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                     "use ak.any() or ak.all()"
                 )
             )
+
+    @property
+    def cpptype(self):
+        """
+        The type of this Array when it is used in cppyy.
+
+        See [cppyy documentation](https://cppyy.readthedocs.io/en/latest/index.html)
+        on types and signatures.
+        """
+        ak.cppyy.register_and_check()
+
+        if self._cpptype is None:
+            # FIXME: see where and if to keep the lookup
+            self._generator = ak._connect.cling.togenerator(
+                self.layout.form, flatlist_as_rvec=False
+            )
+            self._lookup = ak._lookup.Lookup(self.layout)
+            self._cpp_type = self._generator.class_type()
+
+            ak.cppyy._register(array=self, cpp_type=self._cpp_type)
+
+        return self._cpp_type
+
+    def __castcpp__(self):
+        print("NOT IMPLEMENTED YET!!!!")  # noqa: T201
+        pass
 
 
 class Record(NDArrayOperatorsMixin):

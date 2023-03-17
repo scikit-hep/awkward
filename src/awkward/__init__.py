@@ -27,6 +27,7 @@ import awkward._lookup
 import awkward._connect.numpy
 import awkward._connect.numexpr
 import awkward.numba
+import awkward.cppyy
 import awkward.jax
 import awkward.typetracer
 import awkward._typetracer  # todo: remove this after "deprecation" period
