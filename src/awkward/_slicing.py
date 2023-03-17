@@ -10,7 +10,7 @@ from awkward._nplikes import to_nplike
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
-from awkward._regularize import is_integer_like, is_sized_iterable
+from awkward._regularize import is_array_like, is_integer_like, is_sized_iterable
 from awkward.typing import TYPE_CHECKING, Sequence, TypeAlias, TypeVar
 
 if TYPE_CHECKING:
@@ -209,7 +209,7 @@ def prepare_advanced_indexing(items, backend: Backend):
 
 
 def normalize_integer_like(x) -> int | ArrayLike:
-    if ak._util.is_array_like(x):
+    if is_array_like(x):
         if np.issubdtype(x.dtype, np.integer) and x.ndim == 0:
             return x
         else:
