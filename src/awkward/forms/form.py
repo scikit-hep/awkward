@@ -310,11 +310,11 @@ def _parameters_intersect(
 
 
 def _parameters_union(
-    left: JSONMapping,
-    right: JSONMapping,
+    left: JSONMapping | None,
+    right: JSONMapping | None,
     *,
     exclude: Collection[tuple[str, JSONSerialisable]] = (),
-) -> JSONMapping:
+) -> JSONMapping | None:
     """
     Args:
         left: first parameters mapping

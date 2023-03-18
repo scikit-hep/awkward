@@ -8,6 +8,8 @@ from awkward._layout import maybe_posaxis
 from awkward._nplikes.numpylike import IndexType, NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._nplikes.typetracer import TypeTracer
+from awkward._regularize import is_integer_like
+from awkward._slicing import NO_HEAD
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.contents.listoffsetarray import ListOffsetArray
@@ -518,7 +520,7 @@ class ListArray(Content):
                 slicer=ak.contents.ListArray(slicestarts, slicestops, slicecontent),
             )
             nextcontent = self._content._carry(nextcarry, True)
-            nexthead, nexttail = ak._slicing.headtail(tail)
+            nexthead, nexttail = ak._slicing.head_tail(tail)
             outcontent = nextcontent._getitem_next(nexthead, nexttail, None)
 
             return ak.contents.ListOffsetArray(outoffsets, outcontent, parameters=None)
@@ -665,12 +667,12 @@ class ListArray(Content):
         tail: tuple[SliceItem, ...],
         advanced: Index | None,
     ) -> Content:
-        if head == ():
+        if head is NO_HEAD:
             return self
 
-        elif isinstance(head, int):
+        elif is_integer_like(head):
             assert advanced is None
-            nexthead, nexttail = ak._slicing.headtail(tail)
+            nexthead, nexttail = ak._slicing.head_tail(tail)
             lenstarts = self._starts.length
             nextcarry = ak.index.Index64.empty(lenstarts, self._backend.index_nplike)
             assert (
@@ -699,7 +701,7 @@ class ListArray(Content):
         elif isinstance(head, slice):
             lenstarts = self._starts.length
 
-            nexthead, nexttail = ak._slicing.headtail(tail)
+            nexthead, nexttail = ak._slicing.head_tail(tail)
 
             start, stop, step = head.start, head.stop, head.step
 
@@ -858,7 +860,7 @@ class ListArray(Content):
         elif isinstance(head, ak.index.Index64):
             lenstarts = self._starts.length
 
-            nexthead, nexttail = ak._slicing.headtail(tail)
+            nexthead, nexttail = ak._slicing.head_tail(tail)
             flathead = self._backend.index_nplike.reshape(
                 self._backend.index_nplike.asarray(head.data), (-1,)
             )

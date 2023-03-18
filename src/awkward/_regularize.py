@@ -27,7 +27,7 @@ def is_integer(x) -> bool:
 
 
 def is_array_like(x) -> bool:
-    return hasattr(x, "shape") and hasattr(x, "dtype")
+    return hasattr(x, "shape") and hasattr(x, "dtype") and hasattr(x, "T")
 
 
 def is_integer_like(x) -> bool:

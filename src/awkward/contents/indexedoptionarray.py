@@ -9,6 +9,8 @@ from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import IndexType, NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._nplikes.typetracer import MaybeNone, TypeTracer
+from awkward._regularize import is_integer_like
+from awkward._slicing import NO_HEAD
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.form import _type_parameters_equal
@@ -453,13 +455,13 @@ class IndexedOptionArray(Content):
         tail: tuple[SliceItem, ...],
         advanced: Index | None,
     ) -> Content:
-        if head == ():
+        if head is NO_HEAD:
             return self
 
-        elif isinstance(
-            head, (int, slice, ak.index.Index64, ak.contents.ListOffsetArray)
+        elif is_integer_like(head) or isinstance(
+            head, (slice, ak.index.Index64, ak.contents.ListOffsetArray)
         ):
-            nexthead, nexttail = ak._slicing.headtail(tail)
+            nexthead, nexttail = ak._slicing.head_tail(tail)
 
             numnull, nextcarry, outindex = self._nextcarry_outindex()
 

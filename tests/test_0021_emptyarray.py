@@ -161,7 +161,7 @@ def test_from_json_getitem():
     with pytest.raises(IndexError) as excinfo:
         a[2, 1][100:200, 0]
     assert (
-        "<Array [] type='0 * unknown'>\n\nwith\n\n    (100:200, 0)\n\nat inner EmptyArray of length 0, using sub-slice 0.\n\nError details: array is empty."
+        "<Array [] type='0 * unknown'>\n\nwith\n\n    (100:200, 0)\n\nat inner EmptyArray of length 0, using sub-slice array(0).\n\nError details: array is empty."
         in str(excinfo.value)
     )
     with pytest.raises(IndexError) as excinfo:
