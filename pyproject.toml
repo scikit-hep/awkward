@@ -290,6 +290,7 @@ extend-ignore = [
     "NPY002",  # Replace legacy `np.random` call with `np.random.Generator`
     "PLW2901", # Outer for loop variable  overwritten by inner assignment target
     "PLW0603", # Using the global statement to update is discouraged
+    "PLC1901", # x == "" can be simplified to not x (empty string is falsey)
 ]
 target-version = "py37"
 typing-modules = ["awkward.typing"]
