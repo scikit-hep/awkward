@@ -11,9 +11,9 @@ from awkward._layout import wrap_layout
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._typing import Generic, TypeVar, Union
 from awkward.contents import Content
 from awkward.record import Record
-from awkward.typing import Generic, TypeVar, Union
 
 numpy = Numpy.instance()
 np = NumpyMetadata.instance()

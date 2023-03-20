@@ -15,7 +15,7 @@ from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyLike, NumpyMetadata
 from awkward._nplikes.typetracer import MaybeNone, TypeTracer, TypeTracerArray
 from awkward._singleton import Singleton
-from awkward.typing import Callable, Final, Tuple, TypeAlias, TypeVar, Unpack
+from awkward._typing import Callable, Final, Tuple, TypeAlias, TypeVar, Unpack
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()

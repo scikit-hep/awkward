@@ -11,7 +11,7 @@ from awkward._errors import wrap_error
 from awkward._nplikes.numpylike import ArrayLike, IndexType, NumpyLike, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._regularize import is_integer, is_non_string_like_sequence
-from awkward.typing import (
+from awkward._typing import (
     Any,
     Final,
     Literal,

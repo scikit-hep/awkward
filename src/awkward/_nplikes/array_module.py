@@ -8,7 +8,7 @@ import numpy
 from awkward._errors import wrap_error
 from awkward._nplikes.numpylike import ArrayLike, IndexType, NumpyLike, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
-from awkward.typing import Final, Literal
+from awkward._typing import Final, Literal
 
 np = NumpyMetadata.instance()
 

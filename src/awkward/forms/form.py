@@ -11,7 +11,7 @@ from awkward import _errors
 from awkward._behavior import find_typestrs
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
-from awkward.typing import Final, TypeAlias
+from awkward._typing import Final, TypeAlias
 
 np = NumpyMetadata.instance()
 numpy_backend = ak._backends.NumpyBackend.instance()

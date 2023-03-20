@@ -8,10 +8,10 @@ from numbers import Integral
 import awkward as ak
 from awkward._backends import Backend
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._typing import Any, AxisMaybeNone, Literal
 from awkward.contents.content import ActionType, Content
 from awkward.forms import form
 from awkward.record import Record
-from awkward.typing import Any, AxisMaybeNone, Literal
 
 np = NumpyMetadata.instance()
 

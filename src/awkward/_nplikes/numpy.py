@@ -6,7 +6,7 @@ import numpy
 import awkward as ak
 from awkward._nplikes.array_module import ArrayModuleNumpyLike
 from awkward._nplikes.numpylike import ArrayLike, NumpyMetadata
-from awkward.typing import Final, Literal
+from awkward._typing import Final, Literal
 
 np = NumpyMetadata.instance()
 

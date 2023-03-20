@@ -11,7 +11,7 @@ from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._regularize import is_array_like, is_integer_like, is_sized_iterable
-from awkward.typing import TYPE_CHECKING, Sequence, TypeAlias, TypeVar
+from awkward._typing import TYPE_CHECKING, Sequence, TypeAlias, TypeVar
 
 if TYPE_CHECKING:
     from awkward._nplikes.numpylike import ArrayLike

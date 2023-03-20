@@ -4,9 +4,9 @@ from collections.abc import Iterable
 import awkward as ak
 from awkward._behavior import find_typestr
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._typing import final
 from awkward._util import unset
 from awkward.forms.form import Form, _type_parameters_equal
-from awkward.typing import final
 
 np = NumpyMetadata.instance()
 

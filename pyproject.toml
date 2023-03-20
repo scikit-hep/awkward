@@ -293,7 +293,7 @@ extend-ignore = [
     "PLC1901", # x == "" can be simplified to not x (empty string is falsey)
 ]
 target-version = "py37"
-typing-modules = ["awkward.typing"]
+typing-modules = ["awkward._typing"]
 src = ["src"]
 unfixable = [
     "T20",  # Removes print statements

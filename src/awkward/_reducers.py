@@ -7,7 +7,7 @@ from typing import Any as AnyType
 import awkward as ak
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
-from awkward.typing import Final
+from awkward._typing import Final
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()

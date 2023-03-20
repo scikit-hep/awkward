@@ -12,15 +12,12 @@ from awkward._behavior import get_array_class, get_record_class
 from awkward._layout import wrap_layout
 from awkward._nplikes import to_nplike
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import IndexType, NumpyLike, NumpyMetadata
+from awkward._nplikes.numpylike import IndexType, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import TypeTracer
 from awkward._regularize import is_integer_like, is_sized_iterable
 from awkward._slicing import normalize_slice
-from awkward._util import unset
-from awkward.forms.form import Form, JSONMapping, _type_parameters_equal
-from awkward.index import Index, Index64
-from awkward.typing import (
+from awkward._typing import (
     TYPE_CHECKING,
     Any,
     AxisMaybeNone,
@@ -30,8 +27,12 @@ from awkward.typing import (
     TypeAlias,
     TypedDict,
 )
+from awkward._util import unset
+from awkward.forms.form import Form, JSONMapping, _type_parameters_equal
+from awkward.index import Index, Index64
 
 if TYPE_CHECKING:
+    from awkward._nplikes.numpy import NumpyLike
     from awkward._slicing import SliceItem
 
 

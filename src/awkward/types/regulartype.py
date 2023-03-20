@@ -2,9 +2,9 @@
 import awkward as ak
 from awkward._nplikes.shape import unknown_length
 from awkward._regularize import is_integer
+from awkward._typing import final
 from awkward.forms.form import _type_parameters_equal
 from awkward.types.type import Type
-from awkward.typing import final
 
 
 @final
