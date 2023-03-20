@@ -11,12 +11,15 @@ from awkward._layout import maybe_posaxis
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import IndexType, NumpyMetadata
 from awkward._nplikes.shape import unknown_length
+from awkward._parameters import (
+    parameters_intersect,
+    type_parameters_equal,
+)
 from awkward._regularize import is_integer
 from awkward._slicing import NO_HEAD
 from awkward._typing import TYPE_CHECKING, Final, Self, SupportsIndex, final
 from awkward._util import unset
 from awkward.contents.content import Content
-from awkward.forms.form import _type_parameters_equal
 from awkward.forms.recordform import RecordForm
 from awkward.index import Index
 from awkward.record import Record
@@ -652,7 +655,7 @@ class RecordArray(Content):
         elif other.is_option or other.is_indexed:
             return self._mergeable_next(other.content, mergebool)
         # Otherwise, do the parameters match? If not, we can't merge.
-        elif not _type_parameters_equal(self._parameters, other._parameters):
+        elif not type_parameters_equal(self._parameters, other._parameters):
             return False
         elif isinstance(other, RecordArray):
             if self.is_tuple and other.is_tuple:
@@ -699,9 +702,7 @@ class RecordArray(Content):
                 if isinstance(array, ak.contents.EmptyArray):
                     continue
 
-                parameters = ak.forms.form._parameters_intersect(
-                    parameters, array._parameters
-                )
+                parameters = parameters_intersect(parameters, array._parameters)
 
                 if isinstance(array, ak.contents.RecordArray):
                     if self.is_tuple:
@@ -734,9 +735,7 @@ class RecordArray(Content):
             these_fields.sort()
 
             for array in headless:
-                parameters = ak.forms.form._parameters_intersect(
-                    parameters, array._parameters
-                )
+                parameters = parameters_intersect(parameters, array._parameters)
 
                 if isinstance(array, ak.contents.RecordArray):
                     if not array.is_tuple:

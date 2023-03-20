@@ -2,8 +2,8 @@
 
 import awkward as ak
 from awkward._errors import deprecate
+from awkward._parameters import type_parameters_equal
 from awkward._typing import final
-from awkward.forms.form import _type_parameters_equal
 from awkward.types.type import Type
 
 
@@ -52,6 +52,6 @@ class UnknownType(Type):
 
     def __eq__(self, other):
         if isinstance(other, UnknownType):
-            return _type_parameters_equal(self._parameters, other._parameters)
+            return type_parameters_equal(self._parameters, other._parameters)
         else:
             return False

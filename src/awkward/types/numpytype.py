@@ -5,8 +5,8 @@ import re
 
 import awkward as ak
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._parameters import type_parameters_equal
 from awkward._typing import final
-from awkward.forms.form import _type_parameters_equal
 from awkward.types.type import Type
 
 np = NumpyMetadata.instance()
@@ -163,7 +163,7 @@ class NumpyType(Type):
 
     def __eq__(self, other):
         if isinstance(other, NumpyType):
-            return self._primitive == other._primitive and _type_parameters_equal(
+            return self._primitive == other._primitive and type_parameters_equal(
                 self._parameters, other._parameters
             )
         else:

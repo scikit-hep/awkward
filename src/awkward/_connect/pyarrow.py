@@ -6,7 +6,7 @@ from collections.abc import Iterable, Sized
 import awkward as ak
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
-from awkward.forms.form import _parameters_union
+from awkward._parameters import parameters_union
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
@@ -407,7 +407,7 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
 
         content = handle_arrow(paarray.dictionary, generate_bitmasks)
 
-        parameters = ak.forms.form._parameters_union(
+        parameters = parameters_union(
             mask_parameters(awkwardarrow_type), node_parameters(awkwardarrow_type)
         )
         if parameters is None:
@@ -702,7 +702,7 @@ def form_popbuffers(awkwardarrow_type, storage_type):
         a, b = to_awkwardarrow_storage_types(storage_type.value_type)
         content = form_popbuffers(a, b)
 
-        parameters = _parameters_union(
+        parameters = parameters_union(
             mask_parameters(awkwardarrow_type), node_parameters(awkwardarrow_type)
         )
         if parameters is None:
