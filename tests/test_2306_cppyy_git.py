@@ -9,8 +9,6 @@ import awkward._connect.cling
 cppyy = pytest.importorskip("cppyy")
 cppyy.set_debug()
 
-# ak.cppyy.register_and_check()
-
 
 def test_array_generated_dataset_git():
     array = ak.Array(
@@ -23,8 +21,6 @@ def test_array_generated_dataset_git():
 
     generator = ak._connect.cling.togenerator(array.layout.form, flatlist_as_rvec=False)
     lookup = ak._lookup.Lookup(array.layout)
-    print("test line 26:", generator.dataset())
-    print("test line 27:", generator.dataset())
 
     source_code = f"""
     double go_fast(ssize_t length, ssize_t* ptrs) {{
@@ -46,7 +42,7 @@ def test_array_generated_dataset_git():
     generator.generate(cppyy.cppdef)
     cppyy.cppdef(source_code)
     out = cppyy.gbl.go_fast(len(array), lookup.arrayptrs)
-    print("test line 49:", out)
+    assert out == ak.sum(array["y"])
 
 
 @pytest.mark.skip("cannot handle same two arrays")
@@ -150,7 +146,7 @@ def test_array_base_git():
     cppyy.set_debug()
     cppyy.cppdef(source_code_cpp)
     out = cppyy.gbl.go_fast_cpp_1["awkward::ArrayView"](array, len(array))
-    print("test line 152:", out)
+    assert out == ak.sum(array["y"])
 
 
 # On the Python side:
@@ -191,7 +187,6 @@ def test_array_derived_git():
     }
     """
 
-    cppyy.set_debug()
     cppyy.cppdef(source_code_cpp)
 
     # FIXME: a tuple of parameters: move it to __cpptype__??
