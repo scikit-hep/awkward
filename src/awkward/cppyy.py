@@ -22,9 +22,9 @@ conda install -c conda-forge cppyy"""
         ) from err
 
     if not _has_checked_version:
-        if ak._util.parse_version(cppyy.__version__) < ak._util.parse_version("2.4.2"):
+        if ak._util.parse_version(cppyy.__version__) < ak._util.parse_version("1.6.2"):
             raise ImportError(
-                "Awkward Array can only work with cppyy 2.4.2 or later "
+                "Awkward Array can only work with cppyy 1.6.2 or later "
                 "(you have version {})".format(cppyy.__version__)
             )
         _has_checked_version = True
