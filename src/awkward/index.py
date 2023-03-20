@@ -149,8 +149,13 @@ class Index:
     def __len__(self):
         return self.length
 
-    def __array__(self, dtype=None):
-        return self._nplike.asarray(self._data, dtype=dtype)
+    @property
+    def __cuda_array_interface__(self):
+        return self._data.__cuda_array_interface__
+
+    @property
+    def __array_interface__(self):
+        return self._data.__array_interface__
 
     def __repr__(self):
         return self._repr("", "", "")
