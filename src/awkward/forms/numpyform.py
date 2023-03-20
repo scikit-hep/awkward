@@ -4,9 +4,10 @@ from collections.abc import Iterable
 import awkward as ak
 from awkward._behavior import find_typestr
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._parameters import type_parameters_equal
 from awkward._typing import final
 from awkward._util import unset
-from awkward.forms.form import Form, _type_parameters_equal
+from awkward.forms.form import Form
 
 np = NumpyMetadata.instance()
 
@@ -147,7 +148,7 @@ class NumpyForm(Form):
                 self._form_key == other._form_key
                 and self._primitive == other._primitive
                 and self._inner_shape == other._inner_shape
-                and _type_parameters_equal(self._parameters, other._parameters)
+                and type_parameters_equal(self._parameters, other._parameters)
             )
         else:
             return False

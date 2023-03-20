@@ -9,12 +9,16 @@ from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import IndexType, NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._nplikes.typetracer import MaybeNone, TypeTracer
+from awkward._parameters import (
+    parameters_intersect,
+    parameters_union,
+    type_parameters_equal,
+)
 from awkward._regularize import is_integer_like
 from awkward._slicing import NO_HEAD
 from awkward._typing import TYPE_CHECKING, Final, Self, SupportsIndex, final
 from awkward._util import unset
 from awkward.contents.content import Content
-from awkward.forms.form import _type_parameters_equal
 from awkward.forms.indexedoptionform import IndexedOptionForm
 from awkward.index import Index
 
@@ -175,9 +179,7 @@ class IndexedOptionArray(Content):
             return IndexedOptionArray(
                 result,
                 content.content,
-                parameters=ak.forms.form._parameters_union(
-                    content._parameters, parameters
-                ),
+                parameters=parameters_union(content._parameters, parameters),
             )
 
         else:
@@ -620,7 +622,7 @@ class IndexedOptionArray(Content):
         elif other.is_option or other.is_indexed:
             return self._content._mergeable_next(
                 other.content, mergebool
-            ) and _type_parameters_equal(self._parameters, other._parameters)
+            ) and type_parameters_equal(self._parameters, other._parameters)
         else:
             return self._content._mergeable_next(other, mergebool)
 
@@ -706,9 +708,7 @@ class IndexedOptionArray(Content):
         )
         # We can directly merge with other options, but we must merge parameters
         if other.is_option:
-            parameters = ak.forms.form._parameters_union(
-                self._parameters, other._parameters
-            )
+            parameters = parameters_union(self._parameters, other._parameters)
         # Otherwise, this option parameters win out
         else:
             parameters = self._parameters
@@ -751,9 +751,7 @@ class IndexedOptionArray(Content):
                 array, (ak.contents.IndexedOptionArray, ak.contents.IndexedArray)
             ):
                 # If we're merging an option, then merge parameters before pulling out `content`
-                parameters = ak.forms.form._parameters_intersect(
-                    parameters, array._parameters
-                )
+                parameters = parameters_intersect(parameters, array._parameters)
                 contents.append(array.content)
                 array_index = array.index
                 assert (

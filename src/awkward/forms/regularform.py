@@ -2,10 +2,11 @@
 import awkward as ak
 from awkward._behavior import find_typestr
 from awkward._nplikes.shape import unknown_length
+from awkward._parameters import type_parameters_equal
 from awkward._regularize import is_integer
 from awkward._typing import final
 from awkward._util import unset
-from awkward.forms.form import Form, _type_parameters_equal
+from awkward.forms.form import Form
 
 
 @final
@@ -82,7 +83,7 @@ class RegularForm(Form):
             return (
                 self._form_key == other._form_key
                 and self._size == other._size
-                and _type_parameters_equal(self._parameters, other._parameters)
+                and type_parameters_equal(self._parameters, other._parameters)
                 and self._content == other._content
             )
         else:

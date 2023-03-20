@@ -1,9 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 import awkward as ak
 from awkward._nplikes.shape import unknown_length
+from awkward._parameters import type_parameters_equal
 from awkward._regularize import is_integer
 from awkward._typing import final
-from awkward.forms.form import _type_parameters_equal
 from awkward.types.type import Type
 
 
@@ -88,7 +88,7 @@ class RegularType(Type):
         if isinstance(other, RegularType):
             return (
                 self._size == other._size
-                and _type_parameters_equal(self._parameters, other._parameters)
+                and type_parameters_equal(self._parameters, other._parameters)
                 and self._content == other._content
             )
         else:

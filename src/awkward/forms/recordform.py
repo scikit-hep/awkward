@@ -4,10 +4,11 @@ from collections.abc import Iterable
 
 import awkward as ak
 from awkward._behavior import find_typestr
+from awkward._parameters import type_parameters_equal
 from awkward._regularize import is_integer
 from awkward._typing import final
 from awkward._util import unset
-from awkward.forms.form import Form, _type_parameters_equal
+from awkward.forms.form import Form
 
 
 @final
@@ -190,7 +191,7 @@ class RecordForm(Form):
                 self._form_key == other._form_key
                 and self.is_tuple == other.is_tuple
                 and len(self._contents) == len(other._contents)
-                and _type_parameters_equal(self._parameters, other._parameters)
+                and type_parameters_equal(self._parameters, other._parameters)
             ):
                 if self.is_tuple:
                     return self._contents == other._contents

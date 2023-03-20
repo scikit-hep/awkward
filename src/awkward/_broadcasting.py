@@ -12,6 +12,11 @@ from awkward._behavior import find_custom_broadcast
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
+from awkward._parameters import (
+    parameters_are_empty,
+    parameters_are_equal,
+    parameters_intersect,
+)
 from awkward._typing import Any, Callable, Dict, List, TypeAlias, Union
 from awkward._util import unset
 from awkward.contents.bitmaskedarray import BitMaskedArray
@@ -240,7 +245,7 @@ def all_or_nothing_parameters_factory(
         first_parameters = input_parameters[0]
         # Ensure all parameters match, or set parameters to None
         for other_parameters in input_parameters[1:]:
-            if not ak.forms.form._parameters_equal(first_parameters, other_parameters):
+            if not parameters_are_equal(first_parameters, other_parameters):
                 break
         else:
             parameters = first_parameters
@@ -278,14 +283,14 @@ def intersection_parameters_factory(
     # If we encounter None-parameters, then we stop early
     # as there can be no intersection.
     for parameters in input_parameters:
-        if ak.forms.form._parameters_is_empty(parameters):
+        if parameters_are_empty(parameters):
             break
         else:
             parameters_to_intersect.append(parameters)
     # Otherwise, build the intersected parameter dict
     else:
         intersected_parameters = functools.reduce(
-            ak.forms.form._parameters_intersect, parameters_to_intersect
+            parameters_intersect, parameters_to_intersect
         )
 
     def apply(n_outputs: int) -> list[dict[str, Any] | None]:
