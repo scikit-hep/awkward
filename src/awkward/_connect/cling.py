@@ -130,20 +130,12 @@ namespace awkward {
   };
 
   class ArrayView {
-    int fFlags;
   public:
     ArrayView(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs, PyObject* lookup)
-      : fFlags(0), start_(start), stop_(stop), which_(which), ptrs_(ptrs), lookup_(lookup) {
+      : start_(start), stop_(stop), which_(which), ptrs_(ptrs), lookup_(lookup) {
       }
 
     virtual ~ArrayView() {}
-
-    void setSetArgCalled()     {{ fFlags |= 0x01; }}
-    bool wasSetArgCalled()     {{ return fFlags & 0x01; }}
-    void setFromMemoryCalled() {{ fFlags |= 0x02; }}
-    bool wasFromMemoryCalled() {{ return fFlags & 0x02; }}
-    void setToMemoryCalled()   {{ fFlags |= 0x04; }}
-    bool wasToMemoryCalled()   {{ return fFlags & 0x04; }}
 
     size_t size() const noexcept {
       return stop_ - start_;

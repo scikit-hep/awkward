@@ -178,6 +178,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         backend=None,
     ):
         self._cpptype = None
+        self._cpppars = None
         if isinstance(data, ak.contents.Content):
             layout = data
 
@@ -1462,7 +1463,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     @property
     def cpptype(self):
         """
-        The type of this Array when it is used in cppyy.
+        The C++ type of this Array when it is used in cppyy.
 
         See [cppyy documentation](https://cppyy.readthedocs.io/en/latest/index.html)
         on types and signatures.
@@ -1475,13 +1476,26 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                 self.layout.form, flatlist_as_rvec=False
             )
             self._lookup = ak._lookup.Lookup(self.layout)
-            self._cpp_type = self._generator.class_type()
+            self._cpptype = f"awkward::{self._generator.class_type()}"
 
-        return self._cpp_type
+        return self._cpptype
+
+    @property
+    def cpppars(self):
+        """
+        The C++ dataset parameters needed to construct the C++ type of
+        this Array when it is used in cppyy.
+        """
+        if self._cpptype is None:
+            self._cpptype = self.cpptype
+
+        if self._cpppars is None:
+            self._cpppars = (0, len(self), 0, self._lookup.arrayptrs, 0)
+
+        return self._cpppars
 
     def __castcpp__(self):
-        print("NOT IMPLEMENTED YET!!!!")  # noqa: T201
-        pass
+        return self.cpppars
 
 
 class Record(NDArrayOperatorsMixin):
