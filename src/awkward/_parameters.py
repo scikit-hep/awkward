@@ -32,7 +32,7 @@ def type_parameters_equal(
         return True
 
 
-def parameters_equal(
+def parameters_are_equal(
     one: JSONMapping, two: JSONMapping, only_array_record=False
 ) -> bool:
     if one is None and two is None:
@@ -166,7 +166,7 @@ def parameters_union(
             return result
 
 
-def parameters_is_empty(parameters: JSONMapping | None) -> bool:
+def parameters_are_empty(parameters: JSONMapping | None) -> bool:
     """
     Args:
         parameters (dict or None): parameters dictionary, or None

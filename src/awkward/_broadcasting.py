@@ -12,7 +12,7 @@ from awkward._behavior import find_custom_broadcast
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
-from awkward._parameters import parameters_intersect, parameters_is_empty
+from awkward._parameters import parameters_are_empty, parameters_intersect
 from awkward._typing import Any, Callable, Dict, List, TypeAlias, Union
 from awkward._util import unset
 from awkward.contents.bitmaskedarray import BitMaskedArray
@@ -279,7 +279,7 @@ def intersection_parameters_factory(
     # If we encounter None-parameters, then we stop early
     # as there can be no intersection.
     for parameters in input_parameters:
-        if parameters_is_empty(parameters):
+        if parameters_are_empty(parameters):
             break
         else:
             parameters_to_intersect.append(parameters)
