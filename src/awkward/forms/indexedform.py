@@ -1,9 +1,10 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._parameters import _parameters_union, _type_parameters_equal
 from awkward._typing import final
 from awkward._util import unset
-from awkward.forms.form import Form, _parameters_union, _type_parameters_equal
+from awkward.forms.form import Form
 
 
 @final
@@ -75,27 +76,21 @@ class IndexedForm(Form):
 
         if content.is_union and not is_cat:
             return content.copy(
-                parameters=ak.forms.form._parameters_union(
-                    content._parameters, parameters
-                )
+                parameters=_parameters_union(content._parameters, parameters)
             )
 
         elif content.is_option:
             return ak.forms.IndexedOptionForm.simplified(
                 "i64",
                 content.content,
-                parameters=ak.forms.form._parameters_union(
-                    content._parameters, parameters
-                ),
+                parameters=_parameters_union(content._parameters, parameters),
             )
 
         elif content.is_indexed:
             return IndexedForm(
                 "i64",
                 content.content,
-                parameters=ak.forms.form._parameters_union(
-                    content._parameters, parameters
-                ),
+                parameters=_parameters_union(content._parameters, parameters),
             )
 
         else:

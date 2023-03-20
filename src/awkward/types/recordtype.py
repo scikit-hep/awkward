@@ -5,8 +5,8 @@ from collections.abc import Iterable
 
 import awkward as ak
 import awkward._prettyprint
+from awkward._parameters import _type_parameters_equal
 from awkward._typing import final
-from awkward.forms.form import _type_parameters_equal
 from awkward.types.type import Type
 
 

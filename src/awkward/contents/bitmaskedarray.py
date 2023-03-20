@@ -10,6 +10,7 @@ from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import IndexType, NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._nplikes.typetracer import MaybeNone, TypeTracer
+from awkward._parameters import _type_parameters_equal
 from awkward._regularize import is_integer, is_integer_like
 from awkward._slicing import NO_HEAD
 from awkward._typing import TYPE_CHECKING, Final, Self, SupportsIndex, final
@@ -17,7 +18,6 @@ from awkward._util import unset
 from awkward.contents.bytemaskedarray import ByteMaskedArray
 from awkward.contents.content import Content
 from awkward.forms.bitmaskedform import BitMaskedForm
-from awkward.forms.form import _type_parameters_equal
 from awkward.index import Index
 
 if TYPE_CHECKING:

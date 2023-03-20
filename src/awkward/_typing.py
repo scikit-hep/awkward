@@ -52,3 +52,9 @@ else:
         final,
         runtime_checkable,
     )
+
+
+JSONSerializable: TypeAlias = (
+    "str | int | float | bool | None | list | tuple | JSONMapping"
+)
+JSONMapping: TypeAlias = "dict[str, JSONSerializable]"
