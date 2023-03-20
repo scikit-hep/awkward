@@ -9,7 +9,7 @@ import awkward._connect.cling
 cppyy = pytest.importorskip("cppyy")
 
 
-def test_array_generated_dataset_git():
+def test_array_as_generated_dataset():
     array = ak.Array(
         [
             [{"x": 1, "y": [1.1]}, {"x": 2, "y": [2.2, 0.2]}],
@@ -44,7 +44,7 @@ def test_array_generated_dataset_git():
     assert out == ak.sum(array["y"])
 
 
-def test_array_type_git():
+def test_array_as_type():
     array = ak.Array(
         [
             [{"x": 1, "y": [1.1]}, {"x": 2, "y": [2.2, 0.2]}],
@@ -69,12 +69,13 @@ def test_array_type_git():
     }}
     """
 
-    cppyy.cppdef(source_code_cpp)  # , extension = awkward)
+    cppyy.cppdef(source_code_cpp)
+
     out = cppyy.gbl.go_fast_cpp(array.__castcpp__())
     assert out == ak.sum(array["y"])
 
 
-def test_array_derived_git():
+def test_array_as_templated_type():
     array = ak.Array(
         [
             [{"x": 1, "y": [1.1]}, {"x": 2, "y": [2.2, 0.2]}],
@@ -83,7 +84,7 @@ def test_array_derived_git():
         ]
     )
 
-    # Note, 'awkward_array' has to be passed in by-value
+    # Note, 'awkward_array' of a type T has to be passed in by-value
     source_code_cpp = """
     template<typename T>
     double go_fast_cpp_2(T awkward_array) {

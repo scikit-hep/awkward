@@ -135,8 +135,6 @@ namespace awkward {
       : start_(start), stop_(stop), which_(which), ptrs_(ptrs), lookup_(lookup) {
       }
 
-    virtual ~ArrayView() {}
-
     size_t size() const noexcept {
       return stop_ - start_;
     }

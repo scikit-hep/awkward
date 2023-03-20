@@ -1465,6 +1465,11 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         """
         The C++ type of this Array when it is used in cppyy.
 
+            cpptype (None or str): Generated on demand when the Array needs to be passed
+                to a C++ (possibly templated) function defined by a `cppyy` compiler.
+
+        See also #ak.Array.cpppars.
+
         See [cppyy documentation](https://cppyy.readthedocs.io/en/latest/index.html)
         on types and signatures.
         """
@@ -1485,6 +1490,10 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         """
         The C++ dataset parameters needed to construct the C++ type of
         this Array when it is used in cppyy.
+
+            cpppars (None or tuple): Generated on demand when the Array needs to be passed
+                to a C++ function defined by cppyy. The C++ type is defined
+                in #ak.Array.cpptype.
         """
         if self._cpptype is None:
             self._cpptype = self.cpptype
@@ -1495,6 +1504,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         return self._cpppars
 
     def __castcpp__(self):
+        """
+        FIXME: This should be called by cppyy and not exposed to a user.
+        """
         return self.cpppars
 
 
