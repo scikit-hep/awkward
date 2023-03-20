@@ -15,7 +15,7 @@ from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import IndexType, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import TypeTracer
-from awkward._parameters import _type_parameters_equal
+from awkward._parameters import type_parameters_equal
 from awkward._regularize import is_integer_like, is_sized_iterable
 from awkward._slicing import normalize_slice
 from awkward._typing import (
@@ -1335,7 +1335,7 @@ class Content:
         return (
             self.__class__ is other.__class__
             and len(self) == len(other)
-            and _type_parameters_equal(self.parameters, other.parameters)
+            and type_parameters_equal(self.parameters, other.parameters)
             and self._is_equal_to(other, index_dtype, numpyarray)
         )
 

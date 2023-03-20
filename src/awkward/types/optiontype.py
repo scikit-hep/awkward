@@ -1,7 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
-from awkward._parameters import _type_parameters_equal
+from awkward._parameters import type_parameters_equal
 from awkward._typing import final
 from awkward.types.listtype import ListType
 from awkward.types.regulartype import RegularType
@@ -84,7 +84,7 @@ class OptionType(Type):
     def __eq__(self, other):
         if isinstance(other, OptionType):
             return (
-                _type_parameters_equal(self._parameters, other._parameters)
+                type_parameters_equal(self._parameters, other._parameters)
                 and self._content == other._content
             )
         else:

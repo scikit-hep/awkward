@@ -8,7 +8,7 @@ from awkward._backends import backend_of
 from awkward._behavior import behavior_of, get_array_class, get_record_class
 from awkward._errors import wrap_error
 from awkward._nplikes.numpylike import NumpyMetadata
-from awkward._parameters import _parameters_equal
+from awkward._parameters import parameters_equal
 from awkward.operations.ak_to_layout import to_layout
 
 np = NumpyMetadata.instance()
@@ -86,9 +86,7 @@ def almost_equal(
         if left.length != right.length:
             return False
 
-        if check_parameters and not _parameters_equal(
-            left.parameters, right.parameters
-        ):
+        if check_parameters and not parameters_equal(left.parameters, right.parameters):
             return False
 
         # Require that the arrays have the same evaluated types

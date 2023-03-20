@@ -5,7 +5,7 @@ from collections.abc import Collection
 from awkward._typing import JSONMapping, JSONSerializable
 
 
-def _type_parameters_equal(
+def type_parameters_equal(
     one: JSONMapping | None, two: JSONMapping | None, *, allow_missing: bool = False
 ) -> bool:
     if one is None and two is None:
@@ -32,7 +32,7 @@ def _type_parameters_equal(
         return True
 
 
-def _parameters_equal(
+def parameters_equal(
     one: JSONMapping, two: JSONMapping, only_array_record=False
 ) -> bool:
     if one is None and two is None:
@@ -74,7 +74,7 @@ def _parameters_equal(
         return True
 
 
-def _parameters_intersect(
+def parameters_intersect(
     left: JSONMapping | None,
     right: JSONMapping | None,
     *,
@@ -122,7 +122,7 @@ def _parameters_intersect(
     return result
 
 
-def _parameters_union(
+def parameters_union(
     left: JSONMapping | None,
     right: JSONMapping | None,
     *,
@@ -166,7 +166,7 @@ def _parameters_union(
             return result
 
 
-def _parameters_is_empty(parameters: JSONMapping | None) -> bool:
+def parameters_is_empty(parameters: JSONMapping | None) -> bool:
     """
     Args:
         parameters (dict or None): parameters dictionary, or None
