@@ -1477,8 +1477,6 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             self._lookup = ak._lookup.Lookup(self.layout)
             self._cpp_type = self._generator.class_type()
 
-            ak.cppyy._register(array=self, cpp_type=self._cpp_type)
-
         return self._cpp_type
 
     def __castcpp__(self):
