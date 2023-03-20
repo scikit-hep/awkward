@@ -12,7 +12,11 @@ from awkward._behavior import find_custom_broadcast
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
-from awkward._parameters import parameters_are_empty, parameters_intersect
+from awkward._parameters import (
+    parameters_are_empty,
+    parameters_are_equal,
+    parameters_intersect,
+)
 from awkward._typing import Any, Callable, Dict, List, TypeAlias, Union
 from awkward._util import unset
 from awkward.contents.bitmaskedarray import BitMaskedArray
@@ -241,7 +245,7 @@ def all_or_nothing_parameters_factory(
         first_parameters = input_parameters[0]
         # Ensure all parameters match, or set parameters to None
         for other_parameters in input_parameters[1:]:
-            if not ak.forms.form._parameters_equal(first_parameters, other_parameters):
+            if not parameters_are_equal(first_parameters, other_parameters):
                 break
         else:
             parameters = first_parameters

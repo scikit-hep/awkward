@@ -11,7 +11,10 @@ from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import IndexType, NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._nplikes.typetracer import MaybeNone, TypeTracer
-from awkward._parameters import type_parameters_equal
+from awkward._parameters import (
+    parameters_intersect,
+    type_parameters_equal,
+)
 from awkward._regularize import is_integer_like
 from awkward._slicing import NO_HEAD
 from awkward._typing import TYPE_CHECKING, Final, Self, SupportsIndex, final
@@ -731,9 +734,7 @@ class ByteMaskedArray(Content):
             length = 0
             for x in others:
                 length_scalar = self._backend.index_nplike.shape_item_as_index(x.length)
-                parameters = ak.forms.form._parameters_intersect(
-                    parameters, x._parameters
-                )
+                parameters = parameters_intersect(parameters, x._parameters)
                 masks.append(x._mask.data[:length_scalar])
                 tail_contents.append(x._content[:length_scalar])
                 length += x.length

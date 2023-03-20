@@ -10,7 +10,10 @@ from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import ArrayLike, IndexType, NumpyMetadata
 from awkward._nplikes.typetracer import TypeTracerArray
-from awkward._parameters import type_parameters_equal
+from awkward._parameters import (
+    parameters_intersect,
+    type_parameters_equal,
+)
 from awkward._regularize import is_integer_like
 from awkward._slicing import NO_HEAD
 from awkward._typing import TYPE_CHECKING, Final, Self, SupportsIndex, final
@@ -481,9 +484,7 @@ class NumpyArray(Content):
             if isinstance(array, ak.contents.EmptyArray):
                 continue
 
-            parameters = ak.forms.form._parameters_intersect(
-                parameters, array._parameters
-            )
+            parameters = parameters_intersect(parameters, array._parameters)
             if isinstance(array, ak.contents.NumpyArray):
                 contiguous_arrays.append(array.data)
             else:

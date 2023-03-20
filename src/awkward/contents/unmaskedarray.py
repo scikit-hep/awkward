@@ -9,7 +9,11 @@ from awkward._layout import maybe_posaxis
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import IndexType, NumpyMetadata
 from awkward._nplikes.typetracer import MaybeNone
-from awkward._parameters import type_parameters_equal
+from awkward._parameters import (
+    parameters_intersect,
+    parameters_union,
+    type_parameters_equal,
+)
 from awkward._regularize import is_integer_like
 from awkward._slicing import NO_HEAD
 from awkward._typing import TYPE_CHECKING, Final, Self, SupportsIndex, final
@@ -107,15 +111,11 @@ class UnmaskedArray(Content):
         if content.is_union:
             return content.copy(
                 contents=[cls.simplified(x) for x in content.contents],
-                parameters=ak.forms.form._parameters_union(
-                    content._parameters, parameters
-                ),
+                parameters=parameters_union(content._parameters, parameters),
             )
         elif content.is_indexed or content.is_option:
             return content.copy(
-                parameters=ak.forms.form._parameters_union(
-                    content._parameters, parameters
-                )
+                parameters=parameters_union(content._parameters, parameters)
             )
         else:
             return cls(content, parameters=parameters)
@@ -337,9 +337,7 @@ class UnmaskedArray(Content):
             parameters = self._parameters
             tail_contents = []
             for x in others:
-                parameters = ak.forms.form._parameters_intersect(
-                    parameters, x._parameters
-                )
+                parameters = parameters_intersect(parameters, x._parameters)
                 tail_contents.append(x._content)
 
             return UnmaskedArray(

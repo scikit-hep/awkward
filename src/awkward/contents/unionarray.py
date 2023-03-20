@@ -13,6 +13,7 @@ from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import IndexType, NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._nplikes.typetracer import OneOf, TypeTracer
+from awkward._parameters import parameters_intersect, parameters_union
 from awkward._regularize import is_integer_like
 from awkward._slicing import NO_HEAD
 from awkward._typing import TYPE_CHECKING, Final, Self, SupportsIndex, final
@@ -264,9 +265,7 @@ class UnionArray(Content):
                 innercontents = self_cont._contents
 
                 # Update outermost parameters with this union's parameters
-                parameters = ak.forms.form._parameters_union(
-                    self_cont._parameters, parameters
-                )
+                parameters = parameters_union(self_cont._parameters, parameters)
 
                 # For each inner union content
                 for j, inner_cont in enumerate(innercontents):
@@ -408,9 +407,7 @@ class UnionArray(Content):
 
         if len(contents) == 1:
             next = contents[0]._carry(index, True)
-            return next.copy(
-                parameters=ak.forms.form._parameters_union(next._parameters, parameters)
-            )
+            return next.copy(parameters=parameters_union(next._parameters, parameters))
 
         else:
             return cls(
@@ -633,7 +630,7 @@ class UnionArray(Content):
             ak.index.Index(nexttags),
             ak.index.Index(nextindex),
             contents,
-            parameters=ak.forms.form._parameters_union(self._parameters, parameters),
+            parameters=parameters_union(self._parameters, parameters),
         )
 
     def project(self, index):
@@ -1085,9 +1082,7 @@ class UnionArray(Content):
             if isinstance(array, ak.contents.EmptyArray):
                 continue
 
-            parameters = ak.forms.form._parameters_intersect(
-                parameters, array._parameters
-            )
+            parameters = parameters_intersect(parameters, array._parameters)
             if isinstance(array, ak.contents.UnionArray):
                 union_tags = ak.index.Index(array.tags)
                 union_index = ak.index.Index(array.index)

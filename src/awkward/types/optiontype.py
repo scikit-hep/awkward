@@ -1,7 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
-from awkward._parameters import type_parameters_equal
+from awkward._parameters import parameters_union, type_parameters_equal
 from awkward._typing import final
 from awkward.types.listtype import ListType
 from awkward.types.regulartype import RegularType
@@ -101,7 +101,7 @@ class OptionType(Type):
                     contents.append(
                         OptionType(
                             content.content,
-                            parameters=ak.forms.form._parameters_union(
+                            parameters=parameters_union(
                                 self._parameters, content._parameters
                             ),
                             typestr=typestr,
