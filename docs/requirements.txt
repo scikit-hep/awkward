@@ -9,10 +9,9 @@ sphinx-sitemap
 pydata-sphinx-theme
 myst-nb
 sphinx-external-toc
-jupyterlite-sphinx
+jupyterlite-sphinx==0.7.3
 ipyleaflet
-jupyterlite-core==0.1.0b19
-jupyterlite-pyodide-kernel==0.0.5
+jupyterlite==0.1.0b16
 
 numpy>=1.13.1
 numba>=0.50.0
