@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections.abc import Collection
 
 import awkward as ak
-from awkward.typing import TYPE_CHECKING, TypeVar
+from awkward._typing import TYPE_CHECKING, TypeVar
 
 if TYPE_CHECKING:
     from awkward._nplikes.numpylike import ArrayLike, NumpyLike

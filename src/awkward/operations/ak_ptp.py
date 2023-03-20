@@ -1,8 +1,11 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
+__all__ = ("ptp",)
 import awkward as ak
+from awkward._behavior import behavior_of
 from awkward._connect.numpy import unsupported
+from awkward._layout import maybe_posaxis
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._regularize import regularize_axis
 from awkward._util import unset
 
 np = NumpyMetadata.instance()
@@ -78,8 +81,8 @@ def ptp(array, axis=None, *, keepdims=False, mask_identity=True, flatten_records
 
 
 def _impl(array, axis, keepdims, mask_identity):
-    axis = ak._util.regularize_axis(axis)
-    behavior = ak._util.behavior_of(array)
+    axis = regularize_axis(axis)
+    behavior = behavior_of(array)
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
 
     with np.errstate(invalid="ignore", divide="ignore"):
@@ -114,7 +117,7 @@ def _impl(array, axis, keepdims, mask_identity):
                 out = out[(0,) * out.ndim]
         else:
             if not keepdims:
-                posaxis = ak._util.maybe_posaxis(out.layout, axis, 1)
+                posaxis = maybe_posaxis(out.layout, axis, 1)
                 out = out[(slice(None, None),) * posaxis + (0,)]
 
         return out

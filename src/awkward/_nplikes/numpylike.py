@@ -7,7 +7,7 @@ import numpy
 
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._singleton import Singleton
-from awkward.typing import (
+from awkward._typing import (
     Literal,
     Protocol,
     Self,

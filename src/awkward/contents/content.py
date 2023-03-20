@@ -8,16 +8,16 @@ from numbers import Complex, Real
 
 import awkward as ak
 from awkward._backends import Backend
+from awkward._behavior import get_array_class, get_record_class
+from awkward._layout import wrap_layout
 from awkward._nplikes import to_nplike
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import IndexType, NumpyLike, NumpyMetadata
+from awkward._nplikes.numpylike import IndexType, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import TypeTracer
+from awkward._regularize import is_integer_like, is_sized_iterable
 from awkward._slicing import normalize_slice
-from awkward._util import unset
-from awkward.forms.form import Form, JSONMapping, _type_parameters_equal
-from awkward.index import Index, Index64
-from awkward.typing import (
+from awkward._typing import (
     TYPE_CHECKING,
     Any,
     AxisMaybeNone,
@@ -27,8 +27,12 @@ from awkward.typing import (
     TypeAlias,
     TypedDict,
 )
+from awkward._util import unset
+from awkward.forms.form import Form, JSONMapping, _type_parameters_equal
+from awkward.index import Index, Index64
 
 if TYPE_CHECKING:
+    from awkward._nplikes.numpy import NumpyLike
     from awkward._slicing import SliceItem
 
 
@@ -338,7 +342,7 @@ class Content:
         tail: tuple[SliceItem, ...],
         advanced: Index | None,
     ):
-        nexthead, nexttail = ak._slicing.headtail(tail)
+        nexthead, nexttail = ak._slicing.head_tail(tail)
         return self._getitem_field(head)._getitem_next(nexthead, nexttail, advanced)
 
     def _getitem_next_fields(self, head, tail, advanced: Index | None) -> Content:
@@ -348,13 +352,13 @@ class Content:
                 only_fields.append(x)
             else:
                 not_fields.append(x)
-        nexthead, nexttail = ak._slicing.headtail(tuple(not_fields))
+        nexthead, nexttail = ak._slicing.head_tail(tuple(not_fields))
         return self._getitem_fields(head, tuple(only_fields))._getitem_next(
             nexthead, nexttail, advanced
         )
 
     def _getitem_next_newaxis(self, tail, advanced: Index | None):
-        nexthead, nexttail = ak._slicing.headtail(tail)
+        nexthead, nexttail = ak._slicing.head_tail(tail)
         return ak.contents.RegularArray(
             self._getitem_next(nexthead, nexttail, advanced), 1, 0, parameters=None
         )
@@ -362,10 +366,13 @@ class Content:
     def _getitem_next_ellipsis(self, tail, advanced: Index | None):
         mindepth, maxdepth = self.minmax_depth
 
-        dimlength = sum(1 if isinstance(x, (int, slice, Index64)) else 0 for x in tail)
+        dimlength = sum(
+            1 if is_integer_like(x) or isinstance(x, (slice, Index64)) else 0
+            for x in tail
+        )
 
         if len(tail) == 0 or mindepth - 1 == maxdepth - 1 == dimlength:
-            nexthead, nexttail = ak._slicing.headtail(tail)
+            nexthead, nexttail = ak._slicing.head_tail(tail)
             return self._getitem_next(nexthead, nexttail, advanced)
 
         elif dimlength in {mindepth - 1, maxdepth - 1}:
@@ -548,8 +555,8 @@ class Content:
         return self._getitem(where)
 
     def _getitem(self, where):
-        if ak._util.is_integer(where):
-            return self._getitem_at(where)
+        if is_integer_like(where):
+            return self._getitem_at(ak._slicing.normalize_integer_like(where))
 
         elif isinstance(where, slice) and where.step is None:
             # Ensure that start, stop are non-negative!
@@ -574,14 +581,18 @@ class Content:
             if len(where) == 0:
                 return self
 
+            # Backend may change if index contains typetracers
+            backend = ak._backends.backend_of(self, *where)
+            this = self.to_backend(backend)
+
             # Normalise valid indices onto well-defined basis
-            items = ak._slicing.normalise_items(where, self._backend)
+            items = ak._slicing.normalise_items(where, backend)
             # Prepare items for advanced indexing (e.g. via broadcasting)
-            nextwhere = ak._slicing.prepare_advanced_indexing(items)
+            nextwhere = ak._slicing.prepare_advanced_indexing(items, backend)
 
             next = ak.contents.RegularArray(
-                self,
-                self.length,
+                this,
+                this.length,
                 1,
                 parameters=None,
             )
@@ -601,10 +612,8 @@ class Content:
             isinstance(where, ak.contents.Content)
             and where.backend is not self._backend
         ):
-            common_backend = ak._backends.common_backend([where.backend, self._backend])
-            return self.to_backend(common_backend)._getitem(
-                where.to_backend(common_backend)
-            )
+            backend = ak._backends.backend_of(self, where)
+            return self.to_backend(backend)._getitem(where.to_backend(backend))
 
         elif isinstance(where, ak.contents.NumpyArray):
             data_as_index = to_nplike(
@@ -675,7 +684,7 @@ class Content:
         elif isinstance(where, Content):
             return self._getitem((where,))
 
-        elif ak._util.is_sized_iterable(where):
+        elif is_sized_iterable(where):
             # Do we have an array
             nplike = ak._nplikes.nplike_of(where, default=None)
             # We can end up with non-array objects associated with an nplike
@@ -683,13 +692,13 @@ class Content:
                 # Is it a scalar, not array?
                 if len(where.shape) == 0:
                     raise ak._errors.wrap_error(
-                        NotImplementedError(
-                            "scalar arrays in slices are not currently supported"
+                        AssertionError(
+                            "scalar arrays should be handled by integer-like indexing"
                         )
                     )
                 else:
                     layout = ak.operations.ak_to_layout._impl(
-                        where, allow_record=False, allow_other=True, regulararray=False
+                        where, allow_record=False, allow_other=False, regulararray=False
                     )
                     return self._getitem(layout)
 
@@ -706,7 +715,9 @@ class Content:
                 return self._getitem_fields(list(where))
 
             else:
-                layout = ak.operations.to_layout(where)
+                layout = ak.operations.ak_to_layout._impl(
+                    where, allow_record=False, allow_other=False, regulararray=False
+                )
                 return self._getitem(layout)
 
         else:
@@ -1186,18 +1197,18 @@ class Content:
         self, behavior: dict | None, json_conversions: dict[str, Any] | None
     ):
         if self.is_record:
-            getitem = ak._util.recordclass(self, behavior).__getitem__
+            getitem = get_record_class(self, behavior).__getitem__
             overloaded = getitem is not ak.highlevel.Record.__getitem__ and not getattr(
                 getitem, "ignore_in_to_list", False
             )
         else:
-            getitem = ak._util.arrayclass(self, behavior).__getitem__
+            getitem = get_array_class(self, behavior).__getitem__
             overloaded = getitem is not ak.highlevel.Array.__getitem__ and not getattr(
                 getitem, "ignore_in_to_list", False
             )
 
         if overloaded:
-            array = ak._util.wrap(self, behavior=behavior)
+            array = wrap_layout(self, behavior=behavior)
             out = [None] * self.length
             for i in range(self.length):
                 out[i] = array[i]

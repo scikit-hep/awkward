@@ -1,7 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
 import awkward as ak
-from awkward._nplikes import nplike_of, ufuncs
+from awkward._behavior import behavior_of
+from awkward._layout import wrap_layout
+from awkward._nplikes import ufuncs
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward.highlevel import Array
 
@@ -12,7 +13,7 @@ class ByteBehavior(Array):
     __name__ = "Array"
 
     def __bytes__(self):
-        tmp = nplike_of(self.layout).asarray(self.layout)
+        tmp = self.layout.backend.nplike.asarray(self.layout)
         if hasattr(tmp, "tobytes"):
             return tmp.tobytes()
         else:
@@ -57,7 +58,7 @@ class CharBehavior(Array):
     __name__ = "Array"
 
     def __bytes__(self):
-        tmp = nplike_of(self.layout).asarray(self.layout)
+        tmp = self.layout.backend.nplike.asarray(self.layout)
         if hasattr(tmp, "tobytes"):
             return tmp.tobytes()
         else:
@@ -111,13 +112,13 @@ class StringBehavior(Array):
 
 
 def _string_equal(one, two):
-    nplike = nplike_of(one, two)
-    behavior = ak._util.behavior_of(one, two)
+    behavior = behavior_of(one, two)
 
     one, two = (
         ak.operations.without_parameters(one).layout,
         ak.operations.without_parameters(two).layout,
     )
+    nplike = one.backend.nplike
 
     # first condition: string lengths must be the same
     counts1 = nplike.asarray(
@@ -143,7 +144,7 @@ def _string_equal(one, two):
         # update same-length strings with a verdict about their characters
         out[possible] = reduced.data
 
-    return ak._util.wrap(ak.contents.NumpyArray(out), behavior)
+    return wrap_layout(ak.contents.NumpyArray(out), behavior)
 
 
 def _string_notequal(one, two):
@@ -151,16 +152,16 @@ def _string_notequal(one, two):
 
 
 def _string_broadcast(layout, offsets):
-    nplike = nplike_of(offsets)
-    assert nplike is layout.backend.index_nplike
-
-    offsets = nplike.asarray(offsets)
+    index_nplike = layout.backend.index_nplike
+    offsets = index_nplike.asarray(offsets)
     counts = offsets[1:] - offsets[:-1]
     if ak._util.win or ak._util.bits32:
-        counts = nplike.astype(counts, dtype=np.int32)
-    parents = nplike.repeat(nplike.arange(len(counts), dtype=counts.dtype), counts)
+        counts = index_nplike.astype(counts, dtype=np.int32)
+    parents = index_nplike.repeat(
+        index_nplike.arange(counts.size, dtype=counts.dtype), counts
+    )
     return ak.contents.IndexedArray(
-        ak.index.Index64(parents, nplike=nplike), layout
+        ak.index.Index64(parents, nplike=index_nplike), layout
     ).project()
 
 

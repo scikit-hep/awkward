@@ -5,11 +5,14 @@ import copy
 from collections.abc import Iterable
 
 import awkward as ak
+from awkward._behavior import get_record_class
+from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
+from awkward._regularize import is_integer
+from awkward._typing import Self
 from awkward._util import unset
 from awkward.contents.content import Content
-from awkward.typing import Self
 
 np = NumpyMetadata.instance()
 
@@ -34,7 +37,7 @@ class Record:
             raise ak._errors.wrap_error(
                 TypeError(f"Record 'array' must be a RecordArray, not {array!r}")
             )
-        if not ak._util.is_integer(at):
+        if not is_integer(at):
             raise ak._errors.wrap_error(
                 TypeError(f"Record 'at' must be an integer, not {array!r}")
             )
@@ -136,7 +139,7 @@ class Record:
             return self._getitem(where)
 
     def _getitem(self, where):
-        if ak._util.is_integer(where):
+        if is_integer(where):
             raise ak._errors.wrap_error(
                 IndexError("scalar Record cannot be sliced by an integer")
             )
@@ -217,12 +220,12 @@ class Record:
 
     def _to_list(self, behavior, json_conversions):
         overloaded = (
-            ak._util.recordclass(self._array, behavior).__getitem__
+            get_record_class(self._array, behavior).__getitem__
             is not ak.highlevel.Record.__getitem__
         )
 
         if overloaded:
-            record = ak._util.wrap(self, behavior=behavior)
+            record = wrap_layout(self, behavior=behavior)
             contents = []
             for field in self._array.fields:
                 contents.append(record[field])

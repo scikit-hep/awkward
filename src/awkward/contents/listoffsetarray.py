@@ -4,16 +4,19 @@ from __future__ import annotations
 import copy
 
 import awkward as ak
+from awkward._layout import maybe_posaxis
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import IndexType, NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._nplikes.typetracer import TypeTracer, is_unknown_scalar
+from awkward._regularize import is_integer_like
+from awkward._slicing import NO_HEAD
+from awkward._typing import TYPE_CHECKING, Final, Self, SupportsIndex, final
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.form import _type_parameters_equal
 from awkward.forms.listoffsetform import ListOffsetForm
 from awkward.index import Index
-from awkward.typing import TYPE_CHECKING, Final, Self, SupportsIndex, final
 
 if TYPE_CHECKING:
     from awkward._slicing import SliceItem
@@ -433,14 +436,14 @@ class ListOffsetArray(Content):
         advanced: Index | None,
     ) -> Content:
         advanced = advanced.to_nplike(self._backend.nplike)
-        if head == ():
+        if head is NO_HEAD:
             return self
 
-        elif isinstance(head, int):
+        elif is_integer_like(head):
             assert advanced is None
             lenstarts = self._offsets.length - 1
             starts, stops = self.starts, self.stops
-            nexthead, nexttail = ak._slicing.headtail(tail)
+            nexthead, nexttail = ak._slicing.head_tail(tail)
             nextcarry = ak.index.Index64.empty(lenstarts, self._backend.index_nplike)
 
             assert (
@@ -467,7 +470,7 @@ class ListOffsetArray(Content):
             return nextcontent._getitem_next(nexthead, nexttail, advanced)
 
         elif isinstance(head, slice):
-            nexthead, nexttail = ak._slicing.headtail(tail)
+            nexthead, nexttail = ak._slicing.head_tail(tail)
             lenstarts = self._offsets.length - 1
             start, stop, step = head.start, head.stop, head.step
 
@@ -613,7 +616,7 @@ class ListOffsetArray(Content):
             return self._getitem_next_ellipsis(tail, advanced)
 
         elif isinstance(head, ak.index.Index64):
-            nexthead, nexttail = ak._slicing.headtail(tail)
+            nexthead, nexttail = ak._slicing.head_tail(tail)
             flathead = self._backend.index_nplike.reshape(
                 self._backend.index_nplike.asarray(head.data), (-1,)
             )
@@ -714,7 +717,7 @@ class ListOffsetArray(Content):
             raise ak._errors.wrap_error(AssertionError(repr(head)))
 
     def _offsets_and_flattened(self, axis, depth):
-        posaxis = ak._util.maybe_posaxis(self, axis, depth)
+        posaxis = maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 == depth:
             raise ak._errors.wrap_error(np.AxisError("axis=0 not allowed for flatten"))
 
@@ -828,7 +831,7 @@ class ListOffsetArray(Content):
 
     def _local_index(self, axis, depth):
         index_nplike = self._backend.index_nplike
-        posaxis = ak._util.maybe_posaxis(self, axis, depth)
+        posaxis = maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 == depth:
             return self._local_index_axis0()
         elif posaxis is not None and posaxis + 1 == depth + 1:
@@ -1374,7 +1377,7 @@ class ListOffsetArray(Content):
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         index_nplike = self._backend.index_nplike
 
-        posaxis = ak._util.maybe_posaxis(self, axis, depth)
+        posaxis = maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         elif posaxis is not None and posaxis + 1 == depth + 1:
@@ -1804,7 +1807,7 @@ class ListOffsetArray(Content):
         return self.offsets._nbytes_part() + self.content._nbytes_part()
 
     def _pad_none(self, target, axis, depth, clip):
-        posaxis = ak._util.maybe_posaxis(self, axis, depth)
+        posaxis = maybe_posaxis(self, axis, depth)
         index_nplike = self._backend.index_nplike
 
         if posaxis is not None and posaxis + 1 == depth:

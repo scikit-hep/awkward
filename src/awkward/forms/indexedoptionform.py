@@ -1,9 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
 import awkward as ak
+from awkward._behavior import find_typestr
+from awkward._typing import final
 from awkward._util import unset
 from awkward.forms.form import Form, _type_parameters_equal
-from awkward.typing import final
 
 
 @final
@@ -114,7 +114,7 @@ class IndexedOptionForm(Form):
         return ak.types.OptionType(
             self._content._type(typestrs),
             parameters=parameters,
-            typestr=ak._util.gettypestr(self._parameters, typestrs),
+            typestr=find_typestr(self._parameters, typestrs),
         ).simplify_option_union()
 
     def __eq__(self, other):

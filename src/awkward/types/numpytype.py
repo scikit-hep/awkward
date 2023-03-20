@@ -5,9 +5,9 @@ import re
 
 import awkward as ak
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._typing import final
 from awkward.forms.form import _type_parameters_equal
 from awkward.types.type import Type
-from awkward.typing import final
 
 np = NumpyMetadata.instance()
 

@@ -6,16 +6,20 @@ import json
 from collections.abc import Iterable
 
 import awkward as ak
+from awkward._behavior import find_record_reducer
+from awkward._layout import maybe_posaxis
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import IndexType, NumpyMetadata
 from awkward._nplikes.shape import unknown_length
+from awkward._regularize import is_integer
+from awkward._slicing import NO_HEAD
+from awkward._typing import TYPE_CHECKING, Final, Self, SupportsIndex, final
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.form import _type_parameters_equal
 from awkward.forms.recordform import RecordForm
 from awkward.index import Index
 from awkward.record import Record
-from awkward.typing import TYPE_CHECKING, Final, Self, SupportsIndex, final
 
 if TYPE_CHECKING:
     from awkward._slicing import SliceItem
@@ -210,7 +214,7 @@ class RecordArray(Content):
                         )
                     )
 
-            if not (ak._util.is_integer(length) and length >= 0):
+            if not (is_integer(length) and length >= 0):
                 raise ak._errors.wrap_error(
                     TypeError(
                         "{} 'length' must be a non-negative integer or None, not {}".format(
@@ -469,7 +473,7 @@ class RecordArray(Content):
             return self.content(where)
 
         else:
-            nexthead, nexttail = ak._slicing.headtail(only_fields)
+            nexthead, nexttail = ak._slicing.head_tail(only_fields)
             if isinstance(nexthead, str):
                 return self.content(where)._getitem_field(nexthead, nexttail)
             else:
@@ -487,7 +491,7 @@ class RecordArray(Content):
         if len(only_fields) == 0:
             contents = [self.content(i) for i in indexes]
         else:
-            nexthead, nexttail = ak._slicing.headtail(only_fields)
+            nexthead, nexttail = ak._slicing.head_tail(only_fields)
             if isinstance(nexthead, str):
                 contents = [
                     self.content(i)._getitem_field(nexthead, nexttail) for i in indexes
@@ -559,7 +563,7 @@ class RecordArray(Content):
         tail: tuple[SliceItem, ...],
         advanced: Index | None,
     ) -> Content:
-        if head == ():
+        if head is NO_HEAD:
             return self
 
         elif isinstance(head, str):
@@ -572,7 +576,7 @@ class RecordArray(Content):
             return self._getitem_next_missing(head, tail, advanced)
 
         else:
-            nexthead, nexttail = ak._slicing.headtail(tail)
+            nexthead, nexttail = ak._slicing.head_tail(tail)
 
             contents = []
             for i in range(len(self._contents)):
@@ -601,7 +605,7 @@ class RecordArray(Content):
             return next._getitem_next(nexthead, nexttail, advanced)
 
     def _offsets_and_flattened(self, axis, depth):
-        posaxis = ak._util.maybe_posaxis(self, axis, depth)
+        posaxis = maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 == depth:
             raise ak._errors.wrap_error(np.AxisError("axis=0 not allowed for flatten"))
 
@@ -816,7 +820,7 @@ class RecordArray(Content):
         )
 
     def _local_index(self, axis, depth):
-        posaxis = ak._util.maybe_posaxis(self, axis, depth)
+        posaxis = maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 == depth:
             return self._local_index_axis0()
         else:
@@ -881,7 +885,7 @@ class RecordArray(Content):
         )
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
-        posaxis = ak._util.maybe_posaxis(self, axis, depth)
+        posaxis = maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         else:
@@ -912,7 +916,7 @@ class RecordArray(Content):
         keepdims,
         behavior,
     ):
-        reducer_recordclass = ak._util.reducer_recordclass(reducer, self, behavior)
+        reducer_recordclass = find_record_reducer(reducer, self, behavior)
         if reducer_recordclass is None:
             raise ak._errors.wrap_error(
                 TypeError(
@@ -945,7 +949,7 @@ class RecordArray(Content):
         return result
 
     def _pad_none(self, target, axis, depth, clip):
-        posaxis = ak._util.maybe_posaxis(self, axis, depth)
+        posaxis = maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 == depth:
             return self._pad_none_axis0(target, clip)
         else:

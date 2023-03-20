@@ -1,4 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+__all__ = ("to_arrow_table",)
 
 import json
 
@@ -99,7 +100,7 @@ def _impl(
     extensionarray,
     count_nulls,
 ):
-    from awkward._connect.pyarrow import pyarrow
+    from awkward._connect.pyarrow import direct_Content_subclass, pyarrow
 
     layout = ak.operations.to_layout(array, allow_record=True, allow_other=False)
     if isinstance(layout, ak.record.Record):
@@ -142,9 +143,7 @@ def _impl(
             {"record_is_scalar": record_is_scalar},
         ]
         for x in check:
-            parameters.append(
-                {ak._util.direct_Content_subclass(x).__name__: x._parameters}
-            )
+            parameters.append({direct_Content_subclass(x).__name__: x._parameters})
 
     else:
         paarrays.append(

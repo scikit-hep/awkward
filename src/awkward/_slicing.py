@@ -1,5 +1,4 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
 from __future__ import annotations
 
 import operator
@@ -7,11 +6,12 @@ import operator
 import awkward as ak
 from awkward._backends import Backend
 from awkward._errors import wrap_error
-from awkward._nplikes import nplike_of, to_nplike
+from awkward._nplikes import to_nplike
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
-from awkward.typing import TYPE_CHECKING, Sequence, TypeAlias
+from awkward._regularize import is_array_like, is_integer_like, is_sized_iterable
+from awkward._typing import TYPE_CHECKING, Sequence, TypeAlias, TypeVar
 
 if TYPE_CHECKING:
     from awkward._nplikes.numpylike import ArrayLike
@@ -71,20 +71,31 @@ def normalize_slice(slice_: slice, *, backend: Backend) -> slice:
         return slice(start, stop, step)
 
 
-def headtail(
-    oldtail: tuple[SliceItem, ...]
-) -> tuple[SliceItem | tuple, tuple[SliceItem, ...]]:
-    if len(oldtail) == 0:
-        return (), ()
+T = TypeVar("T")
+
+
+class _NoHead:
+    def __repr__(self):
+        return f"{__name__}.NO_HEAD"
+
+
+NO_HEAD = _NoHead()
+S = TypeVar("S", bound=Sequence)
+
+
+def head_tail(sequence: S[T]) -> tuple[T | type(NO_HEAD), S[T]]:
+    if len(sequence) == 0:
+        return NO_HEAD, ()
     else:
-        return oldtail[0], oldtail[1:]
+        return sequence[0], sequence[1:]
 
 
-def prepare_advanced_indexing(items):
+def prepare_advanced_indexing(items, backend: Backend):
     """Broadcast index objects to satisfy NumPy indexing rules
 
     Args:
         items: iterable of index items.
+        backend: backend of items
 
     Returns a tuple of broadcasted index items.
 
@@ -129,7 +140,7 @@ def prepare_advanced_indexing(items):
         )
 
     # Then broadcast the index items
-    nplike = nplike_of(*broadcastable)
+    nplike = backend.index_nplike
     broadcasted = nplike.broadcast_arrays(*broadcastable)
 
     # And re-assemble the index with the broadcasted items
@@ -142,7 +153,7 @@ def prepare_advanced_indexing(items):
 
         x = broadcasted[i_broadcast]
         if len(x.shape) == 0:
-            prepared.append(int(x))
+            prepared.append(x)
         elif np.issubdtype(x.dtype, np.int64):
             prepared.append(ak.index.Index64(nplike.reshape(x, (-1,))))
             prepared[-1].metadata["shape"] = x.shape
@@ -197,6 +208,18 @@ def prepare_advanced_indexing(items):
     return tuple(prepared)
 
 
+def normalize_integer_like(x) -> int | ArrayLike:
+    if is_array_like(x):
+        if np.issubdtype(x.dtype, np.integer) and x.ndim == 0:
+            return x
+        else:
+            raise wrap_error(
+                TypeError("only 0D integer arrays are considered integral")
+            )
+    else:
+        return int(x)
+
+
 def normalise_item(item, backend: Backend) -> SliceItem:
     """
     Args:
@@ -208,8 +231,8 @@ def normalise_item(item, backend: Backend) -> SliceItem:
     of integers.
     """
     # Basic indices
-    if ak._util.is_integer(item):
-        return int(item)
+    if is_integer_like(item):
+        return normalize_integer_like(item)
 
     elif isinstance(item, slice):
         return normalize_slice(item, backend=backend)
@@ -261,7 +284,7 @@ def normalise_item(item, backend: Backend) -> SliceItem:
             return out
 
     # Fallback for sized objects
-    elif ak._util.is_sized_iterable(item):
+    elif is_sized_iterable(item):
         # Do we have an array
         nplike = ak._nplikes.nplike_of(item, default=None)
         # We can end up with non-array objects associated with an nplike
@@ -269,7 +292,9 @@ def normalise_item(item, backend: Backend) -> SliceItem:
             # Is it a scalar, not array?
             if len(item.shape) == 0:
                 raise wrap_error(
-                    NotImplementedError("scalar objects in slice normalisation")
+                    AssertionError(
+                        "scalar arrays should be handled by integer-like indexing"
+                    )
                 )
             else:
                 layout = ak.operations.ak_to_layout._impl(
@@ -305,10 +330,8 @@ def normalise_item(item, backend: Backend) -> SliceItem:
 
 
 def normalise_items(where: Sequence, backend: Backend) -> list:
-    where_backend = ak._backends.backend_of(*where, default=backend)
-    common_backend = ak._backends.common_backend([backend, where_backend])
     # First prepare items for broadcasting into like-types
-    return [normalise_item(x, backend=common_backend) for x in where]
+    return [normalise_item(x, backend=backend) for x in where]
 
 
 def _normalise_item_RegularArray_to_ListOffsetArray64(item: Content) -> Content:

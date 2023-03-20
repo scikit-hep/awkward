@@ -1,8 +1,11 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+__all__ = ("to_rdataframe",)
 
 from collections.abc import Mapping
 
 import awkward as ak
+
+cpu = ak._backends.NumpyBackend.instance()
 
 
 def to_rdataframe(arrays, *, flatlist_as_rvec=True):
@@ -73,7 +76,7 @@ def _impl(
     for name, array in arrays.items():
         layouts[name] = ak.operations.ak_to_layout._impl(
             array, allow_record=False, allow_other=False, regulararray=True
-        )
+        ).to_backend(cpu)
         if length is None:
             length = layouts[name].length
         elif length != layouts[name].length:

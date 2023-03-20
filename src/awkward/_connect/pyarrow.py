@@ -879,8 +879,8 @@ def to_awkwardarrow_type(
     if use_extensionarray:
         return AwkwardArrowType(
             storage_type,
-            ak._util.direct_Content_subclass_name(mask),
-            ak._util.direct_Content_subclass_name(node),
+            direct_Content_subclass_name(mask),
+            direct_Content_subclass_name(node),
             None if mask is None else mask.parameters,
             None if node is None else node.parameters,
             node.is_tuple if isinstance(node, ak.contents.RecordArray) else None,
@@ -888,6 +888,22 @@ def to_awkwardarrow_type(
         )
     else:
         return storage_type
+
+
+def direct_Content_subclass(node):
+    if node is None:
+        return None
+    else:
+        mro = type(node).mro()
+        return mro[mro.index(ak.contents.Content) - 1]
+
+
+def direct_Content_subclass_name(node):
+    out = direct_Content_subclass(node)
+    if out is None:
+        return None
+    else:
+        return out.__name__
 
 
 def remove_optiontype(akarray):

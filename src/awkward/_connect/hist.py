@@ -8,7 +8,7 @@ import numpy as np
 
 import awkward as ak
 from awkward._backends import NumpyBackend
-from awkward.typing import Any, Sequence
+from awkward._typing import Any, Sequence
 
 numpy = NumpyBackend.instance()
 

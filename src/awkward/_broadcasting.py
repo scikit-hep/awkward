@@ -1,5 +1,4 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
 from __future__ import annotations
 
 import copy
@@ -9,10 +8,11 @@ import itertools
 from collections.abc import Sequence
 
 import awkward as ak
-from awkward._nplikes import nplike_of
+from awkward._behavior import find_custom_broadcast
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
+from awkward._typing import Any, Callable, Dict, List, TypeAlias, Union
 from awkward._util import unset
 from awkward.contents.bitmaskedarray import BitMaskedArray
 from awkward.contents.bytemaskedarray import ByteMaskedArray
@@ -33,7 +33,6 @@ from awkward.index import (  # IndexU8,  ; Index32,  ; IndexU32,  ; noqa: F401
     Index64,
 )
 from awkward.record import Record
-from awkward.typing import Any, Callable, Dict, List, TypeAlias, Union
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
@@ -60,11 +59,10 @@ def length_of_broadcast(inputs: Sequence) -> int | type[unknown_length]:
 
 def broadcast_pack(inputs: Sequence, isscalar: list[bool]) -> list:
     maxlen = length_of_broadcast(inputs)
-
     nextinputs = []
     for x in inputs:
         if isinstance(x, Record):
-            index = nplike_of(*inputs).full(maxlen, x.at, dtype=np.int64)
+            index = x.backend.index_nplike.full(maxlen, x.at, dtype=np.int64)
             nextinputs.append(RegularArray(x.array[index], maxlen, 1))
             isscalar.append(True)
         elif isinstance(x, Content):
@@ -881,7 +879,7 @@ def apply_step(
             # General list-handling case: the offsets of each list may be different.
             else:
                 fcns = [
-                    ak._util.custom_broadcast(x, behavior)
+                    find_custom_broadcast(x, behavior)
                     if isinstance(x, Content)
                     else None
                     for x in inputs

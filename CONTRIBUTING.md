@@ -268,3 +268,12 @@ Currently, only one person can deploy releases:
 There are two kinds of releases: (1) `awkward-cpp` updates, which only occur when the C++ is updated (rare) and involves compilation on many platforms (takes hours), and (2) `awkward` updates, which can happen with any bug-fix. The [releases listed in GitHub](https://github.com/scikit-hep/awkward/releases) are `awkward` releases, not `awkward-cpp`.
 
 If you need your merged pull request to be deployed in a release, just ask!
+
+#### Awkward-cpp releases
+When making an `awkward-cpp` release (1), the following manual steps must also be taken:
+- Creating a `git` tag `awkward-cpp-{version}` for the new version epoch.
+
+#### Awkward releases
+When making an `awkward` release (2), the following manual steps must also be taken:
+- Attaching the `headers.zip` from the `deploy.yml` workflow to the release artefacts.
+- Adding a `doc/switcher.json` entry for new minor/major versions.

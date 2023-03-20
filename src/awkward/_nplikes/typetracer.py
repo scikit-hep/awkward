@@ -4,13 +4,14 @@ from __future__ import annotations
 from numbers import Number
 
 import numpy
+from numpy.lib.mixins import NDArrayOperatorsMixin
 
 import awkward as ak
 from awkward._errors import wrap_error
 from awkward._nplikes.numpylike import ArrayLike, IndexType, NumpyLike, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
-from awkward._util import NDArrayOperatorsMixin, is_non_string_like_sequence
-from awkward.typing import (
+from awkward._regularize import is_integer, is_non_string_like_sequence
+from awkward._typing import (
     Any,
     Final,
     Literal,
@@ -326,14 +327,18 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         return len(self._shape)
 
     def view(self, dtype: np.dtype) -> Self:
-        if self.itemsize != np.dtype(dtype).itemsize and self._shape[-1] is not None:
+        dtype = np.dtype(dtype)
+        if (
+            self.itemsize != dtype.itemsize
+            and self.ndim >= 1
+            and self._shape[-1] is not None
+        ):
             last = int(
                 round(self._shape[-1] * self.itemsize / np.dtype(dtype).itemsize)
             )
             shape = self._shape[:-1] + (last,)
         else:
             shape = self._shape
-        dtype = np.dtype(dtype)
         return self._new(
             dtype, shape=shape, form_key=self._form_key, report=self._report
         )
@@ -423,11 +428,20 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
                     )
                 )
 
+        n_dim_index = n_basic_non_ellipsis + n_advanced
+        if n_dim_index > self.ndim:
+            raise wrap_error(
+                IndexError(
+                    f"too many indices for array: array is {self.ndim}-dimensional, but {n_dim_index} were indexed"
+                )
+            )
+
         # 2. Normalise Ellipsis and boolean arrays
         key_parts = []
         for item in key:
             if item is Ellipsis:
-                n_missing_dims = self.ndim - n_advanced - n_basic_non_ellipsis
+                # How many more dimensions do we have than the index provides
+                n_missing_dims = self.ndim - n_dim_index
                 key_parts.extend((slice(None),) * n_missing_dims)
             elif is_unknown_array(item) and np.issubdtype(item, np.bool_):
                 key_parts.append(self.nplike.nonzero(item)[0])
@@ -750,11 +764,7 @@ class TypeTracer(NumpyLike):
         if stop is None:
             start, stop = 0, start
 
-        if (
-            ak._util.is_integer(start)
-            and ak._util.is_integer(stop)
-            and ak._util.is_integer(step)
-        ):
+        if is_integer(start) and is_integer(stop) and is_integer(step):
             length = max(0, (stop - start + (step - (1 if step > 0 else -1))) // step)
         else:
             length = unknown_length
@@ -767,7 +777,15 @@ class TypeTracer(NumpyLike):
     ) -> list[TypeTracerArray]:
         for x in arrays:
             try_touch_data(x)
-        raise ak._errors.wrap_error(NotImplementedError)
+
+            assert x.ndim == 1
+
+        shape = tuple(x.size for x in arrays)
+        if indexing == "xy":
+            shape[:2] = shape[1], shape[0]
+
+        dtype = numpy.result_type(*arrays)
+        return [TypeTracerArray._new(dtype, shape=shape) for _ in arrays]
 
     ############################ testing
 
@@ -1002,7 +1020,7 @@ class TypeTracer(NumpyLike):
             if item is unknown_length:
                 # Size is no longer defined
                 new_size = unknown_length
-            elif not ak._util.is_integer(item):
+            elif not is_integer(item):
                 raise wrap_error(
                     ValueError(
                         "shape must be comprised of positive integers, -1 (for placeholders), or unknown lengths"

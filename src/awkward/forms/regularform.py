@@ -1,10 +1,11 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
 import awkward as ak
+from awkward._behavior import find_typestr
 from awkward._nplikes.shape import unknown_length
+from awkward._regularize import is_integer
+from awkward._typing import final
 from awkward._util import unset
 from awkward.forms.form import Form, _type_parameters_equal
-from awkward.typing import final
 
 
 @final
@@ -21,7 +22,7 @@ class RegularForm(Form):
                     )
                 )
             )
-        if not (size is unknown_length or (ak._util.is_integer(size) and size >= 0)):
+        if not (size is unknown_length or (is_integer(size) and size >= 0)):
             raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'size' must be a non-negative int or None, not {}".format(
@@ -73,7 +74,7 @@ class RegularForm(Form):
             self._content._type(typestrs),
             self._size,
             parameters=self._parameters,
-            typestr=ak._util.gettypestr(self._parameters, typestrs),
+            typestr=find_typestr(self._parameters, typestrs),
         )
 
     def __eq__(self, other):

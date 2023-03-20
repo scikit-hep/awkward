@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
+__all__ = ("from_parquet",)
 import awkward as ak
+from awkward._regularize import is_integer
 
 
 def from_parquet(
@@ -102,7 +103,7 @@ def metadata(
     import fsspec.parquet
 
     if row_groups is not None:
-        if not all(ak._util.is_integer(x) and x >= 0 for x in row_groups):
+        if not all(is_integer(x) and x >= 0 for x in row_groups):
             raise ak._errors.wrap_error(
                 ValueError("row_groups must be a set of non-negative integers")
             )

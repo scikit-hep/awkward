@@ -1,5 +1,4 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-# ruff: noqa: E402 F401 F403 I001
 
 # Versioning
 from awkward._version import __version__
@@ -33,14 +32,12 @@ import awkward.typetracer
 import awkward._typetracer  # todo: remove this after "deprecation" period
 
 # high-level interface
-from awkward.highlevel import Array
-from awkward.highlevel import Record
-from awkward.highlevel import ArrayBuilder
+from awkward.highlevel import *
 
 # behaviors
 import awkward.behaviors.categorical
 import awkward.behaviors.string
-from awkward.behaviors.mixins import mixin_class, mixin_class_method
+from awkward.behaviors.mixins import *
 
 # exports
 import awkward.builder

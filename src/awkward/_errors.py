@@ -5,7 +5,6 @@ import threading
 import warnings
 from collections.abc import Mapping, Sequence
 
-from awkward._nplikes import nplike_of
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
@@ -128,7 +127,12 @@ class OperationErrorContext(ErrorContext):
     _width = 80 - 8
 
     def __init__(self, name, arguments):
-        if self.primary() is not None or all(nplike_of(x).is_eager for x in arguments):
+        from awkward._backends import NumpyBackend, backend_of
+
+        numpy_backend = NumpyBackend.instance()
+        if self.primary() is not None or all(
+            backend_of(x, default=numpy_backend).nplike.is_eager for x in arguments
+        ):
             # if primary is not None: we won't be setting an ErrorContext
             # if all nplikes are eager: no accumulation of large arrays
             # --> in either case, delay string generation
@@ -184,7 +188,12 @@ class SlicingErrorContext(ErrorContext):
     _width = 80 - 4
 
     def __init__(self, array, where):
-        if self.primary() is not None or nplike_of(array, where).is_eager:
+        from awkward._backends import NumpyBackend, backend_of
+
+        numpy_backend = NumpyBackend.instance()
+        if self.primary() is not None or all(
+            backend_of(x, default=numpy_backend).nplike.is_eager for x in (array, where)
+        ):
             # if primary is not None: we won't be setting an ErrorContext
             # if all nplikes are eager: no accumulation of large arrays
             # --> in either case, delay string generation

@@ -9,7 +9,7 @@ import awkward as ak
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
-from awkward.typing import Protocol, TypeAlias
+from awkward._typing import Protocol, TypeAlias
 
 KernelKeyType: TypeAlias = tuple  # Tuple[str, Unpack[Tuple[metadata.dtype, ...]]]
 
@@ -68,9 +68,11 @@ class NumpyKernel(BaseKernel):
     def _cast(cls, x, t):
         if issubclass(t, ctypes._Pointer):
             # Do we have a NumPy-owned array?
-            # TODO should kernels strip nplike wrapper? Probably
             if Numpy.is_own_array(x):
-                return ctypes.cast(x.ctypes.data, t)
+                if x.ndim > 0:
+                    return ctypes.cast(x.ctypes.data, t)
+                else:
+                    return x
             # Or, do we have a ctypes type
             elif hasattr(x, "_b_base_"):
                 return ctypes.cast(x, t)

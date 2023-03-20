@@ -2,10 +2,11 @@
 from __future__ import annotations
 
 import awkward as ak
+from awkward._behavior import find_typestr
 from awkward._errors import deprecate
+from awkward._typing import final
 from awkward._util import unset
 from awkward.forms.form import Form, JSONMapping
-from awkward.typing import final
 
 
 @final
@@ -48,7 +49,7 @@ class EmptyForm(Form):
     def _type(self, typestrs):
         return ak.types.UnknownType(
             parameters=self._parameters,
-            typestr=ak._util.gettypestr(self._parameters, typestrs),
+            typestr=find_typestr(self._parameters, typestrs),
         )
 
     def __eq__(self, other) -> bool:
