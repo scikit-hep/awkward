@@ -10,7 +10,7 @@ from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyLike, NumpyMetadata
 from awkward._nplikes.typetracer import TypeTracer
-from awkward.typing import Self
+from awkward._typing import Self
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()

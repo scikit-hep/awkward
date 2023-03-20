@@ -8,7 +8,7 @@ from collections.abc import Collection
 import packaging.version
 
 from awkward._nplikes.numpylike import NumpyMetadata
-from awkward.typing import TypeVar
+from awkward._typing import TypeVar
 
 np = NumpyMetadata.instance()
 

@@ -10,9 +10,9 @@ from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._regularize import is_integer
+from awkward._typing import Self
 from awkward._util import unset
 from awkward.contents.content import Content
-from awkward.typing import Self
 
 np = NumpyMetadata.instance()
 

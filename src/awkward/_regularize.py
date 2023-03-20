@@ -6,7 +6,7 @@ import os
 from collections.abc import Iterable, Sequence, Sized
 
 from awkward._nplikes.numpylike import NumpyMetadata
-from awkward.typing import AxisMaybeNone, SupportsInt
+from awkward._typing import AxisMaybeNone, SupportsInt
 
 np = NumpyMetadata.instance()
 

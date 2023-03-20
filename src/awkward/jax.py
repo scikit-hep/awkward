@@ -8,7 +8,7 @@ import awkward as ak
 from awkward import highlevel
 from awkward._errors import wrap_error
 from awkward._nplikes.numpy import Numpy
-from awkward.typing import TypeVar
+from awkward._typing import TypeVar
 
 numpy = Numpy.instance()
 

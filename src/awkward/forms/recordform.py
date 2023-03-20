@@ -5,9 +5,9 @@ from collections.abc import Iterable
 import awkward as ak
 from awkward._behavior import find_typestr
 from awkward._regularize import is_integer
+from awkward._typing import final
 from awkward._util import unset
 from awkward.forms.form import Form, _type_parameters_equal
-from awkward.typing import final
 
 
 @final

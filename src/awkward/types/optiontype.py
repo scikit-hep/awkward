@@ -1,12 +1,12 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._typing import final
 from awkward.forms.form import _type_parameters_equal
 from awkward.types.listtype import ListType
 from awkward.types.regulartype import RegularType
 from awkward.types.type import Type
 from awkward.types.uniontype import UnionType
-from awkward.typing import final
 
 
 @final
