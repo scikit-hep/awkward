@@ -181,6 +181,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         check_valid=False,
         backend=None,
     ):
+        self._cpptype = None
         if isinstance(data, ak.contents.Content):
             layout = data
 
@@ -1459,6 +1460,45 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                     "use ak.any() or ak.all()"
                 )
             )
+
+    @property
+    def cpptype(self):
+        """
+        The C++ type of this Array when it is used in cppyy.
+
+            cpptype (None or str): Generated on demand when the Array needs to be passed
+                to a C++ (possibly templated) function defined by a `cppyy` compiler.
+
+        See [cppyy documentation](https://cppyy.readthedocs.io/en/latest/index.html)
+        on types and signatures.
+        """
+        ak.cppyy.register_and_check()
+
+        if self._cpptype is None:
+            # FIXME: see where and if to keep the lookup
+            self._generator = ak._connect.cling.togenerator(
+                self.layout.form, flatlist_as_rvec=False
+            )
+            self._lookup = ak._lookup.Lookup(self.layout)
+            self._cpptype = f"awkward::{self._generator.class_type()}"
+
+        return self._cpptype
+
+    def __cast_cpp__(self):
+        """
+        The `__cast_cpp__` is called by cppyy to determine a C++ type of an `ak.Array`.
+        It returns the C++ dataset type that is already registered with cppyy with the
+        parameters needed to construct the C++ type of this Array when it is
+        used in cppyy.
+        """
+        if self._cpptype is None:
+            self._cpptype = self.cpptype
+
+        import cppyy
+
+        return getattr(cppyy.gbl, self._cpptype)(
+            0, len(self), 0, self._lookup.arrayptrs, 0
+        )
 
 
 class Record(NDArrayOperatorsMixin):
