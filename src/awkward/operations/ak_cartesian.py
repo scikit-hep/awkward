@@ -408,13 +408,6 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
 
         def apply_build_record(inputs, depth, **kwargs):
             if depth == posaxis + len(array_layouts):
-                if all(len(x) == 0 for x in inputs):
-                    inputs = [
-                        x.content
-                        if isinstance(x, ak.contents.RegularArray) and x.size == 1
-                        else x
-                        for x in inputs
-                    ]
                 return (ak.contents.RecordArray(inputs, fields, parameters=parameters),)
 
             else:
