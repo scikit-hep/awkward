@@ -292,7 +292,13 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
             for x in new_arrays:
                 layouts.append(x)
 
-        layouts = list(layouts)
+        if len(nested) >= len(layouts):
+            raise ak._errors.wrap_error(
+                ValueError(
+                    "the `nested` parameter of cartesian must contain "
+                    "fewer items than there are arrays"
+                )
+            )
 
         indexes = [
             ak.index.Index64(backend.index_nplike.reshape(x, (-1,)))
