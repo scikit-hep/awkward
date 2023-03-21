@@ -18,7 +18,10 @@ pip install cppyy
 
 or
 
-conda install -c conda-forge cppyy"""
+conda install -c conda-forge cppyy
+
+Note that this must be in a different venv or conda environment from ROOT, if you have installed ROOT.
+"""
         ) from err
 
     if not _has_checked_version:
