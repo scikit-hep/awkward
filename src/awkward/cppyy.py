@@ -5,7 +5,7 @@ import awkward as ak
 _has_checked_version = False
 
 
-def register_and_check(array=None, cpp_type=None):
+def register_and_check():
     global _has_checked_version
 
     try:
