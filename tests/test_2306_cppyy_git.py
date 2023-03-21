@@ -2,6 +2,7 @@
 
 
 import pytest
+import setuptools
 
 import awkward as ak
 import awkward._connect.cling
@@ -44,6 +45,11 @@ def test_array_as_generated_dataset():
     assert out == ak.sum(array["y"])
 
 
+@pytest.mark.skipif(
+    setuptools.extern.packaging.version.parse(cppyy.__version__)
+    < setuptools.extern.packaging.version.parse("3.0.1"),
+    reason="Awkward Array can only work with cppyy 3.0.1 or later.",
+)
 def test_array_as_type():
     array = ak.Array(
         [
@@ -75,6 +81,11 @@ def test_array_as_type():
     assert out == ak.sum(array["y"])
 
 
+@pytest.mark.skipif(
+    setuptools.extern.packaging.version.parse(cppyy.__version__)
+    < setuptools.extern.packaging.version.parse("3.0.1"),
+    reason="Awkward Array can only work with cppyy 3.0.1 or later.",
+)
 def test_array_as_templated_type():
     array = ak.Array(
         [
