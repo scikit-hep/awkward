@@ -181,7 +181,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         check_valid=False,
         backend=None,
     ):
-        self._cpptype = None
+        self._cpp_type = None
         if isinstance(data, ak.contents.Content):
             layout = data
 
@@ -1462,11 +1462,11 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             )
 
     @property
-    def cpptype(self):
+    def cpp_type(self):
         """
         The C++ type of this Array when it is used in cppyy.
 
-            cpptype (None or str): Generated on demand when the Array needs to be passed
+            cpp_type (None or str): Generated on demand when the Array needs to be passed
                 to a C++ (possibly templated) function defined by a `cppyy` compiler.
 
         See [cppyy documentation](https://cppyy.readthedocs.io/en/latest/index.html)
@@ -1474,15 +1474,15 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         """
         ak.cppyy.register_and_check()
 
-        if self._cpptype is None:
+        if self._cpp_type is None:
             # FIXME: see where and if to keep the lookup
             self._generator = ak._connect.cling.togenerator(
                 self.layout.form, flatlist_as_rvec=False
             )
             self._lookup = ak._lookup.Lookup(self.layout)
-            self._cpptype = f"awkward::{self._generator.class_type()}"
+            self._cpp_type = f"awkward::{self._generator.class_type()}"
 
-        return self._cpptype
+        return self._cpp_type
 
     def __cast_cpp__(self):
         """
@@ -1491,12 +1491,12 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         parameters needed to construct the C++ type of this Array when it is
         used in cppyy.
         """
-        if self._cpptype is None:
-            self._cpptype = self.cpptype
+        if self._cpp_type is None:
+            self._cpp_type = self.cpp_type
 
         import cppyy
 
-        return getattr(cppyy.gbl, self._cpptype)(
+        return getattr(cppyy.gbl, self._cpp_type)(
             0, len(self), 0, self._lookup.arrayptrs, 0
         )
 

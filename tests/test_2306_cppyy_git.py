@@ -60,7 +60,7 @@ def test_array_as_type():
     )
 
     source_code_cpp = f"""
-    double go_fast_cpp({array.cpptype} awkward_array) {{
+    double go_fast_cpp({array.cpp_type} awkward_array) {{
         double out = 0.0;
 
         for (auto list : awkward_array) {{
@@ -114,5 +114,5 @@ def test_array_as_templated_type():
 
     cppyy.cppdef(source_code_cpp)
 
-    out = cppyy.gbl.go_fast_cpp_2[array.cpptype](array)
+    out = cppyy.gbl.go_fast_cpp_2[array.cpp_type](array)
     assert out == ak.sum(array["y"])
