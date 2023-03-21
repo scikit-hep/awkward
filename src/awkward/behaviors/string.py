@@ -244,6 +244,8 @@ def _string_numba_lower(
 
     out = pyapi.to_native_value(rettype, pystr).value
 
+    pyapi.decref(pystr)
+
     pyapi.gil_release(gil)
 
     return out
