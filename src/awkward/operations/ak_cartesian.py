@@ -315,28 +315,43 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
         result = ak.contents.RecordArray(outs, fields, parameters=parameters)
         for i in range(len(array_layouts))[::-1]:
             if i in nested:
-                result = ak.contents.RegularArray(result, len(layouts[i + 1]), 0)
+                result = ak.contents.RegularArray(result, layouts[i + 1].length, 0)
 
     else:
 
-        def newaxis(layout, i):
-            if i == 0:
+        def add_outer_dimensions(
+            layout: ak.contents.Content, n: int
+        ) -> ak.contents.Content:
+            if n == 0:
                 return layout
             else:
-                return ak.contents.RegularArray(newaxis(layout, i - 1), 1, 0)
+                return ak.contents.RegularArray(
+                    add_outer_dimensions(layout, n - 1), 1, 0
+                )
 
-        def getfunction1(layout, depth, lateral_context, **kwargs):
-            i = lateral_context["i"]
+        def apply_pad_inner_list(layout, depth, lateral_context, **kwargs):
+            """
+            Add new dimensions (given by lateral_context["n"]) above innermost list
+            """
+            n = lateral_context["n"]
+            # We want to be above at least one dimension (list)
             if depth == 2:
-                return newaxis(layout, i)
+                return add_outer_dimensions(layout, n)
             else:
                 return None
 
-        def getfunction2(layout, depth, lateral_context, **kwargs):
+        def apply_pad_inner_list_at_axis(layout, depth, lateral_context, **kwargs):
+            """
+            Each array in arrays contributes to one of these new dimensions.
+            To make the cartesian product of the given arrays broadcastable,
+            each array is padded by (n, m) new length-1 regular dimensions
+            (above, below) the target depth. The values of (n, m) are given by
+            the position of the array; the first array is the outermost axis.
+            """
             i = lateral_context["i"]
             if depth == posaxis:
-                inside = len(array_layouts) - i - 1
-                outside = i
+                n_inside = len(array_layouts) - i - 1
+                n_outside = i
                 if (
                     layout.parameter("__array__") == "string"
                     or layout.parameter("__array__") == "bytestring"
@@ -348,40 +363,50 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
                         )
                     )
                 nextlayout = ak._do.recursively_apply(
-                    layout, getfunction1, behavior, lateral_context={"i": inside}
+                    layout,
+                    apply_pad_inner_list,
+                    behavior,
+                    lateral_context={"n": n_inside},
                 )
-                return newaxis(nextlayout, outside)
+                return add_outer_dimensions(nextlayout, n_outside)
             else:
                 return None
 
-        axes_to_flatten = []
+        # New _interior_ axes are added to the result layout, but
+        # unless explicitly named, these axes should be flattened.
+        axes_to_flatten = [
+            posaxis + i + 1
+            for i, _ in enumerate(array_layouts)
+            if i < len(array_layouts) - 1 and i not in nested
+        ]
+        # This list *must* be sorted in reverse order
+        axes_to_flatten.reverse()
 
         if isinstance(array_layouts, dict):
-            fields = []
-            new_layouts = []
-            for i, (name, layout) in enumerate(array_layouts.items()):
-                fields.append(name)
-                new_layouts.append(
-                    ak._do.recursively_apply(
-                        layout, getfunction2, behavior, lateral_context={"i": i}
-                    )
+            fields = list(array_layouts.keys())
+            new_layouts = [
+                ak._do.recursively_apply(
+                    layout,
+                    apply_pad_inner_list_at_axis,
+                    behavior,
+                    lateral_context={"i": i},
                 )
-                if i < len(array_layouts) - 1 and name not in nested:
-                    axes_to_flatten.append(posaxis + i + 1)
+                for i, (_, layout) in enumerate(array_layouts.items())
+            ]
 
         else:
             fields = None
-            new_layouts = []
-            for i, layout in enumerate(array_layouts):
-                new_layouts.append(
-                    ak._do.recursively_apply(
-                        layout, getfunction2, behavior, lateral_context={"i": i}
-                    )
+            new_layouts = [
+                ak._do.recursively_apply(
+                    layout,
+                    apply_pad_inner_list_at_axis,
+                    behavior,
+                    lateral_context={"i": i},
                 )
-                if i < len(array_layouts) - 1 and i not in nested:
-                    axes_to_flatten.append(posaxis + i + 1)
+                for i, layout in enumerate(array_layouts)
+            ]
 
-        def getfunction3(inputs, depth, **kwargs):
+        def apply_build_record(inputs, depth, **kwargs):
             if depth == posaxis + len(array_layouts):
                 if all(len(x) == 0 for x in inputs):
                     inputs = [
@@ -396,15 +421,15 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
                 return None
 
         out = ak._broadcasting.broadcast_and_apply(
-            new_layouts, getfunction3, behavior, right_broadcast=False
+            new_layouts, apply_build_record, behavior, right_broadcast=False
         )
         assert isinstance(out, tuple) and len(out) == 1
         result = out[0]
 
-        while len(axes_to_flatten) != 0:
-            flatten_axis = axes_to_flatten.pop()
+        # Remove surplus dimensions, iterating from smallest to greatest
+        for axis in axes_to_flatten:
             result = ak.operations.flatten(
-                result, axis=flatten_axis, highlevel=False, behavior=behavior
+                result, axis=axis, highlevel=False, behavior=behavior
             )
 
     return wrap_layout(result, behavior, highlevel)
