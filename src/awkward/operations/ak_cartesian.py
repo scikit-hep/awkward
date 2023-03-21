@@ -283,7 +283,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
             ):
                 raise ak._errors.wrap_error(
                     ValueError(
-                        "the 'nested' prarmeter of cartesian must be integers in "
+                        "the 'nested' parameter of cartesian must be integers in "
                         "[0, len(arrays) - 1) for an iterable of arrays"
                     )
                 )
