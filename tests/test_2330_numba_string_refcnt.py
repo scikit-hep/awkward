@@ -3,7 +3,6 @@
 import gc
 import os
 
-import numpy as np
 import pytest
 
 import awkward as ak
@@ -21,7 +20,7 @@ def test_lots_of_strings():
     def f(arr):
         result = 0
         for i in range(len(arr)):
-            result += (arr[i] == "mov")
+            result += arr[i] == "mov"
         return result
 
     arr = ak.Array(["aaa" * 1024**2])
@@ -29,7 +28,7 @@ def test_lots_of_strings():
 
     start_memory = process.memory_info().rss
 
-    for i in range(10):
+    for _i in range(10):
         f(arr)
         gc.collect()
 
