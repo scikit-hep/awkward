@@ -160,7 +160,7 @@ def all_same_offsets(backend: ak._backends.Backend, inputs: list) -> bool:
                 my_offsets = index_nplike.empty(0, dtype=np.int64)
             else:
                 my_offsets = index_nplike.arange(
-                    0, x.content.length, x.size, dtype=np.int64
+                    0, x.content.length + 1, x.size, dtype=np.int64
                 )
 
             if offsets is None:
@@ -841,7 +841,8 @@ def apply_step(
                         else:
                             lencontent = backend.index_nplike.max(stops)
                             nextinputs.append(x.content[:lencontent])
-
+                    elif isinstance(x, RegularArray):
+                        nextinputs.append(x.content[: x.size * x.length])
                     else:
                         nextinputs.append(x)
 
