@@ -182,7 +182,6 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         backend=None,
     ):
         self._cpptype = None
-        self._cpppars = None
         if isinstance(data, ak.contents.Content):
             layout = data
 
@@ -1470,8 +1469,6 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             cpptype (None or str): Generated on demand when the Array needs to be passed
                 to a C++ (possibly templated) function defined by a `cppyy` compiler.
 
-        See also #ak.Array.cpppars.
-
         See [cppyy documentation](https://cppyy.readthedocs.io/en/latest/index.html)
         on types and signatures.
         """
@@ -1489,22 +1486,19 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
     def __cast_cpp__(self):
         """
-        FIXME: This should be called by cppyy and not exposed to a user.
-
-        Currently it returns the C++ dataset parameters needed to construct the C++ type of
-        this Array when it is used in cppyy.
-
-            _cpppars (None or tuple): Generated on demand when the Array needs to be passed
-                to a C++ function defined by cppyy. The C++ type is defined
-                in #ak.Array.cpptype.
+        The `__cast_cpp__` is called by cppyy to determine a C++ type of an `ak.Array`.
+        It returns the C++ dataset type that is already registered with cppyy with the
+        parameters needed to construct the C++ type of this Array when it is
+        used in cppyy.
         """
         if self._cpptype is None:
             self._cpptype = self.cpptype
 
-        if self._cpppars is None:
-            self._cpppars = (0, len(self), 0, self._lookup.arrayptrs, 0)
+        import cppyy
 
-        return self._cpppars
+        return getattr(cppyy.gbl, self._cpptype)(
+            0, len(self), 0, self._lookup.arrayptrs, 0
+        )
 
 
 class Record(NDArrayOperatorsMixin):
