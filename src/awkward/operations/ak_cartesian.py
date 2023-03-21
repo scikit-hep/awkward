@@ -209,23 +209,23 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
     if isinstance(arrays, dict):
         backend = ak._backends.backend_of(*arrays.values(), default=cpu)
         behavior = behavior_of(*arrays.values(), behavior=behavior)
-        new_arrays = {}
-        for n, x in arrays.items():
-            new_arrays[n] = ak.operations.to_layout(
-                x, allow_record=False, allow_other=False
+        array_layouts = {
+            name: ak.operations.to_layout(
+                layout, allow_record=False, allow_other=False
             ).to_backend(backend)
+            for name, layout in arrays.items()
+        }
 
     else:
         arrays = list(arrays)
         backend = ak._backends.backend_of(*arrays, default=cpu)
         behavior = behavior_of(*arrays, behavior=behavior)
-        new_arrays = []
-        for x in arrays:
-            new_arrays.append(
-                ak.operations.to_layout(
-                    x, allow_record=False, allow_other=False
-                ).to_backend(backend)
-            )
+        array_layouts = [
+            ak.operations.to_layout(
+                layout, allow_record=False, allow_other=False
+            ).to_backend(backend)
+            for layout in arrays
+        ]
 
     if with_name is not None:
         if parameters is None:
@@ -234,18 +234,18 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
             parameters = dict(parameters)
         parameters["__record__"] = with_name
 
-    if isinstance(new_arrays, dict):
-        new_arrays_values = list(new_arrays.values())
+    if isinstance(array_layouts, dict):
+        layouts = list(array_layouts.values())
     else:
-        new_arrays_values = new_arrays
+        layouts = array_layouts
 
-    posaxis = maybe_posaxis(new_arrays_values[0], axis, 1)
+    posaxis = maybe_posaxis(layouts[0], axis, 1)
 
     # Validate `posaxis`
     if posaxis is None or posaxis < 0:
         raise ak._errors.wrap_error(ValueError("negative axis depth is ambiguous"))
-    for x in new_arrays_values[1:]:
-        if maybe_posaxis(x, axis, 1) != posaxis:
+    for layout in layouts[1:]:
+        if maybe_posaxis(layout, axis, 1) != posaxis:
             raise ak._errors.wrap_error(
                 ValueError(
                     "arrays to cartesian-product do not have the same depth for negative axis"
@@ -256,20 +256,20 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
     if nested is None or nested is False:
         nested = []
     elif nested is True:
-        if isinstance(new_arrays, dict):
-            nested = list(new_arrays.keys())[:-1]
+        if isinstance(array_layouts, dict):
+            nested = list(array_layouts.keys())[:-1]
         else:
-            nested = list(range(len(new_arrays))[:-1])
+            nested = list(range(len(array_layouts))[:-1])
     else:
-        if isinstance(new_arrays, dict):
-            if any(not (isinstance(x, str) and x in new_arrays) for x in nested):
+        if isinstance(array_layouts, dict):
+            if any(not (isinstance(x, str) and x in array_layouts) for x in nested):
                 raise ak._errors.wrap_error(
                     ValueError(
                         "the 'nested' parameter of cartesian must be dict keys "
                         "for a dict of arrays"
                     )
                 )
-            if len(nested) >= len(new_arrays):
+            if len(nested) >= len(array_layouts):
                 raise ak._errors.wrap_error(
                     ValueError(
                         "the `nested` parameter of cartesian must contain "
@@ -278,7 +278,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
                 )
         else:
             if any(
-                not (isinstance(x, int) and 0 <= x < len(new_arrays) - 1)
+                not (isinstance(x, int) and 0 <= x < len(array_layouts) - 1)
                 for x in nested
             ):
                 raise ak._errors.wrap_error(
@@ -289,22 +289,17 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
                 )
 
     if posaxis == 0:
-        if isinstance(new_arrays, dict):
+        if isinstance(array_layouts, dict):
             fields = []
-            layouts = []
             tonested = []
-            for i, (n, x) in enumerate(new_arrays.items()):
-                fields.append(n)
-                layouts.append(x)
-                if n in nested:
+            for i, (name, _) in enumerate(array_layouts.items()):
+                fields.append(name)
+                if name in nested:
                     tonested.append(i)
             nested = tonested
 
         else:
             fields = None
-            layouts = []
-            for x in new_arrays:
-                layouts.append(x)
 
         indexes = [
             ak.index.Index64(backend.index_nplike.reshape(x, (-1,)))
@@ -318,7 +313,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
         ]
 
         result = ak.contents.RecordArray(outs, fields, parameters=parameters)
-        for i in range(len(new_arrays) - 1, -1, -1):
+        for i in range(len(array_layouts))[::-1]:
             if i in nested:
                 result = ak.contents.RegularArray(result, len(layouts[i + 1]), 0)
 
@@ -340,7 +335,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
         def getfunction2(layout, depth, lateral_context, **kwargs):
             i = lateral_context["i"]
             if depth == posaxis:
-                inside = len(new_arrays) - i - 1
+                inside = len(array_layouts) - i - 1
                 outside = i
                 if (
                     layout.parameter("__array__") == "string"
@@ -359,37 +354,35 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
             else:
                 return None
 
-        toflatten = []
-        if nested is None or nested is False:
-            nested = []
+        axes_to_flatten = []
 
-        if isinstance(new_arrays, dict):
+        if isinstance(array_layouts, dict):
             fields = []
-            layouts = []
-            for i, (n, x) in enumerate(new_arrays.items()):
-                fields.append(n)
-                layouts.append(
+            new_layouts = []
+            for i, (name, layout) in enumerate(array_layouts.items()):
+                fields.append(name)
+                new_layouts.append(
                     ak._do.recursively_apply(
-                        x, getfunction2, behavior, lateral_context={"i": i}
+                        layout, getfunction2, behavior, lateral_context={"i": i}
                     )
                 )
-                if i < len(new_arrays) - 1 and n not in nested:
-                    toflatten.append(posaxis + i + 1)
+                if i < len(array_layouts) - 1 and name not in nested:
+                    axes_to_flatten.append(posaxis + i + 1)
 
         else:
             fields = None
-            layouts = []
-            for i, x in enumerate(new_arrays):
-                layouts.append(
+            new_layouts = []
+            for i, layout in enumerate(array_layouts):
+                new_layouts.append(
                     ak._do.recursively_apply(
-                        x, getfunction2, behavior, lateral_context={"i": i}
+                        layout, getfunction2, behavior, lateral_context={"i": i}
                     )
                 )
-                if i < len(new_arrays) - 1 and i not in nested:
-                    toflatten.append(posaxis + i + 1)
+                if i < len(array_layouts) - 1 and i not in nested:
+                    axes_to_flatten.append(posaxis + i + 1)
 
         def getfunction3(inputs, depth, **kwargs):
-            if depth == posaxis + len(new_arrays):
+            if depth == posaxis + len(array_layouts):
                 if all(len(x) == 0 for x in inputs):
                     inputs = [
                         x.content
@@ -403,13 +396,13 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
                 return None
 
         out = ak._broadcasting.broadcast_and_apply(
-            layouts, getfunction3, behavior, right_broadcast=False
+            new_layouts, getfunction3, behavior, right_broadcast=False
         )
         assert isinstance(out, tuple) and len(out) == 1
         result = out[0]
 
-        while len(toflatten) != 0:
-            flatten_axis = toflatten.pop()
+        while len(axes_to_flatten) != 0:
+            flatten_axis = axes_to_flatten.pop()
             result = ak.operations.flatten(
                 result, axis=flatten_axis, highlevel=False, behavior=behavior
             )
