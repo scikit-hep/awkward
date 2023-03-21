@@ -841,9 +841,14 @@ def apply_step(
                         else:
                             lencontent = backend.index_nplike.max(stops)
                             nextinputs.append(x.content[:lencontent])
-
+                    elif isinstance(x, RegularArray):
+                        nextinputs.append(x.content[: x.size * x.length])
                     else:
-                        nextinputs.append(x)
+                        raise ak._errors.wrap_error(
+                            AssertionError(
+                                "encountered non list-type despite all_same_offsets requiring lists"
+                            )
+                        )
 
                 outcontent = apply_step(
                     backend,
