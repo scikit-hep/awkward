@@ -420,9 +420,9 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
         result = out[0]
 
         # Remove surplus dimensions, iterating from smallest to greatest
-        for axis in axes_to_flatten:
+        for axis_to_flatten in axes_to_flatten:
             result = ak.operations.flatten(
-                result, axis=axis, highlevel=False, behavior=behavior
+                result, axis=axis_to_flatten, highlevel=False, behavior=behavior
             )
 
     return wrap_layout(result, behavior, highlevel)
