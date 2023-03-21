@@ -17,7 +17,6 @@ from awkward._typing import (
     Literal,
     Self,
     SupportsIndex,
-    TypeVar,
 )
 
 np = NumpyMetadata.instance()
@@ -37,15 +36,6 @@ def is_unknown_integer(array: Any) -> bool:
 
 def is_unknown_array(array: Any) -> bool:
     return isinstance(array, TypeTracerArray) and array.ndim > 0
-
-
-T = TypeVar("T")
-S = TypeVar("S")
-
-
-def ensure_known_scalar(value: T, default: S) -> T | S:
-    assert not is_unknown_scalar(default)
-    return default if is_unknown_scalar(value) else value
 
 
 def _emptyarray(x):
