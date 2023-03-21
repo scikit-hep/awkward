@@ -71,7 +71,7 @@ def test_array_as_type():
 
     cppyy.cppdef(source_code_cpp)
 
-    out = cppyy.gbl.go_fast_cpp(array.__castcpp__())
+    out = cppyy.gbl.go_fast_cpp(array.__cast_cpp__())
     assert out == ak.sum(array["y"])
 
 
@@ -104,5 +104,5 @@ def test_array_as_templated_type():
 
     cppyy.cppdef(source_code_cpp)
 
-    out = cppyy.gbl.go_fast_cpp_2[array.cpptype](array.__castcpp__())
+    out = cppyy.gbl.go_fast_cpp_2[array.cpptype](array.__cast_cpp__())
     assert out == ak.sum(array["y"])

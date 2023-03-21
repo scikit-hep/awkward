@@ -1487,13 +1487,14 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         return self._cpptype
 
-    @property
-    def cpppars(self):
+    def __cast_cpp__(self):
         """
-        The C++ dataset parameters needed to construct the C++ type of
+        FIXME: This should be called by cppyy and not exposed to a user.
+
+        Currently it returns the C++ dataset parameters needed to construct the C++ type of
         this Array when it is used in cppyy.
 
-            cpppars (None or tuple): Generated on demand when the Array needs to be passed
+            _cpppars (None or tuple): Generated on demand when the Array needs to be passed
                 to a C++ function defined by cppyy. The C++ type is defined
                 in #ak.Array.cpptype.
         """
@@ -1504,12 +1505,6 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             self._cpppars = (0, len(self), 0, self._lookup.arrayptrs, 0)
 
         return self._cpppars
-
-    def __castcpp__(self):
-        """
-        FIXME: This should be called by cppyy and not exposed to a user.
-        """
-        return self.cpppars
 
 
 class Record(NDArrayOperatorsMixin):
