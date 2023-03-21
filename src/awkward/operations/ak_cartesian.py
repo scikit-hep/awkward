@@ -177,10 +177,7 @@ def cartesian(
          [(4, 3.3, 'a'), (4, 3.3, 'b')]]
 
     The order of the output is fixed: it is always lexicographical in the
-    order that the `arrays` are written. (Before Python 3.6, the order of
-    keys in a dict were not guaranteed, so the dict interface is not
-    recommended for these versions of Python.) Thus, it is not possible to
-    group by `three` in the example above.
+    order that the `arrays` are written.
 
     To emulate an SQL or Pandas "group by" operation, put the keys that you
     wish to group by *first* and use `nested=[0]` or `nested=[n]` to group by
