@@ -257,7 +257,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
         if isinstance(new_arrays, dict):
             if nested is True:
                 nested = list(new_arrays.keys())  # last key is ignored below
-            if any(not (isinstance(n, str) and n in new_arrays) for x in nested):
+            if any(not (isinstance(x, str) and x in new_arrays) for x in nested):
                 raise ak._errors.wrap_error(
                     ValueError(
                         "the 'nested' parameter of cartesian must be dict keys "
