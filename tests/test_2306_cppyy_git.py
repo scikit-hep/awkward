@@ -84,10 +84,9 @@ def test_array_as_templated_type():
         ]
     )
 
-    # Note, 'awkward_array' of a type T has to be passed in by-value
     source_code_cpp = """
     template<typename T>
-    double go_fast_cpp_2(T awkward_array) {
+    double go_fast_cpp_2(T& awkward_array) {
         double out = 0.0;
 
         for (auto list : awkward_array) {
