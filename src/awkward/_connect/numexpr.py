@@ -34,6 +34,7 @@ or
                     "Awkward Array is only known to work with numexpr 2.7.1 or later"
                     "(you have version {})".format(numexpr.__version__),
                     RuntimeWarning,
+                    stacklevel=1,
                 )
             _has_checked_version = True
         return numexpr
