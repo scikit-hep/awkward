@@ -1474,12 +1474,14 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         """
         ak.cppyy.register_and_check()
 
+        import cppyy
+
         if self._cpp_type is None:
-            # FIXME: see where and if to keep the lookup
             self._generator = ak._connect.cling.togenerator(
                 self.layout.form, flatlist_as_rvec=False
             )
             self._lookup = ak._lookup.Lookup(self.layout)
+            self._generator.generate(cppyy.cppdef)
             self._cpp_type = f"awkward::{self._generator.class_type()}"
 
         return self._cpp_type
@@ -1491,10 +1493,10 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         parameters needed to construct the C++ type of this Array when it is
         used in cppyy.
         """
+        import cppyy
+
         if self._cpp_type is None:
             self._cpp_type = self.cpp_type
-
-        import cppyy
 
         return getattr(cppyy.gbl, self._cpp_type)(
             0, len(self), 0, self._lookup.arrayptrs, 0
