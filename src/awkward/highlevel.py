@@ -1644,6 +1644,8 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         import awkward._connect.cling  # noqa: F401
 
+        import cppyy
+
         if self._cpp_type is None:
             self._generator = ak._connect.cling.togenerator(
                 self._layout.form, flatlist_as_rvec=False
