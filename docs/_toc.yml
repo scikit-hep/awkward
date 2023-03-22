@@ -153,6 +153,13 @@ subtrees:
                       - file: user-guide/how-to-use-in-numba-cuda
                         title: "Working with CUDA"
 
+              - file: user-guide/how-to-use-in-cpp
+                title: "Using arrays in C++"
+                subtrees:
+                  - entries:
+                      - file: user-guide/how-to-use-in-cpp-cppyy
+                        title: "JIT compiling operations in cppyy"
+
               - file: user-guide/how-to-specialize
                 title: "Specialized behavior"
                 subtrees:
