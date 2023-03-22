@@ -163,7 +163,7 @@ if not run_cuda_notebooks:
         # We have no CUDA executors, so disable this
         "user-guide/how-to-use-in-numba-cuda.ipynb",
         # We have no cppyy 3.0.1 yet, so disable this
-        "user-guide/how-to-convert-cppyy.ipynb"
+        "user-guide/how-to-convert-cppyy.ipynb",
     ]
 
 # Additional stuff
