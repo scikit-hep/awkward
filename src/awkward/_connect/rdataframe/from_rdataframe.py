@@ -126,6 +126,7 @@ def from_rdataframe(
     column_types = {}
     result_ptrs = {}
     contents = {}
+    index = {}
     awkward_type_cols = {}
 
     columns = (*columns, "rdfentry_")
@@ -228,26 +229,34 @@ def from_rdataframe(
 
             length = cpp_buffers_self.to_char_buffers[builder_type](builder)
 
-            contents[col] = ak.from_buffers(
-                form,
-                length,
-                buffers,
-                byteorder=ak._util.native_byteorder,
-                highlevel=highlevel,
-                behavior=behavior,
-            )
-
             if col == "rdfentry_":
-                contents[col] = ak.index.Index64(
-                    contents[col].layout.to_backend_array(
+                index[col] = ak.from_buffers(
+                    form,
+                    length,
+                    buffers,
+                    byteorder=ak._util.native_byteorder,
+                    highlevel=highlevel,
+                    behavior=behavior,
+                )
+                index[col] = ak.index.Index64(
+                    index[col].layout.to_backend_array(
                         allow_missing=True, backend=ak._backends.NumpyBackend.instance()
                     )
                 )
+            else:
+                contents[col] = ak.from_buffers(
+                    form,
+                    length,
+                    buffers,
+                    byteorder=ak._util.native_byteorder,
+                    highlevel=highlevel,
+                    behavior=behavior,
+                )
 
     for key, value in awkward_type_cols.items():
-        if len(contents["rdfentry_"]) < len(value):
+        if len(index["rdfentry_"]) < len(value):
             contents[key] = wrap_layout(
-                ak.contents.IndexedArray(contents["rdfentry_"], value),
+                ak.contents.IndexedArray(index["rdfentry_"], value),
                 highlevel=highlevel,
                 behavior=behavior,
             )
@@ -263,14 +272,11 @@ def from_rdataframe(
     )
 
     if keep_order:
-        sorted = ak.index.Index64(contents["rdfentry_"].data.argsort())
+        sorted = ak.index.Index64(index["rdfentry_"].data.argsort())
         out = wrap_layout(
             ak.contents.IndexedArray(sorted, out.layout),
             highlevel=highlevel,
             behavior=behavior,
         )
-
-    if maybe_indexed:
-        del contents["rdfentry_"]
 
     return out
