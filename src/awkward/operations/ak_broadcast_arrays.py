@@ -216,10 +216,7 @@ def _impl(
         inputs.append(y.to_backend(backend))
 
     def action(inputs, depth, **kwargs):
-        if depth == depth_limit or (
-            depth_limit is None
-            and all(isinstance(x, ak.contents.NumpyArray) for x in inputs)
-        ):
+        if depth == depth_limit or all(x.is_numpy for x in inputs):
             return tuple(inputs)
         else:
             return None
