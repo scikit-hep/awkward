@@ -203,6 +203,14 @@ class DataSourceGenerator:
         else:
             cpp_code = None
 
+        # FIXME: packaging.version.InvalidVersion: Invalid version: '6.26/10'
+        init_method = (
+            "Initialise"
+            if ak._util.parse_version(ROOT.__version__[:4])
+            < ak._util.parse_version("6.28")
+            else "Initialize"
+        )
+
         if cpp_code is None:
             cpp_code = f"""
 namespace awkward {{
@@ -258,7 +266,7 @@ namespace awkward {{
             {cpp_code_resize_slots}
         }}
 
-        void Initialise() {{
+        void {init_method}() {{
             // initialize fEntryRanges
             const auto chunkSize = fSize / fNSlots;
             auto start = 0UL;
