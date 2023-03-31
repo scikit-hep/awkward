@@ -53,7 +53,6 @@ cppyy.add_include_path(
         )
     )
 )
-compiler = ROOT.gInterpreter.Declare
 
 
 cppyy.include("rdataframe/jagged_builders.h")
