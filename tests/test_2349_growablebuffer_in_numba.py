@@ -1,10 +1,14 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-
 import numpy as np
 import pytest
 
-from awkward._connect.numba.growablebuffer import GrowableBuffer, _from_data
+numba = pytest.importorskip("numba")
+
+from awkward._connect.numba.growablebuffer import (  # noqa: E402
+    GrowableBuffer,
+    _from_data,
+)
 
 
 def test_python_append():
@@ -114,9 +118,6 @@ def test_python_extend():
     assert len(growablebuffer._panels) == 51
 
 
-numba = pytest.importorskip("numba")
-
-
 def test_unbox():
     @numba.njit
     def f1(x):
@@ -198,5 +199,72 @@ def test_ctor():
     assert isinstance(out, GrowableBuffer)
     assert out.dtype == np.dtype("f4")
     assert len(out) == 0
+    assert len(out._panels) == 1
+    assert len(out._panels[0]) == 1024
+    assert out._pos == 0
+    assert out._resize == 10.0
+
+    @numba.njit
+    def f6():
+        return GrowableBuffer("f4", initial=10)
+
+    out = f6()
+    assert isinstance(out, GrowableBuffer)
+    assert out.dtype == np.dtype("f4")
+    assert len(out) == 0
+    assert len(out._panels) == 1
+    assert len(out._panels[0]) == 10
+    assert out._pos == 0
+    assert out._resize == 10.0
+
+    @numba.njit
+    def f7():
+        return GrowableBuffer("f4", resize=2.0)
+
+    out = f7()
+    assert isinstance(out, GrowableBuffer)
+    assert out.dtype == np.dtype("f4")
+    assert len(out) == 0
+    assert len(out._panels) == 1
+    assert len(out._panels[0]) == 1024
+    assert out._pos == 0
+    assert out._resize == 2.0
+
+    @numba.njit
+    def f8():
+        return GrowableBuffer("f4", resize=2.0, initial=10)
+
+    out = f8()
+    assert isinstance(out, GrowableBuffer)
+    assert out.dtype == np.dtype("f4")
+    assert len(out) == 0
+    assert len(out._panels) == 1
+    assert len(out._panels[0]) == 10
+    assert out._pos == 0
+    assert out._resize == 2.0
+
+    @numba.njit
+    def f9():
+        return GrowableBuffer(np.float32)
+
+    out = f9()
+    assert isinstance(out, GrowableBuffer)
+    assert out.dtype == np.dtype(np.float32)
+    assert len(out) == 0
+    assert len(out._panels) == 1
+    assert len(out._panels[0]) == 1024
+    assert out._pos == 0
+    assert out._resize == 10.0
+
+    @numba.njit
+    def f10():
+        return GrowableBuffer(np.dtype(np.float32))
+
+    out = f10()
+    assert isinstance(out, GrowableBuffer)
+    assert out.dtype == np.dtype(np.float32)
+    assert len(out) == 0
+    assert len(out._panels) == 1
+    assert len(out._panels[0]) == 1024
     assert out._pos == 0
     assert out._resize == 10.0

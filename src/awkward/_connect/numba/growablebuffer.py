@@ -277,7 +277,7 @@ def GrowableBuffer_from_data_impl(context, builder, sig, args):
 
 
 @numba.extending.overload(GrowableBuffer)
-def GrowableBuffer_ctor(dtype):
+def GrowableBuffer_ctor(dtype, initial=1024, resize=10.0):
     if isinstance(dtype, numba.types.StringLiteral):
         dt = numpy.dtype(dtype.literal_value)
 
@@ -287,10 +287,9 @@ def GrowableBuffer_ctor(dtype):
     else:
         return
 
-    def ctor_impl(dtype):
-        panels = numba.typed.List([numpy.empty((1024,), dt)])
+    def ctor_impl(dtype, initial=1024, resize=10.0):
+        panels = numba.typed.List([numpy.empty((initial,), dt)])
         length_pos = numpy.zeros((2,), dtype=numpy.int64)
-        resize = 10.0
         return _from_data(panels, length_pos, resize)
 
     return ctor_impl
