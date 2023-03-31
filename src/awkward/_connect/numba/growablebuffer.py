@@ -1,8 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import numba
-import numba.core.typing
-import numba.core.typing.ctypes_utils
+import numba.core.typing.npydecl
 import numpy
 
 
@@ -26,7 +25,7 @@ class GrowableBuffer:
         return self._panels[0].dtype
 
     def __repr__(self):
-        return f"<GrowableBuffer({self.dtype!r}) len {self._length}>"
+        return f"<GrowableBuffer of {self.dtype!r} with {self._length} items>"
 
     @property
     def _length(self):
@@ -233,3 +232,65 @@ def GrowableBufferType_box(typ, val, c):
     c.pyapi.decref(resize_obj)
 
     return out
+
+
+@numba.extending.overload(len)
+def GrowableBufferType_len(growablebuffer):
+    if isinstance(growablebuffer, GrowableBufferType):
+
+        def len_impl(growablebuffer):
+            return growablebuffer._length
+
+        return len_impl
+
+
+def _from_data():
+    ...
+
+
+@numba.extending.type_callable(_from_data)
+def GrowableBuffer_from_data_typer(context):
+    def typer(panels, length_pos, resize):
+        if (
+            isinstance(panels, numba.types.ListType)
+            and isinstance(panels.dtype, numba.types.Array)
+            and isinstance(length_pos, numba.types.Array)
+            and isinstance(resize, numba.types.Float)
+        ):
+            return GrowableBufferType(panels.dtype.dtype)
+
+    return typer
+
+
+@numba.extending.lower_builtin(
+    _from_data, numba.types.ListType, numba.types.Array, numba.types.Float
+)
+def GrowableBuffer_from_data_impl(context, builder, sig, args):
+    out = numba.core.cgutils.create_struct_proxy(sig.return_type)(context, builder)
+    out.panels, out.length_pos, out.resize = args
+
+    if context.enable_nrt:
+        context.nrt.incref(builder, sig.args[0], args[0])
+        context.nrt.incref(builder, sig.args[1], args[1])
+
+    return out._getvalue()
+
+
+@numba.extending.overload(GrowableBuffer)
+def GrowableBuffer_ctor(dtype):
+    if isinstance(dtype, numba.types.StringLiteral):
+        dt = numpy.dtype(dtype.literal_value)
+
+    elif isinstance(dtype, numba.types.DTypeSpec):
+        dt = numba.core.typing.npydecl.parse_dtype(dtype)
+
+    else:
+        return
+
+    def ctor_impl(dtype):
+        panels = numba.typed.List([numpy.empty((1024,), dt)])
+        length_pos = numpy.zeros((2,), dtype=numpy.int64)
+        resize = 10.0
+        return _from_data(panels, length_pos, resize)
+
+    return ctor_impl

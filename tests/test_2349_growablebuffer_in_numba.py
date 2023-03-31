@@ -4,7 +4,7 @@
 import numpy as np
 import pytest
 
-from awkward._connect.numba.growablebuffer import GrowableBuffer
+from awkward._connect.numba.growablebuffer import GrowableBuffer, _from_data
 
 
 def test_python_append():
@@ -158,3 +158,45 @@ def test_box():
     assert out1._length == growablebuffer._length
     assert out1._pos == growablebuffer._pos
     assert out1._resize == growablebuffer._resize
+
+
+def test_len():
+    @numba.njit
+    def f3(x):
+        return len(x)
+
+    growablebuffer = GrowableBuffer(np.int32)
+
+    assert f3(growablebuffer) == 0
+
+    growablebuffer.append(123)
+
+    assert f3(growablebuffer) == 1
+
+
+def test_from_data():
+    @numba.njit
+    def f4():
+        return _from_data(
+            numba.typed.List([np.array([3.12], np.float32)]), np.array([1, 0]), 1.23
+        )
+
+    out = f4()
+    assert isinstance(out, GrowableBuffer)
+    assert out.dtype == np.dtype(np.float32)
+    assert len(out) == 1
+    assert out._pos == 0
+    assert out._resize == 1.23
+
+
+def test_ctor():
+    @numba.njit
+    def f5():
+        return GrowableBuffer("f4")
+
+    out = f5()
+    assert isinstance(out, GrowableBuffer)
+    assert out.dtype == np.dtype("f4")
+    assert len(out) == 0
+    assert out._pos == 0
+    assert out._resize == 10.0
