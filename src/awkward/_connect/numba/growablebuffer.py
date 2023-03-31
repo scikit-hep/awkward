@@ -158,6 +158,7 @@ for member in ("panels", "length_pos", "resize"):
 def GrowableBufferType_dtype(growablebuffer):
     def getter(growablebuffer):
         return growablebuffer._panel[0].dtype
+
     return getter
 
 
@@ -165,6 +166,7 @@ def GrowableBufferType_dtype(growablebuffer):
 def GrowableBufferType_length(growablebuffer):
     def getter(growablebuffer):
         return growablebuffer._length_pos[0]
+
     return getter
 
 
@@ -172,6 +174,7 @@ def GrowableBufferType_length(growablebuffer):
 def GrowableBufferType_pos(growablebuffer):
     def getter(growablebuffer):
         return growablebuffer._length_pos[1]
+
     return getter
 
 
@@ -204,15 +207,29 @@ def GrowableBufferType_box(typ, val, c):
     GrowableBuffer_obj = c.pyapi.unserialize(c.pyapi.serialize_object(GrowableBuffer))
     from_data_obj = c.pyapi.object_getattr_string(GrowableBuffer_obj, "_from_data")
 
-    growablebuffer = numba.core.cgutils.create_struct_proxy(typ)(c.context, c.builder, value=val)
-    panels_obj = c.pyapi.from_native_value(typ.panels, growablebuffer.panels, c.env_manager)
-    length_pos_obj = c.pyapi.from_native_value(typ.length_pos, growablebuffer.length_pos, c.env_manager)
-    resize_obj = c.pyapi.from_native_value(typ.resize, growablebuffer.resize, c.env_manager)
+    growablebuffer = numba.core.cgutils.create_struct_proxy(typ)(
+        c.context, c.builder, value=val
+    )
+    panels_obj = c.pyapi.from_native_value(
+        typ.panels, growablebuffer.panels, c.env_manager
+    )
+    length_pos_obj = c.pyapi.from_native_value(
+        typ.length_pos, growablebuffer.length_pos, c.env_manager
+    )
+    resize_obj = c.pyapi.from_native_value(
+        typ.resize, growablebuffer.resize, c.env_manager
+    )
 
-    out = c.pyapi.call_function_objargs(from_data_obj, (panels_obj, length_pos_obj, resize_obj))
+    out = c.pyapi.call_function_objargs(
+        from_data_obj, (panels_obj, length_pos_obj, resize_obj)
+    )
 
     # decref PyObjects
     c.pyapi.decref(GrowableBuffer_obj)
     c.pyapi.decref(from_data_obj)
+
+    c.pyapi.decref(panels_obj)
+    c.pyapi.decref(length_pos_obj)
+    c.pyapi.decref(resize_obj)
 
     return out
