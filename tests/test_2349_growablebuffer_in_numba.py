@@ -1,11 +1,11 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+import sys
+
 import numpy as np
 import pytest
 
 from awkward._connect.numba.growablebuffer import GrowableBuffer
-
-numba = pytest.importorskip("numba")
 
 
 def test_python_append():
@@ -113,3 +113,16 @@ def test_python_extend():
     growablebuffer.extend(np.array(range(250, 1000)))
     assert growablebuffer.snapshot().tolist() == list(range(1000))
     assert len(growablebuffer._panels) == 51
+
+
+numba = pytest.importorskip("numba")
+
+
+def test_unbox():
+    @numba.njit
+    def f1(x):
+        x
+        return 3.14
+
+    growablebuffer = GrowableBuffer(np.int32)
+    f1(growablebuffer)
