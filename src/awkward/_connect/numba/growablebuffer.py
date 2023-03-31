@@ -161,22 +161,6 @@ def GrowableBufferType_dtype(growablebuffer):
     return getter
 
 
-@numba.extending.overload_attribute(GrowableBufferType, "_length")
-def GrowableBufferType_length(growablebuffer):
-    def getter(growablebuffer):
-        return growablebuffer._length_pos[0]
-
-    return getter
-
-
-@numba.extending.overload_attribute(GrowableBufferType, "_pos")
-def GrowableBufferType_pos(growablebuffer):
-    def getter(growablebuffer):
-        return growablebuffer._length_pos[1]
-
-    return getter
-
-
 @numba.extending.unbox(GrowableBufferType)
 def GrowableBufferType_unbox(typ, obj, c):
     # get PyObjects
@@ -234,16 +218,6 @@ def GrowableBufferType_box(typ, val, c):
     return out
 
 
-@numba.extending.overload(len)
-def GrowableBufferType_len(growablebuffer):
-    if isinstance(growablebuffer, GrowableBufferType):
-
-        def len_impl(growablebuffer):
-            return growablebuffer._length
-
-        return len_impl
-
-
 def _from_data():
     ...
 
@@ -293,3 +267,61 @@ def GrowableBuffer_ctor(dtype, initial=1024, resize=10.0):
         return _from_data(panels, length_pos, resize)
 
     return ctor_impl
+
+
+@numba.extending.overload_method(GrowableBufferType, "_length_get", inline="always")
+def GrowableBuffer_length_get(growablebuffer):
+    def getter(growablebuffer):
+        return growablebuffer._length_pos[0]
+
+    return getter
+
+
+@numba.extending.overload_method(GrowableBufferType, "_pos_get", inline="always")
+def GrowableBuffer_pos_get(growablebuffer):
+    def getter(growablebuffer):
+        return growablebuffer._length_pos[1]
+
+    return getter
+
+
+@numba.extending.overload_method(GrowableBufferType, "_length_set", inline="always")
+def GrowableBuffer_length_set(growablebuffer, value):
+    def setter(growablebuffer, value):
+        growablebuffer._length_pos[0] = value
+
+    return setter
+
+
+@numba.extending.overload_method(GrowableBufferType, "_pos_set", inline="always")
+def GrowableBuffer_pos_set(growablebuffer, value):
+    def setter(growablebuffer, value):
+        growablebuffer._length_pos[1] = value
+
+    return setter
+
+
+@numba.extending.overload_method(GrowableBufferType, "_length_inc", inline="always")
+def GrowableBuffer_length_inc(growablebuffer, value):
+    def inccer(growablebuffer, value):
+        growablebuffer._length_pos[0] += value
+
+    return inccer
+
+
+@numba.extending.overload_method(GrowableBufferType, "_pos_inc", inline="always")
+def GrowableBuffer_pos_inc(growablebuffer, value):
+    def inccer(growablebuffer, value):
+        growablebuffer._length_pos[1] += value
+
+    return inccer
+
+
+@numba.extending.overload(len)
+def GrowableBufferType_len(growablebuffer):
+    if isinstance(growablebuffer, GrowableBufferType):
+
+        def len_impl(growablebuffer):
+            return growablebuffer._length_get()
+
+        return len_impl

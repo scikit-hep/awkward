@@ -268,3 +268,35 @@ def test_ctor():
     assert len(out._panels[0]) == 1024
     assert out._pos == 0
     assert out._resize == 10.0
+
+
+def test_length_and_pos():
+    @numba.njit
+    def f11(growablebuffer):
+        return growablebuffer._length_get(), growablebuffer._pos_get()
+
+    @numba.njit
+    def f12(growablebuffer):
+        growablebuffer._length_set(1)
+        growablebuffer._pos_set(2)
+
+    @numba.njit
+    def f13(growablebuffer):
+        growablebuffer._length_inc(10)
+        growablebuffer._pos_inc(10)
+
+    growablebuffer = GrowableBuffer(np.float32)
+    growablebuffer._length = 123
+    growablebuffer._pos = 99
+
+    assert f11(growablebuffer) == (123, 99)
+
+    f12(growablebuffer)
+
+    assert growablebuffer._length == 1
+    assert growablebuffer._pos == 2
+
+    f13(growablebuffer)
+
+    assert growablebuffer._length == 11
+    assert growablebuffer._pos == 12
