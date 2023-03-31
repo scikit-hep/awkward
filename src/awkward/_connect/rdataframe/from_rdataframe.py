@@ -53,11 +53,9 @@ cppyy.add_include_path(
         )
     )
 )
-compiler = ROOT.gInterpreter.Declare
 
 
-done = compiler('\n#include "rdataframe/jagged_builders.h"\n')
-assert done is True
+cppyy.include("rdataframe/jagged_builders.h")
 
 
 def from_rdataframe(
