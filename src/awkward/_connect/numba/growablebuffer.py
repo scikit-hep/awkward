@@ -64,7 +64,7 @@ class GrowableBuffer:
         panel_index = len(self._panels) - 1
         pos = self._pos
 
-        available = len(self._panels[-1]) - self._pos
+        available = len(self._panels[-1]) - pos
         while len(data) > available:
             self._add_panel()
             available += len(self._panels[-1])
@@ -156,7 +156,7 @@ for member in ("panels", "length_pos", "resize"):
 @numba.extending.overload_attribute(GrowableBufferType, "dtype")
 def GrowableBufferType_dtype(growablebuffer):
     def getter(growablebuffer):
-        return growablebuffer._panel[0].dtype
+        return growablebuffer._panels[0].dtype
 
     return getter
 
@@ -325,3 +325,83 @@ def GrowableBufferType_len(growablebuffer):
             return growablebuffer._length_get()
 
         return len_impl
+
+
+@numba.extending.overload_method(GrowableBufferType, "_add_panel")
+def GrowableBuffer_add_panel(growablebuffer):
+    def add_panel(growablebuffer):
+        last_panel = growablebuffer._panels[-1]
+
+        panel_length = len(last_panel)
+        if len(growablebuffer._panels) == 1:
+            # only resize the first time
+            panel_length = int(numpy.ceil(panel_length * growablebuffer._resize))
+
+        growablebuffer._panels.append(numpy.empty((panel_length,), last_panel.dtype))
+        growablebuffer._pos_set(0)
+
+    return add_panel
+
+
+@numba.extending.overload_method(GrowableBufferType, "append")
+def GrowableBuffer_append(growablebuffer, datum):
+    def append(growablebuffer, datum):
+        if growablebuffer._pos_get() == len(growablebuffer._panels[-1]):
+            growablebuffer._add_panel()
+
+        growablebuffer._panels[-1][growablebuffer._pos_get()] = datum
+        growablebuffer._pos_inc(1)
+        growablebuffer._length_inc(1)
+
+    return append
+
+
+@numba.extending.overload_method(GrowableBufferType, "extend")
+def GrowableBuffer_extend(growablebuffer, data):
+    def extend(growablebuffer, data):
+        panel_index = len(growablebuffer._panels) - 1
+        pos = growablebuffer._pos_get()
+
+        available = len(growablebuffer._panels[-1]) - pos
+        while len(data) > available:
+            growablebuffer._add_panel()
+            available += len(growablebuffer._panels[-1])
+
+        remaining = len(data)
+        while remaining > 0:
+            panel = growablebuffer._panels[panel_index]
+            available_in_panel = len(panel) - pos
+            to_write = min(remaining, available_in_panel)
+
+            start = len(data) - remaining
+            panel[pos : pos + to_write] = data[start : start + to_write]
+
+            if panel_index == len(growablebuffer._panels) - 1:
+                growablebuffer._pos_inc(to_write)
+            remaining -= to_write
+            pos = 0
+            panel_index += 1
+
+        growablebuffer._length_inc(len(data))
+
+    return extend
+
+
+@numba.extending.overload_method(GrowableBufferType, "snapshot")
+def GrowableBuffer_snapshot(growablebuffer):
+    def snapshot(growablebuffer):
+        out = numpy.empty((growablebuffer._length_get(),), growablebuffer.dtype)
+
+        start = 0
+        stop = 0
+        for panel in growablebuffer._panels[:-1]:  # full panels, not including the last
+            stop += len(panel)
+            out[start:stop] = panel
+            start = stop
+
+        stop += growablebuffer._pos_get()
+        out[start:stop] = growablebuffer._panels[-1][: growablebuffer._pos_get()]
+
+        return out
+
+    return snapshot

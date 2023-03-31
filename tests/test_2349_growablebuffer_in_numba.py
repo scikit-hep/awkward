@@ -300,3 +300,74 @@ def test_length_and_pos():
 
     assert growablebuffer._length == 11
     assert growablebuffer._pos == 12
+
+
+def test_add_panel():
+    @numba.njit
+    def f14(growablebuffer):
+        growablebuffer._add_panel()
+
+    growablebuffer = GrowableBuffer(np.float32, initial=10, resize=2.0)
+    growablebuffer._pos = 5
+
+    assert len(growablebuffer._panels) == 1
+    assert len(growablebuffer._panels[0]) == 10
+    assert growablebuffer._pos == 5
+
+    f14(growablebuffer)
+
+    assert len(growablebuffer._panels) == 2
+    assert len(growablebuffer._panels[0]) == 10
+    assert len(growablebuffer._panels[1]) == 20
+    assert growablebuffer._pos == 0
+
+
+def test_append():
+    @numba.njit
+    def f15(growablebuffer):
+        for i in range(8):
+            growablebuffer.append(i)
+
+    growablebuffer = GrowableBuffer(np.float32, initial=10, resize=2.0)
+
+    f15(growablebuffer)
+
+    assert growablebuffer.snapshot().tolist() == list(range(8))
+
+    f15(growablebuffer)
+
+    assert growablebuffer.snapshot().tolist() == list(range(8)) + list(range(8))
+
+
+def test_extend():
+    @numba.njit
+    def f16(growablebuffer):
+        growablebuffer.extend(np.arange(8))
+
+    growablebuffer = GrowableBuffer(np.float32, initial=10, resize=2.0)
+
+    f16(growablebuffer)
+
+    assert growablebuffer.snapshot().tolist() == list(range(8))
+
+    f16(growablebuffer)
+
+    assert growablebuffer.snapshot().tolist() == list(range(8)) + list(range(8))
+
+
+def test_snapshot():
+    @numba.njit
+    def f17(growablebuffer):
+        return growablebuffer.snapshot()
+
+    growablebuffer = GrowableBuffer(np.float32, initial=10, resize=2.0)
+
+    assert f17(growablebuffer).tolist() == []
+
+    growablebuffer.extend(range(8))
+
+    assert f17(growablebuffer).tolist() == list(range(8))
+
+    growablebuffer.extend(range(8))
+
+    assert f17(growablebuffer).tolist() == list(range(8)) + list(range(8))
