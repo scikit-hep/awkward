@@ -1,8 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import numba
-import numba.core.typing
-import numba.core.typing.ctypes_utils
 import numpy
 
 
@@ -75,6 +72,6 @@ class GrowableBuffer:
             start = stop
 
         stop += self._last_panel_length
-        out[start:stop] = self._last_panel[:self._last_panel_length]
+        out[start:stop] = self._last_panel[: self._last_panel_length]
 
         return out
