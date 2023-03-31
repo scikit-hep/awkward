@@ -126,3 +126,35 @@ def test_unbox():
 
     growablebuffer = GrowableBuffer(np.int32)
     f1(growablebuffer)
+
+
+def test_box():
+    @numba.njit
+    def f2(x):
+        return x
+
+    growablebuffer = GrowableBuffer(np.int32, initial=10)
+
+    out1 = f1(growablebuffer)
+    assert len(out1._panels) == len(growablebuffer._panels)
+    assert out1._panels[0] is growablebuffer._panels[0]
+    assert out1._length == growablebuffer._length
+    assert out1._pos == growablebuffer._pos
+    assert out1._resize == growablebuffer._resize
+
+    for x in range(15):
+        growablebuffer.append(x)
+
+    out2 = f1(growablebuffer)
+    assert len(out2._panels) == len(growablebuffer._panels)
+    assert out2._panels[0] is growablebuffer._panels[0]
+    assert out2._panels[1] is growablebuffer._panels[1]
+    assert out2._length == growablebuffer._length
+    assert out2._pos == growablebuffer._pos
+    assert out2._resize == growablebuffer._resize
+
+    assert len(out1._panels) == 1 != len(growablebuffer._panels)
+    assert out1._panels[0] is growablebuffer._panels[0]
+    assert out1._length == 0 != growablebuffer._length
+    assert out1._pos == 0 != growablebuffer._pos
+    assert out1._resize == growablebuffer._resize
