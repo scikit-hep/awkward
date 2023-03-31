@@ -135,7 +135,7 @@ def test_box():
 
     growablebuffer = GrowableBuffer(np.int32, initial=10)
 
-    out1 = f1(growablebuffer)
+    out1 = f2(growablebuffer)
     assert len(out1._panels) == len(growablebuffer._panels)
     assert out1._panels[0] is growablebuffer._panels[0]
     assert out1._length == growablebuffer._length
@@ -145,7 +145,7 @@ def test_box():
     for x in range(15):
         growablebuffer.append(x)
 
-    out2 = f1(growablebuffer)
+    out2 = f2(growablebuffer)
     assert len(out2._panels) == len(growablebuffer._panels)
     assert out2._panels[0] is growablebuffer._panels[0]
     assert out2._panels[1] is growablebuffer._panels[1]

@@ -123,7 +123,6 @@ class GrowableBufferModel(numba.extending.models.StructModel):
     def __init__(self, dmm, fe_type):
         members = [
             ("panels", fe_type.listtype),
-#            ("last", fe_type.arraytype),
             ("length", numba.types.intp),
             ("pos", numba.types.intp),
             ("resize", numba.types.float64),
@@ -154,18 +153,9 @@ def GrowableBufferType_unbox(typ, obj, c):
     pos_obj = c.pyapi.object_getattr_string(obj, "_pos")
     resize_obj = c.pyapi.object_getattr_string(obj, "_resize")
 
-    # lower _get_last and use it to extract the last array from panels
-    panels_val = c.pyapi.to_native_value(typ.listtype, panels_obj).value
-    args = (panels_val,)
-    sig = typ.arraytype(typ.listtype)
-    cres = c.context.compile_subroutine(c.builder, _get_last, sig)
-    last_val = c.context.call_internal_no_propagate(c.builder, cres.fndesc, sig, args)[1]
-
-
     # fill the lowered model
     out = numba.core.cgutils.create_struct_proxy(typ)(c.context, c.builder)
-    out.panels = panels_val
-    # out.last = last_val
+    out.panels = c.pyapi.to_native_value(typ.listtype, panels_obj).value
     out.length = c.pyapi.number_as_ssize_t(length_obj)
     out.pos = c.pyapi.number_as_ssize_t(pos_obj)
     out.resize = c.pyapi.float_as_double(resize_obj)
@@ -175,9 +165,6 @@ def GrowableBufferType_unbox(typ, obj, c):
     c.pyapi.decref(length_obj)
     c.pyapi.decref(pos_obj)
     c.pyapi.decref(resize_obj)
-
-    # if c.context.enable_nrt:
-    #     c.context.nrt.decref(c.builder, typ.arraytype, last_val)
 
     # return it or the exception
     is_error = numba.core.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
