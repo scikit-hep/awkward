@@ -161,6 +161,7 @@ def GrowableBufferType_unbox(typ, obj, c):
     cres = c.context.compile_subroutine(c.builder, _get_last, sig)
     last_val = c.context.call_internal_no_propagate(c.builder, cres.fndesc, sig, args)[1]
 
+
     # fill the lowered model
     out = numba.core.cgutils.create_struct_proxy(typ)(c.context, c.builder)
     out.panels = panels_val
