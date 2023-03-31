@@ -8,23 +8,18 @@ import numpy
 
 class GrowableBuffer:
     def __init__(self, dtype, *, initial=1024, resize=10.0):
-        self._panels = [numpy.zeros((initial,), dtype=dtype)]
-        self._length = 0
-        self._pos = 0
+        # all mutable data are in arrays that can be in-place shared with Numba
+        self._panels = numba.typed.List([numpy.empty((initial,), dtype=dtype)])
+        self._length_pos = numpy.zeros((2,), dtype=numpy.int64)
         self._resize = resize
 
     @classmethod
-    def _from_data(cls, panels, length, pos, resize):
+    def _from_data(cls, panels, length_pos, resize):
         out = cls.__new__(cls)
         out._panels = panels
-        out._length = length
-        out._pos = pos
+        out._length_pos = length_pos
         out._resize = resize
         return out
-
-    @property
-    def _numba_panels(self):
-        return numba.typed.List(self._panels)
 
     @property
     def dtype(self):
@@ -32,6 +27,28 @@ class GrowableBuffer:
 
     def __repr__(self):
         return f"<GrowableBuffer({self.dtype!r}) len {self._length}>"
+
+    @property
+    def _length(self):
+        return self._length_pos[0]
+
+    @_length.setter
+    def _length(self, value):
+        self._length_pos[0] = value
+
+    def _length_inc(self, value):
+        self._length_pos[0] += value
+
+    @property
+    def _pos(self):
+        return self._length_pos[1]
+
+    @_pos.setter
+    def _pos(self, value):
+        self._length_pos[1] = value
+
+    def _pos_inc(self, value):
+        self._length_pos[1] += value
 
     def __len__(self):
         return self._length
@@ -41,8 +58,8 @@ class GrowableBuffer:
             self._add_panel()
 
         self._panels[-1][self._pos] = datum
-        self._pos += 1
-        self._length += 1
+        self._pos_inc(1)
+        self._length_inc(1)
 
     def extend(self, data):
         panel_index = len(self._panels) - 1
@@ -63,12 +80,12 @@ class GrowableBuffer:
             panel[pos : pos + to_write] = data[start : start + to_write]
 
             if panel_index == len(self._panels) - 1:
-                self._pos += to_write
+                self._pos_inc(to_write)
             remaining -= to_write
             pos = 0
             panel_index += 1
 
-        self._length += len(data)
+        self._length_inc(len(data))
 
     def _add_panel(self):
         panel_length = len(self._panels[-1])
@@ -76,11 +93,11 @@ class GrowableBuffer:
             # only resize the first time, and by a large factor (C++ should do this, too!)
             panel_length = int(numpy.ceil(panel_length * self._resize))
 
-        self._panels.append(numpy.zeros((panel_length,), dtype=self.dtype))
+        self._panels.append(numpy.empty((panel_length,), dtype=self.dtype))
         self._pos = 0
 
     def snapshot(self):
-        out = numpy.zeros((self._length,), dtype=self.dtype)
+        out = numpy.empty((self._length,), dtype=self.dtype)
 
         start = 0
         stop = 0
@@ -105,12 +122,16 @@ class GrowableBufferType(numba.types.Type):
         return self._dtype
 
     @property
-    def arraytype(self):
-        return numba.types.Array(self.dtype, 1, "C")
+    def panels(self):
+        return numba.types.ListType(numba.types.Array(self.dtype, 1, "C"))
 
     @property
-    def listtype(self):
-        return numba.types.ListType(self.arraytype)
+    def length_pos(self):
+        return numba.types.Array(numba.types.int64, 1, "C")
+
+    @property
+    def resize(self):
+        return numba.types.float64
 
 
 @numba.extending.typeof_impl.register(GrowableBuffer)
@@ -122,15 +143,14 @@ def typeof_GrowableBuffer(val, c):
 class GrowableBufferModel(numba.extending.models.StructModel):
     def __init__(self, dmm, fe_type):
         members = [
-            ("panels", fe_type.listtype),
-            ("length", numba.types.intp),
-            ("pos", numba.types.intp),
-            ("resize", numba.types.float64),
+            ("panels", fe_type.panels),
+            ("length_pos", fe_type.length_pos),
+            ("resize", fe_type.resize),
         ]
         super().__init__(dmm, fe_type, members)
 
 
-for member in ("panels", "length", "pos", "resize"):
+for member in ("panels", "length_pos", "resize"):
     numba.extending.make_attribute_wrapper(GrowableBufferType, member, "_" + member)
 
 
@@ -141,29 +161,36 @@ def GrowableBufferType_dtype(growablebuffer):
     return getter
 
 
-def _get_last(lst):
-    return lst[-1]
+@numba.extending.overload_attribute(GrowableBufferType, "_length")
+def GrowableBufferType_length(growablebuffer):
+    def getter(growablebuffer):
+        return growablebuffer._length_pos[0]
+    return getter
+
+
+@numba.extending.overload_attribute(GrowableBufferType, "_pos")
+def GrowableBufferType_pos(growablebuffer):
+    def getter(growablebuffer):
+        return growablebuffer._length_pos[1]
+    return getter
 
 
 @numba.extending.unbox(GrowableBufferType)
 def GrowableBufferType_unbox(typ, obj, c):
     # get PyObjects
-    panels_obj = c.pyapi.object_getattr_string(obj, "_numba_panels")
-    length_obj = c.pyapi.object_getattr_string(obj, "_length")
-    pos_obj = c.pyapi.object_getattr_string(obj, "_pos")
+    panels_obj = c.pyapi.object_getattr_string(obj, "_panels")
+    length_pos_obj = c.pyapi.object_getattr_string(obj, "_length_pos")
     resize_obj = c.pyapi.object_getattr_string(obj, "_resize")
 
     # fill the lowered model
     out = numba.core.cgutils.create_struct_proxy(typ)(c.context, c.builder)
-    out.panels = c.pyapi.to_native_value(typ.listtype, panels_obj).value
-    out.length = c.pyapi.number_as_ssize_t(length_obj)
-    out.pos = c.pyapi.number_as_ssize_t(pos_obj)
-    out.resize = c.pyapi.float_as_double(resize_obj)
+    out.panels = c.pyapi.to_native_value(typ.panels, panels_obj).value
+    out.length_pos = c.pyapi.to_native_value(typ.length_pos, length_pos_obj).value
+    out.resize = c.pyapi.to_native_value(typ.resize, resize_obj).value
 
     # decref PyObjects
     c.pyapi.decref(panels_obj)
-    c.pyapi.decref(length_obj)
-    c.pyapi.decref(pos_obj)
+    c.pyapi.decref(length_pos_obj)
     c.pyapi.decref(resize_obj)
 
     # return it or the exception
@@ -173,20 +200,16 @@ def GrowableBufferType_unbox(typ, obj, c):
 
 @numba.extending.box(GrowableBufferType)
 def GrowableBufferType_box(typ, val, c):
-    print("compile-time")
-    numba.core.cgutils.printf(c.builder, "runtime\n")
-
     # get PyObject of the GrowableBuffer class and _from_data constructor
     GrowableBuffer_obj = c.pyapi.unserialize(c.pyapi.serialize_object(GrowableBuffer))
     from_data_obj = c.pyapi.object_getattr_string(GrowableBuffer_obj, "_from_data")
 
     growablebuffer = numba.core.cgutils.create_struct_proxy(typ)(c.context, c.builder, value=val)
-    panels_obj = c.pyapi.from_native_value(typ.listtype, growablebuffer.panels, c.env_manager)
-    length_obj = c.pyapi.long_from_ssize_t(growablebuffer.length)
-    pos_obj = c.pyapi.long_from_ssize_t(growablebuffer.pos)
-    resize_obj = c.pyapi.float_from_double(growablebuffer.resize)
+    panels_obj = c.pyapi.from_native_value(typ.panels, growablebuffer.panels, c.env_manager)
+    length_pos_obj = c.pyapi.from_native_value(typ.length_pos, growablebuffer.length_pos, c.env_manager)
+    resize_obj = c.pyapi.from_native_value(typ.resize, growablebuffer.resize, c.env_manager)
 
-    out = c.pyapi.call_function_objargs(from_data_obj, (panels_obj, length_obj, pos_obj, resize_obj))
+    out = c.pyapi.call_function_objargs(from_data_obj, (panels_obj, length_pos_obj, resize_obj))
 
     # decref PyObjects
     c.pyapi.decref(GrowableBuffer_obj)

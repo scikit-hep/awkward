@@ -153,8 +153,9 @@ def test_box():
     assert out2._pos == growablebuffer._pos
     assert out2._resize == growablebuffer._resize
 
-    assert len(out1._panels) == 1 != len(growablebuffer._panels)
+    assert len(out1._panels) == len(growablebuffer._panels)
     assert out1._panels[0] is growablebuffer._panels[0]
-    assert out1._length == 0 != growablebuffer._length
-    assert out1._pos == 0 != growablebuffer._pos
+    assert out1._panels[1] is growablebuffer._panels[1]
+    assert out1._length == growablebuffer._length
+    assert out1._pos == growablebuffer._pos
     assert out1._resize == growablebuffer._resize
