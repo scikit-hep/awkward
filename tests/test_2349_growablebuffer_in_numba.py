@@ -179,7 +179,9 @@ def test_from_data():
     @numba.njit
     def f4():
         return _from_data(
-            numba.typed.List([np.array([3.12], np.float32)]), np.array([1, 0]), 1.23
+            numba.typed.List([np.array([3.12], np.float32)]),
+            np.array([1, 0], np.int64),
+            1.23,
         )
 
     out = f4()
