@@ -204,7 +204,7 @@ def test_ctor():
     assert len(out._panels) == 1
     assert len(out._panels[0]) == 1024
     assert out._pos == 0
-    assert out._resize == 10.0
+    assert out._resize == 8.0
 
     @numba.njit
     def f6():
@@ -217,7 +217,7 @@ def test_ctor():
     assert len(out._panels) == 1
     assert len(out._panels[0]) == 10
     assert out._pos == 0
-    assert out._resize == 10.0
+    assert out._resize == 8.0
 
     @numba.njit
     def f7():
@@ -256,7 +256,7 @@ def test_ctor():
     assert len(out._panels) == 1
     assert len(out._panels[0]) == 1024
     assert out._pos == 0
-    assert out._resize == 10.0
+    assert out._resize == 8.0
 
     @numba.njit
     def f10():
@@ -269,7 +269,7 @@ def test_ctor():
     assert len(out._panels) == 1
     assert len(out._panels[0]) == 1024
     assert out._pos == 0
-    assert out._resize == 10.0
+    assert out._resize == 8.0
 
 
 def test_length_and_pos():

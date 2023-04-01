@@ -6,7 +6,7 @@ import numpy
 
 
 class GrowableBuffer:
-    def __init__(self, dtype, *, initial=1024, resize=10.0):
+    def __init__(self, dtype, *, initial=1024, resize=8.0):
         # all mutable data are in arrays that can be in-place shared with Numba
         self._panels = numba.typed.List([numpy.empty((initial,), dtype=dtype)])
         self._length_pos = numpy.zeros((2,), dtype=numpy.int64)
@@ -251,7 +251,7 @@ def GrowableBuffer_from_data_impl(context, builder, sig, args):
 
 
 @numba.extending.overload(GrowableBuffer)
-def GrowableBuffer_ctor(dtype, initial=1024, resize=10.0):
+def GrowableBuffer_ctor(dtype, initial=1024, resize=8.0):
     if isinstance(dtype, numba.types.StringLiteral):
         dt = numpy.dtype(dtype.literal_value)
 
@@ -261,7 +261,7 @@ def GrowableBuffer_ctor(dtype, initial=1024, resize=10.0):
     else:
         return
 
-    def ctor_impl(dtype, initial=1024, resize=10.0):
+    def ctor_impl(dtype, initial=1024, resize=8.0):
         panels = numba.typed.List([numpy.empty((initial,), dt)])
         length_pos = numpy.zeros((2,), dtype=numpy.int64)
         return _from_data(panels, length_pos, resize)
