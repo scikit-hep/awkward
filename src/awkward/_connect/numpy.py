@@ -5,6 +5,7 @@ import inspect
 import numpy
 
 import awkward as ak
+from awkward._backends import backend_of
 from awkward._behavior import (
     behavior_of,
     find_custom_cast,
@@ -109,7 +110,7 @@ def implements(numpy_function):
     return decorator
 
 
-def _array_ufunc_custom_cast(inputs, behavior):
+def _array_ufunc_custom_cast(inputs, behavior, backend):
     args = [
         wrap_layout(x, behavior)
         if isinstance(x, (ak.contents.Content, ak.record.Record))
@@ -122,9 +123,11 @@ def _array_ufunc_custom_cast(inputs, behavior):
         cast_fcn = find_custom_cast(x, behavior)
         if cast_fcn is not None:
             x = cast_fcn(x)
-        nextinputs.append(
-            ak.operations.to_layout(x, allow_record=True, allow_other=True)
-        )
+        maybe_layout = ak.operations.to_layout(x, allow_record=True, allow_other=True)
+        if isinstance(maybe_layout, (ak.contents.Content, ak.record.Record)):
+            maybe_layout = maybe_layout.to_backend(backend)
+
+        nextinputs.append(maybe_layout)
     return nextinputs
 
 
@@ -184,8 +187,9 @@ def array_ufunc(ufunc, method, inputs, kwargs):
         return NotImplemented
 
     behavior = behavior_of(*inputs)
+    backend = backend_of(*inputs)
 
-    inputs = _array_ufunc_custom_cast(inputs, behavior)
+    inputs = _array_ufunc_custom_cast(inputs, behavior, backend)
 
     def action(inputs, **ignore):
         signature = _array_ufunc_signature(ufunc, inputs)
@@ -205,7 +209,6 @@ def array_ufunc(ufunc, method, inputs, kwargs):
             isinstance(x, NumpyArray) or not isinstance(x, ak.contents.Content)
             for x in inputs
         ):
-            backend = ak._backends.backend_of(*inputs)
             nplike = backend.nplike
 
             # Broadcast parameters against one another
