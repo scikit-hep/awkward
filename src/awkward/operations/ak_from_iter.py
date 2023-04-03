@@ -7,6 +7,7 @@ from awkward_cpp.lib import _ext
 
 import awkward as ak
 from awkward._errors import OperationErrorContext, wrap_error
+from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
@@ -95,23 +96,22 @@ def _impl(iterable, highlevel, behavior, allow_record, initial, resize):
                 )
             )
 
-    if isinstance(iterable, tuple):
-        iterable = list(iterable)
-
     builder = _ext.ArrayBuilder(initial=initial, resize=resize)
     builder.fromiter(iterable)
 
     formstr, length, buffers = builder.to_buffers()
     form = ak.forms.from_json(formstr)
 
-    return ak.operations.ak_from_buffers._impl(
+    outer = ak.operations.ak_from_buffers._impl(
         form,
         length,
         buffers,
         buffer_key="{form_key}-{attribute}",
         backend="cpu",
         byteorder=ak._util.native_byteorder,
-        highlevel=highlevel,
+        highlevel=False,
         behavior=behavior,
         simplify=True,
-    )[0]
+    )
+    # `outer` is definitely a content, so we bypass any user `__getitem__` implementation
+    return wrap_layout(outer[0], behavior=behavior, highlevel=highlevel)
