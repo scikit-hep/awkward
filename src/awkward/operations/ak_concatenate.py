@@ -6,6 +6,8 @@ from awkward._behavior import behavior_of
 from awkward._layout import maybe_posaxis, wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import is_integer, regularize_axis
+from awkward._typing import Sequence
+from awkward.contents import Content
 from awkward.operations.ak_fill_none import fill_none
 
 np = NumpyMetadata.instance()
@@ -119,7 +121,7 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
 
         contents = [ak._do.mergemany(b) for b in batches]
         if len(contents) > 1:
-            out = ak._do.merge_as_union(contents)
+            out = _merge_as_union(contents)
         else:
             out = contents[0]
 
@@ -292,3 +294,30 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
         )[0]
 
     return wrap_layout(out, behavior, highlevel)
+
+
+def _merge_as_union(
+    contents: Sequence[Content], parameters=None
+) -> ak.contents.UnionArray:
+    length = sum([c.length for c in contents])
+    first = contents[0]
+    tags = ak.index.Index8.empty(length, first.backend.index_nplike)
+    index = ak.index.Index64.empty(length, first.backend.index_nplike)
+
+    offset = 0
+    for i, content in enumerate(contents):
+        content._handle_error(
+            content.backend["awkward_UnionArray_filltags_const", tags.dtype.type](
+                tags.data, offset, content.length, i
+            )
+        )
+        content._handle_error(
+            content.backend["awkward_UnionArray_fillindex_count", index.dtype.type](
+                index.data, offset, content.length
+            )
+        )
+        offset += content.length
+
+    return ak.contents.UnionArray.simplified(
+        tags, index, contents, parameters=parameters
+    )

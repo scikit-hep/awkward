@@ -768,15 +768,6 @@ class UnionArray(Content):
             )
         return (tags, index)
 
-    def _nested_tags_index(self, offsets: Index, counts: Sequence[Index]):
-        return self.nested_tags_index(
-            offsets,
-            counts,
-            backend=self._backend,
-            tags_cls=type(self._tags),
-            index_cls=type(self._index),
-        )
-
     def _getitem_next_jagged_generic(self, slicestarts, slicestops, slicecontent, tail):
         if isinstance(self, ak.contents.UnionArray):
             raise ak._errors.index_error(

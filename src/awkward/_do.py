@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import copy
-from collections.abc import Mapping, MutableMapping, Sequence
+from collections.abc import Mapping, MutableMapping
 from numbers import Integral
 
 import awkward as ak
@@ -268,33 +268,6 @@ def num(layout, axis):
 
 def mergeable(one: Content, two: Content, mergebool: bool = True) -> bool:
     return one._mergeable_next(two, mergebool=mergebool)
-
-
-def merge_as_union(
-    contents: Sequence[Content], parameters=None
-) -> ak.contents.UnionArray:
-    length = sum([c.length for c in contents])
-    first = contents[0]
-    tags = ak.index.Index8.empty(length, first.backend.index_nplike)
-    index = ak.index.Index64.empty(length, first.backend.index_nplike)
-
-    offset = 0
-    for i, content in enumerate(contents):
-        content._handle_error(
-            content.backend["awkward_UnionArray_filltags_const", tags.dtype.type](
-                tags.data, offset, content.length, i
-            )
-        )
-        content._handle_error(
-            content.backend["awkward_UnionArray_fillindex_count", index.dtype.type](
-                index.data, offset, content.length
-            )
-        )
-        offset += content.length
-
-    return ak.contents.UnionArray.simplified(
-        tags, index, contents, parameters=parameters
-    )
 
 
 def mergemany(contents: list[Content]) -> Content:
