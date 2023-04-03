@@ -65,7 +65,9 @@ def from_arraylib(array, regulararray, recordarray):
             )
 
         if len(array.shape) == 0:
-            array = nplike.reshape(array, (1,))
+            raise wrap_error(
+                TypeError("0D (scalar) arrays cannot be converted into Awkward Arrays")
+            )
 
         if array.dtype.kind == "S":
             assert nplike is numpy

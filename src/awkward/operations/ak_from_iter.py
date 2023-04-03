@@ -1,9 +1,12 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("from_iter",)
 
+from collections.abc import Iterable
+
 from awkward_cpp.lib import _ext
 
 import awkward as ak
+from awkward._errors import OperationErrorContext, wrap_error
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
@@ -57,7 +60,7 @@ def from_iter(
 
     See also #ak.to_list.
     """
-    with ak._errors.OperationErrorContext(
+    with OperationErrorContext(
         "ak.from_iter",
         {
             "iterable": iterable,
@@ -72,6 +75,9 @@ def from_iter(
 
 
 def _impl(iterable, highlevel, behavior, allow_record, initial, resize):
+    if not isinstance(iterable, Iterable):
+        raise wrap_error(TypeError(f"{iterable} must be an iterable object."))
+
     if isinstance(iterable, dict):
         if allow_record:
             return _impl(
@@ -83,7 +89,7 @@ def _impl(iterable, highlevel, behavior, allow_record, initial, resize):
                 resize,
             )[0]
         else:
-            raise ak._errors.wrap_error(
+            raise wrap_error(
                 ValueError(
                     "cannot produce an array from a single dict (that would be a record)"
                 )
