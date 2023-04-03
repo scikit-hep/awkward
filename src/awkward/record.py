@@ -5,6 +5,7 @@ import copy
 from collections.abc import Iterable
 
 import awkward as ak
+from awkward._backends import Backend
 from awkward._behavior import get_record_class
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
@@ -246,6 +247,16 @@ class Record:
             return tuple(contents)
         else:
             return dict(zip(self._array.fields, contents))
+
+    def to_backend(self, backend: Backend | str | None = None) -> Self:
+        if backend is None:
+            backend = self._array.backend
+        else:
+            backend = ak._backends.regularize_backend(backend)
+        if backend is self._array.backend:
+            return self
+        else:
+            return Record(self._array._to_backend(backend), self._at)
 
     def __copy__(self) -> Self:
         return self.copy()
