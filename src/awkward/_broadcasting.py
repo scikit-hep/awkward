@@ -440,44 +440,6 @@ def apply_step(
     parameters_factory = parameters_factory_impl(inputs)
 
     # This whole function is one big switch statement.
-    def continuation():
-        # Any EmptyArrays?
-        if any(x.is_unknown for x in contents):
-            return broadcast_any_unknown()
-
-        # Any NumpyArrays with ndim != 1?
-        elif any(x.is_numpy and x.purelist_depth != 1 for x in contents):
-            return broadcast_any_nd_numpy()
-
-        # Any IndexedArrays?
-        elif any((x.is_indexed and not x.is_option) for x in contents):
-            return broadcast_any_indexed()
-
-        # Any UnionArrays?
-        elif any(x.is_union for x in contents):
-            return broadcast_any_union()
-
-        # Any option-types?
-        elif any(x.is_option for x in contents):
-            return broadcast_any_option()
-
-        # Any list-types?
-        elif any(x.is_list for x in contents):
-            return broadcast_any_list()
-
-        # Any RecordArrays?
-        elif any(x.is_record for x in contents):
-            return broadcast_any_record()
-
-        else:
-            raise ak._errors.wrap_error(
-                ValueError(
-                    "cannot broadcast: {}{}".format(
-                        ", ".join(repr(type(x)) for x in inputs), in_function(options)
-                    )
-                )
-            )
-
     def broadcast_any_record():
         if not options["allow_records"]:
             raise ak._errors.wrap_error(
@@ -1040,6 +1002,44 @@ def apply_step(
             behavior,
             options,
         )
+
+    def continuation():
+        # Any EmptyArrays?
+        if any(x.is_unknown for x in contents):
+            return broadcast_any_unknown()
+
+        # Any NumpyArrays with ndim != 1?
+        elif any(x.is_numpy and x.purelist_depth != 1 for x in contents):
+            return broadcast_any_nd_numpy()
+
+        # Any IndexedArrays?
+        elif any((x.is_indexed and not x.is_option) for x in contents):
+            return broadcast_any_indexed()
+
+        # Any UnionArrays?
+        elif any(x.is_union for x in contents):
+            return broadcast_any_union()
+
+        # Any option-types?
+        elif any(x.is_option for x in contents):
+            return broadcast_any_option()
+
+        # Any list-types?
+        elif any(x.is_list for x in contents):
+            return broadcast_any_list()
+
+        # Any RecordArrays?
+        elif any(x.is_record for x in contents):
+            return broadcast_any_record()
+
+        else:
+            raise ak._errors.wrap_error(
+                ValueError(
+                    "cannot broadcast: {}{}".format(
+                        ", ".join(repr(type(x)) for x in inputs), in_function(options)
+                    )
+                )
+            )
 
     result = action(
         inputs,
