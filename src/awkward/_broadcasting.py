@@ -362,6 +362,12 @@ BROADCAST_RULE_TO_FACTORY_IMPL = {
 }
 
 
+def left_broadcast_to(content: Content, depth: int) -> Content:
+    for _ in range(content.purelist_depth, depth):
+        content = RegularArray(content, 1, content.length)
+    return content
+
+
 def apply_step(
     backend: ak._backends.Backend,
     inputs: Sequence,
@@ -393,15 +399,14 @@ def apply_step(
 
     # Handle implicit right-broadcasting (NumPy-like broadcasting).
     if options["right_broadcast"] and any(isinstance(x, listtypes) for x in inputs):
-        maxdepth = max(x.purelist_depth for x in contents)
+        max_depth = max(x.purelist_depth for x in contents)
 
-        if maxdepth > 0 and all(x.purelist_isregular for x in contents):
-            nextinputs = []
-            for obj in inputs:
-                if isinstance(obj, Content):
-                    while obj.purelist_depth < maxdepth:
-                        obj = RegularArray(obj, 1, obj.length)
-                nextinputs.append(obj)
+        if max_depth > 0 and all(x.purelist_isregular for x in contents):
+            nextinputs = [
+                left_broadcast_to(o, max_depth) if isinstance(o, Content) else o
+                for o in inputs
+            ]
+            # Did a broadcast take place?
             if any(x is not y for x, y in zip(inputs, nextinputs)):
                 return apply_step(
                     backend,
@@ -470,7 +475,7 @@ def apply_step(
             )
 
         # Any IndexedArrays?
-        elif any(isinstance(x, IndexedArray) for x in inputs):
+        elif any((x.is_indexed and not x.is_option) for x in contents):
             nextinputs = [
                 x.project() if isinstance(x, IndexedArray) else x for x in inputs
             ]
@@ -486,7 +491,7 @@ def apply_step(
             )
 
         # Any UnionArrays?
-        elif any(isinstance(x, UnionArray) for x in inputs):
+        elif any(x.is_union for x in contents):
             if not backend.nplike.known_data:
                 numtags, length = [], None
                 for x in inputs:
@@ -618,11 +623,11 @@ def apply_step(
             )
 
         # Any option-types?
-        elif any(isinstance(x, optiontypes) for x in inputs):
+        elif any(x.is_option for x in contents):
             if backend.nplike.known_data:
                 mask = None
-                for x in inputs:
-                    if isinstance(x, optiontypes):
+                for x in contents:
+                    if x.is_option:
                         m = x.mask_as_bool(valid_when=False)
                         if mask is None:
                             mask = m
@@ -638,7 +643,7 @@ def apply_step(
                     dtype=np.int64,
                 )
                 index = Index64(index)
-                if any(not isinstance(x, optiontypes) for x in inputs):
+                if any(not x.is_option for x in contents):
                     nextindex = backend.index_nplike.arange(
                         mask.shape[0], dtype=np.int64
                     )
@@ -688,12 +693,9 @@ def apply_step(
             )
 
         # Any list-types?
-        elif any(isinstance(x, listtypes) for x in inputs):
+        elif any(x.is_list for x in contents):
             # All regular?
-            if all(
-                isinstance(x, RegularArray) or not isinstance(x, listtypes)
-                for x in inputs
-            ):
+            if all(x.is_regular or not x.is_list for x in contents):
                 # Ensure all layouts have same length
                 length = unset
                 for x in contents:
@@ -703,14 +705,14 @@ def apply_step(
                         assert length == x.length
                 assert length is not unset
 
-                if any(x.size == 0 for x in inputs if isinstance(x, RegularArray)):
+                if any(x.size == 0 for x in contents if x.is_regular):
                     dimsize = 0
                 else:
-                    dimsize = max(x.size for x in inputs if isinstance(x, RegularArray))
+                    dimsize = max(x.size for x in contents if x.is_regular)
 
                 if backend.nplike.known_data:
-                    for x in inputs:
-                        if isinstance(x, RegularArray):
+                    for x in contents:
+                        if x.is_regular:
                             if dimsize > 1 and x.size == 1:
                                 # For any (N, 1) array, we know we'll broadcast to (N, M) where M is maxsize
                                 tmpindex = Index64(
