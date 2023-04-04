@@ -389,13 +389,13 @@ def apply_step(
             for x in inputs
         ]
 
+    contents = [x for x in inputs if isinstance(x, Content)]
+
     # Handle implicit right-broadcasting (NumPy-like broadcasting).
     if options["right_broadcast"] and any(isinstance(x, listtypes) for x in inputs):
-        maxdepth = max(x.purelist_depth for x in inputs if isinstance(x, Content))
+        maxdepth = max(x.purelist_depth for x in contents)
 
-        if maxdepth > 0 and all(
-            x.purelist_isregular for x in inputs if isinstance(x, Content)
-        ):
+        if maxdepth > 0 and all(x.purelist_isregular for x in contents):
             nextinputs = []
             for obj in inputs:
                 if isinstance(obj, Content):
@@ -416,11 +416,10 @@ def apply_step(
 
     # Now all lengths must agree.
     if backend.nplike.known_data:
-        checklength([x for x in inputs if isinstance(x, Content)], options)
+        checklength(list(contents), options)
     else:
-        for x in inputs:
-            if isinstance(x, Content):
-                x._touch_shape(recursive=False)
+        for x in contents:
+            x._touch_shape(recursive=False)
 
     # Load the parameter broadcasting rule implementation
     rule = options["broadcast_parameters_rule"]
@@ -697,12 +696,11 @@ def apply_step(
             ):
                 # Ensure all layouts have same length
                 length = unset
-                for x in inputs:
-                    if isinstance(x, Content):
-                        if length is unset:
-                            length = x.length
-                        elif backend.nplike.known_data:
-                            assert length == x.length
+                for x in contents:
+                    if length is unset:
+                        length = x.length
+                    elif backend.nplike.known_data:
+                        assert length == x.length
                 assert length is not unset
 
                 if any(x.size == 0 for x in inputs if isinstance(x, RegularArray)):
