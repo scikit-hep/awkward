@@ -443,582 +443,31 @@ def apply_step(
     def continuation():
         # Any EmptyArrays?
         if any(x.is_unknown for x in contents):
-            nextinputs = [
-                x.to_NumpyArray(np.float64, backend) if isinstance(x, EmptyArray) else x
-                for x in inputs
-            ]
-            return apply_step(
-                backend,
-                nextinputs,
-                action,
-                depth,
-                copy.copy(depth_context),
-                lateral_context,
-                behavior,
-                options,
-            )
+            return broadcast_any_unknown()
 
         # Any NumpyArrays with ndim != 1?
         elif any(x.is_numpy and x.purelist_depth != 1 for x in contents):
-            nextinputs = [
-                x.to_RegularArray() if isinstance(x, NumpyArray) else x for x in inputs
-            ]
-            return apply_step(
-                backend,
-                nextinputs,
-                action,
-                depth,
-                copy.copy(depth_context),
-                lateral_context,
-                behavior,
-                options,
-            )
+            return broadcast_any_nd_numpy()
 
         # Any IndexedArrays?
         elif any((x.is_indexed and not x.is_option) for x in contents):
-            nextinputs = [
-                x.project() if isinstance(x, IndexedArray) else x for x in inputs
-            ]
-            return apply_step(
-                backend,
-                nextinputs,
-                action,
-                depth,
-                copy.copy(depth_context),
-                lateral_context,
-                behavior,
-                options,
-            )
+            return broadcast_any_indexed()
 
         # Any UnionArrays?
         elif any(x.is_union for x in contents):
-            if not backend.nplike.known_data:
-                numtags, length = [], None
-                for x in contents:
-                    if x.is_union:
-                        x._touch_data(recursive=False)
-                        numtags.append(len(x.contents))
-                        if length is None:
-                            length = x.tags.data.shape[0]
-                assert length is not unknown_length
-
-                all_combos = list(itertools.product(*[range(x) for x in numtags]))
-
-                tags = backend.index_nplike.empty(length, dtype=np.int8)
-                index = backend.index_nplike.empty(length, dtype=np.int64)
-                numoutputs, outcontents = None, []
-                for combo in all_combos:
-                    nextinputs = []
-                    i = 0
-                    for x in inputs:
-                        if isinstance(x, UnionArray):
-                            nextinputs.append(x._contents[combo[i]])
-                            i += 1
-                        else:
-                            nextinputs.append(x)
-
-                    outcontents.append(
-                        apply_step(
-                            backend,
-                            nextinputs,
-                            action,
-                            depth,
-                            copy.copy(depth_context),
-                            lateral_context,
-                            behavior,
-                            options,
-                        )
-                    )
-                    assert isinstance(outcontents[-1], tuple)
-                    if numoutputs is None:
-                        numoutputs = outcontents[-1].length
-                    else:
-                        assert (
-                            numoutputs is unknown_length
-                            or outcontents[-1].length is unknown_length
-                        ) or numoutputs == outcontents[-1].length
-
-                assert numoutputs is not None
-
-            else:
-                tagslist, numtags, length = [], [], None
-                for x in contents:
-                    if x.is_union:
-                        tagslist.append(x.tags.raw(backend.index_nplike))
-                        numtags.append(len(x.contents))
-                        if length is None:
-                            length = tagslist[-1].shape[0]
-                        elif length != tagslist[-1].shape[0]:
-                            raise ak._errors.wrap_error(
-                                ValueError(
-                                    "cannot broadcast UnionArray of length {} "
-                                    "with UnionArray of length {}{}".format(
-                                        length,
-                                        tagslist[-1].shape[0],
-                                        in_function(options),
-                                    )
-                                )
-                            )
-                assert length is not unknown_length
-
-                combos = backend.index_nplike.stack(tagslist, axis=-1)
-
-                all_combos = backend.index_nplike.asarray(
-                    list(itertools.product(*[range(x) for x in numtags])),
-                    dtype=[(str(i), combos.dtype) for i in range(len(tagslist))],
-                )
-                combos = backend.index_nplike.reshape(
-                    combos.view([(str(i), combos.dtype) for i in range(len(tagslist))]),
-                    (length,),
-                )
-
-                tags = backend.index_nplike.empty(length, dtype=np.int8)
-                index = backend.index_nplike.empty(length, dtype=np.int64)
-                numoutputs, outcontents = None, []
-                for tag, combo in enumerate(all_combos):
-                    mask = combos == combo
-                    tags[mask] = tag
-                    index[mask] = backend.index_nplike.arange(
-                        backend.index_nplike.count_nonzero(mask), dtype=np.int64
-                    )
-                    nextinputs = []
-                    i = 0
-                    for x in inputs:
-                        if isinstance(x, UnionArray):
-                            nextinputs.append(x[mask].project(combo[str(i)]))
-                            i += 1
-                        elif isinstance(x, Content):
-                            nextinputs.append(x[mask])
-                        else:
-                            nextinputs.append(x)
-                    outcontents.append(
-                        apply_step(
-                            backend,
-                            nextinputs,
-                            action,
-                            depth,
-                            copy.copy(depth_context),
-                            lateral_context,
-                            behavior,
-                            options,
-                        )
-                    )
-                    assert isinstance(outcontents[-1], tuple)
-                    if numoutputs is None:
-                        numoutputs = len(outcontents[-1])
-                    else:
-                        assert numoutputs == len(outcontents[-1])
-
-                assert numoutputs is not None
-
-            parameters = parameters_factory(numoutputs)
-            return tuple(
-                UnionArray.simplified(
-                    Index8(tags),
-                    Index64(index),
-                    [x[i] for x in outcontents],
-                    parameters=p,
-                )
-                for i, p in enumerate(parameters)
-            )
+            return broadcast_any_union()
 
         # Any option-types?
         elif any(x.is_option for x in contents):
-            if backend.nplike.known_data:
-                mask = None
-                for x in contents:
-                    if x.is_option:
-                        m = x.mask_as_bool(valid_when=False)
-                        if mask is None:
-                            mask = m
-                        else:
-                            mask = backend.index_nplike.logical_or(
-                                mask, m, maybe_out=mask
-                            )
-
-                nextmask = Index8(mask.view(np.int8))
-                index = backend.index_nplike.full(mask.shape[0], -1, dtype=np.int64)
-                index[~mask] = backend.index_nplike.arange(
-                    mask.shape[0] - backend.index_nplike.count_nonzero(mask),
-                    dtype=np.int64,
-                )
-                index = Index64(index)
-                if any(not x.is_option for x in contents):
-                    nextindex = backend.index_nplike.arange(
-                        mask.shape[0], dtype=np.int64
-                    )
-                    nextindex[mask] = -1
-                    nextindex = Index64(nextindex)
-
-                nextinputs = []
-                for x in inputs:
-                    if isinstance(x, optiontypes):
-                        nextinputs.append(x.project(nextmask))
-                    elif isinstance(x, Content):
-                        nextinputs.append(
-                            IndexedOptionArray(nextindex, x).project(nextmask)
-                        )
-                    else:
-                        nextinputs.append(x)
-
-            else:
-                index = None
-                nextinputs = []
-                for x in inputs:
-                    if isinstance(x, optiontypes):
-                        x._touch_data(recursive=False)
-                        index = Index64(
-                            backend.index_nplike.empty(x.length, dtype=np.int64)
-                        )
-                        nextinputs.append(x.content)
-                    else:
-                        nextinputs.append(x)
-                assert index is not None
-
-            outcontent = apply_step(
-                backend,
-                nextinputs,
-                action,
-                depth,
-                copy.copy(depth_context),
-                lateral_context,
-                behavior,
-                options,
-            )
-            assert isinstance(outcontent, tuple)
-            parameters = parameters_factory(len(outcontent))
-            return tuple(
-                IndexedOptionArray.simplified(index, x, parameters=p)
-                for x, p in zip(outcontent, parameters)
-            )
+            return broadcast_any_option()
 
         # Any list-types?
         elif any(x.is_list for x in contents):
-            # All regular?
-            if all(x.is_regular or not x.is_list for x in contents):
-                # Ensure all layouts have same length
-                length = unset
-                for x in contents:
-                    if length is unset:
-                        length = x.length
-                    elif backend.nplike.known_data:
-                        assert length == x.length
-                assert length is not unset
-
-                if any(x.size == 0 for x in contents if x.is_regular):
-                    dimsize = 0
-                else:
-                    dimsize = max(x.size for x in contents if x.is_regular)
-
-                if backend.nplike.known_data:
-                    for x in contents:
-                        if x.is_regular:
-                            if dimsize > 1 and x.size == 1:
-                                # For any (N, 1) array, we know we'll broadcast to (N, M) where M is maxsize
-                                tmpindex = Index64(
-                                    backend.index_nplike.repeat(
-                                        backend.index_nplike.arange(
-                                            x.length, dtype=np.int64
-                                        ),
-                                        dimsize,
-                                    ),
-                                    nplike=backend.index_nplike,
-                                )
-
-                    nextinputs = []
-                    for x in inputs:
-                        if isinstance(x, RegularArray):
-                            if dimsize > 1 and x.size == 1:
-                                nextinputs.append(
-                                    x.content[: x.length * x.size]._carry(
-                                        tmpindex, allow_lazy=False
-                                    )
-                                )
-                            elif x.size == dimsize:
-                                nextinputs.append(x.content[: x.length * x.size])
-                            elif dimsize == 0:
-                                nextinputs.append(x.content[:0])
-                            else:
-                                raise ak._errors.wrap_error(
-                                    ValueError(
-                                        "cannot broadcast RegularArray of size "
-                                        "{} with RegularArray of size {} {}".format(
-                                            x.size, dimsize, in_function(options)
-                                        )
-                                    )
-                                )
-                        else:
-                            nextinputs.append(x)
-
-                else:
-                    nextinputs = []
-                    for x in inputs:
-                        if isinstance(x, RegularArray):
-                            x._touch_data(recursive=False)
-                            nextinputs.append(x.content)
-                        else:
-                            nextinputs.append(x)
-
-                outcontent = apply_step(
-                    backend,
-                    nextinputs,
-                    action,
-                    depth + 1,
-                    copy.copy(depth_context),
-                    lateral_context,
-                    behavior,
-                    options,
-                )
-                assert isinstance(outcontent, tuple)
-                parameters = parameters_factory(len(outcontent))
-                return tuple(
-                    RegularArray(x, dimsize, length, parameters=p)
-                    for x, p in zip(outcontent, parameters)
-                )
-
-            elif not backend.nplike.known_data:
-                offsets = None
-                nextinputs = []
-                for x in inputs:
-                    if isinstance(x, ListOffsetArray):
-                        x._touch_data(recursive=False)
-                        offsets = Index64(
-                            backend.index_nplike.empty(
-                                x.offsets.data.shape[0], dtype=np.int64
-                            ),
-                            nplike=backend.index_nplike,
-                        )
-                        nextinputs.append(x.content)
-                    elif isinstance(x, ListArray):
-                        x._touch_data(recursive=False)
-                        offsets = Index64(
-                            backend.index_nplike.empty(
-                                x.starts.data.shape[0] + 1, dtype=np.int64
-                            ),
-                            nplike=backend.index_nplike,
-                        )
-                        nextinputs.append(x.content)
-                    elif isinstance(x, RegularArray):
-                        x._touch_data(recursive=False)
-                        nextinputs.append(x.content)
-                    else:
-                        nextinputs.append(x)
-                assert offsets is not None
-
-                outcontent = apply_step(
-                    backend,
-                    nextinputs,
-                    action,
-                    depth + 1,
-                    copy.copy(depth_context),
-                    lateral_context,
-                    behavior,
-                    options,
-                )
-                assert isinstance(outcontent, tuple)
-                parameters = parameters_factory(len(outcontent))
-                return tuple(
-                    ListOffsetArray(offsets, x, parameters=p)
-                    for x, p in zip(outcontent, parameters)
-                )
-
-            # Not all regular, but all same offsets?
-            # Optimization: https://github.com/scikit-hep/awkward-1.0/issues/442
-            elif all_same_offsets(backend, inputs):
-                lencontent, offsets, starts, stops = None, None, None, None
-                nextinputs = []
-
-                for x in inputs:
-                    if isinstance(x, ListOffsetArray):
-                        offsets = x.offsets
-                        lencontent = offsets[-1]
-                        nextinputs.append(x.content[:lencontent])
-
-                    elif isinstance(x, ListArray):
-                        starts, stops = x.starts, x.stops
-                        if starts.length == 0 or stops.length == 0:
-                            nextinputs.append(x.content[:0])
-                        else:
-                            lencontent = backend.index_nplike.max(stops)
-                            nextinputs.append(x.content[:lencontent])
-                    elif isinstance(x, RegularArray):
-                        nextinputs.append(x.content[: x.size * x.length])
-                    else:
-                        nextinputs.append(x)
-
-                outcontent = apply_step(
-                    backend,
-                    nextinputs,
-                    action,
-                    depth + 1,
-                    copy.copy(depth_context),
-                    lateral_context,
-                    behavior,
-                    options,
-                )
-                assert isinstance(outcontent, tuple)
-                parameters = parameters_factory(len(outcontent))
-
-                if isinstance(offsets, Index):
-                    return tuple(
-                        ListOffsetArray(offsets, x, parameters=p).to_ListOffsetArray64(
-                            False
-                        )
-                        for x, p in zip(outcontent, parameters)
-                    )
-                elif isinstance(starts, Index) and isinstance(stops, Index):
-                    return tuple(
-                        ListArray(starts, stops, x, parameters=p).to_ListOffsetArray64(
-                            False
-                        )
-                        for x, p in zip(outcontent, parameters)
-                    )
-                else:
-                    raise ak._errors.wrap_error(
-                        AssertionError(
-                            "unexpected offsets, starts: {}, {}".format(
-                                type(offsets), type(starts)
-                            )
-                        )
-                    )
-
-            # General list-handling case: the offsets of each list may be different.
-            else:
-                fcns = [
-                    find_custom_broadcast(x, behavior)
-                    if isinstance(x, Content)
-                    else None
-                    for x in inputs
-                ]
-
-                # Find first list without custom broadcasting which will define the broadcast offsets
-                # Don't consider RegularArray (handle case of 1-sized regular broadcasting)
-                # Do this to prioritise non-custom broadcasting
-                first = None
-
-                for x, fcn in zip(inputs, fcns):
-                    if (
-                        isinstance(x, listtypes)
-                        and not isinstance(x, RegularArray)
-                        and fcn is None
-                    ):
-                        first = x
-                        break
-
-                # Did we fail to find a list without custom broadcasting?
-                secondround = False
-                # If we failed to find an irregular, non-custom broadcasting list,
-                # continue search for *any* list.
-                if first is None:
-                    secondround = True
-                    for x in inputs:
-                        if isinstance(x, listtypes) and not isinstance(x, RegularArray):
-                            first = x
-                            break
-
-                offsets = first._compact_offsets64(True)
-
-                nextinputs = []
-                for x, fcn in zip(inputs, fcns):
-                    if callable(fcn) and not secondround:
-                        nextinputs.append(fcn(x, offsets))
-                    elif isinstance(x, listtypes):
-                        nextinputs.append(x._broadcast_tooffsets64(offsets).content)
-
-                    # Handle implicit left-broadcasting (non-NumPy-like broadcasting).
-                    elif options["left_broadcast"] and isinstance(x, Content):
-                        nextinputs.append(
-                            RegularArray(x, 1, x.length)
-                            ._broadcast_tooffsets64(offsets)
-                            .content
-                        )
-                    else:
-                        nextinputs.append(x)
-
-                outcontent = apply_step(
-                    backend,
-                    nextinputs,
-                    action,
-                    depth + 1,
-                    copy.copy(depth_context),
-                    lateral_context,
-                    behavior,
-                    options,
-                )
-                assert isinstance(outcontent, tuple)
-                parameters = parameters_factory(len(outcontent))
-
-                return tuple(
-                    ListOffsetArray(offsets, x, parameters=p)
-                    for x, p in zip(outcontent, parameters)
-                )
+            return broadcast_any_list()
 
         # Any RecordArrays?
         elif any(x.is_record for x in contents):
-            if not options["allow_records"]:
-                raise ak._errors.wrap_error(
-                    ValueError(f"cannot broadcast records {in_function(options)}")
-                )
-
-            fields, length, istuple = unset, unset, unset
-            for x in contents:
-                if x.is_record:
-                    if fields is unset:
-                        fields = x.fields
-                    elif set(fields) != set(x.fields):
-                        raise ak._errors.wrap_error(
-                            ValueError(
-                                "cannot broadcast records because fields don't "
-                                "match{}:\n    {}\n    {}".format(
-                                    in_function(options),
-                                    ", ".join(sorted(fields)),
-                                    ", ".join(sorted(x.fields)),
-                                )
-                            )
-                        )
-                    if length is unset:
-                        length = x.length
-                    elif length != x.length:
-                        raise ak._errors.wrap_error(
-                            ValueError(
-                                "cannot broadcast RecordArray of length {} "
-                                "with RecordArray of length {}{}".format(
-                                    length, x.length, in_function(options)
-                                )
-                            )
-                        )
-                    # Records win over tuples
-                    if istuple is unset or not x.is_tuple:
-                        istuple = False
-
-            outcontents, numoutputs = [], None
-            for field in fields:
-                outcontents.append(
-                    apply_step(
-                        backend,
-                        [x[field] if isinstance(x, RecordArray) else x for x in inputs],
-                        action,
-                        depth,
-                        copy.copy(depth_context),
-                        lateral_context,
-                        behavior,
-                        options,
-                    )
-                )
-                assert isinstance(outcontents[-1], tuple)
-                if numoutputs is not None:
-                    assert numoutputs == len(outcontents[-1])
-                numoutputs = len(outcontents[-1])
-
-            return tuple(
-                RecordArray(
-                    [x[i] for x in outcontents],
-                    None if istuple else fields,
-                    length,
-                    parameters=p,
-                )
-                for i, p in enumerate(parameters_factory(numoutputs))
-            )
+            return broadcast_any_record()
 
         else:
             raise ak._errors.wrap_error(
@@ -1028,6 +477,569 @@ def apply_step(
                     )
                 )
             )
+
+    def broadcast_any_record():
+        if not options["allow_records"]:
+            raise ak._errors.wrap_error(
+                ValueError(f"cannot broadcast records {in_function(options)}")
+            )
+
+        fields, length, istuple = unset, unset, unset
+        for x in contents:
+            if x.is_record:
+                if fields is unset:
+                    fields = x.fields
+                elif set(fields) != set(x.fields):
+                    raise ak._errors.wrap_error(
+                        ValueError(
+                            "cannot broadcast records because fields don't "
+                            "match{}:\n    {}\n    {}".format(
+                                in_function(options),
+                                ", ".join(sorted(fields)),
+                                ", ".join(sorted(x.fields)),
+                            )
+                        )
+                    )
+                if length is unset:
+                    length = x.length
+                elif length != x.length:
+                    raise ak._errors.wrap_error(
+                        ValueError(
+                            "cannot broadcast RecordArray of length {} "
+                            "with RecordArray of length {}{}".format(
+                                length, x.length, in_function(options)
+                            )
+                        )
+                    )
+                # Records win over tuples
+                if istuple is unset or not x.is_tuple:
+                    istuple = False
+
+        outcontents, numoutputs = [], None
+        for field in fields:
+            outcontents.append(
+                apply_step(
+                    backend,
+                    [x[field] if isinstance(x, RecordArray) else x for x in inputs],
+                    action,
+                    depth,
+                    copy.copy(depth_context),
+                    lateral_context,
+                    behavior,
+                    options,
+                )
+            )
+            assert isinstance(outcontents[-1], tuple)
+            if numoutputs is not None:
+                assert numoutputs == len(outcontents[-1])
+            numoutputs = len(outcontents[-1])
+
+        return tuple(
+            RecordArray(
+                [x[i] for x in outcontents],
+                None if istuple else fields,
+                length,
+                parameters=p,
+            )
+            for i, p in enumerate(parameters_factory(numoutputs))
+        )
+
+    def broadcast_any_list():
+        # All regular?
+        if all(x.is_regular or not x.is_list for x in contents):
+            # Ensure all layouts have same length
+            length = unset
+            for x in contents:
+                if length is unset:
+                    length = x.length
+                elif backend.nplike.known_data:
+                    assert length == x.length
+            assert length is not unset
+
+            if any(x.size == 0 for x in contents if x.is_regular):
+                dimsize = 0
+            else:
+                dimsize = max(x.size for x in contents if x.is_regular)
+
+            if backend.nplike.known_data:
+                for x in contents:
+                    if x.is_regular:
+                        if dimsize > 1 and x.size == 1:
+                            # For any (N, 1) array, we know we'll broadcast to (N, M) where M is maxsize
+                            tmpindex = Index64(
+                                backend.index_nplike.repeat(
+                                    backend.index_nplike.arange(
+                                        x.length, dtype=np.int64
+                                    ),
+                                    dimsize,
+                                ),
+                                nplike=backend.index_nplike,
+                            )
+
+                nextinputs = []
+                for x in inputs:
+                    if isinstance(x, RegularArray):
+                        if dimsize > 1 and x.size == 1:
+                            nextinputs.append(
+                                x.content[: x.length * x.size]._carry(
+                                    tmpindex, allow_lazy=False
+                                )
+                            )
+                        elif x.size == dimsize:
+                            nextinputs.append(x.content[: x.length * x.size])
+                        elif dimsize == 0:
+                            nextinputs.append(x.content[:0])
+                        else:
+                            raise ak._errors.wrap_error(
+                                ValueError(
+                                    "cannot broadcast RegularArray of size "
+                                    "{} with RegularArray of size {} {}".format(
+                                        x.size, dimsize, in_function(options)
+                                    )
+                                )
+                            )
+                    else:
+                        nextinputs.append(x)
+
+            else:
+                nextinputs = []
+                for x in inputs:
+                    if isinstance(x, RegularArray):
+                        x._touch_data(recursive=False)
+                        nextinputs.append(x.content)
+                    else:
+                        nextinputs.append(x)
+
+            outcontent = apply_step(
+                backend,
+                nextinputs,
+                action,
+                depth + 1,
+                copy.copy(depth_context),
+                lateral_context,
+                behavior,
+                options,
+            )
+            assert isinstance(outcontent, tuple)
+            parameters = parameters_factory(len(outcontent))
+            return tuple(
+                RegularArray(x, dimsize, length, parameters=p)
+                for x, p in zip(outcontent, parameters)
+            )
+
+        elif not backend.nplike.known_data:
+            offsets = None
+            nextinputs = []
+            for x in inputs:
+                if isinstance(x, ListOffsetArray):
+                    x._touch_data(recursive=False)
+                    offsets = Index64(
+                        backend.index_nplike.empty(
+                            x.offsets.data.shape[0], dtype=np.int64
+                        ),
+                        nplike=backend.index_nplike,
+                    )
+                    nextinputs.append(x.content)
+                elif isinstance(x, ListArray):
+                    x._touch_data(recursive=False)
+                    offsets = Index64(
+                        backend.index_nplike.empty(
+                            x.starts.data.shape[0] + 1, dtype=np.int64
+                        ),
+                        nplike=backend.index_nplike,
+                    )
+                    nextinputs.append(x.content)
+                elif isinstance(x, RegularArray):
+                    x._touch_data(recursive=False)
+                    nextinputs.append(x.content)
+                else:
+                    nextinputs.append(x)
+            assert offsets is not None
+
+            outcontent = apply_step(
+                backend,
+                nextinputs,
+                action,
+                depth + 1,
+                copy.copy(depth_context),
+                lateral_context,
+                behavior,
+                options,
+            )
+            assert isinstance(outcontent, tuple)
+            parameters = parameters_factory(len(outcontent))
+            return tuple(
+                ListOffsetArray(offsets, x, parameters=p)
+                for x, p in zip(outcontent, parameters)
+            )
+
+        # Not all regular, but all same offsets?
+        # Optimization: https://github.com/scikit-hep/awkward-1.0/issues/442
+        elif all_same_offsets(backend, inputs):
+            lencontent, offsets, starts, stops = None, None, None, None
+            nextinputs = []
+
+            for x in inputs:
+                if isinstance(x, ListOffsetArray):
+                    offsets = x.offsets
+                    lencontent = offsets[-1]
+                    nextinputs.append(x.content[:lencontent])
+
+                elif isinstance(x, ListArray):
+                    starts, stops = x.starts, x.stops
+                    if starts.length == 0 or stops.length == 0:
+                        nextinputs.append(x.content[:0])
+                    else:
+                        lencontent = backend.index_nplike.max(stops)
+                        nextinputs.append(x.content[:lencontent])
+                elif isinstance(x, RegularArray):
+                    nextinputs.append(x.content[: x.size * x.length])
+                else:
+                    nextinputs.append(x)
+
+            outcontent = apply_step(
+                backend,
+                nextinputs,
+                action,
+                depth + 1,
+                copy.copy(depth_context),
+                lateral_context,
+                behavior,
+                options,
+            )
+            assert isinstance(outcontent, tuple)
+            parameters = parameters_factory(len(outcontent))
+
+            if isinstance(offsets, Index):
+                return tuple(
+                    ListOffsetArray(offsets, x, parameters=p).to_ListOffsetArray64(
+                        False
+                    )
+                    for x, p in zip(outcontent, parameters)
+                )
+            elif isinstance(starts, Index) and isinstance(stops, Index):
+                return tuple(
+                    ListArray(starts, stops, x, parameters=p).to_ListOffsetArray64(
+                        False
+                    )
+                    for x, p in zip(outcontent, parameters)
+                )
+            else:
+                raise ak._errors.wrap_error(
+                    AssertionError(
+                        "unexpected offsets, starts: {}, {}".format(
+                            type(offsets), type(starts)
+                        )
+                    )
+                )
+
+        # General list-handling case: the offsets of each list may be different.
+        else:
+            fcns = [
+                find_custom_broadcast(x, behavior) if isinstance(x, Content) else None
+                for x in inputs
+            ]
+
+            # Find first list without custom broadcasting which will define the broadcast offsets
+            # Don't consider RegularArray (handle case of 1-sized regular broadcasting)
+            # Do this to prioritise non-custom broadcasting
+            first = None
+
+            for x, fcn in zip(inputs, fcns):
+                if (
+                    isinstance(x, listtypes)
+                    and not isinstance(x, RegularArray)
+                    and fcn is None
+                ):
+                    first = x
+                    break
+
+            # Did we fail to find a list without custom broadcasting?
+            secondround = False
+            # If we failed to find an irregular, non-custom broadcasting list,
+            # continue search for *any* list.
+            if first is None:
+                secondround = True
+                for x in inputs:
+                    if isinstance(x, listtypes) and not isinstance(x, RegularArray):
+                        first = x
+                        break
+
+            offsets = first._compact_offsets64(True)
+
+            nextinputs = []
+            for x, fcn in zip(inputs, fcns):
+                if callable(fcn) and not secondround:
+                    nextinputs.append(fcn(x, offsets))
+                elif isinstance(x, listtypes):
+                    nextinputs.append(x._broadcast_tooffsets64(offsets).content)
+
+                # Handle implicit left-broadcasting (non-NumPy-like broadcasting).
+                elif options["left_broadcast"] and isinstance(x, Content):
+                    nextinputs.append(
+                        RegularArray(x, 1, x.length)
+                        ._broadcast_tooffsets64(offsets)
+                        .content
+                    )
+                else:
+                    nextinputs.append(x)
+
+            outcontent = apply_step(
+                backend,
+                nextinputs,
+                action,
+                depth + 1,
+                copy.copy(depth_context),
+                lateral_context,
+                behavior,
+                options,
+            )
+            assert isinstance(outcontent, tuple)
+            parameters = parameters_factory(len(outcontent))
+
+            return tuple(
+                ListOffsetArray(offsets, x, parameters=p)
+                for x, p in zip(outcontent, parameters)
+            )
+
+    def broadcast_any_option():
+        if backend.nplike.known_data:
+            mask = None
+            for x in contents:
+                if x.is_option:
+                    m = x.mask_as_bool(valid_when=False)
+                    if mask is None:
+                        mask = m
+                    else:
+                        mask = backend.index_nplike.logical_or(mask, m, maybe_out=mask)
+
+            nextmask = Index8(mask.view(np.int8))
+            index = backend.index_nplike.full(mask.shape[0], -1, dtype=np.int64)
+            index[~mask] = backend.index_nplike.arange(
+                mask.shape[0] - backend.index_nplike.count_nonzero(mask),
+                dtype=np.int64,
+            )
+            index = Index64(index)
+            if any(not x.is_option for x in contents):
+                nextindex = backend.index_nplike.arange(mask.shape[0], dtype=np.int64)
+                nextindex[mask] = -1
+                nextindex = Index64(nextindex)
+
+            nextinputs = []
+            for x in inputs:
+                if isinstance(x, optiontypes):
+                    nextinputs.append(x.project(nextmask))
+                elif isinstance(x, Content):
+                    nextinputs.append(
+                        IndexedOptionArray(nextindex, x).project(nextmask)
+                    )
+                else:
+                    nextinputs.append(x)
+
+        else:
+            index = None
+            nextinputs = []
+            for x in inputs:
+                if isinstance(x, optiontypes):
+                    x._touch_data(recursive=False)
+                    index = Index64(
+                        backend.index_nplike.empty(x.length, dtype=np.int64)
+                    )
+                    nextinputs.append(x.content)
+                else:
+                    nextinputs.append(x)
+            assert index is not None
+        outcontent = apply_step(
+            backend,
+            nextinputs,
+            action,
+            depth,
+            copy.copy(depth_context),
+            lateral_context,
+            behavior,
+            options,
+        )
+        assert isinstance(outcontent, tuple)
+        parameters = parameters_factory(len(outcontent))
+        return tuple(
+            IndexedOptionArray.simplified(index, x, parameters=p)
+            for x, p in zip(outcontent, parameters)
+        )
+
+    def broadcast_any_union():
+        if not backend.nplike.known_data:
+            numtags, length = [], None
+            for x in contents:
+                if x.is_union:
+                    x._touch_data(recursive=False)
+                    numtags.append(len(x.contents))
+                    if length is None:
+                        length = x.tags.data.shape[0]
+            assert length is not unknown_length
+
+            all_combos = list(itertools.product(*[range(x) for x in numtags]))
+
+            tags = backend.index_nplike.empty(length, dtype=np.int8)
+            index = backend.index_nplike.empty(length, dtype=np.int64)
+            numoutputs, outcontents = None, []
+            for combo in all_combos:
+                nextinputs = []
+                i = 0
+                for x in inputs:
+                    if isinstance(x, UnionArray):
+                        nextinputs.append(x._contents[combo[i]])
+                        i += 1
+                    else:
+                        nextinputs.append(x)
+
+                outcontents.append(
+                    apply_step(
+                        backend,
+                        nextinputs,
+                        action,
+                        depth,
+                        copy.copy(depth_context),
+                        lateral_context,
+                        behavior,
+                        options,
+                    )
+                )
+                assert isinstance(outcontents[-1], tuple)
+                if numoutputs is None:
+                    numoutputs = outcontents[-1].length
+                else:
+                    assert (
+                        numoutputs is unknown_length
+                        or outcontents[-1].length is unknown_length
+                    ) or numoutputs == outcontents[-1].length
+
+            assert numoutputs is not None
+
+        else:
+            tagslist, numtags, length = [], [], None
+            for x in contents:
+                if x.is_union:
+                    tagslist.append(x.tags.raw(backend.index_nplike))
+                    numtags.append(len(x.contents))
+                    if length is None:
+                        length = tagslist[-1].shape[0]
+                    elif length != tagslist[-1].shape[0]:
+                        raise ak._errors.wrap_error(
+                            ValueError(
+                                "cannot broadcast UnionArray of length {} "
+                                "with UnionArray of length {}{}".format(
+                                    length,
+                                    tagslist[-1].shape[0],
+                                    in_function(options),
+                                )
+                            )
+                        )
+            assert length is not unknown_length
+
+            combos = backend.index_nplike.stack(tagslist, axis=-1)
+
+            all_combos = backend.index_nplike.asarray(
+                list(itertools.product(*[range(x) for x in numtags])),
+                dtype=[(str(i), combos.dtype) for i in range(len(tagslist))],
+            )
+            combos = backend.index_nplike.reshape(
+                combos.view([(str(i), combos.dtype) for i in range(len(tagslist))]),
+                (length,),
+            )
+
+            tags = backend.index_nplike.empty(length, dtype=np.int8)
+            index = backend.index_nplike.empty(length, dtype=np.int64)
+            numoutputs, outcontents = None, []
+            for tag, combo in enumerate(all_combos):
+                mask = combos == combo
+                tags[mask] = tag
+                index[mask] = backend.index_nplike.arange(
+                    backend.index_nplike.count_nonzero(mask), dtype=np.int64
+                )
+                nextinputs = []
+                i = 0
+                for x in inputs:
+                    if isinstance(x, UnionArray):
+                        nextinputs.append(x[mask].project(combo[str(i)]))
+                        i += 1
+                    elif isinstance(x, Content):
+                        nextinputs.append(x[mask])
+                    else:
+                        nextinputs.append(x)
+                outcontents.append(
+                    apply_step(
+                        backend,
+                        nextinputs,
+                        action,
+                        depth,
+                        copy.copy(depth_context),
+                        lateral_context,
+                        behavior,
+                        options,
+                    )
+                )
+                assert isinstance(outcontents[-1], tuple)
+                if numoutputs is None:
+                    numoutputs = len(outcontents[-1])
+                else:
+                    assert numoutputs == len(outcontents[-1])
+
+            assert numoutputs is not None
+
+        parameters = parameters_factory(numoutputs)
+        return tuple(
+            UnionArray.simplified(
+                Index8(tags),
+                Index64(index),
+                [x[i] for x in outcontents],
+                parameters=p,
+            )
+            for i, p in enumerate(parameters)
+        )
+
+    def broadcast_any_indexed():
+        nextinputs = [x.project() if isinstance(x, IndexedArray) else x for x in inputs]
+        return apply_step(
+            backend,
+            nextinputs,
+            action,
+            depth,
+            copy.copy(depth_context),
+            lateral_context,
+            behavior,
+            options,
+        )
+
+    def broadcast_any_nd_numpy():
+        nextinputs = [
+            x.to_RegularArray() if isinstance(x, NumpyArray) else x for x in inputs
+        ]
+        return apply_step(
+            backend,
+            nextinputs,
+            action,
+            depth,
+            copy.copy(depth_context),
+            lateral_context,
+            behavior,
+            options,
+        )
+
+    def broadcast_any_unknown():
+        nextinputs = [
+            x.to_NumpyArray(np.float64, backend) if isinstance(x, EmptyArray) else x
+            for x in inputs
+        ]
+        return apply_step(
+            backend,
+            nextinputs,
+            action,
+            depth,
+            copy.copy(depth_context),
+            lateral_context,
+            behavior,
+            options,
+        )
 
     result = action(
         inputs,
