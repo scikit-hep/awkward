@@ -459,7 +459,7 @@ def apply_step(
             )
 
         # Any NumpyArrays with ndim != 1?
-        elif any(x.is_numpy and x.data.ndim != 1 for x in contents):
+        elif any(x.is_numpy and x.purelist_depth != 1 for x in contents):
             nextinputs = [
                 x.to_RegularArray() if isinstance(x, NumpyArray) else x for x in inputs
             ]
@@ -954,15 +954,15 @@ def apply_step(
                 )
 
         # Any RecordArrays?
-        elif any(isinstance(x, RecordArray) for x in inputs):
+        elif any(x.is_record for x in contents):
             if not options["allow_records"]:
                 raise ak._errors.wrap_error(
                     ValueError(f"cannot broadcast records {in_function(options)}")
                 )
 
             fields, length, istuple = unset, unset, unset
-            for x in inputs:
-                if isinstance(x, RecordArray):
+            for x in contents:
+                if x.is_record:
                     if fields is unset:
                         fields = x.fields
                     elif set(fields) != set(x.fields):
