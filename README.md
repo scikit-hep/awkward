@@ -23,6 +23,8 @@ Arrays are **dynamically typed**, but operations on them are **compiled and fast
 Given an array of lists of objects with `x`, `y` fields (with nested lists in the `y` field),
 
 ```python
+import awkward as ak
+
 array = ak.Array([
     [{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}, {"x": 3.3, "y": [1, 2, 3]}],
     [],
