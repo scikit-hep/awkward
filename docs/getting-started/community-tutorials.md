@@ -17,7 +17,7 @@ A tutorial presented at the SciPy conference on July 11, 2022.
 
 ### Format
 - [{fab}`github` GitHub repository](https://github.com/jpivarski-talks/2022-07-11-scipy-loopy-tutorial)
- with Jupyter Notebooks that can be run on [MyBinder](https://mybinder.org/).
+ with Jupyter Notebooks that can be run on [MyBinder](https://mybinder.org/v2/gh/jpivarski-talks/2022-07-11-scipy-loopy-tutorial/v1.0?urlpath=lab/tree/narrative.ipynb).
 - [{fab}`youtube` YouTube](https://www.youtube.com/watch?v=Dovyd72eD70) recording of presentation.
 
 ### Objectives
