@@ -442,7 +442,7 @@ def apply_step(
     # This whole function is one big switch statement.
     def continuation():
         # Any EmptyArrays?
-        if any(isinstance(x, EmptyArray) for x in inputs):
+        if any(x.is_unknown for x in contents):
             nextinputs = [
                 x.to_NumpyArray(np.float64, backend) if isinstance(x, EmptyArray) else x
                 for x in inputs
@@ -459,7 +459,7 @@ def apply_step(
             )
 
         # Any NumpyArrays with ndim != 1?
-        elif any(isinstance(x, NumpyArray) and x.data.ndim != 1 for x in inputs):
+        elif any(x.is_numpy and x.data.ndim != 1 for x in contents):
             nextinputs = [
                 x.to_RegularArray() if isinstance(x, NumpyArray) else x for x in inputs
             ]
@@ -494,8 +494,8 @@ def apply_step(
         elif any(x.is_union for x in contents):
             if not backend.nplike.known_data:
                 numtags, length = [], None
-                for x in inputs:
-                    if isinstance(x, UnionArray):
+                for x in contents:
+                    if x.is_union:
                         x._touch_data(recursive=False)
                         numtags.append(len(x.contents))
                         if length is None:
@@ -542,8 +542,8 @@ def apply_step(
 
             else:
                 tagslist, numtags, length = [], [], None
-                for x in inputs:
-                    if isinstance(x, UnionArray):
+                for x in contents:
+                    if x.is_union:
                         tagslist.append(x.tags.raw(backend.index_nplike))
                         numtags.append(len(x.contents))
                         if length is None:
