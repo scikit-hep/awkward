@@ -717,10 +717,9 @@ class TypeTracer(NumpyLike):
                             populate_shape_and_items(child, dim + 1)
 
                 populate_shape_and_items(obj, 1)
-
-                return TypeTracerArray._new(
-                    numpy.result_type(*flat_items), shape=tuple(shape)
-                )
+                if dtype is None:
+                    dtype = numpy.result_type(*flat_items)
+                return TypeTracerArray._new(dtype, shape=tuple(shape))
             else:
                 raise wrap_error(TypeError)
 
