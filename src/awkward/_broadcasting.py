@@ -889,7 +889,8 @@ def apply_step(
                     union_num_contents.append(len(x.contents))
                     if tags.shape[0] is unknown_length:
                         continue
-                    elif length is None:
+
+                    if length is None:
                         length = tags.shape[0]
                     elif length != tags.shape[0]:
                         raise ak._errors.wrap_error(
