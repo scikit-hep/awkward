@@ -676,10 +676,52 @@ class TypeTracer(NumpyLike):
                 return TypeTracerArray._new(as_array.dtype, ())
 
             elif is_non_string_like_sequence(obj):
-                assert not any(is_non_string_like_sequence(x) for x in obj)
-                shape = (len(obj),)
-                result_type = numpy.result_type(*obj)  # TODO: result_type
-                return TypeTracerArray._new(result_type, shape)
+                shape = []
+                flat_items = []
+                has_seen_leaf = False
+
+                # DFS walk into sequence, construct shape, then validate
+                # remainder of the sequence against this shape.
+                def populate_shape_and_items(node, dim):
+                    nonlocal has_seen_leaf
+
+                    # If we've already computed the shape,
+                    # ensure this item matches!
+                    if has_seen_leaf:
+                        if len(node) != shape[dim - 1]:
+                            raise wrap_error(
+                                ValueError(
+                                    f"sequence at dimension {dim} does not match shape {shape[dim-1]}"
+                                )
+                            )
+                    else:
+                        shape.append(len(node))
+
+                    if isinstance(node, TypeTracerArray):
+                        raise wrap_error(
+                            AssertionError(
+                                "typetracer arrays inside sequences not currently supported"
+                            )
+                        )
+                    # Found leaf!
+                    elif len(node) == 0 or not is_non_string_like_sequence(node[0]):
+                        has_seen_leaf = True
+                        flat_items.extend(
+                            [
+                                item.dtype if is_unknown_scalar(item) else item
+                                for item in node
+                            ]
+                        )
+
+                    # Keep recursing!
+                    else:
+                        for child in node:
+                            populate_shape_and_items(child, dim + 1)
+
+                populate_shape_and_items(obj, 1)
+                if dtype is None:
+                    dtype = numpy.result_type(*flat_items)
+                return TypeTracerArray._new(dtype, shape=tuple(shape))
             else:
                 raise wrap_error(TypeError)
 
