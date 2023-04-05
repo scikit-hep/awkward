@@ -609,21 +609,6 @@ class TypeTracer(NumpyLike):
             axis = axis + ndim
         return 0 <= axis < ndim
 
-    def _shapes_compatible(self, *shapes: tuple[ShapeItem, ...]) -> bool:
-        if len(shapes) == 0:
-            raise wrap_error(ValueError("at least one shape required"))
-        shape, *others = shapes
-        for other_shape in others:
-            if len(shape) != len(other_shape):
-                return False
-
-            for this, that in zip(shape, other_shape):
-                if this is unknown_length or that is unknown_length:
-                    continue
-                if this != that:
-                    return False
-        return True
-
     @property
     def ma(self):
         raise ak._errors.wrap_error(NotImplementedError)
@@ -690,7 +675,6 @@ class TypeTracer(NumpyLike):
                 as_array = numpy.asarray(obj)
                 return TypeTracerArray._new(as_array.dtype, ())
 
-            # Sequence (maybe N-D array)
             elif is_non_string_like_sequence(obj):
                 assert not any(is_non_string_like_sequence(x) for x in obj)
                 shape = (len(obj),)
@@ -1145,45 +1129,9 @@ class TypeTracer(NumpyLike):
         *,
         axis: int = 0,
     ) -> TypeTracerArray:
-        # Touch all data
         for x in arrays:
             try_touch_data(x)
-
-        array, *other_arrays = arrays
-
-        # Check that we have the same dimensionality
-        for other_array in other_arrays:
-            if array.ndim != other_array.ndim:
-                raise ak._errors.wrap_error(
-                    ValueError("arrays have incompatible dimensions")
-                )
-
-        # Regularize axis
-        if axis < 0:
-            axis = array.ndim + axis
-
-        # Compute new shape
-        shape = list(array.shape)
-        for other_array in other_arrays:
-            for i, item in enumerate(shape):
-                if item is unknown_length:
-                    continue
-                other_item = other_array.shape[i]
-                if other_item is unknown_length:
-                    shape[i] = other_item
-                elif other_item != item:
-                    raise ak._errors.wrap_error(
-                        ValueError(
-                            f"arrays have incompatible dimensions along axis {i}"
-                        )
-                    )
-
-        shape.insert(axis, len(arrays))
-
-        # TODO: implement this directly instead of using placeholders
-        placeholders = [_emptyarray(x) for x in arrays]
-
-        return TypeTracerArray._new(numpy.stack(placeholders).dtype, tuple(shape))
+        raise ak._errors.wrap_error(NotImplementedError)
 
     def packbits(
         self,
