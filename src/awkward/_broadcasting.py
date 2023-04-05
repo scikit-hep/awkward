@@ -421,7 +421,7 @@ def apply_step(
 
     # Now all lengths must agree.
     if backend.nplike.known_data:
-        checklength(list(contents), options)
+        checklength(contents, options)
     else:
         for x in contents:
             x._touch_shape(recursive=False)
