@@ -830,16 +830,19 @@ def apply_step(
 
     def broadcast_any_union():
         if not backend.nplike.known_data:
-            numtags, length = [], None
+            # assert False
+            union_num_contents, length = [], None
             for x in contents:
                 if x.is_union:
                     x._touch_data(recursive=False)
-                    numtags.append(len(x.contents))
+                    union_num_contents.append(len(x.contents))
                     if length is None:
                         length = x.tags.data.shape[0]
             assert length is not unknown_length
 
-            all_combos = list(itertools.product(*[range(x) for x in numtags]))
+            all_combos = list(
+                itertools.product(*[range(x) for x in union_num_contents])
+            )
 
             tags = backend.index_nplike.empty(length, dtype=np.int8)
             index = backend.index_nplike.empty(length, dtype=np.int64)
@@ -878,42 +881,42 @@ def apply_step(
             assert numoutputs is not None
 
         else:
-            tagslist, numtags, length = [], [], None
+            union_tags, union_num_contents, length = [], [], None
             for x in contents:
                 if x.is_union:
-                    tagslist.append(x.tags.raw(backend.index_nplike))
-                    numtags.append(len(x.contents))
-                    if length is None:
-                        length = tagslist[-1].shape[0]
-                    elif length != tagslist[-1].shape[0]:
+                    tags = x.tags.raw(backend.index_nplike)
+                    union_tags.append(tags)
+                    union_num_contents.append(len(x.contents))
+                    if tags.shape[0] is unknown_length:
+                        continue
+                    elif length is None:
+                        length = tags.shape[0]
+                    elif length != tags.shape[0]:
                         raise ak._errors.wrap_error(
                             ValueError(
                                 "cannot broadcast UnionArray of length {} "
                                 "with UnionArray of length {}{}".format(
                                     length,
-                                    tagslist[-1].shape[0],
+                                    tags.shape[0],
                                     in_function(options),
                                 )
                             )
                         )
             assert length is not unknown_length
 
-            combos = backend.index_nplike.stack(tagslist, axis=-1)
-
+            # Stack all union tags
+            combos = backend.index_nplike.stack(union_tags, axis=-1)
+            # Build array of indices (c1, c2, c3, ..., cn) of contents in
+            # (union 1, union 2, union 3, ..., union n)
             all_combos = backend.index_nplike.asarray(
-                list(itertools.product(*[range(x) for x in numtags])),
-                dtype=[(str(i), combos.dtype) for i in range(len(tagslist))],
-            )
-            combos = backend.index_nplike.reshape(
-                combos.view([(str(i), combos.dtype) for i in range(len(tagslist))]),
-                (length,),
+                list(itertools.product(*[range(x) for x in union_num_contents]))
             )
 
             tags = backend.index_nplike.empty(length, dtype=np.int8)
             index = backend.index_nplike.empty(length, dtype=np.int64)
             numoutputs, outcontents = None, []
             for tag, combo in enumerate(all_combos):
-                mask = combos == combo
+                mask = backend.index_nplike.all(combos == combo, axis=-1)
                 tags[mask] = tag
                 index[mask] = backend.index_nplike.arange(
                     backend.index_nplike.count_nonzero(mask), dtype=np.int64
@@ -922,7 +925,7 @@ def apply_step(
                 i = 0
                 for x in inputs:
                     if isinstance(x, UnionArray):
-                        nextinputs.append(x[mask].project(combo[str(i)]))
+                        nextinputs.append(x[mask].project(combo[i]))
                         i += 1
                     elif isinstance(x, Content):
                         nextinputs.append(x[mask])
