@@ -680,6 +680,8 @@ class TypeTracer(NumpyLike):
                 flat_items = []
                 has_seen_leaf = False
 
+                # DFS walk into sequence, construct shape, then validate
+                # remainder of the sequence against this shape.
                 def populate_shape_and_items(node, dim):
                     nonlocal has_seen_leaf
 
