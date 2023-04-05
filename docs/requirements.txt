@@ -11,7 +11,7 @@ myst-nb
 sphinx-external-toc
 jupyterlite-sphinx==0.7.3
 ipyleaflet
-jupyterlite==0.1.0b16
+jupyterlite[piplite]==0.1.0b16
 
 numpy>=1.13.1
 numba>=0.50.0
