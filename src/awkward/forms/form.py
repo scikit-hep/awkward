@@ -181,6 +181,44 @@ def from_json(input: str) -> Form:
     return from_dict(json.loads(input))
 
 
+def from_type(type: ak.types.Type) -> Form:
+    if isinstance(type, ak.types.NumpyType):
+        return ak.forms.NumpyForm(type.primitive, parameters=type.parameters)
+    elif isinstance(type, ak.types.ListType):
+        return ak.forms.ListOffsetForm(
+            "i64", from_type(type.content), parameters=type.parameters
+        )
+    elif isinstance(type, ak.types.RegularType):
+        return ak.forms.RegularForm(
+            from_type(type.content),
+            size=type.size,
+            parameters=type.parameters,
+        )
+    elif isinstance(type, ak.types.OptionType):
+        return ak.forms.IndexedOptionForm(
+            "i64",
+            from_type(type.content),
+            parameters=type.parameters,
+        )
+    elif isinstance(type, ak.types.RecordType):
+        return ak.forms.RecordForm(
+            [from_type(c) for c in type.contents],
+            type.fields,
+            parameters=type.parameters,
+        )
+    elif isinstance(type, ak.types.UnionType):
+        return ak.forms.UnionForm(
+            "i8",
+            "i64",
+            [from_type(c) for c in type.contents],
+            parameters=type.parameters,
+        )
+    elif isinstance(type, ak.types.UnknownType):
+        return ak.forms.EmptyForm(parameters=type.parameters)
+    else:
+        raise ak._errors.wrap_error(TypeError(f"unsupported type {type!r}"))
+
+
 def _expand_braces(text, seen=None):
     if seen is None:
         seen = set()
