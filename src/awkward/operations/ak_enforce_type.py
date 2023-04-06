@@ -42,11 +42,19 @@ def enforce_type(
 
 def _impl(array, type, highlevel, behavior):
     layout = ak.to_layout(array)
-    type_ = (
-        ak.types.from_datashape(type, highlevel=False)
-        if isinstance(type, str)
-        else type
-    )
+
+    if isinstance(type, str):
+        type_ = ak.types.from_datashape(type, highlevel=False)
+
+        def select_parameters(type_: ak.types.Type, layout: ak.contents.Content):
+            return layout.parameters
+
+    else:
+
+        def select_parameters(type_: ak.types.Type, layout: ak.contents.Content):
+            return type_.parameters
+
+        type_ = type
 
     def recurse(
         type: ak.types.Type, layout: ak.contents.Content
@@ -54,7 +62,9 @@ def _impl(array, type, highlevel, behavior):
         # Early exit - unknown layouts take the form of the type.
         if layout.is_unknown:
             type_form = ak.forms.from_type(type)
-            return type_form.length_zero_array()
+            return type_form.length_zero_array(highlevel=False).copy(
+                parameters=select_parameters(type, layout)
+            )
 
         # If we want to lose the option
         elif layout.is_option and not isinstance(type, ak.types.OptionType):
@@ -67,10 +77,14 @@ def _impl(array, type, highlevel, behavior):
 
         # Indexed nodes are invisible to layouts
         elif layout.is_indexed:
-            return recurse(type, layout.content)
+            return recurse(type, layout.content).copy(
+                parameters=select_parameters(type, layout)
+            )
 
         if isinstance(type, ak.types.NumpyType):
             assert layout.is_numpy
+
+            layout = layout.copy(parameters=select_parameters(type, layout))
 
             dtype = primitive_to_dtype(type.primitive)
             if np.issubdtype(layout.dtype, dtype):
@@ -88,9 +102,15 @@ def _impl(array, type, highlevel, behavior):
                 layout.is_numpy and layout.inner_shape[0] == type.size
             ):
                 layout = layout.to_ListOffsetArray64(True)
-                return layout.copy(content=recurse(type.content, layout.content))
+                return layout.copy(
+                    content=recurse(type.content, layout.content),
+                    parameters=select_parameters(type, layout),
+                )
             elif layout.is_list:
-                return layout.copy(content=recurse(type.content, layout.content))
+                return layout.copy(
+                    content=recurse(type.content, layout.content),
+                    parameters=select_parameters(type, layout),
+                )
             else:
                 raise wrap_error(
                     AssertionError(f"expected list type, found {type(layout)!r}")
@@ -105,10 +125,16 @@ def _impl(array, type, highlevel, behavior):
             if (layout.is_regular and layout.size == type.size) or (
                 layout.is_numpy and layout.inner_shape[0] == type.size
             ):
-                return layout.copy(content=recurse(type.content, layout.content))
+                return layout.copy(
+                    content=recurse(type.content, layout.content),
+                    parameters=select_parameters(type, layout),
+                )
             elif layout.is_list:
                 layout = layout.to_RegularArray()
-                return layout.copy(content=recurse(type.content, layout.content))
+                return layout.copy(
+                    content=recurse(type.content, layout.content),
+                    parameters=select_parameters(type, layout),
+                )
             else:
                 raise wrap_error(
                     AssertionError(f"expected list type, found {type(layout)!r}")
@@ -118,18 +144,27 @@ def _impl(array, type, highlevel, behavior):
             assert layout.is_record
             assert layout.fields == type.fields  # TODO: do we care about order?
             return layout.copy(
-                contents=[recurse(x, y) for x, y in zip(type.contents, layout.contents)]
+                contents=[
+                    recurse(x, y) for x, y in zip(type.contents, layout.contents)
+                ],
+                parameters=select_parameters(type, layout),
             )
 
         elif isinstance(type, ak.types.UnionType):
             assert layout.is_union
             return layout.copy(
-                contents=[recurse(x, y) for x, y in zip(type.contents, layout.contents)]
+                contents=[
+                    recurse(x, y) for x, y in zip(type.contents, layout.contents)
+                ],
+                parameters=select_parameters(type, layout),
             )
 
         elif isinstance(type, ak.types.OptionType):
             if layout.is_option:
-                return layout.copy(content=recurse(type.content, layout.content))
+                return layout.copy(
+                    content=recurse(type.content, layout.content),
+                    parameters=select_parameters(type, layout),
+                )
             else:
                 return ak.contents.UnmaskedArray(recurse(type.content, layout))
 
