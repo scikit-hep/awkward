@@ -2,7 +2,7 @@
 
 import awkward as ak
 from awkward._errors import deprecate
-from awkward._parameters import type_parameters_equal
+from awkward._parameters import parameters_are_equal, type_parameters_equal
 from awkward._typing import final
 from awkward.types.type import Type
 
@@ -50,8 +50,10 @@ class UnknownType(Type):
         args = self._repr_args()
         return "{}({})".format(type(self).__name__, ", ".join(args))
 
-    def __eq__(self, other):
-        if isinstance(other, UnknownType):
-            return type_parameters_equal(self._parameters, other._parameters)
-        else:
-            return False
+    def _is_equal_to(self, other, parameters: bool):
+        compare_parameters = (
+            parameters_are_equal if parameters else type_parameters_equal
+        )
+        return isinstance(other, UnknownType) and compare_parameters(
+            self._parameters, other._parameters
+        )

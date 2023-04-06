@@ -3,7 +3,7 @@
 from collections.abc import Iterable
 
 import awkward as ak
-from awkward._parameters import type_parameters_equal
+from awkward._parameters import parameters_are_equal, type_parameters_equal
 from awkward._typing import final
 from awkward.types.type import Type
 
@@ -92,11 +92,16 @@ class UnionType(Type):
         args = [repr(self._contents), *self._repr_args()]
         return "{}({})".format(type(self).__name__, ", ".join(args))
 
-    def __eq__(self, other):
-        if isinstance(other, UnionType):
-            return (
-                type_parameters_equal(self._parameters, other._parameters)
-                and self._contents == other._contents
+    def _is_equal_to(self, other, parameters: bool):
+        compare_parameters = (
+            parameters_are_equal if parameters else type_parameters_equal
+        )
+        return (
+            isinstance(other, UnionType)
+            and compare_parameters(self._parameters, other._parameters)
+            and len(self._contents) == len(other._contents)
+            and all(
+                this._is_equal_to(that, parameters)
+                for this, that in zip(self._contents, other._contents)
             )
-        else:
-            return False
+        )

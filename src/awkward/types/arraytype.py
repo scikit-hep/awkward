@@ -1,4 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+from __future__ import annotations
+
 import sys
 
 import awkward as ak
@@ -48,12 +50,15 @@ class ArrayType:
         args = [repr(self._content), repr(self._length)]
         return "{}({})".format(type(self).__name__, ", ".join(args))
 
-    def __eq__(self, other):
-        if isinstance(other, ArrayType):
-            return (
+    def is_equal_to(self, other, *, parameters: bool = False) -> bool:
+        return (
+            isinstance(other, ArrayType)
+            and (
                 other._length is unknown_length
                 or self._length is unknown_length
                 or self._length == other._length
-            ) and self._content == other._content
-        else:
-            return False
+            )
+            and self._content.is_equal_to(other._content, parameters=parameters)
+        )
+
+    __eq__ = is_equal_to

@@ -1,4 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+from __future__ import annotations
 
 import json
 import sys
@@ -69,6 +70,14 @@ class Type:
             out.append("typestr=" + repr(self._typestr))
 
         return out
+
+    def is_equal_to(self, other, *, parameters: bool = False) -> bool:
+        return self._is_equal_to(other, parameters)
+
+    __eq__ = is_equal_to
+
+    def _is_equal_to(self, other, parameters: bool) -> bool:
+        raise ak._errors.wrap_error(NotImplementedError)
 
 
 class _DataShapeTransformer(Transformer):
