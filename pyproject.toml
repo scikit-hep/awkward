@@ -299,7 +299,7 @@ unfixable = [
     "T20",  # Removes print statements
     "F841", # Removes unused variables
 ]
-external = ["AK101"]
+external = []
 mccabe.max-complexity = 100
 
 [tool.ruff.per-file-ignores]
