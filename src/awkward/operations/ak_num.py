@@ -81,9 +81,7 @@ def _impl(array, axis, highlevel, behavior):
     behavior = behavior_of(array, behavior=behavior)
 
     if not is_integer(axis):
-        raise ak._errors.wrap_error(
-            TypeError(f"'axis' must be an integer, not {axis!r}")
-        )
+        raise TypeError(f"'axis' must be an integer, not {axis!r}")
 
     if maybe_posaxis(layout, axis, 1) == 0:
         if isinstance(layout, ak.record.Record):
@@ -98,9 +96,7 @@ def _impl(array, axis, highlevel, behavior):
             return ak.contents.NumpyArray(layout.stops.data - layout.starts.data)
 
         elif layout.is_leaf:
-            raise ak._errors.wrap_error(
-                np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
-            )
+            raise np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
 
     out = ak._do.recursively_apply(layout, action, behavior, numpy_to_regular=True)
 

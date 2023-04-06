@@ -19,11 +19,9 @@ class UnmaskedForm(Form):
         form_key=None,
     ):
         if not isinstance(content, Form):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} all 'contents' must be Form subclasses, not {}".format(
-                        type(self).__name__, repr(content)
-                    )
+            raise TypeError(
+                "{} all 'contents' must be Form subclasses, not {}".format(
+                    type(self).__name__, repr(content)
                 )
             )
 

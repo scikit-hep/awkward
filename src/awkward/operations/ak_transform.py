@@ -497,10 +497,8 @@ def _impl(
                 return out
 
             else:
-                raise ak._errors.wrap_error(
-                    TypeError(
-                        f"transformation must return a Content or None, not {type(out)}\n\n{out!r}"
-                    )
+                raise TypeError(
+                    f"transformation must return a Content or None, not {type(out)}\n\n{out!r}"
                 )
 
         # An exception to the rule of ak._do.recursively_apply, for symmetry with
@@ -531,10 +529,8 @@ def _impl(
             elif isinstance(out, tuple):
                 for x in out:
                     if not isinstance(x, ak.contents.Content):
-                        raise ak._errors.wrap_error(
-                            TypeError(
-                                f"transformation must return a Content, tuple of Contents, or None, not a tuple containing {type(x)}\n\n{x!r}"
-                            )
+                        raise TypeError(
+                            f"transformation must return a Content, tuple of Contents, or None, not a tuple containing {type(x)}\n\n{x!r}"
                         )
                 return out
 
@@ -542,10 +538,8 @@ def _impl(
                 return (out,)
 
             else:
-                raise ak._errors.wrap_error(
-                    TypeError(
-                        f"transformation must return a Content, tuple of Contents, or None, not {type(out)}\n\n{out!r}"
-                    )
+                raise TypeError(
+                    f"transformation must return a Content, tuple of Contents, or None, not {type(out)}\n\n{out!r}"
                 )
 
         inputs = [layout, *more_layouts]

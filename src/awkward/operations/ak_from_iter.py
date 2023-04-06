@@ -75,10 +75,8 @@ def from_iter(
 
 def _impl(iterable, highlevel, behavior, allow_record, initial, resize):
     if not isinstance(iterable, Iterable):
-        raise ak._errors.wrap_error(
-            TypeError(
-                f"cannot produce an array from a non-iterable object ({type(iterable)!r})"
-            )
+        raise TypeError(
+            f"cannot produce an array from a non-iterable object ({type(iterable)!r})"
         )
 
     if isinstance(iterable, dict):
@@ -92,10 +90,8 @@ def _impl(iterable, highlevel, behavior, allow_record, initial, resize):
                 resize,
             )[0]
         else:
-            raise ak._errors.wrap_error(
-                ValueError(
-                    "cannot produce an array from a single dict (that would be a record)"
-                )
+            raise ValueError(
+                "cannot produce an array from a single dict (that would be a record)"
             )
 
     # Ensure that tuples are treated as iterables, not records

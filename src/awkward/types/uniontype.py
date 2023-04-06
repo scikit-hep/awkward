@@ -2,7 +2,6 @@
 
 from collections.abc import Iterable
 
-import awkward as ak
 from awkward._parameters import type_parameters_equal
 from awkward._typing import final
 from awkward.types.type import Type
@@ -12,38 +11,30 @@ from awkward.types.type import Type
 class UnionType(Type):
     def __init__(self, contents, *, parameters=None, typestr=None):
         if not isinstance(contents, Iterable):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} 'contents' must be iterable, not {}".format(
-                        type(self).__name__, repr(contents)
-                    )
+            raise TypeError(
+                "{} 'contents' must be iterable, not {}".format(
+                    type(self).__name__, repr(contents)
                 )
             )
         if not isinstance(contents, list):
             contents = list(contents)
         for content in contents:
             if not isinstance(content, Type):
-                raise ak._errors.wrap_error(
-                    TypeError(
-                        "{} all 'contents' must be Type subclasses, not {}".format(
-                            type(self).__name__, repr(content)
-                        )
+                raise TypeError(
+                    "{} all 'contents' must be Type subclasses, not {}".format(
+                        type(self).__name__, repr(content)
                     )
                 )
         if parameters is not None and not isinstance(parameters, dict):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} 'parameters' must be of type dict or None, not {}".format(
-                        type(self).__name__, repr(parameters)
-                    )
+            raise TypeError(
+                "{} 'parameters' must be of type dict or None, not {}".format(
+                    type(self).__name__, repr(parameters)
                 )
             )
         if typestr is not None and not isinstance(typestr, str):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} 'typestr' must be of type string or None, not {}".format(
-                        type(self).__name__, repr(typestr)
-                    )
+            raise TypeError(
+                "{} 'typestr' must be of type string or None, not {}".format(
+                    type(self).__name__, repr(typestr)
                 )
             )
         self._contents = contents

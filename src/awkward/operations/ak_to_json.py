@@ -185,9 +185,7 @@ def _impl(
         out = ak.contents.NumpyArray(array)
 
     else:
-        raise ak._errors.wrap_error(
-            TypeError(f"unrecognized array type: {repr(array)}")
-        )
+        raise TypeError(f"unrecognized array type: {repr(array)}")
 
     jsondata = out.to_json(
         nan_string=nan_string,
@@ -295,7 +293,7 @@ def _impl(
                     )
 
     except Exception as err:
-        raise ak._errors.wrap_error(err) from err
+        raise err from err
 
 
 class _NoContextManager:

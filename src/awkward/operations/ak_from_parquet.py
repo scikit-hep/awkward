@@ -104,11 +104,9 @@ def metadata(
 
     if row_groups is not None:
         if not all(is_integer(x) and x >= 0 for x in row_groups):
-            raise ak._errors.wrap_error(
-                ValueError("row_groups must be a set of non-negative integers")
-            )
+            raise ValueError("row_groups must be a set of non-negative integers")
         if len(set(row_groups)) < len(row_groups):
-            raise ak._errors.wrap_error(ValueError("row group indices must not repeat"))
+            raise ValueError("row group indices must not repeat")
 
     fs, _, paths = fsspec.get_fs_token_paths(
         path, mode="rb", storage_options=storage_options
@@ -159,16 +157,12 @@ def metadata(
                 metadata.append_row_groups(md)
     if row_groups is not None:
         if any(_ >= metadata.num_row_groups for _ in row_groups):
-            raise ak._errors.wrap_error(
-                ValueError(
-                    f"Row group selection out of bounds 0..{metadata.num_row_groups - 1}"
-                )
+            raise ValueError(
+                f"Row group selection out of bounds 0..{metadata.num_row_groups - 1}"
             )
         if not can_sub:
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "Requested selection of row-groups, but not scanning metadata"
-                )
+            raise TypeError(
+                "Requested selection of row-groups, but not scanning metadata"
             )
 
         path_rgs = {}
@@ -356,8 +350,6 @@ def _all_and_metadata_paths(path, fs, paths, ignore_metadata=False, scan_files=T
     all_paths = [x for x, is_meta, is_comm in all_paths if not is_meta and not is_comm]
 
     if len(all_paths) == 0:
-        raise ak._errors.wrap_error(
-            ValueError(f"no *.parquet or *.parq matches for path {path!r}")
-        )
+        raise ValueError(f"no *.parquet or *.parq matches for path {path!r}")
 
     return all_paths, path_for_metadata, can_sub

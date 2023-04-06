@@ -9,19 +9,15 @@ from awkward._regularize import is_integer
 class ArrayType:
     def __init__(self, content, length):
         if not isinstance(content, ak.types.Type):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} all 'contents' must be Type subclasses, not {}".format(
-                        type(self).__name__, repr(content)
-                    )
+            raise TypeError(
+                "{} all 'contents' must be Type subclasses, not {}".format(
+                    type(self).__name__, repr(content)
                 )
             )
         if not ((is_integer(length) and length >= 0) or length is unknown_length):
-            raise ak._errors.wrap_error(
-                ValueError(
-                    "{} 'length' must be a non-negative integer or unknown length, not {}".format(
-                        type(self).__name__, repr(length)
-                    )
+            raise ValueError(
+                "{} 'length' must be a non-negative integer or unknown length, not {}".format(
+                    type(self).__name__, repr(length)
                 )
             )
         self._content = content

@@ -30,20 +30,20 @@ class Backend(Singleton, ABC):
     @property
     @abstractmethod
     def name(self) -> str:
-        raise ak._errors.wrap_error(NotImplementedError)
+        raise NotImplementedError
 
     @property
     @abstractmethod
     def nplike(self) -> NumpyLike:
-        raise ak._errors.wrap_error(NotImplementedError)
+        raise NotImplementedError
 
     @property
     @abstractmethod
     def index_nplike(self) -> NumpyLike:
-        raise ak._errors.wrap_error(NotImplementedError)
+        raise NotImplementedError
 
     def __getitem__(self, key: KernelKeyType) -> KernelType:
-        raise ak._errors.wrap_error(NotImplementedError)
+        raise NotImplementedError
 
     def apply_reducer(
         self,
@@ -103,9 +103,7 @@ class CupyBackend(Backend):
         if func is not None:
             return CupyKernel(func, index)
         else:
-            raise ak._errors.wrap_error(
-                AssertionError(f"CuPyKernel not found: {index!r}")
-            )
+            raise AssertionError(f"CuPyKernel not found: {index!r}")
 
 
 class JaxBackend(Backend):
@@ -146,9 +144,7 @@ class JaxBackend(Backend):
         from awkward._connect.jax import get_jax_ufunc
 
         if method != "__call__":
-            raise ak._errors.wrap_error(
-                ValueError(f"unsupported ufunc method {method} called")
-            )
+            raise ValueError(f"unsupported ufunc method {method} called")
 
         jax_ufunc = get_jax_ufunc(ufunc)
         return jax_ufunc(*args, **kwargs)
@@ -212,7 +208,7 @@ def _backend_for_nplike(nplike: NumpyLike) -> Backend:
     elif isinstance(nplike, TypeTracer):
         return TypeTracerBackend.instance()
     else:
-        raise ak._errors.wrap_error(ValueError("unrecognised nplike", nplike))
+        raise ValueError("unrecognised nplike", nplike)
 
 
 def common_backend(backends: Collection[Backend]) -> Backend:
@@ -226,11 +222,9 @@ def common_backend(backends: Collection[Backend]) -> Backend:
             if not backend.nplike.known_data:
                 return backend
 
-        raise ak._errors.wrap_error(
-            ValueError(
-                "cannot operate on arrays with incompatible backends. Use #ak.to_backend to coerce the arrays "
-                "to the same backend"
-            )
+        raise ValueError(
+            "cannot operate on arrays with incompatible backends. Use #ak.to_backend to coerce the arrays "
+            "to the same backend"
         )
 
 
@@ -255,7 +249,7 @@ def backend_of(*objects, default: D = _UNSET) -> Backend | D:
     if nplike is not None:
         return _backend_for_nplike(nplike)
     elif default is _UNSET:
-        raise ak._errors.wrap_error(ValueError("could not find backend for", objects))
+        raise ValueError("could not find backend for", objects)
     else:
         return default
 
@@ -271,4 +265,4 @@ def regularize_backend(backend: str | Backend) -> Backend:
     elif backend in _backends:
         return _backends[backend].instance()
     else:
-        raise ak._errors.wrap_error(ValueError(f"No such backend {backend!r} exists."))
+        raise ValueError(f"No such backend {backend!r} exists.")

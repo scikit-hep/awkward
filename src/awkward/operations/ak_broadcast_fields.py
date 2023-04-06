@@ -80,9 +80,9 @@ def _impl(arrays, highlevel, behavior):
         elif layout.is_leaf:
             return pullback, layout
         elif layout.is_union:
-            raise ak._errors.wrap_error(TypeError("unions are not supported"))
+            raise TypeError("unions are not supported")
         else:
-            raise ak._errors.wrap_error(AssertionError("unexpected content type"))
+            raise AssertionError("unexpected content type")
 
     # Like broadcast_and_apply, we want to walk into each layout, correct the structure, and then rebuilt the arrays
     # We do this using "pull back" functions that accept a child content, and return the top-level layout. Unlike
@@ -95,10 +95,8 @@ def _impl(arrays, highlevel, behavior):
         # We can only work with all non-record, or all record/identity
         if any(c.is_record for c in next_inputs):
             if not all(c.is_record or c.is_identity_like for c in next_inputs):
-                raise ak._errors.wrap_error(
-                    AssertionError(
-                        "if any inputs are records, all inputs must be records or identities"
-                    )
+                raise AssertionError(
+                    "if any inputs are records, all inputs must be records or identities"
                 )
         # With no records, we can exit here
         else:

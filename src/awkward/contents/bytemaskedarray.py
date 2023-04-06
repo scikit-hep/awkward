@@ -91,46 +91,36 @@ class ByteMaskedArray(Content):
 
     def __init__(self, mask, content, valid_when, *, parameters=None):
         if not (isinstance(mask, Index) and mask.dtype == np.dtype(np.int8)):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} 'mask' must be an Index with dtype=int8, not {}".format(
-                        type(self).__name__, repr(mask)
-                    )
+            raise TypeError(
+                "{} 'mask' must be an Index with dtype=int8, not {}".format(
+                    type(self).__name__, repr(mask)
                 )
             )
         if not isinstance(content, Content):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} 'content' must be a Content subtype, not {}".format(
-                        type(self).__name__, repr(content)
-                    )
+            raise TypeError(
+                "{} 'content' must be a Content subtype, not {}".format(
+                    type(self).__name__, repr(content)
                 )
             )
         if content.is_union or content.is_indexed or content.is_option:
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{0} cannot contain a union-type, option-type, or indexed 'content' ({1}); try {0}.simplified instead".format(
-                        type(self).__name__, type(content).__name__
-                    )
+            raise TypeError(
+                "{0} cannot contain a union-type, option-type, or indexed 'content' ({1}); try {0}.simplified instead".format(
+                    type(self).__name__, type(content).__name__
                 )
             )
         if not isinstance(valid_when, bool):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} 'valid_when' must be boolean, not {}".format(
-                        type(self).__name__, repr(valid_when)
-                    )
+            raise TypeError(
+                "{} 'valid_when' must be boolean, not {}".format(
+                    type(self).__name__, repr(valid_when)
                 )
             )
         if (
             not (mask.length is unknown_length or content.length is unknown_length)
             and mask.length > content.length
         ):
-            raise ak._errors.wrap_error(
-                ValueError(
-                    "{} len(mask) ({}) must be <= len(content) ({})".format(
-                        type(self).__name__, mask.length, content.length
-                    )
+            raise ValueError(
+                "{} len(mask) ({}) must be <= len(content) ({})".format(
+                    type(self).__name__, mask.length, content.length
                 )
             )
 
@@ -572,7 +562,7 @@ class ByteMaskedArray(Content):
             return self._getitem_next_missing(head, tail, advanced)
 
         else:
-            raise ak._errors.wrap_error(AssertionError(repr(head)))
+            raise AssertionError(repr(head))
 
     def project(self, mask=None):
         mask_length = self._mask.length
@@ -580,11 +570,9 @@ class ByteMaskedArray(Content):
 
         if mask is not None:
             if self._backend.nplike.known_data and mask_length != mask.length:
-                raise ak._errors.wrap_error(
-                    ValueError(
-                        "mask length ({}) is not equal to {} length ({})".format(
-                            mask.length, type(self).__name__, mask_length
-                        )
+                raise ValueError(
+                    "mask length ({}) is not equal to {} length ({})".format(
+                        mask.length, type(self).__name__, mask_length
                     )
                 )
 
@@ -658,7 +646,7 @@ class ByteMaskedArray(Content):
     def _offsets_and_flattened(self, axis, depth):
         posaxis = maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 == depth:
-            raise ak._errors.wrap_error(np.AxisError("axis=0 not allowed for flatten"))
+            raise np.AxisError("axis=0 not allowed for flatten")
         else:
             numnull, nextcarry, outindex = self._nextcarry_outindex()
 
@@ -801,9 +789,7 @@ class ByteMaskedArray(Content):
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         if n < 1:
-            raise ak._errors.wrap_error(
-                ValueError("in combinations, 'n' must be at least 1")
-            )
+            raise ValueError("in combinations, 'n' must be at least 1")
         posaxis = maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
@@ -954,12 +940,10 @@ class ByteMaskedArray(Content):
             elif out.is_regular:
                 out_content = out.content
             else:
-                raise ak._errors.wrap_error(
-                    ValueError(
-                        "reduce_next with unbranching depth > negaxis is only "
-                        "expected to return RegularArray or ListOffsetArray64; "
-                        "instead, it returned " + out
-                    )
+                raise ValueError(
+                    "reduce_next with unbranching depth > negaxis is only "
+                    "expected to return RegularArray or ListOffsetArray64; "
+                    "instead, it returned " + out
                 )
 
             outoffsets = ak.index.Index64.empty(
@@ -1110,7 +1094,7 @@ class ByteMaskedArray(Content):
         elif result is None:
             return continuation()
         else:
-            raise ak._errors.wrap_error(AssertionError(result))
+            raise AssertionError(result)
 
     def to_packed(self) -> Self:
         if self._content.is_record:
@@ -1134,9 +1118,7 @@ class ByteMaskedArray(Content):
 
     def _to_list(self, behavior, json_conversions):
         if not self._backend.nplike.known_data:
-            raise ak._errors.wrap_error(
-                TypeError("cannot convert typetracer arrays to Python lists")
-            )
+            raise TypeError("cannot convert typetracer arrays to Python lists")
 
         out = self._to_list_custom(behavior, json_conversions)
         if out is not None:

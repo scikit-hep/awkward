@@ -18,20 +18,16 @@ class Jax(ArrayModuleNumpyLike):
 
     @property
     def ma(self):
-        raise ak._errors.wrap_error(
-            ValueError(
-                "JAX arrays cannot have missing values until JAX implements "
-                "numpy.ma.MaskedArray"
-            )
+        raise ValueError(
+            "JAX arrays cannot have missing values until JAX implements "
+            "numpy.ma.MaskedArray"
         )
 
     @property
     def char(self):
-        raise ak._errors.wrap_error(
-            ValueError(
-                "JAX arrays cannot do string manipulations until JAX implements "
-                "numpy.char"
-            )
+        raise ValueError(
+            "JAX arrays cannot do string manipulations until JAX implements "
+            "numpy.char"
         )
 
     @property

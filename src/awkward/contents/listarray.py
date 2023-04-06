@@ -108,27 +108,19 @@ class ListArray(Content):
             np.dtype(np.uint32),
             np.dtype(np.int64),
         ):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} 'starts' must be an Index with dtype in (int32, uint32, int64), "
-                    "not {}".format(type(self).__name__, repr(starts))
-                )
+            raise TypeError(
+                "{} 'starts' must be an Index with dtype in (int32, uint32, int64), "
+                "not {}".format(type(self).__name__, repr(starts))
             )
         if not (isinstance(stops, Index) and starts.dtype == stops.dtype):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} 'stops' must be an Index with the same dtype as 'starts' ({}), "
-                    "not {}".format(
-                        type(self).__name__, repr(starts.dtype), repr(stops)
-                    )
-                )
+            raise TypeError(
+                "{} 'stops' must be an Index with the same dtype as 'starts' ({}), "
+                "not {}".format(type(self).__name__, repr(starts.dtype), repr(stops))
             )
         if not isinstance(content, Content):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} 'content' must be a Content subtype, not {}".format(
-                        type(self).__name__, repr(content)
-                    )
+            raise TypeError(
+                "{} 'content' must be a Content subtype, not {}".format(
+                    type(self).__name__, repr(content)
                 )
             )
         if (
@@ -136,30 +128,24 @@ class ListArray(Content):
             and stops.nplike.known_data
             and starts.length > stops.length
         ):
-            raise ak._errors.wrap_error(
-                ValueError(
-                    "{} len(starts) ({}) must be <= len(stops) ({})".format(
-                        type(self).__name__, starts.length, stops.length
-                    )
+            raise ValueError(
+                "{} len(starts) ({}) must be <= len(stops) ({})".format(
+                    type(self).__name__, starts.length, stops.length
                 )
             )
 
         if parameters is not None and parameters.get("__array__") == "string":
             if not content.is_numpy or not content.parameter("__array__") == "char":
-                raise ak._errors.wrap_error(
-                    ValueError(
-                        "{} is a string, so its 'content' must be uint8 NumpyArray of char, not {}".format(
-                            type(self).__name__, repr(content)
-                        )
+                raise ValueError(
+                    "{} is a string, so its 'content' must be uint8 NumpyArray of char, not {}".format(
+                        type(self).__name__, repr(content)
                     )
                 )
         if parameters is not None and parameters.get("__array__") == "bytestring":
             if not content.is_numpy or not content.parameter("__array__") == "byte":
-                raise ak._errors.wrap_error(
-                    ValueError(
-                        "{} is a bytestring, so its 'content' must be uint8 NumpyArray of byte, not {}".format(
-                            type(self).__name__, repr(content)
-                        )
+                raise ValueError(
+                    "{} is a bytestring, so its 'content' must be uint8 NumpyArray of byte, not {}".format(
+                        type(self).__name__, repr(content)
                     )
                 )
 
@@ -644,11 +630,9 @@ class ListArray(Content):
                     parameters=self._parameters,
                 )
             else:
-                raise ak._errors.wrap_error(
-                    AssertionError(
-                        "expected ListOffsetArray from ListArray._getitem_next_jagged, got {}".format(
-                            type(out).__name__
-                        )
+                raise AssertionError(
+                    "expected ListOffsetArray from ListArray._getitem_next_jagged, got {}".format(
+                        type(out).__name__
                     )
                 )
 
@@ -656,11 +640,9 @@ class ListArray(Content):
             return self
 
         else:
-            raise ak._errors.wrap_error(
-                AssertionError(
-                    "expected Index/IndexedOptionArray/ListOffsetArray in ListArray._getitem_next_jagged, got {}".format(
-                        type(slicecontent).__name__
-                    )
+            raise AssertionError(
+                "expected Index/IndexedOptionArray/ListOffsetArray in ListArray._getitem_next_jagged, got {}".format(
+                    type(slicecontent).__name__
                 )
             )
 
@@ -1023,7 +1005,7 @@ class ListArray(Content):
             return self._getitem_next_missing(head, tail, advanced)
 
         else:
-            raise ak._errors.wrap_error(AssertionError(repr(head)))
+            raise AssertionError(repr(head))
 
     def _offsets_and_flattened(self, axis, depth):
         return self.to_ListOffsetArray64(True)._offsets_and_flattened(axis, depth)
@@ -1081,14 +1063,12 @@ class ListArray(Content):
             ):
                 contents.append(array.content)
             else:
-                raise ak._errors.wrap_error(
-                    ValueError(
-                        "cannot merge "
-                        + type(self).__name__
-                        + " with "
-                        + type(array).__name__
-                        + "."
-                    )
+                raise ValueError(
+                    "cannot merge "
+                    + type(self).__name__
+                    + " with "
+                    + type(array).__name__
+                    + "."
                 )
 
         tail_contents = contents[1:]
@@ -1529,16 +1509,14 @@ class ListArray(Content):
         elif result is None:
             return continuation()
         else:
-            raise ak._errors.wrap_error(AssertionError(result))
+            raise AssertionError(result)
 
     def to_packed(self) -> Self:
         return self.to_ListOffsetArray64(True).to_packed()
 
     def _to_list(self, behavior, json_conversions):
         if not self._backend.nplike.known_data:
-            raise ak._errors.wrap_error(
-                TypeError("cannot convert typetracer arrays to Python lists")
-            )
+            raise TypeError("cannot convert typetracer arrays to Python lists")
 
         return ListOffsetArray._to_list(self, behavior, json_conversions)
 

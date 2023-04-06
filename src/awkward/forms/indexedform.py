@@ -20,19 +20,15 @@ class IndexedForm(Form):
         form_key=None,
     ):
         if not isinstance(index, str):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} 'index' must be of type str, not {}".format(
-                        type(self).__name__, repr(index)
-                    )
+            raise TypeError(
+                "{} 'index' must be of type str, not {}".format(
+                    type(self).__name__, repr(index)
                 )
             )
         if not isinstance(content, Form):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} all 'contents' must be Form subclasses, not {}".format(
-                        type(self).__name__, repr(content)
-                    )
+            raise TypeError(
+                "{} all 'contents' must be Form subclasses, not {}".format(
+                    type(self).__name__, repr(content)
                 )
             )
 

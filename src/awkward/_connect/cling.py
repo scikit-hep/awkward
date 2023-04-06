@@ -482,7 +482,7 @@ def togenerator(form, flatlist_as_rvec):
         return UnionArrayGenerator.from_form(form, flatlist_as_rvec)
 
     else:
-        raise ak._errors.wrap_error(AssertionError(f"unrecognized Form: {type(form)}"))
+        raise AssertionError(f"unrecognized Form: {type(form)}")
 
 
 class Generator:
@@ -500,7 +500,7 @@ class Generator:
         elif arraytype == "uint64_t":
             return ak.index.IndexU64
         else:
-            raise ak._errors.wrap_error(AssertionError(arraytype))
+            raise AssertionError(arraytype)
 
     def class_type_suffix(self, key):
         return ak._util.identifier_hash(key)
@@ -793,7 +793,7 @@ class ListArrayGenerator(Generator, ak._lookup.ListLookup):
         elif index_type == "i64":
             self.index_type = "int64_t"
         else:
-            raise ak._errors.wrap_error(AssertionError(index_type))
+            raise AssertionError(index_type)
         self.content = content
 
         # FIXME: satisfy the ContentLookup super-class
@@ -942,7 +942,7 @@ class IndexedArrayGenerator(Generator, ak._lookup.IndexedLookup):
         elif index_type == "i64":
             self.indextype = "int64_t"
         else:
-            raise ak._errors.wrap_error(AssertionError(index_type))
+            raise AssertionError(index_type)
         self.contenttype = content
         self.parameters = parameters
         self.flatlist_as_rvec = flatlist_as_rvec
@@ -1017,7 +1017,7 @@ class IndexedOptionArrayGenerator(Generator, ak._lookup.IndexedOptionLookup):
         elif index_type == "i64":
             self.index_type = "int64_t"
         else:
-            raise ak._errors.wrap_error(AssertionError(index_type))
+            raise AssertionError(index_type)
         self.contenttype = content
         self.parameters = parameters
         self.flatlist_as_rvec = flatlist_as_rvec
@@ -1509,7 +1509,7 @@ class UnionArrayGenerator(Generator, ak._lookup.UnionLookup):
         elif index_type == "i64":
             self.indextype = "int64_t"
         else:
-            raise ak._errors.wrap_error(AssertionError(index_type))
+            raise AssertionError(index_type)
         self.contenttypes = tuple(contents)
         self.parameters = parameters
         self.flatlist_as_rvec = flatlist_as_rvec

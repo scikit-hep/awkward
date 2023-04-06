@@ -1,5 +1,4 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-import awkward as ak
 from awkward._nplikes.shape import unknown_length
 from awkward._parameters import type_parameters_equal
 from awkward._regularize import is_integer
@@ -11,35 +10,27 @@ from awkward.types.type import Type
 class RegularType(Type):
     def __init__(self, content, size, *, parameters=None, typestr=None):
         if not isinstance(content, Type):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} 'content' must be a Type subtype, not {}".format(
-                        type(self).__name__, repr(content)
-                    )
+            raise TypeError(
+                "{} 'content' must be a Type subtype, not {}".format(
+                    type(self).__name__, repr(content)
                 )
             )
         if not (size is unknown_length or (is_integer(size) and size >= 0)):
-            raise ak._errors.wrap_error(
-                ValueError(
-                    "{} 'size' must be a non-negative int or None, not {}".format(
-                        type(self).__name__, repr(size)
-                    )
+            raise ValueError(
+                "{} 'size' must be a non-negative int or None, not {}".format(
+                    type(self).__name__, repr(size)
                 )
             )
         if parameters is not None and not isinstance(parameters, dict):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} 'parameters' must be of type dict or None, not {}".format(
-                        type(self).__name__, repr(parameters)
-                    )
+            raise TypeError(
+                "{} 'parameters' must be of type dict or None, not {}".format(
+                    type(self).__name__, repr(parameters)
                 )
             )
         if typestr is not None and not isinstance(typestr, str):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} 'typestr' must be of type string or None, not {}".format(
-                        type(self).__name__, repr(typestr)
-                    )
+            raise TypeError(
+                "{} 'typestr' must be of type string or None, not {}".format(
+                    type(self).__name__, repr(typestr)
                 )
             )
         self._content = content

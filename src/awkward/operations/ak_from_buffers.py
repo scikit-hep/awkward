@@ -120,15 +120,11 @@ def _impl(
         form = ak.forms.from_dict(form)
 
     if not (is_integer(length) and length >= 0):
-        raise ak._errors.wrap_error(
-            TypeError("'length' argument must be a non-negative integer")
-        )
+        raise TypeError("'length' argument must be a non-negative integer")
 
     if not isinstance(form, ak.forms.Form):
-        raise ak._errors.wrap_error(
-            TypeError(
-                "'form' argument must be a Form or its Python dict/JSON string representation"
-            )
+        raise TypeError(
+            "'form' argument must be a Form or its Python dict/JSON string representation"
         )
 
     if isinstance(buffer_key, str):
@@ -142,10 +138,8 @@ def _impl(
             return buffer_key(form_key=form.form_key, attribute=attribute, form=form)
 
     else:
-        raise ak._errors.wrap_error(
-            TypeError(
-                f"buffer_key must be a string or a callable, not {type(buffer_key)}"
-            )
+        raise TypeError(
+            f"buffer_key must be a string or a callable, not {type(buffer_key)}"
         )
 
     out = reconstitute(form, length, container, getkey, backend, byteorder, simplify)
@@ -167,10 +161,8 @@ def _from_buffer(nplike, buffer, dtype, count, byteorder):
 
         # Require 1D
         if array.size < count:
-            raise ak._errors.wrap_error(
-                TypeError(
-                    f"size of array ({array.size}) is less than size of form ({count})"
-                )
+            raise TypeError(
+                f"size of array ({array.size}) is less than size of form ({count})"
             )
 
         return array[:count]
@@ -185,9 +177,7 @@ def _from_buffer(nplike, buffer, dtype, count, byteorder):
 def reconstitute(form, length, container, getkey, backend, byteorder, simplify):
     if isinstance(form, ak.forms.EmptyForm):
         if length != 0:
-            raise ak._errors.wrap_error(
-                ValueError(f"EmptyForm node, but the expected length is {length}")
-            )
+            raise ValueError(f"EmptyForm node, but the expected length is {length}")
         return ak.contents.EmptyArray()
 
     elif isinstance(form, ak.forms.NumpyForm):
@@ -439,6 +429,4 @@ def reconstitute(form, length, container, getkey, backend, byteorder, simplify):
         )
 
     else:
-        raise ak._errors.wrap_error(
-            AssertionError("unexpected form node type: " + str(type(form)))
-        )
+        raise AssertionError("unexpected form node type: " + str(type(form)))
