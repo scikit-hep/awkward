@@ -24,7 +24,7 @@ def test_simple():
 
     type = ak.types.from_datashape("int8", highlevel=False)
 
-    result = ak.enforce_type(type, array)
+    result = ak.enforce_type(array, type)
     assert str(result.type.content) == str(type)
 
 
@@ -34,7 +34,7 @@ def test_reg():
     type = ak.types.from_datashape("3 * int64", highlevel=False)
     assert not isinstance(type, ak.types.ArrayType)
 
-    result = ak.enforce_type(type, array)
+    result = ak.enforce_type(array, type)
     assert str(result.type.content) == str(type)
 
 
@@ -44,7 +44,7 @@ def test_var():
     type = ak.types.from_datashape("var * int64", highlevel=False)
     assert not isinstance(type, ak.types.ArrayType)
 
-    result = ak.enforce_type(type, array)
+    result = ak.enforce_type(array, type)
     assert str(result.type.content) == str(type)
 
 
@@ -54,7 +54,7 @@ def test_record():
     type = ak.types.from_datashape("3 * {x: int64,y: int64}", highlevel=False)
     assert not isinstance(type, ak.types.ArrayType)
 
-    result = ak.enforce_type(type, array)
+    result = ak.enforce_type(array, type)
     assert str(result.type.content) == str(type)
 
 
@@ -64,5 +64,5 @@ def test_option():
     type = ak.types.from_datashape("var * ?float32", highlevel=False)
     assert not isinstance(type, ak.types.ArrayType)
 
-    result = ak.enforce_type(type, array)
+    result = ak.enforce_type(array, type)
     assert str(result.type.content) == str(type)
