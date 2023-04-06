@@ -1893,14 +1893,12 @@ class Record(NDArrayOperatorsMixin):
                 try:
                     return self[where]
                 except Exception as err:
-                    raise ak._errors.wrap_error(
-                        AttributeError(
-                            "while trying to get field {}, an exception "
-                            "occurred:\n{}: {}".format(repr(where), type(err), str(err))
-                        )
+                    raise AttributeError(
+                        "while trying to get field {}, an exception "
+                        "occurred:\n{}: {}".format(repr(where), type(err), str(err))
                     ) from err
             else:
-                raise ak._errors.wrap_error(AttributeError(f"no field named {where!r}"))
+                raise AttributeError(f"no field named {where!r}")
 
     def __setattr__(self, name, value):
         """
@@ -1929,16 +1927,12 @@ class Record(NDArrayOperatorsMixin):
         if name.startswith("_") or hasattr(type(self), name):
             super().__setattr__(name, value)
         elif name in self._layout.fields:
-            raise ak._errors.wrap_error(
-                AttributeError(
-                    "fields cannot be set as attributes. use #__setitem__ or #ak.with_field"
-                )
+            raise AttributeError(
+                "fields cannot be set as attributes. use #__setitem__ or #ak.with_field"
             )
         else:
-            raise ak._errors.wrap_error(
-                AttributeError(
-                    "only private attributes (started with an underscore) can be set on records"
-                )
+            raise AttributeError(
+                "only private attributes (started with an underscore) can be set on records"
             )
 
     def __dir__(self):

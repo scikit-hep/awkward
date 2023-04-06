@@ -6,8 +6,12 @@ import warnings
 from collections.abc import Mapping, Sequence
 
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._typing import TypeVar
 
 np = NumpyMetadata.instance()
+
+
+E = TypeVar("E", bound=Exception)
 
 
 class PartialFunction:
@@ -43,9 +47,27 @@ class ErrorContext:
             self._slate.__dict__["__primary_context__"] = self
 
     def __exit__(self, exception_type, exception_value, traceback):
-        # Step out of the way so that another ErrorContext can become primary.
-        if self.primary() is self:
-            self._slate.__dict__.clear()
+        try:
+            # Handle caught exception
+            if exception_type is not None:
+                raise self.rewrite_exception(exception_type, exception_value)
+        finally:
+            # Step out of the way so that another ErrorContext can become primary.
+            if self.primary() is self:
+                self._slate.__dict__.clear()
+
+    def rewrite_exception(self, cls: type[E], exception: E) -> E:
+        if issubclass(cls, (NotImplementedError, AssertionError)):
+            # Raise modified exception
+            exc = cls(
+                str(exception)
+                + "\n\nSee if this has been reported at https://github.com/scikit-hep/awkward-1.0/issues"
+            )
+            exc.__cause__ = exception
+        else:
+            exc = cls(self.format_exception(exception))
+            exc.__cause__ = exception
+        return exc
 
     def format_argument(self, width, value):
         from awkward import contents, highlevel, record
@@ -287,6 +309,7 @@ def wrap_error(
 
     Wrap the given exception, instantiating it if needed, to ensure meaningful error messages.
     """
+    return exception
     if isinstance(exception, type) and issubclass(exception, Exception):
         try:
             exception = exception()

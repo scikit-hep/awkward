@@ -219,9 +219,8 @@ def synchronize_cuda(stream=None):
             cupy.array(NO_ERROR),
             [],
         )
-        raise awkward._errors.wrap_error(
+        raise invoked_kernel.error_context.rewrite_exception(
             ValueError(
                 f"{kernel_errors[invoked_kernel.name][int(invocation_index % math.pow(2, ERROR_BITS))]} in compiled CUDA code ({invoked_kernel.name})"
-            ),
-            invoked_kernel.error_context,
+            )
         )
