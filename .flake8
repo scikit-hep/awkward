@@ -1,9 +1,0 @@
-[flake8]
-select = AK1
-exclude = studies, pybind11, rapidjson, docs-*, src/awkward/_typeparser/generated_parser.py, tests/*, dev/*, src/awkward/__init__.py, src/awkward/_connect/numba/*, src/awkward/_errors.py
-
-[flake8:local-plugins]
-extension =
-    AK1 = flake8_awkward:AwkwardASTPlugin
-paths =
-    ./dev/
