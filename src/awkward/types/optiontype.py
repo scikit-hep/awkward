@@ -119,12 +119,14 @@ class OptionType(Type):
         else:
             return self
 
-    def _is_equal_to(self, other, parameters: bool) -> bool:
+    def _is_equal_to(self, other, all_parameters: bool) -> bool:
         compare_parameters = (
-            parameters_are_equal if parameters else type_parameters_equal
+            parameters_are_equal if all_parameters else type_parameters_equal
         )
         return (
             isinstance(other, type(self))
             and compare_parameters(self._parameters, other._parameters)
-            and self._content._is_equal_to(other._content, parameters=parameters)
+            and self._content._is_equal_to(
+                other._content, all_parameters=all_parameters
+            )
         )

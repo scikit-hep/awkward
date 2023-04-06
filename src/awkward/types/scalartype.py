@@ -33,9 +33,9 @@ class ScalarType:
     def __repr__(self):
         return f"{type(self).__name__}({self._content!r})"
 
-    def is_equal_to(self, other, *, parameters: bool = False) -> bool:
+    def is_equal_to(self, other, *, all_parameters: bool = False) -> bool:
         return isinstance(other, ScalarType) and self._content.is_equal_to(
-            other._content, parameters=parameters
+            other._content, all_parameters=all_parameters
         )
 
     __eq__ = is_equal_to

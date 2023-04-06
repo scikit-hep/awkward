@@ -183,26 +183,26 @@ class RecordType(Type):
         args = [repr(self._contents), repr(self._fields), *self._repr_args()]
         return "{}({})".format(type(self).__name__, ", ".join(args))
 
-    def _is_equal_to(self, other, parameters: bool) -> bool:
+    def _is_equal_to(self, other, all_parameters: bool) -> bool:
         if not isinstance(other, type(self)):
             return False
 
         compare_parameters = (
-            parameters_are_equal if parameters else type_parameters_equal
+            parameters_are_equal if all_parameters else type_parameters_equal
         )
         if not compare_parameters(self._parameters, other._parameters):
             return False
 
         if self._fields is None and other._fields is None:
             for this, that in zip(self._contents, other._contents):
-                if not this._is_equal_to(that, parameters):
+                if not this._is_equal_to(that, all_parameters):
                     return False
         elif self._fields is not None and other._fields is not None:
             if set(self._fields) != set(other._fields):
                 return False
             for field in self._fields:
                 if not self.content(field)._is_equal_to(
-                    other.content(field), parameters
+                    other.content(field), all_parameters
                 ):
                     return False
         else:

@@ -66,9 +66,9 @@ class ListType(Type):
         args = [repr(self._content), *self._repr_args()]
         return "{}({})".format(type(self).__name__, ", ".join(args))
 
-    def _is_equal_to(self, other, parameters: bool):
+    def _is_equal_to(self, other, all_parameters: bool):
         compare_parameters = (
-            parameters_are_equal if parameters else type_parameters_equal
+            parameters_are_equal if all_parameters else type_parameters_equal
         )
         return (
             isinstance(other, ListType)

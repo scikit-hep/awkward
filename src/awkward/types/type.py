@@ -71,12 +71,12 @@ class Type:
 
         return out
 
-    def is_equal_to(self, other, *, parameters: bool = False) -> bool:
-        return self._is_equal_to(other, parameters)
+    def is_equal_to(self, other, *, all_parameters: bool = False) -> bool:
+        return self._is_equal_to(other, all_parameters)
 
     __eq__ = is_equal_to
 
-    def _is_equal_to(self, other, parameters: bool) -> bool:
+    def _is_equal_to(self, other, all_parameters: bool) -> bool:
         raise ak._errors.wrap_error(NotImplementedError)
 
 

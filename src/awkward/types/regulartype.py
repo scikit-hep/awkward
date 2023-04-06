@@ -84,13 +84,13 @@ class RegularType(Type):
         args = [repr(self._content), repr(self._size), *self._repr_args()]
         return "{}({})".format(type(self).__name__, ", ".join(args))
 
-    def _is_equal_to(self, other, parameters: bool) -> bool:
+    def _is_equal_to(self, other, all_parameters: bool) -> bool:
         compare_parameters = (
-            parameters_are_equal if parameters else type_parameters_equal
+            parameters_are_equal if all_parameters else type_parameters_equal
         )
         return (
             isinstance(other, type(self))
             and compare_parameters(self._parameters, other._parameters)
             and (self._size == other._size)
-            and self._content._is_equal_to(other._content, parameters)
+            and self._content._is_equal_to(other._content, all_parameters)
         )

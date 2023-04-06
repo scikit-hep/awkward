@@ -50,7 +50,7 @@ class ArrayType:
         args = [repr(self._content), repr(self._length)]
         return "{}({})".format(type(self).__name__, ", ".join(args))
 
-    def is_equal_to(self, other, *, parameters: bool = False) -> bool:
+    def is_equal_to(self, other, *, all_parameters: bool = False) -> bool:
         return (
             isinstance(other, ArrayType)
             and (
@@ -58,7 +58,7 @@ class ArrayType:
                 or self._length is unknown_length
                 or self._length == other._length
             )
-            and self._content.is_equal_to(other._content, parameters=parameters)
+            and self._content.is_equal_to(other._content, all_parameters=all_parameters)
         )
 
     __eq__ = is_equal_to
