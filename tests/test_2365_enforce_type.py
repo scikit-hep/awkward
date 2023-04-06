@@ -58,7 +58,7 @@ def test_record():
     assert str(result.type.content) == str(type)
 
 
-def test_option():
+def test_add_option():
     array = ak.Array([[1, 2, 3, 4], [5, 6, 7]])
 
     type = ak.types.from_datashape("var * ?float32", highlevel=False)
@@ -66,3 +66,14 @@ def test_option():
 
     result = ak.enforce_type(array, type)
     assert str(result.type.content) == str(type)
+
+
+def test_remove_option():
+    array = ak.mask([[1, 2, 3, 4], [5, 6, 7]], [True])
+
+    type = ak.types.from_datashape("var * float32", highlevel=False)
+    assert not isinstance(type, ak.types.ArrayType)
+
+    result = ak.enforce_type(array, type)
+    assert str(result.type.content) == str(type)
+    assert result.to_list() == [[1.0, 2.0, 3.0, 4], [5.0, 6.0, 7.0]]
