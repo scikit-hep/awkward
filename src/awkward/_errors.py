@@ -199,11 +199,11 @@ class OperationErrorContext(ErrorContext):
                 arguments.append(f"\n        {valuestr}")
 
         extra_line = "" if len(arguments) == 0 else "\n    "
-        return f"""while calling
+        return f"""{exception}.
 
-    {self.name}({"".join(arguments)}{extra_line})
+This error occurred while calling
 
-Error details: {str(exception)}"""
+    {self.name}({"".join(arguments)}{extra_line})"""
 
 
 class SlicingErrorContext(ErrorContext):
@@ -245,20 +245,15 @@ class SlicingErrorContext(ErrorContext):
         return out
 
     def format_exception(self, exception):
-        if isinstance(exception, str):
-            message = exception
-        else:
-            message = f"Error details: {str(exception)}"
+        return f"""{exception}.
 
-        return f"""while attempting to slice
+This error occurred while attempting to slice
 
     {self.array}
 
 with
 
-    {self.where}
-
-{message}"""
+    {self.where}"""
 
     @staticmethod
     def format_slice(x):
@@ -300,26 +295,14 @@ with
 
 
 def index_error(subarray, slicer, details: str = None) -> IndexError:
-    detailsstr = ""
+    message = ""
     if details is not None:
-        detailsstr = f"""
+        message = f": {details}"
 
-Error details: {details}."""
-
-    error_context = ErrorContext.primary()
-    if not isinstance(error_context, SlicingErrorContext):
-        # Note: returns an error for the caller to raise!
-        return IndexError(
-            f"cannot slice {type(subarray).__name__} with {SlicingErrorContext.format_slice(slicer)}{detailsstr}"
-        )
-
-    else:
-        # Note: returns an error for the caller to raise!
-        return IndexError(
-            error_context.format_exception(
-                f"at inner {type(subarray).__name__} of length {subarray.length}, using sub-slice {error_context.format_slice(slicer)}.{detailsstr}"
-            )
-        )
+    # Note: returns an error for the caller to raise!
+    return IndexError(
+        f"cannot slice {type(subarray).__name__} (of length {subarray.length}) with {SlicingErrorContext.format_slice(slicer)}{message}"
+    )
 
 
 ###############################################################################
