@@ -71,7 +71,7 @@ class ListType(Type):
             parameters_are_equal if all_parameters else type_parameters_equal
         )
         return (
-            isinstance(other, ListType)
+            isinstance(other, type(self))
             and compare_parameters(self._parameters, other._parameters)
             and self._content == other._content
         )

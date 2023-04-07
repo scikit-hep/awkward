@@ -98,7 +98,7 @@ class UnionType(Type):
             parameters_are_equal if all_parameters else type_parameters_equal
         )
         return (
-            isinstance(other, UnionType)
+            isinstance(other, type(self))
             and compare_parameters(self._parameters, other._parameters)
             and len(self._contents) == len(other._contents)
             and any(

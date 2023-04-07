@@ -54,6 +54,6 @@ class UnknownType(Type):
         compare_parameters = (
             parameters_are_equal if all_parameters else type_parameters_equal
         )
-        return isinstance(other, UnknownType) and compare_parameters(
+        return isinstance(other, type(self)) and compare_parameters(
             self._parameters, other._parameters
         )

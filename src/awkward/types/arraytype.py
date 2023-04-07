@@ -52,7 +52,7 @@ class ArrayType:
 
     def is_equal_to(self, other, *, all_parameters: bool = False) -> bool:
         return (
-            isinstance(other, ArrayType)
+            isinstance(other, type(self))
             and (
                 other._length is unknown_length
                 or self._length is unknown_length
