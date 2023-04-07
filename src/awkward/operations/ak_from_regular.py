@@ -69,10 +69,8 @@ def _impl(array, axis, highlevel, behavior):
             elif posaxis == depth and layout.is_list:
                 return layout
             elif layout.is_leaf:
-                raise ak._errors.wrap_error(
-                    np.AxisError(
-                        f"axis={axis} exceeds the depth of this array ({depth})"
-                    )
+                raise np.AxisError(
+                    f"axis={axis} exceeds the depth of this array ({depth})"
                 )
 
         out = ak._do.recursively_apply(layout, action, behavior, numpy_to_regular=True)

@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import copy
 
-import awkward as ak
 from awkward._nplikes import nplike_of, to_nplike
 from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.jax import Jax
@@ -37,9 +36,7 @@ def _form_to_zero_length(form):
     elif form == "i64":
         return Index64(numpy.zeros(0, dtype=np.int64))
     else:
-        raise ak._errors.wrap_error(
-            AssertionError(f"unrecognized Index form: {form!r}")
-        )
+        raise AssertionError(f"unrecognized Index form: {form!r}")
 
 
 class Index:
@@ -50,9 +47,7 @@ class Index:
             nplike = nplike_of(data)
         self._nplike = nplike
         if metadata is not None and not isinstance(metadata, dict):
-            raise ak._errors.wrap_error(
-                TypeError("Index metadata must be None or a dict")
-            )
+            raise TypeError("Index metadata must be None or a dict")
         self._metadata = metadata
         # We don't care about F, C (it's one dimensional), but we do need
         # the array to be contiguous. This should _not_ return a copy if already
@@ -61,7 +56,7 @@ class Index:
         )
 
         if len(self._data.shape) != 1:
-            raise ak._errors.wrap_error(TypeError("Index data must be one-dimensional"))
+            raise TypeError("Index data must be one-dimensional")
 
         if issubclass(self._data.dtype.type, np.longlong):
             assert (
@@ -82,19 +77,15 @@ class Index:
             elif self._data.dtype == np.dtype(np.int64):
                 self.__class__ = Index64
             else:
-                raise ak._errors.wrap_error(
-                    TypeError(
-                        "Index data must be int8, uint8, int32, uint32, int64, not "
-                        + repr(self._data.dtype)
-                    )
+                raise TypeError(
+                    "Index data must be int8, uint8, int32, uint32, int64, not "
+                    + repr(self._data.dtype)
                 )
         else:
             if self._data.dtype != self._expected_dtype:
                 # self._data = self._data.astype(self._expected_dtype)   # copy/convert
-                raise ak._errors.wrap_error(
-                    NotImplementedError(
-                        "while developing, we want to catch these errors"
-                    )
+                raise NotImplementedError(
+                    "while developing, we want to catch these errors"
                 )
 
     @classmethod

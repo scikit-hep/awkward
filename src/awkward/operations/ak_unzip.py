@@ -53,8 +53,8 @@ def _impl(array, highlevel, behavior):
         elif layout.is_union:
             for content in layout.contents:
                 if set(ak.operations.fields(content)) != set(fields):
-                    raise ak._errors.wrap_error(
-                        ValueError("union of different sets of fields, cannot ak.unzip")
+                    raise ValueError(
+                        "union of different sets of fields, cannot ak.unzip"
                     )
 
     ak._do.recursively_apply(layout, check_for_union, behavior, return_array=False)

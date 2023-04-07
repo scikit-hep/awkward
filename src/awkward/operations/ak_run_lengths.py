@@ -157,9 +157,7 @@ def _impl(array, highlevel, behavior):
                 return ak.contents.NumpyArray(nextcontent)
 
             if not isinstance(layout, (ak.contents.NumpyArray, ak.contents.EmptyArray)):
-                raise ak._errors.wrap_error(
-                    NotImplementedError("run_lengths on " + type(layout).__name__)
-                )
+                raise NotImplementedError("run_lengths on " + type(layout).__name__)
 
             nextcontent, _ = lengths_of(backend.nplike.asarray(layout), None)
             return ak.contents.NumpyArray(nextcontent)
@@ -169,9 +167,7 @@ def _impl(array, highlevel, behavior):
                 layout = layout.project()
 
             if not layout.is_list:
-                raise ak._errors.wrap_error(
-                    NotImplementedError("run_lengths on " + type(layout).__name__)
-                )
+                raise NotImplementedError("run_lengths on " + type(layout).__name__)
 
             if (
                 layout.content.parameter("__array__") == "string"
@@ -204,13 +200,11 @@ def _impl(array, highlevel, behavior):
             if not isinstance(
                 content, (ak.contents.NumpyArray, ak.contents.EmptyArray)
             ):
-                raise ak._errors.wrap_error(
-                    NotImplementedError(
-                        "run_lengths on "
-                        + type(layout).__name__
-                        + " with content "
-                        + type(content).__name__
-                    )
+                raise NotImplementedError(
+                    "run_lengths on "
+                    + type(layout).__name__
+                    + " with content "
+                    + type(content).__name__
                 )
 
             nextcontent, nextoffsets = lengths_of(

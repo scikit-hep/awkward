@@ -53,9 +53,7 @@ def _impl(array, axis, highlevel, behavior):
     behavior = behavior_of(array, behavior=behavior)
 
     if not is_integer(axis):
-        raise ak._errors.wrap_error(
-            TypeError(f"'axis' must be an integer, not {axis!r}")
-        )
+        raise TypeError(f"'axis' must be an integer, not {axis!r}")
 
     if maybe_posaxis(layout, axis, 1) == 0:
         # specialized logic; it's tested in test_0582-propagate-context-in-broadcast_and_apply.py
@@ -92,10 +90,8 @@ def _impl(array, axis, highlevel, behavior):
                 )
 
             elif layout.is_leaf:
-                raise ak._errors.wrap_error(
-                    np.AxisError(
-                        f"axis={axis} exceeds the depth of this array ({depth})"
-                    )
+                raise np.AxisError(
+                    f"axis={axis} exceeds the depth of this array ({depth})"
                 )
 
         out = ak._do.recursively_apply(layout, action, behavior, numpy_to_regular=True)

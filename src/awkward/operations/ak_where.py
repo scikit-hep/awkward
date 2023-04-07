@@ -49,9 +49,7 @@ def where(condition, *args, mergebool=True, highlevel=True, behavior=None):
             return _impl1(condition, mergebool, highlevel, behavior)
 
     elif len(args) == 1:
-        raise ak._errors.wrap_error(
-            ValueError("either both or neither of x and y should be given")
-        )
+        raise ValueError("either both or neither of x and y should be given")
 
     elif len(args) == 2:
         x, y = args
@@ -68,11 +66,9 @@ def where(condition, *args, mergebool=True, highlevel=True, behavior=None):
             return _impl3(condition, x, y, mergebool, highlevel, behavior)
 
     else:
-        raise ak._errors.wrap_error(
-            TypeError(
-                "where() takes from 1 to 3 positional arguments but {} were "
-                "given".format(len(args) + 1)
-            )
+        raise TypeError(
+            "where() takes from 1 to 3 positional arguments but {} were "
+            "given".format(len(args) + 1)
         )
 
 

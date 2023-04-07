@@ -56,11 +56,9 @@ def _impl(base, what, where, highlevel, behavior):
             and all(isinstance(x, str) for x in where)
         )
     ):
-        raise ak._errors.wrap_error(
-            TypeError(
-                "New fields may only be assigned by field name(s) "
-                "or as a new integer slot by passing None for 'where'"
-            )
+        raise TypeError(
+            "New fields may only be assigned by field name(s) "
+            "or as a new integer slot by passing None for 'where'"
         )
 
     if is_non_string_like_sequence(where) and len(where) > 1:
@@ -86,9 +84,7 @@ def _impl(base, what, where, highlevel, behavior):
         base = ak.operations.to_layout(base, allow_record=True, allow_other=False)
 
         if len(base.fields) == 0:
-            raise ak._errors.wrap_error(
-                ValueError("no tuples or records in array; cannot add a new field")
-            )
+            raise ValueError("no tuples or records in array; cannot add a new field")
 
         what = ak.operations.to_layout(what, allow_record=True, allow_other=True)
 

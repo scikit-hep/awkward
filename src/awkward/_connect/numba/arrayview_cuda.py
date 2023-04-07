@@ -23,12 +23,10 @@ class ArrayViewArgHandler:
 
                 return tys, (pos, start, stop, arrayptrs, pylookup)
             else:
-                raise ak._errors.wrap_error(
-                    TypeError(
-                        '`ak.to_backend` should be called with `backend="cuda"` to put '
-                        "the array on the GPU before using it: "
-                        'ak.to_backend(array, backend="cuda")'
-                    )
+                raise TypeError(
+                    '`ak.to_backend` should be called with `backend="cuda"` to put '
+                    "the array on the GPU before using it: "
+                    'ak.to_backend(array, backend="cuda")'
                 )
 
         else:

@@ -20,7 +20,7 @@ class ArgMin(Reducer):
 
     @classmethod
     def apply(cls, array, parents, outlength):
-        raise ak._errors.wrap_error(RuntimeError("Cannot differentiate through argmin"))
+        raise RuntimeError("Cannot differentiate through argmin")
 
 
 class ArgMax(Reducer):
@@ -34,7 +34,7 @@ class ArgMax(Reducer):
 
     @classmethod
     def apply(cls, array, parents, outlength):
-        raise ak._errors.wrap_error(RuntimeError("Cannot differentiate through argmax"))
+        raise RuntimeError("Cannot differentiate through argmax")
 
 
 class Count(Reducer):
@@ -47,9 +47,7 @@ class Count(Reducer):
 
     @classmethod
     def apply(cls, array, parents, outlength):
-        raise ak._errors.wrap_error(
-            RuntimeError("Cannot differentiate through count_zero")
-        )
+        raise RuntimeError("Cannot differentiate through count_zero")
 
 
 class CountNonzero(Reducer):
@@ -62,9 +60,7 @@ class CountNonzero(Reducer):
 
     @classmethod
     def apply(cls, array, parents, outlength):
-        raise ak._errors.wrap_error(
-            RuntimeError("Cannot differentiate through count_nonzero")
-        )
+        raise RuntimeError("Cannot differentiate through count_nonzero")
 
 
 class Sum(Reducer):
@@ -75,9 +71,7 @@ class Sum(Reducer):
     def apply(cls, array, parents, outlength):
         assert isinstance(array, ak.contents.NumpyArray)
         if array.dtype.kind == "M":
-            raise ak._errors.wrap_error(
-                TypeError(f"cannot compute the sum (ak.sum) of {array.dtype!r}")
-            )
+            raise TypeError(f"cannot compute the sum (ak.sum) of {array.dtype!r}")
 
         result = jax.ops.segment_sum(array.data, parents.data)
 

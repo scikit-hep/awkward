@@ -104,67 +104,53 @@ class RegularArray(Content):
 
     def __init__(self, content, size, zeros_length=0, *, parameters=None):
         if not isinstance(content, Content):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} 'content' must be a Content subtype, not {}".format(
-                        type(self).__name__, repr(content)
-                    )
+            raise TypeError(
+                "{} 'content' must be a Content subtype, not {}".format(
+                    type(self).__name__, repr(content)
                 )
             )
         if size is unknown_length:
             if content.backend.index_nplike.known_data:
-                raise ak._errors.wrap_error(
-                    TypeError(
-                        "{} 'size' must be a non-negative integer for backends with known shapes, not None".format(
-                            type(self).__name__
-                        )
+                raise TypeError(
+                    "{} 'size' must be a non-negative integer for backends with known shapes, not None".format(
+                        type(self).__name__
                     )
                 )
         else:
             if not (is_integer(size) and size >= 0):
-                raise ak._errors.wrap_error(
-                    TypeError(
-                        "{} 'size' must be a non-negative integer, not {}".format(
-                            type(self).__name__, size
-                        )
+                raise TypeError(
+                    "{} 'size' must be a non-negative integer, not {}".format(
+                        type(self).__name__, size
                     )
                 )
 
         if zeros_length is unknown_length:
             if content.backend.index_nplike.known_data:
-                raise ak._errors.wrap_error(
-                    TypeError(
-                        "{} 'zeros_length' must be a non-negative integer for backends with known shapes, not None".format(
-                            type(self).__name__
-                        )
+                raise TypeError(
+                    "{} 'zeros_length' must be a non-negative integer for backends with known shapes, not None".format(
+                        type(self).__name__
                     )
                 )
         else:
             if not (is_integer(zeros_length) and zeros_length >= 0):
-                raise ak._errors.wrap_error(
-                    TypeError(
-                        "{} 'zeros_length' must be a non-negative integer, not {}".format(
-                            type(self).__name__, zeros_length
-                        )
+                raise TypeError(
+                    "{} 'zeros_length' must be a non-negative integer, not {}".format(
+                        type(self).__name__, zeros_length
                     )
                 )
 
         if parameters is not None and parameters.get("__array__") == "string":
             if not content.is_numpy or not content.parameter("__array__") == "char":
-                raise ak._errors.wrap_error(
-                    ValueError(
-                        "{} is a string, so its 'content' must be uint8 NumpyArray of char, not {}".format(
-                            type(self).__name__, repr(content)
-                        )
+                raise ValueError(
+                    "{} is a string, so its 'content' must be uint8 NumpyArray of char, not {}".format(
+                        type(self).__name__, repr(content)
                     )
                 )
         if parameters is not None and parameters.get("__array__") == "bytestring":
             if not content.is_numpy or not content.parameter("__array__") == "byte":
-                raise ak._errors.wrap_error(
-                    ValueError(
-                        "{} is a bytestring, so its 'content' must be uint8 NumpyArray of byte, not {}".format(
-                            type(self).__name__, repr(content)
-                        )
+                raise ValueError(
+                    "{} is a bytestring, so its 'content' must be uint8 NumpyArray of byte, not {}".format(
+                        type(self).__name__, repr(content)
                     )
                 )
 
@@ -406,20 +392,16 @@ class RegularArray(Content):
 
     def _broadcast_tooffsets64(self, offsets):
         if offsets.nplike.known_data and (offsets.length == 0 or offsets[0] != 0):
-            raise ak._errors.wrap_error(
-                AssertionError(
-                    "broadcast_tooffsets64 can only be used with offsets that start at 0, not {}".format(
-                        "(empty)" if offsets.length == 0 else str(offsets[0])
-                    )
+            raise AssertionError(
+                "broadcast_tooffsets64 can only be used with offsets that start at 0, not {}".format(
+                    "(empty)" if offsets.length == 0 else str(offsets[0])
                 )
             )
 
         if offsets.nplike.known_data and offsets.length - 1 != self._length:
-            raise ak._errors.wrap_error(
-                AssertionError(
-                    "cannot broadcast RegularArray of length {} to length {}".format(
-                        self._length, offsets.length - 1
-                    )
+            raise AssertionError(
+                "cannot broadcast RegularArray of length {} to length {}".format(
+                    self._length, offsets.length - 1
                 )
             )
 
@@ -718,7 +700,7 @@ class RegularArray(Content):
             return self._getitem_next_missing(head, tail, advanced)
 
         else:
-            raise ak._errors.wrap_error(AssertionError(repr(head)))
+            raise AssertionError(repr(head))
 
     def _offsets_and_flattened(self, axis, depth):
         return self.to_ListOffsetArray64(True)._offsets_and_flattened(axis, depth)
@@ -899,10 +881,8 @@ class RegularArray(Content):
                 self.parameter("__array__") == "string"
                 or self.parameter("__array__") == "bytestring"
             ):
-                raise ak._errors.wrap_error(
-                    ValueError(
-                        "ak.combinations does not compute combinations of the characters of a string; please split it into lists"
-                    )
+                raise ValueError(
+                    "ak.combinations does not compute combinations of the characters of a string; please split it into lists"
                 )
 
             size = self._size
@@ -1378,7 +1358,7 @@ class RegularArray(Content):
         elif result is None:
             return continuation()
         else:
-            raise ak._errors.wrap_error(AssertionError(result))
+            raise AssertionError(result)
 
     def to_packed(self) -> Self:
         index_nplike = self._backend.index_nplike
@@ -1396,9 +1376,7 @@ class RegularArray(Content):
 
     def _to_list(self, behavior, json_conversions):
         if not self._backend.nplike.known_data:
-            raise ak._errors.wrap_error(
-                TypeError("cannot convert typetracer arrays to Python lists")
-            )
+            raise TypeError("cannot convert typetracer arrays to Python lists")
 
         if self.parameter("__array__") == "bytestring":
             convert_bytes = (

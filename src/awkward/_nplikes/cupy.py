@@ -19,20 +19,16 @@ class Cupy(ArrayModuleNumpyLike):
 
     @property
     def ma(self):
-        raise ak._errors.wrap_error(
-            ValueError(
-                "CUDA arrays cannot have missing values until CuPy implements "
-                "numpy.ma.MaskedArray"
-            )
+        raise ValueError(
+            "CUDA arrays cannot have missing values until CuPy implements "
+            "numpy.ma.MaskedArray"
         )
 
     @property
     def char(self):
-        raise ak._errors.wrap_error(
-            ValueError(
-                "CUDA arrays cannot do string manipulations until CuPy implements "
-                "numpy.char"
-            )
+        raise ValueError(
+            "CUDA arrays cannot do string manipulations until CuPy implements "
+            "numpy.char"
         )
 
     @property
@@ -55,9 +51,7 @@ class Cupy(ArrayModuleNumpyLike):
         self, x: ArrayLike, repeats: ArrayLike | int, *, axis: int | None = None
     ):
         if axis is not None:
-            raise ak._errors.wrap_error(
-                NotImplementedError(f"repeat for CuPy with axis={axis!r}")
-            )
+            raise NotImplementedError(f"repeat for CuPy with axis={axis!r}")
         # https://github.com/cupy/cupy/issues/3849
         if isinstance(repeats, self._module.ndarray):
             all_stops = self._module.cumsum(repeats)

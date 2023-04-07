@@ -6,7 +6,6 @@ import weakref
 
 import awkward as ak
 from awkward import highlevel
-from awkward._errors import wrap_error
 from awkward._nplikes.numpy import Numpy
 from awkward._typing import TypeVar
 
@@ -14,7 +13,7 @@ numpy = Numpy.instance()
 
 
 def assert_never(arg) -> None:
-    raise wrap_error(AssertionError(f"this should never be run: {arg}"))
+    raise AssertionError(f"this should never be run: {arg}")
 
 
 class _RegistrationState(enum.Enum):
@@ -35,9 +34,8 @@ def register_and_check():
         import jax  # noqa: TID251
 
     except ModuleNotFoundError:
-        raise wrap_error(
-            ModuleNotFoundError(
-                """install the 'jax' package with:
+        raise ModuleNotFoundError(
+            """install the 'jax' package with:
 
         python3 -m pip install jax jaxlib
 
@@ -45,7 +43,6 @@ def register_and_check():
 
         conda install -c conda-forge jax jaxlib
     """
-            )
         ) from None
 
     _register()
@@ -111,7 +108,7 @@ def _register():
                 jax_connect.register_pytree_class(cls)
         except Exception:
             _registration_state = _RegistrationState.FAILED
-            raise  # noqa: AK101
+            raise
         else:
             _registration_state = _RegistrationState.SUCCESS
 
@@ -120,16 +117,12 @@ def assert_registered():
     """Ensure that JAX integration is registered. Raise a RuntimeError if not."""
     with _registration_lock:
         if _registration_state == _RegistrationState.INIT:
-            raise wrap_error(
-                RuntimeError("JAX features require `ak.jax.register_and_check()`")
-            )
+            raise RuntimeError("JAX features require `ak.jax.register_and_check()`")
         elif _registration_state == _RegistrationState.FAILED:
-            raise wrap_error(
-                RuntimeError(
-                    "JAX features require `ak.jax.register_and_check()`, "
-                    "but the last call to `ak.jax.register_and_check()` did not succeed. "
-                    "Please look for a traceback to identify the error."
-                )
+            raise RuntimeError(
+                "JAX features require `ak.jax.register_and_check()`, "
+                "but the last call to `ak.jax.register_and_check()` did not succeed. "
+                "Please look for a traceback to identify the error."
             )
         elif _registration_state == _RegistrationState.SUCCESS:
             return

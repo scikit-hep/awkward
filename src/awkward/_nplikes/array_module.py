@@ -5,7 +5,6 @@ import math
 
 import numpy
 
-from awkward._errors import wrap_error
 from awkward._nplikes.numpylike import ArrayLike, IndexType, NumpyLike, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._typing import Final, Literal
@@ -31,10 +30,8 @@ class ArrayModuleNumpyLike(NumpyLike):
             return self._module.asarray(obj, dtype=dtype)
         else:
             if getattr(obj, "dtype", dtype) != dtype:
-                raise wrap_error(
-                    ValueError(
-                        "asarray was called with copy=False for an array of a different dtype"
-                    )
+                raise ValueError(
+                    "asarray was called with copy=False for an array of a different dtype"
                 )
             else:
                 return self._module.asarray(obj, dtype=dtype)
@@ -131,20 +128,16 @@ class ArrayModuleNumpyLike(NumpyLike):
             try:
                 result.shape = shape
             except AttributeError:
-                raise wrap_error(
-                    ValueError("cannot reshape array without copying")
-                ) from None
+                raise ValueError("cannot reshape array without copying") from None
             return result
 
     def shape_item_as_index(self, x1: ShapeItem) -> int:
         if x1 is unknown_length:
-            raise wrap_error(
-                TypeError("array module nplikes do not support unknown lengths")
-            )
+            raise TypeError("array module nplikes do not support unknown lengths")
         elif isinstance(x1, int):
             return x1
         else:
-            raise wrap_error(TypeError(f"expected None or int type, received {x1}"))
+            raise TypeError(f"expected None or int type, received {x1}")
 
     def index_as_shape_item(self, x1: IndexType) -> int:
         return int(x1)
@@ -181,9 +174,7 @@ class ArrayModuleNumpyLike(NumpyLike):
         if 0 <= index < length:
             return index
         else:
-            raise wrap_error(
-                IndexError(f"index value out of bounds (0, {length}): {index}")
-            )
+            raise IndexError(f"index value out of bounds (0, {length}): {index}")
 
     def nonzero(self, x: ArrayLike) -> tuple[ArrayLike, ...]:
         return self._module.nonzero(x)

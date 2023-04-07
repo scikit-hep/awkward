@@ -6,8 +6,6 @@ import os
 
 import numpy
 
-import awkward
-
 try:
     import cupy
 
@@ -149,9 +147,8 @@ class Invocation:
 
 def import_cupy(name="Awkward Arrays with CUDA"):
     if cupy is None:
-        raise awkward._errors.wrap_error(
-            ModuleNotFoundError(error_message.format(name))
-        )
+        raise ModuleNotFoundError(error_message.format(name))
+
     return cupy
 
 
@@ -197,9 +194,7 @@ def initialize_cuda_kernels(cupy):
 
         return kernel
     else:
-        raise awkward._errors.wrap_error(
-            ModuleNotFoundError(error_message.format("Awkward Arrays with CUDA"))
-        )
+        raise ModuleNotFoundError(error_message.format("Awkward Arrays with CUDA"))
 
 
 def synchronize_cuda(stream=None):
@@ -219,9 +214,8 @@ def synchronize_cuda(stream=None):
             cupy.array(NO_ERROR),
             [],
         )
-        raise awkward._errors.wrap_error(
+        raise invoked_kernel.error_context.decorate_exception(
             ValueError(
                 f"{kernel_errors[invoked_kernel.name][int(invocation_index % math.pow(2, ERROR_BITS))]} in compiled CUDA code ({invoked_kernel.name})"
-            ),
-            invoked_kernel.error_context,
+            )
         )

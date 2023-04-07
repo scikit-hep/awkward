@@ -6,7 +6,6 @@ __all__ = ("almost_equal",)
 
 from awkward._backends import backend_of
 from awkward._behavior import behavior_of, get_array_class, get_record_class
-from awkward._errors import wrap_error
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._parameters import parameters_are_equal
 from awkward.operations.ak_to_layout import to_layout
@@ -54,10 +53,8 @@ def almost_equal(
 
     backend = backend_of(left, right)
     if not backend.nplike.known_data:
-        raise wrap_error(
-            NotImplementedError(
-                "Awkward Arrays with typetracer backends cannot yet be compared with `ak.almost_equal`."
-            )
+        raise NotImplementedError(
+            "Awkward Arrays with typetracer backends cannot yet be compared with `ak.almost_equal`."
         )
 
     def is_approx_dtype(left, right) -> bool:
@@ -142,6 +139,6 @@ def almost_equal(
             return True
 
         else:
-            raise wrap_error(AssertionError)
+            raise AssertionError
 
     return visitor(left, right)

@@ -42,10 +42,8 @@ def _impl(base, where, highlevel, behavior):
     if isinstance(where, str):
         where = [where]
     elif not (isinstance(where, Sequence) and all(isinstance(x, str) for x in where)):
-        raise ak._errors.wrap_error(
-            TypeError(
-                "Field names must be given as a single string, or a sequence of strings"
-            )
+        raise TypeError(
+            "Field names must be given as a single string, or a sequence of strings"
         )
 
     behavior = behavior_of(base, behavior=behavior)

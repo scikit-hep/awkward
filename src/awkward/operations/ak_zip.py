@@ -167,9 +167,7 @@ def _impl(
     behavior,
 ):
     if depth_limit is not None and depth_limit <= 0:
-        raise ak._errors.wrap_error(
-            ValueError("depth_limit must be None or at least 1")
-        )
+        raise ValueError("depth_limit must be None or at least 1")
 
     if isinstance(arrays, dict):
         behavior = behavior_of(*arrays.values(), behavior=behavior)

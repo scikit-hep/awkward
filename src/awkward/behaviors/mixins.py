@@ -88,9 +88,7 @@ def mixin_class_method(ufunc, rhs=None, *, transpose=True):
 
     def register(method):
         if not isinstance(rhs, (set, type(None))):
-            raise ak._errors.wrap_error(
-                ValueError("expected a set of right-hand-side argument types")
-            )
+            raise ValueError("expected a set of right-hand-side argument types")
         if transpose and rhs is not None:
             # make a copy of rhs, we will edit it later
             # use partial & a module-scoped function so that this is pickleable

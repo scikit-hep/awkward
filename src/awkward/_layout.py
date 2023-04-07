@@ -5,7 +5,6 @@ from collections.abc import Mapping
 
 from awkward._backends import NumpyBackend
 from awkward._behavior import behavior_of
-from awkward._errors import wrap_error
 from awkward._nplikes import nplike_of
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
@@ -52,9 +51,7 @@ def from_arraylib(array, regulararray, recordarray):
 
     def recurse(array, mask=None):
         if Jax.is_tracer(array):
-            raise wrap_error(
-                TypeError("Jax tracers cannot be used with `ak.from_arraylib`")
-            )
+            raise TypeError("Jax tracers cannot be used with `ak.from_arraylib`")
 
         if regulararray and len(array.shape) > 1:
             new_shape = (-1,) + array.shape[2:]
@@ -130,9 +127,7 @@ def from_arraylib(array, regulararray, recordarray):
             return ByteMaskedArray(Index8(mask), data, valid_when=False)
 
     if array.dtype == np.dtype("O"):
-        raise wrap_error(
-            TypeError("Awkward Array does not support arrays with object dtypes.")
-        )
+        raise TypeError("Awkward Array does not support arrays with object dtypes.")
 
     if isinstance(array, numpy.ma.MaskedArray):
         mask = numpy.ma.getmask(array)
@@ -160,9 +155,7 @@ def maybe_posaxis(layout, axis, depth):
 
     if isinstance(layout, Record):
         if axis == 0:
-            raise wrap_error(
-                np.AxisError("Record type at axis=0 is a scalar, not an array")
-            )
+            raise np.AxisError("Record type at axis=0 is a scalar, not an array")
         return maybe_posaxis(layout._array, axis, depth)
 
     if axis >= 0:

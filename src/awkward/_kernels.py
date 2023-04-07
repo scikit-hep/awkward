@@ -33,7 +33,7 @@ class Kernel(Protocol):
 
     @abstractmethod
     def __call__(self, *args) -> KernelError | None:
-        raise ak._errors.wrap_error(NotImplementedError)
+        raise NotImplementedError
 
 
 class BaseKernel(Kernel):
@@ -77,8 +77,8 @@ class NumpyKernel(BaseKernel):
             elif hasattr(x, "_b_base_"):
                 return ctypes.cast(x, t)
             else:
-                raise ak._errors.wrap_error(
-                    AssertionError("CuPy buffers shouldn't be passed to Numpy Kernels.")
+                raise AssertionError(
+                    "CuPy buffers shouldn't be passed to Numpy Kernels."
                 )
         else:
             return x

@@ -21,27 +21,21 @@ class ListForm(Form):
         form_key=None,
     ):
         if not isinstance(starts, str):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} 'starts' must be of type str, not {}".format(
-                        type(self).__name__, repr(starts)
-                    )
+            raise TypeError(
+                "{} 'starts' must be of type str, not {}".format(
+                    type(self).__name__, repr(starts)
                 )
             )
         if not isinstance(stops, str):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} 'starts' must be of type str, not {}".format(
-                        type(self).__name__, repr(starts)
-                    )
+            raise TypeError(
+                "{} 'starts' must be of type str, not {}".format(
+                    type(self).__name__, repr(starts)
                 )
             )
         if not isinstance(content, Form):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} all 'contents' must be Form subclasses, not {}".format(
-                        type(self).__name__, repr(content)
-                    )
+            raise TypeError(
+                "{} all 'contents' must be Form subclasses, not {}".format(
+                    type(self).__name__, repr(content)
                 )
             )
 

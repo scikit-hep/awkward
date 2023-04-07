@@ -138,16 +138,14 @@ def _impl(array, how, levelname, anonymous):
     try:
         import pandas
     except ImportError as err:
-        raise ak._errors.wrap_error(
-            ImportError(
-                """install the 'pandas' package with:
+        raise ImportError(
+            """install the 'pandas' package with:
 
     pip install pandas --upgrade
 
 or
 
     conda install pandas"""
-            )
         ) from err
 
     if how is not None:

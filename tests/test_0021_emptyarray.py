@@ -145,31 +145,20 @@ def test_from_json_getitem():
         a[2, 1, 0]
     assert "index out of range while attempting to get index 0" in str(excinfo.value)
     assert a[2, 1][()].to_list() == []
-    with pytest.raises(IndexError) as excinfo:
+    with pytest.raises(IndexError, match=r"array is empty") as excinfo:
         a[2, 1][0]
-    assert (
-        "<Array [] type='0 * unknown'>\n\nwith\n\n    0\n\nat inner EmptyArray of length 0, using sub-slice 0.\n\nError details: array is empty."
-        in str(excinfo.value)
-    )
     assert a[2, 1][100:200].to_list() == []
     assert a[2, 1, 100:200].to_list() == []
     assert a[2, 1][np.array([], dtype=np.int64)].to_list() == []
     assert a[2, 1, np.array([], dtype=np.int64)].to_list() == []
-    with pytest.raises(IndexError) as excinfo:
+    with pytest.raises(
+        IndexError, match=r"index out of range while attempting to get index 0"
+    ) as excinfo:
         a[2, 1, np.array([0], dtype=np.int64)]
-    assert "index out of range while attempting to get index 0" in str(excinfo.value)
-    with pytest.raises(IndexError) as excinfo:
+    with pytest.raises(IndexError, match="array is empty") as excinfo:
         a[2, 1][100:200, 0]
-    assert (
-        "<Array [] type='0 * unknown'>\n\nwith\n\n    (100:200, 0)\n\nat inner EmptyArray of length 0, using sub-slice array(0).\n\nError details: array is empty."
-        in str(excinfo.value)
-    )
-    with pytest.raises(IndexError) as excinfo:
+    with pytest.raises(IndexError, match="array is empty") as excinfo:
         a[2, 1][100:200, 200:300]
-    assert (
-        "<Array [] type='0 * unknown'>\n\nwith\n\n    (100:200, 200:300)\n\nat inner EmptyArray of length 0, using sub-slice 200:300.\n\nError details: array is empty."
-        in str(excinfo.value)
-    )
 
     # FIXME: Failed: DID NOT RAISE <class 'IndexError'>
     # with pytest.raises(IndexError) as excinfo:
@@ -177,6 +166,7 @@ def test_from_json_getitem():
     # assert ", too many dimensions in slice" in str(excinfo.value)
 
     assert a[1:, 1:].to_list() == [[[]], [[], []]]
-    with pytest.raises(IndexError) as excinfo:
+    with pytest.raises(
+        IndexError, match=r"index out of range while attempting to get index 0"
+    ) as excinfo:
         a[1:, 1:, 0]
-    assert "index out of range while attempting to get index 0" in str(excinfo.value)

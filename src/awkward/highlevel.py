@@ -199,13 +199,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                 if length is None:
                     length = contents[-1].length
                 elif length != contents[-1].length:
-                    raise ak._errors.wrap_error(
-                        ValueError(
-                            "dict of arrays in ak.Array constructor must have arrays "
-                            "of equal length ({} vs {})".format(
-                                length, contents[-1].length
-                            )
-                        )
+                    raise ValueError(
+                        "dict of arrays in ak.Array constructor must have arrays "
+                        "of equal length ({} vs {})".format(length, contents[-1].length)
                     )
             layout = ak.contents.RecordArray(contents, fields)
 
@@ -218,9 +214,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             )
 
         if not isinstance(layout, ak.contents.Content):
-            raise ak._errors.wrap_error(
-                TypeError("could not convert data into an ak.Array")
-            )
+            raise TypeError("could not convert data into an ak.Array")
 
         if with_name is not None:
             layout = ak.operations.with_name(
@@ -296,9 +290,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             self._layout = layout
             self._numbaview = None
         else:
-            raise ak._errors.wrap_error(
-                TypeError("layout must be a subclass of ak.contents.Content")
-            )
+            raise TypeError("layout must be a subclass of ak.contents.Content")
 
     @property
     def behavior(self):
@@ -325,7 +317,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             self.__class__ = get_array_class(self._layout, behavior)
             self._behavior = behavior
         else:
-            raise ak._errors.wrap_error(TypeError("behavior must be None or a dict"))
+            raise TypeError("behavior must be None or a dict")
 
     class Mask:
         def __init__(self, array):
@@ -1028,9 +1020,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                 isinstance(where, str)
                 or (isinstance(where, tuple) and all(isinstance(x, str) for x in where))
             ):
-                raise ak._errors.wrap_error(
-                    TypeError("only fields may be assigned in-place (by field name)")
-                )
+                raise TypeError("only fields may be assigned in-place (by field name)")
 
             self._layout = ak.operations.with_field(
                 self._layout, what, where, highlevel=False
@@ -1061,9 +1051,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                 isinstance(where, str)
                 or (isinstance(where, tuple) and all(isinstance(x, str) for x in where))
             ):
-                raise ak._errors.wrap_error(
-                    TypeError("only fields may be removed in-place (by field name)")
-                )
+                raise TypeError("only fields may be removed in-place (by field name)")
 
             self._layout = ak.operations.ak_without_field._impl(
                 self._layout, where, highlevel=False, behavior=self._behavior
@@ -1113,14 +1101,12 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                 try:
                     return self[where]
                 except Exception as err:
-                    raise ak._errors.wrap_error(
-                        AttributeError(
-                            "while trying to get field {}, an exception "
-                            "occurred:\n{}: {}".format(repr(where), type(err), str(err))
-                        )
+                    raise AttributeError(
+                        "while trying to get field {}, an exception "
+                        "occurred:\n{}: {}".format(repr(where), type(err), str(err))
                     ) from err
             else:
-                raise ak._errors.wrap_error(AttributeError(f"no field named {where!r}"))
+                raise AttributeError(f"no field named {where!r}")
 
     def __setattr__(self, name, value):
         """
@@ -1149,16 +1135,12 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         if name.startswith("_") or hasattr(type(self), name):
             super().__setattr__(name, value)
         elif name in self._layout.fields:
-            raise ak._errors.wrap_error(
-                AttributeError(
-                    "fields cannot be set as attributes. use #__setitem__ or #ak.with_field"
-                )
+            raise AttributeError(
+                "fields cannot be set as attributes. use #__setitem__ or #ak.with_field"
             )
         else:
-            raise ak._errors.wrap_error(
-                AttributeError(
-                    "only private attributes (started with an underscore) can be set on arrays"
-                )
+            raise AttributeError(
+                "only private attributes (started with an underscore) can be set on arrays"
             )
 
     def __dir__(self):
@@ -1454,11 +1436,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         if len(self) == 1:
             return bool(self[0])
         else:
-            raise ak._errors.wrap_error(
-                ValueError(
-                    "the truth value of an array whose length is not 1 is ambiguous; "
-                    "use ak.any() or ak.all()"
-                )
+            raise ValueError(
+                "the truth value of an array whose length is not 1 is ambiguous; "
+                "use ak.any() or ak.all()"
             )
 
     @property
@@ -1565,17 +1545,15 @@ class Record(NDArrayOperatorsMixin):
             layout = ak.record.Record(ak.contents.RecordArray(contents, fields), at=0)
 
         elif isinstance(data, Iterable):
-            raise ak._errors.wrap_error(
-                TypeError("could not convert non-dict into an ak.Record; try ak.Array")
+            raise TypeError(
+                "could not convert non-dict into an ak.Record; try ak.Array"
             )
 
         else:
             layout = None
 
         if not isinstance(layout, ak.record.Record):
-            raise ak._errors.wrap_error(
-                TypeError("could not convert data into an ak.Record")
-            )
+            raise TypeError("could not convert data into an ak.Record")
 
         if with_name is not None:
             layout = ak.operations.with_name(layout, with_name, highlevel=False)
@@ -1641,9 +1619,7 @@ class Record(NDArrayOperatorsMixin):
             self._layout = layout
             self._numbaview = None
         else:
-            raise ak._errors.wrap_error(
-                TypeError("layout must be a subclass of ak.record.Record")
-            )
+            raise TypeError("layout must be a subclass of ak.record.Record")
 
     @property
     def behavior(self):
@@ -1670,7 +1646,7 @@ class Record(NDArrayOperatorsMixin):
             self.__class__ = get_record_class(self._layout, behavior)
             self._behavior = behavior
         else:
-            raise ak._errors.wrap_error(TypeError("behavior must be None or a dict"))
+            raise TypeError("behavior must be None or a dict")
 
     def tolist(self):
         """
@@ -1815,9 +1791,7 @@ class Record(NDArrayOperatorsMixin):
                 isinstance(where, str)
                 or (isinstance(where, tuple) and all(isinstance(x, str) for x in where))
             ):
-                raise ak._errors.wrap_error(
-                    TypeError("only fields may be assigned in-place (by field name)")
-                )
+                raise TypeError("only fields may be assigned in-place (by field name)")
 
             self._layout = ak.operations.ak_with_field._impl(
                 self._layout, what, where, highlevel=False, behavior=self._behavior
@@ -1849,9 +1823,7 @@ class Record(NDArrayOperatorsMixin):
                 isinstance(where, str)
                 or (isinstance(where, tuple) and all(isinstance(x, str) for x in where))
             ):
-                raise ak._errors.wrap_error(
-                    TypeError("only fields may be removed in-place (by field name)")
-                )
+                raise TypeError("only fields may be removed in-place (by field name)")
 
             self._layout = ak.operations.ak_without_field._impl(
                 self._layout, where, highlevel=False, behavior=self._behavior
@@ -1893,14 +1865,12 @@ class Record(NDArrayOperatorsMixin):
                 try:
                     return self[where]
                 except Exception as err:
-                    raise ak._errors.wrap_error(
-                        AttributeError(
-                            "while trying to get field {}, an exception "
-                            "occurred:\n{}: {}".format(repr(where), type(err), str(err))
-                        )
+                    raise AttributeError(
+                        "while trying to get field {}, an exception "
+                        "occurred:\n{}: {}".format(repr(where), type(err), str(err))
                     ) from err
             else:
-                raise ak._errors.wrap_error(AttributeError(f"no field named {where!r}"))
+                raise AttributeError(f"no field named {where!r}")
 
     def __setattr__(self, name, value):
         """
@@ -1929,16 +1899,12 @@ class Record(NDArrayOperatorsMixin):
         if name.startswith("_") or hasattr(type(self), name):
             super().__setattr__(name, value)
         elif name in self._layout.fields:
-            raise ak._errors.wrap_error(
-                AttributeError(
-                    "fields cannot be set as attributes. use #__setitem__ or #ak.with_field"
-                )
+            raise AttributeError(
+                "fields cannot be set as attributes. use #__setitem__ or #ak.with_field"
             )
         else:
-            raise ak._errors.wrap_error(
-                AttributeError(
-                    "only private attributes (started with an underscore) can be set on records"
-                )
+            raise AttributeError(
+                "only private attributes (started with an underscore) can be set on records"
             )
 
     def __dir__(self):
@@ -2129,11 +2095,9 @@ class Record(NDArrayOperatorsMixin):
         )
 
     def __bool__(self):
-        raise ak._errors.wrap_error(
-            ValueError(
-                "the truth value of a record is ambiguous; "
-                "use ak.any() or ak.all() or pick a field"
-            )
+        raise ValueError(
+            "the truth value of a record is ambiguous; "
+            "use ak.any() or ak.all() or pick a field"
         )
 
 
@@ -2318,7 +2282,7 @@ class ArrayBuilder(Sized):
         if behavior is None or isinstance(behavior, dict):
             self._behavior = behavior
         else:
-            raise ak._errors.wrap_error(TypeError("behavior must be None or a dict"))
+            raise TypeError("behavior must be None or a dict")
 
     def tolist(self):
         """
@@ -2437,11 +2401,9 @@ class ArrayBuilder(Sized):
         if len(self) == 1:
             return bool(self[0])
         else:
-            raise ak._errors.wrap_error(
-                ValueError(
-                    "the truth value of an array whose length is not 1 is ambiguous; "
-                    "use ak.any() or ak.all()"
-                )
+            raise ValueError(
+                "the truth value of an array whose length is not 1 is ambiguous; "
+                "use ak.any() or ak.all()"
             )
 
     def snapshot(self):

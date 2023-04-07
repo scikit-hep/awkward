@@ -116,17 +116,15 @@ def _impl(array, counts, axis, highlevel, behavior):
             counts = counts.to_backend_array()
             mask = False
         else:
-            raise ak._errors.wrap_error(
-                ValueError(
-                    "counts must be an integer or a one-dimensional array of integers"
-                )
+            raise ValueError(
+                "counts must be an integer or a one-dimensional array of integers"
             )
 
         if counts.ndim != 1:
-            raise ak._errors.wrap_error(ValueError("counts must be one-dimensional"))
+            raise ValueError("counts must be one-dimensional")
 
         if not np.issubdtype(counts.dtype, np.integer):
-            raise ak._errors.wrap_error(ValueError("counts must be integers"))
+            raise ValueError("counts must be integers")
 
         current_offsets = backend.index_nplike.empty(counts.size + 1, dtype=np.int64)
         current_offsets[0] = 0
@@ -141,9 +139,7 @@ def _impl(array, counts, axis, highlevel, behavior):
                 and layout.length is not unknown_length
                 and not 0 <= counts < layout.length
             ):
-                raise ak._errors.wrap_error(
-                    ValueError("too large counts for array or negative counts")
-                )
+                raise ValueError("too large counts for array or negative counts")
             out = ak.contents.RegularArray(layout, counts)
 
         else:
@@ -166,11 +162,9 @@ def _impl(array, counts, axis, highlevel, behavior):
                     or current_offsets[position] != layout.length
                 )
             ):
-                raise ak._errors.wrap_error(
-                    ValueError(
-                        "structure imposed by 'counts' does not fit in the array or partition "
-                        "at axis={}".format(axis)
-                    )
+                raise ValueError(
+                    "structure imposed by 'counts' does not fit in the array or partition "
+                    "at axis={}".format(axis)
                 )
 
             offsets = current_offsets[: position + 1]
@@ -221,11 +215,9 @@ def _impl(array, counts, axis, highlevel, behavior):
                 if not backend.index_nplike.array_equal(
                     inneroffsets[positions], outeroffsets
                 ):
-                    raise ak._errors.wrap_error(
-                        ValueError(
-                            "structure imposed by 'counts' does not fit in the array or partition "
-                            "at axis={}".format(axis)
-                        )
+                    raise ValueError(
+                        "structure imposed by 'counts' does not fit in the array or partition "
+                        "at axis={}".format(axis)
                     )
                 positions[0] = 0
 
@@ -238,11 +230,9 @@ def _impl(array, counts, axis, highlevel, behavior):
         and current_offsets.size is not unknown_length
         and not (current_offsets.size == 1 and current_offsets[0] == 0)
     ):
-        raise ak._errors.wrap_error(
-            ValueError(
-                "structure imposed by 'counts' does not fit in the array or partition "
-                "at axis={}".format(axis)
-            )
+        raise ValueError(
+            "structure imposed by 'counts' does not fit in the array or partition "
+            "at axis={}".format(axis)
         )
 
     return wrap_layout(out, behavior, highlevel)

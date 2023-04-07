@@ -53,11 +53,9 @@ class NumpyForm(Form):
             ak.types.numpytype.primitive_to_dtype(primitive)
         )
         if not isinstance(inner_shape, Iterable):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} 'inner_shape' must be iterable, not {}".format(
-                        type(self).__name__, repr(inner_shape)
-                    )
+            raise TypeError(
+                "{} 'inner_shape' must be iterable, not {}".format(
+                    type(self).__name__, repr(inner_shape)
                 )
             )
 
