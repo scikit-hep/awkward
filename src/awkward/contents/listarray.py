@@ -622,8 +622,6 @@ class ListArray(Content):
                 out = ak.contents.IndexedOptionArray.simplified(
                     missing_trim, content, parameters=self._parameters
                 )
-                if isinstance(self._backend.nplike, TypeTracer):
-                    out = out.to_typetracer()
                 return ak.contents.ListOffsetArray(
                     largeoffsets,
                     out,
