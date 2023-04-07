@@ -2,6 +2,7 @@
 
 from collections.abc import Iterable
 from itertools import permutations
+
 from awkward._parameters import parameters_are_equal, type_parameters_equal
 from awkward._typing import final
 from awkward.types.type import Type
