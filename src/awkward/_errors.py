@@ -211,7 +211,7 @@ class OperationErrorContext(ErrorContext):
         return out
 
     def format_exception(self, exception):
-        return f"{exception}.\n{self.note}"
+        return f"{exception}\n{self.note}"
 
     @property
     def note(self) -> str:
@@ -268,7 +268,7 @@ class SlicingErrorContext(ErrorContext):
         return out
 
     def format_exception(self, exception):
-        return f"{exception}.\n{self.note}"
+        return f"{exception}\n{self.note}"
 
     @property
     def note(self) -> str:
