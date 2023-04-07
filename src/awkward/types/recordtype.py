@@ -2,6 +2,7 @@
 
 import json
 from collections.abc import Iterable
+from itertools import permutations
 
 import awkward as ak
 import awkward._prettyprint
@@ -193,20 +194,30 @@ class RecordType(Type):
         if not compare_parameters(self._parameters, other._parameters):
             return False
 
-        if self._fields is None and other._fields is None:
-            for this, that in zip(self._contents, other._contents):
-                if not this._is_equal_to(that, all_parameters):
-                    return False
-        elif self._fields is not None and other._fields is not None:
+        # Both tuples
+        if self.is_tuple and other.is_tuple:
+            return all(
+                this._is_equal_to(that, all_parameters)
+                for this, that in zip(self._contents, other._contents)
+            )
+        # Both records
+        elif not (self.is_tuple or other.is_tuple):
             if set(self._fields) != set(other._fields):
                 return False
-            for field in self._fields:
-                if not self.content(field)._is_equal_to(
-                    other.content(field), all_parameters
-                ):
-                    return False
 
-        return True
+            self_contents = [self.content(f) for f in self._fields]
+            other_contents = [other.content(f) for f in other._fields]
+
+            return any(
+                all(
+                    this._is_equal_to(that, all_parameters)
+                    for this, that in zip(self_contents, contents)
+                )
+                for contents in permutations(other_contents)
+            )
+        # Mixed
+        else:
+            return False
 
     def index_to_field(self, index):
         return ak.forms.RecordForm.index_to_field(self, index)
