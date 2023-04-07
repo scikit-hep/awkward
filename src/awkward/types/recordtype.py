@@ -205,8 +205,8 @@ class RecordType(Type):
                     other.content(field), all_parameters
                 ):
                     return False
-        else:
-            return True
+
+        return True
 
     def index_to_field(self, index):
         return ak.forms.RecordForm.index_to_field(self, index)
