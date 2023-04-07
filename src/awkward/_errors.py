@@ -61,7 +61,7 @@ class ErrorContext:
             # Raise modified exception
             exc = cls(
                 str(exception)
-                + "\n\nSee if this has been reported at https://github.com/scikit-hep/awkward-1.0/issues"
+                + "\n\nSee if this has been reported at https://github.com/scikit-hep/awkward/issues"
             )
             exc.__cause__ = exception
         else:
