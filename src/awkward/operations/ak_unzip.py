@@ -48,17 +48,14 @@ def _impl(array, highlevel, behavior):
 
     def check_for_union(layout, **kwargs):
         if isinstance(layout, (ak.contents.RecordArray, ak.Record)):
-            pass  # don't descend into nested records
+            return layout  # don't descend into nested records
 
-        elif isinstance(layout, ak.contents.UnionArray):
+        elif layout.is_union:
             for content in layout.contents:
                 if set(ak.operations.fields(content)) != set(fields):
                     raise ak._errors.wrap_error(
                         ValueError("union of different sets of fields, cannot ak.unzip")
                     )
-
-        elif hasattr(layout, "content"):
-            check_for_union(layout.content)
 
     ak._do.recursively_apply(layout, check_for_union, behavior, return_array=False)
 
