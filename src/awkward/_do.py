@@ -83,9 +83,7 @@ def to_buffers(
     if backend is None:
         backend = content._backend
     if not backend.nplike.known_data:
-        raise ak._errors.wrap_error(
-            TypeError("cannot call 'to_buffers' on an array without concrete data")
-        )
+        raise TypeError("cannot call 'to_buffers' on an array without concrete data")
 
     if isinstance(buffer_key, str):
 
@@ -103,19 +101,13 @@ def to_buffers(
             )
 
     else:
-        raise ak._errors.wrap_error(
-            TypeError(
-                "buffer_key must be a string or a callable, not {}".format(
-                    type(buffer_key)
-                )
-            )
+        raise TypeError(
+            f"buffer_key must be a string or a callable, not {type(buffer_key)}"
         )
 
     if form_key is None:
-        raise ak._errors.wrap_error(
-            TypeError(
-                "a 'form_key' must be supplied, to match Form elements to buffers in the 'container'"
-            )
+        raise TypeError(
+            "a 'form_key' must be supplied, to match Form elements to buffers in the 'container'"
         )
 
     form = content.form_with_key(form_key=form_key, id_start=id_start)
@@ -138,17 +130,13 @@ def combinations(
     parameters: dict | None = None,
 ):
     if n < 1:
-        raise ak._errors.wrap_error(
-            ValueError("in combinations, 'n' must be at least 1")
-        )
+        raise ValueError("in combinations, 'n' must be at least 1")
 
     recordlookup = None
     if fields is not None:
         recordlookup = fields
         if len(recordlookup) != n:
-            raise ak._errors.wrap_error(
-                ValueError("if provided, the length of 'fields' must be 'n'")
-            )
+            raise ValueError("if provided, the length of 'fields' must be 'n'")
     return layout._combinations(n, replacement, recordlookup, parameters, axis, 1)
 
 
@@ -166,31 +154,25 @@ def unique(layout: Content, axis=None):
             branch, depth = layout.branch_depth
             if branch:
                 if negaxis <= 0:
-                    raise ak._errors.wrap_error(
-                        np.AxisError(
-                            "cannot use non-negative axis on a nested list structure "
-                            "of variable depth (negative axis counts from the leaves "
-                            "of the tree; non-negative from the root)"
-                        )
+                    raise np.AxisError(
+                        "cannot use non-negative axis on a nested list structure "
+                        "of variable depth (negative axis counts from the leaves "
+                        "of the tree; non-negative from the root)"
                     )
                 if negaxis > depth:
-                    raise ak._errors.wrap_error(
-                        np.AxisError(
-                            "cannot use axis={} on a nested list structure that splits into "
-                            "different depths, the minimum of which is depth={} from the leaves".format(
-                                axis, depth
-                            )
+                    raise np.AxisError(
+                        "cannot use axis={} on a nested list structure that splits into "
+                        "different depths, the minimum of which is depth={} from the leaves".format(
+                            axis, depth
                         )
                     )
             else:
                 if negaxis <= 0:
                     negaxis = negaxis + depth
                 if not (0 < negaxis and negaxis <= depth):
-                    raise ak._errors.wrap_error(
-                        np.AxisError(
-                            "axis={} exceeds the depth of this array ({})".format(
-                                axis, depth
-                            )
+                    raise np.AxisError(
+                        "axis={} exceeds the depth of this array ({})".format(
+                            axis, depth
                         )
                     )
 
@@ -201,11 +183,9 @@ def unique(layout: Content, axis=None):
 
         return layout._unique(negaxis, starts, parents, 1)
 
-    raise ak._errors.wrap_error(
-        np.AxisError(
-            "unique expects axis 'None' or '-1', got axis={} that is not supported yet".format(
-                axis
-            )
+    raise np.AxisError(
+        "unique expects axis 'None' or '-1', got axis={} that is not supported yet".format(
+            axis
         )
     )
 
@@ -291,10 +271,8 @@ def reduce(
         if len(parts) > 1:
             # We know that `flatten_records` must fail, so the only other type
             # that can return multiple parts here is the union array
-            raise ak._errors.wrap_error(
-                ValueError(
-                    "cannot use axis=None on an array containing irreducible unions"
-                )
+            raise ValueError(
+                "cannot use axis=None on an array containing irreducible unions"
             )
         elif len(parts) == 0:
             parts = [ak.contents.EmptyArray()]
@@ -322,30 +300,24 @@ def reduce(
 
         if branch:
             if negaxis <= 0:
-                raise ak._errors.wrap_error(
-                    ValueError(
-                        "cannot use non-negative axis on a nested list structure "
-                        "of variable depth (negative axis counts from the leaves of "
-                        "the tree; non-negative from the root)"
-                    )
+                raise ValueError(
+                    "cannot use non-negative axis on a nested list structure "
+                    "of variable depth (negative axis counts from the leaves of "
+                    "the tree; non-negative from the root)"
                 )
             if negaxis > depth:
-                raise ak._errors.wrap_error(
-                    ValueError(
-                        "cannot use axis={} on a nested list structure that splits into "
-                        "different depths, the minimum of which is depth={} "
-                        "from the leaves".format(axis, depth)
-                    )
+                raise ValueError(
+                    "cannot use axis={} on a nested list structure that splits into "
+                    "different depths, the minimum of which is depth={} "
+                    "from the leaves".format(axis, depth)
                 )
         else:
             if negaxis <= 0:
                 negaxis += depth
             if not 0 < negaxis <= depth:
-                raise ak._errors.wrap_error(
-                    ValueError(
-                        "axis={} exceeds the depth of the nested list structure "
-                        "(which is {})".format(axis, depth)
-                    )
+                raise ValueError(
+                    "axis={} exceeds the depth of the nested list structure "
+                    "(which is {})".format(axis, depth)
                 )
 
         starts = ak.index.Index64.zeros(1, layout.backend.index_nplike)
@@ -383,31 +355,25 @@ def argsort(
     branch, depth = layout.branch_depth
     if branch:
         if negaxis <= 0:
-            raise ak._errors.wrap_error(
-                ValueError(
-                    "cannot use non-negative axis on a nested list structure "
-                    "of variable depth (negative axis counts from the leaves "
-                    "of the tree; non-negative from the root)"
-                )
+            raise ValueError(
+                "cannot use non-negative axis on a nested list structure "
+                "of variable depth (negative axis counts from the leaves "
+                "of the tree; non-negative from the root)"
             )
         if negaxis > depth:
-            raise ak._errors.wrap_error(
-                ValueError(
-                    "cannot use axis={} on a nested list structure that splits into "
-                    "different depths, the minimum of which is depth={} from the leaves".format(
-                        axis, depth
-                    )
+            raise ValueError(
+                "cannot use axis={} on a nested list structure that splits into "
+                "different depths, the minimum of which is depth={} from the leaves".format(
+                    axis, depth
                 )
             )
     else:
         if negaxis <= 0:
             negaxis = negaxis + depth
         if not 0 < negaxis <= depth:
-            raise ak._errors.wrap_error(
-                ValueError(
-                    "axis={} exceeds the depth of the nested list structure "
-                    "(which is {})".format(axis, depth)
-                )
+            raise ValueError(
+                "axis={} exceeds the depth of the nested list structure "
+                "(which is {})".format(axis, depth)
             )
 
     starts = ak.index.Index64.zeros(1, nplike=layout.backend.index_nplike)
@@ -430,31 +396,25 @@ def sort(
     branch, depth = layout.branch_depth
     if branch:
         if negaxis <= 0:
-            raise ak._errors.wrap_error(
-                ValueError(
-                    "cannot use non-negative axis on a nested list structure "
-                    "of variable depth (negative axis counts from the leaves "
-                    "of the tree; non-negative from the root)"
-                )
+            raise ValueError(
+                "cannot use non-negative axis on a nested list structure "
+                "of variable depth (negative axis counts from the leaves "
+                "of the tree; non-negative from the root)"
             )
         if negaxis > depth:
-            raise ak._errors.wrap_error(
-                ValueError(
-                    "cannot use axis={} on a nested list structure that splits into "
-                    "different depths, the minimum of which is depth={} from the leaves".format(
-                        axis, depth
-                    )
+            raise ValueError(
+                "cannot use axis={} on a nested list structure that splits into "
+                "different depths, the minimum of which is depth={} from the leaves".format(
+                    axis, depth
                 )
             )
     else:
         if negaxis <= 0:
             negaxis = negaxis + depth
         if not 0 < negaxis <= depth:
-            raise ak._errors.wrap_error(
-                ValueError(
-                    "axis={} exceeds the depth of the nested list structure "
-                    "(which is {})".format(axis, depth)
-                )
+            raise ValueError(
+                "axis={} exceeds the depth of the nested list structure "
+                "(which is {})".format(axis, depth)
             )
 
     starts = ak.index.Index64.zeros(1, nplike=layout.backend.index_nplike)

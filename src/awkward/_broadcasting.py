@@ -111,15 +111,13 @@ def checklength(inputs, options):
     length = inputs[0].length
     for x in inputs[1:]:
         if x.length != length:
-            raise ak._errors.wrap_error(
-                ValueError(
-                    "cannot broadcast {} of length {} with {} of length {}{}".format(
-                        type(inputs[0]).__name__,
-                        length,
-                        type(x).__name__,
-                        x.length,
-                        in_function(options),
-                    )
+            raise ValueError(
+                "cannot broadcast {} of length {} with {} of length {}{}".format(
+                    type(inputs[0]).__name__,
+                    length,
+                    type(x).__name__,
+                    x.length,
+                    in_function(options),
                 )
             )
 
@@ -322,11 +320,9 @@ def one_to_one_parameters_factory(
 
     def apply(n_outputs) -> list[dict[str, Any] | None]:
         if n_outputs != len(inputs):
-            raise ak._errors.wrap_error(
-                ValueError(
-                    "cannot follow one-to-one parameter broadcasting rule for actions "
-                    "which change the number of outputs."
-                )
+            raise ValueError(
+                "cannot follow one-to-one parameter broadcasting rule for actions "
+                "which change the number of outputs."
             )
         return input_parameters
 
@@ -431,20 +427,16 @@ def apply_step(
     try:
         parameters_factory_impl = BROADCAST_RULE_TO_FACTORY_IMPL[rule]
     except KeyError:
-        raise ak._errors.wrap_error(
-            ValueError(
-                f"`broadcast_parameters_rule` should be one of {[str(x) for x in BroadcastParameterRule]}, "
-                f"but this routine received `{rule}`"
-            )
+        raise ValueError(
+            f"`broadcast_parameters_rule` should be one of {[str(x) for x in BroadcastParameterRule]}, "
+            f"but this routine received `{rule}`"
         ) from None
     parameters_factory = parameters_factory_impl(inputs)
 
     # This whole function is one big switch statement.
     def broadcast_any_record():
         if not options["allow_records"]:
-            raise ak._errors.wrap_error(
-                ValueError(f"cannot broadcast records {in_function(options)}")
-            )
+            raise ValueError(f"cannot broadcast records {in_function(options)}")
 
         fields, length, istuple = unset, unset, unset
         for x in contents:
@@ -452,25 +444,21 @@ def apply_step(
                 if fields is unset:
                     fields = x.fields
                 elif set(fields) != set(x.fields):
-                    raise ak._errors.wrap_error(
-                        ValueError(
-                            "cannot broadcast records because fields don't "
-                            "match{}:\n    {}\n    {}".format(
-                                in_function(options),
-                                ", ".join(sorted(fields)),
-                                ", ".join(sorted(x.fields)),
-                            )
+                    raise ValueError(
+                        "cannot broadcast records because fields don't "
+                        "match{}:\n    {}\n    {}".format(
+                            in_function(options),
+                            ", ".join(sorted(fields)),
+                            ", ".join(sorted(x.fields)),
                         )
                     )
                 if length is unset:
                     length = x.length
                 elif length != x.length:
-                    raise ak._errors.wrap_error(
-                        ValueError(
-                            "cannot broadcast RecordArray of length {} "
-                            "with RecordArray of length {}{}".format(
-                                length, x.length, in_function(options)
-                            )
+                    raise ValueError(
+                        "cannot broadcast RecordArray of length {} "
+                        "with RecordArray of length {}{}".format(
+                            length, x.length, in_function(options)
                         )
                     )
                 # Records win over tuples
@@ -552,12 +540,10 @@ def apply_step(
                         elif dimsize == 0:
                             nextinputs.append(x.content[:0])
                         else:
-                            raise ak._errors.wrap_error(
-                                ValueError(
-                                    "cannot broadcast RegularArray of size "
-                                    "{} with RegularArray of size {} {}".format(
-                                        x.size, dimsize, in_function(options)
-                                    )
+                            raise ValueError(
+                                "cannot broadcast RegularArray of size "
+                                "{} with RegularArray of size {} {}".format(
+                                    x.size, dimsize, in_function(options)
                                 )
                             )
                     else:
@@ -687,11 +673,9 @@ def apply_step(
                     for x, p in zip(outcontent, parameters)
                 )
             else:
-                raise ak._errors.wrap_error(
-                    AssertionError(
-                        "unexpected offsets, starts: {}, {}".format(
-                            type(offsets), type(starts)
-                        )
+                raise AssertionError(
+                    "unexpected offsets, starts: {}, {}".format(
+                        type(offsets), type(starts)
                     )
                 )
 
@@ -893,14 +877,12 @@ def apply_step(
                     if length is None:
                         length = tags.shape[0]
                     elif length != tags.shape[0]:
-                        raise ak._errors.wrap_error(
-                            ValueError(
-                                "cannot broadcast UnionArray of length {} "
-                                "with UnionArray of length {}{}".format(
-                                    length,
-                                    tags.shape[0],
-                                    in_function(options),
-                                )
+                        raise ValueError(
+                            "cannot broadcast UnionArray of length {} "
+                            "with UnionArray of length {}{}".format(
+                                length,
+                                tags.shape[0],
+                                in_function(options),
                             )
                         )
             assert length is not unknown_length
@@ -1037,11 +1019,9 @@ def apply_step(
             return broadcast_any_record()
 
         else:
-            raise ak._errors.wrap_error(
-                ValueError(
-                    "cannot broadcast: {}{}".format(
-                        ", ".join(repr(type(x)) for x in inputs), in_function(options)
-                    )
+            raise ValueError(
+                "cannot broadcast: {}{}".format(
+                    ", ".join(repr(type(x)) for x in inputs), in_function(options)
                 )
             )
 
@@ -1061,7 +1041,7 @@ def apply_step(
     elif result is None:
         return continuation()
     else:
-        raise ak._errors.wrap_error(AssertionError(result))
+        raise AssertionError(result)
 
 
 def broadcast_and_apply(

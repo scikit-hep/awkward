@@ -120,74 +120,58 @@ class BitMaskedArray(Content):
         self, mask, content, valid_when, length, lsb_order, *, parameters=None
     ):
         if not (isinstance(mask, Index) and mask.dtype == np.dtype(np.uint8)):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} 'mask' must be an Index with dtype=uint8, not {}".format(
-                        type(self).__name__, repr(mask)
-                    )
+            raise TypeError(
+                "{} 'mask' must be an Index with dtype=uint8, not {}".format(
+                    type(self).__name__, repr(mask)
                 )
             )
         if not isinstance(content, Content):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} 'content' must be a Content subtype, not {}".format(
-                        type(self).__name__, repr(content)
-                    )
+            raise TypeError(
+                "{} 'content' must be a Content subtype, not {}".format(
+                    type(self).__name__, repr(content)
                 )
             )
         if content.is_union or content.is_indexed or content.is_option:
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{0} cannot contain a union-type, option-type, or indexed 'content' ({1}); try {0}.simplified instead".format(
-                        type(self).__name__, type(content).__name__
-                    )
+            raise TypeError(
+                "{0} cannot contain a union-type, option-type, or indexed 'content' ({1}); try {0}.simplified instead".format(
+                    type(self).__name__, type(content).__name__
                 )
             )
         if not isinstance(valid_when, bool):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} 'valid_when' must be boolean, not {}".format(
-                        type(self).__name__, repr(valid_when)
-                    )
+            raise TypeError(
+                "{} 'valid_when' must be boolean, not {}".format(
+                    type(self).__name__, repr(valid_when)
                 )
             )
         if length is not unknown_length:
             if not (is_integer(length) and length >= 0):
-                raise ak._errors.wrap_error(
-                    TypeError(
-                        "{} 'length' must be a non-negative integer, not {}".format(
-                            type(self).__name__, length
-                        )
+                raise TypeError(
+                    "{} 'length' must be a non-negative integer, not {}".format(
+                        type(self).__name__, length
                     )
                 )
         if not isinstance(lsb_order, bool):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} 'lsb_order' must be boolean, not {}".format(
-                        type(self).__name__, repr(lsb_order)
-                    )
+            raise TypeError(
+                "{} 'lsb_order' must be boolean, not {}".format(
+                    type(self).__name__, repr(lsb_order)
                 )
             )
         if (
             not (length is unknown_length or mask.length is unknown_length)
             and length > mask.length * 8
         ):
-            raise ak._errors.wrap_error(
-                ValueError(
-                    "{} 'length' ({}) must be <= len(mask) * 8 ({})".format(
-                        type(self).__name__, length, mask.length * 8
-                    )
+            raise ValueError(
+                "{} 'length' ({}) must be <= len(mask) * 8 ({})".format(
+                    type(self).__name__, length, mask.length * 8
                 )
             )
         if (
             not (length is unknown_length or content.length is unknown_length)
             and length > content.length * 8
         ):
-            raise ak._errors.wrap_error(
-                ValueError(
-                    "{} 'length' ({}) must be <= len(content) ({})".format(
-                        type(self).__name__, length, content.length
-                    )
+            raise ValueError(
+                "{} 'length' ({}) must be <= len(content) ({})".format(
+                    type(self).__name__, length, content.length
                 )
             )
 
@@ -556,7 +540,7 @@ class BitMaskedArray(Content):
             return self._getitem_next_missing(head, tail, advanced)
 
         else:
-            raise ak._errors.wrap_error(AssertionError(repr(head)))
+            raise AssertionError(repr(head))
 
     def project(self, mask=None):
         return self.to_ByteMaskedArray().project(mask)
@@ -754,7 +738,7 @@ class BitMaskedArray(Content):
         elif result is None:
             return continuation()
         else:
-            raise ak._errors.wrap_error(AssertionError(result))
+            raise AssertionError(result)
 
     def to_packed(self) -> Self:
         if self._content.is_record:
@@ -790,9 +774,7 @@ class BitMaskedArray(Content):
 
     def _to_list(self, behavior, json_conversions):
         if not self._backend.nplike.known_data:
-            raise ak._errors.wrap_error(
-                TypeError("cannot convert typetracer arrays to Python lists")
-            )
+            raise TypeError("cannot convert typetracer arrays to Python lists")
 
         out = self._to_list_custom(behavior, json_conversions)
         if out is not None:

@@ -7,7 +7,6 @@ import re
 from collections.abc import Mapping
 
 import awkward as ak
-from awkward import _errors
 from awkward._behavior import find_typestrs
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
@@ -82,9 +81,7 @@ def from_dict(input: dict) -> Form:
         # New serialisation
         if "fields" in input:
             if isinstance(input["contents"], Mapping):
-                raise _errors.wrap_error(
-                    TypeError("new-style RecordForm contents must not be mappings")
-                )
+                raise TypeError("new-style RecordForm contents must not be mappings")
             contents = [from_dict(content) for content in input["contents"]]
             fields = input["fields"]
         # Old style record
@@ -171,15 +168,11 @@ def from_dict(input: dict) -> Form:
         )
 
     elif input["class"] == "VirtualArray":
-        raise _errors.wrap_error(
-            ValueError("Awkward 1.x VirtualArrays are not supported")
-        )
+        raise ValueError("Awkward 1.x VirtualArrays are not supported")
 
     else:
-        raise _errors.wrap_error(
-            ValueError(
-                "input class: {} was not recognised".format(repr(input["class"]))
-            )
+        raise ValueError(
+            "input class: {} was not recognised".format(repr(input["class"]))
         )
 
 
@@ -219,19 +212,15 @@ class Form:
 
     def _init(self, *, parameters, form_key):
         if parameters is not None and not isinstance(parameters, dict):
-            raise _errors.wrap_error(
-                TypeError(
-                    "{} 'parameters' must be of type dict or None, not {}".format(
-                        type(self).__name__, repr(parameters)
-                    )
+            raise TypeError(
+                "{} 'parameters' must be of type dict or None, not {}".format(
+                    type(self).__name__, repr(parameters)
                 )
             )
         if form_key is not None and not isinstance(form_key, str):
-            raise _errors.wrap_error(
-                TypeError(
-                    "{} 'form_key' must be of type string or None, not {}".format(
-                        type(self).__name__, repr(form_key)
-                    )
+            raise TypeError(
+                "{} 'form_key' must be of type string or None, not {}".format(
+                    type(self).__name__, repr(form_key)
                 )
             )
 
@@ -247,7 +236,7 @@ class Form:
     @property
     def is_identity_like(self):
         """Return True if the content or its non-list descendents are an identity"""
-        raise _errors.wrap_error(NotImplementedError)
+        raise NotImplementedError
 
     def parameter(self, key: str) -> JSONSerializable:
         if self._parameters is None:
@@ -256,31 +245,31 @@ class Form:
             return self._parameters.get(key)
 
     def purelist_parameter(self, key: str) -> JSONSerializable:
-        raise _errors.wrap_error(NotImplementedError)
+        raise NotImplementedError
 
     @property
     def purelist_isregular(self):
-        raise _errors.wrap_error(NotImplementedError)
+        raise NotImplementedError
 
     @property
     def purelist_depth(self):
-        raise _errors.wrap_error(NotImplementedError)
+        raise NotImplementedError
 
     @property
     def minmax_depth(self):
-        raise _errors.wrap_error(NotImplementedError)
+        raise NotImplementedError
 
     @property
     def branch_depth(self):
-        raise _errors.wrap_error(NotImplementedError)
+        raise NotImplementedError
 
     @property
     def fields(self):
-        raise _errors.wrap_error(NotImplementedError)
+        raise NotImplementedError
 
     @property
     def is_tuple(self):
-        raise _errors.wrap_error(NotImplementedError)
+        raise NotImplementedError
 
     @property
     def form_key(self):
@@ -289,7 +278,7 @@ class Form:
     @form_key.setter
     def form_key(self, value):
         if value is not None and not isinstance(value, str):
-            raise ak._errors.wrap_error(TypeError("form_key must be None or a string"))
+            raise TypeError("form_key must be None or a string")
         self._form_key = value
 
     def __str__(self):
@@ -334,8 +323,8 @@ class Form:
 
         for item in specifier:
             if not isinstance(item, str):
-                raise _errors.wrap_error(
-                    TypeError("a column-selection specifier must be a list of strings")
+                raise TypeError(
+                    "a column-selection specifier must be a list of strings"
                 )
 
         if expand_braces:
@@ -355,19 +344,19 @@ class Form:
         return self._column_types()
 
     def _columns(self, path, output, list_indicator):
-        raise _errors.wrap_error(NotImplementedError)
+        raise NotImplementedError
 
     def _select_columns(self, index, specifier, matches, output):
-        raise _errors.wrap_error(NotImplementedError)
+        raise NotImplementedError
 
     def _column_types(self):
-        raise _errors.wrap_error(NotImplementedError)
+        raise NotImplementedError
 
     def _to_dict_part(self, verbose, toplevel):
-        raise _errors.wrap_error(NotImplementedError)
+        raise NotImplementedError
 
     def _type(self, typestrs):
-        raise _errors.wrap_error(NotImplementedError)
+        raise NotImplementedError
 
     def length_zero_array(
         self, *, backend=numpy_backend, highlevel=True, behavior=None

@@ -3,7 +3,6 @@
 import json
 import re
 
-import awkward as ak
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._parameters import type_parameters_equal
 from awkward._typing import final
@@ -29,12 +28,10 @@ def primitive_to_dtype(primitive):
     else:
         out = _primitive_to_dtype_dict.get(primitive)
         if out is None:
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "unrecognized primitive: {}. Must be one of\n\n    {}\n\nor a "
-                    "datetime64/timedelta64 with units (e.g. 'datetime64[15us]')".format(
-                        repr(primitive), ", ".join(_primitive_to_dtype_dict)
-                    )
+            raise TypeError(
+                "unrecognized primitive: {}. Must be one of\n\n    {}\n\nor a "
+                "datetime64/timedelta64 with units (e.g. 'datetime64[15us]')".format(
+                    repr(primitive), ", ".join(_primitive_to_dtype_dict)
                 )
             )
         return out
@@ -46,12 +43,10 @@ def dtype_to_primitive(dtype):
     else:
         out = _dtype_to_primitive_dict.get(dtype)
         if out is None:
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "unsupported dtype: {}. Must be one of\n\n    {}\n\nor a "
-                    "datetime64/timedelta64 with units (e.g. 'datetime64[15us]')".format(
-                        repr(dtype), ", ".join(_primitive_to_dtype_dict)
-                    )
+            raise TypeError(
+                "unsupported dtype: {}. Must be one of\n\n    {}\n\nor a "
+                "datetime64/timedelta64 with units (e.g. 'datetime64[15us]')".format(
+                    repr(dtype), ", ".join(_primitive_to_dtype_dict)
                 )
             )
         return out
@@ -99,19 +94,15 @@ class NumpyType(Type):
     def __init__(self, primitive, *, parameters=None, typestr=None):
         primitive = dtype_to_primitive(primitive_to_dtype(primitive))
         if parameters is not None and not isinstance(parameters, dict):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} 'parameters' must be of type dict or None, not {}".format(
-                        type(self).__name__, repr(parameters)
-                    )
+            raise TypeError(
+                "{} 'parameters' must be of type dict or None, not {}".format(
+                    type(self).__name__, repr(parameters)
                 )
             )
         if typestr is not None and not isinstance(typestr, str):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} 'typestr' must be of type string or None, not {}".format(
-                        type(self).__name__, repr(typestr)
-                    )
+            raise TypeError(
+                "{} 'typestr' must be of type string or None, not {}".format(
+                    type(self).__name__, repr(typestr)
                 )
             )
         self._primitive = primitive

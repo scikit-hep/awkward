@@ -129,6 +129,4 @@ def _impl(array, behavior):
             return _impl(layout, behavior)
 
         else:
-            raise ak._errors.wrap_error(
-                TypeError(f"unrecognized array type: {array!r}")
-            )
+            raise TypeError(f"unrecognized array type: {array!r}")

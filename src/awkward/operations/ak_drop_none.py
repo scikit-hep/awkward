@@ -69,10 +69,8 @@ def _impl(array, axis, highlevel, behavior):
     else:
         max_axis = layout.branch_depth[1] - 1
         if axis > max_axis:
-            raise ak._errors.wrap_error(
-                np.AxisError(
-                    f"axis={axis} exceeds the depth ({max_axis}) of this array"
-                )
+            raise np.AxisError(
+                f"axis={axis} exceeds the depth ({max_axis}) of this array"
             )
 
         def recompute_offsets(layout, depth, **kwargs):
@@ -91,10 +89,8 @@ def _impl(array, axis, highlevel, behavior):
             if layout.is_record:
                 posaxises = {maybe_posaxis(x, axis, depth) for x in layout.contents}
                 if len(posaxises) > 1 and any(x < depth for x in posaxises):
-                    raise ak._errors.wrap_error(
-                        np.AxisError(
-                            f"axis={axis} implies different levels in records that might require part of a record to be dropped, which is impossible"
-                        )
+                    raise np.AxisError(
+                        f"axis={axis} implies different levels in records that might require part of a record to be dropped, which is impossible"
                     )
             posaxis = maybe_posaxis(layout, axis, depth)
             if posaxis == 0:

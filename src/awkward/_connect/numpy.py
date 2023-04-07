@@ -54,11 +54,9 @@ def _to_rectilinear(arg):
     elif isinstance(arg, list):
         return [_to_rectilinear(x) for x in arg]
     elif is_non_string_like_iterable(arg):
-        raise ak._errors.wrap_error(
-            TypeError(
-                f"encountered an unsupported iterable value {arg!r} whilst converting arguments to NumPy-friendly "
-                f"types. If this argument should be supported, please file a bug report."
-            )
+        raise TypeError(
+            f"encountered an unsupported iterable value {arg!r} whilst converting arguments to NumPy-friendly "
+            f"types. If this argument should be supported, please file a bug report."
         )
     else:
         return arg
@@ -97,10 +95,8 @@ def implements(numpy_function):
             provided_invalid_names = parameters.arguments.keys() & unsupported_names
             if provided_invalid_names:
                 names = ", ".join(provided_invalid_names)
-                raise ak._errors.wrap_error(
-                    TypeError(
-                        f"Awkward NEP-18 overload was provided with unsupported argument(s): {names}"
-                    )
+                raise TypeError(
+                    f"Awkward NEP-18 overload was provided with unsupported argument(s): {names}"
                 )
             return function(*args, **kwargs)
 
@@ -199,10 +195,8 @@ def array_ufunc(ufunc, method, inputs, kwargs):
             return _array_ufunc_adjust(custom, inputs, kwargs, behavior)
 
         if ufunc is numpy.matmul:
-            raise ak._errors.wrap_error(
-                NotImplementedError(
-                    "matrix multiplication (`@` or `np.matmul`) is not yet implemented for Awkward Arrays"
-                )
+            raise NotImplementedError(
+                "matrix multiplication (`@` or `np.matmul`) is not yet implemented for Awkward Arrays"
             )
 
         if all(
@@ -256,11 +250,9 @@ def array_ufunc(ufunc, method, inputs, kwargs):
                         error_message.append(type(x).__name__)
                 else:
                     error_message.append(type(x).__name__)
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "no {}.{} overloads for custom types: {}".format(
-                        type(ufunc).__module__, ufunc.__name__, ", ".join(error_message)
-                    )
+            raise TypeError(
+                "no {}.{} overloads for custom types: {}".format(
+                    type(ufunc).__module__, ufunc.__name__, ", ".join(error_message)
                 )
             )
 
@@ -304,4 +296,4 @@ def array_ufunc(ufunc, method, inputs, kwargs):
 
 
 def action_for_matmul(inputs):
-    raise ak._errors.wrap_error(NotImplementedError)
+    raise NotImplementedError

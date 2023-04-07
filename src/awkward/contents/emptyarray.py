@@ -228,14 +228,12 @@ class EmptyArray(Content):
             raise ak._errors.index_error(self, head, "array is empty")
 
         else:
-            raise ak._errors.wrap_error(AssertionError(repr(head)))
+            raise AssertionError(repr(head))
 
     def _offsets_and_flattened(self, axis, depth):
         posaxis = maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 == depth:
-            raise ak._errors.wrap_error(
-                np.AxisError(self, "axis=0 not allowed for flatten")
-            )
+            raise np.AxisError(self, "axis=0 not allowed for flatten")
         else:
             offsets = ak.index.Index64.zeros(1, nplike=self._backend.index_nplike)
             return (
@@ -266,9 +264,7 @@ class EmptyArray(Content):
                 backend=self._backend,
             )
         else:
-            raise ak._errors.wrap_error(
-                np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
-            )
+            raise np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
 
     def _numbers_to_type(self, name, including_unknown):
         if including_unknown:
@@ -332,9 +328,7 @@ class EmptyArray(Content):
     def _pad_none(self, target, axis, depth, clip):
         posaxis = maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 != depth:
-            raise ak._errors.wrap_error(
-                np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
-            )
+            raise np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
         else:
             return self._pad_none_axis0(target, True)
 
@@ -402,16 +396,14 @@ class EmptyArray(Content):
         elif result is None:
             return continuation()
         else:
-            raise ak._errors.wrap_error(AssertionError(result))
+            raise AssertionError(result)
 
     def to_packed(self) -> Self:
         return self
 
     def _to_list(self, behavior, json_conversions):
         if not self._backend.nplike.known_data:
-            raise ak._errors.wrap_error(
-                TypeError("cannot convert typetracer arrays to Python lists")
-            )
+            raise TypeError("cannot convert typetracer arrays to Python lists")
         return []
 
     def _to_backend(self, backend: ak._backends.Backend) -> Self:

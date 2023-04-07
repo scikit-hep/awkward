@@ -98,9 +98,7 @@ class ContentType(numba.types.Type):
         elif arraytype.dtype.bitwidth == 64:
             return ak.index.Index64
         else:
-            raise ak._errors.wrap_error(
-                AssertionError(f"no Index* type for array: {arraytype}")
-            )
+            raise AssertionError(f"no Index* type for array: {arraytype}")
 
     def getitem_at_check(self, viewtype):
         typer = find_numba_array_typer(viewtype.type, viewtype.behavior)

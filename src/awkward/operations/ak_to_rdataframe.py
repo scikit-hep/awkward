@@ -57,19 +57,13 @@ def _impl(
     import awkward._connect.rdataframe.to_rdataframe  # noqa: F401
 
     if not isinstance(arrays, Mapping):
-        raise ak._errors.wrap_error(
-            TypeError("'arrays' must be a dict (to provide C++ names for the arrays)")
-        )
+        raise TypeError("'arrays' must be a dict (to provide C++ names for the arrays)")
     elif not all(isinstance(name, str) for name in arrays):
-        raise ak._errors.wrap_error(
-            TypeError(
-                "keys of 'arrays' dict must be strings (to provide C++ names for the arrays)"
-            )
+        raise TypeError(
+            "keys of 'arrays' dict must be strings (to provide C++ names for the arrays)"
         )
     elif len(arrays) == 0:
-        raise ak._errors.wrap_error(
-            TypeError("'arrays' must contain at least one array")
-        )
+        raise TypeError("'arrays' must contain at least one array")
 
     layouts = {}
     length = None
@@ -80,9 +74,7 @@ def _impl(
         if length is None:
             length = layouts[name].length
         elif length != layouts[name].length:
-            raise ak._errors.wrap_error(
-                ValueError("lengths of 'arrays' must all be the same")
-            )
+            raise ValueError("lengths of 'arrays' must all be the same")
 
     return ak._connect.rdataframe.to_rdataframe.to_rdataframe(
         layouts,

@@ -318,10 +318,8 @@ def from_datashape(datashape, highlevel=True):
         elif isinstance(out, RecordType):
             return out
         else:
-            raise ak._errors.wrap_error(
-                ValueError(
-                    f"type {type(out).__name__!r} is not compatible with highlevel=True"
-                )
+            raise ValueError(
+                f"type {type(out).__name__!r} is not compatible with highlevel=True"
             )
 
     else:

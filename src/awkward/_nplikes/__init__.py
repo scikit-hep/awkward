@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from collections.abc import Collection
 
-import awkward as ak
 from awkward._typing import TYPE_CHECKING, TypeVar
 
 if TYPE_CHECKING:
@@ -31,11 +30,9 @@ def common_nplike(nplikes: Collection[NumpyLike]) -> NumpyLike:
             if not nplike.known_data:
                 return nplike
 
-        raise ak._errors.wrap_error(
-            ValueError(
-                "cannot operate on arrays with incompatible array libraries. Use #ak.to_backend to coerce the arrays "
-                "to the same backend"
-            )
+        raise ValueError(
+            "cannot operate on arrays with incompatible array libraries. Use #ak.to_backend to coerce the arrays "
+            "to the same backend"
         )
 
 
@@ -94,20 +91,16 @@ def to_nplike(
     if from_nplike is None:
         from_nplike = nplike_of(array, default=None)
         if from_nplike is None:
-            raise ak._errors.wrap_error(
-                TypeError(
-                    f"internal error: expected an array supported by an existing nplike, got {type(array).__name__!r}"
-                )
+            raise TypeError(
+                f"internal error: expected an array supported by an existing nplike, got {type(array).__name__!r}"
             )
 
     if from_nplike is to_nplike:
         return array
 
     if isinstance(from_nplike, TypeTracer) and nplike is not from_nplike:
-        raise ak._errors.wrap_error(
-            TypeError(
-                "Converting a TypeTracer nplike to an nplike with `known_data=True` is not possible"
-            )
+        raise TypeError(
+            "Converting a TypeTracer nplike to an nplike with `known_data=True` is not possible"
         )
 
     # Copy to host memory
@@ -117,6 +110,4 @@ def to_nplike(
     if isinstance(nplike, (Numpy, Cupy, Jax, TypeTracer)):
         return nplike.asarray(array)
     else:
-        raise ak._errors.wrap_error(
-            TypeError(f"internal error: invalid nplike {type(nplike).__name__!r}")
-        )
+        raise TypeError(f"internal error: invalid nplike {type(nplike).__name__!r}")

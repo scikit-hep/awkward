@@ -16,19 +16,15 @@ class RegularForm(Form):
 
     def __init__(self, content, size, *, parameters=None, form_key=None):
         if not isinstance(content, Form):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} all 'contents' must be Form subclasses, not {}".format(
-                        type(self).__name__, repr(content)
-                    )
+            raise TypeError(
+                "{} all 'contents' must be Form subclasses, not {}".format(
+                    type(self).__name__, repr(content)
                 )
             )
         if not (size is unknown_length or (is_integer(size) and size >= 0)):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} 'size' must be a non-negative int or None, not {}".format(
-                        type(self).__name__, repr(size)
-                    )
+            raise TypeError(
+                "{} 'size' must be a non-negative int or None, not {}".format(
+                    type(self).__name__, repr(size)
                 )
             )
 

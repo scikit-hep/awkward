@@ -58,9 +58,7 @@ def _impl(array, allow_record, allow_other, regulararray):
 
     elif isinstance(array, ak.record.Record):
         if not allow_record:
-            raise _errors.wrap_error(
-                TypeError("ak.Record objects are not allowed in this function")
-            )
+            raise TypeError("ak.Record objects are not allowed in this function")
         else:
             return array
 
@@ -69,9 +67,7 @@ def _impl(array, allow_record, allow_other, regulararray):
 
     elif isinstance(array, ak.highlevel.Record):
         if not allow_record:
-            raise _errors.wrap_error(
-                TypeError("ak.Record objects are not allowed in this function")
-            )
+            raise TypeError("ak.Record objects are not allowed in this function")
         else:
             return array.layout
 
@@ -101,10 +97,8 @@ def _impl(array, allow_record, allow_other, regulararray):
             array = backend.nplike.reshape(array, (1,))
 
         if array.dtype.kind in {"S", "U"}:
-            raise _errors.wrap_error(
-                NotImplementedError(
-                    "strings are currently not supported for typetracer arrays"
-                )
+            raise NotImplementedError(
+                "strings are currently not supported for typetracer arrays"
             )
 
         return ak.contents.NumpyArray(array, parameters=None, backend=backend)
@@ -124,10 +118,8 @@ def _impl(array, allow_record, allow_other, regulararray):
         )
 
     elif not allow_other:
-        raise _errors.wrap_error(
-            TypeError(
-                f"{array} cannot be converted into an Awkward Array, and non-array-like objects are not supported."
-            )
+        raise TypeError(
+            f"{array} cannot be converted into an Awkward Array, and non-array-like objects are not supported."
         )
 
     else:

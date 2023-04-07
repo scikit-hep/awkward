@@ -93,9 +93,7 @@ def _impl(
         parameters["__record__"] = with_name
 
     if axis < 0:
-        raise ak._errors.wrap_error(
-            ValueError("the 'axis' for argcombinations must be non-negative")
-        )
+        raise ValueError("the 'axis' for argcombinations must be non-negative")
     else:
         layout = ak._do.local_index(
             ak.operations.to_layout(array, allow_record=False, allow_other=False),

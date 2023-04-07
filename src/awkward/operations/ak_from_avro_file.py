@@ -52,10 +52,8 @@ def from_avro_file(
 
         else:
             if not hasattr(file, "read") or not hasattr(file, "seek"):
-                raise ak._errors.wrap_error(
-                    TypeError(
-                        "'file' must either be a filename string or be a file-like object with 'read' and 'seek' methods"
-                    )
+                raise TypeError(
+                    "'file' must either be a filename string or be a file-like object with 'read' and 'seek' methods"
                 )
             else:
                 form, length, container = awkward._connect.avro.ReadAvroFT(

@@ -8,11 +8,9 @@ import awkward as ak
 class ScalarType:
     def __init__(self, content):
         if not isinstance(content, ak.types.Type):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} all 'contents' must be Type subclasses, not {}".format(
-                        type(self).__name__, repr(content)
-                    )
+            raise TypeError(
+                "{} all 'contents' must be Type subclasses, not {}".format(
+                    type(self).__name__, repr(content)
                 )
             )
         self._content = content
