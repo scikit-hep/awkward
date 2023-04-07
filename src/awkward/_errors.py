@@ -299,40 +299,6 @@ with
             return repr(x)
 
 
-def wrap_error(
-    exception: Exception | type[Exception], error_context: ErrorContext = None
-) -> Exception:
-    """
-    Args:
-        exception: exception object, or exception type to instantiate
-        error_context: context in which error was raised
-
-    Wrap the given exception, instantiating it if needed, to ensure meaningful error messages.
-    """
-    return exception
-    if isinstance(exception, type) and issubclass(exception, Exception):
-        try:
-            exception = exception()
-        except Exception:
-            return exception
-
-    if isinstance(exception, (NotImplementedError, AssertionError)):
-        return type(exception)(
-            str(exception)
-            + "\n\nSee if this has been reported at https://github.com/scikit-hep/awkward-1.0/issues"
-        )
-
-    if error_context is None:
-        error_context = ErrorContext.primary()
-
-    if isinstance(error_context, ErrorContext):
-        # Note: returns an error for the caller to raise!
-        return type(exception)(error_context.format_exception(exception))
-    else:
-        # Note: returns an error for the caller to raise!
-        return exception
-
-
 def index_error(subarray, slicer, details: str = None) -> IndexError:
     detailsstr = ""
     if details is not None:
