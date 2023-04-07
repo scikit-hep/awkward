@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 from collections.abc import Iterable
+from itertools import permutations
 
 import awkward as ak
 from awkward._parameters import parameters_are_equal, type_parameters_equal
@@ -100,8 +101,11 @@ class UnionType(Type):
             isinstance(other, UnionType)
             and compare_parameters(self._parameters, other._parameters)
             and len(self._contents) == len(other._contents)
-            and all(
-                this._is_equal_to(that, all_parameters)
-                for this, that in zip(self._contents, other._contents)
+            and any(
+                all(
+                    this._is_equal_to(that, all_parameters)
+                    for this, that in zip(self._contents, contents)
+                )
+                for contents in permutations(other._contents)
             )
         )
