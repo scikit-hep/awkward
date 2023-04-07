@@ -72,3 +72,15 @@ def test_complex_types():
     )
     assert type_no_parameters.is_equal_to(type_, all_parameters=False)
     assert not type_no_parameters.is_equal_to(type_, all_parameters=True)
+
+
+def test_record_tuple():
+    record_type = ak.types.from_datashape("10 * var * (int64, int32)")
+    tuple_type = ak.types.from_datashape("10 * var * {x: int64, y: int32}")
+    assert record_type != tuple_type
+
+
+def test_record_mixed():
+    record = ak.types.from_datashape("10 * var * {x: int64, y: int32}")
+    permutation = ak.types.from_datashape("10 * var * {y: int64, x: int32}")
+    assert record == permutation
