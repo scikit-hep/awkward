@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 from __future__ import annotations
 
+import sys
 import threading
 import warnings
 from collections.abc import Mapping, Sequence
@@ -50,24 +51,39 @@ class ErrorContext:
         try:
             # Handle caught exception
             if exception_type is not None:
-                raise self.rewrite_exception(exception_type, exception_value)
+                self.handle_exception(exception_type, exception_value)
         finally:
             # Step out of the way so that another ErrorContext can become primary.
             if self.primary() is self:
                 self._slate.__dict__.clear()
 
-    def rewrite_exception(self, cls: type[E], exception: E) -> E:
-        if issubclass(cls, (NotImplementedError, AssertionError)):
-            # Raise modified exception
-            exc = cls(
-                str(exception)
-                + "\n\nSee if this has been reported at https://github.com/scikit-hep/awkward/issues"
-            )
-            exc.__cause__ = exception
+    def handle_exception(self, cls: type[E], exception: E) -> E:
+        if sys.version_info >= (3, 11, 0, "final"):
+            return self.decorate_exception(cls, exception)
         else:
-            exc = cls(self.format_exception(exception))
-            exc.__cause__ = exception
-        return exc
+            raise self.decorate_exception(cls, exception)
+
+    def decorate_exception(self, cls: type[E], exception: E) -> E:
+        if sys.version_info >= (3, 11, 0, "final"):
+            if issubclass(cls, (NotImplementedError, AssertionError)):
+                exception.add_note(
+                    "\n\nSee if this has been reported at https://github.com/scikit-hep/awkward/issues"
+                )
+            else:
+                exception.add_note(self.note)
+            return exception
+        else:
+            if issubclass(cls, (NotImplementedError, AssertionError)):
+                # Raise modified exception
+                new_exception = cls(
+                    str(exception)
+                    + "\n\nSee if this has been reported at https://github.com/scikit-hep/awkward/issues"
+                )
+                new_exception.__cause__ = exception
+            else:
+                new_exception = cls(self.format_exception(exception))
+                new_exception.__cause__ = exception
+            return new_exception
 
     def format_argument(self, width, value):
         from awkward import contents, highlevel, record
@@ -144,6 +160,10 @@ class ErrorContext:
     def format_exception(self, exception: Exception) -> str:
         raise NotImplementedError
 
+    @property
+    def note(self) -> str:
+        raise NotImplementedError
+
 
 class OperationErrorContext(ErrorContext):
     _width = 80 - 8
@@ -191,6 +211,10 @@ class OperationErrorContext(ErrorContext):
         return out
 
     def format_exception(self, exception):
+        return f"{exception}.\n{self.note}"
+
+    @property
+    def note(self) -> str:
         arguments = []
         for name, valuestr in self.arguments.items():
             if isinstance(name, str):
@@ -199,8 +223,7 @@ class OperationErrorContext(ErrorContext):
                 arguments.append(f"\n        {valuestr}")
 
         extra_line = "" if len(arguments) == 0 else "\n    "
-        return f"""{exception}.
-
+        return f"""
 This error occurred while calling
 
     {self.name}({"".join(arguments)}{extra_line})"""
@@ -245,8 +268,11 @@ class SlicingErrorContext(ErrorContext):
         return out
 
     def format_exception(self, exception):
-        return f"""{exception}.
+        return f"{exception}.\n{self.note}"
 
+    @property
+    def note(self) -> str:
+        return f"""
 This error occurred while attempting to slice
 
     {self.array}
