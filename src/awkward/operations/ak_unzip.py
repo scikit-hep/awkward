@@ -48,7 +48,7 @@ def _impl(array, highlevel, behavior):
 
     def check_for_union(layout, **kwargs):
         if isinstance(layout, (ak.contents.RecordArray, ak.Record)):
-            return layout  # don't descend into nested records
+            return  # don't descend into nested records
 
         elif layout.is_union:
             for content in layout.contents:
