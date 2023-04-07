@@ -2,10 +2,11 @@
 
 import json
 from collections.abc import Iterable
+from itertools import permutations
 
 import awkward as ak
 import awkward._prettyprint
-from awkward._parameters import type_parameters_equal
+from awkward._parameters import parameters_are_equal, type_parameters_equal
 from awkward._typing import final
 from awkward.types.type import Type
 
@@ -173,26 +174,38 @@ class RecordType(Type):
         args = [repr(self._contents), repr(self._fields), *self._repr_args()]
         return "{}({})".format(type(self).__name__, ", ".join(args))
 
-    def __eq__(self, other):
-        if isinstance(other, RecordType):
-            if not type_parameters_equal(self._parameters, other._parameters):
+    def _is_equal_to(self, other, all_parameters: bool) -> bool:
+        if not isinstance(other, type(self)):
+            return False
+
+        compare_parameters = (
+            parameters_are_equal if all_parameters else type_parameters_equal
+        )
+        if not compare_parameters(self._parameters, other._parameters):
+            return False
+
+        # Both tuples
+        if self.is_tuple and other.is_tuple:
+            return all(
+                this._is_equal_to(that, all_parameters)
+                for this, that in zip(self._contents, other._contents)
+            )
+        # Both records
+        elif not (self.is_tuple or other.is_tuple):
+            if set(self._fields) != set(other._fields):
                 return False
 
-            if self._fields is None and other._fields is None:
-                return self._contents == other._contents
+            self_contents = [self.content(f) for f in self._fields]
+            other_contents = [other.content(f) for f in other._fields]
 
-            elif self._fields is not None and other._fields is not None:
-                if set(self._fields) != set(other._fields):
-                    return False
-                for field in self._fields:
-                    if self.content(field) != other.content(field):
-                        return False
-
-                return True
-
-            else:
-                return False
-
+            return any(
+                all(
+                    this._is_equal_to(that, all_parameters)
+                    for this, that in zip(self_contents, contents)
+                )
+                for contents in permutations(other_contents)
+            )
+        # Mixed
         else:
             return False
 

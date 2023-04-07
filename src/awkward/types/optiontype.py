@@ -1,6 +1,10 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from awkward._parameters import parameters_union, type_parameters_equal
+from awkward._parameters import (
+    parameters_are_equal,
+    parameters_union,
+    type_parameters_equal,
+)
 from awkward._typing import final
 from awkward.types.listtype import ListType
 from awkward.types.regulartype import RegularType
@@ -74,15 +78,6 @@ class OptionType(Type):
         args = [repr(self._content), *self._repr_args()]
         return "{}({})".format(type(self).__name__, ", ".join(args))
 
-    def __eq__(self, other):
-        if isinstance(other, OptionType):
-            return (
-                type_parameters_equal(self._parameters, other._parameters)
-                and self._content == other._content
-            )
-        else:
-            return False
-
     def simplify_option_union(self):
         if isinstance(self._content, UnionType):
             contents = []
@@ -116,3 +111,15 @@ class OptionType(Type):
 
         else:
             return self
+
+    def _is_equal_to(self, other, all_parameters: bool) -> bool:
+        compare_parameters = (
+            parameters_are_equal if all_parameters else type_parameters_equal
+        )
+        return (
+            isinstance(other, type(self))
+            and compare_parameters(self._parameters, other._parameters)
+            and self._content._is_equal_to(
+                other._content, all_parameters=all_parameters
+            )
+        )

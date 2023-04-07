@@ -4,7 +4,7 @@ import json
 import re
 
 from awkward._nplikes.numpylike import NumpyMetadata
-from awkward._parameters import type_parameters_equal
+from awkward._parameters import parameters_are_equal, type_parameters_equal
 from awkward._typing import final
 from awkward.types.type import Type
 
@@ -152,10 +152,12 @@ class NumpyType(Type):
         args = [repr(self._primitive), *self._repr_args()]
         return "{}({})".format(type(self).__name__, ", ".join(args))
 
-    def __eq__(self, other):
-        if isinstance(other, NumpyType):
-            return self._primitive == other._primitive and type_parameters_equal(
-                self._parameters, other._parameters
-            )
-        else:
-            return False
+    def _is_equal_to(self, other, all_parameters: bool) -> bool:
+        compare_parameters = (
+            parameters_are_equal if all_parameters else type_parameters_equal
+        )
+        return (
+            isinstance(other, type(self))
+            and (self._primitive == other._primitive)
+            and compare_parameters(self._parameters, other._parameters)
+        )
