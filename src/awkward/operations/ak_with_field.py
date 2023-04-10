@@ -94,9 +94,7 @@ def _impl(base, what, where, highlevel, behavior):
             def action_is_record(input, **kwargs):
                 nonlocal result
 
-                if input.is_list:
-                    return input
-                elif input.is_record:
+                if input.is_record:
                     result = True
                     return input
                 elif input.is_union:
