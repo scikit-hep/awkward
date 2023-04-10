@@ -50,7 +50,7 @@ class ErrorContext:
     def __exit__(self, exception_type, exception_value, traceback):
         try:
             # Handle caught exception
-            if exception_type is not None:
+            if exception_type is not None and self.primary() is self:
                 self.handle_exception(exception_type, exception_value)
         finally:
             # Step out of the way so that another ErrorContext can become primary.
@@ -59,7 +59,7 @@ class ErrorContext:
 
     def handle_exception(self, cls: type[E], exception: E) -> E:
         if sys.version_info >= (3, 11, 0, "final"):
-            return self.decorate_exception(cls, exception)
+            self.decorate_exception(cls, exception)
         else:
             raise self.decorate_exception(cls, exception)
 
