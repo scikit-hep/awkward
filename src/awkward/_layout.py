@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 
-from awkward._backends import NumpyBackend
+from awkward._backends.backends import NumpyBackend
 from awkward._behavior import behavior_of
 from awkward._nplikes.dispatch import nplike_of
 from awkward._nplikes.jax import Jax

@@ -4,6 +4,7 @@ import json
 from collections.abc import Iterable, Sized
 
 import awkward as ak
+from awkward._backends.backends import NumpyBackend
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._parameters import parameters_union
@@ -496,7 +497,7 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
             ak.contents.NumpyArray(
                 numpy.frombuffer(pacontent, dtype=np.uint8),
                 parameters=sub_parameters,
-                backend=ak._backends.NumpyBackend.instance(),
+                backend=NumpyBackend.instance(),
             ),
             storage_type.byte_width,
             parameters=parameters,
@@ -532,7 +533,7 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
             ak.contents.NumpyArray(
                 numpy.frombuffer(pacontent, dtype=np.uint8),
                 parameters=sub_parameters,
-                backend=ak._backends.NumpyBackend.instance(),
+                backend=NumpyBackend.instance(),
             ),
             parameters=parameters,
         )
@@ -634,7 +635,7 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
         out = ak.contents.NumpyArray(
             bytedata.view(np.bool_),
             parameters=node_parameters(awkwardarrow_type),
-            backend=ak._backends.NumpyBackend.instance(),
+            backend=NumpyBackend.instance(),
         )
         return popbuffers_finalize(
             out, paarray, validbits, awkwardarrow_type, generate_bitmasks
@@ -654,7 +655,7 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
         out = ak.contents.NumpyArray(
             numpy.frombuffer(data, dtype=dt),
             parameters=node_parameters(awkwardarrow_type),
-            backend=ak._backends.NumpyBackend.instance(),
+            backend=NumpyBackend.instance(),
         )
         return popbuffers_finalize(
             out, paarray, validbits, awkwardarrow_type, generate_bitmasks

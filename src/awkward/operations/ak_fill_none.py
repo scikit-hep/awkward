@@ -3,13 +3,14 @@ __all__ = ("fill_none",)
 import numbers
 
 import awkward as ak
+from awkward._backends.backends import NumpyBackend
 from awkward._behavior import behavior_of
 from awkward._layout import maybe_posaxis, wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import is_sized_iterable, regularize_axis
 
 np = NumpyMetadata.instance()
-cpu = ak._backends.NumpyBackend.instance()
+cpu = NumpyBackend.instance()
 
 
 def fill_none(array, value, axis=-1, *, highlevel=True, behavior=None):

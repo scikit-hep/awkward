@@ -7,6 +7,7 @@ from collections.abc import Iterable
 
 import awkward as ak
 from awkward._backends.backend import Backend
+from awkward._backends.backends import NumpyBackend, TypeTracerBackend
 from awkward._behavior import find_record_reducer
 from awkward._layout import maybe_posaxis
 from awkward._nplikes.numpy import Numpy
@@ -165,7 +166,7 @@ class RecordArray(Content):
 
         # If no content backend was found, then choose our own
         if backend is None:
-            backend = ak._backends.NumpyBackend.instance()
+            backend = NumpyBackend.instance()
 
         if length is None:
             if len(contents) == 0:
@@ -326,7 +327,7 @@ class RecordArray(Content):
                 )
 
     def _to_typetracer(self, forget_length: bool) -> Self:
-        backend = ak._backends.TypeTracerBackend.instance()
+        backend = TypeTracerBackend.instance()
         contents = [x._to_typetracer(forget_length) for x in self._contents]
         return RecordArray(
             contents,

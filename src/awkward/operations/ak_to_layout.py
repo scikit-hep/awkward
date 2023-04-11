@@ -7,6 +7,7 @@ from awkward_cpp.lib import _ext
 
 import awkward as ak
 from awkward import _errors
+from awkward._backends.backends import TypeTracerBackend
 from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
@@ -91,7 +92,7 @@ def _impl(array, allow_record, allow_other, regulararray):
         return ak.operations.from_jax(array, regulararray=regulararray, highlevel=False)
 
     elif TypeTracer.is_own_array(array):
-        backend = ak._backends.TypeTracerBackend.instance()
+        backend = TypeTracerBackend.instance()
 
         if len(array.shape) == 0:
             array = backend.nplike.reshape(array, (1,))

@@ -5,6 +5,7 @@ import awkward_cpp
 
 import awkward as ak
 from awkward._backends.backend import Backend, KernelKeyType
+from awkward._backends.dispatch import register_backend
 from awkward._kernels import CupyKernel, JaxKernel, NumpyKernel, TypeTracerKernel
 from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.jax import Jax
@@ -20,6 +21,7 @@ numpy = Numpy.instance()
 T = TypeVar("T", covariant=True)
 
 
+@register_backend(Numpy)
 class NumpyBackend(Backend):
     name: Final[str] = "cpu"
 
@@ -40,6 +42,7 @@ class NumpyBackend(Backend):
         return NumpyKernel(awkward_cpp.cpu_kernels.kernel[index], index)
 
 
+@register_backend(Cupy)
 class CupyBackend(Backend):
     name: Final[str] = "cuda"
 
@@ -68,6 +71,7 @@ class CupyBackend(Backend):
             raise AssertionError(f"CuPyKernel not found: {index!r}")
 
 
+@register_backend(Jax)
 class JaxBackend(Backend):
     name: Final[str] = "jax"
 
@@ -112,6 +116,7 @@ class JaxBackend(Backend):
         return jax_ufunc(*args, **kwargs)
 
 
+@register_backend(TypeTracer)
 class TypeTracerBackend(Backend):
     name: Final[str] = "typetracer"
 

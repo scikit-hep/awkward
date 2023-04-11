@@ -3,10 +3,11 @@ __all__ = ("transform",)
 import copy
 
 import awkward as ak
+from awkward._backends.backends import NumpyBackend
 from awkward._behavior import behavior_of
 from awkward._layout import wrap_layout
 
-cpu = ak._backends.NumpyBackend.instance()
+cpu = NumpyBackend.instance()
 
 
 def transform(

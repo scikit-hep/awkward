@@ -7,13 +7,14 @@ import re
 from collections.abc import Mapping
 
 import awkward as ak
+from awkward._backends.backends import NumpyBackend
 from awkward._behavior import find_typestrs
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._typing import Final, JSONMapping, JSONSerializable
 
 np = NumpyMetadata.instance()
-numpy_backend = ak._backends.NumpyBackend.instance()
+numpy_backend = NumpyBackend.instance()
 
 
 reserved_nominal_parameters: Final = frozenset(

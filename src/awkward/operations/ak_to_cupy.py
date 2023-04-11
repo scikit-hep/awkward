@@ -2,6 +2,7 @@
 __all__ = ("to_cupy",)
 
 import awkward as ak
+from awkward._backends.backends import CupyBackend
 
 
 def to_cupy(array):
@@ -31,7 +32,7 @@ def to_cupy(array):
 def _impl(array):
     layout = ak.to_layout(array, allow_record=False)
 
-    backend = ak._backends.CupyBackend.instance()
+    backend = CupyBackend.instance()
     cupy_layout = layout.to_backend(backend)
 
     return cupy_layout.to_backend_array(allow_missing=False)

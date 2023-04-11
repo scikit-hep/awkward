@@ -8,6 +8,7 @@ from numbers import Complex, Real
 
 import awkward as ak
 from awkward._backends.backend import Backend
+from awkward._backends.backends import NumpyBackend
 from awkward._backends.dispatch import regularize_backend
 from awkward._behavior import get_array_class, get_record_class
 from awkward._layout import wrap_layout
@@ -1080,9 +1081,7 @@ class Content:
             "`Content.to_numpy(...)` with `Content.to_backend_array(..., backend='cpu')`.",
             "2.2.0",
         )
-        return self.to_backend(ak._backends.NumpyBackend.instance())._to_backend_array(
-            allow_missing
-        )
+        return self.to_backend(NumpyBackend.instance())._to_backend_array(allow_missing)
 
     def to_backend_array(
         self, allow_missing: bool = True, *, backend: Backend | str | None = None
