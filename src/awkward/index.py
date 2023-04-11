@@ -5,7 +5,7 @@ import copy
 
 from awkward._nplikes import to_nplike
 from awkward._nplikes.cupy import Cupy
-from awkward._nplikes.finder import nplike_of
+from awkward._nplikes.dispatch import nplike_of
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyLike, NumpyMetadata

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from awkward._nplikes.finder import nplike_of
+from awkward._nplikes.dispatch import nplike_of
 from awkward._typing import TYPE_CHECKING
 
 if TYPE_CHECKING:

@@ -6,7 +6,7 @@ import operator
 import awkward as ak
 from awkward._backends import Backend
 from awkward._nplikes import to_nplike
-from awkward._nplikes.finder import nplike_of
+from awkward._nplikes.dispatch import nplike_of
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
