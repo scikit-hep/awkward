@@ -32,15 +32,15 @@ class Numpy(ArrayModuleNumpyLike):
         return self._module.ndarray
 
     @classmethod
-    def is_own_array_type(cls, obj) -> bool:
+    def is_own_array_type(cls, type_) -> bool:
         """
         Args:
-            obj: object to test
+            type_: object to test
 
         Return `True` if the given object is a numpy buffer, otherwise `False`.
 
         """
-        return issubclass(obj, numpy.ndarray)
+        return issubclass(type_, numpy.ndarray)
 
     def is_c_contiguous(self, x: ArrayLike) -> bool:
         return x.flags["C_CONTIGUOUS"]

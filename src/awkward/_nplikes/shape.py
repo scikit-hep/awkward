@@ -71,7 +71,7 @@ class _UnknownLength:
     def __gt__(self, other):
         raise TypeError("cannot order unknown lengths")
 
-    def __index__(self):  # pylint: disable=invalid-index-returned
+    def __index__(self):
         raise TypeError("cannot interpret unknown lengths as concrete index values")
 
     def __int__(self):

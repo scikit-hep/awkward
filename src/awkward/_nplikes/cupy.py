@@ -142,15 +142,15 @@ class Cupy(ArrayModuleNumpyLike):
         return self._module.array_str(array, max_line_width, precision, suppress_small)
 
     @classmethod
-    def is_own_array_type(cls, obj: type) -> bool:
+    def is_own_array_type(cls, type_: type) -> bool:
         """
         Args:
-            obj: object to test
+            type_: object to test
 
         Return `True` if the given object is a cupy buffer, otherwise `False`.
 
         """
-        module, _, suffix = obj.__module__.partition(".")
+        module, _, suffix = type_.__module__.partition(".")
         return module == "cupy"
 
     def is_c_contiguous(self, x: ArrayLike) -> bool:

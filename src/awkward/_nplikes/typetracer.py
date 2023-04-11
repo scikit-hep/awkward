@@ -1309,8 +1309,8 @@ class TypeTracer(NumpyLike):
         return numpy.can_cast(from_, to, casting="same_kind")
 
     @classmethod
-    def is_own_array_type(cls, obj: type) -> bool:
-        return issubclass(obj, TypeTracerArray)
+    def is_own_array_type(cls, type_: type) -> bool:
+        return issubclass(type_, TypeTracerArray)
 
     @classmethod
     def is_own_array(cls, obj) -> bool:

@@ -37,38 +37,38 @@ class Jax(ArrayModuleNumpyLike):
         return self._module.ndarray
 
     @classmethod
-    def is_own_array_type(cls, obj: type) -> bool:
+    def is_own_array_type(cls, type_: type) -> bool:
         """
         Args:
-            obj: object to test
+            type_: object to test
 
         Return `True` if the given object is a jax buffer, otherwise `False`.
 
         """
-        return cls.is_array_type(obj) or cls.is_tracer_type(obj)
+        return cls.is_array_type(type_) or cls.is_tracer_type(type_)
 
     @classmethod
-    def is_array_type(cls, obj: type) -> bool:
+    def is_array_type(cls, type_: type) -> bool:
         """
         Args:
-            obj: object to test
+            type_: object to test
 
         Return `True` if the given object is a jax buffer, otherwise `False`.
 
         """
-        module, _, suffix = obj.__module__.partition(".")
+        module, _, suffix = type_.__module__.partition(".")
         return module == "jaxlib"
 
     @classmethod
-    def is_tracer_type(cls, obj: type) -> bool:
+    def is_tracer_type(cls, type_: type) -> bool:
         """
         Args:
-            obj: object to test
+            type_: object to test
 
         Return `True` if the given object is a jax tracer, otherwise `False`.
 
         """
-        module, _, suffix = obj.__module__.partition(".")
+        module, _, suffix = type_.__module__.partition(".")
         return module == "jax"
 
     def is_c_contiguous(self, x: ArrayLike) -> bool:
