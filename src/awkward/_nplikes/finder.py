@@ -2,15 +2,51 @@ from __future__ import annotations
 
 from collections.abc import Collection
 
-from awkward._typing import TYPE_CHECKING, TypeVar
-
-if TYPE_CHECKING:
-    from awkward._nplikes.numpylike import NumpyLike
+from awkward._nplikes.numpylike import NumpyLike
+from awkward._typing import Callable, TypeAlias, TypeVar
 
 # Temporary sentinel marking "argument not given"
 _UNSET = object()
 
 D = TypeVar("D")
+
+
+NumpyLikeFinder: TypeAlias = """
+Callable[[type], NumpyLike | None]
+"""
+
+_type_to_nplike: dict[type, NumpyLike] = {}
+_nplike_finders: list[NumpyLikeFinder] = []
+
+
+N = TypeVar("N", bound=type[NumpyLike])
+
+
+def register_nplike(cls: N) -> N:
+    def finder(obj_cls):
+        if cls.is_own_array_type(obj_cls):
+            return cls.instance()
+
+    _nplike_finders.append(finder)
+    return cls
+
+
+def nplike_of(obj, *, default: D = _UNSET) -> NumpyLike | D:
+    cls = type(obj)
+    try:
+        return _type_to_nplike[cls]
+    except KeyError:
+        for finder in _nplike_finders:
+            nplike = finder(cls)
+            if nplike is not None:
+                break
+        else:
+            if default is _UNSET:
+                raise TypeError(f"cannot find nplike for {cls.__name__}")
+            else:
+                return default
+        _type_to_nplike[cls] = nplike
+        return nplike
 
 
 def common_nplike(nplikes: Collection[NumpyLike]) -> NumpyLike:
@@ -34,47 +70,3 @@ def common_nplike(nplikes: Collection[NumpyLike]) -> NumpyLike:
             "cannot operate on arrays with incompatible array libraries. Use #ak.to_backend to coerce the arrays "
             "to the same backend"
         )
-
-
-def nplike_of(*arrays, default: D = _UNSET) -> NumpyLike | D:
-    """
-    Args:
-        *arrays: iterable of possible array objects
-        default: default NumpyLike instance if no array objects found
-
-    Return the nplike that is best-suited to operating upon the given
-    iterable of arrays. If no known array types are found, return `default`
-    if it is set, otherwise `Numpy.instance()`.
-    """
-    from awkward._nplikes.cupy import Cupy
-    from awkward._nplikes.jax import Jax
-    from awkward._nplikes.numpy import Numpy
-    from awkward._nplikes.typetracer import TypeTracer
-
-    nplikes: set[NumpyLike] = set()
-    for array in arrays:
-        if hasattr(array, "layout"):
-            array = array.layout
-
-        # Layout objects
-        if hasattr(array, "backend"):
-            nplikes.add(array.backend.nplike)
-
-        # Index objects
-        elif hasattr(array, "nplike"):
-            nplikes.add(array.nplike)
-
-        # Other e.g. nplike arrays
-        else:
-            for cls in (Numpy, Cupy, Jax, TypeTracer):
-                if cls.is_own_array(array):
-                    nplikes.add(cls.instance())
-                    break
-
-    if nplikes == set():
-        if default is _UNSET:
-            return Numpy.instance()
-        else:
-            return default
-    else:
-        return common_nplike(nplikes)

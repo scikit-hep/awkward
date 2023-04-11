@@ -45,7 +45,10 @@ class Index:
 
     def __init__(self, data, *, metadata=None, nplike=None):
         if nplike is None:
-            nplike = nplike_of(data)
+            if isinstance(data, Index):
+                nplike = data.nplike
+            else:
+                nplike = nplike_of(data, default=Numpy.instance())
         self._nplike = nplike
         if metadata is not None and not isinstance(metadata, dict):
             raise TypeError("Index metadata must be None or a dict")

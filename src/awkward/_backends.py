@@ -245,9 +245,19 @@ def backend_of(*objects, default: D = _UNSET) -> Backend | D:
     # Implementation detail: right now, we are one-to-one mapping `nplike` to a backend
     # The distinction is still useful because nplikes are just the array abstraction,
     # whilst backends incorporate more Awkward logic
-    nplike = nplike_of(*objects, default=None)
-    if nplike is not None:
-        return _backend_for_nplike(nplike)
+    backends = []
+    for obj in objects:
+        if hasattr(obj, "layout"):
+            obj = obj.layout
+        if hasattr(obj, "backend"):
+            backends.append(obj.backend)
+        else:
+            nplike = nplike_of(obj, default=None)
+            if nplike is not None:
+                backends.append(_backend_for_nplike(nplike))
+
+    if backends:
+        return common_backend(backends)
     elif default is _UNSET:
         raise ValueError("could not find backend for", objects)
     else:

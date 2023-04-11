@@ -50,7 +50,8 @@ def from_arraylib(array, regulararray, recordarray):
     nplike = nplike_of(array)
 
     def recurse(array, mask=None):
-        if Jax.is_tracer(array):
+        cls = type(array)
+        if Jax.is_tracer_type(cls):
             raise TypeError("Jax tracers cannot be used with `ak.from_arraylib`")
 
         if regulararray and len(array.shape) > 1:
