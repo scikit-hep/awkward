@@ -5,6 +5,7 @@ import copy
 import math
 
 import awkward as ak
+from awkward._backends.backend import Backend
 from awkward._layout import maybe_posaxis
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import IndexType, NumpyMetadata
@@ -543,7 +544,7 @@ class UnmaskedArray(Content):
 
         return self._content._to_list(behavior, json_conversions)
 
-    def _to_backend(self, backend: ak._backends.Backend) -> Self:
+    def _to_backend(self, backend: Backend) -> Self:
         content = self._content.to_backend(backend)
         return UnmaskedArray(content, parameters=self._parameters)
 

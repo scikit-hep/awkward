@@ -5,6 +5,7 @@ import jax
 
 import awkward as ak
 from awkward import contents, highlevel, record
+from awkward._backends import Backend
 from awkward._behavior import behavior_of
 from awkward._layout import wrap_layout
 from awkward._nplikes.jax import Jax
@@ -37,7 +38,7 @@ def find_all_buffers(
 def replace_all_buffers(
     layout: contents.Content | record.Record,
     buffers: list,
-    backend: ak._backends.Backend,
+    backend: Backend,
 ):
     def action(node, **kwargs):
         jaxlike = Jax.instance()

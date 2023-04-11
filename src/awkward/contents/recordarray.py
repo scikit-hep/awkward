@@ -6,6 +6,7 @@ import json
 from collections.abc import Iterable
 
 import awkward as ak
+from awkward._backends.backend import Backend
 from awkward._behavior import find_record_reducer
 from awkward._layout import maybe_posaxis
 from awkward._nplikes.numpy import Numpy
@@ -1112,7 +1113,7 @@ class RecordArray(Content):
                 out[i] = dict(zip(fields, [x[i] for x in contents]))
             return out
 
-    def _to_backend(self, backend: ak._backends.Backend) -> Self:
+    def _to_backend(self, backend: Backend) -> Self:
         contents = [content.to_backend(backend) for content in self._contents]
         return RecordArray(
             contents,

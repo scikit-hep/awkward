@@ -6,6 +6,7 @@ __all__ = ("from_buffers",)
 import math
 
 import awkward as ak
+from awkward._backends.dispatch import regularize_backend
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
@@ -109,7 +110,7 @@ def _impl(
     behavior,
     simplify,
 ):
-    backend = ak._backends.regularize_backend(backend)
+    backend = regularize_backend(backend)
 
     if isinstance(form, str):
         if ak.types.numpytype.is_primitive(form):

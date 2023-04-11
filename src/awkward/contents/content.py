@@ -7,7 +7,8 @@ from collections.abc import Callable, Iterable, Mapping, MutableMapping, Sized
 from numbers import Complex, Real
 
 import awkward as ak
-from awkward._backends import Backend
+from awkward._backends.backend import Backend
+from awkward._backends.dispatch import regularize_backend
 from awkward._behavior import get_array_class, get_record_class
 from awkward._layout import wrap_layout
 from awkward._nplikes import to_nplike
@@ -939,7 +940,7 @@ class Content:
         Return the value of the outermost parameter matching `key` in a sequence
         of nested lists, stopping at the first record or tuple layer.
 
-        If a layer has #ak.types.UnionType, the value is only returned if all
+         If a layer has #ak.types.UnionType, the value is only returned if all
         possibilities have the same value.
         """
         return self.form_cls.purelist_parameter(self, key)
@@ -1089,10 +1090,10 @@ class Content:
         if backend is None:
             backend = self._backend
         else:
-            backend = ak._backends.regularize_backend(backend)
+            backend = regularize_backend(backend)
         return self._to_backend_array(allow_missing, backend)
 
-    def _to_backend_array(self, allow_missing: bool, backend: ak._backends.Backend):
+    def _to_backend_array(self, allow_missing: bool, backend: Backend):
         raise NotImplementedError
 
     def drop_none(self):
@@ -1268,7 +1269,7 @@ class Content:
         if backend is None:
             backend = self._backend
         else:
-            backend = ak._backends.regularize_backend(backend)
+            backend = regularize_backend(backend)
         if backend is self._backend:
             return self
         else:
