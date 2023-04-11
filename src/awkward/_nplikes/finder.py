@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from collections.abc import Collection
-
 from awkward._nplikes.numpylike import NumpyLike
 from awkward._typing import Callable, TypeAlias, TypeVar
 
@@ -46,6 +44,8 @@ def nplike_of(obj, *, default: D = _UNSET) -> NumpyLike | D:
     try:
         return _type_to_nplike[cls]
     except KeyError:
+        # Try and find the nplike for this type
+        # caching the result by type
         for finder in _nplike_finders:
             nplike = finder(cls)
             if nplike is not None:
@@ -57,26 +57,3 @@ def nplike_of(obj, *, default: D = _UNSET) -> NumpyLike | D:
                 return default
         _type_to_nplike[cls] = nplike
         return nplike
-
-
-def common_nplike(nplikes: Collection[NumpyLike]) -> NumpyLike:
-    """
-    Args:
-        nplikes: collection of nplikes from which to determine a common nplike
-
-    Return the common nplike for the give nplikes if such a result can be determined.
-    Otherwise, raise a ValueError.
-    """
-    # Either we have one nplike, or one + typetracer
-    if len(nplikes) == 1:
-        return next(iter(nplikes))
-    else:
-        # We allow typetracers to mix with other nplikes, and take precedence
-        for nplike in nplikes:
-            if not nplike.known_data:
-                return nplike
-
-        raise ValueError(
-            "cannot operate on arrays with incompatible array libraries. Use #ak.to_backend to coerce the arrays "
-            "to the same backend"
-        )
