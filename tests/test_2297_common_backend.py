@@ -57,7 +57,7 @@ def test_to_rdataframe():
     array = ak.Array([100, 200, 300.0], backend="typetracer")
     with pytest.raises(
         TypeError,
-        match="Converting a TypeTracer nplike to an nplike with `known_data=True`",
+        match="from an nplike without known data to an nplike with known data",
     ):
         ak.to_rdataframe({"array": array})
 
