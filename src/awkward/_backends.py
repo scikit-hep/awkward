@@ -9,7 +9,7 @@ import awkward_cpp
 import awkward as ak
 from awkward._kernels import CupyKernel, JaxKernel, NumpyKernel, TypeTracerKernel
 from awkward._nplikes.cupy import Cupy
-from awkward._nplikes.finder import nplike_of
+from awkward._nplikes.dispatch import nplike_of
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyLike, NumpyMetadata
