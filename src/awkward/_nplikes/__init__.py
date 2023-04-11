@@ -33,7 +33,4 @@ def to_nplike(
     if isinstance(from_nplike, awkward._nplikes.cupy.Cupy):
         array = array.get()
 
-    if isinstance(nplike, (Numpy, Cupy, Jax, TypeTracer)):
-        return nplike.asarray(array)
-    else:
-        raise TypeError(f"internal error: invalid nplike {type(nplike).__name__!r}")
+    return nplike.asarray(array)
