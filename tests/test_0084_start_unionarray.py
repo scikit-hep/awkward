@@ -4,6 +4,7 @@ import numpy as np
 import pytest
 
 import awkward as ak
+from awkward._backends.numpy import NumpyBackend
 
 to_list = ak.operations.to_list
 
@@ -17,7 +18,7 @@ def test_getitem():
     )
     tags = ak.index.Index8(np.array([1, 1, 0, 0, 1, 0, 1, 1], dtype=np.int8))
 
-    backend = ak._backends.NumpyBackend.instance()
+    backend = NumpyBackend.instance()
     array32 = ak.contents.UnionArray.regular_index(
         tags, index_cls=ak.index.Index32, backend=backend
     )

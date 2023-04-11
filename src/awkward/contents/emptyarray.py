@@ -5,7 +5,8 @@ import copy
 
 import awkward as ak
 from awkward._backends.backend import Backend
-from awkward._backends.backends import NumpyBackend, TypeTracerBackend
+from awkward._backends.numpy import NumpyBackend
+from awkward._backends.typetracer import TypeTracerBackend
 from awkward._errors import deprecate
 from awkward._layout import maybe_posaxis
 from awkward._nplikes.numpy import Numpy

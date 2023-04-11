@@ -7,7 +7,7 @@ from awkward_cpp.lib import _ext
 
 import awkward as ak
 from awkward import _errors
-from awkward._backends.backends import TypeTracerBackend
+from awkward._backends.typetracer import TypeTracerBackend
 from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy

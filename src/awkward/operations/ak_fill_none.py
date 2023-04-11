@@ -3,8 +3,8 @@ __all__ = ("fill_none",)
 import numbers
 
 import awkward as ak
-from awkward._backends.backends import NumpyBackend
 from awkward._backends.dispatch import backend_of
+from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of
 from awkward._layout import maybe_posaxis, wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata

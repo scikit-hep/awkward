@@ -2,7 +2,7 @@
 __all__ = ("to_cupy",)
 
 import awkward as ak
-from awkward._backends.backends import CupyBackend
+from awkward._backends.cupy import CupyBackend
 
 
 def to_cupy(array):

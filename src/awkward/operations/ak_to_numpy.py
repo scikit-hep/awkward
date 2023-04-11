@@ -1,7 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("to_numpy",)
 import awkward as ak
-from awkward._backends.backends import NumpyBackend
+from awkward._backends.numpy import NumpyBackend
 
 
 def to_numpy(array, *, allow_missing=True):

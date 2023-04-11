@@ -7,7 +7,7 @@ import re
 from collections.abc import Mapping
 
 import awkward as ak
-from awkward._backends.backends import NumpyBackend
+from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import find_typestrs
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import unknown_length

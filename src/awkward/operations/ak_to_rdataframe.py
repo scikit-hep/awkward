@@ -3,7 +3,7 @@ __all__ = ("to_rdataframe",)
 from collections.abc import Mapping
 
 import awkward as ak
-from awkward._backends.backends import NumpyBackend
+from awkward._backends.numpy import NumpyBackend
 
 cpu = NumpyBackend.instance()
 

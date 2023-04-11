@@ -8,8 +8,12 @@ from numbers import Complex, Real
 
 import awkward as ak
 from awkward._backends.backend import Backend
-from awkward._backends.backends import NumpyBackend
-from awkward._backends.dispatch import backend_of, regularize_backend
+from awkward._backends.dispatch import (
+    backend_of,
+    register_backend_lookup_factory,
+    regularize_backend,
+)
+from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import get_array_class, get_record_class
 from awkward._layout import wrap_layout
 from awkward._nplikes import to_nplike
@@ -1319,3 +1323,13 @@ class Content:
 
     def copy(self, *, parameters: JSONMapping | None = unset) -> Self:
         raise NotImplementedError
+
+
+@register_backend_lookup_factory
+def find_content_backend(obj: type):
+    if issubclass(obj, Content):
+
+        def finder(obj: Content):
+            return obj.backend
+
+        return finder

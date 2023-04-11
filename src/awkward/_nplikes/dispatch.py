@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from awkward._nplikes.numpylike import NumpyLike
-from awkward._typing import Callable, TypeAlias, TypeVar
+from awkward._typing import TypeVar
 
 # Temporary sentinel marking "argument not given"
 _UNSET = object()
@@ -9,23 +9,15 @@ _UNSET = object()
 D = TypeVar("D")
 
 
-NumpyLikeFinder: TypeAlias = """
-Callable[[type], NumpyLike | None]
-"""
-
 _type_to_nplike: dict[type, NumpyLike] = {}
-_nplike_finders: list[NumpyLikeFinder] = []
+_nplike_classes: list[type[NumpyLike]] = []
 
 
 N = TypeVar("N", bound="type[NumpyLike]")
 
 
 def register_nplike(cls: N) -> N:
-    def finder(obj_cls):
-        if cls.is_own_array_type(obj_cls):
-            return cls.instance()
-
-    _nplike_finders.append(finder)
+    _nplike_classes.append(cls)
     return cls
 
 
@@ -46,9 +38,9 @@ def nplike_of(obj, *, default: D = _UNSET) -> NumpyLike | D:
     except KeyError:
         # Try and find the nplike for this type
         # caching the result by type
-        for finder in _nplike_finders:
-            nplike = finder(cls)
-            if nplike is not None:
+        for nplike_cls in _nplike_classes:
+            if nplike_cls.is_own_array_type(cls):
+                nplike = nplike_cls.instance()
                 break
         else:
             if default is _UNSET:

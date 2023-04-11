@@ -4,7 +4,7 @@ import json
 from collections.abc import Iterable, Sized
 
 import awkward as ak
-from awkward._backends.backends import NumpyBackend
+from awkward._backends.numpy import NumpyBackend
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._parameters import parameters_union

@@ -9,7 +9,7 @@ import ROOT
 import awkward as ak
 import awkward._connect.cling
 import awkward._lookup
-from awkward._backends.backends import NumpyBackend
+from awkward._backends.numpy import NumpyBackend
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata

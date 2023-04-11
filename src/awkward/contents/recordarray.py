@@ -7,7 +7,8 @@ from collections.abc import Iterable
 
 import awkward as ak
 from awkward._backends.backend import Backend
-from awkward._backends.backends import NumpyBackend, TypeTracerBackend
+from awkward._backends.numpy import NumpyBackend
+from awkward._backends.typetracer import TypeTracerBackend
 from awkward._behavior import find_record_reducer
 from awkward._layout import maybe_posaxis
 from awkward._nplikes.numpy import Numpy

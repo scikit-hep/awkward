@@ -65,7 +65,7 @@ def common_backend(backends: Collection[Backend]) -> Backend:
         )
 
 
-def backend_of(obj, default: D = _UNSET) -> Backend | D:
+def _backend_of(obj, default: D = _UNSET) -> Backend | D:
     cls = type(obj)
     try:
         lookup = _type_to_backend_lookup[cls]
@@ -84,7 +84,7 @@ def backend_of(obj, default: D = _UNSET) -> Backend | D:
         return maybe_lookup(obj)
 
 
-def backend_for(*objects, default: D = _UNSET) -> Backend | D:
+def backend_of(*objects, default: D = _UNSET) -> Backend | D:
     """
     Args:
         objects: objects for which to find a suitable backend
@@ -95,7 +95,7 @@ def backend_for(*objects, default: D = _UNSET) -> Backend | D:
     no default is given.
     """
     backends = [
-        b for b in (backend_of(o, default=None) for o in objects) if b is not None
+        b for b in (_backend_of(o, default=None) for o in objects) if b is not None
     ]
 
     if backends:

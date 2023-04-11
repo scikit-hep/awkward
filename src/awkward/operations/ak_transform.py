@@ -3,8 +3,8 @@ __all__ = ("transform",)
 import copy
 
 import awkward as ak
-from awkward._backends.backends import NumpyBackend
 from awkward._backends.dispatch import backend_of
+from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of
 from awkward._layout import wrap_layout
 

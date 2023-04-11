@@ -6,7 +6,7 @@ import jax
 import awkward as ak
 from awkward import contents, highlevel, record
 from awkward._backends.backend import Backend
-from awkward._backends.backends import JaxBackend
+from awkward._backends.jax import JaxBackend
 from awkward._behavior import behavior_of
 from awkward._layout import wrap_layout
 from awkward._nplikes.jax import Jax

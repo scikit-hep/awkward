@@ -2,7 +2,7 @@
 __all__ = ("to_jax",)
 
 import awkward as ak
-from awkward._backends.backends import JaxBackend
+from awkward._backends.jax import JaxBackend
 
 
 def to_jax(array):
