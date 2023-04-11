@@ -32,6 +32,16 @@ def register_nplike(cls: N) -> N:
 
 
 def nplike_of(obj, *, default: D = _UNSET) -> NumpyLike | D:
+    """
+    Args:
+        *arrays: iterable of possible array objects
+        default: default NumpyLike instance if no array objects found
+
+    Return the nplike that is best-suited to operating upon the given
+    iterable of arrays. If no known array types are found, return `default`
+    if it is set, otherwise `Numpy.instance()`.
+    """
+
     cls = type(obj)
     try:
         return _type_to_nplike[cls]
