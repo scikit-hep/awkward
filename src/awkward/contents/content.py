@@ -9,7 +9,7 @@ from numbers import Complex, Real
 import awkward as ak
 from awkward._backends.backend import Backend
 from awkward._backends.backends import NumpyBackend
-from awkward._backends.dispatch import regularize_backend
+from awkward._backends.dispatch import backend_of, regularize_backend
 from awkward._behavior import get_array_class, get_record_class
 from awkward._layout import wrap_layout
 from awkward._nplikes import to_nplike
@@ -560,7 +560,7 @@ class Content:
                 return self
 
             # Backend may change if index contains typetracers
-            backend = ak._backends.backend_of(self, *where)
+            backend = backend_of(self, *where)
             this = self.to_backend(backend)
 
             # Normalise valid indices onto well-defined basis
@@ -590,7 +590,7 @@ class Content:
             isinstance(where, ak.contents.Content)
             and where.backend is not self._backend
         ):
-            backend = ak._backends.backend_of(self, where)
+            backend = backend_of(self, where)
             return self.to_backend(backend)._getitem(where.to_backend(backend))
 
         elif isinstance(where, ak.contents.NumpyArray):

@@ -4,6 +4,7 @@ import copy
 
 import awkward as ak
 from awkward._backends.backends import NumpyBackend
+from awkward._backends.dispatch import backend_of
 from awkward._behavior import behavior_of
 from awkward._layout import wrap_layout
 
@@ -462,7 +463,7 @@ def _impl(
     highlevel,
 ):
     behavior = behavior_of(array, *more_arrays, behavior=behavior)
-    backend = ak._backends.backend_of(array, *more_arrays, default=cpu)
+    backend = backend_of(array, *more_arrays, default=cpu)
     layout = ak.operations.ak_to_layout._impl(
         array, allow_record=False, allow_other=False, regulararray=True
     ).to_backend(backend)

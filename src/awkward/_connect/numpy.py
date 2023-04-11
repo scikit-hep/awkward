@@ -5,7 +5,7 @@ import inspect
 import numpy
 
 import awkward as ak
-from awkward._backends import backend_of
+from awkward._backends.dispatch import backend_of
 from awkward._behavior import (
     behavior_of,
     find_custom_cast,
@@ -45,7 +45,7 @@ implemented = {}
 
 
 def _to_rectilinear(arg):
-    backend = ak._backends.backend_of(arg, default=None)
+    backend = backend_of(arg, default=None)
     # We have some array-like object that our backend mechanism understands
     if backend is not None:
         return ak.operations.to_numpy(arg)

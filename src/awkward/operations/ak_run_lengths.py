@@ -2,6 +2,7 @@
 __all__ = ("run_lengths",)
 import awkward as ak
 from awkward._backends.backends import NumpyBackend
+from awkward._backends.dispatch import backend_of
 from awkward._behavior import behavior_of
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
@@ -97,7 +98,7 @@ def run_lengths(array, *, highlevel=True, behavior=None):
 
 
 def _impl(array, highlevel, behavior):
-    backend = ak._backends.backend_of(array, default=cpu)
+    backend = backend_of(array, default=cpu)
 
     def lengths_of(data, offsets):
         if backend.nplike.is_own_array(data):

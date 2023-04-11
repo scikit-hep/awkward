@@ -54,7 +54,7 @@ def concatenate(arrays, axis=0, *, mergebool=True, highlevel=True, behavior=None
 def _impl(arrays, axis, mergebool, highlevel, behavior):
     axis = regularize_axis(axis)
     # Simple single-array, axis=0 fast-path
-    backend = ak._backends.backend_of(*arrays, default=cpu)
+    backend = backend_of(*arrays, default=cpu)
     behavior = behavior_of(*arrays, behavior=behavior)
     if (
         # Is an array with a known backend
@@ -144,7 +144,7 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
                 inputs = nextinputs
 
             if depth == posaxis:
-                backend = ak._backends.backend_of(*inputs, default=cpu)
+                backend = backend_of(*inputs, default=cpu)
 
                 length = None
                 for x in inputs:

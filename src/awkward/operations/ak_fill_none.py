@@ -4,6 +4,7 @@ import numbers
 
 import awkward as ak
 from awkward._backends.backends import NumpyBackend
+from awkward._backends.dispatch import backend_of
 from awkward._behavior import behavior_of
 from awkward._layout import maybe_posaxis, wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
@@ -74,7 +75,7 @@ def _impl(array, value, axis, highlevel, behavior):
     axis = regularize_axis(axis)
     arraylayout = ak.operations.to_layout(array, allow_record=True, allow_other=False)
     behavior = behavior_of(array, value, behavior=behavior)
-    backend = ak._backends.backend_of(arraylayout, default=cpu)
+    backend = backend_of(arraylayout, default=cpu)
 
     # Convert value type to appropriate layout
     if (

@@ -9,6 +9,7 @@ from collections.abc import Sequence
 
 import awkward as ak
 from awkward._backends.backend import Backend
+from awkward._backends.dispatch import backend_of
 from awkward._behavior import find_custom_broadcast
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
@@ -1059,7 +1060,7 @@ def broadcast_and_apply(
     function_name=None,
     broadcast_parameters_rule=BroadcastParameterRule.INTERSECT,
 ):
-    backend = ak._backends.backend_of(*inputs)
+    backend = backend_of(*inputs)
     isscalar = []
     out = apply_step(
         backend,

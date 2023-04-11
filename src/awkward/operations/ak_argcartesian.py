@@ -2,6 +2,7 @@
 __all__ = ("argcartesian",)
 import awkward as ak
 from awkward._backends.backends import NumpyBackend
+from awkward._backends.dispatch import backend_of
 from awkward._behavior import behavior_of
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
@@ -106,7 +107,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
     axis = regularize_axis(axis)
 
     if isinstance(arrays, dict):
-        backend = ak._backends.backend_of(*arrays.values(), default=cpu)
+        backend = backend_of(*arrays.values(), default=cpu)
         behavior = behavior_of(*arrays.values(), behavior=behavior)
         layouts = {
             n: ak._do.local_index(
@@ -117,7 +118,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
         }
     else:
         arrays = list(arrays)
-        backend = ak._backends.backend_of(*arrays, default=cpu)
+        backend = backend_of(*arrays, default=cpu)
         behavior = behavior_of(*arrays, behavior=behavior)
         layouts = [
             ak._do.local_index(

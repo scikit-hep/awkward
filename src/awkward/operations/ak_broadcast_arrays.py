@@ -2,6 +2,7 @@
 __all__ = ("broadcast_arrays",)
 import awkward as ak
 from awkward._backends.backends import NumpyBackend
+from awkward._backends.dispatch import backend_of
 from awkward._behavior import behavior_of
 from awkward._connect.numpy import unsupported
 from awkward._layout import wrap_layout
@@ -207,7 +208,7 @@ def _impl(
     highlevel,
     behavior,
 ):
-    backend = ak._backends.backend_of(*arrays, default=cpu)
+    backend = backend_of(*arrays, default=cpu)
 
     inputs = []
     for x in arrays:
