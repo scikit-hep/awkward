@@ -378,7 +378,7 @@ class Content:
     ):
         # if this is in a tuple-slice and really should be 0, it will be trimmed later
         length = 1 if length is not unknown_length and length == 0 else length
-        index = Index64(head.index, nplike=self._backend.index_nplike)
+        index = head.index
         indexlength = index.length
         index = index.to_nplike(self._backend.index_nplike)
         outindex = Index64.empty(
@@ -415,8 +415,7 @@ class Content:
     ):
         head = head.to_backend(self._backend)
         jagged = head.content.to_ListOffsetArray64()
-
-        index = Index64(head._index, nplike=self._backend.index_nplike)
+        index = head._index
         content = that._getitem_at(0)
         if self._backend.nplike.known_data and content.length < index.length:
             raise ak._errors.index_error(

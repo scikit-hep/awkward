@@ -435,7 +435,7 @@ class ListArray(Content):
                 as_list_offset_array.offsets[0] : as_list_offset_array.offsets[-1]
             ]
 
-            sliceoffsets = ak.index.Index64(slicecontent._offsets)
+            sliceoffsets = slicecontent._offsets
 
             outcontent = next_content._getitem_next_jagged(
                 sliceoffsets[:-1], sliceoffsets[1:], slicecontent._content, tail
@@ -527,7 +527,7 @@ class ListArray(Content):
                     "jagged slice length differs from array length",
                 )
 
-            missing = ak.index.Index64(slicecontent._index)
+            missing = slicecontent._index
             _numvalid = ak.index.Index64.empty(1, self._backend.index_nplike)
             assert (
                 _numvalid.nplike is self._backend.index_nplike
@@ -1086,8 +1086,8 @@ class ListArray(Content):
                     ak.contents.ListOffsetArray,
                 ),
             ):
-                array_starts = ak.index.Index(array.starts)
-                array_stops = ak.index.Index(array.stops)
+                array_starts = array.starts
+                array_stops = array.stops
 
                 assert (
                     nextstarts.nplike is self._backend.index_nplike
@@ -1120,8 +1120,8 @@ class ListArray(Content):
             elif isinstance(array, ak.contents.RegularArray):
                 listoffsetarray = array.to_ListOffsetArray64(True)
 
-                array_starts = ak.index.Index64(listoffsetarray.starts)
-                array_stops = ak.index.Index64(listoffsetarray.stops)
+                array_starts = listoffsetarray.starts
+                array_stops = listoffsetarray.stops
 
                 assert (
                     nextstarts.nplike is self._backend.index_nplike

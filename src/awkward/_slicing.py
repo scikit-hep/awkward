@@ -512,7 +512,7 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
             cumsum[1:] = item_backend.index_nplike.asarray(
                 item_backend.nplike.cumsum(flat_mask.data)
             )
-            nextoffsets = cumsum[item.offsets]
+            nextoffsets = ak.index.Index(cumsum[item.offsets])
 
         else:
             item._touch_data(recursive=False)
@@ -520,7 +520,7 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
             nextcontent = item_backend.nplike.empty(unknown_length, dtype=np.int64)
 
         return ListOffsetArray(
-            ak.index.Index64(nextoffsets),
+            nextoffsets,
             NumpyArray(nextcontent, backend=item_backend),
         ).to_backend(backend)
 
@@ -560,13 +560,13 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
             cumsum = item_backend.nplike.empty(expanded.shape[0] + 1, dtype=np.int64)
             cumsum[0] = 0
             cumsum[1:] = item_backend.nplike.cumsum(expanded)
-            nextoffsets = cumsum[item.offsets]
+            nextoffsets = ak.index.Index(cumsum[item.offsets])
 
             # outindex fits into the lists; non-missing are sequential
-            outindex = item_backend.index_nplike.full(
-                nextoffsets[-1], -1, dtype=np.int64
+            outindex = ak.index.Index64(
+                item_backend.index_nplike.full(nextoffsets.data[-1], -1, dtype=np.int64)
             )
-            outindex[~isnegative[expanded]] = item_backend.index_nplike.arange(
+            outindex.data[~isnegative[expanded]] = item_backend.index_nplike.arange(
                 nextcontent.shape[0], dtype=np.int64
             )
 
@@ -577,9 +577,9 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
             nextcontent = item_backend.nplike.empty(unknown_length, dtype=np.int64)
 
         return ListOffsetArray(
-            ak.index.Index64(nextoffsets, nplike=item_backend.index_nplike),
+            nextoffsets,
             IndexedOptionArray(
-                ak.index.Index(outindex, nplike=item_backend.index_nplike),
+                outindex,
                 NumpyArray(nextcontent, backend=item_backend),
             ),
         ).to_backend(backend)
@@ -630,10 +630,10 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
 
                 # non-missing are sequential
                 non_negative = item_backend.nplike.logical_not(isnegative[expanded])
-                outindex = item_backend.index_nplike.full(
-                    lenoutindex, -1, dtype=np.int64
+                outindex = ak.index.Index64(
+                    item_backend.index_nplike.full(lenoutindex, -1, dtype=np.int64)
                 )
-                outindex[
+                outindex.data[
                     to_nplike(non_negative, item_backend.index_nplike)
                 ] = item_backend.index_nplike.arange(
                     nextcontent.shape[0], dtype=np.int64
@@ -645,7 +645,7 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
                 nextcontent = item_backend.nplike.empty(unknown_length, dtype=np.int64)
 
             return IndexedOptionArray(
-                ak.index.Index(outindex, nplike=item_backend.index_nplike),
+                outindex,
                 NumpyArray(nextcontent, backend=item_backend),
             ).to_backend(backend)
 
