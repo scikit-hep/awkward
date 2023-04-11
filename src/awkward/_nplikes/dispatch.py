@@ -17,7 +17,7 @@ _type_to_nplike: dict[type, NumpyLike] = {}
 _nplike_finders: list[NumpyLikeFinder] = []
 
 
-N = TypeVar("N", bound=type[NumpyLike])
+N = TypeVar("N", bound="type[NumpyLike]")
 
 
 def register_nplike(cls: N) -> N:
