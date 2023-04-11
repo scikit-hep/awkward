@@ -31,6 +31,6 @@ def _impl(array, exception):
     out = ak._do.validity_error(layout, path="highlevel")
 
     if out not in (None, "") and exception:
-        raise ak._errors.wrap_error(ValueError(out))
+        raise ValueError(out)
     else:
         return out

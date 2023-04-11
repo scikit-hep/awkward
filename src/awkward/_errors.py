@@ -1,13 +1,18 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 from __future__ import annotations
 
+import sys
 import threading
 import warnings
 from collections.abc import Mapping, Sequence
 
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._typing import TypeVar
 
 np = NumpyMetadata.instance()
+
+
+E = TypeVar("E", bound=Exception)
 
 
 class PartialFunction:
@@ -43,9 +48,42 @@ class ErrorContext:
             self._slate.__dict__["__primary_context__"] = self
 
     def __exit__(self, exception_type, exception_value, traceback):
-        # Step out of the way so that another ErrorContext can become primary.
-        if self.primary() is self:
-            self._slate.__dict__.clear()
+        try:
+            # Handle caught exception
+            if exception_type is not None and self.primary() is self:
+                self.handle_exception(exception_type, exception_value)
+        finally:
+            # Step out of the way so that another ErrorContext can become primary.
+            if self.primary() is self:
+                self._slate.__dict__.clear()
+
+    def handle_exception(self, cls: type[E], exception: E) -> E:
+        if sys.version_info >= (3, 11, 0, "final"):
+            self.decorate_exception(cls, exception)
+        else:
+            raise self.decorate_exception(cls, exception)
+
+    def decorate_exception(self, cls: type[E], exception: E) -> E:
+        if sys.version_info >= (3, 11, 0, "final"):
+            if issubclass(cls, (NotImplementedError, AssertionError)):
+                exception.add_note(
+                    "\n\nSee if this has been reported at https://github.com/scikit-hep/awkward/issues"
+                )
+            else:
+                exception.add_note(self.note)
+            return exception
+        else:
+            if issubclass(cls, (NotImplementedError, AssertionError)):
+                # Raise modified exception
+                new_exception = cls(
+                    str(exception)
+                    + "\n\nSee if this has been reported at https://github.com/scikit-hep/awkward/issues"
+                )
+                new_exception.__cause__ = exception
+            else:
+                new_exception = cls(self.format_exception(exception))
+                new_exception.__cause__ = exception
+            return new_exception
 
     def format_argument(self, width, value):
         from awkward import contents, highlevel, record
@@ -122,6 +160,10 @@ class ErrorContext:
     def format_exception(self, exception: Exception) -> str:
         raise NotImplementedError
 
+    @property
+    def note(self) -> str:
+        raise NotImplementedError
+
 
 class OperationErrorContext(ErrorContext):
     _width = 80 - 8
@@ -169,6 +211,10 @@ class OperationErrorContext(ErrorContext):
         return out
 
     def format_exception(self, exception):
+        return f"{exception}\n{self.note}"
+
+    @property
+    def note(self) -> str:
         arguments = []
         for name, valuestr in self.arguments.items():
             if isinstance(name, str):
@@ -177,11 +223,10 @@ class OperationErrorContext(ErrorContext):
                 arguments.append(f"\n        {valuestr}")
 
         extra_line = "" if len(arguments) == 0 else "\n    "
-        return f"""while calling
+        return f"""
+This error occurred while calling
 
-    {self.name}({"".join(arguments)}{extra_line})
-
-Error details: {str(exception)}"""
+    {self.name}({"".join(arguments)}{extra_line})"""
 
 
 class SlicingErrorContext(ErrorContext):
@@ -223,20 +268,18 @@ class SlicingErrorContext(ErrorContext):
         return out
 
     def format_exception(self, exception):
-        if isinstance(exception, str):
-            message = exception
-        else:
-            message = f"Error details: {str(exception)}"
+        return f"{exception}\n{self.note}"
 
-        return f"""while attempting to slice
+    @property
+    def note(self) -> str:
+        return f"""
+This error occurred while attempting to slice
 
     {self.array}
 
 with
 
-    {self.where}
-
-{message}"""
+    {self.where}"""
 
     @staticmethod
     def format_slice(x):
@@ -277,60 +320,15 @@ with
             return repr(x)
 
 
-def wrap_error(
-    exception: Exception | type[Exception], error_context: ErrorContext = None
-) -> Exception:
-    """
-    Args:
-        exception: exception object, or exception type to instantiate
-        error_context: context in which error was raised
-
-    Wrap the given exception, instantiating it if needed, to ensure meaningful error messages.
-    """
-    if isinstance(exception, type) and issubclass(exception, Exception):
-        try:
-            exception = exception()
-        except Exception:
-            return exception
-
-    if isinstance(exception, (NotImplementedError, AssertionError)):
-        return type(exception)(
-            str(exception)
-            + "\n\nSee if this has been reported at https://github.com/scikit-hep/awkward-1.0/issues"
-        )
-
-    if error_context is None:
-        error_context = ErrorContext.primary()
-
-    if isinstance(error_context, ErrorContext):
-        # Note: returns an error for the caller to raise!
-        return type(exception)(error_context.format_exception(exception))
-    else:
-        # Note: returns an error for the caller to raise!
-        return exception
-
-
 def index_error(subarray, slicer, details: str = None) -> IndexError:
-    detailsstr = ""
+    message = ""
     if details is not None:
-        detailsstr = f"""
+        message = f": {details}"
 
-Error details: {details}."""
-
-    error_context = ErrorContext.primary()
-    if not isinstance(error_context, SlicingErrorContext):
-        # Note: returns an error for the caller to raise!
-        return IndexError(
-            f"cannot slice {type(subarray).__name__} with {SlicingErrorContext.format_slice(slicer)}{detailsstr}"
-        )
-
-    else:
-        # Note: returns an error for the caller to raise!
-        return IndexError(
-            error_context.format_exception(
-                f"at inner {type(subarray).__name__} of length {subarray.length}, using sub-slice {error_context.format_slice(slicer)}.{detailsstr}"
-            )
-        )
+    # Note: returns an error for the caller to raise!
+    return IndexError(
+        f"cannot slice {type(subarray).__name__} (of length {subarray.length}) with {SlicingErrorContext.format_slice(slicer)}{message}"
+    )
 
 
 ###############################################################################

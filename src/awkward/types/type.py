@@ -1,4 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+from __future__ import annotations
 
 import json
 import sys
@@ -69,6 +70,14 @@ class Type:
             out.append("typestr=" + repr(self._typestr))
 
         return out
+
+    def is_equal_to(self, other, *, all_parameters: bool = False) -> bool:
+        return self._is_equal_to(other, all_parameters)
+
+    __eq__ = is_equal_to
+
+    def _is_equal_to(self, other, all_parameters: bool) -> bool:
+        raise ak._errors.wrap_error(NotImplementedError)
 
 
 class _DataShapeTransformer(Transformer):
@@ -318,10 +327,8 @@ def from_datashape(datashape, highlevel=True):
         elif isinstance(out, RecordType):
             return out
         else:
-            raise ak._errors.wrap_error(
-                ValueError(
-                    f"type {type(out).__name__!r} is not compatible with highlevel=True"
-                )
+            raise ValueError(
+                f"type {type(out).__name__!r} is not compatible with highlevel=True"
             )
 
     else:

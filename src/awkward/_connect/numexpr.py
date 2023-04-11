@@ -14,16 +14,14 @@ def _import_numexpr():
     try:
         import numexpr
     except ModuleNotFoundError as err:
-        raise ak._errors.wrap_error(
-            ModuleNotFoundError(
-                """install the 'numexpr' package with:
+        raise ModuleNotFoundError(
+            """install the 'numexpr' package with:
 
     pip install numexpr --upgrade
 
 or
 
     conda install numexpr"""
-            )
         ) from err
     else:
         if not _has_checked_version:
@@ -125,9 +123,7 @@ def re_evaluate(local_dict=None):
     try:
         compiled_ex = numexpr.necompiler._numexpr_last["ex"]  # noqa: F841
     except KeyError as err:
-        raise ak._errors.wrap_error(
-            RuntimeError("not a previous evaluate() execution found")
-        ) from err
+        raise RuntimeError("not a previous evaluate() execution found") from err
     names = numexpr.necompiler._numexpr_last["argnames"]
     arguments = getArguments(names, local_dict)
 

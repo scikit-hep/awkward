@@ -7,7 +7,6 @@ import numpy
 from numpy.lib.mixins import NDArrayOperatorsMixin
 
 import awkward as ak
-from awkward._errors import wrap_error
 from awkward._nplikes.numpylike import ArrayLike, IndexType, NumpyLike, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._regularize import is_integer, is_non_string_like_sequence
@@ -190,9 +189,7 @@ def _attach_report(layout, form, report: TypeTracerReport):
             _attach_report(x, y, report)
 
     else:
-        raise ak._errors.wrap_error(
-            AssertionError(f"unrecognized layout type {type(layout)}")
-        )
+        raise AssertionError(f"unrecognized layout type {type(layout)}")
 
 
 def typetracer_with_report(form, forget_length=True):
@@ -209,10 +206,8 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
     _shape: tuple[ShapeItem, ...]
 
     def __new__(cls, *args, **kwargs):
-        raise wrap_error(
-            TypeError(
-                "internal_error: the `TypeTracer` nplike's `TypeTracerArray` object should never be directly instantiated"
-            )
+        raise TypeError(
+            "internal_error: the `TypeTracer` nplike's `TypeTracerArray` object should never be directly instantiated"
         )
 
     def __reduce__(self):
@@ -232,11 +227,9 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         self.report = report
 
         if not isinstance(shape, tuple):
-            raise wrap_error(TypeError("typetracer shape must be a tuple"))
+            raise TypeError("typetracer shape must be a tuple")
         if any(is_unknown_scalar(x) for x in shape):
-            raise wrap_error(
-                TypeError("typetracer shape must be integers or unknown-length")
-            )
+            raise TypeError("typetracer shape must be integers or unknown-length")
         self._shape = shape
         self._dtype = np.dtype(dtype)
 
@@ -286,7 +279,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
     @form_key.setter
     def form_key(self, value):
         if value is not None and not isinstance(value, str):
-            raise ak._errors.wrap_error(TypeError("form_key must be None or a string"))
+            raise TypeError("form_key must be None or a string")
         self._form_key = value
 
     @property
@@ -296,9 +289,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
     @report.setter
     def report(self, value):
         if value is not None and not isinstance(value, TypeTracerReport):
-            raise ak._errors.wrap_error(
-                TypeError("report must be None or a TypeTracerReport")
-            )
+            raise TypeError("report must be None or a TypeTracerReport")
         self._report = value
 
     def touch_shape(self):
@@ -352,17 +343,13 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         )
 
     def __iter__(self):
-        raise ak._errors.wrap_error(
-            AssertionError(
-                "bug in Awkward Array: attempt to convert TypeTracerArray into a concrete array"
-            )
+        raise AssertionError(
+            "bug in Awkward Array: attempt to convert TypeTracerArray into a concrete array"
         )
 
     def __array__(self, dtype=None):
-        raise ak._errors.wrap_error(
-            AssertionError(
-                "bug in Awkward Array: attempt to convert TypeTracerArray into a concrete array"
-            )
+        raise AssertionError(
+            "bug in Awkward Array: attempt to convert TypeTracerArray into a concrete array"
         )
 
     @property
@@ -377,10 +364,8 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         return self._CTypes
 
     def __len__(self):
-        raise ak._errors.wrap_error(
-            AssertionError(
-                "bug in Awkward Array: attempt to get length of a TypeTracerArray"
-            )
+        raise AssertionError(
+            "bug in Awkward Array: attempt to get length of a TypeTracerArray"
         )
 
     def __getitem__(
@@ -413,27 +398,21 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
                 if not has_seen_ellipsis:
                     has_seen_ellipsis = True
                 else:
-                    raise wrap_error(
-                        NotImplementedError(
-                            "only one ellipsis value permitted for advanced index"
-                        )
+                    raise NotImplementedError(
+                        "only one ellipsis value permitted for advanced index"
                     )
             # Basic newaxis
             elif item is np.newaxis:
                 pass
             else:
-                raise wrap_error(
-                    NotImplementedError(
-                        "only integer, unknown scalar, slice, ellipsis, or array indices are permitted"
-                    )
+                raise NotImplementedError(
+                    "only integer, unknown scalar, slice, ellipsis, or array indices are permitted"
                 )
 
         n_dim_index = n_basic_non_ellipsis + n_advanced
         if n_dim_index > self.ndim:
-            raise wrap_error(
-                IndexError(
-                    f"too many indices for array: array is {self.ndim}-dimensional, but {n_dim_index} were indexed"
-                )
+            raise IndexError(
+                f"too many indices for array: array is {self.ndim}-dimensional, but {n_dim_index} were indexed"
             )
 
         # 2. Normalise Ellipsis and boolean arrays
@@ -501,9 +480,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
                         continue
 
                     if not 0 <= item < dimension_length:
-                        raise wrap_error(
-                            NotImplementedError("integer index out of bounds")
-                        )
+                        raise NotImplementedError("integer index out of bounds")
 
         advanced_shape = self.nplike.broadcast_shapes(*advanced_shapes)
         if advanced_is_at_front:
@@ -532,7 +509,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
     ):
         existing_value = self.__getitem__(key)
         if isinstance(value, TypeTracerArray) and value.ndim > existing_value.ndim:
-            raise wrap_error(ValueError("cannot assign shape larger than destination"))
+            raise ValueError("cannot assign shape larger than destination")
 
     def copy(self):
         self.touch_data()
@@ -547,22 +524,20 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         kwargs.pop("out", None)
 
         if method != "__call__" or len(inputs) == 0:
-            raise ak._errors.wrap_error(NotImplementedError)
+            raise NotImplementedError
 
         if len(kwargs) > 0:
-            raise ak._errors.wrap_error(
-                ValueError("TypeTracerArray does not support kwargs for ufuncs")
-            )
+            raise ValueError("TypeTracerArray does not support kwargs for ufuncs")
         return self.nplike._apply_ufunc(ufunc, *inputs)
 
     def __bool__(self) -> bool:
-        raise ak._errors.wrap_error(RuntimeError("cannot realise an unknown value"))
+        raise RuntimeError("cannot realise an unknown value")
 
     def __int__(self) -> int:
-        raise ak._errors.wrap_error(RuntimeError("cannot realise an unknown value"))
+        raise RuntimeError("cannot realise an unknown value")
 
     def __index__(self) -> int:
-        raise ak._errors.wrap_error(RuntimeError("cannot realise an unknown value"))
+        raise RuntimeError("cannot realise an unknown value")
 
 
 def _scalar_type_of(obj) -> numpy.dtype:
@@ -602,7 +577,7 @@ class TypeTracer(NumpyLike):
                 for x, b in zip(result, broadcasted)
             )
         else:
-            raise wrap_error(TypeError)
+            raise TypeError
 
     def _axis_is_valid(self, axis: int, ndim: int) -> bool:
         if axis < 0:
@@ -611,11 +586,11 @@ class TypeTracer(NumpyLike):
 
     @property
     def ma(self):
-        raise ak._errors.wrap_error(NotImplementedError)
+        raise NotImplementedError
 
     @property
     def char(self):
-        raise ak._errors.wrap_error(NotImplementedError)
+        raise NotImplementedError
 
     @property
     def ndarray(self):
@@ -642,10 +617,8 @@ class TypeTracer(NumpyLike):
             if dtype is None:
                 return obj
             elif copy is False and dtype != obj.dtype:
-                raise ak._errors.wrap_error(
-                    ValueError(
-                        "asarray was called with copy=False for an array of a different dtype"
-                    )
+                raise ValueError(
+                    "asarray was called with copy=False for an array of a different dtype"
                 )
             else:
                 return TypeTracerArray._new(
@@ -659,14 +632,10 @@ class TypeTracer(NumpyLike):
             # Support array-like objects
             if hasattr(obj, "shape") and hasattr(obj, "dtype"):
                 if obj.dtype.kind == "S":
-                    raise ak._errors.wrap_error(
-                        TypeError("TypeTracerArray cannot be created from strings")
-                    )
+                    raise TypeError("TypeTracerArray cannot be created from strings")
                 elif copy is False and dtype != obj.dtype:
-                    raise ak._errors.wrap_error(
-                        ValueError(
-                            "asarray was called with copy=False for an array of a different dtype"
-                        )
+                    raise ValueError(
+                        "asarray was called with copy=False for an array of a different dtype"
                     )
                 else:
                     return TypeTracerArray._new(obj.dtype, obj.shape)
@@ -676,12 +645,50 @@ class TypeTracer(NumpyLike):
                 return TypeTracerArray._new(as_array.dtype, ())
 
             elif is_non_string_like_sequence(obj):
-                assert not any(is_non_string_like_sequence(x) for x in obj)
-                shape = (len(obj),)
-                result_type = numpy.result_type(*obj)  # TODO: result_type
-                return TypeTracerArray._new(result_type, shape)
+                shape = []
+                flat_items = []
+                has_seen_leaf = False
+
+                # DFS walk into sequence, construct shape, then validate
+                # remainder of the sequence against this shape.
+                def populate_shape_and_items(node, dim):
+                    nonlocal has_seen_leaf
+
+                    # If we've already computed the shape,
+                    # ensure this item matches!
+                    if has_seen_leaf:
+                        if len(node) != shape[dim - 1]:
+                            raise ValueError(
+                                f"sequence at dimension {dim} does not match shape {shape[dim-1]}"
+                            )
+                    else:
+                        shape.append(len(node))
+
+                    if isinstance(node, TypeTracerArray):
+                        raise AssertionError(
+                            "typetracer arrays inside sequences not currently supported"
+                        )
+                    # Found leaf!
+                    elif len(node) == 0 or not is_non_string_like_sequence(node[0]):
+                        has_seen_leaf = True
+                        flat_items.extend(
+                            [
+                                item.dtype if is_unknown_scalar(item) else item
+                                for item in node
+                            ]
+                        )
+
+                    # Keep recursing!
+                    else:
+                        for child in node:
+                            populate_shape_and_items(child, dim + 1)
+
+                populate_shape_and_items(obj, 1)
+                if dtype is None:
+                    dtype = numpy.result_type(*flat_items)
+                return TypeTracerArray._new(dtype, shape=tuple(shape))
             else:
-                raise wrap_error(TypeError)
+                raise TypeError
 
     def ascontiguousarray(
         self, x: ArrayLike, *, dtype: numpy.dtype | None = None
@@ -694,7 +701,7 @@ class TypeTracer(NumpyLike):
     ) -> TypeTracerArray:
         for x in (buffer, count):
             try_touch_data(x)
-        raise ak._errors.wrap_error(NotImplementedError)
+        raise NotImplementedError
 
     def zeros(
         self, shape: ShapeItem | tuple[ShapeItem, ...], *, dtype: np.dtype | None = None
@@ -815,7 +822,7 @@ class TypeTracer(NumpyLike):
             )
             and x.size != sorter.size
         ):
-            raise wrap_error(ValueError("x.size should equal sorter.size"))
+            raise ValueError("x.size should equal sorter.size")
 
         return TypeTracerArray._new(x.dtype, (values.size,))
 
@@ -829,7 +836,7 @@ class TypeTracer(NumpyLike):
             as_array = numpy.asarray(obj)
             return TypeTracerArray._new(as_array.dtype, ())
         else:
-            raise wrap_error(TypeError(f"expected scalar type, received {obj}"))
+            raise TypeError(f"expected scalar type, received {obj}")
 
     def shape_item_as_index(self, x1: ShapeItem) -> IndexType:
         if x1 is unknown_length:
@@ -837,7 +844,7 @@ class TypeTracer(NumpyLike):
         elif isinstance(x1, int):
             return x1
         else:
-            raise wrap_error(TypeError(f"expected None or int type, received {x1}"))
+            raise TypeError(f"expected None or int type, received {x1}")
 
     def index_as_shape_item(self, x1: IndexType) -> ShapeItem:
         if is_unknown_scalar(x1) and np.issubdtype(x1.dtype, np.integer):
@@ -871,9 +878,7 @@ class TypeTracer(NumpyLike):
         if 0 <= index < length:
             return index
         else:
-            raise wrap_error(
-                IndexError(f"index value out of bounds (0, {length}): {index}")
-            )
+            raise IndexError(f"index value out of bounds (0, {length}): {index}")
 
     def derive_slice_for_length(
         self, slice_: slice, length: ShapeItem
@@ -976,10 +981,8 @@ class TypeTracer(NumpyLike):
                 elif result[i] == 1:
                     result[i] = item
                 else:
-                    raise wrap_error(
-                        ValueError(
-                            "known component of shape does not match broadcast result"
-                        )
+                    raise ValueError(
+                        "known component of shape does not match broadcast result"
                     )
         return tuple(result)
 
@@ -1004,7 +1007,7 @@ class TypeTracer(NumpyLike):
     def broadcast_to(
         self, x: ArrayLike, shape: tuple[ShapeItem, ...]
     ) -> TypeTracerArray:
-        raise ak._errors.wrap_error(NotImplementedError)
+        raise NotImplementedError
 
     def reshape(
         self, x: ArrayLike, shape: tuple[ShapeItem, ...], *, copy: bool | None = None
@@ -1021,19 +1024,17 @@ class TypeTracer(NumpyLike):
                 # Size is no longer defined
                 new_size = unknown_length
             elif not is_integer(item):
-                raise wrap_error(
-                    ValueError(
-                        "shape must be comprised of positive integers, -1 (for placeholders), or unknown lengths"
-                    )
+                raise ValueError(
+                    "shape must be comprised of positive integers, -1 (for placeholders), or unknown lengths"
                 )
             elif item == -1:
                 if n_placeholders == 1:
-                    raise wrap_error(
-                        ValueError("only one placeholder dimension permitted per shape")
+                    raise ValueError(
+                        "only one placeholder dimension permitted per shape"
                     )
                 n_placeholders += 1
             elif item == 0:
-                raise wrap_error(ValueError("shape items cannot be zero"))
+                raise ValueError("shape items cannot be zero")
             else:
                 new_size *= item
 
@@ -1080,7 +1081,7 @@ class TypeTracer(NumpyLike):
         if axis is None:
             assert all(x.ndim == 1 for x in arrays)
         elif axis != 0:
-            raise ak._errors.wrap_error(NotImplementedError("concat with axis != 0"))
+            raise NotImplementedError("concat with axis != 0")
         for x in arrays:
             try_touch_data(x)
 
@@ -1090,19 +1091,15 @@ class TypeTracer(NumpyLike):
             if inner_shape is None:
                 inner_shape = x.shape[1:]
             elif inner_shape != x.shape[1:]:
-                raise ak._errors.wrap_error(
-                    ValueError(
-                        "inner dimensions don't match in concatenate: {} vs {}".format(
-                            inner_shape, x.shape[1:]
-                        )
+                raise ValueError(
+                    "inner dimensions don't match in concatenate: {} vs {}".format(
+                        inner_shape, x.shape[1:]
                     )
                 )
             emptyarrays.append(_emptyarray(x))
 
         if inner_shape is None:
-            raise ak._errors.wrap_error(
-                ValueError("need at least one array to concatenate")
-            )
+            raise ValueError("need at least one array to concatenate")
 
         return TypeTracerArray._new(
             numpy.concatenate(emptyarrays).dtype, (unknown_length, *inner_shape)
@@ -1117,11 +1114,11 @@ class TypeTracer(NumpyLike):
     ) -> TypeTracerArray:
         try_touch_data(x)
         try_touch_data(repeats)
-        raise ak._errors.wrap_error(NotImplementedError)
+        raise NotImplementedError
 
     def tile(self, x: ArrayLike, reps: int) -> TypeTracerArray:
         try_touch_data(x)
-        raise ak._errors.wrap_error(NotImplementedError)
+        raise NotImplementedError
 
     def stack(
         self,
@@ -1131,7 +1128,7 @@ class TypeTracer(NumpyLike):
     ) -> TypeTracerArray:
         for x in arrays:
             try_touch_data(x)
-        raise ak._errors.wrap_error(NotImplementedError)
+        raise NotImplementedError
 
     def packbits(
         self,
@@ -1141,7 +1138,7 @@ class TypeTracer(NumpyLike):
         bitorder: Literal["big", "little"] = "big",
     ) -> TypeTracerArray:
         try_touch_data(x)
-        raise ak._errors.wrap_error(NotImplementedError)
+        raise NotImplementedError
 
     def unpackbits(
         self,
@@ -1152,7 +1149,7 @@ class TypeTracer(NumpyLike):
         bitorder: Literal["big", "little"] = "big",
     ) -> TypeTracerArray:
         try_touch_data(x)
-        raise ak._errors.wrap_error(NotImplementedError)
+        raise NotImplementedError
 
     ############################ ufuncs
 
@@ -1245,7 +1242,7 @@ class TypeTracer(NumpyLike):
         if axis is None:
             return TypeTracerArray._new(np.bool_, shape=())
         else:
-            raise ak._errors.wrap_error(NotImplementedError)
+            raise NotImplementedError
 
     def any(
         self,
@@ -1259,13 +1256,13 @@ class TypeTracer(NumpyLike):
         if axis is None:
             return TypeTracerArray._new(np.bool_, shape=())
         else:
-            raise ak._errors.wrap_error(NotImplementedError)
+            raise NotImplementedError
 
     def count_nonzero(
         self, x: ArrayLike, *, axis: int | None = None, keepdims: bool = False
     ) -> TypeTracerArray:
         try_touch_data(x)
-        raise ak._errors.wrap_error(NotImplementedError)
+        raise NotImplementedError
 
     def min(
         self,
@@ -1276,7 +1273,7 @@ class TypeTracer(NumpyLike):
         maybe_out: ArrayLike | None = None,
     ) -> TypeTracerArray:
         try_touch_data(x)
-        raise ak._errors.wrap_error(NotImplementedError)
+        raise NotImplementedError
 
     def max(
         self,
@@ -1287,7 +1284,7 @@ class TypeTracer(NumpyLike):
         maybe_out: ArrayLike | None = None,
     ) -> TypeTracerArray:
         try_touch_data(x)
-        raise ak._errors.wrap_error(NotImplementedError)
+        raise NotImplementedError
 
     def array_str(
         self,

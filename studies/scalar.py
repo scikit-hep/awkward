@@ -70,7 +70,7 @@ class JaxScalar:
     __slots__ = ["_value"]
 
     def __len__(self):
-        raise ak._errors.wrap_error(TypeError("len() of unsized object"))
+        raise TypeError("len() of unsized object")
 
     def _binop(self, op, other):
         if isinstance(other, JaxScalar):
@@ -99,9 +99,7 @@ class JaxScalar:
         return self._binop(self._value.__mul__, other)
 
     def __matmul__(self, other):
-        raise ak._errors.wrap_error(
-            ValueError("Input operand 0 does not have enough dimensions ")
-        )
+        raise ValueError("Input operand 0 does not have enough dimensions ")
 
     def __truediv__(self, other):
         return self._binop(self._value.__truediv__, other)
@@ -155,9 +153,7 @@ class JaxScalar:
         return self._binop(self._value.__rmul__, other)
 
     def __rmatmul__(self, other):
-        raise ak._errors.wrap_error(
-            ValueError("Input operand 0 does not have enough dimensions ")
-        )
+        raise ValueError("Input operand 0 does not have enough dimensions ")
 
     def __rtruediv__(self, other):
         return self._binop(self._value.__rtruediv__, other)
@@ -199,9 +195,7 @@ class JaxScalar:
         return self._binop(self._value.__imul__, other)
 
     def __imatmul__(self, other):
-        raise ak._errors.wrap_error(
-            ValueError("Input operand 0 does not have enough dimensions ")
-        )
+        raise ValueError("Input operand 0 does not have enough dimensions ")
 
     def __itruediv__(self, other):
         return self._binop(self._value.__itruediv__, other)
@@ -344,7 +338,7 @@ class CupyScalar:
     __slots__ = ["_value"]
 
     def __len__(self):
-        raise ak._errors.wrap_error(TypeError("len() of unsized object"))
+        raise TypeError("len() of unsized object")
 
     def _binop(self, op, other):
         if isinstance(other, CupyScalar):
@@ -373,9 +367,7 @@ class CupyScalar:
         return self._binop(self._value.__mul__, other)
 
     def __matmul__(self, other):
-        raise ak._errors.wrap_error(
-            ValueError("Input operand 0 does not have enough dimensions ")
-        )
+        raise ValueError("Input operand 0 does not have enough dimensions ")
 
     def __truediv__(self, other):
         return self._binop(self._value.__truediv__, other)
@@ -429,9 +421,7 @@ class CupyScalar:
         return self._binop(self._value.__rmul__, other)
 
     def __rmatmul__(self, other):
-        raise ak._errors.wrap_error(
-            ValueError("Input operand 0 does not have enough dimensions ")
-        )
+        raise ValueError("Input operand 0 does not have enough dimensions ")
 
     def __rtruediv__(self, other):
         return self._binop(self._value.__rtruediv__, other)
@@ -473,9 +463,7 @@ class CupyScalar:
         return self._binop(self._value.__imul__, other)
 
     def __imatmul__(self, other):
-        raise ak._errors.wrap_error(
-            ValueError("Input operand 0 does not have enough dimensions ")
-        )
+        raise ValueError("Input operand 0 does not have enough dimensions ")
 
     def __itruediv__(self, other):
         return self._binop(self._value.__itruediv__, other)

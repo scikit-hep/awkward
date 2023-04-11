@@ -5,6 +5,7 @@ import copy
 from collections.abc import Iterable
 
 import awkward as ak
+from awkward._backends import Backend
 from awkward._behavior import get_record_class
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
@@ -34,18 +35,12 @@ class Record:
 
     def __init__(self, array, at):
         if not isinstance(array, ak.contents.RecordArray):
-            raise ak._errors.wrap_error(
-                TypeError(f"Record 'array' must be a RecordArray, not {array!r}")
-            )
+            raise TypeError(f"Record 'array' must be a RecordArray, not {array!r}")
         if not is_integer(at):
-            raise ak._errors.wrap_error(
-                TypeError(f"Record 'at' must be an integer, not {array!r}")
-            )
+            raise TypeError(f"Record 'at' must be an integer, not {array!r}")
         if not (array.length is unknown_length or 0 <= at < array.length):
-            raise ak._errors.wrap_error(
-                ValueError(
-                    f"Record 'at' must be >= 0 and < len(array) == {array.length}, not {at}"
-                )
+            raise ValueError(
+                f"Record 'at' must be >= 0 and < len(array) == {array.length}, not {at}"
             )
         else:
             self._array = array
@@ -140,27 +135,19 @@ class Record:
 
     def _getitem(self, where):
         if is_integer(where):
-            raise ak._errors.wrap_error(
-                IndexError("scalar Record cannot be sliced by an integer")
-            )
+            raise IndexError("scalar Record cannot be sliced by an integer")
 
         elif isinstance(where, slice):
-            raise ak._errors.wrap_error(
-                IndexError("scalar Record cannot be sliced by a range slice (`:`)")
-            )
+            raise IndexError("scalar Record cannot be sliced by a range slice (`:`)")
 
         elif isinstance(where, str):
             return self._getitem_field(where)
 
         elif where is np.newaxis:
-            raise ak._errors.wrap_error(
-                IndexError("scalar Record cannot be sliced by np.newaxis (`None`)")
-            )
+            raise IndexError("scalar Record cannot be sliced by np.newaxis (`None`)")
 
         elif where is Ellipsis:
-            raise ak._errors.wrap_error(
-                IndexError("scalar Record cannot be sliced by an ellipsis (`...`)")
-            )
+            raise IndexError("scalar Record cannot be sliced by an ellipsis (`...`)")
 
         elif isinstance(where, tuple) and len(where) == 0:
             return self
@@ -172,35 +159,25 @@ class Record:
             return self._getitem_field(where[0])._getitem(where[1:])
 
         elif isinstance(where, ak.highlevel.Array):
-            raise ak._errors.wrap_error(
-                IndexError("scalar Record cannot be sliced by an array")
-            )
+            raise IndexError("scalar Record cannot be sliced by an array")
 
         elif isinstance(where, ak.contents.Content):
-            raise ak._errors.wrap_error(
-                IndexError("scalar Record cannot be sliced by an array")
-            )
+            raise IndexError("scalar Record cannot be sliced by an array")
 
         elif isinstance(where, Content):
-            raise ak._errors.wrap_error(
-                IndexError("scalar Record cannot be sliced by an array")
-            )
+            raise IndexError("scalar Record cannot be sliced by an array")
 
         elif isinstance(where, Iterable) and all(isinstance(x, str) for x in where):
             return self._getitem_fields(where)
 
         elif isinstance(where, Iterable):
-            raise ak._errors.wrap_error(
-                IndexError("scalar Record cannot be sliced by an array")
-            )
+            raise IndexError("scalar Record cannot be sliced by an array")
 
         else:
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "only field name (str) or names (non-tuple iterable of str) "
-                    "are valid indices for slicing a scalar record, not\n\n    "
-                    + repr(where)
-                )
+            raise TypeError(
+                "only field name (str) or names (non-tuple iterable of str) "
+                "are valid indices for slicing a scalar record, not\n\n    "
+                + repr(where)
             )
 
     def _getitem_field(self, where, only_fields: tuple[str, ...] = ()) -> Content:
@@ -246,6 +223,16 @@ class Record:
             return tuple(contents)
         else:
             return dict(zip(self._array.fields, contents))
+
+    def to_backend(self, backend: Backend | str | None = None) -> Self:
+        if backend is None:
+            backend = self._array.backend
+        else:
+            backend = ak._backends.regularize_backend(backend)
+        if backend is self._array.backend:
+            return self
+        else:
+            return Record(self._array._to_backend(backend), self._at)
 
     def __copy__(self) -> Self:
         return self.copy()

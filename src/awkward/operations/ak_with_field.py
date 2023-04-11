@@ -56,11 +56,9 @@ def _impl(base, what, where, highlevel, behavior):
             and all(isinstance(x, str) for x in where)
         )
     ):
-        raise ak._errors.wrap_error(
-            TypeError(
-                "New fields may only be assigned by field name(s) "
-                "or as a new integer slot by passing None for 'where'"
-            )
+        raise TypeError(
+            "New fields may only be assigned by field name(s) "
+            "or as a new integer slot by passing None for 'where'"
         )
 
     if is_non_string_like_sequence(where) and len(where) > 1:
@@ -84,17 +82,32 @@ def _impl(base, what, where, highlevel, behavior):
 
         behavior = behavior_of(base, what, behavior=behavior)
         base = ak.operations.to_layout(base, allow_record=True, allow_other=False)
-
-        if len(base.fields) == 0:
-            raise ak._errors.wrap_error(
-                ValueError("no tuples or records in array; cannot add a new field")
-            )
-
         what = ak.operations.to_layout(what, allow_record=True, allow_other=True)
 
         keys = copy.copy(base.fields)
         if where in base.fields:
             keys.remove(where)
+
+        def purelist_is_record(layout):
+            result = False
+
+            def action_is_record(input, **kwargs):
+                nonlocal result
+
+                if input.is_record:
+                    result = True
+                    return input
+                elif input.is_union:
+                    result = all(purelist_is_record(x) for x in input.contents)
+                    return input
+                else:
+                    return None
+
+            ak._do.recursively_apply(layout, action_is_record, return_array=False)
+            return result
+
+        if not purelist_is_record(base):
+            raise ValueError("no tuples or records in array; cannot add a new field")
 
         def action(inputs, **kwargs):
             base, what = inputs

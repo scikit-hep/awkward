@@ -16,12 +16,8 @@ class _UnknownLength:
         return self
 
     def __new__(cls, *args, **kwargs):
-        from awkward._errors import wrap_error
-
-        raise wrap_error(
-            TypeError(
-                "internal_error: the `TypeTracer` nplike's `TypeTracerArray` object should never be directly instantiated"
-            )
+        raise TypeError(
+            "internal_error: the `TypeTracer` nplike's `TypeTracerArray` object should never be directly instantiated"
         )
 
     def __add__(self, other) -> Self | NotImplemented:
@@ -67,33 +63,19 @@ class _UnknownLength:
         return f"{__name__}.{self._name}"
 
     def __eq__(self, other) -> bool:
-        from awkward._errors import wrap_error
-
         if other is self:
             return True
         else:
-            raise wrap_error(
-                TypeError("cannot compare unknown lengths against known values")
-            )
+            raise TypeError("cannot compare unknown lengths against known values")
 
     def __gt__(self, other):
-        from awkward._errors import wrap_error
-
-        raise wrap_error(TypeError("cannot order unknown lengths"))
+        raise TypeError("cannot order unknown lengths")
 
     def __index__(self):  # pylint: disable=invalid-index-returned
-        from awkward._errors import wrap_error
-
-        raise wrap_error(
-            TypeError("cannot interpret unknown lengths as concrete index values")
-        )
+        raise TypeError("cannot interpret unknown lengths as concrete index values")
 
     def __int__(self):
-        from awkward._errors import wrap_error
-
-        raise wrap_error(
-            TypeError("cannot interpret unknown lengths as concrete values")
-        )
+        raise TypeError("cannot interpret unknown lengths as concrete values")
 
     __bool__ = __int__
     __float__ = __int__

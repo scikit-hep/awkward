@@ -54,7 +54,15 @@ namespace awkward {
           reserved_(reserved),
           next_(nullptr) {}
 
-    ~Panel() = default;
+    /// @brief Deletes a Panel.
+    ///
+    /// Unchain the pointers to avoid a stack overflow when
+    /// a recursive implicit destructor is invoked.
+    ~Panel() {
+      for (std::unique_ptr<Panel> current = std::move(next_);
+           current;
+           current = std::move(current->next_));
+    }
 
     /// @brief Overloads [] operator to access elements like an array.
     PRIMITIVE& operator[](size_t i) { return ptr_.get()[i]; }

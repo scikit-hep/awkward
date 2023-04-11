@@ -1,7 +1,10 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import awkward as ak
-from awkward._parameters import parameters_union, type_parameters_equal
+from awkward._parameters import (
+    parameters_are_equal,
+    parameters_union,
+    type_parameters_equal,
+)
 from awkward._typing import final
 from awkward.types.listtype import ListType
 from awkward.types.regulartype import RegularType
@@ -13,27 +16,21 @@ from awkward.types.uniontype import UnionType
 class OptionType(Type):
     def __init__(self, content, *, parameters=None, typestr=None):
         if not isinstance(content, Type):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} 'content' must be a Type subclass, not {}".format(
-                        type(self).__name__, repr(content)
-                    )
+            raise TypeError(
+                "{} 'content' must be a Type subclass, not {}".format(
+                    type(self).__name__, repr(content)
                 )
             )
         if parameters is not None and not isinstance(parameters, dict):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} 'parameters' must be of type dict or None, not {}".format(
-                        type(self).__name__, repr(parameters)
-                    )
+            raise TypeError(
+                "{} 'parameters' must be of type dict or None, not {}".format(
+                    type(self).__name__, repr(parameters)
                 )
             )
         if typestr is not None and not isinstance(typestr, str):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} 'typestr' must be of type string or None, not {}".format(
-                        type(self).__name__, repr(typestr)
-                    )
+            raise TypeError(
+                "{} 'typestr' must be of type string or None, not {}".format(
+                    type(self).__name__, repr(typestr)
                 )
             )
         self._content = content
@@ -81,15 +78,6 @@ class OptionType(Type):
         args = [repr(self._content), *self._repr_args()]
         return "{}({})".format(type(self).__name__, ", ".join(args))
 
-    def __eq__(self, other):
-        if isinstance(other, OptionType):
-            return (
-                type_parameters_equal(self._parameters, other._parameters)
-                and self._content == other._content
-            )
-        else:
-            return False
-
     def simplify_option_union(self):
         if isinstance(self._content, UnionType):
             contents = []
@@ -123,3 +111,15 @@ class OptionType(Type):
 
         else:
             return self
+
+    def _is_equal_to(self, other, all_parameters: bool) -> bool:
+        compare_parameters = (
+            parameters_are_equal if all_parameters else type_parameters_equal
+        )
+        return (
+            isinstance(other, type(self))
+            and compare_parameters(self._parameters, other._parameters)
+            and self._content._is_equal_to(
+                other._content, all_parameters=all_parameters
+            )
+        )

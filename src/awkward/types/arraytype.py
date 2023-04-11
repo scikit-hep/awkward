@@ -1,4 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+from __future__ import annotations
+
 import sys
 
 import awkward as ak
@@ -9,19 +11,15 @@ from awkward._regularize import is_integer
 class ArrayType:
     def __init__(self, content, length):
         if not isinstance(content, ak.types.Type):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} all 'contents' must be Type subclasses, not {}".format(
-                        type(self).__name__, repr(content)
-                    )
+            raise TypeError(
+                "{} all 'contents' must be Type subclasses, not {}".format(
+                    type(self).__name__, repr(content)
                 )
             )
         if not ((is_integer(length) and length >= 0) or length is unknown_length):
-            raise ak._errors.wrap_error(
-                ValueError(
-                    "{} 'length' must be a non-negative integer or unknown length, not {}".format(
-                        type(self).__name__, repr(length)
-                    )
+            raise ValueError(
+                "{} 'length' must be a non-negative integer or unknown length, not {}".format(
+                    type(self).__name__, repr(length)
                 )
             )
         self._content = content
@@ -48,12 +46,15 @@ class ArrayType:
         args = [repr(self._content), repr(self._length)]
         return "{}({})".format(type(self).__name__, ", ".join(args))
 
-    def __eq__(self, other):
-        if isinstance(other, ArrayType):
-            return (
+    def is_equal_to(self, other, *, all_parameters: bool = False) -> bool:
+        return (
+            isinstance(other, type(self))
+            and (
                 other._length is unknown_length
                 or self._length is unknown_length
                 or self._length == other._length
-            ) and self._content == other._content
-        else:
-            return False
+            )
+            and self._content.is_equal_to(other._content, all_parameters=all_parameters)
+        )
+
+    __eq__ = is_equal_to

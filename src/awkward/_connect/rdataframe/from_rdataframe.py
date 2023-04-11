@@ -159,10 +159,8 @@ def from_rdataframe(
             form_str = ROOT.awkward.type_to_form[column_types[col], offsets_type](0)
 
             if form_str == "unsupported type":
-                raise ak._errors.wrap_error(
-                    TypeError(
-                        f"{col!r} column's type {column_types[col]!r} is not supported."
-                    )
+                raise TypeError(
+                    f"{col!r} column's type {column_types[col]!r} is not supported."
                 )
 
             form = ak.forms.from_json(form_str)
@@ -211,9 +209,7 @@ def from_rdataframe(
                     builder, result_ptrs[col]
                 )
             else:
-                raise ak._errors.wrap_error(
-                    AssertionError(f"unrecognized Form: {type(form)}")
-                )
+                raise AssertionError(f"unrecognized Form: {type(form)}")
 
             names_nbytes = cpp_buffers_self.names_nbytes[builder_type](builder)
 

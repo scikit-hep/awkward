@@ -68,9 +68,7 @@ def tolookup(layout, positions):
         return UnionLookup.tolookup(layout, positions)
 
     else:
-        raise ak._errors.wrap_error(
-            AssertionError(f"unrecognized Content: {type(layout)}")
-        )
+        raise AssertionError(f"unrecognized Content: {type(layout)}")
 
 
 class ContentLookup:

@@ -6,7 +6,6 @@ import jax
 import awkward as ak
 from awkward import contents, highlevel, record
 from awkward._behavior import behavior_of
-from awkward._errors import wrap_error
 from awkward._layout import wrap_layout
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
@@ -79,7 +78,7 @@ class AuxData(Generic[T]):
         elif isinstance(obj, (contents.Content, record.Record)):
             layout = obj
         else:
-            raise wrap_error(TypeError)
+            raise TypeError
 
         # First, make sure we're all JAX
         jax_backend = ak._backends.JaxBackend.instance()
@@ -131,13 +130,11 @@ class AuxData(Generic[T]):
             # Check that JAX isn't trying to give us float0 types
             dtype = getattr(buffer, "dtype", None)
             if dtype == np.dtype([("float0", "V")]):
-                raise wrap_error(
-                    TypeError(
-                        f"a buffer with the dtype {buffer.dtype} was encountered during unflattening. "
-                        "JAX uses this dtype for the tangents of integer/boolean outputs; these cannot "
-                        "reasonably be differentiated. Make sure that you are not computing the derivative "
-                        "of a boolean/integer (array) valued function."
-                    )
+                raise TypeError(
+                    f"a buffer with the dtype {buffer.dtype} was encountered during unflattening. "
+                    "JAX uses this dtype for the tangents of integer/boolean outputs; these cannot "
+                    "reasonably be differentiated. Make sure that you are not computing the derivative "
+                    "of a boolean/integer (array) valued function."
                 )
 
         # Replace the mixed NumPy-JAX layout leaves with the given buffers (and use the JAX nplike)

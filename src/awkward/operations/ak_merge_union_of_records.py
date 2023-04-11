@@ -154,9 +154,7 @@ def _impl(array, axis, highlevel, behavior):
     def apply(layout, depth, backend, **kwargs):
         posaxis = maybe_posaxis(layout, axis, depth)
         if depth < posaxis + 1 and layout.is_leaf:
-            raise ak._errors.wrap_error(
-                np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
-            )
+            raise np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
         elif depth == posaxis + 1 and layout.is_union:
             if not all(
                 x.is_record or x.is_indexed or x.is_option for x in layout.contents

@@ -88,11 +88,9 @@ class UnionArray(Content):
 
     def __init__(self, tags, index, contents, *, parameters=None):
         if not (isinstance(tags, Index) and tags.dtype == np.dtype(np.int8)):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} 'tags' must be an Index with dtype=int8, not {}".format(
-                        type(self).__name__, repr(tags)
-                    )
+            raise TypeError(
+                "{} 'tags' must be an Index with dtype=int8, not {}".format(
+                    type(self).__name__, repr(tags)
                 )
             )
 
@@ -101,43 +99,33 @@ class UnionArray(Content):
             np.dtype(np.uint32),
             np.dtype(np.int64),
         ):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} 'index' must be an Index with dtype in (int32, uint32, int64), "
-                    "not {}".format(type(self).__name__, repr(index))
-                )
+            raise TypeError(
+                "{} 'index' must be an Index with dtype in (int32, uint32, int64), "
+                "not {}".format(type(self).__name__, repr(index))
             )
 
         if not isinstance(contents, Iterable):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} 'contents' must be iterable, not {}".format(
-                        type(self).__name__, repr(contents)
-                    )
+            raise TypeError(
+                "{} 'contents' must be iterable, not {}".format(
+                    type(self).__name__, repr(contents)
                 )
             )
         if not isinstance(contents, list):
             contents = list(contents)
 
         if len(contents) < 2:
-            raise ak._errors.wrap_error(
-                TypeError(f"{type(self).__name__} must have at least 2 'contents'")
-            )
+            raise TypeError(f"{type(self).__name__} must have at least 2 'contents'")
         for content in contents:
             if not isinstance(content, Content):
-                raise ak._errors.wrap_error(
-                    TypeError(
-                        "{} all 'contents' must be Content subclasses, not {}".format(
-                            type(self).__name__, repr(content)
-                        )
+                raise TypeError(
+                    "{} all 'contents' must be Content subclasses, not {}".format(
+                        type(self).__name__, repr(content)
                     )
                 )
             if content.is_union:
-                raise ak._errors.wrap_error(
-                    TypeError(
-                        "{0} cannot contain union-types in its 'contents' ({1}); try {0}.simplified instead".format(
-                            type(self).__name__, type(content).__name__
-                        )
+                raise TypeError(
+                    "{0} cannot contain union-types in its 'contents' ({1}); try {0}.simplified instead".format(
+                        type(self).__name__, type(content).__name__
                     )
                 )
 
@@ -145,11 +133,9 @@ class UnionArray(Content):
             not (tags.length is unknown_length or index.length is unknown_length)
             and tags.length > index.length
         ):
-            raise ak._errors.wrap_error(
-                ValueError(
-                    "{} len(tags) ({}) must be <= len(index) ({})".format(
-                        type(self).__name__, tags.length, index.length
-                    )
+            raise ValueError(
+                "{} len(tags) ({}) must be <= len(index) ({})".format(
+                    type(self).__name__, tags.length, index.length
                 )
             )
 
@@ -158,13 +144,11 @@ class UnionArray(Content):
             if backend is None:
                 backend = content.backend
             elif backend is not content.backend:
-                raise ak._errors.wrap_error(
-                    TypeError(
-                        "{} 'contents' must use the same array library (backend): {} vs {}".format(
-                            type(self).__name__,
-                            type(backend).__name__,
-                            type(content.backend).__name__,
-                        )
+                raise TypeError(
+                    "{} 'contents' must use the same array library (backend): {} vs {}".format(
+                        type(self).__name__,
+                        type(backend).__name__,
+                        type(content.backend).__name__,
                     )
                 )
 
@@ -236,20 +220,16 @@ class UnionArray(Content):
             if backend is None:
                 backend = content.backend
             elif backend is not content.backend:
-                raise ak._errors.wrap_error(
-                    TypeError(
-                        "{} 'contents' must use the same array library (backend): {} vs {}".format(
-                            cls.__name__,
-                            type(backend).__name__,
-                            type(content.backend).__name__,
-                        )
+                raise TypeError(
+                    "{} 'contents' must use the same array library (backend): {} vs {}".format(
+                        cls.__name__,
+                        type(backend).__name__,
+                        type(content.backend).__name__,
                     )
                 )
 
         if backend.nplike.known_data and self_index.length < self_tags.length:
-            raise ak._errors.wrap_error(
-                ValueError("invalid UnionArray: len(index) < len(tags)")
-            )
+            raise ValueError("invalid UnionArray: len(index) < len(tags)")
 
         length = self_tags.length
         tags = ak.index.Index8.empty(length, backend.index_nplike)
@@ -399,10 +379,8 @@ class UnionArray(Content):
                     contents.append(self_cont)
 
         if len(contents) > 2**7:
-            raise ak._errors.wrap_error(
-                NotImplementedError(
-                    "FIXME: handle UnionArray with more than 127 contents"
-                )
+            raise NotImplementedError(
+                "FIXME: handle UnionArray with more than 127 contents"
             )
 
         if len(contents) == 1:
@@ -825,13 +803,13 @@ class UnionArray(Content):
             return self._getitem_next_missing(head, tail, advanced)
 
         else:
-            raise ak._errors.wrap_error(AssertionError(repr(head)))
+            raise AssertionError(repr(head))
 
     def _offsets_and_flattened(self, axis, depth):
         posaxis = maybe_posaxis(self, axis, depth)
 
         if posaxis is not None and posaxis + 1 == depth:
-            raise ak._errors.wrap_error(np.AxisError("axis=0 not allowed for flatten"))
+            raise np.AxisError("axis=0 not allowed for flatten")
 
         else:
             has_offsets = False
@@ -945,10 +923,8 @@ class UnionArray(Content):
 
     def _merging_strategy(self, others):
         if len(others) == 0:
-            raise ak._errors.wrap_error(
-                ValueError(
-                    "to merge this array with 'others', at least one other must be provided"
-                )
+            raise ValueError(
+                "to merge this array with 'others', at least one other must be provided"
             )
 
         head = [self]
@@ -1040,9 +1016,7 @@ class UnionArray(Content):
         )
 
         if len(contents) > 2**7:
-            raise ak._errors.wrap_error(
-                AssertionError("FIXME: handle UnionArray with more than 127 contents")
-            )
+            raise AssertionError("FIXME: handle UnionArray with more than 127 contents")
 
         return ak.contents.UnionArray.simplified(
             tags, index, contents, parameters=self._parameters
@@ -1141,9 +1115,7 @@ class UnionArray(Content):
                 nextcontents.append(array)
 
         if len(nextcontents) > 127:
-            raise ak._errors.wrap_error(
-                ValueError("FIXME: handle UnionArray with more than 127 contents")
-            )
+            raise ValueError("FIXME: handle UnionArray with more than 127 contents")
 
         next = ak.contents.UnionArray.simplified(
             nexttags,
@@ -1222,9 +1194,7 @@ class UnionArray(Content):
             mergebool=True,
         )
         if isinstance(simplified, ak.contents.UnionArray):
-            raise ak._errors.wrap_error(
-                ValueError("cannot check if an irreducible UnionArray is unique")
-            )
+            raise ValueError("cannot check if an irreducible UnionArray is unique")
 
         return simplified._is_unique(negaxis, starts, parents, outlength)
 
@@ -1238,9 +1208,7 @@ class UnionArray(Content):
             mergebool=True,
         )
         if isinstance(simplified, ak.contents.UnionArray):
-            raise ak._errors.wrap_error(
-                ValueError("cannot make a unique irreducible UnionArray")
-            )
+            raise ValueError("cannot make a unique irreducible UnionArray")
 
         return simplified._unique(negaxis, starts, parents, outlength)
 
@@ -1262,9 +1230,7 @@ class UnionArray(Content):
             )
 
         if isinstance(simplified, ak.contents.UnionArray):
-            raise ak._errors.wrap_error(
-                ValueError("cannot argsort an irreducible UnionArray")
-            )
+            raise ValueError("cannot argsort an irreducible UnionArray")
 
         return simplified._argsort_next(
             negaxis, starts, shifts, parents, outlength, ascending, stable
@@ -1285,9 +1251,7 @@ class UnionArray(Content):
             return simplified
 
         if isinstance(simplified, ak.contents.UnionArray):
-            raise ak._errors.wrap_error(
-                ValueError("cannot sort an irreducible UnionArray")
-            )
+            raise ValueError("cannot sort an irreducible UnionArray")
 
         return simplified._sort_next(
             negaxis, starts, parents, outlength, ascending, stable
@@ -1307,9 +1271,7 @@ class UnionArray(Content):
     ):
         # If we have a UnionArray, it must be irreducible, thanks to the
         # canonical checks in the constructor.
-        raise ak._errors.wrap_error(
-            ValueError(f"cannot call ak.{reducer.name} on an irreducible UnionArray")
-        )
+        raise ValueError(f"cannot call ak.{reducer.name} on an irreducible UnionArray")
 
     def _validity_error(self, path):
         if self._backend.nplike.known_data and self.index.length < self.tags.length:
@@ -1474,16 +1436,14 @@ class UnionArray(Content):
             try:
                 out = backend.nplike.ma.concatenate(contents)
             except Exception as err:
-                raise ak._errors.wrap_error(
-                    ValueError(f"cannot convert {self} into numpy.ma.MaskedArray")
+                raise ValueError(
+                    f"cannot convert {self} into numpy.ma.MaskedArray"
                 ) from err
         else:
             try:
                 out = backend.nplike.concat(contents)
             except Exception as err:
-                raise ak._errors.wrap_error(
-                    ValueError(f"cannot convert {self} into np.ndarray")
-                ) from err
+                raise ValueError(f"cannot convert {self} into np.ndarray") from err
 
         tags = backend.index_nplike.asarray(self.tags)
         for tag, content in enumerate(contents):
@@ -1562,7 +1522,7 @@ class UnionArray(Content):
         elif result is None:
             return continuation()
         else:
-            raise ak._errors.wrap_error(AssertionError(result))
+            raise AssertionError(result)
 
     def to_packed(self) -> Self:
         tags = self._tags.raw(self._backend.nplike)
@@ -1593,9 +1553,7 @@ class UnionArray(Content):
 
     def _to_list(self, behavior, json_conversions):
         if not self._backend.nplike.known_data:
-            raise ak._errors.wrap_error(
-                TypeError("cannot convert typetracer arrays to Python lists")
-            )
+            raise TypeError("cannot convert typetracer arrays to Python lists")
 
         out = self._to_list_custom(behavior, json_conversions)
         if out is not None:

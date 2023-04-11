@@ -64,9 +64,7 @@ def _nep_18_impl(a, axis=-1, kind=None, order=unsupported):
     elif kind in ("heapsort", "quicksort"):
         stable = False
     else:
-        raise ak._errors.wrap_error(
-            ValueError(
-                f"unsupported value for 'kind' passed to overloaded NumPy function 'sort': {kind!r}"
-            )
+        raise ValueError(
+            f"unsupported value for 'kind' passed to overloaded NumPy function 'sort': {kind!r}"
         )
     return sort(a, axis=axis, stable=stable)
