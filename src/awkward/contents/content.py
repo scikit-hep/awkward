@@ -11,6 +11,7 @@ from awkward._backends import Backend
 from awkward._behavior import get_array_class, get_record_class
 from awkward._layout import wrap_layout
 from awkward._nplikes import to_nplike
+from awkward._nplikes.finder import nplike_of
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import IndexType, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
@@ -660,7 +661,7 @@ class Content:
 
         elif is_sized_iterable(where):
             # Do we have an array
-            nplike = ak._nplikes.nplike_of(where, default=None)
+            nplike = nplike_of(where, default=None)
             # We can end up with non-array objects associated with an nplike
             if nplike is not None and nplike.is_own_array(where):
                 # Is it a scalar, not array?

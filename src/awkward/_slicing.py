@@ -6,6 +6,7 @@ import operator
 import awkward as ak
 from awkward._backends import Backend
 from awkward._nplikes import to_nplike
+from awkward._nplikes.finder import nplike_of
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
@@ -275,7 +276,7 @@ def normalise_item(item, backend: Backend) -> SliceItem:
     # Fallback for sized objects
     elif is_sized_iterable(item):
         # Do we have an array
-        nplike = ak._nplikes.nplike_of(item, default=None)
+        nplike = nplike_of(item, default=None)
         # We can end up with non-array objects associated with an nplike
         if nplike is not None and nplike.is_own_array(item):
             # Is it a scalar, not array?

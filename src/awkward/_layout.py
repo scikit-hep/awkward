@@ -5,7 +5,7 @@ from collections.abc import Mapping
 
 from awkward._backends import NumpyBackend
 from awkward._behavior import behavior_of
-from awkward._nplikes import nplike_of
+from awkward._nplikes.finder import nplike_of
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
