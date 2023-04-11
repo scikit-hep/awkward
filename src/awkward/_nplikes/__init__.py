@@ -11,9 +11,6 @@ def to_nplike(
     array: ArrayLike, nplike: NumpyLike, *, from_nplike: NumpyLike = None
 ) -> ArrayLike:
     from awkward._nplikes.cupy import Cupy
-    from awkward._nplikes.jax import Jax
-    from awkward._nplikes.numpy import Numpy
-    from awkward._nplikes.typetracer import TypeTracer
 
     if from_nplike is None:
         from_nplike = nplike_of(array, default=None)
@@ -25,16 +22,13 @@ def to_nplike(
     if from_nplike is to_nplike:
         return array
 
-    if isinstance(from_nplike, TypeTracer) and nplike is not from_nplike:
+    if nplike.known_data and not from_nplike.known_data:
         raise TypeError(
-            "Converting a TypeTracer nplike to an nplike with `known_data=True` is not possible"
+            "Converting from an nplike without known data to an nplike with known data is not supported"
         )
 
     # Copy to host memory
     if isinstance(from_nplike, Cupy):
         array = array.get()
 
-    if isinstance(nplike, (Numpy, Cupy, Jax, TypeTracer)):
-        return nplike.asarray(array)
-    else:
-        raise TypeError(f"internal error: invalid nplike {type(nplike).__name__!r}")
+    return nplike.asarray(array)
