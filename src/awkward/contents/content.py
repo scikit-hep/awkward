@@ -11,6 +11,7 @@ from awkward._backends import Backend
 from awkward._behavior import get_array_class, get_record_class
 from awkward._layout import wrap_layout
 from awkward._nplikes import to_nplike
+from awkward._nplikes.dispatch import nplike_of
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import IndexType, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
@@ -377,7 +378,7 @@ class Content:
     ):
         # if this is in a tuple-slice and really should be 0, it will be trimmed later
         length = 1 if length is not unknown_length and length == 0 else length
-        index = Index64(head.index, nplike=self._backend.index_nplike)
+        index = head.index
         indexlength = index.length
         index = index.to_nplike(self._backend.index_nplike)
         outindex = Index64.empty(
@@ -414,8 +415,7 @@ class Content:
     ):
         head = head.to_backend(self._backend)
         jagged = head.content.to_ListOffsetArray64()
-
-        index = Index64(head._index, nplike=self._backend.index_nplike)
+        index = head._index
         content = that._getitem_at(0)
         if self._backend.nplike.known_data and content.length < index.length:
             raise ak._errors.index_error(
@@ -660,7 +660,7 @@ class Content:
 
         elif is_sized_iterable(where):
             # Do we have an array
-            nplike = ak._nplikes.nplike_of(where, default=None)
+            nplike = nplike_of(where, default=None)
             # We can end up with non-array objects associated with an nplike
             if nplike is not None and nplike.is_own_array(where):
                 # Is it a scalar, not array?

@@ -1049,8 +1049,8 @@ class UnionArray(Content):
 
             parameters = parameters_intersect(parameters, array._parameters)
             if isinstance(array, ak.contents.UnionArray):
-                union_tags = ak.index.Index(array.tags)
-                union_index = ak.index.Index(array.index)
+                union_tags = array.tags
+                union_index = array.index
                 union_contents = array.contents
                 assert (
                     nexttags.nplike is self._backend.index_nplike
