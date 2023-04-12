@@ -7,12 +7,10 @@ from awkward._backends.backend import Backend
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyLike, NumpyMetadata
 from awkward._typing import Callable, TypeAlias, TypeVar
+from awkward._util import unset
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
-
-
-_UNSET = object()
 
 D = TypeVar("D")
 T = TypeVar("T")
@@ -65,7 +63,7 @@ def common_backend(backends: Collection[Backend]) -> Backend:
         )
 
 
-def _backend_of(obj, default: D = _UNSET) -> Backend | D:
+def _backend_of(obj, default: D = unset) -> Backend | D:
     cls = type(obj)
     try:
         lookup = _type_to_backend_lookup[cls]
@@ -76,7 +74,7 @@ def _backend_of(obj, default: D = _UNSET) -> Backend | D:
             if maybe_lookup is not None:
                 break
         else:
-            if default is _UNSET:
+            if default is unset:
                 raise TypeError(f"cannot find nplike for {cls.__name__}")
             else:
                 return default
@@ -84,7 +82,7 @@ def _backend_of(obj, default: D = _UNSET) -> Backend | D:
         return maybe_lookup(obj)
 
 
-def backend_of(*objects, default: D = _UNSET) -> Backend | D:
+def backend_of(*objects, default: D = unset) -> Backend | D:
     """
     Args:
         objects: objects for which to find a suitable backend
@@ -100,7 +98,7 @@ def backend_of(*objects, default: D = _UNSET) -> Backend | D:
 
     if backends:
         return common_backend(backends)
-    elif default is _UNSET:
+    elif default is unset:
         raise ValueError("could not find backend for", objects)
     else:
         return default
