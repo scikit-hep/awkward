@@ -4,6 +4,7 @@ from __future__ import annotations
 import copy
 
 import awkward as ak
+from awkward._backends.backend import Backend
 from awkward._layout import maybe_posaxis
 from awkward._nplikes.numpylike import IndexType, NumpyMetadata
 from awkward._nplikes.shape import unknown_length
@@ -1518,7 +1519,7 @@ class ListArray(Content):
 
         return ListOffsetArray._to_list(self, behavior, json_conversions)
 
-    def _to_backend(self, backend: ak._backends.Backend) -> Self:
+    def _to_backend(self, backend: Backend) -> Self:
         content = self._content.to_backend(backend)
         starts = self._starts.to_nplike(backend.index_nplike)
         stops = self._stops.to_nplike(backend.index_nplike)

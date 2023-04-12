@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+import awkward._nplikes.cupy
+import awkward._nplikes.jax
+import awkward._nplikes.numpy
+import awkward._nplikes.typetracer
 from awkward._nplikes.dispatch import nplike_of
 from awkward._typing import TYPE_CHECKING
 
@@ -10,8 +14,6 @@ if TYPE_CHECKING:
 def to_nplike(
     array: ArrayLike, nplike: NumpyLike, *, from_nplike: NumpyLike = None
 ) -> ArrayLike:
-    from awkward._nplikes.cupy import Cupy
-
     if from_nplike is None:
         from_nplike = nplike_of(array, default=None)
         if from_nplike is None:
@@ -28,7 +30,7 @@ def to_nplike(
         )
 
     # Copy to host memory
-    if isinstance(from_nplike, Cupy):
+    if isinstance(from_nplike, awkward._nplikes.cupy.Cupy):
         array = array.get()
 
     return nplike.asarray(array)

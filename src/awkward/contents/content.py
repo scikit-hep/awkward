@@ -7,7 +7,13 @@ from collections.abc import Callable, Iterable, Mapping, MutableMapping, Sized
 from numbers import Complex, Real
 
 import awkward as ak
-from awkward._backends import Backend
+from awkward._backends.backend import Backend
+from awkward._backends.dispatch import (
+    backend_of,
+    register_backend_lookup_factory,
+    regularize_backend,
+)
+from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import get_array_class, get_record_class
 from awkward._layout import wrap_layout
 from awkward._nplikes import to_nplike
@@ -558,7 +564,7 @@ class Content:
                 return self
 
             # Backend may change if index contains typetracers
-            backend = ak._backends.backend_of(self, *where)
+            backend = backend_of(self, *where)
             this = self.to_backend(backend)
 
             # Normalise valid indices onto well-defined basis
@@ -588,7 +594,7 @@ class Content:
             isinstance(where, ak.contents.Content)
             and where.backend is not self._backend
         ):
-            backend = ak._backends.backend_of(self, where)
+            backend = backend_of(self, where)
             return self.to_backend(backend)._getitem(where.to_backend(backend))
 
         elif isinstance(where, ak.contents.NumpyArray):
@@ -939,7 +945,7 @@ class Content:
         Return the value of the outermost parameter matching `key` in a sequence
         of nested lists, stopping at the first record or tuple layer.
 
-        If a layer has #ak.types.UnionType, the value is only returned if all
+         If a layer has #ak.types.UnionType, the value is only returned if all
         possibilities have the same value.
         """
         return self.form_cls.purelist_parameter(self, key)
@@ -1079,9 +1085,7 @@ class Content:
             "`Content.to_numpy(...)` with `Content.to_backend_array(..., backend='cpu')`.",
             "2.2.0",
         )
-        return self.to_backend(ak._backends.NumpyBackend.instance())._to_backend_array(
-            allow_missing
-        )
+        return self.to_backend(NumpyBackend.instance())._to_backend_array(allow_missing)
 
     def to_backend_array(
         self, allow_missing: bool = True, *, backend: Backend | str | None = None
@@ -1089,10 +1093,10 @@ class Content:
         if backend is None:
             backend = self._backend
         else:
-            backend = ak._backends.regularize_backend(backend)
+            backend = regularize_backend(backend)
         return self._to_backend_array(allow_missing, backend)
 
-    def _to_backend_array(self, allow_missing: bool, backend: ak._backends.Backend):
+    def _to_backend_array(self, allow_missing: bool, backend: Backend):
         raise NotImplementedError
 
     def drop_none(self):
@@ -1268,7 +1272,7 @@ class Content:
         if backend is None:
             backend = self._backend
         else:
-            backend = ak._backends.regularize_backend(backend)
+            backend = regularize_backend(backend)
         if backend is self._backend:
             return self
         else:
@@ -1319,3 +1323,13 @@ class Content:
 
     def copy(self, *, parameters: JSONMapping | None = unset) -> Self:
         raise NotImplementedError
+
+
+@register_backend_lookup_factory
+def find_content_backend(obj: type):
+    if issubclass(obj, Content):
+
+        def finder(obj: Content):
+            return obj.backend
+
+        return finder

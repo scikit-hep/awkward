@@ -5,7 +5,11 @@ import copy
 from collections.abc import Iterable
 
 import awkward as ak
-from awkward._backends import Backend
+from awkward._backends.backend import Backend
+from awkward._backends.dispatch import (
+    register_backend_lookup_factory,
+    regularize_backend,
+)
 from awkward._behavior import get_record_class
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
@@ -228,7 +232,7 @@ class Record:
         if backend is None:
             backend = self._array.backend
         else:
-            backend = ak._backends.regularize_backend(backend)
+            backend = regularize_backend(backend)
         if backend is self._array.backend:
             return self
         else:
@@ -244,3 +248,13 @@ class Record:
         return Record(
             self._array if array is unset else array, self._at if at is unset else at
         )
+
+
+@register_backend_lookup_factory
+def find_record_backend(obj: type):
+    if issubclass(obj, Record):
+
+        def finder(obj: Record):
+            return obj.backend
+
+        return finder

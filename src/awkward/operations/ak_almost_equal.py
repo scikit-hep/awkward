@@ -4,7 +4,7 @@ from __future__ import annotations
 __all__ = ("almost_equal",)
 
 
-from awkward._backends import backend_of
+from awkward._backends.dispatch import backend_of
 from awkward._behavior import behavior_of, get_array_class, get_record_class
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._parameters import parameters_are_equal

@@ -1,13 +1,15 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("run_lengths",)
 import awkward as ak
+from awkward._backends.dispatch import backend_of
+from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 
 np = NumpyMetadata.instance()
-cpu = ak._backends.NumpyBackend.instance()
+cpu = NumpyBackend.instance()
 
 
 def run_lengths(array, *, highlevel=True, behavior=None):
@@ -96,7 +98,7 @@ def run_lengths(array, *, highlevel=True, behavior=None):
 
 
 def _impl(array, highlevel, behavior):
-    backend = ak._backends.backend_of(array, default=cpu)
+    backend = backend_of(array, default=cpu)
 
     def lengths_of(data, offsets):
         if backend.nplike.is_own_array(data):

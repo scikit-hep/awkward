@@ -4,7 +4,7 @@ from __future__ import annotations
 import operator
 
 import awkward as ak
-from awkward._backends import Backend
+from awkward._backends.backend import Backend
 from awkward._nplikes import to_nplike
 from awkward._nplikes.dispatch import nplike_of
 from awkward._nplikes.jax import Jax
