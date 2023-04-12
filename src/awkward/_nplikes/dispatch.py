@@ -2,9 +2,7 @@ from __future__ import annotations
 
 from awkward._nplikes.numpylike import NumpyLike
 from awkward._typing import TypeVar
-
-# Temporary sentinel marking "argument not given"
-_UNSET = object()
+from awkward._util import unset
 
 D = TypeVar("D")
 
@@ -21,7 +19,7 @@ def register_nplike(cls: N) -> N:
     return cls
 
 
-def nplike_of(obj, *, default: D = _UNSET) -> NumpyLike | D:
+def nplike_of(obj, *, default: D = unset) -> NumpyLike | D:
     """
     Args:
         *arrays: iterable of possible array objects
@@ -43,7 +41,7 @@ def nplike_of(obj, *, default: D = _UNSET) -> NumpyLike | D:
                 nplike = nplike_cls.instance()
                 break
         else:
-            if default is _UNSET:
+            if default is unset:
                 raise TypeError(f"cannot find nplike for {cls.__name__}")
             else:
                 return default
