@@ -499,18 +499,16 @@ namespace awkward {
     /// contiguously allocated `external_pointer`. The panels are deleted,
     /// and a new #ptr is allocated.
     void
-    move_to(PRIMITIVE* to_ptr, size_t offset = 0) noexcept {
-      memcpy(to_ptr + offset,
-             reinterpret_cast<void*>(panel_.get()->data().get()),
-             panel_.get()->current_length() * sizeof(PRIMITIVE));
-
-      // move to next panel
-      panel_ = std::move(panel_.get()->next());
-      if (panel_) {
-        move_to(to_ptr, offset + panel_.get()->current_length());
-      } else {
-        clear();
+    move_to(PRIMITIVE* to_ptr) noexcept {
+      size_t next_offset = 0;
+      while(panel_) {
+        memcpy(to_ptr + next_offset,
+               reinterpret_cast<void*>(panel_.get()->data().get()),
+               panel_.get()->current_length() * sizeof(PRIMITIVE));
+        next_offset += panel_.get()->current_length();
+        panel_ = std::move(panel_.get()->next());
       }
+      clear();
     }
 
     /// @brief Copies and concatenates all accumulated data from multiple panels to one
