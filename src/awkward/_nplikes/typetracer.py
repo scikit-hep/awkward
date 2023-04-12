@@ -607,8 +607,6 @@ class TypeTracer(NumpyLike):
         dtype: numpy.dtype | None = None,
         copy: bool | None = None,
     ) -> TypeTracerArray:
-        try_touch_data(obj)
-
         if isinstance(obj, ak.index.Index):
             obj = obj.data
 
@@ -618,11 +616,16 @@ class TypeTracer(NumpyLike):
 
             if dtype is None:
                 return obj
-            elif copy is False and dtype != obj.dtype:
+            elif dtype == obj.dtype:
+                return TypeTracerArray._new(
+                    dtype, obj.shape, form_key=form_key, report=report
+                )
+            elif copy is False:
                 raise ValueError(
                     "asarray was called with copy=False for an array of a different dtype"
                 )
             else:
+                try_touch_data(obj)
                 return TypeTracerArray._new(
                     dtype, obj.shape, form_key=form_key, report=report
                 )
