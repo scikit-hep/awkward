@@ -449,7 +449,7 @@ namespace awkward {
     void
     append(PRIMITIVE datum) {
       if (ptr_->current_length() == ptr_->reserved()) {
-        add_panel((size_t)ceil((double)ptr_->reserved() * (double)options_.resize()));
+        add_panel((size_t)ceil(options_.initial() * options_.resize()));
       }
       fill_panel(datum);
     }
