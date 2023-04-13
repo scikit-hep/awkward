@@ -335,14 +335,10 @@ def GrowableBufferType_len(growablebuffer):
 @numba.extending.overload_method(GrowableBufferType, "_add_panel")
 def GrowableBuffer_add_panel(growablebuffer):
     def add_panel(growablebuffer):
-        last_panel = growablebuffer._panels[-1]
+        first_panel = growablebuffer._panels[0]
+        panel_length = int(math.ceil(len(first_panel) * growablebuffer._resize))
 
-        panel_length = len(last_panel)
-        if len(growablebuffer._panels) == 1:
-            # only resize the first time
-            panel_length = int(math.ceil(panel_length * growablebuffer._resize))
-
-        growablebuffer._panels.append(numpy.empty((panel_length,), last_panel.dtype))
+        growablebuffer._panels.append(numpy.empty((panel_length,), first_panel.dtype))
         growablebuffer._pos_set(0)
 
     return add_panel
