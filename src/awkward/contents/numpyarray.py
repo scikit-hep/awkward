@@ -4,6 +4,10 @@ from __future__ import annotations
 import copy
 
 import awkward as ak
+from awkward._backends.backend import Backend
+from awkward._backends.dispatch import backend_of
+from awkward._backends.numpy import NumpyBackend
+from awkward._backends.typetracer import TypeTracerBackend
 from awkward._layout import maybe_posaxis
 from awkward._nplikes import to_nplike
 from awkward._nplikes.jax import Jax
@@ -91,9 +95,7 @@ class NumpyArray(Content):
 
     def __init__(self, data: ArrayLike, *, parameters=None, backend=None):
         if backend is None:
-            backend = ak._backends.backend_of(
-                data, default=ak._backends.NumpyBackend.instance()
-            )
+            backend = backend_of(data, default=NumpyBackend.instance())
 
         self._data = backend.nplike.asarray(data)
 
@@ -184,7 +186,7 @@ class NumpyArray(Content):
         )
 
     def _to_typetracer(self, forget_length: bool) -> Self:
-        backend = ak._backends.TypeTracerBackend.instance()
+        backend = TypeTracerBackend.instance()
         data = self._raw(backend.nplike)
         return NumpyArray(
             data.forget_length() if forget_length else data,
@@ -1366,7 +1368,7 @@ class NumpyArray(Content):
 
             return out
 
-    def _to_backend(self, backend: ak._backends.Backend) -> Self:
+    def _to_backend(self, backend: Backend) -> Self:
         return NumpyArray(
             self._raw(backend.nplike),
             parameters=self._parameters,

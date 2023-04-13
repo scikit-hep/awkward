@@ -6,7 +6,7 @@ from collections.abc import Mapping, MutableMapping
 from numbers import Integral
 
 import awkward as ak
-from awkward._backends import Backend
+from awkward._backends.backend import Backend
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._typing import Any, AxisMaybeNone, Literal
 from awkward.contents.content import ActionType, Content

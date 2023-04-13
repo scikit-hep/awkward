@@ -3,8 +3,9 @@ from __future__ import annotations
 
 import copy
 
-from awkward._nplikes import nplike_of, to_nplike
+from awkward._nplikes import to_nplike
 from awkward._nplikes.cupy import Cupy
+from awkward._nplikes.dispatch import nplike_of
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyLike, NumpyMetadata
@@ -43,8 +44,9 @@ class Index:
     _expected_dtype = None
 
     def __init__(self, data, *, metadata=None, nplike=None):
+        assert not isinstance(data, Index)
         if nplike is None:
-            nplike = nplike_of(data)
+            nplike = nplike_of(data, default=Numpy.instance())
         self._nplike = nplike
         if metadata is not None and not isinstance(metadata, dict):
             raise TypeError("Index metadata must be None or a dict")

@@ -4,6 +4,7 @@
 from numba import types
 
 import awkward as ak
+from awkward._backends.cupy import CupyBackend
 
 ########## ArrayView Arguments Handler for CUDA JIT
 
@@ -11,7 +12,7 @@ import awkward as ak
 class ArrayViewArgHandler:
     def prepare_args(self, ty, val, stream, retr):
         if isinstance(val, ak.Array):
-            if isinstance(val.layout.backend, ak._backends.CupyBackend):
+            if isinstance(val.layout.backend, CupyBackend):
                 # Use uint64 for pos, start, stop, the array pointers values, and the pylookup value
                 tys = types.UniTuple(types.uint64, 5)
 

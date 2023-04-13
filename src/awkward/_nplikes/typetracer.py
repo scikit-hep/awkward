@@ -7,6 +7,7 @@ import numpy
 from numpy.lib.mixins import NDArrayOperatorsMixin
 
 import awkward as ak
+from awkward._nplikes.dispatch import register_nplike
 from awkward._nplikes.numpylike import ArrayLike, IndexType, NumpyLike, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._regularize import is_integer, is_non_string_like_sequence
@@ -557,6 +558,7 @@ def try_touch_shape(array):
         array.touch_shape()
 
 
+@register_nplike
 class TypeTracer(NumpyLike):
     known_data: Final = False
     is_eager: Final = True
@@ -605,8 +607,6 @@ class TypeTracer(NumpyLike):
         dtype: numpy.dtype | None = None,
         copy: bool | None = None,
     ) -> TypeTracerArray:
-        try_touch_data(obj)
-
         if isinstance(obj, ak.index.Index):
             obj = obj.data
 
@@ -616,11 +616,16 @@ class TypeTracer(NumpyLike):
 
             if dtype is None:
                 return obj
-            elif copy is False and dtype != obj.dtype:
+            elif dtype == obj.dtype:
+                return TypeTracerArray._new(
+                    dtype, obj.shape, form_key=form_key, report=report
+                )
+            elif copy is False:
                 raise ValueError(
                     "asarray was called with copy=False for an array of a different dtype"
                 )
             else:
+                try_touch_data(obj)
                 return TypeTracerArray._new(
                     dtype, obj.shape, form_key=form_key, report=report
                 )
@@ -1307,8 +1312,12 @@ class TypeTracer(NumpyLike):
         return numpy.can_cast(from_, to, casting="same_kind")
 
     @classmethod
+    def is_own_array_type(cls, type_: type) -> bool:
+        return issubclass(type_, TypeTracerArray)
+
+    @classmethod
     def is_own_array(cls, obj) -> bool:
-        return isinstance(obj, TypeTracerArray)
+        return cls.is_own_array_type(type(obj))
 
     def is_c_contiguous(self, x: ArrayLike) -> bool:
         return True

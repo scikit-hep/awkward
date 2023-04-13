@@ -1,7 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("concatenate",)
 import awkward as ak
-from awkward._backends import NumpyBackend, backend_of
+from awkward._backends.dispatch import backend_of
+from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of
 from awkward._layout import maybe_posaxis, wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
@@ -53,7 +54,7 @@ def concatenate(arrays, axis=0, *, mergebool=True, highlevel=True, behavior=None
 def _impl(arrays, axis, mergebool, highlevel, behavior):
     axis = regularize_axis(axis)
     # Simple single-array, axis=0 fast-path
-    backend = ak._backends.backend_of(*arrays, default=cpu)
+    backend = backend_of(*arrays, default=cpu)
     behavior = behavior_of(*arrays, behavior=behavior)
     if (
         # Is an array with a known backend
@@ -143,7 +144,7 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
                 inputs = nextinputs
 
             if depth == posaxis:
-                backend = ak._backends.backend_of(*inputs, default=cpu)
+                backend = backend_of(*inputs, default=cpu)
 
                 length = None
                 for x in inputs:

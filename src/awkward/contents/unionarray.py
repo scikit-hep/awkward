@@ -7,6 +7,7 @@ import ctypes
 from collections.abc import Iterable, Sequence
 
 import awkward as ak
+from awkward._backends.backend import Backend
 from awkward._layout import maybe_posaxis
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
@@ -649,7 +650,7 @@ class UnionArray(Content):
     def regular_index(
         tags: Index,
         *,
-        backend: ak._backends.Backend,
+        backend: Backend,
         index_cls: type[Index] = Index64,
     ):
         tags = tags.to_nplike(backend.index_nplike)
@@ -704,7 +705,7 @@ class UnionArray(Content):
         offsets: Index,
         counts: Sequence[Index],
         *,
-        backend: ak._backends.Backend,
+        backend: Backend,
         tags_cls: type[Index] = Index8,
         index_cls: type[Index] = Index64,
     ) -> tuple[Index, Index]:
@@ -1049,8 +1050,8 @@ class UnionArray(Content):
 
             parameters = parameters_intersect(parameters, array._parameters)
             if isinstance(array, ak.contents.UnionArray):
-                union_tags = ak.index.Index(array.tags)
-                union_index = ak.index.Index(array.index)
+                union_tags = array.tags
+                union_index = array.index
                 union_contents = array.contents
                 assert (
                     nexttags.nplike is self._backend.index_nplike
@@ -1568,7 +1569,7 @@ class UnionArray(Content):
             out[i] = contents[tag][index[i]]
         return out
 
-    def _to_backend(self, backend: ak._backends.Backend) -> Self:
+    def _to_backend(self, backend: Backend) -> Self:
         tags = self._tags.to_nplike(backend.index_nplike)
         index = self._index.to_nplike(backend.index_nplike)
         contents = [content.to_backend(backend) for content in self._contents]

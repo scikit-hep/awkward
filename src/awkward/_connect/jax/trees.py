@@ -5,6 +5,8 @@ import jax
 
 import awkward as ak
 from awkward import contents, highlevel, record
+from awkward._backends.backend import Backend
+from awkward._backends.jax import JaxBackend
 from awkward._behavior import behavior_of
 from awkward._layout import wrap_layout
 from awkward._nplikes.jax import Jax
@@ -37,7 +39,7 @@ def find_all_buffers(
 def replace_all_buffers(
     layout: contents.Content | record.Record,
     buffers: list,
-    backend: ak._backends.Backend,
+    backend: Backend,
 ):
     def action(node, **kwargs):
         jaxlike = Jax.instance()
@@ -81,7 +83,7 @@ class AuxData(Generic[T]):
             raise TypeError
 
         # First, make sure we're all JAX
-        jax_backend = ak._backends.JaxBackend.instance()
+        jax_backend = JaxBackend.instance()
         layout = layout.to_backend(jax_backend)
 
         # Now pull out the Jax tracers / arrays
@@ -139,7 +141,7 @@ class AuxData(Generic[T]):
 
         # Replace the mixed NumPy-JAX layout leaves with the given buffers (and use the JAX nplike)
         layout = replace_all_buffers(
-            self._layout, list(buffers), backend=ak._backends.JaxBackend.instance()
+            self._layout, list(buffers), backend=JaxBackend.instance()
         )
         return wrap_layout(
             layout, behavior=self._behavior, highlevel=self._is_highlevel

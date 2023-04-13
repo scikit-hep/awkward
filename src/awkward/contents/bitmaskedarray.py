@@ -6,6 +6,7 @@ import json
 import math
 
 import awkward as ak
+from awkward._backends.backend import Backend
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import IndexType, NumpyMetadata
 from awkward._nplikes.shape import unknown_length
@@ -791,7 +792,7 @@ class BitMaskedArray(Content):
 
         return out
 
-    def _to_backend(self, backend: ak._backends.Backend) -> Self:
+    def _to_backend(self, backend: Backend) -> Self:
         content = self._content.to_backend(backend)
         mask = self._mask.to_nplike(backend.index_nplike)
         return BitMaskedArray(
