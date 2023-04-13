@@ -7,6 +7,7 @@
 [![Python 3.7‒3.11](https://img.shields.io/badge/python-3.7%E2%80%923.11-blue)](https://www.python.org)
 [![BSD-3 Clause License](https://img.shields.io/badge/license-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 [![Build Test](https://github.com/scikit-hep/awkward/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/scikit-hep/awkward/actions/workflows/test.yml)
+[![Needs C++ Release](https://github.com/scikit-hep/awkward/actions/workflows/needs-cpp-release.yml/badge.svg)](https://github.com/scikit-hep/awkward/actions/workflows/needs-cpp-release.yml)
 
 [![Scikit-HEP](https://scikit-hep.org/assets/images/Scikit--HEP-Project-blue.svg)](https://scikit-hep.org/)
 [![NSF-1836650](https://img.shields.io/badge/NSF-1836650-blue.svg)](https://nsf.gov/awardsearch/showAward?AWD_ID=1836650)
