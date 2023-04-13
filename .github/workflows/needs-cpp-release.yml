@@ -1,0 +1,49 @@
+name: Needs C++ Release
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  determine-source-date-epoch:
+    name: "Determine SOURCE_DATE_EPOCH"
+    runs-on: ubuntu-latest
+    outputs:
+      source-date-epoch: ${{ steps.log.outputs.source-date-epoch }}
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+          fetch-depth: 0
+
+      - id: log
+        name: Compute SOURCE_DATE_EPOCH
+        run: |
+          # Find latest unix timestamp in awkward-cpp, and the kernel generation files
+          epoch=$( git log -1 --format=%at -- awkward-cpp kernel-specification.yml kernel-test-data.json )
+          echo "source-date-epoch=$epoch" >> $GITHUB_OUTPUT
+
+
+  check-cpp-on-pypi:
+    name: "Check awkward-cpp dependency on PyPI"
+    runs-on: ubuntu-latest
+    needs: [determine-source-date-epoch]
+    env:
+      SOURCE_DATE_EPOCH: ${{ needs.determine-source-date-epoch.outputs.source-date-epoch }}
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+
+      - name: Prepare build files
+        run: pipx run nox -s prepare
+
+      - name: Build awkward-cpp sdist
+        run: pipx run build --sdist awkward-cpp
+
+      - name: Check sdist matches PyPI
+        run: pipx run nox -s check_cpp_sdist_released -- awkward-cpp/dist/awkward-cpp*.tar.gz
