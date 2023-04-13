@@ -90,32 +90,32 @@ def test_python_extend():
     # fill more than one panel, starting at a threshold
     growablebuffer.extend(np.array(range(50, 80)))
     assert growablebuffer.snapshot().tolist() == list(range(80))
-    assert len(growablebuffer._panels) == 5
+    assert len(growablebuffer._panels) == 4
 
     # fill more than one panel, not starting at a threshold, but ending on one
     growablebuffer.extend(np.array(range(80, 110)))
     assert growablebuffer.snapshot().tolist() == list(range(110))
-    assert len(growablebuffer._panels) == 6
+    assert len(growablebuffer._panels) == 5
 
     # fill lots of panels, starting at a threshold
     growablebuffer.extend(np.array(range(110, 160)))
     assert growablebuffer.snapshot().tolist() == list(range(160))
-    assert len(growablebuffer._panels) == 9
+    assert len(growablebuffer._panels) == 6
 
     # fill lots of panels, not starting at a threshold or ending on one
     growablebuffer.extend(np.array(range(160, 200)))
     assert growablebuffer.snapshot().tolist() == list(range(200))
-    assert len(growablebuffer._panels) == 11
+    assert len(growablebuffer._panels) == 7
 
     # fill lots of panels, not starting at a threshold, but ending on one
     growablebuffer.extend(np.array(range(200, 250)))
     assert growablebuffer.snapshot().tolist() == list(range(250))
-    assert len(growablebuffer._panels) == 13
+    assert len(growablebuffer._panels) == 8
 
     # fill a whole lot of panels, just for fun
     growablebuffer.extend(np.array(range(250, 1000)))
     assert growablebuffer.snapshot().tolist() == list(range(1000))
-    assert len(growablebuffer._panels) == 51
+    assert len(growablebuffer._panels) == 9
 
 
 def test_unbox():
@@ -480,29 +480,29 @@ def test_numba_extend():
     # fill more than one panel, starting at a threshold
     extend_range(growablebuffer, 50, 80)
     assert snapshot(growablebuffer).tolist() == list(range(80))
-    assert len(growablebuffer._panels) == 5
+    assert len(growablebuffer._panels) == 4
 
     # fill more than one panel, not starting at a threshold, but ending on one
     extend_range(growablebuffer, 80, 110)
     assert snapshot(growablebuffer).tolist() == list(range(110))
-    assert len(growablebuffer._panels) == 6
+    assert len(growablebuffer._panels) == 5
 
     # fill lots of panels, starting at a threshold
     extend_range(growablebuffer, 110, 160)
     assert snapshot(growablebuffer).tolist() == list(range(160))
-    assert len(growablebuffer._panels) == 9
+    assert len(growablebuffer._panels) == 6
 
     # fill lots of panels, not starting at a threshold or ending on one
     extend_range(growablebuffer, 160, 200)
     assert snapshot(growablebuffer).tolist() == list(range(200))
-    assert len(growablebuffer._panels) == 11
+    assert len(growablebuffer._panels) == 7
 
     # fill lots of panels, not starting at a threshold, but ending on one
     extend_range(growablebuffer, 200, 250)
     assert snapshot(growablebuffer).tolist() == list(range(250))
-    assert len(growablebuffer._panels) == 13
+    assert len(growablebuffer._panels) == 8
 
     # fill a whole lot of panels, just for fun
     extend_range(growablebuffer, 250, 1000)
     assert snapshot(growablebuffer).tolist() == list(range(1000))
-    assert len(growablebuffer._panels) == 51
+    assert len(growablebuffer._panels) == 9
