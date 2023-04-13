@@ -92,7 +92,7 @@ def test_box():
 
 def test_refcount():
     array = ak.highlevel.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
-    array.numba_type
+    array.numba_type  # noqa: B018 (needed to set refcount)
     assert [
         sys.getrefcount(x) == 2
         for x in (
@@ -469,7 +469,7 @@ def test_RecordView_refcount():
         ],
         check_valid=True,
     )[3]
-    record.numba_type
+    record.numba_type  # noqa: B018 (needed to set refcount)
     assert [
         sys.getrefcount(x) == 2
         for x in (

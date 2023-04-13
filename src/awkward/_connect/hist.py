@@ -17,7 +17,7 @@ def unpack(array: ak.Array) -> dict[str, ak.Array] | None:
     if not ak.fields(array):
         return None
     else:
-        return {k: x for k, x in zip(ak.fields(array), ak.unzip(array))}
+        return dict(zip(ak.fields(array), ak.unzip(array)))
 
 
 def broadcast_and_flatten(args: Sequence[Any]) -> tuple[np.ndarray]:
