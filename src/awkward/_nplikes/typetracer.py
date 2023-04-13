@@ -695,11 +695,10 @@ class TypeTracer(NumpyLike):
             else:
                 raise TypeError
 
-    def ascontiguousarray(
-        self, x: ArrayLike, *, dtype: numpy.dtype | None = None
-    ) -> TypeTracerArray:
-        try_touch_data(x)
-        return TypeTracerArray._new(dtype or x.dtype, shape=x.shape)
+    def ascontiguousarray(self, x: ArrayLike) -> TypeTracerArray:
+        return TypeTracerArray._new(
+            x.dtype, shape=x.shape, form_key=x.form_key, report=x.report
+        )
 
     def frombuffer(
         self, buffer, *, dtype: np.dtype | None = None, count: int = -1
