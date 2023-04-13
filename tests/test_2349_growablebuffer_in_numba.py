@@ -80,12 +80,12 @@ def test_python_extend():
     # touching the end of the second panel
     growablebuffer.extend(np.array(range(20, 30)))
     assert growablebuffer.snapshot().tolist() == list(range(30))
-    assert len(growablebuffer._panels) == 3
+    assert len(growablebuffer._panels) == 2
 
     # fill one whole panel exactly (start to end)
     growablebuffer.extend(np.array(range(30, 50)))
     assert growablebuffer.snapshot().tolist() == list(range(50))
-    assert len(growablebuffer._panels) == 4
+    assert len(growablebuffer._panels) == 3
 
     # fill more than one panel, starting at a threshold
     growablebuffer.extend(np.array(range(50, 80)))
@@ -100,38 +100,22 @@ def test_python_extend():
     # fill lots of panels, starting at a threshold
     growablebuffer.extend(np.array(range(110, 160)))
     assert growablebuffer.snapshot().tolist() == list(range(160))
-<<<<<<< HEAD
     assert len(growablebuffer._panels) == 6
-=======
-    assert len(growablebuffer._panels) == 7
->>>>>>> 4eeb578b (fix: extend by one panel of a data length)
 
     # fill lots of panels, not starting at a threshold or ending on one
     growablebuffer.extend(np.array(range(160, 200)))
     assert growablebuffer.snapshot().tolist() == list(range(200))
-<<<<<<< HEAD
     assert len(growablebuffer._panels) == 7
-=======
-    assert len(growablebuffer._panels) == 8
->>>>>>> 4eeb578b (fix: extend by one panel of a data length)
 
     # fill lots of panels, not starting at a threshold, but ending on one
     growablebuffer.extend(np.array(range(200, 250)))
     assert growablebuffer.snapshot().tolist() == list(range(250))
-<<<<<<< HEAD
     assert len(growablebuffer._panels) == 8
-=======
-    assert len(growablebuffer._panels) == 9
->>>>>>> 4eeb578b (fix: extend by one panel of a data length)
 
     # fill a whole lot of panels, just for fun
     growablebuffer.extend(np.array(range(250, 1000)))
     assert growablebuffer.snapshot().tolist() == list(range(1000))
-<<<<<<< HEAD
     assert len(growablebuffer._panels) == 9
-=======
-    assert len(growablebuffer._panels) == 10
->>>>>>> 4eeb578b (fix: extend by one panel of a data length)
 
 
 def test_unbox():
