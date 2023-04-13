@@ -154,4 +154,6 @@ class Cupy(ArrayModuleNumpyLike):
         return module == "cupy"
 
     def is_c_contiguous(self, x: ArrayLike) -> bool:
-        return x.flags["C_CONTIGUOUS"]
+        return x.flags["C_CONTIGUOUS"] or (
+            x.dtype.metadata is not None and x.dtype.metadata.get("pretend_contiguous")
+        )

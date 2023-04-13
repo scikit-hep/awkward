@@ -31,7 +31,7 @@ def register_and_check():
     Register Awkward Array node types with JAX's tree mechanism.
     """
     try:
-        import jax  # noqa: TID251
+        import jax  # noqa: TID251, F401
 
     except ModuleNotFoundError:
         raise ModuleNotFoundError(

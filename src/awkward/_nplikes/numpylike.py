@@ -248,9 +248,7 @@ class NumpyLike(Singleton, Protocol):
         ...
 
     @abstractmethod
-    def ascontiguousarray(
-        self, x: ArrayLike, *, dtype: numpy.dtype | None = None
-    ) -> ArrayLike:
+    def ascontiguousarray(self, x: ArrayLike) -> ArrayLike:
         ...
 
     @abstractmethod

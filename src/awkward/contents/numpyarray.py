@@ -703,19 +703,15 @@ class NumpyArray(Content):
 
         if negaxis is None:
             contiguous_self = self.to_contiguous()
-            # Python 3.8 could use math.prod
-            flattened_shape = 1
-            for s in contiguous_self.shape:
-                flattened_shape = flattened_shape * s
 
             offsets = ak.index.Index64.zeros(2, self._backend.index_nplike)
-            offsets[1] = flattened_shape
+            offsets[1] = self._data.size
             dtype = (
                 np.dtype(np.int64)
                 if self._data.dtype.kind.upper() == "M"
                 else self._data.dtype
             )
-            out = self._backend.nplike.empty(offsets[1], dtype=dtype)
+            out = self._backend.nplike.empty(self._data.size, dtype=dtype)
             assert offsets.nplike is self._backend.index_nplike
             self._handle_error(
                 self._backend[

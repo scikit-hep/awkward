@@ -43,7 +43,9 @@ class Numpy(ArrayModuleNumpyLike):
         return issubclass(type_, numpy.ndarray)
 
     def is_c_contiguous(self, x: ArrayLike) -> bool:
-        return x.flags["C_CONTIGUOUS"]
+        return x.flags["C_CONTIGUOUS"] or (
+            x.dtype.metadata is not None and x.dtype.metadata.get("pretend_contiguous")
+        )
 
     def packbits(
         self,

@@ -1,8 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 from __future__ import annotations
 
-import numpy
-
 import awkward as ak
 from awkward._nplikes.array_module import ArrayModuleNumpyLike
 from awkward._nplikes.dispatch import register_nplike
@@ -74,10 +72,5 @@ class Jax(ArrayModuleNumpyLike):
     def is_c_contiguous(self, x: ArrayLike) -> bool:
         return True
 
-    def ascontiguousarray(
-        self, x: ArrayLike, *, dtype: numpy.dtype | None = None
-    ) -> ArrayLike:
-        if dtype is not None:
-            return x.astype(dtype)
-        else:
-            return x
+    def ascontiguousarray(self, x: ArrayLike) -> ArrayLike:
+        return x

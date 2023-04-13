@@ -805,7 +805,10 @@ def test_complicated():
         to_list(ak.prod(complicated, -1, highlevel=False))
 
     with pytest.raises(TypeError):
-        ak.prod(complicated.to_typetracer(), -1, highlevel=False).form
+        assert (
+            ak.prod(complicated.to_typetracer(), -1, highlevel=False).form
+            == ak.prod(complicated, -1, highlevel=False).form
+        )
 
     assert to_list(ak.prod(complicated["x"], -1, highlevel=False)) == [
         [30],
@@ -830,7 +833,10 @@ def test_complicated():
         to_list(ak.prod(complicated, -2, highlevel=False))
 
     with pytest.raises(TypeError):
-        ak.prod(complicated.to_typetracer(), -2, highlevel=False).form
+        assert (
+            ak.prod(complicated.to_typetracer(), -2, highlevel=False).form
+            == ak.prod(complicated, -2, highlevel=False).form
+        )
     assert to_list(ak.prod(complicated["x"], -2, highlevel=False)) == [
         [2, 3, 5],
         [],

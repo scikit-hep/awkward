@@ -121,7 +121,7 @@ def test_python_extend():
 def test_unbox():
     @numba.njit
     def f1(x):
-        x
+        x  # noqa: B018 (we want to test the unboxing)
         return 3.14
 
     growablebuffer = GrowableBuffer(np.int32)
