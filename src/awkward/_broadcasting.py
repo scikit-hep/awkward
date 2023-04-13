@@ -8,6 +8,8 @@ import itertools
 from collections.abc import Sequence
 
 import awkward as ak
+from awkward._backends.backend import Backend
+from awkward._backends.dispatch import backend_of
 from awkward._behavior import find_custom_broadcast
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
@@ -87,7 +89,7 @@ def broadcast_pack(inputs: Sequence, isscalar: list[bool]) -> list:
     return nextinputs
 
 
-def broadcast_unpack(x, isscalar: list[bool], backend: ak._backends.Backend):
+def broadcast_unpack(x, isscalar: list[bool], backend: Backend):
     if all(isscalar):
         if not backend.nplike.known_data or x.length == 0:
             return x._getitem_nothing()._getitem_nothing()
@@ -122,7 +124,7 @@ def checklength(inputs, options):
             )
 
 
-def all_same_offsets(backend: ak._backends.Backend, inputs: list) -> bool:
+def all_same_offsets(backend: Backend, inputs: list) -> bool:
     index_nplike = backend.index_nplike
 
     offsets = None
@@ -365,7 +367,7 @@ def left_broadcast_to(content: Content, depth: int) -> Content:
 
 
 def apply_step(
-    backend: ak._backends.Backend,
+    backend: Backend,
     inputs: Sequence,
     action,
     depth: int,
@@ -1058,7 +1060,7 @@ def broadcast_and_apply(
     function_name=None,
     broadcast_parameters_rule=BroadcastParameterRule.INTERSECT,
 ):
-    backend = ak._backends.backend_of(*inputs)
+    backend = backend_of(*inputs)
     isscalar = []
     out = apply_step(
         backend,

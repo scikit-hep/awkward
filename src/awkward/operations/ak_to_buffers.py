@@ -2,6 +2,7 @@
 __all__ = ("to_buffers",)
 
 import awkward as ak
+from awkward._backends.dispatch import regularize_backend
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
@@ -139,7 +140,7 @@ def _impl(array, container, buffer_key, form_key, id_start, backend, byteorder):
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
 
     if backend is not None:
-        backend = ak._backends.regularize_backend(backend)
+        backend = regularize_backend(backend)
 
     return ak._do.to_buffers(
         layout,

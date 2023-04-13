@@ -1,12 +1,14 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("where",)
 import awkward as ak
+from awkward._backends.dispatch import backend_of
+from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
-cpu = ak._backends.NumpyBackend.instance()
+cpu = NumpyBackend.instance()
 
 
 @ak._connect.numpy.implements("where")
@@ -76,7 +78,7 @@ def _impl1(condition, mergebool, highlevel, behavior):
     akcondition = ak.operations.to_layout(
         condition, allow_record=False, allow_other=False
     )
-    backend = ak._backends.backend_of(akcondition, default=cpu)
+    backend = backend_of(akcondition, default=cpu)
 
     akcondition = ak.contents.NumpyArray(ak.operations.to_numpy(akcondition))
     out = backend.nplike.nonzero(ak.operations.to_numpy(akcondition))
@@ -105,7 +107,7 @@ def _impl3(condition, x, y, mergebool, highlevel, behavior):
         good_arrays.append(left)
     if isinstance(right, ak.contents.Content):
         good_arrays.append(right)
-    backend = ak._backends.backend_of(*good_arrays, default=cpu)
+    backend = backend_of(*good_arrays, default=cpu)
 
     def action(inputs, **kwargs):
         akcondition, left, right = inputs

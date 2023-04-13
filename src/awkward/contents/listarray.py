@@ -4,6 +4,7 @@ from __future__ import annotations
 import copy
 
 import awkward as ak
+from awkward._backends.backend import Backend
 from awkward._layout import maybe_posaxis
 from awkward._nplikes.numpylike import IndexType, NumpyMetadata
 from awkward._nplikes.shape import unknown_length
@@ -435,7 +436,7 @@ class ListArray(Content):
                 as_list_offset_array.offsets[0] : as_list_offset_array.offsets[-1]
             ]
 
-            sliceoffsets = ak.index.Index64(slicecontent._offsets)
+            sliceoffsets = slicecontent._offsets
 
             outcontent = next_content._getitem_next_jagged(
                 sliceoffsets[:-1], sliceoffsets[1:], slicecontent._content, tail
@@ -527,7 +528,7 @@ class ListArray(Content):
                     "jagged slice length differs from array length",
                 )
 
-            missing = ak.index.Index64(slicecontent._index)
+            missing = slicecontent._index
             _numvalid = ak.index.Index64.empty(1, self._backend.index_nplike)
             assert (
                 _numvalid.nplike is self._backend.index_nplike
@@ -1086,8 +1087,8 @@ class ListArray(Content):
                     ak.contents.ListOffsetArray,
                 ),
             ):
-                array_starts = ak.index.Index(array.starts)
-                array_stops = ak.index.Index(array.stops)
+                array_starts = array.starts
+                array_stops = array.stops
 
                 assert (
                     nextstarts.nplike is self._backend.index_nplike
@@ -1120,8 +1121,8 @@ class ListArray(Content):
             elif isinstance(array, ak.contents.RegularArray):
                 listoffsetarray = array.to_ListOffsetArray64(True)
 
-                array_starts = ak.index.Index64(listoffsetarray.starts)
-                array_stops = ak.index.Index64(listoffsetarray.stops)
+                array_starts = listoffsetarray.starts
+                array_stops = listoffsetarray.stops
 
                 assert (
                     nextstarts.nplike is self._backend.index_nplike
@@ -1518,7 +1519,7 @@ class ListArray(Content):
 
         return ListOffsetArray._to_list(self, behavior, json_conversions)
 
-    def _to_backend(self, backend: ak._backends.Backend) -> Self:
+    def _to_backend(self, backend: Backend) -> Self:
         content = self._content.to_backend(backend)
         starts = self._starts.to_nplike(backend.index_nplike)
         stops = self._stops.to_nplike(backend.index_nplike)

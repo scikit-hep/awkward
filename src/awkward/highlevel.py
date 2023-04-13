@@ -15,6 +15,8 @@ from numpy.lib.mixins import NDArrayOperatorsMixin  # noqa: TID251
 
 import awkward as ak
 import awkward._connect.hist
+from awkward._backends.dispatch import register_backend_lookup_factory
+from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of, get_array_class, get_record_class
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpy import Numpy
@@ -2795,3 +2797,29 @@ class ArrayBuilder(Sized):
 def ignore_in_to_list(getitem_function):
     getitem_function.ignore_in_to_list = True
     return getitem_function
+
+
+@register_backend_lookup_factory
+def find_highlevel_backend(obj: type):
+    if issubclass(obj, (Array, Record)):
+
+        def finder(obj: Array):
+            return obj.layout.backend
+
+        return finder
+    elif issubclass(obj, ArrayBuilder):
+
+        def numpy_lookup(obj: ArrayBuilder):
+            return NumpyBackend.instance()
+
+        return numpy_lookup
+
+
+@register_backend_lookup_factory
+def find_lowlevel_backend(obj: type):
+    if issubclass(obj, _ext.ArrayBuilder):
+
+        def numpy_lookup(obj: ArrayBuilder):
+            return NumpyBackend.instance()
+
+        return numpy_lookup

@@ -14,7 +14,7 @@ typetracer = ak.Array([44, 55, 66], backend="typetracer")
 
 def test_concatenate():
     with pytest.raises(
-        ValueError, match="cannot operate on arrays with incompatible array libraries"
+        ValueError, match="cannot operate on arrays with incompatible backends"
     ):
         ak.concatenate((left, right))
 
@@ -24,7 +24,7 @@ def test_concatenate():
 
 def test_broadcast_arrays():
     with pytest.raises(
-        ValueError, match="cannot operate on arrays with incompatible array libraries"
+        ValueError, match="cannot operate on arrays with incompatible backends"
     ):
         ak.broadcast_arrays(left, right)
 
@@ -34,7 +34,7 @@ def test_broadcast_arrays():
 
 def test_broadcast_fields():
     with pytest.raises(
-        ValueError, match="cannot operate on arrays with incompatible array libraries"
+        ValueError, match="cannot operate on arrays with incompatible backends"
     ):
         ak.broadcast_fields(left, right)
 
@@ -44,7 +44,7 @@ def test_broadcast_fields():
 
 def test_cartesian():
     with pytest.raises(
-        ValueError, match="cannot operate on arrays with incompatible array libraries"
+        ValueError, match="cannot operate on arrays with incompatible backends"
     ):
         ak.cartesian((left, right), axis=0)
 
@@ -57,7 +57,7 @@ def test_to_rdataframe():
     array = ak.Array([100, 200, 300.0], backend="typetracer")
     with pytest.raises(
         TypeError,
-        match="Converting a TypeTracer nplike to an nplike with `known_data=True`",
+        match="from an nplike without known data to an nplike with known data",
     ):
         ak.to_rdataframe({"array": array})
 
@@ -69,7 +69,7 @@ def test_transform():
         return tuple(x.copy(data=backend.nplike.asarray(x) * 2) for x in layouts)
 
     with pytest.raises(
-        ValueError, match="cannot operate on arrays with incompatible array libraries"
+        ValueError, match="cannot operate on arrays with incompatible backends"
     ):
         ak.transform(apply, left, right)
 

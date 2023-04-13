@@ -9,6 +9,7 @@ import ROOT
 import awkward as ak
 import awkward._connect.cling
 import awkward._lookup
+from awkward._backends.numpy import NumpyBackend
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
@@ -234,7 +235,7 @@ def from_rdataframe(
                 )
                 index[col] = ak.index.Index64(
                     index[col].layout.to_backend_array(
-                        allow_missing=True, backend=ak._backends.NumpyBackend.instance()
+                        allow_missing=True, backend=NumpyBackend.instance()
                     )
                 )
             else:

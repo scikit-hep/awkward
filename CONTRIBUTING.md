@@ -1,5 +1,7 @@
 # Contributing to Awkward Array
 
+[![Needs C++ Release](https://github.com/scikit-hep/awkward/actions/workflows/needs-cpp-release.yml/badge.svg)](https://github.com/scikit-hep/awkward/actions/workflows/needs-cpp-release.yml)
+
 Thank you for your interest in contributing! We're eager to see your ideas and look forward to working with you.
 
 This document describes the technical procedures we follow in this project. It should also be stressed that as members of the Scikit-HEP community, we are all obliged to maintaining a welcoming, harassment-free environment. See the [Code of Conduct](https://scikit-hep.org/code-of-conduct) for details.

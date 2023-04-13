@@ -169,7 +169,8 @@ class OperationErrorContext(ErrorContext):
     _width = 80 - 8
 
     def __init__(self, name, arguments):
-        from awkward._backends import NumpyBackend, backend_of
+        from awkward._backends.dispatch import backend_of
+        from awkward._backends.numpy import NumpyBackend
 
         numpy_backend = NumpyBackend.instance()
         if self.primary() is not None or all(
@@ -233,7 +234,8 @@ class SlicingErrorContext(ErrorContext):
     _width = 80 - 4
 
     def __init__(self, array, where):
-        from awkward._backends import NumpyBackend, backend_of
+        from awkward._backends.dispatch import backend_of
+        from awkward._backends.numpy import NumpyBackend
 
         numpy_backend = NumpyBackend.instance()
         if self.primary() is not None or all(

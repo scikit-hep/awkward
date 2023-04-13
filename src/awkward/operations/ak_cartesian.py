@@ -1,13 +1,15 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("cartesian",)
 import awkward as ak
+from awkward._backends.dispatch import backend_of
+from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of
 from awkward._layout import maybe_posaxis, wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
 
 np = NumpyMetadata.instance()
-cpu = ak._backends.NumpyBackend.instance()
+cpu = NumpyBackend.instance()
 
 
 def cartesian(
@@ -207,7 +209,7 @@ def cartesian(
 def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
     axis = regularize_axis(axis)
     if isinstance(arrays, dict):
-        backend = ak._backends.backend_of(*arrays.values(), default=cpu)
+        backend = backend_of(*arrays.values(), default=cpu)
         behavior = behavior_of(*arrays.values(), behavior=behavior)
         array_layouts = {
             name: ak.operations.to_layout(
@@ -218,7 +220,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
 
     else:
         arrays = list(arrays)
-        backend = ak._backends.backend_of(*arrays, default=cpu)
+        backend = backend_of(*arrays, default=cpu)
         behavior = behavior_of(*arrays, behavior=behavior)
         array_layouts = [
             ak.operations.to_layout(

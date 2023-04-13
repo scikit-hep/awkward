@@ -4,6 +4,9 @@ from __future__ import annotations
 import copy
 
 import awkward as ak
+from awkward._backends.backend import Backend
+from awkward._backends.numpy import NumpyBackend
+from awkward._backends.typetracer import TypeTracerBackend
 from awkward._errors import deprecate
 from awkward._layout import maybe_posaxis
 from awkward._nplikes.numpy import Numpy
@@ -68,7 +71,7 @@ class EmptyArray(Content):
                 f"{type(self).__name__} cannot contain parameters", version="2.2.0"
             )
         if backend is None:
-            backend = ak._backends.NumpyBackend.instance()
+            backend = NumpyBackend.instance()
         self._init(parameters, backend)
 
     form_cls: Final = EmptyForm
@@ -109,7 +112,7 @@ class EmptyArray(Content):
     def _to_typetracer(self, forget_length: bool) -> Self:
         return EmptyArray(
             parameters=self._parameters,
-            backend=ak._backends.TypeTracerBackend.instance(),
+            backend=TypeTracerBackend.instance(),
         )
 
     def _touch_data(self, recursive):
@@ -406,7 +409,7 @@ class EmptyArray(Content):
             raise TypeError("cannot convert typetracer arrays to Python lists")
         return []
 
-    def _to_backend(self, backend: ak._backends.Backend) -> Self:
+    def _to_backend(self, backend: Backend) -> Self:
         return EmptyArray(parameters=self._parameters, backend=backend)
 
     def _is_equal_to(self, other, index_dtype, numpyarray):
