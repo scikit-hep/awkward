@@ -80,42 +80,42 @@ def test_python_extend():
     # touching the end of the second panel
     growablebuffer.extend(np.array(range(20, 30)))
     assert growablebuffer.snapshot().tolist() == list(range(30))
-    assert len(growablebuffer._panels) == 3
+    assert len(growablebuffer._panels) == 2
 
     # fill one whole panel exactly (start to end)
     growablebuffer.extend(np.array(range(30, 50)))
     assert growablebuffer.snapshot().tolist() == list(range(50))
-    assert len(growablebuffer._panels) == 4
+    assert len(growablebuffer._panels) == 3
 
     # fill more than one panel, starting at a threshold
     growablebuffer.extend(np.array(range(50, 80)))
     assert growablebuffer.snapshot().tolist() == list(range(80))
-    assert len(growablebuffer._panels) == 5
+    assert len(growablebuffer._panels) == 4
 
     # fill more than one panel, not starting at a threshold, but ending on one
     growablebuffer.extend(np.array(range(80, 110)))
     assert growablebuffer.snapshot().tolist() == list(range(110))
-    assert len(growablebuffer._panels) == 6
+    assert len(growablebuffer._panels) == 5
 
     # fill lots of panels, starting at a threshold
     growablebuffer.extend(np.array(range(110, 160)))
     assert growablebuffer.snapshot().tolist() == list(range(160))
-    assert len(growablebuffer._panels) == 7
+    assert len(growablebuffer._panels) == 6
 
     # fill lots of panels, not starting at a threshold or ending on one
     growablebuffer.extend(np.array(range(160, 200)))
     assert growablebuffer.snapshot().tolist() == list(range(200))
-    assert len(growablebuffer._panels) == 8
+    assert len(growablebuffer._panels) == 7
 
     # fill lots of panels, not starting at a threshold, but ending on one
     growablebuffer.extend(np.array(range(200, 250)))
     assert growablebuffer.snapshot().tolist() == list(range(250))
-    assert len(growablebuffer._panels) == 9
+    assert len(growablebuffer._panels) == 8
 
     # fill a whole lot of panels, just for fun
     growablebuffer.extend(np.array(range(250, 1000)))
     assert growablebuffer.snapshot().tolist() == list(range(1000))
-    assert len(growablebuffer._panels) == 10
+    assert len(growablebuffer._panels) == 9
 
 
 def test_unbox():

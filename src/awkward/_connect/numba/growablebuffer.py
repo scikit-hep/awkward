@@ -68,7 +68,10 @@ class GrowableBuffer:
         remaining = len(data)
 
         if len(data) > available:
-            self._panels.append(numpy.empty((remaining,), dtype=self.dtype))
+            panel_length = int(numpy.ceil(len(self._panels[0]) * self._resize))
+            if remaining > panel_length:
+                panel_length = remaining
+            self._panels.append(numpy.empty((panel_length,), dtype=self.dtype))
             self._pos = 0
             available += len(self._panels[-1])
 
