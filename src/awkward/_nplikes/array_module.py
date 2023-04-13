@@ -36,10 +36,11 @@ class ArrayModuleNumpyLike(NumpyLike):
             else:
                 return self._module.asarray(obj, dtype=dtype)
 
-    def ascontiguousarray(
-        self, x: ArrayLike, *, dtype: np.dtype | None = None
-    ) -> ArrayLike:
-        return self._module.ascontiguousarray(x, dtype=dtype)
+    def ascontiguousarray(self, x: ArrayLike) -> ArrayLike:
+        # Allow buffers to _pretend_ to be contiguous already
+        if x.dtype.metadata is not None and x.dtype.metadata.get("pretend_contiguous"):
+            return x
+        return self._module.ascontiguousarray(x)
 
     def frombuffer(
         self, buffer, *, dtype: np.dtype | None = None, count: int = -1
