@@ -2,6 +2,9 @@ name: Needs C++ Release
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
 
 jobs:
   determine-source-date-epoch:
