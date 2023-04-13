@@ -368,11 +368,19 @@ def GrowableBuffer_extend(growablebuffer, data):
         pos = growablebuffer._pos_get()
 
         available = len(growablebuffer._panels[-1]) - pos
-        while len(data) > available:
-            growablebuffer._add_panel()
+        remaining = len(data)
+
+        if remaining > available:
+            panel_length = int(
+                math.ceil(len(growablebuffer._panels[0]) * growablebuffer._resize)
+            )
+
+            growablebuffer._panels.append(
+                numpy.empty((max(remaining, panel_length),), dtype=growablebuffer.dtype)
+            )
+            growablebuffer._pos_set(0)
             available += len(growablebuffer._panels[-1])
 
-        remaining = len(data)
         while remaining > 0:
             panel = growablebuffer._panels[panel_index]
             available_in_panel = len(panel) - pos
