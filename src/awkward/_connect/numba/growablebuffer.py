@@ -12,6 +12,7 @@ class GrowableBuffer:
         # all mutable data are in arrays that can be in-place shared with Numba
         self._panels = numba.typed.List([numpy.empty((initial,), dtype=dtype)])
         self._length_pos = numpy.zeros((2,), dtype=numpy.int64)
+        self._initial = initial
         self._resize = resize
 
     @classmethod
@@ -19,6 +20,7 @@ class GrowableBuffer:
         out = cls.__new__(cls)
         out._panels = panels
         out._length_pos = length_pos
+        out._initial = 1024
         out._resize = resize
         return out
 
