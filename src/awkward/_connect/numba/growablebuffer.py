@@ -1,5 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+import math
+
 import numba
 import numba.core.typing.npydecl
 import numpy
@@ -67,11 +69,12 @@ class GrowableBuffer:
         available = len(self._panels[-1]) - pos
         remaining = len(data)
 
-        if len(data) > available:
-            panel_length = int(numpy.ceil(len(self._panels[0]) * self._resize))
-            if remaining > panel_length:
-                panel_length = remaining
-            self._panels.append(numpy.empty((panel_length,), dtype=self.dtype))
+        if remaining > available:
+            panel_length = int(math.ceil(len(self._panels[0]) * self._resize))
+
+            self._panels.append(
+                numpy.empty((max(remaining, panel_length),), dtype=self.dtype)
+            )
             self._pos = 0
             available += len(self._panels[-1])
 
@@ -92,7 +95,7 @@ class GrowableBuffer:
         self._length_inc(len(data))
 
     def _add_panel(self):
-        panel_length = int(numpy.ceil(len(self._panels[0]) * self._resize))
+        panel_length = int(math.ceil(len(self._panels[0]) * self._resize))
 
         self._panels.append(numpy.empty((panel_length,), dtype=self.dtype))
         self._pos = 0
@@ -337,7 +340,7 @@ def GrowableBuffer_add_panel(growablebuffer):
         panel_length = len(last_panel)
         if len(growablebuffer._panels) == 1:
             # only resize the first time
-            panel_length = int(numpy.ceil(panel_length * growablebuffer._resize))
+            panel_length = int(math.ceil(panel_length * growablebuffer._resize))
 
         growablebuffer._panels.append(numpy.empty((panel_length,), last_panel.dtype))
         growablebuffer._pos_set(0)
