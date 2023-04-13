@@ -698,7 +698,6 @@ class TypeTracer(NumpyLike):
     def ascontiguousarray(
         self, x: ArrayLike, *, dtype: numpy.dtype | None = None
     ) -> TypeTracerArray:
-        try_touch_data(x)
         return TypeTracerArray._new(dtype or x.dtype, shape=x.shape)
 
     def frombuffer(

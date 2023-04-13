@@ -6,6 +6,7 @@ from abc import abstractmethod
 from typing import Any, Callable
 
 import awkward as ak
+from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
@@ -69,6 +70,7 @@ class NumpyKernel(BaseKernel):
         if issubclass(t, ctypes._Pointer):
             # Do we have a NumPy-owned array?
             if Numpy.is_own_array(x):
+                assert Numpy.is_c_contiguous(x), "kernel expects contiguous array"
                 if x.ndim > 0:
                     return ctypes.cast(x.ctypes.data, t)
                 else:
@@ -100,14 +102,16 @@ class JaxKernel(NumpyKernel):
 
 
 class CupyKernel(BaseKernel):
-    def max_length(self, args):
-        import awkward._connect.cuda as ak_cuda
+    def __init__(self, impl: Callable[..., Any], key: KernelKeyType):
+        super().__init__(impl, key)
 
-        cupy = ak_cuda.import_cupy("Awkward Arrays with CUDA")
+        self._cupy = Cupy.instance()
+
+    def max_length(self, args):
         max_length = metadata.iinfo(metadata.int64).min
         # TODO should kernels strip nplike wrapper? Probably
         for array in args:
-            if isinstance(array, cupy.ndarray):
+            if self._cupy.is_own_array(array):
                 max_length = max(max_length, len(array))
         return max_length
 
@@ -120,6 +124,15 @@ class CupyKernel(BaseKernel):
         if length > 1024:
             return 1024, 1, 1
         return length, 1, 1
+
+    def _cast(self, x, t):
+        if issubclass(t, ctypes._Pointer):
+            # Do we have a NumPy-owned array?
+            if self._cupy.is_own_array(x):
+                assert self._cupy.is_c_contiguous(x)
+            return x
+        else:
+            return x
 
     def __call__(self, *args) -> None:
         import awkward._connect.cuda as ak_cuda
@@ -134,8 +147,10 @@ class CupyKernel(BaseKernel):
                 cupy.array(ak_cuda.NO_ERROR),
                 [],
             )
+        assert len(args) == len(self._impl.argtypes)
 
-        assert len(args) == len(self._impl.dir)
+        args = [self._cast(x, t) for x, t in zip(args, self._impl.argtypes)]
+
         # The first arg is the invocation index which raises itself by 8 in the kernel if there was no error before.
         # The second arg is the error_code.
         args = (
