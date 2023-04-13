@@ -17,12 +17,12 @@ def test_refcount():
 
     @numba.njit
     def f1():
-        array
+        array  # noqa: B018 (we want to test the unboxing)
         return 3.14
 
     @numba.njit
     def f2():
-        array, array
+        array, array  # noqa: B018 (we want to test the unboxing)
         return 3.14
 
     assert sys.getrefcount(array) == 2
@@ -40,7 +40,7 @@ def test_Array():
 
     @numba.njit
     def f1():
-        array
+        array  # noqa: B018 (we want to test the unboxing)
         return 3.14
 
     f1()
