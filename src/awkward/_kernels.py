@@ -15,6 +15,7 @@ from awkward._typing import Protocol, TypeAlias
 KernelKeyType: TypeAlias = tuple  # Tuple[str, Unpack[Tuple[metadata.dtype, ...]]]
 
 
+numpy = Numpy.instance()
 metadata = NumpyMetadata.instance()
 
 
@@ -69,8 +70,8 @@ class NumpyKernel(BaseKernel):
     def _cast(cls, x, t):
         if issubclass(t, ctypes._Pointer):
             # Do we have a NumPy-owned array?
-            if Numpy.is_own_array(x):
-                assert Numpy.is_c_contiguous(x), "kernel expects contiguous array"
+            if numpy.is_own_array(x):
+                assert numpy.is_c_contiguous(x), "kernel expects contiguous array"
                 if x.ndim > 0:
                     return ctypes.cast(x.ctypes.data, t)
                 else:
