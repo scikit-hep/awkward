@@ -42,6 +42,7 @@ def _register():
     import awkward._connect.numba.arrayview
     import awkward._connect.numba.arrayview_cuda
     import awkward._connect.numba.builder
+    import awkward._connect.numba.growablebuffer
     import awkward._connect.numba.layout
 
     n = ak.numba
@@ -63,6 +64,8 @@ def _register():
     n.ArrayBuilderType = awkward._connect.numba.builder.ArrayBuilderType
     n.ArrayBuilderModel = awkward._connect.numba.builder.ArrayBuilderModel
     n.cuda = awkward._connect.numba.arrayview_cuda.ArrayViewArgHandler()
+    n.GrowableBuffer = awkward._connect.numba.growablebuffer.GrowableBuffer
+    n._from_data = awkward._connect.numba.growablebuffer._from_data
 
     @numba.extending.typeof_impl.register(ak.highlevel.Array)
     def typeof_Array(obj, c):
