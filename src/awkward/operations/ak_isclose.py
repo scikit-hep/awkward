@@ -4,6 +4,7 @@ import awkward as ak
 from awkward._behavior import behavior_of
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward.operations.ak_to_layout import _to_layout_detailed
 
 np = NumpyMetadata.instance()
 
@@ -43,16 +44,20 @@ def isclose(
 
 
 def _impl(a, b, rtol, atol, equal_nan, highlevel, behavior):
-    one = ak.operations.to_layout(a)
-    two = ak.operations.to_layout(b)
+    one, one_is_scalar = _to_layout_detailed(
+        a, allow_record=True, allow_other=False, regulararray=True
+    )
+    two, two_is_scalar = _to_layout_detailed(
+        b, allow_record=True, allow_other=False, regulararray=True
+    )
 
     def action(inputs, backend, **kwargs):
-        if all(isinstance(x, ak.contents.NumpyArray) for x in inputs):
+        if all(x.is_numpy for x in inputs):
             return (
                 ak.contents.NumpyArray(
                     backend.nplike.isclose(
-                        inputs[0]._raw(backend.nplike),
-                        inputs[1]._raw(backend.nplike),
+                        inputs[0].data,
+                        inputs[1].data,
                         rtol=rtol,
                         atol=atol,
                         equal_nan=equal_nan,
@@ -61,7 +66,9 @@ def _impl(a, b, rtol, atol, equal_nan, highlevel, behavior):
             )
 
     behavior = behavior_of(a, b, behavior=behavior)
-    out = ak._broadcasting.broadcast_and_apply([one, two], action, behavior)
+    out = ak._broadcasting.broadcast_and_apply(
+        [one, two], action, behavior, return_scalar=one_is_scalar and two_is_scalar
+    )
     assert isinstance(out, tuple) and len(out) == 1
 
     return wrap_layout(out[0], behavior, highlevel)

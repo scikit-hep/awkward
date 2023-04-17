@@ -7,6 +7,7 @@ from awkward._behavior import behavior_of
 from awkward._connect.numpy import unsupported
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward.operations.ak_to_layout import _to_layout_detailed
 
 np = NumpyMetadata.instance()
 cpu = NumpyBackend.instance()
@@ -211,11 +212,16 @@ def _impl(
     backend = backend_of(*arrays, default=cpu)
 
     inputs = []
-    for x in arrays:
-        y = ak.operations.to_layout(x, allow_record=True, allow_other=True)
-        if not isinstance(y, (ak.contents.Content, ak.Record)):
-            y = ak.contents.NumpyArray(backend.nplike.asarray([y]))
-        inputs.append(y.to_backend(backend))
+    input_is_scalar = []
+    for obj in arrays:
+        layout, layout_is_scalar = _to_layout_detailed(
+            obj,
+            allow_record=True,
+            allow_other=False,
+            regulararray=True,
+        )
+        inputs.append(layout.to_backend(backend))
+        input_is_scalar.append(layout_is_scalar)
 
     def action(inputs, depth, **kwargs):
         if depth == depth_limit or all(x.is_numpy for x in inputs):
@@ -232,6 +238,7 @@ def _impl(
         right_broadcast=right_broadcast,
         broadcast_parameters_rule=broadcast_parameters_rule,
         numpy_to_regular=True,
+        return_scalar=all(input_is_scalar),
     )
     assert isinstance(out, tuple)
     return [wrap_layout(x, behavior, highlevel) for x in out]

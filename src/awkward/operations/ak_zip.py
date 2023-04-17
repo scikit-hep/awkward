@@ -4,6 +4,7 @@ import awkward as ak
 from awkward._behavior import behavior_of
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward.operations.ak_to_layout import _to_layout_detailed
 
 np = NumpyMetadata.instance()
 
@@ -176,15 +177,11 @@ def _impl(
         num_scalars = 0
         for n, x in arrays.items():
             recordlookup.append(n)
-            try:
-                layout = ak.operations.to_layout(
-                    x, allow_record=False, allow_other=False
-                )
-            except TypeError:
+            layout, is_scalar = _to_layout_detailed(
+                x, allow_record=True, allow_other=False, regulararray=False
+            )
+            if is_scalar:
                 num_scalars += 1
-                layout = ak.operations.to_layout(
-                    [x], allow_record=False, allow_other=False
-                )
             layouts.append(layout)
 
     else:
@@ -194,15 +191,11 @@ def _impl(
         layouts = []
         num_scalars = 0
         for x in arrays:
-            try:
-                layout = ak.operations.to_layout(
-                    x, allow_record=False, allow_other=False
-                )
-            except TypeError:
+            layout, is_scalar = _to_layout_detailed(
+                x, allow_record=True, allow_other=False, regulararray=False
+            )
+            if is_scalar:
                 num_scalars += 1
-                layout = ak.operations.to_layout(
-                    [x], allow_record=False, allow_other=False
-                )
             layouts.append(layout)
 
     to_record = num_scalars == len(arrays)
@@ -234,13 +227,13 @@ def _impl(
             return None
 
     out = ak._broadcasting.broadcast_and_apply(
-        layouts, action, behavior, right_broadcast=right_broadcast
+        layouts,
+        action,
+        behavior,
+        right_broadcast=right_broadcast,
+        return_scalar=to_record,
     )
     assert isinstance(out, tuple) and len(out) == 1
     out = out[0]
-
-    if to_record:
-        out = out[0]
-        assert isinstance(out, ak.record.Record)
 
     return wrap_layout(out, behavior, highlevel)

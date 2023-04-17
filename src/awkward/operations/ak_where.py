@@ -95,35 +95,21 @@ def _impl1(condition, mergebool, highlevel, behavior):
 
 
 def _impl3(condition, x, y, mergebool, highlevel, behavior):
-    akcondition = ak.operations.to_layout(
-        condition, allow_record=False, allow_other=False
-    )
-
-    left = ak.operations.to_layout(x, allow_record=False, allow_other=True)
-    right = ak.operations.to_layout(y, allow_record=False, allow_other=True)
-
-    good_arrays = [akcondition]
-    if isinstance(left, ak.contents.Content):
-        good_arrays.append(left)
-    if isinstance(right, ak.contents.Content):
-        good_arrays.append(right)
-    backend = backend_of(*good_arrays, default=cpu)
+    inputs = [
+        ak.to_layout(obj, allow_record=False, allow_other=False, regulararray=True)
+        for obj in (condition, x, y)
+    ]
+    backend = backend_of(*inputs, default=cpu)
 
     def action(inputs, **kwargs):
         akcondition, left, right = inputs
-        if isinstance(akcondition, ak.contents.NumpyArray):
+        if condition.is_numpy:
             npcondition = backend.index_nplike.asarray(akcondition)
             tags = ak.index.Index8((npcondition == 0).view(np.int8))
             index = ak.index.Index64(
                 backend.index_nplike.arange(tags.length, dtype=np.int64),
                 nplike=backend.index_nplike,
             )
-            if not isinstance(left, ak.contents.Content):
-                left = ak.contents.NumpyArray(backend.nplike.repeat(left, tags.length))
-            if not isinstance(right, ak.contents.Content):
-                right = ak.contents.NumpyArray(
-                    backend.nplike.repeat(right, tags.length)
-                )
             return (
                 ak.contents.UnionArray.simplified(
                     tags,
@@ -137,10 +123,11 @@ def _impl3(condition, x, y, mergebool, highlevel, behavior):
 
     behavior = behavior_of(condition, x, y, behavior=behavior)
     out = ak._broadcasting.broadcast_and_apply(
-        [akcondition, left, right],
+        inputs,
         action,
         behavior,
         numpy_to_regular=True,
+        return_scalar=False,
     )
 
     return wrap_layout(out[0], behavior, highlevel)

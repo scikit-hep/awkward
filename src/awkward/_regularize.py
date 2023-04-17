@@ -4,6 +4,7 @@ from __future__ import annotations
 import numbers
 import os
 from collections.abc import Iterable, Sequence, Sized
+from numbers import Number
 
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._typing import AxisMaybeNone, SupportsInt
@@ -48,6 +49,14 @@ def is_non_string_like_iterable(obj) -> bool:
 
 def is_non_string_like_sequence(obj) -> bool:
     return not isinstance(obj, (str, bytes)) and isinstance(obj, Sequence)
+
+
+def is_scalar(obj) -> bool:
+    return (
+        isinstance(obj, (str, bytes, Number, bool, np.generic))
+        or (is_array_like(obj) and obj.ndim == 0)
+        or obj is None
+    )
 
 
 def regularize_path(path):

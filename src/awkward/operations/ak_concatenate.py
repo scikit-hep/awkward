@@ -282,6 +282,7 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
             behavior=behavior,
             allow_records=True,
             right_broadcast=False,
+            return_scalar=False,
         )[0]
 
     return wrap_layout(out, behavior, highlevel)

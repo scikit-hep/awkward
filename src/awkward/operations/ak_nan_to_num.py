@@ -4,6 +4,8 @@ import awkward as ak
 from awkward._behavior import behavior_of
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._util import unset
+from awkward.operations.ak_to_layout import _to_layout_detailed
 
 np = NumpyMetadata.instance()
 
@@ -54,82 +56,47 @@ def nan_to_num(
 
 def _impl(array, copy, nan, posinf, neginf, highlevel, behavior):
     behavior = behavior_of(array, behavior=behavior)
+    assert array is not None
+    assert nan is not None
 
-    broadcasting_ids = {}
-    broadcasting = []
+    inputs = []
+    input_is_scalar = []
+    for obj in (array, nan, posinf, neginf):
+        layout, layout_is_scalar = _to_layout_detailed(
+            unset if obj is None else obj,
+            allow_record=True,
+            allow_other=True,
+            regulararray=True,
+        )
+        inputs.append(layout)
+        input_is_scalar.append(layout_is_scalar)
 
-    layout = ak.operations.to_layout(array)
-    broadcasting.append(layout)
-
-    nan_layout = ak.operations.to_layout(nan, allow_other=True)
-    if isinstance(nan_layout, ak.contents.Content):
-        broadcasting_ids[id(nan)] = len(broadcasting)
-        broadcasting.append(nan_layout)
-
-    posinf_layout = ak.operations.to_layout(posinf, allow_other=True)
-    if isinstance(posinf_layout, ak.contents.Content):
-        broadcasting_ids[id(posinf)] = len(broadcasting)
-        broadcasting.append(posinf_layout)
-
-    neginf_layout = ak.operations.to_layout(neginf, allow_other=True)
-    if isinstance(neginf_layout, ak.contents.Content):
-        broadcasting_ids[id(neginf)] = len(broadcasting)
-        broadcasting.append(neginf_layout)
-
-    if len(broadcasting) == 1:
-
-        def action(layout, backend, **kwargs):
-            if isinstance(layout, ak.contents.NumpyArray):
-                return ak.contents.NumpyArray(
+    def action(inputs, backend, **kwargs):
+        layout, nan_layout, posinf_layout, neginf_layout = inputs
+        if all(
+            x.purelist_depth == 1 for x in inputs if isinstance(x, ak.contents.Content)
+        ):
+            return (
+                ak.contents.NumpyArray(
                     backend.nplike.nan_to_num(
                         layout.data,
-                        nan=nan,
-                        posinf=posinf,
-                        neginf=neginf,
+                        nan=nan_layout.data,
+                        posinf=None if posinf_layout is unset else posinf_layout.data,
+                        neginf=None if neginf_layout is unset else neginf_layout.data,
                     )
-                )
-            else:
-                return None
+                ),
+            )
+        else:
+            return None
 
-        out = ak._do.recursively_apply(layout, action, behavior)
-
-    else:
-
-        def action(inputs, backend, **kwargs):
-            if all(isinstance(x, ak.contents.NumpyArray) for x in inputs):
-                tmp_layout = backend.nplike.asarray(inputs[0])
-                if id(nan) in broadcasting_ids:
-                    tmp_nan = backend.nplike.asarray(inputs[broadcasting_ids[id(nan)]])
-                else:
-                    tmp_nan = nan
-                if id(posinf) in broadcasting_ids:
-                    tmp_posinf = backend.nplike.asarray(
-                        inputs[broadcasting_ids[id(posinf)]]
-                    )
-                else:
-                    tmp_posinf = posinf
-                if id(neginf) in broadcasting_ids:
-                    tmp_neginf = backend.nplike.asarray(
-                        inputs[broadcasting_ids[id(neginf)]]
-                    )
-                else:
-                    tmp_neginf = neginf
-                return (
-                    ak.contents.NumpyArray(
-                        backend.nplike.nan_to_num(
-                            tmp_layout,
-                            nan=tmp_nan,
-                            posinf=tmp_posinf,
-                            neginf=tmp_neginf,
-                        )
-                    ),
-                )
-            else:
-                return None
-
-        out = ak._broadcasting.broadcast_and_apply(broadcasting, action, behavior)
-        assert isinstance(out, tuple) and len(out) == 1
-        out = out[0]
+    out = ak._broadcasting.broadcast_and_apply(
+        inputs,
+        action,
+        behavior,
+        return_scalar=all(input_is_scalar),
+    )
+    assert isinstance(out, tuple) and len(out) == 1
+    out = out[0]
 
     return wrap_layout(out, behavior, highlevel)
 

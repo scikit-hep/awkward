@@ -75,14 +75,11 @@ def _impl(array, axis, highlevel, behavior):
                 nplike = layout._backend.index_nplike
 
                 # this is a copy of the raw array
-                index = starts = nplike.asarray(
-                    layout.starts.raw(nplike), dtype=np.int64, copy=True
+                index = starts = nplike.astype(
+                    layout.starts.data, dtype=np.int64, copy=True
                 )
 
-                # this might be a view
-                stops = layout.stops.raw(nplike)
-
-                empties = starts == stops
+                empties = starts == layout.stops.data
                 index[empties] = -1
 
                 return ak.contents.IndexedOptionArray.simplified(

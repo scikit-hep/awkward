@@ -7,6 +7,7 @@ from awkward._behavior import behavior_of
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import is_non_string_like_sequence
+from awkward.operations.ak_broadcast_arrays import _impl as broadcast_arrays
 
 np = NumpyMetadata.instance()
 
@@ -76,13 +77,13 @@ def _impl(base, what, where, highlevel, behavior):
             behavior,
         )
     else:
-        # If we have an iterable here, pull out the only ti
+        # If we have a (length-1) iterable here, pull out the item
         if is_non_string_like_sequence(where):
             where = where[0]
 
         behavior = behavior_of(base, what, behavior=behavior)
         base = ak.operations.to_layout(base, allow_record=True, allow_other=False)
-        what = ak.operations.to_layout(what, allow_record=True, allow_other=True)
+        what = ak.operations.to_layout(what, allow_record=True, allow_other=False)
 
         keys = copy.copy(base.fields)
         if where in base.fields:
@@ -109,22 +110,21 @@ def _impl(base, what, where, highlevel, behavior):
         if not purelist_is_record(base):
             raise ValueError("no tuples or records in array; cannot add a new field")
 
-        def action(inputs, **kwargs):
+        def action(inputs, depth_context, **kwargs):
             base, what = inputs
-            backend = base.backend
 
             if isinstance(base, ak.contents.RecordArray):
-                if what is None:
-                    what = ak.contents.IndexedOptionArray(
-                        ak.index.Index64(
-                            backend.index_nplike.full(len(base), -1, dtype=np.int64),
-                            nplike=backend.index_nplike,
-                        ),
-                        ak.contents.EmptyArray(),
-                    )
-                elif not isinstance(what, ak.contents.Content):
-                    what = ak.contents.NumpyArray(
-                        backend.nplike.repeat(what, len(base))
+                # Broadcast `what` with the first content (to the appropriate length)
+                if len(base.contents) > 0:
+                    first_content = base.contents[0]
+                    what, _ = broadcast_arrays(
+                        [what, first_content[: base.length]],
+                        depth_limit=1,
+                        left_broadcast=True,
+                        right_broadcast=True,
+                        broadcast_parameters_rule="one_to_one",
+                        highlevel=False,
+                        behavior=behavior,
                     )
                 if base.is_tuple:
                     # Preserve tuple-ness
@@ -152,6 +152,7 @@ def _impl(base, what, where, highlevel, behavior):
             action,
             behavior,
             right_broadcast=False,
+            return_scalar=isinstance(base, ak.record.Record),
         )
 
         assert isinstance(out, tuple) and len(out) == 1

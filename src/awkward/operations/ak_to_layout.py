@@ -2,17 +2,16 @@
 __all__ = ("to_layout",)
 
 from collections.abc import Iterable
+from numbers import Number
 
 from awkward_cpp.lib import _ext
 
 import awkward as ak
 from awkward import _errors
-from awkward._backends.typetracer import TypeTracerBackend
-from awkward._nplikes.cupy import Cupy
-from awkward._nplikes.jax import Jax
+from awkward._layout import from_arraylib
+from awkward._nplikes.dispatch import nplike_of
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
-from awkward._nplikes.typetracer import TypeTracer
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
@@ -53,65 +52,62 @@ def to_layout(array, *, allow_record=True, allow_other=False, regulararray=True)
         return _impl(array, allow_record, allow_other, regulararray=regulararray)
 
 
-def _impl(array, allow_record, allow_other, regulararray):
+def _to_layout_detailed(array, allow_record, allow_other, regulararray):
     if isinstance(array, ak.contents.Content):
-        return array
+        return array, False
 
     elif isinstance(array, ak.record.Record):
         if not allow_record:
             raise TypeError("ak.Record objects are not allowed in this function")
         else:
-            return array
+            return array, True
 
     elif isinstance(array, ak.highlevel.Array):
-        return array.layout
+        return array.layout, False
 
     elif isinstance(array, ak.highlevel.Record):
         if not allow_record:
             raise TypeError("ak.Record objects are not allowed in this function")
         else:
-            return array.layout
+            return array.layout, True
 
     elif isinstance(array, ak.highlevel.ArrayBuilder):
-        return array.snapshot().layout
+        return array.snapshot().layout, False
 
     elif isinstance(array, _ext.ArrayBuilder):
-        return array.snapshot()
+        return array.snapshot(), False
 
-    elif numpy.is_own_array(array):
-        return ak.operations.from_numpy(
-            array, regulararray=regulararray, recordarray=True, highlevel=False
+    elif nplike_of(array, default=None) is not None:
+        # 0D scalar arrays will be promoted
+        return (
+            from_arraylib(array, regulararray=regulararray, recordarray=True),
+            array.ndim == 0,
         )
 
-    elif Cupy.is_own_array(array):
-        return ak.operations.from_cupy(
-            array, regulararray=regulararray, highlevel=False
-        )
-
-    elif Jax.is_own_array(array):
-        return ak.operations.from_jax(array, regulararray=regulararray, highlevel=False)
-
-    elif TypeTracer.is_own_array(array):
-        backend = TypeTracerBackend.instance()
-
-        if len(array.shape) == 0:
-            array = backend.nplike.reshape(array, (1,))
-
-        if array.dtype.kind in {"S", "U"}:
-            raise NotImplementedError(
-                "strings are currently not supported for typetracer arrays"
-            )
-
-        return ak.contents.NumpyArray(array, parameters=None, backend=backend)
+    elif isinstance(array, np.generic):
+        array = numpy.asarray(array)
+        return from_arraylib(array, regulararray=regulararray, recordarray=True), True
 
     elif ak._util.in_module(array, "pyarrow"):
-        return ak.operations.from_arrow(array, highlevel=False)
+        return ak.operations.from_arrow(array, highlevel=False), False
 
-    elif isinstance(array, (str, bytes)):
-        return ak.operations.from_iter([array], highlevel=False)[0]
+    elif isinstance(array, (str, bytes, Number, bool)):
+        return ak.operations.from_iter([array], highlevel=False), True
+
+    elif array is None:
+        return (
+            ak.contents.IndexedOptionArray(
+                ak.index.Index64(
+                    numpy.full(1, -1, dtype=np.int64),
+                    nplike=numpy,
+                ),
+                ak.contents.EmptyArray(),
+            ),
+            True,
+        )
 
     elif isinstance(array, Iterable):
-        return _impl(
+        return _to_layout_detailed(
             ak.operations.from_iter(array, highlevel=False),
             allow_record,
             allow_other,
@@ -124,4 +120,8 @@ def _impl(array, allow_record, allow_other, regulararray):
         )
 
     else:
-        return array
+        return array, True
+
+
+def _impl(array, allow_record, allow_other, regulararray):
+    return _to_layout_detailed(array, allow_record, allow_other, regulararray)[0]

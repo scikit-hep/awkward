@@ -64,14 +64,13 @@ def length_of_broadcast(inputs: Sequence) -> int | type[unknown_length]:
     return maxlen
 
 
-def broadcast_pack(inputs: Sequence, isscalar: list[bool]) -> list:
+def broadcast_pack(inputs: Sequence) -> list:
     maxlen = length_of_broadcast(inputs)
     nextinputs = []
     for x in inputs:
         if isinstance(x, Record):
             index = x.backend.index_nplike.full(maxlen, x.at, dtype=np.int64)
             nextinputs.append(RegularArray(x.array[index], maxlen, 1))
-            isscalar.append(True)
         elif isinstance(x, Content):
             nextinputs.append(
                 RegularArray(
@@ -81,16 +80,14 @@ def broadcast_pack(inputs: Sequence, isscalar: list[bool]) -> list:
                     parameters=None,
                 )
             )
-            isscalar.append(False)
         else:
             nextinputs.append(x)
-            isscalar.append(True)
 
     return nextinputs
 
 
-def broadcast_unpack(x, isscalar: list[bool], backend: Backend):
-    if all(isscalar):
+def broadcast_unpack(x, isscalar: bool, backend: Backend):
+    if isscalar:
         if not backend.nplike.known_data or x.length == 0:
             return x._getitem_nothing()._getitem_nothing()
         else:
@@ -1059,12 +1056,12 @@ def broadcast_and_apply(
     regular_to_jagged=False,
     function_name=None,
     broadcast_parameters_rule=BroadcastParameterRule.INTERSECT,
+    return_scalar=False,
 ):
     backend = backend_of(*inputs)
-    isscalar = []
     out = apply_step(
         backend,
-        broadcast_pack(inputs, isscalar),
+        broadcast_pack(inputs),
         action,
         0,
         depth_context,
@@ -1081,4 +1078,4 @@ def broadcast_and_apply(
         },
     )
     assert isinstance(out, tuple)
-    return tuple(broadcast_unpack(x, isscalar, backend) for x in out)
+    return tuple(broadcast_unpack(x, return_scalar, backend) for x in out)
