@@ -122,6 +122,10 @@ jobs:
       with:
         name: header-only
         path: header-only
+    - name: Create archive
+      run: |
+        # Don't include `header-only` parent directory
+        env -C header-only/ zip -r header-only.zip .
     - uses: softprops/action-gh-release@v1
       with:
-        files: header-only/*
+        files: header-only/header-only.zip
