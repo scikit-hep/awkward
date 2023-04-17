@@ -103,7 +103,7 @@ def _impl3(condition, x, y, mergebool, highlevel, behavior):
 
     def action(inputs, **kwargs):
         akcondition, left, right = inputs
-        if condition.is_numpy:
+        if all(x.is_numpy for x in inputs):
             npcondition = backend.index_nplike.asarray(akcondition)
             tags = ak.index.Index8((npcondition == 0).view(np.int8))
             index = ak.index.Index64(
