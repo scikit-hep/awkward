@@ -5,6 +5,11 @@ import awkward as ak
 _has_checked_version = False
 _is_registered = False
 
+from awkward._connect.numba.growablebuffer import (  # noqa: E402, F401
+    GrowableBuffer,
+    _from_data,
+)
+
 
 def register_and_check():
     global _has_checked_version
@@ -64,8 +69,6 @@ def _register():
     n.ArrayBuilderType = awkward._connect.numba.builder.ArrayBuilderType
     n.ArrayBuilderModel = awkward._connect.numba.builder.ArrayBuilderModel
     n.cuda = awkward._connect.numba.arrayview_cuda.ArrayViewArgHandler()
-    n.GrowableBuffer = awkward._connect.numba.growablebuffer.GrowableBuffer
-    n._from_data = awkward._connect.numba.growablebuffer._from_data
 
     @numba.extending.typeof_impl.register(ak.highlevel.Array)
     def typeof_Array(obj, c):
