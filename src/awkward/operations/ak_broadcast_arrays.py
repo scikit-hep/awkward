@@ -208,6 +208,10 @@ def _impl(
     highlevel,
     behavior,
 ):
+    # Need at least one array!
+    if len(arrays) == 0:
+        return []
+
     backend = backend_of(*arrays, default=cpu)
 
     inputs = []
