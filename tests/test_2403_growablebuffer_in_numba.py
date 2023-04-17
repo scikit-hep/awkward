@@ -7,8 +7,6 @@ import awkward as ak
 
 numba = pytest.importorskip("numba")
 
-ak.numba.register_and_check()
-
 
 def test_unbox():
     @numba.njit
