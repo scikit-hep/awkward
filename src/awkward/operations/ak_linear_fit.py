@@ -2,6 +2,7 @@
 __all__ = ("linear_fit",)
 import awkward as ak
 from awkward._backends.dispatch import backend_of
+from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of
 from awkward._layout import wrap_layout
 from awkward._nplikes import ufuncs
@@ -10,6 +11,7 @@ from awkward._regularize import regularize_axis
 from awkward._util import unset
 
 np = NumpyMetadata.instance()
+cpu_backend = NumpyBackend.instance()
 
 
 def linear_fit(
@@ -93,167 +95,74 @@ def linear_fit(
 def _impl(x, y, weight, axis, keepdims, mask_identity):
     axis = regularize_axis(axis)
     behavior = behavior_of(x, y, weight)
-    x = ak.highlevel.Array(
-        ak.operations.to_layout(x, allow_record=False, allow_other=False),
-        behavior=behavior,
-    )
-    y = ak.highlevel.Array(
-        ak.operations.to_layout(y, allow_record=False, allow_other=False),
-        behavior=behavior,
-    )
-    if weight is not None:
-        weight = ak.highlevel.Array(
-            ak.operations.to_layout(weight, allow_record=False, allow_other=False),
-            behavior=behavior,
+    backend_of(x, y, weight, default=cpu_backend)
+
+    if weight is None:
+        x, y = (
+            ak.Array(
+                ak.to_layout(obj, allow_other=False, allow_record=False),
+                behavior=behavior,
+            )
+            for obj in (x, y)
+        )
+    else:
+        x, y, weight = (
+            ak.Array(
+                ak.to_layout(obj, allow_other=False, allow_record=False),
+                behavior=behavior,
+            )
+            for obj in (x, y, weight)
         )
 
     with np.errstate(invalid="ignore", divide="ignore"):
-        backend = backend_of(x, y, weight)
+        reducer_kwargs = {
+            "axis": axis,
+            "keepdims": keepdims,
+            "mask_identity": mask_identity,
+            "highlevel": True,
+            "behavior": behavior,
+        }
         if weight is None:
-            sumw = ak.operations.ak_count._impl(
-                x,
-                axis,
-                keepdims,
-                mask_identity,
-                highlevel=True,
-                behavior=behavior,
-            )
-            sumwx = ak.operations.ak_sum._impl(
-                x,
-                axis,
-                keepdims,
-                mask_identity,
-                highlevel=True,
-                behavior=behavior,
-            )
-            sumwy = ak.operations.ak_sum._impl(
-                y,
-                axis,
-                keepdims,
-                mask_identity,
-                highlevel=True,
-                behavior=behavior,
-            )
-            sumwxx = ak.operations.ak_sum._impl(
-                x**2,
-                axis,
-                keepdims,
-                mask_identity,
-                highlevel=True,
-                behavior=behavior,
-            )
-            sumwxy = ak.operations.ak_sum._impl(
-                x * y,
-                axis,
-                keepdims,
-                mask_identity,
-                highlevel=True,
-                behavior=behavior,
-            )
+            x, y = ak.broadcast_arrays(x, y)
+            sumw = ak.operations.ak_count._impl(x, **reducer_kwargs)
+            sumwx = ak.operations.ak_sum._impl(x, **reducer_kwargs)
+            sumwy = ak.operations.ak_sum._impl(y, **reducer_kwargs)
+            sumwxx = ak.operations.ak_sum._impl(x**2, **reducer_kwargs)
+            sumwxy = ak.operations.ak_sum._impl(x * y, **reducer_kwargs)
         else:
-            sumw = ak.operations.ak_sum._impl(
-                x * 0 + weight,
-                axis,
-                keepdims,
-                mask_identity,
-                highlevel=True,
-                behavior=behavior,
-            )
-            sumwx = ak.operations.ak_sum._impl(
-                x * weight,
-                axis,
-                keepdims,
-                mask_identity,
-                highlevel=True,
-                behavior=behavior,
-            )
-            sumwy = ak.operations.ak_sum._impl(
-                y * weight,
-                axis,
-                keepdims,
-                mask_identity,
-                highlevel=True,
-                behavior=behavior,
-            )
-            sumwxx = ak.operations.ak_sum._impl(
-                (x**2) * weight,
-                axis,
-                keepdims,
-                mask_identity,
-                highlevel=True,
-                behavior=behavior,
-            )
-            sumwxy = ak.operations.ak_sum._impl(
-                x * y * weight,
-                axis,
-                keepdims,
-                mask_identity,
-                highlevel=True,
-                behavior=behavior,
-            )
+            x, y, weight = ak.broadcast_arrays(x, y, weight)
+            sumw = ak.operations.ak_sum._impl(weight, **reducer_kwargs)
+            sumwx = ak.operations.ak_sum._impl(x * weight, **reducer_kwargs)
+            sumwy = ak.operations.ak_sum._impl(y * weight, **reducer_kwargs)
+            sumwxx = ak.operations.ak_sum._impl((x**2) * weight, **reducer_kwargs)
+            sumwxy = ak.operations.ak_sum._impl(x * y * weight, **reducer_kwargs)
+
         delta = (sumw * sumwxx) - (sumwx * sumwx)
         intercept = ((sumwxx * sumwy) - (sumwx * sumwxy)) / delta
         slope = ((sumw * sumwxy) - (sumwx * sumwy)) / delta
         intercept_error = ufuncs.sqrt(sumwxx / delta)
         slope_error = ufuncs.sqrt(sumw / delta)
 
+        # Before we re-promote the result, determine if we have scalars
+        result_is_scalar = not isinstance(delta, (ak.Array, ak.Record))
+
         intercept = ak.operations.to_layout(
-            intercept, allow_record=True, allow_other=True
+            intercept, allow_record=True, allow_other=False
         )
-        slope = ak.operations.to_layout(slope, allow_record=True, allow_other=True)
+        slope = ak.operations.to_layout(slope, allow_record=True, allow_other=False)
         intercept_error = ak.operations.to_layout(
-            intercept_error, allow_record=True, allow_other=True
+            intercept_error, allow_record=True, allow_other=False
         )
         slope_error = ak.operations.to_layout(
-            slope_error, allow_record=True, allow_other=True
+            slope_error, allow_record=True, allow_other=False
         )
-
-        scalar = False
-        if not isinstance(
-            intercept,
-            (
-                ak.contents.Content,
-                ak.record.Record,
-            ),
-        ):
-            intercept = ak.contents.NumpyArray(backend.nplike.asarray([intercept]))
-            scalar = True
-        if not isinstance(
-            slope,
-            (
-                ak.contents.Content,
-                ak.record.Record,
-            ),
-        ):
-            slope = ak.contents.NumpyArray(backend.nplike.asarray([slope]))
-            scalar = True
-        if not isinstance(
-            intercept_error,
-            (
-                ak.contents.Content,
-                ak.record.Record,
-            ),
-        ):
-            intercept_error = ak.contents.NumpyArray(
-                backend.nplike.asarray([intercept_error])
-            )
-            scalar = True
-        if not isinstance(
-            slope_error,
-            (
-                ak.contents.Content,
-                ak.record.Record,
-            ),
-        ):
-            slope_error = ak.contents.NumpyArray(backend.nplike.asarray([slope_error]))
-            scalar = True
 
         out = ak.contents.RecordArray(
             [intercept, slope, intercept_error, slope_error],
             ["intercept", "slope", "intercept_error", "slope_error"],
             parameters={"__record__": "LinearFit"},
         )
-        if scalar:
+        if result_is_scalar:
             out = out[0]
 
-        return wrap_layout(out, highlevel=True, behavior=behavior, allow_other=scalar)
+        return wrap_layout(out, highlevel=True, behavior=behavior, allow_other=True)
