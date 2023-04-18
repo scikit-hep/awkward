@@ -84,7 +84,7 @@ def _to_rectilinear(arg, backend: Backend):
         # Otherwise, cast to layout and convert
         else:
             layout = ak.to_layout(arg, allow_record=False, allow_other=False)
-            return layout.to_backend_array(allow_missing=True)
+            return layout.to_backend(backend).to_backend_array(allow_missing=True)
     elif isinstance(arg, tuple):
         return tuple(_to_rectilinear(x, backend) for x in arg)
     elif isinstance(arg, list):
