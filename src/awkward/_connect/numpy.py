@@ -55,7 +55,8 @@ def _find_backends(args: Iterable) -> Iterator[Backend]:
     Args:
         args: iterable of objects to visit
 
-    Returns the backend of the first layout or high-level Awkward object encountered.
+    Yields the encountered backends of layout / array-like arguments encountered
+    in the argument list.
     """
     stack = collections.deque(args)
     while stack:
@@ -64,7 +65,7 @@ def _find_backends(args: Iterable) -> Iterator[Backend]:
         backend = backend_of(arg, default=None)
         if backend is not None:
             yield backend
-        # Is this object something we already associate with an nplike?
+        # Otherwise, traverse into supported sequence types
         elif isinstance(arg, (tuple, list)):
             stack.extend(arg)
 
