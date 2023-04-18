@@ -464,15 +464,17 @@ def _impl(
 ):
     behavior = behavior_of(array, *more_arrays, behavior=behavior)
     backend = backend_of(array, *more_arrays, default=cpu)
-    layout = ak.operations.ak_to_layout._impl(
-        array, allow_record=False, allow_other=False, regulararray=True
-    ).to_backend(backend)
-    more_layouts = [
-        ak.operations.ak_to_layout._impl(
-            x, allow_record=False, allow_other=False, regulararray=True
-        ).to_backend(backend)
-        for x in more_arrays
-    ]
+    arrays = [array, *more_arrays]
+
+    layouts = []
+    layouts_is_scalar = []
+    for obj in arrays:
+        layout, layout_is_scalar = ak.operations.ak_to_layout._to_layout_detailed(
+            obj, allow_record=False, allow_other=False, regulararray=True
+        )
+        layouts.append(layout.to_backend(backend))
+        layouts_is_scalar.append(layout_is_scalar)
+    result_is_scalar = all(layouts_is_scalar)
 
     options = {
         "allow_records": allow_records,
@@ -487,7 +489,7 @@ def _impl(
         "broadcast_parameters_rule": broadcast_parameters_rule,
     }
 
-    if len(more_layouts) == 0:
+    if len(more_arrays) == 0:
 
         def action(layout, **kwargs):
             out = transformation(layout, **kwargs)
@@ -544,11 +546,9 @@ def _impl(
                     f"transformation must return a Content, tuple of Contents, or None, not {type(out)}\n\n{out!r}"
                 )
 
-        inputs = [layout, *more_layouts]
-        isscalar = []
         out = ak._broadcasting.apply_step(
             backend,
-            ak._broadcasting.broadcast_pack(inputs, isscalar),
+            ak._broadcasting.broadcast_pack(layouts),
             action,
             0,
             copy.copy(depth_context),
@@ -557,7 +557,9 @@ def _impl(
             options,
         )
         assert isinstance(out, tuple)
-        out = [ak._broadcasting.broadcast_unpack(x, isscalar, backend) for x in out]
+        out = [
+            ak._broadcasting.broadcast_unpack(x, result_is_scalar, backend) for x in out
+        ]
 
         if return_value != "none":
             if len(out) == 1:
