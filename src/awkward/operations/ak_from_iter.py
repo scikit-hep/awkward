@@ -1,4 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+__all__ = ("from_iter",)
+
+from collections.abc import Iterable
 
 from awkward_cpp.lib import _ext
 
@@ -71,6 +74,11 @@ def from_iter(
 
 
 def _impl(iterable, highlevel, behavior, allow_record, initial, resize):
+    if not isinstance(iterable, Iterable):
+        raise TypeError(
+            f"cannot produce an array from a non-iterable object ({type(iterable)!r})"
+        )
+
     if isinstance(iterable, dict):
         if allow_record:
             return _impl(
@@ -82,12 +90,11 @@ def _impl(iterable, highlevel, behavior, allow_record, initial, resize):
                 resize,
             )[0]
         else:
-            raise ak._errors.wrap_error(
-                ValueError(
-                    "cannot produce an array from a single dict (that would be a record)"
-                )
+            raise ValueError(
+                "cannot produce an array from a single dict (that would be a record)"
             )
 
+    # Ensure that tuples are treated as iterables, not records
     if isinstance(iterable, tuple):
         iterable = list(iterable)
 

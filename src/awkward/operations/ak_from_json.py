@@ -1,5 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
+__all__ = ("from_json",)
 import json
 import pathlib
 from collections.abc import Iterable, Sized
@@ -8,8 +8,10 @@ from urllib.parse import urlparse
 from awkward_cpp.lib import _ext
 
 import awkward as ak
+from awkward._layout import wrap_layout
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._regularize import is_integer
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
@@ -447,18 +449,14 @@ def _record_to_complex(layout, complex_record_fields):
                                 + node.backend.nplike.asarray(imag) * 1j
                             )
                     else:
-                        raise ak._errors.wrap_error(
-                            ValueError(
-                                f"expected record with fields {complex_record_fields[0]!r} and {complex_record_fields[1]!r} to have integer or floating point types, not {str(real.form.type)!r} and {str(imag.form.type)!r}"
-                            )
+                        raise ValueError(
+                            f"expected record with fields {complex_record_fields[0]!r} and {complex_record_fields[1]!r} to have integer or floating point types, not {str(real.form.type)!r} and {str(imag.form.type)!r}"
                         )
 
         return ak._do.recursively_apply(layout, action)
 
     else:
-        raise ak._errors.wrap_error(
-            TypeError("complex_record_fields must be None or a pair of strings")
-        )
+        raise TypeError("complex_record_fields must be None or a pair of strings")
 
 
 def _no_schema(
@@ -490,7 +488,7 @@ def _no_schema(
                 neginf_string,
             )
         except Exception as err:
-            raise ak._errors.wrap_error(ValueError(str(err))) from None
+            raise ValueError(str(err)) from None
 
     formstr, length, buffers = builder.to_buffers()
     form = ak.forms.from_json(formstr)
@@ -504,7 +502,7 @@ def _no_schema(
         layout = layout[0]
 
     if highlevel and isinstance(layout, (ak.contents.Content, ak.record.Record)):
-        return ak._util.wrap(layout, behavior, highlevel)
+        return wrap_layout(layout, behavior, highlevel)
     else:
         return layout
 
@@ -527,18 +525,14 @@ def _yes_schema(
         schema = json.loads(schema)
 
     if not isinstance(schema, dict):
-        raise ak._errors.wrap_error(
-            TypeError(f"unrecognized JSONSchema: expected dict, got {schema!r}")
-        )
+        raise TypeError(f"unrecognized JSONSchema: expected dict, got {schema!r}")
 
     container = {}
     instructions = []
 
     if schema.get("type") == "array":
         if "items" not in schema:
-            raise ak._errors.wrap_error(
-                TypeError("JSONSchema type is not concrete: array without items")
-            )
+            raise TypeError("JSONSchema type is not concrete: array without items")
 
         instructions.append(["TopLevelArray"])
         form = build_assembly(schema["items"], container, instructions)
@@ -549,10 +543,8 @@ def _yes_schema(
         is_record = True
 
     else:
-        raise ak._errors.wrap_error(
-            TypeError(
-                "only 'array' and 'object' types supported at the JSONSchema root"
-            )
+        raise TypeError(
+            "only 'array' and 'object' types supported at the JSONSchema root"
         )
 
     read_one = not line_delimited
@@ -572,7 +564,7 @@ def _yes_schema(
                 resize,
             )
         except Exception as err:
-            raise ak._errors.wrap_error(ValueError(str(err))) from None
+            raise ValueError(str(err)) from None
 
     layout = ak.operations.from_buffers(
         form, length, container, byteorder=ak._util.native_byteorder, highlevel=False
@@ -583,21 +575,17 @@ def _yes_schema(
         layout = layout[0]
 
     if highlevel and isinstance(layout, (ak.contents.Content, ak.record.Record)):
-        return ak._util.wrap(layout, behavior, highlevel)
+        return wrap_layout(layout, behavior, highlevel)
     else:
         return layout
 
 
 def build_assembly(schema, container, instructions):
     if not isinstance(schema, dict):
-        raise ak._errors.wrap_error(
-            TypeError(f"unrecognized JSONSchema: expected dict, got {schema!r}")
-        )
+        raise TypeError(f"unrecognized JSONSchema: expected dict, got {schema!r}")
 
     if "type" not in schema is None:
-        raise ak._errors.wrap_error(
-            TypeError(f"unrecognized JSONSchema: no 'type' in {schema!r}")
-        )
+        raise TypeError(f"unrecognized JSONSchema: no 'type' in {schema!r}")
 
     tpe = schema["type"]
 
@@ -724,12 +712,10 @@ def build_assembly(schema, container, instructions):
         # https://json-schema.org/understanding-json-schema/reference/array.html
 
         if "items" not in schema:
-            raise ak._errors.wrap_error(
-                TypeError("JSONSchema type is not concrete: array without 'items'")
-            )
+            raise TypeError("JSONSchema type is not concrete: array without 'items'")
 
         if schema.get("minItems") == schema.get("maxItems") != None:  # noqa: E711
-            assert ak._util.is_integer(schema.get("minItems"))
+            assert is_integer(schema.get("minItems"))
 
             if is_optional:
                 mask = f"node{len(container)}"
@@ -772,10 +758,8 @@ def build_assembly(schema, container, instructions):
         # https://json-schema.org/understanding-json-schema/reference/object.html
 
         if "properties" not in schema:
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "JSONSchema type is not concrete: object without 'properties'"
-                )
+            raise TypeError(
+                "JSONSchema type is not concrete: object without 'properties'"
             )
 
         names = []
@@ -808,9 +792,7 @@ def build_assembly(schema, container, instructions):
             return out
 
     elif isinstance(tpe, list):
-        raise ak._errors.wrap_error(
-            NotImplementedError("arbitrary unions of types are not yet supported")
-        )
+        raise NotImplementedError("arbitrary unions of types are not yet supported")
 
     else:
-        raise ak._errors.wrap_error(TypeError(f"unrecognized JSONSchema: {tpe!r}"))
+        raise TypeError(f"unrecognized JSONSchema: {tpe!r}")

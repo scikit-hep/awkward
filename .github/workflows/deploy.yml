@@ -93,16 +93,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-      with:
-        submodules: true
-
-    - name: Create archive
-      run: tar -czvf header-only.tar.gz header-only
-
     - uses: actions/upload-artifact@v3
       with:
-        name: headers
-        path: header-only.tar.gz
+        name: header-only
+        path: header-only
 
   upload:
     needs: [build, check-requirements, check-cpp-on-pypi]
@@ -114,6 +108,24 @@ jobs:
         name: distributions
         path: dist
 
-    - uses: pypa/gh-action-pypi-publish@v1.6.4
+    - uses: pypa/gh-action-pypi-publish@v1.8.5
       with:
         password: ${{ secrets.PYPI_PASSWORD }}
+
+  publish-headers:
+    name: "Publish header-only libraries alongside release"
+    runs-on: ubuntu-latest
+    needs: [bundle-headers]
+    if: github.event_name == 'release' && github.event.action == 'published'
+    steps:
+    - uses: actions/download-artifact@v3
+      with:
+        name: header-only
+        path: header-only
+    - name: Create archive
+      run: |
+        # Don't include `header-only` parent directory
+        env -C header-only/ zip -r header-only.zip .
+    - uses: softprops/action-gh-release@v1
+      with:
+        files: header-only/header-only.zip

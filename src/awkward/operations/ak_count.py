@@ -1,7 +1,10 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
+__all__ = ("count",)
 import awkward as ak
+from awkward._behavior import behavior_of
+from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._regularize import regularize_axis
 from awkward._util import unset
 
 np = NumpyMetadata.instance()
@@ -110,15 +113,16 @@ def count(
                 "and flatten the array."
             )
             if flatten_records:
-                raise ak._errors.wrap_error(ValueError(message))
+                raise ValueError(message)
             else:
                 ak._errors.deprecate(message, "2.2.0")
         return _impl(array, axis, keepdims, mask_identity, highlevel, behavior)
 
 
 def _impl(array, axis, keepdims, mask_identity, highlevel, behavior):
+    axis = regularize_axis(axis)
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
-    behavior = ak._util.behavior_of(array, behavior=behavior)
+    behavior = behavior_of(array, behavior=behavior)
     reducer = ak._reducers.Count()
 
     out = ak._do.reduce(
@@ -130,6 +134,6 @@ def _impl(array, axis, keepdims, mask_identity, highlevel, behavior):
         behavior=behavior,
     )
     if isinstance(out, (ak.contents.Content, ak.record.Record)):
-        return ak._util.wrap(out, behavior, highlevel)
+        return wrap_layout(out, behavior, highlevel)
     else:
         return out

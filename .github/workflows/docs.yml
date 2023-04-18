@@ -191,7 +191,7 @@ jobs:
         path: dist
 
     - name: Install awkward and awkward-cpp wheels
-      run: python -m pip install dist/awkward*.whl
+      run: python -m pip install dist/awkward*.whl --force-reinstall --no-deps
 
     - name: Generate build files
       run: pipx run nox -s prepare -- --docs --headers
@@ -215,7 +215,7 @@ jobs:
         echo "DOCS_VERSION=main" >> $GITHUB_ENV
 
     - name: Generate Python documentation
-      run: sphinx-build -M html . _build/
+      run: sphinx-build -M html . _build/ -T
       working-directory: docs
 
     - name: Upload docs artefact
@@ -254,7 +254,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
+      uses: aws-actions/configure-aws-credentials@v2
       with:
         aws-region: eu-west-2
         role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE }}
@@ -286,7 +286,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-region: eu-west-2
           role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE }}
@@ -314,7 +314,7 @@ jobs:
         id: sync-stable
         run: |
           # Take only leading version
-          version=$(echo "${GITHUB_REF_NAME}" | sed -n -E "s/([0-9]+\.[0-9]+)\.[0-9]+/\1/p")
+          version=$(echo "${GITHUB_REF_NAME}" | sed -n -E "s/v?([0-9]+\.[0-9]+)\.[0-9]+/\1/p")
           aws s3 cp docs/switcher.json "s3://${S3_BUCKET}/doc/"
           aws s3 sync built-docs/ "s3://${S3_BUCKET}/doc/$version/"
           aws s3 sync built-docs/ "s3://${S3_BUCKET}/doc/stable/"

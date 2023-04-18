@@ -4,16 +4,24 @@ from __future__ import annotations
 import copy
 
 import awkward as ak
+from awkward._backends.backend import Backend
+from awkward._layout import maybe_posaxis
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import IndexType, NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._nplikes.typetracer import MaybeNone, TypeTracer
+from awkward._parameters import (
+    parameters_intersect,
+    parameters_union,
+    type_parameters_equal,
+)
+from awkward._regularize import is_integer_like
+from awkward._slicing import NO_HEAD
+from awkward._typing import TYPE_CHECKING, Final, Self, SupportsIndex, final
 from awkward._util import unset
 from awkward.contents.content import Content
-from awkward.forms.form import _type_parameters_equal
 from awkward.forms.indexedoptionform import IndexedOptionForm
 from awkward.index import Index
-from awkward.typing import TYPE_CHECKING, Final, Self, SupportsIndex, final
 
 if TYPE_CHECKING:
     from awkward._slicing import SliceItem
@@ -83,27 +91,21 @@ class IndexedOptionArray(Content):
                 np.dtype(np.int64),
             )
         ):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} 'index' must be an Index with dtype in (int32, uint32, int64), "
-                    "not {}".format(type(self).__name__, repr(index))
-                )
+            raise TypeError(
+                "{} 'index' must be an Index with dtype in (int32, uint32, int64), "
+                "not {}".format(type(self).__name__, repr(index))
             )
         if not isinstance(content, Content):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} 'content' must be a Content subtype, not {}".format(
-                        type(self).__name__, repr(content)
-                    )
+            raise TypeError(
+                "{} 'content' must be a Content subtype, not {}".format(
+                    type(self).__name__, repr(content)
                 )
             )
         is_cat = parameters is not None and parameters.get("__array__") == "categorical"
         if (content.is_union and not is_cat) or content.is_indexed or content.is_option:
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{0} cannot contain a union-type (unless categorical), option-type, or indexed 'content' ({1}); try {0}.simplified instead".format(
-                        type(self).__name__, type(content).__name__
-                    )
+            raise TypeError(
+                "{0} cannot contain a union-type (unless categorical), option-type, or indexed 'content' ({1}); try {0}.simplified instead".format(
+                    type(self).__name__, type(content).__name__
                 )
             )
 
@@ -172,9 +174,7 @@ class IndexedOptionArray(Content):
             return IndexedOptionArray(
                 result,
                 content.content,
-                parameters=ak.forms.form._parameters_union(
-                    content._parameters, parameters
-                ),
+                parameters=parameters_union(content._parameters, parameters),
             )
 
         else:
@@ -452,13 +452,13 @@ class IndexedOptionArray(Content):
         tail: tuple[SliceItem, ...],
         advanced: Index | None,
     ) -> Content:
-        if head == ():
+        if head is NO_HEAD:
             return self
 
-        elif isinstance(
-            head, (int, slice, ak.index.Index64, ak.contents.ListOffsetArray)
+        elif is_integer_like(head) or isinstance(
+            head, (slice, ak.index.Index64, ak.contents.ListOffsetArray)
         ):
-            nexthead, nexttail = ak._slicing.headtail(tail)
+            nexthead, nexttail = ak._slicing.head_tail(tail)
 
             numnull, nextcarry, outindex = self._nextcarry_outindex()
 
@@ -484,16 +484,14 @@ class IndexedOptionArray(Content):
             return self._getitem_next_missing(head, tail, advanced)
 
         else:
-            raise ak._errors.wrap_error(AssertionError(repr(head)))
+            raise AssertionError(repr(head))
 
     def project(self, mask=None):
         if mask is not None:
             if self._backend.nplike.known_data and self._index.length != mask.length:
-                raise ak._errors.wrap_error(
-                    ValueError(
-                        "mask length ({}) is not equal to {} length ({})".format(
-                            mask.length(), type(self).__name__, self._index.length
-                        )
+                raise ValueError(
+                    "mask length ({}) is not equal to {} length ({})".format(
+                        mask.length(), type(self).__name__, self._index.length
                     )
                 )
             nextindex = ak.index.Index64.empty(
@@ -564,9 +562,9 @@ class IndexedOptionArray(Content):
             return self._content._carry(nextcarry, False)
 
     def _offsets_and_flattened(self, axis, depth):
-        posaxis = ak._util.maybe_posaxis(self, axis, depth)
+        posaxis = maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 == depth:
-            raise ak._errors.wrap_error(np.AxisError("axis=0 not allowed for flatten"))
+            raise np.AxisError("axis=0 not allowed for flatten")
         else:
             numnull, nextcarry, outindex = self._nextcarry_outindex()
             next = self._content._carry(nextcarry, False)
@@ -617,16 +615,14 @@ class IndexedOptionArray(Content):
         elif other.is_option or other.is_indexed:
             return self._content._mergeable_next(
                 other.content, mergebool
-            ) and _type_parameters_equal(self._parameters, other._parameters)
+            ) and type_parameters_equal(self._parameters, other._parameters)
         else:
             return self._content._mergeable_next(other, mergebool)
 
     def _merging_strategy(self, others):
         if len(others) == 0:
-            raise ak._errors.wrap_error(
-                ValueError(
-                    "to merge this array with 'others', at least one other must be provided"
-                )
+            raise ValueError(
+                "to merge this array with 'others', at least one other must be provided"
             )
 
         head = [self]
@@ -703,9 +699,7 @@ class IndexedOptionArray(Content):
         )
         # We can directly merge with other options, but we must merge parameters
         if other.is_option:
-            parameters = ak.forms.form._parameters_union(
-                self._parameters, other._parameters
-            )
+            parameters = parameters_union(self._parameters, other._parameters)
         # Otherwise, this option parameters win out
         else:
             parameters = self._parameters
@@ -748,9 +742,7 @@ class IndexedOptionArray(Content):
                 array, (ak.contents.IndexedOptionArray, ak.contents.IndexedArray)
             ):
                 # If we're merging an option, then merge parameters before pulling out `content`
-                parameters = ak.forms.form._parameters_intersect(
-                    parameters, array._parameters
-                )
+                parameters = parameters_intersect(parameters, array._parameters)
                 contents.append(array.content)
                 array_index = array.index
                 assert (
@@ -809,8 +801,8 @@ class IndexedOptionArray(Content):
 
     def _fill_none(self, value: Content) -> Content:
         if value.backend.nplike.known_data and value.length != 1:
-            raise ak._errors.wrap_error(
-                ValueError(f"fill_none value length ({value.length}) is not equal to 1")
+            raise ValueError(
+                f"fill_none value length ({value.length}) is not equal to 1"
             )
 
         contents = [self._content, value]
@@ -836,7 +828,7 @@ class IndexedOptionArray(Content):
         )
 
     def _local_index(self, axis, depth):
-        posaxis = ak._util.maybe_posaxis(self, axis, depth)
+        posaxis = maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 == depth:
             return self._local_index_axis0()
         else:
@@ -1388,23 +1380,17 @@ class IndexedOptionArray(Content):
             elif out.is_regular:
                 out_content = out.content
             else:
-                raise ak._errors.wrap_error(
-                    AssertionError(
-                        "reduce_next with unbranching depth > negaxis is only "
-                        "expected to return RegularArray or ListOffsetArray or "
-                        "IndexedOptionArray; "
-                        "instead, it returned {}".format(type(out).__name__)
-                    )
+                raise AssertionError(
+                    "reduce_next with unbranching depth > negaxis is only "
+                    "expected to return RegularArray or ListOffsetArray or "
+                    "IndexedOptionArray; "
+                    "instead, it returned {}".format(type(out).__name__)
                 )
 
             if starts.nplike.known_data and starts.length > 0 and starts[0] != 0:
-                raise ak._errors.wrap_error(
-                    AssertionError(
-                        "reduce_next with unbranching depth > negaxis expects a "
-                        "ListOffsetArray whose offsets start at zero ({})".format(
-                            starts[0]
-                        )
-                    )
+                raise AssertionError(
+                    "reduce_next with unbranching depth > negaxis expects a "
+                    "ListOffsetArray whose offsets start at zero ({})".format(starts[0])
                 )
             # In this branch, we're above the axis at which the reduction takes place.
             # `next._reduce_next` is therefore expected to return a list/regular layout
@@ -1451,7 +1437,7 @@ class IndexedOptionArray(Content):
             )
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
-        posaxis = ak._util.maybe_posaxis(self, axis, depth)
+        posaxis = maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         else:
@@ -1486,7 +1472,7 @@ class IndexedOptionArray(Content):
         return self.index._nbytes_part() + self.content._nbytes_part()
 
     def _pad_none(self, target, axis, depth, clip):
-        posaxis = ak._util.maybe_posaxis(self, axis, depth)
+        posaxis = maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 == depth:
             return self._pad_none_axis0(target, clip)
         elif posaxis is not None and posaxis + 1 == depth + 1:
@@ -1577,18 +1563,14 @@ class IndexedOptionArray(Content):
                 elif np.issubdtype(content.dtype, np.bytes_):
                     data[mask0] = b""
                 else:
-                    raise ak._errors.wrap_error(
-                        AssertionError(f"unrecognized dtype: {content.dtype}")
-                    )
+                    raise AssertionError(f"unrecognized dtype: {content.dtype}")
 
                 return nplike.ma.MaskedArray(data, mask)
             else:
-                raise ak._errors.wrap_error(
-                    ValueError(
-                        "Content.to_nplike cannot convert 'None' values to "
-                        "np.ma.MaskedArray unless the "
-                        "'allow_missing' parameter is set to True"
-                    )
+                raise ValueError(
+                    "Content.to_nplike cannot convert 'None' values to "
+                    "np.ma.MaskedArray unless the "
+                    "'allow_missing' parameter is set to True"
                 )
         else:
             if allow_missing:
@@ -1677,7 +1659,7 @@ class IndexedOptionArray(Content):
         elif result is None:
             return continuation()
         else:
-            raise ak._errors.wrap_error(AssertionError(result))
+            raise AssertionError(result)
 
     def to_packed(self) -> Self:
         original_index = self._index.raw(self._backend.nplike)
@@ -1707,9 +1689,7 @@ class IndexedOptionArray(Content):
 
     def _to_list(self, behavior, json_conversions):
         if not self._backend.nplike.known_data:
-            raise ak._errors.wrap_error(
-                TypeError("cannot convert typetracer arrays to Python lists")
-            )
+            raise TypeError("cannot convert typetracer arrays to Python lists")
 
         out = self._to_list_custom(behavior, json_conversions)
         if out is not None:
@@ -1727,7 +1707,7 @@ class IndexedOptionArray(Content):
 
         return out
 
-    def _to_backend(self, backend: ak._backends.Backend) -> Self:
+    def _to_backend(self, backend: Backend) -> Self:
         content = self._content.to_backend(backend)
         index = self._index.to_nplike(backend.index_nplike)
         return IndexedOptionArray(index, content, parameters=self._parameters)

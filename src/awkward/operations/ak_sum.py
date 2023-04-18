@@ -1,8 +1,11 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
+__all__ = ("sum",)
 import awkward as ak
+from awkward._behavior import behavior_of
 from awkward._connect.numpy import unsupported
+from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._regularize import regularize_axis
 from awkward._util import unset
 
 np = NumpyMetadata.instance()
@@ -212,7 +215,7 @@ def sum(
                 "and flatten the array."
             )
             if flatten_records:
-                raise ak._errors.wrap_error(ValueError(message))
+                raise ValueError(message)
             else:
                 ak._errors.deprecate(message, "2.2.0")
         return _impl(array, axis, keepdims, mask_identity, highlevel, behavior)
@@ -276,7 +279,7 @@ def nansum(
                 "and flatten the array."
             )
             if flatten_records:
-                raise ak._errors.wrap_error(ValueError(message))
+                raise ValueError(message)
             else:
                 ak._errors.deprecate(message, "2.2.0")
         array = ak.operations.ak_nan_to_none._impl(array, False, None)
@@ -285,8 +288,9 @@ def nansum(
 
 
 def _impl(array, axis, keepdims, mask_identity, highlevel, behavior):
+    axis = regularize_axis(axis)
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
-    behavior = ak._util.behavior_of(array, behavior=behavior)
+    behavior = behavior_of(array, behavior=behavior)
     reducer = ak._reducers.Sum()
 
     out = ak._do.reduce(
@@ -298,7 +302,7 @@ def _impl(array, axis, keepdims, mask_identity, highlevel, behavior):
         behavior=behavior,
     )
     if isinstance(out, (ak.contents.Content, ak.record.Record)):
-        return ak._util.wrap(out, behavior, highlevel=highlevel)
+        return wrap_layout(out, behavior, highlevel=highlevel)
     else:
         return out
 

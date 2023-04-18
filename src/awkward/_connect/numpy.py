@@ -1,10 +1,25 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+import collections
 import functools
 import inspect
+from collections.abc import Iterable
+from itertools import chain
 
 import numpy
 
 import awkward as ak
+from awkward._backends.backend import Backend
+from awkward._backends.dispatch import backend_of, common_backend
+from awkward._behavior import (
+    behavior_of,
+    find_custom_cast,
+    find_ufunc,
+    find_ufunc_generic,
+)
+from awkward._layout import wrap_layout
+from awkward._nplikes import to_nplike
+from awkward._regularize import is_non_string_like_iterable
+from awkward._typing import Iterator
 from awkward._util import numpy_at_least
 from awkward.contents.numpyarray import NumpyArray
 
@@ -35,35 +50,65 @@ def convert_to_array(layout, args, kwargs):
 implemented = {}
 
 
-def _to_rectilinear(arg):
-    backend = ak._backends.backend_of(arg, default=None)
-    # We have some array-like object that our backend mechanism understands
-    if backend is not None:
-        return backend.nplike.to_rectilinear(arg)
-    elif isinstance(arg, tuple):
-        return tuple(_to_rectilinear(x) for x in arg)
-    elif isinstance(arg, list):
-        return [_to_rectilinear(x) for x in arg]
-    elif ak._util.is_non_string_like_iterable(arg):
-        raise ak._errors.wrap_error(
-            TypeError(
-                f"encountered an unsupported iterable value {arg!r} whilst converting arguments to NumPy-friendly "
-                f"types. If this argument should be supported, please file a bug report."
+def _find_backends(args: Iterable) -> Iterator[Backend]:
+    """
+    Args:
+        args: iterable of objects to visit
+
+    Yields the encountered backends of layout / array-like arguments encountered
+    in the argument list.
+    """
+    stack = collections.deque(args)
+    while stack:
+        arg = stack.popleft()
+        # If the argument declares a backend, easy!
+        backend = backend_of(arg, default=None)
+        if backend is not None:
+            yield backend
+        # Otherwise, traverse into supported sequence types
+        elif isinstance(arg, (tuple, list)):
+            stack.extend(arg)
+
+
+def _to_rectilinear(arg, backend: Backend):
+    # Is this object something we already associate with a backend?
+    arg_backend = backend_of(arg, default=None)
+    if arg_backend is not None:
+        arg_nplike = arg_backend.nplike
+        # Is this argument already in a backend-supported form?
+        if arg_nplike.is_own_array(arg):
+            # Convert to the appropriate nplike
+            return to_nplike(
+                arg_nplike.asarray(arg), backend.nplike, from_nplike=arg_nplike
             )
+        # Otherwise, cast to layout and convert
+        else:
+            layout = ak.to_layout(arg, allow_record=False, allow_other=False)
+            return layout.to_backend(backend).to_backend_array(allow_missing=True)
+    elif isinstance(arg, tuple):
+        return tuple(_to_rectilinear(x, backend) for x in arg)
+    elif isinstance(arg, list):
+        return [_to_rectilinear(x, backend) for x in arg]
+    elif is_non_string_like_iterable(arg):
+        raise TypeError(
+            f"encountered an unsupported iterable value {arg!r} whilst converting arguments to NumPy-friendly "
+            f"types. If this argument should be supported, please file a bug report."
         )
     else:
         return arg
 
 
 def _array_function_no_impl(func, types, args, kwargs, behavior):
-    rectilinear_args = tuple(_to_rectilinear(x) for x in args)
-    rectilinear_kwargs = {k: _to_rectilinear(v) for k, v in kwargs.items()}
+    backend = common_backend(_find_backends(chain(args, kwargs.values())))
+
+    rectilinear_args = tuple(_to_rectilinear(x, backend) for x in args)
+    rectilinear_kwargs = {k: _to_rectilinear(v, backend) for k, v in kwargs.items()}
     result = func(*rectilinear_args, **rectilinear_kwargs)
     # We want the result to be a layout (this will fail for functions returning non-array convertibles)
     out = ak.operations.ak_to_layout._impl(
         result, allow_record=True, allow_other=True, regulararray=True
     )
-    return ak._util.wrap(out, behavior=behavior, allow_other=True)
+    return wrap_layout(out, behavior=behavior, allow_other=True)
 
 
 def array_function(func, types, args, kwargs, behavior):
@@ -88,10 +133,8 @@ def implements(numpy_function):
             provided_invalid_names = parameters.arguments.keys() & unsupported_names
             if provided_invalid_names:
                 names = ", ".join(provided_invalid_names)
-                raise ak._errors.wrap_error(
-                    TypeError(
-                        f"Awkward NEP-18 overload was provided with unsupported argument(s): {names}"
-                    )
+                raise TypeError(
+                    f"Awkward NEP-18 overload was provided with unsupported argument(s): {names}"
                 )
             return function(*args, **kwargs)
 
@@ -101,9 +144,9 @@ def implements(numpy_function):
     return decorator
 
 
-def _array_ufunc_custom_cast(inputs, behavior):
+def _array_ufunc_custom_cast(inputs, behavior, backend):
     args = [
-        ak._util.wrap(x, behavior)
+        wrap_layout(x, behavior)
         if isinstance(x, (ak.contents.Content, ak.record.Record))
         else x
         for x in inputs
@@ -111,18 +154,20 @@ def _array_ufunc_custom_cast(inputs, behavior):
 
     nextinputs = []
     for x in args:
-        cast_fcn = ak._util.custom_cast(x, behavior)
+        cast_fcn = find_custom_cast(x, behavior)
         if cast_fcn is not None:
             x = cast_fcn(x)
-        nextinputs.append(
-            ak.operations.to_layout(x, allow_record=True, allow_other=True)
-        )
+        maybe_layout = ak.operations.to_layout(x, allow_record=True, allow_other=True)
+        if isinstance(maybe_layout, (ak.contents.Content, ak.record.Record)):
+            maybe_layout = maybe_layout.to_backend(backend)
+
+        nextinputs.append(maybe_layout)
     return nextinputs
 
 
 def _array_ufunc_adjust(custom, inputs, kwargs, behavior):
     args = [
-        ak._util.wrap(x, behavior)
+        wrap_layout(x, behavior)
         if isinstance(x, (ak.contents.Content, ak.record.Record))
         else x
         for x in inputs
@@ -138,13 +183,7 @@ def _array_ufunc_adjust(custom, inputs, kwargs, behavior):
 
 
 def _array_ufunc_adjust_apply(apply_ufunc, ufunc, method, inputs, kwargs, behavior):
-    nextinputs = [
-        ak._util.wrap(x, behavior)
-        if isinstance(x, (ak.contents.Content, ak.record.Record))
-        else x
-        for x in inputs
-    ]
-
+    nextinputs = [wrap_layout(x, behavior, allow_other=True) for x in inputs]
     out = apply_ufunc(ufunc, method, nextinputs, kwargs)
 
     if out is NotImplemented:
@@ -181,29 +220,27 @@ def array_ufunc(ufunc, method, inputs, kwargs):
     if method != "__call__" or len(inputs) == 0 or "out" in kwargs:
         return NotImplemented
 
-    behavior = ak._util.behavior_of(*inputs)
+    behavior = behavior_of(*inputs)
+    backend = backend_of(*inputs)
 
-    inputs = _array_ufunc_custom_cast(inputs, behavior)
+    inputs = _array_ufunc_custom_cast(inputs, behavior, backend)
 
     def action(inputs, **ignore):
         signature = _array_ufunc_signature(ufunc, inputs)
-
-        custom = ak._util.overload(behavior, signature)
+        custom = find_ufunc(behavior, signature)
+        # Do we have a custom ufunc (an override of the given ufunc)?
         if custom is not None:
             return _array_ufunc_adjust(custom, inputs, kwargs, behavior)
 
         if ufunc is numpy.matmul:
-            raise ak._errors.wrap_error(
-                NotImplementedError(
-                    "matrix multiplication (`@` or `np.matmul`) is not yet implemented for Awkward Arrays"
-                )
+            raise NotImplementedError(
+                "matrix multiplication (`@` or `np.matmul`) is not yet implemented for Awkward Arrays"
             )
 
         if all(
             isinstance(x, NumpyArray) or not isinstance(x, ak.contents.Content)
             for x in inputs
         ):
-            backend = ak._backends.backend_of(*inputs)
             nplike = backend.nplike
 
             # Broadcast parameters against one another
@@ -223,9 +260,10 @@ def array_ufunc(ufunc, method, inputs, kwargs):
 
             return (NumpyArray(result, backend=backend, parameters=parameters),)
 
+        # Do we have a custom generic ufunc override (a function that accepts _all_ ufuncs)?
         for x in inputs:
             if isinstance(x, ak.contents.Content):
-                apply_ufunc = ak._util.custom_ufunc(ufunc, x, behavior)
+                apply_ufunc = find_ufunc_generic(ufunc, x, behavior)
                 if apply_ufunc is not None:
                     out = _array_ufunc_adjust_apply(
                         apply_ufunc, ufunc, method, inputs, kwargs, behavior
@@ -250,11 +288,9 @@ def array_ufunc(ufunc, method, inputs, kwargs):
                         error_message.append(type(x).__name__)
                 else:
                     error_message.append(type(x).__name__)
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "no {}.{} overloads for custom types: {}".format(
-                        type(ufunc).__module__, ufunc.__name__, ", ".join(error_message)
-                    )
+            raise TypeError(
+                "no {}.{} overloads for custom types: {}".format(
+                    type(ufunc).__module__, ufunc.__name__, ", ".join(error_message)
                 )
             )
 
@@ -294,8 +330,8 @@ def array_ufunc(ufunc, method, inputs, kwargs):
         assert isinstance(out, tuple) and len(out) == 1
         out = out[0]
 
-    return ak._util.wrap(out, behavior)
+    return wrap_layout(out, behavior)
 
 
 def action_for_matmul(inputs):
-    raise ak._errors.wrap_error(NotImplementedError)
+    raise NotImplementedError

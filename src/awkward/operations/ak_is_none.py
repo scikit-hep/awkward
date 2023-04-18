@@ -1,7 +1,10 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
+__all__ = ("is_none",)
 import awkward as ak
+from awkward._behavior import behavior_of
+from awkward._layout import maybe_posaxis, wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._regularize import is_integer, regularize_axis
 
 np = NumpyMetadata.instance()
 
@@ -30,16 +33,15 @@ def is_none(array, axis=0, *, highlevel=True, behavior=None):
 
 
 def _impl(array, axis, highlevel, behavior):
+    axis = regularize_axis(axis)
     layout = ak.operations.to_layout(array)
-    behavior = ak._util.behavior_of(array, behavior=behavior)
+    behavior = behavior_of(array, behavior=behavior)
 
-    if not ak._util.is_integer(axis):
-        raise ak._errors.wrap_error(
-            TypeError(f"'axis' must be an integer, not {axis!r}")
-        )
+    if not is_integer(axis):
+        raise TypeError(f"'axis' must be an integer, not {axis!r}")
 
     def action(layout, depth, lateral_context, **kwargs):
-        posaxis = ak._util.maybe_posaxis(layout, axis, depth)
+        posaxis = maybe_posaxis(layout, axis, depth)
 
         if posaxis is not None and posaxis + 1 == depth:
             if layout.is_union or layout.is_record:
@@ -55,10 +57,8 @@ def _impl(array, axis, highlevel, behavior):
                 )
 
         elif layout.is_leaf:
-            raise ak._errors.wrap_error(
-                np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
-            )
+            raise np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
 
     out = ak._do.recursively_apply(layout, action, behavior, numpy_to_regular=True)
 
-    return ak._util.wrap(out, behavior, highlevel)
+    return wrap_layout(out, behavior, highlevel)

@@ -1,10 +1,12 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
 import awkward as ak
+from awkward._behavior import find_typestr
 from awkward._nplikes.shape import unknown_length
+from awkward._parameters import type_parameters_equal
+from awkward._regularize import is_integer
+from awkward._typing import final
 from awkward._util import unset
-from awkward.forms.form import Form, _type_parameters_equal
-from awkward.typing import final
+from awkward.forms.form import Form
 
 
 @final
@@ -14,19 +16,15 @@ class RegularForm(Form):
 
     def __init__(self, content, size, *, parameters=None, form_key=None):
         if not isinstance(content, Form):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} all 'contents' must be Form subclasses, not {}".format(
-                        type(self).__name__, repr(content)
-                    )
+            raise TypeError(
+                "{} all 'contents' must be Form subclasses, not {}".format(
+                    type(self).__name__, repr(content)
                 )
             )
-        if not (size is unknown_length or (ak._util.is_integer(size) and size >= 0)):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} 'size' must be a non-negative int or None, not {}".format(
-                        type(self).__name__, repr(size)
-                    )
+        if not (size is unknown_length or (is_integer(size) and size >= 0)):
+            raise TypeError(
+                "{} 'size' must be a non-negative int or None, not {}".format(
+                    type(self).__name__, repr(size)
                 )
             )
 
@@ -73,7 +71,7 @@ class RegularForm(Form):
             self._content._type(typestrs),
             self._size,
             parameters=self._parameters,
-            typestr=ak._util.gettypestr(self._parameters, typestrs),
+            typestr=find_typestr(self._parameters, typestrs),
         )
 
     def __eq__(self, other):
@@ -81,7 +79,7 @@ class RegularForm(Form):
             return (
                 self._form_key == other._form_key
                 and self._size == other._size
-                and _type_parameters_equal(self._parameters, other._parameters)
+                and type_parameters_equal(self._parameters, other._parameters)
                 and self._content == other._content
             )
         else:

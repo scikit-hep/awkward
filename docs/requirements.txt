@@ -9,9 +9,9 @@ sphinx-sitemap
 pydata-sphinx-theme
 myst-nb
 sphinx-external-toc
-jupyterlite-sphinx
+jupyterlite-sphinx==0.7.3
 ipyleaflet
-jupyterlite>=0.1.0b12,==0.1.0b16
+jupyterlite[piplite]==0.1.0b16
 
 numpy>=1.13.1
 numba>=0.50.0
@@ -22,6 +22,7 @@ fsspec
 s3fs
 h5py
 matplotlib
+awkward
 uproot
 uproot3
 jax>=0.2.7;python_version>="3.6" and sys_platform != "win32"

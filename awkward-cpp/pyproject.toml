@@ -7,9 +7,9 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "awkward_cpp"
-version = "9"
+version = "14"
 dependencies = [
-    "numpy>=1.14.5"
+    "numpy>=1.17.0"
 ]
 readme = "README.md"
 description = "CPU kernels and compiled extensions for Awkward Array"

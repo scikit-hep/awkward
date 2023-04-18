@@ -1,9 +1,10 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
 import awkward as ak
+from awkward._behavior import find_typestr
+from awkward._parameters import type_parameters_equal
+from awkward._typing import final
 from awkward._util import unset
-from awkward.forms.form import Form, _type_parameters_equal
-from awkward.typing import final
+from awkward.forms.form import Form
 
 
 @final
@@ -12,11 +13,9 @@ class ListOffsetForm(Form):
 
     def __init__(self, offsets, content, *, parameters=None, form_key=None):
         if not isinstance(offsets, str):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} 'offsets' must be of type str, not {}".format(
-                        type(self).__name__, repr(offsets)
-                    )
+            raise TypeError(
+                "{} 'offsets' must be of type str, not {}".format(
+                    type(self).__name__, repr(offsets)
                 )
             )
 
@@ -69,7 +68,7 @@ class ListOffsetForm(Form):
         return ak.types.ListType(
             self._content._type(typestrs),
             parameters=self._parameters,
-            typestr=ak._util.gettypestr(self._parameters, typestrs),
+            typestr=find_typestr(self._parameters, typestrs),
         )
 
     def __eq__(self, other):
@@ -77,7 +76,7 @@ class ListOffsetForm(Form):
             return (
                 self._form_key == other._form_key
                 and self._offsets == other._offsets
-                and _type_parameters_equal(self._parameters, other._parameters)
+                and type_parameters_equal(self._parameters, other._parameters)
                 and self._content == other._content
             )
         else:

@@ -54,6 +54,7 @@ else:
     )
 
 
-class SupportsBool(Protocol):
-    def __bool__(self) -> bool:
-        ...
+JSONSerializable: TypeAlias = (
+    "str | int | float | bool | None | list | tuple | JSONMapping"
+)
+JSONMapping: TypeAlias = "dict[str, JSONSerializable]"

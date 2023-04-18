@@ -1,9 +1,10 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
 import awkward as ak
+from awkward._behavior import find_typestr
+from awkward._parameters import type_parameters_equal
+from awkward._typing import final
 from awkward._util import unset
-from awkward.forms.form import Form, _type_parameters_equal
-from awkward.typing import final
+from awkward.forms.form import Form
 
 
 @final
@@ -21,35 +22,27 @@ class BitMaskedForm(Form):
         form_key=None,
     ):
         if not isinstance(mask, str):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} 'mask' must be of type str, not {}".format(
-                        type(self).__name__, repr(mask)
-                    )
+            raise TypeError(
+                "{} 'mask' must be of type str, not {}".format(
+                    type(self).__name__, repr(mask)
                 )
             )
         if not isinstance(content, Form):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} all 'contents' must be Form subclasses, not {}".format(
-                        type(self).__name__, repr(content)
-                    )
+            raise TypeError(
+                "{} all 'contents' must be Form subclasses, not {}".format(
+                    type(self).__name__, repr(content)
                 )
             )
         if not isinstance(valid_when, bool):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} 'valid_when' must be bool, not {}".format(
-                        type(self).__name__, repr(valid_when)
-                    )
+            raise TypeError(
+                "{} 'valid_when' must be bool, not {}".format(
+                    type(self).__name__, repr(valid_when)
                 )
             )
         if not isinstance(lsb_order, bool):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} 'lsb_order' must be bool, not {}".format(
-                        type(self).__name__, repr(lsb_order)
-                    )
+            raise TypeError(
+                "{} 'lsb_order' must be bool, not {}".format(
+                    type(self).__name__, repr(lsb_order)
                 )
             )
 
@@ -153,7 +146,7 @@ class BitMaskedForm(Form):
         return ak.types.OptionType(
             self._content._type(typestrs),
             parameters=self._parameters,
-            typestr=ak._util.gettypestr(self._parameters, typestrs),
+            typestr=find_typestr(self._parameters, typestrs),
         ).simplify_option_union()
 
     def __eq__(self, other):
@@ -163,7 +156,7 @@ class BitMaskedForm(Form):
                 and self._mask == other._mask
                 and self._valid_when == other._valid_when
                 and self._lsb_order == other._lsb_order
-                and _type_parameters_equal(self._parameters, other._parameters)
+                and type_parameters_equal(self._parameters, other._parameters)
                 and self._content == other._content
             )
         else:

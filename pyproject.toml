@@ -7,7 +7,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "awkward"
-version = "2.0.8"
+version = "2.1.3"
 description = "Manipulate JSON-like data with NumPy-like idioms."
 license = { text = "BSD-3-Clause" }
 requires-python = ">=3.7"
@@ -40,9 +40,9 @@ classifiers = [
     "Topic :: Utilities",
 ]
 dependencies = [
-    "awkward_cpp==9",
+    "awkward_cpp==14",
     "importlib_resources;python_version < \"3.9\"",
-    "numpy>=1.14.5",
+    "numpy>=1.17.0",
     "packaging",
     "typing_extensions>=4.1.0; python_version < \"3.11\""
 ]
@@ -290,20 +290,23 @@ extend-ignore = [
     "NPY002",  # Replace legacy `np.random` call with `np.random.Generator`
     "PLW2901", # Outer for loop variable  overwritten by inner assignment target
     "PLW0603", # Using the global statement to update is discouraged
+    "PLC1901", # x == "" can be simplified to not x (empty string is falsey)
 ]
 target-version = "py37"
-typing-modules = ["awkward.typing"]
+typing-modules = ["awkward._typing"]
 src = ["src"]
 unfixable = [
     "T20",  # Removes print statements
     "F841", # Removes unused variables
 ]
-external = ["AK101"]
+external = []
 mccabe.max-complexity = 100
 
 [tool.ruff.per-file-ignores]
 "dev/*" = ["T20", "TID251"]
 "src/awkward/_connect/*" = ["TID251"]
+"src/awkward/__init__.py" = ["E402", "F401", "F403", "I001"]
+"src/awkward/operations/__init__.py" = ["F403"]
 "src/awkward/_nplikes/*" = ["TID251"]
 "tests*/*" = ["T20", "TID251"]
 

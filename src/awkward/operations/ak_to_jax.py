@@ -1,6 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+__all__ = ("to_jax",)
 
 import awkward as ak
+from awkward._backends.jax import JaxBackend
 
 
 def to_jax(array):
@@ -30,7 +32,7 @@ def to_jax(array):
 def _impl(array):
     layout = ak.to_layout(array, allow_record=False)
 
-    backend = ak._backends.JaxBackend.instance()
+    backend = JaxBackend.instance()
     numpy_layout = layout.to_backend(backend)
 
     return numpy_layout.to_backend_array(allow_missing=False)

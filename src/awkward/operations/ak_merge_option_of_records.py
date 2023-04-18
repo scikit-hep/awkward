@@ -1,11 +1,14 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
-
+__all__ = ("merge_option_of_records",)
 import awkward as ak
+from awkward._backends.numpy import NumpyBackend
+from awkward._behavior import behavior_of
+from awkward._layout import maybe_posaxis, wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._regularize import regularize_axis
 
 np = NumpyMetadata.instance()
-cpu = ak._backends.NumpyBackend.instance()
+cpu = NumpyBackend.instance()
 
 
 def merge_option_of_records(array, axis=-1, *, highlevel=True, behavior=None):
@@ -38,7 +41,8 @@ def merge_option_of_records(array, axis=-1, *, highlevel=True, behavior=None):
 
 
 def _impl(array, axis, highlevel, behavior):
-    behavior = ak._util.behavior_of(array, behavior=behavior)
+    axis = regularize_axis(axis)
+    behavior = behavior_of(array, behavior=behavior)
     layout = ak.to_layout(array, allow_record=False)
 
     # First, normalise type-invsible "index-of-records" to "record-of-index"
@@ -62,11 +66,9 @@ def _impl(array, axis, highlevel, behavior):
     layout = ak._do.recursively_apply(layout, apply_displace_index)
 
     def apply(layout, depth, backend, **kwargs):
-        posaxis = ak._util.maybe_posaxis(layout, axis, depth)
+        posaxis = maybe_posaxis(layout, axis, depth)
         if depth < posaxis + 1 and layout.is_leaf:
-            raise ak._errors.wrap_error(
-                np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
-            )
+            raise np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
         elif depth == posaxis + 1 and layout.is_option and layout.content.is_record:
             layout = layout.to_IndexedOptionArray64()
 
@@ -85,4 +87,4 @@ def _impl(array, axis, highlevel, behavior):
             )
 
     out = ak._do.recursively_apply(layout, apply)
-    return ak._util.wrap(out, highlevel=highlevel, behavior=behavior)
+    return wrap_layout(out, highlevel=highlevel, behavior=behavior)

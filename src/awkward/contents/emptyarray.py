@@ -4,14 +4,20 @@ from __future__ import annotations
 import copy
 
 import awkward as ak
+from awkward._backends.backend import Backend
+from awkward._backends.numpy import NumpyBackend
+from awkward._backends.typetracer import TypeTracerBackend
 from awkward._errors import deprecate
+from awkward._layout import maybe_posaxis
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import IndexType, NumpyMetadata
+from awkward._regularize import is_integer_like
+from awkward._slicing import NO_HEAD
+from awkward._typing import TYPE_CHECKING, Final, Self, SupportsIndex, final
 from awkward._util import unset
 from awkward.contents.content import Content
 from awkward.forms.emptyform import EmptyForm
 from awkward.index import Index
-from awkward.typing import TYPE_CHECKING, Final, Self, SupportsIndex, final
 
 if TYPE_CHECKING:
     from awkward._slicing import SliceItem
@@ -65,7 +71,7 @@ class EmptyArray(Content):
                 f"{type(self).__name__} cannot contain parameters", version="2.2.0"
             )
         if backend is None:
-            backend = ak._backends.NumpyBackend.instance()
+            backend = NumpyBackend.instance()
         self._init(parameters, backend)
 
     form_cls: Final = EmptyForm
@@ -106,7 +112,7 @@ class EmptyArray(Content):
     def _to_typetracer(self, forget_length: bool) -> Self:
         return EmptyArray(
             parameters=self._parameters,
-            backend=ak._backends.TypeTracerBackend.instance(),
+            backend=TypeTracerBackend.instance(),
         )
 
     def _touch_data(self, recursive):
@@ -191,10 +197,10 @@ class EmptyArray(Content):
         tail: tuple[SliceItem, ...],
         advanced: Index | None,
     ) -> Content:
-        if head == ():
+        if head is NO_HEAD:
             return self
 
-        elif isinstance(head, int):
+        elif is_integer_like(head):
             raise ak._errors.index_error(self, head, "array is empty")
 
         elif isinstance(head, slice):
@@ -225,14 +231,12 @@ class EmptyArray(Content):
             raise ak._errors.index_error(self, head, "array is empty")
 
         else:
-            raise ak._errors.wrap_error(AssertionError(repr(head)))
+            raise AssertionError(repr(head))
 
     def _offsets_and_flattened(self, axis, depth):
-        posaxis = ak._util.maybe_posaxis(self, axis, depth)
+        posaxis = maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 == depth:
-            raise ak._errors.wrap_error(
-                np.AxisError(self, "axis=0 not allowed for flatten")
-            )
+            raise np.AxisError(self, "axis=0 not allowed for flatten")
         else:
             offsets = ak.index.Index64.zeros(1, nplike=self._backend.index_nplike)
             return (
@@ -255,7 +259,7 @@ class EmptyArray(Content):
         return EmptyArray(parameters=self._parameters, backend=self._backend)
 
     def _local_index(self, axis, depth):
-        posaxis = ak._util.maybe_posaxis(self, axis, depth)
+        posaxis = maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 == depth:
             return ak.contents.NumpyArray(
                 self._backend.nplike.empty(0, dtype=np.int64),
@@ -263,9 +267,7 @@ class EmptyArray(Content):
                 backend=self._backend,
             )
         else:
-            raise ak._errors.wrap_error(
-                np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
-            )
+            raise np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
 
     def _numbers_to_type(self, name, including_unknown):
         if including_unknown:
@@ -327,11 +329,9 @@ class EmptyArray(Content):
         return 0
 
     def _pad_none(self, target, axis, depth, clip):
-        posaxis = ak._util.maybe_posaxis(self, axis, depth)
+        posaxis = maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 != depth:
-            raise ak._errors.wrap_error(
-                np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
-            )
+            raise np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
         else:
             return self._pad_none_axis0(target, True)
 
@@ -399,19 +399,17 @@ class EmptyArray(Content):
         elif result is None:
             return continuation()
         else:
-            raise ak._errors.wrap_error(AssertionError(result))
+            raise AssertionError(result)
 
     def to_packed(self) -> Self:
         return self
 
     def _to_list(self, behavior, json_conversions):
         if not self._backend.nplike.known_data:
-            raise ak._errors.wrap_error(
-                TypeError("cannot convert typetracer arrays to Python lists")
-            )
+            raise TypeError("cannot convert typetracer arrays to Python lists")
         return []
 
-    def _to_backend(self, backend: ak._backends.Backend) -> Self:
+    def _to_backend(self, backend: Backend) -> Self:
         return EmptyArray(parameters=self._parameters, backend=backend)
 
     def _is_equal_to(self, other, index_dtype, numpyarray):

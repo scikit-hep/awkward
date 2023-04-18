@@ -4,7 +4,7 @@ import numpy as np
 import pytest  # noqa: F401
 
 import awkward as ak
-from awkward._backends import TypeTracerBackend
+from awkward._backends.typetracer import TypeTracerBackend
 
 
 def test():

@@ -1,9 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
 import numpy as np
 import pytest
 
 import awkward as ak
+from awkward._behavior import behavior_of
 
 to_list = ak.operations.to_list
 
@@ -18,9 +18,7 @@ def test():
                 and not x.layout.is_option
             ):
                 nextinputs.append(
-                    ak.highlevel.Array(
-                        x.layout.project(), behavior=ak._util.behavior_of(x)
-                    )
+                    ak.highlevel.Array(x.layout.project(), behavior=behavior_of(x))
                 )
             else:
                 nextinputs.append(x)

@@ -1,8 +1,11 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
+__all__ = ("mean",)
 import awkward as ak
+from awkward._behavior import behavior_of
 from awkward._connect.numpy import unsupported
+from awkward._layout import maybe_posaxis
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._regularize import regularize_axis
 from awkward._util import unset
 
 np = NumpyMetadata.instance()
@@ -96,7 +99,7 @@ def mean(
                 "and flatten the array."
             )
             if flatten_records:
-                raise ak._errors.wrap_error(ValueError(message))
+                raise ValueError(message)
             else:
                 ak._errors.deprecate(message, "2.2.0")
         return _impl(x, weight, axis, keepdims, mask_identity)
@@ -159,7 +162,7 @@ def nanmean(
                 "and flatten the array."
             )
             if flatten_records:
-                raise ak._errors.wrap_error(ValueError(message))
+                raise ValueError(message)
             else:
                 ak._errors.deprecate(message, "2.2.0")
         x = ak.operations.ak_nan_to_none._impl(x, False, None)
@@ -170,7 +173,8 @@ def nanmean(
 
 
 def _impl(x, weight, axis, keepdims, mask_identity):
-    behavior = ak._util.behavior_of(x, weight)
+    axis = regularize_axis(axis)
+    behavior = behavior_of(x, weight)
     x = ak.highlevel.Array(
         ak.operations.to_layout(x, allow_record=False, allow_other=False),
         behavior=behavior,
@@ -227,7 +231,7 @@ def _impl(x, weight, axis, keepdims, mask_identity):
                 out = out[(0,) * out.ndim]
         else:
             if not keepdims:
-                posaxis = ak._util.maybe_posaxis(out.layout, axis, 1)
+                posaxis = maybe_posaxis(out.layout, axis, 1)
                 out = out[(slice(None, None),) * posaxis + (0,)]
 
         return out

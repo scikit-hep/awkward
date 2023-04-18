@@ -1,10 +1,14 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
+__all__ = ("transform",)
 import copy
 
 import awkward as ak
+from awkward._backends.dispatch import backend_of
+from awkward._backends.numpy import NumpyBackend
+from awkward._behavior import behavior_of
+from awkward._layout import wrap_layout
 
-cpu = ak._backends.NumpyBackend.instance()
+cpu = NumpyBackend.instance()
 
 
 def transform(
@@ -458,18 +462,17 @@ def _impl(
     behavior,
     highlevel,
 ):
-    behavior = ak._util.behavior_of(*((array, *more_arrays)), behavior=behavior)
-
+    behavior = behavior_of(array, *more_arrays, behavior=behavior)
+    backend = backend_of(array, *more_arrays, default=cpu)
     layout = ak.operations.ak_to_layout._impl(
         array, allow_record=False, allow_other=False, regulararray=True
-    )
+    ).to_backend(backend)
     more_layouts = [
         ak.operations.ak_to_layout._impl(
             x, allow_record=False, allow_other=False, regulararray=True
-        )
+        ).to_backend(backend)
         for x in more_arrays
     ]
-    backend = ak._backends.backend_of(layout, *more_layouts, default=cpu)
 
     options = {
         "allow_records": allow_records,
@@ -496,10 +499,8 @@ def _impl(
                 return out
 
             else:
-                raise ak._errors.wrap_error(
-                    TypeError(
-                        f"transformation must return a Content or None, not {type(out)}\n\n{out!r}"
-                    )
+                raise TypeError(
+                    f"transformation must return a Content or None, not {type(out)}\n\n{out!r}"
                 )
 
         # An exception to the rule of ak._do.recursively_apply, for symmetry with
@@ -514,7 +515,7 @@ def _impl(
         )
 
         if return_value != "none":
-            return ak._util.wrap(out, behavior, highlevel)
+            return wrap_layout(out, behavior, highlevel)
 
     else:
 
@@ -530,10 +531,8 @@ def _impl(
             elif isinstance(out, tuple):
                 for x in out:
                     if not isinstance(x, ak.contents.Content):
-                        raise ak._errors.wrap_error(
-                            TypeError(
-                                f"transformation must return a Content, tuple of Contents, or None, not a tuple containing {type(x)}\n\n{x!r}"
-                            )
+                        raise TypeError(
+                            f"transformation must return a Content, tuple of Contents, or None, not a tuple containing {type(x)}\n\n{x!r}"
                         )
                 return out
 
@@ -541,10 +540,8 @@ def _impl(
                 return (out,)
 
             else:
-                raise ak._errors.wrap_error(
-                    TypeError(
-                        f"transformation must return a Content, tuple of Contents, or None, not {type(out)}\n\n{out!r}"
-                    )
+                raise TypeError(
+                    f"transformation must return a Content, tuple of Contents, or None, not {type(out)}\n\n{out!r}"
                 )
 
         inputs = [layout, *more_layouts]
@@ -564,6 +561,6 @@ def _impl(
 
         if return_value != "none":
             if len(out) == 1:
-                return ak._util.wrap(out[0], behavior, highlevel)
+                return wrap_layout(out[0], behavior, highlevel)
             else:
-                return tuple(ak._util.wrap(x, behavior, highlevel) for x in out)
+                return tuple(wrap_layout(x, behavior, highlevel) for x in out)

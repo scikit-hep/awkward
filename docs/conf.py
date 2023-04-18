@@ -26,6 +26,14 @@ parts = awkward.__version__.split(".")
 version = ".".join(parts[:2])
 release = ".".join(parts)
 
+# -- Environment variables ---------------------------------------------------
+# Allow the CI to set version_match="main"
+version_match = os.environ.get("DOCS_VERSION", version)
+canonical_version = os.environ.get("DOCS_CANONICAL_VERSION")
+report_analytics = os.environ.get("DOCS_REPORT_ANALYTICS", False)
+show_version_switcher = os.environ.get("DOCS_SHOW_VERSION", False)
+run_cuda_notebooks = os.environ.get("DOCS_RUN_CUDA", False)
+
 # -- General configuration ---------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be
@@ -43,16 +51,9 @@ extensions = [
     "IPython.sphinxext.ipython_directive",
 ]
 
-# Allow the CI to set version_match="main"
-if "DOCS_VERSION" in os.environ:
-    version_match = os.environ["DOCS_VERSION"]
-else:
-    version_match = version
-
 
 # Specify a canonical version
-if "DOCS_CANONICAL_VERSION" in os.environ:
-    canonical_version = os.environ["DOCS_CANONICAL_VERSION"]
+if canonical_version is not None:
     html_baseurl = f"https://awkward-array.org/doc/{canonical_version}/"
 
     # Build sitemap on main
@@ -95,7 +96,12 @@ html_theme_options = {
         {
             "name": "PyPI",
             "url": "https://pypi.org/project/awkward",
-            "icon": "fab fa-python",
+            "icon": "fa-brands fa-python",
+        },
+        {
+            "name": "Gitter",
+            "url": "https://gitter.im/Scikit-HEP/awkward-array",
+            "icon": "fa-brands fa-gitter"
         }
     ],
     "use_edit_page_button": True,
@@ -112,14 +118,14 @@ html_theme_options = {
 }
 
 # Disable analytics for previews
-if "DOCS_REPORT_ANALYTICS" in os.environ:
+if report_analytics:
     html_theme_options["analytics"] = {
         "plausible_analytics_domain": "awkward-array.org",
         "plausible_analytics_url": "https://views.scientific-python.org/js/plausible.js",
     }
 
 # Don't show version for offline builds by default
-if "DOCS_SHOW_VERSION" in os.environ:
+if show_version_switcher:
     html_theme_options["switcher"] = {
         "json_url": "https://awkward-array.org/doc/switcher.json",
         "version_match": version_match,
@@ -151,6 +157,12 @@ nb_ipywidgets_js = {
     },
 }
 nb_execution_show_tb = True
+
+if not run_cuda_notebooks:
+    nb_execution_excludepatterns = [
+        # We have no CUDA executors, so disable this
+        "user-guide/how-to-use-in-numba-cuda.ipynb"
+    ]
 
 # Additional stuff
 master_doc = "index"

@@ -1,5 +1,4 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
 import ctypes
 import os
 import textwrap
@@ -10,6 +9,8 @@ import ROOT
 import awkward as ak
 import awkward._connect.cling
 import awkward._lookup
+from awkward._backends.numpy import NumpyBackend
+from awkward._layout import wrap_layout
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward.types.numpytype import primitive_to_dtype
@@ -53,11 +54,9 @@ cppyy.add_include_path(
         )
     )
 )
-compiler = ROOT.gInterpreter.Declare
 
 
-done = compiler('\n#include "rdataframe/jagged_builders.h"\n')
-assert done is True
+cppyy.include("rdataframe/jagged_builders.h")
 
 
 def from_rdataframe(
@@ -126,6 +125,7 @@ def from_rdataframe(
     column_types = {}
     result_ptrs = {}
     contents = {}
+    index = {}
     awkward_type_cols = {}
 
     columns = (*columns, "rdfentry_")
@@ -160,10 +160,8 @@ def from_rdataframe(
             form_str = ROOT.awkward.type_to_form[column_types[col], offsets_type](0)
 
             if form_str == "unsupported type":
-                raise ak._errors.wrap_error(
-                    TypeError(
-                        f"{col!r} column's type {column_types[col]!r} is not supported."
-                    )
+                raise TypeError(
+                    f"{col!r} column's type {column_types[col]!r} is not supported."
                 )
 
             form = ak.forms.from_json(form_str)
@@ -212,9 +210,7 @@ def from_rdataframe(
                     builder, result_ptrs[col]
                 )
             else:
-                raise ak._errors.wrap_error(
-                    AssertionError(f"unrecognized Form: {type(form)}")
-                )
+                raise AssertionError(f"unrecognized Form: {type(form)}")
 
             names_nbytes = cpp_buffers_self.names_nbytes[builder_type](builder)
 
@@ -228,26 +224,34 @@ def from_rdataframe(
 
             length = cpp_buffers_self.to_char_buffers[builder_type](builder)
 
-            contents[col] = ak.from_buffers(
-                form,
-                length,
-                buffers,
-                byteorder=ak._util.native_byteorder,
-                highlevel=highlevel,
-                behavior=behavior,
-            )
-
             if col == "rdfentry_":
-                contents[col] = ak.index.Index64(
-                    contents[col].layout.to_backend_array(
-                        allow_missing=True, backend=ak._backends.NumpyBackend.instance()
+                index[col] = ak.from_buffers(
+                    form,
+                    length,
+                    buffers,
+                    byteorder=ak._util.native_byteorder,
+                    highlevel=highlevel,
+                    behavior=behavior,
+                )
+                index[col] = ak.index.Index64(
+                    index[col].layout.to_backend_array(
+                        allow_missing=True, backend=NumpyBackend.instance()
                     )
+                )
+            else:
+                contents[col] = ak.from_buffers(
+                    form,
+                    length,
+                    buffers,
+                    byteorder=ak._util.native_byteorder,
+                    highlevel=highlevel,
+                    behavior=behavior,
                 )
 
     for key, value in awkward_type_cols.items():
-        if len(contents["rdfentry_"]) < len(value):
-            contents[key] = ak._util.wrap(
-                ak.contents.IndexedArray(contents["rdfentry_"], value),
+        if len(index["rdfentry_"]) < len(value):
+            contents[key] = wrap_layout(
+                ak.contents.IndexedArray(index["rdfentry_"], value),
                 highlevel=highlevel,
                 behavior=behavior,
             )
@@ -263,14 +267,11 @@ def from_rdataframe(
     )
 
     if keep_order:
-        sorted = ak.index.Index64(contents["rdfentry_"].data.argsort())
-        out = ak._util.wrap(
+        sorted = ak.index.Index64(index["rdfentry_"].data.argsort())
+        out = wrap_layout(
             ak.contents.IndexedArray(sorted, out.layout),
             highlevel=highlevel,
             behavior=behavior,
         )
-
-    if maybe_indexed:
-        del contents["rdfentry_"]
 
     return out

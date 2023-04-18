@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+__all__ = ("from_avro_file",)
 
-# from awkward.typing import Type
+# from awkward._typing import Type
 import pathlib
 
 import awkward as ak
@@ -51,10 +52,8 @@ def from_avro_file(
 
         else:
             if not hasattr(file, "read") or not hasattr(file, "seek"):
-                raise ak._errors.wrap_error(
-                    TypeError(
-                        "'file' must either be a filename string or be a file-like object with 'read' and 'seek' methods"
-                    )
+                raise TypeError(
+                    "'file' must either be a filename string or be a file-like object with 'read' and 'seek' methods"
                 )
             else:
                 form, length, container = awkward._connect.avro.ReadAvroFT(

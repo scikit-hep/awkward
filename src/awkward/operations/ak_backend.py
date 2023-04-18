@@ -1,6 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+__all__ = ("backend",)
 
 import awkward as ak
+from awkward._backends.dispatch import backend_of
 
 
 def backend(*arrays) -> str:
@@ -27,5 +29,5 @@ def backend(*arrays) -> str:
 
 
 def _impl(arrays) -> str:
-    backend_impl = ak._backends.backend_of(*arrays, default=None)
+    backend_impl = backend_of(*arrays, default=None)
     return backend_impl.name

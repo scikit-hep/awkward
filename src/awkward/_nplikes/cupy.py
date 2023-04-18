@@ -5,15 +5,14 @@ import numpy
 
 import awkward as ak
 from awkward._nplikes.array_module import ArrayModuleNumpyLike
+from awkward._nplikes.dispatch import register_nplike
 from awkward._nplikes.numpylike import ArrayLike
-from awkward.typing import Final
+from awkward._typing import Final
 
 
+@register_nplike
 class Cupy(ArrayModuleNumpyLike):
     is_eager: Final = False
-
-    def to_rectilinear(self, array, *args, **kwargs):
-        return ak.operations.ak_to_cupy.to_cupy(array, *args, **kwargs)
 
     def __init__(self):
         import awkward._connect.cuda  # noqa: F401
@@ -22,20 +21,16 @@ class Cupy(ArrayModuleNumpyLike):
 
     @property
     def ma(self):
-        raise ak._errors.wrap_error(
-            ValueError(
-                "CUDA arrays cannot have missing values until CuPy implements "
-                "numpy.ma.MaskedArray"
-            )
+        raise ValueError(
+            "CUDA arrays cannot have missing values until CuPy implements "
+            "numpy.ma.MaskedArray"
         )
 
     @property
     def char(self):
-        raise ak._errors.wrap_error(
-            ValueError(
-                "CUDA arrays cannot do string manipulations until CuPy implements "
-                "numpy.char"
-            )
+        raise ValueError(
+            "CUDA arrays cannot do string manipulations until CuPy implements "
+            "numpy.char"
         )
 
     @property
@@ -58,9 +53,7 @@ class Cupy(ArrayModuleNumpyLike):
         self, x: ArrayLike, repeats: ArrayLike | int, *, axis: int | None = None
     ):
         if axis is not None:
-            raise ak._errors.wrap_error(
-                NotImplementedError(f"repeat for CuPy with axis={axis!r}")
-            )
+            raise NotImplementedError(f"repeat for CuPy with axis={axis!r}")
         # https://github.com/cupy/cupy/issues/3849
         if isinstance(repeats, self._module.ndarray):
             all_stops = self._module.cumsum(repeats)
@@ -149,16 +142,18 @@ class Cupy(ArrayModuleNumpyLike):
         return self._module.array_str(array, max_line_width, precision, suppress_small)
 
     @classmethod
-    def is_own_array(cls, obj) -> bool:
+    def is_own_array_type(cls, type_: type) -> bool:
         """
         Args:
-            obj: object to test
+            type_: object to test
 
         Return `True` if the given object is a cupy buffer, otherwise `False`.
 
         """
-        module, _, suffix = type(obj).__module__.partition(".")
+        module, _, suffix = type_.__module__.partition(".")
         return module == "cupy"
 
     def is_c_contiguous(self, x: ArrayLike) -> bool:
-        return x.flags["C_CONTIGUOUS"]
+        return x.flags["C_CONTIGUOUS"] or (
+            x.dtype.metadata is not None and x.dtype.metadata.get("pretend_contiguous")
+        )

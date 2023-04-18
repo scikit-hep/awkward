@@ -1,45 +1,36 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
-import awkward as ak
 from awkward._nplikes.shape import unknown_length
-from awkward.forms.form import _type_parameters_equal
+from awkward._parameters import parameters_are_equal, type_parameters_equal
+from awkward._regularize import is_integer
+from awkward._typing import final
 from awkward.types.type import Type
-from awkward.typing import final
 
 
 @final
 class RegularType(Type):
     def __init__(self, content, size, *, parameters=None, typestr=None):
         if not isinstance(content, Type):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} 'content' must be a Type subtype, not {}".format(
-                        type(self).__name__, repr(content)
-                    )
+            raise TypeError(
+                "{} 'content' must be a Type subtype, not {}".format(
+                    type(self).__name__, repr(content)
                 )
             )
-        if not (size is unknown_length or (ak._util.is_integer(size) and size >= 0)):
-            raise ak._errors.wrap_error(
-                ValueError(
-                    "{} 'size' must be a non-negative int or None, not {}".format(
-                        type(self).__name__, repr(size)
-                    )
+        if not (size is unknown_length or (is_integer(size) and size >= 0)):
+            raise ValueError(
+                "{} 'size' must be a non-negative int or None, not {}".format(
+                    type(self).__name__, repr(size)
                 )
             )
         if parameters is not None and not isinstance(parameters, dict):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} 'parameters' must be of type dict or None, not {}".format(
-                        type(self).__name__, repr(parameters)
-                    )
+            raise TypeError(
+                "{} 'parameters' must be of type dict or None, not {}".format(
+                    type(self).__name__, repr(parameters)
                 )
             )
         if typestr is not None and not isinstance(typestr, str):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} 'typestr' must be of type string or None, not {}".format(
-                        type(self).__name__, repr(typestr)
-                    )
+            raise TypeError(
+                "{} 'typestr' must be of type string or None, not {}".format(
+                    type(self).__name__, repr(typestr)
                 )
             )
         self._content = content
@@ -84,12 +75,13 @@ class RegularType(Type):
         args = [repr(self._content), repr(self._size), *self._repr_args()]
         return "{}({})".format(type(self).__name__, ", ".join(args))
 
-    def __eq__(self, other):
-        if isinstance(other, RegularType):
-            return (
-                self._size == other._size
-                and _type_parameters_equal(self._parameters, other._parameters)
-                and self._content == other._content
-            )
-        else:
-            return False
+    def _is_equal_to(self, other, all_parameters: bool) -> bool:
+        compare_parameters = (
+            parameters_are_equal if all_parameters else type_parameters_equal
+        )
+        return (
+            isinstance(other, type(self))
+            and compare_parameters(self._parameters, other._parameters)
+            and (self._size == other._size)
+            and self._content._is_equal_to(other._content, all_parameters)
+        )

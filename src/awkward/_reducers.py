@@ -7,7 +7,7 @@ from typing import Any as AnyType
 import awkward as ak
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
-from awkward.typing import Final
+from awkward._typing import Final
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
@@ -59,11 +59,11 @@ class Reducer(ABC):
 
     @abstractmethod
     def identity_for(self, dtype: DTypeLike | None):
-        raise ak._errors.wrap_error(NotImplementedError)
+        raise NotImplementedError
 
     @abstractmethod
     def apply(self, array, parents, outlength: int):
-        raise ak._errors.wrap_error(NotImplementedError)
+        raise NotImplementedError
 
 
 class ArgMin(Reducer):
@@ -256,9 +256,7 @@ class Sum(Reducer):
     def apply(self, array, parents, outlength):
         assert isinstance(array, ak.contents.NumpyArray)
         if array.dtype.kind == "M":
-            raise ak._errors.wrap_error(
-                ValueError(f"cannot compute the sum (ak.sum) of {array.dtype!r}")
-            )
+            raise ValueError(f"cannot compute the sum (ak.sum) of {array.dtype!r}")
         else:
             dtype = self.maybe_other_type(array.dtype)
         result = array.backend.nplike.empty(
@@ -300,7 +298,7 @@ class Sum(Reducer):
                     )
                 )
             else:
-                raise ak._errors.wrap_error(NotImplementedError)
+                raise NotImplementedError
         elif array.dtype.type in (np.complex128, np.complex64):
             assert parents.nplike is array.backend.index_nplike
             array._handle_error(
@@ -361,9 +359,7 @@ class Prod(Reducer):
     def apply(self, array, parents, outlength):
         assert isinstance(array, ak.contents.NumpyArray)
         if array.dtype.kind.upper() == "M":
-            raise ak._errors.wrap_error(
-                ValueError(f"cannot compute the product (ak.prod) of {array.dtype!r}")
-            )
+            raise ValueError(f"cannot compute the product (ak.prod) of {array.dtype!r}")
         if array.dtype == np.bool_:
             result = array.backend.nplike.empty(
                 self.maybe_double_length(array.dtype.type, outlength),

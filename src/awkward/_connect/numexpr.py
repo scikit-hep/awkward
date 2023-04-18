@@ -1,9 +1,10 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
 import sys
 import warnings
 
 import awkward as ak
+from awkward._behavior import behavior_of
+from awkward._layout import wrap_layout
 
 _has_checked_version = False
 
@@ -13,16 +14,14 @@ def _import_numexpr():
     try:
         import numexpr
     except ModuleNotFoundError as err:
-        raise ak._errors.wrap_error(
-            ModuleNotFoundError(
-                """install the 'numexpr' package with:
+        raise ModuleNotFoundError(
+            """install the 'numexpr' package with:
 
     pip install numexpr --upgrade
 
 or
 
     conda install numexpr"""
-            )
         ) from err
     else:
         if not _has_checked_version:
@@ -33,6 +32,7 @@ or
                     "Awkward Array is only known to work with numexpr 2.7.1 or later"
                     "(you have version {})".format(numexpr.__version__),
                     RuntimeWarning,
+                    stacklevel=1,
                 )
             _has_checked_version = True
         return numexpr
@@ -106,12 +106,12 @@ def evaluate(
         else:
             return None
 
-    behavior = ak._util.behavior_of(*arrays)
+    behavior = behavior_of(*arrays)
     out = ak._broadcasting.broadcast_and_apply(
         arrays, action, behavior, allow_records=False
     )
     assert isinstance(out, tuple) and len(out) == 1
-    return ak._util.wrap(out[0], behavior)
+    return wrap_layout(out[0], behavior)
 
 
 evaluate.evaluate = evaluate
@@ -123,9 +123,7 @@ def re_evaluate(local_dict=None):
     try:
         compiled_ex = numexpr.necompiler._numexpr_last["ex"]  # noqa: F841
     except KeyError as err:
-        raise ak._errors.wrap_error(
-            RuntimeError("not a previous evaluate() execution found")
-        ) from err
+        raise RuntimeError("not a previous evaluate() execution found") from err
     names = numexpr.necompiler._numexpr_last["argnames"]
     arguments = getArguments(names, local_dict)
 
@@ -146,9 +144,9 @@ def re_evaluate(local_dict=None):
         else:
             return None
 
-    behavior = ak._util.behavior_of(*arrays)
+    behavior = behavior_of(*arrays)
     out = ak._broadcasting.broadcast_and_apply(
         arrays, action, behavior, allow_records=False
     )
     assert isinstance(out, tuple) and len(out) == 1
-    return ak._util.wrap(out[0], behavior)
+    return wrap_layout(out[0], behavior)

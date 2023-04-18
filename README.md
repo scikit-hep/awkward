@@ -23,6 +23,8 @@ Arrays are **dynamically typed**, but operations on them are **compiled and fast
 Given an array of lists of objects with `x`, `y` fields (with nested lists in the `y` field),
 
 ```python
+import awkward as ak
+
 array = ak.Array([
     [{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}, {"x": 3.3, "y": [1, 2, 3]}],
     [],
@@ -209,6 +211,7 @@ Thanks especially to the gracious help of Awkward Array contributors (including 
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/Laurits7"><img src="https://avatars.githubusercontent.com/u/30724920?v=4?s=100" width="100px;" alt="Laurits Tani"/><br /><sub><b>Laurits Tani</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=Laurits7" title="Documentation">📖</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/dsavoiu"><img src="https://avatars.githubusercontent.com/u/17005255?v=4?s=100" width="100px;" alt="Daniel Savoiu"/><br /><sub><b>Daniel Savoiu</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=dsavoiu" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://sites.google.com/view/raybellwaves/home"><img src="https://avatars.githubusercontent.com/u/17162724?v=4?s=100" width="100px;" alt="Ray Bell"/><br /><sub><b>Ray Bell</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=raybellwaves" title="Documentation">📖</a></td>
     </tr>
   </tbody>
 </table>

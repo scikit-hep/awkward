@@ -1,7 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
+__all__ = ("covar",)
 import awkward as ak
+from awkward._behavior import behavior_of
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._regularize import regularize_axis
 from awkward._util import unset
 
 np = NumpyMetadata.instance()
@@ -72,14 +74,15 @@ def covar(
                 "and flatten the array."
             )
             if flatten_records:
-                raise ak._errors.wrap_error(ValueError(message))
+                raise ValueError(message)
             else:
                 ak._errors.deprecate(message, "2.2.0")
         return _impl(x, y, weight, axis, keepdims, mask_identity)
 
 
 def _impl(x, y, weight, axis, keepdims, mask_identity):
-    behavior = ak._util.behavior_of(x, y, weight)
+    axis = regularize_axis(axis)
+    behavior = behavior_of(x, y, weight)
     x = ak.highlevel.Array(
         ak.operations.to_layout(x, allow_record=False, allow_other=False),
         behavior=behavior,

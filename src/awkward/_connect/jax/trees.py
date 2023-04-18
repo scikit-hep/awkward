@@ -5,13 +5,16 @@ import jax
 
 import awkward as ak
 from awkward import contents, highlevel, record
-from awkward._errors import wrap_error
+from awkward._backends.backend import Backend
+from awkward._backends.jax import JaxBackend
+from awkward._behavior import behavior_of
+from awkward._layout import wrap_layout
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._typing import Generic, TypeVar, Union
 from awkward.contents import Content
 from awkward.record import Record
-from awkward.typing import Generic, TypeVar, Union
 
 numpy = Numpy.instance()
 np = NumpyMetadata.instance()
@@ -36,7 +39,7 @@ def find_all_buffers(
 def replace_all_buffers(
     layout: contents.Content | record.Record,
     buffers: list,
-    backend: ak._backends.Backend,
+    backend: Backend,
 ):
     def action(node, **kwargs):
         jaxlike = Jax.instance()
@@ -77,10 +80,10 @@ class AuxData(Generic[T]):
         elif isinstance(obj, (contents.Content, record.Record)):
             layout = obj
         else:
-            raise wrap_error(TypeError)
+            raise TypeError
 
         # First, make sure we're all JAX
-        jax_backend = ak._backends.JaxBackend.instance()
+        jax_backend = JaxBackend.instance()
         layout = layout.to_backend(jax_backend)
 
         # Now pull out the Jax tracers / arrays
@@ -109,7 +112,7 @@ class AuxData(Generic[T]):
         return buffers, AuxData(
             layout=layout,
             is_highlevel=is_highlevel,
-            behavior=ak._util.behavior_of(obj),
+            behavior=behavior_of(obj),
         )
 
     @property
@@ -129,20 +132,18 @@ class AuxData(Generic[T]):
             # Check that JAX isn't trying to give us float0 types
             dtype = getattr(buffer, "dtype", None)
             if dtype == np.dtype([("float0", "V")]):
-                raise wrap_error(
-                    TypeError(
-                        f"a buffer with the dtype {buffer.dtype} was encountered during unflattening. "
-                        "JAX uses this dtype for the tangents of integer/boolean outputs; these cannot "
-                        "reasonably be differentiated. Make sure that you are not computing the derivative "
-                        "of a boolean/integer (array) valued function."
-                    )
+                raise TypeError(
+                    f"a buffer with the dtype {buffer.dtype} was encountered during unflattening. "
+                    "JAX uses this dtype for the tangents of integer/boolean outputs; these cannot "
+                    "reasonably be differentiated. Make sure that you are not computing the derivative "
+                    "of a boolean/integer (array) valued function."
                 )
 
         # Replace the mixed NumPy-JAX layout leaves with the given buffers (and use the JAX nplike)
         layout = replace_all_buffers(
-            self._layout, list(buffers), backend=ak._backends.JaxBackend.instance()
+            self._layout, list(buffers), backend=JaxBackend.instance()
         )
-        return ak._util.wrap(
+        return wrap_layout(
             layout, behavior=self._behavior, highlevel=self._is_highlevel
         )
 

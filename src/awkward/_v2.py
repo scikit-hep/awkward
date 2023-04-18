@@ -1,6 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-raise ModuleNotFoundError(  # noqa: AK101
+raise ModuleNotFoundError(
     """The awkward._v2 submodule was provided for early access to awkward>=2, as it developed.
 
 Now that version 2 has been released, awkward._v2 is no longer needed.

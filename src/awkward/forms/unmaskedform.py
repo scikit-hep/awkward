@@ -1,9 +1,10 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
 import awkward as ak
+from awkward._behavior import find_typestr
+from awkward._parameters import parameters_union, type_parameters_equal
+from awkward._typing import final
 from awkward._util import unset
-from awkward.forms.form import Form, _type_parameters_equal
-from awkward.typing import final
+from awkward.forms.form import Form
 
 
 @final
@@ -18,11 +19,9 @@ class UnmaskedForm(Form):
         form_key=None,
     ):
         if not isinstance(content, Form):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} all 'contents' must be Form subclasses, not {}".format(
-                        type(self).__name__, repr(content)
-                    )
+            raise TypeError(
+                "{} all 'contents' must be Form subclasses, not {}".format(
+                    type(self).__name__, repr(content)
                 )
             )
 
@@ -57,15 +56,11 @@ class UnmaskedForm(Form):
         if content.is_union:
             return content.copy(
                 contents=[cls.simplified(x) for x in content.contents],
-                parameters=ak.forms.form._parameters_union(
-                    content._parameters, parameters
-                ),
+                parameters=parameters_union(content._parameters, parameters),
             )
         elif content.is_indexed or content.is_option:
             return content.copy(
-                parameters=ak.forms.form._parameters_union(
-                    content._parameters, parameters
-                )
+                parameters=parameters_union(content._parameters, parameters)
             )
         else:
             return cls(content, parameters=parameters, form_key=form_key)
@@ -87,14 +82,14 @@ class UnmaskedForm(Form):
         return ak.types.OptionType(
             self._content._type(typestrs),
             parameters=self._parameters,
-            typestr=ak._util.gettypestr(self._parameters, typestrs),
+            typestr=find_typestr(self._parameters, typestrs),
         ).simplify_option_union()
 
     def __eq__(self, other):
         if isinstance(other, UnmaskedForm):
             return (
                 self._form_key == other._form_key
-                and _type_parameters_equal(self._parameters, other._parameters)
+                and type_parameters_equal(self._parameters, other._parameters)
                 and self._content == other._content
             )
         else:

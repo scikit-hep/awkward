@@ -1,8 +1,11 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
+__all__ = ("to_rdataframe",)
 from collections.abc import Mapping
 
 import awkward as ak
+from awkward._backends.numpy import NumpyBackend
+
+cpu = NumpyBackend.instance()
 
 
 def to_rdataframe(arrays, *, flatlist_as_rvec=True):
@@ -54,32 +57,24 @@ def _impl(
     import awkward._connect.rdataframe.to_rdataframe  # noqa: F401
 
     if not isinstance(arrays, Mapping):
-        raise ak._errors.wrap_error(
-            TypeError("'arrays' must be a dict (to provide C++ names for the arrays)")
-        )
+        raise TypeError("'arrays' must be a dict (to provide C++ names for the arrays)")
     elif not all(isinstance(name, str) for name in arrays):
-        raise ak._errors.wrap_error(
-            TypeError(
-                "keys of 'arrays' dict must be strings (to provide C++ names for the arrays)"
-            )
+        raise TypeError(
+            "keys of 'arrays' dict must be strings (to provide C++ names for the arrays)"
         )
     elif len(arrays) == 0:
-        raise ak._errors.wrap_error(
-            TypeError("'arrays' must contain at least one array")
-        )
+        raise TypeError("'arrays' must contain at least one array")
 
     layouts = {}
     length = None
     for name, array in arrays.items():
         layouts[name] = ak.operations.ak_to_layout._impl(
             array, allow_record=False, allow_other=False, regulararray=True
-        )
+        ).to_backend(cpu)
         if length is None:
             length = layouts[name].length
         elif length != layouts[name].length:
-            raise ak._errors.wrap_error(
-                ValueError("lengths of 'arrays' must all be the same")
-            )
+            raise ValueError("lengths of 'arrays' must all be the same")
 
     return ak._connect.rdataframe.to_rdataframe.to_rdataframe(
         layouts,
