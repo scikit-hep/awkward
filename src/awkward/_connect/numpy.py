@@ -8,17 +8,18 @@ from itertools import chain
 import numpy
 
 import awkward as ak
-from awkward._backends.dispatch import backend_of, common_backend
 from awkward._backends.backend import Backend
+from awkward._backends.dispatch import backend_of, common_backend
 from awkward._behavior import (
     behavior_of,
     find_custom_cast,
     find_ufunc,
     find_ufunc_generic,
 )
-from awkward._nplikes import to_nplike
 from awkward._layout import wrap_layout
+from awkward._nplikes import to_nplike
 from awkward._regularize import is_non_string_like_iterable
+from awkward._typing import Iterator
 from awkward._util import numpy_at_least
 from awkward.contents.numpyarray import NumpyArray
 
@@ -49,7 +50,7 @@ def convert_to_array(layout, args, kwargs):
 implemented = {}
 
 
-def _find_backends(args: Iterable) -> Backend:
+def _find_backends(args: Iterable) -> Iterator[Backend]:
     """
     Args:
         args: iterable of objects to visit
@@ -84,9 +85,9 @@ def _to_rectilinear(arg, backend: Backend):
             layout = ak.to_layout(arg, allow_record=False, allow_other=False)
             return layout.to_backend_array(allow_missing=True)
     elif isinstance(arg, tuple):
-        return tuple(_to_rectilinear(x) for x in arg)
+        return tuple(_to_rectilinear(x, backend) for x in arg)
     elif isinstance(arg, list):
-        return [_to_rectilinear(x) for x in arg]
+        return [_to_rectilinear(x, backend) for x in arg]
     elif is_non_string_like_iterable(arg):
         raise TypeError(
             f"encountered an unsupported iterable value {arg!r} whilst converting arguments to NumPy-friendly "
