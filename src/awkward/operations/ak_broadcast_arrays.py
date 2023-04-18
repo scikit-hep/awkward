@@ -222,7 +222,7 @@ def _impl(
         inputs.append(y.to_backend(backend))
 
     def action(inputs, depth, **kwargs):
-        if depth == depth_limit or all(x.is_numpy for x in inputs):
+        if depth == depth_limit or all(x.purelist_depth == 1 for x in inputs):
             return tuple(inputs)
         else:
             return None
