@@ -222,9 +222,14 @@ def _impl(
         inputs.append(y.to_backend(backend))
 
     def action(inputs, depth, **kwargs):
-        if any(x.is_option for x in inputs):
-            return None
-        elif depth == depth_limit or all(x.purelist_depth == 1 for x in inputs):
+        # The depth limit is the depth at which we must return, i.e.
+        # the _first_ layout at that depth
+        if depth == depth_limit:
+            return tuple(inputs)
+        # Walk through non-leaf nodes
+        elif all(
+            x.purelist_depth == 1 and not (x.is_option or x.is_indexed) for x in inputs
+        ):
             return tuple(inputs)
         else:
             return None
