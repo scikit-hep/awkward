@@ -1,7 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import numpy as np
-import pytest  # noqa: F401
+import pytest
 
 import awkward as ak
 
@@ -26,11 +26,10 @@ def test_emptyarray():
     one = ak.highlevel.Array(ak.contents.NumpyArray(np.array([])))
     two = ak.highlevel.Array(ak.contents.EmptyArray())
     assert to_list(one + one) == []
-    assert to_list(two + two) == []
-    assert to_list(one + two) == []
-    assert (one + one).layout.form == (tt(one) + tt(one)).layout.form
-    assert (two + two).layout.form == (tt(two) + tt(two)).layout.form
-    assert (one + two).layout.form == (tt(one) + tt(two)).layout.form
+    with pytest.raises(TypeError, match=r"ufuncs to EmptyArray"):
+        assert to_list(two + two) == []
+    with pytest.raises(TypeError, match=r"ufuncs to EmptyArray"):
+        assert to_list(one + two) == []
 
 
 def test_indexedarray():
