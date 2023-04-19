@@ -366,5 +366,4 @@ class FieldNotFoundError(IndexError):
     ...
 
 
-class AxisError(numpy.AxisError):
-    ...
+AxisError = numpy.AxisError
