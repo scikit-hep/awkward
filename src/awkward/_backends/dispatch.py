@@ -1,7 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 from __future__ import annotations
 
-from collections.abc import Collection
+from collections.abc import Iterable
 
 from awkward._backends.backend import Backend
 from awkward._nplikes.numpy import Numpy
@@ -46,7 +46,7 @@ def register_backend(primary_nplike_cls: type[NumpyLike]):
     return wrapper
 
 
-def common_backend(backends: Collection[Backend]) -> Backend:
+def common_backend(backends: Iterable[Backend]) -> Backend:
     unique_backends = frozenset(backends)
     # Either we have one nplike, or one + typetracer
     if len(unique_backends) == 1:
@@ -57,10 +57,16 @@ def common_backend(backends: Collection[Backend]) -> Backend:
             if not backend.nplike.known_data:
                 return backend
 
-        raise ValueError(
-            "cannot operate on arrays with incompatible backends. Use #ak.to_backend to coerce the arrays "
-            "to the same backend"
-        )
+        if len(unique_backends) > 1:
+            raise ValueError(
+                "cannot operate on arrays with incompatible backends. Use #ak.to_backend to coerce the arrays "
+                "to the same backend"
+            )
+
+        else:
+            raise ValueError(
+                "no backends were given in order to determine a common backend."
+            )
 
 
 def _backend_of(obj, default: D = unset) -> Backend | D:
