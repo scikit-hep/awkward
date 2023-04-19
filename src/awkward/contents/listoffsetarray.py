@@ -5,6 +5,7 @@ import copy
 
 import awkward as ak
 from awkward._backends.backend import Backend
+from awkward._errors import AxisError
 from awkward._layout import maybe_posaxis
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import IndexType, NumpyMetadata
@@ -708,7 +709,7 @@ class ListOffsetArray(Content):
     def _offsets_and_flattened(self, axis, depth):
         posaxis = maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 == depth:
-            raise np.AxisError("axis=0 not allowed for flatten")
+            raise AxisError("axis=0 not allowed for flatten")
 
         elif posaxis is not None and posaxis + 1 == depth + 1:
             listoffsetarray = self.to_ListOffsetArray64(True)
@@ -924,7 +925,7 @@ class ListOffsetArray(Content):
             or self.parameter("__array__") == "bytestring"
         ):
             if branch or (negaxis != depth):
-                raise np.AxisError("array with strings can only be sorted with axis=-1")
+                raise AxisError("array with strings can only be sorted with axis=-1")
 
             # FIXME: check validity error
 
@@ -939,7 +940,7 @@ class ListOffsetArray(Content):
                 self.parameter("__array__") == "string"
                 or self.parameter("__array__") == "bytestring"
             ):
-                raise np.AxisError("array with strings can only be sorted with axis=-1")
+                raise AxisError("array with strings can only be sorted with axis=-1")
 
             if self._backend.nplike.known_data and parents.nplike.known_data:
                 assert self._offsets.length - 1 == parents.length
@@ -1040,7 +1041,7 @@ class ListOffsetArray(Content):
             or self.parameter("__array__") == "bytestring"
         ):
             if branch or (negaxis != depth):
-                raise np.AxisError("array with strings can only be sorted with axis=-1")
+                raise AxisError("array with strings can only be sorted with axis=-1")
 
             # FIXME: check validity error
 
@@ -1086,7 +1087,7 @@ class ListOffsetArray(Content):
                 self.parameter("__array__") == "string"
                 or self.parameter("__array__") == "bytestring"
             ):
-                raise np.AxisError("array with strings can only be sorted with axis=-1")
+                raise AxisError("array with strings can only be sorted with axis=-1")
 
             if self._backend.nplike.known_data and parents.nplike.known_data:
                 assert self._offsets.length - 1 == parents.length
@@ -1225,7 +1226,7 @@ class ListOffsetArray(Content):
             or self.parameter("__array__") == "bytestring"
         ):
             if branch or (negaxis != depth):
-                raise np.AxisError("array with strings can only be sorted with axis=-1")
+                raise AxisError("array with strings can only be sorted with axis=-1")
 
             # FIXME: check validity error
 
@@ -1269,7 +1270,7 @@ class ListOffsetArray(Content):
                 self.parameter("__array__") == "string"
                 or self.parameter("__array__") == "bytestring"
             ):
-                raise np.AxisError("array with strings can only be sorted with axis=-1")
+                raise AxisError("array with strings can only be sorted with axis=-1")
 
             if self._backend.nplike.known_data and parents.nplike.known_data:
                 assert self._offsets.length - 1 == parents.length

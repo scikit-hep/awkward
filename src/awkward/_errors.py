@@ -6,6 +6,8 @@ import threading
 import warnings
 from collections.abc import Mapping, Sequence
 
+import numpy  # noqa: TID251
+
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._typing import TypeVar
 
@@ -363,4 +365,8 @@ Issue: {}.""".format(
 
 
 class FieldNotFoundError(IndexError):
+    ...
+
+
+class AxisError(numpy.AxisError):
     ...

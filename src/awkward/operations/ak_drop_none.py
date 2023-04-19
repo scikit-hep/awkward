@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("drop_none",)
 import awkward as ak
+from awkward._errors import AxisError
 from awkward._layout import maybe_posaxis, wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
@@ -69,9 +70,7 @@ def _impl(array, axis, highlevel, behavior):
     else:
         max_axis = layout.branch_depth[1] - 1
         if axis > max_axis:
-            raise np.AxisError(
-                f"axis={axis} exceeds the depth ({max_axis}) of this array"
-            )
+            raise AxisError(f"axis={axis} exceeds the depth ({max_axis}) of this array")
 
         def recompute_offsets(layout, depth, **kwargs):
             posaxis = maybe_posaxis(layout, axis, depth)
@@ -89,7 +88,7 @@ def _impl(array, axis, highlevel, behavior):
             if layout.is_record:
                 posaxises = {maybe_posaxis(x, axis, depth) for x in layout.contents}
                 if len(posaxises) > 1 and any(x < depth for x in posaxises):
-                    raise np.AxisError(
+                    raise AxisError(
                         f"axis={axis} implies different levels in records that might require part of a record to be dropped, which is impossible"
                     )
             posaxis = maybe_posaxis(layout, axis, depth)
