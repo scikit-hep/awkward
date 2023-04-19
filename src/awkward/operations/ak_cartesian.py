@@ -250,6 +250,11 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
             raise ValueError(
                 "arrays to cartesian-product do not have the same depth for negative axis"
             )
+    depths = [obj.purelist_depth for obj in layouts]
+    if posaxis >= max(depths):
+        raise ValueError(
+            f"axis={axis} exceeds the max depth of the given arrays (which is {max(depths)})"
+        )
 
     # Validate `nested`
     if nested is None or nested is False:
