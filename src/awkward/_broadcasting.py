@@ -24,7 +24,6 @@ from awkward._util import unset
 from awkward.contents.bitmaskedarray import BitMaskedArray
 from awkward.contents.bytemaskedarray import ByteMaskedArray
 from awkward.contents.content import Content
-from awkward.contents.emptyarray import EmptyArray
 from awkward.contents.indexedarray import IndexedArray
 from awkward.contents.indexedoptionarray import IndexedOptionArray
 from awkward.contents.listarray import ListArray
@@ -975,29 +974,9 @@ def apply_step(
             options,
         )
 
-    def broadcast_any_unknown():
-        nextinputs = [
-            x.to_NumpyArray(np.float64, backend) if isinstance(x, EmptyArray) else x
-            for x in inputs
-        ]
-        return apply_step(
-            backend,
-            nextinputs,
-            action,
-            depth,
-            copy.copy(depth_context),
-            lateral_context,
-            behavior,
-            options,
-        )
-
     def continuation():
-        # Any EmptyArrays?
-        if any(x.is_unknown for x in contents):
-            return broadcast_any_unknown()
-
         # Any NumpyArrays with ndim != 1?
-        elif any(x.is_numpy and x.purelist_depth != 1 for x in contents):
+        if any(x.is_numpy and x.purelist_depth != 1 for x in contents):
             return broadcast_any_nd_numpy()
 
         # Any IndexedArrays?
