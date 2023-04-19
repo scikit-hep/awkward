@@ -9,7 +9,7 @@ from awkward._connect.numba.growablebuffer import GrowableBuffer, GrowableBuffer
 
 
 class NumpyBuilder:
-    def __init__(self, dtype, parameters, initial, resize):
+    def __init__(self, dtype, *, parameters="", initial=1024, resize=8.0):
         self._dtype = dtype
         self._data = GrowableBuffer(dtype=dtype, initial=initial, resize=resize)
         self._parameters = parameters

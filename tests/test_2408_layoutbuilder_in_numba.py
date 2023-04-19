@@ -15,7 +15,7 @@ ak.numba.register_and_check()
 
 
 def test_NumpyBuilder():
-    builder = NumpyBuilder(np.float64, "", initial=10, resize=2.0)
+    builder = NumpyBuilder(np.float64, parameters="", initial=10, resize=2.0)
 
     builder.append(1.1)
     builder.append(2.2)
@@ -40,7 +40,7 @@ def test_NumpyBuilder():
 
 def test_python_append():
     # small 'initial' and 'resize' for testing
-    builder = NumpyBuilder(np.int32, "", initial=10, resize=2.0)
+    builder = NumpyBuilder(np.int32, parameters="", initial=10, resize=2.0)
     assert ak.to_list(builder.snapshot()) == []
     assert builder.length == 0
 
@@ -57,7 +57,7 @@ def test_unbox():
         x  # noqa: B018 (we want to test the unboxing)
         return 3.14
 
-    builder = NumpyBuilder(np.int32, "", initial=10, resize=2.0)
+    builder = NumpyBuilder(np.int32, parameters="", initial=10, resize=2.0)
     f1(builder)
 
 
@@ -68,7 +68,7 @@ def test_unbox_for_loop():
             x.append(i)
         return
 
-    builder = NumpyBuilder(np.int32, "", initial=10, resize=2.0)
+    builder = NumpyBuilder(np.int32, parameters="", initial=10, resize=2.0)
     f1(builder)
     assert ak.to_list(builder.snapshot()) == list(range(10))
 
@@ -78,7 +78,7 @@ def test_box():
     def f2(x):
         return x
 
-    builder = NumpyBuilder(np.int32, "", initial=10, resize=2.0)
+    builder = NumpyBuilder(np.int32, parameters="", initial=10, resize=2.0)
 
     out1 = f2(builder)
     assert ak.to_list(out1.snapshot()) == []
@@ -95,7 +95,7 @@ def test_len():
     def f3(x):
         return len(x)
 
-    builder = NumpyBuilder(np.int32, "", initial=10, resize=2.0)
+    builder = NumpyBuilder(np.int32, parameters="", initial=10, resize=2.0)
 
     assert f3(builder) == 0
 
@@ -252,40 +252,41 @@ def test_len():
 #     assert len(growablebuffer._panels[1]) == 20
 #     assert growablebuffer._pos == 0
 #
-#
-# def test_append():
-#     @numba.njit
-#     def f15(growablebuffer):
-#         for i in range(8):
-#             growablebuffer.append(i)
-#
-#     growablebuffer = GrowableBuffer(np.float32, initial=10, resize=2.0)
-#
-#     f15(growablebuffer)
-#
-#     assert growablebuffer.snapshot().tolist() == list(range(8))
-#
-#     f15(growablebuffer)
-#
-#     assert growablebuffer.snapshot().tolist() == list(range(8)) + list(range(8))
-#
-#
-# def test_extend():
-#     @numba.njit
-#     def f16(growablebuffer):
-#         growablebuffer.extend(np.arange(8))
-#
-#     growablebuffer = GrowableBuffer(np.float32, initial=10, resize=2.0)
-#
-#     f16(growablebuffer)
-#
-#     assert growablebuffer.snapshot().tolist() == list(range(8))
-#
-#     f16(growablebuffer)
-#
-#     assert growablebuffer.snapshot().tolist() == list(range(8)) + list(range(8))
-#
-#
+
+
+def test_append():
+    @numba.njit
+    def f15(builder):
+        for i in range(8):
+            builder.append(i)
+
+    builder = NumpyBuilder(np.float32)
+
+    f15(builder)
+
+    assert ak.to_list(builder.snapshot()) == list(range(8))
+
+    f15(builder)
+
+    assert ak.to_list(builder.snapshot()) == list(range(8)) + list(range(8))
+
+
+def test_extend():
+    @numba.njit
+    def f16(builder):
+        builder.extend(np.arange(8))
+
+    builder = NumpyBuilder(np.float32)
+
+    f16(builder)
+
+    assert ak.to_list(builder.snapshot()) == list(range(8))
+
+    f16(builder)
+
+    assert ak.to_list(builder.snapshot()) == list(range(8)) + list(range(8))
+
+
 # def test_snapshot():
 #     @numba.njit
 #     def f17(growablebuffer):
