@@ -5,7 +5,7 @@ import numba
 import numba.core.typing.npydecl
 
 import awkward as ak
-from awkward._connect.numba.growablebuffer import GrowableBuffer
+from awkward._connect.numba.growablebuffer import GrowableBuffer, GrowableBufferType
 
 
 class Ref:
@@ -33,6 +33,14 @@ class NumpyBuilder:
         self._data = GrowableBuffer(dtype=dtype, initial=initial, resize=resize)
         self._parameters = parameters
         self.set_id(Ref(0))
+
+    @classmethod
+    def _from_data(cls, data):
+        out = cls.__new__(cls)
+        out._dtype = data.dtype
+        out._data = data  # GrowableBuffer(dtype=dtype, initial=initial, resize=resize)
+        out._parameters = ""  # parameters
+        return out
 
     def __repr__(self):
         return f"<NumpyBuilder of {self.dtype!r} with {self.length} items>"
@@ -134,6 +142,54 @@ def NumpyBuilderType_unbox(typ, obj, c):
     # return it or the exception
     is_error = numba.core.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
     return numba.extending.NativeValue(out._getvalue(), is_error=is_error)
+
+
+@numba.extending.box(NumpyBuilderType)
+def NumpyBuilderType_box(typ, val, c):
+    # get PyObject of the NumpyBuilder class
+    NumpyBuilder_obj = c.pyapi.unserialize(c.pyapi.serialize_object(NumpyBuilder))
+    from_data_obj = c.pyapi.object_getattr_string(NumpyBuilder_obj, "_from_data")
+
+    builder = numba.core.cgutils.create_struct_proxy(typ)(
+        c.context, c.builder, value=val
+    )
+    data_obj = c.pyapi.from_native_value(typ.data, builder.data, c.env_manager)
+
+    out = c.pyapi.call_function_objargs(from_data_obj, (data_obj,))
+
+    # decref PyObjects
+    c.pyapi.decref(NumpyBuilder_obj)
+    c.pyapi.decref(from_data_obj)
+
+    c.pyapi.decref(data_obj)
+
+    return out
+
+
+def _from_data():
+    ...
+
+
+@numba.extending.type_callable(_from_data)
+def NumpyBuilder_from_data_typer(context):
+    def typer(data):
+        if isinstance(data, GrowableBufferType) and isinstance(
+            data.dtype, numba.types.Array
+        ):
+            return NumpyBuilderType(data.dtype.dtype)
+
+    return typer
+
+
+@numba.extending.lower_builtin(_from_data, GrowableBufferType)
+def NumpyBuilder_from_data_impl(context, builder, sig, args):
+    out = numba.core.cgutils.create_struct_proxy(sig.return_type)(context, builder)
+    out.data = args
+
+    if context.enable_nrt:
+        context.nrt.incref(builder, sig.args[0], args[0])
+
+    return out._getvalue()
 
 
 @numba.extending.overload(NumpyBuilder)

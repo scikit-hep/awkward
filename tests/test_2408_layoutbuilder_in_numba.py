@@ -68,21 +68,23 @@ def test_unbox_for_loop():
     assert builder.snapshot().tolist() == list(range(10))
 
 
-# def test_box():
-#     @numba.njit
-#     def f2(x):
-#         return x
-#
-#     builder = NumpyBuilder(np.int32, "", initial=10, resize=2.0)
-#
-#     out1 = f2(builder)
-#
-#     for x in range(15):
-#         builder.append(x)
-#
-#     out2 = f2(builder)
-#
-#
+def test_box():
+    @numba.njit
+    def f2(x):
+        return x
+
+    builder = NumpyBuilder(np.int32, "", initial=10, resize=2.0)
+
+    out1 = f2(builder)
+    assert out1.snapshot().tolist() == []
+
+    for x in range(15):
+        builder.append(x)
+
+    out2 = f2(builder)
+    assert out2.snapshot().tolist() == list(range(15))
+
+
 # def test_len():
 #     @numba.njit
 #     def f3(x):
