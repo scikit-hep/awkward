@@ -76,7 +76,10 @@ class NumpyBuilder:
         return True
 
     def snapshot(self):
-        return self._data.snapshot()
+        """
+        Converts the currently accumulated data into an #ak.Array.
+        """
+        return ak.contents.NumpyArray(self._data.snapshot())
 
     def form(self):
         params = "" if self._parameters == "" else f", parameters: {self._parameters}"

@@ -25,7 +25,7 @@ def test_NumpyBuilder():
     error = Ref("")
     assert builder.is_valid(error), error.value
 
-    assert builder.snapshot().tolist() == [1.1, 2.2, 3.3, 4.4, 5.5]
+    assert ak.to_list(builder.snapshot()) == [1.1, 2.2, 3.3, 4.4, 5.5]
 
     assert (
         builder.form()
@@ -36,13 +36,13 @@ def test_NumpyBuilder():
 def test_python_append():
     # small 'initial' and 'resize' for testing
     builder = NumpyBuilder(np.int32, "", initial=10, resize=2.0)
-    assert builder.snapshot().tolist() == []
+    assert ak.to_list(builder.snapshot()) == []
     assert builder.length == 0
 
     # within the first panel
     for x in range(0, 5):
         builder.append(x)
-    assert builder.snapshot().tolist() == list(range(5))
+    assert ak.to_list(builder.snapshot()) == list(range(5))
     assert builder.length == 5
 
 
@@ -65,7 +65,7 @@ def test_unbox_for_loop():
 
     builder = NumpyBuilder(np.int32, "", initial=10, resize=2.0)
     f1(builder)
-    assert builder.snapshot().tolist() == list(range(10))
+    assert ak.to_list(builder.snapshot()) == list(range(10))
 
 
 def test_box():
@@ -76,13 +76,13 @@ def test_box():
     builder = NumpyBuilder(np.int32, "", initial=10, resize=2.0)
 
     out1 = f2(builder)
-    assert out1.snapshot().tolist() == []
+    assert ak.to_list(out1.snapshot()) == []
 
     for x in range(15):
         builder.append(x)
 
     out2 = f2(builder)
-    assert out2.snapshot().tolist() == list(range(15))
+    assert ak.to_list(out2.snapshot()) == list(range(15))
 
 
 def test_len():
