@@ -8,38 +8,19 @@ import awkward as ak
 from awkward._connect.numba.growablebuffer import GrowableBuffer, GrowableBufferType
 
 
-class Ref:
-    def __init__(self, value):
-        self.value = value
-
-
-class GenericRef(Ref):
-    def __init__(self, get, set):
-        self.get = get
-        self.set = set
-
-    @property
-    def value(self):
-        return self.get()
-
-    @value.setter
-    def value(self, new_value):
-        return self.set(new_value)
-
-
 class NumpyBuilder:
     def __init__(self, dtype, parameters, initial, resize):
         self._dtype = dtype
         self._data = GrowableBuffer(dtype=dtype, initial=initial, resize=resize)
         self._parameters = parameters
-        self.set_id(Ref(0))
+        self.set_id(0)
 
     @classmethod
     def _from_data(cls, data):
         out = cls.__new__(cls)
         out._dtype = data.dtype
         out._data = data  # GrowableBuffer(dtype=dtype, initial=initial, resize=resize)
-        out._parameters = ""  # parameters
+        out._parameters = ""  # FIXME: parameters?
         return out
 
     def __repr__(self):
@@ -65,23 +46,25 @@ class NumpyBuilder:
     def parameters(self):
         return self._parameters
 
-    def set_id(self, id: Ref(int)):
-        self._id = id.value
-        id.value += 1
+    def set_id(self, id: int):
+        self._id = id
+        id += 1
 
     def clear(self):
         self._data.clear()
 
-    def is_valid(self, error: Ref(str)):
+    def is_valid(self, error: str):
         return True
 
     def snapshot(self):
         """
         Converts the currently accumulated data into an #ak.Array.
         """
+        # FIXME:
         return ak.contents.NumpyArray(self._data.snapshot())
 
     def form(self):
+        # FIXME:
         params = "" if self._parameters == "" else f", parameters: {self._parameters}"
         return f'{{"class": "NumpyArray", "primitive": "{ak.types.numpytype.dtype_to_primitive(self._data.dtype)}", "form_key": "node{self._id}"{params}}}'
 

@@ -9,7 +9,6 @@ numba = pytest.importorskip("numba")
 
 from awkward._connect.numba.layoutbuilder import (  # noqa: E402
     NumpyBuilder,
-    Ref,
 )
 
 ak.numba.register_and_check()
@@ -22,15 +21,21 @@ def test_NumpyBuilder():
     builder.append(2.2)
     builder.extend([3.3, 4.4, 5.5])
 
-    error = Ref("")
+    error = ""
     assert builder.is_valid(error), error.value
 
-    assert ak.to_list(builder.snapshot()) == [1.1, 2.2, 3.3, 4.4, 5.5]
+    array = builder.snapshot()
+    assert str(ak.type(array)) == "5 * float64"
+    assert ak.to_list(array) == [1.1, 2.2, 3.3, 4.4, 5.5]
 
     assert (
         builder.form()
         == '{"class": "NumpyArray", "primitive": "float64", "form_key": "node0"}'
     )
+
+    array1 = builder.snapshot()
+    assert str(ak.type(array1)) == "5 * float64"
+    assert ak.to_list(array1) == [1.1, 2.2, 3.3, 4.4, 5.5]
 
 
 def test_python_append():
