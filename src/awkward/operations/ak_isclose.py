@@ -47,7 +47,7 @@ def _impl(a, b, rtol, atol, equal_nan, highlevel, behavior):
     two = ak.operations.to_layout(b)
 
     def action(inputs, backend, **kwargs):
-        if all(isinstance(x, ak.contents.NumpyArray) for x in inputs):
+        if all(x.is_numpy for x in inputs):
             return (
                 ak.contents.NumpyArray(
                     backend.nplike.isclose(
@@ -58,6 +58,12 @@ def _impl(a, b, rtol, atol, equal_nan, highlevel, behavior):
                         equal_nan=equal_nan,
                     )
                 ),
+            )
+        # Empty arrays are mainly placeholders; they should fail most operations
+        elif any(x.is_unknown for x in inputs):
+            raise TypeError(
+                "cannot evaluate ak.isclose for EmptyArray(s), use `ak.values_astype` "
+                "to convert these to arrays with known dtypes"
             )
 
     behavior = behavior_of(a, b, behavior=behavior)

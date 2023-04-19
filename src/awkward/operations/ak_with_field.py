@@ -113,7 +113,7 @@ def _impl(base, what, where, highlevel, behavior):
             base, what = inputs
             backend = base.backend
 
-            if isinstance(base, ak.contents.RecordArray):
+            if base.is_record:
                 if what is None:
                     what = ak.contents.IndexedOptionArray(
                         ak.index.Index64(

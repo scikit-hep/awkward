@@ -111,7 +111,7 @@ def _impl3(condition, x, y, mergebool, highlevel, behavior):
 
     def action(inputs, **kwargs):
         akcondition, left, right = inputs
-        if isinstance(akcondition, ak.contents.NumpyArray):
+        if akcondition.is_numpy:
             npcondition = backend.index_nplike.asarray(akcondition)
             tags = ak.index.Index8((npcondition == 0).view(np.int8))
             index = ak.index.Index64(
@@ -131,6 +131,11 @@ def _impl3(condition, x, y, mergebool, highlevel, behavior):
                     [left, right],
                     mergebool=mergebool,
                 ),
+            )
+        elif akcondition.is_unknown:
+            raise TypeError(
+                "cannot evaluate ak.where for EmptyArray(s), use `ak.values_astype` "
+                "to convert these to arrays with known dtypes"
             )
         else:
             return None

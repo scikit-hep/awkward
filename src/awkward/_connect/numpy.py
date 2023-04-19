@@ -226,6 +226,12 @@ def array_ufunc(ufunc, method, inputs, kwargs):
     inputs = _array_ufunc_custom_cast(inputs, behavior, backend)
 
     def action(inputs, **ignore):
+        if any(isinstance(x, ak.contents.EmptyArray) for x in inputs):
+            raise TypeError(
+                "cannot apply ufuncs to EmptyArray(s), use `ak.values_astype` "
+                "to convert these to arrays with known dtypes"
+            )
+
         signature = _array_ufunc_signature(ufunc, inputs)
         custom = find_ufunc(behavior, signature)
         # Do we have a custom ufunc (an override of the given ufunc)?

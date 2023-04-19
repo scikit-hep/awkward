@@ -103,6 +103,12 @@ def evaluate(
                     )
                 ),
             )
+        # Empty arrays are mainly placeholders; they should fail most operations
+        elif any(x.is_unknown for x in inputs):
+            raise TypeError(
+                "cannot evaluate numexpr.evaluate for EmptyArray(s), use `ak.values_astype` "
+                "to convert these to arrays with known dtypes"
+            )
         else:
             return None
 
@@ -140,6 +146,12 @@ def re_evaluate(local_dict=None):
         ):
             return (
                 ak.contents.NumpyArray(numexpr.re_evaluate(dict(zip(names, inputs)))),
+            )
+        # Empty arrays are mainly placeholders; they should fail most operations
+        elif any(x.is_unknown for x in inputs):
+            raise TypeError(
+                "cannot evaluate numexpr.reevaluate for EmptyArray(s), use `ak.values_astype` "
+                "to convert these to arrays with known dtypes"
             )
         else:
             return None

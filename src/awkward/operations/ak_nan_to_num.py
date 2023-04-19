@@ -96,7 +96,7 @@ def _impl(array, copy, nan, posinf, neginf, highlevel, behavior):
     else:
 
         def action(inputs, backend, **kwargs):
-            if all(isinstance(x, ak.contents.NumpyArray) for x in inputs):
+            if all(x.is_numpy for x in inputs):
                 tmp_layout = backend.nplike.asarray(inputs[0])
                 if id(nan) in broadcasting_ids:
                     tmp_nan = backend.nplike.asarray(inputs[broadcasting_ids[id(nan)]])
@@ -123,6 +123,12 @@ def _impl(array, copy, nan, posinf, neginf, highlevel, behavior):
                             neginf=tmp_neginf,
                         )
                     ),
+                )
+            # Empty arrays are mainly placeholders; they should fail most operations
+            elif any(x.is_unknown for x in inputs):
+                raise TypeError(
+                    "cannot evaluate ak.nan_to_num for EmptyArray(s), use `ak.values_astype` "
+                    "to convert these to arrays with known dtypes"
                 )
             else:
                 return None

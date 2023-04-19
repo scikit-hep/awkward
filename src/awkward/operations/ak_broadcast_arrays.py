@@ -226,6 +226,12 @@ def _impl(
         # the _first_ layout at that depth
         if depth == depth_limit:
             return tuple(inputs)
+        # Empty arrays are mainly placeholders; they should fail most operations
+        elif any(x.is_unknown for x in inputs):
+            raise TypeError(
+                "cannot broadcast EmptyArray(s), use `ak.values_astype` "
+                "to convert these to arrays with known dtypes"
+            )
         # Walk through non-leaf nodes
         elif all(
             x.purelist_depth == 1 and not (x.is_option or x.is_indexed) for x in inputs
