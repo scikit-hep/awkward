@@ -16,12 +16,16 @@ from awkward._behavior import (
     find_ufunc,
     find_ufunc_generic,
 )
+from awkward._errors import deprecate
 from awkward._layout import wrap_layout
 from awkward._nplikes import to_nplike
+from awkward._nplikes.numpy import NumpyMetadata
 from awkward._regularize import is_non_string_like_iterable
 from awkward._typing import Iterator
 from awkward._util import numpy_at_least
 from awkward.contents.numpyarray import NumpyArray
+
+np = NumpyMetadata.instance()
 
 # NumPy 1.13.1 introduced NEP13, without which Awkward ufuncs won't work, which
 # would be worse than lacking a feature: it would cause unexpected output.
@@ -226,11 +230,18 @@ def array_ufunc(ufunc, method, inputs, kwargs):
     inputs = _array_ufunc_custom_cast(inputs, behavior, backend)
 
     def action(inputs, **ignore):
+        # Empty arrays are mainly placeholders; they should fail most operations
         if any(isinstance(x, ak.contents.EmptyArray) for x in inputs):
-            raise TypeError(
-                "cannot apply ufuncs to EmptyArray(s), use `ak.values_astype` "
-                "to convert these to arrays with known dtypes"
+            deprecate(
+                "during broadcasting, an EmptyArray(s) was converted to a floating point NumpyArray. In future "
+                "this will become an error. Use `ak.values_astype` or `ak.enforce_type` to perform this conversion "
+                "manually if you need this behaviour in future.",
+                version="2.3.0",
             )
+            inputs = [
+                x.to_NumpyArray(np.float64, backend) if x.is_unknown else x
+                for x in inputs
+            ]
 
         signature = _array_ufunc_signature(ufunc, inputs)
         custom = find_ufunc(behavior, signature)

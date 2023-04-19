@@ -4,9 +4,14 @@ import warnings
 
 import awkward as ak
 from awkward._behavior import behavior_of
+from awkward._errors import deprecate
 from awkward._layout import wrap_layout
+from awkward._nplikes.numpy import NumpyMetadata
 
 _has_checked_version = False
+
+
+np = NumpyMetadata.instance()
 
 
 def _import_numexpr():
@@ -85,7 +90,19 @@ def evaluate(
         for x in arguments
     ]
 
-    def action(inputs, **ignore):
+    def action(inputs, backend, **ignore):
+        # Empty arrays are mainly placeholders; they should fail most operations
+        if any(x.is_unknown for x in inputs):
+            deprecate(
+                "during broadcasting, an EmptyArray(s) was converted to a floating point NumpyArray. In future "
+                "this will become an error. Use `ak.values_astype` or `ak.enforce_type` to perform this conversion "
+                "manually if you need this behaviour in future.",
+                version="2.3.0",
+            )
+            inputs = [
+                x.to_NumpyArray(np.float64, backend) if x.is_unknown else x
+                for x in inputs
+            ]
         if all(
             isinstance(x, ak.contents.NumpyArray)
             or not isinstance(x, ak.contents.Content)
@@ -102,12 +119,6 @@ def evaluate(
                         **kwargs,
                     )
                 ),
-            )
-        # Empty arrays are mainly placeholders; they should fail most operations
-        elif any(x.is_unknown for x in inputs):
-            raise TypeError(
-                "cannot evaluate numexpr.evaluate for EmptyArray(s), use `ak.values_astype` "
-                "to convert these to arrays with known dtypes"
             )
         else:
             return None
@@ -138,7 +149,19 @@ def re_evaluate(local_dict=None):
         for x in arguments
     ]
 
-    def action(inputs, **ignore):
+    def action(inputs, backend, **ignore):
+        # Empty arrays are mainly placeholders; they should fail most operations
+        if any(x.is_unknown for x in inputs):
+            deprecate(
+                "during broadcasting, an EmptyArray(s) was converted to a floating point NumpyArray. In future "
+                "this will become an error. Use `ak.values_astype` or `ak.enforce_type` to perform this conversion "
+                "manually if you need this behaviour in future.",
+                version="2.3.0",
+            )
+            inputs = [
+                x.to_NumpyArray(np.float64, backend) if x.is_unknown else x
+                for x in inputs
+            ]
         if all(
             isinstance(x, ak.contents.NumpyArray)
             or not isinstance(x, ak.contents.Content)
@@ -146,12 +169,6 @@ def re_evaluate(local_dict=None):
         ):
             return (
                 ak.contents.NumpyArray(numexpr.re_evaluate(dict(zip(names, inputs)))),
-            )
-        # Empty arrays are mainly placeholders; they should fail most operations
-        elif any(x.is_unknown for x in inputs):
-            raise TypeError(
-                "cannot evaluate numexpr.reevaluate for EmptyArray(s), use `ak.values_astype` "
-                "to convert these to arrays with known dtypes"
             )
         else:
             return None

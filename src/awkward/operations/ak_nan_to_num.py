@@ -2,6 +2,7 @@
 __all__ = ("nan_to_num",)
 import awkward as ak
 from awkward._behavior import behavior_of
+from awkward._errors import deprecate
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 
@@ -96,6 +97,18 @@ def _impl(array, copy, nan, posinf, neginf, highlevel, behavior):
     else:
 
         def action(inputs, backend, **kwargs):
+            # Empty arrays are mainly placeholders; they should fail most operations
+            if any(x.is_unknown for x in inputs):
+                deprecate(
+                    "during broadcasting, an EmptyArray(s) was converted to a floating point NumpyArray. In future "
+                    "this will become an error. Use `ak.values_astype` or `ak.enforce_type` to perform this conversion "
+                    "manually if you need this behaviour in future.",
+                    version="2.3.0",
+                )
+                inputs = [
+                    x.to_NumpyArray(np.float64, backend) if x.is_unknown else x
+                    for x in inputs
+                ]
             if all(x.is_numpy for x in inputs):
                 tmp_layout = backend.nplike.asarray(inputs[0])
                 if id(nan) in broadcasting_ids:
@@ -123,12 +136,6 @@ def _impl(array, copy, nan, posinf, neginf, highlevel, behavior):
                             neginf=tmp_neginf,
                         )
                     ),
-                )
-            # Empty arrays are mainly placeholders; they should fail most operations
-            elif any(x.is_unknown for x in inputs):
-                raise TypeError(
-                    "cannot evaluate ak.nan_to_num for EmptyArray(s), use `ak.values_astype` "
-                    "to convert these to arrays with known dtypes"
                 )
             else:
                 return None

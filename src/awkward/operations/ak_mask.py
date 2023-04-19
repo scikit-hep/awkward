@@ -103,14 +103,9 @@ def mask(array, mask, *, valid_when=True, highlevel=True, behavior=None):
 
 def _impl(array, mask, valid_when, highlevel, behavior):
     def action(inputs, backend, **kwargs):
-        # Empty arrays are mainly placeholders; they should fail most operations
-        if any(x.is_unknown for x in inputs):
-            raise TypeError(
-                "cannot evaluate ak.mask for EmptyArray(s), use `ak.values_astype` "
-                "to convert these to arrays with known dtypes"
-            )
-
         layoutarray, layoutmask = inputs
+        if layoutmask.is_unknown:
+            layoutmask = layoutmask.to_NumpyArray(np.bool_, backend)
         if layoutmask.is_numpy:
             m = layoutmask.data
             if not issubclass(m.dtype.type, (bool, np.bool_)):

@@ -26,9 +26,9 @@ def test_emptyarray():
     one = ak.highlevel.Array(ak.contents.NumpyArray(np.array([])))
     two = ak.highlevel.Array(ak.contents.EmptyArray())
     assert to_list(one + one) == []
-    with pytest.raises(TypeError, match=r"ufuncs to EmptyArray"):
+    with pytest.warns(DeprecationWarning, match=r"EmptyArray\(s\) was converted"):
         assert to_list(two + two) == []
-    with pytest.raises(TypeError, match=r"ufuncs to EmptyArray"):
+    with pytest.warns(DeprecationWarning, match=r"EmptyArray\(s\) was converted"):
         assert to_list(one + two) == []
 
 
