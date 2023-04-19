@@ -217,6 +217,8 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
             ).to_backend(backend)
             for name, layout in arrays.items()
         }
+        layouts = list(array_layouts.values())
+        fields = list(array_layouts.keys())
 
     else:
         arrays = list(arrays)
@@ -228,6 +230,8 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
             ).to_backend(backend)
             for layout in arrays
         ]
+        layouts = array_layouts
+        fields = None
 
     if with_name is not None:
         if parameters is None:
@@ -236,16 +240,11 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
             parameters = dict(parameters)
         parameters["__record__"] = with_name
 
-    if isinstance(array_layouts, dict):
-        layouts = list(array_layouts.values())
-    else:
-        layouts = array_layouts
-
     posaxis = maybe_posaxis(layouts[0], axis, 1)
-
     # Validate `posaxis`
     if posaxis is None or posaxis < 0:
         raise ValueError("negative axis depth is ambiguous")
+    # Ensure other layouts have same positive value for axis
     for layout in layouts[1:]:
         if maybe_posaxis(layout, axis, 1) != posaxis:
             raise ValueError(
@@ -256,10 +255,10 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
     if nested is None or nested is False:
         nested = []
     elif nested is True:
-        if isinstance(array_layouts, dict):
-            nested = list(array_layouts.keys())[:-1]
+        if fields is not None:
+            nested = list(fields)[:-1]
         else:
-            nested = list(range(len(array_layouts))[:-1])
+            nested = list(range(len(layouts))[:-1])
     else:
         if isinstance(array_layouts, dict):
             if any(not (isinstance(x, str) and x in array_layouts) for x in nested):
@@ -283,17 +282,8 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
                 )
 
     if posaxis == 0:
-        if isinstance(array_layouts, dict):
-            fields = []
-            tonested = []
-            for i, (name, _) in enumerate(array_layouts.items()):
-                fields.append(name)
-                if name in nested:
-                    tonested.append(i)
-            nested = tonested
-
-        else:
-            fields = None
+        if fields is not None:
+            nested = [i for i, name in enumerate(fields) if name in nested]
 
         indexes = [
             ak.index.Index64(backend.index_nplike.reshape(x, (-1,)))
@@ -377,29 +367,15 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
         # This list *must* be sorted in reverse order
         axes_to_flatten.reverse()
 
-        if isinstance(array_layouts, dict):
-            fields = list(array_layouts.keys())
-            new_layouts = [
-                ak._do.recursively_apply(
-                    layout,
-                    apply_pad_inner_list_at_axis,
-                    behavior,
-                    lateral_context={"i": i},
-                )
-                for i, (_, layout) in enumerate(array_layouts.items())
-            ]
-
-        else:
-            fields = None
-            new_layouts = [
-                ak._do.recursively_apply(
-                    layout,
-                    apply_pad_inner_list_at_axis,
-                    behavior,
-                    lateral_context={"i": i},
-                )
-                for i, layout in enumerate(array_layouts)
-            ]
+        new_layouts = [
+            ak._do.recursively_apply(
+                layout,
+                apply_pad_inner_list_at_axis,
+                behavior,
+                lateral_context={"i": i},
+            )
+            for i, layout in enumerate(layouts)
+        ]
 
         def apply_build_record(inputs, depth, **kwargs):
             if depth == posaxis + len(array_layouts):
