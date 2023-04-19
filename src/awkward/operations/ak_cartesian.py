@@ -4,6 +4,7 @@ import awkward as ak
 from awkward._backends.dispatch import backend_of
 from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of
+from awkward._errors import AxisError
 from awkward._layout import maybe_posaxis, wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
@@ -243,16 +244,16 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
     posaxis = maybe_posaxis(layouts[0], axis, 1)
     # Validate `posaxis`
     if posaxis is None or posaxis < 0:
-        raise np.AxisError("negative axis depth is ambiguous")
+        raise AxisError("negative axis depth is ambiguous")
     # Ensure other layouts have same positive value for axis
     for layout in layouts[1:]:
         if maybe_posaxis(layout, axis, 1) != posaxis:
-            raise np.AxisError(
+            raise AxisError(
                 "arrays to cartesian-product do not have the same depth for negative axis"
             )
     depths = [obj.purelist_depth for obj in layouts]
     if posaxis >= max(depths):
-        raise np.AxisError(
+        raise AxisError(
             f"axis={axis} exceeds the max depth of the given arrays (which is {max(depths)})"
         )
 
