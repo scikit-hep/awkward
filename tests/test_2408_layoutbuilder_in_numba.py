@@ -85,22 +85,20 @@ def test_box():
     assert out2.snapshot().tolist() == list(range(15))
 
 
-# def test_len():
-#     @numba.njit
-#     def f3(x):
-#         return x._length_get
-#
-#     builder = NumpyBuilder(np.int32, "", initial=10, resize=2.0)
-#
-#     assert f3(builder) == 0
-#
-#     builder.append(123)
-#
-#     assert f3(builder) == 1
-#
-#
-#
-#
+def test_len():
+    @numba.njit
+    def f3(x):
+        return len(x)
+
+    builder = NumpyBuilder(np.int32, "", initial=10, resize=2.0)
+
+    assert f3(builder) == 0
+
+    builder.append(123)
+
+    assert f3(builder) == 1
+
+
 # def test_from_data():
 #     @numba.njit
 #     def f4():

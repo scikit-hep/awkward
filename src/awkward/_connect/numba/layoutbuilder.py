@@ -97,6 +97,10 @@ class NumpyBuilderType(numba.types.Type):
         return ak.numba.GrowableBufferType(self._dtype)
 
     @property
+    def length(self):
+        return numba.types.float64
+
+    @property
     def parameters(self):
         return numba.types.StringLiteral
 
@@ -202,11 +206,21 @@ def NumpyBuilder_ctor(dtype):
 
 
 @numba.extending.overload_method(NumpyBuilderType, "_length_get", inline="always")
-def NumpyBuilder_length_get(builder):
+def NumpyBuilder_length(builder):
     def getter(builder):
-        return builder.length
+        return builder._data._length_pos[0]
 
     return getter
+
+
+@numba.extending.overload(len)
+def NumpyBuilderType_len(builder):
+    if isinstance(builder, NumpyBuilderType):
+
+        def len_impl(builder):
+            return builder._length_get()
+
+        return len_impl
 
 
 @numba.extending.overload_method(NumpyBuilderType, "append")
