@@ -8,15 +8,19 @@ import awkward as ak
 from awkward._connect.numba.growablebuffer import GrowableBuffer, GrowableBufferType
 
 
-class NumpyBuilder:
-    def __init__(self, dtype, *, parameters="", initial=1024, resize=8.0):
+class LayoutBuilder:
+    ...
+
+
+class NumpyBuilder(LayoutBuilder):
+    def __init__(self, dtype, *, parameters=None, initial=1024, resize=8.0):
         self._dtype = dtype
         self._data = GrowableBuffer(dtype=dtype, initial=initial, resize=resize)
         self._parameters = parameters
         self.set_id(0)
 
     @classmethod
-    def _from_data(cls, data):
+    def _from_buffer(cls, data):
         out = cls.__new__(cls)
         out._dtype = data.dtype
         out._data = data  # GrowableBuffer(dtype=dtype, initial=initial, resize=resize)
@@ -25,6 +29,10 @@ class NumpyBuilder:
 
     def __repr__(self):
         return f"<NumpyBuilder of {self.dtype!r} with {self.length} items>"
+
+    @property
+    def type(self):
+        ...
 
     @property
     def dtype(self):
@@ -60,11 +68,11 @@ class NumpyBuilder:
         """
         Converts the currently accumulated data into an #ak.Array.
         """
-        # FIXME:
+        # FIXME: Yes, no numba
         return ak.contents.NumpyArray(self._data.snapshot())
 
     def form(self):
-        # FIXME:
+        # FIXME: no numba
         params = "" if self._parameters == "" else f", parameters: {self._parameters}"
         return f'{{"class": "NumpyArray", "primitive": "{ak.types.numpytype.dtype_to_primitive(self._data.dtype)}", "form_key": "node{self._id}"{params}}}'
 
@@ -79,16 +87,16 @@ class NumpyBuilderType(numba.types.Type):
         return self._dtype
 
     @property
+    def parameters(self):
+        return numba.types.StringLiteral
+
+    @property
     def data(self):
         return ak.numba.GrowableBufferType(self._dtype)
 
     @property
     def length(self):
         return numba.types.float64
-
-    @property
-    def parameters(self):
-        return numba.types.StringLiteral
 
 
 @numba.extending.typeof_impl.register(NumpyBuilder)
@@ -138,7 +146,7 @@ def NumpyBuilderType_unbox(typ, obj, c):
 def NumpyBuilderType_box(typ, val, c):
     # get PyObject of the NumpyBuilder class
     NumpyBuilder_obj = c.pyapi.unserialize(c.pyapi.serialize_object(NumpyBuilder))
-    from_data_obj = c.pyapi.object_getattr_string(NumpyBuilder_obj, "_from_data")
+    from_data_obj = c.pyapi.object_getattr_string(NumpyBuilder_obj, "_from_buffer")
 
     builder = numba.core.cgutils.create_struct_proxy(typ)(
         c.context, c.builder, value=val
@@ -156,12 +164,12 @@ def NumpyBuilderType_box(typ, val, c):
     return out
 
 
-def _from_data():
+def _from_buffer():
     ...
 
 
-@numba.extending.type_callable(_from_data)
-def NumpyBuilder_from_data_typer(context):
+@numba.extending.type_callable(_from_buffer)
+def NumpyBuilder_from_buffer_typer(context):
     def typer(data):
         if isinstance(data, GrowableBufferType) and isinstance(
             data.dtype, numba.types.Array
@@ -171,8 +179,8 @@ def NumpyBuilder_from_data_typer(context):
     return typer
 
 
-@numba.extending.lower_builtin(_from_data, GrowableBufferType)
-def NumpyBuilder_from_data_impl(context, builder, sig, args):
+@numba.extending.lower_builtin(_from_buffer, GrowableBufferType)
+def NumpyBuilder_from_buffer_impl(context, builder, sig, args):
     out = numba.core.cgutils.create_struct_proxy(sig.return_type)(context, builder)
     out.data = args
 
@@ -183,10 +191,10 @@ def NumpyBuilder_from_data_impl(context, builder, sig, args):
 
 
 @numba.extending.overload(NumpyBuilder)
-def NumpyBuilder_ctor(dtype):
+def NumpyBuilder_ctor(dtype, parameters=None, initial=1024, resize=8.0):
     def ctor_impl(dtype, parameters=None, initial=1024, resize=8.0):
-        builder = NumpyBuilder(dtype, parameters, initial, resize)
-        return builder
+        data = GrowableBuffer(dtype, initial, resize)
+        return _from_buffer(data)
 
     return ctor_impl
 
