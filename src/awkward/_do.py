@@ -7,6 +7,7 @@ from numbers import Integral
 
 import awkward as ak
 from awkward._backends.backend import Backend
+from awkward._errors import AxisError
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._typing import Any, AxisMaybeNone, Literal
 from awkward.contents.content import ActionType, Content
@@ -154,13 +155,13 @@ def unique(layout: Content, axis=None):
             branch, depth = layout.branch_depth
             if branch:
                 if negaxis <= 0:
-                    raise np.AxisError(
+                    raise AxisError(
                         "cannot use non-negative axis on a nested list structure "
                         "of variable depth (negative axis counts from the leaves "
                         "of the tree; non-negative from the root)"
                     )
                 if negaxis > depth:
-                    raise np.AxisError(
+                    raise AxisError(
                         "cannot use axis={} on a nested list structure that splits into "
                         "different depths, the minimum of which is depth={} from the leaves".format(
                             axis, depth
@@ -170,7 +171,7 @@ def unique(layout: Content, axis=None):
                 if negaxis <= 0:
                     negaxis = negaxis + depth
                 if not (0 < negaxis and negaxis <= depth):
-                    raise np.AxisError(
+                    raise AxisError(
                         "axis={} exceeds the depth of this array ({})".format(
                             axis, depth
                         )
@@ -183,7 +184,7 @@ def unique(layout: Content, axis=None):
 
         return layout._unique(negaxis, starts, parents, 1)
 
-    raise np.AxisError(
+    raise AxisError(
         "unique expects axis 'None' or '-1', got axis={} that is not supported yet".format(
             axis
         )
