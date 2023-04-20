@@ -65,13 +65,8 @@ def test_unbox():
     builder = NumpyBuilder(np.int32, parameters="", initial=10, resize=2.0)
     f1(builder)
 
-    @numba.njit
-    def f1_1(x):
-        x  # noqa: B018 (we want to test the unboxing)
-        return 3.14
-
     builder = EmptyBuilder()
-    f1_1(builder)
+    f1(builder)
 
 
 def test_unbox_for_loop():
