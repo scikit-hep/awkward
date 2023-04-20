@@ -223,7 +223,7 @@ class RegularArray(Content):
 
     def _to_typetracer(self, forget_length: bool) -> Self:
         return RegularArray(
-            self._content._to_typetracer(False),
+            self._content._to_typetracer(forget_length),
             self._size,
             unknown_length if forget_length else self._length,
             parameters=self._parameters,
