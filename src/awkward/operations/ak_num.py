@@ -2,6 +2,7 @@
 __all__ = ("num",)
 import awkward as ak
 from awkward._behavior import behavior_of
+from awkward._errors import AxisError
 from awkward._layout import maybe_posaxis, wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import is_integer, regularize_axis
@@ -96,7 +97,7 @@ def _impl(array, axis, highlevel, behavior):
             return ak.contents.NumpyArray(layout.stops.data - layout.starts.data)
 
         elif layout.is_leaf:
-            raise np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
+            raise AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
 
     out = ak._do.recursively_apply(layout, action, behavior, numpy_to_regular=True)
 

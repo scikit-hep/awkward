@@ -6,6 +6,7 @@ import awkward as ak
 from awkward._backends.dispatch import backend_of
 from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of
+from awkward._errors import AxisError
 from awkward._layout import maybe_posaxis, wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import is_sized_iterable, regularize_axis
@@ -136,7 +137,7 @@ def _impl(array, value, axis, highlevel, behavior):
                     return layout
 
             elif layout.is_leaf:
-                raise np.AxisError(
+                raise AxisError(
                     f"axis={axis} exceeds the depth of this array ({depth})"
                 )
 

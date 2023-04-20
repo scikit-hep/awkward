@@ -5,6 +5,7 @@ from collections.abc import Mapping
 
 from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of
+from awkward._errors import AxisError
 from awkward._nplikes.dispatch import nplike_of
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
@@ -156,7 +157,7 @@ def maybe_posaxis(layout, axis, depth):
 
     if isinstance(layout, Record):
         if axis == 0:
-            raise np.AxisError("Record type at axis=0 is a scalar, not an array")
+            raise AxisError("Record type at axis=0 is a scalar, not an array")
         return maybe_posaxis(layout._array, axis, depth)
 
     if axis >= 0:
