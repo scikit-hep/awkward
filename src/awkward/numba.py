@@ -1,5 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+import math
+
+import numpy  # noqa: TID251
+
 import awkward as ak
 
 _has_checked_version = False
@@ -33,6 +37,119 @@ conda install numba"""
     _register()
 
 
+class GrowableBuffer:
+    def __init__(self, dtype, *, initial=1024, resize=8.0):
+        register_and_check()
+
+        import numba
+
+        # all mutable data are in arrays that can be in-place shared with Numba
+        self._panels = numba.typed.List([numpy.empty((initial,), dtype=dtype)])
+        self._length_pos = numpy.zeros((2,), dtype=numpy.int64)
+        self._resize = resize
+
+    @classmethod
+    def _from_data(cls, panels, length_pos, resize):
+        out = cls.__new__(cls)
+        out._panels = panels
+        out._length_pos = length_pos
+        out._resize = resize
+        return out
+
+    @property
+    def dtype(self):
+        return self._panels[0].dtype
+
+    def __repr__(self):
+        return f"<GrowableBuffer of {self.dtype!r} with {self._length} items>"
+
+    @property
+    def _length(self):
+        return self._length_pos[0]
+
+    @_length.setter
+    def _length(self, value):
+        self._length_pos[0] = value
+
+    def _length_inc(self, value):
+        self._length_pos[0] += value
+
+    @property
+    def _pos(self):
+        return self._length_pos[1]
+
+    @_pos.setter
+    def _pos(self, value):
+        self._length_pos[1] = value
+
+    def _pos_inc(self, value):
+        self._length_pos[1] += value
+
+    def __len__(self):
+        return self._length
+
+    def append(self, datum):
+        if self._pos == len(self._panels[-1]):
+            self._add_panel()
+
+        self._panels[-1][self._pos] = datum
+        self._pos_inc(1)
+        self._length_inc(1)
+
+    def extend(self, data):
+        panel_index = len(self._panels) - 1
+        pos = self._pos
+
+        available = len(self._panels[-1]) - pos
+        remaining = len(data)
+
+        if remaining > available:
+            panel_length = int(math.ceil(len(self._panels[0]) * self._resize))
+
+            self._panels.append(
+                numpy.empty((max(remaining, panel_length),), dtype=self.dtype)
+            )
+            self._pos = 0
+            available += len(self._panels[-1])
+
+        while remaining > 0:
+            panel = self._panels[panel_index]
+            available_in_panel = len(panel) - pos
+            to_write = min(remaining, available_in_panel)
+
+            start = len(data) - remaining
+            panel[pos : pos + to_write] = data[start : start + to_write]
+
+            if panel_index == len(self._panels) - 1:
+                self._pos_inc(to_write)
+            remaining -= to_write
+            pos = 0
+            panel_index += 1
+
+        self._length_inc(len(data))
+
+    def _add_panel(self):
+        panel_length = int(math.ceil(len(self._panels[0]) * self._resize))
+
+        self._panels.append(numpy.empty((panel_length,), dtype=self.dtype))
+        self._pos = 0
+
+    def snapshot(self):
+        out = numpy.empty((self._length,), dtype=self.dtype)
+
+        start = 0
+        stop = 0
+        for panel in self._panels[:-1]:  # full panels, not including the last
+            stop += len(panel)
+            out[start:stop] = panel
+            start = stop
+
+        stop += self._pos
+        out[start:stop] = self._panels[-1][: self._pos]
+
+        return out
+
+
 def _register():
     if hasattr(ak.numba, "ArrayViewType"):
         return
@@ -64,7 +181,6 @@ def _register():
     n.ArrayBuilderType = awkward._connect.numba.builder.ArrayBuilderType
     n.ArrayBuilderModel = awkward._connect.numba.builder.ArrayBuilderModel
     n.cuda = awkward._connect.numba.arrayview_cuda.ArrayViewArgHandler()
-    n.GrowableBuffer = awkward._connect.numba.growablebuffer.GrowableBuffer
     n._from_data = awkward._connect.numba.growablebuffer._from_data
 
     @numba.extending.typeof_impl.register(ak.highlevel.Array)
