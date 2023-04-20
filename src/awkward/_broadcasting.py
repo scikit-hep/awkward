@@ -817,14 +817,14 @@ def apply_step(
     def broadcast_any_union():
         if not backend.nplike.known_data:
             # assert False
-            union_num_contents, length = [], None
+            union_num_contents = []
+            length = None
             for x in contents:
                 if x.is_union:
                     x._touch_data(recursive=False)
                     union_num_contents.append(len(x.contents))
                     if length is None:
-                        length = x.tags.data.shape[0]
-            assert length is not unknown_length
+                        length = x.length
 
             all_combos = list(
                 itertools.product(*[range(x) for x in union_num_contents])
@@ -832,7 +832,8 @@ def apply_step(
 
             tags = backend.index_nplike.empty(length, dtype=np.int8)
             index = backend.index_nplike.empty(length, dtype=np.int64)
-            numoutputs, outcontents = None, []
+            numoutputs = None
+            outcontents = []
             for combo in all_combos:
                 nextinputs = []
                 i = 0
@@ -856,13 +857,9 @@ def apply_step(
                     )
                 )
                 assert isinstance(outcontents[-1], tuple)
-                if numoutputs is None:
-                    numoutputs = outcontents[-1].length
-                else:
-                    assert (
-                        numoutputs is unknown_length
-                        or outcontents[-1].length is unknown_length
-                    ) or numoutputs == outcontents[-1].length
+                if numoutputs is not None:
+                    assert numoutputs == len(outcontents[-1])
+                numoutputs = len(outcontents[-1])
 
             assert numoutputs is not None
 
