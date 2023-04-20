@@ -7,7 +7,7 @@ import awkward as ak
 from awkward._backends.backend import Backend
 from awkward._backends.numpy import NumpyBackend
 from awkward._backends.typetracer import TypeTracerBackend
-from awkward._errors import deprecate
+from awkward._errors import AxisError, deprecate
 from awkward._layout import maybe_posaxis
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import IndexType, NumpyMetadata
@@ -236,7 +236,7 @@ class EmptyArray(Content):
     def _offsets_and_flattened(self, axis, depth):
         posaxis = maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 == depth:
-            raise np.AxisError(self, "axis=0 not allowed for flatten")
+            raise AxisError(self, "axis=0 not allowed for flatten")
         else:
             offsets = ak.index.Index64.zeros(1, nplike=self._backend.index_nplike)
             return (
@@ -267,7 +267,7 @@ class EmptyArray(Content):
                 backend=self._backend,
             )
         else:
-            raise np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
+            raise AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
 
     def _numbers_to_type(self, name, including_unknown):
         if including_unknown:
@@ -331,7 +331,7 @@ class EmptyArray(Content):
     def _pad_none(self, target, axis, depth, clip):
         posaxis = maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 != depth:
-            raise np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
+            raise AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
         else:
             return self._pad_none_axis0(target, True)
 

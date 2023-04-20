@@ -8,6 +8,7 @@ from awkward._backends.backend import Backend
 from awkward._backends.dispatch import backend_of
 from awkward._backends.numpy import NumpyBackend
 from awkward._backends.typetracer import TypeTracerBackend
+from awkward._errors import AxisError
 from awkward._layout import maybe_posaxis
 from awkward._nplikes import to_nplike
 from awkward._nplikes.jax import Jax
@@ -407,13 +408,13 @@ class NumpyArray(Content):
     def _offsets_and_flattened(self, axis, depth):
         posaxis = maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 == depth:
-            raise np.AxisError("axis=0 not allowed for flatten")
+            raise AxisError("axis=0 not allowed for flatten")
 
         elif len(self.shape) != 1:
             return self.to_RegularArray()._offsets_and_flattened(axis, depth)
 
         else:
-            raise np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
+            raise AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
 
     def _mergeable_next(self, other, mergebool):
         # Is the other content is an identity, or a union?
@@ -514,7 +515,7 @@ class NumpyArray(Content):
         if posaxis is not None and posaxis + 1 == depth:
             return self._local_index_axis0()
         elif len(self.shape) <= 1:
-            raise np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
+            raise AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
         else:
             return self.to_RegularArray()._local_index(axis, depth)
 
@@ -1064,7 +1065,7 @@ class NumpyArray(Content):
         if posaxis is not None and posaxis + 1 == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         elif len(self.shape) <= 1:
-            raise np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
+            raise AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
         else:
             return self.to_RegularArray()._combinations(
                 n, replacement, recordlookup, parameters, axis, depth
@@ -1200,7 +1201,7 @@ class NumpyArray(Content):
             return self.to_RegularArray()._pad_none(target, axis, depth, clip)
         posaxis = maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 != depth:
-            raise np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
+            raise AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
         if not clip:
             if target < self.length:
                 return self
