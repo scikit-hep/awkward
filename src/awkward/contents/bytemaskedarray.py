@@ -568,7 +568,7 @@ class ByteMaskedArray(Content):
 
     def project(self, mask=None):
         mask_length = self._mask.length
-        numnull = ak.index.Index64.zeros(1, nplike=self._backend.index_nplike)
+        _numnull = ak.index.Index64.zeros(1, nplike=self._backend.index_nplike)
 
         if mask is not None:
             if self._backend.nplike.known_data and mask_length != mask.length:
@@ -608,23 +608,24 @@ class ByteMaskedArray(Content):
 
         else:
             assert (
-                numnull.nplike is self._backend.index_nplike
+                _numnull.nplike is self._backend.index_nplike
                 and self._mask.nplike is self._backend.index_nplike
             )
             self._handle_error(
                 self._backend[
                     "awkward_ByteMaskedArray_numnull",
-                    numnull.dtype.type,
+                    _numnull.dtype.type,
                     self._mask.dtype.type,
                 ](
-                    numnull.data,
+                    _numnull.data,
                     self._mask.data,
                     mask_length,
                     self._valid_when,
                 )
             )
+            numnull = self._backend.index_nplike.index_as_shape_item(_numnull[0])
             nextcarry = ak.index.Index64.empty(
-                mask_length - numnull[0], nplike=self._backend.index_nplike
+                mask_length - numnull, nplike=self._backend.index_nplike
             )
             assert (
                 nextcarry.nplike is self._backend.index_nplike
