@@ -2235,7 +2235,7 @@ class ArrayBuilder(Sized):
     be considered the "least effort" approach.
     """
 
-    def __init__(self, *, behavior=None, initial=1024, resize=1.5):
+    def __init__(self, *, behavior=None, initial=1024, resize=8):
         self._layout = _ext.ArrayBuilder(initial=initial, resize=resize)
         self.behavior = behavior
 
