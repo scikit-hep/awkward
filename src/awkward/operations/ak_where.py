@@ -119,10 +119,12 @@ def _impl3(condition, x, y, mergebool, highlevel, behavior):
                 nplike=backend.index_nplike,
             )
             if not isinstance(left, ak.contents.Content):
-                left = ak.contents.NumpyArray(backend.nplike.repeat(left, tags.length))
+                left = ak.contents.NumpyArray(
+                    backend.nplike.repeat(backend.nplike.asarray(left), tags.length)
+                )
             if not isinstance(right, ak.contents.Content):
                 right = ak.contents.NumpyArray(
-                    backend.nplike.repeat(right, tags.length)
+                    backend.nplike.repeat(backend.nplike.asarray(right), tags.length)
                 )
             return (
                 ak.contents.UnionArray.simplified(
