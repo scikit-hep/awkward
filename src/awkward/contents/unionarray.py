@@ -117,6 +117,8 @@ class UnionArray(Content):
 
         if len(contents) < 2:
             raise TypeError(f"{type(self).__name__} must have at least 2 'contents'")
+
+        n_seen_options = 0
         for content in contents:
             if not isinstance(content, Content):
                 raise TypeError(
@@ -130,6 +132,14 @@ class UnionArray(Content):
                         type(self).__name__, type(content).__name__
                     )
                 )
+            elif content.is_option:
+                n_seen_options += 1
+
+        if n_seen_options not in {0, len(contents)}:
+            raise TypeError(
+                "{0} must either be comprised of entirely optional contents, or no optional contents; "
+                "try {0}.simplified instead".format(type(self).__name__)
+            )
 
         if (
             not (tags.length is unknown_length or index.length is unknown_length)
@@ -384,6 +394,17 @@ class UnionArray(Content):
             raise NotImplementedError(
                 "FIXME: handle UnionArray with more than 127 contents"
             )
+
+        # If any contents are options, ensure all contents are options!
+        if any(c.is_option for c in contents):
+            contents = [
+                c
+                if c.is_option
+                else c.to_IndexedOptionArray64()
+                if c.is_indexed
+                else ak.contents.UnmaskedArray(c)
+                for c in contents
+            ]
 
         if len(contents) == 1:
             next = contents[0]._carry(index, True)
