@@ -9,6 +9,7 @@ from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._singleton import Singleton
 from awkward._typing import (
     Literal,
+    NamedTuple,
     Protocol,
     Self,
     SupportsIndex,
@@ -17,6 +18,13 @@ from awkward._typing import (
 )
 
 IndexType: TypeAlias = "int | ArrayLike"
+
+
+class UniqueAllResult(NamedTuple):
+    values: ArrayLike
+    indices: ArrayLike
+    inverse_indices: ArrayLike
+    counts: ArrayLike
 
 
 class ArrayLike(Protocol):
@@ -400,6 +408,21 @@ class NumpyLike(Singleton, Protocol):
 
     @abstractmethod
     def unique_values(self, x: ArrayLike) -> ArrayLike:
+        ...
+
+    @abstractmethod
+    def unique_all(self, x: ArrayLike) -> UniqueAllResult:
+        ...
+
+    @abstractmethod
+    def sort(
+        self,
+        x: ArrayLike,
+        *,
+        axis: int = -1,
+        descending: bool = False,
+        stable: bool = True,
+    ) -> ArrayLike:
         ...
 
     @abstractmethod

@@ -5,7 +5,13 @@ import math
 
 import numpy
 
-from awkward._nplikes.numpylike import ArrayLike, IndexType, NumpyLike, NumpyMetadata
+from awkward._nplikes.numpylike import (
+    ArrayLike,
+    IndexType,
+    NumpyLike,
+    NumpyMetadata,
+    UniqueAllResult,
+)
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._typing import Final, Literal
 
@@ -191,6 +197,31 @@ class ArrayModuleNumpyLike(NumpyLike):
             return_inverse=False,
             equal_nan=False,
         )
+
+    def unique_all(self, x: ArrayLike) -> UniqueAllResult:
+        values, indices, inverse_indices, counts = self._module.unique(
+            x, return_counts=True, return_index=True, return_inverse=True
+        )
+        # np.unique() flattens inverse indices, but they need to share x's shape
+        # See https://github.com/numpy/numpy/issues/20638
+        inverse_indices = inverse_indices.reshape(x.shape)
+        return UniqueAllResult(values, indices, inverse_indices, counts)
+
+    def sort(
+        self,
+        x: ArrayLike,
+        *,
+        axis: int = -1,
+        descending: bool = False,
+        stable: bool = True,
+    ) -> ArrayLike:
+        # Note: this keyword argument is different, and the default is different.
+        kind = "stable" if stable else "quicksort"
+        res = self._module.sort(x, axis=axis, kind=kind)
+        if descending:
+            return self._module.flip(res, axis=axis)
+        else:
+            return res
 
     def concat(
         self,

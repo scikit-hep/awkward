@@ -1583,7 +1583,7 @@ class UnionArray(Content):
 
     def _is_equal_to(self, other, index_dtype, numpyarray):
         return (
-            self.tags == other.tags
+            self.tags.is_equal_to(other.tags)
             and self.index.is_equal_to(other.index, index_dtype, numpyarray)
             and len(self.contents) == len(other.contents)
             and all(
