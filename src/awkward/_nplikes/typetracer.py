@@ -1118,7 +1118,25 @@ class TypeTracer(NumpyLike):
     ) -> TypeTracerArray:
         try_touch_data(x)
         try_touch_data(repeats)
-        raise NotImplementedError
+
+        if axis is None:
+            size = x.size
+            if isinstance(repeats, TypeTracerArray) and repeats.ndim > 0:
+                raise NotImplementedError
+            elif is_unknown_scalar(repeats):
+                size = size * self.index_as_shape_item(repeats)
+            else:
+                size = size * repeats
+            return TypeTracerArray._new(x.dtype, (size,))
+        else:
+            shape = list(x.shape)
+            if isinstance(repeats, TypeTracerArray) and repeats.ndim > 0:
+                raise NotImplementedError
+            elif is_unknown_scalar(repeats):
+                shape[axis] = shape[axis] * self.index_as_shape_item(repeats)
+            else:
+                shape[axis] = shape[axis] * repeats
+            return TypeTracerArray._new(x.dtype, shape=tuple(shape))
 
     def tile(self, x: ArrayLike, reps: int) -> TypeTracerArray:
         try_touch_data(x)

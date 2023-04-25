@@ -124,7 +124,7 @@ def _impl(base, what, where, highlevel, behavior):
                     )
                 elif not isinstance(what, ak.contents.Content):
                     what = ak.contents.NumpyArray(
-                        backend.nplike.repeat(what, len(base))
+                        backend.nplike.repeat(backend.nplike.asarray(what), len(base))
                     )
                 if base.is_tuple:
                     # Preserve tuple-ness
