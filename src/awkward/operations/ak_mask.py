@@ -1,7 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
+__all__ = ("mask",)
 import awkward as ak
-from awkward._nplikes import nplike_of
+from awkward._behavior import behavior_of
+from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
@@ -101,14 +102,12 @@ def mask(array, mask, *, valid_when=True, highlevel=True, behavior=None):
 
 
 def _impl(array, mask, valid_when, highlevel, behavior):
-    def action(inputs, **kwargs):
+    def action(inputs, backend, **kwargs):
         layoutarray, layoutmask = inputs
         if isinstance(layoutmask, ak.contents.NumpyArray):
-            m = nplike_of(layoutmask).asarray(layoutmask)
+            m = backend.nplike.asarray(layoutmask)
             if not issubclass(m.dtype.type, (bool, np.bool_)):
-                raise ak._errors.wrap_error(
-                    ValueError(f"mask must have boolean type, not {repr(m.dtype)}")
-                )
+                raise ValueError(f"mask must have boolean type, not {repr(m.dtype)}")
             bytemask = ak.index.Index8(m.view(np.int8))
             return (
                 ak.contents.ByteMaskedArray.simplified(
@@ -121,7 +120,7 @@ def _impl(array, mask, valid_when, highlevel, behavior):
     layoutarray = ak.operations.to_layout(array, allow_record=False, allow_other=False)
     layoutmask = ak.operations.to_layout(mask, allow_record=False, allow_other=False)
 
-    behavior = ak._util.behavior_of(array, mask, behavior=behavior)
+    behavior = behavior_of(array, mask, behavior=behavior)
     out = ak._broadcasting.broadcast_and_apply(
         [layoutarray, layoutmask],
         action,
@@ -130,4 +129,4 @@ def _impl(array, mask, valid_when, highlevel, behavior):
         right_broadcast=False,
     )
     assert isinstance(out, tuple) and len(out) == 1
-    return ak._util.wrap(out[0], behavior, highlevel)
+    return wrap_layout(out[0], behavior, highlevel)

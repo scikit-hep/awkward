@@ -1,4 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+__all__ = ("validity_error",)
 
 import awkward as ak
 
@@ -30,6 +31,6 @@ def _impl(array, exception):
     out = ak._do.validity_error(layout, path="highlevel")
 
     if out not in (None, "") and exception:
-        raise ak._errors.wrap_error(ValueError(out))
+        raise ValueError(out)
     else:
         return out

@@ -1,49 +1,41 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 from collections.abc import Iterable
+from itertools import permutations
 
-import awkward as ak
-from awkward.forms.form import _type_parameters_equal
+from awkward._parameters import parameters_are_equal, type_parameters_equal
+from awkward._typing import final
 from awkward.types.type import Type
-from awkward.typing import final
 
 
 @final
 class UnionType(Type):
     def __init__(self, contents, *, parameters=None, typestr=None):
         if not isinstance(contents, Iterable):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} 'contents' must be iterable, not {}".format(
-                        type(self).__name__, repr(contents)
-                    )
+            raise TypeError(
+                "{} 'contents' must be iterable, not {}".format(
+                    type(self).__name__, repr(contents)
                 )
             )
         if not isinstance(contents, list):
             contents = list(contents)
         for content in contents:
             if not isinstance(content, Type):
-                raise ak._errors.wrap_error(
-                    TypeError(
-                        "{} all 'contents' must be Type subclasses, not {}".format(
-                            type(self).__name__, repr(content)
-                        )
+                raise TypeError(
+                    "{} all 'contents' must be Type subclasses, not {}".format(
+                        type(self).__name__, repr(content)
                     )
                 )
         if parameters is not None and not isinstance(parameters, dict):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} 'parameters' must be of type dict or None, not {}".format(
-                        type(self).__name__, repr(parameters)
-                    )
+            raise TypeError(
+                "{} 'parameters' must be of type dict or None, not {}".format(
+                    type(self).__name__, repr(parameters)
                 )
             )
         if typestr is not None and not isinstance(typestr, str):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} 'typestr' must be of type string or None, not {}".format(
-                        type(self).__name__, repr(typestr)
-                    )
+            raise TypeError(
+                "{} 'typestr' must be of type string or None, not {}".format(
+                    type(self).__name__, repr(typestr)
                 )
             )
         self._contents = contents
@@ -92,11 +84,19 @@ class UnionType(Type):
         args = [repr(self._contents), *self._repr_args()]
         return "{}({})".format(type(self).__name__, ", ".join(args))
 
-    def __eq__(self, other):
-        if isinstance(other, UnionType):
-            return (
-                _type_parameters_equal(self._parameters, other._parameters)
-                and self._contents == other._contents
+    def _is_equal_to(self, other, all_parameters: bool):
+        compare_parameters = (
+            parameters_are_equal if all_parameters else type_parameters_equal
+        )
+        return (
+            isinstance(other, type(self))
+            and compare_parameters(self._parameters, other._parameters)
+            and len(self._contents) == len(other._contents)
+            and any(
+                all(
+                    this._is_equal_to(that, all_parameters)
+                    for this, that in zip(self._contents, contents)
+                )
+                for contents in permutations(other._contents)
             )
-        else:
-            return False
+        )

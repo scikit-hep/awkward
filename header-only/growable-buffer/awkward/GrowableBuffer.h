@@ -54,7 +54,15 @@ namespace awkward {
           reserved_(reserved),
           next_(nullptr) {}
 
-    ~Panel() = default;
+    /// @brief Deletes a Panel.
+    ///
+    /// Unchain the pointers to avoid a stack overflow when
+    /// a recursive implicit destructor is invoked.
+    ~Panel() {
+      for (std::unique_ptr<Panel> current = std::move(next_);
+           current;
+           current = std::move(current->next_));
+    }
 
     /// @brief Overloads [] operator to access elements like an array.
     PRIMITIVE& operator[](size_t i) { return ptr_.get()[i]; }
@@ -441,7 +449,7 @@ namespace awkward {
     void
     append(PRIMITIVE datum) {
       if (ptr_->current_length() == ptr_->reserved()) {
-        add_panel((size_t)ceil((double)ptr_->reserved() * (double)options_.resize()));
+        add_panel((size_t)ceil(options_.initial() * options_.resize()));
       }
       fill_panel(datum);
     }
@@ -491,18 +499,16 @@ namespace awkward {
     /// contiguously allocated `external_pointer`. The panels are deleted,
     /// and a new #ptr is allocated.
     void
-    move_to(PRIMITIVE* to_ptr, size_t offset = 0) noexcept {
-      memcpy(to_ptr + offset,
-             reinterpret_cast<void*>(panel_.get()->data().get()),
-             panel_.get()->current_length() * sizeof(PRIMITIVE));
-
-      // move to next panel
-      panel_ = std::move(panel_.get()->next());
-      if (panel_) {
-        move_to(to_ptr, offset + panel_.get()->current_length());
-      } else {
-        clear();
+    move_to(PRIMITIVE* to_ptr) noexcept {
+      size_t next_offset = 0;
+      while(panel_) {
+        memcpy(to_ptr + next_offset,
+               reinterpret_cast<void*>(panel_.get()->data().get()),
+               panel_.get()->current_length() * sizeof(PRIMITIVE));
+        next_offset += panel_.get()->current_length();
+        panel_ = std::move(panel_.get()->next());
       }
+      clear();
     }
 
     /// @brief Copies and concatenates all accumulated data from multiple panels to one

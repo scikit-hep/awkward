@@ -1,9 +1,12 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
+__all__ = ("with_field",)
 import copy
 
 import awkward as ak
+from awkward._behavior import behavior_of
+from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._regularize import is_non_string_like_sequence
 
 np = NumpyMetadata.instance()
 
@@ -49,18 +52,16 @@ def _impl(base, what, where, highlevel, behavior):
         where is None
         or isinstance(where, str)
         or (
-            ak._util.is_non_string_like_sequence(where)
+            is_non_string_like_sequence(where)
             and all(isinstance(x, str) for x in where)
         )
     ):
-        raise ak._errors.wrap_error(
-            TypeError(
-                "New fields may only be assigned by field name(s) "
-                "or as a new integer slot by passing None for 'where'"
-            )
+        raise TypeError(
+            "New fields may only be assigned by field name(s) "
+            "or as a new integer slot by passing None for 'where'"
         )
 
-    if ak._util.is_non_string_like_sequence(where) and len(where) > 1:
+    if is_non_string_like_sequence(where) and len(where) > 1:
         return _impl(
             base,
             _impl(
@@ -76,22 +77,37 @@ def _impl(base, what, where, highlevel, behavior):
         )
     else:
         # If we have an iterable here, pull out the only ti
-        if ak._util.is_non_string_like_sequence(where):
+        if is_non_string_like_sequence(where):
             where = where[0]
 
-        behavior = ak._util.behavior_of(base, what, behavior=behavior)
+        behavior = behavior_of(base, what, behavior=behavior)
         base = ak.operations.to_layout(base, allow_record=True, allow_other=False)
-
-        if len(base.fields) == 0:
-            raise ak._errors.wrap_error(
-                ValueError("no tuples or records in array; cannot add a new field")
-            )
-
         what = ak.operations.to_layout(what, allow_record=True, allow_other=True)
 
         keys = copy.copy(base.fields)
         if where in base.fields:
             keys.remove(where)
+
+        def purelist_is_record(layout):
+            result = False
+
+            def action_is_record(input, **kwargs):
+                nonlocal result
+
+                if input.is_record:
+                    result = True
+                    return input
+                elif input.is_union:
+                    result = all(purelist_is_record(x) for x in input.contents)
+                    return input
+                else:
+                    return None
+
+            ak._do.recursively_apply(layout, action_is_record, return_array=False)
+            return result
+
+        if not purelist_is_record(base):
+            raise ValueError("no tuples or records in array; cannot add a new field")
 
         def action(inputs, **kwargs):
             base, what = inputs
@@ -140,4 +156,4 @@ def _impl(base, what, where, highlevel, behavior):
 
         assert isinstance(out, tuple) and len(out) == 1
 
-        return ak._util.wrap(out[0], behavior, highlevel)
+        return wrap_layout(out[0], behavior, highlevel)

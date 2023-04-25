@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from awkward.typing import Protocol, Self
+from awkward._typing import Protocol, Self
 
 
 class Singleton(Protocol):

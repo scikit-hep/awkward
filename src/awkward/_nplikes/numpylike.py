@@ -7,7 +7,7 @@ import numpy
 
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._singleton import Singleton
-from awkward.typing import (
+from awkward._typing import (
     Literal,
     Protocol,
     Self,
@@ -248,9 +248,7 @@ class NumpyLike(Singleton, Protocol):
         ...
 
     @abstractmethod
-    def ascontiguousarray(
-        self, x: ArrayLike, *, dtype: numpy.dtype | None = None
-    ) -> ArrayLike:
+    def ascontiguousarray(self, x: ArrayLike) -> ArrayLike:
         ...
 
     @abstractmethod
@@ -617,4 +615,9 @@ class NumpyLike(Singleton, Protocol):
     @classmethod
     @abstractmethod
     def is_own_array(cls, obj) -> bool:
+        ...
+
+    @classmethod
+    @abstractmethod
+    def is_own_array_type(cls, type_) -> bool:
         ...

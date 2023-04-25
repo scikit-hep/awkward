@@ -1,6 +1,12 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
+__all__ = ("broadcast_fields",)
 import awkward as ak
+from awkward._backends.dispatch import backend_of
+from awkward._backends.numpy import NumpyBackend
+from awkward._behavior import behavior_of
+from awkward._layout import wrap_layout
+
+cpu = NumpyBackend.instance()
 
 
 def broadcast_fields(
@@ -56,8 +62,9 @@ def broadcast_fields(
 
 
 def _impl(arrays, highlevel, behavior):
-    layouts = [ak.to_layout(x) for x in arrays]
-    behavior = ak._util.behavior_of(*arrays, behavior=behavior)
+    backend = backend_of(*arrays, default=cpu)
+    layouts = [ak.to_layout(x).to_backend(backend) for x in arrays]
+    behavior = behavior_of(*arrays, behavior=behavior)
 
     def identity(content):
         return content
@@ -75,9 +82,9 @@ def _impl(arrays, highlevel, behavior):
         elif layout.is_leaf:
             return pullback, layout
         elif layout.is_union:
-            raise ak._errors.wrap_error(TypeError("unions are not supported"))
+            raise TypeError("unions are not supported")
         else:
-            raise ak._errors.wrap_error(AssertionError("unexpected content type"))
+            raise AssertionError("unexpected content type")
 
     # Like broadcast_and_apply, we want to walk into each layout, correct the structure, and then rebuilt the arrays
     # We do this using "pull back" functions that accept a child content, and return the top-level layout. Unlike
@@ -90,10 +97,8 @@ def _impl(arrays, highlevel, behavior):
         # We can only work with all non-record, or all record/identity
         if any(c.is_record for c in next_inputs):
             if not all(c.is_record or c.is_identity_like for c in next_inputs):
-                raise ak._errors.wrap_error(
-                    AssertionError(
-                        "if any inputs are records, all inputs must be records or identities"
-                    )
+                raise AssertionError(
+                    "if any inputs are records, all inputs must be records or identities"
                 )
         # With no records, we can exit here
         else:
@@ -157,6 +162,5 @@ def _impl(arrays, highlevel, behavior):
         return [pull(layout) for pull, layout in zip(pullbacks, inner_layouts)]
 
     return [
-        ak._util.wrap(x, highlevel=highlevel, behavior=behavior)
-        for x in recurse(layouts)
+        wrap_layout(x, highlevel=highlevel, behavior=behavior) for x in recurse(layouts)
     ]

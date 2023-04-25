@@ -203,6 +203,12 @@ class DataSourceGenerator:
         else:
             cpp_code = None
 
+        init_method = (
+            "Initialize"
+            if hasattr(ROOT.RDF.RDataSource, "Initialize")
+            else "Initialise"
+        )
+
         if cpp_code is None:
             cpp_code = f"""
 namespace awkward {{
@@ -258,7 +264,7 @@ namespace awkward {{
             {cpp_code_resize_slots}
         }}
 
-        void Initialise() {{
+        void {init_method}() {{
             // initialize fEntryRanges
             const auto chunkSize = fSize / fNSlots;
             auto start = 0UL;

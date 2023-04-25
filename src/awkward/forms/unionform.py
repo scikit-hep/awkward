@@ -1,12 +1,13 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
 from collections import Counter
 from collections.abc import Iterable
 
 import awkward as ak
+from awkward._behavior import find_typestr
+from awkward._parameters import type_parameters_equal
+from awkward._typing import final
 from awkward._util import unset
-from awkward.forms.form import Form, _type_parameters_equal
-from awkward.typing import final
+from awkward.forms.form import Form
 
 
 @final
@@ -23,36 +24,28 @@ class UnionForm(Form):
         form_key=None,
     ):
         if not isinstance(tags, str):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} 'tags' must be of type str, not {}".format(
-                        type(self).__name__, repr(tags)
-                    )
+            raise TypeError(
+                "{} 'tags' must be of type str, not {}".format(
+                    type(self).__name__, repr(tags)
                 )
             )
         if not isinstance(index, str):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} 'index' must be of type str, not {}".format(
-                        type(self).__name__, repr(index)
-                    )
+            raise TypeError(
+                "{} 'index' must be of type str, not {}".format(
+                    type(self).__name__, repr(index)
                 )
             )
         if not isinstance(contents, Iterable):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} 'contents' must be iterable, not {}".format(
-                        type(self).__name__, repr(contents)
-                    )
+            raise TypeError(
+                "{} 'contents' must be iterable, not {}".format(
+                    type(self).__name__, repr(contents)
                 )
             )
         for content in contents:
             if not isinstance(content, Form):
-                raise ak._errors.wrap_error(
-                    TypeError(
-                        "{} all 'contents' must be Form subclasses, not {}".format(
-                            type(self).__name__, repr(content)
-                        )
+                raise TypeError(
+                    "{} all 'contents' must be Form subclasses, not {}".format(
+                        type(self).__name__, repr(content)
                     )
                 )
 
@@ -144,7 +137,7 @@ class UnionForm(Form):
         return ak.types.UnionType(
             [x._type(typestrs) for x in self._contents],
             parameters=self._parameters,
-            typestr=ak._util.gettypestr(self._parameters, typestrs),
+            typestr=find_typestr(self._parameters, typestrs),
         )
 
     def __eq__(self, other):
@@ -154,7 +147,7 @@ class UnionForm(Form):
             and self._tags == other._tags
             and self._index == other._index
             and len(self._contents) == len(other._contents)
-            and _type_parameters_equal(self._parameters, other._parameters)
+            and type_parameters_equal(self._parameters, other._parameters)
         ):
             return self._contents == other._contents
 

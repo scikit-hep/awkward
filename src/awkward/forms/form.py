@@ -1,22 +1,20 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 from __future__ import annotations
 
+import itertools
 import json
-from collections.abc import Collection, Mapping
+import re
+from collections.abc import Mapping
 
 import awkward as ak
-from awkward import _errors
+from awkward._backends.numpy import NumpyBackend
+from awkward._behavior import find_typestrs
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
-from awkward.typing import Final, TypeAlias
+from awkward._typing import Final, JSONMapping, JSONSerializable
 
 np = NumpyMetadata.instance()
-numpy_backend = ak._backends.NumpyBackend.instance()
-
-JSONSerialisable: TypeAlias = (
-    "str | int | float | bool | None | list | tuple | JSONMapping"
-)
-JSONMapping: TypeAlias = "dict[str, JSONSerialisable]"
+numpy_backend = NumpyBackend.instance()
 
 
 reserved_nominal_parameters: Final = frozenset(
@@ -84,9 +82,7 @@ def from_dict(input: dict) -> Form:
         # New serialisation
         if "fields" in input:
             if isinstance(input["contents"], Mapping):
-                raise _errors.wrap_error(
-                    TypeError("new-style RecordForm contents must not be mappings")
-                )
+                raise TypeError("new-style RecordForm contents must not be mappings")
             contents = [from_dict(content) for content in input["contents"]]
             fields = input["fields"]
         # Old style record
@@ -173,15 +169,11 @@ def from_dict(input: dict) -> Form:
         )
 
     elif input["class"] == "VirtualArray":
-        raise _errors.wrap_error(
-            ValueError("Awkward 1.x VirtualArrays are not supported")
-        )
+        raise ValueError("Awkward 1.x VirtualArrays are not supported")
 
     else:
-        raise _errors.wrap_error(
-            ValueError(
-                "input class: {} was not recognised".format(repr(input["class"]))
-            )
+        raise ValueError(
+            "input class: {} was not recognised".format(repr(input["class"]))
         )
 
 
@@ -189,184 +181,24 @@ def from_json(input: str) -> Form:
     return from_dict(json.loads(input))
 
 
-def _type_parameters_equal(
-    one: JSONMapping | None, two: JSONMapping | None, *, allow_missing: bool = False
-) -> bool:
-    if one is None and two is None:
-        return True
+def _expand_braces(text, seen=None):
+    if seen is None:
+        seen = set()
 
-    elif one is None:
-        # NB: __categorical__ is currently a type-only parameter, but
-        # we check it here as types check this too.
-        for key in ("__array__", "__record__", "__categorical__"):
-            if two.get(key) is not None:
-                return allow_missing
-        return True
+    spans = [m.span() for m in re.finditer(r"\{[^\{\}]*\}", text)][::-1]
+    alts = [text[start + 1 : stop - 1].split(",") for start, stop in spans]
 
-    elif two is None:
-        for key in ("__array__", "__record__", "__categorical__"):
-            if one.get(key) is not None:
-                return allow_missing
-        return True
+    if len(spans) == 0:
+        if text not in seen:
+            yield text
+        seen.add(text)
 
     else:
-        for key in ("__array__", "__record__", "__categorical__"):
-            if one.get(key) != two.get(key):
-                return False
-        return True
-
-
-def _parameters_equal(
-    one: JSONMapping, two: JSONMapping, only_array_record=False
-) -> bool:
-    if one is None and two is None:
-        return True
-    elif one is None:
-        if only_array_record:
-            # NB: __categorical__ is currently a type-only parameter, but
-            # we check it here as types check this too.
-            for key in ("__array__", "__record__", "__categorical__"):
-                if two.get(key) is not None:
-                    return False
-            return True
-        else:
-            for value in two.values():
-                if value is not None:
-                    return False
-            return True
-
-    elif two is None:
-        if only_array_record:
-            for key in ("__array__", "__record__", "__categorical__"):
-                if one.get(key) is not None:
-                    return False
-            return True
-        else:
-            for value in one.values():
-                if value is not None:
-                    return False
-            return True
-
-    else:
-        if only_array_record:
-            keys = ("__array__", "__record__", "__categorical__")
-        else:
-            keys = set(one.keys()).union(two.keys())
-        for key in keys:
-            if one.get(key) != two.get(key):
-                return False
-        return True
-
-
-def _parameters_intersect(
-    left: JSONMapping | None,
-    right: JSONMapping | None,
-    *,
-    exclude: Collection[tuple[str, JSONSerialisable]] = (),
-) -> JSONMapping | None:
-    """
-    Args:
-        left: first parameters mapping
-        right: second parameters mapping
-        exclude: collection of (key, value) items to exclude
-
-    Returns the intersected key-value pairs of `left` and `right` as a dictionary.
-    """
-    if left is None or right is None:
-        return None
-
-    common_keys = iter(left.keys() & right.keys())
-    has_no_exclusions = len(exclude) == 0
-
-    # Avoid creating `result` unless we have to
-    for key in common_keys:
-        left_value = left[key]
-        # Do our keys match?
-        if (
-            left_value is not None
-            and left_value == right[key]
-            and (has_no_exclusions or (key, left_value) not in exclude)
-        ):
-            # Exit, indicating that we want to create `result`
-            break
-    else:
-        return None
-
-    # We found a meaningful key, so create a result dict
-    result = {key: left_value}
-    for key in common_keys:
-        left_value = left[key]
-        if (
-            left_value is not None
-            and left_value == right[key]
-            and (has_no_exclusions or (key, left_value) not in exclude)
-        ):
-            result[key] = left_value
-
-    return result
-
-
-def _parameters_union(
-    left: JSONMapping,
-    right: JSONMapping,
-    *,
-    exclude: Collection[tuple[str, JSONSerialisable]] = (),
-) -> JSONMapping:
-    """
-    Args:
-        left: first parameters mapping
-        right: second parameters mapping
-        exclude: collection of (key, value) items to exclude
-
-    Returns the merged key-value pairs of `left` and `right` as a dictionary.
-
-    """
-    has_no_exclusions = len(exclude) == 0
-    if left is None:
-        if right is None:
-            return None
-        else:
-            return {
-                k: v
-                for k, v in right.items()
-                if v is not None and (has_no_exclusions or (k, v) not in exclude)
-            }
-    else:
-        result = {
-            k: v
-            for k, v in left.items()
-            if v is not None and (has_no_exclusions or (k, v) not in exclude)
-        }
-        if right is None:
-            return result
-        else:
-            for key in right:
-                right_value = right[key]
-                if right_value is not None and (
-                    has_no_exclusions or (key, right_value) not in exclude
-                ):
-                    result[key] = right_value
-
-            return result
-
-
-def _parameters_is_empty(parameters: JSONMapping | None) -> bool:
-    """
-    Args:
-        parameters (dict or None): parameters dictionary, or None
-
-    Return True if the parameters dictionary is considered empty, either because it is
-    None, or because it does not have any meaningful (non-None) values; otherwise,
-    return False.
-    """
-    if parameters is None:
-        return True
-
-    for item in parameters.values():
-        if item is not None:
-            return False
-
-    return True
+        for combo in itertools.product(*alts):
+            replaced = list(text)
+            for (start, stop), replacement in zip(spans, combo):
+                replaced[start:stop] = replacement
+            yield from _expand_braces("".join(replaced), seen)
 
 
 class Form:
@@ -381,19 +213,15 @@ class Form:
 
     def _init(self, *, parameters, form_key):
         if parameters is not None and not isinstance(parameters, dict):
-            raise _errors.wrap_error(
-                TypeError(
-                    "{} 'parameters' must be of type dict or None, not {}".format(
-                        type(self).__name__, repr(parameters)
-                    )
+            raise TypeError(
+                "{} 'parameters' must be of type dict or None, not {}".format(
+                    type(self).__name__, repr(parameters)
                 )
             )
         if form_key is not None and not isinstance(form_key, str):
-            raise _errors.wrap_error(
-                TypeError(
-                    "{} 'form_key' must be of type string or None, not {}".format(
-                        type(self).__name__, repr(form_key)
-                    )
+            raise TypeError(
+                "{} 'form_key' must be of type string or None, not {}".format(
+                    type(self).__name__, repr(form_key)
                 )
             )
 
@@ -409,40 +237,40 @@ class Form:
     @property
     def is_identity_like(self):
         """Return True if the content or its non-list descendents are an identity"""
-        raise _errors.wrap_error(NotImplementedError)
+        raise NotImplementedError
 
-    def parameter(self, key: str) -> JSONSerialisable:
+    def parameter(self, key: str) -> JSONSerializable:
         if self._parameters is None:
             return None
         else:
             return self._parameters.get(key)
 
-    def purelist_parameter(self, key: str) -> JSONSerialisable:
-        raise _errors.wrap_error(NotImplementedError)
+    def purelist_parameter(self, key: str) -> JSONSerializable:
+        raise NotImplementedError
 
     @property
     def purelist_isregular(self):
-        raise _errors.wrap_error(NotImplementedError)
+        raise NotImplementedError
 
     @property
     def purelist_depth(self):
-        raise _errors.wrap_error(NotImplementedError)
+        raise NotImplementedError
 
     @property
     def minmax_depth(self):
-        raise _errors.wrap_error(NotImplementedError)
+        raise NotImplementedError
 
     @property
     def branch_depth(self):
-        raise _errors.wrap_error(NotImplementedError)
+        raise NotImplementedError
 
     @property
     def fields(self):
-        raise _errors.wrap_error(NotImplementedError)
+        raise NotImplementedError
 
     @property
     def is_tuple(self):
-        raise _errors.wrap_error(NotImplementedError)
+        raise NotImplementedError
 
     @property
     def form_key(self):
@@ -451,7 +279,7 @@ class Form:
     @form_key.setter
     def form_key(self, value):
         if value is not None and not isinstance(value, str):
-            raise ak._errors.wrap_error(TypeError("form_key must be None or a string"))
+            raise TypeError("form_key must be None or a string")
         self._form_key = value
 
     def __str__(self):
@@ -483,7 +311,7 @@ class Form:
         return self._type({})
 
     def type_from_behavior(self, behavior):
-        return self._type(ak._util.typestrs(behavior))
+        return self._type(find_typestrs(behavior))
 
     def columns(self, list_indicator=None, column_prefix=()):
         output = []
@@ -496,14 +324,14 @@ class Form:
 
         for item in specifier:
             if not isinstance(item, str):
-                raise _errors.wrap_error(
-                    TypeError("a column-selection specifier must be a list of strings")
+                raise TypeError(
+                    "a column-selection specifier must be a list of strings"
                 )
 
         if expand_braces:
             next_specifier = []
             for item in specifier:
-                for result in ak._util.expand_braces(item):
+                for result in _expand_braces(item):
                     next_specifier.append(result)
             specifier = next_specifier
 
@@ -517,19 +345,19 @@ class Form:
         return self._column_types()
 
     def _columns(self, path, output, list_indicator):
-        raise _errors.wrap_error(NotImplementedError)
+        raise NotImplementedError
 
     def _select_columns(self, index, specifier, matches, output):
-        raise _errors.wrap_error(NotImplementedError)
+        raise NotImplementedError
 
     def _column_types(self):
-        raise _errors.wrap_error(NotImplementedError)
+        raise NotImplementedError
 
     def _to_dict_part(self, verbose, toplevel):
-        raise _errors.wrap_error(NotImplementedError)
+        raise NotImplementedError
 
     def _type(self, typestrs):
-        raise _errors.wrap_error(NotImplementedError)
+        raise NotImplementedError
 
     def length_zero_array(
         self, *, backend=numpy_backend, highlevel=True, behavior=None

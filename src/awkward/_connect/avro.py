@@ -26,8 +26,8 @@ class ReadAvroFT:
             try:
                 self.temp_header += self.data.read(numbytes)
                 if not self.check_valid():
-                    raise ak._errors.wrap_error(
-                        TypeError("invalid Avro file: first 4 bytes are not b'Obj\x01'")
+                    raise TypeError(
+                        "invalid Avro file: first 4 bytes are not b'Obj\x01'"
                     )
                 pos = 4
                 pos, self.pairs = self.decode_varint(4, self.temp_header)
@@ -83,7 +83,7 @@ class ReadAvroFT:
                 pos, num_items, len_block = self.decode_block()
                 temp_data = self.data.read(len_block)
                 if len(temp_data) < len_block:
-                    raise _ReachedEndofArrayError  # noqa: AK101
+                    raise _ReachedEndofArrayError
                 self.update_pos(len_block)
             except _ReachedEndofArrayError:
                 break
@@ -144,14 +144,14 @@ class ReadAvroFT:
             key = self.temp_header[pos : pos + int(dat)]
             pos = pos + int(dat)
             if len(key) < int(dat):
-                raise _ReachedEndofArrayError  # noqa: AK101
+                raise _ReachedEndofArrayError
 
             pos, dat = self.decode_varint(pos, self.temp_header)
             dat = self.decode_zigzag(dat)
             val = self.temp_header[pos : pos + int(dat)]
             pos = pos + int(dat)
             if len(val) < int(dat):
-                raise _ReachedEndofArrayError  # noqa: AK101
+                raise _ReachedEndofArrayError
             if key == b"avro.schema":
                 self.metadata[key.decode()] = json.loads(val.decode())
             else:
@@ -164,7 +164,7 @@ class ReadAvroFT:
     def check_valid(self):
         init = self.temp_header[0:4]
         if len(init) < 4:
-            raise _ReachedEndofArrayError  # noqa: AK101
+            raise _ReachedEndofArrayError
         return init == b"Obj\x01"
 
     def decode_varint(self, pos, _data):
@@ -172,7 +172,7 @@ class ReadAvroFT:
         result = 0
         while True:
             if pos >= len(_data):
-                raise _ReachedEndofArrayError  # noqa: AK101
+                raise _ReachedEndofArrayError
             i = _data[pos]
             pos += 1
             result |= (i & 0x7F) << shift
@@ -203,7 +203,7 @@ class ReadAvroFT:
         elif dtype["type"] == "enum":
             return f"0 node{count}-index <- stack "
         else:
-            raise AssertionError  # noqa: AK101
+            raise AssertionError
 
     def rec_exp_json_code(
         self,
@@ -911,9 +911,7 @@ class ReadAvroFT:
             #         exec_code = exec_code+hh
             #         exec_code = exec_code+jj
             #         exec_code = exec_code+kk
-            raise ak._errors.wrap_error(NotImplementedError)
+            raise NotImplementedError
 
         else:
-            raise ak._errors.wrap_error(
-                AssertionError(f"unrecognized Avro type: {file['type']}")
-            )
+            raise AssertionError(f"unrecognized Avro type: {file['type']}")

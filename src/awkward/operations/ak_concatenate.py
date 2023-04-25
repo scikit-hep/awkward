@@ -1,12 +1,18 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
+__all__ = ("concatenate",)
 import awkward as ak
-from awkward._nplikes import nplike_of
+from awkward._backends.dispatch import backend_of
+from awkward._backends.numpy import NumpyBackend
+from awkward._behavior import behavior_of
+from awkward._layout import maybe_posaxis, wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._regularize import is_integer, regularize_axis
+from awkward._typing import Sequence
+from awkward.contents import Content
 from awkward.operations.ak_fill_none import fill_none
 
 np = NumpyMetadata.instance()
-cpu = ak._backends.NumpyBackend.instance()
+cpu = NumpyBackend.instance()
 
 
 @ak._connect.numpy.implements("concatenate")
@@ -46,56 +52,53 @@ def concatenate(arrays, axis=0, *, mergebool=True, highlevel=True, behavior=None
 
 
 def _impl(arrays, axis, mergebool, highlevel, behavior):
-    axis = ak._util.regularize_axis(axis)
+    axis = regularize_axis(axis)
     # Simple single-array, axis=0 fast-path
-    behavior = ak._util.behavior_of(*arrays, behavior=behavior)
+    backend = backend_of(*arrays, default=cpu)
+    behavior = behavior_of(*arrays, behavior=behavior)
     if (
-        # Is an Awkward Content
-        isinstance(arrays, ak.contents.Content)
-        # Is an array with a known NumpyLike
-        or nplike_of(arrays, default=None) is not None
+        # Is an array with a known backend
+        backend_of(arrays, default=None)
+        is not None
     ):
         # Convert the array to a layout object
         content = ak.operations.to_layout(arrays, allow_record=False, allow_other=False)
         # Only handle concatenation along `axis=0`
         # Let ambiguous depth arrays fall through
-        if ak._util.maybe_posaxis(content, axis, 1) == 0:
+        if maybe_posaxis(content, axis, 1) == 0:
             return ak.operations.ak_flatten._impl(content, 1, highlevel, behavior)
 
     content_or_others = [
-        ak.operations.to_layout(
-            x, allow_record=False if axis == 0 else True, allow_other=True
+        x.to_backend(backend) if isinstance(x, ak.contents.Content) else x
+        for x in (
+            ak.operations.to_layout(
+                x, allow_record=False if axis == 0 else True, allow_other=True
+            )
+            for x in arrays
         )
-        for x in arrays
     ]
 
     contents = [x for x in content_or_others if isinstance(x, ak.contents.Content)]
     if len(contents) == 0:
-        raise ak._errors.wrap_error(
-            ValueError("need at least one array to concatenate")
-        )
+        raise ValueError("need at least one array to concatenate")
 
-    posaxis = ak._util.maybe_posaxis(contents[0], axis, 1)
+    posaxis = maybe_posaxis(contents[0], axis, 1)
     maxdepth = max(
         x.minmax_depth[1]
         for x in content_or_others
         if isinstance(x, ak.contents.Content)
     )
     if posaxis is None or not 0 <= posaxis < maxdepth:
-        raise ak._errors.wrap_error(
-            ValueError(
-                "axis={} is beyond the depth of this array or the depth of this array "
-                "is ambiguous".format(axis)
-            )
+        raise ValueError(
+            "axis={} is beyond the depth of this array or the depth of this array "
+            "is ambiguous".format(axis)
         )
     for x in content_or_others:
         if isinstance(x, ak.contents.Content):
-            if ak._util.maybe_posaxis(x, axis, 1) != posaxis:
-                raise ak._errors.wrap_error(
-                    ValueError(
-                        "arrays to concatenate do not have the same depth for negative "
-                        "axis={}".format(axis)
-                    )
+            if maybe_posaxis(x, axis, 1) != posaxis:
+                raise ValueError(
+                    "arrays to concatenate do not have the same depth for negative "
+                    "axis={}".format(axis)
                 )
 
     if posaxis == 0:
@@ -113,7 +116,7 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
 
         contents = [ak._do.mergemany(b) for b in batches]
         if len(contents) > 1:
-            out = ak._do.merge_as_union(contents)
+            out = _merge_as_union(contents)
         else:
             out = contents[0]
 
@@ -141,19 +144,17 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
                 inputs = nextinputs
 
             if depth == posaxis:
-                backend = ak._backends.backend_of(*inputs, default=cpu)
+                backend = backend_of(*inputs, default=cpu)
 
                 length = None
                 for x in inputs:
                     if isinstance(x, ak.contents.Content):
-                        if not ak._util.is_integer(length):
+                        if not is_integer(length):
                             length = x.length
-                        elif length != x.length and ak._util.is_integer(x.length):
-                            raise ak._errors.wrap_error(
-                                ValueError(
-                                    "all arrays must have the same length for "
-                                    "axis={}".format(axis)
-                                )
+                        elif length != x.length and is_integer(x.length):
+                            raise ValueError(
+                                "all arrays must have the same length for "
+                                "axis={}".format(axis)
                             )
 
             if depth == posaxis and all(
@@ -267,11 +268,9 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
                 for x in inputs
                 if isinstance(x, ak.contents.Content)
             ):
-                raise ak._errors.wrap_error(
-                    ValueError(
-                        "at least one array is not deep enough to concatenate at "
-                        "axis={}".format(axis)
-                    )
+                raise ValueError(
+                    "at least one array is not deep enough to concatenate at "
+                    "axis={}".format(axis)
                 )
 
             else:
@@ -285,4 +284,31 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
             right_broadcast=False,
         )[0]
 
-    return ak._util.wrap(out, behavior, highlevel)
+    return wrap_layout(out, behavior, highlevel)
+
+
+def _merge_as_union(
+    contents: Sequence[Content], parameters=None
+) -> ak.contents.UnionArray:
+    length = sum([c.length for c in contents])
+    first = contents[0]
+    tags = ak.index.Index8.empty(length, first.backend.index_nplike)
+    index = ak.index.Index64.empty(length, first.backend.index_nplike)
+
+    offset = 0
+    for i, content in enumerate(contents):
+        content._handle_error(
+            content.backend["awkward_UnionArray_filltags_const", tags.dtype.type](
+                tags.data, offset, content.length, i
+            )
+        )
+        content._handle_error(
+            content.backend["awkward_UnionArray_fillindex_count", index.dtype.type](
+                index.data, offset, content.length
+            )
+        )
+        offset += content.length
+
+    return ak.contents.UnionArray.simplified(
+        tags, index, contents, parameters=parameters
+    )

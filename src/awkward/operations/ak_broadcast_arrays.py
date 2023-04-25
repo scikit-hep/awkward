@@ -1,11 +1,15 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
+__all__ = ("broadcast_arrays",)
 import awkward as ak
+from awkward._backends.dispatch import backend_of
+from awkward._backends.numpy import NumpyBackend
+from awkward._behavior import behavior_of
 from awkward._connect.numpy import unsupported
-from awkward._nplikes import nplike_of
+from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
+cpu = NumpyBackend.instance()
 
 
 def broadcast_arrays(
@@ -204,23 +208,33 @@ def _impl(
     highlevel,
     behavior,
 ):
+    # Need at least one array!
+    if len(arrays) == 0:
+        return []
+
+    backend = backend_of(*arrays, default=cpu)
+
     inputs = []
     for x in arrays:
         y = ak.operations.to_layout(x, allow_record=True, allow_other=True)
         if not isinstance(y, (ak.contents.Content, ak.Record)):
-            y = ak.contents.NumpyArray(nplike_of(*arrays).asarray([y]))
-        inputs.append(y)
+            y = ak.contents.NumpyArray(backend.nplike.asarray([y]))
+        inputs.append(y.to_backend(backend))
 
     def action(inputs, depth, **kwargs):
-        if depth == depth_limit or (
-            depth_limit is None
-            and all(isinstance(x, ak.contents.NumpyArray) for x in inputs)
+        # The depth limit is the depth at which we must return, i.e.
+        # the _first_ layout at that depth
+        if depth == depth_limit:
+            return tuple(inputs)
+        # Walk through non-leaf nodes
+        elif all(
+            x.purelist_depth == 1 and not (x.is_option or x.is_indexed) for x in inputs
         ):
             return tuple(inputs)
         else:
             return None
 
-    behavior = ak._util.behavior_of(*arrays, behavior=behavior)
+    behavior = behavior_of(*arrays, behavior=behavior)
     out = ak._broadcasting.broadcast_and_apply(
         inputs,
         action,
@@ -231,7 +245,7 @@ def _impl(
         numpy_to_regular=True,
     )
     assert isinstance(out, tuple)
-    return [ak._util.wrap(x, behavior, highlevel) for x in out]
+    return [wrap_layout(x, behavior, highlevel) for x in out]
 
 
 @ak._connect.numpy.implements("broadcast_arrays")

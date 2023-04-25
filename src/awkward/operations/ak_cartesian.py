@@ -1,10 +1,16 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
+__all__ = ("cartesian",)
 import awkward as ak
+from awkward._backends.dispatch import backend_of
+from awkward._backends.numpy import NumpyBackend
+from awkward._behavior import behavior_of
+from awkward._errors import AxisError
+from awkward._layout import maybe_posaxis, wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._regularize import regularize_axis
 
 np = NumpyMetadata.instance()
-cpu = ak._backends.NumpyBackend.instance()
+cpu = NumpyBackend.instance()
 
 
 def cartesian(
@@ -174,10 +180,7 @@ def cartesian(
          [(4, 3.3, 'a'), (4, 3.3, 'b')]]
 
     The order of the output is fixed: it is always lexicographical in the
-    order that the `arrays` are written. (Before Python 3.6, the order of
-    keys in a dict were not guaranteed, so the dict interface is not
-    recommended for these versions of Python.) Thus, it is not possible to
-    group by `three` in the example above.
+    order that the `arrays` are written.
 
     To emulate an SQL or Pandas "group by" operation, put the keys that you
     wish to group by *first* and use `nested=[0]` or `nested=[n]` to group by
@@ -205,25 +208,31 @@ def cartesian(
 
 
 def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
-    axis = ak._util.regularize_axis(axis)
+    axis = regularize_axis(axis)
     if isinstance(arrays, dict):
-        behavior = ak._util.behavior_of(*arrays.values(), behavior=behavior)
-        backend = ak._backends.backend_of(*arrays.values(), default=cpu)
-        new_arrays = {}
-        for n, x in arrays.items():
-            new_arrays[n] = ak.operations.to_layout(
-                x, allow_record=False, allow_other=False
-            )
+        backend = backend_of(*arrays.values(), default=cpu)
+        behavior = behavior_of(*arrays.values(), behavior=behavior)
+        array_layouts = {
+            name: ak.operations.to_layout(
+                layout, allow_record=False, allow_other=False
+            ).to_backend(backend)
+            for name, layout in arrays.items()
+        }
+        layouts = list(array_layouts.values())
+        fields = list(array_layouts.keys())
 
     else:
         arrays = list(arrays)
-        behavior = ak._util.behavior_of(*arrays, behavior=behavior)
-        backend = ak._backends.backend_of(*arrays, default=cpu)
-        new_arrays = []
-        for x in arrays:
-            new_arrays.append(
-                ak.operations.to_layout(x, allow_record=False, allow_other=False)
-            )
+        backend = backend_of(*arrays, default=cpu)
+        behavior = behavior_of(*arrays, behavior=behavior)
+        array_layouts = [
+            ak.operations.to_layout(
+                layout, allow_record=False, allow_other=False
+            ).to_backend(backend)
+            for layout in arrays
+        ]
+        layouts = array_layouts
+        fields = None
 
     if with_name is not None:
         if parameters is None:
@@ -232,194 +241,165 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
             parameters = dict(parameters)
         parameters["__record__"] = with_name
 
-    if isinstance(new_arrays, dict):
-        new_arrays_values = list(new_arrays.values())
-    else:
-        new_arrays_values = new_arrays
-
-    posaxis = ak._util.maybe_posaxis(new_arrays_values[0], axis, 1)
+    posaxis = maybe_posaxis(layouts[0], axis, 1)
+    # Validate `posaxis`
     if posaxis is None or posaxis < 0:
-        raise ak._errors.wrap_error(ValueError("negative axis depth is ambiguous"))
-    for x in new_arrays_values[1:]:
-        if ak._util.maybe_posaxis(x, axis, 1) != posaxis:
-            raise ak._errors.wrap_error(
-                ValueError(
-                    "arrays to cartesian-product do not have the same depth for negative axis"
-                )
+        raise AxisError("negative axis depth is ambiguous")
+    # Ensure other layouts have same positive value for axis
+    for layout in layouts[1:]:
+        if maybe_posaxis(layout, axis, 1) != posaxis:
+            raise AxisError(
+                "arrays to cartesian-product do not have the same depth for negative axis"
             )
+    depths = [obj.purelist_depth for obj in layouts]
+    if posaxis >= max(depths):
+        raise AxisError(
+            f"axis={axis} exceeds the max depth of the given arrays (which is {max(depths)})"
+        )
 
-    if posaxis == 0:
-        if nested is None or nested is False:
-            nested = []
-
-        if isinstance(new_arrays, dict):
-            if nested is True:
-                nested = list(new_arrays.keys())  # last key is ignored below
-            if any(not (isinstance(n, str) and n in new_arrays) for x in nested):
-                raise ak._errors.wrap_error(
-                    ValueError(
-                        "the 'nested' parameter of cartesian must be dict keys "
-                        "for a dict of arrays"
-                    )
-                )
-            fields = []
-            layouts = []
-            tonested = []
-            for i, (n, x) in enumerate(new_arrays.items()):
-                fields.append(n)
-                layouts.append(x)
-                if n in nested:
-                    tonested.append(i)
-            nested = tonested
-
+    # Validate `nested`
+    if nested is None or nested is False:
+        nested = []
+    elif nested is True:
+        if fields is not None:
+            nested = list(fields)[:-1]
         else:
-            if nested is True:
-                nested = list(range(len(new_arrays) - 1))
+            nested = list(range(len(layouts))[:-1])
+    else:
+        if isinstance(array_layouts, dict):
+            if any(not (isinstance(x, str) and x in array_layouts) for x in nested):
+                raise ValueError(
+                    "the 'nested' parameter of cartesian must be dict keys "
+                    "for a dict of arrays"
+                )
+            if len(nested) >= len(array_layouts):
+                raise ValueError(
+                    "the `nested` parameter of cartesian must contain "
+                    "fewer items than there are arrays"
+                )
+        else:
             if any(
-                not (isinstance(x, int) and 0 <= x < len(new_arrays) - 1)
+                not (isinstance(x, int) and 0 <= x < len(array_layouts) - 1)
                 for x in nested
             ):
-                raise ak._errors.wrap_error(
-                    ValueError(
-                        "the 'nested' prarmeter of cartesian must be integers in "
-                        "[0, len(arrays) - 1) for an iterable of arrays"
-                    )
+                raise ValueError(
+                    "the 'nested' parameter of cartesian must be integers in "
+                    "[0, len(arrays) - 1) for an iterable of arrays"
                 )
-            fields = None
-            layouts = []
-            for x in new_arrays:
-                layouts.append(x)
 
-        layouts = list(layouts)
+    if posaxis == 0:
+        if fields is not None:
+            nested = [i for i, name in enumerate(fields) if name in nested]
 
         indexes = [
             ak.index.Index64(backend.index_nplike.reshape(x, (-1,)))
             for x in backend.index_nplike.meshgrid(
-                *[backend.index_nplike.arange(len(x), dtype=np.int64) for x in layouts],
+                *[
+                    backend.index_nplike.arange(x.length, dtype=np.int64)
+                    for x in layouts
+                ],
                 indexing="ij",
             )
         ]
         outs = [
-            ak.contents.IndexedArray.simplified(x, y)
-            for x, y in __builtins__["zip"](indexes, layouts)
+            ak.contents.IndexedArray.simplified(x, y) for x, y in zip(indexes, layouts)
         ]
 
         result = ak.contents.RecordArray(outs, fields, parameters=parameters)
-        for i in range(len(new_arrays) - 1, -1, -1):
+        for i in range(len(array_layouts))[::-1]:
             if i in nested:
-                result = ak.contents.RegularArray(result, len(layouts[i + 1]), 0)
+                result = ak.contents.RegularArray(result, layouts[i + 1].length, 0)
 
     else:
 
-        def newaxis(layout, i):
-            if i == 0:
+        def add_outer_dimensions(
+            layout: ak.contents.Content, n: int
+        ) -> ak.contents.Content:
+            if n == 0:
                 return layout
             else:
-                return ak.contents.RegularArray(newaxis(layout, i - 1), 1, 0)
-
-        def getgetfunction1(i, **kwargs):
-            def getfunction1(layout, depth, **kwargs):
-                if depth == 2:
-                    return newaxis(layout, i)
-                else:
-                    return None
-
-            return getfunction1
-
-        def getgetfunction2(i, **kwargs):
-            def getfunction2(layout, depth, **kwargs):
-                if depth == posaxis:
-                    inside = len(new_arrays) - i - 1
-                    outside = i
-                    if (
-                        layout.parameter("__array__") == "string"
-                        or layout.parameter("__array__") == "bytestring"
-                    ):
-                        raise ak._errors.wrap_error(
-                            ValueError(
-                                "ak.cartesian does not compute combinations of the "
-                                "characters of a string; please split it into lists"
-                            )
-                        )
-                    nextlayout = ak._do.recursively_apply(
-                        layout, getgetfunction1(inside), behavior
-                    )
-                    return newaxis(nextlayout, outside)
-                else:
-                    return None
-
-            return getfunction2
-
-        def apply(x, i):
-            layout = ak.operations.to_layout(x, allow_record=False, allow_other=False)
-            return ak._do.recursively_apply(layout, getgetfunction2(i), behavior)
-
-        toflatten = []
-        if nested is None or nested is False:
-            nested = []
-
-        if isinstance(new_arrays, dict):
-            if nested is True:
-                nested = list(new_arrays.keys())  # last key is ignored below
-            if any(not (isinstance(n, str) and n in new_arrays) for x in nested):
-                raise ak._errors.wrap_error(
-                    ValueError(
-                        "the 'nested' parameter of cartesian must be dict keys "
-                        "for a dict of arrays"
-                    )
+                return ak.contents.RegularArray(
+                    add_outer_dimensions(layout, n - 1), 1, 0
                 )
-            fields = []
-            layouts = []
-            for i, (n, x) in enumerate(new_arrays.items()):
-                fields.append(n)
-                layouts.append(apply(x, i))
-                if i < len(new_arrays) - 1 and n not in nested:
-                    toflatten.append(posaxis + i + 1)
 
-        else:
-            if nested is True:
-                nested = list(range(len(new_arrays) - 1))
-            if any(
-                not (isinstance(x, int) and 0 <= x < len(new_arrays) - 1)
-                for x in nested
-            ):
-                raise ak._errors.wrap_error(
-                    ValueError(
-                        "the 'nested' parameter of cartesian must be integers in "
-                        "[0, len(arrays) - 1) for an iterable of arrays"
+        def apply_pad_inner_list(layout, depth, lateral_context, **kwargs):
+            """
+            Add new dimensions (given by lateral_context["n"]) above innermost list
+            """
+            n = lateral_context["n"]
+            # We want to be above at least one dimension (list)
+            if depth == 2:
+                return add_outer_dimensions(layout, n)
+            else:
+                return None
+
+        def apply_pad_inner_list_at_axis(layout, depth, lateral_context, **kwargs):
+            """
+            Each array in arrays contributes to one of these new dimensions.
+            To make the cartesian product of the given arrays broadcastable,
+            each array is padded by (n, m) new length-1 regular dimensions
+            (above, below) the target depth. The values of (n, m) are given by
+            the position of the array; the first array is the outermost axis.
+            """
+            i = lateral_context["i"]
+            if depth == posaxis:
+                n_inside = len(array_layouts) - i - 1
+                n_outside = i
+                if (
+                    layout.parameter("__array__") == "string"
+                    or layout.parameter("__array__") == "bytestring"
+                ):
+                    raise ValueError(
+                        "ak.cartesian does not compute combinations of the "
+                        "characters of a string; please split it into lists"
                     )
+                nextlayout = ak._do.recursively_apply(
+                    layout,
+                    apply_pad_inner_list,
+                    behavior,
+                    lateral_context={"n": n_inside},
                 )
-            fields = None
-            layouts = []
-            for i, x in enumerate(new_arrays):
-                layouts.append(apply(x, i))
-                if i < len(new_arrays) - 1 and i not in nested:
-                    toflatten.append(posaxis + i + 1)
+                return add_outer_dimensions(nextlayout, n_outside)
+            else:
+                return None
 
-        def getfunction3(inputs, depth, **kwargs):
-            if depth == posaxis + len(new_arrays):
-                if all(len(x) == 0 for x in inputs):
-                    inputs = [
-                        x.content
-                        if isinstance(x, ak.contents.RegularArray) and x.size == 1
-                        else x
-                        for x in inputs
-                    ]
+        # New _interior_ axes are added to the result layout, but
+        # unless explicitly named, these axes should be flattened.
+        axes_to_flatten = [
+            posaxis + i + 1
+            for i, _ in enumerate(array_layouts)
+            if i < len(array_layouts) - 1 and i not in nested
+        ]
+        # This list *must* be sorted in reverse order
+        axes_to_flatten.reverse()
+
+        new_layouts = [
+            ak._do.recursively_apply(
+                layout,
+                apply_pad_inner_list_at_axis,
+                behavior,
+                lateral_context={"i": i},
+            )
+            for i, layout in enumerate(layouts)
+        ]
+
+        def apply_build_record(inputs, depth, **kwargs):
+            if depth == posaxis + len(array_layouts):
                 return (ak.contents.RecordArray(inputs, fields, parameters=parameters),)
 
             else:
                 return None
 
         out = ak._broadcasting.broadcast_and_apply(
-            layouts, getfunction3, behavior, right_broadcast=False
+            new_layouts, apply_build_record, behavior, right_broadcast=False
         )
         assert isinstance(out, tuple) and len(out) == 1
         result = out[0]
 
-        while len(toflatten) != 0:
-            flatten_axis = toflatten.pop()
+        # Remove surplus dimensions, iterating from smallest to greatest
+        for axis_to_flatten in axes_to_flatten:
             result = ak.operations.flatten(
-                result, axis=flatten_axis, highlevel=False, behavior=behavior
+                result, axis=axis_to_flatten, highlevel=False, behavior=behavior
             )
 
-    return ak._util.wrap(result, behavior, highlevel)
+    return wrap_layout(result, behavior, highlevel)

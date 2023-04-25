@@ -1,9 +1,10 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+from awkward._parameters import parameters_union, type_parameters_equal
+from awkward._typing import final
 from awkward._util import unset
-from awkward.forms.form import Form, _parameters_union, _type_parameters_equal
-from awkward.typing import final
+from awkward.forms.form import Form
 
 
 @final
@@ -19,19 +20,15 @@ class IndexedForm(Form):
         form_key=None,
     ):
         if not isinstance(index, str):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} 'index' must be of type str, not {}".format(
-                        type(self).__name__, repr(index)
-                    )
+            raise TypeError(
+                "{} 'index' must be of type str, not {}".format(
+                    type(self).__name__, repr(index)
                 )
             )
         if not isinstance(content, Form):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} all 'contents' must be Form subclasses, not {}".format(
-                        type(self).__name__, repr(content)
-                    )
+            raise TypeError(
+                "{} all 'contents' must be Form subclasses, not {}".format(
+                    type(self).__name__, repr(content)
                 )
             )
 
@@ -75,27 +72,21 @@ class IndexedForm(Form):
 
         if content.is_union and not is_cat:
             return content.copy(
-                parameters=ak.forms.form._parameters_union(
-                    content._parameters, parameters
-                )
+                parameters=parameters_union(content._parameters, parameters)
             )
 
         elif content.is_option:
             return ak.forms.IndexedOptionForm.simplified(
                 "i64",
                 content.content,
-                parameters=ak.forms.form._parameters_union(
-                    content._parameters, parameters
-                ),
+                parameters=parameters_union(content._parameters, parameters),
             )
 
         elif content.is_indexed:
             return IndexedForm(
                 "i64",
                 content.content,
-                parameters=ak.forms.form._parameters_union(
-                    content._parameters, parameters
-                ),
+                parameters=parameters_union(content._parameters, parameters),
             )
 
         else:
@@ -122,7 +113,7 @@ class IndexedForm(Form):
             if out._parameters is None:
                 out._parameters = self._parameters
             else:
-                out._parameters = _parameters_union(out._parameters, self._parameters)
+                out._parameters = parameters_union(out._parameters, self._parameters)
 
             if self._parameters.get("__array__") == "categorical":
                 if out._parameters is self._parameters:
@@ -143,7 +134,7 @@ class IndexedForm(Form):
             return (
                 self._form_key == other._form_key
                 and self._index == other._index
-                and _type_parameters_equal(self._parameters, other._parameters)
+                and type_parameters_equal(self._parameters, other._parameters)
                 and self._content == other._content
             )
         else:

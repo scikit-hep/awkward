@@ -28,7 +28,7 @@ repos:
     args: [--include-version-classifiers, --max-py-version=3.11]
 
 - repo: https://github.com/psf/black
-  rev: 23.1.0
+  rev: 23.3.0
   hooks:
   - id: black
 
@@ -38,19 +38,14 @@ repos:
   - id: cmake-format
     additional_dependencies: [pyyaml]
 
-- repo: https://github.com/PyCQA/flake8
-  rev: 6.0.0
-  hooks:
-  - id: flake8
-
 - repo: https://github.com/charliermarsh/ruff-pre-commit
-  rev: v0.0.254
+  rev: v0.0.261
   hooks:
   - id: ruff
     args: ["--fix", "--show-fixes"]
 
 - repo: https://github.com/codespell-project/codespell
-  rev: v2.2.2
+  rev: v2.2.4
   hooks:
   - id: codespell
     args: ["-L", "ue,subjet,parms,fo,numer,thre"]

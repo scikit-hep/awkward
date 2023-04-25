@@ -1,10 +1,14 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
+__all__ = ("where",)
 import awkward as ak
+from awkward._backends.dispatch import backend_of
+from awkward._backends.numpy import NumpyBackend
+from awkward._behavior import behavior_of
+from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
-cpu = ak._backends.NumpyBackend.instance()
+cpu = NumpyBackend.instance()
 
 
 @ak._connect.numpy.implements("where")
@@ -47,9 +51,7 @@ def where(condition, *args, mergebool=True, highlevel=True, behavior=None):
             return _impl1(condition, mergebool, highlevel, behavior)
 
     elif len(args) == 1:
-        raise ak._errors.wrap_error(
-            ValueError("either both or neither of x and y should be given")
-        )
+        raise ValueError("either both or neither of x and y should be given")
 
     elif len(args) == 2:
         x, y = args
@@ -66,11 +68,9 @@ def where(condition, *args, mergebool=True, highlevel=True, behavior=None):
             return _impl3(condition, x, y, mergebool, highlevel, behavior)
 
     else:
-        raise ak._errors.wrap_error(
-            TypeError(
-                "where() takes from 1 to 3 positional arguments but {} were "
-                "given".format(len(args) + 1)
-            )
+        raise TypeError(
+            "where() takes from 1 to 3 positional arguments but {} were "
+            "given".format(len(args) + 1)
         )
 
 
@@ -78,15 +78,15 @@ def _impl1(condition, mergebool, highlevel, behavior):
     akcondition = ak.operations.to_layout(
         condition, allow_record=False, allow_other=False
     )
-    backend = ak._backends.backend_of(akcondition, default=cpu)
+    backend = backend_of(akcondition, default=cpu)
 
     akcondition = ak.contents.NumpyArray(ak.operations.to_numpy(akcondition))
     out = backend.nplike.nonzero(ak.operations.to_numpy(akcondition))
     if highlevel:
         return tuple(
-            ak._util.wrap(
+            wrap_layout(
                 ak.contents.NumpyArray(x),
-                ak._util.behavior_of(condition, behavior=behavior),
+                behavior_of(condition, behavior=behavior),
             )
             for x in out
         )
@@ -107,7 +107,7 @@ def _impl3(condition, x, y, mergebool, highlevel, behavior):
         good_arrays.append(left)
     if isinstance(right, ak.contents.Content):
         good_arrays.append(right)
-    backend = ak._backends.backend_of(*good_arrays, default=cpu)
+    backend = backend_of(*good_arrays, default=cpu)
 
     def action(inputs, **kwargs):
         akcondition, left, right = inputs
@@ -135,7 +135,7 @@ def _impl3(condition, x, y, mergebool, highlevel, behavior):
         else:
             return None
 
-    behavior = ak._util.behavior_of(condition, x, y, behavior=behavior)
+    behavior = behavior_of(condition, x, y, behavior=behavior)
     out = ak._broadcasting.broadcast_and_apply(
         [akcondition, left, right],
         action,
@@ -143,4 +143,4 @@ def _impl3(condition, x, y, mergebool, highlevel, behavior):
         numpy_to_regular=True,
     )
 
-    return ak._util.wrap(out[0], behavior, highlevel)
+    return wrap_layout(out[0], behavior, highlevel)

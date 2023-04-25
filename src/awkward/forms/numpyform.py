@@ -1,12 +1,13 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
 from collections.abc import Iterable
 
 import awkward as ak
+from awkward._behavior import find_typestr
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._parameters import type_parameters_equal
+from awkward._typing import final
 from awkward._util import unset
-from awkward.forms.form import Form, _type_parameters_equal
-from awkward.typing import final
+from awkward.forms.form import Form
 
 np = NumpyMetadata.instance()
 
@@ -52,11 +53,9 @@ class NumpyForm(Form):
             ak.types.numpytype.primitive_to_dtype(primitive)
         )
         if not isinstance(inner_shape, Iterable):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} 'inner_shape' must be iterable, not {}".format(
-                        type(self).__name__, repr(inner_shape)
-                    )
+            raise TypeError(
+                "{} 'inner_shape' must be iterable, not {}".format(
+                    type(self).__name__, repr(inner_shape)
                 )
             )
 
@@ -132,7 +131,7 @@ class NumpyForm(Form):
         out = ak.types.NumpyType(
             self._primitive,
             parameters=None,
-            typestr=ak._util.gettypestr(self._parameters, typestrs),
+            typestr=find_typestr(self._parameters, typestrs),
         )
         for x in self._inner_shape[::-1]:
             out = ak.types.RegularType(out, x)
@@ -147,7 +146,7 @@ class NumpyForm(Form):
                 self._form_key == other._form_key
                 and self._primitive == other._primitive
                 and self._inner_shape == other._inner_shape
-                and _type_parameters_equal(self._parameters, other._parameters)
+                and type_parameters_equal(self._parameters, other._parameters)
             )
         else:
             return False

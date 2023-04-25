@@ -1,12 +1,14 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
 import glob
 from collections.abc import Iterable
 
 import awkward as ak
+from awkward._behavior import find_typestr
+from awkward._parameters import type_parameters_equal
+from awkward._regularize import is_integer
+from awkward._typing import final
 from awkward._util import unset
-from awkward.forms.form import Form, _type_parameters_equal
-from awkward.typing import final
+from awkward.forms.form import Form
 
 
 @final
@@ -22,28 +24,22 @@ class RecordForm(Form):
         form_key=None,
     ):
         if not isinstance(contents, Iterable):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} 'contents' must be iterable, not {}".format(
-                        type(self).__name__, repr(contents)
-                    )
+            raise TypeError(
+                "{} 'contents' must be iterable, not {}".format(
+                    type(self).__name__, repr(contents)
                 )
             )
         for content in contents:
             if not isinstance(content, Form):
-                raise ak._errors.wrap_error(
-                    TypeError(
-                        "{} all 'contents' must be Form subclasses, not {}".format(
-                            type(self).__name__, repr(content)
-                        )
+                raise TypeError(
+                    "{} all 'contents' must be Form subclasses, not {}".format(
+                        type(self).__name__, repr(content)
                     )
                 )
         if fields is not None and not isinstance(fields, Iterable):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} 'fields' must be iterable, not {}".format(
-                        type(self).__name__, repr(contents)
-                    )
+            raise TypeError(
+                "{} 'fields' must be iterable, not {}".format(
+                    type(self).__name__, repr(contents)
                 )
             )
 
@@ -103,11 +99,9 @@ class RecordForm(Form):
             else:
                 return self._fields[index]
         else:
-            raise ak._errors.wrap_error(
-                IndexError(
-                    "no index {} in record with {} fields".format(
-                        index, len(self._contents)
-                    )
+            raise IndexError(
+                "no index {} in record with {} fields".format(
+                    index, len(self._contents)
                 )
             )
 
@@ -127,11 +121,9 @@ class RecordForm(Form):
                 pass
             else:
                 return i
-        raise ak._errors.wrap_error(
-            ak._errors.FieldNotFoundError(
-                "no field {} in record with {} fields".format(
-                    repr(field), len(self._contents)
-                )
+        raise ak._errors.FieldNotFoundError(
+            "no field {} in record with {} fields".format(
+                repr(field), len(self._contents)
             )
         )
 
@@ -147,16 +139,14 @@ class RecordForm(Form):
             return field in self._fields
 
     def content(self, index_or_field):
-        if ak._util.is_integer(index_or_field):
+        if is_integer(index_or_field):
             index = index_or_field
         elif isinstance(index_or_field, str):
             index = self.field_to_index(index_or_field)
         else:
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "index_or_field must be an integer (index) or string (field), not {}".format(
-                        repr(index_or_field)
-                    )
+            raise TypeError(
+                "index_or_field must be an integer (index) or string (field), not {}".format(
+                    repr(index_or_field)
                 )
             )
         return self._contents[index]
@@ -180,7 +170,7 @@ class RecordForm(Form):
             [x._type(typestrs) for x in self._contents],
             self._fields,
             parameters=self._parameters,
-            typestr=ak._util.gettypestr(self._parameters, typestrs),
+            typestr=find_typestr(self._parameters, typestrs),
         )
 
     def __eq__(self, other):
@@ -189,7 +179,7 @@ class RecordForm(Form):
                 self._form_key == other._form_key
                 and self.is_tuple == other.is_tuple
                 and len(self._contents) == len(other._contents)
-                and _type_parameters_equal(self._parameters, other._parameters)
+                and type_parameters_equal(self._parameters, other._parameters)
             ):
                 if self.is_tuple:
                     return self._contents == other._contents

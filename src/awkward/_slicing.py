@@ -1,17 +1,17 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
 from __future__ import annotations
 
 import operator
 
 import awkward as ak
-from awkward._backends import Backend
-from awkward._errors import wrap_error
-from awkward._nplikes import nplike_of, to_nplike
+from awkward._backends.backend import Backend
+from awkward._nplikes import to_nplike
+from awkward._nplikes.dispatch import nplike_of
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
-from awkward.typing import TYPE_CHECKING, Sequence, TypeAlias
+from awkward._regularize import is_array_like, is_integer_like, is_sized_iterable
+from awkward._typing import TYPE_CHECKING, Sequence, TypeAlias, TypeVar
 
 if TYPE_CHECKING:
     from awkward._nplikes.numpylike import ArrayLike
@@ -26,10 +26,8 @@ SliceItem: TypeAlias = "int | slice | str | None | Ellipsis | ArrayLike | Conten
 def normalize_slice_item(item, *, backend: Backend):
     if backend.index_nplike.is_own_array(item):
         if item.ndim != 0:
-            raise wrap_error(
-                ValueError(
-                    f"slice items must be 0D arrays or Python integers, not {item!r}"
-                )
+            raise ValueError(
+                f"slice items must be 0D arrays or Python integers, not {item!r}"
             )
         else:
             return item
@@ -71,20 +69,31 @@ def normalize_slice(slice_: slice, *, backend: Backend) -> slice:
         return slice(start, stop, step)
 
 
-def headtail(
-    oldtail: tuple[SliceItem, ...]
-) -> tuple[SliceItem | tuple, tuple[SliceItem, ...]]:
-    if len(oldtail) == 0:
-        return (), ()
+T = TypeVar("T")
+
+
+class _NoHead:
+    def __repr__(self):
+        return f"{__name__}.NO_HEAD"
+
+
+NO_HEAD = _NoHead()
+S = TypeVar("S", bound=Sequence)
+
+
+def head_tail(sequence: S[T]) -> tuple[T | type(NO_HEAD), S[T]]:
+    if len(sequence) == 0:
+        return NO_HEAD, ()
     else:
-        return oldtail[0], oldtail[1:]
+        return sequence[0], sequence[1:]
 
 
-def prepare_advanced_indexing(items):
+def prepare_advanced_indexing(items, backend: Backend):
     """Broadcast index objects to satisfy NumPy indexing rules
 
     Args:
         items: iterable of index items.
+        backend: backend of items
 
     Returns a tuple of broadcasted index items.
 
@@ -120,16 +129,14 @@ def prepare_advanced_indexing(items):
 
     # Now ensure that we don't have mixed Awkward-NumPy style indexing
     if n_awkward_contents > 1 or (n_awkward_contents == 1 and len(broadcastable) != 0):
-        raise wrap_error(
-            ValueError(
-                "cannot mix Awkward slicing (using an array with missing or variable-length lists in the slice) with "
-                "NumPy advanced slicing (using more than one broadcastable array or integer in the slice), "
-                "though you can perform multiple slices "
-            )
+        raise ValueError(
+            "cannot mix Awkward slicing (using an array with missing or variable-length lists in the slice) with "
+            "NumPy advanced slicing (using more than one broadcastable array or integer in the slice), "
+            "though you can perform multiple slices "
         )
 
     # Then broadcast the index items
-    nplike = nplike_of(*broadcastable)
+    nplike = backend.index_nplike
     broadcasted = nplike.broadcast_arrays(*broadcastable)
 
     # And re-assemble the index with the broadcasted items
@@ -142,7 +149,7 @@ def prepare_advanced_indexing(items):
 
         x = broadcasted[i_broadcast]
         if len(x.shape) == 0:
-            prepared.append(int(x))
+            prepared.append(x)
         elif np.issubdtype(x.dtype, np.int64):
             prepared.append(ak.index.Index64(nplike.reshape(x, (-1,))))
             prepared[-1].metadata["shape"] = x.shape
@@ -162,11 +169,9 @@ def prepare_advanced_indexing(items):
                 for w in nplike.nonzero(x):
                     prepared.append(ak.index.Index64(w))
         else:
-            raise wrap_error(
-                TypeError(
-                    "array slice must be an array of integers or booleans, not\n\n    {}".format(
-                        repr(x).replace("\n", "\n    ")
-                    )
+            raise TypeError(
+                "array slice must be an array of integers or booleans, not\n\n    {}".format(
+                    repr(x).replace("\n", "\n    ")
                 )
             )
 
@@ -188,13 +193,21 @@ def prepare_advanced_indexing(items):
     # Now error if we find another array
     for item in it:
         if isinstance(item, ak.index.Index):
-            raise wrap_error(
-                ValueError(
-                    "NumPy advanced indexing with array indices separated by None "
-                    "(np.newaxis), Ellipsis, or slice are not permitted with Awkward Arrays"
-                )
+            raise ValueError(
+                "NumPy advanced indexing with array indices separated by None "
+                "(np.newaxis), Ellipsis, or slice are not permitted with Awkward Arrays"
             )
     return tuple(prepared)
+
+
+def normalize_integer_like(x) -> int | ArrayLike:
+    if is_array_like(x):
+        if np.issubdtype(x.dtype, np.integer) and x.ndim == 0:
+            return x
+        else:
+            raise TypeError("only 0D integer arrays are considered integral")
+    else:
+        return int(x)
 
 
 def normalise_item(item, backend: Backend) -> SliceItem:
@@ -208,8 +221,8 @@ def normalise_item(item, backend: Backend) -> SliceItem:
     of integers.
     """
     # Basic indices
-    if ak._util.is_integer(item):
-        return int(item)
+    if is_integer_like(item):
+        return normalize_integer_like(item)
 
     elif isinstance(item, slice):
         return normalize_slice(item, backend=backend)
@@ -261,15 +274,15 @@ def normalise_item(item, backend: Backend) -> SliceItem:
             return out
 
     # Fallback for sized objects
-    elif ak._util.is_sized_iterable(item):
+    elif is_sized_iterable(item):
         # Do we have an array
-        nplike = ak._nplikes.nplike_of(item, default=None)
+        nplike = nplike_of(item, default=None)
         # We can end up with non-array objects associated with an nplike
         if nplike is not None and nplike.is_own_array(item):
             # Is it a scalar, not array?
             if len(item.shape) == 0:
-                raise wrap_error(
-                    NotImplementedError("scalar objects in slice normalisation")
+                raise AssertionError(
+                    "scalar arrays should be handled by integer-like indexing"
                 )
             else:
                 layout = ak.operations.ak_to_layout._impl(
@@ -293,22 +306,18 @@ def normalise_item(item, backend: Backend) -> SliceItem:
             return normalise_item(layout, backend)
 
     else:
-        raise wrap_error(
-            TypeError(
-                "only integers, slices (`:`), ellipsis (`...`), np.newaxis (`None`), "
-                "integer/boolean arrays (possibly with variable-length nested "
-                "lists or missing values), field name (str) or names (non-tuple "
-                "iterable of str) are valid indices for slicing, not\n\n    "
-                + repr(item).replace("\n", "\n    ")
-            )
+        raise TypeError(
+            "only integers, slices (`:`), ellipsis (`...`), np.newaxis (`None`), "
+            "integer/boolean arrays (possibly with variable-length nested "
+            "lists or missing values), field name (str) or names (non-tuple "
+            "iterable of str) are valid indices for slicing, not\n\n    "
+            + repr(item).replace("\n", "\n    ")
         )
 
 
 def normalise_items(where: Sequence, backend: Backend) -> list:
-    where_backend = ak._backends.backend_of(*where, default=backend)
-    common_backend = ak._backends.common_backend([backend, where_backend])
     # First prepare items for broadcasting into like-types
-    return [normalise_item(x, backend=common_backend) for x in where]
+    return [normalise_item(x, backend=backend) for x in where]
 
 
 def _normalise_item_RegularArray_to_ListOffsetArray64(item: Content) -> Content:
@@ -324,7 +333,7 @@ def _normalise_item_RegularArray_to_ListOffsetArray64(item: Content) -> Content:
         return item
 
     else:
-        raise wrap_error(AssertionError(type(item)))
+        raise AssertionError(type(item))
 
 
 def _normalise_item_nested(item: Content) -> Content:
@@ -449,24 +458,20 @@ def _normalise_item_nested(item: Content) -> Content:
         )
 
     elif isinstance(item, ak.contents.UnionArray):
-        raise wrap_error(
-            TypeError(
-                "irreducible unions (different types at the same level in an array) can't be used as slices"
-            )
+        raise TypeError(
+            "irreducible unions (different types at the same level in an array) can't be used as slices"
         )
 
     elif isinstance(item, ak.contents.RecordArray):
-        raise wrap_error(TypeError("record arrays can't be used as slices"))
+        raise TypeError("record arrays can't be used as slices")
 
     else:
-        raise wrap_error(
-            TypeError(
-                "only integers, slices (`:`), ellipsis (`...`), np.newaxis (`None`), "
-                "integer/boolean arrays (possibly with variable-length nested "
-                "lists or missing values), field name (str) or names (non-tuple "
-                "iterable of str) are valid indices for slicing, not\n\n    "
-                + repr(item).replace("\n", "\n    ")
-            )
+        raise TypeError(
+            "only integers, slices (`:`), ellipsis (`...`), np.newaxis (`None`), "
+            "integer/boolean arrays (possibly with variable-length nested "
+            "lists or missing values), field name (str) or names (non-tuple "
+            "iterable of str) are valid indices for slicing, not\n\n    "
+            + repr(item).replace("\n", "\n    ")
         )
 
 
@@ -507,7 +512,7 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
             cumsum[1:] = item_backend.index_nplike.asarray(
                 item_backend.nplike.cumsum(flat_mask.data)
             )
-            nextoffsets = cumsum[item.offsets]
+            nextoffsets = ak.index.Index(cumsum[item.offsets])
 
         else:
             item._touch_data(recursive=False)
@@ -515,7 +520,7 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
             nextcontent = item_backend.nplike.empty(unknown_length, dtype=np.int64)
 
         return ListOffsetArray(
-            ak.index.Index64(nextoffsets),
+            nextoffsets,
             NumpyArray(nextcontent, backend=item_backend),
         ).to_backend(backend)
 
@@ -527,9 +532,7 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
     ):
         if item_backend.nplike.known_data:
             if isinstance(item_backend.nplike, Jax):
-                raise wrap_error(
-                    TypeError("This slice is not supported for JAX differentiation.")
-                )
+                raise TypeError("This slice is not supported for JAX differentiation.")
             # missing values as any integer other than -1 are extremely rare
             isnegative = item.content.index.data < 0
             if item_backend.index_nplike.any(item.content.index.data < -1):
@@ -557,13 +560,13 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
             cumsum = item_backend.nplike.empty(expanded.shape[0] + 1, dtype=np.int64)
             cumsum[0] = 0
             cumsum[1:] = item_backend.nplike.cumsum(expanded)
-            nextoffsets = cumsum[item.offsets]
+            nextoffsets = ak.index.Index(cumsum[item.offsets])
 
             # outindex fits into the lists; non-missing are sequential
-            outindex = item_backend.index_nplike.full(
-                nextoffsets[-1], -1, dtype=np.int64
+            outindex = ak.index.Index64(
+                item_backend.index_nplike.full(nextoffsets.data[-1], -1, dtype=np.int64)
             )
-            outindex[~isnegative[expanded]] = item_backend.index_nplike.arange(
+            outindex.data[~isnegative[expanded]] = item_backend.index_nplike.arange(
                 nextcontent.shape[0], dtype=np.int64
             )
 
@@ -574,9 +577,9 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
             nextcontent = item_backend.nplike.empty(unknown_length, dtype=np.int64)
 
         return ListOffsetArray(
-            ak.index.Index64(nextoffsets, nplike=item_backend.index_nplike),
+            nextoffsets,
             IndexedOptionArray(
-                ak.index.Index(outindex, nplike=item_backend.index_nplike),
+                outindex,
                 NumpyArray(nextcontent, backend=item_backend),
             ),
         ).to_backend(backend)
@@ -597,10 +600,8 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
         ):
             if item_backend.nplike.known_data:
                 if isinstance(item_backend.nplike, Jax):
-                    raise wrap_error(
-                        TypeError(
-                            "This slice is not supported for JAX differentiation."
-                        )
+                    raise TypeError(
+                        "This slice is not supported for JAX differentiation."
                     )
 
                 # missing values as any integer other than -1 are extremely rare
@@ -629,10 +630,10 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
 
                 # non-missing are sequential
                 non_negative = item_backend.nplike.logical_not(isnegative[expanded])
-                outindex = item_backend.index_nplike.full(
-                    lenoutindex, -1, dtype=np.int64
+                outindex = ak.index.Index64(
+                    item_backend.index_nplike.full(lenoutindex, -1, dtype=np.int64)
                 )
-                outindex[
+                outindex.data[
                     to_nplike(non_negative, item_backend.index_nplike)
                 ] = item_backend.index_nplike.arange(
                     nextcontent.shape[0], dtype=np.int64
@@ -644,7 +645,7 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
                 nextcontent = item_backend.nplike.empty(unknown_length, dtype=np.int64)
 
             return IndexedOptionArray(
-                ak.index.Index(outindex, nplike=item_backend.index_nplike),
+                outindex,
                 NumpyArray(nextcontent, backend=item_backend),
             ).to_backend(backend)
 
@@ -658,7 +659,7 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
         return item
 
     else:
-        raise wrap_error(AssertionError(type(item)))
+        raise AssertionError(type(item))
 
 
 def getitem_next_array_wrap(

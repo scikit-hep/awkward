@@ -347,6 +347,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "raybellwaves",
+      "name": "Ray Bell",
+      "avatar_url": "https://avatars.githubusercontent.com/u/17162724?v=4",
+      "profile": "https://sites.google.com/view/raybellwaves/home",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,

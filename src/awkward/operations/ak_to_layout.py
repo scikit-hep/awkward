@@ -1,4 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+__all__ = ("to_layout",)
 
 from collections.abc import Iterable
 
@@ -6,6 +7,7 @@ from awkward_cpp.lib import _ext
 
 import awkward as ak
 from awkward import _errors
+from awkward._backends.typetracer import TypeTracerBackend
 from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
@@ -57,9 +59,7 @@ def _impl(array, allow_record, allow_other, regulararray):
 
     elif isinstance(array, ak.record.Record):
         if not allow_record:
-            raise _errors.wrap_error(
-                TypeError("ak.Record objects are not allowed in this function")
-            )
+            raise TypeError("ak.Record objects are not allowed in this function")
         else:
             return array
 
@@ -68,9 +68,7 @@ def _impl(array, allow_record, allow_other, regulararray):
 
     elif isinstance(array, ak.highlevel.Record):
         if not allow_record:
-            raise _errors.wrap_error(
-                TypeError("ak.Record objects are not allowed in this function")
-            )
+            raise TypeError("ak.Record objects are not allowed in this function")
         else:
             return array.layout
 
@@ -94,16 +92,14 @@ def _impl(array, allow_record, allow_other, regulararray):
         return ak.operations.from_jax(array, regulararray=regulararray, highlevel=False)
 
     elif TypeTracer.is_own_array(array):
-        backend = ak._backends.TypeTracerBackend.instance()
+        backend = TypeTracerBackend.instance()
 
         if len(array.shape) == 0:
             array = backend.nplike.reshape(array, (1,))
 
         if array.dtype.kind in {"S", "U"}:
-            raise _errors.wrap_error(
-                NotImplementedError(
-                    "strings are currently not supported for typetracer arrays"
-                )
+            raise NotImplementedError(
+                "strings are currently not supported for typetracer arrays"
             )
 
         return ak.contents.NumpyArray(array, parameters=None, backend=backend)
@@ -123,10 +119,8 @@ def _impl(array, allow_record, allow_other, regulararray):
         )
 
     elif not allow_other:
-        raise _errors.wrap_error(
-            TypeError(
-                f"{array} cannot be converted into an Awkward Array, and non-array-like objects are not supported."
-            )
+        raise TypeError(
+            f"{array} cannot be converted into an Awkward Array, and non-array-like objects are not supported."
         )
 
     else:

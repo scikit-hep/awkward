@@ -1,11 +1,12 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
+__all__ = ("type",)
 import numbers
 from datetime import datetime, timedelta
 
 from awkward_cpp.lib import _ext
 
 import awkward as ak
+from awkward._behavior import behavior_of
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
@@ -80,7 +81,7 @@ def type(array, *, behavior=None):
 
 
 def _impl(array, behavior):
-    behavior = ak._util.behavior_of(array, behavior=behavior)
+    behavior = behavior_of(array, behavior=behavior)
 
     if isinstance(array, _ext.ArrayBuilder):
         form = ak.forms.from_json(array.form())
@@ -128,6 +129,4 @@ def _impl(array, behavior):
             return _impl(layout, behavior)
 
         else:
-            raise ak._errors.wrap_error(
-                TypeError(f"unrecognized array type: {array!r}")
-            )
+            raise TypeError(f"unrecognized array type: {array!r}")

@@ -1,12 +1,16 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
 from __future__ import annotations
+
+__all__ = ("from_buffers",)
 
 import math
 
 import awkward as ak
+from awkward._backends.dispatch import regularize_backend
+from awkward._layout import wrap_layout
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._regularize import is_integer
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
@@ -62,6 +66,8 @@ def from_buffers(
     the `container` dropped NumPy's `dtype` and `shape` information, leaving
     raw bytes, since `dtype` and `shape` can be reconstituted from the
     #ak.forms.NumpyForm.
+    If the values of `container` are recognised as arrays by the given backend,
+    a view over their existing data will be used, where possible.
 
     The `buffer_key` should be the same as the one used in #ak.to_buffers.
 
@@ -104,7 +110,7 @@ def _impl(
     behavior,
     simplify,
 ):
-    backend = ak._backends.regularize_backend(backend)
+    backend = regularize_backend(backend)
 
     if isinstance(form, str):
         if ak.types.numpytype.is_primitive(form):
@@ -114,16 +120,12 @@ def _impl(
     elif isinstance(form, dict):
         form = ak.forms.from_dict(form)
 
-    if not (ak._util.is_integer(length) and length >= 0):
-        raise ak._errors.wrap_error(
-            TypeError("'length' argument must be a non-negative integer")
-        )
+    if not (is_integer(length) and length >= 0):
+        raise TypeError("'length' argument must be a non-negative integer")
 
     if not isinstance(form, ak.forms.Form):
-        raise ak._errors.wrap_error(
-            TypeError(
-                "'form' argument must be a Form or its Python dict/JSON string representation"
-            )
+        raise TypeError(
+            "'form' argument must be a Form or its Python dict/JSON string representation"
         )
 
     if isinstance(buffer_key, str):
@@ -137,14 +139,12 @@ def _impl(
             return buffer_key(form_key=form.form_key, attribute=attribute, form=form)
 
     else:
-        raise ak._errors.wrap_error(
-            TypeError(
-                f"buffer_key must be a string or a callable, not {type(buffer_key)}"
-            )
+        raise TypeError(
+            f"buffer_key must be a string or a callable, not {type(buffer_key)}"
         )
 
     out = reconstitute(form, length, container, getkey, backend, byteorder, simplify)
-    return ak._util.wrap(out, behavior, highlevel)
+    return wrap_layout(out, behavior, highlevel)
 
 
 _index_to_dtype = {
@@ -157,19 +157,28 @@ _index_to_dtype = {
 
 
 def _from_buffer(nplike, buffer, dtype, count, byteorder):
-    array = nplike.frombuffer(buffer, dtype=dtype, count=count)
-    if byteorder != ak._util.native_byteorder:
-        return array.byteswap(inplace=False)
+    if nplike.is_own_array(buffer):
+        array = nplike.reshape(buffer.view(dtype), shape=(-1,), copy=False)
+
+        # Require 1D
+        if array.size < count:
+            raise TypeError(
+                f"size of array ({array.size}) is less than size of form ({count})"
+            )
+
+        return array[:count]
     else:
-        return array
+        array = nplike.frombuffer(buffer, dtype=dtype, count=count)
+        if byteorder != ak._util.native_byteorder:
+            return array.byteswap(inplace=False)
+        else:
+            return array
 
 
 def reconstitute(form, length, container, getkey, backend, byteorder, simplify):
     if isinstance(form, ak.forms.EmptyForm):
         if length != 0:
-            raise ak._errors.wrap_error(
-                ValueError(f"EmptyForm node, but the expected length is {length}")
-            )
+            raise ValueError(f"EmptyForm node, but the expected length is {length}")
         return ak.contents.EmptyArray()
 
     elif isinstance(form, ak.forms.NumpyForm):
@@ -285,7 +294,13 @@ def reconstitute(form, length, container, getkey, backend, byteorder, simplify):
             count=length,
             byteorder=byteorder,
         )
-        next_length = 0 if len(index) == 0 else backend.index_nplike.max(index) + 1
+        next_length = (
+            0
+            if len(index) == 0
+            else backend.index_nplike.index_as_shape_item(
+                backend.index_nplike.max(index) + 1
+            )
+        )
         content = reconstitute(
             form.content, next_length, container, getkey, backend, byteorder, simplify
         )
@@ -415,6 +430,4 @@ def reconstitute(form, length, container, getkey, backend, byteorder, simplify):
         )
 
     else:
-        raise ak._errors.wrap_error(
-            AssertionError("unexpected form node type: " + str(type(form)))
-        )
+        raise AssertionError("unexpected form node type: " + str(type(form)))

@@ -1,4 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+__all__ = ("from_rdataframe",)
 
 import awkward as ak
 from awkward._nplikes.numpylike import NumpyMetadata
@@ -74,10 +75,8 @@ def _impl(
         project = False
 
     if not all(isinstance(x, str) for x in columns):
-        raise ak._errors.wrap_error(
-            TypeError(
-                f"'columns' must be a string or an iterable of strings, not {columns!r}"
-            )
+        raise TypeError(
+            f"'columns' must be a string or an iterable of strings, not {columns!r}"
         )
 
     if not isinstance(offsets_type, str) or offsets_type not in (
@@ -85,11 +84,9 @@ def _impl(
         "uint32",
         "int64",
     ):
-        raise ak._errors.wrap_error(
-            TypeError(
-                "'offsets_type' must be a string in (int32, uint32, int64), "
-                "not {}".format(repr(offsets_type))
-            )
+        raise TypeError(
+            "'offsets_type' must be a string in (int32, uint32, int64), "
+            "not {}".format(repr(offsets_type))
         )
     else:
         offsets_type = f"{offsets_type}_t"

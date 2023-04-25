@@ -1,11 +1,15 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
+__all__ = ("run_lengths",)
 import awkward as ak
+from awkward._backends.dispatch import backend_of
+from awkward._backends.numpy import NumpyBackend
+from awkward._behavior import behavior_of
+from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 
 np = NumpyMetadata.instance()
-cpu = ak._backends.NumpyBackend.instance()
+cpu = NumpyBackend.instance()
 
 
 def run_lengths(array, *, highlevel=True, behavior=None):
@@ -94,7 +98,7 @@ def run_lengths(array, *, highlevel=True, behavior=None):
 
 
 def _impl(array, highlevel, behavior):
-    backend = ak._backends.backend_of(array, default=cpu)
+    backend = backend_of(array, default=cpu)
 
     def lengths_of(data, offsets):
         if backend.nplike.is_own_array(data):
@@ -155,9 +159,7 @@ def _impl(array, highlevel, behavior):
                 return ak.contents.NumpyArray(nextcontent)
 
             if not isinstance(layout, (ak.contents.NumpyArray, ak.contents.EmptyArray)):
-                raise ak._errors.wrap_error(
-                    NotImplementedError("run_lengths on " + type(layout).__name__)
-                )
+                raise NotImplementedError("run_lengths on " + type(layout).__name__)
 
             nextcontent, _ = lengths_of(backend.nplike.asarray(layout), None)
             return ak.contents.NumpyArray(nextcontent)
@@ -167,9 +169,7 @@ def _impl(array, highlevel, behavior):
                 layout = layout.project()
 
             if not layout.is_list:
-                raise ak._errors.wrap_error(
-                    NotImplementedError("run_lengths on " + type(layout).__name__)
-                )
+                raise NotImplementedError("run_lengths on " + type(layout).__name__)
 
             if (
                 layout.content.parameter("__array__") == "string"
@@ -202,13 +202,11 @@ def _impl(array, highlevel, behavior):
             if not isinstance(
                 content, (ak.contents.NumpyArray, ak.contents.EmptyArray)
             ):
-                raise ak._errors.wrap_error(
-                    NotImplementedError(
-                        "run_lengths on "
-                        + type(layout).__name__
-                        + " with content "
-                        + type(content).__name__
-                    )
+                raise NotImplementedError(
+                    "run_lengths on "
+                    + type(layout).__name__
+                    + " with content "
+                    + type(content).__name__
                 )
 
             nextcontent, nextoffsets = lengths_of(
@@ -222,7 +220,7 @@ def _impl(array, highlevel, behavior):
             return None
 
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
-    behavior = ak._util.behavior_of(array, behavior=behavior)
+    behavior = behavior_of(array, behavior=behavior)
 
     out = ak._do.recursively_apply(layout, action, behavior)
-    return ak._util.wrap(out, behavior, highlevel)
+    return wrap_layout(out, behavior, highlevel)

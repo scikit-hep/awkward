@@ -1,12 +1,18 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
+__all__ = ("fill_none",)
 import numbers
 
 import awkward as ak
+from awkward._backends.dispatch import backend_of
+from awkward._backends.numpy import NumpyBackend
+from awkward._behavior import behavior_of
+from awkward._errors import AxisError
+from awkward._layout import maybe_posaxis, wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._regularize import is_sized_iterable, regularize_axis
 
 np = NumpyMetadata.instance()
-cpu = ak._backends.NumpyBackend.instance()
+cpu = NumpyBackend.instance()
 
 
 def fill_none(array, value, axis=-1, *, highlevel=True, behavior=None):
@@ -67,10 +73,10 @@ def fill_none(array, value, axis=-1, *, highlevel=True, behavior=None):
 
 
 def _impl(array, value, axis, highlevel, behavior):
-    axis = ak._util.regularize_axis(axis)
+    axis = regularize_axis(axis)
     arraylayout = ak.operations.to_layout(array, allow_record=True, allow_other=False)
-    behavior = ak._util.behavior_of(array, value, behavior=behavior)
-    backend = ak._backends.backend_of(arraylayout, default=cpu)
+    behavior = behavior_of(array, value, behavior=behavior)
+    backend = backend_of(arraylayout, default=cpu)
 
     # Convert value type to appropriate layout
     if (
@@ -91,7 +97,7 @@ def _impl(array, value, axis, highlevel, behavior):
             backend.nplike.asarray(value), allow_record=False, allow_other=False
         )
     elif (
-        ak._util.is_sized_iterable(value)
+        is_sized_iterable(value)
         and not (isinstance(value, (str, bytes)))
         or isinstance(value, (ak.highlevel.Record, ak.record.Record))
     ):
@@ -121,7 +127,7 @@ def _impl(array, value, axis, highlevel, behavior):
     else:
 
         def action(layout, depth, **kwargs):
-            posaxis = ak._util.maybe_posaxis(layout, axis, depth)
+            posaxis = maybe_posaxis(layout, axis, depth)
             if posaxis is not None and posaxis + 1 == depth:
                 if layout.is_option:
                     return ak._do.fill_none(layout, valuelayout)
@@ -131,11 +137,9 @@ def _impl(array, value, axis, highlevel, behavior):
                     return layout
 
             elif layout.is_leaf:
-                raise ak._errors.wrap_error(
-                    np.AxisError(
-                        f"axis={axis} exceeds the depth of this array ({depth})"
-                    )
+                raise AxisError(
+                    f"axis={axis} exceeds the depth of this array ({depth})"
                 )
 
     out = ak._do.recursively_apply(arraylayout, action, behavior)
-    return ak._util.wrap(out, behavior, highlevel)
+    return wrap_layout(out, behavior, highlevel)

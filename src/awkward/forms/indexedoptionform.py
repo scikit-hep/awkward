@@ -1,9 +1,10 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
 import awkward as ak
+from awkward._behavior import find_typestr
+from awkward._parameters import parameters_union, type_parameters_equal
+from awkward._typing import final
 from awkward._util import unset
-from awkward.forms.form import Form, _type_parameters_equal
-from awkward.typing import final
+from awkward.forms.form import Form
 
 
 @final
@@ -20,19 +21,15 @@ class IndexedOptionForm(Form):
         form_key=None,
     ):
         if not isinstance(index, str):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} 'index' must be of type str, not {}".format(
-                        type(self).__name__, repr(index)
-                    )
+            raise TypeError(
+                "{} 'index' must be of type str, not {}".format(
+                    type(self).__name__, repr(index)
                 )
             )
         if not isinstance(content, Form):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} all 'contents' must be Form subclasses, not {}".format(
-                        type(self).__name__, repr(content)
-                    )
+            raise TypeError(
+                "{} all 'contents' must be Form subclasses, not {}".format(
+                    type(self).__name__, repr(content)
                 )
             )
 
@@ -81,9 +78,7 @@ class IndexedOptionForm(Form):
             return ak.forms.IndexedOptionForm.simplified(
                 "i64",
                 content.content,
-                parameters=ak.forms.form._parameters_union(
-                    content._parameters, parameters
-                ),
+                parameters=parameters_union(content._parameters, parameters),
             )
 
         else:
@@ -114,7 +109,7 @@ class IndexedOptionForm(Form):
         return ak.types.OptionType(
             self._content._type(typestrs),
             parameters=parameters,
-            typestr=ak._util.gettypestr(self._parameters, typestrs),
+            typestr=find_typestr(self._parameters, typestrs),
         ).simplify_option_union()
 
     def __eq__(self, other):
@@ -122,7 +117,7 @@ class IndexedOptionForm(Form):
             return (
                 self._form_key == other._form_key
                 and self._index == other._index
-                and _type_parameters_equal(self._parameters, other._parameters)
+                and type_parameters_equal(self._parameters, other._parameters)
                 and self._content == other._content
             )
         else:

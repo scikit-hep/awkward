@@ -1,7 +1,11 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
+__all__ = ("firsts",)
 import awkward as ak
+from awkward._behavior import behavior_of
+from awkward._errors import AxisError
+from awkward._layout import maybe_posaxis, wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._regularize import is_integer, regularize_axis
 
 np = NumpyMetadata.instance()
 
@@ -45,16 +49,14 @@ def firsts(array, axis=1, *, highlevel=True, behavior=None):
 
 
 def _impl(array, axis, highlevel, behavior):
-    axis = ak._util.regularize_axis(axis)
+    axis = regularize_axis(axis)
     layout = ak.operations.to_layout(array)
-    behavior = ak._util.behavior_of(array, behavior=behavior)
+    behavior = behavior_of(array, behavior=behavior)
 
-    if not ak._util.is_integer(axis):
-        raise ak._errors.wrap_error(
-            TypeError(f"'axis' must be an integer, not {axis!r}")
-        )
+    if not is_integer(axis):
+        raise TypeError(f"'axis' must be an integer, not {axis!r}")
 
-    if ak._util.maybe_posaxis(layout, axis, 1) == 0:
+    if maybe_posaxis(layout, axis, 1) == 0:
         # specialized logic; it's tested in test_0582-propagate-context-in-broadcast_and_apply.py
         # Build an integer-typed slice array, so that we can
         # ensure we have advanced indexing for both length==0
@@ -68,7 +70,7 @@ def _impl(array, axis, highlevel, behavior):
     else:
 
         def action(layout, depth, depth_context, **kwargs):
-            posaxis = ak._util.maybe_posaxis(layout, axis, depth)
+            posaxis = maybe_posaxis(layout, axis, depth)
 
             if posaxis == depth and layout.is_list:
                 nplike = layout._backend.index_nplike
@@ -89,12 +91,10 @@ def _impl(array, axis, highlevel, behavior):
                 )
 
             elif layout.is_leaf:
-                raise ak._errors.wrap_error(
-                    np.AxisError(
-                        f"axis={axis} exceeds the depth of this array ({depth})"
-                    )
+                raise AxisError(
+                    f"axis={axis} exceeds the depth of this array ({depth})"
                 )
 
         out = ak._do.recursively_apply(layout, action, behavior, numpy_to_regular=True)
 
-    return ak._util.wrap(out, behavior, highlevel)
+    return wrap_layout(out, behavior, highlevel)

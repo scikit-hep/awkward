@@ -1,12 +1,13 @@
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 from __future__ import annotations
 
-__all__ = ["almost_equal"]
+__all__ = ("almost_equal",)
 
-from awkward._backends import backend_of
-from awkward._errors import wrap_error
+
+from awkward._backends.dispatch import backend_of
+from awkward._behavior import behavior_of, get_array_class, get_record_class
 from awkward._nplikes.numpylike import NumpyMetadata
-from awkward._util import arrayclass, behavior_of, recordclass
-from awkward.forms.form import _parameters_equal
+from awkward._parameters import parameters_are_equal
 from awkward.operations.ak_to_layout import to_layout
 
 np = NumpyMetadata.instance()
@@ -52,10 +53,8 @@ def almost_equal(
 
     backend = backend_of(left, right)
     if not backend.nplike.known_data:
-        raise wrap_error(
-            NotImplementedError(
-                "Awkward Arrays with typetracer backends cannot yet be compared with `ak.almost_equal`."
-            )
+        raise NotImplementedError(
+            "Awkward Arrays with typetracer backends cannot yet be compared with `ak.almost_equal`."
         )
 
     def is_approx_dtype(left, right) -> bool:
@@ -84,14 +83,15 @@ def almost_equal(
         if left.length != right.length:
             return False
 
-        if check_parameters and not _parameters_equal(
+        if check_parameters and not parameters_are_equal(
             left.parameters, right.parameters
         ):
             return False
 
         # Require that the arrays have the same evaluated types
         if not (
-            arrayclass(left, left_behavior) is arrayclass(right, right_behavior)
+            get_array_class(left, left_behavior)
+            is get_array_class(right, right_behavior)
             or not check_parameters
         ):
             return False
@@ -127,8 +127,8 @@ def almost_equal(
         elif left.is_record:
             return (
                 (
-                    recordclass(left, left_behavior)
-                    is recordclass(right, right_behavior)
+                    get_record_class(left, left_behavior)
+                    is get_record_class(right, right_behavior)
                     or not check_parameters
                 )
                 and (left.fields == right.fields)
@@ -139,6 +139,6 @@ def almost_equal(
             return True
 
         else:
-            raise wrap_error(AssertionError)
+            raise AssertionError
 
     return visitor(left, right)

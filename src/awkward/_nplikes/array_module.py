@@ -5,10 +5,9 @@ import math
 
 import numpy
 
-from awkward._errors import wrap_error
 from awkward._nplikes.numpylike import ArrayLike, IndexType, NumpyLike, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
-from awkward.typing import Final, Literal
+from awkward._typing import Final, Literal
 
 np = NumpyMetadata.instance()
 
@@ -31,18 +30,17 @@ class ArrayModuleNumpyLike(NumpyLike):
             return self._module.asarray(obj, dtype=dtype)
         else:
             if getattr(obj, "dtype", dtype) != dtype:
-                raise wrap_error(
-                    ValueError(
-                        "asarray was called with copy=False for an array of a different dtype"
-                    )
+                raise ValueError(
+                    "asarray was called with copy=False for an array of a different dtype"
                 )
             else:
                 return self._module.asarray(obj, dtype=dtype)
 
-    def ascontiguousarray(
-        self, x: ArrayLike, *, dtype: np.dtype | None = None
-    ) -> ArrayLike:
-        return self._module.ascontiguousarray(x, dtype=dtype)
+    def ascontiguousarray(self, x: ArrayLike) -> ArrayLike:
+        # Allow buffers to _pretend_ to be contiguous already
+        if x.dtype.metadata is not None and x.dtype.metadata.get("pretend_contiguous"):
+            return x
+        return self._module.ascontiguousarray(x)
 
     def frombuffer(
         self, buffer, *, dtype: np.dtype | None = None, count: int = -1
@@ -122,27 +120,25 @@ class ArrayModuleNumpyLike(NumpyLike):
     def reshape(
         self, x: ArrayLike, shape: tuple[ShapeItem, ...], *, copy: bool | None = None
     ) -> ArrayLike:
-        if copy is False:
-            raise wrap_error(
-                NotImplementedError(
-                    "reshape was called with copy=False, which is currently not supported"
-                )
-            )
-        result = x.reshape(shape)
-        if copy and self._module.shares_memory(x, result):
-            return self._module.copy(result)
+        if copy is None:
+            return self._module.reshape(x, shape)
+        elif copy:
+            return self._module.reshape(self._module.copy(x, order="C"), shape)
         else:
+            result = self._module.asarray(x)
+            try:
+                result.shape = shape
+            except AttributeError:
+                raise ValueError("cannot reshape array without copying") from None
             return result
 
     def shape_item_as_index(self, x1: ShapeItem) -> int:
         if x1 is unknown_length:
-            raise wrap_error(
-                TypeError("array module nplikes do not support unknown lengths")
-            )
+            raise TypeError("array module nplikes do not support unknown lengths")
         elif isinstance(x1, int):
             return x1
         else:
-            raise wrap_error(TypeError(f"expected None or int type, received {x1}"))
+            raise TypeError(f"expected None or int type, received {x1}")
 
     def index_as_shape_item(self, x1: IndexType) -> int:
         return int(x1)
@@ -179,9 +175,7 @@ class ArrayModuleNumpyLike(NumpyLike):
         if 0 <= index < length:
             return index
         else:
-            raise wrap_error(
-                IndexError(f"index value out of bounds (0, {length}): {index}")
-            )
+            raise IndexError(f"index value out of bounds (0, {length}): {index}")
 
     def nonzero(self, x: ArrayLike) -> tuple[ArrayLike, ...]:
         return self._module.nonzero(x)
@@ -387,3 +381,7 @@ class ArrayModuleNumpyLike(NumpyLike):
 
     def can_cast(self, from_: np.dtype | ArrayLike, to: np.dtype | ArrayLike) -> bool:
         return self._module.can_cast(from_, to, casting="same_kind")
+
+    @classmethod
+    def is_own_array(cls, obj) -> bool:
+        return cls.is_own_array_type(type(obj))
