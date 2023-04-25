@@ -296,7 +296,7 @@ def recurse_union_union(
                 layout_equals_type(c, t)
                 for c, t in zip(layout.contents, permuted_types)
             ]
-            n_matching = sum(content_matches_type, start=0)
+            n_matching = sum(content_matches_type, 0)
 
             # If all contents are nominally equal to the position-matched type, then only parameters have changed
             if n_matching == len(type_.contents):
