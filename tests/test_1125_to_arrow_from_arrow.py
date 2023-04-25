@@ -623,9 +623,11 @@ def test_unionarray(tmp_path, extensionarray):
         ak.index.Index8(np.array([0, 0, 1, 1, 1, 0, 1], dtype=np.int8)),
         ak.index.Index64(np.array([0, 1, 3, 2, 1, 2, 0], dtype=np.int64)),
         [
-            ak.contents.NumpyArray(
-                np.array([0.0, 1.1, 2.2]),
-                parameters={"which": "inner1"},
+            ak.contents.UnmaskedArray(
+                ak.contents.NumpyArray(
+                    np.array([0.0, 1.1, 2.2]),
+                    parameters={"which": "inner1"},
+                )
             ),
             ak.contents.ByteMaskedArray(
                 ak.index.Index8(np.array([False, False, True, False]).view(np.int8)),
@@ -674,8 +676,10 @@ def test_unionarray(tmp_path, extensionarray):
             ak.index.Index8(np.array([0, 0, 1, 1, 1, 0, 1], dtype=np.int8)),
             ak.index.Index64(np.array([0, 1, 3, 2, 1, 2, 0], dtype=np.int64)),
             [
-                ak.contents.NumpyArray(
-                    np.array([0.0, 1.1, 2.2]), parameters={"which": "inner1"}
+                ak.contents.UnmaskedArray(
+                    ak.contents.NumpyArray(
+                        np.array([0.0, 1.1, 2.2]), parameters={"which": "inner1"}
+                    )
                 ),
                 ak.contents.ByteMaskedArray(
                     ak.index.Index8(
