@@ -20,3 +20,17 @@ def test_regular():
     array = ak.to_regular([[1, 2, 3]])[:0]
     form_from_type = ak.forms.from_type(array.type.content)
     assert form_from_type == array.layout.form
+
+
+def test_categorical():
+    array = ak.to_categorical(
+        [
+            1,
+            1,
+            2,
+            1,
+            1,
+        ]
+    )
+    form_from_type = ak.forms.from_type(array.type.content)
+    assert form_from_type == array.layout.form
