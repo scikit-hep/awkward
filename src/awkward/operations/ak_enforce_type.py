@@ -285,6 +285,48 @@ def recurse_union_union(
             "the type contents"
         )
 
+    # Type and layout have same number of contents. Up-to *one* content can differ
+    else:
+        ix_contents = range(n_type_contents)
+        for ix_perm_contents in permutations(ix_contents):
+            permuted_types = [type_.contents[j] for j in ix_perm_contents]
+
+            # How many contents match types in this permutation?
+            content_matches_type = [
+                layout_equals_type(c, t)
+                for c, t in zip(layout.contents, permuted_types)
+            ]
+            n_matching = sum(content_matches_type, start=0)
+
+            # If all contents are nominally equal to the position-matched type, then only parameters have changed
+            if n_matching == len(type_.contents):
+                return layout.copy(
+                    contents=[
+                        recurse(c, t) for c, t in zip(layout.contents, permuted_types)
+                    ],
+                    parameters=type_.parameters,
+                )
+            # Single content differs, we can convert by position
+            elif n_matching == len(type_.contents) - 1:
+                next_contents = []
+                for content_layout, content_type, is_match in zip(
+                    layout.contents, permuted_types, content_matches_type
+                ):
+                    if is_match:
+                        next_contents.append(content_layout)
+                    else:
+                        next_contents.append(recurse(content_layout, content_type))
+
+                return layout.copy(
+                    contents=next_contents,
+                    parameters=type_.parameters,
+                )
+            else:
+                raise ValueError(
+                    "UnionArray(s) can currently only be converted into UnionArray(s) with the same number of contents "
+                    "if no greater than one content differs in type"
+                )
+
 
 def recurse_union_non_union(
     layout: ak.contents.UnionArray, type_: ak.types.UnionType

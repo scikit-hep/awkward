@@ -357,3 +357,43 @@ def test_union():
             ],
         ),
     )
+
+    ## union → different union (same N)
+    result = ak.enforce_type(
+        ak.to_layout([1, "hi"]),
+        ak.types.from_datashape("union[float32, string]", highlevel=False),
+    )
+    assert ak.almost_equal(
+        result,
+        ak.contents.UnionArray(
+            tags=ak.index.Index8([0, 1]),
+            index=ak.index.Index64([0, 0]),
+            contents=[
+                ak.contents.NumpyArray(numpy.array([1, 2], dtype=numpy.float32)),
+                ak.contents.ListOffsetArray(
+                    offsets=ak.index.Index64([0, 2]),
+                    content=ak.contents.NumpyArray(
+                        numpy.array([104, 105], dtype=numpy.uint8),
+                        parameters={"__array__": "char"},
+                    ),
+                    parameters={"__array__": "string"},
+                ),
+            ],
+        ),
+    )
+
+    ## union → incompatible different union (same N)
+    with pytest.raises(ValueError):
+        ak.enforce_type(
+            ak.to_layout([1, "hi"]),
+            ak.types.from_datashape("union[int64, bool]", highlevel=False),
+        )
+
+    ## union → different union (same N, more than one change)
+    with pytest.raises(ValueError):
+        ak.enforce_type(
+            ak.to_layout([1, "hi", False]),
+            ak.types.from_datashape(
+                "union[datetime64, string, float32]", highlevel=False
+            ),
+        )
