@@ -117,14 +117,17 @@ def _impl(base, what, where, highlevel, behavior):
                 if what is None:
                     what = ak.contents.IndexedOptionArray(
                         ak.index.Index64(
-                            backend.index_nplike.full(len(base), -1, dtype=np.int64),
+                            backend.index_nplike.full(base.length, -1, dtype=np.int64),
                             nplike=backend.index_nplike,
                         ),
                         ak.contents.EmptyArray(),
                     )
                 elif not isinstance(what, ak.contents.Content):
                     what = ak.contents.NumpyArray(
-                        backend.nplike.repeat(what, len(base))
+                        backend.nplike.repeat(
+                            backend.nplike.asarray(what),
+                            backend.nplike.shape_item_as_index(base.length),
+                        )
                     )
                 if base.is_tuple:
                     # Preserve tuple-ness
