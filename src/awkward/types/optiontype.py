@@ -5,7 +5,8 @@ from awkward._parameters import (
     parameters_union,
     type_parameters_equal,
 )
-from awkward._typing import final
+from awkward._typing import Self, final
+from awkward._util import unset
 from awkward.types.listtype import ListType
 from awkward.types.regulartype import RegularType
 from awkward.types.type import Type
@@ -14,6 +15,13 @@ from awkward.types.uniontype import UnionType
 
 @final
 class OptionType(Type):
+    def copy(self, *, content: Type = unset, parameters=unset, typestr=unset) -> Self:
+        return OptionType(
+            self._content if content is unset else content,
+            parameters=self._parameters if parameters is unset else parameters,
+            typestr=self._typestr if typestr is unset else typestr,
+        )
+
     def __init__(self, content, *, parameters=None, typestr=None):
         if not isinstance(content, Type):
             raise TypeError(

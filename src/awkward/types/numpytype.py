@@ -5,7 +5,8 @@ import re
 
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._parameters import parameters_are_equal, type_parameters_equal
-from awkward._typing import final
+from awkward._typing import Self, final
+from awkward._util import unset
 from awkward.types.type import Type
 
 np = NumpyMetadata.instance()
@@ -91,6 +92,13 @@ for primitive, dtype in _primitive_to_dtype_dict.items():
 
 @final
 class NumpyType(Type):
+    def copy(self, *, primitive: Type = unset, parameters=unset, typestr=unset) -> Self:
+        return NumpyType(
+            self._primitive if primitive is unset else primitive,
+            parameters=self._parameters if parameters is unset else parameters,
+            typestr=self._typestr if typestr is unset else typestr,
+        )
+
     def __init__(self, primitive, *, parameters=None, typestr=None):
         primitive = dtype_to_primitive(primitive_to_dtype(primitive))
         if parameters is not None and not isinstance(parameters, dict):
