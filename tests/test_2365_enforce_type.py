@@ -1,79 +1,365 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import pytest  # noqa: F401
+import numpy
+import pytest
 
 import awkward as ak
 
 
-def test_simple():
-    array = (
-        ak.forms.from_dict(
-            {
-                "class": "IndexedArray",
-                "index": "i64",
-                "content": {
-                    "class": "RecordArray",
-                    "fields": ["x"],
-                    "contents": ["int64"],
-                },
-            }
-        )
-        .length_zero_array()
-        .x
+def test_record():
+    result = ak.enforce_type(
+        ak.to_layout([{"x": [1, 2]}], regulararray=False),
+        ak.types.from_datashape("{x: var * int64}", highlevel=False),
+    )
+    assert ak.almost_equal(
+        result,
+        ak.contents.RecordArray(
+            [
+                ak.contents.ListOffsetArray(
+                    ak.index.Index(numpy.array([0, 2], dtype=numpy.int64)),
+                    ak.contents.NumpyArray(numpy.array([1, 2], dtype=numpy.int64)),
+                )
+            ],
+            ["x"],
+        ),
     )
 
-    type = ak.types.from_datashape("int8", highlevel=False)
+    ## record → different tuple
+    result = ak.enforce_type(
+        ak.to_layout([{"x": [1, 2]}], regulararray=False),
+        ak.types.from_datashape("(var * float64)", highlevel=False),
+    )
 
-    result = ak.enforce_type(array, type)
-    assert str(result.type.content) == str(type)
+    assert ak.almost_equal(
+        result,
+        ak.contents.RecordArray(
+            [
+                ak.contents.ListOffsetArray(
+                    ak.index.Index(numpy.array([0, 2], dtype=numpy.int64)),
+                    ak.contents.NumpyArray(numpy.array([1, 2], dtype=numpy.float64)),
+                )
+            ],
+            fields=None,
+        ),
+    )
+
+    ## tuple → different record
+    result = ak.enforce_type(
+        ak.to_layout([([1, 2],)], regulararray=False),
+        ak.types.from_datashape("{x: var * float64}", highlevel=False),
+    )
+
+    assert ak.almost_equal(
+        result,
+        ak.contents.RecordArray(
+            [
+                ak.contents.ListOffsetArray(
+                    ak.index.Index(numpy.array([0, 2], dtype=numpy.int64)),
+                    ak.contents.NumpyArray(numpy.array([1, 2], dtype=numpy.float64)),
+                )
+            ],
+            fields=["x"],
+        ),
+    )
+    with pytest.raises(ValueError):
+        ak.enforce_type(
+            ak.to_layout([{"x": [1, 2]}], regulararray=False),
+            ak.types.from_datashape("{y: var * float64}", highlevel=False),
+        )
+    with pytest.raises(ValueError):
+        ak.enforce_type(
+            ak.to_layout([{"x": [1, 2]}], regulararray=False),
+            ak.types.from_datashape("{x: var * int64, y: int64}", highlevel=False),
+        )
+    with pytest.raises(ValueError):
+        ak.enforce_type(
+            ak.to_layout([{"x": [1, 2]}], regulararray=False),
+            ak.types.from_datashape("{}", highlevel=False),
+        )
 
 
-def test_reg():
-    array = ak.Array([[1, 2, 3], [4, 5, 6]])
+def test_list():
+    #
+    # List types
+    result = ak.enforce_type(
+        ak.to_layout([[1, 2, 3]]),
+        ak.types.from_datashape("var * int64", highlevel=False),
+    )
+    assert ak.almost_equal(
+        result,
+        ak.contents.ListOffsetArray(
+            ak.index.Index(numpy.array([0, 3], dtype=numpy.int64)),
+            ak.contents.NumpyArray(numpy.array([1, 2, 3], dtype=numpy.int64)),
+        ),
+    )
+    result = ak.enforce_type(
+        ak.to_layout([[1, 2, 3]]), ak.types.from_datashape("3 * int64", highlevel=False)
+    )
+    assert ak.almost_equal(
+        result,
+        ak.contents.RegularArray(
+            ak.contents.NumpyArray(numpy.array([1, 2, 3], dtype=numpy.int64)), size=3
+        ),
+    )
+    with pytest.raises(ValueError, match=r"converted .* different size"):
+        ak.enforce_type(
+            ak.to_layout([[1, 2, 3]]),
+            ak.types.from_datashape("4 * int64", highlevel=False),
+        )
 
-    type = ak.types.from_datashape("3 * int64", highlevel=False)
-    assert not isinstance(type, ak.types.ArrayType)
-
-    result = ak.enforce_type(array, type)
-    assert str(result.type.content) == str(type)
-
-
-def test_var():
-    array = ak.to_regular(ak.Array([[1, 2, 3.0], [4, 5, 6]]))
-
-    type = ak.types.from_datashape("var * int64", highlevel=False)
-    assert not isinstance(type, ak.types.ArrayType)
-
-    result = ak.enforce_type(array, type)
-    assert str(result.type.content) == str(type)
-
-
-def test_record():
-    array = ak.zip({"x": [[1, 2, 3]], "y": [[1.0, 2.0, 3.0]]})
-
-    type = ak.types.from_datashape("3 * {x: int64,y: int64}", highlevel=False)
-    assert not isinstance(type, ak.types.ArrayType)
-
-    result = ak.enforce_type(array, type)
-    assert str(result.type.content) == str(type)
-
-
-def test_add_option():
-    array = ak.Array([[1, 2, 3, 4], [5, 6, 7]])
-
-    type = ak.types.from_datashape("var * ?float32", highlevel=False)
-    assert not isinstance(type, ak.types.ArrayType)
-
-    result = ak.enforce_type(array, type)
-    assert str(result.type.content) == str(type)
+    # Regular types
+    result = ak.enforce_type(
+        ak.to_regular([[1, 2, 3]], axis=-1, highlevel=False),
+        ak.types.from_datashape("var * int64", highlevel=False),
+    )
+    assert ak.almost_equal(
+        result,
+        ak.contents.ListOffsetArray(
+            ak.index.Index(numpy.array([0, 3], dtype=numpy.int64)),
+            ak.contents.NumpyArray(numpy.array([1, 2, 3], dtype=numpy.int64)),
+        ),
+    )
+    result = ak.enforce_type(
+        ak.to_regular([[1, 2, 3]], axis=-1, highlevel=False),
+        ak.types.from_datashape("3 * int64", highlevel=False),
+    )
+    assert ak.almost_equal(
+        result,
+        ak.contents.RegularArray(
+            ak.contents.NumpyArray(numpy.array([1, 2, 3], dtype=numpy.int64)), size=3
+        ),
+    )
+    with pytest.raises(ValueError, match=r"different size"):
+        ak.enforce_type(
+            ak.to_regular([[1, 2, 3]], axis=-1, highlevel=False),
+            ak.types.from_datashape("4 * int64", highlevel=False),
+        )
 
 
-def test_remove_option():
-    array = ak.mask([[1, 2, 3, 4], [5, 6, 7]], [True])
+def test_option():
+    # Options
+    ## option → option
+    result = ak.enforce_type(
+        ak.to_layout([1, None]),
+        ak.types.from_datashape("?int64", highlevel=False),
+    )
+    assert ak.almost_equal(
+        result,
+        ak.contents.IndexedOptionArray(
+            ak.index.Index(numpy.array([0, -1], dtype=numpy.int64)),
+            ak.contents.NumpyArray(numpy.array([1], dtype=numpy.int64)),
+        ),
+    )
 
-    type = ak.types.from_datashape("var * float32", highlevel=False)
-    assert not isinstance(type, ak.types.ArrayType)
+    ## option → no option
+    result = ak.enforce_type(
+        ak.to_layout([1, None])[:1],
+        ak.types.from_datashape("int64", highlevel=False),
+    )
+    assert ak.almost_equal(
+        result, ak.contents.NumpyArray(numpy.array([1], dtype=numpy.int64))
+    )
 
-    result = ak.enforce_type(array, type)
-    assert str(result.type.content) == str(type)
-    assert result.to_list() == [[1.0, 2.0, 3.0, 4], [5.0, 6.0, 7.0]]
+    with pytest.raises(ValueError, match=r"if there are no missing values"):
+        ak.enforce_type(
+            ak.to_layout([1, None]),
+            ak.types.from_datashape("int64", highlevel=False),
+        )
+
+    ## Add option
+    result = ak.enforce_type(
+        ak.to_layout([1, 2]),
+        ak.types.from_datashape("?int64", highlevel=False),
+    )
+    assert ak.almost_equal(
+        result,
+        ak.contents.UnmaskedArray(
+            ak.contents.NumpyArray(numpy.array([1, 2], dtype=numpy.int64))
+        ),
+    )
+
+
+def test_numpy():
+    ## NumPy
+    ## 1D → 1D
+    result = ak.enforce_type(
+        ak.to_layout([1, 2]),
+        ak.types.from_datashape("int64", highlevel=False),
+    )
+    assert ak.almost_equal(result, numpy.array([1, 2], dtype=numpy.int64))
+
+    result = ak.enforce_type(
+        ak.to_layout([1, 2]),
+        ak.types.from_datashape("float32", highlevel=False),
+    )
+    assert ak.almost_equal(result, numpy.array([1.0, 2.0], dtype=numpy.float32))
+
+    with pytest.raises(ValueError):
+        ak.enforce_type(
+            ak.to_layout([1, 2]),
+            ak.types.from_datashape("string", highlevel=False),
+        )
+
+    ## 1D → 2D
+    with pytest.raises(ValueError):
+        ak.enforce_type(
+            ak.to_layout([1, 2]),
+            ak.types.from_datashape("var * int64", highlevel=False),
+        )
+    with pytest.raises(ValueError):
+        ak.enforce_type(
+            ak.to_layout([1, 2]),
+            ak.types.from_datashape("2 * float32", highlevel=False),
+        )
+    ## 2D → 1D
+    with pytest.raises(ValueError):
+        ak.enforce_type(
+            ak.to_layout(numpy.zeros((2, 3)), regulararray=False),
+            ak.types.from_datashape("int64", highlevel=False),
+        )
+    with pytest.raises(ValueError):
+        ak.enforce_type(
+            ak.to_layout(numpy.zeros((2, 3)), regulararray=False),
+            ak.types.from_datashape("float32", highlevel=False),
+        )
+
+    ## 2D → 2D
+    result = ak.enforce_type(
+        ak.to_layout(numpy.zeros((2, 3)), regulararray=False),
+        ak.types.from_datashape("var * int64", highlevel=False),
+    )
+    assert ak.almost_equal(
+        result,
+        ak.contents.ListOffsetArray(
+            ak.index.Index(numpy.array([0, 3, 6], dtype=numpy.int64)),
+            ak.contents.NumpyArray(numpy.array([0, 0, 0, 0, 0, 0], dtype=numpy.int64)),
+        ),
+    )
+
+    result = ak.enforce_type(
+        ak.to_layout(numpy.zeros((2, 3)), regulararray=False),
+        ak.types.from_datashape("3 * float32", highlevel=False),
+    )
+    assert ak.almost_equal(
+        result,
+        ak.contents.RegularArray(
+            ak.contents.NumpyArray(
+                numpy.array([0, 0, 0, 0, 0, 0], dtype=numpy.float32)
+            ),
+            size=3,
+        ),
+    )
+
+
+def test_union():
+    # Unions
+
+    ## non union → union
+    result = ak.enforce_type(
+        ak.to_layout([1, 2]),
+        ak.types.from_datashape("union[int64, string]", highlevel=False),
+    )
+    assert ak.almost_equal(
+        result,
+        ak.contents.UnionArray(
+            tags=ak.index.Index8([0, 0]),
+            index=ak.index.Index64([0, 1]),
+            contents=[
+                ak.contents.NumpyArray(numpy.array([1, 2], dtype=numpy.int64)),
+                ak.contents.ListOffsetArray(
+                    offsets=ak.index.Index64([0]),
+                    content=ak.contents.NumpyArray(
+                        numpy.array([], dtype=numpy.uint8),
+                        parameters={"__array__": "char"},
+                    ),
+                    parameters={"__array__": "string"},
+                ),
+            ],
+        ),
+    )
+
+    with pytest.raises(ValueError):
+        ak.enforce_type(
+            ak.to_layout([1, 2]),
+            ak.types.from_datashape("union[var * int64, string]", highlevel=False),
+        )
+    ## union → no union
+    result = ak.enforce_type(
+        # Build union layout, slice to test projection
+        ak.to_layout([1, "hi", "bye"])[1:2],
+        ak.types.from_datashape("string", highlevel=False),
+    )
+    assert ak.almost_equal(
+        result,
+        ak.contents.ListOffsetArray(
+            offsets=ak.index.Index64([0, 2]),
+            content=ak.contents.NumpyArray(
+                numpy.array([104, 105], dtype=numpy.uint8),
+                parameters={"__array__": "char"},
+            ),
+            parameters={"__array__": "string"},
+        ),
+    )
+    result = ak.enforce_type(
+        # Build union layout, slice to test projection
+        ak.to_layout([1, "hi", "bye"])[:1],
+        ak.types.from_datashape("int64", highlevel=False),
+    )
+    assert ak.almost_equal(
+        result, ak.contents.NumpyArray(numpy.array([1], dtype=numpy.int64))
+    )
+
+    with pytest.raises(ValueError):
+        ak.enforce_type(
+            ak.to_layout([1, "hi"]),
+            ak.types.from_datashape("var * int64", highlevel=False),
+        )
+
+    ## union → same union
+    result = ak.enforce_type(
+        ak.to_layout([1, "hi"]),
+        ak.types.from_datashape("union[int64, string]", highlevel=False),
+    )
+    assert ak.almost_equal(
+        result,
+        ak.contents.UnionArray(
+            tags=ak.index.Index8([0, 1]),
+            index=ak.index.Index64([0, 0]),
+            contents=[
+                ak.contents.NumpyArray(numpy.array([1, 2], dtype=numpy.int64)),
+                ak.contents.ListOffsetArray(
+                    offsets=ak.index.Index64([0, 2]),
+                    content=ak.contents.NumpyArray(
+                        numpy.array([104, 105], dtype=numpy.uint8),
+                        parameters={"__array__": "char"},
+                    ),
+                    parameters={"__array__": "string"},
+                ),
+            ],
+        ),
+    )
+
+    ## union → bigger union
+    result = ak.enforce_type(
+        ak.to_layout([1, "hi"]),
+        ak.types.from_datashape("union[int64, string, datetime64]", highlevel=False),
+    )
+    assert ak.almost_equal(
+        result,
+        ak.contents.UnionArray(
+            tags=ak.index.Index8([0, 1]),
+            index=ak.index.Index64([0, 0]),
+            contents=[
+                ak.contents.NumpyArray(numpy.array([1, 2], dtype=numpy.int64)),
+                ak.contents.ListOffsetArray(
+                    offsets=ak.index.Index64([0, 2]),
+                    content=ak.contents.NumpyArray(
+                        numpy.array([104, 105], dtype=numpy.uint8),
+                        parameters={"__array__": "char"},
+                    ),
+                    parameters={"__array__": "string"},
+                ),
+                ak.contents.NumpyArray(numpy.array([], dtype=numpy.datetime64)),
+            ],
+        ),
+    )
