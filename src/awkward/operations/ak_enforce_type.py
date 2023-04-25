@@ -31,15 +31,23 @@ def layout_equals_type(layout: ak.contents.Content, type_: ak.types.Type) -> boo
             layout.content, type_.content
         )
     elif layout.is_regular:
-        return isinstance(type_, ak.types.RegularType) and layout_equals_type(
-            layout.content, type_.content
+        return (
+            isinstance(type_, ak.types.RegularType)
+            and (
+                layout.size is unknown_length
+                or type_.size is unknown_length
+                or layout.size == type_.size
+            )
+            and layout_equals_type(layout.content, type_.content)
         )
     elif layout.is_numpy:
         for _ in range(layout.purelist_depth - 1):
             if not isinstance(type_, ak.types.RegularType):
                 return False
             type_ = type_.content
-        return isinstance(type_, ak.types.NumpyType)
+        return isinstance(
+            type_, ak.types.NumpyType
+        ) and layout.dtype == primitive_to_dtype(type_.primitive)
     elif layout.is_record:
         if not isinstance(type_, ak.types.Record) or type_.is_tuple != layout.is_tuple:
             return False
@@ -122,9 +130,12 @@ def recurse_option_any(
 ) -> ak.contents.Content:
     # option → option (no change)
     if isinstance(type_, ak.types.OptionType):
-        # TODO: packed!
-        return layout.copy(
-            content=recurse(layout.content, type_.content), parameters=type_.parameters
+        # Convert to packed so that any non-referenced content items are trimmed
+        # This is required so that unused union items are seen to be safe to project out later
+        layout_packed = layout.to_packed()
+        return layout_packed.copy(
+            content=recurse(layout_packed.content, type_.content),
+            parameters=type_.parameters,
         )
 
     # drop option!
@@ -204,7 +215,7 @@ def recurse_union_union(
         # No permutation succeeded
         raise NotImplementedError(
             "UnionArray(s) can currently only be converted into UnionArray(s) with a greater number contents if the "
-            "layout contents are compatible with some permutation of the type contents "
+            "layout contents are equal to some permutation of the type contents "
         )
 
     # Otherwise, we assume that we're projecting out one (or more) of our contents
@@ -212,7 +223,7 @@ def recurse_union_union(
     # and type is {A, B, C}. As the layout needs to lose a content, we must hope that the matching
     # permutation (by type) is also one that drops only unused contents from the union,
     # as layout operation must be typetracer-predictable
-    else:
+    elif n_layout_contents > n_type_contents:
         ix_contents = range(n_layout_contents)
         for ix_perm_contents in permutations(ix_contents, n_type_contents):
             retained_contents = [layout.contents[j] for j in ix_perm_contents]
