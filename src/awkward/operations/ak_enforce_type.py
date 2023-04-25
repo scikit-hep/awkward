@@ -470,70 +470,42 @@ def recurse_record_any(
                 )
             )
 
-        if type_.is_tuple:
-            # For tuples, the type order matters. So, we'll permute
-            # the layout contents, and keep track of their indices into the `contents` list
-            ix_contents = range(len(layout.contents))
-            for ix_perm_contents in permutations(ix_contents):
-                perm_contents = [layout.contents[i] for i in ix_perm_contents]
-                try:
-                    builders = [
-                        recurse(c, t, raise_invalid_type_conversion_error)
-                        for c, t in zip(perm_contents, type_.contents)
-                    ]
-                except InvalidTypeConversionError:
-                    continue
-                else:
+        if type_.is_tuple and layout.is_tuple:
+            builders = [
+                recurse(c, t, raise_invalid_type_conversion_error)
+                for c, t in zip(layout.contents, type_.contents)
+            ]
 
-                    def thunk(this):
-                        this_contents = [this.contents[i] for i in ix_perm_contents]
-                        return this.copy(
-                            fields=None,
-                            contents=[b(c) for b, c in zip(builders, this_contents)],
-                            parameters=type_.parameters,
-                        )
-
-                    return thunk
-
-            handle_error(
-                ValueError(
-                    "RecordArray(s) can only be converted into RecordArray(s) with compatible contents"
+            def thunk(this):
+                return this.copy(
+                    fields=None,
+                    contents=[b(c) for b, c in zip(builders, this.contents)],
+                    parameters=type_.parameters,
                 )
-            )
 
+            return thunk
+        elif not (type_.is_tuple or layout.is_tuple):
+            builders = [
+                recurse(
+                    layout.content(f),
+                    type_.content(f),
+                    raise_invalid_type_conversion_error,
+                )
+                for f in type_.fields
+            ]
+
+            def thunk(this):
+                return this.copy(
+                    fields=type_.fields,
+                    contents=[b(c) for b, c in zip(builders, this.contents)],
+                    parameters=type_.parameters,
+                )
+
+            return thunk
         else:
-            type_items = zip(type_.fields, type_.contents)
-
-            # We can permute the type, rather than the layout, because records are not ordered
-            for perm in permutations(type_items):
-                perm_fields, perm_contents = zip(*perm)
-                try:
-                    builders = [
-                        recurse(c, t, raise_invalid_type_conversion_error)
-                        for c, t in zip(layout.contents, perm_contents)
-                    ]
-                except InvalidTypeConversionError:
-                    continue
-                else:
-                    if not (layout.is_tuple or layout.fields == list(perm_fields)):
-                        handle_error(
-                            ValueError(
-                                "RecordArray(s) can only be converted into RecordArray(s) with compatible "
-                                "fields"
-                            )
-                        )
-
-                    def thunk(this):
-                        return this.copy(
-                            fields=list(perm_fields),
-                            contents=[b(c) for b, c in zip(builders, this.contents)],
-                            parameters=type_.parameters,
-                        )
-
-                    return thunk
             handle_error(
                 ValueError(
-                    "RecordArray(s) can only be converted into RecordArray(s) with compatible contents"
+                    "RecordArray(s) cannot be converted between records and tuples."
                 )
             )
     else:

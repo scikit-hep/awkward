@@ -24,54 +24,48 @@ def test_record():
         ),
     )
 
-    ## record → different tuple
     result = ak.enforce_type(
-        ak.to_layout([{"x": [1, 2]}], regulararray=False),
-        ak.types.from_datashape("(var * float64)", highlevel=False),
+        ak.to_layout([{"x": [1, 0]}], regulararray=False),
+        ak.types.from_datashape("{x: var * bool}", highlevel=False),
     )
-
     assert ak.almost_equal(
         result,
         ak.contents.RecordArray(
             [
                 ak.contents.ListOffsetArray(
                     ak.index.Index(numpy.array([0, 2], dtype=numpy.int64)),
-                    ak.contents.NumpyArray(numpy.array([1, 2], dtype=numpy.float64)),
+                    ak.contents.NumpyArray(numpy.array([1, 0], dtype=numpy.bool_)),
                 )
             ],
-            fields=None,
+            ["x"],
         ),
     )
+
+    ## record → different tuple
+    with pytest.raises(ValueError, match=r"converted between records and tuples"):
+        ak.enforce_type(
+            ak.to_layout([{"x": [1, 2]}], regulararray=False),
+            ak.types.from_datashape("(var * float64)", highlevel=False),
+        )
 
     ## tuple → different record
-    result = ak.enforce_type(
-        ak.to_layout([([1, 2],)], regulararray=False),
-        ak.types.from_datashape("{x: var * float64}", highlevel=False),
-    )
+    with pytest.raises(ValueError, match=r"converted between records and tuples"):
+        ak.enforce_type(
+            ak.to_layout([([1, 2],)], regulararray=False),
+            ak.types.from_datashape("{x: var * float64}", highlevel=False),
+        )
 
-    assert ak.almost_equal(
-        result,
-        ak.contents.RecordArray(
-            [
-                ak.contents.ListOffsetArray(
-                    ak.index.Index(numpy.array([0, 2], dtype=numpy.int64)),
-                    ak.contents.NumpyArray(numpy.array([1, 2], dtype=numpy.float64)),
-                )
-            ],
-            fields=["x"],
-        ),
-    )
-    with pytest.raises(ValueError):
+    with pytest.raises(IndexError, match=r"no field 'y' in record with 1 fields"):
         ak.enforce_type(
             ak.to_layout([{"x": [1, 2]}], regulararray=False),
             ak.types.from_datashape("{y: var * float64}", highlevel=False),
         )
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=r"containing different numbers of contents"):
         ak.enforce_type(
             ak.to_layout([{"x": [1, 2]}], regulararray=False),
             ak.types.from_datashape("{x: var * int64, y: int64}", highlevel=False),
         )
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=r"containing different numbers of contents"):
         ak.enforce_type(
             ak.to_layout([{"x": [1, 2]}], regulararray=False),
             ak.types.from_datashape("{}", highlevel=False),
