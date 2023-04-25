@@ -215,8 +215,13 @@ def from_type(type: ak.types.Type) -> Form:
         )
     elif isinstance(type, ak.types.UnknownType):
         return ak.forms.EmptyForm(parameters=type.parameters)
+    elif isinstance(type, (ak.types.ArrayType, ak.types.ScalarType)):
+        raise TypeError(
+            "High-level types (ak.types.ArrayType, ak.types.ScalarType) do not have representations as Awkward forms. "
+            "Instead the low level type should be used."
+        )
     else:
-        raise ak._errors.wrap_error(TypeError(f"unsupported type {type!r}"))
+        raise TypeError(f"unsupported type {type!r}")
 
 
 def _expand_braces(text, seen=None):
