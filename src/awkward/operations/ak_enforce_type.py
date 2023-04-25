@@ -8,6 +8,7 @@ import awkward as ak
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
+from awkward._parameters import type_parameters_equal
 from awkward._typing import Callable, TypeAlias
 from awkward.types.numpytype import primitive_to_dtype
 
@@ -16,6 +17,62 @@ np = NumpyMetadata.instance()
 
 BuilderType: TypeAlias = "Callable[[ak.contents.Content], ak.contents.Content]"
 ErrorHandlerType: TypeAlias = "Callable[[Exception], None]"
+
+
+def layout_equals_type(layout: ak.contents.Content, type_: ak.types.Type) -> bool:
+    if not type_parameters_equal(layout._parameters, type_._parameters):
+        return False
+
+    if layout.is_unknown:
+        return isinstance(type_, ak.types.UnknownType)
+    elif layout.is_option:
+        return isinstance(type_, ak.types.OptionType) and layout_equals_type(
+            layout.content, type_.content
+        )
+    elif layout.is_indexed:
+        return layout_equals_type(layout.content, type_)
+    elif layout.is_list:
+        return isinstance(type_, ak.types.ListType) and layout_equals_type(
+            layout.content, type_.content
+        )
+    elif layout.is_regular:
+        return isinstance(type_, ak.types.RegularType) and layout_equals_type(
+            layout.content, type_.content
+        )
+    elif layout.is_numpy:
+        for _ in range(layout.purelist_depth - 1):
+            if not isinstance(type_, ak.types.RegularType):
+                return False
+            type_ = type_.content
+        return isinstance(type_, ak.types.NumpyType)
+    elif layout.is_record:
+        if not isinstance(type_, ak.types.Record) or type_.is_tuple != layout.is_tuple:
+            return False
+
+        if layout.is_tuple:
+            return all(
+                layout_equals_type(c, t)
+                for c, t in zip(layout.contents, type_.contents)
+            )
+        else:
+            return all(
+                layout_equals_type(layout.content(f), type_.content(f))
+                for f in type_.fields
+            )
+
+    elif layout.is_union:
+        if len(layout.contents) != len(type_.contents):
+            return False
+
+        for contents in permutations(layout.contents):
+            if all(
+                layout_equals_type(layout, type_)
+                for layout, type_ in zip(contents, type_.contents)
+            ):
+                return True
+        return False
+    else:
+        raise TypeError(layout)
 
 
 def enforce_type(
@@ -176,36 +233,40 @@ def recurse_union_union(
         # Permute the index, so that we can later recover remaining types
         ix_contents = range(n_type_contents)
         for ix_perm_contents in permutations(ix_contents, n_layout_contents):
-            try:
-                builders = [
-                    recurse(
-                        c,
-                        type_.contents[j],
-                        raise_invalid_type_conversion_error,
-                    )
-                    for c, j in zip(layout.contents, ix_perm_contents)
-                ]
-            except InvalidTypeConversionError:
+            # Require that all layouts match types for this permutation
+            if not all(
+                layout_equals_type(c, type_.contents[j])
+                for c, j in zip(layout.contents, ix_perm_contents)
+            ):
                 continue
-            else:
 
-                def thunk(this):
-                    ix_missing_contents = frozenset(ix_contents) - frozenset(
-                        ix_perm_contents
-                    )
-                    missing_types = [type_.contents[j] for j in ix_missing_contents]
-                    contents = [b(c) for b, c in zip(builders, this.contents)]
-                    contents.extend(
-                        [
-                            ak.forms.from_type(t).length_zero_array(
-                                highlevel=False, backend=this.backend
-                            )
-                            for t in missing_types
-                        ]
-                    )
-                    return this.copy(contents=contents, parameters=type_.parameters)
+            # Create subtree builders (as parameters can change!)
+            builders = [
+                recurse(
+                    c,
+                    type_.contents[j],
+                    handle_error,
+                )
+                for c, j in zip(layout.contents, ix_perm_contents)
+            ]
 
-                return thunk
+            def thunk(this):
+                ix_missing_contents = frozenset(ix_contents) - frozenset(
+                    ix_perm_contents
+                )
+                missing_types = [type_.contents[j] for j in ix_missing_contents]
+                contents = [b(c) for b, c in zip(builders, this.contents)]
+                contents.extend(
+                    [
+                        ak.forms.from_type(t).length_zero_array(
+                            highlevel=False, backend=this.backend
+                        )
+                        for t in missing_types
+                    ]
+                )
+                return this.copy(contents=contents, parameters=type_.parameters)
+
+            return thunk
         # No permutation succeeded
         handle_error(
             NotImplementedError(
@@ -222,62 +283,66 @@ def recurse_union_union(
     else:
         ix_contents = range(n_layout_contents)
         for ix_perm_contents in permutations(ix_contents, n_type_contents):
-            try:
-                builders = [
-                    recurse(
-                        layout.contents[j],
-                        t,
-                        raise_invalid_type_conversion_error,
-                    )
-                    for j, t in zip(ix_perm_contents, type_.contents)
-                ]
-            except InvalidTypeConversionError:
+            # Require that all layouts match types for this permutation
+            if not all(
+                layout_equals_type(layout.contents[j], c)
+                for j, c in zip(ix_perm_contents, type_.contents)
+            ):
                 continue
-            else:
 
-                def thunk(this):
-                    is_trivial_permutation = ix_perm_contents == range(n_type_contents)
-                    if is_trivial_permutation:
-                        # The trivial permutation won't require any copying of tags
-                        this_tags = this.tags
-                    else:
-                        this_tags = ak.index.Index8.empty(
-                            this.tags.length, this.backend.index_nplike
-                        )
+            # Create subtree builders (as parameters can change!)
+            builders = [
+                recurse(
+                    layout.contents[j],
+                    c,
+                    handle_error,
+                )
+                for j, c in zip(ix_perm_contents, type_.contents)
+            ]
 
-                    _total_used_tags = 0
-                    this_contents = []
-
-                    for i, j in zip(ix_perm_contents, range(n_type_contents)):
-                        this_contents.append(this.contents[i])
-                        this_tag_is_i = this.tags.data == i
-
-                        # Rewrite the tags if they need to be condensed
-                        if not is_trivial_permutation:
-                            this_tags.data[this_tag_is_i] = j
-
-                        # Keep track of the length of this subcontent
-                        _total_used_tags += this.backend.index_nplike.count_nonzero(
-                            this_tag_is_i
-                        )
-                    # Is the new union of the same length as the original?
-                    total_used_tags = this.backend.index_nplike.index_as_shape_item(
-                        _total_used_tags
-                    )
-                    if not (
-                        total_used_tags is unknown_length
-                        or this.length is unknown_length
-                        or total_used_tags == this.length
-                    ):
-                        raise ValueError("union conversion must not be lossless")
-
-                    return this.copy(
-                        tags=this_tags,
-                        contents=[b(c) for b, c in zip(builders, this_contents)],
-                        parameters=type_.parameters,
+            def thunk(this):
+                is_trivial_permutation = ix_perm_contents == range(n_type_contents)
+                if is_trivial_permutation:
+                    # The trivial permutation won't require any copying of tags
+                    this_tags = this.tags
+                else:
+                    this_tags = ak.index.Index8.empty(
+                        this.tags.length, this.backend.index_nplike
                     )
 
-                return thunk
+                _total_used_tags = 0
+                this_contents = []
+
+                for i, j in zip(ix_perm_contents, range(n_type_contents)):
+                    this_contents.append(this.contents[i])
+                    this_tag_is_i = this.tags.data == i
+
+                    # Rewrite the tags if they need to be condensed
+                    if not is_trivial_permutation:
+                        this_tags.data[this_tag_is_i] = j
+
+                    # Keep track of the length of this subcontent
+                    _total_used_tags += this.backend.index_nplike.count_nonzero(
+                        this_tag_is_i
+                    )
+                # Is the new union of the same length as the original?
+                total_used_tags = this.backend.index_nplike.index_as_shape_item(
+                    _total_used_tags
+                )
+                if not (
+                    total_used_tags is unknown_length
+                    or this.length is unknown_length
+                    or total_used_tags == this.length
+                ):
+                    raise ValueError("union conversion must not be lossless")
+
+                return this.copy(
+                    tags=this_tags,
+                    contents=[b(c) for b, c in zip(builders, this_contents)],
+                    parameters=type_.parameters,
+                )
+
+            return thunk
 
         handle_error(
             # Add note about expand + contract
@@ -295,22 +360,21 @@ def recurse_union_non_union(
     handle_error: ErrorHandlerType,
 ) -> BuilderType:
     for i, content in enumerate(layout.contents):
-        try:
-            builder = recurse(content, type_, raise_invalid_type_conversion_error)
-        except InvalidTypeConversionError:
+        if not layout_equals_type(content, type_):
             continue
-        else:
+        builder = recurse(content, type_, handle_error)
 
-            def thunk(this):
-                projected = this.project(i)
-                if projected.length != this.length:
-                    raise ValueError(
-                        f"UnionArray(s) can only be converted to {type_} if they are equivalent to their "
-                        f"projections"
-                    )
-                return builder(projected)
+        def thunk(this):
+            projected = this.project(i)
+            if projected.length != this.length:
+                raise ValueError(
+                    f"UnionArray(s) can only be converted to {type_} if they are equivalent to their "
+                    f"projections"
+                )
+            return builder(projected)
 
-            return thunk
+        return thunk
+
     handle_error(
         ValueError(
             f"UnionArray(s) can only be converted into {type_} if it is compatible, but no "
@@ -325,34 +389,31 @@ def recurse_any_union(
     handle_error: ErrorHandlerType,
 ) -> BuilderType:
     for i, content_type in enumerate(type_.contents):
-        try:
-            content_builder = recurse(
-                layout, content_type, raise_invalid_type_conversion_error
-            )
-        except InvalidTypeConversionError:
+        if not layout_equals_type(layout, content_type):
             continue
-        else:
 
-            def thunk(this):
-                tags = this.backend.index_nplike.zeros(this.length, dtype=np.int8)
-                index = this.backend.index_nplike.arange(this.length, dtype=np.int64)
+        content_builder = recurse(layout, content_type, handle_error)
 
-                other_contents = [
-                    ak.forms.from_type(t).length_zero_array(
-                        backend=this.backend, highlevel=False
-                    )
-                    for j, t in enumerate(type_.contents)
-                    if j != i
-                ]
+        def thunk(this):
+            tags = this.backend.index_nplike.zeros(this.length, dtype=np.int8)
+            index = this.backend.index_nplike.arange(this.length, dtype=np.int64)
 
-                return ak.contents.UnionArray(
-                    tags=ak.index.Index8(tags, nplike=this.backend.index_nplike),
-                    index=ak.index.Index64(index, nplike=this.backend.index_nplike),
-                    contents=[content_builder(this), *other_contents],
-                    parameters=type_.parameters,
+            other_contents = [
+                ak.forms.from_type(t).length_zero_array(
+                    backend=this.backend, highlevel=False
                 )
+                for j, t in enumerate(type_.contents)
+                if j != i
+            ]
 
-            return thunk
+            return ak.contents.UnionArray(
+                tags=ak.index.Index8(tags, nplike=this.backend.index_nplike),
+                index=ak.index.Index64(index, nplike=this.backend.index_nplike),
+                contents=[content_builder(this), *other_contents],
+                parameters=type_.parameters,
+            )
+
+        return thunk
 
     handle_error(
         ValueError(
