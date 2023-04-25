@@ -6,30 +6,17 @@ import awkward as ak
 
 
 def test_from_iter():
-    array = ak.from_iter(
-        [
-            1,
-            2,
-            "hi",
-            [3, 4, {"x": 4}, None],
-            [
-                1j,
-                [
-                    3,
-                    4,
-                    (
-                        False,
-                        True,
-                    ),
-                ],
-            ],
-        ]
-    )[:0]
-    array_round_trip = ak.forms.from_type(array.type.content).length_zero_array()
-    assert array_round_trip.type.is_equal_to(array.type)
+    # We define `from_type` to match ArrayBuilder where possible. We can't
+    # include options inside unions, though, because ArrayBuilder creates `UnmaskedArray`
+    # nodes for the non-indexed option
+    array = ak.to_packed(
+        ak.from_iter([1, 2, "hi", [3, 4, {"x": 4}], {"y": [None, 2]}])[:0]
+    )
+    form_from_type = ak.forms.from_type(array.type.content)
+    assert form_from_type == array.layout.form
 
 
 def test_regular():
     array = ak.to_regular([[1, 2, 3]])[:0]
-    array_round_trip = ak.forms.from_type(array.type.content).length_zero_array()
-    assert array_round_trip.type.is_equal_to(array.type)
+    form_from_type = ak.forms.from_type(array.type.content)
+    assert form_from_type == array.layout.form
