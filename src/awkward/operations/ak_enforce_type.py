@@ -112,7 +112,10 @@ def enforce_type(
 def recurse_indexed_any(
     layout: ak.contents.IndexedArray, type_: ak.types.Type
 ) -> ak.contents.Content:
-    return recurse(layout.project(), type_)
+    if layout_equals_type(layout, type_):
+        return layout.copy(content=recurse(layout.content, type_))
+    else:
+        return recurse(layout.project(), type_)
 
 
 def recurse_unknown_any(
