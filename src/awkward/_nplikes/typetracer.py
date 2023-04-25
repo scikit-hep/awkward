@@ -8,7 +8,13 @@ from numpy.lib.mixins import NDArrayOperatorsMixin
 
 import awkward as ak
 from awkward._nplikes.dispatch import register_nplike
-from awkward._nplikes.numpylike import ArrayLike, IndexType, NumpyLike, NumpyMetadata
+from awkward._nplikes.numpylike import (
+    ArrayLike,
+    IndexType,
+    NumpyLike,
+    NumpyMetadata,
+    UniqueAllResult,
+)
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._regularize import is_integer, is_non_string_like_sequence
 from awkward._typing import (
@@ -1080,6 +1086,26 @@ class TypeTracer(NumpyLike):
     def unique_values(self, x: ArrayLike) -> TypeTracerArray:
         try_touch_data(x)
         return TypeTracerArray._new(x.dtype, shape=(unknown_length,))
+
+    def unique_all(self, x: ArrayLike) -> UniqueAllResult:
+        try_touch_data(x)
+        return UniqueAllResult(
+            TypeTracerArray._new(x.dtype, shape=(unknown_length,)),
+            TypeTracerArray._new(np.int64, shape=(unknown_length,)),
+            TypeTracerArray._new(np.int64, shape=x.shape),
+            TypeTracerArray._new(np.int64, shape=(unknown_length,)),
+        )
+
+    def sort(
+        self,
+        x: ArrayLike,
+        *,
+        axis: int = -1,
+        descending: bool = False,
+        stable: bool = True,
+    ) -> ArrayLike:
+        try_touch_data(x)
+        return TypeTracerArray._new(x.dtype, shape=x.shape)
 
     def concat(self, arrays, *, axis: int | None = 0) -> TypeTracerArray:
         if axis is None:
