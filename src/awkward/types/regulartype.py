@@ -1,4 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+from __future__ import annotations
+
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._parameters import parameters_are_equal, type_parameters_equal
 from awkward._regularize import is_integer
