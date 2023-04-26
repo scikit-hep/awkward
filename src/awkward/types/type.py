@@ -6,12 +6,17 @@ import sys
 
 import awkward as ak
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._typing import Self
+from awkward._util import unset
 from awkward.types._awkward_datashape_parser import Lark_StandAlone, Transformer
 
 np = NumpyMetadata.instance()
 
 
 class Type:
+    def copy(self, *, parameters=unset, typestr=unset) -> Self:
+        raise NotImplementedError
+
     @property
     def parameters(self):
         if self._parameters is None:  # pylint: disable=E0203

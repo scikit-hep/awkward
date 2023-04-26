@@ -11,6 +11,7 @@ from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import find_typestrs
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
+from awkward._parameters import parameters_union
 from awkward._typing import Final, JSONMapping, JSONSerializable
 
 np = NumpyMetadata.instance()
@@ -179,6 +180,70 @@ def from_dict(input: dict) -> Form:
 
 def from_json(input: str) -> Form:
     return from_dict(json.loads(input))
+
+
+def from_type(type_: ak.types.Type) -> Form:
+    # Categorical types are reintroduced into forms using metadata
+    if type_.parameter("__categorical__"):
+        # Drop categorical placeholder parameter
+        next_parameters = type_.parameters.copy()
+        next_parameters.pop("__categorical__")
+
+        if isinstance(type_, ak.types.OptionType):
+            next_content = from_type(type_.content)
+            return ak.forms.IndexedOptionForm(
+                "i64",
+                next_content,
+                parameters=parameters_union(
+                    next_parameters, {"__array__": "categorical"}
+                ),
+            )
+        else:
+            next_content = from_type(type_.copy(parameters=next_parameters))
+            return ak.forms.IndexedForm(
+                "i64", next_content, parameters={"__array__": "categorical"}
+            )
+
+    if isinstance(type_, ak.types.NumpyType):
+        return ak.forms.NumpyForm(type_.primitive, parameters=type_.parameters)
+    elif isinstance(type_, ak.types.ListType):
+        return ak.forms.ListOffsetForm(
+            "i64", from_type(type_.content), parameters=type_.parameters
+        )
+    elif isinstance(type_, ak.types.RegularType):
+        return ak.forms.RegularForm(
+            from_type(type_.content),
+            size=type_.size,
+            parameters=type_.parameters,
+        )
+    elif isinstance(type_, ak.types.OptionType):
+        return ak.forms.IndexedOptionForm(
+            "i64",
+            from_type(type_.content),
+            parameters=type_.parameters,
+        )
+    elif isinstance(type_, ak.types.RecordType):
+        return ak.forms.RecordForm(
+            [from_type(c) for c in type_.contents],
+            type_.fields,
+            parameters=type_.parameters,
+        )
+    elif isinstance(type_, ak.types.UnionType):
+        return ak.forms.UnionForm(
+            "i8",
+            "i64",
+            [from_type(c) for c in type_.contents],
+            parameters=type_.parameters,
+        )
+    elif isinstance(type_, ak.types.UnknownType):
+        return ak.forms.EmptyForm(parameters=type_.parameters)
+    elif isinstance(type_, (ak.types.ArrayType, ak.types.ScalarType)):
+        raise TypeError(
+            "High-level types (ak.types.ArrayType, ak.types.ScalarType) do not have representations as Awkward forms. "
+            "Instead the low level type should be used."
+        )
+    else:
+        raise TypeError(f"unsupported type {type_!r}")
 
 
 def _expand_braces(text, seen=None):

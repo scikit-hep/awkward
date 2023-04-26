@@ -300,6 +300,7 @@
     generated/ak.forms.UnmaskedForm
     generated/ak.forms.from_dict
     generated/ak.forms.from_json
+    generated/ak.forms.from_type
 
 .. toctree::
     :caption: Builtin behaviors

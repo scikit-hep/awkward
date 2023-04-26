@@ -1,12 +1,21 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+from __future__ import annotations
 
 from awkward._parameters import parameters_are_equal, type_parameters_equal
-from awkward._typing import final
+from awkward._typing import Self, final
+from awkward._util import unset
 from awkward.types.type import Type
 
 
 @final
 class ListType(Type):
+    def copy(self, *, content: Type = unset, parameters=unset, typestr=unset) -> Self:
+        return ListType(
+            self._content if content is unset else content,
+            parameters=self._parameters if parameters is unset else parameters,
+            typestr=self._typestr if typestr is unset else typestr,
+        )
+
     def __init__(self, content, *, parameters=None, typestr=None):
         if not isinstance(content, Type):
             raise TypeError(

@@ -2127,17 +2127,8 @@ class ListOffsetArray(Content):
 
     def to_packed(self) -> Self:
         next = self.to_ListOffsetArray64(True)
-        content = next._content.to_packed()
-        packed_length = self._backend.index_nplike.index_as_shape_item(
-            next._offsets[-1]
-        )
-        if (
-            content.length is not unknown_length
-            and packed_length is not unknown_length
-            and content.length != packed_length
-        ):
-            content = content[: next._offsets[-1]]
-        return ListOffsetArray(next._offsets, content, parameters=next._parameters)
+        next_content = next._content[: next._offsets[-1]].to_packed()
+        return ListOffsetArray(next._offsets, next_content, parameters=next._parameters)
 
     def _to_list(self, behavior, json_conversions):
         if not self._backend.nplike.known_data:
