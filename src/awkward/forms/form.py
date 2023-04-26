@@ -11,6 +11,7 @@ from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import find_typestrs
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
+from awkward._parameters import parameters_union
 from awkward._typing import Final, JSONMapping, JSONSerializable
 
 np = NumpyMetadata.instance()
@@ -184,14 +185,21 @@ def from_json(input: str) -> Form:
 def from_type(type_: ak.types.Type) -> Form:
     # Categorical types are reintroduced into forms using metadata
     if type_.parameter("__categorical__"):
+        # Drop categorical placeholder parameter
         next_parameters = type_.parameters.copy()
         next_parameters.pop("__categorical__")
-        next_content = from_type(type_.copy(parameters=next_parameters))
+
         if isinstance(type_, ak.types.OptionType):
+            next_content = from_type(type_.content)
             return ak.forms.IndexedOptionForm(
-                "i64", next_content, parameters={"__array__": "categorical"}
+                "i64",
+                next_content,
+                parameters=parameters_union(
+                    next_parameters, {"__array__": "categorical"}
+                ),
             )
         else:
+            next_content = from_type(type_.copy(parameters=next_parameters))
             return ak.forms.IndexedForm(
                 "i64", next_content, parameters={"__array__": "categorical"}
             )
