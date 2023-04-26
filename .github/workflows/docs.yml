@@ -13,7 +13,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  PYTHON_VERSION: "3.11.2"
+  WASM_PYTHON_VERSION: "3.11.2"
+  X86_64_PYTHON_VERSION: "3.10.6"
   SOURCE_DATE_EPOCH: "1668811211"
 
 jobs:
@@ -28,7 +29,7 @@ jobs:
     - name: Setup Python
       uses: actions/setup-python@v4
       with:
-        python-version: "${{ env.PYTHON_VERSION }}"
+        python-version: "${{ env.WASM_PYTHON_VERSION }}"
 
     - name: Generate build files
       run: pipx run nox -s prepare -- --headers --signatures
@@ -38,7 +39,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ./awkward-cpp/dist
-        key: ${{ runner.os }}-${{ env.PYTHON_VERSION }}-awkward-cpp-wasm-${{ hashFiles('awkward-cpp/**') }}-CACHEBUST
+        key: ${{ runner.os }}-${{ env.WASM_PYTHON_VERSION }}-awkward-cpp-wasm-${{ hashFiles('awkward-cpp/**') }}-CACHEBUST
 
     - name: Install dependencies
       if: steps.cache-awkward-cpp-wasm-wheel.outputs.cache-hit != 'true'
@@ -106,7 +107,7 @@ jobs:
         cache-downloads: true
         environment-file: docs/environment.yml
         extra-specs: |
-           python=${{ env.PYTHON_VERSION }}
+           python=${{ env.X86_64_PYTHON_VERSION }}
            doxygen
            python-build
 
@@ -118,7 +119,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ./awkward-cpp/dist
-        key: ${{ runner.os }}-${{ env.PYTHON_VERSION }}-awkward-x86-64-wasm-${{ hashFiles('awkward-cpp/**') }}
+        key: ${{ runner.os }}-${{ env.X86_64_PYTHON_VERSION }}-awkward-x86-64-wasm-${{ hashFiles('awkward-cpp/**') }}
 
     - name: Build wheel
       if: steps.cache-awkward-cpp-x86-64-wheel.outputs.cache-hit != 'true'
@@ -183,7 +184,7 @@ jobs:
         cache-downloads: true
         environment-file: docs/environment.yml
         extra-specs: |
-           python=${{ env.PYTHON_VERSION }}
+           python=${{ env.X86_64_PYTHON_VERSION }}
            doxygen
 
     - name: Download awkward wheel
