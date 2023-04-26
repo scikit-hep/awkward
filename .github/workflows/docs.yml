@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  PYTHON_VERSION: "3.10.6"
+  PYTHON_VERSION: "3.11.2"
   SOURCE_DATE_EPOCH: "1668811211"
 
 jobs:
