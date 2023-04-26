@@ -113,8 +113,12 @@ def recurse_indexed_any(
     layout: ak.contents.IndexedArray, type_: ak.types.Type
 ) -> ak.contents.Content:
     if layout_equals_type(layout, type_):
+        # If the types match, then we don't need to project, as only parameters
+        # are changed (if at all)
         return layout.copy(content=recurse(layout.content, type_))
     else:
+        # Otherwise, to ensure that we can project out options, we need to know
+        # exactly what's visible to the user
         return recurse(layout.project(), type_)
 
 
@@ -144,8 +148,7 @@ def recurse_option_any(
     # drop option!
     else:
         if layout.backend.index_nplike.all(layout.mask_as_bool(True)):
-            layout_no_option = ak.drop_none(layout, axis=0, highlevel=False)
-            return recurse(layout_no_option, type_)
+            return recurse(layout.project(), type_)
         else:
             raise ValueError(
                 "option types can only be removed if there are no missing values"
@@ -332,7 +335,7 @@ def recurse_union_union(
 
 
 def recurse_union_non_union(
-    layout: ak.contents.UnionArray, type_: ak.types.UnionType
+    layout: ak.contents.UnionArray, type_: ak.types.Type
 ) -> ak.contents.Content:
     for i, content in enumerate(layout.contents):
         if not layout_equals_type(content, type_):
