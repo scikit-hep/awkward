@@ -104,6 +104,7 @@ jobs:
         extra-specs: |
            python=${{ env.PYTHON_VERSION }}
            doxygen
+           build
 
     - name: Generate build files
       run: pipx run nox -s prepare -- --headers --signatures
@@ -117,7 +118,7 @@ jobs:
 
     - name: Build wheel
       if: steps.cache-awkward-cpp-x86-64-wheel.outputs.cache-hit != 'true'
-      run: pipx run build -w ./awkward-cpp
+      run: python -m build -w ./awkward-cpp
 
     - name: Upload wheel
       uses: actions/upload-artifact@v3
