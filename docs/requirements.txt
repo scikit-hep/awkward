@@ -17,7 +17,7 @@ sphinx-external-toc
 ipyleaflet
 
 numpy>=1.13.1
-numba>=0.50.0
+numba>=0.50.0;python_version<"3.11"
 pandas>=0.24.0
 numexpr
 pyarrow>=7.0.0
