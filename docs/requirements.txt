@@ -1,7 +1,7 @@
 # JupyterLite (kernel requires specific pyodide version)
 jupyterlite-pyodide-kernel==0.0.7
 jupyterlite[piplite]==0.1.0
-jupyterlite-sphinx==0.7.2
+jupyterlite-sphinx==0.8.0
 
 sphinx>=4.5.0,<5.0.0
 PyYAML
