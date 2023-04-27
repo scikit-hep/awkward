@@ -14,20 +14,20 @@ from awkward.types.numpytype import primitive_to_dtype
 np = NumpyMetadata.instance()
 
 
-def layout_equals_type(layout: ak.contents.Content, type_: ak.types.Type) -> bool:
+def layout_has_type(layout: ak.contents.Content, type_: ak.types.Type) -> bool:
     if not type_parameters_equal(layout._parameters, type_._parameters):
         return False
 
     if layout.is_unknown:
         return isinstance(type_, ak.types.UnknownType)
     elif layout.is_option:
-        return isinstance(type_, ak.types.OptionType) and layout_equals_type(
+        return isinstance(type_, ak.types.OptionType) and layout_has_type(
             layout.content, type_.content
         )
     elif layout.is_indexed:
-        return layout_equals_type(layout.content, type_)
+        return layout_has_type(layout.content, type_)
     elif layout.is_list:
-        return isinstance(type_, ak.types.ListType) and layout_equals_type(
+        return isinstance(type_, ak.types.ListType) and layout_has_type(
             layout.content, type_.content
         )
     elif layout.is_regular:
@@ -38,7 +38,7 @@ def layout_equals_type(layout: ak.contents.Content, type_: ak.types.Type) -> boo
                 or type_.size is unknown_length
                 or layout.size == type_.size
             )
-            and layout_equals_type(layout.content, type_.content)
+            and layout_has_type(layout.content, type_.content)
         )
     elif layout.is_numpy:
         for _ in range(layout.purelist_depth - 1):
@@ -54,12 +54,11 @@ def layout_equals_type(layout: ak.contents.Content, type_: ak.types.Type) -> boo
 
         if layout.is_tuple:
             return all(
-                layout_equals_type(c, t)
-                for c, t in zip(layout.contents, type_.contents)
+                layout_has_type(c, t) for c, t in zip(layout.contents, type_.contents)
             )
         else:
             return all(
-                layout_equals_type(layout.content(f), type_.content(f))
+                layout_has_type(layout.content(f), type_.content(f))
                 for f in type_.fields
             )
 
@@ -69,7 +68,7 @@ def layout_equals_type(layout: ak.contents.Content, type_: ak.types.Type) -> boo
 
         for contents in permutations(layout.contents):
             if all(
-                layout_equals_type(layout, type_)
+                layout_has_type(layout, type_)
                 for layout, type_ in zip(contents, type_.contents)
             ):
                 return True
@@ -112,7 +111,7 @@ def enforce_type(
 def recurse_indexed_any(
     layout: ak.contents.IndexedArray, type_: ak.types.Type
 ) -> ak.contents.Content:
-    if layout_equals_type(layout, type_):
+    if layout_has_type(layout, type_):
         # If the types match, then we don't need to project, as only parameters
         # are changed (if at all)
         return layout.copy(content=recurse(layout.content, type_))
@@ -196,8 +195,7 @@ def recurse_union_union(
             retained_types = [type_.contents[j] for j in ix_perm_contents]
             # Require that all layouts match types for layout permutation
             if not all(
-                layout_equals_type(c, t)
-                for c, t in zip(layout.contents, retained_types)
+                layout_has_type(c, t) for c, t in zip(layout.contents, retained_types)
             ):
                 continue
 
@@ -235,8 +233,7 @@ def recurse_union_union(
             retained_contents = [layout.contents[j] for j in ix_perm_contents]
             # Require that all layouts match types for layout permutation
             if not all(
-                layout_equals_type(c, t)
-                for c, t in zip(retained_contents, type_.contents)
+                layout_has_type(c, t) for c, t in zip(retained_contents, type_.contents)
             ):
                 continue
 
@@ -299,8 +296,7 @@ def recurse_union_union(
 
             # How many contents match types in this permutation?
             content_matches_type = [
-                layout_equals_type(c, t)
-                for c, t in zip(layout.contents, permuted_types)
+                layout_has_type(c, t) for c, t in zip(layout.contents, permuted_types)
             ]
             n_matching = sum(content_matches_type, 0)
 
@@ -338,7 +334,7 @@ def recurse_union_non_union(
     layout: ak.contents.UnionArray, type_: ak.types.Type
 ) -> ak.contents.Content:
     for i, content in enumerate(layout.contents):
-        if not layout_equals_type(content, type_):
+        if not layout_has_type(content, type_):
             continue
 
         projected = layout.project(i)
@@ -359,7 +355,7 @@ def recurse_any_union(
     layout: ak.contents.Content, type_: ak.types.UnionType
 ) -> ak.contents.Content:
     for i, content_type in enumerate(type_.contents):
-        if not layout_equals_type(layout, content_type):
+        if not layout_has_type(layout, content_type):
             continue
 
         tags = layout.backend.index_nplike.zeros(layout.length, dtype=np.int8)
