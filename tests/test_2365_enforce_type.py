@@ -397,3 +397,142 @@ def test_union():
                 "union[datetime64, string, float32]", highlevel=False
             ),
         )
+
+
+def test_string():
+    ## string -> bytestring
+    result = ak.enforce_type(
+        ak.to_layout(["hello world"]),
+        ak.types.from_datashape("bytes", highlevel=False),
+    )
+    assert ak.almost_equal(
+        result,
+        ak.contents.ListOffsetArray(
+            offsets=ak.index.Index64([0, 11]),
+            content=ak.contents.NumpyArray(
+                numpy.array(
+                    [104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100],
+                    dtype=numpy.uint8,
+                ),
+                parameters={"__array__": "byte"},
+            ),
+            parameters={"__array__": "bytestring"},
+        ),
+    )
+
+    ## bytestring -> string
+    result = ak.enforce_type(
+        ak.to_layout([b"hello world"]),
+        ak.types.from_datashape("string", highlevel=False),
+    )
+    assert ak.almost_equal(
+        result,
+        ak.contents.ListOffsetArray(
+            offsets=ak.index.Index64([0, 11]),
+            content=ak.contents.NumpyArray(
+                numpy.array(
+                    [104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100],
+                    dtype=numpy.uint8,
+                ),
+                parameters={"__array__": "char"},
+            ),
+            parameters={"__array__": "string"},
+        ),
+    )
+
+    ## string -> string
+    result = ak.enforce_type(
+        ak.to_layout(["hello world"]),
+        ak.types.from_datashape("string", highlevel=False),
+    )
+    assert ak.almost_equal(
+        result,
+        ak.contents.ListOffsetArray(
+            offsets=ak.index.Index64([0, 11]),
+            content=ak.contents.NumpyArray(
+                numpy.array(
+                    [104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100],
+                    dtype=numpy.uint8,
+                ),
+                parameters={"__array__": "char"},
+            ),
+            parameters={"__array__": "string"},
+        ),
+    )
+
+    ## bytestring -> bytestring
+    result = ak.enforce_type(
+        ak.to_layout([b"hello world"]),
+        ak.types.from_datashape("bytes", highlevel=False),
+    )
+    assert ak.almost_equal(
+        result,
+        ak.contents.ListOffsetArray(
+            offsets=ak.index.Index64([0, 11]),
+            content=ak.contents.NumpyArray(
+                numpy.array(
+                    [104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100],
+                    dtype=numpy.uint8,
+                ),
+                parameters={"__array__": "byte"},
+            ),
+            parameters={"__array__": "bytestring"},
+        ),
+    )
+
+    ## bytestring -> list of byte
+    result = ak.enforce_type(
+        ak.to_layout([b"hello world"]),
+        ak.types.from_datashape("var * byte", highlevel=False),
+    )
+    assert ak.almost_equal(
+        result,
+        ak.contents.ListOffsetArray(
+            offsets=ak.index.Index64([0, 11]),
+            content=ak.contents.NumpyArray(
+                numpy.array(
+                    [104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100],
+                    dtype=numpy.uint8,
+                ),
+                parameters={"__array__": "byte"},
+            ),
+        ),
+    )
+
+    ## bytestring -> list of int64
+    result = ak.enforce_type(
+        ak.to_layout([b"hello world"]),
+        ak.types.from_datashape("var * int64", highlevel=False),
+    )
+    assert ak.almost_equal(
+        result,
+        ak.contents.ListOffsetArray(
+            offsets=ak.index.Index64([0, 11]),
+            content=ak.contents.NumpyArray(
+                numpy.array(
+                    [104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100],
+                    dtype=numpy.int64,
+                )
+            ),
+        ),
+    )
+
+    ## list of int64 -> string
+    result = ak.enforce_type(
+        ak.without_parameters([b"hello world"]),
+        ak.types.from_datashape("string", highlevel=False),
+    )
+    assert ak.almost_equal(
+        result,
+        ak.contents.ListOffsetArray(
+            offsets=ak.index.Index64([0, 11]),
+            content=ak.contents.NumpyArray(
+                numpy.array(
+                    [104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100],
+                    dtype=numpy.uint8,
+                ),
+                parameters={"__array__": "char"},
+            ),
+            parameters={"__array__": "string"},
+        ),
+    )

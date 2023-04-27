@@ -386,17 +386,6 @@ def recurse_any_union(
     )
 
 
-def recurse_list_1d(
-    layout: ak.contents.Content, type_: ak.types.Type
-) -> ak.contents.Content:
-    # These are "special" layout, so we need an exact (nominally) matching type
-    if layout.form.type.is_equal_to(type_, all_parameters=False):
-        return layout.copy(parameters=type_.parameters)
-
-    else:
-        raise ValueError("form type does not match list type")
-
-
 def recurse_list_or_regular_any(
     layout: ak.contents.Content, type_: ak.types.Type
 ) -> ak.contents.Content:
@@ -440,9 +429,11 @@ def recurse_numpy_any(
                 "NumpyArray(s) can only be converted into NumpyArray(s), options of NumpyArray(s), or "
                 "unions thereof"
             )
-
         return ak.values_astype(
-            layout, to=primitive_to_dtype(type_.primitive), highlevel=False
+            # HACK: drop parameters from type so that character arrays are supported
+            layout.copy(parameters=None),
+            to=primitive_to_dtype(type_.primitive),
+            highlevel=False,
         ).copy(parameters=type_.parameters)
 
     else:
@@ -522,10 +513,6 @@ def recurse(layout: ak.contents.Content, type_: ak.types.Type) -> ak.contents.Co
     # If we see a union, we are therefore *adding* one
     elif isinstance(type_, ak.types.UnionType):
         return recurse_any_union(layout, type_)
-
-    # If we have a list, but it's not supposed to be traversed into
-    if layout.is_list and layout.purelist_depth == 1:
-        return recurse_list_1d(layout, type_)
 
     elif layout.is_regular or layout.is_list:
         return recurse_list_or_regular_any(layout, type_)
