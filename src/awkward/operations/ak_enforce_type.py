@@ -380,7 +380,7 @@ def recurse_any_union(
             parameters=type_.parameters,
         )
 
-    raise ValueError(
+    raise TypeError(
         f"{type(layout).__name__} can only be converted into a UnionType if it is compatible with one "
         "of its contents, but no compatible content as found"
     )
@@ -415,7 +415,7 @@ def recurse_list_or_regular_any(
         )
 
     else:
-        raise ValueError(
+        raise TypeError(
             f"lists can only be converted to lists, options of lists, or unions thereof, not {type_}"
         )
 
@@ -425,7 +425,7 @@ def recurse_numpy_any(
 ) -> ak.contents.Content:
     if len(layout.shape) == 1:
         if not isinstance(type_, ak.types.NumpyType):
-            raise ValueError(
+            raise TypeError(
                 "NumpyArray(s) can only be converted into NumpyArray(s), options of NumpyArray(s), or "
                 "unions thereof"
             )
@@ -445,26 +445,79 @@ def recurse_record_any(
     layout: ak.contents.RecordArray, type_: ak.types.Type
 ) -> ak.contents.Content:
     if isinstance(type_, ak.types.RecordType):
-        if len(layout.contents) != len(type_.contents):
-            raise ValueError(
-                "cannot convert between RecordArray(s) containing different numbers of contents "
-            )
-
         if type_.is_tuple and layout.is_tuple:
-            return layout.copy(
-                fields=None,
-                contents=[
-                    recurse(c, t) for c, t in zip(layout.contents, type_.contents)
-                ],
-                parameters=type_.parameters,
-            )
+            if len(type_.contents) > len(layout.contents):
+                type_contents = iter(type_.contents)
+                # Recurse into shared contents
+                next_contents = [
+                    recurse(c, t) for c, t in zip(layout.contents, type_contents)
+                ]
+                for next_type in type_contents:
+                    if not isinstance(next_type, ak.types.OptionType):
+                        raise TypeError(
+                            "can only add new slots to a tuple if they are option types"
+                        )
+                    # Append new contents
+                    next_contents.append(
+                        ak.contents.IndexedOptionArray.simplified(
+                            ak.index.Index64(
+                                layout.backend.index_nplike.full(layout.length, -1)
+                            ),
+                            ak.forms.from_type(next_type).length_zero_array(
+                                backend=layout.backend, highlevel=False
+                            ),
+                        )
+                    )
+
+                return layout.copy(
+                    fields=None,
+                    contents=next_contents,
+                    parameters=type_.parameters,
+                )
+            else:
+                # Strip off trailing contents
+                return layout.copy(
+                    fields=None,
+                    contents=[
+                        recurse(c, t) for c, t in zip(layout.contents, type_.contents)
+                    ],
+                    parameters=type_.parameters,
+                )
 
         elif not (type_.is_tuple or layout.is_tuple):
+            type_fields = frozenset(type_.fields)
+            layout_fields = frozenset(layout._fields)
+
+            # Compute existing and new fields
+            existing_fields = list(type_fields & layout_fields)
+            new_fields = list(type_fields - layout_fields)
+            next_fields = existing_fields + new_fields
+
+            # Recurse into shared contents
+            next_contents = [
+                recurse(layout.content(f), type_.content(f)) for f in existing_fields
+            ]
+            for field in new_fields:
+                field_type = type_.content(field)
+                if not isinstance(field_type, ak.types.OptionType):
+                    raise TypeError(
+                        "can only add new slots to a tuple if they are option types"
+                    )
+                # Append new contents
+                next_contents.append(
+                    ak.contents.IndexedOptionArray.simplified(
+                        ak.index.Index64(
+                            layout.backend.index_nplike.full(layout.length, -1)
+                        ),
+                        ak.forms.from_type(field_type).length_zero_array(
+                            backend=layout.backend, highlevel=False
+                        ),
+                    )
+                )
+
             return layout.copy(
-                fields=type_.fields,
-                contents=[
-                    recurse(layout.content(f), type_.content(f)) for f in type_.fields
-                ],
+                fields=next_fields,
+                contents=next_contents,
                 parameters=type_.parameters,
             )
 
@@ -473,7 +526,7 @@ def recurse_record_any(
                 "RecordArray(s) cannot be converted between records and tuples."
             )
     else:
-        raise ValueError(
+        raise TypeError(
             "RecordArray(s) can only be converted into RecordArray(s), options of RecordArray(s), or "
             "unions thereof"
         )

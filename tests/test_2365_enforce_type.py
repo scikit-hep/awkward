@@ -55,21 +55,61 @@ def test_record():
             ak.types.from_datashape("{x: var * float64}", highlevel=False),
         )
 
-    with pytest.raises(IndexError, match=r"no field 'y' in record with 1 fields"):
+    with pytest.raises(
+        TypeError, match=r"can only add new slots to a tuple if they are option types"
+    ):
         ak.enforce_type(
             ak.to_layout([{"x": [1, 2]}], regulararray=False),
             ak.types.from_datashape("{y: var * float64}", highlevel=False),
         )
-    with pytest.raises(ValueError, match=r"containing different numbers of contents"):
-        ak.enforce_type(
-            ak.to_layout([{"x": [1, 2]}], regulararray=False),
-            ak.types.from_datashape("{x: var * int64, y: int64}", highlevel=False),
-        )
-    with pytest.raises(ValueError, match=r"containing different numbers of contents"):
-        ak.enforce_type(
-            ak.to_layout([{"x": [1, 2]}], regulararray=False),
-            ak.types.from_datashape("{}", highlevel=False),
-        )
+
+    result = ak.enforce_type(
+        ak.to_layout([{"x": [1, 2]}], regulararray=False),
+        ak.types.from_datashape("{y: ?var * float64}", highlevel=False),
+    )
+    assert ak.almost_equal(
+        result,
+        ak.contents.RecordArray(
+            [
+                ak.contents.IndexedOptionArray(
+                    ak.index.Index64([-1]),
+                    ak.contents.ListOffsetArray(
+                        ak.index.Index(numpy.array([0], dtype=numpy.int64)),
+                        ak.contents.NumpyArray(numpy.array([], dtype=numpy.float64)),
+                    ),
+                )
+            ],
+            ["y"],
+        ),
+    )
+    result = ak.enforce_type(
+        ak.to_layout([{"x": [1, 2]}], regulararray=False),
+        ak.types.from_datashape("{x: var * int64, y: ?int64}", highlevel=False),
+    )
+    assert ak.almost_equal(
+        result,
+        ak.contents.RecordArray(
+            [
+                ak.contents.ListOffsetArray(
+                    ak.index.Index(numpy.array([0, 2], dtype=numpy.int64)),
+                    ak.contents.NumpyArray(numpy.array([1, 2], dtype=numpy.int64)),
+                ),
+                ak.contents.IndexedOptionArray(
+                    ak.index.Index64([-1]),
+                    ak.contents.NumpyArray(numpy.array([], dtype=numpy.int64)),
+                ),
+            ],
+            ["x", "y"],
+        ),
+    )
+    result = ak.enforce_type(
+        ak.to_layout([{"x": [1, 2]}], regulararray=False),
+        ak.types.from_datashape("{}", highlevel=False),
+    )
+    assert ak.almost_equal(
+        result,
+        ak.contents.RecordArray([], [], length=1),
+    )
 
 
 def test_list():
