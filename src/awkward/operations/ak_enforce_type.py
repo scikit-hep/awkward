@@ -177,13 +177,14 @@ def recurse_option_any(
 
     # drop option!
     else:
-        if layout.backend.index_nplike.all(layout.mask_as_bool(True)):
-            # TODO: do this lazily if indexed, or take content if not?
-            return recurse(layout.project(), type_)
-        else:
+        if layout.backend.index_nplike.any(layout.mask_as_bool(False)):
             raise ValueError(
                 "option types can only be removed if there are no missing values"
             )
+        elif layout_has_type(layout.content, type_):
+            return recurse(layout.content, type_)
+        else:
+            return recurse(layout.project(), type_)
 
 
 def recurse_any_option(
