@@ -17,20 +17,27 @@ from awkward.types.numpytype import primitive_to_dtype
 np = NumpyMetadata.instance()
 
 
-def layout_has_type(layout: ak.contents.Content, type_: ak.types.Type) -> bool:
+def _layout_has_type(layout: ak.contents.Content, type_: ak.types.Type) -> bool:
+    """
+    Args:
+        layout: content object
+        type_: low-level type object
+
+    Returns True if the layout satisfies the given type;, otherwise False.
+    """
     if not type_parameters_equal(layout._parameters, type_._parameters):
         return False
 
     if layout.is_unknown:
         return isinstance(type_, ak.types.UnknownType)
     elif layout.is_option:
-        return isinstance(type_, ak.types.OptionType) and layout_has_type(
+        return isinstance(type_, ak.types.OptionType) and _layout_has_type(
             layout.content, type_.content
         )
     elif layout.is_indexed:
-        return layout_has_type(layout.content, type_)
+        return _layout_has_type(layout.content, type_)
     elif layout.is_list:
-        return isinstance(type_, ak.types.ListType) and layout_has_type(
+        return isinstance(type_, ak.types.ListType) and _layout_has_type(
             layout.content, type_.content
         )
     elif layout.is_regular:
@@ -41,7 +48,7 @@ def layout_has_type(layout: ak.contents.Content, type_: ak.types.Type) -> bool:
                 or type_.size is unknown_length
                 or layout.size == type_.size
             )
-            and layout_has_type(layout.content, type_.content)
+            and _layout_has_type(layout.content, type_.content)
         )
     elif layout.is_numpy:
         for _ in range(layout.purelist_depth - 1):
@@ -57,11 +64,11 @@ def layout_has_type(layout: ak.contents.Content, type_: ak.types.Type) -> bool:
 
         if layout.is_tuple:
             return all(
-                layout_has_type(c, t) for c, t in zip(layout.contents, type_.contents)
+                _layout_has_type(c, t) for c, t in zip(layout.contents, type_.contents)
             )
         else:
             return all(
-                layout_has_type(layout.content(f), type_.content(f))
+                _layout_has_type(layout.content(f), type_.content(f))
                 for f in type_.fields
             )
     elif layout.is_union:
@@ -70,7 +77,7 @@ def layout_has_type(layout: ak.contents.Content, type_: ak.types.Type) -> bool:
 
         for contents in permutations(layout.contents):
             if all(
-                layout_has_type(layout, type_)
+                _layout_has_type(layout, type_)
                 for layout, type_ in zip(contents, type_.contents)
             ):
                 return True
@@ -110,35 +117,19 @@ def enforce_type(
         return _impl(array, type, highlevel, behavior)
 
 
-def recurse_indexed_any(
-    layout: ak.contents.IndexedArray, type_: ak.types.Type
-) -> ak.contents.Content:
-    if layout_has_type(layout, type_):
-        # If the types match, then we don't need to project, as only parameters
-        # are changed (if at all)
-        return layout.copy(content=recurse(layout.content, type_))
-    else:
-        # Otherwise, to ensure that we can project out options, we need to know
-        # exactly what's visible to the user
-        return recurse(layout.project(), type_)
-
-
-def recurse_unknown_any(
-    layout: ak.contents.EmptyArray, type_: ak.types.Type
-) -> ak.contents.Content:
-    type_form = ak.forms.from_type(type_)
-
-    return type_form.length_zero_array(highlevel=False).copy(
-        parameters=type_.parameters
-    )
-
-
-def option_to_packed_indexed_option(
+def _option_to_packed_indexed_option(
     layout: ak.contents.IndexedOptionArray
     | ak.contents.BitMaskedArray
     | ak.contents.ByteMaskedArray
     | ak.contents.UnmaskedArray,
 ) -> ak.contents.IndexedOptionArray:
+    """
+    Args:
+        layout: option-type layout
+
+    Returns a new IndexedOptionArray whose contents are projected
+
+    """
     index_nplike = layout.backend.index_nplike
     new_index = index_nplike.empty(layout.length, dtype=np.int64)
 
@@ -152,12 +143,12 @@ def option_to_packed_indexed_option(
     )
     return ak.contents.IndexedOptionArray(
         ak.index.Index64(new_index, nplike=index_nplike),
-        layout.project().to_packed(),
+        layout.project(),
         parameters=layout._parameters,
     )
 
 
-def option_to_projected_indexed(
+def _option_to_projected_indexed(
     layout: ak.contents.IndexedOptionArray
     | ak.contents.BitMaskedArray
     | ak.contents.ByteMaskedArray
@@ -172,20 +163,47 @@ def option_to_projected_indexed(
     )
 
 
-def recurse_option_any(
-    layout: ak.contents.Content, type_: ak.types.Type
+def _recurse_indexed_any(
+    layout: ak.contents.IndexedArray, type_: ak.types.Type
+) -> ak.contents.Content:
+    if _layout_has_type(layout, type_):
+        # If the types match, then we don't need to project, as only parameters
+        # are changed (if at all)
+        return layout.copy(content=_recurse(layout.content, type_))
+    else:
+        # Otherwise, to ensure that we can project out options, we need to know
+        # exactly what's visible to the user
+        return _recurse(layout.project(), type_)
+
+
+def _recurse_unknown_any(
+    layout: ak.contents.EmptyArray, type_: ak.types.Type
+) -> ak.contents.Content:
+    type_form = ak.forms.from_type(type_)
+
+    return type_form.length_zero_array(highlevel=False).copy(
+        parameters=type_.parameters
+    )
+
+
+def _recurse_option_any(
+    layout: ak.contents.IndexedOptionArray
+    | ak.contents.BitMaskedArray
+    | ak.contents.ByteMaskedArray
+    | ak.contents.UnmaskedArray,
+    type_: ak.types.Type,
 ) -> ak.contents.Content:
     # option → option (no change)
     if isinstance(type_, ak.types.OptionType):
         # Is the layout changes below this level
-        if layout_has_type(layout.content, type_.content):
+        if _layout_has_type(layout.content, type_.content):
             # Convert to packed so that any non-referenced content items are trimmed
             # This is required so that unused union items are seen to be safe to project out later
             # We don't use to_packed(), as it recurses
-            layout = option_to_packed_indexed_option(layout)
+            layout = _option_to_packed_indexed_option(layout)
 
         return layout.copy(
-            content=recurse(layout.content, type_.content),
+            content=_recurse(layout.content, type_.content),
             parameters=type_.parameters,
         )
 
@@ -195,36 +213,36 @@ def recurse_option_any(
             raise ValueError(
                 "option types can only be removed if there are no missing values"
             )
-        elif layout_has_type(layout.content, type_):
+        elif _layout_has_type(layout.content, type_):
             # Convert option to IndexedOptionArray and determine index of valid values
-            return option_to_projected_indexed(layout).copy(
-                content=recurse(layout.content, type_)
+            return _option_to_projected_indexed(layout).copy(
+                content=_recurse(layout.content, type_)
             )
         else:
-            return recurse(layout.project(), type_)
+            return _recurse(layout.project(), type_)
 
 
-def recurse_any_option(
+def _recurse_any_option(
     layout: ak.contents.Content, type_: ak.types.OptionType
 ) -> ak.contents.Content:
     return ak.contents.UnmaskedArray(
-        recurse(layout, type_.content), parameters=type_.parameters
+        _recurse(layout, type_.content), parameters=type_.parameters
     )
 
 
-def recurse_union_any(
+def _recurse_union_any(
     layout: ak.contents.UnionArray, type_: ak.types.Type
 ) -> ak.contents.Content:
     # If the target is a union type, then we have to determine the solution for e.g.
     # {A, B, C, D} → {X, Y, C, Z}.
     if isinstance(type_, ak.types.UnionType):
-        return recurse_union_union(layout, type_)
+        return _recurse_union_union(layout, type_)
     # Otherwise, we are projecting out the union to a single type
     else:
-        return recurse_union_non_union(layout, type_)
+        return _recurse_union_non_union(layout, type_)
 
 
-def recurse_union_union(
+def _recurse_union_union(
     layout: ak.contents.UnionArray, type_: ak.types.UnionType
 ) -> ak.contents.Content:
     n_type_contents = len(type_.contents)
@@ -245,7 +263,7 @@ def recurse_union_union(
             retained_types = [type_.contents[j] for j in ix_perm_contents]
             # Require that all layouts match types for layout permutation
             if not all(
-                layout_has_type(c, t) for c, t in zip(layout.contents, retained_types)
+                _layout_has_type(c, t) for c, t in zip(layout.contents, retained_types)
             ):
                 continue
 
@@ -257,7 +275,7 @@ def recurse_union_union(
             # We only need to recurse here to enable parameter changes
             # Given that we _know_ all layouts match their types for the permutation,
             # we don't need to project these contents — they won't be operated upon (besides parameters)
-            contents = [recurse(c, t) for c, t in zip(layout.contents, retained_types)]
+            contents = [_recurse(c, t) for c, t in zip(layout.contents, retained_types)]
             contents.extend(
                 [
                     ak.forms.from_type(t).length_zero_array(
@@ -285,7 +303,8 @@ def recurse_union_union(
             retained_contents = [layout.contents[j] for j in ix_perm_contents]
             # Require that all layouts match types for layout permutation
             if not all(
-                layout_has_type(c, t) for c, t in zip(retained_contents, type_.contents)
+                _layout_has_type(c, t)
+                for c, t in zip(retained_contents, type_.contents)
             ):
                 continue
 
@@ -330,7 +349,7 @@ def recurse_union_union(
                 # Given that we _know_ all layouts match their types for the permutation,
                 # we don't need to project these contents — they won't be operated upon (besides parameters)
                 contents=[
-                    recurse(c, t) for c, t in zip(retained_contents, type_.contents)
+                    _recurse(c, t) for c, t in zip(retained_contents, type_.contents)
                 ],
                 parameters=type_.parameters,
             )
@@ -350,7 +369,7 @@ def recurse_union_union(
 
             # How many contents match types in this permutation?
             content_matches_type = [
-                layout_has_type(c, t) for c, t in zip(layout.contents, permuted_types)
+                _layout_has_type(c, t) for c, t in zip(layout.contents, permuted_types)
             ]
             n_matching = sum(content_matches_type, 0)
 
@@ -358,7 +377,7 @@ def recurse_union_union(
             if n_matching == len(type_.contents):
                 return layout.copy(
                     contents=[
-                        recurse(c, t) for c, t in zip(layout.contents, permuted_types)
+                        _recurse(c, t) for c, t in zip(layout.contents, permuted_types)
                     ],
                     parameters=type_.parameters,
                 )
@@ -371,11 +390,11 @@ def recurse_union_union(
                 ):
                     if is_match:
                         next_contents.append(
-                            recurse(layout.contents[tag], content_type)
+                            _recurse(layout.contents[tag], content_type)
                         )
                     else:
                         layout_content = layout.project(tag)
-                        next_contents.append(recurse(layout_content, content_type))
+                        next_contents.append(_recurse(layout_content, content_type))
 
                         # Rebuild the index as an enumeration over the (dense) projection
                         # This ensures that it is packed, as the type is changing
@@ -400,11 +419,11 @@ def recurse_union_union(
                 )
 
 
-def recurse_union_non_union(
+def _recurse_union_non_union(
     layout: ak.contents.UnionArray, type_: ak.types.Type
 ) -> ak.contents.Content:
     for tag, content in enumerate(layout.contents):
-        if not layout_has_type(content, type_):
+        if not _layout_has_type(content, type_):
             continue
 
         content_is_tag = layout.tags.data == tag
@@ -414,7 +433,7 @@ def recurse_union_non_union(
             # From the canonical rules, the content of a union *can* be an index, so we use simplified
             return ak.contents.IndexedArray.simplified(
                 ak.index.Index(layout.index.data[content_is_tag]),
-                recurse(content, type_),
+                _recurse(content, type_),
             )
         else:
             raise ValueError(
@@ -428,11 +447,11 @@ def recurse_union_non_union(
     )
 
 
-def recurse_any_union(
+def _recurse_any_union(
     layout: ak.contents.Content, type_: ak.types.UnionType
 ) -> ak.contents.Content:
     for i, content_type in enumerate(type_.contents):
-        if not layout_has_type(layout, content_type):
+        if not _layout_has_type(layout, content_type):
             continue
 
         tags = layout.backend.index_nplike.zeros(layout.length, dtype=np.int8)
@@ -449,7 +468,7 @@ def recurse_any_union(
         return ak.contents.UnionArray(
             tags=ak.index.Index8(tags, nplike=layout.backend.index_nplike),
             index=ak.index.Index64(index, nplike=layout.backend.index_nplike),
-            contents=[recurse(layout, content_type), *other_contents],
+            contents=[_recurse(layout, content_type), *other_contents],
             parameters=type_.parameters,
         )
 
@@ -459,8 +478,8 @@ def recurse_any_union(
     )
 
 
-def recurse_regular_any(
-    layout: ak.contents.Content, type_: ak.types.Type
+def _recurse_regular_any(
+    layout: ak.contents.RegularArray, type_: ak.types.Type
 ) -> ak.contents.Content:
     if isinstance(type_, ak.types.RegularType):
         # regular → regular requires same size!
@@ -470,14 +489,14 @@ def recurse_regular_any(
             )
 
         return layout.copy(
-            content=recurse(layout.content, type_.content),
+            content=_recurse(layout.content, type_.content),
             parameters=type_.parameters,
         )
 
     elif isinstance(type_, ak.types.ListType):
         layout_list = layout.to_ListOffsetArray64(True)
         return layout_list.copy(
-            content=recurse(layout_list.content, type_.content),
+            content=_recurse(layout_list.content, type_.content),
             parameters=type_.parameters,
         )
 
@@ -487,8 +506,8 @@ def recurse_regular_any(
         )
 
 
-def recurse_list_any(
-    layout: ak.contents.Content, type_: ak.types.Type
+def _recurse_list_any(
+    layout: ak.contents.ListArray | ak.contents.ListOffsetArray, type_: ak.types.Type
 ) -> ak.contents.Content:
     if isinstance(type_, ak.types.RegularType):
         layout_regular = layout.to_RegularArray()
@@ -499,15 +518,15 @@ def recurse_list_any(
 
         return layout_regular.copy(
             # The result of `to_RegularArray` should already be packed
-            content=recurse(layout_regular.content, type_.content),
+            content=_recurse(layout_regular.content, type_.content),
             parameters=type_.parameters,
         )
 
     elif isinstance(type_, ak.types.ListType):
-        if layout_has_type(layout.content, type_.content):
+        if _layout_has_type(layout.content, type_.content):
             # Don't need to pack the content
             return layout.copy(
-                content=recurse(layout.content, type_.content),
+                content=_recurse(layout.content, type_.content),
                 parameters=type_.parameters,
             )
         else:
@@ -515,7 +534,7 @@ def recurse_list_any(
             layout = layout.to_ListOffsetArray64(True)
             layout = layout[: layout.offsets[-1]]
             return layout.copy(
-                content=recurse(layout.content, type_.content),
+                content=_recurse(layout.content, type_.content),
                 parameters=type_.parameters,
             )
 
@@ -525,7 +544,7 @@ def recurse_list_any(
         )
 
 
-def recurse_numpy_any(
+def _recurse_numpy_any(
     layout: ak.contents.NumpyArray, type_: ak.types.Type
 ) -> ak.contents.Content:
     if len(layout.shape) == 1:
@@ -543,10 +562,10 @@ def recurse_numpy_any(
 
     else:
         assert len(layout.shape) > 0
-        return recurse(layout.to_RegularArray(), type_)
+        return _recurse(layout.to_RegularArray(), type_)
 
 
-def recurse_record_any(
+def _recurse_record_any(
     layout: ak.contents.RecordArray, type_: ak.types.Type
 ) -> ak.contents.Content:
     if isinstance(type_, ak.types.RecordType):
@@ -554,7 +573,7 @@ def recurse_record_any(
             # Recurse into shared contents
             type_contents = iter(type_.contents)
             next_contents = [
-                recurse(c, t) for c, t in zip(layout.contents, type_contents)
+                _recurse(c, t) for c, t in zip(layout.contents, type_contents)
             ]
             # Anything left in `type_contents` are the types of new slots
             for next_type in type_contents:
@@ -591,7 +610,7 @@ def recurse_record_any(
 
             # Recurse into shared contents
             next_contents = [
-                recurse(layout.content(f), type_.content(f)) for f in existing_fields
+                _recurse(layout.content(f), type_.content(f)) for f in existing_fields
             ]
             for field in new_fields:
                 field_type = type_.content(field)
@@ -629,7 +648,7 @@ def recurse_record_any(
 
 
 # Require parameters be conserved
-def recurse(layout: ak.contents.Content, type_: ak.types.Type) -> ak.contents.Content:
+def _recurse(layout: ak.contents.Content, type_: ak.types.Type) -> ak.contents.Content:
     """
     Args:
         layout: layout to recurse into
@@ -642,38 +661,38 @@ def recurse(layout: ak.contents.Content, type_: ak.types.Type) -> ak.contents.Co
     """
 
     if layout.is_unknown:
-        return recurse_unknown_any(layout, type_)
+        return _recurse_unknown_any(layout, type_)
 
     elif layout.is_option:
-        return recurse_option_any(layout, type_)
+        return _recurse_option_any(layout, type_)
 
     elif layout.is_indexed:
-        return recurse_indexed_any(layout, type_)
+        return _recurse_indexed_any(layout, type_)
 
     # Here we *don't* have any layouts that are options, unknowns, or indexed
     # If we see an option, we are therefore *adding* one
     elif isinstance(type_, ak.types.OptionType):
-        return recurse_any_option(layout, type_)
+        return _recurse_any_option(layout, type_)
 
     elif layout.is_union:
-        return recurse_union_any(layout, type_)
+        return _recurse_union_any(layout, type_)
 
     # Here we *don't* have any layouts that are options, unknowns, indexed, or unions
     # If we see a union, we are therefore *adding* one
     elif isinstance(type_, ak.types.UnionType):
-        return recurse_any_union(layout, type_)
+        return _recurse_any_union(layout, type_)
 
     elif layout.is_regular:
-        return recurse_regular_any(layout, type_)
+        return _recurse_regular_any(layout, type_)
 
     elif layout.is_list:
-        return recurse_list_any(layout, type_)
+        return _recurse_list_any(layout, type_)
 
     elif layout.is_numpy:
-        return recurse_numpy_any(layout, type_)
+        return _recurse_numpy_any(layout, type_)
 
     elif layout.is_record:
-        return recurse_record_any(layout, type_)
+        return _recurse_record_any(layout, type_)
     else:
         raise NotImplementedError(type(layout), type_)
 
@@ -684,5 +703,5 @@ def _impl(array, type_, highlevel, behavior):
     if isinstance(type_, str):
         type_ = ak.types.from_datashape(type_, highlevel=False)
 
-    out = recurse(layout, type_)
+    out = _recurse(layout, type_)
     return wrap_layout(out, like=array, behavior=behavior, highlevel=highlevel)
