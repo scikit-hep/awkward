@@ -343,7 +343,7 @@ def test_union():
         result, ak.contents.NumpyArray(numpy.array([1], dtype=numpy.int64))
     )
 
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         ak.enforce_type(
             ak.to_layout([1, "hi"]),
             ak.types.from_datashape("var * int64", highlevel=False),
