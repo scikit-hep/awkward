@@ -352,7 +352,18 @@ def test_union():
     ## union → same union
     result = ak.enforce_type(
         ak.to_layout([1, "hi"]),
-        ak.types.from_datashape("union[int64, string]", highlevel=False),
+        ak.types.UnionType(
+            [
+                ak.types.NumpyType("int64"),
+                ak.types.ListType(
+                    ak.types.NumpyType(
+                        "uint8", parameters={"__array__": "char"}, typestr="char"
+                    ),
+                    parameters={"__array__": "string", "foo": "bar"},
+                    typestr="string",
+                ),
+            ]
+        ),
     )
     assert ak.almost_equal(
         result,
@@ -367,7 +378,7 @@ def test_union():
                         numpy.array([104, 105], dtype=numpy.uint8),
                         parameters={"__array__": "char"},
                     ),
-                    parameters={"__array__": "string"},
+                    parameters={"__array__": "string", "foo": "bar"},
                 ),
             ],
         ),
@@ -401,7 +412,18 @@ def test_union():
     ## union → different union (same N)
     result = ak.enforce_type(
         ak.to_layout([1, "hi"]),
-        ak.types.from_datashape("union[float32, string]", highlevel=False),
+        ak.types.UnionType(
+            [
+                ak.types.NumpyType("float32"),
+                ak.types.ListType(
+                    ak.types.NumpyType(
+                        "uint8", parameters={"__array__": "char"}, typestr="char"
+                    ),
+                    parameters={"__array__": "string", "foo": "bar"},
+                    typestr="string",
+                ),
+            ]
+        ),
     )
     assert ak.almost_equal(
         result,
@@ -416,7 +438,7 @@ def test_union():
                         numpy.array([104, 105], dtype=numpy.uint8),
                         parameters={"__array__": "char"},
                     ),
-                    parameters={"__array__": "string"},
+                    parameters={"__array__": "string", "foo": "bar"},
                 ),
             ],
         ),

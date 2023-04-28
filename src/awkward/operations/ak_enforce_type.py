@@ -318,15 +318,31 @@ def recurse_union_union(
             # Single content differs, we can convert by position
             elif n_matching == len(type_.contents) - 1:
                 next_contents = []
-                for content_layout, content_type, is_match in zip(
-                    layout.contents, permuted_types, content_matches_type
+                index = layout.index
+                for tag, content_type, is_match in zip(
+                    range(len(layout.contents)), permuted_types, content_matches_type
                 ):
                     if is_match:
-                        next_contents.append(content_layout)
+                        next_contents.append(
+                            recurse(layout.contents[tag], content_type)
+                        )
                     else:
-                        next_contents.append(recurse(content_layout, content_type))
+                        layout_content = layout.project(tag)
+                        next_contents.append(recurse(layout_content, content_type))
+
+                        # Rebuild the index as an enumeration over the (dense) projection
+                        # This ensures that it is packed, as the type is changing
+                        index_data = layout.backend.index_nplike.asarray(
+                            index.data, copy=True
+                        )
+                        is_tag = layout.tags.data == tag
+                        index_data[is_tag] = layout.backend.index_nplike.arange(
+                            layout_content.length, dtype=index_data.dtype
+                        )
+                        index = ak.index.Index(index_data)
 
                 return layout.copy(
+                    index=index,
                     contents=next_contents,
                     parameters=type_.parameters,
                 )
