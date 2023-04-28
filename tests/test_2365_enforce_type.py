@@ -228,30 +228,30 @@ def test_numpy():
     )
     assert ak.almost_equal(result, numpy.array([1.0, 2.0], dtype=numpy.float32))
 
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         ak.enforce_type(
             ak.to_layout([1, 2]),
             ak.types.from_datashape("string", highlevel=False),
         )
 
     ## 1D → 2D
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         ak.enforce_type(
             ak.to_layout([1, 2]),
             ak.types.from_datashape("var * int64", highlevel=False),
         )
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         ak.enforce_type(
             ak.to_layout([1, 2]),
             ak.types.from_datashape("2 * float32", highlevel=False),
         )
     ## 2D → 1D
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         ak.enforce_type(
             ak.to_layout(numpy.zeros((2, 3)), regulararray=False),
             ak.types.from_datashape("int64", highlevel=False),
         )
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         ak.enforce_type(
             ak.to_layout(numpy.zeros((2, 3)), regulararray=False),
             ak.types.from_datashape("float32", highlevel=False),
@@ -312,7 +312,7 @@ def test_union():
         ),
     )
 
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         ak.enforce_type(
             ak.to_layout([1, 2]),
             ak.types.from_datashape("union[var * int64, string]", highlevel=False),
@@ -423,14 +423,14 @@ def test_union():
     )
 
     ## union → incompatible different union (same N)
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         ak.enforce_type(
             ak.to_layout([1, "hi"]),
             ak.types.from_datashape("union[int64, bool]", highlevel=False),
         )
 
     ## union → different union (same N, more than one change)
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         ak.enforce_type(
             ak.to_layout([1, "hi", False]),
             ak.types.from_datashape(

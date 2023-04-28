@@ -1,6 +1,9 @@
+from __future__ import annotations
+
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 # ruff: noqa: B023
 __all__ = ("enforce_type",)
+
 
 from itertools import permutations
 
@@ -61,7 +64,6 @@ def layout_has_type(layout: ak.contents.Content, type_: ak.types.Type) -> bool:
                 layout_has_type(layout.content(f), type_.content(f))
                 for f in type_.fields
             )
-
     elif layout.is_union:
         if len(layout.contents) != len(type_.contents):
             return False
@@ -136,17 +138,22 @@ def recurse_option_any(
 ) -> ak.contents.Content:
     # option → option (no change)
     if isinstance(type_, ak.types.OptionType):
-        # Convert to packed so that any non-referenced content items are trimmed
-        # This is required so that unused union items are seen to be safe to project out later
-        layout_packed = layout.to_packed()
-        return layout_packed.copy(
-            content=recurse(layout_packed.content, type_.content),
+        # Is the layout changes below this level
+        if layout_has_type(layout.content, type_.content):
+            # Convert to packed so that any non-referenced content items are trimmed
+            # This is required so that unused union items are seen to be safe to project out later
+            # TODO: don't use to_packed(), as it recurses
+            layout = layout.to_packed()
+
+        return layout.copy(
+            content=recurse(layout.content, type_.content),
             parameters=type_.parameters,
         )
 
     # drop option!
     else:
         if layout.backend.index_nplike.all(layout.mask_as_bool(True)):
+            # TODO: do this lazily if indexed, or take content if not?
             return recurse(layout.project(), type_)
         else:
             raise ValueError(
@@ -324,7 +331,7 @@ def recurse_union_union(
                     parameters=type_.parameters,
                 )
             else:
-                raise ValueError(
+                raise TypeError(
                     "UnionArray(s) can currently only be converted into UnionArray(s) with the same number of contents "
                     "if no greater than one content differs in type"
                 )
@@ -404,7 +411,7 @@ def recurse_list_or_regular_any(
         )
 
     elif isinstance(type_, ak.types.ListType):
-        layout_list = layout.to_ListOffsetArray64()
+        layout_list = layout.to_ListOffsetArray64(True)
         return layout_list.copy(
             content=recurse(layout_list.content, type_.content),
             parameters=type_.parameters,
