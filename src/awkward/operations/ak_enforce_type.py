@@ -148,7 +148,7 @@ def _option_to_packed_indexed_option(
     )
 
 
-def _option_to_projected_indexed(
+def _option_to_indexed(
     layout: ak.contents.IndexedOptionArray
     | ak.contents.BitMaskedArray
     | ak.contents.ByteMaskedArray
@@ -214,8 +214,7 @@ def _recurse_option_any(
                 "option types can only be removed if there are no missing values"
             )
         elif _layout_has_type(layout.content, type_):
-            # Convert option to IndexedOptionArray and determine index of valid values
-            return _option_to_projected_indexed(layout).copy(
+            return _option_to_indexed(layout).copy(
                 content=_recurse(layout.content, type_)
             )
         else:
