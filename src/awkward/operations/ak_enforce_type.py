@@ -449,43 +449,34 @@ def recurse_record_any(
 ) -> ak.contents.Content:
     if isinstance(type_, ak.types.RecordType):
         if type_.is_tuple and layout.is_tuple:
-            if len(type_.contents) > len(layout.contents):
-                type_contents = iter(type_.contents)
-                # Recurse into shared contents
-                next_contents = [
-                    recurse(c, t) for c, t in zip(layout.contents, type_contents)
-                ]
-                for next_type in type_contents:
-                    if not isinstance(next_type, ak.types.OptionType):
-                        raise TypeError(
-                            "can only add new slots to a tuple if they are option types"
-                        )
-                    # Append new contents
-                    next_contents.append(
-                        ak.contents.IndexedOptionArray.simplified(
-                            ak.index.Index64(
-                                layout.backend.index_nplike.full(layout.length, -1)
-                            ),
-                            ak.forms.from_type(next_type).length_zero_array(
-                                backend=layout.backend, highlevel=False
-                            ),
-                        )
+            # Recurse into shared contents
+            type_contents = iter(type_.contents)
+            next_contents = [
+                recurse(c, t) for c, t in zip(layout.contents, type_contents)
+            ]
+            # Anything left in `type_contents` are the types of new slots
+            for next_type in type_contents:
+                if not isinstance(next_type, ak.types.OptionType):
+                    raise TypeError(
+                        "can only add new slots to a tuple if they are option types"
                     )
+                # Append new contents
+                next_contents.append(
+                    ak.contents.IndexedOptionArray.simplified(
+                        ak.index.Index64(
+                            layout.backend.index_nplike.full(layout.length, -1)
+                        ),
+                        ak.forms.from_type(next_type).length_zero_array(
+                            backend=layout.backend, highlevel=False
+                        ),
+                    )
+                )
 
-                return layout.copy(
-                    fields=None,
-                    contents=next_contents,
-                    parameters=type_.parameters,
-                )
-            else:
-                # Strip off trailing contents
-                return layout.copy(
-                    fields=None,
-                    contents=[
-                        recurse(c, t) for c, t in zip(layout.contents, type_.contents)
-                    ],
-                    parameters=type_.parameters,
-                )
+            return layout.copy(
+                fields=None,
+                contents=next_contents,
+                parameters=type_.parameters,
+            )
 
         elif not (type_.is_tuple or layout.is_tuple):
             type_fields = frozenset(type_.fields)
