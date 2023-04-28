@@ -135,6 +135,7 @@
     :caption: Broadcasting
 
     generated/ak.broadcast_arrays
+    generated/ak.broadcast_fields
 
 .. toctree::
     :caption: Combinatorics ("for loop" replacements)
