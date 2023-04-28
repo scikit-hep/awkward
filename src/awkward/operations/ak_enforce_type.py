@@ -133,6 +133,31 @@ def recurse_unknown_any(
     )
 
 
+def pack_option_non_recursive(
+    layout: ak.contents.IndexedOptionArray
+    | ak.contents.BitMaskedArray
+    | ak.contents.ByteMaskedArray
+    | ak.contents.UnmaskedArray,
+) -> ak.contents.IndexedOptionArray:
+    # Convert option to IndexedOptionArray and determine index of valid values
+    index_nplike = layout.backend.index_nplike
+    new_index = index_nplike.empty(layout.length, dtype=np.int64)
+
+    is_none = layout.mask_as_bool(False)
+    num_none = index_nplike.count_nonzero(is_none)
+
+    new_index[is_none] = -1
+    new_index[~is_none] = index_nplike.arange(
+        layout.length - num_none,
+        dtype=new_index.dtype,
+    )
+    return ak.contents.IndexedOptionArray(
+        ak.index.Index(new_index, nplike=index_nplike),
+        layout.project().to_packed(),
+        parameters=layout._parameters,
+    )
+
+
 def recurse_option_any(
     layout: ak.contents.Content, type_: ak.types.Type
 ) -> ak.contents.Content:
@@ -142,8 +167,8 @@ def recurse_option_any(
         if layout_has_type(layout.content, type_.content):
             # Convert to packed so that any non-referenced content items are trimmed
             # This is required so that unused union items are seen to be safe to project out later
-            # TODO: don't use to_packed(), as it recurses
-            layout = layout.to_packed()
+            # We don't use to_packed(), as it recurses
+            layout = pack_option_non_recursive(layout)
 
         return layout.copy(
             content=recurse(layout.content, type_.content),
