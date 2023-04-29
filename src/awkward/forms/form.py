@@ -9,6 +9,7 @@ from collections.abc import Mapping
 import awkward as ak
 from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import find_typestrs
+from awkward._errors import deprecate
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._parameters import parameters_union
@@ -427,6 +428,12 @@ class Form:
     def length_zero_array(
         self, *, backend=numpy_backend, highlevel=True, behavior=None
     ):
+        if highlevel:
+            deprecate(
+                "The `highlevel=True` variant of `Form.length_zero_array` is now deprecated. "
+                "Please use `ak.Array(form.length_zero_array(...), behavior=...)` if an `ak.Array` is required.",
+                version="2.3.0",
+            )
         return ak.operations.ak_from_buffers._impl(
             form=self,
             length=0,
