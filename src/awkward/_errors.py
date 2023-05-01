@@ -55,6 +55,11 @@ class ErrorContext:
             if exception_type is not None and self.primary() is self:
                 self.handle_exception(exception_type, exception_value)
         finally:
+            # `_kwargs` may hold cyclic references, that we really want to avoid
+            # as this can lead to large buffers remaining in memory for longer than absolutely necessary
+            # Let's just clear this, now.
+            self._kwargs.clear()
+
             # Step out of the way so that another ErrorContext can become primary.
             if self.primary() is self:
                 self._slate.__dict__.clear()
