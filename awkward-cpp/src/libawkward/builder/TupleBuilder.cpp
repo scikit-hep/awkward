@@ -42,7 +42,7 @@ namespace awkward {
   };
 
   const std::string
-  TupleBuilder::to_buffers(BuffersContainer& container, int64_t& form_key_id) const {
+  TupleBuilder::to_buffers(BuffersContainer& container, int64_t& form_key_id) {
     std::stringstream form_key;
     form_key << "node" << (form_key_id++);
 

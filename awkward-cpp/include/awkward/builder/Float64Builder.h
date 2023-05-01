@@ -48,7 +48,7 @@ namespace awkward {
       classname() const override;
 
     const std::string
-      to_buffers(BuffersContainer& container, int64_t& form_key_id) const override;
+      to_buffers(BuffersContainer& container, int64_t& form_key_id) override;
 
     int64_t
       length() const override;

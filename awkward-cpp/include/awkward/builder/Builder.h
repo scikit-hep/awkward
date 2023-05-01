@@ -52,7 +52,7 @@ namespace awkward {
     /// @brief Copy the current snapshot into the BuffersContainer and
     /// return a Form as a std::string (JSON).
     virtual const std::string
-      to_buffers(BuffersContainer& container, int64_t& form_key_id) const = 0;
+      to_buffers(BuffersContainer& container, int64_t& form_key_id) = 0;
 
     /// @brief Current length of the accumulated array.
     virtual int64_t

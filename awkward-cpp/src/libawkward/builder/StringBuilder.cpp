@@ -43,18 +43,18 @@ namespace awkward {
   }
 
   const std::string
-  StringBuilder::to_buffers(BuffersContainer& container, int64_t& form_key_id) const {
+  StringBuilder::to_buffers(BuffersContainer& container, int64_t& form_key_id) {
     std::stringstream outer_form_key;
     std::stringstream inner_form_key;
     outer_form_key << "node" << (form_key_id++);
     inner_form_key << "node" << (form_key_id++);
 
-    offsets_.concatenate(
+    offsets_.move_to(
       reinterpret_cast<int64_t*>(
         container.empty_buffer(outer_form_key.str() + "-offsets",
         (int64_t)offsets_.length() * (int64_t)sizeof(int64_t))));
 
-    content_.concatenate(
+    content_.move_to(
       reinterpret_cast<uint8_t*>(
         container.empty_buffer(inner_form_key.str() + "-data",
         (int64_t)content_.length() * (int64_t)sizeof(uint8_t))));

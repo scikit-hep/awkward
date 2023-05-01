@@ -245,25 +245,25 @@ namespace awkward {
     }
 
     /// @brief HERE
-    void output_fill(int64_t i, void* external_pointer) const {
+    void output_fill(int64_t i, void* external_pointer) {
       switch (output_dtypes_[(size_t)i]) {
         case util::dtype::int8:
-          buffers_uint8_[(size_t)output_which_[(size_t)i]].concatenate(
+          buffers_uint8_[(size_t)output_which_[(size_t)i]].move_to(
             reinterpret_cast<uint8_t*>(external_pointer)
           );
           break;
         case util::dtype::uint8:
-          buffers_uint8_[(size_t)output_which_[(size_t)i]].concatenate(
+          buffers_uint8_[(size_t)output_which_[(size_t)i]].move_to(
             reinterpret_cast<uint8_t*>(external_pointer)
           );
           break;
         case util::dtype::int64:
-          buffers_int64_[(size_t)output_which_[(size_t)i]].concatenate(
+          buffers_int64_[(size_t)output_which_[(size_t)i]].move_to(
             reinterpret_cast<int64_t*>(external_pointer)
           );
           break;
         case util::dtype::float64:
-          buffers_float64_[(size_t)output_which_[(size_t)i]].concatenate(
+          buffers_float64_[(size_t)output_which_[(size_t)i]].move_to(
             reinterpret_cast<double*>(external_pointer)
           );
           break;

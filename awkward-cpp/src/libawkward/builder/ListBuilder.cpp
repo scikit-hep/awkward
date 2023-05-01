@@ -36,14 +36,14 @@ namespace awkward {
   };
 
   const std::string
-  ListBuilder::to_buffers(BuffersContainer& container, int64_t& form_key_id) const {
+  ListBuilder::to_buffers(BuffersContainer& container, int64_t& form_key_id) {
     std::stringstream form_key;
     form_key << "node" << (form_key_id++);
 
     void* ptr = container.empty_buffer(form_key.str() + "-offsets",
       (int64_t)offsets_.length() * (int64_t)sizeof(int64_t));
 
-    offsets_.concatenate(reinterpret_cast<int64_t*>(ptr));
+    offsets_.move_to(reinterpret_cast<int64_t*>(ptr));
 
     return "{\"class\": \"ListOffsetArray\", \"offsets\": \"i64\", \"content\": "
            + content_.get()->to_buffers(container, form_key_id) + ", \"form_key\": \""

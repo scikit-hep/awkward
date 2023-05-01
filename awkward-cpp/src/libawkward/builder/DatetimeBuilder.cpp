@@ -35,11 +35,11 @@ namespace awkward {
   };
 
   const std::string
-  DatetimeBuilder::to_buffers(BuffersContainer& container, int64_t& form_key_id) const {
+  DatetimeBuilder::to_buffers(BuffersContainer& container, int64_t& form_key_id) {
     std::stringstream form_key;
     form_key << "node" << (form_key_id++);
 
-    content_.concatenate(
+    content_.move_to(
       reinterpret_cast<int64_t*>(
         container.empty_buffer(form_key.str() + "-data",
         (int64_t)content_.length() * (int64_t)sizeof(int64_t))));

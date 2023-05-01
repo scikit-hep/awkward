@@ -42,11 +42,11 @@ namespace awkward {
   }
 
   const std::string
-  Float64Builder::to_buffers(BuffersContainer& container, int64_t& form_key_id) const {
+  Float64Builder::to_buffers(BuffersContainer& container, int64_t& form_key_id) {
     std::stringstream form_key;
     form_key << "node" << (form_key_id++);
 
-    buffer_.concatenate(
+    buffer_.move_to(
       reinterpret_cast<double*>(
         container.empty_buffer(form_key.str() + "-data",
         (int64_t)buffer_.length() * (int64_t)sizeof(double))));

@@ -27,11 +27,11 @@ namespace awkward {
   };
 
   const std::string
-  BoolBuilder::to_buffers(BuffersContainer& container, int64_t& form_key_id) const {
+  BoolBuilder::to_buffers(BuffersContainer& container, int64_t& form_key_id) {
     std::stringstream form_key;
     form_key << "node" << (form_key_id++);
 
-    buffer_.concatenate(
+    buffer_.move_to(
       reinterpret_cast<uint8_t*>(
         container.empty_buffer(form_key.str() + "-data",
         (int64_t)buffer_.length() * (int64_t)sizeof(bool))));

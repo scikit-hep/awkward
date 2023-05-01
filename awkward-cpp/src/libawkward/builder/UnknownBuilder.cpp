@@ -34,7 +34,7 @@ namespace awkward {
   };
 
   const std::string
-  UnknownBuilder::to_buffers(BuffersContainer& container, int64_t& form_key_id) const {
+  UnknownBuilder::to_buffers(BuffersContainer& container, int64_t& form_key_id) {
     if (nullcount_ == 0) {
       std::stringstream form_key;
       form_key << "node" << (form_key_id++);

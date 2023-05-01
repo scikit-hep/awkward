@@ -44,16 +44,16 @@ namespace awkward {
   };
 
   const std::string
-  UnionBuilder::to_buffers(BuffersContainer& container, int64_t& form_key_id) const {
+  UnionBuilder::to_buffers(BuffersContainer& container, int64_t& form_key_id) {
     std::stringstream form_key;
     form_key << "node" << (form_key_id++);
 
-    tags_.concatenate(
+    tags_.move_to(
       reinterpret_cast<int8_t*>(
         container.empty_buffer(form_key.str() + "-tags",
         (int64_t)tags_.length() * (int64_t)sizeof(int8_t))));
 
-    index_.concatenate(
+    index_.move_to(
       reinterpret_cast<int64_t*>(
         container.empty_buffer(form_key.str() + "-index",
         (int64_t)index_.length() * (int64_t)sizeof(int64_t))));

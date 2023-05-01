@@ -40,14 +40,14 @@ namespace awkward {
   };
 
   const std::string
-  OptionBuilder::to_buffers(BuffersContainer& container, int64_t& form_key_id) const {
+  OptionBuilder::to_buffers(BuffersContainer& container, int64_t& form_key_id) {
     std::stringstream form_key;
     form_key << "node" << (form_key_id++);
 
     void* ptr = container.empty_buffer(form_key.str() + "-index",
       (int64_t)index_.length() * (int64_t)sizeof(int64_t));
 
-    index_.concatenate(reinterpret_cast<int64_t*>(ptr));
+    index_.move_to(reinterpret_cast<int64_t*>(ptr));
 
     return "{\"class\": \"IndexedOptionArray\", \"index\": \"i64\", \"content\": "
            + content_.get()->to_buffers(container, form_key_id) + ", \"form_key\": \""

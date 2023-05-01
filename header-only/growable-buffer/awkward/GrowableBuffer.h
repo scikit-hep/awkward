@@ -486,6 +486,7 @@ namespace awkward {
       return (*ptr_)[ptr_->current_length() - 1];
     }
 
+private:
     /// @brief Copies and concatenates all accumulated data from multiple panels to one
     /// contiguously allocated `external_pointer`.
     void
@@ -494,7 +495,7 @@ namespace awkward {
         panel_->concatenate_to(external_pointer, 0);
       }
     }
-
+public:
     /// @brief Moves all accumulated data from multiple panels to one
     /// contiguously allocated `external_pointer`. The panels are deleted,
     /// and a new #ptr is allocated.
