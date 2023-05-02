@@ -568,9 +568,7 @@ def apply_step(
                     if dimsize_known_to_be_zero:
                         nextinputs.append(x.content[:0])
                     # If we have a known size=1 content, then broadcast it to the dimension size
-                    elif (
-                        dimsize_greater_than_one_if_known > 1 and x_size_known_to_be_one
-                    ):
+                    elif dimsize_greater_than_one_if_known and x_size_known_to_be_one:
                         nextinputs.append(
                             x.content[: x.length * x.size]._carry(
                                 size_one_carry_index, allow_lazy=False
