@@ -562,8 +562,10 @@ def apply_step(
             # 3. otherwise, recurse into the content as-is
             nextinputs = []
             for x in inputs:
-                x_size_known_to_be_one = x.size is not unknown_length and x.size == 1
                 if isinstance(x, RegularArray):
+                    x_size_known_to_be_one = (
+                        x.size is not unknown_length and x.size == 1
+                    )
                     # If dimsize is known to be exactly zero, all contents are zero length
                     if dimsize_known_to_be_zero:
                         nextinputs.append(x.content[:0])
