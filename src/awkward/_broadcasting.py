@@ -77,7 +77,7 @@ def broadcast_pack(inputs: Sequence, isscalar: list[bool]) -> list:
             nextinputs.append(
                 RegularArray(
                     x,
-                    x.length if x.backend.nplike.known_data else 1,
+                    x.length,
                     1,
                     parameters=None,
                 )
