@@ -91,9 +91,9 @@ def _impl(base, what, where, highlevel, behavior):
         base = ak.operations.to_layout(
             base, allow_record=True, allow_other=False
         ).to_backend(backend)
-        what = ak.operations.to_layout(
-            what, allow_record=True, allow_other=True
-        ).to_backend(backend)
+        what = ak.operations.to_layout(what, allow_record=True, allow_other=True)
+        if isinstance(what, (ak.contents.Content, ak.record.Record)):
+            what = what.to_backend(backend)
 
         keys = copy.copy(base.fields)
         if where in base.fields:
