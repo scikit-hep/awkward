@@ -3,12 +3,17 @@ __all__ = ("with_field",)
 import copy
 
 import awkward as ak
+from awkward._backends.dispatch import backend_of
+from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import is_non_string_like_sequence
 
 np = NumpyMetadata.instance()
+
+
+cpu = NumpyBackend.instance()
 
 
 def with_field(array, what, where=None, *, highlevel=True, behavior=None):
@@ -81,8 +86,14 @@ def _impl(base, what, where, highlevel, behavior):
             where = where[0]
 
         behavior = behavior_of(base, what, behavior=behavior)
-        base = ak.operations.to_layout(base, allow_record=True, allow_other=False)
-        what = ak.operations.to_layout(what, allow_record=True, allow_other=True)
+        backend = backend_of(base, what, default=cpu)
+
+        base = ak.operations.to_layout(
+            base, allow_record=True, allow_other=False
+        ).to_backend(backend)
+        what = ak.operations.to_layout(
+            what, allow_record=True, allow_other=True
+        ).to_backend(backend)
 
         keys = copy.copy(base.fields)
         if where in base.fields:
