@@ -32,7 +32,7 @@ void test_arange() {
   assert(buffer.length() == data_size);
 
   std::unique_ptr<int64_t[]> ptr(new int64_t[buffer.length()]);
-  buffer.concatenate(ptr.get());
+  buffer.move_to(ptr.get());
   assert(buffer.length() == data_size);
   buffer.clear();
   assert(buffer.length() == 0);
@@ -50,7 +50,7 @@ void test_zeros() {
   assert(buffer.length() == data_size);
 
   std::unique_ptr<uint32_t[]> ptr(new uint32_t[buffer.length()]);
-  buffer.concatenate(ptr.get());
+  buffer.move_to(ptr.get());
   assert(buffer.length() == data_size);
   buffer.clear();
   assert(buffer.length() == 0);
@@ -76,7 +76,7 @@ void test_float() {
   assert(buffer.length() == data_size);
 
   std::unique_ptr<float[]> ptr(new float[buffer.length()]);
-  buffer.concatenate(ptr.get());
+  buffer.move_to(ptr.get());
   assert(buffer.length() == data_size);
   buffer.clear();
   assert(buffer.length() == 0);
@@ -100,7 +100,7 @@ void test_int64() {
   assert(buffer.length() == data_size);
 
   std::unique_ptr<int64_t[]> ptr(new int64_t[buffer.length()]);
-  buffer.concatenate(ptr.get());
+  buffer.move_to(ptr.get());
   assert(buffer.length() == data_size);
   buffer.clear();
   assert(buffer.length() == 0);
@@ -125,7 +125,7 @@ void test_bool() {
   assert(buffer.length() == data_size);
 
   std::unique_ptr<bool[]> ptr(new bool[buffer.length()]);
-  buffer.concatenate(ptr.get());
+  buffer.move_to(ptr.get());
   assert(buffer.length() == data_size);
   buffer.clear();
   assert(buffer.length() == 0);
@@ -148,7 +148,7 @@ void test_double() {
   }
 
   std::unique_ptr<double[]> ptr(new double[buffer.length()]);
-  buffer.concatenate(ptr.get());
+  buffer.move_to(ptr.get());
   assert(buffer.length() == data_size);
   buffer.clear();
   assert(buffer.length() == 0);
@@ -171,7 +171,7 @@ void test_complex() {
   }
 
   std::complex<double>* ptr = new std::complex<double>[buffer.length()];
-  buffer.concatenate(ptr);
+  buffer.move_to(ptr);
   assert(buffer.length() == data_size);
   buffer.clear();
   assert(buffer.length() == 0);
@@ -193,7 +193,7 @@ void test_extend() {
   buffer.extend(data, data_size);
 
   std::unique_ptr<double[]> ptr(new double[buffer.length()]);
-  buffer.concatenate(ptr.get());
+  buffer.move_to(ptr.get());
   assert(buffer.length() == data_size);
   buffer.clear();
   assert(buffer.length() == 0);
@@ -239,7 +239,7 @@ void test_copy_complex_as_complex() {
   }
 
   std::unique_ptr<std::complex<FROM>[]> ptr(new std::complex<FROM>[buffer.length()]);
-  buffer.concatenate(ptr.get());
+  buffer.move_to(ptr.get());
 
   for (size_t i = 0; i < buffer.length(); i++) {
     assert(ptr.get()[i] == data[i]);
@@ -247,7 +247,7 @@ void test_copy_complex_as_complex() {
 
   auto to_buffer = awkward::GrowableBuffer<std::complex<FROM>>::template copy_as<std::complex<TO>>(buffer);
   std::complex<TO>* ptr2 = new std::complex<TO>[to_buffer.length()];
-  to_buffer.concatenate(ptr2);
+  to_buffer.move_to(ptr2);
 
   for (size_t i = 0; i < to_buffer.length(); i++) {
     assert(ptr2[i].real() == (TO)data[i].real());
@@ -277,7 +277,7 @@ void test_copy_complex_as() {
   }
 
   std::unique_ptr<std::complex<FROM>[]> ptr(new std::complex<FROM>[buffer.length()]);
-  buffer.concatenate(ptr.get());
+  buffer.move_to(ptr.get());
 
   for (size_t i = 0; i < data_size; i++) {
     assert(ptr.get()[i] == data[i]);
@@ -285,7 +285,7 @@ void test_copy_complex_as() {
 
   auto to_buffer = awkward::GrowableBuffer<std::complex<FROM>>::template copy_as<TO>(buffer);
   std::unique_ptr<TO[]> ptr2(new TO[to_buffer.length()]);
-  to_buffer.concatenate(ptr2.get());
+  to_buffer.move_to(ptr2.get());
 
   for (size_t i = 0, j = 0; i < to_buffer.length() * 0.5; i++, j+=2) {
     assert(ptr2.get()[j] == (TO)data[i].real());

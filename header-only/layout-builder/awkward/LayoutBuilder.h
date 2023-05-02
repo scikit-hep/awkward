@@ -138,8 +138,8 @@ namespace awkward {
       /// Used to fill the buffers map by allocating it with user-defined pointers
       /// using the same name and size (in bytes) obtained from #buffer_nbytes.
       void
-      to_buffers(std::map<std::string, void*>& buffers) const noexcept {
-        data_.concatenate(reinterpret_cast<PRIMITIVE*>(
+      to_buffers(std::map<std::string, void*>& buffers) noexcept {
+        data_.move_to(reinterpret_cast<PRIMITIVE*>(
             buffers["node" + std::to_string(id_) + "-data"]));
         }
 
@@ -148,8 +148,8 @@ namespace awkward {
       ///
       /// The map keys and the buffer sizes are obtained from #buffer_nbytes
       void
-      to_char_buffers(std::map<std::string, uint8_t*>& buffers) const noexcept {
-        data_.concatenate(reinterpret_cast<PRIMITIVE*>(
+      to_char_buffers(std::map<std::string, uint8_t*>& buffers) noexcept {
+        data_.move_to(reinterpret_cast<PRIMITIVE*>(
           buffers["node" + std::to_string(id_) + "-data"]));
       }
 
@@ -316,8 +316,8 @@ namespace awkward {
       /// Used to fill the buffers map by allocating it with user-defined pointers
       /// using the same names and sizes (in bytes) obtained from #buffer_nbytes.
       void
-      to_buffers(std::map<std::string, void*>& buffers) const noexcept {
-        offsets_.concatenate(reinterpret_cast<PRIMITIVE*>(
+      to_buffers(std::map<std::string, void*>& buffers) noexcept {
+        offsets_.move_to(reinterpret_cast<PRIMITIVE*>(
             buffers["node" + std::to_string(id_) + "-offsets"]));
         content_.to_buffers(buffers);
       }
@@ -327,8 +327,8 @@ namespace awkward {
       ///
       /// The map keys and the buffer sizes are obtained from #buffer_nbytes
       void
-      to_char_buffers(std::map<std::string, uint8_t*>& buffers) const noexcept {
-        offsets_.concatenate(reinterpret_cast<PRIMITIVE*>(
+      to_char_buffers(std::map<std::string, uint8_t*>& buffers) noexcept {
+        offsets_.move_to(reinterpret_cast<PRIMITIVE*>(
             buffers["node" + std::to_string(id_) + "-offsets"]));
         content_.to_char_buffers(buffers);
       }
@@ -501,10 +501,10 @@ namespace awkward {
       /// Used to fill the buffers map by allocating it with user-defined pointers
       /// using the same names and sizes (in bytes) obtained from #buffer_nbytes.
       void
-      to_buffers(std::map<std::string, void*>& buffers) const noexcept {
-        starts_.concatenate(reinterpret_cast<PRIMITIVE*>(
+      to_buffers(std::map<std::string, void*>& buffers) noexcept {
+        starts_.move_to(reinterpret_cast<PRIMITIVE*>(
             buffers["node" + std::to_string(id_) + "-starts"]));
-        stops_.concatenate(reinterpret_cast<PRIMITIVE*>(
+        stops_.move_to(reinterpret_cast<PRIMITIVE*>(
             buffers["node" + std::to_string(id_) + "-stops"]));
         content_.to_buffers(buffers);
       }
@@ -514,10 +514,10 @@ namespace awkward {
       ///
       /// The map keys and the buffer sizes are obtained from #buffer_nbytes
       void
-      to_char_buffers(std::map<std::string, uint8_t*>& buffers) const noexcept {
-        starts_.concatenate(reinterpret_cast<PRIMITIVE*>(
+      to_char_buffers(std::map<std::string, uint8_t*>& buffers) noexcept {
+        starts_.move_to(reinterpret_cast<PRIMITIVE*>(
             buffers["node" + std::to_string(id_) + "-starts"]));
-        stops_.concatenate(reinterpret_cast<PRIMITIVE*>(
+        stops_.move_to(reinterpret_cast<PRIMITIVE*>(
             buffers["node" + std::to_string(id_) + "-stops"]));
         content_.to_char_buffers(buffers);
       }
@@ -913,7 +913,7 @@ namespace awkward {
       /// Used to fill the buffers map by allocating it with user-defined pointers
       /// using the same names and sizes (in bytes) obtained from #buffer_nbytes.
       void
-      to_buffers(std::map<std::string, void*>& buffers) const noexcept {
+      to_buffers(std::map<std::string, void*>& buffers) noexcept {
         for (size_t i = 0; i < fields_count_; i++)
           visit_at(contents, i, [&buffers](auto& content) {
             content.builder.to_buffers(buffers);
@@ -1123,7 +1123,7 @@ namespace awkward {
       /// Used to fill the buffers map by allocating it with user-defined pointers
       /// using the same names and sizes (in bytes) obtained from #buffer_nbytes.
       void
-      to_buffers(std::map<std::string, void*>& buffers) const noexcept {
+      to_buffers(std::map<std::string, void*>& buffers) noexcept {
         for (size_t i = 0; i < fields_count_; i++)
           visit_at(contents, i, [&buffers](auto& content) {
             content.to_buffers(buffers);
@@ -1306,7 +1306,7 @@ namespace awkward {
       /// Used to fill the buffers map by allocating it with user-defined pointers
       /// using the same names and sizes (in bytes) obtained from #buffer_nbytes.
       void
-      to_buffers(std::map<std::string, void*>& buffers) const noexcept {
+      to_buffers(std::map<std::string, void*>& buffers) noexcept {
         content_.to_buffers(buffers);
       }
 
@@ -1491,8 +1491,8 @@ namespace awkward {
       /// Used to fill the buffers map by allocating it with user-defined pointers
       /// using the same names and sizes (in bytes) obtained from #buffer_nbytes.
       void
-      to_buffers(std::map<std::string, void*>& buffers) const noexcept {
-        index_.concatenate(reinterpret_cast<PRIMITIVE*>(
+      to_buffers(std::map<std::string, void*>& buffers) noexcept {
+        index_.move_to(reinterpret_cast<PRIMITIVE*>(
             buffers["node" + std::to_string(id_) + "-index"]));
         content_.to_buffers(buffers);
       }
@@ -1502,8 +1502,8 @@ namespace awkward {
       ///
       /// The map keys and the buffer sizes are obtained from #buffer_nbytes
       void
-      to_char_buffers(std::map<std::string, uint8_t*>& buffers) const noexcept {
-        index_.concatenate(reinterpret_cast<PRIMITIVE*>(
+      to_char_buffers(std::map<std::string, uint8_t*>& buffers) noexcept {
+        index_.move_to(reinterpret_cast<PRIMITIVE*>(
             buffers["node" + std::to_string(id_) + "-index"]));
         content_.to_char_buffers(buffers);
       }
@@ -1691,8 +1691,8 @@ namespace awkward {
       /// Used to fill the buffers map by allocating it with user-defined pointers
       /// using the same names and sizes (in bytes) obtained from #buffer_nbytes.
       void
-      to_buffers(std::map<std::string, void*>& buffers) const noexcept {
-        index_.concatenate(reinterpret_cast<PRIMITIVE*>(
+      to_buffers(std::map<std::string, void*>& buffers) noexcept {
+        index_.move_to(reinterpret_cast<PRIMITIVE*>(
             buffers["node" + std::to_string(id_) + "-index"]));
         content_.to_buffers(buffers);
       }
@@ -1702,8 +1702,8 @@ namespace awkward {
       ///
       /// The map keys and the buffer sizes are obtained from #buffer_nbytes
       void
-      to_char_buffers(std::map<std::string, uint8_t*>& buffers) const noexcept {
-        index_.concatenate(reinterpret_cast<PRIMITIVE*>(
+      to_char_buffers(std::map<std::string, uint8_t*>& buffers) noexcept {
+        index_.move_to(reinterpret_cast<PRIMITIVE*>(
             buffers["node" + std::to_string(id_) + "-index"]));
         content_.to_char_buffers(buffers);
       }
@@ -1839,7 +1839,7 @@ namespace awkward {
       /// Used to fill the buffers map by allocating it with user-defined pointers
       /// using the same names and sizes (in bytes) obtained from #buffer_nbytes.
       void
-      to_buffers(std::map<std::string, void*>& buffers) const noexcept {
+      to_buffers(std::map<std::string, void*>& buffers) noexcept {
         content_.to_buffers(buffers);
       }
 
@@ -2038,8 +2038,8 @@ namespace awkward {
       /// Used to fill the buffers map by allocating it with user-defined pointers
       /// using the same names and sizes (in bytes) obtained from #buffer_nbytes.
       void
-      to_buffers(std::map<std::string, void*>& buffers) const noexcept {
-        mask_.concatenate(reinterpret_cast<int8_t*>(
+      to_buffers(std::map<std::string, void*>& buffers) noexcept {
+        mask_.move_to(reinterpret_cast<int8_t*>(
             buffers["node" + std::to_string(id_) + "-mask"]));
         content_.to_buffers(buffers);
       }
@@ -2049,8 +2049,8 @@ namespace awkward {
       ///
       /// The map keys and the buffer sizes are obtained from #buffer_nbytes
       void
-      to_char_buffers(std::map<std::string, uint8_t*>& buffers) const noexcept {
-        mask_.concatenate(reinterpret_cast<int8_t*>(
+      to_char_buffers(std::map<std::string, uint8_t*>& buffers) noexcept {
+        mask_.move_to(reinterpret_cast<int8_t*>(
             buffers["node" + std::to_string(id_) + "-mask"]));
         content_.to_char_buffers(buffers);
       }
@@ -2291,7 +2291,7 @@ namespace awkward {
       /// Used to fill the buffers map by allocating it with user-defined pointers
       /// using the same names and sizes (in bytes) obtained from #buffer_nbytes.
       void
-      to_buffers(std::map<std::string, void*>& buffers) const noexcept {
+      to_buffers(std::map<std::string, void*>& buffers) noexcept {
         mask_.concatenate_from(reinterpret_cast<uint8_t*>(
             buffers["node" + std::to_string(id_) + "-mask"]), 0, 1);
         mask_.append(reinterpret_cast<uint8_t*>(
@@ -2557,12 +2557,12 @@ namespace awkward {
       /// Used to fill the buffers map by allocating it with user-defined pointers
       /// using the same names and sizes (in bytes) obtained from #buffer_nbytes.
       void
-      to_buffers(std::map<std::string, void*>& buffers) const noexcept {
+      to_buffers(std::map<std::string, void*>& buffers) noexcept {
         auto index_sequence((std::index_sequence_for<BUILDERS...>()));
 
-        tags_.concatenate(reinterpret_cast<TAGS*>(
+        tags_.move_to(reinterpret_cast<TAGS*>(
             buffers["node" + std::to_string(id_) + "-tags"]));
-        index_.concatenate(reinterpret_cast<INDEX*>(
+        index_.move_to(reinterpret_cast<INDEX*>(
             buffers["node" + std::to_string(id_) + "-index"]));
 
         for (size_t i = 0; i < contents_count_; i++)
@@ -2576,12 +2576,12 @@ namespace awkward {
       ///
       /// The map keys and the buffer sizes are obtained from #buffer_nbytes
       void
-      to_char_buffers(std::map<std::string, uint8_t*>& buffers) const noexcept {
+      to_char_buffers(std::map<std::string, uint8_t*>& buffers) noexcept {
         auto index_sequence((std::index_sequence_for<BUILDERS...>()));
 
-        tags_.concatenate(reinterpret_cast<TAGS*>(
+        tags_.move_to(reinterpret_cast<TAGS*>(
             buffers["node" + std::to_string(id_) + "-tags"]));
-        index_.concatenate(reinterpret_cast<INDEX*>(
+        index_.move_to(reinterpret_cast<INDEX*>(
             buffers["node" + std::to_string(id_) + "-index"]));
 
         for (size_t i = 0; i < contents_count_; i++)
