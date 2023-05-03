@@ -317,11 +317,13 @@ def test_union():
             ak.to_layout([1, 2]),
             ak.types.from_datashape("union[var * int64, string]", highlevel=False),
         )
-    ## union → no union
+
+    ## union → no union (project)
     result = ak.enforce_type(
         # Build union layout, slice to test projection
         ak.to_layout([1, "hi", "bye"])[1:2],
         ak.types.from_datashape("string", highlevel=False),
+        union_erasure="project",
     )
     assert ak.almost_equal(
         result,
@@ -338,6 +340,7 @@ def test_union():
         # Build union layout, slice to test projection
         ak.to_layout([1, "hi", "bye"])[:1],
         ak.types.from_datashape("int64", highlevel=False),
+        union_erasure="project",
     )
     assert ak.almost_equal(
         result, ak.contents.NumpyArray(numpy.array([1], dtype=numpy.int64))
@@ -347,6 +350,60 @@ def test_union():
         ak.enforce_type(
             ak.to_layout([1, "hi"]),
             ak.types.from_datashape("var * int64", highlevel=False),
+            union_erasure="project",
+        )
+
+    ## union → no union (convert)
+    array = ak.concatenate(
+        [
+            # {x: int64, y: float64}
+            [{"x": 1, "y": 2.0}],
+            # {y: int64}
+            [{"y": 3}],
+        ],
+    )
+    assert array.type == ak.types.ArrayType(
+        ak.types.UnionType(
+            [
+                ak.types.RecordType(
+                    [ak.types.NumpyType("int64"), ak.types.NumpyType("float64")],
+                    ["x", "y"],
+                ),
+                ak.types.RecordType([ak.types.NumpyType("int64")], ["y"]),
+            ]
+        ),
+        2,
+    )
+    result = ak.enforce_type(
+        array,
+        ak.types.from_datashape("{y: int64}", highlevel=False),
+        union_erasure="convert",
+    )
+    assert ak.almost_equal(
+        result,
+        ak.contents.IndexedArray(
+            index=ak.index.Index64([0, 1]),
+            content=ak.contents.RecordArray(
+                contents=[
+                    ak.contents.NumpyArray(
+                        numpy.array([2, 3], dtype=numpy.int64),
+                    )
+                ],
+                fields=["y"],
+            ),
+        ),
+    )
+    with pytest.raises(TypeError):
+        ak.enforce_type(
+            ak.to_layout([1, "hi"]),
+            ak.types.from_datashape("string", highlevel=False),
+            union_erasure="convert",
+        )
+    with pytest.raises(TypeError):
+        ak.enforce_type(
+            ak.to_layout([1, "hi"])[1:],
+            ak.types.from_datashape("string", highlevel=False),
+            union_erasure="convert",
         )
 
     ## union → same union

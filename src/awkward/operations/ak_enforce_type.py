@@ -540,7 +540,7 @@ def _recurse_union_non_union(
                 i, j, dtype=np.int64
             )
             # Convert layout
-            next_contents.append(enforce_type(tag_content, type_))
+            next_contents.append(_recurse(tag_content, type_, union_erasure))
 
         # Merge the results
         for content in next_contents[1:]:
