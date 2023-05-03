@@ -187,7 +187,7 @@ def _option_to_projected_indexed_option(
     )
 
 
-def _drop_option(
+def _drop_unused_option(
     layout: ak.contents.IndexedOptionArray
     | ak.contents.BitMaskedArray
     | ak.contents.ByteMaskedArray
@@ -199,9 +199,12 @@ def _drop_option(
         layout: option-type layout
         lazy: whether to keep indirection via an IndexedArray
 
-    Returns a new Content containing the non-missing items of `layout`.
-    This is equivalent to dropping the None values.
-    Preserve an indirection if `lazy` is True, and the option is indexed
+    Returns a new #ak.contents.Content whose contents are equivalent to `layout`, but
+    without the option type.
+
+    Preserve an indirection if `lazy` is True, and the option is indexed.
+
+    This function should only be applied to layouts known not to have any missing values.
     """
     if not layout.is_indexed:
         return layout.content[: layout.length]
@@ -275,7 +278,9 @@ def _recurse_option_any(
         else:
             # If so, drop the option-type, but don't project anything
             return _recurse(
-                _drop_option(layout, lazy=_layout_has_type(layout.content, type_)),
+                _drop_unused_option(
+                    layout, lazy=_layout_has_type(layout.content, type_)
+                ),
                 type_,
                 union_erasure,
             )
