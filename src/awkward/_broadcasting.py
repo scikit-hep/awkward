@@ -67,6 +67,7 @@ def length_of_broadcast(inputs: Sequence) -> int | type[unknown_length]:
 def broadcast_pack(inputs: Sequence, isscalar: list[bool]) -> list:
     maxlen = length_of_broadcast(inputs)
     nextinputs = []
+
     for x in inputs:
         if isinstance(x, Record):
             index = x.backend.index_nplike.full(maxlen, x.at, dtype=np.int64)
@@ -76,7 +77,7 @@ def broadcast_pack(inputs: Sequence, isscalar: list[bool]) -> list:
             nextinputs.append(
                 RegularArray(
                     x,
-                    x.length if x.backend.nplike.known_data else 1,
+                    x.length,
                     1,
                     parameters=None,
                 )
@@ -497,68 +498,100 @@ def apply_step(
         )
 
     def broadcast_any_list():
+        index_nplike = backend.index_nplike
         # All regular?
         if all(x.is_regular or not x.is_list for x in contents):
             # Ensure all layouts have same length
-            length = unset
+            length = None
             for x in contents:
-                if length is unset:
+                if length is None:
                     length = x.length
-                elif backend.nplike.known_data:
+                elif length is not unknown_length and x.length is not unknown_length:
                     assert length == x.length
-            assert length is not unset
+            assert length is not None
 
-            if any(x.size == 0 for x in contents if x.is_regular):
-                dimsize = 0
-            else:
-                dimsize = max(x.size for x in contents if x.is_regular)
+            # Determine the size of the broadcast result
+            dim_size = None
+            for x in contents:
+                if not x.is_regular:
+                    continue
 
-            if backend.nplike.known_data:
-                for x in contents:
-                    if x.is_regular:
-                        if dimsize > 1 and x.size == 1:
-                            # For any (N, 1) array, we know we'll broadcast to (N, M) where M is maxsize
-                            tmpindex = Index64(
-                                backend.index_nplike.repeat(
-                                    backend.index_nplike.arange(
-                                        x.length, dtype=np.int64
-                                    ),
-                                    dimsize,
+                # Any unknown length sets max_size to unknown
+                if x.size is unknown_length:
+                    dim_size = unknown_length
+                # Any zero-length column triggers zero broadcasting
+                elif x.size == 0:
+                    dim_size = 0
+                    break
+                elif dim_size is None:
+                    dim_size = x.size
+                elif dim_size is unknown_length:
+                    continue
+                else:
+                    dim_size = max(dim_size, x.size)
+
+            dimsize_greater_than_one_if_known = (
+                dim_size is unknown_length or dim_size > 1
+            )
+            dimsize_known_to_be_zero = dim_size is not unknown_length and dim_size == 0
+
+            # Build a broadcast index for size=1 contents
+            size_one_carry_index = None
+            for x in contents:
+                if x.is_regular:
+                    x_size_known_to_be_one = (
+                        x.size is not unknown_length and x.size == 1
+                    )
+                    if dimsize_greater_than_one_if_known and x_size_known_to_be_one:
+                        # For any (N, 1) array, we know we'll broadcast to (N, M) where M is maxsize
+                        size_one_carry_index = Index64(
+                            index_nplike.repeat(
+                                index_nplike.arange(
+                                    index_nplike.shape_item_as_index(x.length),
+                                    dtype=np.int64,
                                 ),
-                                nplike=backend.index_nplike,
-                            )
+                                index_nplike.shape_item_as_index(dim_size),
+                            ),
+                            nplike=index_nplike,
+                        )
+                        break
 
-                nextinputs = []
-                for x in inputs:
-                    if isinstance(x, RegularArray):
-                        if dimsize > 1 and x.size == 1:
-                            nextinputs.append(
-                                x.content[: x.length * x.size]._carry(
-                                    tmpindex, allow_lazy=False
-                                )
+            # Here we have three possible broadcasting outcomes (by precedence):
+            # 1. any (exactly) size-0 content trims all other contents
+            # 2. any (exactly) size-1 content broadcasts to the common length
+            # 3. otherwise, recurse into the content as-is
+            nextinputs = []
+            for x in inputs:
+                if isinstance(x, RegularArray):
+                    x_size_known_to_be_one = (
+                        x.size is not unknown_length and x.size == 1
+                    )
+                    # If dimsize is known to be exactly zero, all contents are zero length
+                    if dimsize_known_to_be_zero:
+                        nextinputs.append(x.content[:0])
+                    # If we have a known size=1 content, then broadcast it to the dimension size
+                    elif dimsize_greater_than_one_if_known and x_size_known_to_be_one:
+                        nextinputs.append(
+                            x.content[: x.length * x.size]._carry(
+                                size_one_carry_index, allow_lazy=False
                             )
-                        elif x.size == dimsize:
-                            nextinputs.append(x.content[: x.length * x.size])
-                        elif dimsize == 0:
-                            nextinputs.append(x.content[:0])
-                        else:
-                            raise ValueError(
-                                "cannot broadcast RegularArray of size "
-                                "{} with RegularArray of size {} {}".format(
-                                    x.size, dimsize, in_function(options)
-                                )
+                        )
+                    # Any unknown values or sizes are assumed to be correct as-is
+                    elif (
+                        dim_size is unknown_length
+                        or x.size is unknown_length
+                        or x.size == dim_size
+                    ):
+                        nextinputs.append(x.content[: x.length * x.size])
+                    else:
+                        raise ValueError(
+                            "cannot broadcast RegularArray of size "
+                            "{} with RegularArray of size {} {}".format(
+                                x.size, dim_size, in_function(options)
                             )
-                    else:
-                        nextinputs.append(x)
-
-            else:
-                nextinputs = []
-                for x in inputs:
-                    if isinstance(x, RegularArray):
-                        x._touch_data(recursive=False)
-                        nextinputs.append(x.content)
-                    else:
-                        nextinputs.append(x)
+                        )
+                else:
+                    nextinputs.append(x)
 
             outcontent = apply_step(
                 backend,
@@ -573,7 +606,7 @@ def apply_step(
             assert isinstance(outcontent, tuple)
             parameters = parameters_factory(len(outcontent))
             return tuple(
-                RegularArray(x, dimsize, length, parameters=p)
+                RegularArray(x, dim_size, length, parameters=p)
                 for x, p in zip(outcontent, parameters)
             )
 
@@ -600,7 +633,6 @@ def apply_step(
                     )
                     nextinputs.append(x.content)
                 elif isinstance(x, RegularArray):
-                    x._touch_data(recursive=False)
                     nextinputs.append(x.content)
                 else:
                     nextinputs.append(x)
