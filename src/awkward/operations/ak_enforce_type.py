@@ -117,7 +117,7 @@ def enforce_type(
         return _impl(array, type, highlevel, behavior)
 
 
-def _option_to_packed_indexed_option(
+def _option_to_projected_indexed_option(
     layout: ak.contents.IndexedOptionArray
     | ak.contents.BitMaskedArray
     | ak.contents.ByteMaskedArray
@@ -127,8 +127,7 @@ def _option_to_packed_indexed_option(
     Args:
         layout: option-type layout
 
-    Returns a new IndexedOptionArray whose contents are projected
-
+    Returns a new IndexedOptionArray whose contents are already projected.
     """
     index_nplike = layout.backend.index_nplike
     new_index = index_nplike.empty(layout.length, dtype=np.int64)
@@ -148,19 +147,34 @@ def _option_to_packed_indexed_option(
     )
 
 
-def _option_to_indexed(
+def _drop_option(
     layout: ak.contents.IndexedOptionArray
     | ak.contents.BitMaskedArray
     | ak.contents.ByteMaskedArray
     | ak.contents.UnmaskedArray,
+    lazy: bool,
 ) -> ak.contents.IndexedArray:
-    # Convert option to IndexedOptionArray and determine index of valid values
-    layout = layout.to_IndexedOptionArray64()
-    return ak.contents.IndexedArray.simplified(
-        index=ak.index.Index64(layout.index.data[layout.mask_as_bool(True)]),
-        content=layout.content,
-        parameters=layout._parameters,
-    )
+    """
+    Args:
+        layout: option-type layout
+        lazy: whether to keep indirection via an IndexedArray
+
+    Returns a new Content containing the non-missing items of `layout`.
+    This is equivalent to dropping the None values.
+    Preserve an indirection if `lazy` is True, and the option is indexed
+    """
+    if not layout.is_indexed:
+        return layout.content[: layout.length]
+    elif lazy:
+        # Convert option to IndexedOptionArray and determine index of valid values
+        layout = layout.to_IndexedOptionArray64()
+        return ak.contents.IndexedArray.simplified(
+            index=ak.index.Index64(layout.index.data[layout.mask_as_bool(True)]),
+            content=layout.content,
+            parameters=layout._parameters,
+        )
+    else:
+        return layout.project()
 
 
 def _recurse_indexed_any(
@@ -200,7 +214,7 @@ def _recurse_option_any(
             # If so, convert to packed so that any non-referenced content items are trimmed
             # This is required so that unused union items are seen to be safe to project out later
             # We don't use to_packed(), as it recurses
-            layout = _option_to_packed_indexed_option(layout)
+            layout = _option_to_projected_indexed_option(layout)
 
         return layout.copy(
             content=_recurse(layout.content, type_.content),
@@ -213,12 +227,12 @@ def _recurse_option_any(
             raise ValueError(
                 "option types can only be removed if there are no missing values"
             )
-        elif _layout_has_type(layout.content, type_):
-            return _option_to_indexed(layout).copy(
-                content=_recurse(layout.content, type_)
-            )
         else:
-            return _recurse(layout.project(), type_)
+            # If so, drop the option-type, but don't project anything
+            return _recurse(
+                _drop_option(layout, lazy=_layout_has_type(layout.content, type_)),
+                type_,
+            )
 
 
 def _recurse_any_option(
