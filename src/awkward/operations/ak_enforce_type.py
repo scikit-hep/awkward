@@ -195,9 +195,9 @@ def _recurse_option_any(
 ) -> ak.contents.Content:
     # option → option (no change)
     if isinstance(type_, ak.types.OptionType):
-        # Is the layout changes below this level
-        if _layout_has_type(layout.content, type_.content):
-            # Convert to packed so that any non-referenced content items are trimmed
+        # Optimisation: is the layout changed below this level?
+        if not _layout_has_type(layout.content, type_.content):
+            # If so, convert to packed so that any non-referenced content items are trimmed
             # This is required so that unused union items are seen to be safe to project out later
             # We don't use to_packed(), as it recurses
             layout = _option_to_packed_indexed_option(layout)
