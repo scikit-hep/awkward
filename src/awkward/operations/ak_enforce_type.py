@@ -107,7 +107,7 @@ def enforce_type(
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         type (#ak.types.Type or str): The type that `array` will be enforced to.
-        union_erasure (str): Rule for erasing unions, one of `"convert"` or `"project"`
+        union_erasure (str): Rule for erasing unions, one of `"convert"` or `"project"`.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
