@@ -36,10 +36,6 @@ def _layout_has_type(layout: ak.contents.Content, type_: ak.types.Type) -> bool:
         )
     elif layout.is_indexed:
         return _layout_has_type(layout.content, type_)
-    elif layout.is_list:
-        return isinstance(type_, ak.types.ListType) and _layout_has_type(
-            layout.content, type_.content
-        )
     elif layout.is_regular:
         return (
             isinstance(type_, ak.types.RegularType)
@@ -49,6 +45,10 @@ def _layout_has_type(layout: ak.contents.Content, type_: ak.types.Type) -> bool:
                 or layout.size == type_.size
             )
             and _layout_has_type(layout.content, type_.content)
+        )
+    elif layout.is_list:
+        return isinstance(type_, ak.types.ListType) and _layout_has_type(
+            layout.content, type_.content
         )
     elif layout.is_numpy:
         for _ in range(layout.purelist_depth - 1):
