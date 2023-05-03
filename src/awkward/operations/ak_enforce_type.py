@@ -107,11 +107,7 @@ def enforce_type(
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         type (#ak.types.Type or str): The type that `array` will be enforced to.
-        union_erasure (str): Rule for erasing unions, one of:
-
-            - `"convert"` - convert all union contents to the given type
-            - `"project"` - project out the first content with exactly the given type
-
+        union_erasure (str): Rule for erasing unions, one of `"convert"` or `"project"`
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
@@ -143,6 +139,10 @@ def enforce_type(
     The conversion rules outlined above are not data-dependent; the appropriate rule is chosen from the layout and the
     given type value. If the conversion is not possible given the layout data, e.g. a conversion from an irregular list
     to a regular type, it will fail.
+
+    The `union_erasure` argument determines whether unions are projected or converted during erasure:
+    - `"convert"` - convert all union contents to the given type
+    - `"project"` - project out the first content with exactly the given type
     """
     with ak._errors.OperationErrorContext(
         "ak.enforce_type",
