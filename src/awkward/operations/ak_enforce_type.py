@@ -97,31 +97,34 @@ def enforce_type(
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         type (#ak.types.Type or str): The type of the Awkward
-            Array to enforce to.
+            Array to enforce.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
     Returns an array whose structure is modified to match the given type.
+
     In addition to preserving the existing type and/or changing parameters,
 
     - #ak.types.OptionType can be added or removed (if there are no missing values)
     - #ak.types.UnionType can
-       - grow to include new variant types,
-       - shrink to drop existing variant types (if the union contains no values for this type),
-       - change type in a single variant.
-       Due to these rules, changes to more than one variant of a union must be performed with multiple calls to #ak.enforce_type
+
+      * grow to include new variant types,
+      * shrink to drop existing variant types (if the union contains no values for this type),
+      * change type in a single variant.
+      Due to these rules, changes to more than one variant of a union must be performed with multiple calls to #ak.enforce_type
     - #ak.types.RecordType can
-       - grow to include new fields / slots,
-       - shrink to drop existing fields / slots,
-       A #ak.types.RecordType may only be converted to another #ak.types.RecordType if it is of the same flavour, i.e.
-       tuples can be converted to tuples, or records to records. Where a new field/slot is added to a #ak.types.RecordType,
-       it must be an #ak.types.OptionType. For tuples, slots may only be added to the end of the tuple
+
+      * grow to include new fields / slots,
+      * shrink to drop existing fields / slots.
+
+      A #ak.types.RecordType may only be converted to another #ak.types.RecordType if it is of the same flavour, i.e.
+      tuples can be converted to tuples, or records to records. Where a new field/slot is added to a #ak.types.RecordType,
+      it must be an #ak.types.OptionType. For tuples, slots may only be added to the end of the tuple
     - #ak.types.ListType can convert to a #ak.types.RegularType
     - #ak.types.NumpyType can change primitive
     - #ak.types.UnknownType can be converted to any other type, and be converted to from any other type.
-
     The conversion rules outlined above are not data-dependent; the appropriate rule is chosen from the layout and the
     given type value. If the conversion is not possible given the layout data, e.g. a conversion from an irregular list
     to a regular type, it will fail.
