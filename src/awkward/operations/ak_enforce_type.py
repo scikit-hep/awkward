@@ -97,13 +97,34 @@ def enforce_type(
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         type (#ak.types.Type or str): The type of the Awkward
-            Array to enforce.
+            Array to enforce to.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
+    Returns an array whose structure is modified to match the given type.
+    In addition to preserving the existing type and/or changing parameters,
 
+    - #ak.types.OptionType can be added or removed (if there are no missing values)
+    - #ak.types.UnionType can
+       - grow to include new variant types,
+       - shrink to drop existing variant types (if the union contains no values for this type),
+       - change type in a single variant.
+       Due to these rules, changes to more than one variant of a union must be performed with multiple calls to #ak.enforce_type
+    - #ak.types.RecordType can
+       - grow to include new fields / slots,
+       - shrink to drop existing fields / slots,
+       A #ak.types.RecordType may only be converted to another #ak.types.RecordType if it is of the same flavour, i.e.
+       tuples can be converted to tuples, or records to records. Where a new field/slot is added to a #ak.types.RecordType,
+       it must be an #ak.types.OptionType. For tuples, slots may only be added to the end of the tuple
+    - #ak.types.ListType can convert to a #ak.types.RegularType
+    - #ak.types.NumpyType can change primitive
+    - #ak.types.UnknownType can be converted to any other type, and be converted to from any other type.
+
+    The conversion rules outlined above are not data-dependent; the appropriate rule is chosen from the layout and the
+    given type value. If the conversion is not possible given the layout data, e.g. a conversion from an irregular list
+    to a regular type, it will fail.
     """
     with ak._errors.OperationErrorContext(
         "ak.enforce_type",
@@ -322,22 +343,21 @@ def _recurse_union_union(
                 continue
 
             is_trivial_permutation = ix_perm_contents == range(n_type_contents)
+            # Optimisation: if this is the trivial permutation, swe don't need to do any tag re-arranging
             if is_trivial_permutation:
-                # The trivial permutation won't require any copying of tags
                 layout_tags = layout.tags
             else:
                 layout_tags = ak.index.Index8.empty(
                     layout.tags.length, layout.backend.index_nplike
                 )
 
-            layout_contents = []
-
+            # Ensure that the union references all of the tags of the permutation,
+            # and re-order the tags if this is not the trivial permutation
             _total_used_tags = 0
             for i, j in zip(ix_perm_contents, range(n_type_contents)):
-                layout_contents.append(layout.contents[i])
                 layout_tag_is_i = layout.tags.data == i
 
-                # Rewrite the tags if they need to be condensed
+                # Rewrite the tags if they need to be condensed (i.e., not if this is the trivial permutation)
                 if not is_trivial_permutation:
                     layout_tags.data[layout_tag_is_i] = j
 
@@ -401,16 +421,22 @@ def _recurse_union_union(
                 for tag, content_type, is_match in zip(
                     range(len(layout.contents)), permuted_types, content_matches_type
                 ):
+                    # If the types agree between the intended type and content, then include this content
+                    # as-is, only recursing to update parameters. Because the types agree, we're safe
+                    # not to project out this content
+                    # TODO: don't walk into the tree if nothing needs doing.
                     if is_match:
                         next_contents.append(
                             _recurse(layout.contents[tag], content_type)
                         )
+                    # Otherwise, this content is being converted, and we need to recurse into the projection
+                    # to ensure that the content is packed
                     else:
                         layout_content = layout.project(tag)
                         next_contents.append(_recurse(layout_content, content_type))
 
                         # Rebuild the index as an enumeration over the (dense) projection
-                        # This ensures that it is packed, as the type is changing
+                        # This ensures that it is packed!
                         index_data = layout.backend.index_nplike.asarray(
                             index.data, copy=True
                         )
@@ -666,7 +692,6 @@ def _recurse(layout: ak.contents.Content, type_: ak.types.Type) -> ak.contents.C
     Args:
         layout: layout to recurse into
         type_: expected type of the recursion result
-        handle_error: error handler, used instead of bare `raise`
 
     Returns a callable which converts from `layout` to `type_`. layout ensures that
     calling `recurse` is a type-only program, whilst keeping the conversion logic
