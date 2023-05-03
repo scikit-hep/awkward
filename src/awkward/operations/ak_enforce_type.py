@@ -123,7 +123,8 @@ def enforce_type(
     - #ak.types.UnionType can
 
       * grow to include new variant types,
-      * shrink to drop existing variant types (if the union contains no values for this type),
+      * project to a single type (if the union contains no values for this type),
+      * convert to a single type,
       * change type in a single variant.
       Due to these rules, changes to more than one variant of a union must be performed with multiple calls to #ak.enforce_type
     - #ak.types.RecordType can
