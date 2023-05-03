@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("from_parquet",)
 import awkward as ak
+from awkward._layout import wrap_layout
 from awkward._regularize import is_integer
 
 
@@ -230,7 +231,9 @@ def _load(
         )
 
     if len(arrays) == 0:
-        return subform.length_zero_array(highlevel=highlevel, behavior=behavior)
+        return wrap_layout(
+            subform.length_zero_array(highlevel=False), behavior=behavior
+        )
     elif len(arrays) == 1:
         # make high-level
         if isinstance(arrays[0], ak.record.Record):
