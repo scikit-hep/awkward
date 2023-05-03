@@ -59,7 +59,10 @@ def _layout_has_type(layout: ak.contents.Content, type_: ak.types.Type) -> bool:
             type_, ak.types.NumpyType
         ) and layout.dtype == primitive_to_dtype(type_.primitive)
     elif layout.is_record:
-        if not isinstance(type_, ak.types.Record) or type_.is_tuple != layout.is_tuple:
+        if (
+            not isinstance(type_, ak.types.RecordType)
+            or type_.is_tuple != layout.is_tuple
+        ):
             return False
 
         if layout.is_tuple:
@@ -67,7 +70,7 @@ def _layout_has_type(layout: ak.contents.Content, type_: ak.types.Type) -> bool:
                 _layout_has_type(c, t) for c, t in zip(layout.contents, type_.contents)
             )
         else:
-            return all(
+            return (frozenset(layout.fields) == frozenset(type_.fields)) and all(
                 _layout_has_type(layout.content(f), type_.content(f))
                 for f in type_.fields
             )
