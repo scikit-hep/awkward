@@ -403,69 +403,6 @@ def enforce_type(
         return _impl(array, type, highlevel, behavior)
 
 
-def _option_to_projected_indexed_option(
-    layout: ak.contents.IndexedOptionArray
-    | ak.contents.BitMaskedArray
-    | ak.contents.ByteMaskedArray
-    | ak.contents.UnmaskedArray,
-) -> ak.contents.IndexedOptionArray:
-    """
-    Args:
-        layout: option-type layout
-
-    Returns a new IndexedOptionArray whose contents are already projected.
-    """
-    index_nplike = layout.backend.index_nplike
-    new_index = index_nplike.empty(layout.length, dtype=np.int64)
-
-    is_none = layout.mask_as_bool(False)
-    num_none = index_nplike.count_nonzero(is_none)
-
-    new_index[is_none] = -1
-    new_index[~is_none] = index_nplike.arange(
-        layout.length - num_none,
-        dtype=new_index.dtype,
-    )
-    return ak.contents.IndexedOptionArray(
-        ak.index.Index64(new_index, nplike=index_nplike),
-        layout.project(),
-        parameters=layout._parameters,
-    )
-
-
-def _drop_unused_option(
-    layout: ak.contents.IndexedOptionArray
-    | ak.contents.BitMaskedArray
-    | ak.contents.ByteMaskedArray
-    | ak.contents.UnmaskedArray,
-    lazy: bool,
-) -> ak.contents.IndexedArray:
-    """
-    Args:
-        layout: option-type layout
-        lazy: whether to keep indirection via an IndexedArray
-
-    Returns a new #ak.contents.Content whose contents are equivalent to `layout`, but
-    without the option type.
-
-    Preserve an indirection if `lazy` is True, and the option is indexed.
-
-    This function should only be applied to layouts known not to have any missing values.
-    """
-    if not layout.is_indexed:
-        return layout.content[: layout.length]
-    elif lazy:
-        # Convert option to IndexedOptionArray and determine index of valid values
-        layout = layout.to_IndexedOptionArray64()
-        return ak.contents.IndexedArray.simplified(
-            index=ak.index.Index64(layout.index.data[layout.mask_as_bool(True)]),
-            content=layout.content,
-            parameters=layout._parameters,
-        )
-    else:
-        return layout.project()
-
-
 def _recurse_indexed_any(
     layout: ak.contents.IndexedArray, type_: ak.types.Type
 ) -> ak.contents.Content:
@@ -505,7 +442,22 @@ def _recurse_option_any(
             # If so, convert to packed so that any non-referenced content items are trimmed
             # This is required so that unused union items are seen to be safe to project out later
             # We don't use to_packed(), as it recurses
-            layout = _option_to_projected_indexed_option(layout)
+            index_nplike = layout.backend.index_nplike
+            new_index = index_nplike.empty(layout.length, dtype=np.int64)
+
+            is_none = layout.mask_as_bool(False)
+            num_none = index_nplike.count_nonzero(is_none)
+
+            new_index[is_none] = -1
+            new_index[~is_none] = index_nplike.arange(
+                layout.length - num_none,
+                dtype=new_index.dtype,
+            )
+            layout = ak.contents.IndexedOptionArray(
+                ak.index.Index64(new_index, nplike=index_nplike),
+                layout.project(),
+                parameters=layout._parameters,
+            )
 
         return layout.copy(
             content=_enforce_type(layout.content, type_.content),
