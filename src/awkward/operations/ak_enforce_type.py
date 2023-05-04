@@ -564,13 +564,16 @@ def _recurse_any_union(
     type_: ak.types.UnionType,
     union_erasure: UnionErasureMode,
 ) -> ak.contents.Content:
+    index_nplike = layout.backend.index_nplike
+
     for i, content_type in enumerate(type_.contents):
         if not _layout_has_type(layout, content_type):
             continue
 
-        tags = layout.backend.index_nplike.zeros(layout.length, dtype=np.int8)
-        index = layout.backend.index_nplike.arange(layout.length, dtype=np.int64)
+        tags = index_nplike.zeros(layout.length, dtype=np.int8)
+        index = index_nplike.arange(layout.length, dtype=np.int64)
 
+        # Build zero-length contents from the new types
         other_contents = [
             ak.forms.from_type(t).length_zero_array(
                 backend=layout.backend, highlevel=False
@@ -580,8 +583,8 @@ def _recurse_any_union(
         ]
 
         return ak.contents.UnionArray(
-            tags=ak.index.Index8(tags, nplike=layout.backend.index_nplike),
-            index=ak.index.Index64(index, nplike=layout.backend.index_nplike),
+            tags=ak.index.Index8(tags, nplike=index_nplike),
+            index=ak.index.Index64(index, nplike=index_nplike),
             contents=[_recurse(layout, content_type, union_erasure), *other_contents],
             parameters=type_.parameters,
         )
