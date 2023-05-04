@@ -453,16 +453,16 @@ def _recurse_option_any(
                 layout.length - num_none,
                 dtype=new_index.dtype,
             )
-            layout = ak.contents.IndexedOptionArray(
+            return ak.contents.IndexedOptionArray(
                 ak.index.Index64(new_index, nplike=index_nplike),
-                layout.project(),
+                _enforce_type(layout.project(), type_.content),
                 parameters=layout._parameters,
             )
-
-        return layout.copy(
-            content=_enforce_type(layout.content, type_.content),
-            parameters=type_.parameters,
-        )
+        else:
+            return layout.copy(
+                content=_enforce_type(layout.content, type_.content),
+                parameters=type_.parameters,
+            )
 
     # drop option!
     else:
