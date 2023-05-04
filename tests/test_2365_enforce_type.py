@@ -357,6 +357,10 @@ def test_union():
             [{"x": 1, "y": 2.0}],
             # {y: int64}
             [{"y": 3}],
+            # {x: int64, y: float64}
+            [{"x": 4, "y": 5.0}],
+            # {y: int64}
+            [{"y": 6}],
         ],
     )
     assert array.type == ak.types.ArrayType(
@@ -369,7 +373,7 @@ def test_union():
                 ak.types.RecordType([ak.types.NumpyType("int64")], ["y"]),
             ]
         ),
-        2,
+        4,
     )
     result = ak.enforce_type(
         array, ak.types.from_datashape("{y: int64}", highlevel=False)
@@ -377,11 +381,11 @@ def test_union():
     assert ak.almost_equal(
         result,
         ak.contents.IndexedArray(
-            index=ak.index.Index64([0, 1]),
+            index=ak.index.Index64([0, 1, 2, 3]),
             content=ak.contents.RecordArray(
                 contents=[
                     ak.contents.NumpyArray(
-                        numpy.array([2, 3], dtype=numpy.int64),
+                        numpy.array([2, 3, 5, 6], dtype=numpy.int64),
                     )
                 ],
                 fields=["y"],
