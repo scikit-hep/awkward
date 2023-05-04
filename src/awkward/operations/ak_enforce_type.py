@@ -629,7 +629,15 @@ def _recurse_list_any(
 ) -> ak.contents.Content:
     if isinstance(type_, ak.types.RegularType):
         layout_regular = layout.to_RegularArray()
-        if layout_regular.size != type_.size:
+
+        # Empty arrays can have any size!
+        if layout.length is not unknown_length and layout.length == 0:
+            return layout_regular.copy(size=type_.size)
+
+        if (
+            layout_regular.size is not unknown_length
+            and layout_regular.size != type_.size
+        ):
             raise ValueError(
                 f"converted regular layout has different size ({layout_regular.size}) to type ({type_.size})"
             )
