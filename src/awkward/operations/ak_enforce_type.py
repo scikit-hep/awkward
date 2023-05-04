@@ -18,6 +18,61 @@ from awkward.types.numpytype import primitive_to_dtype
 np = NumpyMetadata.instance()
 
 
+def enforce_type(
+    array,
+    type,
+    *,
+    highlevel=True,
+    behavior=None,
+):
+    """
+    Args:
+        array: Array-like data (anything #ak.to_layout recognizes).
+        type (#ak.types.Type or str): The type that `array` will be enforced to.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.contents.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+
+    Returns an array whose structure is modified to match the given type.
+
+    In addition to preserving the existing type and/or changing parameters,
+
+    - #ak.types.OptionType can be added or removed (if there are no missing values)
+    - #ak.types.UnionType can
+
+      * grow to include new variant types,
+      * convert to a single type,
+      * project to a single type (if conversion to a single type is not possible, and the union contains no values for this type),
+      * change type in a single variant.
+      Due to these rules, changes to more than one variant of a union must be performed with multiple calls to #ak.enforce_type
+    - #ak.types.RecordType can
+
+      * grow to include new fields / slots,
+      * shrink to drop existing fields / slots.
+
+      A #ak.types.RecordType may only be converted to another #ak.types.RecordType if it is of the same flavour, i.e.
+      tuples can be converted to tuples, or records to records. Where a new field/slot is added to a #ak.types.RecordType,
+      it must be an #ak.types.OptionType. For tuples, slots may only be added to the end of the tuple
+    - #ak.types.ListType can convert to a #ak.types.RegularType
+    - #ak.types.NumpyType can change primitive
+    - #ak.types.UnknownType can be converted to any other type, and be converted to from any other type.
+    The conversion rules outlined above are not data-dependent; the appropriate rule is chosen from the layout and the
+    given type value. If the conversion is not possible given the layout data, e.g. a conversion from an irregular list
+    to a regular type, it will fail.
+    """
+    with ak._errors.OperationErrorContext(
+        "ak.enforce_type",
+        {
+            "array": array,
+            "type": type,
+            "highlevel": highlevel,
+            "behavior": behavior,
+        },
+    ):
+        return _impl(array, type, highlevel, behavior)
+
+
 # TODO: move this if it ends up being useful elsewhere
 def _layout_has_type(layout: ak.contents.Content, type_: ak.types.Type) -> bool:
     """
@@ -91,6 +146,7 @@ def _layout_has_type(layout: ak.contents.Content, type_: ak.types.Type) -> bool:
         raise TypeError(layout)
 
 
+# TODO: move this if it ends up being useful elsewhere
 class _TypeEnforceableResult(NamedTuple):
     is_enforceable: bool
     requires_packing: bool
@@ -346,61 +402,6 @@ def _type_is_enforceable(
             return _TypeEnforceableResult(is_enforceable=False, requires_packing=False)
     else:
         raise TypeError(layout)
-
-
-def enforce_type(
-    array,
-    type,
-    *,
-    highlevel=True,
-    behavior=None,
-):
-    """
-    Args:
-        array: Array-like data (anything #ak.to_layout recognizes).
-        type (#ak.types.Type or str): The type that `array` will be enforced to.
-        highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.contents.Content subclass.
-        behavior (None or dict): Custom #ak.behavior for the output array, if
-            high-level.
-
-    Returns an array whose structure is modified to match the given type.
-
-    In addition to preserving the existing type and/or changing parameters,
-
-    - #ak.types.OptionType can be added or removed (if there are no missing values)
-    - #ak.types.UnionType can
-
-      * grow to include new variant types,
-      * project to a single type (if the union contains no values for this type),
-      * convert to a single type,
-      * change type in a single variant.
-      Due to these rules, changes to more than one variant of a union must be performed with multiple calls to #ak.enforce_type
-    - #ak.types.RecordType can
-
-      * grow to include new fields / slots,
-      * shrink to drop existing fields / slots.
-
-      A #ak.types.RecordType may only be converted to another #ak.types.RecordType if it is of the same flavour, i.e.
-      tuples can be converted to tuples, or records to records. Where a new field/slot is added to a #ak.types.RecordType,
-      it must be an #ak.types.OptionType. For tuples, slots may only be added to the end of the tuple
-    - #ak.types.ListType can convert to a #ak.types.RegularType
-    - #ak.types.NumpyType can change primitive
-    - #ak.types.UnknownType can be converted to any other type, and be converted to from any other type.
-    The conversion rules outlined above are not data-dependent; the appropriate rule is chosen from the layout and the
-    given type value. If the conversion is not possible given the layout data, e.g. a conversion from an irregular list
-    to a regular type, it will fail.
-    """
-    with ak._errors.OperationErrorContext(
-        "ak.enforce_type",
-        {
-            "array": array,
-            "type": type,
-            "highlevel": highlevel,
-            "behavior": behavior,
-        },
-    ):
-        return _impl(array, type, highlevel, behavior)
 
 
 def _recurse_indexed_any(
