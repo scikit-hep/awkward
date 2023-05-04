@@ -323,7 +323,6 @@ def test_union():
         # Build union layout, slice to test projection
         ak.to_layout([1, "hi", "bye"])[1:2],
         ak.types.from_datashape("string", highlevel=False),
-        union_erasure="project",
     )
     assert ak.almost_equal(
         result,
@@ -340,7 +339,6 @@ def test_union():
         # Build union layout, slice to test projection
         ak.to_layout([1, "hi", "bye"])[:1],
         ak.types.from_datashape("int64", highlevel=False),
-        union_erasure="project",
     )
     assert ak.almost_equal(
         result, ak.contents.NumpyArray(numpy.array([1], dtype=numpy.int64))
@@ -350,7 +348,6 @@ def test_union():
         ak.enforce_type(
             ak.to_layout([1, "hi"]),
             ak.types.from_datashape("var * int64", highlevel=False),
-            union_erasure="project",
         )
 
     ## union → no union (convert)
@@ -375,9 +372,7 @@ def test_union():
         2,
     )
     result = ak.enforce_type(
-        array,
-        ak.types.from_datashape("{y: int64}", highlevel=False),
-        union_erasure="convert",
+        array, ak.types.from_datashape("{y: int64}", highlevel=False)
     )
     assert ak.almost_equal(
         result,
@@ -393,17 +388,9 @@ def test_union():
             ),
         ),
     )
-    with pytest.raises(TypeError):
+    with pytest.raises(ValueError):
         ak.enforce_type(
-            ak.to_layout([1, "hi"]),
-            ak.types.from_datashape("string", highlevel=False),
-            union_erasure="convert",
-        )
-    with pytest.raises(TypeError):
-        ak.enforce_type(
-            ak.to_layout([1, "hi"])[1:],
-            ak.types.from_datashape("string", highlevel=False),
-            union_erasure="convert",
+            ak.to_layout([1, "hi"]), ak.types.from_datashape("string", highlevel=False)
         )
 
     ## union → same union
