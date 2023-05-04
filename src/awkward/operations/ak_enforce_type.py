@@ -95,7 +95,9 @@ def _impl(array, type_, highlevel, behavior):
 
     # Ensure we re-wrap records!
     if isinstance(layout, ak.record.Record):
-        out = ak.record.Record(_enforce_type(layout.array, type_), layout.at)
+        out = ak.record.Record(
+            _enforce_type(layout.array[layout.at : layout.at + 1], type_), 0
+        )
     else:
         out = _enforce_type(layout, type_)
 
