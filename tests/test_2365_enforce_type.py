@@ -646,3 +646,49 @@ def test_string():
             parameters={"__array__": "string"},
         ),
     )
+
+
+def test_highlevel():
+    with pytest.raises(TypeError, match=r"High-level type objects are not supported"):
+        ak.enforce_type(
+            ak.to_layout(["hello world"]),
+            ak.types.from_datashape("1 * bytes"),
+        )
+    with pytest.raises(TypeError, match=r"High-level type objects are not supported"):
+        ak.enforce_type(
+            ak.to_layout([{"msg": "hello world"}]),
+            ak.types.ScalarType(
+                ak.types.RecordType(
+                    [
+                        ak.types.ListType(
+                            ak.types.NumpyType(
+                                "uint8", parameters={"__array__": "char"}
+                            ),
+                            parameters={"__array__": "string"},
+                        )
+                    ],
+                    ["msg"],
+                )
+            ),
+        )
+
+
+def test_single_record():
+    result = ak.enforce_type(
+        ak.Record({"x": [1, 2]}),
+        ak.types.from_datashape("{x: var * float64}", highlevel=False),
+        highlevel=False,
+    )
+    assert isinstance(result, ak.record.Record)
+    assert ak.almost_equal(
+        result.array,
+        ak.contents.RecordArray(
+            [
+                ak.contents.ListOffsetArray(
+                    ak.index.Index(numpy.array([0, 2], dtype=numpy.int64)),
+                    ak.contents.NumpyArray(numpy.array([1, 2], dtype=numpy.float64)),
+                )
+            ],
+            ["x"],
+        ),
+    )
