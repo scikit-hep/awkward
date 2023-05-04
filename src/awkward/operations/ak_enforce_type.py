@@ -28,7 +28,7 @@ def enforce_type(
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
-        type (#ak.types.Type or str): The type that `array` will be enforced to.
+        type (#ak.types.Type, #ak.types.ScalarType, #ak.types.ArrayType, or str): The type that `array` will be enforced to.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
@@ -39,6 +39,12 @@ def enforce_type(
     In addition to preserving the existing type and/or changing parameters,
 
     - #ak.types.OptionType can be added or removed (if there are no missing values)
+          >>> a = ak.Array([1, 2, 3, None])
+          >>> b = a[:-1]
+          >>> b.type.show()
+          3 * ?int64
+          >>> c = ak.enforce_type(b, "int64")
+          >>> c.type.show()
     - #ak.types.UnionType can
 
       * grow to include new variant types,
@@ -1040,10 +1046,28 @@ def _enforce_type(
 
 
 def _impl(array, type_, highlevel, behavior):
-    layout = ak.to_layout(array)
+    layout = ak.to_layout(array, allow_record=True)
 
     if isinstance(type_, str):
         type_ = ak.types.from_datashape(type_, highlevel=False)
 
-    out = _enforce_type(layout, type_)
-    return wrap_layout(out, like=array, behavior=behavior, highlevel=highlevel)
+    if isinstance(type_, (ak.types.ArrayType, ak.types.ScalarType)):
+        raise TypeError(
+            "High-level type objects are not supported by this function. Instead, "
+            "a low-level type object (instance of ak.types.Type) should be used. "
+            "If you are using a high-level type `type` from another array (e.g. using `array.type`), "
+            "then the low-level type object can be found under `type.content`"
+        )
+
+    # Ensure we re-wrap records!
+    if isinstance(layout, ak.record.Record):
+        out = ak.record.Record(_enforce_type(layout.array, type_), layout.at)
+    else:
+        out = _enforce_type(layout, type_)
+
+    return wrap_layout(
+        out,
+        like=array,
+        behavior=behavior,
+        highlevel=highlevel,
+    )
