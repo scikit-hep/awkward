@@ -38,31 +38,191 @@ def enforce_type(
 
     In addition to preserving the existing type and/or changing parameters,
 
-    - #ak.types.OptionType can be added or removed (if there are no missing values)
-          >>> a = ak.Array([1, 2, 3, None])
-          >>> b = a[:-1]
-          >>> b.type.show()
-          3 * ?int64
-          >>> c = ak.enforce_type(b, "int64")
-          >>> c.type.show()
+    - #ak.types.OptionType can be added
+
+      >>> a = ak.Array([1, 2, 3])
+      >>> a.type.show()
+      3 * int64
+      >>> b = ak.enforce_type(a, "?int64")
+      >>> b.type.show()
+      3 * ?int64
+
+      or removed (if there are no missing values)
+
+      >>> a = ak.Array([1, 2, 3, None])
+      >>> b = a[:-1]
+      >>> b.type.show()
+      3 * ?int64
+      >>> c = ak.enforce_type(b, "int64")
+      >>> c.type.show()
+      3 * int64
+
     - #ak.types.UnionType can
 
       * grow to include new variant types,
+
+      >>> a = ak.Array([{'x': 1}, 2.0])
+      >>> a.type.show()
+      2 * union[
+          {
+              x: int64
+          },
+          float64
+      ]
+      >>> b = ak.enforce_type(a, "union[{x: int64}, float64, string]")
+      >>> b.type.show()
+      2 * union[
+      {
+          x: float32
+      },
+          float64,
+          string
+      ]
+
       * convert to a single type,
+
+      >>> a = ak.concatenate([
+      ...   ak.Array([{'x': 1}, {'x': 2}]),
+      ...   ak.Array([{'x': True, "y": None}, {'x': False, "y": None}])
+      ... ])
+      >>> a.type.show()
+      4 * union[
+          {
+              x: int64
+          },
+          {
+              x: bool,
+              y: ?unknown
+          }
+      ]
+      >>> b = ak.enforce_type(a, "{x: float64}")
+      >>> b.type.show()
+      4 * {
+          x: float64
+      }
+
       * project to a single type (if conversion to a single type is not possible, and the union contains no values for this type),
+
+      >>> a = ak.concatenate([
+      ...   ak.Array([{'x': 1}, {'x': 2}]),
+      ...   ak.Array([{'x': "yes", "y": None}, {'x': "no", "y": None}])
+      ... ])
+      >>> b = a[:2]
+      >>> b.type.show()
+      2 * union[
+          {
+              x: int64
+          },
+          {
+              x: string,
+              y: ?unknown
+          }
+      ]
+      >>> c = ak.enforce_type(b, "{x: int64}")
+      >>> c.type.show()
+      2 * {
+          x: int64
+      }
+
       * change type in a single variant.
+
+      >>> a = ak.Array([{'x': 1}, 2.0])
+      >>> a.type.show()
+      2 * union[
+          {
+              x: int64
+          },
+          float64
+      ]
+      >>> b = ak.enforce_type(a, "union[{x: float32}, float64]")
+      >>> b.type.show()
+      2 * union[
+      {
+          x: float32
+      },
+          float64
+      ]
+
       Due to these rules, changes to more than one variant of a union must be performed with multiple calls to #ak.enforce_type
+
     - #ak.types.RecordType can
 
-      * grow to include new fields / slots,
+      * grow to include new optional fields / slots,
+
+      >>> a = ak.Array([{'x': 1}])
+      >>> a.type.show()
+      1 * {
+          x: int64
+      }
+      >>> b = ak.enforce_type(a, "{x: int64, y: ?float32}")
+      >>> b.type.show()
+      1 * {
+          x: int64,
+          y: ?float32
+      }
+
       * shrink to drop existing fields / slots.
+
+      >>> a = ak.Array([{'x': 1, 'y': 1j+3}])
+      >>> a.type.show()
+      1 * {
+          x: int64,
+          y: complex128
+      }
+      >>> b = ak.enforce_type(a, "{x: int64}")
+      >>> b.type.show()
+      1 * {
+          x: int64
+      }
 
       A #ak.types.RecordType may only be converted to another #ak.types.RecordType if it is of the same flavour, i.e.
       tuples can be converted to tuples, or records to records. Where a new field/slot is added to a #ak.types.RecordType,
       it must be an #ak.types.OptionType. For tuples, slots may only be added to the end of the tuple
+    - #ak.types.RegularType can convert to a #ak.types.ListType
+
+      >>> a = ak.to_regular([[1, 2, 3], [4, 5, 6]])
+      >>> a.type.show()
+      2 * 3 * int64
+      >>> b = ak.enforce_type(a, "var * int64")
+      >>> b.type.show()
+      2 * var * int64
+
     - #ak.types.ListType can convert to a #ak.types.RegularType
+
+      >>> a = ak.Array([[1, 2, 3], [4, 5, 6]])
+      >>> a.type.show()
+      2 * var * int64
+      >>> b = ak.enforce_type(a, "3 * int64")
+      >>> b.type.show()
+      2 * 3 * int64
+
     - #ak.types.NumpyType can change primitive
-    - #ak.types.UnknownType can be converted to any other type, and be converted to from any other type.
+
+      >>> a = ak.Array([1, 2, 3])
+      >>> a.type.show()
+      3 * int64
+      >>> b = ak.enforce_type(a, "float32")
+      >>> b.type.show()
+      3 * float32
+
+    - #ak.types.UnknownType can be converted to any other type
+
+      >>> a = ak.Array([])
+      >>> a.type.show()
+      0 * unknown
+      >>> b = ak.enforce_type(a, "float32")
+      >>> b.type.show()
+      0 * float32
+
+      and can be converted to from any other type.
+
+      >>> a = ak.Array([1, 2, 3])
+      >>> a.type.show()
+      3 * int64
+      >>> b = ak.enforce_type(a, "?unknown")
+      >>> b.type.show()
+      3 * ?unknown
+
     The conversion rules outlined above are not data-dependent; the appropriate rule is chosen from the layout and the
     given type value. If the conversion is not possible given the layout data, e.g. a conversion from an irregular list
     to a regular type, it will fail.
@@ -203,9 +363,18 @@ def _type_is_enforceable(
     if layout.is_unknown:
         return _TypeEnforceableResult(is_enforceable=True, requires_packing=False)
 
+    elif isinstance(type_, ak.types.UnknownType):
+        return _TypeEnforceableResult(is_enforceable=False, requires_packing=False)
+
     elif layout.is_option:
         if isinstance(type_, ak.types.OptionType):
-            return _type_is_enforceable(layout.content, type_.content)
+            # Converting to an unknown inside an option!
+            if isinstance(type_.content, ak.types.UnknownType):
+                return _TypeEnforceableResult(
+                    is_enforceable=True, requires_packing=False
+                )
+            else:
+                return _type_is_enforceable(layout.content, type_.content)
         else:
             content_is_enforceable, content_needs_packed = _type_is_enforceable(
                 layout.content, type_
@@ -220,7 +389,11 @@ def _type_is_enforceable(
     # Here we *don't* have any layouts that are options, unknowns, or indexed
     # If we see an option, we are therefore *adding* one
     elif isinstance(type_, ak.types.OptionType):
-        return _type_is_enforceable(layout, type_.content)
+        # Converting to an unknown inside an option!
+        if isinstance(type_.content, ak.types.UnknownType):
+            return _TypeEnforceableResult(is_enforceable=True, requires_packing=False)
+        else:
+            return _type_is_enforceable(layout, type_.content)
 
     elif layout.is_union:
         # If the target is a union type, then we have to determine the solution for e.g.
@@ -460,7 +633,14 @@ def _recurse_unknown_any(
 ) -> ak.contents.Content:
     type_form = ak.forms.from_type(type_)
     return type_form.length_zero_array(highlevel=False).copy(
-        parameters=type_.parameters
+        parameters=type_._parameters
+    )
+
+
+def _recurse_any_unknown(layout: ak.contents.Content, type_: ak.types.UnknownType):
+    raise TypeError(
+        "cannot convert non-EmptyArray layouts to a bare UnknownType. "
+        "To introduce an UnknownType, it must be wrapped in an OptionType"
     )
 
 
@@ -473,33 +653,42 @@ def _recurse_option_any(
 ) -> ak.contents.Content:
     # option → option (no change)
     if isinstance(type_, ak.types.OptionType):
-        # Check that we can build the content
-        content_enforceable = _type_is_enforceable(layout.content, type_.content)
-        if content_enforceable.requires_packing:
-            # If so, convert to packed so that any non-referenced content items are trimmed
-            # This is required so that unused union items are seen to be safe to project out later
-            # We don't use to_packed(), as it recurses
-            index_nplike = layout.backend.index_nplike
-            new_index = index_nplike.empty(layout.length, dtype=np.int64)
-
-            is_none = layout.mask_as_bool(False)
-            num_none = index_nplike.count_nonzero(is_none)
-
-            new_index[is_none] = -1
-            new_index[~is_none] = index_nplike.arange(
-                layout.length - num_none,
-                dtype=new_index.dtype,
-            )
+        # Converting to an unknown inside an option!
+        if isinstance(type_.content, ak.types.UnknownType):
             return ak.contents.IndexedOptionArray(
-                ak.index.Index64(new_index, nplike=index_nplike),
-                _enforce_type(layout.project(), type_.content),
-                parameters=layout._parameters,
+                ak.index.Index64(layout.backend.index_nplike.full(layout.length, -1)),
+                ak.forms.from_type(type_.content).length_zero_array(
+                    backend=layout.backend, highlevel=False
+                ),
             )
         else:
-            return layout.copy(
-                content=_enforce_type(layout.content, type_.content),
-                parameters=type_.parameters,
-            )
+            # Check that we can build the content
+            content_enforceable = _type_is_enforceable(layout.content, type_.content)
+            if content_enforceable.requires_packing:
+                # If so, convert to packed so that any non-referenced content items are trimmed
+                # This is required so that unused union items are seen to be safe to project out later
+                # We don't use to_packed(), as it recurses
+                index_nplike = layout.backend.index_nplike
+                new_index = index_nplike.empty(layout.length, dtype=np.int64)
+
+                is_none = layout.mask_as_bool(False)
+                num_none = index_nplike.count_nonzero(is_none)
+
+                new_index[is_none] = -1
+                new_index[~is_none] = index_nplike.arange(
+                    layout.length - num_none,
+                    dtype=new_index.dtype,
+                )
+                return ak.contents.IndexedOptionArray(
+                    ak.index.Index64(new_index, nplike=index_nplike),
+                    _enforce_type(layout.project(), type_.content),
+                    parameters=layout._parameters,
+                )
+            else:
+                return layout.copy(
+                    content=_enforce_type(layout.content, type_.content),
+                    parameters=type_._parameters,
+                )
 
     # drop option!
     else:
@@ -530,9 +719,18 @@ def _recurse_option_any(
 def _recurse_any_option(
     layout: ak.contents.Content, type_: ak.types.OptionType
 ) -> ak.contents.Content:
-    return ak.contents.UnmaskedArray(
-        _enforce_type(layout, type_.content), parameters=type_.parameters
-    )
+    # Converting to an unknown inside an option!
+    if isinstance(type_.content, ak.types.UnknownType):
+        return ak.contents.IndexedOptionArray(
+            ak.index.Index64(layout.backend.index_nplike.full(layout.length, -1)),
+            ak.forms.from_type(type_.content).length_zero_array(
+                backend=layout.backend, highlevel=False
+            ),
+        )
+    else:
+        return ak.contents.UnmaskedArray(
+            _enforce_type(layout, type_.content), parameters=type_._parameters
+        )
 
 
 def _recurse_union_any(
@@ -598,7 +796,7 @@ def _recurse_union_union(
                 for t in missing_types
             ]
         )
-        return layout.copy(contents=contents, parameters=type_.parameters)
+        return layout.copy(contents=contents, parameters=type_._parameters)
 
     # Otherwise, we assume that we're projecting out one (or more) of our contents
     # Assume here that we have a *subset* of the layout, i.e layout is {A, B, C, D, ...}
@@ -666,7 +864,7 @@ def _recurse_union_union(
         return layout.copy(
             tags=layout_tags,
             contents=contents,
-            parameters=type_.parameters,
+            parameters=type_._parameters,
         )
 
     # Type and layout have same number of contents. Up-to *one* content can differ
@@ -689,7 +887,7 @@ def _recurse_union_union(
                 ]
                 return layout.copy(
                     contents=contents,
-                    parameters=type_.parameters,
+                    parameters=type_._parameters,
                 )
             # Single content differs, we can convert by position
             elif n_matching == len(type_.contents) - 1:
@@ -739,7 +937,7 @@ def _recurse_union_union(
                 return layout.copy(
                     index=index,
                     contents=next_contents,
-                    parameters=type_.parameters,
+                    parameters=type_._parameters,
                 )
             else:
                 raise TypeError(
@@ -782,8 +980,8 @@ def _recurse_union_non_union(
                 break
         else:
             raise TypeError(
-                f"UnionArray(s) can only be converted into {type_} if it is compatible, but no "
-                "compatible content as found"
+                f"UnionArray(s) can only be converted into {type_} if it has the same type, "
+                f"but no content with type {type_} was found"
             )
 
         # Require that we are the only content
@@ -831,7 +1029,7 @@ def _recurse_any_union(
                 _enforce_type(layout, content_type),
                 *other_contents,
             ],
-            parameters=type_.parameters,
+            parameters=type_._parameters,
         )
 
     raise TypeError(
@@ -852,14 +1050,14 @@ def _recurse_regular_any(
 
         return layout.copy(
             content=_enforce_type(layout.content, type_.content),
-            parameters=type_.parameters,
+            parameters=type_._parameters,
         )
 
     elif isinstance(type_, ak.types.ListType):
         layout_list = layout.to_ListOffsetArray64(True)
         return layout_list.copy(
             content=_enforce_type(layout.content, type_.content),
-            parameters=type_.parameters,
+            parameters=type_._parameters,
         )
 
     else:
@@ -886,7 +1084,7 @@ def _recurse_list_any(
             return layout_regular.copy(
                 # The result of `to_RegularArray` should already be packed
                 content=_enforce_type(layout_regular.content, type_.content),
-                parameters=type_.parameters,
+                parameters=type_._parameters,
             )
 
         else:
@@ -903,13 +1101,13 @@ def _recurse_list_any(
             layout = layout[: layout.offsets[-1]]
             return layout.copy(
                 content=_enforce_type(layout.content, type_.content),
-                parameters=type_.parameters,
+                parameters=type_._parameters,
             )
         else:
             # Don't need to pack the content
             return layout.copy(
                 content=_enforce_type(layout.content, type_.content),
-                parameters=type_.parameters,
+                parameters=type_._parameters,
             )
 
     else:
@@ -932,7 +1130,7 @@ def _recurse_numpy_any(
             layout.copy(parameters=None),
             to=primitive_to_dtype(type_.primitive),
             highlevel=False,
-        ).copy(parameters=type_.parameters)
+        ).copy(parameters=type_._parameters)
 
     else:
         assert len(layout.shape) > 0
@@ -958,11 +1156,11 @@ def _recurse_record_any(
                     )
                 # Append new contents
                 next_contents.append(
-                    ak.contents.IndexedOptionArray.simplified(
+                    ak.contents.IndexedOptionArray(
                         ak.index.Index64(
                             layout.backend.index_nplike.full(layout.length, -1)
                         ),
-                        ak.forms.from_type(next_type).length_zero_array(
+                        ak.forms.from_type(next_type.content).length_zero_array(
                             backend=layout.backend, highlevel=False
                         ),
                     )
@@ -971,7 +1169,7 @@ def _recurse_record_any(
             return layout.copy(
                 fields=None,
                 contents=next_contents,
-                parameters=type_.parameters,
+                parameters=type_._parameters,
             )
 
         elif not (type_.is_tuple or layout.is_tuple):
@@ -998,11 +1196,11 @@ def _recurse_record_any(
                     )
                 # Append new contents
                 next_contents.append(
-                    ak.contents.IndexedOptionArray.simplified(
+                    ak.contents.IndexedOptionArray(
                         ak.index.Index64(
                             layout.backend.index_nplike.full(layout.length, -1)
                         ),
-                        ak.forms.from_type(field_type).length_zero_array(
+                        ak.forms.from_type(field_type.content).length_zero_array(
                             backend=layout.backend, highlevel=False
                         ),
                     )
@@ -1011,7 +1209,7 @@ def _recurse_record_any(
             return layout.copy(
                 fields=next_fields,
                 contents=next_contents,
-                parameters=type_.parameters,
+                parameters=type_._parameters,
             )
 
         else:
@@ -1037,9 +1235,11 @@ def _enforce_type(
     calling `recurse` is a type-only program, whilst keeping the conversion logic
     adjacent to the type check logic.
     """
-
     if layout.is_unknown:
         return _recurse_unknown_any(layout, type_)
+
+    elif isinstance(type_, ak.types.UnknownType):
+        return _recurse_any_unknown(layout, type_)
 
     elif layout.is_option:
         return _recurse_option_any(layout, type_)
