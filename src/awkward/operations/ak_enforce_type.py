@@ -79,6 +79,34 @@ def enforce_type(
         return _impl(array, type, highlevel, behavior)
 
 
+def _impl(array, type_, highlevel, behavior):
+    layout = ak.to_layout(array, allow_record=True)
+
+    if isinstance(type_, str):
+        type_ = ak.types.from_datashape(type_, highlevel=False)
+
+    if isinstance(type_, (ak.types.ArrayType, ak.types.ScalarType)):
+        raise TypeError(
+            "High-level type objects are not supported by this function. Instead, "
+            "a low-level type object (instance of ak.types.Type) should be used. "
+            "If you are using a high-level type `type` from another array (e.g. using `array.type`), "
+            "then the low-level type object can be found under `type.content`"
+        )
+
+    # Ensure we re-wrap records!
+    if isinstance(layout, ak.record.Record):
+        out = ak.record.Record(_enforce_type(layout.array, type_), layout.at)
+    else:
+        out = _enforce_type(layout, type_)
+
+    return wrap_layout(
+        out,
+        like=array,
+        behavior=behavior,
+        highlevel=highlevel,
+    )
+
+
 # TODO: move this if it ends up being useful elsewhere
 def _layout_has_type(layout: ak.contents.Content, type_: ak.types.Type) -> bool:
     """
@@ -1043,31 +1071,3 @@ def _enforce_type(
         return _recurse_record_any(layout, type_)
     else:
         raise NotImplementedError(type(layout), type_)
-
-
-def _impl(array, type_, highlevel, behavior):
-    layout = ak.to_layout(array, allow_record=True)
-
-    if isinstance(type_, str):
-        type_ = ak.types.from_datashape(type_, highlevel=False)
-
-    if isinstance(type_, (ak.types.ArrayType, ak.types.ScalarType)):
-        raise TypeError(
-            "High-level type objects are not supported by this function. Instead, "
-            "a low-level type object (instance of ak.types.Type) should be used. "
-            "If you are using a high-level type `type` from another array (e.g. using `array.type`), "
-            "then the low-level type object can be found under `type.content`"
-        )
-
-    # Ensure we re-wrap records!
-    if isinstance(layout, ak.record.Record):
-        out = ak.record.Record(_enforce_type(layout.array, type_), layout.at)
-    else:
-        out = _enforce_type(layout, type_)
-
-    return wrap_layout(
-        out,
-        like=array,
-        behavior=behavior,
-        highlevel=highlevel,
-    )
