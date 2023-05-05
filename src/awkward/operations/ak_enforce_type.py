@@ -583,12 +583,17 @@ def _type_is_enforceable(
                 )
 
             elif not (type_.is_tuple or layout.is_tuple):
-                type_fields = frozenset(type_.fields)
                 layout_fields = frozenset(layout._fields)
 
                 # Compute existing and new fields
-                existing_fields = list(type_fields & layout_fields)
-                new_fields = list(type_fields - layout_fields)
+                # Use lists to preserve type order
+                existing_fields = []
+                new_fields = []
+                for field in type_.fields:
+                    if field in layout_fields:
+                        existing_fields.append(field)
+                    else:
+                        new_fields.append(field)
 
                 # Recurse into shared contents
                 contents_enforceable = [
@@ -782,10 +787,9 @@ def _recurse_union_union(
                 "UnionArray(s) can currently only be converted into UnionArray(s) with a greater number contents if the "
                 "layout contents are equal to some permutation of the type contents "
             )
-
+        ix_perm_contents_set = frozenset(ix_perm_contents)
         missing_types = [
-            type_.contents[j]
-            for j in (frozenset(ix_contents) - frozenset(ix_perm_contents))
+            type_.contents[j] for j in ix_contents if j not in ix_perm_contents_set
         ]
 
         # We only need to recurse here to enable parameter changes
@@ -1179,12 +1183,17 @@ def _recurse_record_any(
             )
 
         elif not (type_.is_tuple or layout.is_tuple):
-            type_fields = frozenset(type_.fields)
             layout_fields = frozenset(layout._fields)
 
             # Compute existing and new fields
-            existing_fields = list(type_fields & layout_fields)
-            new_fields = list(type_fields - layout_fields)
+            # Use lists to preserve type order
+            existing_fields = []
+            new_fields = []
+            for field in type_.fields:
+                if field in layout_fields:
+                    existing_fields.append(field)
+                else:
+                    new_fields.append(field)
             next_fields = existing_fields + new_fields
 
             # Recurse into shared contents
@@ -1198,7 +1207,7 @@ def _recurse_record_any(
                 # Added types must be options, so that they can be all-None
                 if not isinstance(field_type, ak.types.OptionType):
                     raise TypeError(
-                        "can only add new slots to a tuple if they are option types"
+                        "can only add new fields to a record if they are option types"
                     )
                 # Append new contents
                 next_contents.append(
