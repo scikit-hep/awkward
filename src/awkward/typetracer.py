@@ -31,9 +31,9 @@ def empty_if_typetracer(array: T) -> T:
 
     if layout.backend is typetracer_backend:
         layout._touch_data(True)
-        return layout.form.length_zero_array(behavior=behavior)
-    else:
-        return wrap_layout(layout, behavior=behavior)
+        layout = layout.form.length_zero_array(highlevel=False)
+
+    return wrap_layout(layout, behavior=behavior)
 
 
 def _attach_report(
