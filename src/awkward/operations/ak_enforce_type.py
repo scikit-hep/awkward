@@ -548,10 +548,16 @@ def _type_is_enforceable(
                     is_enforceable=False, requires_packing=False
                 )
             type_ = type_.content
-        return _TypeEnforceableResult(
-            is_enforceable=isinstance(type_, ak.types.NumpyType),
-            requires_packing=True,
-        )
+        if isinstance(type_, ak.types.NumpyType):
+            return _TypeEnforceableResult(
+                is_enforceable=True,
+                requires_packing=primitive_to_dtype(type_.primitive) != layout.dtype,
+            )
+        else:
+            return _TypeEnforceableResult(
+                is_enforceable=False,
+                requires_packing=False,
+            )
 
     elif layout.is_record:
         if isinstance(type_, ak.types.RecordType):
@@ -1094,7 +1100,7 @@ def _recurse_list_any(
             )
 
     elif isinstance(type_, ak.types.ListType):
-        content_enforceable = _type_is_enforceable(layout.content, type_)
+        content_enforceable = _type_is_enforceable(layout.content, type_.content)
         if content_enforceable.requires_packing:
             # Need to pack the content!
             layout = layout.to_ListOffsetArray64(True)
