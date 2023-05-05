@@ -692,3 +692,50 @@ def test_single_record():
             ["x"],
         ),
     )
+
+
+def test_indexed():
+    # Non-packing (because dtype hasn't changed)
+    result = ak.enforce_type(
+        ak.contents.IndexedArray(
+            ak.index.Index64([0, 2]),
+            ak.contents.ListOffsetArray(
+                ak.index.Index64([0, 3, 6, 9]),
+                ak.contents.NumpyArray(numpy.arange(9, dtype=numpy.int64)),
+            ),
+        ),
+        ak.types.from_datashape(
+            'var * int64[parameters={"key": "value"}]', highlevel=False
+        ),
+    )
+    assert result.layout.is_equal_to(
+        ak.contents.IndexedArray(
+            ak.index.Index64([0, 2]),
+            ak.contents.ListOffsetArray(
+                ak.index.Index(numpy.array([0, 3, 6, 9], dtype=numpy.int64)),
+                ak.contents.NumpyArray(
+                    numpy.array([0, 1, 2, 3, 4, 5, 6, 7, 8], dtype=numpy.int64),
+                    parameters={"key": "value"},
+                ),
+            ),
+        )
+    )
+    # Packing
+    result = ak.enforce_type(
+        ak.contents.IndexedArray(
+            ak.index.Index64([0, 2]),
+            ak.contents.ListOffsetArray(
+                ak.index.Index64([0, 3, 6, 9]),
+                ak.contents.NumpyArray(numpy.arange(9, dtype=numpy.int64)),
+            ),
+        ),
+        ak.types.from_datashape("var * float32", highlevel=False),
+    )
+    assert result.layout.is_equal_to(
+        ak.contents.ListOffsetArray(
+            ak.index.Index64([0, 3, 6]),
+            ak.contents.NumpyArray(
+                numpy.array([0, 1, 2, 6, 7, 8], dtype=numpy.float32)
+            ),
+        )
+    )
