@@ -17,6 +17,9 @@ class LayoutBuilder:
         self._content = content
         self._parameters = parameters
 
+    # def get_item(self) -> builder
+    #     ...
+
     @property
     def type(self):
         return self._type({})
@@ -34,15 +37,18 @@ class LayoutBuilder:
     def is_valid(self, error: str):
         return self._content.is_valid(error)
 
-    def snapshot(self, *, highlevel=True, behavior=None) -> ArrayLike:
-        return self._content.snapshot()
+    # def snapshot(self, *, highlevel=True, behavior=None) -> ArrayLike:
+    #     return self._content.snapshot()
 
     def _type(self, typestrs):
         raise NotImplementedError
 
 
+########## Numpy ############################################################
+
+
 @final
-class NumpyBuilder(LayoutBuilder):
+class Numpy(LayoutBuilder):
     def __init__(self, dtype, *, parameters=None, initial=1024, resize=8.0):
         self._dtype = dtype
         self._data = GrowableBuffer(dtype=dtype, initial=initial, resize=resize)
@@ -55,10 +61,11 @@ class NumpyBuilder(LayoutBuilder):
         out._dtype = data.dtype
         out._data = data  # GrowableBuffer(dtype=dtype, initial=initial, resize=resize)
         out._parameters = ""  # FIXME: parameters?
+        out._id = 0
         return out
 
     def __repr__(self):
-        return f"<NumpyBuilder of {self.dtype!r} with {self.length} items>"
+        return f"<Numpy of {self.dtype!r} with {self._length} items>"
 
     def _type(self, typestrs):
         ...
@@ -68,11 +75,23 @@ class NumpyBuilder(LayoutBuilder):
         return self._dtype
 
     @property
-    def length(self):
+    def _length(self):
         return len(self._data)
 
     def __len__(self):
-        return self.length
+        return self._length
+
+    @property
+    def id(self):
+        return self._id
+
+    @id.setter
+    def id(self, id: int):
+        self._id = id
+        id += 1
+        return id
+
+    # FIXME: LayoutBuilder.id = (next_id := LayoutBuilder.id)
 
     def append(self, x):
         self._data.append(x)
@@ -82,10 +101,6 @@ class NumpyBuilder(LayoutBuilder):
 
     def parameters(self):
         return self._parameters
-
-    def set_id(self, id: int):
-        self._id = id
-        id += 1
 
     def clear(self):
         self._data.clear()
@@ -98,23 +113,29 @@ class NumpyBuilder(LayoutBuilder):
         Converts the currently accumulated data into an #ak.Array.
         """
         # FIXME: Yes, no numba
+        # return ak.Array(ak.contents.NumpyArray(
+        #     self._data.snapshot(),
+        #     parameters = self.parameters,
+        # ))
+
         return ak.from_buffers(
-            self.form(), self.length, {"node0-data": self._data.snapshot()}
+            self.form(), self._length, {f"node{self.id}-data": self._data.snapshot()}
         )
 
     def form(self):
         # FIXME: no numba
+        form_key = f"node{self.id}"
         params = ""
         if self._parameters is not None:
             params = (
                 "" if self._parameters == "" else f", parameters: {self._parameters}"
             )
-        return f'{{"class": "NumpyArray", "primitive": "{ak.types.numpytype.dtype_to_primitive(self._data.dtype)}", "form_key": "node0"{params}}}'
+        return f'{{"class": "NumpyArray", "primitive": "{ak.types.numpytype.dtype_to_primitive(self._data.dtype)}", "form_key": "{form_key}"{params}}}'
 
 
-class NumpyBuilderType(numba.types.Type):
+class NumpyType(numba.types.Type):
     def __init__(self, dtype):
-        super().__init__(name=f"ak.NumpyBuilder({dtype})")
+        super().__init__(name=f"ak.numba.lb.Numpy({dtype})")
         self._dtype = dtype
 
     @property
@@ -134,13 +155,13 @@ class NumpyBuilderType(numba.types.Type):
         return numba.types.float64
 
 
-@numba.extending.typeof_impl.register(NumpyBuilder)
-def typeof_NumpyBuilder(val, c):
-    return NumpyBuilderType(numba.from_dtype(val.dtype))
+@numba.extending.typeof_impl.register(Numpy)
+def typeof_Numpy(val, c):
+    return NumpyType(numba.from_dtype(val.dtype))
 
 
-@numba.extending.register_model(NumpyBuilderType)
-class NumpyBuilderModel(numba.extending.models.StructModel):
+@numba.extending.register_model(NumpyType)
+class NumpyModel(numba.extending.models.StructModel):
     def __init__(self, dmm, fe_type):
         members = [
             ("data", fe_type.data),
@@ -149,19 +170,19 @@ class NumpyBuilderModel(numba.extending.models.StructModel):
 
 
 for member in ("data",):
-    numba.extending.make_attribute_wrapper(NumpyBuilderType, member, "_" + member)
+    numba.extending.make_attribute_wrapper(NumpyType, member, "_" + member)
 
 
-@numba.extending.overload_attribute(NumpyBuilderType, "dtype")
-def NumpyBuilderType_dtype(builder):
+@numba.extending.overload_attribute(NumpyType, "dtype")
+def NumpyType_dtype(builder):
     def getter(builder):
         return builder.dtype
 
     return getter
 
 
-@numba.extending.unbox(NumpyBuilderType)
-def NumpyBuilderType_unbox(typ, obj, c):
+@numba.extending.unbox(NumpyType)
+def NumpyType_unbox(typ, obj, c):
     # get PyObjects
     data_obj = c.pyapi.object_getattr_string(obj, "_data")
 
@@ -177,11 +198,11 @@ def NumpyBuilderType_unbox(typ, obj, c):
     return numba.extending.NativeValue(out._getvalue(), is_error=is_error)
 
 
-@numba.extending.box(NumpyBuilderType)
-def NumpyBuilderType_box(typ, val, c):
-    # get PyObject of the NumpyBuilder class
-    NumpyBuilder_obj = c.pyapi.unserialize(c.pyapi.serialize_object(NumpyBuilder))
-    from_data_obj = c.pyapi.object_getattr_string(NumpyBuilder_obj, "_from_buffer")
+@numba.extending.box(NumpyType)
+def NumpyType_box(typ, val, c):
+    # get PyObject of the Numpy class
+    Numpy_obj = c.pyapi.unserialize(c.pyapi.serialize_object(Numpy))
+    from_data_obj = c.pyapi.object_getattr_string(Numpy_obj, "_from_buffer")
 
     builder = numba.core.cgutils.create_struct_proxy(typ)(
         c.context, c.builder, value=val
@@ -191,7 +212,7 @@ def NumpyBuilderType_box(typ, val, c):
     out = c.pyapi.call_function_objargs(from_data_obj, (data_obj,))
 
     # decref PyObjects
-    c.pyapi.decref(NumpyBuilder_obj)
+    c.pyapi.decref(Numpy_obj)
     c.pyapi.decref(from_data_obj)
 
     c.pyapi.decref(data_obj)
@@ -204,18 +225,18 @@ def _from_buffer():
 
 
 @numba.extending.type_callable(_from_buffer)
-def NumpyBuilder_from_buffer_typer(context):
+def Numpy_from_buffer_typer(context):
     def typer(data):
         if isinstance(data, GrowableBufferType) and isinstance(
             data.dtype, numba.types.Array
         ):
-            return NumpyBuilderType(data.dtype.dtype)
+            return NumpyType(data.dtype.dtype)
 
     return typer
 
 
 @numba.extending.lower_builtin(_from_buffer, GrowableBufferType)
-def NumpyBuilder_from_buffer_impl(context, builder, sig, args):
+def Numpy_from_buffer_impl(context, builder, sig, args):
     out = numba.core.cgutils.create_struct_proxy(sig.return_type)(context, builder)
     out.data = args
 
@@ -225,8 +246,8 @@ def NumpyBuilder_from_buffer_impl(context, builder, sig, args):
     return out._getvalue()
 
 
-@numba.extending.overload(NumpyBuilder)
-def NumpyBuilder_ctor(dtype, parameters=None, initial=1024, resize=8.0):
+@numba.extending.overload(Numpy)
+def Numpy_ctor(dtype, parameters=None, initial=1024, resize=8.0):
     def ctor_impl(dtype, parameters=None, initial=1024, resize=8.0):
         data = GrowableBuffer(dtype, initial, resize)
         return _from_buffer(data)
@@ -234,8 +255,8 @@ def NumpyBuilder_ctor(dtype, parameters=None, initial=1024, resize=8.0):
     return ctor_impl
 
 
-@numba.extending.overload_method(NumpyBuilderType, "_length_get", inline="always")
-def NumpyBuilder_length(builder):
+@numba.extending.overload_method(NumpyType, "_length_get", inline="always")
+def Numpy_length(builder):
     def getter(builder):
         return builder._data._length_pos[0]
 
@@ -243,8 +264,8 @@ def NumpyBuilder_length(builder):
 
 
 @numba.extending.overload(len)
-def NumpyBuilderType_len(builder):
-    if isinstance(builder, NumpyBuilderType):
+def NumpyType_len(builder):
+    if isinstance(builder, NumpyType):
 
         def len_impl(builder):
             return builder._length_get()
@@ -252,38 +273,60 @@ def NumpyBuilderType_len(builder):
         return len_impl
 
 
-@numba.extending.overload_method(NumpyBuilderType, "append")
-def NumpyBuilder_append(builder, datum):
+@numba.extending.overload_method(NumpyType, "append")
+def Numpy_append(builder, datum):
     def append(builder, datum):
         builder._data.append(datum)
 
     return append
 
 
-@numba.extending.overload_method(NumpyBuilderType, "extend")
-def NumpyBuilder_extend(builder, data):
+@numba.extending.overload_method(NumpyType, "extend")
+def Numpy_extend(builder, data):
     def extend(builder, data):
         builder._data.extend(data)
 
     return extend
 
 
-@numba.extending.overload_method(NumpyBuilderType, "snapshot")
-def NumpyBuilder_snapshot(builder):
+@numba.extending.overload_method(NumpyType, "snapshot")
+def Numpy_snapshot(builder):
     def snapshot(builder):
         return builder._data.snapshot()
 
     return snapshot
 
 
+########## Empty ############################################################
+
+
 @final
-class EmptyBuilder(LayoutBuilder):
+class Empty(LayoutBuilder):
     def __init__(self, *, parameters=None):
         self._parameters = parameters
         self._id = 0
 
+    @classmethod
+    def _from_buffer(cls):
+        out = cls.__new__(cls)
+        out._parameters = ""  # FIXME: parameters?
+        return out
+
     def __repr__(self):
-        return f"<EmptyBuilder with {self.length} items>"
+        return f"<Empty with {self.length} items>"
+
+    def _type(self, typestrs):
+        ...
+
+    @property
+    def _length(self):
+        return 0
+
+    def length(self):
+        return self._length
+
+    def __len__(self):
+        return self._length
 
     def parameters(self):
         return self._parameters
@@ -294,10 +337,6 @@ class EmptyBuilder(LayoutBuilder):
 
     def clear(self):
         pass
-
-    @property
-    def length(self):
-        return 0
 
     def is_valid(self, error: str):
         return True
@@ -311,35 +350,36 @@ class EmptyBuilder(LayoutBuilder):
         return f'{{"class": "EmptyArray"{params}}}'
 
     def snapshot(self) -> ArrayLike:
-        return ak.from_buffers(self.form(), self.length, {})
+        return ak.from_buffers(self.form(), len(self), {})
 
 
-class EmptyBuilderType(numba.types.Type):
+class EmptyType(numba.types.Type):
     def __init__(self):
-        super().__init__(name="ak.EmptyBuilder()")
-
-    @property
-    def parameters(self):
-        return numba.types.StringLiteral
+        super().__init__(name="ak.numba.lb.Empty()")
 
     @property
     def length(self):
-        return numba.types.float64
+        return numba.types.int64
 
 
-@numba.extending.typeof_impl.register(EmptyBuilder)
-def typeof_EmptyBuilder(val, c):
-    return EmptyBuilderType()
+@numba.extending.typeof_impl.register(Empty)
+def typeof_Empty(val, c):
+    return EmptyType()
 
 
-@numba.extending.register_model(EmptyBuilderType)
-class EmptyBuilderModel(numba.extending.models.StructModel):
+@numba.extending.register_model(EmptyType)
+class EmptyModel(numba.extending.models.StructModel):
     def __init__(self, dmm, fe_type):
-        super().__init__(dmm, fe_type, [])
+        members = [("length", fe_type.length)]
+        super().__init__(dmm, fe_type, members)
 
 
-@numba.extending.unbox(EmptyBuilderType)
-def EmptyBuilderType_unbox(typ, obj, c):
+for member in ("length",):
+    numba.extending.make_attribute_wrapper(EmptyType, member, "_" + member)
+
+
+@numba.extending.unbox(EmptyType)
+def EmptyType_unbox(typ, obj, c):
     # fill the lowered model
     out = numba.core.cgutils.create_struct_proxy(typ)(c.context, c.builder)
 
@@ -348,8 +388,62 @@ def EmptyBuilderType_unbox(typ, obj, c):
     return numba.extending.NativeValue(out._getvalue(), is_error=is_error)
 
 
+@numba.extending.box(EmptyType)
+def EmptyType_box(typ, val, c):
+    # get PyObject of the Empty class
+    Empty_obj = c.pyapi.unserialize(c.pyapi.serialize_object(Empty))
+    from_data_obj = c.pyapi.object_getattr_string(Empty_obj, "_from_buffer")
+
+    empty = numba.core.cgutils.create_struct_proxy(typ)(c.context, c.builder, value=val)
+    out = c.pyapi.call_function_objargs(from_data_obj, ())
+
+    # decref PyObjects
+    c.pyapi.decref(Empty_obj)
+    c.pyapi.decref(from_data_obj)
+
+    return out
+
+
+@numba.extending.overload(Empty)
+def Empty_ctor():
+    def ctor_impl():
+        return _from_data()
+
+    return ctor_impl
+
+
+@numba.extending.overload_method(EmptyType, "_length_get", inline="always")
+def Empty_length(builder):
+    def getter(builder):
+        return builder._length
+
+    return getter
+
+
+@numba.extending.overload_method(EmptyType, "snapshot")
+def Empty_snapshot(builder):
+    def snapshot(builder):
+        out = numpy.empty(0)
+        return out
+
+    return snapshot
+
+
+@numba.extending.overload(len)
+def Empty_len(builder):
+    if isinstance(builder, EmptyType):
+
+        def len_impl(builder):
+            return builder._length_get()
+
+        return len_impl
+
+
+########## ListOffset #########################################################
+
+
 @final
-class ListOffsetBuilder(LayoutBuilder):
+class ListOffset(LayoutBuilder):
     def __init__(self, dtype, content, *, parameters=None, initial=1024, resize=8.0):
         self._offsets = GrowableBuffer(dtype=dtype, initial=initial, resize=resize)
         self._offsets.append(0)
@@ -358,8 +452,9 @@ class ListOffsetBuilder(LayoutBuilder):
         self._id = 0
 
     def __repr__(self):
-        return f"<ListOffsetBuilder of {self._content!r} with {self.length} items>"
+        return f"<ListOffset of {self._content!r} with {self._length} items>"
 
+    @property
     def content(self):
         return self._content
 
@@ -367,7 +462,7 @@ class ListOffsetBuilder(LayoutBuilder):
         return self._content
 
     def end_list(self):
-        self._offsets.append(self._content.length())
+        self._offsets.append(self._content._length)
 
     def parameters(self):
         return self._parameters
@@ -383,12 +478,16 @@ class ListOffsetBuilder(LayoutBuilder):
         self._content.clear()
 
     @property
-    def length(self):
-        return self._offsets.length() - 1
+    def _length(self):
+        return self._offsets._length - 1
+
+    def __len__(self):
+        return self._length
 
     def is_valid(self, error: str):
-        if self._content.length() != self._offsets.last():
-            error = f"ListOffset node{self._id} has content length {self._content.length()} but last offset {self._offsets.last()}"
+        # FIXME: implement GrowableBuffer.last()
+        if len(self._content) != self._offsets._panels[-1][self._offsets._pos - 1]:
+            error = f"ListOffset node{self._id} has content length {len(self._content)} but last offset {self._offsets._panels[-1][self._offsets._pos]}"
             return False
         else:
             return self._content.is_valid(error)
@@ -403,27 +502,44 @@ class ListOffsetBuilder(LayoutBuilder):
 
     def form(self):
         params = "" if self._parameters == "" else f", parameters: {self._parameters}"
-        return f'{{"class": "ListOffsetArray", "offsets": "{self._offsets.index_form()}", "content": {self._content.form()}, "form_key": "node{self._id}"{params}}}'
+        return f'{{"class": "ListOffsetArray", "offsets": "{self._offsets.dtype}", "content": {self._content.form()}, "form_key": "node{self._id}"{params}}}'
+
+    def snapshot(self) -> ArrayLike:
+        """
+        Converts the currently accumulated data into an #ak.Array.
+        """
+        content = self._content.snapshot()
+
+        return ak.Array(
+            ak.contents.listoffsetarray.ListOffsetArray(
+                ak.index.Index(self._offsets.snapshot()),
+                content.layout,
+            )
+        )
+
+
+########## List ############################################################
 
 
 @final
-class ListBuilder(LayoutBuilder):
-    def __init__(self, PRIMITIVE, content, parameters):
-        self._starts = GrowableBuffer(PRIMITIVE)
-        self._stops = GrowableBuffer(PRIMITIVE)
+class List(LayoutBuilder):
+    def __init__(self, dtype, content, *, parameters=None, initial=1024, resize=8.0):
+        self._starts = GrowableBuffer(dtype=dtype, initial=initial, resize=resize)
+        self._stops = GrowableBuffer(dtype=dtype, initial=initial, resize=resize)
         self._content = content
         self._parameters = parameters
         self._id = 0
 
+    @property
     def content(self):
         return self._content
 
     def begin_list(self):
-        self._starts.append(self._content.length())
+        self._starts.append(self._content._length)
         return self._content
 
     def end_list(self):
-        self._stops.append(self._content.length())
+        self._stops.append(self._content._length)
 
     def parameters(self):
         return self._parameters
@@ -438,14 +554,18 @@ class ListBuilder(LayoutBuilder):
         self._stops.clear()
         self._content.clear()
 
-    def length(self):
-        return self._starts.length()
+    @property
+    def _length(self):
+        return len(self._starts)
+
+    def __len__(self):
+        return self._length
 
     def is_valid(self, error: str):
-        if self._starts.length() != self._stops.length():
-            error = f"List node{self._id} has starts length {self._starts.length()} but stops length {self._stops.length()}"
-        elif self._stops.length() > 0 and self._content.length() != self._stops.last():
-            error = f"List node{self._id} has content length {self._content.length()} but last stops {self._stops.last()}"
+        if len(self._starts) != len(self._stops):
+            error = f"List node{self._id} has starts length {len(self._starts)} but stops length {len(self._stops)}"
+        elif len(self._stops) > 0 and len(self._content) != self._stops.last():
+            error = f"List node{self._id} has content length {len(self._content)} but last stops {self._stops.last()}"
             return False
         else:
             return self._content.is_valid(error)
@@ -464,16 +584,30 @@ class ListBuilder(LayoutBuilder):
         params = "" if self._parameters == "" else f", parameters: {self._parameters}"
         return f'{{"class": "ListArray", "starts": "{self._starts.index_form()}", "stops": "{self._stops.index_form()}", "content": {self._content.form()}, "form_key": "node{self._id}"{params}}}'
 
+    def snapshot(self) -> ArrayLike:
+        """
+        Converts the currently accumulated data into an #ak.Array.
+        """
+        return ak.contents.ListArray(
+            ak.index.Index(self._starts.snapshot()),
+            ak.index.Index(self._stops.snapshot()),
+            self._content.snapshot().layout,
+        )
+
+
+########## Regular ############################################################
+
 
 @final
-class RegularBuilder(LayoutBuilder):
-    def __init__(self, content, size, parameters):
+class Regular(LayoutBuilder):
+    def __init__(self, content, size, *, parameters=None):
         self._length = 0
         self._content = content
-        self.size_ = size
+        self._size = size
         self._parameters = parameters
         self._id = 0
 
+    @property
     def content(self):
         return self._content
 
@@ -497,9 +631,12 @@ class RegularBuilder(LayoutBuilder):
     def length(self):
         return self._length
 
+    def __len__(self):
+        return self._length
+
     def is_valid(self, error: str):
-        if self._content.length() != self._length * self.size_:
-            error = f"Regular node{self._id} has content length {self._content.length()}, but length {self._length} and size {self.size_}"
+        if self._content._length != self._length * self._size:
+            error = f"Regular node{self._id} has content length {self._content._length}, but length {self._length} and size {self._size}"
             return False
         else:
             return self._content.is_valid(error)
@@ -512,11 +649,23 @@ class RegularBuilder(LayoutBuilder):
 
     def form(self):
         params = "" if self._parameters == "" else f", parameters: {self._parameters}"
-        return f'{{"class": "RegularArray", "size": {self.size_}, "content": {self._content.form()}, "form_key": "node{self._id}"{params}}}'
+        return f'{{"class": "RegularArray", "size": {self._size}, "content": {self._content.form()}, "form_key": "node{self._id}"{params}}}'
+
+    def snapshot(self) -> ArrayLike:
+        """
+        Converts the currently accumulated data into an #ak.Array.
+        """
+        return ak.contents.RegularArray(
+            self._content.snapshot().layout,
+            self._size,
+        )
+
+
+########## Indexed ############################################################
 
 
 @final
-class IndexedBuilder(LayoutBuilder):
+class Indexed(LayoutBuilder):
     def __init__(self, PRIMITIVE, content, parameters):
         self.last_valid_ = -1
         self.index_ = GrowableBuffer(PRIMITIVE)
@@ -524,16 +673,17 @@ class IndexedBuilder(LayoutBuilder):
         self._parameters = parameters
         self._id = 0
 
+    @property
     def content(self):
         return self._content
 
     def append_index(self):
-        self.last_valid_ = self._content.length()
+        self.last_valid_ = self._content._length
         self.index_.append(self.last_valid_)
         return self._content
 
     def extend_index(self, size):
-        start = self._content.length()
+        start = self._content._length
         stop = start + size
         self.last_valid_ = stop - 1
         self.index_.extend(list(range(start, stop)), size)
@@ -553,7 +703,7 @@ class IndexedBuilder(LayoutBuilder):
         self._content.clear()
 
     def length(self):
-        return self.index_.length()
+        return self.index_._length()
 
     def is_valid(self, error: str):
         if self._content.length() != self.index_.length():
@@ -577,8 +727,11 @@ class IndexedBuilder(LayoutBuilder):
         return f'{{"class": "IndexedArray", "index": "{self.index_.index_form()}", "content": {self._content.form()}, "form_key": "node{self._id}"{params}}}'
 
 
+########## IndexedOption #######################################################
+
+
 @final
-class IndexedOptionBuilder(LayoutBuilder):
+class IndexedOption(LayoutBuilder):
     def __init__(self, PRIMITIVE, content, parameters):
         self.last_valid_ = -1
         self.index_ = GrowableBuffer(PRIMITIVE)
@@ -586,6 +739,7 @@ class IndexedOptionBuilder(LayoutBuilder):
         self._parameters = parameters
         self._id = 0
 
+    @property
     def content(self):
         return self._content
 
@@ -643,8 +797,11 @@ class IndexedOptionBuilder(LayoutBuilder):
         return f'{{"class": "IndexedOptionArray", "index": "{self.index_.index_form()}", "content": {self._content.form()}, "form_key": "node{self._id}"{params}}}'
 
 
+########## ByteMasked #########################################################
+
+
 @final
-class ByteMaskedBuilder(LayoutBuilder):
+class ByteMasked(LayoutBuilder):
     def __init__(self, content, valid_when, parameters):
         self._mask = GrowableBuffer("int8")
         self._content = content
@@ -652,6 +809,7 @@ class ByteMaskedBuilder(LayoutBuilder):
         self._parameters = parameters
         self._id = 0
 
+    @property
     def content(self):
         return self._content
 
@@ -691,7 +849,7 @@ class ByteMaskedBuilder(LayoutBuilder):
 
     def is_valid(self, error: str):
         if self._content.length() != self._mask.length():
-            error = f"ByteMasked node{self._id} has content length {self._content.length()} but mask length {self._stops.length()}"
+            error = f"ByteMasked node{self._id} has content length {self._content.length()} but mask length {len(self._stops)}"
             return False
         else:
             return self._content.is_valid(error)
@@ -709,8 +867,11 @@ class ByteMaskedBuilder(LayoutBuilder):
         return f'{{"class": "ByteMaskedArray", "mask": "{self._mask.index_form()}", "valid_when": {json.dumps(self._valid_when)}, "content": {self._content.form()}, "form_key": "node{self._id}"{params}}}'
 
 
+########## BitMasked #########################################################
+
+
 @final
-class BitMaskedBuilder(LayoutBuilder):
+class BitMasked(LayoutBuilder):
     def __init__(self, content, valid_when, lsb_order, parameters):
         self._mask = GrowableBuffer("uint8")
         self._content = content
@@ -748,6 +909,7 @@ class BitMaskedBuilder(LayoutBuilder):
         self._parameters = parameters
         self._id = 0
 
+    @property
     def content(self):
         return self._content
 
@@ -838,13 +1000,17 @@ class BitMaskedBuilder(LayoutBuilder):
         return f'{{"class": "BitMaskedArray", "mask": "{self._mask.index_form()}", "valid_when": {json.dumps(self._valid_when)}, "lsb_order": {json.dumps(self._lsb_order)}, "content": {self._content.form()}, "form_key": "node{self._id}"{params}}}'
 
 
+########## Unmasked #########################################################
+
+
 @final
-class UnmaskedBuilder(LayoutBuilder):
+class Unmasked(LayoutBuilder):
     def __init__(self, content, parameters):
         self._content = content
         self._parameters = parameters
         self._id = 0
 
+    @property
     def content(self):
         return self._content
 
@@ -882,6 +1048,9 @@ class UnmaskedBuilder(LayoutBuilder):
         return f'{{"class": "UnmaskedArray", "content": {self._content.form()}, "form_key": "node{self._id}"{params}}}'
 
 
+########## Record #########################################################
+
+
 class FieldPair:
     def __init__(self, name, content):
         self.name = name
@@ -889,7 +1058,7 @@ class FieldPair:
 
 
 @final
-class RecordBuilder(LayoutBuilder):
+class Record(LayoutBuilder):
     def __init__(self, field_pairs, *, parameters=None):
         assert len(field_pairs) != 0
         self._field_pairs = field_pairs
@@ -946,8 +1115,11 @@ class RecordBuilder(LayoutBuilder):
         return f'{{"class": "RecordArray", "contents": {{{pairs}}}, "form_key": "node{self._id}"{params}}}'
 
 
+########## Tuple #######################################################
+
+
 @final
-class TupleBuilder(LayoutBuilder):
+class Tuple(LayoutBuilder):
     def __init__(self, contents, parameters):
         assert len(contents) != 0
         self._contents = contents
@@ -1001,8 +1173,11 @@ class TupleBuilder(LayoutBuilder):
         return f'{{"class": "RecordArray", "contents": [{contents}], "form_key": "node{self._id}"{params}}}'
 
 
+########## EmptyRecord #######################################################
+
+
 @final
-class EmptyRecordBuilder(LayoutBuilder):
+class EmptyRecord(LayoutBuilder):
     def __init__(self, is_tuple, parameters):
         self._length = 0
         self._is_tuple = is_tuple
@@ -1044,8 +1219,11 @@ class EmptyRecordBuilder(LayoutBuilder):
             return f'{{"class": "RecordArray", "contents": {{}}, "form_key": "node{self._id}"{params}}}'
 
 
+########## Union #######################################################
+
+
 @final
-class UnionBuilder(LayoutBuilder):
+class Union(LayoutBuilder):
     def __init__(self, PRIMITIVE, contents, parameters):
         self.last_valid_index_ = [-1] * len(contents)
         self.tags_ = GrowableBuffer("int8")
@@ -1072,7 +1250,7 @@ class UnionBuilder(LayoutBuilder):
             content.set_id(id)
 
     def clear(self):
-        for tag in range(len(self.last_valid_index_)):
+        for tag, _value in self.last_valid_index_:
             self.last_valid_index_[tag] = -1
         self.tags_.clear()
         self.index_.clear()
@@ -1083,7 +1261,7 @@ class UnionBuilder(LayoutBuilder):
         return self.tags_.length()
 
     def is_valid(self, error: str):
-        for tag in range(len(self.last_valid_index_)):
+        for tag, _value in self.last_valid_index_:
             if self._contents[tag].length() != self.last_valid_index_[tag] + 1:
                 error = f"Union node{self._id} has content {tag} length {self._contents[tag].length()} but last valid index is {self.last_valid_index_[tag]}"
                 return False

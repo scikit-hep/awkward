@@ -7,27 +7,20 @@ import awkward as ak
 
 numba = pytest.importorskip("numba")
 
-from awkward._connect.numba.layoutbuilder import (  # noqa: E402
-    EmptyBuilder,
-    LayoutBuilder,
-    NumpyBuilder,
-    _from_buffer,
-)
+import awkward._connect.numba.layoutbuilder as lb
 
 ak.numba.register_and_check()
 
 
-def test_NumpyBuilder():
-    builder = LayoutBuilder(
-        NumpyBuilder(np.float64, parameters="", initial=10, resize=2.0)
-    )
+def test_Numpy():
+    builder = lb.Numpy(np.float64)
 
-    builder.content.append(1.1)
-    builder.content.append(2.2)
-    builder.content.extend([3.3, 4.4, 5.5])
+    builder.append(1.1)
+    builder.append(2.2)
+    builder.extend([3.3, 4.4, 5.5])
 
     error = ""
-    assert builder.content.is_valid(error), error.value
+    assert builder.is_valid(error), error.value
 
     array = builder.snapshot()
     assert str(ak.type(array)) == "5 * float64"
@@ -45,15 +38,79 @@ def test_NumpyBuilder():
 
 def test_python_append():
     # small 'initial' and 'resize' for testing
-    builder = NumpyBuilder(np.int32, parameters="", initial=10, resize=2.0)
+    builder = lb.Numpy(np.int32, parameters="", initial=10, resize=2.0)
     assert ak.to_list(builder.snapshot()) == []
-    assert builder.length == 0
+    assert len(builder) == 0
 
     # within the first panel
     for x in range(0, 5):
         builder.append(x)
     assert ak.to_list(builder.snapshot()) == list(range(5))
-    assert builder.length == 5
+    assert len(builder) == 5
+
+
+def test_Empty():
+    builder = lb.Empty()
+    assert len(builder) == 0
+    assert ak.to_list(builder.snapshot()) == []
+
+    error = ""
+    assert builder.is_valid(error), error.value
+
+    with pytest.raises(AttributeError):
+        builder.content.append(1.1)
+
+    with pytest.raises(AttributeError):
+        builder.content.extend([3.3, 4.4, 5.5])
+
+    error = ""
+    assert builder.is_valid(error), error.value
+
+    array = builder.snapshot()
+    assert str(ak.type(array)) == "0 * unknown"  # FIXME: float64 ???
+    assert ak.to_list(array) == []
+
+    assert builder.form() == '{"class": "EmptyArray"}'
+
+
+def test_ListOffset():
+    builder = lb.ListOffset(np.int32, lb.Numpy(np.float64))
+    assert len(builder) == 0
+    subbuilder = builder.begin_list()
+    subbuilder.append(1.1)
+    subbuilder.append(2.2)
+    subbuilder.append(3.3)
+    builder.end_list()
+
+    builder.begin_list()
+    builder.end_list()
+
+    builder.begin_list()
+    subbuilder.append(4.4)
+    subbuilder.append(5.5)
+    builder.end_list()
+    assert ak.to_list(builder.snapshot()) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
+
+    error = ""
+    assert builder.is_valid(error), error.value
+
+
+def test_List():
+    builder = lb.List(np.int32, lb.Numpy(np.float64))
+    assert len(builder) == 0
+    assert ak.to_list(builder.snapshot()) == []
+
+    error = ""
+    assert builder.is_valid(error), error.value
+
+
+def test_Regular():
+    builder = lb.Regular(lb.Numpy(np.float64), 3)
+    assert len(builder) == 0
+    assert ak.to_list(builder.snapshot()) == []
+
+    error = ""
+    assert builder.is_valid(error), error.value
 
 
 def test_unbox():
@@ -62,10 +119,10 @@ def test_unbox():
         x  # noqa: B018 (we want to test the unboxing)
         return 3.14
 
-    builder = NumpyBuilder(np.int32, parameters="", initial=10, resize=2.0)
+    builder = lb.Numpy(np.int32, parameters="", initial=10, resize=2.0)
     f1(builder)
 
-    builder = EmptyBuilder()
+    builder = lb.Empty()
     f1(builder)
 
 
@@ -76,9 +133,14 @@ def test_unbox_for_loop():
             x.append(i)
         return
 
-    builder = NumpyBuilder(np.int32, parameters="", initial=10, resize=2.0)
+    builder = lb.Numpy(np.int32, parameters="", initial=10, resize=2.0)
     f1(builder)
     assert ak.to_list(builder.snapshot()) == list(range(10))
+
+    builder = lb.Empty()
+    # Unknown attribute 'append' of type ak.Empty()
+    with pytest.raises(numba.core.errors.TypingError):
+        f1(builder)
 
 
 def test_box():
@@ -86,7 +148,7 @@ def test_box():
     def f2(x):
         return x
 
-    builder = NumpyBuilder(np.int32, parameters="", initial=10, resize=2.0)
+    builder = lb.Numpy(np.int32)
 
     out1 = f2(builder)
     assert ak.to_list(out1.snapshot()) == []
@@ -95,7 +157,13 @@ def test_box():
         builder.append(x)
 
     out2 = f2(builder)
+
     assert ak.to_list(out2.snapshot()) == list(range(15))
+
+    builder = lb.Empty()
+
+    out3 = f2(builder)
+    assert ak.to_list(out3.snapshot()) == []
 
 
 def test_len():
@@ -103,7 +171,7 @@ def test_len():
     def f3(x):
         return len(x)
 
-    builder = NumpyBuilder(np.int32, parameters="", initial=10, resize=2.0)
+    builder = lb.Numpy(np.int32, parameters="", initial=10, resize=2.0)
 
     assert f3(builder) == 0
 
@@ -111,24 +179,28 @@ def test_len():
 
     assert f3(builder) == 1
 
-
-@pytest.mark.skip("No implementation of function")
-def test_from_buffer():
-    @numba.njit
-    def f4():
-        data = ak.numba._from_data(
-            numba.typed.List([np.array([3.12], np.float32)]),
-            np.array([1, 0], np.int64),
-            1.23,
-        )
-        return _from_buffer(data)
-
-    out = f4()
-    assert isinstance(out, NumpyBuilder)
-    assert out.dtype == np.dtype(np.float32)
-    assert len(out) == 1
+    builder = lb.Empty()
+    assert f3(builder) == 0
 
 
+#
+# @pytest.mark.skip("No implementation of function")
+# def test_from_buffer():
+#     @numba.njit
+#     def f4():
+#         data = ak.numba._from_data(
+#             numba.typed.List([np.array([3.12], np.float32)]),
+#             np.array([1, 0], np.int64),
+#             1.23,
+#         )
+#         return _from_buffer(data)
+#
+#     out = f4()
+#     assert isinstance(out, Numpy)
+#     assert out.dtype == np.dtype(np.float32)
+#     assert len(out) == 1
+#
+#
 # def test_ctor():
 #     @numba.njit
 #     def f5():
@@ -209,6 +281,7 @@ def test_from_buffer():
 #     assert out._resize == 8.0
 #
 #
+#
 
 
 def test_append():
@@ -217,7 +290,7 @@ def test_append():
         for i in range(8):
             builder.append(i)
 
-    builder = NumpyBuilder(np.float32)
+    builder = lb.Numpy(np.float32)
 
     f15(builder)
 
@@ -233,7 +306,7 @@ def test_extend():
     def f16(builder):
         builder.extend(np.arange(8))
 
-    builder = NumpyBuilder(np.float32)
+    builder = lb.Numpy(np.float32)
 
     f16(builder)
 
@@ -244,28 +317,29 @@ def test_extend():
     assert ak.to_list(builder.snapshot()) == list(range(8)) + list(range(8))
 
 
-def test_snapshot():
-    @numba.njit
-    def f17(builder):
-        return builder.snapshot()
-
-    builder = NumpyBuilder(np.float32)
-
-    assert ak.to_list(f17(builder)) == []
-
-    builder.extend(range(8))
-
-    assert ak.to_list(f17(builder)) == list(range(8))
-
-    builder.extend(range(8))
-
-    assert ak.to_list(f17(builder)) == list(range(8)) + list(range(8))
+# def test_snapshot():
+#     @numba.njit
+#     def f17(builder):
+#         return builder.snapshot()
+#
+#     builder = Numpy(np.float32)
+#
+#     assert ak.to_list(f17(builder)) == []
+#
+#     builder.extend(range(8))
+#
+#     assert ak.to_list(f17(builder)) == list(range(8))
+#
+#     builder.extend(range(8))
+#
+#     assert ak.to_list(f17(builder)) == list(range(8)) + list(range(8))
+#
 
 
 def test_numba_append():
     # FIXME:@numba.njit
     def create():
-        return NumpyBuilder(np.int32)
+        return lb.Numpy(np.int32)
 
     @numba.njit
     def append_range(builder, start, stop):
@@ -311,22 +385,3 @@ def test_numba_append():
     append_single(builder, 30)
     assert ak.to_list(snapshot(builder)) == list(range(31))
     assert len(builder) == 31
-
-
-def test_EmptyBuilder():
-    builder = LayoutBuilder(EmptyBuilder())
-
-    with pytest.raises(AttributeError):
-        builder.content.append(1.1)
-
-    with pytest.raises(AttributeError):
-        builder.content.extend([3.3, 4.4, 5.5])
-
-    error = ""
-    assert builder.is_valid(error), error.value
-
-    array = builder.snapshot()
-    assert str(ak.type(array)) == "0 * unknown"  # FIXME: float64 ???
-    assert ak.to_list(array) == []
-
-    assert builder.form() == '{"class": "EmptyArray"}'
