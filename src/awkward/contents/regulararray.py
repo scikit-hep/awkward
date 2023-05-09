@@ -1206,19 +1206,27 @@ class RegularArray(Content):
     def _to_backend_array(self, allow_missing, backend):
         array_param = self.parameter("__array__")
         if array_param in {"bytestring", "string"}:
-            return backend.nplike.asarray(self.to_list())
+            # As our array-of-strings _may_ be empty, we should pass the dtype
+            dtype = np.str_ if array_param == "string" else np.bytes_
+            return backend.nplike.asarray(self.to_list(), dtype=dtype)
+        else:
+            out = self._content._to_backend_array(allow_missing, backend)
+            shape = (self._length, self._size) + out.shape[1:]
 
-        out = self._content._to_backend_array(allow_missing, backend)
-        shape = (self._length, self._size) + out.shape[1:]
-
-        # ShapeItem is a defined type, but some nplikes don't map onto the entire space; e.g.
-        # NumPy never has `None` shape items. We require that if a shape-item is used between nplikes
-        # they both be the same "known-shape-ness".
-        assert self._backend.index_nplike.known_data == self._backend.nplike.known_data
-        return self._backend.nplike.reshape(
-            out[: self._backend.nplike.shape_item_as_index(self._length * self._size)],
-            shape,
-        )
+            # ShapeItem is a defined type, but some nplikes don't map onto the entire space; e.g.
+            # NumPy never has `None` shape items. We require that if a shape-item is used between nplikes
+            # they both be the same "known-shape-ness".
+            assert (
+                self._backend.index_nplike.known_data == self._backend.nplike.known_data
+            )
+            return self._backend.nplike.reshape(
+                out[
+                    : self._backend.nplike.shape_item_as_index(
+                        self._length * self._size
+                    )
+                ],
+                shape,
+            )
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         assert self._backend.nplike.known_data

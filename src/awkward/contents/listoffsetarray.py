@@ -2004,9 +2004,11 @@ class ListOffsetArray(Content):
     def _to_backend_array(self, allow_missing, backend):
         array_param = self.parameter("__array__")
         if array_param in {"bytestring", "string"}:
-            return backend.nplike.asarray(self.to_list())
-
-        return self.to_RegularArray()._to_backend_array(allow_missing, backend)
+            # As our array-of-strings _may_ be empty, we should pass the dtype
+            dtype = np.str_ if array_param == "string" else np.bytes_
+            return backend.nplike.asarray(self.to_list(), dtype=dtype)
+        else:
+            return self.to_RegularArray()._to_backend_array(allow_missing, backend)
 
     def _remove_structure(self, backend, options):
         if (
