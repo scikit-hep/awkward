@@ -50,29 +50,29 @@ class LayoutBuilder:
 @final
 class Numpy(LayoutBuilder):
     def __init__(self, dtype, *, parameters=None, initial=1024, resize=8.0):
-        self._dtype = dtype
+        self._dtype = np.dtype(dtype)
         self._data = GrowableBuffer(dtype=dtype, initial=initial, resize=resize)
         self._parameters = parameters
         self._id = 0
 
     @classmethod
-    def _from_buffer(cls, data):
+    def _from_buffer(cls, dtype, data):
         out = cls.__new__(cls)
-        out._dtype = data.dtype
+        out._dtype = np.dtype(dtype)
         out._data = data  # GrowableBuffer(dtype=dtype, initial=initial, resize=resize)
         out._parameters = ""  # FIXME: parameters?
         out._id = 0
         return out
+
+    @property
+    def dtype(self):
+        return self._dtype
 
     def __repr__(self):
         return f"<Numpy of {self.dtype!r} with {self._length} items>"
 
     def _type(self, typestrs):
         ...
-
-    @property
-    def dtype(self):
-        return self._dtype
 
     @property
     def _length(self):
@@ -112,12 +112,6 @@ class Numpy(LayoutBuilder):
         """
         Converts the currently accumulated data into an #ak.Array.
         """
-        # FIXME: Yes, no numba
-        # return ak.Array(ak.contents.NumpyArray(
-        #     self._data.snapshot(),
-        #     parameters = self.parameters,
-        # ))
-
         return ak.from_buffers(
             self.form(), self._length, {f"node{self.id}-data": self._data.snapshot()}
         )
@@ -130,7 +124,7 @@ class Numpy(LayoutBuilder):
             params = (
                 "" if self._parameters == "" else f", parameters: {self._parameters}"
             )
-        return f'{{"class": "NumpyArray", "primitive": "{ak.types.numpytype.dtype_to_primitive(self._data.dtype)}", "form_key": "{form_key}"{params}}}'
+        return f'{{"class": "NumpyArray", "primitive": "{ak.types.numpytype.dtype_to_primitive(self.dtype)}", "form_key": "{form_key}"{params}}}'
 
 
 class NumpyType(numba.types.Type):
@@ -157,40 +151,48 @@ class NumpyType(numba.types.Type):
 
 @numba.extending.typeof_impl.register(Numpy)
 def typeof_Numpy(val, c):
-    return NumpyType(numba.from_dtype(val.dtype))
+    return NumpyType(numba.from_dtype(val._data.dtype))
 
 
 @numba.extending.register_model(NumpyType)
 class NumpyModel(numba.extending.models.StructModel):
     def __init__(self, dmm, fe_type):
         members = [
+            ("dtype", fe_type.dtype),
             ("data", fe_type.data),
         ]
         super().__init__(dmm, fe_type, members)
 
 
-for member in ("data",):
+for member in (
+    "dtype",
+    "data",
+):
     numba.extending.make_attribute_wrapper(NumpyType, member, "_" + member)
 
 
-@numba.extending.overload_attribute(NumpyType, "dtype")
-def NumpyType_dtype(builder):
-    def getter(builder):
-        return builder.dtype
-
-    return getter
+# @numba.extending.overload_attribute(NumpyType, "dtype")
+# def NumpyType_dtype(builder):
+#     def getter(builder):
+#         if isinstance(builder, numba.types.StringLiteral):
+#         return builder._data.dtype
+#
+#     return getter
 
 
 @numba.extending.unbox(NumpyType)
 def NumpyType_unbox(typ, obj, c):
     # get PyObjects
+    dtype_obj = c.pyapi.object_getattr_string(obj, "_dtype")
     data_obj = c.pyapi.object_getattr_string(obj, "_data")
 
     # fill the lowered model
     out = numba.core.cgutils.create_struct_proxy(typ)(c.context, c.builder)
+    out.dtype = c.pyapi.to_native_value(typ.dtype, data_obj).value
     out.data = c.pyapi.to_native_value(typ.data, data_obj).value
 
     # decref PyObjects
+    c.pyapi.decref(dtype_obj)
     c.pyapi.decref(data_obj)
 
     # return it or the exception
@@ -200,21 +202,29 @@ def NumpyType_unbox(typ, obj, c):
 
 @numba.extending.box(NumpyType)
 def NumpyType_box(typ, val, c):
-    # get PyObject of the Numpy class
+    # get PyObject of the Numpy class and _from_buffer constructor
     Numpy_obj = c.pyapi.unserialize(c.pyapi.serialize_object(Numpy))
-    from_data_obj = c.pyapi.object_getattr_string(Numpy_obj, "_from_buffer")
+    from_buffer_obj = c.pyapi.object_getattr_string(Numpy_obj, "_from_buffer")
 
     builder = numba.core.cgutils.create_struct_proxy(typ)(
         c.context, c.builder, value=val
     )
+    dtype_obj = c.pyapi.from_native_value(typ.dtype, builder.data, c.env_manager)
     data_obj = c.pyapi.from_native_value(typ.data, builder.data, c.env_manager)
 
-    out = c.pyapi.call_function_objargs(from_data_obj, (data_obj,))
+    out = c.pyapi.call_function_objargs(
+        from_buffer_obj,
+        (
+            dtype_obj,
+            data_obj,
+        ),
+    )
 
     # decref PyObjects
     c.pyapi.decref(Numpy_obj)
-    c.pyapi.decref(from_data_obj)
+    c.pyapi.decref(from_buffer_obj)
 
+    c.pyapi.decref(dtype_obj)
     c.pyapi.decref(data_obj)
 
     return out
@@ -226,31 +236,42 @@ def _from_buffer():
 
 @numba.extending.type_callable(_from_buffer)
 def Numpy_from_buffer_typer(context):
-    def typer(data):
-        if isinstance(data, GrowableBufferType) and isinstance(
-            data.dtype, numba.types.Array
-        ):
-            return NumpyType(data.dtype.dtype)
+    def typer(dtype, buffer):
+        if isinstance(dtype, np.dtype) and isinstance(buffer, GrowableBufferType):
+            return NumpyType(dtype, buffer)
 
     return typer
 
 
-@numba.extending.lower_builtin(_from_buffer, GrowableBufferType)
+@numba.extending.lower_builtin(_from_buffer, np.dtype, GrowableBufferType)
 def Numpy_from_buffer_impl(context, builder, sig, args):
     out = numba.core.cgutils.create_struct_proxy(sig.return_type)(context, builder)
-    out.data = args
+    out.dtype = args[0]
+    out.data = args[1]
 
     if context.enable_nrt:
         context.nrt.incref(builder, sig.args[0], args[0])
+        context.nrt.incref(builder, sig.args[1], args[1])
 
     return out._getvalue()
 
 
 @numba.extending.overload(Numpy)
 def Numpy_ctor(dtype, parameters=None, initial=1024, resize=8.0):
+    if isinstance(dtype, numba.types.StringLiteral):
+        dt = np.dtype(dtype.literal_value)
+
+    elif isinstance(dtype, numba.types.DTypeSpec):
+        dt = numba.core.typing.npydecl.parse_dtype(dtype)
+
+    else:
+        return
+
     def ctor_impl(dtype, parameters=None, initial=1024, resize=8.0):
-        data = GrowableBuffer(dtype, initial, resize)
-        return _from_buffer(data)
+        panels = numba.typed.List([np.empty((initial,), dt)])
+        length_pos = np.zeros((2,), dtype=np.int64)
+        data = ak.numba._from_data(panels, length_pos, resize)
+        return NumpyType(data)
 
     return ctor_impl
 
@@ -276,7 +297,8 @@ def NumpyType_len(builder):
 @numba.extending.overload_method(NumpyType, "append")
 def Numpy_append(builder, datum):
     def append(builder, datum):
-        builder._data.append(datum)
+        buffer = builder._data
+        buffer.append(datum)
 
     return append
 
@@ -394,7 +416,6 @@ def EmptyType_box(typ, val, c):
     Empty_obj = c.pyapi.unserialize(c.pyapi.serialize_object(Empty))
     from_data_obj = c.pyapi.object_getattr_string(Empty_obj, "_from_buffer")
 
-    empty = numba.core.cgutils.create_struct_proxy(typ)(c.context, c.builder, value=val)
     out = c.pyapi.call_function_objargs(from_data_obj, ())
 
     # decref PyObjects
@@ -407,7 +428,7 @@ def EmptyType_box(typ, val, c):
 @numba.extending.overload(Empty)
 def Empty_ctor():
     def ctor_impl():
-        return _from_data()
+        return _from_buffer()
 
     return ctor_impl
 
@@ -423,7 +444,7 @@ def Empty_length(builder):
 @numba.extending.overload_method(EmptyType, "snapshot")
 def Empty_snapshot(builder):
     def snapshot(builder):
-        out = numpy.empty(0)
+        out = np.empty(0)
         return out
 
     return snapshot
