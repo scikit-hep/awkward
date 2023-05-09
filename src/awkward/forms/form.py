@@ -187,8 +187,11 @@ def from_type(type_: ak.types.Type) -> Form:
     # Categorical types are reintroduced into forms using metadata
     if type_.parameter("__categorical__"):
         # Drop categorical placeholder parameter
-        next_parameters = type_.parameters.copy()
-        next_parameters.pop("__categorical__")
+        if type_._parameters is None:
+            next_parameters = None
+        else:
+            next_parameters = type_._parameters.copy()
+            next_parameters.pop("__categorical__")
 
         if isinstance(type_, ak.types.OptionType):
             next_content = from_type(type_.content)
@@ -206,38 +209,38 @@ def from_type(type_: ak.types.Type) -> Form:
             )
 
     if isinstance(type_, ak.types.NumpyType):
-        return ak.forms.NumpyForm(type_.primitive, parameters=type_.parameters)
+        return ak.forms.NumpyForm(type_.primitive, parameters=type_._parameters)
     elif isinstance(type_, ak.types.ListType):
         return ak.forms.ListOffsetForm(
-            "i64", from_type(type_.content), parameters=type_.parameters
+            "i64", from_type(type_.content), parameters=type_._parameters
         )
     elif isinstance(type_, ak.types.RegularType):
         return ak.forms.RegularForm(
             from_type(type_.content),
             size=type_.size,
-            parameters=type_.parameters,
+            parameters=type_._parameters,
         )
     elif isinstance(type_, ak.types.OptionType):
         return ak.forms.IndexedOptionForm(
             "i64",
             from_type(type_.content),
-            parameters=type_.parameters,
+            parameters=type_._parameters,
         )
     elif isinstance(type_, ak.types.RecordType):
         return ak.forms.RecordForm(
             [from_type(c) for c in type_.contents],
             type_.fields,
-            parameters=type_.parameters,
+            parameters=type_._parameters,
         )
     elif isinstance(type_, ak.types.UnionType):
         return ak.forms.UnionForm(
             "i8",
             "i64",
             [from_type(c) for c in type_.contents],
-            parameters=type_.parameters,
+            parameters=type_._parameters,
         )
     elif isinstance(type_, ak.types.UnknownType):
-        return ak.forms.EmptyForm(parameters=type_.parameters)
+        return ak.forms.EmptyForm(parameters=type_._parameters)
     elif isinstance(type_, (ak.types.ArrayType, ak.types.ScalarType)):
         raise TypeError(
             "High-level types (ak.types.ArrayType, ak.types.ScalarType) do not have representations as Awkward forms. "
