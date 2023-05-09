@@ -148,6 +148,7 @@
 .. toctree::
     :caption: Value and type conversions
 
+    generated/ak.enforce_type
     generated/ak.nan_to_none
     generated/ak.nan_to_num
     generated/ak.values_astype
