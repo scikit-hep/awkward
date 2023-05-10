@@ -13,7 +13,6 @@ from awkward._backends.dispatch import (
     register_backend_lookup_factory,
     regularize_backend,
 )
-from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import get_array_class, get_record_class
 from awkward._layout import wrap_layout
 from awkward._nplikes import to_nplike
@@ -1078,14 +1077,6 @@ class Content:
         options: dict[str, Any],
     ):
         raise NotImplementedError
-
-    def to_numpy(self, allow_missing: bool = True):
-        ak._errors.deprecate(
-            "`Content.to_numpy` is deprecated. Please replace calls to "
-            "`Content.to_numpy(...)` with `Content.to_backend_array(..., backend='cpu')`.",
-            "2.2.0",
-        )
-        return self.to_backend(NumpyBackend.instance())._to_backend_array(allow_missing)
 
     def to_backend_array(
         self, allow_missing: bool = True, *, backend: Backend | str | None = None
