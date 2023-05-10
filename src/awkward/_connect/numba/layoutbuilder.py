@@ -56,9 +56,8 @@ class Numpy(LayoutBuilder):
         self._id = 0
 
     @classmethod
-    def _from_buffer(cls, dtype, data):
+    def _from_buffer(cls, data):
         out = cls.__new__(cls)
-        out._dtype = np.dtype(dtype)
         out._data = data  # GrowableBuffer(dtype=dtype, initial=initial, resize=resize)
         out._parameters = ""  # FIXME: parameters?
         out._id = 0
@@ -66,7 +65,7 @@ class Numpy(LayoutBuilder):
 
     @property
     def dtype(self):
-        return self._dtype
+        return self._data.dtype
 
     def __repr__(self):
         return f"<Numpy of {self.dtype!r} with {self._length} items>"
@@ -124,7 +123,8 @@ class Numpy(LayoutBuilder):
             params = (
                 "" if self._parameters == "" else f", parameters: {self._parameters}"
             )
-        return f'{{"class": "NumpyArray", "primitive": "{ak.types.numpytype.dtype_to_primitive(self.dtype)}", "form_key": "{form_key}"{params}}}'
+
+        return f'{{"class": "NumpyArray", "primitive": "{self._data.dtype}", "form_key": "{form_key}"{params}}}'
 
 
 class NumpyType(numba.types.Type):
@@ -158,7 +158,7 @@ def typeof_Numpy(val, c):
 class NumpyModel(numba.extending.models.StructModel):
     def __init__(self, dmm, fe_type):
         members = [
-            ("dtype", fe_type.dtype),
+            ("dtype", fe_type.data.dtype),
             ("data", fe_type.data),
         ]
         super().__init__(dmm, fe_type, members)
@@ -183,16 +183,16 @@ for member in (
 @numba.extending.unbox(NumpyType)
 def NumpyType_unbox(typ, obj, c):
     # get PyObjects
-    dtype_obj = c.pyapi.object_getattr_string(obj, "_dtype")
+    # dtype_obj = c.pyapi.object_getattr_string(obj, "_dtype")
     data_obj = c.pyapi.object_getattr_string(obj, "_data")
 
     # fill the lowered model
     out = numba.core.cgutils.create_struct_proxy(typ)(c.context, c.builder)
-    out.dtype = c.pyapi.to_native_value(typ.dtype, data_obj).value
+    # out.dtype = c.pyapi.to_native_value(typ.dtype, data_obj).value
     out.data = c.pyapi.to_native_value(typ.data, data_obj).value
 
     # decref PyObjects
-    c.pyapi.decref(dtype_obj)
+    # c.pyapi.decref(dtype_obj)
     c.pyapi.decref(data_obj)
 
     # return it or the exception
@@ -209,22 +209,19 @@ def NumpyType_box(typ, val, c):
     builder = numba.core.cgutils.create_struct_proxy(typ)(
         c.context, c.builder, value=val
     )
-    dtype_obj = c.pyapi.from_native_value(typ.dtype, builder.data, c.env_manager)
+    # dtype_obj = c.pyapi.from_native_value(typ.dtype, builder.dtype, c.env_manager)
     data_obj = c.pyapi.from_native_value(typ.data, builder.data, c.env_manager)
 
     out = c.pyapi.call_function_objargs(
         from_buffer_obj,
-        (
-            dtype_obj,
-            data_obj,
-        ),
+        (data_obj,),
     )
 
     # decref PyObjects
     c.pyapi.decref(Numpy_obj)
     c.pyapi.decref(from_buffer_obj)
 
-    c.pyapi.decref(dtype_obj)
+    # c.pyapi.decref(dtype_obj)
     c.pyapi.decref(data_obj)
 
     return out
@@ -236,28 +233,26 @@ def _from_buffer():
 
 @numba.extending.type_callable(_from_buffer)
 def Numpy_from_buffer_typer(context):
-    def typer(dtype, buffer):
-        if isinstance(dtype, np.dtype) and isinstance(buffer, GrowableBufferType):
-            return NumpyType(dtype, buffer)
+    def typer(buffer):
+        if isinstance(buffer, GrowableBufferType):
+            return NumpyType(buffer)
 
     return typer
 
 
-@numba.extending.lower_builtin(_from_buffer, np.dtype, GrowableBufferType)
+@numba.extending.lower_builtin(_from_buffer, GrowableBufferType)
 def Numpy_from_buffer_impl(context, builder, sig, args):
     out = numba.core.cgutils.create_struct_proxy(sig.return_type)(context, builder)
-    out.dtype = args[0]
-    out.data = args[1]
+    out.data = args[0]
 
     if context.enable_nrt:
         context.nrt.incref(builder, sig.args[0], args[0])
-        context.nrt.incref(builder, sig.args[1], args[1])
 
     return out._getvalue()
 
 
 @numba.extending.overload(Numpy)
-def Numpy_ctor(dtype, parameters=None, initial=1024, resize=8.0):
+def Numpy_ctor(dtype):  # , parameters=None, initial=1024, resize=8.0):
     if isinstance(dtype, numba.types.StringLiteral):
         dt = np.dtype(dtype.literal_value)
 
@@ -267,11 +262,11 @@ def Numpy_ctor(dtype, parameters=None, initial=1024, resize=8.0):
     else:
         return
 
-    def ctor_impl(dtype, parameters=None, initial=1024, resize=8.0):
-        panels = numba.typed.List([np.empty((initial,), dt)])
-        length_pos = np.zeros((2,), dtype=np.int64)
-        data = ak.numba._from_data(panels, length_pos, resize)
-        return NumpyType(data)
+    def ctor_impl(dtype):  # , parameters=None, initial=1024, resize=8.0):
+        # panels = numba.typed.List([np.empty((initial,), dt)])
+        # length_pos = np.zeros((2,), dtype=np.int64)
+        # data = ak.numba._from_data(panels, length_pos, resize)
+        return NumpyType(dt)
 
     return ctor_impl
 
@@ -609,10 +604,12 @@ class List(LayoutBuilder):
         """
         Converts the currently accumulated data into an #ak.Array.
         """
-        return ak.contents.ListArray(
-            ak.index.Index(self._starts.snapshot()),
-            ak.index.Index(self._stops.snapshot()),
-            self._content.snapshot().layout,
+        return ak.Array(
+            ak.contents.ListArray(
+                ak.index.Index(self._starts.snapshot()),
+                ak.index.Index(self._stops.snapshot()),
+                self._content.snapshot().layout,
+            )
         )
 
 
@@ -688,8 +685,8 @@ class Regular(LayoutBuilder):
 @final
 class Indexed(LayoutBuilder):
     def __init__(self, PRIMITIVE, content, parameters):
-        self.last_valid_ = -1
-        self.index_ = GrowableBuffer(PRIMITIVE)
+        self._last_valid = -1
+        self._index = GrowableBuffer(PRIMITIVE)
         self._content = content
         self._parameters = parameters
         self._id = 0
@@ -699,15 +696,15 @@ class Indexed(LayoutBuilder):
         return self._content
 
     def append_index(self):
-        self.last_valid_ = self._content._length
-        self.index_.append(self.last_valid_)
+        self._last_valid = self._content._length
+        self._index.append(self._last_valid)
         return self._content
 
     def extend_index(self, size):
         start = self._content._length
         stop = start + size
-        self.last_valid_ = stop - 1
-        self.index_.extend(list(range(start, stop)), size)
+        self._last_valid = stop - 1
+        self._index.extend(list(range(start, stop)), size)
         return self._content
 
     def parameters(self):
@@ -719,33 +716,33 @@ class Indexed(LayoutBuilder):
         self._content.set_id(id)
 
     def clear(self):
-        self.last_valid_ = -1
-        self.index_.clear()
+        self._last_valid = -1
+        self._index.clear()
         self._content.clear()
 
     def length(self):
-        return self.index_._length()
+        return self._index._length()
 
     def is_valid(self, error: str):
-        if self._content.length() != self.index_.length():
-            error = f"Indexed node{self._id} has content length {self._content.length()} but index length {self.index_.length()}"
+        if self._content.length() != self._index.length():
+            error = f"Indexed node{self._id} has content length {self._content.length()} but index length {self._index.length()}"
             return False
-        elif self._content.length() != self.last_valid_ + 1:
-            error = f"Indexed node{self._id} has content length {self._content.length()} but last valid index is {self.last_valid_}"
+        elif self._content.length() != self._last_valid + 1:
+            error = f"Indexed node{self._id} has content length {self._content.length()} but last valid index is {self._last_valid}"
         else:
             return self._content.is_valid(error)
 
     def buffer_nbytes(self, names_nbytes):
-        names_nbytes[f"node{self._id}-index"] = self.index_.nbytes()
+        names_nbytes[f"node{self._id}-index"] = self._index.nbytes()
         self._content.buffer_nbytes(names_nbytes)
 
     def to_buffers(self, buffers):
-        self.index_.concatenate(buffers[f"node{self._id}-index"])
+        self._index.concatenate(buffers[f"node{self._id}-index"])
         self._content.to_buffers(buffers)
 
     def form(self):
         params = "" if self._parameters == "" else f", parameters: {self._parameters}"
-        return f'{{"class": "IndexedArray", "index": "{self.index_.index_form()}", "content": {self._content.form()}, "form_key": "node{self._id}"{params}}}'
+        return f'{{"class": "IndexedArray", "index": "{self._index.index_form()}", "content": {self._content.form()}, "form_key": "node{self._id}"{params}}}'
 
 
 ########## IndexedOption #######################################################
@@ -754,8 +751,8 @@ class Indexed(LayoutBuilder):
 @final
 class IndexedOption(LayoutBuilder):
     def __init__(self, PRIMITIVE, content, parameters):
-        self.last_valid_ = -1
-        self.index_ = GrowableBuffer(PRIMITIVE)
+        self._last_valid = -1
+        self._index = GrowableBuffer(PRIMITIVE)
         self._content = content
         self._parameters = parameters
         self._id = 0
@@ -765,22 +762,22 @@ class IndexedOption(LayoutBuilder):
         return self._content
 
     def append_index(self):
-        self.last_valid_ = self._content.length()
-        self.index_.append(self.last_valid_)
+        self._last_valid = self._content.length()
+        self._index.append(self._last_valid)
         return self._content
 
     def extend_index(self, size):
         start = self._content.length()
         stop = start + size
-        self.last_valid_ = stop - 1
-        self.index_.extend(list(range(start, stop)), size)
+        self._last_valid = stop - 1
+        self._index.extend(list(range(start, stop)), size)
         return self._content
 
     def append_null(self):
-        self.index_.append(-1)
+        self._index.append(-1)
 
     def extend_null(self, size):
-        self.index_.extend([-1] * size, size)
+        self._index.extend([-1] * size, size)
 
     def parameters(self):
         return self._parameters
@@ -791,31 +788,31 @@ class IndexedOption(LayoutBuilder):
         self._content.set_id(id)
 
     def clear(self):
-        self.last_valid_ = -1
-        self.index_.clear()
+        self._last_valid = -1
+        self._index.clear()
         self._content.clear()
 
     def length(self):
-        return self.index_.length()
+        return self._index.length()
 
     def is_valid(self, error: str):
-        if self._content.length() != self.last_valid_ + 1:
-            error = f"Indexed node{self._id} has content length {self._content.length()} but last valid index is {self.last_valid_}"
+        if self._content.length() != self._last_valid + 1:
+            error = f"Indexed node{self._id} has content length {self._content.length()} but last valid index is {self._last_valid}"
             return False
         else:
             return self._content.is_valid(error)
 
     def buffer_nbytes(self, names_nbytes):
-        names_nbytes[f"node{self._id}-index"] = self.index_.nbytes()
+        names_nbytes[f"node{self._id}-index"] = self._index.nbytes()
         self._content.buffer_nbytes(names_nbytes)
 
     def to_buffers(self, buffers):
-        self.index_.concatenate(buffers[f"node{self._id}-index"])
+        self._index.concatenate(buffers[f"node{self._id}-index"])
         self._content.to_buffers(buffers)
 
     def form(self):
         params = "" if self._parameters == "" else f", parameters: {self._parameters}"
-        return f'{{"class": "IndexedOptionArray", "index": "{self.index_.index_form()}", "content": {self._content.form()}, "form_key": "node{self._id}"{params}}}'
+        return f'{{"class": "IndexedOptionArray", "index": "{self._index.index_form()}", "content": {self._content.form()}, "form_key": "node{self._id}"{params}}}'
 
 
 ########## ByteMasked #########################################################
@@ -1246,9 +1243,9 @@ class EmptyRecord(LayoutBuilder):
 @final
 class Union(LayoutBuilder):
     def __init__(self, PRIMITIVE, contents, parameters):
-        self.last_valid_index_ = [-1] * len(contents)
-        self.tags_ = GrowableBuffer("int8")
-        self.index_ = GrowableBuffer(PRIMITIVE)
+        self._last_valid_index = [-1] * len(contents)
+        self._tags = GrowableBuffer("int8")
+        self._index = GrowableBuffer(PRIMITIVE)
         self._contents = contents
         self._parameters = parameters
         self._id = 0
@@ -1256,9 +1253,9 @@ class Union(LayoutBuilder):
     def append_index(self, tag):
         which_content = self._contents[tag]
         next_index = which_content.length()
-        self.last_valid_index_[tag] = next_index
-        self.tags_.append(tag)
-        self.index_.append(next_index)
+        self._last_valid_index[tag] = next_index
+        self._tags.append(tag)
+        self._index.append(next_index)
         return which_content
 
     def parameters(self):
@@ -1271,20 +1268,20 @@ class Union(LayoutBuilder):
             content.set_id(id)
 
     def clear(self):
-        for tag, _value in self.last_valid_index_:
-            self.last_valid_index_[tag] = -1
-        self.tags_.clear()
-        self.index_.clear()
+        for tag, _value in self._last_valid_index:
+            self._last_valid_index[tag] = -1
+        self._tags.clear()
+        self._index.clear()
         for content in self._contents:
             content.clear()
 
     def length(self):
-        return self.tags_.length()
+        return self._tags.length()
 
     def is_valid(self, error: str):
-        for tag, _value in self.last_valid_index_:
-            if self._contents[tag].length() != self.last_valid_index_[tag] + 1:
-                error = f"Union node{self._id} has content {tag} length {self._contents[tag].length()} but last valid index is {self.last_valid_index_[tag]}"
+        for tag, _value in self._last_valid_index:
+            if self._contents[tag].length() != self._last_valid_index[tag] + 1:
+                error = f"Union node{self._id} has content {tag} length {self._contents[tag].length()} but last valid index is {self._last_valid_index[tag]}"
                 return False
         for content in self._contents:
             if not content.is_valid(error):
@@ -1292,18 +1289,18 @@ class Union(LayoutBuilder):
         return True
 
     def buffer_nbytes(self, names_nbytes):
-        names_nbytes[f"node{self._id}-tags"] = self.tags_.nbytes()
-        names_nbytes[f"node{self._id}-index"] = self.index_.nbytes()
+        names_nbytes[f"node{self._id}-tags"] = self._tags.nbytes()
+        names_nbytes[f"node{self._id}-index"] = self._index.nbytes()
         for content in self._contents:
             content.buffer_nbytes(names_nbytes)
 
     def to_buffers(self, buffers):
-        self.tags_.concatenate(buffers[f"node{self._id}-tags"])
-        self.index_.concatenate(buffers[f"node{self._id}-index"])
+        self._tags.concatenate(buffers[f"node{self._id}-tags"])
+        self._index.concatenate(buffers[f"node{self._id}-index"])
         for content in self._contents:
             content.to_buffers(buffers)
 
     def form(self):
         params = "" if self._parameters == "" else f", parameters: {self._parameters}"
         contents = ", ".join(content.form() for content in self._contents)
-        return f'{{"class": "UnionArray", "tags": "{self.tags_.index_form()}", "index": "{self.index_.index_form()}", "contents": [{contents}], "form_key": "node{self._id}"{params}}}'
+        return f'{{"class": "UnionArray", "tags": "{self._tags.index_form()}", "index": "{self._index.index_form()}", "contents": [{contents}], "form_key": "node{self._id}"{params}}}'

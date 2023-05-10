@@ -23,6 +23,7 @@ def test_Numpy():
     assert builder.is_valid(error), error.value
 
     array = builder.snapshot()
+    assert isinstance(array, ak.Array)
     assert str(ak.type(array)) == "5 * float64"
     assert ak.to_list(array) == [1.1, 2.2, 3.3, 4.4, 5.5]
 
@@ -67,7 +68,8 @@ def test_Empty():
     assert builder.is_valid(error), error.value
 
     array = builder.snapshot()
-    assert str(ak.type(array)) == "0 * unknown"  # FIXME: float64 ???
+    assert isinstance(array, ak.Array)
+    assert str(ak.type(array)) == "0 * unknown"
     assert ak.to_list(array) == []
 
     assert builder.form() == '{"class": "EmptyArray"}'
@@ -76,6 +78,7 @@ def test_Empty():
 def test_ListOffset():
     builder = lb.ListOffset(np.int32, lb.Numpy(np.float64))
     assert len(builder) == 0
+
     subbuilder = builder.begin_list()
     subbuilder.append(1.1)
     subbuilder.append(2.2)
@@ -89,7 +92,10 @@ def test_ListOffset():
     subbuilder.append(4.4)
     subbuilder.append(5.5)
     builder.end_list()
-    assert ak.to_list(builder.snapshot()) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
+
+    array = builder.snapshot()
+    assert isinstance(array, ak.Array)
+    assert ak.to_list(array) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
 
     error = ""
     assert builder.is_valid(error), error.value
@@ -98,7 +104,27 @@ def test_ListOffset():
 def test_List():
     builder = lb.List(np.int32, lb.Numpy(np.float64))
     assert len(builder) == 0
-    assert ak.to_list(builder.snapshot()) == []
+    array = builder.snapshot()
+    assert isinstance(array, ak.Array)
+    assert ak.to_list(array) == []
+
+    subbuilder = builder.begin_list()
+    subbuilder.append(1.1)
+    subbuilder.append(2.2)
+    subbuilder.append(3.3)
+    builder.end_list()
+
+    builder.begin_list()
+    builder.end_list()
+
+    builder.begin_list()
+    subbuilder.append(4.4)
+    subbuilder.append(5.5)
+    builder.end_list()
+
+    array = builder.snapshot()
+    assert isinstance(array, ak.Array)
+    assert ak.to_list(array) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
 
     error = ""
     assert builder.is_valid(error), error.value
@@ -107,7 +133,9 @@ def test_List():
 def test_Regular():
     builder = lb.Regular(lb.Numpy(np.float64), 3)
     assert len(builder) == 0
-    assert ak.to_list(builder.snapshot()) == []
+    array = builder.snapshot()
+    assert isinstance(array, ak.Array)
+    assert ak.to_list(array) == []
 
     error = ""
     assert builder.is_valid(error), error.value
@@ -143,27 +171,27 @@ def test_unbox_for_loop():
         f1(builder)
 
 
-# def test_box():
-#     @numba.njit
-#     def f2(x):
-#         return x
-#
-#     builder = lb.Numpy(np.int32)
-#
-#     out1 = f2(builder)
-#     assert ak.to_list(out1.snapshot()) == []
-#
-#     for x in range(15):
-#         builder.append(x)
-#
-#     out2 = f2(builder)
-#
-#     assert ak.to_list(out2.snapshot()) == list(range(15))
-#
-#     builder = lb.Empty()
-#
-#     out3 = f2(builder)
-#     assert ak.to_list(out3.snapshot()) == []
+def test_box():
+    @numba.njit
+    def f2(x):
+        return x
+
+    builder = lb.Numpy(np.int32)
+
+    out1 = f2(builder)
+    assert ak.to_list(out1.snapshot()) == []
+
+    for x in range(15):
+        builder.append(x)
+
+    out2 = f2(builder)
+
+    assert ak.to_list(out2.snapshot()) == list(range(15))
+
+    builder = lb.Empty()
+
+    out3 = f2(builder)
+    assert ak.to_list(out3.snapshot()) == []
 
 
 def test_len():
@@ -183,7 +211,6 @@ def test_len():
     assert f3(builder) == 0
 
 
-# @pytest.mark.skip("numba.core.errors.LoweringError")
 def test_from_buffer():
     @numba.njit
     def f4():
@@ -192,148 +219,142 @@ def test_from_buffer():
             np.array([1, 0], np.int64),
             1.23,
         )
-        dtype = data.dtype
-        return dtype
-        # return lb._from_buffer(dtype, data)
+        return lb._from_buffer(data)
 
     out = f4()
-    print(type(out))
-    print(out)
-    # assert isinstance(out, lb.Numpy)
-    # print(out.dtype)
-    # print(ak.to_list(out.snapshot()))
-    # # assert out.dtype == np.dtype(np.float32)
-    # assert len(out) == 1
+    assert isinstance(out, lb.Numpy)
+    assert out.dtype == np.dtype(np.float32)
+    assert len(out) == 1
+    print(ak.to_list(out.snapshot()))
 
 
 # @pytest.mark.skip("numba.core.errors.LoweringError")
-# def test_ctor():
-#     @numba.njit
-#     def f5():
-#         return lb.Numpy("f4")
-#
-#     out = f5()
-#     assert isinstance(out, lb.Numpy)
-#     assert out.dtype == np.dtype("f4")
-#     assert len(out) == 0
-#
-#     @numba.njit
-#     def f9():
-#         return lb.Numpy(np.float32)
-#
-#     out = f9()
-#     assert isinstance(out, lb.Numpy)
-#     assert out.dtype == np.dtype(np.float32)
-#     assert len(out) == 0
-#
-#     @numba.njit
-#     def f10():
-#         return lb.Numpy(np.dtype(np.float32))
-#
-#     out = f10()
-#     assert isinstance(out, lb.Numpy)
-#     assert out.dtype == np.dtype(np.float32)
-#     assert len(out) == 0
-#
-#
-# def test_append():
-#     @numba.njit
-#     def f15(builder):
-#         for i in range(8):
-#             builder.append(i)
-#
-#     builder = lb.Numpy(np.float32)
-#
-#     f15(builder)
-#
-#     assert ak.to_list(builder.snapshot()) == list(range(8))
-#
-#     f15(builder)
-#
-#     assert ak.to_list(builder.snapshot()) == list(range(8)) + list(range(8))
-#
-#
-# def test_extend():
-#     @numba.njit
-#     def f16(builder):
-#         builder.extend(np.arange(8))
-#
-#     builder = lb.Numpy(np.float32)
-#
-#     f16(builder)
-#
-#     assert ak.to_list(builder.snapshot()) == list(range(8))
-#
-#     f16(builder)
-#
-#     assert ak.to_list(builder.snapshot()) == list(range(8)) + list(range(8))
-#
-#
-# def test_snapshot():
-#     @numba.njit
-#     def f17(builder):
-#         return builder.snapshot()
-#
-#     builder = lb.Numpy(np.float32)
-#
-#     assert ak.to_list(f17(builder)) == []
-#
-#     builder.extend(range(8))
-#
-#     assert ak.to_list(f17(builder)) == list(range(8))
-#
-#     builder.extend(range(8))
-#
-#     assert ak.to_list(f17(builder)) == list(range(8)) + list(range(8))
-#
-#
-#
-# def test_numba_append():
-#     # FIXME: @numba.njit
-#     def create():
-#         return lb.Numpy(np.int32)
-#
-#     @numba.njit
-#     def append_range(builder, start, stop):
-#         for x in range(start, stop):
-#             builder.append(x)
-#
-#     @numba.njit
-#     def append_single(builder, x):
-#         builder.append(x)
-#
-#     @numba.njit
-#     def snapshot(builder):
-#         return builder.snapshot()
-#
-#     builder = create()
-#     assert ak.to_list(snapshot(builder)) == []
-#     assert len(builder) == 0
-#
-#     append_range(builder, 0, 5)
-#     assert ak.to_list(snapshot(builder)) == list(range(5))
-#     assert len(builder) == 5
-#
-#     append_range(builder, 5, 9)
-#     assert ak.to_list(snapshot(builder)) == list(range(9))
-#     assert len(builder) == 9
-#
-#     append_single(builder, 9)
-#     assert ak.to_list(snapshot(builder)) == list(range(10))
-#     assert len(builder) == 10
-#
-#     append_single(builder, 10)
-#     assert ak.to_list(snapshot(builder)) == list(range(11))
-#     assert len(builder) == 11
-#
-#     append_single(builder, 11)
-#     assert ak.to_list(snapshot(builder)) == list(range(12))
-#     assert len(builder) == 12
-#
-#     append_range(builder, 12, 30)
-#     assert ak.to_list(snapshot(builder)) == list(range(30))
-#     assert len(builder) == 30
-#
-#     append_single(builder, 30)
-#     assert ak.to_list(snapshot(builder)) == list(range(31))
-#     assert len(builder) == 31
+def test_ctor():
+    @numba.njit
+    def f5():
+        return lb.Numpy("f4")
+
+    out = f5()
+    assert isinstance(out, lb.Numpy)
+    assert out.dtype == np.dtype("f4")
+    assert len(out) == 0
+
+    @numba.njit
+    def f9():
+        return lb.Numpy(np.float32)
+
+    out = f9()
+    assert isinstance(out, lb.Numpy)
+    assert out.dtype == np.dtype(np.float32)
+    assert len(out) == 0
+
+    @numba.njit
+    def f10():
+        return lb.Numpy(np.dtype(np.float32))
+
+    out = f10()
+    assert isinstance(out, lb.Numpy)
+    assert out.dtype == np.dtype(np.float32)
+    assert len(out) == 0
+
+
+def test_append():
+    @numba.njit
+    def f15(builder):
+        for i in range(8):
+            builder.append(i)
+
+    builder = lb.Numpy(np.float32)
+
+    f15(builder)
+
+    assert ak.to_list(builder.snapshot()) == list(range(8))
+
+    f15(builder)
+
+    assert ak.to_list(builder.snapshot()) == list(range(8)) + list(range(8))
+
+
+def test_extend():
+    @numba.njit
+    def f16(builder):
+        builder.extend(np.arange(8))
+
+    builder = lb.Numpy(np.float32)
+
+    f16(builder)
+
+    assert ak.to_list(builder.snapshot()) == list(range(8))
+
+    f16(builder)
+
+    assert ak.to_list(builder.snapshot()) == list(range(8)) + list(range(8))
+
+
+def test_snapshot():
+    @numba.njit
+    def f17(builder):
+        return builder.snapshot()
+
+    builder = lb.Numpy(np.float32)
+
+    assert ak.to_list(f17(builder)) == []
+
+    builder.extend(range(8))
+
+    assert ak.to_list(f17(builder)) == list(range(8))
+
+    builder.extend(range(8))
+
+    assert ak.to_list(f17(builder)) == list(range(8)) + list(range(8))
+
+
+def test_numba_append():
+    # FIXME: @numba.njit
+    def create():
+        return lb.Numpy(np.int32)
+
+    @numba.njit
+    def append_range(builder, start, stop):
+        for x in range(start, stop):
+            builder.append(x)
+
+    @numba.njit
+    def append_single(builder, x):
+        builder.append(x)
+
+    @numba.njit
+    def snapshot(builder):
+        return builder.snapshot()
+
+    builder = create()
+    assert ak.to_list(snapshot(builder)) == []
+    assert len(builder) == 0
+
+    append_range(builder, 0, 5)
+    assert ak.to_list(snapshot(builder)) == list(range(5))
+    assert len(builder) == 5
+
+    append_range(builder, 5, 9)
+    assert ak.to_list(snapshot(builder)) == list(range(9))
+    assert len(builder) == 9
+
+    append_single(builder, 9)
+    assert ak.to_list(snapshot(builder)) == list(range(10))
+    assert len(builder) == 10
+
+    append_single(builder, 10)
+    assert ak.to_list(snapshot(builder)) == list(range(11))
+    assert len(builder) == 11
+
+    append_single(builder, 11)
+    assert ak.to_list(snapshot(builder)) == list(range(12))
+    assert len(builder) == 12
+
+    append_range(builder, 12, 30)
+    assert ak.to_list(snapshot(builder)) == list(range(30))
+    assert len(builder) == 30
+
+    append_single(builder, 30)
+    assert ak.to_list(snapshot(builder)) == list(range(31))
+    assert len(builder) == 31
