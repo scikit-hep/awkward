@@ -941,7 +941,14 @@ class ByteMasked(LayoutBuilder):
 
 @final
 class BitMasked(LayoutBuilder):
-    def __init__(self, content, valid_when, lsb_order, *, parameters=None):
+    def __init__(
+        self,
+        content,
+        *,
+        parameters=None,
+        valid_when=True,
+        lsb_order=True,
+    ):
         self._mask = GrowableBuffer("uint8")
         self._content = content
         self._valid_when = valid_when
@@ -1070,6 +1077,18 @@ class BitMasked(LayoutBuilder):
     def form(self):
         params = "" if self._parameters == "" else f", parameters: {self._parameters}"
         return f'{{"class": "BitMaskedArray", "mask": "{self._mask.index_form()}", "valid_when": {json.dumps(self._valid_when)}, "lsb_order": {json.dumps(self._lsb_order)}, "content": {self._content.form()}, "form_key": "node{self._id}"{params}}}'
+
+    def snapshot(self) -> ArrayLike:
+        """
+        Converts the currently accumulated data into an #ak.Array.
+        """
+        return ak.Array(
+            ak.contents.BitMaskedArray(
+                ak.index.Index8(self._mask.snapshot()),
+                self._content.snapshot().layout,
+                valid_when=self._valid_when,
+            )
+        )
 
 
 ########## Unmasked #########################################################
