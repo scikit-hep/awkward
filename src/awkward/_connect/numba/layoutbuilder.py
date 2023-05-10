@@ -1265,7 +1265,7 @@ class Tuple(LayoutBuilder):
 
 @final
 class EmptyRecord(LayoutBuilder):
-    def __init__(self, is_tuple, parameters):
+    def __init__(self, is_tuple, *, parameters=None):
         self._length = 0
         self._is_tuple = is_tuple
         self._parameters = parameters
@@ -1289,6 +1289,9 @@ class EmptyRecord(LayoutBuilder):
     def length(self):
         return self._length
 
+    def __len__(self):
+        return self.length()
+
     def is_valid(self, error: str):
         return True
 
@@ -1304,6 +1307,20 @@ class EmptyRecord(LayoutBuilder):
             return f'{{"class": "RecordArray", "contents": [], "form_key": "node{self._id}"{params}}}'
         else:
             return f'{{"class": "RecordArray", "contents": {{}}, "form_key": "node{self._id}"{params}}}'
+
+    def snapshot(self) -> ArrayLike:
+        """
+        Converts the currently accumulated data into an #ak.Array.
+        """
+        contents = [] if self._is_tuple else {{}}
+
+        return ak.Array(
+            ak.contents.RecordArray(
+                contents,
+                None,
+                self.length(),
+            )
+        )
 
 
 ########## Union #######################################################

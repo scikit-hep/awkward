@@ -79,18 +79,18 @@ def test_ListOffset():
     builder = lb.ListOffset(np.int32, lb.Numpy(np.float64))
     assert len(builder) == 0
 
-    subbuilder = builder.begin_list()
-    subbuilder.append(1.1)
-    subbuilder.append(2.2)
-    subbuilder.append(3.3)
+    content = builder.begin_list()
+    content.append(1.1)
+    content.append(2.2)
+    content.append(3.3)
     builder.end_list()
 
     builder.begin_list()
     builder.end_list()
 
     builder.begin_list()
-    subbuilder.append(4.4)
-    subbuilder.append(5.5)
+    content.append(4.4)
+    content.append(5.5)
     builder.end_list()
 
     array = builder.snapshot()
@@ -108,18 +108,18 @@ def test_List():
     assert isinstance(array, ak.Array)
     assert ak.to_list(array) == []
 
-    subbuilder = builder.begin_list()
-    subbuilder.append(1.1)
-    subbuilder.append(2.2)
-    subbuilder.append(3.3)
+    content = builder.begin_list()
+    content.append(1.1)
+    content.append(2.2)
+    content.append(3.3)
     builder.end_list()
 
     builder.begin_list()
     builder.end_list()
 
     builder.begin_list()
-    subbuilder.append(4.4)
-    subbuilder.append(5.5)
+    content.append(4.4)
+    content.append(5.5)
     builder.end_list()
 
     array = builder.snapshot()
@@ -137,16 +137,16 @@ def test_Regular():
     assert isinstance(array, ak.Array)
     assert ak.to_list(array) == []
 
-    subbuilder = builder.begin_list()
-    subbuilder.append(1.1)
-    subbuilder.append(2.2)
-    subbuilder.append(3.3)
+    content = builder.begin_list()
+    content.append(1.1)
+    content.append(2.2)
+    content.append(3.3)
     builder.end_list()
 
     builder.begin_list()
-    subbuilder.append(4.4)
-    subbuilder.append(5.5)
-    subbuilder.append(6.6)
+    content.append(4.4)
+    content.append(5.5)
+    content.append(6.6)
     builder.end_list()
 
     array = builder.snapshot()
@@ -177,15 +177,15 @@ def test_Indexed():
     builder = lb.Indexed(np.int64, lb.Numpy(np.float64))
     assert len(builder) == 0
 
-    subbuilder = builder.append_index()
-    subbuilder.append(1.1)
+    content = builder.append_index()
+    content.append(1.1)
 
     builder.append_index()
-    subbuilder.append(2.2)
+    content.append(2.2)
 
     data = np.array([3.3, 4.4, 5.5], dtype=np.float64)
     builder.extend_index(3)
-    subbuilder.extend(data)
+    content.extend(data)
 
     array = builder.snapshot()
     assert ak.to_list(array) == [1.1, 2.2, 3.3, 4.4, 5.5]
@@ -195,13 +195,13 @@ def test_IndexedOption():
     builder = lb.IndexedOption(np.int64, lb.Numpy(np.float64))
     assert len(builder) == 0
 
-    subbuilder = builder.append_index()
-    subbuilder.append(1.1)
+    content = builder.append_index()
+    content.append(1.1)
     builder.append_null()
 
     data = np.array([3.3, 4.4, 5.5], dtype=np.float64)
     builder.extend_index(3)
-    subbuilder.extend(data)  # , 3)
+    content.extend(data)
 
     builder.extend_null(2)
     array = builder.snapshot()
@@ -218,19 +218,19 @@ def test_Record():
     )
     assert len(builder) == 0
 
-    one_builder = builder.field("one")
-    two_builder = builder.field("two")
-    three_builder = builder.field("three")
+    one = builder.field("one")
+    two = builder.field("two")
+    three = builder.field("three")
 
-    three_builder.append(0x61)  #'a')
+    three.append(0x61)  #'a')
 
-    one_builder.append(1.1)
-    one_builder.append(3.3)
+    one.append(1.1)
+    one.append(3.3)
 
-    two_builder.append(2)
-    two_builder.append(4)
+    two.append(2)
+    two.append(4)
 
-    three_builder.append(0x62)  #'b')
+    three.append(0x62)  #'b')
 
     array = builder.snapshot()
     assert ak.to_list(array) == [
@@ -244,18 +244,18 @@ def test_IndexedOption_Record():
         np.int64, lb.Record({"x": lb.Numpy(np.float64), "y": lb.Numpy(np.int64)})
     )
     assert len(builder) == 0
-    subbuilder = builder.append_index()
-    x_builder = subbuilder.field("x")
-    y_builder = subbuilder.field("y")
+    b = builder.append_index()
+    x = b.field("x")
+    y = b.field("y")
 
-    x_builder.append(1.1)
-    y_builder.append(2)
+    x.append(1.1)
+    y.append(2)
 
     builder.append_null()
 
     builder.append_index()
-    x_builder.append(3.3)
-    y_builder.append(4)
+    x.append(3.3)
+    y.append(4)
 
     array = builder.snapshot()
     assert ak.to_list(array) == [
@@ -274,34 +274,48 @@ def test_Tuple_Numpy_ListOffset():
     error = ""
     assert builder.is_valid(error) is True
 
-    subbuilder_one = builder.index(0)
-    subbuilder_one.append(1.1)
-    subbuilder_two = builder.index(1)
-    subsubbuilder = subbuilder_two.begin_list()
-    subsubbuilder.append(1)
-    subbuilder_two.end_list()
+    one = builder.index(0)
+    one.append(1.1)
+    two = builder.index(1)
+    two_list = two.begin_list()
+    two_list.append(1)
+    two.end_list()
 
     assert builder.is_valid(error) is True
 
-    subbuilder_one.append(2.2)
-    subbuilder_two.begin_list()
-    subsubbuilder.append(1)
-    subsubbuilder.append(2)
-    subbuilder_two.end_list()
+    one.append(2.2)
+    two.begin_list()
+    two_list.append(1)
+    two_list.append(2)
+    two.end_list()
 
     assert builder.is_valid(error) is True
 
-    subbuilder_one.append(3.3)
-    subbuilder_two.begin_list()
-    subsubbuilder.append(1)
-    subsubbuilder.append(2)
-    subsubbuilder.append(3)
-    subbuilder_two.end_list()
+    one.append(3.3)
+    two.begin_list()
+    two_list.append(1)
+    two_list.append(2)
+    two_list.append(3)
+    two.end_list()
 
     array = builder.snapshot()
     assert ak.to_list(array) == [(1.1, [1]), (2.2, [1, 2]), (3.3, [1, 2, 3])]
 
     assert builder.is_valid(error) is True
+
+
+def test_EmptyRecord():
+    builder = lb.EmptyRecord(True)
+    assert len(builder) == 0
+
+    builder.append()
+    assert len(builder) == 1
+
+    builder.extend(2)
+    assert len(builder) == 3
+
+    array = builder.snapshot()
+    assert ak.to_list(array) == [(), (), ()]
 
 
 #
