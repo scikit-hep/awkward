@@ -200,7 +200,6 @@ def pad_none(
 def remove_structure(
     layout: Content | Record,
     backend: Backend | None = None,
-    flatten_records: bool = True,
     function_name: str | None = None,
     drop_nones: bool = True,
     keepdims: bool = False,
@@ -209,7 +208,6 @@ def remove_structure(
         return remove_structure(
             layout._array[layout._at : layout._at + 1],
             backend,
-            flatten_records,
             function_name,
             drop_nones,
             keepdims,
@@ -221,7 +219,6 @@ def remove_structure(
         arrays = layout._remove_structure(
             backend,
             {
-                "flatten_records": flatten_records,
                 "function_name": function_name,
                 "drop_nones": drop_nones,
                 "keepdims": keepdims,
@@ -265,13 +262,10 @@ def reduce(
     behavior: dict | None = None,
 ):
     if axis is None:
-        parts = remove_structure(
-            layout, flatten_records=False, drop_nones=False, keepdims=keepdims
-        )
+        parts = remove_structure(layout, drop_nones=False, keepdims=keepdims)
 
         if len(parts) > 1:
-            # We know that `flatten_records` must fail, so the only other type
-            # that can return multiple parts here is the union array
+            # The only type that can return multiple parts here is the union array
             raise ValueError(
                 "cannot use axis=None on an array containing irreducible unions"
             )

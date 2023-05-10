@@ -995,22 +995,16 @@ class RecordArray(Content):
         return out
 
     def _remove_structure(self, backend, options):
-        if options["flatten_records"]:
-            out = []
-            for content in self._contents:
-                out.extend(content[: self._length]._remove_structure(backend, options))
-            return out
-        else:
-            in_function = ""
-            if options["function_name"] is not None:
-                in_function = " in " + options["function_name"]
-            raise TypeError(
-                (
-                    "encountered a record whilst removing array structure{}, "
-                    "but this operation does not support erasing records. "
-                    "Try first calling `ak.ravel` or `ak.flatten(..., axis=None)."
-                ).format(in_function)
-            )
+        in_function = ""
+        if options["function_name"] is not None:
+            in_function = " in " + options["function_name"]
+        raise TypeError(
+            (
+                "encountered a record whilst removing array structure{}, "
+                "but this operation does not support erasing records. "
+                "Try first calling `ak.ravel` or `ak.flatten(..., axis=None)."
+            ).format(in_function)
+        )
 
     def _recursively_apply(
         self, action, behavior, depth, depth_context, lateral_context, options
