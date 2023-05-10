@@ -265,6 +265,45 @@ def test_IndexedOption_Record():
     ]
 
 
+def test_Tuple_Numpy_ListOffset():
+    builder = lb.Tuple(
+        [lb.Numpy(np.float64), lb.ListOffset(np.int64, lb.Numpy(np.int32))]
+    )
+    assert len(builder) == 0
+
+    error = ""
+    assert builder.is_valid(error) is True
+
+    subbuilder_one = builder.index(0)
+    subbuilder_one.append(1.1)
+    subbuilder_two = builder.index(1)
+    subsubbuilder = subbuilder_two.begin_list()
+    subsubbuilder.append(1)
+    subbuilder_two.end_list()
+
+    assert builder.is_valid(error) is True
+
+    subbuilder_one.append(2.2)
+    subbuilder_two.begin_list()
+    subsubbuilder.append(1)
+    subsubbuilder.append(2)
+    subbuilder_two.end_list()
+
+    assert builder.is_valid(error) is True
+
+    subbuilder_one.append(3.3)
+    subbuilder_two.begin_list()
+    subsubbuilder.append(1)
+    subsubbuilder.append(2)
+    subsubbuilder.append(3)
+    subbuilder_two.end_list()
+
+    array = builder.snapshot()
+    assert ak.to_list(array) == [(1.1, [1]), (2.2, [1, 2]), (3.3, [1, 2, 3])]
+
+    assert builder.is_valid(error) is True
+
+
 #
 # def test_unbox():
 #     @numba.njit

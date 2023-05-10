@@ -1098,10 +1098,11 @@ class Unmasked(LayoutBuilder):
 ########## Record #########################################################
 
 
-class FieldPair:
-    def __init__(self, name, content):
-        self.name = name
-        self.content = content
+# class FieldPair:
+#     def __init__(self, name, content):
+#         self.name = name
+#         self.content = content
+#
 
 
 @final
@@ -1188,7 +1189,7 @@ class Record(LayoutBuilder):
 
 @final
 class Tuple(LayoutBuilder):
-    def __init__(self, contents, parameters):
+    def __init__(self, contents, *, parameters=None):
         assert len(contents) != 0
         self._contents = contents
         self._first_content = contents[0]
@@ -1212,15 +1213,18 @@ class Tuple(LayoutBuilder):
             _content.clear()
 
     def length(self):
-        return self._first_content.length()
+        return len(self._first_content)
+
+    def __len__(self):
+        return self.length()
 
     def is_valid(self, error: str):
         length = -1
         for index, content in enumerate(self._contents):
             if length == -1:
-                length = content.length()
-            elif length != content.length():
-                error = f"Tuple node{self._id} has index {index} length {content.length()} that differs from the first length {length}"
+                length = len(content)
+            elif length != len(content):
+                error = f"Tuple node{self._id} has index {index} length {len(content)} that differs from the first length {length}"
                 return False
         for content in self._contents:
             if not content.is_valid(error):
@@ -1239,6 +1243,21 @@ class Tuple(LayoutBuilder):
         params = "" if self._parameters == "" else f", parameters: {self._parameters}"
         contents = ", ".join(content.form() for content in self._contents)
         return f'{{"class": "RecordArray", "contents": [{contents}], "form_key": "node{self._id}"{params}}}'
+
+    def snapshot(self) -> ArrayLike:
+        """
+        Converts the currently accumulated data into an #ak.Array.
+        """
+        contents = []
+        for content in self._contents:
+            contents.append(content.snapshot().layout)
+
+        return ak.Array(
+            ak.contents.RecordArray(
+                contents,
+                None,
+            )
+        )
 
 
 ########## EmptyRecord #######################################################
