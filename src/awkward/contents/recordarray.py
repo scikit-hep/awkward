@@ -905,6 +905,14 @@ class RecordArray(Content):
             sub = cont._validity_error(f"{path}.field({i})")
             if sub != "":
                 return sub
+
+        # Check for duplicate fields
+        if not self.is_tuple:
+            seen_fields = set()
+            for field in self._fields:
+                if field in seen_fields:
+                    return f"at {path} ({type(self)!r}): duplicate field {field!r}"
+                seen_fields.add(field)
         return ""
 
     def _nbytes_part(self):
