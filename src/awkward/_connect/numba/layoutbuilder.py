@@ -705,7 +705,7 @@ class Indexed(LayoutBuilder):
         start = self._content._length
         stop = start + size
         self._last_valid = stop - 1
-        self._index.extend(list(range(start, stop)), size)
+        self._index.extend(list(range(start, stop)))
         return self._content
 
     def parameters(self):
@@ -759,14 +759,15 @@ class Indexed(LayoutBuilder):
             )
         )
 
+
 ########## IndexedOption #######################################################
 
 
 @final
 class IndexedOption(LayoutBuilder):
-    def __init__(self, PRIMITIVE, content, parameters):
+    def __init__(self, dtype, content, *, parameters=None):
         self._last_valid = -1
-        self._index = GrowableBuffer(PRIMITIVE)
+        self._index = GrowableBuffer(dtype=dtype)
         self._content = content
         self._parameters = parameters
         self._id = 0
@@ -776,22 +777,22 @@ class IndexedOption(LayoutBuilder):
         return self._content
 
     def append_index(self):
-        self._last_valid = self._content.length()
+        self._last_valid = len(self._content)
         self._index.append(self._last_valid)
         return self._content
 
     def extend_index(self, size):
-        start = self._content.length()
+        start = len(self._content)
         stop = start + size
         self._last_valid = stop - 1
-        self._index.extend(list(range(start, stop)), size)
+        self._index.extend(list(range(start, stop)))
         return self._content
 
     def append_null(self):
         self._index.append(-1)
 
     def extend_null(self, size):
-        self._index.extend([-1] * size, size)
+        self._index.extend([-1] * size)
 
     def parameters(self):
         return self._parameters
@@ -807,10 +808,13 @@ class IndexedOption(LayoutBuilder):
         self._content.clear()
 
     def length(self):
-        return self._index.length()
+        return self._index._length
+
+    def __len__(self):
+        return self.length()
 
     def is_valid(self, error: str):
-        if self._content.length() != self._last_valid + 1:
+        if len(self._content) != self._last_valid + 1:
             error = f"Indexed node{self._id} has content length {self._content.length()} but last valid index is {self._last_valid}"
             return False
         else:
@@ -827,6 +831,17 @@ class IndexedOption(LayoutBuilder):
     def form(self):
         params = "" if self._parameters == "" else f", parameters: {self._parameters}"
         return f'{{"class": "IndexedOptionArray", "index": "{self._index.index_form()}", "content": {self._content.form()}, "form_key": "node{self._id}"{params}}}'
+
+    def snapshot(self) -> ArrayLike:
+        """
+        Converts the currently accumulated data into an #ak.Array.
+        """
+        return ak.Array(
+            ak.contents.IndexedOptionArray(
+                ak.index.Index64(self._index.snapshot()),
+                self._content.snapshot().layout,
+            )
+        )
 
 
 ########## ByteMasked #########################################################

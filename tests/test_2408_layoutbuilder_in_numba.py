@@ -183,19 +183,36 @@ def test_Indexed():
     builder.append_index()
     subbuilder.append(2.2)
 
-    data = np.array([3.3, 4.4, 5.5], dtype=np.float32)
-    # FIXME: extend
-    # builder.extend_index(3)
-    # subbuilder.extend(data, 3)
+    data = np.array([3.3, 4.4, 5.5], dtype=np.float64)
+    builder.extend_index(3)
+    subbuilder.extend(data)
 
     array = builder.snapshot()
-    assert ak.to_list(array) == [1.1, 2.2] # FIXME:, 3.3, 4.4, 5.5]
+    assert ak.to_list(array) == [1.1, 2.2, 3.3, 4.4, 5.5]
+
+
+def test_IndexedOption():
+    builder = lb.IndexedOption(np.int64, lb.Numpy(np.float64))
+    assert len(builder) == 0
+
+    subbuilder = builder.append_index()
+    subbuilder.append(1.1)
+    builder.append_null()
+
+    data = np.array([3.3, 4.4, 5.5], dtype=np.float64)
+    builder.extend_index(3)
+    subbuilder.extend(data)  # , 3)
+
+    builder.extend_null(2)
+    array = builder.snapshot()
+    assert ak.to_list(array) == [1.1, None, 3.3, 4.4, 5.5, None, None]
+
 
 #
 # def test_unbox():
 #     @numba.njit
 #     def f1(x):
-#         x  # noqa: B018 (we want to test the unboxing)
+#         x  # (we want to test the unboxing)
 #         return 3.14
 #
 #     builder = lb.Numpy(np.int32, parameters="", initial=10, resize=2.0)
