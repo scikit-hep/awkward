@@ -88,6 +88,9 @@ class GrowableBuffer:
     def __len__(self):
         return self._length
 
+    def last(self):
+        return self._panels[-1][self._pos - 1]
+
     def append(self, datum):
         if self._pos == len(self._panels[-1]):
             self._add_panel()

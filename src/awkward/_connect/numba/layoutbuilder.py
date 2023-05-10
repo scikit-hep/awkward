@@ -502,8 +502,8 @@ class ListOffset(LayoutBuilder):
 
     def is_valid(self, error: str):
         # FIXME: implement GrowableBuffer.last()
-        if len(self._content) != self._offsets._panels[-1][self._offsets._pos - 1]:
-            error = f"ListOffset node{self._id} has content length {len(self._content)} but last offset {self._offsets._panels[-1][self._offsets._pos]}"
+        if len(self._content) != self._offsets.last():
+            error = f"ListOffset node{self._id} has content length {len(self._content)} but last offset {self._offsets.last()}"
             return False
         else:
             return self._content.is_valid(error)
@@ -673,9 +673,11 @@ class Regular(LayoutBuilder):
         """
         Converts the currently accumulated data into an #ak.Array.
         """
-        return ak.contents.RegularArray(
-            self._content.snapshot().layout,
-            self._size,
+        return ak.Array(
+            ak.contents.RegularArray(
+                self._content.snapshot().layout,
+                self._size,
+            )
         )
 
 
