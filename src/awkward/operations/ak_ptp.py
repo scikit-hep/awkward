@@ -6,11 +6,12 @@ from awkward._connect.numpy import unsupported
 from awkward._layout import maybe_posaxis
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
+from awkward._util import unset
 
 np = NumpyMetadata.instance()
 
 
-def ptp(array, axis=None, *, keepdims=False, mask_identity=True):
+def ptp(array, axis=None, *, keepdims=False, mask_identity=True, flatten_records=unset):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
@@ -66,6 +67,16 @@ def ptp(array, axis=None, *, keepdims=False, mask_identity=True):
             "mask_identity": mask_identity,
         },
     ):
+        if flatten_records is not unset:
+            message = (
+                "`flatten_records` is no longer a supported argument for reducers. "
+                "Instead, use `ak.ravel(array)` first to remove the record structure "
+                "and flatten the array."
+            )
+            if flatten_records:
+                raise ValueError(message)
+            else:
+                ak._errors.deprecate(message, "2.2.0")
         return _impl(array, axis, keepdims, mask_identity)
 
 

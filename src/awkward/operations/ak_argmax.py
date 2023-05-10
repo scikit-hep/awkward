@@ -6,6 +6,7 @@ from awkward._connect.numpy import unsupported
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
+from awkward._util import unset
 
 np = NumpyMetadata.instance()
 
@@ -16,6 +17,7 @@ def argmax(
     *,
     keepdims=False,
     mask_identity=True,
+    flatten_records=unset,
     highlevel=True,
     behavior=None,
 ):
@@ -69,6 +71,16 @@ def argmax(
             "behavior": behavior,
         },
     ):
+        if flatten_records is not unset:
+            message = (
+                "`flatten_records` is no longer a supported argument for reducers. "
+                "Instead, use `ak.ravel(array)` first to remove the record structure "
+                "and flatten the array."
+            )
+            if flatten_records:
+                raise ValueError(message)
+            else:
+                ak._errors.deprecate(message, "2.2.0")
         return _impl(array, axis, keepdims, mask_identity, highlevel, behavior)
 
 
@@ -78,6 +90,7 @@ def nanargmax(
     *,
     keepdims=False,
     mask_identity=True,
+    flatten_records=unset,
     highlevel=True,
     behavior=None,
 ):
@@ -122,6 +135,16 @@ def nanargmax(
             "behavior": behavior,
         },
     ):
+        if flatten_records is not unset:
+            message = (
+                "`flatten_records` is no longer a supported argument for reducers. "
+                "Instead, use `ak.ravel(array)` first to remove the record structure "
+                "and flatten the array."
+            )
+            if flatten_records:
+                raise ValueError(message)
+            else:
+                ak._errors.deprecate(message, "2.2.0")
         array = ak.operations.ak_nan_to_none._impl(array, False, None)
 
         return _impl(array, axis, keepdims, mask_identity, highlevel, behavior)

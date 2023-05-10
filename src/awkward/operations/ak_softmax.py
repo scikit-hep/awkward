@@ -5,11 +5,14 @@ from awkward._behavior import behavior_of
 from awkward._nplikes import ufuncs
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
+from awkward._util import unset
 
 np = NumpyMetadata.instance()
 
 
-def softmax(x, axis=None, *, keepdims=False, mask_identity=False):
+def softmax(
+    x, axis=None, *, keepdims=False, mask_identity=False, flatten_records=unset
+):
     """
     Args:
         x: The data on which to compute the softmax (anything #ak.to_layout recognizes).
@@ -51,6 +54,16 @@ def softmax(x, axis=None, *, keepdims=False, mask_identity=False):
             "mask_identity": mask_identity,
         },
     ):
+        if flatten_records is not unset:
+            message = (
+                "`flatten_records` is no longer a supported argument for reducers. "
+                "Instead, use `ak.ravel(array)` first to remove the record structure "
+                "and flatten the array."
+            )
+            if flatten_records:
+                raise ValueError(message)
+            else:
+                ak._errors.deprecate(message, "2.2.0")
         return _impl(x, axis, keepdims, mask_identity)
 
 
