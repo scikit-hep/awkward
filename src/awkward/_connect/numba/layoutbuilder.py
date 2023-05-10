@@ -685,9 +685,9 @@ class Regular(LayoutBuilder):
 
 @final
 class Indexed(LayoutBuilder):
-    def __init__(self, PRIMITIVE, content, parameters):
+    def __init__(self, dtype, content, *, parameters=None):
         self._last_valid = -1
-        self._index = GrowableBuffer(PRIMITIVE)
+        self._index = GrowableBuffer(dtype=dtype)
         self._content = content
         self._parameters = parameters
         self._id = 0
@@ -722,7 +722,10 @@ class Indexed(LayoutBuilder):
         self._content.clear()
 
     def length(self):
-        return self._index._length()
+        return self._index._length
+
+    def __len__(self):
+        return self.length()
 
     def is_valid(self, error: str):
         if self._content.length() != self._index.length():
@@ -745,6 +748,16 @@ class Indexed(LayoutBuilder):
         params = "" if self._parameters == "" else f", parameters: {self._parameters}"
         return f'{{"class": "IndexedArray", "index": "{self._index.index_form()}", "content": {self._content.form()}, "form_key": "node{self._id}"{params}}}'
 
+    def snapshot(self) -> ArrayLike:
+        """
+        Converts the currently accumulated data into an #ak.Array.
+        """
+        return ak.Array(
+            ak.contents.IndexedArray(
+                ak.index.Index64(self._index.snapshot()),
+                self._content.snapshot().layout,
+            )
+        )
 
 ########## IndexedOption #######################################################
 
