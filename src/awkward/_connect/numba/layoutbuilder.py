@@ -501,7 +501,6 @@ class ListOffset(LayoutBuilder):
         return self._length
 
     def is_valid(self, error: str):
-        # FIXME: implement GrowableBuffer.last()
         if len(self._content) != self._offsets.last():
             error = f"ListOffset node{self._id} has content length {len(self._content)} but last offset {self._offsets.last()}"
             return False
