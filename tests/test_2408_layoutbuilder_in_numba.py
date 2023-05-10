@@ -208,6 +208,41 @@ def test_IndexedOption():
     assert ak.to_list(array) == [1.1, None, 3.3, 4.4, 5.5, None, None]
 
 
+def test_Record():
+    builder = lb.Record(
+        {
+            "one": lb.Numpy(np.float64),
+            "two": lb.Numpy(np.int64),
+            "three": lb.Numpy(np.uint8),
+        }
+    )
+    assert len(builder) == 0
+
+    one_builder = builder.field("one")
+    two_builder = builder.field("two")
+    three_builder = builder.field("three")
+
+    three_builder.append(0x61)  #'a')
+
+    one_builder.append(1.1)
+    one_builder.append(3.3)
+
+    two_builder.append(2)
+    two_builder.append(4)
+
+    three_builder.append(0x62)  #'b')
+
+    array = builder.snapshot()
+    assert ak.to_list(array) == [
+        {"one": 1.1, "two": 2, "three": 97},  # FIXME: 'a'},
+        {"one": 3.3, "two": 4, "three": 98},  # FIXME: 'b'},
+    ]
+
+
+def test_IndexedOption_Record():
+    pass
+
+
 #
 # def test_unbox():
 #     @numba.njit

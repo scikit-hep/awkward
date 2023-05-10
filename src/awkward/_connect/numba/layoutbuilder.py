@@ -1109,12 +1109,13 @@ class Record(LayoutBuilder):
     def __init__(self, field_pairs, *, parameters=None):
         assert len(field_pairs) != 0
         self._field_pairs = field_pairs
-        self._first_content = field_pairs[0].content
+        self._first_pair = next(iter(field_pairs.items()))
+        self._first_content = self._first_pair[1]  # field_pairs[0].content
         self._parameters = parameters
         self._id = 0
 
     def field(self, name):
-        return self._field_pairs[name].content
+        return self._field_pairs[name]  # .content
 
     def parameters(self):
         return self._parameters
@@ -1130,7 +1131,10 @@ class Record(LayoutBuilder):
             pair.content.clear()
 
     def length(self):
-        return self._first_content.length()
+        return len(self._first_content)
+
+    def __len__(self):
+        return self.length()
 
     def is_valid(self, error: str):
         length = -1
@@ -1160,6 +1164,23 @@ class Record(LayoutBuilder):
             for pair in self._field_pairs.values()
         )
         return f'{{"class": "RecordArray", "contents": {{{pairs}}}, "form_key": "node{self._id}"{params}}}'
+
+    def snapshot(self) -> ArrayLike:
+        """
+        Converts the currently accumulated data into an #ak.Array.
+        """
+        contents = []
+        fields = []
+        for field, content in self._field_pairs.items():
+            contents.append(content.snapshot().layout)
+            fields.append(field)
+
+        return ak.Array(
+            ak.contents.RecordArray(
+                contents,
+                fields,
+            )
+        )
 
 
 ########## Tuple #######################################################
