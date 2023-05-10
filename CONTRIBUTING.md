@@ -279,7 +279,8 @@ To make an `awkward-cpp` release:
 
 #### `awkward` releases
 To make an `awkward` release:
-1. A new GitHub release must be published.
-2. A `docs/switcher.json` entry must be added for new minor/major versions.
+1. A commit to `main` should increase the version number in `pyproject.toml`
+2. A new GitHub release must be published.
+3. A `docs/switcher.json` entry must be added for new minor/major versions.
 
 Pushes that modify `docs/switcher.json` on `main` will automatically be synchronised with AWS.
