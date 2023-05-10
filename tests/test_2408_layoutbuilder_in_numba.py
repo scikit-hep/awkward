@@ -213,7 +213,7 @@ def test_Record():
         {
             "one": lb.Numpy(np.float64),
             "two": lb.Numpy(np.int64),
-            "three": lb.Numpy(np.uint8),
+            "three": lb.Numpy(np.uint8),  # FIXME: char
         }
     )
     assert len(builder) == 0
@@ -240,7 +240,29 @@ def test_Record():
 
 
 def test_IndexedOption_Record():
-    pass
+    builder = lb.IndexedOption(
+        np.int64, lb.Record({"x": lb.Numpy(np.float64), "y": lb.Numpy(np.int64)})
+    )
+    assert len(builder) == 0
+    subbuilder = builder.append_index()
+    x_builder = subbuilder.field("x")
+    y_builder = subbuilder.field("y")
+
+    x_builder.append(1.1)
+    y_builder.append(2)
+
+    builder.append_null()
+
+    builder.append_index()
+    x_builder.append(3.3)
+    y_builder.append(4)
+
+    array = builder.snapshot()
+    assert ak.to_list(array) == [
+        {"x": 1.1, "y": 2},
+        None,
+        {"x": 3.3, "y": 4},
+    ]
 
 
 #
