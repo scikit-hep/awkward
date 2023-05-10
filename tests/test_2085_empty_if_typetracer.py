@@ -30,7 +30,7 @@ def test():
     form = layout.form_with_key("node{id}")
 
     meta, report = typetracer_with_report(form)
-    meta = ak._util.wrap(meta, ak._util.behavior_of(array))
+    meta = ak.Array(meta)
 
     func(meta)
     assert report.data_touched == ["node0", "node2", "node3"]
