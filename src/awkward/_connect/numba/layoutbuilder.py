@@ -850,8 +850,14 @@ class IndexedOption(LayoutBuilder):
 
 @final
 class ByteMasked(LayoutBuilder):
-    def __init__(self, content, valid_when, *, parameters=None):
-        self._mask = GrowableBuffer("int8")
+    def __init__(
+        self,
+        content,
+        *,
+        parameters=None,
+        valid_when=True,
+    ):
+        self._mask = GrowableBuffer("bool")
         self._content = content
         self._valid_when = valid_when
         self._parameters = parameters
@@ -869,7 +875,7 @@ class ByteMasked(LayoutBuilder):
         return self._content
 
     def extend_valid(self, size):
-        self._mask.extend([self._valid_when] * size, size)
+        self._mask.extend([self._valid_when] * size)
         return self._content
 
     def append_null(self):
@@ -877,7 +883,7 @@ class ByteMasked(LayoutBuilder):
         return self._content
 
     def extend_null(self, size):
-        self._mask.extend([not self._valid_when] * size, size)
+        self._mask.extend([not self._valid_when] * size)
         return self._content
 
     def parameters(self):
@@ -916,6 +922,18 @@ class ByteMasked(LayoutBuilder):
     def form(self):
         params = "" if self._parameters == "" else f", parameters: {self._parameters}"
         return f'{{"class": "ByteMaskedArray", "mask": "{self._mask.index_form()}", "valid_when": {json.dumps(self._valid_when)}, "content": {self._content.form()}, "form_key": "node{self._id}"{params}}}'
+
+    def snapshot(self) -> ArrayLike:
+        """
+        Converts the currently accumulated data into an #ak.Array.
+        """
+        return ak.Array(
+            ak.contents.ByteMaskedArray(
+                ak.index.Index8(self._mask.snapshot()),
+                self._content.snapshot().layout,
+                valid_when=self._valid_when,
+            )
+        )
 
 
 ########## BitMasked #########################################################

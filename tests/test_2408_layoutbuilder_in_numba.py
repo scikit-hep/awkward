@@ -348,8 +348,25 @@ def test_Unmasked():
 
 
 def test_ByteMasked():
-    builder = lb.ByteMasked(True, lb.Numpy(np.float64))
+    builder = lb.ByteMasked(lb.Numpy(np.float64), valid_when=True)
     assert len(builder) == 0
+
+    content = builder.append_valid()
+    content.append(1.1)
+
+    builder.append_null()
+    content.append(np.nan)
+
+    data = np.array([3.3, 4.4, 5.5], dtype=np.float64)
+    builder.extend_valid(3)
+    content.extend(data)
+
+    builder.extend_null(2)
+    content.append(np.nan)
+    content.append(np.nan)
+
+    array = builder.snapshot()
+    assert ak.to_list(array) == [1.1, None, 3.3, 4.4, 5.5, None, None]
 
 
 #
