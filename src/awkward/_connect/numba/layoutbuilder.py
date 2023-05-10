@@ -71,6 +71,7 @@ class Numpy(LayoutBuilder):
         return f"<Numpy of {self.dtype!r} with {self._length} items>"
 
     def _type(self, typestrs):
+        return f"lb.Numpy{self.dtype}"
         ...
 
     @property
@@ -697,17 +698,17 @@ class Indexed(LayoutBuilder):
     def content(self):
         return self._content
 
-    def append_index(self):
+    def append(self, datum):
         self._last_valid = self._content._length
         self._index.append(self._last_valid)
-        return self._content
+        self._content.append(datum)
 
-    def extend_index(self, size):
+    def extend(self, data):
         start = self._content._length
-        stop = start + size
+        stop = start + len(data)
         self._last_valid = stop - 1
         self._index.extend(list(range(start, stop)))
-        return self._content
+        self._content.extend(data)
 
     def parameters(self):
         return self._parameters
@@ -777,17 +778,17 @@ class IndexedOption(LayoutBuilder):
     def content(self):
         return self._content
 
-    def append_index(self):
+    def append(self, datum):
         self._last_valid = len(self._content)
         self._index.append(self._last_valid)
-        return self._content
+        self._content.append(datum)
 
-    def extend_index(self, size):
+    def extend(self, data):
         start = len(self._content)
-        stop = start + size
+        stop = start + len(data)
         self._last_valid = stop - 1
         self._index.extend(list(range(start, stop)))
-        return self._content
+        self._content.extend(data)
 
     def append_null(self):
         self._index.append(-1)
@@ -944,10 +945,12 @@ class BitMasked(LayoutBuilder):
     def __init__(
         self,
         content,
+        valid_when,
+        lsb_order,
         *,
         parameters=None,
-        valid_when=True,
-        lsb_order=True,
+        # valid_when=True,
+        # lsb_order=True,
     ):
         self._mask = GrowableBuffer("uint8")
         self._content = content
@@ -1155,20 +1158,13 @@ class Unmasked(LayoutBuilder):
 ########## Record #########################################################
 
 
-# class FieldPair:
-#     def __init__(self, name, content):
-#         self.name = name
-#         self.content = content
-#
-
-
 @final
 class Record(LayoutBuilder):
-    def __init__(self, field_pairs, *, parameters=None):
-        assert len(field_pairs) != 0
-        self._field_pairs = field_pairs
-        self._first_pair = next(iter(field_pairs.items()))
-        self._first_content = self._first_pair[1]  # field_pairs[0].content
+    def __init__(self, contents, fields, *, parameters=None):
+        assert len(fields) != 0
+        self._contents = contents
+        self._fields = fields
+        self._first_content = self._contents[0]
         self._parameters = parameters
         self._id = 0
 
@@ -1177,12 +1173,6 @@ class Record(LayoutBuilder):
 
     def parameters(self):
         return self._parameters
-
-    def set_id(self, id: int):
-        self._id = id
-        id += 1
-        for pair in self._field_pairs.values():
-            pair.content.set_id(id)
 
     def clear(self):
         for pair in self._field_pairs.values():
@@ -1196,24 +1186,17 @@ class Record(LayoutBuilder):
 
     def is_valid(self, error: str):
         length = -1
-        for pair in self._field_pairs.values():
+        # for pair in self._field_pairs.values():
+        for i in enumerate(self._contents):
             if length == -1:
-                length = pair.content.length()
-            elif length != pair.content.length():
-                error = f"Record node{self._id} has field {pair.name} length {pair.content.length()} that differs from the first length {length}"
+                length = len(self._contents[i])
+            elif length != len(self._contents[i]):
+                error = f"Record node{self._id} has field {self._fields[i]} length {len(self._contents[i])} that differs from the first length {length}"
                 return False
-        for pair in self._field_pairs.values():
-            if not pair.content.is_valid(error):
+        for content in self._contents:
+            if not content.is_valid(error):
                 return False
         return True
-
-    def buffer_nbytes(self, names_nbytes):
-        for pair in self._field_pairs.values():
-            pair.content.buffer_nbytes(names_nbytes)
-
-    def to_buffers(self, buffers):
-        for pair in self._field_pairs.values():
-            pair.content.to_buffers(buffers)
 
     def form(self):
         params = "" if self._parameters == "" else f", parameters: {self._parameters}"
@@ -1228,20 +1211,20 @@ class Record(LayoutBuilder):
         Converts the currently accumulated data into an #ak.Array.
         """
         contents = []
-        fields = []
-        for field, content in self._field_pairs.items():
+        for content in self._contents:
             contents.append(content.snapshot().layout)
-            fields.append(field)
 
         return ak.Array(
             ak.contents.RecordArray(
                 contents,
-                fields,
+                self._fields,
             )
         )
 
 
 ########## Tuple #######################################################
+
+# FIXME: same as Record!!
 
 
 @final
@@ -1320,6 +1303,7 @@ class Tuple(LayoutBuilder):
 ########## EmptyRecord #######################################################
 
 
+# FIXME: is needed???
 @final
 class EmptyRecord(LayoutBuilder):
     def __init__(self, is_tuple, *, parameters=None):

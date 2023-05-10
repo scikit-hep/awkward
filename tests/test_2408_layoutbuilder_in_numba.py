@@ -176,15 +176,11 @@ def test_Indexed():
     builder = lb.Indexed(np.int64, lb.Numpy(np.float64))
     assert len(builder) == 0
 
-    content = builder.append_index()
-    content.append(1.1)
-
-    builder.append_index()
-    content.append(2.2)
+    builder.append(1.1)
+    builder.append(2.2)
 
     data = np.array([3.3, 4.4, 5.5], dtype=np.float64)
-    builder.extend_index(3)
-    content.extend(data)
+    builder.extend(data)
 
     array = builder.snapshot()
     assert ak.to_list(array) == [1.1, 2.2, 3.3, 4.4, 5.5]
@@ -194,13 +190,11 @@ def test_IndexedOption():
     builder = lb.IndexedOption(np.int64, lb.Numpy(np.float64))
     assert len(builder) == 0
 
-    content = builder.append_index()
-    content.append(1.1)
+    builder.append(1.1)
     builder.append_null()
 
     data = np.array([3.3, 4.4, 5.5], dtype=np.float64)
-    builder.extend_index(3)
-    content.extend(data)
+    builder.extend(data)
 
     builder.extend_null(2)
     array = builder.snapshot()
@@ -209,11 +203,12 @@ def test_IndexedOption():
 
 def test_Record():
     builder = lb.Record(
-        {
-            "one": lb.Numpy(np.float64),
-            "two": lb.Numpy(np.int64),
-            "three": lb.Numpy(np.uint8),  # FIXME: char
-        }
+        [
+            lb.Numpy(np.float64),
+            lb.Numpy(np.int64),
+            lb.Numpy(np.uint8),
+        ],
+        ["one", "two", "three"],
     )
     assert len(builder) == 0
 
@@ -243,9 +238,8 @@ def test_IndexedOption_Record():
         np.int64, lb.Record({"x": lb.Numpy(np.float64), "y": lb.Numpy(np.int64)})
     )
     assert len(builder) == 0
-    b = builder.append_index()
-    x = b.field("x")
-    y = b.field("y")
+    x = builder.field("x")
+    y = builder.field("y")
 
     x.append(1.1)
     y.append(2)
@@ -373,7 +367,9 @@ def test_ByteMasked():
     " AttributeError: 'GrowableBuffer' object has no attribute 'append_and_get_ref'"
 )
 def test_BitMasked():
-    builder = lb.BitMasked(lb.Numpy(np.float64), valid_when=True, lsb_order=True)
+    builder = lb.BitMasked(
+        True, True, lb.Numpy(np.float64)
+    )  # , valid_when=True, lsb_order=True)
     assert len(builder) == 0
 
 
