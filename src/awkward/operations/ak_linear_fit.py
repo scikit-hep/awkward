@@ -7,7 +7,6 @@ from awkward._layout import wrap_layout
 from awkward._nplikes import ufuncs
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
-from awkward._util import unset
 
 np = NumpyMetadata.instance()
 
@@ -20,7 +19,6 @@ def linear_fit(
     *,
     keepdims=False,
     mask_identity=False,
-    flatten_records=unset,
 ):
     """
     Args:
@@ -43,8 +41,6 @@ def linear_fit(
             empty lists results in None (an option type); otherwise, the
             calculation is followed through with the reducers' identities,
             usually resulting in floating-point `nan`.
-        flatten_records (bool): If True, axis=None combines fields from
-            different records; otherwise, records raise an error.
 
     Computes the linear fit of `y` with respect to `x` (many types supported,
     including all Awkward Arrays and Records, must be broadcastable to each

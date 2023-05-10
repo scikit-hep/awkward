@@ -6,7 +6,6 @@ from awkward._connect.numpy import unsupported
 from awkward._layout import maybe_posaxis
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
-from awkward._util import unset
 
 np = NumpyMetadata.instance()
 
@@ -19,7 +18,6 @@ def var(
     *,
     keepdims=False,
     mask_identity=False,
-    flatten_records=unset,
 ):
     """
     Args:
@@ -81,16 +79,6 @@ def var(
             "mask_identity": mask_identity,
         },
     ):
-        if flatten_records is not unset:
-            message = (
-                "`flatten_records` is no longer a supported argument for reducers. "
-                "Instead, use `ak.ravel(array)` first to remove the record structure "
-                "and flatten the array."
-            )
-            if flatten_records:
-                raise ValueError(message)
-            else:
-                ak._errors.deprecate(message, "2.2.0")
         return _impl(x, weight, ddof, axis, keepdims, mask_identity)
 
 
@@ -102,7 +90,6 @@ def nanvar(
     *,
     keepdims=False,
     mask_identity=True,
-    flatten_records=unset,
 ):
     """
     Args:
@@ -149,16 +136,6 @@ def nanvar(
             "mask_identity": mask_identity,
         },
     ):
-        if flatten_records is not unset:
-            message = (
-                "`flatten_records` is no longer a supported argument for reducers. "
-                "Instead, use `ak.ravel(array)` first to remove the record structure "
-                "and flatten the array."
-            )
-            if flatten_records:
-                raise ValueError(message)
-            else:
-                ak._errors.deprecate(message, "2.2.0")
         x = ak.operations.ak_nan_to_none._impl(x, False, None)
         if weight is not None:
             weight = ak.operations.ak_nan_to_none._impl(weight, False, None)
