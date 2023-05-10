@@ -4,7 +4,8 @@ import numpy as np
 import pytest  # noqa: F401
 
 import awkward as ak
-from awkward._nplikes.typetracer import TypeTracer, typetracer_with_report
+from awkward._nplikes.typetracer import TypeTracer
+from awkward.typetracer import typetracer_with_report
 
 typetracer = TypeTracer.instance()
 
