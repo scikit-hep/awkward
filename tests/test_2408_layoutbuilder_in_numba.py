@@ -329,6 +329,29 @@ def test_EmptyRecord():
     assert ak.to_list(array) == [(), (), ()]
 
 
+def test_Unmasked():
+    builder = lb.Unmasked(lb.Numpy(np.int64))
+    assert len(builder) == 0
+
+    content = builder.append_valid()
+    content.append(11)
+    content.append(22)
+    content.append(33)
+    content.append(44)
+    content.append(55)
+
+    err = ""
+    assert builder.is_valid(err) is True
+
+    array = builder.snapshot()
+    assert ak.to_list(array) == [11, 22, 33, 44, 55]
+
+
+def test_ByteMasked():
+    builder = lb.ByteMasked(True, lb.Numpy(np.float64))
+    assert len(builder) == 0
+
+
 #
 # def test_unbox():
 #     @numba.njit

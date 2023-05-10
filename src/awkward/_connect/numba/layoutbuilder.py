@@ -850,7 +850,7 @@ class IndexedOption(LayoutBuilder):
 
 @final
 class ByteMasked(LayoutBuilder):
-    def __init__(self, content, valid_when, parameters):
+    def __init__(self, content, valid_when, *, parameters=None):
         self._mask = GrowableBuffer("int8")
         self._content = content
         self._valid_when = valid_when
@@ -893,7 +893,10 @@ class ByteMasked(LayoutBuilder):
         self._content.clear()
 
     def length(self):
-        return self._mask.length()
+        return len(self._mask)
+
+    def __len__(self):
+        return self.length()
 
     def is_valid(self, error: str):
         if self._content.length() != self._mask.length():
@@ -920,7 +923,7 @@ class ByteMasked(LayoutBuilder):
 
 @final
 class BitMasked(LayoutBuilder):
-    def __init__(self, content, valid_when, lsb_order, parameters):
+    def __init__(self, content, valid_when, lsb_order, *, parameters=None):
         self._mask = GrowableBuffer("uint8")
         self._content = content
         self._valid_when = valid_when
@@ -1028,6 +1031,9 @@ class BitMasked(LayoutBuilder):
     def length(self):
         return (self._mask.length() - 1) * 8 + self._current_index
 
+    def __len__(self):
+        return self.length()
+
     def is_valid(self, error: str):
         if self._content.length() != self.length():
             error = f"BitMasked node{self._id} has content length {self._content.length()} but bit mask length {self.length()}"
@@ -1053,7 +1059,7 @@ class BitMasked(LayoutBuilder):
 
 @final
 class Unmasked(LayoutBuilder):
-    def __init__(self, content, parameters):
+    def __init__(self, content, *, parameters=None):
         self._content = content
         self._parameters = parameters
         self._id = 0
@@ -1080,7 +1086,10 @@ class Unmasked(LayoutBuilder):
         self._content.clear()
 
     def length(self):
-        return self._content.length()
+        return len(self._content)
+
+    def __len__(self):
+        return self.length()
 
     def is_valid(self, error: str):
         return self._content.is_valid(error)
@@ -1094,6 +1103,16 @@ class Unmasked(LayoutBuilder):
     def form(self):
         params = "" if self._parameters == "" else f", parameters: {self._parameters}"
         return f'{{"class": "UnmaskedArray", "content": {self._content.form()}, "form_key": "node{self._id}"{params}}}'
+
+    def snapshot(self) -> ArrayLike:
+        """
+        Converts the currently accumulated data into an #ak.Array.
+        """
+        return ak.Array(
+            ak.contents.UnmaskedArray(
+                self._content.snapshot().layout,
+            )
+        )
 
 
 ########## Record #########################################################
@@ -1391,3 +1410,19 @@ class Union(LayoutBuilder):
         params = "" if self._parameters == "" else f", parameters: {self._parameters}"
         contents = ", ".join(content.form() for content in self._contents)
         return f'{{"class": "UnionArray", "tags": "{self._tags.index_form()}", "index": "{self._index.index_form()}", "contents": [{contents}], "form_key": "node{self._id}"{params}}}'
+
+    def snapshot(self) -> ArrayLike:
+        """
+        Converts the currently accumulated data into an #ak.Array.
+        """
+        contents = []
+        for content in self._contents:
+            contents.append(content.snapshot().layout)
+
+        return ak.Array(
+            ak.contents.UnionArray(
+                ak.index.Index8(self._tags.snapshot()),
+                ak.index.Index64(self._index.snapshot()),
+                contents,
+            )
+        )
