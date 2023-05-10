@@ -676,6 +676,7 @@ class Regular(LayoutBuilder):
             ak.contents.RegularArray(
                 self._content.snapshot().layout,
                 self._size,
+                self.length(),
             )
         )
 
@@ -1312,7 +1313,7 @@ class EmptyRecord(LayoutBuilder):
         """
         Converts the currently accumulated data into an #ak.Array.
         """
-        contents = [] if self._is_tuple else {{}}
+        contents = [] if self._is_tuple else {}
 
         return ak.Array(
             ak.contents.RecordArray(

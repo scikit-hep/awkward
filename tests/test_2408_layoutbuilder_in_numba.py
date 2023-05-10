@@ -156,7 +156,6 @@ def test_Regular():
     assert builder.is_valid(error), error.value
 
 
-@pytest.mark.skip("FIXME: []")
 def test_Regular_size0():
     builder = lb.Regular(lb.Numpy(np.float64), 0)
     assert len(builder) == 0
@@ -306,6 +305,18 @@ def test_Tuple_Numpy_ListOffset():
 
 def test_EmptyRecord():
     builder = lb.EmptyRecord(True)
+    assert len(builder) == 0
+
+    builder.append()
+    assert len(builder) == 1
+
+    builder.extend(2)
+    assert len(builder) == 3
+
+    array = builder.snapshot()
+    assert ak.to_list(array) == [(), (), ()]
+
+    builder = lb.EmptyRecord(False)
     assert len(builder) == 0
 
     builder.append()
