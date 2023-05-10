@@ -137,8 +137,40 @@ def test_Regular():
     assert isinstance(array, ak.Array)
     assert ak.to_list(array) == []
 
+    subbuilder = builder.begin_list()
+    subbuilder.append(1.1)
+    subbuilder.append(2.2)
+    subbuilder.append(3.3)
+    builder.end_list()
+
+    builder.begin_list()
+    subbuilder.append(4.4)
+    subbuilder.append(5.5)
+    subbuilder.append(6.6)
+    builder.end_list()
+
+    array = builder.snapshot()
+    assert ak.to_list(array) == [[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]
+
     error = ""
     assert builder.is_valid(error), error.value
+
+
+@pytest.mark.skip("FIXME: []")
+def test_Regular_size0():
+    builder = lb.Regular(lb.Numpy(np.float64), 0)
+    assert len(builder) == 0
+
+    builder.begin_list()
+    builder.end_list()
+
+    builder.begin_list()
+    builder.end_list()
+
+    assert len(builder) == 2
+
+    array = builder.snapshot()
+    assert ak.to_list(array) == [[], []]
 
 
 def test_unbox():
