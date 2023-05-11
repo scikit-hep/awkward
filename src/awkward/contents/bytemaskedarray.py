@@ -800,7 +800,9 @@ class ByteMaskedArray(Content):
             negaxis, starts, parents, outlength, ascending, stable, behavior
         )
 
-    def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
+    def _combinations(
+        self, n, replacement, recordlookup, parameters, axis, depth, behavior
+    ):
         if n < 1:
             raise ValueError("in combinations, 'n' must be at least 1")
         posaxis = maybe_posaxis(self, axis, depth)
@@ -811,7 +813,7 @@ class ByteMaskedArray(Content):
 
             next = self._content._carry(nextcarry, True)
             out = next._combinations(
-                n, replacement, recordlookup, parameters, axis, depth
+                n, replacement, recordlookup, parameters, axis, depth, behavior
             )
             return ak.contents.IndexedOptionArray.simplified(
                 outindex, out, parameters=parameters

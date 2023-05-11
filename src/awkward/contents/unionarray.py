@@ -1177,7 +1177,9 @@ class UnionArray(Content):
                 parameters=self._parameters,
             )
 
-    def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
+    def _combinations(
+        self, n, replacement, recordlookup, parameters, axis, depth, behavior
+    ):
         posaxis = maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
@@ -1186,7 +1188,7 @@ class UnionArray(Content):
             for content in self._contents:
                 contents.append(
                     content._combinations(
-                        n, replacement, recordlookup, parameters, axis, depth
+                        n, replacement, recordlookup, parameters, axis, depth, behavior
                     )
                 )
             return ak.unionarray.UnionArray(

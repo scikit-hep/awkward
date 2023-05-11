@@ -1259,9 +1259,11 @@ class ListArray(Content):
             negaxis, starts, parents, outlength, ascending, stable, behavior
         )
 
-    def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
+    def _combinations(
+        self, n, replacement, recordlookup, parameters, axis, depth, behavior
+    ):
         return ListOffsetArray._combinations(
-            self, n, replacement, recordlookup, parameters, axis, depth
+            self, n, replacement, recordlookup, parameters, axis, depth, behavior
         )
 
     def _reduce_next(

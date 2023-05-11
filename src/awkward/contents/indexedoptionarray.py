@@ -1449,7 +1449,9 @@ class IndexedOptionArray(Content):
                 outoffsets, inner, parameters=self._parameters
             )
 
-    def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
+    def _combinations(
+        self, n, replacement, recordlookup, parameters, axis, depth, behavior
+    ):
         posaxis = maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
@@ -1457,7 +1459,7 @@ class IndexedOptionArray(Content):
             _, nextcarry, outindex = self._nextcarry_outindex()
             next = self._content._carry(nextcarry, True)
             out = next._combinations(
-                n, replacement, recordlookup, parameters, axis, depth
+                n, replacement, recordlookup, parameters, axis, depth, behavior
             )
             return IndexedOptionArray.simplified(outindex, out, parameters=parameters)
 

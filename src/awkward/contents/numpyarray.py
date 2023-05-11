@@ -1064,7 +1064,9 @@ class NumpyArray(Content):
                 backend=self._backend,
             )
 
-    def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
+    def _combinations(
+        self, n, replacement, recordlookup, parameters, axis, depth, behavior
+    ):
         posaxis = maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
@@ -1072,7 +1074,7 @@ class NumpyArray(Content):
             raise AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
         else:
             return self.to_RegularArray()._combinations(
-                n, replacement, recordlookup, parameters, axis, depth
+                n, replacement, recordlookup, parameters, axis, depth, behavior
             )
 
     def _reduce_next(

@@ -923,6 +923,7 @@ class Content:
         parameters: dict[str, Any] | None,
         axis: int,
         depth: int,
+        behavior: dict | None = None,
     ):
         raise NotImplementedError
 

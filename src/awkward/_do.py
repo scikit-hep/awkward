@@ -129,6 +129,7 @@ def combinations(
     axis: Integral = 1,
     fields: list[str] | None = None,
     parameters: dict | None = None,
+    behavior: dict | None = None,
 ):
     if n < 1:
         raise ValueError("in combinations, 'n' must be at least 1")
@@ -138,7 +139,9 @@ def combinations(
         recordlookup = fields
         if len(recordlookup) != n:
             raise ValueError("if provided, the length of 'fields' must be 'n'")
-    return layout._combinations(n, replacement, recordlookup, parameters, axis, 1)
+    return layout._combinations(
+        n, replacement, recordlookup, parameters, axis, 1, behavior
+    )
 
 
 def is_unique(

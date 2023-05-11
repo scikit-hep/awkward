@@ -416,14 +416,16 @@ class UnmaskedArray(Content):
         else:
             return out
 
-    def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
+    def _combinations(
+        self, n, replacement, recordlookup, parameters, axis, depth, behavior
+    ):
         posaxis = maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         else:
             return ak.contents.UnmaskedArray(
                 self._content._combinations(
-                    n, replacement, recordlookup, parameters, axis, depth
+                    n, replacement, recordlookup, parameters, axis, depth, behavior
                 ),
                 parameters=self._parameters,
             )

@@ -302,7 +302,9 @@ class EmptyArray(Content):
     ):
         return self
 
-    def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
+    def _combinations(
+        self, n, replacement, recordlookup, parameters, axis, depth, behavior
+    ):
         return ak.contents.EmptyArray(
             parameters=self._parameters, backend=self._backend
         )

@@ -1353,7 +1353,9 @@ class ListOffsetArray(Content):
                 outoffsets, outcontent, parameters=self._parameters
             )
 
-    def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
+    def _combinations(
+        self, n, replacement, recordlookup, parameters, axis, depth, behavior
+    ):
         index_nplike = self._backend.index_nplike
 
         posaxis = maybe_posaxis(self, axis, depth)
@@ -1458,7 +1460,7 @@ class ListOffsetArray(Content):
         else:
             compact = self.to_ListOffsetArray64(True)
             next = compact._content._combinations(
-                n, replacement, recordlookup, parameters, axis, depth + 1
+                n, replacement, recordlookup, parameters, axis, depth + 1, behavior
             )
             return ak.contents.ListOffsetArray(
                 compact.offsets, next, parameters=self._parameters

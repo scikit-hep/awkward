@@ -875,7 +875,9 @@ class RegularArray(Content):
 
         return out
 
-    def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
+    def _combinations(
+        self, n, replacement, recordlookup, parameters, axis, depth, behavior
+    ):
         index_nplike = self._backend.index_nplike
 
         posaxis = maybe_posaxis(self, axis, depth)
@@ -963,7 +965,9 @@ class RegularArray(Content):
             length = self._length * self._size
             next = self._content._getitem_range(
                 0, index_nplike.shape_item_as_index(length)
-            )._combinations(n, replacement, recordlookup, parameters, axis, depth + 1)
+            )._combinations(
+                n, replacement, recordlookup, parameters, axis, depth + 1, behavior
+            )
             return ak.contents.RegularArray(
                 next, self._size, self._length, parameters=self._parameters
             )

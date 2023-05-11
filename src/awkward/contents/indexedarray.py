@@ -910,13 +910,15 @@ class IndexedArray(Content):
             negaxis, starts, parents, outlength, ascending, stable, behavior
         )
 
-    def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
+    def _combinations(
+        self, n, replacement, recordlookup, parameters, axis, depth, behavior
+    ):
         posaxis = maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         else:
             return self.project()._combinations(
-                n, replacement, recordlookup, parameters, axis, depth
+                n, replacement, recordlookup, parameters, axis, depth, behavior
             )
 
     def _reduce_next(
