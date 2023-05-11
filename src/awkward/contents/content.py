@@ -1329,7 +1329,9 @@ class Content:
     def _repr(self, indent: str, pre: str, post: str) -> str:
         raise NotImplementedError
 
-    def _numbers_to_type(self, name: str, including_unknown: bool) -> Content:
+    def _numbers_to_type(
+        self, name: str, including_unknown: bool, behavior: Mapping
+    ) -> Content:
         raise NotImplementedError
 
     def _fill_none(self, value: Content) -> Content:

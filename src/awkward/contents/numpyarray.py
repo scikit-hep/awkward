@@ -8,6 +8,7 @@ from awkward._backends.backend import Backend
 from awkward._backends.dispatch import backend_of
 from awkward._backends.numpy import NumpyBackend
 from awkward._backends.typetracer import TypeTracerBackend
+from awkward._behavior import is_subtype
 from awkward._errors import AxisError
 from awkward._layout import maybe_posaxis
 from awkward._nplikes import to_nplike
@@ -660,12 +661,9 @@ class NumpyArray(Content):
 
         return out2, nextoffsets[: outlength[0]]
 
-    def _numbers_to_type(self, name, including_unknown):
-        if (
-            self.parameter("__array__") == "string"
-            or self.parameter("__array__") == "bytestring"
-            or self.parameter("__array__") == "char"
-            or self.parameter("__array__") == "byte"
+    def _numbers_to_type(self, name, including_unknown, behavior):
+        if is_subtype(
+            behavior, self.parameter("__array__"), ("stringlike", "char", "byte")
         ):
             return self
         else:

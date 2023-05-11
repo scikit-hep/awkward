@@ -804,7 +804,7 @@ class RecordArray(Content):
                 backend=self._backend,
             )
 
-    def _numbers_to_type(self, name, including_unknown):
+    def _numbers_to_type(self, name, including_unknown, behavior):
         contents = []
         for x in self._contents:
             contents.append(x._numbers_to_type(name, including_unknown))

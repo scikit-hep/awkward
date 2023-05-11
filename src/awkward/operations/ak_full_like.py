@@ -1,7 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("full_like",)
 import awkward as ak
-from awkward._behavior import behavior_of
+from awkward._behavior import behavior_of, is_subtype
 from awkward._connect.numpy import unsupported
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
@@ -136,8 +136,8 @@ def _impl(array, fill_value, highlevel, behavior, dtype, including_unknown):
             else:
                 return None
 
-        elif layout.parameter("__array__") in {"bytestring", "string"}:
-            stringlike_type = layout.parameter("__array__")
+        elif is_subtype(behavior, layout.parameter("__array__"), ("string", "bytes")):
+            nominal_type = layout.parameter("__array__")
             if fill_value is _ZEROS:
                 asbytes = nplike.frombuffer(b"", dtype=np.uint8)
                 result = ak.contents.ListArray(
@@ -153,14 +153,14 @@ def _impl(array, fill_value, highlevel, behavior, dtype, including_unknown):
                         asbytes,
                         parameters={
                             "__array__": "byte"
-                            if stringlike_type == "bytestring"
+                            if is_subtype(behavior, nominal_type, "bytestring")
                             else "char"
                         },
                     ),
-                    parameters={"__array__": stringlike_type},
+                    parameters={"__array__": nominal_type},
                 )
 
-            elif stringlike_type == "bytestring":
+            elif is_subtype(behavior, nominal_type, "bytestring"):
                 if isinstance(fill_value, bytes):
                     asbytes = fill_value
                 else:
@@ -176,11 +176,10 @@ def _impl(array, fill_value, highlevel, behavior, dtype, including_unknown):
                         index_nplike.full(layout.length, len(asbytes), dtype=np.int64)
                     ),
                     ak.contents.NumpyArray(asbytes, parameters={"__array__": "byte"}),
-                    parameters={"__array__": "bytestring"},
+                    parameters={"__array__": nominal_type},
                 )
 
             else:
-                assert stringlike_type == "string"
                 asstr = str(fill_value).encode("utf-8", "surrogateescape")
                 asbytes = nplike.frombuffer(asstr, dtype=np.uint8)
                 result = ak.contents.ListArray(
@@ -192,7 +191,7 @@ def _impl(array, fill_value, highlevel, behavior, dtype, including_unknown):
                         index_nplike.full(layout.length, len(asbytes), dtype=np.int64)
                     ),
                     ak.contents.NumpyArray(asbytes, parameters={"__array__": "char"}),
-                    parameters={"__array__": "string"},
+                    parameters={"__array__": nominal_type},
                 )
             if dtype is not None:
                 # Interpret strings as numeric/bool types

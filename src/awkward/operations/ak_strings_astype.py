@@ -1,7 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("strings_astype",)
 import awkward as ak
-from awkward._behavior import behavior_of
+from awkward._behavior import behavior_of, is_subtype
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
@@ -54,9 +54,8 @@ def _impl(array, to, highlevel, behavior):
     to_dtype = np.dtype(to)
 
     def action(layout, **kwargs):
-        if layout.is_list and (
-            layout.parameter("__array__") == "string"
-            or layout.parameter("__array__") == "bytestring"
+        if layout.is_list and is_subtype(
+            behavior, layout.parameter("__array__"), "stringlike"
         ):
             layout = ak.operations.without_parameters(
                 layout, highlevel=False, behavior=behavior

@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("values_astype",)
 import awkward as ak
+from awkward._behavior import behavior_of, overlay_behavior
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 
@@ -66,8 +67,11 @@ def values_astype(array, to, *, including_unknown=False, highlevel=True, behavio
 
 
 def _impl(array, to, including_unknown, highlevel, behavior):
+    behavior = behavior_of(array, behavior=behavior)
     to_dtype = np.dtype(to)
     to_str = ak.types.numpytype.dtype_to_primitive(to_dtype)
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
-    out = ak._do.numbers_to_type(layout, to_str, including_unknown)
+    out = ak._do.numbers_to_type(
+        layout, to_str, including_unknown, overlay_behavior(behavior)
+    )
     return wrap_layout(out, behavior, highlevel, like=array)

@@ -855,10 +855,10 @@ class ListOffsetArray(Content):
                 self._offsets, self._content._local_index(axis, depth + 1)
             )
 
-    def _numbers_to_type(self, name, including_unknown):
+    def _numbers_to_type(self, name, including_unknown, behavior):
         return ak.contents.ListOffsetArray(
             self._offsets,
-            self._content._numbers_to_type(name, including_unknown),
+            self._content._numbers_to_type(name, including_unknown, behavior),
             parameters=self._parameters,
         )
 

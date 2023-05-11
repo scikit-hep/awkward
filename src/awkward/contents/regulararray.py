@@ -794,9 +794,9 @@ class RegularArray(Content):
                 self._content._local_index(axis, depth + 1), self._size, self._length
             )
 
-    def _numbers_to_type(self, name, including_unknown):
+    def _numbers_to_type(self, name, including_unknown, behavior):
         return ak.contents.RegularArray(
-            self._content._numbers_to_type(name, including_unknown),
+            self._content._numbers_to_type(name, including_unknown, behavior),
             self._size,
             self._length,
             parameters=self._parameters,

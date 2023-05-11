@@ -5,6 +5,7 @@ import copy
 
 import awkward as ak
 from awkward._backends.backend import Backend
+from awkward._behavior import is_subtype
 from awkward._layout import maybe_posaxis
 from awkward._nplikes.numpylike import IndexType, NumpyMetadata
 from awkward._nplikes.shape import unknown_length
@@ -1211,11 +1212,11 @@ class ListArray(Content):
                 self._content._local_index(axis, depth + 1),
             )
 
-    def _numbers_to_type(self, name, including_unknown):
+    def _numbers_to_type(self, name, including_unknown, behavior):
         return ak.contents.ListArray(
             self._starts,
             self._stops,
-            self._content._numbers_to_type(name, including_unknown),
+            self._content._numbers_to_type(name, including_unknown, behavior),
             parameters=self._parameters,
         )
 
@@ -1441,9 +1442,11 @@ class ListArray(Content):
 
     def _to_backend_array(self, allow_missing, behavior, backend):
         array_param = self.parameter("__array__")
-        if array_param in {"bytestring", "string"}:
+        if is_subtype(behavior, array_param, ("string", "bytestring")):
             # As our array-of-strings _may_ be empty, we should pass the dtype
-            dtype = np.str_ if array_param == "string" else np.bytes_
+            dtype = (
+                np.str_ if is_subtype(behavior, array_param, "string") else np.bytes_
+            )
             return backend.nplike.asarray(self.to_list(), dtype=dtype)
         else:
             return self.to_RegularArray()._to_backend_array(

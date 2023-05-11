@@ -3,7 +3,7 @@ __all__ = ("run_lengths",)
 import awkward as ak
 from awkward._backends.dispatch import backend_of
 from awkward._backends.numpy import NumpyBackend
-from awkward._behavior import behavior_of
+from awkward._behavior import behavior_of, is_subtype
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
@@ -151,10 +151,7 @@ def _impl(array, highlevel, behavior):
             if layout.is_indexed:
                 layout = layout.project()
 
-            if (
-                layout.parameter("__array__") == "string"
-                or layout.parameter("__array__") == "bytestring"
-            ):
+            if is_subtype(behavior, layout.parameter("__array__"), "stringlike"):
                 nextcontent, _ = lengths_of(ak.highlevel.Array(layout), None)
                 return ak.contents.NumpyArray(nextcontent)
 
@@ -171,10 +168,7 @@ def _impl(array, highlevel, behavior):
             if not layout.is_list:
                 raise NotImplementedError("run_lengths on " + type(layout).__name__)
 
-            if (
-                layout.content.parameter("__array__") == "string"
-                or layout.content.parameter("__array__") == "bytestring"
-            ):
+            if is_subtype(behavior, layout.parameter("__array__"), "stringlike"):
                 # We also want to trim the _upper_ bound of content,
                 # so we manually convert the list type to zero-based
                 listoffsetarray = layout.to_ListOffsetArray64(False)

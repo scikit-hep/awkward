@@ -269,7 +269,7 @@ class EmptyArray(Content):
         else:
             raise AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
 
-    def _numbers_to_type(self, name, including_unknown):
+    def _numbers_to_type(self, name, including_unknown, behavior):
         if including_unknown:
             return self.to_NumpyArray(ak.types.numpytype.primitive_to_dtype(name))
         else:

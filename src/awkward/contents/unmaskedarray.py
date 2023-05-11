@@ -357,9 +357,9 @@ class UnmaskedArray(Content):
                 self._content._local_index(axis, depth), parameters=self._parameters
             )
 
-    def _numbers_to_type(self, name, including_unknown):
+    def _numbers_to_type(self, name, including_unknown, behavior):
         return ak.contents.UnmaskedArray(
-            self._content._numbers_to_type(name, including_unknown),
+            self._content._numbers_to_type(name, including_unknown, behavior),
             parameters=self._parameters,
         )
 

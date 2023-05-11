@@ -3,7 +3,7 @@ __all__ = ("cartesian",)
 import awkward as ak
 from awkward._backends.dispatch import backend_of
 from awkward._backends.numpy import NumpyBackend
-from awkward._behavior import behavior_of
+from awkward._behavior import behavior_of, is_subtype
 from awkward._errors import AxisError
 from awkward._layout import maybe_posaxis, wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
@@ -345,10 +345,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
             if depth == posaxis:
                 n_inside = len(array_layouts) - i - 1
                 n_outside = i
-                if (
-                    layout.parameter("__array__") == "string"
-                    or layout.parameter("__array__") == "bytestring"
-                ):
+                if is_subtype(behavior, layout.parameter("__array__"), "stringlike"):
                     raise ValueError(
                         "ak.cartesian does not compute combinations of the "
                         "characters of a string; please split it into lists"
