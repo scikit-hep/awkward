@@ -1236,8 +1236,6 @@ class Record(LayoutBuilder):
 
 ########## Tuple #######################################################
 
-# FIXME: same as Record!!
-
 
 @final
 class Tuple(LayoutBuilder):
@@ -1315,7 +1313,6 @@ class Tuple(LayoutBuilder):
 ########## EmptyRecord #######################################################
 
 
-# FIXME: is needed???
 @final
 class EmptyRecord(LayoutBuilder):
     def __init__(self, is_tuple, *, parameters=None):
@@ -1381,17 +1378,17 @@ class EmptyRecord(LayoutBuilder):
 
 @final
 class Union(LayoutBuilder):
-    def __init__(self, PRIMITIVE, contents, parameters):
+    def __init__(self, dtype, contents, *, parameters=None):
         self._last_valid_index = [-1] * len(contents)
         self._tags = GrowableBuffer("int8")
-        self._index = GrowableBuffer(PRIMITIVE)
+        self._index = GrowableBuffer(dtype=dtype)
         self._contents = contents
         self._parameters = parameters
         self._id = 0
 
     def append_index(self, tag):
         which_content = self._contents[tag]
-        next_index = which_content.length()
+        next_index = len(which_content)
         self._last_valid_index[tag] = next_index
         self._tags.append(tag)
         self._index.append(next_index)
@@ -1415,7 +1412,10 @@ class Union(LayoutBuilder):
             content.clear()
 
     def length(self):
-        return self._tags.length()
+        return len(self._tags)
+
+    def __len__(self):
+        return self.length()
 
     def is_valid(self, error: str):
         for tag, _value in self._last_valid_index:
