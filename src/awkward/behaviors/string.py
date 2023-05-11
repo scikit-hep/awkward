@@ -277,3 +277,6 @@ def register(behavior):
 
     behavior["__cast__", str] = _cast_bytes_or_str_to_string
     behavior["__cast__", bytes] = _cast_bytes_or_str_to_string
+
+    behavior["__super__", "string"] = "stringlike"
+    behavior["__super__", "bytestring"] = "stringlike"
