@@ -967,6 +967,7 @@ class Content:
         starts: Index,
         parents: Index,
         outlength: int,
+        behavior: dict | None,
     ):
         raise NotImplementedError
 

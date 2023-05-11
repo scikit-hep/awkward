@@ -763,7 +763,7 @@ class IndexedArray(Content):
         next = self._content._carry(nextindex, False)
         return next._is_unique(negaxis, starts, parents, outlength, behavior)
 
-    def _unique(self, negaxis, starts, parents, outlength):
+    def _unique(self, negaxis, starts, parents, outlength, behavior):
         if self._index.length == 0:
             return self
 
@@ -801,12 +801,7 @@ class IndexedArray(Content):
             )
         )
         next = self._content._carry(nextcarry, False)
-        unique = next._unique(
-            negaxis,
-            starts,
-            nextparents,
-            outlength,
-        )
+        unique = next._unique(negaxis, starts, nextparents, outlength, behavior)
 
         if branch or (negaxis is not None and negaxis != depth):
             nextoutindex = ak.index.Index64.empty(

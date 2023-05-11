@@ -809,14 +809,11 @@ class RegularArray(Content):
             negaxis, starts, parents, outlength, behavior
         )
 
-    def _unique(self, negaxis, starts, parents, outlength):
+    def _unique(self, negaxis, starts, parents, outlength, behavior):
         if self._length == 0:
             return self
         out = self.to_ListOffsetArray64(True)._unique(
-            negaxis,
-            starts,
-            parents,
-            outlength,
+            negaxis, starts, parents, outlength, behavior
         )
 
         if isinstance(out, ak.contents.RegularArray):

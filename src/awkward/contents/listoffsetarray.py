@@ -920,7 +920,7 @@ class ListOffsetArray(Content):
                 negaxis, starts, nextparents, outlength, behavior
             )
 
-    def _unique(self, negaxis, starts, parents, outlength):
+    def _unique(self, negaxis, starts, parents, outlength, behavior):
         if self._offsets.length - 1 == 0:
             return self
 
@@ -962,10 +962,7 @@ class ListOffsetArray(Content):
 
             nextcontent = self._content._carry(nextcarry, False)
             outcontent = nextcontent._unique(
-                negaxis - 1,
-                nextstarts,
-                nextparents,
-                maxnextparents[0] + 1,
+                negaxis - 1, nextstarts, nextparents, maxnextparents[0] + 1, behavior
             )
 
             outcarry = ak.index.Index64.empty(
@@ -1020,6 +1017,7 @@ class ListOffsetArray(Content):
                 self._offsets[:-1],
                 nextparents,
                 self._offsets.length - 1,
+                behavior,
             )
 
             if negaxis is None or negaxis == depth - 1:

@@ -596,11 +596,11 @@ class BitMaskedArray(Content):
             negaxis, starts, parents, outlength, behavior
         )
 
-    def _unique(self, negaxis, starts, parents, outlength):
+    def _unique(self, negaxis, starts, parents, outlength, behavior):
         if self._mask.length == 0:
             return self
         out = self.to_IndexedOptionArray64()._unique(
-            negaxis, starts, parents, outlength
+            negaxis, starts, parents, outlength, behavior
         )
         if negaxis is None:
             return out

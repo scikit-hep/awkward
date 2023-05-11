@@ -686,13 +686,13 @@ class NumpyArray(Content):
                 negaxis, starts, parents, outlength, behavior
             )
         else:
-            out = self._unique(negaxis, starts, parents, outlength)
+            out = self._unique(negaxis, starts, parents, outlength, behavior)
             if isinstance(out, ak.contents.ListOffsetArray):
                 return out.content.length == self.length
 
             return out.length == self.length
 
-    def _unique(self, negaxis, starts, parents, outlength):
+    def _unique(self, negaxis, starts, parents, outlength, behavior):
         if self.shape[0] == 0:
             return self
 
@@ -753,10 +753,7 @@ class NumpyArray(Content):
         if len(self.shape) != 1 or not self.is_contiguous:
             contiguous_self = self.to_contiguous()
             return contiguous_self.to_RegularArray()._unique(
-                negaxis,
-                starts,
-                parents,
-                outlength,
+                negaxis, starts, parents, outlength, behavior
             )
         else:
             parents_length = parents.length

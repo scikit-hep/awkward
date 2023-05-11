@@ -278,7 +278,7 @@ class EmptyArray(Content):
     def _is_unique(self, negaxis, starts, parents, outlength, behavior: dict | None):
         return True
 
-    def _unique(self, negaxis, starts, parents, outlength):
+    def _unique(self, negaxis, starts, parents, outlength, behavior):
         return self
 
     def _argsort_next(

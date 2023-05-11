@@ -1227,12 +1227,12 @@ class ListArray(Content):
             negaxis, starts, parents, outlength, behavior
         )
 
-    def _unique(self, negaxis, starts, parents, outlength):
+    def _unique(self, negaxis, starts, parents, outlength, behavior):
         if self._starts.length is not unknown_length and self._starts.length == 0:
             return self
 
         return self.to_ListOffsetArray64(True)._unique(
-            negaxis, starts, parents, outlength
+            negaxis, starts, parents, outlength, behavior
         )
 
     def _argsort_next(

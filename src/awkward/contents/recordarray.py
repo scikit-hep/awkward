@@ -822,7 +822,7 @@ class RecordArray(Content):
                 return False
         return True
 
-    def _unique(self, negaxis, starts, parents, outlength):
+    def _unique(self, negaxis, starts, parents, outlength, behavior):
         raise NotImplementedError
 
     def _argsort_next(

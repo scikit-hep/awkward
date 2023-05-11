@@ -922,7 +922,7 @@ class IndexedOptionArray(Content):
         projected = self.project()
         return projected._is_unique(negaxis, starts, parents, outlength, behavior)
 
-    def _unique(self, negaxis, starts, parents, outlength):
+    def _unique(self, negaxis, starts, parents, outlength, behavior):
         branch, depth = self.branch_depth
 
         inject_nones = (
@@ -933,12 +933,7 @@ class IndexedOptionArray(Content):
 
         next, nextparents, numnull, outindex = self._rearrange_prepare_next(parents)
 
-        out = next._unique(
-            negaxis,
-            starts,
-            nextparents,
-            outlength,
-        )
+        out = next._unique(negaxis, starts, nextparents, outlength, behavior)
 
         if branch or (negaxis is not None and negaxis != depth):
             nextoutindex = ak.index.Index64.empty(

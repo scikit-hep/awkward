@@ -150,7 +150,7 @@ def is_unique(
     return layout._is_unique(negaxis, starts, parents, 1, behavior)
 
 
-def unique(layout: Content, axis=None):
+def unique(layout: Content, axis=None, behavior: dict | None = None):
     if axis == -1 or axis is None:
         negaxis = axis if axis is None else -axis
         if negaxis is not None:
@@ -184,7 +184,7 @@ def unique(layout: Content, axis=None):
             layout.length, nplike=layout._backend.index_nplike
         )
 
-        return layout._unique(negaxis, starts, parents, 1)
+        return layout._unique(negaxis, starts, parents, 1, behavior)
 
     raise AxisError(
         "unique expects axis 'None' or '-1', got axis={} that is not supported yet".format(
