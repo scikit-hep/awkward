@@ -144,6 +144,20 @@ def find_array_typestr(
     return behavior.get(("__typestr__", parameters.get("__array__")), default)
 
 
+def is_subtype(behavior: None | Mapping, type_name: str, supertype_name: str) -> bool:
+    behavior = overlay_behavior(behavior)
+    while type_name is not None:
+        if type_name == supertype_name:
+            return True
+        type_name = behavior.get(("__super__", type_name))
+    return False
+
+
+def find_supertype(behavior: None | Mapping, type_name: str) -> bool:
+    behavior = overlay_behavior(behavior)
+    return behavior.get(("__super__", type_name))
+
+
 def behavior_of(*arrays, **kwargs):
     from awkward.highlevel import Array, ArrayBuilder, Record
 
