@@ -49,8 +49,8 @@ class Numpy(LayoutBuilder):
     @classmethod
     def _from_buffer(cls, data):
         out = cls.__new__(cls)
-        out._data = data  # GrowableBuffer(dtype=dtype, initial=initial, resize=resize)
-        out._parameters = ""  # FIXME: parameters?
+        out._data = data
+        out._parameters = None
         return out
 
     def __repr__(self):
@@ -85,7 +85,9 @@ class Numpy(LayoutBuilder):
         """
         Converts the currently accumulated data into an #ak.Array.
         """
-        return ak.Array(ak.contents.NumpyArray(self._data.snapshot()))
+        return ak.Array(
+            ak.contents.NumpyArray(self._data.snapshot(), parameters=self._parameters)
+        )
 
 
 class NumpyType(numba.types.Type):
@@ -269,7 +271,7 @@ class Empty(LayoutBuilder):
     @classmethod
     def _from_buffer(cls):
         out = cls.__new__(cls)
-        out._parameters = ""  # FIXME: parameters?
+        out._parameters = None
         return out
 
     def __repr__(self):
@@ -298,7 +300,7 @@ class Empty(LayoutBuilder):
         return True
 
     def snapshot(self) -> ArrayLike:
-        return ak.Array(ak.contents.EmptyArray())
+        return ak.Array(ak.contents.EmptyArray(parameters=self._parameters))
 
 
 class EmptyType(numba.types.Type):
@@ -442,6 +444,7 @@ class ListOffset(LayoutBuilder):
             ak.contents.listoffsetarray.ListOffsetArray(
                 ak.index.Index(self._offsets.snapshot()),
                 content.layout,
+                parameters=self._parameters,
             )
         )
 
@@ -501,6 +504,7 @@ class List(LayoutBuilder):
                 ak.index.Index(self._starts.snapshot()),
                 ak.index.Index(self._stops.snapshot()),
                 self._content.snapshot().layout,
+                parameters=self._parameters,
             )
         )
 
@@ -554,6 +558,7 @@ class Regular(LayoutBuilder):
                 self._content.snapshot().layout,
                 self._size,
                 self.length(),
+                parameters=self._parameters,
             )
         )
 
@@ -628,6 +633,7 @@ class Indexed(LayoutBuilder):
             ak.contents.IndexedArray(
                 ak.index.Index64(self._index.snapshot()),
                 self._content.snapshot().layout,
+                parameters=self._parameters,
             )
         )
 
@@ -706,6 +712,7 @@ class IndexedOption(LayoutBuilder):
             ak.contents.IndexedOptionArray(
                 ak.index.Index64(self._index.snapshot()),
                 self._content.snapshot().layout,
+                parameters=self._parameters,
             )
         )
 
@@ -779,6 +786,7 @@ class ByteMasked(LayoutBuilder):
                 ak.index.Index8(self._mask.snapshot()),
                 self._content.snapshot().layout,
                 valid_when=self._valid_when,
+                parameters=self._parameters,
             )
         )
 
@@ -918,6 +926,7 @@ class BitMasked(LayoutBuilder):
                 valid_when=self._valid_when,
                 length=self.length(),
                 lsb_order=self._lsb_order,
+                parameters=self._parameters,
             )
         )
 
@@ -963,6 +972,7 @@ class Unmasked(LayoutBuilder):
         return ak.Array(
             ak.contents.UnmaskedArray(
                 self._content.snapshot().layout,
+                parameters=self._parameters,
             )
         )
 
@@ -1021,6 +1031,7 @@ class Record(LayoutBuilder):
             ak.contents.RecordArray(
                 contents,
                 self._fields,
+                parameters=self._parameters,
             )
         )
 
@@ -1077,6 +1088,7 @@ class Tuple(LayoutBuilder):
             ak.contents.RecordArray(
                 contents,
                 None,
+                parameters=self._parameters,
             )
         )
 
@@ -1123,6 +1135,7 @@ class EmptyRecord(LayoutBuilder):
                 contents,
                 None,
                 self.length(),
+                parameters=self._parameters,
             )
         )
 
@@ -1187,5 +1200,6 @@ class Union(LayoutBuilder):
                 ak.index.Index8(self._tags.snapshot()),
                 ak.index.Index64(self._index.snapshot()),
                 contents,
+                parameters=self._parameters,
             )
         )

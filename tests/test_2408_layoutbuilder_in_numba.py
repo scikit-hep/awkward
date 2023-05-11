@@ -29,14 +29,21 @@ def test_Numpy():
 
     assert builder.type == "ak.numba.lb.Numpy(float64)"
 
-    array1 = builder.snapshot()
-    assert str(ak.type(array1)) == "5 * float64"
-    assert ak.to_list(array1) == [1.1, 2.2, 3.3, 4.4, 5.5]
+
+def test_Numpy_char():
+    builder = lb.Numpy(np.uint8, parameters={"__array__": "char"})
+    builder.append(97)
+    builder.append(98)
+    builder.append(99)
+
+    array = builder.snapshot()
+    assert str(ak.type(array)) == "3 * char"
+    assert ak.to_list(array) == "abc"  # FIXME: ['a', 'b', 'c']????
 
 
 def test_python_append():
     # small 'initial' and 'resize' for testing
-    builder = lb.Numpy(np.int32, parameters="", initial=10, resize=2.0)
+    builder = lb.Numpy(np.int32, parameters=None, initial=10, resize=2.0)
     assert ak.to_list(builder.snapshot()) == []
     assert len(builder) == 0
 
@@ -499,7 +506,7 @@ def test_unbox():
         x  # noqa: B018 (we want to test the unboxing)
         return 3.14
 
-    builder = lb.Numpy(np.int32, parameters="", initial=10, resize=2.0)
+    builder = lb.Numpy(np.int32, parameters=None, initial=10, resize=2.0)
     f1(builder)
 
     builder = lb.Empty()
@@ -513,7 +520,7 @@ def test_unbox_for_loop():
             x.append(i)
         return
 
-    builder = lb.Numpy(np.int64, parameters="", initial=10, resize=2.0)
+    builder = lb.Numpy(np.int64, parameters=None, initial=10, resize=2.0)
     f1(builder)
     assert ak.to_list(builder.snapshot()) == list(range(10))
 
@@ -551,7 +558,7 @@ def test_len():
     def f3(x):
         return len(x)
 
-    builder = lb.Numpy(np.int32, parameters="", initial=10, resize=2.0)
+    builder = lb.Numpy(np.int32, parameters=None, initial=10, resize=2.0)
 
     assert f3(builder) == 0
 
