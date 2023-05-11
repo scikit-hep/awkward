@@ -956,20 +956,18 @@ class ByteMasked(LayoutBuilder):
 class BitMasked(LayoutBuilder):
     def __init__(
         self,
-        content,
         valid_when,
         lsb_order,
+        content,
         *,
         parameters=None,
-        # valid_when=True,
-        # lsb_order=True,
     ):
         self._mask = GrowableBuffer("uint8")
         self._content = content
         self._valid_when = valid_when
         self._lsb_order = lsb_order
         self._current_byte = np.uint8(0)
-        self._current_byteref = self._mask.append_and_get_ref(self._current_byte)
+        self._mask.append(self._current_byte)
         self._current_index = 0
         if self._lsb_order:
             self._cast = np.array(
@@ -1016,7 +1014,7 @@ class BitMasked(LayoutBuilder):
         """
         if self._current_index == 8:
             self._current_byte = np.uint8(0)
-            self._current_byteref = self._mask.append_and_get_ref(self._current_byte)
+            self._mask.append(self._current_byte)
             self._current_index = 0
 
     def _append_end(self):
@@ -1026,10 +1024,10 @@ class BitMasked(LayoutBuilder):
         self._current_index += 1
         if self._valid_when:
             # 0 indicates null, 1 indicates valid
-            self._current_byteref.value = self._current_byte
+            self._mask._panels[-1][self._mask._pos - 1] = self._current_byte
         else:
             # 0 indicates valid, 1 indicates null
-            self._current_byteref.value = ~self._current_byte
+            self._mask._panels[-1][self._mask._pos - 1] = ~self._current_byte
 
     def append_valid(self):
         self._append_begin()
@@ -1069,7 +1067,7 @@ class BitMasked(LayoutBuilder):
         self._content.clear()
 
     def length(self):
-        return (self._mask.length() - 1) * 8 + self._current_index
+        return (len(self._mask) - 1) * 8 + self._current_index
 
     def __len__(self):
         return self.length()
@@ -1099,9 +1097,11 @@ class BitMasked(LayoutBuilder):
         """
         return ak.Array(
             ak.contents.BitMaskedArray(
-                ak.index.Index8(self._mask.snapshot()),
+                ak.index.Index(self._mask.snapshot()),
                 self._content.snapshot().layout,
                 valid_when=self._valid_when,
+                length=self.length(),
+                lsb_order=self._lsb_order,
             )
         )
 

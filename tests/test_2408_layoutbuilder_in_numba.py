@@ -388,14 +388,46 @@ def test_ByteMasked():
     assert ak.to_list(array) == [1.1, None, 3.3, 4.4, 5.5, None, None]
 
 
-@pytest.mark.skip(
-    " AttributeError: 'GrowableBuffer' object has no attribute 'append_and_get_ref'"
-)
 def test_BitMasked():
-    builder = lb.BitMasked(
-        True, True, lb.Numpy(np.float64)
-    )  # , valid_when=True, lsb_order=True)
+    builder = lb.BitMasked(True, True, lb.Numpy(np.float64))
     assert len(builder) == 0
+
+    subbuilder = builder.append_valid()
+    subbuilder.append(1.1)
+    assert len(builder) == 1
+    array = builder.snapshot()
+    assert ak.to_list(array) == [1.1]
+
+    builder.append_null()
+    subbuilder.append(np.nan)
+    assert len(builder) == 2
+
+    data = np.array([3.3, 4.4, 5.5], dtype=np.float64)
+
+    builder.extend_valid(3)
+    subbuilder.extend(data)
+    assert len(builder) == 5
+
+    builder.extend_null(2)
+    subbuilder.append(np.nan)
+    subbuilder.append(np.nan)
+
+    assert len(builder) == 7
+
+    builder.append_valid()
+    subbuilder.append(8)
+    assert len(builder) == 8
+
+    builder.append_valid()
+    subbuilder.append(9)
+    assert len(builder) == 9
+
+    builder.append_valid()
+    subbuilder.append(10)
+    assert len(builder) == 10
+
+    array = builder.snapshot()
+    assert ak.to_list(array) == [1.1, None, 3.3, 4.4, 5.5, None, None, 8, 9, 10]
 
 
 def test_unbox():
