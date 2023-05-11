@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 import awkward as ak
-from awkward._behavior import find_typestr
 from awkward._parameters import type_parameters_equal
 from awkward._typing import final
 from awkward._util import unset
@@ -124,7 +123,7 @@ class ByteMaskedForm(Form):
         return ak.types.OptionType(
             self._content._type(typestrs),
             parameters=self._parameters,
-            typestr=find_typestr(self._parameters, typestrs),
+            #
         ).simplify_option_union()
 
     def __eq__(self, other):
