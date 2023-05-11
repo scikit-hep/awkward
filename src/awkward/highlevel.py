@@ -17,7 +17,12 @@ import awkward as ak
 import awkward._connect.hist
 from awkward._backends.dispatch import register_backend_lookup_factory
 from awkward._backends.numpy import NumpyBackend
-from awkward._behavior import behavior_of, get_array_class, get_record_class
+from awkward._behavior import (
+    behavior_of,
+    get_array_class,
+    get_record_class,
+    overlay_behavior,
+)
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
@@ -947,7 +952,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         have the same dimension as the array being indexed.
         """
         with ak._errors.SlicingErrorContext(self, where):
-            out = self._layout[where]
+            out = self._layout._getitem(
+                where, overlay_behavior(behavior_of(self, where))
+            )
             if isinstance(out, ak.contents.NumpyArray):
                 array_param = out.parameter("__array__")
                 if array_param == "byte":

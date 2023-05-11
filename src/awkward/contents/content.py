@@ -13,7 +13,12 @@ from awkward._backends.dispatch import (
     register_backend_lookup_factory,
     regularize_backend,
 )
-from awkward._behavior import get_array_class, get_record_class
+from awkward._behavior import (
+    get_array_class,
+    get_record_class,
+    is_subtype,
+    overlay_behavior,
+)
 from awkward._layout import wrap_layout
 from awkward._nplikes import to_nplike
 from awkward._nplikes.dispatch import nplike_of
@@ -533,9 +538,9 @@ class Content:
             )
 
     def __getitem__(self, where):
-        return self._getitem(where)
+        return self._getitem(where, None)
 
-    def _getitem(self, where):
+    def _getitem(self, where, behavior: Mapping):
         if is_integer_like(where):
             return self._getitem_at(ak._slicing.normalize_integer_like(where))
 
@@ -547,16 +552,16 @@ class Content:
             return self._getitem_range(start, stop)
 
         elif isinstance(where, slice):
-            return self._getitem((where,))
+            return self._getitem((where,), behavior)
 
         elif isinstance(where, str):
             return self._getitem_field(where)
 
         elif where is np.newaxis:
-            return self._getitem((where,))
+            return self._getitem((where,), behavior)
 
         elif where is Ellipsis:
-            return self._getitem((where,))
+            return self._getitem((where,), behavior)
 
         elif isinstance(where, tuple):
             if len(where) == 0:
@@ -586,7 +591,7 @@ class Content:
                 return out._getitem_at(0)
 
         elif isinstance(where, ak.highlevel.Array):
-            return self._getitem(where.layout)
+            return self._getitem(where.layout, behavior)
 
         # Convert between nplikes of different backends
         elif (
@@ -594,7 +599,9 @@ class Content:
             and where.backend is not self._backend
         ):
             backend = backend_of(self, where)
-            return self.to_backend(backend)._getitem(where.to_backend(backend))
+            return self.to_backend(backend)._getitem(
+                where.to_backend(backend), behavior
+            )
 
         elif isinstance(where, ak.contents.NumpyArray):
             data_as_index = to_nplike(
@@ -626,7 +633,7 @@ class Content:
                     allow_lazy = "copied"  # True, but also can be modified in-place
                 else:
                     wheres = self._backend.index_nplike.nonzero(data_as_index)
-                    return self._getitem(wheres)
+                    return self._getitem(wheres, behavior)
             else:
                 raise TypeError(
                     "array slice must be an array of integers or booleans, not\n\n    {}".format(
@@ -645,15 +652,15 @@ class Content:
         elif isinstance(where, ak.contents.RegularArray):
             maybe_numpy = where.maybe_to_NumpyArray()
             if maybe_numpy is None:
-                return self._getitem((where,))
+                return self._getitem((where,), behavior)
             else:
-                return self._getitem(maybe_numpy)
+                return self._getitem(maybe_numpy, behavior)
 
         # Awkward Array of strings
         elif (
             isinstance(where, Content)
             and where._parameters is not None
-            and (where._parameters.get("__array__") in ("string", "bytestring"))
+            and is_subtype(behavior, where._parameters.get("__array__"), "stringlike")
         ):
             return self._getitem_fields(ak.operations.to_list(where))
 
@@ -661,7 +668,7 @@ class Content:
             return where.to_NumpyArray(np.int64)
 
         elif isinstance(where, Content):
-            return self._getitem((where,))
+            return self._getitem((where,), behavior)
 
         elif is_sized_iterable(where):
             # Do we have an array
@@ -677,7 +684,7 @@ class Content:
                     layout = ak.operations.ak_to_layout._impl(
                         where, allow_record=False, allow_other=False, regulararray=False
                     )
-                    return self._getitem(layout)
+                    return self._getitem(layout, behavior)
 
             elif len(where) == 0:
                 return self._carry(
@@ -695,7 +702,7 @@ class Content:
                 layout = ak.operations.ak_to_layout._impl(
                     where, allow_record=False, allow_other=False, regulararray=False
                 )
-                return self._getitem(layout)
+                return self._getitem(layout, behavior)
 
         else:
             raise TypeError(
@@ -1086,15 +1093,24 @@ class Content:
         raise NotImplementedError
 
     def to_backend_array(
-        self, allow_missing: bool = True, *, backend: Backend | str | None = None
+        self,
+        allow_missing: bool = True,
+        *,
+        backend: Backend | str | None = None,
+        behavior: Mapping | None = None,
     ):
         if backend is None:
             backend = self._backend
         else:
             backend = regularize_backend(backend)
-        return self._to_backend_array(allow_missing, backend)
 
-    def _to_backend_array(self, allow_missing: bool, backend: Backend):
+        if behavior is None:
+            behavior = overlay_behavior(behavior)
+        return self._to_backend_array(allow_missing, behavior, backend)
+
+    def _to_backend_array(
+        self, allow_missing: bool, behavior: Mapping, backend: Backend
+    ):
         raise NotImplementedError
 
     def drop_none(self):
