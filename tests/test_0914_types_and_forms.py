@@ -1312,7 +1312,7 @@ def test_ArrayType():
                 content=ak.types.unknowntype.UnknownType(), length=10
             )
         )
-        == "ArrayType(UnknownType(), 10)"
+        == "ArrayType(UnknownType(), 10, None)"
     )
 
     assert (

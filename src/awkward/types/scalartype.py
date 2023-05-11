@@ -39,7 +39,7 @@ class ScalarType:
         )
 
     def __repr__(self):
-        return f"{type(self).__name__}({self._content!r})"
+        return f"{type(self).__name__}({self._content!r}, {self._behavior!r})"
 
     def is_equal_to(self, other, *, all_parameters: bool = False) -> bool:
         return isinstance(other, type(self)) and self._content.is_equal_to(

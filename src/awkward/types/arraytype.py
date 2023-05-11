@@ -55,7 +55,7 @@ class ArrayType:
         ]
 
     def __repr__(self):
-        args = [repr(self._content), repr(self._length)]
+        args = [repr(self._content), repr(self._length), repr(self._behavior)]
         return "{}({})".format(type(self).__name__, ", ".join(args))
 
     def is_equal_to(self, other, *, all_parameters: bool = False) -> bool:
