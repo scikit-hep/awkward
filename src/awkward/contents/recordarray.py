@@ -988,10 +988,13 @@ class RecordArray(Content):
             children=values,
         )
 
-    def _to_backend_array(self, allow_missing, backend):
+    def _to_backend_array(self, allow_missing, behavior, backend):
         if self.fields is None:
             return backend.nplike.empty(self.length, dtype=[])
-        contents = [x._to_backend_array(allow_missing, backend) for x in self._contents]
+        contents = [
+            x._to_backend_array(allow_missing, behavior, backend)
+            for x in self._contents
+        ]
         if any(len(x.shape) != 1 for x in contents):
             raise ValueError(f"cannot convert {self} into np.ndarray")
         out = backend.nplike.empty(

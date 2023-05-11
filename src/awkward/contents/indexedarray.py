@@ -1030,8 +1030,8 @@ class IndexedArray(Content):
             )
             return next2._to_arrow(pyarrow, mask_node, validbytes, length, options)
 
-    def _to_backend_array(self, allow_missing, backend):
-        return self.project()._to_backend_array(allow_missing, backend)
+    def _to_backend_array(self, allow_missing, behavior, backend):
+        return self.project()._to_backend_array(allow_missing, behavior, backend)
 
     def _remove_structure(self, backend, behavior, options):
         return self.project()._remove_structure(backend, behavior, options)

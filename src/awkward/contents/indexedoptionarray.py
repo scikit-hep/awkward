@@ -1538,11 +1538,11 @@ class IndexedOptionArray(Content):
             options,
         )
 
-    def _to_backend_array(self, allow_missing, backend):
+    def _to_backend_array(self, allow_missing, behavior, backend):
         nplike = backend.nplike
         index_nplike = backend.index_nplike
 
-        content = self.project()._to_backend_array(allow_missing, backend)
+        content = self.project()._to_backend_array(allow_missing, behavior, backend)
         shape = (self.length, *content.shape[1:])
         data = nplike.empty(shape, dtype=content.dtype)
         mask0 = index_nplike.asarray(self.mask_as_bool(valid_when=False)).view(np.bool_)

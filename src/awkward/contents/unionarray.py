@@ -1457,13 +1457,13 @@ class UnionArray(Content):
             children=values,
         )
 
-    def _to_backend_array(self, allow_missing, backend):
+    def _to_backend_array(self, allow_missing, behavior, backend):
         ak._errors.deprecate(
             "Conversion of irreducible unions to backend arrays is deprecated.", "2.2.0"
         )
 
         contents = [
-            self.project(i)._to_backend_array(allow_missing, backend)
+            self.project(i)._to_backend_array(allow_missing, behavior, backend)
             for i in range(len(self.contents))
         ]
 

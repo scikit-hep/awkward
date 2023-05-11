@@ -2,6 +2,7 @@
 __all__ = ("to_numpy",)
 import awkward as ak
 from awkward._backends.numpy import NumpyBackend
+from awkward._behavior import behavior_of
 
 
 def to_numpy(array, *, allow_missing=True):
@@ -43,12 +44,15 @@ def to_numpy(array, *, allow_missing=True):
 
 
 def _impl(array, allow_missing):
+    behavior = behavior_of(array)
+    layout = ak.to_layout(array, allow_record=False)
+
     import numpy  # noqa: TID251
 
     with numpy.errstate(invalid="ignore"):
-        layout = ak.to_layout(array, allow_record=False)
-
         backend = NumpyBackend.instance()
         numpy_layout = layout.to_backend(backend)
 
-        return numpy_layout.to_backend_array(allow_missing=allow_missing)
+        return numpy_layout.to_backend_array(
+            allow_missing=allow_missing, behavior=behavior
+        )

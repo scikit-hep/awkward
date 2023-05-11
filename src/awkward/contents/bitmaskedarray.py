@@ -679,8 +679,10 @@ class BitMaskedArray(Content):
             pyarrow, mask_node, validbytes, length, options
         )
 
-    def _to_backend_array(self, allow_missing, backend):
-        return self.to_ByteMaskedArray()._to_backend_array(allow_missing, backend)
+    def _to_backend_array(self, allow_missing, behavior, backend):
+        return self.to_ByteMaskedArray()._to_backend_array(
+            allow_missing, behavior, backend
+        )
 
     def _remove_structure(self, backend, behavior, options):
         branch, depth = self.branch_depth

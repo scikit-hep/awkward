@@ -1249,7 +1249,7 @@ class NumpyArray(Content):
             ),
         )
 
-    def _to_backend_array(self, allow_missing, backend):
+    def _to_backend_array(self, allow_missing, behavior, backend):
         return to_nplike(self.data, backend.nplike, from_nplike=self._backend.nplike)
 
     def _remove_structure(self, backend, behavior, options):

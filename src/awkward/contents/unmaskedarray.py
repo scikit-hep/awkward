@@ -475,8 +475,8 @@ class UnmaskedArray(Content):
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         return self._content._to_arrow(pyarrow, self, None, length, options)
 
-    def _to_backend_array(self, allow_missing, backend):
-        content = self.content._to_backend_array(allow_missing, backend)
+    def _to_backend_array(self, allow_missing, behavior, backend):
+        content = self.content._to_backend_array(allow_missing, behavior, backend)
         if allow_missing:
             return backend.nplike.ma.MaskedArray(content)
         else:

@@ -373,7 +373,7 @@ class EmptyArray(Content):
             )
             return next._to_arrow(pyarrow, mask_node, validbytes, length, options)
 
-    def _to_backend_array(self, allow_missing, backend):
+    def _to_backend_array(self, allow_missing, behavior, backend):
         return backend.nplike.empty(0, dtype=np.float64)
 
     def _remove_structure(self, backend, behavior, options):

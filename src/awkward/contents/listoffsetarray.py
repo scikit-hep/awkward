@@ -5,6 +5,7 @@ import copy
 
 import awkward as ak
 from awkward._backends.backend import Backend
+from awkward._behavior import is_subtype
 from awkward._errors import AxisError
 from awkward._layout import maybe_posaxis
 from awkward._nplikes.numpy import Numpy
@@ -2006,14 +2007,18 @@ class ListOffsetArray(Content):
                 ),
             )
 
-    def _to_backend_array(self, allow_missing, backend):
+    def _to_backend_array(self, allow_missing, behavior, backend):
         array_param = self.parameter("__array__")
-        if array_param in {"bytestring", "string"}:
+        if is_subtype(behavior, array_param, ("string", "bytestring")):
             # As our array-of-strings _may_ be empty, we should pass the dtype
-            dtype = np.str_ if array_param == "string" else np.bytes_
+            dtype = (
+                np.str_ if is_subtype(behavior, array_param, "string") else np.bytes_
+            )
             return backend.nplike.asarray(self.to_list(), dtype=dtype)
         else:
-            return self.to_RegularArray()._to_backend_array(allow_missing, backend)
+            return self.to_RegularArray()._to_backend_array(
+                allow_missing, behavior, backend
+            )
 
     def _remove_structure(self, backend, behavior, options):
         if (

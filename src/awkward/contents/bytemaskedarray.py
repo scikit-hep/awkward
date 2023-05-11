@@ -1039,8 +1039,10 @@ class ByteMaskedArray(Content):
             options,
         )
 
-    def _to_backend_array(self, allow_missing, backend):
-        return self.to_IndexedOptionArray64()._to_backend_array(allow_missing, backend)
+    def _to_backend_array(self, allow_missing, behavior, backend):
+        return self.to_IndexedOptionArray64()._to_backend_array(
+            allow_missing, behavior, backend
+        )
 
     def _remove_structure(self, backend, behavior, options):
         branch, depth = self.branch_depth
