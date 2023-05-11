@@ -37,6 +37,24 @@ class LayoutBuilder:
         raise NotImplementedError
 
 
+class LayoutBuilderType(numba.types.Type):
+    def __init__(self):
+        super().__init__(name="ak.numba.lb.LayoutBuilder()")
+
+    @property
+    def parameters(self):
+        return numba.types.StringLiteral
+
+    @property
+    def length(self):
+        return numba.types.float64
+
+
+@numba.extending.typeof_impl.register(LayoutBuilder)
+def typeof_LayoutBuilder(val, c):
+    return LayoutBuilderType(val._content)
+
+
 ########## Numpy ############################################################
 
 
@@ -58,6 +76,10 @@ class Numpy(LayoutBuilder):
 
     def _type(self, typestrs):
         return f"ak.numba.lb.Numpy({self._data.dtype})"
+
+    @property
+    def dtype(self):
+        return self._data.dtype
 
     @property
     def _length(self):
@@ -180,7 +202,7 @@ def _from_buffer():
 def Numpy_from_buffer_typer(context):
     def typer(buffer):
         if isinstance(buffer, GrowableBufferType):
-            return NumpyType(buffer)
+            return NumpyType(buffer.dtype)
 
     return typer
 
@@ -342,23 +364,13 @@ def EmptyType_unbox(typ, obj, c):
 def EmptyType_box(typ, val, c):
     # get PyObject of the Empty class
     Empty_obj = c.pyapi.unserialize(c.pyapi.serialize_object(Empty))
-    from_data_obj = c.pyapi.object_getattr_string(Empty_obj, "_from_buffer")
 
-    out = c.pyapi.call_function_objargs(from_data_obj, ())
+    out = c.pyapi.call_function_objargs(Empty_obj, ())
 
     # decref PyObjects
     c.pyapi.decref(Empty_obj)
-    c.pyapi.decref(from_data_obj)
 
     return out
-
-
-@numba.extending.overload(Empty)
-def Empty_ctor():
-    def ctor_impl():
-        return _from_buffer()
-
-    return ctor_impl
 
 
 @numba.extending.overload_method(EmptyType, "_length_get", inline="always")
@@ -447,6 +459,33 @@ class ListOffset(LayoutBuilder):
                 parameters=self._parameters,
             )
         )
+
+
+class ListOffsetType(numba.types.Type):
+    def __init__(self, dtype, content):
+        super().__init__(name="ak.numba.lb.ListOffset()")
+        self._dtype = dtype
+
+    @property
+    def parameters(self):
+        return numba.types.StringLiteral
+
+    @property
+    def offsets(self):
+        return ak.numba.GrowableBufferType(self._dtype)
+
+    @property
+    def content(self):
+        return LayoutBuilderType
+
+    @property
+    def length(self):
+        return numba.types.float64
+
+
+@numba.extending.typeof_impl.register(ListOffset)
+def typeof_ListOffset(val, c):
+    return ListOffsetType(val._content)
 
 
 ########## List ############################################################

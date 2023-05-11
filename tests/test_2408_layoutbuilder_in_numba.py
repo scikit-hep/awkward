@@ -506,10 +506,13 @@ def test_unbox():
         x  # noqa: B018 (we want to test the unboxing)
         return 3.14
 
-    builder = lb.Numpy(np.int32, parameters=None, initial=10, resize=2.0)
+    builder = lb.Numpy(np.int32)
     f1(builder)
 
     builder = lb.Empty()
+    f1(builder)
+
+    builder = lb.ListOffset(np.int32, lb.Numpy(np.float64))
     f1(builder)
 
 
@@ -570,9 +573,6 @@ def test_len():
     assert f3(builder) == 0
 
 
-@pytest.mark.skip(
-    "NumbaNotImplementedError('Failed in nopython mode pipeline (step: native lowering)\n\x1b[1mak.GrowableBuffer(float32) cannot be represented as a NumPy dtype\x1b[0m')"
-)
 def test_from_buffer():
     @numba.njit
     def f4():
@@ -581,18 +581,20 @@ def test_from_buffer():
             np.array([1, 0], np.int64),
             1.23,
         )
+        data.append(66.6)
+        data.append(77.7)
+
         return lb._from_buffer(data)
 
     out = f4()
     assert isinstance(out, lb.Numpy)
     assert out.dtype == np.dtype(np.float32)
-    assert len(out) == 1
-    print(ak.to_list(out.snapshot()))
+    assert len(out) == 3
+
+    # FIXME: [66.5999984741211, 77.69999694824219, 7.006492321624085e-45] ???
+    # assert ak.to_list(out.snapshot()) == [666]
 
 
-@pytest.mark.skip(
-    "NumbaNotImplementedError('Failed in nopython mode pipeline (step: native lowering)\n\x1b[1mak.GrowableBuffer(float32) cannot be represented as a NumPy dtype\x1b[0m')"
-)
 def test_ctor():
     @numba.njit
     def f5():
