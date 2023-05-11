@@ -84,8 +84,11 @@ class RecordType(Type):
     _str_parameters_exclude = ("__categorical__", "__record__")
 
     def _str(self, indent, compact, behavior):
-        if self._typestr is not None:
-            out = [self._typestr]
+        typestr = behavior.get(
+            ("__typestr__", self.parameter("__record__")), self._typestr
+        )
+        if typestr is not None:
+            out = [typestr]
 
         else:
             if compact:

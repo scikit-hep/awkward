@@ -53,8 +53,11 @@ class OptionType(Type):
     def _str(self, indent, compact, behavior):
         head = []
         tail = []
-        if self._typestr is not None:
-            content_out = [self._typestr]
+        typestr = behavior.get(
+            ("__typestr__", self.parameter("__array__")), self._typestr
+        )
+        if typestr is not None:
+            content_out = [typestr]
 
         else:
             content_out = self._content._str(indent, compact, behavior)

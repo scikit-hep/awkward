@@ -32,7 +32,11 @@ class ScalarType:
         stream.write("".join([*self._str("", False), "\n"]))
 
     def _str(self, indent, compact):
-        return self._content._str(indent, compact, self._behavior)
+        return self._content._str(
+            indent,
+            compact,
+            ak.behavior if self._behavior is None else self._behavior,
+        )
 
     def __repr__(self):
         return f"{type(self).__name__}({self._content!r})"

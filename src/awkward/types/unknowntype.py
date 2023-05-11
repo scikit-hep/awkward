@@ -37,8 +37,11 @@ class UnknownType(Type):
         self._typestr = typestr
 
     def _str(self, indent, compact, behavior):
-        if self._typestr is not None:
-            out = [self._typestr]
+        typestr = behavior.get(
+            ("__typestr__", self.parameter("__array__")), self._typestr
+        )
+        if typestr is not None:
+            out = [typestr]
 
         else:
             params = self._str_parameters()

@@ -47,7 +47,11 @@ class ArrayType:
     def _str(self, indent, compact):
         return [
             f"{self._length} * ",
-            *self._content._str(indent, compact, self._behavior),
+            *self._content._str(
+                indent,
+                compact,
+                ak.behavior if self._behavior is None else self._behavior,
+            ),
         ]
 
     def __repr__(self):
