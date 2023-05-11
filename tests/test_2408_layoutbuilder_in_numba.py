@@ -27,10 +27,7 @@ def test_Numpy():
     assert str(ak.type(array)) == "5 * float64"
     assert ak.to_list(array) == [1.1, 2.2, 3.3, 4.4, 5.5]
 
-    assert (
-        builder.form()
-        == '{"class": "NumpyArray", "primitive": "float64", "form_key": "node0"}'
-    )
+    assert builder.type == "ak.numba.lb.Numpy(float64)"
 
     array1 = builder.snapshot()
     assert str(ak.type(array1)) == "5 * float64"
@@ -72,7 +69,7 @@ def test_Empty():
     assert str(ak.type(array)) == "0 * unknown"
     assert ak.to_list(array) == []
 
-    assert builder.form() == '{"class": "EmptyArray"}'
+    assert builder.type == "ak.numba.lb.Empty()"
 
 
 def test_ListOffset():

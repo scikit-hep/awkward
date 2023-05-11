@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import json  # FIXME:
 
 import numba
 import numba.core.typing.npydecl
@@ -31,14 +30,8 @@ class LayoutBuilder:
     def clear(self):
         return self._content.clear()
 
-    def form(self):
-        return self._content.form()
-
     def is_valid(self, error: str):
         return self._content.is_valid(error)
-
-    # def snapshot(self, *, highlevel=True, behavior=None) -> ArrayLike:
-    #     return self._content.snapshot()
 
     def _type(self, typestrs):
         raise NotImplementedError
@@ -52,26 +45,19 @@ class Numpy(LayoutBuilder):
     def __init__(self, dtype, *, parameters=None, initial=1024, resize=8.0):
         self._data = GrowableBuffer(dtype=dtype, initial=initial, resize=resize)
         self._parameters = parameters
-        self._id = 0
 
     @classmethod
     def _from_buffer(cls, data):
         out = cls.__new__(cls)
         out._data = data  # GrowableBuffer(dtype=dtype, initial=initial, resize=resize)
         out._parameters = ""  # FIXME: parameters?
-        out._id = 0
         return out
 
-    @property
-    def dtype(self):
-        return self._data.dtype
-
     def __repr__(self):
-        return f"<Numpy of {self.dtype!r} with {self._length} items>"
+        return f"<Numpy of {self._data.dtype!r} with {self._length} items>"
 
     def _type(self, typestrs):
-        return f"lb.Numpy{self.dtype}"
-        ...
+        return f"ak.numba.lb.Numpy({self._data.dtype})"
 
     @property
     def _length(self):
@@ -79,18 +65,6 @@ class Numpy(LayoutBuilder):
 
     def __len__(self):
         return self._length
-
-    @property
-    def id(self):
-        return self._id
-
-    @id.setter
-    def id(self, id: int):
-        self._id = id
-        id += 1
-        return id
-
-    # FIXME: LayoutBuilder.id = (next_id := LayoutBuilder.id)
 
     def append(self, x):
         self._data.append(x)
@@ -112,17 +86,6 @@ class Numpy(LayoutBuilder):
         Converts the currently accumulated data into an #ak.Array.
         """
         return ak.Array(ak.contents.NumpyArray(self._data.snapshot()))
-
-    def form(self):
-        # FIXME: no numba
-        form_key = f"node{self.id}"
-        params = ""
-        if self._parameters is not None:
-            params = (
-                "" if self._parameters == "" else f", parameters: {self._parameters}"
-            )
-
-        return f'{{"class": "NumpyArray", "primitive": "{self._data.dtype}", "form_key": "{form_key}"{params}}}'
 
 
 class NumpyType(numba.types.Type):
@@ -163,15 +126,6 @@ class NumpyModel(numba.extending.models.StructModel):
 
 for member in ("data",):
     numba.extending.make_attribute_wrapper(NumpyType, member, "_" + member)
-
-
-@numba.extending.overload_attribute(NumpyType, "dtype")
-def NumpyType_dtype(builder):
-    def getter(builder):
-        if isinstance(builder, numba.types.StringLiteral):
-            return builder._data.dtype
-
-    return getter
 
 
 @numba.extending.unbox(NumpyType)
@@ -255,6 +209,7 @@ def Numpy_ctor(dtype, parameters=None, initial=1024, resize=8.0):
         panels = numba.typed.List([np.empty((initial,), dt)])
         length_pos = np.zeros((2,), dtype=np.int64)
         data = ak.numba._from_data(panels, length_pos, resize)
+
         return _from_buffer(data)
 
     return ctor_impl
@@ -310,7 +265,6 @@ def Numpy_snapshot(builder):
 class Empty(LayoutBuilder):
     def __init__(self, *, parameters=None):
         self._parameters = parameters
-        self._id = 0
 
     @classmethod
     def _from_buffer(cls):
@@ -322,7 +276,7 @@ class Empty(LayoutBuilder):
         return f"<Empty with {self.length} items>"
 
     def _type(self, typestrs):
-        ...
+        return "ak.numba.lb.Empty()"
 
     @property
     def _length(self):
@@ -337,26 +291,14 @@ class Empty(LayoutBuilder):
     def parameters(self):
         return self._parameters
 
-    def set_id(self, id: int):
-        self._id = id
-        id += 1
-
     def clear(self):
         pass
 
     def is_valid(self, error: str):
         return True
 
-    def form(self):
-        params = ""
-        if self._parameters is not None:
-            params = (
-                "" if self._parameters == "" else f', "parameters": {self._parameters}'
-            )
-        return f'{{"class": "EmptyArray"{params}}}'
-
     def snapshot(self) -> ArrayLike:
-        return ak.from_buffers(self.form(), len(self), {})
+        return ak.Array(ak.contents.EmptyArray())
 
 
 class EmptyType(numba.types.Type):
@@ -454,7 +396,6 @@ class ListOffset(LayoutBuilder):
         self._offsets.append(0)
         self._content = content
         self._parameters = parameters
-        self._id = 0
 
     def __repr__(self):
         return f"<ListOffset of {self._content!r} with {self._length} items>"
@@ -471,11 +412,6 @@ class ListOffset(LayoutBuilder):
 
     def parameters(self):
         return self._parameters
-
-    def set_id(self, id: int):
-        self._id = id
-        id += 1
-        self._content.set_id(id)
 
     def clear(self):
         self._offsets.clear()
@@ -495,18 +431,6 @@ class ListOffset(LayoutBuilder):
             return False
         else:
             return self._content.is_valid(error)
-
-    def buffer_nbytes(self, names_nbytes):
-        names_nbytes[f"node{self._id}-offsets"] = self._offsets.nbytes()
-        self._content.buffer_nbytes(names_nbytes)
-
-    def to_buffers(self, buffers):
-        self._offsets.concatenate(buffers[f"node{self._id}-offsets"])
-        self._content.to_buffers(buffers)
-
-    def form(self):
-        params = "" if self._parameters == "" else f", parameters: {self._parameters}"
-        return f'{{"class": "ListOffsetArray", "offsets": "{self._offsets.dtype}", "content": {self._content.form()}, "form_key": "node{self._id}"{params}}}'
 
     def snapshot(self) -> ArrayLike:
         """
@@ -532,7 +456,6 @@ class List(LayoutBuilder):
         self._stops = GrowableBuffer(dtype=dtype, initial=initial, resize=resize)
         self._content = content
         self._parameters = parameters
-        self._id = 0
 
     @property
     def content(self):
@@ -547,11 +470,6 @@ class List(LayoutBuilder):
 
     def parameters(self):
         return self._parameters
-
-    def set_id(self, id: int):
-        self._id = id
-        id += 1
-        self._content.set_id(id)
 
     def clear(self):
         self._starts.clear()
@@ -573,20 +491,6 @@ class List(LayoutBuilder):
             return False
         else:
             return self._content.is_valid(error)
-
-    def buffer_nbytes(self, names_nbytes):
-        names_nbytes[f"node{self._id}-starts"] = self._starts.nbytes()
-        names_nbytes[f"node{self._id}-stops"] = self._stops.nbytes()
-        self._content.buffer_nbytes(names_nbytes)
-
-    def to_buffers(self, buffers):
-        self._starts.concatenate(buffers[f"node{self._id}-starts"])
-        self._stops.concatenate(buffers[f"node{self._id}-stops"])
-        self._content.to_buffers(buffers)
-
-    def form(self):
-        params = "" if self._parameters == "" else f", parameters: {self._parameters}"
-        return f'{{"class": "ListArray", "starts": "{self._starts.index_form()}", "stops": "{self._stops.index_form()}", "content": {self._content.form()}, "form_key": "node{self._id}"{params}}}'
 
     def snapshot(self) -> ArrayLike:
         """
@@ -611,7 +515,6 @@ class Regular(LayoutBuilder):
         self._content = content
         self._size = size
         self._parameters = parameters
-        self._id = 0
 
     @property
     def content(self):
@@ -625,11 +528,6 @@ class Regular(LayoutBuilder):
 
     def parameters(self):
         return self._parameters
-
-    def set_id(self, id: int):
-        self._id = id
-        id += 1
-        self._content.set_id(id)
 
     def clear(self):
         self._content.clear()
@@ -646,16 +544,6 @@ class Regular(LayoutBuilder):
             return False
         else:
             return self._content.is_valid(error)
-
-    def buffer_nbytes(self, names_nbytes):
-        self._content.buffer_nbytes(names_nbytes)
-
-    def to_buffers(self, buffers):
-        self._content.to_buffers(buffers)
-
-    def form(self):
-        params = "" if self._parameters == "" else f", parameters: {self._parameters}"
-        return f'{{"class": "RegularArray", "size": {self._size}, "content": {self._content.form()}, "form_key": "node{self._id}"{params}}}'
 
     def snapshot(self) -> ArrayLike:
         """
@@ -680,7 +568,6 @@ class Indexed(LayoutBuilder):
         self._index = GrowableBuffer(dtype=dtype)
         self._content = content
         self._parameters = parameters
-        self._id = 0
 
     @property
     def content(self):
@@ -713,11 +600,6 @@ class Indexed(LayoutBuilder):
     def parameters(self):
         return self._parameters
 
-    def set_id(self, id: int):
-        self._id = id
-        id += 1
-        self._content.set_id(id)
-
     def clear(self):
         self._last_valid = -1
         self._index.clear()
@@ -737,18 +619,6 @@ class Indexed(LayoutBuilder):
             error = f"Indexed node{self._id} has content length {len(self._content)} but last valid index is {self._last_valid}"
         else:
             return self._content.is_valid(error)
-
-    def buffer_nbytes(self, names_nbytes):
-        names_nbytes[f"node{self._id}-index"] = self._index.nbytes()
-        self._content.buffer_nbytes(names_nbytes)
-
-    def to_buffers(self, buffers):
-        self._index.concatenate(buffers[f"node{self._id}-index"])
-        self._content.to_buffers(buffers)
-
-    def form(self):
-        params = "" if self._parameters == "" else f", parameters: {self._parameters}"
-        return f'{{"class": "IndexedArray", "index": "{self._index.index_form()}", "content": {self._content.form()}, "form_key": "node{self._id}"{params}}}'
 
     def snapshot(self) -> ArrayLike:
         """
@@ -772,7 +642,6 @@ class IndexedOption(LayoutBuilder):
         self._index = GrowableBuffer(dtype=dtype)
         self._content = content
         self._parameters = parameters
-        self._id = 0
 
     @property
     def content(self):
@@ -811,11 +680,6 @@ class IndexedOption(LayoutBuilder):
     def parameters(self):
         return self._parameters
 
-    def set_id(self, id: int):
-        self._id = id
-        id += 1
-        self._content.set_id(id)
-
     def clear(self):
         self._last_valid = -1
         self._index.clear()
@@ -833,18 +697,6 @@ class IndexedOption(LayoutBuilder):
             return False
         else:
             return self._content.is_valid(error)
-
-    def buffer_nbytes(self, names_nbytes):
-        names_nbytes[f"node{self._id}-index"] = self._index.nbytes()
-        self._content.buffer_nbytes(names_nbytes)
-
-    def to_buffers(self, buffers):
-        self._index.concatenate(buffers[f"node{self._id}-index"])
-        self._content.to_buffers(buffers)
-
-    def form(self):
-        params = "" if self._parameters == "" else f", parameters: {self._parameters}"
-        return f'{{"class": "IndexedOptionArray", "index": "{self._index.index_form()}", "content": {self._content.form()}, "form_key": "node{self._id}"{params}}}'
 
     def snapshot(self) -> ArrayLike:
         """
@@ -874,7 +726,6 @@ class ByteMasked(LayoutBuilder):
         self._content = content
         self._valid_when = valid_when
         self._parameters = parameters
-        self._id = 0
 
     @property
     def content(self):
@@ -902,11 +753,6 @@ class ByteMasked(LayoutBuilder):
     def parameters(self):
         return self._parameters
 
-    def set_id(self, id: int):
-        self._id = id
-        id += 1
-        self._content.set_id(id)
-
     def clear(self):
         self._mask.clear()
         self._content.clear()
@@ -923,18 +769,6 @@ class ByteMasked(LayoutBuilder):
             return False
         else:
             return self._content.is_valid(error)
-
-    def buffer_nbytes(self, names_nbytes):
-        names_nbytes[f"node{self._id}-mask"] = self._mask.nbytes()
-        self._content.buffer_nbytes(names_nbytes)
-
-    def to_buffers(self, buffers):
-        self._mask.concatenate(buffers[f"node{self._id}-mask"])
-        self._content.to_buffers(buffers)
-
-    def form(self):
-        params = "" if self._parameters == "" else f", parameters: {self._parameters}"
-        return f'{{"class": "ByteMaskedArray", "mask": "{self._mask.index_form()}", "valid_when": {json.dumps(self._valid_when)}, "content": {self._content.form()}, "form_key": "node{self._id}"{params}}}'
 
     def snapshot(self) -> ArrayLike:
         """
@@ -996,7 +830,6 @@ class BitMasked(LayoutBuilder):
                 ]
             )
         self._parameters = parameters
-        self._id = 0
 
     @property
     def content(self):
@@ -1057,11 +890,6 @@ class BitMasked(LayoutBuilder):
     def parameters(self):
         return self._parameters
 
-    def set_id(self, id: int):
-        self._id = id
-        id += 1
-        self._content.set_id(id)
-
     def clear(self):
         self._mask.clear()
         self._content.clear()
@@ -1078,18 +906,6 @@ class BitMasked(LayoutBuilder):
             return False
         else:
             return self._content.is_valid(error)
-
-    def buffer_nbytes(self, names_nbytes):
-        names_nbytes[f"node{self._id}-mask"] = self._mask.nbytes()
-        self._content.buffer_nbytes(names_nbytes)
-
-    def to_buffers(self, buffers):
-        self._mask.concatenate(buffers[f"node{self._id}-mask"])
-        self._content.to_buffers(buffers)
-
-    def form(self):
-        params = "" if self._parameters == "" else f", parameters: {self._parameters}"
-        return f'{{"class": "BitMaskedArray", "mask": "{self._mask.index_form()}", "valid_when": {json.dumps(self._valid_when)}, "lsb_order": {json.dumps(self._lsb_order)}, "content": {self._content.form()}, "form_key": "node{self._id}"{params}}}'
 
     def snapshot(self) -> ArrayLike:
         """
@@ -1114,7 +930,6 @@ class Unmasked(LayoutBuilder):
     def __init__(self, content, *, parameters=None):
         self._content = content
         self._parameters = parameters
-        self._id = 0
 
     @property
     def content(self):
@@ -1129,11 +944,6 @@ class Unmasked(LayoutBuilder):
     def parameters(self):
         return self._parameters
 
-    def set_id(self, id: int):
-        self._id = id
-        id += 1
-        self._content.set_id(id)
-
     def clear(self):
         self._content.clear()
 
@@ -1145,16 +955,6 @@ class Unmasked(LayoutBuilder):
 
     def is_valid(self, error: str):
         return self._content.is_valid(error)
-
-    def buffer_nbytes(self, names_nbytes):
-        self._content.buffer_nbytes(names_nbytes)
-
-    def to_buffers(self, buffers):
-        self._content.to_buffers(buffers)
-
-    def form(self):
-        params = "" if self._parameters == "" else f", parameters: {self._parameters}"
-        return f'{{"class": "UnmaskedArray", "content": {self._content.form()}, "form_key": "node{self._id}"{params}}}'
 
     def snapshot(self) -> ArrayLike:
         """
@@ -1178,7 +978,6 @@ class Record(LayoutBuilder):
         self._fields = fields
         self._first_content = self._contents[0]
         self._parameters = parameters
-        self._id = 0
 
     def field(self, name):
         return self._contents[self._fields.index(name)]
@@ -1210,14 +1009,6 @@ class Record(LayoutBuilder):
                 return False
         return True
 
-    def form(self):
-        params = "" if self._parameters == "" else f", parameters: {self._parameters}"
-        pairs = ", ".join(
-            f"{json.dumps(pair.name)}: {pair.content.form()}"
-            for pair in self._field_pairs.values()
-        )
-        return f'{{"class": "RecordArray", "contents": {{{pairs}}}, "form_key": "node{self._id}"{params}}}'
-
     def snapshot(self) -> ArrayLike:
         """
         Converts the currently accumulated data into an #ak.Array.
@@ -1244,19 +1035,12 @@ class Tuple(LayoutBuilder):
         self._contents = contents
         self._first_content = contents[0]
         self._parameters = parameters
-        self._id = 0
 
     def index(self, at):
         return self._contents[at]
 
     def parameters(self):
         return self._parameters
-
-    def set_id(self, id: int):
-        self._id = id
-        id += 1
-        for content in self._contents:
-            content.set_id(id)
 
     def clear(self):
         for _content in self._contents:
@@ -1280,19 +1064,6 @@ class Tuple(LayoutBuilder):
             if not content.is_valid(error):
                 return False
         return True
-
-    def buffer_nbytes(self, names_nbytes):
-        for content in self._contents:
-            content.buffer_nbytes(names_nbytes)
-
-    def to_buffers(self, buffers):
-        for content in self._contents:
-            content.to_buffers(buffers)
-
-    def form(self):
-        params = "" if self._parameters == "" else f", parameters: {self._parameters}"
-        contents = ", ".join(content.form() for content in self._contents)
-        return f'{{"class": "RecordArray", "contents": [{contents}], "form_key": "node{self._id}"{params}}}'
 
     def snapshot(self) -> ArrayLike:
         """
@@ -1319,7 +1090,6 @@ class EmptyRecord(LayoutBuilder):
         self._length = 0
         self._is_tuple = is_tuple
         self._parameters = parameters
-        self._id = 0
 
     def append(self):
         self._length += 1
@@ -1329,9 +1099,6 @@ class EmptyRecord(LayoutBuilder):
 
     def parameters(self):
         return self._parameters
-
-    def set_id(self, id: int):
-        self._id = id
 
     def clear(self):
         self._length = 0
@@ -1344,19 +1111,6 @@ class EmptyRecord(LayoutBuilder):
 
     def is_valid(self, error: str):
         return True
-
-    def buffer_nbytes(self, names_nbytes):
-        pass
-
-    def to_buffers(self, buffers):
-        pass
-
-    def form(self):
-        params = "" if self._parameters == "" else f", parameters: {self._parameters}"
-        if self._is_tuple:
-            return f'{{"class": "RecordArray", "contents": [], "form_key": "node{self._id}"{params}}}'
-        else:
-            return f'{{"class": "RecordArray", "contents": {{}}, "form_key": "node{self._id}"{params}}}'
 
     def snapshot(self) -> ArrayLike:
         """
@@ -1384,7 +1138,6 @@ class Union(LayoutBuilder):
         self._index = GrowableBuffer(dtype=dtype)
         self._contents = contents
         self._parameters = parameters
-        self._id = 0
 
     def append_index(self, tag):
         which_content = self._contents[tag]
@@ -1396,12 +1149,6 @@ class Union(LayoutBuilder):
 
     def parameters(self):
         return self._parameters
-
-    def set_id(self, id: int):
-        self._id = id
-        id += 1
-        for content in self._contents:
-            content.set_id(id)
 
     def clear(self):
         for tag, _value in self._last_valid_index:
@@ -1426,23 +1173,6 @@ class Union(LayoutBuilder):
             if not content.is_valid(error):
                 return False
         return True
-
-    def buffer_nbytes(self, names_nbytes):
-        names_nbytes[f"node{self._id}-tags"] = self._tags.nbytes()
-        names_nbytes[f"node{self._id}-index"] = self._index.nbytes()
-        for content in self._contents:
-            content.buffer_nbytes(names_nbytes)
-
-    def to_buffers(self, buffers):
-        self._tags.concatenate(buffers[f"node{self._id}-tags"])
-        self._index.concatenate(buffers[f"node{self._id}-index"])
-        for content in self._contents:
-            content.to_buffers(buffers)
-
-    def form(self):
-        params = "" if self._parameters == "" else f", parameters: {self._parameters}"
-        contents = ", ".join(content.form() for content in self._contents)
-        return f'{{"class": "UnionArray", "tags": "{self._tags.index_form()}", "index": "{self._index.index_form()}", "contents": [{contents}], "form_key": "node{self._id}"{params}}}'
 
     def snapshot(self) -> ArrayLike:
         """
