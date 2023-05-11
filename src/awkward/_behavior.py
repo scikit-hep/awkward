@@ -144,10 +144,20 @@ def find_array_typestr(
     return behavior.get(("__typestr__", parameters.get("__array__")), default)
 
 
-def is_subtype(behavior: None | Mapping, type_name: str, supertype_name: str) -> bool:
+def is_subtype(
+    behavior: None | Mapping,
+    type_name: str | None,
+    supertype_names: str | tuple[str, ...],
+) -> bool:
+    if type_name is None:
+        return False
+
+    if isinstance(supertype_names, str):
+        supertype_names = (supertype_names,)
+
     behavior = overlay_behavior(behavior)
     while type_name is not None:
-        if type_name == supertype_name:
+        if type_name in supertype_names:
             return True
         type_name = behavior.get(("__super__", type_name))
     return False
