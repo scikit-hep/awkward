@@ -126,18 +126,22 @@ def find_ufunc(behavior, signature):
                 return custom
 
 
-def find_record_typestr(behavior: None | Mapping, parameters: None | Mapping[str, Any]):
+def find_record_typestr(
+    behavior: None | Mapping, parameters: None | Mapping[str, Any], default: str = None
+):
     if parameters is None:
-        return None
+        return default
     behavior = overlay_behavior(behavior)
-    return behavior.get(("__typestr__", parameters.get("__record__")))
+    return behavior.get(("__typestr__", parameters.get("__record__")), default)
 
 
-def find_array_typestr(behavior: None | Mapping, parameters: None | Mapping[str, Any]):
+def find_array_typestr(
+    behavior: None | Mapping, parameters: None | Mapping[str, Any], default: str = None
+):
     if parameters is None:
-        return None
+        return default
     behavior = overlay_behavior(behavior)
-    return behavior.get(("__typestr__", parameters.get("__array__")))
+    return behavior.get(("__typestr__", parameters.get("__array__")), default)
 
 
 def behavior_of(*arrays, **kwargs):

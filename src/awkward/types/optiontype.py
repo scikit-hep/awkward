@@ -56,7 +56,7 @@ class OptionType(Type):
         if self._typestr is not None:
             deprecate("typestr argument is deprecated", "2.4.0")
 
-        typestr = find_array_typestr(behavior, self._parameters)
+        typestr = find_array_typestr(behavior, self._parameters, self._typestr)
 
         head = []
         tail = []
