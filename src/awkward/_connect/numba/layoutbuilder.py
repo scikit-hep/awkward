@@ -232,7 +232,9 @@ def Numpy_ctor(dtype, parameters=None, initial=1024, resize=8.0):
     def ctor_impl(dtype, parameters=None, initial=1024, resize=8.0):
         panels = numba.typed.List([np.empty((initial,), dt)])
         length_pos = np.zeros((2,), dtype=np.int64)
-        data = ak.numba._from_data(panels, length_pos, resize)
+        data = ak._connect.numba.growablebuffer._from_data(  # noqa: RUF100, E1111
+            panels, length_pos, resize
+        )
 
         return _from_buffer(data)
 
