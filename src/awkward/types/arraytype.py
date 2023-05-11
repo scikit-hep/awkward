@@ -50,7 +50,7 @@ class ArrayType:
             *self._content._str(
                 indent,
                 compact,
-                ak.behavior if self._behavior is None else self._behavior,
+                self._behavior,
             ),
         ]
 

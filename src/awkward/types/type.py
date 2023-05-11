@@ -34,9 +34,9 @@ class Type:
         return self._typestr
 
     def __str__(self):
-        return "".join(self._str("", True))
+        return "".join(self._str("", True, None))
 
-    def _str(self, indent: str, compact: bool, behavior) -> list[str]:
+    def _str(self, indent: str, compact: bool, behavior: dict | None) -> list[str]:
         raise NotImplementedError
 
     def show(self, stream=sys.stdout):

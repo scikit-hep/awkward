@@ -1,6 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 from __future__ import annotations
 
+from awkward._behavior import overlay_behavior
+from awkward._errors import deprecate
 from awkward._parameters import parameters_are_equal, type_parameters_equal
 from awkward._typing import Self, final
 from awkward._util import unset
@@ -44,6 +46,10 @@ class ListType(Type):
         return self._content
 
     def _str(self, indent, compact, behavior):
+        if self._typestr is not None:
+            deprecate("typestr argument is deprecated", "2.4.0")
+
+        behavior = overlay_behavior(behavior)
         typestr = behavior.get(
             ("__typestr__", self.parameter("__array__")), self._typestr
         )
