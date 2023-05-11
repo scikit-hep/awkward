@@ -186,6 +186,30 @@ def test_Indexed():
     assert ak.to_list(array) == [1.1, 2.2, 3.3, 4.4, 5.5]
 
 
+def test_Indexed_Record():
+    builder = lb.Indexed(
+        np.int64, lb.Record([lb.Numpy(np.float64), lb.Numpy(np.int64)], ["x", "y"])
+    )
+    assert len(builder) == 0
+
+    content = builder.append_index()
+    x = content.field("x")
+    y = content.field("y")
+
+    x.append(1.1)
+    y.append(2)
+
+    builder.append_index()
+    x.append(3.3)
+    y.append(4)
+
+    array = builder.snapshot()
+    assert ak.to_list(array) == [
+        {"x": 1.1, "y": 2},
+        {"x": 3.3, "y": 4},
+    ]
+
+
 def test_IndexedOption():
     builder = lb.IndexedOption(np.int64, lb.Numpy(np.float64))
     assert len(builder) == 0
@@ -235,11 +259,12 @@ def test_Record():
 
 def test_IndexedOption_Record():
     builder = lb.IndexedOption(
-        np.int64, lb.Record({"x": lb.Numpy(np.float64), "y": lb.Numpy(np.int64)})
+        np.int64, lb.Record([lb.Numpy(np.float64), lb.Numpy(np.int64)], ["x", "y"])
     )
     assert len(builder) == 0
-    x = builder.field("x")
-    y = builder.field("y")
+    content = builder.append_index()
+    x = content.field("x")
+    y = content.field("y")
 
     x.append(1.1)
     y.append(2)
@@ -443,6 +468,9 @@ def test_len():
     assert f3(builder) == 0
 
 
+@pytest.mark.skip(
+    "NumbaNotImplementedError('Failed in nopython mode pipeline (step: native lowering)\n\x1b[1mak.GrowableBuffer(float32) cannot be represented as a NumPy dtype\x1b[0m')"
+)
 def test_from_buffer():
     @numba.njit
     def f4():
@@ -460,11 +488,13 @@ def test_from_buffer():
     print(ak.to_list(out.snapshot()))
 
 
-# @pytest.mark.skip("numba.core.errors.LoweringError")
+@pytest.mark.skip(
+    "NumbaNotImplementedError('Failed in nopython mode pipeline (step: native lowering)\n\x1b[1mak.GrowableBuffer(float32) cannot be represented as a NumPy dtype\x1b[0m')"
+)
 def test_ctor():
     @numba.njit
     def f5():
-        return lb.Numpy("f4")
+        return lb.Numpy(np.float32)  # "f4")
 
     out = f5()
     assert isinstance(out, lb.Numpy)

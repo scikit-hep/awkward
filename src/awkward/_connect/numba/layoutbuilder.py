@@ -50,7 +50,6 @@ class LayoutBuilder:
 @final
 class Numpy(LayoutBuilder):
     def __init__(self, dtype, *, parameters=None, initial=1024, resize=8.0):
-        self._dtype = np.dtype(dtype)
         self._data = GrowableBuffer(dtype=dtype, initial=initial, resize=resize)
         self._parameters = parameters
         self._id = 0
@@ -112,9 +111,7 @@ class Numpy(LayoutBuilder):
         """
         Converts the currently accumulated data into an #ak.Array.
         """
-        return ak.from_buffers(
-            self.form(), self._length, {f"node{self.id}-data": self._data.snapshot()}
-        )
+        return ak.Array(ak.contents.NumpyArray(self._data.snapshot()))
 
     def form(self):
         # FIXME: no numba
@@ -159,41 +156,34 @@ def typeof_Numpy(val, c):
 class NumpyModel(numba.extending.models.StructModel):
     def __init__(self, dmm, fe_type):
         members = [
-            ("dtype", fe_type.data.dtype),
             ("data", fe_type.data),
         ]
         super().__init__(dmm, fe_type, members)
 
 
-for member in (
-    "dtype",
-    "data",
-):
+for member in ("data",):
     numba.extending.make_attribute_wrapper(NumpyType, member, "_" + member)
 
 
-# @numba.extending.overload_attribute(NumpyType, "dtype")
-# def NumpyType_dtype(builder):
-#     def getter(builder):
-#         if isinstance(builder, numba.types.StringLiteral):
-#         return builder._data.dtype
-#
-#     return getter
+@numba.extending.overload_attribute(NumpyType, "dtype")
+def NumpyType_dtype(builder):
+    def getter(builder):
+        if isinstance(builder, numba.types.StringLiteral):
+            return builder._data.dtype
+
+    return getter
 
 
 @numba.extending.unbox(NumpyType)
 def NumpyType_unbox(typ, obj, c):
     # get PyObjects
-    # dtype_obj = c.pyapi.object_getattr_string(obj, "_dtype")
     data_obj = c.pyapi.object_getattr_string(obj, "_data")
 
     # fill the lowered model
     out = numba.core.cgutils.create_struct_proxy(typ)(c.context, c.builder)
-    # out.dtype = c.pyapi.to_native_value(typ.dtype, data_obj).value
     out.data = c.pyapi.to_native_value(typ.data, data_obj).value
 
     # decref PyObjects
-    # c.pyapi.decref(dtype_obj)
     c.pyapi.decref(data_obj)
 
     # return it or the exception
@@ -210,7 +200,6 @@ def NumpyType_box(typ, val, c):
     builder = numba.core.cgutils.create_struct_proxy(typ)(
         c.context, c.builder, value=val
     )
-    # dtype_obj = c.pyapi.from_native_value(typ.dtype, builder.dtype, c.env_manager)
     data_obj = c.pyapi.from_native_value(typ.data, builder.data, c.env_manager)
 
     out = c.pyapi.call_function_objargs(
@@ -222,7 +211,6 @@ def NumpyType_box(typ, val, c):
     c.pyapi.decref(Numpy_obj)
     c.pyapi.decref(from_buffer_obj)
 
-    # c.pyapi.decref(dtype_obj)
     c.pyapi.decref(data_obj)
 
     return out
@@ -253,7 +241,7 @@ def Numpy_from_buffer_impl(context, builder, sig, args):
 
 
 @numba.extending.overload(Numpy)
-def Numpy_ctor(dtype):  # , parameters=None, initial=1024, resize=8.0):
+def Numpy_ctor(dtype, parameters=None, initial=1024, resize=8.0):
     if isinstance(dtype, numba.types.StringLiteral):
         dt = np.dtype(dtype.literal_value)
 
@@ -263,11 +251,11 @@ def Numpy_ctor(dtype):  # , parameters=None, initial=1024, resize=8.0):
     else:
         return
 
-    def ctor_impl(dtype):  # , parameters=None, initial=1024, resize=8.0):
-        # panels = numba.typed.List([np.empty((initial,), dt)])
-        # length_pos = np.zeros((2,), dtype=np.int64)
-        # data = ak.numba._from_data(panels, length_pos, resize)
-        return NumpyType(dt)
+    def ctor_impl(dtype, parameters=None, initial=1024, resize=8.0):
+        panels = numba.typed.List([np.empty((initial,), dt)])
+        length_pos = np.zeros((2,), dtype=np.int64)
+        data = ak.numba._from_data(panels, length_pos, resize)
+        return _from_buffer(data)
 
     return ctor_impl
 
@@ -479,7 +467,7 @@ class ListOffset(LayoutBuilder):
         return self._content
 
     def end_list(self):
-        self._offsets.append(self._content._length)
+        self._offsets.append(len(self._content))
 
     def parameters(self):
         return self._parameters
@@ -551,11 +539,11 @@ class List(LayoutBuilder):
         return self._content
 
     def begin_list(self):
-        self._starts.append(self._content._length)
+        self._starts.append(len(self._content))
         return self._content
 
     def end_list(self):
-        self._stops.append(self._content._length)
+        self._stops.append(len(self._content))
 
     def parameters(self):
         return self._parameters
@@ -653,8 +641,8 @@ class Regular(LayoutBuilder):
         return self._length
 
     def is_valid(self, error: str):
-        if self._content._length != self._length * self._size:
-            error = f"Regular node{self._id} has content length {self._content._length}, but length {self._length} and size {self._size}"
+        if len(self._content) != self._length * self._size:
+            error = f"Regular node{self._id} has content length {len(self._content)}, but length {self._length} and size {self._size}"
             return False
         else:
             return self._content.is_valid(error)
@@ -699,16 +687,28 @@ class Indexed(LayoutBuilder):
         return self._content
 
     def append(self, datum):
-        self._last_valid = self._content._length
+        self._last_valid = len(self._content)
         self._index.append(self._last_valid)
         self._content.append(datum)
 
+    def append_index(self):
+        self._last_valid = len(self._content)
+        self._index.append(self._last_valid)
+        return self._content
+
     def extend(self, data):
-        start = self._content._length
+        start = len(self._content)
         stop = start + len(data)
         self._last_valid = stop - 1
         self._index.extend(list(range(start, stop)))
         self._content.extend(data)
+
+    def extend_index(self, size):
+        start = len(self._content)
+        stop = start + size
+        self._last_valid = stop - 1
+        self._index.extend(list(range(start, stop)))
+        return self._content
 
     def parameters(self):
         return self._parameters
@@ -730,11 +730,11 @@ class Indexed(LayoutBuilder):
         return self.length()
 
     def is_valid(self, error: str):
-        if self._content.length() != self._index.length():
-            error = f"Indexed node{self._id} has content length {self._content.length()} but index length {self._index.length()}"
+        if len(self._content) != self._index.length():
+            error = f"Indexed node{self._id} has content length {len(self._content)} but index length {self._index.length()}"
             return False
-        elif self._content.length() != self._last_valid + 1:
-            error = f"Indexed node{self._id} has content length {self._content.length()} but last valid index is {self._last_valid}"
+        elif len(self._content) != self._last_valid + 1:
+            error = f"Indexed node{self._id} has content length {len(self._content)} but last valid index is {self._last_valid}"
         else:
             return self._content.is_valid(error)
 
@@ -783,12 +783,24 @@ class IndexedOption(LayoutBuilder):
         self._index.append(self._last_valid)
         self._content.append(datum)
 
+    def append_index(self):
+        self._last_valid = len(self._content)
+        self._index.append(self._last_valid)
+        return self._content
+
     def extend(self, data):
         start = len(self._content)
         stop = start + len(data)
         self._last_valid = stop - 1
         self._index.extend(list(range(start, stop)))
         self._content.extend(data)
+
+    def extend_index(self, size):
+        start = len(self._content)
+        stop = start + size
+        self._last_valid = stop - 1
+        self._index.extend(list(range(start, stop)))
+        return self._content
 
     def append_null(self):
         self._index.append(-1)
@@ -817,7 +829,7 @@ class IndexedOption(LayoutBuilder):
 
     def is_valid(self, error: str):
         if len(self._content) != self._last_valid + 1:
-            error = f"Indexed node{self._id} has content length {self._content.length()} but last valid index is {self._last_valid}"
+            error = f"Indexed node{self._id} has content length {len(self._content)} but last valid index is {self._last_valid}"
             return False
         else:
             return self._content.is_valid(error)
@@ -906,8 +918,8 @@ class ByteMasked(LayoutBuilder):
         return self.length()
 
     def is_valid(self, error: str):
-        if self._content.length() != self._mask.length():
-            error = f"ByteMasked node{self._id} has content length {self._content.length()} but mask length {len(self._stops)}"
+        if len(self._content) != self._mask.length():
+            error = f"ByteMasked node{self._id} has content length {len(self._content)} but mask length {len(self._stops)}"
             return False
         else:
             return self._content.is_valid(error)
@@ -1063,8 +1075,8 @@ class BitMasked(LayoutBuilder):
         return self.length()
 
     def is_valid(self, error: str):
-        if self._content.length() != self.length():
-            error = f"BitMasked node{self._id} has content length {self._content.length()} but bit mask length {self.length()}"
+        if len(self._content) != self.length():
+            error = f"BitMasked node{self._id} has content length {len(self._content)} but bit mask length {self.length()}"
             return False
         else:
             return self._content.is_valid(error)
@@ -1169,7 +1181,7 @@ class Record(LayoutBuilder):
         self._id = 0
 
     def field(self, name):
-        return self._field_pairs[name]  # .content
+        return self._contents[self._fields.index(name)]
 
     def parameters(self):
         return self._parameters
