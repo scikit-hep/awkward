@@ -576,23 +576,18 @@ def test_len():
 def test_from_buffer():
     @numba.njit
     def f4():
-        data = ak.numba._from_data(
-            numba.typed.List([np.array([3.12], np.float32)]),
-            np.array([1, 0], np.int64),
-            1.23,
-        )
-        data.append(66.6)
-        data.append(77.7)
+        growablebuffer = ak.numba.GrowableBuffer(np.float64)
+        growablebuffer.append(66.6)
+        growablebuffer.append(77.7)
 
-        return lb._from_buffer(data)
+        return lb._from_buffer(growablebuffer)
 
     out = f4()
     assert isinstance(out, lb.Numpy)
-    assert out.dtype == np.dtype(np.float32)
-    assert len(out) == 3
+    assert out.dtype == np.dtype(np.float64)
+    assert len(out) == 2
 
-    # FIXME: [66.5999984741211, 77.69999694824219, 7.006492321624085e-45] ???
-    # assert ak.to_list(out.snapshot()) == [666]
+    assert ak.to_list(out.snapshot()) == [66.6, 77.7]
 
 
 def test_ctor():
