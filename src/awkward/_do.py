@@ -209,6 +209,7 @@ def remove_structure(
     function_name: str | None = None,
     drop_nones: bool = True,
     keepdims: bool = False,
+    behavior: dict | None = None,
 ):
     if isinstance(layout, Record):
         return remove_structure(
@@ -225,6 +226,7 @@ def remove_structure(
             backend = layout._backend
         arrays = layout._remove_structure(
             backend,
+            behavior,
             {
                 "flatten_records": flatten_records,
                 "function_name": function_name,
@@ -271,7 +273,11 @@ def reduce(
 ):
     if axis is None:
         parts = remove_structure(
-            layout, flatten_records=False, drop_nones=False, keepdims=keepdims
+            layout,
+            flatten_records=False,
+            drop_nones=False,
+            keepdims=keepdims,
+            behavior=behavior,
         )
 
         if len(parts) > 1:

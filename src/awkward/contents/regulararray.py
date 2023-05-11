@@ -1293,7 +1293,7 @@ class RegularArray(Content):
                 ),
             )
 
-    def _remove_structure(self, backend, options):
+    def _remove_structure(self, backend, behavior, options):
         if (
             self.parameter("__array__") == "string"
             or self.parameter("__array__") == "bytestring"
@@ -1304,7 +1304,7 @@ class RegularArray(Content):
             content = self._content[
                 : index_nplike.shape_item_as_index(self._length * self._size)
             ]
-            contents = content._remove_structure(backend, options)
+            contents = content._remove_structure(backend, behavior, options)
             if options["keepdims"]:
                 return [
                     RegularArray(c, size=c.length, parameters=self._parameters)

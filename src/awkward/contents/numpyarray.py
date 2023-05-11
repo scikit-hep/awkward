@@ -1252,7 +1252,7 @@ class NumpyArray(Content):
     def _to_backend_array(self, allow_missing, backend):
         return to_nplike(self.data, backend.nplike, from_nplike=self._backend.nplike)
 
-    def _remove_structure(self, backend, options):
+    def _remove_structure(self, backend, behavior, options):
         if options["keepdims"]:
             shape = (1,) * (self._data.ndim - 1) + (-1,)
         else:

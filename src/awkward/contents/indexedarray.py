@@ -1033,8 +1033,8 @@ class IndexedArray(Content):
     def _to_backend_array(self, allow_missing, backend):
         return self.project()._to_backend_array(allow_missing, backend)
 
-    def _remove_structure(self, backend, options):
-        return self.project()._remove_structure(backend, options)
+    def _remove_structure(self, backend, behavior, options):
+        return self.project()._remove_structure(backend, behavior, options)
 
     def _recursively_apply(
         self, action, behavior, depth, depth_context, lateral_context, options

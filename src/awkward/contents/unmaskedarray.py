@@ -482,10 +482,10 @@ class UnmaskedArray(Content):
         else:
             return content
 
-    def _remove_structure(self, backend, options):
+    def _remove_structure(self, backend, behavior, options):
         branch, depth = self.branch_depth
         if branch or options["drop_nones"] or depth > 1:
-            return self.project()._remove_structure(backend, options)
+            return self.project()._remove_structure(backend, behavior, options)
         else:
             return [self]
 

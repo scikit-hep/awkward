@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("ravel",)
 import awkward as ak
+from awkward._behavior import behavior_of
 from awkward._connect.numpy import unsupported
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
@@ -57,9 +58,12 @@ def ravel(array, *, highlevel=True, behavior=None):
 
 
 def _impl(array, highlevel, behavior):
+    behavior = behavior_of(array, behavior=behavior)
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
 
-    out = ak._do.remove_structure(layout, function_name="ak.ravel", drop_nones=False)
+    out = ak._do.remove_structure(
+        layout, function_name="ak.ravel", drop_nones=False, behavior=behavior
+    )
     assert isinstance(out, tuple) and all(
         isinstance(x, ak.contents.Content) for x in out
     )

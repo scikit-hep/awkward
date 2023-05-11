@@ -1448,8 +1448,10 @@ class ListArray(Content):
         else:
             return self.to_RegularArray()._to_backend_array(allow_missing, backend)
 
-    def _remove_structure(self, backend, options):
-        return self.to_ListOffsetArray64(False)._remove_structure(backend, options)
+    def _remove_structure(self, backend, behavior, options):
+        return self.to_ListOffsetArray64(False)._remove_structure(
+            backend, behavior, options
+        )
 
     def _drop_none(self):
         return self.to_ListOffsetArray64()._drop_none()

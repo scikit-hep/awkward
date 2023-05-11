@@ -2015,7 +2015,7 @@ class ListOffsetArray(Content):
         else:
             return self.to_RegularArray()._to_backend_array(allow_missing, backend)
 
-    def _remove_structure(self, backend, options):
+    def _remove_structure(self, backend, behavior, options):
         if (
             self.parameter("__array__") == "string"
             or self.parameter("__array__") == "bytestring"
@@ -2023,7 +2023,7 @@ class ListOffsetArray(Content):
             return [self]
         else:
             content = self._content[self._offsets[0] : self._offsets[-1]]
-            contents = content._remove_structure(backend, options)
+            contents = content._remove_structure(backend, behavior, options)
             if options["keepdims"]:
                 return [
                     ListOffsetArray(

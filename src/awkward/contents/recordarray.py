@@ -1014,11 +1014,15 @@ class RecordArray(Content):
 
         return out
 
-    def _remove_structure(self, backend, options):
+    def _remove_structure(self, backend, behavior, options):
         if options["flatten_records"]:
             out = []
             for content in self._contents:
-                out.extend(content[: self._length]._remove_structure(backend, options))
+                out.extend(
+                    content[: self._length]._remove_structure(
+                        backend, behavior, options
+                    )
+                )
             return out
         else:
             in_function = ""

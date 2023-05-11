@@ -1103,7 +1103,7 @@ class Content:
     def _drop_none(self) -> Content:
         raise NotImplementedError
 
-    def _remove_structure(self, backend, options):
+    def _remove_structure(self, backend, behavior, options):
         raise NotImplementedError
 
     def _recursively_apply(

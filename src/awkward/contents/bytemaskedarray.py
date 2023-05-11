@@ -1042,10 +1042,10 @@ class ByteMaskedArray(Content):
     def _to_backend_array(self, allow_missing, backend):
         return self.to_IndexedOptionArray64()._to_backend_array(allow_missing, backend)
 
-    def _remove_structure(self, backend, options):
+    def _remove_structure(self, backend, behavior, options):
         branch, depth = self.branch_depth
         if branch or options["drop_nones"] or depth > 1:
-            return self.project()._remove_structure(backend, options)
+            return self.project()._remove_structure(backend, behavior, options)
         else:
             return [self]
 
