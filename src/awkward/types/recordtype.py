@@ -91,7 +91,7 @@ class RecordType(Type):
 
         behavior = overlay_behavior(behavior)
         typestr = behavior.get(
-            ("__typestr__", self.parameter("__array__")), self._typestr
+            ("__typestr__", self.parameter("__record__")), self._typestr
         )
         if typestr is not None:
             out = [typestr]
