@@ -4,7 +4,7 @@ from __future__ import annotations
 import json
 import re
 
-from awkward._behavior import overlay_behavior
+from awkward._behavior import find_array_typestr
 from awkward._errors import deprecate
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._parameters import parameters_are_equal, type_parameters_equal
@@ -130,10 +130,7 @@ class NumpyType(Type):
         if self._typestr is not None:
             deprecate("typestr argument is deprecated", "2.4.0")
 
-        behavior = overlay_behavior(behavior)
-        typestr = behavior.get(
-            ("__typestr__", self.parameter("__array__")), self._typestr
-        )
+        typestr = find_array_typestr(behavior, self._parameters)
         if typestr is not None:
             out = [typestr]
 

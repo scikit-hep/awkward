@@ -7,7 +7,7 @@ from itertools import permutations
 
 import awkward as ak
 import awkward._prettyprint
-from awkward._behavior import overlay_behavior
+from awkward._behavior import find_record_typestr
 from awkward._errors import deprecate
 from awkward._parameters import parameters_are_equal, type_parameters_equal
 from awkward._typing import Self, final
@@ -89,10 +89,7 @@ class RecordType(Type):
         if self._typestr is not None:
             deprecate("typestr argument is deprecated", "2.4.0")
 
-        behavior = overlay_behavior(behavior)
-        typestr = behavior.get(
-            ("__typestr__", self.parameter("__record__")), self._typestr
-        )
+        typestr = find_record_typestr(behavior, self._parameters)
         if typestr is not None:
             out = [typestr]
 
