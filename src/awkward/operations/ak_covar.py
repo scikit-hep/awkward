@@ -4,7 +4,6 @@ import awkward as ak
 from awkward._behavior import behavior_of
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
-from awkward._util import unset
 
 np = NumpyMetadata.instance()
 
@@ -17,7 +16,6 @@ def covar(
     *,
     keepdims=False,
     mask_identity=False,
-    flatten_records=unset,
 ):
     """
     Args:
@@ -67,16 +65,6 @@ def covar(
             "mask_identity": mask_identity,
         },
     ):
-        if flatten_records is not unset:
-            message = (
-                "`flatten_records` is no longer a supported argument for reducers. "
-                "Instead, use `ak.ravel(array)` first to remove the record structure "
-                "and flatten the array."
-            )
-            if flatten_records:
-                raise ValueError(message)
-            else:
-                ak._errors.deprecate(message, "2.2.0")
         return _impl(x, y, weight, axis, keepdims, mask_identity)
 
 

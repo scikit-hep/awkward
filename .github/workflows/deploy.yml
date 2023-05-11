@@ -102,15 +102,17 @@ jobs:
     needs: [build, check-requirements, check-cpp-on-pypi]
     runs-on: ubuntu-latest
     if: (github.event_name == 'release' && github.event.action == 'published') || inputs.publish-pypi
+    permissions:
+      id-token: write
+    environment:
+      name: "deploy-pypi"
     steps:
     - uses: actions/download-artifact@v3
       with:
         name: distributions
         path: dist
 
-    - uses: pypa/gh-action-pypi-publish@v1.8.5
-      with:
-        password: ${{ secrets.PYPI_PASSWORD }}
+    - uses: pypa/gh-action-pypi-publish@v1.8.6
 
   publish-headers:
     name: "Publish header-only libraries alongside release"

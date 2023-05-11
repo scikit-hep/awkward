@@ -166,12 +166,14 @@ jobs:
     needs: [build_wheels, build_alt_wheels, make_sdist]
     runs-on: ubuntu-latest
     if: inputs.publish-pypi
+    permissions:
+      id-token: write
+    environment:
+      name: "deploy-cpp-pypi"
     steps:
     - uses: actions/download-artifact@v3
       with:
         name: artifact
         path: dist
 
-    - uses: pypa/gh-action-pypi-publish@v1.8.5
-      with:
-        password: ${{ secrets.PYPI_PASSWORD_CPP }}
+    - uses: pypa/gh-action-pypi-publish@v1.8.6
