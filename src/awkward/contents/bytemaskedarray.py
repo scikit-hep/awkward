@@ -764,11 +764,11 @@ class ByteMaskedArray(Content):
             parameters=self._parameters,
         )
 
-    def _is_unique(self, negaxis, starts, parents, outlength):
+    def _is_unique(self, negaxis, starts, parents, outlength, behavior: dict | None):
         if self._mask.length == 0:
             return True
         return self.to_IndexedOptionArray64()._is_unique(
-            negaxis, starts, parents, outlength
+            negaxis, starts, parents, outlength, behavior
         )
 
     def _unique(self, negaxis, starts, parents, outlength):

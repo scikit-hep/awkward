@@ -589,11 +589,11 @@ class BitMaskedArray(Content):
     def _numbers_to_type(self, name, including_unknown):
         return self.to_ByteMaskedArray()._numbers_to_type(name, including_unknown)
 
-    def _is_unique(self, negaxis, starts, parents, outlength):
+    def _is_unique(self, negaxis, starts, parents, outlength, behavior: dict | None):
         if self._mask.length == 0:
             return True
         return self.to_IndexedOptionArray64()._is_unique(
-            negaxis, starts, parents, outlength
+            negaxis, starts, parents, outlength, behavior
         )
 
     def _unique(self, negaxis, starts, parents, outlength):

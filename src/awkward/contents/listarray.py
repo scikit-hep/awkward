@@ -1219,12 +1219,12 @@ class ListArray(Content):
             parameters=self._parameters,
         )
 
-    def _is_unique(self, negaxis, starts, parents, outlength):
+    def _is_unique(self, negaxis, starts, parents, outlength, behavior: dict | None):
         if self._starts.length is not unknown_length and self._starts.length == 0:
             return True
 
         return self.to_ListOffsetArray64(True)._is_unique(
-            negaxis, starts, parents, outlength
+            negaxis, starts, parents, outlength, behavior
         )
 
     def _unique(self, negaxis, starts, parents, outlength):

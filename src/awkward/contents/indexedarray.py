@@ -751,7 +751,7 @@ class IndexedArray(Content):
             parameters=self._parameters,
         )
 
-    def _is_unique(self, negaxis, starts, parents, outlength):
+    def _is_unique(self, negaxis, starts, parents, outlength, behavior: dict | None):
         if self._index.length == 0:
             return True
 
@@ -761,7 +761,7 @@ class IndexedArray(Content):
             return False
 
         next = self._content._carry(nextindex, False)
-        return next._is_unique(negaxis, starts, parents, outlength)
+        return next._is_unique(negaxis, starts, parents, outlength, behavior)
 
     def _unique(self, negaxis, starts, parents, outlength):
         if self._index.length == 0:

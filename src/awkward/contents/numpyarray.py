@@ -676,17 +676,14 @@ class NumpyArray(Content):
                 backend=self._backend,
             )
 
-    def _is_unique(self, negaxis, starts, parents, outlength):
+    def _is_unique(self, negaxis, starts, parents, outlength, behavior: dict | None):
         if self.length == 0:
             return True
 
         elif len(self.shape) != 1 or not self.is_contiguous:
             contiguous_self = self.to_contiguous()
             return contiguous_self.to_RegularArray()._is_unique(
-                negaxis,
-                starts,
-                parents,
-                outlength,
+                negaxis, starts, parents, outlength, behavior
             )
         else:
             out = self._unique(negaxis, starts, parents, outlength)

@@ -861,7 +861,7 @@ class ListOffsetArray(Content):
             parameters=self._parameters,
         )
 
-    def _is_unique(self, negaxis, starts, parents, outlength):
+    def _is_unique(self, negaxis, starts, parents, outlength, behavior: dict | None):
         if self._offsets.length - 1 == 0:
             return True
 
@@ -886,10 +886,14 @@ class ListOffsetArray(Content):
                 return out2.length == self.length
 
         if negaxis is None:
-            return self._content._is_unique(negaxis, starts, parents, outlength)
+            return self._content._is_unique(
+                negaxis, starts, parents, outlength, behavior
+            )
 
         if not branch and (negaxis == depth):
-            return self._content._is_unique(negaxis - 1, starts, parents, outlength)
+            return self._content._is_unique(
+                negaxis - 1, starts, parents, outlength, behavior
+            )
         else:
             nextparents = ak.index.Index64.empty(
                 self._offsets[-1] - self._offsets[0], self._backend.index_nplike
@@ -912,7 +916,9 @@ class ListOffsetArray(Content):
             )
             starts = self._offsets[:-1]
 
-            return self._content._is_unique(negaxis, starts, nextparents, outlength)
+            return self._content._is_unique(
+                negaxis, starts, nextparents, outlength, behavior
+            )
 
     def _unique(self, negaxis, starts, parents, outlength):
         if self._offsets.length - 1 == 0:

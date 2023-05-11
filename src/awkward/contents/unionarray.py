@@ -1207,7 +1207,7 @@ class UnionArray(Content):
             parameters=self._parameters,
         )
 
-    def _is_unique(self, negaxis, starts, parents, outlength):
+    def _is_unique(self, negaxis, starts, parents, outlength, behavior: dict | None):
         simplified = type(self).simplified(
             self._tags,
             self._index,
@@ -1219,7 +1219,7 @@ class UnionArray(Content):
         if isinstance(simplified, ak.contents.UnionArray):
             raise ValueError("cannot check if an irreducible UnionArray is unique")
 
-        return simplified._is_unique(negaxis, starts, parents, outlength)
+        return simplified._is_unique(negaxis, starts, parents, outlength, behavior)
 
     def _unique(self, negaxis, starts, parents, outlength):
         simplified = type(self).simplified(

@@ -275,7 +275,7 @@ class EmptyArray(Content):
         else:
             return self
 
-    def _is_unique(self, negaxis, starts, parents, outlength):
+    def _is_unique(self, negaxis, starts, parents, outlength, behavior: dict | None):
         return True
 
     def _unique(self, negaxis, starts, parents, outlength):

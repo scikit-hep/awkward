@@ -363,10 +363,10 @@ class UnmaskedArray(Content):
             parameters=self._parameters,
         )
 
-    def _is_unique(self, negaxis, starts, parents, outlength):
+    def _is_unique(self, negaxis, starts, parents, outlength, behavior: dict | None):
         if self._content.length == 0:
             return True
-        return self._content._is_unique(negaxis, starts, parents, outlength)
+        return self._content._is_unique(negaxis, starts, parents, outlength, behavior)
 
     def _unique(self, negaxis, starts, parents, outlength):
         if self._content.length == 0:

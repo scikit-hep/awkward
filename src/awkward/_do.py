@@ -141,11 +141,13 @@ def combinations(
     return layout._combinations(n, replacement, recordlookup, parameters, axis, 1)
 
 
-def is_unique(layout, axis: Integral | None = None) -> bool:
+def is_unique(
+    layout, axis: Integral | None = None, behavior: dict | None = None
+) -> bool:
     negaxis = axis if axis is None else -axis
     starts = ak.index.Index64.zeros(1, nplike=layout._backend.index_nplike)
     parents = ak.index.Index64.zeros(layout.length, nplike=layout._backend.index_nplike)
-    return layout._is_unique(negaxis, starts, parents, 1)
+    return layout._is_unique(negaxis, starts, parents, 1, behavior)
 
 
 def unique(layout: Content, axis=None):
@@ -339,8 +341,10 @@ def reduce(
         return next[0]
 
 
-def validity_error(layout: Content, path: str = "layout") -> str:
-    paramcheck = layout._validity_error_parameters(path)
+def validity_error(
+    layout: Content, path: str = "layout", behavior: dict | None = None
+) -> str:
+    paramcheck = layout._validity_error_parameters(path, behavior=behavior)
     if paramcheck != "":
         return paramcheck
     return layout._validity_error(path)
