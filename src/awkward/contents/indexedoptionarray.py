@@ -1294,7 +1294,9 @@ class IndexedOptionArray(Content):
         else:
             return out
 
-    def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
+    def _sort_next(
+        self, negaxis, starts, parents, outlength, ascending, stable, behavior
+    ):
         assert (
             starts.nplike is self._backend.index_nplike
             and parents.nplike is self._backend.index_nplike
@@ -1304,7 +1306,7 @@ class IndexedOptionArray(Content):
         next, nextparents, numnull, outindex = self._rearrange_prepare_next(parents)
 
         out = next._sort_next(
-            negaxis, starts, nextparents, outlength, ascending, stable
+            negaxis, starts, nextparents, outlength, ascending, stable, behavior
         )
 
         nextoutindex = ak.index.Index64.empty(

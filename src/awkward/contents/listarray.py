@@ -1252,9 +1252,11 @@ class ListArray(Content):
         )
         return out
 
-    def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
+    def _sort_next(
+        self, negaxis, starts, parents, outlength, ascending, stable, behavior
+    ):
         return self.to_ListOffsetArray64(True)._sort_next(
-            negaxis, starts, parents, outlength, ascending, stable
+            negaxis, starts, parents, outlength, ascending, stable, behavior
         )
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):

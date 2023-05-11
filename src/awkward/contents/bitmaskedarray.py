@@ -622,9 +622,11 @@ class BitMaskedArray(Content):
             negaxis, starts, shifts, parents, outlength, ascending, stable, behavior
         )
 
-    def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
+    def _sort_next(
+        self, negaxis, starts, parents, outlength, ascending, stable, behavior
+    ):
         return self.to_IndexedOptionArray64()._sort_next(
-            negaxis, starts, parents, outlength, ascending, stable
+            negaxis, starts, parents, outlength, ascending, stable, behavior
         )
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):

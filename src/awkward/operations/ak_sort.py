@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("sort",)
 import awkward as ak
+from awkward._behavior import behavior_of
 from awkward._connect.numpy import unsupported
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
@@ -49,9 +50,10 @@ def sort(array, axis=-1, *, ascending=True, stable=True, highlevel=True, behavio
 
 
 def _impl(array, axis, ascending, stable, highlevel, behavior):
+    behavior = behavior_of(array, behavior=behavior)
     axis = regularize_axis(axis)
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
-    out = ak._do.sort(layout, axis, ascending, stable)
+    out = ak._do.sort(layout, axis, ascending, stable, behavior=behavior)
     return wrap_layout(out, behavior, highlevel, like=array)
 
 

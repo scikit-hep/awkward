@@ -390,7 +390,11 @@ def argsort(
 
 
 def sort(
-    layout: Content, axis: int = -1, ascending: bool = True, stable: bool = False
+    layout: Content,
+    axis: int = -1,
+    ascending: bool = True,
+    stable: bool = False,
+    behavior: dict | None = None,
 ) -> Content:
     negaxis = -axis
     branch, depth = layout.branch_depth
@@ -419,4 +423,4 @@ def sort(
 
     starts = ak.index.Index64.zeros(1, nplike=layout.backend.index_nplike)
     parents = ak.index.Index64.zeros(layout.length, nplike=layout.backend.index_nplike)
-    return layout._sort_next(negaxis, starts, parents, 1, ascending, stable)
+    return layout._sort_next(negaxis, starts, parents, 1, ascending, stable, behavior)

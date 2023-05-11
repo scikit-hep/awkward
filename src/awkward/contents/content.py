@@ -838,6 +838,7 @@ class Content:
         outlength: int,
         ascending: bool,
         stable: bool,
+        behavior: dict | None,
     ):
         raise NotImplementedError
 

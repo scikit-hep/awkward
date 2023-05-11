@@ -397,9 +397,11 @@ class UnmaskedArray(Content):
         else:
             return out
 
-    def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
+    def _sort_next(
+        self, negaxis, starts, parents, outlength, ascending, stable, behavior
+    ):
         out = self._content._sort_next(
-            negaxis, starts, parents, outlength, ascending, stable
+            negaxis, starts, parents, outlength, ascending, stable, behavior
         )
 
         if isinstance(out, ak.contents.RegularArray):

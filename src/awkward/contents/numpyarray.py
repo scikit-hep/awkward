@@ -981,14 +981,16 @@ class NumpyArray(Content):
             out = NumpyArray(nextcarry.data, parameters=None, backend=self._backend)
             return out
 
-    def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
+    def _sort_next(
+        self, negaxis, starts, parents, outlength, ascending, stable, behavior
+    ):
         if len(self.shape) == 0:
             raise TypeError(f"{type(self).__name__} attempting to sort a scalar ")
 
         elif len(self.shape) != 1 or not self.is_contiguous:
             contiguous_self = self.to_contiguous()
             return contiguous_self.to_RegularArray()._sort_next(
-                negaxis, starts, parents, outlength, ascending, stable
+                negaxis, starts, parents, outlength, ascending, stable, behavior
             )
 
         else:

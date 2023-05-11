@@ -1215,7 +1215,9 @@ class ListOffsetArray(Content):
                 outoffsets, outcontent, parameters=self._parameters
             )
 
-    def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
+    def _sort_next(
+        self, negaxis, starts, parents, outlength, ascending, stable, behavior
+    ):
         branch, depth = self.branch_depth
 
         index_nplike = self._backend.index_nplike
@@ -1291,6 +1293,7 @@ class ListOffsetArray(Content):
                 maxnextparents + 1,
                 ascending,
                 stable,
+                behavior,
             )
 
             outcarry = ak.index.Index64.empty(nextcarry.length, index_nplike)
@@ -1343,6 +1346,7 @@ class ListOffsetArray(Content):
                 lenstarts,
                 ascending,
                 stable,
+                behavior,
             )
             outoffsets = self._compact_offsets64(True)
             return ak.contents.ListOffsetArray(

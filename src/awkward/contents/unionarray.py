@@ -1267,7 +1267,9 @@ class UnionArray(Content):
             negaxis, starts, shifts, parents, outlength, ascending, stable, behavior
         )
 
-    def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
+    def _sort_next(
+        self, negaxis, starts, parents, outlength, ascending, stable, behavior
+    ):
         if self.length == 0:
             return self
 
@@ -1285,7 +1287,7 @@ class UnionArray(Content):
             raise ValueError("cannot sort an irreducible UnionArray")
 
         return simplified._sort_next(
-            negaxis, starts, parents, outlength, ascending, stable
+            negaxis, starts, parents, outlength, ascending, stable, behavior
         )
 
     def _reduce_next(
