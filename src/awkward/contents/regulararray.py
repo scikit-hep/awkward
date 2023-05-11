@@ -885,10 +885,7 @@ class RegularArray(Content):
         if posaxis is not None and posaxis + 1 == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         elif posaxis is not None and posaxis + 1 == depth + 1:
-            if (
-                self.parameter("__array__") == "string"
-                or self.parameter("__array__") == "bytestring"
-            ):
+            if is_subtype(behavior, self.parameter("__array__"), "stringlike"):
                 raise ValueError(
                     "ak.combinations does not compute combinations of the characters of a string; please split it into lists"
                 )
@@ -1297,10 +1294,7 @@ class RegularArray(Content):
             )
 
     def _remove_structure(self, backend, behavior, options):
-        if (
-            self.parameter("__array__") == "string"
-            or self.parameter("__array__") == "bytestring"
-        ):
+        if is_subtype(behavior, self.parameter("__array__"), "stringlike"):
             return [self]
         else:
             index_nplike = self._backend.index_nplike
@@ -1398,7 +1392,8 @@ class RegularArray(Content):
         if not self._backend.nplike.known_data:
             raise TypeError("cannot convert typetracer arrays to Python lists")
 
-        if self.parameter("__array__") == "bytestring":
+        nominal_type = self.parameter("__array__")
+        if is_subtype(behavior, nominal_type, "bytestring"):
             convert_bytes = (
                 None if json_conversions is None else json_conversions["convert_bytes"]
             )
@@ -1413,7 +1408,7 @@ class RegularArray(Content):
                     out[i] = convert_bytes(content[(i) * size : (i + 1) * size])
             return out
 
-        elif self.parameter("__array__") == "string":
+        elif is_subtype(behavior, nominal_type, "string"):
             data = self._content.data
             if hasattr(data, "tobytes"):
 

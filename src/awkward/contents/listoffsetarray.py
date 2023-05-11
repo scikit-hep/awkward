@@ -868,10 +868,7 @@ class ListOffsetArray(Content):
 
         branch, depth = self.branch_depth
 
-        if (
-            self.parameter("__array__") == "string"
-            or self.parameter("__array__") == "bytestring"
-        ):
+        if is_subtype(behavior, self.parameter("__array__"), "stringlike"):
             if branch or (negaxis is not None and negaxis != depth):
                 raise ValueError(
                     "array with strings can only be checked on uniqueness with axis=-1"
@@ -927,10 +924,7 @@ class ListOffsetArray(Content):
 
         branch, depth = self.branch_depth
 
-        if (
-            self.parameter("__array__") == "string"
-            or self.parameter("__array__") == "bytestring"
-        ):
+        if is_subtype(behavior, self.parameter("__array__"), "stringlike"):
             if branch or (negaxis != depth):
                 raise AxisError("array with strings can only be sorted with axis=-1")
 
@@ -943,10 +937,7 @@ class ListOffsetArray(Content):
                 )
 
         if not branch and (negaxis == depth):
-            if (
-                self.parameter("__array__") == "string"
-                or self.parameter("__array__") == "bytestring"
-            ):
+            if is_subtype(behavior, self.parameter("__array__"), "stringlike"):
                 raise AxisError("array with strings can only be sorted with axis=-1")
 
             if self._backend.nplike.known_data and parents.nplike.known_data:
@@ -1034,10 +1025,7 @@ class ListOffsetArray(Content):
     ):
         branch, depth = self.branch_depth
 
-        if (
-            self.parameter("__array__") == "string"
-            or self.parameter("__array__") == "bytestring"
-        ):
+        if is_subtype(behavior, self.parameter("__array__"), "stringlike"):
             if branch or (negaxis != depth):
                 raise AxisError("array with strings can only be sorted with axis=-1")
 
@@ -1081,10 +1069,7 @@ class ListOffsetArray(Content):
                 )
 
         if not branch and (negaxis == depth):
-            if (
-                self.parameter("__array__") == "string"
-                or self.parameter("__array__") == "bytestring"
-            ):
+            if is_subtype(behavior, self.parameter("__array__"), "stringlike"):
                 raise AxisError("array with strings can only be sorted with axis=-1")
 
             if self._backend.nplike.known_data and parents.nplike.known_data:
@@ -1223,10 +1208,7 @@ class ListOffsetArray(Content):
 
         index_nplike = self._backend.index_nplike
 
-        if (
-            self.parameter("__array__") == "string"
-            or self.parameter("__array__") == "bytestring"
-        ):
+        if is_subtype(behavior, self.parameter("__array__"), "stringlike"):
             if branch or (negaxis != depth):
                 raise AxisError("array with strings can only be sorted with axis=-1")
 
@@ -1268,10 +1250,7 @@ class ListOffsetArray(Content):
                 return self._carry(nextcarry, False)
 
         if not branch and (negaxis == depth):
-            if (
-                self.parameter("__array__") == "string"
-                or self.parameter("__array__") == "bytestring"
-            ):
+            if is_subtype(behavior, self.parameter("__array__"), "stringlike"):
                 raise AxisError("array with strings can only be sorted with axis=-1")
 
             if self._backend.nplike.known_data and parents.nplike.known_data:
@@ -1363,10 +1342,7 @@ class ListOffsetArray(Content):
         if posaxis is not None and posaxis + 1 == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         elif posaxis is not None and posaxis + 1 == depth + 1:
-            if (
-                self.parameter("__array__") == "string"
-                or self.parameter("__array__") == "bytestring"
-            ):
+            if is_subtype(behavior, self.parameter("__array__"), "stringlike"):
                 raise ValueError(
                     "ak.combinations does not compute combinations of the characters of a string; please split it into lists"
                 )
@@ -2021,10 +1997,7 @@ class ListOffsetArray(Content):
             )
 
     def _remove_structure(self, backend, behavior, options):
-        if (
-            self.parameter("__array__") == "string"
-            or self.parameter("__array__") == "bytestring"
-        ):
+        if is_subtype(behavior, self.parameter("__array__"), "stringlike"):
             return [self]
         else:
             content = self._content[self._offsets[0] : self._offsets[-1]]
@@ -2162,7 +2135,8 @@ class ListOffsetArray(Content):
 
         nextcontent = self._content._getitem_range(mini, maxi)
 
-        if self.parameter("__array__") == "bytestring":
+        nominal_type = self.parameter("__array__")
+        if is_subtype(behavior, nominal_type, "bytestring"):
             convert_bytes = (
                 None if json_conversions is None else json_conversions["convert_bytes"]
             )
@@ -2176,7 +2150,7 @@ class ListOffsetArray(Content):
                     out[i] = convert_bytes(content[starts_data[i] : stops_data[i]])
             return out
 
-        elif self.parameter("__array__") == "string":
+        elif is_subtype(behavior, nominal_type, "string"):
             data = nextcontent.data
             if hasattr(data, "tobytes"):
 
