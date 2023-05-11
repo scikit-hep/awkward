@@ -63,9 +63,10 @@ class ListOffsetForm(Form):
             verbose,
         )
 
-    def _type(self, typestrs):
+    @property
+    def type(self):
         return ak.types.ListType(
-            self._content._type(typestrs),
+            self._content.type,
             parameters=self._parameters,
         )
 

@@ -132,9 +132,10 @@ class UnionForm(Form):
             verbose,
         )
 
-    def _type(self, typestrs):
+    @property
+    def type(self):
         return ak.types.UnionType(
-            [x._type(typestrs) for x in self._contents],
+            [x.type for x in self._contents],
             parameters=self._parameters,
         )
 

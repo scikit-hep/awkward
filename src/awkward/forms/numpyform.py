@@ -126,7 +126,8 @@ class NumpyForm(Form):
                 out["inner_shape"] = list(self._inner_shape)
             return self._to_dict_extra(out, verbose)
 
-    def _type(self, typestrs):
+    @property
+    def type(self):
         out = ak.types.NumpyType(
             self._primitive,
             parameters=None,

@@ -8,7 +8,6 @@ from collections.abc import Mapping
 
 import awkward as ak
 from awkward._backends.numpy import NumpyBackend
-from awkward._behavior import find_typestrs
 from awkward._errors import deprecate
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
@@ -377,10 +376,17 @@ class Form:
 
     @property
     def type(self):
-        return self._type({})
+        raise NotImplementedError
 
     def type_from_behavior(self, behavior):
-        return self._type(find_typestrs(behavior))
+        deprecate(
+            "low level types produced by forms do not hold references to behaviors. "
+            "Use a high-level type (e.g. ak.types.ArrayType or ak.types.ScalarType) to"
+            "associate a type with behavior information, or simply access the low-level"
+            "type from Form.type",
+            version="2.4.0",
+        )
+        return self.type
 
     def columns(self, list_indicator=None, column_prefix=()):
         output = []
@@ -423,9 +429,6 @@ class Form:
         raise NotImplementedError
 
     def _to_dict_part(self, verbose, toplevel):
-        raise NotImplementedError
-
-    def _type(self, typestrs):
         raise NotImplementedError
 
     def length_zero_array(

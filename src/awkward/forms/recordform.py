@@ -164,9 +164,10 @@ class RecordForm(Form):
         out["contents"] = contents_tolist
         return self._to_dict_extra(out, verbose)
 
-    def _type(self, typestrs):
+    @property
+    def type(self):
         return ak.types.RecordType(
-            [x._type(typestrs) for x in self._contents],
+            [x.type for x in self._contents],
             self._fields,
             parameters=self._parameters,
         )

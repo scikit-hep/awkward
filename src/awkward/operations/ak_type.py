@@ -85,19 +85,13 @@ def _impl(array, behavior):
 
     if isinstance(array, _ext.ArrayBuilder):
         form = ak.forms.from_json(array.form())
-        return ak.types.ArrayType(
-            form.type_from_behavior(behavior), len(array), behavior=behavior
-        )
+        return ak.types.ArrayType(form.type, len(array), behavior=behavior)
 
     elif isinstance(array, ak.record.Record):
-        return ak.types.ScalarType(
-            array.array.form.type_from_behavior(behavior), behavior=behavior
-        )
+        return ak.types.ScalarType(array.array.form.type, behavior=behavior)
 
     elif isinstance(array, ak.contents.Content):
-        return ak.types.ArrayType(
-            array.form.type_from_behavior(behavior), array.length, behavior=behavior
-        )
+        return ak.types.ArrayType(array.form.type, array.length, behavior=behavior)
 
     elif isinstance(array, (np.dtype, np.generic)):
         return ak.types.ScalarType(

@@ -97,7 +97,8 @@ class IndexedOptionForm(Form):
             verbose,
         )
 
-    def _type(self, typestrs):
+    @property
+    def type(self):
         if self.parameter("__array__") == "categorical":
             parameters = dict(self._parameters)
             del parameters["__array__"]
@@ -106,7 +107,7 @@ class IndexedOptionForm(Form):
             parameters = self._parameters
 
         return ak.types.OptionType(
-            self._content._type(typestrs),
+            self._content.type,
             parameters=parameters,
         ).simplify_option_union()
 

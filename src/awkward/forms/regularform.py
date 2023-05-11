@@ -65,9 +65,10 @@ class RegularForm(Form):
             verbose,
         )
 
-    def _type(self, typestrs):
+    @property
+    def type(self):
         return ak.types.RegularType(
-            self._content._type(typestrs),
+            self._content.type,
             self._size,
             parameters=self._parameters,
         )

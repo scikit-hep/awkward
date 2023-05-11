@@ -106,8 +106,9 @@ class IndexedForm(Form):
             verbose,
         )
 
-    def _type(self, typestrs):
-        out = self._content._type(typestrs)
+    @property
+    def type(self):
+        out = self._content.type
 
         if self._parameters is not None:
             if out._parameters is None:

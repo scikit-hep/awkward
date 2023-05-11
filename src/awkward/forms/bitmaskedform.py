@@ -141,9 +141,10 @@ class BitMaskedForm(Form):
             verbose,
         )
 
-    def _type(self, typestrs):
+    @property
+    def type(self):
         return ak.types.OptionType(
-            self._content._type(typestrs),
+            self._content.type,
             parameters=self._parameters,
             #
         ).simplify_option_union()
