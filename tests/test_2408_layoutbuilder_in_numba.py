@@ -518,71 +518,71 @@ def test_unbox():
 
 def test_unbox_for_loop():
     @numba.njit
-    def f1(x):
+    def f2(x):
         for i in range(0, 10):
             x.append(i)
         return
 
     builder = lb.Numpy(np.int64, parameters=None, initial=10, resize=2.0)
-    f1(builder)
+    f2(builder)
     assert ak.to_list(builder.snapshot()) == list(range(10))
 
     builder = lb.Empty()
     # Unknown attribute 'append' of type ak.Empty()
     with pytest.raises(numba.core.errors.TypingError):
-        f1(builder)
+        f2(builder)
 
 
 def test_box():
     @numba.njit
-    def f2(x):
+    def f3(x):
         return x
 
     builder = lb.Numpy(np.int32)
 
-    out1 = f2(builder)
+    out1 = f3(builder)
     assert ak.to_list(out1.snapshot()) == []
 
     for x in range(15):
         builder.append(x)
 
-    out2 = f2(builder)
+    out2 = f3(builder)
 
     assert ak.to_list(out2.snapshot()) == list(range(15))
 
     builder = lb.Empty()
 
-    out3 = f2(builder)
+    out3 = f3(builder)
     assert ak.to_list(out3.snapshot()) == []
 
 
 def test_len():
     @numba.njit
-    def f3(x):
+    def f4(x):
         return len(x)
 
     builder = lb.Numpy(np.int32, parameters=None, initial=10, resize=2.0)
 
-    assert f3(builder) == 0
+    assert f4(builder) == 0
 
     builder.append(123)
 
-    assert f3(builder) == 1
+    assert f4(builder) == 1
 
     builder = lb.Empty()
-    assert f3(builder) == 0
+    assert f4(builder) == 0
 
 
 def test_from_buffer():
     @numba.njit
-    def f4():
+    def f5():
         growablebuffer = ak.numba.GrowableBuffer(np.float64)
         growablebuffer.append(66.6)
         growablebuffer.append(77.7)
 
         return lb._from_buffer(growablebuffer)
 
-    out = f4()
+    out = f5()
     assert isinstance(out, lb.Numpy)
     assert out.dtype == np.dtype(np.float64)
     assert len(out) == 2
@@ -592,28 +592,28 @@ def test_from_buffer():
 
 def test_ctor():
     @numba.njit
-    def f5():
-        return lb.Numpy(np.float32)  # "f4")
+    def f6():
+        return lb.Numpy("f4")
 
-    out = f5()
+    out = f6()
     assert isinstance(out, lb.Numpy)
     assert out.dtype == np.dtype("f4")
     assert len(out) == 0
 
     @numba.njit
-    def f9():
+    def f7():
         return lb.Numpy(np.float32)
 
-    out = f9()
+    out = f7()
     assert isinstance(out, lb.Numpy)
     assert out.dtype == np.dtype(np.float32)
     assert len(out) == 0
 
     @numba.njit
-    def f10():
+    def f8():
         return lb.Numpy(np.dtype(np.float32))
 
-    out = f10()
+    out = f8()
     assert isinstance(out, lb.Numpy)
     assert out.dtype == np.dtype(np.float32)
     assert len(out) == 0
@@ -621,57 +621,57 @@ def test_ctor():
 
 def test_append():
     @numba.njit
-    def f15(builder):
+    def f9(builder):
         for i in range(8):
             builder.append(i)
 
     builder = lb.Numpy(np.float32)
 
-    f15(builder)
+    f9(builder)
 
     assert ak.to_list(builder.snapshot()) == list(range(8))
 
-    f15(builder)
+    f9(builder)
 
     assert ak.to_list(builder.snapshot()) == list(range(8)) + list(range(8))
 
 
 def test_extend():
     @numba.njit
-    def f16(builder):
+    def f10(builder):
         builder.extend(np.arange(8))
 
     builder = lb.Numpy(np.float32)
 
-    f16(builder)
+    f10(builder)
 
     assert ak.to_list(builder.snapshot()) == list(range(8))
 
-    f16(builder)
+    f10(builder)
 
     assert ak.to_list(builder.snapshot()) == list(range(8)) + list(range(8))
 
 
 def test_snapshot():
     @numba.njit
-    def f17(builder):
+    def f11(builder):
         return builder.snapshot()
 
     builder = lb.Numpy(np.float32)
 
-    assert ak.to_list(f17(builder)) == []
+    assert ak.to_list(f11(builder)) == []
 
     builder.extend(range(8))
 
-    assert ak.to_list(f17(builder)) == list(range(8))
+    assert ak.to_list(f11(builder)) == list(range(8))
 
     builder.extend(range(8))
 
-    assert ak.to_list(f17(builder)) == list(range(8)) + list(range(8))
+    assert ak.to_list(f11(builder)) == list(range(8)) + list(range(8))
 
 
 def test_numba_append():
-    # FIXME: @numba.njit
+    @numba.njit
     def create():
         return lb.Numpy(np.int32)
 
