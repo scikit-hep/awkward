@@ -826,7 +826,15 @@ class RecordArray(Content):
         raise NotImplementedError
 
     def _argsort_next(
-        self, negaxis, starts, shifts, parents, outlength, ascending, stable
+        self,
+        negaxis,
+        starts,
+        shifts,
+        parents,
+        outlength,
+        ascending,
+        stable,
+        behavior,
     ):
         raise NotImplementedError
 

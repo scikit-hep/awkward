@@ -887,11 +887,19 @@ class IndexedArray(Content):
         raise NotImplementedError
 
     def _argsort_next(
-        self, negaxis, starts, shifts, parents, outlength, ascending, stable
+        self,
+        negaxis,
+        starts,
+        shifts,
+        parents,
+        outlength,
+        ascending,
+        stable,
+        behavior,
     ):
         next = self._content._carry(self._index, False)
         return next._argsort_next(
-            negaxis, starts, shifts, parents, outlength, ascending, stable
+            negaxis, starts, shifts, parents, outlength, ascending, stable, behavior
         )
 
     def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):

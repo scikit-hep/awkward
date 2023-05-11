@@ -865,14 +865,22 @@ class NumpyArray(Content):
             )
 
     def _argsort_next(
-        self, negaxis, starts, shifts, parents, outlength, ascending, stable
+        self,
+        negaxis,
+        starts,
+        shifts,
+        parents,
+        outlength,
+        ascending,
+        stable,
+        behavior,
     ):
         if len(self.shape) == 0:
             raise TypeError(f"{type(self).__name__} attempting to argsort a scalar ")
         elif len(self.shape) != 1 or not self.is_contiguous:
             contiguous_self = self.to_contiguous()
             return contiguous_self.to_RegularArray()._argsort_next(
-                negaxis, starts, shifts, parents, outlength, ascending, stable
+                negaxis, starts, shifts, parents, outlength, ascending, stable, behavior
             )
 
         else:

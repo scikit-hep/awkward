@@ -374,10 +374,18 @@ class UnmaskedArray(Content):
         return self._content._unique(negaxis, starts, parents, outlength, behavior)
 
     def _argsort_next(
-        self, negaxis, starts, shifts, parents, outlength, ascending, stable
+        self,
+        negaxis,
+        starts,
+        shifts,
+        parents,
+        outlength,
+        ascending,
+        stable,
+        behavior,
     ):
         out = self._content._argsort_next(
-            negaxis, starts, shifts, parents, outlength, ascending, stable
+            negaxis, starts, shifts, parents, outlength, ascending, stable, behavior
         )
 
         if isinstance(out, ak.contents.RegularArray):

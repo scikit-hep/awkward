@@ -1236,11 +1236,19 @@ class ListArray(Content):
         )
 
     def _argsort_next(
-        self, negaxis, starts, shifts, parents, outlength, ascending, stable
+        self,
+        negaxis,
+        starts,
+        shifts,
+        parents,
+        outlength,
+        ascending,
+        stable,
+        behavior,
     ):
         next = self.to_ListOffsetArray64(True)
         out = next._argsort_next(
-            negaxis, starts, shifts, parents, outlength, ascending, stable
+            negaxis, starts, shifts, parents, outlength, ascending, stable, behavior
         )
         return out
 

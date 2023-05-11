@@ -1236,7 +1236,15 @@ class UnionArray(Content):
         return simplified._unique(negaxis, starts, parents, outlength, behavior)
 
     def _argsort_next(
-        self, negaxis, starts, shifts, parents, outlength, ascending, stable
+        self,
+        negaxis,
+        starts,
+        shifts,
+        parents,
+        outlength,
+        ascending,
+        stable,
+        behavior,
     ):
         simplified = type(self).simplified(
             self._tags,
@@ -1256,7 +1264,7 @@ class UnionArray(Content):
             raise ValueError("cannot argsort an irreducible UnionArray")
 
         return simplified._argsort_next(
-            negaxis, starts, shifts, parents, outlength, ascending, stable
+            negaxis, starts, shifts, parents, outlength, ascending, stable, behavior
         )
 
     def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):

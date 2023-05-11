@@ -1156,7 +1156,15 @@ class IndexedOptionArray(Content):
         return next, nextparents, numnull, outindex
 
     def _argsort_next(
-        self, negaxis, starts, shifts, parents, outlength, ascending, stable
+        self,
+        negaxis,
+        starts,
+        shifts,
+        parents,
+        outlength,
+        ascending,
+        stable,
+        behavior,
     ):
         assert (
             starts.nplike is self._backend.index_nplike
@@ -1174,7 +1182,14 @@ class IndexedOptionArray(Content):
             nextshifts = None
 
         out = next._argsort_next(
-            negaxis, starts, nextshifts, nextparents, outlength, ascending, stable
+            negaxis,
+            starts,
+            nextshifts,
+            nextparents,
+            outlength,
+            ascending,
+            stable,
+            behavior,
         )
 
         # `next._argsort_next` is given the non-None values. We choose to

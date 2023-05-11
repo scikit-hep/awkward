@@ -1029,14 +1029,7 @@ class ListOffsetArray(Content):
             )
 
     def _argsort_next(
-        self,
-        negaxis,
-        starts,
-        shifts,
-        parents,
-        outlength,
-        ascending,
-        stable,
+        self, negaxis, starts, shifts, parents, outlength, ascending, stable, behavior
     ):
         branch, depth = self.branch_depth
 
@@ -1155,6 +1148,7 @@ class ListOffsetArray(Content):
                 nextstarts.length,
                 ascending,
                 stable,
+                behavior,
             )
 
             outcarry = ak.index.Index64.empty(
@@ -1214,6 +1208,7 @@ class ListOffsetArray(Content):
                 self._offsets.length - 1,
                 ascending,
                 stable,
+                behavior,
             )
             outoffsets = self._compact_offsets64(True)
             return ak.contents.ListOffsetArray(

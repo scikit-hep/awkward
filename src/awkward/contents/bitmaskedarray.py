@@ -608,10 +608,18 @@ class BitMaskedArray(Content):
             return out._content
 
     def _argsort_next(
-        self, negaxis, starts, shifts, parents, outlength, ascending, stable
+        self,
+        negaxis,
+        starts,
+        shifts,
+        parents,
+        outlength,
+        ascending,
+        stable,
+        behavior,
     ):
         return self.to_IndexedOptionArray64()._argsort_next(
-            negaxis, starts, shifts, parents, outlength, ascending, stable
+            negaxis, starts, shifts, parents, outlength, ascending, stable, behavior
         )
 
     def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):

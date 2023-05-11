@@ -282,11 +282,19 @@ class EmptyArray(Content):
         return self
 
     def _argsort_next(
-        self, negaxis, starts, shifts, parents, outlength, ascending, stable
+        self,
+        negaxis,
+        starts,
+        shifts,
+        parents,
+        outlength,
+        ascending,
+        stable,
+        behavior,
     ):
         as_numpy = self.to_NumpyArray(np.float64)
         return as_numpy._argsort_next(
-            negaxis, starts, shifts, parents, outlength, ascending, stable
+            negaxis, starts, shifts, parents, outlength, ascending, stable, behavior
         )
 
     def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
