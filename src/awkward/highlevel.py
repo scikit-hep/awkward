@@ -436,7 +436,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         wrapped by an #ak.types.ArrayType.
         """
         return ak.types.ArrayType(
-            self._layout.form.type_from_behavior(self._behavior), self._layout.length
+            self._layout.form.type_from_behavior(self._behavior),
+            self._layout.length,
+            self._behavior,
         )
 
     @property
@@ -1714,7 +1716,7 @@ class Record(NDArrayOperatorsMixin):
         wrapped by an #ak.types.ScalarType.
         """
         return ak.types.ScalarType(
-            self._layout.array.form.type_from_behavior(self._behavior)
+            self._layout.array.form.type_from_behavior(self._behavior), self._behavior
         )
 
     @property

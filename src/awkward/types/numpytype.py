@@ -124,15 +124,9 @@ class NumpyType(Type):
 
     _str_parameters_exclude = ("__categorical__", "__unit__")
 
-    def _str(self, indent, compact):
+    def _str(self, indent, compact, behavior):
         if self._typestr is not None:
             out = [self._typestr]
-
-        elif self.parameter("__array__") == "char":
-            out = ["char"]
-
-        elif self.parameter("__array__") == "byte":
-            out = ["byte"]
 
         else:
             if self.parameter("__unit__") is not None:

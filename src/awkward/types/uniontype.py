@@ -57,7 +57,7 @@ class UnionType(Type):
     def contents(self):
         return self._contents
 
-    def _str(self, indent, compact):
+    def _str(self, indent, compact, behavior):
         if self._typestr is not None:
             out = [self._typestr]
 
@@ -71,14 +71,19 @@ class UnionType(Type):
             for i, x in enumerate(self._contents):
                 if i + 1 < len(self._contents):
                     if compact:
-                        y = [*x._str(indent, compact), ", "]
+                        y = [*x._str(indent, compact, behavior), ", "]
                     else:
-                        y = [*x._str(indent + "    ", compact), ",\n", indent, "    "]
+                        y = [
+                            *x._str(indent + "    ", compact, behavior),
+                            ",\n",
+                            indent,
+                            "    ",
+                        ]
                 else:
                     if compact:
-                        y = x._str(indent, compact)
+                        y = x._str(indent, compact, behavior)
                     else:
-                        y = x._str(indent + "    ", compact)
+                        y = x._str(indent + "    ", compact, behavior)
                 children.append(y)
 
             flat_children = [y for x in children for y in x]

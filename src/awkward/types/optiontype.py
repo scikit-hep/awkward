@@ -50,14 +50,14 @@ class OptionType(Type):
     def content(self):
         return self._content
 
-    def _str(self, indent, compact):
+    def _str(self, indent, compact, behavior):
         head = []
         tail = []
         if self._typestr is not None:
             content_out = [self._typestr]
 
         else:
-            content_out = self._content._str(indent, compact)
+            content_out = self._content._str(indent, compact, behavior)
             params = self._str_parameters()
             if params is None:
                 if isinstance(

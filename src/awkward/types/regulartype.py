@@ -64,27 +64,25 @@ class RegularType(Type):
     def size(self):
         return self._size
 
-    def _str(self, indent, compact):
+    def _str(self, indent, compact, behavior):
         if self._typestr is not None:
-            out = [self._typestr]
-
-        elif self.parameter("__array__") == "string":
-            out = [f"string[{self._size}]"]
-
-        elif self.parameter("__array__") == "bytestring":
-            out = [f"bytes[{self._size}]"]
+            out = [f"{self._typestr}[{self._size}]"]
 
         else:
             params = self._str_parameters()
 
             if params is None:
-                out = [str(self._size), " * ", *self._content._str(indent, compact)]
+                out = [
+                    str(self._size),
+                    " * ",
+                    *self._content._str(indent, compact, behavior),
+                ]
             else:
                 out = [
                     "[",
                     str(self._size),
                     " * ",
-                    *self._content._str(indent, compact),
+                    *self._content._str(indent, compact, behavior),
                 ] + [", ", params, "]"]
 
         return [self._str_categorical_begin(), *out] + [self._str_categorical_end()]

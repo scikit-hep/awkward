@@ -36,8 +36,12 @@ class Type:
     def __str__(self):
         return "".join(self._str("", True))
 
+    def _str(self, indent: str, compact: bool, behavior) -> list[str]:
+        raise NotImplementedError
+
     def show(self, stream=sys.stdout):
-        stream.write("".join([*self._str("", False), "\n"]))
+        # TODO: deprecate lowlevel show
+        stream.write("".join([*self._str("", False, None), "\n"]))
 
     _str_parameters_exclude = ("__categorical__",)
 

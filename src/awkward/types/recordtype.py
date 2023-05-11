@@ -83,7 +83,7 @@ class RecordType(Type):
 
     _str_parameters_exclude = ("__categorical__", "__record__")
 
-    def _str(self, indent, compact):
+    def _str(self, indent, compact, behavior):
         if self._typestr is not None:
             out = [self._typestr]
 
@@ -97,14 +97,19 @@ class RecordType(Type):
             for i, x in enumerate(self._contents):
                 if i + 1 < len(self._contents):
                     if compact:
-                        y = [*x._str(indent, compact), ", "]
+                        y = [*x._str(indent, compact, behavior), ", "]
                     else:
-                        y = [*x._str(indent + "    ", compact), ",\n", indent, "    "]
+                        y = [
+                            *x._str(indent + "    ", compact, behavior),
+                            ",\n",
+                            indent,
+                            "    ",
+                        ]
                 else:
                     if compact:
-                        y = x._str(indent, compact)
+                        y = x._str(indent, compact, behavior)
                     else:
-                        y = x._str(indent + "    ", compact)
+                        y = x._str(indent + "    ", compact, behavior)
                 children.append(y)
 
             params = self._str_parameters()
