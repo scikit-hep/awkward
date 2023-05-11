@@ -122,9 +122,7 @@ class ByteMaskedForm(Form):
     @property
     def type(self):
         return ak.types.OptionType(
-            self._content.type,
-            parameters=self._parameters,
-            #
+            self._content.type, parameters=self._parameters
         ).simplify_option_union()
 
     def __eq__(self, other):

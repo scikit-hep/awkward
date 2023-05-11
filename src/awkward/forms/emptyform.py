@@ -47,10 +47,7 @@ class EmptyForm(Form):
 
     @property
     def type(self):
-        return ak.types.UnknownType(
-            parameters=self._parameters,
-            #
-        )
+        return ak.types.UnknownType(parameters=self._parameters)
 
     def __eq__(self, other) -> bool:
         return isinstance(other, EmptyForm) and self._form_key == other._form_key
