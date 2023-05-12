@@ -36,12 +36,12 @@ numpy = Numpy.instance()
 
 
 def _apply_record_reducer(
-    reducer, layout: RecordArray, offsets: ak.index.Index, behavior
+    reducer, layout: RecordArray, mask: bool, offsets: ak.index.Index, behavior
 ) -> Content:
     # Build a 1D list over these contents
     array = wrap_layout(ak.contents.ListOffsetArray(offsets, layout), behavior=behavior)
     # Perform the reduction
-    return ak.to_layout(reducer(array))
+    return ak.to_layout(reducer(array, mask))
 
 
 @final
@@ -898,7 +898,7 @@ class RecordArray(Content):
         if reducer_recordclass is None:
             raise TypeError(
                 "no ak.{} overloads for custom types: {}".format(
-                    reducer.name, ", ".join(self._fields)
+                    reducer.name, ", ".join(self.fields)
                 )
             )
         else:
@@ -923,7 +923,9 @@ class RecordArray(Content):
                 )
             )
 
-            out = _apply_record_reducer(reducer_recordclass, self, outoffsets, behavior)
+            out = _apply_record_reducer(
+                reducer_recordclass, self, mask, outoffsets, behavior
+            )
 
             if mask:
                 outmask = ak.index.Index8.empty(outlength, self._backend.index_nplike)
