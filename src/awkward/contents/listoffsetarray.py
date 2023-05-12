@@ -1874,9 +1874,9 @@ class ListOffsetArray(Content):
                 parameters=self._parameters,
             )
 
-    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
-        is_string = self.parameter("__array__") == "string"
-        is_bytestring = self.parameter("__array__") == "bytestring"
+    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options, behavior):
+        is_string = is_subtype(behavior, self.parameter("__array__"), "string")
+        is_bytestring = is_subtype(behavior, self.parameter("__array__"), "bytestring")
         if is_string:
             downsize = options["string_to32"]
         elif is_bytestring:
@@ -1907,7 +1907,7 @@ class ListOffsetArray(Content):
                     parameters=self._parameters,
                 )
                 return next.to_ListOffsetArray64(True)._to_arrow(
-                    pyarrow, mask_node, validbytes, length, options
+                    pyarrow, mask_node, validbytes, length, options, behavior
                 )
 
         if issubclass(npoffsets.dtype.type, np.int64):
@@ -1952,7 +1952,7 @@ class ListOffsetArray(Content):
 
         else:
             paarray = akcontent._to_arrow(
-                pyarrow, None, None, akcontent.length, options
+                pyarrow, None, None, akcontent.length, options, behavior
             )
 
             content_type = pyarrow.list_(paarray.type).value_field.with_nullable(

@@ -1061,6 +1061,7 @@ class Content:
         extensionarray: bool = True,
         count_nulls: bool = True,
         record_is_scalar: bool = False,
+        behavior: Mapping = None,
     ):
         import awkward._connect.pyarrow
 
@@ -1080,6 +1081,7 @@ class Content:
                 "count_nulls": count_nulls,
                 "record_is_scalar": record_is_scalar,
             },
+            behavior,
         )
 
     def _to_arrow(
@@ -1089,6 +1091,7 @@ class Content:
         validbytes: Any,
         length: int,
         options: dict[str, Any],
+        behavior: Mapping | None,
     ):
         raise NotImplementedError
 

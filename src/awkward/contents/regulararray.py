@@ -1236,19 +1236,17 @@ class RegularArray(Content):
                 shape,
             )
 
-    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
+    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options, behavior):
         assert self._backend.nplike.known_data
 
-        if self.parameter("__array__") == "string":
+        if is_subtype(behavior, self.parameter("__array__"), "string"):
             return self.to_ListOffsetArray64(False)._to_arrow(
-                pyarrow, mask_node, validbytes, length, options
+                pyarrow, mask_node, validbytes, length, options, behavior
             )
-
-        is_bytestring = self.parameter("__array__") == "bytestring"
 
         akcontent = self._content[: self._length * self._size]
 
-        if is_bytestring:
+        if is_subtype(behavior, self.parameter("__array__"), "bytestring"):
             assert isinstance(akcontent, ak.contents.NumpyArray)
 
             return pyarrow.Array.from_buffers(
@@ -1268,7 +1266,7 @@ class RegularArray(Content):
 
         else:
             paarray = akcontent._to_arrow(
-                pyarrow, None, None, self._length * self._size, options
+                pyarrow, None, None, self._length * self._size, options, behavior
             )
 
             content_type = pyarrow.list_(paarray.type).value_field.with_nullable(

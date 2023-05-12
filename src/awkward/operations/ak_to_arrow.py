@@ -2,6 +2,7 @@
 __all__ = ("to_arrow",)
 
 import awkward as ak
+from awkward._behavior import behavior_of
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
@@ -99,6 +100,7 @@ def _impl(
     extensionarray,
     count_nulls,
 ):
+    behavior = behavior_of(array)
     layout = ak.operations.to_layout(array, allow_record=True, allow_other=False)
     if isinstance(layout, ak.record.Record):
         layout = layout.array[layout.at : layout.at + 1]
@@ -115,4 +117,5 @@ def _impl(
         extensionarray=extensionarray,
         count_nulls=count_nulls,
         record_is_scalar=record_is_scalar,
+        behavior=behavior,
     )

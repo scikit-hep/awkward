@@ -347,7 +347,7 @@ class EmptyArray(Content):
         else:
             return self._pad_none_axis0(target, True)
 
-    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
+    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options, behavior):
         if options["emptyarray_to"] is None:
             return pyarrow.Array.from_buffers(
                 ak._connect.pyarrow.to_awkwardarrow_type(
@@ -371,7 +371,9 @@ class EmptyArray(Content):
                 parameters=self._parameters,
                 backend=self._backend,
             )
-            return next._to_arrow(pyarrow, mask_node, validbytes, length, options)
+            return next._to_arrow(
+                pyarrow, mask_node, validbytes, length, options, behavior
+            )
 
     def _to_backend_array(self, allow_missing, behavior, backend):
         return backend.nplike.empty(0, dtype=np.float64)

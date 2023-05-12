@@ -981,7 +981,7 @@ class IndexedArray(Content):
                 parameters=self._parameters,
             )
 
-    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
+    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options, behavior):
         if (
             not options["categorical_as_dictionary"]
             and self.parameter("__array__") == "categorical"
@@ -989,13 +989,15 @@ class IndexedArray(Content):
             next_parameters = dict(self._parameters)
             del next_parameters["__array__"]
             next = IndexedArray(self._index, self._content, parameters=next_parameters)
-            return next._to_arrow(pyarrow, mask_node, validbytes, length, options)
+            return next._to_arrow(
+                pyarrow, mask_node, validbytes, length, options, behavior
+            )
 
         index = self._index.raw(numpy)
 
         if self.parameter("__array__") == "categorical":
             dictionary = self._content._to_arrow(
-                pyarrow, None, None, self._content.length, options
+                pyarrow, None, None, self._content.length, options, behavior
             )
             out = pyarrow.DictionaryArray.from_arrays(
                 index,
@@ -1028,7 +1030,9 @@ class IndexedArray(Content):
             next2 = next.copy(
                 parameters=parameters_union(next._parameters, self._parameters)
             )
-            return next2._to_arrow(pyarrow, mask_node, validbytes, length, options)
+            return next2._to_arrow(
+                pyarrow, mask_node, validbytes, length, options, behavior
+            )
 
     def _to_backend_array(self, allow_missing, behavior, backend):
         return self.project()._to_backend_array(allow_missing, behavior, backend)

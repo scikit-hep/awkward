@@ -1217,10 +1217,10 @@ class NumpyArray(Content):
     def _nbytes_part(self):
         return self.data.nbytes
 
-    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
+    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options, behavior):
         if self._data.ndim != 1:
             return self.to_RegularArray()._to_arrow(
-                pyarrow, mask_node, validbytes, length, options
+                pyarrow, mask_node, validbytes, length, options, behavior
             )
 
         nparray = self._raw(numpy)

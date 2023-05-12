@@ -472,8 +472,8 @@ class UnmaskedArray(Content):
                 parameters=self._parameters,
             )
 
-    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
-        return self._content._to_arrow(pyarrow, self, None, length, options)
+    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options, behavior):
+        return self._content._to_arrow(pyarrow, self, None, length, options, behavior)
 
     def _to_backend_array(self, allow_missing, behavior, backend):
         content = self.content._to_backend_array(allow_missing, behavior, backend)

@@ -676,9 +676,9 @@ class BitMaskedArray(Content):
     def _pad_none(self, target, axis, depth, clip):
         return self.to_ByteMaskedArray()._pad_none(target, axis, depth, clip)
 
-    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
+    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options, behavior):
         return self.to_ByteMaskedArray()._to_arrow(
-            pyarrow, mask_node, validbytes, length, options
+            pyarrow, mask_node, validbytes, length, options, behavior
         )
 
     def _to_backend_array(self, allow_missing, behavior, backend):

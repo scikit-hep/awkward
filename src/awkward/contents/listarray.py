@@ -1435,9 +1435,9 @@ class ListArray(Content):
                 target, axis, depth, clip=True
             )
 
-    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
+    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options, behavior):
         return self.to_ListOffsetArray64(False)._to_arrow(
-            pyarrow, mask_node, validbytes, length, options
+            pyarrow, mask_node, validbytes, length, options, behavior
         )
 
     def _to_backend_array(self, allow_missing, behavior, backend):
