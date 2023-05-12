@@ -62,3 +62,33 @@ def test_stringlike_backend_array():
         ["bish", "bash", "bosh"], "__array__", "my-string", behavior=behavior
     )
     assert ak.to_numpy(array).tolist() == ["bish", "bash", "bosh"]
+
+
+def test_stringlike_values_astype():
+    behavior = {("__super__", "my-string"): "string"}
+    array = ak.with_parameter(
+        ["bish", "bash", "bosh"], "__array__", "my-string", behavior=behavior
+    )
+    assert ak.values_astype(array, np.int64).tolist() == ["bish", "bash", "bosh"]
+
+    array = ak.with_parameter(["bish", "bash", "bosh"], "__array__", "my-other-string")
+    assert ak.values_astype(array, np.float32).tolist() == ["bish", "bash", "bosh"]
+
+
+def test_stringlike_to_arrow_table():
+    behavior = {("__super__", "my-string"): "string"}
+    array = ak.with_parameter(
+        ["bish", "bash", "bosh"], "__array__", "my-string", behavior=behavior
+    )
+    table = ak.to_arrow_table(array, extensionarray=False)
+
+    # Fails
+    assert table.schema.to_string() == ": large_string not null"
+    array = ak.with_parameter(
+        ["bish", "bash", "bosh"], "__array__", "my-other-string", behavior=behavior
+    )
+    table = ak.to_arrow_table(array, extensionarray=False)
+    assert (
+        table.schema.to_string()
+        == ": large_list<item: uint8 not null> not null\n  child 0, item: uint8 not null"
+    )
