@@ -44,10 +44,11 @@ def _impl(array, name, highlevel, behavior):
 
     def action(layout, **ignore):
         if isinstance(layout, ak.contents.RecordArray):
-            parameters = dict(layout.parameters)
-            parameters["__record__"] = name
             return ak.contents.RecordArray(
-                layout.contents, layout.fields, layout.length, parameters=parameters
+                layout._contents,
+                layout._fields,
+                layout._length,
+                parameters={**layout.parameters, "__record__": name},
             )
         else:
             return None
