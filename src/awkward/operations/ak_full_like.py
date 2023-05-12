@@ -136,7 +136,9 @@ def _impl(array, fill_value, highlevel, behavior, dtype, including_unknown):
             else:
                 return None
 
-        elif is_subtype(behavior, layout.parameter("__array__"), ("string", "bytes")):
+        elif is_subtype(
+            behavior, layout.parameter("__array__"), ("string", "bytestring")
+        ):
             nominal_type = layout.parameter("__array__")
             if fill_value is _ZEROS:
                 asbytes = nplike.frombuffer(b"", dtype=np.uint8)
