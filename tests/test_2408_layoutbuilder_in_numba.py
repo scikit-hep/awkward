@@ -555,6 +555,16 @@ def test_box():
     out3 = f3(builder)
     assert ak.to_list(out3.snapshot()) == []
 
+    builder = lb.ListOffset(np.int64, lb.Numpy(np.int32))
+
+    out4 = f3(builder)
+    assert ak.to_list(out4.snapshot()) == []
+
+    builder = lb.ListOffset(np.int32, lb.ListOffset(np.int64, lb.Numpy(np.int64)))
+
+    out5 = f3(builder)
+    assert ak.to_list(out5.snapshot()) == []
+
 
 def test_len():
     @numba.njit
@@ -570,6 +580,15 @@ def test_len():
     assert f4(builder) == 1
 
     builder = lb.Empty()
+    assert f4(builder) == 0
+
+    builder = lb.ListOffset(np.int64, lb.Numpy(np.int32))
+    assert f4(builder) == 0
+
+    builder = lb.ListOffset(np.int8, lb.Empty())
+    assert f4(builder) == 0
+
+    builder = lb.ListOffset(np.int32, lb.ListOffset(np.int32, lb.Numpy(np.int64)))
     assert f4(builder) == 0
 
 
