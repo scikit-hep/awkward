@@ -168,7 +168,9 @@ def _impl(array, highlevel, behavior):
             if not layout.is_list:
                 raise NotImplementedError("run_lengths on " + type(layout).__name__)
 
-            if is_subtype(behavior, layout.parameter("__array__"), "stringlike"):
+            if is_subtype(
+                behavior, layout.content.parameter("__array__"), "stringlike"
+            ):
                 # We also want to trim the _upper_ bound of content,
                 # so we manually convert the list type to zero-based
                 listoffsetarray = layout.to_ListOffsetArray64(False)
