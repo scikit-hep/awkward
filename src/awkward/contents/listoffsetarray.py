@@ -2184,43 +2184,6 @@ class ListOffsetArray(Content):
         offsets = self._offsets.to_nplike(backend.index_nplike)
         return ListOffsetArray(offsets, content, parameters=self._parameters)
 
-    def _awkward_strings_to_nonfinite(self, nonfinit_dict):
-        if self.parameter("__array__") == "string":
-            strings = self.to_list()
-            if any(item in nonfinit_dict for item in strings):
-                numbers = self._backend.index_nplike.empty(
-                    self.starts.length, dtype=np.float64
-                )
-                has_another_string = False
-                for i, val in enumerate(strings):
-                    if val in nonfinit_dict:
-                        numbers[i] = nonfinit_dict[val]
-                    else:
-                        numbers[i] = None
-                        has_another_string = True
-
-                content = ak.contents.NumpyArray(numbers)
-
-                if has_another_string:
-                    union_tags = ak.index.Index8.zeros(
-                        content.length, nplike=self._backend.index_nplike
-                    )
-                    content.backend.nplike.isnan(content._data, union_tags._data)
-                    union_index = ak.index.Index64(
-                        self._backend.index_nplike.arange(
-                            content.length, dtype=np.int64
-                        ),
-                        nplike=self._backend.index_nplike,
-                    )
-
-                    return ak.contents.UnionArray(
-                        tags=union_tags,
-                        index=union_index,
-                        contents=[content, self.to_ListOffsetArray64(True)],
-                    )
-
-                return content
-
     def _is_equal_to(self, other, index_dtype, numpyarray):
         return self.offsets.is_equal_to(
             other.offsets, index_dtype, numpyarray
