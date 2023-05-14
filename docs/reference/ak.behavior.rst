@@ -384,6 +384,66 @@ with type ``name`` will be matched instead of more detailed argument lists
 with type ``name`` at a later spot in the list. The "apply_ufunc" interface
 is *greedy*.
 
+Overriding NumPy reducers
+=========================
+
+In addition to ufuncs, it is also possible to override _reducers_ on records. Consider a 2D vector that implements binary addition:
+.. code-block:: python
+    def vector_add(left, right):
+        return ak.contents.RecordArray(
+            [
+                ak.to_layout(left["rho"] + right["rho"]),
+                ak.to_layout(left["phi"] + right["phi"]),
+            ],
+            ["rho", "phi"],
+            parameters={"__record__": "Vector2D"},
+        )
+
+
+    ak.behavior[np.add, "Vector2D", "Vector2D"] = vector_add
+
+
+Whilst the `np.add` overload permits binary addition of `Vector2D` objects,
+.. code-block:: python
+    >>> vector = ak.Array(
+    ...     [[{"rho": -1.1, "phi": -0.1}, {"rho": 1.1, "phi": 0.1}], [{"rho": -2.2, "phi": 0.0}, {"rho": 3.1, "phi": 0.9}]],
+    ...     with_name="Vector2D",
+    ... )
+    >>> (vector + vector).show()
+    [[{rho: -2.2, phi: -0.2}, {rho: 2.2, phi: 0.2}],
+     [{rho: -4.4, phi: 0}, {rho: 6.2, phi: 1.8}]]
+
+it does not permit the use of the `ak.sum` reducer:
+.. code-block:: python
+    >>> ak.sum(vector, axis=-1)
+    TypeError: no ak.sum overloads for custom types: rho, phi
+
+    This error occurred while calling
+
+        ak.sum(
+            array = <Array [[{rho: -1.1, ...}, ...], ...] type='2 * var * Vecto...'>
+            axis = -1
+            keepdims = False
+            mask_identity = False
+            highlevel = True
+            behavior = None
+        )
+To implement support for reducers like `ak.sum`, we should override them with a behavior:
+.. code-block:: python
+    >>> def vector_sum(vector, mask):
+    ...     return ak.contents.RecordArray(
+    ...         [
+    ...             ak.sum(vector["rho"], highlevel=False, axis=-1),
+    ...             ak.sum(vector["phi"], highlevel=False, axis=-1),
+    ...         ],
+    ...         ["rho", "phi"],
+    ...         parameters={"__record__": "Vector2D"},
+    ...     )
+    >>> ak.behavior[ak.sum, "Vector2D"] = vector_sum
+    >>> ak.sum(vector, axis=-1).show()
+    [{rho: 0, phi: 0},
+    {rho: 0.9, phi: 0.9}]
+
 Mixin decorators
 ================
 The pattern of adding additional properties and function overrides to records
