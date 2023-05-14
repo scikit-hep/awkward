@@ -57,11 +57,11 @@ def test_reducers():
 
 
 def test_overloaded_reducers():
-    def overload_add(array, axis=-1):
+    def overload_add(array, mask):
         return ak.contents.RecordArray(
             [
-                ak.contents.NumpyArray(np.asarray([ak.sum(array["rho"], axis=axis)])),
-                ak.contents.NumpyArray(np.asarray([ak.sum(array["phi"], axis=axis)])),
+                ak.sum(array["rho"], axis=-1, mask_identity=False, highlevel=False),
+                ak.sum(array["phi"], axis=-1, mask_identity=False, highlevel=False),
             ],
             ["rho", "phi"],
         )
@@ -75,15 +75,17 @@ def test_overloaded_reducers():
         behavior=behavior,
     )
 
-    with pytest.raises(NotImplementedError):
-        assert ak.to_list(ak.sum(array, axis=1)) == [{"rho": 0, "phi": 0}]
+    assert ak.to_list(ak.sum(array, axis=1)) == [{"rho": 0, "phi": 0}]
 
-    with pytest.raises(TypeError):
+    with pytest.raises(
+        TypeError, match=r"overloads for custom types: VectorArray2D, int"
+    ):
         ak.to_list(array + 1)
 
-    def overload_add2(array):
+    def overload_add2(array, mask):
         return ak.contents.RecordArray(
-            [ak.contents.NumpyArray(np.asarray([2.4, 3, 4.5, 6]))], ["rho"]
+            [ak.contents.NumpyArray(np.asarray([2.4, 3, 4.5, 6], dtype=np.float64))],
+            ["rho"],
         )
 
     behavior = {}
@@ -95,8 +97,7 @@ def test_overloaded_reducers():
         behavior=behavior,
     )
 
-    with pytest.raises(NotImplementedError):
-        assert ak.to_list(ak.sum(array, axis=1)) == [{"rho": 2.4}]
+    assert ak.to_list(ak.sum(array, axis=1)) == [{"rho": 2.4}]
 
     array = ak.highlevel.Array(
         ak.contents.ByteMaskedArray(
@@ -115,5 +116,5 @@ def test_overloaded_reducers():
         )
     )
 
-    with pytest.raises(TypeError):
+    with pytest.raises(TypeError, match=r"overloads for custom types: a, b"):
         ak.to_list(ak.sum(array, axis=0))
