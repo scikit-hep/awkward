@@ -65,27 +65,25 @@ def almost_equal(
         return left == right
 
     def visitor(left, right) -> bool:
-        # Enforce super-canonicalisation rules
-        if left.is_option:
-            left = left.to_IndexedOptionArray64()
-        # Project out indexed-of-record (comes from e.g. `RegularArray.to_ListOffsetArray64()`)
-        elif left.is_indexed:
+        # First, erase indexed types!
+        if left.is_indexed and not left.is_option:
             left = left.project()
-        if right.is_option:
-            right = right.to_IndexedOptionArray64()
-        # Project out indexed-of-record
-        elif right.is_indexed:
+        if right.is_indexed and not right.is_option:
             right = right.project()
 
-        if type(left) is not type(right):
-            if not check_regular and (
-                left.is_list and right.is_regular or left.is_regular and right.is_list
-            ):
-                left = left.to_ListOffsetArray64()
-                right = right.to_ListOffsetArray64()
-            else:
-                return False
+        # Simplify option types
+        if left.is_option:
+            left = left.to_IndexedOptionArray64()
+        if right.is_option:
+            right = right.to_IndexedOptionArray64()
 
+        # Simplify regular NumPy types
+        if left.is_numpy and left.purelist_depth > 1:
+            left = left.to_RegularArray()
+        if right.is_regular and left.purelist_depth > 1:
+            right = right.to_RegularArray()
+
+        # Different lengths aren't equal!
         if left.length != right.length:
             return False
 
@@ -102,15 +100,23 @@ def almost_equal(
         ):
             return False
 
-        if left.is_list:
-            return backend.index_nplike.array_equal(
-                left.offsets, right.offsets
-            ) and visitor(
-                left.content[: left.offsets[-1]], right.content[: right.offsets[-1]]
-            )
-        elif left.is_regular:
+        # Regular-regular
+        if left.is_regular and right.is_regular:
             return (left.size == right.size) and visitor(left.content, right.content)
-        elif left.is_numpy:
+        # List-list
+        elif left.is_list and right.is_list:
+            # Mixed regular-var
+            if (left.is_regular ^ right.is_regular) and check_regular:
+                return False
+            else:
+                left = left.to_ListOffsetArray64(False)
+                right = right.to_ListOffsetArray64(False)
+                return visitor(
+                    left.content[left.offsets[0] : left.offsets[-1]],
+                    right.content[right.offsets[0] : right.offsets[-1]],
+                )
+
+        elif left.is_numpy and right.is_numpy:
             # Timelike types must be exactly compared, including their units
             if (
                 np.issubdtype(left.dtype, np.datetime64)
@@ -133,11 +139,11 @@ def almost_equal(
                     )
                     and left.shape == right.shape
                 )
-        elif left.is_option:
+        elif left.is_option and right.is_option:
             return backend.index_nplike.array_equal(
-                left.index.data < 0, right.index.data < 0
-            ) and visitor(left.project().to_packed(), right.project().to_packed())
-        elif left.is_union:
+                left.mask_as_bool(True), right.mask_as_bool(True)
+            ) and visitor(left.project(), right.project())
+        elif left.is_union and right.is_union:
             # For two unions with different content orderings to match, the tags should be equal at each index
             # Therefore, we can order the contents by index appearance
             def ordered_unique_values(values):
@@ -169,13 +175,11 @@ def almost_equal(
 
             # Now project out the contents, and check for equality
             for i, j in zip(left_tag_order, right_tag_order):
-                if not visitor(
-                    left.project(i).to_packed(), right.project(j).to_packed()
-                ):
+                if not visitor(left.project(i), right.project(j)):
                     return False
             return True
 
-        elif left.is_record:
+        elif left.is_record and right.is_record:
             return (
                 (
                     get_record_class(left, left_behavior)
@@ -186,10 +190,10 @@ def almost_equal(
                 and (left.is_tuple or (len(left.fields) == len(right.fields)))
                 and all(visitor(left.content(f), right.content(f)) for f in left.fields)
             )
-        elif left.is_unknown:
+        elif left.is_unknown and right.is_unknown:
             return True
 
         else:
-            raise AssertionError
+            return False
 
     return visitor(left, right)
