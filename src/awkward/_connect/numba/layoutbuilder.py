@@ -788,6 +788,10 @@ class ListType(numba.types.Type):
         return ak.numba.GrowableBufferType(self._dtype)
 
     @property
+    def stops(self):
+        return ak.numba.GrowableBufferType(self._dtype)
+
+    @property
     def content(self):
         return tonumbatype(self._content)
 

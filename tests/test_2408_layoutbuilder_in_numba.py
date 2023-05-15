@@ -518,6 +518,12 @@ def test_unbox():
     builder = lb.ListOffset(np.int32, lb.Empty())
     f1(builder)
 
+    builder = lb.List(np.int8, lb.Numpy(np.int64))
+    f1(builder)
+
+    builder = lb.List(np.int32, lb.Empty())
+    f1(builder)
+
     # FIXME:
     # builder = lb.ListOffset(np.int32, lb.ListOffset(np.int64, lb.Numpy(np.int64)))
     # f1(builder)
