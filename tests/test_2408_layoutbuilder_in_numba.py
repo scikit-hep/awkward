@@ -573,6 +573,14 @@ def test_box():
     out4 = f3(builder)
     assert ak.to_list(out4.snapshot()) == []
 
+    builder = lb.List(np.int8, lb.Numpy(np.int64))
+    out5 = f3(builder)
+    # FIXME: assert ak.to_list(out5.snapshot()) == []
+
+    builder = lb.List(np.int32, lb.Empty())
+    out6 = f3(builder)
+    assert ak.to_list(out6.snapshot()) == []
+
     # FIXME:
     # builder = lb.ListOffset(np.int32, lb.ListOffset(np.int64, lb.Numpy(np.int64)))
     #
