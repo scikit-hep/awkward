@@ -688,6 +688,40 @@ def test_Numpy_append():
     assert ak.to_list(builder.snapshot()) == list(range(8)) + list(range(8))
 
 
+def test_Numpy_extend():
+    @numba.njit
+    def f10(builder):
+        builder.extend(np.arange(8))
+
+    builder = lb.Numpy(np.float32)
+
+    f10(builder)
+
+    assert ak.to_list(builder.snapshot()) == list(range(8))
+
+    f10(builder)
+
+    assert ak.to_list(builder.snapshot()) == list(range(8)) + list(range(8))
+
+
+def test_Numpy_snapshot():
+    @numba.njit
+    def f11(builder):
+        return builder.snapshot()
+
+    builder = lb.Numpy(np.float32)
+
+    assert ak.to_list(f11(builder)) == []
+
+    builder.extend(range(8))
+
+    assert ak.to_list(f11(builder)) == list(range(8))
+
+    builder.extend(range(8))
+
+    assert ak.to_list(f11(builder)) == list(range(8)) + list(range(8))
+
+
 def test_ListOffset_begin_list():
     @numba.njit
     def f28(builder):
@@ -747,42 +781,8 @@ def test_ListOffset_append():
     assert ak.to_list(builder.snapshot()) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
 
 
-def test_Numpy_extend():
-    @numba.njit
-    def f10(builder):
-        builder.extend(np.arange(8))
-
-    builder = lb.Numpy(np.float32)
-
-    f10(builder)
-
-    assert ak.to_list(builder.snapshot()) == list(range(8))
-
-    f10(builder)
-
-    assert ak.to_list(builder.snapshot()) == list(range(8)) + list(range(8))
-
-
 def test_ListOffset_extend():
     builder = lb.ListOffset(np.int64, lb.Numpy(np.int32))
-
-
-def test_Numpy_snapshot():
-    @numba.njit
-    def f11(builder):
-        return builder.snapshot()
-
-    builder = lb.Numpy(np.float32)
-
-    assert ak.to_list(f11(builder)) == []
-
-    builder.extend(range(8))
-
-    assert ak.to_list(f11(builder)) == list(range(8))
-
-    builder.extend(range(8))
-
-    assert ak.to_list(f11(builder)) == list(range(8)) + list(range(8))
 
 
 def test_ListOffset_snapshot():
