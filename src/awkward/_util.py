@@ -2,18 +2,16 @@
 from __future__ import annotations
 
 import os
+import struct
 import sys
 from collections.abc import Collection
 
 import packaging.version
 
-from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._typing import TypeVar
 
-np = NumpyMetadata.instance()
-
 win = os.name == "nt"
-bits32 = np.iinfo(np.intp).bits == 32
+bits32 = struct.calcsize("P") * 8 == 32
 
 # matches include/awkward/common.h
 kMaxInt8 = 127  # 2**7  - 1
