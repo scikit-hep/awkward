@@ -10,7 +10,7 @@ from collections.abc import Sequence
 import awkward as ak
 from awkward._backends.backend import Backend
 from awkward._backends.dispatch import backend_of
-from awkward._behavior import find_custom_broadcast
+from awkward._behavior import is_subtype
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
@@ -700,45 +700,64 @@ def apply_step(
 
         # General list-handling case: the offsets of each list may be different.
         else:
-            fcns = [
-                find_custom_broadcast(x, behavior) if isinstance(x, Content) else None
-                for x in inputs
-            ]
+            # We have three possible cases here:
+            # 1. all-string (nothing to do)
+            # 2. mixed string-list (strings gain a dimension and broadcast to the non-string offsets)
+            # 3. no strings (all lists broadcast to a single offsets)
+            offsets_content = None
+            all_content_strings = True
+            input_is_string = []
+            for x in inputs:
+                if isinstance(x, Content):
+                    content_is_string = is_subtype(
+                        behavior, x.parameter("__array__"), "stringlike"
+                    )
+                    # Don't try and take offsets from strings
+                    if not content_is_string:
+                        all_content_strings = False
+                        # Take the offsets from the first irregular list
+                        if x.is_list and not x.is_regular and offsets_content is None:
+                            offsets_content = x
+                    input_is_string.append(content_is_string)
+                else:
+                    input_is_string.append(False)
 
-            # Find first list without custom broadcasting which will define the broadcast offsets
-            # Don't consider RegularArray (handle case of 1-sized regular broadcasting)
-            # Do this to prioritise non-custom broadcasting
-            first = None
+            # case (1): user getfunctions should exit before this gets called
+            if all_content_strings:
+                raise ValueError(
+                    "cannot broadcast all strings: {}{}".format(
+                        ", ".join(repr(type(x)) for x in inputs), in_function(options)
+                    )
+                )
 
-            for x, fcn in zip(inputs, fcns):
-                if (
-                    isinstance(x, listtypes)
-                    and not isinstance(x, RegularArray)
-                    and fcn is None
-                ):
-                    first = x
-                    break
-
-            # Did we fail to find a list without custom broadcasting?
-            secondround = False
-            # If we failed to find an irregular, non-custom broadcasting list,
-            # continue search for *any* list.
-            if first is None:
-                secondround = True
-                for x in inputs:
-                    if isinstance(x, listtypes) and not isinstance(x, RegularArray):
-                        first = x
+            # Didn't find a ragged list, try any list!
+            if offsets_content is None:
+                for content in contents:
+                    if content.is_list:
+                        offsets_content = content
                         break
+                else:
+                    raise AssertionError("no list found in list branch!")
 
-            offsets = first._compact_offsets64(True)
+            offsets = offsets_content._compact_offsets64(True)
 
             nextinputs = []
-            for x, fcn in zip(inputs, fcns):
-                if callable(fcn) and not secondround:
-                    nextinputs.append(fcn(x, offsets))
+            for x, x_is_string in zip(inputs, input_is_string):
+                if x_is_string:
+                    offsets_data = backend.index_nplike.asarray(offsets)
+                    counts = offsets_data[1:] - offsets_data[:-1]
+                    if ak._util.win or ak._util.bits32:
+                        counts = index_nplike.astype(counts, dtype=np.int32)
+                    parents = index_nplike.repeat(
+                        index_nplike.arange(counts.size, dtype=counts.dtype), counts
+                    )
+                    nextinputs.append(
+                        ak.contents.IndexedArray(
+                            ak.index.Index64(parents, nplike=index_nplike), x
+                        ).project()
+                    )
                 elif isinstance(x, listtypes):
                     nextinputs.append(x._broadcast_tooffsets64(offsets).content)
-
                 # Handle implicit left-broadcasting (non-NumPy-like broadcasting).
                 elif options["left_broadcast"] and isinstance(x, Content):
                     nextinputs.append(
