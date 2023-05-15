@@ -240,7 +240,7 @@ def GrowableBuffer_add_panel(growablebuffer):
 @numba.extending.overload_method(GrowableBufferType, "append")
 def GrowableBuffer_append(growablebuffer, datum):
     def append(growablebuffer, datum):
-        if growablebuffer._pos_get() == len(growablebuffer._panels[-1]):  # FIXME: ???
+        if growablebuffer._pos_get() == len(growablebuffer._panels[-1]):
             growablebuffer._add_panel()
 
         growablebuffer._panels[-1][growablebuffer._pos_get()] = datum

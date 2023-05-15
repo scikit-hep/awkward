@@ -487,6 +487,8 @@ class ListOffset(LayoutBuilder):
         return f"ak.numba.lb.ListOffset({self._offsets.dtype}, {self._content.type})"
 
     def numbatype(self):
+        # content_type = numba.deferred_type()
+        # content_type.define(self.content.numbatype())
         return ListOffsetType(
             numba.from_dtype(self.offsets.dtype), self.content.numbatype()
         )

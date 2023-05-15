@@ -525,8 +525,8 @@ def test_unbox():
     f1(builder)
 
     # FIXME:
-    # builder = lb.ListOffset(np.int32, lb.ListOffset(np.int64, lb.Numpy(np.int64)))
-    # f1(builder)
+    builder = lb.ListOffset(np.int32, lb.ListOffset(np.int64, lb.Numpy(np.int64)))
+    f1(builder)
 
 
 def test_unbox_for_loop():
