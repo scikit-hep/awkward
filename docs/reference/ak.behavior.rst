@@ -3,16 +3,7 @@ ak.behavior
 
 .. py:data:: ak.behavior
 
-* `Motivation <#motivation>`__
-* `Parameters and behaviors <#parameters-and-behaviors>`__
-* `Adding behavior to records <#adding-behavior-to-records>`__
-* `Overriding NumPy ufuncs and binary operators <#overriding-numpy-ufuncs-and-binary-operators>`__
-* `Mixin decorators <#mixin-decorators>`__
-* `Adding behavior to arrays <#adding-behavior-to-arrays>`__
-* `Custom type names <#custom-type-names>`__
-* `Custom broadcasting <#custom-broadcasting>`__
-* `Overriding behavior in Numba <#overriding-behavior-in-numba>`__
-* `Complete example <#complete-example>`__
+.. contents::
 
 Motivation
 ==========
@@ -388,6 +379,7 @@ Overriding NumPy reducers
 =========================
 
 In addition to ufuncs, it is also possible to override _reducers_ on records. Consider a 2D vector that implements binary addition:
+
 .. code-block:: python
     def vector_add(left, right):
         return ak.contents.RecordArray(
@@ -404,6 +396,7 @@ In addition to ufuncs, it is also possible to override _reducers_ on records. Co
 
 
 Whilst the `np.add` overload permits binary addition of `Vector2D` objects,
+
 .. code-block:: python
     >>> vector = ak.Array(
     ...     [[{"rho": -1.1, "phi": -0.1}, {"rho": 1.1, "phi": 0.1}], [{"rho": -2.2, "phi": 0.0}, {"rho": 3.1, "phi": 0.9}]],
@@ -414,6 +407,7 @@ Whilst the `np.add` overload permits binary addition of `Vector2D` objects,
      [{rho: -4.4, phi: 0}, {rho: 6.2, phi: 1.8}]]
 
 it does not permit the use of the `ak.sum` reducer:
+
 .. code-block:: python
     >>> ak.sum(vector, axis=-1)
     TypeError: no ak.sum overloads for custom types: rho, phi
@@ -429,6 +423,7 @@ it does not permit the use of the `ak.sum` reducer:
             behavior = None
         )
 To implement support for reducers like `ak.sum`, we should override them with a behavior:
+
 .. code-block:: python
     >>> def vector_sum(vector, mask):
     ...     return ak.contents.RecordArray(
