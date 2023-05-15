@@ -7,14 +7,14 @@ import sys
 import awkward as ak
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._typing import Self
-from awkward._util import unset
+from awkward._util import UNSET
 from awkward.types._awkward_datashape_parser import Lark_StandAlone, Transformer
 
 np = NumpyMetadata.instance()
 
 
 class Type:
-    def copy(self, *, parameters=unset, typestr=unset) -> Self:
+    def copy(self, *, parameters=UNSET, typestr=UNSET) -> Self:
         raise NotImplementedError
 
     @property

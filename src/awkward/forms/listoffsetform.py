@@ -3,7 +3,7 @@ import awkward as ak
 from awkward._behavior import find_typestr
 from awkward._parameters import type_parameters_equal
 from awkward._typing import final
-from awkward._util import unset
+from awkward._util import UNSET
 from awkward.forms.form import Form
 
 
@@ -33,17 +33,17 @@ class ListOffsetForm(Form):
 
     def copy(
         self,
-        offsets=unset,
-        content=unset,
+        offsets=UNSET,
+        content=UNSET,
         *,
-        parameters=unset,
-        form_key=unset,
+        parameters=UNSET,
+        form_key=UNSET,
     ):
         return ListOffsetForm(
-            self._offsets if offsets is unset else offsets,
-            self._content if content is unset else content,
-            parameters=self._parameters if parameters is unset else parameters,
-            form_key=self._form_key if form_key is unset else form_key,
+            self._offsets if offsets is UNSET else offsets,
+            self._content if content is UNSET else content,
+            parameters=self._parameters if parameters is UNSET else parameters,
+            form_key=self._form_key if form_key is UNSET else form_key,
         )
 
     @classmethod

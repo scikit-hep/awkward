@@ -1,19 +1,18 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 from __future__ import annotations
 
+import base64
 import os
+import struct
 import sys
 from collections.abc import Collection
 
 import packaging.version
 
-from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._typing import TypeVar
 
-np = NumpyMetadata.instance()
-
 win = os.name == "nt"
-bits32 = np.iinfo(np.intp).bits == 32
+bits32 = struct.calcsize("P") * 8 == 32
 
 # matches include/awkward/common.h
 kMaxInt8 = 127  # 2**7  - 1
@@ -68,9 +67,6 @@ def native_to_byteorder(array, byteorder: str):
 
 
 def identifier_hash(str):
-    import base64
-    import struct
-
     return (
         base64.encodebytes(struct.pack("q", hash(str)))
         .rstrip(b"=\n")
@@ -80,18 +76,21 @@ def identifier_hash(str):
     )
 
 
-# FIXME: introduce sentinel type for this
-class _Unset:
+class Sentinel:
+    """A class for implementing sentinel types"""
+
+    def __init__(self, name, module=None):
+        self._name = name
+        self._module = module
+
     def __repr__(self):
-        return f"{__name__}.unset"
+        if self._module is not None:
+            return f"{self._module}.{self._name}"
+        else:
+            return f"{self._name}"
 
 
-unset = _Unset()
-
-
-# Sentinel object for catching pass-through values
-class Unspecified:
-    pass
+UNSET = Sentinel("UNSET", __name__)
 
 
 T = TypeVar("T")

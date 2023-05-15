@@ -2,7 +2,7 @@
 __all__ = ("any",)
 import awkward as ak
 from awkward._behavior import behavior_of
-from awkward._connect.numpy import unsupported
+from awkward._connect.numpy import UNSUPPORTED
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
@@ -86,5 +86,5 @@ def _impl(array, axis, keepdims, mask_identity, highlevel, behavior):
 
 
 @ak._connect.numpy.implements("any")
-def _nep_18_impl(a, axis=None, out=unsupported, keepdims=False, *, where=unsupported):
+def _nep_18_impl(a, axis=None, out=UNSUPPORTED, keepdims=False, *, where=UNSUPPORTED):
     return any(a, axis=axis, keepdims=keepdims)

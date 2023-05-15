@@ -3,7 +3,7 @@ import awkward as ak
 from awkward._behavior import find_typestr
 from awkward._parameters import type_parameters_equal
 from awkward._typing import final
-from awkward._util import unset
+from awkward._util import UNSET
 from awkward.forms.form import Form
 
 
@@ -58,19 +58,19 @@ class ByteMaskedForm(Form):
 
     def copy(
         self,
-        mask=unset,
-        content=unset,
-        valid_when=unset,
+        mask=UNSET,
+        content=UNSET,
+        valid_when=UNSET,
         *,
-        parameters=unset,
-        form_key=unset,
+        parameters=UNSET,
+        form_key=UNSET,
     ):
         return ByteMaskedForm(
-            self._mask if mask is unset else mask,
-            self._content if content is unset else content,
-            self._valid_when if valid_when is unset else valid_when,
-            parameters=self._parameters if parameters is unset else parameters,
-            form_key=self._form_key if form_key is unset else form_key,
+            self._mask if mask is UNSET else mask,
+            self._content if content is UNSET else content,
+            self._valid_when if valid_when is UNSET else valid_when,
+            parameters=self._parameters if parameters is UNSET else parameters,
+            form_key=self._form_key if form_key is UNSET else form_key,
         )
 
     @classmethod

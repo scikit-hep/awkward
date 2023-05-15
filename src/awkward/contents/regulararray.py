@@ -17,7 +17,7 @@ from awkward._parameters import (
 from awkward._regularize import is_integer, is_integer_like
 from awkward._slicing import NO_HEAD
 from awkward._typing import TYPE_CHECKING, Final, Self, SupportsIndex, final
-from awkward._util import unset
+from awkward._util import UNSET
 from awkward.contents.content import Content
 from awkward.forms.regularform import RegularForm
 from awkward.index import Index
@@ -175,12 +175,12 @@ class RegularArray(Content):
 
     form_cls: Final = RegularForm
 
-    def copy(self, content=unset, size=unset, zeros_length=unset, *, parameters=unset):
+    def copy(self, content=UNSET, size=UNSET, zeros_length=UNSET, *, parameters=UNSET):
         return RegularArray(
-            self._content if content is unset else content,
-            self._size if size is unset else size,
-            self._length if zeros_length is unset else zeros_length,
-            parameters=self._parameters if parameters is unset else parameters,
+            self._content if content is UNSET else content,
+            self._size if size is UNSET else size,
+            self._length if zeros_length is UNSET else zeros_length,
+            parameters=self._parameters if parameters is UNSET else parameters,
         )
 
     def __copy__(self):
@@ -940,11 +940,11 @@ class RegularArray(Content):
                 )
 
             contents = []
-            length = unset
+            length = UNSET
             for ptr in tocarry:
                 contents.append(self._content._carry(ptr, True))
                 length = contents[-1].length
-            assert length is not unset
+            assert length is not UNSET
             recordarray = ak.contents.RecordArray(
                 contents,
                 recordlookup,

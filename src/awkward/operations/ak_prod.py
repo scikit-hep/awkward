@@ -2,7 +2,7 @@
 __all__ = ("prod",)
 import awkward as ak
 from awkward._behavior import behavior_of
-from awkward._connect.numpy import unsupported
+from awkward._connect.numpy import UNSUPPORTED
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
@@ -140,11 +140,11 @@ def _impl(array, axis, keepdims, mask_identity, highlevel, behavior):
 def _nep_18_impl_prod(
     a,
     axis=None,
-    dtype=unsupported,
-    out=unsupported,
+    dtype=UNSUPPORTED,
+    out=UNSUPPORTED,
     keepdims=False,
-    initial=unsupported,
-    where=unsupported,
+    initial=UNSUPPORTED,
+    where=UNSUPPORTED,
 ):
     return prod(a, axis=axis, keepdims=keepdims)
 
@@ -153,10 +153,10 @@ def _nep_18_impl_prod(
 def _nep_18_impl_nanprod(
     a,
     axis=None,
-    dtype=unsupported,
-    out=unsupported,
+    dtype=UNSUPPORTED,
+    out=UNSUPPORTED,
     keepdims=False,
-    initial=unsupported,
-    where=unsupported,
+    initial=UNSUPPORTED,
+    where=UNSUPPORTED,
 ):
     return nanprod(a, axis=axis, keepdims=keepdims)

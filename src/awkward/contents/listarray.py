@@ -16,7 +16,7 @@ from awkward._parameters import (
 from awkward._regularize import is_integer_like
 from awkward._slicing import NO_HEAD
 from awkward._typing import TYPE_CHECKING, Final, Self, SupportsIndex, final
-from awkward._util import unset
+from awkward._util import UNSET
 from awkward.contents.content import Content
 from awkward.contents.listoffsetarray import ListOffsetArray
 from awkward.forms.listform import ListForm
@@ -172,12 +172,12 @@ class ListArray(Content):
 
     form_cls: Final = ListForm
 
-    def copy(self, starts=unset, stops=unset, content=unset, *, parameters=unset):
+    def copy(self, starts=UNSET, stops=UNSET, content=UNSET, *, parameters=UNSET):
         return ListArray(
-            self._starts if starts is unset else starts,
-            self._stops if stops is unset else stops,
-            self._content if content is unset else content,
-            parameters=self._parameters if parameters is unset else parameters,
+            self._starts if starts is UNSET else starts,
+            self._stops if stops is UNSET else stops,
+            self._content if content is UNSET else content,
+            parameters=self._parameters if parameters is UNSET else parameters,
         )
 
     def __copy__(self):

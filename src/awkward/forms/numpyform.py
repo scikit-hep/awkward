@@ -6,7 +6,7 @@ from awkward._behavior import find_typestr
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._parameters import type_parameters_equal
 from awkward._typing import final
-from awkward._util import unset
+from awkward._util import UNSET
 from awkward.forms.form import Form
 
 np = NumpyMetadata.instance()
@@ -73,17 +73,17 @@ class NumpyForm(Form):
 
     def copy(
         self,
-        primitive=unset,
-        inner_shape=unset,
+        primitive=UNSET,
+        inner_shape=UNSET,
         *,
-        parameters=unset,
-        form_key=unset,
+        parameters=UNSET,
+        form_key=UNSET,
     ):
         return NumpyForm(
-            self._primitive if primitive is unset else primitive,
-            self._inner_shape if inner_shape is unset else inner_shape,
-            parameters=self._parameters if parameters is unset else parameters,
-            form_key=self._form_key if form_key is unset else form_key,
+            self._primitive if primitive is UNSET else primitive,
+            self._inner_shape if inner_shape is UNSET else inner_shape,
+            parameters=self._parameters if parameters is UNSET else parameters,
+            form_key=self._form_key if form_key is UNSET else form_key,
         )
 
     @classmethod

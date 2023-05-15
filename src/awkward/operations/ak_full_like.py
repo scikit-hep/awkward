@@ -2,7 +2,7 @@
 __all__ = ("full_like",)
 import awkward as ak
 from awkward._behavior import behavior_of
-from awkward._connect.numpy import unsupported
+from awkward._connect.numpy import UNSUPPORTED
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.typetracer import ensure_known_scalar
@@ -213,6 +213,6 @@ def _impl(array, fill_value, highlevel, behavior, dtype, including_unknown):
 
 @ak._connect.numpy.implements("full_like")
 def _nep_18_impl(
-    a, fill_value, dtype=None, order=unsupported, subok=unsupported, shape=unsupported
+    a, fill_value, dtype=None, order=UNSUPPORTED, subok=UNSUPPORTED, shape=UNSUPPORTED
 ):
     return full_like(a, fill_value=fill_value, dtype=dtype)

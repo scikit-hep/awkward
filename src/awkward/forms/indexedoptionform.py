@@ -3,7 +3,7 @@ import awkward as ak
 from awkward._behavior import find_typestr
 from awkward._parameters import parameters_union, type_parameters_equal
 from awkward._typing import final
-from awkward._util import unset
+from awkward._util import UNSET
 from awkward.forms.form import Form
 
 
@@ -47,17 +47,17 @@ class IndexedOptionForm(Form):
 
     def copy(
         self,
-        index=unset,
-        content=unset,
+        index=UNSET,
+        content=UNSET,
         *,
-        parameters=unset,
-        form_key=unset,
+        parameters=UNSET,
+        form_key=UNSET,
     ):
         return IndexedOptionForm(
-            self._index if index is unset else index,
-            self._content if content is unset else content,
-            parameters=self._parameters if parameters is unset else parameters,
-            form_key=self._form_key if form_key is unset else form_key,
+            self._index if index is UNSET else index,
+            self._content if content is UNSET else content,
+            parameters=self._parameters if parameters is UNSET else parameters,
+            form_key=self._form_key if form_key is UNSET else form_key,
         )
 
     @classmethod

@@ -2,7 +2,7 @@
 __all__ = ("sum",)
 import awkward as ak
 from awkward._behavior import behavior_of
-from awkward._connect.numpy import unsupported
+from awkward._connect.numpy import UNSUPPORTED
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
@@ -288,11 +288,11 @@ def _impl(array, axis, keepdims, mask_identity, highlevel, behavior):
 def _nep_18_impl_sum(
     a,
     axis=None,
-    dtype=unsupported,
-    out=unsupported,
+    dtype=UNSUPPORTED,
+    out=UNSUPPORTED,
     keepdims=False,
-    initial=unsupported,
-    where=unsupported,
+    initial=UNSUPPORTED,
+    where=UNSUPPORTED,
 ):
     return sum(a, axis=axis, keepdims=keepdims)
 
@@ -301,10 +301,10 @@ def _nep_18_impl_sum(
 def _nep_18_impl_nansum(
     a,
     axis=None,
-    dtype=unsupported,
-    out=unsupported,
+    dtype=UNSUPPORTED,
+    out=UNSUPPORTED,
     keepdims=False,
-    initial=unsupported,
-    where=unsupported,
+    initial=UNSUPPORTED,
+    where=UNSUPPORTED,
 ):
     return nansum(a, axis=axis, keepdims=keepdims)

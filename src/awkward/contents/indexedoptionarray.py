@@ -19,7 +19,7 @@ from awkward._parameters import (
 from awkward._regularize import is_integer_like
 from awkward._slicing import NO_HEAD
 from awkward._typing import TYPE_CHECKING, Final, Self, SupportsIndex, final
-from awkward._util import unset
+from awkward._util import UNSET
 from awkward.contents.content import Content
 from awkward.forms.indexedoptionform import IndexedOptionForm
 from awkward.index import Index
@@ -126,11 +126,11 @@ class IndexedOptionArray(Content):
 
     form_cls: Final = IndexedOptionForm
 
-    def copy(self, index=unset, content=unset, *, parameters=unset):
+    def copy(self, index=UNSET, content=UNSET, *, parameters=UNSET):
         return IndexedOptionArray(
-            self._index if index is unset else index,
-            self._content if content is unset else content,
-            parameters=self._parameters if parameters is unset else parameters,
+            self._index if index is UNSET else index,
+            self._content if content is UNSET else content,
+            parameters=self._parameters if parameters is UNSET else parameters,
         )
 
     def __copy__(self):

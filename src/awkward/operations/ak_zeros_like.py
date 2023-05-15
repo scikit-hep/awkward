@@ -2,7 +2,7 @@
 __all__ = ("zeros_like",)
 
 import awkward as ak
-from awkward._connect.numpy import unsupported
+from awkward._connect.numpy import UNSUPPORTED
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
@@ -58,6 +58,6 @@ def _impl(array, highlevel, behavior, dtype, including_unknown):
 
 @ak._connect.numpy.implements("zeros_like")
 def _nep_18_impl(
-    a, dtype=None, order=unsupported, subok=unsupported, shape=unsupported
+    a, dtype=None, order=UNSUPPORTED, subok=UNSUPPORTED, shape=UNSUPPORTED
 ):
     return zeros_like(a, dtype=dtype)

@@ -2,7 +2,7 @@
 __all__ = ("min",)
 import awkward as ak
 from awkward._behavior import behavior_of
-from awkward._connect.numpy import unsupported
+from awkward._connect.numpy import UNSUPPORTED
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
@@ -169,10 +169,10 @@ def _impl(array, axis, keepdims, initial, mask_identity, highlevel, behavior):
 def _nep_18_impl_amin(
     a,
     axis=None,
-    out=unsupported,
+    out=UNSUPPORTED,
     keepdims=False,
     initial=None,
-    where=unsupported,
+    where=UNSUPPORTED,
 ):
     return min(a, axis=axis, keepdims=keepdims, initial=initial)
 
@@ -181,9 +181,9 @@ def _nep_18_impl_amin(
 def _nep_18_impl_nanmin(
     a,
     axis=None,
-    out=unsupported,
+    out=UNSUPPORTED,
     keepdims=False,
     initial=None,
-    where=unsupported,
+    where=UNSUPPORTED,
 ):
     return nanmin(a, axis=axis, keepdims=keepdims, initial=initial)

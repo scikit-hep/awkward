@@ -7,7 +7,7 @@ from awkward._behavior import find_typestr
 from awkward._parameters import type_parameters_equal
 from awkward._regularize import is_integer
 from awkward._typing import final
-from awkward._util import unset
+from awkward._util import UNSET
 from awkward.forms.form import Form
 
 
@@ -60,17 +60,17 @@ class RecordForm(Form):
 
     def copy(
         self,
-        contents=unset,
-        fields=unset,
+        contents=UNSET,
+        fields=UNSET,
         *,
-        parameters=unset,
-        form_key=unset,
+        parameters=UNSET,
+        form_key=UNSET,
     ):
         return RecordForm(
-            self._contents if contents is unset else contents,
-            self._fields if fields is unset else fields,
-            parameters=self._parameters if parameters is unset else parameters,
-            form_key=self._form_key if form_key is unset else form_key,
+            self._contents if contents is UNSET else contents,
+            self._fields if fields is UNSET else fields,
+            parameters=self._parameters if parameters is UNSET else parameters,
+            form_key=self._form_key if form_key is UNSET else form_key,
         )
 
     @classmethod

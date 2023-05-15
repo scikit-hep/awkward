@@ -2,7 +2,7 @@
 __all__ = ("std",)
 import awkward as ak
 from awkward._behavior import behavior_of
-from awkward._connect.numpy import unsupported
+from awkward._connect.numpy import UNSUPPORTED
 from awkward._layout import maybe_posaxis
 from awkward._nplikes import ufuncs
 from awkward._nplikes.numpylike import NumpyMetadata
@@ -181,12 +181,12 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity):
 def _nep_18_impl_std(
     a,
     axis=None,
-    dtype=unsupported,
-    out=unsupported,
+    dtype=UNSUPPORTED,
+    out=UNSUPPORTED,
     ddof=0,
     keepdims=False,
     *,
-    where=unsupported,
+    where=UNSUPPORTED,
 ):
     return std(a, axis=axis, keepdims=keepdims, ddof=ddof)
 
@@ -195,11 +195,11 @@ def _nep_18_impl_std(
 def _nep_18_impl_nanstd(
     a,
     axis=None,
-    dtype=unsupported,
-    out=unsupported,
+    dtype=UNSUPPORTED,
+    out=UNSUPPORTED,
     ddof=0,
     keepdims=False,
     *,
-    where=unsupported,
+    where=UNSUPPORTED,
 ):
     return nanstd(a, axis=axis, keepdims=keepdims, ddof=ddof)

@@ -2,7 +2,7 @@
 __all__ = ("mean",)
 import awkward as ak
 from awkward._behavior import behavior_of
-from awkward._connect.numpy import unsupported
+from awkward._connect.numpy import UNSUPPORTED
 from awkward._layout import maybe_posaxis
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
@@ -218,11 +218,11 @@ def _impl(x, weight, axis, keepdims, mask_identity):
 def _nep_18_impl_mean(
     a,
     axis=None,
-    dtype=unsupported,
-    out=unsupported,
+    dtype=UNSUPPORTED,
+    out=UNSUPPORTED,
     keepdims=False,
     *,
-    where=unsupported,
+    where=UNSUPPORTED,
 ):
     return mean(a, axis=axis, keepdims=keepdims)
 
@@ -231,10 +231,10 @@ def _nep_18_impl_mean(
 def _nep_18_impl_nanmean(
     a,
     axis=None,
-    dtype=unsupported,
-    out=unsupported,
+    dtype=UNSUPPORTED,
+    out=UNSUPPORTED,
     keepdims=False,
     *,
-    where=unsupported,
+    where=UNSUPPORTED,
 ):
     return nanmean(a, axis=axis, keepdims=keepdims)
