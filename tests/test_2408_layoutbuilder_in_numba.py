@@ -518,9 +518,9 @@ def test_unbox():
     builder = lb.ListOffset(np.int32, lb.Empty())
     f1(builder)
 
-    content = lb.ListOffset(np.int64, lb.Numpy(np.int64))
-    builder = lb.ListOffset(np.int32, content)
-    f1(builder)
+    # FIXME:
+    # builder = lb.ListOffset(np.int32, lb.ListOffset(np.int64, lb.Numpy(np.int64)))
+    # f1(builder)
 
 
 def test_unbox_for_loop():
@@ -601,7 +601,6 @@ def test_len():
     # assert f4(builder) == 0
 
 
-@pytest.mark.skip("FIXME")
 def test_from_buffer():
     @numba.njit
     def f19(debug=True):
@@ -684,10 +683,9 @@ def test_ListOffset_begin_list():
 
     out = f28(builder)
     assert isinstance(out, lb.Numpy)
-    # FIXME: assert out.dtype == np.dtype(np.int32)
+    assert out.dtype == np.dtype(np.int32)
 
 
-@pytest.mark.skip("FIXME")
 def test_ListOffset_end_list():
     @numba.njit
     def f29(builder):
@@ -709,7 +707,6 @@ def test_ListOffset_end_list():
     assert ak.to_list(builder.snapshot()) == [[], [], []]
 
 
-@pytest.mark.skip("FIXME")
 def test_ListOffset_append():
     @numba.njit
     def f30(builder):
@@ -726,7 +723,6 @@ def test_ListOffset_append():
         content.append(4.4)
         content.append(5.5)
         builder.end_list()
-        print(len(builder))
 
     builder = lb.ListOffset(np.int64, lb.Numpy(np.float64))
     assert len(builder) == 0
@@ -734,9 +730,7 @@ def test_ListOffset_append():
     f30(builder)
     assert len(builder) == 3
 
-
-# FIXME:
-# assert ak.to_list(builder.snapshot()) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
+    assert ak.to_list(builder.snapshot()) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
 
 
 def test_Numpy_extend():

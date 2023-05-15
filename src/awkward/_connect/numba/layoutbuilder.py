@@ -39,11 +39,11 @@ class LayoutBuilder:
 
 def tonumbatype(content):
     if isinstance(content, Numpy):
-        return NumpyType.type(content)
+        return Numpy.numbatype(content)
     if isinstance(content, Empty):
-        return EmptyType.type(content)
+        return Empty.numbatype(content)
     if isinstance(content, ListOffset):
-        return ListOffsetType.type(content)
+        return ListOffset.numbatype(content)
 
 
 class LayoutBuilderType(numba.types.Type):
@@ -371,6 +371,9 @@ class Empty(LayoutBuilder):
     def _type(self, typestrs):
         return "ak.numba.lb.Empty()"
 
+    def numbatype(self):
+        return EmptyType()
+
     @property
     def _length(self):
         return 0
@@ -482,6 +485,11 @@ class ListOffset(LayoutBuilder):
 
     def _type(self, typestrs):
         return f"ak.numba.lb.ListOffset({self._offsets.dtype}, {self._content.type})"
+
+    def numbatype(self):
+        return ListOffsetType(
+            numba.from_dtype(self.offsets.dtype), self.content.numbatype()
+        )
 
     @property
     def offsets(self):
@@ -700,6 +708,17 @@ class List(LayoutBuilder):
         self._stops = GrowableBuffer(dtype=dtype, initial=initial, resize=resize)
         self._content = content
         self._parameters = parameters
+
+    def numbatype(self):
+        return ListType(numba.from_dtype(self.starts.dtype), self.content.numbatype())
+
+    @property
+    def starts(self):
+        return self._starts
+
+    @property
+    def stops(self):
+        return self._stops
 
     @property
     def content(self):
