@@ -64,6 +64,10 @@ def almost_equal(
                     return np.issubdtype(right, family)
         return left == right
 
+    def packed_list_content(layout):
+        layout = layout.to_ListOffsetArray64(False)
+        return layout.content[layout.offsets[0] : layout.offsets[-1]]
+
     def visitor(left, right) -> bool:
         # First, erase indexed types!
         if left.is_indexed and not left.is_option:
@@ -106,14 +110,20 @@ def almost_equal(
         # List-list
         elif left.is_list and right.is_list:
             # Mixed regular-var
-            if (left.is_regular ^ right.is_regular) and check_regular:
-                return False
+            if left.is_regular and not right.is_regular:
+                return check_regular and visitor(
+                    left.content,
+                    packed_list_content(right),
+                )
+            elif right.is_regular and not left.is_regular:
+                return check_regular and visitor(
+                    packed_list_content(left),
+                    right.content,
+                )
             else:
-                left = left.to_ListOffsetArray64(False)
-                right = right.to_ListOffsetArray64(False)
                 return visitor(
-                    left.content[left.offsets[0] : left.offsets[-1]],
-                    right.content[right.offsets[0] : right.offsets[-1]],
+                    packed_list_content(left),
+                    packed_list_content(right),
                 )
 
         elif left.is_numpy and right.is_numpy:
