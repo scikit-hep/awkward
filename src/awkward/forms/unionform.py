@@ -3,7 +3,6 @@ from collections import Counter
 from collections.abc import Iterable
 
 import awkward as ak
-from awkward._behavior import find_typestr
 from awkward._parameters import type_parameters_equal
 from awkward._typing import final
 from awkward._util import UNSET
@@ -133,11 +132,11 @@ class UnionForm(Form):
             verbose,
         )
 
-    def _type(self, typestrs):
+    @property
+    def type(self):
         return ak.types.UnionType(
-            [x._type(typestrs) for x in self._contents],
+            [x.type for x in self._contents],
             parameters=self._parameters,
-            typestr=find_typestr(self._parameters, typestrs),
         )
 
     def __eq__(self, other):

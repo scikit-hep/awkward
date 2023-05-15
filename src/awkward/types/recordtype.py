@@ -7,6 +7,8 @@ from itertools import permutations
 
 import awkward as ak
 import awkward._prettyprint
+from awkward._behavior import find_record_typestr
+from awkward._errors import deprecate
 from awkward._parameters import parameters_are_equal, type_parameters_equal
 from awkward._typing import Self, final
 from awkward._util import UNSET
@@ -83,9 +85,13 @@ class RecordType(Type):
 
     _str_parameters_exclude = ("__categorical__", "__record__")
 
-    def _str(self, indent, compact):
+    def _str(self, indent, compact, behavior):
         if self._typestr is not None:
-            out = [self._typestr]
+            deprecate("typestr argument is deprecated", "2.4.0")
+
+        typestr = find_record_typestr(behavior, self._parameters, self._typestr)
+        if typestr is not None:
+            out = [typestr]
 
         else:
             if compact:
@@ -97,14 +103,19 @@ class RecordType(Type):
             for i, x in enumerate(self._contents):
                 if i + 1 < len(self._contents):
                     if compact:
-                        y = [*x._str(indent, compact), ", "]
+                        y = [*x._str(indent, compact, behavior), ", "]
                     else:
-                        y = [*x._str(indent + "    ", compact), ",\n", indent, "    "]
+                        y = [
+                            *x._str(indent + "    ", compact, behavior),
+                            ",\n",
+                            indent,
+                            "    ",
+                        ]
                 else:
                     if compact:
-                        y = x._str(indent, compact)
+                        y = x._str(indent, compact, behavior)
                     else:
-                        y = x._str(indent + "    ", compact)
+                        y = x._str(indent + "    ", compact, behavior)
                 children.append(y)
 
             params = self._str_parameters()

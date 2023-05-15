@@ -6,6 +6,22 @@ import pytest
 import awkward as ak
 
 
+def assert_overrides_typestr(type_, typestr: str = "override", expected: str = None):
+    # Assume typestr is expected result
+    if expected is None:
+        expected = typestr
+    # Set appropriate array or record parameter
+    if isinstance(type_, ak.types.RecordType):
+        parameters = {**type_.parameters, "__record__": "custom"}
+    else:
+        parameters = {**type_.parameters, "__array__": "custom"}
+    behavior = {("__typestr__", "custom"): typestr}
+    # Build highlevel type with custom behavior
+    with_parameter = type_.copy(parameters=parameters)
+    as_str = "".join(with_parameter._str("", False, behavior))
+    assert as_str == expected
+
+
 def test_UnknownType():
     assert str(ak.types.unknowntype.UnknownType()) == "unknown"
     with pytest.warns(DeprecationWarning):
@@ -13,18 +29,11 @@ def test_UnknownType():
             str(ak.types.unknowntype.UnknownType(parameters={"x": 123}))
             == 'unknown[parameters={"x": 123}]'
         )
-    assert (
-        str(ak.types.unknowntype.UnknownType(parameters=None, typestr="override"))
-        == "override"
-    )
     with pytest.warns(DeprecationWarning):
-        assert (
-            str(
-                ak.types.unknowntype.UnknownType(
-                    parameters={"x": 123}, typestr="override"
-                )
-            )
-            == "override"
+        assert_overrides_typestr(ak.types.unknowntype.UnknownType())
+
+        assert_overrides_typestr(
+            ak.types.unknowntype.UnknownType(parameters={"x": 123})
         )
         assert (
             str(ak.types.unknowntype.UnknownType(parameters={"__categorical__": True}))
@@ -38,24 +47,18 @@ def test_UnknownType():
             )
             == 'categorical[type=unknown[parameters={"x": 123}]]'
         )
-        assert (
-            str(
-                ak.types.unknowntype.UnknownType(
-                    parameters={"__categorical__": True}, typestr="override"
-                )
-            )
-            == "categorical[type=override]"
+        assert_overrides_typestr(
+            ak.types.unknowntype.UnknownType(
+                parameters={"__categorical__": True, "x": 123}
+            ),
+            expected="categorical[type=override]",
         )
 
     assert repr(ak.types.unknowntype.UnknownType()) == "UnknownType()"
     with pytest.warns(DeprecationWarning):
         assert (
-            repr(
-                ak.types.unknowntype.UnknownType(
-                    parameters={"__categorical__": True}, typestr="override"
-                )
-            )
-            == "UnknownType(parameters={'__categorical__': True}, typestr='override')"
+            repr(ak.types.unknowntype.UnknownType(parameters={"__categorical__": True}))
+            == "UnknownType(parameters={'__categorical__': True})"
         )
 
 
@@ -87,17 +90,10 @@ def test_NumpyType():
         str(ak.types.numpytype.NumpyType("bool", parameters={"x": 123}))
         == 'bool[parameters={"x": 123}]'
     )
-    assert (
-        str(ak.types.numpytype.NumpyType("bool", parameters=None, typestr="override"))
-        == "override"
-    )
-    assert (
-        str(
-            ak.types.numpytype.NumpyType(
-                "bool", parameters={"x": 123}, typestr="override"
-            )
-        )
-        == "override"
+    assert_overrides_typestr(ak.types.numpytype.NumpyType("bool"))
+
+    assert_overrides_typestr(
+        ak.types.numpytype.NumpyType("bool", parameters={"x": 123})
     )
     assert (
         str(ak.types.numpytype.NumpyType("bool", parameters={"__categorical__": True}))
@@ -111,13 +107,10 @@ def test_NumpyType():
         )
         == 'categorical[type=bool[parameters={"x": 123}]]'
     )
-    assert (
-        str(
-            ak.types.numpytype.NumpyType(
-                "bool", parameters={"__categorical__": True}, typestr="override"
-            )
-        )
-        == "categorical[type=override]"
+
+    assert_overrides_typestr(
+        ak.types.numpytype.NumpyType("bool", parameters={"__categorical__": True}),
+        expected="categorical[type=override]",
     )
     assert str(ak.types.numpytype.NumpyType("datetime64")) == "datetime64"
     assert (
@@ -277,12 +270,10 @@ def test_NumpyType():
     assert (
         repr(
             ak.types.numpytype.NumpyType(
-                primitive="bool",
-                parameters={"__categorical__": True},
-                typestr="override",
+                primitive="bool", parameters={"__categorical__": True}
             )
         )
-        == "NumpyType('bool', parameters={'__categorical__': True}, typestr='override')"
+        == "NumpyType('bool', parameters={'__categorical__': True})"
     )
     assert (
         repr(
@@ -329,27 +320,19 @@ def test_RegularType():
         )
         == '[10 * unknown, parameters={"x": 123}]'
     )
-    assert (
-        str(
-            ak.types.regulartype.RegularType(
-                ak.types.unknowntype.UnknownType(),
-                10,
-                parameters=None,
-                typestr="override",
-            )
-        )
-        == "override"
+
+    assert_overrides_typestr(
+        ak.types.regulartype.RegularType(ak.types.unknowntype.UnknownType(), 10),
+        expected="override[10]",
     )
-    assert (
-        str(
-            ak.types.regulartype.RegularType(
-                ak.types.unknowntype.UnknownType(),
-                10,
-                parameters={"x": 123},
-                typestr="override",
-            )
-        )
-        == "override"
+
+    assert_overrides_typestr(
+        ak.types.regulartype.RegularType(
+            ak.types.unknowntype.UnknownType(),
+            10,
+            parameters={"x": 123},
+        ),
+        expected="override[10]",
     )
     assert (
         str(
@@ -371,16 +354,13 @@ def test_RegularType():
         )
         == 'categorical[type=[10 * unknown, parameters={"x": 123}]]'
     )
-    assert (
-        str(
-            ak.types.regulartype.RegularType(
-                ak.types.unknowntype.UnknownType(),
-                10,
-                parameters={"__categorical__": True},
-                typestr="override",
-            )
-        )
-        == "categorical[type=override]"
+    assert_overrides_typestr(
+        ak.types.regulartype.RegularType(
+            ak.types.unknowntype.UnknownType(),
+            10,
+            parameters={"__categorical__": True},
+        ),
+        expected="categorical[type=override[10]]",
     )
     assert (
         str(
@@ -417,10 +397,9 @@ def test_RegularType():
                 content=ak.types.unknowntype.UnknownType(),
                 size=10,
                 parameters={"__categorical__": True},
-                typestr="override",
             )
         )
-        == "RegularType(UnknownType(), 10, parameters={'__categorical__': True}, typestr='override')"
+        == "RegularType(UnknownType(), 10, parameters={'__categorical__': True})"
     )
     assert (
         repr(
@@ -461,23 +440,14 @@ def test_ListType():
         )
         == '[var * unknown, parameters={"x": 123}]'
     )
-    assert (
-        str(
-            ak.types.listtype.ListType(
-                ak.types.unknowntype.UnknownType(), parameters=None, typestr="override"
-            )
-        )
-        == "override"
+    assert_overrides_typestr(
+        ak.types.listtype.ListType(ak.types.unknowntype.UnknownType())
     )
-    assert (
-        str(
-            ak.types.listtype.ListType(
-                ak.types.unknowntype.UnknownType(),
-                parameters={"x": 123},
-                typestr="override",
-            )
+    assert_overrides_typestr(
+        ak.types.listtype.ListType(
+            ak.types.unknowntype.UnknownType(),
+            parameters={"x": 123},
         )
-        == "override"
     )
     assert (
         str(
@@ -496,15 +466,12 @@ def test_ListType():
         )
         == 'categorical[type=[var * unknown, parameters={"x": 123}]]'
     )
-    assert (
-        str(
-            ak.types.listtype.ListType(
-                ak.types.unknowntype.UnknownType(),
-                parameters={"__categorical__": True},
-                typestr="override",
-            )
-        )
-        == "categorical[type=override]"
+    assert_overrides_typestr(
+        ak.types.listtype.ListType(
+            ak.types.unknowntype.UnknownType(),
+            parameters={"__categorical__": True},
+        ),
+        expected="categorical[type=override]",
     )
     assert (
         str(
@@ -534,10 +501,9 @@ def test_ListType():
             ak.types.listtype.ListType(
                 content=ak.types.unknowntype.UnknownType(),
                 parameters={"__categorical__": True},
-                typestr="override",
             )
         )
-        == "ListType(UnknownType(), parameters={'__categorical__': True}, typestr='override')"
+        == "ListType(UnknownType(), parameters={'__categorical__': True})"
     )
     assert (
         repr(
@@ -614,61 +580,43 @@ def test_RecordType():
         )
         == "Name[x: unknown, y: bool]"
     )
-    assert (
-        str(
-            ak.types.recordtype.RecordType(
-                [
-                    ak.types.unknowntype.UnknownType(),
-                    ak.types.numpytype.NumpyType("bool"),
-                ],
-                None,
-                parameters=None,
-                typestr="override",
-            )
+    assert_overrides_typestr(
+        ak.types.recordtype.RecordType(
+            [
+                ak.types.unknowntype.UnknownType(),
+                ak.types.numpytype.NumpyType("bool"),
+            ],
+            None,
         )
-        == "override"
     )
-    assert (
-        str(
-            ak.types.recordtype.RecordType(
-                [
-                    ak.types.unknowntype.UnknownType(),
-                    ak.types.numpytype.NumpyType("bool"),
-                ],
-                ["x", "y"],
-                parameters=None,
-                typestr="override",
-            )
+    assert_overrides_typestr(
+        ak.types.recordtype.RecordType(
+            [
+                ak.types.unknowntype.UnknownType(),
+                ak.types.numpytype.NumpyType("bool"),
+            ],
+            ["x", "y"],
         )
-        == "override"
     )
-    assert (
-        str(
-            ak.types.recordtype.RecordType(
-                [
-                    ak.types.unknowntype.UnknownType(),
-                    ak.types.numpytype.NumpyType("bool"),
-                ],
-                None,
-                parameters={"__record__": "Name"},
-                typestr="override",
-            )
+    assert_overrides_typestr(
+        ak.types.recordtype.RecordType(
+            [
+                ak.types.unknowntype.UnknownType(),
+                ak.types.numpytype.NumpyType("bool"),
+            ],
+            None,
+            parameters={"__record__": "Name"},
         )
-        == "override"
     )
-    assert (
-        str(
-            ak.types.recordtype.RecordType(
-                [
-                    ak.types.unknowntype.UnknownType(),
-                    ak.types.numpytype.NumpyType("bool"),
-                ],
-                ["x", "y"],
-                parameters={"__record__": "Name"},
-                typestr="override",
-            )
+    assert_overrides_typestr(
+        ak.types.recordtype.RecordType(
+            [
+                ak.types.unknowntype.UnknownType(),
+                ak.types.numpytype.NumpyType("bool"),
+            ],
+            ["x", "y"],
+            parameters={"__record__": "Name"},
         )
-        == "override"
     )
     assert (
         str(
@@ -722,61 +670,45 @@ def test_RecordType():
         )
         == 'Name[x: unknown, y: bool, parameters={"x": 123}]'
     )
-    assert (
-        str(
-            ak.types.recordtype.RecordType(
-                [
-                    ak.types.unknowntype.UnknownType(),
-                    ak.types.numpytype.NumpyType("bool"),
-                ],
-                None,
-                parameters={"x": 123},
-                typestr="override",
-            )
+    assert_overrides_typestr(
+        ak.types.recordtype.RecordType(
+            [
+                ak.types.unknowntype.UnknownType(),
+                ak.types.numpytype.NumpyType("bool"),
+            ],
+            None,
+            parameters={"x": 123},
         )
-        == "override"
     )
-    assert (
-        str(
-            ak.types.recordtype.RecordType(
-                [
-                    ak.types.unknowntype.UnknownType(),
-                    ak.types.numpytype.NumpyType("bool"),
-                ],
-                ["x", "y"],
-                parameters={"x": 123},
-                typestr="override",
-            )
+    assert_overrides_typestr(
+        ak.types.recordtype.RecordType(
+            [
+                ak.types.unknowntype.UnknownType(),
+                ak.types.numpytype.NumpyType("bool"),
+            ],
+            ["x", "y"],
+            parameters={"x": 123},
         )
-        == "override"
     )
-    assert (
-        str(
-            ak.types.recordtype.RecordType(
-                [
-                    ak.types.unknowntype.UnknownType(),
-                    ak.types.numpytype.NumpyType("bool"),
-                ],
-                None,
-                parameters={"__record__": "Name", "x": 123},
-                typestr="override",
-            )
+    assert_overrides_typestr(
+        ak.types.recordtype.RecordType(
+            [
+                ak.types.unknowntype.UnknownType(),
+                ak.types.numpytype.NumpyType("bool"),
+            ],
+            None,
+            parameters={"__record__": "Name", "x": 123},
         )
-        == "override"
     )
-    assert (
-        str(
-            ak.types.recordtype.RecordType(
-                [
-                    ak.types.unknowntype.UnknownType(),
-                    ak.types.numpytype.NumpyType("bool"),
-                ],
-                ["x", "y"],
-                parameters={"__record__": "Name", "x": 123},
-                typestr="override",
-            )
+    assert_overrides_typestr(
+        ak.types.recordtype.RecordType(
+            [
+                ak.types.unknowntype.UnknownType(),
+                ak.types.numpytype.NumpyType("bool"),
+            ],
+            ["x", "y"],
+            parameters={"__record__": "Name", "x": 123},
         )
-        == "override"
     )
     assert (
         str(
@@ -830,61 +762,49 @@ def test_RecordType():
         )
         == "categorical[type=Name[x: unknown, y: bool]]"
     )
-    assert (
-        str(
-            ak.types.recordtype.RecordType(
-                [
-                    ak.types.unknowntype.UnknownType(),
-                    ak.types.numpytype.NumpyType("bool"),
-                ],
-                None,
-                parameters={"__categorical__": True},
-                typestr="override",
-            )
-        )
-        == "categorical[type=override]"
+    assert_overrides_typestr(
+        ak.types.recordtype.RecordType(
+            [
+                ak.types.unknowntype.UnknownType(),
+                ak.types.numpytype.NumpyType("bool"),
+            ],
+            None,
+            parameters={"__categorical__": True},
+        ),
+        expected="categorical[type=override]",
     )
-    assert (
-        str(
-            ak.types.recordtype.RecordType(
-                [
-                    ak.types.unknowntype.UnknownType(),
-                    ak.types.numpytype.NumpyType("bool"),
-                ],
-                ["x", "y"],
-                parameters={"__categorical__": True},
-                typestr="override",
-            )
-        )
-        == "categorical[type=override]"
+    assert_overrides_typestr(
+        ak.types.recordtype.RecordType(
+            [
+                ak.types.unknowntype.UnknownType(),
+                ak.types.numpytype.NumpyType("bool"),
+            ],
+            ["x", "y"],
+            parameters={"__categorical__": True},
+        ),
+        expected="categorical[type=override]",
     )
-    assert (
-        str(
-            ak.types.recordtype.RecordType(
-                [
-                    ak.types.unknowntype.UnknownType(),
-                    ak.types.numpytype.NumpyType("bool"),
-                ],
-                None,
-                parameters={"__record__": "Name", "__categorical__": True},
-                typestr="override",
-            )
-        )
-        == "categorical[type=override]"
+    assert_overrides_typestr(
+        ak.types.recordtype.RecordType(
+            [
+                ak.types.unknowntype.UnknownType(),
+                ak.types.numpytype.NumpyType("bool"),
+            ],
+            None,
+            parameters={"__record__": "Name", "__categorical__": True},
+        ),
+        expected="categorical[type=override]",
     )
-    assert (
-        str(
-            ak.types.recordtype.RecordType(
-                [
-                    ak.types.unknowntype.UnknownType(),
-                    ak.types.numpytype.NumpyType("bool"),
-                ],
-                ["x", "y"],
-                parameters={"__record__": "Name", "__categorical__": True},
-                typestr="override",
-            )
-        )
-        == "categorical[type=override]"
+    assert_overrides_typestr(
+        ak.types.recordtype.RecordType(
+            [
+                ak.types.unknowntype.UnknownType(),
+                ak.types.numpytype.NumpyType("bool"),
+            ],
+            ["x", "y"],
+            parameters={"__record__": "Name", "__categorical__": True},
+        ),
+        expected="categorical[type=override]",
     )
     assert (
         str(
@@ -938,61 +858,49 @@ def test_RecordType():
         )
         == 'categorical[type=Name[x: unknown, y: bool, parameters={"x": 123}]]'
     )
-    assert (
-        str(
-            ak.types.recordtype.RecordType(
-                [
-                    ak.types.unknowntype.UnknownType(),
-                    ak.types.numpytype.NumpyType("bool"),
-                ],
-                None,
-                parameters={"x": 123, "__categorical__": True},
-                typestr="override",
-            )
-        )
-        == "categorical[type=override]"
+    assert_overrides_typestr(
+        ak.types.recordtype.RecordType(
+            [
+                ak.types.unknowntype.UnknownType(),
+                ak.types.numpytype.NumpyType("bool"),
+            ],
+            None,
+            parameters={"x": 123, "__categorical__": True},
+        ),
+        expected="categorical[type=override]",
     )
-    assert (
-        str(
-            ak.types.recordtype.RecordType(
-                [
-                    ak.types.unknowntype.UnknownType(),
-                    ak.types.numpytype.NumpyType("bool"),
-                ],
-                ["x", "y"],
-                parameters={"x": 123, "__categorical__": True},
-                typestr="override",
-            )
-        )
-        == "categorical[type=override]"
+    assert_overrides_typestr(
+        ak.types.recordtype.RecordType(
+            [
+                ak.types.unknowntype.UnknownType(),
+                ak.types.numpytype.NumpyType("bool"),
+            ],
+            ["x", "y"],
+            parameters={"x": 123, "__categorical__": True},
+        ),
+        expected="categorical[type=override]",
     )
-    assert (
-        str(
-            ak.types.recordtype.RecordType(
-                [
-                    ak.types.unknowntype.UnknownType(),
-                    ak.types.numpytype.NumpyType("bool"),
-                ],
-                None,
-                parameters={"__record__": "Name", "x": 123, "__categorical__": True},
-                typestr="override",
-            )
-        )
-        == "categorical[type=override]"
+    assert_overrides_typestr(
+        ak.types.recordtype.RecordType(
+            [
+                ak.types.unknowntype.UnknownType(),
+                ak.types.numpytype.NumpyType("bool"),
+            ],
+            None,
+            parameters={"__record__": "Name", "x": 123, "__categorical__": True},
+        ),
+        expected="categorical[type=override]",
     )
-    assert (
-        str(
-            ak.types.recordtype.RecordType(
-                [
-                    ak.types.unknowntype.UnknownType(),
-                    ak.types.numpytype.NumpyType("bool"),
-                ],
-                ["x", "y"],
-                parameters={"__record__": "Name", "x": 123, "__categorical__": True},
-                typestr="override",
-            )
-        )
-        == "categorical[type=override]"
+    assert_overrides_typestr(
+        ak.types.recordtype.RecordType(
+            [
+                ak.types.unknowntype.UnknownType(),
+                ak.types.numpytype.NumpyType("bool"),
+            ],
+            ["x", "y"],
+            parameters={"__record__": "Name", "x": 123, "__categorical__": True},
+        ),
+        expected="categorical[type=override]",
     )
 
     assert (
@@ -1028,10 +936,9 @@ def test_RecordType():
                 ],
                 fields=None,
                 parameters={"__record__": "Name", "x": 123, "__categorical__": True},
-                typestr="override",
             )
         )
-        == "RecordType([UnknownType(), NumpyType('bool')], None, parameters={'__record__': 'Name', 'x': 123, '__categorical__': True}, typestr='override')"
+        == "RecordType([UnknownType(), NumpyType('bool')], None, parameters={'__record__': 'Name', 'x': 123, '__categorical__': True})"
     )
     assert (
         repr(
@@ -1055,10 +962,9 @@ def test_RecordType():
                 ],
                 fields=["x", "y"],
                 parameters={"__record__": "Name", "x": 123, "__categorical__": True},
-                typestr="override",
             )
         )
-        == "RecordType([UnknownType(), NumpyType('bool')], ['x', 'y'], parameters={'__record__': 'Name', 'x': 123, '__categorical__': True}, typestr='override')"
+        == "RecordType([UnknownType(), NumpyType('bool')], ['x', 'y'], parameters={'__record__': 'Name', 'x': 123, '__categorical__': True})"
     )
 
 
@@ -1111,67 +1017,39 @@ def test_OptionType():
         )
         == 'option[10 * unknown, parameters={"x": 123}]'
     )
-    assert (
-        str(
-            ak.types.optiontype.OptionType(
-                ak.types.unknowntype.UnknownType(), parameters=None, typestr="override"
-            )
+    assert_overrides_typestr(
+        ak.types.optiontype.OptionType(
+            ak.types.unknowntype.UnknownType(), parameters=None
         )
-        == "override"
     )
-    assert (
-        str(
-            ak.types.optiontype.OptionType(
-                ak.types.listtype.ListType(ak.types.unknowntype.UnknownType()),
-                parameters=None,
-                typestr="override",
-            )
+    assert_overrides_typestr(
+        ak.types.optiontype.OptionType(
+            ak.types.listtype.ListType(ak.types.unknowntype.UnknownType()),
+            parameters=None,
         )
-        == "override"
     )
-    assert (
-        str(
-            ak.types.optiontype.OptionType(
-                ak.types.regulartype.RegularType(
-                    ak.types.unknowntype.UnknownType(), 10
-                ),
-                parameters=None,
-                typestr="override",
-            )
+    assert_overrides_typestr(
+        ak.types.optiontype.OptionType(
+            ak.types.regulartype.RegularType(ak.types.unknowntype.UnknownType(), 10)
         )
-        == "override"
     )
-    assert (
-        str(
-            ak.types.optiontype.OptionType(
-                ak.types.unknowntype.UnknownType(),
-                parameters={"x": 123},
-                typestr="override",
-            )
+    assert_overrides_typestr(
+        ak.types.optiontype.OptionType(
+            ak.types.unknowntype.UnknownType(),
+            parameters={"x": 123},
         )
-        == "override"
     )
-    assert (
-        str(
-            ak.types.optiontype.OptionType(
-                ak.types.listtype.ListType(ak.types.unknowntype.UnknownType()),
-                parameters={"x": 123},
-                typestr="override",
-            )
+    assert_overrides_typestr(
+        ak.types.optiontype.OptionType(
+            ak.types.listtype.ListType(ak.types.unknowntype.UnknownType()),
+            parameters={"x": 123},
         )
-        == "override"
     )
-    assert (
-        str(
-            ak.types.optiontype.OptionType(
-                ak.types.regulartype.RegularType(
-                    ak.types.unknowntype.UnknownType(), 10
-                ),
-                parameters={"x": 123},
-                typestr="override",
-            )
+    assert_overrides_typestr(
+        ak.types.optiontype.OptionType(
+            ak.types.regulartype.RegularType(ak.types.unknowntype.UnknownType(), 10),
+            parameters={"x": 123},
         )
-        == "override"
     )
     assert (
         str(
@@ -1230,69 +1108,47 @@ def test_OptionType():
         )
         == 'option[categorical[type=10 * unknown], parameters={"x": 123}]'
     )
-    assert (
-        str(
-            ak.types.optiontype.OptionType(
-                ak.types.unknowntype.UnknownType(),
-                parameters={"__categorical__": True},
-                typestr="override",
-            )
-        )
-        == "categorical[type=override]"
+    assert_overrides_typestr(
+        ak.types.optiontype.OptionType(
+            ak.types.unknowntype.UnknownType(),
+            parameters={"__categorical__": True},
+        ),
+        expected="categorical[type=override]",
     )
-    assert (
-        str(
-            ak.types.optiontype.OptionType(
-                ak.types.listtype.ListType(ak.types.unknowntype.UnknownType()),
-                parameters={"__categorical__": True},
-                typestr="override",
-            )
-        )
-        == "categorical[type=override]"
+    assert_overrides_typestr(
+        ak.types.optiontype.OptionType(
+            ak.types.listtype.ListType(ak.types.unknowntype.UnknownType()),
+            parameters={"__categorical__": True},
+        ),
+        expected="categorical[type=override]",
     )
-    assert (
-        str(
-            ak.types.optiontype.OptionType(
-                ak.types.regulartype.RegularType(
-                    ak.types.unknowntype.UnknownType(), 10
-                ),
-                parameters={"__categorical__": True},
-                typestr="override",
-            )
-        )
-        == "categorical[type=override]"
+    assert_overrides_typestr(
+        ak.types.optiontype.OptionType(
+            ak.types.regulartype.RegularType(ak.types.unknowntype.UnknownType(), 10),
+            parameters={"__categorical__": True},
+        ),
+        expected="categorical[type=override]",
     )
-    assert (
-        str(
-            ak.types.optiontype.OptionType(
-                ak.types.unknowntype.UnknownType(),
-                parameters={"x": 123, "__categorical__": True},
-                typestr="override",
-            )
-        )
-        == "categorical[type=override]"
+    assert_overrides_typestr(
+        ak.types.optiontype.OptionType(
+            ak.types.unknowntype.UnknownType(),
+            parameters={"x": 123, "__categorical__": True},
+        ),
+        expected="categorical[type=override]",
     )
-    assert (
-        str(
-            ak.types.optiontype.OptionType(
-                ak.types.listtype.ListType(ak.types.unknowntype.UnknownType()),
-                parameters={"x": 123, "__categorical__": True},
-                typestr="override",
-            )
-        )
-        == "categorical[type=override]"
+    assert_overrides_typestr(
+        ak.types.optiontype.OptionType(
+            ak.types.listtype.ListType(ak.types.unknowntype.UnknownType()),
+            parameters={"x": 123, "__categorical__": True},
+        ),
+        expected="categorical[type=override]",
     )
-    assert (
-        str(
-            ak.types.optiontype.OptionType(
-                ak.types.regulartype.RegularType(
-                    ak.types.unknowntype.UnknownType(), 10
-                ),
-                parameters={"x": 123, "__categorical__": True},
-                typestr="override",
-            )
-        )
-        == "categorical[type=override]"
+    assert_overrides_typestr(
+        ak.types.optiontype.OptionType(
+            ak.types.regulartype.RegularType(ak.types.unknowntype.UnknownType(), 10),
+            parameters={"x": 123, "__categorical__": True},
+        ),
+        expected="categorical[type=override]",
     )
 
     assert (
@@ -1314,10 +1170,9 @@ def test_OptionType():
                     ak.types.unknowntype.UnknownType(), 10
                 ),
                 parameters={"x": 123, "__categorical__": True},
-                typestr="override",
             )
         )
-        == "OptionType(RegularType(UnknownType(), 10), parameters={'x': 123, '__categorical__': True}, typestr='override')"
+        == "OptionType(RegularType(UnknownType(), 10), parameters={'x': 123, '__categorical__': True})"
     )
 
 
@@ -1345,31 +1200,23 @@ def test_UnionType():
         )
         == 'union[unknown, bool, parameters={"x": 123}]'
     )
-    assert (
-        str(
-            ak.types.uniontype.UnionType(
-                [
-                    ak.types.unknowntype.UnknownType(),
-                    ak.types.numpytype.NumpyType("bool"),
-                ],
-                parameters=None,
-                typestr="override",
-            )
+    assert_overrides_typestr(
+        ak.types.uniontype.UnionType(
+            [
+                ak.types.unknowntype.UnknownType(),
+                ak.types.numpytype.NumpyType("bool"),
+            ],
+            parameters=None,
         )
-        == "override"
     )
-    assert (
-        str(
-            ak.types.uniontype.UnionType(
-                [
-                    ak.types.unknowntype.UnknownType(),
-                    ak.types.numpytype.NumpyType("bool"),
-                ],
-                parameters={"x": 123},
-                typestr="override",
-            )
+    assert_overrides_typestr(
+        ak.types.uniontype.UnionType(
+            [
+                ak.types.unknowntype.UnknownType(),
+                ak.types.numpytype.NumpyType("bool"),
+            ],
+            parameters={"x": 123},
         )
-        == "override"
     )
     assert (
         str(
@@ -1395,31 +1242,25 @@ def test_UnionType():
         )
         == 'categorical[type=union[unknown, bool, parameters={"x": 123}]]'
     )
-    assert (
-        str(
-            ak.types.uniontype.UnionType(
-                [
-                    ak.types.unknowntype.UnknownType(),
-                    ak.types.numpytype.NumpyType("bool"),
-                ],
-                parameters={"__categorical__": True},
-                typestr="override",
-            )
-        )
-        == "categorical[type=override]"
+    assert_overrides_typestr(
+        ak.types.uniontype.UnionType(
+            [
+                ak.types.unknowntype.UnknownType(),
+                ak.types.numpytype.NumpyType("bool"),
+            ],
+            parameters={"__categorical__": True},
+        ),
+        expected="categorical[type=override]",
     )
-    assert (
-        str(
-            ak.types.uniontype.UnionType(
-                [
-                    ak.types.unknowntype.UnknownType(),
-                    ak.types.numpytype.NumpyType("bool"),
-                ],
-                parameters={"x": 123, "__categorical__": True},
-                typestr="override",
-            )
-        )
-        == "categorical[type=override]"
+    assert_overrides_typestr(
+        ak.types.uniontype.UnionType(
+            [
+                ak.types.unknowntype.UnknownType(),
+                ak.types.numpytype.NumpyType("bool"),
+            ],
+            parameters={"x": 123, "__categorical__": True},
+        ),
+        expected="categorical[type=override]",
     )
 
     assert (
@@ -1441,10 +1282,9 @@ def test_UnionType():
                     ak.types.numpytype.NumpyType("bool"),
                 ],
                 parameters={"x": 123, "__categorical__": True},
-                typestr="override",
             )
         )
-        == "UnionType([UnknownType(), NumpyType('bool')], parameters={'x': 123, '__categorical__': True}, typestr='override')"
+        == "UnionType([UnknownType(), NumpyType('bool')], parameters={'x': 123, '__categorical__': True})"
     )
 
 
@@ -1462,10 +1302,8 @@ def test_ArrayType():
 
     # ArrayType should not have these arguments (should not be a Type subclass)
     with pytest.raises(TypeError):
-        ak.types.arraytype.ArrayType(ak.types.unknowntype.UnknownType(), 10, {"x": 123})
-    with pytest.raises(TypeError):
         ak.types.arraytype.ArrayType(
-            ak.types.unknowntype.UnknownType(), 10, None, typestr="override"
+            ak.types.arraytype.ArrayType(ak.types.unknowntype.UnknownType(), 10), 10
         )
 
     assert (
@@ -1474,7 +1312,32 @@ def test_ArrayType():
                 content=ak.types.unknowntype.UnknownType(), length=10
             )
         )
-        == "ArrayType(UnknownType(), 10)"
+        == "ArrayType(UnknownType(), 10, None)"
+    )
+
+    assert (
+        str(
+            ak.types.arraytype.ArrayType(
+                content=ak.types.numpytype.NumpyType(
+                    "int64", parameters={"__array__": "custom"}
+                ),
+                length=10,
+                behavior={("__typestr__", "custom"): "override"},
+            )
+        )
+        == "10 * override"
+    )
+
+    assert (
+        str(
+            ak.types.arraytype.ArrayType(
+                content=ak.types.numpytype.NumpyType(
+                    "int64", parameters={"__array__": "custom"}
+                ),
+                length=10,
+            )
+        )
+        == '10 * int64[parameters={"__array__": "custom"}]'
     )
 
 

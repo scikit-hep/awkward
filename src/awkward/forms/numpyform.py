@@ -2,7 +2,6 @@
 from collections.abc import Iterable
 
 import awkward as ak
-from awkward._behavior import find_typestr
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._parameters import type_parameters_equal
 from awkward._typing import final
@@ -127,11 +126,11 @@ class NumpyForm(Form):
                 out["inner_shape"] = list(self._inner_shape)
             return self._to_dict_extra(out, verbose)
 
-    def _type(self, typestrs):
+    @property
+    def type(self):
         out = ak.types.NumpyType(
             self._primitive,
             parameters=None,
-            typestr=find_typestr(self._parameters, typestrs),
         )
         for x in self._inner_shape[::-1]:
             out = ak.types.RegularType(out, x)

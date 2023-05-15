@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import awkward as ak
-from awkward._behavior import find_typestr
 from awkward._errors import deprecate
 from awkward._typing import final
 from awkward._util import UNSET
@@ -46,11 +45,9 @@ class EmptyForm(Form):
     def _to_dict_part(self, verbose, toplevel):
         return self._to_dict_extra({"class": "EmptyArray"}, verbose)
 
-    def _type(self, typestrs):
-        return ak.types.UnknownType(
-            parameters=self._parameters,
-            typestr=find_typestr(self._parameters, typestrs),
-        )
+    @property
+    def type(self):
+        return ak.types.UnknownType(parameters=self._parameters)
 
     def __eq__(self, other) -> bool:
         return isinstance(other, EmptyForm) and self._form_key == other._form_key

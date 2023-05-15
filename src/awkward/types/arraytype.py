@@ -9,7 +9,7 @@ from awkward._regularize import is_integer
 
 
 class ArrayType:
-    def __init__(self, content, length):
+    def __init__(self, content, length, behavior=None):
         if not isinstance(content, ak.types.Type):
             raise TypeError(
                 "{} all 'contents' must be Type subclasses, not {}".format(
@@ -24,6 +24,7 @@ class ArrayType:
             )
         self._content = content
         self._length = length
+        self._behavior = behavior
 
     @property
     def content(self):
@@ -33,6 +34,10 @@ class ArrayType:
     def length(self):
         return self._length
 
+    @property
+    def behavior(self):
+        return self._behavior
+
     def __str__(self):
         return "".join(self._str("", True))
 
@@ -40,10 +45,17 @@ class ArrayType:
         stream.write("".join([*self._str("", False), "\n"]))
 
     def _str(self, indent, compact):
-        return [f"{self._length} * ", *self._content._str(indent, compact)]
+        return [
+            f"{self._length} * ",
+            *self._content._str(
+                indent,
+                compact,
+                self._behavior,
+            ),
+        ]
 
     def __repr__(self):
-        args = [repr(self._content), repr(self._length)]
+        args = [repr(self._content), repr(self._length), repr(self._behavior)]
         return "{}({})".format(type(self).__name__, ", ".join(args))
 
     def is_equal_to(self, other, *, all_parameters: bool = False) -> bool:

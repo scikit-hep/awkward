@@ -3,7 +3,6 @@ import glob
 from collections.abc import Iterable
 
 import awkward as ak
-from awkward._behavior import find_typestr
 from awkward._parameters import type_parameters_equal
 from awkward._regularize import is_integer
 from awkward._typing import final
@@ -165,12 +164,12 @@ class RecordForm(Form):
         out["contents"] = contents_tolist
         return self._to_dict_extra(out, verbose)
 
-    def _type(self, typestrs):
+    @property
+    def type(self):
         return ak.types.RecordType(
-            [x._type(typestrs) for x in self._contents],
+            [x.type for x in self._contents],
             self._fields,
             parameters=self._parameters,
-            typestr=find_typestr(self._parameters, typestrs),
         )
 
     def __eq__(self, other):

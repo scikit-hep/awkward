@@ -4,6 +4,8 @@ from __future__ import annotations
 import json
 import re
 
+from awkward._behavior import find_array_typestr
+from awkward._errors import deprecate
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._parameters import parameters_are_equal, type_parameters_equal
 from awkward._typing import Self, final
@@ -124,15 +126,13 @@ class NumpyType(Type):
 
     _str_parameters_exclude = ("__categorical__", "__unit__")
 
-    def _str(self, indent, compact):
+    def _str(self, indent, compact, behavior):
         if self._typestr is not None:
-            out = [self._typestr]
+            deprecate("typestr argument is deprecated", "2.4.0")
 
-        elif self.parameter("__array__") == "char":
-            out = ["char"]
-
-        elif self.parameter("__array__") == "byte":
-            out = ["byte"]
+        typestr = find_array_typestr(behavior, self._parameters, self._typestr)
+        if typestr is not None:
+            out = [typestr]
 
         else:
             if self.parameter("__unit__") is not None:

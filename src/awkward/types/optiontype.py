@@ -1,6 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 from __future__ import annotations
 
+from awkward._behavior import find_array_typestr
+from awkward._errors import deprecate
 from awkward._parameters import (
     parameters_are_equal,
     parameters_union,
@@ -50,14 +52,19 @@ class OptionType(Type):
     def content(self):
         return self._content
 
-    def _str(self, indent, compact):
+    def _str(self, indent, compact, behavior):
+        if self._typestr is not None:
+            deprecate("typestr argument is deprecated", "2.4.0")
+
+        typestr = find_array_typestr(behavior, self._parameters, self._typestr)
+
         head = []
         tail = []
-        if self._typestr is not None:
-            content_out = [self._typestr]
+        if typestr is not None:
+            content_out = [typestr]
 
         else:
-            content_out = self._content._str(indent, compact)
+            content_out = self._content._str(indent, compact, behavior)
             params = self._str_parameters()
             if params is None:
                 if isinstance(

@@ -6,6 +6,7 @@ from collections.abc import Mapping
 
 import awkward as ak
 from awkward._nplikes import ufuncs
+from awkward._typing import Any
 
 
 def overlay_behavior(behavior: dict | None) -> Mapping:
@@ -125,34 +126,22 @@ def find_ufunc(behavior, signature):
                 return custom
 
 
-def find_typestrs(behavior):
+def find_record_typestr(
+    behavior: None | Mapping, parameters: None | Mapping[str, Any], default: str = None
+):
+    if parameters is None:
+        return default
     behavior = overlay_behavior(behavior)
-    out = {}
-    for key, typestr in behavior.items():
-        if (
-            isinstance(key, tuple)
-            and len(key) == 2
-            and key[0] == "__typestr__"
-            and isinstance(key[1], str)
-            and isinstance(typestr, str)
-        ):
-            out[key[1]] = typestr
-    return out
+    return behavior.get(("__typestr__", parameters.get("__record__")), default)
 
 
-def find_typestr(parameters, typestrs):
-    if parameters is not None:
-        record = parameters.get("__record__")
-        if record is not None:
-            typestr = typestrs.get(record)
-            if typestr is not None:
-                return typestr
-        array = parameters.get("__array__")
-        if array is not None:
-            typestr = typestrs.get(array)
-            if typestr is not None:
-                return typestr
-    return None
+def find_array_typestr(
+    behavior: None | Mapping, parameters: None | Mapping[str, Any], default: str = None
+):
+    if parameters is None:
+        return default
+    behavior = overlay_behavior(behavior)
+    return behavior.get(("__typestr__", parameters.get("__array__")), default)
 
 
 def behavior_of(*arrays, **kwargs):
