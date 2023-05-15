@@ -80,7 +80,7 @@ def almost_equal(
         # Simplify regular NumPy types
         if left.is_numpy and left.purelist_depth > 1:
             left = left.to_RegularArray()
-        if right.is_regular and left.purelist_depth > 1:
+        if right.is_regular and right.purelist_depth > 1:
             right = right.to_RegularArray()
 
         # Different lengths aren't equal!
