@@ -68,8 +68,14 @@ def almost_equal(
         # Enforce super-canonicalisation rules
         if left.is_option:
             left = left.to_IndexedOptionArray64()
+        # Project out indexed-of-record (comes from e.g. `RegularArray.to_ListOffsetArray64()`)
+        elif left.is_indexed:
+            left = left.project()
         if right.is_option:
             right = right.to_IndexedOptionArray64()
+        # Project out indexed-of-record
+        elif right.is_indexed:
+            right = right.project()
 
         if type(left) is not type(right):
             if not check_regular and (
