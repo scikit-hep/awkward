@@ -756,11 +756,16 @@ def apply_step(
 
             offsets = offsets_content._compact_offsets64(True)
 
+            nextparameters = []
             nextinputs = []
-            for x, x_is_string in zip(inputs, input_is_string):
+            for x, x_is_string, x_parameters in zip(
+                inputs, input_is_string, parameters_factory(len(inputs))
+            ):
                 if x_is_string:
+                    # Each string will be repeated by the multiplicity of the non-string list
                     offsets_data = backend.index_nplike.asarray(offsets)
                     counts = offsets_data[1:] - offsets_data[:-1]
+
                     if ak._util.win or ak._util.bits32:
                         counts = index_nplike.astype(counts, dtype=np.int32)
                     parents = index_nplike.repeat(
@@ -771,8 +776,12 @@ def apply_step(
                             ak.index.Index64(parents, nplike=index_nplike), x
                         ).project()
                     )
+                    # FIXME: this just obliterates the parameters, rather than discarding the parameters of this content for the broadcast
+                    nextparameters.append(None)
                 elif isinstance(x, listtypes):
                     nextinputs.append(x._broadcast_tooffsets64(offsets).content)
+
+                    nextparameters.append(x_parameters)
                 # Handle implicit left-broadcasting (non-NumPy-like broadcasting).
                 elif options["left_broadcast"] and isinstance(x, Content):
                     nextinputs.append(
@@ -780,8 +789,12 @@ def apply_step(
                         ._broadcast_tooffsets64(offsets)
                         .content
                     )
+
+                    nextparameters.append(x_parameters)
                 else:
                     nextinputs.append(x)
+
+                    nextparameters.append(x_parameters)
 
             outcontent = apply_step(
                 backend,
@@ -793,12 +806,12 @@ def apply_step(
                 behavior,
                 options,
             )
+
             assert isinstance(outcontent, tuple)
-            parameters = parameters_factory(len(outcontent))
 
             return tuple(
                 ListOffsetArray(offsets, x, parameters=p)
-                for x, p in zip(outcontent, parameters)
+                for x, p in zip(outcontent, nextparameters)
             )
 
     def broadcast_any_option():
