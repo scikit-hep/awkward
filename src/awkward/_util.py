@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 from __future__ import annotations
 
+import base64
 import os
 import struct
 import sys
@@ -66,9 +67,6 @@ def native_to_byteorder(array, byteorder: str):
 
 
 def identifier_hash(str):
-    import base64
-    import struct
-
     return (
         base64.encodebytes(struct.pack("q", hash(str)))
         .rstrip(b"=\n")
