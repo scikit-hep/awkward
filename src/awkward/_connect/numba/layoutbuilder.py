@@ -37,6 +37,15 @@ class LayoutBuilder:
         raise NotImplementedError
 
 
+def tonumbatype(content):
+    if isinstance(content, Numpy):
+        return NumpyType.type(content)
+    if isinstance(content, Empty):
+        return EmptyType.type(content)
+    if isinstance(content, ListOffset):
+        return ListOffsetType.type(content)
+
+
 class LayoutBuilderType(numba.types.Type):
     def __init__(self):
         super().__init__(name="ak.numba.lb.LayoutBuilder()")
@@ -52,10 +61,46 @@ class LayoutBuilderType(numba.types.Type):
 
 @numba.extending.typeof_impl.register(LayoutBuilder)
 def typeof_LayoutBuilder(val, c):
+    if isinstance(val, Numpy):
+        return NumpyType(numba.from_dtype(val._data.dtype))
+
+    if isinstance(val, Empty):
+        return EmptyType()
+
     if isinstance(val, ListOffset):
         return ListOffsetType(numba.from_dtype(val._offsets.dtype), val._content)
 
-    return LayoutBuilderType(val._content)
+    if isinstance(val, List):
+        return ListType(numba.from_dtype(val._starts.dtype), val._content)
+
+    if isinstance(val, Regular):
+        return RegularType(val._content, val._size)
+
+    if isinstance(val, IndexedOption):
+        return IndexedOptionType(numba.from_dtype(val._index.dtype), val._content)
+
+    if isinstance(val, ByteMasked):
+        return ByteMaskedType(val._content)
+
+    if isinstance(val, BitMasked):
+        return BitMaskedType(valid_when, lsb_order, val._content)
+
+    if isinstance(val, Unmasked):
+        return UnmaskedType(val._content)
+
+    if isinstance(val, Record):
+        return RecordType(val._content, val._fields)
+
+    if isinstance(val, Tuple):
+        return TupleType(val._content)
+
+    if isinstance(val, EmptyRecord):
+        return EmptyRecord(is_tuple)
+
+    if isinstance(val, Union):
+        return UnionType(numba.from_dtype(val._index.dtype), val._content)
+
+    return LayoutBuilderType(val)
 
 
 @numba.extending.overload(len)
@@ -64,6 +109,16 @@ def LayoutBuilderType_len(builder):
         isinstance(builder, NumpyType)
         or isinstance(builder, EmptyType)
         or isinstance(builder, ListOffsetType)
+        or isinstance(builder, List)
+        or isinstance(builder, Regular)
+        or isinstance(builder, IndexedOption)
+        or isinstance(builder, ByteMasked)
+        or isinstance(builder, BitMasked)
+        or isinstance(builder, Unmasked)
+        or isinstance(builder, Record)
+        or isinstance(builder, Tuple)
+        or isinstance(builder, EmptyRecord)
+        or isinstance(builder, Union)
     ):
 
         def len_impl(builder):
@@ -93,6 +148,9 @@ class Numpy(LayoutBuilder):
 
     def _type(self, typestrs):
         return f"ak.numba.lb.Numpy({self._data.dtype})"
+
+    def numbatype(self):
+        return NumpyType(numba.from_dtype(self.dtype))
 
     @property
     def dtype(self):
@@ -153,11 +211,6 @@ class NumpyType(numba.types.Type):
     @property
     def length(self):
         return numba.types.float64
-
-
-@numba.extending.typeof_impl.register(Numpy)
-def typeof_Numpy(val, c):
-    return NumpyType(numba.from_dtype(val._data.dtype))
 
 
 @numba.extending.register_model(NumpyType)
@@ -265,24 +318,33 @@ def Numpy_ctor(dtype, parameters=None, initial=1024, resize=8.0):
 @numba.extending.overload_method(NumpyType, "_length_get", inline="always")
 def Numpy_length(builder):
     def getter(builder):
-        return builder._data._length_pos[0]
+        return builder.data._length_pos[0]
 
     return getter
 
 
+@numba.extending.overload_attribute(NumpyType, "data", inline="always")
+def Numpy_buffer(builder):
+    def get(builder):
+        return builder._data
+
+    return get
+
+
 @numba.extending.overload_method(NumpyType, "append")
 def Numpy_append(builder, datum):
-    def append(builder, datum):
-        buffer = builder._data
-        buffer.append(datum)
+    if isinstance(builder, NumpyType):
 
-    return append
+        def append(builder, datum):
+            builder.data.append(datum)
+
+        return append
 
 
 @numba.extending.overload_method(NumpyType, "extend")
 def Numpy_extend(builder, data):
     def extend(builder, data):
-        builder._data.extend(data)
+        builder.data.extend(data)
 
     return extend
 
@@ -290,7 +352,7 @@ def Numpy_extend(builder, data):
 @numba.extending.overload_method(NumpyType, "snapshot")
 def Numpy_snapshot(builder):
     def snapshot(builder):
-        return builder._data.snapshot()
+        return builder.data.snapshot()
 
     return snapshot
 
@@ -343,11 +405,6 @@ class EmptyType(numba.types.Type):
     @property
     def length(self):
         return numba.types.int64
-
-
-@numba.extending.typeof_impl.register(Empty)
-def typeof_Empty(val, c):
-    return EmptyType()
 
 
 @numba.extending.register_model(EmptyType)
@@ -426,9 +483,9 @@ class ListOffset(LayoutBuilder):
     def _type(self, typestrs):
         return f"ak.numba.lb.ListOffset({self._offsets.dtype}, {self._content.type})"
 
-    # @property
-    # def offsets(self):
-    #     return self._offsets
+    @property
+    def offsets(self):
+        return self._offsets
 
     @property
     def content(self):
@@ -477,15 +534,6 @@ class ListOffset(LayoutBuilder):
         )
 
 
-def tonumbatype(content):
-    if isinstance(content, Numpy):
-        return NumpyType.type(content)
-    if isinstance(content, Empty):
-        return EmptyType.type(content)
-    if isinstance(content, ListOffset):
-        return ListOffsetType.type(content)
-
-
 class ListOffsetType(numba.types.Type):
     def __init__(self, dtype, content):
         super().__init__(name=f"ak.numba.lb.ListOffset({dtype}, {content.type})")
@@ -494,7 +542,7 @@ class ListOffsetType(numba.types.Type):
 
     @classmethod
     def type(cls, content):
-        return ListOffsetType(content._offsets.dtype, tonumbatype(content._content))
+        return ListOffsetType(content.offsets.dtype, content.content)
 
     @property
     def parameters(self):
@@ -586,6 +634,62 @@ def ListOffset_length(builder):
     return getter
 
 
+@numba.extending.overload_method(ListOffsetType, "_offsets", inline="always")
+def ListOffset_offsets(builder):
+    def getter(builder):
+        return builder._offsets
+
+    return getter
+
+
+@numba.extending.overload_method(ListOffsetType, "begin_list", inline="always")
+def ListOffset_begin_list(builder):
+    if isinstance(builder, ListOffsetType):
+
+        def getter(builder):
+            return builder._content
+
+        return getter
+
+
+@numba.extending.overload_method(ListOffsetType, "append")
+def ListOffset_append(builder, datum):
+    if isinstance(builder, ListOffsetType):
+
+        def append(builder, datum):
+            builder.append(datum)
+
+        return append
+
+
+@numba.extending.overload_method(ListOffsetType, "end_list", inline="always")
+def ListOffset_end_list(builder):
+    if isinstance(builder, ListOffsetType):
+
+        def impl(builder):
+            builder._offsets.append(len(builder._content))
+
+        return impl
+
+
+@numba.extending.overload_method(ListOffsetType, "extend")
+def ListOffset_extend(builder, datum):
+    if isinstance(builder, ListOffsetType):
+
+        def extend(builder, datum):
+            builder.extend(datum)
+
+        return extend
+
+
+@numba.extending.overload_method(ListOffsetType, "snapshot")
+def ListOffset_snapshot(builder):
+    def snapshot(builder):
+        return builder.snapshot()
+
+    return snapshot
+
+
 ########## List ############################################################
 
 
@@ -644,6 +748,169 @@ class List(LayoutBuilder):
                 parameters=self._parameters,
             )
         )
+
+
+class ListType(numba.types.Type):
+    def __init__(self, dtype, content):
+        super().__init__(name=f"ak.numba.lb.List({dtype}, {content.type})")
+        self._dtype = dtype
+        self._content = content
+
+    @classmethod
+    def type(cls, content):
+        return ListType(content.starts.dtype, content.content)
+
+    @property
+    def parameters(self):
+        return numba.types.StringLiteral
+
+    @property
+    def starts(self):
+        return ak.numba.GrowableBufferType(self._dtype)
+
+    @property
+    def content(self):
+        return tonumbatype(self._content)
+
+    @property
+    def length(self):
+        return numba.types.float64
+
+
+@numba.extending.register_model(ListType)
+class ListModel(numba.extending.models.StructModel):
+    def __init__(self, dmm, fe_type):
+        members = [
+            ("starts", fe_type.starts),
+            ("stops", fe_type.starts),
+            ("content", fe_type.content),
+        ]
+        super().__init__(dmm, fe_type, members)
+
+
+for member in (
+    "starts",
+    "stops",
+    "content",
+):
+    numba.extending.make_attribute_wrapper(ListType, member, "_" + member)
+
+
+@numba.extending.unbox(ListType)
+def ListType_unbox(typ, obj, c):
+    # get PyObjects
+    starts_obj = c.pyapi.object_getattr_string(obj, "_starts")
+    stops_obj = c.pyapi.object_getattr_string(obj, "_stops")
+    content_obj = c.pyapi.object_getattr_string(obj, "_content")
+
+    # fill the lowered model
+    out = numba.core.cgutils.create_struct_proxy(typ)(c.context, c.builder)
+    out.starts = c.pyapi.to_native_value(typ.starts, starts_obj).value
+    out.stops = c.pyapi.to_native_value(typ.stops, starts_obj).value
+    out.content = c.pyapi.to_native_value(typ.content, content_obj).value
+
+    # decref PyObjects
+    c.pyapi.decref(starts_obj)
+    c.pyapi.decref(stops_obj)
+    c.pyapi.decref(content_obj)
+
+    # return it or the exception
+    is_error = numba.core.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
+    return numba.extending.NativeValue(out._getvalue(), is_error=is_error)
+
+
+@numba.extending.box(ListType)
+def ListType_box(typ, val, c):
+    # get PyObject of the List class
+    List_obj = c.pyapi.unserialize(c.pyapi.serialize_object(List))
+
+    builder = numba.core.cgutils.create_struct_proxy(typ)(
+        c.context, c.builder, value=val
+    )
+    starts_obj = c.pyapi.from_native_value(typ.starts, builder.starts, c.env_manager)
+    stops_obj = c.pyapi.from_native_value(typ.stops, builder.stops, c.env_manager)
+    content_obj = c.pyapi.from_native_value(typ.content, builder.content, c.env_manager)
+
+    out = c.pyapi.call_function_objargs(
+        List_obj,
+        (
+            starts_obj,
+            content_obj,
+        ),
+    )
+
+    # decref PyObjects
+    c.pyapi.decref(List_obj)
+
+    c.pyapi.decref(starts_obj)
+    c.pyapi.decref(content_obj)
+
+    return out
+
+
+@numba.extending.overload_method(ListType, "_length_get", inline="always")
+def List_length(builder):
+    def getter(builder):
+        return builder._starts._length_pos[0] - 1
+
+    return getter
+
+
+@numba.extending.overload_method(ListType, "_offsets", inline="always")
+def List_offsets(builder):
+    def getter(builder):
+        return builder._starts
+
+    return getter
+
+
+@numba.extending.overload_method(ListType, "begin_list", inline="always")
+def List_begin_list(builder):
+    if isinstance(builder, ListType):
+
+        def getter(builder):
+            builder._starts.append(len(builder._content))
+            return builder._content
+
+        return getter
+
+
+@numba.extending.overload_method(ListType, "append")
+def List_append(builder, datum):
+    if isinstance(builder, ListType):
+
+        def append(builder, datum):
+            builder.append(datum)
+
+        return append
+
+
+@numba.extending.overload_method(ListType, "end_list", inline="always")
+def List_end_list(builder):
+    if isinstance(builder, ListType):
+
+        def impl(builder):
+            builder._stops.append(len(builder._content))
+
+        return impl
+
+
+@numba.extending.overload_method(ListType, "extend")
+def List_extend(builder, datum):
+    if isinstance(builder, ListType):
+
+        def extend(builder, datum):
+            builder.extend(datum)
+
+        return extend
+
+
+@numba.extending.overload_method(ListType, "snapshot")
+def List_snapshot(builder):
+    def snapshot(builder):
+        return builder.snapshot()
+
+    return snapshot
 
 
 ########## Regular ############################################################

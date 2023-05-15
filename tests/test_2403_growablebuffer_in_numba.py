@@ -398,3 +398,15 @@ def test_numba_extend():
     extend_range(growablebuffer, 250, 1000)
     assert snapshot(growablebuffer).tolist() == list(range(1000))
     assert len(growablebuffer._panels) == 9
+
+
+def test_from_buffer():
+    @numba.njit
+    def f19():
+        growablebuffer = ak.numba.GrowableBuffer(np.float64)
+        growablebuffer.append(66.6)
+        growablebuffer.append(77.7)
+        return growablebuffer
+
+    out = f19()
+    assert out.snapshot().tolist() == [66.6, 77.7]
