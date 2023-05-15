@@ -3,8 +3,6 @@ ak.behavior
 
 .. py:data:: ak.behavior
 
-.. contents::
-
 Motivation
 ==========
 
