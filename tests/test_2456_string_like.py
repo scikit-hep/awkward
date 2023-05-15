@@ -92,3 +92,42 @@ def test_stringlike_to_arrow_table():
         table.schema.to_string()
         == ": large_list<item: uint8 not null> not null\n  child 0, item: uint8 not null"
     )
+
+
+def test_string_broadcasting():
+    result = ak.broadcast_arrays(["he", "lo"], ["w", "orld"])
+    assert result[0].tolist() == ["he", "lo"]
+    assert result[1].tolist() == ["w", "orld"]
+
+    with pytest.raises(ValueError):
+        ak.broadcast_arrays(["he", "lo"], [1, 2, 3])
+
+    result = ak.broadcast_arrays(["he", "lo"], [[1, 2, 3], [4]])
+    assert result[0].tolist() == [["he", "he", "he"], ["lo"]]
+    assert result[1].tolist() == [[1, 2, 3], [4]]
+
+
+def test_stringlike_broadcasting():
+    behavior = {("__super__", "my-string"): "string"}
+    result = ak.broadcast_arrays(
+        ak.with_parameter(["he", "lo"], "__array__", "my-string"),
+        ak.with_parameter(["w", "orld"], "__array__", "my-string"),
+        behavior=behavior,
+    )
+    assert result[0].tolist() == ["he", "lo"]
+    assert result[1].tolist() == ["w", "orld"]
+
+    with pytest.raises(ValueError):
+        ak.broadcast_arrays(
+            ak.with_parameter(["he", "lo"], "__array__", "my-string"),
+            [1, 2, 3],
+            behavior=behavior,
+        )
+
+    result = ak.broadcast_arrays(
+        ak.with_parameter(["he", "lo"], "__array__", "my-string"),
+        [[1, 2, 3], [4]],
+        behavior=behavior,
+    )
+    assert result[0].tolist() == [["he", "he", "he"], ["lo"]]
+    assert result[1].tolist() == [[1, 2, 3], [4]]
