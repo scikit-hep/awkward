@@ -22,7 +22,7 @@ from awkward._parameters import (
 from awkward._regularize import is_integer
 from awkward._slicing import NO_HEAD
 from awkward._typing import TYPE_CHECKING, Final, Self, SupportsIndex, final
-from awkward._util import unset
+from awkward._util import UNSET
 from awkward.contents.content import Content
 from awkward.forms.recordform import RecordForm
 from awkward.index import Index
@@ -260,19 +260,19 @@ class RecordArray(Content):
 
     def copy(
         self,
-        contents=unset,
-        fields=unset,
-        length=unset,
+        contents=UNSET,
+        fields=UNSET,
+        length=UNSET,
         *,
-        parameters=unset,
-        backend=unset,
+        parameters=UNSET,
+        backend=UNSET,
     ):
         return RecordArray(
-            self._contents if contents is unset else contents,
-            self._fields if fields is unset else fields,
-            self._length if length is unset else length,
-            parameters=self._parameters if parameters is unset else parameters,
-            backend=self._backend if backend is unset else backend,
+            self._contents if contents is UNSET else contents,
+            self._fields if fields is UNSET else fields,
+            self._length if length is UNSET else length,
+            parameters=self._parameters if parameters is UNSET else parameters,
+            backend=self._backend if backend is UNSET else backend,
         )
 
     def __copy__(self):
@@ -742,13 +742,13 @@ class RecordArray(Content):
                     )
 
         nextcontents = []
-        minlength = ak._util.unset
+        minlength = ak._util.UNSET
         for forfield in for_each_field:
             merged = forfield[0]._mergemany(forfield[1:])
 
             nextcontents.append(merged)
 
-            if minlength is ak._util.unset or (
+            if minlength is ak._util.UNSET or (
                 not (merged.length is unknown_length or minlength is unknown_length)
                 and merged.length < minlength
             ):

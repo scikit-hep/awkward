@@ -20,7 +20,7 @@ from awkward._parameters import (
 from awkward._regularize import is_integer_like
 from awkward._slicing import NO_HEAD
 from awkward._typing import TYPE_CHECKING, Final, Self, SupportsIndex, final
-from awkward._util import unset
+from awkward._util import UNSET
 from awkward.contents.content import Content
 from awkward.forms.bytemaskedform import ByteMaskedForm
 from awkward.index import Index
@@ -147,12 +147,12 @@ class ByteMaskedArray(Content):
 
     form_cls: Final = ByteMaskedForm
 
-    def copy(self, mask=unset, content=unset, valid_when=unset, *, parameters=unset):
+    def copy(self, mask=UNSET, content=UNSET, valid_when=UNSET, *, parameters=UNSET):
         return ByteMaskedArray(
-            self._mask if mask is unset else mask,
-            self._content if content is unset else content,
-            self._valid_when if valid_when is unset else valid_when,
-            parameters=self._parameters if parameters is unset else parameters,
+            self._mask if mask is UNSET else mask,
+            self._content if content is UNSET else content,
+            self._valid_when if valid_when is UNSET else valid_when,
+            parameters=self._parameters if parameters is UNSET else parameters,
         )
 
     def __copy__(self):

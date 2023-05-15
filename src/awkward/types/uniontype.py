@@ -6,19 +6,19 @@ from itertools import permutations
 
 from awkward._parameters import parameters_are_equal, type_parameters_equal
 from awkward._typing import Self, final
-from awkward._util import unset
+from awkward._util import UNSET
 from awkward.types.type import Type
 
 
 @final
 class UnionType(Type):
     def copy(
-        self, *, contents: list[Type] = unset, parameters=unset, typestr=unset
+        self, *, contents: list[Type] = UNSET, parameters=UNSET, typestr=UNSET
     ) -> Self:
         return UnionType(
-            self._contents if contents is unset else contents,
-            parameters=self._parameters if parameters is unset else parameters,
-            typestr=self._typestr if typestr is unset else typestr,
+            self._contents if contents is UNSET else contents,
+            parameters=self._parameters if parameters is UNSET else parameters,
+            typestr=self._typestr if typestr is UNSET else typestr,
         )
 
     def __init__(self, contents, *, parameters=None, typestr=None):

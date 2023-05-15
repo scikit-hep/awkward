@@ -19,7 +19,7 @@ from awkward._parameters import parameters_intersect, parameters_union
 from awkward._regularize import is_integer_like
 from awkward._slicing import NO_HEAD
 from awkward._typing import TYPE_CHECKING, Final, Self, SupportsIndex, final
-from awkward._util import unset
+from awkward._util import UNSET
 from awkward.contents.content import Content
 from awkward.forms.unionform import UnionForm
 from awkward.index import Index, Index8, Index64
@@ -188,17 +188,17 @@ class UnionArray(Content):
 
     def copy(
         self,
-        tags=unset,
-        index=unset,
-        contents=unset,
+        tags=UNSET,
+        index=UNSET,
+        contents=UNSET,
         *,
-        parameters=unset,
+        parameters=UNSET,
     ):
         return UnionArray(
-            self._tags if tags is unset else tags,
-            self._index if index is unset else index,
-            self._contents if contents is unset else contents,
-            parameters=self._parameters if parameters is unset else parameters,
+            self._tags if tags is UNSET else tags,
+            self._index if index is UNSET else index,
+            self._contents if contents is UNSET else contents,
+            parameters=self._parameters if parameters is UNSET else parameters,
         )
 
     def __copy__(self):

@@ -6,7 +6,7 @@ import awkward as ak
 from awkward._behavior import find_typestr
 from awkward._parameters import type_parameters_equal
 from awkward._typing import final
-from awkward._util import unset
+from awkward._util import UNSET
 from awkward.forms.form import Form
 
 
@@ -68,19 +68,19 @@ class UnionForm(Form):
 
     def copy(
         self,
-        tags=unset,
-        index=unset,
-        contents=unset,
+        tags=UNSET,
+        index=UNSET,
+        contents=UNSET,
         *,
-        parameters=unset,
-        form_key=unset,
+        parameters=UNSET,
+        form_key=UNSET,
     ):
         return UnionForm(
-            self._tags if tags is unset else tags,
-            self._index if index is unset else index,
-            self._contents if contents is unset else contents,
-            parameters=self._parameters if parameters is unset else parameters,
-            form_key=self._form_key if form_key is unset else form_key,
+            self._tags if tags is UNSET else tags,
+            self._index if index is UNSET else index,
+            self._contents if contents is UNSET else contents,
+            parameters=self._parameters if parameters is UNSET else parameters,
+            form_key=self._form_key if form_key is UNSET else form_key,
         )
 
     @classmethod

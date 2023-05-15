@@ -22,7 +22,7 @@ from awkward._parameters import (
 from awkward._regularize import is_integer_like
 from awkward._slicing import NO_HEAD
 from awkward._typing import TYPE_CHECKING, Final, Self, SupportsIndex, final
-from awkward._util import unset
+from awkward._util import UNSET
 from awkward.contents.content import Content
 from awkward.forms.numpyform import NumpyForm
 from awkward.index import Index
@@ -128,15 +128,15 @@ class NumpyArray(Content):
 
     def copy(
         self,
-        data=unset,
+        data=UNSET,
         *,
-        parameters=unset,
-        backend=unset,
+        parameters=UNSET,
+        backend=UNSET,
     ):
         return NumpyArray(
-            self._data if data is unset else data,
-            parameters=self._parameters if parameters is unset else parameters,
-            backend=self._backend if backend is unset else backend,
+            self._data if data is UNSET else data,
+            parameters=self._parameters if parameters is UNSET else parameters,
+            backend=self._backend if backend is UNSET else backend,
         )
 
     def __copy__(self):

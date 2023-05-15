@@ -5,7 +5,7 @@ from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._parameters import parameters_are_equal, type_parameters_equal
 from awkward._regularize import is_integer
 from awkward._typing import Self, final
-from awkward._util import unset
+from awkward._util import UNSET
 from awkward.types.type import Type
 
 
@@ -14,16 +14,16 @@ class RegularType(Type):
     def copy(
         self,
         *,
-        content: Type = unset,
-        size: ShapeItem = unset,
-        parameters=unset,
-        typestr=unset,
+        content: Type = UNSET,
+        size: ShapeItem = UNSET,
+        parameters=UNSET,
+        typestr=UNSET,
     ) -> Self:
         return RegularType(
-            self._content if content is unset else content,
-            size=self._size if size is unset else size,
-            parameters=self._parameters if parameters is unset else parameters,
-            typestr=self._typestr if typestr is unset else typestr,
+            self._content if content is UNSET else content,
+            size=self._size if size is UNSET else size,
+            parameters=self._parameters if parameters is UNSET else parameters,
+            typestr=self._typestr if typestr is UNSET else typestr,
         )
 
     def __init__(self, content, size, *, parameters=None, typestr=None):

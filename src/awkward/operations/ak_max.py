@@ -2,7 +2,7 @@
 __all__ = ("max",)
 import awkward as ak
 from awkward._behavior import behavior_of
-from awkward._connect.numpy import unsupported
+from awkward._connect.numpy import UNSUPPORTED
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
@@ -169,13 +169,13 @@ def _impl(array, axis, keepdims, initial, mask_identity, highlevel, behavior):
 
 @ak._connect.numpy.implements("amax")
 def _nep_18_impl_amax(
-    a, axis=None, out=unsupported, keepdims=False, initial=None, where=unsupported
+    a, axis=None, out=UNSUPPORTED, keepdims=False, initial=None, where=UNSUPPORTED
 ):
     return max(a, axis=axis, keepdims=keepdims, initial=initial)
 
 
 @ak._connect.numpy.implements("nanmax")
 def _nep_18_impl_nanmax(
-    a, axis=None, out=unsupported, keepdims=False, initial=None, where=unsupported
+    a, axis=None, out=UNSUPPORTED, keepdims=False, initial=None, where=UNSUPPORTED
 ):
     return nanmax(a, axis=axis, keepdims=keepdims, initial=initial)

@@ -4,7 +4,7 @@ __all__ = ("copy",)
 import copy as _copy
 
 import awkward as ak
-from awkward._connect.numpy import unsupported
+from awkward._connect.numpy import UNSUPPORTED
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
@@ -70,5 +70,5 @@ def _impl(array):
 
 
 @ak._connect.numpy.implements("copy")
-def _nep_18_impl(a, order=unsupported, subok=unsupported):
+def _nep_18_impl(a, order=UNSUPPORTED, subok=UNSUPPORTED):
     return copy(a)

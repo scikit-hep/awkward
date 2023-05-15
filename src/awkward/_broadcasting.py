@@ -20,7 +20,7 @@ from awkward._parameters import (
     parameters_intersect,
 )
 from awkward._typing import Any, Callable, Dict, List, TypeAlias, Union
-from awkward._util import Sentinel, unset
+from awkward._util import UNSET, Sentinel
 from awkward.contents.bitmaskedarray import BitMaskedArray
 from awkward.contents.bytemaskedarray import ByteMaskedArray
 from awkward.contents.content import Content
@@ -426,10 +426,10 @@ def apply_step(
         if not options["allow_records"]:
             raise ValueError(f"cannot broadcast records {in_function(options)}")
 
-        fields, length, istuple = unset, unset, unset
+        fields, length, istuple = UNSET, UNSET, UNSET
         for x in contents:
             if x.is_record:
-                if fields is unset:
+                if fields is UNSET:
                     fields = x.fields
                 elif set(fields) != set(x.fields):
                     raise ValueError(
@@ -440,7 +440,7 @@ def apply_step(
                             ", ".join(sorted(x.fields)),
                         )
                     )
-                if length is unset:
+                if length is UNSET:
                     length = x.length
                 elif length != x.length:
                     raise ValueError(
@@ -450,7 +450,7 @@ def apply_step(
                         )
                     )
                 # Records win over tuples
-                if istuple is unset or not x.is_tuple:
+                if istuple is UNSET or not x.is_tuple:
                     istuple = False
 
         outcontents, numoutputs = [], None

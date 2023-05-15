@@ -37,7 +37,7 @@ from awkward._typing import (
     TypeAlias,
     TypedDict,
 )
-from awkward._util import unset
+from awkward._util import UNSET
 from awkward.forms.form import Form
 from awkward.index import Index, Index64
 
@@ -902,13 +902,13 @@ class Content:
             )
         )
         contents = []
-        length = ak._util.unset
+        length = ak._util.UNSET
         for ptr in tocarry:
             contents.append(
                 ak.contents.IndexedArray.simplified(ptr, self, parameters=None)
             )
             length = contents[-1].length
-        assert not (length is ak._util.unset and self._backend.nplike.known_data)
+        assert not (length is ak._util.UNSET and self._backend.nplike.known_data)
         return ak.contents.RecordArray(
             contents, recordlookup, length, parameters=parameters, backend=self._backend
         )
@@ -1312,7 +1312,7 @@ class Content:
     def _fill_none(self, value: Content) -> Content:
         raise NotImplementedError
 
-    def copy(self, *, parameters: JSONMapping | None = unset) -> Self:
+    def copy(self, *, parameters: JSONMapping | None = UNSET) -> Self:
         raise NotImplementedError
 
 

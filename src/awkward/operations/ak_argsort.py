@@ -1,7 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("argsort",)
 import awkward as ak
-from awkward._connect.numpy import unsupported
+from awkward._connect.numpy import UNSUPPORTED
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
@@ -69,7 +69,7 @@ def _impl(array, axis, ascending, stable, highlevel, behavior):
 
 
 @ak._connect.numpy.implements("argsort")
-def _nep_18_impl(a, axis=-1, kind=None, order=unsupported):
+def _nep_18_impl(a, axis=-1, kind=None, order=UNSUPPORTED):
     if kind is None:
         stable = False
     elif kind in ("stable", "mergesort"):

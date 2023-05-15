@@ -17,7 +17,7 @@ from awkward._parameters import (
 from awkward._regularize import is_integer, is_integer_like
 from awkward._slicing import NO_HEAD
 from awkward._typing import TYPE_CHECKING, Final, Self, SupportsIndex, final
-from awkward._util import unset
+from awkward._util import UNSET
 from awkward.contents.bytemaskedarray import ByteMaskedArray
 from awkward.contents.content import Content
 from awkward.forms.bitmaskedform import BitMaskedForm
@@ -205,21 +205,21 @@ class BitMaskedArray(Content):
 
     def copy(
         self,
-        mask=unset,
-        content=unset,
-        valid_when=unset,
-        length=unset,
-        lsb_order=unset,
+        mask=UNSET,
+        content=UNSET,
+        valid_when=UNSET,
+        length=UNSET,
+        lsb_order=UNSET,
         *,
-        parameters=unset,
+        parameters=UNSET,
     ):
         return BitMaskedArray(
-            self._mask if mask is unset else mask,
-            self._content if content is unset else content,
-            self._valid_when if valid_when is unset else valid_when,
-            self._length if length is unset else length,
-            self._lsb_order if lsb_order is unset else lsb_order,
-            parameters=self._parameters if parameters is unset else parameters,
+            self._mask if mask is UNSET else mask,
+            self._content if content is UNSET else content,
+            self._valid_when if valid_when is UNSET else valid_when,
+            self._length if length is UNSET else length,
+            self._lsb_order if lsb_order is UNSET else lsb_order,
+            parameters=self._parameters if parameters is UNSET else parameters,
         )
 
     def __copy__(self):

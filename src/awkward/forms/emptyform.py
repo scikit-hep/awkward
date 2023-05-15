@@ -5,7 +5,7 @@ import awkward as ak
 from awkward._behavior import find_typestr
 from awkward._errors import deprecate
 from awkward._typing import final
-from awkward._util import unset
+from awkward._util import UNSET
 from awkward.forms.form import Form, JSONMapping
 
 
@@ -22,15 +22,15 @@ class EmptyForm(Form):
         self._init(parameters=parameters, form_key=form_key)
 
     def copy(
-        self, *, parameters: JSONMapping | None = unset, form_key=unset
+        self, *, parameters: JSONMapping | None = UNSET, form_key=UNSET
     ) -> EmptyForm:
-        if not (parameters is unset or parameters is None or len(parameters) == 0):
+        if not (parameters is UNSET or parameters is None or len(parameters) == 0):
             deprecate(
                 f"{type(self).__name__} cannot contain parameters", version="2.2.0"
             )
         return EmptyForm(
-            parameters=self._parameters if parameters is unset else parameters,
-            form_key=self._form_key if form_key is unset else form_key,
+            parameters=self._parameters if parameters is UNSET else parameters,
+            form_key=self._form_key if form_key is UNSET else form_key,
         )
 
     @classmethod

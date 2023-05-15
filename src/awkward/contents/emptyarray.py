@@ -14,7 +14,7 @@ from awkward._nplikes.numpylike import IndexType, NumpyMetadata
 from awkward._regularize import is_integer_like
 from awkward._slicing import NO_HEAD
 from awkward._typing import TYPE_CHECKING, Final, Self, SupportsIndex, final
-from awkward._util import unset
+from awkward._util import UNSET
 from awkward.contents.content import Content
 from awkward.forms.emptyform import EmptyForm
 from awkward.index import Index
@@ -79,16 +79,16 @@ class EmptyArray(Content):
     def copy(
         self,
         *,
-        parameters=unset,
-        backend=unset,
+        parameters=UNSET,
+        backend=UNSET,
     ):
-        if not (parameters is unset or parameters is None or len(parameters) == 0):
+        if not (parameters is UNSET or parameters is None or len(parameters) == 0):
             deprecate(
                 f"{type(self).__name__} cannot contain parameters", version="2.2.0"
             )
         return EmptyArray(
-            parameters=self._parameters if parameters is unset else parameters,
-            backend=self._backend if backend is unset else backend,
+            parameters=self._parameters if parameters is UNSET else parameters,
+            backend=self._backend if backend is UNSET else backend,
         )
 
     def __copy__(self):

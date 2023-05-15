@@ -9,7 +9,7 @@ import awkward as ak
 import awkward._prettyprint
 from awkward._parameters import parameters_are_equal, type_parameters_equal
 from awkward._typing import Self, final
-from awkward._util import unset
+from awkward._util import UNSET
 from awkward.types.type import Type
 
 
@@ -18,16 +18,16 @@ class RecordType(Type):
     def copy(
         self,
         *,
-        contents: list[Type] = unset,
-        fields: list[str] | None = unset,
-        parameters=unset,
-        typestr=unset,
+        contents: list[Type] = UNSET,
+        fields: list[str] | None = UNSET,
+        parameters=UNSET,
+        typestr=UNSET,
     ) -> Self:
         return RecordType(
-            self._contents if contents is unset else contents,
-            self._fields if fields is unset else fields,
-            parameters=self._parameters if parameters is unset else parameters,
-            typestr=self._typestr if typestr is unset else typestr,
+            self._contents if contents is UNSET else contents,
+            self._fields if fields is UNSET else fields,
+            parameters=self._parameters if parameters is UNSET else parameters,
+            typestr=self._typestr if typestr is UNSET else typestr,
         )
 
     def __init__(self, contents, fields, *, parameters=None, typestr=None):

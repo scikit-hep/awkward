@@ -94,7 +94,7 @@ class Sentinel:
             return f"{self._name}"
 
 
-unset = Sentinel("UNSET", __name__)
+UNSET = Sentinel("UNSET", __name__)
 
 
 T = TypeVar("T")

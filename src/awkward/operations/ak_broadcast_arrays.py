@@ -4,7 +4,7 @@ import awkward as ak
 from awkward._backends.dispatch import backend_of
 from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of
-from awkward._connect.numpy import unsupported
+from awkward._connect.numpy import UNSUPPORTED
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 
@@ -249,5 +249,5 @@ def _impl(
 
 
 @ak._connect.numpy.implements("broadcast_arrays")
-def _nep_18_impl(*args, subok=unsupported):
+def _nep_18_impl(*args, subok=UNSUPPORTED):
     return broadcast_arrays(*args)
