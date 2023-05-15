@@ -71,25 +71,6 @@ def find_custom_cast(obj, behavior):
     return None
 
 
-def find_custom_broadcast(layout, behavior):
-    behavior = overlay_behavior(behavior)
-    custom = layout.parameter("__array__")
-    if not isinstance(custom, str):
-        custom = layout.parameter("__record__")
-    if not isinstance(custom, str):
-        custom = layout.purelist_parameter("__record__")
-    if isinstance(custom, str):
-        for key, fcn in behavior.items():
-            if (
-                isinstance(key, tuple)
-                and len(key) == 2
-                and key[0] == "__broadcast__"
-                and key[1] == custom
-            ):
-                return fcn
-    return None
-
-
 def find_ufunc_generic(ufunc, layout, behavior):
     behavior = overlay_behavior(behavior)
     custom = layout.parameter("__array__")
