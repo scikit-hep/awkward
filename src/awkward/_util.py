@@ -80,18 +80,21 @@ def identifier_hash(str):
     )
 
 
-# FIXME: introduce sentinel type for this
-class _Unset:
+class Sentinel:
+    """A class for implementing sentinel types"""
+
+    def __init__(self, name, module=None):
+        self._name = name
+        self._module = module
+
     def __repr__(self):
-        return f"{__name__}.unset"
+        if self._module is not None:
+            return f"{self._module}.{self._name}"
+        else:
+            return f"{self._name}"
 
 
-unset = _Unset()
-
-
-# Sentinel object for catching pass-through values
-class Unspecified:
-    pass
+unset = Sentinel("UNSET", __name__)
 
 
 T = TypeVar("T")
