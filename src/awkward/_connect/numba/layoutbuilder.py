@@ -1016,6 +1016,147 @@ class Regular(LayoutBuilder):
         )
 
 
+class RegularType(numba.types.Type):
+    def __init__(self, content, size):
+        super().__init__(name=f"ak.numba.lb.Regular({content.type()})")
+        self._length = 0
+        self._content = content
+        self._size = size
+
+    @classmethod
+    def type(cls):
+        return RegularType(cls.content)
+
+    @property
+    def parameters(self):
+        return numba.types.StringLiteral
+
+    @property
+    def content(self):
+        return tonumbatype(self._content)
+
+    @property
+    def length(self):
+        return numba.types.int64
+
+
+@numba.extending.register_model(RegularType)
+class RegularModel(numba.extending.models.StructModel):
+    def __init__(self, dmm, fe_type):
+        members = [
+            ("content", fe_type.content),
+        ]
+        super().__init__(dmm, fe_type, members)
+
+
+for member in ("content",):
+    numba.extending.make_attribute_wrapper(RegularType, member, "_" + member)
+
+
+@numba.extending.unbox(RegularType)
+def RegularType_unbox(typ, obj, c):
+    # get PyObjects
+    content_obj = c.pyapi.object_getattr_string(obj, "_content")
+
+    # fill the lowered model
+    out = numba.core.cgutils.create_struct_proxy(typ)(c.context, c.builder)
+    out.content = c.pyapi.to_native_value(typ.content, content_obj).value
+
+    # decref PyObjects
+    c.pyapi.decref(content_obj)
+
+    # return it or the exception
+    is_error = numba.core.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
+    return numba.extending.NativeValue(out._getvalue(), is_error=is_error)
+
+
+@numba.extending.box(RegularType)
+def RegularType_box(typ, val, c):
+    # get PyObject of the Regular class
+    Regular_obj = c.pyapi.unserialize(c.pyapi.serialize_object(Regular))
+
+    builder = numba.core.cgutils.create_struct_proxy(typ)(
+        c.context, c.builder, value=val
+    )
+    content_obj = c.pyapi.from_native_value(typ.content, builder.content, c.env_manager)
+
+    out = c.pyapi.call_function_objargs(
+        Regular_obj,
+        (content_obj,),
+    )
+
+    # decref PyObjects
+    c.pyapi.decref(Regular_obj)
+
+    c.pyapi.decref(content_obj)
+
+    return out
+
+
+@numba.extending.overload_method(RegularType, "_length_get", inline="always")
+def Regular_length(builder):
+    def getter(builder):
+        return builder._length
+
+    return getter
+
+
+@numba.extending.overload_method(RegularType, "_size", inline="always")
+def Regular_starts(builder):
+    def getter(builder):
+        return builder._size
+
+    return getter
+
+
+@numba.extending.overload_method(RegularType, "begin_list", inline="always")
+def Regular_begin_list(builder):
+    if isinstance(builder, RegularType):
+
+        def getter(builder):
+            return builder._content
+
+        return getter
+
+
+@numba.extending.overload_method(RegularType, "append")
+def Regular_append(builder, datum):
+    if isinstance(builder, RegularType):
+
+        def append(builder, datum):
+            builder.append(datum)
+
+        return append
+
+
+@numba.extending.overload_method(RegularType, "end_list", inline="always")
+def Regular_end_list(builder):
+    if isinstance(builder, RegularType):
+
+        def impl(builder):
+            builder._length += 1
+
+        return impl
+
+
+@numba.extending.overload_method(RegularType, "extend")
+def Regular_extend(builder, datum):
+    if isinstance(builder, RegularType):
+
+        def extend(builder, datum):
+            builder.extend(datum)
+
+        return extend
+
+
+@numba.extending.overload_method(RegularType, "snapshot")
+def Regular_snapshot(builder):
+    def snapshot(builder):
+        return builder.snapshot()
+
+    return snapshot
+
+
 ########## Indexed ############################################################
 
 

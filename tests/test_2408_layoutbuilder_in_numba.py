@@ -825,6 +825,37 @@ def test_List_append():
     assert builder.is_valid(error), error.value
 
 
+@pytest.mark.skip("FIXME: builder.end_list()")
+def test_Regular_append():
+    @numba.njit
+    def f33(builder):
+        content = builder.begin_list()
+        content.append(1.1)
+        content.append(2.2)
+        content.append(3.3)
+        builder.end_list()
+
+        builder.begin_list()
+        content.append(4.4)
+        content.append(5.5)
+        content.append(6.6)
+        builder.end_list()
+
+    builder = lb.Regular(lb.Numpy(np.float64), 3)
+    assert len(builder) == 0
+    array = builder.snapshot()
+    assert isinstance(array, ak.Array)
+    assert ak.to_list(array) == []
+
+    f33(builder)
+
+    array = builder.snapshot()
+    assert ak.to_list(array) == [[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]
+
+    error = ""
+    assert builder.is_valid(error), error.value
+
+
 def test_numba_append():
     @numba.njit
     def create():
