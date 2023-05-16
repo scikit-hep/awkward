@@ -185,7 +185,7 @@ def _impl(
         out = ak.contents.NumpyArray(array)
 
     else:
-        raise TypeError(f"unrecognized array type: {repr(array)}")
+        raise TypeError(f"unrecognized array type: {array!r}")
 
     jsondata = out.to_json(
         nan_string=nan_string,

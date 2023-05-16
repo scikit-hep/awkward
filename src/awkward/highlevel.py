@@ -1353,7 +1353,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         See also #__array_function__.
         """
-        name = f"{type(ufunc).__module__}.{ufunc.__name__}.{str(method)}"
+        name = f"{type(ufunc).__module__}.{ufunc.__name__}.{method!s}"
         arguments = {}
         for i, arg in enumerate(inputs):
             arguments[i] = arg
@@ -2029,7 +2029,7 @@ class Record(NDArrayOperatorsMixin):
 
         See #ak.Array.__array_ufunc__ for a more complete description.
         """
-        name = f"{type(ufunc).__module__}.{ufunc.__name__}.{str(method)}"
+        name = f"{type(ufunc).__module__}.{ufunc.__name__}.{method!s}"
         arguments = {}
         for i, arg in enumerate(inputs):
             arguments[i] = arg
