@@ -84,7 +84,7 @@ def almost_equal(
         # Simplify regular NumPy types
         if left.is_numpy and left.purelist_depth > 1:
             left = left.to_RegularArray()
-        if right.is_regular and right.purelist_depth > 1:
+        if right.is_numpy and right.purelist_depth > 1:
             right = right.to_RegularArray()
 
         # Different lengths aren't equal!
@@ -111,12 +111,12 @@ def almost_equal(
         elif left.is_list and right.is_list:
             # Mixed regular-var
             if left.is_regular and not right.is_regular:
-                return check_regular and visitor(
+                return (not check_regular) and visitor(
                     left.content,
                     packed_list_content(right),
                 )
             elif right.is_regular and not left.is_regular:
-                return check_regular and visitor(
+                return (not check_regular) and visitor(
                     packed_list_content(left),
                     right.content,
                 )
