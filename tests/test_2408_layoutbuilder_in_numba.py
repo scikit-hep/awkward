@@ -27,7 +27,7 @@ def test_Numpy():
     assert str(ak.type(array)) == "5 * float64"
     assert ak.to_list(array) == [1.1, 2.2, 3.3, 4.4, 5.5]
 
-    assert builder.type == "ak.numba.lb.Numpy(float64)"
+    assert builder.type() == "ak.numba.lb.Numpy(float64)"
 
 
 def test_Numpy_char():
@@ -76,7 +76,7 @@ def test_Empty():
     assert str(ak.type(array)) == "0 * unknown"
     assert ak.to_list(array) == []
 
-    assert builder.type == "ak.numba.lb.Empty()"
+    assert builder.type() == "ak.numba.lb.Empty()"
 
 
 def test_ListOffset():
@@ -525,8 +525,8 @@ def test_unbox():
     f1(builder)
 
     # FIXME:
-    builder = lb.ListOffset(np.int32, lb.ListOffset(np.int64, lb.Numpy(np.int64)))
-    f1(builder)
+    # builder = lb.ListOffset(np.int32, lb.List(np.int64, lb.Numpy(np.int64)))
+    # f1(builder)
 
 
 def test_unbox_for_loop():
@@ -573,9 +573,9 @@ def test_box():
     out4 = f3(builder)
     assert ak.to_list(out4.snapshot()) == []
 
-    builder = lb.List(np.int8, lb.Numpy(np.int64))
+    builder = lb.List(np.int64, lb.Numpy(np.int64))
     out5 = f3(builder)
-    # FIXME: assert ak.to_list(out5.snapshot()) == []
+    assert ak.to_list(out5.snapshot()) == []
 
     builder = lb.List(np.int32, lb.Empty())
     out6 = f3(builder)

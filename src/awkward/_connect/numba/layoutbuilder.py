@@ -19,9 +19,9 @@ class LayoutBuilder:
     # def get_item(self) -> builder
     #     ...
 
-    @property
-    def type(self):
-        return self._type({})
+    # @property
+    # def type(self):
+    #     return self._type({})
 
     @property
     def content(self):
@@ -146,7 +146,7 @@ class Numpy(LayoutBuilder):
     def __repr__(self):
         return f"<Numpy of {self._data.dtype!r} with {self._length} items>"
 
-    def _type(self, typestrs):
+    def type(self):
         return f"ak.numba.lb.Numpy({self._data.dtype})"
 
     def numbatype(self):
@@ -193,12 +193,12 @@ class NumpyType(numba.types.Type):
         self._dtype = dtype
 
     @classmethod
-    def type(cls, content):
-        return NumpyType(content.dtype)
+    def type(cls):
+        return NumpyType(cls.dtype)
 
-    # @property
-    # def dtype(self):
-    #     return self._dtype
+    @property
+    def dtype(self):
+        return self._dtype
 
     @property
     def parameters(self):
@@ -323,6 +323,14 @@ def Numpy_length(builder):
     return getter
 
 
+@numba.extending.overload_attribute(NumpyType, "dtype", inline="always")
+def Numpy_dtype(builder):
+    def get(builder):
+        return builder._data.dtype
+
+    return get
+
+
 @numba.extending.overload_attribute(NumpyType, "data", inline="always")
 def Numpy_buffer(builder):
     def get(builder):
@@ -368,7 +376,7 @@ class Empty(LayoutBuilder):
     def __repr__(self):
         return f"<Empty with {self.length} items>"
 
-    def _type(self, typestrs):
+    def type(self):
         return "ak.numba.lb.Empty()"
 
     def numbatype(self):
@@ -402,7 +410,7 @@ class EmptyType(numba.types.Type):
         super().__init__(name="ak.numba.lb.Empty()")
 
     @classmethod
-    def type(cls, content):
+    def type(cls):
         return EmptyType()
 
     @property
@@ -483,12 +491,10 @@ class ListOffset(LayoutBuilder):
     def __repr__(self):
         return f"<ListOffset of {self._content!r} with {self._length} items>"
 
-    def _type(self, typestrs):
-        return f"ak.numba.lb.ListOffset({self._offsets.dtype}, {self._content.type})"
+    def type(self):
+        return f"ak.numba.lb.ListOffset({self._offsets.dtype}, {self._content.type()})"
 
     def numbatype(self):
-        # content_type = numba.deferred_type()
-        # content_type.define(self.content.numbatype())
         return ListOffsetType(
             numba.from_dtype(self.offsets.dtype), self.content.numbatype()
         )
@@ -546,13 +552,13 @@ class ListOffset(LayoutBuilder):
 
 class ListOffsetType(numba.types.Type):
     def __init__(self, dtype, content):
-        super().__init__(name=f"ak.numba.lb.ListOffset({dtype}, {content.type})")
+        super().__init__(name=f"ak.numba.lb.ListOffset({dtype}, {content.type()})")
         self._dtype = dtype
         self._content = content
 
     @classmethod
-    def type(cls, content):
-        return ListOffsetType(content.offsets.dtype, content.content)
+    def type(cls):
+        return ListOffsetType(cls.offsets.dtype, cls.content)
 
     @property
     def parameters(self):
@@ -612,6 +618,7 @@ def ListOffsetType_unbox(typ, obj, c):
 def ListOffsetType_box(typ, val, c):
     # get PyObject of the ListOffset class
     ListOffset_obj = c.pyapi.unserialize(c.pyapi.serialize_object(ListOffset))
+    from_offsets_obj = c.pyapi.object_getattr_string(ListOffset_obj, "_from_offsets")
 
     builder = numba.core.cgutils.create_struct_proxy(typ)(
         c.context, c.builder, value=val
@@ -619,13 +626,15 @@ def ListOffsetType_box(typ, val, c):
     offsets_obj = c.pyapi.from_native_value(typ.offsets, builder.offsets, c.env_manager)
     content_obj = c.pyapi.from_native_value(typ.content, builder.content, c.env_manager)
 
-    out = c.pyapi.call_function_objargs(
-        ListOffset_obj,
-        (
-            offsets_obj,
-            content_obj,
-        ),
-    )
+    out = c.pyapi.call_function_objargs(from_offsets_obj, (offsets_obj, content_obj))
+
+    # out = c.pyapi.call_function_objargs(
+    #     ListOffset_obj,
+    #     (
+    #         offsets_obj,
+    #         content_obj,
+    #     ),
+    # )
 
     # decref PyObjects
     c.pyapi.decref(ListOffset_obj)
@@ -711,6 +720,12 @@ class List(LayoutBuilder):
         self._content = content
         self._parameters = parameters
 
+    def __repr__(self):
+        return f"<List of {self._content!r} with {self._length} items>"
+
+    def type(self):
+        return f"ak.numba.lb.List({self._starts.dtype}, {self._content.type()})"
+
     def numbatype(self):
         return ListType(numba.from_dtype(self.starts.dtype), self.content.numbatype())
 
@@ -773,13 +788,13 @@ class List(LayoutBuilder):
 
 class ListType(numba.types.Type):
     def __init__(self, dtype, content):
-        super().__init__(name=f"ak.numba.lb.List({dtype}, {content.type})")
+        super().__init__(name=f"ak.numba.lb.List({dtype}, {content.type()})")
         self._dtype = dtype
         self._content = content
 
     @classmethod
-    def type(cls, content):
-        return ListType(content.starts.dtype, content.content)
+    def type(cls):
+        return ListType(cls.starts.dtype, cls.content)
 
     @property
     def parameters(self):
