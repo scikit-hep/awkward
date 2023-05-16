@@ -420,7 +420,7 @@ This error occurred while calling
 To implement support for reducers like `ak.sum`, we should override them with a behavior:
 
 ```pycon 
->>> def vector_sum(vector, mask):
+>>> def vector_sum(vector, mask_identity):
 ...     return ak.contents.RecordArray(
 ...         [
 ...             ak.sum(vector["rho"], highlevel=False, axis=-1),
@@ -435,8 +435,8 @@ To implement support for reducers like `ak.sum`, we should override them with a 
 {rho: 0.9, phi: 0.9}]
 ```
 
-Custom reducers are invoked with two arguments: a 2D array containing lists of records, and a boolean indicating whether the reducer should introduce an option type for reductions along empty sublists. The reducer should return an array or layout with the same number of elements as the input array, reducing along `axis=1` and dropping the reduced dimension (i.e. `keepdims=False`).
-If the reducer does not introduce an option type, and `mask=True`, Awkward will mask the result at the appropriate positions. 
+Custom reducers are invoked with two arguments: a 2D array containing lists of records, and a boolean `mask_identity` indicating whether the reducer should introduce an option type (for reductions along empty sublists). If the reducer does not introduce an option type, and `mask=True`, Awkward will mask the result at the appropriate positions. The reducer should return an {class}`ak.Array` or {class}`ak.contents.Content` with the same number of elements as the input array. The reduction itself should be performed along `axis=1`, dropping the reduced dimension (i.e. `keepdims=False`). 
+
 
 ## Mixin decorators
 
