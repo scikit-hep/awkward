@@ -787,8 +787,42 @@ def test_ListOffset_extend():
 
 def test_ListOffset_snapshot():
     @numba.njit
-    def f11(builder):
+    def f31(builder):
         return builder.snapshot()
+
+
+def test_List_append():
+    @numba.njit
+    def f32(builder):
+        content = builder.begin_list()
+        content.append(1.1)
+        content.append(2.2)
+        content.append(3.3)
+        builder.end_list()
+
+        builder.begin_list()
+        builder.end_list()
+
+        builder.begin_list()
+        content.append(4.4)
+        content.append(5.5)
+        builder.end_list()
+
+    builder = lb.List(np.int32, lb.Numpy(np.float64))
+    assert len(builder) == 0
+
+    array = builder.snapshot()
+    assert isinstance(array, ak.Array)
+    assert ak.to_list(array) == []
+
+    f32(builder)
+
+    array = builder.snapshot()
+    assert isinstance(array, ak.Array)
+    assert ak.to_list(array) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
+
+    error = ""
+    assert builder.is_valid(error), error.value
 
 
 def test_numba_append():

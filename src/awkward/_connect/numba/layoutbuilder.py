@@ -628,13 +628,13 @@ def ListOffsetType_box(typ, val, c):
 
     out = c.pyapi.call_function_objargs(from_offsets_obj, (offsets_obj, content_obj))
 
-    # out = c.pyapi.call_function_objargs(
-    #     ListOffset_obj,
-    #     (
-    #         offsets_obj,
-    #         content_obj,
-    #     ),
-    # )
+    out = c.pyapi.call_function_objargs(
+        ListOffset_obj,
+        (
+            offsets_obj,
+            content_obj,
+        ),
+    )
 
     # decref PyObjects
     c.pyapi.decref(ListOffset_obj)
@@ -721,10 +721,10 @@ class List(LayoutBuilder):
         self._parameters = parameters
 
     def __repr__(self):
-        return f"<List of {self._content!r} with {self._length} items>"
+        return f"<List of {self.content!r} with {self._length} items>"
 
     def type(self):
-        return f"ak.numba.lb.List({self._starts.dtype}, {self._content.type()})"
+        return f"ak.numba.lb.List({self.starts.dtype}, {self._content.type()})"
 
     def numbatype(self):
         return ListType(numba.from_dtype(self.starts.dtype), self.content.numbatype())
@@ -742,11 +742,11 @@ class List(LayoutBuilder):
         return self._content
 
     def begin_list(self):
-        self._starts.append(len(self._content))
-        return self._content
+        self.starts.append(len(self.content))
+        return self.content
 
     def end_list(self):
-        self._stops.append(len(self._content))
+        self.stops.append(len(self.content))
 
     def parameters(self):
         return self._parameters
@@ -764,10 +764,10 @@ class List(LayoutBuilder):
         return self._length
 
     def is_valid(self, error: str):
-        if len(self._starts) != len(self._stops):
-            error = f"List node{self._id} has starts length {len(self._starts)} but stops length {len(self._stops)}"
-        elif len(self._stops) > 0 and len(self._content) != self._stops.last():
-            error = f"List node{self._id} has content length {len(self._content)} but last stops {self._stops.last()}"
+        if len(self.starts) != len(self.stops):
+            error = f"List node{self._id} has starts length {len(self.starts)} but stops length {len(self.stops)}"
+        elif len(self.stops) > 0 and len(self.content) != self.stops.last():
+            error = f"List has content length {len(self.content)} but last stops {self.stops.last()}"
             return False
         else:
             return self._content.is_valid(error)
@@ -778,9 +778,9 @@ class List(LayoutBuilder):
         """
         return ak.Array(
             ak.contents.ListArray(
-                ak.index.Index(self._starts.snapshot()),
-                ak.index.Index(self._stops.snapshot()),
-                self._content.snapshot().layout,
+                ak.index.Index(self.starts.snapshot()),
+                ak.index.Index(self.stops.snapshot()),
+                self.content.snapshot().layout,
                 parameters=self._parameters,
             )
         )
@@ -822,7 +822,7 @@ class ListModel(numba.extending.models.StructModel):
     def __init__(self, dmm, fe_type):
         members = [
             ("starts", fe_type.starts),
-            ("stops", fe_type.starts),
+            ("stops", fe_type.stops),
             ("content", fe_type.content),
         ]
         super().__init__(dmm, fe_type, members)
@@ -846,7 +846,7 @@ def ListType_unbox(typ, obj, c):
     # fill the lowered model
     out = numba.core.cgutils.create_struct_proxy(typ)(c.context, c.builder)
     out.starts = c.pyapi.to_native_value(typ.starts, starts_obj).value
-    out.stops = c.pyapi.to_native_value(typ.stops, starts_obj).value
+    out.stops = c.pyapi.to_native_value(typ.stops, stops_obj).value
     out.content = c.pyapi.to_native_value(typ.content, content_obj).value
 
     # decref PyObjects
@@ -883,6 +883,7 @@ def ListType_box(typ, val, c):
     c.pyapi.decref(List_obj)
 
     c.pyapi.decref(starts_obj)
+    c.pyapi.decref(stops_obj)
     c.pyapi.decref(content_obj)
 
     return out
@@ -896,10 +897,18 @@ def List_length(builder):
     return getter
 
 
-@numba.extending.overload_method(ListType, "_offsets", inline="always")
-def List_offsets(builder):
+@numba.extending.overload_method(ListType, "_starts", inline="always")
+def List_starts(builder):
     def getter(builder):
         return builder._starts
+
+    return getter
+
+
+@numba.extending.overload_method(ListType, "_stops", inline="always")
+def List_starts(builder):
+    def getter(builder):
+        return builder._stops
 
     return getter
 
