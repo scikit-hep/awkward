@@ -60,13 +60,9 @@ def find_record_reducer(reducer, layout, behavior):
 
 def find_custom_cast(obj, behavior):
     behavior = overlay_behavior(behavior)
-    for key, fcn in behavior.items():
-        if (
-            isinstance(key, tuple)
-            and len(key) == 2
-            and key[0] == "__cast__"
-            and isinstance(obj, key[1])
-        ):
+    for cls in type(obj).__mro__:
+        fcn = behavior.get(("__cast__", cls))
+        if fcn is not None:
             return fcn
     return None
 
@@ -74,56 +70,54 @@ def find_custom_cast(obj, behavior):
 def find_custom_broadcast(layout, behavior):
     behavior = overlay_behavior(behavior)
     custom = layout.parameter("__array__")
-    if not isinstance(custom, str):
+    if custom is None:
         custom = layout.parameter("__record__")
-    if not isinstance(custom, str):
+    if custom is None:
         custom = layout.purelist_parameter("__record__")
     if isinstance(custom, str):
-        for key, fcn in behavior.items():
-            if (
-                isinstance(key, tuple)
-                and len(key) == 2
-                and key[0] == "__broadcast__"
-                and key[1] == custom
-            ):
-                return fcn
-    return None
+        return behavior.get(("__broadcast__", custom))
+    else:
+        return None
 
 
 def find_ufunc_generic(ufunc, layout, behavior):
     behavior = overlay_behavior(behavior)
     custom = layout.parameter("__array__")
-    if not isinstance(custom, str):
+    if custom is None:
         custom = layout.parameter("__record__")
     if isinstance(custom, str):
-        for key, fcn in behavior.items():
-            if (
-                isinstance(key, tuple)
-                and len(key) == 2
-                and (key[0] is ufunc or key[0] is ufuncs.ufunc)
-                and key[1] == custom
-            ):
-                return fcn
-    return None
+        fcn = behavior.get((ufunc, custom))
+        if fcn is None:
+            fcn = behavior.get((ufuncs.ufunc, custom))
+        return fcn
+    else:
+        return None
 
 
-def find_ufunc(behavior, signature):
+def find_ufunc(behavior, signature: tuple):
     if not any(s is None for s in signature):
         behavior = overlay_behavior(behavior)
-        for key, custom in behavior.items():
-            if (
-                isinstance(key, tuple)
-                and len(key) == len(signature)
-                and key[0] == signature[0]
-                and all(
-                    k == s
-                    or (
-                        isinstance(k, type) and isinstance(s, type) and issubclass(s, k)
+
+        # Special case all strings or hashable types.
+        if all(isinstance(x, str) for x in signature):
+            return behavior.get(signature)
+        else:
+            for key, custom in behavior.items():
+                if (
+                    isinstance(key, tuple)
+                    and len(key) == len(signature)
+                    and key[0] == signature[0]
+                    and all(
+                        k == s
+                        or (
+                            isinstance(k, type)
+                            and isinstance(s, type)
+                            and issubclass(s, k)
+                        )
+                        for k, s in zip(key[1:], signature[1:])
                     )
-                    for k, s in zip(key[1:], signature[1:])
-                )
-            ):
-                return custom
+                ):
+                    return custom
 
 
 def find_record_typestr(
