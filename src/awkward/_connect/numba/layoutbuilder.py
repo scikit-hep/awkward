@@ -618,15 +618,12 @@ def ListOffsetType_unbox(typ, obj, c):
 def ListOffsetType_box(typ, val, c):
     # get PyObject of the ListOffset class
     ListOffset_obj = c.pyapi.unserialize(c.pyapi.serialize_object(ListOffset))
-    from_offsets_obj = c.pyapi.object_getattr_string(ListOffset_obj, "_from_offsets")
 
     builder = numba.core.cgutils.create_struct_proxy(typ)(
         c.context, c.builder, value=val
     )
     offsets_obj = c.pyapi.from_native_value(typ.offsets, builder.offsets, c.env_manager)
     content_obj = c.pyapi.from_native_value(typ.content, builder.content, c.env_manager)
-
-    out = c.pyapi.call_function_objargs(from_offsets_obj, (offsets_obj, content_obj))
 
     out = c.pyapi.call_function_objargs(
         ListOffset_obj,
@@ -1134,7 +1131,7 @@ def Regular_end_list(builder):
     if isinstance(builder, RegularType):
 
         def impl(builder):
-            builder._length += 1
+            builder._length += 1  # FIXME:
 
         return impl
 
@@ -1230,6 +1227,101 @@ class Indexed(LayoutBuilder):
                 parameters=self._parameters,
             )
         )
+
+
+class IndexedType(numba.types.Type):
+    def __init__(self, dtype, content):
+        super().__init__(name=f"ak.numba.lb.Indexed({dtype}, {content.type()})")
+        self._dtype = dtype
+        self._content = content
+
+    @classmethod
+    def type(cls):
+        return IndexedType(cls.index.dtype, cls.content)
+
+    @property
+    def parameters(self):
+        return numba.types.StringLiteral
+
+    @property
+    def index(self):
+        return ak.numba.GrowableBufferType(self._dtype)
+
+    @property
+    def content(self):
+        return tonumbatype(self._content)
+
+    @property
+    def length(self):
+        return numba.types.int64
+
+
+@numba.extending.register_model(IndexedType)
+class IndexedModel(numba.extending.models.StructModel):
+    def __init__(self, dmm, fe_type):
+        members = [
+            ("index", fe_type.index),
+            ("content", fe_type.content),
+        ]
+        super().__init__(dmm, fe_type, members)
+
+
+for member in (
+    "index",
+    "content",
+):
+    numba.extending.make_attribute_wrapper(RegularType, member, "_" + member)
+
+
+@numba.extending.unbox(IndexedType)
+def IndexedType_unbox(typ, obj, c):
+    # get PyObjects
+    index_obj = c.pyapi.object_getattr_string(obj, "_index")
+    content_obj = c.pyapi.object_getattr_string(obj, "_content")
+
+    # fill the lowered model
+    out = numba.core.cgutils.create_struct_proxy(typ)(c.context, c.builder)
+    out.index = c.pyapi.to_native_value(typ.index, offsets_obj).value
+    out.content = c.pyapi.to_native_value(typ.content, content_obj).value
+
+    # decref PyObjects
+    c.pyapi.decref(index_obj)
+    c.pyapi.decref(content_obj)
+
+    # return it or the exception
+    is_error = numba.core.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
+    return numba.extending.NativeValue(out._getvalue(), is_error=is_error)
+
+
+@numba.extending.box(IndexedType)
+def IndexedType_box(typ, val, c):
+    # get PyObject of the Indexed class
+    Indexed_obj = c.pyapi.unserialize(c.pyapi.serialize_object(Indexed))
+
+    builder = numba.core.cgutils.create_struct_proxy(typ)(
+        c.context, c.builder, value=val
+    )
+    content_obj = c.pyapi.from_native_value(typ.content, builder.content, c.env_manager)
+
+    out = c.pyapi.call_function_objargs(
+        Indexed_obj,
+        (content_obj,),
+    )
+
+    # decref PyObjects
+    c.pyapi.decref(Indexed_obj)
+
+    c.pyapi.decref(content_obj)
+
+    return out
+
+
+@numba.extending.overload_method(IndexedType, "_length_get", inline="always")
+def Indexed_length(builder):
+    def getter(builder):
+        return builder._length
+
+    return getter
 
 
 ########## IndexedOption #######################################################
