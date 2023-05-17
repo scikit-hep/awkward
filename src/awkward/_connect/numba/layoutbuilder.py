@@ -1281,7 +1281,7 @@ def IndexedType_unbox(typ, obj, c):
 
     # fill the lowered model
     out = numba.core.cgutils.create_struct_proxy(typ)(c.context, c.builder)
-    out.index = c.pyapi.to_native_value(typ.index, offsets_obj).value
+    out.index = c.pyapi.to_native_value(typ.index, index_obj).value
     out.content = c.pyapi.to_native_value(typ.content, content_obj).value
 
     # decref PyObjects
@@ -1301,16 +1301,21 @@ def IndexedType_box(typ, val, c):
     builder = numba.core.cgutils.create_struct_proxy(typ)(
         c.context, c.builder, value=val
     )
+    index_obj = c.pyapi.from_native_value(typ.index, builder.index, c.env_manager)
     content_obj = c.pyapi.from_native_value(typ.content, builder.content, c.env_manager)
 
     out = c.pyapi.call_function_objargs(
         Indexed_obj,
-        (content_obj,),
+        (
+            index_obj,
+            content_obj,
+        ),
     )
 
     # decref PyObjects
     c.pyapi.decref(Indexed_obj)
 
+    c.pyapi.decref(index_obj)
     c.pyapi.decref(content_obj)
 
     return out
@@ -1320,6 +1325,14 @@ def IndexedType_box(typ, val, c):
 def Indexed_length(builder):
     def getter(builder):
         return builder._length
+
+    return getter
+
+
+@numba.extending.overload_method(IndexedType, "_index", inline="always")
+def Indexed_index(builder):
+    def getter(builder):
+        return builder._index
 
     return getter
 
