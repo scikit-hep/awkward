@@ -487,7 +487,7 @@ class UnionArray(Content):
         out.append(self._index._repr(indent + "    ", "<index>", "</index>\n"))
 
         for i, x in enumerate(self._contents):
-            out.append(f"{indent}    <content index={repr(str(i))}>\n")
+            out.append(f"{indent}    <content index={str(i)!r}>\n")
             out.append(x._repr(indent + "        ", "", "\n"))
             out.append(f"{indent}    </content>\n")
 
