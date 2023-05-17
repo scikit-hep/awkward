@@ -207,7 +207,7 @@ def _array_ufunc_signature(ufunc, inputs):
         else:
             signature.append(type(x))
 
-    return signature
+    return tuple(signature)
 
 
 def array_ufunc(ufunc, method, inputs, kwargs):
