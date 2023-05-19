@@ -11,7 +11,7 @@ from awkward._backends.numpy import NumpyBackend
 from awkward._backends.typetracer import TypeTracerBackend
 from awkward._behavior import find_record_reducer
 from awkward._errors import AxisError
-from awkward._layout import maybe_posaxis
+from awkward._layout import maybe_posaxis, wrap_layout
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import IndexType, NumpyMetadata
 from awkward._nplikes.shape import unknown_length
@@ -33,6 +33,15 @@ if TYPE_CHECKING:
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
+
+
+def _apply_record_reducer(
+    reducer, layout: RecordArray, mask: bool, offsets: ak.index.Index, behavior
+) -> Content:
+    # Build a 1D list over these contents
+    array = wrap_layout(ak.contents.ListOffsetArray(offsets, layout), behavior=behavior)
+    # Perform the reduction
+    return ak.to_layout(reducer(array, mask))
 
 
 @final
@@ -889,13 +898,111 @@ class RecordArray(Content):
         if reducer_recordclass is None:
             raise TypeError(
                 "no ak.{} overloads for custom types: {}".format(
-                    reducer.name, ", ".join(self._fields)
+                    reducer.name, ", ".join(self.fields)
                 )
             )
         else:
-            raise NotImplementedError(
-                "overloading reducers for RecordArrays has not been implemented yet"
+            # Convert parents into offsets
+            outoffsets = ak.index.Index64.empty(
+                outlength + 1, self._backend.index_nplike
             )
+            assert (
+                outoffsets.nplike is self._backend.index_nplike
+                and parents.nplike is self._backend.index_nplike
+            )
+            self._handle_error(
+                self._backend[
+                    "awkward_ListOffsetArray_reduce_local_outoffsets_64",
+                    outoffsets.dtype.type,
+                    parents.dtype.type,
+                ](
+                    outoffsets.data,
+                    parents.data,
+                    parents.length,
+                    outlength,
+                )
+            )
+
+            out = _apply_record_reducer(
+                reducer_recordclass, self, mask, outoffsets, behavior
+            )
+
+            if reducer.needs_position:
+                assert isinstance(out, ak.contents.NumpyArray)
+
+                if shifts is None:
+                    assert (
+                        out.backend is self._backend
+                        and parents.nplike is self._backend.index_nplike
+                        and starts.nplike is self._backend.index_nplike
+                    )
+                    self._handle_error(
+                        self._backend[
+                            "awkward_NumpyArray_reduce_adjust_starts_64",
+                            out.data.dtype.type,
+                            parents.dtype.type,
+                            starts.dtype.type,
+                        ](
+                            out.data,
+                            outlength,
+                            parents.data,
+                            starts.data,
+                        )
+                    )
+                else:
+                    assert (
+                        out.backend is self._backend
+                        and parents.nplike is self._backend.index_nplike
+                        and starts.nplike is self._backend.index_nplike
+                        and shifts.nplike is self._backend.index_nplike
+                    )
+                    self._handle_error(
+                        self._backend[
+                            "awkward_NumpyArray_reduce_adjust_starts_shifts_64",
+                            out.data.dtype.type,
+                            parents.dtype.type,
+                            starts.dtype.type,
+                            shifts.dtype.type,
+                        ](
+                            out.data,
+                            outlength,
+                            parents.data,
+                            starts.data,
+                            shifts.data,
+                        )
+                    )
+
+            if mask:
+                outmask = ak.index.Index8.empty(outlength, self._backend.index_nplike)
+                assert (
+                    outmask.nplike is self._backend.index_nplike
+                    and parents.nplike is self._backend.index_nplike
+                )
+                self._handle_error(
+                    self._backend[
+                        "awkward_NumpyArray_reduce_mask_ByteMaskedArray_64",
+                        outmask.dtype.type,
+                        parents.dtype.type,
+                    ](
+                        outmask.data,
+                        parents.data,
+                        parents.length,
+                        outlength,
+                    )
+                )
+
+                out = ak.contents.ByteMaskedArray.simplified(
+                    outmask, out, False, parameters=None
+                )
+            elif out.is_option:
+                raise TypeError(
+                    "a custom reducer function returned an option when it was not expected"
+                )
+
+            if keepdims:
+                out = ak.contents.RegularArray(out, 1, self.length, parameters=None)
+
+            return out
 
     def _validity_error(self, path):
         for i, cont in enumerate(self.contents):
@@ -1008,6 +1115,8 @@ class RecordArray(Content):
             for content in self._contents:
                 out.extend(content[: self._length]._remove_structure(backend, options))
             return out
+        elif options["allow_records"]:
+            return [self]
         else:
             in_function = ""
             if options["function_name"] is not None:
