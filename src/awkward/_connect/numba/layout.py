@@ -116,7 +116,7 @@ class ContentType(numba.types.Type):
                 self, viewtype, (*viewtype.fields, key)
             )
         else:
-            raise TypeError(f"array does not have a field with key {repr(key)}")
+            raise TypeError(f"array does not have a field with key {key!r}")
 
     def lower_getitem_at_check(
         self,
@@ -227,7 +227,7 @@ def castint(context, builder, fromtype, totype, val):
         elif fromtype.width == 64:
             fromtype = numba.int64
     if not isinstance(fromtype, numba.types.Integer):
-        raise AssertionError(f"unrecognized integer type: {repr(fromtype)}")
+        raise AssertionError(f"unrecognized integer type: {fromtype!r}")
 
     if fromtype.bitwidth < totype.bitwidth:
         if fromtype.signed:

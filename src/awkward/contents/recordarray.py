@@ -376,7 +376,7 @@ class RecordArray(Content):
 
         if self._fields is None:
             for i, x in enumerate(self._contents):
-                out.append(f"{indent}    <content index={repr(str(i))}>\n")
+                out.append(f"{indent}    <content index={str(i)!r}>\n")
                 out.append(x._repr(indent + "        ", "", "\n"))
                 out.append(indent + "    </content>\n")
         else:

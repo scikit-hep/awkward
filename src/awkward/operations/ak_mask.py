@@ -107,7 +107,7 @@ def _impl(array, mask, valid_when, highlevel, behavior):
         if isinstance(layoutmask, ak.contents.NumpyArray):
             m = backend.nplike.asarray(layoutmask)
             if not issubclass(m.dtype.type, (bool, np.bool_)):
-                raise ValueError(f"mask must have boolean type, not {repr(m.dtype)}")
+                raise ValueError(f"mask must have boolean type, not {m.dtype!r}")
             bytemask = ak.index.Index8(m.view(np.int8))
             return (
                 ak.contents.ByteMaskedArray.simplified(
