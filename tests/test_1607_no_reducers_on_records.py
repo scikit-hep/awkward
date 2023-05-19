@@ -118,3 +118,28 @@ def test_overloaded_reducers():
 
     with pytest.raises(TypeError, match=r"overloads for custom types: a, b"):
         ak.to_list(ak.sum(array, axis=0))
+
+    def overload_argmax(array, mask):
+        return ak.argmax(array["rho"], axis=-1, mask_identity=False, highlevel=False)
+
+    behavior = {}
+    behavior[ak.argmax, "VectorArray2D"] = overload_argmax
+
+    array = ak.Array(
+        [
+            [
+                {"rho": -1.1, "phi": -0.1},
+                {"rho": 1.1, "phi": 0.1},
+                {"rho": -1.1, "phi": 0.3},
+            ],
+            [
+                {"rho": 1.1, "phi": 0.1},
+                {"rho": -1.1, "phi": 0.3},
+                {"rho": -1.1, "phi": -0.1},
+            ],
+        ],
+        with_name="VectorArray2D",
+        behavior=behavior,
+    )
+
+    assert ak.to_list(ak.argmax(array, axis=1)) == [1, 0]
