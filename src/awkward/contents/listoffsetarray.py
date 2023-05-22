@@ -385,7 +385,10 @@ class ListOffsetArray(Content):
 
         starts, stops = self.starts, self.stops
 
-        nextcarry = ak.index.Index64.empty(offsets[-1], self._backend.index_nplike)
+        nextcarry = ak.index.Index64.empty(
+            self._backend.index_nplike.index_as_shape_item(offsets[-1]),
+            self._backend.index_nplike,
+        )
         assert (
             nextcarry.nplike is self._backend.index_nplike
             and offsets.nplike is self._backend.index_nplike
