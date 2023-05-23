@@ -2077,11 +2077,15 @@ class ListOffsetArray(Content):
     def _recursively_apply(
         self, action, behavior, depth, depth_context, lateral_context, options
     ):
-        offsetsmin = self._offsets[0]
-        offsets = ak.index.Index(
-            self._offsets.data - offsetsmin, nplike=self._backend.index_nplike
-        )
-        content = self._content[offsetsmin : self._offsets[-1]]
+        if self._backend.nplike.known_data:
+            offsetsmin = self._offsets[0]
+            offsets = ak.index.Index(
+                self._offsets.data - offsetsmin, nplike=self._backend.index_nplike
+            )
+            content = self._content[offsetsmin : self._offsets[-1]]
+        else:
+            self._touch_data(recursive=False)
+            offsets, content = self._offsets, self._content
 
         if options["return_array"]:
 
