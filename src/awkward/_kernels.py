@@ -10,6 +10,7 @@ from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.typetracer import try_touch_data
 from awkward._typing import Protocol, TypeAlias
 
 KernelKeyType: TypeAlias = tuple  # Tuple[str, Unpack[Tuple[metadata.dtype, ...]]]
@@ -183,6 +184,8 @@ class TypeTracerKernel:
         self._name_and_types = index
 
     def __call__(self, *args) -> TypeTracerKernelError:
+        for arg in args:
+            try_touch_data(arg)
         return TypeTracerKernelError()
 
     def __repr__(self):
