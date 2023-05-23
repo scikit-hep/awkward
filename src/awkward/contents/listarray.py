@@ -386,6 +386,7 @@ class ListArray(Content):
     def _broadcast_tooffsets64(self, offsets):
         if not self.backend.index_nplike.known_data:
             self._touch_data(recursive=False)
+            offsets.touch_data()
         return ListOffsetArray._broadcast_tooffsets64(self, offsets)
 
     def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
