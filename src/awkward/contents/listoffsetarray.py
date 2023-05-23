@@ -369,6 +369,8 @@ class ListOffsetArray(Content):
         return out
 
     def _broadcast_tooffsets64(self, offsets):
+        if not self.backend.index_nplike.known_data:
+            self._touch_data(recursive=False)
         if offsets.nplike.known_data and (offsets.length == 0 or offsets[0] != 0):
             raise AssertionError(
                 "broadcast_tooffsets64 can only be used with offsets that start at 0, not {}".format(
@@ -2074,15 +2076,11 @@ class ListOffsetArray(Content):
     def _recursively_apply(
         self, action, behavior, depth, depth_context, lateral_context, options
     ):
-        if self._backend.nplike.known_data:
-            offsetsmin = self._offsets[0]
-            offsets = ak.index.Index(
-                self._offsets.data - offsetsmin, nplike=self._backend.index_nplike
-            )
-            content = self._content[offsetsmin : self._offsets[-1]]
-        else:
-            self._touch_data(recursive=False)
-            offsets, content = self._offsets, self._content
+        offsetsmin = self._offsets[0]
+        offsets = ak.index.Index(
+            self._offsets.data - offsetsmin, nplike=self._backend.index_nplike
+        )
+        content = self._content[offsetsmin : self._offsets[-1]]
 
         if options["return_array"]:
 

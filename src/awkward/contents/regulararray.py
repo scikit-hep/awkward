@@ -392,6 +392,8 @@ class RegularArray(Content):
         return out
 
     def _broadcast_tooffsets64(self, offsets):
+        if not self.backend.index_nplike.known_data:
+            self._touch_data(recursive=False)
         if offsets.nplike.known_data and (offsets.length == 0 or offsets[0] != 0):
             raise AssertionError(
                 "broadcast_tooffsets64 can only be used with offsets that start at 0, not {}".format(
