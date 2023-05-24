@@ -246,7 +246,7 @@ class IndexedOptionArray(Content):
         out.append(post)
         return "".join(out)
 
-    def to_IndexedOptionArray64(self):
+    def to_IndexedOptionArray64(self) -> IndexedOptionArray:
         if self._index.dtype == np.dtype(np.int64):
             return self
         else:

@@ -29,6 +29,7 @@ from awkward.index import Index
 
 if TYPE_CHECKING:
     from awkward._slicing import SliceItem
+    from awkward.contents import IndexedOptionArray
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
@@ -172,7 +173,7 @@ class UnmaskedArray(Content):
         out.append(post)
         return "".join(out)
 
-    def to_IndexedOptionArray64(self):
+    def to_IndexedOptionArray64(self) -> IndexedOptionArray:
         arange = self._backend.index_nplike.arange(self._content.length, dtype=np.int64)
         return ak.contents.IndexedOptionArray(
             ak.index.Index64(arange, nplike=self._backend.index_nplike),

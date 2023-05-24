@@ -28,6 +28,7 @@ from awkward.index import Index
 
 if TYPE_CHECKING:
     from awkward._slicing import SliceItem
+    from awkward.contents.indexedoptionarray import IndexedOptionArray
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
@@ -258,7 +259,7 @@ class IndexedArray(Content):
         out.append(post)
         return "".join(out)
 
-    def to_IndexedOptionArray64(self):
+    def to_IndexedOptionArray64(self) -> IndexedOptionArray:
         return ak.contents.IndexedOptionArray(
             self._index, self._content, parameters=self._parameters
         )
