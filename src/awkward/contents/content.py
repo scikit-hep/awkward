@@ -44,6 +44,9 @@ from awkward.index import Index, Index64
 if TYPE_CHECKING:
     from awkward._nplikes.numpy import NumpyLike
     from awkward._slicing import SliceItem
+    from awkward.contents.indexedoptionarray import IndexedOptionArray
+    from awkward.contents.numpyarray import NumpyArray
+    from awkward.contents.regulararray import RegularArray
 
 
 np = NumpyMetadata.instance()
@@ -349,7 +352,7 @@ class Content:
 
     def _getitem_next_newaxis(
         self, tail: tuple[SliceItem, ...], advanced: Index | None
-    ) -> ak.contents.RegularArray:
+    ) -> RegularArray:
         nexthead, nexttail = ak._slicing.head_tail(tail)
         return ak.contents.RegularArray(
             self._getitem_next(nexthead, nexttail, advanced), 1, 0, parameters=None
@@ -381,12 +384,12 @@ class Content:
 
     def _getitem_next_regular_missing(
         self,
-        head: ak.contents.IndexedOptionArray,
+        head: IndexedOptionArray,
         tail: tuple[SliceItem, ...],
         advanced: Index | None,
         raw: Content,
         length: int,
-    ) -> ak.contents.RegularArray:
+    ) -> RegularArray:
         # if this is in a tuple-slice and really should be 0, it will be trimmed later
         length = 1 if length is not unknown_length and length == 0 else length
         index = head.index
@@ -423,7 +426,7 @@ class Content:
 
     def _getitem_next_missing_jagged(
         self, head: Content, tail, advanced: Index | None, that: Content
-    ) -> ak.contents.RegularArray:
+    ) -> RegularArray:
         head = head.to_backend(self._backend)
         jagged = head.content.to_ListOffsetArray64()
         index = head._index
@@ -477,7 +480,7 @@ class Content:
 
     def _getitem_next_missing(
         self,
-        head: ak.contents.IndexedOptionArray,
+        head: IndexedOptionArray,
         tail: tuple[SliceItem, ...],
         advanced: Index | None,
     ) -> Content:
@@ -748,7 +751,7 @@ class Content:
     def _carry(self, carry: Index, allow_lazy: bool) -> Content:
         raise NotImplementedError
 
-    def _local_index_axis0(self) -> ak.contents.NumpyArray:
+    def _local_index_axis0(self) -> NumpyArray:
         localindex = Index64.empty(self.length, self._backend.index_nplike)
         self._handle_error(
             self._backend["awkward_localindex", np.int64](
