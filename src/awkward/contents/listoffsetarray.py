@@ -143,7 +143,7 @@ class ListOffsetArray(Content):
         self._init(parameters, content.backend)
 
     @property
-    def offsets(self):
+    def offsets(self) -> Index:
         return self._offsets
 
     @property

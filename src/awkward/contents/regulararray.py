@@ -200,7 +200,7 @@ class RegularArray(Content):
         return cls(content, size, zeros_length, parameters=parameters)
 
     @property
-    def offsets(self):
+    def offsets(self) -> Index:
         return self._compact_offsets64(True)
 
     @property
