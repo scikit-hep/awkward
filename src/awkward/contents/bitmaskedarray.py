@@ -547,7 +547,7 @@ class BitMaskedArray(Content):
     def project(self, mask=None):
         return self.to_ByteMaskedArray().project(mask)
 
-    def _offsets_and_flattened(self, axis, depth):
+    def _offsets_and_flattened(self, axis: int, depth: int) -> tuple[Index, Content]:
         return self.to_ByteMaskedArray._offsets_and_flattened(axis, depth)
 
     def _mergeable_next(self, other: Content, mergebool: bool) -> bool:
