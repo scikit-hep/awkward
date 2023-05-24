@@ -420,7 +420,9 @@ class ListOffsetArray(Content):
 
         return ListOffsetArray(offsets, nextcontent, parameters=self._parameters)
 
-    def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
+    def _getitem_next_jagged(
+        self, slicestarts: Index, slicestops: Index, slicecontent: Content, tail
+    ) -> Content:
         out = ak.contents.ListArray(
             self.starts, self.stops, self._content, parameters=self._parameters
         )

@@ -183,7 +183,9 @@ class EmptyArray(Content):
         else:
             raise ak._errors.index_error(self, carry.data, "array is empty")
 
-    def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
+    def _getitem_next_jagged(
+        self, slicestarts: Index, slicestops: Index, slicecontent: Content, tail
+    ) -> Content:
         raise ak._errors.index_error(
             self,
             ak.contents.ListArray(

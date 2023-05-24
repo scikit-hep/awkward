@@ -730,6 +730,11 @@ class Content:
     ) -> Content:
         raise NotImplementedError
 
+    def _getitem_next_jagged(
+        self, slicestarts: Index, slicestops: Index, slicecontent: Content, tail
+    ) -> Content:
+        raise NotImplementedError
+
     def _carry(self, carry: Index, allow_lazy: bool) -> Content:
         raise NotImplementedError
 

@@ -247,7 +247,9 @@ class UnmaskedArray(Content):
             self._content._carry(carry, allow_lazy), parameters=self._parameters
         )
 
-    def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
+    def _getitem_next_jagged(
+        self, slicestarts: Index, slicestops: Index, slicecontent: Content, tail
+    ) -> Content:
         return UnmaskedArray(
             self._content._getitem_next_jagged(
                 slicestarts, slicestops, slicecontent, tail

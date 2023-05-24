@@ -507,7 +507,9 @@ class BitMaskedArray(Content):
         assert isinstance(carry, ak.index.Index)
         return self.to_ByteMaskedArray()._carry(carry, allow_lazy)
 
-    def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
+    def _getitem_next_jagged(
+        self, slicestarts: Index, slicestops: Index, slicecontent: Content, tail
+    ) -> Content:
         return self.to_ByteMaskedArray()._getitem_next_jagged(
             slicestarts, slicestops, slicecontent, tail
         )

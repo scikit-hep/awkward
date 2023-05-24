@@ -543,7 +543,9 @@ class RecordArray(Content):
                 backend=self._backend,
             )
 
-    def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
+    def _getitem_next_jagged(
+        self, slicestarts: Index, slicestops: Index, slicecontent: Content, tail
+    ) -> Content:
         contents = []
         for i in range(len(self._contents)):
             contents.append(

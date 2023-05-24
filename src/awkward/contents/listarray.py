@@ -390,7 +390,9 @@ class ListArray(Content):
             offsets.data.touch_data()
         return ListOffsetArray._broadcast_tooffsets64(self, offsets)
 
-    def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
+    def _getitem_next_jagged(
+        self, slicestarts: Index, slicestops: Index, slicecontent: Content, tail
+    ) -> Content:
         slicestarts = slicestarts.to_nplike(self._backend.index_nplike)
         slicestops = slicestops.to_nplike(self._backend.index_nplike)
         if self._backend.nplike.known_data and slicestarts.length != self.length:
