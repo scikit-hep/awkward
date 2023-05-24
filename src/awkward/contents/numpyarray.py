@@ -8,7 +8,7 @@ from awkward._backends.backend import Backend
 from awkward._backends.dispatch import backend_of
 from awkward._backends.numpy import NumpyBackend
 from awkward._backends.typetracer import TypeTracerBackend
-from awkward._errors import AxisError
+from awkward._errors import AxisError, deprecate
 from awkward._layout import maybe_posaxis
 from awkward._nplikes import to_nplike
 from awkward._nplikes.jax import Jax
@@ -162,6 +162,11 @@ class NumpyArray(Content):
 
     @property
     def strides(self):
+        deprecate(
+            f"{type(self).__name__}.strides is deprecated. Use `{type(self).__name__}.data.strides` if "
+            "the underlying array library supports it.",
+            "2.4.0",
+        )
         return self._data.strides
 
     @property
