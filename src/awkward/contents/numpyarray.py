@@ -15,6 +15,7 @@ from awkward._nplikes import to_nplike
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import ArrayLike, IndexType, NumpyMetadata
+from awkward._nplikes.shape import ShapeItem
 from awkward._nplikes.typetracer import TypeTracerArray
 from awkward._parameters import (
     parameters_intersect,
@@ -205,7 +206,7 @@ class NumpyArray(Content):
             self._data.touch_shape()
 
     @property
-    def length(self):
+    def length(self) -> ShapeItem:
         return self._data.shape[0]
 
     def __repr__(self):

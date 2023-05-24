@@ -12,6 +12,7 @@ from awkward._errors import AxisError, deprecate
 from awkward._layout import maybe_posaxis
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import IndexType, NumpyMetadata
+from awkward._nplikes.shape import ShapeItem
 from awkward._regularize import is_integer_like
 from awkward._slicing import NO_HEAD
 from awkward._typing import TYPE_CHECKING, Final, Self, SupportsIndex, final
@@ -123,7 +124,7 @@ class EmptyArray(Content):
         pass
 
     @property
-    def length(self):
+    def length(self) -> ShapeItem:
         return 0
 
     def __repr__(self):
