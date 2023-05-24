@@ -236,7 +236,7 @@ class ListOffsetArray(Content):
         out.append(post)
         return "".join(out)
 
-    def to_ListOffsetArray64(self, start_at_zero=False):
+    def to_ListOffsetArray64(self, start_at_zero: bool = False) -> ListOffsetArray:
         if not self._backend.nplike.known_data and (
             start_at_zero or self._offsets.dtype != np.dtype(np.int64)
         ):

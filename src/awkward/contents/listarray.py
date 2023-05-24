@@ -262,7 +262,7 @@ class ListArray(Content):
         out.append(post)
         return "".join(out)
 
-    def to_ListOffsetArray64(self, start_at_zero=False):
+    def to_ListOffsetArray64(self, start_at_zero: bool = False) -> ListOffsetArray:
         starts = self._starts.data
         stops = self._stops.data
 

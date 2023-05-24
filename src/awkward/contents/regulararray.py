@@ -259,7 +259,7 @@ class RegularArray(Content):
         out.append(post)
         return "".join(out)
 
-    def to_ListOffsetArray64(self, start_at_zero=False):
+    def to_ListOffsetArray64(self, start_at_zero: bool = False) -> ListOffsetArray:
         offsets = self._compact_offsets64(start_at_zero)
         return self._broadcast_tooffsets64(offsets)
 
