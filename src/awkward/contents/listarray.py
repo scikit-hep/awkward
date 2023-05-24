@@ -168,7 +168,7 @@ class ListArray(Content):
         return self._stops
 
     @property
-    def content(self):
+    def content(self) -> Content:
         return self._content
 
     form_cls: Final = ListForm

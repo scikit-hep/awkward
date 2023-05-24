@@ -146,7 +146,7 @@ class ListOffsetArray(Content):
         return self._offsets
 
     @property
-    def content(self):
+    def content(self) -> Content:
         return self._content
 
     form_cls: Final = ListOffsetForm

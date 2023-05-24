@@ -191,7 +191,7 @@ class BitMaskedArray(Content):
         return self._mask
 
     @property
-    def content(self):
+    def content(self) -> Content:
         return self._content
 
     @property

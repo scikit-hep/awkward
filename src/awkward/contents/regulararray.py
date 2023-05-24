@@ -168,7 +168,7 @@ class RegularArray(Content):
         self._init(parameters, content.backend)
 
     @property
-    def content(self):
+    def content(self) -> Content:
         return self._content
 
     @property

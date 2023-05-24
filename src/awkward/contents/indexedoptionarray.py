@@ -122,7 +122,7 @@ class IndexedOptionArray(Content):
         return self._index
 
     @property
-    def content(self):
+    def content(self) -> Content:
         return self._content
 
     form_cls: Final = IndexedOptionForm
