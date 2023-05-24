@@ -384,7 +384,7 @@ class ListArray(Content):
         )
         return out
 
-    def _broadcast_tooffsets64(self, offsets):
+    def _broadcast_tooffsets64(self, offsets: Index) -> ListOffsetArray:
         if not self.backend.index_nplike.known_data:
             self._touch_data(recursive=False)
             offsets.data.touch_data()
