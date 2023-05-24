@@ -147,20 +147,6 @@ def _string_notequal(one, two):
     return ~_string_equal(one, two)
 
 
-def _string_broadcast(layout, offsets):
-    index_nplike = layout.backend.index_nplike
-    offsets = index_nplike.asarray(offsets)
-    counts = offsets[1:] - offsets[:-1]
-    if ak._util.win or ak._util.bits32:
-        counts = index_nplike.astype(counts, dtype=np.int32)
-    parents = index_nplike.repeat(
-        index_nplike.arange(counts.size, dtype=counts.dtype), counts
-    )
-    return ak.contents.IndexedArray(
-        ak.index.Index64(parents, nplike=index_nplike), layout
-    ).project()
-
-
 def _string_numba_typer(viewtype):
     import numba
 
@@ -266,9 +252,6 @@ def register(behavior):
     behavior[ufuncs.equal, "string", "string"] = _string_equal
     behavior[ufuncs.not_equal, "bytestring", "bytestring"] = _string_notequal
     behavior[ufuncs.not_equal, "string", "string"] = _string_notequal
-
-    behavior["__broadcast__", "bytestring"] = _string_broadcast
-    behavior["__broadcast__", "string"] = _string_broadcast
 
     behavior["__numba_typer__", "bytestring"] = _string_numba_typer
     behavior["__numba_lower__", "bytestring"] = _string_numba_lower
