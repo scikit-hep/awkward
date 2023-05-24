@@ -570,50 +570,6 @@ so that
 3 * string
 ```
 
-## Custom broadcasting
-
-In situations where we want to think about lists as objects, such as strings,
-we may even need to override the broadcasting rules. For instance, given
-
-```python
-ak.Array(["HAL"]) + ak.Array([[1, 1, 1, 1, 1]])
-```
-
-we might expect `"HAL"` to broadcast to each `1`, like
-
-```python
-[[[73, 66, 77], [73, 66, 77], [73, 66, 77], [73, 66, 77], [73, 66, 77]]]
-```
-
-but (without custom broadcasting) instead it raises a broadcasting for any
-length of `1` list other than 3:
-
-```python
->>> # without custom broadcasting
->>> print(ak.Array(["HAL"]) + ak.Array([[1, 1, 1, 1, 1]]))
-ValueError: in ListOffsetArray64, cannot broadcast nested list
->>> print(ak.Array(["HAL"]) + ak.Array([[1, 1, 1]]))
-[[73, 66, 77]]
-```
-
-It's matching each character of `"HAL"` with a number from the list, but we
-want the string to be taken as an object. That is fixed (in
-`ak.behaviors.string`) with a custom broadcasting rule:
-
-```python
-def _string_broadcast(layout, offsets):
-    # layout:  an ak.layout.Content object
-    # offsets: an ak.layout.Index of offsets to match
-    #
-    # should return: an ak.layout.Content object of the broadcasted result
-    ...
-
-awkward.behavior["__broadcast__", "string"] = _string_broadcast
-```
-
-Very few applications would need to do this, but the {data}`ak.behavior` object
-provides a lot of room for customization hooks like this.
-
 ## Overriding behavior in Numba
 
 Awkward Arrays can be arguments and return values of functions compiled with
