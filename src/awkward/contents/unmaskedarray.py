@@ -138,11 +138,11 @@ class UnmaskedArray(Content):
             parameters=self._parameters,
         )
 
-    def _touch_data(self, recursive):
+    def _touch_data(self, recursive: bool):
         if recursive:
             self._content._touch_data(recursive)
 
-    def _touch_shape(self, recursive):
+    def _touch_shape(self, recursive: bool):
         if recursive:
             self._content._touch_shape(recursive)
 

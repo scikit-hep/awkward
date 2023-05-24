@@ -117,10 +117,10 @@ class EmptyArray(Content):
             backend=TypeTracerBackend.instance(),
         )
 
-    def _touch_data(self, recursive):
+    def _touch_data(self, recursive: bool):
         pass
 
-    def _touch_shape(self, recursive):
+    def _touch_shape(self, recursive: bool):
         pass
 
     @property

@@ -348,12 +348,12 @@ class RecordArray(Content):
             backend=backend,
         )
 
-    def _touch_data(self, recursive):
+    def _touch_data(self, recursive: bool):
         if recursive:
             for x in self._contents:
                 x._touch_data(recursive)
 
-    def _touch_shape(self, recursive):
+    def _touch_shape(self, recursive: bool):
         if recursive:
             for x in self._contents:
                 x._touch_shape(recursive)

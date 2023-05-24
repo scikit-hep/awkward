@@ -217,10 +217,10 @@ class Content:
     def _to_typetracer(self, forget_length: bool) -> Self:
         raise NotImplementedError
 
-    def _touch_data(self, recursive):
+    def _touch_data(self, recursive: bool):
         raise NotImplementedError
 
-    def _touch_shape(self, recursive):
+    def _touch_shape(self, recursive: bool):
         raise NotImplementedError
 
     @property
