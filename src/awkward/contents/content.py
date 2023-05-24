@@ -65,6 +65,9 @@ ActionType: TypeAlias = """Callable[
     ],
     Content | None,
 ]"""
+JSONValueType: TypeAlias = """
+float | int | str | list[JSONValueType] | dict[str, JSONValueType]
+"""
 
 
 class RecursivelyApplyOptionsType(TypedDict):
@@ -139,7 +142,7 @@ class Content:
         self._backend = backend
 
     @property
-    def parameters(self) -> dict[str, Any]:
+    def parameters(self) -> dict[str, JSONValueType]:
         """
         Free-form parameters associated with every array node as a dict from parameter
         name to its JSON-like value. Some parameters are special and are used to assign
@@ -154,7 +157,7 @@ class Content:
             self._parameters = {}
         return self._parameters
 
-    def parameter(self, key: str):
+    def parameter(self, key: str) -> JSONValueType | None:
         """
         Returns a parameter's value or None.
 
@@ -173,7 +176,9 @@ class Content:
     def form(self) -> Form:
         return self.form_with_key(None)
 
-    def form_with_key(self, form_key="node{id}", id_start=0):
+    def form_with_key(
+        self, form_key: str | None | Callable = "node{id}", id_start: int = 0
+    ) -> Form:
         hold_id = [id_start]
 
         if form_key is None:
