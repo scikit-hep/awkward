@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import copy
+from collections.abc import Sequence
 
 import awkward as ak
 from awkward._backends.backend import Backend
@@ -244,10 +245,10 @@ class EmptyArray(Content):
                 EmptyArray(parameters=self._parameters, backend=self._backend),
             )
 
-    def _mergeable_next(self, other, mergebool):
+    def _mergeable_next(self, other: Content, mergebool: bool) -> bool:
         return True
 
-    def _mergemany(self, others):
+    def _mergemany(self, others: Sequence[Content]) -> Content:
         if len(others) == 0:
             return self
         elif len(others) == 1:

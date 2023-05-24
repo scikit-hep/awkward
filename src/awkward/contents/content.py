@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import copy
 import math
-from collections.abc import Callable, Iterable, Mapping, MutableMapping, Sized
+from collections.abc import Callable, Iterable, Mapping, MutableMapping, Sequence, Sized
 from numbers import Complex, Real
 
 import awkward as ak
@@ -748,10 +748,7 @@ class Content:
     def _mergeable_next(self, other: Content, mergebool: bool) -> bool:
         raise NotImplementedError
 
-    def _mergemany(
-        self,
-        others: list[Content],
-    ) -> Content:
+    def _mergemany(self, others: Sequence[Content]) -> Content:
         raise NotImplementedError
 
     def _merging_strategy(

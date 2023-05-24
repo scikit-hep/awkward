@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import copy
 import math
+from collections.abc import Sequence
 
 import awkward as ak
 from awkward._backends.backend import Backend
@@ -312,7 +313,7 @@ class UnmaskedArray(Content):
             else:
                 return (offsets, flattened)
 
-    def _mergeable_next(self, other, mergebool):
+    def _mergeable_next(self, other: Content, mergebool: bool) -> bool:
         # Is the other content is an identity, or a union?
         if other.is_identity_like or other.is_union:
             return True
@@ -327,7 +328,7 @@ class UnmaskedArray(Content):
     def _reverse_merge(self, other):
         return self.to_IndexedOptionArray64()._reverse_merge(other)
 
-    def _mergemany(self, others):
+    def _mergemany(self, others: Sequence[Content]) -> Content:
         if len(others) == 0:
             return self
 

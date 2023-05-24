@@ -941,7 +941,7 @@ class UnionArray(Content):
                     ),
                 )
 
-    def _mergeable_next(self, other, mergebool):
+    def _mergeable_next(self, other: Content, mergebool: bool) -> bool:
         return True
 
     def _merging_strategy(self, others):
@@ -1045,7 +1045,7 @@ class UnionArray(Content):
             tags, index, contents, parameters=self._parameters
         )
 
-    def _mergemany(self, others):
+    def _mergemany(self, others: Sequence[Content]) -> Content:
         if len(others) == 0:
             return self
 

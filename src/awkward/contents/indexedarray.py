@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import copy
+from collections.abc import Sequence
 
 import awkward as ak
 from awkward._backends.backend import Backend
@@ -474,7 +475,7 @@ class IndexedArray(Content):
         else:
             return self.project()._offsets_and_flattened(axis, depth)
 
-    def _mergeable_next(self, other, mergebool):
+    def _mergeable_next(self, other: Content, mergebool: bool) -> bool:
         # Is the other content is an identity, or a union?
         if other.is_identity_like or other.is_union:
             return True
@@ -566,7 +567,7 @@ class IndexedArray(Content):
             index, content, parameters=parameters
         )
 
-    def _mergemany(self, others):
+    def _mergemany(self, others: Sequence[Content]) -> Content:
         if len(others) == 0:
             return self
 
