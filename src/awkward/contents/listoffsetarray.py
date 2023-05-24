@@ -181,7 +181,7 @@ class ListOffsetArray(Content):
     def stops(self):
         return self._offsets[1:]
 
-    def _form_with_key(self, getkey):
+    def _form_with_key(self, getkey: Callable[[Content], str | None]) -> ListOffsetForm:
         form_key = getkey(self)
         return self.form_cls(
             self._offsets.form,

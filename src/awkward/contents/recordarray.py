@@ -316,7 +316,7 @@ class RecordArray(Content):
             self._contents, None, self._length, parameters=None, backend=self._backend
         )
 
-    def _form_with_key(self, getkey):
+    def _form_with_key(self, getkey: Callable[[Content], str | None]) -> RecordForm:
         form_key = getkey(self)
         return self.form_cls(
             [x._form_with_key(getkey) for x in self._contents],

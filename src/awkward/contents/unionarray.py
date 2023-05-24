@@ -422,7 +422,7 @@ class UnionArray(Content):
     def content(self, index):
         return self._contents[index]
 
-    def _form_with_key(self, getkey):
+    def _form_with_key(self, getkey: Callable[[Content], str | None]) -> UnionForm:
         form_key = getkey(self)
         return self.form_cls(
             self._tags.form,

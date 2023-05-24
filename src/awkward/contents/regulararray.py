@@ -211,7 +211,7 @@ class RegularArray(Content):
     def stops(self):
         return self._compact_offsets64(True)[1:]
 
-    def _form_with_key(self, getkey):
+    def _form_with_key(self, getkey: Callable[[Content], str | None]) -> RegularForm:
         form_key = getkey(self)
         return self.form_cls(
             self._content._form_with_key(getkey),

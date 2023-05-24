@@ -106,7 +106,7 @@ class EmptyArray(Content):
             deprecate(f"{cls.__name__} cannot contain parameters", version="2.2.0")
         return cls(parameters=parameters, backend=backend)
 
-    def _form_with_key(self, getkey):
+    def _form_with_key(self, getkey: Callable[[Content], str | None]) -> EmptyForm:
         return self.form_cls(parameters=self._parameters, form_key=getkey(self))
 
     def _to_buffers(

@@ -203,7 +203,7 @@ class Content:
 
     def _form_with_key(
         self,
-        getkey: Callable[[Content], Form],
+        getkey: Callable[[Content], str | None],
     ) -> Form:
         raise NotImplementedError
 

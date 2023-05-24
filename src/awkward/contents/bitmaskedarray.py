@@ -278,7 +278,7 @@ class BitMaskedArray(Content):
                 parameters=parameters,
             )
 
-    def _form_with_key(self, getkey):
+    def _form_with_key(self, getkey: Callable[[Content], str | None]) -> BitMaskedForm:
         form_key = getkey(self)
         return self.form_cls(
             self._mask.form,

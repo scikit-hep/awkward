@@ -202,7 +202,7 @@ class ByteMaskedArray(Content):
         else:
             return cls(mask, content, valid_when, parameters=parameters)
 
-    def _form_with_key(self, getkey):
+    def _form_with_key(self, getkey: Callable[[Content], str | None]) -> ByteMaskedForm:
         form_key = getkey(self)
         return self.form_cls(
             self._mask.form,

@@ -156,25 +156,25 @@ class NumpyArray(Content):
         return cls(data, parameters=parameters, backend=backend)
 
     @property
-    def shape(self):
+    def shape(self) -> tuple[ShapeItem, ...]:
         return self._data.shape
 
     @property
-    def inner_shape(self):
+    def inner_shape(self) -> tuple[ShapeItem, ...]:
         return self._data.shape[1:]
 
     @property
-    def strides(self):
+    def strides(self) -> tuple[int, ...]:
         return self._data.strides
 
     @property
-    def dtype(self):
+    def dtype(self) -> np.dtype:
         return self._data.dtype
 
     def _raw(self, nplike=None):
         return to_nplike(self.data, nplike, from_nplike=self._backend.nplike)
 
-    def _form_with_key(self, getkey):
+    def _form_with_key(self, getkey: Callable[[Content], str | None]) -> NumpyForm:
         return self.form_cls(
             ak.types.numpytype.dtype_to_primitive(self._data.dtype),
             self._data.shape[1:],
