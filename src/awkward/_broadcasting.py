@@ -10,7 +10,6 @@ from collections.abc import Sequence
 import awkward as ak
 from awkward._backends.backend import Backend
 from awkward._backends.dispatch import backend_of
-from awkward._behavior import is_subtype
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
@@ -709,9 +708,10 @@ def apply_step(
             input_is_string = []
             for x in inputs:
                 if isinstance(x, Content):
-                    content_is_string = is_subtype(
-                        behavior, x.parameter("__array__"), "stringlike"
-                    )
+                    content_is_string = x.parameter("__array__") in {
+                        "string",
+                        "bytestring",
+                    }
                     # Don't try and take offsets from strings
                     if not content_is_string:
                         all_content_strings = False
