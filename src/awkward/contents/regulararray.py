@@ -203,7 +203,7 @@ class RegularArray(Content):
         return self._compact_offsets64(True)
 
     @property
-    def starts(self):
+    def starts(self) -> Index:
         return self._compact_offsets64(True)[:-1]
 
     @property

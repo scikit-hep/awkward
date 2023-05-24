@@ -173,7 +173,7 @@ class ListOffsetArray(Content):
         return cls(offsets, content, parameters=parameters)
 
     @property
-    def starts(self):
+    def starts(self) -> Index:
         return self._offsets[:-1]
 
     @property

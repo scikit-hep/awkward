@@ -160,11 +160,11 @@ class ListArray(Content):
         self._init(parameters, content.backend)
 
     @property
-    def starts(self):
+    def starts(self) -> Index:
         return self._starts
 
     @property
-    def stops(self):
+    def stops(self) -> Index:
         return self._stops
 
     @property
