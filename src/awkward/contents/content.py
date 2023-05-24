@@ -333,7 +333,9 @@ class Content:
         nexthead, nexttail = ak._slicing.head_tail(tail)
         return self._getitem_field(head)._getitem_next(nexthead, nexttail, advanced)
 
-    def _getitem_next_fields(self, head, tail, advanced: Index | None) -> Content:
+    def _getitem_next_fields(
+        self, head: SliceItem, tail: tuple[SliceItem, ...], advanced: Index | None
+    ) -> Content:
         only_fields, not_fields = [], []
         for x in tail:
             if isinstance(x, (str, list)):
@@ -345,13 +347,17 @@ class Content:
             nexthead, nexttail, advanced
         )
 
-    def _getitem_next_newaxis(self, tail, advanced: Index | None):
+    def _getitem_next_newaxis(
+        self, tail: tuple[SliceItem, ...], advanced: Index | None
+    ) -> ak.contents.RegularArray:
         nexthead, nexttail = ak._slicing.head_tail(tail)
         return ak.contents.RegularArray(
             self._getitem_next(nexthead, nexttail, advanced), 1, 0, parameters=None
         )
 
-    def _getitem_next_ellipsis(self, tail, advanced: Index | None):
+    def _getitem_next_ellipsis(
+        self, tail: tuple[SliceItem, ...], advanced: Index | None
+    ) -> Content:
         mindepth, maxdepth = self.minmax_depth
 
         dimlength = sum(
@@ -376,11 +382,11 @@ class Content:
     def _getitem_next_regular_missing(
         self,
         head: ak.contents.IndexedOptionArray,
-        tail,
+        tail: tuple[SliceItem, ...],
         advanced: Index | None,
         raw: Content,
         length: int,
-    ):
+    ) -> ak.contents.RegularArray:
         # if this is in a tuple-slice and really should be 0, it will be trimmed later
         length = 1 if length is not unknown_length and length == 0 else length
         index = head.index
@@ -417,7 +423,7 @@ class Content:
 
     def _getitem_next_missing_jagged(
         self, head: Content, tail, advanced: Index | None, that: Content
-    ):
+    ) -> ak.contents.RegularArray:
         head = head.to_backend(self._backend)
         jagged = head.content.to_ListOffsetArray64()
         index = head._index
@@ -472,9 +478,9 @@ class Content:
     def _getitem_next_missing(
         self,
         head: ak.contents.IndexedOptionArray,
-        tail,
+        tail: tuple[SliceItem, ...],
         advanced: Index | None,
-    ):
+    ) -> Content:
         assert isinstance(head, ak.contents.IndexedOptionArray)
 
         if advanced is not None:
@@ -731,7 +737,11 @@ class Content:
         raise NotImplementedError
 
     def _getitem_next_jagged(
-        self, slicestarts: Index, slicestops: Index, slicecontent: Content, tail
+        self,
+        slicestarts: Index,
+        slicestops: Index,
+        slicecontent: Content,
+        tail: tuple[SliceItem, ...],
     ) -> Content:
         raise NotImplementedError
 
