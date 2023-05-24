@@ -2,13 +2,14 @@
 from __future__ import annotations
 
 import copy
+from collections.abc import MutableMapping, Sequence
 
 import awkward as ak
 from awkward._backends.backend import Backend
 from awkward._layout import maybe_posaxis
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import IndexType, NumpyMetadata
-from awkward._nplikes.shape import unknown_length
+from awkward._nplikes.numpylike import ArrayLike, IndexType, NumpyMetadata
+from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._parameters import (
     parameters_intersect,
     parameters_union,
@@ -16,14 +17,16 @@ from awkward._parameters import (
 )
 from awkward._regularize import is_integer, is_integer_like
 from awkward._slicing import NO_HEAD
-from awkward._typing import TYPE_CHECKING, Final, Self, SupportsIndex, final
+from awkward._typing import TYPE_CHECKING, Callable, Final, Self, SupportsIndex, final
 from awkward._util import UNSET
 from awkward.contents.content import Content
+from awkward.forms.form import Form
 from awkward.forms.regularform import RegularForm
 from awkward.index import Index
 
 if TYPE_CHECKING:
     from awkward._slicing import SliceItem
+    from awkward.contents.listoffsetarray import ListOffsetArray
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
@@ -166,7 +169,7 @@ class RegularArray(Content):
         self._init(parameters, content.backend)
 
     @property
-    def content(self):
+    def content(self) -> Content:
         return self._content
 
     @property
@@ -197,18 +200,18 @@ class RegularArray(Content):
         return cls(content, size, zeros_length, parameters=parameters)
 
     @property
-    def offsets(self):
+    def offsets(self) -> Index:
         return self._compact_offsets64(True)
 
     @property
-    def starts(self):
+    def starts(self) -> Index:
         return self._compact_offsets64(True)[:-1]
 
     @property
     def stops(self):
         return self._compact_offsets64(True)[1:]
 
-    def _form_with_key(self, getkey):
+    def _form_with_key(self, getkey: Callable[[Content], str | None]) -> RegularForm:
         form_key = getkey(self)
         return self.form_cls(
             self._content._form_with_key(getkey),
@@ -217,7 +220,14 @@ class RegularArray(Content):
             form_key=form_key,
         )
 
-    def _to_buffers(self, form, getkey, container, backend, byteorder):
+    def _to_buffers(
+        self,
+        form: Form,
+        getkey: Callable[[Content, Form, str], str],
+        container: MutableMapping[str, ArrayLike],
+        backend: Backend,
+        byteorder: str,
+    ):
         assert isinstance(form, self.form_cls)
         self._content._to_buffers(form.content, getkey, container, backend, byteorder)
 
@@ -229,16 +239,16 @@ class RegularArray(Content):
             parameters=self._parameters,
         )
 
-    def _touch_data(self, recursive):
+    def _touch_data(self, recursive: bool):
         if recursive:
             self._content._touch_data(recursive)
 
-    def _touch_shape(self, recursive):
+    def _touch_shape(self, recursive: bool):
         if recursive:
             self._content._touch_shape(recursive)
 
     @property
-    def length(self):
+    def length(self) -> ShapeItem:
         return self._length
 
     def __repr__(self):
@@ -257,7 +267,7 @@ class RegularArray(Content):
         out.append(post)
         return "".join(out)
 
-    def to_ListOffsetArray64(self, start_at_zero=False):
+    def to_ListOffsetArray64(self, start_at_zero: bool = False) -> ListOffsetArray:
         offsets = self._compact_offsets64(start_at_zero)
         return self._broadcast_tooffsets64(offsets)
 
@@ -391,7 +401,7 @@ class RegularArray(Content):
         )
         return out
 
-    def _broadcast_tooffsets64(self, offsets):
+    def _broadcast_tooffsets64(self, offsets: Index) -> ListOffsetArray:
         if not self.backend.index_nplike.known_data:
             self._touch_data(recursive=False)
             offsets.data.touch_data()
@@ -447,7 +457,9 @@ class RegularArray(Content):
                 offsets, self._content, parameters=self._parameters
             )
 
-    def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
+    def _getitem_next_jagged(
+        self, slicestarts: Index, slicestops: Index, slicecontent: Content, tail
+    ) -> Content:
         out = self.to_ListOffsetArray64(True)
         return out._getitem_next_jagged(slicestarts, slicestops, slicecontent, tail)
 
@@ -706,10 +718,10 @@ class RegularArray(Content):
         else:
             raise AssertionError(repr(head))
 
-    def _offsets_and_flattened(self, axis, depth):
+    def _offsets_and_flattened(self, axis: int, depth: int) -> tuple[Index, Content]:
         return self.to_ListOffsetArray64(True)._offsets_and_flattened(axis, depth)
 
-    def _mergeable_next(self, other, mergebool):
+    def _mergeable_next(self, other: Content, mergebool: bool) -> bool:
         # Is the other content is an identity, or a union?
         if other.is_identity_like or other.is_union:
             return True
@@ -733,7 +745,7 @@ class RegularArray(Content):
         else:
             return False
 
-    def _mergemany(self, others):
+    def _mergemany(self, others: Sequence[Content]) -> Content:
         if len(others) == 0:
             return self
 
@@ -1308,7 +1320,7 @@ class RegularArray(Content):
             else:
                 return contents
 
-    def _drop_none(self):
+    def _drop_none(self) -> Content:
         return self.to_ListOffsetArray64()._drop_none()
 
     def _recursively_apply(

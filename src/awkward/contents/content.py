@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import copy
 import math
-from collections.abc import Callable, Iterable, Mapping, MutableMapping, Sized
+from collections.abc import Callable, Iterable, Mapping, MutableMapping, Sequence, Sized
 from numbers import Complex, Real
 
 import awkward as ak
@@ -44,6 +44,9 @@ from awkward.index import Index, Index64
 if TYPE_CHECKING:
     from awkward._nplikes.numpy import NumpyLike
     from awkward._slicing import SliceItem
+    from awkward.contents.indexedoptionarray import IndexedOptionArray
+    from awkward.contents.numpyarray import NumpyArray
+    from awkward.contents.regulararray import RegularArray
 
 
 np = NumpyMetadata.instance()
@@ -62,6 +65,9 @@ ActionType: TypeAlias = """Callable[
     ],
     Content | None,
 ]"""
+JSONValueType: TypeAlias = """
+float | int | str | list[JSONValueType] | dict[str, JSONValueType]
+"""
 
 
 class RecursivelyApplyOptionsType(TypedDict):
@@ -136,7 +142,7 @@ class Content:
         self._backend = backend
 
     @property
-    def parameters(self) -> dict[str, Any]:
+    def parameters(self) -> dict[str, JSONValueType]:
         """
         Free-form parameters associated with every array node as a dict from parameter
         name to its JSON-like value. Some parameters are special and are used to assign
@@ -151,7 +157,7 @@ class Content:
             self._parameters = {}
         return self._parameters
 
-    def parameter(self, key: str):
+    def parameter(self, key: str) -> JSONValueType | None:
         """
         Returns a parameter's value or None.
 
@@ -170,7 +176,9 @@ class Content:
     def form(self) -> Form:
         return self.form_with_key(None)
 
-    def form_with_key(self, form_key="node{id}", id_start=0):
+    def form_with_key(
+        self, form_key: str | None | Callable = "node{id}", id_start: int = 0
+    ) -> Form:
         hold_id = [id_start]
 
         if form_key is None:
@@ -203,7 +211,7 @@ class Content:
 
     def _form_with_key(
         self,
-        getkey: Callable[[Content], Form],
+        getkey: Callable[[Content], str | None],
     ) -> Form:
         raise NotImplementedError
 
@@ -217,10 +225,10 @@ class Content:
     def _to_typetracer(self, forget_length: bool) -> Self:
         raise NotImplementedError
 
-    def _touch_data(self, recursive):
+    def _touch_data(self, recursive: bool):
         raise NotImplementedError
 
-    def _touch_shape(self, recursive):
+    def _touch_shape(self, recursive: bool):
         raise NotImplementedError
 
     @property
@@ -333,7 +341,9 @@ class Content:
         nexthead, nexttail = ak._slicing.head_tail(tail)
         return self._getitem_field(head)._getitem_next(nexthead, nexttail, advanced)
 
-    def _getitem_next_fields(self, head, tail, advanced: Index | None) -> Content:
+    def _getitem_next_fields(
+        self, head: SliceItem, tail: tuple[SliceItem, ...], advanced: Index | None
+    ) -> Content:
         only_fields, not_fields = [], []
         for x in tail:
             if isinstance(x, (str, list)):
@@ -345,13 +355,17 @@ class Content:
             nexthead, nexttail, advanced
         )
 
-    def _getitem_next_newaxis(self, tail, advanced: Index | None):
+    def _getitem_next_newaxis(
+        self, tail: tuple[SliceItem, ...], advanced: Index | None
+    ) -> RegularArray:
         nexthead, nexttail = ak._slicing.head_tail(tail)
         return ak.contents.RegularArray(
             self._getitem_next(nexthead, nexttail, advanced), 1, 0, parameters=None
         )
 
-    def _getitem_next_ellipsis(self, tail, advanced: Index | None):
+    def _getitem_next_ellipsis(
+        self, tail: tuple[SliceItem, ...], advanced: Index | None
+    ) -> Content:
         mindepth, maxdepth = self.minmax_depth
 
         dimlength = sum(
@@ -375,12 +389,12 @@ class Content:
 
     def _getitem_next_regular_missing(
         self,
-        head: ak.contents.IndexedOptionArray,
-        tail,
+        head: IndexedOptionArray,
+        tail: tuple[SliceItem, ...],
         advanced: Index | None,
         raw: Content,
         length: int,
-    ):
+    ) -> RegularArray:
         # if this is in a tuple-slice and really should be 0, it will be trimmed later
         length = 1 if length is not unknown_length and length == 0 else length
         index = head.index
@@ -417,7 +431,7 @@ class Content:
 
     def _getitem_next_missing_jagged(
         self, head: Content, tail, advanced: Index | None, that: Content
-    ):
+    ) -> RegularArray:
         head = head.to_backend(self._backend)
         jagged = head.content.to_ListOffsetArray64()
         index = head._index
@@ -471,10 +485,10 @@ class Content:
 
     def _getitem_next_missing(
         self,
-        head: ak.contents.IndexedOptionArray,
-        tail,
+        head: IndexedOptionArray,
+        tail: tuple[SliceItem, ...],
         advanced: Index | None,
-    ):
+    ) -> Content:
         assert isinstance(head, ak.contents.IndexedOptionArray)
 
         if advanced is not None:
@@ -730,10 +744,19 @@ class Content:
     ) -> Content:
         raise NotImplementedError
 
+    def _getitem_next_jagged(
+        self,
+        slicestarts: Index,
+        slicestops: Index,
+        slicecontent: Content,
+        tail: tuple[SliceItem, ...],
+    ) -> Content:
+        raise NotImplementedError
+
     def _carry(self, carry: Index, allow_lazy: bool) -> Content:
         raise NotImplementedError
 
-    def _local_index_axis0(self) -> ak.contents.NumpyArray:
+    def _local_index_axis0(self) -> NumpyArray:
         localindex = Index64.empty(self.length, self._backend.index_nplike)
         self._handle_error(
             self._backend["awkward_localindex", np.int64](
@@ -748,10 +771,7 @@ class Content:
     def _mergeable_next(self, other: Content, mergebool: bool) -> bool:
         raise NotImplementedError
 
-    def _mergemany(
-        self,
-        others: list[Content],
-    ) -> Content:
+    def _mergemany(self, others: Sequence[Content]) -> Content:
         raise NotImplementedError
 
     def _merging_strategy(

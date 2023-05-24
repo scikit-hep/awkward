@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import copy
+from collections.abc import MutableMapping, Sequence
 
 import awkward as ak
 from awkward._backends.backend import Backend
@@ -14,6 +15,7 @@ from awkward._nplikes import to_nplike
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import ArrayLike, IndexType, NumpyMetadata
+from awkward._nplikes.shape import ShapeItem
 from awkward._nplikes.typetracer import TypeTracerArray
 from awkward._parameters import (
     parameters_intersect,
@@ -21,9 +23,10 @@ from awkward._parameters import (
 )
 from awkward._regularize import is_integer_like
 from awkward._slicing import NO_HEAD
-from awkward._typing import TYPE_CHECKING, Final, Self, SupportsIndex, final
+from awkward._typing import TYPE_CHECKING, Callable, Final, Self, SupportsIndex, final
 from awkward._util import UNSET
 from awkward.contents.content import Content
+from awkward.forms.form import Form
 from awkward.forms.numpyform import NumpyForm
 from awkward.index import Index
 from awkward.types.numpytype import primitive_to_dtype
@@ -153,25 +156,25 @@ class NumpyArray(Content):
         return cls(data, parameters=parameters, backend=backend)
 
     @property
-    def shape(self):
+    def shape(self) -> tuple[ShapeItem, ...]:
         return self._data.shape
 
     @property
-    def inner_shape(self):
+    def inner_shape(self) -> tuple[ShapeItem, ...]:
         return self._data.shape[1:]
 
     @property
-    def strides(self):
+    def strides(self) -> tuple[int, ...]:
         return self._data.strides
 
     @property
-    def dtype(self):
+    def dtype(self) -> np.dtype:
         return self._data.dtype
 
     def _raw(self, nplike=None):
         return to_nplike(self.data, nplike, from_nplike=self._backend.nplike)
 
-    def _form_with_key(self, getkey):
+    def _form_with_key(self, getkey: Callable[[Content], str | None]) -> NumpyForm:
         return self.form_cls(
             ak.types.numpytype.dtype_to_primitive(self._data.dtype),
             self._data.shape[1:],
@@ -179,7 +182,14 @@ class NumpyArray(Content):
             form_key=getkey(self),
         )
 
-    def _to_buffers(self, form, getkey, container, backend, byteorder):
+    def _to_buffers(
+        self,
+        form: Form,
+        getkey: Callable[[Content, Form, str], str],
+        container: MutableMapping[str, ArrayLike],
+        backend: Backend,
+        byteorder: str,
+    ):
         assert isinstance(form, self.form_cls)
         key = getkey(self, form, "data")
         container[key] = ak._util.native_to_byteorder(
@@ -195,16 +205,16 @@ class NumpyArray(Content):
             backend=backend,
         )
 
-    def _touch_data(self, recursive):
+    def _touch_data(self, recursive: bool):
         if not self._backend.nplike.known_data:
             self._data.touch_data()
 
-    def _touch_shape(self, recursive):
+    def _touch_shape(self, recursive: bool):
         if not self._backend.nplike.known_data:
             self._data.touch_shape()
 
     @property
-    def length(self):
+    def length(self) -> ShapeItem:
         return self._data.shape[0]
 
     def __repr__(self):
@@ -320,7 +330,9 @@ class NumpyArray(Content):
             raise ak._errors.index_error(self, carry.data, str(err)) from err
         return NumpyArray(nextdata, parameters=self._parameters, backend=self._backend)
 
-    def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
+    def _getitem_next_jagged(
+        self, slicestarts: Index, slicestops: Index, slicecontent: Content, tail
+    ) -> Content:
         if self._data.ndim == 1:
             raise ak._errors.index_error(
                 self,
@@ -405,7 +417,7 @@ class NumpyArray(Content):
         else:
             raise AssertionError(repr(head))
 
-    def _offsets_and_flattened(self, axis, depth):
+    def _offsets_and_flattened(self, axis: int, depth: int) -> tuple[Index, Content]:
         posaxis = maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 == depth:
             raise AxisError("axis=0 not allowed for flatten")
@@ -416,7 +428,7 @@ class NumpyArray(Content):
         else:
             raise AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
 
-    def _mergeable_next(self, other, mergebool):
+    def _mergeable_next(self, other: Content, mergebool: bool) -> bool:
         # Is the other content is an identity, or a union?
         if other.is_identity_like or other.is_union:
             return True
@@ -465,7 +477,7 @@ class NumpyArray(Content):
         else:
             return False
 
-    def _mergemany(self, others):
+    def _mergemany(self, others: Sequence[Content]) -> Content:
         if len(others) == 0:
             return self
 

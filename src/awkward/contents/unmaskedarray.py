@@ -3,13 +3,15 @@ from __future__ import annotations
 
 import copy
 import math
+from collections.abc import MutableMapping, Sequence
 
 import awkward as ak
 from awkward._backends.backend import Backend
 from awkward._errors import AxisError
 from awkward._layout import maybe_posaxis
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import IndexType, NumpyMetadata
+from awkward._nplikes.numpylike import ArrayLike, IndexType, NumpyMetadata
+from awkward._nplikes.shape import ShapeItem
 from awkward._nplikes.typetracer import MaybeNone
 from awkward._parameters import (
     parameters_intersect,
@@ -18,14 +20,16 @@ from awkward._parameters import (
 )
 from awkward._regularize import is_integer_like
 from awkward._slicing import NO_HEAD
-from awkward._typing import TYPE_CHECKING, Final, Self, SupportsIndex, final
+from awkward._typing import TYPE_CHECKING, Callable, Final, Self, SupportsIndex, final
 from awkward._util import UNSET
 from awkward.contents.content import Content
+from awkward.forms.form import Form
 from awkward.forms.unmaskedform import UnmaskedForm
 from awkward.index import Index
 
 if TYPE_CHECKING:
     from awkward._slicing import SliceItem
+    from awkward.contents import IndexedOptionArray
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
@@ -84,7 +88,7 @@ class UnmaskedArray(Content):
         self._init(parameters, content.backend)
 
     @property
-    def content(self):
+    def content(self) -> Content:
         return self._content
 
     form_cls: Final = UnmaskedForm
@@ -118,7 +122,7 @@ class UnmaskedArray(Content):
         else:
             return cls(content, parameters=parameters)
 
-    def _form_with_key(self, getkey):
+    def _form_with_key(self, getkey: Callable[[Content], str | None]) -> UnmaskedForm:
         form_key = getkey(self)
         return self.form_cls(
             self._content._form_with_key(getkey),
@@ -126,7 +130,14 @@ class UnmaskedArray(Content):
             form_key=form_key,
         )
 
-    def _to_buffers(self, form, getkey, container, backend, byteorder):
+    def _to_buffers(
+        self,
+        form: Form,
+        getkey: Callable[[Content, Form, str], str],
+        container: MutableMapping[str, ArrayLike],
+        backend: Backend,
+        byteorder: str,
+    ):
         assert isinstance(form, self.form_cls)
         self._content._to_buffers(form.content, getkey, container, backend, byteorder)
 
@@ -136,16 +147,16 @@ class UnmaskedArray(Content):
             parameters=self._parameters,
         )
 
-    def _touch_data(self, recursive):
+    def _touch_data(self, recursive: bool):
         if recursive:
             self._content._touch_data(recursive)
 
-    def _touch_shape(self, recursive):
+    def _touch_shape(self, recursive: bool):
         if recursive:
             self._content._touch_shape(recursive)
 
     @property
-    def length(self):
+    def length(self) -> ShapeItem:
         return self._content.length
 
     def __repr__(self):
@@ -162,7 +173,7 @@ class UnmaskedArray(Content):
         out.append(post)
         return "".join(out)
 
-    def to_IndexedOptionArray64(self):
+    def to_IndexedOptionArray64(self) -> IndexedOptionArray:
         arange = self._backend.index_nplike.arange(self._content.length, dtype=np.int64)
         return ak.contents.IndexedOptionArray(
             ak.index.Index64(arange, nplike=self._backend.index_nplike),
@@ -246,7 +257,9 @@ class UnmaskedArray(Content):
             self._content._carry(carry, allow_lazy), parameters=self._parameters
         )
 
-    def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
+    def _getitem_next_jagged(
+        self, slicestarts: Index, slicestops: Index, slicecontent: Content, tail
+    ) -> Content:
         return UnmaskedArray(
             self._content._getitem_next_jagged(
                 slicestarts, slicestops, slicecontent, tail
@@ -297,7 +310,7 @@ class UnmaskedArray(Content):
         else:
             return self._content
 
-    def _offsets_and_flattened(self, axis, depth):
+    def _offsets_and_flattened(self, axis: int, depth: int) -> tuple[Index, Content]:
         posaxis = maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 == depth:
             raise AxisError("axis=0 not allowed for flatten")
@@ -312,7 +325,7 @@ class UnmaskedArray(Content):
             else:
                 return (offsets, flattened)
 
-    def _mergeable_next(self, other, mergebool):
+    def _mergeable_next(self, other: Content, mergebool: bool) -> bool:
         # Is the other content is an identity, or a union?
         if other.is_identity_like or other.is_union:
             return True
@@ -327,7 +340,7 @@ class UnmaskedArray(Content):
     def _reverse_merge(self, other):
         return self.to_IndexedOptionArray64()._reverse_merge(other)
 
-    def _mergemany(self, others):
+    def _mergemany(self, others: Sequence[Content]) -> Content:
         if len(others) == 0:
             return self
 
@@ -477,7 +490,7 @@ class UnmaskedArray(Content):
         else:
             return [self]
 
-    def _drop_none(self):
+    def _drop_none(self) -> Content:
         return self.to_ByteMaskedArray(True)._drop_none()
 
     def _recursively_apply(

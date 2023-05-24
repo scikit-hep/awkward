@@ -4,27 +4,30 @@ from __future__ import annotations
 import copy
 import json
 import math
+from collections.abc import MutableMapping, Sequence
 
 import awkward as ak
 from awkward._backends.backend import Backend
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import IndexType, NumpyMetadata
-from awkward._nplikes.shape import unknown_length
+from awkward._nplikes.numpylike import ArrayLike, IndexType, NumpyMetadata
+from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import MaybeNone, TypeTracer
 from awkward._parameters import (
     type_parameters_equal,
 )
 from awkward._regularize import is_integer, is_integer_like
 from awkward._slicing import NO_HEAD
-from awkward._typing import TYPE_CHECKING, Final, Self, SupportsIndex, final
+from awkward._typing import TYPE_CHECKING, Callable, Final, Self, SupportsIndex, final
 from awkward._util import UNSET
 from awkward.contents.bytemaskedarray import ByteMaskedArray
 from awkward.contents.content import Content
 from awkward.forms.bitmaskedform import BitMaskedForm
+from awkward.forms.form import Form
 from awkward.index import Index
 
 if TYPE_CHECKING:
     from awkward._slicing import SliceItem
+    from awkward.contents import IndexedOptionArray
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
@@ -190,7 +193,7 @@ class BitMaskedArray(Content):
         return self._mask
 
     @property
-    def content(self):
+    def content(self) -> Content:
         return self._content
 
     @property
@@ -275,7 +278,7 @@ class BitMaskedArray(Content):
                 parameters=parameters,
             )
 
-    def _form_with_key(self, getkey):
+    def _form_with_key(self, getkey: Callable[[Content], str | None]) -> BitMaskedForm:
         form_key = getkey(self)
         return self.form_cls(
             self._mask.form,
@@ -286,7 +289,14 @@ class BitMaskedArray(Content):
             form_key=form_key,
         )
 
-    def _to_buffers(self, form, getkey, container, backend, byteorder):
+    def _to_buffers(
+        self,
+        form: Form,
+        getkey: Callable[[Content, Form, str], str],
+        container: MutableMapping[str, ArrayLike],
+        backend: Backend,
+        byteorder: str,
+    ):
         assert isinstance(form, self.form_cls)
         key = getkey(self, form, "mask")
         container[key] = ak._util.native_to_byteorder(
@@ -305,20 +315,20 @@ class BitMaskedArray(Content):
             parameters=self._parameters,
         )
 
-    def _touch_data(self, recursive):
+    def _touch_data(self, recursive: bool):
         if not self._backend.index_nplike.known_data:
             self._mask.data.touch_data()
         if recursive:
             self._content._touch_data(recursive)
 
-    def _touch_shape(self, recursive):
+    def _touch_shape(self, recursive: bool):
         if not self._backend.index_nplike.known_data:
             self._mask.data.touch_shape()
         if recursive:
             self._content._touch_shape(recursive)
 
     @property
-    def length(self):
+    def length(self) -> ShapeItem:
         return self._length
 
     def __repr__(self):
@@ -340,7 +350,7 @@ class BitMaskedArray(Content):
         out.append(post)
         return "".join(out)
 
-    def to_IndexedOptionArray64(self):
+    def to_IndexedOptionArray64(self) -> IndexedOptionArray:
         index = ak.index.Index64.empty(
             self._mask.length * 8, self._backend.index_nplike
         )
@@ -506,7 +516,9 @@ class BitMaskedArray(Content):
         assert isinstance(carry, ak.index.Index)
         return self.to_ByteMaskedArray()._carry(carry, allow_lazy)
 
-    def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
+    def _getitem_next_jagged(
+        self, slicestarts: Index, slicestops: Index, slicecontent: Content, tail
+    ) -> Content:
         return self.to_ByteMaskedArray()._getitem_next_jagged(
             slicestarts, slicestops, slicecontent, tail
         )
@@ -546,10 +558,10 @@ class BitMaskedArray(Content):
     def project(self, mask=None):
         return self.to_ByteMaskedArray().project(mask)
 
-    def _offsets_and_flattened(self, axis, depth):
+    def _offsets_and_flattened(self, axis: int, depth: int) -> tuple[Index, Content]:
         return self.to_ByteMaskedArray._offsets_and_flattened(axis, depth)
 
-    def _mergeable_next(self, other, mergebool):
+    def _mergeable_next(self, other: Content, mergebool: bool) -> bool:
         # Is the other content is an identity, or a union?
         if other.is_identity_like or other.is_union:
             return True
@@ -564,7 +576,7 @@ class BitMaskedArray(Content):
     def _reverse_merge(self, other):
         return self.to_IndexedOptionArray64()._reverse_merge(other)
 
-    def _mergemany(self, others):
+    def _mergemany(self, others: Sequence[Content]) -> Content:
         if len(others) == 0:
             return self
 
@@ -677,7 +689,7 @@ class BitMaskedArray(Content):
         else:
             return [self]
 
-    def _drop_none(self):
+    def _drop_none(self) -> Content:
         return self.to_ByteMaskedArray()._drop_none()
 
     def _recursively_apply(

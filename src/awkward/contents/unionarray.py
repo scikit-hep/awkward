@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import copy
 import ctypes
-from collections.abc import Iterable, Sequence
+from collections.abc import Iterable, MutableMapping, Sequence
 
 import awkward as ak
 from awkward._backends.backend import Backend
@@ -12,15 +12,16 @@ from awkward._errors import AxisError
 from awkward._layout import maybe_posaxis
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import IndexType, NumpyMetadata
-from awkward._nplikes.shape import unknown_length
+from awkward._nplikes.numpylike import ArrayLike, IndexType, NumpyMetadata
+from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import OneOf, TypeTracer
 from awkward._parameters import parameters_intersect, parameters_union
 from awkward._regularize import is_integer_like
 from awkward._slicing import NO_HEAD
-from awkward._typing import TYPE_CHECKING, Final, Self, SupportsIndex, final
+from awkward._typing import TYPE_CHECKING, Callable, Final, Self, SupportsIndex, final
 from awkward._util import UNSET
 from awkward.contents.content import Content
+from awkward.forms.form import Form
 from awkward.forms.unionform import UnionForm
 from awkward.index import Index, Index8, Index64
 
@@ -421,7 +422,7 @@ class UnionArray(Content):
     def content(self, index):
         return self._contents[index]
 
-    def _form_with_key(self, getkey):
+    def _form_with_key(self, getkey: Callable[[Content], str | None]) -> UnionForm:
         form_key = getkey(self)
         return self.form_cls(
             self._tags.form,
@@ -431,7 +432,14 @@ class UnionArray(Content):
             form_key=form_key,
         )
 
-    def _to_buffers(self, form, getkey, container, backend, byteorder):
+    def _to_buffers(
+        self,
+        form: Form,
+        getkey: Callable[[Content, Form, str], str],
+        container: MutableMapping[str, ArrayLike],
+        backend: Backend,
+        byteorder: str,
+    ):
         assert isinstance(form, self.form_cls)
         key1 = getkey(self, form, "tags")
         key2 = getkey(self, form, "index")
@@ -454,7 +462,7 @@ class UnionArray(Content):
             parameters=self._parameters,
         )
 
-    def _touch_data(self, recursive):
+    def _touch_data(self, recursive: bool):
         if not self._backend.index_nplike.known_data:
             self._tags.data.touch_data()
             self._index.data.touch_data()
@@ -462,7 +470,7 @@ class UnionArray(Content):
             for x in self._contents:
                 x._touch_data(recursive)
 
-    def _touch_shape(self, recursive):
+    def _touch_shape(self, recursive: bool):
         if not self._backend.index_nplike.known_data:
             self._tags.data.touch_shape()
             self._index.data.touch_shape()
@@ -471,7 +479,7 @@ class UnionArray(Content):
                 x._touch_shape(recursive)
 
     @property
-    def length(self):
+    def length(self) -> ShapeItem:
         return self._tags.length
 
     def __repr__(self):
@@ -780,7 +788,9 @@ class UnionArray(Content):
             )
         return self._getitem_next_jagged(slicestarts, slicestops, slicecontent, tail)
 
-    def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
+    def _getitem_next_jagged(
+        self, slicestarts: Index, slicestops: Index, slicecontent: Content, tail
+    ) -> Content:
         return self._getitem_next_jagged_generic(
             slicestarts, slicestops, slicecontent, tail
         )
@@ -828,7 +838,7 @@ class UnionArray(Content):
         else:
             raise AssertionError(repr(head))
 
-    def _offsets_and_flattened(self, axis, depth):
+    def _offsets_and_flattened(self, axis: int, depth: int) -> tuple[Index, Content]:
         posaxis = maybe_posaxis(self, axis, depth)
 
         if posaxis is not None and posaxis + 1 == depth:
@@ -941,7 +951,7 @@ class UnionArray(Content):
                     ),
                 )
 
-    def _mergeable_next(self, other, mergebool):
+    def _mergeable_next(self, other: Content, mergebool: bool) -> bool:
         return True
 
     def _merging_strategy(self, others):
@@ -1045,7 +1055,7 @@ class UnionArray(Content):
             tags, index, contents, parameters=self._parameters
         )
 
-    def _mergemany(self, others):
+    def _mergemany(self, others: Sequence[Content]) -> Content:
         if len(others) == 0:
             return self
 

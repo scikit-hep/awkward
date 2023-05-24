@@ -2,23 +2,25 @@
 from __future__ import annotations
 
 import copy
+from collections.abc import MutableMapping, Sequence
 
 import awkward as ak
 from awkward._backends.backend import Backend
 from awkward._errors import AxisError
 from awkward._layout import maybe_posaxis
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import IndexType, NumpyMetadata
-from awkward._nplikes.shape import unknown_length
+from awkward._nplikes.numpylike import ArrayLike, IndexType, NumpyMetadata
+from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import TypeTracer, is_unknown_scalar
 from awkward._parameters import (
     type_parameters_equal,
 )
 from awkward._regularize import is_integer_like
 from awkward._slicing import NO_HEAD
-from awkward._typing import TYPE_CHECKING, Final, Self, SupportsIndex, final
+from awkward._typing import TYPE_CHECKING, Callable, Final, Self, SupportsIndex, final
 from awkward._util import UNSET
 from awkward.contents.content import Content
+from awkward.forms.form import Form
 from awkward.forms.listoffsetform import ListOffsetForm
 from awkward.index import Index
 
@@ -141,11 +143,11 @@ class ListOffsetArray(Content):
         self._init(parameters, content.backend)
 
     @property
-    def offsets(self):
+    def offsets(self) -> Index:
         return self._offsets
 
     @property
-    def content(self):
+    def content(self) -> Content:
         return self._content
 
     form_cls: Final = ListOffsetForm
@@ -172,14 +174,14 @@ class ListOffsetArray(Content):
         return cls(offsets, content, parameters=parameters)
 
     @property
-    def starts(self):
+    def starts(self) -> Index:
         return self._offsets[:-1]
 
     @property
     def stops(self):
         return self._offsets[1:]
 
-    def _form_with_key(self, getkey):
+    def _form_with_key(self, getkey: Callable[[Content], str | None]) -> ListOffsetForm:
         form_key = getkey(self)
         return self.form_cls(
             self._offsets.form,
@@ -188,7 +190,14 @@ class ListOffsetArray(Content):
             form_key=form_key,
         )
 
-    def _to_buffers(self, form, getkey, container, backend, byteorder):
+    def _to_buffers(
+        self,
+        form: Form,
+        getkey: Callable[[Content, Form, str], str],
+        container: MutableMapping[str, ArrayLike],
+        backend: Backend,
+        byteorder: str,
+    ):
         assert isinstance(form, self.form_cls)
         key = getkey(self, form, "offsets")
         container[key] = ak._util.native_to_byteorder(
@@ -204,20 +213,20 @@ class ListOffsetArray(Content):
             parameters=self._parameters,
         )
 
-    def _touch_data(self, recursive):
+    def _touch_data(self, recursive: bool):
         if not self._backend.index_nplike.known_data:
             self._offsets.data.touch_data()
         if recursive:
             self._content._touch_data(recursive)
 
-    def _touch_shape(self, recursive):
+    def _touch_shape(self, recursive: bool):
         if not self._backend.index_nplike.known_data:
             self._offsets.data.touch_shape()
         if recursive:
             self._content._touch_shape(recursive)
 
     @property
-    def length(self):
+    def length(self) -> ShapeItem:
         return self._offsets.length - 1
 
     def __repr__(self):
@@ -235,7 +244,7 @@ class ListOffsetArray(Content):
         out.append(post)
         return "".join(out)
 
-    def to_ListOffsetArray64(self, start_at_zero=False):
+    def to_ListOffsetArray64(self, start_at_zero: bool = False) -> ListOffsetArray:
         if not self._backend.nplike.known_data and (
             start_at_zero or self._offsets.dtype != np.dtype(np.int64)
         ):
@@ -368,7 +377,7 @@ class ListOffsetArray(Content):
         )
         return out
 
-    def _broadcast_tooffsets64(self, offsets):
+    def _broadcast_tooffsets64(self, offsets: Index) -> ListOffsetArray:
         if not self.backend.index_nplike.known_data:
             self._touch_data(recursive=False)
             offsets.data.touch_data()
@@ -419,7 +428,9 @@ class ListOffsetArray(Content):
 
         return ListOffsetArray(offsets, nextcontent, parameters=self._parameters)
 
-    def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
+    def _getitem_next_jagged(
+        self, slicestarts: Index, slicestops: Index, slicecontent: Content, tail
+    ) -> Content:
         out = ak.contents.ListArray(
             self.starts, self.stops, self._content, parameters=self._parameters
         )
@@ -712,7 +723,7 @@ class ListOffsetArray(Content):
         else:
             raise AssertionError(repr(head))
 
-    def _offsets_and_flattened(self, axis, depth):
+    def _offsets_and_flattened(self, axis: int, depth: int) -> tuple[Index, Content]:
         posaxis = maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 == depth:
             raise AxisError("axis=0 not allowed for flatten")
@@ -780,7 +791,7 @@ class ListOffsetArray(Content):
                     ListOffsetArray(tooffsets, flattened, parameters=self._parameters),
                 )
 
-    def _mergeable_next(self, other, mergebool):
+    def _mergeable_next(self, other: Content, mergebool: bool) -> bool:
         # Is the other content is an identity, or a union?
         if other.is_identity_like or other.is_union:
             return True
@@ -804,7 +815,7 @@ class ListOffsetArray(Content):
         else:
             return False
 
-    def _mergemany(self, others):
+    def _mergemany(self, others: Sequence[Content]) -> Content:
         if len(others) == 0:
             return self
         listarray = ak.contents.ListArray(
@@ -2041,7 +2052,7 @@ class ListOffsetArray(Content):
             else:
                 return contents
 
-    def _drop_none(self):
+    def _drop_none(self) -> Content:
         if self._content.is_option:
             _, _, none_indexes = self._content._nextcarry_outindex()
             new_content = self._content._drop_none()
