@@ -678,7 +678,7 @@ class BitMaskedArray(Content):
         else:
             return [self]
 
-    def _drop_none(self):
+    def _drop_none(self) -> Content:
         return self.to_ByteMaskedArray()._drop_none()
 
     def _recursively_apply(

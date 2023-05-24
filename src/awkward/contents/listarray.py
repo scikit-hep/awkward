@@ -1443,7 +1443,7 @@ class ListArray(Content):
     def _remove_structure(self, backend, options):
         return self.to_ListOffsetArray64(False)._remove_structure(backend, options)
 
-    def _drop_none(self):
+    def _drop_none(self) -> Content:
         return self.to_ListOffsetArray64()._drop_none()
 
     def _rebuild_without_nones(self, none_indexes, new_content):

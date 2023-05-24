@@ -2042,7 +2042,7 @@ class ListOffsetArray(Content):
             else:
                 return contents
 
-    def _drop_none(self):
+    def _drop_none(self) -> Content:
         if self._content.is_option:
             _, _, none_indexes = self._content._nextcarry_outindex()
             new_content = self._content._drop_none()

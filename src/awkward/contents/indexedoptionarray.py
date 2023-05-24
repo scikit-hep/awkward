@@ -1587,7 +1587,7 @@ class IndexedOptionArray(Content):
         else:
             return [self]
 
-    def _drop_none(self):
+    def _drop_none(self) -> Content:
         return self.project()
 
     def _recursively_apply(

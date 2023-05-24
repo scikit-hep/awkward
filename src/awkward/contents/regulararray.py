@@ -1309,7 +1309,7 @@ class RegularArray(Content):
             else:
                 return contents
 
-    def _drop_none(self):
+    def _drop_none(self) -> Content:
         return self.to_ListOffsetArray64()._drop_none()
 
     def _recursively_apply(
