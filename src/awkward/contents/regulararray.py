@@ -388,8 +388,8 @@ class RegularArray(Content):
 
     def _compact_offsets64(self, start_at_zero):
         index_nplike = self._backend.index_nplike
-        if self._length is not unknown_length and self._length == 0:
-            return ak.index.Index64.zeros(1, nplike=index_nplike)
+        if self._size is not unknown_length and self._size == 0:
+            return ak.index.Index64.zeros(self._length + 1, nplike=index_nplike)
         else:
             return ak.index.Index64(
                 index_nplike.arange(
