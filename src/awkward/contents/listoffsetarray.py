@@ -396,7 +396,7 @@ class ListOffsetArray(Content):
         if index_nplike.known_data and not index_nplike.array_equal(
             this_zero_offsets, offsets
         ):
-            raise AssertionError("cannot broadcast nested list")
+            raise ValueError("cannot broadcast nested list")
 
         return ListOffsetArray(offsets, next_content, parameters=self._parameters)
 
