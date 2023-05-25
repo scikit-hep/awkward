@@ -249,28 +249,21 @@ class ListOffsetArray(Content):
             self._touch_data(recursive=False)
             self._content._touch_data(recursive=False)
 
-        if issubclass(self._offsets.dtype.type, np.int64):
-            if (
-                not self._backend.nplike.known_data
-                or self._offsets[0] == 0
-                or not start_at_zero
-            ):
-                return self
-
-            if start_at_zero:
-                offsets = Index64(
-                    self._offsets.raw(self._backend.nplike) - self._offsets[0],
-                    nplike=self._backend.index_nplike,
-                )
-                content = self._content[self._offsets[0] :]
-            else:
-                offsets, content = self._offsets, self._content
-
-            return ListOffsetArray(offsets, content, parameters=self._parameters)
-
+        known_starts_at_zero = (
+            self._backend.index_nplike.known_data and self._offsets[0] == 0
+        )
+        if start_at_zero and not known_starts_at_zero:
+            offsets = Index64(
+                self._offsets.data - self._offsets[0],
+                nplike=self._backend.index_nplike,
+            )
+            return ListOffsetArray(
+                offsets, self._content[self._offsets[0] :], parameters=self._parameters
+            )
         else:
-            offsets = self._compact_offsets64(start_at_zero)
-            return self._broadcast_tooffsets64(offsets)
+            return ListOffsetArray(
+                self._offsets.to64(), self._content, parameters=self._parameters
+            )
 
     def to_RegularArray(self):
         start, stop = self._offsets[0], self._offsets[self._offsets.length - 1]
