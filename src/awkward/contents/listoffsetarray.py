@@ -323,7 +323,7 @@ class ListOffsetArray(Content):
         offsets = self._offsets[start : stop + 1]
         if offsets.length is not unknown_length and offsets.length == 0:
             offsets = Index(
-                self._backend.index_nplike.asarray([0], dtype=self._offsets.dtype),
+                self._backend.index_nplike.zeros(1, dtype=self._offsets.dtype),
                 nplike=self._backend.index_nplike,
             )
         return ListOffsetArray(offsets, self._content, parameters=self._parameters)
