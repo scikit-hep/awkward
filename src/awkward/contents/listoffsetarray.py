@@ -243,12 +243,6 @@ class ListOffsetArray(Content):
         return "".join(out)
 
     def to_ListOffsetArray64(self, start_at_zero: bool = False) -> ListOffsetArray:
-        if not self._backend.nplike.known_data and (
-            start_at_zero or self._offsets.dtype != np.dtype(np.int64)
-        ):
-            self._touch_data(recursive=False)
-            self._content._touch_data(recursive=False)
-
         known_starts_at_zero = (
             self._backend.index_nplike.known_data and self._offsets[0] == 0
         )
