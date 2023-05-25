@@ -45,11 +45,6 @@ class ArrayLike(Protocol):
 
     @property
     @abstractmethod
-    def strides(self) -> tuple[ShapeItem, ...]:
-        ...
-
-    @property
-    @abstractmethod
     def size(self) -> ShapeItem:
         ...
 
@@ -481,6 +476,10 @@ class NumpyLike(Singleton, Protocol):
         count: int | None = None,
         bitorder: Literal["big", "little"] = "big",
     ) -> ArrayLike:
+        ...
+
+    @abstractmethod
+    def strides(self, x: ArrayLike) -> tuple[ShapeItem, ...]:
         ...
 
     ############################ ufuncs

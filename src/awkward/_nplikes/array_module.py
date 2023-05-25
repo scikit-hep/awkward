@@ -274,6 +274,9 @@ class ArrayModuleNumpyLike(NumpyLike):
     def broadcast_to(self, x: ArrayLike, shape: tuple[ShapeItem, ...]) -> ArrayLike:
         return self._module.broadcast_to(x, shape)
 
+    def strides(self, x: ArrayLike) -> tuple[ShapeItem, ...]:
+        return x.strides
+
     ############################ ufuncs
 
     def add(

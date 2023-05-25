@@ -242,14 +242,6 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
             self._report.touch_data(self._form_key)
 
     @property
-    def strides(self) -> tuple[ShapeItem, ...]:
-        self.touch_shape()
-        out = (self._dtype.itemsize,)
-        for x in reversed(self._shape):
-            out = (x * out[0], *out)
-        return out
-
-    @property
     def nplike(self) -> TypeTracer:
         return TypeTracer.instance()
 
@@ -1128,6 +1120,13 @@ class TypeTracer(NumpyLike):
     ) -> TypeTracerArray:
         try_touch_data(x)
         raise NotImplementedError
+
+    def strides(self, x: ArrayLike) -> tuple[ShapeItem, ...]:
+        x.touch_shape()
+        out = (x._dtype.itemsize,)
+        for item in reversed(x._shape):
+            out = (item * out[0], *out)
+        return out
 
     ############################ ufuncs
 

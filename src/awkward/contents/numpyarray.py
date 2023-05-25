@@ -165,7 +165,7 @@ class NumpyArray(Content):
 
     @property
     def strides(self) -> tuple[ShapeItem, ...]:
-        return self._data.strides
+        return self._backend.nplike.strides(self._data)
 
     @property
     def dtype(self) -> np.dtype:
