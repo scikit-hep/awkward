@@ -156,15 +156,15 @@ class NumpyArray(Content):
         return cls(data, parameters=parameters, backend=backend)
 
     @property
-    def shape(self) -> tuple[int, ...]:
+    def shape(self) -> tuple[ShapeItem, ...]:
         return self._data.shape
 
     @property
-    def inner_shape(self) -> tuple[int, ...]:
+    def inner_shape(self) -> tuple[ShapeItem, ...]:
         return self._data.shape[1:]
 
     @property
-    def strides(self) -> tuple[int, ...]:
+    def strides(self) -> tuple[ShapeItem, ...]:
         return self._data.strides
 
     @property
