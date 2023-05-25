@@ -1389,7 +1389,6 @@ class NumpyArray(Content):
             return (
                 self._backend.nplike.array_equal(self.data, other.data)
                 and self.dtype == other.dtype
-                and self.is_contiguous == other.is_contiguous
                 and self.shape == other.shape
             )
         else:
