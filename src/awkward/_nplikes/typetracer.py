@@ -1073,8 +1073,8 @@ class TypeTracer(NumpyLike):
 
         if axis is None:
             size = x.size
-            if isinstance(repeats, TypeTracerArray) and repeats.ndim > 0:
-                raise NotImplementedError
+            if is_unknown_array(repeats):
+                size = unknown_length
             else:
                 size = size * self.index_as_shape_item(repeats)
             return TypeTracerArray._new(x.dtype, (size,))
