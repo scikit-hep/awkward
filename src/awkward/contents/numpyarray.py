@@ -691,10 +691,15 @@ class NumpyArray(Content):
     def _is_unique(self, negaxis, starts, parents, outlength):
         if self.length == 0:
             return True
-
-        elif len(self.shape) != 1 or not self.is_contiguous:
-            contiguous_self = self.to_contiguous()
-            return contiguous_self.to_RegularArray()._is_unique(
+        elif len(self.shape) != 1:
+            return self.to_RegularArray()._is_unique(
+                negaxis,
+                starts,
+                parents,
+                outlength,
+            )
+        elif not self.is_contiguous:
+            return self.to_contiguous()._is_unique(
                 negaxis,
                 starts,
                 parents,
@@ -704,17 +709,17 @@ class NumpyArray(Content):
             out = self._unique(negaxis, starts, parents, outlength)
             if isinstance(out, ak.contents.ListOffsetArray):
                 return out.content.length == self.length
-
-            return out.length == self.length
+            else:
+                return out.length == self.length
 
     def _unique(self, negaxis, starts, parents, outlength):
         if self.shape[0] == 0:
             return self
 
-        if len(self.shape) == 0:
+        elif len(self.shape) == 0:
             return self
 
-        if negaxis is None:
+        elif negaxis is None:
             contiguous_self = self.to_contiguous()
 
             offsets = ak.index.Index64.zeros(2, self._backend.index_nplike)
@@ -765,9 +770,8 @@ class NumpyArray(Content):
             )
 
         # axis is not None
-        if len(self.shape) != 1 or not self.is_contiguous:
-            contiguous_self = self.to_contiguous()
-            return contiguous_self.to_RegularArray()._unique(
+        elif len(self.shape) != 1:
+            return self.to_RegularArray()._unique(
                 negaxis,
                 starts,
                 parents,
@@ -885,14 +889,14 @@ class NumpyArray(Content):
     def _argsort_next(
         self, negaxis, starts, shifts, parents, outlength, ascending, stable
     ):
-        if len(self.shape) == 0:
-            raise TypeError(f"{type(self).__name__} attempting to argsort a scalar ")
-        elif len(self.shape) != 1 or not self.is_contiguous:
-            contiguous_self = self.to_contiguous()
-            return contiguous_self.to_RegularArray()._argsort_next(
+        if len(self.shape) != 1:
+            return self.to_RegularArray()._argsort_next(
                 negaxis, starts, shifts, parents, outlength, ascending, stable
             )
-
+        elif not self.is_contiguous:
+            return self.to_contiguous()._argsort_next(
+                negaxis, starts, shifts, parents, outlength, ascending, stable
+            )
         else:
             parents_length = parents.length
             _offsets_length = ak.index.Index64.empty(1, self._backend.index_nplike)
@@ -992,12 +996,12 @@ class NumpyArray(Content):
             return out
 
     def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
-        if len(self.shape) == 0:
-            raise TypeError(f"{type(self).__name__} attempting to sort a scalar ")
-
-        elif len(self.shape) != 1 or not self.is_contiguous:
-            contiguous_self = self.to_contiguous()
-            return contiguous_self.to_RegularArray()._sort_next(
+        if len(self.shape) != 1:
+            return self.to_RegularArray()._sort_next(
+                negaxis, starts, parents, outlength, ascending, stable
+            )
+        elif not self.is_contiguous:
+            return self.to_contiguous()._sort_next(
                 negaxis, starts, parents, outlength, ascending, stable
             )
 
@@ -1209,8 +1213,10 @@ class NumpyArray(Content):
     def _pad_none(self, target, axis, depth, clip):
         if len(self.shape) == 0:
             raise ValueError("cannot apply ak.pad_none to a scalar")
-        elif len(self.shape) > 1 or not self.is_contiguous:
+        elif len(self.shape) > 1:
             return self.to_RegularArray()._pad_none(target, axis, depth, clip)
+        elif not self.is_contiguous:
+            return self.to_contiguous()._pad_none(target, axis, depth, clip)
         posaxis = maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 != depth:
             raise AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
