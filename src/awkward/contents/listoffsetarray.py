@@ -371,55 +371,47 @@ class ListOffsetArray(Content):
             )
 
     def _broadcast_tooffsets64(self, offsets: Index) -> ListOffsetArray:
-        if not self.backend.index_nplike.known_data:
+        index_nplike = self._backend.index_nplike
+        assert offsets.nplike is index_nplike
+
+        if not index_nplike.known_data:
             self._touch_data(recursive=False)
             offsets._touch_data()
-        if offsets.nplike.known_data and (offsets.length == 0 or offsets[0] != 0):
+
+        if offsets.length is not unknown_length:
+            if offsets.length == 0:
+                raise AssertionError(
+                    "broadcast_tooffsets64 can only be used with non-empty offsets"
+                )
+
+            elif offsets.length - 1 != self.length:
+                raise AssertionError(
+                    "cannot broadcast {} of length {} to length {}".format(
+                        type(self).__name__, self.length, offsets.length - 1
+                    )
+                )
+        if index_nplike.known_data and offsets[0] != 0:
             raise AssertionError(
                 "broadcast_tooffsets64 can only be used with offsets that start at 0, not {}".format(
                     "(empty)" if offsets.length == 0 else str(offsets[0])
                 )
             )
 
-        if offsets.nplike.known_data and offsets.length - 1 != self.length:
-            raise AssertionError(
-                "cannot broadcast {} of length {} to length {}".format(
-                    type(self).__name__, self.length, offsets.length - 1
-                )
-            )
+        # Check whether we need to slice the content, shift our offsets
+        start = self._offsets[0]
+        this_zero_offsets = self._offsets.data
+        if index_nplike.known_data and start == 0:
+            next_content = self._content
+        else:
+            this_zero_offsets = this_zero_offsets - start
+            next_content = self._content[start:]
 
-        starts, stops = self.starts, self.stops
+        if index_nplike.known_data and not index_nplike.array_equal(
+            this_zero_offsets, offsets
+        ):
+            raise AssertionError("cannot broadcast nested list")
 
-        nextcarry = Index64.empty(
-            self._backend.index_nplike.index_as_shape_item(offsets[-1]),
-            self._backend.index_nplike,
-        )
-        assert (
-            nextcarry.nplike is self._backend.index_nplike
-            and offsets.nplike is self._backend.index_nplike
-            and starts.nplike is self._backend.index_nplike
-            and stops.nplike is self._backend.index_nplike
-        )
-        self._handle_error(
-            self._backend[
-                "awkward_ListArray_broadcast_tooffsets",
-                nextcarry.dtype.type,
-                offsets.dtype.type,
-                starts.dtype.type,
-                stops.dtype.type,
-            ](
-                nextcarry.data,
-                offsets.data,
-                offsets.length,
-                starts.data,
-                stops.data,
-                self._content.length,
-            )
-        )
-
-        nextcontent = self._content._carry(nextcarry, True)
-
-        return ListOffsetArray(offsets, nextcontent, parameters=self._parameters)
+        return ListOffsetArray(offsets, next_content, parameters=self._parameters)
 
     def _getitem_next_jagged(
         self, slicestarts: Index, slicestops: Index, slicecontent: Content, tail
