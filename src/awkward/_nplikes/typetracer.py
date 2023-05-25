@@ -198,7 +198,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         )
 
     @property
-    def dtype(self):
+    def dtype(self) -> np.dtype:
         return self._dtype
 
     @property
@@ -214,21 +214,21 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         return self._shape
 
     @property
-    def form_key(self):
+    def form_key(self) -> str | None:
         return self._form_key
 
     @form_key.setter
-    def form_key(self, value):
+    def form_key(self, value: str | None):
         if value is not None and not isinstance(value, str):
             raise TypeError("form_key must be None or a string")
         self._form_key = value
 
     @property
-    def report(self):
+    def report(self) -> TypeTracerReport | None:
         return self._report
 
     @report.setter
-    def report(self, value):
+    def report(self, value: TypeTracerReport | None):
         if value is not None and not isinstance(value, TypeTracerReport):
             raise TypeError("report must be None or a TypeTracerReport")
         self._report = value
@@ -294,7 +294,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         )
 
     @property
-    def itemsize(self):
+    def itemsize(self) -> int:
         return self._dtype.itemsize
 
     class _CTypes:
@@ -316,7 +316,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         | Ellipsis
         | tuple[SupportsIndex | slice | Ellipsis | ArrayLike, ...]
         | ArrayLike,
-    ) -> Self:
+    ) -> Self | int | float | bool | complex:
         if not isinstance(key, tuple):
             key = (key,)
 
