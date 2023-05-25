@@ -594,7 +594,6 @@ cuda_kernels_tests = [
     "awkward_NumpyArray_reduce_adjust_starts_shifts_64",
     "awkward_regularize_arrayslice",
     "awkward_RegularArray_getitem_next_at",
-    "awkward_ListOffsetArray_compact_offsets",
     "awkward_BitMaskedArray_to_IndexedOptionArray",
     "awkward_ByteMaskedArray_getitem_nextcarry",
     "awkward_ByteMaskedArray_getitem_nextcarry_outindex",
