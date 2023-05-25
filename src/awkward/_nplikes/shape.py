@@ -17,7 +17,7 @@ class _UnknownLength:
 
     def __new__(cls, *args, **kwargs):
         raise TypeError(
-            "internal_error: the `TypeTracer` nplike's `TypeTracerArray` object should never be directly instantiated"
+            "internal_error: the _UnknownLength class should never be directly instantiated"
         )
 
     def __add__(self, other) -> Self | NotImplemented:
