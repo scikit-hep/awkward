@@ -45,6 +45,11 @@ class ArrayLike(Protocol):
 
     @property
     @abstractmethod
+    def strides(self) -> tuple[ShapeItem, ...]:
+        ...
+
+    @property
+    @abstractmethod
     def size(self) -> ShapeItem:
         ...
 

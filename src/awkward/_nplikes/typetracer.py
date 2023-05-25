@@ -242,10 +242,10 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
             self._report.touch_data(self._form_key)
 
     @property
-    def strides(self):
+    def strides(self) -> tuple[ShapeItem, ...]:
         self.touch_shape()
         out = (self._dtype.itemsize,)
-        for x in self._shape[:0:-1]:
+        for x in reversed(self._shape):
             out = (x * out[0], *out)
         return out
 
