@@ -420,15 +420,28 @@ class RegularArray(Content):
                 )
             )
 
-        this_offsets = self._compact_offsets64(True)
-        if index_nplike.known_data and not index_nplike.array_equal(
-            offsets.data, this_offsets.data
-        ):
-            raise ValueError("cannot broadcast nested list")
+        if self._size is unknown_length or self._size == 1:
+            count = offsets.data[1:] - offsets.data[:-1]
+            carry = ak.index.Index64(
+                index_nplike.repeat(
+                    index_nplike.arange(
+                        index_nplike.shape_item_as_index(self._length), dtype=np.int64
+                    ),
+                    count,
+                ),
+                nplike=index_nplike,
+            )
+            next_content = self._content._carry(carry, True)
+        else:
+            this_offsets = self._compact_offsets64(True)
+            if index_nplike.known_data and not index_nplike.array_equal(
+                offsets.data, this_offsets.data
+            ):
+                raise ValueError("cannot broadcast nested list")
 
-        nextcontent = self._content[: offsets[-1]]
+            next_content = self._content[: offsets[-1]]
         return ak.contents.ListOffsetArray(
-            offsets, nextcontent, parameters=self._parameters
+            offsets, next_content, parameters=self._parameters
         )
 
     def _getitem_next_jagged(
