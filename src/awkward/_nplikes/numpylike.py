@@ -478,6 +478,10 @@ class NumpyLike(Singleton, Protocol):
     ) -> ArrayLike:
         ...
 
+    @abstractmethod
+    def strides(self, x: ArrayLike) -> tuple[ShapeItem, ...]:
+        ...
+
     ############################ ufuncs
 
     @abstractmethod

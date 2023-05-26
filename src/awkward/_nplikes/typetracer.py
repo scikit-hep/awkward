@@ -198,7 +198,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         )
 
     @property
-    def dtype(self):
+    def dtype(self) -> np.dtype:
         return self._dtype
 
     @property
@@ -214,21 +214,21 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         return self._shape
 
     @property
-    def form_key(self):
+    def form_key(self) -> str | None:
         return self._form_key
 
     @form_key.setter
-    def form_key(self, value):
+    def form_key(self, value: str | None):
         if value is not None and not isinstance(value, str):
             raise TypeError("form_key must be None or a string")
         self._form_key = value
 
     @property
-    def report(self):
+    def report(self) -> TypeTracerReport | None:
         return self._report
 
     @report.setter
-    def report(self, value):
+    def report(self, value: TypeTracerReport | None):
         if value is not None and not isinstance(value, TypeTracerReport):
             raise TypeError("report must be None or a TypeTracerReport")
         self._report = value
@@ -240,14 +240,6 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
     def touch_data(self):
         if self._report is not None:
             self._report.touch_data(self._form_key)
-
-    @property
-    def strides(self):
-        self.touch_shape()
-        out = (self._dtype.itemsize,)
-        for x in self._shape[:0:-1]:
-            out = (x * out[0], *out)
-        return out
 
     @property
     def nplike(self) -> TypeTracer:
@@ -294,7 +286,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         )
 
     @property
-    def itemsize(self):
+    def itemsize(self) -> int:
         return self._dtype.itemsize
 
     class _CTypes:
@@ -316,7 +308,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         | Ellipsis
         | tuple[SupportsIndex | slice | Ellipsis | ArrayLike, ...]
         | ArrayLike,
-    ) -> Self:
+    ) -> Self | int | float | bool | complex:
         if not isinstance(key, tuple):
             key = (key,)
 
@@ -1128,6 +1120,13 @@ class TypeTracer(NumpyLike):
     ) -> TypeTracerArray:
         try_touch_data(x)
         raise NotImplementedError
+
+    def strides(self, x: ArrayLike) -> tuple[ShapeItem, ...]:
+        x.touch_shape()
+        out = (x._dtype.itemsize,)
+        for item in reversed(x._shape):
+            out = (item * out[0], *out)
+        return out
 
     ############################ ufuncs
 
