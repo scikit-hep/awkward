@@ -231,6 +231,14 @@ class Index:
         else:
             return self.nplike.array_equal(self.data, other.data)
 
+    def _touch_data(self, recursive: bool):
+        if not self.nplike.known_data:
+            self._data.touch_data()
+
+    def _touch_shape(self, recursive: bool):
+        if not self.nplike.known_data:
+            self._data.touch_shape()
+
 
 class Index8(Index):
     _expected_dtype = np.dtype(np.int8)
