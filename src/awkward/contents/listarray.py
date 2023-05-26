@@ -388,17 +388,24 @@ class ListArray(Content):
         self._touch_data(recursive=False)
         offsets._touch_data()
 
-        if offsets.nplike.known_data and (offsets.length == 0 or offsets[0] != 0):
+        index_nplike = self._backend.index_nplike
+        assert offsets.nplike is index_nplike
+        if offsets.length is not unknown_length and offsets.length == 0:
             raise AssertionError(
-                "broadcast_tooffsets64 can only be used with offsets that start at 0, not {}".format(
-                    "(empty)" if offsets.length == 0 else str(offsets[0])
-                )
+                "broadcast_tooffsets64 can only be used with non-empty offsets"
             )
-
-        if offsets.nplike.known_data and offsets.length - 1 != self.length:
+        elif index_nplike.known_data and offsets[0] != 0:
             raise AssertionError(
-                "cannot broadcast {} of length {} to length {}".format(
-                    type(self).__name__, self.length, offsets.length - 1
+                f"broadcast_tooffsets64 can only be used with offsets that start at 0, not {offsets[0]}"
+            )
+        elif (
+            offsets.length is not unknown_length
+            and self._length is not unknown_length
+            and offsets.length - 1 != self._length
+        ):
+            raise AssertionError(
+                "cannot broadcast RegularArray of length {} to length {}".format(
+                    self._length, offsets.length - 1
                 )
             )
 

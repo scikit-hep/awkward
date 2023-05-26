@@ -406,21 +406,27 @@ class RegularArray(Content):
         offsets._touch_data()
 
         index_nplike = self._backend.index_nplike
-        if offsets.nplike.known_data and (offsets.length == 0 or offsets[0] != 0):
+        assert offsets.nplike is index_nplike
+        if offsets.length is not unknown_length and offsets.length == 0:
             raise AssertionError(
-                "broadcast_tooffsets64 can only be used with offsets that start at 0, not {}".format(
-                    "(empty)" if offsets.length == 0 else str(offsets[0])
-                )
+                "broadcast_tooffsets64 can only be used with non-empty offsets"
             )
-
-        if offsets.nplike.known_data and offsets.length - 1 != self._length:
+        elif index_nplike.known_data and offsets[0] != 0:
+            raise AssertionError(
+                f"broadcast_tooffsets64 can only be used with offsets that start at 0, not {offsets[0]}"
+            )
+        elif (
+            offsets.length is not unknown_length
+            and self._length is not unknown_length
+            and offsets.length - 1 != self._length
+        ):
             raise AssertionError(
                 "cannot broadcast RegularArray of length {} to length {}".format(
                     self._length, offsets.length - 1
                 )
             )
 
-        if self._size is unknown_length or self._size == 1:
+        if self._size is not unknown_length and self._size == 1:
             count = offsets.data[1:] - offsets.data[:-1]
             carry = ak.index.Index64(
                 index_nplike.repeat(
