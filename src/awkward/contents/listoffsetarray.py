@@ -727,6 +727,15 @@ class ListOffsetArray(Content):
             raise AxisError("axis=0 not allowed for flatten")
 
         elif posaxis is not None and posaxis + 1 == depth + 1:
+            if (
+                self.parameter("__array__") == "string"
+                or self.parameter("__array__") == "bytestring"
+            ):
+                raise ValueError(
+                    "array of strings cannot be directly flattened. "
+                    'To flatten this array, drop the `"__array__"="string"` parameter using '
+                    "`ak.enforce_type`, `ak.with_parameter`, or `ak.without_parameters`/"
+                )
             listoffsetarray = self.to_ListOffsetArray64(True)
             stop = listoffsetarray.offsets[-1]
             content = listoffsetarray.content._getitem_range(0, stop)
