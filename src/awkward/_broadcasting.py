@@ -110,15 +110,23 @@ def in_function(options):
 
 
 def checklength(inputs, options):
-    length = inputs[0].length
-    for x in inputs[1:]:
-        if x.length != length:
+    it = iter(inputs)
+    length: int
+    for content in it:
+        if content.length is not unknown_length:
+            length = content.length
+            break
+
+    for other_content in it:
+        if other_content.length is unknown_length:
+            continue
+        elif other_content.length != length:
             raise ValueError(
                 "cannot broadcast {} of length {} with {} of length {}{}".format(
-                    type(inputs[0]).__name__,
+                    type(content).__name__,
                     length,
-                    type(x).__name__,
-                    x.length,
+                    type(other_content).__name__,
+                    other_content.length,
                     in_function(options),
                 )
             )
@@ -403,11 +411,7 @@ def apply_step(
                 )
 
     # Now all lengths must agree.
-    if backend.nplike.known_data:
-        checklength(contents, options)
-    else:
-        for x in contents:
-            x._touch_shape(recursive=False)
+    checklength(contents, options)
 
     # Load the parameter broadcasting rule implementation
     rule = options["broadcast_parameters_rule"]
