@@ -316,14 +316,12 @@ class BitMaskedArray(Content):
         )
 
     def _touch_data(self, recursive: bool):
-        if not self._backend.index_nplike.known_data:
-            self._mask.data.touch_data()
+        self._mask._touch_data()
         if recursive:
             self._content._touch_data(recursive)
 
     def _touch_shape(self, recursive: bool):
-        if not self._backend.index_nplike.known_data:
-            self._mask.data.touch_shape()
+        self._mask._touch_shape()
         if recursive:
             self._content._touch_shape(recursive)
 

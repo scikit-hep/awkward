@@ -463,17 +463,15 @@ class UnionArray(Content):
         )
 
     def _touch_data(self, recursive: bool):
-        if not self._backend.index_nplike.known_data:
-            self._tags.data.touch_data()
-            self._index.data.touch_data()
+        self._tags._touch_data()
+        self._index._touch_data()
         if recursive:
             for x in self._contents:
                 x._touch_data(recursive)
 
     def _touch_shape(self, recursive: bool):
-        if not self._backend.index_nplike.known_data:
-            self._tags.data.touch_shape()
-            self._index.data.touch_shape()
+        self._tags._touch_shape()
+        self._index._touch_shape()
         if recursive:
             for x in self._contents:
                 x._touch_shape(recursive)
