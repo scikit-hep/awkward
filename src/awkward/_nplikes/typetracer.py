@@ -15,6 +15,7 @@ from awkward._nplikes.numpylike import (
     NumpyMetadata,
     UniqueAllResult,
 )
+from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._regularize import is_integer, is_non_string_like_sequence
 from awkward._typing import (
@@ -539,6 +540,10 @@ class TypeTracer(NumpyLike):
         dtype: numpy.dtype | None = None,
         copy: bool | None = None,
     ) -> TypeTracerArray:
+        if isinstance(obj, PlaceholderArray):
+            assert obj.dtype == dtype or dtype is None
+            return obj
+
         if isinstance(obj, ak.index.Index):
             obj = obj.data
 
@@ -628,9 +633,12 @@ class TypeTracer(NumpyLike):
                 raise TypeError
 
     def ascontiguousarray(self, x: ArrayLike) -> TypeTracerArray:
-        return TypeTracerArray._new(
-            x.dtype, shape=x.shape, form_key=x.form_key, report=x.report
-        )
+        if not isinstance(x, PlaceholderArray):
+            return TypeTracerArray._new(
+                x.dtype, shape=x.shape, form_key=x.form_key, report=x.report
+            )
+        else:
+            return x
 
     def frombuffer(
         self, buffer, *, dtype: np.dtype | None = None, count: int = -1

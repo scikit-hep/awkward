@@ -12,6 +12,7 @@ from awkward._nplikes.numpylike import (
     NumpyMetadata,
     UniqueAllResult,
 )
+from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._typing import Final, Literal
 
@@ -30,7 +31,10 @@ class ArrayModuleNumpyLike(NumpyLike):
         dtype: numpy.dtype | None = None,
         copy: bool | None = None,
     ) -> ArrayLike:
-        if copy:
+        if isinstance(obj, PlaceholderArray):
+            assert obj.dtype == dtype or dtype is None
+            return obj
+        elif copy:
             return self._module.array(obj, dtype=dtype, copy=True)
         elif copy is None:
             return self._module.asarray(obj, dtype=dtype)
@@ -43,10 +47,10 @@ class ArrayModuleNumpyLike(NumpyLike):
                 return self._module.asarray(obj, dtype=dtype)
 
     def ascontiguousarray(self, x: ArrayLike) -> ArrayLike:
-        # Allow buffers to _pretend_ to be contiguous already
-        if x.dtype.metadata is not None and x.dtype.metadata.get("pretend_contiguous"):
+        if isinstance(x, PlaceholderArray):
             return x
-        return self._module.ascontiguousarray(x)
+        else:
+            return self._module.ascontiguousarray(x)
 
     def frombuffer(
         self, buffer, *, dtype: np.dtype | None = None, count: int = -1
