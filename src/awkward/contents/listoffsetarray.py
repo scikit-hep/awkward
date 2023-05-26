@@ -373,12 +373,12 @@ class ListOffsetArray(Content):
             )
         elif (
             offsets.length is not unknown_length
-            and self._length is not unknown_length
-            and offsets.length - 1 != self._length
+            and self._offsets.length is not unknown_length
+            and offsets.length != self._offsets.length
         ):
             raise AssertionError(
                 "cannot broadcast RegularArray of length {} to length {}".format(
-                    self._length, offsets.length - 1
+                    self.length, offsets.length - 1
                 )
             )
 
