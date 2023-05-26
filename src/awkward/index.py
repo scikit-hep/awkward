@@ -231,11 +231,11 @@ class Index:
         else:
             return self.nplike.array_equal(self.data, other.data)
 
-    def _touch_data(self, recursive: bool):
+    def _touch_data(self):
         if not self.nplike.known_data:
             self._data.touch_data()
 
-    def _touch_shape(self, recursive: bool):
+    def _touch_shape(self):
         if not self.nplike.known_data:
             self._data.touch_shape()
 
