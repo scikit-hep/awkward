@@ -427,7 +427,9 @@ class RegularArray(Content):
             )
 
         if self._size is not unknown_length and self._size == 1:
-            count = offsets.data[1:] - offsets.data[:-1]
+            count = index_nplike.astype(
+                offsets.data[1:] - offsets.data[:-1], dtype=np.int64
+            )
             carry = ak.index.Index64(
                 index_nplike.repeat(
                     index_nplike.arange(
