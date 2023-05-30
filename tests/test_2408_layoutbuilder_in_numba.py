@@ -590,7 +590,7 @@ def test_box():
 
     builder = lb.Regular(lb.Numpy(np.float64), 3)
     out7 = f3(builder)
-    assert ak.to_list(out6.snapshot()) == []
+    assert ak.to_list(out7.snapshot()) == []
 
     builder = lb.ListOffset(np.int32, lb.Regular(lb.Numpy(np.float64), 3))
     out8 = f3(builder)
@@ -619,9 +619,8 @@ def test_len():
     builder = lb.ListOffset(np.int8, lb.Empty())
     assert f4(builder) == 0
 
-    # FIXME:
-    # builder = lb.ListOffset(np.int32, lb.ListOffset(np.int32, lb.Numpy(np.int64)))
-    # assert f4(builder) == 0
+    builder = lb.ListOffset(np.int32, lb.ListOffset(np.int32, lb.Numpy(np.int64)))
+    assert f4(builder) == 0
 
 
 def test_from_buffer():
@@ -746,7 +745,7 @@ def test_ListOffset_begin_list():
 def test_ListOffset_end_list():
     @numba.njit
     def f29(builder):
-        content = builder.begin_list()
+        builder.begin_list()
         builder.end_list()
 
         builder.begin_list()
@@ -790,8 +789,10 @@ def test_ListOffset_append():
     assert ak.to_list(builder.snapshot()) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
 
 
+@pytest.mark.skip("FIXME: ListOffset object has no attribute extend")
 def test_ListOffset_extend():
     builder = lb.ListOffset(np.int64, lb.Numpy(np.int32))
+    builder.extend([1, 2, 3])
 
 
 def test_ListOffset_snapshot():
