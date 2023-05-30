@@ -48,6 +48,24 @@ def tonumbatype(content):
         return ListOffset.numbatype(content)
     if isinstance(content, Regular):
         return Regular.numbatype(content)
+    if isinstance(content, Indexed):
+        return Indexed.numbatype(content)
+    if isinstance(content, IndexedOption):
+        return IndexedOption.numbatype(content)
+    if isinstance(content, ByteMasked):
+        return ByteMasked.numbatype(content)
+    if isinstance(content, BitMasked):
+        return BitMasked.numbatype(content)
+    if isinstance(content, Unmasked):
+        return Unmasked.numbatype(content)
+    if isinstance(content, Record):
+        return Record.numbatype(content)
+    if isinstance(content, Tuple):
+        return Tuple.numbatype(content)
+    if isinstance(content, EmptyRecord):
+        return EmptyRecord.numbatype(content)
+    if isinstance(content, Union):
+        return Union.numbatype(content)
 
     return content
 
@@ -89,7 +107,7 @@ def typeof_LayoutBuilder(val, c):
         return ByteMaskedType(val._content)
 
     if isinstance(val, BitMasked):
-        return BitMaskedType(valid_when, lsb_order, val._content)
+        return BitMaskedType(val._valid_when, val._lsb_order, val._content)
 
     if isinstance(val, Unmasked):
         return UnmaskedType(val._content)
@@ -101,11 +119,12 @@ def typeof_LayoutBuilder(val, c):
         return TupleType(val._content)
 
     if isinstance(val, EmptyRecord):
-        return EmptyRecord(is_tuple)
+        return EmptyRecord(val._is_tuple)
 
     if isinstance(val, Union):
         return UnionType(numba.from_dtype(val._index.dtype), val._content)
 
+    # FIXME: raise an error?
     return LayoutBuilderType(val)
 
 
@@ -115,17 +134,17 @@ def LayoutBuilderType_len(builder):
         isinstance(builder, NumpyType)
         or isinstance(builder, EmptyType)
         or isinstance(builder, ListOffsetType)
-        or isinstance(builder, List)
-        or isinstance(builder, Regular)
-        or isinstance(builder, Indexed)
-        or isinstance(builder, IndexedOption)
-        or isinstance(builder, ByteMasked)
-        or isinstance(builder, BitMasked)
-        or isinstance(builder, Unmasked)
-        or isinstance(builder, Record)
-        or isinstance(builder, Tuple)
-        or isinstance(builder, EmptyRecord)
-        or isinstance(builder, Union)
+        or isinstance(builder, ListType)
+        or isinstance(builder, RegularType)
+        or isinstance(builder, IndexedType)
+        or isinstance(builder, IndexedOptionType)
+        or isinstance(builder, ByteMaskedType)
+        or isinstance(builder, BitMaskedType)
+        or isinstance(builder, UnmaskedType)
+        or isinstance(builder, RecordType)
+        or isinstance(builder, TupleType)
+        or isinstance(builder, EmptyRecordType)
+        or isinstance(builder, UnionType)
     ):
 
         def len_impl(builder):
@@ -1341,7 +1360,7 @@ for member in (
     "index",
     "content",
 ):
-    numba.extending.make_attribute_wrapper(RegularType, member, "_" + member)
+    numba.extending.make_attribute_wrapper(IndexedType, member, "_" + member)
 
 
 @numba.extending.unbox(IndexedType)
@@ -1413,11 +1432,26 @@ def Indexed_index(builder):
 
 @final
 class IndexedOption(LayoutBuilder):
-    def __init__(self, dtype, content, *, parameters=None):
+    def __init__(self, dtype, content, *, parameters=None, initial=1024, resize=8.0):
         self._last_valid = -1
-        self._index = GrowableBuffer(dtype=dtype)
+        self._index = GrowableBuffer(dtype=dtype, initial=initial, resize=resize)
         self._content = content
         self._parameters = parameters
+
+    def __repr__(self):
+        return f"<IndexedOption of {self._content!r} with {self._index._length} items>"
+
+    def type(self):
+        return f"ak.numba.lb.IndexedOption({self._index.dtype}, {self._content.type()})"
+
+    def numbatype(self):
+        return IndexedOptionType(
+            numba.from_dtype(self.index.dtype), self.content.numbatype()
+        )
+
+    @property
+    def index(self):
+        return self._index
 
     @property
     def content(self):
@@ -1461,11 +1495,12 @@ class IndexedOption(LayoutBuilder):
         self._index.clear()
         self._content.clear()
 
-    def length(self):
+    @property
+    def _length(self):
         return self._index._length
 
     def __len__(self):
-        return self.length()
+        return self._length
 
     def is_valid(self, error: str):
         if len(self._content) != self._last_valid + 1:
@@ -1485,6 +1520,114 @@ class IndexedOption(LayoutBuilder):
                 parameters=self._parameters,
             )
         )
+
+
+class IndexedOptionType(numba.types.Type):
+    def __init__(self, dtype, content):
+        super().__init__(name=f"ak.numba.lb.IndexedOption({dtype}, {content.type()})")
+        self._dtype = dtype
+        self._content = content
+
+    @classmethod
+    def type(cls):
+        return IndexedOptionType(cls.index.dtype, cls.content)
+
+    @property
+    def parameters(self):
+        return numba.types.StringLiteral
+
+    @property
+    def index(self):
+        return ak.numba.GrowableBufferType(self._dtype)
+
+    @property
+    def content(self):
+        return tonumbatype(self._content)
+
+    @property
+    def length(self):
+        return numba.types.int64
+
+
+@numba.extending.register_model(IndexedOptionType)
+class IndexedOptionModel(numba.extending.models.StructModel):
+    def __init__(self, dmm, fe_type):
+        members = [
+            ("index", fe_type.index),
+            ("content", fe_type.content),
+        ]
+        super().__init__(dmm, fe_type, members)
+
+
+for member in (
+    "index",
+    "content",
+):
+    numba.extending.make_attribute_wrapper(IndexedOptionType, member, "_" + member)
+
+
+@numba.extending.unbox(IndexedOptionType)
+def IndexedOptionType_unbox(typ, obj, c):
+    # get PyObjects
+    index_obj = c.pyapi.object_getattr_string(obj, "_index")
+    content_obj = c.pyapi.object_getattr_string(obj, "_content")
+
+    # fill the lowered model
+    out = numba.core.cgutils.create_struct_proxy(typ)(c.context, c.builder)
+    out.index = c.pyapi.to_native_value(typ.index, index_obj).value
+    out.content = c.pyapi.to_native_value(typ.content, content_obj).value
+
+    # decref PyObjects
+    c.pyapi.decref(index_obj)
+    c.pyapi.decref(content_obj)
+
+    # return it or the exception
+    is_error = numba.core.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
+    return numba.extending.NativeValue(out._getvalue(), is_error=is_error)
+
+
+@numba.extending.box(IndexedOptionType)
+def IndexedOptionType_box(typ, val, c):
+    # get PyObject of the Indexed class
+    IndexedOption_obj = c.pyapi.unserialize(c.pyapi.serialize_object(IndexedOption))
+
+    builder = numba.core.cgutils.create_struct_proxy(typ)(
+        c.context, c.builder, value=val
+    )
+    index_obj = c.pyapi.from_native_value(typ.index, builder.index, c.env_manager)
+    content_obj = c.pyapi.from_native_value(typ.content, builder.content, c.env_manager)
+
+    out = c.pyapi.call_function_objargs(
+        Indexed_obj,
+        (
+            index_obj,
+            content_obj,
+        ),
+    )
+
+    # decref PyObjects
+    c.pyapi.decref(IndexedOption_obj)
+
+    c.pyapi.decref(index_obj)
+    c.pyapi.decref(content_obj)
+
+    return out
+
+
+@numba.extending.overload_method(IndexedOptionType, "_length_get", inline="always")
+def IndexedOption_length(builder):
+    def getter(builder):
+        return builder._length
+
+    return getter
+
+
+@numba.extending.overload_method(IndexedOptionType, "_index", inline="always")
+def IndexedOption_index(builder):
+    def getter(builder):
+        return builder._index
+
+    return getter
 
 
 ########## ByteMasked #########################################################
