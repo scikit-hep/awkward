@@ -584,13 +584,17 @@ def test_box():
     out6 = f3(builder)
     assert ak.to_list(out6.snapshot()) == []
 
-    # FIXME:
-    # builder = lb.ListOffset(np.int32, lb.ListOffset(np.int64, lb.Numpy(np.int64)))
-    #
-    # out5 = f3(builder)
-    # assert ak.to_list(out5.snapshot()) == []
+    builder = lb.ListOffset(np.int32, lb.ListOffset(np.int64, lb.Numpy(np.int64)))
+    out5 = f3(builder)
+    assert ak.to_list(out5.snapshot()) == []
+
     builder = lb.Regular(lb.Numpy(np.float64), 3)
     out7 = f3(builder)
+    assert ak.to_list(out6.snapshot()) == []
+
+    builder = lb.ListOffset(np.int32, lb.Regular(lb.Numpy(np.float64), 3))
+    out8 = f3(builder)
+    assert ak.to_list(out8.snapshot()) == []
 
 
 def test_len():
@@ -830,7 +834,6 @@ def test_List_append():
     assert builder.is_valid(error), error.value
 
 
-# @pytest.mark.skip("FIXME: builder.end_list()")
 def test_Regular_append():
     @numba.njit
     def f33(builder):

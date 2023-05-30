@@ -44,6 +44,10 @@ def tonumbatype(content):
         return Empty.numbatype(content)
     if isinstance(content, ListOffset):
         return ListOffset.numbatype(content)
+    if isinstance(content, Regular):
+        return Regular.numbatype(content)
+
+    return content
 
 
 class LayoutBuilderType(numba.types.Type):
@@ -997,6 +1001,12 @@ class Regular(LayoutBuilder):
 
     def parameters(self):
         return self._parameters
+
+    def type(self):
+        return f"ak.numba.lb.Regular({self._content.type()})"
+
+    def numbatype(self):
+        return RegularType(self.content.numbatype(), numba.types.int64)
 
     def clear(self):
         self._content.clear()
