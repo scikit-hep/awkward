@@ -2080,6 +2080,15 @@ class Unmasked(LayoutBuilder):
         self._content = content
         self._parameters = parameters
 
+    def __repr__(self):
+        return f"<Unmasked of {self._content!r}>"
+
+    def type(self):
+        return f"ak.numba.lb.Unmasked({self._content.type()})"
+
+    def numbatype(self):
+        return UnmaskedType(self.content.numbatype())
+
     @property
     def content(self):
         return self._content
@@ -2096,11 +2105,12 @@ class Unmasked(LayoutBuilder):
     def clear(self):
         self._content.clear()
 
-    def length(self):
+    @property
+    def _length(self):
         return len(self._content)
 
     def __len__(self):
-        return self.length()
+        return self._length
 
     def is_valid(self, error: str):
         return self._content.is_valid(error)
@@ -2115,6 +2125,89 @@ class Unmasked(LayoutBuilder):
                 parameters=self._parameters,
             )
         )
+
+
+class UnmaskedType(numba.types.Type):
+    def __init__(self, content):
+        super().__init__(name=f"ak.numba.lb.Unmasked({content.type()})")
+        self._content = content
+
+    @classmethod
+    def type(cls):
+        return UnmaskedType(cls.content)
+
+    @property
+    def parameters(self):
+        return numba.types.StringLiteral
+
+    @property
+    def content(self):
+        return tonumbatype(self._content)
+
+    @property
+    def length(self):
+        return numba.types.int64
+
+
+@numba.extending.register_model(UnmaskedType)
+class UnmaskedModel(numba.extending.models.StructModel):
+    def __init__(self, dmm, fe_type):
+        members = [
+            ("content", fe_type.content),
+        ]
+        super().__init__(dmm, fe_type, members)
+
+
+for member in ("content",):
+    numba.extending.make_attribute_wrapper(UnmaskedType, member, "_" + member)
+
+
+@numba.extending.unbox(UnmaskedType)
+def UnmaskedType_unbox(typ, obj, c):
+    # get PyObjects
+    content_obj = c.pyapi.object_getattr_string(obj, "_content")
+
+    # fill the lowered model
+    out = numba.core.cgutils.create_struct_proxy(typ)(c.context, c.builder)
+    out.content = c.pyapi.to_native_value(typ.content, content_obj).value
+
+    # decref PyObjects
+    c.pyapi.decref(content_obj)
+
+    # return it or the exception
+    is_error = numba.core.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
+    return numba.extending.NativeValue(out._getvalue(), is_error=is_error)
+
+
+@numba.extending.box(UnmaskedType)
+def UnmaskedType_box(typ, val, c):
+    # get PyObject of the Unmasked class
+    Unmasked_obj = c.pyapi.unserialize(c.pyapi.serialize_object(Unmasked))
+
+    builder = numba.core.cgutils.create_struct_proxy(typ)(
+        c.context, c.builder, value=val
+    )
+    content_obj = c.pyapi.from_native_value(typ.content, builder.content, c.env_manager)
+
+    out = c.pyapi.call_function_objargs(
+        Unmasked_obj,
+        (content_obj,),
+    )
+
+    # decref PyObjects
+    c.pyapi.decref(Unmasked_obj)
+
+    c.pyapi.decref(content_obj)
+
+    return out
+
+
+@numba.extending.overload_method(UnmaskedType, "_length_get", inline="always")
+def Unmasked_length(builder):
+    def getter(builder):
+        return builder._length
+
+    return getter
 
 
 ########## Record #########################################################
