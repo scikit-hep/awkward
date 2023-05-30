@@ -48,7 +48,7 @@ def test_categorical_from_arrow_ChunkedArray():
     )
 
     batches = [batch] * 3
-    batches_mixed_schema = [batch] + [batch_new_schema]
+    batches_mixed_schema = [batch, batch_new_schema]
 
     table = pyarrow.Table.from_batches(batches)
     table_mixed_schema = pyarrow.Table.from_batches(batches_mixed_schema)

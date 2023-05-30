@@ -84,14 +84,9 @@ class RegularType(Type):
                     *self._content._str(indent, compact, behavior),
                 ]
             else:
-                out = [
-                    "[",
-                    str(self._size),
-                    " * ",
-                    *self._content._str(indent, compact, behavior),
-                ] + [", ", params, "]"]
+                out = ["[", str(self._size), " * ", *self._content._str(indent, compact, behavior), ", ", params, "]"]
 
-        return [self._str_categorical_begin(), *out] + [self._str_categorical_end()]
+        return [self._str_categorical_begin(), *out, self._str_categorical_end()]
 
     def __repr__(self):
         args = [repr(self._content), repr(self._size), *self._repr_args()]

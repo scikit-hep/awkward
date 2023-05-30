@@ -96,11 +96,11 @@ class UnionType(Type):
             params = self._str_parameters()
 
             if params is None:
-                out = ["union[", pre, *flat_children] + [post, "]"]
+                out = ["union[", pre, *flat_children, post, "]"]
             else:
-                out = ["union[", pre, *flat_children] + [", ", post, params, "]"]
+                out = ["union[", pre, *flat_children, ", ", post, params, "]"]
 
-        return [self._str_categorical_begin(), *out] + [self._str_categorical_end()]
+        return [self._str_categorical_begin(), *out, self._str_categorical_end()]
 
     def __repr__(self):
         args = [repr(self._contents), *self._repr_args()]
