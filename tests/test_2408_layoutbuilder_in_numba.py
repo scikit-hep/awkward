@@ -530,6 +530,12 @@ def test_unbox():
     builder = lb.Regular(lb.Numpy(np.float64), size=3)
     f1(builder)
 
+    builder = lb.Indexed(np.int64, lb.Numpy(np.float64))
+    f1(builder)
+
+    builder = lb.IndexedOption(np.int64, lb.Numpy(np.float64))
+    f1(builder)
+
 
 def test_unbox_for_loop():
     @numba.njit
@@ -594,6 +600,14 @@ def test_box():
     builder = lb.ListOffset(np.int32, lb.Regular(lb.Numpy(np.float64), 3))
     out8 = f3(builder)
     assert ak.to_list(out8.snapshot()) == []
+
+    builder = lb.Indexed(np.int64, lb.Numpy(np.float64))
+    out9 = f3(builder)
+    assert ak.to_list(out9.snapshot()) == []
+
+    builder = lb.IndexedOption(np.int64, lb.Numpy(np.float64))
+    out10 = f3(builder)
+    assert ak.to_list(out10.snapshot()) == []
 
 
 def test_len():

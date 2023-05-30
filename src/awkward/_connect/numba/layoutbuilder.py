@@ -100,6 +100,9 @@ def typeof_LayoutBuilder(val, c):
     if isinstance(val, Regular):
         return RegularType(val._content, val._size)
 
+    if isinstance(val, Indexed):
+        return IndexedType(numba.from_dtype(val._index.dtype), val._content)
+
     if isinstance(val, IndexedOption):
         return IndexedOptionType(numba.from_dtype(val._index.dtype), val._content)
 
@@ -1598,7 +1601,7 @@ def IndexedOptionType_box(typ, val, c):
     content_obj = c.pyapi.from_native_value(typ.content, builder.content, c.env_manager)
 
     out = c.pyapi.call_function_objargs(
-        Indexed_obj,
+        IndexedOption_obj,
         (
             index_obj,
             content_obj,
