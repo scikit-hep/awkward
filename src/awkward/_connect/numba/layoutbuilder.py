@@ -133,21 +133,24 @@ def typeof_LayoutBuilder(val, c):
 
 @numba.extending.overload(len)
 def LayoutBuilderType_len(builder):
-    if (
-        isinstance(builder, NumpyType)
-        or isinstance(builder, EmptyType)
-        or isinstance(builder, ListOffsetType)
-        or isinstance(builder, ListType)
-        or isinstance(builder, RegularType)
-        or isinstance(builder, IndexedType)
-        or isinstance(builder, IndexedOptionType)
-        or isinstance(builder, ByteMaskedType)
-        or isinstance(builder, BitMaskedType)
-        or isinstance(builder, UnmaskedType)
-        or isinstance(builder, RecordType)
-        or isinstance(builder, TupleType)
-        or isinstance(builder, EmptyRecordType)
-        or isinstance(builder, UnionType)
+    if isinstance(
+        builder,
+        (
+            BitMaskedType,
+            ByteMaskedType,
+            EmptyRecordType,
+            EmptyType,
+            IndexedOptionType,
+            IndexedType,
+            ListOffsetType,
+            ListType,
+            NumpyType,
+            RecordType,
+            RegularType,
+            TupleType,
+            UnionType,
+            UnmaskedType,
+        ),
     ):
 
         def len_impl(builder):
@@ -2222,6 +2225,16 @@ class Record(LayoutBuilder):
         self._first_content = self._contents[0]
         self._parameters = parameters
 
+    # FIXME:
+    def __repr__(self):
+        return f"<Record of {self._contents!r} with {self._fields} items>"
+
+    def type(self):
+        return f"ak.numba.lb.Record({self._contents.type()})"
+
+    def numbatype(self):
+        return RecordType(self.content.numbatype())
+
     def field(self, name):
         return self._contents[self._fields.index(name)]
 
@@ -2267,6 +2280,29 @@ class Record(LayoutBuilder):
                 parameters=self._parameters,
             )
         )
+
+
+class RecordType(numba.types.Type):
+    def __init__(self, contents, fields):
+        super().__init__(name=f"ak.numba.lb.Record({contents.type()})")
+        self._contents = contents
+        self._fields = fields
+
+    @classmethod
+    def type(cls):
+        return RecordType(cls.contents, cls.fields)
+
+    @property
+    def parameters(self):
+        return numba.types.StringLiteral
+
+    @property
+    def field(self, name):
+        return tonumbatype(self._contents[self._fields.index(name)])
+
+    @property
+    def length(self):
+        return numba.types.int64
 
 
 ########## Tuple #######################################################
@@ -2326,6 +2362,28 @@ class Tuple(LayoutBuilder):
         )
 
 
+class TupleType(numba.types.Type):
+    def __init__(self, contents):
+        super().__init__(name=f"ak.numba.lb.Tuple({contents.type()})")
+        self._contents = contents
+
+    @classmethod
+    def type(cls):
+        return TupleType(cls.contents)
+
+    @property
+    def parameters(self):
+        return numba.types.StringLiteral
+
+    @property
+    def index(self, at):
+        return tonumbatype(self._contents[at])
+
+    @property
+    def length(self):
+        return numba.types.int64
+
+
 ########## EmptyRecord #######################################################
 
 
@@ -2373,15 +2431,41 @@ class EmptyRecord(LayoutBuilder):
         )
 
 
+class EmptyRecordType(numba.types.Type):
+    def __init__(self, is_tuple):
+        super().__init__(name="ak.numba.lb.EmptyRecord()")
+        self._is_tuple = is_tuple
+
+    @classmethod
+    def type(cls):
+        return EmptyRecordType(cls._is_tuple)
+
+    @property
+    def parameters(self):
+        return numba.types.StringLiteral
+
+    @property
+    def length(self):
+        return numba.types.int64
+
+
 ########## Union #######################################################
 
 
 @final
 class Union(LayoutBuilder):
-    def __init__(self, dtype, contents, *, parameters=None):
+    def __init__(
+        self,
+        dtype,
+        contents,
+        *,
+        parameters=None,
+        initial=1024,
+        resize=8.0,
+    ):
         self._last_valid_index = [-1] * len(contents)
-        self._tags = GrowableBuffer("int8")
-        self._index = GrowableBuffer(dtype=dtype)
+        self._tags = GrowableBuffer("int8", initial=initial, resize=resize)
+        self._index = GrowableBuffer(dtype=dtype, initial=initial, resize=resize)
         self._contents = contents
         self._parameters = parameters
 
@@ -2436,3 +2520,22 @@ class Union(LayoutBuilder):
                 parameters=self._parameters,
             )
         )
+
+
+class UnionType(numba.types.Type):
+    def __init__(self, dtype, contents):
+        super().__init__(name="ak.numba.lb.Union()")
+        self._dtype = dtype
+        self._contents = contents
+
+    @classmethod
+    def type(cls):
+        return UnionType(cls._is_tuple)
+
+    @property
+    def parameters(self):
+        return numba.types.StringLiteral
+
+    @property
+    def length(self):
+        return numba.types.int64
