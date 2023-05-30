@@ -42,6 +42,8 @@ def tonumbatype(content):
         return Numpy.numbatype(content)
     if isinstance(content, Empty):
         return Empty.numbatype(content)
+    if isinstance(content, List):
+        return List.numbatype(content)
     if isinstance(content, ListOffset):
         return ListOffset.numbatype(content)
     if isinstance(content, Regular):
@@ -115,6 +117,7 @@ def LayoutBuilderType_len(builder):
         or isinstance(builder, ListOffsetType)
         or isinstance(builder, List)
         or isinstance(builder, Regular)
+        or isinstance(builder, Indexed)
         or isinstance(builder, IndexedOption)
         or isinstance(builder, ByteMasked)
         or isinstance(builder, BitMasked)
@@ -578,7 +581,7 @@ class ListOffsetType(numba.types.Type):
 
     @property
     def length(self):
-        return numba.types.float64
+        return numba.types.int64
 
 
 @numba.extending.register_model(ListOffsetType)
@@ -907,7 +910,7 @@ def List_starts(builder):
 
 
 @numba.extending.overload_method(ListType, "_stops", inline="always")
-def List_starts(builder):
+def List_stops(builder):
     def getter(builder):
         return builder._stops
 
@@ -1213,11 +1216,24 @@ def Regular_snapshot(builder):
 
 @final
 class Indexed(LayoutBuilder):
-    def __init__(self, dtype, content, *, parameters=None):
+    def __init__(self, dtype, content, *, parameters=None, initial=1024, resize=8.0):
         self._last_valid = -1
-        self._index = GrowableBuffer(dtype=dtype)
+        self._index = GrowableBuffer(dtype=dtype, initial=initial, resize=resize)
         self._content = content
         self._parameters = parameters
+
+    def __repr__(self):
+        return f"<Indexed of {self._content!r} with {self._index._length} items>"
+
+    def type(self):
+        return f"ak.numba.lb.Indexed({self._index.dtype}, {self._content.type()})"
+
+    def numbatype(self):
+        return IndexedType(numba.from_dtype(self.index.dtype), self.content.numbatype())
+
+    @property
+    def index(self):
+        return self._index
 
     @property
     def content(self):
@@ -1255,11 +1271,12 @@ class Indexed(LayoutBuilder):
         self._index.clear()
         self._content.clear()
 
-    def length(self):
+    @property
+    def _length(self):
         return self._index._length
 
     def __len__(self):
-        return self.length()
+        return self._length
 
     def is_valid(self, error: str):
         if len(self._content) != self._index.length():
