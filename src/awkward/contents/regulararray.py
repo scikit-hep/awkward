@@ -428,7 +428,10 @@ class RegularArray(Content):
 
         if self._size is not unknown_length and self._size == 1:
             count = index_nplike.astype(
-                offsets.data[1:] - offsets.data[:-1], dtype=np.int64
+                offsets.data[1:] - offsets.data[:-1],
+                # This will be a lossy cast on 32-bit systems, but there should be no allocatable arrays
+                # with such shapes anyway.
+                dtype=np.intp,
             )
             carry = ak.index.Index64(
                 index_nplike.repeat(
