@@ -539,6 +539,10 @@ def test_unbox():
     builder = lb.ByteMasked(lb.Numpy(np.float64), valid_when=True)
     f1(builder)
 
+    # FIXME:
+    # builder = lb.BitMasked(True, True, lb.Numpy(np.float64))
+    # f1(builder)
+
 
 def test_unbox_for_loop():
     @numba.njit
@@ -614,7 +618,12 @@ def test_box():
 
     builder = lb.ByteMasked(lb.Numpy(np.float64), valid_when=True)
     out11 = f3(builder)
-    assert ak.to_list(out10.snapshot()) == []
+    assert ak.to_list(out11.snapshot()) == []
+
+    # FIXME:
+    # builder = lb.BitMasked(True, True, lb.Numpy(np.float64))
+    # out12 = f3(builder)
+    # assert ak.to_list(out12.snapshot()) == []
 
 
 def test_len():
