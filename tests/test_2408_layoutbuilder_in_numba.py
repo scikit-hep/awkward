@@ -506,10 +506,27 @@ def test_unbox():
         x  # noqa: B018 (we want to test the unboxing)
         return 3.14
 
-    builder = lb.Numpy(np.int32)
+    # FIXME:
+    # builder = lb.BitMasked(True, True, lb.Numpy(np.float64))
+    # f1(builder)
+
+    builder = lb.ByteMasked(lb.Numpy(np.float64), valid_when=True)
     f1(builder)
 
+    # builder = lb.EmptyRecord(True)
+    # assert builder.type() == "ak.numba.lb.EmptyRecord(True)"
+    # f1(builder)
+
     builder = lb.Empty()
+    f1(builder)
+
+    builder = lb.IndexedOption(np.int64, lb.Numpy(np.float64))
+    f1(builder)
+
+    builder = lb.Indexed(np.int64, lb.Numpy(np.float64))
+    f1(builder)
+
+    builder = lb.ListOffset(np.int32, lb.List(np.int64, lb.Numpy(np.int64)))
     f1(builder)
 
     builder = lb.ListOffset(np.int32, lb.Numpy(np.float64))
@@ -524,24 +541,35 @@ def test_unbox():
     builder = lb.List(np.int32, lb.Empty())
     f1(builder)
 
-    builder = lb.ListOffset(np.int32, lb.List(np.int64, lb.Numpy(np.int64)))
+    builder = lb.Numpy(np.int32)
+    f1(builder)
+
+    builder = lb.Record(
+        [
+            lb.Numpy(np.float64),
+            lb.Numpy(np.int64),
+            lb.Numpy(np.uint8),
+        ],
+        ["one", "two", "three"],
+    )
     f1(builder)
 
     builder = lb.Regular(lb.Numpy(np.float64), size=3)
     f1(builder)
 
-    builder = lb.Indexed(np.int64, lb.Numpy(np.float64))
+    builder = lb.Tuple(
+        [lb.Numpy(np.float64), lb.ListOffset(np.int64, lb.Numpy(np.int32))]
+    )
     f1(builder)
 
-    builder = lb.IndexedOption(np.int64, lb.Numpy(np.float64))
+    builder = lb.Union(
+        np.int64,
+        [
+            lb.Numpy(np.float64),
+            lb.ListOffset(np.int64, lb.Numpy(np.int32)),
+        ],
+    )
     f1(builder)
-
-    builder = lb.ByteMasked(lb.Numpy(np.float64), valid_when=True)
-    f1(builder)
-
-    # FIXME:
-    # builder = lb.BitMasked(True, True, lb.Numpy(np.float64))
-    # f1(builder)
 
     builder = lb.Unmasked(lb.Numpy(np.int64))
     f1(builder)
