@@ -430,7 +430,7 @@ class RegularArray(Content):
             count = offsets.data[1:] - offsets.data[:-1]
             # Sanity check that our kernel isn't losing values here
             assert (
-                self._backend.index_nplike.known_data
+                not self._backend.index_nplike.known_data
                 or (count.dtype == np.intp)
                 or (self._backend.index_nplike.max(count) <= np.iinfo(np.intp).max)
             )
