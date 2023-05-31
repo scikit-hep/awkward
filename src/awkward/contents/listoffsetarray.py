@@ -214,14 +214,12 @@ class ListOffsetArray(Content):
         )
 
     def _touch_data(self, recursive: bool):
-        if not self._backend.index_nplike.known_data:
-            self._offsets.data.touch_data()
+        self._offsets._touch_data()
         if recursive:
             self._content._touch_data(recursive)
 
     def _touch_shape(self, recursive: bool):
-        if not self._backend.index_nplike.known_data:
-            self._offsets.data.touch_shape()
+        self._offsets._touch_shape()
         if recursive:
             self._content._touch_shape(recursive)
 
@@ -380,7 +378,7 @@ class ListOffsetArray(Content):
     def _broadcast_tooffsets64(self, offsets: Index) -> ListOffsetArray:
         if not self.backend.index_nplike.known_data:
             self._touch_data(recursive=False)
-            offsets.data.touch_data()
+            offsets._touch_data()
         if offsets.nplike.known_data and (offsets.length == 0 or offsets[0] != 0):
             raise AssertionError(
                 "broadcast_tooffsets64 can only be used with offsets that start at 0, not {}".format(
@@ -729,6 +727,15 @@ class ListOffsetArray(Content):
             raise AxisError("axis=0 not allowed for flatten")
 
         elif posaxis is not None and posaxis + 1 == depth + 1:
+            if (
+                self.parameter("__array__") == "string"
+                or self.parameter("__array__") == "bytestring"
+            ):
+                raise ValueError(
+                    "array of strings cannot be directly flattened. "
+                    'To flatten this array, drop the `"__array__"="string"` parameter using '
+                    "`ak.enforce_type`, `ak.with_parameter`, or `ak.without_parameters`/"
+                )
             listoffsetarray = self.to_ListOffsetArray64(True)
             stop = listoffsetarray.offsets[-1]
             content = listoffsetarray.content._getitem_range(0, stop)
