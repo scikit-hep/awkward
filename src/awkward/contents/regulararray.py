@@ -439,7 +439,7 @@ class RegularArray(Content):
                     index_nplike.arange(
                         index_nplike.shape_item_as_index(self._length), dtype=np.int64
                     ),
-                    count,
+                    index_nplike.astype(count, np.intp),
                 ),
                 nplike=index_nplike,
             )
