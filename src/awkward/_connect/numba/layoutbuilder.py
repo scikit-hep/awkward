@@ -706,16 +706,6 @@ def ListOffset_begin_list(builder):
         return getter
 
 
-# @numba.extending.overload_method(ListOffsetType, "append")
-# def ListOffset_append(builder, datum):
-#     if isinstance(builder, ListOffsetType):
-#
-#         def append(builder, datum):
-#             builder.append(datum)
-#
-#         return append
-
-
 @numba.extending.overload_method(ListOffsetType, "end_list", inline="always")
 def ListOffset_end_list(builder):
     if isinstance(builder, ListOffsetType):
@@ -724,24 +714,6 @@ def ListOffset_end_list(builder):
             builder._offsets.append(len(builder._content))
 
         return impl
-
-
-# @numba.extending.overload_method(ListOffsetType, "extend")
-# def ListOffset_extend(builder, datum):
-#     if isinstance(builder, ListOffsetType):
-#
-#         def extend(builder, datum):
-#             builder.extend(datum)
-#
-#         return extend
-
-
-@numba.extending.overload_method(ListOffsetType, "snapshot")
-def ListOffset_snapshot(builder):
-    def snapshot(builder):
-        return builder.snapshot()
-
-    return snapshot
 
 
 ########## List ############################################################
