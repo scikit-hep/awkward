@@ -555,7 +555,7 @@ class ListOffset(LayoutBuilder):
 
     @property
     def _length(self):
-        return self._offsets._length - 1
+        return self._offsets._length_pos[0] - 1
 
     def __len__(self):
         return self._length
