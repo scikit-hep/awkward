@@ -387,75 +387,76 @@ class RegularArray(Content):
         )
 
     def _compact_offsets64(self, start_at_zero):
-        out = ak.index.Index64.empty(
-            self._length + 1,
-            self._backend.index_nplike,
-        )
-        assert out.nplike is self._backend.index_nplike
-        self._handle_error(
-            self._backend["awkward_RegularArray_compact_offsets", out.dtype.type](
-                out.data,
-                self._length,
-                self._size,
+        index_nplike = self._backend.index_nplike
+        if self._size is not unknown_length and self._size == 0:
+            return ak.index.Index64.zeros(self._length + 1, nplike=index_nplike)
+        else:
+            return ak.index.Index64(
+                index_nplike.arange(
+                    0,
+                    index_nplike.shape_item_as_index(self._length * self._size) + 1,
+                    index_nplike.shape_item_as_index(self._size),
+                    dtype=np.int64,
+                ),
+                nplike=index_nplike,
             )
-        )
-        return out
 
     def _broadcast_tooffsets64(self, offsets: Index) -> ListOffsetArray:
-        if not self.backend.index_nplike.known_data:
-            self._touch_data(recursive=False)
-            offsets._touch_data()
-        if offsets.nplike.known_data and (offsets.length == 0 or offsets[0] != 0):
-            raise AssertionError(
-                "broadcast_tooffsets64 can only be used with offsets that start at 0, not {}".format(
-                    "(empty)" if offsets.length == 0 else str(offsets[0])
-                )
-            )
+        self._touch_data(recursive=False)
+        offsets._touch_data()
 
-        if offsets.nplike.known_data and offsets.length - 1 != self._length:
+        index_nplike = self._backend.index_nplike
+        assert offsets.nplike is index_nplike
+        if offsets.length is not unknown_length and offsets.length == 0:
+            raise AssertionError(
+                "broadcast_tooffsets64 can only be used with non-empty offsets"
+            )
+        elif index_nplike.known_data and offsets[0] != 0:
+            raise AssertionError(
+                f"broadcast_tooffsets64 can only be used with offsets that start at 0, not {offsets[0]}"
+            )
+        elif (
+            offsets.length is not unknown_length
+            and self._length is not unknown_length
+            and offsets.length - 1 != self._length
+        ):
             raise AssertionError(
                 "cannot broadcast RegularArray of length {} to length {}".format(
                     self._length, offsets.length - 1
                 )
             )
 
-        if self._size == 1:
-            carrylen = self._backend.index_nplike.index_as_shape_item(offsets[-1])
-            nextcarry = ak.index.Index64.empty(carrylen, self._backend.index_nplike)
+        if self._size is not unknown_length and self._size == 1:
+            count = offsets.data[1:] - offsets.data[:-1]
+            # Sanity check that our kernel isn't losing values here
             assert (
-                nextcarry.nplike is self._backend.index_nplike
-                and offsets.nplike is self._backend.index_nplike
+                not self._backend.index_nplike.known_data
+                or count.size is unknown_length
+                or count.size == 0
+                or count.dtype == np.intp
+                or self._backend.index_nplike.max(count) <= np.iinfo(np.intp).max
             )
-            self._handle_error(
-                self._backend[
-                    "awkward_RegularArray_broadcast_tooffsets_size1",
-                    nextcarry.dtype.type,
-                    offsets.dtype.type,
-                ](
-                    nextcarry.data,
-                    offsets.data,
-                    offsets.length,
-                )
+            carry = ak.index.Index64(
+                index_nplike.repeat(
+                    index_nplike.arange(
+                        index_nplike.shape_item_as_index(self._length), dtype=np.int64
+                    ),
+                    index_nplike.astype(count, np.intp),
+                ),
+                nplike=index_nplike,
             )
-            nextcontent = self._content._carry(nextcarry, True)
-            return ak.contents.ListOffsetArray(
-                offsets, nextcontent, parameters=self._parameters
-            )
-
+            next_content = self._content._carry(carry, True)
         else:
-            assert offsets.nplike is self._backend.index_nplike
-            self._handle_error(
-                self._backend[
-                    "awkward_RegularArray_broadcast_tooffsets", offsets.dtype.type
-                ](
-                    offsets.data,
-                    offsets.length,
-                    self._size,
-                )
-            )
-            return ak.contents.ListOffsetArray(
-                offsets, self._content, parameters=self._parameters
-            )
+            this_offsets = self._compact_offsets64(True)
+            if index_nplike.known_data and not index_nplike.array_equal(
+                offsets.data, this_offsets.data
+            ):
+                raise ValueError("cannot broadcast nested list")
+
+            next_content = self._content[: offsets[-1]]
+        return ak.contents.ListOffsetArray(
+            offsets, next_content, parameters=self._parameters
+        )
 
     def _getitem_next_jagged(
         self, slicestarts: Index, slicestops: Index, slicecontent: Content, tail
