@@ -48,24 +48,21 @@ class PlaceholderArray(ArrayLike):
 
     @property
     def T(self):
-        return type(self)(self._nplike, self._dtype, self._shape[::-1])
+        return type(self)(self._nplike, self._shape[::-1], self._dtype)
 
     def view(self, dtype: dtype) -> Self:
         dtype = np.dtype(dtype)
-        if (
-            self.itemsize != dtype.itemsize
-            and len(self._shape) >= 1
-            and self._shape[-1] is not None
-        ):
-            last = int(
-                round(self._shape[-1] * self.itemsize / np.dtype(dtype).itemsize)
-            )
+        if len(self._shape) >= 1:
+            last, remainder = divmod(self._shape[-1] * self.itemsize, dtype.itemsize)
+            if remainder is not unknown_length and remainder != 0:
+                raise ValueError(
+                    "new size of array with larger dtype must be a "
+                    "divisor of the total size in bytes (of the last axis of the array)"
+                )
             shape = self._shape[:-1] + (last,)
         else:
             shape = self._shape
-        return self._new(
-            dtype, shape=shape, form_key=self._form_key, report=self._report
-        )
+        return type(self)(self._nplike, shape, dtype)
 
     def __getitem__(self, index):
         if isinstance(index, slice):

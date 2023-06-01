@@ -253,14 +253,13 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
 
     def view(self, dtype: np.dtype) -> Self:
         dtype = np.dtype(dtype)
-        if (
-            self.itemsize != dtype.itemsize
-            and self.ndim >= 1
-            and self._shape[-1] is not None
-        ):
-            last = int(
-                round(self._shape[-1] * self.itemsize / np.dtype(dtype).itemsize)
-            )
+        if len(self._shape) >= 1:
+            last, remainder = divmod(self._shape[-1] * self.itemsize, dtype.itemsize)
+            if remainder is not unknown_length and remainder != 0:
+                raise ValueError(
+                    "new size of array with larger dtype must be a "
+                    "divisor of the total size in bytes (of the last axis of the array)"
+                )
             shape = self._shape[:-1] + (last,)
         else:
             shape = self._shape
