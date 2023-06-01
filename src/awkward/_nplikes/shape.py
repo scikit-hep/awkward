@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from awkward._typing import Self, TypeAlias
 
-ShapeItem: TypeAlias = "int | _UnknownLength"
+ShapeItem: TypeAlias = "int | type[unknown_length]"
 
 
 class _UnknownLength:
