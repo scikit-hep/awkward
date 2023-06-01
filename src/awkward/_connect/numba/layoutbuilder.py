@@ -1,6 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 
+import math
+
 import numba
 import numba.core.typing.npydecl
 import numpy as np
@@ -15,13 +17,6 @@ class LayoutBuilder:
     def __init__(self, content, *, parameters=None):
         self._content = content
         self._parameters = parameters
-
-    # def get_item(self) -> builder
-    #     ...
-
-    # @property
-    # def type(self):
-    #     return self._type({})
 
     @property
     def content(self):
@@ -96,10 +91,12 @@ def typeof_LayoutBuilder(val, c):
         )
 
     elif isinstance(val, List):
-        return ListType(numba.from_dtype(val._starts.dtype), val._content)
+        return ListType(
+            numba.from_dtype(val._starts.dtype), val._content, val._parameters
+        )
 
     elif isinstance(val, Regular):
-        return RegularType(val._content, val._size)
+        return RegularType(val._content, val._size, val._parameters)
 
     elif isinstance(val, Indexed):
         return IndexedType(numba.from_dtype(val._index.dtype), val._content)
@@ -731,10 +728,14 @@ class List(LayoutBuilder):
         return f"<List of {self.content!r} with {self._length} items>"
 
     def type(self):
-        return f"ak.numba.lb.List({self.starts.dtype}, {self._content.type()})"
+        return f"ak.numba.lb.List({self.starts.dtype}, {self._content.type()}, parameters={self._parameters})"
 
     def numbatype(self):
-        return ListType(numba.from_dtype(self.starts.dtype), self.content.numbatype())
+        return ListType(
+            numba.from_dtype(self.starts.dtype),
+            self.content,
+            numba.types.StringLiteral(self._parameters),
+        )
 
     @property
     def starts(self):
@@ -794,18 +795,21 @@ class List(LayoutBuilder):
 
 
 class ListType(numba.types.Type):
-    def __init__(self, dtype, content):
-        super().__init__(name=f"ak.numba.lb.List({dtype}, {content.type()})")
+    def __init__(self, dtype, content, parameters):
+        super().__init__(
+            name=f"ak.numba.lb.List({dtype}, {content.type()}, parameters={parameters.literal_value if isinstance(parameters, numba.types.Literal) else None})"
+        )
         self._dtype = dtype
         self._content = content
+        self._parameters = parameters
 
     @classmethod
     def type(cls):
-        return ListType(cls.starts.dtype, cls.content)
+        return ListType(cls.starts.dtype, cls.content, cls.parameters)
 
     @property
     def parameters(self):
-        return numba.types.StringLiteral
+        return numba.types.StringLiteral(self._parameters)
 
     @property
     def starts(self):
@@ -899,7 +903,7 @@ def ListType_box(typ, val, c):
 @numba.extending.overload_method(ListType, "_length_get", inline="always")
 def List_length(builder):
     def getter(builder):
-        return builder._starts._length_pos[0] - 1
+        return builder._starts._length_pos[0]
 
     return getter
 
@@ -931,16 +935,6 @@ def List_begin_list(builder):
         return getter
 
 
-# @numba.extending.overload_method(ListType, "append")
-# def List_append(builder, datum):
-#     if isinstance(builder, ListType):
-#
-#         def append(builder, datum):
-#             builder.append(datum)
-#
-#         return append
-
-
 @numba.extending.overload_method(ListType, "end_list", inline="always")
 def List_end_list(builder):
     if isinstance(builder, ListType):
@@ -949,16 +943,6 @@ def List_end_list(builder):
             builder._stops.append(len(builder._content))
 
         return impl
-
-
-# @numba.extending.overload_method(ListType, "extend")
-# def List_extend(builder, datum):
-#     if isinstance(builder, ListType):
-#
-#         def extend(builder, datum):
-#             builder.extend(datum)
-#
-#         return extend
 
 
 @numba.extending.overload_method(ListType, "snapshot")
@@ -975,10 +959,25 @@ def List_snapshot(builder):
 @final
 class Regular(LayoutBuilder):
     def __init__(self, content, size, *, parameters=None):
-        # self._full_length = np.zeros((1,), dtype=np.int64) #len(content)/size
         self._content = content
-        self._size = size  # always not 0! ? EmptyRegular???
+        self._size = size
         self._parameters = parameters
+
+        if size < 1:
+            raise ValueError("unsupported feature: size must be at least 1")
+
+    def __repr__(self):
+        return f"<Regular of {self._content!r} with {self._length if self._size > 0 else '0'} items>"
+
+    def type(self):
+        return f"ak.numba.lb.Regular({self._content.type()}, {self._size}, parameters={self._parameters})"
+
+    def numbatype(self):
+        return RegularType(
+            self.content,
+            self.size,
+            numba.types.StringLiteral(self._parameters),
+        )
 
     @property
     def content(self):
@@ -990,42 +989,30 @@ class Regular(LayoutBuilder):
 
     @property
     def _length(self):
-        return self._full_length[0]
-
-    @_length.setter
-    def _length(self, value):
-        self._full_length[0] = value
-
-    def _length_inc(self, value):
-        self._full_length[0] += value
+        return math.floor(len(self.content) / self.size)
 
     def begin_list(self):
-        return self._content
+        return self.content
 
     def end_list(self):
-        self._full_length[0] += 1
+        # FIXME: self._full_length[0] += 1
+        pass
 
     def parameters(self):
         return self._parameters
 
-    def type(self):
-        return f"ak.numba.lb.Regular({self._content.type()})"
-
-    def numbatype(self):
-        return RegularType(self.content.numbatype(), numba.types.int64)
-
     def clear(self):
-        self._content.clear()
+        self.content.clear()
 
     def __len__(self):
         return self._length
 
     def is_valid(self, error: str):
-        if len(self._content) != self._length * self._size:
-            error = f"Regular node{self._id} has content length {len(self._content)}, but length {self._length} and size {self._size}"
+        if len(self.content) != self._length * self.size:
+            error = f"Regular node{self._id} has content length {len(self.content)}, but length {self._length} and size {self.size}"
             return False
         else:
-            return self._content.is_valid(error)
+            return self.content.is_valid(error)
 
     def snapshot(self) -> ArrayLike:
         """
@@ -1042,18 +1029,21 @@ class Regular(LayoutBuilder):
 
 
 class RegularType(numba.types.Type):
-    def __init__(self, content, size):
-        super().__init__(name=f"ak.numba.lb.Regular({content.type()})")
+    def __init__(self, content, size, parameters):
+        super().__init__(
+            name=f"ak.numba.lb.Regular({content.type()}, {size}, parameters={parameters.literal_value if isinstance(parameters, numba.types.Literal) else None})"
+        )
         self._content = content
         self._size = size
+        self._parameters = parameters
 
     @classmethod
     def type(cls):
-        return RegularType(cls.content)
+        return RegularType(cls.content, cls.size, cls.parameters)
 
     @property
     def parameters(self):
-        return numba.types.StringLiteral
+        return numba.types.StringLiteral(self._parameters)
 
     @property
     def content(self):
@@ -1063,10 +1053,6 @@ class RegularType(numba.types.Type):
     def size(self):
         return numba.types.int64
 
-    @property
-    def full_length(self):
-        return numba.types.Array(numba.types.int64, 1, "C")
-
 
 @numba.extending.register_model(RegularType)
 class RegularModel(numba.extending.models.StructModel):
@@ -1074,12 +1060,14 @@ class RegularModel(numba.extending.models.StructModel):
         members = [
             ("content", fe_type.content),
             ("size", fe_type.size),
-            ("full_length", fe_type.full_length),
         ]
         super().__init__(dmm, fe_type, members)
 
 
-for member in ("content", "size", "full_length"):
+for member in (
+    "content",
+    "size",
+):
     numba.extending.make_attribute_wrapper(RegularType, member, "_" + member)
 
 
@@ -1088,18 +1076,15 @@ def RegularType_unbox(typ, obj, c):
     # get PyObjects
     content_obj = c.pyapi.object_getattr_string(obj, "_content")
     size_obj = c.pyapi.object_getattr_string(obj, "_size")
-    full_length_obj = c.pyapi.object_getattr_string(obj, "_full_length")
 
     # fill the lowered model
     out = numba.core.cgutils.create_struct_proxy(typ)(c.context, c.builder)
     out.content = c.pyapi.to_native_value(typ.content, content_obj).value
     out.size = c.pyapi.to_native_value(typ.size, size_obj).value
-    out.full_length = c.pyapi.to_native_value(typ.full_length, full_length_obj).value
 
     # decref PyObjects
     c.pyapi.decref(content_obj)
     c.pyapi.decref(size_obj)
-    c.pyapi.decref(full_length_obj)
 
     # return it or the exception
     is_error = numba.core.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
@@ -1137,25 +1122,9 @@ def RegularType_box(typ, val, c):
 @numba.extending.overload_method(RegularType, "_length_get", inline="always")
 def Regular_length(builder):
     def getter(builder):
-        return builder._full_length[0]
+        return math.floor(len(builder.content) / builder.size)
 
     return getter
-
-
-@numba.extending.overload_method(RegularType, "_length_set", inline="always")
-def Regular_length_set(builder, value):
-    def setter(builder, value):
-        builder._full_length[0] = value
-
-    return setter
-
-
-@numba.extending.overload_method(RegularType, "_length_inc", inline="always")
-def Regular_length_inc(builder, value):
-    def inccer(builder, value):
-        builder._full_length[0] += value
-
-    return inccer
 
 
 @numba.extending.overload_method(RegularType, "_size", inline="always")
@@ -1176,34 +1145,14 @@ def Regular_begin_list(builder):
         return getter
 
 
-# @numba.extending.overload_method(RegularType, "append")
-# def Regular_append(builder, datum):
-#     if isinstance(builder, RegularType):
-#
-#         def append(builder, datum):
-#             builder.append(datum)
-#
-#         return append
-
-
 @numba.extending.overload_method(RegularType, "end_list", inline="always")
 def Regular_end_list(builder):
     if isinstance(builder, RegularType):
 
         def impl(builder):
-            builder._length_inc(1)
+            pass
 
         return impl
-
-
-# @numba.extending.overload_method(RegularType, "extend")
-# def Regular_extend(builder, datum):
-#     if isinstance(builder, RegularType):
-#
-#         def extend(builder, datum):
-#             builder.extend(datum)
-#
-#         return extend
 
 
 @numba.extending.overload_method(RegularType, "snapshot")
