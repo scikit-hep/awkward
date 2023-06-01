@@ -511,8 +511,10 @@ def apply_step(
                 elif x.size == 0:
                     dim_size = 0
                     break
+                # Take first size as dim_size
                 elif dim_size is None:
                     dim_size = x.size
+                # If the dim_size is unknown, we can't compare
                 elif dim_size is unknown_length:
                     continue
                 else:
@@ -598,69 +600,28 @@ def apply_step(
                 for x, p in zip(outcontent, parameters)
             )
 
-        elif not backend.nplike.known_data:
-            offsets = None
-            nextinputs = []
-            for x in inputs:
-                if isinstance(x, ListOffsetArray):
-                    x._touch_data(recursive=False)
-                    offsets = Index64(
-                        backend.index_nplike.empty(
-                            x.offsets.data.shape[0], dtype=np.int64
-                        ),
-                        nplike=backend.index_nplike,
-                    )
-                    nextinputs.append(x.content)
-                elif isinstance(x, ListArray):
-                    x._touch_data(recursive=False)
-                    offsets = Index64(
-                        backend.index_nplike.empty(
-                            x.starts.data.shape[0] + 1, dtype=np.int64
-                        ),
-                        nplike=backend.index_nplike,
-                    )
-                    nextinputs.append(x.content)
-                elif isinstance(x, RegularArray):
-                    nextinputs.append(x.content)
-                else:
-                    nextinputs.append(x)
-            assert offsets is not None
-
-            outcontent = apply_step(
-                backend,
-                nextinputs,
-                action,
-                depth + 1,
-                copy.copy(depth_context),
-                lateral_context,
-                behavior,
-                options,
-            )
-            assert isinstance(outcontent, tuple)
-            parameters = parameters_factory(len(outcontent))
-            return tuple(
-                ListOffsetArray(offsets, x, parameters=p)
-                for x, p in zip(outcontent, parameters)
-            )
-
         # Not all regular, but all same offsets?
         # Optimization: https://github.com/scikit-hep/awkward-1.0/issues/442
-        elif all_same_offsets(backend, inputs):
+        elif index_nplike.known_data and all_same_offsets(backend, inputs):
             lencontent, offsets, starts, stops = None, None, None, None
             nextinputs = []
 
             for x in inputs:
                 if isinstance(x, ListOffsetArray):
                     offsets = x.offsets
-                    lencontent = offsets[-1]
+                    lencontent = index_nplike.index_as_shape_item(offsets[-1])
                     nextinputs.append(x.content[:lencontent])
 
                 elif isinstance(x, ListArray):
                     starts, stops = x.starts, x.stops
-                    if starts.length == 0 or stops.length == 0:
+                    if (starts.length is not unknown_length and starts.length == 0) or (
+                        stops.length is not unknown_length and stops.length == 0
+                    ):
                         nextinputs.append(x.content[:0])
                     else:
-                        lencontent = backend.index_nplike.max(stops)
+                        lencontent = index_nplike.index_as_shape_item(
+                            index_nplike.max(stops)
+                        )
                         nextinputs.append(x.content[:lencontent])
                 elif isinstance(x, RegularArray):
                     nextinputs.append(x.content[: x.size * x.length])
