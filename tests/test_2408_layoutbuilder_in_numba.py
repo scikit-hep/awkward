@@ -531,9 +531,9 @@ def test_unbox():
     #     assert builder.type() == "ak.numba.lb.EmptyRecord(True)"
     #     f1(builder)
     #
-    #     builder = lb.Empty()
-    #     f1(builder)
-    #
+    builder = lb.Empty()
+    f1(builder)
+
     #     builder = lb.IndexedOption(np.int64, lb.Numpy(np.float64))
     #     f1(builder)
     #
@@ -603,11 +603,10 @@ def test_unbox_for_loop():
     f2(builder)
     assert ak.to_list(builder.snapshot()) == list(range(10))
 
-
-#     builder = lb.Empty()
-#     # Unknown attribute 'append' of type ak.Empty()
-#     with pytest.raises(numba.core.errors.TypingError):
-#         f2(builder)
+    builder = lb.Empty()
+    # Unknown attribute 'append' of type lb.Empty
+    with pytest.raises(numba.core.errors.TypingError):
+        f2(builder)
 
 
 def test_box():

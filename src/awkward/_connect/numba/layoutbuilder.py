@@ -90,7 +90,7 @@ def typeof_LayoutBuilder(val, c):
         return NumpyType(numba.from_dtype(val._data.dtype), val._parameters)
 
     elif isinstance(val, Empty):
-        return EmptyType()
+        return EmptyType(val._parameters)
 
     elif isinstance(val, ListOffset):
         return ListOffsetType(numba.from_dtype(val._offsets.dtype), val._content)
@@ -170,12 +170,6 @@ class Numpy(LayoutBuilder):
         self._data = GrowableBuffer(dtype=dtype, initial=initial, resize=resize)
         self._parameters = parameters
 
-    def __repr__(self):
-        return f"<Numpy of {self._data.dtype!r} with {self._length} items>"
-
-    def __len__(self):
-        return self._length
-
     @classmethod
     def _from_buffer(cls, data):
         out = cls.__new__(cls)
@@ -183,17 +177,8 @@ class Numpy(LayoutBuilder):
         out._parameters = None
         return out
 
-    @property
-    def _length(self):
-        return len(self._data)
-
-    @property
-    def dtype(self):
-        return self._data.dtype
-
-    @property
-    def parameters(self):
-        return self._parameters
+    def __repr__(self):
+        return f"<Numpy of {self._data.dtype!r} with {self._length} items>"
 
     def type(self):
         return f"ak.numba.lb.Numpy({self._data.dtype}, parameters={self._parameters})"
@@ -202,6 +187,21 @@ class Numpy(LayoutBuilder):
         return NumpyType(
             numba.from_dtype(self.dtype), numba.types.StringLiteral(self._parameters)
         )
+
+    @property
+    def _length(self):
+        return len(self._data)
+
+    def __len__(self):
+        return self._length
+
+    @property
+    def dtype(self):
+        return self._data.dtype
+
+    @property
+    def parameters(self):
+        return self._parameters
 
     def append(self, x):
         self._data.append(x)
@@ -414,7 +414,7 @@ class Empty(LayoutBuilder):
         self._parameters = parameters
 
     def __repr__(self):
-        return f"<Empty with {self.length} items>"
+        return f"<Empty with {self._length} items>"
 
     def type(self):
         return f"ak.numba.lb.Empty(parameters={self.parameters})"
@@ -448,10 +448,15 @@ class EmptyType(numba.types.Type):
         super().__init__(
             name=f"ak.numba.lb.Empty(parameters={parameters.literal_value if isinstance(parameters, numba.types.Literal) else None})"
         )
+        self._parameters = parameters
 
     @classmethod
     def type(cls):
         return EmptyType()
+
+    @property
+    def parameters(self):
+        return numba.types.StringLiteral(self._parameters)
 
     @property
     def length(self):
