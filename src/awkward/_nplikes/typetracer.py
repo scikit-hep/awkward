@@ -1327,7 +1327,10 @@ class TypeTracer(NumpyLike):
     ) -> TypeTracerArray:
         assert not isinstance(x, PlaceholderArray)
         try_touch_data(x)
-        raise NotImplementedError
+        if axis is None:
+            return TypeTracerArray._new(x.dtype, shape=())
+        else:
+            raise NotImplementedError
 
     def array_str(
         self,
