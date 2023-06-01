@@ -2442,8 +2442,6 @@ def TupleType_unbox(typ, obj, c):
     return numba.extending.NativeValue(out._getvalue(), is_error=is_error)
 
 
-########## EmptyRecord -- removed - FIXME and from C++ #######################################################
-
 ########## Union #######################################################
 
 
