@@ -120,7 +120,7 @@ def checklength(inputs, options):
     for other_content in it:
         if other_content.length is unknown_length:
             continue
-        elif other_content.length != length:
+        if other_content.length != length:
             raise ValueError(
                 "cannot broadcast {} of length {} with {} of length {}{}".format(
                     type(content).__name__,
