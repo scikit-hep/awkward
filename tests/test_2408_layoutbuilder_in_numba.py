@@ -28,6 +28,7 @@ def test_Numpy():
     assert ak.to_list(array) == [1.1, 2.2, 3.3, 4.4, 5.5]
 
     assert builder.type() == "ak.numba.lb.Numpy(float64, parameters=None)"
+    assert builder.type() == str(builder.numbatype())
 
     error = ""
     assert builder.is_valid(error), error.value
@@ -84,6 +85,7 @@ def test_Empty():
     assert ak.to_list(array) == []
 
     assert builder.type() == "ak.numba.lb.Empty(parameters=None)"
+    assert builder.type() == str(builder.numbatype())
 
     builder = lb.Empty(parameters={"When I was one": "I just begun"})
     assert (
@@ -92,31 +94,40 @@ def test_Empty():
     )
 
 
-# def test_ListOffset():
-#     builder = lb.ListOffset(np.int32, lb.Numpy(np.float64))
-#     assert len(builder) == 0
-#
-#     content = builder.begin_list()
-#     content.append(1.1)
-#     content.append(2.2)
-#     content.append(3.3)
-#     builder.end_list()
-#
-#     builder.begin_list()
-#     builder.end_list()
-#
-#     builder.begin_list()
-#     content.append(4.4)
-#     content.append(5.5)
-#     builder.end_list()
-#
-#     array = builder.snapshot()
-#     assert isinstance(array, ak.Array)
-#     assert ak.to_list(array) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
-#
-#     error = ""
-#     assert builder.is_valid(error), error.value
-#
+def test_ListOffset():
+    builder = lb.ListOffset(np.int32, lb.Numpy(np.float64))
+    assert len(builder) == 0
+    assert (
+        builder.type()
+        == "ak.numba.lb.ListOffset(int32, ak.numba.lb.Numpy(float64, parameters=None), parameters=None)"
+    )
+    assert (
+        str(builder.numbatype())
+        == "ak.numba.lb.ListOffset(int32, ak.numba.lb.Numpy(float64, parameters=None), parameters=None)"
+    )
+
+    content = builder.begin_list()
+    content.append(1.1)
+    content.append(2.2)
+    content.append(3.3)
+    builder.end_list()
+
+    builder.begin_list()
+    builder.end_list()
+
+    builder.begin_list()
+    content.append(4.4)
+    content.append(5.5)
+    builder.end_list()
+
+    array = builder.snapshot()
+    assert isinstance(array, ak.Array)
+    assert ak.to_list(array) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
+
+    error = ""
+    assert builder.is_valid(error), error.value
+
+
 #
 # def test_List():
 #     builder = lb.List(np.int32, lb.Numpy(np.float64))

@@ -91,7 +91,9 @@ def typeof_LayoutBuilder(val, c):
         return EmptyType(val._parameters)
 
     elif isinstance(val, ListOffset):
-        return ListOffsetType(numba.from_dtype(val._offsets.dtype), val._content)
+        return ListOffsetType(
+            numba.from_dtype(val._offsets.dtype), val._content, val._parameters
+        )
 
     elif isinstance(val, List):
         return ListType(numba.from_dtype(val._starts.dtype), val._content)
@@ -228,7 +230,7 @@ class NumpyType(numba.types.Type):
 
     @classmethod
     def type(cls):
-        return NumpyType(cls.dtype)
+        return NumpyType(cls.dtype, cls.parameters)
 
     @property
     def dtype(self):
@@ -519,23 +521,17 @@ class ListOffset(LayoutBuilder):
         self._content = content
         self._parameters = parameters
 
-    @classmethod
-    def _from_offsets(cls, offsets, content):
-        out = cls.__new__(cls)
-        out._offsets = offsets
-        out._content = content
-        out._parameters = None
-        return out
-
     def __repr__(self):
         return f"<ListOffset of {self._content!r} with {self._length} items>"
 
     def type(self):
-        return f"ak.numba.lb.ListOffset({self._offsets.dtype}, {self._content.type()})"
+        return f"ak.numba.lb.ListOffset({self._offsets.dtype}, {self._content.type()}, parameters={self._parameters})"
 
     def numbatype(self):
         return ListOffsetType(
-            numba.from_dtype(self.offsets.dtype), self.content.numbatype()
+            numba.from_dtype(self.offsets.dtype),
+            self.content,
+            numba.types.StringLiteral(self._parameters),
         )
 
     @property
@@ -590,18 +586,21 @@ class ListOffset(LayoutBuilder):
 
 
 class ListOffsetType(numba.types.Type):
-    def __init__(self, dtype, content):
-        super().__init__(name=f"ak.numba.lb.ListOffset({dtype}, {content.type()})")
+    def __init__(self, dtype, content, parameters):
+        super().__init__(
+            name=f"ak.numba.lb.ListOffset({dtype}, {content.type()}, parameters={parameters.literal_value if isinstance(parameters, numba.types.Literal) else None})"
+        )
         self._dtype = dtype
         self._content = content
+        self._parameters = parameters
 
     @classmethod
     def type(cls):
-        return ListOffsetType(cls.offsets.dtype, cls.content)
+        return ListOffsetType(cls.offsets.dtype, cls.content, cls.parameters)
 
     @property
     def parameters(self):
-        return numba.types.StringLiteral
+        return numba.types.StringLiteral(self._parameters)
 
     @property
     def offsets(self):
