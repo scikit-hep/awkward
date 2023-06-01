@@ -339,32 +339,6 @@ def test_Empty():
 #     assert builder.is_valid(error) is True
 #
 #
-# def test_EmptyRecord():
-#     builder = lb.EmptyRecord(True)
-#     assert len(builder) == 0
-#
-#     builder.append()
-#     assert len(builder) == 1
-#
-#     builder.extend(2)
-#     assert len(builder) == 3
-#
-#     array = builder.snapshot()
-#     assert ak.to_list(array) == [(), (), ()]
-#
-#     builder = lb.EmptyRecord(False)
-#     assert len(builder) == 0
-#
-#     builder.append()
-#     assert len(builder) == 1
-#
-#     builder.extend(2)
-#     assert len(builder) == 3
-#
-#     array = builder.snapshot()
-#     assert ak.to_list(array) == [(), (), ()]
-#
-#
 # def test_Unmasked():
 #     builder = lb.Unmasked(lb.Numpy(np.int64))
 #     assert len(builder) == 0
@@ -525,10 +499,6 @@ def test_unbox():
     #     f1(builder)
     #
     #     builder = lb.ByteMasked(lb.Numpy(np.float64), valid_when=True)
-    #     f1(builder)
-    #
-    #     builder = lb.EmptyRecord(True)
-    #     assert builder.type() == "ak.numba.lb.EmptyRecord(True)"
     #     f1(builder)
     #
     builder = lb.Empty()

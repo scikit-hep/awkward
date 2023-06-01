@@ -62,8 +62,6 @@ def to_numbatype(content):
         return Record.numbatype(content)
     elif isinstance(content, Tuple):
         return Tuple.numbatype(content)
-    elif isinstance(content, EmptyRecord):
-        return EmptyRecord.numbatype(content)
     elif isinstance(content, Union):
         return Union.numbatype(content)
 
@@ -122,9 +120,6 @@ def typeof_LayoutBuilder(val, c):
     elif isinstance(val, Tuple):
         return TupleType(val._contents)
 
-    elif isinstance(val, EmptyRecord):
-        return EmptyRecordType(val._is_tuple)
-
     elif isinstance(val, Union):
         return UnionType(numba.from_dtype(val._index.dtype), val._contents)
 
@@ -139,7 +134,6 @@ def LayoutBuilderType_len(builder):
         (  # content as property for all that have a content
             BitMaskedType,  # append, extend, append_null(0 args), extend_null(1 int arg)
             ByteMaskedType,  # append, extend, append_null(0 args), extend_null(1 int arg)
-            # EmptyRecordType,
             EmptyType,
             IndexedOptionType,  # append, extend, append_null(0 args), extend_null(1 int arg)
             IndexedType,  # append, extend,
@@ -2448,197 +2442,7 @@ def TupleType_unbox(typ, obj, c):
     return numba.extending.NativeValue(out._getvalue(), is_error=is_error)
 
 
-########## EmptyRecord -- remove it - FIXME and from C++ #######################################################
-
-
-@final
-class EmptyRecord(LayoutBuilder):
-    def __init__(self, is_tuple, *, parameters=None):
-        self._full_length = np.zeros((1,), dtype=np.int64)
-        self._is_tuple = is_tuple
-        self._contents = [] if is_tuple else {}
-        self._parameters = parameters
-
-    def __repr__(self):
-        return f"<EmptyRecord of {[] if self._is_tuple else {}!r} with {self._length} items>"
-
-    def type(self):
-        return f"ak.numba.lb.EmptyRecord({self._is_tuple})"
-
-    def numbatype(self):
-        return EmptyRecordType(
-            numba.bool_as_bool(self._is_tuple)
-        )  # numba.types.Boolean)
-
-    def parameters(self):
-        return self._parameters
-
-    def clear(self):
-        self._length = 0
-
-    @property
-    def _length(self):
-        return self._full_length[0]
-
-    def __len__(self):
-        return self._length
-
-    def append(self):
-        self._full_length[0] += 1
-
-    def extend(self, size):
-        self._full_length[0] += size
-
-    def is_valid(self, error: str):
-        return True
-
-    def snapshot(self) -> ArrayLike:
-        """
-        Converts the currently accumulated data into an #ak.Array.
-        """
-        return ak.Array(
-            ak.contents.RecordArray(
-                self._contents,
-                None,
-                self._length,
-                parameters=self._parameters,
-            )
-        )
-
-
-class EmptyRecordType(numba.types.Type):
-    def __init__(self, is_tuple):
-        super().__init__(name=f"ak.numba.lb.EmptyRecord({is_tuple})")
-        self._is_tuple = is_tuple
-
-    @classmethod
-    def type(cls):
-        return EmptyRecordType(cls._is_tuple)
-
-    @property
-    def parameters(self):
-        return numba.types.StringLiteral
-
-    @property
-    def is_tuple(self):
-        return numba.types.boolean
-
-    @property
-    def full_length(self):
-        return numba.types.Array(numba.types.int64, 1, "C")
-
-
-# empty_record_type = EmptyRecordType(numba.types.Boolean)
-#
-# from numba.extending import typeof_impl
-#
-# @typeof_impl.register(EmptyRecordType)
-# def typeof_index(val, c):
-#     return empty_record_type
-#
-# from numba.extending import as_numba_type
-#
-# as_numba_type.register(EmptyRecord, empty_record_type)
-#
-# from numba.extending import type_callable
-#
-# @type_callable(EmptyRecord)
-# def type_empty_record(context):
-#     def typer(is_tuple):
-#         if isinstance(is_tuple, types.Boolean):
-#             return empty_record_type
-#     return typer
-#
-# from numba.extending import models, register_model
-#
-# @register_model(EmptyRecordType)
-# class EmptyRecordModel(models.StructModel):
-#     def __init__(self, dmm, fe_type):
-#         members = [('is_tuple', types.bool),]
-#         models.StructModel.__init__(self, dmm, fe_type, members)
-#
-# from numba.extending import make_attribute_wrapper
-#
-# make_attribute_wrapper(EmptyRecordType, 'is_tuple', 'is_tuple')
-
-
-@numba.extending.register_model(EmptyRecordType)
-class EmptyRecordModel(numba.extending.models.StructModel):
-    def __init__(self, dmm, fe_type):
-        members = [
-            ("is_tuple", fe_type.is_tuple),
-            # ("full_length", fe_type.full_length),
-        ]
-        super().__init__(dmm, fe_type, members)
-
-
-for member in (
-    "is_tuple",
-    # "full_length",
-):
-    numba.extending.make_attribute_wrapper(EmptyRecordType, member, "_" + member)
-
-
-@numba.extending.unbox(EmptyRecordType)
-def EmptyRecordType_unbox(typ, obj, c):
-    # get PyObjects
-    is_tuple_obj = c.pyapi.object_getattr_string(obj, "_is_tuple")
-    # full_length_obj = c.pyapi.object_getattr_string(obj, "_full_length")
-
-    # fill the lowered model
-    out = numba.core.cgutils.create_struct_proxy(typ)(c.context, c.builder)
-    out.is_tuple = c.pyapi.to_native_value(typ.is_tuple, is_tuple_obj).value
-    # out.full_length = c.pyapi.to_native_value(typ.full_length, full_length_obj).value
-
-    # decref PyObjects
-    c.pyapi.decref(is_tuple_obj)
-    # c.pyapi.decref(full_length_obj)
-
-    # return it or the exception
-    is_error = numba.core.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
-    return numba.extending.NativeValue(out._getvalue(), is_error=is_error)
-
-
-@numba.extending.box(EmptyRecordType)
-def EmptyRecordType_box(typ, val, c):
-    # get PyObject of the EmptyRecord class
-    EmptyRecord_obj = c.pyapi.unserialize(c.pyapi.serialize_object(EmptyRecord))
-
-    builder = numba.core.cgutils.create_struct_proxy(typ)(
-        c.context, c.builder, value=val
-    )
-    is_tuple_obj = c.pyapi.from_native_value(
-        typ.is_tuple, builder.is_tuple, c.env_manager
-    )
-
-    out = c.pyapi.call_function_objargs(
-        EmptyRecord_obj,
-        (is_tuple_obj,),
-    )
-
-    # decref PyObjects
-    c.pyapi.decref(EmptyRecord_obj)
-
-    c.pyapi.decref(is_tuple_obj)
-
-    return out
-
-
-@numba.extending.overload_method(EmptyRecordType, "_length_get", inline="always")
-def EmptyRecord_length(builder):
-    def getter(builder):
-        return builder._length
-
-    return getter
-
-
-@numba.extending.overload_attribute(EmptyRecordType, "is_tuple", inline="always")
-def EmptyRecord_dtype(builder):
-    def get(builder):
-        return builder._is_tuple
-
-    return get
-
+########## EmptyRecord -- removed - FIXME and from C++ #######################################################
 
 ########## Union #######################################################
 
