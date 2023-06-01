@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from awkward._typing import Self, TypeAlias
 
-ShapeItem: TypeAlias = "int | _UnknownLength"
+ShapeItem: TypeAlias = "int | type[unknown_length]"
 
 
 class _UnknownLength:
@@ -55,6 +55,11 @@ class _UnknownLength:
 
     __rfloordiv__ = __floordiv__
     __ifloordiv__ = __floordiv__
+
+    def __divmod__(self, other) -> tuple[Self, Self]:
+        return self, self
+
+    __rdivmod__ = __divmod__
 
     def __str__(self) -> str:
         return "##"
