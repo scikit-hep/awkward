@@ -431,8 +431,10 @@ class RegularArray(Content):
             # Sanity check that our kernel isn't losing values here
             assert (
                 not self._backend.index_nplike.known_data
-                or (count.dtype == np.intp)
-                or (self._backend.index_nplike.max(count) <= np.iinfo(np.intp).max)
+                or count.size is unknown_length
+                or count.size == 0
+                or count.dtype == np.intp
+                or self._backend.index_nplike.max(count) <= np.iinfo(np.intp).max
             )
             carry = ak.index.Index64(
                 index_nplike.repeat(
