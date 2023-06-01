@@ -791,52 +791,40 @@ def apply_step(
             )
 
     def broadcast_any_option():
-        if backend.nplike.known_data:
-            mask = None
-            for x in contents:
-                if x.is_option:
-                    m = x.mask_as_bool(valid_when=False)
-                    if mask is None:
-                        mask = m
-                    else:
-                        mask = backend.index_nplike.logical_or(mask, m, maybe_out=mask)
+        mask = None
+        for x in contents:
+            if x.is_option:
+                m = x.mask_as_bool(valid_when=False)
+                if mask is None:
+                    mask = m
+                else:
+                    mask = backend.index_nplike.logical_or(mask, m, maybe_out=mask)
 
-            nextmask = Index8(mask.view(np.int8))
-            index = backend.index_nplike.full(mask.shape[0], -1, dtype=np.int64)
-            index[~mask] = backend.index_nplike.arange(
-                mask.shape[0] - backend.index_nplike.count_nonzero(mask),
+        nextmask = Index8(mask.view(np.int8))
+        index = backend.index_nplike.full(mask.shape[0], -1, dtype=np.int64)
+        index[~mask] = backend.index_nplike.arange(
+            backend.index_nplike.shape_item_as_index(mask.shape[0])
+            - backend.index_nplike.count_nonzero(mask),
+            dtype=np.int64,
+        )
+        index = Index64(index)
+        if any(not x.is_option for x in contents):
+            nextindex = backend.index_nplike.arange(
+                backend.index_nplike.shape_item_as_index(mask.shape[0]),
                 dtype=np.int64,
             )
-            index = Index64(index)
-            if any(not x.is_option for x in contents):
-                nextindex = backend.index_nplike.arange(mask.shape[0], dtype=np.int64)
-                nextindex[mask] = -1
-                nextindex = Index64(nextindex)
+            nextindex[mask] = -1
+            nextindex = Index64(nextindex)
 
-            nextinputs = []
-            for x in inputs:
-                if isinstance(x, optiontypes):
-                    nextinputs.append(x.project(nextmask))
-                elif isinstance(x, Content):
-                    nextinputs.append(
-                        IndexedOptionArray(nextindex, x).project(nextmask)
-                    )
-                else:
-                    nextinputs.append(x)
+        nextinputs = []
+        for x in inputs:
+            if isinstance(x, optiontypes):
+                nextinputs.append(x.project(nextmask))
+            elif isinstance(x, Content):
+                nextinputs.append(IndexedOptionArray(nextindex, x).project(nextmask))
+            else:
+                nextinputs.append(x)
 
-        else:
-            index = None
-            nextinputs = []
-            for x in inputs:
-                if isinstance(x, optiontypes):
-                    x._touch_data(recursive=False)
-                    index = Index64(
-                        backend.index_nplike.empty(x.length, dtype=np.int64)
-                    )
-                    nextinputs.append(x.content)
-                else:
-                    nextinputs.append(x)
-            assert index is not None
         outcontent = apply_step(
             backend,
             nextinputs,
