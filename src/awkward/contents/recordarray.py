@@ -446,10 +446,6 @@ class RecordArray(Content):
     def _getitem_range(self, start: SupportsIndex, stop: IndexType) -> Content:
         if not self._backend.nplike.known_data:
             self._touch_shape(recursive=False)
-            return self
-
-        if self._length is unknown_length:
-            return self
 
         start, stop, _, length = self._backend.index_nplike.derive_slice_for_length(
             slice(start, stop), self._length
