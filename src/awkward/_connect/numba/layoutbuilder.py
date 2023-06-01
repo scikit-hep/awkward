@@ -1122,7 +1122,7 @@ def RegularType_box(typ, val, c):
 @numba.extending.overload_method(RegularType, "_length_get", inline="always")
 def Regular_length(builder):
     def getter(builder):
-        return math.floor(len(builder.content) / builder.size)
+        return math.floor(len(builder._content) / builder._size)
 
     return getter
 

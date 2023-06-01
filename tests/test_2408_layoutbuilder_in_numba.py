@@ -693,6 +693,9 @@ def test_len():
     builder = lb.List(np.int64, lb.Numpy(np.int32))
     assert f4(builder) == 0
 
+    builder = lb.Regular(lb.Numpy(np.float64), 3)
+    assert f4(builder) == 0
+
 
 def test_from_buffer():
     @numba.njit
@@ -957,52 +960,52 @@ def test_Regular_append():
     assert builder.is_valid(error), error.value
 
 
-# def test_numba_append():
-#     @numba.njit
-#     def create():
-#         return lb.Numpy(np.int32)
-#
-#     @numba.njit
-#     def append_range(builder, start, stop):
-#         for x in range(start, stop):
-#             builder.append(x)
-#
-#     @numba.njit
-#     def append_single(builder, x):
-#         builder.append(x)
-#
-#     @numba.njit
-#     def snapshot(builder):
-#         return builder.snapshot()
-#
-#     builder = create()
-#     assert ak.to_list(snapshot(builder)) == []
-#     assert len(builder) == 0
-#
-#     append_range(builder, 0, 5)
-#     assert ak.to_list(snapshot(builder)) == list(range(5))
-#     assert len(builder) == 5
-#
-#     append_range(builder, 5, 9)
-#     assert ak.to_list(snapshot(builder)) == list(range(9))
-#     assert len(builder) == 9
-#
-#     append_single(builder, 9)
-#     assert ak.to_list(snapshot(builder)) == list(range(10))
-#     assert len(builder) == 10
-#
-#     append_single(builder, 10)
-#     assert ak.to_list(snapshot(builder)) == list(range(11))
-#     assert len(builder) == 11
-#
-#     append_single(builder, 11)
-#     assert ak.to_list(snapshot(builder)) == list(range(12))
-#     assert len(builder) == 12
-#
-#     append_range(builder, 12, 30)
-#     assert ak.to_list(snapshot(builder)) == list(range(30))
-#     assert len(builder) == 30
-#
-#     append_single(builder, 30)
-#     assert ak.to_list(snapshot(builder)) == list(range(31))
-#     assert len(builder) == 31
+def test_numba_append():
+    @numba.njit
+    def create():
+        return lb.Numpy(np.int32)
+
+    @numba.njit
+    def append_range(builder, start, stop):
+        for x in range(start, stop):
+            builder.append(x)
+
+    @numba.njit
+    def append_single(builder, x):
+        builder.append(x)
+
+    @numba.njit
+    def snapshot(builder):
+        return builder.snapshot()
+
+    builder = create()
+    assert ak.to_list(snapshot(builder)) == []
+    assert len(builder) == 0
+
+    append_range(builder, 0, 5)
+    assert ak.to_list(snapshot(builder)) == list(range(5))
+    assert len(builder) == 5
+
+    append_range(builder, 5, 9)
+    assert ak.to_list(snapshot(builder)) == list(range(9))
+    assert len(builder) == 9
+
+    append_single(builder, 9)
+    assert ak.to_list(snapshot(builder)) == list(range(10))
+    assert len(builder) == 10
+
+    append_single(builder, 10)
+    assert ak.to_list(snapshot(builder)) == list(range(11))
+    assert len(builder) == 11
+
+    append_single(builder, 11)
+    assert ak.to_list(snapshot(builder)) == list(range(12))
+    assert len(builder) == 12
+
+    append_range(builder, 12, 30)
+    assert ak.to_list(snapshot(builder)) == list(range(30))
+    assert len(builder) == 30
+
+    append_single(builder, 30)
+    assert ak.to_list(snapshot(builder)) == list(range(31))
+    assert len(builder) == 31
