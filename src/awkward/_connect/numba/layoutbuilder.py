@@ -77,7 +77,7 @@ class LayoutBuilderType(numba.types.Type):
 
     @property
     def parameters(self):
-        return numba.types.StringLiteral # FIXME
+        return numba.types.StringLiteral  # FIXME
 
     @property
     def length(self):
@@ -129,31 +129,29 @@ def typeof_LayoutBuilder(val, c):
         return UnionType(numba.from_dtype(val._index.dtype), val._contents)
 
     else:
+        raise TypeError("unrecognized LayoutBuilder type")
 
-        raise TypeError(
-            "unrecognized LayoutBuilder type"
-        )
 
 @numba.extending.overload(len)
 def LayoutBuilderType_len(builder):
     if isinstance(
         builder,
-        ( # content as property for all that have a content
-            BitMaskedType, # append, extend, append_null(0 args), extend_null(1 int arg)
-            ByteMaskedType, # append, extend, append_null(0 args), extend_null(1 int arg)
-            #EmptyRecordType,
+        (  # content as property for all that have a content
+            BitMaskedType,  # append, extend, append_null(0 args), extend_null(1 int arg)
+            ByteMaskedType,  # append, extend, append_null(0 args), extend_null(1 int arg)
+            # EmptyRecordType,
             EmptyType,
-            IndexedOptionType, # append, extend, append_null(0 args), extend_null(1 int arg)
-            IndexedType,# append, extend,
-            ListOffsetType, # begin_list->content, end_list (both modify offsets)
-            ListType,# begin_list->content, end_list (both modify offsets)
-            NumpyType,# append, extend,
-            RecordType, # field (Literal string) alias, content (Literal int and string) method
-            RegularType, # begin_list->content, end_list content property
-            TupleType, # index (Literal int) alias, content (Literal int) method
-            UnionType, # append_index (Literal int) updates tags and index -> content
-                    # and content (Literal int) method
-            UnmaskedType, # append, extend,
+            IndexedOptionType,  # append, extend, append_null(0 args), extend_null(1 int arg)
+            IndexedType,  # append, extend,
+            ListOffsetType,  # begin_list->content, end_list (both modify offsets)
+            ListType,  # begin_list->content, end_list (both modify offsets)
+            NumpyType,  # append, extend,
+            RecordType,  # field (Literal string) alias, content (Literal int and string) method
+            RegularType,  # begin_list->content, end_list content property
+            TupleType,  # index (Literal int) alias, content (Literal int) method
+            UnionType,  # append_index (Literal int) updates tags and index -> content
+            # and content (Literal int) method
+            UnmaskedType,  # append, extend,
         ),
     ):
 
@@ -172,6 +170,12 @@ class Numpy(LayoutBuilder):
         self._data = GrowableBuffer(dtype=dtype, initial=initial, resize=resize)
         self._parameters = parameters
 
+    def __repr__(self):
+        return f"<Numpy of {self._data.dtype!r} with {self._length} items>"
+
+    def __len__(self):
+        return self._length
+
     @classmethod
     def _from_buffer(cls, data):
         out = cls.__new__(cls)
@@ -179,34 +183,31 @@ class Numpy(LayoutBuilder):
         out._parameters = None
         return out
 
-    def __repr__(self):
-        return f"<Numpy of {self._data.dtype!r} with {self._length} items>"
-
-    def type(self):
-        return f"ak.numba.lb.Numpy({self._data.dtype}, parameters={self._parameters})"
-
-    def numbatype(self):
-        return NumpyType(numba.from_dtype(self.dtype), numba.types.StringLiteral(self._parameters))
+    @property
+    def _length(self):
+        return len(self._data)
 
     @property
     def dtype(self):
         return self._data.dtype
 
     @property
-    def _length(self):
-        return len(self._data)
+    def parameters(self):
+        return self._parameters
 
-    def __len__(self):
-        return self._length
+    def type(self):
+        return f"ak.numba.lb.Numpy({self._data.dtype}, parameters={self._parameters})"
+
+    def numbatype(self):
+        return NumpyType(
+            numba.from_dtype(self.dtype), numba.types.StringLiteral(self._parameters)
+        )
 
     def append(self, x):
         self._data.append(x)
 
     def extend(self, data):
         self._data.extend(data)
-
-    def parameters(self):
-        return self._parameters
 
     def clear(self):
         self._data.clear()
@@ -225,7 +226,9 @@ class Numpy(LayoutBuilder):
 
 class NumpyType(numba.types.Type):
     def __init__(self, dtype, parameters):
-        super().__init__(name=f"ak.numba.lb.Numpy({dtype}, parameters={parameters.literal_value if isinstance(parameters, numba.types.Literal) else None})")
+        super().__init__(
+            name=f"ak.numba.lb.Numpy({dtype}, parameters={parameters.literal_value if isinstance(parameters, numba.types.Literal) else None})"
+        )
         self._dtype = dtype
         self._parameters = parameters
 
@@ -414,21 +417,19 @@ class Empty(LayoutBuilder):
         return f"<Empty with {self.length} items>"
 
     def type(self):
-        return "ak.numba.lb.Empty()"
+        return f"ak.numba.lb.Empty(parameters={self.parameters})"
 
     def numbatype(self):
-        return EmptyType()
+        return EmptyType(numba.types.StringLiteral(self._parameters))
 
     @property
     def _length(self):
         return 0
 
-    def length(self):
-        return self._length
-
     def __len__(self):
         return self._length
 
+    @property
     def parameters(self):
         return self._parameters
 
@@ -443,8 +444,10 @@ class Empty(LayoutBuilder):
 
 
 class EmptyType(numba.types.Type):
-    def __init__(self):
-        super().__init__(name="ak.numba.lb.Empty()")
+    def __init__(self, parameters):
+        super().__init__(
+            name=f"ak.numba.lb.Empty(parameters={parameters.literal_value if isinstance(parameters, numba.types.Literal) else None})"
+        )
 
     @classmethod
     def type(cls):
@@ -1002,9 +1005,9 @@ def List_snapshot(builder):
 @final
 class Regular(LayoutBuilder):
     def __init__(self, content, size, *, parameters=None):
-        #self._full_length = np.zeros((1,), dtype=np.int64) #len(content)/size
+        # self._full_length = np.zeros((1,), dtype=np.int64) #len(content)/size
         self._content = content
-        self._size = size # always not 0! ? EmptyRegular???
+        self._size = size  # always not 0! ? EmptyRegular???
         self._parameters = parameters
 
     @property
@@ -1817,8 +1820,8 @@ def ByteMasked_length(builder):
 class BitMasked(LayoutBuilder):
     def __init__(
         self,
-        dtype, # mask
-        content, #FIXME
+        dtype,  # mask
+        content,  # FIXME
         valid_when,
         lsb_order,
         *,
@@ -1861,7 +1864,7 @@ class BitMasked(LayoutBuilder):
             )
         self._parameters = parameters
 
-    def __repr__(self): # as constructor
+    def __repr__(self):  # as constructor
         return f"<BitMasked of {self._content!r} with {self._length} items>"
 
     def type(self):
@@ -1965,7 +1968,9 @@ class BitMasked(LayoutBuilder):
 
 class BitMaskedType(numba.types.Type):
     def __init__(self, valid_when, lsb_order, content):
-        super().__init__(name=f"ak.numba.lb.BitMasked({valid_when}, {lsb_order}, {content.type()})")
+        super().__init__(
+            name=f"ak.numba.lb.BitMasked({valid_when}, {lsb_order}, {content.type()})"
+        )
         self._valid_when = valid_when
         self._lsb_order = lsb_order
         self._content = content
@@ -2301,7 +2306,7 @@ class RecordType(numba.types.Type):
     def parameters(self):
         return numba.types.StringLiteral
 
-    def content(self, name): # Literal string or Literal int
+    def content(self, name):  # Literal string or Literal int
         return to_numbatype(self._contents[self._fields.index(name)])
 
     @property
@@ -2456,7 +2461,9 @@ class EmptyRecord(LayoutBuilder):
         return f"ak.numba.lb.EmptyRecord({self._is_tuple})"
 
     def numbatype(self):
-        return EmptyRecordType(numba.bool_as_bool(self._is_tuple)) #numba.types.Boolean)
+        return EmptyRecordType(
+            numba.bool_as_bool(self._is_tuple)
+        )  # numba.types.Boolean)
 
     def parameters(self):
         return self._parameters
@@ -2515,6 +2522,7 @@ class EmptyRecordType(numba.types.Type):
     def full_length(self):
         return numba.types.Array(numba.types.int64, 1, "C")
 
+
 # empty_record_type = EmptyRecordType(numba.types.Boolean)
 #
 # from numba.extending import typeof_impl
@@ -2547,6 +2555,7 @@ class EmptyRecordType(numba.types.Type):
 # from numba.extending import make_attribute_wrapper
 #
 # make_attribute_wrapper(EmptyRecordType, 'is_tuple', 'is_tuple')
+
 
 @numba.extending.register_model(EmptyRecordType)
 class EmptyRecordModel(numba.extending.models.StructModel):

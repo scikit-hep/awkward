@@ -32,6 +32,12 @@ def test_Numpy():
     error = ""
     assert builder.is_valid(error), error.value
 
+    assert len(builder) == 5
+    builder.clear()
+    assert len(builder) == 0
+
+    assert builder.is_valid(error), error.value
+
 
 def test_Numpy_char():
     builder = lb.Numpy(np.uint8, parameters={"__array__": "char"})
@@ -43,38 +49,49 @@ def test_Numpy_char():
     assert str(ak.type(array)) == "3 * char"
     assert ak.to_list(array) == "abc"  # FIXME: ['a', 'b', 'c']????
 
-    assert builder.type() == "ak.numba.lb.Numpy(uint8, parameters={\'__array__\': \'char\'})"
-    assert str(builder.numbatype()) == "ak.numba.lb.Numpy(uint8, parameters={\'__array__\': \'char\'})"
+    assert (
+        builder.type() == "ak.numba.lb.Numpy(uint8, parameters={'__array__': 'char'})"
+    )
+    assert (
+        str(builder.numbatype())
+        == "ak.numba.lb.Numpy(uint8, parameters={'__array__': 'char'})"
+    )
 
     error = ""
     assert builder.is_valid(error), error.value
 
 
-# def test_Empty():
-#     builder = lb.Empty()
-#     assert len(builder) == 0
-#     assert ak.to_list(builder.snapshot()) == []
-#
-#     error = ""
-#     assert builder.is_valid(error), error.value
-#
-#     with pytest.raises(AttributeError):
-#         builder.content.append(1.1)
-#
-#     with pytest.raises(AttributeError):
-#         builder.content.extend([3.3, 4.4, 5.5])
-#
-#     error = ""
-#     assert builder.is_valid(error), error.value
-#
-#     array = builder.snapshot()
-#     assert isinstance(array, ak.Array)
-#     assert str(ak.type(array)) == "0 * unknown"
-#     assert ak.to_list(array) == []
-#
-#     assert builder.type() == "ak.numba.lb.Empty()"
-#
-#
+def test_Empty():
+    builder = lb.Empty()
+    assert len(builder) == 0
+    assert ak.to_list(builder.snapshot()) == []
+
+    error = ""
+    assert builder.is_valid(error), error.value
+
+    with pytest.raises(AttributeError):
+        builder.content.append(1.1)
+
+    with pytest.raises(AttributeError):
+        builder.content.extend([3.3, 4.4, 5.5])
+
+    error = ""
+    assert builder.is_valid(error), error.value
+
+    array = builder.snapshot()
+    assert isinstance(array, ak.Array)
+    assert str(ak.type(array)) == "0 * unknown"
+    assert ak.to_list(array) == []
+
+    assert builder.type() == "ak.numba.lb.Empty(parameters=None)"
+
+    builder = lb.Empty(parameters={"When I was one": "I just begun"})
+    assert (
+        builder.type()
+        == "ak.numba.lb.Empty(parameters={'When I was one': 'I just begun'})"
+    )
+
+
 # def test_ListOffset():
 #     builder = lb.ListOffset(np.int32, lb.Numpy(np.float64))
 #     assert len(builder) == 0
@@ -501,44 +518,47 @@ def test_unbox():
     def f1(x):
         x  # noqa: B018 (we want to test the unboxing)
         return 3.14
-#
-#     # FIXME:
-#     builder = lb.BitMasked(True, True, lb.Numpy(np.float64))
-#     f1(builder)
-#
-#     builder = lb.ByteMasked(lb.Numpy(np.float64), valid_when=True)
-#     f1(builder)
-#
-#     builder = lb.EmptyRecord(True)
-#     assert builder.type() == "ak.numba.lb.EmptyRecord(True)"
-#     f1(builder)
-#
-#     builder = lb.Empty()
-#     f1(builder)
-#
-#     builder = lb.IndexedOption(np.int64, lb.Numpy(np.float64))
-#     f1(builder)
-#
-#     builder = lb.Indexed(np.int64, lb.Numpy(np.float64))
-#     f1(builder)
-#
-#     builder = lb.ListOffset(np.int32, lb.List(np.int64, lb.Numpy(np.int64)))
-#     f1(builder)
-#
-#     builder = lb.ListOffset(np.int32, lb.Numpy(np.float64))
-#     f1(builder)
-#
-#     builder = lb.ListOffset(np.int32, lb.Empty())
-#     f1(builder)
-#
-#     builder = lb.List(np.int8, lb.Numpy(np.int64))
-#     f1(builder)
-#
-#     builder = lb.List(np.int32, lb.Empty())
-#     f1(builder)
-#
+
+    #
+    #     # FIXME:
+    #     builder = lb.BitMasked(True, True, lb.Numpy(np.float64))
+    #     f1(builder)
+    #
+    #     builder = lb.ByteMasked(lb.Numpy(np.float64), valid_when=True)
+    #     f1(builder)
+    #
+    #     builder = lb.EmptyRecord(True)
+    #     assert builder.type() == "ak.numba.lb.EmptyRecord(True)"
+    #     f1(builder)
+    #
+    #     builder = lb.Empty()
+    #     f1(builder)
+    #
+    #     builder = lb.IndexedOption(np.int64, lb.Numpy(np.float64))
+    #     f1(builder)
+    #
+    #     builder = lb.Indexed(np.int64, lb.Numpy(np.float64))
+    #     f1(builder)
+    #
+    #     builder = lb.ListOffset(np.int32, lb.List(np.int64, lb.Numpy(np.int64)))
+    #     f1(builder)
+    #
+    #     builder = lb.ListOffset(np.int32, lb.Numpy(np.float64))
+    #     f1(builder)
+    #
+    #     builder = lb.ListOffset(np.int32, lb.Empty())
+    #     f1(builder)
+    #
+    #     builder = lb.List(np.int8, lb.Numpy(np.int64))
+    #     f1(builder)
+    #
+    #     builder = lb.List(np.int32, lb.Empty())
+    #     f1(builder)
+    #
     builder = lb.Numpy(np.int32)
     f1(builder)
+
+
 #
 #     builder = lb.Record(
 #         [
@@ -571,6 +591,7 @@ def test_unbox():
 #     f1(builder)
 #
 
+
 def test_unbox_for_loop():
     @numba.njit
     def f2(x):
@@ -581,6 +602,7 @@ def test_unbox_for_loop():
     builder = lb.Numpy(np.int64, parameters=None, initial=10, resize=2.0)
     f2(builder)
     assert ak.to_list(builder.snapshot()) == list(range(10))
+
 
 #     builder = lb.Empty()
 #     # Unknown attribute 'append' of type ak.Empty()
@@ -604,6 +626,8 @@ def test_box():
     out2 = f3(builder)
 
     assert ak.to_list(out2.snapshot()) == list(range(15))
+
+
 #
 #     builder = lb.Empty()
 #
@@ -656,6 +680,7 @@ def test_box():
 #     assert ak.to_list(out13.snapshot()) == []
 #
 
+
 def test_len():
     @numba.njit
     def f4(x):
@@ -669,6 +694,7 @@ def test_len():
 
     assert f4(builder) == 1
 
+
 #     builder = lb.Empty()
 #     assert f4(builder) == 0
 #
@@ -681,6 +707,7 @@ def test_len():
 #     builder = lb.ListOffset(np.int32, lb.ListOffset(np.int32, lb.Numpy(np.int64)))
 #     assert f4(builder) == 0
 #
+
 
 def test_from_buffer():
     @numba.njit

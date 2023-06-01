@@ -152,6 +152,11 @@ class GrowableBuffer:
 
         return out
 
+    def clear(self):
+        self._panels.clear()
+        self._length = 0
+        self._pos = 0
+
 
 def _register():
     if hasattr(ak.numba, "ArrayViewType"):
