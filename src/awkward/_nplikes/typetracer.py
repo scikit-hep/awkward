@@ -383,6 +383,9 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
                     or is_unknown_integer(item)
                     or is_unknown_array(item)
                 ):
+                    try_touch_data(item)
+                    try_touch_data(self)
+
                     if is_unknown_scalar(item):
                         item = self.nplike.promote_scalar(item)
 
@@ -408,6 +411,9 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
                     previous_item_is_basic = True
                 # Integer
                 elif isinstance(item, int) or is_unknown_integer(item):
+                    try_touch_data(item)
+                    try_touch_data(self)
+
                     item = self.nplike.promote_scalar(item)
 
                     if is_unknown_length(dimension_length) or is_unknown_integer(item):
@@ -1294,7 +1300,10 @@ class TypeTracer(NumpyLike):
     ) -> TypeTracerArray:
         assert not isinstance(x, PlaceholderArray)
         try_touch_data(x)
-        raise NotImplementedError
+        if axis is None:
+            return TypeTracerArray._new(np.intp, shape=())
+        else:
+            raise NotImplementedError
 
     def min(
         self,
