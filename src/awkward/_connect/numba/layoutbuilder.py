@@ -99,7 +99,9 @@ def typeof_LayoutBuilder(val, c):
         return RegularType(val._content, val._size, val._parameters)
 
     elif isinstance(val, Indexed):
-        return IndexedType(numba.from_dtype(val._index.dtype), val._content)
+        return IndexedType(
+            numba.from_dtype(val._index.dtype), val._content, val._parameters
+        )
 
     elif isinstance(val, IndexedOption):
         return IndexedOptionType(numba.from_dtype(val._index.dtype), val._content)
@@ -1178,10 +1180,14 @@ class Indexed(LayoutBuilder):
         return f"<Indexed of {self._content!r} with {self._index._length} items>"
 
     def type(self):
-        return f"ak.numba.lb.Indexed({self._index.dtype}, {self._content.type()})"
+        return f"ak.numba.lb.Indexed({self._index.dtype}, {self._content.type()}, parameters={self._parameters})"
 
     def numbatype(self):
-        return IndexedType(numba.from_dtype(self.index.dtype), self.content.numbatype())
+        return IndexedType(
+            numba.from_dtype(self.index.dtype),
+            self.content,
+            numba.types.StringLiteral(self._parameters),
+        )
 
     @property
     def index(self):
@@ -1231,11 +1237,9 @@ class Indexed(LayoutBuilder):
         return self._length
 
     def is_valid(self, error: str):
-        if len(self._content) != self._index.length():
-            error = f"Indexed node{self._id} has content length {len(self._content)} but index length {self._index.length()}"
+        if len(self._content) != self._index._length:
+            error = f"Indexed has content length {len(self._content)} but index length {self._index._length}"
             return False
-        elif len(self._content) != self._last_valid + 1:
-            error = f"Indexed node{self._id} has content length {len(self._content)} but last valid index is {self._last_valid}"
         else:
             return self._content.is_valid(error)
 
@@ -1253,18 +1257,21 @@ class Indexed(LayoutBuilder):
 
 
 class IndexedType(numba.types.Type):
-    def __init__(self, dtype, content):
-        super().__init__(name=f"ak.numba.lb.Indexed({dtype}, {content.type()})")
+    def __init__(self, dtype, content, parameters):
+        super().__init__(
+            name=f"ak.numba.lb.Indexed({dtype}, {content.type()}, parameters={parameters.literal_value if isinstance(parameters, numba.types.Literal) else None})"
+        )
         self._dtype = dtype
         self._content = content
+        self._parameters = parameters
 
     @classmethod
     def type(cls):
-        return IndexedType(cls.index.dtype, cls.content)
+        return IndexedType(cls.index.dtype, cls.content, cls.parameters)
 
     @property
     def parameters(self):
-        return numba.types.StringLiteral
+        return numba.types.StringLiteral(self._parameters)
 
     @property
     def index(self):
@@ -1347,7 +1354,7 @@ def IndexedType_box(typ, val, c):
 @numba.extending.overload_method(IndexedType, "_length_get", inline="always")
 def Indexed_length(builder):
     def getter(builder):
-        return builder._length
+        return builder._index._length_pos[0]
 
     return getter
 
@@ -1358,6 +1365,28 @@ def Indexed_index(builder):
         return builder._index
 
     return getter
+
+
+@numba.extending.overload_method(IndexedType, "append")
+def Indexed_append(builder, datum):
+    if isinstance(builder, IndexedType):
+
+        def append(builder, datum):
+            builder._index.append(len(builder._content))
+            builder._content.append(datum)
+
+        return append
+
+
+@numba.extending.overload_method(IndexedType, "extend")
+def Indexed_extend(builder, data):
+    def extend(builder, data):
+        start = len(builder._content)
+        stop = start + len(data)
+        builder._index.extend(list(range(start, stop)))
+        builder._content.extend(data)
+
+    return extend
 
 
 ########## IndexedOption #######################################################

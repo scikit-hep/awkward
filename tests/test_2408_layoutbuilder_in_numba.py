@@ -20,7 +20,7 @@ def test_Numpy():
     builder.extend([3.3, 4.4, 5.5])
 
     error = ""
-    assert builder.is_valid(error), error.value
+    assert builder.is_valid(error), error
 
     array = builder.snapshot()
     assert isinstance(array, ak.Array)
@@ -31,13 +31,13 @@ def test_Numpy():
     assert builder.type() == str(builder.numbatype())
 
     error = ""
-    assert builder.is_valid(error), error.value
+    assert builder.is_valid(error), error
 
     assert len(builder) == 5
     builder.clear()
     assert len(builder) == 0
 
-    assert builder.is_valid(error), error.value
+    assert builder.is_valid(error), error
 
 
 def test_Numpy_char():
@@ -59,7 +59,7 @@ def test_Numpy_char():
     )
 
     error = ""
-    assert builder.is_valid(error), error.value
+    assert builder.is_valid(error), error
 
 
 def test_Empty():
@@ -68,7 +68,7 @@ def test_Empty():
     assert ak.to_list(builder.snapshot()) == []
 
     error = ""
-    assert builder.is_valid(error), error.value
+    assert builder.is_valid(error), error
 
     with pytest.raises(AttributeError):
         builder.content.append(1.1)
@@ -77,7 +77,7 @@ def test_Empty():
         builder.content.extend([3.3, 4.4, 5.5])
 
     error = ""
-    assert builder.is_valid(error), error.value
+    assert builder.is_valid(error), error
 
     array = builder.snapshot()
     assert isinstance(array, ak.Array)
@@ -125,7 +125,7 @@ def test_ListOffset():
     assert ak.to_list(array) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
 
     error = ""
-    assert builder.is_valid(error), error.value
+    assert builder.is_valid(error), error
 
 
 def test_List():
@@ -154,7 +154,7 @@ def test_List():
     assert ak.to_list(array) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
 
     error = ""
-    assert builder.is_valid(error), error.value
+    assert builder.is_valid(error), error
 
     assert (
         builder.type()
@@ -192,7 +192,7 @@ def test_Regular():
     assert len(builder) == 2
 
     error = ""
-    assert builder.is_valid(error), error.value
+    assert builder.is_valid(error), error
 
     assert (
         builder.type()
@@ -211,20 +211,35 @@ def test_Regular_size0():
         lb.Regular(lb.Numpy(np.float64), 0)
 
 
-# def test_Indexed():
-#     builder = lb.Indexed(np.int64, lb.Numpy(np.float64))
-#     assert len(builder) == 0
-#
-#     builder.append(1.1)
-#     builder.append(2.2)
-#
-#     data = np.array([3.3, 4.4, 5.5], dtype=np.float64)
-#     builder.extend(data)
-#
-#     array = builder.snapshot()
-#     assert ak.to_list(array) == [1.1, 2.2, 3.3, 4.4, 5.5]
-#
-#
+def test_Indexed():
+    builder = lb.Indexed(np.int64, lb.Numpy(np.float64))
+    assert len(builder) == 0
+
+    builder.append(1.1)
+    builder.append(2.2)
+
+    data = np.array([3.3, 4.4, 5.5], dtype=np.float64)
+    builder.extend(data)
+
+    array = builder.snapshot()
+    assert ak.to_list(array) == [1.1, 2.2, 3.3, 4.4, 5.5]
+    assert len(builder) == 5
+
+    error = ""
+    assert builder.is_valid(error), error
+
+    assert (
+        builder.type()
+        == "ak.numba.lb.Indexed(int64, ak.numba.lb.Numpy(float64, parameters=None), parameters=None)"
+    )
+    assert (
+        str(builder.numbatype())
+        == "ak.numba.lb.Indexed(int64, ak.numba.lb.Numpy(float64, parameters=None), parameters=None)"
+    )
+    builder.clear()
+    assert len(builder) == 0
+
+
 # def test_Indexed_Record():
 #     builder = lb.Indexed(
 #         np.int64, lb.Record([lb.Numpy(np.float64), lb.Numpy(np.int64)], ["x", "y"])
@@ -529,8 +544,8 @@ def test_unbox():
     #     builder = lb.IndexedOption(np.int64, lb.Numpy(np.float64))
     #     f1(builder)
     #
-    #     builder = lb.Indexed(np.int64, lb.Numpy(np.float64))
-    #     f1(builder)
+    builder = lb.Indexed(np.int64, lb.Numpy(np.float64))
+    f1(builder)
 
     builder = lb.ListOffset(np.int32, lb.List(np.int64, lb.Numpy(np.int64)))
     f1(builder)
@@ -640,15 +655,15 @@ def test_box():
     out7 = f3(builder)
     assert ak.to_list(out7.snapshot()) == []
 
+    builder = lb.ListOffset(np.int32, lb.Regular(lb.Numpy(np.float64), 3))
+    out8 = f3(builder)
+    assert ak.to_list(out8.snapshot()) == []
 
-#     builder = lb.ListOffset(np.int32, lb.Regular(lb.Numpy(np.float64), 3))
-#     out8 = f3(builder)
-#     assert ak.to_list(out8.snapshot()) == []
-#
-#     builder = lb.Indexed(np.int64, lb.Numpy(np.float64))
-#     out9 = f3(builder)
-#     assert ak.to_list(out9.snapshot()) == []
-#
+    builder = lb.Indexed(np.int64, lb.Numpy(np.float64))
+    out9 = f3(builder)
+    assert ak.to_list(out9.snapshot()) == []
+
+
 #     builder = lb.IndexedOption(np.int64, lb.Numpy(np.float64))
 #     out10 = f3(builder)
 #     assert ak.to_list(out10.snapshot()) == []
@@ -694,6 +709,9 @@ def test_len():
     assert f4(builder) == 0
 
     builder = lb.Regular(lb.Numpy(np.float64), 3)
+    assert f4(builder) == 0
+
+    builder = lb.Indexed(np.int64, lb.Numpy(np.float64))
     assert f4(builder) == 0
 
 
@@ -923,7 +941,7 @@ def test_List_append():
     assert ak.to_list(array) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
 
     error = ""
-    assert builder.is_valid(error), error.value
+    assert builder.is_valid(error), error
 
     assert len(builder) == 3
     builder.clear()
@@ -957,7 +975,43 @@ def test_Regular_append():
     assert ak.to_list(array) == [[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]
 
     error = ""
-    assert builder.is_valid(error), error.value
+    assert builder.is_valid(error), error
+
+
+def test_Indexed_append_extend():
+    @numba.njit
+    def f34(builder):
+        builder.append(1.1)
+        builder.append(2.2)
+        builder.append(3.3)
+        builder.append(4.4)
+        builder.append(5.5)
+        builder.append(6.6)
+
+    @numba.njit
+    def f35(builder, data):
+        builder.extend(data)
+
+    builder = lb.Indexed(np.int64, lb.Numpy(np.float64))
+    assert len(builder) == 0
+
+    f34(builder)
+    assert len(builder) == 6
+
+    array = builder.snapshot()
+    assert ak.to_list(array) == [1.1, 2.2, 3.3, 4.4, 5.5, 6.6]
+
+    error = ""
+    assert builder.is_valid(error), error
+
+    data = np.array([33.33, 44.44, 55.55], dtype=np.float64)
+    f35(builder, data)
+    assert len(builder) == 9
+
+    array = builder.snapshot()
+    assert ak.to_list(array) == [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 33.33, 44.44, 55.55]
+
+    assert builder.is_valid(error), error
 
 
 def test_numba_append():
