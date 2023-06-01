@@ -1,7 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 from __future__ import annotations
 
-from math import prod
+from functools import reduce
+from operator import mul
 
 from awkward._nplikes.numpylike import ArrayLike, NumpyLike, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
@@ -32,7 +33,7 @@ class PlaceholderArray(ArrayLike):
 
     @property
     def size(self) -> ShapeItem:
-        return prod(self._shape)
+        return reduce(mul, self._shape)
 
     @property
     def strides(self) -> tuple[ShapeItem, ...]:
