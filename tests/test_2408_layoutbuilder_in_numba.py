@@ -434,49 +434,79 @@ def test_ByteMasked():
     array = builder.snapshot()
     assert ak.to_list(array) == [1.1, None, 3.3, 4.4, 5.5, None, None]
 
+    error = ""
+    assert builder.is_valid(error), error
 
-# def test_BitMasked():
-#     builder = lb.BitMasked(True, True, lb.Numpy(np.float64))
-#     assert len(builder) == 0
-#
-#     subbuilder = builder.append_valid()
-#     subbuilder.append(1.1)
-#     assert len(builder) == 1
-#     array = builder.snapshot()
-#     assert ak.to_list(array) == [1.1]
-#
-#     builder.append_null()
-#     subbuilder.append(np.nan)
-#     assert len(builder) == 2
-#
-#     data = np.array([3.3, 4.4, 5.5], dtype=np.float64)
-#
-#     builder.extend_valid(3)
-#     subbuilder.extend(data)
-#     assert len(builder) == 5
-#
-#     builder.extend_null(2)
-#     subbuilder.append(np.nan)
-#     subbuilder.append(np.nan)
-#
-#     assert len(builder) == 7
-#
-#     builder.append_valid()
-#     subbuilder.append(8)
-#     assert len(builder) == 8
-#
-#     builder.append_valid()
-#     subbuilder.append(9)
-#     assert len(builder) == 9
-#
-#     builder.append_valid()
-#     subbuilder.append(10)
-#     assert len(builder) == 10
-#
-#     array = builder.snapshot()
-#     assert ak.to_list(array) == [1.1, None, 3.3, 4.4, 5.5, None, None, 8, 9, 10]
-#
-#
+    # FIXME: add dtype
+    # assert (
+    #     builder.type()
+    #     == "ak.numba.lb.ByteMasked(bool, ak.numba.lb.Numpy(float64, parameters=None), valid_when=True, parameters=None)"
+    # )
+    # assert (
+    #     str(builder.numbatype())
+    #     == "ak.numba.lb.ByteMasked(bool, ak.numba.lb.Numpy(float64, parameters=None), valid_when=True, parameters=None)"
+    # )
+    builder.clear()
+    assert len(builder) == 0
+
+
+def test_BitMasked():
+    builder = lb.BitMasked(np.uint8, lb.Numpy(np.float64), True, True)
+    assert len(builder) == 0
+
+    subbuilder = builder.append_valid()
+    subbuilder.append(1.1)
+    assert len(builder) == 1
+    array = builder.snapshot()
+    assert ak.to_list(array) == [1.1]
+
+    builder.append_null()
+    subbuilder.append(np.nan)
+    assert len(builder) == 2
+
+    data = np.array([3.3, 4.4, 5.5], dtype=np.float64)
+
+    builder.extend_valid(3)
+    subbuilder.extend(data)
+    assert len(builder) == 5
+
+    builder.extend_null(2)
+    subbuilder.append(np.nan)
+    subbuilder.append(np.nan)
+
+    assert len(builder) == 7
+
+    builder.append_valid()
+    subbuilder.append(8)
+    assert len(builder) == 8
+
+    builder.append_valid()
+    subbuilder.append(9)
+    assert len(builder) == 9
+
+    builder.append_valid()
+    subbuilder.append(10)
+    assert len(builder) == 10
+
+    array = builder.snapshot()
+    assert ak.to_list(array) == [1.1, None, 3.3, 4.4, 5.5, None, None, 8, 9, 10]
+
+    error = ""
+    assert builder.is_valid(error), error
+
+    assert (
+        builder.type()
+        == "ak.numba.lb.BitMasked(uint8, ak.numba.lb.Numpy(float64, parameters=None), True, True, parameters=None)"
+    )
+    assert (
+        str(builder.numbatype())
+        == "ak.numba.lb.BitMasked(uint8, ak.numba.lb.Numpy(float64, parameters=None), True, True, parameters=None)"
+    )
+    # FIXME: ValueError: __len__() should return >= 0
+    # builder.clear()
+    # assert len(builder) == 0
+
+
 # def test_Union_Numpy_ListOffset():
 #     builder = lb.Union(
 #         np.int64,
@@ -549,11 +579,9 @@ def test_unbox():
         x  # noqa: B018 (we want to test the unboxing)
         return 3.14
 
-    #
-    #     # FIXME:
-    #     builder = lb.BitMasked(True, True, lb.Numpy(np.float64))
-    #     f1(builder)
-    #
+    builder = lb.BitMasked(np.uint8, lb.Numpy(np.float64), True, True)
+    f1(builder)
+
     builder = lb.ByteMasked(lb.Numpy(np.float64), valid_when=True)
     f1(builder)
 
@@ -690,11 +718,11 @@ def test_box():
     out11 = f3(builder)
     assert ak.to_list(out11.snapshot()) == []
 
+    builder = lb.BitMasked(np.uint8, lb.Numpy(np.float64), True, True)
+    out12 = f3(builder)
+    assert ak.to_list(out12.snapshot()) == []
 
-#     builder = lb.BitMasked(np.uitn8, lb.Numpy(np.float64), True, True)
-#     out12 = f3(builder)
-#     assert ak.to_list(out12.snapshot()) == []
-#
+
 #     builder = lb.Unmasked(lb.Numpy(np.int64))
 #     out13 = f3(builder)
 #     assert ak.to_list(out13.snapshot()) == []
