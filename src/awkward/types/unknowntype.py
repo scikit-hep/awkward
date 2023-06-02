@@ -52,7 +52,7 @@ class UnknownType(Type):
             else:
                 out = ["unknown[", params, "]"]
 
-        return [self._str_categorical_begin(), *out] + [self._str_categorical_end()]
+        return [self._str_categorical_begin(), *out, self._str_categorical_end()]
 
     def __repr__(self):
         args = self._repr_args()

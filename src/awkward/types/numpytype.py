@@ -155,7 +155,7 @@ class NumpyType(Type):
                     params = ""
                 out = [self._primitive, "[", units, params, "]"]
 
-        return [self._str_categorical_begin(), *out] + [self._str_categorical_end()]
+        return [self._str_categorical_begin(), *out, self._str_categorical_end()]
 
     def __repr__(self):
         args = [repr(self._primitive), *self._repr_args()]
