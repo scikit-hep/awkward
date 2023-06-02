@@ -6,11 +6,15 @@ __all__ = [
     "empty_if_typetracer",
     "TypeTracerReport",
     "typetracer_with_report",
+    "PlaceholderArray",
+    "unknown_length",
 ]
 
 from awkward._backends.typetracer import TypeTracerBackend
 from awkward._behavior import behavior_of
 from awkward._layout import wrap_layout
+from awkward._nplikes.placeholder import PlaceholderArray
+from awkward._nplikes.shape import unknown_length
 from awkward._nplikes.typetracer import (
     TypeTracerReport,
     is_unknown_array,

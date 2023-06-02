@@ -106,19 +106,27 @@ def in_function(options):
     if options["function_name"] is None:
         return ""
     else:
-        return "in " + options["function_name"]
+        return " in " + options["function_name"]
 
 
 def checklength(inputs, options):
-    length = inputs[0].length
-    for x in inputs[1:]:
-        if x.length != length:
+    it = iter(inputs)
+    length: int
+    for content in it:
+        if content.length is not unknown_length:
+            length = content.length
+            break
+
+    for other_content in it:
+        if other_content.length is unknown_length:
+            continue
+        if other_content.length != length:
             raise ValueError(
                 "cannot broadcast {} of length {} with {} of length {}{}".format(
-                    type(inputs[0]).__name__,
+                    type(content).__name__,
                     length,
-                    type(x).__name__,
-                    x.length,
+                    type(other_content).__name__,
+                    other_content.length,
                     in_function(options),
                 )
             )
@@ -403,11 +411,7 @@ def apply_step(
                 )
 
     # Now all lengths must agree.
-    if backend.nplike.known_data:
-        checklength(contents, options)
-    else:
-        for x in contents:
-            x._touch_shape(recursive=False)
+    checklength(contents, options)
 
     # Load the parameter broadcasting rule implementation
     rule = options["broadcast_parameters_rule"]
@@ -507,8 +511,10 @@ def apply_step(
                 elif x.size == 0:
                     dim_size = 0
                     break
+                # Take first size as dim_size
                 elif dim_size is None:
                     dim_size = x.size
+                # If the dim_size is unknown, we can't compare
                 elif dim_size is unknown_length:
                     continue
                 else:
@@ -594,69 +600,28 @@ def apply_step(
                 for x, p in zip(outcontent, parameters)
             )
 
-        elif not backend.nplike.known_data:
-            offsets = None
-            nextinputs = []
-            for x in inputs:
-                if isinstance(x, ListOffsetArray):
-                    x._touch_data(recursive=False)
-                    offsets = Index64(
-                        backend.index_nplike.empty(
-                            x.offsets.data.shape[0], dtype=np.int64
-                        ),
-                        nplike=backend.index_nplike,
-                    )
-                    nextinputs.append(x.content)
-                elif isinstance(x, ListArray):
-                    x._touch_data(recursive=False)
-                    offsets = Index64(
-                        backend.index_nplike.empty(
-                            x.starts.data.shape[0] + 1, dtype=np.int64
-                        ),
-                        nplike=backend.index_nplike,
-                    )
-                    nextinputs.append(x.content)
-                elif isinstance(x, RegularArray):
-                    nextinputs.append(x.content)
-                else:
-                    nextinputs.append(x)
-            assert offsets is not None
-
-            outcontent = apply_step(
-                backend,
-                nextinputs,
-                action,
-                depth + 1,
-                copy.copy(depth_context),
-                lateral_context,
-                behavior,
-                options,
-            )
-            assert isinstance(outcontent, tuple)
-            parameters = parameters_factory(len(outcontent))
-            return tuple(
-                ListOffsetArray(offsets, x, parameters=p)
-                for x, p in zip(outcontent, parameters)
-            )
-
         # Not all regular, but all same offsets?
         # Optimization: https://github.com/scikit-hep/awkward-1.0/issues/442
-        elif all_same_offsets(backend, inputs):
+        elif index_nplike.known_data and all_same_offsets(backend, inputs):
             lencontent, offsets, starts, stops = None, None, None, None
             nextinputs = []
 
             for x in inputs:
                 if isinstance(x, ListOffsetArray):
                     offsets = x.offsets
-                    lencontent = offsets[-1]
+                    lencontent = index_nplike.index_as_shape_item(offsets[-1])
                     nextinputs.append(x.content[:lencontent])
 
                 elif isinstance(x, ListArray):
                     starts, stops = x.starts, x.stops
-                    if starts.length == 0 or stops.length == 0:
+                    if (starts.length is not unknown_length and starts.length == 0) or (
+                        stops.length is not unknown_length and stops.length == 0
+                    ):
                         nextinputs.append(x.content[:0])
                     else:
-                        lencontent = backend.index_nplike.max(stops)
+                        lencontent = index_nplike.index_as_shape_item(
+                            index_nplike.max(stops)
+                        )
                         nextinputs.append(x.content[:lencontent])
                 elif isinstance(x, RegularArray):
                     nextinputs.append(x.content[: x.size * x.length])
@@ -787,52 +752,40 @@ def apply_step(
             )
 
     def broadcast_any_option():
-        if backend.nplike.known_data:
-            mask = None
-            for x in contents:
-                if x.is_option:
-                    m = x.mask_as_bool(valid_when=False)
-                    if mask is None:
-                        mask = m
-                    else:
-                        mask = backend.index_nplike.logical_or(mask, m, maybe_out=mask)
+        mask = None
+        for x in contents:
+            if x.is_option:
+                m = x.mask_as_bool(valid_when=False)
+                if mask is None:
+                    mask = m
+                else:
+                    mask = backend.index_nplike.logical_or(mask, m, maybe_out=mask)
 
-            nextmask = Index8(mask.view(np.int8))
-            index = backend.index_nplike.full(mask.shape[0], -1, dtype=np.int64)
-            index[~mask] = backend.index_nplike.arange(
-                mask.shape[0] - backend.index_nplike.count_nonzero(mask),
+        nextmask = Index8(mask.view(np.int8))
+        index = backend.index_nplike.full(mask.shape[0], -1, dtype=np.int64)
+        index[~mask] = backend.index_nplike.arange(
+            backend.index_nplike.shape_item_as_index(mask.shape[0])
+            - backend.index_nplike.count_nonzero(mask),
+            dtype=np.int64,
+        )
+        index = Index64(index)
+        if any(not x.is_option for x in contents):
+            nextindex = backend.index_nplike.arange(
+                backend.index_nplike.shape_item_as_index(mask.shape[0]),
                 dtype=np.int64,
             )
-            index = Index64(index)
-            if any(not x.is_option for x in contents):
-                nextindex = backend.index_nplike.arange(mask.shape[0], dtype=np.int64)
-                nextindex[mask] = -1
-                nextindex = Index64(nextindex)
+            nextindex[mask] = -1
+            nextindex = Index64(nextindex)
 
-            nextinputs = []
-            for x in inputs:
-                if isinstance(x, optiontypes):
-                    nextinputs.append(x.project(nextmask))
-                elif isinstance(x, Content):
-                    nextinputs.append(
-                        IndexedOptionArray(nextindex, x).project(nextmask)
-                    )
-                else:
-                    nextinputs.append(x)
+        nextinputs = []
+        for x in inputs:
+            if isinstance(x, optiontypes):
+                nextinputs.append(x.project(nextmask))
+            elif isinstance(x, Content):
+                nextinputs.append(IndexedOptionArray(nextindex, x).project(nextmask))
+            else:
+                nextinputs.append(x)
 
-        else:
-            index = None
-            nextinputs = []
-            for x in inputs:
-                if isinstance(x, optiontypes):
-                    x._touch_data(recursive=False)
-                    index = Index64(
-                        backend.index_nplike.empty(x.length, dtype=np.int64)
-                    )
-                    nextinputs.append(x.content)
-                else:
-                    nextinputs.append(x)
-            assert index is not None
         outcontent = apply_step(
             backend,
             nextinputs,

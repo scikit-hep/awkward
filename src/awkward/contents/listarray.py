@@ -269,23 +269,17 @@ class ListArray(Content):
         return "".join(out)
 
     def to_ListOffsetArray64(self, start_at_zero: bool = False) -> ListOffsetArray:
+        index_nplike = self._backend.index_nplike
+
         starts = self._starts.data
         stops = self._stops.data
 
-        lenoffsets = None if (starts.shape[0] is None) else (starts.shape[0] + 1)
-        if not self._backend.nplike.known_data:
-            self._touch_data(recursive=False)
-            self._content._touch_data(recursive=False)
-            offsets = self._backend.index_nplike.empty(lenoffsets, dtype=starts.dtype)
-            return ListOffsetArray(
-                ak.index.Index(offsets, nplike=self._backend.index_nplike),
-                self._content,
-                parameters=self._parameters,
-            )
-
-        elif self._backend.index_nplike.array_equal(starts[1:], stops[:-1]):
-            offsets = self._backend.index_nplike.empty(lenoffsets, dtype=starts.dtype)
-            if offsets.shape[0] == 1:
+        lenoffsets = self._starts.length + 1
+        if (not index_nplike.known_data) or index_nplike.array_equal(
+            starts[1:], stops[:-1]
+        ):
+            offsets = index_nplike.empty(lenoffsets, dtype=starts.dtype)
+            if lenoffsets is not unknown_length and lenoffsets == 1:
                 offsets[0] = 0
             else:
                 offsets[:-1] = starts
@@ -391,10 +385,60 @@ class ListArray(Content):
         return out
 
     def _broadcast_tooffsets64(self, offsets: Index) -> ListOffsetArray:
-        if not self.backend.index_nplike.known_data:
-            self._touch_data(recursive=False)
-            offsets._touch_data()
-        return ListOffsetArray._broadcast_tooffsets64(self, offsets)
+        self._touch_data(recursive=False)
+        offsets._touch_data()
+
+        index_nplike = self._backend.index_nplike
+        assert offsets.nplike is index_nplike
+        if offsets.length is not unknown_length and offsets.length == 0:
+            raise AssertionError(
+                "broadcast_tooffsets64 can only be used with non-empty offsets"
+            )
+        elif index_nplike.known_data and offsets[0] != 0:
+            raise AssertionError(
+                f"broadcast_tooffsets64 can only be used with offsets that start at 0, not {offsets[0]}"
+            )
+        elif (
+            offsets.length is not unknown_length
+            and self._starts.length is not unknown_length
+            and offsets.length - 1 != self._starts.length
+        ):
+            raise AssertionError(
+                "cannot broadcast RegularArray of length {} to length {}".format(
+                    self._starts.length, offsets.length - 1
+                )
+            )
+
+        nextcarry = ak.index.Index64.empty(
+            self._backend.index_nplike.index_as_shape_item(offsets[-1]),
+            self._backend.index_nplike,
+        )
+        assert (
+            nextcarry.nplike is self._backend.index_nplike
+            and offsets.nplike is self._backend.index_nplike
+            and self._starts.nplike is self._backend.index_nplike
+            and self._stops.nplike is self._backend.index_nplike
+        )
+        self._handle_error(
+            self._backend[
+                "awkward_ListArray_broadcast_tooffsets",
+                nextcarry.dtype.type,
+                offsets.dtype.type,
+                self._starts.dtype.type,
+                self._stops.dtype.type,
+            ](
+                nextcarry.data,
+                offsets.data,
+                offsets.length,
+                self._starts.data,
+                self._stops.data,
+                self._content.length,
+            )
+        )
+
+        nextcontent = self._content._carry(nextcarry, True)
+
+        return ListOffsetArray(offsets, nextcontent, parameters=self._parameters)
 
     def _getitem_next_jagged(
         self, slicestarts: Index, slicestops: Index, slicecontent: Content, tail

@@ -7,6 +7,7 @@ import awkward as ak
 from awkward._nplikes.array_module import ArrayModuleNumpyLike
 from awkward._nplikes.dispatch import register_nplike
 from awkward._nplikes.numpylike import ArrayLike
+from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._typing import Final
 
 
@@ -40,10 +41,14 @@ class Cupy(ArrayModuleNumpyLike):
     def frombuffer(
         self, buffer, *, dtype: numpy.dtype | None = None, count: int = -1
     ) -> ArrayLike:
+        assert not isinstance(buffer, PlaceholderArray)
+        assert not isinstance(count, PlaceholderArray)
         np_array = numpy.frombuffer(buffer, dtype=dtype, count=count)
         return self._module.asarray(np_array)
 
     def array_equal(self, x1: ArrayLike, x2: ArrayLike, *, equal_nan: bool = False):
+        assert not isinstance(x1, PlaceholderArray)
+        assert not isinstance(x2, PlaceholderArray)
         if x1.shape != x2.shape:
             return False
         else:
@@ -52,6 +57,8 @@ class Cupy(ArrayModuleNumpyLike):
     def repeat(
         self, x: ArrayLike, repeats: ArrayLike | int, *, axis: int | None = None
     ):
+        assert not isinstance(x, PlaceholderArray)
+        assert not isinstance(repeats, PlaceholderArray)
         if axis is not None:
             raise NotImplementedError(f"repeat for CuPy with axis={axis!r}")
         # https://github.com/cupy/cupy/issues/3849
@@ -75,6 +82,7 @@ class Cupy(ArrayModuleNumpyLike):
         keepdims: bool = False,
         maybe_out: ArrayLike | None = None,
     ) -> ArrayLike:
+        assert not isinstance(x, PlaceholderArray)
         out = self._module.all(x, axis=axis, out=maybe_out)
         if axis is None and isinstance(out, self._module.ndarray):
             return out.item()
@@ -89,6 +97,7 @@ class Cupy(ArrayModuleNumpyLike):
         keepdims: bool = False,
         maybe_out: ArrayLike | None = None,
     ) -> ArrayLike:
+        assert not isinstance(x, PlaceholderArray)
         out = self._module.any(x, axis=axis, out=maybe_out)
         if axis is None and isinstance(out, self._module.ndarray):
             return out.item()
@@ -102,6 +111,7 @@ class Cupy(ArrayModuleNumpyLike):
         axis: int | tuple[int, ...] | None = None,
         keepdims: bool = False,
     ) -> ArrayLike:
+        assert not isinstance(x, PlaceholderArray)
         out = self._module.count_nonzero(x, axis=axis)
         if axis is None and isinstance(out, self._module.ndarray):
             return out.item()
@@ -116,6 +126,7 @@ class Cupy(ArrayModuleNumpyLike):
         keepdims: bool = False,
         maybe_out: ArrayLike | None = None,
     ) -> ArrayLike:
+        assert not isinstance(x, PlaceholderArray)
         out = self._module.min(x, axis=axis, out=maybe_out)
         if axis is None and isinstance(out, self._module.ndarray):
             return out.item()
@@ -130,16 +141,12 @@ class Cupy(ArrayModuleNumpyLike):
         keepdims: bool = False,
         maybe_out: ArrayLike | None = None,
     ) -> ArrayLike:
+        assert not isinstance(x, PlaceholderArray)
         out = self._module.max(x, axis=axis, out=maybe_out)
         if axis is None and isinstance(out, self._module.ndarray):
             return out.item()
         else:
             return out
-
-    def array_str(
-        self, array, max_line_width=None, precision=None, suppress_small=None
-    ):
-        return self._module.array_str(array, max_line_width, precision, suppress_small)
 
     @classmethod
     def is_own_array_type(cls, type_: type) -> bool:
@@ -154,6 +161,7 @@ class Cupy(ArrayModuleNumpyLike):
         return module == "cupy"
 
     def is_c_contiguous(self, x: ArrayLike) -> bool:
-        return x.flags["C_CONTIGUOUS"] or (
-            x.dtype.metadata is not None and x.dtype.metadata.get("pretend_contiguous")
-        )
+        if isinstance(x, PlaceholderArray):
+            return True
+        else:
+            return x.flags["C_CONTIGUOUS"]
