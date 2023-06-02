@@ -263,21 +263,23 @@ def test_Indexed():
 #         {"x": 3.3, "y": 4},
 #     ]
 #
-#
-# def test_IndexedOption():
-#     builder = lb.IndexedOption(np.int64, lb.Numpy(np.float64))
-#     assert len(builder) == 0
-#
-#     builder.append(1.1)
-#     builder.append_null()
-#
-#     data = np.array([3.3, 4.4, 5.5], dtype=np.float64)
-#     builder.extend(data)
-#
-#     builder.extend_null(2)
-#     array = builder.snapshot()
-#     assert ak.to_list(array) == [1.1, None, 3.3, 4.4, 5.5, None, None]
-#
+
+
+def test_IndexedOption():
+    builder = lb.IndexedOption(np.int64, lb.Numpy(np.float64))
+    assert len(builder) == 0
+
+    builder.append(1.1)
+    builder.append_null()
+
+    data = np.array([3.3, 4.4, 5.5], dtype=np.float64)
+    builder.extend(data)
+
+    builder.extend_null(2)
+    array = builder.snapshot()
+    assert ak.to_list(array) == [1.1, None, 3.3, 4.4, 5.5, None, None]
+
+
 #
 # def test_Record():
 #     builder = lb.Record(
@@ -541,9 +543,9 @@ def test_unbox():
     builder = lb.Empty()
     f1(builder)
 
-    #     builder = lb.IndexedOption(np.int64, lb.Numpy(np.float64))
-    #     f1(builder)
-    #
+    builder = lb.IndexedOption(np.int64, lb.Numpy(np.float64))
+    f1(builder)
+
     builder = lb.Indexed(np.int64, lb.Numpy(np.float64))
     f1(builder)
 
@@ -663,11 +665,11 @@ def test_box():
     out9 = f3(builder)
     assert ak.to_list(out9.snapshot()) == []
 
+    builder = lb.IndexedOption(np.int64, lb.Numpy(np.float64))
+    out10 = f3(builder)
+    assert ak.to_list(out10.snapshot()) == []
 
-#     builder = lb.IndexedOption(np.int64, lb.Numpy(np.float64))
-#     out10 = f3(builder)
-#     assert ak.to_list(out10.snapshot()) == []
-#
+
 #     builder = lb.ByteMasked(lb.Numpy(np.float64), valid_when=True)
 #     out11 = f3(builder)
 #     assert ak.to_list(out11.snapshot()) == []
@@ -712,6 +714,9 @@ def test_len():
     assert f4(builder) == 0
 
     builder = lb.Indexed(np.int64, lb.Numpy(np.float64))
+    assert f4(builder) == 0
+
+    builder = lb.IndexedOption(np.int64, lb.Numpy(np.float64))
     assert f4(builder) == 0
 
 

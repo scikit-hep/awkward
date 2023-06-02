@@ -104,7 +104,9 @@ def typeof_LayoutBuilder(val, c):
         )
 
     elif isinstance(val, IndexedOption):
-        return IndexedOptionType(numba.from_dtype(val._index.dtype), val._content)
+        return IndexedOptionType(
+            numba.from_dtype(val._index.dtype), val._content, val._parameters
+        )
 
     elif isinstance(val, ByteMasked):
         return ByteMaskedType(val._content)
@@ -1404,11 +1406,13 @@ class IndexedOption(LayoutBuilder):
         return f"<IndexedOption of {self._content!r} with {self._index._length} items>"
 
     def type(self):
-        return f"ak.numba.lb.IndexedOption({self._index.dtype}, {self._content.type()})"
+        return f"ak.numba.lb.IndexedOption({self._index.dtype}, {self._content.type()}, parameters={self._parameters})"
 
     def numbatype(self):
         return IndexedOptionType(
-            numba.from_dtype(self.index.dtype), self.content.numbatype()
+            numba.from_dtype(self.index.dtype),
+            self.content,
+            numba.types.StringLiteral(self._parameters),
         )
 
     @property
@@ -1485,18 +1489,21 @@ class IndexedOption(LayoutBuilder):
 
 
 class IndexedOptionType(numba.types.Type):
-    def __init__(self, dtype, content):
-        super().__init__(name=f"ak.numba.lb.IndexedOption({dtype}, {content.type()})")
+    def __init__(self, dtype, content, parameters):
+        super().__init__(
+            name=f"ak.numba.lb.IndexedOption({dtype}, {content.type()}, parameters={parameters.literal_value if isinstance(parameters, numba.types.Literal) else None})"
+        )
         self._dtype = dtype
         self._content = content
+        self._parameters = parameters
 
     @classmethod
     def type(cls):
-        return IndexedOptionType(cls.index.dtype, cls.content)
+        return IndexedOptionType(cls.index.dtype, cls.content, cls.parameters)
 
     @property
     def parameters(self):
-        return numba.types.StringLiteral
+        return numba.types.StringLiteral(self._parameters)
 
     @property
     def index(self):
@@ -1579,7 +1586,7 @@ def IndexedOptionType_box(typ, val, c):
 @numba.extending.overload_method(IndexedOptionType, "_length_get", inline="always")
 def IndexedOption_length(builder):
     def getter(builder):
-        return builder._length
+        return builder._index._length_pos[0]
 
     return getter
 
@@ -1590,6 +1597,46 @@ def IndexedOption_index(builder):
         return builder._index
 
     return getter
+
+
+@numba.extending.overload_method(IndexedOptionType, "append")
+def IndexedOption_append(builder, datum):
+    if isinstance(builder, IndexedType):
+
+        def append(builder, datum):
+            builder._index.append(len(builder._content))
+            builder._content.append(datum)
+
+        return append
+
+
+@numba.extending.overload_method(IndexedOptionType, "extend")
+def IndexedOption_extend(builder, data):
+    def extend(builder, data):
+        start = len(builder._content)
+        stop = start + len(data)
+        builder._index.extend(list(range(start, stop)))
+        builder._content.extend(data)
+
+    return extend
+
+
+@numba.extending.overload_method(IndexedOptionType, "append_null")
+def IndexedOption_append_null(builder):
+    if isinstance(builder, IndexedType):
+
+        def append_null(builder, datum):
+            builder._index.append(-1)
+
+        return append_null
+
+
+@numba.extending.overload_method(IndexedOptionType, "extend_null")
+def IndexedOption_extend_null(builder, size):
+    def extend_null(builder, data):
+        builder._index.extend([-1] * size)
+
+    return extend_null
 
 
 ########## ByteMasked #########################################################
