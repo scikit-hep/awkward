@@ -109,7 +109,7 @@ def typeof_LayoutBuilder(val, c):
         )
 
     elif isinstance(val, ByteMasked):
-        return ByteMaskedType(val._content)
+        return ByteMaskedType(val._content, val._valid_when, val._parameters)
 
     elif isinstance(val, BitMasked):
         return BitMaskedType(val._valid_when, val._lsb_order, val._content)
@@ -1648,8 +1648,8 @@ class ByteMasked(LayoutBuilder):
         self,
         content,
         *,
-        parameters=None,
         valid_when=True,
+        parameters=None,
         initial=1024,
         resize=8.0,
     ):
@@ -1662,15 +1662,20 @@ class ByteMasked(LayoutBuilder):
         return f"<ByteMasked of {self._content!r} with {self._mask._length} items>"
 
     def type(self):
-        return f"ak.numba.lb.ByteMasked({self._content.type()})"
+        return f"ak.numba.lb.ByteMasked({self._content.type()}, valid_when={self._valid_when}, parameters={self._parameters})"
 
     def numbatype(self):
-        return ByteMaskedType(self.content.numbatype())
+        return ByteMaskedType(
+            self.valid_when,
+            self.content,
+            numba.types.StringLiteral(self._parameters),
+        )
 
     @property
     def content(self):
         return self._content
 
+    @property
     def valid_when(self):
         return self._valid_when
 
@@ -1705,8 +1710,8 @@ class ByteMasked(LayoutBuilder):
         return self._length
 
     def is_valid(self, error: str):
-        if len(self._content) != self._mask.length():
-            error = f"ByteMasked node{self._id} has content length {len(self._content)} but mask length {len(self._stops)}"
+        if len(self._content) != len(self._mask):
+            error = f"ByteMasked has content length {len(self._content)} but mask length {len(self._mask)}"
             return False
         else:
             return self._content.is_valid(error)
@@ -1726,17 +1731,29 @@ class ByteMasked(LayoutBuilder):
 
 
 class ByteMaskedType(numba.types.Type):
-    def __init__(self, content):
-        super().__init__(name=f"ak.numba.lb.ByteMasked({content.type()})")
+    def __init__(self, content, valid_when, parameters):
+        super().__init__(
+            name=f"ak.numba.lb.ByteMasked({content.type()}, , valid_when={valid_when}, parameters={parameters.literal_value if isinstance(parameters, numba.types.Literal) else None})"
+        )
         self._content = content
+        self._valid_when = valid_when
+        self._parameters = parameters
 
     @classmethod
     def type(cls):
-        return ByteMaskedType(cls.content)
+        return ByteMaskedType(cls.content, cls.valid_when, cls.parameters)
+
+    @property
+    def valid_when(self):
+        return numba.types.boolean
 
     @property
     def parameters(self):
-        return numba.types.StringLiteral
+        return numba.types.StringLiteral(self._parameters)
+
+    @property
+    def mask(self):
+        return ak.numba.GrowableBufferType(numba.types.boolean)
 
     @property
     def content(self):
@@ -1751,12 +1768,18 @@ class ByteMaskedType(numba.types.Type):
 class ByteMaskedModel(numba.extending.models.StructModel):
     def __init__(self, dmm, fe_type):
         members = [
+            ("mask", fe_type.mask),
             ("content", fe_type.content),
+            ("valid_when", fe_type.valid_when),
         ]
         super().__init__(dmm, fe_type, members)
 
 
-for member in ("content",):
+for member in (
+    "mask",
+    "content",
+    "valid_when",
+):
     numba.extending.make_attribute_wrapper(ByteMaskedType, member, "_" + member)
 
 
@@ -1764,13 +1787,19 @@ for member in ("content",):
 def ByteMaskedType_unbox(typ, obj, c):
     # get PyObjects
     content_obj = c.pyapi.object_getattr_string(obj, "_content")
+    mask_obj = c.pyapi.object_getattr_string(obj, "_mask")
+    valid_when_obj = c.pyapi.object_getattr_string(obj, "_valid_when")
 
     # fill the lowered model
     out = numba.core.cgutils.create_struct_proxy(typ)(c.context, c.builder)
     out.content = c.pyapi.to_native_value(typ.content, content_obj).value
+    out.mask = c.pyapi.to_native_value(typ.mask, mask_obj).value
+    out.valid_when = c.pyapi.to_native_value(typ.valid_when, valid_when_obj).value
 
     # decref PyObjects
     c.pyapi.decref(content_obj)
+    c.pyapi.decref(mask_obj)
+    c.pyapi.decref(valid_when_obj)
 
     # return it or the exception
     is_error = numba.core.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
@@ -1803,9 +1832,49 @@ def ByteMaskedType_box(typ, val, c):
 @numba.extending.overload_method(ByteMaskedType, "_length_get", inline="always")
 def ByteMasked_length(builder):
     def getter(builder):
-        return builder._length
+        return len(builder._content)
 
     return getter
+
+
+@numba.extending.overload_method(ByteMaskedType, "append")
+def ByteMasked_append(builder, datum):
+    if isinstance(builder, ByteMaskedType):
+
+        def append(builder, datum):
+            builder._mask.append(builder._valid_when)
+            builder._content.append(datum)
+
+        return append
+
+
+@numba.extending.overload_method(ByteMaskedType, "extend")
+def ByteMasked_extend(builder, data):
+    def extend(builder, data):
+        builder._mask.extend([builder._valid_when] * len(data))
+        builder._content.extend(data)
+
+    return extend
+
+
+@numba.extending.overload_method(ByteMaskedType, "append_null")
+def ByteMasked_append_null(builder):
+    if isinstance(builder, ByteMaskedType):
+
+        def append_null(builder):
+            builder._mask.append(not builder._valid_when)
+            builder._content.append(np.nan)
+
+        return append_null
+
+
+@numba.extending.overload_method(ByteMaskedType, "extend_null")
+def ByteMasked_extend_null(builder, size):
+    def extend_null(builder, size):
+        builder._mask.extend([not builder._valid_when] * size)
+        builder._content.extend([np.nan] * size)
+
+    return extend_null
 
 
 ########## BitMasked #########################################################
