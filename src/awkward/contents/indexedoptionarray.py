@@ -1388,7 +1388,7 @@ class IndexedOptionArray(Content):
             return out
         else:
             if out.is_list:
-                out_content = out.content[out.starts[0] :]
+                out_content = out.content[out.offsets[0] :]
             elif out.is_regular:
                 out_content = out.content
             else:
