@@ -57,7 +57,11 @@ class ListType(Type):
             if params is None:
                 out = ["var * ", *self._content._str(indent, compact, behavior)]
             else:
-                out = ["[var * ", *self._content._str(indent, compact, behavior), f", {params}]"]
+                out = [
+                    "[var * ",
+                    *self._content._str(indent, compact, behavior),
+                    f", {params}]",
+                ]
 
         return [self._str_categorical_begin(), *out, self._str_categorical_end()]
 
