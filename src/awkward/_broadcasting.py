@@ -106,7 +106,7 @@ def in_function(options):
     if options["function_name"] is None:
         return ""
     else:
-        return "in " + options["function_name"]
+        return " in " + options["function_name"]
 
 
 def checklength(inputs, options):
