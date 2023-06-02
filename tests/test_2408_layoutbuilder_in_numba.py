@@ -1155,11 +1155,7 @@ def test_ByteMasked_append_extend():
         builder.extend(data)
 
     @numba.njit
-    def f44(builder):
-        builder.append_null()
-
-    @numba.njit
-    def f45(builder, size):
+    def f44(builder, size):
         builder.extend_null(size)
 
     builder = lb.ByteMasked(lb.Numpy(np.float64), valid_when=True)
@@ -1170,7 +1166,63 @@ def test_ByteMasked_append_extend():
     data = np.array([3.3, 4.4, 5.5], dtype=np.float64)
     f43(builder, data)
 
-    f45(builder, 2)
+    f44(builder, 2)
+
+    array = builder.snapshot()
+    assert ak.to_list(array) == [
+        1.1,
+        2.2,
+        3.3,
+        4.4,
+        5.5,
+        6.6,
+        None,
+        3.3,
+        4.4,
+        5.5,
+        None,
+        None,
+    ]
+
+    error = ""
+    assert builder.is_valid(error), error
+
+    assert len(builder) == 12
+    builder.clear()
+    assert len(builder) == 0
+
+
+def test_BitMasked_append_extend():
+    @numba.njit
+    def f45(builder):
+        builder.append(1.1)
+        builder.append(2.2)
+        builder.append(3.3)
+        builder.append(4.4)
+        builder.append(5.5)
+        builder.append(6.6)
+
+    @numba.njit
+    def f46(builder):
+        builder.append_null()
+
+    @numba.njit
+    def f47(builder, data):
+        builder.extend(data)
+
+    @numba.njit
+    def f48(builder, size):
+        builder.extend_null(size)
+
+    builder = lb.BitMasked(np.uint8, lb.Numpy(np.float64), True, True)
+    assert len(builder) == 0
+
+    f45(builder)
+    f46(builder)
+    data = np.array([3.3, 4.4, 5.5], dtype=np.float64)
+    f47(builder, data)
+
+    f48(builder, 2)
 
     array = builder.snapshot()
     assert ak.to_list(array) == [
