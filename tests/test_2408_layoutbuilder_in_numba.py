@@ -279,6 +279,22 @@ def test_IndexedOption():
     array = builder.snapshot()
     assert ak.to_list(array) == [1.1, None, 3.3, 4.4, 5.5, None, None]
 
+    assert len(builder) == 7
+
+    error = ""
+    assert builder.is_valid(error), error
+
+    assert (
+        builder.type()
+        == "ak.numba.lb.IndexedOption(int64, ak.numba.lb.Numpy(float64, parameters=None), parameters=None)"
+    )
+    assert (
+        str(builder.numbatype())
+        == "ak.numba.lb.IndexedOption(int64, ak.numba.lb.Numpy(float64, parameters=None), parameters=None)"
+    )
+    builder.clear()
+    assert len(builder) == 0
+
 
 #
 # def test_Record():
@@ -720,7 +736,7 @@ def test_len():
     assert f4(builder) == 0
 
 
-def test_from_buffer():
+def test_Numpy_from_buffer():
     @numba.njit
     def f19(debug=True):
         growablebuffer = ak.numba.GrowableBuffer(np.float64)
@@ -747,7 +763,7 @@ def test_from_buffer():
     assert ak.to_list(out.snapshot()) == [66.6, 77.7]
 
 
-def test_ctor():
+def test_Numpy_ctor():
     @numba.njit
     def f6():
         return lb.Numpy("f4")
@@ -1017,6 +1033,50 @@ def test_Indexed_append_extend():
     assert ak.to_list(array) == [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 33.33, 44.44, 55.55]
 
     assert builder.is_valid(error), error
+
+
+def test_IndexedOption_append_extend():
+    @numba.njit
+    def f36(builder):
+        builder.append(1.1)
+        builder.append(2.2)
+        builder.append(3.3)
+        builder.append(4.4)
+        builder.append(5.5)
+        builder.append(6.6)
+
+    @numba.njit
+    def f37(builder):
+        builder.append_null()
+
+    @numba.njit
+    def f38(builder, data):
+        builder.extend(data)
+
+    @numba.njit
+    def f39(builder, size):
+        builder.extend_null(size)
+
+    builder = lb.IndexedOption(np.int64, lb.Numpy(np.float64))
+    assert len(builder) == 0
+
+    f36(builder)
+    assert len(builder) == 6
+
+    array = builder.snapshot()
+    assert ak.to_list(array) == [1.1, 2.2, 3.3, 4.4, 5.5, 6.6]
+
+    # error = ""
+    # assert builder.is_valid(error), error
+
+    data = np.array([33.33, 44.44, 55.55], dtype=np.float64)
+    f38(builder, data)
+    assert len(builder) == 9
+
+    array = builder.snapshot()
+    assert ak.to_list(array) == [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 33.33, 44.44, 55.55]
+
+    # assert builder.is_valid(error), error
 
 
 def test_numba_append():

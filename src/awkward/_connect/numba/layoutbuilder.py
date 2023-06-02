@@ -1470,7 +1470,7 @@ class IndexedOption(LayoutBuilder):
 
     def is_valid(self, error: str):
         if len(self._content) != self._last_valid + 1:
-            error = f"Indexed node{self._id} has content length {len(self._content)} but last valid index is {self._last_valid}"
+            error = f"IndexedOption has content length {len(self._content)} but last valid index is {self._last_valid}"
             return False
         else:
             return self._content.is_valid(error)
@@ -1601,7 +1601,7 @@ def IndexedOption_index(builder):
 
 @numba.extending.overload_method(IndexedOptionType, "append")
 def IndexedOption_append(builder, datum):
-    if isinstance(builder, IndexedType):
+    if isinstance(builder, IndexedOptionType):
 
         def append(builder, datum):
             builder._index.append(len(builder._content))
