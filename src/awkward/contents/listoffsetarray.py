@@ -175,11 +175,17 @@ class ListOffsetArray(Content):
 
     @property
     def starts(self) -> Index:
-        return self._offsets[:-1]
+        if self._offsets.length is unknown_length or self._offsets.length > 1:
+            return self._offsets[:-1]
+        else:
+            return self._offsets[:1]
 
     @property
-    def stops(self):
-        return self._offsets[1:]
+    def stops(self) -> Index:
+        if self._offsets.length is unknown_length or self._offsets.length > 1:
+            return self._offsets[-1:]
+        else:
+            return self._offsets[:1]
 
     def _form_with_key(self, getkey: Callable[[Content], str | None]) -> ListOffsetForm:
         form_key = getkey(self)

@@ -205,11 +205,19 @@ class RegularArray(Content):
 
     @property
     def starts(self) -> Index:
-        return self._compact_offsets64(True)[:-1]
+        offsets = self._compact_offsets64(True)
+        if offsets.length is unknown_length or offsets.length > 1:
+            return offsets[:-1]
+        else:
+            return offsets[:1]
 
     @property
-    def stops(self):
-        return self._compact_offsets64(True)[1:]
+    def stops(self) -> Index:
+        offsets = self._compact_offsets64(True)
+        if offsets.length is unknown_length or offsets.length > 1:
+            return offsets[-1:]
+        else:
+            return offsets[:1]
 
     def _form_with_key(self, getkey: Callable[[Content], str | None]) -> RegularForm:
         form_key = getkey(self)
