@@ -1054,7 +1054,11 @@ def test_IndexedOption_append_extend():
         builder.extend(data)
 
     @numba.njit
-    def f39(builder, size):
+    def f39(builder):
+        builder.append_null()
+
+    @numba.njit
+    def f40(builder, size):
         builder.extend_null(size)
 
     builder = lb.IndexedOption(np.int64, lb.Numpy(np.float64))
@@ -1063,20 +1067,41 @@ def test_IndexedOption_append_extend():
     f36(builder)
     assert len(builder) == 6
 
-    array = builder.snapshot()
-    assert ak.to_list(array) == [1.1, 2.2, 3.3, 4.4, 5.5, 6.6]
+    f39(builder)
+    assert len(builder) == 7
 
+    array = builder.snapshot()
+    assert ak.to_list(array) == [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, None]
+
+    # FIXME
     # error = ""
     # assert builder.is_valid(error), error
 
     data = np.array([33.33, 44.44, 55.55], dtype=np.float64)
     f38(builder, data)
-    assert len(builder) == 9
+    assert len(builder) == 10
+
+    f40(builder, 3)
+    assert len(builder) == 13
 
     array = builder.snapshot()
-    assert ak.to_list(array) == [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 33.33, 44.44, 55.55]
+    assert ak.to_list(array) == [
+        1.1,
+        2.2,
+        3.3,
+        4.4,
+        5.5,
+        6.6,
+        None,
+        33.33,
+        44.44,
+        55.55,
+        None,
+        None,
+        None,
+    ]
 
-    # assert builder.is_valid(error), error
+    # FIXME: assert builder.is_valid(error), error
 
 
 def test_numba_append():

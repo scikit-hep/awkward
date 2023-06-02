@@ -1623,9 +1623,9 @@ def IndexedOption_extend(builder, data):
 
 @numba.extending.overload_method(IndexedOptionType, "append_null")
 def IndexedOption_append_null(builder):
-    if isinstance(builder, IndexedType):
+    if isinstance(builder, IndexedOptionType):
 
-        def append_null(builder, datum):
+        def append_null(builder):
             builder._index.append(-1)
 
         return append_null
@@ -1633,7 +1633,7 @@ def IndexedOption_append_null(builder):
 
 @numba.extending.overload_method(IndexedOptionType, "extend_null")
 def IndexedOption_extend_null(builder, size):
-    def extend_null(builder, data):
+    def extend_null(builder, size):
         builder._index.extend([-1] * size)
 
     return extend_null
