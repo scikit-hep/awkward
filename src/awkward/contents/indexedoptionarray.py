@@ -1392,7 +1392,6 @@ class IndexedOptionArray(Content):
             elif isinstance(out, ak.contents.ListOffsetArray):
                 # The `outindex` that will index into `out_content` is 0-based, so we should ensure that we normalise
                 # the list content to start at the first offset.
-                # We know that we don't have any list type other than `ListOffsetArray`
                 out_content = out.content[out.offsets[0] :]
             else:
                 raise AssertionError(
