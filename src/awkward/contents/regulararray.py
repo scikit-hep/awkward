@@ -1018,7 +1018,11 @@ class RegularArray(Content):
                 )
             )
             nextstarts = ak.index.Index64.empty(
-                starts.length * self._size, nplike=index_nplike
+                # `starts` must have at least enough elements for the largest `nextparent` to index into
+                # The upper bound for this value is given by `nextlen` (each item in this list belonging
+                # to a distinct reduction), but the length of `starts` should equate to `maxnextparents - 1`.
+                starts.length * self._size,
+                nplike=index_nplike,
             )
             assert (
                 nextstarts.nplike is index_nplike and nextparents.nplike is index_nplike
