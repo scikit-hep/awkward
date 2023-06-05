@@ -6,7 +6,8 @@ from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of
 from awkward._layout import maybe_posaxis, wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
-from awkward._regularize import is_integer, regularize_axis
+from awkward._nplikes.shape import unknown_length
+from awkward._regularize import regularize_axis
 from awkward._typing import Sequence
 from awkward.contents import Content
 from awkward.operations.ak_fill_none import fill_none
@@ -132,9 +133,20 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
     else:
 
         def action(inputs, depth, **kwargs):
-            if depth == posaxis and any(
-                isinstance(x, ak.contents.Content) and x.is_option for x in inputs
+            if any(
+                x.minmax_depth == (1, 1)
+                for x in inputs
+                if isinstance(x, ak.contents.Content)
             ):
+                raise ValueError(
+                    "at least one array is not deep enough to concatenate at "
+                    "axis={}".format(axis)
+                )
+
+            if depth != posaxis:
+                return
+
+            if any(isinstance(x, ak.contents.Content) and x.is_option for x in inputs):
                 nextinputs = []
                 for x in inputs:
                     if x.is_option and x.content.is_list:
@@ -143,23 +155,25 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
                         nextinputs.append(x)
                 inputs = nextinputs
 
-            if depth == posaxis:
-                backend = backend_of(*inputs, default=cpu)
+            # Ensure the lengths agree, taking known lengths over unknown lengths
+            length = None
+            for x in inputs:
+                if isinstance(x, ak.contents.Content):
+                    if length is None:
+                        length = x.length
+                    elif x.length is unknown_length:
+                        continue
+                    elif length is unknown_length:
+                        length = x.length
+                    elif length != x.length:
+                        raise ValueError(
+                            "all arrays must have the same length for "
+                            "axis={}".format(axis)
+                        )
+            assert length is not None
 
-                length = None
-                for x in inputs:
-                    if isinstance(x, ak.contents.Content):
-                        if not is_integer(length):
-                            length = x.length
-                        elif length != x.length and is_integer(x.length):
-                            raise ValueError(
-                                "all arrays must have the same length for "
-                                "axis={}".format(axis)
-                            )
-
-            if depth == posaxis and all(
-                isinstance(x, ak.contents.Content)
-                and x.is_regular
+            if all(
+                (isinstance(x, ak.contents.Content) and x.is_regular)
                 or (isinstance(x, ak.contents.NumpyArray) and x.data.ndim > 1)
                 or not isinstance(x, ak.contents.Content)
                 for x in inputs
@@ -208,7 +222,7 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
 
                 return (ak.contents.RegularArray(inner, prototype.size),)
 
-            elif depth == posaxis and all(
+            elif all(
                 isinstance(x, ak.contents.Content)
                 and x.is_list
                 or (isinstance(x, ak.contents.NumpyArray) and x.data.ndim > 1)
@@ -224,7 +238,10 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
                             ak.contents.ListOffsetArray(
                                 ak.index.Index64(
                                     backend.index_nplike.arange(
-                                        length + 1, dtype=np.int64
+                                        backend.index_nplike.shape_item_as_index(
+                                            length + 1
+                                        ),
+                                        dtype=np.int64,
                                     ),
                                     nplike=backend.index_nplike,
                                 ),
@@ -269,16 +286,6 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
                 )
 
                 return (ak.contents.ListOffsetArray(offsets, inner),)
-
-            elif any(
-                x.minmax_depth == (1, 1)
-                for x in inputs
-                if isinstance(x, ak.contents.Content)
-            ):
-                raise ValueError(
-                    "at least one array is not deep enough to concatenate at "
-                    "axis={}".format(axis)
-                )
 
             else:
                 return None
