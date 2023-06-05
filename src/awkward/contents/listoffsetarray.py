@@ -1665,7 +1665,6 @@ class ListOffsetArray(Content):
         )
         maxcount = index_nplike.index_as_shape_item(_maxcount[0])
 
-        # A "stable" sort is essential for the subsequent steps.
         nextcarry = Index64.empty(nextlen, nplike=index_nplike)
         nextparents = Index64.empty(nextlen, nplike=index_nplike)
         _maxnextparents = Index64.empty(1, index_nplike)
