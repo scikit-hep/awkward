@@ -12,9 +12,9 @@ def test():
     # The child option introduces a missing parent: parents become _non-dense_
     # The regular array tests our regular reduction pathway
     layout = ak.contents.ListOffsetArray(
-        ak.index.Index64([0, 3, 5, 6]),
+        ak.index.Index64([0, 3, 4, 6]),
         ak.contents.ByteMaskedArray(
-            ak.index.Index8([0, 1, 1, 1, 1, 1]),
+            ak.index.Index8([1, 1, 1, 0, 1, 1]),
             ak.contents.RegularArray(
                 ak.contents.NumpyArray(
                     np.array(
@@ -31,7 +31,7 @@ def test():
     assert result.is_equal_to(
         ak.contents.RegularArray(
             ak.contents.NumpyArray(
-                np.array([0, 0, 1, 0, 1, 0, 0, 0, 0], dtype=np.int64)
+                np.array([1, 0, 2, -1, -1, -1, 0, 0, 1], dtype=np.int64)
             ),
             size=3,
         )
