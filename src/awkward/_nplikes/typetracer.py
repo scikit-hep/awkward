@@ -970,7 +970,23 @@ class TypeTracer(NumpyLike):
         self, x: ArrayLike, shape: tuple[ShapeItem, ...]
     ) -> TypeTracerArray:
         assert not isinstance(x, PlaceholderArray)
-        raise NotImplementedError
+        try_touch_data(x)
+        new_shape = self.broadcast_shapes(x.shape, shape)
+        # broadcast_to is asymmetric, whilst broadcast_shapes is not
+        # rather than implement broadcasting logic here, let's just santitise the result
+        # the above broadcasting result can either be equal to `shape`, have greater number dimensions,
+        # and/or have differing dimensions we only want the case where the shape is equal
+        if len(new_shape) != len(shape):
+            raise ValueError
+
+        for result, intended in zip(new_shape, shape):
+            if intended is unknown_length:
+                continue
+            if result is unknown_length:
+                continue
+            if intended != result:
+                raise ValueError
+        return TypeTracerArray._new(x.dtype, shape=new_shape)
 
     def reshape(
         self, x: ArrayLike, shape: tuple[ShapeItem, ...], *, copy: bool | None = None
