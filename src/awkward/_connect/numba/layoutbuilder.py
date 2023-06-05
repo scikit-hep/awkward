@@ -1903,9 +1903,9 @@ class BitMasked(LayoutBuilder):
         self._content = content
         self._valid_when = valid_when
         self._lsb_order = lsb_order
-        self._current_byte = np.uint8(0)
-        self._mask.append(self._current_byte)
-        self._current_index = 0
+        self._current_byte_index = np.zeros((2,), dtype=np.uint8)  # np.uint8(0)
+        self._mask.append(self._current_byte_index[0])
+        # self._current_index = 0
         if self._lsb_order:
             self._cast = np.array(
                 [
@@ -1965,27 +1965,31 @@ class BitMasked(LayoutBuilder):
         """
         Private helper function.
         """
-        if self._current_index == 8:
-            self._current_byte = np.uint8(0)
-            self._mask.append(self._current_byte)
-            self._current_index = 0
+        if self._current_byte_index[1] == 8:
+            self._current_byte_index[0] = np.uint8(0)
+            self._mask.append(self._current_byte_index[0])
+            self._current_byte_index[1] = 0
 
     def _append_end(self):
         """
         Private helper function.
         """
-        self._current_index += 1
+        self._current_byte_index[1] += 1
         if self._valid_when:
             # 0 indicates null, 1 indicates valid
-            self._mask._panels[-1][self._mask._pos - 1] = self._current_byte
+            self._mask._panels[-1][
+                self._mask._length_pos[1] - 1
+            ] = self._current_byte_index[0]
         else:
             # 0 indicates valid, 1 indicates null
-            self._mask._panels[-1][self._mask._pos - 1] = ~self._current_byte
+            self._mask._panels[-1][
+                self._mask._length_pos[1] - 1
+            ] = ~self._current_byte_index[0]
 
     def append_valid(self):
         self._append_begin()
         # current_byte_ and cast_: 0 indicates null, 1 indicates valid
-        self._current_byte |= self._cast[self._current_index]
+        self._current_byte_index[0] |= self._cast[self._current_byte_index[1]]
         self._append_end()
         return self._content
 
@@ -2016,14 +2020,18 @@ class BitMasked(LayoutBuilder):
 
     @property
     def _length(self):
-        return (len(self._mask) - 1) * 8 + self._current_index
+        return (
+            len(self._mask)
+            if len(self._mask) == 0
+            else (len(self._mask) - 1) * 8 + self._current_byte_index[1]
+        )
 
     def __len__(self):
         return self._length
 
     def is_valid(self, error: str):
         if len(self._content) != self._length:
-            error = f"BitMasked node{self._id} has content length {len(self._content)} but bit mask length {self._length}"
+            error = f"BitMasked has content length {len(self._content)} but bit mask length {self._length}"
             return False
         else:
             return self._content.is_valid(error)
@@ -2076,6 +2084,10 @@ class BitMaskedType(numba.types.Type):
         return numba.types.boolean
 
     @property
+    def current_byte_index(self):
+        return numba.types.Array(numba.types.uint8, 1, "C")
+
+    @property
     def content(self):
         return to_numbatype(self._content)
 
@@ -2092,6 +2104,7 @@ class BitMaskedModel(numba.extending.models.StructModel):
             ("content", fe_type.content),
             ("valid_when", fe_type.valid_when),
             ("lsb_order", fe_type.lsb_order),
+            ("current_byte_index", fe_type.current_byte_index),
         ]
         super().__init__(dmm, fe_type, members)
 
@@ -2101,6 +2114,7 @@ for member in (
     "content",
     "valid_when",
     "lsb_order",
+    "current_byte_index",
 ):
     numba.extending.make_attribute_wrapper(BitMaskedType, member, "_" + member)
 
@@ -2112,6 +2126,7 @@ def BitMaskedType_unbox(typ, obj, c):
     content_obj = c.pyapi.object_getattr_string(obj, "_content")
     valid_when_obj = c.pyapi.object_getattr_string(obj, "_valid_when")
     lsb_order_obj = c.pyapi.object_getattr_string(obj, "_lsb_order")
+    current_byte_index_obj = c.pyapi.object_getattr_string(obj, "_current_byte_index")
 
     # fill the lowered model
     out = numba.core.cgutils.create_struct_proxy(typ)(c.context, c.builder)
@@ -2119,12 +2134,16 @@ def BitMaskedType_unbox(typ, obj, c):
     out.content = c.pyapi.to_native_value(typ.content, content_obj).value
     out.valid_when = c.pyapi.to_native_value(typ.valid_when, valid_when_obj).value
     out.lsb_order = c.pyapi.to_native_value(typ.lsb_order, lsb_order_obj).value
+    out.current_byte_index = c.pyapi.to_native_value(
+        typ.current_byte_index, current_byte_index_obj
+    ).value
 
     # decref PyObjects
     c.pyapi.decref(mask_obj)
     c.pyapi.decref(content_obj)
     c.pyapi.decref(valid_when_obj)
     c.pyapi.decref(lsb_order_obj)
+    c.pyapi.decref(current_byte_index_obj)
 
     # return it or the exception
     is_error = numba.core.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
@@ -2169,6 +2188,39 @@ def BitMaskedType_box(typ, val, c):
     return out
 
 
+@numba.extending.overload_attribute(BitMaskedType, "_cast")
+def BitMaskedType_cast(builder):
+    def get_cast(builder):
+        if builder._lsb_order:
+            return np.array(
+                [
+                    np.uint8(1 << 0),
+                    np.uint8(1 << 1),
+                    np.uint8(1 << 2),
+                    np.uint8(1 << 3),
+                    np.uint8(1 << 4),
+                    np.uint8(1 << 5),
+                    np.uint8(1 << 6),
+                    np.uint8(1 << 7),
+                ]
+            )
+        else:
+            np.array(
+                [
+                    np.uint8(128 >> 0),
+                    np.uint8(128 >> 1),
+                    np.uint8(128 >> 2),
+                    np.uint8(128 >> 3),
+                    np.uint8(128 >> 4),
+                    np.uint8(128 >> 5),
+                    np.uint8(128 >> 6),
+                    np.uint8(128 >> 7),
+                ]
+            )
+
+    return get_cast
+
+
 @numba.extending.overload_method(BitMaskedType, "_length_get", inline="always")
 def BitMasked_length(builder):
     def getter(builder):
@@ -2180,10 +2232,10 @@ def BitMasked_length(builder):
 @numba.extending.overload_method(BitMaskedType, "_append_begin", inline="always")
 def BitMasked_append_begin(builder):
     def append_begin(builder):
-        if builder._current_index == 8:
-            builder._current_byte = np.uint8(0)
-            builder._mask.append(builder._current_byte)
-            builder._current_index = 0
+        if builder._current_byte_index[1] == 8:
+            builder._current_byte_index[0] = np.uint8(0)
+            builder._mask.append(np.uint8(0))
+            builder._current_byte_index[1] = 0
 
         return
 
@@ -2193,13 +2245,17 @@ def BitMasked_append_begin(builder):
 @numba.extending.overload_method(BitMaskedType, "_append_end", inline="always")
 def BitMasked_append_end(builder):
     def append_end(builder):
-        builder._current_index += 1
+        builder._current_byte_index[1] += 1
         if builder._valid_when:
             # 0 indicates null, 1 indicates valid
-            builder._mask._panels[-1][builder._mask._pos - 1] = builder._current_byte
+            builder._mask._panels[-1][
+                builder._mask._length_pos[1] - 1
+            ] = builder._current_byte_index[0]
         else:
             # 0 indicates valid, 1 indicates null
-            builder._mask._panels[-1][builder._mask._pos - 1] = ~builder._current_byte
+            builder._mask._panels[-1][
+                builder._mask._length_pos[1] - 1
+            ] = ~builder._current_byte_index[0]
 
         return
 
@@ -2213,7 +2269,9 @@ def BitMasked_append(builder, datum):
         def append(builder, datum):
             builder._append_begin()
             # current_byte_ and cast_: 0 indicates null, 1 indicates valid
-            builder._current_byte |= builder._cast[builder._current_index]
+            builder._current_byte_index[0] |= builder._cast[
+                builder._current_byte_index[1]
+            ]
             builder._append_end()
             builder._content.append(datum)
 
@@ -2228,6 +2286,17 @@ def BitMasked_extend(builder, data):
         builder._content.extend(data)
 
     return extend
+
+
+@numba.extending.overload_method(BitMaskedType, "append_valid")
+def BitMasked_append_valid(builder):
+    def append_valid(builder):
+        builder._append_begin()
+        # current_byte_ and cast_: 0 indicates null, 1 indicates valid
+        builder._current_byte_index[0] |= builder._cast[builder._current_byte_index[1]]
+        builder._append_end()
+
+    return append_valid
 
 
 @numba.extending.overload_method(BitMaskedType, "append_null")
@@ -2248,7 +2317,7 @@ def BitMasked_extend_null(builder, size):
     def extend_null(builder, size):
         for _ in range(size):
             builder.append_null()
-        builder._content.extend([np.nan] * size)
+        # builder._content.extend([np.nan] * size)
 
     return extend_null
 

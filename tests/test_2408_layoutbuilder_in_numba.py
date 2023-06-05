@@ -502,9 +502,8 @@ def test_BitMasked():
         str(builder.numbatype())
         == "ak.numba.lb.BitMasked(uint8, ak.numba.lb.Numpy(float64, parameters=None), True, True, parameters=None)"
     )
-    # FIXME: ValueError: __len__() should return >= 0
-    # builder.clear()
-    # assert len(builder) == 0
+    builder.clear()
+    assert len(builder) == 0
 
 
 # def test_Union_Numpy_ListOffset():
