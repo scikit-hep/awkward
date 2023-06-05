@@ -1903,9 +1903,11 @@ class BitMasked(LayoutBuilder):
         self._content = content
         self._valid_when = valid_when
         self._lsb_order = lsb_order
-        self._current_byte_index = np.zeros((2,), dtype=np.uint8)  # np.uint8(0)
-        self._mask.append(self._current_byte_index[0])
+        self._current_byte_index = np.zeros((2,), dtype=np.uint8)
+        # FIXME:
+        # self._current_byte = np.uint8(0)
         # self._current_index = 0
+        self._mask.append(self._current_byte_index[0])
         if self._lsb_order:
             self._cast = np.array(
                 [
@@ -2224,7 +2226,7 @@ def BitMaskedType_cast(builder):
 @numba.extending.overload_method(BitMaskedType, "_length_get", inline="always")
 def BitMasked_length(builder):
     def getter(builder):
-        return builder._length
+        return len(builder._content)
 
     return getter
 
@@ -2344,11 +2346,13 @@ class Unmasked(LayoutBuilder):
     def content(self):
         return self._content
 
-    def append_valid(self):
-        return self._content
+    # FIXME: what if content does not have append?
+    def append(self, value):
+        self._content.append(value)
 
-    def extend_valid(self, size):
-        return self._content
+    # FIXME: what if content does not have extend?
+    def extend(self, data):
+        return self._content.extend(data)
 
     def parameters(self):
         return self._parameters
@@ -2456,9 +2460,29 @@ def UnmaskedType_box(typ, val, c):
 @numba.extending.overload_method(UnmaskedType, "_length_get", inline="always")
 def Unmasked_length(builder):
     def getter(builder):
-        return builder._length
+        return len(builder._content)
 
     return getter
+
+
+@numba.extending.overload_method(UnmaskedType, "append")
+def Unmasked_append(builder, datum):
+    if isinstance(builder, UnmaskedType):
+
+        def append(builder, datum):
+            builder._content.append(datum)
+
+        return append
+
+
+@numba.extending.overload_method(UnmaskedType, "extend")
+def Unmasked_extend(builder, data):
+    if isinstance(builder, UnmaskedType):
+
+        def extend(builder, data):
+            builder._content.extend(data)
+
+        return extend
 
 
 ########## Record #########################################################

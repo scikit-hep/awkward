@@ -393,24 +393,23 @@ def test_IndexedOption():
 #
 #     assert builder.is_valid(error) is True
 #
-#
-# def test_Unmasked():
-#     builder = lb.Unmasked(lb.Numpy(np.int64))
-#     assert len(builder) == 0
-#
-#     content = builder.append_valid()
-#     content.append(11)
-#     content.append(22)
-#     content.append(33)
-#     content.append(44)
-#     content.append(55)
-#
-#     err = ""
-#     assert builder.is_valid(err) is True
-#
-#     array = builder.snapshot()
-#     assert ak.to_list(array) == [11, 22, 33, 44, 55]
-#
+
+
+def test_Unmasked():
+    builder = lb.Unmasked(lb.Numpy(np.int64))
+    assert len(builder) == 0
+
+    builder.append(11)
+    builder.append(22)
+    builder.append(33)
+    builder.append(44)
+    builder.append(55)
+
+    err = ""
+    assert builder.is_valid(err) is True
+
+    array = builder.snapshot()
+    assert ak.to_list(array) == [11, 22, 33, 44, 55]
 
 
 def test_ByteMasked():
@@ -625,24 +624,22 @@ def test_unbox():
     builder = lb.Regular(lb.Numpy(np.float64), size=3)
     f1(builder)
 
+    #     builder = lb.Tuple(
+    #         [lb.Numpy(np.float64), lb.ListOffset(np.int64, lb.Numpy(np.int32))]
+    #     )
+    #     f1(builder)
+    #
+    #     builder = lb.Union(
+    #         np.int64,
+    #         [
+    #             lb.Numpy(np.float64),
+    #             lb.ListOffset(np.int64, lb.Numpy(np.int32)),
+    #         ],
+    #     )
+    #     f1(builder)
 
-#     builder = lb.Tuple(
-#         [lb.Numpy(np.float64), lb.ListOffset(np.int64, lb.Numpy(np.int32))]
-#     )
-#     f1(builder)
-#
-#     builder = lb.Union(
-#         np.int64,
-#         [
-#             lb.Numpy(np.float64),
-#             lb.ListOffset(np.int64, lb.Numpy(np.int32)),
-#         ],
-#     )
-#     f1(builder)
-#
-#     builder = lb.Unmasked(lb.Numpy(np.int64))
-#     f1(builder)
-#
+    builder = lb.Unmasked(lb.Numpy(np.int64))
+    f1(builder)
 
 
 def test_unbox_for_loop():
@@ -721,11 +718,9 @@ def test_box():
     out12 = f3(builder)
     assert ak.to_list(out12.snapshot()) == []
 
-
-#     builder = lb.Unmasked(lb.Numpy(np.int64))
-#     out13 = f3(builder)
-#     assert ak.to_list(out13.snapshot()) == []
-#
+    builder = lb.Unmasked(lb.Numpy(np.int64))
+    out13 = f3(builder)
+    assert ak.to_list(out13.snapshot()) == []
 
 
 def test_len():
@@ -764,6 +759,12 @@ def test_len():
     assert f4(builder) == 0
 
     builder = lb.ByteMasked(lb.Numpy(np.float64), valid_when=True)
+    assert f4(builder) == 0
+
+    builder = lb.BitMasked(np.uint8, lb.Numpy(np.float64), True, True)
+    assert f4(builder) == 0
+
+    builder = lb.Unmasked(lb.Numpy(np.int64))
     assert f4(builder) == 0
 
 
@@ -1243,6 +1244,47 @@ def test_BitMasked_append_extend():
     assert builder.is_valid(error), error
 
     assert len(builder) == 12
+    builder.clear()
+    assert len(builder) == 0
+
+
+def test_Unmasked_append_extend():
+    @numba.njit
+    def f49(builder):
+        builder.append(1.1)
+        builder.append(2.2)
+        builder.append(3.3)
+        builder.append(4.4)
+        builder.append(5.5)
+        builder.append(6.6)
+
+    @numba.njit
+    def f50(builder, data):
+        builder.extend(data)
+
+    builder = lb.Unmasked(lb.Numpy(np.float64))
+
+    f49(builder)
+    data = np.array([3.3, 4.4, 5.5], dtype=np.float64)
+    f50(builder, data)
+
+    array = builder.snapshot()
+    assert ak.to_list(array) == [
+        1.1,
+        2.2,
+        3.3,
+        4.4,
+        5.5,
+        6.6,
+        3.3,
+        4.4,
+        5.5,
+    ]
+
+    error = ""
+    assert builder.is_valid(error), error
+
+    assert len(builder) == 9
     builder.clear()
     assert len(builder) == 0
 
