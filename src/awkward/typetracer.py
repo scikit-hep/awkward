@@ -22,13 +22,14 @@ from awkward._nplikes.typetracer import (
     typetracer_with_report,
 )
 from awkward._typing import TypeVar
+from awkward.forms import Form
 from awkward.highlevel import Array, Record
 from awkward.operations.ak_to_layout import to_layout
 
 T = TypeVar("T", Array, Record)
 
 
-def empty_if_typetracer(array: T) -> T:
+def _length_0_1_if_typetracer(array: T, function):
     typetracer_backend = TypeTracerBackend.instance()
 
     layout = to_layout(array, allow_other=False)
@@ -36,6 +37,14 @@ def empty_if_typetracer(array: T) -> T:
 
     if layout.backend is typetracer_backend:
         layout._touch_data(True)
-        layout = layout.form.length_zero_array(highlevel=False)
+        layout = function(layout.form, highlevel=False)
 
     return wrap_layout(layout, behavior=behavior)
+
+
+def empty_if_typetracer(array: T) -> T:
+    return _length_0_1_if_typetracer(array, Form.length_zero_array)
+
+
+def length_one_if_typetracer(array: T) -> T:
+    return _length_0_1_if_typetracer(array, Form.length_one_array)

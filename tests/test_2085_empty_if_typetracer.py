@@ -1,19 +1,28 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import numpy as np
-import pytest  # noqa: F401
+import pytest
 
 import awkward as ak
-from awkward.typetracer import empty_if_typetracer, typetracer_with_report
+from awkward.typetracer import (
+    empty_if_typetracer,
+    length_one_if_typetracer,
+    typetracer_with_report,
+)
 
 
-def test():
+@pytest.mark.parametrize("function", [empty_if_typetracer, length_one_if_typetracer])
+def test(function):
     def func(array):
         assert ak.backend(array) == "typetracer"
 
         radius = np.sqrt(array.x**2 + array.y**2)
-        radius = empty_if_typetracer(radius)
+        radius = function(radius)
         assert ak.backend(radius) == "cpu"
+        if function is empty_if_typetracer:
+            assert len(radius) == 0
+        else:
+            assert len(radius) == 1
 
         hist_contents, hist_edges = np.histogram(ak.flatten(radius, axis=None))
 
