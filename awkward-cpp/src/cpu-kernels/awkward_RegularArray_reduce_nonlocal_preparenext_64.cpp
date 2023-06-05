@@ -7,11 +7,9 @@
 ERROR awkward_RegularArray_reduce_nonlocal_preparenext_64(
     int64_t* nextcarry,
     int64_t* nextparents,
-    int64_t* maxnextparents,
     const int64_t* parents,
     int64_t size,
     int64_t length) {
-  *maxnextparents = 0;
   int64_t k = 0;
   for (int64_t j = 0; j < size; j++) {
     for (int64_t i = 0; i < length; i++) {
@@ -19,9 +17,6 @@ ERROR awkward_RegularArray_reduce_nonlocal_preparenext_64(
         // by the transpose, i.e. ensure that nextparents is sorted
         nextcarry[k] = i * size + j;
         nextparents[k] = parents[i] * size + j;
-        if (nextparents[k] > *maxnextparents) {
-          *maxnextparents = nextparents[k];
-        }
         k++;
 
     }

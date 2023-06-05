@@ -998,31 +998,28 @@ class RegularArray(Content):
         if not branch and negaxis == depth:
             nextcarry = ak.index.Index64.empty(nextlen, nplike=index_nplike)
             nextparents = ak.index.Index64.empty(nextlen, nplike=index_nplike)
-            _maxnextparents = ak.index.Index64.zeros(1, nplike=index_nplike)
             assert (
                 parents.nplike is index_nplike
                 and nextcarry.nplike is index_nplike
                 and nextparents.nplike is index_nplike
-                and _maxnextparents.nplike is index_nplike
             )
             self._handle_error(
                 self._backend[
                     "awkward_RegularArray_reduce_nonlocal_preparenext",
                     nextcarry.dtype.type,
                     nextparents.dtype.type,
-                    _maxnextparents.dtype.type,
                     parents.dtype.type,
                 ](
                     nextcarry.data,
                     nextparents.data,
-                    _maxnextparents.data,
                     parents.data,
                     self._size,
                     self._length,
                 )
             )
-            num_starts = index_nplike.index_as_shape_item(_maxnextparents[0] + 1)
-            nextstarts = ak.index.Index64.empty(num_starts, nplike=index_nplike)
+            nextstarts = ak.index.Index64.empty(
+                starts.length * self._size, nplike=index_nplike
+            )
             assert (
                 nextstarts.nplike is index_nplike and nextparents.nplike is index_nplike
             )
