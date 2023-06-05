@@ -1464,5 +1464,5 @@ class RegularArray(Content):
 
     def _is_equal_to(self, other, index_dtype, numpyarray):
         return self._size == other.size and self._content.is_equal_to(
-            self._content, index_dtype, numpyarray
+            other._content, index_dtype, numpyarray
         )
