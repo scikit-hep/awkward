@@ -1125,11 +1125,6 @@ class TypeTracer(NumpyLike):
                 shape[axis] = shape[axis] * self.index_as_shape_item(repeats)
             return TypeTracerArray._new(x.dtype, shape=tuple(shape))
 
-    def tile(self, x: ArrayLike, reps: int) -> TypeTracerArray:
-        assert not isinstance(x, PlaceholderArray)
-        try_touch_data(x)
-        raise NotImplementedError
-
     def stack(
         self,
         arrays: list[ArrayLike] | tuple[ArrayLike, ...],

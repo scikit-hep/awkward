@@ -190,7 +190,14 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
                     prototype[start : start + size] = tag
                     start += size
 
-                tags = ak.index.Index8(backend.index_nplike.tile(prototype, length))
+                tags = ak.index.Index8(
+                    backend.index_nplike.reshape(
+                        backend.index_nplike.broadcast_to(
+                            prototype, (length, prototype.size)
+                        ),
+                        (-1,),
+                    )
+                )
                 index = ak.contents.UnionArray.regular_index(tags, backend=backend)
                 inner = ak.contents.UnionArray.simplified(
                     tags,
@@ -199,7 +206,7 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
                     mergebool=mergebool,
                 )
 
-                return (ak.contents.RegularArray(inner, len(prototype)),)
+                return (ak.contents.RegularArray(inner, prototype.size),)
 
             elif depth == posaxis and all(
                 isinstance(x, ak.contents.Content)
