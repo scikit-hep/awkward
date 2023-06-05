@@ -383,20 +383,22 @@ class ListOffsetArray(Content):
             )
 
         # Check whether we need to slice the content, shift our offsets
-        start = self._offsets[0]
+        this_start = self._offsets[0]
         this_zero_offsets = self._offsets.data
-        if index_nplike.known_data and start == 0:
+        if index_nplike.known_data and this_start == 0:
             next_content = self._content
         else:
-            this_zero_offsets = this_zero_offsets - start
-            next_content = self._content[start:]
+            this_zero_offsets = this_zero_offsets - this_start
+            next_content = self._content[this_start:]
 
         if index_nplike.known_data and not index_nplike.array_equal(
             this_zero_offsets, offsets
         ):
             raise ValueError("cannot broadcast nested list")
 
-        return ListOffsetArray(offsets, next_content, parameters=self._parameters)
+        return ListOffsetArray(
+            offsets, next_content[: offsets[-1]], parameters=self._parameters
+        )
 
     def _getitem_next_jagged(
         self, slicestarts: Index, slicestops: Index, slicecontent: Content, tail
