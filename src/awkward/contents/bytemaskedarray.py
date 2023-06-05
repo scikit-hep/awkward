@@ -949,10 +949,12 @@ class ByteMaskedArray(Content):
         if not branch and negaxis == depth:
             return out
         else:
-            if out.is_list:
-                out_content = out.content[out.starts[0] :]
-            elif out.is_regular:
+            if isinstance(out, ak.contents.RegularArray):
                 out_content = out.content
+            elif isinstance(out, ak.contents.ListOffsetArray):
+                # The `outindex` that will index into `out_content` is 0-based, so we should ensure that we normalise
+                # the list content to start at the first offset.
+                out_content = out.content[out.offsets[0] :]
             else:
                 raise ValueError(
                     "reduce_next with unbranching depth > negaxis is only "
