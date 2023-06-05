@@ -996,37 +996,45 @@ class RegularArray(Content):
         branch, depth = self.branch_depth
         nextlen = self._length * self._size
         if not branch and negaxis == depth:
-            if self._size == 0:
-                nextstarts = ak.index.Index64(
-                    index_nplike.zeros(self._length, dtype=np.int64),
-                    nplike=index_nplike,
-                )
-            else:
-                nextstarts = ak.index.Index64(
-                    index_nplike.arange(0, nextlen, self._size),
-                    nplike=index_nplike,
-                )
-            assert nextstarts.length == self._length
-
             nextcarry = ak.index.Index64.empty(nextlen, nplike=index_nplike)
             nextparents = ak.index.Index64.empty(nextlen, nplike=index_nplike)
+            _maxnextparents = ak.index.Index64.zeros(1, nplike=index_nplike)
             assert (
                 parents.nplike is index_nplike
                 and nextcarry.nplike is index_nplike
                 and nextparents.nplike is index_nplike
+                and _maxnextparents.nplike is index_nplike
             )
             self._handle_error(
                 self._backend[
                     "awkward_RegularArray_reduce_nonlocal_preparenext",
                     nextcarry.dtype.type,
                     nextparents.dtype.type,
+                    _maxnextparents.dtype.type,
                     parents.dtype.type,
                 ](
                     nextcarry.data,
                     nextparents.data,
+                    _maxnextparents.data,
                     parents.data,
                     self._size,
-                    len(self),
+                    self._length,
+                )
+            )
+            num_starts = index_nplike.index_as_shape_item(_maxnextparents[0] + 1)
+            nextstarts = ak.index.Index64.empty(num_starts, nplike=index_nplike)
+            assert (
+                nextstarts.nplike is index_nplike and nextparents.nplike is index_nplike
+            )
+            self._handle_error(
+                self._backend[
+                    "awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64",
+                    nextstarts.dtype.type,
+                    nextparents.dtype.type,
+                ](
+                    nextstarts.data,
+                    nextparents.data,
+                    nextlen,
                 )
             )
 

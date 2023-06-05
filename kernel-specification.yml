@@ -3655,6 +3655,7 @@ kernels:
         args:
           - {name: nextcarry, type: "List[int64_t]", dir: out}
           - {name: nextparents, type: "List[int64_t]", dir: out}
+          - {name: maxnextparents, type: "List[int64_t]", dir: out}
           - {name: parents, type: "Const[List[int64_t]]", dir: in}
           - {name: size, type: "int64_t", dir: in}
           - {name: length, type: "int64_t", dir: in}
@@ -3668,6 +3669,8 @@ kernels:
                   # so order our arrays by the transpose
                   nextcarry[k] = i * size + j
                   nextparents[k] = parents[i] * size + j
+                  if (nextparents[k] > maxnextparents[0]):
+                      maxnextparents[0] = nextparents[k]
                   k += 1
     automatic-tests: false
     manual-tests: []
