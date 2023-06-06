@@ -424,7 +424,7 @@ def test_Unmasked():
 
 
 def test_ByteMasked():
-    builder = lb.ByteMasked(lb.Numpy(np.float64), valid_when=True)
+    builder = lb.ByteMasked(bool, lb.Numpy(np.float64), valid_when=True)
     assert len(builder) == 0
 
     content = builder.append_valid()
@@ -447,15 +447,14 @@ def test_ByteMasked():
     error = ""
     assert builder.is_valid(error), error
 
-    # FIXME: add dtype
-    # assert (
-    #     builder.type()
-    #     == "ak.numba.lb.ByteMasked(bool, ak.numba.lb.Numpy(float64, parameters=None), valid_when=True, parameters=None)"
-    # )
-    # assert (
-    #     str(builder.numbatype())
-    #     == "ak.numba.lb.ByteMasked(bool, ak.numba.lb.Numpy(float64, parameters=None), valid_when=True, parameters=None)"
-    # )
+    assert (
+        builder.type()
+        == "ak.numba.lb.ByteMasked(bool, ak.numba.lb.Numpy(float64, parameters=None), valid_when=True, parameters=None)"
+    )
+    assert (
+        str(builder.numbatype())
+        == "ak.numba.lb.ByteMasked(bool, ak.numba.lb.Numpy(float64, parameters=None), valid_when=True, parameters=None)"
+    )
     builder.clear()
     assert len(builder) == 0
 
@@ -591,7 +590,7 @@ def test_unbox():
     builder = lb.BitMasked(np.uint8, lb.Numpy(np.float64), True, True)
     f1(builder)
 
-    builder = lb.ByteMasked(lb.Numpy(np.float64), valid_when=True)
+    builder = lb.ByteMasked(bool, lb.Numpy(np.float64), valid_when=True)
     f1(builder)
 
     builder = lb.Empty()
@@ -721,7 +720,7 @@ def test_box():
     out10 = f3(builder)
     assert ak.to_list(out10.snapshot()) == []
 
-    builder = lb.ByteMasked(lb.Numpy(np.float64), valid_when=True)
+    builder = lb.ByteMasked(bool, lb.Numpy(np.float64), valid_when=True)
     out11 = f3(builder)
     assert ak.to_list(out11.snapshot()) == []
 
@@ -769,7 +768,7 @@ def test_len():
     builder = lb.IndexedOption(np.int64, lb.Numpy(np.float64))
     assert f4(builder) == 0
 
-    builder = lb.ByteMasked(lb.Numpy(np.float64), valid_when=True)
+    builder = lb.ByteMasked(bool, lb.Numpy(np.float64), valid_when=True)
     assert f4(builder) == 0
 
     builder = lb.BitMasked(np.uint8, lb.Numpy(np.float64), True, True)
@@ -1169,7 +1168,7 @@ def test_ByteMasked_append_extend():
     def f44(builder, size):
         builder.extend_null(size)
 
-    builder = lb.ByteMasked(lb.Numpy(np.float64), valid_when=True)
+    builder = lb.ByteMasked(bool, lb.Numpy(np.float64), valid_when=True)
     assert len(builder) == 0
 
     f41(builder)

@@ -109,7 +109,12 @@ def typeof_LayoutBuilder(val, c):
         )
 
     elif isinstance(val, ByteMasked):
-        return ByteMaskedType(val._content, val._valid_when, val._parameters)
+        return ByteMaskedType(
+            numba.from_dtype(val._mask.dtype),
+            val._content,
+            val._valid_when,
+            val._parameters,
+        )
 
     elif isinstance(val, BitMasked):
         return BitMaskedType(
@@ -1652,6 +1657,7 @@ def IndexedOption_extend_null(builder, size):
 class ByteMasked(LayoutBuilder):
     def __init__(
         self,
+        dtype,  # mask must be "bool"
         content,
         *,
         valid_when=True,
@@ -1659,7 +1665,7 @@ class ByteMasked(LayoutBuilder):
         initial=1024,
         resize=8.0,
     ):
-        self._mask = GrowableBuffer(dtype="bool", initial=initial, resize=resize)
+        self._mask = GrowableBuffer(dtype=dtype, initial=initial, resize=resize)
         self._content = content
         self._valid_when = valid_when
         self._parameters = parameters
@@ -1668,10 +1674,11 @@ class ByteMasked(LayoutBuilder):
         return f"<ByteMasked of {self._content!r} with {self._mask._length} items>"
 
     def type(self):
-        return f"ak.numba.lb.ByteMasked({self._content.type()}, valid_when={self._valid_when}, parameters={self._parameters})"
+        return f"ak.numba.lb.ByteMasked({self._mask.dtype}, {self._content.type()}, valid_when={self._valid_when}, parameters={self._parameters})"
 
     def numbatype(self):
         return ByteMaskedType(
+            numba.from_dtype(self._mask.dtype),
             self.content,
             self.valid_when,
             numba.types.StringLiteral(self._parameters),
@@ -1737,10 +1744,11 @@ class ByteMasked(LayoutBuilder):
 
 
 class ByteMaskedType(numba.types.Type):
-    def __init__(self, content, valid_when, parameters):
+    def __init__(self, dtype, content, valid_when, parameters):
         super().__init__(
-            name=f"ak.numba.lb.ByteMasked({content.type()}, , valid_when={valid_when}, parameters={parameters.literal_value if isinstance(parameters, numba.types.Literal) else None})"
+            name=f"ak.numba.lb.ByteMasked({dtype}, {content.type()}, valid_when={valid_when}, parameters={parameters.literal_value if isinstance(parameters, numba.types.Literal) else None})"
         )
+        self._dtype = dtype
         self._content = content
         self._valid_when = valid_when
         self._parameters = parameters
@@ -1759,7 +1767,7 @@ class ByteMaskedType(numba.types.Type):
 
     @property
     def mask(self):
-        return ak.numba.GrowableBufferType(numba.types.boolean)
+        return ak.numba.GrowableBufferType(self._dtype)
 
     @property
     def content(self):
@@ -1820,16 +1828,21 @@ def ByteMaskedType_box(typ, val, c):
     builder = numba.core.cgutils.create_struct_proxy(typ)(
         c.context, c.builder, value=val
     )
+    mask_obj = c.pyapi.from_native_value(typ.mask, builder.mask, c.env_manager)
     content_obj = c.pyapi.from_native_value(typ.content, builder.content, c.env_manager)
 
     out = c.pyapi.call_function_objargs(
         ByteMasked_obj,
-        (content_obj,),
+        (
+            mask_obj,
+            content_obj,
+        ),
     )
 
     # decref PyObjects
     c.pyapi.decref(ByteMasked_obj)
 
+    c.pyapi.decref(mask_obj)
     c.pyapi.decref(content_obj)
 
     return out
@@ -2067,7 +2080,9 @@ class BitMaskedType(numba.types.Type):
 
     @classmethod
     def type(cls):
-        return BitMaskedType(cls.content)
+        return BitMaskedType(
+            cls.dtype, cls.content, cls.valid_when, cls.lsb_order, cls.parameters
+        )
 
     @property
     def parameters(self):
@@ -2207,7 +2222,7 @@ def BitMaskedType_cast(builder):
                 ]
             )
         else:
-            np.array(
+            return np.array(
                 [
                     np.uint8(128 >> 0),
                     np.uint8(128 >> 1),
@@ -2239,7 +2254,6 @@ def BitMasked_append_begin(builder):
             builder._mask.append(np.uint8(0))
             builder._current_byte_index[1] = 0
 
-        return
 
     return append_begin
 
