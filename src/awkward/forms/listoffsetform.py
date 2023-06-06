@@ -163,5 +163,5 @@ class ListOffsetForm(Form):
             return self._content._column_types()
 
     def _smallest_zero_buffer_lengths(self) -> Iterator[ShapeItem]:
-        yield index_size_bytes[self._offsets]
+        yield index_size_bytes[self._offsets] * 2
         yield from self._content._smallest_zero_buffer_lengths()
