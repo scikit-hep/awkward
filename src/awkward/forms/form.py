@@ -5,14 +5,15 @@ import itertools
 import json
 import re
 from collections.abc import Mapping
+from functools import reduce
 
 import awkward as ak
 from awkward._backends.numpy import NumpyBackend
 from awkward._errors import deprecate
 from awkward._nplikes.numpylike import NumpyMetadata
-from awkward._nplikes.shape import unknown_length
+from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._parameters import parameters_union
-from awkward._typing import Final, JSONMapping, JSONSerializable
+from awkward._typing import Final, Iterator, JSONMapping, JSONSerializable
 
 np = NumpyMetadata.instance()
 numpy_backend = NumpyBackend.instance()
@@ -28,6 +29,15 @@ reserved_nominal_parameters: Final = frozenset(
         ("__array__", "categorical"),
     }
 )
+
+
+index_size_bytes: Final = {
+    "i8": 1,
+    "u8": 1,
+    "i32": 4,
+    "u32": 4,
+    "i64": 8,
+}
 
 
 def from_dict(input: dict) -> Form:
@@ -452,6 +462,9 @@ class Form:
             simplify=False,
         )
 
+    def _smallest_zero_buffer_lengths(self) -> Iterator[ShapeItem]:
+        raise NotImplementedError
+
     def length_one_array(self, *, backend=numpy_backend, highlevel=True, behavior=None):
         # A length-1 array will need at least N bytes, where N is the largest dtype (e.g. 256 bit complex)
         # Similarly, a length-1 array will need no more than 2*N bytes, as all contents need at most two
@@ -459,12 +472,19 @@ class Form:
         # create a buffer of this length (2N) and instruct all contents to use it (via `buffer_key=""`).
         # At the same time, with all index-like metadata set to 0, the list types will have zero lengths
         # whilst unions, indexed, and option types will contain a single value.
+        def max_prefer_unknown(this: ShapeItem, that: ShapeItem) -> ShapeItem:
+            if this is unknown_length:
+                return this
+            if that is unknown_length:
+                return that
+            return max(this, that)
+
+        buffer_length = reduce(max_prefer_unknown, self._smallest_zero_buffer_lengths())
+
         return ak.operations.ak_from_buffers._impl(
             form=self,
             length=1,
-            container={
-                "": b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
-            },
+            container={"": b"\x00" * buffer_length},
             buffer_key="",
             backend=backend,
             byteorder=ak._util.native_byteorder,

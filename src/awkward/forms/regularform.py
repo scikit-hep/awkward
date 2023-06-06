@@ -1,9 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 import awkward as ak
-from awkward._nplikes.shape import unknown_length
+from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._parameters import type_parameters_equal
 from awkward._regularize import is_integer
-from awkward._typing import final
+from awkward._typing import Iterator, final
 from awkward._util import UNSET
 from awkward.forms.form import Form
 
@@ -154,3 +154,7 @@ class RegularForm(Form):
             return ("string",)
         else:
             return self._content._column_types()
+
+    def _smallest_zero_buffer_lengths(self) -> Iterator[ShapeItem]:
+        for length in self._content._smallest_zero_buffer_lengths():
+            yield length * self._size

@@ -3,8 +3,9 @@ from collections.abc import Iterable
 
 import awkward as ak
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.shape import ShapeItem
 from awkward._parameters import type_parameters_equal
-from awkward._typing import final
+from awkward._typing import Iterator, final
 from awkward._util import UNSET
 from awkward.forms.form import Form
 
@@ -206,3 +207,10 @@ class NumpyForm(Form):
 
     def _column_types(self):
         return (ak.types.numpytype.primitive_to_dtype(self._primitive),)
+
+    def _smallest_zero_buffer_lengths(self) -> Iterator[ShapeItem]:
+        if len(self.inner_shape) > 0:
+            raise NotImplementedError
+
+        dtype = ak.types.numpytype.primitive_to_dtype(self._primitive)
+        yield dtype.itemsize

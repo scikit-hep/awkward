@@ -3,9 +3,10 @@ import glob
 from collections.abc import Iterable
 
 import awkward as ak
+from awkward._nplikes.shape import ShapeItem
 from awkward._parameters import type_parameters_equal
 from awkward._regularize import is_integer
-from awkward._typing import final
+from awkward._typing import Iterator, final
 from awkward._util import UNSET
 from awkward.forms.form import Form
 
@@ -268,3 +269,7 @@ class RecordForm(Form):
 
     def _column_types(self):
         return sum((x._column_types() for x in self._contents), ())
+
+    def _smallest_zero_buffer_lengths(self) -> Iterator[ShapeItem]:
+        for content in self._contents:
+            yield from content._smallest_zero_buffer_lengths()

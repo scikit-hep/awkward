@@ -1,16 +1,26 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+from __future__ import annotations
+
 import awkward as ak
+from awkward._nplikes.shape import ShapeItem
 from awkward._parameters import type_parameters_equal
-from awkward._typing import final
+from awkward._typing import Iterator, JSONMapping, final
 from awkward._util import UNSET
-from awkward.forms.form import Form
+from awkward.forms.form import Form, index_size_bytes
 
 
 @final
 class ListOffsetForm(Form):
     is_list = True
 
-    def __init__(self, offsets, content, *, parameters=None, form_key=None):
+    def __init__(
+        self,
+        offsets: str,
+        content: Form,
+        *,
+        parameters: JSONMapping | None = None,
+        form_key: str | None = None,
+    ):
         if not isinstance(offsets, str):
             raise TypeError(
                 "{} 'offsets' must be of type str, not {}".format(
@@ -151,3 +161,7 @@ class ListOffsetForm(Form):
             return ("string",)
         else:
             return self._content._column_types()
+
+    def _smallest_zero_buffer_lengths(self) -> Iterator[ShapeItem]:
+        yield index_size_bytes[self._offsets]
+        yield from self._content._smallest_zero_buffer_lengths()
