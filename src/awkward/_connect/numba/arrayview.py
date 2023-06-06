@@ -106,7 +106,7 @@ def code_to_function(code, function_name, externals=None, debug=False):
 
 def to_numbatype(form):
     if isinstance(form, ak.forms.EmptyForm):
-        return to_numbatype(form.to_NumpyForm(np.dtype(np.float64)))
+        return to_numbatype(form.to_NumpyForm(primitive="float64"))
 
     elif isinstance(form, ak.forms.NumpyForm):
         if len(form.inner_shape) == 0:
