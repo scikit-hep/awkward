@@ -929,9 +929,27 @@ class RecordArray(Content):
                 )
             )
 
+            # Positional reducers ultimately need to do more work when rebuilding the result
+            # so asking for a mask doesn't help us!
+            reducer_should_mask = mask and not reducer.needs_position
             out = _apply_record_reducer(
-                reducer_recordclass, self, mask, outoffsets, behavior
+                reducer_recordclass,
+                self,
+                reducer_should_mask,
+                outoffsets,
+                behavior,
             )
+
+            if out.is_option and not reducer_should_mask:
+                reason = (
+                    "reducer is positional"
+                    if reducer.needs_position
+                    else "mask is False"
+                )
+                raise TypeError(
+                    f"a custom implementation of the reducer {reducer.name} for {self.parameter('__record__')!r} "
+                    f"returned an option when it was not expected ({reason})"
+                )
 
             if reducer.needs_position:
                 assert isinstance(out, ak.contents.NumpyArray)
@@ -999,10 +1017,6 @@ class RecordArray(Content):
 
                 out = ak.contents.ByteMaskedArray.simplified(
                     outmask, out, False, parameters=None
-                )
-            elif out.is_option:
-                raise TypeError(
-                    "a custom reducer function returned an option when it was not expected"
                 )
 
             if keepdims:
