@@ -2254,7 +2254,6 @@ def BitMasked_append_begin(builder):
             builder._mask.append(np.uint8(0))
             builder._current_byte_index[1] = 0
 
-
     return append_begin
 
 
@@ -2272,8 +2271,6 @@ def BitMasked_append_end(builder):
             builder._mask._panels[-1][
                 builder._mask._length_pos[1] - 1
             ] = ~builder._current_byte_index[0]
-
-        return
 
     return append_end
 
