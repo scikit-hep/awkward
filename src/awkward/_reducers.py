@@ -6,7 +6,7 @@ from typing import Any as AnyType
 
 import awkward as ak
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import ArrayLike, NumpyMetadata
+from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import ShapeItem
 from awkward._typing import Final
 
@@ -74,71 +74,57 @@ class Reducer(ABC):
         raise NotImplementedError
 
 
-class PositionalReducer(Reducer):
-    needs_position: Final = True
-
-    def _apply_without_corrections(
-        self,
-        array: ak.contents.NumpyArray,
-        parents: ak.index.Index,
-        outlength: ShapeItem,
-    ) -> ArrayLike:
-        raise NotImplementedError
-
-    def apply(
-        self,
-        array: ak.contents.NumpyArray,
-        parents: ak.index.Index,
-        starts: ak.index.Index,
-        shifts: ak.index.Index | None,
-        outlength: ShapeItem,
-    ) -> ak.contents.NumpyArray:
-        reduced = self._apply_without_corrections(array, parents, outlength)
-        if shifts is None:
-            assert (
-                parents.nplike is array.backend.index_nplike
-                and starts.nplike is array.backend.index_nplike
+def apply_positional_corrections(
+    reduced: ak.contents.NumpyArray,
+    parents: ak.index.Index,
+    starts: ak.index.Index,
+    shifts: ak.index.Index | None,
+):
+    if shifts is None:
+        assert (
+            parents.nplike is reduced.backend.index_nplike
+            and starts.nplike is reduced.backend.index_nplike
+        )
+        reduced._handle_error(
+            reduced.backend[
+                "awkward_NumpyArray_reduce_adjust_starts_64",
+                reduced.dtype.type,
+                parents.dtype.type,
+                starts.dtype.type,
+            ](
+                reduced.data,
+                reduced.length,
+                parents.data,
+                starts.data,
             )
-            array._handle_error(
-                array.backend[
-                    "awkward_NumpyArray_reduce_adjust_starts_64",
-                    reduced.dtype.type,
-                    parents.dtype.type,
-                    starts.dtype.type,
-                ](
-                    reduced,
-                    outlength,
-                    parents.data,
-                    starts.data,
-                )
+        )
+    else:
+        assert (
+            parents.nplike is reduced.backend.index_nplike
+            and starts.nplike is reduced.backend.index_nplike
+            and shifts.nplike is reduced.backend.index_nplike
+        )
+        reduced._handle_error(
+            reduced._backend[
+                "awkward_NumpyArray_reduce_adjust_starts_shifts_64",
+                reduced.dtype.type,
+                parents.dtype.type,
+                starts.dtype.type,
+                shifts.dtype.type,
+            ](
+                reduced.data,
+                reduced.length,
+                parents.data,
+                starts.data,
+                shifts.data,
             )
-        else:
-            assert (
-                parents.nplike is array.backend.index_nplike
-                and starts.nplike is array.backend.index_nplike
-                and shifts.nplike is array.backend.index_nplike
-            )
-            array._handle_error(
-                array._backend[
-                    "awkward_NumpyArray_reduce_adjust_starts_shifts_64",
-                    reduced.dtype.type,
-                    parents.dtype.type,
-                    starts.dtype.type,
-                    shifts.dtype.type,
-                ](
-                    reduced,
-                    outlength,
-                    parents.data,
-                    starts.data,
-                    shifts.data,
-                )
-            )
-        return ak.contents.NumpyArray(reduced)
+        )
 
 
-class ArgMin(PositionalReducer):
+class ArgMin(Reducer):
     name: Final = "argmin"
     preferred_dtype: Final = np.int64
+    needs_position: Final = True
 
     @classmethod
     def return_dtype(cls, given_dtype):
@@ -147,7 +133,14 @@ class ArgMin(PositionalReducer):
     def identity_for(self, dtype: np.dtype | None):
         return np.int64(-1)
 
-    def _apply_without_corrections(self, array, parents, outlength):
+    def apply(
+        self,
+        array: ak.contents.NumpyArray,
+        parents: ak.index.Index,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
+        outlength: ShapeItem,
+    ):
         assert isinstance(array, ak.contents.NumpyArray)
         dtype = self.maybe_other_type(array.dtype)
         result = array.backend.nplike.empty(outlength, dtype=np.int64)
@@ -183,12 +176,15 @@ class ArgMin(PositionalReducer):
                     outlength,
                 )
             )
-        return result
+        array = ak.contents.NumpyArray(result)
+        apply_positional_corrections(array, parents, starts, shifts)
+        return array
 
 
-class ArgMax(PositionalReducer):
+class ArgMax(Reducer):
     name: Final = "argmax"
     preferred_dtype: Final = np.int64
+    needs_position: Final = True
 
     @classmethod
     def return_dtype(cls, given_dtype):
@@ -197,7 +193,14 @@ class ArgMax(PositionalReducer):
     def identity_for(self, dtype: np.dtype | None):
         return np.int64(-1)
 
-    def _apply_without_corrections(self, array, parents, outlength):
+    def apply(
+        self,
+        array: ak.contents.NumpyArray,
+        parents: ak.index.Index,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
+        outlength: ShapeItem,
+    ):
         assert isinstance(array, ak.contents.NumpyArray)
         dtype = self.maybe_other_type(array.dtype)
         result = array.backend.nplike.empty(outlength, dtype=np.int64)
@@ -233,7 +236,9 @@ class ArgMax(PositionalReducer):
                     outlength,
                 )
             )
-        return result
+        array = ak.contents.NumpyArray(result)
+        apply_positional_corrections(array, parents, starts, shifts)
+        return array
 
 
 class Count(Reducer):
@@ -245,7 +250,14 @@ class Count(Reducer):
     def return_dtype(cls, given_dtype):
         return np.int64
 
-    def apply(self, array, parents, outlength):
+    def apply(
+        self,
+        array: ak.contents.NumpyArray,
+        parents: ak.index.Index,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
+        outlength: ShapeItem,
+    ):
         assert isinstance(array, ak.contents.NumpyArray)
         result = array.backend.nplike.empty(outlength, dtype=np.int64)
         assert parents.nplike is array.backend.index_nplike
@@ -274,7 +286,14 @@ class CountNonzero(Reducer):
     def return_dtype(cls, given_dtype):
         return np.int64
 
-    def apply(self, array, parents, outlength):
+    def apply(
+        self,
+        array: ak.contents.NumpyArray,
+        parents: ak.index.Index,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
+        outlength: ShapeItem,
+    ):
         assert isinstance(array, ak.contents.NumpyArray)
         dtype = np.dtype(np.int64) if array.dtype.kind.upper() == "M" else array.dtype
         result = array.backend.nplike.empty(outlength, dtype=np.int64)
@@ -321,7 +340,14 @@ class Sum(Reducer):
     preferred_dtype: Final = np.float64
     needs_position: Final = False
 
-    def apply(self, array, parents, outlength):
+    def apply(
+        self,
+        array: ak.contents.NumpyArray,
+        parents: ak.index.Index,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
+        outlength: ShapeItem,
+    ):
         assert isinstance(array, ak.contents.NumpyArray)
         if array.dtype.kind == "M":
             raise ValueError(f"cannot compute the sum (ak.sum) of {array.dtype!r}")
@@ -424,7 +450,14 @@ class Prod(Reducer):
     preferred_dtype: Final = np.int64
     needs_position: Final = False
 
-    def apply(self, array, parents, outlength):
+    def apply(
+        self,
+        array: ak.contents.NumpyArray,
+        parents: ak.index.Index,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
+        outlength: ShapeItem,
+    ):
         assert isinstance(array, ak.contents.NumpyArray)
         if array.dtype.kind.upper() == "M":
             raise ValueError(f"cannot compute the product (ak.prod) of {array.dtype!r}")
@@ -515,7 +548,14 @@ class Any(Reducer):
     def return_dtype(cls, given_dtype):
         return np.bool_
 
-    def apply(self, array, parents, outlength):
+    def apply(
+        self,
+        array: ak.contents.NumpyArray,
+        parents: ak.index.Index,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
+        outlength: ShapeItem,
+    ):
         assert isinstance(array, ak.contents.NumpyArray)
         dtype = self.maybe_other_type(array.dtype)
         result = array.backend.nplike.empty(outlength, dtype=np.bool_)
@@ -566,7 +606,14 @@ class All(Reducer):
     def return_dtype(cls, given_dtype):
         return np.bool_
 
-    def apply(self, array, parents, outlength):
+    def apply(
+        self,
+        array: ak.contents.NumpyArray,
+        parents: ak.index.Index,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
+        outlength: ShapeItem,
+    ):
         assert isinstance(array, ak.contents.NumpyArray)
         dtype = self.maybe_other_type(array.dtype)
         result = array.backend.nplike.empty(outlength, dtype=np.bool_)
@@ -643,7 +690,14 @@ class Min(Reducer):
 
         return self._initial
 
-    def apply(self, array, parents, outlength):
+    def apply(
+        self,
+        array: ak.contents.NumpyArray,
+        parents: ak.index.Index,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
+        outlength: ShapeItem,
+    ):
         assert isinstance(array, ak.contents.NumpyArray)
         dtype = self.maybe_other_type(array.dtype)
         result = array.backend.nplike.empty(
@@ -746,7 +800,14 @@ class Max(Reducer):
 
         return self._initial
 
-    def apply(self, array, parents, outlength):
+    def apply(
+        self,
+        array: ak.contents.NumpyArray,
+        parents: ak.index.Index,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
+        outlength: ShapeItem,
+    ):
         assert isinstance(array, ak.contents.NumpyArray)
         dtype = self.maybe_other_type(array.dtype)
         result = array.backend.nplike.empty(

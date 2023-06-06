@@ -4,6 +4,7 @@ import jax
 
 import awkward as ak
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.shape import ShapeItem
 from awkward._reducers import Reducer
 
 np = NumpyMetadata.instance()
@@ -19,7 +20,14 @@ class ArgMin(Reducer):
         return np.int64
 
     @classmethod
-    def apply(cls, array, parents, outlength):
+    def apply(
+        cls,
+        array: ak.contents.NumpyArray,
+        parents: ak.index.Index,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
+        outlength: ShapeItem,
+    ):
         raise RuntimeError("Cannot differentiate through argmin")
 
 
@@ -33,7 +41,14 @@ class ArgMax(Reducer):
         return np.int64
 
     @classmethod
-    def apply(cls, array, parents, outlength):
+    def apply(
+        cls,
+        array: ak.contents.NumpyArray,
+        parents: ak.index.Index,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
+        outlength: ShapeItem,
+    ):
         raise RuntimeError("Cannot differentiate through argmax")
 
 
@@ -46,7 +61,14 @@ class Count(Reducer):
         return np.int64
 
     @classmethod
-    def apply(cls, array, parents, outlength):
+    def apply(
+        cls,
+        array: ak.contents.NumpyArray,
+        parents: ak.index.Index,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
+        outlength: ShapeItem,
+    ):
         raise RuntimeError("Cannot differentiate through count_zero")
 
 
@@ -59,7 +81,14 @@ class CountNonzero(Reducer):
         return np.int64
 
     @classmethod
-    def apply(cls, array, parents, outlength):
+    def apply(
+        cls,
+        array: ak.contents.NumpyArray,
+        parents: ak.index.Index,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
+        outlength: ShapeItem,
+    ):
         raise RuntimeError("Cannot differentiate through count_nonzero")
 
 
@@ -68,7 +97,14 @@ class Sum(Reducer):
     preferred_dtype = np.float64
 
     @classmethod
-    def apply(cls, array, parents, outlength):
+    def apply(
+        cls,
+        array: ak.contents.NumpyArray,
+        parents: ak.index.Index,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
+        outlength: ShapeItem,
+    ):
         assert isinstance(array, ak.contents.NumpyArray)
         if array.dtype.kind == "M":
             raise TypeError(f"cannot compute the sum (ak.sum) of {array.dtype!r}")
@@ -90,7 +126,14 @@ class Prod(Reducer):
     preferred_dtype = np.int64
 
     @classmethod
-    def apply(cls, array, parents, outlength):
+    def apply(
+        cls,
+        array: ak.contents.NumpyArray,
+        parents: ak.index.Index,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
+        outlength: ShapeItem,
+    ):
         assert isinstance(array, ak.contents.NumpyArray)
         # See issue https://github.com/google/jax/issues/9296
         result = jax.numpy.exp(
@@ -114,7 +157,14 @@ class Any(Reducer):
         return np.bool_
 
     @classmethod
-    def apply(cls, array, parents, outlength):
+    def apply(
+        cls,
+        array: ak.contents.NumpyArray,
+        parents: ak.index.Index,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
+        outlength: ShapeItem,
+    ):
         assert isinstance(array, ak.contents.NumpyArray)
         result = jax.ops.segment_max(array.data, parents.data)
         result = jax.numpy.asarray(result, dtype=bool)
@@ -131,7 +181,14 @@ class All(Reducer):
         return np.bool_
 
     @classmethod
-    def apply(cls, array, parents, outlength):
+    def apply(
+        cls,
+        array: ak.contents.NumpyArray,
+        parents: ak.index.Index,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
+        outlength: ShapeItem,
+    ):
         assert isinstance(array, ak.contents.NumpyArray)
         result = jax.ops.segment_min(array.data, parents.data)
         result = jax.numpy.asarray(result, dtype=bool)
@@ -170,7 +227,14 @@ class Min(Reducer):
         return initial
 
     @classmethod
-    def apply(cls, array, parents, outlength):
+    def apply(
+        cls,
+        array: ak.contents.NumpyArray,
+        parents: ak.index.Index,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
+        outlength: ShapeItem,
+    ):
         assert isinstance(array, ak.contents.NumpyArray)
 
         result = jax.ops.segment_min(array.data, parents.data)
@@ -218,7 +282,14 @@ class Max(Reducer):
         return initial
 
     @classmethod
-    def apply(cls, array, parents, outlength):
+    def apply(
+        cls,
+        array: ak.contents.NumpyArray,
+        parents: ak.index.Index,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
+        outlength: ShapeItem,
+    ):
         assert isinstance(array, ak.contents.NumpyArray)
 
         result = jax.ops.segment_max(array.data, parents.data)
