@@ -273,19 +273,15 @@ class Content:
 
             message = error.str.decode(errors="surrogateescape")
 
-            if error.pass_through:
-                raise ValueError(message + filename)
+            if error.attempt != ak._util.kSliceNone:
+                message += f" while attempting to get index {error.attempt}"
 
+            message += filename
+
+            if slicer is None:
+                raise ValueError(message)
             else:
-                if error.attempt != ak._util.kSliceNone:
-                    message += f" while attempting to get index {error.attempt}"
-
-                message += filename
-
-                if slicer is None:
-                    raise ValueError(message)
-                else:
-                    raise ak._errors.index_error(self, slicer, message)
+                raise ak._errors.index_error(self, slicer, message)
 
     @staticmethod
     def _selfless_handle_error(error):
@@ -299,16 +295,12 @@ class Content:
 
             message = error.str.decode(errors="surrogateescape")
 
-            if error.pass_through:
-                raise ValueError(message + filename)
+            if error.attempt != ak._util.kSliceNone:
+                message += f" while attempting to get index {error.attempt}"
 
-            else:
-                if error.attempt != ak._util.kSliceNone:
-                    message += f" while attempting to get index {error.attempt}"
+            message += filename
 
-                message += filename
-
-                raise ValueError(message)
+            raise ValueError(message)
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         raise TypeError(
