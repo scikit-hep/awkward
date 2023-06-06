@@ -1128,9 +1128,7 @@ class NumpyArray(Content):
         assert self.is_contiguous
         assert self._data.ndim == 1
 
-        out = self._backend.apply_reducer(
-            reducer, self, parents, starts, shifts, outlength
-        )
+        out = reducer.apply(self, parents, starts, shifts, outlength)
 
         if mask:
             outmask = ak.index.Index8.empty(outlength, self._backend.index_nplike)
