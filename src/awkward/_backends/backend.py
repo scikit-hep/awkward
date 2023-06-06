@@ -39,9 +39,11 @@ class Backend(Singleton, ABC):
         reducer: ak._reducers.Reducer,
         layout: ak.contents.NumpyArray,
         parents: ak.index.Index,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
         outlength: int,
     ) -> ak.contents.NumpyArray:
-        return reducer.apply(layout, parents, outlength)
+        return reducer.apply(layout, parents, starts, shifts, outlength)
 
     def apply_ufunc(self, ufunc, method, args, kwargs):
         return getattr(ufunc, method)(*args, **kwargs)

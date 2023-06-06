@@ -6,7 +6,8 @@ from typing import Any as AnyType
 
 import awkward as ak
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpylike import ArrayLike, NumpyMetadata
+from awkward._nplikes.shape import ShapeItem
 from awkward._typing import Final
 
 np = NumpyMetadata.instance()
@@ -62,13 +63,81 @@ class Reducer(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def apply(self, array, parents, outlength: int):
+    def apply(
+        self,
+        array: ak.contents.NumpyArray,
+        parents: ak.index.Index,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
+        outlength: ShapeItem,
+    ):
         raise NotImplementedError
 
 
-class ArgMin(Reducer):
-    name: Final = "argmin"
+class PositionalReducer(Reducer):
     needs_position: Final = True
+
+    def _apply_without_corrections(
+        self,
+        array: ak.contents.NumpyArray,
+        parents: ak.index.Index,
+        outlength: ShapeItem,
+    ) -> ArrayLike:
+        raise NotImplementedError
+
+    def apply(
+        self,
+        array: ak.contents.NumpyArray,
+        parents: ak.index.Index,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
+        outlength: ShapeItem,
+    ) -> ak.contents.NumpyArray:
+        reduced = self._apply_without_corrections(array, parents, outlength)
+        if shifts is None:
+            assert (
+                parents.nplike is array.backend.index_nplike
+                and starts.nplike is array.backend.index_nplike
+            )
+            array._handle_error(
+                array.backend[
+                    "awkward_NumpyArray_reduce_adjust_starts_64",
+                    reduced.dtype.type,
+                    parents.dtype.type,
+                    starts.dtype.type,
+                ](
+                    reduced,
+                    outlength,
+                    parents.data,
+                    starts.data,
+                )
+            )
+        else:
+            assert (
+                parents.nplike is array.backend.index_nplike
+                and starts.nplike is array.backend.index_nplike
+                and shifts.nplike is array.backend.index_nplike
+            )
+            array._handle_error(
+                array._backend[
+                    "awkward_NumpyArray_reduce_adjust_starts_shifts_64",
+                    reduced.dtype.type,
+                    parents.dtype.type,
+                    starts.dtype.type,
+                    shifts.dtype.type,
+                ](
+                    reduced,
+                    outlength,
+                    parents.data,
+                    starts.data,
+                    shifts.data,
+                )
+            )
+        return ak.contents.NumpyArray(reduced)
+
+
+class ArgMin(PositionalReducer):
+    name: Final = "argmin"
     preferred_dtype: Final = np.int64
 
     @classmethod
@@ -78,7 +147,7 @@ class ArgMin(Reducer):
     def identity_for(self, dtype: np.dtype | None):
         return np.int64(-1)
 
-    def apply(self, array, parents, outlength):
+    def _apply_without_corrections(self, array, parents, outlength):
         assert isinstance(array, ak.contents.NumpyArray)
         dtype = self.maybe_other_type(array.dtype)
         result = array.backend.nplike.empty(outlength, dtype=np.int64)
@@ -114,12 +183,11 @@ class ArgMin(Reducer):
                     outlength,
                 )
             )
-        return ak.contents.NumpyArray(result)
+        return result
 
 
-class ArgMax(Reducer):
+class ArgMax(PositionalReducer):
     name: Final = "argmax"
-    needs_position: Final = True
     preferred_dtype: Final = np.int64
 
     @classmethod
@@ -129,7 +197,7 @@ class ArgMax(Reducer):
     def identity_for(self, dtype: np.dtype | None):
         return np.int64(-1)
 
-    def apply(self, array, parents, outlength):
+    def _apply_without_corrections(self, array, parents, outlength):
         assert isinstance(array, ak.contents.NumpyArray)
         dtype = self.maybe_other_type(array.dtype)
         result = array.backend.nplike.empty(outlength, dtype=np.int64)
@@ -165,7 +233,7 @@ class ArgMax(Reducer):
                     outlength,
                 )
             )
-        return ak.contents.NumpyArray(result)
+        return result
 
 
 class Count(Reducer):

@@ -44,12 +44,14 @@ class JaxBackend(Backend):
         reducer: ak._reducers.Reducer,
         layout: ak.contents.NumpyArray,
         parents: ak.index.Index,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
         outlength: int,
     ) -> ak.contents.NumpyArray:
         from awkward._connect.jax import get_jax_reducer
 
         jax_reducer = get_jax_reducer(reducer)
-        return jax_reducer.apply(layout, parents, outlength)
+        return jax_reducer.apply(layout, parents, starts, shifts, outlength)
 
     def apply_ufunc(self, ufunc, method, args, kwargs):
         from awkward._connect.jax import get_jax_ufunc

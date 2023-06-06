@@ -1128,50 +1128,9 @@ class NumpyArray(Content):
         assert self.is_contiguous
         assert self._data.ndim == 1
 
-        out = self._backend.apply_reducer(reducer, self, parents, outlength)
-
-        if reducer.needs_position:
-            if shifts is None:
-                assert (
-                    out.backend is self._backend
-                    and parents.nplike is self._backend.index_nplike
-                    and starts.nplike is self._backend.index_nplike
-                )
-                self._handle_error(
-                    self._backend[
-                        "awkward_NumpyArray_reduce_adjust_starts_64",
-                        out.data.dtype.type,
-                        parents.dtype.type,
-                        starts.dtype.type,
-                    ](
-                        out.data,
-                        outlength,
-                        parents.data,
-                        starts.data,
-                    )
-                )
-            else:
-                assert (
-                    out.backend is self._backend
-                    and parents.nplike is self._backend.index_nplike
-                    and starts.nplike is self._backend.index_nplike
-                    and shifts.nplike is self._backend.index_nplike
-                )
-                self._handle_error(
-                    self._backend[
-                        "awkward_NumpyArray_reduce_adjust_starts_shifts_64",
-                        out.data.dtype.type,
-                        parents.dtype.type,
-                        starts.dtype.type,
-                        shifts.dtype.type,
-                    ](
-                        out.data,
-                        outlength,
-                        parents.data,
-                        starts.data,
-                        shifts.data,
-                    )
-                )
+        out = self._backend.apply_reducer(
+            reducer, self, parents, starts, shifts, outlength
+        )
 
         if mask:
             outmask = ak.index.Index8.empty(outlength, self._backend.index_nplike)
@@ -1191,7 +1150,6 @@ class NumpyArray(Content):
                     outlength,
                 )
             )
-
             out = ak.contents.ByteMaskedArray(outmask, out, False, parameters=None)
 
         if keepdims:
