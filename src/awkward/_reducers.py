@@ -59,10 +59,6 @@ class Reducer(ABC):
         return type
 
     @abstractmethod
-    def identity_for(self, dtype: DTypeLike | None):
-        raise NotImplementedError
-
-    @abstractmethod
     def apply(
         self,
         array: ak.contents.NumpyArray,
@@ -70,7 +66,7 @@ class Reducer(ABC):
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
-    ):
+    ) -> ak.contents.NumpyArray:
         raise NotImplementedError
 
 
@@ -130,9 +126,6 @@ class ArgMin(Reducer):
     def return_dtype(cls, given_dtype):
         return np.int64
 
-    def identity_for(self, dtype: np.dtype | None):
-        return np.int64(-1)
-
     def apply(
         self,
         array: ak.contents.NumpyArray,
@@ -140,7 +133,7 @@ class ArgMin(Reducer):
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
-    ):
+    ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
         dtype = self.maybe_other_type(array.dtype)
         result = array.backend.nplike.empty(outlength, dtype=np.int64)
@@ -190,9 +183,6 @@ class ArgMax(Reducer):
     def return_dtype(cls, given_dtype):
         return np.int64
 
-    def identity_for(self, dtype: np.dtype | None):
-        return np.int64(-1)
-
     def apply(
         self,
         array: ak.contents.NumpyArray,
@@ -200,7 +190,7 @@ class ArgMax(Reducer):
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
-    ):
+    ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
         dtype = self.maybe_other_type(array.dtype)
         result = array.backend.nplike.empty(outlength, dtype=np.int64)
@@ -257,7 +247,7 @@ class Count(Reducer):
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
-    ):
+    ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
         result = array.backend.nplike.empty(outlength, dtype=np.int64)
         assert parents.nplike is array.backend.index_nplike
@@ -272,9 +262,6 @@ class Count(Reducer):
             )
         )
         return ak.contents.NumpyArray(result)
-
-    def identity_for(self, dtype: np.dtype | None):
-        return np.int64(0)
 
 
 class CountNonzero(Reducer):
@@ -293,7 +280,7 @@ class CountNonzero(Reducer):
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
-    ):
+    ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
         dtype = np.dtype(np.int64) if array.dtype.kind.upper() == "M" else array.dtype
         result = array.backend.nplike.empty(outlength, dtype=np.int64)
@@ -331,9 +318,6 @@ class CountNonzero(Reducer):
             )
         return ak.contents.NumpyArray(result)
 
-    def identity_for(self, dtype: np.dtype | None):
-        return np.int64(0)
-
 
 class Sum(Reducer):
     name: Final = "sum"
@@ -347,7 +331,7 @@ class Sum(Reducer):
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
-    ):
+    ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
         if array.dtype.kind == "M":
             raise ValueError(f"cannot compute the sum (ak.sum) of {array.dtype!r}")
@@ -435,15 +419,6 @@ class Sum(Reducer):
         else:
             return ak.contents.NumpyArray(result)
 
-    def identity_for(self, dtype: np.dtype | None):
-        if dtype is None:
-            dtype = self.preferred_dtype
-
-        if dtype in {np.timedelta64, np.datetime64}:
-            return np.timedelta64(0)
-        else:
-            return numpy.asarray(0, dtype=dtype)[()]
-
 
 class Prod(Reducer):
     name: Final = "prod"
@@ -457,7 +432,7 @@ class Prod(Reducer):
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
-    ):
+    ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
         if array.dtype.kind.upper() == "M":
             raise ValueError(f"cannot compute the product (ak.prod) of {array.dtype!r}")
@@ -529,15 +504,6 @@ class Prod(Reducer):
         else:
             return ak.contents.NumpyArray(result)
 
-    def identity_for(self, dtype: np.dtype | None):
-        if dtype is None:
-            dtype = self.preferred_dtype
-
-        if dtype in {np.timedelta64, np.datetime64}:
-            return np.timedelta64(0)
-        else:
-            return numpy.asarray(1, dtype=dtype)[()]
-
 
 class Any(Reducer):
     name: Final = "any"
@@ -555,7 +521,7 @@ class Any(Reducer):
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
-    ):
+    ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
         dtype = self.maybe_other_type(array.dtype)
         result = array.backend.nplike.empty(outlength, dtype=np.bool_)
@@ -593,9 +559,6 @@ class Any(Reducer):
             )
         return ak.contents.NumpyArray(result)
 
-    def identity_for(self, dtype: DTypeLike | None) -> float:
-        return False
-
 
 class All(Reducer):
     name: Final = "all"
@@ -613,7 +576,7 @@ class All(Reducer):
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
-    ):
+    ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
         dtype = self.maybe_other_type(array.dtype)
         result = array.backend.nplike.empty(outlength, dtype=np.bool_)
@@ -651,9 +614,6 @@ class All(Reducer):
             )
         return ak.contents.NumpyArray(result)
 
-    def identity_for(self, dtype: DTypeLike | None) -> float:
-        return True
-
 
 class Min(Reducer):
     name: Final = "min"
@@ -667,7 +627,7 @@ class Min(Reducer):
     def initial(self) -> float | None:
         return self._initial
 
-    def identity_for(self, dtype: DTypeLike | None) -> float:
+    def _identity_for(self, dtype: DTypeLike | None) -> float:
         dtype = np.dtype(dtype)
 
         assert (
@@ -697,7 +657,7 @@ class Min(Reducer):
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
-    ):
+    ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
         dtype = self.maybe_other_type(array.dtype)
         result = array.backend.nplike.empty(
@@ -733,7 +693,7 @@ class Min(Reducer):
                     parents.data,
                     parents.length,
                     outlength,
-                    self.identity_for(dtype),
+                    self._identity_for(dtype),
                 )
             )
         else:
@@ -750,7 +710,7 @@ class Min(Reducer):
                     parents.data,
                     parents.length,
                     outlength,
-                    self.identity_for(dtype),
+                    self._identity_for(dtype),
                 )
             )
         if array.dtype.type in (np.complex128, np.complex64):
@@ -777,7 +737,7 @@ class Max(Reducer):
     def initial(self):
         return self._initial
 
-    def identity_for(self, dtype: DTypeLike | None):
+    def _identity_for(self, dtype: DTypeLike | None):
         dtype = np.dtype(dtype)
 
         assert (
@@ -807,7 +767,7 @@ class Max(Reducer):
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
-    ):
+    ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
         dtype = self.maybe_other_type(array.dtype)
         result = array.backend.nplike.empty(
@@ -843,7 +803,7 @@ class Max(Reducer):
                     parents.data,
                     parents.length,
                     outlength,
-                    self.identity_for(dtype),
+                    self._identity_for(dtype),
                 )
             )
         else:
@@ -860,7 +820,7 @@ class Max(Reducer):
                     parents.data,
                     parents.length,
                     outlength,
-                    self.identity_for(dtype),
+                    self._identity_for(dtype),
                 )
             )
         if array.dtype.type in (np.complex128, np.complex64):
