@@ -1,5 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+import operator
 from collections.abc import Iterable
+from functools import reduce
 
 import awkward as ak
 from awkward._nplikes.numpylike import NumpyMetadata
@@ -209,8 +211,5 @@ class NumpyForm(Form):
         return (ak.types.numpytype.primitive_to_dtype(self._primitive),)
 
     def _smallest_zero_buffer_lengths(self) -> Iterator[ShapeItem]:
-        if len(self.inner_shape) > 0:
-            raise NotImplementedError
-
         dtype = ak.types.numpytype.primitive_to_dtype(self._primitive)
-        yield dtype.itemsize
+        yield dtype.itemsize * reduce(operator.mul, self.inner_shape, 1)
