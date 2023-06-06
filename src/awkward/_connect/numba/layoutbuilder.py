@@ -121,7 +121,7 @@ def typeof_LayoutBuilder(val, c):
         )
 
     elif isinstance(val, Unmasked):
-        return UnmaskedType(val._content)
+        return UnmaskedType(val._content, val._parameters)
 
     elif isinstance(val, Record):
         return RecordType(val._contents, val._fields)
@@ -2337,10 +2337,13 @@ class Unmasked(LayoutBuilder):
         return f"<Unmasked of {self._content!r}>"
 
     def type(self):
-        return f"ak.numba.lb.Unmasked({self._content.type()})"
+        return f"ak.numba.lb.Unmasked({self._content.type()}, parameters={self._parameters})"
 
     def numbatype(self):
-        return UnmaskedType(self.content.numbatype())
+        return UnmaskedType(
+            self.content,
+            numba.types.StringLiteral(self._parameters),
+        )
 
     @property
     def content(self):
@@ -2354,6 +2357,7 @@ class Unmasked(LayoutBuilder):
     def extend(self, data):
         return self._content.extend(data)
 
+    @property
     def parameters(self):
         return self._parameters
 
@@ -2383,17 +2387,19 @@ class Unmasked(LayoutBuilder):
 
 
 class UnmaskedType(numba.types.Type):
-    def __init__(self, content):
-        super().__init__(name=f"ak.numba.lb.Unmasked({content.type()})")
+    def __init__(self, content, parameters):
+        super().__init__(
+            name=f"ak.numba.lb.Unmasked({content.type()}, parameters={parameters.literal_value if isinstance(parameters, numba.types.Literal) else None})"
+        )
         self._content = content
 
     @classmethod
     def type(cls):
-        return UnmaskedType(cls.content)
+        return UnmaskedType(cls.content, cls.parameters)
 
     @property
     def parameters(self):
-        return numba.types.StringLiteral
+        return numba.types.StringLiteral(self._parameters)
 
     @property
     def content(self):

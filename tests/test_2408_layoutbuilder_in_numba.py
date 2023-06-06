@@ -411,6 +411,17 @@ def test_Unmasked():
     array = builder.snapshot()
     assert ak.to_list(array) == [11, 22, 33, 44, 55]
 
+    assert (
+        builder.type()
+        == "ak.numba.lb.Unmasked(ak.numba.lb.Numpy(int64, parameters=None), parameters=None)"
+    )
+    assert (
+        str(builder.numbatype())
+        == "ak.numba.lb.Unmasked(ak.numba.lb.Numpy(int64, parameters=None), parameters=None)"
+    )
+    builder.clear()
+    assert len(builder) == 0
+
 
 def test_ByteMasked():
     builder = lb.ByteMasked(lb.Numpy(np.float64), valid_when=True)
