@@ -296,39 +296,54 @@ def test_IndexedOption():
     assert len(builder) == 0
 
 
-#
-# def test_Record():
-#     builder = lb.Record(
-#         [
-#             lb.Numpy(np.float64),
-#             lb.Numpy(np.int64),
-#             lb.Numpy(np.uint8),
-#         ],
-#         ["one", "two", "three"],
-#     )
-#     assert len(builder) == 0
-#
-#     one = builder.content("one")
-#     two = builder.content("two")
-#     three = builder.content("three")
-#
-#     three.append(0x61)  #'a')
-#
-#     one.append(1.1)
-#     one.append(3.3)
-#
-#     two.append(2)
-#     two.append(4)
-#
-#     three.append(0x62)  #'b')
-#
-#     array = builder.snapshot()
-#     assert ak.to_list(array) == [
-#         {"one": 1.1, "two": 2, "three": 97},  # FIXME: 'a'},
-#         {"one": 3.3, "two": 4, "three": 98},  # FIXME: 'b'},
-#     ]
-#
-#
+def test_Record():
+    builder = lb.Record(
+        [
+            lb.Numpy(np.float64),
+            lb.Numpy(np.int64),
+            lb.Numpy(np.uint8, parameters={"__array__": "char"}),
+        ],
+        ["one", "two", "three"],
+    )
+    assert len(builder) == 0
+
+    one = builder.content("one")
+    two = builder.content("two")
+    three = builder.content("three")
+
+    three.append(0x61)  #'a')
+
+    one.append(1.1)
+    one.append(3.3)
+
+    two.append(2)
+    two.append(4)
+
+    three.append(0x62)  #'b')
+
+    array = builder.snapshot()
+    assert ak.to_list(array) == [
+        {"one": 1.1, "two": 2, "three": "a"},
+        {"one": 3.3, "two": 4, "three": "b"},
+    ]
+
+    assert len(builder) == 2
+
+    error = ""
+    assert builder.is_valid(error), error
+
+    assert (
+        builder.type()
+        == "ak.numba.lb.Record([ak.numba.lb.Numpy(float64, parameters=None), ak.numba.lb.Numpy(int64, parameters=None), ak.numba.lb.Numpy(uint8, parameters={'__array__': 'char'})], ['one', 'two', 'three'], parameters=None)"
+    )
+    assert (
+        str(builder.numbatype())
+        == "ak.numba.lb.Record([ak.numba.lb.Numpy(float64, parameters=None), ak.numba.lb.Numpy(int64, parameters=None), ak.numba.lb.Numpy(uint8, parameters={'__array__': 'char'})], ['one', 'two', 'three'], parameters=None)"
+    )
+    builder.clear()
+    assert len(builder) == 0
+
+
 # def test_IndexedOption_Record():
 #     builder = lb.IndexedOption(
 #         np.int64, lb.Record([lb.Numpy(np.float64), lb.Numpy(np.int64)], ["x", "y"])

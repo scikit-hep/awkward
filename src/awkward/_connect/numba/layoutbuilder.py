@@ -186,7 +186,7 @@ class Numpy(LayoutBuilder):
         return out
 
     def __repr__(self):
-        return f"<Numpy of {self._data.dtype!r} with {self._length} items>"
+        return f"ak.numba.lb.Numpy({self._data.dtype}, parameters={self._parameters})"
 
     def type(self):
         return f"ak.numba.lb.Numpy({self._data.dtype}, parameters={self._parameters})"
@@ -422,7 +422,7 @@ class Empty(LayoutBuilder):
         self._parameters = parameters
 
     def __repr__(self):
-        return f"<Empty with {self._length} items>"
+        return f"ak.numba.lb.Empty(parameters={self.parameters})"
 
     def type(self):
         return f"ak.numba.lb.Empty(parameters={self.parameters})"
@@ -534,10 +534,10 @@ class ListOffset(LayoutBuilder):
         self._parameters = parameters
 
     def __repr__(self):
-        return f"<ListOffset of {self._content!r} with {self._length} items>"
+        return f"ak.numba.lb.ListOffset({self._offsets.dtype}, {self._content}, parameters={self._parameters})"
 
     def type(self):
-        return f"ak.numba.lb.ListOffset({self._offsets.dtype}, {self._content.type()}, parameters={self._parameters})"
+        return f"ak.numba.lb.ListOffset({self._offsets.dtype}, {self._content}, parameters={self._parameters})"
 
     def numbatype(self):
         return ListOffsetType(
@@ -740,10 +740,10 @@ class List(LayoutBuilder):
         self._parameters = parameters
 
     def __repr__(self):
-        return f"<List of {self.content!r} with {self._length} items>"
+        return f"ak.numba.lb.List({self.starts.dtype}, {self._content}, parameters={self._parameters})"
 
     def type(self):
-        return f"ak.numba.lb.List({self.starts.dtype}, {self._content.type()}, parameters={self._parameters})"
+        return f"ak.numba.lb.List({self.starts.dtype}, {self._content}, parameters={self._parameters})"
 
     def numbatype(self):
         return ListType(
@@ -982,10 +982,10 @@ class Regular(LayoutBuilder):
             raise ValueError("unsupported feature: size must be at least 1")
 
     def __repr__(self):
-        return f"<Regular of {self._content!r} with {self._length if self._size > 0 else '0'} items>"
+        return f"ak.numba.lb.Regular({self._content}, {self._size}, parameters={self._parameters})"
 
     def type(self):
-        return f"ak.numba.lb.Regular({self._content.type()}, {self._size}, parameters={self._parameters})"
+        return f"ak.numba.lb.Regular({self._content}, {self._size}, parameters={self._parameters})"
 
     def numbatype(self):
         return RegularType(
@@ -1190,10 +1190,10 @@ class Indexed(LayoutBuilder):
         self._parameters = parameters
 
     def __repr__(self):
-        return f"<Indexed of {self._content!r} with {self._index._length} items>"
+        return f"ak.numba.lb.Indexed({self._index.dtype}, {self._content}, parameters={self._parameters})"
 
     def type(self):
-        return f"ak.numba.lb.Indexed({self._index.dtype}, {self._content.type()}, parameters={self._parameters})"
+        return f"ak.numba.lb.Indexed({self._index.dtype}, {self._content}, parameters={self._parameters})"
 
     def numbatype(self):
         return IndexedType(
@@ -1414,10 +1414,10 @@ class IndexedOption(LayoutBuilder):
         self._parameters = parameters
 
     def __repr__(self):
-        return f"<IndexedOption of {self._content!r} with {self._index._length} items>"
+        return f"ak.numba.lb.IndexedOption({self._index.dtype}, {self._content}, parameters={self._parameters})"
 
     def type(self):
-        return f"ak.numba.lb.IndexedOption({self._index.dtype}, {self._content.type()}, parameters={self._parameters})"
+        return f"ak.numba.lb.IndexedOption({self._index.dtype}, {self._content}, parameters={self._parameters})"
 
     def numbatype(self):
         return IndexedOptionType(
@@ -1671,10 +1671,10 @@ class ByteMasked(LayoutBuilder):
         self._parameters = parameters
 
     def __repr__(self):
-        return f"<ByteMasked of {self._content!r} with {self._mask._length} items>"
+        return f"ak.numba.lb.ByteMasked({self._mask.dtype}, {self._content}, valid_when={self._valid_when}, parameters={self._parameters})"
 
     def type(self):
-        return f"ak.numba.lb.ByteMasked({self._mask.dtype}, {self._content.type()}, valid_when={self._valid_when}, parameters={self._parameters})"
+        return f"ak.numba.lb.ByteMasked({self._mask.dtype}, {self._content}, valid_when={self._valid_when}, parameters={self._parameters})"
 
     def numbatype(self):
         return ByteMaskedType(
@@ -1950,10 +1950,10 @@ class BitMasked(LayoutBuilder):
         self._parameters = parameters
 
     def __repr__(self):  # as constructor
-        return f"<BitMasked of {self._content!r} with {self._length} items>"
+        return f"ak.numba.lb.BitMasked({self._mask.dtype}, {self._content}, {self._valid_when}, {self._lsb_order}, parameters={self._parameters})"
 
     def type(self):
-        return f"ak.numba.lb.BitMasked({self._mask.dtype}, {self._content.type()}, {self._valid_when}, {self._lsb_order}, parameters={self._parameters})"
+        return f"ak.numba.lb.BitMasked({self._mask.dtype}, {self._content}, {self._valid_when}, {self._lsb_order}, parameters={self._parameters})"
 
     def numbatype(self):
         return BitMaskedType(
@@ -2345,10 +2345,10 @@ class Unmasked(LayoutBuilder):
         self._parameters = parameters
 
     def __repr__(self):
-        return f"<Unmasked of {self._content!r}>"
+        return f"ak.numba.lb.Unmasked({self._content}, parameters={self._parameters})"
 
     def type(self):
-        return f"ak.numba.lb.Unmasked({self._content.type()}, parameters={self._parameters})"
+        return f"ak.numba.lb.Unmasked({self._content}, parameters={self._parameters})"
 
     def numbatype(self):
         return UnmaskedType(
@@ -2515,23 +2515,38 @@ class Record(LayoutBuilder):
         self._parameters = parameters
 
     def __repr__(self):
-        return f"<Record of {self._contents!r} with {self._fields}>"
+        return f"ak.numba.lb.Record({self.contents}, {self._fields}, parameters={self._parameters})"
 
     def type(self):
-        return f"ak.numba.lb.Record({self._contents})"
+        return f"ak.numba.lb.Record({self.contents}, {self._fields}, parameters={self._parameters})"
 
     def numbatype(self):
-        return RecordType(self.content.numbatype())
+        return RecordType(
+            [content.numbatype() for content in self.contents],
+            self.fields,
+            numba.types.StringLiteral(self._parameters),
+        )
+
+    @property
+    def contents(self):
+        return self._contents
+
+    @property
+    def fields(self):
+        return self._fields
+
+    def content(self, name):
+        return self._contents[self._fields.index(name)]
 
     def field(self, name):
-        return self._contents[self._fields.index(name)]
+        return self.content(name)
 
     def parameters(self):
         return self._parameters
 
     def clear(self):
-        for pair in self._field_pairs.values():
-            pair.content.clear()
+        for content in self._contents:
+            content.clear()
 
     def length(self):
         return len(self._first_content)
@@ -2541,12 +2556,11 @@ class Record(LayoutBuilder):
 
     def is_valid(self, error: str):
         length = -1
-        # for pair in self._field_pairs.values():
-        for i in enumerate(self._contents):
+        for i, content in enumerate(self._contents):
             if length == -1:
-                length = len(self._contents[i])
-            elif length != len(self._contents[i]):
-                error = f"Record node{self._id} has field {self._fields[i]} length {len(self._contents[i])} that differs from the first length {length}"
+                length = len(content)
+            elif length != len(content):
+                error = f"Record has field {self._fields[i]} length {len(content)} that differs from the first length {length}"
                 return False
         for content in self._contents:
             if not content.is_valid(error):
@@ -2571,18 +2585,29 @@ class Record(LayoutBuilder):
 
 
 class RecordType(numba.types.Type):
-    def __init__(self, contents, fields):
-        super().__init__(name=f"ak.numba.lb.Record({contents}, {fields})")
+    def __init__(self, contents, fields, parameters):
+        super().__init__(
+            name=f"ak.numba.lb.Record({contents}, {fields}, parameters={parameters.literal_value if isinstance(parameters, numba.types.Literal) else None})"
+        )
         self._contents = contents
         self._fields = fields
+        self._parameters = parameters
 
     @classmethod
     def type(cls):
-        return RecordType(cls.contents, cls.fields)
+        return RecordType(cls.contents, cls.fields, cls.parameters)
 
     @property
     def parameters(self):
-        return numba.types.StringLiteral
+        return numba.types.StringLiteral(self._parameters)
+
+    @property
+    def contents(self):
+        return to_numbatype(self._contents)
+
+    @property
+    def fields(self):
+        return numba.types.StringLiteral()
 
     def content(self, name):  # Literal string or Literal int
         return to_numbatype(self._contents[self._fields.index(name)])
