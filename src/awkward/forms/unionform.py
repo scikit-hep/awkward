@@ -3,11 +3,10 @@ from collections import Counter
 from collections.abc import Iterable
 
 import awkward as ak
-from awkward._nplikes.shape import ShapeItem
 from awkward._parameters import type_parameters_equal
-from awkward._typing import Iterator, final
+from awkward._typing import final
 from awkward._util import UNSET
-from awkward.forms.form import Form, index_size_bytes
+from awkward.forms.form import Form
 
 
 @final
@@ -255,8 +254,3 @@ class UnionForm(Form):
 
     def _column_types(self):
         return sum((x._column_types() for x in self._contents), ())
-
-    def _smallest_zero_buffer_lengths(self) -> Iterator[ShapeItem]:
-        yield index_size_bytes[self._index]
-        yield index_size_bytes[self._tags]
-        yield from self._contents[0]._smallest_zero_buffer_lengths()

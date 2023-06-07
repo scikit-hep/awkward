@@ -1,13 +1,10 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-import operator
 from collections.abc import Iterable
-from functools import reduce
 
 import awkward as ak
 from awkward._nplikes.numpylike import NumpyMetadata
-from awkward._nplikes.shape import ShapeItem
 from awkward._parameters import type_parameters_equal
-from awkward._typing import Iterator, final
+from awkward._typing import final
 from awkward._util import UNSET
 from awkward.forms.form import Form
 
@@ -209,7 +206,3 @@ class NumpyForm(Form):
 
     def _column_types(self):
         return (ak.types.numpytype.primitive_to_dtype(self._primitive),)
-
-    def _smallest_zero_buffer_lengths(self) -> Iterator[ShapeItem]:
-        dtype = ak.types.numpytype.primitive_to_dtype(self._primitive)
-        yield dtype.itemsize * reduce(operator.mul, self.inner_shape, 1)

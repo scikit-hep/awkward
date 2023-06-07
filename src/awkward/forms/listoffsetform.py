@@ -2,11 +2,10 @@
 from __future__ import annotations
 
 import awkward as ak
-from awkward._nplikes.shape import ShapeItem
 from awkward._parameters import type_parameters_equal
-from awkward._typing import Iterator, JSONMapping, final
+from awkward._typing import JSONMapping, final
 from awkward._util import UNSET
-from awkward.forms.form import Form, index_size_bytes
+from awkward.forms.form import Form
 
 
 @final
@@ -161,7 +160,3 @@ class ListOffsetForm(Form):
             return ("string",)
         else:
             return self._content._column_types()
-
-    def _smallest_zero_buffer_lengths(self) -> Iterator[ShapeItem]:
-        yield index_size_bytes[self._offsets] * 2
-        yield from self._content._smallest_zero_buffer_lengths()

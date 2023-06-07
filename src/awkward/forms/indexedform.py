@@ -1,11 +1,10 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
-from awkward._nplikes.shape import ShapeItem
 from awkward._parameters import parameters_union, type_parameters_equal
-from awkward._typing import Iterator, final
+from awkward._typing import final
 from awkward._util import UNSET
-from awkward.forms.form import Form, index_size_bytes
+from awkward.forms.form import Form
 
 
 @final
@@ -193,7 +192,3 @@ class IndexedForm(Form):
 
     def _column_types(self):
         return self._content._column_types()
-
-    def _smallest_zero_buffer_lengths(self) -> Iterator[ShapeItem]:
-        yield index_size_bytes[self._index]
-        yield from self._content._smallest_zero_buffer_lengths()

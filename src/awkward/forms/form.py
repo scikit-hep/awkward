@@ -5,7 +5,6 @@ import itertools
 import json
 import re
 from collections.abc import Mapping
-from functools import reduce
 
 import awkward as ak
 from awkward._backends.numpy import NumpyBackend
@@ -13,7 +12,7 @@ from awkward._errors import deprecate
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._parameters import parameters_union
-from awkward._typing import Final, Iterator, JSONMapping, JSONSerializable
+from awkward._typing import Final, JSONMapping, JSONSerializable
 
 np = NumpyMetadata.instance()
 numpy_backend = NumpyBackend.instance()
@@ -462,9 +461,6 @@ class Form:
             simplify=False,
         )
 
-    def _smallest_zero_buffer_lengths(self) -> Iterator[ShapeItem]:
-        raise NotImplementedError
-
     def length_one_array(self, *, backend=numpy_backend, highlevel=True, behavior=None):
         # The naive implementation of a length-1 array requires that we have a sufficiently
         # large buffer to be able to build _any_ subtree.
@@ -475,16 +471,12 @@ class Form:
                 return that
             return max(this, that)
 
-        buffer_length = reduce(max_prefer_unknown, self._smallest_zero_buffer_lengths())
-        if buffer_length is unknown_length:
-            raise NotImplementedError(
-                "cannot create length_zero_array from a form containing unknown shape items"
-            )
-
         return ak.operations.ak_from_buffers._impl(
             form=self,
             length=1,
-            container={"": b"\x00" * buffer_length},
+            container={
+                "": b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+            },
             buffer_key="",
             backend=backend,
             byteorder=ak._util.native_byteorder,
