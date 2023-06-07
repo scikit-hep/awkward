@@ -264,7 +264,6 @@ def test_Indexed_Record():
     ]
 
 
-
 def test_IndexedOption():
     builder = lb.IndexedOption(np.int64, lb.Numpy(np.float64))
     assert len(builder) == 0
@@ -334,11 +333,11 @@ def test_Record():
 
     assert (
         builder.type()
-        == "ak.numba.lb.Record([ak.numba.lb.Numpy(float64, parameters=None), ak.numba.lb.Numpy(int64, parameters=None), ak.numba.lb.Numpy(uint8, parameters={'__array__': 'char'})], ['one', 'two', 'three'], parameters=None)"
+        == "ak.numba.lb.Record((ak.numba.lb.Numpy(float64, parameters=None), ak.numba.lb.Numpy(int64, parameters=None), ak.numba.lb.Numpy(uint8, parameters={'__array__': 'char'})), [one, two, three], parameters=None)"
     )
     assert (
         str(builder.numbatype())
-        == "ak.numba.lb.Record([ak.numba.lb.Numpy(float64, parameters=None), ak.numba.lb.Numpy(int64, parameters=None), ak.numba.lb.Numpy(uint8, parameters={'__array__': 'char'})], ['one', 'two', 'three'], parameters=None)"
+        == "ak.numba.lb.Record((ak.numba.lb.Numpy(float64, parameters=None), ak.numba.lb.Numpy(int64, parameters=None), ak.numba.lb.Numpy(uint8, parameters={'__array__': 'char'})), [one, two, three], parameters=None)"
     )
     builder.clear()
     assert len(builder) == 0
@@ -635,7 +634,6 @@ def test_unbox():
     builder = lb.Numpy(np.int32)
     f1(builder)
 
-
     builder = lb.Record(
         [
             lb.Numpy(np.float64),
@@ -757,6 +755,7 @@ def test_box():
     )
     out14 = f3(builder)
     assert ak.to_list(out14.snapshot()) == []
+
 
 def test_len():
     @numba.njit

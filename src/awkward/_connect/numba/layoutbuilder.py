@@ -59,7 +59,8 @@ def to_numbatype(content):
         return Tuple.numbatype(content)
     elif isinstance(content, Union):
         return Union.numbatype(content)
-
+    elif isinstance(content, tuple):
+        return numba.types.Tuple([to_numbatype(it) for it in content])
     else:
         return content
 
@@ -2509,8 +2510,8 @@ def Unmasked_extend(builder, data):
 class Record(LayoutBuilder):
     def __init__(self, contents, fields, *, parameters=None):
         assert len(fields) != 0
-        self._contents = contents
-        self._fields = fields
+        self._contents = tuple(contents)
+        self._fields = tuple(fields)
         self._first_content = self._contents[0]
         self._parameters = parameters
 
@@ -2518,11 +2519,15 @@ class Record(LayoutBuilder):
     def contents(self):
         return self._contents
 
+    @property
+    def fields(self):
+        return self._fields
+
     def __repr__(self):
-        return f"ak.numba.lb.Record({self.contents}, {self._fields}, parameters={self._parameters})"
+        return f"Record({self.contents}, {self.fields}, parameters={self._parameters})"
 
     def type(self):
-        return f"ak.numba.lb.Record({self.contents}, {self._fields}, parameters={self._parameters})"
+        return f"ak.numba.lb.Record({self.contents}, {self.fields}, parameters={self._parameters})"
 
     def numbatype(self):
         return RecordType(
@@ -2530,11 +2535,6 @@ class Record(LayoutBuilder):
             self.fields,
             numba.types.StringLiteral(self._parameters),
         )
-
-
-    @property
-    def fields(self):
-        return self._fields
 
     def content(self, name):
         return self._contents[self._fields.index(name)]
@@ -2608,13 +2608,13 @@ class RecordType(numba.types.Type):
         # FIXME:
         # Lists must be strictly homogeneous: Numba will reject any list
         # containing objects of different types, even if the types are compatible
-        d = {}
-        cs = [to_numbatype(it) for it in self._contents]
-        return cs
+        return numba.types.Tuple(to_numbatype(self._contents))
 
     @property
     def fields(self):
-        return numba.types.StringLiteral(self._fields)
+        return numba.types.Tuple(
+            to_numbatype([numba.types.StringLiteral(it) for it in self._fields])
+        )
 
     def content(self, name):  # Literal string or Literal int
         return to_numbatype(self._contents[self._fields.index(name)])
@@ -2634,7 +2634,10 @@ class RecordModel(numba.extending.models.StructModel):
         super().__init__(dmm, fe_type, members)
 
 
-for member in ("contents", "fields",):
+for member in (
+    "contents",
+    "fields",
+):
     numba.extending.make_attribute_wrapper(RecordType, member, "_" + member)
 
 
@@ -2657,6 +2660,7 @@ def RecordType_unbox(typ, obj, c):
     is_error = numba.core.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
     return numba.extending.NativeValue(out._getvalue(), is_error=is_error)
 
+
 @numba.extending.box(RecordType)
 def RecordType_box(typ, val, c):
     # get PyObject of the Record class
@@ -2665,7 +2669,9 @@ def RecordType_box(typ, val, c):
     builder = numba.core.cgutils.create_struct_proxy(typ)(
         c.context, c.builder, value=val
     )
-    contents_obj = c.pyapi.from_native_value(typ.contents, builder.contents, c.env_manager)
+    contents_obj = c.pyapi.from_native_value(
+        typ.contents, builder.contents, c.env_manager
+    )
     fields_obj = c.pyapi.from_native_value(typ.fields, builder.fields, c.env_manager)
 
     out = c.pyapi.call_function_objargs(
@@ -2684,12 +2690,14 @@ def RecordType_box(typ, val, c):
 
     return out
 
+
 @numba.extending.overload_method(RecordType, "_length_get", inline="always")
 def Record_length(builder):
     def getter(builder):
         return len(builder._contents[0])
 
     return getter
+
 
 ########## Tuple #######################################################
 
