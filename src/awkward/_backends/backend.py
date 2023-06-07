@@ -18,7 +18,6 @@ T = TypeVar("T", covariant=True)
 KernelKeyType: TypeAlias = Tuple[str, Unpack[Tuple[np.dtype, ...]]]
 KernelType: TypeAlias = "Callable[..., KernelError | None]"
 
-
 class UfuncLike(Protocol):
     def __call__(self, *args: ArrayLike, **kwargs) -> ArrayLike:
         ...

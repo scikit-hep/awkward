@@ -67,6 +67,14 @@ class Reducer(ABC):
             type = np.float32
         return type
 
+    @abstractmethod
+    def apply(
+        self,
+        array: ak.contents.NumpyArray,
+        parents: ak.index.Index,
+        outlength: ShapeItem,
+    ) -> ak.contents.NumpyArray:
+        raise NotImplementedError
 
 class ArgMin(Reducer):
     name: Final = "argmin"
