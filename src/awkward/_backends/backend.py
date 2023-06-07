@@ -35,8 +35,14 @@ class Backend(Singleton, ABC):
     def __getitem__(self, key: KernelKeyType) -> KernelType:
         raise NotImplementedError
 
-    def prepare_reducer(self, reducer: ak._reducers.Reducer) -> ak._reducers.Reducer:
-        return reducer
+    def apply_reducer(
+        self,
+        reducer: ak._reducers.Reducer,
+        layout: ak.contents.NumpyArray,
+        parents: ak.index.Index,
+        outlength: int,
+    ) -> ak.contents.NumpyArray:
+        return reducer.apply(layout, parents, outlength)
 
     def apply_ufunc(self, ufunc, method, args, kwargs):
         return getattr(ufunc, method)(*args, **kwargs)

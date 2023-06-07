@@ -267,9 +267,6 @@ def reduce(
     keepdims: bool = False,
     behavior: dict | None = None,
 ):
-    # Allow backend to modify reducer
-    reducer = layout.backend.prepare_reducer(reducer)
-
     if axis is None:
         parts = remove_structure(
             layout,

@@ -39,10 +39,17 @@ class JaxBackend(Backend):
         # JAX uses Awkward's C++ kernels for index-only operations
         return JaxKernel(awkward_cpp.cpu_kernels.kernel[index], index)
 
-    def prepare_reducer(self, reducer: ak._reducers.Reducer) -> ak._reducers.Reducer:
+    def apply_reducer(
+        self,
+        reducer: ak._reducers.Reducer,
+        layout: ak.contents.NumpyArray,
+        parents: ak.index.Index,
+        outlength: int,
+    ) -> ak.contents.NumpyArray:
         from awkward._connect.jax import get_jax_reducer
 
-        return get_jax_reducer(reducer)
+        jax_reducer = get_jax_reducer(reducer)
+        return jax_reducer.apply(layout, parents, outlength)
 
     def apply_ufunc(self, ufunc, method, args, kwargs):
         from awkward._connect.jax import get_jax_ufunc

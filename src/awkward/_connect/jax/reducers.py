@@ -1,163 +1,74 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-from __future__ import annotations
-
-from abc import abstractmethod
 
 import jax
 
 import awkward as ak
-from awkward import _reducers
 from awkward._nplikes.numpylike import NumpyMetadata
-from awkward._nplikes.shape import ShapeItem
 from awkward._reducers import Reducer
-from awkward._typing import Final, Self, TypeVar
 
 np = NumpyMetadata.instance()
 
 
-_overloads: dict[type[Reducer], type[JAXReducer]] = {}
-
-
-R = TypeVar("R", bound=Reducer)
-
-
-def overloads(cls: type[Reducer]):
-    def registrar(new_cls: type[R]) -> type[R]:
-        _overloads[cls] = new_cls
-        return new_cls
-
-    return registrar
-
-
-class JAXReducer(Reducer):
-    @classmethod
-    @abstractmethod
-    def from_kernel_reducer(cls, reducer: Reducer) -> Self:
-        raise NotImplementedError
-
-
-@overloads(_reducers.ArgMin)
-class ArgMin(JAXReducer):
-    name: Final = "argmin"
-    needs_position: Final = True
-    preferred_dtype: Final = np.int64
-
-    @classmethod
-    def from_kernel_reducer(cls, reducer: Reducer) -> Self:
-        raise NotImplementedError
+class ArgMin(Reducer):
+    name = "argmin"
+    needs_position = True
+    preferred_dtype = np.int64
 
     @classmethod
     def return_dtype(cls, given_dtype):
         return np.int64
 
-    def apply(
-        self,
-        array: ak.contents.NumpyArray,
-        parents: ak.index.Index,
-        starts: ak.index.Index,
-        shifts: ak.index.Index | None,
-        outlength: ShapeItem,
-    ) -> ak.contents.NumpyArray:
+    @classmethod
+    def apply(cls, array, parents, outlength):
         raise RuntimeError("Cannot differentiate through argmin")
 
 
-@overloads(_reducers.ArgMax)
-class ArgMax(JAXReducer):
-    name: Final = "argmax"
-    needs_position: Final = True
-    preferred_dtype: Final = np.int64
-
-    @classmethod
-    def from_kernel_reducer(cls, reducer: Reducer) -> Self:
-        assert isinstance(reducer, _reducers.ArgMax)
-        return cls()
+class ArgMax(Reducer):
+    name = "argmax"
+    needs_position = True
+    preferred_dtype = np.int64
 
     @classmethod
     def return_dtype(cls, given_dtype):
         return np.int64
 
-    def apply(
-        self,
-        array: ak.contents.NumpyArray,
-        parents: ak.index.Index,
-        starts: ak.index.Index,
-        shifts: ak.index.Index | None,
-        outlength: ShapeItem,
-    ) -> ak.contents.NumpyArray:
+    @classmethod
+    def apply(cls, array, parents, outlength):
         raise RuntimeError("Cannot differentiate through argmax")
 
 
-@overloads(_reducers.Count)
-class Count(JAXReducer):
-    name: Final = "count"
-    preferred_dtype: Final = np.float64
-    needs_position: Final = False
-
-    @classmethod
-    def from_kernel_reducer(cls, reducer: Reducer) -> Self:
-        assert isinstance(reducer, _reducers.Count)
-        return cls()
+class Count(Reducer):
+    name = "count"
+    preferred_dtype = np.float64
 
     @classmethod
     def return_dtype(cls, given_dtype):
         return np.int64
 
-    def apply(
-        self,
-        array: ak.contents.NumpyArray,
-        parents: ak.index.Index,
-        starts: ak.index.Index,
-        shifts: ak.index.Index | None,
-        outlength: ShapeItem,
-    ) -> ak.contents.NumpyArray:
+    @classmethod
+    def apply(cls, array, parents, outlength):
         raise RuntimeError("Cannot differentiate through count_zero")
 
 
-@overloads(_reducers.CountNonzero)
-class CountNonzero(JAXReducer):
-    name: Final = "count_nonzero"
-    preferred_dtype: Final = np.float64
-    needs_position: Final = False
-
-    @classmethod
-    def from_kernel_reducer(cls, reducer: Reducer) -> Self:
-        assert isinstance(reducer, _reducers.CountNonzero)
-        return cls()
+class CountNonzero(Reducer):
+    name = "count_nonzero"
+    preferred_dtype = np.float64
 
     @classmethod
     def return_dtype(cls, given_dtype):
         return np.int64
 
-    def apply(
-        self,
-        array: ak.contents.NumpyArray,
-        parents: ak.index.Index,
-        starts: ak.index.Index,
-        shifts: ak.index.Index | None,
-        outlength: ShapeItem,
-    ) -> ak.contents.NumpyArray:
+    @classmethod
+    def apply(cls, array, parents, outlength):
         raise RuntimeError("Cannot differentiate through count_nonzero")
 
 
-@overloads(_reducers.Sum)
-class Sum(JAXReducer):
-    name: Final = "sum"
-    preferred_dtype: Final = np.float64
-    needs_position: Final = False
+class Sum(Reducer):
+    name = "sum"
+    preferred_dtype = np.float64
 
     @classmethod
-    def from_kernel_reducer(cls, reducer: Reducer) -> Self:
-        assert isinstance(reducer, _reducers.Sum)
-        return cls()
-
-    def apply(
-        self,
-        array: ak.contents.NumpyArray,
-        parents: ak.index.Index,
-        starts: ak.index.Index,
-        shifts: ak.index.Index | None,
-        outlength: ShapeItem,
-    ) -> ak.contents.NumpyArray:
+    def apply(cls, array, parents, outlength):
         assert isinstance(array, ak.contents.NumpyArray)
         if array.dtype.kind == "M":
             raise TypeError(f"cannot compute the sum (ak.sum) of {array.dtype!r}")
@@ -174,25 +85,12 @@ class Sum(JAXReducer):
             return ak.contents.NumpyArray(result, backend=array.backend)
 
 
-@overloads(_reducers.Prod)
-class Prod(JAXReducer):
-    name: Final = "prod"
-    preferred_dtype: Final = np.int64
-    needs_position: Final = False
+class Prod(Reducer):
+    name = "prod"
+    preferred_dtype = np.int64
 
     @classmethod
-    def from_kernel_reducer(cls, reducer: Reducer) -> Self:
-        assert isinstance(reducer, _reducers.Prod)
-        return cls()
-
-    def apply(
-        self,
-        array: ak.contents.NumpyArray,
-        parents: ak.index.Index,
-        starts: ak.index.Index,
-        shifts: ak.index.Index | None,
-        outlength: ShapeItem,
-    ) -> ak.contents.NumpyArray:
+    def apply(cls, array, parents, outlength):
         assert isinstance(array, ak.contents.NumpyArray)
         # See issue https://github.com/google/jax/issues/9296
         result = jax.numpy.exp(
@@ -207,29 +105,16 @@ class Prod(JAXReducer):
             return ak.contents.NumpyArray(result, backend=array.backend)
 
 
-@overloads(_reducers.Any)
-class Any(JAXReducer):
-    name: Final = "any"
-    preferred_dtype: Final = np.bool_
-    needs_position: Final = False
-
-    @classmethod
-    def from_kernel_reducer(cls, reducer: Reducer) -> Self:
-        assert isinstance(reducer, _reducers.Any)
-        return cls()
+class Any(Reducer):
+    name = "any"
+    preferred_dtype = np.bool_
 
     @classmethod
     def return_dtype(cls, given_dtype):
         return np.bool_
 
-    def apply(
-        self,
-        array: ak.contents.NumpyArray,
-        parents: ak.index.Index,
-        starts: ak.index.Index,
-        shifts: ak.index.Index | None,
-        outlength: ShapeItem,
-    ) -> ak.contents.NumpyArray:
+    @classmethod
+    def apply(cls, array, parents, outlength):
         assert isinstance(array, ak.contents.NumpyArray)
         result = jax.ops.segment_max(array.data, parents.data)
         result = jax.numpy.asarray(result, dtype=bool)
@@ -237,29 +122,16 @@ class Any(JAXReducer):
         return ak.contents.NumpyArray(result, backend=array.backend)
 
 
-@overloads(_reducers.All)
-class All(JAXReducer):
-    name: Final = "all"
-    preferred_dtype: Final = np.bool_
-    needs_position: Final = False
-
-    @classmethod
-    def from_kernel_reducer(cls, reducer: Reducer) -> Self:
-        assert isinstance(reducer, _reducers.All)
-        return cls()
+class All(Reducer):
+    name = "all"
+    preferred_dtype = np.bool_
 
     @classmethod
     def return_dtype(cls, given_dtype):
         return np.bool_
 
-    def apply(
-        self,
-        array: ak.contents.NumpyArray,
-        parents: ak.index.Index,
-        starts: ak.index.Index,
-        shifts: ak.index.Index | None,
-        outlength: ShapeItem,
-    ) -> ak.contents.NumpyArray:
+    @classmethod
+    def apply(cls, array, parents, outlength):
         assert isinstance(array, ak.contents.NumpyArray)
         result = jax.ops.segment_min(array.data, parents.data)
         result = jax.numpy.asarray(result, dtype=bool)
@@ -267,23 +139,16 @@ class All(JAXReducer):
         return ak.contents.NumpyArray(result, backend=array.backend)
 
 
-@overloads(_reducers.Min)
-class Min(JAXReducer):
-    name: Final = "min"
-    preferred_dtype: Final = np.float64
-    needs_position: Final = False
+class Min(Reducer):
+    name = "min"
+    preferred_dtype = np.float64
+    initial = None
 
     def __init__(self, initial):
-        self._initial = initial
+        type(self).initial = initial
 
-    @property
-    def initial(self):
-        return self._initial
-
-    @classmethod
-    def from_kernel_reducer(cls, reducer: Reducer) -> Self:
-        assert isinstance(reducer, _reducers.Min)
-        return cls(reducer.initial)
+    def __del__(self):
+        type(self).initial = None
 
     @staticmethod
     def _min_initial(initial, type):
@@ -304,18 +169,12 @@ class Min(JAXReducer):
 
         return initial
 
-    def apply(
-        self,
-        array: ak.contents.NumpyArray,
-        parents: ak.index.Index,
-        starts: ak.index.Index,
-        shifts: ak.index.Index | None,
-        outlength: ShapeItem,
-    ) -> ak.contents.NumpyArray:
+    @classmethod
+    def apply(cls, array, parents, outlength):
         assert isinstance(array, ak.contents.NumpyArray)
 
         result = jax.ops.segment_min(array.data, parents.data)
-        result = jax.numpy.minimum(result, self._min_initial(self.initial, array.dtype))
+        result = jax.numpy.minimum(result, cls._min_initial(cls.initial, array.dtype))
 
         if array.dtype.type in (np.complex128, np.complex64):
             return ak.contents.NumpyArray(
@@ -328,23 +187,16 @@ class Min(JAXReducer):
             return ak.contents.NumpyArray(result, backend=array.backend)
 
 
-@overloads(_reducers.Max)
-class Max(JAXReducer):
-    name: Final = "max"
-    preferred_dtype: Final = np.float64
-    needs_position: Final = False
+class Max(Reducer):
+    name = "max"
+    preferred_dtype = np.float64
+    initial = None
 
     def __init__(self, initial):
-        self._initial = initial
+        type(self).initial = initial
 
-    @property
-    def initial(self):
-        return self._initial
-
-    @classmethod
-    def from_kernel_reducer(cls, reducer: Reducer) -> Self:
-        assert isinstance(reducer, _reducers.Max)
-        return cls(reducer.initial)
+    def __del__(self):
+        type(self).initial = None
 
     @staticmethod
     def _max_initial(initial, type):
@@ -365,19 +217,13 @@ class Max(JAXReducer):
 
         return initial
 
-    def apply(
-        self,
-        array: ak.contents.NumpyArray,
-        parents: ak.index.Index,
-        starts: ak.index.Index,
-        shifts: ak.index.Index | None,
-        outlength: ShapeItem,
-    ) -> ak.contents.NumpyArray:
+    @classmethod
+    def apply(cls, array, parents, outlength):
         assert isinstance(array, ak.contents.NumpyArray)
 
         result = jax.ops.segment_max(array.data, parents.data)
 
-        result = jax.numpy.maximum(result, self._max_initial(self.initial, array.dtype))
+        result = jax.numpy.maximum(result, cls._max_initial(cls.initial, array.dtype))
         if array.dtype.type in (np.complex128, np.complex64):
             return ak.contents.NumpyArray(
                 array.backend.nplike.asarray(
@@ -390,4 +236,7 @@ class Max(JAXReducer):
 
 
 def get_jax_reducer(reducer: Reducer) -> Reducer:
-    return _overloads[type(reducer)].from_kernel_reducer(reducer)
+    if isinstance(reducer, type):
+        return globals()[reducer.__name__]
+    else:
+        return globals()[type(reducer).__name__]
