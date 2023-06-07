@@ -333,11 +333,11 @@ def test_Record():
 
     assert (
         builder.type()
-        == "ak.numba.lb.Record((ak.numba.lb.Numpy(float64, parameters=None), ak.numba.lb.Numpy(int64, parameters=None), ak.numba.lb.Numpy(uint8, parameters={'__array__': 'char'})), [one, two, three], parameters=None)"
+        == "ak.numba.lb.Record((ak.numba.lb.Numpy(float64, parameters=None), ak.numba.lb.Numpy(int64, parameters=None), ak.numba.lb.Numpy(uint8, parameters={'__array__': 'char'})), ('one', 'two', 'three'), parameters=None)"
     )
     assert (
         str(builder.numbatype())
-        == "ak.numba.lb.Record((ak.numba.lb.Numpy(float64, parameters=None), ak.numba.lb.Numpy(int64, parameters=None), ak.numba.lb.Numpy(uint8, parameters={'__array__': 'char'})), [one, two, three], parameters=None)"
+        == "ak.numba.lb.Record((ak.numba.lb.Numpy(float64, parameters=None), ak.numba.lb.Numpy(int64, parameters=None), ak.numba.lb.Numpy(uint8, parameters={'__array__': 'char'})), ('one', 'two', 'three'), parameters=None)"
     )
     builder.clear()
     assert len(builder) == 0
