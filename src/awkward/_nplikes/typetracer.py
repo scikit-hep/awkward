@@ -506,6 +506,8 @@ class TypeTracer(NumpyLike):
             assert not isinstance(x, PlaceholderArray)
             try_touch_data(x)
 
+        inputs = [x.content if isinstance(x, MaybeNone) else x for x in inputs]
+
         broadcasted = self.broadcast_arrays(*inputs)
         placeholders = [numpy.empty(0, x.dtype) for x in broadcasted]
 

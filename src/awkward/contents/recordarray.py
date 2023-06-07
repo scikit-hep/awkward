@@ -36,11 +36,9 @@ np = NumpyMetadata.instance()
 numpy = Numpy.instance()
 
 
-def _apply_record_reducer(
-    reducer, layout: RecordArray, mask: bool, offsets: ak.index.Index, behavior
-) -> Content:
+def _apply_record_reducer(reducer, layout: Content, mask: bool, behavior) -> Content:
     # Build a 1D list over these contents
-    array = wrap_layout(ak.contents.ListOffsetArray(offsets, layout), behavior=behavior)
+    array = wrap_layout(layout, behavior=behavior)
     # Perform the reduction
     return ak.to_layout(reducer(array, mask))
 
@@ -908,30 +906,45 @@ class RecordArray(Content):
                 )
             )
         else:
-            # Convert parents into offsets
-            outoffsets = ak.index.Index64.empty(
-                outlength + 1, self._backend.index_nplike
-            )
+            # Convert parents into offsets to build a list for axis=1 reduction
+            offsets = ak.index.Index64.empty(outlength + 1, self._backend.index_nplike)
             assert (
-                outoffsets.nplike is self._backend.index_nplike
+                offsets.nplike is self._backend.index_nplike
                 and parents.nplike is self._backend.index_nplike
             )
-            self._handle_error(
+            self._backend.maybe_kernel_error(
                 self._backend[
                     "awkward_ListOffsetArray_reduce_local_outoffsets_64",
-                    outoffsets.dtype.type,
+                    offsets.dtype.type,
                     parents.dtype.type,
                 ](
-                    outoffsets.data,
+                    offsets.data,
                     parents.data,
                     parents.length,
                     outlength,
                 )
             )
+            layout_to_reduce = ak.contents.ListOffsetArray(offsets, self)
 
+            # Positional reducers ultimately need to do more work when rebuilding the result
+            # so asking for a mask doesn't help us!
+            reducer_should_mask = mask and not reducer.needs_position
             out = _apply_record_reducer(
-                reducer_recordclass, self, mask, outoffsets, behavior
+                reducer_recordclass,
+                layout_to_reduce,
+                reducer_should_mask,
+                behavior,
             )
+            if out.is_option and not reducer_should_mask:
+                reason = (
+                    "reducer is positional"
+                    if reducer.needs_position
+                    else "mask is False"
+                )
+                raise TypeError(
+                    f"a custom implementation of the reducer {reducer.name} for {self.parameter('__record__')!r} "
+                    f"returned an option when it was not expected ({reason})"
+                )
 
             if reducer.needs_position:
                 assert isinstance(out, ak.contents.NumpyArray)
@@ -942,7 +955,7 @@ class RecordArray(Content):
                         and parents.nplike is self._backend.index_nplike
                         and starts.nplike is self._backend.index_nplike
                     )
-                    self._handle_error(
+                    self._backend.maybe_kernel_error(
                         self._backend[
                             "awkward_NumpyArray_reduce_adjust_starts_64",
                             out.data.dtype.type,
@@ -962,7 +975,7 @@ class RecordArray(Content):
                         and starts.nplike is self._backend.index_nplike
                         and shifts.nplike is self._backend.index_nplike
                     )
-                    self._handle_error(
+                    self._backend.maybe_kernel_error(
                         self._backend[
                             "awkward_NumpyArray_reduce_adjust_starts_shifts_64",
                             out.data.dtype.type,
@@ -984,7 +997,7 @@ class RecordArray(Content):
                     outmask.nplike is self._backend.index_nplike
                     and parents.nplike is self._backend.index_nplike
                 )
-                self._handle_error(
+                self._backend.maybe_kernel_error(
                     self._backend[
                         "awkward_NumpyArray_reduce_mask_ByteMaskedArray_64",
                         outmask.dtype.type,
@@ -999,10 +1012,6 @@ class RecordArray(Content):
 
                 out = ak.contents.ByteMaskedArray.simplified(
                     outmask, out, False, parameters=None
-                )
-            elif out.is_option:
-                raise TypeError(
-                    "a custom reducer function returned an option when it was not expected"
                 )
 
             if keepdims:

@@ -365,7 +365,7 @@ class RegularArray(Content):
             )
 
         assert nextcarry.nplike is self._backend.index_nplike
-        self._handle_error(
+        self._maybe_index_error(
             self._backend[
                 "awkward_RegularArray_getitem_carry",
                 nextcarry.dtype.type,
@@ -479,7 +479,7 @@ class RegularArray(Content):
             nexthead, nexttail = ak._slicing.head_tail(tail)
             nextcarry = ak.index.Index64.empty(self._length, index_nplike)
             assert nextcarry.nplike is index_nplike
-            self._handle_error(
+            self._maybe_index_error(
                 self._backend[
                     "awkward_RegularArray_getitem_next_at", nextcarry.dtype.type
                 ](
@@ -501,7 +501,7 @@ class RegularArray(Content):
 
             nextcarry = ak.index.Index64.empty(self._length * nextsize, index_nplike)
             assert nextcarry.nplike is index_nplike
-            self._handle_error(
+            self._maybe_index_error(
                 self._backend[
                     "awkward_RegularArray_getitem_next_range",
                     nextcarry.dtype.type,
@@ -534,7 +534,7 @@ class RegularArray(Content):
                     nextadvanced.nplike is index_nplike
                     and advanced.nplike is index_nplike
                 )
-                self._handle_error(
+                self._maybe_index_error(
                     self._backend[
                         "awkward_RegularArray_getitem_next_range_spreadadvanced",
                         nextadvanced.dtype.type,
@@ -571,7 +571,7 @@ class RegularArray(Content):
             flathead = index_nplike.reshape(index_nplike.asarray(head.data), (-1,))
             regular_flathead = ak.index.Index64.empty(flathead.shape[0], index_nplike)
             assert regular_flathead.nplike is index_nplike
-            self._handle_error(
+            self._maybe_index_error(
                 self._backend[
                     "awkward_RegularArray_getitem_next_array_regularize",
                     regular_flathead.dtype.type,
@@ -599,7 +599,7 @@ class RegularArray(Content):
                     and nextadvanced.nplike is index_nplike
                     and regular_flathead.nplike is index_nplike
                 )
-                self._handle_error(
+                self._maybe_index_error(
                     self._backend[
                         "awkward_RegularArray_getitem_next_array",
                         nextcarry.dtype.type,
@@ -641,7 +641,7 @@ class RegularArray(Content):
                     and advanced.nplike is index_nplike
                     and regular_flathead.nplike is index_nplike
                 )
-                self._handle_error(
+                self._maybe_index_error(
                     self._backend[
                         "awkward_RegularArray_getitem_next_array_advanced",
                         nextcarry.dtype.type,
@@ -690,7 +690,7 @@ class RegularArray(Content):
             )
 
             assert head.offsets.nplike is index_nplike
-            self._handle_error(
+            self._maybe_index_error(
                 self._backend[
                     "awkward_RegularArray_getitem_jagged_expand",
                     multistarts.dtype.type,
@@ -794,7 +794,7 @@ class RegularArray(Content):
             localindex = ak.index.Index64.empty(
                 self._length * self._size, nplike=self._backend.index_nplike
             )
-            self._handle_error(
+            self._backend.maybe_kernel_error(
                 self._backend["awkward_RegularArray_localindex", np.int64](
                     localindex.data,
                     self._size,
@@ -938,7 +938,7 @@ class RegularArray(Content):
                 assert (
                     toindex.nplike is index_nplike and fromindex.nplike is index_nplike
                 )
-                self._handle_error(
+                self._backend.maybe_kernel_error(
                     self._backend[
                         "awkward_RegularArray_combinations_64",
                         np.int64,
@@ -996,18 +996,6 @@ class RegularArray(Content):
         branch, depth = self.branch_depth
         nextlen = self._length * self._size
         if not branch and negaxis == depth:
-            if self._size == 0:
-                nextstarts = ak.index.Index64(
-                    index_nplike.zeros(self._length, dtype=np.int64),
-                    nplike=index_nplike,
-                )
-            else:
-                nextstarts = ak.index.Index64(
-                    index_nplike.arange(0, nextlen, self._size),
-                    nplike=index_nplike,
-                )
-            assert nextstarts.length == self._length
-
             nextcarry = ak.index.Index64.empty(nextlen, nplike=index_nplike)
             nextparents = ak.index.Index64.empty(nextlen, nplike=index_nplike)
             assert (
@@ -1015,7 +1003,7 @@ class RegularArray(Content):
                 and nextcarry.nplike is index_nplike
                 and nextparents.nplike is index_nplike
             )
-            self._handle_error(
+            self._backend.maybe_kernel_error(
                 self._backend[
                     "awkward_RegularArray_reduce_nonlocal_preparenext",
                     nextcarry.dtype.type,
@@ -1026,7 +1014,28 @@ class RegularArray(Content):
                     nextparents.data,
                     parents.data,
                     self._size,
-                    len(self),
+                    self._length,
+                )
+            )
+            nextstarts = ak.index.Index64.empty(
+                # `starts` must have at least enough elements for the largest `nextparent` to index into
+                # The upper bound for this value is given by `nextlen` (each item in this list belonging
+                # to a distinct reduction), but the length of `starts` should equate to `maxnextparents - 1`.
+                starts.length * self._size,
+                nplike=index_nplike,
+            )
+            assert (
+                nextstarts.nplike is index_nplike and nextparents.nplike is index_nplike
+            )
+            self._backend.maybe_kernel_error(
+                self._backend[
+                    "awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64",
+                    nextstarts.dtype.type,
+                    nextparents.dtype.type,
+                ](
+                    nextstarts.data,
+                    nextparents.data,
+                    nextlen,
                 )
             )
 
@@ -1065,7 +1074,7 @@ class RegularArray(Content):
             nextparents = ak.index.Index64.empty(nextlen, index_nplike)
 
             assert nextparents.nplike is index_nplike
-            self._handle_error(
+            self._backend.maybe_kernel_error(
                 self._backend[
                     "awkward_RegularArray_reduce_local_nextparents",
                     nextparents.dtype.type,
@@ -1154,7 +1163,7 @@ class RegularArray(Content):
 
             outoffsets = ak.index.Index64.empty(outlength + 1, index_nplike)
             assert outoffsets.nplike is index_nplike and parents.nplike is index_nplike
-            self._handle_error(
+            self._backend.maybe_kernel_error(
                 self._backend[
                     "awkward_ListOffsetArray_reduce_local_outoffsets_64",
                     outoffsets.dtype.type,
@@ -1196,7 +1205,7 @@ class RegularArray(Content):
                     self._backend.index_nplike,
                 )
                 assert index.nplike is self._backend.index_nplike
-                self._handle_error(
+                self._backend.maybe_kernel_error(
                     self._backend[
                         "awkward_RegularArray_rpad_and_clip_axis1", index.dtype.type
                     ](index.data, target, self._size, self._length)
@@ -1456,5 +1465,5 @@ class RegularArray(Content):
 
     def _is_equal_to(self, other, index_dtype, numpyarray):
         return self._size == other.size and self._content.is_equal_to(
-            self._content, index_dtype, numpyarray
+            other._content, index_dtype, numpyarray
         )
