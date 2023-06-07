@@ -47,7 +47,7 @@ class ArgMin(JAXReducer):
         raise NotImplementedError
 
     @classmethod
-    def return_dtype(cls, given_dtype):
+    def _return_dtype(cls, given_dtype):
         return np.int64
 
     def apply(
@@ -71,7 +71,7 @@ class ArgMax(JAXReducer):
         return cls()
 
     @classmethod
-    def return_dtype(cls, given_dtype):
+    def _return_dtype(cls, given_dtype):
         return np.int64
 
     def apply(
@@ -95,7 +95,7 @@ class Count(JAXReducer):
         return cls()
 
     @classmethod
-    def return_dtype(cls, given_dtype):
+    def _return_dtype(cls, given_dtype):
         return np.int64
 
     def apply(
@@ -119,7 +119,7 @@ class CountNonzero(JAXReducer):
         return cls()
 
     @classmethod
-    def return_dtype(cls, given_dtype):
+    def _return_dtype(cls, given_dtype):
         return np.int64
 
     def apply(
@@ -207,7 +207,7 @@ class Any(JAXReducer):
         return cls()
 
     @classmethod
-    def return_dtype(cls, given_dtype):
+    def _return_dtype(cls, given_dtype):
         return np.bool_
 
     def apply(
@@ -235,7 +235,7 @@ class All(JAXReducer):
         return cls()
 
     @classmethod
-    def return_dtype(cls, given_dtype):
+    def _return_dtype(cls, given_dtype):
         return np.bool_
 
     def apply(

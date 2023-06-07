@@ -34,30 +34,6 @@ class Reducer(ABC):
     def highlevel_function(cls):
         return getattr(ak.operations, cls.name)
 
-    @classmethod
-    def return_dtype(cls, given_dtype: DTypeLike) -> DTypeLike:
-        if given_dtype in (np.bool_, np.int8, np.int16, np.int32):
-            return np.int32 if ak._util.win or ak._util.bits32 else np.int64
-
-        if given_dtype in (np.uint8, np.uint16, np.uint32):
-            return np.uint32 if ak._util.win or ak._util.bits32 else np.uint64
-
-        return given_dtype
-
-    @classmethod
-    def maybe_double_length(cls, type: DTypeLike, length: int) -> int:
-        return 2 * length if type in (np.complex128, np.complex64) else length
-
-    @classmethod
-    def maybe_other_type(cls, dtype: DTypeLike) -> DTypeLike:
-        dtype = np.dtype(dtype)
-        type = np.int64 if dtype.kind.upper() == "M" else dtype.type
-        if dtype == np.complex128:
-            type = np.float64
-        if dtype == np.complex64:
-            type = np.float32
-        return type
-
     @abstractmethod
     def apply(
         self,
@@ -67,6 +43,30 @@ class Reducer(ABC):
     ) -> ak.contents.NumpyArray:
         raise NotImplementedError
 
+    @classmethod
+    def _return_dtype(cls, given_dtype: DTypeLike) -> DTypeLike:
+        if given_dtype in (np.bool_, np.int8, np.int16, np.int32):
+            return np.int32 if ak._util.win or ak._util.bits32 else np.int64
+
+        if given_dtype in (np.uint8, np.uint16, np.uint32):
+            return np.uint32 if ak._util.win or ak._util.bits32 else np.uint64
+
+        return given_dtype
+
+    @classmethod
+    def _maybe_double_length(cls, type: DTypeLike, length: int) -> int:
+        return 2 * length if type in (np.complex128, np.complex64) else length
+
+    @classmethod
+    def _maybe_other_type(cls, dtype: DTypeLike) -> DTypeLike:
+        dtype = np.dtype(dtype)
+        type = np.int64 if dtype.kind.upper() == "M" else dtype.type
+        if dtype == np.complex128:
+            type = np.float64
+        if dtype == np.complex64:
+            type = np.float32
+        return type
+
 
 class ArgMin(Reducer):
     name: Final = "argmin"
@@ -74,7 +74,7 @@ class ArgMin(Reducer):
     needs_position: Final = True
 
     @classmethod
-    def return_dtype(cls, given_dtype):
+    def _return_dtype(cls, given_dtype):
         return np.int64
 
     def apply(
@@ -84,7 +84,7 @@ class ArgMin(Reducer):
         outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
-        dtype = self.maybe_other_type(array.dtype)
+        dtype = self._maybe_other_type(array.dtype)
         result = array.backend.nplike.empty(outlength, dtype=np.int64)
         if array.dtype.type in (np.complex128, np.complex64):
             assert parents.nplike is array.backend.index_nplike
@@ -127,7 +127,7 @@ class ArgMax(Reducer):
     needs_position: Final = True
 
     @classmethod
-    def return_dtype(cls, given_dtype):
+    def _return_dtype(cls, given_dtype):
         return np.int64
 
     def apply(
@@ -137,7 +137,7 @@ class ArgMax(Reducer):
         outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
-        dtype = self.maybe_other_type(array.dtype)
+        dtype = self._maybe_other_type(array.dtype)
         result = array.backend.nplike.empty(outlength, dtype=np.int64)
         if array.dtype.type in (np.complex128, np.complex64):
             assert parents.nplike is array.backend.index_nplike
@@ -180,7 +180,7 @@ class Count(Reducer):
     needs_position: Final = False
 
     @classmethod
-    def return_dtype(cls, given_dtype):
+    def _return_dtype(cls, given_dtype):
         return np.int64
 
     def apply(
@@ -211,7 +211,7 @@ class CountNonzero(Reducer):
     needs_position: Final = False
 
     @classmethod
-    def return_dtype(cls, given_dtype):
+    def _return_dtype(cls, given_dtype):
         return np.int64
 
     def apply(
@@ -273,10 +273,10 @@ class Sum(Reducer):
         if array.dtype.kind == "M":
             raise ValueError(f"cannot compute the sum (ak.sum) of {array.dtype!r}")
         else:
-            dtype = self.maybe_other_type(array.dtype)
+            dtype = self._maybe_other_type(array.dtype)
         result = array.backend.nplike.empty(
-            self.maybe_double_length(array.dtype.type, outlength),
-            dtype=self.return_dtype(dtype),
+            self._maybe_double_length(array.dtype.type, outlength),
+            dtype=self._return_dtype(dtype),
         )
 
         if array.dtype == np.bool_:
@@ -373,7 +373,7 @@ class Prod(Reducer):
             raise ValueError(f"cannot compute the product (ak.prod) of {array.dtype!r}")
         if array.dtype == np.bool_:
             result = array.backend.nplike.empty(
-                self.maybe_double_length(array.dtype.type, outlength),
+                self._maybe_double_length(array.dtype.type, outlength),
                 dtype=np.dtype(np.bool_),
             )
             assert parents.nplike is array.backend.index_nplike
@@ -392,12 +392,12 @@ class Prod(Reducer):
                 )
             )
             result = array.backend.nplike.astype(
-                result, dtype=self.return_dtype(array.dtype)
+                result, dtype=self._return_dtype(array.dtype)
             )
         elif array.dtype.type in (np.complex128, np.complex64):
             result = array.backend.nplike.empty(
-                self.maybe_double_length(array.dtype.type, outlength),
-                dtype=self.return_dtype(array.dtype),
+                self._maybe_double_length(array.dtype.type, outlength),
+                dtype=self._return_dtype(array.dtype),
             )
             assert parents.nplike is array.backend.index_nplike
             array.backend.maybe_kernel_error(
@@ -416,8 +416,8 @@ class Prod(Reducer):
             )
         else:
             result = array.backend.nplike.empty(
-                self.maybe_double_length(array.dtype.type, outlength),
-                dtype=self.return_dtype(array.dtype),
+                self._maybe_double_length(array.dtype.type, outlength),
+                dtype=self._return_dtype(array.dtype),
             )
             assert parents.nplike is array.backend.index_nplike
             array.backend.maybe_kernel_error(
@@ -446,7 +446,7 @@ class Any(Reducer):
     needs_position: Final = False
 
     @classmethod
-    def return_dtype(cls, given_dtype):
+    def _return_dtype(cls, given_dtype):
         return np.bool_
 
     def apply(
@@ -456,7 +456,7 @@ class Any(Reducer):
         outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
-        dtype = self.maybe_other_type(array.dtype)
+        dtype = self._maybe_other_type(array.dtype)
         result = array.backend.nplike.empty(outlength, dtype=np.bool_)
         if array.dtype.type in (np.complex128, np.complex64):
             assert parents.nplike is array.backend.index_nplike
@@ -499,7 +499,7 @@ class All(Reducer):
     needs_position: Final = False
 
     @classmethod
-    def return_dtype(cls, given_dtype):
+    def _return_dtype(cls, given_dtype):
         return np.bool_
 
     def apply(
@@ -509,7 +509,7 @@ class All(Reducer):
         outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
-        dtype = self.maybe_other_type(array.dtype)
+        dtype = self._maybe_other_type(array.dtype)
         result = array.backend.nplike.empty(outlength, dtype=np.bool_)
         if array.dtype.type in (np.complex128, np.complex64):
             assert parents.nplike is array.backend.index_nplike
@@ -588,9 +588,9 @@ class Min(Reducer):
         outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
-        dtype = self.maybe_other_type(array.dtype)
+        dtype = self._maybe_other_type(array.dtype)
         result = array.backend.nplike.empty(
-            self.maybe_double_length(array.dtype.type, outlength), dtype=dtype
+            self._maybe_double_length(array.dtype.type, outlength), dtype=dtype
         )
         if array.dtype == np.bool_:
             assert parents.nplike is array.backend.index_nplike
@@ -696,9 +696,9 @@ class Max(Reducer):
         outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
-        dtype = self.maybe_other_type(array.dtype)
+        dtype = self._maybe_other_type(array.dtype)
         result = array.backend.nplike.empty(
-            self.maybe_double_length(array.dtype.type, outlength), dtype=dtype
+            self._maybe_double_length(array.dtype.type, outlength), dtype=dtype
         )
         if array.dtype == np.bool_:
             assert parents.nplike is array.backend.index_nplike
