@@ -30,15 +30,6 @@ reserved_nominal_parameters: Final = frozenset(
 )
 
 
-index_size_bytes: Final = {
-    "i8": 1,
-    "u8": 1,
-    "i32": 4,
-    "u32": 4,
-    "i64": 8,
-}
-
-
 def from_dict(input: dict) -> Form:
     assert input is not None
     if isinstance(input, str):
