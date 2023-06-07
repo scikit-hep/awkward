@@ -1128,7 +1128,48 @@ class NumpyArray(Content):
         assert self.is_contiguous
         assert self._data.ndim == 1
 
-        out = reducer.apply(self, parents, starts, shifts, outlength)
+        out = reducer.apply(self, parents, outlength)
+
+        if reducer.needs_position:
+            if shifts is None:
+                assert (
+                    parents.nplike is self._backend.index_nplike
+                    and starts.nplike is self._backend.index_nplike
+                )
+                self._backend.maybe_kernel_error(
+                    self._backend[
+                        "awkward_NumpyArray_reduce_adjust_starts_64",
+                        out.data.dtype.type,
+                        parents.dtype.type,
+                        starts.dtype.type,
+                    ](
+                        out.data,
+                        outlength,
+                        parents.data,
+                        starts.data,
+                    )
+                )
+            else:
+                assert (
+                    parents.nplike is self._backend.index_nplike
+                    and starts.nplike is self._backend.index_nplike
+                    and shifts.nplike is self._backend.index_nplike
+                )
+                self._backend.maybe_kernel_error(
+                    self._backend[
+                        "awkward_NumpyArray_reduce_adjust_starts_shifts_64",
+                        out.data.dtype.type,
+                        parents.dtype.type,
+                        starts.dtype.type,
+                        shifts.dtype.type,
+                    ](
+                        out.data,
+                        outlength,
+                        parents.data,
+                        starts.data,
+                        shifts.data,
+                    )
+                )
 
         if mask:
             outmask = ak.index.Index8.empty(outlength, self._backend.index_nplike)
