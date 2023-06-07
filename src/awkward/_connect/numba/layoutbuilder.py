@@ -41,8 +41,6 @@ def to_numbatype(content):
         return ListOffset.numbatype(content)
     elif isinstance(content, Regular):
         return Regular.numbatype(content)
-    elif isinstance(content, Indexed):
-        return Indexed.numbatype(content)
     elif isinstance(content, IndexedOption):
         return IndexedOption.numbatype(content)
     elif isinstance(content, ByteMasked):
@@ -92,11 +90,6 @@ def typeof_LayoutBuilder(val, c):
     elif isinstance(val, Regular):
         return RegularType(val._content, val._size, val._parameters)
 
-    elif isinstance(val, Indexed):
-        return IndexedType(
-            numba.from_dtype(val._index.dtype), val._content, val._parameters
-        )
-
     elif isinstance(val, IndexedOption):
         return IndexedOptionType(
             numba.from_dtype(val._index.dtype), val._content, val._parameters
@@ -144,7 +137,6 @@ def LayoutBuilderType_len(builder):
             ByteMaskedType,  # append, extend, append_null(0 args), extend_null(1 int arg)
             EmptyType,
             IndexedOptionType,  # append, extend, append_null(0 args), extend_null(1 int arg)
-            IndexedType,  # append, extend,
             ListOffsetType,  # begin_list->content, end_list (both modify offsets)
             NumpyType,  # append, extend,
             RecordType,  # field (Literal string) alias, content (Literal int and string) method
@@ -929,230 +921,6 @@ def Regular_snapshot(builder):
         return builder.snapshot()
 
     return snapshot
-
-
-########## Indexed ############################################################
-
-
-@final
-class Indexed(LayoutBuilder):
-    def __init__(self, dtype, content, *, parameters=None, initial=1024, resize=8.0):
-        self._last_valid = -1
-        self._index = GrowableBuffer(dtype=dtype, initial=initial, resize=resize)
-        self._content = content
-        self._parameters = parameters
-
-    def __repr__(self):
-        return f"ak.numba.lb.Indexed({self._index.dtype}, {self._content}, parameters={self._parameters})"
-
-    def type(self):
-        return f"ak.numba.lb.Indexed({self._index.dtype}, {self._content}, parameters={self._parameters})"
-
-    def numbatype(self):
-        return IndexedType(
-            numba.from_dtype(self.index.dtype),
-            self.content,
-            numba.types.StringLiteral(self._parameters),
-        )
-
-    @property
-    def index(self):
-        return self._index
-
-    @property
-    def content(self):
-        return self._content
-
-    def append(self, datum):
-        self._last_valid = len(self._content)
-        self._index.append(self._last_valid)
-        self._content.append(datum)
-
-    def append_index(self):
-        self._last_valid = len(self._content)
-        self._index.append(self._last_valid)
-        return self._content
-
-    def extend(self, data):
-        start = len(self._content)
-        stop = start + len(data)
-        self._last_valid = stop - 1
-        self._index.extend(list(range(start, stop)))
-        self._content.extend(data)
-
-    def extend_index(self, size):
-        start = len(self._content)
-        stop = start + size
-        self._last_valid = stop - 1
-        self._index.extend(list(range(start, stop)))
-        return self._content
-
-    def parameters(self):
-        return self._parameters
-
-    def clear(self):
-        self._last_valid = -1
-        self._index.clear()
-        self._content.clear()
-
-    @property
-    def _length(self):
-        return self._index._length
-
-    def __len__(self):
-        return self._length
-
-    def is_valid(self, error: str):
-        if len(self._content) != self._index._length:
-            error = f"Indexed has content length {len(self._content)} but index length {self._index._length}"
-            return False
-        else:
-            return self._content.is_valid(error)
-
-    def snapshot(self) -> ArrayLike:
-        """
-        Converts the currently accumulated data into an #ak.Array.
-        """
-        return ak.Array(
-            ak.contents.IndexedArray(
-                ak.index.Index64(self._index.snapshot()),
-                self._content.snapshot().layout,
-                parameters=self._parameters,
-            )
-        )
-
-
-class IndexedType(numba.types.Type):
-    def __init__(self, dtype, content, parameters):
-        super().__init__(
-            name=f"ak.numba.lb.Indexed({dtype}, {content.type()}, parameters={parameters.literal_value if isinstance(parameters, numba.types.Literal) else None})"
-        )
-        self._dtype = dtype
-        self._content = content
-        self._parameters = parameters
-
-    @classmethod
-    def type(cls):
-        return IndexedType(cls.index.dtype, cls.content, cls.parameters)
-
-    @property
-    def parameters(self):
-        return numba.types.StringLiteral(self._parameters)
-
-    @property
-    def index(self):
-        return ak.numba.GrowableBufferType(self._dtype)
-
-    @property
-    def content(self):
-        return to_numbatype(self._content)
-
-    @property
-    def length(self):
-        return numba.types.int64
-
-
-@numba.extending.register_model(IndexedType)
-class IndexedModel(numba.extending.models.StructModel):
-    def __init__(self, dmm, fe_type):
-        members = [
-            ("index", fe_type.index),
-            ("content", fe_type.content),
-        ]
-        super().__init__(dmm, fe_type, members)
-
-
-for member in (
-    "index",
-    "content",
-):
-    numba.extending.make_attribute_wrapper(IndexedType, member, "_" + member)
-
-
-@numba.extending.unbox(IndexedType)
-def IndexedType_unbox(typ, obj, c):
-    # get PyObjects
-    index_obj = c.pyapi.object_getattr_string(obj, "_index")
-    content_obj = c.pyapi.object_getattr_string(obj, "_content")
-
-    # fill the lowered model
-    out = numba.core.cgutils.create_struct_proxy(typ)(c.context, c.builder)
-    out.index = c.pyapi.to_native_value(typ.index, index_obj).value
-    out.content = c.pyapi.to_native_value(typ.content, content_obj).value
-
-    # decref PyObjects
-    c.pyapi.decref(index_obj)
-    c.pyapi.decref(content_obj)
-
-    # return it or the exception
-    is_error = numba.core.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
-    return numba.extending.NativeValue(out._getvalue(), is_error=is_error)
-
-
-@numba.extending.box(IndexedType)
-def IndexedType_box(typ, val, c):
-    # get PyObject of the Indexed class
-    Indexed_obj = c.pyapi.unserialize(c.pyapi.serialize_object(Indexed))
-
-    builder = numba.core.cgutils.create_struct_proxy(typ)(
-        c.context, c.builder, value=val
-    )
-    index_obj = c.pyapi.from_native_value(typ.index, builder.index, c.env_manager)
-    content_obj = c.pyapi.from_native_value(typ.content, builder.content, c.env_manager)
-
-    out = c.pyapi.call_function_objargs(
-        Indexed_obj,
-        (
-            index_obj,
-            content_obj,
-        ),
-    )
-
-    # decref PyObjects
-    c.pyapi.decref(Indexed_obj)
-
-    c.pyapi.decref(index_obj)
-    c.pyapi.decref(content_obj)
-
-    return out
-
-
-@numba.extending.overload_method(IndexedType, "_length_get", inline="always")
-def Indexed_length(builder):
-    def getter(builder):
-        return builder._index._length_pos[0]
-
-    return getter
-
-
-@numba.extending.overload_method(IndexedType, "_index", inline="always")
-def Indexed_index(builder):
-    def getter(builder):
-        return builder._index
-
-    return getter
-
-
-@numba.extending.overload_method(IndexedType, "append")
-def Indexed_append(builder, datum):
-    if isinstance(builder, IndexedType):
-
-        def append(builder, datum):
-            builder._index.append(len(builder._content))
-            builder._content.append(datum)
-
-        return append
-
-
-@numba.extending.overload_method(IndexedType, "extend")
-def Indexed_extend(builder, data):
-    def extend(builder, data):
-        start = len(builder._content)
-        stop = start + len(data)
-        builder._index.extend(list(range(start, stop)))
-        builder._content.extend(data)
-
-    return extend
 
 
 ########## IndexedOption #######################################################
