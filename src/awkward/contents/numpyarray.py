@@ -1128,7 +1128,7 @@ class NumpyArray(Content):
         assert self.is_contiguous
         assert self._data.ndim == 1
 
-        out = reducer.apply(self, parents, outlength)
+        out = self._backend.apply_reducer(reducer, self, parents, outlength)
 
         if reducer.needs_position:
             if shifts is None:
