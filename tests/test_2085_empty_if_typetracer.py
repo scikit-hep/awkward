@@ -12,7 +12,7 @@ from awkward.typetracer import (
 
 
 @pytest.mark.parametrize("function", [empty_if_typetracer, length_one_if_typetracer])
-def test(function):
+def test_typetracer(function):
     def func(array):
         assert ak.backend(array) == "typetracer"
 
@@ -43,3 +43,13 @@ def test(function):
 
     func(meta)
     assert report.data_touched == ["node0", "node2", "node3"]
+
+
+@pytest.mark.parametrize("regulararray", [False, True])
+def test_multiplier(regulararray):
+    a = ak.from_numpy(np.arange(2 * 3 * 5).reshape(2, 3, 5), regulararray=regulararray)
+    assert str(a.type) == "2 * 3 * 5 * int64"
+
+    b = a.layout.form.length_one_array()
+    assert str(b.type) == "1 * 3 * 5 * int64"
+    assert b.tolist() == [[[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]]

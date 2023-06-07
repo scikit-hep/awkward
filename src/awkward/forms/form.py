@@ -471,13 +471,90 @@ class Form:
                 return that
             return max(this, that)
 
+        container = {}
+
+        def prepare(form, multiplier):
+            form_key = f"node-{len(container)}"
+
+            if isinstance(form, (ak.forms.BitMaskedForm, ak.forms.ByteMaskedForm)):
+                if form.valid_when:
+                    container[form_key] = b"\x00" * multiplier
+                else:
+                    container[form_key] = b"\xff" * multiplier
+                return form.copy(form_key=form_key)  # DO NOT RECURSE
+
+            elif isinstance(form, ak.forms.IndexedOptionForm):
+                container[form_key] = b"\xff\xff\xff\xff\xff\xff\xff\xff"  # -1
+                return form.copy(form_key=form_key)  # DO NOT RECURSE
+
+            elif isinstance(form, ak.forms.EmptyForm):
+                # no error if protected by non-recursing node type
+                raise TypeError(
+                    "cannot generate a length_one_array from a Form with an "
+                    "unknowntype that cannot be hidden (EmptyForm not within "
+                    "BitMaskedForm, ByteMaskedForm, or IndexedOptionForm)"
+                )
+
+            elif isinstance(form, ak.forms.UnmaskedForm):
+                return form.copy(content=prepare(form.content, multiplier))
+
+            elif isinstance(form, (ak.forms.IndexedForm, ak.forms.ListForm)):
+                container[form_key] = b"\x00" * (8 * multiplier)
+                return form.copy(
+                    content=prepare(form.content, multiplier), form_key=form_key
+                )
+
+            elif isinstance(form, ak.forms.ListOffsetForm):
+                # offsets length == array length + 1
+                container[form_key] = b"\x00" * (8 * (multiplier + 1))
+                return form.copy(
+                    content=prepare(form.content, multiplier), form_key=form_key
+                )
+
+            elif isinstance(form, ak.forms.RegularForm):
+                size = form.size
+
+                # https://github.com/scikit-hep/awkward/pull/2499#discussion_r1220503454
+                if size is unknown_length:
+                    size = 1
+
+                return form.copy(content=prepare(form.content, multiplier * size))
+
+            elif isinstance(form, ak.forms.NumpyForm):
+                dtype = ak.types.numpytype.primitive_to_dtype(form._primitive)
+                size = multiplier * dtype.itemsize
+                for x in form.inner_shape:
+                    if x is not unknown_length:
+                        size *= x
+
+                container[form_key] = b"\x00" * size
+                return form.copy(form_key=form_key)
+
+            elif isinstance(form, ak.forms.RecordForm):
+                return form.copy(
+                    # recurse down all contents
+                    contents=[prepare(x, multiplier) for x in form.contents]
+                )
+
+            elif isinstance(form, ak.forms.UnionForm):
+                # both tags and index will get this buffer, but index is 8 bytes
+                container[form_key] = b"\x00" * (8 * multiplier)
+                return form.copy(
+                    # only recurse down contents[0] because all index == 0
+                    contents=(
+                        [prepare(form.contents[0], multiplier)] + form.contents[1:]
+                    ),
+                    form_key=form_key,
+                )
+
+            else:
+                raise AssertionError(f"not a Form: {form!r}")
+
         return ak.operations.ak_from_buffers._impl(
-            form=self,
+            form=prepare(self, 1),
             length=1,
-            container={
-                "": b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
-            },
-            buffer_key="",
+            container=container,
+            buffer_key="{form_key}",
             backend=backend,
             byteorder=ak._util.native_byteorder,
             highlevel=highlevel,
