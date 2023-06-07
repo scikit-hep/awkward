@@ -14,19 +14,19 @@ from awkward._typing import final
 
 
 class LayoutBuilder:
-    def __init__(self, content, *, parameters=None):
-        self._content = content
+    def __init__(self, builder, *, parameters=None):
+        self._builder = builder
         self._parameters = parameters
 
     @property
-    def content(self):
-        return self._content
+    def builder(self):
+        return self._builder
 
     def clear(self):
-        return self._content.clear()
+        return self._builder.clear()
 
     def is_valid(self, error: str):
-        return self._content.is_valid(error)
+        return self._builder.is_valid(error)
 
     def _type(self, typestrs):
         raise NotImplementedError
@@ -2264,7 +2264,6 @@ class Record(LayoutBuilder):
         assert len(fields) != 0
         self._contents = tuple(contents)
         self._fields = tuple(fields)
-        self._first_content = self._contents[0]
         self._parameters = parameters
 
     @property
@@ -2303,7 +2302,7 @@ class Record(LayoutBuilder):
 
     @property
     def _length(self):
-        return len(self._first_content)
+        return len(self._contents[0])
 
     def __len__(self):
         return self._length
