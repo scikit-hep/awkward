@@ -268,7 +268,7 @@ class UnionArray(Content):
                     for k in range(len(contents)):
                         # Try and merge inner union content with running outer-union contentca
                         if merge and contents[k]._mergeable_next(inner_cont, mergebool):
-                            Content._selfless_handle_error(
+                            backend.maybe_kernel_error(
                                 backend[
                                     "awkward_UnionArray_simplify",
                                     tags.dtype.type,
@@ -297,7 +297,7 @@ class UnionArray(Content):
 
                     # Did we fail to merge any of the final outer contents with this inner union content?
                     if unmerged:
-                        Content._selfless_handle_error(
+                        backend.maybe_kernel_error(
                             backend[
                                 "awkward_UnionArray_simplify",
                                 tags.dtype.type,
@@ -326,7 +326,7 @@ class UnionArray(Content):
                 unmerged = True
                 for k in range(len(contents)):
                     if contents[k] is self_cont:
-                        Content._selfless_handle_error(
+                        backend.maybe_kernel_error(
                             backend[
                                 "awkward_UnionArray_simplify_one",
                                 tags.dtype.type,
@@ -348,7 +348,7 @@ class UnionArray(Content):
                         break
 
                     elif merge and contents[k]._mergeable_next(self_cont, mergebool):
-                        Content._selfless_handle_error(
+                        backend.maybe_kernel_error(
                             backend[
                                 "awkward_UnionArray_simplify_one",
                                 tags.dtype.type,
@@ -371,7 +371,7 @@ class UnionArray(Content):
                         break
 
                 if unmerged:
-                    Content._selfless_handle_error(
+                    backend.maybe_kernel_error(
                         backend[
                             "awkward_UnionArray_simplify_one",
                             tags.dtype.type,
@@ -653,7 +653,7 @@ class UnionArray(Content):
             and self._tags.nplike is self._backend.index_nplike
             and self._index.nplike is self._backend.index_nplike
         )
-        self._handle_error(
+        self._backend.maybe_kernel_error(
             self._backend[
                 "awkward_UnionArray_project",
                 lenout.dtype.type,
@@ -688,7 +688,7 @@ class UnionArray(Content):
         assert (
             _size.nplike is backend.index_nplike and tags.nplike is backend.index_nplike
         )
-        Content._selfless_handle_error(
+        backend.maybe_kernel_error(
             backend[
                 "awkward_UnionArray_regular_index_getsize",
                 _size.dtype.type,
@@ -707,7 +707,7 @@ class UnionArray(Content):
             and current.nplike is backend.index_nplike
             and tags.nplike is backend.index_nplike
         )
-        Content._selfless_handle_error(
+        backend.maybe_kernel_error(
             backend[
                 "awkward_UnionArray_regular_index",
                 outindex.dtype.type,
@@ -757,7 +757,7 @@ class UnionArray(Content):
                 and f_offsets.nplike is index_nplike
                 and count.nplike is index_nplike
             )
-            Content._selfless_handle_error(
+            backend.maybe_kernel_error(
                 backend[
                     "awkward_UnionArray_nestedfill_tags_index",
                     tags.dtype.type,
@@ -866,7 +866,7 @@ class UnionArray(Content):
                     and self._tags.nplike is self._backend.index_nplike
                     and self._index.nplike is self._backend.index_nplike
                 )
-                self._handle_error(
+                self._backend.maybe_kernel_error(
                     self._backend[
                         "awkward_UnionArray_flatten_length",
                         total_length.dtype.type,
@@ -901,7 +901,7 @@ class UnionArray(Content):
                     and self._tags.nplike is self._backend.index_nplike
                     and self._index.nplike is self._backend.index_nplike
                 )
-                self._handle_error(
+                self._backend.maybe_kernel_error(
                     self._backend[
                         "awkward_UnionArray_flatten_combine",
                         totags.dtype.type,
@@ -993,7 +993,7 @@ class UnionArray(Content):
         contents.extend(self.contents)
 
         assert tags.nplike is self._backend.index_nplike
-        self._handle_error(
+        self._backend.maybe_kernel_error(
             self._backend["awkward_UnionArray_filltags_const", tags.dtype.type](
                 tags.data,
                 0,
@@ -1003,7 +1003,7 @@ class UnionArray(Content):
         )
 
         assert index.nplike is self._backend.index_nplike
-        self._handle_error(
+        self._backend.maybe_kernel_error(
             self._backend["awkward_UnionArray_fillindex_count", index.dtype.type](
                 index.data,
                 0,
@@ -1015,7 +1015,7 @@ class UnionArray(Content):
             tags.nplike is self._backend.index_nplike
             and self.tags.nplike is self._backend.index_nplike
         )
-        self._handle_error(
+        self._backend.maybe_kernel_error(
             self._backend[
                 "awkward_UnionArray_filltags",
                 tags.dtype.type,
@@ -1033,7 +1033,7 @@ class UnionArray(Content):
             index.nplike is self._backend.index_nplike
             and self.index.nplike is self._backend.index_nplike
         )
-        self._handle_error(
+        self._backend.maybe_kernel_error(
             self._backend[
                 "awkward_UnionArray_fillindex",
                 index.dtype.type,
@@ -1087,7 +1087,7 @@ class UnionArray(Content):
                     nexttags.nplike is self._backend.index_nplike
                     and union_tags.nplike is self._backend.index_nplike
                 )
-                self._handle_error(
+                self._backend.maybe_kernel_error(
                     self._backend[
                         "awkward_UnionArray_filltags",
                         nexttags.dtype.type,
@@ -1104,7 +1104,7 @@ class UnionArray(Content):
                     nextindex.nplike is self._backend.index_nplike
                     and union_index.nplike is self._backend.index_nplike
                 )
-                self._handle_error(
+                self._backend.maybe_kernel_error(
                     self._backend[
                         "awkward_UnionArray_fillindex",
                         nextindex.dtype.type,
@@ -1122,7 +1122,7 @@ class UnionArray(Content):
 
             else:
                 assert nexttags.nplike is self._backend.index_nplike
-                self._handle_error(
+                self._backend.maybe_kernel_error(
                     self._backend[
                         "awkward_UnionArray_filltags_const",
                         nexttags.dtype.type,
@@ -1135,7 +1135,7 @@ class UnionArray(Content):
                 )
 
                 assert nextindex.nplike is self._backend.index_nplike
-                self._handle_error(
+                self._backend.maybe_kernel_error(
                     self._backend[
                         "awkward_UnionArray_fillindex_count", nextindex.dtype.type
                     ](nextindex.data, length_so_far, array.length)
