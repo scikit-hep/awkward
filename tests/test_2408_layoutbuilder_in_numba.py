@@ -1150,7 +1150,7 @@ def test_IndexedOption_append_extend():
     array = builder.snapshot()
     assert ak.to_list(array) == [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, None]
 
-    # FIXME
+    # FIXME: keep track of self._last_valid
     # error = ""
     # assert builder.is_valid(error), error
 
