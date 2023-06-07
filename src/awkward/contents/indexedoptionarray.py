@@ -160,7 +160,7 @@ class IndexedOptionArray(Content):
                 inner = content.to_IndexedOptionArray64().index
             result = ak.index.Index64.empty(index.length, nplike=backend.index_nplike)
 
-            Content._selfless_handle_error(
+            backend.maybe_kernel_error(
                 backend[
                     "awkward_IndexedArray_simplify",
                     result.dtype.type,
@@ -350,7 +350,7 @@ class IndexedOptionArray(Content):
 
         _numnull = ak.index.Index64.empty(1, nplike=backend.index_nplike)
         assert _numnull.nplike is index_nplike and self._index.nplike is index_nplike
-        self._handle_error(
+        self._backend.maybe_kernel_error(
             backend[
                 "awkward_IndexedArray_numnull",
                 _numnull.dtype.type,
@@ -377,7 +377,7 @@ class IndexedOptionArray(Content):
             and outindex.nplike is index_nplike
             and self._index.nplike is index_nplike
         )
-        self._handle_error(
+        self._backend.maybe_kernel_error(
             backend[
                 "awkward_IndexedArray_getitem_nextcarry_outindex",
                 nextcarry.dtype.type,
@@ -426,7 +426,7 @@ class IndexedOptionArray(Content):
             and reducedstarts.nplike is self._backend.index_nplike
             and reducedstops.nplike is self._backend.index_nplike
         )
-        self._handle_error(
+        self._maybe_index_error(
             self._backend[
                 "awkward_MaskedArray_getitem_next_jagged_project",
                 outindex.dtype.type,
@@ -514,7 +514,7 @@ class IndexedOptionArray(Content):
                 and mask.nplike is self._backend.index_nplike
                 and self._index.nplike is self._backend.index_nplike
             )
-            self._handle_error(
+            self._backend.maybe_kernel_error(
                 self._backend[
                     "awkward_IndexedArray_overlay_mask",
                     nextindex.dtype.type,
@@ -537,7 +537,7 @@ class IndexedOptionArray(Content):
                 _numnull.nplike is self._backend.index_nplike
                 and self._index.nplike is self._backend.index_nplike
             )
-            self._handle_error(
+            self._backend.maybe_kernel_error(
                 self._backend[
                     "awkward_IndexedArray_numnull",
                     _numnull.dtype.type,
@@ -558,7 +558,7 @@ class IndexedOptionArray(Content):
                 nextcarry.nplike is self._backend.index_nplike
                 and self._index.nplike is self._backend.index_nplike
             )
-            self._handle_error(
+            self._backend.maybe_kernel_error(
                 self._backend[
                     "awkward_IndexedArray_flatten_nextcarry",
                     nextcarry.dtype.type,
@@ -603,7 +603,7 @@ class IndexedOptionArray(Content):
                     and outindex.nplike is self._backend.index_nplike
                     and offsets.nplike is self._backend.index_nplike
                 )
-                self._handle_error(
+                self._backend.maybe_kernel_error(
                     self._backend[
                         "awkward_IndexedArray_flatten_none2empty",
                         outoffsets.dtype.type,
@@ -679,7 +679,7 @@ class IndexedOptionArray(Content):
         content = other._mergemany([self._content])
 
         assert index.nplike is self._backend.index_nplike
-        self._handle_error(
+        self._backend.maybe_kernel_error(
             self._backend["awkward_IndexedArray_fill_count", index.dtype.type](
                 index.data,
                 0,
@@ -696,7 +696,7 @@ class IndexedOptionArray(Content):
             index.nplike is self._backend.index_nplike
             and reinterpreted_index.nplike is self._backend.index_nplike
         )
-        self._handle_error(
+        self._backend.maybe_kernel_error(
             self._backend[
                 "awkward_IndexedArray_fill",
                 index.dtype.type,
@@ -761,7 +761,7 @@ class IndexedOptionArray(Content):
                     nextindex.nplike is self._backend.index_nplike
                     and array_index.nplike is self._backend.index_nplike
                 )
-                self._handle_error(
+                self._backend.maybe_kernel_error(
                     self._backend[
                         "awkward_IndexedArray_fill",
                         nextindex.dtype.type,
@@ -781,7 +781,7 @@ class IndexedOptionArray(Content):
             else:
                 contents.append(array)
                 assert nextindex.nplike is self._backend.index_nplike
-                self._handle_error(
+                self._backend.maybe_kernel_error(
                     self._backend[
                         "awkward_IndexedArray_fill_count",
                         nextindex.dtype.type,
@@ -825,7 +825,7 @@ class IndexedOptionArray(Content):
             index.nplike is self._backend.index_nplike
             and self._index.nplike is self._backend.index_nplike
         )
-        self._handle_error(
+        self._backend.maybe_kernel_error(
             self._backend[
                 "awkward_UnionArray_fillna", index.dtype.type, self._index.dtype.type
             ](index.data, self._index.data, tags.length)
@@ -866,7 +866,7 @@ class IndexedOptionArray(Content):
             and nextstops.nplike is self._backend.index_nplike
             and subranges_length.nplike is self._backend.index_nplike
         )
-        self._handle_error(
+        self._backend.maybe_kernel_error(
             self._backend[
                 "awkward_IndexedArray_ranges_next_64",
                 self._index.dtype.type,
@@ -895,7 +895,7 @@ class IndexedOptionArray(Content):
             and stops.nplike is self._backend.index_nplike
             and nextcarry.nplike is self._backend.index_nplike
         )
-        self._handle_error(
+        self._backend.maybe_kernel_error(
             self._backend[
                 "awkward_IndexedArray_ranges_carry_next_64",
                 self._index.dtype.type,
@@ -961,7 +961,7 @@ class IndexedOptionArray(Content):
                 and parents.nplike is self._backend.index_nplike
                 and nextparents.nplike is self._backend.index_nplike
             )
-            self._handle_error(
+            self._backend.maybe_kernel_error(
                 self._backend[
                     "awkward_IndexedArray_local_preparenext",
                     nextoutindex.dtype.type,
@@ -992,7 +992,7 @@ class IndexedOptionArray(Content):
                 and _len_newnulls.nplike is self._backend.index_nplike
                 and self._index.nplike is self._backend.index_nplike
             )
-            self._handle_error(
+            self._backend.maybe_kernel_error(
                 self._backend[
                     "awkward_IndexedArray_numnull_parents",
                     newnulls.dtype.type,
@@ -1023,7 +1023,7 @@ class IndexedOptionArray(Content):
                 and out._offsets.nplike is self._backend.index_nplike
                 and newnulls.nplike is self._backend.index_nplike
             )
-            self._handle_error(
+            self._backend.maybe_kernel_error(
                 self._backend[
                     "awkward_IndexedArray_unique_next_index_and_offsets_64",
                     newindex.dtype.type,
@@ -1056,7 +1056,7 @@ class IndexedOptionArray(Content):
                 self._backend.index_nplike,
             )
             assert nextoutindex.nplike is self._backend.index_nplike
-            self._handle_error(
+            self._backend.maybe_kernel_error(
                 self._backend[
                     "awkward_IndexedArray_numnull_unique_64",
                     nextoutindex.dtype.type,
@@ -1088,7 +1088,7 @@ class IndexedOptionArray(Content):
                 nextshifts.nplike is self._backend.index_nplike
                 and self._index.nplike is self._backend.index_nplike
             )
-            self._handle_error(
+            self._backend.maybe_kernel_error(
                 self._backend[
                     "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_64",
                     nextshifts.dtype.type,
@@ -1105,7 +1105,7 @@ class IndexedOptionArray(Content):
                 and self._index.nplike is self._backend.index_nplike
                 and shifts.nplike is self._backend.index_nplike
             )
-            self._handle_error(
+            self._backend.maybe_kernel_error(
                 self._backend[
                     "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64",
                     nextshifts.dtype.type,
@@ -1129,7 +1129,7 @@ class IndexedOptionArray(Content):
         _numnull = ak.index.Index64.empty(1, self._backend.index_nplike)
         assert _numnull.nplike is self._backend.index_nplike
 
-        self._handle_error(
+        self._backend.maybe_kernel_error(
             self._backend[
                 "awkward_IndexedArray_numnull",
                 _numnull.dtype.type,
@@ -1151,7 +1151,7 @@ class IndexedOptionArray(Content):
             and nextparents.nplike is self._backend.index_nplike
             and outindex.nplike is self._backend.index_nplike
         )
-        self._handle_error(
+        self._backend.maybe_kernel_error(
             self._backend[
                 "awkward_IndexedArray_reduce_next_64",
                 nextcarry.dtype.type,
@@ -1200,7 +1200,7 @@ class IndexedOptionArray(Content):
         nulls_merged = False
         nulls_index = ak.index.Index64.empty(numnull, self._backend.index_nplike)
         assert nulls_index.nplike is self._backend.index_nplike
-        self._handle_error(
+        self._backend.maybe_kernel_error(
             self._backend[
                 "awkward_IndexedArray_index_of_nulls",
                 nulls_index.dtype.type,
@@ -1236,7 +1236,7 @@ class IndexedOptionArray(Content):
             and parents.nplike is self._backend.index_nplike
             and nextparents.nplike is self._backend.index_nplike
         )
-        self._handle_error(
+        self._backend.maybe_kernel_error(
             self._backend[
                 "awkward_IndexedArray_local_preparenext",
                 nextoutindex.dtype.type,
@@ -1260,7 +1260,7 @@ class IndexedOptionArray(Content):
             # we need to mapping the -1 values to their corresponding indices
             # in `out`
             assert nextoutindex.nplike is self._backend.index_nplike
-            self._handle_error(
+            self._backend.maybe_kernel_error(
                 self._backend["awkward_Index_nones_as_index", nextoutindex.dtype.type](
                     nextoutindex.data,
                     nextoutindex.length,
@@ -1313,7 +1313,7 @@ class IndexedOptionArray(Content):
         )
         assert nextoutindex.nplike is self._backend.index_nplike
 
-        self._handle_error(
+        self._backend.maybe_kernel_error(
             self._backend[
                 "awkward_IndexedArray_local_preparenext",
                 nextoutindex.dtype.type,
@@ -1427,7 +1427,7 @@ class IndexedOptionArray(Content):
                 outoffsets.nplike is self._backend.index_nplike
                 and starts.nplike is self._backend.index_nplike
             )
-            self._handle_error(
+            self._backend.maybe_kernel_error(
                 self._backend[
                     "awkward_IndexedArray_reduce_next_fix_offsets_64",
                     outoffsets.dtype.type,
@@ -1496,7 +1496,7 @@ class IndexedOptionArray(Content):
                 index.nplike is self._backend.index_nplike
                 and mask.nplike is self._backend.index_nplike
             )
-            self._handle_error(
+            self._backend.maybe_kernel_error(
                 self._backend[
                     "awkward_IndexedOptionArray_rpad_and_clip_mask_axis1",
                     index.dtype.type,

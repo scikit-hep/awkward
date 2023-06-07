@@ -269,10 +269,6 @@ class ArrayModuleNumpyLike(NumpyLike):
         assert not isinstance(repeats, PlaceholderArray)
         return self._module.repeat(x, repeats=repeats, axis=axis)
 
-    def tile(self, x: ArrayLike, reps: int) -> ArrayLike:
-        assert not isinstance(x, PlaceholderArray)
-        return self._module.tile(x, reps)
-
     def stack(
         self,
         arrays: list[ArrayLike] | tuple[ArrayLike, ...],

@@ -249,7 +249,7 @@ class BitMaskedArray(Content):
         if content.is_union or content.is_indexed or content.is_option:
             backend = content.backend
             index = ak.index.Index64.empty(mask.length * 8, backend.index_nplike)
-            Content._selfless_handle_error(
+            backend.maybe_kernel_error(
                 backend[
                     "awkward_BitMaskedArray_to_IndexedOptionArray",
                     index.dtype.type,
@@ -356,7 +356,7 @@ class BitMaskedArray(Content):
             index.nplike is self._backend.nplike
             and self._mask.nplike is self._backend.nplike
         )
-        self._handle_error(
+        self._backend.maybe_kernel_error(
             self._backend[
                 "awkward_BitMaskedArray_to_IndexedOptionArray",
                 index.dtype.type,
@@ -381,7 +381,7 @@ class BitMaskedArray(Content):
             bytemask.nplike is self._backend.nplike
             and self._mask.nplike is self._backend.nplike
         )
-        self._handle_error(
+        self._backend.maybe_kernel_error(
             self._backend[
                 "awkward_BitMaskedArray_to_ByteMaskedArray",
                 bytemask.dtype.type,
@@ -447,7 +447,7 @@ class BitMaskedArray(Content):
             bytemask.nplike is self._backend.nplike
             and self._mask.nplike is self._backend.nplike
         )
-        self._handle_error(
+        self._backend.maybe_kernel_error(
             self._backend[
                 "awkward_BitMaskedArray_to_ByteMaskedArray",
                 bytemask.dtype.type,
