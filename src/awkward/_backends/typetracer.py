@@ -44,17 +44,20 @@ class TypeTracerBackend(Backend):
         else:
             return x
 
-    def apply_ufunc(self, ufunc, method, args, kwargs):
-        shape = None
-        numpy_args = []
+    def prepare_ufunc(self, ufunc):
+        def impl(*args, **kwargs):
+            shape = None
+            numpy_args = []
 
-        for x in args:
-            if isinstance(x, TypeTracerArray):
-                x.touch_data()
-                shape = x.shape
+            for x in args:
+                if isinstance(x, TypeTracerArray):
+                    x.touch_data()
+                    shape = x.shape
 
-            numpy_args.append(self._coerce_ufunc_argument(x))
+                numpy_args.append(self._coerce_ufunc_argument(x))
 
-        assert shape is not None
-        tmp = getattr(ufunc, method)(*numpy_args, **kwargs)
-        return self._typetracer.empty((shape[0],) + tmp.shape[1:], dtype=tmp.dtype)
+            assert shape is not None
+            tmp = ufunc(*numpy_args, **kwargs)
+            return self._typetracer.empty((shape[0],) + tmp.shape[1:], dtype=tmp.dtype)
+
+        return impl
