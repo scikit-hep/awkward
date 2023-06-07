@@ -34,15 +34,6 @@ class Reducer(ABC):
     def highlevel_function(cls):
         return getattr(ak.operations, cls.name)
 
-    @abstractmethod
-    def apply(
-        self,
-        array: ak.contents.NumpyArray,
-        parents: ak.index.Index,
-        outlength: ShapeItem,
-    ) -> ak.contents.NumpyArray:
-        raise NotImplementedError
-
     @classmethod
     def _return_dtype(cls, given_dtype: DTypeLike) -> DTypeLike:
         if given_dtype in (np.bool_, np.int8, np.int16, np.int32):
@@ -52,6 +43,15 @@ class Reducer(ABC):
             return np.uint32 if ak._util.win or ak._util.bits32 else np.uint64
 
         return given_dtype
+
+    @abstractmethod
+    def apply(
+        self,
+        array: ak.contents.NumpyArray,
+        parents: ak.index.Index,
+        outlength: ShapeItem,
+    ) -> ak.contents.NumpyArray:
+        raise NotImplementedError
 
     @classmethod
     def _maybe_double_length(cls, type: DTypeLike, length: int) -> int:
@@ -67,14 +67,6 @@ class Reducer(ABC):
             type = np.float32
         return type
 
-    @abstractmethod
-    def apply(
-        self,
-        array: ak.contents.NumpyArray,
-        parents: ak.index.Index,
-        outlength: ShapeItem,
-    ) -> ak.contents.NumpyArray:
-        raise NotImplementedError
 
 class ArgMin(Reducer):
     name: Final = "argmin"
