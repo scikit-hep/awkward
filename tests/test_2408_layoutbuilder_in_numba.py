@@ -240,29 +240,29 @@ def test_Indexed():
     assert len(builder) == 0
 
 
-# def test_Indexed_Record():
-#     builder = lb.Indexed(
-#         np.int64, lb.Record([lb.Numpy(np.float64), lb.Numpy(np.int64)], ["x", "y"])
-#     )
-#     assert len(builder) == 0
-#
-#     content = builder.append_index()
-#     x = content.field("x")
-#     y = content.field("y")
-#
-#     x.append(1.1)
-#     y.append(2)
-#
-#     builder.append_index()
-#     x.append(3.3)
-#     y.append(4)
-#
-#     array = builder.snapshot()
-#     assert ak.to_list(array) == [
-#         {"x": 1.1, "y": 2},
-#         {"x": 3.3, "y": 4},
-#     ]
-#
+def test_Indexed_Record():
+    builder = lb.Indexed(
+        np.int64, lb.Record([lb.Numpy(np.float64), lb.Numpy(np.int64)], ["x", "y"])
+    )
+    assert len(builder) == 0
+
+    content = builder.append_index()
+    x = content.field("x")
+    y = content.field("y")
+
+    x.append(1.1)
+    y.append(2)
+
+    builder.append_index()
+    x.append(3.3)
+    y.append(4)
+
+    array = builder.snapshot()
+    assert ak.to_list(array) == [
+        {"x": 1.1, "y": 2},
+        {"x": 3.3, "y": 4},
+    ]
+
 
 
 def test_IndexedOption():
@@ -344,32 +344,32 @@ def test_Record():
     assert len(builder) == 0
 
 
-# def test_IndexedOption_Record():
-#     builder = lb.IndexedOption(
-#         np.int64, lb.Record([lb.Numpy(np.float64), lb.Numpy(np.int64)], ["x", "y"])
-#     )
-#     assert len(builder) == 0
-#     content = builder.append_index()
-#     x = content.field("x")
-#     y = content.field("y")
-#
-#     x.append(1.1)
-#     y.append(2)
-#
-#     builder.append_null()
-#
-#     builder.append_index()
-#     x.append(3.3)
-#     y.append(4)
-#
-#     array = builder.snapshot()
-#     assert ak.to_list(array) == [
-#         {"x": 1.1, "y": 2},
-#         None,
-#         {"x": 3.3, "y": 4},
-#     ]
-#
-#
+def test_IndexedOption_Record():
+    builder = lb.IndexedOption(
+        np.int64, lb.Record([lb.Numpy(np.float64), lb.Numpy(np.int64)], ["x", "y"])
+    )
+    assert len(builder) == 0
+    content = builder.append_index()
+    x = content.field("x")
+    y = content.field("y")
+
+    x.append(1.1)
+    y.append(2)
+
+    builder.append_null()
+
+    builder.append_index()
+    x.append(3.3)
+    y.append(4)
+
+    array = builder.snapshot()
+    assert ak.to_list(array) == [
+        {"x": 1.1, "y": 2},
+        None,
+        {"x": 3.3, "y": 4},
+    ]
+
+
 # def test_Tuple_Numpy_ListOffset():
 #     builder = lb.Tuple(
 #         [lb.Numpy(np.float64), lb.ListOffset(np.int64, lb.Numpy(np.int32))]
@@ -635,16 +635,16 @@ def test_unbox():
     builder = lb.Numpy(np.int32)
     f1(builder)
 
-    #
-    #     builder = lb.Record(
-    #         [
-    #             lb.Numpy(np.float64),
-    #             lb.Numpy(np.int64),
-    #             lb.Numpy(np.uint8),
-    #         ],
-    #         ["one", "two", "three"],
-    #     )
-    #     f1(builder)
+
+    builder = lb.Record(
+        [
+            lb.Numpy(np.float64),
+            lb.Numpy(np.int64),
+            lb.Numpy(np.uint8),
+        ],
+        ["one", "two", "three"],
+    )
+    f1(builder)
 
     builder = lb.Regular(lb.Numpy(np.float64), size=3)
     f1(builder)
@@ -747,6 +747,16 @@ def test_box():
     out13 = f3(builder)
     assert ak.to_list(out13.snapshot()) == []
 
+    builder = lb.Record(
+        [
+            lb.Numpy(np.float64),
+            lb.Numpy(np.int64),
+            lb.Numpy(np.uint8),
+        ],
+        ["one", "two", "three"],
+    )
+    out14 = f3(builder)
+    assert ak.to_list(out14.snapshot()) == []
 
 def test_len():
     @numba.njit
@@ -790,6 +800,16 @@ def test_len():
     assert f4(builder) == 0
 
     builder = lb.Unmasked(lb.Numpy(np.int64))
+    assert f4(builder) == 0
+
+    builder = lb.Record(
+        [
+            lb.Numpy(np.float64),
+            lb.Numpy(np.int64),
+            lb.Numpy(np.uint8),
+        ],
+        ["one", "two", "three"],
+    )
     assert f4(builder) == 0
 
 
