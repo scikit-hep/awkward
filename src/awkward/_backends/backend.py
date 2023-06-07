@@ -16,7 +16,7 @@ numpy = Numpy.instance()
 
 T = TypeVar("T", covariant=True)
 KernelKeyType: TypeAlias = Tuple[str, Unpack[Tuple[np.dtype, ...]]]
-KernelType: TypeAlias = Callable[..., KernelError | None]
+KernelType: TypeAlias = "Callable[..., KernelError | None]"
 
 
 class Backend(Singleton, ABC):
