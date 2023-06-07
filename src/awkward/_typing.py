@@ -19,7 +19,6 @@ __all__ = list(
         "TypedDict",
         "Literal",
         "SupportsIndex",
-        "ParamSpec",
         *typing.__all__,
     }
 )
@@ -31,7 +30,6 @@ if sys.version_info < (3, 11):
     from typing_extensions import (
         Final,
         Literal,
-        ParamSpec,
         Protocol,
         Self,
         SupportsIndex,
@@ -45,7 +43,6 @@ else:
     from typing import (
         Final,
         Literal,
-        ParamSpec,
         Protocol,
         Self,
         SupportsIndex,
