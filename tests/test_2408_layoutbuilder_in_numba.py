@@ -128,8 +128,8 @@ def test_ListOffset():
     assert builder.is_valid(error), error
 
 
-def test_List():
-    builder = lb.List(np.int32, lb.Numpy(np.float64))
+def test_ListOffset2():
+    builder = lb.ListOffset(np.int32, lb.Numpy(np.float64))
     assert len(builder) == 0
     array = builder.snapshot()
     assert isinstance(array, ak.Array)
@@ -158,11 +158,11 @@ def test_List():
 
     assert (
         builder.type()
-        == "ak.numba.lb.List(int32, ak.numba.lb.Numpy(float64, parameters=None), parameters=None)"
+        == "ak.numba.lb.ListOffset(int32, ak.numba.lb.Numpy(float64, parameters=None), parameters=None)"
     )
     assert (
         str(builder.numbatype())
-        == "ak.numba.lb.List(int32, ak.numba.lb.Numpy(float64, parameters=None), parameters=None)"
+        == "ak.numba.lb.ListOffset(int32, ak.numba.lb.Numpy(float64, parameters=None), parameters=None)"
     )
     builder.clear()
     assert len(builder) == 0
@@ -616,7 +616,7 @@ def test_unbox():
     builder = lb.Indexed(np.int64, lb.Numpy(np.float64))
     f1(builder)
 
-    builder = lb.ListOffset(np.int32, lb.List(np.int64, lb.Numpy(np.int64)))
+    builder = lb.ListOffset(np.int32, lb.ListOffset(np.int64, lb.Numpy(np.int64)))
     f1(builder)
 
     builder = lb.ListOffset(np.int32, lb.Numpy(np.float64))
@@ -625,10 +625,10 @@ def test_unbox():
     builder = lb.ListOffset(np.int32, lb.Empty())
     f1(builder)
 
-    builder = lb.List(np.int8, lb.Numpy(np.int64))
+    builder = lb.ListOffset(np.int8, lb.Numpy(np.int64))
     f1(builder)
 
-    builder = lb.List(np.int32, lb.Empty())
+    builder = lb.ListOffset(np.int32, lb.Empty())
     f1(builder)
 
     builder = lb.Numpy(np.int32)
@@ -705,11 +705,11 @@ def test_box():
     out4 = f3(builder)
     assert ak.to_list(out4.snapshot()) == []
 
-    builder = lb.List(np.int64, lb.Numpy(np.int64))
+    builder = lb.ListOffset(np.int64, lb.Numpy(np.int64))
     out5 = f3(builder)
     assert ak.to_list(out5.snapshot()) == []
 
-    builder = lb.List(np.int32, lb.Empty())
+    builder = lb.ListOffset(np.int32, lb.Empty())
     out6 = f3(builder)
     assert ak.to_list(out6.snapshot()) == []
 
@@ -780,7 +780,7 @@ def test_len():
     builder = lb.ListOffset(np.int32, lb.ListOffset(np.int32, lb.Numpy(np.int64)))
     assert f4(builder) == 0
 
-    builder = lb.List(np.int64, lb.Numpy(np.int32))
+    builder = lb.ListOffset(np.int64, lb.Numpy(np.int32))
     assert f4(builder) == 0
 
     builder = lb.Regular(lb.Numpy(np.float64), 3)
@@ -1007,7 +1007,7 @@ def test_ListOffset_as_string():
     assert ak.to_list(builder.snapshot()) == ["hello", "world"]
 
 
-def test_List_append():
+def test_ListOffset_append2():
     @numba.njit
     def f32(builder):
         content = builder.begin_list()
@@ -1024,7 +1024,7 @@ def test_List_append():
         content.append(5.5)
         builder.end_list()
 
-    builder = lb.List(np.int32, lb.Numpy(np.float64))
+    builder = lb.ListOffset(np.int32, lb.Numpy(np.float64))
     assert len(builder) == 0
 
     array = builder.snapshot()

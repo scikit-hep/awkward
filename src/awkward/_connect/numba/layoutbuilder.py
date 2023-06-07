@@ -37,8 +37,6 @@ def to_numbatype(content):
         return Numpy.numbatype(content)
     elif isinstance(content, Empty):
         return Empty.numbatype(content)
-    elif isinstance(content, List):
-        return List.numbatype(content)
     elif isinstance(content, ListOffset):
         return ListOffset.numbatype(content)
     elif isinstance(content, Regular):
@@ -89,11 +87,6 @@ def typeof_LayoutBuilder(val, c):
     elif isinstance(val, ListOffset):
         return ListOffsetType(
             numba.from_dtype(val._offsets.dtype), val._content, val._parameters
-        )
-
-    elif isinstance(val, List):
-        return ListType(
-            numba.from_dtype(val._starts.dtype), val._content, val._parameters
         )
 
     elif isinstance(val, Regular):
@@ -153,7 +146,6 @@ def LayoutBuilderType_len(builder):
             IndexedOptionType,  # append, extend, append_null(0 args), extend_null(1 int arg)
             IndexedType,  # append, extend,
             ListOffsetType,  # begin_list->content, end_list (both modify offsets)
-            ListType,  # begin_list->content, end_list (both modify offsets)
             NumpyType,  # append, extend,
             RecordType,  # field (Literal string) alias, content (Literal int and string) method
             RegularType,  # begin_list->content, end_list content property
@@ -729,246 +721,6 @@ def ListOffset_end_list(builder):
         return impl
 
 
-########## List ############################################################
-
-
-@final
-class List(LayoutBuilder):
-    def __init__(self, dtype, content, *, parameters=None, initial=1024, resize=8.0):
-        self._starts = GrowableBuffer(dtype=dtype, initial=initial, resize=resize)
-        self._stops = GrowableBuffer(dtype=dtype, initial=initial, resize=resize)
-        self._content = content
-        self._parameters = parameters
-
-    def __repr__(self):
-        return f"ak.numba.lb.List({self.starts.dtype}, {self._content}, parameters={self._parameters})"
-
-    def type(self):
-        return f"ak.numba.lb.List({self.starts.dtype}, {self._content}, parameters={self._parameters})"
-
-    def numbatype(self):
-        return ListType(
-            numba.from_dtype(self.starts.dtype),
-            self.content,
-            numba.types.StringLiteral(self._parameters),
-        )
-
-    @property
-    def starts(self):
-        return self._starts
-
-    @property
-    def stops(self):
-        return self._stops
-
-    @property
-    def content(self):
-        return self._content
-
-    def begin_list(self):
-        self.starts.append(len(self.content))
-        return self.content
-
-    def end_list(self):
-        self.stops.append(len(self.content))
-
-    def parameters(self):
-        return self._parameters
-
-    def clear(self):
-        self._starts.clear()
-        self._stops.clear()
-        self._content.clear()
-
-    @property
-    def _length(self):
-        return len(self._starts)
-
-    def __len__(self):
-        return self._length
-
-    def is_valid(self, error: str):
-        if len(self.starts) != len(self.stops):
-            error = f"List node{self._id} has starts length {len(self.starts)} but stops length {len(self.stops)}"
-        elif len(self.stops) > 0 and len(self.content) != self.stops.last():
-            error = f"List has content length {len(self.content)} but last stops {self.stops.last()}"
-            return False
-        else:
-            return self._content.is_valid(error)
-
-    def snapshot(self) -> ArrayLike:
-        """
-        Converts the currently accumulated data into an #ak.Array.
-        """
-        return ak.Array(
-            ak.contents.ListArray(
-                ak.index.Index(self.starts.snapshot()),
-                ak.index.Index(self.stops.snapshot()),
-                self.content.snapshot().layout,
-                parameters=self._parameters,
-            )
-        )
-
-
-class ListType(numba.types.Type):
-    def __init__(self, dtype, content, parameters):
-        super().__init__(
-            name=f"ak.numba.lb.List({dtype}, {content.type()}, parameters={parameters.literal_value if isinstance(parameters, numba.types.Literal) else None})"
-        )
-        self._dtype = dtype
-        self._content = content
-        self._parameters = parameters
-
-    @classmethod
-    def type(cls):
-        return ListType(cls.starts.dtype, cls.content, cls.parameters)
-
-    @property
-    def parameters(self):
-        return numba.types.StringLiteral(self._parameters)
-
-    @property
-    def starts(self):
-        return ak.numba.GrowableBufferType(self._dtype)
-
-    @property
-    def stops(self):
-        return ak.numba.GrowableBufferType(self._dtype)
-
-    @property
-    def content(self):
-        return to_numbatype(self._content)
-
-    @property
-    def length(self):
-        return numba.types.float64
-
-
-@numba.extending.register_model(ListType)
-class ListModel(numba.extending.models.StructModel):
-    def __init__(self, dmm, fe_type):
-        members = [
-            ("starts", fe_type.starts),
-            ("stops", fe_type.stops),
-            ("content", fe_type.content),
-        ]
-        super().__init__(dmm, fe_type, members)
-
-
-for member in (
-    "starts",
-    "stops",
-    "content",
-):
-    numba.extending.make_attribute_wrapper(ListType, member, "_" + member)
-
-
-@numba.extending.unbox(ListType)
-def ListType_unbox(typ, obj, c):
-    # get PyObjects
-    starts_obj = c.pyapi.object_getattr_string(obj, "_starts")
-    stops_obj = c.pyapi.object_getattr_string(obj, "_stops")
-    content_obj = c.pyapi.object_getattr_string(obj, "_content")
-
-    # fill the lowered model
-    out = numba.core.cgutils.create_struct_proxy(typ)(c.context, c.builder)
-    out.starts = c.pyapi.to_native_value(typ.starts, starts_obj).value
-    out.stops = c.pyapi.to_native_value(typ.stops, stops_obj).value
-    out.content = c.pyapi.to_native_value(typ.content, content_obj).value
-
-    # decref PyObjects
-    c.pyapi.decref(starts_obj)
-    c.pyapi.decref(stops_obj)
-    c.pyapi.decref(content_obj)
-
-    # return it or the exception
-    is_error = numba.core.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
-    return numba.extending.NativeValue(out._getvalue(), is_error=is_error)
-
-
-@numba.extending.box(ListType)
-def ListType_box(typ, val, c):
-    # get PyObject of the List class
-    List_obj = c.pyapi.unserialize(c.pyapi.serialize_object(List))
-
-    builder = numba.core.cgutils.create_struct_proxy(typ)(
-        c.context, c.builder, value=val
-    )
-    starts_obj = c.pyapi.from_native_value(typ.starts, builder.starts, c.env_manager)
-    stops_obj = c.pyapi.from_native_value(typ.stops, builder.stops, c.env_manager)
-    content_obj = c.pyapi.from_native_value(typ.content, builder.content, c.env_manager)
-
-    out = c.pyapi.call_function_objargs(
-        List_obj,
-        (
-            starts_obj,
-            content_obj,
-        ),
-    )
-
-    # decref PyObjects
-    c.pyapi.decref(List_obj)
-
-    c.pyapi.decref(starts_obj)
-    c.pyapi.decref(stops_obj)
-    c.pyapi.decref(content_obj)
-
-    return out
-
-
-@numba.extending.overload_method(ListType, "_length_get", inline="always")
-def List_length(builder):
-    def getter(builder):
-        return builder._starts._length_pos[0]
-
-    return getter
-
-
-@numba.extending.overload_method(ListType, "_starts", inline="always")
-def List_starts(builder):
-    def getter(builder):
-        return builder._starts
-
-    return getter
-
-
-@numba.extending.overload_method(ListType, "_stops", inline="always")
-def List_stops(builder):
-    def getter(builder):
-        return builder._stops
-
-    return getter
-
-
-@numba.extending.overload_method(ListType, "begin_list", inline="always")
-def List_begin_list(builder):
-    if isinstance(builder, ListType):
-
-        def getter(builder):
-            builder._starts.append(len(builder._content))
-            return builder._content
-
-        return getter
-
-
-@numba.extending.overload_method(ListType, "end_list", inline="always")
-def List_end_list(builder):
-    if isinstance(builder, ListType):
-
-        def impl(builder):
-            builder._stops.append(len(builder._content))
-
-        return impl
-
-
-@numba.extending.overload_method(ListType, "snapshot")
-def List_snapshot(builder):
-    def snapshot(builder):
-        return builder.snapshot()
-
-    return snapshot
-
-
 ########## Regular ############################################################
 
 
@@ -1023,7 +775,7 @@ class Regular(LayoutBuilder):
     def __len__(self):
         return self._length
 
-    def is_valid(self, error: str):
+    def is_valid(self, error: str):  # structure_valid
         if len(self.content) != self._length * self.size:
             error = f"Regular node{self._id} has content length {len(self.content)}, but length {self._length} and size {self.size}"
             return False
@@ -2524,7 +2276,7 @@ class Record(LayoutBuilder):
         return self._fields
 
     def __repr__(self):
-        return f"Record({self.contents}, {self.fields}, parameters={self._parameters})"
+        return f"ak.numba.lb.Record({self.contents}, {self.fields}, parameters={self._parameters})"
 
     def type(self):
         return f"ak.numba.lb.Record({self.contents}, {self.fields}, parameters={self._parameters})"
@@ -2605,9 +2357,6 @@ class RecordType(numba.types.Type):
 
     @property
     def contents(self):
-        # FIXME:
-        # Lists must be strictly homogeneous: Numba will reject any list
-        # containing objects of different types, even if the types are compatible
         return numba.types.Tuple(to_numbatype(self._contents))
 
     @property
