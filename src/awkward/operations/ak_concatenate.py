@@ -297,12 +297,12 @@ def _merge_as_union(
 
     offset = 0
     for i, content in enumerate(contents):
-        content._handle_error(
+        content.backend.maybe_kernel_error(
             content.backend["awkward_UnionArray_filltags_const", tags.dtype.type](
                 tags.data, offset, content.length, i
             )
         )
-        content._handle_error(
+        content.backend.maybe_kernel_error(
             content.backend["awkward_UnionArray_fillindex_count", index.dtype.type](
                 index.data, offset, content.length
             )

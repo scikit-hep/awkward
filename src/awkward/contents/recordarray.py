@@ -912,7 +912,7 @@ class RecordArray(Content):
                 offsets.nplike is self._backend.index_nplike
                 and parents.nplike is self._backend.index_nplike
             )
-            self._handle_error(
+            self._backend.maybe_kernel_error(
                 self._backend[
                     "awkward_ListOffsetArray_reduce_local_outoffsets_64",
                     offsets.dtype.type,
@@ -955,7 +955,7 @@ class RecordArray(Content):
                         and parents.nplike is self._backend.index_nplike
                         and starts.nplike is self._backend.index_nplike
                     )
-                    self._handle_error(
+                    self._backend.maybe_kernel_error(
                         self._backend[
                             "awkward_NumpyArray_reduce_adjust_starts_64",
                             out.data.dtype.type,
@@ -975,7 +975,7 @@ class RecordArray(Content):
                         and starts.nplike is self._backend.index_nplike
                         and shifts.nplike is self._backend.index_nplike
                     )
-                    self._handle_error(
+                    self._backend.maybe_kernel_error(
                         self._backend[
                             "awkward_NumpyArray_reduce_adjust_starts_shifts_64",
                             out.data.dtype.type,
@@ -997,7 +997,7 @@ class RecordArray(Content):
                     outmask.nplike is self._backend.index_nplike
                     and parents.nplike is self._backend.index_nplike
                 )
-                self._handle_error(
+                self._backend.maybe_kernel_error(
                     self._backend[
                         "awkward_NumpyArray_reduce_mask_ByteMaskedArray_64",
                         outmask.dtype.type,
