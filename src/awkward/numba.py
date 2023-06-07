@@ -153,7 +153,10 @@ class GrowableBuffer:
         return out
 
     def clear(self):
-        self._panels.clear()
+        import numba
+
+        initial = len(self._panels[0])
+        self._panels = numba.typed.List([numpy.empty((initial,), dtype=self.dtype)])
         self._length = 0
         self._pos = 0
 
