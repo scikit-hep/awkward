@@ -369,44 +369,43 @@ def test_IndexedOption_Record2():
     ]
 
 
-# def test_Tuple_Numpy_ListOffset():
-#     builder = lb.Tuple(
-#         [lb.Numpy(np.float64), lb.ListOffset(np.int64, lb.Numpy(np.int32))]
-#     )
-#     assert len(builder) == 0
-#
-#     error = ""
-#     assert builder.is_valid(error) is True
-#
-#     one = builder.index(0)
-#     one.append(1.1)
-#     two = builder.index(1)
-#     two_list = two.begin_list()
-#     two_list.append(1)
-#     two.end_list()
-#
-#     assert builder.is_valid(error) is True
-#
-#     one.append(2.2)
-#     two.begin_list()
-#     two_list.append(1)
-#     two_list.append(2)
-#     two.end_list()
-#
-#     assert builder.is_valid(error) is True
-#
-#     one.append(3.3)
-#     two.begin_list()
-#     two_list.append(1)
-#     two_list.append(2)
-#     two_list.append(3)
-#     two.end_list()
-#
-#     array = builder.snapshot()
-#     assert ak.to_list(array) == [(1.1, [1]), (2.2, [1, 2]), (3.3, [1, 2, 3])]
-#
-#     assert builder.is_valid(error) is True
-#
+def test_Tuple_Numpy_ListOffset():
+    builder = lb.Tuple(
+        [lb.Numpy(np.float64), lb.ListOffset(np.int64, lb.Numpy(np.int32))]
+    )
+    assert len(builder) == 0
+
+    error = ""
+    assert builder.is_valid(error) is True
+
+    one = builder.index(0)
+    one.append(1.1)
+    two = builder.index(1)
+    two_list = two.begin_list()
+    two_list.append(1)
+    two.end_list()
+
+    assert builder.is_valid(error) is True
+
+    one.append(2.2)
+    two.begin_list()
+    two_list.append(1)
+    two_list.append(2)
+    two.end_list()
+
+    assert builder.is_valid(error) is True
+
+    one.append(3.3)
+    two.begin_list()
+    two_list.append(1)
+    two_list.append(2)
+    two_list.append(3)
+    two.end_list()
+
+    array = builder.snapshot()
+    assert ak.to_list(array) == [(1.1, [1]), (2.2, [1, 2]), (3.3, [1, 2, 3])]
+
+    assert builder.is_valid(error) is True
 
 
 def test_Unmasked():
@@ -664,11 +663,11 @@ def test_unbox():
     builder = lb.Regular(lb.Numpy(np.float64), size=3)
     f1(builder)
 
-    #     builder = lb.Tuple(
-    #         [lb.Numpy(np.float64), lb.ListOffset(np.int64, lb.Numpy(np.int32))]
-    #     )
-    #     f1(builder)
-    #
+    builder = lb.Tuple(
+        [lb.Numpy(np.float64), lb.ListOffset(np.int64, lb.Numpy(np.int32))]
+    )
+    f1(builder)
+
     #     builder = lb.Union(
     #         np.int64,
     #         [
@@ -773,6 +772,12 @@ def test_box():
     out14 = f3(builder)
     assert ak.to_list(out14.snapshot()) == []
 
+    builder = lb.Tuple(
+        [lb.Numpy(np.float64), lb.ListOffset(np.int64, lb.Numpy(np.int32))]
+    )
+    out15 = f3(builder)
+    assert ak.to_list(out15.snapshot()) == []
+
 
 def test_len():
     @numba.njit
@@ -825,6 +830,11 @@ def test_len():
             lb.Numpy(np.uint8),
         ],
         ["one", "two", "three"],
+    )
+    assert f4(builder) == 0
+
+    builder = lb.Tuple(
+        [lb.Numpy(np.float64), lb.ListOffset(np.int64, lb.Numpy(np.int32))]
     )
     assert f4(builder) == 0
 
@@ -1392,6 +1402,40 @@ def test_Record_content():
     f53(builder)
     array = builder.snapshot()
     assert ak.to_list(array) == [{"one": 1.1, "three": "o", "two": 1}]
+
+    error = ""
+    assert builder.is_valid(error), error
+
+    assert len(builder) == 1
+    builder.clear()
+    assert len(builder) == 0
+
+
+def test_Tuple_append():
+    @numba.njit
+    def f54(builder):
+        content_one = builder._contents[0]
+        content_one.append(1.1)
+        content_two = builder._contents[1]
+        content_list = content_two.begin_list()
+        content_list.append(1)
+        content_list.append(2)
+        content_list.append(3)
+        content_two.end_list()
+
+    builder = lb.Tuple(
+        [lb.Numpy(np.float64), lb.ListOffset(np.int64, lb.Numpy(np.int32))]
+    )
+    f54(builder)
+    array = builder.snapshot()
+    assert ak.to_list(array) == [(1.1, [1, 2, 3])]
+
+    error = ""
+    assert builder.is_valid(error), error
+
+    assert len(builder) == 1
+    builder.clear()
+    assert len(builder) == 0
 
 
 def test_numba_append():

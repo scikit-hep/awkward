@@ -116,7 +116,7 @@ def typeof_LayoutBuilder(val, c):
         return RegularType(val._content, val._size, val._parameters)
 
     elif isinstance(val, Tuple):
-        return TupleType(val._contents)
+        return TupleType(val._contents, val._parameters)
 
     elif isinstance(val, Union):
         return UnionType(numba.from_dtype(val._index.dtype), val._contents)
@@ -2247,8 +2247,24 @@ def Record_content(builder, name):
 class Tuple(LayoutBuilder):
     def __init__(self, contents, *, parameters=None):
         assert len(contents) != 0
-        self._contents = contents
+        self._contents = tuple(contents)
         self._parameters = parameters
+
+    @property
+    def contents(self):
+        return self._contents
+
+    def __repr__(self):
+        return f"ak.numba.lb.Tuple({self.contents}, parameters={self._parameters})"
+
+    def type(self):
+        return f"ak.numba.lb.Tuple({self.contents}, parameters={self._parameters})"
+
+    def numbatype(self):
+        return TupleType(
+            self.contents,
+            numba.types.StringLiteral(self._parameters),
+        )
 
     def index(self, at):
         return self._contents[at]
@@ -2257,14 +2273,15 @@ class Tuple(LayoutBuilder):
         return self._parameters
 
     def clear(self):
-        for _content in self._contents:
-            _content.clear()
+        for content in self._contents:
+            content.clear()
 
-    def length(self):
+    @property
+    def _length(self):
         return len(self._contents[0])
 
     def __len__(self):
-        return self.length()
+        return self._length
 
     def is_valid(self, error: str):
         length = -1
@@ -2272,7 +2289,7 @@ class Tuple(LayoutBuilder):
             if length == -1:
                 length = len(content)
             elif length != len(content):
-                error = f"Tuple node{self._id} has index {index} length {len(content)} that differs from the first length {length}"
+                error = f"Tuple has index {index} length {len(content)} that differs from the first length {length}"
                 return False
         for content in self._contents:
             if not content.is_valid(error):
@@ -2297,24 +2314,28 @@ class Tuple(LayoutBuilder):
 
 
 class TupleType(numba.types.Type):
-    def __init__(self, contents):
-        super().__init__(name=f"ak.numba.lb.Tuple({contents})")
+    def __init__(self, contents, parameters):
+        super().__init__(
+            name=f"ak.numba.lb.Tuple({contents}, parameters={parameters.literal_value if isinstance(parameters, numba.types.Literal) else None})"
+        )
         self._contents = contents
+        self._parameters = parameters
 
     @classmethod
     def type(cls):
-        return TupleType(cls.contents)
-
-    def __repr__(self):
-        return f"<Tuple of {self._contents!r}>"
+        return TupleType(cls.contents, cls.parameters)
 
     @property
     def parameters(self):
         return numba.types.StringLiteral
 
     @property
-    def index(self, at):
-        return to_numbatype(self._contents[at])
+    def contents(self):
+        return numba.types.Tuple([to_numbatype(it) for it in self._contents])
+
+    # @property
+    # def index(self, at):
+    #     return to_numbatype(self._contents[at])
 
     @property
     def length(self):
@@ -2325,23 +2346,63 @@ class TupleType(numba.types.Type):
 class TupleModel(numba.extending.models.StructModel):
     def __init__(self, dmm, fe_type):
         members = [
-            # ("contents", fe_type.contents),
+            ("contents", fe_type.contents),
         ]
         super().__init__(dmm, fe_type, members)
 
 
-# for member in ("contents",):
-#     numba.extending.make_attribute_wrapper(TupleType, member, "_" + member)
+for member in ("contents",):
+    numba.extending.make_attribute_wrapper(TupleType, member, "_" + member)
 
 
 @numba.extending.unbox(TupleType)
 def TupleType_unbox(typ, obj, c):
+    # get PyObjects
+    contents_obj = c.pyapi.object_getattr_string(obj, "_contents")
+
     # fill the lowered model
     out = numba.core.cgutils.create_struct_proxy(typ)(c.context, c.builder)
+    out.contents = c.pyapi.to_native_value(typ.contents, contents_obj).value
+
+    # decref PyObjects
+    c.pyapi.decref(contents_obj)
 
     # return it or the exception
     is_error = numba.core.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
     return numba.extending.NativeValue(out._getvalue(), is_error=is_error)
+
+
+@numba.extending.box(TupleType)
+def TupleType_box(typ, val, c):
+    # get PyObject of the Tuple class
+    Tuple_obj = c.pyapi.unserialize(c.pyapi.serialize_object(Tuple))
+
+    builder = numba.core.cgutils.create_struct_proxy(typ)(
+        c.context, c.builder, value=val
+    )
+    contents_obj = c.pyapi.from_native_value(
+        typ.contents, builder.contents, c.env_manager
+    )
+
+    out = c.pyapi.call_function_objargs(
+        Tuple_obj,
+        (contents_obj,),
+    )
+
+    # decref PyObjects
+    c.pyapi.decref(Tuple_obj)
+
+    c.pyapi.decref(contents_obj)
+
+    return out
+
+
+@numba.extending.overload_method(TupleType, "_length_get", inline="always")
+def Tuple_length(builder):
+    def getter(builder):
+        return len(builder._contents[0])
+
+    return getter
 
 
 ########## Union #######################################################
