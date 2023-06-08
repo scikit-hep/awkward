@@ -644,6 +644,23 @@ def test_unbox():
     )
     f1(builder)
 
+    @numba.njit(debug=True)
+    def f1111(x):
+        i = x._contents[0]
+        i = x._contents[1]
+        i = x._contents[2]
+        return i
+
+    f1111(builder)
+
+    @numba.njit(debug=True)
+    def f111(x, indx):
+        i = x._contents[indx]
+        return i
+
+    # FIXME: Tuple needs a compile-time index
+    # f111(builder, 0)
+
     builder = lb.Regular(lb.Numpy(np.float64), size=3)
     f1(builder)
 
@@ -1336,12 +1353,20 @@ def test_Unmasked_append_extend():
 
 def test_Record_content():
     @numba.njit
-    def f51(builder):
-        content_one = builder.content("one")
+    def f51(builder, name):
+        return builder._field_index(name)
+
+    @numba.njit
+    def f52(builder, name):
+        return builder.content(name)
+
+    @numba.njit
+    def f53(builder):
+        content_one = builder._contents[0]  # content("one")
         content_one.append(1.1)
-        content_two = builder.content("two")
+        content_two = builder._contents[1]  # content("two")
         content_two.append(1)
-        content_three = builder.content("three")
+        content_three = builder._contents[2]  # content("three")
         content_three.append(111)
 
     builder = lb.Record(
@@ -1352,11 +1377,21 @@ def test_Record_content():
         ],
         ["one", "two", "three"],
     )
+    assert f51(builder, "one") == 0
+    assert f51(builder, "two") == 1
+    assert f51(builder, "three") == 2
 
-    f51(builder)
+    with pytest.raises(ValueError):
+        f51(builder, "four")  # ValueError: tuple.index(x): x not in tuple
 
+    # FIXME: Tuple needs a compile-time index
+    # getitem(Tuple(ak.numba.lb.Numpy(float64, parameters=None), ak.numba.lb.Numpy(int64, parameters=None), ak.numba.lb.Numpy(uint8, parameters={'__array__': 'char'})), int64)
+    # content = f52(builder, 0)
+    # print(content)
+
+    f53(builder)
     array = builder.snapshot()
-    assert ak.to_list(array) == []
+    assert ak.to_list(array) == [{"one": 1.1, "three": "o", "two": 1}]
 
 
 def test_numba_append():

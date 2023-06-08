@@ -2123,7 +2123,7 @@ class RecordType(numba.types.Type):
 
     @property
     def contents(self):
-        return numba.types.Tuple(to_numbatype(self._contents))
+        return numba.types.Tuple([to_numbatype(it) for it in self._contents])
 
     @property
     def fields(self):
@@ -2131,9 +2131,12 @@ class RecordType(numba.types.Type):
             to_numbatype([numba.types.StringLiteral(it) for it in self._fields])
         )
 
-    def content(self, name):  # Literal string or Literal int
-        return to_numbatype(self._contents[self._fields.index(name)])
-
+    # def content(self, name):  # Literal string or Literal int
+    #     return to_numbatype(self._contents[self._fields.index(name)])
+    #
+    # def field(self, name):  # Literal string or Literal int
+    #     return to_numbatype(self._contents[self._fields.index(name)])
+    #
     @property
     def length(self):
         return numba.types.int64
@@ -2212,6 +2215,29 @@ def Record_length(builder):
         return len(builder._contents[0])
 
     return getter
+
+
+@numba.extending.overload_method(RecordType, "_field_index")
+def Record_field_index(builder, name):
+    if isinstance(builder, RecordType):
+
+        def getter(builder, name):
+            return builder._fields.index(name)
+
+        return getter
+
+
+@numba.extending.overload_method(RecordType, "content")
+def Record_content(builder, name):
+    if isinstance(builder, RecordType):
+
+        def getter(builder, name):
+            # FIXME: Tuple needs a compile-time index
+            content = builder._contents[builder._fields.index(name)]
+
+            return content
+
+        return getter
 
 
 ########## Tuple #######################################################
