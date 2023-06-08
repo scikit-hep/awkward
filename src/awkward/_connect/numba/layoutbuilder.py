@@ -119,7 +119,9 @@ def typeof_LayoutBuilder(val, c):
         return TupleType(val._contents, val._parameters)
 
     elif isinstance(val, Union):
-        return UnionType(numba.from_dtype(val._index.dtype), val._contents)
+        return UnionType(
+            numba.from_dtype(val._index.dtype), val._contents, val._parameters
+        )
 
     elif isinstance(val, Unmasked):
         return UnmaskedType(val._content, val._parameters)
@@ -142,8 +144,7 @@ def LayoutBuilderType_len(builder):
             RecordType,
             RegularType,
             TupleType,
-            UnionType,  # append_index (Literal int) updates tags and index -> content
-            # and content (Literal int) method
+            UnionType,
             UnmaskedType,
         ),
     ):
@@ -2422,8 +2423,25 @@ class Union(LayoutBuilder):
         self._last_valid_index = [-1] * len(contents)
         self._tags = GrowableBuffer("int8", initial=initial, resize=resize)
         self._index = GrowableBuffer(dtype=dtype, initial=initial, resize=resize)
-        self._contents = contents
+        self._contents = tuple(contents)
         self._parameters = parameters
+
+    @property
+    def contents(self):
+        return self._contents
+
+    def __repr__(self):
+        return f"ak.numba.lb.Union({self._index.dtype}, {self.contents}, parameters={self._parameters})"
+
+    def type(self):
+        return f"ak.numba.lb.Union({self._index.dtype}, {self.contents}, parameters={self._parameters})"
+
+    def numbatype(self):
+        return UnionType(
+            numba.from_dtype(self._index.dtype),
+            self.contents,
+            numba.types.StringLiteral(self._parameters),
+        )
 
     def append_index(self, tag):
         which_content = self._contents[tag]
@@ -2444,16 +2462,17 @@ class Union(LayoutBuilder):
         for content in self._contents:
             content.clear()
 
-    def length(self):
+    @property
+    def _length(self):
         return len(self._tags)
 
     def __len__(self):
-        return self.length()
+        return self._length
 
     def is_valid(self, error: str):
         for tag, _value in self._last_valid_index:
             if self._contents[tag].length() != self._last_valid_index[tag] + 1:
-                error = f"Union node{self._id} has content {tag} length {self._contents[tag].length()} but last valid index is {self._last_valid_index[tag]}"
+                error = f"Union has content {tag} length {self._contents[tag].length()} but last valid index is {self._last_valid_index[tag]}"
                 return False
         for content in self._contents:
             if not content.is_valid(error):
@@ -2479,18 +2498,29 @@ class Union(LayoutBuilder):
 
 
 class UnionType(numba.types.Type):
-    def __init__(self, dtype, contents):
-        super().__init__(name="ak.numba.lb.Union()")
+    def __init__(self, dtype, contents, parameters):
+        super().__init__(
+            name=f"ak.numba.lb.Union({dtype}, {contents},  parameters={parameters.literal_value if isinstance(parameters, numba.types.Literal) else None})"
+        )
         self._dtype = dtype
         self._contents = contents
+        self._parameters = parameters
 
     @classmethod
     def type(cls):
-        return UnionType(cls._is_tuple)
+        return UnionType(cls.index.dtype, cls.contents, cls.parameters)
 
     @property
     def parameters(self):
         return numba.types.StringLiteral
+
+    @property
+    def index(self):
+        return ak.numba.GrowableBufferType(self._dtype)
+
+    @property
+    def contents(self):
+        return numba.types.Tuple([to_numbatype(it) for it in self._contents])
 
     @property
     def length(self):
@@ -2501,20 +2531,72 @@ class UnionType(numba.types.Type):
 class UnionModel(numba.extending.models.StructModel):
     def __init__(self, dmm, fe_type):
         members = [
-            # ("contents", fe_type.contents),
+            ("index", fe_type.index),
+            ("contents", fe_type.contents),
         ]
         super().__init__(dmm, fe_type, members)
 
 
-# for member in ("contents", ):
-#     numba.extending.make_attribute_wrapper(UnionType, member, "_" + member)
+for member in (
+    "index",
+    "contents",
+):
+    numba.extending.make_attribute_wrapper(UnionType, member, "_" + member)
 
 
 @numba.extending.unbox(UnionType)
 def UnionType_unbox(typ, obj, c):
+    # get PyObjects
+    index_obj = c.pyapi.object_getattr_string(obj, "_index")
+    contents_obj = c.pyapi.object_getattr_string(obj, "_contents")
+
     # fill the lowered model
     out = numba.core.cgutils.create_struct_proxy(typ)(c.context, c.builder)
+    out.index = c.pyapi.to_native_value(typ.index, index_obj).value
+    out.contents = c.pyapi.to_native_value(typ.contents, contents_obj).value
+
+    # decref PyObjects
+    c.pyapi.decref(index_obj)
+    c.pyapi.decref(contents_obj)
 
     # return it or the exception
     is_error = numba.core.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
     return numba.extending.NativeValue(out._getvalue(), is_error=is_error)
+
+
+@numba.extending.box(UnionType)
+def UnionType_box(typ, val, c):
+    # get PyObject of the Tuple class
+    Union_obj = c.pyapi.unserialize(c.pyapi.serialize_object(Union))
+
+    builder = numba.core.cgutils.create_struct_proxy(typ)(
+        c.context, c.builder, value=val
+    )
+    index_obj = c.pyapi.from_native_value(typ.index, builder.index, c.env_manager)
+    contents_obj = c.pyapi.from_native_value(
+        typ.contents, builder.contents, c.env_manager
+    )
+
+    out = c.pyapi.call_function_objargs(
+        Union_obj,
+        (
+            index_obj,
+            contents_obj,
+        ),
+    )
+
+    # decref PyObjects
+    c.pyapi.decref(Union_obj)
+
+    c.pyapi.decref(index_obj)
+    c.pyapi.decref(contents_obj)
+
+    return out
+
+
+@numba.extending.overload_method(UnionType, "_length_get", inline="always")
+def Union_length(builder):
+    def getter(builder):
+        return len(builder._contents[0])
+
+    return getter

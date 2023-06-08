@@ -528,72 +528,72 @@ def test_BitMasked():
     assert len(builder) == 0
 
 
-# def test_Union_Numpy_ListOffset():
-#     builder = lb.Union(
-#         np.int64,
-#         [
-#             lb.Numpy(np.float64),
-#             lb.ListOffset(np.int64, lb.Numpy(np.int32)),
-#         ],
-#     )
-#     assert len(builder) == 0
-#
-#     # error = ""
-#     # assert builder.is_valid(error) == True
-#
-#     one = builder.append_index(0)
-#     one.append(1.1)
-#
-#     # assert builder.is_valid(error) == True
-#
-#     two = builder.append_index(1)
-#     list = two.begin_list()
-#     list.append(1)
-#     list.append(2)
-#     two.end_list()
-#
-#     # assert builder.is_valid(error) == True
-#
-#     array = builder.snapshot()
-#     assert ak.to_list(array) == [1.1, [1, 2]]
-#
-#
-# def test_Union_ListOffset_Record():
-#     builder = lb.Union(
-#         np.int64,
-#         [
-#             lb.ListOffset(np.int64, lb.Numpy(np.int32)),
-#             lb.Record([lb.Numpy(np.float64), lb.Numpy(np.int64)], ["x", "y"]),
-#         ],
-#     )
-#     assert len(builder) == 0
-#
-#     one = builder.append_index(0)
-#     list = one.begin_list()
-#     list.append(1)
-#     list.append(3)
-#     one.end_list()
-#
-#     two = builder.append_index(1)
-#     x = two.field("x")
-#     y = two.field("y")
-#
-#     x.append(1.1)
-#     y.append(11)
-#
-#     builder.append_index(0)
-#     list = one.begin_list()
-#     list.append(5.5)
-#     one.end_list()
-#
-#     builder.append_index(1)
-#     x.append(2.2)
-#     y.append(22)
-#
-#     array = builder.snapshot()
-#     assert ak.to_list(array) == [[1, 3], {"x": 1.1, "y": 11}, [5], {"x": 2.2, "y": 22}]
-#
-#
+def test_Union_Numpy_ListOffset():
+    builder = lb.Union(
+        np.int64,
+        [
+            lb.Numpy(np.float64),
+            lb.ListOffset(np.int64, lb.Numpy(np.int32)),
+        ],
+    )
+    assert len(builder) == 0
+
+    # error = ""
+    # assert builder.is_valid(error) == True
+
+    one = builder.append_index(0)
+    one.append(1.1)
+
+    # assert builder.is_valid(error) == True
+
+    two = builder.append_index(1)
+    list = two.begin_list()
+    list.append(1)
+    list.append(2)
+    two.end_list()
+
+    # assert builder.is_valid(error) == True
+
+    array = builder.snapshot()
+    assert ak.to_list(array) == [1.1, [1, 2]]
+
+
+def test_Union_ListOffset_Record():
+    builder = lb.Union(
+        np.int64,
+        [
+            lb.ListOffset(np.int64, lb.Numpy(np.int32)),
+            lb.Record([lb.Numpy(np.float64), lb.Numpy(np.int64)], ["x", "y"]),
+        ],
+    )
+    assert len(builder) == 0
+
+    one = builder.append_index(0)
+    list = one.begin_list()
+    list.append(1)
+    list.append(3)
+    one.end_list()
+
+    two = builder.append_index(1)
+    x = two.field("x")
+    y = two.field("y")
+
+    x.append(1.1)
+    y.append(11)
+
+    builder.append_index(0)
+    list = one.begin_list()
+    list.append(5.5)
+    one.end_list()
+
+    builder.append_index(1)
+    x.append(2.2)
+    y.append(22)
+
+    array = builder.snapshot()
+    assert ak.to_list(array) == [[1, 3], {"x": 1.1, "y": 11}, [5], {"x": 2.2, "y": 22}]
+
+
 def test_unbox():
     @numba.njit(debug=True)
     def f1(x):
@@ -668,14 +668,14 @@ def test_unbox():
     )
     f1(builder)
 
-    #     builder = lb.Union(
-    #         np.int64,
-    #         [
-    #             lb.Numpy(np.float64),
-    #             lb.ListOffset(np.int64, lb.Numpy(np.int32)),
-    #         ],
-    #     )
-    #     f1(builder)
+    builder = lb.Union(
+        np.int64,
+        [
+            lb.Numpy(np.float64),
+            lb.ListOffset(np.int64, lb.Numpy(np.int32)),
+        ],
+    )
+    f1(builder)
 
     builder = lb.Unmasked(lb.Numpy(np.int64))
     f1(builder)
@@ -778,6 +778,16 @@ def test_box():
     out15 = f3(builder)
     assert ak.to_list(out15.snapshot()) == []
 
+    builder = lb.Union(
+        np.int64,
+        [
+            lb.Numpy(np.float64),
+            lb.ListOffset(np.int64, lb.Numpy(np.int32)),
+        ],
+    )
+    out16 = f3(builder)
+    assert ak.to_list(out16.snapshot()) == []
+
 
 def test_len():
     @numba.njit
@@ -835,6 +845,15 @@ def test_len():
 
     builder = lb.Tuple(
         [lb.Numpy(np.float64), lb.ListOffset(np.int64, lb.Numpy(np.int32))]
+    )
+    assert f4(builder) == 0
+
+    builder = lb.Union(
+        np.int64,
+        [
+            lb.Numpy(np.float64),
+            lb.ListOffset(np.int64, lb.Numpy(np.int32)),
+        ],
     )
     assert f4(builder) == 0
 
