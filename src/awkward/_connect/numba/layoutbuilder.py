@@ -32,33 +32,33 @@ class LayoutBuilder:
         raise NotImplementedError
 
 
-def to_numbatype(content):
-    if isinstance(content, Numpy):
-        return Numpy.numbatype(content)
-    elif isinstance(content, Empty):
-        return Empty.numbatype(content)
-    elif isinstance(content, ListOffset):
-        return ListOffset.numbatype(content)
-    elif isinstance(content, Regular):
-        return Regular.numbatype(content)
-    elif isinstance(content, IndexedOption):
-        return IndexedOption.numbatype(content)
-    elif isinstance(content, ByteMasked):
-        return ByteMasked.numbatype(content)
-    elif isinstance(content, BitMasked):
-        return BitMasked.numbatype(content)
-    elif isinstance(content, Unmasked):
-        return Unmasked.numbatype(content)
-    elif isinstance(content, Record):
-        return Record.numbatype(content)
-    elif isinstance(content, Tuple):
-        return Tuple.numbatype(content)
-    elif isinstance(content, Union):
-        return Union.numbatype(content)
-    elif isinstance(content, tuple):
-        return numba.types.Tuple([to_numbatype(it) for it in content])
+def to_numbatype(builder):
+    if isinstance(builder, Numpy):
+        return Numpy.numbatype(builder)
+    elif isinstance(builder, Empty):
+        return Empty.numbatype(builder)
+    elif isinstance(builder, ListOffset):
+        return ListOffset.numbatype(builder)
+    elif isinstance(builder, Regular):
+        return Regular.numbatype(builder)
+    elif isinstance(builder, IndexedOption):
+        return IndexedOption.numbatype(builder)
+    elif isinstance(builder, ByteMasked):
+        return ByteMasked.numbatype(builder)
+    elif isinstance(builder, BitMasked):
+        return BitMasked.numbatype(builder)
+    elif isinstance(builder, Unmasked):
+        return Unmasked.numbatype(builder)
+    elif isinstance(builder, Record):
+        return Record.numbatype(builder)
+    elif isinstance(builder, Tuple):
+        return Tuple.numbatype(builder)
+    elif isinstance(builder, Union):
+        return Union.numbatype(builder)
+    elif isinstance(builder, tuple):
+        return numba.types.Tuple([to_numbatype(it) for it in builder])
     else:
-        return content
+        return builder
 
 
 class LayoutBuilderType(numba.types.Type):
@@ -76,23 +76,13 @@ class LayoutBuilderType(numba.types.Type):
 
 @numba.extending.typeof_impl.register(LayoutBuilder)
 def typeof_LayoutBuilder(val, c):
-    if isinstance(val, Numpy):
-        return NumpyType(numba.from_dtype(val._data.dtype), val._parameters)
-
-    elif isinstance(val, Empty):
-        return EmptyType(val._parameters)
-
-    elif isinstance(val, ListOffset):
-        return ListOffsetType(
-            numba.from_dtype(val._offsets.dtype), val._content, val._parameters
-        )
-
-    elif isinstance(val, Regular):
-        return RegularType(val._content, val._size, val._parameters)
-
-    elif isinstance(val, IndexedOption):
-        return IndexedOptionType(
-            numba.from_dtype(val._index.dtype), val._content, val._parameters
+    if isinstance(val, BitMasked):
+        return BitMaskedType(
+            numba.from_dtype(val._mask.dtype),
+            val._content,
+            val._valid_when,
+            val._lsb_order,
+            val._parameters,
         )
 
     elif isinstance(val, ByteMasked):
@@ -103,26 +93,36 @@ def typeof_LayoutBuilder(val, c):
             val._parameters,
         )
 
-    elif isinstance(val, BitMasked):
-        return BitMaskedType(
-            numba.from_dtype(val._mask.dtype),
-            val._content,
-            val._valid_when,
-            val._lsb_order,
-            val._parameters,
+    elif isinstance(val, Empty):
+        return EmptyType(val._parameters)
+
+    elif isinstance(val, IndexedOption):
+        return IndexedOptionType(
+            numba.from_dtype(val._index.dtype), val._content, val._parameters
         )
 
-    elif isinstance(val, Unmasked):
-        return UnmaskedType(val._content, val._parameters)
+    elif isinstance(val, ListOffset):
+        return ListOffsetType(
+            numba.from_dtype(val._offsets.dtype), val._content, val._parameters
+        )
+
+    elif isinstance(val, Numpy):
+        return NumpyType(numba.from_dtype(val._data.dtype), val._parameters)
 
     elif isinstance(val, Record):
         return RecordType(val._contents, val._fields, val._parameters)
+
+    elif isinstance(val, Regular):
+        return RegularType(val._content, val._size, val._parameters)
 
     elif isinstance(val, Tuple):
         return TupleType(val._contents)
 
     elif isinstance(val, Union):
         return UnionType(numba.from_dtype(val._index.dtype), val._contents)
+
+    elif isinstance(val, Unmasked):
+        return UnmaskedType(val._content, val._parameters)
 
     else:
         raise TypeError("unrecognized LayoutBuilder type")
@@ -132,19 +132,19 @@ def typeof_LayoutBuilder(val, c):
 def LayoutBuilderType_len(builder):
     if isinstance(
         builder,
-        (  # content as property for all that have a content
-            BitMaskedType,  # append, extend, append_null(0 args), extend_null(1 int arg)
-            ByteMaskedType,  # append, extend, append_null(0 args), extend_null(1 int arg)
+        (
+            BitMaskedType,
+            ByteMaskedType,
             EmptyType,
-            IndexedOptionType,  # append, extend, append_null(0 args), extend_null(1 int arg)
-            ListOffsetType,  # begin_list->content, end_list (both modify offsets)
-            NumpyType,  # append, extend,
-            RecordType,  # field (Literal string) alias, content (Literal int and string) method
-            RegularType,  # begin_list->content, end_list content property
-            TupleType,  # index (Literal int) alias, content (Literal int) method
+            IndexedOptionType,
+            ListOffsetType,
+            NumpyType,
+            RecordType,
+            RegularType,
+            TupleType,
             UnionType,  # append_index (Literal int) updates tags and index -> content
             # and content (Literal int) method
-            UnmaskedType,  # append, extend,
+            UnmaskedType,
         ),
     ):
 
@@ -755,7 +755,6 @@ class Regular(LayoutBuilder):
         return self.content
 
     def end_list(self):
-        # FIXME: self._full_length[0] += 1
         pass
 
     def parameters(self):

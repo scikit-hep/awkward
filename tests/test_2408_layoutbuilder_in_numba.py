@@ -1334,6 +1334,31 @@ def test_Unmasked_append_extend():
     assert len(builder) == 0
 
 
+def test_Record_content():
+    @numba.njit
+    def f51(builder):
+        content_one = builder.content("one")
+        content_one.append(1.1)
+        content_two = builder.content("two")
+        content_two.append(1)
+        content_three = builder.content("three")
+        content_three.append(111)
+
+    builder = lb.Record(
+        [
+            lb.Numpy(np.float64),
+            lb.Numpy(np.int64),
+            lb.Numpy(np.uint8, parameters={"__array__": "char"}),
+        ],
+        ["one", "two", "three"],
+    )
+
+    f51(builder)
+
+    array = builder.snapshot()
+    assert ak.to_list(array) == []
+
+
 def test_numba_append():
     @numba.njit
     def create():
