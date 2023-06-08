@@ -12,6 +12,7 @@ __all__ = [
 
 from awkward._backends.typetracer import TypeTracerBackend
 from awkward._behavior import behavior_of
+from awkward._errors import deprecate
 from awkward._layout import wrap_layout
 from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import unknown_length
@@ -43,6 +44,15 @@ def _length_0_1_if_typetracer(array: T, function):
 
 
 def empty_if_typetracer(array: T) -> T:
+    deprecate(
+        "'empty_if_typetracer' is being replaced by 'length_zero_if_typetracer' (change name)",
+        "2.4.0",
+    )
+
+    return length_zero_if_typetracer(array)
+
+
+def length_zero_if_typetracer(array: T) -> T:
     return _length_0_1_if_typetracer(array, Form.length_zero_array)
 
 

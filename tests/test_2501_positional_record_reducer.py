@@ -6,7 +6,7 @@ import awkward as ak
 
 
 def _min_pair(array, mask):
-    array = ak.typetracer.empty_if_typetracer(array)
+    array = ak.typetracer.length_zero_if_typetracer(array)
 
     # Find location of minimum 0 slot
     i_min = ak.argmin(array["0"], axis=-1, keepdims=True, mask_identity=True)
@@ -25,7 +25,7 @@ def _min_pair(array, mask):
 
 
 def _argmin_pair(array, mask):
-    array = ak.typetracer.empty_if_typetracer(array)
+    array = ak.typetracer.length_zero_if_typetracer(array)
 
     assert not mask
     # Find location of minimum 0 slot
@@ -33,7 +33,7 @@ def _argmin_pair(array, mask):
 
 
 def _argmin_pair_bad(array, mask):
-    array = ak.typetracer.empty_if_typetracer(array)
+    array = ak.typetracer.length_zero_if_typetracer(array)
 
     assert not mask
     # Find location of minimum 0 slot

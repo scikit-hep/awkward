@@ -5,13 +5,15 @@ import pytest
 
 import awkward as ak
 from awkward.typetracer import (
-    empty_if_typetracer,
     length_one_if_typetracer,
+    length_zero_if_typetracer,
     typetracer_with_report,
 )
 
 
-@pytest.mark.parametrize("function", [empty_if_typetracer, length_one_if_typetracer])
+@pytest.mark.parametrize(
+    "function", [length_zero_if_typetracer, length_one_if_typetracer]
+)
 def test_typetracer(function):
     def func(array):
         assert ak.backend(array) == "typetracer"
@@ -19,7 +21,7 @@ def test_typetracer(function):
         radius = np.sqrt(array.x**2 + array.y**2)
         radius = function(radius)
         assert ak.backend(radius) == "cpu"
-        if function is empty_if_typetracer:
+        if function is length_zero_if_typetracer:
             assert len(radius) == 0
         else:
             assert len(radius) == 1
