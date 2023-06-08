@@ -13,37 +13,48 @@ ERROR awkward_RecordArray_reduce_nonlocal_outoffsets_64(
   int64_t outlength) {
   int64_t i_start = 0;
   int64_t j_stop = 0;
-  int64_t k_carry = 0;
-  int64_t offset = 0;
+  int64_t k_sublist = 0;
 
-  // Zero initialize offsets
+  outoffsets[0] = 0;
+
+  // Initialise carry to unique value, indicating "missing" parent
+  for (i_start = 0; i_start < outlength; i_start++) {
+    outcarry[i_start] = -1;
+  }
+
+  // Fill offsets with lengths of sublists (in order of appearance, *NOT* parents)
   for (i_start = 0;  i_start <= outlength;  i_start++) {
     outoffsets[i_start] = 0;
   }
 
-  // Compute lengths of sublists
-  for (i_start = 0, j_stop = 1; j_stop < lenparents; j_stop++) {
+  // Fill offsets with lengths of sublists (in order of appearance, *NOT* parents)
+  for (k_sublist = 0, i_start = 0, j_stop = 1; j_stop < lenparents; j_stop++) {
     if (parents[i_start] != parents[j_stop]) {
-        outoffsets[parents[i_start]] = j_stop - i_start;
-        outcarry[parents[i_start]] = k_carry;
+        outoffsets[k_sublist + 1] = j_stop;
+        outcarry[parents[i_start]] = k_sublist;
         i_start = j_stop;
-        k_carry++;
+        k_sublist++;
     }
   }
 
-  // Close final open list
-  if (lenparents > 0)
-  {
-    outoffsets[parents[i_start]] = lenparents - i_start;
-    outcarry[parents[i_start]] = k_carry;
+  // Close the last sublist
+  if (lenparents > 0) {
+    outoffsets[k_sublist + 1] = j_stop;
+    outcarry[parents[i_start]] = k_sublist;
+    i_start = j_stop;
+    k_sublist++;
   }
 
-  // Convert to offsets; final `outoffsets` is always zero before entering
-  // this loop, as lenoffsets = maxparent + 2
-  for (j_stop=0; j_stop <= outlength; j_stop++) {
-    int64_t tmp = outoffsets[j_stop];
-    outoffsets[j_stop] = offset;
-    offset += tmp;
+  // Append empty lists for missing parents
+  for (i_start = k_sublist; i_start < outlength; i_start++) {
+    outoffsets[i_start + 1] = lenparents;
+  }
+
+  // Replace unique value with index of appended empty list
+  for (i_start=0; i_start <= outlength; i_start++) {
+    if (outcarry[i_start] == -1) {
+        outcarry[i_start] = k_sublist++;
+    }
   }
   return success();
 }

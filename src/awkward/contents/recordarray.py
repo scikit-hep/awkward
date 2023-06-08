@@ -943,7 +943,8 @@ class RecordArray(Content):
                 ak.contents.ListOffsetArray(offsets, self),
                 reducer_should_mask,
                 behavior,
-            )._carry(carry, allow_lazy=True)
+            )
+            out = out._carry(carry, allow_lazy=True)
 
             if out.is_option and not reducer_should_mask:
                 reason = (
