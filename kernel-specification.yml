@@ -3432,6 +3432,48 @@ kernels:
     automatic-tests: false
     manual-tests: []
 
+  - name: awkward_RecordArray_reduce_nonlocal_outoffsets_64
+    specializations:
+      - name: awkward_RecordArray_reduce_nonlocal_outoffsets_64
+        args:
+          - {name: outoffsets, type: "List[int64_t]", dir: out}
+          - {name: outcarry, type: "List[int64_t]", dir: out}
+          - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
+          - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+    description: null
+    definition: |
+      def awkward_RecordArray_reduce_nonlocal_outoffsets_64(
+          outoffsets, outcarry, parents, lenparents, outlength
+      ):
+          # Zero initialise offsets
+          for i in range(outlength+1):
+              outoffsets[i] = 0
+
+          # Fill offsets with lengths of sublists
+          i_start = 0
+          k_carry = 0
+          for j in range(1, lenparents):
+              # If this element is different from the last, we have a new sublist
+              if parents[i_start] != parents[j]:
+                  # Count how long the old sublist was
+                  outoffsets[parents[i_start]] = j - i_start
+                  outcarry[parents[i_start]] = k_carry;
+                  # Start of
+                  i_start = j
+                  k_carry += 1;
+
+          if lenparents:
+              # Flush last sublist (which is never closed)
+              outoffsets[parents[i_start]] = lenparents - i_start
+
+          offset = 0
+          for j in range(outlength + 1):
+              outoffsets[j], offset = offset, offset + outoffsets[j]
+
+    automatic-tests: true
+    manual-tests: []
+
   - name: awkward_RegularArray_combinations_64
     specializations:
       - name: awkward_RegularArray_combinations_64
