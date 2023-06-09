@@ -54,6 +54,8 @@ class ArgMin(JAXReducer):
         self,
         array: ak.contents.NumpyArray,
         parents: ak.index.Index,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
         outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
         raise RuntimeError("Cannot differentiate through argmin")
@@ -78,6 +80,8 @@ class ArgMax(JAXReducer):
         self,
         array: ak.contents.NumpyArray,
         parents: ak.index.Index,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
         outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
         raise RuntimeError("Cannot differentiate through argmax")
@@ -102,6 +106,8 @@ class Count(JAXReducer):
         self,
         array: ak.contents.NumpyArray,
         parents: ak.index.Index,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
         outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
         raise RuntimeError("Cannot differentiate through count_zero")
@@ -126,6 +132,8 @@ class CountNonzero(JAXReducer):
         self,
         array: ak.contents.NumpyArray,
         parents: ak.index.Index,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
         outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
         raise RuntimeError("Cannot differentiate through count_nonzero")
@@ -146,6 +154,8 @@ class Sum(JAXReducer):
         self,
         array: ak.contents.NumpyArray,
         parents: ak.index.Index,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
         outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
@@ -179,6 +189,8 @@ class Prod(JAXReducer):
         self,
         array: ak.contents.NumpyArray,
         parents: ak.index.Index,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
         outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
@@ -214,6 +226,8 @@ class Any(JAXReducer):
         self,
         array: ak.contents.NumpyArray,
         parents: ak.index.Index,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
         outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
@@ -242,6 +256,8 @@ class All(JAXReducer):
         self,
         array: ak.contents.NumpyArray,
         parents: ak.index.Index,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
         outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
@@ -292,6 +308,8 @@ class Min(JAXReducer):
         self,
         array: ak.contents.NumpyArray,
         parents: ak.index.Index,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
         outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
@@ -351,6 +369,8 @@ class Max(JAXReducer):
         self,
         array: ak.contents.NumpyArray,
         parents: ak.index.Index,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
         outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
