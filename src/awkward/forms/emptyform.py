@@ -3,7 +3,8 @@ from __future__ import annotations
 
 import awkward as ak
 from awkward._errors import deprecate
-from awkward._typing import final
+from awkward._nplikes.shape import ShapeItem
+from awkward._typing import Iterator, final
 from awkward._util import UNSET
 from awkward.forms.form import Form, JSONMapping
 
@@ -103,3 +104,6 @@ class EmptyForm(Form):
 
     def _column_types(self) -> tuple[str, ...]:
         return ("empty",)
+
+    def _length_one_buffer_lengths(self) -> Iterator[ShapeItem]:
+        yield 0
