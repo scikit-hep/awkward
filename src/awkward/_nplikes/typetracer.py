@@ -382,8 +382,6 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
                     or is_unknown_integer(item)
                     or is_unknown_array(item)
                 ):
-                    try_touch_data(item)
-                    try_touch_data(self)
 
                     if is_unknown_scalar(item):
                         item = self.nplike.promote_scalar(item)
