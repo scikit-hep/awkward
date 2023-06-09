@@ -1,6 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 from __future__ import annotations
 
+from inspect import signature
+
 import awkward as ak
 from awkward._errors import deprecate
 from awkward._nplikes.shape import ShapeItem
@@ -53,8 +55,34 @@ class EmptyForm(Form):
     def __eq__(self, other) -> bool:
         return isinstance(other, EmptyForm) and self._form_key == other._form_key
 
-    def to_NumpyForm(self, dtype):
-        return ak.forms.numpyform.from_dtype(dtype, parameters=self._parameters)
+    def to_NumpyForm(self, *args, **kwargs):
+        def legacy_impl(dtype):
+            deprecate(
+                f"the `dtype` parameter in {type(self).__name__}.to_NumpyForm is deprecated, "
+                f"in favour of a new `primitive` argument. Pass `primitive` by keyword to opt-in to the new behavior.",
+                version="2.4.0",
+            )
+            return ak.forms.numpyform.from_dtype(dtype, parameters=self._parameters)
+
+        def new_impl(*, primitive):
+            return ak.forms.numpyform.NumpyForm(primitive, parameters=self._parameters)
+
+        dispatch_table = [
+            new_impl,
+            legacy_impl,
+        ]
+        for func in dispatch_table:
+            sig = signature(func)
+            try:
+                bound_arguments = sig.bind(*args, **kwargs)
+            except TypeError:
+                continue
+            else:
+                return func(*bound_arguments.args, **bound_arguments.kwargs)
+        raise AssertionError(
+            f"{type(self).__name__}.to_NumpyForm accepts either the new `primitive` argument as a keyword-only "
+            f"argument, or the legacy `dtype` argument as positional or keyword"
+        )
 
     def purelist_parameter(self, key):
         if self._parameters is None or key not in self._parameters:
