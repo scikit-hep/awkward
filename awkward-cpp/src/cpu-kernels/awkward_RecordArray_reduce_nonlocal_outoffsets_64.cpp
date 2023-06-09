@@ -4,7 +4,6 @@
 
 #include "awkward/kernels.h"
 
-// This kernel
 ERROR awkward_RecordArray_reduce_nonlocal_outoffsets_64(
   int64_t* outoffsets,
   int64_t* outcarry,
@@ -15,6 +14,7 @@ ERROR awkward_RecordArray_reduce_nonlocal_outoffsets_64(
   int64_t j_stop = 0;
   int64_t k_sublist = 0;
 
+  // The first offset is always 0
   outoffsets[0] = 0;
 
   // Initialise carry to unique value, indicating "missing" parent
@@ -23,7 +23,8 @@ ERROR awkward_RecordArray_reduce_nonlocal_outoffsets_64(
   }
 
   // Fill offsets with lengths of sublists (in order of appearance, *NOT* parents)
-  for (k_sublist = 0, i = 0, j_stop = 1; j_stop < lenparents; j_stop++) {
+  i = 0;
+  for (j_stop = 1; j_stop < lenparents; j_stop++) {
     if (parents[i] != parents[j_stop]) {
         outoffsets[k_sublist + 1] = j_stop;
         outcarry[parents[i]] = k_sublist;
@@ -31,7 +32,6 @@ ERROR awkward_RecordArray_reduce_nonlocal_outoffsets_64(
         k_sublist++;
     }
   }
-
   // Close the last sublist!
   if (lenparents > 0) {
     outoffsets[k_sublist + 1] = j_stop;
@@ -46,7 +46,7 @@ ERROR awkward_RecordArray_reduce_nonlocal_outoffsets_64(
   }
 
   // Replace unique value with index of appended empty lists
-  for (i=0; i <= outlength; i++) {
+  for (i = 0; i <= outlength; i++) {
     if (outcarry[i] == -1) {
         outcarry[i] = k_sublist++;
     }

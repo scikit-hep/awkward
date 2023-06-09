@@ -3447,29 +3447,37 @@ kernels:
           outoffsets, outcarry, parents, lenparents, outlength
       ):
           # Zero initialise offsets
-          for i in range(outlength+1):
-              outoffsets[i] = 0
+          outoffsets[0] = 0
 
-          # Fill offsets with lengths of sublists
-          i_start = 0
-          k_carry = 0
+          # Initialise carry to unique value, indicating "missing"
+          for i in range(outlength):
+              outcarry[i] = -1
+
+          # Fill offsets with lengths of sublists (in order of appearance, *NOT* parents)
+          i = 0
+          k_sublist = 0
           for j in range(1, lenparents):
-              # If this element is different from the last, we have a new sublist
-              if parents[i_start] != parents[j]:
-                  # Count how long the old sublist was
-                  outoffsets[parents[i_start]] = j - i_start
-                  outcarry[parents[i_start]] = k_carry;
-                  # Start of
-                  i_start = j
-                  k_carry += 1;
+              if parents[i] != parents[j]:
+                  outoffsets[k_sublist + 1] = j
+                  outcarry[parents[i]] = k_sublist
+                  i = j
+                  k_sublist += 1
 
-          if lenparents:
-              # Flush last sublist (which is never closed)
-              outoffsets[parents[i_start]] = lenparents - i_start
+          # Close open sublist
+          if lenparents > 0:
+              outoffsets[k_sublist + 1] = j
+              outcarry[parents[i]] = k_sublist
+              k_sublist += 1
 
-          offset = 0
-          for j in range(outlength + 1):
-              outoffsets[j], offset = offset, offset + outoffsets[j]
+          # Append empty lists for missing parents
+          for i in range(k_sublist, outlength):
+              outoffsets[i + 1] = lenparents
+
+          # Replace unique value with index of appended empty list
+          for i in range(outlength):
+              if outcarry[i] == -1:
+                  outcarry[i] = k_sublist
+                  k_sublist += 1
 
     automatic-tests: true
     manual-tests: []
