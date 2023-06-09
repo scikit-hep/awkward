@@ -181,7 +181,7 @@ class ByteMaskedArray(Content):
         if content.is_union or content.is_indexed or content.is_option:
             backend = content.backend
             index = ak.index.Index64.empty(mask.length, nplike=backend.index_nplike)
-            Content._selfless_handle_error(
+            backend.maybe_kernel_error(
                 backend[
                     "awkward_ByteMaskedArray_toIndexedOptionArray",
                     index.dtype.type,
@@ -284,7 +284,7 @@ class ByteMaskedArray(Content):
             index.nplike is self._backend.index_nplike
             and self._mask.nplike is self._backend.index_nplike
         )
-        self._handle_error(
+        self._backend.maybe_kernel_error(
             self._backend[
                 "awkward_ByteMaskedArray_toIndexedOptionArray",
                 index.dtype.type,
@@ -432,7 +432,7 @@ class ByteMaskedArray(Content):
             _numnull.nplike is self._backend.index_nplike
             and self._mask.nplike is self._backend.index_nplike
         )
-        self._handle_error(
+        self._backend.maybe_kernel_error(
             self._backend[
                 "awkward_ByteMaskedArray_numnull",
                 _numnull.dtype.type,
@@ -457,7 +457,7 @@ class ByteMaskedArray(Content):
             and outindex.nplike is self._backend.index_nplike
             and self._mask.nplike is self._backend.index_nplike
         )
-        self._handle_error(
+        self._backend.maybe_kernel_error(
             self._backend[
                 "awkward_ByteMaskedArray_getitem_nextcarry_outindex",
                 nextcarry.dtype.type,
@@ -507,7 +507,7 @@ class ByteMaskedArray(Content):
             and reducedstarts.nplike is self._backend.nplike
             and reducedstops.nplike is self._backend.nplike
         )
-        self._handle_error(
+        self._maybe_index_error(
             self._backend[
                 "awkward_MaskedArray_getitem_next_jagged_project",
                 outindex.dtype.type,
@@ -597,7 +597,7 @@ class ByteMaskedArray(Content):
                 and mask.nplike is self._backend.index_nplike
                 and self._mask.nplike is self._backend.index_nplike
             )
-            self._handle_error(
+            self._backend.maybe_kernel_error(
                 self._backend[
                     "awkward_ByteMaskedArray_overlay_mask",
                     nextmask.dtype.type,
@@ -622,7 +622,7 @@ class ByteMaskedArray(Content):
                 _numnull.nplike is self._backend.index_nplike
                 and self._mask.nplike is self._backend.index_nplike
             )
-            self._handle_error(
+            self._backend.maybe_kernel_error(
                 self._backend[
                     "awkward_ByteMaskedArray_numnull",
                     _numnull.dtype.type,
@@ -642,7 +642,7 @@ class ByteMaskedArray(Content):
                 nextcarry.nplike is self._backend.index_nplike
                 and self._mask.nplike is self._backend.index_nplike
             )
-            self._handle_error(
+            self._backend.maybe_kernel_error(
                 self._backend[
                     "awkward_ByteMaskedArray_getitem_nextcarry",
                     nextcarry.dtype.type,
@@ -688,7 +688,7 @@ class ByteMaskedArray(Content):
                     and outindex.nplike is self._backend.index_nplike
                     and offsets.nplike is self._backend.index_nplike
                 )
-                self._handle_error(
+                self._backend.maybe_kernel_error(
                     self._backend[
                         "awkward_IndexedArray_flatten_none2empty",
                         outoffsets.dtype.type,
@@ -837,7 +837,7 @@ class ByteMaskedArray(Content):
             _numnull.nplike is self._backend.index_nplike
             and self._mask.nplike is self._backend.index_nplike
         )
-        self._handle_error(
+        self._backend.maybe_kernel_error(
             self._backend[
                 "awkward_ByteMaskedArray_numnull",
                 _numnull.dtype.type,
@@ -868,7 +868,7 @@ class ByteMaskedArray(Content):
             and self._mask.nplike is self._backend.index_nplike
             and parents.nplike is self._backend.index_nplike
         )
-        self._handle_error(
+        self._backend.maybe_kernel_error(
             self._backend[
                 "awkward_ByteMaskedArray_reduce_next_64",
                 nextcarry.dtype.type,
@@ -898,7 +898,7 @@ class ByteMaskedArray(Content):
                     nextshifts.nplike is self._backend.index_nplike
                     and self._mask.nplike is self._backend.index_nplike
                 )
-                self._handle_error(
+                self._backend.maybe_kernel_error(
                     self._backend[
                         "awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_64",
                         nextshifts.dtype.type,
@@ -915,7 +915,7 @@ class ByteMaskedArray(Content):
                     nextshifts.nplike is self._backend.index_nplike
                     and self._mask.nplike is self._backend.index_nplike
                 )
-                self._handle_error(
+                self._backend.maybe_kernel_error(
                     self._backend[
                         "awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_fromshifts_64",
                         nextshifts.dtype.type,
@@ -966,7 +966,7 @@ class ByteMaskedArray(Content):
                 starts.length + 1, nplike=self._backend.index_nplike
             )
             assert outoffsets.nplike is self._backend.nplike
-            self._handle_error(
+            self._backend.maybe_kernel_error(
                 self._backend[
                     "awkward_IndexedArray_reduce_next_fix_offsets_64",
                     outoffsets.dtype.type,
@@ -1006,7 +1006,7 @@ class ByteMaskedArray(Content):
                 index.nplike is self._backend.index_nplike
                 and self._mask.nplike is self._backend.index_nplike
             )
-            self._handle_error(
+            self._backend.maybe_kernel_error(
                 self._backend[
                     "awkward_IndexedOptionArray_rpad_and_clip_mask_axis1",
                     index.dtype.type,

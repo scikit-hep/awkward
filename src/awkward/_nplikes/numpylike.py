@@ -445,10 +445,6 @@ class NumpyLike(Singleton, Protocol):
         ...
 
     @abstractmethod
-    def tile(self, x: ArrayLike, reps: int) -> ArrayLike:
-        ...
-
-    @abstractmethod
     def stack(
         self,
         arrays: list[ArrayLike] | tuple[ArrayLike, ...],

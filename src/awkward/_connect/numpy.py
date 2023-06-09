@@ -250,7 +250,11 @@ def array_ufunc(ufunc, method, inputs, kwargs):
                 else:
                     args.append(x)
 
-            result = backend.apply_ufunc(ufunc, method, args, kwargs)
+            # Give backend a chance to change the ufunc implementation
+            impl = backend.prepare_ufunc(ufunc)
+
+            # Invoke ufunc
+            result = impl(*args, **kwargs)
 
             return (NumpyArray(result, backend=backend, parameters=parameters),)
 

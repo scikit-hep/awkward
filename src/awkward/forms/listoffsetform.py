@@ -1,7 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+from __future__ import annotations
+
 import awkward as ak
 from awkward._parameters import type_parameters_equal
-from awkward._typing import final
+from awkward._typing import JSONMapping, final
 from awkward._util import UNSET
 from awkward.forms.form import Form
 
@@ -10,7 +12,14 @@ from awkward.forms.form import Form
 class ListOffsetForm(Form):
     is_list = True
 
-    def __init__(self, offsets, content, *, parameters=None, form_key=None):
+    def __init__(
+        self,
+        offsets: str,
+        content: Form,
+        *,
+        parameters: JSONMapping | None = None,
+        form_key: str | None = None,
+    ):
         if not isinstance(offsets, str):
             raise TypeError(
                 "{} 'offsets' must be of type str, not {}".format(

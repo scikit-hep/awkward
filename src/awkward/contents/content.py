@@ -14,6 +14,7 @@ from awkward._backends.dispatch import (
     regularize_backend,
 )
 from awkward._behavior import get_array_class, get_record_class
+from awkward._kernels import KernelError
 from awkward._layout import wrap_layout
 from awkward._nplikes import to_nplike
 from awkward._nplikes.dispatch import nplike_of
@@ -262,45 +263,12 @@ class Content:
     def maybe_to_NumpyArray(self):
         return None
 
-    def _handle_error(self, error, slicer=None):
-        if error is not None and error.str is not None:
-            if error.filename is None:
-                filename = ""
-            else:
-                filename = " (in compiled code: " + error.filename.decode(
-                    errors="surrogateescape"
-                ).lstrip("\n").lstrip("(")
-
-            message = error.str.decode(errors="surrogateescape")
-
-            if error.attempt != ak._util.kSliceNone:
-                message += f" while attempting to get index {error.attempt}"
-
-            message += filename
-
-            if slicer is None:
-                raise ValueError(message)
-            else:
-                raise ak._errors.index_error(self, slicer, message)
-
-    @staticmethod
-    def _selfless_handle_error(error):
-        if error.str is not None:
-            if error.filename is None:
-                filename = ""
-            else:
-                filename = " (in compiled code: " + error.filename.decode(
-                    errors="surrogateescape"
-                ).lstrip("\n").lstrip("(")
-
-            message = error.str.decode(errors="surrogateescape")
-
-            if error.attempt != ak._util.kSliceNone:
-                message += f" while attempting to get index {error.attempt}"
-
-            message += filename
-
-            raise ValueError(message)
+    def _maybe_index_error(self, error: KernelError | None, slicer):
+        if error is None or error.str is None:
+            return
+        else:
+            message = self._backend.format_kernel_error(error)
+            raise ak._errors.index_error(self, slicer, message)
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         raise TypeError(
@@ -401,7 +369,7 @@ class Content:
             outindex.nplike is self._backend.index_nplike
             and index.nplike is self._backend.index_nplike
         )
-        self._handle_error(
+        self._maybe_index_error(
             self._backend[
                 "awkward_missing_repeat", outindex.dtype.type, index.dtype.type
             ](
@@ -448,7 +416,7 @@ class Content:
             and starts.nplike is self._backend.index_nplike
             and stops.nplike is self._backend.index_nplike
         )
-        self._handle_error(
+        self._maybe_index_error(
             self._backend[
                 "awkward_Content_getitem_next_missing_jagged_getmaskstartstop",
                 index.dtype.type,
@@ -750,7 +718,7 @@ class Content:
 
     def _local_index_axis0(self) -> NumpyArray:
         localindex = Index64.empty(self.length, self._backend.index_nplike)
-        self._handle_error(
+        self._backend.maybe_kernel_error(
             self._backend["awkward_localindex", np.int64](
                 localindex.data,
                 localindex.length,
@@ -897,7 +865,7 @@ class Content:
             toindex.nplike is self._backend.index_nplike
             and fromindex.nplike is self._backend.index_nplike
         )
-        self._handle_error(
+        self._backend.maybe_kernel_error(
             self._backend[
                 "awkward_RegularArray_combinations_64",
                 np.int64,
@@ -1035,7 +1003,7 @@ class Content:
             index = Index64.empty(target, self._backend.index_nplike)
 
             assert index.nplike is self._backend.index_nplike
-            self._handle_error(
+            self._backend.maybe_kernel_error(
                 self._backend[
                     "awkward_index_rpad_and_clip_axis0",
                     index.dtype.type,
