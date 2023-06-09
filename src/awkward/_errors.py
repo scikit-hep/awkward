@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 from __future__ import annotations
 
+import builtins
 import sys
 import threading
 import warnings
@@ -29,6 +30,17 @@ class PartialFunction:
 
     def __call__(self):
         return self.func(*self.args, **self.kwargs)
+
+
+class AwkwardKeyError(builtins.KeyError):
+    def __str__(self):
+        return super(Exception, self).__str__()
+
+
+# Pretend to be builtins!
+AwkwardKeyError.__name__ = "KeyError"
+AwkwardKeyError.__qualname__ = "KeyError"
+AwkwardKeyError.__module__ = "builtins"
 
 
 class ErrorContext:
@@ -86,6 +98,9 @@ class ErrorContext:
                     str(exception)
                     + "\n\nSee if this has been reported at https://github.com/scikit-hep/awkward/issues"
                 )
+                new_exception.__cause__ = exception
+            elif issubclass(cls, KeyError):
+                new_exception = AwkwardKeyError(self.format_exception(exception))
                 new_exception.__cause__ = exception
             else:
                 new_exception = cls(self.format_exception(exception))
