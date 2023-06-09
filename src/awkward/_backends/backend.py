@@ -59,8 +59,6 @@ class Backend(Singleton, ABC):
 
         message = error.str.decode(errors="surrogateescape")
 
-        assert not error.pass_through
-
         if error.attempt != ak._util.kSliceNone:
             message += f" while attempting to get index {error.attempt}"
 
