@@ -24,7 +24,7 @@ def from_dtype(dtype, parameters=None, *, time_units_as_parameter: bool = UNSET)
 
     if time_units_as_parameter:
         deprecate(
-            "from_dtype conversion of datetime units to generic `datetime` types is deprecated, "
+            "from_dtype conversion of temporal units to generic `datetime64` and `timedelta64` types is deprecated, "
             "pass `time_units_as_parameter=False` to disable this warning.",
             version="2.4.0",
         )
