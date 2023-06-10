@@ -23,7 +23,6 @@ metadata = NumpyMetadata.instance()
 class KernelError(Protocol):
     filename: str | None  # pylint: disable=E0602
     str: str | None
-    pass_through: bool
     attempt: int
     id: int
 
@@ -174,7 +173,6 @@ class TypeTracerKernelError(KernelError):
     def __init__(self):
         self.str = None
         self.filename = None
-        self.pass_through = False
         self.attempt = ak._util.kSliceNone
         self.id = ak._util.kSliceNone
 
