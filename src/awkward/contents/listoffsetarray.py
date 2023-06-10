@@ -1577,6 +1577,8 @@ class ListOffsetArray(Content):
             )
             nextparents = Index64.empty(nextlen, index_nplike)
 
+            # n.b. awkward_ListOffsetArray_reduce_local_nextparents_64 always returns parents that are
+            # monotonically increasing (because it is local)
             assert (
                 nextparents.nplike is index_nplike
                 and self._offsets.nplike is index_nplike
@@ -1704,6 +1706,7 @@ class ListOffsetArray(Content):
                 maxcount,
             )
         )
+
         maxnextparents = index_nplike.index_as_shape_item(_maxnextparents[0])
         nextstarts = Index64.empty(maxnextparents + 1, index_nplike)
         assert nextstarts.nplike is index_nplike and nextparents.nplike is index_nplike
