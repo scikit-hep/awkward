@@ -2,6 +2,7 @@
 from collections.abc import Iterable
 
 import awkward as ak
+from awkward._errors import deprecate
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._parameters import type_parameters_equal
 from awkward._typing import final
@@ -11,14 +12,26 @@ from awkward.forms.form import Form
 np = NumpyMetadata.instance()
 
 
-def from_dtype(dtype, parameters=None):
+def from_dtype(dtype, parameters=None, *, time_units_as_parameter: bool = UNSET):
     if dtype.subdtype is None:
         inner_shape = ()
     else:
         inner_shape = dtype.shape
         dtype = dtype.subdtype[0]
 
-    if issubclass(dtype.type, (np.datetime64, np.timedelta64)):
+    if time_units_as_parameter is UNSET:
+        time_units_as_parameter = True
+
+    if time_units_as_parameter:
+        deprecate(
+            "from_dtype conversion of temporal units to generic `datetime64` and `timedelta64` types is deprecated, "
+            "pass `time_units_as_parameter=False` to disable this warning.",
+            version="2.4.0",
+        )
+
+    if time_units_as_parameter and issubclass(
+        dtype.type, (np.datetime64, np.timedelta64)
+    ):
         unit, step = np.datetime_data(dtype)
         if unit != "generic":
             unitstr = ("" if step == 1 else str(step)) + unit
