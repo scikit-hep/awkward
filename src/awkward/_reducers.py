@@ -39,6 +39,8 @@ class Reducer(Protocol):
         self,
         array: ak.contents.NumpyArray,
         parents: ak.index.Index,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
         outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
         ...
@@ -74,6 +76,53 @@ class KernelReducer(Reducer):
             return given_dtype
 
 
+def apply_positional_corrections(
+    reduced: ak.contents.NumpyArray,
+    parents: ak.index.Index,
+    starts: ak.index.Index,
+    shifts: ak.index.Index | None,
+):
+    if shifts is None:
+        assert (
+            parents.nplike is reduced.backend.index_nplike
+            and starts.nplike is reduced.backend.index_nplike
+        )
+        reduced.backend.maybe_kernel_error(
+            reduced.backend[
+                "awkward_NumpyArray_reduce_adjust_starts_64",
+                reduced.dtype.type,
+                parents.dtype.type,
+                starts.dtype.type,
+            ](
+                reduced.data,
+                reduced.length,
+                parents.data,
+                starts.data,
+            )
+        )
+    else:
+        assert (
+            parents.nplike is reduced.backend.index_nplike
+            and starts.nplike is reduced.backend.index_nplike
+            and shifts.nplike is reduced.backend.index_nplike
+        )
+        reduced.backend.maybe_kernel_error(
+            reduced._backend[
+                "awkward_NumpyArray_reduce_adjust_starts_shifts_64",
+                reduced.dtype.type,
+                parents.dtype.type,
+                starts.dtype.type,
+                shifts.dtype.type,
+            ](
+                reduced.data,
+                reduced.length,
+                parents.data,
+                starts.data,
+                shifts.data,
+            )
+        )
+
+
 class ArgMin(KernelReducer):
     name: Final = "argmin"
     preferred_dtype: Final = np.int64
@@ -83,6 +132,8 @@ class ArgMin(KernelReducer):
         self,
         array: ak.contents.NumpyArray,
         parents: ak.index.Index,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
         outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
@@ -121,7 +172,9 @@ class ArgMin(KernelReducer):
                     outlength,
                 )
             )
-        return ak.contents.NumpyArray(result, backend=array.backend)
+        result_array = ak.contents.NumpyArray(result, backend=array.backend)
+        apply_positional_corrections(result_array, parents, starts, shifts)
+        return result_array
 
 
 class ArgMax(KernelReducer):
@@ -133,6 +186,8 @@ class ArgMax(KernelReducer):
         self,
         array: ak.contents.NumpyArray,
         parents: ak.index.Index,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
         outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
@@ -171,7 +226,9 @@ class ArgMax(KernelReducer):
                     outlength,
                 )
             )
-        return ak.contents.NumpyArray(result, backend=array.backend)
+        result_array = ak.contents.NumpyArray(result, backend=array.backend)
+        apply_positional_corrections(result_array, parents, starts, shifts)
+        return result_array
 
 
 class Count(KernelReducer):
@@ -183,6 +240,8 @@ class Count(KernelReducer):
         self,
         array: ak.contents.NumpyArray,
         parents: ak.index.Index,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
         outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
@@ -210,6 +269,8 @@ class CountNonzero(KernelReducer):
         self,
         array: ak.contents.NumpyArray,
         parents: ak.index.Index,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
         outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
@@ -261,6 +322,8 @@ class Sum(KernelReducer):
         self,
         array: ak.contents.NumpyArray,
         parents: ak.index.Index,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
         outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
@@ -363,6 +426,8 @@ class Prod(KernelReducer):
         self,
         array: ak.contents.NumpyArray,
         parents: ak.index.Index,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
         outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
@@ -452,6 +517,8 @@ class Any(KernelReducer):
         self,
         array: ak.contents.NumpyArray,
         parents: ak.index.Index,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
         outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
@@ -503,6 +570,8 @@ class All(KernelReducer):
         self,
         array: ak.contents.NumpyArray,
         parents: ak.index.Index,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
         outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
@@ -584,6 +653,8 @@ class Min(KernelReducer):
         self,
         array: ak.contents.NumpyArray,
         parents: ak.index.Index,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
         outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
@@ -690,6 +761,8 @@ class Max(KernelReducer):
         self,
         array: ak.contents.NumpyArray,
         parents: ak.index.Index,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
         outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)

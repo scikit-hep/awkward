@@ -267,7 +267,6 @@ class ERROR(Structure):
         ("filename", c_char_p),
         ("id", c_int64),
         ("attempt", c_int64),
-        ("pass_through", c_bool),
     ]
 
 
