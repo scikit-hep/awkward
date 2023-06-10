@@ -37,10 +37,8 @@ class AwkwardKeyError(builtins.KeyError):
         return super(Exception, self).__str__()
 
 
-# Pretend to be builtins!
 AwkwardKeyError.__name__ = "KeyError"
 AwkwardKeyError.__qualname__ = "KeyError"
-AwkwardKeyError.__module__ = "builtins"
 
 
 class ErrorContext:
