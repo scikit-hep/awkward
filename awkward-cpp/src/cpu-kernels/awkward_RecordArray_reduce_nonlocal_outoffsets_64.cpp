@@ -22,7 +22,7 @@ ERROR awkward_RecordArray_reduce_nonlocal_outoffsets_64(
     outcarry[i] = -1;
   }
 
-  // Fill offsets with lengths of sublists (in order of appearance, *NOT* parents)
+  // Fill offsets with stop index of sublists in parents array. Ignore ordering given by parents, this is done by subsequent carry
   i = 0;
   for (j_stop = 1; j_stop < lenparents; j_stop++) {
     if (parents[i] != parents[j_stop]) {
