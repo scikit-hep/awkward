@@ -9,7 +9,7 @@ import awkward as ak
 def test_no_parameter():
     dtype = np.dtype("datetime64[15us]")
     with pytest.warns(
-        DeprecationWarning, match=r"from_dtype conversion of datetime units"
+        DeprecationWarning, match=r"from_dtype conversion of temporal units"
     ):
         form = ak.forms.numpyform.from_dtype(dtype)
     assert form.primitive == "datetime64"
@@ -19,7 +19,7 @@ def test_no_parameter():
 def test_true_parameter():
     dtype = np.dtype("datetime64[15us]")
     with pytest.warns(
-        DeprecationWarning, match=r"from_dtype conversion of datetime units"
+        DeprecationWarning, match=r"from_dtype conversion of temporal units"
     ):
         form = ak.forms.numpyform.from_dtype(dtype, time_units_as_parameter=True)
     assert form.primitive == "datetime64"
