@@ -211,41 +211,19 @@ def test_Regular_size0():
         lb.Regular(lb.Numpy(np.float64), 0)
 
 
-def test_IndexedOption_Record():
-    builder = lb.IndexedOption(
-        np.int64, lb.Record([lb.Numpy(np.float64), lb.Numpy(np.int64)], ["x", "y"])
-    )
-    assert len(builder) == 0
-
-    content = builder.append_index()
-    x = content.field("x")
-    y = content.field("y")
-
-    x.append(1.1)
-    y.append(2)
-
-    builder.append_index()
-    x.append(3.3)
-    y.append(4)
-
-    array = builder.snapshot()
-    assert ak.to_list(array) == [
-        {"x": 1.1, "y": 2},
-        {"x": 3.3, "y": 4},
-    ]
-
-
 def test_IndexedOption():
     builder = lb.IndexedOption(np.int64, lb.Numpy(np.float64))
     assert len(builder) == 0
 
-    builder.append(1.1)
-    builder.append_null()
+    content = builder.append_valid()
+    content.append(1.1)
+    builder.append_invalid()
 
     data = np.array([3.3, 4.4, 5.5], dtype=np.float64)
-    builder.extend(data)
+    builder.extend_valid(len(data))
+    content.extend(data)
 
-    builder.extend_null(2)
+    builder.extend_invalid(2)
     array = builder.snapshot()
     assert ak.to_list(array) == [1.1, None, 3.3, 4.4, 5.5, None, None]
 
@@ -314,21 +292,21 @@ def test_Record():
     assert len(builder) == 0
 
 
-def test_IndexedOption_Record2():
+def test_IndexedOption_Record():
     builder = lb.IndexedOption(
         np.int64, lb.Record([lb.Numpy(np.float64), lb.Numpy(np.int64)], ["x", "y"])
     )
     assert len(builder) == 0
-    content = builder.append_index()
+    content = builder.append_valid()
     x = content.field("x")
     y = content.field("y")
 
     x.append(1.1)
     y.append(2)
 
-    builder.append_null()
+    builder.append_invalid()
 
-    builder.append_index()
+    builder.append_valid()
     x.append(3.3)
     y.append(4)
 
@@ -1097,15 +1075,50 @@ def test_Regular_append():
     assert builder.is_valid(error), error
 
 
+def test_IndexedOption_Record_append():
+    @numba.njit
+    def f19(builder):
+        content = builder.append_valid()
+        x = content._contents[0]
+        y = content._contents[1]
+        x.append(1.1)
+        y.append(2)
+        builder.append_invalid()
+
+        builder.append_valid()
+        x.append(3.3)
+        y.append(4)
+
+    builder = lb.IndexedOption(
+        np.int64, lb.Record([lb.Numpy(np.float64), lb.Numpy(np.int64)], ["x", "y"])
+    )
+    assert len(builder) == 0
+
+    f19(builder)
+
+    array = builder.snapshot()
+    assert ak.to_list(array) == [
+        {"x": 1.1, "y": 2},
+        None,
+        {"x": 3.3, "y": 4},
+    ]
+
+
 def test_IndexedOption_append_extend():
     @numba.njit
     def f21(builder):
-        builder.append_valid(1.1)
-        builder.append_valid(2.2)
-        builder.append_valid(3.3)
-        builder.append_valid(4.4)
-        builder.append_valid(5.5)
-        builder.append_valid(6.6)
+        content = builder.append_valid()
+        content.append(1.1)
+        builder.append_valid()
+        content.append(2.2)
+        builder.append_valid()
+        content.append(3.3)
+        builder.append_valid()
+        content.append(4.4)
+        builder.append_valid()
+        content.append(5.5)
+        builder.append_valid()
+        content.append(6.6)
 
     @numba.njit
     def f22(builder):
@@ -1113,7 +1126,8 @@ def test_IndexedOption_append_extend():
 
     @numba.njit
     def f23(builder, data):
-        builder.extend_valid(data)
+        content = builder.extend_valid(len(data))
+        content.extend(data)
 
     @numba.njit
     def f24(builder, size):

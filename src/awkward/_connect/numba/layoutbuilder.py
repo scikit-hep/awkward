@@ -957,34 +957,34 @@ class IndexedOption(LayoutBuilder):
     def content(self):
         return self._content
 
-    def append(self, datum):
-        self._last_valid = len(self._content)
-        self._index.append(self._last_valid)
-        self._content.append(datum)
+    # def append(self, datum):
+    #     self._last_valid = len(self._content)
+    #     self._index.append(self._last_valid)
+    #     self._content.append(datum)
 
-    def append_index(self):
+    def append_valid(self):
         self._last_valid = len(self._content)
         self._index.append(self._last_valid)
         return self._content
 
-    def extend(self, data):
-        start = len(self._content)
-        stop = start + len(data)
-        self._last_valid = stop - 1
-        self._index.extend(list(range(start, stop)))
-        self._content.extend(data)
+    # def extend(self, data):
+    #     start = len(self._content)
+    #     stop = start + len(data)
+    #     self._last_valid = stop - 1
+    #     self._index.extend(list(range(start, stop)))
+    #     self._content.extend(data)
 
-    def extend_index(self, size):
+    def extend_valid(self, size):
         start = len(self._content)
         stop = start + size
         self._last_valid = stop - 1
         self._index.extend(list(range(start, stop)))
         return self._content
 
-    def append_null(self):
+    def append_invalid(self):
         self._index.append(-1)
 
-    def extend_null(self, size):
+    def extend_invalid(self, size):
         self._index.extend([-1] * size)
 
     def parameters(self):
@@ -1134,23 +1134,23 @@ def IndexedOption_index(builder):
 
 
 @numba.extending.overload_method(IndexedOptionType, "append_valid")
-def IndexedOption_append_valid(builder, datum):
+def IndexedOption_append_valid(builder):
     if isinstance(builder, IndexedOptionType):
 
-        def append_valid(builder, datum):
+        def append_valid(builder):
             builder._index.append(len(builder._content))
-            builder._content.append(datum)
+            return builder._content
 
         return append_valid
 
 
 @numba.extending.overload_method(IndexedOptionType, "extend_valid")
-def IndexedOption_extend_valid(builder, data):
-    def extend_valid(builder, data):
+def IndexedOption_extend_valid(builder, size):
+    def extend_valid(builder, size):
         start = len(builder._content)
-        stop = start + len(data)
+        stop = start + size
         builder._index.extend(list(range(start, stop)))
-        builder._content.extend(data)
+        return builder._content
 
     return extend_valid
 
