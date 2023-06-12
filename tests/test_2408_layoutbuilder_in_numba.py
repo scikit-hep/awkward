@@ -361,11 +361,12 @@ def test_Unmasked():
     builder = lb.Unmasked(lb.Numpy(np.int64))
     assert len(builder) == 0
 
-    builder.append(11)
-    builder.append(22)
-    builder.append(33)
-    builder.append(44)
-    builder.append(55)
+    content = builder._content
+    content.append(11)
+    content.append(22)
+    content.append(33)
+    content.append(44)
+    content.append(55)
 
     err = ""
     assert builder.is_valid(err) is True
@@ -1310,16 +1311,18 @@ def test_BitMasked_append_extend():
 def test_Unmasked_append_extend():
     @numba.njit
     def f33(builder):
-        builder.append(1.1)
-        builder.append(2.2)
-        builder.append(3.3)
-        builder.append(4.4)
-        builder.append(5.5)
-        builder.append(6.6)
+        content = builder._content
+        content.append(1.1)
+        content.append(2.2)
+        content.append(3.3)
+        content.append(4.4)
+        content.append(5.5)
+        content.append(6.6)
 
     @numba.njit
     def f34(builder, data):
-        builder.extend(data)
+        content = builder._content
+        content.extend(data)
 
     builder = lb.Unmasked(lb.Numpy(np.float64))
 

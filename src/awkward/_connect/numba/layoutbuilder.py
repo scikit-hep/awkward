@@ -1791,24 +1791,30 @@ def BitMasked_append_end(builder):
 
 @numba.extending.overload_method(BitMaskedType, "extend_valid")
 def BitMasked_extend_valid(builder, size):
-    def extend_valid(builder, size):
-        for _ in range(size):
-            builder.append_valid()
-        return builder._content
+    if isinstance(builder, BitMaskedType):
 
-    return extend_valid
+        def extend_valid(builder, size):
+            for _ in range(size):
+                builder.append_valid()
+            return builder._content
+
+        return extend_valid
 
 
 @numba.extending.overload_method(BitMaskedType, "append_valid")
 def BitMasked_append_valid(builder):
-    def append_valid(builder):
-        builder._append_begin()
-        # current_byte_ and cast_: 0 indicates null, 1 indicates valid
-        builder._current_byte_index[0] |= builder._cast[builder._current_byte_index[1]]
-        builder._append_end()
-        return builder._content
+    if isinstance(builder, BitMaskedType):
 
-    return append_valid
+        def append_valid(builder):
+            builder._append_begin()
+            # current_byte_ and cast_: 0 indicates null, 1 indicates valid
+            builder._current_byte_index[0] |= builder._cast[
+                builder._current_byte_index[1]
+            ]
+            builder._append_end()
+            return builder._content
+
+        return append_valid
 
 
 @numba.extending.overload_method(BitMaskedType, "append_invalid")
@@ -1826,12 +1832,14 @@ def BitMasked_append_invalid(builder):
 
 @numba.extending.overload_method(BitMaskedType, "extend_invalid")
 def BitMasked_extend_invalid(builder, size):
-    def extend_invalid(builder, size):
-        for _ in range(size):
-            builder.append_invalid()
-        return builder._content
+    if isinstance(builder, BitMaskedType):
 
-    return extend_invalid
+        def extend_invalid(builder, size):
+            for _ in range(size):
+                builder.append_invalid()
+            return builder._content
+
+        return extend_invalid
 
 
 ########## Unmasked #########################################################
@@ -1858,14 +1866,6 @@ class Unmasked(LayoutBuilder):
     @property
     def content(self):
         return self._content
-
-    # FIXME: what if content does not have append?
-    def append(self, value):
-        self._content.append(value)
-
-    # FIXME: what if content does not have extend?
-    def extend(self, data):
-        return self._content.extend(data)
 
     @property
     def parameters(self):
@@ -1979,26 +1979,6 @@ def Unmasked_length(builder):
         return len(builder._content)
 
     return getter
-
-
-@numba.extending.overload_method(UnmaskedType, "append")
-def Unmasked_append(builder, datum):
-    if isinstance(builder, UnmaskedType):
-
-        def append(builder, datum):
-            builder._content.append(datum)
-
-        return append
-
-
-@numba.extending.overload_method(UnmaskedType, "extend")
-def Unmasked_extend(builder, data):
-    if isinstance(builder, UnmaskedType):
-
-        def extend(builder, data):
-            builder._content.extend(data)
-
-        return extend
 
 
 ########## Record #########################################################
