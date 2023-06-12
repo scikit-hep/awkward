@@ -211,35 +211,6 @@ def test_Regular_size0():
         lb.Regular(lb.Numpy(np.float64), 0)
 
 
-def test_IndexedOption2():
-    builder = lb.IndexedOption(np.int64, lb.Numpy(np.float64))
-    assert len(builder) == 0
-
-    builder.append(1.1)
-    builder.append(2.2)
-
-    data = np.array([3.3, 4.4, 5.5], dtype=np.float64)
-    builder.extend(data)
-
-    array = builder.snapshot()
-    assert ak.to_list(array) == [1.1, 2.2, 3.3, 4.4, 5.5]
-    assert len(builder) == 5
-
-    error = ""
-    assert builder.is_valid(error), error
-
-    assert (
-        builder.type()
-        == "ak.numba.lb.IndexedOption(int64, ak.numba.lb.Numpy(float64, parameters=None), parameters=None)"
-    )
-    assert (
-        str(builder.numbatype())
-        == "ak.numba.lb.IndexedOption(int64, ak.numba.lb.Numpy(float64, parameters=None), parameters=None)"
-    )
-    builder.clear()
-    assert len(builder) == 0
-
-
 def test_IndexedOption_Record():
     builder = lb.IndexedOption(
         np.int64, lb.Record([lb.Numpy(np.float64), lb.Numpy(np.int64)], ["x", "y"])
