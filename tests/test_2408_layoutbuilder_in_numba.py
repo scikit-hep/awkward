@@ -1230,7 +1230,7 @@ def test_IndexedOption_append_extend():
 
 def test_ByteMasked_append_extend():
     @numba.njit
-    def f41(builder):
+    def f25(builder):
         builder.append(1.1)
         builder.append(2.2)
         builder.append(3.3)
@@ -1239,26 +1239,26 @@ def test_ByteMasked_append_extend():
         builder.append(6.6)
 
     @numba.njit
-    def f42(builder):
+    def f26(builder):
         builder.append_null()
 
     @numba.njit
-    def f43(builder, data):
+    def f27(builder, data):
         builder.extend(data)
 
     @numba.njit
-    def f44(builder, size):
+    def f28(builder, size):
         builder.extend_null(size)
 
     builder = lb.ByteMasked(bool, lb.Numpy(np.float64), valid_when=True)
     assert len(builder) == 0
 
-    f41(builder)
-    f42(builder)
+    f25(builder)
+    f26(builder)
     data = np.array([3.3, 4.4, 5.5], dtype=np.float64)
-    f43(builder, data)
+    f27(builder, data)
 
-    f44(builder, 2)
+    f28(builder, 2)
 
     array = builder.snapshot()
     assert ak.to_list(array) == [
@@ -1286,7 +1286,7 @@ def test_ByteMasked_append_extend():
 
 def test_BitMasked_append_extend():
     @numba.njit
-    def f45(builder):
+    def f29(builder):
         builder.append(1.1)
         builder.append(2.2)
         builder.append(3.3)
@@ -1295,26 +1295,26 @@ def test_BitMasked_append_extend():
         builder.append(6.6)
 
     @numba.njit
-    def f46(builder):
+    def f30(builder):
         builder.append_null()
 
     @numba.njit
-    def f47(builder, data):
+    def f31(builder, data):
         builder.extend(data)
 
     @numba.njit
-    def f48(builder, size):
+    def f32(builder, size):
         builder.extend_null(size)
 
     builder = lb.BitMasked(np.uint8, lb.Numpy(np.float64), True, True)
     assert len(builder) == 0
 
-    f45(builder)
-    f46(builder)
+    f29(builder)
+    f30(builder)
     data = np.array([3.3, 4.4, 5.5], dtype=np.float64)
-    f47(builder, data)
+    f31(builder, data)
 
-    f48(builder, 2)
+    f32(builder, 2)
 
     array = builder.snapshot()
     assert ak.to_list(array) == [
@@ -1342,7 +1342,7 @@ def test_BitMasked_append_extend():
 
 def test_Unmasked_append_extend():
     @numba.njit
-    def f49(builder):
+    def f33(builder):
         builder.append(1.1)
         builder.append(2.2)
         builder.append(3.3)
@@ -1351,14 +1351,14 @@ def test_Unmasked_append_extend():
         builder.append(6.6)
 
     @numba.njit
-    def f50(builder, data):
+    def f34(builder, data):
         builder.extend(data)
 
     builder = lb.Unmasked(lb.Numpy(np.float64))
 
-    f49(builder)
+    f33(builder)
     data = np.array([3.3, 4.4, 5.5], dtype=np.float64)
-    f50(builder, data)
+    f34(builder, data)
 
     array = builder.snapshot()
     assert ak.to_list(array) == [
@@ -1383,15 +1383,15 @@ def test_Unmasked_append_extend():
 
 def test_Record_content():
     @numba.njit
-    def f51(builder, name):
+    def f35(builder, name):
         return builder._field_index(name)
 
     @numba.njit
-    def f52(builder, name):
+    def f36(builder, name):
         return builder.content(name)
 
     @numba.njit
-    def f53(builder):
+    def f37(builder):
         content_one = builder._contents[0]  # content("one")
         content_one.append(1.1)
         content_two = builder._contents[1]  # content("two")
@@ -1407,19 +1407,19 @@ def test_Record_content():
         ],
         ["one", "two", "three"],
     )
-    assert f51(builder, "one") == 0
-    assert f51(builder, "two") == 1
-    assert f51(builder, "three") == 2
+    assert f35(builder, "one") == 0
+    assert f35(builder, "two") == 1
+    assert f35(builder, "three") == 2
 
     with pytest.raises(ValueError):
-        f51(builder, "four")  # ValueError: tuple.index(x): x not in tuple
+        f35(builder, "four")  # ValueError: tuple.index(x): x not in tuple
 
     # FIXME: Tuple needs a compile-time index
     # getitem(Tuple(ak.numba.lb.Numpy(float64, parameters=None), ak.numba.lb.Numpy(int64, parameters=None), ak.numba.lb.Numpy(uint8, parameters={'__array__': 'char'})), int64)
-    # content = f52(builder, 0)
+    # content = f36(builder, 0)
     # print(content)
 
-    f53(builder)
+    f37(builder)
     array = builder.snapshot()
     assert ak.to_list(array) == [{"one": 1.1, "three": "o", "two": 1}]
 
@@ -1433,7 +1433,7 @@ def test_Record_content():
 
 def test_Tuple_append():
     @numba.njit
-    def f54(builder):
+    def f38(builder):
         content_one = builder._contents[0]
         content_one.append(1.1)
         content_two = builder._contents[1]
@@ -1446,7 +1446,7 @@ def test_Tuple_append():
     builder = lb.Tuple(
         [lb.Numpy(np.float64), lb.ListOffset(np.int64, lb.Numpy(np.int32))]
     )
-    f54(builder)
+    f38(builder)
     array = builder.snapshot()
     assert ak.to_list(array) == [(1.1, [1, 2, 3])]
 
@@ -1460,7 +1460,7 @@ def test_Tuple_append():
 
 def test_Union_append():
     @numba.njit
-    def f55(builder):
+    def f39(builder):
         one = builder.append_content(builder._contents[0], 0)
         one.append(1.1)
 
@@ -1481,7 +1481,7 @@ def test_Union_append():
     )
     assert len(builder) == 0
 
-    f55(builder)
+    f39(builder)
 
     array = builder.snapshot()
     assert ak.to_list(array) == [1.1, [1, 2, 3]]
