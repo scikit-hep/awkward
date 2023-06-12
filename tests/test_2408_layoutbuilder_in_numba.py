@@ -530,6 +530,7 @@ def test_BitMasked():
 
 def test_Union_Numpy_ListOffset():
     builder = lb.Union(
+        np.int8,
         np.int64,
         [
             lb.Numpy(np.float64),
@@ -541,12 +542,12 @@ def test_Union_Numpy_ListOffset():
     # error = ""
     # assert builder.is_valid(error) == True
 
-    one = builder.append_index(0)
+    one = builder.append_content(0)
     one.append(1.1)
 
     # assert builder.is_valid(error) == True
 
-    two = builder.append_index(1)
+    two = builder.append_content(1)
     list = two.begin_list()
     list.append(1)
     list.append(2)
@@ -560,6 +561,7 @@ def test_Union_Numpy_ListOffset():
 
 def test_Union_ListOffset_Record():
     builder = lb.Union(
+        np.int8,
         np.int64,
         [
             lb.ListOffset(np.int64, lb.Numpy(np.int32)),
@@ -568,25 +570,25 @@ def test_Union_ListOffset_Record():
     )
     assert len(builder) == 0
 
-    one = builder.append_index(0)
+    one = builder.append_content(0)
     list = one.begin_list()
     list.append(1)
     list.append(3)
     one.end_list()
 
-    two = builder.append_index(1)
+    two = builder.append_content(1)
     x = two.field("x")
     y = two.field("y")
 
     x.append(1.1)
     y.append(11)
 
-    builder.append_index(0)
+    builder.append_content(0)
     list = one.begin_list()
     list.append(5.5)
     one.end_list()
 
-    builder.append_index(1)
+    builder.append_content(1)
     x.append(2.2)
     y.append(22)
 
@@ -644,21 +646,21 @@ def test_unbox():
     f1(builder)
 
     @numba.njit(debug=True)
-    def f1111(x):
+    def f_compiled_index(x):
         i = x._contents[0]
         i = x._contents[1]
         i = x._contents[2]
         return i
 
-    f1111(builder)
+    f_compiled_index(builder)
 
     @numba.njit(debug=True)
-    def f111(x, indx):
+    def f_runtime_index(x, indx):
         i = x._contents[indx]
         return i
 
     # FIXME: Tuple needs a compile-time index
-    # f111(builder, 0)
+    # f_runtime_index(builder, 0)
 
     builder = lb.Regular(lb.Numpy(np.float64), size=3)
     f1(builder)
@@ -669,6 +671,7 @@ def test_unbox():
     f1(builder)
 
     builder = lb.Union(
+        np.int8,
         np.int64,
         [
             lb.Numpy(np.float64),
@@ -779,6 +782,7 @@ def test_box():
     assert ak.to_list(out15.snapshot()) == []
 
     builder = lb.Union(
+        np.int8,
         np.int64,
         [
             lb.Numpy(np.float64),
@@ -849,6 +853,7 @@ def test_len():
     assert f4(builder) == 0
 
     builder = lb.Union(
+        np.int8,
         np.int64,
         [
             lb.Numpy(np.float64),
@@ -1455,6 +1460,35 @@ def test_Tuple_append():
     assert len(builder) == 1
     builder.clear()
     assert len(builder) == 0
+
+
+def test_Union_append():
+    @numba.njit
+    def f55(builder):
+        one = builder.append_content(builder._contents[0], 0)
+        one.append(1.1)
+
+        two = builder.append_content(builder._contents[1], 1)
+        list = two.begin_list()
+        list.append(1)
+        list.append(2)
+        list.append(3)
+        two.end_list()
+
+    builder = lb.Union(
+        np.int8,
+        np.int64,
+        [
+            lb.Numpy(np.float64),
+            lb.ListOffset(np.int64, lb.Numpy(np.int32)),
+        ],
+    )
+    assert len(builder) == 0
+
+    f55(builder)
+
+    array = builder.snapshot()
+    assert ak.to_list(array) == [1.1, [1, 2, 3]]
 
 
 def test_numba_append():
