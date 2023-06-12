@@ -700,20 +700,20 @@ def ListOffset_offsets(builder):
 def ListOffset_begin_list(builder):
     if isinstance(builder, ListOffsetType):
 
-        def getter(builder):
+        def begin_list(builder):
             return builder._content
 
-        return getter
+        return begin_list
 
 
 @numba.extending.overload_method(ListOffsetType, "end_list", inline="always")
 def ListOffset_end_list(builder):
     if isinstance(builder, ListOffsetType):
 
-        def impl(builder):
+        def end_list(builder):
             builder._offsets.append(len(builder._content))
 
-        return impl
+        return end_list
 
 
 ########## Regular ############################################################
@@ -901,20 +901,20 @@ def Regular_starts(builder):
 def Regular_begin_list(builder):
     if isinstance(builder, RegularType):
 
-        def getter(builder):
+        def begin_list(builder):
             return builder._content
 
-        return getter
+        return begin_list
 
 
 @numba.extending.overload_method(RegularType, "end_list", inline="always")
 def Regular_end_list(builder):
     if isinstance(builder, RegularType):
 
-        def impl(builder):
+        def end_list(builder):
             pass
 
-        return impl
+        return end_list
 
 
 @numba.extending.overload_method(RegularType, "snapshot")
@@ -1133,44 +1133,44 @@ def IndexedOption_index(builder):
     return getter
 
 
-@numba.extending.overload_method(IndexedOptionType, "append")
-def IndexedOption_append(builder, datum):
+@numba.extending.overload_method(IndexedOptionType, "append_valid")
+def IndexedOption_append_valid(builder, datum):
     if isinstance(builder, IndexedOptionType):
 
-        def append(builder, datum):
+        def append_valid(builder, datum):
             builder._index.append(len(builder._content))
             builder._content.append(datum)
 
-        return append
+        return append_valid
 
 
-@numba.extending.overload_method(IndexedOptionType, "extend")
-def IndexedOption_extend(builder, data):
-    def extend(builder, data):
+@numba.extending.overload_method(IndexedOptionType, "extend_valid")
+def IndexedOption_extend_valid(builder, data):
+    def extend_valid(builder, data):
         start = len(builder._content)
         stop = start + len(data)
         builder._index.extend(list(range(start, stop)))
         builder._content.extend(data)
 
-    return extend
+    return extend_valid
 
 
-@numba.extending.overload_method(IndexedOptionType, "append_null")
-def IndexedOption_append_null(builder):
+@numba.extending.overload_method(IndexedOptionType, "append_invalid")
+def IndexedOption_append_invalid(builder):
     if isinstance(builder, IndexedOptionType):
 
-        def append_null(builder):
+        def append_invalid(builder):
             builder._index.append(-1)
 
-        return append_null
+        return append_invalid
 
 
-@numba.extending.overload_method(IndexedOptionType, "extend_null")
-def IndexedOption_extend_null(builder, size):
-    def extend_null(builder, size):
+@numba.extending.overload_method(IndexedOptionType, "extend_invalid")
+def IndexedOption_extend_invalid(builder, size):
+    def extend_invalid(builder, size):
         builder._index.extend([-1] * size)
 
-    return extend_null
+    return extend_invalid
 
 
 ########## ByteMasked #########################################################

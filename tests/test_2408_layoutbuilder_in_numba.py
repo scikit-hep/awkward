@@ -1126,64 +1126,27 @@ def test_Regular_append():
     assert builder.is_valid(error), error
 
 
-def test_IndexedOption_append_extend2():
-    @numba.njit
-    def f19(builder):
-        builder.append(1.1)
-        builder.append(2.2)
-        builder.append(3.3)
-        builder.append(4.4)
-        builder.append(5.5)
-        builder.append(6.6)
-
-    @numba.njit
-    def f20(builder, data):
-        builder.extend(data)
-
-    builder = lb.IndexedOption(np.int64, lb.Numpy(np.float64))
-    assert len(builder) == 0
-
-    f19(builder)
-    assert len(builder) == 6
-
-    array = builder.snapshot()
-    assert ak.to_list(array) == [1.1, 2.2, 3.3, 4.4, 5.5, 6.6]
-
-    # FIXME: keep track of self._last_valid
-    # error = ""
-    # assert builder.is_valid(error), error
-
-    data = np.array([33.33, 44.44, 55.55], dtype=np.float64)
-    f20(builder, data)
-    assert len(builder) == 9
-
-    array = builder.snapshot()
-    assert ak.to_list(array) == [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 33.33, 44.44, 55.55]
-
-    # assert builder.is_valid(error), error
-
-
 def test_IndexedOption_append_extend():
     @numba.njit
     def f21(builder):
-        builder.append(1.1)
-        builder.append(2.2)
-        builder.append(3.3)
-        builder.append(4.4)
-        builder.append(5.5)
-        builder.append(6.6)
+        builder.append_valid(1.1)
+        builder.append_valid(2.2)
+        builder.append_valid(3.3)
+        builder.append_valid(4.4)
+        builder.append_valid(5.5)
+        builder.append_valid(6.6)
 
     @numba.njit
     def f22(builder):
-        builder.append_null()
+        builder.append_invalid()
 
     @numba.njit
     def f23(builder, data):
-        builder.extend(data)
+        builder.extend_valid(data)
 
     @numba.njit
     def f24(builder, size):
-        builder.extend_null(size)
+        builder.extend_invalid(size)
 
     builder = lb.IndexedOption(np.int64, lb.Numpy(np.float64))
     assert len(builder) == 0
