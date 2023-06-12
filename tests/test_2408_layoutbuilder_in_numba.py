@@ -392,14 +392,14 @@ def test_ByteMasked():
     content = builder.append_valid()
     content.append(1.1)
 
-    builder.append_null()
+    builder.append_invalid()
     content.append(np.nan)
 
     data = np.array([3.3, 4.4, 5.5], dtype=np.float64)
     builder.extend_valid(3)
     content.extend(data)
 
-    builder.extend_null(2)
+    builder.extend_invalid(2)
     content.append(np.nan)
     content.append(np.nan)
 
@@ -431,7 +431,7 @@ def test_BitMasked():
     array = builder.snapshot()
     assert ak.to_list(array) == [1.1]
 
-    builder.append_null()
+    builder.append_invalid()
     subbuilder.append(np.nan)
     assert len(builder) == 2
 
@@ -441,7 +441,7 @@ def test_BitMasked():
     subbuilder.extend(data)
     assert len(builder) == 5
 
-    builder.extend_null(2)
+    builder.extend_invalid(2)
     subbuilder.append(np.nan)
     subbuilder.append(np.nan)
 
@@ -1179,24 +1179,33 @@ def test_IndexedOption_append_extend():
 def test_ByteMasked_append_extend():
     @numba.njit
     def f25(builder):
-        builder.append(1.1)
-        builder.append(2.2)
-        builder.append(3.3)
-        builder.append(4.4)
-        builder.append(5.5)
-        builder.append(6.6)
+        content = builder.append_valid()
+        content.append(1.1)
+        builder.append_valid()
+        content.append(2.2)
+        builder.append_valid()
+        content.append(3.3)
+        builder.append_valid()
+        content.append(4.4)
+        builder.append_valid()
+        content.append(5.5)
+        builder.append_valid()
+        content.append(6.6)
 
     @numba.njit
     def f26(builder):
-        builder.append_null()
+        content = builder.append_invalid()
+        content.append(np.nan)
 
     @numba.njit
     def f27(builder, data):
-        builder.extend(data)
+        content = builder.extend_valid(len(data))
+        content.extend(data)
 
     @numba.njit
     def f28(builder, size):
-        builder.extend_null(size)
+        content = builder.extend_invalid(size)
+        content.extend([np.nan] * size)
 
     builder = lb.ByteMasked(bool, lb.Numpy(np.float64), valid_when=True)
     assert len(builder) == 0
@@ -1235,24 +1244,34 @@ def test_ByteMasked_append_extend():
 def test_BitMasked_append_extend():
     @numba.njit
     def f29(builder):
-        builder.append(1.1)
-        builder.append(2.2)
-        builder.append(3.3)
-        builder.append(4.4)
-        builder.append(5.5)
-        builder.append(6.6)
+        content = builder.append_valid()
+        content.append(1.1)
+        builder.append_valid()
+        content.append(2.2)
+        builder.append_valid()
+        content.append(3.3)
+        builder.append_valid()
+        content.append(4.4)
+        builder.append_valid()
+        content.append(5.5)
+        builder.append_valid()
+        content.append(6.6)
 
     @numba.njit
     def f30(builder):
-        builder.append_null()
+        content = builder.append_invalid()
+        content.append(np.nan)
 
     @numba.njit
     def f31(builder, data):
-        builder.extend(data)
+        content = builder.extend_valid(len(data))
+        content.extend(data)
 
     @numba.njit
     def f32(builder, size):
-        builder.extend_null(size)
+        content = builder.extend_invalid(size)
+        content.append(np.nan)
+        content.append(np.nan)
 
     builder = lb.BitMasked(np.uint8, lb.Numpy(np.float64), True, True)
     assert len(builder) == 0

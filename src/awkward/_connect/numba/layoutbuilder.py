@@ -957,22 +957,10 @@ class IndexedOption(LayoutBuilder):
     def content(self):
         return self._content
 
-    # def append(self, datum):
-    #     self._last_valid = len(self._content)
-    #     self._index.append(self._last_valid)
-    #     self._content.append(datum)
-
     def append_valid(self):
         self._last_valid = len(self._content)
         self._index.append(self._last_valid)
         return self._content
-
-    # def extend(self, data):
-    #     start = len(self._content)
-    #     stop = start + len(data)
-    #     self._last_valid = stop - 1
-    #     self._index.extend(list(range(start, stop)))
-    #     self._content.extend(data)
 
     def extend_valid(self, size):
         start = len(self._content)
@@ -1223,11 +1211,11 @@ class ByteMasked(LayoutBuilder):
         self._mask.extend([self._valid_when] * size)
         return self._content
 
-    def append_null(self):
+    def append_invalid(self):
         self._mask.append(not self._valid_when)
         return self._content
 
-    def extend_null(self, size):
+    def extend_invalid(self, size):
         self._mask.extend([not self._valid_when] * size)
         return self._content
 
@@ -1373,50 +1361,56 @@ def ByteMaskedType_box(typ, val, c):
 
 @numba.extending.overload_method(ByteMaskedType, "_length_get", inline="always")
 def ByteMasked_length(builder):
-    def getter(builder):
-        return len(builder._content)
-
-    return getter
-
-
-@numba.extending.overload_method(ByteMaskedType, "append")
-def ByteMasked_append(builder, datum):
     if isinstance(builder, ByteMaskedType):
 
-        def append(builder, datum):
+        def getter(builder):
+            return len(builder._content)
+
+        return getter
+
+
+@numba.extending.overload_method(ByteMaskedType, "append_valid")
+def ByteMasked_append_valid(builder):
+    if isinstance(builder, ByteMaskedType):
+
+        def append_valid(builder):
             builder._mask.append(builder._valid_when)
-            builder._content.append(datum)
+            return builder._content
 
-        return append
-
-
-@numba.extending.overload_method(ByteMaskedType, "extend")
-def ByteMasked_extend(builder, data):
-    def extend(builder, data):
-        builder._mask.extend([builder._valid_when] * len(data))
-        builder._content.extend(data)
-
-    return extend
+        return append_valid
 
 
-@numba.extending.overload_method(ByteMaskedType, "append_null")
-def ByteMasked_append_null(builder):
+@numba.extending.overload_method(ByteMaskedType, "extend_valid")
+def ByteMasked_extend_valid(builder, size):
     if isinstance(builder, ByteMaskedType):
 
-        def append_null(builder):
+        def extend_valid(builder, size):
+            builder._mask.extend([builder._valid_when] * size)
+            return builder._content
+
+        return extend_valid
+
+
+@numba.extending.overload_method(ByteMaskedType, "append_invalid")
+def ByteMasked_append_invalid(builder):
+    if isinstance(builder, ByteMaskedType):
+
+        def append_invalid(builder):
             builder._mask.append(not builder._valid_when)
-            builder._content.append(np.nan)
+            return builder._content
 
-        return append_null
+        return append_invalid
 
 
-@numba.extending.overload_method(ByteMaskedType, "extend_null")
-def ByteMasked_extend_null(builder, size):
-    def extend_null(builder, size):
-        builder._mask.extend([not builder._valid_when] * size)
-        builder._content.extend([np.nan] * size)
+@numba.extending.overload_method(ByteMaskedType, "extend_invalid")
+def ByteMasked_extend_invalid(builder, size):
+    if isinstance(builder, ByteMaskedType):
 
-    return extend_null
+        def extend_invalid(builder, size):
+            builder._mask.extend([not builder._valid_when] * size)
+            return builder._content
+
+        return extend_invalid
 
 
 ########## BitMasked #########################################################
@@ -1440,9 +1434,6 @@ class BitMasked(LayoutBuilder):
         self._valid_when = valid_when
         self._lsb_order = lsb_order
         self._current_byte_index = np.zeros((2,), dtype=np.uint8)
-        # FIXME:
-        # self._current_byte = np.uint8(0)
-        # self._current_index = 0
         self._mask.append(self._current_byte_index[0])
         if self._lsb_order:
             self._cast = np.array(
@@ -1537,16 +1528,16 @@ class BitMasked(LayoutBuilder):
             self.append_valid()
         return self._content
 
-    def append_null(self):
+    def append_invalid(self):
         self._append_begin()
         # current_byte_ and cast_ default to null, no change
         self._append_end()
         return self._content
 
-    def extend_null(self, size):
+    def extend_invalid(self, size):
         # Just an interface; not actually faster than calling append many times.
         for _ in range(size):
-            self.append_null()
+            self.append_invalid()
         return self._content
 
     def parameters(self):
@@ -1798,30 +1789,14 @@ def BitMasked_append_end(builder):
     return append_end
 
 
-@numba.extending.overload_method(BitMaskedType, "append")
-def BitMasked_append(builder, datum):
-    if isinstance(builder, BitMaskedType):
-
-        def append(builder, datum):
-            builder._append_begin()
-            # current_byte_ and cast_: 0 indicates null, 1 indicates valid
-            builder._current_byte_index[0] |= builder._cast[
-                builder._current_byte_index[1]
-            ]
-            builder._append_end()
-            builder._content.append(datum)
-
-        return append
-
-
-@numba.extending.overload_method(BitMaskedType, "extend")
-def BitMasked_extend(builder, data):
-    def extend(builder, data):
-        for _ in range(len(data)):
+@numba.extending.overload_method(BitMaskedType, "extend_valid")
+def BitMasked_extend_valid(builder, size):
+    def extend_valid(builder, size):
+        for _ in range(size):
             builder.append_valid()
-        builder._content.extend(data)
+        return builder._content
 
-    return extend
+    return extend_valid
 
 
 @numba.extending.overload_method(BitMaskedType, "append_valid")
@@ -1831,31 +1806,32 @@ def BitMasked_append_valid(builder):
         # current_byte_ and cast_: 0 indicates null, 1 indicates valid
         builder._current_byte_index[0] |= builder._cast[builder._current_byte_index[1]]
         builder._append_end()
+        return builder._content
 
     return append_valid
 
 
-@numba.extending.overload_method(BitMaskedType, "append_null")
-def BitMasked_append_null(builder):
+@numba.extending.overload_method(BitMaskedType, "append_invalid")
+def BitMasked_append_invalid(builder):
     if isinstance(builder, BitMaskedType):
 
-        def append_null(builder):
+        def append_invalid(builder):
             builder._append_begin()
             # current_byte_ and cast_ default to null, no change
             builder._append_end()
-            builder._content.append(np.nan)
+            return builder._content
 
-        return append_null
+        return append_invalid
 
 
-@numba.extending.overload_method(BitMaskedType, "extend_null")
-def BitMasked_extend_null(builder, size):
-    def extend_null(builder, size):
+@numba.extending.overload_method(BitMaskedType, "extend_invalid")
+def BitMasked_extend_invalid(builder, size):
+    def extend_invalid(builder, size):
         for _ in range(size):
-            builder.append_null()
-        # builder._content.extend([np.nan] * size)
+            builder.append_invalid()
+        return builder._content
 
-    return extend_null
+    return extend_invalid
 
 
 ########## Unmasked #########################################################
