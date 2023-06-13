@@ -291,6 +291,11 @@ def to_parquet(
     if parquet_extra_options is None:
         parquet_extra_options = {}
 
+    if not isinstance(destination, str):
+        raise TypeError(
+            f"'destination' argument of 'ak.to_parquet' must be a string, not {type(destination).__name__} ('array' argument is first; 'destination' second)"
+        )
+
     fs, destination = fsspec.core.url_to_fs(destination, **(storage_options or {}))
     metalist = []
     with pyarrow_parquet.ParquetWriter(
