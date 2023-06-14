@@ -1,8 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("to_parquet",)
 
-import pathlib
 from collections.abc import Mapping, Sequence
+from os import fsdecode
 
 import awkward as ak
 from awkward._nplikes.numpylike import NumpyMetadata
@@ -40,7 +40,7 @@ def to_parquet(
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
-        destination (str or pathlib.Path): Name of the output file, file path, or
+        destination (path-like): Name of the output file, file path, or
             remote URL passed to [fsspec.core.url_to_fs](https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.core.url_to_fs)
             for remote writing.
         list_to32 (bool): If True, convert Awkward lists into 32-bit Arrow lists
@@ -292,12 +292,12 @@ def to_parquet(
     if parquet_extra_options is None:
         parquet_extra_options = {}
 
-    if isinstance(destination, pathlib.Path):
-        destination = str(destination)
-    if not isinstance(destination, str):
+    try:
+        destination = fsdecode(destination)
+    except TypeError:
         raise TypeError(
-            f"'destination' argument of 'ak.to_parquet' must be a string, not {type(destination).__name__} ('array' argument is first; 'destination' second)"
-        )
+            f"'destination' argument of 'ak.to_parquet' must be a path-like, not {type(destination).__name__} ('array' argument is first; 'destination' second)"
+        ) from None
 
     fs, destination = fsspec.core.url_to_fs(destination, **(storage_options or {}))
     metalist = []
