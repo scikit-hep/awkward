@@ -934,7 +934,13 @@ def apply_step(
         )
 
     def broadcast_any_indexed():
-        nextinputs = [x.project() if isinstance(x, IndexedArray) else x for x in inputs]
+        # The `apply` function may exit at the level of a `RecordArray`. We can avoid projection
+        # of the record array in such cases, in favour of a deferred carry. This can be done by
+        # "pushing" the `IndexedArray` _into_ the record (i.e., wrapping each `content`).
+        nextinputs = [
+            x._push_inside_record_or_project() if isinstance(x, IndexedArray) else x
+            for x in inputs
+        ]
         return apply_step(
             backend,
             nextinputs,
