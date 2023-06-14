@@ -934,7 +934,10 @@ def apply_step(
         )
 
     def broadcast_any_indexed():
-        nextinputs = [x.project() if isinstance(x, IndexedArray) else x for x in inputs]
+        nextinputs = [
+            x._push_inside_record_or_project() if isinstance(x, IndexedArray) else x
+            for x in inputs
+        ]
         return apply_step(
             backend,
             nextinputs,
