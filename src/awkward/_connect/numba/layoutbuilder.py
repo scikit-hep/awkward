@@ -2022,6 +2022,9 @@ class Record(LayoutBuilder):
     def field(self, name):
         return self.content(name)
 
+    def field_index(self, name):
+        return self.fields.index(name)
+
     def parameters(self):
         return self._parameters
 
@@ -2093,12 +2096,6 @@ class RecordType(numba.types.Type):
             to_numbatype([numba.types.StringLiteral(it) for it in self._fields])
         )
 
-    # def content(self, name):  # Literal string or Literal int
-    #     return to_numbatype(self._contents[self._fields.index(name)])
-    #
-    # def field(self, name):  # Literal string or Literal int
-    #     return to_numbatype(self._contents[self._fields.index(name)])
-    #
     @property
     def length(self):
         return numba.types.int64
@@ -2183,20 +2180,33 @@ def Record_length(builder):
 def Record_field_index(builder, name):
     if isinstance(builder, RecordType):
 
-        def getter(builder, name):
+        def field_index(builder, name):
             return builder._fields.index(name)
 
-        return getter
+        return field_index
 
 
 @numba.extending.overload_method(RecordType, "content")
 def Record_content(builder, field_index):
-    def getter(builder, field_index):
-        content = builder._contents[numba.literally(field_index)]
+    if isinstance(builder, RecordType):
+        if isinstance(field_index, numba.types.Integer):
 
-        return content
+            def getter(builder, field_index):
+                content = builder._contents[numba.literally(field_index)]
 
-    return getter
+                return content
+
+            return getter
+
+        if isinstance(field_index, numba.types.UnicodeType):
+
+            def getter(builder, field_index):
+                indx = builder._field_index(field_index)
+                content = builder._contents[indx]
+
+                return content
+
+            return getter
 
 
 ########## Tuple #######################################################
@@ -2289,7 +2299,7 @@ class TupleType(numba.types.Type):
 
     @property
     def parameters(self):
-        return numba.types.StringLiteral
+        return numba.types.StringLiteral(self._parameters)
 
     @property
     def contents(self):
@@ -2361,20 +2371,24 @@ def TupleType_box(typ, val, c):
 
 @numba.extending.overload_method(TupleType, "_length_get", inline="always")
 def Tuple_length(builder):
-    def getter(builder):
-        return len(builder._contents[0])
+    if isinstance(builder, TupleType):
 
-    return getter
+        def getter(builder):
+            return len(builder._contents[0])
+
+        return getter
 
 
 @numba.extending.overload_method(TupleType, "content")
 def Tuple_content(builder, index):
-    def getter(builder, index):
-        content = builder._contents[numba.literally(index)]
+    if isinstance(builder, TupleType) and isinstance(index, numba.types.Integer):
 
-        return content
+        def getter(builder, index):
+            content = builder._contents[numba.literally(index)]
 
-    return getter
+            return content
+
+        return getter
 
 
 ########## Union #######################################################
@@ -2491,7 +2505,7 @@ class UnionType(numba.types.Type):
 
     @property
     def parameters(self):
-        return numba.types.StringLiteral
+        return numba.types.StringLiteral(self._parameters)
 
     @property
     def tags(self):
@@ -2587,18 +2601,22 @@ def UnionType_box(typ, val, c):
 
 @numba.extending.overload_method(UnionType, "_length_get", inline="always")
 def Union_length(builder):
-    def getter(builder):
-        return len(builder._contents[0])
+    if isinstance(builder, UnionType):
 
-    return getter
+        def getter(builder):
+            return len(builder._contents[0])
+
+        return getter
 
 
 @numba.extending.overload_method(UnionType, "append_content")
 def Union_append_content(builder, tag):
-    def append_content(builder, tag):
-        content = builder._contents[numba.literally(tag)]
-        builder._tags.append(tag)
-        builder._index.append(len(content))
-        return content
+    if isinstance(builder, UnionType) and isinstance(tag, numba.types.Integer):
 
-    return append_content
+        def append_content(builder, tag):
+            content = builder._contents[numba.literally(tag)]
+            builder._tags.append(tag)
+            builder._index.append(len(content))
+            return content
+
+        return append_content

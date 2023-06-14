@@ -609,8 +609,8 @@ def test_unbox():
         i = x.content(indx)
         return i
 
-    content = f_runtime_index(builder, 1)
-    assert content.type() == builder._contents[1].type()
+    content = f_runtime_index(builder, builder.field_index("one"))
+    assert content.type() == builder._contents[0].type()
 
     builder = lb.Regular(lb.Numpy(np.float64), size=3)
     f1(builder)
@@ -1353,15 +1353,15 @@ def test_Unmasked_append_extend():
 
 def test_Record_content():
     @numba.njit
-    def f35(builder, name):
+    def field_index(builder, name):
         return builder._field_index(name)
 
     @numba.njit
-    def f36(builder, name):
+    def content(builder, name):
         return builder.content(name)
 
     @numba.njit
-    def f37(builder):
+    def fill(builder):
         content_one = builder.content(0)  # content("one")
         content_one.append(1.1)
         content_two = builder.content(1)  # content("two")
@@ -1377,19 +1377,17 @@ def test_Record_content():
         ],
         ["one", "two", "three"],
     )
-    assert f35(builder, "one") == 0
-    assert f35(builder, "two") == 1
-    assert f35(builder, "three") == 2
+    assert field_index(builder, "one") == 0
+    assert field_index(builder, "two") == 1
+    assert field_index(builder, "three") == 2
 
     with pytest.raises(ValueError):
-        f35(builder, "four")  # ValueError: tuple.index(x): x not in tuple
+        field_index(builder, "four")  # ValueError: tuple.index(x): x not in tuple
 
-    # FIXME: Tuple needs a compile-time index
-    # getitem(Tuple(ak.numba.lb.Numpy(float64, parameters=None), ak.numba.lb.Numpy(int64, parameters=None), ak.numba.lb.Numpy(uint8, parameters={'__array__': 'char'})), int64)
-    # content = f36(builder, 0)
-    # print(content)
+    content = content(builder, field_index(builder, "one"))
+    assert content.type() == builder._contents[0].type()
 
-    f37(builder)
+    fill(builder)
     array = builder.snapshot()
     assert ak.to_list(array) == [{"one": 1.1, "three": "o", "two": 1}]
 
