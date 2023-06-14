@@ -32,13 +32,9 @@ class PartialFunction:
         return self.func(*self.args, **self.kwargs)
 
 
-class AwkwardKeyError(builtins.KeyError):
+class KeyError(builtins.KeyError):
     def __str__(self):
         return super(Exception, self).__str__()
-
-
-AwkwardKeyError.__name__ = "KeyError"
-AwkwardKeyError.__qualname__ = "KeyError"
 
 
 class ErrorContext:
@@ -97,8 +93,8 @@ class ErrorContext:
                     + "\n\nSee if this has been reported at https://github.com/scikit-hep/awkward/issues"
                 )
                 new_exception.__cause__ = exception
-            elif issubclass(cls, KeyError):
-                new_exception = AwkwardKeyError(self.format_exception(exception))
+            elif issubclass(cls, builtins.KeyError):
+                new_exception = KeyError(self.format_exception(exception))
                 new_exception.__cause__ = exception
             else:
                 new_exception = cls(self.format_exception(exception))
