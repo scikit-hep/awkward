@@ -1150,4 +1150,4 @@ class IndexedArray(Content):
                 parameters=parameters_union(self.content._parameters, self._parameters),
             )
         else:
-            return self
+            return self.project()
