@@ -1,8 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("from_avro_file",)
 
-# from awkward._typing import Type
-import pathlib
+from os import PathLike, fsdecode
 
 import awkward as ak
 from awkward._nplikes.numpylike import NumpyMetadata
@@ -15,7 +14,7 @@ def from_avro_file(
 ):
     """
     Args:
-        file (string or file-like object): Avro file to be read as Awkward Array.
+        file (path-like or file-like object): Avro file to be read as Awkward Array.
         limit_entries (int): The number of rows of the Avro file to be read into the Awkward Array.
         debug_forth (bool): If True, prints the generated Forth code for debugging.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
@@ -40,8 +39,8 @@ def from_avro_file(
             "debug_forth": debug_forth,
         },
     ):
-        if isinstance(file, pathlib.Path):
-            file = str(file)
+        if isinstance(file, PathLike):
+            file = fsdecode(file)
 
         if isinstance(file, str):
             with open(file, "rb") as opened_file:
