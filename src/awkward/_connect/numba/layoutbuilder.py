@@ -2179,7 +2179,7 @@ def Record_length(builder):
     return getter
 
 
-@numba.extending.overload_method(RecordType, "_field_index")
+@numba.extending.overload_method(RecordType, "_field_index", inline="always")
 def Record_field_index(builder, name):
     if isinstance(builder, RecordType):
 
@@ -2190,16 +2190,13 @@ def Record_field_index(builder, name):
 
 
 @numba.extending.overload_method(RecordType, "content")
-def Record_content(builder, name):
-    if isinstance(builder, RecordType):
+def Record_content(builder, field_index):
+    def getter(builder, field_index):
+        content = builder._contents[numba.literally(field_index)]
 
-        def getter(builder, name):
-            # FIXME: Tuple needs a compile-time index
-            content = builder._contents[builder._fields.index(name)]
+        return content
 
-            return content
-
-        return getter
+    return getter
 
 
 ########## Tuple #######################################################
@@ -2366,6 +2363,16 @@ def TupleType_box(typ, val, c):
 def Tuple_length(builder):
     def getter(builder):
         return len(builder._contents[0])
+
+    return getter
+
+
+@numba.extending.overload_method(TupleType, "content")
+def Tuple_content(builder, index):
+    def getter(builder, index):
+        content = builder._contents[numba.literally(index)]
+
+        return content
 
     return getter
 
@@ -2587,8 +2594,9 @@ def Union_length(builder):
 
 
 @numba.extending.overload_method(UnionType, "append_content")
-def Union_append_content(builder, content, tag):
-    def append_content(builder, content, tag):
+def Union_append_content(builder, tag):
+    def append_content(builder, tag):
+        content = builder._contents[numba.literally(tag)]
         builder._tags.append(tag)
         builder._index.append(len(content))
         return content

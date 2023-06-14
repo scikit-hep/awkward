@@ -606,11 +606,11 @@ def test_unbox():
 
     @numba.njit(debug=True)
     def f_runtime_index(x, indx):
-        i = x._contents[indx]
+        i = x.content(indx)
         return i
 
-    # FIXME: Tuple needs a compile-time index
-    # f_runtime_index(builder, 0)
+    content = f_runtime_index(builder, 1)
+    assert content.type() == builder._contents[1].type()
 
     builder = lb.Regular(lb.Numpy(np.float64), size=3)
     f1(builder)
@@ -1080,8 +1080,8 @@ def test_IndexedOption_Record_append():
     @numba.njit
     def f19(builder):
         content = builder.append_valid()
-        x = content._contents[0]
-        y = content._contents[1]
+        x = content.content(0)
+        y = content.content(1)
         x.append(1.1)
         y.append(2)
         builder.append_invalid()
@@ -1362,11 +1362,11 @@ def test_Record_content():
 
     @numba.njit
     def f37(builder):
-        content_one = builder._contents[0]  # content("one")
+        content_one = builder.content(0)  # content("one")
         content_one.append(1.1)
-        content_two = builder._contents[1]  # content("two")
+        content_two = builder.content(1)  # content("two")
         content_two.append(1)
-        content_three = builder._contents[2]  # content("three")
+        content_three = builder.content(2)  # content("three")
         content_three.append(111)
 
     builder = lb.Record(
@@ -1404,9 +1404,9 @@ def test_Record_content():
 def test_Tuple_append():
     @numba.njit
     def f38(builder):
-        content_one = builder._contents[0]
+        content_one = builder.content(0)
         content_one.append(1.1)
-        content_two = builder._contents[1]
+        content_two = builder.content(1)
         content_list = content_two.begin_list()
         content_list.append(1)
         content_list.append(2)
@@ -1431,10 +1431,10 @@ def test_Tuple_append():
 def test_Union_append():
     @numba.njit
     def f39(builder):
-        one = builder.append_content(builder._contents[0], 0)
+        one = builder.append_content(0)
         one.append(1.1)
 
-        two = builder.append_content(builder._contents[1], 1)
+        two = builder.append_content(1)
         list = two.begin_list()
         list.append(1)
         list.append(2)
