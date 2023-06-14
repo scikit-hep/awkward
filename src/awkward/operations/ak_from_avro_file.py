@@ -39,7 +39,7 @@ def from_avro_file(
             "debug_forth": debug_forth,
         },
     ):
-        if isinstance(file, PathLike):
+        if isinstance(file, (str, bytes, PathLike)):
             file = fsdecode(file)
 
         if isinstance(file, str):

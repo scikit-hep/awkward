@@ -205,7 +205,7 @@ def _impl(
     )
 
     if file is not None:
-        if isinstance(file, PathLike):
+        if isinstance(file, (str, bytes, PathLike)):
             parsed_url = urlparse(fsdecode(file))
             if parsed_url.scheme == "" or parsed_url.netloc == "":
 
