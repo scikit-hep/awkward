@@ -1,8 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("to_json",)
 import json
-import pathlib
 from numbers import Number
+from os import PathLike, fsdecode
 from urllib.parse import urlparse
 
 from awkward_cpp.lib import _ext
@@ -33,7 +33,7 @@ def to_json(
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
-        file (None, str/pathlib.Path, or file-like object): If None, this function returns
+        file (None, path-like, or file-like object): If None, this function returns
             JSON-encoded bytes. Otherwise, this function has no return value.
             If a string/pathlib.Path, this function opens a file with that name, writes JSON
             data, and closes the file. If that path has a URI protocol (like
@@ -205,8 +205,8 @@ def _impl(
     )
 
     if file is not None:
-        if isinstance(file, (str, pathlib.Path)):
-            parsed_url = urlparse(file)
+        if isinstance(file, (str, bytes, PathLike)):
+            parsed_url = urlparse(fsdecode(file))
             if parsed_url.scheme == "" or parsed_url.netloc == "":
 
                 def opener():
