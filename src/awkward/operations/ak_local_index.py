@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("local_index",)
 import awkward as ak
+from awkward._errors import with_operation_context
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
@@ -8,6 +9,7 @@ from awkward._regularize import regularize_axis
 np = NumpyMetadata.instance()
 
 
+@with_operation_context
 def local_index(array, axis=-1, *, highlevel=True, behavior=None):
     """
     Args:
@@ -72,11 +74,7 @@ def local_index(array, axis=-1, *, highlevel=True, behavior=None):
                        2               8.8
                        3               9.9
     """
-    with ak._errors.OperationErrorContext(
-        "ak.local_index",
-        {"array": array, "axis": axis, "highlevel": highlevel, "behavior": behavior},
-    ):
-        return _impl(array, axis, highlevel, behavior)
+    return _impl(array, axis, highlevel, behavior)
 
 
 def _impl(array, axis, highlevel, behavior):

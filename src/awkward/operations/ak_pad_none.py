@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("pad_none",)
 import awkward as ak
+from awkward._errors import with_operation_context
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
@@ -8,6 +9,7 @@ from awkward._regularize import regularize_axis
 np = NumpyMetadata.instance()
 
 
+@with_operation_context
 def pad_none(array, target, axis=1, *, clip=False, highlevel=True, behavior=None):
     """
     Args:
@@ -95,18 +97,7 @@ def pad_none(array, target, axis=1, *, clip=False, highlevel=True, behavior=None
         >>> ak.pad_none(array, 2, axis=2, clip=True).type.show()
         3 * var *   2 * ?float64
     """
-    with ak._errors.OperationErrorContext(
-        "ak.pad_none",
-        {
-            "array": array,
-            "target": target,
-            "axis": axis,
-            "clip": clip,
-            "highlevel": highlevel,
-            "behavior": behavior,
-        },
-    ):
-        return _impl(array, target, axis, clip, highlevel, behavior)
+    return _impl(array, target, axis, clip, highlevel, behavior)
 
 
 def _impl(array, target, axis, clip, highlevel, behavior):

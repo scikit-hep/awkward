@@ -1,14 +1,15 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("to_parquet",)
-
 from collections.abc import Mapping, Sequence
 
 import awkward as ak
+from awkward._errors import with_operation_context
 from awkward._nplikes.numpylike import NumpyMetadata
 
 metadata = NumpyMetadata.instance()
 
 
+@with_operation_context
 def to_parquet(
     array,
     destination,
@@ -318,6 +319,7 @@ def to_parquet(
     return meta
 
 
+@with_operation_context
 def write_metadata(dir_path, fs, *metas, global_metadata=True):
     """Generate metadata file(s) from list of arrow metadata instances"""
     assert metas

@@ -1,9 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("metadata_from_parquet",)
-
 import collections
 
 import awkward as ak
+from awkward._errors import with_operation_context
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
@@ -15,6 +15,7 @@ ParquetMetadata = collections.namedtuple(
 )
 
 
+@with_operation_context
 def metadata_from_parquet(
     path,
     *,
@@ -59,20 +60,13 @@ def metadata_from_parquet(
     """
     import awkward._connect.pyarrow  # noqa: F401
 
-    with ak._errors.OperationErrorContext(
-        "ak.metadata_from_parquet",
-        {
-            "path": path,
-            "storage_options": storage_options,
-        },
-    ):
-        return _impl(
-            path,
-            storage_options,
-            row_groups=row_groups,
-            ignore_metadata=ignore_metadata,
-            scan_files=scan_files,
-        )
+    return _impl(
+        path,
+        storage_options,
+        row_groups=row_groups,
+        ignore_metadata=ignore_metadata,
+        scan_files=scan_files,
+    )
 
 
 def _impl(

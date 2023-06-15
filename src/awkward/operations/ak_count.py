@@ -2,6 +2,7 @@
 __all__ = ("count",)
 import awkward as ak
 from awkward._behavior import behavior_of
+from awkward._errors import with_operation_context
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
@@ -9,6 +10,7 @@ from awkward._regularize import regularize_axis
 np = NumpyMetadata.instance()
 
 
+@with_operation_context
 def count(
     array,
     axis=None,
@@ -93,18 +95,7 @@ def count(
     If it is desirable to exclude NaN ("not a number") values from #ak.count,
     use #ak.nan_to_none to turn them into None, which are not counted.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.count",
-        {
-            "array": array,
-            "axis": axis,
-            "keepdims": keepdims,
-            "mask_identity": mask_identity,
-            "highlevel": highlevel,
-            "behavior": behavior,
-        },
-    ):
-        return _impl(array, axis, keepdims, mask_identity, highlevel, behavior)
+    return _impl(array, axis, keepdims, mask_identity, highlevel, behavior)
 
 
 def _impl(array, axis, keepdims, mask_identity, highlevel, behavior):

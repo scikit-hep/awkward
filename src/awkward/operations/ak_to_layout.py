@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("to_layout",)
-
 from collections.abc import Iterable
 
 from awkward_cpp.lib import _ext
@@ -8,6 +7,7 @@ from awkward_cpp.lib import _ext
 import awkward as ak
 from awkward import _errors
 from awkward._backends.typetracer import TypeTracerBackend
+from awkward._errors import with_operation_context
 from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
@@ -18,6 +18,7 @@ np = NumpyMetadata.instance()
 numpy = Numpy.instance()
 
 
+@with_operation_context
 def to_layout(array, *, allow_record=True, allow_other=False, regulararray=True):
     """
     Args:

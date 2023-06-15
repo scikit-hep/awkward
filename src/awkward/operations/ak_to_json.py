@@ -9,6 +9,7 @@ from awkward_cpp.lib import _ext
 
 import awkward as ak
 from awkward._behavior import behavior_of
+from awkward._errors import with_operation_context
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
 
@@ -16,6 +17,7 @@ np = NumpyMetadata.instance()
 numpy = Numpy.instance()
 
 
+@with_operation_context
 def to_json(
     array,
     file=None,
@@ -111,35 +113,19 @@ def to_json(
 
     See also #ak.from_json.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.to_json",
-        {
-            "array": array,
-            "file": file,
-            "line_delimited": line_delimited,
-            "num_indent_spaces": num_indent_spaces,
-            "num_readability_spaces": num_readability_spaces,
-            "nan_string": nan_string,
-            "posinf_string": posinf_string,
-            "neginf_string": neginf_string,
-            "complex_record_fields": complex_record_fields,
-            "convert_bytes": convert_bytes,
-            "convert_other": convert_other,
-        },
-    ):
-        return _impl(
-            array,
-            file,
-            line_delimited,
-            num_indent_spaces,
-            num_readability_spaces,
-            nan_string,
-            posinf_string,
-            neginf_string,
-            complex_record_fields,
-            convert_bytes,
-            convert_other,
-        )
+    return _impl(
+        array,
+        file,
+        line_delimited,
+        num_indent_spaces,
+        num_readability_spaces,
+        nan_string,
+        posinf_string,
+        neginf_string,
+        complex_record_fields,
+        convert_bytes,
+        convert_other,
+    )
 
 
 def _impl(
