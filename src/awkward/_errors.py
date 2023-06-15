@@ -5,7 +5,7 @@ import builtins
 import sys
 import threading
 import warnings
-from collections.abc import Callable, Iterable, Mapping, Sequence
+from collections.abc import Callable, Collection, Iterable, Mapping
 from functools import wraps
 
 import numpy  # noqa: TID251
@@ -162,7 +162,7 @@ class ErrorContext:
                 if len(valuestr) > width:
                     valuestr = valuestr[: width - 3] + "..."
 
-        elif isinstance(value, (Sequence, Mapping)) and len(value) < 10000:
+        elif isinstance(value, (Collection, Mapping)) and len(value) < 10000:
             valuestr = repr(value)
             if len(valuestr) > width:
                 valuestr = valuestr[: width - 3] + "..."
@@ -193,7 +193,7 @@ class OperationErrorContext(ErrorContext):
             # Do we not recognise this as an object with a backend?
             if backend is None:
                 # Is this an iterable object, and are we permitted to recurse?
-                if isinstance(obj, Iterable) and depth != depth_limit:
+                if isinstance(obj, Collection) and depth != depth_limit:
                     return self.any_backend_is_delayed(
                         obj, depth=depth + 1, depth_limit=depth_limit
                     )
