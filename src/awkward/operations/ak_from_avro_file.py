@@ -30,6 +30,7 @@ def from_avro_file(
     Awkward form and Forth code for that specific Avro file and then reads it.
     """
     import awkward._connect.avro
+
     if isinstance(file, (str, bytes, PathLike)):
         file = fsdecode(file)
         with open(file, "rb") as opened_file:
