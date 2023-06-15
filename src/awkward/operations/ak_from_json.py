@@ -384,7 +384,7 @@ class _NoContextManager:
 
 
 def _get_reader(source):
-    if not isinstance(source, pathlib.Path) and isinstance(source, str):
+    if isinstance(source, str):
         source = source.encode("utf8", errors="surrogateescape")
 
     if isinstance(source, bytes):
