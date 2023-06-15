@@ -5,7 +5,9 @@ import builtins
 import sys
 import threading
 import warnings
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
+from functools import wraps
+from inspect import signature
 
 import numpy  # noqa: TID251
 
@@ -381,3 +383,21 @@ class FieldNotFoundError(IndexError):
 
 
 AxisError = numpy.AxisError
+
+
+T = TypeVar("T", bound=Callable)
+
+
+def with_operation_context(func: T) -> T:
+    sig = signature(func)
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        bound = sig.bind(*args, **kwargs)
+        bound.apply_defaults()
+
+        # NOTE: this decorator assumes that the operation is exposed under `ak.`
+        with OperationErrorContext(f"ak.{func.__qualname__}", bound.arguments):
+            return func(*args, **kwargs)
+
+    return wrapper
