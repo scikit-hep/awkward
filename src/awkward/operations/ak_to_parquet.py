@@ -327,7 +327,6 @@ def to_parquet(
     return meta
 
 
-@with_operation_context
 def write_metadata(dir_path, fs, *metas, global_metadata=True):
     """Generate metadata file(s) from list of arrow metadata instances"""
     assert metas
