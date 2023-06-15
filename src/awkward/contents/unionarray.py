@@ -1077,18 +1077,15 @@ class UnionArray(Content):
         if len(others) == 0:
             return self
 
+        index_nplike = self._backend.index_nplike
         head, tail = self._merging_strategy(others)
 
         total_length = 0
         for array in head:
             total_length += array.length
 
-        nexttags = ak.index.Index8.empty(
-            total_length, nplike=self._backend.index_nplike
-        )
-        nextindex = ak.index.Index64.empty(
-            total_length, nplike=self._backend.index_nplike
-        )
+        nexttags = ak.index.Index8.empty(total_length, nplike=index_nplike)
+        nextindex = ak.index.Index64.empty(total_length, nplike=index_nplike)
 
         nextcontents = []
         length_so_far = 0
@@ -1104,8 +1101,8 @@ class UnionArray(Content):
                 union_index = array.index
                 union_contents = array.contents
                 assert (
-                    nexttags.nplike is self._backend.index_nplike
-                    and union_tags.nplike is self._backend.index_nplike
+                    nexttags.nplike is index_nplike
+                    and union_tags.nplike is index_nplike
                 )
                 self._backend.maybe_kernel_error(
                     self._backend[
@@ -1121,8 +1118,8 @@ class UnionArray(Content):
                     )
                 )
                 assert (
-                    nextindex.nplike is self._backend.index_nplike
-                    and union_index.nplike is self._backend.index_nplike
+                    nextindex.nplike is index_nplike
+                    and union_index.nplike is index_nplike
                 )
                 self._backend.maybe_kernel_error(
                     self._backend[
@@ -1139,9 +1136,30 @@ class UnionArray(Content):
                 length_so_far += array.length
 
                 nextcontents.extend(union_contents)
+            elif isinstance(array, ak.contents.IndexedArray):
+                assert nexttags.nplike is index_nplike
+                self._backend.maybe_kernel_error(
+                    self._backend[
+                        "awkward_UnionArray_filltags_const",
+                        nexttags.dtype.type,
+                    ](
+                        nexttags.data,
+                        length_so_far,
+                        array.length,
+                        len(nextcontents),
+                    )
+                )
+                nextindex.data[
+                    index_nplike.shape_item_as_index(
+                        length_so_far
+                    ) : index_nplike.shape_item_as_index(length_so_far + array.length)
+                ] = array.index.data
 
+                length_so_far += array.length
+
+                nextcontents.append(array.content)
             else:
-                assert nexttags.nplike is self._backend.index_nplike
+                assert nexttags.nplike is index_nplike
                 self._backend.maybe_kernel_error(
                     self._backend[
                         "awkward_UnionArray_filltags_const",
@@ -1154,7 +1172,7 @@ class UnionArray(Content):
                     )
                 )
 
-                assert nextindex.nplike is self._backend.index_nplike
+                assert nextindex.nplike is index_nplike
                 self._backend.maybe_kernel_error(
                     self._backend[
                         "awkward_UnionArray_fillindex_count", nextindex.dtype.type
