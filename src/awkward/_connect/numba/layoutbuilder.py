@@ -177,9 +177,6 @@ class Numpy(LayoutBuilder):
     def __repr__(self):
         return f"ak.numba.lb.Numpy({self._data.dtype}, parameters={self._parameters})"
 
-    def type(self):
-        return f"ak.numba.lb.Numpy({self._data.dtype}, parameters={self._parameters})"
-
     def numbatype(self):
         return NumpyType(
             numba.from_dtype(self.dtype), numba.types.StringLiteral(self._parameters)
@@ -228,10 +225,6 @@ class NumpyType(numba.types.Type):
         )
         self._dtype = dtype
         self._parameters = parameters
-
-    @classmethod
-    def type(cls):
-        return NumpyType(cls.dtype, cls.parameters)
 
     @property
     def dtype(self):
@@ -412,9 +405,6 @@ class Empty(LayoutBuilder):
     def __repr__(self):
         return f"ak.numba.lb.Empty(parameters={self.parameters})"
 
-    def type(self):
-        return f"ak.numba.lb.Empty(parameters={self.parameters})"
-
     def numbatype(self):
         return EmptyType(numba.types.StringLiteral(self._parameters))
 
@@ -445,10 +435,6 @@ class EmptyType(numba.types.Type):
             name=f"ak.numba.lb.Empty(parameters={parameters.literal_value if isinstance(parameters, numba.types.Literal) else None})"
         )
         self._parameters = parameters
-
-    @classmethod
-    def type(cls):
-        return EmptyType(cls.parameters)
 
     @property
     def parameters(self):
@@ -524,9 +510,6 @@ class ListOffset(LayoutBuilder):
     def __repr__(self):
         return f"ak.numba.lb.ListOffset({self._offsets.dtype}, {self._content}, parameters={self._parameters})"
 
-    def type(self):
-        return f"ak.numba.lb.ListOffset({self._offsets.dtype}, {self._content}, parameters={self._parameters})"
-
     def numbatype(self):
         return ListOffsetType(
             numba.from_dtype(self.offsets.dtype),
@@ -588,15 +571,11 @@ class ListOffset(LayoutBuilder):
 class ListOffsetType(numba.types.Type):
     def __init__(self, dtype, content, parameters):
         super().__init__(
-            name=f"ak.numba.lb.ListOffset({dtype}, {content.type()}, parameters={parameters.literal_value if isinstance(parameters, numba.types.Literal) else None})"
+            name=f"ak.numba.lb.ListOffset({dtype}, {content.numbatype()}, parameters={parameters.literal_value if isinstance(parameters, numba.types.Literal) else None})"
         )
         self._dtype = dtype
         self._content = content
         self._parameters = parameters
-
-    @classmethod
-    def type(cls):
-        return ListOffsetType(cls.offsets.dtype, cls.content, cls.parameters)
 
     @property
     def parameters(self):
@@ -732,9 +711,6 @@ class Regular(LayoutBuilder):
     def __repr__(self):
         return f"ak.numba.lb.Regular({self._content}, {self._size}, parameters={self._parameters})"
 
-    def type(self):
-        return f"ak.numba.lb.Regular({self._content}, {self._size}, parameters={self._parameters})"
-
     def numbatype(self):
         return RegularType(
             self.content,
@@ -793,15 +769,11 @@ class Regular(LayoutBuilder):
 class RegularType(numba.types.Type):
     def __init__(self, content, size, parameters):
         super().__init__(
-            name=f"ak.numba.lb.Regular({content.type()}, {size}, parameters={parameters.literal_value if isinstance(parameters, numba.types.Literal) else None})"
+            name=f"ak.numba.lb.Regular({content.numbatype()}, {size}, parameters={parameters.literal_value if isinstance(parameters, numba.types.Literal) else None})"
         )
         self._content = content
         self._size = size
         self._parameters = parameters
-
-    @classmethod
-    def type(cls):
-        return RegularType(cls.content, cls.size, cls.parameters)
 
     @property
     def parameters(self):
@@ -939,9 +911,6 @@ class IndexedOption(LayoutBuilder):
     def __repr__(self):
         return f"ak.numba.lb.IndexedOption({self._index.dtype}, {self._content}, parameters={self._parameters})"
 
-    def type(self):
-        return f"ak.numba.lb.IndexedOption({self._index.dtype}, {self._content}, parameters={self._parameters})"
-
     def numbatype(self):
         return IndexedOptionType(
             numba.from_dtype(self.index.dtype),
@@ -1013,15 +982,11 @@ class IndexedOption(LayoutBuilder):
 class IndexedOptionType(numba.types.Type):
     def __init__(self, dtype, content, parameters):
         super().__init__(
-            name=f"ak.numba.lb.IndexedOption({dtype}, {content.type()}, parameters={parameters.literal_value if isinstance(parameters, numba.types.Literal) else None})"
+            name=f"ak.numba.lb.IndexedOption({dtype}, {content.numbatype()}, parameters={parameters.literal_value if isinstance(parameters, numba.types.Literal) else None})"
         )
         self._dtype = dtype
         self._content = content
         self._parameters = parameters
-
-    @classmethod
-    def type(cls):
-        return IndexedOptionType(cls.index.dtype, cls.content, cls.parameters)
 
     @property
     def parameters(self):
@@ -1184,9 +1149,6 @@ class ByteMasked(LayoutBuilder):
     def __repr__(self):
         return f"ak.numba.lb.ByteMasked({self._mask.dtype}, {self._content}, valid_when={self._valid_when}, parameters={self._parameters})"
 
-    def type(self):
-        return f"ak.numba.lb.ByteMasked({self._mask.dtype}, {self._content}, valid_when={self._valid_when}, parameters={self._parameters})"
-
     def numbatype(self):
         return ByteMaskedType(
             numba.from_dtype(self._mask.dtype),
@@ -1257,16 +1219,12 @@ class ByteMasked(LayoutBuilder):
 class ByteMaskedType(numba.types.Type):
     def __init__(self, dtype, content, valid_when, parameters):
         super().__init__(
-            name=f"ak.numba.lb.ByteMasked({dtype}, {content.type()}, valid_when={valid_when}, parameters={parameters.literal_value if isinstance(parameters, numba.types.Literal) else None})"
+            name=f"ak.numba.lb.ByteMasked({dtype}, {content.numbatype()}, valid_when={valid_when}, parameters={parameters.literal_value if isinstance(parameters, numba.types.Literal) else None})"
         )
         self._dtype = dtype
         self._content = content
         self._valid_when = valid_when
         self._parameters = parameters
-
-    @classmethod
-    def type(cls):
-        return ByteMaskedType(cls.content, cls.valid_when, cls.parameters)
 
     @property
     def valid_when(self):
@@ -1466,9 +1424,6 @@ class BitMasked(LayoutBuilder):
     def __repr__(self):  # as constructor
         return f"ak.numba.lb.BitMasked({self._mask.dtype}, {self._content}, {self._valid_when}, {self._lsb_order}, parameters={self._parameters})"
 
-    def type(self):
-        return f"ak.numba.lb.BitMasked({self._mask.dtype}, {self._content}, {self._valid_when}, {self._lsb_order}, parameters={self._parameters})"
-
     def numbatype(self):
         return BitMaskedType(
             numba.from_dtype(self._mask.dtype),
@@ -1584,19 +1539,13 @@ class BitMasked(LayoutBuilder):
 class BitMaskedType(numba.types.Type):
     def __init__(self, dtype, content, valid_when, lsb_order, parameters):
         super().__init__(
-            name=f"ak.numba.lb.BitMasked({dtype}, {content.type()}, {valid_when}, {lsb_order}, parameters={parameters.literal_value if isinstance(parameters, numba.types.Literal) else None})"
+            name=f"ak.numba.lb.BitMasked({dtype}, {content.numbatype()}, {valid_when}, {lsb_order}, parameters={parameters.literal_value if isinstance(parameters, numba.types.Literal) else None})"
         )
         self._dtype = dtype
         self._content = content
         self._valid_when = valid_when
         self._lsb_order = lsb_order
         self._parameters = parameters
-
-    @classmethod
-    def type(cls):
-        return BitMaskedType(
-            cls.dtype, cls.content, cls.valid_when, cls.lsb_order, cls.parameters
-        )
 
     @property
     def parameters(self):
@@ -1854,9 +1803,6 @@ class Unmasked(LayoutBuilder):
     def __repr__(self):
         return f"ak.numba.lb.Unmasked({self._content}, parameters={self._parameters})"
 
-    def type(self):
-        return f"ak.numba.lb.Unmasked({self._content}, parameters={self._parameters})"
-
     def numbatype(self):
         return UnmaskedType(
             self.content,
@@ -1899,13 +1845,9 @@ class Unmasked(LayoutBuilder):
 class UnmaskedType(numba.types.Type):
     def __init__(self, content, parameters):
         super().__init__(
-            name=f"ak.numba.lb.Unmasked({content.type()}, parameters={parameters.literal_value if isinstance(parameters, numba.types.Literal) else None})"
+            name=f"ak.numba.lb.Unmasked({content.numbatype()}, parameters={parameters.literal_value if isinstance(parameters, numba.types.Literal) else None})"
         )
         self._content = content
-
-    @classmethod
-    def type(cls):
-        return UnmaskedType(cls.content, cls.parameters)
 
     @property
     def parameters(self):
@@ -2006,8 +1948,7 @@ class Record(LayoutBuilder):
     def __repr__(self):
         return f"ak.numba.lb.Record({self.contents}, {self.fields}, parameters={self._parameters})"
 
-    def type(self):
-        return f"ak.numba.lb.Record({self.contents}, {self.fields}, parameters={self._parameters})"
+    # def form(self): -> ak.forms.Form
 
     def numbatype(self):
         return RecordType(
@@ -2078,10 +2019,6 @@ class RecordType(numba.types.Type):
         self._fields = fields
         self._parameters = parameters
 
-    @classmethod
-    def type(cls):
-        return RecordType(cls.contents, cls.fields, cls.parameters)
-
     @property
     def parameters(self):
         return numba.types.StringLiteral(self._parameters)
@@ -2095,6 +2032,12 @@ class RecordType(numba.types.Type):
         return numba.types.Tuple(
             to_numbatype([numba.types.StringLiteral(it) for it in self._fields])
         )
+
+    def field(self, name):
+        return numba.types.int64
+
+    def content(self, name):
+        return to_numbatype(self._contents[self.field(name)])
 
     @property
     def length(self):
@@ -2190,7 +2133,7 @@ def Record_field_index(builder, name):
 def Record_content(builder, field_index):
     if isinstance(builder, RecordType):
         if isinstance(field_index, numba.types.Integer):
-
+            # check
             def getter(builder, field_index):
                 content = builder._contents[numba.literally(field_index)]
 
@@ -2201,7 +2144,7 @@ def Record_content(builder, field_index):
         if isinstance(field_index, numba.types.UnicodeType):
 
             def getter(builder, field_index):
-                indx = builder._field_index(field_index)
+                indx = builder._field_index(field_index)  # int64
                 content = builder._contents[indx]
 
                 return content
@@ -2227,9 +2170,6 @@ class Tuple(LayoutBuilder):
         return self._contents
 
     def __repr__(self):
-        return f"ak.numba.lb.Tuple({self.contents}, parameters={self._parameters})"
-
-    def type(self):
         return f"ak.numba.lb.Tuple({self.contents}, parameters={self._parameters})"
 
     def numbatype(self):
@@ -2293,10 +2233,6 @@ class TupleType(numba.types.Type):
         self._contents = contents
         self._parameters = parameters
 
-    @classmethod
-    def type(cls):
-        return TupleType(cls.contents, cls.parameters)
-
     @property
     def parameters(self):
         return numba.types.StringLiteral(self._parameters)
@@ -2304,10 +2240,6 @@ class TupleType(numba.types.Type):
     @property
     def contents(self):
         return numba.types.Tuple([to_numbatype(it) for it in self._contents])
-
-    # @property
-    # def index(self, at):
-    #     return to_numbatype(self._contents[at])
 
     @property
     def length(self):
@@ -2431,9 +2363,6 @@ class Union(LayoutBuilder):
     def __repr__(self):
         return f"ak.numba.lb.Union({self._tags.dtype}, {self._index.dtype}, {self.contents}, parameters={self._parameters})"
 
-    def type(self):
-        return f"ak.numba.lb.Union({self._tags.dtype}, {self._index.dtype}, {self.contents}, parameters={self._parameters})"
-
     def numbatype(self):
         return UnionType(
             numba.from_dtype(self._tags.dtype),
@@ -2498,10 +2427,6 @@ class UnionType(numba.types.Type):
         self._index_dtype = index_dtype
         self._contents = contents
         self._parameters = parameters
-
-    @classmethod
-    def type(cls):
-        return UnionType(cls.tags.dtype, cls.index.dtype, cls.contents, cls.parameters)
 
     @property
     def parameters(self):

@@ -27,8 +27,7 @@ def test_Numpy():
     assert str(ak.type(array)) == "5 * float64"
     assert ak.to_list(array) == [1.1, 2.2, 3.3, 4.4, 5.5]
 
-    assert builder.type() == "ak.numba.lb.Numpy(float64, parameters=None)"
-    assert builder.type() == str(builder.numbatype())
+    assert str(builder.numbatype()) == "ak.numba.lb.Numpy(float64, parameters=None)"
 
     error = ""
     assert builder.is_valid(error), error
@@ -50,9 +49,6 @@ def test_Numpy_char():
     assert str(ak.type(array)) == "3 * char"
     assert ak.to_list(array) == "abc"  # FIXME: ['a', 'b', 'c']????
 
-    assert (
-        builder.type() == "ak.numba.lb.Numpy(uint8, parameters={'__array__': 'char'})"
-    )
     assert (
         str(builder.numbatype())
         == "ak.numba.lb.Numpy(uint8, parameters={'__array__': 'char'})"
@@ -84,12 +80,11 @@ def test_Empty():
     assert str(ak.type(array)) == "0 * unknown"
     assert ak.to_list(array) == []
 
-    assert builder.type() == "ak.numba.lb.Empty(parameters=None)"
-    assert builder.type() == str(builder.numbatype())
+    assert str(builder.numbatype()) == "ak.numba.lb.Empty(parameters=None)"
 
     builder = lb.Empty(parameters={"When I was one": "I just begun"})
     assert (
-        builder.type()
+        str(builder.numbatype())
         == "ak.numba.lb.Empty(parameters={'When I was one': 'I just begun'})"
     )
 
@@ -97,10 +92,6 @@ def test_Empty():
 def test_ListOffset():
     builder = lb.ListOffset(np.int32, lb.Numpy(np.float64))
     assert len(builder) == 0
-    assert (
-        builder.type()
-        == "ak.numba.lb.ListOffset(int32, ak.numba.lb.Numpy(float64, parameters=None), parameters=None)"
-    )
     assert (
         str(builder.numbatype())
         == "ak.numba.lb.ListOffset(int32, ak.numba.lb.Numpy(float64, parameters=None), parameters=None)"
@@ -157,10 +148,6 @@ def test_ListOffset2():
     assert builder.is_valid(error), error
 
     assert (
-        builder.type()
-        == "ak.numba.lb.ListOffset(int32, ak.numba.lb.Numpy(float64, parameters=None), parameters=None)"
-    )
-    assert (
         str(builder.numbatype())
         == "ak.numba.lb.ListOffset(int32, ak.numba.lb.Numpy(float64, parameters=None), parameters=None)"
     )
@@ -195,10 +182,6 @@ def test_Regular():
     assert builder.is_valid(error), error
 
     assert (
-        builder.type()
-        == "ak.numba.lb.Regular(ak.numba.lb.Numpy(float64, parameters=None), 3, parameters=None)"
-    )
-    assert (
         str(builder.numbatype())
         == "ak.numba.lb.Regular(ak.numba.lb.Numpy(float64, parameters=None), 3, parameters=None)"
     )
@@ -232,10 +215,6 @@ def test_IndexedOption():
     error = ""
     assert builder.is_valid(error), error
 
-    assert (
-        builder.type()
-        == "ak.numba.lb.IndexedOption(int64, ak.numba.lb.Numpy(float64, parameters=None), parameters=None)"
-    )
     assert (
         str(builder.numbatype())
         == "ak.numba.lb.IndexedOption(int64, ak.numba.lb.Numpy(float64, parameters=None), parameters=None)"
@@ -280,10 +259,6 @@ def test_Record():
     error = ""
     assert builder.is_valid(error), error
 
-    assert (
-        builder.type()
-        == "ak.numba.lb.Record((ak.numba.lb.Numpy(float64, parameters=None), ak.numba.lb.Numpy(int64, parameters=None), ak.numba.lb.Numpy(uint8, parameters={'__array__': 'char'})), ('one', 'two', 'three'), parameters=None)"
-    )
     assert (
         str(builder.numbatype())
         == "ak.numba.lb.Record((ak.numba.lb.Numpy(float64, parameters=None), ak.numba.lb.Numpy(int64, parameters=None), ak.numba.lb.Numpy(uint8, parameters={'__array__': 'char'})), ('one', 'two', 'three'), parameters=None)"
@@ -375,10 +350,6 @@ def test_Unmasked():
     assert ak.to_list(array) == [11, 22, 33, 44, 55]
 
     assert (
-        builder.type()
-        == "ak.numba.lb.Unmasked(ak.numba.lb.Numpy(int64, parameters=None), parameters=None)"
-    )
-    assert (
         str(builder.numbatype())
         == "ak.numba.lb.Unmasked(ak.numba.lb.Numpy(int64, parameters=None), parameters=None)"
     )
@@ -410,10 +381,6 @@ def test_ByteMasked():
     error = ""
     assert builder.is_valid(error), error
 
-    assert (
-        builder.type()
-        == "ak.numba.lb.ByteMasked(bool, ak.numba.lb.Numpy(float64, parameters=None), valid_when=True, parameters=None)"
-    )
     assert (
         str(builder.numbatype())
         == "ak.numba.lb.ByteMasked(bool, ak.numba.lb.Numpy(float64, parameters=None), valid_when=True, parameters=None)"
@@ -466,10 +433,6 @@ def test_BitMasked():
     error = ""
     assert builder.is_valid(error), error
 
-    assert (
-        builder.type()
-        == "ak.numba.lb.BitMasked(uint8, ak.numba.lb.Numpy(float64, parameters=None), True, True, parameters=None)"
-    )
     assert (
         str(builder.numbatype())
         == "ak.numba.lb.BitMasked(uint8, ak.numba.lb.Numpy(float64, parameters=None), True, True, parameters=None)"
@@ -609,8 +572,8 @@ def test_unbox():
         i = x.content(indx)
         return i
 
-    content = f_runtime_index(builder, builder.field_index("one"))
-    assert content.type() == builder._contents[0].type()
+    content = f_runtime_index(builder, 0)  # "one")
+    assert content.numbatype() == builder._contents[0].numbatype()
 
     builder = lb.Regular(lb.Numpy(np.float64), size=3)
     f1(builder)
@@ -1079,9 +1042,9 @@ def test_Regular_append():
 def test_IndexedOption_Record_append():
     @numba.njit
     def f19(builder):
-        content = builder.append_valid()
-        x = content.content(0)
-        y = content.content(1)
+        record = builder.append_valid()
+        x = record.content(0)  # "x")
+        y = record.content(1)  # "y")
         x.append(1.1)
         y.append(2)
         builder.append_invalid()
@@ -1357,16 +1320,12 @@ def test_Record_content():
         return builder._field_index(name)
 
     @numba.njit
-    def content(builder, name):
-        return builder.content(name)
-
-    @numba.njit
     def fill(builder):
-        content_one = builder.content(0)  # content("one")
+        content_one = builder.content(0)  # "one")
         content_one.append(1.1)
-        content_two = builder.content(1)  # content("two")
+        content_two = builder.content(1)  # "two")
         content_two.append(1)
-        content_three = builder.content(2)  # content("three")
+        content_three = builder.content(2)  # "three")
         content_three.append(111)
 
     builder = lb.Record(
@@ -1384,12 +1343,9 @@ def test_Record_content():
     with pytest.raises(ValueError):
         field_index(builder, "four")  # ValueError: tuple.index(x): x not in tuple
 
-    content = content(builder, field_index(builder, "one"))
-    assert content.type() == builder._contents[0].type()
-
     fill(builder)
     array = builder.snapshot()
-    assert ak.to_list(array) == [{"one": 1.1, "three": "o", "two": 1}]
+    assert ak.to_list(array) == [{"one": 1.1, "three": "o", "two": 1}]  # ???
 
     error = ""
     assert builder.is_valid(error), error
