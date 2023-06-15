@@ -2134,22 +2134,22 @@ def Record_content(builder, field_index):
     if isinstance(builder, RecordType):
         if isinstance(field_index, numba.types.Integer):
             # check
-            def getter(builder, field_index):
+            def getter_int(builder, field_index):
                 content = builder._contents[numba.literally(field_index)]
 
                 return content
 
-            return getter
+            return getter_int
 
         if isinstance(field_index, numba.types.UnicodeType):
 
-            def getter(builder, field_index):
+            def getter_str(builder, field_index):
                 indx = builder._field_index(field_index)  # int64
                 content = builder._contents[indx]
 
                 return content
 
-            return getter
+            return getter_str
 
 
 ########## Tuple #######################################################
