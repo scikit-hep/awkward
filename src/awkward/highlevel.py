@@ -436,7 +436,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         wrapped by an #ak.types.ArrayType.
         """
         return ak.types.ArrayType(
-            self._layout.form.type_from_behavior(self._behavior), self._layout.length
+            self._layout.form.type,
+            self._layout.length,
+            self._behavior,
         )
 
     @property
@@ -1351,7 +1353,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         See also #__array_function__.
         """
-        name = f"{type(ufunc).__module__}.{ufunc.__name__}.{str(method)}"
+        name = f"{type(ufunc).__module__}.{ufunc.__name__}.{method!s}"
         arguments = {}
         for i, arg in enumerate(inputs):
             arguments[i] = arg
@@ -1713,9 +1715,7 @@ class Record(NDArrayOperatorsMixin):
         The type of a #ak.record.Record (from #ak.Array.layout) is not
         wrapped by an #ak.types.ScalarType.
         """
-        return ak.types.ScalarType(
-            self._layout.array.form.type_from_behavior(self._behavior)
-        )
+        return ak.types.ScalarType(self._layout.array.form.type, self._behavior)
 
     @property
     def typestr(self):
@@ -2029,7 +2029,7 @@ class Record(NDArrayOperatorsMixin):
 
         See #ak.Array.__array_ufunc__ for a more complete description.
         """
-        name = f"{type(ufunc).__module__}.{ufunc.__name__}.{str(method)}"
+        name = f"{type(ufunc).__module__}.{ufunc.__name__}.{method!s}"
         arguments = {}
         for i, arg in enumerate(inputs):
             arguments[i] = arg
@@ -2235,7 +2235,7 @@ class ArrayBuilder(Sized):
     be considered the "least effort" approach.
     """
 
-    def __init__(self, *, behavior=None, initial=1024, resize=1.5):
+    def __init__(self, *, behavior=None, initial=1024, resize=8):
         self._layout = _ext.ArrayBuilder(initial=initial, resize=resize)
         self.behavior = behavior
 
@@ -2318,9 +2318,7 @@ class ArrayBuilder(Sized):
         wrapped by an #ak.types.ArrayType.
         """
         form = ak.forms.from_json(self._layout.form())
-        return ak.types.ArrayType(
-            form.type_from_behavior(self._behavior), len(self._layout)
-        )
+        return ak.types.ArrayType(form.type, len(self._layout), self._behavior)
 
     @property
     def typestr(self):

@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 from __future__ import annotations
 
+import builtins
 import sys
 import threading
 import warnings
@@ -31,6 +32,11 @@ class PartialFunction:
         return self.func(*self.args, **self.kwargs)
 
 
+class KeyError(builtins.KeyError):
+    def __str__(self):
+        return super(Exception, self).__str__()
+
+
 class ErrorContext:
     # Any other threads should get a completely independent _slate.
     _slate = threading.local()
@@ -55,6 +61,11 @@ class ErrorContext:
             if exception_type is not None and self.primary() is self:
                 self.handle_exception(exception_type, exception_value)
         finally:
+            # `_kwargs` may hold cyclic references, that we really want to avoid
+            # as this can lead to large buffers remaining in memory for longer than absolutely necessary
+            # Let's just clear this, now.
+            self._kwargs.clear()
+
             # Step out of the way so that another ErrorContext can become primary.
             if self.primary() is self:
                 self._slate.__dict__.clear()
@@ -81,6 +92,9 @@ class ErrorContext:
                     str(exception)
                     + "\n\nSee if this has been reported at https://github.com/scikit-hep/awkward/issues"
                 )
+                new_exception.__cause__ = exception
+            elif issubclass(cls, builtins.KeyError):
+                new_exception = KeyError(self.format_exception(exception))
                 new_exception.__cause__ = exception
             else:
                 new_exception = cls(self.format_exception(exception))

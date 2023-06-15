@@ -1,0 +1,38 @@
+name: Sync Docs Selector
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - docs/switcher.json
+
+concurrency:
+  group: 'docs-version-${{ github.head_ref || github.run_id }}'
+  cancel-in-progress: true
+
+jobs:
+  coverage:
+    runs-on: ubuntu-20.04
+    name: Push version switcher
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      S3_BUCKET: "awkward-array.org"
+      CLOUDFRONT_ID: "EFM4QVENUIXHS"
+    environment:
+      name: docs-prod
+    steps:
+      - uses: actions/checkout@v3
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-region: eu-west-2
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE }}
+      # Pushes to main trigger latest
+      - name: Push version selector
+        run: |
+          aws s3 cp docs/switcher.json "s3://${S3_BUCKET}/doc/switcher.json"
+          aws cloudfront create-invalidation --distribution-id "${CLOUDFRONT_ID}" \
+            --paths "/doc/switcher.json"

@@ -3,7 +3,7 @@
 from awkward.forms.bitmaskedform import BitMaskedForm  # noqa: F401
 from awkward.forms.bytemaskedform import ByteMaskedForm  # noqa: F401
 from awkward.forms.emptyform import EmptyForm  # noqa: F401
-from awkward.forms.form import Form, from_dict, from_json  # noqa: F401
+from awkward.forms.form import Form, from_dict, from_json, from_type  # noqa: F401
 from awkward.forms.indexedform import IndexedForm  # noqa: F401
 from awkward.forms.indexedoptionform import IndexedOptionForm  # noqa: F401
 from awkward.forms.listform import ListForm  # noqa: F401

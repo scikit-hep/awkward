@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import copy
+from collections.abc import MutableMapping, Sequence
 
 import awkward as ak
 from awkward._backends.backend import Backend
@@ -10,13 +11,15 @@ from awkward._backends.typetracer import TypeTracerBackend
 from awkward._errors import AxisError, deprecate
 from awkward._layout import maybe_posaxis
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import IndexType, NumpyMetadata
+from awkward._nplikes.numpylike import ArrayLike, IndexType, NumpyMetadata
+from awkward._nplikes.shape import ShapeItem
 from awkward._regularize import is_integer_like
 from awkward._slicing import NO_HEAD
-from awkward._typing import TYPE_CHECKING, Final, Self, SupportsIndex, final
-from awkward._util import unset
+from awkward._typing import TYPE_CHECKING, Callable, Final, Self, SupportsIndex, final
+from awkward._util import UNSET
 from awkward.contents.content import Content
 from awkward.forms.emptyform import EmptyForm
+from awkward.forms.form import Form
 from awkward.index import Index
 
 if TYPE_CHECKING:
@@ -79,16 +82,16 @@ class EmptyArray(Content):
     def copy(
         self,
         *,
-        parameters=unset,
-        backend=unset,
+        parameters=UNSET,
+        backend=UNSET,
     ):
-        if not (parameters is unset or parameters is None or len(parameters) == 0):
+        if not (parameters is UNSET or parameters is None or len(parameters) == 0):
             deprecate(
                 f"{type(self).__name__} cannot contain parameters", version="2.2.0"
             )
         return EmptyArray(
-            parameters=self._parameters if parameters is unset else parameters,
-            backend=self._backend if backend is unset else backend,
+            parameters=self._parameters if parameters is UNSET else parameters,
+            backend=self._backend if backend is UNSET else backend,
         )
 
     def __copy__(self):
@@ -103,10 +106,17 @@ class EmptyArray(Content):
             deprecate(f"{cls.__name__} cannot contain parameters", version="2.2.0")
         return cls(parameters=parameters, backend=backend)
 
-    def _form_with_key(self, getkey):
+    def _form_with_key(self, getkey: Callable[[Content], str | None]) -> EmptyForm:
         return self.form_cls(parameters=self._parameters, form_key=getkey(self))
 
-    def _to_buffers(self, form, getkey, container, backend, byteorder):
+    def _to_buffers(
+        self,
+        form: Form,
+        getkey: Callable[[Content, Form, str], str],
+        container: MutableMapping[str, ArrayLike],
+        backend: Backend,
+        byteorder: str,
+    ):
         assert isinstance(form, self.form_cls)
 
     def _to_typetracer(self, forget_length: bool) -> Self:
@@ -115,14 +125,14 @@ class EmptyArray(Content):
             backend=TypeTracerBackend.instance(),
         )
 
-    def _touch_data(self, recursive):
+    def _touch_data(self, recursive: bool):
         pass
 
-    def _touch_shape(self, recursive):
+    def _touch_shape(self, recursive: bool):
         pass
 
     @property
-    def length(self):
+    def length(self) -> ShapeItem:
         return 0
 
     def __repr__(self):
@@ -182,7 +192,9 @@ class EmptyArray(Content):
         else:
             raise ak._errors.index_error(self, carry.data, "array is empty")
 
-    def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
+    def _getitem_next_jagged(
+        self, slicestarts: Index, slicestops: Index, slicecontent: Content, tail
+    ) -> Content:
         raise ak._errors.index_error(
             self,
             ak.contents.ListArray(
@@ -233,7 +245,7 @@ class EmptyArray(Content):
         else:
             raise AssertionError(repr(head))
 
-    def _offsets_and_flattened(self, axis, depth):
+    def _offsets_and_flattened(self, axis: int, depth: int) -> tuple[Index, Content]:
         posaxis = maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 == depth:
             raise AxisError(self, "axis=0 not allowed for flatten")
@@ -244,10 +256,10 @@ class EmptyArray(Content):
                 EmptyArray(parameters=self._parameters, backend=self._backend),
             )
 
-    def _mergeable_next(self, other, mergebool):
+    def _mergeable_next(self, other: Content, mergebool: bool) -> bool:
         return True
 
-    def _mergemany(self, others):
+    def _mergemany(self, others: Sequence[Content]) -> Content:
         if len(others) == 0:
             return self
         elif len(others) == 1:

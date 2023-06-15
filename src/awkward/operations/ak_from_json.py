@@ -28,7 +28,7 @@ def from_json(
     complex_record_fields=None,
     buffersize=65536,
     initial=1024,
-    resize=1.5,
+    resize=8,
     highlevel=True,
     behavior=None,
 ):

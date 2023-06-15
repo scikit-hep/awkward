@@ -58,9 +58,11 @@ def test_option():
     assert z.type == ak.types.ArrayType(
         ak.types.UnionType(
             [
-                ak.types.RecordType(
-                    [ak.types.NumpyType("int64"), ak.types.NumpyType("int64")],
-                    ["a", "b"],
+                ak.types.OptionType(
+                    ak.types.RecordType(
+                        [ak.types.NumpyType("int64"), ak.types.NumpyType("int64")],
+                        ["a", "b"],
+                    )
                 ),
                 ak.types.OptionType(
                     ak.types.RecordType(
@@ -104,9 +106,11 @@ def test_option_unmasked():
     assert z.type == ak.types.ArrayType(
         ak.types.UnionType(
             [
-                ak.types.RecordType(
-                    [ak.types.NumpyType("int64"), ak.types.NumpyType("int64")],
-                    ["a", "b"],
+                ak.types.OptionType(
+                    ak.types.RecordType(
+                        [ak.types.NumpyType("int64"), ak.types.NumpyType("int64")],
+                        ["a", "b"],
+                    )
                 ),
                 ak.types.OptionType(
                     ak.types.RecordType(

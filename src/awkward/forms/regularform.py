@@ -1,11 +1,10 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 import awkward as ak
-from awkward._behavior import find_typestr
 from awkward._nplikes.shape import unknown_length
 from awkward._parameters import type_parameters_equal
 from awkward._regularize import is_integer
 from awkward._typing import final
-from awkward._util import unset
+from awkward._util import UNSET
 from awkward.forms.form import Form
 
 
@@ -40,12 +39,12 @@ class RegularForm(Form):
     def size(self):
         return self._size
 
-    def copy(self, content=unset, size=unset, *, parameters=unset, form_key=unset):
+    def copy(self, content=UNSET, size=UNSET, *, parameters=UNSET, form_key=UNSET):
         return RegularForm(
-            self._content if content is unset else content,
-            self._size if size is unset else size,
-            parameters=self._parameters if parameters is unset else parameters,
-            form_key=self._form_key if form_key is unset else form_key,
+            self._content if content is UNSET else content,
+            self._size if size is UNSET else size,
+            parameters=self._parameters if parameters is UNSET else parameters,
+            form_key=self._form_key if form_key is UNSET else form_key,
         )
 
     @classmethod
@@ -66,12 +65,12 @@ class RegularForm(Form):
             verbose,
         )
 
-    def _type(self, typestrs):
+    @property
+    def type(self):
         return ak.types.RegularType(
-            self._content._type(typestrs),
+            self._content.type,
             self._size,
             parameters=self._parameters,
-            typestr=find_typestr(self._parameters, typestrs),
         )
 
     def __eq__(self, other):

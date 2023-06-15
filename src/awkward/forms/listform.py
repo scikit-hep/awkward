@@ -1,9 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 import awkward as ak
-from awkward._behavior import find_typestr
 from awkward._parameters import type_parameters_equal
 from awkward._typing import final
-from awkward._util import unset
+from awkward._util import UNSET
 from awkward.forms.form import Form
 
 
@@ -58,19 +57,19 @@ class ListForm(Form):
 
     def copy(
         self,
-        starts=unset,
-        stops=unset,
-        content=unset,
+        starts=UNSET,
+        stops=UNSET,
+        content=UNSET,
         *,
-        parameters=unset,
-        form_key=unset,
+        parameters=UNSET,
+        form_key=UNSET,
     ):
         return ListForm(
-            self._starts if starts is unset else starts,
-            self._stops if stops is unset else stops,
-            self._content if content is unset else content,
-            parameters=self._parameters if parameters is unset else parameters,
-            form_key=self._form_key if form_key is unset else form_key,
+            self._starts if starts is UNSET else starts,
+            self._stops if stops is UNSET else stops,
+            self._content if content is UNSET else content,
+            parameters=self._parameters if parameters is UNSET else parameters,
+            form_key=self._form_key if form_key is UNSET else form_key,
         )
 
     @classmethod
@@ -105,11 +104,11 @@ class ListForm(Form):
             verbose,
         )
 
-    def _type(self, typestrs):
+    @property
+    def type(self):
         return ak.types.ListType(
-            self._content._type(typestrs),
+            self._content.type,
             parameters=self._parameters,
-            typestr=find_typestr(self._parameters, typestrs),
         )
 
     def __eq__(self, other):

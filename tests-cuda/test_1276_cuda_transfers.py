@@ -2,7 +2,6 @@
 
 import cupy as cp  # noqa: F401
 import numpy as np
-import pytest
 
 import awkward as ak
 
@@ -45,9 +44,6 @@ def test_tocuda():
     assert ak.to_list(copyback_array) == ak.to_list(array)
 
 
-@pytest.mark.skip(
-    reason="Can't test this right now because of unimplemented CUDA Kernels (awkward_ListOffsetArray_compact_offsets)"
-)
 def test_tocuda_unimplementedkernels():
     content = ak.contents.NumpyArray(
         np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])

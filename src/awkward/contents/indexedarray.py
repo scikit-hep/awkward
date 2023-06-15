@@ -2,13 +2,15 @@
 from __future__ import annotations
 
 import copy
+from collections.abc import MutableMapping, Sequence
 
 import awkward as ak
 from awkward._backends.backend import Backend
 from awkward._errors import AxisError
 from awkward._layout import maybe_posaxis
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import IndexType, NumpyMetadata
+from awkward._nplikes.numpylike import ArrayLike, IndexType, NumpyMetadata
+from awkward._nplikes.shape import ShapeItem
 from awkward._nplikes.typetracer import TypeTracer
 from awkward._parameters import (
     parameters_intersect,
@@ -17,14 +19,16 @@ from awkward._parameters import (
 )
 from awkward._regularize import is_integer_like
 from awkward._slicing import NO_HEAD
-from awkward._typing import TYPE_CHECKING, Final, Self, SupportsIndex, final
-from awkward._util import unset
+from awkward._typing import TYPE_CHECKING, Callable, Final, Self, SupportsIndex, final
+from awkward._util import UNSET
 from awkward.contents.content import Content
+from awkward.forms.form import Form
 from awkward.forms.indexedform import IndexedForm
 from awkward.index import Index
 
 if TYPE_CHECKING:
     from awkward._slicing import SliceItem
+    from awkward.contents.indexedoptionarray import IndexedOptionArray
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
@@ -123,16 +127,16 @@ class IndexedArray(Content):
         return self._index
 
     @property
-    def content(self):
+    def content(self) -> Content:
         return self._content
 
     form_cls: Final = IndexedForm
 
-    def copy(self, index=unset, content=unset, *, parameters=unset):
+    def copy(self, index=UNSET, content=UNSET, *, parameters=UNSET):
         return IndexedArray(
-            self._index if index is unset else index,
-            self._content if content is unset else content,
-            parameters=self._parameters if parameters is unset else parameters,
+            self._index if index is UNSET else index,
+            self._content if content is UNSET else content,
+            parameters=self._parameters if parameters is UNSET else parameters,
         )
 
     def __copy__(self):
@@ -162,7 +166,7 @@ class IndexedArray(Content):
                 inner = content.to_IndexedOptionArray64().index
             result = ak.index.Index64.empty(index.length, nplike=backend.index_nplike)
 
-            Content._selfless_handle_error(
+            backend.maybe_kernel_error(
                 backend[
                     "awkward_IndexedArray_simplify",
                     result.dtype.type,
@@ -192,7 +196,7 @@ class IndexedArray(Content):
         else:
             return cls(index, content, parameters=parameters)
 
-    def _form_with_key(self, getkey):
+    def _form_with_key(self, getkey: Callable[[Content], str | None]) -> IndexedForm:
         form_key = getkey(self)
         return self.form_cls(
             self._index.form,
@@ -201,7 +205,14 @@ class IndexedArray(Content):
             form_key=form_key,
         )
 
-    def _to_buffers(self, form, getkey, container, backend, byteorder):
+    def _to_buffers(
+        self,
+        form: Form,
+        getkey: Callable[[Content, Form, str], str],
+        container: MutableMapping[str, ArrayLike],
+        backend: Backend,
+        byteorder: str,
+    ):
         assert isinstance(form, self.form_cls)
         key = getkey(self, form, "index")
         container[key] = ak._util.native_to_byteorder(
@@ -217,20 +228,18 @@ class IndexedArray(Content):
             parameters=self._parameters,
         )
 
-    def _touch_data(self, recursive):
-        if not self._backend.index_nplike.known_data:
-            self._index.data.touch_data()
+    def _touch_data(self, recursive: bool):
+        self._index._touch_data()
         if recursive:
             self._content._touch_data(recursive)
 
-    def _touch_shape(self, recursive):
-        if not self._backend.index_nplike.known_data:
-            self._index.data.touch_shape()
+    def _touch_shape(self, recursive: bool):
+        self._index._touch_shape()
         if recursive:
             self._content._touch_shape(recursive)
 
     @property
-    def length(self):
+    def length(self) -> ShapeItem:
         return self._index.length
 
     def __repr__(self):
@@ -248,7 +257,7 @@ class IndexedArray(Content):
         out.append(post)
         return "".join(out)
 
-    def to_IndexedOptionArray64(self):
+    def to_IndexedOptionArray64(self) -> IndexedOptionArray:
         return ak.contents.IndexedOptionArray(
             self._index, self._content, parameters=self._parameters
         )
@@ -327,7 +336,7 @@ class IndexedArray(Content):
             nextcarry.nplike is self._backend.index_nplike
             and self._index.nplike is self._backend.index_nplike
         )
-        self._handle_error(
+        self._maybe_index_error(
             self._backend[
                 "awkward_IndexedArray_getitem_nextcarry",
                 nextcarry.dtype.type,
@@ -344,7 +353,9 @@ class IndexedArray(Content):
         next = self._content._carry(nextcarry, False)
         return next._getitem_next_jagged(slicestarts, slicestops, slicecontent, tail)
 
-    def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
+    def _getitem_next_jagged(
+        self, slicestarts: Index, slicestops: Index, slicecontent: Content, tail
+    ) -> Content:
         return self._getitem_next_jagged_generic(
             slicestarts, slicestops, slicecontent, tail
         )
@@ -370,7 +381,7 @@ class IndexedArray(Content):
                 nextcarry.nplike is self._backend.index_nplike
                 and self._index.nplike is self._backend.index_nplike
             )
-            self._handle_error(
+            self._maybe_index_error(
                 self._backend[
                     "awkward_IndexedArray_getitem_nextcarry",
                     nextcarry.dtype.type,
@@ -421,7 +432,7 @@ class IndexedArray(Content):
                 and mask.nplike is self._backend.index_nplike
                 and self._index.nplike is self._backend.index_nplike
             )
-            self._handle_error(
+            self._backend.maybe_kernel_error(
                 self._backend[
                     "awkward_IndexedArray_overlay_mask",
                     nextindex.dtype.type,
@@ -445,7 +456,7 @@ class IndexedArray(Content):
                 nextcarry.nplike is self._backend.index_nplike
                 and self._index.nplike is self._backend.index_nplike
             )
-            self._handle_error(
+            self._backend.maybe_kernel_error(
                 self._backend[
                     "awkward_IndexedArray_getitem_nextcarry",
                     nextcarry.dtype.type,
@@ -466,7 +477,7 @@ class IndexedArray(Content):
                 )
             )
 
-    def _offsets_and_flattened(self, axis, depth):
+    def _offsets_and_flattened(self, axis: int, depth: int) -> tuple[Index, Content]:
         posaxis = maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 == depth:
             raise AxisError("axis=0 not allowed for flatten")
@@ -474,7 +485,7 @@ class IndexedArray(Content):
         else:
             return self.project()._offsets_and_flattened(axis, depth)
 
-    def _mergeable_next(self, other, mergebool):
+    def _mergeable_next(self, other: Content, mergebool: bool) -> bool:
         # Is the other content is an identity, or a union?
         if other.is_identity_like or other.is_union:
             return True
@@ -531,7 +542,7 @@ class IndexedArray(Content):
 
         # Fill `index` with a range starting at zero, up to `theirlength`
         assert index.nplike is self._backend.index_nplike
-        self._handle_error(
+        self._backend.maybe_kernel_error(
             self._backend["awkward_IndexedArray_fill_count", index.dtype.type](
                 index.data,
                 0,
@@ -542,7 +553,7 @@ class IndexedArray(Content):
 
         # Fill remaining indices
         assert index.nplike is self._backend.index_nplike
-        self._handle_error(
+        self._backend.maybe_kernel_error(
             self._backend[
                 "awkward_IndexedArray_fill",
                 index.dtype.type,
@@ -566,7 +577,7 @@ class IndexedArray(Content):
             index, content, parameters=parameters
         )
 
-    def _mergemany(self, others):
+    def _mergemany(self, others: Sequence[Content]) -> Content:
         if len(others) == 0:
             return self
 
@@ -609,7 +620,7 @@ class IndexedArray(Content):
                     nextindex.nplike is self._backend.index_nplike
                     and array_index.nplike is self._backend.index_nplike
                 )
-                self._handle_error(
+                self._backend.maybe_kernel_error(
                     self._backend[
                         "awkward_IndexedArray_fill",
                         nextindex.dtype.type,
@@ -627,7 +638,7 @@ class IndexedArray(Content):
             else:
                 contents.append(array)
                 assert nextindex.nplike is self._backend.index_nplike
-                self._handle_error(
+                self._backend.maybe_kernel_error(
                     self._backend[
                         "awkward_IndexedArray_fill_count",
                         nextindex.dtype.type,
@@ -692,7 +703,7 @@ class IndexedArray(Content):
                 next.nplike is self._backend.index_nplike
                 and offsets.nplike is self._backend.index_nplike
             )
-            self._handle_error(
+            self._backend.maybe_kernel_error(
                 self._backend[
                     "awkward_sort",
                     next.dtype.type,
@@ -714,7 +725,7 @@ class IndexedArray(Content):
                 next.nplike is self._backend.index_nplike
                 and length.nplike is self._backend.index_nplike
             )
-            self._handle_error(
+            self._backend.maybe_kernel_error(
                 self._backend["awkward_unique", next.dtype.type, length.dtype.type](
                     next.data,
                     self._index.length,
@@ -728,7 +739,7 @@ class IndexedArray(Content):
                 and next.nplike is self._backend.index_nplike
                 and length.nplike is self._backend.index_nplike
             )
-            self._handle_error(
+            self._backend.maybe_kernel_error(
                 self._backend[
                     "awkward_unique_copy",
                     self._index.dtype.type,
@@ -783,7 +794,7 @@ class IndexedArray(Content):
             and self._index.nplike is self._backend.index_nplike
             and parents.nplike is self._backend.index_nplike
         )
-        self._handle_error(
+        self._backend.maybe_kernel_error(
             self._backend[
                 "awkward_IndexedArray_reduce_next_64",
                 nextcarry.dtype.type,
@@ -818,7 +829,7 @@ class IndexedArray(Content):
                 and parents.nplike is self._backend.index_nplike
                 and nextparents.nplike is self._backend.index_nplike
             )
-            self._handle_error(
+            self._backend.maybe_kernel_error(
                 self._backend[
                     "awkward_IndexedArray_local_preparenext",
                     nextoutindex.dtype.type,
@@ -861,7 +872,7 @@ class IndexedArray(Content):
                     outoffsets.nplike is self._backend.index_nplike
                     and starts.nplike is self._backend.index_nplike
                 )
-                self._handle_error(
+                self._backend.maybe_kernel_error(
                     self._backend[
                         "awkward_IndexedArray_reduce_next_fix_offsets_64",
                         outoffsets.dtype.type,
@@ -1125,3 +1136,18 @@ class IndexedArray(Content):
         return self.index.is_equal_to(
             other.index, index_dtype, numpyarray
         ) and self.content.is_equal_to(other.content, index_dtype, numpyarray)
+
+    def _push_inside_record_or_project(self) -> Self | ak.contents.RecordArray:
+        if self.content.is_record:
+            return ak.contents.RecordArray(
+                contents=[
+                    ak.contents.IndexedArray.simplified(self._index, c)
+                    for c in self.content.contents
+                ],
+                fields=self.content._fields,
+                length=self.length,
+                backend=self._backend,
+                parameters=parameters_union(self.content._parameters, self._parameters),
+            )
+        else:
+            return self.project()

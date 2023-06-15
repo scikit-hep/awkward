@@ -2,11 +2,10 @@
 __all__ = ("max",)
 import awkward as ak
 from awkward._behavior import behavior_of
-from awkward._connect.numpy import unsupported
+from awkward._connect.numpy import UNSUPPORTED
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
-from awkward._util import unset
 
 np = NumpyMetadata.instance()
 
@@ -18,7 +17,6 @@ def max(
     keepdims=False,
     initial=None,
     mask_identity=True,
-    flatten_records=unset,
     highlevel=True,
     behavior=None,
 ):
@@ -73,16 +71,6 @@ def max(
             "behavior": behavior,
         },
     ):
-        if flatten_records is not unset:
-            message = (
-                "`flatten_records` is no longer a supported argument for reducers. "
-                "Instead, use `ak.ravel(array)` first to remove the record structure "
-                "and flatten the array."
-            )
-            if flatten_records:
-                raise ValueError(message)
-            else:
-                ak._errors.deprecate(message, "2.2.0")
         return _impl(
             array,
             axis,
@@ -101,7 +89,6 @@ def nanmax(
     keepdims=False,
     initial=None,
     mask_identity=True,
-    flatten_records=unset,
     highlevel=True,
     behavior=None,
 ):
@@ -147,16 +134,6 @@ def nanmax(
             "behavior": behavior,
         },
     ):
-        if flatten_records is not unset:
-            message = (
-                "`flatten_records` is no longer a supported argument for reducers. "
-                "Instead, use `ak.ravel(array)` first to remove the record structure "
-                "and flatten the array."
-            )
-            if flatten_records:
-                raise ValueError(message)
-            else:
-                ak._errors.deprecate(message, "2.2.0")
         array = ak.operations.ak_nan_to_none._impl(array, False, None)
 
         return _impl(
@@ -192,13 +169,13 @@ def _impl(array, axis, keepdims, initial, mask_identity, highlevel, behavior):
 
 @ak._connect.numpy.implements("amax")
 def _nep_18_impl_amax(
-    a, axis=None, out=unsupported, keepdims=False, initial=None, where=unsupported
+    a, axis=None, out=UNSUPPORTED, keepdims=False, initial=None, where=UNSUPPORTED
 ):
     return max(a, axis=axis, keepdims=keepdims, initial=initial)
 
 
 @ak._connect.numpy.implements("nanmax")
 def _nep_18_impl_nanmax(
-    a, axis=None, out=unsupported, keepdims=False, initial=None, where=unsupported
+    a, axis=None, out=UNSUPPORTED, keepdims=False, initial=None, where=UNSUPPORTED
 ):
     return nanmax(a, axis=axis, keepdims=keepdims, initial=initial)

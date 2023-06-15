@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import copy
 import ctypes
-from collections.abc import Iterable, Sequence
+from collections.abc import Iterable, MutableMapping, Sequence
 
 import awkward as ak
 from awkward._backends.backend import Backend
@@ -12,15 +12,16 @@ from awkward._errors import AxisError
 from awkward._layout import maybe_posaxis
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import IndexType, NumpyMetadata
-from awkward._nplikes.shape import unknown_length
+from awkward._nplikes.numpylike import ArrayLike, IndexType, NumpyMetadata
+from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import OneOf, TypeTracer
 from awkward._parameters import parameters_intersect, parameters_union
 from awkward._regularize import is_integer_like
 from awkward._slicing import NO_HEAD
-from awkward._typing import TYPE_CHECKING, Final, Self, SupportsIndex, final
-from awkward._util import unset
+from awkward._typing import TYPE_CHECKING, Callable, Final, Self, SupportsIndex, final
+from awkward._util import UNSET
 from awkward.contents.content import Content
+from awkward.forms.form import Form
 from awkward.forms.unionform import UnionForm
 from awkward.index import Index, Index8, Index64
 
@@ -117,6 +118,8 @@ class UnionArray(Content):
 
         if len(contents) < 2:
             raise TypeError(f"{type(self).__name__} must have at least 2 'contents'")
+
+        n_seen_options = 0
         for content in contents:
             if not isinstance(content, Content):
                 raise TypeError(
@@ -130,6 +133,14 @@ class UnionArray(Content):
                         type(self).__name__, type(content).__name__
                     )
                 )
+            elif content.is_option:
+                n_seen_options += 1
+
+        if n_seen_options not in {0, len(contents)}:
+            raise TypeError(
+                "{0} must either be comprised of entirely optional contents, or no optional contents; "
+                "try {0}.simplified instead".format(type(self).__name__)
+            )
 
         if (
             not (tags.length is unknown_length or index.length is unknown_length)
@@ -178,17 +189,17 @@ class UnionArray(Content):
 
     def copy(
         self,
-        tags=unset,
-        index=unset,
-        contents=unset,
+        tags=UNSET,
+        index=UNSET,
+        contents=UNSET,
         *,
-        parameters=unset,
+        parameters=UNSET,
     ):
         return UnionArray(
-            self._tags if tags is unset else tags,
-            self._index if index is unset else index,
-            self._contents if contents is unset else contents,
-            parameters=self._parameters if parameters is unset else parameters,
+            self._tags if tags is UNSET else tags,
+            self._index if index is UNSET else index,
+            self._contents if contents is UNSET else contents,
+            parameters=self._parameters if parameters is UNSET else parameters,
         )
 
     def __copy__(self):
@@ -257,7 +268,7 @@ class UnionArray(Content):
                     for k in range(len(contents)):
                         # Try and merge inner union content with running outer-union contentca
                         if merge and contents[k]._mergeable_next(inner_cont, mergebool):
-                            Content._selfless_handle_error(
+                            backend.maybe_kernel_error(
                                 backend[
                                     "awkward_UnionArray_simplify",
                                     tags.dtype.type,
@@ -286,7 +297,7 @@ class UnionArray(Content):
 
                     # Did we fail to merge any of the final outer contents with this inner union content?
                     if unmerged:
-                        Content._selfless_handle_error(
+                        backend.maybe_kernel_error(
                             backend[
                                 "awkward_UnionArray_simplify",
                                 tags.dtype.type,
@@ -315,7 +326,7 @@ class UnionArray(Content):
                 unmerged = True
                 for k in range(len(contents)):
                     if contents[k] is self_cont:
-                        Content._selfless_handle_error(
+                        backend.maybe_kernel_error(
                             backend[
                                 "awkward_UnionArray_simplify_one",
                                 tags.dtype.type,
@@ -337,7 +348,7 @@ class UnionArray(Content):
                         break
 
                     elif merge and contents[k]._mergeable_next(self_cont, mergebool):
-                        Content._selfless_handle_error(
+                        backend.maybe_kernel_error(
                             backend[
                                 "awkward_UnionArray_simplify_one",
                                 tags.dtype.type,
@@ -360,7 +371,7 @@ class UnionArray(Content):
                         break
 
                 if unmerged:
-                    Content._selfless_handle_error(
+                    backend.maybe_kernel_error(
                         backend[
                             "awkward_UnionArray_simplify_one",
                             tags.dtype.type,
@@ -385,6 +396,17 @@ class UnionArray(Content):
                 "FIXME: handle UnionArray with more than 127 contents"
             )
 
+        # If any contents are options, ensure all contents are options!
+        if any(c.is_option for c in contents):
+            contents = [
+                c
+                if c.is_option
+                else c.to_IndexedOptionArray64()
+                if c.is_indexed
+                else ak.contents.UnmaskedArray(c)
+                for c in contents
+            ]
+
         if len(contents) == 1:
             next = contents[0]._carry(index, True)
             return next.copy(parameters=parameters_union(next._parameters, parameters))
@@ -400,7 +422,7 @@ class UnionArray(Content):
     def content(self, index):
         return self._contents[index]
 
-    def _form_with_key(self, getkey):
+    def _form_with_key(self, getkey: Callable[[Content], str | None]) -> UnionForm:
         form_key = getkey(self)
         return self.form_cls(
             self._tags.form,
@@ -410,7 +432,14 @@ class UnionArray(Content):
             form_key=form_key,
         )
 
-    def _to_buffers(self, form, getkey, container, backend, byteorder):
+    def _to_buffers(
+        self,
+        form: Form,
+        getkey: Callable[[Content, Form, str], str],
+        container: MutableMapping[str, ArrayLike],
+        backend: Backend,
+        byteorder: str,
+    ):
         assert isinstance(form, self.form_cls)
         key1 = getkey(self, form, "tags")
         key2 = getkey(self, form, "index")
@@ -433,24 +462,22 @@ class UnionArray(Content):
             parameters=self._parameters,
         )
 
-    def _touch_data(self, recursive):
-        if not self._backend.index_nplike.known_data:
-            self._tags.data.touch_data()
-            self._index.data.touch_data()
+    def _touch_data(self, recursive: bool):
+        self._tags._touch_data()
+        self._index._touch_data()
         if recursive:
             for x in self._contents:
                 x._touch_data(recursive)
 
-    def _touch_shape(self, recursive):
-        if not self._backend.index_nplike.known_data:
-            self._tags.data.touch_shape()
-            self._index.data.touch_shape()
+    def _touch_shape(self, recursive: bool):
+        self._tags._touch_shape()
+        self._index._touch_shape()
         if recursive:
             for x in self._contents:
                 x._touch_shape(recursive)
 
     @property
-    def length(self):
+    def length(self) -> ShapeItem:
         return self._tags.length
 
     def __repr__(self):
@@ -466,7 +493,7 @@ class UnionArray(Content):
         out.append(self._index._repr(indent + "    ", "<index>", "</index>\n"))
 
         for i, x in enumerate(self._contents):
-            out.append(f"{indent}    <content index={repr(str(i))}>\n")
+            out.append(f"{indent}    <content index={str(i)!r}>\n")
             out.append(x._repr(indent + "        ", "", "\n"))
             out.append(f"{indent}    </content>\n")
 
@@ -626,7 +653,7 @@ class UnionArray(Content):
             and self._tags.nplike is self._backend.index_nplike
             and self._index.nplike is self._backend.index_nplike
         )
-        self._handle_error(
+        self._backend.maybe_kernel_error(
             self._backend[
                 "awkward_UnionArray_project",
                 lenout.dtype.type,
@@ -661,7 +688,7 @@ class UnionArray(Content):
         assert (
             _size.nplike is backend.index_nplike and tags.nplike is backend.index_nplike
         )
-        Content._selfless_handle_error(
+        backend.maybe_kernel_error(
             backend[
                 "awkward_UnionArray_regular_index_getsize",
                 _size.dtype.type,
@@ -680,7 +707,7 @@ class UnionArray(Content):
             and current.nplike is backend.index_nplike
             and tags.nplike is backend.index_nplike
         )
-        Content._selfless_handle_error(
+        backend.maybe_kernel_error(
             backend[
                 "awkward_UnionArray_regular_index",
                 outindex.dtype.type,
@@ -730,7 +757,7 @@ class UnionArray(Content):
                 and f_offsets.nplike is index_nplike
                 and count.nplike is index_nplike
             )
-            Content._selfless_handle_error(
+            backend.maybe_kernel_error(
                 backend[
                     "awkward_UnionArray_nestedfill_tags_index",
                     tags.dtype.type,
@@ -759,7 +786,9 @@ class UnionArray(Content):
             )
         return self._getitem_next_jagged(slicestarts, slicestops, slicecontent, tail)
 
-    def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
+    def _getitem_next_jagged(
+        self, slicestarts: Index, slicestops: Index, slicecontent: Content, tail
+    ) -> Content:
         return self._getitem_next_jagged_generic(
             slicestarts, slicestops, slicecontent, tail
         )
@@ -807,7 +836,7 @@ class UnionArray(Content):
         else:
             raise AssertionError(repr(head))
 
-    def _offsets_and_flattened(self, axis, depth):
+    def _offsets_and_flattened(self, axis: int, depth: int) -> tuple[Index, Content]:
         posaxis = maybe_posaxis(self, axis, depth)
 
         if posaxis is not None and posaxis + 1 == depth:
@@ -837,7 +866,7 @@ class UnionArray(Content):
                     and self._tags.nplike is self._backend.index_nplike
                     and self._index.nplike is self._backend.index_nplike
                 )
-                self._handle_error(
+                self._backend.maybe_kernel_error(
                     self._backend[
                         "awkward_UnionArray_flatten_length",
                         total_length.dtype.type,
@@ -872,7 +901,7 @@ class UnionArray(Content):
                     and self._tags.nplike is self._backend.index_nplike
                     and self._index.nplike is self._backend.index_nplike
                 )
-                self._handle_error(
+                self._backend.maybe_kernel_error(
                     self._backend[
                         "awkward_UnionArray_flatten_combine",
                         totags.dtype.type,
@@ -920,7 +949,7 @@ class UnionArray(Content):
                     ),
                 )
 
-    def _mergeable_next(self, other, mergebool):
+    def _mergeable_next(self, other: Content, mergebool: bool) -> bool:
         return True
 
     def _merging_strategy(self, others):
@@ -964,7 +993,7 @@ class UnionArray(Content):
         contents.extend(self.contents)
 
         assert tags.nplike is self._backend.index_nplike
-        self._handle_error(
+        self._backend.maybe_kernel_error(
             self._backend["awkward_UnionArray_filltags_const", tags.dtype.type](
                 tags.data,
                 0,
@@ -974,7 +1003,7 @@ class UnionArray(Content):
         )
 
         assert index.nplike is self._backend.index_nplike
-        self._handle_error(
+        self._backend.maybe_kernel_error(
             self._backend["awkward_UnionArray_fillindex_count", index.dtype.type](
                 index.data,
                 0,
@@ -986,7 +1015,7 @@ class UnionArray(Content):
             tags.nplike is self._backend.index_nplike
             and self.tags.nplike is self._backend.index_nplike
         )
-        self._handle_error(
+        self._backend.maybe_kernel_error(
             self._backend[
                 "awkward_UnionArray_filltags",
                 tags.dtype.type,
@@ -1004,7 +1033,7 @@ class UnionArray(Content):
             index.nplike is self._backend.index_nplike
             and self.index.nplike is self._backend.index_nplike
         )
-        self._handle_error(
+        self._backend.maybe_kernel_error(
             self._backend[
                 "awkward_UnionArray_fillindex",
                 index.dtype.type,
@@ -1024,7 +1053,7 @@ class UnionArray(Content):
             tags, index, contents, parameters=self._parameters
         )
 
-    def _mergemany(self, others):
+    def _mergemany(self, others: Sequence[Content]) -> Content:
         if len(others) == 0:
             return self
 
@@ -1058,7 +1087,7 @@ class UnionArray(Content):
                     nexttags.nplike is self._backend.index_nplike
                     and union_tags.nplike is self._backend.index_nplike
                 )
-                self._handle_error(
+                self._backend.maybe_kernel_error(
                     self._backend[
                         "awkward_UnionArray_filltags",
                         nexttags.dtype.type,
@@ -1075,7 +1104,7 @@ class UnionArray(Content):
                     nextindex.nplike is self._backend.index_nplike
                     and union_index.nplike is self._backend.index_nplike
                 )
-                self._handle_error(
+                self._backend.maybe_kernel_error(
                     self._backend[
                         "awkward_UnionArray_fillindex",
                         nextindex.dtype.type,
@@ -1093,7 +1122,7 @@ class UnionArray(Content):
 
             else:
                 assert nexttags.nplike is self._backend.index_nplike
-                self._handle_error(
+                self._backend.maybe_kernel_error(
                     self._backend[
                         "awkward_UnionArray_filltags_const",
                         nexttags.dtype.type,
@@ -1106,7 +1135,7 @@ class UnionArray(Content):
                 )
 
                 assert nextindex.nplike is self._backend.index_nplike
-                self._handle_error(
+                self._backend.maybe_kernel_error(
                     self._backend[
                         "awkward_UnionArray_fillindex_count", nextindex.dtype.type
                     ](nextindex.data, length_so_far, array.length)
@@ -1583,7 +1612,7 @@ class UnionArray(Content):
 
     def _is_equal_to(self, other, index_dtype, numpyarray):
         return (
-            self.tags == other.tags
+            self.tags.is_equal_to(other.tags)
             and self.index.is_equal_to(other.index, index_dtype, numpyarray)
             and len(self.contents) == len(other.contents)
             and all(

@@ -4,7 +4,7 @@ from __future__ import annotations
 import awkward_cpp
 
 import awkward as ak
-from awkward._backends.backend import Backend, KernelKeyType
+from awkward._backends.backend import Backend, KernelKeyType, UfuncLike
 from awkward._backends.dispatch import register_backend
 from awkward._kernels import JaxKernel
 from awkward._nplikes.jax import Jax
@@ -39,23 +39,12 @@ class JaxBackend(Backend):
         # JAX uses Awkward's C++ kernels for index-only operations
         return JaxKernel(awkward_cpp.cpu_kernels.kernel[index], index)
 
-    def apply_reducer(
-        self,
-        reducer: ak._reducers.Reducer,
-        layout: ak.contents.NumpyArray,
-        parents: ak.index.Index,
-        outlength: int,
-    ) -> ak.contents.NumpyArray:
+    def prepare_reducer(self, reducer: ak._reducers.Reducer) -> ak._reducers.Reducer:
         from awkward._connect.jax import get_jax_reducer
 
-        jax_reducer = get_jax_reducer(reducer)
-        return jax_reducer.apply(layout, parents, outlength)
+        return get_jax_reducer(reducer)
 
-    def apply_ufunc(self, ufunc, method, args, kwargs):
+    def prepare_ufunc(self, ufunc: UfuncLike) -> UfuncLike:
         from awkward._connect.jax import get_jax_ufunc
 
-        if method != "__call__":
-            raise ValueError(f"unsupported ufunc method {method} called")
-
-        jax_ufunc = get_jax_ufunc(ufunc)
-        return jax_ufunc(*args, **kwargs)
+        return get_jax_ufunc(ufunc)
