@@ -8,7 +8,7 @@ from collections.abc import Iterable, MutableMapping, Sequence
 
 import awkward as ak
 from awkward._backends.backend import Backend
-from awkward._errors import AxisError
+from awkward._errors import AxisError, deprecate
 from awkward._layout import maybe_posaxis
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
@@ -221,9 +221,17 @@ class UnionArray(Content):
         contents,
         *,
         parameters=None,
-        merge=True,
+        merge=UNSET,
         mergebool=False,
     ):
+        if merge is UNSET:
+            merge = True
+        else:
+            deprecate(
+                "The `merge` argument to UnionArray.simplified(...) is deprecated; "
+                "it is no longer possible to construct UnionArrays with mergeable contents.",
+                version="2.4.0",
+            )
         self_index = index
         self_tags = tags
         self_contents = contents
@@ -395,6 +403,18 @@ class UnionArray(Content):
             raise NotImplementedError(
                 "FIXME: handle UnionArray with more than 127 contents"
             )
+
+        for tag, content in enumerate(contents):
+            if (
+                isinstance(content, ak.contents.IndexedArray)
+                and content.parameter("__array__") != "categorical"
+            ):
+                # only want to affect the part of the UnionArray.index for this tag
+                selection = tags == tag
+                # function-composition of this part of the UnionArray.index with the IndexedArray.index
+                index.data[selection] = content.index.data[index.data[selection]]
+                # now we don't have an IndexedArray anymore
+                contents[tag] = content.content
 
         # If any contents are options, ensure all contents are options!
         if any(c.is_option for c in contents):
