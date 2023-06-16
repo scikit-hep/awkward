@@ -1155,7 +1155,10 @@ class UnionArray(Content):
 
             # This pathway is covered by `.simplified`, but we can avoid an extra array operation
             # by performing this now
-            elif isinstance(array, ak.contents.IndexedArray):
+            elif (
+                isinstance(array, ak.contents.IndexedArray)
+                and array.parameter("__array__") != "categorical"
+            ):
                 assert nexttags.nplike is index_nplike
                 self._backend.maybe_kernel_error(
                     self._backend[
