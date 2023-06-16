@@ -3,6 +3,7 @@ __all__ = ("min",)
 import awkward as ak
 from awkward._behavior import behavior_of
 from awkward._connect.numpy import UNSUPPORTED
+from awkward._errors import with_operation_context
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
@@ -10,6 +11,7 @@ from awkward._regularize import regularize_axis
 np = NumpyMetadata.instance()
 
 
+@with_operation_context
 def min(
     array,
     axis=None,
@@ -59,27 +61,18 @@ def min(
 
     See also #ak.nanmin.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.min",
-        {
-            "array": array,
-            "axis": axis,
-            "keepdims": keepdims,
-            "initial": initial,
-            "mask_identity": mask_identity,
-        },
-    ):
-        return _impl(
-            array,
-            axis,
-            keepdims,
-            initial,
-            mask_identity,
-            highlevel,
-            behavior,
-        )
+    return _impl(
+        array,
+        axis,
+        keepdims,
+        initial,
+        mask_identity,
+        highlevel,
+        behavior,
+    )
 
 
+@with_operation_context
 def nanmin(
     array,
     axis=None,
@@ -120,29 +113,15 @@ def nanmin(
 
     See also #ak.min.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.nanmin",
-        {
-            "array": array,
-            "axis": axis,
-            "keepdims": keepdims,
-            "initial": initial,
-            "mask_identity": mask_identity,
-            "highlevel": highlevel,
-            "behavior": behavior,
-        },
-    ):
-        array = ak.operations.ak_nan_to_none._impl(array, False, None)
-
-        return _impl(
-            array,
-            axis,
-            keepdims,
-            initial,
-            mask_identity,
-            highlevel,
-            behavior,
-        )
+    return _impl(
+        ak.operations.ak_nan_to_none._impl(array, False, None),
+        axis,
+        keepdims,
+        initial,
+        mask_identity,
+        highlevel,
+        behavior,
+    )
 
 
 def _impl(array, axis, keepdims, initial, mask_identity, highlevel, behavior):

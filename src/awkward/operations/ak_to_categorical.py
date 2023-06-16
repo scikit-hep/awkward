@@ -2,6 +2,7 @@
 __all__ = ("to_categorical",)
 import awkward as ak
 from awkward._behavior import behavior_of
+from awkward._errors import with_operation_context
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
@@ -10,6 +11,7 @@ np = NumpyMetadata.instance()
 numpy = Numpy.instance()
 
 
+@with_operation_context
 def to_categorical(array, *, highlevel=True, behavior=None):
     """
     Args:
@@ -81,11 +83,7 @@ def to_categorical(array, *, highlevel=True, behavior=None):
 
     See also #ak.is_categorical, #ak.categories, #ak.from_categorical.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.to_categorical",
-        {"array": array, "highlevel": highlevel, "behavior": behavior},
-    ):
-        return _impl(array, highlevel, behavior)
+    return _impl(array, highlevel, behavior)
 
 
 def _impl(array, highlevel, behavior):

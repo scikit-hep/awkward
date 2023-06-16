@@ -4,11 +4,13 @@ __all__ = ("from_avro_file",)
 from os import PathLike, fsdecode
 
 import awkward as ak
+from awkward._errors import with_operation_context
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
 
 
+@with_operation_context
 def from_avro_file(
     file, limit_entries=None, *, debug_forth=False, highlevel=True, behavior=None
 ):
@@ -29,36 +31,24 @@ def from_avro_file(
     """
     import awkward._connect.avro
 
-    with ak._errors.OperationErrorContext(
-        "ak.from_avro_file",
-        {
-            "file": file,
-            "highlevel": highlevel,
-            "behavior": behavior,
-            "limit_entries": limit_entries,
-            "debug_forth": debug_forth,
-        },
-    ):
-        if isinstance(file, (str, bytes, PathLike)):
-            file = fsdecode(file)
+    if isinstance(file, (str, bytes, PathLike)):
+        file = fsdecode(file)
+        with open(file, "rb") as opened_file:
+            form, length, container = awkward._connect.avro.ReadAvroFT(
+                opened_file, limit_entries, debug_forth
+            ).outcontents
+            return _impl(form, length, container, highlevel, behavior)
 
-        if isinstance(file, str):
-            with open(file, "rb") as opened_file:
-                form, length, container = awkward._connect.avro.ReadAvroFT(
-                    opened_file, limit_entries, debug_forth
-                ).outcontents
-                return _impl(form, length, container, highlevel, behavior)
-
+    else:
+        if not hasattr(file, "read") or not hasattr(file, "seek"):
+            raise TypeError(
+                "'file' must either be a filename string or be a file-like object with 'read' and 'seek' methods"
+            )
         else:
-            if not hasattr(file, "read") or not hasattr(file, "seek"):
-                raise TypeError(
-                    "'file' must either be a filename string or be a file-like object with 'read' and 'seek' methods"
-                )
-            else:
-                form, length, container = awkward._connect.avro.ReadAvroFT(
-                    file, limit_entries, debug_forth
-                ).outarr
-                return _impl(form, length, container, highlevel, behavior)
+            form, length, container = awkward._connect.avro.ReadAvroFT(
+                file, limit_entries, debug_forth
+            ).outarr
+            return _impl(form, length, container, highlevel, behavior)
 
 
 def _impl(form, length, container, highlevel, behavior):

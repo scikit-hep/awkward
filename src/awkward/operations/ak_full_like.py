@@ -3,6 +3,7 @@ __all__ = ("full_like",)
 import awkward as ak
 from awkward._behavior import behavior_of
 from awkward._connect.numpy import UNSUPPORTED
+from awkward._errors import with_operation_context
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.typetracer import ensure_known_scalar
@@ -11,6 +12,7 @@ from awkward.operations.ak_zeros_like import _ZEROS
 np = NumpyMetadata.instance()
 
 
+@with_operation_context
 def full_like(
     array,
     fill_value,
@@ -78,18 +80,7 @@ def full_like(
     (There is no equivalent of NumPy's `np.empty_like` because Awkward Arrays
     are immutable.)
     """
-    with ak._errors.OperationErrorContext(
-        "ak.full_like",
-        {
-            "array": array,
-            "fill_value": fill_value,
-            "dtype": dtype,
-            "including_unknown": including_unknown,
-            "highlevel": highlevel,
-            "behavior": behavior,
-        },
-    ):
-        return _impl(array, fill_value, highlevel, behavior, dtype, including_unknown)
+    return _impl(array, fill_value, highlevel, behavior, dtype, including_unknown)
 
 
 def _impl(array, fill_value, highlevel, behavior, dtype, including_unknown):

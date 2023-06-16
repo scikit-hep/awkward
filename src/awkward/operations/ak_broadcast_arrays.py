@@ -5,6 +5,7 @@ from awkward._backends.dispatch import backend_of
 from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of
 from awkward._connect.numpy import UNSUPPORTED
+from awkward._errors import with_operation_context
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 
@@ -12,6 +13,7 @@ np = NumpyMetadata.instance()
 cpu = NumpyBackend.instance()
 
 
+@with_operation_context
 def broadcast_arrays(
     *arrays,
     depth_limit=None,
@@ -176,27 +178,15 @@ def broadcast_arrays(
          [],
          [[6.6]]]
     """
-    with ak._errors.OperationErrorContext(
-        "ak.broadcast_arrays",
-        {
-            "arrays": arrays,
-            "depth_limit": depth_limit,
-            "broadcast_parameters_rule": broadcast_parameters_rule,
-            "left_broadcast": left_broadcast,
-            "right_broadcast": right_broadcast,
-            "highlevel": highlevel,
-            "behavior": behavior,
-        },
-    ):
-        return _impl(
-            arrays,
-            depth_limit,
-            broadcast_parameters_rule,
-            left_broadcast,
-            right_broadcast,
-            highlevel,
-            behavior,
-        )
+    return _impl(
+        arrays,
+        depth_limit,
+        broadcast_parameters_rule,
+        left_broadcast,
+        right_broadcast,
+        highlevel,
+        behavior,
+    )
 
 
 def _impl(

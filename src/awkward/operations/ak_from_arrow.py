@@ -1,12 +1,14 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("from_arrow",)
 import awkward as ak
+from awkward._errors import with_operation_context
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
 
 
+@with_operation_context
 def from_arrow(array, *, generate_bitmasks=False, highlevel=True, behavior=None):
     """
     Args:
@@ -32,16 +34,7 @@ def from_arrow(array, *, generate_bitmasks=False, highlevel=True, behavior=None)
 
     See also #ak.to_arrow, #ak.to_arrow_table, #ak.from_parquet, #ak.from_arrow_schema.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.from_arrow",
-        {
-            "array": array,
-            "generate_bitmasks": generate_bitmasks,
-            "highlevel": highlevel,
-            "behavior": behavior,
-        },
-    ):
-        return _impl(array, generate_bitmasks, highlevel, behavior)
+    return _impl(array, generate_bitmasks, highlevel, behavior)
 
 
 def _impl(array, generate_bitmasks, highlevel, behavior):

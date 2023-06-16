@@ -2,12 +2,14 @@
 __all__ = ("isclose",)
 import awkward as ak
 from awkward._behavior import behavior_of
+from awkward._errors import with_operation_context
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
 
 
+@with_operation_context
 def isclose(
     a, b, rtol=1e-05, atol=1e-08, equal_nan=False, *, highlevel=True, behavior=None
 ):
@@ -27,19 +29,7 @@ def isclose(
     Implements [np.isclose](https://numpy.org/doc/stable/reference/generated/numpy.isclose.html)
     for Awkward Arrays.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.isclose",
-        {
-            "a": a,
-            "b": b,
-            "rtol": rtol,
-            "atol": atol,
-            "equal_nan": equal_nan,
-            "highlevel": highlevel,
-            "behavior": behavior,
-        },
-    ):
-        return _impl(a, b, rtol, atol, equal_nan, highlevel, behavior)
+    return _impl(a, b, rtol, atol, equal_nan, highlevel, behavior)
 
 
 def _impl(a, b, rtol, atol, equal_nan, highlevel, behavior):
