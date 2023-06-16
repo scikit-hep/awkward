@@ -16,7 +16,11 @@ class ByteBehavior(Array):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        deprecate(f"{type(self).__name__} is deprecated", version="2.4.0")
+        deprecate(
+            f"{type(self).__name__} is deprecated: string-types are now considered a built-in feature "
+            f"provided by Awkward Array, rather than an extension.",
+            version="2.4.0",
+        )
 
     def __bytes__(self):
         tmp = self.layout.backend.nplike.asarray(self.layout)
@@ -62,7 +66,11 @@ class CharBehavior(Array):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        deprecate(f"{type(self).__name__} is deprecated", version="2.4.0")
+        deprecate(
+            f"{type(self).__name__} is deprecated: string-types are now considered a built-in feature "
+            f"provided by Awkward Array, rather than an extension.",
+            version="2.4.0",
+        )
 
     def __bytes__(self):
         tmp = self.layout.backend.nplike.asarray(self.layout)
@@ -108,7 +116,11 @@ class ByteStringBehavior(Array):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        deprecate(f"{type(self).__name__} is deprecated", version="2.4.0")
+        deprecate(
+            f"{type(self).__name__} is deprecated: string-types are now considered a built-in feature "
+            f"provided by Awkward Array, rather than an extension.",
+            version="2.4.0",
+        )
 
     def __iter__(self):
         for x in super().__iter__():
@@ -121,7 +133,11 @@ class StringBehavior(Array):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        deprecate(f"{type(self).__name__} is deprecated", version="2.4.0")
+        deprecate(
+            f"{type(self).__name__} is deprecated: string-types are now considered a built-in feature "
+            f"provided by Awkward Array, rather than an extension.",
+            version="2.4.0",
+        )
 
     def __iter__(self):
         for x in super().__iter__():
