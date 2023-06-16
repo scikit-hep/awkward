@@ -404,17 +404,26 @@ class UnionArray(Content):
                 "FIXME: handle UnionArray with more than 127 contents"
             )
 
+        # If any contents are non-categorical index types, we can merge them into the union
+        # This is safe, because any remaining index types at this point in the routine are not considered
+        # mergeable with the other contents. This means none of the other contents are option or index types,
+        # nor are any contents mergeable with these index types' contents. We already know that the
+        # other contents cannot be unions. Thus, it's safe to simply erase the outer indexed type.
         for tag, content in enumerate(contents):
             if (
                 isinstance(content, ak.contents.IndexedArray)
                 and content.parameter("__array__") != "categorical"
             ):
                 # only want to affect the part of the UnionArray.index for this tag
-                selection = tags == tag
+                selection = tags.data == tag
                 # function-composition of this part of the UnionArray.index with the IndexedArray.index
                 index.data[selection] = content.index.data[index.data[selection]]
-                # now we don't have an IndexedArray anymore
-                contents[tag] = content.content
+                # now we don't have an IndexedArray anymore, but we want to preserve its parameters
+                contents[tag] = content.content.copy(
+                    parameters=parameters_union(
+                        content.content.parameters, content.parameters
+                    )
+                )
 
         # If any contents are options, ensure all contents are options!
         if any(c.is_option for c in contents):
@@ -1136,6 +1145,9 @@ class UnionArray(Content):
                 length_so_far += array.length
 
                 nextcontents.extend(union_contents)
+
+            # This pathway is covered by `.simplified`, but we can avoid an extra array operation
+            # by performing this now
             elif isinstance(array, ak.contents.IndexedArray):
                 assert nexttags.nplike is index_nplike
                 self._backend.maybe_kernel_error(
@@ -1157,7 +1169,13 @@ class UnionArray(Content):
 
                 length_so_far += array.length
 
-                nextcontents.append(array.content)
+                nextcontents.append(
+                    array.content.copy(
+                        parameters=parameters_union(
+                            array.content.parameters, array.parameters
+                        )
+                    )
+                )
             else:
                 assert nexttags.nplike is index_nplike
                 self._backend.maybe_kernel_error(
