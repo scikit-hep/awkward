@@ -135,6 +135,13 @@ class UnionArray(Content):
                 )
             elif content.is_option:
                 n_seen_options += 1
+            elif content.is_indexed and content.parameter("__array__") != "categorical":
+                raise TypeError(
+                    (
+                        "{0} cannot contain non-categorical indexed-types in its 'contents' ({1}); "
+                        "try {0}.simplified instead"
+                    ).format(type(self).__name__, type(content).__name__)
+                )
 
         if n_seen_options not in {0, len(contents)}:
             raise TypeError(
@@ -1172,7 +1179,7 @@ class UnionArray(Content):
                 nextcontents.append(
                     array.content.copy(
                         parameters=parameters_union(
-                            array.content.parameters, array.parameters
+                            array.content._parameters, array._parameters
                         )
                     )
                 )
