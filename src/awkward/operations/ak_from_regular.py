@@ -2,6 +2,7 @@
 __all__ = ("from_regular",)
 import awkward as ak
 from awkward._behavior import behavior_of
+from awkward._errors import AxisError, with_operation_context
 from awkward._layout import maybe_posaxis, wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
@@ -9,6 +10,7 @@ from awkward._regularize import regularize_axis
 np = NumpyMetadata.instance()
 
 
+@with_operation_context
 def from_regular(array, axis=1, *, highlevel=True, behavior=None):
     """
     Args:
@@ -37,11 +39,7 @@ def from_regular(array, axis=1, *, highlevel=True, behavior=None):
 
     See also #ak.to_regular.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.from_regular",
-        {"array": array, "axis": axis, "highlevel": highlevel, "behavior": behavior},
-    ):
-        return _impl(array, axis, highlevel, behavior)
+    return _impl(array, axis, highlevel, behavior)
 
 
 def _impl(array, axis, highlevel, behavior):
@@ -69,7 +67,7 @@ def _impl(array, axis, highlevel, behavior):
             elif posaxis == depth and layout.is_list:
                 return layout
             elif layout.is_leaf:
-                raise np.AxisError(
+                raise AxisError(
                     f"axis={axis} exceeds the depth of this array ({depth})"
                 )
 

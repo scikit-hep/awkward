@@ -3,7 +3,10 @@ __all__ = ("with_field",)
 import copy
 
 import awkward as ak
+from awkward._backends.dispatch import backend_of
+from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of
+from awkward._errors import with_operation_context
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import is_non_string_like_sequence
@@ -11,6 +14,10 @@ from awkward._regularize import is_non_string_like_sequence
 np = NumpyMetadata.instance()
 
 
+cpu = NumpyBackend.instance()
+
+
+@with_operation_context
 def with_field(array, what, where=None, *, highlevel=True, behavior=None):
     """
     Args:
@@ -34,17 +41,7 @@ def with_field(array, what, where=None, *, highlevel=True, behavior=None):
     #ak.with_field, so performance is not a factor in choosing one over the
     other.)
     """
-    with ak._errors.OperationErrorContext(
-        "ak.with_field",
-        {
-            "array": array,
-            "what": what,
-            "where": where,
-            "highlevel": highlevel,
-            "behavior": behavior,
-        },
-    ):
-        return _impl(array, what, where, highlevel, behavior)
+    return _impl(array, what, where, highlevel, behavior)
 
 
 def _impl(base, what, where, highlevel, behavior):
@@ -81,8 +78,14 @@ def _impl(base, what, where, highlevel, behavior):
             where = where[0]
 
         behavior = behavior_of(base, what, behavior=behavior)
-        base = ak.operations.to_layout(base, allow_record=True, allow_other=False)
+        backend = backend_of(base, what, default=cpu)
+
+        base = ak.operations.to_layout(
+            base, allow_record=True, allow_other=False
+        ).to_backend(backend)
         what = ak.operations.to_layout(what, allow_record=True, allow_other=True)
+        if isinstance(what, (ak.contents.Content, ak.record.Record)):
+            what = what.to_backend(backend)
 
         keys = copy.copy(base.fields)
         if where in base.fields:
@@ -117,14 +120,17 @@ def _impl(base, what, where, highlevel, behavior):
                 if what is None:
                     what = ak.contents.IndexedOptionArray(
                         ak.index.Index64(
-                            backend.index_nplike.full(len(base), -1, dtype=np.int64),
+                            backend.index_nplike.full(base.length, -1, dtype=np.int64),
                             nplike=backend.index_nplike,
                         ),
                         ak.contents.EmptyArray(),
                     )
                 elif not isinstance(what, ak.contents.Content):
                     what = ak.contents.NumpyArray(
-                        backend.nplike.repeat(what, len(base))
+                        backend.nplike.repeat(
+                            backend.nplike.asarray(what),
+                            backend.nplike.shape_item_as_index(base.length),
+                        )
                     )
                 if base.is_tuple:
                     # Preserve tuple-ness

@@ -58,7 +58,6 @@ extern "C" {
     const char* filename;
     int64_t identity;
     int64_t attempt;
-    bool pass_through;
   };
 
   const int8_t   kMaxInt8   =                 127;   // 2**7  - 1
@@ -76,7 +75,6 @@ extern "C" {
         out.filename = nullptr;
         out.identity = kSliceNone;
         out.attempt = kSliceNone;
-        out.pass_through = false;
         return out;
     };
 
@@ -91,22 +89,6 @@ extern "C" {
         out.filename = filename;
         out.identity = identity;
         out.attempt = attempt;
-        out.pass_through = false;
-        return out;
-    };
-
-  inline struct Error
-    failure_pass_through(
-      const char* str,
-      int64_t identity,
-      int64_t attempt,
-      const char* filename) {
-        struct Error out;
-        out.str = str;
-        out.filename = filename;
-        out.identity = identity;
-        out.attempt = attempt;
-        out.pass_through = true;
         return out;
     };
 }

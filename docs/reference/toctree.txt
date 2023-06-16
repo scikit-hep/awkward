@@ -135,6 +135,7 @@
     :caption: Broadcasting
 
     generated/ak.broadcast_arrays
+    generated/ak.broadcast_fields
 
 .. toctree::
     :caption: Combinatorics ("for loop" replacements)
@@ -147,6 +148,7 @@
 .. toctree::
     :caption: Value and type conversions
 
+    generated/ak.enforce_type
     generated/ak.nan_to_none
     generated/ak.nan_to_num
     generated/ak.values_astype
@@ -300,6 +302,7 @@
     generated/ak.forms.UnmaskedForm
     generated/ak.forms.from_dict
     generated/ak.forms.from_json
+    generated/ak.forms.from_type
 
 .. toctree::
     :caption: Builtin behaviors

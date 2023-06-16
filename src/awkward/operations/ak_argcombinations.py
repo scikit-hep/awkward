@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("argcombinations",)
 import awkward as ak
+from awkward._errors import with_operation_context
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
@@ -8,6 +9,7 @@ from awkward._regularize import regularize_axis
 np = NumpyMetadata.instance()
 
 
+@with_operation_context
 def argcombinations(
     array,
     n,
@@ -54,31 +56,17 @@ def argcombinations(
     #ak.argcartesian. See #ak.combinations and #ak.argcartesian for a more
     complete description.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.argcombinations",
-        {
-            "array": array,
-            "n": n,
-            "replacement": replacement,
-            "axis": axis,
-            "fields": fields,
-            "parameters": parameters,
-            "with_name": with_name,
-            "highlevel": highlevel,
-            "behavior": behavior,
-        },
-    ):
-        return _impl(
-            array,
-            n,
-            replacement,
-            axis,
-            fields,
-            parameters,
-            with_name,
-            highlevel,
-            behavior,
-        )
+    return _impl(
+        array,
+        n,
+        replacement,
+        axis,
+        fields,
+        parameters,
+        with_name,
+        highlevel,
+        behavior,
+    )
 
 
 def _impl(

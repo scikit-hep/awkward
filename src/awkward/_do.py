@@ -7,6 +7,7 @@ from numbers import Integral
 
 import awkward as ak
 from awkward._backends.backend import Backend
+from awkward._errors import AxisError
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._typing import Any, AxisMaybeNone, Literal
 from awkward.contents.content import ActionType, Content
@@ -154,13 +155,13 @@ def unique(layout: Content, axis=None):
             branch, depth = layout.branch_depth
             if branch:
                 if negaxis <= 0:
-                    raise np.AxisError(
+                    raise AxisError(
                         "cannot use non-negative axis on a nested list structure "
                         "of variable depth (negative axis counts from the leaves "
                         "of the tree; non-negative from the root)"
                     )
                 if negaxis > depth:
-                    raise np.AxisError(
+                    raise AxisError(
                         "cannot use axis={} on a nested list structure that splits into "
                         "different depths, the minimum of which is depth={} from the leaves".format(
                             axis, depth
@@ -170,7 +171,7 @@ def unique(layout: Content, axis=None):
                 if negaxis <= 0:
                     negaxis = negaxis + depth
                 if not (0 < negaxis and negaxis <= depth):
-                    raise np.AxisError(
+                    raise AxisError(
                         "axis={} exceeds the depth of this array ({})".format(
                             axis, depth
                         )
@@ -183,7 +184,7 @@ def unique(layout: Content, axis=None):
 
         return layout._unique(negaxis, starts, parents, 1)
 
-    raise np.AxisError(
+    raise AxisError(
         "unique expects axis 'None' or '-1', got axis={} that is not supported yet".format(
             axis
         )
@@ -203,6 +204,7 @@ def remove_structure(
     function_name: str | None = None,
     drop_nones: bool = True,
     keepdims: bool = False,
+    allow_records: bool = False,
 ):
     if isinstance(layout, Record):
         return remove_structure(
@@ -212,6 +214,7 @@ def remove_structure(
             function_name,
             drop_nones,
             keepdims,
+            allow_records,
         )
 
     else:
@@ -224,6 +227,7 @@ def remove_structure(
                 "function_name": function_name,
                 "drop_nones": drop_nones,
                 "keepdims": keepdims,
+                "allow_records": allow_records,
             },
         )
         return tuple(arrays)
@@ -263,9 +267,15 @@ def reduce(
     keepdims: bool = False,
     behavior: dict | None = None,
 ):
+    reducer = layout.backend.prepare_reducer(reducer)
+
     if axis is None:
         parts = remove_structure(
-            layout, flatten_records=False, drop_nones=False, keepdims=keepdims
+            layout,
+            flatten_records=False,
+            drop_nones=False,
+            keepdims=keepdims,
+            allow_records=True,
         )
 
         if len(parts) > 1:
@@ -275,9 +285,9 @@ def reduce(
                 "cannot use axis=None on an array containing irreducible unions"
             )
         elif len(parts) == 0:
-            parts = [ak.contents.EmptyArray()]
-
-        (layout,) = parts
+            layout = ak.contents.EmptyArray()
+        else:
+            (layout,) = parts
 
         starts = ak.index.Index64.zeros(1, layout.backend.index_nplike)
         parents = ak.index.Index64.zeros(layout.length, layout.backend.index_nplike)

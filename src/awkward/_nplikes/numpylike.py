@@ -9,6 +9,7 @@ from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._singleton import Singleton
 from awkward._typing import (
     Literal,
+    NamedTuple,
     Protocol,
     Self,
     SupportsIndex,
@@ -17,6 +18,13 @@ from awkward._typing import (
 )
 
 IndexType: TypeAlias = "int | ArrayLike"
+
+
+class UniqueAllResult(NamedTuple):
+    values: ArrayLike
+    indices: ArrayLike
+    inverse_indices: ArrayLike
+    counts: ArrayLike
 
 
 class ArrayLike(Protocol):
@@ -403,6 +411,21 @@ class NumpyLike(Singleton, Protocol):
         ...
 
     @abstractmethod
+    def unique_all(self, x: ArrayLike) -> UniqueAllResult:
+        ...
+
+    @abstractmethod
+    def sort(
+        self,
+        x: ArrayLike,
+        *,
+        axis: int = -1,
+        descending: bool = False,
+        stable: bool = True,
+    ) -> ArrayLike:
+        ...
+
+    @abstractmethod
     def concat(
         self,
         arrays: list[ArrayLike] | tuple[ArrayLike, ...],
@@ -419,10 +442,6 @@ class NumpyLike(Singleton, Protocol):
         *,
         axis: int | None = None,
     ) -> ArrayLike:
-        ...
-
-    @abstractmethod
-    def tile(self, x: ArrayLike, reps: int) -> ArrayLike:
         ...
 
     @abstractmethod
@@ -453,6 +472,10 @@ class NumpyLike(Singleton, Protocol):
         count: int | None = None,
         bitorder: Literal["big", "little"] = "big",
     ) -> ArrayLike:
+        ...
+
+    @abstractmethod
+    def strides(self, x: ArrayLike) -> tuple[ShapeItem, ...]:
         ...
 
     ############################ ufuncs

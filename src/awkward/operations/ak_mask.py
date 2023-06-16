@@ -2,12 +2,14 @@
 __all__ = ("mask",)
 import awkward as ak
 from awkward._behavior import behavior_of
+from awkward._errors import with_operation_context
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
 
 
+@with_operation_context
 def mask(array, mask, *, valid_when=True, highlevel=True, behavior=None):
     """
     Args:
@@ -88,17 +90,7 @@ def mask(array, mask, *, valid_when=True, highlevel=True, behavior=None):
 
     (which is 5 characters away from simply filtering the `array`).
     """
-    with ak._errors.OperationErrorContext(
-        "ak.mask",
-        {
-            "array": array,
-            "mask": mask,
-            "valid_when": valid_when,
-            "highlevel": highlevel,
-            "behavior": behavior,
-        },
-    ):
-        return _impl(array, mask, valid_when, highlevel, behavior)
+    return _impl(array, mask, valid_when, highlevel, behavior)
 
 
 def _impl(array, mask, valid_when, highlevel, behavior):
@@ -107,7 +99,7 @@ def _impl(array, mask, valid_when, highlevel, behavior):
         if isinstance(layoutmask, ak.contents.NumpyArray):
             m = backend.nplike.asarray(layoutmask)
             if not issubclass(m.dtype.type, (bool, np.bool_)):
-                raise ValueError(f"mask must have boolean type, not {repr(m.dtype)}")
+                raise ValueError(f"mask must have boolean type, not {m.dtype!r}")
             bytemask = ak.index.Index8(m.view(np.int8))
             return (
                 ak.contents.ByteMaskedArray.simplified(

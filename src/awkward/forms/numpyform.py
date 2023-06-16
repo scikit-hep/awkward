@@ -2,24 +2,36 @@
 from collections.abc import Iterable
 
 import awkward as ak
-from awkward._behavior import find_typestr
+from awkward._errors import deprecate
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._parameters import type_parameters_equal
 from awkward._typing import final
-from awkward._util import unset
+from awkward._util import UNSET
 from awkward.forms.form import Form
 
 np = NumpyMetadata.instance()
 
 
-def from_dtype(dtype, parameters=None):
+def from_dtype(dtype, parameters=None, *, time_units_as_parameter: bool = UNSET):
     if dtype.subdtype is None:
         inner_shape = ()
     else:
         inner_shape = dtype.shape
         dtype = dtype.subdtype[0]
 
-    if issubclass(dtype.type, (np.datetime64, np.timedelta64)):
+    if time_units_as_parameter is UNSET:
+        time_units_as_parameter = True
+
+    if time_units_as_parameter:
+        deprecate(
+            "from_dtype conversion of temporal units to generic `datetime64` and `timedelta64` types is deprecated, "
+            "pass `time_units_as_parameter=False` to disable this warning.",
+            version="2.4.0",
+        )
+
+    if time_units_as_parameter and issubclass(
+        dtype.type, (np.datetime64, np.timedelta64)
+    ):
         unit, step = np.datetime_data(dtype)
         if unit != "generic":
             unitstr = ("" if step == 1 else str(step)) + unit
@@ -73,17 +85,17 @@ class NumpyForm(Form):
 
     def copy(
         self,
-        primitive=unset,
-        inner_shape=unset,
+        primitive=UNSET,
+        inner_shape=UNSET,
         *,
-        parameters=unset,
-        form_key=unset,
+        parameters=UNSET,
+        form_key=UNSET,
     ):
         return NumpyForm(
-            self._primitive if primitive is unset else primitive,
-            self._inner_shape if inner_shape is unset else inner_shape,
-            parameters=self._parameters if parameters is unset else parameters,
-            form_key=self._form_key if form_key is unset else form_key,
+            self._primitive if primitive is UNSET else primitive,
+            self._inner_shape if inner_shape is UNSET else inner_shape,
+            parameters=self._parameters if parameters is UNSET else parameters,
+            form_key=self._form_key if form_key is UNSET else form_key,
         )
 
     @classmethod
@@ -127,11 +139,11 @@ class NumpyForm(Form):
                 out["inner_shape"] = list(self._inner_shape)
             return self._to_dict_extra(out, verbose)
 
-    def _type(self, typestrs):
+    @property
+    def type(self):
         out = ak.types.NumpyType(
             self._primitive,
             parameters=None,
-            typestr=find_typestr(self._parameters, typestrs),
         )
         for x in self._inner_shape[::-1]:
             out = ak.types.RegularType(out, x)

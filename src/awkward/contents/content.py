@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import copy
 import math
-from collections.abc import Callable, Iterable, Mapping, MutableMapping, Sized
+from collections.abc import Callable, Iterable, Mapping, MutableMapping, Sequence, Sized
 from numbers import Complex, Real
 
 import awkward as ak
@@ -13,8 +13,8 @@ from awkward._backends.dispatch import (
     register_backend_lookup_factory,
     regularize_backend,
 )
-from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import get_array_class, get_record_class
+from awkward._kernels import KernelError
 from awkward._layout import wrap_layout
 from awkward._nplikes import to_nplike
 from awkward._nplikes.dispatch import nplike_of
@@ -38,13 +38,16 @@ from awkward._typing import (
     TypeAlias,
     TypedDict,
 )
-from awkward._util import unset
+from awkward._util import UNSET
 from awkward.forms.form import Form
 from awkward.index import Index, Index64
 
 if TYPE_CHECKING:
     from awkward._nplikes.numpy import NumpyLike
     from awkward._slicing import SliceItem
+    from awkward.contents.indexedoptionarray import IndexedOptionArray
+    from awkward.contents.numpyarray import NumpyArray
+    from awkward.contents.regulararray import RegularArray
 
 
 np = NumpyMetadata.instance()
@@ -63,6 +66,9 @@ ActionType: TypeAlias = """Callable[
     ],
     Content | None,
 ]"""
+JSONValueType: TypeAlias = """
+float | int | str | list[JSONValueType] | dict[str, JSONValueType]
+"""
 
 
 class RecursivelyApplyOptionsType(TypedDict):
@@ -137,7 +143,7 @@ class Content:
         self._backend = backend
 
     @property
-    def parameters(self) -> dict[str, Any]:
+    def parameters(self) -> dict[str, JSONValueType]:
         """
         Free-form parameters associated with every array node as a dict from parameter
         name to its JSON-like value. Some parameters are special and are used to assign
@@ -152,7 +158,7 @@ class Content:
             self._parameters = {}
         return self._parameters
 
-    def parameter(self, key: str):
+    def parameter(self, key: str) -> JSONValueType | None:
         """
         Returns a parameter's value or None.
 
@@ -171,7 +177,9 @@ class Content:
     def form(self) -> Form:
         return self.form_with_key(None)
 
-    def form_with_key(self, form_key="node{id}", id_start=0):
+    def form_with_key(
+        self, form_key: str | None | Callable = "node{id}", id_start: int = 0
+    ) -> Form:
         hold_id = [id_start]
 
         if form_key is None:
@@ -204,7 +212,7 @@ class Content:
 
     def _form_with_key(
         self,
-        getkey: Callable[[Content], Form],
+        getkey: Callable[[Content], str | None],
     ) -> Form:
         raise NotImplementedError
 
@@ -218,10 +226,10 @@ class Content:
     def _to_typetracer(self, forget_length: bool) -> Self:
         raise NotImplementedError
 
-    def _touch_data(self, recursive):
+    def _touch_data(self, recursive: bool):
         raise NotImplementedError
 
-    def _touch_shape(self, recursive):
+    def _touch_shape(self, recursive: bool):
         raise NotImplementedError
 
     @property
@@ -255,53 +263,12 @@ class Content:
     def maybe_to_NumpyArray(self):
         return None
 
-    def _handle_error(self, error, slicer=None):
-        if error is not None and error.str is not None:
-            if error.filename is None:
-                filename = ""
-            else:
-                filename = " (in compiled code: " + error.filename.decode(
-                    errors="surrogateescape"
-                ).lstrip("\n").lstrip("(")
-
-            message = error.str.decode(errors="surrogateescape")
-
-            if error.pass_through:
-                raise ValueError(message + filename)
-
-            else:
-                if error.attempt != ak._util.kSliceNone:
-                    message += f" while attempting to get index {error.attempt}"
-
-                message += filename
-
-                if slicer is None:
-                    raise ValueError(message)
-                else:
-                    raise ak._errors.index_error(self, slicer, message)
-
-    @staticmethod
-    def _selfless_handle_error(error):
-        if error.str is not None:
-            if error.filename is None:
-                filename = ""
-            else:
-                filename = " (in compiled code: " + error.filename.decode(
-                    errors="surrogateescape"
-                ).lstrip("\n").lstrip("(")
-
-            message = error.str.decode(errors="surrogateescape")
-
-            if error.pass_through:
-                raise ValueError(message + filename)
-
-            else:
-                if error.attempt != ak._util.kSliceNone:
-                    message += f" while attempting to get index {error.attempt}"
-
-                message += filename
-
-                raise ValueError(message)
+    def _maybe_index_error(self, error: KernelError | None, slicer):
+        if error is None or error.str is None:
+            return
+        else:
+            message = self._backend.format_kernel_error(error)
+            raise ak._errors.index_error(self, slicer, message)
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         raise TypeError(
@@ -334,7 +301,9 @@ class Content:
         nexthead, nexttail = ak._slicing.head_tail(tail)
         return self._getitem_field(head)._getitem_next(nexthead, nexttail, advanced)
 
-    def _getitem_next_fields(self, head, tail, advanced: Index | None) -> Content:
+    def _getitem_next_fields(
+        self, head: SliceItem, tail: tuple[SliceItem, ...], advanced: Index | None
+    ) -> Content:
         only_fields, not_fields = [], []
         for x in tail:
             if isinstance(x, (str, list)):
@@ -346,13 +315,17 @@ class Content:
             nexthead, nexttail, advanced
         )
 
-    def _getitem_next_newaxis(self, tail, advanced: Index | None):
+    def _getitem_next_newaxis(
+        self, tail: tuple[SliceItem, ...], advanced: Index | None
+    ) -> RegularArray:
         nexthead, nexttail = ak._slicing.head_tail(tail)
         return ak.contents.RegularArray(
             self._getitem_next(nexthead, nexttail, advanced), 1, 0, parameters=None
         )
 
-    def _getitem_next_ellipsis(self, tail, advanced: Index | None):
+    def _getitem_next_ellipsis(
+        self, tail: tuple[SliceItem, ...], advanced: Index | None
+    ) -> Content:
         mindepth, maxdepth = self.minmax_depth
 
         dimlength = sum(
@@ -376,12 +349,12 @@ class Content:
 
     def _getitem_next_regular_missing(
         self,
-        head: ak.contents.IndexedOptionArray,
-        tail,
+        head: IndexedOptionArray,
+        tail: tuple[SliceItem, ...],
         advanced: Index | None,
         raw: Content,
         length: int,
-    ):
+    ) -> RegularArray:
         # if this is in a tuple-slice and really should be 0, it will be trimmed later
         length = 1 if length is not unknown_length and length == 0 else length
         index = head.index
@@ -396,7 +369,7 @@ class Content:
             outindex.nplike is self._backend.index_nplike
             and index.nplike is self._backend.index_nplike
         )
-        self._handle_error(
+        self._maybe_index_error(
             self._backend[
                 "awkward_missing_repeat", outindex.dtype.type, index.dtype.type
             ](
@@ -418,7 +391,7 @@ class Content:
 
     def _getitem_next_missing_jagged(
         self, head: Content, tail, advanced: Index | None, that: Content
-    ):
+    ) -> RegularArray:
         head = head.to_backend(self._backend)
         jagged = head.content.to_ListOffsetArray64()
         index = head._index
@@ -443,7 +416,7 @@ class Content:
             and starts.nplike is self._backend.index_nplike
             and stops.nplike is self._backend.index_nplike
         )
-        self._handle_error(
+        self._maybe_index_error(
             self._backend[
                 "awkward_Content_getitem_next_missing_jagged_getmaskstartstop",
                 index.dtype.type,
@@ -472,10 +445,10 @@ class Content:
 
     def _getitem_next_missing(
         self,
-        head: ak.contents.IndexedOptionArray,
-        tail,
+        head: IndexedOptionArray,
+        tail: tuple[SliceItem, ...],
         advanced: Index | None,
-    ):
+    ) -> Content:
         assert isinstance(head, ak.contents.IndexedOptionArray)
 
         if advanced is not None:
@@ -731,12 +704,21 @@ class Content:
     ) -> Content:
         raise NotImplementedError
 
+    def _getitem_next_jagged(
+        self,
+        slicestarts: Index,
+        slicestops: Index,
+        slicecontent: Content,
+        tail: tuple[SliceItem, ...],
+    ) -> Content:
+        raise NotImplementedError
+
     def _carry(self, carry: Index, allow_lazy: bool) -> Content:
         raise NotImplementedError
 
-    def _local_index_axis0(self) -> ak.contents.NumpyArray:
+    def _local_index_axis0(self) -> NumpyArray:
         localindex = Index64.empty(self.length, self._backend.index_nplike)
-        self._handle_error(
+        self._backend.maybe_kernel_error(
             self._backend["awkward_localindex", np.int64](
                 localindex.data,
                 localindex.length,
@@ -749,10 +731,7 @@ class Content:
     def _mergeable_next(self, other: Content, mergebool: bool) -> bool:
         raise NotImplementedError
 
-    def _mergemany(
-        self,
-        others: list[Content],
-    ) -> Content:
+    def _mergemany(self, others: Sequence[Content]) -> Content:
         raise NotImplementedError
 
     def _merging_strategy(
@@ -886,7 +865,7 @@ class Content:
             toindex.nplike is self._backend.index_nplike
             and fromindex.nplike is self._backend.index_nplike
         )
-        self._handle_error(
+        self._backend.maybe_kernel_error(
             self._backend[
                 "awkward_RegularArray_combinations_64",
                 np.int64,
@@ -903,13 +882,13 @@ class Content:
             )
         )
         contents = []
-        length = ak._util.unset
+        length = ak._util.UNSET
         for ptr in tocarry:
             contents.append(
                 ak.contents.IndexedArray.simplified(ptr, self, parameters=None)
             )
             length = contents[-1].length
-        assert not (length is ak._util.unset and self._backend.nplike.known_data)
+        assert not (length is ak._util.UNSET and self._backend.nplike.known_data)
         return ak.contents.RecordArray(
             contents, recordlookup, length, parameters=parameters, backend=self._backend
         )
@@ -1024,7 +1003,7 @@ class Content:
             index = Index64.empty(target, self._backend.index_nplike)
 
             assert index.nplike is self._backend.index_nplike
-            self._handle_error(
+            self._backend.maybe_kernel_error(
                 self._backend[
                     "awkward_index_rpad_and_clip_axis0",
                     index.dtype.type,
@@ -1078,14 +1057,6 @@ class Content:
         options: dict[str, Any],
     ):
         raise NotImplementedError
-
-    def to_numpy(self, allow_missing: bool = True):
-        ak._errors.deprecate(
-            "`Content.to_numpy` is deprecated. Please replace calls to "
-            "`Content.to_numpy(...)` with `Content.to_backend_array(..., backend='cpu')`.",
-            "2.2.0",
-        )
-        return self.to_backend(NumpyBackend.instance())._to_backend_array(allow_missing)
 
     def to_backend_array(
         self, allow_missing: bool = True, *, backend: Backend | str | None = None
@@ -1321,7 +1292,7 @@ class Content:
     def _fill_none(self, value: Content) -> Content:
         raise NotImplementedError
 
-    def copy(self, *, parameters: JSONMapping | None = unset) -> Self:
+    def copy(self, *, parameters: JSONMapping | None = UNSET) -> Self:
         raise NotImplementedError
 
 

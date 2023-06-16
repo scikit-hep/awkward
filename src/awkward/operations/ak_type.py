@@ -7,11 +7,13 @@ from awkward_cpp.lib import _ext
 
 import awkward as ak
 from awkward._behavior import behavior_of
+from awkward._errors import with_operation_context
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
 
 
+@with_operation_context
 def type(array, *, behavior=None):
     """
     Args:
@@ -73,11 +75,7 @@ def type(array, *, behavior=None):
     similar to existing type-constructors, so it's a plausible addition
     to the language.)
     """
-    with ak._errors.OperationErrorContext(
-        "ak.type",
-        {"array": array, "behavior": behavior},
-    ):
-        return _impl(array, behavior)
+    return _impl(array, behavior)
 
 
 def _impl(array, behavior):
@@ -85,13 +83,13 @@ def _impl(array, behavior):
 
     if isinstance(array, _ext.ArrayBuilder):
         form = ak.forms.from_json(array.form())
-        return ak.types.ArrayType(form.type_from_behavior(behavior), len(array))
+        return ak.types.ArrayType(form.type, len(array), behavior=behavior)
 
     elif isinstance(array, ak.record.Record):
-        return ak.types.ScalarType(array.array.form.type_from_behavior(behavior))
+        return ak.types.ScalarType(array.array.form.type, behavior=behavior)
 
     elif isinstance(array, ak.contents.Content):
-        return ak.types.ArrayType(array.form.type_from_behavior(behavior), array.length)
+        return ak.types.ArrayType(array.form.type, array.length, behavior=behavior)
 
     elif isinstance(array, (np.dtype, np.generic)):
         return ak.types.ScalarType(
@@ -99,22 +97,22 @@ def _impl(array, behavior):
         )
 
     elif isinstance(array, bool):  # np.bool_ in np.generic (above)
-        return ak.types.ScalarType(ak.types.NumpyType("bool"))
+        return ak.types.ScalarType(ak.types.NumpyType("bool"), behavior=behavior)
 
     elif isinstance(array, numbers.Integral):
-        return ak.types.ScalarType(ak.types.NumpyType("int64"))
+        return ak.types.ScalarType(ak.types.NumpyType("int64"), behavior=behavior)
 
     elif isinstance(array, numbers.Real):
-        return ak.types.ScalarType(ak.types.NumpyType("float64"))
+        return ak.types.ScalarType(ak.types.NumpyType("float64"), behavior=behavior)
 
     elif isinstance(array, numbers.Complex):
-        return ak.types.ScalarType(ak.types.NumpyType("complex128"))
+        return ak.types.ScalarType(ak.types.NumpyType("complex128"), behavior=behavior)
 
     elif isinstance(array, datetime):  # np.datetime64 in np.generic (above)
-        return ak.types.ScalarType(ak.types.NumpyType("datetime64"))
+        return ak.types.ScalarType(ak.types.NumpyType("datetime64"), behavior=behavior)
 
     elif isinstance(array, timedelta):  # np.timedelta64 in np.generic (above)
-        return ak.types.ScalarType(ak.types.NumpyType("timedelta"))
+        return ak.types.ScalarType(ak.types.NumpyType("timedelta"), behavior=behavior)
 
     elif isinstance(array, ak.highlevel.ArrayBuilder):
         # Don't go through `to_layout`: we want to avoid snapshotting this array
@@ -123,7 +121,7 @@ def _impl(array, behavior):
     else:
         layout = ak.to_layout(array, allow_other=True, allow_record=True)
         if layout is None:
-            return ak.types.ScalarType(ak.types.UnknownType())
+            return ak.types.ScalarType(ak.types.UnknownType(), behavior=behavior)
 
         elif isinstance(layout, (ak.contents.Content, ak.record.Record)):
             return _impl(layout, behavior)

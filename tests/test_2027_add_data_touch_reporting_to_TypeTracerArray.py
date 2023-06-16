@@ -5,7 +5,7 @@ import copy
 import numpy as np
 
 import awkward as ak
-from awkward._nplikes.typetracer import typetracer_with_report
+from awkward.typetracer import typetracer_with_report
 
 
 def test_prototypical_example():

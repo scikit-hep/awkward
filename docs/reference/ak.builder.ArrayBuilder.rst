@@ -10,11 +10,11 @@ object is wrapped by :class:`ak.ArrayBuilder`.
 underscores after "begin" and "end," but that hasn't happened in the
 low-level interface, yet or possibly at all.)
 
-.. py:class:: ArrayBuilder(initial=1024, resize=1.5)
+.. py:class:: ArrayBuilder(initial=1024, resize=8)
 
 .. py:method:: ArrayBuilder.__getitem__(where)
 
-.. py:method:: ArrayBuilder.__init__(initial=1024, resize=1.5)
+.. py:method:: ArrayBuilder.__init__(initial=1024, resize=8)
 
 .. py:method:: ArrayBuilder.__iter__()
 

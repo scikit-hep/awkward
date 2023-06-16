@@ -9,7 +9,7 @@
 
 #include "awkward/python/content.h"
 #include "awkward/python/util.h"
-#include "awkward/datetime_util.h"
+
 
 using namespace pybind11::literals;
 
@@ -197,7 +197,7 @@ make_ArrayBuilder(const py::handle& m, const std::string& name) {
   return (py::class_<ak::ArrayBuilder>(m, name.c_str())
       .def(py::init([](const int64_t initial, double resize) -> ak::ArrayBuilder {
         return ak::ArrayBuilder({initial, resize});
-      }), py::arg("initial") = 1024, py::arg("resize") = 1.5)
+      }), py::arg("initial") = 1024, py::arg("resize") = 8)
       .def_property_readonly("_ptr",
                              [](const ak::ArrayBuilder* self) -> size_t {
         return reinterpret_cast<size_t>(self);

@@ -2,15 +2,16 @@
 __all__ = ("min",)
 import awkward as ak
 from awkward._behavior import behavior_of
-from awkward._connect.numpy import unsupported
+from awkward._connect.numpy import UNSUPPORTED
+from awkward._errors import with_operation_context
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
-from awkward._util import unset
 
 np = NumpyMetadata.instance()
 
 
+@with_operation_context
 def min(
     array,
     axis=None,
@@ -18,7 +19,6 @@ def min(
     keepdims=False,
     initial=None,
     mask_identity=True,
-    flatten_records=unset,
     highlevel=True,
     behavior=None,
 ):
@@ -61,37 +61,18 @@ def min(
 
     See also #ak.nanmin.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.min",
-        {
-            "array": array,
-            "axis": axis,
-            "keepdims": keepdims,
-            "initial": initial,
-            "mask_identity": mask_identity,
-        },
-    ):
-        if flatten_records is not unset:
-            message = (
-                "`flatten_records` is no longer a supported argument for reducers. "
-                "Instead, use `ak.ravel(array)` first to remove the record structure "
-                "and flatten the array."
-            )
-            if flatten_records:
-                raise ValueError(message)
-            else:
-                ak._errors.deprecate(message, "2.2.0")
-        return _impl(
-            array,
-            axis,
-            keepdims,
-            initial,
-            mask_identity,
-            highlevel,
-            behavior,
-        )
+    return _impl(
+        array,
+        axis,
+        keepdims,
+        initial,
+        mask_identity,
+        highlevel,
+        behavior,
+    )
 
 
+@with_operation_context
 def nanmin(
     array,
     axis=None,
@@ -99,7 +80,6 @@ def nanmin(
     keepdims=False,
     initial=None,
     mask_identity=True,
-    flatten_records=unset,
     highlevel=True,
     behavior=None,
 ):
@@ -133,39 +113,15 @@ def nanmin(
 
     See also #ak.min.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.nanmin",
-        {
-            "array": array,
-            "axis": axis,
-            "keepdims": keepdims,
-            "initial": initial,
-            "mask_identity": mask_identity,
-            "highlevel": highlevel,
-            "behavior": behavior,
-        },
-    ):
-        if flatten_records is not unset:
-            message = (
-                "`flatten_records` is no longer a supported argument for reducers. "
-                "Instead, use `ak.ravel(array)` first to remove the record structure "
-                "and flatten the array."
-            )
-            if flatten_records:
-                raise ValueError(message)
-            else:
-                ak._errors.deprecate(message, "2.2.0")
-        array = ak.operations.ak_nan_to_none._impl(array, False, None)
-
-        return _impl(
-            array,
-            axis,
-            keepdims,
-            initial,
-            mask_identity,
-            highlevel,
-            behavior,
-        )
+    return _impl(
+        ak.operations.ak_nan_to_none._impl(array, False, None),
+        axis,
+        keepdims,
+        initial,
+        mask_identity,
+        highlevel,
+        behavior,
+    )
 
 
 def _impl(array, axis, keepdims, initial, mask_identity, highlevel, behavior):
@@ -192,10 +148,10 @@ def _impl(array, axis, keepdims, initial, mask_identity, highlevel, behavior):
 def _nep_18_impl_amin(
     a,
     axis=None,
-    out=unsupported,
+    out=UNSUPPORTED,
     keepdims=False,
     initial=None,
-    where=unsupported,
+    where=UNSUPPORTED,
 ):
     return min(a, axis=axis, keepdims=keepdims, initial=initial)
 
@@ -204,9 +160,9 @@ def _nep_18_impl_amin(
 def _nep_18_impl_nanmin(
     a,
     axis=None,
-    out=unsupported,
+    out=UNSUPPORTED,
     keepdims=False,
     initial=None,
-    where=unsupported,
+    where=UNSUPPORTED,
 ):
     return nanmin(a, axis=axis, keepdims=keepdims, initial=initial)

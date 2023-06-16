@@ -149,3 +149,19 @@ def test_typetracer():
     array = ak.Array([[[1, 2, 3]], [[5, 4]]], backend="typetracer")
     with pytest.raises(NotImplementedError):
         ak.almost_equal(array, 2 * array)
+
+
+def test_indexed():
+    assert ak.almost_equal(
+        ak.contents.ListOffsetArray(
+            ak.index.Index64([0, 2, 4, 8]),
+            ak.contents.IndexedArray(
+                ak.index.Index64([0, 1, 2, 3, 2, 1, 0, 5]),
+                ak.contents.NumpyArray(np.arange(6, dtype=np.int64)),
+            ),
+        ),
+        ak.contents.ListOffsetArray(
+            ak.index.Index64([0, 2, 4, 8]),
+            ak.contents.NumpyArray(np.array([0, 1, 2, 3, 2, 1, 0, 5], dtype=np.int64)),
+        ),
+    )

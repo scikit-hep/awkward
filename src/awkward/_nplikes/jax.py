@@ -5,6 +5,7 @@ import awkward as ak
 from awkward._nplikes.array_module import ArrayModuleNumpyLike
 from awkward._nplikes.dispatch import register_nplike
 from awkward._nplikes.numpylike import ArrayLike
+from awkward._nplikes.shape import ShapeItem
 from awkward._typing import Final
 
 
@@ -74,3 +75,10 @@ class Jax(ArrayModuleNumpyLike):
 
     def ascontiguousarray(self, x: ArrayLike) -> ArrayLike:
         return x
+
+    def strides(self, x: ArrayLike) -> tuple[ShapeItem, ...]:
+        x.touch_shape()
+        out = (x._dtype.itemsize,)
+        for item in reversed(x._shape):
+            out = (item * out[0], *out)
+        return out

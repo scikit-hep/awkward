@@ -3,6 +3,7 @@ __all__ = ("merge_union_of_records",)
 import awkward as ak
 from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of
+from awkward._errors import AxisError, with_operation_context
 from awkward._layout import maybe_posaxis, wrap_layout
 from awkward._nplikes.numpylike import ArrayLike, NumpyMetadata
 from awkward._regularize import regularize_axis
@@ -11,6 +12,7 @@ np = NumpyMetadata.instance()
 cpu = NumpyBackend.instance()
 
 
+@with_operation_context
 def merge_union_of_records(array, axis=-1, *, highlevel=True, behavior=None):
     """
     Args:
@@ -43,11 +45,7 @@ def merge_union_of_records(array, axis=-1, *, highlevel=True, behavior=None):
         >>> ak.merge_union_of_records(array)
         <Array [{a: 1, b: None}, {...}, None] type='3 * ?{a: ?int64, b: ?int64}'>
     """
-    with ak._errors.OperationErrorContext(
-        "ak.merge_union_of_records",
-        {"array": array, "axis": axis, "highlevel": highlevel, "behavior": behavior},
-    ):
-        return _impl(array, axis, highlevel, behavior)
+    return _impl(array, axis, highlevel, behavior)
 
 
 def _impl(array, axis, highlevel, behavior):
@@ -155,7 +153,7 @@ def _impl(array, axis, highlevel, behavior):
     def apply(layout, depth, backend, **kwargs):
         posaxis = maybe_posaxis(layout, axis, depth)
         if depth < posaxis + 1 and layout.is_leaf:
-            raise np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
+            raise AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
         elif depth == posaxis + 1 and layout.is_union:
             if not all(
                 x.is_record or x.is_indexed or x.is_option for x in layout.contents

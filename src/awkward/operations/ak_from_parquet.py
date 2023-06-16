@@ -1,9 +1,12 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("from_parquet",)
 import awkward as ak
+from awkward._errors import with_operation_context
+from awkward._layout import wrap_layout
 from awkward._regularize import is_integer
 
 
+@with_operation_context
 def from_parquet(
     path,
     *,
@@ -50,44 +53,30 @@ def from_parquet(
 
     See also #ak.to_parquet, #ak.metadata_from_parquet.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.from_parquet",
-        {
-            "path": path,
-            "columns": columns,
-            "row_groups": row_groups,
-            "storage_options": storage_options,
-            "max_gap": max_gap,
-            "max_block": max_block,
-            "footer_sample_size": footer_sample_size,
-            "generate_bitmasks": generate_bitmasks,
-            "highlevel": highlevel,
-            "behavior": behavior,
-        },
-    ):
-        import awkward._connect.pyarrow  # noqa: F401
+    import awkward._connect.pyarrow  # noqa: F401
 
-        parquet_columns, subform, actual_paths, fs, subrg, row_counts, meta = metadata(
-            path,
-            storage_options,
-            row_groups,
-            columns,
-        )
-        return _load(
-            actual_paths,
-            parquet_columns if columns is not None else None,
-            subrg,
-            max_gap,
-            max_block,
-            footer_sample_size,
-            generate_bitmasks,
-            subform,
-            highlevel,
-            behavior,
-            fs,
-        )
+    parquet_columns, subform, actual_paths, fs, subrg, row_counts, meta = metadata(
+        path,
+        storage_options,
+        row_groups,
+        columns,
+    )
+    return _load(
+        actual_paths,
+        parquet_columns if columns is not None else None,
+        subrg,
+        max_gap,
+        max_block,
+        footer_sample_size,
+        generate_bitmasks,
+        subform,
+        highlevel,
+        behavior,
+        fs,
+    )
 
 
+@with_operation_context
 def metadata(
     path,
     storage_options=None,
@@ -230,7 +219,9 @@ def _load(
         )
 
     if len(arrays) == 0:
-        return subform.length_zero_array(highlevel=highlevel, behavior=behavior)
+        return wrap_layout(
+            subform.length_zero_array(highlevel=False), behavior=behavior
+        )
     elif len(arrays) == 1:
         # make high-level
         if isinstance(arrays[0], ak.record.Record):

@@ -2139,33 +2139,6 @@ kernels:
     automatic-tests: true
     manual-tests: []
 
-  - name: awkward_ListOffsetArray_compact_offsets
-    specializations:
-      - name: awkward_ListOffsetArray32_compact_offsets_64
-        args:
-          - {name: tooffsets, type: "List[int64_t]", dir: out}
-          - {name: fromoffsets, type: "Const[List[int32_t]]", dir: in, role: ListOffsetArray-offsets}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_ListOffsetArray64_compact_offsets_64
-        args:
-          - {name: tooffsets, type: "List[int64_t]", dir: out}
-          - {name: fromoffsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_ListOffsetArrayU32_compact_offsets_64
-        args:
-          - {name: tooffsets, type: "List[int64_t]", dir: out}
-          - {name: fromoffsets, type: "Const[List[uint32_t]]", dir: in, role: ListOffsetArray-offsets}
-          - {name: length, type: "int64_t", dir: in, role: default}
-    description: null
-    definition: |
-      def awkward_ListOffsetArray_compact_offsets(tooffsets, fromoffsets, length):
-          diff = int(fromoffsets[0])
-          tooffsets[0] = 0
-          for i in range(length):
-              tooffsets[i + 1] = fromoffsets[i + 1] - diff
-    automatic-tests: true
-    manual-tests: []
-
   - name: awkward_ListOffsetArray_drop_none_indexes
     specializations:
       - name: awkward_ListOffsetArray_drop_none_indexes_32
@@ -3459,43 +3432,53 @@ kernels:
     automatic-tests: false
     manual-tests: []
 
-  - name: awkward_RegularArray_broadcast_tooffsets
+  - name: awkward_RecordArray_reduce_nonlocal_outoffsets_64
     specializations:
-      - name: awkward_RegularArray_broadcast_tooffsets_64
+      - name: awkward_RecordArray_reduce_nonlocal_outoffsets_64
         args:
-          - {name: fromoffsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
-          - {name: offsetslength, type: "int64_t", dir: in, role: default}
-          - {name: size, type: "int64_t", dir: in, role: RegularArray-size}
+          - {name: outoffsets, type: "List[int64_t]", dir: out}
+          - {name: outcarry, type: "List[int64_t]", dir: out}
+          - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
+          - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
     description: null
     definition: |
-      def awkward_RegularArray_broadcast_tooffsets(fromoffsets, offsetslength, size):
-          for i in range(offsetslength - 1):
-              count = int(fromoffsets[i + 1] - fromoffsets[i])
-              if count < 0:
-                  raise ValueError("broadcast's offsets must be monotonically increasing")
-              if size != count:
-                  raise ValueError("cannot broadcast nested list")
-    automatic-tests: true
-    manual-tests: []
+      def awkward_RecordArray_reduce_nonlocal_outoffsets_64(
+          outoffsets, outcarry, parents, lenparents, outlength
+      ):
+          # Zero initialise offsets
+          outoffsets[0] = 0
 
-  - name: awkward_RegularArray_broadcast_tooffsets_size1
-    specializations:
-      - name: awkward_RegularArray_broadcast_tooffsets_size1_64
-        args:
-          - {name: tocarry, type: "List[int64_t]", dir: out}
-          - {name: fromoffsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
-          - {name: offsetslength, type: "int64_t", dir: in, role: default}
-    description: null
-    definition: |
-      def awkward_RegularArray_broadcast_tooffsets_size1(tocarry, fromoffsets, offsetslength):
-          k = 0
-          for i in range(offsetslength - 1):
-              count = int(fromoffsets[i + 1] - fromoffsets[i])
-              if count < 0:
-                  raise ValueError("broadcast's offsets must be monotonically increasing")
-              for j in range(count):
-                  tocarry[k] = float(i)
-                  k = k + 1
+          # Initialise carry to unique value, indicating "missing"
+          for i in range(outlength):
+              outcarry[i] = -1
+
+          # Fill offsets with lengths of sublists (in order of appearance, *NOT* parents)
+          i = 0
+          k_sublist = 0
+          for j in range(1, lenparents):
+              if parents[i] != parents[j]:
+                  outoffsets[k_sublist + 1] = j
+                  outcarry[parents[i]] = k_sublist
+                  i = j
+                  k_sublist += 1
+
+          # Close open sublist
+          if lenparents > 0:
+              outoffsets[k_sublist + 1] = j
+              outcarry[parents[i]] = k_sublist
+              k_sublist += 1
+
+          # Append empty lists for missing parents
+          for i in range(k_sublist, outlength):
+              outoffsets[i + 1] = lenparents
+
+          # Replace unique value with index of appended empty list
+          for i in range(outlength):
+              if outcarry[i] == -1:
+                  outcarry[i] = k_sublist
+                  k_sublist += 1
+
     automatic-tests: true
     manual-tests: []
 
@@ -3514,22 +3497,6 @@ kernels:
     definition: |
       Insert Python definition here
     automatic-tests: false
-    manual-tests: []
-
-  - name: awkward_RegularArray_compact_offsets
-    specializations:
-      - name: awkward_RegularArray_compact_offsets64
-        args:
-          - {name: tooffsets, type: "List[int64_t]", dir: out}
-          - {name: length, type: "int64_t", dir: in, role: default}
-          - {name: size, type: "int64_t", dir: in, role: RegularArray-size}
-    description: null
-    definition: |
-      def awkward_RegularArray_compact_offsets(tooffsets, length, size):
-          tooffsets[0] = 0
-          for i in range(length):
-              tooffsets[i + 1] = (i + 1) * size
-    automatic-tests: true
     manual-tests: []
 
   - name: awkward_RegularArray_getitem_carry

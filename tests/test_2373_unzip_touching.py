@@ -116,7 +116,7 @@ def test():
         }
     )
 
-    ttlayout, report = ak._nplikes.typetracer.typetracer_with_report(form)
+    ttlayout, report = ak.typetracer.typetracer_with_report(form)
 
     ttarray = ak.Array(ttlayout)
     pairs = ak.cartesian([ttarray.muon, ttarray.jet], axis=1, nested=True)

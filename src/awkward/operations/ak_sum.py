@@ -2,22 +2,22 @@
 __all__ = ("sum",)
 import awkward as ak
 from awkward._behavior import behavior_of
-from awkward._connect.numpy import unsupported
+from awkward._connect.numpy import UNSUPPORTED
+from awkward._errors import with_operation_context
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
-from awkward._util import unset
 
 np = NumpyMetadata.instance()
 
 
+@with_operation_context
 def sum(
     array,
     axis=None,
     *,
     keepdims=False,
     mask_identity=False,
-    flatten_records=unset,
     highlevel=True,
     behavior=None,
 ):
@@ -197,37 +197,16 @@ def sum(
 
     See also #ak.nansum.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.sum",
-        {
-            "array": array,
-            "axis": axis,
-            "keepdims": keepdims,
-            "mask_identity": mask_identity,
-            "highlevel": highlevel,
-            "behavior": behavior,
-        },
-    ):
-        if flatten_records is not unset:
-            message = (
-                "`flatten_records` is no longer a supported argument for reducers. "
-                "Instead, use `ak.ravel(array)` first to remove the record structure "
-                "and flatten the array."
-            )
-            if flatten_records:
-                raise ValueError(message)
-            else:
-                ak._errors.deprecate(message, "2.2.0")
-        return _impl(array, axis, keepdims, mask_identity, highlevel, behavior)
+    return _impl(array, axis, keepdims, mask_identity, highlevel, behavior)
 
 
+@with_operation_context
 def nansum(
     array,
     axis=None,
     *,
     keepdims=False,
     mask_identity=False,
-    flatten_records=unset,
     highlevel=True,
     behavior=None,
 ):
@@ -261,30 +240,14 @@ def nansum(
 
     See also #ak.sum.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.nansum",
-        {
-            "array": array,
-            "axis": axis,
-            "keepdims": keepdims,
-            "mask_identity": mask_identity,
-            "highlevel": highlevel,
-            "behavior": behavior,
-        },
-    ):
-        if flatten_records is not unset:
-            message = (
-                "`flatten_records` is no longer a supported argument for reducers. "
-                "Instead, use `ak.ravel(array)` first to remove the record structure "
-                "and flatten the array."
-            )
-            if flatten_records:
-                raise ValueError(message)
-            else:
-                ak._errors.deprecate(message, "2.2.0")
-        array = ak.operations.ak_nan_to_none._impl(array, False, None)
-
-        return _impl(array, axis, keepdims, mask_identity, highlevel, behavior)
+    return _impl(
+        ak.operations.ak_nan_to_none._impl(array, False, None),
+        axis,
+        keepdims,
+        mask_identity,
+        highlevel,
+        behavior,
+    )
 
 
 def _impl(array, axis, keepdims, mask_identity, highlevel, behavior):
@@ -311,11 +274,11 @@ def _impl(array, axis, keepdims, mask_identity, highlevel, behavior):
 def _nep_18_impl_sum(
     a,
     axis=None,
-    dtype=unsupported,
-    out=unsupported,
+    dtype=UNSUPPORTED,
+    out=UNSUPPORTED,
     keepdims=False,
-    initial=unsupported,
-    where=unsupported,
+    initial=UNSUPPORTED,
+    where=UNSUPPORTED,
 ):
     return sum(a, axis=axis, keepdims=keepdims)
 
@@ -324,10 +287,10 @@ def _nep_18_impl_sum(
 def _nep_18_impl_nansum(
     a,
     axis=None,
-    dtype=unsupported,
-    out=unsupported,
+    dtype=UNSUPPORTED,
+    out=UNSUPPORTED,
     keepdims=False,
-    initial=unsupported,
-    where=unsupported,
+    initial=UNSUPPORTED,
+    where=UNSUPPORTED,
 ):
     return nansum(a, axis=axis, keepdims=keepdims)

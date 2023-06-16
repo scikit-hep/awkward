@@ -91,7 +91,7 @@ jobs:
         run: pipx run nox -s diagnostics -- --check-spec-sorted
 
       - name: Install test requirements
-        run: python -m pip install -v -r requirements-test.txt
+        run: python -m pip install -v -r requirements-test.txt pytest-github-actions-annotate-failures
 
       - name: Test specification
         if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
@@ -162,7 +162,7 @@ jobs:
         run: pipx run nox -s diagnostics -- --check-spec-sorted
 
       - name: Install test requirements
-        run: python -m pip install -v -r requirements-test.txt
+        run: python -m pip install -v -r requirements-test.txt pytest-github-actions-annotate-failures
 
       - name: Test specification
         if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
@@ -238,7 +238,7 @@ jobs:
         run: pipx run nox -s diagnostics -- --check-spec-sorted
 
       - name: Install test requirements
-        run: python -m pip install -v -r requirements-test.txt
+        run: python -m pip install -v -r requirements-test.txt pytest-github-actions-annotate-failures
 
       - name: Test specification
         if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
@@ -285,14 +285,12 @@ jobs:
           submodules: true
 
       - name: Setup Python via Conda
-        uses: mamba-org/provision-with-micromamba@main
+        uses: mamba-org/setup-micromamba@v1
         with:
           # Cache invalidates daily by default
-          cache-env: true
-          environment-file: false
+          cache-environment: true
           environment-name: awkward
-          channels: conda-forge
-          extra-specs: |
+          create-args: >-
             python=${{ env.PYTHON_VERSION }}
             numpy
             root
@@ -323,7 +321,7 @@ jobs:
         run: python -m pip list
 
       - name: Install test requirements
-        run: python -m pip install -v -r requirements-test.txt
+        run: python -m pip install -v -r requirements-test.txt pytest-github-actions-annotate-failures
 
       - name: Test
         run: python -m pytest -vv -rs tests

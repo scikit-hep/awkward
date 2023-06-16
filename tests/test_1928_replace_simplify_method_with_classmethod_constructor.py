@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import numpy as np
+import pytest
 
 import awkward as ak
 
@@ -40,7 +41,21 @@ def test_indexedoption_of_union():
 
 
 def test_indexedoption_of_union_of_option_1():
-    unionarray = ak.contents.UnionArray(
+    with pytest.raises(
+        TypeError, match=r" must either be comprised of entirely optional contents"
+    ):
+        ak.contents.UnionArray(
+            ak.index.Index8(np.array([0, 0, 1, 0, 1, 1, 1, 0, 0, 0, 1], dtype=np.int8)),
+            ak.index.Index64(
+                np.array([0, 1, 0, 2, 1, 2, 3, 3, 4, 5, 4], dtype=np.int64)
+            ),
+            [
+                ak.from_iter([0.0, 1.1, 2.2, 3.3, None, 5.5], highlevel=False),
+                ak.from_iter(["zero", "one", "two", "three", "four"], highlevel=False),
+            ],
+        )
+
+    unionarray = ak.contents.UnionArray.simplified(
         ak.index.Index8(np.array([0, 0, 1, 0, 1, 1, 1, 0, 0, 0, 1], dtype=np.int8)),
         ak.index.Index64(np.array([0, 1, 0, 2, 1, 2, 3, 3, 4, 5, 4], dtype=np.int64)),
         [
@@ -66,7 +81,21 @@ def test_indexedoption_of_union_of_option_1():
 
 
 def test_indexedoption_of_union_of_option_2():
-    unionarray = ak.contents.UnionArray(
+    with pytest.raises(
+        TypeError, match=r"must either be comprised of entirely optional contents"
+    ):
+        ak.contents.UnionArray(
+            ak.index.Index8(np.array([0, 0, 1, 0, 1, 1, 1, 0, 0, 0, 1], dtype=np.int8)),
+            ak.index.Index64(
+                np.array([0, 1, 0, 2, 1, 2, 3, 3, 4, 5, 4], dtype=np.int64)
+            ),
+            [
+                ak.from_iter([0.0, 1.1, 2.2, 3.3, 4.4, 5.5], highlevel=False),
+                ak.from_iter(["zero", None, "two", "three", "four"], highlevel=False),
+            ],
+        )
+
+    unionarray = ak.contents.UnionArray.simplified(
         ak.index.Index8(np.array([0, 0, 1, 0, 1, 1, 1, 0, 0, 0, 1], dtype=np.int8)),
         ak.index.Index64(np.array([0, 1, 0, 2, 1, 2, 3, 3, 4, 5, 4], dtype=np.int64)),
         [

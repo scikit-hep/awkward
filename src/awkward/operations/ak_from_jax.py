@@ -1,10 +1,11 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("from_jax",)
-
-from awkward import _errors, jax
+from awkward import jax
+from awkward._errors import with_operation_context
 from awkward._layout import from_arraylib, wrap_layout
 
 
+@with_operation_context
 def from_jax(array, *, regulararray=False, highlevel=True, behavior=None):
     """
     Args:
@@ -29,18 +30,9 @@ def from_jax(array, *, regulararray=False, highlevel=True, behavior=None):
 
     See also #ak.to_jax, #ak.from_numpy and #ak.from_jax.
     """
-    with _errors.OperationErrorContext(
-        "ak.from_jax",
-        {
-            "array": array,
-            "regulararray": regulararray,
-            "highlevel": highlevel,
-            "behavior": behavior,
-        },
-    ):
-        jax.assert_registered()
-        return wrap_layout(
-            from_arraylib(array, regulararray, False),
-            highlevel=highlevel,
-            behavior=behavior,
-        )
+    jax.assert_registered()
+    return wrap_layout(
+        from_arraylib(array, regulararray, False),
+        highlevel=highlevel,
+        behavior=behavior,
+    )

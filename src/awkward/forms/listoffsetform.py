@@ -1,9 +1,10 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+from __future__ import annotations
+
 import awkward as ak
-from awkward._behavior import find_typestr
 from awkward._parameters import type_parameters_equal
-from awkward._typing import final
-from awkward._util import unset
+from awkward._typing import JSONMapping, final
+from awkward._util import UNSET
 from awkward.forms.form import Form
 
 
@@ -11,7 +12,14 @@ from awkward.forms.form import Form
 class ListOffsetForm(Form):
     is_list = True
 
-    def __init__(self, offsets, content, *, parameters=None, form_key=None):
+    def __init__(
+        self,
+        offsets: str,
+        content: Form,
+        *,
+        parameters: JSONMapping | None = None,
+        form_key: str | None = None,
+    ):
         if not isinstance(offsets, str):
             raise TypeError(
                 "{} 'offsets' must be of type str, not {}".format(
@@ -33,17 +41,17 @@ class ListOffsetForm(Form):
 
     def copy(
         self,
-        offsets=unset,
-        content=unset,
+        offsets=UNSET,
+        content=UNSET,
         *,
-        parameters=unset,
-        form_key=unset,
+        parameters=UNSET,
+        form_key=UNSET,
     ):
         return ListOffsetForm(
-            self._offsets if offsets is unset else offsets,
-            self._content if content is unset else content,
-            parameters=self._parameters if parameters is unset else parameters,
-            form_key=self._form_key if form_key is unset else form_key,
+            self._offsets if offsets is UNSET else offsets,
+            self._content if content is UNSET else content,
+            parameters=self._parameters if parameters is UNSET else parameters,
+            form_key=self._form_key if form_key is UNSET else form_key,
         )
 
     @classmethod
@@ -64,11 +72,11 @@ class ListOffsetForm(Form):
             verbose,
         )
 
-    def _type(self, typestrs):
+    @property
+    def type(self):
         return ak.types.ListType(
-            self._content._type(typestrs),
+            self._content.type,
             parameters=self._parameters,
-            typestr=find_typestr(self._parameters, typestrs),
         )
 
     def __eq__(self, other):

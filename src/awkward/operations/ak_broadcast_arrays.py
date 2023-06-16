@@ -4,7 +4,8 @@ import awkward as ak
 from awkward._backends.dispatch import backend_of
 from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of
-from awkward._connect.numpy import unsupported
+from awkward._connect.numpy import UNSUPPORTED
+from awkward._errors import with_operation_context
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 
@@ -12,6 +13,7 @@ np = NumpyMetadata.instance()
 cpu = NumpyBackend.instance()
 
 
+@with_operation_context
 def broadcast_arrays(
     *arrays,
     depth_limit=None,
@@ -176,27 +178,15 @@ def broadcast_arrays(
          [],
          [[6.6]]]
     """
-    with ak._errors.OperationErrorContext(
-        "ak.broadcast_arrays",
-        {
-            "arrays": arrays,
-            "depth_limit": depth_limit,
-            "broadcast_parameters_rule": broadcast_parameters_rule,
-            "left_broadcast": left_broadcast,
-            "right_broadcast": right_broadcast,
-            "highlevel": highlevel,
-            "behavior": behavior,
-        },
-    ):
-        return _impl(
-            arrays,
-            depth_limit,
-            broadcast_parameters_rule,
-            left_broadcast,
-            right_broadcast,
-            highlevel,
-            behavior,
-        )
+    return _impl(
+        arrays,
+        depth_limit,
+        broadcast_parameters_rule,
+        left_broadcast,
+        right_broadcast,
+        highlevel,
+        behavior,
+    )
 
 
 def _impl(
@@ -222,7 +212,14 @@ def _impl(
         inputs.append(y.to_backend(backend))
 
     def action(inputs, depth, **kwargs):
-        if depth == depth_limit or all(x.is_numpy for x in inputs):
+        # The depth limit is the depth at which we must return, i.e.
+        # the _first_ layout at that depth
+        if depth == depth_limit:
+            return tuple(inputs)
+        # Walk through non-leaf nodes
+        elif all(
+            x.purelist_depth == 1 and not (x.is_option or x.is_indexed) for x in inputs
+        ):
             return tuple(inputs)
         else:
             return None
@@ -242,5 +239,5 @@ def _impl(
 
 
 @ak._connect.numpy.implements("broadcast_arrays")
-def _nep_18_impl(*args, subok=unsupported):
+def _nep_18_impl(*args, subok=UNSUPPORTED):
     return broadcast_arrays(*args)

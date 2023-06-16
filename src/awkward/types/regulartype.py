@@ -1,13 +1,33 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-from awkward._nplikes.shape import unknown_length
+from __future__ import annotations
+
+from awkward._behavior import find_array_typestr
+from awkward._errors import deprecate
+from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._parameters import parameters_are_equal, type_parameters_equal
 from awkward._regularize import is_integer
-from awkward._typing import final
+from awkward._typing import Self, final
+from awkward._util import UNSET
 from awkward.types.type import Type
 
 
 @final
 class RegularType(Type):
+    def copy(
+        self,
+        *,
+        content: Type = UNSET,
+        size: ShapeItem = UNSET,
+        parameters=UNSET,
+        typestr=UNSET,
+    ) -> Self:
+        return RegularType(
+            self._content if content is UNSET else content,
+            size=self._size if size is UNSET else size,
+            parameters=self._parameters if parameters is UNSET else parameters,
+            typestr=self._typestr if typestr is UNSET else typestr,
+        )
+
     def __init__(self, content, size, *, parameters=None, typestr=None):
         if not isinstance(content, Type):
             raise TypeError(
@@ -46,30 +66,35 @@ class RegularType(Type):
     def size(self):
         return self._size
 
-    def _str(self, indent, compact):
+    def _str(self, indent, compact, behavior):
         if self._typestr is not None:
-            out = [self._typestr]
+            deprecate("typestr argument is deprecated", "2.4.0")
 
-        elif self.parameter("__array__") == "string":
-            out = [f"string[{self._size}]"]
-
-        elif self.parameter("__array__") == "bytestring":
-            out = [f"bytes[{self._size}]"]
+        typestr = find_array_typestr(behavior, self._parameters, self._typestr)
+        if typestr is not None:
+            out = [f"{typestr}[{self._size}]"]
 
         else:
             params = self._str_parameters()
 
             if params is None:
-                out = [str(self._size), " * ", *self._content._str(indent, compact)]
+                out = [
+                    str(self._size),
+                    " * ",
+                    *self._content._str(indent, compact, behavior),
+                ]
             else:
                 out = [
                     "[",
                     str(self._size),
                     " * ",
-                    *self._content._str(indent, compact),
-                ] + [", ", params, "]"]
+                    *self._content._str(indent, compact, behavior),
+                    ", ",
+                    params,
+                    "]",
+                ]
 
-        return [self._str_categorical_begin(), *out] + [self._str_categorical_end()]
+        return [self._str_categorical_begin(), *out, self._str_categorical_end()]
 
     def __repr__(self):
         args = [repr(self._content), repr(self._size), *self._repr_args()]

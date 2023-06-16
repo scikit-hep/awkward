@@ -1,7 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("sort",)
 import awkward as ak
-from awkward._connect.numpy import unsupported
+from awkward._connect.numpy import UNSUPPORTED
+from awkward._errors import with_operation_context
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
@@ -9,6 +10,7 @@ from awkward._regularize import regularize_axis
 np = NumpyMetadata.instance()
 
 
+@with_operation_context
 def sort(array, axis=-1, *, ascending=True, stable=True, highlevel=True, behavior=None):
     """
     Args:
@@ -34,18 +36,7 @@ def sort(array, axis=-1, *, ascending=True, stable=True, highlevel=True, behavio
         >>> ak.sort(ak.Array([[7, 5, 7], [], [2], [8, 2]]))
         <Array [[5, 7, 7], [], [2], [2, 8]] type='4 * var * int64'>
     """
-    with ak._errors.OperationErrorContext(
-        "ak.sort",
-        {
-            "array": array,
-            "axis": axis,
-            "ascending": ascending,
-            "stable": stable,
-            "highlevel": highlevel,
-            "behavior": behavior,
-        },
-    ):
-        return _impl(array, axis, ascending, stable, highlevel, behavior)
+    return _impl(array, axis, ascending, stable, highlevel, behavior)
 
 
 def _impl(array, axis, ascending, stable, highlevel, behavior):
@@ -56,7 +47,7 @@ def _impl(array, axis, ascending, stable, highlevel, behavior):
 
 
 @ak._connect.numpy.implements("sort")
-def _nep_18_impl(a, axis=-1, kind=None, order=unsupported):
+def _nep_18_impl(a, axis=-1, kind=None, order=UNSUPPORTED):
     if kind is None:
         stable = False
     elif kind in ("stable", "mergesort"):

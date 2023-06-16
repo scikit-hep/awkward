@@ -2,6 +2,7 @@
 __all__ = ("singletons",)
 import awkward as ak
 from awkward._behavior import behavior_of
+from awkward._errors import AxisError, with_operation_context
 from awkward._layout import maybe_posaxis, wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import is_integer, regularize_axis
@@ -9,6 +10,7 @@ from awkward._regularize import is_integer, regularize_axis
 np = NumpyMetadata.instance()
 
 
+@with_operation_context
 def singletons(array, axis=0, *, highlevel=True, behavior=None):
     """
     Args:
@@ -40,11 +42,7 @@ def singletons(array, axis=0, *, highlevel=True, behavior=None):
 
     See #ak.firsts to invert this function.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.singletons",
-        {"array": array, "axis": axis, "highlevel": highlevel, "behavior": behavior},
-    ):
-        return _impl(array, axis, highlevel, behavior)
+    return _impl(array, axis, highlevel, behavior)
 
 
 def _impl(array, axis, highlevel, behavior):
@@ -80,7 +78,7 @@ def _impl(array, axis, highlevel, behavior):
                 return ak.contents.RegularArray(layout, 1).to_ListOffsetArray64(True)
 
         elif layout.is_leaf:
-            raise np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
+            raise AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
 
     out = ak._do.recursively_apply(layout, action, behavior, numpy_to_regular=True)
 
