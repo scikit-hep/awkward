@@ -4,6 +4,7 @@ import awkward as ak
 from awkward._backends.dispatch import backend_of
 from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of
+from awkward._errors import with_operation_context
 from awkward._layout import maybe_posaxis, wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
@@ -17,6 +18,7 @@ cpu = NumpyBackend.instance()
 
 
 @ak._connect.numpy.implements("concatenate")
+@with_operation_context
 def concatenate(arrays, axis=0, *, mergebool=True, highlevel=True, behavior=None):
     """
     Args:
@@ -39,17 +41,7 @@ def concatenate(arrays, axis=0, *, mergebool=True, highlevel=True, behavior=None
     must have the same lengths and nested lists are each concatenated,
     element for element, and similarly for deeper levels.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.concatenate",
-        {
-            "arrays": arrays,
-            "axis": axis,
-            "mergebool": mergebool,
-            "highlevel": highlevel,
-            "behavior": behavior,
-        },
-    ):
-        return _impl(arrays, axis, mergebool, highlevel, behavior)
+    return _impl(arrays, axis, mergebool, highlevel, behavior)
 
 
 def _impl(arrays, axis, mergebool, highlevel, behavior):

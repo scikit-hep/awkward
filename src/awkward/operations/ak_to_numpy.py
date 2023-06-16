@@ -2,8 +2,10 @@
 __all__ = ("to_numpy",)
 import awkward as ak
 from awkward._backends.numpy import NumpyBackend
+from awkward._errors import with_operation_context
 
 
+@with_operation_context
 def to_numpy(array, *, allow_missing=True):
     """
     Args:
@@ -35,11 +37,7 @@ def to_numpy(array, *, allow_missing=True):
 
     See also #ak.from_numpy and #ak.to_cupy.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.to_numpy",
-        {"array": array, "allow_missing": allow_missing},
-    ):
-        return _impl(array, allow_missing)
+    return _impl(array, allow_missing)
 
 
 def _impl(array, allow_missing):

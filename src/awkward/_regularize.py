@@ -50,30 +50,6 @@ def is_non_string_like_sequence(obj) -> bool:
     return not isinstance(obj, (str, bytes)) and isinstance(obj, Sequence)
 
 
-def regularize_path(path):
-    """
-    Converts pathlib Paths into plain string paths (for all versions of Python).
-    """
-    is_path = False
-
-    if isinstance(path, getattr(os, "PathLike", ())):
-        is_path = True
-        path = os.fspath(path)
-
-    elif hasattr(path, "__fspath__"):
-        is_path = True
-        path = path.__fspath__()
-
-    elif path.__class__.__module__ == "pathlib":
-        import pathlib
-
-        if isinstance(path, pathlib.Path):
-            is_path = True
-            path = str(path)
-
-    return is_path, path
-
-
 def regularize_axis(axis: SupportsInt | None) -> AxisMaybeNone:
     if axis is None:
         return None

@@ -1,9 +1,10 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("is_tuple",)
-
 import awkward as ak
+from awkward._errors import with_operation_context
 
 
+@with_operation_context
 def is_tuple(array):
     """
     Args:
@@ -12,11 +13,7 @@ def is_tuple(array):
     If `array` is a record, this returns True if the record is a tuple.
     If `array` is an array, this returns True if the outermost record is a tuple.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.is_tuple",
-        {"array": array},
-    ):
-        return _impl(array)
+    return _impl(array)
 
 
 def _impl(array):

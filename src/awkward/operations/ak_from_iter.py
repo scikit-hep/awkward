@@ -1,16 +1,17 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("from_iter",)
-
 from collections.abc import Iterable
 
 from awkward_cpp.lib import _ext
 
 import awkward as ak
+from awkward._errors import with_operation_context
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
 
 
+@with_operation_context
 def from_iter(
     iterable,
     *,
@@ -59,18 +60,7 @@ def from_iter(
 
     See also #ak.to_list.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.from_iter",
-        {
-            "iterable": iterable,
-            "allow_record": allow_record,
-            "highlevel": highlevel,
-            "behavior": behavior,
-            "initial": initial,
-            "resize": resize,
-        },
-    ):
-        return _impl(iterable, highlevel, behavior, allow_record, initial, resize)
+    return _impl(iterable, highlevel, behavior, allow_record, initial, resize)
 
 
 def _impl(iterable, highlevel, behavior, allow_record, initial, resize):

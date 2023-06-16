@@ -1136,3 +1136,18 @@ class IndexedArray(Content):
         return self.index.is_equal_to(
             other.index, index_dtype, numpyarray
         ) and self.content.is_equal_to(other.content, index_dtype, numpyarray)
+
+    def _push_inside_record_or_project(self) -> Self | ak.contents.RecordArray:
+        if self.content.is_record:
+            return ak.contents.RecordArray(
+                contents=[
+                    ak.contents.IndexedArray.simplified(self._index, c)
+                    for c in self.content.contents
+                ],
+                fields=self.content._fields,
+                length=self.length,
+                backend=self._backend,
+                parameters=parameters_union(self.content._parameters, self._parameters),
+            )
+        else:
+            return self.project()

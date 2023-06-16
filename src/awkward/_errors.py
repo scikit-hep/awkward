@@ -1,15 +1,17 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 from __future__ import annotations
 
+import builtins
 import sys
 import threading
 import warnings
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Collection, Iterable, Mapping
+from functools import wraps
 
 import numpy  # noqa: TID251
 
 from awkward._nplikes.numpylike import NumpyMetadata
-from awkward._typing import TypeVar
+from awkward._typing import Any, TypeVar
 
 np = NumpyMetadata.instance()
 
@@ -29,6 +31,11 @@ class PartialFunction:
 
     def __call__(self):
         return self.func(*self.args, **self.kwargs)
+
+
+class KeyError(builtins.KeyError):
+    def __str__(self):
+        return super(Exception, self).__str__()
 
 
 class ErrorContext:
@@ -86,6 +93,9 @@ class ErrorContext:
                     str(exception)
                     + "\n\nSee if this has been reported at https://github.com/scikit-hep/awkward/issues"
                 )
+                new_exception.__cause__ = exception
+            elif issubclass(cls, builtins.KeyError):
+                new_exception = KeyError(self.format_exception(exception))
                 new_exception.__cause__ = exception
             else:
                 new_exception = cls(self.format_exception(exception))
@@ -152,7 +162,7 @@ class ErrorContext:
                 if len(valuestr) > width:
                     valuestr = valuestr[: width - 3] + "..."
 
-        elif isinstance(value, (Sequence, Mapping)) and len(value) < 10000:
+        elif isinstance(value, (Collection, Mapping)) and len(value) < 10000:
             valuestr = repr(value)
             if len(valuestr) > width:
                 valuestr = valuestr[: width - 3] + "..."
@@ -173,36 +183,65 @@ class ErrorContext:
 class OperationErrorContext(ErrorContext):
     _width = 80 - 8
 
-    def __init__(self, name, arguments):
+    def any_backend_is_delayed(
+        self, iterable: Iterable, *, depth: int = 1, depth_limit: int = 2
+    ) -> bool:
         from awkward._backends.dispatch import backend_of
-        from awkward._backends.numpy import NumpyBackend
 
-        numpy_backend = NumpyBackend.instance()
-        if self.primary() is not None or all(
-            backend_of(x, default=numpy_backend).nplike.is_eager for x in arguments
+        for obj in iterable:
+            backend = backend_of(obj, default=None)
+            # Do we not recognise this as an object with a backend?
+            if backend is None:
+                # Is this an iterable object, and are we permitted to recurse?
+                if isinstance(obj, Collection) and depth != depth_limit:
+                    return self.any_backend_is_delayed(
+                        obj, depth=depth + 1, depth_limit=depth_limit
+                    )
+                # Assume not delayed!
+                else:
+                    return False
+            # Eager backends aren't delayed!
+            elif backend.nplike.is_eager:
+                continue
+            else:
+                return True
+        return False
+
+    def __init__(self, name, args: Iterable[Any], kwargs: Mapping[str, Any]):
+        if self.primary() is None and (
+            self.any_backend_is_delayed(args)
+            or self.any_backend_is_delayed(kwargs.values())
         ):
+            string_args = self._format_args(args)
+            string_kwargs = self._format_kwargs(kwargs)
+        else:
             # if primary is not None: we won't be setting an ErrorContext
             # if all nplikes are eager: no accumulation of large arrays
             # --> in either case, delay string generation
-            string_arguments = PartialFunction(self._string_arguments, arguments)
-        else:
-            string_arguments = self._string_arguments(arguments)
+            string_args = PartialFunction(self._format_args, args)
+            string_kwargs = PartialFunction(self._format_kwargs, kwargs)
 
         super().__init__(
             name=name,
-            arguments=string_arguments,
+            args=string_args,
+            kwargs=string_kwargs,
         )
 
-    def _string_arguments(self, arguments):
+    def _format_args(self, arguments: Iterable) -> list[str]:
+        string_arguments = []
+        for value in arguments:
+            string_arguments.append(self.format_argument(self._width, value))
+
+        return string_arguments
+
+    def _format_kwargs(self, arguments: Mapping[str, Any]) -> dict[str, str]:
         string_arguments = {}
         for key, value in arguments.items():
             if isinstance(key, str):
                 width = self._width - len(key) - 3
             else:
                 width = self._width
-
             string_arguments[key] = self.format_argument(width, value)
-
         return string_arguments
 
     @property
@@ -210,29 +249,39 @@ class OperationErrorContext(ErrorContext):
         return self._kwargs["name"]
 
     @property
-    def arguments(self):
-        out = self._kwargs["arguments"]
+    def args(self) -> list:
+        out = self._kwargs["args"]
         if isinstance(out, PartialFunction):
-            out = self._kwargs["arguments"] = out()
+            out = self._kwargs["args"] = out()
         return out
 
-    def format_exception(self, exception):
+    @property
+    def kwargs(self) -> dict:
+        out = self._kwargs["kwargs"]
+        if isinstance(out, PartialFunction):
+            out = self._kwargs["kwargs"] = out()
+        return out
+
+    def format_exception(self, exception: Exception) -> str:
         return f"{exception}\n{self.note}"
 
     @property
     def note(self) -> str:
         arguments = []
-        for name, valuestr in self.arguments.items():
+        for valuestr in self.args:
+            arguments.append(f"\n        {valuestr}")
+        for name, valuestr in self.kwargs.items():
             if isinstance(name, str):
                 arguments.append(f"\n        {name} = {valuestr}")
             else:
                 arguments.append(f"\n        {valuestr}")
 
         extra_line = "" if len(arguments) == 0 else "\n    "
+        calling_note = f'{self.name}({"".join(arguments)}{extra_line})'
         return f"""
 This error occurred while calling
 
-    {self.name}({"".join(arguments)}{extra_line})"""
+    {calling_note}"""
 
 
 class SlicingErrorContext(ErrorContext):
@@ -372,3 +421,16 @@ class FieldNotFoundError(IndexError):
 
 
 AxisError = numpy.AxisError
+
+
+T = TypeVar("T", bound=Callable)
+
+
+def with_operation_context(func: T) -> T:
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        # NOTE: this decorator assumes that the operation is exposed under `ak.`
+        with OperationErrorContext(f"ak.{func.__qualname__}", args, kwargs):
+            return func(*args, **kwargs)
+
+    return wrapper
