@@ -3,6 +3,7 @@ __all__ = ("ptp",)
 import awkward as ak
 from awkward._behavior import behavior_of
 from awkward._connect.numpy import UNSUPPORTED
+from awkward._errors import with_operation_context
 from awkward._layout import maybe_posaxis
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
@@ -10,6 +11,7 @@ from awkward._regularize import regularize_axis
 np = NumpyMetadata.instance()
 
 
+@with_operation_context
 def ptp(array, axis=None, *, keepdims=False, mask_identity=True):
     """
     Args:
@@ -57,16 +59,7 @@ def ptp(array, axis=None, *, keepdims=False, mask_identity=True):
     See #ak.sum for a more complete description of nested list and missing
     value (None) handling in reducers.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.ptp",
-        {
-            "array": array,
-            "axis": axis,
-            "keepdims": keepdims,
-            "mask_identity": mask_identity,
-        },
-    ):
-        return _impl(array, axis, keepdims, mask_identity)
+    return _impl(array, axis, keepdims, mask_identity)
 
 
 def _impl(array, axis, keepdims, mask_identity):

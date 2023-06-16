@@ -8,6 +8,7 @@ from urllib.parse import urlparse
 from awkward_cpp.lib import _ext
 
 import awkward as ak
+from awkward._errors import with_operation_context
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
@@ -17,6 +18,7 @@ np = NumpyMetadata.instance()
 numpy = Numpy.instance()
 
 
+@with_operation_context
 def from_json(
     source,
     *,
@@ -319,53 +321,36 @@ def from_json(
 
     See also #ak.to_json.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.from_json",
-        {
-            "source": source,
-            "line_delimited": line_delimited,
-            "schema": schema,
-            "nan_string": nan_string,
-            "posinf_string": posinf_string,
-            "neginf_string": neginf_string,
-            "complex_record_fields": complex_record_fields,
-            "buffersize": buffersize,
-            "initial": initial,
-            "resize": resize,
-            "highlevel": highlevel,
-            "behavior": behavior,
-        },
-    ):
-        if schema is None:
-            return _no_schema(
-                source,
-                line_delimited,
-                nan_string,
-                posinf_string,
-                neginf_string,
-                complex_record_fields,
-                buffersize,
-                initial,
-                resize,
-                highlevel,
-                behavior,
-            )
+    if schema is None:
+        return _no_schema(
+            source,
+            line_delimited,
+            nan_string,
+            posinf_string,
+            neginf_string,
+            complex_record_fields,
+            buffersize,
+            initial,
+            resize,
+            highlevel,
+            behavior,
+        )
 
-        else:
-            return _yes_schema(
-                source,
-                line_delimited,
-                schema,
-                nan_string,
-                posinf_string,
-                neginf_string,
-                complex_record_fields,
-                buffersize,
-                initial,
-                resize,
-                highlevel,
-                behavior,
-            )
+    else:
+        return _yes_schema(
+            source,
+            line_delimited,
+            schema,
+            nan_string,
+            posinf_string,
+            neginf_string,
+            complex_record_fields,
+            buffersize,
+            initial,
+            resize,
+            highlevel,
+            behavior,
+        )
 
 
 class _BytesReader:
@@ -580,6 +565,7 @@ def _yes_schema(
         return layout
 
 
+@with_operation_context
 def build_assembly(schema, container, instructions):
     if not isinstance(schema, dict):
         raise TypeError(f"unrecognized JSONSchema: expected dict, got {schema!r}")
