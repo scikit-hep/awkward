@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 import awkward as ak
 from awkward._behavior import behavior_of
+from awkward._errors import deprecate
 from awkward._layout import wrap_layout
 from awkward._nplikes import ufuncs
 from awkward._nplikes.numpylike import NumpyMetadata
@@ -11,6 +12,11 @@ np = NumpyMetadata.instance()
 
 class ByteBehavior(Array):
     __name__ = "Array"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        deprecate(f"{type(self).__name__} is deprecated", version="2.4.0")
 
     def __bytes__(self):
         tmp = self.layout.backend.nplike.asarray(self.layout)
@@ -53,6 +59,11 @@ class ByteBehavior(Array):
 class CharBehavior(Array):
     __name__ = "Array"
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        deprecate(f"{type(self).__name__} is deprecated", version="2.4.0")
+
     def __bytes__(self):
         tmp = self.layout.backend.nplike.asarray(self.layout)
         if hasattr(tmp, "tobytes"):
@@ -94,6 +105,11 @@ class CharBehavior(Array):
 class ByteStringBehavior(Array):
     __name__ = "Array"
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        deprecate(f"{type(self).__name__} is deprecated", version="2.4.0")
+
     def __iter__(self):
         for x in super().__iter__():
             yield x.__bytes__()
@@ -101,6 +117,11 @@ class ByteStringBehavior(Array):
 
 class StringBehavior(Array):
     __name__ = "Array"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        deprecate(f"{type(self).__name__} is deprecated", version="2.4.0")
 
     def __iter__(self):
         for x in super().__iter__():
@@ -238,14 +259,10 @@ def _cast_bytes_or_str_to_string(string):
 
 
 def register(behavior):
-    behavior["byte"] = ByteBehavior
     behavior["__typestr__", "byte"] = "byte"
-    behavior["char"] = CharBehavior
     behavior["__typestr__", "char"] = "char"
 
-    behavior["bytestring"] = ByteStringBehavior
     behavior["__typestr__", "bytestring"] = "bytes"
-    behavior["string"] = StringBehavior
     behavior["__typestr__", "string"] = "string"
 
     behavior[ufuncs.equal, "bytestring", "bytestring"] = _string_equal
