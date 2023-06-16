@@ -29,8 +29,9 @@ env:
   SOURCE_DATE_EPOCH: "1668811211"
 
 jobs:
-  Linux:
+  dask_coffea:
     runs-on: ubuntu-20.04
+    continue-on-error: true
 
     env:
       PIP_ONLY_BINARY: cmake
@@ -96,3 +97,55 @@ jobs:
       - name: Run coffea tests
         run: python -m pytest -vv -rs tests/test_dask*
         working-directory: coffea
+
+  anndata:
+    runs-on: ubuntu-20.04
+
+    env:
+      PIP_ONLY_BINARY: cmake
+      PYTHON_VERSION: "3.10"
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+
+      - name: 'Python ${{ env.PYTHON_VERSION }}'
+        uses: actions/setup-python@v4
+        with:
+          python-version: '${{ env.PYTHON_VERSION }}'
+
+      - name: Generate build files
+        run: pipx run nox -s prepare -- --headers --signatures --tests
+
+      - name: Cache awkward-cpp wheel
+        id: cache-awkward-cpp-wheel
+        uses: actions/cache@v3
+        with:
+          path: ./awkward-cpp/dist
+          key: ${{ github.job }}-${{ hashFiles('awkward-cpp/**') }}
+
+      - name: Build awkward-cpp wheel
+        if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
+        run: |
+          python -m pip install build
+          python -m build -w ./awkward-cpp
+
+      - name: Install awkward-cpp
+        run: python -m pip install -v ./awkward-cpp/dist/*.whl
+
+      - name: Build & install awkward
+        run: python -m pip install -v .
+
+      - name: Clone dask-awkward
+        uses: actions/checkout@v3
+        with:
+          repository: scverse/anndata
+          path: anndata
+
+      - name: Install anndata
+        run: python -m pip install -v "./anndata[test]"
+
+      - name: Run anndata tests
+        run: python -m pytest -vv -rs andata/tests
+        working-directory: anndata
