@@ -1284,7 +1284,6 @@ class UnionArray(Content):
             self._index,
             self._contents,
             parameters=self._parameters,
-            merge=True,
             mergebool=True,
         )
         if isinstance(simplified, ak.contents.UnionArray):
@@ -1298,7 +1297,6 @@ class UnionArray(Content):
             self._index,
             self._contents,
             parameters=self._parameters,
-            merge=True,
             mergebool=True,
         )
         if isinstance(simplified, ak.contents.UnionArray):
