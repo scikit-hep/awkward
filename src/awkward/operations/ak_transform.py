@@ -6,13 +6,33 @@ import awkward as ak
 from awkward._backends.dispatch import backend_of
 from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of
-from awkward._errors import with_operation_context
+from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 
 cpu = NumpyBackend.instance()
 
 
-@with_operation_context
+def _dispatcher(
+    transformation,
+    array,
+    *more_arrays,
+    depth_context=None,
+    lateral_context=None,
+    allow_records=True,
+    broadcast_parameters_rule="intersect",
+    left_broadcast=True,
+    right_broadcast=True,
+    numpy_to_regular=False,
+    regular_to_jagged=False,
+    return_value="simplified",
+    highlevel=True,
+    behavior=None,
+):
+    yield array
+    yield from more_arrays
+
+
+@high_level_function(_dispatcher)
 def transform(
     transformation,
     array,

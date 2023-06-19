@@ -6,7 +6,7 @@ import awkward as ak
 from awkward._backends.dispatch import backend_of
 from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of
-from awkward._errors import with_operation_context
+from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import is_non_string_like_sequence
@@ -17,7 +17,12 @@ np = NumpyMetadata.instance()
 cpu = NumpyBackend.instance()
 
 
-@with_operation_context
+def _dispatcher(array, what, where=None, *, highlevel=True, behavior=None):
+    yield array
+    yield what
+
+
+@high_level_function(_dispatcher)
 def with_field(array, what, where=None, *, highlevel=True, behavior=None):
     """
     Args:

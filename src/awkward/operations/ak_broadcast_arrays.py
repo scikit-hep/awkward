@@ -5,7 +5,7 @@ from awkward._backends.dispatch import backend_of
 from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of
 from awkward._connect.numpy import UNSUPPORTED
-from awkward._errors import with_operation_context
+from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 
@@ -13,7 +13,19 @@ np = NumpyMetadata.instance()
 cpu = NumpyBackend.instance()
 
 
-@with_operation_context
+def _dispatcher(
+    *arrays,
+    depth_limit=None,
+    broadcast_parameters_rule="one_to_one",
+    left_broadcast=True,
+    right_broadcast=True,
+    highlevel=True,
+    behavior=None,
+):
+    yield from arrays
+
+
+@high_level_function(_dispatcher)
 def broadcast_arrays(
     *arrays,
     depth_limit=None,
@@ -126,7 +138,7 @@ def broadcast_arrays(
             output = []
             for inner in outer:
                 output.append(x + inner)
-            yield output
+            yield arrayput
 
     where `x` has the same value for each `inner` in the inner loop.
 

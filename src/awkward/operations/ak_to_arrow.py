@@ -1,13 +1,27 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("to_arrow",)
 import awkward as ak
-from awkward._errors import with_operation_context
+from awkward._dispatch import high_level_function
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
 
 
-@with_operation_context
+def _dispatcher(
+    array,
+    *,
+    list_to32=False,
+    string_to32=False,
+    bytestring_to32=False,
+    emptyarray_to=None,
+    categorical_as_dictionary=False,
+    extensionarray=True,
+    count_nulls=True,
+):
+    yield array
+
+
+@high_level_function(_dispatcher)
 def to_arrow(
     array,
     *,

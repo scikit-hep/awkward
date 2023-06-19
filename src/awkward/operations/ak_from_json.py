@@ -8,7 +8,7 @@ from urllib.parse import urlparse
 from awkward_cpp.lib import _ext
 
 import awkward as ak
-from awkward._errors import with_operation_context
+from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
@@ -18,7 +18,7 @@ np = NumpyMetadata.instance()
 numpy = Numpy.instance()
 
 
-@with_operation_context
+@high_level_function()
 def from_json(
     source,
     *,
@@ -520,11 +520,11 @@ def _yes_schema(
             raise TypeError("JSONSchema type is not concrete: array without items")
 
         instructions.append(["TopLevelArray"])
-        form = build_assembly(schema["items"], container, instructions)
+        form = _build_assembly(schema["items"], container, instructions)
         is_record = False
 
     elif schema.get("type") == "object":
-        form = build_assembly(schema, container, instructions)
+        form = _build_assembly(schema, container, instructions)
         is_record = True
 
     else:
@@ -565,8 +565,7 @@ def _yes_schema(
         return layout
 
 
-@with_operation_context
-def build_assembly(schema, container, instructions):
+def _build_assembly(schema, container, instructions):
     if not isinstance(schema, dict):
         raise TypeError(f"unrecognized JSONSchema: expected dict, got {schema!r}")
 
@@ -712,7 +711,7 @@ def build_assembly(schema, container, instructions):
 
             instructions.append(["FixedLengthList", schema.get("minItems")])
 
-            content = build_assembly(schema["items"], container, instructions)
+            content = _build_assembly(schema["items"], container, instructions)
 
             out = ak.forms.RegularForm(content, size=schema.get("minItems"))
             if is_optional:
@@ -730,7 +729,7 @@ def build_assembly(schema, container, instructions):
             container[offsets + "-offsets"] = None
             instructions.append(["VarLengthList", offsets + "-offsets", "int64"])
 
-            content = build_assembly(schema["items"], container, instructions)
+            content = _build_assembly(schema["items"], container, instructions)
 
             out = ak.forms.ListOffsetForm("i64", content, form_key=offsets)
             if is_optional:
@@ -769,7 +768,7 @@ def build_assembly(schema, container, instructions):
         for keyindex, subschema in enumerate(subschemas):
             # set the "jump_to" instruction position in the KeyTable
             instructions[startkeys + keyindex][2] = len(instructions)
-            contents.append(build_assembly(subschema, container, instructions))
+            contents.append(_build_assembly(subschema, container, instructions))
 
         out = ak.forms.RecordForm(contents, names)
         if is_optional:

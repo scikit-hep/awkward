@@ -2,11 +2,15 @@
 __all__ = ("categories",)
 import awkward as ak
 from awkward._behavior import behavior_of
-from awkward._errors import with_operation_context
+from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 
 
-@with_operation_context
+def _dispatcher(array, highlevel=True):
+    yield array
+
+
+@high_level_function(_dispatcher)
 def categories(array, highlevel=True):
     """
     Args:

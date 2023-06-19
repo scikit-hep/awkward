@@ -2,13 +2,26 @@
 __all__ = ("to_buffers",)
 import awkward as ak
 from awkward._backends.dispatch import regularize_backend
-from awkward._errors import with_operation_context
+from awkward._dispatch import high_level_function
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
 
 
-@with_operation_context
+def _dispatcher(
+    array,
+    container=None,
+    buffer_key="{form_key}-{attribute}",
+    form_key="node{id}",
+    *,
+    id_start=0,
+    backend=None,
+    byteorder="<",
+):
+    yield array
+
+
+@high_level_function(_dispatcher)
 def to_buffers(
     array,
     container=None,

@@ -2,7 +2,7 @@
 __all__ = ("zeros_like",)
 import awkward as ak
 from awkward._connect.numpy import UNSUPPORTED
-from awkward._errors import with_operation_context
+from awkward._dispatch import high_level_function
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
@@ -11,7 +11,13 @@ np = NumpyMetadata.instance()
 _ZEROS = object()
 
 
-@with_operation_context
+def _dispatcher(
+    array, *, dtype=None, including_unknown=False, highlevel=True, behavior=None
+):
+    yield array
+
+
+@high_level_function(_dispatcher)
 def zeros_like(
     array, *, dtype=None, including_unknown=False, highlevel=True, behavior=None
 ):

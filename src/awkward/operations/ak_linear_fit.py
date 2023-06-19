@@ -3,7 +3,7 @@ __all__ = ("linear_fit",)
 import awkward as ak
 from awkward._backends.dispatch import backend_of
 from awkward._behavior import behavior_of
-from awkward._errors import with_operation_context
+from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 from awkward._nplikes import ufuncs
 from awkward._nplikes.numpylike import NumpyMetadata
@@ -12,16 +12,12 @@ from awkward._regularize import regularize_axis
 np = NumpyMetadata.instance()
 
 
-@with_operation_context
-def linear_fit(
-    x,
-    y,
-    weight=None,
-    axis=None,
-    *,
-    keepdims=False,
-    mask_identity=False,
-):
+def _dispatcher(x, y, weight=None, axis=None, *, keepdims=False, mask_identity=False):
+    yield from (x, y, weight)
+
+
+@high_level_function(_dispatcher)
+def linear_fit(x, y, weight=None, axis=None, *, keepdims=False, mask_identity=False):
     """
     Args:
         x: One coordinate to use in the linear fit (anything #ak.to_layout recognizes).

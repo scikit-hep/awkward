@@ -4,13 +4,43 @@ from collections.abc import Mapping, Sequence
 from os import fsdecode
 
 import awkward as ak
-from awkward._errors import with_operation_context
+from awkward._dispatch import high_level_function
 from awkward._nplikes.numpylike import NumpyMetadata
 
 metadata = NumpyMetadata.instance()
 
 
-@with_operation_context
+def _dispatcher(
+    array,
+    destination,
+    *,
+    list_to32=False,
+    string_to32=True,
+    bytestring_to32=True,
+    emptyarray_to=None,
+    categorical_as_dictionary=False,
+    extensionarray=True,
+    count_nulls=True,
+    compression="zstd",
+    compression_level=None,
+    row_group_size=64 * 1024 * 1024,
+    data_page_size=None,
+    parquet_flavor=None,
+    parquet_version="2.4",
+    parquet_page_version="1.0",
+    parquet_metadata_statistics=True,
+    parquet_dictionary_encoding=False,
+    parquet_byte_stream_split=False,
+    parquet_coerce_timestamps=None,
+    parquet_old_int96_timestamps=None,
+    parquet_compliant_nested=False,  # https://issues.apache.org/jira/browse/ARROW-16348
+    parquet_extra_options=None,
+    storage_options=None,
+):
+    yield array
+
+
+@high_level_function(_dispatcher)
 def to_parquet(
     array,
     destination,

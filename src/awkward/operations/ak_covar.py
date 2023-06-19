@@ -2,23 +2,21 @@
 __all__ = ("covar",)
 import awkward as ak
 from awkward._behavior import behavior_of
-from awkward._errors import with_operation_context
+from awkward._dispatch import high_level_function
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
 
 np = NumpyMetadata.instance()
 
 
-@with_operation_context
-def covar(
-    x,
-    y,
-    weight=None,
-    axis=None,
-    *,
-    keepdims=False,
-    mask_identity=False,
-):
+def _dispatcher(x, y, weight=None, axis=None, *, keepdims=False, mask_identity=False):
+    yield x
+    yield y
+    yield weight
+
+
+@high_level_function(_dispatcher)
+def covar(x, y, weight=None, axis=None, *, keepdims=False, mask_identity=False):
     """
     Args:
         x: One coordinate to use in the covariance calculation (anything #ak.to_layout recognizes).

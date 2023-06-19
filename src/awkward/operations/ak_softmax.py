@@ -2,7 +2,7 @@
 __all__ = ("softmax",)
 import awkward as ak
 from awkward._behavior import behavior_of
-from awkward._errors import with_operation_context
+from awkward._dispatch import high_level_function
 from awkward._nplikes import ufuncs
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
@@ -10,7 +10,11 @@ from awkward._regularize import regularize_axis
 np = NumpyMetadata.instance()
 
 
-@with_operation_context
+def _dispatcher(x, axis=None, *, keepdims=False, mask_identity=False):
+    yield x
+
+
+@high_level_function(_dispatcher)
 def softmax(x, axis=None, *, keepdims=False, mask_identity=False):
     """
     Args:

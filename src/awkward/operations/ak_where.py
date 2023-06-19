@@ -4,7 +4,7 @@ import awkward as ak
 from awkward._backends.dispatch import backend_of
 from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of
-from awkward._errors import with_operation_context
+from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 
@@ -12,8 +12,12 @@ np = NumpyMetadata.instance()
 cpu = NumpyBackend.instance()
 
 
-@ak._connect.numpy.implements("where")
-@with_operation_context
+def _dispatcher(condition, *args, mergebool=True, highlevel=True, behavior=None):
+    yield condition
+    yield from args
+
+
+@high_level_function(_dispatcher)
 def where(condition, *args, mergebool=True, highlevel=True, behavior=None):
     """
     Args:

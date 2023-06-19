@@ -2,10 +2,14 @@
 __all__ = ("to_cupy",)
 import awkward as ak
 from awkward._backends.cupy import CupyBackend
-from awkward._errors import with_operation_context
+from awkward._dispatch import high_level_function
 
 
-@with_operation_context
+def _dispatcher(array):
+    yield array
+
+
+@high_level_function(_dispatcher)
 def to_cupy(array):
     """
     Args:

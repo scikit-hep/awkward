@@ -4,14 +4,18 @@ from collections.abc import Sequence
 
 import awkward as ak
 from awkward._behavior import behavior_of
-from awkward._errors import with_operation_context
+from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
 
 
-@with_operation_context
+def _dispatcher(array, where, *, highlevel=True, behavior=None):
+    yield array
+
+
+@high_level_function(_dispatcher)
 def without_field(array, where, *, highlevel=True, behavior=None):
     """
     Args:

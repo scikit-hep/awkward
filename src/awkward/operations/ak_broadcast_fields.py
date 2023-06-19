@@ -4,18 +4,18 @@ import awkward as ak
 from awkward._backends.dispatch import backend_of
 from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of
-from awkward._errors import with_operation_context
+from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 
 cpu = NumpyBackend.instance()
 
 
-@with_operation_context
-def broadcast_fields(
-    *arrays,
-    highlevel=True,
-    behavior=None,
-):
+def _dispatcher(*arrays, highlevel=True, behavior=None):
+    yield from arrays
+
+
+@high_level_function(_dispatcher)
+def broadcast_fields(*arrays, highlevel=True, behavior=None):
     """
     Args:
         arrays: Array-like data (anything #ak.to_layout recognizes).

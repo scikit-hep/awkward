@@ -6,7 +6,7 @@ from awkward_cpp.lib import _ext
 
 import awkward as ak
 from awkward._backends.typetracer import TypeTracerBackend
-from awkward._errors import with_operation_context
+from awkward._dispatch import high_level_function
 from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
@@ -17,7 +17,11 @@ np = NumpyMetadata.instance()
 numpy = Numpy.instance()
 
 
-@with_operation_context
+def _dispatcher(array, *, allow_record=True, allow_other=False, regulararray=True):
+    yield array
+
+
+@high_level_function(_dispatcher)
 def to_layout(array, *, allow_record=True, allow_other=False, regulararray=True):
     """
     Args:

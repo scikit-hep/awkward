@@ -1,10 +1,14 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("is_tuple",)
 import awkward as ak
-from awkward._errors import with_operation_context
+from awkward._dispatch import high_level_function
 
 
-@with_operation_context
+def _dispatcher(array):
+    yield array
+
+
+@high_level_function(_dispatcher)
 def is_tuple(array):
     """
     Args:

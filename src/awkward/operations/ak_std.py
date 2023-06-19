@@ -3,7 +3,7 @@ __all__ = ("std",)
 import awkward as ak
 from awkward._behavior import behavior_of
 from awkward._connect.numpy import UNSUPPORTED
-from awkward._errors import with_operation_context
+from awkward._dispatch import high_level_function
 from awkward._layout import maybe_posaxis
 from awkward._nplikes import ufuncs
 from awkward._nplikes.numpylike import NumpyMetadata
@@ -12,16 +12,15 @@ from awkward._regularize import regularize_axis
 np = NumpyMetadata.instance()
 
 
-@with_operation_context
-def std(
-    x,
-    weight=None,
-    ddof=0,
-    axis=None,
-    *,
-    keepdims=False,
-    mask_identity=False,
+def _dispatcher(
+    x, weight=None, ddof=0, axis=None, *, keepdims=False, mask_identity=False
 ):
+    yield x
+    yield weight
+
+
+@high_level_function(_dispatcher)
+def std(x, weight=None, ddof=0, axis=None, *, keepdims=False, mask_identity=False):
     """
     Args:
         x: The data on which to compute the standard deviation (anything #ak.to_layout recognizes).
@@ -68,16 +67,15 @@ def std(
     return _impl(x, weight, ddof, axis, keepdims, mask_identity)
 
 
-@with_operation_context
-def nanstd(
-    x,
-    weight=None,
-    ddof=0,
-    axis=None,
-    *,
-    keepdims=False,
-    mask_identity=True,
+def _dispatcher(
+    x, weight=None, ddof=0, axis=None, *, keepdims=False, mask_identity=True
 ):
+    yield x
+    yield weight
+
+
+@high_level_function(_dispatcher)
+def nanstd(x, weight=None, ddof=0, axis=None, *, keepdims=False, mask_identity=True):
     """
     Args:
         x: The data on which to compute the standard deviation (anything #ak.to_layout recognizes).

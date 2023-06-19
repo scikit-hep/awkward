@@ -4,12 +4,16 @@ from collections.abc import Mapping
 
 import awkward as ak
 from awkward._backends.numpy import NumpyBackend
-from awkward._errors import with_operation_context
+from awkward._dispatch import high_level_function
 
 cpu = NumpyBackend.instance()
 
 
-@with_operation_context
+def _dispatcher(arrays, *, flatlist_as_rvec=True):
+    yield from arrays.values()
+
+
+@high_level_function(_dispatcher)
 def to_rdataframe(arrays, *, flatlist_as_rvec=True):
     """
     Args:

@@ -1,7 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("combinations",)
 import awkward as ak
-from awkward._errors import with_operation_context
+from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
@@ -9,7 +9,22 @@ from awkward._regularize import regularize_axis
 np = NumpyMetadata.instance()
 
 
-@with_operation_context
+def _dispatcher(
+    array,
+    n,
+    *,
+    replacement=False,
+    axis=1,
+    fields=None,
+    parameters=None,
+    with_name=None,
+    highlevel=True,
+    behavior=None,
+):
+    yield array
+
+
+@high_level_function(_dispatcher)
 def combinations(
     array,
     n,

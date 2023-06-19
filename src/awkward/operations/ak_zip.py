@@ -1,15 +1,34 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("zip",)
+from collections.abc import Mapping
+
 import awkward as ak
 from awkward._behavior import behavior_of
-from awkward._errors import with_operation_context
+from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
 
 
-@with_operation_context
+def _dispatcher(
+    arrays,
+    depth_limit=None,
+    *,
+    parameters=None,
+    with_name=None,
+    right_broadcast=False,
+    optiontype_outside_record=False,
+    highlevel=True,
+    behavior=None,
+):
+    if isinstance(arrays, Mapping):
+        yield from arrays.values()
+    else:
+        yield from arrays
+
+
+@high_level_function(_dispatcher)
 def zip(
     arrays,
     depth_limit=None,

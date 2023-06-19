@@ -4,7 +4,7 @@ import awkward as ak
 from awkward._backends.dispatch import backend_of
 from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of
-from awkward._errors import with_operation_context
+from awkward._dispatch import high_level_function
 from awkward._layout import maybe_posaxis, wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
@@ -17,8 +17,11 @@ np = NumpyMetadata.instance()
 cpu = NumpyBackend.instance()
 
 
-@ak._connect.numpy.implements("concatenate")
-@with_operation_context
+def _dispatcher(arrays, axis=0, *, mergebool=True, highlevel=True, behavior=None):
+    yield from arrays
+
+
+@high_level_function(_dispatcher)
 def concatenate(arrays, axis=0, *, mergebool=True, highlevel=True, behavior=None):
     """
     Args:

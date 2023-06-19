@@ -1,12 +1,12 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("from_parquet",)
 import awkward as ak
-from awkward._errors import with_operation_context
+from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 from awkward._regularize import is_integer
 
 
-@with_operation_context
+@high_level_function()
 def from_parquet(
     path,
     *,
@@ -76,7 +76,18 @@ def from_parquet(
     )
 
 
-@with_operation_context
+def _dispatcher(
+    path,
+    storage_options=None,
+    row_groups=None,
+    columns=None,
+    ignore_metadata=False,
+    scan_files=True,
+):
+    yield
+
+
+@high_level_function(_dispatcher)
 def metadata(
     path,
     storage_options=None,

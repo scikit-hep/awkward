@@ -1,7 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("drop_none",)
 import awkward as ak
-from awkward._errors import AxisError, with_operation_context
+from awkward._dispatch import high_level_function
+from awkward._errors import AxisError
 from awkward._layout import maybe_posaxis, wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
@@ -9,7 +10,11 @@ from awkward._regularize import regularize_axis
 np = NumpyMetadata.instance()
 
 
-@with_operation_context
+def _dispatcher(array, axis=None, highlevel=True, behavior=None):
+    yield array
+
+
+@high_level_function(_dispatcher)
 def drop_none(array, axis=None, highlevel=True, behavior=None):
     """
     Args:
