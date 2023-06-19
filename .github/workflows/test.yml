@@ -27,7 +27,6 @@ env:
   # This will ensure that the hash of the awkward-cpp directory remains
   # constant for unchanged files, meaning that it can be used for caching
   SOURCE_DATE_EPOCH: "1668811211"
-  AWKWARD_CHECK_DISPATCH_SIGNATURES: 1
 
 jobs:
   Windows:
