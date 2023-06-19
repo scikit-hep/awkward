@@ -4,11 +4,7 @@ import awkward as ak
 from awkward._dispatch import high_level_function
 
 
-def _dispatcher(array):
-    yield array
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def is_tuple(array):
     """
     Args:
@@ -17,6 +13,10 @@ def is_tuple(array):
     If `array` is a record, this returns True if the record is a tuple.
     If `array` is an array, this returns True if the outermost record is a tuple.
     """
+    # Dispatch
+    yield array
+
+    # Implementation
     return _impl(array)
 
 

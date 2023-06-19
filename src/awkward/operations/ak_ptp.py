@@ -11,11 +11,7 @@ from awkward._regularize import regularize_axis
 np = NumpyMetadata.instance()
 
 
-def _dispatcher(array, axis=None, *, keepdims=False, mask_identity=True):
-    yield array
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def ptp(array, axis=None, *, keepdims=False, mask_identity=True):
     """
     Args:
@@ -63,6 +59,10 @@ def ptp(array, axis=None, *, keepdims=False, mask_identity=True):
     See #ak.sum for a more complete description of nested list and missing
     value (None) handling in reducers.
     """
+    # Dispatch
+    yield array
+
+    # Implementation
     return _impl(array, axis, keepdims, mask_identity)
 
 

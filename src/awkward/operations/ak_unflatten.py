@@ -12,11 +12,7 @@ from awkward._regularize import is_integer_like, regularize_axis
 np = NumpyMetadata.instance()
 
 
-def _dispatcher(array, counts, axis=0, *, highlevel=True, behavior=None):
-    yield array
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def unflatten(array, counts, axis=0, *, highlevel=True, behavior=None):
     """
     Args:
@@ -80,6 +76,10 @@ def unflatten(array, counts, axis=0, *, highlevel=True, behavior=None):
 
     See also #ak.num and #ak.flatten.
     """
+    # Dispatch
+    yield array
+
+    # Implementation
     return _impl(array, counts, axis, highlevel, behavior)
 
 

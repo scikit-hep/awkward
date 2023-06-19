@@ -17,11 +17,7 @@ np = NumpyMetadata.instance()
 cpu = NumpyBackend.instance()
 
 
-def _dispatcher(arrays, axis=0, *, mergebool=True, highlevel=True, behavior=None):
-    yield from arrays
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def concatenate(arrays, axis=0, *, mergebool=True, highlevel=True, behavior=None):
     """
     Args:
@@ -44,6 +40,10 @@ def concatenate(arrays, axis=0, *, mergebool=True, highlevel=True, behavior=None
     must have the same lengths and nested lists are each concatenated,
     element for element, and similarly for deeper levels.
     """
+    # Dispatch
+    yield from arrays
+
+    # Implementation
     return _impl(arrays, axis, mergebool, highlevel, behavior)
 
 

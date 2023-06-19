@@ -9,11 +9,7 @@ from awkward._nplikes.numpylike import NumpyMetadata
 np = NumpyMetadata.instance()
 
 
-def _dispatcher(array, *, highlevel=True, behavior=None):
-    yield array
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def without_parameters(array, *, highlevel=True, behavior=None):
     """
     Args:
@@ -29,6 +25,10 @@ def without_parameters(array, *, highlevel=True, behavior=None):
     Note that a "new array" is a lightweight shallow copy, not a duplication
     of large data buffers.
     """
+    # Dispatch
+    yield array
+
+    # Implementation
     return _impl(array, highlevel, behavior)
 
 

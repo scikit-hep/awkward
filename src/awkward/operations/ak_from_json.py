@@ -18,7 +18,7 @@ np = NumpyMetadata.instance()
 numpy = Numpy.instance()
 
 
-@high_level_function()
+@high_level_function
 def from_json(
     source,
     *,

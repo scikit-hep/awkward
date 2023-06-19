@@ -11,12 +11,7 @@ from awkward._regularize import regularize_axis
 np = NumpyMetadata.instance()
 
 
-def _dispatcher(x, weight=None, axis=None, *, keepdims=False, mask_identity=False):
-    yield x
-    yield weight
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def mean(x, weight=None, axis=None, *, keepdims=False, mask_identity=False):
     """
     Args:
@@ -80,10 +75,15 @@ def mean(x, weight=None, axis=None, *, keepdims=False, mask_identity=False):
 
     See also #ak.nanmean.
     """
+    # Dispatch
+    yield x
+    yield weight
+
+    # Implementation
     return _impl(x, weight, axis, keepdims, mask_identity)
 
 
-@high_level_function(_dispatcher)
+@high_level_function
 def nanmean(x, weight=None, axis=None, *, keepdims=False, mask_identity=True):
     """
     Args:
@@ -116,6 +116,10 @@ def nanmean(x, weight=None, axis=None, *, keepdims=False, mask_identity=True):
 
     See also #ak.mean.
     """
+    # Dispatch
+    yield x
+    yield weight
+
     if weight is not None:
         weight = ak.operations.ak_nan_to_none._impl(weight, False, None)
 

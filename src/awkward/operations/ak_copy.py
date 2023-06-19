@@ -10,11 +10,7 @@ from awkward._nplikes.numpylike import NumpyMetadata
 np = NumpyMetadata.instance()
 
 
-def _dispatcher(array):
-    yield array
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def copy(array):
     """
     Args:
@@ -63,6 +59,10 @@ def copy(array):
     changes, so we don't support it. However, an #ak.Array's data might come from
     a mutable third-party library, so this function allows you to make a true copy.
     """
+    # Dispatch
+    yield array
+
+    # Implementation
     return _impl(array)
 
 

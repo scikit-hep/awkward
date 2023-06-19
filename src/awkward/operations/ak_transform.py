@@ -12,27 +12,7 @@ from awkward._layout import wrap_layout
 cpu = NumpyBackend.instance()
 
 
-def _dispatcher(
-    transformation,
-    array,
-    *more_arrays,
-    depth_context=None,
-    lateral_context=None,
-    allow_records=True,
-    broadcast_parameters_rule="intersect",
-    left_broadcast=True,
-    right_broadcast=True,
-    numpy_to_regular=False,
-    regular_to_jagged=False,
-    return_value="simplified",
-    highlevel=True,
-    behavior=None,
-):
-    yield array
-    yield from more_arrays
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def transform(
     transformation,
     array,
@@ -431,6 +411,11 @@ def transform(
     See also: #ak.is_valid and #ak.valid_when to check the validity of transformed
     outputs.
     """
+    # Dispatch
+    yield array
+    yield from more_arrays
+
+    # Implementation
     return _impl(
         transformation,
         array,

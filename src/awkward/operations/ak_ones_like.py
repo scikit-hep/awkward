@@ -8,13 +8,7 @@ from awkward._nplikes.numpylike import NumpyMetadata
 np = NumpyMetadata.instance()
 
 
-def _dispatcher(
-    array, *, dtype=None, including_unknown=False, highlevel=True, behavior=None
-):
-    yield array
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def ones_like(
     array, *, dtype=None, including_unknown=False, highlevel=True, behavior=None
 ):
@@ -37,6 +31,10 @@ def ones_like(
     (There is no equivalent of NumPy's `np.empty_like` because Awkward Arrays
     are immutable.)
     """
+    # Dispatch
+    yield array
+
+    # Implementation
     return _impl(array, highlevel, behavior, dtype, including_unknown)
 
 

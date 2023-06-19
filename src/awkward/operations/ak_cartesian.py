@@ -16,23 +16,7 @@ np = NumpyMetadata.instance()
 cpu = NumpyBackend.instance()
 
 
-def _dispatcher(
-    arrays,
-    axis=1,
-    *,
-    nested=None,
-    parameters=None,
-    with_name=None,
-    highlevel=True,
-    behavior=None,
-):
-    if isinstance(arrays, Mapping):
-        yield from arrays.values()
-    else:
-        yield from arrays
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def cartesian(
     arrays,
     axis=1,
@@ -212,6 +196,13 @@ def cartesian(
     #ak.argcartesian form can be particularly useful as nested indexing in
     #ak.Array.__getitem__.
     """
+    # Dispatch
+    if isinstance(arrays, Mapping):
+        yield from arrays.values()
+    else:
+        yield from arrays
+
+    # Implementation
     return _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior)
 
 

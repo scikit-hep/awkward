@@ -7,11 +7,7 @@ from awkward._nplikes.numpylike import NumpyMetadata
 np = NumpyMetadata.instance()
 
 
-def _dispatcher(array):
-    yield array
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def fields(array):
     """
     Args:
@@ -28,6 +24,10 @@ def fields(array):
     If the array contains neither tuples nor records, this returns an empty
     list.
     """
+    # Dispatch
+    yield array
+
+    # Implementation
     return _impl(array)
 
 

@@ -11,11 +11,7 @@ from awkward._regularize import is_integer, regularize_axis
 np = NumpyMetadata.instance()
 
 
-def _dispatcher(array, axis=0, *, highlevel=True, behavior=None):
-    yield array
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def is_none(array, axis=0, *, highlevel=True, behavior=None):
     """
     Args:
@@ -32,6 +28,10 @@ def is_none(array, axis=0, *, highlevel=True, behavior=None):
     Returns an array whose value is True where an element of `array` is None;
     False otherwise (at a given `axis` depth).
     """
+    # Dispatch
+    yield array
+
+    # Implementation
     return _impl(array, axis, highlevel, behavior)
 
 

@@ -11,24 +11,7 @@ from awkward._nplikes.numpylike import NumpyMetadata
 np = NumpyMetadata.instance()
 
 
-def _dispatcher(
-    arrays,
-    depth_limit=None,
-    *,
-    parameters=None,
-    with_name=None,
-    right_broadcast=False,
-    optiontype_outside_record=False,
-    highlevel=True,
-    behavior=None,
-):
-    if isinstance(arrays, Mapping):
-        yield from arrays.values()
-    else:
-        yield from arrays
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def zip(
     arrays,
     depth_limit=None,
@@ -152,6 +135,13 @@ def zip(
         >>> ak.zip([one, two], optiontype_outside_record=True)
         <Array [None, (2, 5), None] type='3 * ?(int64, int64)'>
     """
+    # Dispatch
+    if isinstance(arrays, Mapping):
+        yield from arrays.values()
+    else:
+        yield from arrays
+
+    # Implementation
     return _impl(
         arrays,
         depth_limit,

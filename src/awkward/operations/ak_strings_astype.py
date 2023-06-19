@@ -11,11 +11,7 @@ np = NumpyMetadata.instance()
 numpy = Numpy.instance()
 
 
-def _dispatcher(array, to, *, highlevel=True, behavior=None):
-    yield array
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def strings_astype(array, to, *, highlevel=True, behavior=None):
     """
     Args:
@@ -49,6 +45,10 @@ def strings_astype(array, to, *, highlevel=True, behavior=None):
 
     See also #ak.numbers_astype.
     """
+    # Dispatch
+    yield array
+
+    # Implementation
     return _impl(array, to, highlevel, behavior)
 
 

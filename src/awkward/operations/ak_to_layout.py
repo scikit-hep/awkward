@@ -17,11 +17,7 @@ np = NumpyMetadata.instance()
 numpy = Numpy.instance()
 
 
-def _dispatcher(array, *, allow_record=True, allow_other=False, regulararray=True):
-    yield array
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def to_layout(array, *, allow_record=True, allow_other=False, regulararray=True):
     """
     Args:
@@ -45,6 +41,10 @@ def to_layout(array, *, allow_record=True, allow_other=False, regulararray=True)
     would rarely be used in a data analysis because #ak.contents.Content and
     #ak.record.Record are lower-level than #ak.Array.
     """
+    # Dispatch
+    yield array
+
+    # Implementation
     return _impl(array, allow_record, allow_other, regulararray=regulararray)
 
 

@@ -9,11 +9,7 @@ from awkward._nplikes.numpylike import NumpyMetadata
 np = NumpyMetadata.instance()
 
 
-def _dispatcher(array, *, highlevel=True, behavior=None):
-    yield array
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def unzip(array, *, highlevel=True, behavior=None):
     """
     Args:
@@ -40,6 +36,10 @@ def unzip(array, *, highlevel=True, behavior=None):
         >>> y
         <Array [[1], [2, 2], [3, 3, 3]] type='3 * var * int64'>
     """
+    # Dispatch
+    yield array
+
+    # Implementation
     return _impl(array, highlevel, behavior)
 
 

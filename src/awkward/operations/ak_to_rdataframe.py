@@ -9,11 +9,7 @@ from awkward._dispatch import high_level_function
 cpu = NumpyBackend.instance()
 
 
-def _dispatcher(arrays, *, flatlist_as_rvec=True):
-    yield from arrays.values()
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def to_rdataframe(arrays, *, flatlist_as_rvec=True):
     """
     Args:
@@ -46,6 +42,10 @@ def to_rdataframe(arrays, *, flatlist_as_rvec=True):
 
     See also #ak.from_rdataframe.
     """
+    # Dispatch
+    yield from arrays.values()
+
+    # Implementation
     return _impl(
         arrays,
         flatlist_as_rvec=flatlist_as_rvec,

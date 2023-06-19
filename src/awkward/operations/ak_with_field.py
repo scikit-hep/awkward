@@ -17,12 +17,7 @@ np = NumpyMetadata.instance()
 cpu = NumpyBackend.instance()
 
 
-def _dispatcher(array, what, where=None, *, highlevel=True, behavior=None):
-    yield array
-    yield what
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def with_field(array, what, where=None, *, highlevel=True, behavior=None):
     """
     Args:
@@ -46,6 +41,11 @@ def with_field(array, what, where=None, *, highlevel=True, behavior=None):
     #ak.with_field, so performance is not a factor in choosing one over the
     other.)
     """
+    # Dispatch
+    yield array
+    yield what
+
+    # Implementation
     return _impl(array, what, where, highlevel, behavior)
 
 

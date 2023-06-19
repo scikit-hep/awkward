@@ -5,11 +5,7 @@ from awkward._backends.numpy import NumpyBackend
 from awkward._dispatch import high_level_function
 
 
-def _dispatcher(array, *, allow_missing=True):
-    yield array
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def to_numpy(array, *, allow_missing=True):
     """
     Args:
@@ -41,6 +37,10 @@ def to_numpy(array, *, allow_missing=True):
 
     See also #ak.from_numpy and #ak.to_cupy.
     """
+    # Dispatch
+    yield array
+
+    # Implementation
     return _impl(array, allow_missing)
 
 

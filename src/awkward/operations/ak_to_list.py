@@ -11,11 +11,7 @@ from awkward._nplikes.numpylike import NumpyMetadata
 np = NumpyMetadata.instance()
 
 
-def _dispatcher(array):
-    yield array
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def to_list(array):
     """
     Args:
@@ -43,6 +39,10 @@ def to_list(array):
 
     See also #ak.from_iter and #ak.Array.tolist.
     """
+    # Dispatch
+    yield array
+
+    # Implementation
     return _impl(array)
 
 

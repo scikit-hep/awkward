@@ -17,24 +17,7 @@ np = NumpyMetadata.instance()
 numpy = Numpy.instance()
 
 
-def _dispatcher(
-    array,
-    file=None,
-    *,
-    line_delimited=False,
-    num_indent_spaces=None,
-    num_readability_spaces=0,
-    nan_string=None,
-    posinf_string=None,
-    neginf_string=None,
-    complex_record_fields=None,
-    convert_bytes=None,
-    convert_other=None,
-):
-    yield array
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def to_json(
     array,
     file=None,
@@ -130,6 +113,10 @@ def to_json(
 
     See also #ak.from_json.
     """
+    # Dispatch
+    yield array
+
+    # Implementation
     return _impl(
         array,
         file,

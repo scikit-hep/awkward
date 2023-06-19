@@ -13,11 +13,7 @@ np = NumpyMetadata.instance()
 cpu = NumpyBackend.instance()
 
 
-def _dispatcher(array, axis=-1, *, highlevel=True, behavior=None):
-    yield array
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def merge_option_of_records(array, axis=-1, *, highlevel=True, behavior=None):
     """
     Args:
@@ -40,6 +36,10 @@ def merge_option_of_records(array, axis=-1, *, highlevel=True, behavior=None):
         >>> ak.merge_option_of_records(array)
         <Array [{a: None}, {a: 1}, {a: 2}] type='3 * {a: ?int64}'>
     """
+    # Dispatch
+    yield array
+
+    # Implementation
     return _impl(array, axis, highlevel, behavior)
 
 

@@ -11,19 +11,7 @@ from awkward._regularize import regularize_axis
 np = NumpyMetadata.instance()
 
 
-def _dispatcher(
-    array,
-    axis=None,
-    *,
-    keepdims=False,
-    mask_identity=False,
-    highlevel=True,
-    behavior=None,
-):
-    yield array
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def prod(
     array,
     axis=None,
@@ -65,22 +53,14 @@ def prod(
 
     See also #ak.nanprod.
     """
+    # Dispatch
+    yield array
+
+    # Implementation
     return _impl(array, axis, keepdims, mask_identity, highlevel, behavior)
 
 
-def _dispatcher(
-    array,
-    axis=None,
-    *,
-    keepdims=False,
-    mask_identity=False,
-    highlevel=True,
-    behavior=None,
-):
-    yield array
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def nanprod(
     array,
     axis=None,
@@ -116,6 +96,10 @@ def nanprod(
 
     See also #ak.prod.
     """
+    # Dispatch
+    yield array
+
+    # Implementation
     return _impl(
         ak.operations.ak_nan_to_none._impl(array, False, None),
         axis,

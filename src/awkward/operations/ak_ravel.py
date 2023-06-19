@@ -9,11 +9,7 @@ from awkward._nplikes.numpylike import NumpyMetadata
 np = NumpyMetadata.instance()
 
 
-def _dispatcher(array, *, highlevel=True, behavior=None):
-    yield array
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def ravel(array, *, highlevel=True, behavior=None):
     """
     Args:
@@ -55,6 +51,10 @@ def ravel(array, *, highlevel=True, behavior=None):
     Missing values are not eliminated by flattening. See #ak.flatten with
     `axis=None` for an equivalent function that eliminates the option type.
     """
+    # Dispatch
+    yield array
+
+    # Implementation
     return _impl(array, highlevel, behavior)
 
 

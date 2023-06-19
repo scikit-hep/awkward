@@ -8,11 +8,7 @@ from awkward._nplikes.numpylike import NumpyMetadata
 np = NumpyMetadata.instance()
 
 
-def _dispatcher(array, *, highlevel=True, behavior=None):
-    yield array
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def to_packed(array, *, highlevel=True, behavior=None):
     """
     Args:
@@ -71,6 +67,10 @@ def to_packed(array, *, highlevel=True, behavior=None):
 
     See also #ak.to_buffers.
     """
+    # Dispatch
+    yield array
+
+    # Implementation
     return _impl(array, highlevel, behavior)
 
 

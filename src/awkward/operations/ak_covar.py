@@ -9,13 +9,7 @@ from awkward._regularize import regularize_axis
 np = NumpyMetadata.instance()
 
 
-def _dispatcher(x, y, weight=None, axis=None, *, keepdims=False, mask_identity=False):
-    yield x
-    yield y
-    yield weight
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def covar(x, y, weight=None, axis=None, *, keepdims=False, mask_identity=False):
     """
     Args:
@@ -54,6 +48,12 @@ def covar(x, y, weight=None, axis=None, *, keepdims=False, mask_identity=False):
     missing values (None) in reducers, and #ak.mean for an example with another
     non-reducer.
     """
+    # Dispatch
+    yield x
+    yield y
+    yield weight
+
+    # Implementation
     return _impl(x, y, weight, axis, keepdims, mask_identity)
 
 

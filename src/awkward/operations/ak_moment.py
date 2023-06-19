@@ -9,12 +9,7 @@ from awkward._regularize import regularize_axis
 np = NumpyMetadata.instance()
 
 
-def _dispatcher(x, n, weight=None, axis=None, *, keepdims=False, mask_identity=False):
-    yield x
-    yield weight
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def moment(x, n, weight=None, axis=None, *, keepdims=False, mask_identity=False):
     """
     Args:
@@ -57,6 +52,11 @@ def moment(x, n, weight=None, axis=None, *, keepdims=False, mask_identity=False)
     missing values (None) in reducers, and #ak.mean for an example with another
     non-reducer.
     """
+    # Dispatch
+    yield x
+    yield weight
+
+    # Implementation
     return _impl(x, n, weight, axis, keepdims, mask_identity)
 
 

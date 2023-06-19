@@ -9,11 +9,7 @@ from awkward._nplikes.numpylike import NumpyMetadata
 np = NumpyMetadata.instance()
 
 
-def _dispatcher(array, name, *, highlevel=True, behavior=None):
-    yield array
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def with_name(array, name, *, highlevel=True, behavior=None):
     """
     Args:
@@ -37,6 +33,10 @@ def with_name(array, name, *, highlevel=True, behavior=None):
     to the data; see #ak.Array and #ak.behavior for a more complete
     description.
     """
+    # Dispatch
+    yield array
+
+    # Implementation
     return _impl(array, name, highlevel, behavior)
 
 

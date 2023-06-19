@@ -4,11 +4,7 @@ import awkward as ak
 from awkward._dispatch import high_level_function
 
 
-def _dispatcher(array, *, exception=False):
-    yield array
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def validity_error(array, *, exception=False):
     """
     Args:
@@ -24,6 +20,10 @@ def validity_error(array, *, exception=False):
 
     See also #ak.is_valid.
     """
+    # Dispatch
+    yield array
+
+    # Implementation
     return _impl(array, exception)
 
 

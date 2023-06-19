@@ -8,11 +8,7 @@ from awkward._nplikes.numpylike import NumpyMetadata
 np = NumpyMetadata.instance()
 
 
-def _dispatcher(array, to, *, including_unknown=False, highlevel=True, behavior=None):
-    yield array
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def values_astype(array, to, *, including_unknown=False, highlevel=True, behavior=None):
     """
     Args:
@@ -58,6 +54,10 @@ def values_astype(array, to, *, including_unknown=False, highlevel=True, behavio
 
     See also #ak.strings_astype.
     """
+    # Dispatch
+    yield array
+
+    # Implementation
     return _impl(array, to, including_unknown, highlevel, behavior)
 
 

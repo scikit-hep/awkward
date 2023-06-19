@@ -6,7 +6,7 @@ from awkward._layout import wrap_layout
 from awkward._regularize import is_integer
 
 
-@high_level_function()
+@high_level_function
 def from_parquet(
     path,
     *,
@@ -76,18 +76,7 @@ def from_parquet(
     )
 
 
-def _dispatcher(
-    path,
-    storage_options=None,
-    row_groups=None,
-    columns=None,
-    ignore_metadata=False,
-    scan_files=True,
-):
-    yield
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def metadata(
     path,
     storage_options=None,

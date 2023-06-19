@@ -6,11 +6,7 @@ from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 
 
-def _dispatcher(array, highlevel=True):
-    yield array
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def categories(array, highlevel=True):
     """
     Args:
@@ -24,6 +20,10 @@ def categories(array, highlevel=True):
 
     See also #ak.is_categorical, #ak.to_categorical, #ak.from_categorical.
     """
+    # Dispatch
+    yield array
+
+    # Implementation
     return _impl(array, highlevel)
 
 

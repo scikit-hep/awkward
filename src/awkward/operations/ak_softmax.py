@@ -10,11 +10,7 @@ from awkward._regularize import regularize_axis
 np = NumpyMetadata.instance()
 
 
-def _dispatcher(x, axis=None, *, keepdims=False, mask_identity=False):
-    yield x
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def softmax(x, axis=None, *, keepdims=False, mask_identity=False):
     """
     Args:
@@ -48,6 +44,10 @@ def softmax(x, axis=None, *, keepdims=False, mask_identity=False):
     missing values (None) in reducers, and #ak.mean for an example with another
     non-reducer.
     """
+    # Dispatch
+    yield x
+
+    # Implementation
     return _impl(x, axis, keepdims, mask_identity)
 
 

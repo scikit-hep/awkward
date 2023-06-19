@@ -11,19 +11,7 @@ from awkward._regularize import regularize_axis
 np = NumpyMetadata.instance()
 
 
-def _dispatcher(
-    array,
-    axis=None,
-    *,
-    keepdims=False,
-    mask_identity=True,
-    highlevel=True,
-    behavior=None,
-):
-    yield array
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def argmin(
     array,
     axis=None,
@@ -72,22 +60,14 @@ def argmin(
 
     See also #ak.nanargmin.
     """
+    # Dispatch
+    yield array
+
+    # Implementation
     return _impl(array, axis, keepdims, mask_identity, highlevel, behavior)
 
 
-def _dispatcher(
-    array,
-    axis=None,
-    *,
-    keepdims=False,
-    mask_identity=True,
-    highlevel=True,
-    behavior=None,
-):
-    yield array
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def nanargmin(
     array,
     axis=None,
@@ -126,6 +106,10 @@ def nanargmin(
 
     See also #ak.argmin.
     """
+    # Dispatch
+    yield array
+
+    # Implementation
     return _impl(
         ak.operations.ak_nan_to_none._impl(array, False, None),
         axis,

@@ -10,11 +10,7 @@ from awkward._nplikes.numpylike import NumpyMetadata
 np = NumpyMetadata.instance()
 
 
-def _dispatcher(array, backend, *, highlevel=True, behavior=None):
-    yield array
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def to_backend(array, backend, *, highlevel=True, behavior=None):
     """
     Args:
@@ -54,6 +50,10 @@ def to_backend(array, backend, *, highlevel=True, behavior=None):
 
     See #ak.kernels.
     """
+    # Dispatch
+    yield array
+
+    # Implementation
     return _impl(array, backend, highlevel, behavior)
 
 

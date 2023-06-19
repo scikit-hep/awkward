@@ -8,20 +8,7 @@ from awkward._nplikes.numpylike import NumpyMetadata
 np = NumpyMetadata.instance()
 
 
-def _dispatcher(
-    array,
-    container=None,
-    buffer_key="{form_key}-{attribute}",
-    form_key="node{id}",
-    *,
-    id_start=0,
-    backend=None,
-    byteorder="<",
-):
-    yield array
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def to_buffers(
     array,
     container=None,
@@ -133,6 +120,10 @@ def to_buffers(
 
     See also #ak.from_buffers and #ak.to_packed.
     """
+    # Dispatch
+    yield array
+
+    # Implementation
     return _impl(array, container, buffer_key, form_key, id_start, backend, byteorder)
 
 

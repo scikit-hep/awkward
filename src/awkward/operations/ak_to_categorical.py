@@ -11,11 +11,7 @@ np = NumpyMetadata.instance()
 numpy = Numpy.instance()
 
 
-def _dispatcher(array, *, highlevel=True, behavior=None):
-    yield array
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def to_categorical(array, *, highlevel=True, behavior=None):
     """
     Args:
@@ -87,6 +83,10 @@ def to_categorical(array, *, highlevel=True, behavior=None):
 
     See also #ak.is_categorical, #ak.categories, #ak.from_categorical.
     """
+    # Dispatch
+    yield array
+
+    # Implementation
     return _impl(array, highlevel, behavior)
 
 

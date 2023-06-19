@@ -4,11 +4,7 @@ from awkward._backends.dispatch import backend_of
 from awkward._dispatch import high_level_function
 
 
-def _dispatcher(*arrays):
-    yield from arrays
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def backend(*arrays):
     """
     Args:
@@ -25,6 +21,10 @@ def backend(*arrays):
 
     See #ak.to_backend.
     """
+    # Dispatch
+    yield from arrays
+
+    # Implementation
     return _impl(arrays)
 
 

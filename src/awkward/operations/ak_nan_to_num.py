@@ -9,20 +9,7 @@ from awkward._nplikes.numpylike import NumpyMetadata
 np = NumpyMetadata.instance()
 
 
-def _dispatcher(
-    array,
-    copy=True,
-    nan=0.0,
-    posinf=None,
-    neginf=None,
-    *,
-    highlevel=True,
-    behavior=None,
-):
-    yield array
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def nan_to_num(
     array,
     copy=True,
@@ -52,6 +39,10 @@ def nan_to_num(
 
     See also #ak.nan_to_none to convert NaN to None, i.e. missing values with option-type.
     """
+    # Dispatch
+    yield array
+
+    # Implementation
     return _impl(array, copy, nan, posinf, neginf, highlevel, behavior)
 
 

@@ -5,11 +5,7 @@ from awkward._backends.cupy import CupyBackend
 from awkward._dispatch import high_level_function
 
 
-def _dispatcher(array):
-    yield array
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def to_cupy(array):
     """
     Args:
@@ -27,6 +23,10 @@ def to_cupy(array):
 
     See also #ak.from_cupy and #ak.to_numpy.
     """
+    # Dispatch
+    yield array
+
+    # Implementation
     return _impl(array)
 
 

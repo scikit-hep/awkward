@@ -9,22 +9,7 @@ from awkward._regularize import regularize_axis
 np = NumpyMetadata.instance()
 
 
-def _dispatcher(
-    array,
-    n,
-    *,
-    replacement=False,
-    axis=1,
-    fields=None,
-    parameters=None,
-    with_name=None,
-    highlevel=True,
-    behavior=None,
-):
-    yield array
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def argcombinations(
     array,
     n,
@@ -71,6 +56,10 @@ def argcombinations(
     #ak.argcartesian. See #ak.combinations and #ak.argcartesian for a more
     complete description.
     """
+    # Dispatch
+    yield array
+
+    # Implementation
     return _impl(
         array,
         n,

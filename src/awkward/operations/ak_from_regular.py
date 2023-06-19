@@ -11,11 +11,7 @@ from awkward._regularize import regularize_axis
 np = NumpyMetadata.instance()
 
 
-def _dispatcher(array, axis=1, *, highlevel=True, behavior=None):
-    yield array
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def from_regular(array, axis=1, *, highlevel=True, behavior=None):
     """
     Args:
@@ -44,6 +40,10 @@ def from_regular(array, axis=1, *, highlevel=True, behavior=None):
 
     See also #ak.to_regular.
     """
+    # Dispatch
+    yield array
+
+    # Implementation
     return _impl(array, axis, highlevel, behavior)
 
 

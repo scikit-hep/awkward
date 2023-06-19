@@ -10,11 +10,7 @@ from awkward._regularize import regularize_axis
 np = NumpyMetadata.instance()
 
 
-def _dispatcher(array, axis=None, highlevel=True, behavior=None):
-    yield array
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def drop_none(array, axis=None, highlevel=True, behavior=None):
     """
     Args:
@@ -47,6 +43,10 @@ def drop_none(array, axis=None, highlevel=True, behavior=None):
         <Array [[[0]], [[None]], [[1]], [[2, None]]] type='4 * var * var * ?int64'>
 
     """
+    # Dispatch
+    yield array
+
+    # Implementation
     return _impl(array, axis, highlevel, behavior)
 
 

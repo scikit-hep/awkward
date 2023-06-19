@@ -11,14 +11,7 @@ from awkward._regularize import regularize_axis
 np = NumpyMetadata.instance()
 
 
-def _dispatcher(
-    x, weight=None, ddof=0, axis=None, *, keepdims=False, mask_identity=False
-):
-    yield x
-    yield weight
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def var(x, weight=None, ddof=0, axis=None, *, keepdims=False, mask_identity=False):
     """
     Args:
@@ -69,17 +62,15 @@ def var(x, weight=None, ddof=0, axis=None, *, keepdims=False, mask_identity=Fals
 
     See also #ak.nanvar.
     """
-    return _impl(x, weight, ddof, axis, keepdims, mask_identity)
-
-
-def _dispatcher(
-    x, weight=None, ddof=0, axis=None, *, keepdims=False, mask_identity=True
-):
+    # Dispatch
     yield x
     yield weight
 
+    # Implementation
+    return _impl(x, weight, ddof, axis, keepdims, mask_identity)
 
-@high_level_function(_dispatcher)
+
+@high_level_function
 def nanvar(x, weight=None, ddof=0, axis=None, *, keepdims=False, mask_identity=True):
     """
     Args:
@@ -115,6 +106,11 @@ def nanvar(x, weight=None, ddof=0, axis=None, *, keepdims=False, mask_identity=T
 
     See also #ak.var.
     """
+    # Dispatch
+    yield x
+    yield weight
+
+    # Implementation
     if weight is not None:
         weight = ak.operations.ak_nan_to_none._impl(weight, False, None)
 

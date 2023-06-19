@@ -12,12 +12,7 @@ np = NumpyMetadata.instance()
 cpu = NumpyBackend.instance()
 
 
-def _dispatcher(condition, *args, mergebool=True, highlevel=True, behavior=None):
-    yield condition
-    yield from args
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def where(condition, *args, mergebool=True, highlevel=True, behavior=None):
     """
     Args:
@@ -49,6 +44,11 @@ def where(condition, *args, mergebool=True, highlevel=True, behavior=None):
     for all `i`. The structure of `x` and `y` do not need to be the same; if
     they are incompatible types, the output will have #ak.type.UnionType.
     """
+    # Dispatch
+    yield condition
+    yield from args
+
+    # Implementation
     if len(args) == 0:
         return _impl1(condition, mergebool, highlevel, behavior)
 

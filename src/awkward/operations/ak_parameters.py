@@ -12,11 +12,7 @@ from awkward._nplikes.numpylike import NumpyMetadata
 np = NumpyMetadata.instance()
 
 
-def _dispatcher(array):
-    yield array
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def parameters(array):
     """
     Args:
@@ -33,6 +29,10 @@ def parameters(array):
     See #ak.Array and #ak.behavior for a more complete description of
     behaviors.
     """
+    # Dispatch
+    yield array
+
+    # Implementation
     return _impl(array)
 
 

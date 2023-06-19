@@ -10,11 +10,7 @@ from awkward._layout import wrap_layout
 cpu = NumpyBackend.instance()
 
 
-def _dispatcher(*arrays, highlevel=True, behavior=None):
-    yield from arrays
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def broadcast_fields(*arrays, highlevel=True, behavior=None):
     """
     Args:
@@ -52,6 +48,10 @@ def broadcast_fields(*arrays, highlevel=True, behavior=None):
         }
 
     """
+    # Dispatch
+    yield from arrays
+
+    # Implementation
     return _impl(arrays, highlevel, behavior)
 
 

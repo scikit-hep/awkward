@@ -13,11 +13,7 @@ np = NumpyMetadata.instance()
 cpu = NumpyBackend.instance()
 
 
-def _dispatcher(array, *, highlevel=True, behavior=None):
-    yield array
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def run_lengths(array, *, highlevel=True, behavior=None):
     """
     Args:
@@ -92,6 +88,10 @@ def run_lengths(array, *, highlevel=True, behavior=None):
 
     See also #ak.num, #ak.argsort, #ak.unflatten.
     """
+    # Dispatch
+    yield array
+
+    # Implementation
     return _impl(array, highlevel, behavior)
 
 

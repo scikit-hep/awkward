@@ -9,21 +9,7 @@ from awkward._nplikes.numpylike import NumpyMetadata
 np = NumpyMetadata.instance()
 
 
-def _dispatcher(
-    array,
-    *,
-    list_to32=False,
-    string_to32=False,
-    bytestring_to32=False,
-    emptyarray_to=None,
-    categorical_as_dictionary=False,
-    extensionarray=True,
-    count_nulls=True,
-):
-    yield array
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def to_arrow_table(
     array,
     *,
@@ -80,6 +66,10 @@ def to_arrow_table(
 
     See also #ak.from_arrow, #ak.to_arrow, #ak.to_parquet.
     """
+    # Dispatch
+    yield array
+
+    # Implementation
     return _impl(
         array,
         list_to32,

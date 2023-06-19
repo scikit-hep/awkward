@@ -15,23 +15,7 @@ np = NumpyMetadata.instance()
 cpu = NumpyBackend.instance()
 
 
-def _dispatcher(
-    arrays,
-    axis=1,
-    *,
-    nested=None,
-    parameters=None,
-    with_name=None,
-    highlevel=True,
-    behavior=None,
-):
-    if isinstance(arrays, Mapping):
-        yield from arrays.values()
-    else:
-        yield from arrays
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def argcartesian(
     arrays,
     axis=1,
@@ -108,6 +92,13 @@ def argcartesian(
     All of the parameters for #ak.cartesian apply equally to #ak.argcartesian,
     so see the #ak.cartesian documentation for a more complete description.
     """
+    # Dispatch
+    if isinstance(arrays, Mapping):
+        yield from arrays.values()
+    else:
+        yield from arrays
+
+    # Implementation
     return _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior)
 
 

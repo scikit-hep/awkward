@@ -11,11 +11,7 @@ from awkward._regularize import is_integer, regularize_axis
 np = NumpyMetadata.instance()
 
 
-def _dispatcher(array, axis=1, *, highlevel=True, behavior=None):
-    yield array
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def num(array, axis=1, *, highlevel=True, behavior=None):
     """
     Args:
@@ -75,6 +71,10 @@ def num(array, axis=1, *, highlevel=True, behavior=None):
         >>> array.mask[ak.num(array) > 0][:, 0]
         <Array [[1.1, 2.2, 3.3], None, [7.7]] type='3 * option[var * float64]'>
     """
+    # Dispatch
+    yield array
+
+    # Implementation
     return _impl(array, axis, highlevel, behavior)
 
 

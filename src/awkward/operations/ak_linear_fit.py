@@ -12,11 +12,7 @@ from awkward._regularize import regularize_axis
 np = NumpyMetadata.instance()
 
 
-def _dispatcher(x, y, weight=None, axis=None, *, keepdims=False, mask_identity=False):
-    yield from (x, y, weight)
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def linear_fit(x, y, weight=None, axis=None, *, keepdims=False, mask_identity=False):
     """
     Args:
@@ -70,6 +66,10 @@ def linear_fit(x, y, weight=None, axis=None, *, keepdims=False, mask_identity=Fa
     missing values (None) in reducers, and #ak.mean for an example with another
     non-reducer.
     """
+    # Dispatch
+    yield from (x, y, weight)
+
+    # Implementation
     return _impl(x, y, weight, axis, keepdims, mask_identity)
 
 

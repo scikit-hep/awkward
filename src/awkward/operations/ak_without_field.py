@@ -11,11 +11,7 @@ from awkward._nplikes.numpylike import NumpyMetadata
 np = NumpyMetadata.instance()
 
 
-def _dispatcher(array, where, *, highlevel=True, behavior=None):
-    yield array
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def without_field(array, where, *, highlevel=True, behavior=None):
     """
     Args:
@@ -37,6 +33,10 @@ def without_field(array, where, *, highlevel=True, behavior=None):
     #ak.without_field, so performance is not a factor in choosing one over the
     other.)
     """
+    # Dispatch
+    yield array
+
+    # Implementation
     return _impl(array, where, highlevel, behavior)
 
 

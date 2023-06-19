@@ -10,19 +10,7 @@ from awkward._regularize import regularize_axis
 np = NumpyMetadata.instance()
 
 
-def _dispatcher(
-    array,
-    axis=None,
-    *,
-    keepdims=False,
-    mask_identity=False,
-    highlevel=True,
-    behavior=None,
-):
-    yield array
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def count(
     array,
     axis=None,
@@ -107,6 +95,10 @@ def count(
     If it is desirable to exclude NaN ("not a number") values from #ak.count,
     use #ak.nan_to_none to turn them into None, which are not counted.
     """
+    # Dispatch
+    yield array
+
+    # Implementation
     return _impl(array, axis, keepdims, mask_identity, highlevel, behavior)
 
 

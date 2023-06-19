@@ -9,11 +9,7 @@ from awkward._nplikes.numpylike import NumpyMetadata
 np = NumpyMetadata.instance()
 
 
-def _dispatcher(array, *, highlevel=True, behavior=None):
-    yield array
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def nan_to_none(array, *, highlevel=True, behavior=None):
     """
     Args:
@@ -27,6 +23,10 @@ def nan_to_none(array, *, highlevel=True, behavior=None):
 
     See also #ak.nan_to_num to convert NaN or infinity to specified values.
     """
+    # Dispatch
+    yield array
+
+    # Implementation
     return _impl(array, highlevel, behavior)
 
 

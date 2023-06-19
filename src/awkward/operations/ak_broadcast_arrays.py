@@ -13,19 +13,7 @@ np = NumpyMetadata.instance()
 cpu = NumpyBackend.instance()
 
 
-def _dispatcher(
-    *arrays,
-    depth_limit=None,
-    broadcast_parameters_rule="one_to_one",
-    left_broadcast=True,
-    right_broadcast=True,
-    highlevel=True,
-    behavior=None,
-):
-    yield from arrays
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def broadcast_arrays(
     *arrays,
     depth_limit=None,
@@ -190,6 +178,10 @@ def broadcast_arrays(
          [],
          [[6.6]]]
     """
+    # Dispatch
+    yield from arrays
+
+    # Implementation
     return _impl(
         arrays,
         depth_limit,

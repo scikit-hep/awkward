@@ -5,11 +5,7 @@ from awkward._backends.jax import JaxBackend
 from awkward._dispatch import high_level_function
 
 
-def _dispatcher(array):
-    yield array
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def to_jax(array):
     """
     Args:
@@ -27,6 +23,10 @@ def to_jax(array):
 
     See also #ak.from_jax and #ak.to_numpy.
     """
+    # Dispatch
+    yield array
+
+    # Implementation
     return _impl(array)
 
 

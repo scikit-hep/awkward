@@ -17,11 +17,7 @@ from awkward.types.numpytype import primitive_to_dtype
 np = NumpyMetadata.instance()
 
 
-def _dispatcher(array, type, *, highlevel=True, behavior=None):
-    yield array
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def enforce_type(array, type, *, highlevel=True, behavior=None):
     """
     Args:
@@ -225,6 +221,10 @@ def enforce_type(array, type, *, highlevel=True, behavior=None):
     given type value. If the conversion is not possible given the layout data, e.g. a conversion from an irregular list
     to a regular type, it will fail.
     """
+    # Dispatch
+    yield array
+
+    # Implementation
     return _impl(array, type, highlevel, behavior)
 
 

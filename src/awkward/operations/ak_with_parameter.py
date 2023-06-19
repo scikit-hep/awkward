@@ -9,11 +9,7 @@ from awkward._nplikes.numpylike import NumpyMetadata
 np = NumpyMetadata.instance()
 
 
-def _dispatcher(array, parameter, value, *, highlevel=True, behavior=None):
-    yield array
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def with_parameter(array, parameter, value, *, highlevel=True, behavior=None):
     """
     Args:
@@ -34,6 +30,10 @@ def with_parameter(array, parameter, value, *, highlevel=True, behavior=None):
     You can also remove a single parameter with this function, since setting
     a parameter to None is equivalent to removing it.
     """
+    # Dispatch
+    yield array
+
+    # Implementation
     return _impl(array, parameter, value, highlevel, behavior)
 
 

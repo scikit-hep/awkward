@@ -13,11 +13,7 @@ from awkward._nplikes.numpylike import NumpyMetadata
 np = NumpyMetadata.instance()
 
 
-def _dispatcher(array, *, behavior=None):
-    yield array
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def type(array, *, behavior=None):
     """
     Args:
@@ -79,6 +75,10 @@ def type(array, *, behavior=None):
     similar to existing type-constructors, so it's a plausible addition
     to the language.)
     """
+    # Dispatch
+    yield array
+
+    # Implementation
     return _impl(array, behavior)
 
 

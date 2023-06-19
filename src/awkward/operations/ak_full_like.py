@@ -12,20 +12,7 @@ from awkward.operations.ak_zeros_like import _ZEROS
 np = NumpyMetadata.instance()
 
 
-def _dispatcher(
-    array,
-    fill_value,
-    *,
-    dtype=None,
-    including_unknown=False,
-    highlevel=True,
-    behavior=None,
-):
-    yield array
-    yield fill_value
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def full_like(
     array,
     fill_value,
@@ -93,6 +80,11 @@ def full_like(
     (There is no equivalent of NumPy's `np.empty_like` because Awkward Arrays
     are immutable.)
     """
+    # Dispatch
+    yield array
+    yield fill_value
+
+    # Implementation
     return _impl(array, fill_value, highlevel, behavior, dtype, including_unknown)
 
 

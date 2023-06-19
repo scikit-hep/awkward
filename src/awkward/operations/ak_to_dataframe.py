@@ -13,13 +13,7 @@ def _default_levelname(index: int) -> str:
     return "sub" * index + "entry"
 
 
-def _dispatcher(
-    array, *, how="inner", levelname=_default_levelname, anonymous="values"
-):
-    yield array
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def to_dataframe(
     array, *, how="inner", levelname=_default_levelname, anonymous="values"
 ):
@@ -133,6 +127,10 @@ def to_dataframe(
               2         3.0  NaN
               3         4.0  NaN
     """
+    # Dispatch
+    yield array
+
+    # Implementation
     return _impl(array, how, levelname, anonymous)
 
 

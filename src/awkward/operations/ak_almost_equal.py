@@ -12,21 +12,7 @@ from awkward.operations.ak_to_layout import to_layout
 np = NumpyMetadata.instance()
 
 
-def _dispatcher(
-    left,
-    right,
-    *,
-    rtol: float = 1e-5,
-    atol: float = 1e-8,
-    dtype_exact: bool = True,
-    check_parameters: bool = True,
-    check_regular: bool = True,
-):
-    yield left
-    yield right
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def almost_equal(
     left,
     right,
@@ -59,6 +45,11 @@ def almost_equal(
     TypeTracer arrays are not supported, as there is very little information to
     be compared.
     """
+    # Dispatch
+    yield left
+    yield right
+
+    # Implementation
     left_behavior = behavior_of(left)
     right_behavior = behavior_of(right)
 

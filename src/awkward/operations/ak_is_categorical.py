@@ -4,11 +4,7 @@ import awkward as ak
 from awkward._dispatch import high_level_function
 
 
-def _dispatcher(array):
-    yield array
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def is_categorical(array):
     """
     Args:
@@ -21,6 +17,10 @@ def is_categorical(array):
 
     See also #ak.categories, #ak.to_categorical, #ak.from_categorical.
     """
+    # Dispatch
+    yield array
+
+    # Implementation
     return _impl(array)
 
 

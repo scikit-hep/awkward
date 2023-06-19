@@ -11,19 +11,7 @@ from awkward._regularize import regularize_axis
 np = NumpyMetadata.instance()
 
 
-def _dispatcher(
-    array,
-    axis=None,
-    *,
-    keepdims=False,
-    mask_identity=False,
-    highlevel=True,
-    behavior=None,
-):
-    yield array
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def any(
     array,
     axis=None,
@@ -65,6 +53,10 @@ def any(
     See #ak.sum for a more complete description of nested list and missing
     value (None) handling in reducers.
     """
+    # Dispatch
+    yield array
+
+    # Implementation
     return _impl(array, axis, keepdims, mask_identity, highlevel, behavior)
 
 

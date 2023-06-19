@@ -10,19 +10,7 @@ from awkward._regularize import regularize_axis
 np = NumpyMetadata.instance()
 
 
-def _dispatcher(
-    array,
-    axis=None,
-    *,
-    keepdims=False,
-    mask_identity=False,
-    highlevel=True,
-    behavior=None,
-):
-    yield array
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def count_nonzero(
     array,
     axis=None,
@@ -66,6 +54,10 @@ def count_nonzero(
     count None values. If it is desirable to count them, use #ak.fill_none
     to turn them into something that would be counted.
     """
+    # Dispatch
+    yield array
+
+    # Implementation
     return _impl(array, axis, keepdims, mask_identity, highlevel, behavior)
 
 

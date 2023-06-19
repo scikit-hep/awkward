@@ -9,14 +9,7 @@ from awkward._nplikes.numpylike import NumpyMetadata
 np = NumpyMetadata.instance()
 
 
-def _dispatcher(
-    a, b, rtol=1e-05, atol=1e-08, equal_nan=False, *, highlevel=True, behavior=None
-):
-    yield a
-    yield b
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def isclose(
     a, b, rtol=1e-05, atol=1e-08, equal_nan=False, *, highlevel=True, behavior=None
 ):
@@ -36,6 +29,11 @@ def isclose(
     Implements [np.isclose](https://numpy.org/doc/stable/reference/generated/numpy.isclose.html)
     for Awkward Arrays.
     """
+    # Dispatch
+    yield a
+    yield b
+
+    # Implementation
     return _impl(a, b, rtol, atol, equal_nan, highlevel, behavior)
 
 

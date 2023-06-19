@@ -9,12 +9,7 @@ from awkward._nplikes.numpylike import NumpyMetadata
 np = NumpyMetadata.instance()
 
 
-def _dispatcher(array, mask, *, valid_when=True, highlevel=True, behavior=None):
-    yield array
-    yield mask
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def mask(array, mask, *, valid_when=True, highlevel=True, behavior=None):
     """
     Args:
@@ -95,6 +90,11 @@ def mask(array, mask, *, valid_when=True, highlevel=True, behavior=None):
 
     (which is 5 characters away from simply filtering the `array`).
     """
+    # Dispatch
+    yield array
+    yield mask
+
+    # Implementation
     return _impl(array, mask, valid_when, highlevel, behavior)
 
 

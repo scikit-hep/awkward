@@ -9,11 +9,7 @@ from awkward._regularize import regularize_axis
 np = NumpyMetadata.instance()
 
 
-def _dispatcher(array, axis=-1, *, highlevel=True, behavior=None):
-    yield array
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def local_index(array, axis=-1, *, highlevel=True, behavior=None):
     """
     Args:
@@ -78,6 +74,10 @@ def local_index(array, axis=-1, *, highlevel=True, behavior=None):
                        2               8.8
                        3               9.9
     """
+    # Dispatch
+    yield array
+
+    # Implementation
     return _impl(array, axis, highlevel, behavior)
 
 

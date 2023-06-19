@@ -10,13 +10,7 @@ from awkward._regularize import regularize_axis
 np = NumpyMetadata.instance()
 
 
-def _dispatcher(
-    array, axis=-1, *, ascending=True, stable=True, highlevel=True, behavior=None
-):
-    yield array
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def argsort(
     array, axis=-1, *, ascending=True, stable=True, highlevel=True, behavior=None
 ):
@@ -55,6 +49,10 @@ def argsort(
         >>> data[index]
         <Array [[5, 7, 7], [], [2], [2, 8]] type='4 * var * int64'>
     """
+    # Dispatch
+    yield array
+
+    # Implementation
     return _impl(array, axis, ascending, stable, highlevel, behavior)
 
 

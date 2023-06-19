@@ -9,11 +9,7 @@ from awkward._regularize import regularize_axis
 np = NumpyMetadata.instance()
 
 
-def _dispatcher(array, target, axis=1, *, clip=False, highlevel=True, behavior=None):
-    yield array
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def pad_none(array, target, axis=1, *, clip=False, highlevel=True, behavior=None):
     """
     Args:
@@ -101,6 +97,10 @@ def pad_none(array, target, axis=1, *, clip=False, highlevel=True, behavior=None
         >>> ak.pad_none(array, 2, axis=2, clip=True).type.show()
         3 * var *   2 * ?float64
     """
+    # Dispatch
+    yield array
+
+    # Implementation
     return _impl(array, target, axis, clip, highlevel, behavior)
 
 

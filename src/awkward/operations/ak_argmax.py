@@ -11,19 +11,7 @@ from awkward._regularize import regularize_axis
 np = NumpyMetadata.instance()
 
 
-def _dispatcher(
-    array,
-    axis=None,
-    *,
-    keepdims=False,
-    mask_identity=True,
-    highlevel=True,
-    behavior=None,
-):
-    yield array
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def argmax(
     array,
     axis=None,
@@ -72,22 +60,14 @@ def argmax(
 
     See also #ak.nanargmax.
     """
+    # Dispatch
+    yield array
+
+    # Implementation
     return _impl(array, axis, keepdims, mask_identity, highlevel, behavior)
 
 
-def _dispatcher(
-    array,
-    axis=None,
-    *,
-    keepdims=False,
-    mask_identity=True,
-    highlevel=True,
-    behavior=None,
-):
-    yield array
-
-
-@high_level_function(_dispatcher)
+@high_level_function
 def nanargmax(
     array,
     axis=None,
@@ -127,6 +107,10 @@ def nanargmax(
 
     See also #ak.argmax.
     """
+    # Dispatch
+    yield array
+
+    # Implementation
     return _impl(
         ak.operations.ak_nan_to_none._impl(array, False, None),
         axis,
