@@ -1,4 +1,3 @@
-import os
 from functools import wraps
 from inspect import signature
 
@@ -15,16 +14,21 @@ def high_level_function(dispatcher=None):
     """Decorate a high-level function such that it may be overloaded by third-party array objects"""
 
     def decorator(func: T) -> T:
-        # Don't always check something that should be correct at author time
-        if "AWKWARD_CHECK_DISPATCH_SIGNATURES" in os.environ and not (
-            dispatcher is None or signature(func) == signature(dispatcher)
-        ):
-            raise RuntimeError(
-                f"Array dispatcher for {func.__qualname__} is incompatible with implementation"
-            )
+        signatures_validated = False
 
         @wraps(func)
         def dispatch(*args, **kwargs):
+            nonlocal signatures_validated
+
+            # Don't always check something that should be correct at author time
+            if not (signatures_validated or dispatcher is None):
+                if signature(func) == signature(dispatcher):
+                    signatures_validated = True
+                else:
+                    raise RuntimeError(
+                        f"Array dispatcher for {func.__qualname__} is incompatible with implementation"
+                    )
+
             # NOTE: this decorator assumes that the operation is exposed under `ak.`
             with OperationErrorContext(f"ak.{func.__qualname__}", args, kwargs):
                 if dispatcher is not None:
