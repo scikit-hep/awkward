@@ -267,6 +267,9 @@ def _cast_bytes_or_str_to_string(string):
 
 
 def register(behavior):
+    behavior["byte"] = ByteBehavior
+    behavior["char"] = CharBehavior
+
     behavior["__typestr__", "byte"] = "byte"
     behavior["__typestr__", "char"] = "char"
 
