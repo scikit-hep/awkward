@@ -122,10 +122,6 @@ class ByteStringBehavior(Array):
             version="2.4.0",
         )
 
-    def __iter__(self):
-        for x in super().__iter__():
-            yield x.__bytes__()
-
 
 class StringBehavior(Array):
     __name__ = "Array"
@@ -138,10 +134,6 @@ class StringBehavior(Array):
             f"provided by Awkward Array, rather than an extension.",
             version="2.4.0",
         )
-
-    def __iter__(self):
-        for x in super().__iter__():
-            yield x.__str__()
 
 
 def _string_equal(one, two):
