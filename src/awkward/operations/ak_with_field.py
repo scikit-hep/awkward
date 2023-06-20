@@ -6,6 +6,7 @@ import awkward as ak
 from awkward._backends.dispatch import backend_of
 from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of
+from awkward._errors import with_operation_context
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import is_non_string_like_sequence
@@ -16,6 +17,7 @@ np = NumpyMetadata.instance()
 cpu = NumpyBackend.instance()
 
 
+@with_operation_context
 def with_field(array, what, where=None, *, highlevel=True, behavior=None):
     """
     Args:
@@ -39,17 +41,7 @@ def with_field(array, what, where=None, *, highlevel=True, behavior=None):
     #ak.with_field, so performance is not a factor in choosing one over the
     other.)
     """
-    with ak._errors.OperationErrorContext(
-        "ak.with_field",
-        {
-            "array": array,
-            "what": what,
-            "where": where,
-            "highlevel": highlevel,
-            "behavior": behavior,
-        },
-    ):
-        return _impl(array, what, where, highlevel, behavior)
+    return _impl(array, what, where, highlevel, behavior)
 
 
 def _impl(base, what, where, highlevel, behavior):

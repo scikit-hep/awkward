@@ -2,12 +2,14 @@
 __all__ = ("zip",)
 import awkward as ak
 from awkward._behavior import behavior_of
+from awkward._errors import with_operation_context
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
 
 
+@with_operation_context
 def zip(
     arrays,
     depth_limit=None,
@@ -131,29 +133,16 @@ def zip(
         >>> ak.zip([one, two], optiontype_outside_record=True)
         <Array [None, (2, 5), None] type='3 * ?(int64, int64)'>
     """
-    with ak._errors.OperationErrorContext(
-        "ak.zip",
-        {
-            "arrays": arrays,
-            "depth_limit": depth_limit,
-            "parameters": parameters,
-            "with_name": with_name,
-            "right_broadcast": right_broadcast,
-            "optiontype_outside_record": optiontype_outside_record,
-            "highlevel": highlevel,
-            "behavior": behavior,
-        },
-    ):
-        return _impl(
-            arrays,
-            depth_limit,
-            parameters,
-            with_name,
-            right_broadcast,
-            optiontype_outside_record,
-            highlevel,
-            behavior,
-        )
+    return _impl(
+        arrays,
+        depth_limit,
+        parameters,
+        with_name,
+        right_broadcast,
+        optiontype_outside_record,
+        highlevel,
+        behavior,
+    )
 
 
 def _impl(

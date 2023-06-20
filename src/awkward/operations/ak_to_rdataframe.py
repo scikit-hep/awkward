@@ -4,10 +4,12 @@ from collections.abc import Mapping
 
 import awkward as ak
 from awkward._backends.numpy import NumpyBackend
+from awkward._errors import with_operation_context
 
 cpu = NumpyBackend.instance()
 
 
+@with_operation_context
 def to_rdataframe(arrays, *, flatlist_as_rvec=True):
     """
     Args:
@@ -40,14 +42,10 @@ def to_rdataframe(arrays, *, flatlist_as_rvec=True):
 
     See also #ak.from_rdataframe.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.to_rdataframe",
-        {"arrays": arrays},
-    ):
-        return _impl(
-            arrays,
-            flatlist_as_rvec=flatlist_as_rvec,
-        )
+    return _impl(
+        arrays,
+        flatlist_as_rvec=flatlist_as_rvec,
+    )
 
 
 def _impl(

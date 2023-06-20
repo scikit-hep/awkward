@@ -8,7 +8,7 @@ from collections.abc import Iterable, MutableMapping, Sequence
 
 import awkward as ak
 from awkward._backends.backend import Backend
-from awkward._errors import AxisError
+from awkward._errors import AxisError, deprecate
 from awkward._layout import maybe_posaxis
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
@@ -135,6 +135,13 @@ class UnionArray(Content):
                 )
             elif content.is_option:
                 n_seen_options += 1
+            elif content.is_indexed and content.parameter("__array__") != "categorical":
+                raise TypeError(
+                    (
+                        "{0} cannot contain non-categorical indexed-types in its 'contents' ({1}); "
+                        "try {0}.simplified instead"
+                    ).format(type(self).__name__, type(content).__name__)
+                )
 
         if n_seen_options not in {0, len(contents)}:
             raise TypeError(
@@ -221,9 +228,17 @@ class UnionArray(Content):
         contents,
         *,
         parameters=None,
-        merge=True,
+        merge=UNSET,
         mergebool=False,
     ):
+        if merge is UNSET:
+            merge = True
+        else:
+            deprecate(
+                "The `merge` argument to UnionArray.simplified(...) is deprecated; "
+                "it is no longer possible to construct UnionArrays with mergeable contents.",
+                version="2.4.0",
+            )
         self_index = index
         self_tags = tags
         self_contents = contents
@@ -395,6 +410,27 @@ class UnionArray(Content):
             raise NotImplementedError(
                 "FIXME: handle UnionArray with more than 127 contents"
             )
+
+        # If any contents are non-categorical index types, we can merge them into the union
+        # This is safe, because any remaining index types at this point in the routine are not considered
+        # mergeable with the other contents. This means none of the other contents are option or index types,
+        # nor are any contents mergeable with these index types' contents. We already know that the
+        # other contents cannot be unions. Thus, it's safe to simply erase the outer indexed type.
+        for tag, content in enumerate(contents):
+            if (
+                isinstance(content, ak.contents.IndexedArray)
+                and content.parameter("__array__") != "categorical"
+            ):
+                # only want to affect the part of the UnionArray.index for this tag
+                selection = tags.data == tag
+                # function-composition of this part of the UnionArray.index with the IndexedArray.index
+                index.data[selection] = content.index.data[index.data[selection]]
+                # now we don't have an IndexedArray anymore, but we want to preserve its parameters
+                contents[tag] = content.content.copy(
+                    parameters=parameters_union(
+                        content.content.parameters, content.parameters
+                    )
+                )
 
         # If any contents are options, ensure all contents are options!
         if any(c.is_option for c in contents):
@@ -1057,18 +1093,15 @@ class UnionArray(Content):
         if len(others) == 0:
             return self
 
+        index_nplike = self._backend.index_nplike
         head, tail = self._merging_strategy(others)
 
         total_length = 0
         for array in head:
             total_length += array.length
 
-        nexttags = ak.index.Index8.empty(
-            total_length, nplike=self._backend.index_nplike
-        )
-        nextindex = ak.index.Index64.empty(
-            total_length, nplike=self._backend.index_nplike
-        )
+        nexttags = ak.index.Index8.empty(total_length, nplike=index_nplike)
+        nextindex = ak.index.Index64.empty(total_length, nplike=index_nplike)
 
         nextcontents = []
         length_so_far = 0
@@ -1084,8 +1117,8 @@ class UnionArray(Content):
                 union_index = array.index
                 union_contents = array.contents
                 assert (
-                    nexttags.nplike is self._backend.index_nplike
-                    and union_tags.nplike is self._backend.index_nplike
+                    nexttags.nplike is index_nplike
+                    and union_tags.nplike is index_nplike
                 )
                 self._backend.maybe_kernel_error(
                     self._backend[
@@ -1101,8 +1134,8 @@ class UnionArray(Content):
                     )
                 )
                 assert (
-                    nextindex.nplike is self._backend.index_nplike
-                    and union_index.nplike is self._backend.index_nplike
+                    nextindex.nplike is index_nplike
+                    and union_index.nplike is index_nplike
                 )
                 self._backend.maybe_kernel_error(
                     self._backend[
@@ -1120,8 +1153,41 @@ class UnionArray(Content):
 
                 nextcontents.extend(union_contents)
 
+            # This pathway is covered by `.simplified`, but we can avoid an extra array operation
+            # by performing this now
+            elif (
+                isinstance(array, ak.contents.IndexedArray)
+                and array.parameter("__array__") != "categorical"
+            ):
+                assert nexttags.nplike is index_nplike
+                self._backend.maybe_kernel_error(
+                    self._backend[
+                        "awkward_UnionArray_filltags_const",
+                        nexttags.dtype.type,
+                    ](
+                        nexttags.data,
+                        length_so_far,
+                        array.length,
+                        len(nextcontents),
+                    )
+                )
+                nextindex.data[
+                    index_nplike.shape_item_as_index(
+                        length_so_far
+                    ) : index_nplike.shape_item_as_index(length_so_far + array.length)
+                ] = array.index.data
+
+                length_so_far += array.length
+
+                nextcontents.append(
+                    array.content.copy(
+                        parameters=parameters_union(
+                            array.content._parameters, array._parameters
+                        )
+                    )
+                )
             else:
-                assert nexttags.nplike is self._backend.index_nplike
+                assert nexttags.nplike is index_nplike
                 self._backend.maybe_kernel_error(
                     self._backend[
                         "awkward_UnionArray_filltags_const",
@@ -1134,7 +1200,7 @@ class UnionArray(Content):
                     )
                 )
 
-                assert nextindex.nplike is self._backend.index_nplike
+                assert nextindex.nplike is index_nplike
                 self._backend.maybe_kernel_error(
                     self._backend[
                         "awkward_UnionArray_fillindex_count", nextindex.dtype.type
@@ -1221,7 +1287,6 @@ class UnionArray(Content):
             self._index,
             self._contents,
             parameters=self._parameters,
-            merge=True,
             mergebool=True,
         )
         if isinstance(simplified, ak.contents.UnionArray):
@@ -1235,7 +1300,6 @@ class UnionArray(Content):
             self._index,
             self._contents,
             parameters=self._parameters,
-            merge=True,
             mergebool=True,
         )
         if isinstance(simplified, ak.contents.UnionArray):

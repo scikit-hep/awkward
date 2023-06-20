@@ -835,7 +835,6 @@ class IndexedOptionArray(Content):
             index,
             contents,
             parameters=self._parameters,
-            merge=True,
             mergebool=True,
         )
 

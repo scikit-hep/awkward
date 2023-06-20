@@ -2,11 +2,11 @@
 from __future__ import annotations
 
 __all__ = ("from_buffers",)
-
 import math
 
 import awkward as ak
 from awkward._backends.dispatch import regularize_backend
+from awkward._errors import with_operation_context
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
@@ -16,6 +16,7 @@ np = NumpyMetadata.instance()
 numpy = Numpy.instance()
 
 
+@with_operation_context
 def from_buffers(
     form,
     length,
@@ -73,30 +74,17 @@ def from_buffers(
 
     See #ak.to_buffers for examples.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.from_buffers",
-        {
-            "form": form,
-            "length": length,
-            "container": container,
-            "buffer_key": buffer_key,
-            "backend": backend,
-            "byteorder": byteorder,
-            "highlevel": highlevel,
-            "behavior": behavior,
-        },
-    ):
-        return _impl(
-            form,
-            length,
-            container,
-            buffer_key,
-            backend,
-            byteorder,
-            highlevel,
-            behavior,
-            False,
-        )
+    return _impl(
+        form,
+        length,
+        container,
+        buffer_key,
+        backend,
+        byteorder,
+        highlevel,
+        behavior,
+        False,
+    )
 
 
 def _impl(
@@ -175,6 +163,7 @@ def _from_buffer(nplike, buffer, dtype, count, byteorder):
             return array
 
 
+@with_operation_context
 def reconstitute(form, length, container, getkey, backend, byteorder, simplify):
     if isinstance(form, ak.forms.EmptyForm):
         if length != 0:

@@ -2,10 +2,9 @@
 from __future__ import annotations
 
 __all__ = ("almost_equal",)
-
-
 from awkward._backends.dispatch import backend_of
 from awkward._behavior import behavior_of, get_array_class, get_record_class
+from awkward._errors import with_operation_context
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._parameters import parameters_are_equal
 from awkward.operations.ak_to_layout import to_layout
@@ -13,6 +12,7 @@ from awkward.operations.ak_to_layout import to_layout
 np = NumpyMetadata.instance()
 
 
+@with_operation_context
 def almost_equal(
     left,
     right,

@@ -1,10 +1,11 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("to_cupy",)
-
 import awkward as ak
 from awkward._backends.cupy import CupyBackend
+from awkward._errors import with_operation_context
 
 
+@with_operation_context
 def to_cupy(array):
     """
     Args:
@@ -22,11 +23,7 @@ def to_cupy(array):
 
     See also #ak.from_cupy and #ak.to_numpy.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.to_cupy",
-        {"array": array},
-    ):
-        return _impl(array)
+    return _impl(array)
 
 
 def _impl(array):
