@@ -8,6 +8,7 @@ import pytest
 import awkward as ak
 
 pyarrow_parquet = pytest.importorskip("pyarrow.parquet")
+fsspec = pytest.importorskip("fsspec")
 
 
 def through_arrow(
@@ -848,8 +849,6 @@ def test_unionarray(tmp_path, through, extensionarray):
 
 @pytest.fixture()
 def generate_datafiles(tmp_path):
-    import fsspec
-
     fs = fsspec.filesystem("file")
     data1 = ak.from_iter([[1, 2, 3], [4, 5]])
     data2 = data1 + 1
