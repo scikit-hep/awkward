@@ -4,6 +4,7 @@ import os.path
 
 import numpy as np
 import pytest
+from packaging.version import parse as parse_version
 
 import awkward as ak
 
@@ -675,7 +676,8 @@ def test_recordarray(tmp_path, is_tuple, through, extensionarray):
 
 
 @pytest.mark.skipif(
-    not ak._util.numpy_at_least("1.20"), reason="NumPy >= 1.20 required for dates"
+    parse_version(np.__version__) < parse_version("1.20.0"),
+    reason="NumPy >= 1.20 required for dates",
 )
 @pytest.mark.parametrize("through", [through_arrow, through_parquet])
 @pytest.mark.parametrize("extensionarray", [False, True])
