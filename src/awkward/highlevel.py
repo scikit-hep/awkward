@@ -11,7 +11,6 @@ import sys
 from collections.abc import Iterable, Mapping, Sized
 
 from awkward_cpp.lib import _ext
-from numpy.lib.mixins import NDArrayOperatorsMixin  # noqa: TID251
 
 import awkward as ak
 import awkward._connect.hist
@@ -21,6 +20,7 @@ from awkward._behavior import behavior_of, get_array_class, get_record_class
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._operators import NDArrayOperatorsMixin
 from awkward._regularize import is_non_string_like_iterable
 
 np = NumpyMetadata.instance()
@@ -29,25 +29,7 @@ numpy = Numpy.instance()
 _dir_pattern = re.compile(r"^[a-zA-Z_]\w*$")
 
 
-def _patch_operators_mixin():
-    """
-    NumPy 1.25.0 introduces __slots__ on their mixin.
-    Introducing __slots__ leads to problems with generating mixin classes using diamond inheritance.
-    This patch removes the __slots__ attribute.
-    """
-    cls_namespace = NDArrayOperatorsMixin.__dict__.copy()
-    cls_namespace.pop("__slots__", None)
-    return type(
-        "AwkwardNDArrayOperatorsMixin",
-        NDArrayOperatorsMixin.__bases__,
-        cls_namespace,
-    )
-
-
-AwkwardNDArrayOperatorsMixin = _patch_operators_mixin()
-
-
-class Array(AwkwardNDArrayOperatorsMixin, Iterable, Sized):
+class Array(NDArrayOperatorsMixin, Iterable, Sized):
     """
     Args:
         data (#ak.contents.Content, #ak.Array, `np.ndarray`, `cp.ndarray`, `pyarrow.*`, str, dict, or iterable):
@@ -1499,7 +1481,7 @@ class Array(AwkwardNDArrayOperatorsMixin, Iterable, Sized):
         )
 
 
-class Record(AwkwardNDArrayOperatorsMixin):
+class Record(NDArrayOperatorsMixin):
     """
     Args:
         data (#ak.record.Record, #ak.Record, str, or dict):
