@@ -29,7 +29,25 @@ numpy = Numpy.instance()
 _dir_pattern = re.compile(r"^[a-zA-Z_]\w*$")
 
 
-class Array(NDArrayOperatorsMixin, Iterable, Sized):
+def _patch_operators_mixin():
+    """
+    NumPy 1.25.0 introduces __slots__ on their mixin.
+    Introducing __slots__ leads to problems with generating mixin classes using diamond inheritance.
+    This patch removes the __slots__ attribute.
+    """
+    cls_namespace = NDArrayOperatorsMixin.__dict__.copy()
+    cls_namespace.pop("__slots__", None)
+    return type(
+        "AwkwardNDArrayOperatorsMixin",
+        NDArrayOperatorsMixin.__bases__,
+        cls_namespace,
+    )
+
+
+AwkwardNDArrayOperatorsMixin = _patch_operators_mixin()
+
+
+class Array(AwkwardNDArrayOperatorsMixin, Iterable, Sized):
     """
     Args:
         data (#ak.contents.Content, #ak.Array, `np.ndarray`, `cp.ndarray`, `pyarrow.*`, str, dict, or iterable):
@@ -1481,7 +1499,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         )
 
 
-class Record(NDArrayOperatorsMixin):
+class Record(AwkwardNDArrayOperatorsMixin):
     """
     Args:
         data (#ak.record.Record, #ak.Record, str, or dict):
