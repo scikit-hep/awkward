@@ -4,7 +4,6 @@ from __future__ import annotations
 from numbers import Number
 
 import numpy
-from numpy.lib.mixins import NDArrayOperatorsMixin
 
 import awkward as ak
 from awkward._nplikes.dispatch import register_nplike
@@ -17,6 +16,7 @@ from awkward._nplikes.numpylike import (
 )
 from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
+from awkward._operators import NDArrayOperatorsMixin
 from awkward._regularize import is_integer, is_non_string_like_sequence
 from awkward._typing import (
     Any,

@@ -10,6 +10,7 @@ import awkward as ak
 
 pyarrow = pytest.importorskip("pyarrow")
 pyarrow_parquet = pytest.importorskip("pyarrow.parquet")
+fsspec = pytest.importorskip("fsspec")
 
 to_list = ak.operations.to_list
 
