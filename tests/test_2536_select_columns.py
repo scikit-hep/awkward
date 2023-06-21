@@ -21,11 +21,13 @@ def test_no_prune():
         ]
     ).layout.form
 
-    assert form.select_columns(["*"], prune_interior_leaves=False) == form
-    assert form.select_columns(["x"], prune_interior_leaves=False) == form
-    assert form.select_columns(["x.y"], prune_interior_leaves=False) == form
-    assert form.select_columns(["x.*"], prune_interior_leaves=False) == form
-    assert form.select_columns(["x.y.z", "x.y.w"], prune_interior_leaves=False) == form
+    assert form.select_columns(["*"], prune_unions_and_records=False) == form
+    assert form.select_columns(["x"], prune_unions_and_records=False) == form
+    assert form.select_columns(["x.y"], prune_unions_and_records=False) == form
+    assert form.select_columns(["x.*"], prune_unions_and_records=False) == form
+    assert (
+        form.select_columns(["x.y.z", "x.y.w"], prune_unions_and_records=False) == form
+    )
     assert (
         form.select_columns(["x.y.z"])
         == form.select_columns(["x.y.z*"])
@@ -62,7 +64,7 @@ def test_no_prune():
         )
     )
     assert form.select_columns(
-        ["x.y.q"], prune_interior_leaves=False
+        ["x.y.q"], prune_unions_and_records=False
     ) == ak.forms.from_dict(
         {
             "class": "RecordArray",
@@ -86,8 +88,33 @@ def test_no_prune():
             ],
         }
     )
-    assert form.select_columns([], prune_interior_leaves=False) == ak.forms.from_dict(
-        {"class": "RecordArray", "fields": [], "contents": []}
+    assert form.select_columns(
+        [], prune_unions_and_records=False
+    ) == ak.forms.from_dict({"class": "RecordArray", "fields": [], "contents": []})
+
+    union_form = ak.forms.from_dict(
+        {
+            "class": "UnionArray",
+            "tags": "i8",
+            "index": "i64",
+            "contents": [
+                {"class": "RecordArray", "fields": ["x"], "contents": ["int64"]},
+                {"class": "RecordArray", "fields": ["y"], "contents": ["int64"]},
+            ],
+        }
+    )
+    assert union_form.select_columns(
+        "z", prune_unions_and_records=False
+    ) == ak.forms.from_dict(
+        {
+            "class": "UnionArray",
+            "tags": "i8",
+            "index": "i64",
+            "contents": [
+                {"class": "RecordArray", "fields": [], "contents": []},
+                {"class": "RecordArray", "fields": [], "contents": []},
+            ],
+        }
     )
 
 
@@ -108,13 +135,29 @@ def test_prune():
     ).layout.form
 
     assert form.select_columns(
-        ["x.y.q"], prune_interior_leaves=True
+        ["x.y.q"], prune_unions_and_records=True
     ) == ak.forms.from_dict(
         {
             "class": "RecordArray",
             "fields": [],
             "contents": [],
         }
+    )
+
+    union_form = ak.forms.from_dict(
+        {
+            "class": "UnionArray",
+            "tags": "i8",
+            "index": "i64",
+            "contents": [
+                {"class": "RecordArray", "fields": ["x"], "contents": ["int64"]},
+                {"class": "RecordArray", "fields": ["y"], "contents": ["int64"]},
+            ],
+        }
+    )
+    assert (
+        union_form.select_columns("z", prune_unions_and_records=True)
+        == ak.forms.EmptyForm()
     )
 
 

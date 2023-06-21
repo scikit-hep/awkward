@@ -457,7 +457,7 @@ class Form:
         return output
 
     def select_columns(
-        self, specifier, expand_braces=True, *, prune_interior_leaves: bool = True
+        self, specifier, expand_braces=True, *, prune_unions_and_records: bool = True
     ):
         if isinstance(specifier, str):
             specifier = {specifier}
@@ -483,7 +483,7 @@ class Form:
         specifier = [[] if item == "" else item.split(".") for item in set(specifier)]
         match_specifier = _SpecifierMatcher(specifier, match_if_empty=False)
         selection = self._select_columns(match_specifier)
-        if prune_interior_leaves:
+        if prune_unions_and_records:
             return selection._prune_columns(False)
         else:
             return selection
