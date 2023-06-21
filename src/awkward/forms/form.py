@@ -280,7 +280,7 @@ class _SpecifierMatcher:
         fixed_strings = set()
         patterns = set()
         # And then map these unique strings to their child specifiers
-        match_to_next_specifiers = defaultdict[str, list[list[str]]](list)
+        match_to_next_specifiers: defaultdict[str, list[list[str]]] = defaultdict(list)
 
         # For each specifier, categorise it as a fixed-string or pattern,
         # and build the next-specifier table
