@@ -3,6 +3,8 @@
 import json
 from collections.abc import Iterable, Sized
 
+from packaging.version import parse as parse_version
+
 import awkward as ak
 from awkward._backends.numpy import NumpyBackend
 from awkward._nplikes.numpy import Numpy
@@ -29,7 +31,7 @@ or
 """
 
 else:
-    if ak._util.parse_version(pyarrow.__version__) < ak._util.parse_version("7.0.0"):
+    if parse_version(pyarrow.__version__) < parse_version("7.0.0"):
         pyarrow = None
         error_message = "pyarrow 7.0.0 or later required for {0}"
 

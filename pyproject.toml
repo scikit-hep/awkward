@@ -308,6 +308,7 @@ mccabe.max-complexity = 100
 "src/awkward/__init__.py" = ["E402", "F401", "F403", "I001"]
 "src/awkward/operations/__init__.py" = ["F403"]
 "src/awkward/_nplikes/*" = ["TID251"]
+"src/awkward/_operators.py" = ["TID251"]
 "tests*/*" = ["T20", "TID251"]
 
 [tool.ruff.flake8-tidy-imports.banned-api]
