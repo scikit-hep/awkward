@@ -25,38 +25,41 @@ def test():
     assert form.select_columns(["x"]) == form
     assert form.select_columns(["x.y"]) == form
     assert form.select_columns(["x.*"]) == form
-    assert form.select_columns(["x.y.*"]) == form
     assert form.select_columns(["x.y.z", "x.y.w"]) == form
-    assert form.select_columns(["x.y.z"]) == ak.forms.from_dict(
-        {
-            "class": "RecordArray",
-            "fields": ["x"],
-            "contents": [
-                {
-                    "class": "ListOffsetArray",
-                    "offsets": "i64",
-                    "content": {
-                        "class": "RecordArray",
-                        "fields": ["y"],
-                        "contents": [
-                            {
-                                "class": "RecordArray",
-                                "fields": [
-                                    "z",
-                                ],
-                                "contents": [
-                                    {
-                                        "class": "ListOffsetArray",
-                                        "offsets": "i64",
-                                        "content": "int64",
-                                    }
-                                ],
-                            }
-                        ],
-                    },
-                }
-            ],
-        }
+    assert (
+        form.select_columns(["x.y.z"])
+        == form.select_columns(["x.y.z*"])
+        == ak.forms.from_dict(
+            {
+                "class": "RecordArray",
+                "fields": ["x"],
+                "contents": [
+                    {
+                        "class": "ListOffsetArray",
+                        "offsets": "i64",
+                        "content": {
+                            "class": "RecordArray",
+                            "fields": ["y"],
+                            "contents": [
+                                {
+                                    "class": "RecordArray",
+                                    "fields": [
+                                        "z",
+                                    ],
+                                    "contents": [
+                                        {
+                                            "class": "ListOffsetArray",
+                                            "offsets": "i64",
+                                            "content": "int64",
+                                        }
+                                    ],
+                                }
+                            ],
+                        },
+                    }
+                ],
+            }
+        )
     )
     assert form.select_columns(["x.y.q"]) == ak.forms.from_dict(
         {
