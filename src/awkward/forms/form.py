@@ -273,7 +273,7 @@ def _expand_braces(text, seen=None):
 
 
 class _SpecifierMatcher:
-    def __init__(self, specifiers: list[list[str]]):
+    def __init__(self, specifiers: list[list[str]], *, match_if_empty: bool = False):
         # We'll build two sets of unique fixed-strings and patterns
         fixed_strings = set()
         patterns = set()
@@ -299,20 +299,13 @@ class _SpecifierMatcher:
         self._match_to_next_specifiers = match_to_next_specifiers
         self._fixed_strings = fixed_strings
         self._patterns = patterns
+        self._match_if_empty = match_if_empty
 
     @property
-    def is_identity(self) -> bool:
-        """
-        The identity specifier matcher will always return itself for any given field, indicating
-        that the specifier list has been exhausted.
-        """
+    def is_empty(self) -> bool:
         return not (self._patterns or self._fixed_strings)
 
-    def __call__(self, field: str) -> Self | None:
-        # When we run out of specifiers, we always return the identity
-        if self.is_identity:
-            return self
-
+    def __call__(self, field: str, *, next_match_if_empty: bool = False) -> Self | None:
         has_matched = False
 
         # Fixed-strings are an O(log n) lookup
@@ -328,8 +321,11 @@ class _SpecifierMatcher:
                 next_specifiers.extend(self._match_to_next_specifiers[pattern])
 
         if has_matched:
-            return _SpecifierMatcher(next_specifiers)
-        # Return None if we didn't match anything, distinct from "there are no child specifiers"
+            return _SpecifierMatcher(
+                next_specifiers, match_if_empty=next_match_if_empty
+            )
+        elif self.is_empty and self._match_if_empty:
+            return self
         else:
             return
 
@@ -483,7 +479,7 @@ class Form:
             specifier = next_specifier
 
         specifier = [[] if item == "" else item.split(".") for item in set(specifier)]
-        match_specifier = _SpecifierMatcher(specifier)
+        match_specifier = _SpecifierMatcher(specifier, match_if_empty=False)
         return self._select_columns(match_specifier)
 
     def column_types(self):

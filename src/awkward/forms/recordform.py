@@ -241,33 +241,28 @@ class RecordForm(Form):
             content._columns((*path, field), output, list_indicator)
 
     def _select_columns(self, match_specifier):
-        if match_specifier.is_identity:
-            return RecordForm(
-                [], [], parameters=self._parameters, form_key=self._form_key
-            )
-        else:
-            contents = []
-            fields = []
-            for content, field in zip(self._contents, self.fields):
-                # Try and match this field
-                next_match_specifier = match_specifier(field)
-                if next_match_specifier is None:
-                    continue
+        contents = []
+        fields = []
+        for content, field in zip(self._contents, self.fields):
+            # Try and match this field, allowing derived matcher to match any field if empty
+            next_match_specifier = match_specifier(field, next_match_if_empty=True)
+            if next_match_specifier is None:
+                continue
 
-                if next_match_specifier.is_identity:
-                    next_content = content
-                # Do we need to proceed in selection?
-                else:
-                    next_content = content._select_columns(next_match_specifier)
-                contents.append(next_content)
-                fields.append(field)
+            # Optimisation: avoid selecting columns if we know the entire subtree will match
+            if next_match_specifier.is_empty:
+                next_content = content
+            else:
+                next_content = content._select_columns(next_match_specifier)
+            contents.append(next_content)
+            fields.append(field)
 
-            return RecordForm(
-                contents,
-                fields,
-                parameters=self._parameters,
-                form_key=self._form_key,
-            )
+        return RecordForm(
+            contents,
+            fields,
+            parameters=self._parameters,
+            form_key=self._form_key,
+        )
 
     def _column_types(self):
         return sum((x._column_types() for x in self._contents), ())
