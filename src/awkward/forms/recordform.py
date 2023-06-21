@@ -240,9 +240,28 @@ class RecordForm(Form):
         for content, field in zip(self._contents, self.fields):
             content._columns((*path, field), output, list_indicator)
 
-    def _select_columns(
-        self, match_specifier, prune_interior_leaves: bool, is_inside_record: bool
-    ):
+    def _prune_columns(self, is_inside_record: bool):
+        contents = []
+        fields = []
+        for content, field in zip(self._contents, self.fields):
+            next_content = content._prune_columns(True)
+            if next_content is None:
+                continue
+            contents.append(next_content)
+            fields.append(field)
+
+        if fields or not is_inside_record:
+            return RecordForm(
+                contents,
+                fields,
+                parameters=self._parameters,
+                form_key=self._form_key,
+            )
+        # If all subtrees are pruned (or we have no subtrees!), then we should prune this form too
+        else:
+            return None
+
+    def _select_columns(self, match_specifier):
         contents = []
         fields = []
         for content, field in zip(self._contents, self.fields):
@@ -254,25 +273,16 @@ class RecordForm(Form):
             # NOTE: we could optimise this by avoiding column selection if we know the entire subtree will match
             #       this is given by `next_match_specifier.is_empty`, *but* we also want to perform column pruning
             #       meaning this optimisation is less useful, we we'd require a special prune-only pass
-            next_content = content._select_columns(
-                next_match_specifier, prune_interior_leaves, True
-            )
-            # If the selection is None, then the subtree was pruned
-            if next_content is None:
-                continue
+            next_content = content._select_columns(next_match_specifier)
             contents.append(next_content)
             fields.append(field)
 
-        # If all subtrees are pruned (or we have no subtrees!), then we should prune this form too
-        if not fields and prune_interior_leaves and is_inside_record:
-            return None
-        else:
-            return RecordForm(
-                contents,
-                fields,
-                parameters=self._parameters,
-                form_key=self._form_key,
-            )
+        return RecordForm(
+            contents,
+            fields,
+            parameters=self._parameters,
+            form_key=self._form_key,
+        )
 
     def _column_types(self):
         return sum((x._column_types() for x in self._contents), ())

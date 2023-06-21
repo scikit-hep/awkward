@@ -5,7 +5,7 @@ import awkward as ak
 from awkward._errors import deprecate
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._parameters import type_parameters_equal
-from awkward._typing import final
+from awkward._typing import Self, final
 from awkward._util import UNSET
 from awkward.forms.form import Form
 
@@ -212,9 +212,10 @@ class NumpyForm(Form):
     def _columns(self, path, output, list_indicator):
         output.append(".".join(path))
 
-    def _select_columns(
-        self, match_specifier, prune_interior_leaves: bool, is_inside_record: bool
-    ):
+    def _select_columns(self, match_specifier):
+        return self
+
+    def _prune_columns(self, is_inside_record: bool) -> Self:
         return self
 
     def _column_types(self):

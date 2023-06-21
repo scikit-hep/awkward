@@ -6,7 +6,7 @@ from inspect import signature
 import awkward as ak
 from awkward._errors import deprecate
 from awkward._nplikes.shape import ShapeItem
-from awkward._typing import Iterator, final
+from awkward._typing import Iterator, Self, final
 from awkward._util import UNSET
 from awkward.forms.form import Form, JSONMapping
 
@@ -125,9 +125,10 @@ class EmptyForm(Form):
     def _columns(self, path, output, list_indicator):
         output.append(".".join(path))
 
-    def _select_columns(
-        self, match_specifier, prune_interior_leaves: bool, is_inside_record: bool
-    ):
+    def _select_columns(self, match_specifier):
+        return self
+
+    def _prune_columns(self, is_inside_record: bool) -> Self:
         return self
 
     def _column_types(self) -> tuple[str, ...]:

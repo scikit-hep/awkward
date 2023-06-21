@@ -1,7 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 import awkward as ak
 from awkward._parameters import type_parameters_equal
-from awkward._typing import final
+from awkward._typing import Self, final
 from awkward._util import UNSET
 from awkward.forms.form import Form
 
@@ -174,12 +174,8 @@ class ByteMaskedForm(Form):
     def _columns(self, path, output, list_indicator):
         self._content._columns(path, output, list_indicator)
 
-    def _select_columns(
-        self, match_specifier, prune_interior_leaves: bool, is_inside_record: bool
-    ):
-        next_content = self._content._select_columns(
-            match_specifier, prune_interior_leaves, is_inside_record
-        )
+    def _prune_columns(self, is_inside_record: bool) -> Self | None:
+        next_content = self._content._prune_columns(is_inside_record)
         if next_content is None:
             return None
         else:
@@ -190,6 +186,15 @@ class ByteMaskedForm(Form):
                 parameters=self._parameters,
                 form_key=self._form_key,
             )
+
+    def _select_columns(self, match_specifier):
+        return ByteMaskedForm(
+            self._mask,
+            self._content._select_columns(match_specifier),
+            self._valid_when,
+            parameters=self._parameters,
+            form_key=self._form_key,
+        )
 
     def _column_types(self):
         return self._content._column_types()

@@ -141,12 +141,8 @@ class RegularForm(Form):
             path = (*path, list_indicator)
         self._content._columns(path, output, list_indicator)
 
-    def _select_columns(
-        self, match_specifier, prune_interior_leaves: bool, is_inside_record: bool
-    ):
-        next_content = self._content._select_columns(
-            match_specifier, prune_interior_leaves, is_inside_record
-        )
+    def _prune_columns(self, is_inside_record: bool):
+        next_content = self._content._prune_columns(is_inside_record)
         if next_content is None:
             return None
         else:
@@ -156,6 +152,14 @@ class RegularForm(Form):
                 parameters=self._parameters,
                 form_key=self._form_key,
             )
+
+    def _select_columns(self, match_specifier):
+        return RegularForm(
+            self._content._select_columns(match_specifier),
+            self._size,
+            parameters=self._parameters,
+            form_key=self._form_key,
+        )
 
     def _column_types(self):
         if self.parameter("__array__") in ("string", "bytestring"):

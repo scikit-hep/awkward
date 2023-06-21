@@ -2,7 +2,7 @@
 
 import awkward as ak
 from awkward._parameters import parameters_union, type_parameters_equal
-from awkward._typing import final
+from awkward._typing import Self, final
 from awkward._util import UNSET
 from awkward.forms.form import Form
 
@@ -182,12 +182,8 @@ class IndexedForm(Form):
     def _columns(self, path, output, list_indicator):
         self._content._columns(path, output, list_indicator)
 
-    def _select_columns(
-        self, match_specifier, prune_interior_leaves: bool, is_inside_record: bool
-    ):
-        next_content = self._content._select_columns(
-            match_specifier, prune_interior_leaves, is_inside_record
-        )
+    def _prune_columns(self, is_inside_record: bool) -> Self | None:
+        next_content = self._content._prune_columns(is_inside_record)
         if next_content is None:
             return None
         else:
@@ -197,6 +193,14 @@ class IndexedForm(Form):
                 parameters=self._parameters,
                 form_key=self._form_key,
             )
+
+    def _select_columns(self, match_specifier):
+        return IndexedForm(
+            self._index,
+            self._content._select_columns(match_specifier),
+            parameters=self._parameters,
+            form_key=self._form_key,
+        )
 
     def _column_types(self):
         return self._content._column_types()
