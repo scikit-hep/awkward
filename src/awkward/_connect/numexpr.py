@@ -2,6 +2,8 @@
 import sys
 import warnings
 
+from packaging.version import parse as parse_version
+
 import awkward as ak
 from awkward._behavior import behavior_of
 from awkward._layout import wrap_layout
@@ -25,9 +27,7 @@ or
         ) from err
     else:
         if not _has_checked_version:
-            if ak._util.parse_version(numexpr.__version__) < ak._util.parse_version(
-                "2.7.1"
-            ):
+            if parse_version(numexpr.__version__) < parse_version("2.7.1"):
                 warnings.warn(
                     "Awkward Array is only known to work with numexpr 2.7.1 or later"
                     "(you have version {})".format(numexpr.__version__),
