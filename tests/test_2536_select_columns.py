@@ -5,7 +5,7 @@ import pytest  # noqa: F401
 import awkward as ak
 
 
-def test():
+def test_no_prune():
     form = ak.Array(
         [
             {
@@ -21,11 +21,11 @@ def test():
         ]
     ).layout.form
 
-    assert form.select_columns(["*"]) == form
-    assert form.select_columns(["x"]) == form
-    assert form.select_columns(["x.y"]) == form
-    assert form.select_columns(["x.*"]) == form
-    assert form.select_columns(["x.y.z", "x.y.w"]) == form
+    assert form.select_columns(["*"], prune_interior_leaves=False) == form
+    assert form.select_columns(["x"], prune_interior_leaves=False) == form
+    assert form.select_columns(["x.y"], prune_interior_leaves=False) == form
+    assert form.select_columns(["x.*"], prune_interior_leaves=False) == form
+    assert form.select_columns(["x.y.z", "x.y.w"], prune_interior_leaves=False) == form
     assert (
         form.select_columns(["x.y.z"])
         == form.select_columns(["x.y.z*"])
@@ -61,7 +61,9 @@ def test():
             }
         )
     )
-    assert form.select_columns(["x.y.q"]) == ak.forms.from_dict(
+    assert form.select_columns(
+        ["x.y.q"], prune_interior_leaves=False
+    ) == ak.forms.from_dict(
         {
             "class": "RecordArray",
             "fields": ["x"],
@@ -84,8 +86,35 @@ def test():
             ],
         }
     )
-    assert form.select_columns([]) == ak.forms.from_dict(
+    assert form.select_columns([], prune_interior_leaves=False) == ak.forms.from_dict(
         {"class": "RecordArray", "fields": [], "contents": []}
+    )
+
+
+def test_prune():
+    form = ak.Array(
+        [
+            {
+                "x": [
+                    {
+                        "y": {
+                            "z": [1, 2, 3],
+                            "w": 4,
+                        }
+                    }
+                ]
+            }
+        ]
+    ).layout.form
+
+    assert form.select_columns(
+        ["x.y.q"], prune_interior_leaves=True
+    ) == ak.forms.from_dict(
+        {
+            "class": "RecordArray",
+            "fields": [],
+            "contents": [],
+        }
     )
 
 

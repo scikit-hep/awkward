@@ -240,7 +240,9 @@ class RecordForm(Form):
         for content, field in zip(self._contents, self.fields):
             content._columns((*path, field), output, list_indicator)
 
-    def _select_columns(self, match_specifier):
+    def _select_columns(
+        self, match_specifier, prune_interior_leaves: bool, is_inside_record: bool
+    ):
         contents = []
         fields = []
         for content, field in zip(self._contents, self.fields):
@@ -249,20 +251,28 @@ class RecordForm(Form):
             if next_match_specifier is None:
                 continue
 
-            # Optimisation: avoid selecting columns if we know the entire subtree will match
-            if next_match_specifier.is_empty:
-                next_content = content
-            else:
-                next_content = content._select_columns(next_match_specifier)
+            # NOTE: we could optimise this by avoiding column selection if we know the entire subtree will match
+            #       this is given by `next_match_specifier.is_empty`, *but* we also want to perform column pruning
+            #       meaning this optimisation is less useful, we we'd require a special prune-only pass
+            next_content = content._select_columns(
+                next_match_specifier, prune_interior_leaves, True
+            )
+            # If the selection is None, then the subtree was pruned
+            if next_content is None:
+                continue
             contents.append(next_content)
             fields.append(field)
 
-        return RecordForm(
-            contents,
-            fields,
-            parameters=self._parameters,
-            form_key=self._form_key,
-        )
+        # If all subtrees are pruned (or we have no subtrees!), then we should prune this form too
+        if not fields and prune_interior_leaves and is_inside_record:
+            return None
+        else:
+            return RecordForm(
+                contents,
+                fields,
+                parameters=self._parameters,
+                form_key=self._form_key,
+            )
 
     def _column_types(self):
         return sum((x._column_types() for x in self._contents), ())

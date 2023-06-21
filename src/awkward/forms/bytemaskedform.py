@@ -174,14 +174,22 @@ class ByteMaskedForm(Form):
     def _columns(self, path, output, list_indicator):
         self._content._columns(path, output, list_indicator)
 
-    def _select_columns(self, match_specifier):
-        return ByteMaskedForm(
-            self._mask,
-            self._content._select_columns(match_specifier),
-            self._valid_when,
-            parameters=self._parameters,
-            form_key=self._form_key,
+    def _select_columns(
+        self, match_specifier, prune_interior_leaves: bool, is_inside_record: bool
+    ):
+        next_content = self._content._select_columns(
+            match_specifier, prune_interior_leaves, is_inside_record
         )
+        if next_content is None:
+            return None
+        else:
+            return ByteMaskedForm(
+                self._mask,
+                next_content,
+                self._valid_when,
+                parameters=self._parameters,
+                form_key=self._form_key,
+            )
 
     def _column_types(self):
         return self._content._column_types()

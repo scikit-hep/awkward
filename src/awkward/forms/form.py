@@ -456,7 +456,9 @@ class Form:
         self._columns(column_prefix, output, list_indicator)
         return output
 
-    def select_columns(self, specifier, expand_braces=True):
+    def select_columns(
+        self, specifier, expand_braces=True, *, prune_interior_leaves: bool = True
+    ):
         if isinstance(specifier, str):
             specifier = {specifier}
 
@@ -480,7 +482,7 @@ class Form:
 
         specifier = [[] if item == "" else item.split(".") for item in set(specifier)]
         match_specifier = _SpecifierMatcher(specifier, match_if_empty=False)
-        return self._select_columns(match_specifier)
+        return self._select_columns(match_specifier, prune_interior_leaves, False)
 
     def column_types(self):
         return self._column_types()
@@ -488,7 +490,9 @@ class Form:
     def _columns(self, path, output, list_indicator):
         raise NotImplementedError
 
-    def _select_columns(self, match_specifier):
+    def _select_columns(
+        self, match_specifier, prune_interior_leaves: bool, is_inside_record: bool
+    ) -> Form | None:
         raise NotImplementedError
 
     def _column_types(self):

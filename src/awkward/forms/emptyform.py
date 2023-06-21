@@ -125,7 +125,9 @@ class EmptyForm(Form):
     def _columns(self, path, output, list_indicator):
         output.append(".".join(path))
 
-    def _select_columns(self, match_specifier):
+    def _select_columns(
+        self, match_specifier, prune_interior_leaves: bool, is_inside_record: bool
+    ):
         return self
 
     def _column_types(self) -> tuple[str, ...]:

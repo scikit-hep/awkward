@@ -231,14 +231,23 @@ class UnionForm(Form):
         for content, field in zip(self._contents, self.fields):
             content._columns((*path, field), output, list_indicator)
 
-    def _select_columns(self, match_specifier):
+    def _select_columns(
+        self, match_specifier, prune_interior_leaves: bool, is_inside_record: bool
+    ):
         contents = []
         for content in self._contents:
-            next_content = content._select_columns(match_specifier)
+            next_content = content._select_columns(
+                match_specifier, prune_interior_leaves, is_inside_record
+            )
+            if next_content is None:
+                continue
             contents.append(next_content)
 
         if len(contents) == 0:
-            return ak.forms.EmptyForm(form_key=self._form_key)
+            if prune_interior_leaves and is_inside_record:
+                return None
+            else:
+                return ak.forms.EmptyForm(form_key=self._form_key)
         elif len(contents) == 1:
             return contents[0]
         else:
