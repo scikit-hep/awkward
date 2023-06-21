@@ -11,7 +11,6 @@ import sys
 from collections.abc import Iterable, Mapping, Sized
 
 from awkward_cpp.lib import _ext
-from numpy.lib.mixins import NDArrayOperatorsMixin  # noqa: TID251
 
 import awkward as ak
 import awkward._connect.hist
@@ -21,6 +20,7 @@ from awkward._behavior import behavior_of, get_array_class, get_record_class
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._operators import NDArrayOperatorsMixin
 from awkward._regularize import is_non_string_like_iterable
 
 np = NumpyMetadata.instance()
