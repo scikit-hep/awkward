@@ -7,8 +7,6 @@ import struct
 import sys
 from collections.abc import Collection
 
-import packaging.version
-
 from awkward._typing import TypeVar
 
 win = os.name == "nt"
@@ -22,16 +20,6 @@ kMaxUInt32 = 4294967295  # 2**32 - 1
 kMaxInt64 = 9223372036854775806  # 2**63 - 2: see below
 kSliceNone = kMaxInt64 + 1  # for Slice::none()
 kMaxLevels = 48
-
-
-def parse_version(version):
-    return packaging.version.parse(version)
-
-
-def numpy_at_least(version):
-    import numpy  # noqa: TID251
-
-    return parse_version(numpy.__version__) >= parse_version(version)
 
 
 def in_module(obj, modulename: str) -> bool:
