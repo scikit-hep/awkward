@@ -215,7 +215,7 @@ class NumpyForm(Form):
     def _select_columns(self, match_specifier):
         return self
 
-    def _prune_columns(self, is_inside_record: bool) -> Self:
+    def _prune_columns(self, is_inside_record_or_union: bool) -> Self:
         return self
 
     def _column_types(self):

@@ -147,8 +147,8 @@ class ListOffsetForm(Form):
             path = (*path, list_indicator)
         self._content._columns(path, output, list_indicator)
 
-    def _prune_columns(self, is_inside_record: bool):
-        next_content = self._content._prune_columns(is_inside_record)
+    def _prune_columns(self, is_inside_record_or_union: bool):
+        next_content = self._content._prune_columns(is_inside_record_or_union)
         if next_content is None:
             return None
         else:

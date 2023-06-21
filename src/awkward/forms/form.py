@@ -494,7 +494,7 @@ class Form:
     def _columns(self, path, output, list_indicator):
         raise NotImplementedError
 
-    def _prune_columns(self, is_inside_record: bool) -> Self | None:
+    def _prune_columns(self, is_inside_record_or_union: bool) -> Self | None:
         raise NotImplementedError
 
     def _select_columns(self, match_specifier) -> Self | None:

@@ -231,16 +231,20 @@ class UnionForm(Form):
         for content, field in zip(self._contents, self.fields):
             content._columns((*path, field), output, list_indicator)
 
-    def _prune_columns(self, is_inside_record: bool) -> Self | None:
+    def _prune_columns(self, is_inside_record_or_union: bool) -> Self | None:
         contents = []
         for content in self._contents:
-            next_content = content._prune_columns(is_inside_record)
+            next_content = content._prune_columns(True)
             if next_content is None:
                 continue
             contents.append(next_content)
 
         if len(contents) == 0:
-            return None
+            if is_inside_record_or_union:
+                return None
+            else:
+                # outermost unions should return an EmptyForm instead
+                return ak.forms.EmptyForm(form_key=self._form_key)
         elif len(contents) == 1:
             return contents[0]
         else:

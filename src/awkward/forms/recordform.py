@@ -240,7 +240,7 @@ class RecordForm(Form):
         for content, field in zip(self._contents, self.fields):
             content._columns((*path, field), output, list_indicator)
 
-    def _prune_columns(self, is_inside_record: bool):
+    def _prune_columns(self, is_inside_record_or_union: bool):
         contents = []
         fields = []
         for content, field in zip(self._contents, self.fields):
@@ -250,7 +250,7 @@ class RecordForm(Form):
             contents.append(next_content)
             fields.append(field)
 
-        if fields or not is_inside_record:
+        if fields or not is_inside_record_or_union:
             return RecordForm(
                 contents,
                 fields,
