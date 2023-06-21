@@ -457,8 +457,6 @@ class Form:
     def select_columns(self, specifier, expand_braces=True):
         if isinstance(specifier, str):
             specifier = {specifier}
-        else:
-            specifier = set(specifier)
 
         # Only take unique specifiers
         for item in specifier:
