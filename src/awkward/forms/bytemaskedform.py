@@ -174,10 +174,10 @@ class ByteMaskedForm(Form):
     def _columns(self, path, output, list_indicator):
         self._content._columns(path, output, list_indicator)
 
-    def _select_columns(self, index, specifier, matches, output):
+    def _select_columns(self, match_specifier):
         return ByteMaskedForm(
             self._mask,
-            self._content._select_columns(index, specifier, matches, output),
+            self._content._select_columns(match_specifier),
             self._valid_when,
             parameters=self._parameters,
             form_key=self._form_key,

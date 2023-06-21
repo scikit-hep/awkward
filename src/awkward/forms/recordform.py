@@ -1,8 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-from collections.abc import Callable, Iterable
-from fnmatch import fnmatchcase
-from functools import partial
-from glob import escape as escape_glob
+from collections.abc import Iterable
 
 import awkward as ak
 from awkward._parameters import type_parameters_equal
@@ -243,47 +240,22 @@ class RecordForm(Form):
         for content, field in zip(self._contents, self.fields):
             content._columns((*path, field), output, list_indicator)
 
-    def _build_pattern_matchers(
-        self, specifier: list[list[str]], index: int
-    ) -> list[Callable[[str], bool]]:
-        specifier_matchers = []
-        fixed_string_patterns = set()
-
-        def matches_fixed_string_patterns(field):
-            return field in fixed_string_patterns
-
-        for _i, components in enumerate(specifier):
-            if index >= len(components):
-                specifier_matchers.append(lambda y: True)
-            else:
-                this_item = components[index]
-
-                # Is the pattern a trivial fixed string?
-                if escape_glob(this_item) == this_item:
-                    fixed_string_patterns.add(this_item)
-                    specifier_matchers.append(matches_fixed_string_patterns)
-                else:
-                    specifier_matchers.append(partial(fnmatchcase, pat=this_item))
-        return specifier_matchers
-
-    def _select_columns(self, index, specifier, matches, output):
-        specifier_matchers = self._build_pattern_matchers(specifier, index)
-
+    def _select_columns(self, match_specifier):
         contents = []
         fields = []
         for content, field in zip(self._contents, self.fields):
-            next_matches = [
-                matches[i] and matcher(field)
-                for i, matcher in enumerate(specifier_matchers)
-            ]
-            if any(next_matches):
-                len_output = len(output)
-                next_content = content._select_columns(
-                    index + 1, specifier, next_matches, output
-                )
-                if len_output != len(output):
-                    contents.append(next_content)
-                    fields.append(field)
+            # Try and match this field
+            next_match_specifier = match_specifier(field)
+            if next_match_specifier is None:
+                continue
+
+            if next_match_specifier.is_identity:
+                next_content = content
+            # Do we need to proceed in selection?
+            else:
+                next_content = content._select_columns(next_match_specifier)
+            contents.append(next_content)
+            fields.append(field)
 
         return RecordForm(
             contents,

@@ -141,9 +141,9 @@ class RegularForm(Form):
             path = (*path, list_indicator)
         self._content._columns(path, output, list_indicator)
 
-    def _select_columns(self, index, specifier, matches, output):
+    def _select_columns(self, match_specifier):
         return RegularForm(
-            self._content._select_columns(index, specifier, matches, output),
+            self._content._select_columns(match_specifier),
             self._size,
             parameters=self._parameters,
             form_key=self._form_key,
