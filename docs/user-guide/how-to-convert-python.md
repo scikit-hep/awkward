@@ -314,7 +314,7 @@ ak.Array([b"one", b"two", b"three", b"four"]).to_list()
 Advanced topic: the rest of this section may be skipped if you don't care about internal representations.
 ```
 
-Awkward's strings and bytestrings are not distinct types, but specializations of variable-length lists. Whereas a list might be internally represented by a {class}`ak.contents.ListArray` or a {class}`ak.contents.ListOffsetArray`,
+Awkward's strings and bytestrings are _specializations_ of variable-length lists. Whereas a list might be internally represented by a {class}`ak.contents.ListArray` or a {class}`ak.contents.ListOffsetArray`,
 
 ```{code-cell} ipython3
 ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout
@@ -342,13 +342,6 @@ ak.Array(["one", "two", "three", "four"]) == ak.Array(
 
 Special behaviors for strings are implemented using the same {data}`ak.behavior` mechanism that you might use to give special behaviors to Arrays and Records.
 
-```{code-cell} ipython3
-ak.behavior["string"]
-```
-
-```{code-cell} ipython3
-ak.behavior["bytestring"]
-```
 
 ```{code-cell} ipython3
 ak.behavior[np.equal, "string", "string"]
