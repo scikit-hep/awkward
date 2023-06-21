@@ -5,7 +5,7 @@ import itertools
 import json
 import re
 from collections import defaultdict
-from collections.abc import Mapping
+from collections.abc import Iterable, Mapping
 from fnmatch import fnmatchcase
 from glob import escape as escape_glob
 
@@ -273,7 +273,9 @@ def _expand_braces(text, seen=None):
 
 
 class _SpecifierMatcher:
-    def __init__(self, specifiers: list[list[str]], *, match_if_empty: bool = False):
+    def __init__(
+        self, specifiers: Iterable[list[str]], *, match_if_empty: bool = False
+    ):
         # We'll build two sets of unique fixed-strings and patterns
         fixed_strings = set()
         patterns = set()
