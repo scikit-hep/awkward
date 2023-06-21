@@ -241,28 +241,33 @@ class RecordForm(Form):
             content._columns((*path, field), output, list_indicator)
 
     def _select_columns(self, match_specifier):
-        contents = []
-        fields = []
-        for content, field in zip(self._contents, self.fields):
-            # Try and match this field
-            next_match_specifier = match_specifier(field)
-            if next_match_specifier is None:
-                continue
+        if match_specifier.is_identity:
+            return RecordForm(
+                [], [], parameters=self._parameters, form_key=self._form_key
+            )
+        else:
+            contents = []
+            fields = []
+            for content, field in zip(self._contents, self.fields):
+                # Try and match this field
+                next_match_specifier = match_specifier(field)
+                if next_match_specifier is None:
+                    continue
 
-            if next_match_specifier.is_identity:
-                next_content = content
-            # Do we need to proceed in selection?
-            else:
-                next_content = content._select_columns(next_match_specifier)
-            contents.append(next_content)
-            fields.append(field)
+                if next_match_specifier.is_identity:
+                    next_content = content
+                # Do we need to proceed in selection?
+                else:
+                    next_content = content._select_columns(next_match_specifier)
+                contents.append(next_content)
+                fields.append(field)
 
-        return RecordForm(
-            contents,
-            fields,
-            parameters=self._parameters,
-            form_key=self._form_key,
-        )
+            return RecordForm(
+                contents,
+                fields,
+                parameters=self._parameters,
+                form_key=self._form_key,
+            )
 
     def _column_types(self):
         return sum((x._column_types() for x in self._contents), ())

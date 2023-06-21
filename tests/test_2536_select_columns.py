@@ -81,4 +81,6 @@ def test():
             ],
         }
     )
-    assert form.select_columns([]) == form
+    assert form.select_columns([]) == ak.forms.from_dict(
+        {"class": "RecordArray", "fields": [], "contents": []}
+    )
