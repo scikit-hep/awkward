@@ -4,7 +4,10 @@ from __future__ import annotations
 import itertools
 import json
 import re
-from collections.abc import Mapping
+from collections import defaultdict
+from collections.abc import Iterable, Mapping
+from fnmatch import fnmatchcase
+from glob import escape as escape_glob
 
 import awkward as ak
 from awkward._backends.numpy import NumpyBackend
@@ -12,7 +15,7 @@ from awkward._errors import deprecate
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._parameters import parameters_union
-from awkward._typing import Final, JSONMapping, JSONSerializable
+from awkward._typing import Final, JSONMapping, JSONSerializable, Self
 
 np = NumpyMetadata.instance()
 numpy_backend = NumpyBackend.instance()
@@ -269,6 +272,66 @@ def _expand_braces(text, seen=None):
             yield from _expand_braces("".join(replaced), seen)
 
 
+class _SpecifierMatcher:
+    def __init__(
+        self, specifiers: Iterable[list[str]], *, match_if_empty: bool = False
+    ):
+        # We'll build two sets of unique fixed-strings and patterns
+        fixed_strings = set()
+        patterns = set()
+        # And then map these unique strings to their child specifiers
+        match_to_next_specifiers: defaultdict[str, list[list[str]]] = defaultdict(list)
+
+        # For each specifier, categorise it as a fixed-string or pattern,
+        # and build the next-specifier table
+        parent: str
+        child: list[str]
+        for item in specifiers:
+            parent, *child = item
+
+            if escape_glob(parent) == parent:
+                fixed_strings.add(parent)
+            else:
+                patterns.add(parent)
+
+            # Only include child specifier list if it is non-empty
+            if child:
+                match_to_next_specifiers[parent].append(child)
+
+        self._match_to_next_specifiers = match_to_next_specifiers
+        self._fixed_strings = fixed_strings
+        self._patterns = patterns
+        self._match_if_empty = match_if_empty
+
+    @property
+    def is_empty(self) -> bool:
+        return not (self._patterns or self._fixed_strings)
+
+    def __call__(self, field: str, *, next_match_if_empty: bool = False) -> Self | None:
+        has_matched = False
+
+        # Fixed-strings are an O(log n) lookup
+        next_specifiers = []
+        if field in self._fixed_strings:
+            has_matched = True
+            next_specifiers.extend(self._match_to_next_specifiers[field])
+
+        # Fixed-strings are an O(n) lookup
+        for pattern in self._patterns:
+            if fnmatchcase(field, pattern):
+                has_matched = True
+                next_specifiers.extend(self._match_to_next_specifiers[pattern])
+
+        if has_matched:
+            return _SpecifierMatcher(
+                next_specifiers, match_if_empty=next_match_if_empty
+            )
+        elif self.is_empty and self._match_if_empty:
+            return self
+        else:
+            return
+
+
 class Form:
     is_numpy = False
     is_unknown = False
@@ -393,14 +456,21 @@ class Form:
         self._columns(column_prefix, output, list_indicator)
         return output
 
-    def select_columns(self, specifier, expand_braces=True):
+    def select_columns(
+        self, specifier, expand_braces=True, *, prune_unions_and_records: bool = True
+    ):
         if isinstance(specifier, str):
-            specifier = [specifier]
+            specifier = {specifier}
 
+        # Only take unique specifiers
         for item in specifier:
             if not isinstance(item, str):
                 raise TypeError(
-                    "a column-selection specifier must be a list of strings"
+                    "a column-selection specifier must be a list of non-empty strings"
+                )
+            if not item:
+                raise ValueError(
+                    "a column-selection specifier must be a list of non-empty strings"
                 )
 
         if expand_braces:
@@ -411,10 +481,12 @@ class Form:
             specifier = next_specifier
 
         specifier = [[] if item == "" else item.split(".") for item in set(specifier)]
-        matches = [True] * len(specifier)
-
-        output = []
-        return self._select_columns(0, specifier, matches, output)
+        match_specifier = _SpecifierMatcher(specifier, match_if_empty=False)
+        selection = self._select_columns(match_specifier)
+        if prune_unions_and_records:
+            return selection._prune_columns(False)
+        else:
+            return selection
 
     def column_types(self):
         return self._column_types()
@@ -422,7 +494,10 @@ class Form:
     def _columns(self, path, output, list_indicator):
         raise NotImplementedError
 
-    def _select_columns(self, index, specifier, matches, output):
+    def _prune_columns(self, is_inside_record_or_union: bool) -> Self | None:
+        raise NotImplementedError
+
+    def _select_columns(self, match_specifier) -> Self | None:
         raise NotImplementedError
 
     def _column_types(self):
