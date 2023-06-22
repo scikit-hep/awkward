@@ -45,7 +45,7 @@ def softmax(x, axis=None, *, keepdims=False, mask_identity=False):
     non-reducer.
     """
     # Dispatch
-    yield x
+    yield (x,)
 
     # Implementation
     return _impl(x, axis, keepdims, mask_identity)
