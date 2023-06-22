@@ -271,11 +271,16 @@ There are two kinds of releases: (1) `awkward-cpp` updates, which only occur whe
 
 If you need your merged pull request to be deployed in a release, just ask!
 
-#### Awkward-cpp releases
-When making an `awkward-cpp` release (1), the following manual steps must also be taken:
-- Creating a `git` tag `awkward-cpp-{version}` for the new version epoch.
+#### `awkward-cpp` releases
+To make an `awkward-cpp` release:
+1. A commit to `main` should increase the version number in `awkward-cpp/pyproject.toml`
+2. The [Deploy C++](https://github.com/scikit-hep/awkward/actions/workflows/deploy-cpp.yml) GitHub Actions workflow should be manually triggered.
+3. A `git` tag `awkward-cpp-{version}` should be created for the new version epoch.
 
-#### Awkward releases
-When making an `awkward` release (2), the following manual steps must also be taken:
-- Attaching the `headers.zip` from the `deploy.yml` workflow to the release artefacts.
-- Adding a `doc/switcher.json` entry for new minor/major versions.
+#### `awkward` releases
+To make an `awkward` release:
+1. A commit to `main` should increase the version number in `pyproject.toml`
+2. A new GitHub release must be published.
+3. A `docs/switcher.json` entry must be added for new minor/major versions.
+
+Pushes that modify `docs/switcher.json` on `main` will automatically be synchronised with AWS.

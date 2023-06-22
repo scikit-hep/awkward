@@ -2,10 +2,9 @@
 from __future__ import annotations
 
 __all__ = ("almost_equal",)
-
-
 from awkward._backends.dispatch import backend_of
 from awkward._behavior import behavior_of, get_array_class, get_record_class
+from awkward._errors import with_operation_context
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._parameters import parameters_are_equal
 from awkward.operations.ak_to_layout import to_layout
@@ -13,6 +12,7 @@ from awkward.operations.ak_to_layout import to_layout
 np = NumpyMetadata.instance()
 
 
+@with_operation_context
 def almost_equal(
     left,
     right,
@@ -64,22 +64,30 @@ def almost_equal(
                     return np.issubdtype(right, family)
         return left == right
 
+    def packed_list_content(layout):
+        layout = layout.to_ListOffsetArray64(False)
+        return layout.content[layout.offsets[0] : layout.offsets[-1]]
+
     def visitor(left, right) -> bool:
-        # Enforce super-canonicalisation rules
+        # First, erase indexed types!
+        if left.is_indexed and not left.is_option:
+            left = left.project()
+        if right.is_indexed and not right.is_option:
+            right = right.project()
+
+        # Simplify option types
         if left.is_option:
             left = left.to_IndexedOptionArray64()
         if right.is_option:
             right = right.to_IndexedOptionArray64()
 
-        if type(left) is not type(right):
-            if not check_regular and (
-                left.is_list and right.is_regular or left.is_regular and right.is_list
-            ):
-                left = left.to_ListOffsetArray64()
-                right = right.to_ListOffsetArray64()
-            else:
-                return False
+        # Simplify regular NumPy types
+        if left.is_numpy and left.purelist_depth > 1:
+            left = left.to_RegularArray()
+        if right.is_numpy and right.purelist_depth > 1:
+            right = right.to_RegularArray()
 
+        # Different lengths aren't equal!
         if left.length != right.length:
             return False
 
@@ -96,49 +104,106 @@ def almost_equal(
         ):
             return False
 
-        if left.is_list:
-            return backend.index_nplike.array_equal(
-                left.offsets, right.offsets
-            ) and visitor(
-                left.content[: left.offsets[-1]], right.content[: right.offsets[-1]]
-            )
-        elif left.is_regular:
+        # Regular-regular
+        if left.is_regular and right.is_regular:
             return (left.size == right.size) and visitor(left.content, right.content)
-        elif left.is_numpy:
-            return (
-                is_approx_dtype(left.dtype, right.dtype)
-                and backend.nplike.all(
-                    backend.nplike.isclose(
-                        left.data, right.data, rtol=rtol, atol=atol, equal_nan=False
-                    )
+        # List-list
+        elif left.is_list and right.is_list:
+            # Mixed regular-var
+            if left.is_regular and not right.is_regular:
+                return (not check_regular) and visitor(
+                    left.content,
+                    packed_list_content(right),
                 )
-                and left.shape == right.shape
-            )
+            elif right.is_regular and not left.is_regular:
+                return (not check_regular) and visitor(
+                    packed_list_content(left),
+                    right.content,
+                )
+            else:
+                return visitor(
+                    packed_list_content(left),
+                    packed_list_content(right),
+                )
 
-        elif left.is_option:
+        elif left.is_numpy and right.is_numpy:
+            # Timelike types must be exactly compared, including their units
+            if (
+                np.issubdtype(left.dtype, np.datetime64)
+                or np.issubdtype(right.dtype, np.datetime64)
+                or np.issubdtype(left.dtype, np.timedelta64)
+                or np.issubdtype(right.dtype, np.timedelta64)
+            ):
+                return (
+                    (left.dtype == right.dtype)
+                    and backend.nplike.all(left.data == right.data)
+                    and left.shape == right.shape
+                )
+            else:
+                return (
+                    is_approx_dtype(left.dtype, right.dtype)
+                    and backend.nplike.all(
+                        backend.nplike.isclose(
+                            left.data, right.data, rtol=rtol, atol=atol, equal_nan=False
+                        )
+                    )
+                    and left.shape == right.shape
+                )
+        elif left.is_option and right.is_option:
             return backend.index_nplike.array_equal(
-                left.index.data < 0, right.index.data < 0
-            ) and visitor(left.project().to_packed(), right.project().to_packed())
-        elif left.is_union:
-            return (len(left.contents) == len(right.contents)) and all(
-                visitor(left.project(i).to_packed(), right.project(i).to_packed())
-                for i, _ in enumerate(left.contents)
+                left.mask_as_bool(True), right.mask_as_bool(True)
+            ) and visitor(left.project(), right.project())
+        elif left.is_union and right.is_union:
+            # For two unions with different content orderings to match, the tags should be equal at each index
+            # Therefore, we can order the contents by index appearance
+            def ordered_unique_values(values):
+                # First, find unique values and their appearance (from smallest to largest)
+                # unique_index is in ascending order of `unique` value
+                (
+                    unique,
+                    unique_index,
+                    *_,
+                ) = backend.index_nplike.unique_all(values)
+                # Now re-order `unique` by order of appearance (`unique_index`)
+                return values[backend.index_nplike.sort(unique_index)]
+
+            # Find order of appearance for each union tags, and assume these are one-to-one maps
+            left_tag_order = ordered_unique_values(left.tags.data)
+            right_tag_order = ordered_unique_values(right.tags.data)
+
+            # Create map from left tags to right tags
+            left_tag_to_right_tag = backend.index_nplike.empty(
+                left_tag_order.size, dtype=np.int64
             )
-        elif left.is_record:
+            left_tag_to_right_tag[left_tag_order] = right_tag_order
+
+            # Map left tags onto right, such that the result should equal right.tags
+            # if the two tag arrays are equivalent
+            new_left_tag = left_tag_to_right_tag[left.tags.data]
+            if not backend.index_nplike.all(new_left_tag == right.tags.data):
+                return False
+
+            # Now project out the contents, and check for equality
+            for i, j in zip(left_tag_order, right_tag_order):
+                if not visitor(left.project(i), right.project(j)):
+                    return False
+            return True
+
+        elif left.is_record and right.is_record:
             return (
                 (
                     get_record_class(left, left_behavior)
                     is get_record_class(right, right_behavior)
                     or not check_parameters
                 )
-                and (left.fields == right.fields)
-                and (left.is_tuple == right.is_tuple)
-                and all(visitor(x, y) for x, y in zip(left.contents, right.contents))
+                and left.is_tuple == right.is_tuple
+                and (left.is_tuple or (len(left.fields) == len(right.fields)))
+                and all(visitor(left.content(f), right.content(f)) for f in left.fields)
             )
-        elif left.is_unknown:
+        elif left.is_unknown and right.is_unknown:
             return True
 
         else:
-            raise AssertionError
+            return False
 
     return visitor(left, right)

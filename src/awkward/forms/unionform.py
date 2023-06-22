@@ -3,10 +3,9 @@ from collections import Counter
 from collections.abc import Iterable
 
 import awkward as ak
-from awkward._behavior import find_typestr
 from awkward._parameters import type_parameters_equal
-from awkward._typing import final
-from awkward._util import unset
+from awkward._typing import Self, final
+from awkward._util import UNSET
 from awkward.forms.form import Form
 
 
@@ -68,19 +67,19 @@ class UnionForm(Form):
 
     def copy(
         self,
-        tags=unset,
-        index=unset,
-        contents=unset,
+        tags=UNSET,
+        index=UNSET,
+        contents=UNSET,
         *,
-        parameters=unset,
-        form_key=unset,
+        parameters=UNSET,
+        form_key=UNSET,
     ):
         return UnionForm(
-            self._tags if tags is unset else tags,
-            self._index if index is unset else index,
-            self._contents if contents is unset else contents,
-            parameters=self._parameters if parameters is unset else parameters,
-            form_key=self._form_key if form_key is unset else form_key,
+            self._tags if tags is UNSET else tags,
+            self._index if index is UNSET else index,
+            self._contents if contents is UNSET else contents,
+            parameters=self._parameters if parameters is UNSET else parameters,
+            form_key=self._form_key if form_key is UNSET else form_key,
         )
 
     @classmethod
@@ -133,11 +132,11 @@ class UnionForm(Form):
             verbose,
         )
 
-    def _type(self, typestrs):
+    @property
+    def type(self):
         return ak.types.UnionType(
-            [x._type(typestrs) for x in self._contents],
+            [x.type for x in self._contents],
             parameters=self._parameters,
-            typestr=find_typestr(self._parameters, typestrs),
         )
 
     def __eq__(self, other):
@@ -232,16 +231,20 @@ class UnionForm(Form):
         for content, field in zip(self._contents, self.fields):
             content._columns((*path, field), output, list_indicator)
 
-    def _select_columns(self, index, specifier, matches, output):
+    def _prune_columns(self, is_inside_record_or_union: bool) -> Self | None:
         contents = []
         for content in self._contents:
-            len_output = len(output)
-            next_content = content._select_columns(index, specifier, matches, output)
-            if len_output != len(output):
-                contents.append(next_content)
+            next_content = content._prune_columns(True)
+            if next_content is None:
+                continue
+            contents.append(next_content)
 
         if len(contents) == 0:
-            return ak.forms.EmptyForm(form_key=self._form_key)
+            if is_inside_record_or_union:
+                return None
+            else:
+                # outermost unions should return an EmptyForm instead
+                return ak.forms.EmptyForm(form_key=self._form_key)
         elif len(contents) == 1:
             return contents[0]
         else:
@@ -252,6 +255,19 @@ class UnionForm(Form):
                 parameters=self._parameters,
                 form_key=self._form_key,
             )
+
+    def _select_columns(self, match_specifier):
+        contents = [
+            content._select_columns(match_specifier) for content in self._contents
+        ]
+
+        return UnionForm(
+            self._tags,
+            self._index,
+            contents,
+            parameters=self._parameters,
+            form_key=self._form_key,
+        )
 
     def _column_types(self):
         return sum((x._column_types() for x in self._contents), ())

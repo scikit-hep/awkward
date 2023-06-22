@@ -22,7 +22,7 @@ def roundtrip(layout):
     lookup = ak._lookup.Lookup(layout)
     assert isinstance(lookup, ak._lookup.Lookup)
 
-    numbatype = ak_numba_arrayview.tonumbatype(layout.form)
+    numbatype = ak_numba_arrayview.to_numbatype(layout.form)
     assert isinstance(numbatype, ak_numba_layout.ContentType)
 
     layout2 = numbatype.tolayout(lookup, 0, ())

@@ -2,21 +2,21 @@
 __all__ = ("count_nonzero",)
 import awkward as ak
 from awkward._behavior import behavior_of
+from awkward._errors import with_operation_context
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
-from awkward._util import unset
 
 np = NumpyMetadata.instance()
 
 
+@with_operation_context
 def count_nonzero(
     array,
     axis=None,
     *,
     keepdims=False,
     mask_identity=False,
-    flatten_records=unset,
     highlevel=True,
     behavior=None,
 ):
@@ -54,28 +54,7 @@ def count_nonzero(
     count None values. If it is desirable to count them, use #ak.fill_none
     to turn them into something that would be counted.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.count_nonzero",
-        {
-            "array": array,
-            "axis": axis,
-            "keepdims": keepdims,
-            "mask_identity": mask_identity,
-            "highlevel": highlevel,
-            "behavior": behavior,
-        },
-    ):
-        if flatten_records is not unset:
-            message = (
-                "`flatten_records` is no longer a supported argument for reducers. "
-                "Instead, use `ak.ravel(array)` first to remove the record structure "
-                "and flatten the array."
-            )
-            if flatten_records:
-                raise ValueError(message)
-            else:
-                ak._errors.deprecate(message, "2.2.0")
-        return _impl(array, axis, keepdims, mask_identity, highlevel, behavior)
+    return _impl(array, axis, keepdims, mask_identity, highlevel, behavior)
 
 
 def _impl(array, axis, keepdims, mask_identity, highlevel, behavior):

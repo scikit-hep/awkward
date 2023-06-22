@@ -93,7 +93,6 @@ def test_dress():
 
 
 def test_record_name():
-    typestrs = {}
     builder = ak.highlevel.ArrayBuilder()
 
     builder.begin_record("Dummy")
@@ -112,8 +111,8 @@ def test_record_name():
 
     a = builder.snapshot()
 
-    assert str(a.layout.form._type(typestrs)) == "Dummy[one: int64, two: float64]"
-    assert a.layout.form._type(typestrs).parameters == {"__record__": "Dummy"}
+    assert str(a.layout.form.type) == "Dummy[one: int64, two: float64]"
+    assert a.layout.form.type.parameters == {"__record__": "Dummy"}
 
 
 def test_builder_string():

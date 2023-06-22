@@ -1,11 +1,15 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+from __future__ import annotations
 
+from awkward._behavior import find_array_typestr
+from awkward._errors import deprecate
 from awkward._parameters import (
     parameters_are_equal,
     parameters_union,
     type_parameters_equal,
 )
-from awkward._typing import final
+from awkward._typing import Self, final
+from awkward._util import UNSET
 from awkward.types.listtype import ListType
 from awkward.types.regulartype import RegularType
 from awkward.types.type import Type
@@ -14,6 +18,13 @@ from awkward.types.uniontype import UnionType
 
 @final
 class OptionType(Type):
+    def copy(self, *, content: Type = UNSET, parameters=UNSET, typestr=UNSET) -> Self:
+        return OptionType(
+            self._content if content is UNSET else content,
+            parameters=self._parameters if parameters is UNSET else parameters,
+            typestr=self._typestr if typestr is UNSET else typestr,
+        )
+
     def __init__(self, content, *, parameters=None, typestr=None):
         if not isinstance(content, Type):
             raise TypeError(
@@ -41,14 +52,19 @@ class OptionType(Type):
     def content(self):
         return self._content
 
-    def _str(self, indent, compact):
+    def _str(self, indent, compact, behavior):
+        if self._typestr is not None:
+            deprecate("typestr argument is deprecated", "2.4.0")
+
+        typestr = find_array_typestr(behavior, self._parameters, self._typestr)
+
         head = []
         tail = []
-        if self._typestr is not None:
-            content_out = [self._typestr]
+        if typestr is not None:
+            content_out = [typestr]
 
         else:
-            content_out = self._content._str(indent, compact)
+            content_out = self._content._str(indent, compact, behavior)
             params = self._str_parameters()
             if params is None:
                 if isinstance(
@@ -68,11 +84,13 @@ class OptionType(Type):
                 head = ["option["]
                 tail = [f", {params}]"]
 
-        return (
-            [*head, self._str_categorical_begin(), *content_out]
-            + [self._str_categorical_end()]
-            + tail
-        )
+        return [
+            *head,
+            self._str_categorical_begin(),
+            *content_out,
+            self._str_categorical_end(),
+            *tail,
+        ]
 
     def __repr__(self):
         args = [repr(self._content), *self._repr_args()]

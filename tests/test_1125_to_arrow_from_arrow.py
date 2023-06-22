@@ -4,6 +4,7 @@ import os
 
 import numpy as np
 import pytest
+from packaging.version import parse as parse_version
 
 import awkward as ak
 
@@ -571,7 +572,8 @@ def test_recordarray(tmp_path, is_tuple, extensionarray):
 
 
 @pytest.mark.skipif(
-    not ak._util.numpy_at_least("1.20"), reason="NumPy >= 1.20 required for dates"
+    parse_version(np.__version__) < parse_version("1.20.0"),
+    reason="NumPy >= 1.20 required for dates",
 )
 @pytest.mark.parametrize("extensionarray", [False, True])
 def test_numpyarray_datetime(tmp_path, extensionarray):
@@ -623,9 +625,11 @@ def test_unionarray(tmp_path, extensionarray):
         ak.index.Index8(np.array([0, 0, 1, 1, 1, 0, 1], dtype=np.int8)),
         ak.index.Index64(np.array([0, 1, 3, 2, 1, 2, 0], dtype=np.int64)),
         [
-            ak.contents.NumpyArray(
-                np.array([0.0, 1.1, 2.2]),
-                parameters={"which": "inner1"},
+            ak.contents.UnmaskedArray(
+                ak.contents.NumpyArray(
+                    np.array([0.0, 1.1, 2.2]),
+                    parameters={"which": "inner1"},
+                )
             ),
             ak.contents.ByteMaskedArray(
                 ak.index.Index8(np.array([False, False, True, False]).view(np.int8)),
@@ -674,8 +678,10 @@ def test_unionarray(tmp_path, extensionarray):
             ak.index.Index8(np.array([0, 0, 1, 1, 1, 0, 1], dtype=np.int8)),
             ak.index.Index64(np.array([0, 1, 3, 2, 1, 2, 0], dtype=np.int64)),
             [
-                ak.contents.NumpyArray(
-                    np.array([0.0, 1.1, 2.2]), parameters={"which": "inner1"}
+                ak.contents.UnmaskedArray(
+                    ak.contents.NumpyArray(
+                        np.array([0.0, 1.1, 2.2]), parameters={"which": "inner1"}
+                    )
                 ),
                 ak.contents.ByteMaskedArray(
                     ak.index.Index8(

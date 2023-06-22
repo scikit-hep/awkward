@@ -446,7 +446,7 @@ namespace awkward {{
 
 def togenerator(form, flatlist_as_rvec):
     if isinstance(form, ak.forms.EmptyForm):
-        return togenerator(form.to_NumpyForm(np.dtype(np.float64)), flatlist_as_rvec)
+        return togenerator(form.to_NumpyForm(primitive="float64"), flatlist_as_rvec)
 
     elif isinstance(form, ak.forms.NumpyForm):
         if len(form.inner_shape) == 0:

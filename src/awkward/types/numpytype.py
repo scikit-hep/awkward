@@ -1,11 +1,15 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+from __future__ import annotations
 
 import json
 import re
 
+from awkward._behavior import find_array_typestr
+from awkward._errors import deprecate
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._parameters import parameters_are_equal, type_parameters_equal
-from awkward._typing import final
+from awkward._typing import Self, final
+from awkward._util import UNSET
 from awkward.types.type import Type
 
 np = NumpyMetadata.instance()
@@ -91,6 +95,13 @@ for primitive, dtype in _primitive_to_dtype_dict.items():
 
 @final
 class NumpyType(Type):
+    def copy(self, *, primitive: Type = UNSET, parameters=UNSET, typestr=UNSET) -> Self:
+        return NumpyType(
+            self._primitive if primitive is UNSET else primitive,
+            parameters=self._parameters if parameters is UNSET else parameters,
+            typestr=self._typestr if typestr is UNSET else typestr,
+        )
+
     def __init__(self, primitive, *, parameters=None, typestr=None):
         primitive = dtype_to_primitive(primitive_to_dtype(primitive))
         if parameters is not None and not isinstance(parameters, dict):
@@ -115,15 +126,13 @@ class NumpyType(Type):
 
     _str_parameters_exclude = ("__categorical__", "__unit__")
 
-    def _str(self, indent, compact):
+    def _str(self, indent, compact, behavior):
         if self._typestr is not None:
-            out = [self._typestr]
+            deprecate("typestr argument is deprecated", "2.4.0")
 
-        elif self.parameter("__array__") == "char":
-            out = ["char"]
-
-        elif self.parameter("__array__") == "byte":
-            out = ["byte"]
+        typestr = find_array_typestr(behavior, self._parameters, self._typestr)
+        if typestr is not None:
+            out = [typestr]
 
         else:
             if self.parameter("__unit__") is not None:
@@ -146,7 +155,7 @@ class NumpyType(Type):
                     params = ""
                 out = [self._primitive, "[", units, params, "]"]
 
-        return [self._str_categorical_begin(), *out] + [self._str_categorical_end()]
+        return [self._str_categorical_begin(), *out, self._str_categorical_end()]
 
     def __repr__(self):
         args = [repr(self._primitive), *self._repr_args()]

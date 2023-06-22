@@ -91,7 +91,7 @@ jobs:
     - name: Prepare build files
       run: pipx run nox -s prepare
 
-    - uses: pypa/cibuildwheel@v2.12.3
+    - uses: pypa/cibuildwheel@v2.13.1
       env:
         CIBW_BUILD: ${{ matrix.build }}
         CIBW_ARCHS: ${{ matrix.arch }}
@@ -138,9 +138,9 @@ jobs:
     - name: Prepare build files
       run: pipx run nox -s prepare
 
-    - uses: docker/setup-qemu-action@v2.1.0
+    - uses: docker/setup-qemu-action@v2.2.0
 
-    - uses: pypa/cibuildwheel@v2.12.3
+    - uses: pypa/cibuildwheel@v2.13.1
       env:
         CIBW_BUILD: cp${{ matrix.python }}-*
         CIBW_ARCHS: ${{ matrix.arch }}
@@ -166,12 +166,14 @@ jobs:
     needs: [build_wheels, build_alt_wheels, make_sdist]
     runs-on: ubuntu-latest
     if: inputs.publish-pypi
+    permissions:
+      id-token: write
+    environment:
+      name: "deploy-cpp-pypi"
     steps:
     - uses: actions/download-artifact@v3
       with:
         name: artifact
         path: dist
 
-    - uses: pypa/gh-action-pypi-publish@v1.8.5
-      with:
-        password: ${{ secrets.PYPI_PASSWORD_CPP }}
+    - uses: pypa/gh-action-pypi-publish@v1.8.6

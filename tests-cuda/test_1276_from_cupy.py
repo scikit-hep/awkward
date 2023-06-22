@@ -2,7 +2,6 @@
 
 import cupy as cp
 import numpy as np
-import pytest
 
 import awkward as ak
 
@@ -35,9 +34,6 @@ def test_NumpyArray_constructor():
     assert ak.backend(ak.contents.NumpyArray(cp.array([1, 2, 3]))) == "cuda"
 
 
-@pytest.mark.skip(
-    reason="Can't test this right now because of unimplemented CUDA Kernels (awkward_ListOffsetArray_compact_offsets"
-)
 def test_add():
     one = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]], backend="cuda")
     two = ak.Array([100, 200, 300], backend="cuda")

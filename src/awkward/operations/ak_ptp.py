@@ -2,16 +2,17 @@
 __all__ = ("ptp",)
 import awkward as ak
 from awkward._behavior import behavior_of
-from awkward._connect.numpy import unsupported
+from awkward._connect.numpy import UNSUPPORTED
+from awkward._errors import with_operation_context
 from awkward._layout import maybe_posaxis
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
-from awkward._util import unset
 
 np = NumpyMetadata.instance()
 
 
-def ptp(array, axis=None, *, keepdims=False, mask_identity=True, flatten_records=unset):
+@with_operation_context
+def ptp(array, axis=None, *, keepdims=False, mask_identity=True):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
@@ -58,26 +59,7 @@ def ptp(array, axis=None, *, keepdims=False, mask_identity=True, flatten_records
     See #ak.sum for a more complete description of nested list and missing
     value (None) handling in reducers.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.ptp",
-        {
-            "array": array,
-            "axis": axis,
-            "keepdims": keepdims,
-            "mask_identity": mask_identity,
-        },
-    ):
-        if flatten_records is not unset:
-            message = (
-                "`flatten_records` is no longer a supported argument for reducers. "
-                "Instead, use `ak.ravel(array)` first to remove the record structure "
-                "and flatten the array."
-            )
-            if flatten_records:
-                raise ValueError(message)
-            else:
-                ak._errors.deprecate(message, "2.2.0")
-        return _impl(array, axis, keepdims, mask_identity)
+    return _impl(array, axis, keepdims, mask_identity)
 
 
 def _impl(array, axis, keepdims, mask_identity):
@@ -124,5 +106,5 @@ def _impl(array, axis, keepdims, mask_identity):
 
 
 @ak._connect.numpy.implements("ptp")
-def _nep_18_impl(a, axis=None, out=unsupported, keepdims=False):
+def _nep_18_impl(a, axis=None, out=UNSUPPORTED, keepdims=False):
     return ptp(a, axis=axis, keepdims=keepdims)

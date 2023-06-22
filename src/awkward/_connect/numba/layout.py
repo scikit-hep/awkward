@@ -116,7 +116,7 @@ class ContentType(numba.types.Type):
                 self, viewtype, (*viewtype.fields, key)
             )
         else:
-            raise TypeError(f"array does not have a field with key {repr(key)}")
+            raise TypeError(f"array does not have a field with key {key!r}")
 
     def lower_getitem_at_check(
         self,
@@ -227,7 +227,7 @@ def castint(context, builder, fromtype, totype, val):
         elif fromtype.width == 64:
             fromtype = numba.int64
     if not isinstance(fromtype, numba.types.Integer):
-        raise AssertionError(f"unrecognized integer type: {repr(fromtype)}")
+        raise AssertionError(f"unrecognized integer type: {fromtype!r}")
 
     if fromtype.bitwidth < totype.bitwidth:
         if fromtype.signed:
@@ -369,7 +369,7 @@ class RegularArrayType(ContentType, ak._lookup.RegularLookup):
     @classmethod
     def from_form(cls, form):
         return RegularArrayType(
-            ak._connect.numba.arrayview.tonumbatype(form.content),
+            ak._connect.numba.arrayview.to_numbatype(form.content),
             form.size,
             form.parameters,
         )
@@ -449,7 +449,7 @@ class ListArrayType(ContentType, ak._lookup.ListLookup):
 
         return ListArrayType(
             cls.from_form_index(index_string),
-            ak._connect.numba.arrayview.tonumbatype(form.content),
+            ak._connect.numba.arrayview.to_numbatype(form.content),
             form.parameters,
         )
 
@@ -535,7 +535,7 @@ class IndexedArrayType(ContentType, ak._lookup.IndexedLookup):
     def from_form(cls, form):
         return IndexedArrayType(
             cls.from_form_index(form.index),
-            ak._connect.numba.arrayview.tonumbatype(form.content),
+            ak._connect.numba.arrayview.to_numbatype(form.content),
             form.parameters,
         )
 
@@ -629,7 +629,7 @@ class IndexedOptionArrayType(ContentType, ak._lookup.IndexedOptionLookup):
     def from_form(cls, form):
         return IndexedOptionArrayType(
             cls.from_form_index(form.index),
-            ak._connect.numba.arrayview.tonumbatype(form.content),
+            ak._connect.numba.arrayview.to_numbatype(form.content),
             form.parameters,
         )
 
@@ -740,7 +740,7 @@ class ByteMaskedArrayType(ContentType, ak._lookup.ByteMaskedLookup):
     def from_form(cls, form):
         return ByteMaskedArrayType(
             cls.from_form_index(form.mask),
-            ak._connect.numba.arrayview.tonumbatype(form.content),
+            ak._connect.numba.arrayview.to_numbatype(form.content),
             form.valid_when,
             form.parameters,
         )
@@ -852,7 +852,7 @@ class BitMaskedArrayType(ContentType, ak._lookup.BitMaskedLookup):
     def from_form(cls, form):
         return BitMaskedArrayType(
             cls.from_form_index(form.mask),
-            ak._connect.numba.arrayview.tonumbatype(form.content),
+            ak._connect.numba.arrayview.to_numbatype(form.content),
             form.valid_when,
             form.lsb_order,
             form.parameters,
@@ -984,7 +984,7 @@ class UnmaskedArrayType(ContentType, ak._lookup.UnmaskedLookup):
     @classmethod
     def from_form(cls, form):
         return UnmaskedArrayType(
-            ak._connect.numba.arrayview.tonumbatype(form.content),
+            ak._connect.numba.arrayview.to_numbatype(form.content),
             form.parameters,
         )
 
@@ -1073,7 +1073,7 @@ class RecordArrayType(ContentType, ak._lookup.RecordLookup):
     @classmethod
     def from_form(cls, form):
         return RecordArrayType(
-            [ak._connect.numba.arrayview.tonumbatype(x) for x in form.contents],
+            [ak._connect.numba.arrayview.to_numbatype(x) for x in form.contents],
             None if form.is_tuple else form.fields,
             form.parameters,
         )
@@ -1364,7 +1364,7 @@ class UnionArrayType(ContentType, ak._lookup.UnionLookup):
         return UnionArrayType(
             cls.from_form_index(form.tags),
             cls.from_form_index(form.index),
-            [ak._connect.numba.arrayview.tonumbatype(x) for x in form.contents],
+            [ak._connect.numba.arrayview.to_numbatype(x) for x in form.contents],
             form.parameters,
         )
 

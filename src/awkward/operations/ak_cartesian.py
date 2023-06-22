@@ -4,7 +4,7 @@ import awkward as ak
 from awkward._backends.dispatch import backend_of
 from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of
-from awkward._errors import AxisError
+from awkward._errors import AxisError, with_operation_context
 from awkward._layout import maybe_posaxis, wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
@@ -13,6 +13,7 @@ np = NumpyMetadata.instance()
 cpu = NumpyBackend.instance()
 
 
+@with_operation_context
 def cartesian(
     arrays,
     axis=1,
@@ -192,19 +193,7 @@ def cartesian(
     #ak.argcartesian form can be particularly useful as nested indexing in
     #ak.Array.__getitem__.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.cartesian",
-        {
-            "arrays": arrays,
-            "axis": axis,
-            "nested": nested,
-            "parameters": parameters,
-            "with_name": with_name,
-            "highlevel": highlevel,
-            "behavior": behavior,
-        },
-    ):
-        return _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior)
+    return _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior)
 
 
 def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):

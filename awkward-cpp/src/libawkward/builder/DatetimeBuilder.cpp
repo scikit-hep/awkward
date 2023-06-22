@@ -11,7 +11,6 @@
 
 #include "awkward/builder/DatetimeBuilder.h"
 #include "awkward/util.h"
-#include "awkward/datetime_util.h"
 
 namespace awkward {
   const BuilderPtr

@@ -3,15 +3,16 @@ __all__ = ("linear_fit",)
 import awkward as ak
 from awkward._backends.dispatch import backend_of
 from awkward._behavior import behavior_of
+from awkward._errors import with_operation_context
 from awkward._layout import wrap_layout
 from awkward._nplikes import ufuncs
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
-from awkward._util import unset
 
 np = NumpyMetadata.instance()
 
 
+@with_operation_context
 def linear_fit(
     x,
     y,
@@ -20,7 +21,6 @@ def linear_fit(
     *,
     keepdims=False,
     mask_identity=False,
-    flatten_records=unset,
 ):
     """
     Args:
@@ -43,8 +43,6 @@ def linear_fit(
             empty lists results in None (an option type); otherwise, the
             calculation is followed through with the reducers' identities,
             usually resulting in floating-point `nan`.
-        flatten_records (bool): If True, axis=None combines fields from
-            different records; otherwise, records raise an error.
 
     Computes the linear fit of `y` with respect to `x` (many types supported,
     including all Awkward Arrays and Records, must be broadcastable to each
@@ -76,18 +74,7 @@ def linear_fit(
     missing values (None) in reducers, and #ak.mean for an example with another
     non-reducer.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.linear_fit",
-        {
-            "x": x,
-            "y": y,
-            "weight": weight,
-            "axis": axis,
-            "keepdims": keepdims,
-            "mask_identity": mask_identity,
-        },
-    ):
-        return _impl(x, y, weight, axis, keepdims, mask_identity)
+    return _impl(x, y, weight, axis, keepdims, mask_identity)
 
 
 def _impl(x, y, weight, axis, keepdims, mask_identity):

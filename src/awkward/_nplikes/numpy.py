@@ -2,11 +2,12 @@
 from __future__ import annotations
 
 import numpy
+from packaging.version import parse as parse_version
 
-import awkward as ak
 from awkward._nplikes.array_module import ArrayModuleNumpyLike
 from awkward._nplikes.dispatch import register_nplike
 from awkward._nplikes.numpylike import ArrayLike, NumpyMetadata
+from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._typing import Final, Literal
 
 np = NumpyMetadata.instance()
@@ -43,9 +44,10 @@ class Numpy(ArrayModuleNumpyLike):
         return issubclass(type_, numpy.ndarray)
 
     def is_c_contiguous(self, x: ArrayLike) -> bool:
-        return x.flags["C_CONTIGUOUS"] or (
-            x.dtype.metadata is not None and x.dtype.metadata.get("pretend_contiguous")
-        )
+        if isinstance(x, PlaceholderArray):
+            return True
+        else:
+            return x.flags["C_CONTIGUOUS"]
 
     def packbits(
         self,
@@ -54,7 +56,8 @@ class Numpy(ArrayModuleNumpyLike):
         axis: int | None = None,
         bitorder: Literal["big", "little"] = "big",
     ):
-        if ak._util.numpy_at_least("1.17.0"):
+        assert not isinstance(x, PlaceholderArray)
+        if parse_version(numpy.__version__) >= parse_version("1.17.0"):
             return numpy.packbits(x, axis=axis, bitorder=bitorder)
         else:
             assert axis is None, "unsupported argument value for axis given"
@@ -81,7 +84,8 @@ class Numpy(ArrayModuleNumpyLike):
         count: int | None = None,
         bitorder: Literal["big", "little"] = "big",
     ):
-        if ak._util.numpy_at_least("1.17.0"):
+        assert not isinstance(x, PlaceholderArray)
+        if parse_version(numpy.__version__) >= parse_version("1.17.0"):
             return numpy.unpackbits(x, axis=axis, count=count, bitorder=bitorder)
         else:
             assert axis is None, "unsupported argument value for axis given"

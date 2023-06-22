@@ -100,13 +100,13 @@ jobs:
       # solve with different external library versions. By default,
       # ROOT uses cxx-compiler too, so hopefully this won't be an issue
     - name: Setup Python via Conda
-      uses: mamba-org/provision-with-micromamba@main
+      uses: mamba-org/setup-micromamba@v1
       with:
         # Cache invalidates daily by default
-        cache-env: true
+        cache-environment: true
         cache-downloads: true
         environment-file: docs/environment.yml
-        extra-specs: |
+        create-args: >-
            python=${{ env.X86_64_PYTHON_VERSION }}
            doxygen
            python-build
@@ -177,13 +177,13 @@ jobs:
       # solve with different external library versions. By default,
       # ROOT uses cxx-compiler too, so hopefully this won't be an issue
     - name: Setup Python via Conda
-      uses: mamba-org/provision-with-micromamba@main
+      uses: mamba-org/setup-micromamba@v1
       with:
         # Cache invalidates daily by default
-        cache-env: true
+        cache-environment: true
         cache-downloads: true
         environment-file: docs/environment.yml
-        extra-specs: |
+        create-args: >-
            python=${{ env.X86_64_PYTHON_VERSION }}
            doxygen
 

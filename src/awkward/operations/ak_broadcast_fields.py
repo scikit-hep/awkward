@@ -4,11 +4,13 @@ import awkward as ak
 from awkward._backends.dispatch import backend_of
 from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of
+from awkward._errors import with_operation_context
 from awkward._layout import wrap_layout
 
 cpu = NumpyBackend.instance()
 
 
+@with_operation_context
 def broadcast_fields(
     *arrays,
     highlevel=True,
@@ -50,15 +52,7 @@ def broadcast_fields(
         }
 
     """
-    with ak._errors.OperationErrorContext(
-        "ak.broadcast_fields",
-        {
-            "arrays": arrays,
-            "highlevel": highlevel,
-            "behavior": behavior,
-        },
-    ):
-        return _impl(arrays, highlevel, behavior)
+    return _impl(arrays, highlevel, behavior)
 
 
 def _impl(arrays, highlevel, behavior):

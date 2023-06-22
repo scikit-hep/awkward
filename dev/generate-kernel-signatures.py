@@ -21,7 +21,6 @@ cuda_kernels_impl = [
     "awkward_IndexedArray_mask",
     "awkward_ByteMaskedArray_mask",
     "awkward_zero_mask",
-    "awkward_RegularArray_compact_offsets",
     "awkward_IndexedArray_fill_count",
     "awkward_UnionArray_fillna",
     "awkward_localindex",
@@ -58,13 +57,11 @@ cuda_kernels_impl = [
     "awkward_RegularArray_getitem_jagged_expand",
     "awkward_ListArray_getitem_jagged_expand",
     "awkward_ListArray_getitem_next_array",
-    "awkward_RegularArray_broadcast_tooffsets",
     "awkward_NumpyArray_fill_tobool",
     "awkward_NumpyArray_reduce_adjust_starts_64",
     "awkward_NumpyArray_reduce_adjust_starts_shifts_64",
     "awkward_regularize_arrayslice",
     "awkward_RegularArray_getitem_next_at",
-    "awkward_ListOffsetArray_compact_offsets",
     "awkward_BitMaskedArray_to_IndexedOptionArray",
     "awkward_ByteMaskedArray_getitem_nextcarry",
     "awkward_ByteMaskedArray_getitem_nextcarry_outindex",
@@ -270,7 +267,6 @@ class ERROR(Structure):
         ("filename", c_char_p),
         ("id", c_int64),
         ("attempt", c_int64),
-        ("pass_through", c_bool),
     ]
 
 

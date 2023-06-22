@@ -5,7 +5,14 @@ import math
 
 import numpy
 
-from awkward._nplikes.numpylike import ArrayLike, IndexType, NumpyLike, NumpyMetadata
+from awkward._nplikes.numpylike import (
+    ArrayLike,
+    IndexType,
+    NumpyLike,
+    NumpyMetadata,
+    UniqueAllResult,
+)
+from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._typing import Final, Literal
 
@@ -24,7 +31,10 @@ class ArrayModuleNumpyLike(NumpyLike):
         dtype: numpy.dtype | None = None,
         copy: bool | None = None,
     ) -> ArrayLike:
-        if copy:
+        if isinstance(obj, PlaceholderArray):
+            assert obj.dtype == dtype or dtype is None
+            return obj
+        elif copy:
             return self._module.array(obj, dtype=dtype, copy=True)
         elif copy is None:
             return self._module.asarray(obj, dtype=dtype)
@@ -37,14 +47,16 @@ class ArrayModuleNumpyLike(NumpyLike):
                 return self._module.asarray(obj, dtype=dtype)
 
     def ascontiguousarray(self, x: ArrayLike) -> ArrayLike:
-        # Allow buffers to _pretend_ to be contiguous already
-        if x.dtype.metadata is not None and x.dtype.metadata.get("pretend_contiguous"):
+        if isinstance(x, PlaceholderArray):
             return x
-        return self._module.ascontiguousarray(x)
+        else:
+            return self._module.ascontiguousarray(x)
 
     def frombuffer(
         self, buffer, *, dtype: np.dtype | None = None, count: int = -1
     ) -> ArrayLike:
+        assert not isinstance(buffer, PlaceholderArray)
+        assert not isinstance(count, PlaceholderArray)
         return self._module.frombuffer(buffer, dtype=dtype, count=count)
 
     def zeros(
@@ -68,14 +80,17 @@ class ArrayModuleNumpyLike(NumpyLike):
         return self._module.full(shape, fill_value, dtype=dtype)
 
     def zeros_like(self, x: ArrayLike, *, dtype: np.dtype | None = None) -> ArrayLike:
+        assert not isinstance(x, PlaceholderArray)
         return self._module.zeros_like(x, dtype=dtype)
 
     def ones_like(self, x: ArrayLike, *, dtype: np.dtype | None = None) -> ArrayLike:
+        assert not isinstance(x, PlaceholderArray)
         return self._module.ones_like(x, dtype=dtype)
 
     def full_like(
         self, x: ArrayLike, fill_value, *, dtype: np.dtype | None = None
     ) -> ArrayLike:
+        assert not isinstance(x, PlaceholderArray)
         return self._module.full_like(x, fill_value, dtype=dtype)
 
     def arange(
@@ -86,6 +101,9 @@ class ArrayModuleNumpyLike(NumpyLike):
         *,
         dtype: np.dtype | None = None,
     ) -> ArrayLike:
+        assert not isinstance(start, PlaceholderArray)
+        assert not isinstance(stop, PlaceholderArray)
+        assert not isinstance(step, PlaceholderArray)
         return self._module.arange(start, stop, step, dtype=dtype)
 
     def meshgrid(
@@ -98,6 +116,8 @@ class ArrayModuleNumpyLike(NumpyLike):
     def array_equal(
         self, x1: ArrayLike, x2: ArrayLike, *, equal_nan: bool = False
     ) -> ArrayLike:
+        assert not isinstance(x1, PlaceholderArray)
+        assert not isinstance(x2, PlaceholderArray)
         return self._module.asarray(
             self._module.array_equal(x1, x2, equal_nan=equal_nan)
         )
@@ -110,16 +130,21 @@ class ArrayModuleNumpyLike(NumpyLike):
         side: Literal["left", "right"] = "left",
         sorter: ArrayLike | None = None,
     ) -> ArrayLike:
+        assert not isinstance(x, PlaceholderArray)
+        assert not isinstance(values, PlaceholderArray)
+        assert not isinstance(sorter, PlaceholderArray)
         return self._module.searchsorted(x, values, side=side, sorter=sorter)
 
     ############################ manipulation
 
     def broadcast_arrays(self, *arrays: ArrayLike) -> list[ArrayLike]:
+        assert not any(isinstance(x, PlaceholderArray) for x in arrays)
         return self._module.broadcast_arrays(*arrays)
 
     def reshape(
         self, x: ArrayLike, shape: tuple[ShapeItem, ...], *, copy: bool | None = None
     ) -> ArrayLike:
+        assert not isinstance(x, PlaceholderArray)
         if copy is None:
             return self._module.reshape(x, shape)
         elif copy:
@@ -178,12 +203,17 @@ class ArrayModuleNumpyLike(NumpyLike):
             raise IndexError(f"index value out of bounds (0, {length}): {index}")
 
     def nonzero(self, x: ArrayLike) -> tuple[ArrayLike, ...]:
+        assert not isinstance(x, PlaceholderArray)
         return self._module.nonzero(x)
 
     def where(self, condition: ArrayLike, x1: ArrayLike, x2: ArrayLike) -> ArrayLike:
+        assert not isinstance(condition, PlaceholderArray)
+        assert not isinstance(x1, PlaceholderArray)
+        assert not isinstance(x2, PlaceholderArray)
         return self._module.where(condition, x1, x2)
 
     def unique_values(self, x: ArrayLike) -> ArrayLike:
+        assert not isinstance(x, PlaceholderArray)
         return self._module.unique(
             x,
             return_counts=False,
@@ -192,12 +222,40 @@ class ArrayModuleNumpyLike(NumpyLike):
             equal_nan=False,
         )
 
+    def unique_all(self, x: ArrayLike) -> UniqueAllResult:
+        assert not isinstance(x, PlaceholderArray)
+        values, indices, inverse_indices, counts = self._module.unique(
+            x, return_counts=True, return_index=True, return_inverse=True
+        )
+        # np.unique() flattens inverse indices, but they need to share x's shape
+        # See https://github.com/numpy/numpy/issues/20638
+        inverse_indices = inverse_indices.reshape(x.shape)
+        return UniqueAllResult(values, indices, inverse_indices, counts)
+
+    def sort(
+        self,
+        x: ArrayLike,
+        *,
+        axis: int = -1,
+        descending: bool = False,
+        stable: bool = True,
+    ) -> ArrayLike:
+        assert not isinstance(x, PlaceholderArray)
+        # Note: this keyword argument is different, and the default is different.
+        kind = "stable" if stable else "quicksort"
+        res = self._module.sort(x, axis=axis, kind=kind)
+        if descending:
+            return self._module.flip(res, axis=axis)
+        else:
+            return res
+
     def concat(
         self,
         arrays: list[ArrayLike] | tuple[ArrayLike, ...],
         *,
         axis: int | None = 0,
     ) -> ArrayLike:
+        assert not any(isinstance(x, PlaceholderArray) for x in arrays)
         return self._module.concatenate(arrays, axis=axis, casting="same_kind")
 
     def repeat(
@@ -207,10 +265,9 @@ class ArrayModuleNumpyLike(NumpyLike):
         *,
         axis: int | None = None,
     ) -> ArrayLike:
+        assert not isinstance(x, PlaceholderArray)
+        assert not isinstance(repeats, PlaceholderArray)
         return self._module.repeat(x, repeats=repeats, axis=axis)
-
-    def tile(self, x: ArrayLike, reps: int) -> ArrayLike:
-        return self._module.tile(x, reps)
 
     def stack(
         self,
@@ -218,6 +275,7 @@ class ArrayModuleNumpyLike(NumpyLike):
         *,
         axis: int = 0,
     ) -> ArrayLike:
+        assert not any(isinstance(x, PlaceholderArray) for x in arrays)
         arrays = list(arrays)
         return self._module.stack(arrays, axis=axis)
 
@@ -228,6 +286,7 @@ class ArrayModuleNumpyLike(NumpyLike):
         axis: int | None = None,
         bitorder: Literal["big", "little"] = "big",
     ) -> ArrayLike:
+        assert not isinstance(x, PlaceholderArray)
         return self._module.packbits(x, axis=axis, bitorder=bitorder)
 
     def unpackbits(
@@ -238,42 +297,58 @@ class ArrayModuleNumpyLike(NumpyLike):
         count: int | None = None,
         bitorder: Literal["big", "little"] = "big",
     ) -> ArrayLike:
+        assert not isinstance(x, PlaceholderArray)
         return self._module.unpackbits(x, axis=axis, count=count, bitorder=bitorder)
 
     def broadcast_to(self, x: ArrayLike, shape: tuple[ShapeItem, ...]) -> ArrayLike:
+        assert not isinstance(x, PlaceholderArray)
         return self._module.broadcast_to(x, shape)
+
+    def strides(self, x: ArrayLike) -> tuple[ShapeItem, ...]:
+        return x.strides
 
     ############################ ufuncs
 
     def add(
         self, x1: ArrayLike, x2: ArrayLike, maybe_out: ArrayLike | None = None
     ) -> ArrayLike:
+        assert not isinstance(x1, PlaceholderArray)
+        assert not isinstance(x2, PlaceholderArray)
         return self._module.add(x1, x2, out=maybe_out)
 
     def logical_or(
         self, x1: ArrayLike, x2: ArrayLike, *, maybe_out: ArrayLike | None = None
     ) -> ArrayLike:
+        assert not isinstance(x1, PlaceholderArray)
+        assert not isinstance(x2, PlaceholderArray)
         return self._module.logical_or(x1, x2, out=maybe_out)
 
     def logical_and(
         self, x1: ArrayLike, x2: ArrayLike, *, maybe_out: ArrayLike | None = None
     ) -> ArrayLike:
+        assert not isinstance(x1, PlaceholderArray)
+        assert not isinstance(x2, PlaceholderArray)
         return self._module.logical_and(x1, x2, out=maybe_out)
 
     def logical_not(
         self, x: ArrayLike, maybe_out: ArrayLike | None = None
     ) -> ArrayLike:
+        assert not isinstance(x, PlaceholderArray)
         return self._module.logical_not(x, out=maybe_out)
 
     def sqrt(self, x: ArrayLike, maybe_out: ArrayLike | None = None) -> ArrayLike:
+        assert not isinstance(x, PlaceholderArray)
         return self._module.sqrt(x, out=maybe_out)
 
     def exp(self, x: ArrayLike, maybe_out: ArrayLike | None = None) -> ArrayLike:
+        assert not isinstance(x, PlaceholderArray)
         return self._module.exp(x, out=maybe_out)
 
     def divide(
         self, x1: ArrayLike, x2: ArrayLike, maybe_out: ArrayLike | None = None
     ) -> ArrayLike:
+        assert not isinstance(x1, PlaceholderArray)
+        assert not isinstance(x2, PlaceholderArray)
         return self._module.divide(x1, x2, out=maybe_out)
 
     ############################ almost-ufuncs
@@ -287,6 +362,7 @@ class ArrayModuleNumpyLike(NumpyLike):
         posinf: int | float | None = None,
         neginf: int | float | None = None,
     ) -> ArrayLike:
+        assert not isinstance(x, PlaceholderArray)
         return self._module.nan_to_num(
             x, copy=copy, nan=nan, posinf=posinf, neginf=neginf
         )
@@ -300,9 +376,12 @@ class ArrayModuleNumpyLike(NumpyLike):
         atol: float = 1e-8,
         equal_nan: bool = False,
     ) -> ArrayLike:
+        assert not isinstance(x1, PlaceholderArray)
+        assert not isinstance(x2, PlaceholderArray)
         return self._module.isclose(x1, x2, rtol=rtol, atol=atol, equal_nan=equal_nan)
 
     def isnan(self, x: ArrayLike) -> ArrayLike:
+        assert not isinstance(x, PlaceholderArray)
         return self._module.isnan(x)
 
     def all(
@@ -313,6 +392,7 @@ class ArrayModuleNumpyLike(NumpyLike):
         keepdims: bool = False,
         maybe_out: ArrayLike | None = None,
     ) -> ArrayLike:
+        assert not isinstance(x, PlaceholderArray)
         return self._module.all(x, axis=axis, keepdims=keepdims, out=maybe_out)
 
     def any(
@@ -323,6 +403,7 @@ class ArrayModuleNumpyLike(NumpyLike):
         keepdims: bool = False,
         maybe_out: ArrayLike | None = None,
     ) -> ArrayLike:
+        assert not isinstance(x, PlaceholderArray)
         return self._module.any(x, axis=axis, keepdims=keepdims, out=maybe_out)
 
     def min(
@@ -333,6 +414,7 @@ class ArrayModuleNumpyLike(NumpyLike):
         keepdims: bool = False,
         maybe_out: ArrayLike | None = None,
     ) -> ArrayLike:
+        assert not isinstance(x, PlaceholderArray)
         return self._module.min(x, axis=axis, keepdims=keepdims, out=maybe_out)
 
     def max(
@@ -343,11 +425,13 @@ class ArrayModuleNumpyLike(NumpyLike):
         keepdims: bool = False,
         maybe_out: ArrayLike | None = None,
     ) -> ArrayLike:
+        assert not isinstance(x, PlaceholderArray)
         return self._module.max(x, axis=axis, keepdims=keepdims, out=maybe_out)
 
     def count_nonzero(
         self, x: ArrayLike, *, axis: int | None = None, keepdims: bool = False
     ) -> ArrayLike:
+        assert not isinstance(x, PlaceholderArray)
         return self._module.count_nonzero(x, axis=axis, keepdims=keepdims)
 
     def cumsum(
@@ -357,6 +441,7 @@ class ArrayModuleNumpyLike(NumpyLike):
         axis: int | None = None,
         maybe_out: ArrayLike | None = None,
     ) -> ArrayLike:
+        assert not isinstance(x, PlaceholderArray)
         return self._module.cumsum(x, axis=axis, out=maybe_out)
 
     def array_str(
@@ -367,6 +452,7 @@ class ArrayModuleNumpyLike(NumpyLike):
         precision: int | None = None,
         suppress_small: bool | None = None,
     ):
+        assert not isinstance(x, PlaceholderArray)
         return self._module.array_str(
             x,
             max_line_width=max_line_width,
@@ -377,6 +463,7 @@ class ArrayModuleNumpyLike(NumpyLike):
     def astype(
         self, x: ArrayLike, dtype: numpy.dtype, *, copy: bool | None = True
     ) -> ArrayLike:
+        assert not isinstance(x, PlaceholderArray)
         return x.astype(dtype, copy=copy)
 
     def can_cast(self, from_: np.dtype | ArrayLike, to: np.dtype | ArrayLike) -> bool:

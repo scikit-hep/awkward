@@ -7,7 +7,7 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "awkward_cpp"
-version = "15"
+version = "17"
 dependencies = [
     "numpy>=1.17.0"
 ]
