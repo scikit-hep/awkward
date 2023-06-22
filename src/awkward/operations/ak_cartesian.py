@@ -1,10 +1,13 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("cartesian",)
+from collections.abc import Mapping
+
 import awkward as ak
 from awkward._backends.dispatch import backend_of
 from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of
-from awkward._errors import AxisError, with_operation_context
+from awkward._dispatch import high_level_function
+from awkward._errors import AxisError
 from awkward._layout import maybe_posaxis, wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
@@ -13,7 +16,7 @@ np = NumpyMetadata.instance()
 cpu = NumpyBackend.instance()
 
 
-@with_operation_context
+@high_level_function
 def cartesian(
     arrays,
     axis=1,
@@ -193,6 +196,13 @@ def cartesian(
     #ak.argcartesian form can be particularly useful as nested indexing in
     #ak.Array.__getitem__.
     """
+    # Dispatch
+    if isinstance(arrays, Mapping):
+        yield arrays.values()
+    else:
+        yield arrays
+
+    # Implementation
     return _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior)
 
 

@@ -6,7 +6,7 @@ from awkward_cpp.lib import _ext
 
 import awkward as ak
 from awkward._backends.typetracer import TypeTracerBackend
-from awkward._errors import with_operation_context
+from awkward._dispatch import high_level_function
 from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
@@ -17,7 +17,7 @@ np = NumpyMetadata.instance()
 numpy = Numpy.instance()
 
 
-@with_operation_context
+@high_level_function
 def to_layout(array, *, allow_record=True, allow_other=False, regulararray=True):
     """
     Args:
@@ -41,6 +41,10 @@ def to_layout(array, *, allow_record=True, allow_other=False, regulararray=True)
     would rarely be used in a data analysis because #ak.contents.Content and
     #ak.record.Record are lower-level than #ak.Array.
     """
+    # Dispatch
+    yield (array,)
+
+    # Implementation
     return _impl(array, allow_record, allow_other, regulararray=regulararray)
 
 

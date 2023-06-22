@@ -1,7 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("combinations",)
 import awkward as ak
-from awkward._errors import with_operation_context
+from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
@@ -9,7 +9,7 @@ from awkward._regularize import regularize_axis
 np = NumpyMetadata.instance()
 
 
-@with_operation_context
+@high_level_function
 def combinations(
     array,
     n,
@@ -177,6 +177,10 @@ def combinations(
     The #ak.argcombinations form can be particularly useful as nested indexing
     in #ak.Array.__getitem__.
     """
+    # Dispatch
+    yield (array,)
+
+    # Implementation
     return _impl(
         array,
         n,

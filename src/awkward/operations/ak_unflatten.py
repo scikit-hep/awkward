@@ -2,7 +2,7 @@
 __all__ = ("unflatten",)
 import awkward as ak
 from awkward._behavior import behavior_of
-from awkward._errors import with_operation_context
+from awkward._dispatch import high_level_function
 from awkward._layout import maybe_posaxis, wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
@@ -12,7 +12,7 @@ from awkward._regularize import is_integer_like, regularize_axis
 np = NumpyMetadata.instance()
 
 
-@with_operation_context
+@high_level_function
 def unflatten(array, counts, axis=0, *, highlevel=True, behavior=None):
     """
     Args:
@@ -76,6 +76,10 @@ def unflatten(array, counts, axis=0, *, highlevel=True, behavior=None):
 
     See also #ak.num and #ak.flatten.
     """
+    # Dispatch
+    yield (array,)
+
+    # Implementation
     return _impl(array, counts, axis, highlevel, behavior)
 
 

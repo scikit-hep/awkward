@@ -3,7 +3,7 @@ __all__ = ("max",)
 import awkward as ak
 from awkward._behavior import behavior_of
 from awkward._connect.numpy import UNSUPPORTED
-from awkward._errors import with_operation_context
+from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
@@ -11,7 +11,7 @@ from awkward._regularize import regularize_axis
 np = NumpyMetadata.instance()
 
 
-@with_operation_context
+@high_level_function
 def max(
     array,
     axis=None,
@@ -61,6 +61,10 @@ def max(
 
     See also #ak.nanmax.
     """
+    # Dispatch
+    yield (array,)
+
+    # Implementation
     return _impl(
         array,
         axis,
@@ -72,7 +76,7 @@ def max(
     )
 
 
-@with_operation_context
+@high_level_function
 def nanmax(
     array,
     axis=None,
@@ -113,6 +117,10 @@ def nanmax(
 
     See also #ak.max.
     """
+    # Dispatch
+    yield (array,)
+
+    # Implementation
     return _impl(
         ak.operations.ak_nan_to_none._impl(array, False, None),
         axis,

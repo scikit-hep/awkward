@@ -4,13 +4,13 @@ __all__ = ("from_avro_file",)
 from os import PathLike, fsdecode
 
 import awkward as ak
-from awkward._errors import with_operation_context
+from awkward._dispatch import high_level_function
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
 
 
-@with_operation_context
+@high_level_function
 def from_avro_file(
     file, limit_entries=None, *, debug_forth=False, highlevel=True, behavior=None
 ):

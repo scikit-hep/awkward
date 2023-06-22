@@ -3,7 +3,7 @@ __all__ = ("prod",)
 import awkward as ak
 from awkward._behavior import behavior_of
 from awkward._connect.numpy import UNSUPPORTED
-from awkward._errors import with_operation_context
+from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
@@ -11,7 +11,7 @@ from awkward._regularize import regularize_axis
 np = NumpyMetadata.instance()
 
 
-@with_operation_context
+@high_level_function
 def prod(
     array,
     axis=None,
@@ -53,10 +53,14 @@ def prod(
 
     See also #ak.nanprod.
     """
+    # Dispatch
+    yield (array,)
+
+    # Implementation
     return _impl(array, axis, keepdims, mask_identity, highlevel, behavior)
 
 
-@with_operation_context
+@high_level_function
 def nanprod(
     array,
     axis=None,
@@ -92,6 +96,10 @@ def nanprod(
 
     See also #ak.prod.
     """
+    # Dispatch
+    yield (array,)
+
+    # Implementation
     return _impl(
         ak.operations.ak_nan_to_none._impl(array, False, None),
         axis,

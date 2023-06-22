@@ -1,14 +1,14 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("to_packed",)
 import awkward as ak
-from awkward._errors import with_operation_context
+from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
 
 
-@with_operation_context
+@high_level_function
 def to_packed(array, *, highlevel=True, behavior=None):
     """
     Args:
@@ -67,6 +67,10 @@ def to_packed(array, *, highlevel=True, behavior=None):
 
     See also #ak.to_buffers.
     """
+    # Dispatch
+    yield (array,)
+
+    # Implementation
     return _impl(array, highlevel, behavior)
 
 

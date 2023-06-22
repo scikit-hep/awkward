@@ -5,13 +5,13 @@ from collections.abc import Iterable, Mapping
 from awkward_cpp.lib import _ext
 
 import awkward as ak
-from awkward._errors import with_operation_context
+from awkward._dispatch import high_level_function
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
 
 
-@with_operation_context
+@high_level_function
 def to_list(array):
     """
     Args:
@@ -39,6 +39,10 @@ def to_list(array):
 
     See also #ak.from_iter and #ak.Array.tolist.
     """
+    # Dispatch
+    yield (array,)
+
+    # Implementation
     return _impl(array)
 
 

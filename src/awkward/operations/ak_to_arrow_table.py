@@ -3,13 +3,13 @@ __all__ = ("to_arrow_table",)
 import json
 
 import awkward as ak
-from awkward._errors import with_operation_context
+from awkward._dispatch import high_level_function
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
 
 
-@with_operation_context
+@high_level_function
 def to_arrow_table(
     array,
     *,
@@ -66,6 +66,10 @@ def to_arrow_table(
 
     See also #ak.from_arrow, #ak.to_arrow, #ak.to_parquet.
     """
+    # Dispatch
+    yield (array,)
+
+    # Implementation
     return _impl(
         array,
         list_to32,

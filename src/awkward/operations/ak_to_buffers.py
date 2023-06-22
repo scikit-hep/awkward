@@ -2,13 +2,13 @@
 __all__ = ("to_buffers",)
 import awkward as ak
 from awkward._backends.dispatch import regularize_backend
-from awkward._errors import with_operation_context
+from awkward._dispatch import high_level_function
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
 
 
-@with_operation_context
+@high_level_function
 def to_buffers(
     array,
     container=None,
@@ -120,6 +120,10 @@ def to_buffers(
 
     See also #ak.from_buffers and #ak.to_packed.
     """
+    # Dispatch
+    yield (array,)
+
+    # Implementation
     return _impl(array, container, buffer_key, form_key, id_start, backend, byteorder)
 
 

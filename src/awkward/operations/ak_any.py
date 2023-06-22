@@ -3,7 +3,7 @@ __all__ = ("any",)
 import awkward as ak
 from awkward._behavior import behavior_of
 from awkward._connect.numpy import UNSUPPORTED
-from awkward._errors import with_operation_context
+from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
@@ -11,7 +11,7 @@ from awkward._regularize import regularize_axis
 np = NumpyMetadata.instance()
 
 
-@with_operation_context
+@high_level_function
 def any(
     array,
     axis=None,
@@ -53,6 +53,10 @@ def any(
     See #ak.sum for a more complete description of nested list and missing
     value (None) handling in reducers.
     """
+    # Dispatch
+    yield (array,)
+
+    # Implementation
     return _impl(array, axis, keepdims, mask_identity, highlevel, behavior)
 
 

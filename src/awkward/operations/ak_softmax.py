@@ -2,7 +2,7 @@
 __all__ = ("softmax",)
 import awkward as ak
 from awkward._behavior import behavior_of
-from awkward._errors import with_operation_context
+from awkward._dispatch import high_level_function
 from awkward._nplikes import ufuncs
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
@@ -10,7 +10,7 @@ from awkward._regularize import regularize_axis
 np = NumpyMetadata.instance()
 
 
-@with_operation_context
+@high_level_function
 def softmax(x, axis=None, *, keepdims=False, mask_identity=False):
     """
     Args:
@@ -44,6 +44,10 @@ def softmax(x, axis=None, *, keepdims=False, mask_identity=False):
     missing values (None) in reducers, and #ak.mean for an example with another
     non-reducer.
     """
+    # Dispatch
+    yield (x,)
+
+    # Implementation
     return _impl(x, axis, keepdims, mask_identity)
 
 

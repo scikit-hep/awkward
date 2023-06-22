@@ -7,13 +7,13 @@ from awkward_cpp.lib import _ext
 
 import awkward as ak
 from awkward._behavior import behavior_of
-from awkward._errors import with_operation_context
+from awkward._dispatch import high_level_function
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
 
 
-@with_operation_context
+@high_level_function
 def type(array, *, behavior=None):
     """
     Args:
@@ -75,6 +75,10 @@ def type(array, *, behavior=None):
     similar to existing type-constructors, so it's a plausible addition
     to the language.)
     """
+    # Dispatch
+    yield (array,)
+
+    # Implementation
     return _impl(array, behavior)
 
 

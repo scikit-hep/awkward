@@ -2,14 +2,14 @@
 __all__ = ("nan_to_num",)
 import awkward as ak
 from awkward._behavior import behavior_of
-from awkward._errors import with_operation_context
+from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
 
 
-@with_operation_context
+@high_level_function
 def nan_to_num(
     array,
     copy=True,
@@ -39,6 +39,10 @@ def nan_to_num(
 
     See also #ak.nan_to_none to convert NaN to None, i.e. missing values with option-type.
     """
+    # Dispatch
+    yield (array,)
+
+    # Implementation
     return _impl(array, copy, nan, posinf, neginf, highlevel, behavior)
 
 

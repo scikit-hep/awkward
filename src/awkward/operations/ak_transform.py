@@ -6,13 +6,13 @@ import awkward as ak
 from awkward._backends.dispatch import backend_of
 from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of
-from awkward._errors import with_operation_context
+from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 
 cpu = NumpyBackend.instance()
 
 
-@with_operation_context
+@high_level_function
 def transform(
     transformation,
     array,
@@ -411,6 +411,10 @@ def transform(
     See also: #ak.is_valid and #ak.valid_when to check the validity of transformed
     outputs.
     """
+    # Dispatch
+    yield (array, *more_arrays)
+
+    # Implementation
     return _impl(
         transformation,
         array,

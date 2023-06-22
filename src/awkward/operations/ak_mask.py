@@ -2,14 +2,14 @@
 __all__ = ("mask",)
 import awkward as ak
 from awkward._behavior import behavior_of
-from awkward._errors import with_operation_context
+from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
 
 
-@with_operation_context
+@high_level_function
 def mask(array, mask, *, valid_when=True, highlevel=True, behavior=None):
     """
     Args:
@@ -90,6 +90,10 @@ def mask(array, mask, *, valid_when=True, highlevel=True, behavior=None):
 
     (which is 5 characters away from simply filtering the `array`).
     """
+    # Dispatch
+    yield array, mask
+
+    # Implementation
     return _impl(array, mask, valid_when, highlevel, behavior)
 
 

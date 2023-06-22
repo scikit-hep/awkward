@@ -2,14 +2,14 @@
 __all__ = ("with_parameter",)
 import awkward as ak
 from awkward._behavior import behavior_of
-from awkward._errors import with_operation_context
+from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
 
 
-@with_operation_context
+@high_level_function
 def with_parameter(array, parameter, value, *, highlevel=True, behavior=None):
     """
     Args:
@@ -30,6 +30,10 @@ def with_parameter(array, parameter, value, *, highlevel=True, behavior=None):
     You can also remove a single parameter with this function, since setting
     a parameter to None is equivalent to removing it.
     """
+    # Dispatch
+    yield (array,)
+
+    # Implementation
     return _impl(array, parameter, value, highlevel, behavior)
 
 

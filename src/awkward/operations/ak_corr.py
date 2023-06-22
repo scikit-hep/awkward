@@ -2,7 +2,7 @@
 __all__ = ("corr",)
 import awkward as ak
 from awkward._behavior import behavior_of
-from awkward._errors import with_operation_context
+from awkward._dispatch import high_level_function
 from awkward._nplikes import ufuncs
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
@@ -10,16 +10,8 @@ from awkward._regularize import regularize_axis
 np = NumpyMetadata.instance()
 
 
-@with_operation_context
-def corr(
-    x,
-    y,
-    weight=None,
-    axis=None,
-    *,
-    keepdims=False,
-    mask_identity=False,
-):
+@high_level_function
+def corr(x, y, weight=None, axis=None, *, keepdims=False, mask_identity=False):
     """
     Args:
         x: One coordinate to use in the correlation (anything #ak.to_layout recognizes).
@@ -59,6 +51,10 @@ def corr(
     missing values (None) in reducers, and #ak.mean for an example with another
     non-reducer.
     """
+    # Dispatch
+    yield x, y, weight
+
+    # Implementation
     return _impl(x, y, weight, axis, keepdims, mask_identity)
 
 

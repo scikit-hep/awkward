@@ -4,7 +4,7 @@ from __future__ import annotations
 __all__ = ("almost_equal",)
 from awkward._backends.dispatch import backend_of
 from awkward._behavior import behavior_of, get_array_class, get_record_class
-from awkward._errors import with_operation_context
+from awkward._dispatch import high_level_function
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._parameters import parameters_are_equal
 from awkward.operations.ak_to_layout import to_layout
@@ -12,7 +12,7 @@ from awkward.operations.ak_to_layout import to_layout
 np = NumpyMetadata.instance()
 
 
-@with_operation_context
+@high_level_function
 def almost_equal(
     left,
     right,
@@ -22,7 +22,7 @@ def almost_equal(
     dtype_exact: bool = True,
     check_parameters: bool = True,
     check_regular: bool = True,
-) -> bool:
+):
     """
     Args:
         left: Array-like data (anything #ak.to_layout recognizes).
@@ -45,6 +45,10 @@ def almost_equal(
     TypeTracer arrays are not supported, as there is very little information to
     be compared.
     """
+    # Dispatch
+    yield left, right
+
+    # Implementation
     left_behavior = behavior_of(left)
     right_behavior = behavior_of(right)
 

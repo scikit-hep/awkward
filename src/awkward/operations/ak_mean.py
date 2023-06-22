@@ -3,7 +3,7 @@ __all__ = ("mean",)
 import awkward as ak
 from awkward._behavior import behavior_of
 from awkward._connect.numpy import UNSUPPORTED
-from awkward._errors import with_operation_context
+from awkward._dispatch import high_level_function
 from awkward._layout import maybe_posaxis
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
@@ -11,15 +11,8 @@ from awkward._regularize import regularize_axis
 np = NumpyMetadata.instance()
 
 
-@with_operation_context
-def mean(
-    x,
-    weight=None,
-    axis=None,
-    *,
-    keepdims=False,
-    mask_identity=False,
-):
+@high_level_function
+def mean(x, weight=None, axis=None, *, keepdims=False, mask_identity=False):
     """
     Args:
         x: The data on which to compute the mean (anything #ak.to_layout recognizes).
@@ -82,18 +75,15 @@ def mean(
 
     See also #ak.nanmean.
     """
+    # Dispatch
+    yield x, weight
+
+    # Implementation
     return _impl(x, weight, axis, keepdims, mask_identity)
 
 
-@with_operation_context
-def nanmean(
-    x,
-    weight=None,
-    axis=None,
-    *,
-    keepdims=False,
-    mask_identity=True,
-):
+@high_level_function
+def nanmean(x, weight=None, axis=None, *, keepdims=False, mask_identity=True):
     """
     Args:
         x: The data on which to compute the mean (anything #ak.to_layout recognizes).
@@ -125,6 +115,9 @@ def nanmean(
 
     See also #ak.mean.
     """
+    # Dispatch
+    yield x, weight
+
     if weight is not None:
         weight = ak.operations.ak_nan_to_none._impl(weight, False, None)
 

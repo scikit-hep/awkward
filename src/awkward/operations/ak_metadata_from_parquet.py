@@ -3,7 +3,7 @@ __all__ = ("metadata_from_parquet",)
 import collections
 
 import awkward as ak
-from awkward._errors import with_operation_context
+from awkward._dispatch import high_level_function
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
@@ -15,7 +15,7 @@ ParquetMetadata = collections.namedtuple(
 )
 
 
-@with_operation_context
+@high_level_function
 def metadata_from_parquet(
     path,
     *,

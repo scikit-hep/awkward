@@ -1,11 +1,11 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("backend",)
 from awkward._backends.dispatch import backend_of
-from awkward._errors import with_operation_context
+from awkward._dispatch import high_level_function
 
 
-@with_operation_context
-def backend(*arrays) -> str:
+@high_level_function
+def backend(*arrays):
     """
     Args:
         arrays: Array-like data (anything #ak.to_layout recognizes).
@@ -21,6 +21,10 @@ def backend(*arrays) -> str:
 
     See #ak.to_backend.
     """
+    # Dispatch
+    yield arrays
+
+    # Implementation
     return _impl(arrays)
 
 

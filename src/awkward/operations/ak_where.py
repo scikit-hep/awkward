@@ -4,7 +4,7 @@ import awkward as ak
 from awkward._backends.dispatch import backend_of
 from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of
-from awkward._errors import with_operation_context
+from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 
@@ -12,8 +12,7 @@ np = NumpyMetadata.instance()
 cpu = NumpyBackend.instance()
 
 
-@ak._connect.numpy.implements("where")
-@with_operation_context
+@high_level_function
 def where(condition, *args, mergebool=True, highlevel=True, behavior=None):
     """
     Args:
@@ -45,6 +44,10 @@ def where(condition, *args, mergebool=True, highlevel=True, behavior=None):
     for all `i`. The structure of `x` and `y` do not need to be the same; if
     they are incompatible types, the output will have #ak.type.UnionType.
     """
+    # Dispatch
+    yield (*args, condition)
+
+    # Implementation
     if len(args) == 0:
         return _impl1(condition, mergebool, highlevel, behavior)
 

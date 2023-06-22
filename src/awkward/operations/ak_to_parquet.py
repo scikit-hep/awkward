@@ -4,13 +4,13 @@ from collections.abc import Mapping, Sequence
 from os import fsdecode
 
 import awkward as ak
-from awkward._errors import with_operation_context
+from awkward._dispatch import high_level_function
 from awkward._nplikes.numpylike import NumpyMetadata
 
 metadata = NumpyMetadata.instance()
 
 
-@with_operation_context
+@high_level_function
 def to_parquet(
     array,
     destination,
@@ -171,6 +171,10 @@ def to_parquet(
 
     See also #ak.to_arrow, which is used as an intermediate step.
     """
+    # Dispatch
+    yield (array,)
+
+    # Implementation
     import awkward._connect.pyarrow
 
     data = array

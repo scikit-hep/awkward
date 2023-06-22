@@ -2,14 +2,14 @@
 __all__ = ("isclose",)
 import awkward as ak
 from awkward._behavior import behavior_of
-from awkward._errors import with_operation_context
+from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
 
 
-@with_operation_context
+@high_level_function
 def isclose(
     a, b, rtol=1e-05, atol=1e-08, equal_nan=False, *, highlevel=True, behavior=None
 ):
@@ -29,6 +29,10 @@ def isclose(
     Implements [np.isclose](https://numpy.org/doc/stable/reference/generated/numpy.isclose.html)
     for Awkward Arrays.
     """
+    # Dispatch
+    yield a, b
+
+    # Implementation
     return _impl(a, b, rtol, atol, equal_nan, highlevel, behavior)
 
 

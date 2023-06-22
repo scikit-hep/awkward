@@ -6,7 +6,7 @@ __all__ = ("enforce_type",)
 from itertools import permutations
 
 import awkward as ak
-from awkward._errors import with_operation_context
+from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
@@ -17,14 +17,8 @@ from awkward.types.numpytype import primitive_to_dtype
 np = NumpyMetadata.instance()
 
 
-@with_operation_context
-def enforce_type(
-    array,
-    type,
-    *,
-    highlevel=True,
-    behavior=None,
-):
+@high_level_function
+def enforce_type(array, type, *, highlevel=True, behavior=None):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
@@ -227,6 +221,10 @@ def enforce_type(
     given type value. If the conversion is not possible given the layout data, e.g. a conversion from an irregular list
     to a regular type, it will fail.
     """
+    # Dispatch
+    yield (array,)
+
+    # Implementation
     return _impl(array, type, highlevel, behavior)
 
 

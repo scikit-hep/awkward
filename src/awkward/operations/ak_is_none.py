@@ -2,7 +2,8 @@
 __all__ = ("is_none",)
 import awkward as ak
 from awkward._behavior import behavior_of
-from awkward._errors import AxisError, with_operation_context
+from awkward._dispatch import high_level_function
+from awkward._errors import AxisError
 from awkward._layout import maybe_posaxis, wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import is_integer, regularize_axis
@@ -10,7 +11,7 @@ from awkward._regularize import is_integer, regularize_axis
 np = NumpyMetadata.instance()
 
 
-@with_operation_context
+@high_level_function
 def is_none(array, axis=0, *, highlevel=True, behavior=None):
     """
     Args:
@@ -27,6 +28,10 @@ def is_none(array, axis=0, *, highlevel=True, behavior=None):
     Returns an array whose value is True where an element of `array` is None;
     False otherwise (at a given `axis` depth).
     """
+    # Dispatch
+    yield (array,)
+
+    # Implementation
     return _impl(array, axis, highlevel, behavior)
 
 

@@ -1,10 +1,10 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("is_categorical",)
 import awkward as ak
-from awkward._errors import with_operation_context
+from awkward._dispatch import high_level_function
 
 
-@with_operation_context
+@high_level_function
 def is_categorical(array):
     """
     Args:
@@ -17,6 +17,10 @@ def is_categorical(array):
 
     See also #ak.categories, #ak.to_categorical, #ak.from_categorical.
     """
+    # Dispatch
+    yield (array,)
+
+    # Implementation
     return _impl(array)
 
 

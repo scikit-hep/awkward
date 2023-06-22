@@ -2,14 +2,14 @@
 __all__ = ("ravel",)
 import awkward as ak
 from awkward._connect.numpy import UNSUPPORTED
-from awkward._errors import with_operation_context
+from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
 
 
-@with_operation_context
+@high_level_function
 def ravel(array, *, highlevel=True, behavior=None):
     """
     Args:
@@ -51,6 +51,10 @@ def ravel(array, *, highlevel=True, behavior=None):
     Missing values are not eliminated by flattening. See #ak.flatten with
     `axis=None` for an equivalent function that eliminates the option type.
     """
+    # Dispatch
+    yield (array,)
+
+    # Implementation
     return _impl(array, highlevel, behavior)
 
 

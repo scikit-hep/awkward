@@ -9,7 +9,7 @@ from awkward_cpp.lib import _ext
 
 import awkward as ak
 from awkward._behavior import behavior_of
-from awkward._errors import with_operation_context
+from awkward._dispatch import high_level_function
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
 
@@ -17,7 +17,7 @@ np = NumpyMetadata.instance()
 numpy = Numpy.instance()
 
 
-@with_operation_context
+@high_level_function
 def to_json(
     array,
     file=None,
@@ -113,6 +113,10 @@ def to_json(
 
     See also #ak.from_json.
     """
+    # Dispatch
+    yield (array,)
+
+    # Implementation
     return _impl(
         array,
         file,

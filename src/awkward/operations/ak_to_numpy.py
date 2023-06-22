@@ -2,10 +2,10 @@
 __all__ = ("to_numpy",)
 import awkward as ak
 from awkward._backends.numpy import NumpyBackend
-from awkward._errors import with_operation_context
+from awkward._dispatch import high_level_function
 
 
-@with_operation_context
+@high_level_function
 def to_numpy(array, *, allow_missing=True):
     """
     Args:
@@ -37,6 +37,10 @@ def to_numpy(array, *, allow_missing=True):
 
     See also #ak.from_numpy and #ak.to_cupy.
     """
+    # Dispatch
+    yield (array,)
+
+    # Implementation
     return _impl(array, allow_missing)
 
 
