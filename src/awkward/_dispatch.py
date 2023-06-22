@@ -29,7 +29,14 @@ def high_level_function(func: T) -> T:
                     except AttributeError:
                         continue
                     else:
-                        return custom_impl(dispatch, array_likes, args, kwargs)
+                        result = custom_impl(dispatch, array_likes, args, kwargs)
+
+                        # Future proof the implementation by permitting the `__awkward_function__` to return `NotImplemented`
+                        # This may later be used to signal that another overload should be used.
+                        if result is NotImplemented:
+                            raise NotImplementedError
+                        else:
+                            return result
 
                 # Failed to find a custom overload, so resume the original function
                 try:
