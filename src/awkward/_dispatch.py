@@ -20,7 +20,7 @@ def high_level_function(func: DispatcherType) -> HighLevelType:
             gen_or_result = func(*args, **kwargs)
             if isgenerator(gen_or_result):
                 array_likes = next(gen_or_result)
-                assert isinstance(array_likes, tuple)
+                assert isinstance(array_likes, Collection)
 
                 # Permit a third-party array object to intercept the invocation
                 for array_like in array_likes:
