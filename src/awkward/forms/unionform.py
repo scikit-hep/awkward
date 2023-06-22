@@ -4,7 +4,7 @@ from collections.abc import Iterable
 
 import awkward as ak
 from awkward._parameters import type_parameters_equal
-from awkward._typing import final
+from awkward._typing import Self, final
 from awkward._util import UNSET
 from awkward.forms.form import Form
 
@@ -231,16 +231,20 @@ class UnionForm(Form):
         for content, field in zip(self._contents, self.fields):
             content._columns((*path, field), output, list_indicator)
 
-    def _select_columns(self, index, specifier, matches, output):
+    def _prune_columns(self, is_inside_record_or_union: bool) -> Self | None:
         contents = []
         for content in self._contents:
-            len_output = len(output)
-            next_content = content._select_columns(index, specifier, matches, output)
-            if len_output != len(output):
-                contents.append(next_content)
+            next_content = content._prune_columns(True)
+            if next_content is None:
+                continue
+            contents.append(next_content)
 
         if len(contents) == 0:
-            return ak.forms.EmptyForm(form_key=self._form_key)
+            if is_inside_record_or_union:
+                return None
+            else:
+                # outermost unions should return an EmptyForm instead
+                return ak.forms.EmptyForm(form_key=self._form_key)
         elif len(contents) == 1:
             return contents[0]
         else:
@@ -251,6 +255,19 @@ class UnionForm(Form):
                 parameters=self._parameters,
                 form_key=self._form_key,
             )
+
+    def _select_columns(self, match_specifier):
+        contents = [
+            content._select_columns(match_specifier) for content in self._contents
+        ]
+
+        return UnionForm(
+            self._tags,
+            self._index,
+            contents,
+            parameters=self._parameters,
+            form_key=self._form_key,
+        )
 
     def _column_types(self):
         return sum((x._column_types() for x in self._contents), ())
