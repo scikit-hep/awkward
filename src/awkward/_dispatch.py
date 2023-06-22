@@ -30,6 +30,6 @@ def high_level_function(func: T) -> T:
                 except StopIteration as err:
                     return err.value
 
-            return func(*args, **kwargs)
+            return gen_or_result
 
     return dispatch
