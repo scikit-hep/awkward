@@ -2,7 +2,7 @@
 __all__ = ("firsts",)
 import awkward as ak
 from awkward._behavior import behavior_of
-from awkward._errors import AxisError
+from awkward._errors import AxisError, with_operation_context
 from awkward._layout import maybe_posaxis, wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import is_integer, regularize_axis
@@ -10,6 +10,7 @@ from awkward._regularize import is_integer, regularize_axis
 np = NumpyMetadata.instance()
 
 
+@with_operation_context
 def firsts(array, axis=1, *, highlevel=True, behavior=None):
     """
     Args:
@@ -41,11 +42,7 @@ def firsts(array, axis=1, *, highlevel=True, behavior=None):
 
     See #ak.singletons to invert this function.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.firsts",
-        {"array": array, "axis": axis, "highlevel": highlevel, "behavior": behavior},
-    ):
-        return _impl(array, axis, highlevel, behavior)
+    return _impl(array, axis, highlevel, behavior)
 
 
 def _impl(array, axis, highlevel, behavior):

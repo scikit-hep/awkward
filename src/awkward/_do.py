@@ -204,6 +204,7 @@ def remove_structure(
     function_name: str | None = None,
     drop_nones: bool = True,
     keepdims: bool = False,
+    allow_records: bool = False,
 ):
     if isinstance(layout, Record):
         return remove_structure(
@@ -213,6 +214,7 @@ def remove_structure(
             function_name,
             drop_nones,
             keepdims,
+            allow_records,
         )
 
     else:
@@ -225,6 +227,7 @@ def remove_structure(
                 "function_name": function_name,
                 "drop_nones": drop_nones,
                 "keepdims": keepdims,
+                "allow_records": allow_records,
             },
         )
         return tuple(arrays)
@@ -264,9 +267,15 @@ def reduce(
     keepdims: bool = False,
     behavior: dict | None = None,
 ):
+    reducer = layout.backend.prepare_reducer(reducer)
+
     if axis is None:
         parts = remove_structure(
-            layout, flatten_records=False, drop_nones=False, keepdims=keepdims
+            layout,
+            flatten_records=False,
+            drop_nones=False,
+            keepdims=keepdims,
+            allow_records=True,
         )
 
         if len(parts) > 1:
@@ -276,9 +285,9 @@ def reduce(
                 "cannot use axis=None on an array containing irreducible unions"
             )
         elif len(parts) == 0:
-            parts = [ak.contents.EmptyArray()]
-
-        (layout,) = parts
+            layout = ak.contents.EmptyArray()
+        else:
+            (layout,) = parts
 
         starts = ak.index.Index64.zeros(1, layout.backend.index_nplike)
         parents = ak.index.Index64.zeros(layout.length, layout.backend.index_nplike)

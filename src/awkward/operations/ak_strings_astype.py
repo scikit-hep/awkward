@@ -2,6 +2,7 @@
 __all__ = ("strings_astype",)
 import awkward as ak
 from awkward._behavior import behavior_of
+from awkward._errors import with_operation_context
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
@@ -10,6 +11,7 @@ np = NumpyMetadata.instance()
 numpy = Numpy.instance()
 
 
+@with_operation_context
 def strings_astype(array, to, *, highlevel=True, behavior=None):
     """
     Args:
@@ -43,11 +45,7 @@ def strings_astype(array, to, *, highlevel=True, behavior=None):
 
     See also #ak.numbers_astype.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.strings_astype",
-        {"array": array, "to": to, "highlevel": highlevel, "behavior": behavior},
-    ):
-        return _impl(array, to, highlevel, behavior)
+    return _impl(array, to, highlevel, behavior)
 
 
 def _impl(array, to, highlevel, behavior):

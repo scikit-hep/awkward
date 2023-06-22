@@ -4,21 +4,23 @@ from __future__ import annotations
 from collections.abc import Iterable
 from itertools import permutations
 
+from awkward._behavior import find_array_typestr
+from awkward._errors import deprecate
 from awkward._parameters import parameters_are_equal, type_parameters_equal
 from awkward._typing import Self, final
-from awkward._util import unset
+from awkward._util import UNSET
 from awkward.types.type import Type
 
 
 @final
 class UnionType(Type):
     def copy(
-        self, *, contents: list[Type] = unset, parameters=unset, typestr=unset
+        self, *, contents: list[Type] = UNSET, parameters=UNSET, typestr=UNSET
     ) -> Self:
         return UnionType(
-            self._contents if contents is unset else contents,
-            parameters=self._parameters if parameters is unset else parameters,
-            typestr=self._typestr if typestr is unset else typestr,
+            self._contents if contents is UNSET else contents,
+            parameters=self._parameters if parameters is UNSET else parameters,
+            typestr=self._typestr if typestr is UNSET else typestr,
         )
 
     def __init__(self, contents, *, parameters=None, typestr=None):
@@ -57,9 +59,13 @@ class UnionType(Type):
     def contents(self):
         return self._contents
 
-    def _str(self, indent, compact):
+    def _str(self, indent, compact, behavior):
         if self._typestr is not None:
-            out = [self._typestr]
+            deprecate("typestr argument is deprecated", "2.4.0")
+
+        typestr = find_array_typestr(behavior, self._parameters, self._typestr)
+        if typestr is not None:
+            out = [typestr]
 
         else:
             if compact:
@@ -71,25 +77,30 @@ class UnionType(Type):
             for i, x in enumerate(self._contents):
                 if i + 1 < len(self._contents):
                     if compact:
-                        y = [*x._str(indent, compact), ", "]
+                        y = [*x._str(indent, compact, behavior), ", "]
                     else:
-                        y = [*x._str(indent + "    ", compact), ",\n", indent, "    "]
+                        y = [
+                            *x._str(indent + "    ", compact, behavior),
+                            ",\n",
+                            indent,
+                            "    ",
+                        ]
                 else:
                     if compact:
-                        y = x._str(indent, compact)
+                        y = x._str(indent, compact, behavior)
                     else:
-                        y = x._str(indent + "    ", compact)
+                        y = x._str(indent + "    ", compact, behavior)
                 children.append(y)
 
             flat_children = [y for x in children for y in x]
             params = self._str_parameters()
 
             if params is None:
-                out = ["union[", pre, *flat_children] + [post, "]"]
+                out = ["union[", pre, *flat_children, post, "]"]
             else:
-                out = ["union[", pre, *flat_children] + [", ", post, params, "]"]
+                out = ["union[", pre, *flat_children, ", ", post, params, "]"]
 
-        return [self._str_categorical_begin(), *out] + [self._str_categorical_end()]
+        return [self._str_categorical_begin(), *out, self._str_categorical_end()]
 
     def __repr__(self):
         args = [repr(self._contents), *self._repr_args()]

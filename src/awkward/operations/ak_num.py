@@ -2,7 +2,7 @@
 __all__ = ("num",)
 import awkward as ak
 from awkward._behavior import behavior_of
-from awkward._errors import AxisError
+from awkward._errors import AxisError, with_operation_context
 from awkward._layout import maybe_posaxis, wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import is_integer, regularize_axis
@@ -10,6 +10,7 @@ from awkward._regularize import is_integer, regularize_axis
 np = NumpyMetadata.instance()
 
 
+@with_operation_context
 def num(array, axis=1, *, highlevel=True, behavior=None):
     """
     Args:
@@ -69,11 +70,7 @@ def num(array, axis=1, *, highlevel=True, behavior=None):
         >>> array.mask[ak.num(array) > 0][:, 0]
         <Array [[1.1, 2.2, 3.3], None, [7.7]] type='3 * option[var * float64]'>
     """
-    with ak._errors.OperationErrorContext(
-        "ak.num",
-        {"array": array, "axis": axis, "highlevel": highlevel, "behavior": behavior},
-    ):
-        return _impl(array, axis, highlevel, behavior)
+    return _impl(array, axis, highlevel, behavior)
 
 
 def _impl(array, axis, highlevel, behavior):

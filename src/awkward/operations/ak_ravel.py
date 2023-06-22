@@ -1,13 +1,15 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("ravel",)
 import awkward as ak
-from awkward._connect.numpy import unsupported
+from awkward._connect.numpy import UNSUPPORTED
+from awkward._errors import with_operation_context
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
 
 
+@with_operation_context
 def ravel(array, *, highlevel=True, behavior=None):
     """
     Args:
@@ -49,11 +51,7 @@ def ravel(array, *, highlevel=True, behavior=None):
     Missing values are not eliminated by flattening. See #ak.flatten with
     `axis=None` for an equivalent function that eliminates the option type.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.ravel",
-        {"array": array, "highlevel": highlevel, "behavior": behavior},
-    ):
-        return _impl(array, highlevel, behavior)
+    return _impl(array, highlevel, behavior)
 
 
 def _impl(array, highlevel, behavior):
@@ -70,5 +68,5 @@ def _impl(array, highlevel, behavior):
 
 
 @ak._connect.numpy.implements("ravel")
-def _nep_18_impl(a, order=unsupported):
+def _nep_18_impl(a, order=UNSUPPORTED):
     return ravel(a)

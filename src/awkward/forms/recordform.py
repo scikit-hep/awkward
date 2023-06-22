@@ -1,13 +1,11 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-import glob
 from collections.abc import Iterable
 
 import awkward as ak
-from awkward._behavior import find_typestr
 from awkward._parameters import type_parameters_equal
 from awkward._regularize import is_integer
 from awkward._typing import final
-from awkward._util import unset
+from awkward._util import UNSET
 from awkward.forms.form import Form
 
 
@@ -60,17 +58,17 @@ class RecordForm(Form):
 
     def copy(
         self,
-        contents=unset,
-        fields=unset,
+        contents=UNSET,
+        fields=UNSET,
         *,
-        parameters=unset,
-        form_key=unset,
+        parameters=UNSET,
+        form_key=UNSET,
     ):
         return RecordForm(
-            self._contents if contents is unset else contents,
-            self._fields if fields is unset else fields,
-            parameters=self._parameters if parameters is unset else parameters,
-            form_key=self._form_key if form_key is unset else form_key,
+            self._contents if contents is UNSET else contents,
+            self._fields if fields is UNSET else fields,
+            parameters=self._parameters if parameters is UNSET else parameters,
+            form_key=self._form_key if form_key is UNSET else form_key,
         )
 
     @classmethod
@@ -165,12 +163,12 @@ class RecordForm(Form):
         out["contents"] = contents_tolist
         return self._to_dict_extra(out, verbose)
 
-    def _type(self, typestrs):
+    @property
+    def type(self):
         return ak.types.RecordType(
-            [x._type(typestrs) for x in self._contents],
+            [x.type for x in self._contents],
             self._fields,
             parameters=self._parameters,
-            typestr=find_typestr(self._parameters, typestrs),
         )
 
     def __eq__(self, other):
@@ -242,23 +240,42 @@ class RecordForm(Form):
         for content, field in zip(self._contents, self.fields):
             content._columns((*path, field), output, list_indicator)
 
-    def _select_columns(self, index, specifier, matches, output):
+    def _prune_columns(self, is_inside_record_or_union: bool):
         contents = []
         fields = []
         for content, field in zip(self._contents, self.fields):
-            next_matches = [
-                matches[i]
-                and (index >= len(item) or glob.fnmatch.fnmatchcase(field, item[index]))
-                for i, item in enumerate(specifier)
-            ]
-            if any(next_matches):
-                len_output = len(output)
-                next_content = content._select_columns(
-                    index + 1, specifier, next_matches, output
-                )
-                if len_output != len(output):
-                    contents.append(next_content)
-                    fields.append(field)
+            next_content = content._prune_columns(True)
+            if next_content is None:
+                continue
+            contents.append(next_content)
+            fields.append(field)
+
+        if fields or not is_inside_record_or_union:
+            return RecordForm(
+                contents,
+                fields,
+                parameters=self._parameters,
+                form_key=self._form_key,
+            )
+        # If all subtrees are pruned (or we have no subtrees!), then we should prune this form too
+        else:
+            return None
+
+    def _select_columns(self, match_specifier):
+        contents = []
+        fields = []
+        for content, field in zip(self._contents, self.fields):
+            # Try and match this field, allowing derived matcher to match any field if empty
+            next_match_specifier = match_specifier(field, next_match_if_empty=True)
+            if next_match_specifier is None:
+                continue
+
+            # NOTE: we could optimise this by avoiding column selection if we know the entire subtree will match
+            #       this is given by `next_match_specifier.is_empty`, *but* we also want to perform column pruning
+            #       meaning this optimisation is less useful, we we'd require a special prune-only pass
+            next_content = content._select_columns(next_match_specifier)
+            contents.append(next_content)
+            fields.append(field)
 
         return RecordForm(
             contents,

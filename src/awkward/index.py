@@ -10,13 +10,13 @@ from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyLike, NumpyMetadata
 from awkward._nplikes.typetracer import TypeTracer
-from awkward._typing import Self
+from awkward._typing import Final, Self
 
-np = NumpyMetadata.instance()
-numpy = Numpy.instance()
+np: Final = NumpyMetadata.instance()
+numpy: Final = Numpy.instance()
 
 
-_dtype_to_form = {
+_dtype_to_form: Final = {
     np.dtype(np.int8): "i8",
     np.dtype(np.uint8): "u8",
     np.dtype(np.int32): "i32",
@@ -24,20 +24,15 @@ _dtype_to_form = {
     np.dtype(np.int64): "i64",
 }
 
+_form_to_dtype: Final = {v: k for k, v in _dtype_to_form.items()}
 
-def _form_to_zero_length(form):
-    if form == "i8":
-        return Index8(numpy.zeros(0, dtype=np.int8))
-    elif form == "u8":
-        return IndexU8(numpy.zeros(0, dtype=np.uint8))
-    elif form == "i32":
-        return Index32(numpy.zeros(0, dtype=np.int32))
-    elif form == "u32":
-        return IndexU32(numpy.zeros(0, dtype=np.uint32))
-    elif form == "i64":
-        return Index64(numpy.zeros(0, dtype=np.int64))
-    else:
-        raise AssertionError(f"unrecognized Index form: {form!r}")
+
+def _form_to_zero_length(form: str) -> Index:
+    try:
+        dtype = _form_to_dtype[form]
+    except KeyError:
+        raise AssertionError(f"unrecognized Index form: {form!r}") from None
+    return Index(numpy.zeros(0, dtype=dtype))
 
 
 class Index:
@@ -230,6 +225,14 @@ class Index:
             )
         else:
             return self.nplike.array_equal(self.data, other.data)
+
+    def _touch_data(self):
+        if not self.nplike.known_data:
+            self._data.touch_data()
+
+    def _touch_shape(self):
+        if not self.nplike.known_data:
+            self._data.touch_shape()
 
 
 class Index8(Index):

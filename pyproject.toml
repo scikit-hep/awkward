@@ -7,7 +7,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "awkward"
-version = "2.2.0"
+version = "2.2.3"
 description = "Manipulate JSON-like data with NumPy-like idioms."
 license = { text = "BSD-3-Clause" }
 requires-python = ">=3.7"
@@ -40,7 +40,7 @@ classifiers = [
     "Topic :: Utilities",
 ]
 dependencies = [
-    "awkward_cpp==15",
+    "awkward_cpp==17",
     "importlib_resources;python_version < \"3.9\"",
     "numpy>=1.17.0",
     "packaging",
@@ -308,6 +308,7 @@ mccabe.max-complexity = 100
 "src/awkward/__init__.py" = ["E402", "F401", "F403", "I001"]
 "src/awkward/operations/__init__.py" = ["F403"]
 "src/awkward/_nplikes/*" = ["TID251"]
+"src/awkward/_operators.py" = ["TID251"]
 "tests*/*" = ["T20", "TID251"]
 
 [tool.ruff.flake8-tidy-imports.banned-api]

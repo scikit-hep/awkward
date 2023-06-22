@@ -7,14 +7,14 @@ import sys
 import awkward as ak
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._typing import Self
-from awkward._util import unset
+from awkward._util import UNSET
 from awkward.types._awkward_datashape_parser import Lark_StandAlone, Transformer
 
 np = NumpyMetadata.instance()
 
 
 class Type:
-    def copy(self, *, parameters=unset, typestr=unset) -> Self:
+    def copy(self, *, parameters=UNSET, typestr=UNSET) -> Self:
         raise NotImplementedError
 
     @property
@@ -34,10 +34,14 @@ class Type:
         return self._typestr
 
     def __str__(self):
-        return "".join(self._str("", True))
+        return "".join(self._str("", True, None))
+
+    def _str(self, indent: str, compact: bool, behavior: dict | None) -> list[str]:
+        raise NotImplementedError
 
     def show(self, stream=sys.stdout):
-        stream.write("".join([*self._str("", False), "\n"]))
+        # TODO: deprecate lowlevel show
+        stream.write("".join([*self._str("", False, None), "\n"]))
 
     _str_parameters_exclude = ("__categorical__",)
 
@@ -310,8 +314,8 @@ def from_datashape(datashape, highlevel=True):
     the return type is #ak.types.ArrayType, representing an #ak.highlevel.Array.
 
     If `highlevel=True` and the type string starts with a record indicator (e.g. `{`),
-    the return type is #ak.types.RecordType, representing an #ak.highlevel.Record,
-    rather than an array of them.
+    the return type is #ak.types.ScalarType with an #ak.types.RecordType content,
+    representing a scalar #ak.highlevel.Record rather than an array of them.
 
     Other strings (e.g. starting with `var *`, `?`, `option`, etc.) are not compatible
     with `highlevel=True`; an exception would be raised.
@@ -322,6 +326,7 @@ def from_datashape(datashape, highlevel=True):
     from awkward.types.arraytype import ArrayType
     from awkward.types.recordtype import RecordType
     from awkward.types.regulartype import RegularType
+    from awkward.types.scalartype import ScalarType
 
     parser = Lark_StandAlone(transformer=_DataShapeTransformer())
     out = parser.parse(datashape)
@@ -330,7 +335,7 @@ def from_datashape(datashape, highlevel=True):
         if isinstance(out, RegularType):
             return ArrayType(out.content, out.size)
         elif isinstance(out, RecordType):
-            return out
+            return ScalarType(out)
         else:
             raise ValueError(
                 f"type {type(out).__name__!r} is not compatible with highlevel=True"

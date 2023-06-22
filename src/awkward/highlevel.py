@@ -11,7 +11,6 @@ import sys
 from collections.abc import Iterable, Mapping, Sized
 
 from awkward_cpp.lib import _ext
-from numpy.lib.mixins import NDArrayOperatorsMixin  # noqa: TID251
 
 import awkward as ak
 import awkward._connect.hist
@@ -21,6 +20,7 @@ from awkward._behavior import behavior_of, get_array_class, get_record_class
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._operators import NDArrayOperatorsMixin
 from awkward._regularize import is_non_string_like_iterable
 
 np = NumpyMetadata.instance()
@@ -327,7 +327,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         def __getitem__(self, where):
             with ak._errors.OperationErrorContext(
-                "ak.Array.mask", {0: self._array, 1: where}
+                "ak.Array.mask", args=[self._array, where], kwargs={}
             ):
                 return ak.operations.mask(self._array, where, valid_when=True)
 
@@ -436,7 +436,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         wrapped by an #ak.types.ArrayType.
         """
         return ak.types.ArrayType(
-            self._layout.form.type_from_behavior(self._behavior), self._layout.length
+            self._layout.form.type,
+            self._layout.length,
+            self._behavior,
         )
 
     @property
@@ -1016,7 +1018,8 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         """
         with ak._errors.OperationErrorContext(
             "ak.Array.__setitem__",
-            {"self": self, "field_name": where, "field_value": what},
+            (self,),
+            {"where": where, "what": what},
         ):
             if not (
                 isinstance(where, str)
@@ -1047,7 +1050,8 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         """
         with ak._errors.OperationErrorContext(
             "ak.Array.__delitem__",
-            {"self": self, "field_name": where},
+            (self,),
+            {"where": where},
         ):
             if not (
                 isinstance(where, str)
@@ -1279,11 +1283,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         nested lists in a NumPy `"O"` array are severed from the array and
         cannot be sliced as dimensions.
         """
-        arguments = {0: self}
-        for i, arg in enumerate(args):
-            arguments[i + 1] = arg
-        arguments.update(kwargs)
-        with ak._errors.OperationErrorContext("numpy.asarray", arguments):
+        with ak._errors.OperationErrorContext("numpy.asarray", (self, *args), kwargs):
             return ak._connect.numpy.convert_to_array(self._layout, args, kwargs)
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
@@ -1351,12 +1351,8 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         See also #__array_function__.
         """
-        name = f"{type(ufunc).__module__}.{ufunc.__name__}.{str(method)}"
-        arguments = {}
-        for i, arg in enumerate(inputs):
-            arguments[i] = arg
-        arguments.update(kwargs)
-        with ak._errors.OperationErrorContext(name, arguments):
+        name = f"{type(ufunc).__module__}.{ufunc.__name__}.{method!s}"
+        with ak._errors.OperationErrorContext(name, inputs, kwargs):
             return ak._connect.numpy.array_ufunc(ufunc, method, inputs, kwargs)
 
     def __array_function__(self, func, types, args, kwargs):
@@ -1713,9 +1709,7 @@ class Record(NDArrayOperatorsMixin):
         The type of a #ak.record.Record (from #ak.Array.layout) is not
         wrapped by an #ak.types.ScalarType.
         """
-        return ak.types.ScalarType(
-            self._layout.array.form.type_from_behavior(self._behavior)
-        )
+        return ak.types.ScalarType(self._layout.array.form.type, self._behavior)
 
     @property
     def typestr(self):
@@ -1787,7 +1781,8 @@ class Record(NDArrayOperatorsMixin):
         """
         with ak._errors.OperationErrorContext(
             "ak.Record.__setitem__",
-            {"self": self, "field_name": where, "field_value": what},
+            (self,),
+            {"where": where, "what": what},
         ):
             if not (
                 isinstance(where, str)
@@ -1819,7 +1814,8 @@ class Record(NDArrayOperatorsMixin):
         """
         with ak._errors.OperationErrorContext(
             "ak.Record.__delitem__",
-            {"self": self, "field_name": where},
+            (self,),
+            {"where": where},
         ):
             if not (
                 isinstance(where, str)
@@ -2029,12 +2025,8 @@ class Record(NDArrayOperatorsMixin):
 
         See #ak.Array.__array_ufunc__ for a more complete description.
         """
-        name = f"{type(ufunc).__module__}.{ufunc.__name__}.{str(method)}"
-        arguments = {}
-        for i, arg in enumerate(inputs):
-            arguments[i] = arg
-        arguments.update(kwargs)
-        with ak._errors.OperationErrorContext(name, arguments):
+        name = f"{type(ufunc).__module__}.{ufunc.__name__}.{method!s}"
+        with ak._errors.OperationErrorContext(name, inputs, kwargs):
             return ak._connect.numpy.array_ufunc(ufunc, method, inputs, kwargs)
 
     @property
@@ -2318,9 +2310,7 @@ class ArrayBuilder(Sized):
         wrapped by an #ak.types.ArrayType.
         """
         form = ak.forms.from_json(self._layout.form())
-        return ak.types.ArrayType(
-            form.type_from_behavior(self._behavior), len(self._layout)
-        )
+        return ak.types.ArrayType(form.type, len(self._layout), self._behavior)
 
     @property
     def typestr(self):
@@ -2378,11 +2368,7 @@ class ArrayBuilder(Sized):
 
         See #ak.Array.__array__ for a more complete description.
         """
-        arguments = {0: self}
-        for i, arg in enumerate(args):
-            arguments[i + 1] = arg
-        arguments.update(kwargs)
-        with ak._errors.OperationErrorContext("numpy.asarray", arguments):
+        with ak._errors.OperationErrorContext("numpy.asarray", (self, *args), kwargs):
             return ak._connect.numpy.convert_to_array(self.snapshot(), args, kwargs)
 
     @property
@@ -2417,7 +2403,7 @@ class ArrayBuilder(Sized):
         formstr, length, container = self._layout.to_buffers()
         form = ak.forms.from_json(formstr)
 
-        with ak._errors.OperationErrorContext("ak.ArrayBuilder.snapshot", {}):
+        with ak._errors.OperationErrorContext("ak.ArrayBuilder.snapshot", [], {}):
             return ak.operations.ak_from_buffers._impl(
                 form,
                 length,

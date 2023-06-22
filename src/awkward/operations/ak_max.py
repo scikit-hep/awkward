@@ -2,7 +2,8 @@
 __all__ = ("max",)
 import awkward as ak
 from awkward._behavior import behavior_of
-from awkward._connect.numpy import unsupported
+from awkward._connect.numpy import UNSUPPORTED
+from awkward._errors import with_operation_context
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
@@ -10,6 +11,7 @@ from awkward._regularize import regularize_axis
 np = NumpyMetadata.instance()
 
 
+@with_operation_context
 def max(
     array,
     axis=None,
@@ -59,29 +61,18 @@ def max(
 
     See also #ak.nanmax.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.max",
-        {
-            "array": array,
-            "axis": axis,
-            "keepdims": keepdims,
-            "initial": initial,
-            "mask_identity": mask_identity,
-            "highlevel": highlevel,
-            "behavior": behavior,
-        },
-    ):
-        return _impl(
-            array,
-            axis,
-            keepdims,
-            initial,
-            mask_identity,
-            highlevel,
-            behavior,
-        )
+    return _impl(
+        array,
+        axis,
+        keepdims,
+        initial,
+        mask_identity,
+        highlevel,
+        behavior,
+    )
 
 
+@with_operation_context
 def nanmax(
     array,
     axis=None,
@@ -122,29 +113,15 @@ def nanmax(
 
     See also #ak.max.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.nanmax",
-        {
-            "array": array,
-            "axis": axis,
-            "keepdims": keepdims,
-            "initial": initial,
-            "mask_identity": mask_identity,
-            "highlevel": highlevel,
-            "behavior": behavior,
-        },
-    ):
-        array = ak.operations.ak_nan_to_none._impl(array, False, None)
-
-        return _impl(
-            array,
-            axis,
-            keepdims,
-            initial,
-            mask_identity,
-            highlevel,
-            behavior,
-        )
+    return _impl(
+        ak.operations.ak_nan_to_none._impl(array, False, None),
+        axis,
+        keepdims,
+        initial,
+        mask_identity,
+        highlevel,
+        behavior,
+    )
 
 
 def _impl(array, axis, keepdims, initial, mask_identity, highlevel, behavior):
@@ -169,13 +146,13 @@ def _impl(array, axis, keepdims, initial, mask_identity, highlevel, behavior):
 
 @ak._connect.numpy.implements("amax")
 def _nep_18_impl_amax(
-    a, axis=None, out=unsupported, keepdims=False, initial=None, where=unsupported
+    a, axis=None, out=UNSUPPORTED, keepdims=False, initial=None, where=UNSUPPORTED
 ):
     return max(a, axis=axis, keepdims=keepdims, initial=initial)
 
 
 @ak._connect.numpy.implements("nanmax")
 def _nep_18_impl_nanmax(
-    a, axis=None, out=unsupported, keepdims=False, initial=None, where=unsupported
+    a, axis=None, out=UNSUPPORTED, keepdims=False, initial=None, where=UNSUPPORTED
 ):
     return nanmax(a, axis=axis, keepdims=keepdims, initial=initial)

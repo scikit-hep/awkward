@@ -285,14 +285,12 @@ jobs:
           submodules: true
 
       - name: Setup Python via Conda
-        uses: mamba-org/provision-with-micromamba@main
+        uses: mamba-org/setup-micromamba@v1
         with:
           # Cache invalidates daily by default
-          cache-env: true
-          environment-file: false
+          cache-environment: true
           environment-name: awkward
-          channels: conda-forge
-          extra-specs: |
+          create-args: >-
             python=${{ env.PYTHON_VERSION }}
             numpy
             root

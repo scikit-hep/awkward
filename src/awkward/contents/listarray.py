@@ -2,12 +2,13 @@
 from __future__ import annotations
 
 import copy
+from collections.abc import MutableMapping, Sequence
 
 import awkward as ak
 from awkward._backends.backend import Backend
 from awkward._layout import maybe_posaxis
-from awkward._nplikes.numpylike import IndexType, NumpyMetadata
-from awkward._nplikes.shape import unknown_length
+from awkward._nplikes.numpylike import ArrayLike, IndexType, NumpyMetadata
+from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import TypeTracer
 from awkward._parameters import (
     parameters_intersect,
@@ -15,10 +16,11 @@ from awkward._parameters import (
 )
 from awkward._regularize import is_integer_like
 from awkward._slicing import NO_HEAD
-from awkward._typing import TYPE_CHECKING, Final, Self, SupportsIndex, final
-from awkward._util import unset
+from awkward._typing import TYPE_CHECKING, Callable, Final, Self, SupportsIndex, final
+from awkward._util import UNSET
 from awkward.contents.content import Content
 from awkward.contents.listoffsetarray import ListOffsetArray
+from awkward.forms.form import Form
 from awkward.forms.listform import ListForm
 from awkward.index import Index
 
@@ -159,25 +161,25 @@ class ListArray(Content):
         self._init(parameters, content.backend)
 
     @property
-    def starts(self):
+    def starts(self) -> Index:
         return self._starts
 
     @property
-    def stops(self):
+    def stops(self) -> Index:
         return self._stops
 
     @property
-    def content(self):
+    def content(self) -> Content:
         return self._content
 
     form_cls: Final = ListForm
 
-    def copy(self, starts=unset, stops=unset, content=unset, *, parameters=unset):
+    def copy(self, starts=UNSET, stops=UNSET, content=UNSET, *, parameters=UNSET):
         return ListArray(
-            self._starts if starts is unset else starts,
-            self._stops if stops is unset else stops,
-            self._content if content is unset else content,
-            parameters=self._parameters if parameters is unset else parameters,
+            self._starts if starts is UNSET else starts,
+            self._stops if stops is UNSET else stops,
+            self._content if content is UNSET else content,
+            parameters=self._parameters if parameters is UNSET else parameters,
         )
 
     def __copy__(self):
@@ -195,7 +197,7 @@ class ListArray(Content):
     def simplified(cls, starts, stops, content, *, parameters=None):
         return cls(starts, stops, content, parameters=parameters)
 
-    def _form_with_key(self, getkey):
+    def _form_with_key(self, getkey: Callable[[Content], str | None]) -> ListForm:
         form_key = getkey(self)
         return self.form_cls(
             self._starts.form,
@@ -205,7 +207,14 @@ class ListArray(Content):
             form_key=form_key,
         )
 
-    def _to_buffers(self, form, getkey, container, backend, byteorder):
+    def _to_buffers(
+        self,
+        form: Form,
+        getkey: Callable[[Content, Form, str], str],
+        container: MutableMapping[str, ArrayLike],
+        backend: Backend,
+        byteorder: str,
+    ):
         assert isinstance(form, self.form_cls)
         key1 = getkey(self, form, "starts")
         key2 = getkey(self, form, "stops")
@@ -227,22 +236,20 @@ class ListArray(Content):
             parameters=self._parameters,
         )
 
-    def _touch_data(self, recursive):
-        if not self._backend.index_nplike.known_data:
-            self._starts.data.touch_data()
-            self._stops.data.touch_data()
+    def _touch_data(self, recursive: bool):
+        self._starts._touch_data()
+        self._stops._touch_data()
         if recursive:
             self._content._touch_data(recursive)
 
-    def _touch_shape(self, recursive):
-        if not self._backend.index_nplike.known_data:
-            self._starts.data.touch_shape()
-            self._stops.data.touch_shape()
+    def _touch_shape(self, recursive: bool):
+        self._starts._touch_shape()
+        self._stops._touch_shape()
         if recursive:
             self._content._touch_shape(recursive)
 
     @property
-    def length(self):
+    def length(self) -> ShapeItem:
         return self._starts.length
 
     def __repr__(self):
@@ -261,24 +268,18 @@ class ListArray(Content):
         out.append(post)
         return "".join(out)
 
-    def to_ListOffsetArray64(self, start_at_zero=False):
+    def to_ListOffsetArray64(self, start_at_zero: bool = False) -> ListOffsetArray:
+        index_nplike = self._backend.index_nplike
+
         starts = self._starts.data
         stops = self._stops.data
 
-        lenoffsets = None if (starts.shape[0] is None) else (starts.shape[0] + 1)
-        if not self._backend.nplike.known_data:
-            self._touch_data(recursive=False)
-            self._content._touch_data(recursive=False)
-            offsets = self._backend.index_nplike.empty(lenoffsets, dtype=starts.dtype)
-            return ListOffsetArray(
-                ak.index.Index(offsets, nplike=self._backend.index_nplike),
-                self._content,
-                parameters=self._parameters,
-            )
-
-        elif self._backend.index_nplike.array_equal(starts[1:], stops[:-1]):
-            offsets = self._backend.index_nplike.empty(lenoffsets, dtype=starts.dtype)
-            if offsets.shape[0] == 1:
+        lenoffsets = self._starts.length + 1
+        if (not index_nplike.known_data) or index_nplike.array_equal(
+            starts[1:], stops[:-1]
+        ):
+            offsets = index_nplike.empty(lenoffsets, dtype=starts.dtype)
+            if lenoffsets is not unknown_length and lenoffsets == 1:
                 offsets[0] = 0
             else:
                 offsets[:-1] = starts
@@ -368,7 +369,7 @@ class ListArray(Content):
             and self._starts.nplike is self._backend.index_nplike
             and self._stops.nplike is self._backend.index_nplike
         )
-        self._handle_error(
+        self._backend.maybe_kernel_error(
             self._backend[
                 "awkward_ListArray_compact_offsets",
                 out.dtype.type,
@@ -383,10 +384,65 @@ class ListArray(Content):
         )
         return out
 
-    def _broadcast_tooffsets64(self, offsets):
-        return ListOffsetArray._broadcast_tooffsets64(self, offsets)
+    def _broadcast_tooffsets64(self, offsets: Index) -> ListOffsetArray:
+        self._touch_data(recursive=False)
+        offsets._touch_data()
 
-    def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
+        index_nplike = self._backend.index_nplike
+        assert offsets.nplike is index_nplike
+        if offsets.length is not unknown_length and offsets.length == 0:
+            raise AssertionError(
+                "broadcast_tooffsets64 can only be used with non-empty offsets"
+            )
+        elif index_nplike.known_data and offsets[0] != 0:
+            raise AssertionError(
+                f"broadcast_tooffsets64 can only be used with offsets that start at 0, not {offsets[0]}"
+            )
+        elif (
+            offsets.length is not unknown_length
+            and self._starts.length is not unknown_length
+            and offsets.length - 1 != self._starts.length
+        ):
+            raise AssertionError(
+                "cannot broadcast RegularArray of length {} to length {}".format(
+                    self._starts.length, offsets.length - 1
+                )
+            )
+
+        nextcarry = ak.index.Index64.empty(
+            self._backend.index_nplike.index_as_shape_item(offsets[-1]),
+            self._backend.index_nplike,
+        )
+        assert (
+            nextcarry.nplike is self._backend.index_nplike
+            and offsets.nplike is self._backend.index_nplike
+            and self._starts.nplike is self._backend.index_nplike
+            and self._stops.nplike is self._backend.index_nplike
+        )
+        self._backend.maybe_kernel_error(
+            self._backend[
+                "awkward_ListArray_broadcast_tooffsets",
+                nextcarry.dtype.type,
+                offsets.dtype.type,
+                self._starts.dtype.type,
+                self._stops.dtype.type,
+            ](
+                nextcarry.data,
+                offsets.data,
+                offsets.length,
+                self._starts.data,
+                self._stops.data,
+                self._content.length,
+            )
+        )
+
+        nextcontent = self._content._carry(nextcarry, True)
+
+        return ListOffsetArray(offsets, nextcontent, parameters=self._parameters)
+
+    def _getitem_next_jagged(
+        self, slicestarts: Index, slicestops: Index, slicecontent: Content, tail
+    ) -> Content:
         slicestarts = slicestarts.to_nplike(self._backend.index_nplike)
         slicestops = slicestops.to_nplike(self._backend.index_nplike)
         if self._backend.nplike.known_data and slicestarts.length != self.length:
@@ -412,7 +468,7 @@ class ListArray(Content):
                 and self._starts.nplike is self._backend.index_nplike
                 and self._stops.nplike is self._backend.index_nplike
             )
-            self._handle_error(
+            self._maybe_index_error(
                 self._backend[
                     "awkward_ListArray_getitem_jagged_descend",
                     outoffsets.dtype.type,
@@ -453,7 +509,7 @@ class ListArray(Content):
                 and slicestarts.nplike is self._backend.index_nplike
                 and slicestops.nplike is self._backend.index_nplike
             )
-            self._handle_error(
+            self._maybe_index_error(
                 self._backend[
                     "awkward_ListArray_getitem_jagged_carrylen",
                     _carrylen.dtype.type,
@@ -485,7 +541,7 @@ class ListArray(Content):
                 and self._starts.nplike is self._backend.index_nplike
                 and self._stops.nplike is self._backend.index_nplike
             )
-            self._handle_error(
+            self._maybe_index_error(
                 self._backend[
                     "awkward_ListArray_getitem_jagged_apply",
                     outoffsets.dtype.type,
@@ -536,7 +592,7 @@ class ListArray(Content):
                 and slicestops.nplike is self._backend.index_nplike
                 and missing.nplike is self._backend.index_nplike
             )
-            self._handle_error(
+            self._maybe_index_error(
                 self._backend[
                     "awkward_ListArray_getitem_jagged_numvalid",
                     _numvalid.dtype.type,
@@ -574,7 +630,7 @@ class ListArray(Content):
                 and slicestops.nplike is self._backend.index_nplike
                 and missing.nplike is self._backend.index_nplike
             )
-            self._handle_error(
+            self._maybe_index_error(
                 self._backend[
                     "awkward_ListArray_getitem_jagged_shrink",
                     nextcarry.dtype.type,
@@ -664,7 +720,7 @@ class ListArray(Content):
                 and self._starts.nplike is self._backend.index_nplike
                 and self._stops.nplike is self._backend.index_nplike
             )
-            self._handle_error(
+            self._maybe_index_error(
                 self._backend[
                     "awkward_ListArray_getitem_next_at",
                     nextcarry.dtype.type,
@@ -700,7 +756,7 @@ class ListArray(Content):
                     and self._starts.nplike is self._backend.index_nplike
                     and self._stops.nplike is self._backend.index_nplike
                 )
-                self._handle_error(
+                self._maybe_index_error(
                     self._backend[
                         "awkward_ListArray_getitem_next_range_carrylength",
                         carrylength.dtype.type,
@@ -746,7 +802,7 @@ class ListArray(Content):
                 and self._starts.nplike is self._backend.index_nplike
                 and self._stops.nplike is self._backend.index_nplike
             )
-            self._handle_error(
+            self._maybe_index_error(
                 self._backend[
                     "awkward_ListArray_getitem_next_range",
                     nextoffsets.dtype.type,
@@ -783,7 +839,7 @@ class ListArray(Content):
                         total.nplike is self._backend.index_nplike
                         and nextoffsets.nplike is self._backend.index_nplike
                     )
-                    self._handle_error(
+                    self._maybe_index_error(
                         self._backend[
                             "awkward_ListArray_getitem_next_range_counts",
                             total.dtype.type,
@@ -809,7 +865,7 @@ class ListArray(Content):
                     and advanced.nplike is self._backend.index_nplike
                     and nextoffsets.nplike is self._backend.index_nplike
                 )
-                self._handle_error(
+                self._maybe_index_error(
                     self._backend[
                         "awkward_ListArray_getitem_next_range_spreadadvanced",
                         nextadvanced.dtype.type,
@@ -869,7 +925,7 @@ class ListArray(Content):
                     and self._stops.nplike is self._backend.index_nplike
                     and regular_flathead.nplike is self._backend.index_nplike
                 )
-                self._handle_error(
+                self._maybe_index_error(
                     self._backend[
                         "awkward_ListArray_getitem_next_array",
                         nextcarry.dtype.type,
@@ -915,7 +971,7 @@ class ListArray(Content):
                     and regular_flathead.nplike is self._backend.index_nplike
                     and advanced.nplike is self._backend.index_nplike
                 )
-                self._handle_error(
+                self._maybe_index_error(
                     self._backend[
                         "awkward_ListArray_getitem_next_array_advanced",
                         nextcarry.dtype.type,
@@ -970,7 +1026,7 @@ class ListArray(Content):
                 and self._starts.nplike is self._backend.index_nplike
                 and self._stops.nplike is self._backend.index_nplike
             )
-            self._handle_error(
+            self._maybe_index_error(
                 self._backend[
                     "awkward_ListArray_getitem_jagged_expand",
                     multistarts.dtype.type,
@@ -1006,10 +1062,10 @@ class ListArray(Content):
         else:
             raise AssertionError(repr(head))
 
-    def _offsets_and_flattened(self, axis, depth):
+    def _offsets_and_flattened(self, axis: int, depth: int) -> tuple[Index, Content]:
         return self.to_ListOffsetArray64(True)._offsets_and_flattened(axis, depth)
 
-    def _mergeable_next(self, other, mergebool):
+    def _mergeable_next(self, other: Content, mergebool: bool) -> bool:
         # Is the other content is an identity, or a union?
         if other.is_identity_like or other.is_union:
             return True
@@ -1033,7 +1089,7 @@ class ListArray(Content):
         else:
             return False
 
-    def _mergemany(self, others):
+    def _mergemany(self, others: Sequence[Content]) -> Content:
         if len(others) == 0:
             return self
 
@@ -1096,7 +1152,7 @@ class ListArray(Content):
                     and array_starts.nplike is self._backend.index_nplike
                     and array_stops.nplike is self._backend.index_nplike
                 )
-                self._handle_error(
+                self._backend.maybe_kernel_error(
                     self._backend[
                         "awkward_ListArray_fill",
                         nextstarts.dtype.type,
@@ -1130,7 +1186,7 @@ class ListArray(Content):
                     and array_starts.nplike is self._backend.index_nplike
                     and array_stops.nplike is self._backend.index_nplike
                 )
-                self._handle_error(
+                self._backend.maybe_kernel_error(
                     self._backend[
                         "awkward_ListArray_fill",
                         nextstarts.dtype.type,
@@ -1190,7 +1246,7 @@ class ListArray(Content):
                 localindex.nplike is self._backend.index_nplike
                 and offsets.nplike is self._backend.index_nplike
             )
-            self._handle_error(
+            self._backend.maybe_kernel_error(
                 self._backend[
                     "awkward_ListArray_localindex",
                     localindex.dtype.type,
@@ -1326,7 +1382,7 @@ class ListArray(Content):
                     and self._starts.nplike is self._backend.index_nplike
                     and self._stops.nplike is self._backend.index_nplike
                 )
-                self._handle_error(
+                self._backend.maybe_kernel_error(
                     self._backend[
                         "awkward_ListArray_min_range",
                         _min.dtype.type,
@@ -1351,7 +1407,7 @@ class ListArray(Content):
                         and self._starts.nplike is self._backend.index_nplike
                         and self._stops.nplike is self._backend.index_nplike
                     )
-                    self._handle_error(
+                    self._backend.maybe_kernel_error(
                         self._backend[
                             "awkward_ListArray_rpad_and_clip_length_axis1",
                             _tolength.dtype.type,
@@ -1383,7 +1439,7 @@ class ListArray(Content):
                         and starts_.nplike is self._backend.index_nplike
                         and stops_.nplike is self._backend.index_nplike
                     )
-                    self._handle_error(
+                    self._backend.maybe_kernel_error(
                         self._backend[
                             "awkward_ListArray_rpad_axis1",
                             index.dtype.type,
@@ -1439,7 +1495,7 @@ class ListArray(Content):
     def _remove_structure(self, backend, options):
         return self.to_ListOffsetArray64(False)._remove_structure(backend, options)
 
-    def _drop_none(self):
+    def _drop_none(self) -> Content:
         return self.to_ListOffsetArray64()._drop_none()
 
     def _rebuild_without_nones(self, none_indexes, new_content):

@@ -4,7 +4,6 @@ from __future__ import annotations
 from numbers import Number
 
 import numpy
-from numpy.lib.mixins import NDArrayOperatorsMixin
 
 import awkward as ak
 from awkward._nplikes.dispatch import register_nplike
@@ -15,7 +14,9 @@ from awkward._nplikes.numpylike import (
     NumpyMetadata,
     UniqueAllResult,
 )
+from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
+from awkward._operators import NDArrayOperatorsMixin
 from awkward._regularize import is_integer, is_non_string_like_sequence
 from awkward._typing import (
     Any,
@@ -198,7 +199,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         )
 
     @property
-    def dtype(self):
+    def dtype(self) -> np.dtype:
         return self._dtype
 
     @property
@@ -214,21 +215,21 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         return self._shape
 
     @property
-    def form_key(self):
+    def form_key(self) -> str | None:
         return self._form_key
 
     @form_key.setter
-    def form_key(self, value):
+    def form_key(self, value: str | None):
         if value is not None and not isinstance(value, str):
             raise TypeError("form_key must be None or a string")
         self._form_key = value
 
     @property
-    def report(self):
+    def report(self) -> TypeTracerReport | None:
         return self._report
 
     @report.setter
-    def report(self, value):
+    def report(self, value: TypeTracerReport | None):
         if value is not None and not isinstance(value, TypeTracerReport):
             raise TypeError("report must be None or a TypeTracerReport")
         self._report = value
@@ -242,14 +243,6 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
             self._report.touch_data(self._form_key)
 
     @property
-    def strides(self):
-        self.touch_shape()
-        out = (self._dtype.itemsize,)
-        for x in self._shape[:0:-1]:
-            out = (x * out[0], *out)
-        return out
-
-    @property
     def nplike(self) -> TypeTracer:
         return TypeTracer.instance()
 
@@ -260,14 +253,13 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
 
     def view(self, dtype: np.dtype) -> Self:
         dtype = np.dtype(dtype)
-        if (
-            self.itemsize != dtype.itemsize
-            and self.ndim >= 1
-            and self._shape[-1] is not None
-        ):
-            last = int(
-                round(self._shape[-1] * self.itemsize / np.dtype(dtype).itemsize)
-            )
+        if len(self._shape) >= 1:
+            last, remainder = divmod(self._shape[-1] * self.itemsize, dtype.itemsize)
+            if remainder is not unknown_length and remainder != 0:
+                raise ValueError(
+                    "new size of array with larger dtype must be a "
+                    "divisor of the total size in bytes (of the last axis of the array)"
+                )
             shape = self._shape[:-1] + (last,)
         else:
             shape = self._shape
@@ -294,7 +286,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         )
 
     @property
-    def itemsize(self):
+    def itemsize(self) -> int:
         return self._dtype.itemsize
 
     class _CTypes:
@@ -316,7 +308,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         | Ellipsis
         | tuple[SupportsIndex | slice | Ellipsis | ArrayLike, ...]
         | ArrayLike,
-    ) -> Self:
+    ) -> Self | int | float | bool | complex:
         if not isinstance(key, tuple):
             key = (key,)
 
@@ -390,6 +382,9 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
                     or is_unknown_integer(item)
                     or is_unknown_array(item)
                 ):
+                    try_touch_data(item)
+                    try_touch_data(self)
+
                     if is_unknown_scalar(item):
                         item = self.nplike.promote_scalar(item)
 
@@ -415,6 +410,9 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
                     previous_item_is_basic = True
                 # Integer
                 elif isinstance(item, int) or is_unknown_integer(item):
+                    try_touch_data(item)
+                    try_touch_data(self)
+
                     item = self.nplike.promote_scalar(item)
 
                     if is_unknown_length(dimension_length) or is_unknown_integer(item):
@@ -505,7 +503,10 @@ class TypeTracer(NumpyLike):
 
     def _apply_ufunc(self, ufunc, *inputs):
         for x in inputs:
+            assert not isinstance(x, PlaceholderArray)
             try_touch_data(x)
+
+        inputs = [x.content if isinstance(x, MaybeNone) else x for x in inputs]
 
         broadcasted = self.broadcast_arrays(*inputs)
         placeholders = [numpy.empty(0, x.dtype) for x in broadcasted]
@@ -547,6 +548,8 @@ class TypeTracer(NumpyLike):
         dtype: numpy.dtype | None = None,
         copy: bool | None = None,
     ) -> TypeTracerArray:
+        assert not isinstance(obj, PlaceholderArray)
+
         if isinstance(obj, ak.index.Index):
             obj = obj.data
 
@@ -636,6 +639,7 @@ class TypeTracer(NumpyLike):
                 raise TypeError
 
     def ascontiguousarray(self, x: ArrayLike) -> TypeTracerArray:
+        assert not isinstance(x, PlaceholderArray)
         return TypeTracerArray._new(
             x.dtype, shape=x.shape, form_key=x.form_key, report=x.report
         )
@@ -644,6 +648,7 @@ class TypeTracer(NumpyLike):
         self, buffer, *, dtype: np.dtype | None = None, count: int = -1
     ) -> TypeTracerArray:
         for x in (buffer, count):
+            assert not isinstance(x, PlaceholderArray)
             try_touch_data(x)
         raise NotImplementedError
 
@@ -675,6 +680,7 @@ class TypeTracer(NumpyLike):
         *,
         dtype: np.dtype | None = None,
     ) -> TypeTracerArray:
+        assert not isinstance(fill_value, PlaceholderArray)
         if not isinstance(shape, tuple):
             shape = (shape,)
         dtype = _scalar_type_of(fill_value) if dtype is None else dtype
@@ -683,6 +689,7 @@ class TypeTracer(NumpyLike):
     def zeros_like(
         self, x: ArrayLike, *, dtype: np.dtype | None = None
     ) -> TypeTracerArray:
+        assert not isinstance(x, PlaceholderArray)
         try_touch_shape(x)
         if is_unknown_scalar(x):
             return TypeTracerArray._new(dtype or x.dtype, shape=())
@@ -692,12 +699,14 @@ class TypeTracer(NumpyLike):
     def ones_like(
         self, x: ArrayLike, *, dtype: np.dtype | None = None
     ) -> TypeTracerArray:
+        assert not isinstance(x, PlaceholderArray)
         try_touch_shape(x)
         return self.zeros_like(x, dtype=dtype)
 
     def full_like(
         self, x: ArrayLike, fill_value, *, dtype: np.dtype | None = None
     ) -> TypeTracerArray:
+        assert not isinstance(x, PlaceholderArray)
         try_touch_shape(x)
         return self.zeros_like(x, dtype=dtype)
 
@@ -709,6 +718,9 @@ class TypeTracer(NumpyLike):
         *,
         dtype: np.dtype | None = None,
     ) -> TypeTracerArray:
+        assert not isinstance(start, PlaceholderArray)
+        assert not isinstance(stop, PlaceholderArray)
+        assert not isinstance(step, PlaceholderArray)
         try_touch_data(start)
         try_touch_data(stop)
         try_touch_data(step)
@@ -727,6 +739,7 @@ class TypeTracer(NumpyLike):
         self, *arrays: ArrayLike, indexing: Literal["xy", "ij"] = "xy"
     ) -> list[TypeTracerArray]:
         for x in arrays:
+            assert not isinstance(x, PlaceholderArray)
             try_touch_data(x)
 
             assert x.ndim == 1
@@ -743,6 +756,8 @@ class TypeTracer(NumpyLike):
     def array_equal(
         self, x1: ArrayLike, x2: ArrayLike, *, equal_nan: bool = False
     ) -> TypeTracerArray:
+        assert not isinstance(x1, PlaceholderArray)
+        assert not isinstance(x2, PlaceholderArray)
         try_touch_data(x1)
         try_touch_data(x2)
         return TypeTracerArray._new(np.bool_, shape=())
@@ -755,6 +770,9 @@ class TypeTracer(NumpyLike):
         side: Literal["left", "right"] = "left",
         sorter: ArrayLike | None = None,
     ) -> TypeTracerArray:
+        assert not isinstance(x, PlaceholderArray)
+        assert not isinstance(values, PlaceholderArray)
+        assert not isinstance(sorter, PlaceholderArray)
         try_touch_data(x)
         try_touch_data(values)
         try_touch_data(sorter)
@@ -773,6 +791,7 @@ class TypeTracer(NumpyLike):
     ############################ manipulation
 
     def promote_scalar(self, obj) -> TypeTracerArray:
+        assert not isinstance(obj, PlaceholderArray)
         if is_unknown_scalar(obj):
             return obj
         elif isinstance(obj, (Number, bool)):
@@ -932,6 +951,7 @@ class TypeTracer(NumpyLike):
 
     def broadcast_arrays(self, *arrays: ArrayLike) -> list[TypeTracerArray]:
         for x in arrays:
+            assert not isinstance(x, PlaceholderArray)
             try_touch_data(x)
 
         if len(arrays) == 0:
@@ -951,11 +971,29 @@ class TypeTracer(NumpyLike):
     def broadcast_to(
         self, x: ArrayLike, shape: tuple[ShapeItem, ...]
     ) -> TypeTracerArray:
-        raise NotImplementedError
+        assert not isinstance(x, PlaceholderArray)
+        try_touch_data(x)
+        new_shape = self.broadcast_shapes(x.shape, shape)
+        # broadcast_to is asymmetric, whilst broadcast_shapes is not
+        # rather than implement broadcasting logic here, let's just santitise the result
+        # the above broadcasting result can either be equal to `shape`, have greater number dimensions,
+        # and/or have differing dimensions we only want the case where the shape is equal
+        if len(new_shape) != len(shape):
+            raise ValueError
+
+        for result, intended in zip(new_shape, shape):
+            if intended is unknown_length:
+                continue
+            if result is unknown_length:
+                continue
+            if intended != result:
+                raise ValueError
+        return TypeTracerArray._new(x.dtype, shape=new_shape)
 
     def reshape(
         self, x: ArrayLike, shape: tuple[ShapeItem, ...], *, copy: bool | None = None
     ) -> TypeTracerArray:
+        assert not isinstance(x, PlaceholderArray)
         x.touch_shape()
 
         size = x.size
@@ -998,6 +1036,7 @@ class TypeTracer(NumpyLike):
         axis: int | None = None,
         maybe_out: ArrayLike | None = None,
     ) -> TypeTracerArray:
+        assert not isinstance(x, PlaceholderArray)
         try_touch_data(x)
         if axis is None:
             return TypeTracerArray._new(x.dtype, (x.size,))
@@ -1006,6 +1045,7 @@ class TypeTracer(NumpyLike):
             return TypeTracerArray._new(x.dtype, x.shape)
 
     def nonzero(self, x: ArrayLike) -> tuple[TypeTracerArray, ...]:
+        assert not isinstance(x, PlaceholderArray)
         # array
         try_touch_data(x)
         return (TypeTracerArray._new(np.int64, (unknown_length,)),) * len(x.shape)
@@ -1013,15 +1053,20 @@ class TypeTracer(NumpyLike):
     def where(
         self, condition: ArrayLike, x1: ArrayLike, x2: ArrayLike
     ) -> TypeTracerArray:
+        assert not isinstance(condition, PlaceholderArray)
+        assert not isinstance(x1, PlaceholderArray)
+        assert not isinstance(x2, PlaceholderArray)
         condition, x1, x2 = self.broadcast_arrays(condition, x1, x2)
         result_dtype = numpy.result_type(x1, x2)
         return TypeTracerArray._new(result_dtype, shape=condition.shape)
 
     def unique_values(self, x: ArrayLike) -> TypeTracerArray:
+        assert not isinstance(x, PlaceholderArray)
         try_touch_data(x)
         return TypeTracerArray._new(x.dtype, shape=(unknown_length,))
 
     def unique_all(self, x: ArrayLike) -> UniqueAllResult:
+        assert not isinstance(x, PlaceholderArray)
         try_touch_data(x)
         return UniqueAllResult(
             TypeTracerArray._new(x.dtype, shape=(unknown_length,)),
@@ -1038,6 +1083,7 @@ class TypeTracer(NumpyLike):
         descending: bool = False,
         stable: bool = True,
     ) -> ArrayLike:
+        assert not isinstance(x, PlaceholderArray)
         try_touch_data(x)
         return TypeTracerArray._new(x.dtype, shape=x.shape)
 
@@ -1052,6 +1098,7 @@ class TypeTracer(NumpyLike):
         inner_shape = None
         emptyarrays = []
         for x in arrays:
+            assert not isinstance(x, PlaceholderArray)
             if inner_shape is None:
                 inner_shape = x.shape[1:]
             elif inner_shape != x.shape[1:]:
@@ -1076,13 +1123,15 @@ class TypeTracer(NumpyLike):
         *,
         axis: int | None = None,
     ) -> TypeTracerArray:
+        assert not isinstance(x, PlaceholderArray)
+        assert not isinstance(repeats, PlaceholderArray)
         try_touch_data(x)
         try_touch_data(repeats)
 
         if axis is None:
             size = x.size
-            if isinstance(repeats, TypeTracerArray) and repeats.ndim > 0:
-                raise NotImplementedError
+            if is_unknown_array(repeats):
+                size = unknown_length
             else:
                 size = size * self.index_as_shape_item(repeats)
             return TypeTracerArray._new(x.dtype, (size,))
@@ -1094,10 +1143,6 @@ class TypeTracer(NumpyLike):
                 shape[axis] = shape[axis] * self.index_as_shape_item(repeats)
             return TypeTracerArray._new(x.dtype, shape=tuple(shape))
 
-    def tile(self, x: ArrayLike, reps: int) -> TypeTracerArray:
-        try_touch_data(x)
-        raise NotImplementedError
-
     def stack(
         self,
         arrays: list[ArrayLike] | tuple[ArrayLike, ...],
@@ -1105,6 +1150,7 @@ class TypeTracer(NumpyLike):
         axis: int = 0,
     ) -> TypeTracerArray:
         for x in arrays:
+            assert not isinstance(x, PlaceholderArray)
             try_touch_data(x)
         raise NotImplementedError
 
@@ -1115,6 +1161,7 @@ class TypeTracer(NumpyLike):
         axis: int | None = None,
         bitorder: Literal["big", "little"] = "big",
     ) -> TypeTracerArray:
+        assert not isinstance(x, PlaceholderArray)
         try_touch_data(x)
         raise NotImplementedError
 
@@ -1126,8 +1173,17 @@ class TypeTracer(NumpyLike):
         count: int | None = None,
         bitorder: Literal["big", "little"] = "big",
     ) -> TypeTracerArray:
+        assert not isinstance(x, PlaceholderArray)
         try_touch_data(x)
         raise NotImplementedError
+
+    def strides(self, x: ArrayLike) -> tuple[ShapeItem, ...]:
+        assert not isinstance(x, PlaceholderArray)
+        x.touch_shape()
+        out = (x._dtype.itemsize,)
+        for item in reversed(x._shape):
+            out = (item * out[0], *out)
+        return out
 
     ############################ ufuncs
 
@@ -1137,6 +1193,7 @@ class TypeTracer(NumpyLike):
         x2: ArrayLike,
         maybe_out: ArrayLike | None = None,
     ) -> TypeTracerArray:
+        assert not isinstance(x1, PlaceholderArray)
         return self._apply_ufunc(numpy.add, x1, x2)
 
     def logical_and(
@@ -1145,6 +1202,7 @@ class TypeTracer(NumpyLike):
         x2: ArrayLike,
         maybe_out: ArrayLike | None = None,
     ) -> TypeTracerArray:
+        assert not isinstance(x1, PlaceholderArray)
         return self._apply_ufunc(numpy.logical_and, x1, x2)
 
     def logical_or(
@@ -1153,17 +1211,22 @@ class TypeTracer(NumpyLike):
         x2: ArrayLike,
         maybe_out: ArrayLike | None = None,
     ) -> TypeTracerArray:
+        assert not isinstance(x1, PlaceholderArray)
+        assert not isinstance(x2, PlaceholderArray)
         return self._apply_ufunc(numpy.logical_or, x1, x2)
 
     def logical_not(
         self, x: ArrayLike, maybe_out: ArrayLike | None = None
     ) -> TypeTracerArray:
+        assert not isinstance(x, PlaceholderArray)
         return self._apply_ufunc(numpy.logical_not, x)
 
     def sqrt(self, x: ArrayLike, maybe_out: ArrayLike | None = None) -> TypeTracerArray:
+        assert not isinstance(x, PlaceholderArray)
         return self._apply_ufunc(numpy.sqrt, x)
 
     def exp(self, x: ArrayLike, maybe_out: ArrayLike | None = None) -> TypeTracerArray:
+        assert not isinstance(x, PlaceholderArray)
         return self._apply_ufunc(numpy.exp, x)
 
     def divide(
@@ -1172,6 +1235,8 @@ class TypeTracer(NumpyLike):
         x2: ArrayLike,
         maybe_out: ArrayLike | None = None,
     ) -> TypeTracerArray:
+        assert not isinstance(x1, PlaceholderArray)
+        assert not isinstance(x2, PlaceholderArray)
         return self._apply_ufunc(numpy.divide, x1, x2)
 
     ############################ almost-ufuncs
@@ -1185,6 +1250,7 @@ class TypeTracer(NumpyLike):
         posinf: int | float | None = None,
         neginf: int | float | None = None,
     ) -> TypeTracerArray:
+        assert not isinstance(x, PlaceholderArray)
         try_touch_data(x)
         return TypeTracerArray._new(x.dtype, shape=x.shape)
 
@@ -1197,12 +1263,15 @@ class TypeTracer(NumpyLike):
         atol: float = 1e-8,
         equal_nan: bool = False,
     ) -> TypeTracerArray:
+        assert not isinstance(x1, PlaceholderArray)
+        assert not isinstance(x2, PlaceholderArray)
         try_touch_data(x1)
         try_touch_data(x2)
         out, _ = self.broadcast_arrays(x1, x2)
         return TypeTracerArray._new(np.bool_, shape=out.shape)
 
     def isnan(self, x: ArrayLike) -> TypeTracerArray:
+        assert not isinstance(x, PlaceholderArray)
         try_touch_data(x)
         return TypeTracerArray._new(np.bool_, shape=x.shape)
 
@@ -1216,6 +1285,7 @@ class TypeTracer(NumpyLike):
         keepdims: bool = False,
         maybe_out: ArrayLike | None = None,
     ) -> TypeTracerArray:
+        assert not isinstance(x, PlaceholderArray)
         try_touch_data(x)
         if axis is None:
             return TypeTracerArray._new(np.bool_, shape=())
@@ -1230,6 +1300,7 @@ class TypeTracer(NumpyLike):
         keepdims: bool = False,
         maybe_out: ArrayLike | None = None,
     ) -> TypeTracerArray:
+        assert not isinstance(x, PlaceholderArray)
         try_touch_data(x)
         if axis is None:
             return TypeTracerArray._new(np.bool_, shape=())
@@ -1239,8 +1310,12 @@ class TypeTracer(NumpyLike):
     def count_nonzero(
         self, x: ArrayLike, *, axis: int | None = None, keepdims: bool = False
     ) -> TypeTracerArray:
+        assert not isinstance(x, PlaceholderArray)
         try_touch_data(x)
-        raise NotImplementedError
+        if axis is None:
+            return TypeTracerArray._new(np.intp, shape=())
+        else:
+            raise NotImplementedError
 
     def min(
         self,
@@ -1250,6 +1325,7 @@ class TypeTracer(NumpyLike):
         keepdims: bool = False,
         maybe_out: ArrayLike | None = None,
     ) -> TypeTracerArray:
+        assert not isinstance(x, PlaceholderArray)
         try_touch_data(x)
         raise NotImplementedError
 
@@ -1261,8 +1337,12 @@ class TypeTracer(NumpyLike):
         keepdims: bool = False,
         maybe_out: ArrayLike | None = None,
     ) -> TypeTracerArray:
+        assert not isinstance(x, PlaceholderArray)
         try_touch_data(x)
-        raise NotImplementedError
+        if axis is None:
+            return TypeTracerArray._new(x.dtype, shape=())
+        else:
+            raise NotImplementedError
 
     def array_str(
         self,
@@ -1272,12 +1352,14 @@ class TypeTracer(NumpyLike):
         precision: int | None = None,
         suppress_small: bool | None = None,
     ):
+        assert not isinstance(x, PlaceholderArray)
         try_touch_data(x)
         return "[## ... ##]"
 
     def astype(
         self, x: ArrayLike, dtype: numpy.dtype, *, copy: bool | None = True
     ) -> TypeTracerArray:
+        assert not isinstance(x, PlaceholderArray)
         x.touch_data()
         return TypeTracerArray._new(np.dtype(dtype), x.shape)
 
@@ -1293,6 +1375,7 @@ class TypeTracer(NumpyLike):
         return cls.is_own_array_type(type(obj))
 
     def is_c_contiguous(self, x: ArrayLike) -> bool:
+        assert not isinstance(x, PlaceholderArray)
         return True
 
 

@@ -4,16 +4,18 @@ from __future__ import annotations
 import itertools
 import json
 import re
-from collections.abc import Mapping
+from collections import defaultdict
+from collections.abc import Iterable, Mapping
+from fnmatch import fnmatchcase
+from glob import escape as escape_glob
 
 import awkward as ak
 from awkward._backends.numpy import NumpyBackend
-from awkward._behavior import find_typestrs
 from awkward._errors import deprecate
 from awkward._nplikes.numpylike import NumpyMetadata
-from awkward._nplikes.shape import unknown_length
+from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._parameters import parameters_union
-from awkward._typing import Final, JSONMapping, JSONSerializable
+from awkward._typing import Final, JSONMapping, JSONSerializable, Self
 
 np = NumpyMetadata.instance()
 numpy_backend = NumpyBackend.instance()
@@ -270,6 +272,66 @@ def _expand_braces(text, seen=None):
             yield from _expand_braces("".join(replaced), seen)
 
 
+class _SpecifierMatcher:
+    def __init__(
+        self, specifiers: Iterable[list[str]], *, match_if_empty: bool = False
+    ):
+        # We'll build two sets of unique fixed-strings and patterns
+        fixed_strings = set()
+        patterns = set()
+        # And then map these unique strings to their child specifiers
+        match_to_next_specifiers: defaultdict[str, list[list[str]]] = defaultdict(list)
+
+        # For each specifier, categorise it as a fixed-string or pattern,
+        # and build the next-specifier table
+        parent: str
+        child: list[str]
+        for item in specifiers:
+            parent, *child = item
+
+            if escape_glob(parent) == parent:
+                fixed_strings.add(parent)
+            else:
+                patterns.add(parent)
+
+            # Only include child specifier list if it is non-empty
+            if child:
+                match_to_next_specifiers[parent].append(child)
+
+        self._match_to_next_specifiers = match_to_next_specifiers
+        self._fixed_strings = fixed_strings
+        self._patterns = patterns
+        self._match_if_empty = match_if_empty
+
+    @property
+    def is_empty(self) -> bool:
+        return not (self._patterns or self._fixed_strings)
+
+    def __call__(self, field: str, *, next_match_if_empty: bool = False) -> Self | None:
+        has_matched = False
+
+        # Fixed-strings are an O(log n) lookup
+        next_specifiers = []
+        if field in self._fixed_strings:
+            has_matched = True
+            next_specifiers.extend(self._match_to_next_specifiers[field])
+
+        # Fixed-strings are an O(n) lookup
+        for pattern in self._patterns:
+            if fnmatchcase(field, pattern):
+                has_matched = True
+                next_specifiers.extend(self._match_to_next_specifiers[pattern])
+
+        if has_matched:
+            return _SpecifierMatcher(
+                next_specifiers, match_if_empty=next_match_if_empty
+            )
+        elif self.is_empty and self._match_if_empty:
+            return self
+        else:
+            return
+
+
 class Form:
     is_numpy = False
     is_unknown = False
@@ -377,24 +439,38 @@ class Form:
 
     @property
     def type(self):
-        return self._type({})
+        raise NotImplementedError
 
     def type_from_behavior(self, behavior):
-        return self._type(find_typestrs(behavior))
+        deprecate(
+            "low level types produced by forms do not hold references to behaviors. "
+            "Use a high-level type (e.g. ak.types.ArrayType or ak.types.ScalarType) to"
+            "associate a type with behavior information, or simply access the low-level"
+            "type from Form.type",
+            version="2.4.0",
+        )
+        return self.type
 
     def columns(self, list_indicator=None, column_prefix=()):
         output = []
         self._columns(column_prefix, output, list_indicator)
         return output
 
-    def select_columns(self, specifier, expand_braces=True):
+    def select_columns(
+        self, specifier, expand_braces=True, *, prune_unions_and_records: bool = True
+    ):
         if isinstance(specifier, str):
-            specifier = [specifier]
+            specifier = {specifier}
 
+        # Only take unique specifiers
         for item in specifier:
             if not isinstance(item, str):
                 raise TypeError(
-                    "a column-selection specifier must be a list of strings"
+                    "a column-selection specifier must be a list of non-empty strings"
+                )
+            if not item:
+                raise ValueError(
+                    "a column-selection specifier must be a list of non-empty strings"
                 )
 
         if expand_braces:
@@ -405,10 +481,12 @@ class Form:
             specifier = next_specifier
 
         specifier = [[] if item == "" else item.split(".") for item in set(specifier)]
-        matches = [True] * len(specifier)
-
-        output = []
-        return self._select_columns(0, specifier, matches, output)
+        match_specifier = _SpecifierMatcher(specifier, match_if_empty=False)
+        selection = self._select_columns(match_specifier)
+        if prune_unions_and_records:
+            return selection._prune_columns(False)
+        else:
+            return selection
 
     def column_types(self):
         return self._column_types()
@@ -416,16 +494,16 @@ class Form:
     def _columns(self, path, output, list_indicator):
         raise NotImplementedError
 
-    def _select_columns(self, index, specifier, matches, output):
+    def _prune_columns(self, is_inside_record_or_union: bool) -> Self | None:
+        raise NotImplementedError
+
+    def _select_columns(self, match_specifier) -> Self | None:
         raise NotImplementedError
 
     def _column_types(self):
         raise NotImplementedError
 
     def _to_dict_part(self, verbose, toplevel):
-        raise NotImplementedError
-
-    def _type(self, typestrs):
         raise NotImplementedError
 
     def length_zero_array(
@@ -450,19 +528,99 @@ class Form:
         )
 
     def length_one_array(self, *, backend=numpy_backend, highlevel=True, behavior=None):
-        # A length-1 array will need at least N bytes, where N is the largest dtype (e.g. 256 bit complex)
-        # Similarly, a length-1 array will need no more than 2*N bytes, as all contents need at most two
-        # index-types e.g. `ListOffsetArray.offsets` for their various index metadata. Therefore, we
-        # create a buffer of this length (2N) and instruct all contents to use it (via `buffer_key=""`).
-        # At the same time, with all index-like metadata set to 0, the list types will have zero lengths
-        # whilst unions, indexed, and option types will contain a single value.
+        # The naive implementation of a length-1 array requires that we have a sufficiently
+        # large buffer to be able to build _any_ subtree.
+        def max_prefer_unknown(this: ShapeItem, that: ShapeItem) -> ShapeItem:
+            if this is unknown_length:
+                return this
+            if that is unknown_length:
+                return that
+            return max(this, that)
+
+        container = {}
+
+        def prepare(form, multiplier):
+            form_key = f"node-{len(container)}"
+
+            if isinstance(form, (ak.forms.BitMaskedForm, ak.forms.ByteMaskedForm)):
+                if form.valid_when:
+                    container[form_key] = b"\x00" * multiplier
+                else:
+                    container[form_key] = b"\xff" * multiplier
+                return form.copy(form_key=form_key)  # DO NOT RECURSE
+
+            elif isinstance(form, ak.forms.IndexedOptionForm):
+                container[form_key] = b"\xff\xff\xff\xff\xff\xff\xff\xff"  # -1
+                return form.copy(form_key=form_key)  # DO NOT RECURSE
+
+            elif isinstance(form, ak.forms.EmptyForm):
+                # no error if protected by non-recursing node type
+                raise TypeError(
+                    "cannot generate a length_one_array from a Form with an "
+                    "unknowntype that cannot be hidden (EmptyForm not within "
+                    "BitMaskedForm, ByteMaskedForm, or IndexedOptionForm)"
+                )
+
+            elif isinstance(form, ak.forms.UnmaskedForm):
+                return form.copy(content=prepare(form.content, multiplier))
+
+            elif isinstance(form, (ak.forms.IndexedForm, ak.forms.ListForm)):
+                container[form_key] = b"\x00" * (8 * multiplier)
+                return form.copy(
+                    content=prepare(form.content, multiplier), form_key=form_key
+                )
+
+            elif isinstance(form, ak.forms.ListOffsetForm):
+                # offsets length == array length + 1
+                container[form_key] = b"\x00" * (8 * (multiplier + 1))
+                return form.copy(
+                    content=prepare(form.content, multiplier), form_key=form_key
+                )
+
+            elif isinstance(form, ak.forms.RegularForm):
+                size = form.size
+
+                # https://github.com/scikit-hep/awkward/pull/2499#discussion_r1220503454
+                if size is unknown_length:
+                    size = 1
+
+                return form.copy(content=prepare(form.content, multiplier * size))
+
+            elif isinstance(form, ak.forms.NumpyForm):
+                dtype = ak.types.numpytype.primitive_to_dtype(form._primitive)
+                size = multiplier * dtype.itemsize
+                for x in form.inner_shape:
+                    if x is not unknown_length:
+                        size *= x
+
+                container[form_key] = b"\x00" * size
+                return form.copy(form_key=form_key)
+
+            elif isinstance(form, ak.forms.RecordForm):
+                return form.copy(
+                    # recurse down all contents
+                    contents=[prepare(x, multiplier) for x in form.contents]
+                )
+
+            elif isinstance(form, ak.forms.UnionForm):
+                # both tags and index will get this buffer, but index is 8 bytes
+                container[form_key] = b"\x00" * (8 * multiplier)
+                return form.copy(
+                    # only recurse down contents[0] because all index == 0
+                    contents=(
+                        [prepare(form.contents[0], multiplier)] + form.contents[1:]
+                    ),
+                    form_key=form_key,
+                )
+
+            else:
+                raise AssertionError(f"not a Form: {form!r}")
+
         return ak.operations.ak_from_buffers._impl(
-            form=self,
+            form=prepare(self, 1),
             length=1,
-            container={
-                "": b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
-            },
-            buffer_key="",
+            container=container,
+            buffer_key="{form_key}",
             backend=backend,
             byteorder=ak._util.native_byteorder,
             highlevel=highlevel,

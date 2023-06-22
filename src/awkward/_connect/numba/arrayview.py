@@ -104,15 +104,15 @@ def code_to_function(code, function_name, externals=None, debug=False):
     return namespace[function_name]
 
 
-def tonumbatype(form):
+def to_numbatype(form):
     if isinstance(form, ak.forms.EmptyForm):
-        return tonumbatype(form.to_NumpyForm(np.dtype(np.float64)))
+        return to_numbatype(form.to_NumpyForm(primitive="float64"))
 
     elif isinstance(form, ak.forms.NumpyForm):
         if len(form.inner_shape) == 0:
             return ak._connect.numba.layout.NumpyArrayType.from_form(form)
         else:
-            return tonumbatype(form.to_RegularForm())
+            return to_numbatype(form.to_RegularForm())
 
     elif isinstance(form, ak.forms.RegularForm):
         return ak._connect.numba.layout.RegularArrayType.from_form(form)
@@ -196,7 +196,7 @@ class ArrayView:
         )
 
         return ArrayView(
-            tonumbatype(layout.form),
+            to_numbatype(layout.form),
             behavior,
             ak._lookup.Lookup(layout),
             0,
@@ -585,7 +585,7 @@ class RecordView:
         arraylayout = layout.array
         return RecordView(
             ArrayView(
-                tonumbatype(arraylayout.form),
+                to_numbatype(arraylayout.form),
                 behavior,
                 ak._lookup.Lookup(arraylayout),
                 0,

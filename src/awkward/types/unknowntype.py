@@ -1,19 +1,20 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 from __future__ import annotations
 
+from awkward._behavior import find_array_typestr
 from awkward._errors import deprecate
 from awkward._parameters import parameters_are_equal, type_parameters_equal
 from awkward._typing import Self, final
-from awkward._util import unset
+from awkward._util import UNSET
 from awkward.types.type import Type
 
 
 @final
 class UnknownType(Type):
-    def copy(self, *, parameters=unset, typestr=unset) -> Self:
+    def copy(self, *, parameters=UNSET, typestr=UNSET) -> Self:
         return UnknownType(
-            parameters=self._parameters if parameters is unset else parameters,
-            typestr=self._typestr if typestr is unset else typestr,
+            parameters=self._parameters if parameters is UNSET else parameters,
+            typestr=self._typestr if typestr is UNSET else typestr,
         )
 
     def __init__(self, *, parameters=None, typestr=None):
@@ -36,9 +37,13 @@ class UnknownType(Type):
         self._parameters = parameters
         self._typestr = typestr
 
-    def _str(self, indent, compact):
+    def _str(self, indent, compact, behavior):
         if self._typestr is not None:
-            out = [self._typestr]
+            deprecate("typestr argument is deprecated", "2.4.0")
+
+        typestr = find_array_typestr(behavior, self._parameters, self._typestr)
+        if typestr is not None:
+            out = [typestr]
 
         else:
             params = self._str_parameters()
@@ -47,7 +52,7 @@ class UnknownType(Type):
             else:
                 out = ["unknown[", params, "]"]
 
-        return [self._str_categorical_begin(), *out] + [self._str_categorical_end()]
+        return [self._str_categorical_begin(), *out, self._str_categorical_end()]
 
     def __repr__(self):
         args = self._repr_args()

@@ -1,12 +1,13 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("to_arrow",)
-
 import awkward as ak
+from awkward._errors import with_operation_context
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
 
 
+@with_operation_context
 def to_arrow(
     array,
     *,
@@ -64,29 +65,16 @@ def to_arrow(
 
     See also #ak.from_arrow, #ak.to_arrow_table, #ak.to_parquet, #ak.from_arrow_schema.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.to_arrow",
-        {
-            "array": array,
-            "list_to32": list_to32,
-            "string_to32": string_to32,
-            "bytestring_to32": bytestring_to32,
-            "emptyarray_to": emptyarray_to,
-            "categorical_as_dictionary": categorical_as_dictionary,
-            "extensionarray": extensionarray,
-            "count_nulls": count_nulls,
-        },
-    ):
-        return _impl(
-            array,
-            list_to32,
-            string_to32,
-            bytestring_to32,
-            emptyarray_to,
-            categorical_as_dictionary,
-            extensionarray,
-            count_nulls,
-        )
+    return _impl(
+        array,
+        list_to32,
+        string_to32,
+        bytestring_to32,
+        emptyarray_to,
+        categorical_as_dictionary,
+        extensionarray,
+        count_nulls,
+    )
 
 
 def _impl(

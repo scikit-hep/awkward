@@ -445,10 +445,6 @@ class NumpyLike(Singleton, Protocol):
         ...
 
     @abstractmethod
-    def tile(self, x: ArrayLike, reps: int) -> ArrayLike:
-        ...
-
-    @abstractmethod
     def stack(
         self,
         arrays: list[ArrayLike] | tuple[ArrayLike, ...],
@@ -476,6 +472,10 @@ class NumpyLike(Singleton, Protocol):
         count: int | None = None,
         bitorder: Literal["big", "little"] = "big",
     ) -> ArrayLike:
+        ...
+
+    @abstractmethod
+    def strides(self, x: ArrayLike) -> tuple[ShapeItem, ...]:
         ...
 
     ############################ ufuncs

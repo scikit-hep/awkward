@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import copy
 import json
-from collections.abc import Iterable
+from collections.abc import Iterable, MutableMapping, Sequence
 
 import awkward as ak
 from awkward._backends.backend import Backend
@@ -11,19 +11,20 @@ from awkward._backends.numpy import NumpyBackend
 from awkward._backends.typetracer import TypeTracerBackend
 from awkward._behavior import find_record_reducer
 from awkward._errors import AxisError
-from awkward._layout import maybe_posaxis
+from awkward._layout import maybe_posaxis, wrap_layout
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import IndexType, NumpyMetadata
-from awkward._nplikes.shape import unknown_length
+from awkward._nplikes.numpylike import ArrayLike, IndexType, NumpyMetadata
+from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._parameters import (
     parameters_intersect,
     type_parameters_equal,
 )
 from awkward._regularize import is_integer
 from awkward._slicing import NO_HEAD
-from awkward._typing import TYPE_CHECKING, Final, Self, SupportsIndex, final
-from awkward._util import unset
+from awkward._typing import TYPE_CHECKING, Callable, Final, Self, SupportsIndex, final
+from awkward._util import UNSET
 from awkward.contents.content import Content
+from awkward.forms.form import Form
 from awkward.forms.recordform import RecordForm
 from awkward.index import Index
 from awkward.record import Record
@@ -33,6 +34,13 @@ if TYPE_CHECKING:
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
+
+
+def _apply_record_reducer(reducer, layout: Content, mask: bool, behavior) -> Content:
+    # Build a 1D list over these contents
+    array = wrap_layout(layout, behavior=behavior)
+    # Perform the reduction
+    return ak.to_layout(reducer(array, mask))
 
 
 @final
@@ -260,19 +268,19 @@ class RecordArray(Content):
 
     def copy(
         self,
-        contents=unset,
-        fields=unset,
-        length=unset,
+        contents=UNSET,
+        fields=UNSET,
+        length=UNSET,
         *,
-        parameters=unset,
-        backend=unset,
+        parameters=UNSET,
+        backend=UNSET,
     ):
         return RecordArray(
-            self._contents if contents is unset else contents,
-            self._fields if fields is unset else fields,
-            self._length if length is unset else length,
-            parameters=self._parameters if parameters is unset else parameters,
-            backend=self._backend if backend is unset else backend,
+            self._contents if contents is UNSET else contents,
+            self._fields if fields is UNSET else fields,
+            self._length if length is UNSET else length,
+            parameters=self._parameters if parameters is UNSET else parameters,
+            backend=self._backend if backend is UNSET else backend,
         )
 
     def __copy__(self):
@@ -306,7 +314,7 @@ class RecordArray(Content):
             self._contents, None, self._length, parameters=None, backend=self._backend
         )
 
-    def _form_with_key(self, getkey):
+    def _form_with_key(self, getkey: Callable[[Content], str | None]) -> RecordForm:
         form_key = getkey(self)
         return self.form_cls(
             [x._form_with_key(getkey) for x in self._contents],
@@ -315,7 +323,14 @@ class RecordArray(Content):
             form_key=form_key,
         )
 
-    def _to_buffers(self, form, getkey, container, backend, byteorder):
+    def _to_buffers(
+        self,
+        form: Form,
+        getkey: Callable[[Content, Form, str], str],
+        container: MutableMapping[str, ArrayLike],
+        backend: Backend,
+        byteorder: str,
+    ):
         assert isinstance(form, self.form_cls)
         if self._fields is None:
             for i, content in enumerate(self._contents):
@@ -339,18 +354,18 @@ class RecordArray(Content):
             backend=backend,
         )
 
-    def _touch_data(self, recursive):
+    def _touch_data(self, recursive: bool):
         if recursive:
             for x in self._contents:
                 x._touch_data(recursive)
 
-    def _touch_shape(self, recursive):
+    def _touch_shape(self, recursive: bool):
         if recursive:
             for x in self._contents:
                 x._touch_shape(recursive)
 
     @property
-    def length(self):
+    def length(self) -> ShapeItem:
         return self._length
 
     def __repr__(self):
@@ -367,7 +382,7 @@ class RecordArray(Content):
 
         if self._fields is None:
             for i, x in enumerate(self._contents):
-                out.append(f"{indent}    <content index={repr(str(i))}>\n")
+                out.append(f"{indent}    <content index={str(i)!r}>\n")
                 out.append(x._repr(indent + "        ", "", "\n"))
                 out.append(indent + "    </content>\n")
         else:
@@ -429,10 +444,6 @@ class RecordArray(Content):
     def _getitem_range(self, start: SupportsIndex, stop: IndexType) -> Content:
         if not self._backend.nplike.known_data:
             self._touch_shape(recursive=False)
-            return self
-
-        if self._length is unknown_length:
-            return self
 
         start, stop, _, length = self._backend.index_nplike.derive_slice_for_length(
             slice(start, stop), self._length
@@ -534,7 +545,9 @@ class RecordArray(Content):
                 backend=self._backend,
             )
 
-    def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
+    def _getitem_next_jagged(
+        self, slicestarts: Index, slicestops: Index, slicecontent: Content, tail
+    ) -> Content:
         contents = []
         for i in range(len(self._contents)):
             contents.append(
@@ -593,7 +606,7 @@ class RecordArray(Content):
             )
             return next._getitem_next(nexthead, nexttail, advanced)
 
-    def _offsets_and_flattened(self, axis, depth):
+    def _offsets_and_flattened(self, axis: int, depth: int) -> tuple[Index, Content]:
         posaxis = maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 == depth:
             raise AxisError("axis=0 not allowed for flatten")
@@ -629,7 +642,7 @@ class RecordArray(Content):
                 ),
             )
 
-    def _mergeable_next(self, other, mergebool):
+    def _mergeable_next(self, other: Content, mergebool: bool) -> bool:
         # Is the other content is an identity, or a union?
         if other.is_identity_like or other.is_union:
             return True
@@ -665,7 +678,7 @@ class RecordArray(Content):
         else:
             return False
 
-    def _mergemany(self, others):
+    def _mergemany(self, others: Sequence[Content]) -> Content:
         if len(others) == 0:
             return self
 
@@ -742,13 +755,13 @@ class RecordArray(Content):
                     )
 
         nextcontents = []
-        minlength = ak._util.unset
+        minlength = ak._util.UNSET
         for forfield in for_each_field:
             merged = forfield[0]._mergemany(forfield[1:])
 
             nextcontents.append(merged)
 
-            if minlength is ak._util.unset or (
+            if minlength is ak._util.UNSET or (
                 not (merged.length is unknown_length or minlength is unknown_length)
                 and merged.length < minlength
             ):
@@ -889,13 +902,133 @@ class RecordArray(Content):
         if reducer_recordclass is None:
             raise TypeError(
                 "no ak.{} overloads for custom types: {}".format(
-                    reducer.name, ", ".join(self._fields)
+                    reducer.name, ", ".join(self.fields)
                 )
             )
         else:
-            raise NotImplementedError(
-                "overloading reducers for RecordArrays has not been implemented yet"
+            # Positional reducers ultimately need to do more work when rebuilding the result
+            # so asking for a mask doesn't help us!
+            reducer_should_mask = mask and not reducer.needs_position
+
+            # Convert parents into offsets to build a list for axis=1 reduction
+            offsets = ak.index.Index64.empty(outlength + 1, self._backend.index_nplike)
+            assert (
+                offsets.nplike is self._backend.index_nplike
+                and parents.nplike is self._backend.index_nplike
             )
+            # `parents` are possibly non monotonic increasing, so we must re-order the result
+            # This happens naturally for the `NumpyArray` reducers.
+            carry = ak.index.Index64.empty(outlength, self._backend.index_nplike)
+
+            # Note: if we knew that `negaxis == depth` exclusively for this layout, we could use
+            # the simpler `ListOffsetArray_reduce_local_outoffsets_64`. However, if our parent was reduced,
+            # we would still see `negaxis == depth`, so this kernel has to be used instead.
+            assert carry.nplike is self._backend.index_nplike
+            self._backend.maybe_kernel_error(
+                self._backend[
+                    "awkward_RecordArray_reduce_nonlocal_outoffsets_64",
+                    offsets.dtype.type,
+                    carry.dtype.type,
+                    parents.dtype.type,
+                ](
+                    offsets.data,
+                    carry.data,
+                    parents.data,
+                    parents.length,
+                    outlength,
+                )
+            )
+            out = _apply_record_reducer(
+                reducer_recordclass,
+                ak.contents.ListOffsetArray(offsets, self),
+                reducer_should_mask,
+                behavior,
+            )
+            out = out._carry(carry, allow_lazy=True)
+
+            if out.is_option and not reducer_should_mask:
+                reason = (
+                    "reducer is positional"
+                    if reducer.needs_position
+                    else "mask is False"
+                )
+                raise TypeError(
+                    f"a custom implementation of the reducer {reducer.name} for {self.parameter('__record__')!r} "
+                    f"returned an option when it was not expected ({reason})"
+                )
+
+            if reducer.needs_position:
+                assert isinstance(out, ak.contents.NumpyArray)
+
+                if shifts is None:
+                    assert (
+                        out.backend is self._backend
+                        and parents.nplike is self._backend.index_nplike
+                        and starts.nplike is self._backend.index_nplike
+                    )
+                    self._backend.maybe_kernel_error(
+                        self._backend[
+                            "awkward_NumpyArray_reduce_adjust_starts_64",
+                            out.data.dtype.type,
+                            parents.dtype.type,
+                            starts.dtype.type,
+                        ](
+                            out.data,
+                            outlength,
+                            parents.data,
+                            starts.data,
+                        )
+                    )
+                else:
+                    assert (
+                        out.backend is self._backend
+                        and parents.nplike is self._backend.index_nplike
+                        and starts.nplike is self._backend.index_nplike
+                        and shifts.nplike is self._backend.index_nplike
+                    )
+                    self._backend.maybe_kernel_error(
+                        self._backend[
+                            "awkward_NumpyArray_reduce_adjust_starts_shifts_64",
+                            out.data.dtype.type,
+                            parents.dtype.type,
+                            starts.dtype.type,
+                            shifts.dtype.type,
+                        ](
+                            out.data,
+                            outlength,
+                            parents.data,
+                            starts.data,
+                            shifts.data,
+                        )
+                    )
+
+            if mask:
+                outmask = ak.index.Index8.empty(outlength, self._backend.index_nplike)
+                assert (
+                    outmask.nplike is self._backend.index_nplike
+                    and parents.nplike is self._backend.index_nplike
+                )
+                self._backend.maybe_kernel_error(
+                    self._backend[
+                        "awkward_NumpyArray_reduce_mask_ByteMaskedArray_64",
+                        outmask.dtype.type,
+                        parents.dtype.type,
+                    ](
+                        outmask.data,
+                        parents.data,
+                        parents.length,
+                        outlength,
+                    )
+                )
+
+                out = ak.contents.ByteMaskedArray.simplified(
+                    outmask, out, False, parameters=None
+                )
+
+            if keepdims:
+                out = ak.contents.RegularArray(out, 1, self.length, parameters=None)
+
+            return out
 
     def _validity_error(self, path):
         for i, cont in enumerate(self.contents):
@@ -1008,6 +1141,8 @@ class RecordArray(Content):
             for content in self._contents:
                 out.extend(content[: self._length]._remove_structure(backend, options))
             return out
+        elif options["allow_records"]:
+            return [self]
         else:
             in_function = ""
             if options["function_name"] is not None:

@@ -6,6 +6,7 @@ from collections.abc import Iterable
 from itertools import chain
 
 import numpy
+from packaging.version import parse as parse_version
 
 import awkward as ak
 from awkward._backends.backend import Backend
@@ -20,23 +21,17 @@ from awkward._layout import wrap_layout
 from awkward._nplikes import to_nplike
 from awkward._regularize import is_non_string_like_iterable
 from awkward._typing import Iterator
-from awkward._util import numpy_at_least
+from awkward._util import Sentinel
 from awkward.contents.numpyarray import NumpyArray
 
 # NumPy 1.13.1 introduced NEP13, without which Awkward ufuncs won't work, which
 # would be worse than lacking a feature: it would cause unexpected output.
 # NumPy 1.17.0 introduced NEP18, which is optional (use ak.* instead of np.*).
-if not numpy_at_least("1.13.1"):
+if parse_version(numpy.__version__) < parse_version("1.13.1"):
     raise ImportError("NumPy 1.13.1 or later required")
 
 
-# FIXME: introduce sentinel type for this
-class _Unsupported:
-    def __repr__(self):
-        return f"{__name__}.unsupported"
-
-
-unsupported = _Unsupported()
+UNSUPPORTED = Sentinel("UNSUPPORTED", __name__)
 
 
 def convert_to_array(layout, args, kwargs):
@@ -124,7 +119,7 @@ def implements(numpy_function):
     def decorator(function):
         signature = inspect.signature(function)
         unsupported_names = {
-            p.name for p in signature.parameters.values() if p.default is unsupported
+            p.name for p in signature.parameters.values() if p.default is UNSUPPORTED
         }
 
         @functools.wraps(function)
@@ -213,7 +208,7 @@ def _array_ufunc_signature(ufunc, inputs):
         else:
             signature.append(type(x))
 
-    return signature
+    return tuple(signature)
 
 
 def array_ufunc(ufunc, method, inputs, kwargs):
@@ -256,7 +251,11 @@ def array_ufunc(ufunc, method, inputs, kwargs):
                 else:
                     args.append(x)
 
-            result = backend.apply_ufunc(ufunc, method, args, kwargs)
+            # Give backend a chance to change the ufunc implementation
+            impl = backend.prepare_ufunc(ufunc)
+
+            # Invoke ufunc
+            result = impl(*args, **kwargs)
 
             return (NumpyArray(result, backend=backend, parameters=parameters),)
 

@@ -16,7 +16,7 @@ from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._regularize import is_integer
 from awkward._typing import Self
-from awkward._util import unset
+from awkward._util import UNSET
 from awkward.contents.content import Content
 
 np = NumpyMetadata.instance()
@@ -244,9 +244,9 @@ class Record:
     def __deepcopy__(self, memo):
         return Record(copy.deepcopy(self._array, memo), self._at)
 
-    def copy(self, array=unset, at=unset) -> Self:
+    def copy(self, array=UNSET, at=UNSET) -> Self:
         return Record(
-            self._array if array is unset else array, self._at if at is unset else at
+            self._array if array is UNSET else array, self._at if at is UNSET else at
         )
 
 

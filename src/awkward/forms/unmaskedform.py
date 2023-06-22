@@ -1,9 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 import awkward as ak
-from awkward._behavior import find_typestr
 from awkward._parameters import parameters_union, type_parameters_equal
-from awkward._typing import final
-from awkward._util import unset
+from awkward._typing import Self, final
+from awkward._util import UNSET
 from awkward.forms.form import Form
 
 
@@ -34,15 +33,15 @@ class UnmaskedForm(Form):
 
     def copy(
         self,
-        content=unset,
+        content=UNSET,
         *,
-        parameters=unset,
-        form_key=unset,
+        parameters=UNSET,
+        form_key=UNSET,
     ):
         return UnmaskedForm(
-            self._content if content is unset else content,
-            parameters=self._parameters if parameters is unset else parameters,
-            form_key=self._form_key if form_key is unset else form_key,
+            self._content if content is UNSET else content,
+            parameters=self._parameters if parameters is UNSET else parameters,
+            form_key=self._form_key if form_key is UNSET else form_key,
         )
 
     @classmethod
@@ -78,11 +77,11 @@ class UnmaskedForm(Form):
             verbose,
         )
 
-    def _type(self, typestrs):
+    @property
+    def type(self):
         return ak.types.OptionType(
-            self._content._type(typestrs),
+            self._content.type,
             parameters=self._parameters,
-            typestr=find_typestr(self._parameters, typestrs),
         ).simplify_option_union()
 
     def __eq__(self, other):
@@ -136,9 +135,20 @@ class UnmaskedForm(Form):
     def _columns(self, path, output, list_indicator):
         self._content._columns(path, output, list_indicator)
 
-    def _select_columns(self, index, specifier, matches, output):
+    def _prune_columns(self, is_inside_record_or_union: bool) -> Self | None:
+        next_content = self._content._prune_columns(is_inside_record_or_union)
+        if next_content is None:
+            return None
+        else:
+            return UnmaskedForm(
+                next_content,
+                parameters=self._parameters,
+                form_key=self._form_key,
+            )
+
+    def _select_columns(self, match_specifier):
         return UnmaskedForm(
-            self._content._select_columns(index, specifier, matches, output),
+            self._content._select_columns(match_specifier),
             parameters=self._parameters,
             form_key=self._form_key,
         )

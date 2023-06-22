@@ -437,7 +437,7 @@ def test_hardcoded():
 def test_record_highlevel():
     text = "Thingy[x: int64, y: float64]"
     parsedtype = ak.types.from_datashape(text, highlevel=True)
-    assert isinstance(parsedtype, ak.types.RecordType)
+    assert isinstance(parsedtype, ak.types.ScalarType)
     assert str(parsedtype) == text
 
 
