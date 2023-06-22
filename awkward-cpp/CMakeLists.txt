@@ -1,6 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-cmake_minimum_required(VERSION 3.15...3.24)
+cmake_minimum_required(VERSION 3.15...3.26)
 
 # Project must be near the top
 project(
@@ -30,16 +30,13 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
 
-if(APPLE)
-  set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-  set(CMAKE_INSTALL_RPATH "@loader_path")
-elseif(EMSCRIPTEN)
+if(CMAKE_SYSTEM_NAME STREQUAL Emscripten)
   message(STATUS "Using Emscripten")
   set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
   set(CMAKE_BUILD_RPATH_USE_ORIGIN TRUE)
-  # TODO: this can be removed with pyodide-build>=0.22.0a1
-  set(CMAKE_STRIP "emstrip")
-  string(APPEND CMAKE_CXX_FLAGS " -s DISABLE_EXCEPTION_CATCHING=0")
+elif(APPLE)
+  set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+  set(CMAKE_INSTALL_RPATH "@loader_path")
 else()
   set(CMAKE_BUILD_RPATH_USE_ORIGIN TRUE)
 endif()
@@ -105,6 +102,7 @@ target_link_libraries(awkward PRIVATE awkward-cpu-kernels-static ${CMAKE_DL_LIBS
 target_link_libraries(awkward PUBLIC awkward-parent)
 
 # Third tier: Python modules.
+find_package(Python REQUIRED COMPONENTS Interpreter Development.Module)
 find_package(pybind11 CONFIG REQUIRED)
 
 # Install python bindings
