@@ -67,30 +67,6 @@ jobs:
       with:
         submodules: true
 
-    - name: Cache python version
-      id: cache-awkward-cpp-wasm-wheel
-      uses: actions/cache@v3
-      with:
-        path: ./awkward-cpp/dist
-        key: ${{ runner.os }}-${{needs.pyodide-python-version.outputs.python-version}}-awkward-cpp-wasm-${{ hashFiles('awkward-cpp/**') }}-CACHEBUST
-
-
-    - name: Setup Python
-      if: steps.cache-awkward-cpp-wasm-wheel.outputs.cache-hit != 'true'
-      uses: actions/setup-python@v4
-      with:
-        python-version: "${{ needs.pyodide-python-version.outputs.python-version }}"
-
-    - name: Install dependencies
-      run: python3 -m pip install -r docs/requirements-wasm.txt
-
-    - name: Determine Pyodide Python version
-      id: compute-python-version
-      run: |
-        # Save Python version
-        PYTHON_VERSION=$(pyodide config get python_version)
-        echo $PYTHON_VERSION > pyodide-python-version
-
 
     - name: Setup Python
       uses: actions/setup-python@v4
@@ -105,7 +81,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ./awkward-cpp/dist
-        key: ${{ runner.os }}-${{ env.WASM_PYTHON_VERSION }}-awkward-cpp-wasm-${{ hashFiles('awkward-cpp/**') }}
+        key: ${{ runner.os }}-${{needs.pyodide-python-version.outputs.python-version}}-awkward-cpp-wasm-${{ hashFiles('awkward-cpp/**') }}
 
     - name: Install dependencies
       if: steps.cache-awkward-cpp-wasm-wheel.outputs.cache-hit != 'true'
