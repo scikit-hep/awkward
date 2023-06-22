@@ -71,7 +71,7 @@ jobs:
     - name: Setup Python
       uses: actions/setup-python@v4
       with:
-        python-version: "${{ steps.compute-python-version.outputs.python-version }}"
+        python-version: "${{ needs.pyodide-python-version.outputs.python-version }}"
 
     - name: Generate build files
       run: pipx run nox -s prepare -- --headers --signatures
@@ -81,13 +81,13 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ./awkward-cpp/dist
-        key: ${{ runner.os }}-${{needs.pyodide-python-version.outputs.python-version}}-awkward-cpp-wasm-${{ hashFiles('awkward-cpp/**') }}
+        key: ${{ runner.os }}-"${{ needs.pyodide-python-version.outputs.python-version }}-awkward-cpp-wasm-${{ hashFiles('awkward-cpp/**') }}
 
     - name: Install dependencies
       if: steps.cache-awkward-cpp-wasm-wheel.outputs.cache-hit != 'true'
       run: python3 -m pip install -r docs/requirements-wasm.txt
 
-    - name: Install dependencies
+    - name: Determine EMSDK version
       if: steps.cache-awkward-cpp-wasm-wheel.outputs.cache-hit != 'true'
       id: compute-emsdk-version
       run: |
