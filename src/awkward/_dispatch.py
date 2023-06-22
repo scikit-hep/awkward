@@ -43,6 +43,10 @@ def high_level_function(func: DispatcherType) -> HighLevelType:
                     next(gen_or_result)
                 except StopIteration as err:
                     return err.value
+                else:
+                    raise AssertionError(
+                        "high-level functions should only implement a single yield statement"
+                    )
 
             return gen_or_result
 
