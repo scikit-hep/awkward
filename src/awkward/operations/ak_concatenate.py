@@ -41,7 +41,14 @@ def concatenate(arrays, axis=0, *, mergebool=True, highlevel=True, behavior=None
     element for element, and similarly for deeper levels.
     """
     # Dispatch
-    yield arrays
+    if (
+        # Is an array with a known backend
+        backend_of(arrays, default=None)
+        is not None
+    ):
+        yield (arrays,)
+    else:
+        yield arrays
 
     # Implementation
     return _impl(arrays, axis, mergebool, highlevel, behavior)
