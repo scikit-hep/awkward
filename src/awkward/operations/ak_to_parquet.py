@@ -172,7 +172,7 @@ def to_parquet(
     See also #ak.to_arrow, which is used as an intermediate step.
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     import awkward._connect.pyarrow

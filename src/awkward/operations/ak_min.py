@@ -62,7 +62,7 @@ def min(
     See also #ak.nanmin.
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(
@@ -118,7 +118,7 @@ def nanmin(
     See also #ak.min.
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(

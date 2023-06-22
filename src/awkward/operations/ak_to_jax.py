@@ -24,7 +24,7 @@ def to_jax(array):
     See also #ak.from_jax and #ak.to_numpy.
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(array)

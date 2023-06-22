@@ -18,7 +18,7 @@ def is_categorical(array):
     See also #ak.categories, #ak.to_categorical, #ak.from_categorical.
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(array)

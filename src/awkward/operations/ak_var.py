@@ -63,8 +63,7 @@ def var(x, weight=None, ddof=0, axis=None, *, keepdims=False, mask_identity=Fals
     See also #ak.nanvar.
     """
     # Dispatch
-    yield x
-    yield weight
+    yield x, weight
 
     # Implementation
     return _impl(x, weight, ddof, axis, keepdims, mask_identity)
@@ -107,8 +106,7 @@ def nanvar(x, weight=None, ddof=0, axis=None, *, keepdims=False, mask_identity=T
     See also #ak.var.
     """
     # Dispatch
-    yield x
-    yield weight
+    yield x, weight
 
     # Implementation
     if weight is not None:

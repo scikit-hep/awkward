@@ -75,7 +75,7 @@ def local_index(array, axis=-1, *, highlevel=True, behavior=None):
                        3               9.9
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(array, axis, highlevel, behavior)

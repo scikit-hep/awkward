@@ -37,7 +37,7 @@ def unzip(array, *, highlevel=True, behavior=None):
         <Array [[1], [2, 2], [3, 3, 3]] type='3 * var * int64'>
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(array, highlevel, behavior)

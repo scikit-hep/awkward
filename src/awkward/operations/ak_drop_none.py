@@ -44,7 +44,7 @@ def drop_none(array, axis=None, highlevel=True, behavior=None):
 
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(array, axis, highlevel, behavior)

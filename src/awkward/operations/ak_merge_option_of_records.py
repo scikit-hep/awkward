@@ -37,7 +37,7 @@ def merge_option_of_records(array, axis=-1, *, highlevel=True, behavior=None):
         <Array [{a: None}, {a: 1}, {a: 2}] type='3 * {a: ?int64}'>
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(array, axis, highlevel, behavior)

@@ -121,7 +121,7 @@ def to_buffers(
     See also #ak.from_buffers and #ak.to_packed.
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(array, container, buffer_key, form_key, id_start, backend, byteorder)

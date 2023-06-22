@@ -61,7 +61,7 @@ def argmin(
     See also #ak.nanargmin.
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(array, axis, keepdims, mask_identity, highlevel, behavior)
@@ -107,7 +107,7 @@ def nanargmin(
     See also #ak.argmin.
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(

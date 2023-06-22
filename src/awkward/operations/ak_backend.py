@@ -22,7 +22,7 @@ def backend(*arrays):
     See #ak.to_backend.
     """
     # Dispatch
-    yield from arrays
+    yield arrays
 
     # Implementation
     return _impl(arrays)

@@ -29,7 +29,7 @@ def is_none(array, axis=0, *, highlevel=True, behavior=None):
     False otherwise (at a given `axis` depth).
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(array, axis, highlevel, behavior)

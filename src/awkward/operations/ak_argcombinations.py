@@ -57,7 +57,7 @@ def argcombinations(
     complete description.
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(

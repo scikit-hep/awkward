@@ -45,8 +45,7 @@ def where(condition, *args, mergebool=True, highlevel=True, behavior=None):
     they are incompatible types, the output will have #ak.type.UnionType.
     """
     # Dispatch
-    yield condition
-    yield from args
+    yield (*args, condition)
 
     # Implementation
     if len(args) == 0:

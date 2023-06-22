@@ -42,8 +42,7 @@ def with_field(array, what, where=None, *, highlevel=True, behavior=None):
     other.)
     """
     # Dispatch
-    yield array
-    yield what
+    yield array, what
 
     # Implementation
     return _impl(array, what, where, highlevel, behavior)

@@ -43,7 +43,7 @@ def to_rdataframe(arrays, *, flatlist_as_rvec=True):
     See also #ak.from_rdataframe.
     """
     # Dispatch
-    yield from arrays.values()
+    yield arrays.values()
 
     # Implementation
     return _impl(

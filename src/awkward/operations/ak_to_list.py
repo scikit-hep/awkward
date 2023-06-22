@@ -40,7 +40,7 @@ def to_list(array):
     See also #ak.from_iter and #ak.Array.tolist.
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(array)

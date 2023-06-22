@@ -37,7 +37,7 @@ def sort(array, axis=-1, *, ascending=True, stable=True, highlevel=True, behavio
         <Array [[5, 7, 7], [], [2], [2, 8]] type='4 * var * int64'>
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(array, axis, ascending, stable, highlevel, behavior)

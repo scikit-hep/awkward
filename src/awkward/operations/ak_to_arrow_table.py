@@ -67,7 +67,7 @@ def to_arrow_table(
     See also #ak.from_arrow, #ak.to_arrow, #ak.to_parquet.
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(

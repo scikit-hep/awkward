@@ -47,7 +47,7 @@ def merge_union_of_records(array, axis=-1, *, highlevel=True, behavior=None):
         <Array [{a: 1, b: None}, {...}, None] type='3 * ?{a: ?int64, b: ?int64}'>
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(array, axis, highlevel, behavior)

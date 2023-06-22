@@ -32,7 +32,7 @@ def ones_like(
     are immutable.)
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(array, highlevel, behavior, dtype, including_unknown)

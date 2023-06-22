@@ -91,8 +91,7 @@ def mask(array, mask, *, valid_when=True, highlevel=True, behavior=None):
     (which is 5 characters away from simply filtering the `array`).
     """
     # Dispatch
-    yield array
-    yield mask
+    yield array, mask
 
     # Implementation
     return _impl(array, mask, valid_when, highlevel, behavior)

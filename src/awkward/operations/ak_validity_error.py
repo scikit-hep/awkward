@@ -21,7 +21,7 @@ def validity_error(array, *, exception=False):
     See also #ak.is_valid.
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(array, exception)

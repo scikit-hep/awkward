@@ -62,7 +62,7 @@ def max(
     See also #ak.nanmax.
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(
@@ -118,7 +118,7 @@ def nanmax(
     See also #ak.max.
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(

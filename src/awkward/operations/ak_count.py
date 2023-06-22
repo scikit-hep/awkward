@@ -96,7 +96,7 @@ def count(
     use #ak.nan_to_none to turn them into None, which are not counted.
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(array, axis, keepdims, mask_identity, highlevel, behavior)

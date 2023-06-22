@@ -126,7 +126,7 @@ def broadcast_arrays(
             output = []
             for inner in outer:
                 output.append(x + inner)
-            yield arrayput
+            yield output
 
     where `x` has the same value for each `inner` in the inner loop.
 
@@ -179,7 +179,7 @@ def broadcast_arrays(
          [[6.6]]]
     """
     # Dispatch
-    yield from arrays
+    yield arrays
 
     # Implementation
     return _impl(

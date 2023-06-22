@@ -76,7 +76,7 @@ def type(array, *, behavior=None):
     to the language.)
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(array, behavior)

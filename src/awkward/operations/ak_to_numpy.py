@@ -38,7 +38,7 @@ def to_numpy(array, *, allow_missing=True):
     See also #ak.from_numpy and #ak.to_cupy.
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(array, allow_missing)

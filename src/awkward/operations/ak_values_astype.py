@@ -55,7 +55,7 @@ def values_astype(array, to, *, including_unknown=False, highlevel=True, behavio
     See also #ak.strings_astype.
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(array, to, including_unknown, highlevel, behavior)

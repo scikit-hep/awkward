@@ -55,7 +55,7 @@ def count_nonzero(
     to turn them into something that would be counted.
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(array, axis, keepdims, mask_identity, highlevel, behavior)

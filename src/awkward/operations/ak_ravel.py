@@ -52,7 +52,7 @@ def ravel(array, *, highlevel=True, behavior=None):
     `axis=None` for an equivalent function that eliminates the option type.
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(array, highlevel, behavior)

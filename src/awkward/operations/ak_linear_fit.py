@@ -67,7 +67,7 @@ def linear_fit(x, y, weight=None, axis=None, *, keepdims=False, mask_identity=Fa
     non-reducer.
     """
     # Dispatch
-    yield from (x, y, weight)
+    yield x, y, weight
 
     # Implementation
     return _impl(x, y, weight, axis, keepdims, mask_identity)

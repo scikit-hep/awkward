@@ -30,8 +30,7 @@ def isclose(
     for Awkward Arrays.
     """
     # Dispatch
-    yield a
-    yield b
+    yield a, b
 
     # Implementation
     return _impl(a, b, rtol, atol, equal_nan, highlevel, behavior)

@@ -49,9 +49,7 @@ def covar(x, y, weight=None, axis=None, *, keepdims=False, mask_identity=False):
     non-reducer.
     """
     # Dispatch
-    yield x
-    yield y
-    yield weight
+    yield x, y, weight
 
     # Implementation
     return _impl(x, y, weight, axis, keepdims, mask_identity)

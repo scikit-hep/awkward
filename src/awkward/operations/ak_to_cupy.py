@@ -24,7 +24,7 @@ def to_cupy(array):
     See also #ak.from_cupy and #ak.to_numpy.
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(array)

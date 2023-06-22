@@ -68,7 +68,7 @@ def to_packed(array, *, highlevel=True, behavior=None):
     See also #ak.to_buffers.
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(array, highlevel, behavior)

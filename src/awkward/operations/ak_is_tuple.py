@@ -14,7 +14,7 @@ def is_tuple(array):
     If `array` is an array, this returns True if the outermost record is a tuple.
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(array)

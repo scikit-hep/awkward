@@ -44,7 +44,7 @@ def singletons(array, axis=0, *, highlevel=True, behavior=None):
     See #ak.firsts to invert this function.
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(array, axis, highlevel, behavior)

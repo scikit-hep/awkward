@@ -34,7 +34,7 @@ def with_name(array, name, *, highlevel=True, behavior=None):
     description.
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(array, name, highlevel, behavior)

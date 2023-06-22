@@ -61,7 +61,7 @@ def argmax(
     See also #ak.nanargmax.
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(array, axis, keepdims, mask_identity, highlevel, behavior)
@@ -108,7 +108,7 @@ def nanargmax(
     See also #ak.argmax.
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(

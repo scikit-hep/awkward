@@ -412,8 +412,7 @@ def transform(
     outputs.
     """
     # Dispatch
-    yield array
-    yield from more_arrays
+    yield (array, *more_arrays)
 
     # Implementation
     return _impl(

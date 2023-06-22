@@ -31,7 +31,7 @@ def with_parameter(array, parameter, value, *, highlevel=True, behavior=None):
     a parameter to None is equivalent to removing it.
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(array, parameter, value, highlevel, behavior)

@@ -114,7 +114,7 @@ def to_json(
     See also #ak.from_json.
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(

@@ -198,7 +198,7 @@ def sum(
     See also #ak.nansum.
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(array, axis, keepdims, mask_identity, highlevel, behavior)
@@ -245,7 +245,7 @@ def nansum(
     See also #ak.sum.
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(

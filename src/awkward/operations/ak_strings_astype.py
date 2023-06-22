@@ -46,7 +46,7 @@ def strings_astype(array, to, *, highlevel=True, behavior=None):
     See also #ak.numbers_astype.
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(array, to, highlevel, behavior)

@@ -60,7 +60,7 @@ def ptp(array, axis=None, *, keepdims=False, mask_identity=True):
     value (None) handling in reducers.
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(array, axis, keepdims, mask_identity)

@@ -46,8 +46,7 @@ def almost_equal(
     be compared.
     """
     # Dispatch
-    yield left
-    yield right
+    yield left, right
 
     # Implementation
     left_behavior = behavior_of(left)

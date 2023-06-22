@@ -76,8 +76,7 @@ def mean(x, weight=None, axis=None, *, keepdims=False, mask_identity=False):
     See also #ak.nanmean.
     """
     # Dispatch
-    yield x
-    yield weight
+    yield x, weight
 
     # Implementation
     return _impl(x, weight, axis, keepdims, mask_identity)
@@ -117,8 +116,7 @@ def nanmean(x, weight=None, axis=None, *, keepdims=False, mask_identity=True):
     See also #ak.mean.
     """
     # Dispatch
-    yield x
-    yield weight
+    yield x, weight
 
     if weight is not None:
         weight = ak.operations.ak_nan_to_none._impl(weight, False, None)

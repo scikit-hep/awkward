@@ -178,7 +178,7 @@ def combinations(
     in #ak.Array.__getitem__.
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(

@@ -198,9 +198,9 @@ def cartesian(
     """
     # Dispatch
     if isinstance(arrays, Mapping):
-        yield from arrays.values()
+        yield arrays.values()
     else:
-        yield from arrays
+        yield arrays
 
     # Implementation
     return _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior)

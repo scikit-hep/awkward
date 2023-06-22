@@ -24,7 +24,7 @@ def nan_to_none(array, *, highlevel=True, behavior=None):
     See also #ak.nan_to_num to convert NaN or infinity to specified values.
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(array, highlevel, behavior)

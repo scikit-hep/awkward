@@ -54,7 +54,7 @@ def to_regular(array, axis=1, *, highlevel=True, behavior=None):
     See also #ak.from_regular.
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(array, axis, highlevel, behavior)

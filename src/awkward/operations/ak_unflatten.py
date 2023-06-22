@@ -77,7 +77,7 @@ def unflatten(array, counts, axis=0, *, highlevel=True, behavior=None):
     See also #ak.num and #ak.flatten.
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(array, counts, axis, highlevel, behavior)

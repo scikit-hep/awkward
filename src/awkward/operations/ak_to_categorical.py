@@ -84,7 +84,7 @@ def to_categorical(array, *, highlevel=True, behavior=None):
     See also #ak.is_categorical, #ak.categories, #ak.from_categorical.
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(array, highlevel, behavior)

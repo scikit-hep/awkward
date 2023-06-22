@@ -53,8 +53,7 @@ def moment(x, n, weight=None, axis=None, *, keepdims=False, mask_identity=False)
     non-reducer.
     """
     # Dispatch
-    yield x
-    yield weight
+    yield x, weight
 
     # Implementation
     return _impl(x, n, weight, axis, keepdims, mask_identity)

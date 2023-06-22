@@ -98,7 +98,7 @@ def pad_none(array, target, axis=1, *, clip=False, highlevel=True, behavior=None
         3 * var *   2 * ?float64
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(array, target, axis, clip, highlevel, behavior)

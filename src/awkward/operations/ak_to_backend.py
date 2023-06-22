@@ -51,7 +51,7 @@ def to_backend(array, backend, *, highlevel=True, behavior=None):
     See #ak.kernels.
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(array, backend, highlevel, behavior)

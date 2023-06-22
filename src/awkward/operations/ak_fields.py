@@ -25,7 +25,7 @@ def fields(array):
     list.
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(array)

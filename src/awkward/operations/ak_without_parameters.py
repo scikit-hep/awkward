@@ -26,7 +26,7 @@ def without_parameters(array, *, highlevel=True, behavior=None):
     of large data buffers.
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(array, highlevel, behavior)

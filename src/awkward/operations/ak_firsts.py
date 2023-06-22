@@ -44,7 +44,7 @@ def firsts(array, axis=1, *, highlevel=True, behavior=None):
     See #ak.singletons to invert this function.
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(array, axis, highlevel, behavior)

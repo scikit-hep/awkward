@@ -42,7 +42,7 @@ def to_layout(array, *, allow_record=True, allow_other=False, regulararray=True)
     #ak.record.Record are lower-level than #ak.Array.
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(array, allow_record, allow_other, regulararray=regulararray)

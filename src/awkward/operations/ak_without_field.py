@@ -34,7 +34,7 @@ def without_field(array, where, *, highlevel=True, behavior=None):
     other.)
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(array, where, highlevel, behavior)

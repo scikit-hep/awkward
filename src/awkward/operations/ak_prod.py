@@ -54,7 +54,7 @@ def prod(
     See also #ak.nanprod.
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(array, axis, keepdims, mask_identity, highlevel, behavior)
@@ -97,7 +97,7 @@ def nanprod(
     See also #ak.prod.
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(

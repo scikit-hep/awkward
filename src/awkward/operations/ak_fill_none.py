@@ -62,8 +62,7 @@ def fill_none(array, value, axis=-1, *, highlevel=True, behavior=None):
     The values could be floating-point numbers or strings.
     """
     # Dispatch
-    yield array
-    yield value
+    yield array, value
 
     # Implementation
     return _impl(array, value, axis, highlevel, behavior)

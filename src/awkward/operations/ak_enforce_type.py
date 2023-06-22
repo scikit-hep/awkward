@@ -222,7 +222,7 @@ def enforce_type(array, type, *, highlevel=True, behavior=None):
     to a regular type, it will fail.
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(array, type, highlevel, behavior)

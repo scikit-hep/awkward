@@ -89,7 +89,7 @@ def run_lengths(array, *, highlevel=True, behavior=None):
     See also #ak.num, #ak.argsort, #ak.unflatten.
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(array, highlevel, behavior)

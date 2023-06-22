@@ -128,7 +128,7 @@ def to_dataframe(
               3         4.0  NaN
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(array, how, levelname, anonymous)

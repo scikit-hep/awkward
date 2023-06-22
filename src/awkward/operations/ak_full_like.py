@@ -81,8 +81,7 @@ def full_like(
     are immutable.)
     """
     # Dispatch
-    yield array
-    yield fill_value
+    yield array, fill_value
 
     # Implementation
     return _impl(array, fill_value, highlevel, behavior, dtype, including_unknown)

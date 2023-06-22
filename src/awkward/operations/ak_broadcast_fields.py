@@ -49,7 +49,7 @@ def broadcast_fields(*arrays, highlevel=True, behavior=None):
 
     """
     # Dispatch
-    yield from arrays
+    yield arrays
 
     # Implementation
     return _impl(arrays, highlevel, behavior)

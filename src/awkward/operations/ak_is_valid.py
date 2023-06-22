@@ -20,7 +20,7 @@ def is_valid(array, *, exception=False):
     See also #ak.validity_error.
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(array, exception)

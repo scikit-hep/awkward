@@ -72,7 +72,7 @@ def num(array, axis=1, *, highlevel=True, behavior=None):
         <Array [[1.1, 2.2, 3.3], None, [7.7]] type='3 * option[var * float64]'>
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(array, axis, highlevel, behavior)

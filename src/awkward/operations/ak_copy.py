@@ -60,7 +60,7 @@ def copy(array):
     a mutable third-party library, so this function allows you to make a true copy.
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(array)

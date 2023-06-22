@@ -21,7 +21,7 @@ def categories(array, highlevel=True):
     See also #ak.is_categorical, #ak.to_categorical, #ak.from_categorical.
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(array, highlevel)

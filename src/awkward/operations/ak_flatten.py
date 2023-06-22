@@ -160,7 +160,7 @@ def flatten(array, axis=1, *, highlevel=True, behavior=None):
          999]
     """
     # Dispatch
-    yield array
+    yield (array,)
 
     # Implementation
     return _impl(array, axis, highlevel, behavior)
