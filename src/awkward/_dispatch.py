@@ -1,16 +1,16 @@
+from collections.abc import Callable, Collection, Generator
 from functools import wraps
 from inspect import isgenerator
 
 from awkward._errors import OperationErrorContext
-from awkward._typing import Callable, Iterator, TypeAlias, TypeVar
+from awkward._typing import Any, TypeAlias, TypeVar
 
-DispatcherType: TypeAlias = Iterator
+T = TypeVar("T")
+DispatcherType: TypeAlias = "Callable[..., Generator[Collection[Any], None, T]]"
+HighLevelType: TypeAlias = "Callable[..., T]"
 
 
-T = TypeVar("T", bound=Callable)
-
-
-def high_level_function(func: T) -> T:
+def high_level_function(func: DispatcherType) -> HighLevelType:
     """Decorate a high-level function such that it may be overloaded by third-party array objects"""
 
     @wraps(func)
