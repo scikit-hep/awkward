@@ -1,3 +1,8 @@
+# JupyterLite (kernel requires specific pyodide version)
+jupyterlite-pyodide-kernel==0.0.8
+jupyterlite[piplite]==0.1.0
+jupyterlite-sphinx==0.8.0
+
 sphinx>=4.5.0,<5.0.0
 PyYAML
 black
@@ -9,12 +14,10 @@ sphinx-sitemap
 pydata-sphinx-theme
 myst-nb
 sphinx-external-toc
-jupyterlite-sphinx==0.7.3
 ipyleaflet
-jupyterlite[piplite]==0.1.0b16
 
 numpy>=1.13.1
-numba>=0.50.0
+numba>=0.50.0;python_version<"3.11"
 pandas>=0.24.0
 numexpr
 pyarrow>=7.0.0
