@@ -16,7 +16,7 @@ from awkward._behavior import (
     find_custom_cast,
     find_ufunc,
     find_ufunc_generic,
-    get_nominal_type,
+    get_layout_name,
 )
 from awkward._layout import wrap_layout
 from awkward._nplikes import to_nplike
@@ -197,7 +197,7 @@ def _array_ufunc_signature(ufunc, inputs):
     signature = [ufunc]
     for x in inputs:
         if isinstance(x, ak.contents.Content):
-            nominal_type = get_nominal_type(x)
+            nominal_type = get_layout_name(x)
             if nominal_type is not None:
                 signature.append(nominal_type)
             elif isinstance(x, NumpyArray):
@@ -270,14 +270,14 @@ def array_ufunc(ufunc, method, inputs, kwargs):
                         return out
 
         if all(
-            get_nominal_type(x) is not None
+            get_layout_name(x) is not None
             for x in inputs
             if isinstance(x, ak.contents.Content)
         ):
             error_message = []
             for x in inputs:
                 if isinstance(x, ak.contents.Content):
-                    nominal_type = get_nominal_type(x)
+                    nominal_type = get_layout_name(x)
                     if nominal_type is not None:
                         error_message.append(nominal_type)
                     else:

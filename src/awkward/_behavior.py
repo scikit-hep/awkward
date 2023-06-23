@@ -22,16 +22,23 @@ def overlay_behavior(behavior: Mapping | None) -> Mapping:
     return ChainMap(behavior, ak.behavior)
 
 
-def get_nominal_type(layout) -> str | None:
-    if layout.is_list:
-        parameters = ["__name__", "__array__"]
-    else:
-        parameters = ["__record__"]
-    for param in parameters:
-        name = layout.parameter(param)
+def get_array_name(parameters: JSONMapping | None) -> str | None:
+    for param in "__name__", "__array__":
+        name = parameters.get(param)
         if name is not None:
             return name
     return None
+
+
+def get_record_name(parameters: JSONMapping | None) -> str | None:
+    return parameters.get("__record__")
+
+
+def get_layout_name(layout) -> str | None:
+    if layout.is_record:
+        return get_record_name(layout._parameters)
+    else:
+        return get_array_name(layout._parameters)
 
 
 def get_array_class(layout, behavior: Mapping | None) -> type:
@@ -84,11 +91,13 @@ def get_record_class(layout, behavior: Mapping | None) -> type:
     return Record
 
 
-def find_record_reducer(reducer, layout, behavior: Mapping | None):
+def find_record_reducer(
+    reducer, parameters: JSONMapping | None, behavior: Mapping | None
+):
     behavior = overlay_behavior(behavior)
-    rec = layout.parameter("__record__")
-    if isinstance(rec, str):
-        return behavior.get((reducer.highlevel_function(), rec))
+    name = get_record_name(parameters)
+    if name is not None:
+        return behavior.get((reducer.highlevel_function(), name))
 
 
 def find_custom_cast(obj, behavior: Mapping | None):
@@ -101,7 +110,7 @@ def find_custom_cast(obj, behavior: Mapping | None):
 
 
 def find_ufunc_generic(ufunc, layout, behavior: Mapping | None):
-    nominal_type = get_nominal_type(layout)
+    nominal_type = get_layout_name(layout)
     if nominal_type is None:
         return None
     behavior = overlay_behavior(behavior)
@@ -140,10 +149,12 @@ def find_ufunc(behavior: Mapping | None, signature: tuple):
 def find_record_typestr(
     behavior: Mapping | None, parameters: JSONMapping | None, default: str = None
 ):
-    if parameters is None:
-        return default
     behavior = overlay_behavior(behavior)
-    return behavior.get(("__typestr__", parameters.get("__record__")), default)
+    name = get_record_name(parameters)
+    if name is None:
+        return default
+    else:
+        return behavior.get(("__typestr__", name), default)
 
 
 def find_array_typestr(
@@ -152,11 +163,11 @@ def find_array_typestr(
     if parameters is None:
         return default
     behavior = overlay_behavior(behavior)
-
-    name = parameters.get("__name__")
+    name = get_array_name(parameters)
     if name is None:
-        name = parameters.get("__array__")
-    return behavior.get(("__typestr__", name), default)
+        return default
+    else:
+        return behavior.get(("__typestr__", name), default)
 
 
 def behavior_of(*arrays, **kwargs) -> dict:

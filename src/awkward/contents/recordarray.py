@@ -898,7 +898,7 @@ class RecordArray(Content):
         keepdims,
         behavior,
     ):
-        reducer_recordclass = find_record_reducer(reducer, self, behavior)
+        reducer_recordclass = find_record_reducer(reducer, self._parameters, behavior)
         if reducer_recordclass is None:
             raise TypeError(
                 "no ak.{} overloads for custom types: {}".format(
