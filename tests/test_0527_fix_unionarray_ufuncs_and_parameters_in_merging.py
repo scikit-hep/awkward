@@ -6,17 +6,18 @@ import pytest  # noqa: F401
 import awkward as ak
 
 # https://github.com/scikit-hep/awkward-1.0/issues/459#issuecomment-694941328
+# https://github.com/scikit-hep/awkward/pull/2540
 #
 # So the rules would be,
-#    * if arrays have different `__array__` or `__record__` parameters, they are not equal;
+#    * if arrays have different `__array__`, "__name__", or `__record__` parameters, they are not equal;
 #    * if they otherwise have different parameters, the types can be equal, but merging
 #      (concatenation, option-simplify, or union-simplify) removes parameters other than
-#      `__array__` and `__record__`.
+#      `__array__`, "__name__", and `__record__`.
 
 
 def test_0459_types():
     plain_plain = ak.highlevel.Array([0.0, 1.1, 2.2, 3.3, 4.4])
-    array_plain = ak.operations.with_parameter(plain_plain, "__array__", "zoinks")
+    array_plain = ak.operations.with_parameter(plain_plain, "__name__", "zoinks")
     plain_isdoc = ak.operations.with_parameter(
         plain_plain, "__doc__", "This is a zoink."
     )
@@ -25,10 +26,10 @@ def test_0459_types():
     )
 
     assert ak.operations.parameters(plain_plain) == {}
-    assert ak.operations.parameters(array_plain) == {"__array__": "zoinks"}
+    assert ak.operations.parameters(array_plain) == {"__name__": "zoinks"}
     assert ak.operations.parameters(plain_isdoc) == {"__doc__": "This is a zoink."}
     assert ak.operations.parameters(array_isdoc) == {
-        "__array__": "zoinks",
+        "__name__": "zoinks",
         "__doc__": "This is a zoink.",
     }
 
@@ -49,12 +50,12 @@ def test_0459_types():
     assert ak.operations.type(plain_isdoc) != ak.operations.type(array_isdoc)
     assert ak.operations.type(array_isdoc) != ak.operations.type(plain_isdoc)
 
-    assert array_plain.layout.parameters == {"__array__": "zoinks"}
+    assert array_plain.layout.parameters == {"__name__": "zoinks"}
     assert ak.operations.without_parameters(array_plain).layout.parameters == {}
     assert plain_isdoc.layout.parameters == {"__doc__": "This is a zoink."}
     assert ak.operations.without_parameters(plain_isdoc).layout.parameters == {}
     assert array_isdoc.layout.parameters == {
-        "__array__": "zoinks",
+        "__name__": "zoinks",
         "__doc__": "This is a zoink.",
     }
     assert ak.operations.without_parameters(array_isdoc).layout.parameters == {}
@@ -62,7 +63,7 @@ def test_0459_types():
 
 def test_0459():
     plain_plain = ak.highlevel.Array([0.0, 1.1, 2.2, 3.3, 4.4])
-    array_plain = ak.operations.with_parameter(plain_plain, "__array__", "zoinks")
+    array_plain = ak.operations.with_parameter(plain_plain, "__name__", "zoinks")
     plain_isdoc = ak.operations.with_parameter(
         plain_plain, "__doc__", "This is a zoink."
     )
@@ -71,10 +72,10 @@ def test_0459():
     )
 
     assert ak.operations.parameters(plain_plain) == {}
-    assert ak.operations.parameters(array_plain) == {"__array__": "zoinks"}
+    assert ak.operations.parameters(array_plain) == {"__name__": "zoinks"}
     assert ak.operations.parameters(plain_isdoc) == {"__doc__": "This is a zoink."}
     assert ak.operations.parameters(array_isdoc) == {
-        "__array__": "zoinks",
+        "__name__": "zoinks",
         "__doc__": "This is a zoink.",
     }
 
@@ -84,14 +85,14 @@ def test_0459():
     )
     assert ak.operations.parameters(
         ak.operations.concatenate([array_plain, array_plain])
-    ) == {"__array__": "zoinks"}
+    ) == {"__name__": "zoinks"}
     assert ak.operations.parameters(
         ak.operations.concatenate([plain_isdoc, plain_isdoc])
     ) == {"__doc__": "This is a zoink."}
     assert ak.operations.parameters(
         ak.operations.concatenate([array_isdoc, array_isdoc])
     ) == {
-        "__array__": "zoinks",
+        "__name__": "zoinks",
         "__doc__": "This is a zoink.",
     }
 
@@ -152,14 +153,14 @@ def test_0459():
     )
     assert ak.operations.parameters(
         ak.operations.concatenate([array_plain, array_isdoc])
-    ) == {"__array__": "zoinks"}
+    ) == {"__name__": "zoinks"}
     assert (
         ak.operations.parameters(ak.operations.concatenate([plain_isdoc, plain_plain]))
         == {}
     )
     assert ak.operations.parameters(
         ak.operations.concatenate([array_isdoc, array_plain])
-    ) == {"__array__": "zoinks"}
+    ) == {"__name__": "zoinks"}
 
     assert isinstance(
         ak.operations.concatenate([plain_plain, plain_isdoc]).layout,
