@@ -59,12 +59,10 @@ def get_array_class(layout, behavior: Mapping | None) -> type:
             continue
         # Did the user register a behavior class?
         cls = behavior.get(name)
-        if cls is None:
-            continue
         # Is the behavior class valid?
         if isinstance(cls, type) and issubclass(cls, Array):
             return cls
-        else:
+        elif cls is not None:
             raise TypeError(
                 f"a non ak.Array subclass was encountered when resolving the array class for {name}"
             )
@@ -74,12 +72,12 @@ def get_array_class(layout, behavior: Mapping | None) -> type:
         purelist_name = layout.purelist_parameter("__record__")
         if purelist_name is not None:
             cls = behavior.get(("*", purelist_name))
-            if not (isinstance(cls, type) and issubclass(cls, Array)):
+            if isinstance(cls, type) and issubclass(cls, Array):
+                return cls
+            elif cls is not None:
                 raise TypeError(
                     f"a non ak.Array subclass was encountered when resolving the array class for {name}"
                 )
-            else:
-                return cls
     return Array
 
 
