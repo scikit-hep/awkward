@@ -109,7 +109,7 @@ jobs:
       id: build-awkward-cpp-wasm-wheel
       run: |
         # pyodide-build doesn't work out of the box with pipx
-        CMAKE_ARGS="-DEMSCRIPTEN=1 -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=BOTH" pyodide build --exports whole_archive
+        CFLAGS=-fexceptions LDFLAGS=-fexceptions pyodide build --exports whole_archive
       working-directory: awkward-cpp
 
     - name: Upload wheel
