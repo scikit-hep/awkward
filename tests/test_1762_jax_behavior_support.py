@@ -24,8 +24,8 @@ def test():
     tangent = ak.Array(np.arange(10, dtype=np.float64), backend="jax")
 
     behavior = {"grad": GradBehavior}
-    primal_grad = ak.with_parameter(primal, "__array__", "grad", behavior=behavior)
-    tangent_grad = ak.with_parameter(tangent, "__array__", "grad", behavior=behavior)
+    primal_grad = ak.with_parameter(primal, "__name__", "grad", behavior=behavior)
+    tangent_grad = ak.with_parameter(tangent, "__name__", "grad", behavior=behavior)
     value_jvp_grad, jvp_grad_grad = jax.jvp(
         square_fifth_entry, (primal_grad,), (tangent_grad,)
     )
