@@ -510,41 +510,63 @@ One may wish to disable this by type-checking, since the functionalities are rat
 ## Adding behavior to arrays
 
 Occasionally, you may want to add behavior to an array that does not contain
-records. A good example of this is to implement strings: strings are not a
-special data type in Awkward Array as they are in many other libraries, they
-are a behavior overlaid on arrays.
-
-There are four predefined string behaviors:
-
-- {class}`ak.CharBehavior`: an array of UTF-8 encoded characters;
-- {class}`ak.ByteBehavior`: an array of unencoded characters;
-- {class}`ak.StringBehavior`: an array of variable-length UTF-8 encoded strings;
-- {class}`ak.ByteStringBehavior`: an array of variable-length unencoded bytestrings.
-
-All four override the string representations (`__str__` and `__repr__`),
-but the string behaviors additionally override equality:
-
-```python
->>> ak.Array(["one", "two", "three"]) == ak.Array(["1", "TWO", "three"])
-<Array [False, False, True] type='3 * bool'>
-```
+records. A good example of this is to extend Awkward's string type: strings are a built-in
+Awkward type, implemented as views over lists of characters. It is possible to implement a 
+custom string that has its own suite of methods using the `__name__` parameter.
 
 The only difference here is the parameter: instead of setting `"__record__"`,
-we set `"__array__"`.
+we set `"__name__"`.
 
-```python
->>> ak.Array(["one", "two", "three"]).layout
-<ListOffsetArray64>
-    <parameters>
-        <param key="__array__">"string"</param>
-    </parameters>
-    <offsets><Index64 i="[0 3 6 11]" offset="0" length="4""/></offsets>
-    <content><NumpyArray format="B" shape="11" data="0x 6f6e6574 776f7468 726565">
-        <parameters>
-            <param key="__array__">"char"</param>
-        </parameters>
-    </NumpyArray></content>
-</ListOffsetArray64>
+```pycon
+>>> import awkward as ak
+>>> class ReversibleStringArray(ak.Array):
+...     def reversed(self):
+...         def apply(layout, **_):
+...             if layout.purelist_depth == 1:
+...                 reversed_content = layout.content.copy(
+...                     data=layout.content.data[::-1],
+...                 )
+...                 reversed_offsets = ak.index.Index(
+...                     layout.offsets[-1] - layout.offsets.data[::-1]
+...                 )
+...                 # Reverse the offsets and unflatten!
+...                 return layout.copy(
+...                     content=reversed_content,
+...                     offsets=reversed_offsets,
+...                 )
+...         return ak.transform(apply, self)
+...
+>>>
+>>> ak.behavior["my-string"] = ReversibleStringArray
+>>>
+>>> built_in_strings = ak.Array(
+...     ["So", "I", "said", "to", "Schrodinger,", "Think", "outside", "the", "box."],
+... )
+>>> reversible_strings = ak.with_parameter(
+...     built_in_strings,
+...     "__name__",
+...     "my-string",
+... )
+>>> reversible_strings.show()
+['So',
+ 'I',
+ 'said',
+ 'to',
+ 'Schrodinger,',
+ 'Think',
+ 'outside',
+ 'the',
+ 'box.']
+>>> reversible_strings.reversed().show()
+['.xob',
+ 'eht',
+ 'edistuo',
+ 'knihT',
+ ',regnidorhcS',
+ 'ot',
+ 'dias',
+ 'I',
+ 'oS']
 ```
 
 In `ak.behaviors.string`, string behaviors are assigned with lines like

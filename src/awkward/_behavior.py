@@ -6,10 +6,10 @@ from collections.abc import Mapping
 
 import awkward as ak
 from awkward._nplikes import ufuncs
-from awkward._typing import Any
+from awkward._typing import JSONMapping
 
 
-def overlay_behavior(behavior: dict | None) -> Mapping:
+def overlay_behavior(behavior: Mapping | None) -> Mapping:
     """
     Args:
         behavior: behavior dictionary, or None
@@ -22,24 +22,57 @@ def overlay_behavior(behavior: dict | None) -> Mapping:
     return ChainMap(behavior, ak.behavior)
 
 
-def get_array_class(layout, behavior):
+def get_nominal_type(layout) -> str | None:
+    if layout.is_list:
+        parameters = ["__name__", "__array__"]
+    else:
+        parameters = ["__record__"]
+    for param in parameters:
+        name = layout.parameter(param)
+        if name is not None:
+            return name
+    return None
+
+
+def get_array_class(layout, behavior: Mapping | None) -> type:
     from awkward.highlevel import Array
 
     behavior = overlay_behavior(behavior)
-    arr = layout.parameter("__array__")
-    if isinstance(arr, str):
-        cls = behavior.get(arr)
+
+    # __array__ is a fallback for __name__. If one of these parameters is set, we should return a registered behavior
+    # class, or the default array type
+    for param in "__name__", "__array__":
+        # Did the user specify a nominal parameter?
+        name = layout.parameter(param)
+        if name is None:
+            continue
+        # Did the user register a behavior class?
+        cls = behavior.get(name)
+        if cls is None:
+            continue
+        # Is the behavior class valid?
         if isinstance(cls, type) and issubclass(cls, Array):
             return cls
-    deeprec = layout.purelist_parameter("__record__")
-    if isinstance(deeprec, str):
-        cls = behavior.get(("*", deeprec))
-        if isinstance(cls, type) and issubclass(cls, Array):
-            return cls
+        else:
+            raise TypeError(
+                f"a non ak.Array subclass was encountered when resolving the array class for {name}"
+            )
+
+    # At this point, we just load the record array class
+    if name is None:
+        purelist_name = layout.purelist_parameter("__record__")
+        if purelist_name is not None:
+            cls = behavior.get(("*", purelist_name))
+            if not (isinstance(cls, type) and issubclass(cls, Array)):
+                raise TypeError(
+                    f"a non ak.Array subclass was encountered when resolving the array class for {name}"
+                )
+            else:
+                return cls
     return Array
 
 
-def get_record_class(layout, behavior):
+def get_record_class(layout, behavior: Mapping | None) -> type:
     from awkward.highlevel import Record
 
     behavior = overlay_behavior(behavior)
@@ -51,14 +84,14 @@ def get_record_class(layout, behavior):
     return Record
 
 
-def find_record_reducer(reducer, layout, behavior):
+def find_record_reducer(reducer, layout, behavior: Mapping | None):
     behavior = overlay_behavior(behavior)
     rec = layout.parameter("__record__")
     if isinstance(rec, str):
         return behavior.get((reducer.highlevel_function(), rec))
 
 
-def find_custom_cast(obj, behavior):
+def find_custom_cast(obj, behavior: Mapping | None):
     behavior = overlay_behavior(behavior)
     for cls in type(obj).__mro__:
         fcn = behavior.get(("__cast__", cls))
@@ -67,21 +100,18 @@ def find_custom_cast(obj, behavior):
     return None
 
 
-def find_ufunc_generic(ufunc, layout, behavior):
-    behavior = overlay_behavior(behavior)
-    custom = layout.parameter("__array__")
-    if custom is None:
-        custom = layout.parameter("__record__")
-    if isinstance(custom, str):
-        fcn = behavior.get((ufunc, custom))
-        if fcn is None:
-            fcn = behavior.get((ufuncs.ufunc, custom))
-        return fcn
-    else:
+def find_ufunc_generic(ufunc, layout, behavior: Mapping | None):
+    nominal_type = get_nominal_type(layout)
+    if nominal_type is None:
         return None
+    behavior = overlay_behavior(behavior)
+    fcn = behavior.get((ufunc, nominal_type))
+    if fcn is None:
+        fcn = behavior.get((ufuncs.ufunc, nominal_type))
+    return fcn
 
 
-def find_ufunc(behavior, signature: tuple):
+def find_ufunc(behavior: Mapping | None, signature: tuple):
     if not any(s is None for s in signature):
         behavior = overlay_behavior(behavior)
 
@@ -108,7 +138,7 @@ def find_ufunc(behavior, signature: tuple):
 
 
 def find_record_typestr(
-    behavior: None | Mapping, parameters: None | Mapping[str, Any], default: str = None
+    behavior: Mapping | None, parameters: JSONMapping | None, default: str = None
 ):
     if parameters is None:
         return default
@@ -117,15 +147,19 @@ def find_record_typestr(
 
 
 def find_array_typestr(
-    behavior: None | Mapping, parameters: None | Mapping[str, Any], default: str = None
+    behavior: Mapping | None, parameters: JSONMapping | None, default: str = None
 ):
     if parameters is None:
         return default
     behavior = overlay_behavior(behavior)
-    return behavior.get(("__typestr__", parameters.get("__array__")), default)
+
+    name = parameters.get("__name__")
+    if name is None:
+        name = parameters.get("__array__")
+    return behavior.get(("__typestr__", name), default)
 
 
-def behavior_of(*arrays, **kwargs):
+def behavior_of(*arrays, **kwargs) -> dict:
     from awkward.highlevel import Array, ArrayBuilder, Record
 
     behavior = kwargs.get("behavior")
