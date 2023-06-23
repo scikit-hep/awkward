@@ -23,6 +23,8 @@ def overlay_behavior(behavior: Mapping | None) -> Mapping:
 
 
 def get_array_name(parameters: JSONMapping | None) -> str | None:
+    if parameters is None:
+        return None
     for param in "__name__", "__array__":
         name = parameters.get(param)
         if name is not None:
@@ -31,6 +33,8 @@ def get_array_name(parameters: JSONMapping | None) -> str | None:
 
 
 def get_record_name(parameters: JSONMapping | None) -> str | None:
+    if parameters is None:
+        return None
     return parameters.get("__record__")
 
 
