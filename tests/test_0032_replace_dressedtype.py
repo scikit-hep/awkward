@@ -13,43 +13,43 @@ def test_types_with_parameters():
     assert t.parameters == {}
 
     with pytest.warns(DeprecationWarning):
-        t = ak.types.UnknownType(parameters={"__array__": ["val", "ue"]})
-        assert t.parameters == {"__array__": ["val", "ue"]}
+        t = ak.types.UnknownType(parameters={"__name__": ["val", "ue"]})
+        assert t.parameters == {"__name__": ["val", "ue"]}
 
-    t = ak.types.NumpyType("int32", parameters={"__array__": ["val", "ue"]})
-    assert t.parameters == {"__array__": ["val", "ue"]}
-    t = ak.types.NumpyType("float64", parameters={"__array__": ["val", "ue"]})
-    assert t.parameters == {"__array__": ["val", "ue"]}
+    t = ak.types.NumpyType("int32", parameters={"__name__": ["val", "ue"]})
+    assert t.parameters == {"__name__": ["val", "ue"]}
+    t = ak.types.NumpyType("float64", parameters={"__name__": ["val", "ue"]})
+    assert t.parameters == {"__name__": ["val", "ue"]}
     t = ak.types.ArrayType(
-        ak.types.NumpyType("int32", parameters={"__array__": ["val", "ue"]}), 100
+        ak.types.NumpyType("int32", parameters={"__name__": ["val", "ue"]}), 100
     )
-    assert t.content.parameters == {"__array__": ["val", "ue"]}
+    assert t.content.parameters == {"__name__": ["val", "ue"]}
     t = ak.types.ListType(
-        ak.types.NumpyType("int32"), parameters={"__array__": ["val", "ue"]}
+        ak.types.NumpyType("int32"), parameters={"__name__": ["val", "ue"]}
     )
-    assert t.parameters == {"__array__": ["val", "ue"]}
+    assert t.parameters == {"__name__": ["val", "ue"]}
     t = ak.types.RegularType(
-        ak.types.NumpyType("int32"), 5, parameters={"__array__": ["val", "ue"]}
+        ak.types.NumpyType("int32"), 5, parameters={"__name__": ["val", "ue"]}
     )
-    assert t.parameters == {"__array__": ["val", "ue"]}
+    assert t.parameters == {"__name__": ["val", "ue"]}
     t = ak.types.OptionType(
-        ak.types.NumpyType("int32"), parameters={"__array__": ["val", "ue"]}
+        ak.types.NumpyType("int32"), parameters={"__name__": ["val", "ue"]}
     )
-    assert t.parameters == {"__array__": ["val", "ue"]}
+    assert t.parameters == {"__name__": ["val", "ue"]}
     t = ak.types.UnionType(
         (ak.types.NumpyType("int32"), ak.types.NumpyType("float64")),
-        parameters={"__array__": ["val", "ue"]},
+        parameters={"__name__": ["val", "ue"]},
     )
-    assert t.parameters == {"__array__": ["val", "ue"]}
+    assert t.parameters == {"__name__": ["val", "ue"]}
     t = ak.types.RecordType(
         [
             ak.types.NumpyType("int32"),
             ak.types.NumpyType("float64"),
         ],
         fields=["one", "two"],
-        parameters={"__array__": ["val", "ue"]},
+        parameters={"__name__": ["val", "ue"]},
     )
-    assert t.parameters == {"__array__": ["val", "ue"]}
+    assert t.parameters == {"__name__": ["val", "ue"]}
 
     with pytest.warns(DeprecationWarning):
         t = ak.types.UnknownType(
@@ -60,7 +60,7 @@ def test_types_with_parameters():
         assert t == ak.types.UnknownType(
             parameters={"__record__": "one \u2192 two", "key1": ["val", "ue"]}
         )
-        assert t != ak.types.UnknownType(parameters={"__array__": ["val", "ue"]})
+        assert t != ak.types.UnknownType(parameters={"__name__": ["val", "ue"]})
 
 
 def test_dress():
@@ -71,14 +71,14 @@ def test_dress():
     ns = {"Dummy": Dummy}
 
     x = ak.contents.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5]))
-    x.parameters["__array__"] = "Dummy"
+    x.parameters["__name__"] = "Dummy"
     a = ak.highlevel.Array(x, behavior=ns, check_valid=True)
     assert str(a) == "<Dummy [1.1, 2.2, 3.3, 4.4, 5.5]>"
 
     x2 = ak.contents.ListOffsetArray(
         ak.index.Index64(np.array([0, 3, 3, 5], dtype=np.int64)),
         ak.contents.NumpyArray(
-            np.array([1.1, 2.2, 3.3, 4.4, 5.5]), parameters={"__array__": "Dummy"}
+            np.array([1.1, 2.2, 3.3, 4.4, 5.5]), parameters={"__name__": "Dummy"}
         ),
     )
     a2 = ak.highlevel.Array(x2, behavior=ns, check_valid=True)
