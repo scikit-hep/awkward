@@ -14,6 +14,7 @@ from awkward._backends.dispatch import (
     regularize_backend,
 )
 from awkward._behavior import get_array_class, get_record_class
+from awkward._errors import deprecate
 from awkward._kernels import KernelError
 from awkward._layout import wrap_layout
 from awkward._nplikes import to_nplike
@@ -102,35 +103,52 @@ class Content:
                 )
             )
         else:
-            if not self.is_list and parameters.get("__array__") in (
-                "string",
-                "bytestring",
-            ):
-                raise TypeError(
-                    '{} is not allowed to have parameters["__array__"] = "{}"'.format(
-                        type(self).__name__, parameters["__array__"]
+            if parameters.get("__array__") is not None:
+                array_name = parameters["__array__"]
+
+                if array_name not in {
+                    "string",
+                    "bytestring",
+                    "char",
+                    "byte",
+                    "categorical",
+                    "sorted_map",
+                }:
+                    deprecate(
+                        'use of parameters["__array__"] for non built-in array types is deprecated. '
+                        "Please use the `__name__` parameter instead",
+                        version="2.4.0",
                     )
-                )
-            if not isinstance(self, ak.contents.NumpyArray) and parameters.get(
-                "__array__"
-            ) in ("char", "byte"):
-                raise TypeError(
-                    '{} is not allowed to have parameters["__array__"] = "{}"'.format(
-                        type(self).__name__, parameters["__array__"]
+
+                # Validate string-likes
+                if not self.is_list and array_name in ("string", "bytestring"):
+                    raise TypeError(
+                        '{} is not allowed to have parameters["__array__"] = "{}"'.format(
+                            type(self).__name__, array_name
+                        )
                     )
-                )
-            if not self.is_indexed and parameters.get("__array__") == "categorical":
-                raise TypeError(
-                    '{} is not allowed to have parameters["__array__"] = "{}"'.format(
-                        type(self).__name__, parameters["__array__"]
+                # Validate char/byte-likes
+                if not isinstance(self, ak.contents.NumpyArray) and parameters[
+                    "__array__"
+                ] in ("char", "byte"):
+                    raise TypeError(
+                        '{} is not allowed to have parameters["__array__"] = "{}"'.format(
+                            type(self).__name__, array_name
+                        )
                     )
-                )
-            if not self.is_record and parameters.get("__array__") == "sorted_map":
-                raise TypeError(
-                    '{} is not allowed to have parameters["__array__"] = "{}"'.format(
-                        type(self).__name__, parameters["__array__"]
+                # Validate categoricals
+                if not self.is_indexed and array_name == "categorical":
+                    raise TypeError(
+                        '{} is not allowed to have parameters["__array__"] = "{}"'.format(
+                            type(self).__name__, array_name
+                        )
                     )
-                )
+                if not self.is_record and array_name == "sorted_map":
+                    raise TypeError(
+                        '{} is not allowed to have parameters["__array__"] = "{}"'.format(
+                            type(self).__name__, array_name
+                        )
+                    )
 
         if not isinstance(backend, Backend):
             raise TypeError(
