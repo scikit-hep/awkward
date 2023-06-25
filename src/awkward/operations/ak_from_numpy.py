@@ -1,9 +1,10 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("from_numpy",)
-import awkward as ak
+from awkward._dispatch import high_level_function
 from awkward._layout import from_arraylib, wrap_layout
 
 
+@high_level_function
 def from_numpy(
     array, *, regulararray=False, recordarray=True, highlevel=True, behavior=None
 ):
@@ -38,18 +39,8 @@ def from_numpy(
 
     See also #ak.to_numpy and #ak.from_cupy.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.from_numpy",
-        {
-            "array": array,
-            "regulararray": regulararray,
-            "recordarray": recordarray,
-            "highlevel": highlevel,
-            "behavior": behavior,
-        },
-    ):
-        return wrap_layout(
-            from_arraylib(array, regulararray, recordarray),
-            highlevel=highlevel,
-            behavior=behavior,
-        )
+    return wrap_layout(
+        from_arraylib(array, regulararray, recordarray),
+        highlevel=highlevel,
+        behavior=behavior,
+    )

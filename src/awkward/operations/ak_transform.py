@@ -6,11 +6,13 @@ import awkward as ak
 from awkward._backends.dispatch import backend_of
 from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of
+from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 
 cpu = NumpyBackend.instance()
 
 
+@high_level_function
 def transform(
     transformation,
     array,
@@ -409,41 +411,26 @@ def transform(
     See also: #ak.is_valid and #ak.valid_when to check the validity of transformed
     outputs.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.transform",
-        {
-            "transformation": transformation,
-            "array": array,
-            "more_arrays": more_arrays,
-            "depth_context": depth_context,
-            "lateral_context": lateral_context,
-            "allow_records": allow_records,
-            "broadcast_parameters_rule": broadcast_parameters_rule,
-            "left_broadcast": left_broadcast,
-            "right_broadcast": right_broadcast,
-            "numpy_to_regular": numpy_to_regular,
-            "regular_to_jagged": regular_to_jagged,
-            "return_value": return_value,
-            "behavior": behavior,
-            "highlevel": highlevel,
-        },
-    ):
-        return _impl(
-            transformation,
-            array,
-            more_arrays,
-            depth_context,
-            lateral_context,
-            allow_records,
-            broadcast_parameters_rule,
-            left_broadcast,
-            right_broadcast,
-            numpy_to_regular,
-            regular_to_jagged,
-            return_value,
-            behavior,
-            highlevel,
-        )
+    # Dispatch
+    yield (array, *more_arrays)
+
+    # Implementation
+    return _impl(
+        transformation,
+        array,
+        more_arrays,
+        depth_context,
+        lateral_context,
+        allow_records,
+        broadcast_parameters_rule,
+        left_broadcast,
+        right_broadcast,
+        numpy_to_regular,
+        regular_to_jagged,
+        return_value,
+        behavior,
+        highlevel,
+    )
 
 
 def _impl(

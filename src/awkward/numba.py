@@ -3,6 +3,7 @@
 import math
 
 import numpy  # noqa: TID251
+from packaging.version import parse as parse_version
 
 import awkward as ak
 
@@ -27,7 +28,7 @@ conda install numba"""
         ) from err
 
     if not _has_checked_version:
-        if ak._util.parse_version(numba.__version__) < ak._util.parse_version("0.50"):
+        if parse_version(numba.__version__) < parse_version("0.50"):
             raise ImportError(
                 "Awkward Array can only work with numba 0.50 or later "
                 "(you have version {})".format(numba.__version__)

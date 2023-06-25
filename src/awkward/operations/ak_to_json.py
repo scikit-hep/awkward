@@ -1,14 +1,15 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("to_json",)
 import json
-import pathlib
 from numbers import Number
+from os import PathLike, fsdecode
 from urllib.parse import urlparse
 
 from awkward_cpp.lib import _ext
 
 import awkward as ak
 from awkward._behavior import behavior_of
+from awkward._dispatch import high_level_function
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
 
@@ -16,6 +17,7 @@ np = NumpyMetadata.instance()
 numpy = Numpy.instance()
 
 
+@high_level_function
 def to_json(
     array,
     file=None,
@@ -33,7 +35,7 @@ def to_json(
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
-        file (None, str/pathlib.Path, or file-like object): If None, this function returns
+        file (None, path-like, or file-like object): If None, this function returns
             JSON-encoded bytes. Otherwise, this function has no return value.
             If a string/pathlib.Path, this function opens a file with that name, writes JSON
             data, and closes the file. If that path has a URI protocol (like
@@ -111,35 +113,23 @@ def to_json(
 
     See also #ak.from_json.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.to_json",
-        {
-            "array": array,
-            "file": file,
-            "line_delimited": line_delimited,
-            "num_indent_spaces": num_indent_spaces,
-            "num_readability_spaces": num_readability_spaces,
-            "nan_string": nan_string,
-            "posinf_string": posinf_string,
-            "neginf_string": neginf_string,
-            "complex_record_fields": complex_record_fields,
-            "convert_bytes": convert_bytes,
-            "convert_other": convert_other,
-        },
-    ):
-        return _impl(
-            array,
-            file,
-            line_delimited,
-            num_indent_spaces,
-            num_readability_spaces,
-            nan_string,
-            posinf_string,
-            neginf_string,
-            complex_record_fields,
-            convert_bytes,
-            convert_other,
-        )
+    # Dispatch
+    yield (array,)
+
+    # Implementation
+    return _impl(
+        array,
+        file,
+        line_delimited,
+        num_indent_spaces,
+        num_readability_spaces,
+        nan_string,
+        posinf_string,
+        neginf_string,
+        complex_record_fields,
+        convert_bytes,
+        convert_other,
+    )
 
 
 def _impl(
@@ -205,8 +195,8 @@ def _impl(
     )
 
     if file is not None:
-        if isinstance(file, (str, pathlib.Path)):
-            parsed_url = urlparse(file)
+        if isinstance(file, (str, bytes, PathLike)):
+            parsed_url = urlparse(fsdecode(file))
             if parsed_url.scheme == "" or parsed_url.netloc == "":
 
                 def opener():

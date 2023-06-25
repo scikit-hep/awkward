@@ -2,12 +2,14 @@
 __all__ = ("with_name",)
 import awkward as ak
 from awkward._behavior import behavior_of
+from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
 
 
+@high_level_function
 def with_name(array, name, *, highlevel=True, behavior=None):
     """
     Args:
@@ -31,11 +33,11 @@ def with_name(array, name, *, highlevel=True, behavior=None):
     to the data; see #ak.Array and #ak.behavior for a more complete
     description.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.with_name",
-        {"array": array, "name": name, "highlevel": highlevel, "behavior": behavior},
-    ):
-        return _impl(array, name, highlevel, behavior)
+    # Dispatch
+    yield (array,)
+
+    # Implementation
+    return _impl(array, name, highlevel, behavior)
 
 
 def _impl(array, name, highlevel, behavior):

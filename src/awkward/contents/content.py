@@ -1276,7 +1276,7 @@ class Content:
         return (
             self.__class__ is other.__class__
             and len(self) == len(other)
-            and type_parameters_equal(self.parameters, other.parameters)
+            and type_parameters_equal(self._parameters, other._parameters)
             and self._is_equal_to(other, index_dtype, numpyarray)
         )
 

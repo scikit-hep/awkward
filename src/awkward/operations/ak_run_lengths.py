@@ -4,6 +4,7 @@ import awkward as ak
 from awkward._backends.dispatch import backend_of
 from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of
+from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
@@ -12,6 +13,7 @@ np = NumpyMetadata.instance()
 cpu = NumpyBackend.instance()
 
 
+@high_level_function
 def run_lengths(array, *, highlevel=True, behavior=None):
     """
     Args:
@@ -86,15 +88,11 @@ def run_lengths(array, *, highlevel=True, behavior=None):
 
     See also #ak.num, #ak.argsort, #ak.unflatten.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.run_lengths",
-        {
-            "array": array,
-            "highlevel": highlevel,
-            "behavior": behavior,
-        },
-    ):
-        return _impl(array, highlevel, behavior)
+    # Dispatch
+    yield (array,)
+
+    # Implementation
+    return _impl(array, highlevel, behavior)
 
 
 def _impl(array, highlevel, behavior):

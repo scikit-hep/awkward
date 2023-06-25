@@ -1,13 +1,14 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("to_buffers",)
-
 import awkward as ak
 from awkward._backends.dispatch import regularize_backend
+from awkward._dispatch import high_level_function
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
 
 
+@high_level_function
 def to_buffers(
     array,
     container=None,
@@ -119,21 +120,11 @@ def to_buffers(
 
     See also #ak.from_buffers and #ak.to_packed.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.to_buffers",
-        {
-            "array": array,
-            "container": container,
-            "buffer_key": buffer_key,
-            "form_key": form_key,
-            "id_start": id_start,
-            "backend": backend,
-            "byteorder": byteorder,
-        },
-    ):
-        return _impl(
-            array, container, buffer_key, form_key, id_start, backend, byteorder
-        )
+    # Dispatch
+    yield (array,)
+
+    # Implementation
+    return _impl(array, container, buffer_key, form_key, id_start, backend, byteorder)
 
 
 def _impl(array, container, buffer_key, form_key, id_start, backend, byteorder):

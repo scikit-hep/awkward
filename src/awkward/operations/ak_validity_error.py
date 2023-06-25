@@ -1,9 +1,10 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("validity_error",)
-
 import awkward as ak
+from awkward._dispatch import high_level_function
 
 
+@high_level_function
 def validity_error(array, *, exception=False):
     """
     Args:
@@ -19,11 +20,11 @@ def validity_error(array, *, exception=False):
 
     See also #ak.is_valid.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.validity_error",
-        {"array": array, "exception": exception},
-    ):
-        return _impl(array, exception)
+    # Dispatch
+    yield (array,)
+
+    # Implementation
+    return _impl(array, exception)
 
 
 def _impl(array, exception):

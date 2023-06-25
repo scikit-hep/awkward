@@ -1,15 +1,16 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("copy",)
-
 import copy as _copy
 
 import awkward as ak
 from awkward._connect.numpy import UNSUPPORTED
+from awkward._dispatch import high_level_function
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
 
 
+@high_level_function
 def copy(array):
     """
     Args:
@@ -58,11 +59,11 @@ def copy(array):
     changes, so we don't support it. However, an #ak.Array's data might come from
     a mutable third-party library, so this function allows you to make a true copy.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.fill_none",
-        {"array": array},
-    ):
-        return _impl(array)
+    # Dispatch
+    yield (array,)
+
+    # Implementation
+    return _impl(array)
 
 
 def _impl(array):

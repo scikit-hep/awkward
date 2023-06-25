@@ -2,6 +2,7 @@
 __all__ = ("singletons",)
 import awkward as ak
 from awkward._behavior import behavior_of
+from awkward._dispatch import high_level_function
 from awkward._errors import AxisError
 from awkward._layout import maybe_posaxis, wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
@@ -10,6 +11,7 @@ from awkward._regularize import is_integer, regularize_axis
 np = NumpyMetadata.instance()
 
 
+@high_level_function
 def singletons(array, axis=0, *, highlevel=True, behavior=None):
     """
     Args:
@@ -41,11 +43,11 @@ def singletons(array, axis=0, *, highlevel=True, behavior=None):
 
     See #ak.firsts to invert this function.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.singletons",
-        {"array": array, "axis": axis, "highlevel": highlevel, "behavior": behavior},
-    ):
-        return _impl(array, axis, highlevel, behavior)
+    # Dispatch
+    yield (array,)
+
+    # Implementation
+    return _impl(array, axis, highlevel, behavior)
 
 
 def _impl(array, axis, highlevel, behavior):

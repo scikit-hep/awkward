@@ -2,9 +2,11 @@
 __all__ = ("categories",)
 import awkward as ak
 from awkward._behavior import behavior_of
+from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 
 
+@high_level_function
 def categories(array, highlevel=True):
     """
     Args:
@@ -18,11 +20,11 @@ def categories(array, highlevel=True):
 
     See also #ak.is_categorical, #ak.to_categorical, #ak.from_categorical.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.categories",
-        {"array": array, "highlevel": highlevel},
-    ):
-        return _impl(array, highlevel)
+    # Dispatch
+    yield (array,)
+
+    # Implementation
+    return _impl(array, highlevel)
 
 
 def _impl(array, highlevel):

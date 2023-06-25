@@ -3,6 +3,7 @@ __all__ = ("argmax",)
 import awkward as ak
 from awkward._behavior import behavior_of
 from awkward._connect.numpy import UNSUPPORTED
+from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
@@ -10,6 +11,7 @@ from awkward._regularize import regularize_axis
 np = NumpyMetadata.instance()
 
 
+@high_level_function
 def argmax(
     array,
     axis=None,
@@ -58,20 +60,14 @@ def argmax(
 
     See also #ak.nanargmax.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.argmax",
-        {
-            "array": array,
-            "axis": axis,
-            "keepdims": keepdims,
-            "mask_identity": mask_identity,
-            "highlevel": highlevel,
-            "behavior": behavior,
-        },
-    ):
-        return _impl(array, axis, keepdims, mask_identity, highlevel, behavior)
+    # Dispatch
+    yield (array,)
+
+    # Implementation
+    return _impl(array, axis, keepdims, mask_identity, highlevel, behavior)
 
 
+@high_level_function
 def nanargmax(
     array,
     axis=None,
@@ -111,20 +107,18 @@ def nanargmax(
 
     See also #ak.argmax.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.nanargmax",
-        {
-            "array": array,
-            "axis": axis,
-            "keepdims": keepdims,
-            "mask_identity": mask_identity,
-            "highlevel": highlevel,
-            "behavior": behavior,
-        },
-    ):
-        array = ak.operations.ak_nan_to_none._impl(array, False, None)
+    # Dispatch
+    yield (array,)
 
-        return _impl(array, axis, keepdims, mask_identity, highlevel, behavior)
+    # Implementation
+    return _impl(
+        ak.operations.ak_nan_to_none._impl(array, False, None),
+        axis,
+        keepdims,
+        mask_identity,
+        highlevel,
+        behavior,
+    )
 
 
 def _impl(array, axis, keepdims, mask_identity, highlevel, behavior):

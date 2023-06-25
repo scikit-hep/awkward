@@ -2,12 +2,14 @@
 __all__ = ("unzip",)
 import awkward as ak
 from awkward._behavior import behavior_of
+from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
 
 
+@high_level_function
 def unzip(array, *, highlevel=True, behavior=None):
     """
     Args:
@@ -34,11 +36,11 @@ def unzip(array, *, highlevel=True, behavior=None):
         >>> y
         <Array [[1], [2, 2], [3, 3, 3]] type='3 * var * int64'>
     """
-    with ak._errors.OperationErrorContext(
-        "ak.unzip",
-        {"array": array, "highlevel": highlevel, "behavior": behavior},
-    ):
-        return _impl(array, highlevel, behavior)
+    # Dispatch
+    yield (array,)
+
+    # Implementation
+    return _impl(array, highlevel, behavior)
 
 
 def _impl(array, highlevel, behavior):

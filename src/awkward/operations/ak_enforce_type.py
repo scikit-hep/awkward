@@ -3,11 +3,10 @@ from __future__ import annotations
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 # ruff: noqa: B023
 __all__ = ("enforce_type",)
-
-
 from itertools import permutations
 
 import awkward as ak
+from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
@@ -18,13 +17,8 @@ from awkward.types.numpytype import primitive_to_dtype
 np = NumpyMetadata.instance()
 
 
-def enforce_type(
-    array,
-    type,
-    *,
-    highlevel=True,
-    behavior=None,
-):
+@high_level_function
+def enforce_type(array, type, *, highlevel=True, behavior=None):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
@@ -227,16 +221,11 @@ def enforce_type(
     given type value. If the conversion is not possible given the layout data, e.g. a conversion from an irregular list
     to a regular type, it will fail.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.enforce_type",
-        {
-            "array": array,
-            "type": type,
-            "highlevel": highlevel,
-            "behavior": behavior,
-        },
-    ):
-        return _impl(array, type, highlevel, behavior)
+    # Dispatch
+    yield (array,)
+
+    # Implementation
+    return _impl(array, type, highlevel, behavior)
 
 
 def _impl(array, type_, highlevel, behavior):

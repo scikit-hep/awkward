@@ -3,6 +3,7 @@ __all__ = ("mean",)
 import awkward as ak
 from awkward._behavior import behavior_of
 from awkward._connect.numpy import UNSUPPORTED
+from awkward._dispatch import high_level_function
 from awkward._layout import maybe_posaxis
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
@@ -10,14 +11,8 @@ from awkward._regularize import regularize_axis
 np = NumpyMetadata.instance()
 
 
-def mean(
-    x,
-    weight=None,
-    axis=None,
-    *,
-    keepdims=False,
-    mask_identity=False,
-):
+@high_level_function
+def mean(x, weight=None, axis=None, *, keepdims=False, mask_identity=False):
     """
     Args:
         x: The data on which to compute the mean (anything #ak.to_layout recognizes).
@@ -80,27 +75,15 @@ def mean(
 
     See also #ak.nanmean.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.mean",
-        {
-            "x": x,
-            "weight": weight,
-            "axis": axis,
-            "keepdims": keepdims,
-            "mask_identity": mask_identity,
-        },
-    ):
-        return _impl(x, weight, axis, keepdims, mask_identity)
+    # Dispatch
+    yield x, weight
+
+    # Implementation
+    return _impl(x, weight, axis, keepdims, mask_identity)
 
 
-def nanmean(
-    x,
-    weight=None,
-    axis=None,
-    *,
-    keepdims=False,
-    mask_identity=True,
-):
+@high_level_function
+def nanmean(x, weight=None, axis=None, *, keepdims=False, mask_identity=True):
     """
     Args:
         x: The data on which to compute the mean (anything #ak.to_layout recognizes).
@@ -132,21 +115,19 @@ def nanmean(
 
     See also #ak.mean.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.nanmean",
-        {
-            "x": x,
-            "weight": weight,
-            "axis": axis,
-            "keepdims": keepdims,
-            "mask_identity": mask_identity,
-        },
-    ):
-        x = ak.operations.ak_nan_to_none._impl(x, False, None)
-        if weight is not None:
-            weight = ak.operations.ak_nan_to_none._impl(weight, False, None)
+    # Dispatch
+    yield x, weight
 
-        return _impl(x, weight, axis, keepdims, mask_identity)
+    if weight is not None:
+        weight = ak.operations.ak_nan_to_none._impl(weight, False, None)
+
+    return _impl(
+        ak.operations.ak_nan_to_none._impl(x, False, None),
+        weight,
+        axis,
+        keepdims,
+        mask_identity,
+    )
 
 
 def _impl(x, weight, axis, keepdims, mask_identity):

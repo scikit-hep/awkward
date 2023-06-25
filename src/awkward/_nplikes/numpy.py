@@ -2,8 +2,8 @@
 from __future__ import annotations
 
 import numpy
+from packaging.version import parse as parse_version
 
-import awkward as ak
 from awkward._nplikes.array_module import ArrayModuleNumpyLike
 from awkward._nplikes.dispatch import register_nplike
 from awkward._nplikes.numpylike import ArrayLike, NumpyMetadata
@@ -57,7 +57,7 @@ class Numpy(ArrayModuleNumpyLike):
         bitorder: Literal["big", "little"] = "big",
     ):
         assert not isinstance(x, PlaceholderArray)
-        if ak._util.numpy_at_least("1.17.0"):
+        if parse_version(numpy.__version__) >= parse_version("1.17.0"):
             return numpy.packbits(x, axis=axis, bitorder=bitorder)
         else:
             assert axis is None, "unsupported argument value for axis given"
@@ -85,7 +85,7 @@ class Numpy(ArrayModuleNumpyLike):
         bitorder: Literal["big", "little"] = "big",
     ):
         assert not isinstance(x, PlaceholderArray)
-        if ak._util.numpy_at_least("1.17.0"):
+        if parse_version(numpy.__version__) >= parse_version("1.17.0"):
             return numpy.unpackbits(x, axis=axis, count=count, bitorder=bitorder)
         else:
             assert axis is None, "unsupported argument value for axis given"

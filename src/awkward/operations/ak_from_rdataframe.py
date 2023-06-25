@@ -1,12 +1,13 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("from_rdataframe",)
-
 import awkward as ak
+from awkward._dispatch import high_level_function
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
 
 
+@high_level_function
 def from_rdataframe(
     rdf,
     columns,
@@ -45,21 +46,7 @@ def from_rdataframe(
 
     See also #ak.to_rdataframe.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.from_rdataframe",
-        {
-            "rdf": rdf,
-            "columns": columns,
-            "keep_order": keep_order,
-            "offsets_type": offsets_type,
-            "with_name": with_name,
-            "highlevel": highlevel,
-            "behavior": behavior,
-        },
-    ):
-        return _impl(
-            rdf, columns, highlevel, behavior, with_name, offsets_type, keep_order
-        )
+    return _impl(rdf, columns, highlevel, behavior, with_name, offsets_type, keep_order)
 
 
 def _impl(

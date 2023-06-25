@@ -1,10 +1,11 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("to_jax",)
-
 import awkward as ak
 from awkward._backends.jax import JaxBackend
+from awkward._dispatch import high_level_function
 
 
+@high_level_function
 def to_jax(array):
     """
     Args:
@@ -22,11 +23,11 @@ def to_jax(array):
 
     See also #ak.from_jax and #ak.to_numpy.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.to_jax",
-        {"array": array},
-    ):
-        return _impl(array)
+    # Dispatch
+    yield (array,)
+
+    # Implementation
+    return _impl(array)
 
 
 def _impl(array):

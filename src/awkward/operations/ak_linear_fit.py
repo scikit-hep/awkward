@@ -3,6 +3,7 @@ __all__ = ("linear_fit",)
 import awkward as ak
 from awkward._backends.dispatch import backend_of
 from awkward._behavior import behavior_of
+from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 from awkward._nplikes import ufuncs
 from awkward._nplikes.numpylike import NumpyMetadata
@@ -11,15 +12,8 @@ from awkward._regularize import regularize_axis
 np = NumpyMetadata.instance()
 
 
-def linear_fit(
-    x,
-    y,
-    weight=None,
-    axis=None,
-    *,
-    keepdims=False,
-    mask_identity=False,
-):
+@high_level_function
+def linear_fit(x, y, weight=None, axis=None, *, keepdims=False, mask_identity=False):
     """
     Args:
         x: One coordinate to use in the linear fit (anything #ak.to_layout recognizes).
@@ -72,18 +66,11 @@ def linear_fit(
     missing values (None) in reducers, and #ak.mean for an example with another
     non-reducer.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.linear_fit",
-        {
-            "x": x,
-            "y": y,
-            "weight": weight,
-            "axis": axis,
-            "keepdims": keepdims,
-            "mask_identity": mask_identity,
-        },
-    ):
-        return _impl(x, y, weight, axis, keepdims, mask_identity)
+    # Dispatch
+    yield x, y, weight
+
+    # Implementation
+    return _impl(x, y, weight, axis, keepdims, mask_identity)
 
 
 def _impl(x, y, weight, axis, keepdims, mask_identity):

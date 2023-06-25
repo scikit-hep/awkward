@@ -2,6 +2,7 @@
 __all__ = ("sort",)
 import awkward as ak
 from awkward._connect.numpy import UNSUPPORTED
+from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
@@ -9,6 +10,7 @@ from awkward._regularize import regularize_axis
 np = NumpyMetadata.instance()
 
 
+@high_level_function
 def sort(array, axis=-1, *, ascending=True, stable=True, highlevel=True, behavior=None):
     """
     Args:
@@ -34,18 +36,11 @@ def sort(array, axis=-1, *, ascending=True, stable=True, highlevel=True, behavio
         >>> ak.sort(ak.Array([[7, 5, 7], [], [2], [8, 2]]))
         <Array [[5, 7, 7], [], [2], [2, 8]] type='4 * var * int64'>
     """
-    with ak._errors.OperationErrorContext(
-        "ak.sort",
-        {
-            "array": array,
-            "axis": axis,
-            "ascending": ascending,
-            "stable": stable,
-            "highlevel": highlevel,
-            "behavior": behavior,
-        },
-    ):
-        return _impl(array, axis, ascending, stable, highlevel, behavior)
+    # Dispatch
+    yield (array,)
+
+    # Implementation
+    return _impl(array, axis, ascending, stable, highlevel, behavior)
 
 
 def _impl(array, axis, ascending, stable, highlevel, behavior):

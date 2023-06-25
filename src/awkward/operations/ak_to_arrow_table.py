@@ -1,14 +1,15 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("to_arrow_table",)
-
 import json
 
 import awkward as ak
+from awkward._dispatch import high_level_function
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
 
 
+@high_level_function
 def to_arrow_table(
     array,
     *,
@@ -65,29 +66,20 @@ def to_arrow_table(
 
     See also #ak.from_arrow, #ak.to_arrow, #ak.to_parquet.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.to_arrow_table",
-        {
-            "array": array,
-            "list_to32": list_to32,
-            "string_to32": string_to32,
-            "bytestring_to32": bytestring_to32,
-            "emptyarray_to": emptyarray_to,
-            "categorical_as_dictionary": categorical_as_dictionary,
-            "extensionarray": extensionarray,
-            "count_nulls": count_nulls,
-        },
-    ):
-        return _impl(
-            array,
-            list_to32,
-            string_to32,
-            bytestring_to32,
-            emptyarray_to,
-            categorical_as_dictionary,
-            extensionarray,
-            count_nulls,
-        )
+    # Dispatch
+    yield (array,)
+
+    # Implementation
+    return _impl(
+        array,
+        list_to32,
+        string_to32,
+        bytestring_to32,
+        emptyarray_to,
+        categorical_as_dictionary,
+        extensionarray,
+        count_nulls,
+    )
 
 
 def _impl(

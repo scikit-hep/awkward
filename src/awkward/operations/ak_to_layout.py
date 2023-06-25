@@ -1,13 +1,12 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("to_layout",)
-
 from collections.abc import Iterable
 
 from awkward_cpp.lib import _ext
 
 import awkward as ak
-from awkward import _errors
 from awkward._backends.typetracer import TypeTracerBackend
+from awkward._dispatch import high_level_function
 from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
@@ -18,6 +17,7 @@ np = NumpyMetadata.instance()
 numpy = Numpy.instance()
 
 
+@high_level_function
 def to_layout(array, *, allow_record=True, allow_other=False, regulararray=True):
     """
     Args:
@@ -41,16 +41,11 @@ def to_layout(array, *, allow_record=True, allow_other=False, regulararray=True)
     would rarely be used in a data analysis because #ak.contents.Content and
     #ak.record.Record are lower-level than #ak.Array.
     """
-    with _errors.OperationErrorContext(
-        "ak.to_layout",
-        {
-            "array": array,
-            "allow_record": allow_record,
-            "allow_other": allow_other,
-            "regulararray": regulararray,
-        },
-    ):
-        return _impl(array, allow_record, allow_other, regulararray=regulararray)
+    # Dispatch
+    yield (array,)
+
+    # Implementation
+    return _impl(array, allow_record, allow_other, regulararray=regulararray)
 
 
 def _impl(array, allow_record, allow_other, regulararray):

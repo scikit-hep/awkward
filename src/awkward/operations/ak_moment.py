@@ -2,21 +2,15 @@
 __all__ = ("moment",)
 import awkward as ak
 from awkward._behavior import behavior_of
+from awkward._dispatch import high_level_function
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
 
 np = NumpyMetadata.instance()
 
 
-def moment(
-    x,
-    n,
-    weight=None,
-    axis=None,
-    *,
-    keepdims=False,
-    mask_identity=False,
-):
+@high_level_function
+def moment(x, n, weight=None, axis=None, *, keepdims=False, mask_identity=False):
     """
     Args:
         x: The data on which to compute the moment (anything #ak.to_layout recognizes).
@@ -58,18 +52,11 @@ def moment(
     missing values (None) in reducers, and #ak.mean for an example with another
     non-reducer.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.moment",
-        {
-            "x": x,
-            "n": n,
-            "weight": weight,
-            "axis": axis,
-            "keepdims": keepdims,
-            "mask_identity": mask_identity,
-        },
-    ):
-        return _impl(x, n, weight, axis, keepdims, mask_identity)
+    # Dispatch
+    yield x, weight
+
+    # Implementation
+    return _impl(x, n, weight, axis, keepdims, mask_identity)
 
 
 def _impl(x, n, weight, axis, keepdims, mask_identity):

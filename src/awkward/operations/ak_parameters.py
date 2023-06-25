@@ -1,17 +1,18 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("parameters",)
-
 import copy
 import numbers
 
 from awkward_cpp.lib import _ext
 
 import awkward as ak
+from awkward._dispatch import high_level_function
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
 
 
+@high_level_function
 def parameters(array):
     """
     Args:
@@ -28,11 +29,11 @@ def parameters(array):
     See #ak.Array and #ak.behavior for a more complete description of
     behaviors.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.parameters",
-        {"array": array},
-    ):
-        return _impl(array)
+    # Dispatch
+    yield (array,)
+
+    # Implementation
+    return _impl(array)
 
 
 def _impl(array):

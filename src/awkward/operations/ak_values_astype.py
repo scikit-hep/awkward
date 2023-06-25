@@ -1,12 +1,14 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("values_astype",)
 import awkward as ak
+from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
 
 
+@high_level_function
 def values_astype(array, to, *, including_unknown=False, highlevel=True, behavior=None):
     """
     Args:
@@ -52,17 +54,11 @@ def values_astype(array, to, *, including_unknown=False, highlevel=True, behavio
 
     See also #ak.strings_astype.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.values_astype",
-        {
-            "array": array,
-            "to": to,
-            "including_unknown": including_unknown,
-            "highlevel": highlevel,
-            "behavior": behavior,
-        },
-    ):
-        return _impl(array, to, including_unknown, highlevel, behavior)
+    # Dispatch
+    yield (array,)
+
+    # Implementation
+    return _impl(array, to, including_unknown, highlevel, behavior)
 
 
 def _impl(array, to, including_unknown, highlevel, behavior):

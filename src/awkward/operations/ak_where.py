@@ -4,6 +4,7 @@ import awkward as ak
 from awkward._backends.dispatch import backend_of
 from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of
+from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 
@@ -11,7 +12,7 @@ np = NumpyMetadata.instance()
 cpu = NumpyBackend.instance()
 
 
-@ak._connect.numpy.implements("where")
+@high_level_function
 def where(condition, *args, mergebool=True, highlevel=True, behavior=None):
     """
     Args:
@@ -43,29 +44,19 @@ def where(condition, *args, mergebool=True, highlevel=True, behavior=None):
     for all `i`. The structure of `x` and `y` do not need to be the same; if
     they are incompatible types, the output will have #ak.type.UnionType.
     """
+    # Dispatch
+    yield (*args, condition)
+
+    # Implementation
     if len(args) == 0:
-        with ak._errors.OperationErrorContext(
-            "ak.where",
-            {"condition": condition, "mergebool": mergebool, "highlevel": highlevel},
-        ):
-            return _impl1(condition, mergebool, highlevel, behavior)
+        return _impl1(condition, mergebool, highlevel, behavior)
 
     elif len(args) == 1:
         raise ValueError("either both or neither of x and y should be given")
 
     elif len(args) == 2:
         x, y = args
-        with ak._errors.OperationErrorContext(
-            "ak.where",
-            {
-                "condition": condition,
-                "x": x,
-                "y": y,
-                "mergebool": mergebool,
-                "highlevel": highlevel,
-            },
-        ):
-            return _impl3(condition, x, y, mergebool, highlevel, behavior)
+        return _impl3(condition, x, y, mergebool, highlevel, behavior)
 
     else:
         raise TypeError(

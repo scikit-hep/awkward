@@ -1,8 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("zeros_like",)
-
 import awkward as ak
 from awkward._connect.numpy import UNSUPPORTED
+from awkward._dispatch import high_level_function
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
@@ -11,6 +11,7 @@ np = NumpyMetadata.instance()
 _ZEROS = object()
 
 
+@high_level_function
 def zeros_like(
     array, *, dtype=None, including_unknown=False, highlevel=True, behavior=None
 ):
@@ -33,17 +34,11 @@ def zeros_like(
     (There is no equivalent of NumPy's `np.empty_like` because Awkward Arrays
     are immutable.)
     """
-    with ak._errors.OperationErrorContext(
-        "ak.zeros_like",
-        {
-            "array": array,
-            "dtype": dtype,
-            "including_unknown": including_unknown,
-            "highlevel": highlevel,
-            "behavior": behavior,
-        },
-    ):
-        return _impl(array, highlevel, behavior, dtype, including_unknown)
+    # Dispatch
+    yield (array,)
+
+    # Implementation
+    return _impl(array, highlevel, behavior, dtype, including_unknown)
 
 
 def _impl(array, highlevel, behavior, dtype, including_unknown):

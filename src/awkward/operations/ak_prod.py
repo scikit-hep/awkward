@@ -3,6 +3,7 @@ __all__ = ("prod",)
 import awkward as ak
 from awkward._behavior import behavior_of
 from awkward._connect.numpy import UNSUPPORTED
+from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
@@ -10,6 +11,7 @@ from awkward._regularize import regularize_axis
 np = NumpyMetadata.instance()
 
 
+@high_level_function
 def prod(
     array,
     axis=None,
@@ -51,20 +53,14 @@ def prod(
 
     See also #ak.nanprod.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.prod",
-        {
-            "array": array,
-            "axis": axis,
-            "keepdims": keepdims,
-            "mask_identity": mask_identity,
-            "highlevel": highlevel,
-            "behavior": behavior,
-        },
-    ):
-        return _impl(array, axis, keepdims, mask_identity, highlevel, behavior)
+    # Dispatch
+    yield (array,)
+
+    # Implementation
+    return _impl(array, axis, keepdims, mask_identity, highlevel, behavior)
 
 
+@high_level_function
 def nanprod(
     array,
     axis=None,
@@ -100,20 +96,18 @@ def nanprod(
 
     See also #ak.prod.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.nanprod",
-        {
-            "array": array,
-            "axis": axis,
-            "keepdims": keepdims,
-            "mask_identity": mask_identity,
-            "highlevel": highlevel,
-            "behavior": behavior,
-        },
-    ):
-        array = ak.operations.ak_nan_to_none._impl(array, False, None)
+    # Dispatch
+    yield (array,)
 
-        return _impl(array, axis, keepdims, mask_identity, highlevel, behavior)
+    # Implementation
+    return _impl(
+        ak.operations.ak_nan_to_none._impl(array, False, None),
+        axis,
+        keepdims,
+        mask_identity,
+        highlevel,
+        behavior,
+    )
 
 
 def _impl(array, axis, keepdims, mask_identity, highlevel, behavior):

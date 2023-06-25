@@ -3,12 +3,14 @@ __all__ = ("to_backend",)
 import awkward as ak
 from awkward._backends.dispatch import regularize_backend
 from awkward._behavior import behavior_of
+from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
 
 
+@high_level_function
 def to_backend(array, backend, *, highlevel=True, behavior=None):
     """
     Args:
@@ -48,16 +50,11 @@ def to_backend(array, backend, *, highlevel=True, behavior=None):
 
     See #ak.kernels.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.to_backend",
-        {
-            "array": array,
-            "backend": backend,
-            "highlevel": highlevel,
-            "behavior": behavior,
-        },
-    ):
-        return _impl(array, backend, highlevel, behavior)
+    # Dispatch
+    yield (array,)
+
+    # Implementation
+    return _impl(array, backend, highlevel, behavior)
 
 
 def _impl(array, backend, highlevel, behavior):

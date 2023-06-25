@@ -1,7 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("to_dataframe",)
-
 import awkward as ak
+from awkward._dispatch import high_level_function
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
 
@@ -9,8 +9,13 @@ numpy = Numpy.instance()
 np = NumpyMetadata.instance()
 
 
+def _default_levelname(index: int) -> str:
+    return "sub" * index + "entry"
+
+
+@high_level_function
 def to_dataframe(
-    array, *, how="inner", levelname=lambda i: "sub" * i + "entry", anonymous="values"
+    array, *, how="inner", levelname=_default_levelname, anonymous="values"
 ):
     """
     Args:
@@ -122,16 +127,11 @@ def to_dataframe(
               2         3.0  NaN
               3         4.0  NaN
     """
-    with ak._errors.OperationErrorContext(
-        "ak.to_dataframe",
-        {
-            "array": array,
-            "how": how,
-            "levelname": levelname,
-            "anonymous": anonymous,
-        },
-    ):
-        return _impl(array, how, levelname, anonymous)
+    # Dispatch
+    yield (array,)
+
+    # Implementation
+    return _impl(array, how, levelname, anonymous)
 
 
 def _impl(array, how, levelname, anonymous):

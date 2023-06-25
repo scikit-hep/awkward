@@ -1,16 +1,17 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("to_list",)
-
 from collections.abc import Iterable, Mapping
 
 from awkward_cpp.lib import _ext
 
 import awkward as ak
+from awkward._dispatch import high_level_function
 from awkward._nplikes.numpylike import NumpyMetadata
 
 np = NumpyMetadata.instance()
 
 
+@high_level_function
 def to_list(array):
     """
     Args:
@@ -38,11 +39,11 @@ def to_list(array):
 
     See also #ak.from_iter and #ak.Array.tolist.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.to_list",
-        {"array": array},
-    ):
-        return _impl(array)
+    # Dispatch
+    yield (array,)
+
+    # Implementation
+    return _impl(array)
 
 
 def _impl(array):

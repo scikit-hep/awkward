@@ -1,9 +1,12 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("argcartesian",)
+from collections.abc import Mapping
+
 import awkward as ak
 from awkward._backends.dispatch import backend_of
 from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of
+from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
@@ -12,6 +15,7 @@ np = NumpyMetadata.instance()
 cpu = NumpyBackend.instance()
 
 
+@high_level_function
 def argcartesian(
     arrays,
     axis=1,
@@ -88,19 +92,14 @@ def argcartesian(
     All of the parameters for #ak.cartesian apply equally to #ak.argcartesian,
     so see the #ak.cartesian documentation for a more complete description.
     """
-    with ak._errors.OperationErrorContext(
-        "ak.argcartesian",
-        {
-            "arrays": arrays,
-            "axis": axis,
-            "nested": nested,
-            "parameters": parameters,
-            "with_name": with_name,
-            "highlevel": highlevel,
-            "behavior": behavior,
-        },
-    ):
-        return _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior)
+    # Dispatch
+    if isinstance(arrays, Mapping):
+        yield arrays.values()
+    else:
+        yield arrays
+
+    # Implementation
+    return _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior)
 
 
 def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):

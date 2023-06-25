@@ -13,22 +13,65 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  PYTHON_VERSION: "3.10.6"
+  X86_64_PYTHON_VERSION: "3.10.6"
   SOURCE_DATE_EPOCH: "1668811211"
 
 jobs:
-  awkward-cpp-wasm:
-    name: Build C++ WASM
+  pyodide-python-version:
+    name: Determine Pyodide Python version
     runs-on: ubuntu-22.04
+    outputs:
+      python-version: ${{ steps.retrieve-python-version.outputs.python-version }}
     steps:
     - uses: actions/checkout@v3
       with:
         submodules: true
 
+    - name: Cache python version
+      id: cache-pyodide-python-version
+      uses: actions/cache@v3
+      with:
+        path: pyodide-python-version
+        key: ${{ runner.os }}-docs-pyodide-python-version-${{ hashFiles('docs/requirements-wasm.txt') }}
+
+    - name: Setup Python
+      if: steps.cache-pyodide-python-version.outputs.cache-hit != 'true'
+      uses: actions/setup-python@v4
+      with:
+        python-version: "${{ env.X86_64_PYTHON_VERSION }}"
+
+    - name: Install dependencies
+      if: steps.cache-pyodide-python-version.outputs.cache-hit != 'true'
+      run: python3 -m pip install -r docs/requirements-wasm.txt
+
+    - name: Determine Python version
+      if: steps.cache-pyodide-python-version.outputs.cache-hit != 'true'
+      id: compute-python-version
+      run: |
+        # Save Python version
+        PYTHON_VERSION=$(pyodide config get python_version)
+        echo $PYTHON_VERSION > pyodide-python-version
+
+    - name: Retrieve Python version
+      id: retrieve-python-version
+      run: |
+        PYTHON_VERSION=$(cat pyodide-python-version)
+        echo "python-version=$PYTHON_VERSION" >> "$GITHUB_OUTPUT"
+
+  awkward-cpp-wasm:
+    name: Build C++ WASM
+    runs-on: ubuntu-22.04
+    needs: [pyodide-python-version]
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: true
+
+
     - name: Setup Python
       uses: actions/setup-python@v4
       with:
-        python-version: "${{ env.PYTHON_VERSION }}"
+        python-version: "${{ needs.pyodide-python-version.outputs.python-version }}"
 
     - name: Generate build files
       run: pipx run nox -s prepare -- --headers --signatures
@@ -38,21 +81,35 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ./awkward-cpp/dist
-        key: ${{ runner.os }}-${{ env.PYTHON_VERSION }}-awkward-cpp-wasm-${{ hashFiles('awkward-cpp/**') }}
+        key: ${{ runner.os }}-"${{ needs.pyodide-python-version.outputs.python-version }}-awkward-cpp-wasm-${{ hashFiles('awkward-cpp/**') }}
+
+    - name: Install dependencies
+      if: steps.cache-awkward-cpp-wasm-wheel.outputs.cache-hit != 'true'
+      run: python3 -m pip install -r docs/requirements-wasm.txt
+
+    - name: Determine EMSDK version
+      if: steps.cache-awkward-cpp-wasm-wheel.outputs.cache-hit != 'true'
+      id: compute-emsdk-version
+      run: |
+        # Prepare xbuild environment (side-effect)
+        pyodide config list
+        # Save EMSDK version
+        EMSCRIPTEN_VERSION=$(pyodide config get emscripten_version)
+        echo "emsdk-version=$EMSCRIPTEN_VERSION" >> $GITHUB_OUTPUT
+      working-directory: awkward-cpp
 
     - name: Install EMSDK
       uses: mymindstorm/setup-emsdk@v12
       if: steps.cache-awkward-cpp-wasm-wheel.outputs.cache-hit != 'true'
       with:
-        version: 3.1.14
+        version: ${{ steps.compute-emsdk-version.outputs.emsdk-version }}
 
     - name: Build wheel
       if: steps.cache-awkward-cpp-wasm-wheel.outputs.cache-hit != 'true'
+      id: build-awkward-cpp-wasm-wheel
       run: |
         # pyodide-build doesn't work out of the box with pipx
-        python3 -m pip install pyyaml pyodide-build==0.21.0
-        export CMAKE_ARGS="-DEMSCRIPTEN=1"
-        pyodide build --exports whole_archive
+        CFLAGS=-fexceptions LDFLAGS=-fexceptions pyodide build --exports whole_archive
       working-directory: awkward-cpp
 
     - name: Upload wheel
@@ -64,6 +121,10 @@ jobs:
   awkward-cpp-x86-64:
     runs-on: ubuntu-22.04
     name: Build C++ x86
+    defaults:
+      run:
+        # Ensure conda env is activated
+        shell: "bash -l {0}"
     steps:
     - uses: actions/checkout@v3
       with:
@@ -88,8 +149,9 @@ jobs:
         cache-downloads: true
         environment-file: docs/environment.yml
         create-args: >-
-           python=${{ env.PYTHON_VERSION }}
+           python=${{ env.X86_64_PYTHON_VERSION }}
            doxygen
+           python-build
 
     - name: Generate build files
       run: pipx run nox -s prepare -- --headers --signatures
@@ -99,11 +161,11 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ./awkward-cpp/dist
-        key: ${{ runner.os }}-${{ env.PYTHON_VERSION }}-awkward-x86-64-wasm-${{ hashFiles('awkward-cpp/**') }}
+        key: ${{ runner.os }}-${{ env.X86_64_PYTHON_VERSION }}-awkward-x86-64-wasm-${{ hashFiles('awkward-cpp/**') }}
 
     - name: Build wheel
       if: steps.cache-awkward-cpp-x86-64-wheel.outputs.cache-hit != 'true'
-      run: pipx run build -w ./awkward-cpp
+      run: python -m build -w ./awkward-cpp
 
     - name: Upload wheel
       uses: actions/upload-artifact@v3
@@ -164,7 +226,7 @@ jobs:
         cache-downloads: true
         environment-file: docs/environment.yml
         create-args: >-
-           python=${{ env.PYTHON_VERSION }}
+           python=${{ env.X86_64_PYTHON_VERSION }}
            doxygen
 
     - name: Download awkward wheel
