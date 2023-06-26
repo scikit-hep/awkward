@@ -1178,7 +1178,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         import awkward._prettyprint
 
         try:
-            pytype = super().__getattribute__("__name__")
+            pytype = super().__getattribute__(".__subclass__")
         except AttributeError:
             pytype = type(self).__name__
 
