@@ -25,7 +25,7 @@ def overlay_behavior(behavior: Mapping | None) -> Mapping:
 def get_array_name(parameters: JSONMapping | None) -> str | None:
     if parameters is None:
         return None
-    for param in ".__subclass__", "__array__":
+    for param in "__subclass__", "__array__":
         name = parameters.get(param)
         if name is not None:
             return name
@@ -52,7 +52,7 @@ def get_array_class(layout, behavior: Mapping | None) -> type:
 
     # __array__ is a fallback for __name__. If one of these parameters is set, we should return a registered behavior
     # class, or the default array type
-    for param in ".__subclass__", "__array__":
+    for param in "__subclass__", "__array__":
         # Did the user specify a nominal parameter?
         name = layout.parameter(param)
         if name is None:

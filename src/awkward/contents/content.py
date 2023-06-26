@@ -14,7 +14,6 @@ from awkward._backends.dispatch import (
     regularize_backend,
 )
 from awkward._behavior import get_array_class, get_record_class
-from awkward._errors import deprecate
 from awkward._kernels import KernelError
 from awkward._layout import wrap_layout
 from awkward._nplikes import to_nplike
@@ -105,21 +104,6 @@ class Content:
         else:
             if parameters.get("__array__") is not None:
                 array_name = parameters["__array__"]
-
-                if array_name not in {
-                    "string",
-                    "bytestring",
-                    "char",
-                    "byte",
-                    "categorical",
-                    "sorted_map",
-                }:
-                    deprecate(
-                        'use of parameters["__array__"] for non built-in array types is deprecated. '
-                        "Please use the `__name__` parameter instead",
-                        version="2.4.0",
-                    )
-
                 # Validate string-likes
                 if not self.is_list and array_name in ("string", "bytestring"):
                     raise TypeError(

@@ -504,69 +504,97 @@ class WeightedPoint(Point):
         )
 ```
 
-A footnote: in this implementation, adding a WeightedPoint and a Point returns a Point.
+A footnote: in this implementation, adding a `WeightedPoint` and a Point returns a `Point`.
 One may wish to disable this by type-checking, since the functionalities are rather different.
 
 ## Adding behavior to arrays
 
-Occasionally, you may want to add behavior to an array that does not contain
-records. A good example of this is to extend Awkward's string type: strings are a built-in
-Awkward type, implemented as views over lists of characters. It is possible to implement a 
-custom string that has its own suite of methods using the `__name__` parameter.
-
-The only difference here is the parameter: instead of setting `"__record__"`,
-we set `"__name__"`.
+Occasionally, you may want to add behavior to an array that does not contain records. 
+The built-in `__array__` parameter behaves similarly to the `__record__` parameter; it adds a [nominal type](https://en.wikipedia.org/wiki/Nominal_type_system) to the array. Unlike `__record__`, behavior-classes associated with `__array__` are only found if the parameter is set upon the outermost layout node. For example, we might want to create a special list type with a `reversed()` method that reverses the last axis. 
 
 ```pycon
 >>> import awkward as ak
->>> class ReversibleStringArray(ak.Array):
+>>> class ReversibleArray(ak.Array):
 ...     def reversed(self):
-...         def apply(layout, **_):
-...             if layout.purelist_depth == 1:
-...                 reversed_content = layout.content.copy(
-...                     data=layout.content.data[::-1],
-...                 )
-...                 reversed_offsets = ak.index.Index(
-...                     layout.offsets[-1] - layout.offsets.data[::-1]
-...                 )
-...                 # Reverse the offsets and unflatten!
-...                 return layout.copy(
-...                     content=reversed_content,
-...                     offsets=reversed_offsets,
-...                 )
-...         return ak.transform(apply, self)
+...         index = ak.local_index(self)
+...         reversed_index = index[..., ::-1]
+...         return self[reversed_index]
+>>> ak.behavior["reversible"] = ReversibleArray
+>>> built_in_array = ak.Array(
+...  [[1, 2, 3], [4, 5, 6, 7], [8, 9]],
+... )
+>>> reversible_array = ak.with_parameter(
+...     built_in_array,
+...     "__array__",
+...     "reversible",
+... )
+>>> reversible_array.show()
+[[1, 2, 3],
+ [4, 5, 6, 7],
+ [8, 9]]
+>>> reversible_array.reversed().show()
+[[3, 2, 1],
+ [7, 6, 5, 4],
+ [9, 8]]
+```
+If we nest this `reversible_array` inside another list, using `ak.unflatten`, then we lose the `reversed` method:
+```pycon
+>>> nested_reversible_array = ak.unflatten(
+    reversible_array,
+    [2, 1, 0],
+)
+>>> reversible_array.reversed().show()
+[[3, 2, 1],
+ [7, 6, 5, 4],
+ [9, 8]]
+>>> nested_reversible_array.reversed().show()
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
 ...
->>>
->>> ak.behavior["my-string"] = ReversibleStringArray
->>>
->>> built_in_strings = ak.Array(
-...     ["So", "I", "said", "to", "Schrodinger,", "Think", "outside", "the", "box."],
-... )
->>> reversible_strings = ak.with_parameter(
-...     built_in_strings,
-...     "__name__",
-...     "my-string",
-... )
->>> reversible_strings.show()
-['So',
- 'I',
- 'said',
- 'to',
- 'Schrodinger,',
- 'Think',
- 'outside',
- 'the',
- 'box.']
->>> reversible_strings.reversed().show()
-['.xob',
- 'eht',
- 'edistuo',
- 'knihT',
- ',regnidorhcS',
- 'ot',
- 'dias',
- 'I',
- 'oS']
+AttributeError: no field named 'reversed'
+```
+
+Just like `__record__`, layouts that define `__array__` can customize the application of ufuncs:
+```pycon
+>>> reversible_array.show()
+[[1, 2, 3],
+ [4, 5, 6, 7],
+ [8, 9]]
+>>> def reversible_add(x, y):
+...     return x.reversed() + y.reversed()
+... ak.behavior[np.add, "reversible", "reversible"] = reversible_add
+>>> (reversible_array + reversible_array).show()
+[[6, 4, 2],
+ [14, 12, 10, 8],
+ [18, 16]]
+```
+
+Some values of `__array__` are special — reserved for built-in types such as strings and categoricals. Strings are implemented as views over lists of characters, whereby the list has the parameter `__array__ = "string"`:
+```pycon
+>>> ak.to_layout(["hello", "world!"])
+<ListOffsetArray len='2'>
+    <parameter name='__array__'>'string'</parameter>
+    <offsets><Index dtype='int64' len='3'>
+        [ 0  5 11]
+    </Index></offsets>
+    <content><NumpyArray dtype='uint8' len='11'>
+        <parameter name='__array__'>'char'</parameter>
+        [104 101 108 108 111 119 111 114 108 100  33]
+    </NumpyArray></content>
+</ListOffsetArray>
+```
+
+In order to customise the behavior of these built-in types, it is therefore necessary to use a secondary parameter `__subclass__` instead of `__array__`. After defining this parameter, we can see that the previous example of `ReversibleArray` also works sensibly for strings:
+```pycon
+>>> strings = ak.with_parameter(["hi", "book", "cats"], "__subclass__", "reversible")
+>>> strings.show()
+['hi',
+ 'book',
+ 'cats']
+>>> strings.reversed().show()
+['cats',
+ 'book',
+ 'hi']                
 ```
 
 In `ak.behaviors.string`, string behaviors are assigned with lines like

@@ -4,7 +4,7 @@ from collections.abc import Collection
 
 from awkward._typing import JSONMapping, JSONSerializable
 
-NOMINAL_PARAMETERS = ("__array__", ".__subclass__", "__categorical__", "__record__")
+NOMINAL_PARAMETERS = ("__array__", "__subclass__", "__categorical__", "__record__")
 
 
 def type_parameters_equal(
