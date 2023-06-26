@@ -27,6 +27,7 @@ from awkward._regularize import is_non_string_like_iterable
 from awkward._typing import Any, Iterator, Mapping
 from awkward._util import Sentinel
 from awkward.contents.numpyarray import NumpyArray
+from awkward.units import get_unit_registry
 
 # NumPy 1.13.1 introduced NEP13, without which Awkward ufuncs won't work, which
 # would be worse than lacking a feature: it would cause unexpected output.
@@ -274,6 +275,49 @@ def _array_ufunc_categorical(
         return tuple(ak.to_layout(x, allow_other=True) for x in out)
 
 
+def _array_ufunc_custom_units(ufunc, inputs, kwargs, behavior):
+    registry = get_unit_registry()
+    if registry is None:
+        return None
+
+    # Check if we have units
+    for x in inputs:
+        if isinstance(x, ak.contents.Content) and x.parameter("__units__"):
+            break
+        elif isinstance(x, registry.Quantity):
+            break
+    # Exit now, if not!
+    else:
+        return None
+
+    # Wrap all Awkward Arrays with
+    nextinputs = []
+    for x in inputs:
+        if isinstance(x, ak.contents.Content):
+            nextinputs.append(
+                registry.Quantity(
+                    ak.with_parameter(x, "__units__", None, behavior=behavior),
+                    x.parameter("__units__"),
+                )
+            )
+        else:
+            nextinputs.append(x)
+    out = ufunc(*nextinputs, **kwargs)
+    if not isinstance(out, tuple):
+        out = (out,)
+
+    nextout = []
+    for qty in out:
+        assert isinstance(qty, registry.Quantity)
+        assert isinstance(qty.magnitude, ak.Array)
+        nextout.append(
+            ak.with_parameter(
+                qty.magnitude, "__units__", str(qty.units), highlevel=False
+            )
+        )
+    return tuple(nextout)
+
+
 def _array_ufunc_string_likes(
     ufunc, method: str, inputs, kwargs: dict[str, Any], behavior: Mapping | None
 ):
@@ -334,13 +378,32 @@ def array_ufunc(ufunc, method: str, inputs, kwargs: dict[str, Any]):
     inputs = _array_ufunc_custom_cast(inputs, behavior, backend)
 
     def action(inputs, **ignore):
-        contents = [x for x in inputs if isinstance(x, ak.contents.Content)]
+        # Do we have any units in the mix? If so, delegate to `pint` to perform
+        # the ufunc dispatch. This will re-enter `array_ufunc`, but without units
+        # NOTE: there's nothing preventing us from handling units for non-NumpyArray
+        #       contents, but for now we restrict ourselves to NumpyArray (in the
+        #       NumpyArray constructor). By running _before_ the custom machinery,
+        #       custom user ufuncs can avoid needing to worry about units
+        out = _array_ufunc_custom_units(ufunc, inputs, kwargs, behavior)
+        if out is not None:
+            return out
 
         signature = _array_ufunc_signature(ufunc, inputs)
-        # Do we have a custom ufunc (an override of the given ufunc)?
+        # Do we have a custom (specific) ufunc (an override of the given ufunc)?
         custom = find_ufunc(behavior, signature)
         if custom is not None:
             return _array_ufunc_adjust(custom, inputs, kwargs, behavior)
+
+        # Do we have a custom generic ufunc override (a function that accepts _all_ ufuncs)?
+        contents = [x for x in inputs if isinstance(x, ak.contents.Content)]
+        for x in contents:
+            apply_ufunc = find_ufunc_generic(ufunc, x, behavior)
+            if apply_ufunc is not None:
+                out = _array_ufunc_adjust_apply(
+                    apply_ufunc, ufunc, method, inputs, kwargs, behavior
+                )
+                if out is not None:
+                    return out
 
         # Do we have any categoricals?
         if any(
@@ -375,16 +438,6 @@ def array_ufunc(ufunc, method: str, inputs, kwargs: dict[str, Any]):
             raise NotImplementedError(
                 "matrix multiplication (`@` or `np.matmul`) is not yet implemented for Awkward Arrays"
             )
-
-        # Do we have a custom generic ufunc override (a function that accepts _all_ ufuncs)?
-        for x in contents:
-            apply_ufunc = find_ufunc_generic(ufunc, x, behavior)
-            if apply_ufunc is not None:
-                out = _array_ufunc_adjust_apply(
-                    apply_ufunc, ufunc, method, inputs, kwargs, behavior
-                )
-                if out is not None:
-                    return out
 
         if all(
             isinstance(x, NumpyArray) or not isinstance(x, ak.contents.Content)
