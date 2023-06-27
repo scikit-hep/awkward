@@ -14,22 +14,31 @@ from awkward._typing import final
 
 
 class LayoutBuilder:
-    def __init__(self, builder, *, parameters=None):
-        self._builder = builder
+    def _init(self, parameters):
         self._parameters = parameters
 
     @property
-    def builder(self):
-        return self._builder
+    def parameters(self):
+        return self._parameters
+
+    def __len__(self):
+        raise AssertionError("missing implementation")
+
+    def numbatype(self):
+        raise AssertionError("missing implementation")
+
+    def snapshot(self):
+        raise AssertionError("missing implementation")
+
+    @property
+    def form(self):
+        raise AssertionError("missing implementation")
 
     def clear(self):
-        return self._builder.clear()
+        raise AssertionError("missing implementation")
 
     def is_valid(self, error: str):
-        return self._builder.is_valid(error)
-
-    def _type(self, typestrs):
-        raise NotImplementedError
+        raise AssertionError("missing implementation")
 
 
 def to_numbatype(builder):
