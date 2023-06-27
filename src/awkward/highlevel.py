@@ -1718,6 +1718,21 @@ class Record(NDArrayOperatorsMixin):
         """
         return str(self.type)
 
+    def _getitem(self, where):
+        out = self._layout[where]
+        if isinstance(out, ak.contents.NumpyArray):
+            array_param = out.parameter("__array__")
+            if array_param == "byte":
+                return ak._util.tobytes(out._raw(numpy))
+            elif array_param == "char":
+                return ak._util.tobytes(out._raw(numpy)).decode(
+                    errors="surrogateescape"
+                )
+            else:
+                return wrap_layout(out, self._behavior)
+        else:
+            return wrap_layout(out, self._behavior, allow_other=True)
+
     def __getitem__(self, where):
         """
         Args:
@@ -1745,19 +1760,7 @@ class Record(NDArrayOperatorsMixin):
             2
         """
         with ak._errors.SlicingErrorContext(self, where):
-            out = self._layout[where]
-            if isinstance(out, ak.contents.NumpyArray):
-                array_param = out.parameter("__array__")
-                if array_param == "byte":
-                    return ak._util.tobytes(out._raw(numpy))
-                elif array_param == "char":
-                    return ak._util.tobytes(out._raw(numpy)).decode(
-                        errors="surrogateescape"
-                    )
-                else:
-                    return wrap_layout(out, self._behavior)
-            else:
-                return wrap_layout(out, self._behavior, allow_other=True)
+            return self._getitem(where)
 
     def __setitem__(self, where, what):
         """

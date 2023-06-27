@@ -4,7 +4,6 @@ import numbers
 import re
 
 import awkward as ak
-from awkward._layout import wrap_layout
 from awkward._nplikes.numpy import Numpy
 
 numpy = Numpy.instance()
@@ -33,38 +32,6 @@ def alternate(length):
 
 
 is_identifier = re.compile(r"^[A-Za-z_][A-Za-z_0-9]*$")
-
-
-# avoid recursion in which ak.Array.__getitem__ calls prettyprint
-# to form an error string: private reimplementation of ak.Array.__getitem__
-
-
-def get_at(data, index):
-    out = data._layout._getitem_at(index)
-    if isinstance(out, ak.contents.NumpyArray):
-        array_param = out.parameter("__array__")
-        if array_param == "byte":
-            return ak._util.tobytes(out._raw(numpy))
-        elif array_param == "char":
-            return ak._util.tobytes(out._raw(numpy)).decode(errors="surrogateescape")
-    if isinstance(out, (ak.contents.Content, ak.record.Record)):
-        return wrap_layout(out, data._behavior)
-    else:
-        return out
-
-
-def get_field(data, field):
-    out = data._layout._getitem_field(field)
-    if isinstance(out, ak.contents.NumpyArray):
-        array_param = out.parameter("__array__")
-        if array_param == "byte":
-            return ak._util.tobytes(out._raw(numpy))
-        elif array_param == "char":
-            return ak._util.tobytes(out._raw(numpy)).decode(errors="surrogateescape")
-    if isinstance(out, (ak.contents.Content, ak.record.Record)):
-        return wrap_layout(out, data._behavior)
-    else:
-        return out
 
 
 def custom_str(current):
@@ -107,14 +74,14 @@ def valuestr_horiz(data, limit_cols):
             return 2, front + back
 
         elif len(data) == 1:
-            cols_taken, strs = valuestr_horiz(get_at(data, 0), limit_cols)
+            cols_taken, strs = valuestr_horiz(data._getitem(0), limit_cols)
             return 2 + cols_taken, front + strs + back
 
         else:
             limit_cols -= 5  # anticipate the ", ..."
             which = 0
             for forward, index in alternate(len(data)):
-                current = get_at(data, index)
+                current = data._getitem(index)
                 if forward:
                     for_comma = 0 if which == 0 else 2
                     cols_taken, strs = valuestr_horiz(current, limit_cols - for_comma)
@@ -187,7 +154,7 @@ def valuestr_horiz(data, limit_cols):
                 which += 1
 
                 target = limit_cols if len(fields) == 1 else half(limit_cols)
-                cols_taken, strs = valuestr_horiz(get_field(data, key), target)
+                cols_taken, strs = valuestr_horiz(data._getitem(key), target)
                 if limit_cols - cols_taken >= 0:
                     front.extend(strs)
                     limit_cols -= cols_taken
@@ -244,7 +211,7 @@ def valuestr(data, limit_rows, limit_cols):
         front, back = [], []
         which = 0
         for forward, index in alternate(len(data)):
-            _, strs = valuestr_horiz(get_at(data, index), limit_cols - 2)
+            _, strs = valuestr_horiz(data._getitem(index), limit_cols - 2)
             if forward:
                 front.append("".join(strs))
             else:
@@ -287,9 +254,7 @@ def valuestr(data, limit_rows, limit_cols):
                         key_str = key_str[1:]
                 else:
                     key_str = key + ": "
-            _, strs = valuestr_horiz(
-                get_field(data, key), limit_cols - 2 - len(key_str)
-            )
+            _, strs = valuestr_horiz(data._getitem(key), limit_cols - 2 - len(key_str))
             front.append(key_str + "".join(strs))
 
             which += 1
