@@ -29,6 +29,19 @@ numpy = Numpy.instance()
 _dir_pattern = re.compile(r"^[a-zA-Z_]\w*$")
 
 
+def prepare_layout(layout: ak.contents.Content):
+    if isinstance(layout, ak.contents.NumpyArray):
+        array_param = layout.parameter("__array__")
+        if array_param == "byte":
+            return ak._util.tobytes(layout.data)
+        elif array_param == "char":
+            return ak._util.tobytes(layout.data).decode(errors="surrogateescape")
+        else:
+            return layout
+    else:
+        return layout
+
+
 class Array(NDArrayOperatorsMixin, Iterable, Sized):
     """
     Args:
@@ -490,10 +503,13 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         See also #ak.to_list.
         """
-        yield from self._layout
+        for item in self._layout:
+            yield prepare_layout(item)
 
     def _getitem(self, where):
-        return wrap_layout(self._layout[where], self._behavior, allow_other=True)
+        return wrap_layout(
+            prepare_layout(self._layout[where]), self._behavior, allow_other=True
+        )
 
     def __getitem__(self, where):
         """
@@ -1693,7 +1709,9 @@ class Record(NDArrayOperatorsMixin):
         return str(self.type)
 
     def _getitem(self, where):
-        return wrap_layout(self._layout[where], self._behavior, allow_other=True)
+        return wrap_layout(
+            prepare_layout(self._layout[where]), self._behavior, allow_other=True
+        )
 
     def __getitem__(self, where):
         """

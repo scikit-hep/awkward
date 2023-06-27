@@ -56,7 +56,8 @@ def test_byte():
     )
     a = ak.with_parameter(a, "__array__", "byte")
     assert bytes(a) == b"hey there"
-    assert ak.to_list(a) == [*b"hey there"]
+    assert str(a) == str([ord(c) for c in "hey there"])
+    assert ak.to_list(a) == b"hey there"
 
 
 def test_char():
@@ -66,7 +67,7 @@ def test_char():
     )
     a = ak.with_parameter(a, "__array__", "char")
     assert str(a) == str([ord(c) for c in "hey there"])
-    assert ak.to_list(a) == [ord(c) for c in "hey there"]
+    assert ak.to_list(a) == "hey there"
 
 
 def test_string2():

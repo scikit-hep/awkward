@@ -300,14 +300,7 @@ class ListOffsetArray(Content):
         ):
             raise ak._errors.index_error(self, where)
         start, stop = self._offsets[where], self._offsets[where + 1]
-        out = self._content._getitem_range(start, stop)
-        array_param = out.parameter("__array__")
-        if array_param == "byte":
-            return ak._util.tobytes(out.data)
-        elif array_param == "char":
-            return ak._util.tobytes(out.data).decode(errors="surrogateescape")
-        else:
-            return out
+        return self._content._getitem_range(start, stop)
 
     def _getitem_range(self, start: SupportsIndex, stop: IndexType) -> Content:
         if not self._backend.nplike.known_data:
@@ -2145,31 +2138,25 @@ class ListOffsetArray(Content):
             convert_bytes = (
                 None if json_conversions is None else json_conversions["convert_bytes"]
             )
-            content = ak._util.tobytes(nextcontent.data)
+            data = nextcontent.data
             out = [None] * starts.length
             if convert_bytes is None:
                 for i in range(starts.length):
-                    out[i] = content[starts_data[i] : stops_data[i]]
+                    out[i] = ak._util.tobytes(data[starts_data[i] : stops_data[i]])
             else:
                 for i in range(starts.length):
-                    out[i] = convert_bytes(content[starts_data[i] : stops_data[i]])
+                    out[i] = convert_bytes(
+                        ak._util.tobytes(data[starts_data[i] : stops_data[i]])
+                    )
             return out
 
         elif self.parameter("__array__") == "string":
             data = nextcontent.data
-            if hasattr(data, "tobytes"):
-
-                def tostring(x):
-                    return x.tobytes().decode(errors="surrogateescape")
-
-            else:
-
-                def tostring(x):
-                    return x.tostring().decode(errors="surrogateescape")
-
             out = [None] * starts.length
             for i in range(starts.length):
-                out[i] = tostring(data[starts_data[i] : stops_data[i]])
+                out[i] = ak._util.tobytes(data[starts_data[i] : stops_data[i]]).decode(
+                    errors="surrogateescape"
+                )
             return out
 
         else:

@@ -1278,6 +1278,18 @@ class NumpyArray(Content):
         if not self._backend.nplike.known_data:
             raise TypeError("cannot convert typetracer arrays to Python lists")
 
+        if self.parameter("__array__") == "byte":
+            convert_bytes = (
+                None if json_conversions is None else json_conversions["convert_bytes"]
+            )
+            if convert_bytes is None:
+                return ak._util.tobytes(self._data)
+            else:
+                return convert_bytes(ak._util.tobytes(self._data))
+
+        elif self.parameter("__array__") == "char":
+            return ak._util.tobytes(self._data).decode(errors="surrogateescape")
+
         out = self._to_list_custom(behavior, json_conversions)
         if out is not None:
             return out

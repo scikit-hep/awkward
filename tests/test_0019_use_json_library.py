@@ -81,17 +81,14 @@ def test_bytearray():
     array = ak.contents.NumpyArray(
         np.frombuffer(b"hellothere", "u1"), parameters={"__array__": "byte"}
     )
-    assert (
-        ak.operations.to_json(array, convert_bytes=bytes.decode)
-        == "[104,101,108,108,111,116,104,101,114,101]"
-    )
+    assert ak.operations.to_json(array, convert_bytes=bytes.decode) == '"hellothere"'
 
 
 def test_chararray():
     array = ak.contents.NumpyArray(
         np.frombuffer(b"hellothere", "u1"), parameters={"__array__": "char"}
     )
-    assert ak.operations.to_json(array) == "[104,101,108,108,111,116,104,101,114,101]"
+    assert ak.operations.to_json(array) == '"hellothere"'
 
 
 def test_string_array():
