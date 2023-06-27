@@ -7,22 +7,13 @@ import pytest
 
 import awkward as ak
 
-try:
-    import numba as nb
-    import numba.cuda as nb_cuda
-    from numba import config
 
-    ak.numba.register_and_check()
+nb = pytest.importorskip("numba")
+nb_cuda = pytest.importorskip("numba.cuda")
 
-except ImportError:
-    nb = nb_cuda = None
 
-numbatest = pytest.mark.skipif(
-    nb is None or nb_cuda is None, reason="requires the numba and numba.cuda packages"
-)
-
-config.CUDA_LOW_OCCUPANCY_WARNINGS = False
-config.CUDA_WARN_ON_IMPLICIT_COPY = False
+nb.config.CUDA_LOW_OCCUPANCY_WARNINGS = False
+nb.config.CUDA_WARN_ON_IMPLICIT_COPY = False
 
 
 @nb_cuda.jit(extensions=[ak.numba.cuda])
@@ -79,7 +70,6 @@ def pass_two_tuple_through(array, out):
     out[tid][1] = array["1"][tid]
 
 
-@numbatest
 def test_array_multiply():
     # create an ak.Array with a cuda backend:
     akarray = ak.Array([0, 1, 2, 3], backend="cuda")
@@ -95,7 +85,6 @@ def test_array_multiply():
     assert ak.Array(host_results).tolist() == [0, 3, 6, 9]
 
 
-@numbatest
 def test_array_on_cpu_multiply():
     # create an ak.Array with a cpu backend:
     array = ak.Array([0, 1, 2, 3])
@@ -114,7 +103,6 @@ def test_array_on_cpu_multiply():
     assert ak.Array(host_results).tolist() == [0, 3, 6, 9]
 
 
-@numbatest
 def test_ListOffsetArray():
     array = ak.Array([[0, 1], [2], [3, 4, 5]], backend="cuda")
 
@@ -130,7 +118,6 @@ def test_ListOffsetArray():
     )
 
 
-@numbatest
 def test_RecordArray():
     array = ak.Array(
         [{"x": 0}, {"x": 1}, {"x": 2}, {"x": 3}, {"x": 4}, {"x": 5}], backend="cuda"
@@ -146,7 +133,6 @@ def test_RecordArray():
     assert ak.Array(host_results).tolist() == array.x.to_list()
 
 
-@numbatest
 def test_EmptyArray():
     array = ak.Array(ak.contents.EmptyArray(), backend="cuda")
 
@@ -159,7 +145,6 @@ def test_EmptyArray():
     assert ak.Array(host_results).tolist() == array.to_list()
 
 
-@numbatest
 def test_NumpyArray():
     array = ak.Array(ak.contents.NumpyArray([0, 1, 2, 3]), backend="cuda")
 
@@ -172,7 +157,6 @@ def test_NumpyArray():
     assert ak.Array(host_results).tolist() == array.to_list()
 
 
-@numbatest
 def test_RegularArray_NumpyArray():
     array = ak.Array(
         ak.contents.RegularArray(
@@ -191,7 +175,6 @@ def test_RegularArray_NumpyArray():
     assert ak.Array(host_results).tolist() == array.to_list()
 
 
-@numbatest
 def test_RegularArray_EmptyArray():
     array = ak.Array(
         ak.contents.RegularArray(ak.contents.EmptyArray(), 0, zeros_length=10),
@@ -209,7 +192,6 @@ def test_RegularArray_EmptyArray():
     )
 
 
-@numbatest
 def test_ListArray_NumpyArray():
     array = ak.Array(
         ak.contents.ListArray(
@@ -233,7 +215,6 @@ def test_ListArray_NumpyArray():
     ]
 
 
-@numbatest
 def test_ListOffsetArray_NumpyArray():
     array = ak.Array(
         ak.contents.ListOffsetArray(
@@ -254,7 +235,6 @@ def test_ListOffsetArray_NumpyArray():
     )
 
 
-@numbatest
 def test_RecordArray_NumpyArray():
     array = ak.Array(
         ak.contents.RecordArray(
@@ -341,7 +321,6 @@ def test_RecordArray_NumpyArray():
     assert ak.Array(host_results).tolist() == [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
 
-@numbatest
 def test_IndexedArray_NumpyArray():
     array = ak.Array(
         ak.contents.IndexedArray(
@@ -360,7 +339,6 @@ def test_IndexedArray_NumpyArray():
     assert ak.Array(host_results).tolist() == array.to_list()
 
 
-@numbatest
 def test_IndexedOptionArray_NumpyArray():
     array = ak.Array(
         ak.contents.IndexedOptionArray(
@@ -387,7 +365,6 @@ def test_IndexedOptionArray_NumpyArray():
     ]
 
 
-@numbatest
 def test_ByteMaskedArray_NumpyArray():
     array = ak.Array(
         ak.contents.ByteMaskedArray(
