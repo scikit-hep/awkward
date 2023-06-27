@@ -76,7 +76,7 @@ def to_buffers(
     buffer_key="{form_key}-{attribute}",
     form_key: str | None = "node{id}",
     id_start: Integral = 0,
-    backend: Backend = None,
+    backend: Backend | None = None,
     byteorder: Literal["<", ">"] = "<",
 ) -> tuple[form.Form, int, Mapping[str, Any]]:
     if container is None:

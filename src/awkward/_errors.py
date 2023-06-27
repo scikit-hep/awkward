@@ -376,7 +376,7 @@ with
             return repr(x)
 
 
-def index_error(subarray, slicer, details: str = None) -> IndexError:
+def index_error(subarray, slicer, details: str | None = None) -> IndexError:
     message = ""
     if details is not None:
         message = f": {details}"
