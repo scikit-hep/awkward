@@ -49,13 +49,24 @@ class Dummy(ak.highlevel.Array):
     pass
 
 
-def test_string1():
+def test_byte():
     a = ak.highlevel.Array(
-        np.array([ord(x) for x in "hey there"], dtype=np.uint8), check_valid=True
+        np.array([ord(x) for x in "hey there"], dtype=np.uint8),
+        check_valid=True,
     )
-    a.__class__ = ak.behaviors.string.ByteBehavior
-    assert str(a) == str(b"hey there")
-    assert str(a) == str(b"hey there")
+    a = ak.with_parameter(a, "__array__", "byte")
+    assert bytes(a) == b"hey there"
+    assert ak.to_list(a) == [*b"hey there"]
+
+
+def test_char():
+    a = ak.highlevel.Array(
+        np.array([ord(x) for x in "hey there"], dtype=np.uint8),
+        check_valid=True,
+    )
+    a = ak.with_parameter(a, "__array__", "char")
+    assert str(a) == str([ord(c) for c in "hey there"])
+    assert ak.to_list(a) == [ord(c) for c in "hey there"]
 
 
 def test_string2():

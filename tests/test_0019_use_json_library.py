@@ -81,7 +81,41 @@ def test_bytearray():
     array = ak.contents.NumpyArray(
         np.frombuffer(b"hellothere", "u1"), parameters={"__array__": "byte"}
     )
-    assert ak.operations.to_json(array, convert_bytes=bytes.decode) == '"hellothere"'
+    assert (
+        ak.operations.to_json(array, convert_bytes=bytes.decode)
+        == "[104,101,108,108,111,116,104,101,114,101]"
+    )
+
+
+def test_chararray():
+    array = ak.contents.NumpyArray(
+        np.frombuffer(b"hellothere", "u1"), parameters={"__array__": "char"}
+    )
+    assert ak.operations.to_json(array) == "[104,101,108,108,111,116,104,101,114,101]"
+
+
+def test_string_array():
+    array = ak.contents.ListOffsetArray(
+        ak.index.Index64([0, 5, 10]),
+        ak.contents.NumpyArray(
+            np.frombuffer(b"hellothere", "u1"), parameters={"__array__": "char"}
+        ),
+        parameters={"__array__": "string"},
+    )
+    assert ak.operations.to_json(array) == '["hello","there"]'
+
+
+def test_bytestring_array():
+    array = ak.contents.ListOffsetArray(
+        ak.index.Index64([0, 5, 10]),
+        ak.contents.NumpyArray(
+            np.frombuffer(b"hellothere", "u1"), parameters={"__array__": "byte"}
+        ),
+        parameters={"__array__": "bytestring"},
+    )
+    assert (
+        ak.operations.to_json(array, convert_bytes=bytes.decode) == '["hello","there"]'
+    )
 
 
 def test_complex():
