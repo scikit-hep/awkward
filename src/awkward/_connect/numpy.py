@@ -290,29 +290,32 @@ def _array_ufunc_custom_units(ufunc, inputs, kwargs, behavior):
     else:
         return None
 
-    # Wrap all Awkward Arrays with
+    # Wrap underlying data buffers with `pint.Quantity`
     nextinputs = []
     for x in inputs:
         if isinstance(x, ak.contents.Content):
+            assert isinstance(x, ak.contents.NumpyArray)
             nextinputs.append(
                 registry.Quantity(
-                    ak.with_parameter(x, "__units__", None, behavior=behavior),
+                    x.data,
                     x.parameter("__units__"),
                 )
             )
         else:
             nextinputs.append(x)
+
+    # Apply ufunc to wrapped NEP-13 aware arrays
     out = ufunc(*nextinputs, **kwargs)
     if not isinstance(out, tuple):
         out = (out,)
 
+    # Rebuild `NumpyArray` with correct units of result
     nextout = []
     for qty in out:
         assert isinstance(qty, registry.Quantity)
-        assert isinstance(qty.magnitude, ak.Array)
         nextout.append(
-            ak.with_parameter(
-                qty.magnitude, "__units__", str(qty.units), highlevel=False
+            ak.contents.NumpyArray(
+                qty.magnitude, parameters={"__units__": str(qty.units)}
             )
         )
     return tuple(nextout)
@@ -378,15 +381,20 @@ def array_ufunc(ufunc, method: str, inputs, kwargs: dict[str, Any]):
     inputs = _array_ufunc_custom_cast(inputs, behavior, backend)
 
     def action(inputs, **ignore):
-        # Do we have any units in the mix? If so, delegate to `pint` to perform
-        # the ufunc dispatch. This will re-enter `array_ufunc`, but without units
-        # NOTE: there's nothing preventing us from handling units for non-NumpyArray
-        #       contents, but for now we restrict ourselves to NumpyArray (in the
-        #       NumpyArray constructor). By running _before_ the custom machinery,
-        #       custom user ufuncs can avoid needing to worry about units
-        out = _array_ufunc_custom_units(ufunc, inputs, kwargs, behavior)
-        if out is not None:
-            return out
+        is_at_leaves = all(
+            isinstance(x, NumpyArray) or not isinstance(x, ak.contents.Content)
+            for x in inputs
+        )
+        if is_at_leaves:
+            # Do we have any units in the mix? If so, delegate to `pint` to perform
+            # the ufunc dispatch. This will re-enter `array_ufunc`, but without units
+            # NOTE: there's nothing preventing us from handling units for non-NumpyArray
+            #       contents, but for now we restrict ourselves to NumpyArray (in the
+            #       NumpyArray constructor). By running _before_ the custom machinery,
+            #       custom user ufuncs can avoid needing to worry about units
+            out = _array_ufunc_custom_units(ufunc, inputs, kwargs, behavior)
+            if out is not None:
+                return out
 
         signature = _array_ufunc_signature(ufunc, inputs)
         # Do we have a custom (specific) ufunc (an override of the given ufunc)?
@@ -439,10 +447,7 @@ def array_ufunc(ufunc, method: str, inputs, kwargs: dict[str, Any]):
                 "matrix multiplication (`@` or `np.matmul`) is not yet implemented for Awkward Arrays"
             )
 
-        if all(
-            isinstance(x, NumpyArray) or not isinstance(x, ak.contents.Content)
-            for x in inputs
-        ):
+        if is_at_leaves:
             nplike = backend.nplike
 
             # Broadcast parameters against one another
@@ -465,8 +470,25 @@ def array_ufunc(ufunc, method: str, inputs, kwargs: dict[str, Any]):
 
             return (NumpyArray(result, backend=backend, parameters=parameters),)
 
+
+        # If we aren't at the leaves, and we have any records, broadcasting will subsequently fail
+        # Let's present a nicer error message
+        elif all(x.is_record for x in inputs if isinstance(x, ak.contents.Content)):
+            error_message = []
+            for x, y in zip(inputs, signature[1:]):
+                if y is None:
+                    error_message.append(
+                        f"<unnamed-{'record' if x.is_record else 'array'}>"
+                    )
+                else:
+                    error_message.append(str(y))
+            raise TypeError(
+                "no {}.{} overloads for signature: {}".format(
+                    type(ufunc).__module__, ufunc.__name__, ", ".join(error_message)
+                )
+            )
         # Do we have exclusively nominal types without custom overloads?
-        if all(
+        elif all(
             x.parameter("__list__") is not None or x.parameter("__record__") is not None
             for x in contents
         ):

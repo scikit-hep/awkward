@@ -900,11 +900,19 @@ class RecordArray(Content):
     ):
         reducer_recordclass = find_record_reducer(reducer, self, behavior)
         if reducer_recordclass is None:
-            raise TypeError(
-                "no ak.{} overloads for custom types: {}".format(
-                    reducer.name, ", ".join(self.fields)
+            nominal_type = self.parameter("__record__")
+            if nominal_type is None:
+                raise TypeError(
+                    "no ak.{} overloads for unnamed record type: {}".format(
+                        reducer.name, str(self.form.type)
+                    )
                 )
-            )
+            else:
+                raise TypeError(
+                    "no ak.{} overloads for record named {!r}".format(
+                        reducer.name, nominal_type
+                    )
+                )
         else:
             # Positional reducers ultimately need to do more work when rebuilding the result
             # so asking for a mask doesn't help us!

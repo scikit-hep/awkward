@@ -10,7 +10,7 @@ to_list = ak.operations.to_list
 
 def test_ufuncs_on_records_1439_raise_a_warning():
     array = ak.Array([{"x": 1.0, "y": 1.1}, {"x": 2.0, "y": 2.2}])
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         np.absolute(array)
 
 
@@ -36,7 +36,7 @@ def test_ufuncs_on_records_1439_without_warning():
 def test_this_should_raise_a_warning():
     one = ak.Array([{"x": 1}, {"x": 2}, {"x": 3}])
     two = ak.Array([{"x": 1.1}, {"x": 2.2}, {"x": 3.3}])
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         one + two
 
 

@@ -411,7 +411,7 @@ def apply_step(
     # This whole function is one big switch statement.
     def broadcast_any_record():
         if not options["allow_records"]:
-            raise ValueError(f"cannot broadcast records {in_function(options)}")
+            raise TypeError(f"cannot broadcast records{in_function(options)}")
 
         fields, length, istuple = UNSET, UNSET, UNSET
         nextparameters = []

@@ -78,7 +78,7 @@ def test_overloaded_reducers():
     assert ak.to_list(ak.sum(array, axis=1)) == [{"rho": 0, "phi": 0}]
 
     with pytest.raises(
-        TypeError, match=r"overloads for custom types: VectorArray2D, int"
+        TypeError, match=r"overloads for signature: VectorArray2D, <class 'int'>"
     ):
         ak.to_list(array + 1)
 
@@ -116,8 +116,16 @@ def test_overloaded_reducers():
         )
     )
 
-    with pytest.raises(TypeError, match=r"overloads for custom types: a, b"):
-        ak.to_list(ak.sum(array, axis=0))
+    # Check error message for unnamed record
+    with pytest.raises(
+        TypeError, match=r"overloads for unnamed record type: \{a: int64, b: \?int64\}"
+    ):
+        ak.sum(array, axis=0)
+
+    # Check error message for named record
+    named_array = ak.with_name(array, "custom-record")
+    with pytest.raises(TypeError, match=r"overloads for record named 'custom-record'"):
+        ak.sum(named_array, axis=0)
 
     def overload_argmax(array, mask):
         return ak.argmax(array["rho"], axis=-1, mask_identity=False, highlevel=False)
