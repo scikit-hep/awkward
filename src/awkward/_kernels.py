@@ -128,7 +128,7 @@ class CupyKernel(BaseKernel):
         return length, 1, 1
 
     def _cast(self, x, t):
-        if issubclass(t, ctypes._Pointer):
+        if t:
             # Do we have a NumPy-owned array?
             if self._cupy.is_own_array(x):
                 assert self._cupy.is_c_contiguous(x)
@@ -149,9 +149,9 @@ class CupyKernel(BaseKernel):
                 cupy.array(ak_cuda.NO_ERROR),
                 [],
             )
-        assert len(args) == len(self._impl.argtypes)
+        assert len(args) == len(self._impl.is_ptr)
 
-        args = [self._cast(x, t) for x, t in zip(args, self._impl.argtypes)]
+        args = [self._cast(x, t) for x, t in zip(args, self._impl.is_ptr)]
 
         # The first arg is the invocation index which raises itself by 8 in the kernel if there was no error before.
         # The second arg is the error_code.
