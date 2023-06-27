@@ -54,10 +54,12 @@ class ListType(Type):
             return None
 
         name = self._parameters.get("__array__")
-        if name in {"string", "bytestring"}:
-            return name
-
-        return None
+        if name == "string":
+            return "string"
+        elif name == "bytestring":
+            return "bytes"
+        else:
+            return None
 
     def _str(self, indent, compact, behavior):
         if self._typestr is not None:
