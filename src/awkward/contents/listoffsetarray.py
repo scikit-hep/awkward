@@ -300,7 +300,14 @@ class ListOffsetArray(Content):
         ):
             raise ak._errors.index_error(self, where)
         start, stop = self._offsets[where], self._offsets[where + 1]
-        return self._content._getitem_range(start, stop)
+        out = self._content._getitem_range(start, stop)
+        array_param = out.parameter("__array__")
+        if array_param == "byte":
+            return ak._util.tobytes(out.data)
+        elif array_param == "char":
+            return ak._util.tobytes(out.data).decode(errors="surrogateescape")
+        else:
+            return out
 
     def _getitem_range(self, start: SupportsIndex, stop: IndexType) -> Content:
         if not self._backend.nplike.known_data:

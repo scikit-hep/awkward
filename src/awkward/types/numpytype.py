@@ -126,40 +126,48 @@ class NumpyType(Type):
 
     _str_parameters_exclude = ("__categorical__", "__unit__")
 
+    def _get_typestr(self, behavior) -> str | None:
+        typestr = find_array_typestr(behavior, self._parameters, self._typestr)
+        if typestr is not None:
+            return typestr
+
+        if self._parameters is None:
+            return None
+
+        name = self._parameters.get("__array__")
+        if name in {"byte", "char"}:
+            return name
+
+        return None
+
     def _str(self, indent, compact, behavior):
         if self._typestr is not None:
             deprecate("typestr argument is deprecated", "2.4.0")
 
-        typestr = find_array_typestr(behavior, self._parameters, self._typestr)
+        typestr = self._get_typestr(behavior)
         if typestr is not None:
             out = [typestr]
 
         else:
-            name = self._parameters.get("__array__")
-            if name in {"byte", "char"}:
-                out = [name]
+            if self.parameter("__unit__") is not None:
+                numpy_unit = str(np.dtype("M8[" + self._parameters["__unit__"] + "]"))
+                bracket_index = numpy_unit.index("[")
+                units = "unit=" + json.dumps(numpy_unit[bracket_index + 1 : -1])
             else:
-                if self.parameter("__unit__") is not None:
-                    numpy_unit = str(
-                        np.dtype("M8[" + self._parameters["__unit__"] + "]")
-                    )
-                    bracket_index = numpy_unit.index("[")
-                    units = "unit=" + json.dumps(numpy_unit[bracket_index + 1 : -1])
-                else:
-                    units = None
+                units = None
 
-                params = self._str_parameters()
+            params = self._str_parameters()
 
-                if units is None and params is None:
-                    out = [self._primitive]
-                else:
-                    if units is not None and params is not None:
-                        units = units + ", "
-                    elif units is None:
-                        units = ""
-                    elif params is None:
-                        params = ""
-                    out = [self._primitive, "[", units, params, "]"]
+            if units is None and params is None:
+                out = [self._primitive]
+            else:
+                if units is not None and params is not None:
+                    units = units + ", "
+                elif units is None:
+                    units = ""
+                elif params is None:
+                    params = ""
+                out = [self._primitive, "[", units, params, "]"]
 
         return [self._str_categorical_begin(), *out, self._str_categorical_end()]
 

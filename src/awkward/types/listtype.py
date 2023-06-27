@@ -45,27 +45,37 @@ class ListType(Type):
     def content(self):
         return self._content
 
+    def _get_typestr(self, behavior) -> str | None:
+        typestr = find_array_typestr(behavior, self._parameters, self._typestr)
+        if typestr is not None:
+            return typestr
+
+        if self._parameters is None:
+            return None
+
+        name = self._parameters.get("__array__")
+        if name in {"string", "bytestring"}:
+            return name
+
+        return None
+
     def _str(self, indent, compact, behavior):
         if self._typestr is not None:
             deprecate("typestr argument is deprecated", "2.4.0")
 
-        typestr = find_array_typestr(behavior, self._parameters, self._typestr)
+        typestr = self._get_typestr(behavior)
         if typestr is not None:
             out = [typestr]
         else:
-            name = self._parameters.get("__array__")
-            if name in {"string", "bytestring"}:
-                out = [name]
+            params = self._str_parameters()
+            if params is None:
+                out = ["var * ", *self._content._str(indent, compact, behavior)]
             else:
-                params = self._str_parameters()
-                if params is None:
-                    out = ["var * ", *self._content._str(indent, compact, behavior)]
-                else:
-                    out = [
-                        "[var * ",
-                        *self._content._str(indent, compact, behavior),
-                        f", {params}]",
-                    ]
+                out = [
+                    "[var * ",
+                    *self._content._str(indent, compact, behavior),
+                    f", {params}]",
+                ]
 
         return [self._str_categorical_begin(), *out, self._str_categorical_end()]
 

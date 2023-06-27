@@ -297,7 +297,13 @@ class NumpyArray(Content):
         except IndexError as err:
             raise ak._errors.index_error(self, where, str(err)) from err
 
-        if hasattr(out, "shape") and len(out.shape) != 0:
+        # Character / byte arrays should be converted to Python types
+        name = self.parameter("__array__")
+        if name == "char":
+            return chr(out)
+        elif name == "byte":
+            return bytes(out)
+        elif hasattr(out, "shape") and len(out.shape) != 0:
             return NumpyArray(out, parameters=None, backend=self._backend)
         else:
             return out
