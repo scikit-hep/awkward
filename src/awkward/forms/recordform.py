@@ -41,7 +41,7 @@ class RecordForm(Form):
                 )
             )
 
-        self._fields = fields
+        self._fields = list(fields)
         self._contents = list(contents)
         self._init(parameters=parameters, form_key=form_key)
 
