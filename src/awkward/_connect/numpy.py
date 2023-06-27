@@ -234,7 +234,7 @@ def array_ufunc(ufunc, method, inputs, kwargs):
 
         # Support known string ufuncs
         if (
-            ufunc in (numpy.equal, numpy.not_equal, numpy.add)
+            ufunc in (numpy.equal, numpy.not_equal)
             and len(inputs) == 2
             and isinstance(inputs[0], ak.contents.Content)
             and isinstance(inputs[1], ak.contents.Content)
