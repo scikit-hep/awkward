@@ -7,7 +7,6 @@ import pytest
 
 import awkward as ak
 
-
 nb = pytest.importorskip("numba")
 nb_cuda = pytest.importorskip("numba.cuda")
 

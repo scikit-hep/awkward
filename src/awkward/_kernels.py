@@ -114,7 +114,7 @@ class CupyKernel(BaseKernel):
         # TODO should kernels strip nplike wrapper? Probably
         for array in args:
             if self._cupy.is_own_array(array):
-                max_length = max(max_length, len(array))
+                max_length = max(max_length, array.size)
         return max_length
 
     def calc_grid(self, length):

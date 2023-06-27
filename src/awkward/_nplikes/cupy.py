@@ -170,3 +170,9 @@ class Cupy(ArrayModuleNumpyLike):
             return True
         else:
             return x.flags["C_CONTIGUOUS"]  # type: ignore[attr-defined]
+
+    def broadcast_arrays(self, *arrays):
+        return [
+            self._module.array(x) if not isinstance(x, self._module.ndarray) else x
+            for x in super().broadcast_arrays(*arrays)
+        ]
