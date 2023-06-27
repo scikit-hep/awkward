@@ -674,9 +674,7 @@ class NumpyArray(Content):
 
     def _numbers_to_type(self, name, including_unknown):
         if (
-            self.parameter("__array__") == "string"
-            or self.parameter("__array__") == "bytestring"
-            or self.parameter("__array__") == "char"
+            self.parameter("__array__") == "char"
             or self.parameter("__array__") == "byte"
         ):
             return self
