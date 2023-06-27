@@ -135,25 +135,31 @@ class NumpyType(Type):
             out = [typestr]
 
         else:
-            if self.parameter("__unit__") is not None:
-                numpy_unit = str(np.dtype("M8[" + self._parameters["__unit__"] + "]"))
-                bracket_index = numpy_unit.index("[")
-                units = "unit=" + json.dumps(numpy_unit[bracket_index + 1 : -1])
+            name = self._parameters.get("__array__")
+            if name in {"byte", "char"}:
+                out = [name]
             else:
-                units = None
+                if self.parameter("__unit__") is not None:
+                    numpy_unit = str(
+                        np.dtype("M8[" + self._parameters["__unit__"] + "]")
+                    )
+                    bracket_index = numpy_unit.index("[")
+                    units = "unit=" + json.dumps(numpy_unit[bracket_index + 1 : -1])
+                else:
+                    units = None
 
-            params = self._str_parameters()
+                params = self._str_parameters()
 
-            if units is None and params is None:
-                out = [self._primitive]
-            else:
-                if units is not None and params is not None:
-                    units = units + ", "
-                elif units is None:
-                    units = ""
-                elif params is None:
-                    params = ""
-                out = [self._primitive, "[", units, params, "]"]
+                if units is None and params is None:
+                    out = [self._primitive]
+                else:
+                    if units is not None and params is not None:
+                        units = units + ", "
+                    elif units is None:
+                        units = ""
+                    elif params is None:
+                        params = ""
+                    out = [self._primitive, "[", units, params, "]"]
 
         return [self._str_categorical_begin(), *out, self._str_categorical_end()]
 

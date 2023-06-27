@@ -33,9 +33,9 @@ def post_process_layout(layout: ak.contents.Content):
     if isinstance(layout, ak.contents.NumpyArray):
         array_param = layout.parameter("__array__")
         if array_param == "byte":
-            return ak._util.tobytes(layout)
+            return ak._util.tobytes(layout.data)
         elif array_param == "char":
-            return ak._util.tobytes(layout).decode(errors="surrogateescape")
+            return ak._util.tobytes(layout.data).decode(errors="surrogateescape")
         else:
             return layout
     else:

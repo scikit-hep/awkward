@@ -53,15 +53,19 @@ class ListType(Type):
         if typestr is not None:
             out = [typestr]
         else:
-            params = self._str_parameters()
-            if params is None:
-                out = ["var * ", *self._content._str(indent, compact, behavior)]
+            name = self._parameters.get("__array__")
+            if name in {"string", "bytestring"}:
+                out = [name]
             else:
-                out = [
-                    "[var * ",
-                    *self._content._str(indent, compact, behavior),
-                    f", {params}]",
-                ]
+                params = self._str_parameters()
+                if params is None:
+                    out = ["var * ", *self._content._str(indent, compact, behavior)]
+                else:
+                    out = [
+                        "[var * ",
+                        *self._content._str(indent, compact, behavior),
+                        f", {params}]",
+                    ]
 
         return [self._str_categorical_begin(), *out, self._str_categorical_end()]
 

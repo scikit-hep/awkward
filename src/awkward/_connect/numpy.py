@@ -232,6 +232,51 @@ def array_ufunc(ufunc, method, inputs, kwargs):
                 "matrix multiplication (`@` or `np.matmul`) is not yet implemented for Awkward Arrays"
             )
 
+        # Support known string ufuncs
+        if (
+            ufunc in (numpy.equal, numpy.not_equal, numpy.add)
+            and len(inputs) == 2
+            and isinstance(inputs[0], ak.contents.Content)
+            and isinstance(inputs[1], ak.contents.Content)
+            and inputs[0].parameter("__array__") in ("string", "bytestring")
+            and inputs[1].parameter("__array__") == inputs[0].parameter("__array__")
+        ):
+            left, right = inputs
+            nplike = backend.nplike
+
+            left = ak.without_parameters(left, highlevel=False)
+            right = ak.without_parameters(right, highlevel=False)
+
+            # first condition: string lengths must be the same
+            counts1 = nplike.asarray(
+                ak._do.reduce(left, ak._reducers.Count(), axis=-1, mask=False)
+            )
+            counts2 = nplike.asarray(
+                ak._do.reduce(right, ak._reducers.Count(), axis=-1, mask=False)
+            )
+
+            out = counts1 == counts2
+
+            # only compare characters in strings that are possibly equal (same length)
+            possible = nplike.logical_and(out, counts1)
+            possible_counts = counts1[possible]
+
+            if len(possible_counts) > 0:
+                onepossible = left[possible]
+                twopossible = right[possible]
+                reduced = ak.operations.all(
+                    ak.Array(onepossible) == ak.Array(twopossible),
+                    axis=-1,
+                    highlevel=False,
+                )
+                # update same-length strings with a verdict about their characters
+                out[possible] = reduced.data
+
+            if ufunc is numpy.not_equal:
+                out = nplike.logical_not(out)
+
+            return (ak.contents.NumpyArray(out),)
+
         if all(
             isinstance(x, NumpyArray) or not isinstance(x, ak.contents.Content)
             for x in inputs
