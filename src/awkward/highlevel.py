@@ -31,12 +31,11 @@ _dir_pattern = re.compile(r"^[a-zA-Z_]\w*$")
 
 def post_process_layout(layout: ak.contents.Content):
     if isinstance(layout, ak.contents.NumpyArray):
-        array = layout._raw(numpy)
         array_param = layout.parameter("__array__")
         if array_param == "byte":
-            return ak._util.tobytes(array)
+            return ak._util.tobytes(layout)
         elif array_param == "char":
-            return ak._util.tobytes(array).decode(errors="surrogateescape")
+            return ak._util.tobytes(layout).decode(errors="surrogateescape")
         else:
             return layout
     else:
