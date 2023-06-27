@@ -22,21 +22,11 @@ class ByteBehavior(Array):
             version="2.4.0",
         )
 
-    def __bytes__(self):
-        tmp = self.layout.backend.nplike.asarray(self.layout)
-        if hasattr(tmp, "tobytes"):
-            return tmp.tobytes()
-        else:
-            return tmp.tostring()
-
     def __str__(self):
         return str(self.__bytes__())
 
     def __repr__(self):
         return repr(self.__bytes__())
-
-    def __iter__(self):
-        yield from self.__bytes__()
 
     def __eq__(self, other):
         if isinstance(other, (bytes, ByteBehavior)):
@@ -72,21 +62,11 @@ class CharBehavior(Array):
             version="2.4.0",
         )
 
-    def __bytes__(self):
-        tmp = self.layout.backend.nplike.asarray(self.layout)
-        if hasattr(tmp, "tobytes"):
-            return tmp.tobytes()
-        else:
-            return tmp.tostring()
-
     def __str__(self):
         return self.__bytes__().decode("utf-8", "surrogateescape")
 
     def __repr__(self):
         return repr(self.__bytes__().decode("utf-8", "surrogateescape"))
-
-    def __iter__(self):
-        yield from self.__str__()
 
     def __eq__(self, other):
         if isinstance(other, (str, CharBehavior)):

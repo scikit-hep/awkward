@@ -29,6 +29,20 @@ numpy = Numpy.instance()
 _dir_pattern = re.compile(r"^[a-zA-Z_]\w*$")
 
 
+def post_process_layout(layout: ak.contents.Content):
+    if isinstance(layout, ak.contents.NumpyArray):
+        array = layout._raw(numpy)
+        array_param = layout.parameter("__array__")
+        if array_param == "byte":
+            return ak._util.tobytes(array)
+        elif array_param == "char":
+            return ak._util.tobytes(array).decode(errors="surrogateescape")
+        else:
+            return layout
+    else:
+        return layout
+
+
 class Array(NDArrayOperatorsMixin, Iterable, Sized):
     """
     Args:
@@ -491,31 +505,14 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         See also #ak.to_list.
         """
         if isinstance(self._layout, ak.contents.NumpyArray):
-            array = self._layout._raw(numpy)
-            array_param = self._layout.parameter("__array__")
-            if array_param == "byte":
-                for x in ak._util.tobytes(array):
-                    yield x
-            elif array_param == "char":
-                for x in ak._util.tobytes(array).decode(errors="surrogateescape"):
-                    yield x
-            else:
-                for x in array:
-                    yield x
+            yield from post_process_layout(self._layout)
         else:
             for x in self._layout:
-                if isinstance(x, ak.contents.NumpyArray):
-                    array_param = x.parameter("__array__")
-                    if array_param == "byte":
-                        yield ak._util.tobytes(x._raw(numpy))
-                    elif array_param == "char":
-                        yield ak._util.tobytes(x._raw(numpy)).decode(
-                            errors="surrogateescape"
-                        )
-                    else:
-                        yield wrap_layout(x, self._behavior)
-                else:
-                    yield wrap_layout(x, self._behavior, allow_other=True)
+                yield post_process_layout(x)
+
+    def _getitem(self, where):
+        out = post_process_layout(self._layout[where])
+        return wrap_layout(out, self._behavior, allow_other=True)
 
     def __getitem__(self, where):
         """
@@ -947,19 +944,15 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         have the same dimension as the array being indexed.
         """
         with ak._errors.SlicingErrorContext(self, where):
-            out = self._layout[where]
-            if isinstance(out, ak.contents.NumpyArray):
-                array_param = out.parameter("__array__")
-                if array_param == "byte":
-                    return ak._util.tobytes(out._raw(numpy))
-                elif array_param == "char":
-                    return ak._util.tobytes(out._raw(numpy)).decode(
-                        errors="surrogateescape"
-                    )
-                else:
-                    return wrap_layout(out, self._behavior)
-            else:
-                return wrap_layout(out, self._behavior, allow_other=True)
+            return self._getitem(where)
+
+    def __bytes__(self) -> bytes:
+        if isinstance(self._layout, ak.contents.NumpyArray) and self._layout.parameter(
+            "__array__"
+        ) in {"byte", "char"}:
+            return ak._util.tobytes(self._layout.data)
+        else:
+            return bytes(iter(self))
 
     def __setitem__(self, where, what):
         """
@@ -1719,19 +1712,8 @@ class Record(NDArrayOperatorsMixin):
         return str(self.type)
 
     def _getitem(self, where):
-        out = self._layout[where]
-        if isinstance(out, ak.contents.NumpyArray):
-            array_param = out.parameter("__array__")
-            if array_param == "byte":
-                return ak._util.tobytes(out._raw(numpy))
-            elif array_param == "char":
-                return ak._util.tobytes(out._raw(numpy)).decode(
-                    errors="surrogateescape"
-                )
-            else:
-                return wrap_layout(out, self._behavior)
-        else:
-            return wrap_layout(out, self._behavior, allow_other=True)
+        out = post_process_layout(self._layout[where])
+        return wrap_layout(out, self._behavior, allow_other=True)
 
     def __getitem__(self, where):
         """
