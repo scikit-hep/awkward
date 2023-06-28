@@ -202,11 +202,11 @@ def _array_ufunc_signature(ufunc, inputs):
     signature = [ufunc]
     for x in inputs:
         if isinstance(x, ak.contents.Content):
-            record, array = x.parameter("__record__"), x.parameter("__array__")
-            if record is not None:
-                signature.append(record)
-            elif array is not None:
-                signature.append(array)
+            record_name, list_name = x.parameter("__record__"), x.parameter("__list__")
+            if record_name is not None:
+                signature.append(record_name)
+            elif list_name is not None:
+                signature.append(list_name)
             elif isinstance(x, NumpyArray):
                 signature.append(x.dtype.type)
             else:

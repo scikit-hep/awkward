@@ -4,6 +4,8 @@ from collections.abc import Collection
 
 from awkward._typing import JSONMapping, JSONSerializable
 
+NOMINAL_PARAMETERS = ("__list__", "__record__", "__categorical__")
+
 
 def type_parameters_equal(
     one: JSONMapping | None, two: JSONMapping | None, *, allow_missing: bool = False
@@ -14,19 +16,19 @@ def type_parameters_equal(
     elif one is None:
         # NB: __categorical__ is currently a type-only parameter, but
         # we check it here as types check this too.
-        for key in ("__array__", "__record__", "__categorical__"):
+        for key in NOMINAL_PARAMETERS:
             if two.get(key) is not None:
                 return allow_missing
         return True
 
     elif two is None:
-        for key in ("__array__", "__record__", "__categorical__"):
+        for key in NOMINAL_PARAMETERS:
             if one.get(key) is not None:
                 return allow_missing
         return True
 
     else:
-        for key in ("__array__", "__record__", "__categorical__"):
+        for key in NOMINAL_PARAMETERS:
             if one.get(key) != two.get(key):
                 return False
         return True
@@ -41,7 +43,7 @@ def parameters_are_equal(
         if only_array_record:
             # NB: __categorical__ is currently a type-only parameter, but
             # we check it here as types check this too.
-            for key in ("__array__", "__record__", "__categorical__"):
+            for key in NOMINAL_PARAMETERS:
                 if two.get(key) is not None:
                     return False
             return True
@@ -53,7 +55,7 @@ def parameters_are_equal(
 
     elif two is None:
         if only_array_record:
-            for key in ("__array__", "__record__", "__categorical__"):
+            for key in NOMINAL_PARAMETERS:
                 if one.get(key) is not None:
                     return False
             return True
