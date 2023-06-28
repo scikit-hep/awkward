@@ -512,11 +512,6 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         for item in self._layout:
             yield wrap_layout(prepare_layout(item), self._behavior, allow_other=True)
 
-    def _getitem(self, where):
-        return wrap_layout(
-            prepare_layout(self._layout[where]), self._behavior, allow_other=True
-        )
-
     def __getitem__(self, where):
         """
         Args:
@@ -947,7 +942,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         have the same dimension as the array being indexed.
         """
         with ak._errors.SlicingErrorContext(self, where):
-            return self._getitem(where)
+            return wrap_layout(
+                prepare_layout(self._layout[where]), self._behavior, allow_other=True
+            )
 
     def __bytes__(self) -> bytes:
         if isinstance(self._layout, ak.contents.NumpyArray) and self._layout.parameter(
@@ -1714,11 +1711,6 @@ class Record(NDArrayOperatorsMixin):
         """
         return str(self.type)
 
-    def _getitem(self, where):
-        return wrap_layout(
-            prepare_layout(self._layout[where]), self._behavior, allow_other=True
-        )
-
     def __getitem__(self, where):
         """
         Args:
@@ -1746,7 +1738,9 @@ class Record(NDArrayOperatorsMixin):
             2
         """
         with ak._errors.SlicingErrorContext(self, where):
-            return self._getitem(where)
+            return wrap_layout(
+                prepare_layout(self._layout[where]), self._behavior, allow_other=True
+            )
 
     def __setitem__(self, where, what):
         """
