@@ -268,17 +268,12 @@ def array_ufunc(ufunc, method, inputs, kwargs):
 
     def action(inputs, **ignore):
         signature = _array_ufunc_signature(ufunc, inputs)
-        custom = find_ufunc(behavior, signature)
         # Do we have a custom ufunc (an override of the given ufunc)?
+        custom = find_ufunc(behavior, signature)
         if custom is not None:
             return _array_ufunc_adjust(custom, inputs, kwargs, behavior)
 
-        if ufunc is numpy.matmul:
-            raise NotImplementedError(
-                "matrix multiplication (`@` or `np.matmul`) is not yet implemented for Awkward Arrays"
-            )
-
-        # Intercept string ufuncs
+        # Do we have only strings?
         if all(
             isinstance(x, ak.contents.Content)
             and x.parameter("__array__") in ("string", "bytestring")
@@ -287,6 +282,11 @@ def array_ufunc(ufunc, method, inputs, kwargs):
             out = _array_ufunc_string_likes(ufunc, inputs, kwargs, behavior)
             if out is not None:
                 return out
+
+        if ufunc is numpy.matmul:
+            raise NotImplementedError(
+                "matrix multiplication (`@` or `np.matmul`) is not yet implemented for Awkward Arrays"
+            )
 
         if all(
             isinstance(x, NumpyArray) or not isinstance(x, ak.contents.Content)
