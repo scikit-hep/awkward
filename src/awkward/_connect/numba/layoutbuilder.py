@@ -213,13 +213,8 @@ class Numpy(LayoutBuilder):
     def is_valid(self, error: str):
         return True
 
-    def snapshot(self) -> ArrayLike:
-        """
-        Converts the currently accumulated data into an #ak.Array.
-        """
-        return ak.Array(
-            ak.contents.NumpyArray(self._data.snapshot(), parameters=self._parameters)
-        )
+    def snapshot(self) -> ak.contents.Content:
+        return ak.contents.NumpyArray(self._data.snapshot(), parameters=self._parameters)
 
 
 class NumpyType(numba.types.Type):
