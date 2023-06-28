@@ -258,15 +258,15 @@ def _array_ufunc_categorical(ufunc, method: str, inputs, kwargs, behavior):
     else:
         nextinputs = []
         for x in inputs:
-            if isinstance(x, ak.highlevel.Array) and x.layout.is_indexed:
-                nextinputs.append(
-                    ak.highlevel.Array(x.layout.project(), behavior=behavior_of(x))
-                )
+            if isinstance(x, ak.contents.Content) and x.is_indexed:
+                nextinputs.append(wrap_layout(x.project(), behavior=behavior))
             else:
-                nextinputs.append(x)
+                nextinputs.append(wrap_layout(x, behavior=behavior, allow_other=True))
 
         out = getattr(ufunc, method)(*nextinputs, **kwargs)
-        return (out,)
+        if not isinstance(out, tuple):
+            out = (out,)
+        return tuple(ak.to_layout(x, allow_other=True) for x in out)
 
 
 def _array_ufunc_string_likes(ufunc, method: str, inputs, kwargs, behavior):
@@ -304,7 +304,7 @@ def _array_ufunc_string_likes(ufunc, method: str, inputs, kwargs, behavior):
             onepossible = left[possible]
             twopossible = right[possible]
             reduced = ak.operations.all(
-                ak.Array(onepossible) == ak.Array(twopossible),
+                wrap_layout(onepossible) == wrap_layout(twopossible),
                 axis=-1,
                 highlevel=False,
             )
