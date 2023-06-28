@@ -378,15 +378,6 @@ def Numpy_extend(builder, data):
     return extend
 
 
-@numba.extending.overload_method(NumpyType, "snapshot")
-def Numpy_snapshot(builder):
-    def snapshot(builder):
-        # FIXME: returns 'numpy.ndarray'
-        return builder.data.snapshot()
-
-    return snapshot
-
-
 ########## Empty ############################################################
 
 
