@@ -133,6 +133,12 @@ class Content:
                         type(self).__name__, parameters["__array__"]
                     )
                 )
+        elif not (self.is_list or parameters.get("__list__") is None):
+            raise TypeError(
+                '{} is not allowed to have parameters["__list__"] = "{}"'.format(
+                    type(self).__name__, parameters["__list__"]
+                )
+            )
 
         if not isinstance(backend, Backend):
             raise TypeError(
