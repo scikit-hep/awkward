@@ -201,10 +201,6 @@ class Numpy(LayoutBuilder):
     def dtype(self):
         return self._data.dtype
 
-    @property
-    def parameters(self):
-        return self._parameters
-
     def append(self, x):
         self._data.append(x)
 
