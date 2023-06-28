@@ -217,29 +217,21 @@ class Numpy(LayoutBuilder):
         return ak.contents.NumpyArray(self._data.snapshot(), parameters=self._parameters)
 
 
-class NumpyType(numba.types.Type):
+class NumpyType(LayoutBuilderType):
     def __init__(self, dtype, parameters):
         super().__init__(
-            name=f"ak.numba.lb.Numpy({dtype}, parameters={parameters.literal_value if isinstance(parameters, numba.types.Literal) else None})"
+            name=f"ak.lb.Numpy({dtype!r}, parameters={parameters!r})"
         )
         self._dtype = dtype
-        self._parameters = parameters
+        self._init(parameters)
 
     @property
     def dtype(self):
         return self._dtype
 
     @property
-    def parameters(self):
-        return numba.types.StringLiteral(self._parameters)
-
-    @property
     def data(self):
         return ak.numba.GrowableBufferType(self._dtype)
-
-    @property
-    def length(self):
-        return numba.types.float64
 
 
 @numba.extending.register_model(NumpyType)
