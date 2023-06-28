@@ -134,8 +134,7 @@ class Record:
         self._array._touch_shape(recursive)
 
     def __getitem__(self, where):
-        with ak._errors.SlicingErrorContext(self, where):
-            return self._getitem(where)
+        return self._getitem(where)
 
     def _getitem(self, where):
         if is_integer(where):
