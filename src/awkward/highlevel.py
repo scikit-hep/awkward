@@ -1,4 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+from __future__ import annotations
+
 __all__ = ("Array", "ArrayBuilder", "Record")
 
 import copy
@@ -22,6 +24,7 @@ from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._operators import NDArrayOperatorsMixin
 from awkward._regularize import is_non_string_like_iterable
+from awkward._typing import TypeVar
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
@@ -29,7 +32,10 @@ numpy = Numpy.instance()
 _dir_pattern = re.compile(r"^[a-zA-Z_]\w*$")
 
 
-def prepare_layout(layout: ak.contents.Content):
+T = TypeVar("T", bound=ak.contents.Content)
+
+
+def prepare_layout(layout: T) -> T | str | bytes:
     if isinstance(layout, ak.contents.NumpyArray):
         array_param = layout.parameter("__array__")
         if array_param == "byte":
