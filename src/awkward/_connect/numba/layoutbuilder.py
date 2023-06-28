@@ -74,8 +74,11 @@ class LayoutBuilderType(numba.types.Type):
     def _init(self, parameters):
         self._parameters = parameters
     @property
-    def parameters(self):
-        return numba.types.StringLiteral(self._parameters)
+    def parameter(self, name):
+        if name in self._parameters:
+            return numba.types.StringLiteral(self._parameters[name])
+        else:
+            raise TypeError(f"LayoutBuilder.parameters does not have a {name!r}")
 
     @property
     def length(self):
