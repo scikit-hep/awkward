@@ -61,8 +61,11 @@ class Type:
         out = []
         if self._parameters is not None:
             for k, v in self._parameters.items():
-                if k not in self._str_parameters_exclude:
-                    out.append(json.dumps(k) + ": " + json.dumps(v))
+                if v is None:
+                    continue
+                if k in self._str_parameters_exclude:
+                    continue
+                out.append(json.dumps(k) + ": " + json.dumps(v))
 
         if len(out) == 0:
             return None
