@@ -17,6 +17,7 @@ from awkward._behavior import (
     find_ufunc,
     find_ufunc_generic,
 )
+from awkward._categorical import as_hashable
 from awkward._layout import wrap_layout
 from awkward._nplikes import to_nplike
 from awkward._regularize import is_non_string_like_iterable
@@ -152,6 +153,9 @@ def _array_ufunc_custom_cast(inputs, behavior, backend):
         cast_fcn = find_custom_cast(x, behavior)
         if cast_fcn is not None:
             x = cast_fcn(x)
+        # String conversion
+        elif isinstance(x, (str, bytes)):
+            x = ak.to_layout([x])
         maybe_layout = ak.operations.to_layout(x, allow_record=True, allow_other=True)
         if isinstance(maybe_layout, (ak.contents.Content, ak.record.Record)):
             maybe_layout = maybe_layout.to_backend(backend)
@@ -211,7 +215,63 @@ def _array_ufunc_signature(ufunc, inputs):
     return tuple(signature)
 
 
-def _array_ufunc_string_likes(ufunc, inputs, kwargs, behavior):
+def _array_ufunc_categorical(ufunc, method: str, inputs, kwargs, behavior):
+    if (
+        ufunc is numpy.equal
+        and len(inputs) == 2
+        and isinstance(inputs[0], ak.contents.Content)
+        and inputs[0].is_indexed
+        and inputs[0].parameter("__array__") == "categorical"
+        and isinstance(inputs[1], ak.contents.Content)
+        and inputs[1].is_indexed
+        and inputs[1].parameter("__array__") == "categorical"
+    ):
+        assert method == "__call__"
+        one, two = inputs
+
+        one_index = numpy.asarray(one.index)
+        two_index = numpy.asarray(two.index)
+        one_content = wrap_layout(one.content, behavior)
+        two_content = wrap_layout(two.content, behavior)
+
+        if len(one_content) == len(two_content) and ak.operations.all(
+            one_content == two_content, axis=None
+        ):
+            one_mapped = one_index
+
+        else:
+            one_list = ak.operations.to_list(one_content)
+            two_list = ak.operations.to_list(two_content)
+            one_hashable = [as_hashable(x) for x in one_list]
+            two_hashable = [as_hashable(x) for x in two_list]
+            two_lookup = {x: i for i, x in enumerate(two_hashable)}
+
+            one_to_two = numpy.empty(len(one_hashable) + 1, dtype=numpy.int64)
+            for i, x in enumerate(one_hashable):
+                one_to_two[i] = two_lookup.get(x, len(two_hashable))
+            one_to_two[-1] = -1
+
+            one_mapped = one_to_two[one_index]
+
+        out = one_mapped == two_index
+        return (ak.contents.NumpyArray(out),)
+    else:
+        nextinputs = []
+        for x in inputs:
+            if isinstance(x, ak.highlevel.Array) and x.layout.is_indexed:
+                nextinputs.append(
+                    ak.highlevel.Array(x.layout.project(), behavior=behavior_of(x))
+                )
+            else:
+                nextinputs.append(x)
+
+        out = getattr(ufunc, method)(*nextinputs, **kwargs)
+        return (out,)
+
+
+def _array_ufunc_string_likes(ufunc, method: str, inputs, kwargs, behavior):
+    assert method == "__call__"
+
     if (
         ufunc in (numpy.equal, numpy.not_equal)
         and len(inputs) == 2
@@ -257,7 +317,7 @@ def _array_ufunc_string_likes(ufunc, inputs, kwargs, behavior):
         return (ak.contents.NumpyArray(out),)
 
 
-def array_ufunc(ufunc, method, inputs, kwargs):
+def array_ufunc(ufunc, method: str, inputs, kwargs):
     if method != "__call__" or len(inputs) == 0 or "out" in kwargs:
         return NotImplemented
 
@@ -267,19 +327,28 @@ def array_ufunc(ufunc, method, inputs, kwargs):
     inputs = _array_ufunc_custom_cast(inputs, behavior, backend)
 
     def action(inputs, **ignore):
+        contents = [x for x in inputs if isinstance(x, ak.contents.Content)]
+
         signature = _array_ufunc_signature(ufunc, inputs)
         # Do we have a custom ufunc (an override of the given ufunc)?
         custom = find_ufunc(behavior, signature)
         if custom is not None:
             return _array_ufunc_adjust(custom, inputs, kwargs, behavior)
 
-        # Do we have only strings?
-        if all(
-            isinstance(x, ak.contents.Content)
-            and x.parameter("__array__") in ("string", "bytestring")
-            for x in inputs
+        # Do we have any strings?
+        if any(
+            x.is_list and x.parameter("__array__") in ("string", "bytestring")
+            for x in contents
         ):
-            out = _array_ufunc_string_likes(ufunc, inputs, kwargs, behavior)
+            out = _array_ufunc_string_likes(ufunc, method, inputs, kwargs, behavior)
+            if out is not None:
+                return out
+
+        # Do we have any categoricals?
+        if any(
+            x.is_indexed and x.parameter("__array__") == "categorical" for x in contents
+        ):
+            out = _array_ufunc_categorical(ufunc, method, inputs, kwargs, behavior)
             if out is not None:
                 return out
 
@@ -316,21 +385,19 @@ def array_ufunc(ufunc, method, inputs, kwargs):
             return (NumpyArray(result, backend=backend, parameters=parameters),)
 
         # Do we have a custom generic ufunc override (a function that accepts _all_ ufuncs)?
-        for x in inputs:
-            if isinstance(x, ak.contents.Content):
-                apply_ufunc = find_ufunc_generic(ufunc, x, behavior)
-                if apply_ufunc is not None:
-                    out = _array_ufunc_adjust_apply(
-                        apply_ufunc, ufunc, method, inputs, kwargs, behavior
-                    )
-                    if out is not None:
-                        return out
+        for x in contents:
+            apply_ufunc = find_ufunc_generic(ufunc, x, behavior)
+            if apply_ufunc is not None:
+                out = _array_ufunc_adjust_apply(
+                    apply_ufunc, ufunc, method, inputs, kwargs, behavior
+                )
+                if out is not None:
+                    return out
 
         if all(
             x.parameter("__array__") is not None
             or x.parameter("__record__") is not None
-            for x in inputs
-            if isinstance(x, ak.contents.Content)
+            for x in contents
         ):
             error_message = []
             for x in inputs:

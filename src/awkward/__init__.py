@@ -45,8 +45,6 @@ import awkward.builder
 import awkward.forth
 
 behavior: dict = {}
-awkward.behaviors.string.register(behavior)
-awkward.behaviors.categorical.register(behavior)
 
 # operations
 from awkward.operations import *

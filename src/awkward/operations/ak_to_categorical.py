@@ -2,6 +2,7 @@
 __all__ = ("to_categorical",)
 import awkward as ak
 from awkward._behavior import behavior_of
+from awkward._categorical import as_hashable
 from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpy import Numpy
@@ -107,7 +108,7 @@ def _impl(array, highlevel, behavior):
                 cls = ak.contents.IndexedArray
 
             content_list = ak.operations.to_list(content)
-            hashable = [ak.behaviors.categorical._as_hashable(x) for x in content_list]
+            hashable = [as_hashable(x) for x in content_list]
 
             lookup = {}
             is_first = numpy.empty(len(hashable), dtype=np.bool_)
