@@ -486,7 +486,7 @@ def Empty_snapshot(builder):
 @final
 class ListOffset(LayoutBuilder):
     def __init__(self, dtype, content, *, parameters=None, initial=1024, resize=8.0):
-        self._offsets = GrowableBuffer(dtype=dtype, initial=initial, resize=resize)
+        self._offsets = GrowableBuffer(dtype=np.dtype(dtype), initial=initial, resize=resize)
         self._offsets.append(0)
         self._content = content
         self._parameters = parameters
