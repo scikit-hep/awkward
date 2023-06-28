@@ -504,7 +504,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         See also #ak.to_list.
         """
         for item in self._layout:
-            yield prepare_layout(item)
+            yield wrap_layout(prepare_layout(item), self._behavior, allow_other=True)
 
     def _getitem(self, where):
         return wrap_layout(
