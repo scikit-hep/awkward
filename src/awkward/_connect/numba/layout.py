@@ -8,6 +8,92 @@ import awkward as ak
 from awkward._behavior import overlay_behavior
 
 
+def string_numba_typer(viewtype):
+    import numba
+
+    if viewtype.type.parameters["__array__"] == "string":
+        return numba.types.string
+    else:
+        return numba.cpython.charseq.bytes_type
+
+
+def string_numba_lower(
+    context, builder, rettype, viewtype, viewval, viewproxy, attype, atval
+):
+    import llvmlite.ir
+    import numba
+
+    whichpos = ak._connect.numba.layout.posat(
+        context, builder, viewproxy.pos, viewtype.type.CONTENT
+    )
+    nextpos = ak._connect.numba.layout.getat(
+        context, builder, viewproxy.arrayptrs, whichpos
+    )
+
+    whichnextpos = ak._connect.numba.layout.posat(
+        context, builder, nextpos, viewtype.type.contenttype.ARRAY
+    )
+
+    startspos = ak._connect.numba.layout.posat(
+        context, builder, viewproxy.pos, viewtype.type.STARTS
+    )
+    startsptr = ak._connect.numba.layout.getat(
+        context, builder, viewproxy.arrayptrs, startspos
+    )
+    startsarraypos = builder.add(viewproxy.start, atval)
+    start = ak._connect.numba.layout.getat(
+        context, builder, startsptr, startsarraypos, viewtype.type.indextype.dtype
+    )
+
+    stopspos = ak._connect.numba.layout.posat(
+        context, builder, viewproxy.pos, viewtype.type.STOPS
+    )
+    stopsptr = ak._connect.numba.layout.getat(
+        context, builder, viewproxy.arrayptrs, stopspos
+    )
+    stopsarraypos = builder.add(viewproxy.start, atval)
+    stop = ak._connect.numba.layout.getat(
+        context, builder, stopsptr, stopsarraypos, viewtype.type.indextype.dtype
+    )
+
+    baseptr = ak._connect.numba.layout.getat(
+        context, builder, viewproxy.arrayptrs, whichnextpos
+    )
+    rawptr = builder.add(
+        baseptr,
+        ak._connect.numba.layout.castint(
+            context, builder, viewtype.type.indextype.dtype, numba.intp, start
+        ),
+    )
+    rawptr_cast = builder.inttoptr(
+        rawptr,
+        llvmlite.ir.PointerType(llvmlite.ir.IntType(numba.intp.bitwidth // 8)),
+    )
+    strsize = builder.sub(stop, start)
+    strsize_cast = ak._connect.numba.layout.castint(
+        context, builder, viewtype.type.indextype.dtype, numba.intp, strsize
+    )
+
+    pyapi = context.get_python_api(builder)
+    gil = pyapi.gil_ensure()
+
+    strptr = builder.bitcast(rawptr_cast, pyapi.cstring)
+
+    if viewtype.type.parameters["__array__"] == "string":
+        kind = context.get_constant(numba.types.int32, pyapi.py_unicode_1byte_kind)
+        pystr = pyapi.string_from_kind_and_data(kind, strptr, strsize_cast)
+    else:
+        pystr = pyapi.bytes_from_string_and_size(strptr, strsize_cast)
+
+    out = pyapi.to_native_value(rettype, pystr).value
+
+    pyapi.decref(pystr)
+
+    pyapi.gil_release(gil)
+
+    return out
+
+
 def find_numba_array_typer(layouttype, behavior):
     behavior = overlay_behavior(behavior)
     arr = layouttype.parameters.get("__array__")
@@ -102,6 +188,14 @@ class ContentType(numba.types.Type):
 
     def getitem_at_check(self, viewtype):
         typer = find_numba_array_typer(viewtype.type, viewtype.behavior)
+
+        # Allow strings to override typer
+        if typer is None and viewtype.type.parameters.get("__array__") in {
+            "string",
+            "bytestring",
+        }:
+            typer = string_numba_typer
+
         if typer is None:
             return self.getitem_at(viewtype)
         else:
@@ -132,14 +226,15 @@ class ContentType(numba.types.Type):
         checkbounds,
     ):
         lower = find_numba_array_lower(viewtype.type, viewtype.behavior)
-        if lower is not None:
-            atval = regularize_atval(
-                context, builder, viewproxy, attype, atval, wrapneg, checkbounds
-            )
-            return lower(
-                context, builder, rettype, viewtype, viewval, viewproxy, attype, atval
-            )
-        else:
+
+        # Allow strings to override lower
+        if lower is None and viewtype.type.parameters.get("__array__") in {
+            "string",
+            "bytestring",
+        }:
+            lower = string_numba_lower
+
+        if lower is None:
             return self.lower_getitem_at(
                 context,
                 builder,
@@ -151,6 +246,13 @@ class ContentType(numba.types.Type):
                 atval,
                 wrapneg,
                 checkbounds,
+            )
+        else:
+            atval = regularize_atval(
+                context, builder, viewproxy, attype, atval, wrapneg, checkbounds
+            )
+            return lower(
+                context, builder, rettype, viewtype, viewval, viewproxy, attype, atval
             )
 
     def lower_getitem_range(
