@@ -73,6 +73,7 @@ def to_numbatype(builder):
 class LayoutBuilderType(numba.types.Type):
     def _init(self, parameters):
         self._parameters = parameters
+
     @property
     def parameter(self, name):
         if name in self._parameters:
