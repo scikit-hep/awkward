@@ -1117,7 +1117,6 @@ def IndexedOption_extend_invalid(builder, size):
 class ByteMasked(LayoutBuilder):
     def __init__(
         self,
-        dtype,  # mask must be "bool"
         content,
         *,
         valid_when=True,
@@ -1125,7 +1124,7 @@ class ByteMasked(LayoutBuilder):
         initial=1024,
         resize=8.0,
     ):
-        self._mask = GrowableBuffer(dtype=dtype, initial=initial, resize=resize)
+        self._mask = GrowableBuffer(dtype=np.dtype(np.bool_), initial=initial, resize=resize)
         self._content = content
         self._valid_when = valid_when
         self._parameters = parameters
