@@ -71,9 +71,8 @@ def to_numbatype(builder):
 
 
 class LayoutBuilderType(numba.types.Type):
-    def __init__(self, parameters):
-        super().__init__(name="ak.numba.lb.LayoutBuilder()")
-
+    def _init(self, parameters):
+        self._parameters = parameters
     @property
     def parameters(self):
         return numba.types.StringLiteral(self._parameters)
