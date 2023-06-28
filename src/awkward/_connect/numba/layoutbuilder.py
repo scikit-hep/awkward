@@ -194,12 +194,8 @@ class Numpy(LayoutBuilder):
             numba.from_dtype(self.dtype), numba.types.StringLiteral(self._parameters)
         )
 
-    @property
-    def _length(self):
-        return len(self._data)
-
     def __len__(self):
-        return self._length
+        return len(self._data)
 
     @property
     def dtype(self):
