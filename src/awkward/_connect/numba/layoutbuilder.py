@@ -214,7 +214,9 @@ class Numpy(LayoutBuilder):
         return True
 
     def snapshot(self) -> ak.contents.Content:
-        return ak.contents.NumpyArray(self._data.snapshot(), parameters=self._parameters)
+        return ak.contents.NumpyArray(
+            self._data.snapshot(), parameters=self._parameters
+        )
 
 
 class NumpyType(LayoutBuilderType):
