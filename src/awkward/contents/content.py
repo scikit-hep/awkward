@@ -101,8 +101,10 @@ class Content:
                     type(self).__name__, repr(parameters)
                 )
             )
-        else:
-            if not self.is_list and parameters.get("__array__") in (
+        # Validate built-in `__array__`
+        elif parameters.get("__array__") is not None:
+            array_name = parameters["__array__"]
+            if not self.is_list and array_name in (
                 "string",
                 "bytestring",
             ):
@@ -119,13 +121,13 @@ class Content:
                         type(self).__name__, parameters["__array__"]
                     )
                 )
-            if not self.is_indexed and parameters.get("__array__") == "categorical":
+            if not self.is_indexed and array_name == "categorical":
                 raise TypeError(
                     '{} is not allowed to have parameters["__array__"] = "{}"'.format(
                         type(self).__name__, parameters["__array__"]
                     )
                 )
-            if not self.is_record and parameters.get("__array__") == "sorted_map":
+            if not self.is_record and array_name == "sorted_map":
                 raise TypeError(
                     '{} is not allowed to have parameters["__array__"] = "{}"'.format(
                         type(self).__name__, parameters["__array__"]
