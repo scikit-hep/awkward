@@ -65,7 +65,7 @@ def to_numbatype(builder):
     elif isinstance(builder, Union):
         return Union.numbatype(builder)
     elif isinstance(builder, tuple):
-        return numba.types.Tuple([to_numbatype(it) for it in builder])
+        return Tuple.numbatype(builder)
     else:
         return builder
 
