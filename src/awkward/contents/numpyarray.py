@@ -1290,52 +1290,51 @@ class NumpyArray(Content):
         elif self.parameter("__array__") == "char":
             return ak._util.tobytes(self._data).decode(errors="surrogateescape")
 
-        else:
-            out = self._to_list_custom(behavior, json_conversions)
-            if out is not None:
-                return out
-
-            if json_conversions is not None:
-                complex_real_string = json_conversions["complex_real_string"]
-                complex_imag_string = json_conversions["complex_imag_string"]
-                if complex_real_string is not None:
-                    if issubclass(self.dtype.type, np.complexfloating):
-                        return ak.contents.RecordArray(
-                            [
-                                ak.contents.NumpyArray(
-                                    self._data.real, backend=self._backend
-                                ),
-                                ak.contents.NumpyArray(
-                                    self._data.imag, backend=self._backend
-                                ),
-                            ],
-                            [complex_real_string, complex_imag_string],
-                            self.length,
-                            parameters=self._parameters,
-                            backend=self._backend,
-                        )._to_list(behavior, json_conversions)
-
-            out = self._data.tolist()
-
-            if json_conversions is not None:
-                nan_string = json_conversions["nan_string"]
-                if nan_string is not None:
-                    for i in self._backend.nplike.nonzero(
-                        self._backend.nplike.isnan(self._data)
-                    )[0]:
-                        out[i] = nan_string
-
-                posinf_string = json_conversions["posinf_string"]
-                if posinf_string is not None:
-                    for i in self._backend.nplike.nonzero(self._data == np.inf)[0]:
-                        out[i] = posinf_string
-
-                neginf_string = json_conversions["neginf_string"]
-                if neginf_string is not None:
-                    for i in self._backend.nplike.nonzero(self._data == -np.inf)[0]:
-                        out[i] = neginf_string
-
+        out = self._to_list_custom(behavior, json_conversions)
+        if out is not None:
             return out
+
+        if json_conversions is not None:
+            complex_real_string = json_conversions["complex_real_string"]
+            complex_imag_string = json_conversions["complex_imag_string"]
+            if complex_real_string is not None:
+                if issubclass(self.dtype.type, np.complexfloating):
+                    return ak.contents.RecordArray(
+                        [
+                            ak.contents.NumpyArray(
+                                self._data.real, backend=self._backend
+                            ),
+                            ak.contents.NumpyArray(
+                                self._data.imag, backend=self._backend
+                            ),
+                        ],
+                        [complex_real_string, complex_imag_string],
+                        self.length,
+                        parameters=self._parameters,
+                        backend=self._backend,
+                    )._to_list(behavior, json_conversions)
+
+        out = self._data.tolist()
+
+        if json_conversions is not None:
+            nan_string = json_conversions["nan_string"]
+            if nan_string is not None:
+                for i in self._backend.nplike.nonzero(
+                    self._backend.nplike.isnan(self._data)
+                )[0]:
+                    out[i] = nan_string
+
+            posinf_string = json_conversions["posinf_string"]
+            if posinf_string is not None:
+                for i in self._backend.nplike.nonzero(self._data == np.inf)[0]:
+                    out[i] = posinf_string
+
+            neginf_string = json_conversions["neginf_string"]
+            if neginf_string is not None:
+                for i in self._backend.nplike.nonzero(self._data == -np.inf)[0]:
+                    out[i] = neginf_string
+
+        return out
 
     def _to_backend(self, backend: Backend) -> Self:
         return NumpyArray(

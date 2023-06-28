@@ -84,6 +84,37 @@ def test_bytearray():
     assert ak.operations.to_json(array, convert_bytes=bytes.decode) == '"hellothere"'
 
 
+def test_chararray():
+    array = ak.contents.NumpyArray(
+        np.frombuffer(b"hellothere", "u1"), parameters={"__array__": "char"}
+    )
+    assert ak.operations.to_json(array) == '"hellothere"'
+
+
+def test_string_array():
+    array = ak.contents.ListOffsetArray(
+        ak.index.Index64([0, 5, 10]),
+        ak.contents.NumpyArray(
+            np.frombuffer(b"hellothere", "u1"), parameters={"__array__": "char"}
+        ),
+        parameters={"__array__": "string"},
+    )
+    assert ak.operations.to_json(array) == '["hello","there"]'
+
+
+def test_bytestring_array():
+    array = ak.contents.ListOffsetArray(
+        ak.index.Index64([0, 5, 10]),
+        ak.contents.NumpyArray(
+            np.frombuffer(b"hellothere", "u1"), parameters={"__array__": "byte"}
+        ),
+        parameters={"__array__": "bytestring"},
+    )
+    assert (
+        ak.operations.to_json(array, convert_bytes=bytes.decode) == '["hello","there"]'
+    )
+
+
 def test_complex():
     content = ak.contents.NumpyArray(
         np.array([(1.1 + 0.1j), 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])

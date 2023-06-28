@@ -1,12 +1,13 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("to_list",)
-from collections.abc import Iterable, Mapping
+from collections.abc import Mapping
 
 from awkward_cpp.lib import _ext
 
 import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._regularize import is_non_string_like_iterable
 
 np = NumpyMetadata.instance()
 
@@ -77,7 +78,7 @@ def _impl(array):
     elif isinstance(array, Mapping):
         return {k: _impl(v) for k, v in array.items()}
 
-    elif isinstance(array, Iterable):
+    elif is_non_string_like_iterable(array):
         return [_impl(x) for x in array]
 
     else:

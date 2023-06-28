@@ -66,11 +66,27 @@ class RegularType(Type):
     def size(self):
         return self._size
 
+    def _get_typestr(self, behavior) -> str | None:
+        typestr = find_array_typestr(behavior, self._parameters, self._typestr)
+        if typestr is not None:
+            return typestr
+
+        if self._parameters is None:
+            return None
+
+        name = self._parameters.get("__array__")
+        if name == "string":
+            return "string"
+        elif name == "bytestring":
+            return "bytes"
+        else:
+            return None
+
     def _str(self, indent, compact, behavior):
         if self._typestr is not None:
             deprecate("typestr argument is deprecated", "2.4.0")
 
-        typestr = find_array_typestr(behavior, self._parameters, self._typestr)
+        typestr = self._get_typestr(behavior)
         if typestr is not None:
             out = [f"{typestr}[{self._size}]"]
 

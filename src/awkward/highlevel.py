@@ -1,4 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+from __future__ import annotations
+
 __all__ = ("Array", "ArrayBuilder", "Record")
 
 import copy
@@ -22,11 +24,28 @@ from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._operators import NDArrayOperatorsMixin
 from awkward._regularize import is_non_string_like_iterable
+from awkward._typing import TypeVar
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
 
 _dir_pattern = re.compile(r"^[a-zA-Z_]\w*$")
+
+
+T = TypeVar("T", bound=ak.contents.Content)
+
+
+def prepare_layout(layout: T) -> T | str | bytes:
+    if isinstance(layout, ak.contents.NumpyArray):
+        array_param = layout.parameter("__array__")
+        if array_param == "byte":
+            return ak._util.tobytes(layout.data)
+        elif array_param == "char":
+            return ak._util.tobytes(layout.data).decode(errors="surrogateescape")
+        else:
+            return layout
+    else:
+        return layout
 
 
 class Array(NDArrayOperatorsMixin, Iterable, Sized):
@@ -490,32 +509,8 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         See also #ak.to_list.
         """
-        if isinstance(self._layout, ak.contents.NumpyArray):
-            array = self._layout._raw(numpy)
-            array_param = self._layout.parameter("__array__")
-            if array_param == "byte":
-                for x in ak._util.tobytes(array):
-                    yield x
-            elif array_param == "char":
-                for x in ak._util.tobytes(array).decode(errors="surrogateescape"):
-                    yield x
-            else:
-                for x in array:
-                    yield x
-        else:
-            for x in self._layout:
-                if isinstance(x, ak.contents.NumpyArray):
-                    array_param = x.parameter("__array__")
-                    if array_param == "byte":
-                        yield ak._util.tobytes(x._raw(numpy))
-                    elif array_param == "char":
-                        yield ak._util.tobytes(x._raw(numpy)).decode(
-                            errors="surrogateescape"
-                        )
-                    else:
-                        yield wrap_layout(x, self._behavior)
-                else:
-                    yield wrap_layout(x, self._behavior, allow_other=True)
+        for item in self._layout:
+            yield wrap_layout(prepare_layout(item), self._behavior, allow_other=True)
 
     def __getitem__(self, where):
         """
@@ -947,19 +942,17 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         have the same dimension as the array being indexed.
         """
         with ak._errors.SlicingErrorContext(self, where):
-            out = self._layout[where]
-            if isinstance(out, ak.contents.NumpyArray):
-                array_param = out.parameter("__array__")
-                if array_param == "byte":
-                    return ak._util.tobytes(out._raw(numpy))
-                elif array_param == "char":
-                    return ak._util.tobytes(out._raw(numpy)).decode(
-                        errors="surrogateescape"
-                    )
-                else:
-                    return wrap_layout(out, self._behavior)
-            else:
-                return wrap_layout(out, self._behavior, allow_other=True)
+            return wrap_layout(
+                prepare_layout(self._layout[where]), self._behavior, allow_other=True
+            )
+
+    def __bytes__(self) -> bytes:
+        if isinstance(self._layout, ak.contents.NumpyArray) and self._layout.parameter(
+            "__array__"
+        ) in {"byte", "char"}:
+            return ak._util.tobytes(self._layout.data)
+        else:
+            return bytes(iter(self))
 
     def __setitem__(self, where, what):
         """
@@ -1745,19 +1738,9 @@ class Record(NDArrayOperatorsMixin):
             2
         """
         with ak._errors.SlicingErrorContext(self, where):
-            out = self._layout[where]
-            if isinstance(out, ak.contents.NumpyArray):
-                array_param = out.parameter("__array__")
-                if array_param == "byte":
-                    return ak._util.tobytes(out._raw(numpy))
-                elif array_param == "char":
-                    return ak._util.tobytes(out._raw(numpy)).decode(
-                        errors="surrogateescape"
-                    )
-                else:
-                    return wrap_layout(out, self._behavior)
-            else:
-                return wrap_layout(out, self._behavior, allow_other=True)
+            return wrap_layout(
+                prepare_layout(self._layout[where]), self._behavior, allow_other=True
+            )
 
     def __setitem__(self, where, what):
         """
