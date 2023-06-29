@@ -139,6 +139,12 @@ class Content:
                     type(self).__name__, parameters["__list__"]
                 )
             )
+        elif not (self.is_record or parameters.get("__record__") is None):
+            raise TypeError(
+                '{} is not allowed to have parameters["__record__"] = "{}"'.format(
+                    type(self).__name__, parameters["__record__"]
+                )
+            )
 
         if not isinstance(backend, Backend):
             raise TypeError(
