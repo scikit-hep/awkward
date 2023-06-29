@@ -8,7 +8,9 @@ import pytest
 import awkward as ak
 
 
-def assert_overrides_typestr(type_, typestr: str = "override", expected: Optional[str] = None):
+def assert_overrides_typestr(
+    type_, typestr: str = "override", expected: Optional[str] = None
+):
     # Assume typestr is expected result
     if expected is None:
         expected = typestr
