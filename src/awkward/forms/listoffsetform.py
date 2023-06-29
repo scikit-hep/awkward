@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import awkward as ak
 from awkward._parameters import type_parameters_equal
-from awkward._typing import JSONMapping, final
+from awkward._typing import JSONMapping, JSONSerializable, final
 from awkward._util import UNSET
 from awkward.forms.form import Form
 
@@ -90,11 +90,13 @@ class ListOffsetForm(Form):
         else:
             return False
 
-    def purelist_parameter(self, key):
-        if self._parameters is None or key not in self._parameters:
-            return self._content.purelist_parameter(key)
-        else:
-            return self._parameters[key]
+    def purelist_parameters(self, *keys: str) -> JSONSerializable:
+        if self._parameters is not None:
+            for key in keys:
+                if key in self._parameters:
+                    return self._parameters[key]
+
+        return self._content.purelist_parameters(*keys)
 
     @property
     def purelist_isregular(self):

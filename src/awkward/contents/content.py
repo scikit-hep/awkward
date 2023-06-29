@@ -932,10 +932,20 @@ class Content:
         Return the value of the outermost parameter matching `key` in a sequence
         of nested lists, stopping at the first record or tuple layer.
 
-         If a layer has #ak.types.UnionType, the value is only returned if all
+        If a layer has #ak.types.UnionType, the value is only returned if all
         possibilities have the same value.
         """
         return self.form_cls.purelist_parameter(self, key)
+
+    def purelist_parameters(self, *keys: str):
+        """
+        Return the value of the outermost parameter matching one of `keys` in a sequence
+        of nested lists, stopping at the first record or tuple layer.
+
+        If a layer has #ak.types.UnionType, the value is only returned if all
+        possibilities have the same value.
+        """
+        return self.form_cls.purelist_parameters(self, *keys)
 
     def _is_unique(
         self,
