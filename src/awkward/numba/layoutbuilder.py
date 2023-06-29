@@ -3,7 +3,6 @@
 import numpy as np
 
 import awkward as ak
-from awkward._errors import deprecate
 from awkward._typing import final
 
 
@@ -94,21 +93,17 @@ class Numpy(LayoutBuilder):
 
 @final
 class Empty(LayoutBuilder):
-    def __init__(self, *, parameters=None):
-        if not (parameters is None or len(parameters) == 0):
-            deprecate(
-                f"{type(self).__name__} cannot contain parameters", version="2.2.0"
-            )
-        self._init(parameters)
+    def __init__(self):
+        self._init(None)
 
     def __repr__(self):
-        return f"ak.numba.lb.Empty(parameters={self.parameters})"
+        return "ak.numba.lb.Empty(parameters=None)"
 
     def numbatype(self):
         import numba
 
         return ak._connect.numba.layoutbuilder.EmptyType(
-            numba.types.StringLiteral(self.parameters)
+            numba.types.StringLiteral(None)
         )
 
     def __len__(self):
@@ -116,9 +111,7 @@ class Empty(LayoutBuilder):
 
     @property
     def form(self):
-        return ak.forms.EmptyForm(
-            parameters=self.parameters
-        )  # FIXME: EmptyForm cannot contain parameters parameters=self._parameters,)
+        return ak.forms.EmptyForm()
 
     def clear(self):
         pass
@@ -127,7 +120,7 @@ class Empty(LayoutBuilder):
         return True
 
     def snapshot(self) -> ak.contents.Content:
-        return ak.contents.EmptyArray(parameters=self.parameters)
+        return ak.contents.EmptyArray()
 
 
 @final
