@@ -388,12 +388,8 @@ class Empty(LayoutBuilder):
     def numbatype(self):
         return EmptyType(numba.types.StringLiteral(self._parameters))
 
-    @property
-    def _length(self):
-        return 0
-
     def __len__(self):
-        return self._length
+        return 0
 
     def clear(self):
         pass
@@ -410,20 +406,12 @@ class EmptyType(LayoutBuilderType):
         super().__init__(name=f"ak.lb.Empty(parameters={parameters!r})")
         self._init(parameters)
 
-    @property
-    def length(self):
-        return numba.types.int64
-
 
 @numba.extending.register_model(EmptyType)
 class EmptyModel(numba.extending.models.StructModel):
     def __init__(self, dmm, fe_type):
-        members = [("length", fe_type.length)]
+        members = []
         super().__init__(dmm, fe_type, members)
-
-
-for member in ("length",):
-    numba.extending.make_attribute_wrapper(EmptyType, member, "_" + member)
 
 
 @numba.extending.unbox(EmptyType)
@@ -452,7 +440,7 @@ def EmptyType_box(typ, val, c):
 @numba.extending.overload_method(EmptyType, "_length_get", inline="always")
 def Empty_length(builder):
     def getter(builder):
-        return builder._length
+        return 0
 
     return getter
 
