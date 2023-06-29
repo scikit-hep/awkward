@@ -117,7 +117,7 @@ def GrowableBufferType_box(typ, val, c):
 
 
 def _from_data():
-    ...
+    raise RuntimeError("_from_data Python function is only implemented in Numba")
 
 
 @numba.extending.type_callable(_from_data)
