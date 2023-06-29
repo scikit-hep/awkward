@@ -275,9 +275,9 @@ def test_IndexedOption_Record():
         np.int64, lb.Record([lb.Numpy(np.float64), lb.Numpy(np.int64)], ["x", "y"])
     )
     assert len(builder) == 0
-    content = builder.append_valid()
-    x = content.field("x")
-    y = content.field("y")
+    record = builder.append_valid()
+    x = record.content("x")
+    y = record.content("y")
 
     x.append(1.1)
     y.append(2)
@@ -493,8 +493,8 @@ def test_Union_ListOffset_Record():
     one.end_list()
 
     two = builder.append_content(1)
-    x = two.field("x")
-    y = two.field("y")
+    x = two.content("x")
+    y = two.content("y")
 
     x.append(1.1)
     y.append(11)
@@ -1027,8 +1027,8 @@ def test_IndexedOption_Record_append():
     @numba.njit
     def f19(builder):
         record = builder.append_valid()
-        x = record.content(0)  # "x")
-        y = record.content(1)  # "y")
+        x = record.content("x")
+        y = record.content("y")
         x.append(1.1)
         y.append(2)
         builder.append_invalid()

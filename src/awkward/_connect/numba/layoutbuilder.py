@@ -1828,22 +1828,12 @@ class Record(LayoutBuilder):
     def content(self, name):
         return self._contents[self._fields.index(name)]
 
-    def field(self, name):
-        return self.content(name)
-
-    def field_index(self, name):
-        return self.fields.index(name)
-
     def clear(self):
         for content in self._contents:
             content.clear()
 
-    @property
-    def _length(self):
-        return len(self._contents[0])
-
     def __len__(self):
-        return self._length
+        return len(self._contents[0])
 
     def is_valid(self, error: str):
         length = -1
@@ -1894,10 +1884,6 @@ class RecordType(LayoutBuilderType):
 
     def content(self, name):
         return to_numbatype(self._contents[self.field(name)])
-
-    @property
-    def length(self):
-        return numba.types.int64
 
 
 @numba.extending.register_model(RecordType)
@@ -1997,15 +1983,6 @@ def Record_content(builder, field_name):
 
             return getter_int
 
-        # if isinstance(field_name, numba.types.Integer):
-        #     # check
-        #     def getter_int(builder, field_name):
-        #         content = builder._contents[numba.literally(field_name)]
-        #
-        #         return content
-        #
-        #     return getter_int
-        #
         if isinstance(field_name, numba.types.StringLiteral):
             which = builder._fields.index(field_name.literal_value)
 
@@ -2014,6 +1991,7 @@ def Record_content(builder, field_name):
 
             return getter_str
 
+        # FIXME: ?
         # if isinstance(field_name, numba.types.UnicodeType):
         #     which = builder._fields.index(field_name)
         #     def getter_str(builder, field_name):
@@ -2055,12 +2033,8 @@ class Tuple(LayoutBuilder):
         for content in self._contents:
             content.clear()
 
-    @property
-    def _length(self):
-        return len(self._contents[0])
-
     def __len__(self):
-        return self._length
+        return len(self._contents[0])
 
     def is_valid(self, error: str):
         length = -1
@@ -2096,10 +2070,6 @@ class TupleType(LayoutBuilderType):
     @property
     def contents(self):
         return numba.types.Tuple([to_numbatype(it) for it in self._contents])
-
-    @property
-    def length(self):
-        return numba.types.int64
 
 
 @numba.extending.register_model(TupleType)
@@ -2240,12 +2210,8 @@ class Union(LayoutBuilder):
         for content in self._contents:
             content.clear()
 
-    @property
-    def _length(self):
-        return len(self._tags)
-
     def __len__(self):
-        return self._length
+        return len(self._tags)
 
     def is_valid(self, error: str):
         for content in self._contents:
@@ -2287,10 +2253,6 @@ class UnionType(LayoutBuilderType):
     @property
     def contents(self):
         return numba.types.Tuple([to_numbatype(it) for it in self._contents])
-
-    @property
-    def length(self):
-        return numba.types.int64
 
 
 @numba.extending.register_model(UnionType)
