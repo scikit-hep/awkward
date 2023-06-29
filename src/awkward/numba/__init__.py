@@ -2,10 +2,11 @@
 
 import math
 
-import numpy  # noqa: TID251
+import numpy
 from packaging.version import parse as parse_version
 
 import awkward as ak
+import awkward.numba.layoutbuilder
 
 _has_checked_version = False
 _is_registered = False
