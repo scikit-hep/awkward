@@ -358,6 +358,18 @@ def array_ufunc(ufunc, method: str, inputs, kwargs: dict[str, Any]):
             if out is not None:
                 return out
 
+            # Do we have all-strings? If so, we can't proceed
+            if all(
+                x.is_list and x.parameter("__array__") in ("string", "bytestring")
+                for x in contents
+            ):
+                raise TypeError(
+                    "{}.{} is not implemented for string types. "
+                    "To register an implementation, add a name to these string(s) and register a behavior overload".format(
+                        type(ufunc).__module__, ufunc.__name__
+                    )
+                )
+
         if ufunc is numpy.matmul:
             raise NotImplementedError(
                 "matrix multiplication (`@` or `np.matmul`) is not yet implemented for Awkward Arrays"
