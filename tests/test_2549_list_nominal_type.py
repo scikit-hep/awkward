@@ -13,16 +13,6 @@ class ReversibleArray(ak.Array):
         return self[reversed_index]
 
 
-class ReversibleStringArray(ak.Array):
-    def reversed(self):
-        without_parameters = ak.with_parameter(self, "__list__", None)
-        index = ak.local_index(without_parameters)
-        reversed_index = index[..., ::-1]
-        return ak.with_parameter(
-            without_parameters[reversed_index], "__list__", "string"
-        )
-
-
 def test_class():
     behavior = {"reversible": ReversibleArray}
     reversible_array = ak.with_parameter(
@@ -107,9 +97,9 @@ def test_string_ufuncs():
 
 
 def test_string_class():
-    ak.behavior["reversible-string"] = ReversibleStringArray
+    ak.behavior["reversible-string"] = ReversibleArray
 
     strings = ak.with_parameter(["hi", "book", "cats"], "__list__", "reversible-string")
-    assert isinstance(strings, ReversibleStringArray)
+    assert isinstance(strings, ReversibleArray)
     assert strings.to_list() == ["hi", "book", "cats"]
     assert strings.reversed().to_list() == ["cats", "book", "hi"]
