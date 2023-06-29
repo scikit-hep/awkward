@@ -13,43 +13,43 @@ def test_types_with_parameters():
     assert t.parameters == {}
 
     with pytest.warns(DeprecationWarning):
-        t = ak.types.UnknownType(parameters={"__array__": ["val", "ue"]})
-        assert t.parameters == {"__array__": ["val", "ue"]}
+        t = ak.types.UnknownType(parameters={"latitude": ["val", "ue"]})
+        assert t.parameters == {"latitude": ["val", "ue"]}
 
-    t = ak.types.NumpyType("int32", parameters={"__array__": ["val", "ue"]})
-    assert t.parameters == {"__array__": ["val", "ue"]}
-    t = ak.types.NumpyType("float64", parameters={"__array__": ["val", "ue"]})
-    assert t.parameters == {"__array__": ["val", "ue"]}
+    t = ak.types.NumpyType("int32", parameters={"latitude": ["val", "ue"]})
+    assert t.parameters == {"latitude": ["val", "ue"]}
+    t = ak.types.NumpyType("float64", parameters={"latitude": ["val", "ue"]})
+    assert t.parameters == {"latitude": ["val", "ue"]}
     t = ak.types.ArrayType(
-        ak.types.NumpyType("int32", parameters={"__array__": ["val", "ue"]}), 100
+        ak.types.NumpyType("int32", parameters={"latitude": ["val", "ue"]}), 100
     )
-    assert t.content.parameters == {"__array__": ["val", "ue"]}
+    assert t.content.parameters == {"latitude": ["val", "ue"]}
     t = ak.types.ListType(
-        ak.types.NumpyType("int32"), parameters={"__array__": ["val", "ue"]}
+        ak.types.NumpyType("int32"), parameters={"latitude": ["val", "ue"]}
     )
-    assert t.parameters == {"__array__": ["val", "ue"]}
+    assert t.parameters == {"latitude": ["val", "ue"]}
     t = ak.types.RegularType(
-        ak.types.NumpyType("int32"), 5, parameters={"__array__": ["val", "ue"]}
+        ak.types.NumpyType("int32"), 5, parameters={"latitude": ["val", "ue"]}
     )
-    assert t.parameters == {"__array__": ["val", "ue"]}
+    assert t.parameters == {"latitude": ["val", "ue"]}
     t = ak.types.OptionType(
-        ak.types.NumpyType("int32"), parameters={"__array__": ["val", "ue"]}
+        ak.types.NumpyType("int32"), parameters={"latitude": ["val", "ue"]}
     )
-    assert t.parameters == {"__array__": ["val", "ue"]}
+    assert t.parameters == {"latitude": ["val", "ue"]}
     t = ak.types.UnionType(
         (ak.types.NumpyType("int32"), ak.types.NumpyType("float64")),
-        parameters={"__array__": ["val", "ue"]},
+        parameters={"latitude": ["val", "ue"]},
     )
-    assert t.parameters == {"__array__": ["val", "ue"]}
+    assert t.parameters == {"latitude": ["val", "ue"]}
     t = ak.types.RecordType(
         [
             ak.types.NumpyType("int32"),
             ak.types.NumpyType("float64"),
         ],
         fields=["one", "two"],
-        parameters={"__array__": ["val", "ue"]},
+        parameters={"latitude": ["val", "ue"]},
     )
-    assert t.parameters == {"__array__": ["val", "ue"]}
+    assert t.parameters == {"latitude": ["val", "ue"]}
 
     with pytest.warns(DeprecationWarning):
         t = ak.types.UnknownType(
@@ -60,7 +60,7 @@ def test_types_with_parameters():
         assert t == ak.types.UnknownType(
             parameters={"__record__": "one \u2192 two", "key1": ["val", "ue"]}
         )
-        assert t != ak.types.UnknownType(parameters={"__array__": ["val", "ue"]})
+        assert t != ak.types.UnknownType(parameters={"latitude": ["val", "ue"]})
 
 
 def test_dress():
@@ -70,26 +70,27 @@ def test_dress():
 
     ns = {"Dummy": Dummy}
 
-    x = ak.contents.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5]))
-    x.parameters["__array__"] = "Dummy"
+    x = ak.contents.RegularArray(
+        ak.contents.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6, 6])),
+        size=3,
+        parameters={"__list__": "Dummy"},
+    )
     a = ak.highlevel.Array(x, behavior=ns, check_valid=True)
-    assert str(a) == "<Dummy [1.1, 2.2, 3.3, 4.4, 5.5]>"
+    assert str(a) == "<Dummy [[1.1, 2.2, 3.3], [4.4, 5.5, 6]]>"
 
     x2 = ak.contents.ListOffsetArray(
-        ak.index.Index64(np.array([0, 3, 3, 5], dtype=np.int64)),
-        ak.contents.NumpyArray(
-            np.array([1.1, 2.2, 3.3, 4.4, 5.5]), parameters={"__array__": "Dummy"}
-        ),
+        ak.index.Index64(np.array([0, 2, 2, 2], dtype=np.int64)),
+        x,
     )
     a2 = ak.highlevel.Array(x2, behavior=ns, check_valid=True)
     # columns limit changed from 40 to 80 in v2
     assert (
         repr(a2)
-        == "<Array [<Dummy [1.1, 2.2, 3.3]>, <Dummy []>, <Dummy [4.4, 5.5]>] type='3 * ...'>"
+        == "<Array [<Dummy [[1.1, 2.2, 3.3], [4.4, 5.5, 6]]>, <Dummy []>, <Dummy []>] type='...'>"
     )
-    assert str(a2[0]) == "<Dummy [1.1, 2.2, 3.3]>"
+    assert str(a2[0]) == "<Dummy [[1.1, 2.2, 3.3], [4.4, 5.5, 6]]>"
     assert str(a2[1]) == "<Dummy []>"
-    assert str(a2[2]) == "<Dummy [4.4, 5.5]>"
+    assert str(a2[2]) == "<Dummy []>"
 
 
 def test_record_name():

@@ -31,9 +31,9 @@ def get_array_class(layout, behavior):
         cls = behavior.get(list_name)
         if isinstance(cls, type) and issubclass(cls, Array):
             return cls
-    deeprec = layout.purelist_parameter("__record__")
-    if isinstance(deeprec, str):
-        cls = behavior.get(("*", deeprec))
+    deep_list_record_name = layout.purelist_parameters("__record__", "__list__")
+    if isinstance(deep_list_record_name, str):
+        cls = behavior.get(("*", deep_list_record_name))
         if isinstance(cls, type) and issubclass(cls, Array):
             return cls
     return Array
