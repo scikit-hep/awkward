@@ -173,8 +173,8 @@ def _register():
     import awkward._connect.numba.arrayview_cuda
     import awkward._connect.numba.builder
     import awkward._connect.numba.growablebuffer
-    import awkward._connect.numba.layoutbuilder
     import awkward._connect.numba.layout
+    import awkward._connect.numba.layoutbuilder
 
     n = ak.numba
     n.ArrayViewType = awkward._connect.numba.arrayview.ArrayViewType
@@ -209,3 +209,84 @@ def _register():
     @numba.extending.typeof_impl.register(ak.highlevel.ArrayBuilder)
     def typeof_ArrayBuilder(obj, c):
         return obj.numba_type
+
+    @numba.extending.typeof_impl.register(ak.numba.layoutbuilder.BitMasked)
+    def typeof_layoutbuilder_BitMasked(val, c):
+        import numba
+
+        return ak._connect.numba.layoutbuilder.BitMaskedType(
+            numba.from_dtype(val._mask.dtype),
+            val._content,
+            val._valid_when,
+            val._lsb_order,
+            val._parameters,
+        )
+
+    @numba.extending.typeof_impl.register(ak.numba.layoutbuilder.ByteMasked)
+    def typeof_layoutbuilder_ByteMasked(val, c):
+        return ak._connect.numba.layoutbuilder.ByteMaskedType(
+            val._content,
+            val._valid_when,
+            val._parameters,
+        )
+
+    @numba.extending.typeof_impl.register(ak.numba.layoutbuilder.Empty)
+    def typeof_layoutbuilder_Empty(val, c):
+        return ak._connect.numba.layoutbuilder.EmptyType(val._parameters)
+
+    @numba.extending.typeof_impl.register(ak.numba.layoutbuilder.IndexedOption)
+    def typeof_layoutbuilder_IndexedOption(val, c):
+        import numba
+
+        return ak._connect.numba.layoutbuilder.IndexedOptionType(
+            numba.from_dtype(val._index.dtype), val._content, val._parameters
+        )
+
+    @numba.extending.typeof_impl.register(ak.numba.layoutbuilder.ListOffset)
+    def typeof_layoutbuilder_ListOffset(val, c):
+        import numba
+
+        return ak._connect.numba.layoutbuilder.ListOffsetType(
+            numba.from_dtype(val._offsets.dtype), val._content, val._parameters
+        )
+
+    @numba.extending.typeof_impl.register(ak.numba.layoutbuilder.Numpy)
+    def typeof_layoutbuilder_Numpy(val, c):
+        import numba
+
+        return ak._connect.numba.layoutbuilder.NumpyType(
+            numba.from_dtype(val._data.dtype), val._parameters
+        )
+
+    @numba.extending.typeof_impl.register(ak.numba.layoutbuilder.Record)
+    def typeof_layoutbuilder_Record(val, c):
+        return ak._connect.numba.layoutbuilder.RecordType(
+            val._contents, val._fields, val._parameters
+        )
+
+    @numba.extending.typeof_impl.register(ak.numba.layoutbuilder.Regular)
+    def typeof_layoutbuilder_Regular(val, c):
+        return ak._connect.numba.layoutbuilder.RegularType(
+            val._content, val._size, val._parameters
+        )
+
+    @numba.extending.typeof_impl.register(ak.numba.layoutbuilder.Tuple)
+    def typeof_layoutbuilder_Tuple(val, c):
+        return ak._connect.numba.layoutbuilder.TupleType(val._contents, val._parameters)
+
+    @numba.extending.typeof_impl.register(ak.numba.layoutbuilder.Union)
+    def typeof_layoutbuilder_Union(val, c):
+        import numba
+
+        return ak._connect.numba.layoutbuilder.UnionType(
+            numba.from_dtype(val._tags.dtype),
+            numba.from_dtype(val._index.dtype),
+            val._contents,
+            val._parameters,
+        )
+
+    @numba.extending.typeof_impl.register(ak.numba.layoutbuilder.Unmasked)
+    def typeof_layoutbuilder_Unmasked(val, c):
+        return ak._connect.numba.layoutbuilder.UnmaskedType(
+            val._content, val._parameters
+        )

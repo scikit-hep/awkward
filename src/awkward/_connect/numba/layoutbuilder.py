@@ -14,7 +14,6 @@ from awkward.numba.layoutbuilder import (
     ByteMasked,
     Empty,
     IndexedOption,
-    LayoutBuilder,
     ListOffset,
     Numpy,
     Record,
@@ -68,64 +67,6 @@ class LayoutBuilderType(numba.types.Type):
     @property
     def length(self):
         return numba.types.int64
-
-
-@numba.extending.typeof_impl.register(LayoutBuilder)
-def typeof_LayoutBuilder(val, c):
-    if isinstance(val, BitMasked):
-        return BitMaskedType(
-            numba.from_dtype(val._mask.dtype),
-            val._content,
-            val._valid_when,
-            val._lsb_order,
-            val._parameters,
-        )
-
-    elif isinstance(val, ByteMasked):
-        return ByteMaskedType(
-            val._content,
-            val._valid_when,
-            val._parameters,
-        )
-
-    elif isinstance(val, Empty):
-        return EmptyType(val._parameters)
-
-    elif isinstance(val, IndexedOption):
-        return IndexedOptionType(
-            numba.from_dtype(val._index.dtype), val._content, val._parameters
-        )
-
-    elif isinstance(val, ListOffset):
-        return ListOffsetType(
-            numba.from_dtype(val._offsets.dtype), val._content, val._parameters
-        )
-
-    elif isinstance(val, Numpy):
-        return NumpyType(numba.from_dtype(val._data.dtype), val._parameters)
-
-    elif isinstance(val, Record):
-        return RecordType(val._contents, val._fields, val._parameters)
-
-    elif isinstance(val, Regular):
-        return RegularType(val._content, val._size, val._parameters)
-
-    elif isinstance(val, Tuple):
-        return TupleType(val._contents, val._parameters)
-
-    elif isinstance(val, Union):
-        return UnionType(
-            numba.from_dtype(val._tags.dtype),
-            numba.from_dtype(val._index.dtype),
-            val._contents,
-            val._parameters,
-        )
-
-    elif isinstance(val, Unmasked):
-        return UnmaskedType(val._content, val._parameters)
-
-    else:
-        raise TypeError("unrecognized LayoutBuilder type")
 
 
 @numba.extending.overload(len)

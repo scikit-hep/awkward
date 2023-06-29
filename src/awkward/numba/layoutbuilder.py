@@ -269,7 +269,9 @@ class Regular(LayoutBuilder):
 class IndexedOption(LayoutBuilder):
     def __init__(self, dtype, content, *, parameters=None, initial=1024, resize=8.0):
         self._last_valid = -1
-        self._index = ak.numba.GrowableBuffer(dtype=dtype, initial=initial, resize=resize)
+        self._index = ak.numba.GrowableBuffer(
+            dtype=dtype, initial=initial, resize=resize
+        )
         self._content = content
         self._init(parameters)
 
@@ -441,7 +443,9 @@ class BitMasked(LayoutBuilder):
         initial=1024,
         resize=8.0,
     ):
-        self._mask = ak.numba.GrowableBuffer(dtype=dtype, initial=initial, resize=resize)
+        self._mask = ak.numba.GrowableBuffer(
+            dtype=dtype, initial=initial, resize=resize
+        )
         self._content = content
         self._valid_when = valid_when
         self._lsb_order = lsb_order
@@ -791,8 +795,12 @@ class Union(LayoutBuilder):
         initial=1024,
         resize=8.0,
     ):
-        self._tags = ak.numba.GrowableBuffer(dtype=tags_dtype, initial=initial, resize=resize)
-        self._index = ak.numba.GrowableBuffer(dtype=index_dtype, initial=initial, resize=resize)
+        self._tags = ak.numba.GrowableBuffer(
+            dtype=tags_dtype, initial=initial, resize=resize
+        )
+        self._index = ak.numba.GrowableBuffer(
+            dtype=index_dtype, initial=initial, resize=resize
+        )
         self._contents = tuple(contents)
         self._init(parameters)
 
