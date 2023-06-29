@@ -8,9 +8,7 @@ import awkward as ak
 
 class ReversibleArray(ak.Array):
     def reversed(self):
-        index = ak.local_index(self)
-        reversed_index = index[..., ::-1]
-        return self[reversed_index]
+        return self[..., ::-1]
 
 
 def test_class():
@@ -51,7 +49,9 @@ def test_ufunc():
     assert isinstance(reversible_array, ReversibleArray)
 
     def reversible_add(x, y):
-        return x.reversed() + y.reversed()
+        return ak.with_parameter(x.reversed(), "__list__", None) + ak.with_parameter(
+            y.reversed(), "__list__", None
+        )
 
     ak.behavior[np.add, "reversible", "reversible"] = reversible_add
 
