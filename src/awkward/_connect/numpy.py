@@ -202,11 +202,11 @@ def _array_ufunc_signature(ufunc, inputs):
     signature = [ufunc]
     for x in inputs:
         if isinstance(x, ak.contents.Content):
-            record, array = x.parameter("__record__"), x.parameter("__array__")
-            if record is not None:
-                signature.append(record)
-            elif array is not None:
-                signature.append(array)
+            record_name, list_name = x.parameter("__record__"), x.parameter("__list__")
+            if record_name is not None:
+                signature.append(record_name)
+            elif list_name is not None:
+                signature.append(list_name)
             elif isinstance(x, NumpyArray):
                 signature.append(x.dtype.type)
             else:
@@ -358,10 +358,32 @@ def array_ufunc(ufunc, method: str, inputs, kwargs: dict[str, Any]):
             if out is not None:
                 return out
 
+            # Do we have all-strings? If so, we can't proceed
+            if all(
+                x.is_list and x.parameter("__array__") in ("string", "bytestring")
+                for x in contents
+            ):
+                raise TypeError(
+                    "{}.{} is not implemented for string types. "
+                    "To register an implementation, add a name to these string(s) and register a behavior overload".format(
+                        type(ufunc).__module__, ufunc.__name__
+                    )
+                )
+
         if ufunc is numpy.matmul:
             raise NotImplementedError(
                 "matrix multiplication (`@` or `np.matmul`) is not yet implemented for Awkward Arrays"
             )
+
+        # Do we have a custom generic ufunc override (a function that accepts _all_ ufuncs)?
+        for x in contents:
+            apply_ufunc = find_ufunc_generic(ufunc, x, behavior)
+            if apply_ufunc is not None:
+                out = _array_ufunc_adjust_apply(
+                    apply_ufunc, ufunc, method, inputs, kwargs, behavior
+                )
+                if out is not None:
+                    return out
 
         if all(
             isinstance(x, NumpyArray) or not isinstance(x, ak.contents.Content)
@@ -390,26 +412,16 @@ def array_ufunc(ufunc, method: str, inputs, kwargs: dict[str, Any]):
 
             return (NumpyArray(result, backend=backend, parameters=parameters),)
 
-        # Do we have a custom generic ufunc override (a function that accepts _all_ ufuncs)?
-        for x in contents:
-            apply_ufunc = find_ufunc_generic(ufunc, x, behavior)
-            if apply_ufunc is not None:
-                out = _array_ufunc_adjust_apply(
-                    apply_ufunc, ufunc, method, inputs, kwargs, behavior
-                )
-                if out is not None:
-                    return out
-
+        # Do we have exclusively nominal types without custom overloads?
         if all(
-            x.parameter("__array__") is not None
-            or x.parameter("__record__") is not None
+            x.parameter("__list__") is not None or x.parameter("__record__") is not None
             for x in contents
         ):
             error_message = []
             for x in inputs:
                 if isinstance(x, ak.contents.Content):
-                    if x.parameter("__array__") is not None:
-                        error_message.append(x.parameter("__array__"))
+                    if x.parameter("__list__") is not None:
+                        error_message.append(x.parameter("__list__"))
                     elif x.parameter("__record__") is not None:
                         error_message.append(x.parameter("__record__"))
                     else:

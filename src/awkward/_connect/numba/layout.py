@@ -92,7 +92,7 @@ def string_numba_lower(
 
 def find_numba_array_typer(layouttype, behavior):
     behavior = overlay_behavior(behavior)
-    arr = layouttype.parameters.get("__array__")
+    arr = layouttype.parameters.get("__list__")
     if isinstance(arr, str):
         typer = behavior.get(("__numba_typer__", arr))
         if callable(typer):
@@ -107,7 +107,7 @@ def find_numba_array_typer(layouttype, behavior):
 
 def find_numba_array_lower(layouttype, behavior):
     behavior = overlay_behavior(behavior)
-    arr = layouttype.parameters.get("__array__")
+    arr = layouttype.parameters.get("__list__")
     if isinstance(arr, str):
         lower = behavior.get(("__numba_lower__", arr))
         if callable(lower):

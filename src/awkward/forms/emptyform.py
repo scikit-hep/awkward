@@ -6,7 +6,7 @@ from inspect import signature
 import awkward as ak
 from awkward._errors import deprecate
 from awkward._nplikes.shape import ShapeItem
-from awkward._typing import Iterator, Self, final
+from awkward._typing import Iterator, JSONSerializable, Self, final
 from awkward._util import UNSET
 from awkward.forms.form import Form, JSONMapping
 
@@ -84,11 +84,11 @@ class EmptyForm(Form):
             f"argument, or the legacy `dtype` argument as positional or keyword"
         )
 
-    def purelist_parameter(self, key):
-        if self._parameters is None or key not in self._parameters:
-            return None
-        else:
-            return self._parameters[key]
+    def purelist_parameters(self, *keys: str) -> JSONSerializable:
+        if self._parameters is not None:
+            for key in keys:
+                if key in self._parameters:
+                    return self._parameters[key]
 
     @property
     def purelist_isregular(self) -> bool:

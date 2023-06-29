@@ -377,6 +377,9 @@ class Form:
             return self._parameters.get(key)
 
     def purelist_parameter(self, key: str) -> JSONSerializable:
+        return self.purelist_parameters(key)
+
+    def purelist_parameters(self, *keys: str) -> JSONSerializable:
         raise NotImplementedError
 
     @property

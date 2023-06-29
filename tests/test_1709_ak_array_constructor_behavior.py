@@ -14,7 +14,7 @@ class MyBehavior(ak.Array):
 
 def test():
     behavior = {"MyBehavior": MyBehavior}
-    array = ak.with_parameter([1, 2, 3], "__array__", "MyBehavior", behavior=behavior)
+    array = ak.with_parameter([[1, 2, 3]], "__list__", "MyBehavior", behavior=behavior)
     assert isinstance(array, MyBehavior)
 
     shallow_copy = ak.Array(array)

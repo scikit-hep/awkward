@@ -4,7 +4,7 @@ from collections.abc import Iterable
 import awkward as ak
 from awkward._parameters import type_parameters_equal
 from awkward._regularize import is_integer
-from awkward._typing import final
+from awkward._typing import JSONSerializable, final
 from awkward._util import UNSET
 from awkward.forms.form import Form
 
@@ -190,8 +190,11 @@ class RecordForm(Form):
         else:
             return False
 
-    def purelist_parameter(self, key):
-        return self.parameter(key)
+    def purelist_parameters(self, *keys: str) -> JSONSerializable:
+        if self._parameters is not None:
+            for key in keys:
+                if key in self._parameters:
+                    return self._parameters[key]
 
     @property
     def purelist_isregular(self):

@@ -15,7 +15,7 @@ from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._regularize import is_integer
-from awkward._typing import Self
+from awkward._typing import JSONSerializable, Self
 from awkward._util import UNSET
 from awkward.contents.content import Content
 
@@ -106,8 +106,11 @@ class Record:
     def parameter(self, key):
         return self._array.parameter(key)
 
-    def purelist_parameter(self, key):
-        return self._array.purelist_parameter(key)
+    def purelist_parameter(self, key) -> JSONSerializable:
+        return self._array.purelist_parameters(key)
+
+    def purelist_parameters(self, *keys):
+        return self._array.purelist_parameters(*keys)
 
     @property
     def purelist_isregular(self):
