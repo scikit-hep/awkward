@@ -10,6 +10,18 @@ import numpy as np
 import awkward as ak
 from awkward._connect.numba.growablebuffer import GrowableBuffer, GrowableBufferType
 from awkward._typing import final
+from awkward.forms import (
+    BitMaskedForm,
+    ByteMaskedForm,
+    EmptyForm,
+    IndexedOptionForm,
+    ListOffsetForm,
+    NumpyForm,
+    RecordForm,
+    RegularForm,
+    UnionForm,
+    UnmaskedForm,
+)
 
 
 class LayoutBuilder:
@@ -205,6 +217,13 @@ class Numpy(LayoutBuilder):
     def extend(self, data):
         self._data.extend(data)
 
+    @property
+    def form(self):
+        return NumpyForm(
+            primitive=ak.types.numpytype.dtype_to_primitive(self._data.dtype),
+            parameters=self._parameters,
+        )
+
     def clear(self):
         self._data.clear()
 
@@ -391,6 +410,12 @@ class Empty(LayoutBuilder):
     def __len__(self):
         return 0
 
+    @property
+    def form(self):
+        return (
+            EmptyForm()
+        )  # FIXME: EmptyForm cannot contain parameters parameters=self._parameters,)
+
     def clear(self):
         pass
 
@@ -475,6 +500,14 @@ class ListOffset(LayoutBuilder):
     @property
     def content(self):
         return self._content
+
+    @property
+    def form(self):
+        return ListOffsetForm(
+            ak.index._dtype_to_form[self.offsets.dtype],
+            self.content.form,
+            parameters=self._parameters,
+        )
 
     def begin_list(self):
         return self._content
@@ -658,8 +691,12 @@ class Regular(LayoutBuilder):
         return self._size
 
     @property
-    def _length(self):
-        return math.floor(len(self.content) / self.size)
+    def form(self):
+        return RegularForm(
+            self.content.form,
+            self.size,
+            parameters=self._parameters,
+        )
 
     def begin_list(self):
         return self.content
@@ -671,11 +708,11 @@ class Regular(LayoutBuilder):
         self.content.clear()
 
     def __len__(self):
-        return self._length
+        return math.floor(len(self.content) / self.size)
 
     def is_valid(self, error: str):  # structure_valid
-        if len(self.content) != self._length * self.size:
-            error = f"Regular node{self._id} has content length {len(self.content)}, but length {self._length} and size {self.size}"
+        if len(self.content) != len(self) * self.size:
+            error = f"Regular node{self._id} has content length {len(self.content)}, but length {len(self)} and size {self.size}"
             return False
         else:
             return self.content.is_valid(error)
@@ -684,7 +721,7 @@ class Regular(LayoutBuilder):
         return ak.contents.RegularArray(
             self._content.snapshot(),
             self._size,
-            self._length,
+            len(self),
             parameters=self._parameters,
         )
 
@@ -837,6 +874,14 @@ class IndexedOption(LayoutBuilder):
     def content(self):
         return self._content
 
+    @property
+    def form(self):
+        return IndexedOptionForm(
+            ak.index._dtype_to_form[self.index.dtype],
+            self.content.form,
+            parameters=self._parameters,
+        )
+
     def append_valid(self):
         self._last_valid = len(self._content)
         self._index.append(self._last_valid)
@@ -860,12 +905,8 @@ class IndexedOption(LayoutBuilder):
         self._index.clear()
         self._content.clear()
 
-    @property
-    def _length(self):
-        return self._index._length
-
     def __len__(self):
-        return self._length
+        return self._index._length
 
     def is_valid(self, error: str):
         if len(self._content) != self._last_valid + 1:
@@ -898,10 +939,6 @@ class IndexedOptionType(LayoutBuilderType):
     @property
     def content(self):
         return to_numbatype(self._content)
-
-    @property
-    def length(self):
-        return numba.types.int64
 
 
 @numba.extending.register_model(IndexedOptionType)
@@ -1064,6 +1101,15 @@ class ByteMasked(LayoutBuilder):
     def valid_when(self):
         return self._valid_when
 
+    @property
+    def form(self):  # FIXME: do not hardcode "i8"
+        return ByteMaskedForm(
+            "i8",
+            self.content.form,
+            self._valid_when,
+            parameters=self._parameters,
+        )
+
     def append_valid(self):
         self._mask.append(self._valid_when)
         return self._content
@@ -1084,12 +1130,8 @@ class ByteMasked(LayoutBuilder):
         self._mask.clear()
         self._content.clear()
 
-    @property
-    def _length(self):
-        return len(self._mask)
-
     def __len__(self):
-        return self._length
+        return len(self._mask)
 
     def is_valid(self, error: str):
         if len(self._content) != len(self._mask):
@@ -1127,10 +1169,6 @@ class ByteMaskedType(LayoutBuilderType):
     @property
     def content(self):
         return to_numbatype(self._content)
-
-    @property
-    def length(self):
-        return numba.types.int64
 
 
 @numba.extending.register_model(ByteMaskedType)
@@ -1326,6 +1364,16 @@ class BitMasked(LayoutBuilder):
     def lsb_order(self):
         return self._lsb_order
 
+    @property
+    def form(self):
+        return BitMaskedForm(
+            ak.index._dtype_to_form[self._mask.dtype],
+            self.content.form,
+            self.valid_when,
+            self.lsb_order,
+            parameters=self._parameters,
+        )
+
     def _append_begin(self):
         """
         Private helper function.
@@ -1380,20 +1428,16 @@ class BitMasked(LayoutBuilder):
         self._mask.clear()
         self._content.clear()
 
-    @property
-    def _length(self):
+    def __len__(self):
         return (
             len(self._mask)
             if len(self._mask) == 0
             else (len(self._mask) - 1) * 8 + self._current_byte_index[1]
         )
 
-    def __len__(self):
-        return self._length
-
     def is_valid(self, error: str):
-        if len(self._content) != self._length:
-            error = f"BitMasked has content length {len(self._content)} but bit mask length {self._length}"
+        if len(self._content) != len(self):
+            error = f"BitMasked has content length {len(self._content)} but bit mask length {len(self)}"
             return False
         else:
             return self._content.is_valid(error)
@@ -1403,7 +1447,7 @@ class BitMasked(LayoutBuilder):
             ak.index.Index(self._mask.snapshot()),
             self._content.snapshot(),
             valid_when=self._valid_when,
-            length=self._length,
+            length=len(self),
             lsb_order=self._lsb_order,
             parameters=self._parameters,
         )
@@ -1439,10 +1483,6 @@ class BitMaskedType(LayoutBuilderType):
     @property
     def content(self):
         return to_numbatype(self._content)
-
-    @property
-    def length(self):
-        return numba.types.int64
 
 
 @numba.extending.register_model(BitMaskedType)
@@ -1682,15 +1722,18 @@ class Unmasked(LayoutBuilder):
     def content(self):
         return self._content
 
+    @property
+    def form(self):
+        return UnmaskedForm(
+            self.content.form,
+            parameters=self._parameters,
+        )
+
     def clear(self):
         self._content.clear()
 
-    @property
-    def _length(self):
-        return len(self._content)
-
     def __len__(self):
-        return self._length
+        return len(self._content)
 
     def is_valid(self, error: str):
         return self._content.is_valid(error)
@@ -1712,10 +1755,6 @@ class UnmaskedType(LayoutBuilderType):
     @property
     def content(self):
         return to_numbatype(self._content)
-
-    @property
-    def length(self):
-        return numba.types.int64
 
 
 @numba.extending.register_model(UnmaskedType)
@@ -1804,7 +1843,13 @@ class Record(LayoutBuilder):
     def __repr__(self):
         return f"ak.numba.lb.Record({self.contents}, {self.fields}, parameters={self._parameters})"
 
-    # def form(self): -> ak.forms.Form
+    @property
+    def form(self):
+        return RecordForm(
+            [content.form for content in self.contents],
+            self.fields,
+            parameters=self._parameters,
+        )
 
     def numbatype(self):
         return RecordType(
@@ -1866,12 +1911,6 @@ class RecordType(LayoutBuilderType):
         return numba.types.Tuple(
             to_numbatype([numba.types.StringLiteral(it) for it in self._fields])
         )
-
-    def field(self, name):
-        return numba.types.IntegerLiteral(self.fields.index(name))
-
-    def content(self, name):
-        return to_numbatype(self._contents[self.field(name)])
 
 
 @numba.extending.register_model(RecordType)
@@ -1963,7 +2002,6 @@ def Record_field_index(builder, name):
 def Record_content(builder, field_name):
     if isinstance(builder, RecordType):
         if isinstance(field_name, numba.types.IntegerLiteral):
-            # check
             which = field_name.literal_value
 
             def getter_int(builder, field_name):
@@ -1979,7 +2017,7 @@ def Record_content(builder, field_name):
 
             return getter_str
 
-        # FIXME: ?
+        # FIXME: ???
         # if isinstance(field_name, numba.types.UnicodeType):
         #     which = builder._fields.index(field_name)
         #     def getter_str(builder, field_name):
@@ -2004,6 +2042,14 @@ class Tuple(LayoutBuilder):
     @property
     def contents(self):
         return self._contents
+
+    @property
+    def form(self):
+        return RecordForm(
+            [content.form for content in self.contents],
+            fields=None,
+            parameters=self._parameters,
+        )
 
     def __repr__(self):
         return f"ak.numba.lb.Tuple({self.contents}, parameters={self._parameters})"
@@ -2173,6 +2219,15 @@ class Union(LayoutBuilder):
     @property
     def contents(self):
         return self._contents
+
+    @property
+    def form(self):
+        return UnionForm(
+            ak.index._dtype_to_form[self.tags.dtype],
+            ak.index._dtype_to_form[self.index.dtype],
+            [content.form for content in self.contents],
+            parameters=self._parameters,
+        )
 
     def __repr__(self):
         return f"ak.numba.lb.Union({self._tags.dtype}, {self._index.dtype}, {self.contents}, parameters={self._parameters})"

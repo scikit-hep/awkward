@@ -22,15 +22,17 @@ def test_Numpy():
     error = ""
     assert builder.is_valid(error), error
 
-    array = builder.snapshot()
-    assert isinstance(array, ak.contents.NumpyArray)
-    assert str(ak.type(array)) == "5 * float64"
-    assert ak.to_list(array) == [1.1, 2.2, 3.3, 4.4, 5.5]
+    layout = builder.snapshot()
+    assert isinstance(layout, ak.contents.NumpyArray)
+    assert str(ak.type(layout)) == "5 * float64"
+    assert ak.to_list(layout) == [1.1, 2.2, 3.3, 4.4, 5.5]
 
     assert (
         str(builder.numbatype())
         == "ak.lb.Numpy(float64, parameters=Literal[NoneType](None))"
     )
+
+    assert builder.form == layout.form
 
     error = ""
     assert builder.is_valid(error), error
@@ -48,9 +50,9 @@ def test_Numpy_char():
     builder.append(98)
     builder.append(99)
 
-    array = builder.snapshot()
-    assert str(ak.type(array)) == "3 * char"
-    assert ak.to_list(array) == "abc"  # FIXME: ['a', 'b', 'c']????
+    layout = builder.snapshot()
+    assert str(ak.type(layout)) == "3 * char"
+    assert ak.to_list(layout) == "abc"  # FIXME: ['a', 'b', 'c']????
 
     assert (
         str(builder.numbatype())
@@ -78,10 +80,10 @@ def test_Empty():
     error = ""
     assert builder.is_valid(error), error
 
-    array = builder.snapshot()
-    assert isinstance(array, ak.contents.EmptyArray)
-    assert str(ak.type(array)) == "0 * unknown"
-    assert ak.to_list(array) == []
+    layout = builder.snapshot()
+    assert isinstance(layout, ak.contents.EmptyArray)
+    assert str(ak.type(layout)) == "0 * unknown"
+    assert ak.to_list(layout) == []
 
     assert str(builder.numbatype()) == "ak.lb.Empty(parameters=Literal[NoneType](None))"
 
@@ -90,15 +92,15 @@ def test_Empty():
         str(builder.numbatype())
         == "ak.lb.Empty(parameters=Literal[dict]({'When I was one': 'I just begun'}))"
     )
+    assert builder.form == layout.form
 
 
 def test_ListOffset():
     builder = lb.ListOffset(np.int32, lb.Numpy(np.float64))
     assert len(builder) == 0
-    assert (
-        str(builder.numbatype())
-        == "ak.lb.ListOffset(int32, ak.lb.Numpy(float64, parameters=Literal[NoneType](None)), parameters=Literal[NoneType](None))"
-    )
+    layout = builder.snapshot()
+    assert isinstance(layout, ak.contents.ListOffsetArray)
+    assert ak.to_list(layout) == []
 
     content = builder.begin_list()
     content.append(1.1)
@@ -114,38 +116,10 @@ def test_ListOffset():
     content.append(5.5)
     builder.end_list()
 
-    array = builder.snapshot()
-    assert isinstance(array, ak.contents.ListOffsetArray)
-    assert ak.to_list(array) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
-
-    error = ""
-    assert builder.is_valid(error), error
-
-
-def test_ListOffset2():
-    builder = lb.ListOffset(np.int32, lb.Numpy(np.float64))
-    assert len(builder) == 0
-    array = builder.snapshot()
-    assert isinstance(array, ak.contents.ListOffsetArray)
-    assert ak.to_list(array) == []
-
-    content = builder.begin_list()
-    content.append(1.1)
-    content.append(2.2)
-    content.append(3.3)
-    builder.end_list()
-
-    builder.begin_list()
-    builder.end_list()
-
-    builder.begin_list()
-    content.append(4.4)
-    content.append(5.5)
-    builder.end_list()
-
-    array = builder.snapshot()
-    assert isinstance(array, ak.contents.ListOffsetArray)
-    assert ak.to_list(array) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
+    layout = builder.snapshot()
+    assert isinstance(layout, ak.contents.ListOffsetArray)
+    assert ak.to_list(layout) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
+    assert builder.form == layout.form
 
     error = ""
     assert builder.is_valid(error), error
@@ -161,9 +135,9 @@ def test_ListOffset2():
 def test_Regular():
     builder = lb.Regular(lb.Numpy(np.float64), 3)
     assert len(builder) == 0
-    array = builder.snapshot()
-    assert isinstance(array, ak.contents.RegularArray)
-    assert ak.to_list(array) == []
+    layout = builder.snapshot()
+    assert isinstance(layout, ak.contents.RegularArray)
+    assert ak.to_list(layout) == []
 
     content = builder.begin_list()
     content.append(1.1)
@@ -177,9 +151,10 @@ def test_Regular():
     content.append(6.6)
     builder.end_list()
 
-    array = builder.snapshot()
-    assert ak.to_list(array) == [[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]
+    layout = builder.snapshot()
+    assert ak.to_list(layout) == [[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]
     assert len(builder) == 2
+    assert builder.form == layout.form
 
     error = ""
     assert builder.is_valid(error), error
@@ -210,8 +185,9 @@ def test_IndexedOption():
     content.extend(data)
 
     builder.extend_invalid(2)
-    array = builder.snapshot()
-    assert ak.to_list(array) == [1.1, None, 3.3, 4.4, 5.5, None, None]
+    layout = builder.snapshot()
+    assert ak.to_list(layout) == [1.1, None, 3.3, 4.4, 5.5, None, None]
+    assert builder.form == layout.form
 
     assert len(builder) == 7
 
@@ -251,11 +227,12 @@ def test_Record():
 
     three.append(0x62)  #'b')
 
-    array = builder.snapshot()
-    assert ak.to_list(array) == [
+    layout = builder.snapshot()
+    assert ak.to_list(layout) == [
         {"one": 1.1, "two": 2, "three": "a"},
         {"one": 3.3, "two": 4, "three": "b"},
     ]
+    assert builder.form == layout.form
 
     assert len(builder) == 2
 
@@ -288,12 +265,13 @@ def test_IndexedOption_Record():
     x.append(3.3)
     y.append(4)
 
-    array = builder.snapshot()
-    assert ak.to_list(array) == [
+    layout = builder.snapshot()
+    assert ak.to_list(layout) == [
         {"x": 1.1, "y": 2},
         None,
         {"x": 3.3, "y": 4},
     ]
+    assert builder.form == layout.form
 
 
 def test_Tuple_Numpy_ListOffset():
@@ -329,10 +307,11 @@ def test_Tuple_Numpy_ListOffset():
     two_list.append(3)
     two.end_list()
 
-    array = builder.snapshot()
-    assert ak.to_list(array) == [(1.1, [1]), (2.2, [1, 2]), (3.3, [1, 2, 3])]
+    layout = builder.snapshot()
+    assert ak.to_list(layout) == [(1.1, [1]), (2.2, [1, 2]), (3.3, [1, 2, 3])]
 
     assert builder.is_valid(error) is True
+    assert builder.form == layout.form
 
 
 def test_Unmasked():
@@ -349,8 +328,9 @@ def test_Unmasked():
     err = ""
     assert builder.is_valid(err) is True
 
-    array = builder.snapshot()
-    assert ak.to_list(array) == [11, 22, 33, 44, 55]
+    layout = builder.snapshot()
+    assert ak.to_list(layout) == [11, 22, 33, 44, 55]
+    assert builder.form == layout.form
 
     assert (
         str(builder.numbatype())
@@ -378,8 +358,9 @@ def test_ByteMasked():
     content.append(np.nan)
     content.append(np.nan)
 
-    array = builder.snapshot()
-    assert ak.to_list(array) == [1.1, None, 3.3, 4.4, 5.5, None, None]
+    layout = builder.snapshot()
+    assert ak.to_list(layout) == [1.1, None, 3.3, 4.4, 5.5, None, None]
+    assert builder.form == layout.form
 
     error = ""
     assert builder.is_valid(error), error
@@ -399,8 +380,9 @@ def test_BitMasked():
     subbuilder = builder.append_valid()
     subbuilder.append(1.1)
     assert len(builder) == 1
-    array = builder.snapshot()
-    assert ak.to_list(array) == [1.1]
+    layout = builder.snapshot()
+    assert ak.to_list(layout) == [1.1]
+    assert builder.form == layout.form
 
     builder.append_invalid()
     subbuilder.append(np.nan)
@@ -430,8 +412,8 @@ def test_BitMasked():
     subbuilder.append(10)
     assert len(builder) == 10
 
-    array = builder.snapshot()
-    assert ak.to_list(array) == [1.1, None, 3.3, 4.4, 5.5, None, None, 8, 9, 10]
+    layout = builder.snapshot()
+    assert ak.to_list(layout) == [1.1, None, 3.3, 4.4, 5.5, None, None, 8, 9, 10]
 
     error = ""
     assert builder.is_valid(error), error
@@ -471,8 +453,9 @@ def test_Union_Numpy_ListOffset():
 
     # assert builder.is_valid(error) == True
 
-    array = builder.snapshot()
-    assert ak.to_list(array) == [1.1, [1, 2]]
+    layout = builder.snapshot()
+    assert ak.to_list(layout) == [1.1, [1, 2]]
+    assert builder.form == layout.form
 
 
 def test_Union_ListOffset_Record():
@@ -508,8 +491,9 @@ def test_Union_ListOffset_Record():
     x.append(2.2)
     y.append(22)
 
-    array = builder.snapshot()
-    assert ak.to_list(array) == [[1, 3], {"x": 1.1, "y": 11}, [5], {"x": 2.2, "y": 22}]
+    layout = builder.snapshot()
+    assert ak.to_list(layout) == [[1, 3], {"x": 1.1, "y": 11}, [5], {"x": 2.2, "y": 22}]
+    assert builder.form == layout.form
 
 
 def test_unbox():
@@ -975,15 +959,15 @@ def test_ListOffset_append2():
     builder = lb.ListOffset(np.int32, lb.Numpy(np.float64))
     assert len(builder) == 0
 
-    array = builder.snapshot()
-    assert isinstance(array, ak.contents.ListOffsetArray)
-    assert ak.to_list(array) == []
+    layout = builder.snapshot()
+    assert isinstance(layout, ak.contents.ListOffsetArray)
+    assert ak.to_list(layout) == []
 
     f17(builder)
 
-    array = builder.snapshot()
-    assert isinstance(array, ak.contents.ListOffsetArray)
-    assert ak.to_list(array) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
+    layout = builder.snapshot()
+    assert isinstance(layout, ak.contents.ListOffsetArray)
+    assert ak.to_list(layout) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
 
     error = ""
     assert builder.is_valid(error), error
@@ -1010,14 +994,14 @@ def test_Regular_append():
 
     builder = lb.Regular(lb.Numpy(np.float64), 3)
     assert len(builder) == 0
-    array = builder.snapshot()
-    assert isinstance(array, ak.contents.RegularArray)
-    assert ak.to_list(array) == []
+    layout = builder.snapshot()
+    assert isinstance(layout, ak.contents.RegularArray)
+    assert ak.to_list(layout) == []
 
     f18(builder)
 
-    array = builder.snapshot()
-    assert ak.to_list(array) == [[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]
+    layout = builder.snapshot()
+    assert ak.to_list(layout) == [[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]
 
     error = ""
     assert builder.is_valid(error), error
@@ -1044,12 +1028,13 @@ def test_IndexedOption_Record_append():
 
     f19(builder)
 
-    array = builder.snapshot()
-    assert ak.to_list(array) == [
+    layout = builder.snapshot()
+    assert ak.to_list(layout) == [
         {"x": 1.1, "y": 2},
         None,
         {"x": 3.3, "y": 4},
     ]
+    assert builder.form == layout.form
 
 
 def test_IndexedOption_append_extend():
@@ -1090,8 +1075,8 @@ def test_IndexedOption_append_extend():
     f22(builder)
     assert len(builder) == 7
 
-    array = builder.snapshot()
-    assert ak.to_list(array) == [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, None]
+    layout = builder.snapshot()
+    assert ak.to_list(layout) == [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, None]
 
     # FIXME: keep track of self._last_valid
     # error = ""
@@ -1104,8 +1089,8 @@ def test_IndexedOption_append_extend():
     f24(builder, 3)
     assert len(builder) == 13
 
-    array = builder.snapshot()
-    assert ak.to_list(array) == [
+    layout = builder.snapshot()
+    assert ak.to_list(layout) == [
         1.1,
         2.2,
         3.3,
@@ -1165,8 +1150,8 @@ def test_ByteMasked_append_extend():
 
     f28(builder, 2)
 
-    array = builder.snapshot()
-    assert ak.to_list(array) == [
+    layout = builder.snapshot()
+    assert ak.to_list(layout) == [
         1.1,
         2.2,
         3.3,
@@ -1231,8 +1216,8 @@ def test_BitMasked_append_extend():
 
     f32(builder, 2)
 
-    array = builder.snapshot()
-    assert ak.to_list(array) == [
+    layout = builder.snapshot()
+    assert ak.to_list(layout) == [
         1.1,
         2.2,
         3.3,
@@ -1277,8 +1262,8 @@ def test_Unmasked_append_extend():
     data = np.array([3.3, 4.4, 5.5], dtype=np.float64)
     f34(builder, data)
 
-    array = builder.snapshot()
-    assert ak.to_list(array) == [
+    layout = builder.snapshot()
+    assert ak.to_list(layout) == [
         1.1,
         2.2,
         3.3,
@@ -1328,8 +1313,9 @@ def test_Record_content():
         field_index(builder, "four")  # ValueError: tuple.index(x): x not in tuple
 
     fill(builder)
-    array = builder.snapshot()
-    assert ak.to_list(array) == [{"one": 1.1, "three": "o", "two": 1}]  # ???
+    layout = builder.snapshot()
+    assert ak.to_list(layout) == [{"one": 1.1, "three": "o", "two": 1}]  # ???
+    assert builder.form == layout.form
 
     error = ""
     assert builder.is_valid(error), error
@@ -1355,8 +1341,8 @@ def test_Tuple_append():
         [lb.Numpy(np.float64), lb.ListOffset(np.int64, lb.Numpy(np.int32))]
     )
     f38(builder)
-    array = builder.snapshot()
-    assert ak.to_list(array) == [(1.1, [1, 2, 3])]
+    layout = builder.snapshot()
+    assert ak.to_list(layout) == [(1.1, [1, 2, 3])]
 
     error = ""
     assert builder.is_valid(error), error
@@ -1391,8 +1377,8 @@ def test_Union_append():
 
     f39(builder)
 
-    array = builder.snapshot()
-    assert ak.to_list(array) == [1.1, [1, 2, 3]]
+    layout = builder.snapshot()
+    assert ak.to_list(layout) == [1.1, [1, 2, 3]]
 
 
 def test_numba_append():
