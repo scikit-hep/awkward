@@ -133,18 +133,19 @@ class Content:
                         type(self).__name__, parameters["__array__"]
                     )
                 )
-        elif not (self.is_list or parameters.get("__list__") is None):
-            raise TypeError(
-                '{} is not allowed to have parameters["__list__"] = "{}"'.format(
-                    type(self).__name__, parameters["__list__"]
-                )
-            )
-        elif not (self.is_record or parameters.get("__record__") is None):
-            raise TypeError(
-                '{} is not allowed to have parameters["__record__"] = "{}"'.format(
-                    type(self).__name__, parameters["__record__"]
-                )
-            )
+        # TODO: enable this once we can guarantee this doesn't happen during broadcasting
+        # elif not (self.is_list or parameters.get("__list__") is None):
+        #     raise TypeError(
+        #         '{} is not allowed to have parameters["__list__"] = "{}"'.format(
+        #             type(self).__name__, parameters["__list__"]
+        #         )
+        #     )
+        # elif not (self.is_record or parameters.get("__record__") is None):
+        #     raise TypeError(
+        #         '{} is not allowed to have parameters["__record__"] = "{}"'.format(
+        #             type(self).__name__, parameters["__record__"]
+        #         )
+        #     )
 
         if not isinstance(backend, Backend):
             raise TypeError(
