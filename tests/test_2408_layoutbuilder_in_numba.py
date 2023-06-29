@@ -87,11 +87,8 @@ def test_Empty():
 
     assert str(builder.numbatype()) == "ak.lb.Empty(parameters=Literal[NoneType](None))"
 
-    builder = lb.Empty(parameters={"When I was one": "I just begun"})
-    assert (
-        str(builder.numbatype())
-        == "ak.lb.Empty(parameters=Literal[dict]({'When I was one': 'I just begun'}))"
-    )
+    builder = lb.Empty(parameters=None)
+    assert str(builder.numbatype()) == "ak.lb.Empty(parameters=Literal[NoneType](None))"
     assert builder.form == layout.form
 
 

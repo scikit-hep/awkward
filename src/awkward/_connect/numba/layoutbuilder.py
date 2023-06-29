@@ -9,6 +9,7 @@ import numpy as np
 
 import awkward as ak
 from awkward._connect.numba.growablebuffer import GrowableBuffer, GrowableBufferType
+from awkward._errors import deprecate
 from awkward._typing import final
 from awkward.forms import (
     BitMaskedForm,
@@ -399,21 +400,25 @@ def Numpy_extend(builder, data):
 @final
 class Empty(LayoutBuilder):
     def __init__(self, *, parameters=None):
+        if not (parameters is None or len(parameters) == 0):
+            deprecate(
+                f"{type(self).__name__} cannot contain parameters", version="2.2.0"
+            )
         self._init(parameters)
 
     def __repr__(self):
-        return f"ak.numba.lb.Empty(parameters={self._parameters})"
+        return f"ak.numba.lb.Empty(parameters={self.parameters})"
 
     def numbatype(self):
-        return EmptyType(numba.types.StringLiteral(self._parameters))
+        return EmptyType(numba.types.StringLiteral(self.parameters))
 
     def __len__(self):
         return 0
 
     @property
     def form(self):
-        return (
-            EmptyForm()
+        return EmptyForm(
+            parameters=self.parameters
         )  # FIXME: EmptyForm cannot contain parameters parameters=self._parameters,)
 
     def clear(self):
@@ -423,7 +428,7 @@ class Empty(LayoutBuilder):
         return True
 
     def snapshot(self) -> ak.contents.Content:
-        return ak.contents.EmptyArray(parameters=self._parameters)
+        return ak.contents.EmptyArray(parameters=self.parameters)
 
 
 class EmptyType(LayoutBuilderType):
