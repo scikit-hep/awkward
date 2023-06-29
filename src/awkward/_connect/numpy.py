@@ -401,15 +401,14 @@ def array_ufunc(ufunc, method: str, inputs, kwargs: dict[str, Any]):
                     return out
 
         if all(
-            x.parameter("__array__") is not None
-            or x.parameter("__record__") is not None
+            x.parameter("__list__") is not None or x.parameter("__record__") is not None
             for x in contents
         ):
             error_message = []
             for x in inputs:
                 if isinstance(x, ak.contents.Content):
-                    if x.parameter("__array__") is not None:
-                        error_message.append(x.parameter("__array__"))
+                    if x.parameter("__list__") is not None:
+                        error_message.append(x.parameter("__list__"))
                     elif x.parameter("__record__") is not None:
                         error_message.append(x.parameter("__record__"))
                     else:
