@@ -2017,13 +2017,24 @@ def Record_content(builder, field_name):
 
             return getter_str
 
-        # FIXME: ???
+        # FIXME: support numba.types.UnicodeType???
+        #
+        # The following test fails with: ValueError: tuple.index(x): x not in tuple
+        # 'x' in this case is 'unicode_type', not its val
+        #
+        # @numba.njit(debug=True)
+        # def f_runtime_index(x, name):
+        #     return x.content(name)
+        #
+        # content = f_runtime_index(builder, "one")
+        #
         # if isinstance(field_name, numba.types.UnicodeType):
         #     which = builder._fields.index(field_name)
-        #     def getter_str(builder, field_name):
+        #
+        #     def getter_ustr(builder, field_name):
         #         return builder._contents[which]
         #
-        #     return getter_str
+        #     return getter_ustr
 
 
 ########## Tuple #######################################################
