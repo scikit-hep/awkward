@@ -385,28 +385,6 @@ def array_ufunc(ufunc, method: str, inputs, kwargs: dict[str, Any]):
                 if out is not None:
                     return out
 
-        # Do we have any nominal types without custom overloads?
-        if any(
-            x.parameter("__list__") is not None or x.parameter("__record__") is not None
-            for x in contents
-        ):
-            error_message = []
-            for x in inputs:
-                if isinstance(x, ak.contents.Content):
-                    if x.parameter("__list__") is not None:
-                        error_message.append(x.parameter("__list__"))
-                    elif x.parameter("__record__") is not None:
-                        error_message.append(x.parameter("__record__"))
-                    else:
-                        error_message.append(type(x).__name__)
-                else:
-                    error_message.append(type(x).__name__)
-            raise TypeError(
-                "no {}.{} overloads for custom types: {}".format(
-                    type(ufunc).__module__, ufunc.__name__, ", ".join(error_message)
-                )
-            )
-
         if all(
             isinstance(x, NumpyArray) or not isinstance(x, ak.contents.Content)
             for x in inputs
@@ -433,6 +411,28 @@ def array_ufunc(ufunc, method: str, inputs, kwargs: dict[str, Any]):
             result = impl(*args, **kwargs)
 
             return (NumpyArray(result, backend=backend, parameters=parameters),)
+
+        # Do we have exclusively nominal types without custom overloads?
+        if all(
+            x.parameter("__list__") is not None or x.parameter("__record__") is not None
+            for x in contents
+        ):
+            error_message = []
+            for x in inputs:
+                if isinstance(x, ak.contents.Content):
+                    if x.parameter("__list__") is not None:
+                        error_message.append(x.parameter("__list__"))
+                    elif x.parameter("__record__") is not None:
+                        error_message.append(x.parameter("__record__"))
+                    else:
+                        error_message.append(type(x).__name__)
+                else:
+                    error_message.append(type(x).__name__)
+            raise TypeError(
+                "no {}.{} overloads for custom types: {}".format(
+                    type(ufunc).__module__, ufunc.__name__, ", ".join(error_message)
+                )
+            )
 
         return None
 
