@@ -292,6 +292,7 @@ class ReadAvroFT:
                     parameters={"__array__": "char"},
                     form_key=f"node{form_next_id+1}",
                 ),
+                parameters={"__array__": "string"},
                 form_key=f"node{form_next_id}",
             )
             declarations.append(f"output node{form_next_id+1}-data uint8 \n")
@@ -793,6 +794,7 @@ class ReadAvroFT:
                         parameters={"__array__": "char"},
                         form_key=f"node{form_next_id+2}",
                     ),
+                    parameters={"__array__": "string"},
                     form_key=f"node{form_next_id+1}",
                 ),
                 parameters={"__array__": "categorical"},

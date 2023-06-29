@@ -340,12 +340,6 @@ ak.Array(["one", "two", "three", "four"]) == ak.Array(
 
 (Without this overloaded behavior, the string comparison would yield `[True, True, True]` for `"one" == "one"` and would fail to broadcast `"three"` and `"thirty three"`.)
 
-Special behaviors for strings are implemented using the same {data}`ak.behavior` mechanism that you might use to give special behaviors to Arrays and Records.
-
-
-```{code-cell} ipython3
-ak.behavior[np.equal, "string", "string"]
-```
 
 The fact that strings are really just variable-length lists is worth keeping in mind, since they might behave in unexpectedly list-like ways. If you notice any behavior that ought to be overloded for strings, recommend it as a [feature request](https://github.com/scikit-hep/awkward-1.0/issues/new?assignees=&labels=feature&template=feature-request.md&title=).
 

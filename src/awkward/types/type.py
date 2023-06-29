@@ -45,31 +45,34 @@ class Type:
 
     _str_parameters_exclude = ("__categorical__",)
 
-    def _str_categorical_begin(self):
+    def _str_categorical_begin(self) -> str:
         if self.parameter("__categorical__") is not None:
             return "categorical[type="
         else:
             return ""
 
-    def _str_categorical_end(self):
+    def _str_categorical_end(self) -> str:
         if self.parameter("__categorical__") is not None:
             return "]"
         else:
             return ""
 
-    def _str_parameters(self):
+    def _str_parameters(self) -> str:
         out = []
         if self._parameters is not None:
             for k, v in self._parameters.items():
-                if k not in self._str_parameters_exclude:
-                    out.append(json.dumps(k) + ": " + json.dumps(v))
+                if v is None:
+                    continue
+                if k in self._str_parameters_exclude:
+                    continue
+                out.append(json.dumps(k) + ": " + json.dumps(v))
 
         if len(out) == 0:
             return None
         else:
             return "parameters={" + ", ".join(out) + "}"
 
-    def _repr_args(self):
+    def _repr_args(self) -> list[str]:
         out = []
 
         if self._parameters is not None and len(self._parameters) > 0:

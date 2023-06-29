@@ -33,12 +33,12 @@ reserved_nominal_parameters: Final = frozenset(
 )
 
 
-def from_dict(input: dict) -> Form:
+def from_dict(input: Mapping) -> Form:
     assert input is not None
     if isinstance(input, str):
         return ak.forms.NumpyForm(primitive=input)
 
-    assert isinstance(input, dict)
+    assert isinstance(input, Mapping)
     parameters = input.get("parameters", None)
     form_key = input.get("form_key", None)
 
@@ -90,7 +90,7 @@ def from_dict(input: dict) -> Form:
             contents = [from_dict(content) for content in input["contents"]]
             fields = input["fields"]
         # Old style record
-        elif isinstance(input["contents"], dict):
+        elif isinstance(input["contents"], Mapping):
             contents = []
             fields = []
             for key, content in input["contents"].items():

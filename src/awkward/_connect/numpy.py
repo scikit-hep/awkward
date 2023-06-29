@@ -1,4 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+from __future__ import annotations
+
 import collections
 import functools
 import inspect
@@ -17,10 +19,11 @@ from awkward._behavior import (
     find_ufunc,
     find_ufunc_generic,
 )
+from awkward._categorical import as_hashable
 from awkward._layout import wrap_layout
 from awkward._nplikes import to_nplike
 from awkward._regularize import is_non_string_like_iterable
-from awkward._typing import Iterator
+from awkward._typing import Any, Iterator, Mapping
 from awkward._util import Sentinel
 from awkward.contents.numpyarray import NumpyArray
 
@@ -93,26 +96,22 @@ def _to_rectilinear(arg, backend: Backend):
         return arg
 
 
-def _array_function_no_impl(func, types, args, kwargs, behavior):
-    backend = common_backend(_find_backends(chain(args, kwargs.values())))
-
-    rectilinear_args = tuple(_to_rectilinear(x, backend) for x in args)
-    rectilinear_kwargs = {k: _to_rectilinear(v, backend) for k, v in kwargs.items()}
-    result = func(*rectilinear_args, **rectilinear_kwargs)
-    # We want the result to be a layout (this will fail for functions returning non-array convertibles)
-    out = ak.operations.ak_to_layout._impl(
-        result, allow_record=True, allow_other=True, regulararray=True
-    )
-    return wrap_layout(out, behavior=behavior, allow_other=True)
-
-
-def array_function(func, types, args, kwargs, behavior):
+def array_function(func, types, args, kwargs: dict[str, Any], behavior: Mapping | None):
     function = implemented.get(func)
-    # Use NumPy's implementation
-    if function is None:
-        return _array_function_no_impl(func, types, args, kwargs, behavior)
-    else:
+    if function is not None:
         return function(*args, **kwargs)
+    # Use NumPy's implementation
+    else:
+        backend = common_backend(_find_backends(chain(args, kwargs.values())))
+
+        rectilinear_args = tuple(_to_rectilinear(x, backend) for x in args)
+        rectilinear_kwargs = {k: _to_rectilinear(v, backend) for k, v in kwargs.items()}
+        result = func(*rectilinear_args, **rectilinear_kwargs)
+        # We want the result to be a layout (this will fail for functions returning non-array convertibles)
+        out = ak.operations.ak_to_layout._impl(
+            result, allow_record=True, allow_other=True, regulararray=True
+        )
+        return wrap_layout(out, behavior=behavior, allow_other=True)
 
 
 def implements(numpy_function):
@@ -139,7 +138,7 @@ def implements(numpy_function):
     return decorator
 
 
-def _array_ufunc_custom_cast(inputs, behavior, backend):
+def _array_ufunc_custom_cast(inputs, behavior: Mapping | None, backend):
     args = [
         wrap_layout(x, behavior)
         if isinstance(x, (ak.contents.Content, ak.record.Record))
@@ -152,6 +151,9 @@ def _array_ufunc_custom_cast(inputs, behavior, backend):
         cast_fcn = find_custom_cast(x, behavior)
         if cast_fcn is not None:
             x = cast_fcn(x)
+        # String conversion
+        elif isinstance(x, (str, bytes)):
+            x = ak.to_layout([x])
         maybe_layout = ak.operations.to_layout(x, allow_record=True, allow_other=True)
         if isinstance(maybe_layout, (ak.contents.Content, ak.record.Record)):
             maybe_layout = maybe_layout.to_backend(backend)
@@ -160,7 +162,9 @@ def _array_ufunc_custom_cast(inputs, behavior, backend):
     return nextinputs
 
 
-def _array_ufunc_adjust(custom, inputs, kwargs, behavior):
+def _array_ufunc_adjust(
+    custom, inputs, kwargs: dict[str, Any], behavior: Mapping | None
+):
     args = [
         wrap_layout(x, behavior)
         if isinstance(x, (ak.contents.Content, ak.record.Record))
@@ -177,7 +181,9 @@ def _array_ufunc_adjust(custom, inputs, kwargs, behavior):
     )
 
 
-def _array_ufunc_adjust_apply(apply_ufunc, ufunc, method, inputs, kwargs, behavior):
+def _array_ufunc_adjust_apply(
+    apply_ufunc, ufunc, method, inputs, kwargs: dict[str, Any], behavior: Mapping | None
+):
     nextinputs = [wrap_layout(x, behavior, allow_other=True) for x in inputs]
     out = apply_ufunc(ufunc, method, nextinputs, kwargs)
 
@@ -211,7 +217,113 @@ def _array_ufunc_signature(ufunc, inputs):
     return tuple(signature)
 
 
-def array_ufunc(ufunc, method, inputs, kwargs):
+def _array_ufunc_categorical(
+    ufunc, method: str, inputs, kwargs: dict[str, Any], behavior: Mapping | None
+):
+    if (
+        ufunc is numpy.equal
+        and len(inputs) == 2
+        and isinstance(inputs[0], ak.contents.Content)
+        and inputs[0].is_indexed
+        and inputs[0].parameter("__array__") == "categorical"
+        and isinstance(inputs[1], ak.contents.Content)
+        and inputs[1].is_indexed
+        and inputs[1].parameter("__array__") == "categorical"
+    ):
+        assert method == "__call__"
+        one, two = inputs
+
+        one_index = numpy.asarray(one.index)
+        two_index = numpy.asarray(two.index)
+        one_content = wrap_layout(one.content, behavior)
+        two_content = wrap_layout(two.content, behavior)
+
+        if len(one_content) == len(two_content) and ak.operations.all(
+            one_content == two_content, axis=None
+        ):
+            one_mapped = one_index
+
+        else:
+            one_list = ak.operations.to_list(one_content)
+            two_list = ak.operations.to_list(two_content)
+            one_hashable = [as_hashable(x) for x in one_list]
+            two_hashable = [as_hashable(x) for x in two_list]
+            two_lookup = {x: i for i, x in enumerate(two_hashable)}
+
+            one_to_two = numpy.empty(len(one_hashable) + 1, dtype=numpy.int64)
+            for i, x in enumerate(one_hashable):
+                one_to_two[i] = two_lookup.get(x, len(two_hashable))
+            one_to_two[-1] = -1
+
+            one_mapped = one_to_two[one_index]
+
+        out = one_mapped == two_index
+        return (ak.contents.NumpyArray(out),)
+    else:
+        nextinputs = []
+        for x in inputs:
+            if isinstance(x, ak.contents.Content) and x.is_indexed:
+                nextinputs.append(wrap_layout(x.project(), behavior=behavior))
+            else:
+                nextinputs.append(wrap_layout(x, behavior=behavior, allow_other=True))
+
+        out = getattr(ufunc, method)(*nextinputs, **kwargs)
+        if not isinstance(out, tuple):
+            out = (out,)
+        return tuple(ak.to_layout(x, allow_other=True) for x in out)
+
+
+def _array_ufunc_string_likes(
+    ufunc, method: str, inputs, kwargs: dict[str, Any], behavior: Mapping | None
+):
+    assert method == "__call__"
+
+    if (
+        ufunc in (numpy.equal, numpy.not_equal)
+        and len(inputs) == 2
+        and isinstance(inputs[0], ak.contents.Content)
+        and isinstance(inputs[1], ak.contents.Content)
+        and inputs[0].parameter("__array__") in ("string", "bytestring")
+        and inputs[1].parameter("__array__") == inputs[0].parameter("__array__")
+    ):
+        left, right = inputs
+        nplike = left.backend.nplike
+
+        left = ak.without_parameters(left, highlevel=False)
+        right = ak.without_parameters(right, highlevel=False)
+
+        # first condition: string lengths must be the same
+        counts1 = nplike.asarray(
+            ak._do.reduce(left, ak._reducers.Count(), axis=-1, mask=False)
+        )
+        counts2 = nplike.asarray(
+            ak._do.reduce(right, ak._reducers.Count(), axis=-1, mask=False)
+        )
+
+        out = counts1 == counts2
+
+        # only compare characters in strings that are possibly equal (same length)
+        possible = nplike.logical_and(out, counts1)
+        possible_counts = counts1[possible]
+
+        if len(possible_counts) > 0:
+            onepossible = left[possible]
+            twopossible = right[possible]
+            reduced = ak.operations.all(
+                wrap_layout(onepossible) == wrap_layout(twopossible),
+                axis=-1,
+                highlevel=False,
+            )
+            # update same-length strings with a verdict about their characters
+            out[possible] = reduced.data
+
+        if ufunc is numpy.not_equal:
+            out = nplike.logical_not(out)
+
+        return (ak.contents.NumpyArray(out),)
+
+
+def array_ufunc(ufunc, method: str, inputs, kwargs: dict[str, Any]):
     if method != "__call__" or len(inputs) == 0 or "out" in kwargs:
         return NotImplemented
 
@@ -221,11 +333,30 @@ def array_ufunc(ufunc, method, inputs, kwargs):
     inputs = _array_ufunc_custom_cast(inputs, behavior, backend)
 
     def action(inputs, **ignore):
+        contents = [x for x in inputs if isinstance(x, ak.contents.Content)]
+
         signature = _array_ufunc_signature(ufunc, inputs)
-        custom = find_ufunc(behavior, signature)
         # Do we have a custom ufunc (an override of the given ufunc)?
+        custom = find_ufunc(behavior, signature)
         if custom is not None:
             return _array_ufunc_adjust(custom, inputs, kwargs, behavior)
+
+        # Do we have any categoricals?
+        if any(
+            x.is_indexed and x.parameter("__array__") == "categorical" for x in contents
+        ):
+            out = _array_ufunc_categorical(ufunc, method, inputs, kwargs, behavior)
+            if out is not None:
+                return out
+
+        # Do we have any strings?
+        if any(
+            x.is_list and x.parameter("__array__") in ("string", "bytestring")
+            for x in contents
+        ):
+            out = _array_ufunc_string_likes(ufunc, method, inputs, kwargs, behavior)
+            if out is not None:
+                return out
 
         if ufunc is numpy.matmul:
             raise NotImplementedError(
@@ -260,21 +391,19 @@ def array_ufunc(ufunc, method, inputs, kwargs):
             return (NumpyArray(result, backend=backend, parameters=parameters),)
 
         # Do we have a custom generic ufunc override (a function that accepts _all_ ufuncs)?
-        for x in inputs:
-            if isinstance(x, ak.contents.Content):
-                apply_ufunc = find_ufunc_generic(ufunc, x, behavior)
-                if apply_ufunc is not None:
-                    out = _array_ufunc_adjust_apply(
-                        apply_ufunc, ufunc, method, inputs, kwargs, behavior
-                    )
-                    if out is not None:
-                        return out
+        for x in contents:
+            apply_ufunc = find_ufunc_generic(ufunc, x, behavior)
+            if apply_ufunc is not None:
+                out = _array_ufunc_adjust_apply(
+                    apply_ufunc, ufunc, method, inputs, kwargs, behavior
+                )
+                if out is not None:
+                    return out
 
         if all(
             x.parameter("__array__") is not None
             or x.parameter("__record__") is not None
-            for x in inputs
-            if isinstance(x, ak.contents.Content)
+            for x in contents
         ):
             error_message = []
             for x in inputs:
