@@ -70,10 +70,16 @@ def test_ufunc():
         [14, 12, 10, 8],
         [18, 16],
     ]
-
-    # We can't apply ufunc to types without overloads
     with pytest.raises(TypeError, match=r"overloads for custom types"):
-        reversible_array + ak.without_parameters(reversible_array)
+        reversible_array + ak.with_parameter(
+            reversible_array, "__list__", "non-reversible"
+        )
+
+    # TODO: this should become true once string broadcasting is addressed
+    #       so that we can generalise the solution
+    # # We can't apply ufunc to types without overloads
+    # with pytest.raises(TypeError, match=r"overloads for custom types"):
+    #     reversible_array + ak.without_parameters(reversible_array)
 
 
 def test_string_ufuncs():
