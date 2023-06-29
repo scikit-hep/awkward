@@ -173,6 +173,7 @@ def _register():
     import awkward._connect.numba.arrayview_cuda
     import awkward._connect.numba.builder
     import awkward._connect.numba.growablebuffer
+    import awkward._connect.numba.layoutbuilder
     import awkward._connect.numba.layout
 
     n = ak.numba

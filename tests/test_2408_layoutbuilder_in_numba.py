@@ -7,7 +7,7 @@ import awkward as ak
 
 numba = pytest.importorskip("numba")
 
-import awkward._connect.numba.layoutbuilder as lb  # noqa: E402
+import awkward.numba.layoutbuilder as lb  # noqa: E402
 
 ak.numba.register_and_check()
 
@@ -776,7 +776,7 @@ def test_Numpy_from_buffer():
         growablebuffer.append(66.6)
         growablebuffer.append(77.7)
 
-        return lb._from_buffer(growablebuffer)
+        return ak._connect.numba.layoutbuilder._from_buffer(growablebuffer)
 
     out = f6()
     assert isinstance(out, lb.Numpy)
