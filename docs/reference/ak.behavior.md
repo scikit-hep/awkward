@@ -520,9 +520,7 @@ First, one must define the behavior class
 ```python
 class ReversibleArray(ak.Array):
     def reversed(self):
-        index = ak.local_index(self)
-        reversed_index = index[..., ::-1]
-        return self[reversed_index]
+        return self[..., ::-1]
 ```
 To make this behavior class available to new arrays, it must be associated with its name
 ```python
