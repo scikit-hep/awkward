@@ -349,9 +349,6 @@ def reduce(
 
 
 def validity_error(layout: Content, path: str = "layout") -> str:
-    paramcheck = layout._validity_error_parameters(path)
-    if paramcheck != "":
-        return paramcheck
     return layout._validity_error(path)
 
 

@@ -904,14 +904,6 @@ class Content:
     ):
         raise NotImplementedError
 
-    def _validity_error_parameters(self, path: str) -> str:
-        if self.parameter("__array__") == "categorical":
-            if not ak._do.is_unique(self._content):
-                return 'at {} ("{}"): __array__ = "categorical" requires contents to be unique'.format(
-                    path, type(self)
-                )
-        return ""
-
     def _validity_error(self, path: str) -> str:
         raise NotImplementedError
 
