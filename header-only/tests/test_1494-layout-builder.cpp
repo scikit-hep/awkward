@@ -1525,7 +1525,7 @@ test_Unmasked() {
   UnmaskedBuilder<NumpyBuilder<int64_t>> builder;
   assert(builder.length() == 0);
 
-  auto& subbuilder = builder.append_valid();
+  auto& subbuilder = builder.content();
   subbuilder.append(11);
   subbuilder.append(22);
   subbuilder.append(33);

@@ -1579,23 +1579,6 @@ namespace awkward {
         return content_;
       }
 
-      /// @brief Returns the reference to the builder content.
-      ///
-      /// After this, avalid element is inserted in the builder content.
-      BUILDER&
-      append_valid() noexcept {
-        return content_;
-      }
-      /// @brief Returns the reference to the builder content.
-      ///
-      /// After this, `size` number of valid elements are inserted in the builder content.
-      ///
-      /// Just an interface; not actually faster than calling append many times.
-      BUILDER&
-      extend_valid(size_t size) noexcept {
-        return content_;
-      }
-
       /// @brief Parameters for the builder form.
       const std::string&
       parameters() const noexcept {
