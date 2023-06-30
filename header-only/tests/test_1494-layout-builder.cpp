@@ -1676,12 +1676,12 @@ test_Union8_U32_Numpy_ListOffset() {
   std::string error;
   assert(builder.is_valid(error) == true);
 
-  auto &subbuilder_one = builder.append_index<0>();
+  auto &subbuilder_one = builder.append_content<0>();
   subbuilder_one.append(1.1);
 
   assert(builder.is_valid(error) == true);
 
-  auto& subbuilder_two = builder.append_index<1>();
+  auto& subbuilder_two = builder.append_content<1>();
   auto& subsubbuilder = subbuilder_two.begin_list();
   subsubbuilder.append(1);
   subsubbuilder.append(2);
@@ -1760,7 +1760,7 @@ void
   std::string error;
   assert(builder.is_valid(error) == true);
 
-  auto& subbuilder_one = builder.append_index<0>();
+  auto& subbuilder_one = builder.append_content<0>();
   auto& subsubbuilder = subbuilder_one.begin_list();
   subsubbuilder.append(1.1);
   subsubbuilder.append(3.3);
@@ -1768,7 +1768,7 @@ void
 
   assert(builder.is_valid(error) == true);
 
-  auto &subbuilder_two = builder.append_index<1>();
+  auto &subbuilder_two = builder.append_content<1>();
   subbuilder_two.set_fields(fields_map);
 
   auto& x_builder = subbuilder_two.content<Field::x>();
@@ -1779,14 +1779,14 @@ void
 
   assert(builder.is_valid(error) == true);
 
-  builder.append_index<0>();
+  builder.append_content<0>();
   subbuilder_one.begin_list();
   subsubbuilder.append(5.5);
   subbuilder_one.end_list();
 
   assert(builder.is_valid(error) == true);
 
-  builder.append_index<1>();
+  builder.append_content<1>();
   x_builder.append(2);
   y_builder.append('b');
 

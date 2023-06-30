@@ -2125,7 +2125,7 @@ namespace awkward {
       /// `index` buffer and returns the reference to the content of the current builder.
       template <std::size_t TAG>
       ContentType<TAG>&
-      append_index() noexcept {
+      append_content() noexcept {
         auto& which_content = std::get<TAG>(contents_);
         INDEX next_index = which_content.length();
 
