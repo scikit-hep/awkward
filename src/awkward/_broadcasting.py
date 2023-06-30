@@ -210,11 +210,12 @@ def parameters_of(obj: Any, default: Any = NO_PARAMETERS) -> JSONMapping | None:
 
 
 def all_or_nothing_parameters_factory(
-    parameters: Sequence[JSONMapping | None],
+    parameters: Sequence[JSONMapping | None], n_outputs: int
 ) -> List[JSONMapping | None]:
     """
     Args:
         parameters: sequence of #ak.contents.Content or other objects
+        n_outputs: required number of outputs
 
     Return a callable that creates an appropriately sized list of parameter objects.
     The parameter objects within this list are built using an "all or nothing rule":
@@ -238,15 +239,17 @@ def all_or_nothing_parameters_factory(
 
     # NB: we don't make unique copies here, so let's hope everyone
     # is well-behaved downstream!
-    return [result] * len(input_parameters)
+    return [result] * n_outputs
 
 
 def intersection_parameters_factory(
     parameters: Sequence[JSONMapping | None],
+    n_outputs: int,
 ) -> List[JSONMapping | None]:
     """
     Args:
         parameters: sequence of #ak.contents.Content or other objects
+        n_outputs: required number of outputs
 
     Return a callable that creates an appropriately sized list of parameter objects.
     The parameter objects within this list are built using an "intersection rule":
@@ -276,15 +279,17 @@ def intersection_parameters_factory(
 
     # NB: we don't make unique copies here, so let's hope everyone
     # is well-behaved downstream!
-    return [intersected_parameters] * len(input_parameters)
+    return [intersected_parameters] * n_outputs
 
 
 def one_to_one_parameters_factory(
     parameters: Sequence[JSONMapping | None],
+    n_outputs: int,
 ) -> List[JSONMapping | None]:
     """
     Args:
         parameters: sequence of #ak.contents.Content or other objects
+        n_outputs: required number of outputs
 
     Return a callable that creates an appropriately sized list of parameter objects.
     The parameter objects within this list are built using a "one-to-one rule":
@@ -295,15 +300,20 @@ def one_to_one_parameters_factory(
     content at the same position in the `inputs` sequence. If the length of the
     given contents does not match the requested list length, a ValueError is raised.
     """
-    return [p if p is not NO_PARAMETERS else None for p in parameters]
+    if n_outputs == len(parameters):
+        return [p if p is not NO_PARAMETERS else None for p in parameters]
+    else:
+        return [None] * n_outputs
 
 
 def none_parameters_factory(
     parameters: Sequence[JSONMapping | None],
+    n_outputs: int,
 ) -> List[JSONMapping | None]:
     """
     Args:
-        inputs: sequence of #ak.contents.Content or other objects
+        parameters: sequence of #ak.contents.Content or other objects
+        n_outputs: required number of outputs
 
     Return a callable that creates an appropriately sized list of parameter objects.
     The parameter objects within this list are built using an "all or nothing rule":
@@ -312,7 +322,7 @@ def none_parameters_factory(
     outputs, i.e. `[None, None, ...]`.
     """
 
-    return [None] * len(parameters)
+    return [None] * n_outputs
 
 
 # Mapping from rule enum values to factory implementations
@@ -387,7 +397,7 @@ def apply_step(
     # Load the parameter broadcasting rule implementation
     rule = options["broadcast_parameters_rule"]
     try:
-        parameters_factory_impl = BROADCAST_RULE_TO_FACTORY_IMPL[rule]
+        parameters_factory = BROADCAST_RULE_TO_FACTORY_IMPL[rule]
     except KeyError:
         raise ValueError(
             f"`broadcast_parameters_rule` should be one of {[str(x) for x in BroadcastParameterRule]}, "
@@ -449,7 +459,7 @@ def apply_step(
                 assert numoutputs == len(outcontents[-1])
             numoutputs = len(outcontents[-1])
 
-        parameters = parameters_factory_impl(nextparameters)
+        parameters = parameters_factory(nextparameters, numoutputs)
 
         return tuple(
             RecordArray(
@@ -575,7 +585,7 @@ def apply_step(
                 options,
             )
             assert isinstance(outcontent, tuple)
-            parameters = parameters_factory_impl(nextparameters)
+            parameters = parameters_factory(nextparameters, len(outcontent))
 
             return tuple(
                 RegularArray(x, dim_size, length, parameters=p)
@@ -626,7 +636,7 @@ def apply_step(
                 options,
             )
             assert isinstance(outcontent, tuple)
-            parameters = parameters_factory_impl(nextparameters)
+            parameters = parameters_factory(nextparameters, len(outcontent))
 
             if isinstance(offsets, Index):
                 return tuple(
@@ -736,7 +746,7 @@ def apply_step(
                 options,
             )
             assert isinstance(outcontent, tuple)
-            parameters = parameters_factory_impl(nextparameters)
+            parameters = parameters_factory(nextparameters, len(outcontent))
 
             return tuple(
                 ListOffsetArray(offsets, x, parameters=p)
@@ -793,7 +803,7 @@ def apply_step(
             options,
         )
         assert isinstance(outcontent, tuple)
-        parameters = parameters_factory_impl(nextparameters)
+        parameters = parameters_factory(nextparameters, len(outcontent))
 
         return tuple(
             IndexedOptionArray.simplified(index, x, parameters=p)
@@ -837,7 +847,7 @@ def apply_step(
                         i += 1
                     else:
                         nextinputs.append(x)
-
+                assert len(nextinputs) == len(nextparameters)
                 outcontents.append(
                     apply_step(
                         backend,
@@ -927,7 +937,7 @@ def apply_step(
 
             assert numoutputs is not None
 
-        parameters = parameters_factory_impl(nextparameters)
+        parameters = parameters_factory(nextparameters, numoutputs)
 
         return tuple(
             UnionArray.simplified(

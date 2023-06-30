@@ -392,10 +392,7 @@ def array_ufunc(ufunc, method: str, inputs, kwargs: dict[str, Any]):
             nplike = backend.nplike
 
             # Broadcast parameters against one another
-            parameters_factory = ak._broadcasting.intersection_parameters_factory(
-                inputs
-            )
-            (parameters,) = parameters_factory(1)
+            (parameters,) = ak._broadcasting.intersection_parameters_factory(inputs, 1)
 
             args = []
             for x in inputs:
