@@ -1923,7 +1923,7 @@ test_string_form() {
   ListOffsetBuilder<int64_t, NumpyBuilder<uint8_t>> builder;
   assert(builder.length() == 0);
 
-  auto& subbuilder = builder.begin_list();
+  auto& subbuilder = builder.content();
 
   builder.set_parameters("\"__array__\": \"string\"");
 

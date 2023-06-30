@@ -231,6 +231,12 @@ namespace awkward {
         set_id(id);
       }
 
+      /// @brief Returns the reference to the builder content.
+      BUILDER&
+      content() noexcept {
+        return content_;
+      }
+
       /// @brief Begins a list and returns the reference to the builder content.
       BUILDER&
       begin_list() noexcept {
