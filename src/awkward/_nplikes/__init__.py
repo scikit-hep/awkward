@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 
 def to_nplike(
-    array: ArrayLike, nplike: NumpyLike, *, from_nplike: NumpyLike = None
+    array: ArrayLike, nplike: NumpyLike, *, from_nplike: NumpyLike | None = None
 ) -> ArrayLike:
     if from_nplike is None:
         from_nplike = nplike_of(array, default=None)

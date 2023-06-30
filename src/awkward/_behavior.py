@@ -108,7 +108,9 @@ def find_ufunc(behavior, signature: tuple):
 
 
 def find_record_typestr(
-    behavior: None | Mapping, parameters: None | Mapping[str, Any], default: str = None
+    behavior: None | Mapping,
+    parameters: None | Mapping[str, Any],
+    default: str | None = None,
 ):
     if parameters is None:
         return default
@@ -117,7 +119,9 @@ def find_record_typestr(
 
 
 def find_array_typestr(
-    behavior: None | Mapping, parameters: None | Mapping[str, Any], default: str = None
+    behavior: None | Mapping,
+    parameters: None | Mapping[str, Any],
+    default: str | None = None,
 ):
     if parameters is None:
         return default

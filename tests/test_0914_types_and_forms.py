@@ -1,12 +1,16 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+from typing import Optional
+
 import numpy as np
 import pytest
 
 import awkward as ak
 
 
-def assert_overrides_typestr(type_, typestr: str = "override", expected: str = None):
+def assert_overrides_typestr(
+    type_, typestr: str = "override", expected: Optional[str] = None
+):
     # Assume typestr is expected result
     if expected is None:
         expected = typestr
