@@ -273,9 +273,12 @@ def intersection_parameters_factory(
             parameters_to_intersect.append(params)
     # Otherwise, build the intersected parameter dict
     else:
-        intersected_parameters = functools.reduce(
-            parameters_intersect, parameters_to_intersect
-        )
+        if len(parameters_to_intersect):
+            intersected_parameters = functools.reduce(
+                parameters_intersect, parameters_to_intersect
+            )
+        else:
+            intersected_parameters = None
 
     # NB: we don't make unique copies here, so let's hope everyone
     # is well-behaved downstream!

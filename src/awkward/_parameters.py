@@ -147,9 +147,9 @@ def parameters_union(
         if parameters is None:
             parameters = {key: value}
         else:
-            parameters = {key: value}
+            parameters[key] = value
 
-        return parameters
+    return parameters
 
 
 def parameters_are_empty(parameters: JSONMapping | None) -> bool:
