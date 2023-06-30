@@ -683,15 +683,15 @@ test_Record()
 
   std::vector<std::string> fields {"one", "two", "three"};
 
-  auto names = builder.field_names();
+  auto names = builder.fields();
 
   for (size_t i = 0; i < names.size(); i++) {
     assert(names[i] == fields[i]);
   }
 
-  auto& one_builder = builder.field<Field::one>();
-  auto& two_builder = builder.field<Field::two>();
-  auto& three_builder = builder.field<Field::three>();
+  auto& one_builder = builder.content<Field::one>();
+  auto& two_builder = builder.content<Field::two>();
+  auto& three_builder = builder.content<Field::three>();
 
   three_builder.append('a');
 
@@ -777,10 +777,10 @@ test_ListOffset_Record() {
   assert(builder.length() == 0);
 
   auto& subbuilder = builder.begin_list();
-  subbuilder.set_field_names(fields_map);
+  subbuilder.set_fields(fields_map);
 
-  auto& x_builder = subbuilder.field<Field::x>();
-  auto& y_builder = subbuilder.field<Field::y>();
+  auto& x_builder = subbuilder.content<Field::x>();
+  auto& y_builder = subbuilder.content<Field::y>();
 
   x_builder.append(1.1);
   auto& y_subbuilder = y_builder.begin_list();
@@ -899,19 +899,19 @@ test_Record_Record()
       RecordField<Field0::y, RecordBuilder<
           RecordField<Field2::w, NumpyBuilder<char>>>>
   > builder;
-  builder.set_field_names(fields_map0);
+  builder.set_fields(fields_map0);
   assert(builder.length() == 0);
 
-  auto& x_builder = builder.field<Field0::x>();
-  x_builder.set_field_names(fields_map1);
+  auto& x_builder = builder.content<Field0::x>();
+  x_builder.set_fields(fields_map1);
 
-  auto& y_builder = builder.field<Field0::y>();
-  y_builder.set_field_names(fields_map2);
+  auto& y_builder = builder.content<Field0::y>();
+  y_builder.set_fields(fields_map2);
 
-  auto& u_builder = x_builder.field<Field1::u>();
-  auto& v_builder = x_builder.field<Field1::v>();
+  auto& u_builder = x_builder.content<Field1::u>();
+  auto& v_builder = x_builder.content<Field1::v>();
 
-  auto& w_builder = y_builder.field<Field2::w>();
+  auto& w_builder = y_builder.content<Field2::w>();
 
   u_builder.append(1.1);
   auto& v_subbuilder = v_builder.begin_list();
@@ -1029,18 +1029,18 @@ test_Record_nested()
       RecordField<Field0::v, NumpyBuilder<int64_t>>,
       RecordField<Field0::w, NumpyBuilder<double>>
   > builder;
-  builder.set_field_names(fields_map0);
+  builder.set_fields(fields_map0);
   assert(builder.length() == 0);
 
-  auto& u_builder = builder.field<Field0::u>();
-  auto& v_builder = builder.field<Field0::v>();
-  auto& w_builder = builder.field<Field0::w>();
+  auto& u_builder = builder.content<Field0::u>();
+  auto& v_builder = builder.content<Field0::v>();
+  auto& w_builder = builder.content<Field0::w>();
 
   auto& u_subbuilder = u_builder.begin_list();
-  u_subbuilder.set_field_names(fields_map1);
+  u_subbuilder.set_fields(fields_map1);
 
-  auto& i_builder = u_subbuilder.field<Field1::i>();
-  auto& j_builder = u_subbuilder.field<Field1::j>();
+  auto& i_builder = u_subbuilder.content<Field1::i>();
+  auto& j_builder = u_subbuilder.content<Field1::j>();
 
   i_builder.append(1.1);
   auto& j_subbuilder = j_builder.begin_list();
@@ -1454,10 +1454,10 @@ test_IndexedOption_Record() {
   assert(builder.length() == 0);
 
   auto& subbuilder = builder.append_index();
-  subbuilder.set_field_names(fields_map);
+  subbuilder.set_fields(fields_map);
 
-  auto& x_builder = subbuilder.field<Field::x>();
-  auto& y_builder = subbuilder.field<Field::y>();
+  auto& x_builder = subbuilder.content<Field::x>();
+  auto& y_builder = subbuilder.content<Field::y>();
 
   x_builder.append(1.1);
   y_builder.append(2);
@@ -1810,10 +1810,10 @@ void
   assert(builder.is_valid(error) == true);
 
   auto &subbuilder_two = builder.append_index<1>();
-  subbuilder_two.set_field_names(fields_map);
+  subbuilder_two.set_fields(fields_map);
 
-  auto& x_builder = subbuilder_two.field<Field::x>();
-  auto& y_builder = subbuilder_two.field<Field::y>();
+  auto& x_builder = subbuilder_two.content<Field::x>();
+  auto& y_builder = subbuilder_two.content<Field::y>();
 
   x_builder.append(1);
   y_builder.append('a');

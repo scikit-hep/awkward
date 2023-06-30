@@ -798,9 +798,9 @@ namespace awkward {
 
       /// @brief Returns a vector of strings sontaining all the field names.
       const std::vector<std::string>
-      field_names() const noexcept {
+      fields() const noexcept {
         if (content_names_.empty()) {
-          return field_names_;
+          return fields_;
         } else {
           std::vector<std::string> result;
           for (auto it : content_names_) {
@@ -815,14 +815,14 @@ namespace awkward {
       /// Alternative method to set the field names besides passing the
       /// user-defined map as constructor parameter.
       void
-      set_field_names(MAP user_defined_field_id_to_name_map) noexcept {
+      set_fields(MAP user_defined_field_id_to_name_map) noexcept {
         content_names_ = user_defined_field_id_to_name_map;
       }
 
       /// @brief Returns the reference to the builder contents at `INDEX`.
       template <std::size_t INDEX>
       typename RecordFieldType<INDEX>::Builder&
-      field() noexcept {
+      content() noexcept {
         return std::get<INDEX>(contents).builder;
       }
 
@@ -882,7 +882,7 @@ namespace awkward {
           else if (length != (int64_t)lengths[i]) {
             std::stringstream out;
             out << "Record node" << id_ << " has field \""
-                << field_names().at(i) << "\" length " << lengths[i]
+                << fields().at(i) << "\" length " << lengths[i]
                 << " that differs from the first length " << length << "\n";
             error.append(out.str());
 
@@ -972,7 +972,7 @@ namespace awkward {
       template <std::size_t... S>
       void
       map_fields(std::index_sequence<S...>) noexcept {
-        field_names_ = std::vector<std::string>(
+        fields_ = std::vector<std::string>(
             {std::string(std::get<S>(contents).index_as_field())...});
       }
 
@@ -994,7 +994,7 @@ namespace awkward {
       }
 
       /// @brief Vector of strings of field names.
-      std::vector<std::string> field_names_;
+      std::vector<std::string> fields_;
 
       /// @brief User-defined map of record field names.
       UserDefinedMap content_names_;
