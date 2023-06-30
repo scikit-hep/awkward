@@ -65,9 +65,6 @@ template <unsigned SIZE, class BUILDER>
 using RegularBuilder = awkward::LayoutBuilder::Regular<SIZE, BUILDER>;
 
 template<class PRIMITIVE, class BUILDER>
-using IndexedBuilder = awkward::LayoutBuilder::Indexed<PRIMITIVE, BUILDER>;
-
-template<class PRIMITIVE, class BUILDER>
 using IndexedOptionBuilder = awkward::LayoutBuilder::IndexedOption<PRIMITIVE, BUILDER>;
 
 template<class BUILDER>
@@ -1331,19 +1328,19 @@ test_Regular_size0() {
 }
 
 void
-test_Indexed() {
-  IndexedBuilder<uint32_t, NumpyBuilder<double>> builder;
+test_Indexed_as_IndexedOption() {
+  IndexedOptionBuilder<uint32_t, NumpyBuilder<double>> builder;
   assert(builder.length() == 0);
 
-  auto& subbuilder = builder.append_index();
+  auto& subbuilder = builder.append_valid();
   subbuilder.append(1.1);
 
-  builder.append_index();
+  builder.append_valid();
   subbuilder.append(2.2);
 
   double data[3] = {3.3, 4.4, 5.5};
 
-  builder.extend_index(3);
+  builder.extend_valid(3);
   subbuilder.extend(data, 3);
 
   // [1.1, 2.2, 3.3, 4.4, 5.5]
@@ -1369,7 +1366,7 @@ test_Indexed() {
 
   assert(builder.form() ==
   "{ "
-      "\"class\": \"IndexedArray\", "
+      "\"class\": \"IndexedOptionArray\", "
       "\"index\": \"u32\", "
       "\"content\": { "
           "\"class\": \"NumpyArray\", "
@@ -1389,17 +1386,17 @@ test_IndexedOption() {
   IndexedOptionBuilder<int32_t, NumpyBuilder<double>> builder;
   assert(builder.length() == 0);
 
-  auto& subbuilder = builder.append_index();
+  auto& subbuilder = builder.append_valid();
   subbuilder.append(1.1);
 
-  builder.append_null();
+  builder.append_invalid();
 
   double data[3] = {3.3, 4.4, 5.5};
 
-  builder.extend_index(3);
+  builder.extend_valid(3);
   subbuilder.extend(data, 3);
 
-  builder.extend_null(2);
+  builder.extend_invalid(2);
 
   // [1.1, None, 3.3, 4.4, 5.5, None, None]
 
@@ -1453,7 +1450,7 @@ test_IndexedOption_Record() {
   >> builder;
   assert(builder.length() == 0);
 
-  auto& subbuilder = builder.append_index();
+  auto& subbuilder = builder.append_valid();
   subbuilder.set_fields(fields_map);
 
   auto& x_builder = subbuilder.content<Field::x>();
@@ -1462,9 +1459,9 @@ test_IndexedOption_Record() {
   x_builder.append(1.1);
   y_builder.append(2);
 
-  builder.append_null();
+  builder.append_invalid();
 
-  builder.append_index();
+  builder.append_valid();
   x_builder.append(3.3);
   y_builder.append(4);
 
@@ -1953,14 +1950,14 @@ test_string_form() {
 
 void
 test_categorical_form() {
-  IndexedBuilder<int64_t, NumpyBuilder<int64_t>> builder;
+  IndexedOptionBuilder<int64_t, NumpyBuilder<int64_t>> builder;
   assert(builder.length() == 0);
 
   builder.set_parameters("\"__array__\": \"categorical\"");
 
   assert(builder.form() ==
   "{ "
-      "\"class\": \"IndexedArray\", "
+      "\"class\": \"IndexedOptionArray\", "
       "\"index\": \"i64\", "
       "\"content\": { "
           "\"class\": \"NumpyArray\", "
@@ -1997,7 +1994,7 @@ int main(int /* argc */, char ** /* argv */) {
   test_Tuple_Numpy_ListOffset();
   test_Regular();
   test_Regular_size0();
-  test_Indexed();
+  test_Indexed_as_IndexedOption();
   test_IndexedOption();
   test_IndexedOption_Record();
   test_Unmasked();

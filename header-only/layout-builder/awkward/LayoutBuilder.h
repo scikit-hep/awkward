@@ -1352,197 +1352,6 @@ namespace awkward {
       size_t size_ = SIZE;
     };
 
-    /// @class Indexed
-    ///
-    /// @brief Builds an IndexedArray which consists of an `index` buffer. It is a
-    /// general-purpose tool for changing the order of and/or duplicating some content.
-    ///
-    /// The index values can be 64-bit signed integers `int64`, 32-bit signed integers
-    /// `int32` or 32-bit unsigned integers `uint32`.
-    ///
-    /// @tparam PRIMITIVE The type of `index` buffer.
-    /// @tparam BUILDER The type of builder content.
-    template <typename PRIMITIVE, typename BUILDER>
-    class Indexed {
-    public:
-      /// @brief Creates a new Indexed layout builder by allocating a new `index` buffer,
-      /// using `default_options` for initializing the buffer.
-      Indexed()
-          : index_(
-                awkward::GrowableBuffer<PRIMITIVE>(default_options)),
-            last_valid_(-1) {
-        size_t id = 0;
-        set_id(id);
-      }
-
-      /// @brief Creates a new Indexed layout builder by allocating a new `index`
-      /// buffer, taking `options` from {@link BuilderOptions BuilderOptions}
-      /// for initializing the buffer.
-      ///
-      /// @param options Initial size configuration of a buffer.
-      Indexed(const awkward::BuilderOptions& options)
-          : index_(awkward::GrowableBuffer<PRIMITIVE>(options)),
-            last_valid_(-1) {
-        size_t id = 0;
-        set_id(id);
-      }
-
-      /// @brief Returns the reference to the builder content.
-      BUILDER&
-      content() noexcept {
-        return content_;
-      }
-
-      /// @brief Inserts the last valid index in the `index` buffer and
-      /// returns the reference to the builder content.
-      BUILDER&
-      append_index() noexcept {
-        last_valid_ = content_.length();
-        index_.append(last_valid_);
-        return content_;
-      }
-
-      /// @brief Inserts `size` number of valid index in the `index` buffer
-      /// and returns the reference to the builder content.
-      ///
-      /// Just an interface; not actually faster than calling append many times.
-      BUILDER&
-      extend_index(size_t size) noexcept {
-        size_t start = content_.length();
-        size_t stop = start + size;
-        last_valid_ = stop - 1;
-        for (size_t i = start; i < stop; i++) {
-          index_.append(i);
-        }
-        return content_;
-      }
-
-      /// @brief Parameters for the builder form.
-      const std::string&
-      parameters() const noexcept {
-        return parameters_;
-      }
-
-      /// @brief Sets the form parameters.
-      void
-      set_parameters(std::string parameter) noexcept {
-        parameters_ = parameter;
-      }
-
-      /// @brief Assigns a unique ID to each node.
-      void
-      set_id(size_t& id) noexcept {
-        id_ = id;
-        id++;
-        content_.set_id(id);
-      }
-
-      /// @brief Discards the accumulated index and clears the content
-      /// of the builder. Also, last valid returns to `-1`.
-      void
-      clear() noexcept {
-        last_valid_ = -1;
-        index_.clear();
-        content_.clear();
-      }
-
-      /// @brief Current length of the content and the `index` buffer.
-      size_t
-      length() const noexcept {
-        return index_.length();
-      }
-
-      /// @brief Checks for validity and consistency.
-      bool
-      is_valid(std::string& error) const noexcept {
-        if (content_.length() != index_.length()) {
-          std::stringstream out;
-          out << "Indexed node" << id_ << " has content length "
-              << content_.length() << " but index length " << index_.length()
-              << "\n";
-          error.append(out.str());
-
-          return false;
-        } else if (content_.length() != last_valid_ + 1) {
-          std::stringstream out;
-          out << "Indexed node" << id_ << " has content length "
-              << content_.length() << " but last valid index is " << last_valid_
-              << "\n";
-          error.append(out.str());
-
-          return false;
-        } else {
-          return content_.is_valid(error);
-        }
-      }
-
-      /// @brief Retrieves the names and sizes (in bytes) of the buffers used
-      /// in the builder and its contents.
-      void
-      buffer_nbytes(std::map<std::string, size_t>& names_nbytes) const
-          noexcept {
-        names_nbytes["node" + std::to_string(id_) + "-index"] = index_.nbytes();
-        content_.buffer_nbytes(names_nbytes);
-      }
-
-      /// @brief Copies and concatenates all the accumulated data in each of the
-      /// buffers of the builder and its contents to user-defined pointers.
-      ///
-      /// Used to fill the buffers map by allocating it with user-defined pointers
-      /// using the same names and sizes (in bytes) obtained from #buffer_nbytes.
-      void
-      to_buffers(std::map<std::string, void*>& buffers) const noexcept {
-        index_.concatenate(reinterpret_cast<PRIMITIVE*>(
-            buffers["node" + std::to_string(id_) + "-index"]));
-        content_.to_buffers(buffers);
-      }
-
-      /// @brief Copies and concatenates all the accumulated data in the builder
-      /// to a map of user-allocated buffers.
-      ///
-      /// The map keys and the buffer sizes are obtained from #buffer_nbytes
-      void
-      to_char_buffers(std::map<std::string, uint8_t*>& buffers) const noexcept {
-        index_.concatenate(reinterpret_cast<PRIMITIVE*>(
-            buffers["node" + std::to_string(id_) + "-index"]));
-        content_.to_char_buffers(buffers);
-      }
-
-      /// @brief Generates a unique description of the builder and its
-      /// contents in the form of a JSON-like string.
-      std::string
-      form() const noexcept {
-        std::stringstream form_key;
-        form_key << "node" << id_;
-        std::string params("");
-        if (parameters_ == "") {
-        } else {
-          params = std::string(", \"parameters\": { " + parameters_ + " }");
-        }
-        return "{ \"class\": \"IndexedArray\", \"index\": \"" +
-               type_to_numpy_like<PRIMITIVE>() +
-               "\", \"content\": " + content_.form() + params +
-               ", \"form_key\": \"" + form_key.str() + "\" }";
-      }
-
-    private:
-      /// @brief Buffer of `PRIMITIVE` type.
-      ///
-      /// It specifies the index of each element.
-      GrowableBuffer<PRIMITIVE> index_;
-
-      /// @brief The content of the IndexedArray.
-      BUILDER content_;
-
-      /// @brief Form parameters.
-      std::string parameters_;
-
-      /// @brief Unique form ID.
-      size_t id_;
-
-      /// @brief Last valid index.
-      size_t last_valid_;
-    };
 
     /// @class IndexedOption
     ///
@@ -1588,7 +1397,7 @@ namespace awkward {
       /// @brief Inserts the last valid index in the `index` buffer and
       /// returns the reference to the builder content.
       BUILDER&
-      append_index() noexcept {
+      append_valid() noexcept {
         last_valid_ = content_.length();
         index_.append(last_valid_);
         return content_;
@@ -1599,7 +1408,7 @@ namespace awkward {
       ///
       /// Just an interface; not actually faster than calling append many times.
       BUILDER&
-      extend_index(size_t size) noexcept {
+      extend_valid(size_t size) noexcept {
         size_t start = content_.length();
         size_t stop = start + size;
         last_valid_ = stop - 1;
@@ -1611,7 +1420,7 @@ namespace awkward {
 
       /// @brief Inserts `-1` in the `index` buffer.
       void
-      append_null() noexcept {
+      append_invalid() noexcept {
         index_.append(-1);
       }
 
@@ -1619,7 +1428,7 @@ namespace awkward {
       ///
       /// Just an interface; not actually faster than calling append many times.
       void
-      extend_null(size_t size) noexcept {
+      extend_invalid(size_t size) noexcept {
         for (size_t i = 0; i < size; i++) {
           index_.append(-1);
         }
