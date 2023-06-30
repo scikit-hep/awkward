@@ -1635,7 +1635,7 @@ test_BitMasked() {
   subbuilder.append(1.1);
   assert(builder.length() == 1);
 
-  builder.append_null();
+  builder.append_invalid();
   subbuilder.append(-1000); // have to supply a "dummy" value
   assert(builder.length() == 2);
 
@@ -1645,7 +1645,7 @@ test_BitMasked() {
   subbuilder.extend(data, 3);
   assert(builder.length() == 5);
 
-  builder.extend_null(2);
+  builder.extend_invalid(2);
   for (size_t i = 0; i < 2; i++) {
     subbuilder.append(-1000);  // have to supply a "dummy" value
   }
