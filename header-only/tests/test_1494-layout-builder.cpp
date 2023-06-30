@@ -49,9 +49,6 @@ using ListBuilder = awkward::LayoutBuilder::List<PRIMITIVE, BUILDER>;
 
 using EmptyBuilder = awkward::LayoutBuilder::Empty;
 
-template<bool IS_TUPLE>
-using EmptyRecordBuilder = awkward::LayoutBuilder::EmptyRecord<IS_TUPLE>;
-
 template<class... BUILDERS>
 using RecordBuilder = awkward::LayoutBuilder::Record<UserDefinedMap, BUILDERS...>;
 
@@ -618,41 +615,6 @@ test_ListOffset_Empty() {
           "}, "
           "\"form_key\": \"node1\" "
       "}, "
-      "\"form_key\": \"node0\" "
-  "}");
-
-  clear_buffers(buffers);
-  builder.clear();
-  assert(builder.length() == 0);
-}
-
-void
-test_EmptyRecord() {
-  EmptyRecordBuilder<true> builder;
-  assert(builder.length() == 0);
-
-  builder.append();
-  assert(builder.length() == 1);
-
-  builder.extend(2);
-  assert(builder.length() == 3);
-
-  // [(), (), ()]
-
-  std::string error;
-  assert(builder.is_valid(error) == true);
-
-  std::map<std::string, size_t> names_nbytes = {};
-  builder.buffer_nbytes(names_nbytes);
-  assert(names_nbytes.size() == 0);
-
-  auto buffers = empty_buffers(names_nbytes);
-  builder.to_buffers(buffers);
-
-  assert(builder.form() ==
-  "{ "
-      "\"class\": \"RecordArray\", "
-      "\"contents\": [], "
       "\"form_key\": \"node0\" "
   "}");
 
@@ -1986,7 +1948,6 @@ int main(int /* argc */, char ** /* argv */) {
   test_List();
   test_Empty();
   test_ListOffset_Empty();
-  test_EmptyRecord();
   test_Record();
   test_ListOffset_Record();
   test_Record_Record();
