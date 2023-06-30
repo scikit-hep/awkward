@@ -1118,9 +1118,9 @@ test_Tuple_Numpy_ListOffset() {
   std::string error;
   assert(builder.is_valid(error) == true);
 
-  auto& subbuilder_one = builder.index<0>();
+  auto& subbuilder_one = builder.content<0>();
   subbuilder_one.append(1.1);
-  auto& subbuilder_two = builder.index<1>();
+  auto& subbuilder_two = builder.content<1>();
   auto& subsubbuilder = subbuilder_two.begin_list();
   subsubbuilder.append(1);
   subbuilder_two.end_list();

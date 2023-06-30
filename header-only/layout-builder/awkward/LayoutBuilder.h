@@ -913,7 +913,7 @@ namespace awkward {
       /// @brief Returns the reference to the builder contents at `INDEX`.
       template <std::size_t INDEX>
       TupleContentType<INDEX>&
-      index() noexcept {
+      content() noexcept {
         return std::get<INDEX>(contents);
       }
 
