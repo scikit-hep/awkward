@@ -18,7 +18,7 @@ from awkward._parameters import (
     parameters_are_equal,
     parameters_intersect,
 )
-from awkward._typing import Any, Callable, JSONMapping, List, TypeAlias
+from awkward._typing import Any, JSONMapping, List
 from awkward._util import UNSET, Sentinel
 from awkward.contents.bitmaskedarray import BitMaskedArray
 from awkward.contents.bytemaskedarray import ByteMaskedArray
@@ -194,9 +194,6 @@ class BroadcastParameterRule(str, enum.Enum):
     NONE = "none"
 
 
-BroadcastParameterFactory: TypeAlias = "Callable[[int], List[JSONMapping | None]]"
-
-
 def parameters_of(obj: Any, default: Any = NO_PARAMETERS) -> JSONMapping | None:
     """
     Args:
@@ -214,7 +211,7 @@ def parameters_of(obj: Any, default: Any = NO_PARAMETERS) -> JSONMapping | None:
 
 def all_or_nothing_parameters_factory(
     parameters: Sequence[JSONMapping | None],
-) -> BroadcastParameterFactory:
+) -> List[JSONMapping | None]:
     """
     Args:
         parameters: sequence of #ak.contents.Content or other objects
@@ -239,17 +236,14 @@ def all_or_nothing_parameters_factory(
         else:
             result = first_parameters
 
-    def apply(n_outputs: int) -> list[dict[str, Any] | None]:
-        # NB: we don't make unique copies here, so let's hope everyone
-        # is well-behaved downstream!
-        return [result] * n_outputs
-
-    return apply
+    # NB: we don't make unique copies here, so let's hope everyone
+    # is well-behaved downstream!
+    return [result] * len(input_parameters)
 
 
 def intersection_parameters_factory(
     parameters: Sequence[JSONMapping | None],
-) -> BroadcastParameterFactory:
+) -> List[JSONMapping | None]:
     """
     Args:
         parameters: sequence of #ak.contents.Content or other objects
@@ -280,17 +274,14 @@ def intersection_parameters_factory(
             parameters_intersect, parameters_to_intersect
         )
 
-    def apply(n_outputs: int) -> list[dict[str, Any] | None]:
-        # NB: we don't make unique copies here, so let's hope everyone
-        # is well-behaved downstream!
-        return [intersected_parameters] * n_outputs
-
-    return apply
+    # NB: we don't make unique copies here, so let's hope everyone
+    # is well-behaved downstream!
+    return [intersected_parameters] * len(input_parameters)
 
 
 def one_to_one_parameters_factory(
     parameters: Sequence[JSONMapping | None],
-) -> BroadcastParameterFactory:
+) -> List[JSONMapping | None]:
     """
     Args:
         parameters: sequence of #ak.contents.Content or other objects
@@ -304,21 +295,12 @@ def one_to_one_parameters_factory(
     content at the same position in the `inputs` sequence. If the length of the
     given contents does not match the requested list length, a ValueError is raised.
     """
-
-    def apply(n_outputs) -> list[dict[str, Any] | None]:
-        if n_outputs != len(parameters):
-            raise ValueError(
-                "cannot follow one-to-one parameter broadcasting rule for actions "
-                "which change the number of outputs."
-            )
-        return [p if p is not NO_PARAMETERS else None for p in parameters]
-
-    return apply
+    return [p if p is not NO_PARAMETERS else None for p in parameters]
 
 
 def none_parameters_factory(
     parameters: Sequence[JSONMapping | None],
-) -> BroadcastParameterFactory:
+) -> List[JSONMapping | None]:
     """
     Args:
         inputs: sequence of #ak.contents.Content or other objects
@@ -330,10 +312,7 @@ def none_parameters_factory(
     outputs, i.e. `[None, None, ...]`.
     """
 
-    def apply(n_outputs: int) -> list[dict[str, Any] | None]:
-        return [None] * n_outputs
-
-    return apply
+    return [None] * len(parameters)
 
 
 # Mapping from rule enum values to factory implementations
@@ -470,8 +449,8 @@ def apply_step(
                 assert numoutputs == len(outcontents[-1])
             numoutputs = len(outcontents[-1])
 
-        parameters_factory = parameters_factory_impl(nextparameters)
-        parameters = parameters_factory(numoutputs)
+        parameters = parameters_factory_impl(nextparameters)
+
         return tuple(
             RecordArray(
                 [x[i] for x in outcontents],
@@ -596,8 +575,8 @@ def apply_step(
                 options,
             )
             assert isinstance(outcontent, tuple)
-            parameters_factory = parameters_factory_impl(nextparameters)
-            parameters = parameters_factory(len(outcontent))
+            parameters = parameters_factory_impl(nextparameters)
+
             return tuple(
                 RegularArray(x, dim_size, length, parameters=p)
                 for x, p in zip(outcontent, parameters)
@@ -647,8 +626,7 @@ def apply_step(
                 options,
             )
             assert isinstance(outcontent, tuple)
-            parameters_factory = parameters_factory_impl(nextparameters)
-            parameters = parameters_factory(len(outcontent))
+            parameters = parameters_factory_impl(nextparameters)
 
             if isinstance(offsets, Index):
                 return tuple(
@@ -758,8 +736,7 @@ def apply_step(
                 options,
             )
             assert isinstance(outcontent, tuple)
-            parameters_factory = parameters_factory_impl(nextparameters)
-            parameters = parameters_factory(len(outcontent))
+            parameters = parameters_factory_impl(nextparameters)
 
             return tuple(
                 ListOffsetArray(offsets, x, parameters=p)
@@ -816,8 +793,8 @@ def apply_step(
             options,
         )
         assert isinstance(outcontent, tuple)
-        parameters_factory = parameters_factory_impl(nextparameters)
-        parameters = parameters_factory(len(outcontent))
+        parameters = parameters_factory_impl(nextparameters)
+
         return tuple(
             IndexedOptionArray.simplified(index, x, parameters=p)
             for x, p in zip(outcontent, parameters)
@@ -950,8 +927,8 @@ def apply_step(
 
             assert numoutputs is not None
 
-        parameters_factory = parameters_factory_impl(nextparameters)
-        parameters = parameters_factory(numoutputs)
+        parameters = parameters_factory_impl(nextparameters)
+
         return tuple(
             UnionArray.simplified(
                 Index8(tags),
