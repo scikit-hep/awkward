@@ -147,7 +147,7 @@ def parameters_union(
         if parameters is None:
             parameters = {key: value}
         else:
-            parameters[key] = value
+            parameters[key] = value  # pylint: disable-msg=E1137
 
     return parameters
 
