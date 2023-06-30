@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 from collections.abc import Collection
+from itertools import chain
 
-from awkward._typing import JSONMapping, JSONSerializable
+from awkward._typing import Any, JSONMapping, JSONSerializable, Set
 
 TYPE_PARAMETERS = ("__array__", "__list__", "__record__", "__categorical__")
 
@@ -97,6 +98,7 @@ def parameters_intersect(
     has_no_exclusions = len(exclude) == 0
 
     # Avoid creating `result` unless we have to
+    result = None
     for key in common_keys:
         left_value = left[key]
         # Do our keys match?
@@ -106,21 +108,10 @@ def parameters_intersect(
             and (has_no_exclusions or (key, left_value) not in exclude)
         ):
             # Exit, indicating that we want to create `result`
-            break
-    else:
-        return None
-
-    # We found a meaningful key, so create a result dict
-    result = {key: left_value}
-    for key in common_keys:
-        left_value = left[key]
-        if (
-            left_value is not None
-            and left_value == right[key]
-            and (has_no_exclusions or (key, left_value) not in exclude)
-        ):
-            result[key] = left_value
-
+            if result is None:
+                result = {key: left_value}
+            else:
+                result[key] = left_value  # pylint: disable-msg=E1137
     return result
 
 
@@ -128,44 +119,37 @@ def parameters_union(
     left: JSONMapping | None,
     right: JSONMapping | None,
     *,
-    exclude: Collection[tuple[str, JSONSerializable]] = (),
+    exclude: Set[tuple[str, Any]] = frozenset(),
 ) -> JSONMapping | None:
     """
     Args:
         left: first parameters mapping
         right: second parameters mapping
-        exclude: collection of (key, value) items to exclude
+        exclude: collection of key items to exclude
 
     Returns the merged key-value pairs of `left` and `right` as a dictionary.
 
     """
-    has_no_exclusions = len(exclude) == 0
-    if left is None:
-        if right is None:
-            return None
-        else:
-            return {
-                k: v
-                for k, v in right.items()
-                if v is not None and (has_no_exclusions or (k, v) not in exclude)
-            }
-    else:
-        result = {
-            k: v
-            for k, v in left.items()
-            if v is not None and (has_no_exclusions or (k, v) not in exclude)
-        }
-        if right is None:
-            return result
-        else:
-            for key in right:
-                right_value = right[key]
-                if right_value is not None and (
-                    has_no_exclusions or (key, right_value) not in exclude
-                ):
-                    result[key] = right_value
+    has_exclusions = len(exclude) > 0
+    items = []
+    if left is not None:
+        items.append(left.items())
+    if right is not None:
+        items.append(right.items())
 
-            return result
+    parameters = None
+    for item in chain.from_iterable(items):
+        key, value = item
+        if value is None:
+            continue
+        if has_exclusions and item in exclude:
+            continue
+        if parameters is None:
+            parameters = {key: value}
+        else:
+            parameters[key] = value  # pylint: disable-msg=E1137
+
+    return parameters
 
 
 def parameters_are_empty(parameters: JSONMapping | None) -> bool:

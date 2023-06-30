@@ -22,6 +22,7 @@ from awkward._behavior import (
 from awkward._categorical import as_hashable
 from awkward._layout import wrap_layout
 from awkward._nplikes import to_nplike
+from awkward._parameters import parameters_intersect
 from awkward._regularize import is_non_string_like_iterable
 from awkward._typing import Any, Iterator, Mapping
 from awkward._util import Sentinel
@@ -392,10 +393,9 @@ def array_ufunc(ufunc, method: str, inputs, kwargs: dict[str, Any]):
             nplike = backend.nplike
 
             # Broadcast parameters against one another
-            parameters_factory = ak._broadcasting.intersection_parameters_factory(
-                inputs
+            parameters = functools.reduce(
+                parameters_intersect, [x._parameters for x in contents]
             )
-            (parameters,) = parameters_factory(1)
 
             args = []
             for x in inputs:

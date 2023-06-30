@@ -281,7 +281,7 @@ def test_transform_float_int_2d_different_intersect():
     assert that_next.parameters == {"key": "value", "pets": [{"name": "fido"}]}
 
 
-def test_transform_float_int_2d_one_to_one_error():
+def test_transform_float_int_2d_one_to_one_none():
     this = ak.contents.ListOffsetArray(
         ak.index.Index64(np.array([0, 3, 4], dtype="int64")),
         ak.contents.NumpyArray(np.array([1.0, 2.0, 3.0, 4.0], dtype="float64")),
@@ -298,10 +298,10 @@ def test_transform_float_int_2d_one_to_one_error():
         if isinstance(layout, ak.contents.NumpyArray):
             return layout
 
-    with pytest.raises(ValueError):
-        ak.operations.ak_transform.transform(
-            apply, this, that, highlevel=False, broadcast_parameters_rule="one_to_one"
-        )
+    result = ak.operations.ak_transform.transform(
+        apply, this, that, highlevel=False, broadcast_parameters_rule="one_to_one"
+    )
+    assert result._parameters is None
 
 
 def test_transform_string_self_one_to_one():
