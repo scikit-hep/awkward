@@ -1764,7 +1764,7 @@ namespace awkward {
       ///
       /// After this, a dummy (invalid) value is inserted in the builder content.
       BUILDER&
-      append_null() noexcept {
+      append_invalid() noexcept {
         mask_.append(!valid_when_);
         return content_;
       }
@@ -1775,7 +1775,7 @@ namespace awkward {
       ///
       /// Just an interface; not actually faster than calling append many times.
       BUILDER&
-      extend_null(size_t size) noexcept {
+      extend_invalid(size_t size) noexcept {
         for (size_t i = 0; i < size; i++) {
           mask_.append(!valid_when_);
         }

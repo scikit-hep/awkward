@@ -1574,7 +1574,7 @@ test_ByteMasked() {
   auto& subbuilder = builder.append_valid();
   subbuilder.append(1.1);
 
-  builder.append_null();
+  builder.append_invalid();
   subbuilder.append(-1000); // have to supply a "dummy" value
 
   double data[3] = {3.3, 4.4, 5.5};
@@ -1582,7 +1582,7 @@ test_ByteMasked() {
   builder.extend_valid(3);
   subbuilder.extend(data, 3);
 
-  builder.extend_null(2);
+  builder.extend_invalid(2);
   for (size_t i = 0; i < 2; i++) {
     subbuilder.append(-1000);  // have to supply a "dummy" value
   }
