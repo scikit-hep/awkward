@@ -44,9 +44,6 @@ using NumpyBuilder = awkward::LayoutBuilder::Numpy<PRIMITIVE>;
 template<class PRIMITIVE, class BUILDER>
 using ListOffsetBuilder = awkward::LayoutBuilder::ListOffset<PRIMITIVE, BUILDER>;
 
-template<class PRIMITIVE, class BUILDER>
-using ListBuilder = awkward::LayoutBuilder::List<PRIMITIVE, BUILDER>;
-
 using EmptyBuilder = awkward::LayoutBuilder::Empty;
 
 template<class... BUILDERS>
@@ -436,83 +433,6 @@ test_ListOffset_ListOffset() {
               "\"primitive\": \"float64\", "
               "\"form_key\": \"node2\" "
           "}, "
-          "\"form_key\": \"node1\" "
-      "}, "
-      "\"form_key\": \"node0\" "
-  "}");
-
-  clear_buffers(buffers);
-  builder.clear();
-  assert(builder.length() == 0);
-}
-
-void
-test_List() {
-  ListBuilder<uint32_t, NumpyBuilder<double>> builder;
-  assert(builder.length() == 0);
-
-  auto& subbuilder = builder.begin_list();
-  subbuilder.append(1.1);
-  subbuilder.append(2.2);
-  subbuilder.append(3.3);
-  builder.end_list();
-
-  builder.begin_list();
-  builder.end_list();
-
-  builder.begin_list();
-  subbuilder.append(4.4);
-  subbuilder.append(5.5);
-  builder.end_list();
-
-  builder.begin_list();
-  subbuilder.append(6.6);
-
-  builder.end_list();
-
-  builder.begin_list();
-  subbuilder.append(7.7);
-  subbuilder.append(8.8);
-  subbuilder.append(9.9);
-  builder.end_list();
-
-  // [
-  //     [1.1, 2.2, 3.3],
-  //     [],
-  //     [4.4, 5.5],
-  //     [6.6],
-  //     [7.7, 8.8, 9.9],
-  // ]
-
-  std::string error;
-  assert(builder.is_valid(error) == true);
-
-  std::map<std::string, size_t> names_nbytes = {};
-  builder.buffer_nbytes(names_nbytes);
-  assert(names_nbytes.size() == 3);
-
-  auto buffers = empty_buffers(names_nbytes);
-  builder.to_buffers(buffers);
-
-  std::ostringstream out;
-  dump(out,
-       "node0-starts", (uint32_t*)buffers["node0-starts"], names_nbytes["node0-starts"]/sizeof(uint32_t),
-       "node0-stops", (uint32_t*)buffers["node0-stops"], names_nbytes["node0-stops"]/sizeof(uint32_t),
-       "node1-data", (double*)buffers["node1-data"], names_nbytes["node1-data"]/sizeof(double));
-
-  std::string check{"node0-starts: 0 3 3 5 6 \n"
-                    "node0-stops: 3 3 5 6 9 \n"
-                    "node1-data: 1.1 2.2 3.3 4.4 5.5 6.6 7.7 8.8 9.9 \n"};
-  assert(out.str().compare(check) == 0);
-
-  assert(builder.form() ==
-  "{ "
-      "\"class\": \"ListArray\", "
-      "\"starts\": \"u32\", "
-      "\"stops\": \"u32\", "
-      "\"content\": { "
-          "\"class\": \"NumpyArray\", "
-          "\"primitive\": \"float64\", "
           "\"form_key\": \"node1\" "
       "}, "
       "\"form_key\": \"node0\" "
@@ -1945,7 +1865,6 @@ int main(int /* argc */, char ** /* argv */) {
   test_Numpy_complex();
   test_ListOffset();
   test_ListOffset_ListOffset();
-  test_List();
   test_Empty();
   test_ListOffset_Empty();
   test_Record();
