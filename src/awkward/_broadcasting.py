@@ -18,7 +18,7 @@ from awkward._parameters import (
     parameters_are_equal,
     parameters_intersect,
 )
-from awkward._typing import Any, Callable, Dict, List, TypeAlias, Union
+from awkward._typing import Any, Callable, JSONMapping, List, TypeAlias
 from awkward._util import UNSET, Sentinel
 from awkward.contents.bitmaskedarray import BitMaskedArray
 from awkward.contents.bytemaskedarray import ByteMaskedArray
@@ -194,12 +194,10 @@ class BroadcastParameterRule(str, enum.Enum):
     NONE = "none"
 
 
-BroadcastParameterFactory: TypeAlias = Callable[
-    [int], List[Union[Dict[str, Any], None]]
-]
+BroadcastParameterFactory: TypeAlias = "Callable[[int], List[JSONMapping | None]]"
 
 
-def _parameters_of(obj: Any, default: Any = NO_PARAMETERS) -> Any:
+def parameters_of(obj: Any, default: Any = NO_PARAMETERS) -> JSONMapping | None:
     """
     Args:
         obj: #ak.contents.Content that holds parameters, or object
@@ -215,11 +213,11 @@ def _parameters_of(obj: Any, default: Any = NO_PARAMETERS) -> Any:
 
 
 def all_or_nothing_parameters_factory(
-    inputs: Sequence,
+    parameters: Sequence[JSONMapping | None],
 ) -> BroadcastParameterFactory:
     """
     Args:
-        inputs: sequence of #ak.contents.Content or other objects
+        parameters: sequence of #ak.contents.Content or other objects
 
     Return a callable that creates an appropriately sized list of parameter objects.
     The parameter objects within this list are built using an "all or nothing rule":
@@ -228,11 +226,9 @@ def all_or_nothing_parameters_factory(
     parameters are repeated, i.e. `[parameters, parameters, ...]`. Otherwise, a list
     of Nones is returned, i.e. `[None, None, ...]`.
     """
-    input_parameters = [
-        p for p in (_parameters_of(c) for c in inputs) if p is not NO_PARAMETERS
-    ]
+    input_parameters = [p for p in parameters if p is not NO_PARAMETERS]
 
-    parameters = None
+    result = None
     if len(input_parameters) > 0:
         # All parameters must match this first layout's parameters
         first_parameters = input_parameters[0]
@@ -241,22 +237,22 @@ def all_or_nothing_parameters_factory(
             if not parameters_are_equal(first_parameters, other_parameters):
                 break
         else:
-            parameters = first_parameters
+            result = first_parameters
 
     def apply(n_outputs: int) -> list[dict[str, Any] | None]:
         # NB: we don't make unique copies here, so let's hope everyone
         # is well-behaved downstream!
-        return [parameters] * n_outputs
+        return [result] * n_outputs
 
     return apply
 
 
 def intersection_parameters_factory(
-    inputs: Sequence,
+    parameters: Sequence[JSONMapping | None],
 ) -> BroadcastParameterFactory:
     """
     Args:
-        inputs: sequence of #ak.contents.Content or other objects
+        parameters: sequence of #ak.contents.Content or other objects
 
     Return a callable that creates an appropriately sized list of parameter objects.
     The parameter objects within this list are built using an "intersection rule":
@@ -266,20 +262,18 @@ def intersection_parameters_factory(
     `[None, None, ...]`; otherwise, the computed parameter dictionary is repeated,
     i.e. `[parameters, parameters, ...]`.
     """
-    input_parameters = [
-        p for p in (_parameters_of(c) for c in inputs) if p is not NO_PARAMETERS
-    ]
+    input_parameters = [p for p in parameters if p is not NO_PARAMETERS]
 
     intersected_parameters = None
     parameters_to_intersect = []
     # Build a list of set-like dict.items() views.
     # If we encounter None-parameters, then we stop early
     # as there can be no intersection.
-    for parameters in input_parameters:
-        if parameters_are_empty(parameters):
+    for params in input_parameters:
+        if parameters_are_empty(params):
             break
         else:
-            parameters_to_intersect.append(parameters)
+            parameters_to_intersect.append(params)
     # Otherwise, build the intersected parameter dict
     else:
         intersected_parameters = functools.reduce(
@@ -295,11 +289,11 @@ def intersection_parameters_factory(
 
 
 def one_to_one_parameters_factory(
-    inputs: Sequence,
+    parameters: Sequence[JSONMapping | None],
 ) -> BroadcastParameterFactory:
     """
     Args:
-        inputs: sequence of #ak.contents.Content or other objects
+        parameters: sequence of #ak.contents.Content or other objects
 
     Return a callable that creates an appropriately sized list of parameter objects.
     The parameter objects within this list are built using a "one-to-one rule":
@@ -310,22 +304,20 @@ def one_to_one_parameters_factory(
     content at the same position in the `inputs` sequence. If the length of the
     given contents does not match the requested list length, a ValueError is raised.
     """
-    # Find the parameters of the inputs, with None values for non-Contents
-    input_parameters = [_parameters_of(c, default=None) for c in inputs]
 
     def apply(n_outputs) -> list[dict[str, Any] | None]:
-        if n_outputs != len(inputs):
+        if n_outputs != len(parameters):
             raise ValueError(
                 "cannot follow one-to-one parameter broadcasting rule for actions "
                 "which change the number of outputs."
             )
-        return input_parameters
+        return [p if p is not NO_PARAMETERS else None for p in parameters]
 
     return apply
 
 
 def none_parameters_factory(
-    inputs: Sequence,
+    parameters: Sequence[JSONMapping | None],
 ) -> BroadcastParameterFactory:
     """
     Args:
@@ -422,7 +414,6 @@ def apply_step(
             f"`broadcast_parameters_rule` should be one of {[str(x) for x in BroadcastParameterRule]}, "
             f"but this routine received `{rule}`"
         ) from None
-    parameters_factory = parameters_factory_impl(inputs)
 
     # This whole function is one big switch statement.
     def broadcast_any_record():
@@ -430,8 +421,10 @@ def apply_step(
             raise ValueError(f"cannot broadcast records {in_function(options)}")
 
         fields, length, istuple = UNSET, UNSET, UNSET
+        nextparameters = []
         for x in contents:
             if x.is_record:
+                nextparameters.append(x._parameters)
                 if fields is UNSET:
                     fields = x.fields
                 elif set(fields) != set(x.fields):
@@ -455,6 +448,8 @@ def apply_step(
                 # Records win over tuples
                 if istuple is UNSET or not x.is_tuple:
                     istuple = False
+            else:
+                nextparameters.append(NO_PARAMETERS)
 
         outcontents, numoutputs = [], None
         for field in fields:
@@ -475,6 +470,8 @@ def apply_step(
                 assert numoutputs == len(outcontents[-1])
             numoutputs = len(outcontents[-1])
 
+        parameters_factory = parameters_factory_impl(nextparameters)
+        parameters = parameters_factory(numoutputs)
         return tuple(
             RecordArray(
                 [x[i] for x in outcontents],
@@ -482,7 +479,7 @@ def apply_step(
                 length,
                 parameters=p,
             )
-            for i, p in enumerate(parameters_factory(numoutputs))
+            for i, p in enumerate(parameters)
         )
 
     def broadcast_any_list():
@@ -551,6 +548,7 @@ def apply_step(
             # 2. any (exactly) size-1 content broadcasts to the common length
             # 3. otherwise, recurse into the content as-is
             nextinputs = []
+            nextparameters = []
             for x in inputs:
                 if isinstance(x, RegularArray):
                     x_size_known_to_be_one = (
@@ -559,6 +557,7 @@ def apply_step(
                     # If dimsize is known to be exactly zero, all contents are zero length
                     if dimsize_known_to_be_zero:
                         nextinputs.append(x.content[:0])
+                        nextparameters.append(x._parameters)
                     # If we have a known size=1 content, then broadcast it to the dimension size
                     elif dimsize_greater_than_one_if_known and x_size_known_to_be_one:
                         nextinputs.append(
@@ -566,6 +565,7 @@ def apply_step(
                                 size_one_carry_index, allow_lazy=False
                             )
                         )
+                        nextparameters.append(x._parameters)
                     # Any unknown values or sizes are assumed to be correct as-is
                     elif (
                         dim_size is unknown_length
@@ -573,6 +573,7 @@ def apply_step(
                         or x.size == dim_size
                     ):
                         nextinputs.append(x.content[: x.length * x.size])
+                        nextparameters.append(x._parameters)
                     else:
                         raise ValueError(
                             "cannot broadcast RegularArray of size "
@@ -582,6 +583,7 @@ def apply_step(
                         )
                 else:
                     nextinputs.append(x)
+                    nextparameters.append(NO_PARAMETERS)
 
             outcontent = apply_step(
                 backend,
@@ -594,6 +596,7 @@ def apply_step(
                 options,
             )
             assert isinstance(outcontent, tuple)
+            parameters_factory = parameters_factory_impl(nextparameters)
             parameters = parameters_factory(len(outcontent))
             return tuple(
                 RegularArray(x, dim_size, length, parameters=p)
@@ -605,12 +608,14 @@ def apply_step(
         elif index_nplike.known_data and all_same_offsets(backend, inputs):
             lencontent, offsets, starts, stops = None, None, None, None
             nextinputs = []
+            nextparameters = []
 
             for x in inputs:
                 if isinstance(x, ListOffsetArray):
                     offsets = x.offsets
                     lencontent = index_nplike.index_as_shape_item(offsets[-1])
                     nextinputs.append(x.content[:lencontent])
+                    nextparameters.append(x._parameters)
 
                 elif isinstance(x, ListArray):
                     starts, stops = x.starts, x.stops
@@ -623,10 +628,13 @@ def apply_step(
                             index_nplike.max(stops)
                         )
                         nextinputs.append(x.content[:lencontent])
+                        nextparameters.append(x._parameters)
                 elif isinstance(x, RegularArray):
                     nextinputs.append(x.content[: x.size * x.length])
+                    nextparameters.append(x._parameters)
                 else:
                     nextinputs.append(x)
+                    nextparameters.append(NO_PARAMETERS)
 
             outcontent = apply_step(
                 backend,
@@ -639,6 +647,7 @@ def apply_step(
                 options,
             )
             assert isinstance(outcontent, tuple)
+            parameters_factory = parameters_factory_impl(nextparameters)
             parameters = parameters_factory(len(outcontent))
 
             if isinstance(offsets, Index):
@@ -707,6 +716,7 @@ def apply_step(
             offsets = offsets_content._compact_offsets64(True)
 
             nextinputs = []
+            nextparameters = []
             for x, x_is_string in zip(inputs, input_is_string):
                 if x_is_string:
                     offsets_data = backend.index_nplike.asarray(offsets)
@@ -721,8 +731,10 @@ def apply_step(
                             ak.index.Index64(parents, nplike=index_nplike), x
                         ).project()
                     )
+                    nextparameters.append(NO_PARAMETERS)
                 elif isinstance(x, listtypes):
                     nextinputs.append(x._broadcast_tooffsets64(offsets).content)
+                    nextparameters.append(x._parameters)
                 # Handle implicit left-broadcasting (non-NumPy-like broadcasting).
                 elif options["left_broadcast"] and isinstance(x, Content):
                     nextinputs.append(
@@ -730,8 +742,10 @@ def apply_step(
                         ._broadcast_tooffsets64(offsets)
                         .content
                     )
+                    nextparameters.append(NO_PARAMETERS)
                 else:
                     nextinputs.append(x)
+                    nextparameters.append(NO_PARAMETERS)
 
             outcontent = apply_step(
                 backend,
@@ -744,6 +758,7 @@ def apply_step(
                 options,
             )
             assert isinstance(outcontent, tuple)
+            parameters_factory = parameters_factory_impl(nextparameters)
             parameters = parameters_factory(len(outcontent))
 
             return tuple(
@@ -778,13 +793,17 @@ def apply_step(
             nextindex = Index64(nextindex)
 
         nextinputs = []
+        nextparameters = []
         for x in inputs:
             if isinstance(x, optiontypes):
                 nextinputs.append(x.project(nextmask))
+                nextparameters.append(x._parameters)
             elif isinstance(x, Content):
                 nextinputs.append(IndexedOptionArray(nextindex, x).project(nextmask))
+                nextparameters.append(x._parameters)
             else:
                 nextinputs.append(x)
+                nextparameters.append(NO_PARAMETERS)
 
         outcontent = apply_step(
             backend,
@@ -797,6 +816,7 @@ def apply_step(
             options,
         )
         assert isinstance(outcontent, tuple)
+        parameters_factory = parameters_factory_impl(nextparameters)
         parameters = parameters_factory(len(outcontent))
         return tuple(
             IndexedOptionArray.simplified(index, x, parameters=p)
@@ -804,6 +824,14 @@ def apply_step(
         )
 
     def broadcast_any_union():
+        nextparameters = []
+
+        for x in inputs:
+            if isinstance(x, UnionArray):
+                nextparameters.append(x._parameters)
+            else:
+                nextparameters.append(NO_PARAMETERS)
+
         if not backend.nplike.known_data:
             # assert False
             union_num_contents = []
@@ -922,6 +950,7 @@ def apply_step(
 
             assert numoutputs is not None
 
+        parameters_factory = parameters_factory_impl(nextparameters)
         parameters = parameters_factory(numoutputs)
         return tuple(
             UnionArray.simplified(

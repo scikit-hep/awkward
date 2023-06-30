@@ -13,6 +13,7 @@ from awkward._nplikes.numpylike import ArrayLike, IndexType, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem
 from awkward._nplikes.typetracer import TypeTracer
 from awkward._parameters import (
+    TYPE_PARAMETERS,
     parameters_intersect,
     parameters_union,
     type_parameters_equal,
@@ -473,7 +474,7 @@ class IndexedArray(Content):
                 parameters=parameters_union(
                     next._parameters,
                     self._parameters,
-                    exclude=(("__array__", "categorical"),),
+                    exclude=(TYPE_PARAMETERS,),
                 )
             )
 
