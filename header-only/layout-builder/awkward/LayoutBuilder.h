@@ -573,17 +573,17 @@ namespace awkward {
         set_id(id);
       }
 
-      /// @brief Parameters for the builder form.
-      const std::string&
-      parameters() const noexcept {
-        return parameters_;
-      }
-
-      /// @brief Sets the form parameters.
-      void
-      set_parameters(std::string parameter) noexcept {
-        parameters_ = parameter;
-      }
+      // /// @brief Parameters for the builder form.
+      // const std::string&
+      // parameters() const noexcept {
+      //   return parameters_;
+      // }
+      //
+      // /// @brief Sets the form parameters.
+      // void
+      // set_parameters(std::string parameter) noexcept {
+      //   parameters_ = parameter;
+      // }
 
       void
       set_id(size_t& /* id */) noexcept {}
@@ -621,18 +621,10 @@ namespace awkward {
       /// contents in the form of a JSON-like string.
       std::string
       form() const noexcept {
-        std::string params("");
-        if (parameters_ == "") {
-        } else {
-          params = std::string(", \"parameters\": { " + parameters_ + " }");
-        }
-        return "{ \"class\": \"EmptyArray\"" + params + " }";
+        return "{ \"class\": \"EmptyArray\", \"parameters\": {} }";
       }
 
     private:
-      /// @brief Form parameters.
-      std::string parameters_;
-
       /// @brief Unique form ID.
       size_t id_;
     };
