@@ -949,6 +949,11 @@ class IndexedArray(Content):
         )
 
     def _validity_error(self, path):
+        if self.parameter("__array__") == "categorical":
+            if not ak._do.is_unique(self._content):
+                return 'at {} ("{}"): __array__ = "categorical" requires contents to be unique'.format(
+                    path, type(self)
+                )
         error = self._backend["awkward_IndexedArray_validity", self.index.dtype.type](
             self.index.data, self.index.length, self._content.length, False
         )

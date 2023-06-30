@@ -1,7 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 import awkward as ak
 from awkward._parameters import parameters_union, type_parameters_equal
-from awkward._typing import Self, final
+from awkward._typing import JSONSerializable, Self, final
 from awkward._util import UNSET
 from awkward.forms.form import Form
 
@@ -94,11 +94,13 @@ class UnmaskedForm(Form):
         else:
             return False
 
-    def purelist_parameter(self, key):
-        if self._parameters is None or key not in self._parameters:
-            return self._content.purelist_parameter(key)
-        else:
-            return self._parameters[key]
+    def purelist_parameters(self, *keys: str) -> JSONSerializable:
+        if self._parameters is not None:
+            for key in keys:
+                if key in self._parameters:
+                    return self._parameters[key]
+
+        return self._content.purelist_parameters(*keys)
 
     @property
     def purelist_isregular(self):

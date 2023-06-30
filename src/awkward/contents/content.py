@@ -101,8 +101,10 @@ class Content:
                     type(self).__name__, repr(parameters)
                 )
             )
-        else:
-            if not self.is_list and parameters.get("__array__") in (
+        # Validate built-in `__array__`
+        elif parameters.get("__array__") is not None:
+            array_name = parameters["__array__"]
+            if not self.is_list and array_name in (
                 "string",
                 "bytestring",
             ):
@@ -119,18 +121,31 @@ class Content:
                         type(self).__name__, parameters["__array__"]
                     )
                 )
-            if not self.is_indexed and parameters.get("__array__") == "categorical":
+            if not self.is_indexed and array_name == "categorical":
                 raise TypeError(
                     '{} is not allowed to have parameters["__array__"] = "{}"'.format(
                         type(self).__name__, parameters["__array__"]
                     )
                 )
-            if not self.is_record and parameters.get("__array__") == "sorted_map":
+            if not self.is_record and array_name == "sorted_map":
                 raise TypeError(
                     '{} is not allowed to have parameters["__array__"] = "{}"'.format(
                         type(self).__name__, parameters["__array__"]
                     )
                 )
+        # TODO: enable this once we can guarantee this doesn't happen during broadcasting
+        # elif not (self.is_list or parameters.get("__list__") is None):
+        #     raise TypeError(
+        #         '{} is not allowed to have parameters["__list__"] = "{}"'.format(
+        #             type(self).__name__, parameters["__list__"]
+        #         )
+        #     )
+        # elif not (self.is_record or parameters.get("__record__") is None):
+        #     raise TypeError(
+        #         '{} is not allowed to have parameters["__record__"] = "{}"'.format(
+        #             type(self).__name__, parameters["__record__"]
+        #         )
+        #     )
 
         if not isinstance(backend, Backend):
             raise TypeError(
@@ -904,14 +919,6 @@ class Content:
     ):
         raise NotImplementedError
 
-    def _validity_error_parameters(self, path: str) -> str:
-        if self.parameter("__array__") == "categorical":
-            if not ak._do.is_unique(self._content):
-                return 'at {} ("{}"): __array__ = "categorical" requires contents to be unique'.format(
-                    path, type(self)
-                )
-        return ""
-
     def _validity_error(self, path: str) -> str:
         raise NotImplementedError
 
@@ -924,10 +931,20 @@ class Content:
         Return the value of the outermost parameter matching `key` in a sequence
         of nested lists, stopping at the first record or tuple layer.
 
-         If a layer has #ak.types.UnionType, the value is only returned if all
+        If a layer has #ak.types.UnionType, the value is only returned if all
         possibilities have the same value.
         """
         return self.form_cls.purelist_parameter(self, key)
+
+    def purelist_parameters(self, *keys: str):
+        """
+        Return the value of the outermost parameter matching one of `keys` in a sequence
+        of nested lists, stopping at the first record or tuple layer.
+
+        If a layer has #ak.types.UnionType, the value is only returned if all
+        possibilities have the same value.
+        """
+        return self.form_cls.purelist_parameters(self, *keys)
 
     def _is_unique(
         self,

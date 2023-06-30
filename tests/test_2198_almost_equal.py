@@ -122,12 +122,12 @@ def test_behavior():
 
     behavior = {"custom_list": CustomList}
 
-    array = ak.with_parameter([1, 2, 3], "__array__", "custom_list", behavior=behavior)
-    other_array = ak.with_parameter([1, 2, 3], "__array__", "custom_list")
+    array = ak.with_parameter([[1, 2, 3]], "__list__", "custom_list", behavior=behavior)
+    other_array = ak.with_parameter([[1, 2, 3]], "__list__", "custom_list")
     assert not ak.almost_equal(array, other_array)
     assert ak.almost_equal(array, other_array, check_parameters=False)
 
-    another_array = ak.Array([1, 2, 3], behavior=behavior)
+    another_array = ak.Array([[1, 2, 3]], behavior=behavior)
     assert not ak.almost_equal(array, another_array)
     assert not ak.almost_equal(other_array, another_array)
 

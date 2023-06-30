@@ -510,41 +510,44 @@ One may wish to disable this by type-checking, since the functionalities are rat
 ## Adding behavior to arrays
 
 Occasionally, you may want to add behavior to an array that does not contain
-records. A good example of this is to implement strings: strings are not a
-special data type in Awkward Array as they are in many other libraries, they
-are a behavior overlaid on arrays.
+records. Historically, this mechanism was used to help implement strings (although)
+strings have since been made a part of Awkward's internals, alongside categorical types.
 
-There are four predefined string behaviors:
+Awkward Array supports adding behaviors to the list-types in an array. Let's suppose that 
+one wishes to define a special list that defines a `reversed()` method, equivalent to `array[..., ::-1]`.
 
-- {class}`ak.CharBehavior`: an array of UTF-8 encoded characters;
-- {class}`ak.ByteBehavior`: an array of unencoded characters;
-- {class}`ak.StringBehavior`: an array of variable-length UTF-8 encoded strings;
-- {class}`ak.ByteStringBehavior`: an array of variable-length unencoded bytestrings.
-
-All four override the string representations (`__str__` and `__repr__`),
-but the string behaviors additionally override equality:
-
+First, one must define the behavior class
 ```python
->>> ak.Array(["one", "two", "three"]) == ak.Array(["1", "TWO", "three"])
-<Array [False, False, True] type='3 * bool'>
+class ReversibleArray(ak.Array):
+    def reversed(self):
+        return self[..., ::-1]
+```
+To make this behavior class available to new arrays, it must be associated with its name
+```python
+ak.behavior["reversible"] = ReversibleArray
+```
+One can then add the `__list__` parameter to a list-type array to request this behavior class
+```pycon
+>>> reversible_list = ak.with_parameter([[1, 2, 3], [4], [5, 6, 7]], "__list__", "reversible")
+>>> reversible_list.reversed()
+[[3, 2, 1], [4], [7, 6, 5]]
+```
+If this list is nested within another list, the array class will not be found:
+```pycon
+>>> nested_list = ak.unflatten(reversible_list, [2, 1])
+>>> nested_list.reversed()
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+...
+AttributeError: no field named 'reversed'
 ```
 
-The only difference here is the parameter: instead of setting `"__record__"`,
-we set `"__array__"`.
-
+Just like with records, we can register a "deep" array class that will be found for all levels of list-depth, using `"*"`:
 ```python
->>> ak.Array(["one", "two", "three"]).layout
-<ListOffsetArray64>
-    <parameters>
-        <param key="__array__">"string"</param>
-    </parameters>
-    <offsets><Index64 i="[0 3 6 11]" offset="0" length="4""/></offsets>
-    <content><NumpyArray format="B" shape="11" data="0x 6f6e6574 776f7468 726565">
-        <parameters>
-            <param key="__array__">"char"</param>
-        </parameters>
-    </NumpyArray></content>
-</ListOffsetArray64>
+>>> ak.behavior["*", "reversible"] = ReversibleArray
+>>> nested_list = ak.unflatten(reversible_list, [2, 1])
+>>> nested_list.reversed()
+[[[3, 2, 1], [4]], [[7, 6, 5]]]
 ```
 
 In `ak.behaviors.string`, string behaviors are assigned with lines like
@@ -556,18 +559,17 @@ ak.behavior[np.equal, "string", "string"] = _string_equal
 
 ## Custom type names
 
-To make the string type appear as `string` in type representations, a
-`"__typestr__"` behavior is overriden (in `ak.behaviors.string`):
-
+To change the type-string representation of our custom list, a
+`"__typestr__"` behavior can be registered:
 ```python
-ak.behavior["__typestr__", "string"] = "string"
+ak.behavior["__typestr__", "reversible"] = "a-reversible-list"
 ```
 
 so that
 
 ```python
->>> ak.type(ak.Array(["one", "two", "three"]))
-3 * string
+>>> ak.type(ak.with_parameter([[1, 2, 3], [4], [5, 6, 7]], "__list__", "reversible"))
+3 * a-reversible-list
 ```
 
 ## Overriding behavior in Numba
@@ -656,9 +658,9 @@ ak.behavior["__numba_lower__", ".", record_name] = lower
 ak.behavior["__numba_typer__", "*", record_name] = typer
 ak.behavior["__numba_lower__", "*", record_name] = lower
 
-# parameters["__array__"] = array_name
-ak.behavior["__numba_typer__", array_name] = typer
-ak.behavior["__numba_lower__", array_name] = lower
+# parameters["__list__"] = list_name
+ak.behavior["__numba_typer__", list_name] = typer
+ak.behavior["__numba_lower__", list_name] = lower
 ```
 
 The `typer` function takes an

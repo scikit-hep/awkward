@@ -26,14 +26,14 @@ def get_array_class(layout, behavior):
     from awkward.highlevel import Array
 
     behavior = overlay_behavior(behavior)
-    arr = layout.parameter("__array__")
-    if isinstance(arr, str):
-        cls = behavior.get(arr)
+    list_name = layout.parameter("__list__")
+    if isinstance(list_name, str):
+        cls = behavior.get(list_name)
         if isinstance(cls, type) and issubclass(cls, Array):
             return cls
-    deeprec = layout.purelist_parameter("__record__")
-    if isinstance(deeprec, str):
-        cls = behavior.get(("*", deeprec))
+    deep_list_record_name = layout.purelist_parameters("__record__", "__list__")
+    if isinstance(deep_list_record_name, str):
+        cls = behavior.get(("*", deep_list_record_name))
         if isinstance(cls, type) and issubclass(cls, Array):
             return cls
     return Array
@@ -69,7 +69,7 @@ def find_custom_cast(obj, behavior):
 
 def find_ufunc_generic(ufunc, layout, behavior):
     behavior = overlay_behavior(behavior)
-    custom = layout.parameter("__array__")
+    custom = layout.parameter("__list__")
     if custom is None:
         custom = layout.parameter("__record__")
     if isinstance(custom, str):
@@ -126,7 +126,7 @@ def find_array_typestr(
     if parameters is None:
         return default
     behavior = overlay_behavior(behavior)
-    return behavior.get(("__typestr__", parameters.get("__array__")), default)
+    return behavior.get(("__typestr__", parameters.get("__list__")), default)
 
 
 def behavior_of(*arrays, **kwargs):
