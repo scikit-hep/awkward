@@ -298,12 +298,13 @@ def one_to_one_parameters_factory(
     `inputs`. If the two values match, then a list of parameter objects is returned,
     where each element of the returned list corresponds to the parameters of the
     content at the same position in the `inputs` sequence. If the length of the
-    given contents does not match the requested list length, a ValueError is raised.
+    given contents does not match the requested list length, the intersection of the parameters
+    is returned instead.
     """
     if n_outputs == len(parameters):
         return [p if p is not NO_PARAMETERS else None for p in parameters]
     else:
-        return [None] * n_outputs
+        return intersection_parameters_factory(parameters, n_outputs)
 
 
 def none_parameters_factory(
