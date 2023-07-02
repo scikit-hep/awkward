@@ -8,7 +8,6 @@ from collections.abc import Iterable
 from itertools import chain
 
 import numpy
-from packaging.version import parse as parse_version
 
 import awkward as ak
 from awkward._backends.backend import Backend
@@ -27,13 +26,6 @@ from awkward._regularize import is_non_string_like_iterable
 from awkward._typing import Any, Iterator, Mapping
 from awkward._util import Sentinel
 from awkward.contents.numpyarray import NumpyArray
-
-# NumPy 1.13.1 introduced NEP13, without which Awkward ufuncs won't work, which
-# would be worse than lacking a feature: it would cause unexpected output.
-# NumPy 1.17.0 introduced NEP18, which is optional (use ak.* instead of np.*).
-if parse_version(numpy.__version__) < parse_version("1.13.1"):
-    raise ImportError("NumPy 1.13.1 or later required")
-
 
 UNSUPPORTED = Sentinel("UNSUPPORTED", __name__)
 

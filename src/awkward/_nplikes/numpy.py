@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import numpy
-from packaging.version import parse as parse_version
 
 from awkward._nplikes.array_module import ArrayModuleNumpyLike
 from awkward._nplikes.dispatch import register_nplike
@@ -57,24 +56,7 @@ class Numpy(ArrayModuleNumpyLike):
         bitorder: Literal["big", "little"] = "big",
     ):
         assert not isinstance(x, PlaceholderArray)
-        if parse_version(numpy.__version__) >= parse_version("1.17.0"):
-            return numpy.packbits(x, axis=axis, bitorder=bitorder)
-        else:
-            assert axis is None, "unsupported argument value for axis given"
-            if bitorder == "little":
-                if len(x) % 8 == 0:
-                    ready_to_pack = x
-                else:
-                    ready_to_pack = numpy.empty(
-                        int(numpy.ceil(len(x) / 8.0)) * 8,
-                        dtype=x.dtype,
-                    )
-                    ready_to_pack[: len(x)] = x
-                    ready_to_pack[len(x) :] = 0
-                return numpy.packbits(ready_to_pack.reshape(-1, 8)[:, ::-1].reshape(-1))
-            else:
-                assert bitorder == "bit"
-                return numpy.packbits(x)
+        return numpy.packbits(x, axis=axis, bitorder=bitorder)
 
     def unpackbits(
         self,
@@ -85,14 +67,4 @@ class Numpy(ArrayModuleNumpyLike):
         bitorder: Literal["big", "little"] = "big",
     ):
         assert not isinstance(x, PlaceholderArray)
-        if parse_version(numpy.__version__) >= parse_version("1.17.0"):
-            return numpy.unpackbits(x, axis=axis, count=count, bitorder=bitorder)
-        else:
-            assert axis is None, "unsupported argument value for axis given"
-            assert count is None, "unsupported argument value for count given"
-            ready_to_bitswap = numpy.unpackbits(x)
-            if bitorder == "little":
-                return ready_to_bitswap.reshape(-1, 8)[:, ::-1].reshape(-1)
-            else:
-                assert bitorder == "bit"
-                return ready_to_bitswap
+        return numpy.unpackbits(x, axis=axis, count=count, bitorder=bitorder)
