@@ -45,7 +45,7 @@ classifiers = [
     "Topic :: Utilities",
 ]
 license = {text = "BSD-3-Clause"}
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 
 [project.urls]
 Homepage = "https://github.com/scikit-hep/awkward-1.0"
