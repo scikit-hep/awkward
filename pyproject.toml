@@ -316,3 +316,6 @@ mccabe.max-complexity = 100
 "numpy".msg = "Use `numpy = ak._nplikes.Numpy.instance()` instead"
 "jax".msg = "Use `jax = ak._nplikes.Jax.instance()` instead"
 "cupy".msg = "Use `cupy = ak._nplikes.Cupy.instance()` instead"
+
+[tool.nbqa.addopts]
+pyupgrade = ["--py38-plus"]
