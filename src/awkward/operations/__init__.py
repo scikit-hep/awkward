@@ -38,6 +38,7 @@ from awkward.operations.ak_from_jax import *
 from awkward.operations.ak_from_json import *
 from awkward.operations.ak_from_numpy import *
 from awkward.operations.ak_from_parquet import *
+from awkward.operations.ak_from_pint import *
 from awkward.operations.ak_from_rdataframe import *
 from awkward.operations.ak_from_regular import *
 from awkward.operations.ak_full_like import *
@@ -86,6 +87,7 @@ from awkward.operations.ak_to_list import *
 from awkward.operations.ak_to_numpy import *
 from awkward.operations.ak_to_packed import *
 from awkward.operations.ak_to_parquet import *
+from awkward.operations.ak_to_pint import *
 from awkward.operations.ak_to_rdataframe import *
 from awkward.operations.ak_to_regular import *
 from awkward.operations.ak_transform import *
