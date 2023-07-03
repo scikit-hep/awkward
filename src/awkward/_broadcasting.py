@@ -12,13 +12,13 @@ from awkward._backends.backend import Backend
 from awkward._backends.dispatch import backend_of
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
-from awkward._nplikes.shape import unknown_length
+from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._parameters import (
     parameters_are_empty,
     parameters_are_equal,
     parameters_intersect,
 )
-from awkward._typing import Any, JSONMapping, List
+from awkward._typing import Any, JSONMapping, List, TypedDict
 from awkward._util import UNSET, Sentinel
 from awkward.contents.bitmaskedarray import BitMaskedArray
 from awkward.contents.bytemaskedarray import ByteMaskedArray
@@ -47,20 +47,31 @@ optiontypes = (IndexedOptionArray, ByteMaskedArray, BitMaskedArray, UnmaskedArra
 listtypes = (ListOffsetArray, ListArray, RegularArray)
 
 
-def length_of_broadcast(inputs: Sequence) -> int | type[unknown_length]:
-    maxlen = -1
+class BroadcastOptions(TypedDict):
+    allow_records: bool
+    left_broadcast: bool
+    right_broadcast: bool
+    numpy_to_regular: bool
+    regular_to_jagged: bool
+    function_name: str | None
+    broadcast_parameters_rule: BroadcastParameterRule
 
+
+def length_of_broadcast(inputs: Sequence) -> int | type[unknown_length]:
+    maxlen = 1
+
+    has_seen_unknown_length: bool = False
     for x in inputs:
         if isinstance(x, Content):
             if x.length is unknown_length:
-                return x.length
-
+                has_seen_unknown_length = True
+                continue
             maxlen = max(maxlen, x.length)
 
-    if maxlen < 0:
-        maxlen = 1
-
-    return maxlen
+    if has_seen_unknown_length:
+        return unknown_length
+    else:
+        return maxlen
 
 
 def broadcast_pack(inputs: Sequence, isscalar: list[bool]) -> list:
@@ -109,9 +120,9 @@ def in_function(options):
         return " in " + options["function_name"]
 
 
-def checklength(inputs, options):
+def ensure_common_length(inputs, options: BroadcastOptions) -> ShapeItem:
     it = iter(inputs)
-    length: int
+    length: ShapeItem = unknown_length
     for content in it:
         if content.length is not unknown_length:
             length = content.length
@@ -130,6 +141,7 @@ def checklength(inputs, options):
                     in_function(options),
                 )
             )
+    return length
 
 
 def all_same_offsets(backend: Backend, inputs: list) -> bool:
@@ -352,7 +364,7 @@ def apply_step(
     depth_context,
     lateral_context,
     behavior,
-    options,
+    options: BroadcastOptions,
 ):
     # This happens when descending anyway, but setting the option does it before action.
     if options["numpy_to_regular"] and any(
@@ -395,8 +407,8 @@ def apply_step(
                     options,
                 )
 
-    # Now all lengths must agree.
-    checklength(contents, options)
+    # Now all lengths must agree
+    length = ensure_common_length(contents, options)
 
     # Load the parameter broadcasting rule implementation
     rule = options["broadcast_parameters_rule"]
@@ -413,14 +425,24 @@ def apply_step(
         if not options["allow_records"]:
             raise ValueError(f"cannot broadcast records {in_function(options)}")
 
-        fields, length, istuple = UNSET, UNSET, UNSET
+        fields: list[str] | None = UNSET
+        frozen_fields: frozenset[str] | None = UNSET
+
+        is_tuple: bool = True
         nextparameters = []
+
         for x in contents:
             if x.is_record:
                 nextparameters.append(x._parameters)
+
+                if x.is_tuple:
+                    continue
+
+                # Check fields match
                 if fields is UNSET:
-                    fields = x.fields
-                elif set(fields) != set(x.fields):
+                    fields = x._fields
+                    frozen_fields = frozenset(x._fields)
+                elif frozen_fields != frozenset(x.fields):
                     raise ValueError(
                         "cannot broadcast records because fields don't "
                         "match{}:\n    {}\n    {}".format(
@@ -429,22 +451,13 @@ def apply_step(
                             ", ".join(sorted(x.fields)),
                         )
                     )
-                if length is UNSET:
-                    length = x.length
-                elif length != x.length:
-                    raise ValueError(
-                        "cannot broadcast RecordArray of length {} "
-                        "with RecordArray of length {}{}".format(
-                            length, x.length, in_function(options)
-                        )
-                    )
                 # Records win over tuples
-                if istuple is UNSET or not x.is_tuple:
-                    istuple = False
+                is_tuple = False
             else:
                 nextparameters.append(NO_PARAMETERS)
 
-        outcontents, numoutputs = [], None
+        numoutputs = None
+        outcontents = []
         for field in fields:
             outcontents.append(
                 apply_step(
@@ -459,16 +472,17 @@ def apply_step(
                 )
             )
             assert isinstance(outcontents[-1], tuple)
-            if numoutputs is not None:
+            if numoutputs is None:
+                numoutputs = len(outcontents[-1])
+            else:
                 assert numoutputs == len(outcontents[-1])
-            numoutputs = len(outcontents[-1])
 
         parameters = parameters_factory(nextparameters, numoutputs)
 
         return tuple(
             RecordArray(
                 [x[i] for x in outcontents],
-                None if istuple else fields,
+                None if is_tuple else fields,
                 length,
                 parameters=p,
             )
@@ -479,55 +493,46 @@ def apply_step(
         index_nplike = backend.index_nplike
         # All regular?
         if all(x.is_regular or not x.is_list for x in contents):
-            # Ensure all layouts have same length
-            length = None
-            for x in contents:
-                if length is None:
-                    length = x.length
-                elif length is not unknown_length and x.length is not unknown_length:
-                    assert length == x.length
-            assert length is not None
+            it_regular_contents = iter(c for c in contents if c.is_regular)
 
-            # Determine the size of the broadcast result
-            dim_size = None
-            for x in contents:
-                if not x.is_regular:
-                    continue
-
-                # Any unknown length sets max_size to unknown
-                if x.size is unknown_length:
-                    dim_size = unknown_length
-                # Any zero-length column triggers zero broadcasting
-                elif x.size == 0:
-                    dim_size = 0
+            # Find known size out of our contents
+            dim_size: ShapeItem
+            for content in it_regular_contents:
+                if content.size is not unknown_length:
+                    dim_size = content.size
                     break
-                # Take first size as dim_size
-                elif dim_size is None:
-                    dim_size = x.size
-                # If the dim_size is unknown, we can't compare
-                elif dim_size is unknown_length:
-                    continue
-                else:
-                    dim_size = max(dim_size, x.size)
+            else:
+                dim_size = unknown_length
+            # Now we know that we have at least one layout with concrete size, let's check the remainder
+            if not (dim_size is unknown_length or dim_size == 0):
+                # Determine the size of the broadcast result
+                for content in it_regular_contents:
+                    # Any unknown lengths can't be compared
+                    if content.size is unknown_length:
+                        continue
+                    # Any zero-length column triggers zero broadcasting
+                    if content.size == 0:
+                        dim_size = 0
+                        break
+                    else:
+                        dim_size = max(dim_size, content.size)
 
-            dimsize_greater_than_one_if_known = (
-                dim_size is unknown_length or dim_size > 1
-            )
-            dimsize_known_to_be_zero = dim_size is not unknown_length and dim_size == 0
+            dimsize_maybe_broadcastable = dim_size is unknown_length or dim_size > 1
+            dimsize_is_zero = dim_size is not unknown_length and dim_size == 0
 
             # Build a broadcast index for size=1 contents
             size_one_carry_index = None
-            for x in contents:
-                if x.is_regular:
-                    x_size_known_to_be_one = (
-                        x.size is not unknown_length and x.size == 1
+            for content in contents:
+                if content.is_regular:
+                    content_size_maybe_one = (
+                        content.size is not unknown_length and content.size == 1
                     )
-                    if dimsize_greater_than_one_if_known and x_size_known_to_be_one:
+                    if dimsize_maybe_broadcastable and content_size_maybe_one:
                         # For any (N, 1) array, we know we'll broadcast to (N, M) where M is maxsize
                         size_one_carry_index = Index64(
                             index_nplike.repeat(
                                 index_nplike.arange(
-                                    index_nplike.shape_item_as_index(x.length),
+                                    index_nplike.shape_item_as_index(content.length),
                                     dtype=np.int64,
                                 ),
                                 index_nplike.shape_item_as_index(dim_size),
@@ -542,40 +547,42 @@ def apply_step(
             # 3. otherwise, recurse into the content as-is
             nextinputs = []
             nextparameters = []
-            for x in inputs:
-                if isinstance(x, RegularArray):
-                    x_size_known_to_be_one = (
-                        x.size is not unknown_length and x.size == 1
+            for content in inputs:
+                if isinstance(content, RegularArray):
+                    content_size_maybe_one = (
+                        content.size is not unknown_length and content.size == 1
                     )
                     # If dimsize is known to be exactly zero, all contents are zero length
-                    if dimsize_known_to_be_zero:
-                        nextinputs.append(x.content[:0])
-                        nextparameters.append(x._parameters)
+                    if dimsize_is_zero:
+                        nextinputs.append(content.content[:0])
+                        nextparameters.append(content._parameters)
                     # If we have a known size=1 content, then broadcast it to the dimension size
-                    elif dimsize_greater_than_one_if_known and x_size_known_to_be_one:
+                    elif dimsize_maybe_broadcastable and content_size_maybe_one:
                         nextinputs.append(
-                            x.content[: x.length * x.size]._carry(
+                            content.content[: content.length * content.size]._carry(
                                 size_one_carry_index, allow_lazy=False
                             )
                         )
-                        nextparameters.append(x._parameters)
+                        nextparameters.append(content._parameters)
                     # Any unknown values or sizes are assumed to be correct as-is
                     elif (
                         dim_size is unknown_length
-                        or x.size is unknown_length
-                        or x.size == dim_size
+                        or content.size is unknown_length
+                        or content.size == dim_size
                     ):
-                        nextinputs.append(x.content[: x.length * x.size])
-                        nextparameters.append(x._parameters)
+                        nextinputs.append(
+                            content.content[: content.length * content.size]
+                        )
+                        nextparameters.append(content._parameters)
                     else:
                         raise ValueError(
                             "cannot broadcast RegularArray of size "
                             "{} with RegularArray of size {} {}".format(
-                                x.size, dim_size, in_function(options)
+                                content.size, dim_size, in_function(options)
                             )
                         )
                 else:
-                    nextinputs.append(x)
+                    nextinputs.append(content)
                     nextparameters.append(NO_PARAMETERS)
 
             outcontent = apply_step(
@@ -603,30 +610,30 @@ def apply_step(
             nextinputs = []
             nextparameters = []
 
-            for x in inputs:
-                if isinstance(x, ListOffsetArray):
-                    offsets = x.offsets
+            for content in inputs:
+                if isinstance(content, ListOffsetArray):
+                    offsets = content.offsets
                     lencontent = index_nplike.index_as_shape_item(offsets[-1])
-                    nextinputs.append(x.content[:lencontent])
-                    nextparameters.append(x._parameters)
+                    nextinputs.append(content.content[:lencontent])
+                    nextparameters.append(content._parameters)
 
-                elif isinstance(x, ListArray):
-                    starts, stops = x.starts, x.stops
+                elif isinstance(content, ListArray):
+                    starts, stops = content.starts, content.stops
                     if (starts.length is not unknown_length and starts.length == 0) or (
                         stops.length is not unknown_length and stops.length == 0
                     ):
-                        nextinputs.append(x.content[:0])
+                        nextinputs.append(content.content[:0])
                     else:
                         lencontent = index_nplike.index_as_shape_item(
                             index_nplike.max(stops)
                         )
-                        nextinputs.append(x.content[:lencontent])
-                        nextparameters.append(x._parameters)
-                elif isinstance(x, RegularArray):
-                    nextinputs.append(x.content[: x.size * x.length])
-                    nextparameters.append(x._parameters)
+                        nextinputs.append(content.content[:lencontent])
+                        nextparameters.append(content._parameters)
+                elif isinstance(content, RegularArray):
+                    nextinputs.append(content.content[: content.size * content.length])
+                    nextparameters.append(content._parameters)
                 else:
-                    nextinputs.append(x)
+                    nextinputs.append(content)
                     nextparameters.append(NO_PARAMETERS)
 
             outcontent = apply_step(
@@ -672,9 +679,9 @@ def apply_step(
             offsets_content = None
             all_content_strings = True
             input_is_string = []
-            for x in inputs:
-                if isinstance(x, Content):
-                    content_is_string = x.parameter("__array__") in {
+            for content in inputs:
+                if isinstance(content, Content):
+                    content_is_string = content.parameter("__array__") in {
                         "string",
                         "bytestring",
                     }
@@ -682,8 +689,12 @@ def apply_step(
                     if not content_is_string:
                         all_content_strings = False
                         # Take the offsets from the first irregular list
-                        if x.is_list and not x.is_regular and offsets_content is None:
-                            offsets_content = x
+                        if (
+                            content.is_list
+                            and not content.is_regular
+                            and offsets_content is None
+                        ):
+                            offsets_content = content
                     input_is_string.append(content_is_string)
                 else:
                     input_is_string.append(False)
@@ -709,7 +720,7 @@ def apply_step(
 
             nextinputs = []
             nextparameters = []
-            for x, x_is_string in zip(inputs, input_is_string):
+            for content, x_is_string in zip(inputs, input_is_string):
                 if x_is_string:
                     offsets_data = backend.index_nplike.asarray(offsets)
                     counts = offsets_data[1:] - offsets_data[:-1]
@@ -720,23 +731,23 @@ def apply_step(
                     )
                     nextinputs.append(
                         ak.contents.IndexedArray(
-                            ak.index.Index64(parents, nplike=index_nplike), x
+                            ak.index.Index64(parents, nplike=index_nplike), content
                         ).project()
                     )
                     nextparameters.append(NO_PARAMETERS)
-                elif isinstance(x, listtypes):
-                    nextinputs.append(x._broadcast_tooffsets64(offsets).content)
-                    nextparameters.append(x._parameters)
+                elif isinstance(content, listtypes):
+                    nextinputs.append(content._broadcast_tooffsets64(offsets).content)
+                    nextparameters.append(content._parameters)
                 # Handle implicit left-broadcasting (non-NumPy-like broadcasting).
-                elif options["left_broadcast"] and isinstance(x, Content):
+                elif options["left_broadcast"] and isinstance(content, Content):
                     nextinputs.append(
-                        RegularArray(x, 1, x.length)
+                        RegularArray(content, 1, content.length)
                         ._broadcast_tooffsets64(offsets)
                         .content
                     )
                     nextparameters.append(NO_PARAMETERS)
                 else:
-                    nextinputs.append(x)
+                    nextinputs.append(content)
                     nextparameters.append(NO_PARAMETERS)
 
             outcontent = apply_step(
@@ -1064,12 +1075,12 @@ def broadcast_and_apply(
     behavior,
     depth_context=None,
     lateral_context=None,
-    allow_records=True,
-    left_broadcast=True,
-    right_broadcast=True,
-    numpy_to_regular=False,
-    regular_to_jagged=False,
-    function_name=None,
+    allow_records: bool = True,
+    left_broadcast: bool = True,
+    right_broadcast: bool = True,
+    numpy_to_regular: bool = False,
+    regular_to_jagged: bool = False,
+    function_name: str | None = None,
     broadcast_parameters_rule=BroadcastParameterRule.INTERSECT,
 ):
     backend = backend_of(*inputs)
