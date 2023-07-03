@@ -18,7 +18,7 @@ from awkward._parameters import (
     parameters_are_equal,
     parameters_intersect,
 )
-from awkward._typing import Any, JSONMapping, List
+from awkward._typing import Any, JSONMapping, List, TypedDict
 from awkward._util import UNSET, Sentinel
 from awkward.contents.bitmaskedarray import BitMaskedArray
 from awkward.contents.bytemaskedarray import ByteMaskedArray
@@ -344,6 +344,16 @@ def left_broadcast_to(content: Content, depth: int) -> Content:
     return content
 
 
+class BroadcastOptions(TypedDict):
+    allow_records: bool
+    left_broadcast: bool
+    right_broadcast: bool
+    numpy_to_regular: bool
+    regular_to_jagged: bool
+    function_name: str | None
+    broadcast_parameters_rule: BroadcastParameterRule
+
+
 def apply_step(
     backend: Backend,
     inputs: Sequence,
@@ -352,7 +362,7 @@ def apply_step(
     depth_context,
     lateral_context,
     behavior,
-    options,
+    options: BroadcastOptions,
 ):
     # This happens when descending anyway, but setting the option does it before action.
     if options["numpy_to_regular"] and any(
@@ -1064,12 +1074,12 @@ def broadcast_and_apply(
     behavior,
     depth_context=None,
     lateral_context=None,
-    allow_records=True,
-    left_broadcast=True,
-    right_broadcast=True,
-    numpy_to_regular=False,
-    regular_to_jagged=False,
-    function_name=None,
+    allow_records: bool = True,
+    left_broadcast: bool = True,
+    right_broadcast: bool = True,
+    numpy_to_regular: bool = False,
+    regular_to_jagged: bool = False,
+    function_name: str | None = None,
     broadcast_parameters_rule=BroadcastParameterRule.INTERSECT,
 ):
     backend = backend_of(*inputs)
