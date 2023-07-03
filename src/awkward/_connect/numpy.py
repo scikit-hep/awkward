@@ -470,7 +470,6 @@ def array_ufunc(ufunc, method: str, inputs, kwargs: dict[str, Any]):
 
             return (NumpyArray(result, backend=backend, parameters=parameters),)
 
-
         # If we aren't at the leaves, and we have any records, broadcasting will subsequently fail
         # Let's present a nicer error message
         elif all(x.is_record for x in inputs if isinstance(x, ak.contents.Content)):
