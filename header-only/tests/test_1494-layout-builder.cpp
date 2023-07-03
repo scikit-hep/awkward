@@ -44,13 +44,7 @@ using NumpyBuilder = awkward::LayoutBuilder::Numpy<PRIMITIVE>;
 template<class PRIMITIVE, class BUILDER>
 using ListOffsetBuilder = awkward::LayoutBuilder::ListOffset<PRIMITIVE, BUILDER>;
 
-template<class PRIMITIVE, class BUILDER>
-using ListBuilder = awkward::LayoutBuilder::List<PRIMITIVE, BUILDER>;
-
 using EmptyBuilder = awkward::LayoutBuilder::Empty;
-
-template<bool IS_TUPLE>
-using EmptyRecordBuilder = awkward::LayoutBuilder::EmptyRecord<IS_TUPLE>;
 
 template<class... BUILDERS>
 using RecordBuilder = awkward::LayoutBuilder::Record<UserDefinedMap, BUILDERS...>;
@@ -63,9 +57,6 @@ using TupleBuilder = awkward::LayoutBuilder::Tuple<BUILDERS...>;
 
 template <unsigned SIZE, class BUILDER>
 using RegularBuilder = awkward::LayoutBuilder::Regular<SIZE, BUILDER>;
-
-template<class PRIMITIVE, class BUILDER>
-using IndexedBuilder = awkward::LayoutBuilder::Indexed<PRIMITIVE, BUILDER>;
 
 template<class PRIMITIVE, class BUILDER>
 using IndexedOptionBuilder = awkward::LayoutBuilder::IndexedOption<PRIMITIVE, BUILDER>;
@@ -453,83 +444,6 @@ test_ListOffset_ListOffset() {
 }
 
 void
-test_List() {
-  ListBuilder<uint32_t, NumpyBuilder<double>> builder;
-  assert(builder.length() == 0);
-
-  auto& subbuilder = builder.begin_list();
-  subbuilder.append(1.1);
-  subbuilder.append(2.2);
-  subbuilder.append(3.3);
-  builder.end_list();
-
-  builder.begin_list();
-  builder.end_list();
-
-  builder.begin_list();
-  subbuilder.append(4.4);
-  subbuilder.append(5.5);
-  builder.end_list();
-
-  builder.begin_list();
-  subbuilder.append(6.6);
-
-  builder.end_list();
-
-  builder.begin_list();
-  subbuilder.append(7.7);
-  subbuilder.append(8.8);
-  subbuilder.append(9.9);
-  builder.end_list();
-
-  // [
-  //     [1.1, 2.2, 3.3],
-  //     [],
-  //     [4.4, 5.5],
-  //     [6.6],
-  //     [7.7, 8.8, 9.9],
-  // ]
-
-  std::string error;
-  assert(builder.is_valid(error) == true);
-
-  std::map<std::string, size_t> names_nbytes = {};
-  builder.buffer_nbytes(names_nbytes);
-  assert(names_nbytes.size() == 3);
-
-  auto buffers = empty_buffers(names_nbytes);
-  builder.to_buffers(buffers);
-
-  std::ostringstream out;
-  dump(out,
-       "node0-starts", (uint32_t*)buffers["node0-starts"], names_nbytes["node0-starts"]/sizeof(uint32_t),
-       "node0-stops", (uint32_t*)buffers["node0-stops"], names_nbytes["node0-stops"]/sizeof(uint32_t),
-       "node1-data", (double*)buffers["node1-data"], names_nbytes["node1-data"]/sizeof(double));
-
-  std::string check{"node0-starts: 0 3 3 5 6 \n"
-                    "node0-stops: 3 3 5 6 9 \n"
-                    "node1-data: 1.1 2.2 3.3 4.4 5.5 6.6 7.7 8.8 9.9 \n"};
-  assert(out.str().compare(check) == 0);
-
-  assert(builder.form() ==
-  "{ "
-      "\"class\": \"ListArray\", "
-      "\"starts\": \"u32\", "
-      "\"stops\": \"u32\", "
-      "\"content\": { "
-          "\"class\": \"NumpyArray\", "
-          "\"primitive\": \"float64\", "
-          "\"form_key\": \"node1\" "
-      "}, "
-      "\"form_key\": \"node0\" "
-  "}");
-
-  clear_buffers(buffers);
-  builder.clear();
-  assert(builder.length() == 0);
-}
-
-void
 test_Empty() {
   EmptyBuilder builder;
   assert(builder.length() == 0);
@@ -630,41 +544,6 @@ test_ListOffset_Empty() {
 }
 
 void
-test_EmptyRecord() {
-  EmptyRecordBuilder<true> builder;
-  assert(builder.length() == 0);
-
-  builder.append();
-  assert(builder.length() == 1);
-
-  builder.extend(2);
-  assert(builder.length() == 3);
-
-  // [(), (), ()]
-
-  std::string error;
-  assert(builder.is_valid(error) == true);
-
-  std::map<std::string, size_t> names_nbytes = {};
-  builder.buffer_nbytes(names_nbytes);
-  assert(names_nbytes.size() == 0);
-
-  auto buffers = empty_buffers(names_nbytes);
-  builder.to_buffers(buffers);
-
-  assert(builder.form() ==
-  "{ "
-      "\"class\": \"RecordArray\", "
-      "\"contents\": [], "
-      "\"form_key\": \"node0\" "
-  "}");
-
-  clear_buffers(buffers);
-  builder.clear();
-  assert(builder.length() == 0);
-}
-
-void
 test_Record()
 {
   enum Field : std::size_t {one, two, three};
@@ -683,15 +562,15 @@ test_Record()
 
   std::vector<std::string> fields {"one", "two", "three"};
 
-  auto names = builder.field_names();
+  auto names = builder.fields();
 
   for (size_t i = 0; i < names.size(); i++) {
     assert(names[i] == fields[i]);
   }
 
-  auto& one_builder = builder.field<Field::one>();
-  auto& two_builder = builder.field<Field::two>();
-  auto& three_builder = builder.field<Field::three>();
+  auto& one_builder = builder.content<Field::one>();
+  auto& two_builder = builder.content<Field::two>();
+  auto& three_builder = builder.content<Field::three>();
 
   three_builder.append('a');
 
@@ -777,10 +656,10 @@ test_ListOffset_Record() {
   assert(builder.length() == 0);
 
   auto& subbuilder = builder.begin_list();
-  subbuilder.set_field_names(fields_map);
+  subbuilder.set_fields(fields_map);
 
-  auto& x_builder = subbuilder.field<Field::x>();
-  auto& y_builder = subbuilder.field<Field::y>();
+  auto& x_builder = subbuilder.content<Field::x>();
+  auto& y_builder = subbuilder.content<Field::y>();
 
   x_builder.append(1.1);
   auto& y_subbuilder = y_builder.begin_list();
@@ -899,19 +778,19 @@ test_Record_Record()
       RecordField<Field0::y, RecordBuilder<
           RecordField<Field2::w, NumpyBuilder<char>>>>
   > builder;
-  builder.set_field_names(fields_map0);
+  builder.set_fields(fields_map0);
   assert(builder.length() == 0);
 
-  auto& x_builder = builder.field<Field0::x>();
-  x_builder.set_field_names(fields_map1);
+  auto& x_builder = builder.content<Field0::x>();
+  x_builder.set_fields(fields_map1);
 
-  auto& y_builder = builder.field<Field0::y>();
-  y_builder.set_field_names(fields_map2);
+  auto& y_builder = builder.content<Field0::y>();
+  y_builder.set_fields(fields_map2);
 
-  auto& u_builder = x_builder.field<Field1::u>();
-  auto& v_builder = x_builder.field<Field1::v>();
+  auto& u_builder = x_builder.content<Field1::u>();
+  auto& v_builder = x_builder.content<Field1::v>();
 
-  auto& w_builder = y_builder.field<Field2::w>();
+  auto& w_builder = y_builder.content<Field2::w>();
 
   u_builder.append(1.1);
   auto& v_subbuilder = v_builder.begin_list();
@@ -1029,18 +908,18 @@ test_Record_nested()
       RecordField<Field0::v, NumpyBuilder<int64_t>>,
       RecordField<Field0::w, NumpyBuilder<double>>
   > builder;
-  builder.set_field_names(fields_map0);
+  builder.set_fields(fields_map0);
   assert(builder.length() == 0);
 
-  auto& u_builder = builder.field<Field0::u>();
-  auto& v_builder = builder.field<Field0::v>();
-  auto& w_builder = builder.field<Field0::w>();
+  auto& u_builder = builder.content<Field0::u>();
+  auto& v_builder = builder.content<Field0::v>();
+  auto& w_builder = builder.content<Field0::w>();
 
   auto& u_subbuilder = u_builder.begin_list();
-  u_subbuilder.set_field_names(fields_map1);
+  u_subbuilder.set_fields(fields_map1);
 
-  auto& i_builder = u_subbuilder.field<Field1::i>();
-  auto& j_builder = u_subbuilder.field<Field1::j>();
+  auto& i_builder = u_subbuilder.content<Field1::i>();
+  auto& j_builder = u_subbuilder.content<Field1::j>();
 
   i_builder.append(1.1);
   auto& j_subbuilder = j_builder.begin_list();
@@ -1159,9 +1038,9 @@ test_Tuple_Numpy_ListOffset() {
   std::string error;
   assert(builder.is_valid(error) == true);
 
-  auto& subbuilder_one = builder.index<0>();
+  auto& subbuilder_one = builder.content<0>();
   subbuilder_one.append(1.1);
-  auto& subbuilder_two = builder.index<1>();
+  auto& subbuilder_two = builder.content<1>();
   auto& subsubbuilder = subbuilder_two.begin_list();
   subsubbuilder.append(1);
   subbuilder_two.end_list();
@@ -1331,19 +1210,19 @@ test_Regular_size0() {
 }
 
 void
-test_Indexed() {
-  IndexedBuilder<uint32_t, NumpyBuilder<double>> builder;
+test_Indexed_as_IndexedOption() {
+  IndexedOptionBuilder<uint32_t, NumpyBuilder<double>> builder;
   assert(builder.length() == 0);
 
-  auto& subbuilder = builder.append_index();
+  auto& subbuilder = builder.append_valid();
   subbuilder.append(1.1);
 
-  builder.append_index();
+  builder.append_valid();
   subbuilder.append(2.2);
 
   double data[3] = {3.3, 4.4, 5.5};
 
-  builder.extend_index(3);
+  builder.extend_valid(3);
   subbuilder.extend(data, 3);
 
   // [1.1, 2.2, 3.3, 4.4, 5.5]
@@ -1369,7 +1248,7 @@ test_Indexed() {
 
   assert(builder.form() ==
   "{ "
-      "\"class\": \"IndexedArray\", "
+      "\"class\": \"IndexedOptionArray\", "
       "\"index\": \"u32\", "
       "\"content\": { "
           "\"class\": \"NumpyArray\", "
@@ -1389,17 +1268,17 @@ test_IndexedOption() {
   IndexedOptionBuilder<int32_t, NumpyBuilder<double>> builder;
   assert(builder.length() == 0);
 
-  auto& subbuilder = builder.append_index();
+  auto& subbuilder = builder.append_valid();
   subbuilder.append(1.1);
 
-  builder.append_null();
+  builder.append_invalid();
 
   double data[3] = {3.3, 4.4, 5.5};
 
-  builder.extend_index(3);
+  builder.extend_valid(3);
   subbuilder.extend(data, 3);
 
-  builder.extend_null(2);
+  builder.extend_invalid(2);
 
   // [1.1, None, 3.3, 4.4, 5.5, None, None]
 
@@ -1453,18 +1332,18 @@ test_IndexedOption_Record() {
   >> builder;
   assert(builder.length() == 0);
 
-  auto& subbuilder = builder.append_index();
-  subbuilder.set_field_names(fields_map);
+  auto& subbuilder = builder.append_valid();
+  subbuilder.set_fields(fields_map);
 
-  auto& x_builder = subbuilder.field<Field::x>();
-  auto& y_builder = subbuilder.field<Field::y>();
+  auto& x_builder = subbuilder.content<Field::x>();
+  auto& y_builder = subbuilder.content<Field::y>();
 
   x_builder.append(1.1);
   y_builder.append(2);
 
-  builder.append_null();
+  builder.append_invalid();
 
-  builder.append_index();
+  builder.append_valid();
   x_builder.append(3.3);
   y_builder.append(4);
 
@@ -1528,7 +1407,7 @@ test_Unmasked() {
   UnmaskedBuilder<NumpyBuilder<int64_t>> builder;
   assert(builder.length() == 0);
 
-  auto& subbuilder = builder.append_valid();
+  auto& subbuilder = builder.content();
   subbuilder.append(11);
   subbuilder.append(22);
   subbuilder.append(33);
@@ -1577,7 +1456,7 @@ test_ByteMasked() {
   auto& subbuilder = builder.append_valid();
   subbuilder.append(1.1);
 
-  builder.append_null();
+  builder.append_invalid();
   subbuilder.append(-1000); // have to supply a "dummy" value
 
   double data[3] = {3.3, 4.4, 5.5};
@@ -1585,7 +1464,7 @@ test_ByteMasked() {
   builder.extend_valid(3);
   subbuilder.extend(data, 3);
 
-  builder.extend_null(2);
+  builder.extend_invalid(2);
   for (size_t i = 0; i < 2; i++) {
     subbuilder.append(-1000);  // have to supply a "dummy" value
   }
@@ -1638,7 +1517,7 @@ test_BitMasked() {
   subbuilder.append(1.1);
   assert(builder.length() == 1);
 
-  builder.append_null();
+  builder.append_invalid();
   subbuilder.append(-1000); // have to supply a "dummy" value
   assert(builder.length() == 2);
 
@@ -1648,7 +1527,7 @@ test_BitMasked() {
   subbuilder.extend(data, 3);
   assert(builder.length() == 5);
 
-  builder.extend_null(2);
+  builder.extend_invalid(2);
   for (size_t i = 0; i < 2; i++) {
     subbuilder.append(-1000);  // have to supply a "dummy" value
   }
@@ -1717,12 +1596,12 @@ test_Union8_U32_Numpy_ListOffset() {
   std::string error;
   assert(builder.is_valid(error) == true);
 
-  auto &subbuilder_one = builder.append_index<0>();
+  auto &subbuilder_one = builder.append_content<0>();
   subbuilder_one.append(1.1);
 
   assert(builder.is_valid(error) == true);
 
-  auto& subbuilder_two = builder.append_index<1>();
+  auto& subbuilder_two = builder.append_content<1>();
   auto& subsubbuilder = subbuilder_two.begin_list();
   subsubbuilder.append(1);
   subsubbuilder.append(2);
@@ -1801,7 +1680,7 @@ void
   std::string error;
   assert(builder.is_valid(error) == true);
 
-  auto& subbuilder_one = builder.append_index<0>();
+  auto& subbuilder_one = builder.append_content<0>();
   auto& subsubbuilder = subbuilder_one.begin_list();
   subsubbuilder.append(1.1);
   subsubbuilder.append(3.3);
@@ -1809,25 +1688,25 @@ void
 
   assert(builder.is_valid(error) == true);
 
-  auto &subbuilder_two = builder.append_index<1>();
-  subbuilder_two.set_field_names(fields_map);
+  auto &subbuilder_two = builder.append_content<1>();
+  subbuilder_two.set_fields(fields_map);
 
-  auto& x_builder = subbuilder_two.field<Field::x>();
-  auto& y_builder = subbuilder_two.field<Field::y>();
+  auto& x_builder = subbuilder_two.content<Field::x>();
+  auto& y_builder = subbuilder_two.content<Field::y>();
 
   x_builder.append(1);
   y_builder.append('a');
 
   assert(builder.is_valid(error) == true);
 
-  builder.append_index<0>();
+  builder.append_content<0>();
   subbuilder_one.begin_list();
   subsubbuilder.append(5.5);
   subbuilder_one.end_list();
 
   assert(builder.is_valid(error) == true);
 
-  builder.append_index<1>();
+  builder.append_content<1>();
   x_builder.append(2);
   y_builder.append('b');
 
@@ -1953,14 +1832,14 @@ test_string_form() {
 
 void
 test_categorical_form() {
-  IndexedBuilder<int64_t, NumpyBuilder<int64_t>> builder;
+  IndexedOptionBuilder<int64_t, NumpyBuilder<int64_t>> builder;
   assert(builder.length() == 0);
 
   builder.set_parameters("\"__array__\": \"categorical\"");
 
   assert(builder.form() ==
   "{ "
-      "\"class\": \"IndexedArray\", "
+      "\"class\": \"IndexedOptionArray\", "
       "\"index\": \"i64\", "
       "\"content\": { "
           "\"class\": \"NumpyArray\", "
@@ -1986,10 +1865,8 @@ int main(int /* argc */, char ** /* argv */) {
   test_Numpy_complex();
   test_ListOffset();
   test_ListOffset_ListOffset();
-  test_List();
   test_Empty();
   test_ListOffset_Empty();
-  test_EmptyRecord();
   test_Record();
   test_ListOffset_Record();
   test_Record_Record();
@@ -1997,7 +1874,7 @@ int main(int /* argc */, char ** /* argv */) {
   test_Tuple_Numpy_ListOffset();
   test_Regular();
   test_Regular_size0();
-  test_Indexed();
+  test_Indexed_as_IndexedOption();
   test_IndexedOption();
   test_IndexedOption_Record();
   test_Unmasked();

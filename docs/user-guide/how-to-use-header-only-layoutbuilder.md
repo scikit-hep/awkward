@@ -106,7 +106,7 @@ UserDefinedMap fields_map({
 
 ```{code-cell}
 template<class... BUILDERS>
-using RecordBuilder = awkward::LayoutBuilder::Record<UserDefinedMap, BUILDERS...>; 
+using RecordBuilder = awkward::LayoutBuilder::Record<UserDefinedMap, BUILDERS...>;
 
 template<std::size_t field_name, class BUILDER>
 using RecordField = awkward::LayoutBuilder::Field<field_name, BUILDER>;
@@ -136,26 +136,26 @@ RecordBuilder<
 > builder(fields_map);
 ```
 
-Second Method: The user-defined `fields_map` can be passed a parameter in `set_field_names()`.
+Second Method: The user-defined `fields_map` can be passed a parameter in `set_fields()`.
 
 ```{code-cell}
-builder.set_field_names(fields_map);
+builder.set_fields(fields_map);
 ```
 
-The `field_names()` method can be used to check if field names are set correctly in the Record Builder or not.
+The `fields()` method can be used to check if field names are set correctly in the Record Builder or not.
 
 ```{code-cell}
 std::vector<std::string> fields {"one", "two"};
 
-auto names = builder.field_names();
+auto names = builder.fields();
 names
 ```
 
 Assign each field content to a `fieldname_builder` builder which will be used to fill the Builder buffers.
 
 ```{code-cell}
-auto& one_builder = builder.field<Field::one>();
-auto& two_builder = builder.field<Field::two>();
+auto& one_builder = builder.content<Field::one>();
+auto& two_builder = builder.content<Field::two>();
 ```
 
 Append the data in the fields using `append()`. In case of ListOffsetArray, append the data between `begin_list()` and `end_list()`.
@@ -265,7 +265,7 @@ py::object snapshot_builder(const T& builder)
     // as Awkward Array calls `frombuffer` to convert to the correct type
     py::dict container;
     for (auto it: buffers) {
-        
+
         // Create capsule that frees the allocated data when out of scope
         py::capsule free_when_done(it.second, [](void *data) {
             uint8_t* dataPtr = reinterpret_cast<uint8_t*>(data);
@@ -274,7 +274,7 @@ py::object snapshot_builder(const T& builder)
 
         // Adopt the memory filled by `to_buffers` as a NumPy array
         // We only need to return a "buffer" here, but py::array_t let's
-        // us associate a capsule for destruction, which means that 
+        // us associate a capsule for destruction, which means that
         // Python can own this memory. Therefore, we use py::array_t
         uint8_t* data = reinterpret_cast<uint8_t*>(it.second);
         container[py::str(it.first)] = py::array_t<uint8_t>(
@@ -285,7 +285,7 @@ py::object snapshot_builder(const T& builder)
         );
     }
     return from_buffers(builder.form(), builder.length(), container);
-    
+
 }
 ```
 
