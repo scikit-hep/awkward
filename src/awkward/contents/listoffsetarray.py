@@ -260,7 +260,12 @@ class ListOffsetArray(Content):
             )
 
     def to_RegularArray(self):
-        start, stop = self._offsets[0], self._offsets[self._offsets.length - 1]
+        start, stop = (
+            self._offsets[0],
+            self._offsets[
+                self._backend.index_nplike.shape_item_as_index(self._offsets.length - 1)
+            ],
+        )
         content = self._content._getitem_range(start, stop)
         _size = Index64.empty(1, self._backend.index_nplike)
         assert (
