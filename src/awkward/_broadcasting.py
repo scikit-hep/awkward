@@ -721,21 +721,7 @@ def apply_step(
             nextinputs = []
             nextparameters = []
             for content, x_is_string in zip(inputs, input_is_string):
-                if x_is_string:
-                    offsets_data = backend.index_nplike.asarray(offsets)
-                    counts = offsets_data[1:] - offsets_data[:-1]
-                    if ak._util.win or ak._util.bits32:
-                        counts = index_nplike.astype(counts, dtype=np.int32)
-                    parents = index_nplike.repeat(
-                        index_nplike.arange(counts.size, dtype=counts.dtype), counts
-                    )
-                    nextinputs.append(
-                        ak.contents.IndexedArray(
-                            ak.index.Index64(parents, nplike=index_nplike), content
-                        ).project()
-                    )
-                    nextparameters.append(NO_PARAMETERS)
-                elif isinstance(content, listtypes):
+                if isinstance(content, listtypes) and not x_is_string:
                     nextinputs.append(content._broadcast_tooffsets64(offsets).content)
                     nextparameters.append(content._parameters)
                 # Handle implicit left-broadcasting (non-NumPy-like broadcasting).
