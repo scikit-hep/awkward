@@ -66,8 +66,7 @@ def length_of_broadcast(inputs: Sequence) -> int | type[unknown_length]:
             if x.length is unknown_length:
                 has_seen_unknown_length = True
                 continue
-            else:
-                maxlen = max(maxlen, x.length)
+            maxlen = max(maxlen, x.length)
 
     if has_seen_unknown_length:
         return unknown_length
@@ -438,22 +437,22 @@ def apply_step(
 
                 if x.is_tuple:
                     continue
-                else:
-                    # Check fields match
-                    if fields is UNSET:
-                        fields = x._fields
-                        frozen_fields = frozenset(x._fields)
-                    elif frozen_fields != frozenset(x.fields):
-                        raise ValueError(
-                            "cannot broadcast records because fields don't "
-                            "match{}:\n    {}\n    {}".format(
-                                in_function(options),
-                                ", ".join(sorted(fields)),
-                                ", ".join(sorted(x.fields)),
-                            )
+
+                # Check fields match
+                if fields is UNSET:
+                    fields = x._fields
+                    frozen_fields = frozenset(x._fields)
+                elif frozen_fields != frozenset(x.fields):
+                    raise ValueError(
+                        "cannot broadcast records because fields don't "
+                        "match{}:\n    {}\n    {}".format(
+                            in_function(options),
+                            ", ".join(sorted(fields)),
+                            ", ".join(sorted(x.fields)),
                         )
-                    # Records win over tuples
-                    is_tuple = False
+                    )
+                # Records win over tuples
+                is_tuple = False
             else:
                 nextparameters.append(NO_PARAMETERS)
 
@@ -512,7 +511,7 @@ def apply_step(
                     if content.size is unknown_length:
                         continue
                     # Any zero-length column triggers zero broadcasting
-                    elif content.size == 0:
+                    if content.size == 0:
                         dim_size = 0
                         break
                     else:
