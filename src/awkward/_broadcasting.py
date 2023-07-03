@@ -58,19 +58,21 @@ class BroadcastOptions(TypedDict):
 
 
 def length_of_broadcast(inputs: Sequence) -> int | type[unknown_length]:
-    maxlen = -1
+    maxlen = 1
 
+    has_seen_unknown_length: bool = False
     for x in inputs:
         if isinstance(x, Content):
             if x.length is unknown_length:
-                return x.length
+                has_seen_unknown_length = True
+                continue
+            else:
+                maxlen = max(maxlen, x.length)
 
-            maxlen = max(maxlen, x.length)
-
-    if maxlen < 0:
-        maxlen = 1
-
-    return maxlen
+    if has_seen_unknown_length:
+        return unknown_length
+    else:
+        return maxlen
 
 
 def broadcast_pack(inputs: Sequence, isscalar: list[bool]) -> list:
