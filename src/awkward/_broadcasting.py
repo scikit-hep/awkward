@@ -47,6 +47,16 @@ optiontypes = (IndexedOptionArray, ByteMaskedArray, BitMaskedArray, UnmaskedArra
 listtypes = (ListOffsetArray, ListArray, RegularArray)
 
 
+class BroadcastOptions(TypedDict):
+    allow_records: bool
+    left_broadcast: bool
+    right_broadcast: bool
+    numpy_to_regular: bool
+    regular_to_jagged: bool
+    function_name: str | None
+    broadcast_parameters_rule: BroadcastParameterRule
+
+
 def length_of_broadcast(inputs: Sequence) -> int | type[unknown_length]:
     maxlen = -1
 
@@ -109,7 +119,7 @@ def in_function(options):
         return " in " + options["function_name"]
 
 
-def ensure_common_length(inputs, options) -> ShapeItem:
+def ensure_common_length(inputs, options: BroadcastOptions) -> ShapeItem:
     it = iter(inputs)
     length: int
     for content in it:
@@ -343,16 +353,6 @@ def left_broadcast_to(content: Content, depth: int) -> Content:
     for _ in range(content.purelist_depth, depth):
         content = RegularArray(content, 1, content.length)
     return content
-
-
-class BroadcastOptions(TypedDict):
-    allow_records: bool
-    left_broadcast: bool
-    right_broadcast: bool
-    numpy_to_regular: bool
-    regular_to_jagged: bool
-    function_name: str | None
-    broadcast_parameters_rule: BroadcastParameterRule
 
 
 def apply_step(
