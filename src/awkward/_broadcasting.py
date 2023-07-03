@@ -12,7 +12,7 @@ from awkward._backends.backend import Backend
 from awkward._backends.dispatch import backend_of
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
-from awkward._nplikes.shape import unknown_length
+from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._parameters import (
     parameters_are_empty,
     parameters_are_equal,
@@ -109,7 +109,7 @@ def in_function(options):
         return " in " + options["function_name"]
 
 
-def checklength(inputs, options):
+def checklength(inputs, options) -> ShapeItem:
     it = iter(inputs)
     length: int
     for content in it:
@@ -130,6 +130,7 @@ def checklength(inputs, options):
                     in_function(options),
                 )
             )
+    return length
 
 
 def all_same_offsets(backend: Backend, inputs: list) -> bool:
@@ -423,38 +424,42 @@ def apply_step(
         if not options["allow_records"]:
             raise ValueError(f"cannot broadcast records {in_function(options)}")
 
-        fields, length, istuple = UNSET, UNSET, UNSET
+        fields: list[str] | None = UNSET
+        frozen_fields: frozenset[str] | None = UNSET
+
+        is_tuple: bool = True
         nextparameters = []
+
+        # Ensure all layouts have same length
+        length = checklength(contents, options)
+
         for x in contents:
             if x.is_record:
                 nextparameters.append(x._parameters)
-                if fields is UNSET:
-                    fields = x.fields
-                elif set(fields) != set(x.fields):
-                    raise ValueError(
-                        "cannot broadcast records because fields don't "
-                        "match{}:\n    {}\n    {}".format(
-                            in_function(options),
-                            ", ".join(sorted(fields)),
-                            ", ".join(sorted(x.fields)),
+
+                if x.is_tuple:
+                    continue
+                else:
+                    # Check fields match
+                    if fields is UNSET:
+                        fields = x._fields
+                        frozen_fields = frozenset(x._fields)
+                    elif frozen_fields != frozenset(x.fields):
+                        raise ValueError(
+                            "cannot broadcast records because fields don't "
+                            "match{}:\n    {}\n    {}".format(
+                                in_function(options),
+                                ", ".join(sorted(fields)),
+                                ", ".join(sorted(x.fields)),
+                            )
                         )
-                    )
-                if length is UNSET:
-                    length = x.length
-                elif length != x.length:
-                    raise ValueError(
-                        "cannot broadcast RecordArray of length {} "
-                        "with RecordArray of length {}{}".format(
-                            length, x.length, in_function(options)
-                        )
-                    )
-                # Records win over tuples
-                if istuple is UNSET or not x.is_tuple:
-                    istuple = False
+                    # Records win over tuples
+                    is_tuple = False
             else:
                 nextparameters.append(NO_PARAMETERS)
 
-        outcontents, numoutputs = [], None
+        numoutputs = None
+        outcontents = []
         for field in fields:
             outcontents.append(
                 apply_step(
@@ -469,16 +474,17 @@ def apply_step(
                 )
             )
             assert isinstance(outcontents[-1], tuple)
-            if numoutputs is not None:
+            if numoutputs is None:
+                numoutputs = len(outcontents[-1])
+            else:
                 assert numoutputs == len(outcontents[-1])
-            numoutputs = len(outcontents[-1])
 
         parameters = parameters_factory(nextparameters, numoutputs)
 
         return tuple(
             RecordArray(
                 [x[i] for x in outcontents],
-                None if istuple else fields,
+                None if is_tuple else fields,
                 length,
                 parameters=p,
             )
