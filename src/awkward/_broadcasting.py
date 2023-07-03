@@ -109,7 +109,7 @@ def in_function(options):
         return " in " + options["function_name"]
 
 
-def checklength(inputs, options) -> ShapeItem:
+def ensure_common_length(inputs, options) -> ShapeItem:
     it = iter(inputs)
     length: int
     for content in it:
@@ -406,8 +406,8 @@ def apply_step(
                     options,
                 )
 
-    # Now all lengths must agree.
-    checklength(contents, options)
+    # Now all lengths must agree
+    length = ensure_common_length(contents, options)
 
     # Load the parameter broadcasting rule implementation
     rule = options["broadcast_parameters_rule"]
@@ -429,9 +429,6 @@ def apply_step(
 
         is_tuple: bool = True
         nextparameters = []
-
-        # Ensure all layouts have same length
-        length = checklength(contents, options)
 
         for x in contents:
             if x.is_record:
@@ -495,9 +492,6 @@ def apply_step(
         index_nplike = backend.index_nplike
         # All regular?
         if all(x.is_regular or not x.is_list for x in contents):
-            # Ensure all layouts have same length
-            length = checklength(contents, options)
-
             # Determine the size of the broadcast result
             dim_size = None
             for x in contents:
