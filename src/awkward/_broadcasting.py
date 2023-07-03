@@ -34,7 +34,6 @@ from awkward.contents.regulararray import RegularArray
 from awkward.contents.unionarray import UnionArray
 from awkward.contents.unmaskedarray import UnmaskedArray
 from awkward.index import (  # IndexU8,  ; Index32,  ; IndexU32,  ; noqa: F401
-    Index,
     Index8,
     Index64,
 )
@@ -144,54 +143,13 @@ def ensure_common_length(inputs, options: BroadcastOptions) -> ShapeItem:
     return length
 
 
-def all_same_offsets(backend: Backend, inputs: list) -> bool:
-    index_nplike = backend.index_nplike
-
-    offsets = None
-    for x in inputs:
-        if isinstance(x, ListOffsetArray):
-            if offsets is None:
-                offsets = x.offsets.raw(index_nplike)
-            elif not index_nplike.array_equal(offsets, x.offsets.raw(index_nplike)):
-                return False
-
-        elif isinstance(x, ListArray):
-            starts = x.starts.raw(index_nplike)
-            stops = x.stops.raw(index_nplike)
-
-            if not index_nplike.array_equal(starts[1:], stops[:-1]):
-                return False
-
-            elif offsets is None:
-                offsets = index_nplike.empty(starts.shape[0] + 1, dtype=starts.dtype)
-                if offsets.shape[0] == 1:
-                    offsets[0] = 0
-                else:
-                    offsets[:-1] = starts
-                    offsets[-1] = stops[-1]
-
-            elif not index_nplike.array_equal(offsets[:-1], starts) or (
-                stops.shape[0] != 0 and offsets[-1] != stops[-1]
-            ):
-                return False
-
-        elif isinstance(x, RegularArray):
-            if x.size == 0:
-                my_offsets = index_nplike.empty(0, dtype=np.int64)
-            else:
-                my_offsets = index_nplike.arange(
-                    0, x.content.length + 1, x.size, dtype=np.int64
-                )
-
-            if offsets is None:
-                offsets = my_offsets
-            elif not index_nplike.array_equal(offsets, my_offsets):
-                return False
-
-        elif isinstance(x, Content):
-            return False
-
-    return True
+def offset_source_rank(list_content: ak.contents.Content) -> int:
+    if isinstance(list_content, ak.contents.ListOffsetArray):
+        return 0
+    elif isinstance(list_content, ak.contents.ListArray):
+        return 1
+    else:
+        raise AssertionError
 
 
 NO_PARAMETERS = Sentinel("NO_PARAMETERS", __name__)
@@ -341,6 +299,14 @@ def none_parameters_factory(
     return [None] * n_outputs
 
 
+def is_string_like(obj) -> bool:
+    return (
+        isinstance(obj, ak.contents.Content)
+        and obj.is_list
+        and obj.parameter("__array__") in {"string", "bytestring"}
+    )
+
+
 # Mapping from rule enum values to factory implementations
 BROADCAST_RULE_TO_FACTORY_IMPL = {
     BroadcastParameterRule.INTERSECT: intersection_parameters_factory,
@@ -354,6 +320,81 @@ def left_broadcast_to(content: Content, depth: int) -> Content:
     for _ in range(content.purelist_depth, depth):
         content = RegularArray(content, 1, content.length)
     return content
+
+
+def broadcast_regular_dim_size(contents: Sequence[ak.contents.Content]) -> ShapeItem:
+    # Find known size out of our contents
+    dim_size: ShapeItem
+    it_non_string_regular_contents = iter(
+        c for c in contents if c.is_regular and not is_string_like(c)
+    )
+    for x in it_non_string_regular_contents:
+        if x.size is not unknown_length:
+            dim_size = x.size
+            break
+    else:
+        # We should only be here if we didn't find any regular arrays with known lengths;
+        # there is guaranteed to be at least one non-string list
+        dim_size = unknown_length
+    # Now we know that we have at least one layout with concrete size, let's check the remainder
+    # dim_size=0 should win, though, so we require that dim_size != 0
+    if dim_size is not unknown_length and dim_size > 0:
+        for x in it_non_string_regular_contents:
+            # Any unknown lengths can't be compared
+            if x.size is unknown_length:
+                continue
+            # Any zero-length column triggers zero broadcasting
+            if x.size == 0:
+                return 0
+            else:
+                dim_size = max(dim_size, x.size)
+    return dim_size
+
+
+def broadcast_to_offsets_avoiding_carry(
+    list_content: ak.contents.Content,
+    offsets: ak.index.Index,
+) -> ak.contents.Content:
+    index_nplike = list_content.backend.index_nplike
+
+    # Without known data, we can't perform these optimisations
+    if not index_nplike.known_data:
+        return list_content._broadcast_tooffsets64(offsets).content
+
+    elif isinstance(list_content, ListOffsetArray):
+        if index_nplike.array_equal(offsets.data, list_content.offsets.data):
+            next_length = index_nplike.index_as_shape_item(offsets[-1])
+            return list_content.content[:next_length]
+        else:
+            return list_content._broadcast_tooffsets64(offsets).content
+    elif isinstance(list_content, ListArray):
+        # Is this list contiguous?
+        if index_nplike.array_equal(
+            list_content.starts.data[1:], list_content.stops.data[:-1]
+        ):
+            # Does this list match the offsets?
+            if index_nplike.array_equal(
+                offsets.data[:-1], list_content.starts.data
+            ) and not (
+                list_content.stops.data.shape[0] != 0
+                and offsets[-1] != list_content.stops[-1]
+            ):
+                next_length = index_nplike.index_as_shape_item(offsets[-1])
+                return list_content.content[:next_length]
+            else:
+                return list_content._broadcast_tooffsets64(offsets).content
+        else:
+            return list_content._broadcast_tooffsets64(offsets).content
+
+    elif isinstance(list_content, RegularArray):
+        my_offsets = list_content._compact_offsets64(True)
+        if index_nplike.array_equal(offsets.data, my_offsets.data):
+            return list_content.content[: list_content.size * list_content.length]
+        else:
+            return list_content._broadcast_tooffsets64(offsets).content
+
+    else:
+        raise AssertionError
 
 
 def apply_step(
@@ -423,7 +464,7 @@ def apply_step(
     # This whole function is one big switch statement.
     def broadcast_any_record():
         if not options["allow_records"]:
-            raise ValueError(f"cannot broadcast records {in_function(options)}")
+            raise ValueError(f"cannot broadcast records{in_function(options)}")
 
         fields: list[str] | None = UNSET
         frozen_fields: frozenset[str] | None = UNSET
@@ -491,98 +532,91 @@ def apply_step(
 
     def broadcast_any_list():
         index_nplike = backend.index_nplike
-        # All regular?
-        if all(x.is_regular or not x.is_list for x in contents):
-            it_regular_contents = iter(c for c in contents if c.is_regular)
+        # Under the category of "is_list", we have both strings and non-strings
+        # The strings should behave like non-lists within these routines.
 
-            # Find known size out of our contents
-            dim_size: ShapeItem
-            for content in it_regular_contents:
-                if content.size is not unknown_length:
-                    dim_size = content.size
-                    break
-            else:
-                dim_size = unknown_length
-            # Now we know that we have at least one layout with concrete size, let's check the remainder
-            if not (dim_size is unknown_length or dim_size == 0):
-                # Determine the size of the broadcast result
-                for content in it_regular_contents:
-                    # Any unknown lengths can't be compared
-                    if content.size is unknown_length:
-                        continue
-                    # Any zero-length column triggers zero broadcasting
-                    if content.size == 0:
-                        dim_size = 0
-                        break
-                    else:
-                        dim_size = max(dim_size, content.size)
-
+        # Are the non-string list types exclusively regular?
+        if all(x.is_regular or (is_string_like(x) or not x.is_list) for x in contents):
+            # Compute the expected dim size
+            dim_size = broadcast_regular_dim_size(contents)
             dimsize_maybe_broadcastable = dim_size is unknown_length or dim_size > 1
             dimsize_is_zero = dim_size is not unknown_length and dim_size == 0
 
-            # Build a broadcast index for size=1 contents
+            # Build a broadcast index for size=1 contents, and identify whether we have strings
+            inputs_are_strings = []
             size_one_carry_index = None
-            for content in contents:
-                if content.is_regular:
-                    content_size_maybe_one = (
-                        content.size is not unknown_length and content.size == 1
-                    )
-                    if dimsize_maybe_broadcastable and content_size_maybe_one:
+            for x in inputs:
+                if isinstance(x, ak.contents.Content):
+                    content_is_string = is_string_like(x)
+                    inputs_are_strings.append(content_is_string)
+                    if (
+                        # Strings don't count as lists in this context
+                        not content_is_string
+                        # Is this layout known to be size==1?
+                        and x.is_regular
+                        and x.size is not unknown_length
+                        and x.size == 1
+                        # Does the computed dim_size support broadcasting
+                        and dimsize_maybe_broadcastable
+                        and size_one_carry_index is None
+                    ):
                         # For any (N, 1) array, we know we'll broadcast to (N, M) where M is maxsize
                         size_one_carry_index = Index64(
                             index_nplike.repeat(
                                 index_nplike.arange(
-                                    index_nplike.shape_item_as_index(content.length),
+                                    index_nplike.shape_item_as_index(length),
                                     dtype=np.int64,
                                 ),
                                 index_nplike.shape_item_as_index(dim_size),
                             ),
                             nplike=index_nplike,
                         )
-                        break
+                else:
+                    inputs_are_strings.append(False)
 
-            # Here we have three possible broadcasting outcomes (by precedence):
-            # 1. any (exactly) size-0 content trims all other contents
-            # 2. any (exactly) size-1 content broadcasts to the common length
-            # 3. otherwise, recurse into the content as-is
+            # W.r.t broadcasting against other lists, we have three possibilities
+            # a. any (exactly) size-0 content broadcasts all other regular dimensions to 0
+            # b. any (exactly) size-1 content broadcasts to the `size_one_carry_index``
+            # c. otherwise, the list size should equal the dimension; recurse into the content as-is
+
+            # If we have non-lists, these are just appended as-is. As we're dealing with regular layouts,
+            # we don't left-broadcast
             nextinputs = []
             nextparameters = []
-            for content in inputs:
-                if isinstance(content, RegularArray):
+            for x, x_is_string in zip(inputs, inputs_are_strings):
+                if isinstance(x, RegularArray) and not x_is_string:
                     content_size_maybe_one = (
-                        content.size is not unknown_length and content.size == 1
+                        x.size is not unknown_length and x.size == 1
                     )
                     # If dimsize is known to be exactly zero, all contents are zero length
                     if dimsize_is_zero:
-                        nextinputs.append(content.content[:0])
-                        nextparameters.append(content._parameters)
+                        nextinputs.append(x.content[:0])
+                        nextparameters.append(x._parameters)
                     # If we have a known size=1 content, then broadcast it to the dimension size
                     elif dimsize_maybe_broadcastable and content_size_maybe_one:
                         nextinputs.append(
-                            content.content[: content.length * content.size]._carry(
+                            x.content[: x.length * x.size]._carry(
                                 size_one_carry_index, allow_lazy=False
                             )
                         )
-                        nextparameters.append(content._parameters)
+                        nextparameters.append(x._parameters)
                     # Any unknown values or sizes are assumed to be correct as-is
                     elif (
                         dim_size is unknown_length
-                        or content.size is unknown_length
-                        or content.size == dim_size
+                        or x.size is unknown_length
+                        or x.size == dim_size
                     ):
-                        nextinputs.append(
-                            content.content[: content.length * content.size]
-                        )
-                        nextparameters.append(content._parameters)
+                        nextinputs.append(x.content[: x.length * x.size])
+                        nextparameters.append(x._parameters)
                     else:
                         raise ValueError(
                             "cannot broadcast RegularArray of size "
-                            "{} with RegularArray of size {} {}".format(
-                                content.size, dim_size, in_function(options)
+                            "{} with RegularArray of size {}{}".format(
+                                x.size, dim_size, in_function(options)
                             )
                         )
                 else:
-                    nextinputs.append(content)
+                    nextinputs.append(x)
                     nextparameters.append(NO_PARAMETERS)
 
             outcontent = apply_step(
@@ -602,152 +636,52 @@ def apply_step(
                 RegularArray(x, dim_size, length, parameters=p)
                 for x, p in zip(outcontent, parameters)
             )
-
-        # Not all regular, but all same offsets?
-        # Optimization: https://github.com/scikit-hep/awkward-1.0/issues/442
-        elif index_nplike.known_data and all_same_offsets(backend, inputs):
-            lencontent, offsets, starts, stops = None, None, None, None
-            nextinputs = []
-            nextparameters = []
-
-            for content in inputs:
-                if isinstance(content, ListOffsetArray):
-                    offsets = content.offsets
-                    lencontent = index_nplike.index_as_shape_item(offsets[-1])
-                    nextinputs.append(content.content[:lencontent])
-                    nextparameters.append(content._parameters)
-
-                elif isinstance(content, ListArray):
-                    starts, stops = content.starts, content.stops
-                    if (starts.length is not unknown_length and starts.length == 0) or (
-                        stops.length is not unknown_length and stops.length == 0
-                    ):
-                        nextinputs.append(content.content[:0])
-                    else:
-                        lencontent = index_nplike.index_as_shape_item(
-                            index_nplike.max(stops)
-                        )
-                        nextinputs.append(content.content[:lencontent])
-                        nextparameters.append(content._parameters)
-                elif isinstance(content, RegularArray):
-                    nextinputs.append(content.content[: content.size * content.length])
-                    nextparameters.append(content._parameters)
-                else:
-                    nextinputs.append(content)
-                    nextparameters.append(NO_PARAMETERS)
-
-            outcontent = apply_step(
-                backend,
-                nextinputs,
-                action,
-                depth + 1,
-                copy.copy(depth_context),
-                lateral_context,
-                behavior,
-                options,
-            )
-            assert isinstance(outcontent, tuple)
-            parameters = parameters_factory(nextparameters, len(outcontent))
-
-            if isinstance(offsets, Index):
-                return tuple(
-                    ListOffsetArray(offsets, x, parameters=p).to_ListOffsetArray64(
-                        False
-                    )
-                    for x, p in zip(outcontent, parameters)
-                )
-            elif isinstance(starts, Index) and isinstance(stops, Index):
-                return tuple(
-                    ListArray(starts, stops, x, parameters=p).to_ListOffsetArray64(
-                        False
-                    )
-                    for x, p in zip(outcontent, parameters)
-                )
-            else:
-                raise AssertionError(
-                    "unexpected offsets, starts: {}, {}".format(
-                        type(offsets), type(starts)
-                    )
-                )
-
         # General list-handling case: the offsets of each list may be different.
         else:
-            # We have three possible cases here:
-            # 1. all-string (nothing to do)
-            # 2. mixed string-list (strings gain a dimension and broadcast to the non-string offsets)
-            # 3. no strings (all lists broadcast to a single offsets)
             offsets_content = None
-            all_content_strings = True
             input_is_string = []
-            for content in inputs:
-                if isinstance(content, Content):
-                    content_is_string = content.parameter("__array__") in {
-                        "string",
-                        "bytestring",
-                    }
-                    # Don't try and take offsets from strings
-                    if not content_is_string:
-                        all_content_strings = False
-                        # Take the offsets from the first irregular list
-                        if (
-                            content.is_list
-                            and not content.is_regular
-                            and offsets_content is None
-                        ):
-                            offsets_content = content
+
+            # Find the offsets to broadcast to, taking the "best" list
+            for x in inputs:
+                if isinstance(x, Content):
+                    content_is_string = is_string_like(x)
                     input_is_string.append(content_is_string)
+                    if (
+                        x.is_list
+                        and not x.is_regular
+                        and not content_is_string
+                        and (
+                            offsets_content is None
+                            or (
+                                offset_source_rank(x)
+                                < offset_source_rank(offsets_content)
+                            )
+                        )
+                    ):
+                        offsets_content = x
                 else:
                     input_is_string.append(False)
 
-            # case (1): user getfunctions should exit before this gets called
-            if all_content_strings:
-                raise ValueError(
-                    "cannot broadcast all strings: {}{}".format(
-                        ", ".join(repr(type(x)) for x in inputs), in_function(options)
-                    )
-                )
-
-            # Didn't find a ragged list, try any list!
-            if offsets_content is None:
-                for content in contents:
-                    if content.is_list:
-                        offsets_content = content
-                        break
-                else:
-                    raise AssertionError("no list found in list branch!")
-
+            # Build the offsets of the lowest-ranking source
             offsets = offsets_content._compact_offsets64(True)
 
             nextinputs = []
             nextparameters = []
-            for content, x_is_string in zip(inputs, input_is_string):
-                if x_is_string:
-                    offsets_data = backend.index_nplike.asarray(offsets)
-                    counts = offsets_data[1:] - offsets_data[:-1]
-                    if ak._util.win or ak._util.bits32:
-                        counts = index_nplike.astype(counts, dtype=np.int32)
-                    parents = index_nplike.repeat(
-                        index_nplike.arange(counts.size, dtype=counts.dtype), counts
-                    )
-                    nextinputs.append(
-                        ak.contents.IndexedArray(
-                            ak.index.Index64(parents, nplike=index_nplike), content
-                        ).project()
-                    )
-                    nextparameters.append(NO_PARAMETERS)
-                elif isinstance(content, listtypes):
-                    nextinputs.append(content._broadcast_tooffsets64(offsets).content)
-                    nextparameters.append(content._parameters)
+            for x, x_is_string in zip(inputs, input_is_string):
+                if isinstance(x, listtypes) and not x_is_string:
+                    next_content = broadcast_to_offsets_avoiding_carry(x, offsets)
+                    nextinputs.append(next_content)
+                    nextparameters.append(x._parameters)
                 # Handle implicit left-broadcasting (non-NumPy-like broadcasting).
-                elif options["left_broadcast"] and isinstance(content, Content):
+                elif options["left_broadcast"] and isinstance(x, Content):
                     nextinputs.append(
-                        RegularArray(content, 1, content.length)
+                        RegularArray(x, 1, x.length)
                         ._broadcast_tooffsets64(offsets)
                         .content
                     )
                     nextparameters.append(NO_PARAMETERS)
                 else:
-                    nextinputs.append(content)
+                    nextinputs.append(x)
                     nextparameters.append(NO_PARAMETERS)
 
             outcontent = apply_step(
@@ -1035,8 +969,8 @@ def apply_step(
         elif any(x.is_option for x in contents):
             return broadcast_any_option()
 
-        # Any list-types?
-        elif any(x.is_list for x in contents):
+        # Any non-string list-types?
+        elif any(x.is_list and not is_string_like(x) for x in contents):
             return broadcast_any_list()
 
         # Any RecordArrays?
