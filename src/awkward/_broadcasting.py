@@ -496,13 +496,7 @@ def apply_step(
         # All regular?
         if all(x.is_regular or not x.is_list for x in contents):
             # Ensure all layouts have same length
-            length = None
-            for x in contents:
-                if length is None:
-                    length = x.length
-                elif length is not unknown_length and x.length is not unknown_length:
-                    assert length == x.length
-            assert length is not None
+            length = checklength(contents, options)
 
             # Determine the size of the broadcast result
             dim_size = None
