@@ -677,7 +677,6 @@ def apply_step(
             # 2. mixed string-list (strings gain a dimension and broadcast to the non-string offsets)
             # 3. no strings (all lists broadcast to a single offsets)
             offsets_content = None
-            all_content_strings = True
             input_is_string = []
             for content in inputs:
                 if isinstance(content, Content):
@@ -685,22 +684,21 @@ def apply_step(
                         "string",
                         "bytestring",
                     }
-                    # Don't try and take offsets from strings
-                    if not content_is_string:
-                        all_content_strings = False
-                        # Take the offsets from the first irregular list
-                        if (
-                            content.is_list
-                            and not content.is_regular
-                            and offsets_content is None
-                        ):
-                            offsets_content = content
                     input_is_string.append(content_is_string)
+                    # Don't try and take offsets from strings
+                    # Take the offsets from the first irregular list
+                    if (
+                        content.is_list
+                        and not content.is_regular
+                        and not content_is_string
+                        and offsets_content is None
+                    ):
+                        offsets_content = content
                 else:
                     input_is_string.append(False)
 
             # case (1): user getfunctions should exit before this gets called
-            if all_content_strings:
+            if all(input_is_string):
                 raise ValueError(
                     "cannot broadcast all strings: {}{}".format(
                         ", ".join(repr(type(x)) for x in inputs), in_function(options)
