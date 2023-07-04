@@ -96,7 +96,7 @@ class EmptyArray(Content):
 
     @classmethod
     def simplified(cls, *, parameters=None, backend=None):
-        if not (parameters is UNSET or parameters is None or len(parameters) == 0):
+        if not (parameters is None or len(parameters) == 0):
             raise TypeError(f"{cls.__name__} cannot contain parameters")
         return cls(backend=backend)
 
