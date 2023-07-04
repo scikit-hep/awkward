@@ -100,7 +100,9 @@ Sections in this document about a subclass of Content are named "`Content >: XYZ
 Parameters
 ----------
 
-Each layout node can have arbitrary metadata, called "parameters." Some parameters have built-in meanings, which are described below, and others can be given meanings by defining functions in {data}`ak.behavior`.
+Each layout node can have arbitrary metadata[^foot], called "parameters." Some parameters have built-in meanings, which are described below, and others can be given meanings by defining functions in {data}`ak.behavior`.
+
+[^foot]: Except for `ak.contents.EmptyArray`, which is an identity type.
 
 +++
 
@@ -124,7 +126,7 @@ Content >: EmptyArray
 
 {class}`ak.contents.EmptyArray` is one of the two possible leaf types of a layout tree; the other is {class}`ak.contents.NumpyArray` (A third, corner-case "leaf type" is a {class}`ak.contents.RecordArray` with zero fields).
 
-EmptyArray is a trivial node type: it can only represent empty arrays with unknown type.
+EmptyArray is a trivial node type: it can only represent empty arrays with unknown type. It is an identity — when merging an array against an empty array, the empty array has no effect upon the result type. As such, this node cannot have user-defined parameters; {attr}`ak.contents.EmptyArray.parameters` is always empty.
 
 ```{code-cell} ipython3
 ak.contents.EmptyArray()
@@ -132,14 +134,6 @@ ak.contents.EmptyArray()
 
 ```{code-cell} ipython3
 ak.Array(ak.contents.EmptyArray())
-```
-
-Since this is such a simple node type, let's use it to show examples of adding parameters.
-
-```{code-cell} ipython3
-ak.contents.EmptyArray(
-    parameters={"name1": "value1", "name2": {"more": ["complex", "value"]}}
-)
 ```
 
 Content >: NumpyArray
@@ -194,6 +188,17 @@ ak.Array(
 ```
 
 If you are _producing_ arrays, you can pick any representation that is convenient. If you are _consuming_ arrays, you need to be aware of the different representations.
+
+Since this is such a simple node type, let's use it to show examples of adding parameters.
+
+```{code-cell} ipython3
+ak.Array(
+    ak.contents.NumpyArray(
+        np.array([[1, 2, 3], [4, 5, 6]]),
+        parameters={"name1": "value1", "name2": {"more": ["complex", "value"]}}
+    )
+)
+```
 
 +++
 

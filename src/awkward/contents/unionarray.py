@@ -10,7 +10,6 @@ import awkward as ak
 from awkward._backends.backend import Backend
 from awkward._errors import AxisError, deprecate
 from awkward._layout import maybe_posaxis
-from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import ArrayLike, IndexType, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
@@ -1518,37 +1517,9 @@ class UnionArray(Content):
         )
 
     def _to_backend_array(self, allow_missing, backend):
-        ak._errors.deprecate(
-            "Conversion of irreducible unions to backend arrays is deprecated.", "2.2.0"
+        raise TypeError(
+            "Conversion of irreducible unions to backend arrays is not supported."
         )
-
-        contents = [
-            self.project(i)._to_backend_array(allow_missing, backend)
-            for i in range(len(self.contents))
-        ]
-
-        if any(isinstance(x, backend.nplike.ma.MaskedArray) for x in contents):
-            try:
-                out = backend.nplike.ma.concatenate(contents)
-            except Exception as err:
-                raise ValueError(
-                    f"cannot convert {self} into numpy.ma.MaskedArray"
-                ) from err
-        else:
-            try:
-                out = backend.nplike.concat(contents)
-            except Exception as err:
-                raise ValueError(f"cannot convert {self} into np.ndarray") from err
-
-        tags = backend.index_nplike.asarray(self.tags)
-        for tag, content in enumerate(contents):
-            mask = tags == tag
-            if Jax.is_own_array(out):
-                out = out.at[mask].set(content)
-            else:
-                out[mask] = content
-
-        return out
 
     def _remove_structure(self, backend, options):
         out = []
