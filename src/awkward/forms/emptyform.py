@@ -17,24 +17,23 @@ class EmptyForm(Form):
     is_unknown = True
 
     def __init__(self, *, parameters: JSONMapping | None = None, form_key=None):
-        if not (parameters is None or len(parameters) == 0):
-            raise ValueError(f"{type(self).__name__} cannot contain parameters")
+        if parameters is not None:
+            raise TypeError(f"{type(self).__name__} cannot contain parameters")
         self._init(parameters=parameters, form_key=form_key)
 
     def copy(
         self, *, parameters: JSONMapping | None = UNSET, form_key=UNSET
     ) -> EmptyForm:
-        if not (parameters is UNSET or parameters is None or len(parameters) == 0):
-            raise ValueError(f"{type(self).__name__} cannot contain parameters")
+        if not (parameters is UNSET or parameters is None):
+            raise TypeError(f"{type(self).__name__} cannot contain parameters")
         return EmptyForm(
-            parameters=self._parameters if parameters is UNSET else parameters,
             form_key=self._form_key if form_key is UNSET else form_key,
         )
 
     @classmethod
     def simplified(cls, *, parameters=None, form_key=None) -> Form:
-        if not (parameters is None or len(parameters) == 0):
-            raise ValueError(f"{cls.__name__} cannot contain parameters")
+        if parameters is not None:
+            raise TypeError(f"{cls.__name__} cannot contain parameters")
         return cls(parameters=parameters, form_key=form_key)
 
     def __repr__(self):
@@ -46,7 +45,7 @@ class EmptyForm(Form):
 
     @property
     def type(self):
-        return ak.types.UnknownType(parameters=self._parameters)
+        return ak.types.UnknownType()
 
     def __eq__(self, other) -> bool:
         return isinstance(other, EmptyForm) and self._form_key == other._form_key
@@ -58,10 +57,10 @@ class EmptyForm(Form):
                 f"in favour of a new `primitive` argument. Pass `primitive` by keyword to opt-in to the new behavior.",
                 version="2.4.0",
             )
-            return ak.forms.numpyform.from_dtype(dtype, parameters=self._parameters)
+            return ak.forms.numpyform.from_dtype(dtype)
 
         def new_impl(*, primitive):
-            return ak.forms.numpyform.NumpyForm(primitive, parameters=self._parameters)
+            return ak.forms.numpyform.NumpyForm(primitive)
 
         dispatch_table = [
             new_impl,
@@ -81,10 +80,7 @@ class EmptyForm(Form):
         )
 
     def purelist_parameters(self, *keys: str) -> JSONSerializable:
-        if self._parameters is not None:
-            for key in keys:
-                if key in self._parameters:
-                    return self._parameters[key]
+        return None
 
     @property
     def purelist_isregular(self) -> bool:

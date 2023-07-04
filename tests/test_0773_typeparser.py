@@ -35,10 +35,8 @@ def test_unknown_1():
 
 def test_unknown_2():
     text = 'unknown[parameters={"wonky": ["parameter", 3.14]}]'
-    with pytest.warns(DeprecationWarning):
-        parsedtype = ak.types.from_datashape(text, highlevel=False)
-    assert isinstance(parsedtype, ak.types.UnknownType)
-    assert str(parsedtype) == text
+    with pytest.raises(ValueError):
+        ak.types.from_datashape(text, highlevel=False)
 
 
 def test_record_tuple_1():
@@ -148,10 +146,8 @@ def test_option_unknown_1():
 
 def test_option_unknown_2():
     text = '?unknown[parameters={"foo": "bar"}]'
-    with pytest.warns(DeprecationWarning):
-        parsedtype = ak.types.from_datashape(text, highlevel=False)
-    assert isinstance(parsedtype, ak.types.OptionType)
-    assert str(parsedtype) == text
+    with pytest.raises(ValueError):
+        ak.types.from_datashape(text, highlevel=False)
 
 
 def test_option_unknown_1_parm():
@@ -489,21 +485,18 @@ def test_unknowntype():
 
 
 def test_unknowntype_parameter():
-    with pytest.warns(DeprecationWarning):
-        t = UnknownType(parameters={"__array__": "Something"})
-        assert str(ak.types.from_datashape(str(t), highlevel=False)) == str(t)
+    with pytest.raises(ValueError):
+        UnknownType(parameters={"__array__": "Something"})
 
 
 def test_unknowntype_categorical():
-    with pytest.warns(DeprecationWarning):
-        t = UnknownType(parameters={"__categorical__": True})
-        assert str(ak.types.from_datashape(str(t), highlevel=False)) == str(t)
+    with pytest.raises(ValueError):
+        UnknownType(parameters={"__categorical__": True})
 
 
 def test_unknowntype_categorical_parameter():
-    with pytest.warns(DeprecationWarning):
-        t = UnknownType(parameters={"__array__": "Something", "__categorical__": True})
-        assert str(ak.types.from_datashape(str(t), highlevel=False)) == str(t)
+    with pytest.raises(ValueError):
+        UnknownType(parameters={"__array__": "Something", "__categorical__": True})
 
 
 def test_regulartype_numpytype():

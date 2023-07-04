@@ -1,7 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 from __future__ import annotations
 
-import copy
 from collections.abc import MutableMapping, Sequence
 
 import awkward as ak
@@ -83,10 +82,9 @@ class EmptyArray(Content):
         parameters=UNSET,
         backend=UNSET,
     ):
-        if not (parameters is UNSET or parameters is None or len(parameters) == 0):
+        if not (parameters is UNSET or parameters is None):
             raise ValueError(f"{type(self).__name__} cannot contain parameters")
         return EmptyArray(
-            parameters=self._parameters if parameters is UNSET else parameters,
             backend=self._backend if backend is UNSET else backend,
         )
 
@@ -94,15 +92,16 @@ class EmptyArray(Content):
         return self.copy()
 
     def __deepcopy__(self, memo):
-        return self.copy(parameters=copy.deepcopy(self._parameters, memo))
+        return self.copy()
 
     @classmethod
     def simplified(cls, *, parameters=None, backend=None):
-        raise ValueError(f"{cls.__name__} cannot contain parameters")
-        return cls(parameters=parameters, backend=backend)
+        if not (parameters is UNSET or parameters is None):
+            raise ValueError(f"{cls.__name__} cannot contain parameters")
+        return cls(backend=backend)
 
     def _form_with_key(self, getkey: Callable[[Content], str | None]) -> EmptyForm:
-        return self.form_cls(parameters=self._parameters, form_key=getkey(self))
+        return self.form_cls(form_key=getkey(self))
 
     def _to_buffers(
         self,
@@ -116,7 +115,6 @@ class EmptyArray(Content):
 
     def _to_typetracer(self, forget_length: bool) -> Self:
         return EmptyArray(
-            parameters=self._parameters,
             backend=TypeTracerBackend.instance(),
         )
 
@@ -248,7 +246,7 @@ class EmptyArray(Content):
             offsets = ak.index.Index64.zeros(1, nplike=self._backend.index_nplike)
             return (
                 offsets,
-                EmptyArray(parameters=self._parameters, backend=self._backend),
+                EmptyArray(backend=self._backend),
             )
 
     def _mergeable_next(self, other: Content, mergebool: bool) -> bool:
@@ -263,7 +261,7 @@ class EmptyArray(Content):
             return others[0]._mergemany(others[1:])
 
     def _fill_none(self, value: Content) -> Content:
-        return EmptyArray(parameters=self._parameters, backend=self._backend)
+        return EmptyArray(backend=self._backend)
 
     def _local_index(self, axis, depth):
         posaxis = maybe_posaxis(self, axis, depth)
@@ -300,9 +298,7 @@ class EmptyArray(Content):
         return self
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
-        return ak.contents.EmptyArray(
-            parameters=self._parameters, backend=self._backend
-        )
+        return ak.contents.EmptyArray(backend=self._backend)
 
     def _reduce_next(
         self,
@@ -383,7 +379,7 @@ class EmptyArray(Content):
                 if options["keep_parameters"]:
                     return self
                 else:
-                    return EmptyArray(parameters=None, backend=self._backend)
+                    return EmptyArray(backend=self._backend)
 
         else:
 
@@ -417,7 +413,7 @@ class EmptyArray(Content):
         return []
 
     def _to_backend(self, backend: Backend) -> Self:
-        return EmptyArray(parameters=self._parameters, backend=backend)
+        return EmptyArray(backend=backend)
 
     def _is_equal_to(self, other, index_dtype, numpyarray):
         return True
