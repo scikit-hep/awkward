@@ -12,9 +12,10 @@ def test_types_with_parameters():
     t = ak.types.UnknownType()
     assert t.parameters == {}
 
-    with pytest.warns(DeprecationWarning):
-        t = ak.types.UnknownType(parameters={"latitude": ["val", "ue"]})
-        assert t.parameters == {"latitude": ["val", "ue"]}
+    with pytest.raises(TypeError):
+        ak.types.UnknownType(parameters={"latitude": ["val", "ue"]})
+    t = ak.types.UnknownType()
+    assert t.parameters == {}
 
     t = ak.types.NumpyType("int32", parameters={"latitude": ["val", "ue"]})
     assert t.parameters == {"latitude": ["val", "ue"]}
@@ -50,17 +51,6 @@ def test_types_with_parameters():
         parameters={"latitude": ["val", "ue"]},
     )
     assert t.parameters == {"latitude": ["val", "ue"]}
-
-    with pytest.warns(DeprecationWarning):
-        t = ak.types.UnknownType(
-            parameters={"key1": ["val", "ue"], "__record__": "one \u2192 two"}
-        )
-        assert t.parameters == {"__record__": "one \u2192 two", "key1": ["val", "ue"]}
-
-        assert t == ak.types.UnknownType(
-            parameters={"__record__": "one \u2192 two", "key1": ["val", "ue"]}
-        )
-        assert t != ak.types.UnknownType(parameters={"latitude": ["val", "ue"]})
 
 
 def test_dress():
