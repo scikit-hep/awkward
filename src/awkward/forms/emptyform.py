@@ -18,18 +18,14 @@ class EmptyForm(Form):
 
     def __init__(self, *, parameters: JSONMapping | None = None, form_key=None):
         if not (parameters is None or len(parameters) == 0):
-            deprecate(
-                f"{type(self).__name__} cannot contain parameters", version="2.2.0"
-            )
+            raise ValueError(f"{type(self).__name__} cannot contain parameters")
         self._init(parameters=parameters, form_key=form_key)
 
     def copy(
         self, *, parameters: JSONMapping | None = UNSET, form_key=UNSET
     ) -> EmptyForm:
         if not (parameters is UNSET or parameters is None or len(parameters) == 0):
-            deprecate(
-                f"{type(self).__name__} cannot contain parameters", version="2.2.0"
-            )
+            raise ValueError(f"{type(self).__name__} cannot contain parameters")
         return EmptyForm(
             parameters=self._parameters if parameters is UNSET else parameters,
             form_key=self._form_key if form_key is UNSET else form_key,
@@ -38,7 +34,7 @@ class EmptyForm(Form):
     @classmethod
     def simplified(cls, *, parameters=None, form_key=None) -> Form:
         if not (parameters is None or len(parameters) == 0):
-            deprecate(f"{cls.__name__} cannot contain parameters", version="2.2.0")
+            raise ValueError(f"{cls.__name__} cannot contain parameters")
         return cls(parameters=parameters, form_key=form_key)
 
     def __repr__(self):

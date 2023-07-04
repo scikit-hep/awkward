@@ -8,7 +8,7 @@ import awkward as ak
 from awkward._backends.backend import Backend
 from awkward._backends.numpy import NumpyBackend
 from awkward._backends.typetracer import TypeTracerBackend
-from awkward._errors import AxisError, deprecate
+from awkward._errors import AxisError
 from awkward._layout import maybe_posaxis
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import ArrayLike, IndexType, NumpyMetadata
@@ -70,9 +70,7 @@ class EmptyArray(Content):
 
     def __init__(self, *, parameters=None, backend=None):
         if not (parameters is None or len(parameters) == 0):
-            deprecate(
-                f"{type(self).__name__} cannot contain parameters", version="2.2.0"
-            )
+            raise ValueError(f"{type(self).__name__} cannot contain parameters")
         if backend is None:
             backend = NumpyBackend.instance()
         self._init(parameters, backend)
@@ -86,9 +84,7 @@ class EmptyArray(Content):
         backend=UNSET,
     ):
         if not (parameters is UNSET or parameters is None or len(parameters) == 0):
-            deprecate(
-                f"{type(self).__name__} cannot contain parameters", version="2.2.0"
-            )
+            raise ValueError(f"{type(self).__name__} cannot contain parameters")
         return EmptyArray(
             parameters=self._parameters if parameters is UNSET else parameters,
             backend=self._backend if backend is UNSET else backend,
@@ -102,8 +98,7 @@ class EmptyArray(Content):
 
     @classmethod
     def simplified(cls, *, parameters=None, backend=None):
-        if not (parameters is None or len(parameters) == 0):
-            deprecate(f"{cls.__name__} cannot contain parameters", version="2.2.0")
+        raise ValueError(f"{cls.__name__} cannot contain parameters")
         return cls(parameters=parameters, backend=backend)
 
     def _form_with_key(self, getkey: Callable[[Content], str | None]) -> EmptyForm:

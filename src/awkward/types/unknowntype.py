@@ -19,9 +19,7 @@ class UnknownType(Type):
 
     def __init__(self, *, parameters=None, typestr=None):
         if parameters is not None:
-            deprecate(
-                f"{type(self).__name__} cannot contain parameters", version="2.2.0"
-            )
+            raise ValueError(f"{type(self).__name__} cannot contain parameters")
         if parameters is not None and not isinstance(parameters, dict):
             raise TypeError(
                 "{} 'parameters' must be of type dict or None, not {}".format(
