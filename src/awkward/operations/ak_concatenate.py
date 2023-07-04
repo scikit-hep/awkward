@@ -17,6 +17,7 @@ np = NumpyMetadata.instance()
 cpu = NumpyBackend.instance()
 
 
+@ak._connect.numpy.implements("concatenate")
 @high_level_function
 def concatenate(arrays, axis=0, *, mergebool=True, highlevel=True, behavior=None):
     """
