@@ -11,14 +11,14 @@ from awkward.types.type import Type
 class UnknownType(Type):
     def copy(self, *, parameters=UNSET, typestr=UNSET) -> Self:
         if not (parameters is UNSET or parameters is None):
-            raise ValueError(f"{type(self).__name__} cannot contain parameters")
+            raise TypeError(f"{type(self).__name__} cannot contain parameters")
         return UnknownType(
             typestr=self._typestr if typestr is UNSET else typestr,
         )
 
     def __init__(self, *, parameters=None, typestr=None):
         if parameters is not None:
-            raise ValueError(f"{type(self).__name__} cannot contain parameters")
+            raise TypeError(f"{type(self).__name__} cannot contain parameters")
         if typestr is not None and not isinstance(typestr, str):
             raise TypeError(
                 "{} 'typestr' must be of type string or None, not {}".format(
