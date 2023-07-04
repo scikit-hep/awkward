@@ -71,3 +71,9 @@ repos:
     entry: python dev/validate-test-names.py
     types: [file, python]
     files: ^tests/
+
+
+- repo: https://github.com/asottile/pyupgrade
+  rev: v3.8.0
+  hooks:
+  - id: pyupgrade

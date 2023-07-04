@@ -147,7 +147,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         ak.concatenate
 
-    exists. If your NumPy is older than 1.17, use `ak.concatenate` directly.
+    exists.
 
     Pandas
     ******
@@ -1359,9 +1359,6 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         [available since NumPy 1.17](https://numpy.org/devdocs/release/1.17.0-notes.html#numpy-functions-now-always-support-overrides-with-array-function)
         (and
         [NumPy 1.16 with an experimental flag set](https://numpy.org/devdocs/release/1.16.0-notes.html#numpy-functions-now-support-overrides-with-array-function)).
-        This is not crucial for Awkward Array to work correctly, as NumPy
-        functions like np.concatenate can be manually replaced with
-        #ak.concatenate for early versions of NumPy.
 
         See also #__array_ufunc__.
         """

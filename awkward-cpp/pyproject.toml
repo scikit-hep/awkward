@@ -9,7 +9,7 @@ build-backend = "scikit_build_core.build"
 name = "awkward_cpp"
 version = "19"
 dependencies = [
-    "numpy>=1.17.0"
+    "numpy>=1.18.0"
 ]
 readme = "README.md"
 description = "CPU kernels and compiled extensions for Awkward Array"
@@ -45,7 +45,7 @@ classifiers = [
     "Topic :: Utilities",
 ]
 license = {text = "BSD-3-Clause"}
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 
 [project.urls]
 Homepage = "https://github.com/scikit-hep/awkward-1.0"

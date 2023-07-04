@@ -37,7 +37,6 @@ jobs:
           - '3.10'
           - '3.9'
           - '3.8'
-          - '3.7'
 
         python-architecture:
           - x64
@@ -116,7 +115,6 @@ jobs:
           - '3.10'
           - '3.9'
           - '3.8'
-          - '3.7'
 
     runs-on: macOS-11
 
@@ -187,12 +185,11 @@ jobs:
           - '3.10'
           - '3.9'
           - '3.8'
-          - '3.7'
         numpy-package:
           - "numpy"
         include:
-          - python-version: '3.7'
-            numpy-package: "numpy==1.17.0"
+          - python-version: '3.8'
+            numpy-package: "numpy==1.18.0"
 
     runs-on: ubuntu-20.04
 

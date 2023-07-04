@@ -16,7 +16,7 @@ myst-nb
 sphinx-external-toc
 ipyleaflet
 
-numpy>=1.13.1
+numpy
 numba>=0.50.0;python_version<"3.11"
 pandas>=0.24.0
 numexpr

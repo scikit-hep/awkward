@@ -10,7 +10,7 @@ name = "awkward"
 version = "2.2.4"
 description = "Manipulate JSON-like data with NumPy-like idioms."
 license = { text = "BSD-3-Clause" }
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 authors = [
     { name = "Jim Pivarski", email = "pivarski@princeton.edu" },
 ]
@@ -42,7 +42,7 @@ classifiers = [
 dependencies = [
     "awkward_cpp==19",
     "importlib_resources;python_version < \"3.9\"",
-    "numpy>=1.17.0",
+    "numpy>=1.18.0",
     "packaging",
     "typing_extensions>=4.1.0; python_version < \"3.11\""
 ]
@@ -316,3 +316,6 @@ mccabe.max-complexity = 100
 "numpy".msg = "Use `numpy = ak._nplikes.Numpy.instance()` instead"
 "jax".msg = "Use `jax = ak._nplikes.Jax.instance()` instead"
 "cupy".msg = "Use `cupy = ak._nplikes.Cupy.instance()` instead"
+
+[tool.nbqa.addopts]
+pyupgrade = ["--py38-plus"]

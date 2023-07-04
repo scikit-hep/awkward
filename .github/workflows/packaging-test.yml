@@ -59,7 +59,7 @@ jobs:
     - uses: pypa/cibuildwheel@v2.13.1
       env:
         CIBW_ARCHS_MACOS: universal2
-        CIBW_BUILD: cp39-win_amd64 cp37-manylinux_x86_64 cp38-macosx_universal2
+        CIBW_BUILD: cp39-win_amd64 cp310-manylinux_x86_64 cp38-macosx_universal2
       with:
         config-file: cibuildwheel.toml
         package-dir: awkward-cpp
