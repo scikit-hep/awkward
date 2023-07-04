@@ -68,7 +68,7 @@ class EmptyArray(Content):
     is_leaf = True
 
     def __init__(self, *, parameters=None, backend=None):
-        if parameters is not None:
+        if not (parameters is None or parameters == {}):
             raise TypeError(f"{type(self).__name__} cannot contain parameters")
         if backend is None:
             backend = NumpyBackend.instance()
@@ -82,7 +82,7 @@ class EmptyArray(Content):
         parameters=UNSET,
         backend=UNSET,
     ):
-        if not (parameters is UNSET or parameters is None):
+        if not (parameters is UNSET or parameters is None or parameters == {}):
             raise TypeError(f"{type(self).__name__} cannot contain parameters")
         return EmptyArray(
             backend=self._backend if backend is UNSET else backend,
@@ -96,7 +96,7 @@ class EmptyArray(Content):
 
     @classmethod
     def simplified(cls, *, parameters=None, backend=None):
-        if not (parameters is UNSET or parameters is None):
+        if not (parameters is UNSET or parameters is None or parameters == {}):
             raise TypeError(f"{cls.__name__} cannot contain parameters")
         return cls(backend=backend)
 

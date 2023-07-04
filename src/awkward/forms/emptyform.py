@@ -17,14 +17,14 @@ class EmptyForm(Form):
     is_unknown = True
 
     def __init__(self, *, parameters: JSONMapping | None = None, form_key=None):
-        if parameters is not None:
+        if not (parameters is None or parameters == {}):
             raise TypeError(f"{type(self).__name__} cannot contain parameters")
         self._init(parameters=parameters, form_key=form_key)
 
     def copy(
         self, *, parameters: JSONMapping | None = UNSET, form_key=UNSET
     ) -> EmptyForm:
-        if not (parameters is UNSET or parameters is None):
+        if not (parameters is UNSET or parameters is None or parameters == {}):
             raise TypeError(f"{type(self).__name__} cannot contain parameters")
         return EmptyForm(
             form_key=self._form_key if form_key is UNSET else form_key,
@@ -32,7 +32,7 @@ class EmptyForm(Form):
 
     @classmethod
     def simplified(cls, *, parameters=None, form_key=None) -> Form:
-        if parameters is not None:
+        if not (parameters is None or parameters == {}):
             raise TypeError(f"{cls.__name__} cannot contain parameters")
         return cls(parameters=parameters, form_key=form_key)
 
