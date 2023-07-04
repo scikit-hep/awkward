@@ -35,7 +35,7 @@ def test_unknown_1():
 
 def test_unknown_2():
     text = 'unknown[parameters={"wonky": ["parameter", 3.14]}]'
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         ak.types.from_datashape(text, highlevel=False)
 
 
@@ -146,7 +146,7 @@ def test_option_unknown_1():
 
 def test_option_unknown_2():
     text = '?unknown[parameters={"foo": "bar"}]'
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         ak.types.from_datashape(text, highlevel=False)
 
 
@@ -485,17 +485,17 @@ def test_unknowntype():
 
 
 def test_unknowntype_parameter():
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         UnknownType(parameters={"__array__": "Something"})
 
 
 def test_unknowntype_categorical():
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         UnknownType(parameters={"__categorical__": True})
 
 
 def test_unknowntype_categorical_parameter():
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         UnknownType(parameters={"__array__": "Something", "__categorical__": True})
 
 

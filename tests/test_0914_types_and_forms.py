@@ -29,31 +29,11 @@ def assert_overrides_typestr(
 
 def test_UnknownType():
     assert str(ak.types.unknowntype.UnknownType()) == "unknown"
-    with pytest.warns(DeprecationWarning):
-        assert (
-            str(ak.types.unknowntype.UnknownType(parameters={"x": 123}))
-            == 'unknown[parameters={"x": 123}]'
-        )
-    with pytest.warns(DeprecationWarning):
-        assert (
-            str(ak.types.unknowntype.UnknownType(parameters={"__categorical__": True}))
-            == "categorical[type=unknown]"
-        )
-        assert (
-            str(
-                ak.types.unknowntype.UnknownType(
-                    parameters={"__categorical__": True, "x": 123}
-                )
-            )
-            == 'categorical[type=unknown[parameters={"x": 123}]]'
-        )
-
+    with pytest.raises(TypeError):
+        ak.types.unknowntype.UnknownType(parameters={"x": 123})
+    with pytest.raises(TypeError):
+        ak.types.unknowntype.UnknownType(parameters={"__categorical__": True})
     assert repr(ak.types.unknowntype.UnknownType()) == "UnknownType()"
-    with pytest.warns(DeprecationWarning):
-        assert (
-            repr(ak.types.unknowntype.UnknownType(parameters={"__categorical__": True}))
-            == "UnknownType(parameters={'__categorical__': True})"
-        )
 
 
 @pytest.mark.skipif(
@@ -1206,23 +1186,16 @@ def test_EmptyForm():
     "class": "EmptyArray"
 }"""
     )
-    with pytest.warns(DeprecationWarning):
-        assert (
-            str(ak.forms.emptyform.EmptyForm(parameters={"x": 123}, form_key="hello"))
-            == """{
+    assert (
+        str(ak.forms.emptyform.EmptyForm(form_key="hello"))
+        == """{
     "class": "EmptyArray",
-    "parameters": {
-        "x": 123
-    },
     "form_key": "hello"
 }"""
-        )
+    )
     assert repr(ak.forms.emptyform.EmptyForm()) == "EmptyForm()"
-    with pytest.warns(DeprecationWarning):
-        assert (
-            repr(ak.forms.emptyform.EmptyForm(parameters={"x": 123}, form_key="hello"))
-            == "EmptyForm(parameters={'x': 123}, form_key='hello')"
-        )
+    with pytest.raises(TypeError):
+        ak.forms.emptyform.EmptyForm(parameters={"x": 123}, form_key="hello")
 
     assert ak.forms.emptyform.EmptyForm().to_dict(verbose=False) == {
         "class": "EmptyArray"
@@ -1232,31 +1205,15 @@ def test_EmptyForm():
         "parameters": {},
         "form_key": None,
     }
-    with pytest.warns(DeprecationWarning):
-        assert ak.forms.emptyform.EmptyForm(
-            parameters={"x": 123}, form_key="hello"
-        ).to_dict(verbose=False) == {
-            "class": "EmptyArray",
-            "parameters": {"x": 123},
-            "form_key": "hello",
-        }
+    assert ak.forms.emptyform.EmptyForm(form_key="hello").to_dict(verbose=False) == {
+        "class": "EmptyArray",
+        "form_key": "hello",
+    }
     assert ak.forms.from_dict({"class": "EmptyArray"}).to_dict() == {
         "class": "EmptyArray",
         "parameters": {},
         "form_key": None,
     }
-    with pytest.warns(DeprecationWarning):
-        assert ak.forms.from_dict(
-            {
-                "class": "EmptyArray",
-                "parameters": {"x": 123},
-                "form_key": "hello",
-            }
-        ).to_dict() == {
-            "class": "EmptyArray",
-            "parameters": {"x": 123},
-            "form_key": "hello",
-        }
 
 
 @pytest.mark.skipif(

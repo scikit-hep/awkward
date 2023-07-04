@@ -241,15 +241,14 @@ def test_indexedoptionarray_numpyarray(tmp_path, extensionarray):
 
 @pytest.mark.parametrize("extensionarray", [False, True])
 def test_indexedoptionarray_emptyarray(tmp_path, extensionarray):
-    with pytest.warns(DeprecationWarning):
-        akarray = ak.contents.IndexedOptionArray(
-            ak.index.Index64(np.array([-1, -1, -1, -1, -1], dtype=np.int64)),
-            ak.contents.EmptyArray(parameters={"which": "inner"}),
-            parameters={"which": "outer"},
-        )
-        paarray = akarray.to_arrow(extensionarray=extensionarray)
-        arrow_round_trip(akarray, paarray, extensionarray)
-        parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+    akarray = ak.contents.IndexedOptionArray(
+        ak.index.Index64(np.array([-1, -1, -1, -1, -1], dtype=np.int64)),
+        ak.contents.EmptyArray(),
+        parameters={"which": "outer"},
+    )
+    paarray = akarray.to_arrow(extensionarray=extensionarray)
+    arrow_round_trip(akarray, paarray, extensionarray)
+    parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
 
 
 @pytest.mark.parametrize("categorical_as_dictionary", [False, True])
