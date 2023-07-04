@@ -10,14 +10,14 @@ from awkward.types.type import Type
 @final
 class UnknownType(Type):
     def copy(self, *, parameters=UNSET, typestr=UNSET) -> Self:
-        if not (parameters is UNSET or parameters is None or parameters == {}):
+        if not (parameters is UNSET or parameters is None or len(parameters) == 0):
             raise TypeError(f"{type(self).__name__} cannot contain parameters")
         return UnknownType(
             typestr=self._typestr if typestr is UNSET else typestr,
         )
 
     def __init__(self, *, parameters=None, typestr=None):
-        if not (parameters is None or parameters == {}):
+        if not (parameters is None or len(parameters) == 0):
             raise TypeError(f"{type(self).__name__} cannot contain parameters")
         if typestr is not None and not isinstance(typestr, str):
             raise TypeError(
