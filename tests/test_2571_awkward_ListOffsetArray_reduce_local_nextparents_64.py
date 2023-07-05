@@ -1,12 +1,14 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import pytest  # noqa: F401
+import numpy as np
+import pytest
 
 import awkward as ak
-import numpy as np
 
 
-@pytest.mark.parametrize("indextype", [ak.index.Index32, ak.index.IndexU32, ak.index.Index64])
+@pytest.mark.parametrize(
+    "indextype", [ak.index.Index32, ak.index.IndexU32, ak.index.Index64]
+)
 def test(indextype):
     array = ak.Array(
         ak.contents.ListOffsetArray(
