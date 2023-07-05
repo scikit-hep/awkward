@@ -886,9 +886,10 @@ class ListOffsetArray(Content):
         if not branch and (negaxis == depth):
             return self._content._is_unique(negaxis - 1, starts, parents, outlength)
         else:
-            nextparents = Index64.empty(
-                self._offsets[-1] - self._offsets[0], self._backend.index_nplike
+            nextlen = self._backend.index_nplike.index_as_shape_item(
+                self._offsets[-1] - self._offsets[0]
             )
+            nextparents = Index64.empty(nextlen, self._backend.index_nplike)
 
             assert (
                 nextparents.nplike is self._backend.index_nplike
@@ -981,9 +982,10 @@ class ListOffsetArray(Content):
             )
 
         else:
-            nextparents = Index64.empty(
-                self._offsets[-1] - self._offsets[0], self._backend.index_nplike
+            nextlen = self._backend.index_nplike.index_as_shape_item(
+                self._offsets[-1] - self._offsets[0]
             )
+            nextparents = Index64.empty(nextlen, self._backend.index_nplike)
 
             assert (
                 nextparents.nplike is self._backend.index_nplike
@@ -1165,12 +1167,10 @@ class ListOffsetArray(Content):
                 out_offsets, out, parameters=self._parameters
             )
         else:
-            nextparents = Index64.empty(
-                self._backend.index_nplike.index_as_shape_item(
-                    self._offsets[-1] - self._offsets[0]
-                ),
-                self._backend.index_nplike,
+            nextlen = self._backend.index_nplike.index_as_shape_item(
+                self._offsets[-1] - self._offsets[0]
             )
+            nextparents = Index64.empty(nextlen, self._backend.index_nplike)
 
             assert (
                 nextparents.nplike is self._backend.index_nplike
@@ -1299,10 +1299,10 @@ class ListOffsetArray(Content):
                 parameters=self._parameters,
             )
         else:
-            nextparents = Index64.empty(
-                index_nplike.index_as_shape_item(self._offsets[-1] - self._offsets[0]),
-                index_nplike,
+            nextlen = index_nplike.index_as_shape_item(
+                self._offsets[-1] - self._offsets[0]
             )
+            nextparents = Index64.empty(nextlen, index_nplike)
             lenstarts = self._offsets.length - 1
 
             assert (
