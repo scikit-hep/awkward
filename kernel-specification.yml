@@ -2217,7 +2217,17 @@ kernels:
 
   - name: awkward_ListOffsetArray_reduce_local_nextparents_64
     specializations:
-      - name: awkward_ListOffsetArray_reduce_local_nextparents_64
+      - name: awkward_ListOffsetArray32_reduce_local_nextparents_64
+        args:
+          - {name: nextparents, type: "List[int64_t]", dir: out}
+          - {name: offsets, type: "Const[List[int32_t]]", dir: in, role: reducer-offsets}
+          - {name: length, type: "int64_t", dir: in, role: reducer-length}
+      - name: awkward_ListOffsetArrayU32_reduce_local_nextparents_64
+        args:
+          - {name: nextparents, type: "List[int64_t]", dir: out}
+          - {name: offsets, type: "Const[List[uint32_t]]", dir: in, role: reducer-offsets}
+          - {name: length, type: "int64_t", dir: in, role: reducer-length}
+      - name: awkward_ListOffsetArray64_reduce_local_nextparents_64
         args:
           - {name: nextparents, type: "List[int64_t]", dir: out}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
