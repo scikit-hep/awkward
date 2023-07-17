@@ -6,104 +6,109 @@ import awkward as ak  # noqa: F401
 
 
 def test_index():
-    array_i1 = np.array([np.iinfo("i1").min, -1, 0, 1, np.iinfo("i1").max], dtype="i1")
-    array_u1 = np.array([np.iinfo("u1").min, -1, 0, 1, np.iinfo("u1").max], dtype="u1")
-    array_li2 = np.array(
-        [np.iinfo("<i2").min, -1, 0, 1, np.iinfo("<i2").max], dtype="<i2"
-    )
-    array_lu2 = np.array(
-        [np.iinfo("<u2").min, -1, 0, 1, np.iinfo("<u2").max], dtype="<u2"
-    )
-    array_li4 = np.array(
-        [np.iinfo("<i4").min, -1, 0, 1, np.iinfo("<i4").max], dtype="<i4"
-    )
-    array_lu4 = np.array(
-        [np.iinfo("<u4").min, -1, 0, 1, np.iinfo("<u4").max], dtype="<u4"
-    )
-    array_li8 = np.array(
-        [np.iinfo("<i8").min, -1, 0, 1, np.iinfo("<i8").max], dtype="<i8"
-    )
-    array_lu8 = np.array(
-        [np.iinfo("<u8").min, -1, 0, 1, np.iinfo("<u8").max], dtype="<u8"
-    )
-    array_bi2 = np.array(
-        [np.iinfo(">i2").min, -1, 0, 1, np.iinfo(">i2").max], dtype=">i2"
-    )
-    array_bu2 = np.array(
-        [np.iinfo(">u2").min, -1, 0, 1, np.iinfo(">u2").max], dtype=">u2"
-    )
-    array_bi4 = np.array(
-        [np.iinfo(">i4").min, -1, 0, 1, np.iinfo(">i4").max], dtype=">i4"
-    )
-    array_bu4 = np.array(
-        [np.iinfo(">u4").min, -1, 0, 1, np.iinfo(">u4").max], dtype=">u4"
-    )
-    array_bi8 = np.array(
-        [np.iinfo(">i8").min, -1, 0, 1, np.iinfo(">i8").max], dtype=">i8"
-    )
-    array_bu8 = np.array(
-        [np.iinfo(">u8").min, -1, 0, 1, np.iinfo(">u8").max], dtype=">u8"
-    )
+    with pytest.warns(DeprecationWarning, match="conversion of -1"):
+        array_u1 = np.array(
+            [np.iinfo("u1").min, -1, 0, 1, np.iinfo("u1").max], dtype="u1"
+        )
+        array_i1 = np.array(
+            [np.iinfo("i1").min, -1, 0, 1, np.iinfo("i1").max], dtype="i1"
+        )
+        array_li2 = np.array(
+            [np.iinfo("<i2").min, -1, 0, 1, np.iinfo("<i2").max], dtype="<i2"
+        )
+        array_lu2 = np.array(
+            [np.iinfo("<u2").min, -1, 0, 1, np.iinfo("<u2").max], dtype="<u2"
+        )
+        array_li4 = np.array(
+            [np.iinfo("<i4").min, -1, 0, 1, np.iinfo("<i4").max], dtype="<i4"
+        )
+        array_lu4 = np.array(
+            [np.iinfo("<u4").min, -1, 0, 1, np.iinfo("<u4").max], dtype="<u4"
+        )
+        array_li8 = np.array(
+            [np.iinfo("<i8").min, -1, 0, 1, np.iinfo("<i8").max], dtype="<i8"
+        )
+        array_lu8 = np.array(
+            [np.iinfo("<u8").min, -1, 0, 1, np.iinfo("<u8").max], dtype="<u8"
+        )
+        array_bi2 = np.array(
+            [np.iinfo(">i2").min, -1, 0, 1, np.iinfo(">i2").max], dtype=">i2"
+        )
+        array_bu2 = np.array(
+            [np.iinfo(">u2").min, -1, 0, 1, np.iinfo(">u2").max], dtype=">u2"
+        )
+        array_bi4 = np.array(
+            [np.iinfo(">i4").min, -1, 0, 1, np.iinfo(">i4").max], dtype=">i4"
+        )
+        array_bu4 = np.array(
+            [np.iinfo(">u4").min, -1, 0, 1, np.iinfo(">u4").max], dtype=">u4"
+        )
+        array_bi8 = np.array(
+            [np.iinfo(">i8").min, -1, 0, 1, np.iinfo(">i8").max], dtype=">i8"
+        )
+        array_bu8 = np.array(
+            [np.iinfo(">u8").min, -1, 0, 1, np.iinfo(">u8").max], dtype=">u8"
+        )
 
-    index_i1 = ak.layout.Index8(array_i1)
-    index_u1 = ak.layout.IndexU8(array_u1)
-    index_li2 = ak.layout.Index32(array_li2)
-    index_lu2 = ak.layout.Index32(array_lu2)
-    index_li4 = ak.layout.Index32(array_li4)
-    index_lu4 = ak.layout.IndexU32(array_lu4)
-    index_li8 = ak.layout.Index64(array_li8)
-    index_lu8 = ak.layout.Index64(array_lu8)
-    index_bi2 = ak.layout.Index32(array_bi2)
-    index_bu2 = ak.layout.Index32(array_bu2)
-    index_bi4 = ak.layout.Index32(array_bi4)
-    index_bu4 = ak.layout.IndexU32(array_bu4)
-    index_bi8 = ak.layout.Index64(array_bi8)
-    index_bu8 = ak.layout.Index64(array_bu8)
+        index_i1 = ak.layout.Index8(array_i1)
+        index_u1 = ak.layout.IndexU8(array_u1)
+        index_li2 = ak.layout.Index32(array_li2)
+        index_lu2 = ak.layout.Index32(array_lu2)
+        index_li4 = ak.layout.Index32(array_li4)
+        index_lu4 = ak.layout.IndexU32(array_lu4)
+        index_li8 = ak.layout.Index64(array_li8)
+        index_lu8 = ak.layout.Index64(array_lu8)
+        index_bi2 = ak.layout.Index32(array_bi2)
+        index_bu2 = ak.layout.Index32(array_bu2)
+        index_bi4 = ak.layout.Index32(array_bi4)
+        index_bu4 = ak.layout.IndexU32(array_bu4)
+        index_bi8 = ak.layout.Index64(array_bi8)
+        index_bu8 = ak.layout.Index64(array_bu8)
 
-    assert index_i1[2] == 0
-    assert index_u1[2] == 0
-    assert index_li2[2] == 0
-    assert index_lu2[2] == 0
-    assert index_li4[2] == 0
-    assert index_lu4[2] == 0
-    assert index_li8[2] == 0
-    assert index_lu8[2] == 0
-    assert index_bi2[2] == 0
-    assert index_bu2[2] == 0
-    assert index_bi4[2] == 0
-    assert index_bu4[2] == 0
-    assert index_bi8[2] == 0
-    assert index_bu8[2] == 0
+        assert index_i1[2] == 0
+        assert index_u1[2] == 0
+        assert index_li2[2] == 0
+        assert index_lu2[2] == 0
+        assert index_li4[2] == 0
+        assert index_lu4[2] == 0
+        assert index_li8[2] == 0
+        assert index_lu8[2] == 0
+        assert index_bi2[2] == 0
+        assert index_bu2[2] == 0
+        assert index_bi4[2] == 0
+        assert index_bu4[2] == 0
+        assert index_bi8[2] == 0
+        assert index_bu8[2] == 0
 
-    array_i1[2] = 10
-    array_u1[2] = 10
-    array_li2[2] = 10
-    array_lu2[2] = 10
-    array_li4[2] = 10
-    array_lu4[2] = 10
-    array_li8[2] = 10
-    array_lu8[2] = 10
-    array_bi2[2] = 10
-    array_bu2[2] = 10
-    array_bi4[2] = 10
-    array_bu4[2] = 10
-    array_bi8[2] = 10
-    array_bu8[2] = 10
+        array_i1[2] = 10
+        array_u1[2] = 10
+        array_li2[2] = 10
+        array_lu2[2] = 10
+        array_li4[2] = 10
+        array_lu4[2] = 10
+        array_li8[2] = 10
+        array_lu8[2] = 10
+        array_bi2[2] = 10
+        array_bu2[2] = 10
+        array_bi4[2] = 10
+        array_bu4[2] = 10
+        array_bi8[2] = 10
+        array_bu8[2] = 10
 
-    assert index_i1[2] == 10
-    assert index_u1[2] == 10
-    assert index_li2[2] == 0
-    assert index_lu2[2] == 0
-    assert index_li4[2] == 10
-    assert index_lu4[2] == 10
-    assert index_li8[2] == 10
-    assert index_lu8[2] == 0
-    assert index_bi2[2] == 0
-    assert index_bu2[2] == 0
-    assert index_bi4[2] == 0
-    assert index_bu4[2] == 0
-    assert index_bi8[2] == 0
-    assert index_bu8[2] == 0
+        assert index_i1[2] == 10
+        assert index_u1[2] == 10
+        assert index_li2[2] == 0
+        assert index_lu2[2] == 0
+        assert index_li4[2] == 10
+        assert index_lu4[2] == 10
+        assert index_li8[2] == 10
+        assert index_lu8[2] == 0
+        assert index_bi2[2] == 0
+        assert index_bu2[2] == 0
+        assert index_bi4[2] == 0
+        assert index_bu4[2] == 0
+        assert index_bi8[2] == 0
+        assert index_bu8[2] == 0
 
 
 content = ak.layout.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
