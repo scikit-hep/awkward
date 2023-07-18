@@ -13,6 +13,8 @@ def maybe_deprecated_conversion():
     if packaging.version.Version(np.__version__) >= packaging.version.Version("1.24.0"):
         with pytest.warns(DeprecationWarning, match="conversion of -1"):
             yield
+    else:
+        yield
 
 
 def test_index():
