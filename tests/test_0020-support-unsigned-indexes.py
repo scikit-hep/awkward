@@ -1,8 +1,18 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+import contextlib
 
-import pytest  # noqa: F401
 import numpy as np  # noqa: F401
+import packaging.version
+import pytest  # noqa: F401
+
 import awkward as ak  # noqa: F401
+
+
+@contextlib.contextmanager
+def maybe_deprecated_conversion():
+    if packaging.version.Version(np.__version__) >= packaging.version.Version("1.24.0"):
+        with pytest.warns(DeprecationWarning, match="conversion of -1"):
+            yield
 
 
 def test_index():
