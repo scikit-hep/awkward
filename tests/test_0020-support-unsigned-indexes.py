@@ -16,7 +16,7 @@ def maybe_deprecated_conversion():
 
 
 def test_index():
-    with pytest.warns(DeprecationWarning, match="conversion of -1"):
+    with maybe_deprecated_conversion():
         array_u1 = np.array(
             [np.iinfo("u1").min, -1, 0, 1, np.iinfo("u1").max], dtype="u1"
         )
