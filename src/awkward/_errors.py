@@ -59,7 +59,11 @@ class ErrorContext:
     def __exit__(self, exception_type, exception_value, traceback):
         try:
             # Handle caught exception
-            if exception_type is not None and self.primary() is self:
+            if (
+                exception_type is not None
+                and issubclass(exception_type, Exception)
+                and self.primary() is self
+            ):
                 self.handle_exception(exception_type, exception_value)
         finally:
             # `_kwargs` may hold cyclic references, that we really want to avoid
