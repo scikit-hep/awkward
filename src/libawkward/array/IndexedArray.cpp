@@ -1870,7 +1870,6 @@ namespace awkward {
       }
 
       if (IndexedArray32* raw = dynamic_cast<IndexedArray32*>(array.get())) {
-        is_option = false;
         contents.push_back(raw->content());
         Index32 array_index = raw->index();
         struct Error err = kernel::IndexedArray_fill<int32_t, int64_t>(
@@ -1885,7 +1884,6 @@ namespace awkward {
         length_so_far += array.get()->length();
       }
       else if (IndexedArrayU32* raw = dynamic_cast<IndexedArrayU32*>(array.get())) {
-        is_option = false;
         contents.push_back(raw->content());
         IndexU32 array_index = raw->index();
         struct Error err = kernel::IndexedArray_fill<uint32_t, int64_t>(
@@ -1900,7 +1898,6 @@ namespace awkward {
         length_so_far += array.get()->length();
       }
       else if (IndexedArray64* raw = dynamic_cast<IndexedArray64*>(array.get())) {
-        is_option = false;
         contents.push_back(raw->content());
         Index64 array_index = raw->index();
         struct Error err = kernel::IndexedArray_fill<int64_t, int64_t>(
