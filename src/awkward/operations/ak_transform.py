@@ -511,7 +511,13 @@ def _impl(
             options,
         )
 
-        if return_value != "none":
+        if return_value == "none":
+            return None
+        elif expect_termination and not transformer_did_terminate:
+            raise RuntimeError(
+                "the transformation function was expected to terminate by returning a Content, but instead only returned None."
+            )
+        else:
             return wrap_layout(out, behavior, highlevel)
 
     else:
@@ -563,8 +569,8 @@ def _impl(
             return
         elif expect_termination and not transformer_did_terminate:
             raise RuntimeError(
-                "the transformation function was expected to terminate by returning a layout, "
-                "or tuple of layouts, but instead only returned None."
+                "the transformation function was expected to terminate by returning a Content, "
+                "or tuple of Contents, but instead only returned None."
             )
         else:
             if len(out) == 1:
