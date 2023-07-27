@@ -91,7 +91,7 @@ def _impl(array, copy, nan, posinf, neginf, highlevel, behavior):
 
         def action(inputs, backend, **kwargs):
             if all(isinstance(x, ak.contents.NumpyArray) for x in inputs):
-                tmp_layout = backend.nplike.asarray(inputs[0].data)
+                tmp_layout = inputs[0].data
                 if id(nan) in broadcasting_ids:
                     tmp_nan = inputs[broadcasting_ids[id(nan)]].to_backend_array()
                 else:
