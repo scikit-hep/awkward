@@ -26,7 +26,7 @@ def transform(
     numpy_to_regular=False,
     regular_to_jagged=False,
     return_value="simplified",
-    expect_termination=False,
+    expect_return_value=False,
     highlevel=True,
     behavior=None,
 ):
@@ -74,7 +74,7 @@ def transform(
             nodes are not nested inappropriately. Note that if `return_value` is `"none"`,
             the only way to get information out of this function is through the
             `lateral_context`.
-        expect_termination (bool): If True, raise a `RuntimeError` if the transformer
+        expect_return_value (bool): If True, raise a `RuntimeError` if the transformer
             does not terminate the recursion.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
@@ -431,7 +431,7 @@ def transform(
         numpy_to_regular,
         regular_to_jagged,
         return_value,
-        expect_termination,
+        expect_return_value,
         behavior,
         highlevel,
     )
@@ -450,7 +450,7 @@ def _impl(
     numpy_to_regular,
     regular_to_jagged,
     return_value,
-    expect_termination,
+    expect_return_value,
     behavior,
     highlevel,
 ):
@@ -477,7 +477,7 @@ def _impl(
         "return_array": return_value != "none",
         "function_name": "ak.transform",
         "broadcast_parameters_rule": broadcast_parameters_rule,
-        "expect_termination": expect_termination,
+        "expect_return_value": expect_return_value,
     }
 
     transformer_did_terminate = False
@@ -513,7 +513,7 @@ def _impl(
 
         if return_value == "none":
             return None
-        elif expect_termination and not transformer_did_terminate:
+        elif expect_return_value and not transformer_did_terminate:
             raise RuntimeError(
                 "the transformation function was expected to terminate by returning a Content, but instead only returned None."
             )
@@ -567,7 +567,7 @@ def _impl(
 
         if return_value == "none":
             return
-        elif expect_termination and not transformer_did_terminate:
+        elif expect_return_value and not transformer_did_terminate:
             raise RuntimeError(
                 "the transformation function was expected to terminate by returning a Content, "
                 "or tuple of Contents, but instead only returned None."
