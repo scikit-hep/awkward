@@ -91,21 +91,17 @@ def _impl(array, copy, nan, posinf, neginf, highlevel, behavior):
 
         def action(inputs, backend, **kwargs):
             if all(isinstance(x, ak.contents.NumpyArray) for x in inputs):
-                tmp_layout = backend.nplike.asarray(inputs[0])
+                tmp_layout = inputs[0].data
                 if id(nan) in broadcasting_ids:
-                    tmp_nan = backend.nplike.asarray(inputs[broadcasting_ids[id(nan)]])
+                    tmp_nan = inputs[broadcasting_ids[id(nan)]].to_backend_array()
                 else:
                     tmp_nan = nan
                 if id(posinf) in broadcasting_ids:
-                    tmp_posinf = backend.nplike.asarray(
-                        inputs[broadcasting_ids[id(posinf)]]
-                    )
+                    tmp_posinf = inputs[broadcasting_ids[id(posinf)]].to_backend_array()
                 else:
                     tmp_posinf = posinf
                 if id(neginf) in broadcasting_ids:
-                    tmp_neginf = backend.nplike.asarray(
-                        inputs[broadcasting_ids[id(neginf)]]
-                    )
+                    tmp_neginf = inputs[broadcasting_ids[id(neginf)]].to_backend_array()
                 else:
                     tmp_neginf = neginf
                 return (
