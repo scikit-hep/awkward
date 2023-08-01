@@ -234,7 +234,7 @@ kSliceNone = kMaxInt64 + 1
     os.mkdir(tests_spec)
     with open(os.path.join(tests_spec, "__init__.py"), "w") as f:
         f.write(
-            """# AUTO GENERATED ON {}
+            f"""# AUTO GENERATED ON {reproducible_datetime()}
 # DO NOT EDIT BY HAND!
 #
 # To regenerate file, run
@@ -244,9 +244,7 @@ kSliceNone = kMaxInt64 + 1
 
 # fmt: off
 
-""".format(
-                reproducible_datetime()
-            )
+"""
         )
 
     with open(
@@ -323,7 +321,7 @@ def genspectests(specdict):
             "w",
         ) as f:
             f.write(
-                """# AUTO GENERATED ON {}
+                f"""# AUTO GENERATED ON {reproducible_datetime()}
 # DO NOT EDIT BY HAND!
 #
 # To regenerate file, run
@@ -333,9 +331,7 @@ def genspectests(specdict):
 
 # fmt: off
 
-""".format(
-                    reproducible_datetime()
-                )
+"""
             )
             f.write("import pytest\nimport kernels\n\n")
             num = 1
@@ -437,7 +433,7 @@ def gencpukerneltests(specdict):
     os.mkdir(tests_cpu_kernels)
     with open(os.path.join(tests_cpu_kernels, "__init__.py"), "w") as f:
         f.write(
-            """# AUTO GENERATED ON {}
+            f"""# AUTO GENERATED ON {reproducible_datetime()}
 # DO NOT EDIT BY HAND!
 #
 # To regenerate file, run
@@ -447,9 +443,7 @@ def gencpukerneltests(specdict):
 
 # fmt: off
 
-""".format(
-                reproducible_datetime()
-            )
+"""
         )
 
     for spec in specdict.values():
@@ -457,7 +451,7 @@ def gencpukerneltests(specdict):
             os.path.join(tests_cpu_kernels, "test_cpu" + spec.name + ".py"), "w"
         ) as f:
             f.write(
-                """# AUTO GENERATED ON {}
+                f"""# AUTO GENERATED ON {reproducible_datetime()}
 # DO NOT EDIT BY HAND!
 #
 # To regenerate file, run
@@ -467,9 +461,7 @@ def gencpukerneltests(specdict):
 
 # fmt: off
 
-""".format(
-                    reproducible_datetime()
-                )
+"""
             )
 
             f.write(
@@ -637,7 +629,7 @@ def gencudakerneltests(specdict):
     os.mkdir(tests_cuda_kernels)
     with open(os.path.join(tests_cuda_kernels, "__init__.py"), "w") as f:
         f.write(
-            """# AUTO GENERATED ON {}
+            f"""# AUTO GENERATED ON {reproducible_datetime()}
 # DO NOT EDIT BY HAND!
 #
 # To regenerate file, run
@@ -647,9 +639,7 @@ def gencudakerneltests(specdict):
 
 # fmt: off
 
-""".format(
-                reproducible_datetime()
-            )
+"""
         )
 
     for spec in specdict.values():
@@ -658,7 +648,7 @@ def gencudakerneltests(specdict):
                 os.path.join(tests_cuda_kernels, "test_cuda" + spec.name + ".py"), "w"
             ) as f:
                 f.write(
-                    """# AUTO GENERATED ON {}
+                    f"""# AUTO GENERATED ON {reproducible_datetime()}
 # DO NOT EDIT BY HAND!
 #
 # To regenerate file, run
@@ -668,9 +658,7 @@ def gencudakerneltests(specdict):
 
 # fmt: off
 
-""".format(
-                        reproducible_datetime()
-                    )
+"""
                 )
 
                 f.write(

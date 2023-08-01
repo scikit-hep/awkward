@@ -21,9 +21,7 @@ class IndexedOptionForm(Form):
     ):
         if not isinstance(index, str):
             raise TypeError(
-                "{} 'index' must be of type str, not {}".format(
-                    type(self).__name__, repr(index)
-                )
+                f"{type(self).__name__} 'index' must be of type str, not {index!r}"
             )
         if not isinstance(content, Form):
             raise TypeError(

@@ -172,9 +172,7 @@ def unique(layout: Content, axis=None):
                     negaxis = negaxis + depth
                 if not (0 < negaxis and negaxis <= depth):
                     raise AxisError(
-                        "axis={} exceeds the depth of this array ({})".format(
-                            axis, depth
-                        )
+                        f"axis={axis} exceeds the depth of this array ({depth})"
                     )
 
         starts = ak.index.Index64.zeros(1, nplike=layout._backend.index_nplike)
@@ -185,9 +183,7 @@ def unique(layout: Content, axis=None):
         return layout._unique(negaxis, starts, parents, 1)
 
     raise AxisError(
-        "unique expects axis 'None' or '-1', got axis={} that is not supported yet".format(
-            axis
-        )
+        f"unique expects axis 'None' or '-1', got axis={axis} that is not supported yet"
     )
 
 
