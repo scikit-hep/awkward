@@ -19,7 +19,7 @@ namespace awkward {
 
     /// @brief Object of {@link BuilderOptions BuilderOptions} which sets the
     /// values of the default options.
-    awkward::BuilderOptions default_options(1024, 1);
+    inline awkward::BuilderOptions default_options(1024, 1);
 
     /// @class Field
     ///
