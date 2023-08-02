@@ -13,13 +13,13 @@
 #include <string>
 #include <functional>
 
+/// @brief Object of {@link BuilderOptions BuilderOptions} which sets the
+/// values of the default options.
+#define AWKWARD_LAYOUTBUILDER_DEFAULT_OPTIONS awkward::BuilderOptions(1024, 1)
+
 namespace awkward {
 
   namespace LayoutBuilder {
-
-    /// @brief Object of {@link BuilderOptions BuilderOptions} which sets the
-    /// values of the default options.
-    inline awkward::BuilderOptions default_options(1024, 1);
 
     /// @class Field
     ///
@@ -55,10 +55,10 @@ namespace awkward {
     class Numpy {
     public:
       /// @brief Creates a new Numpy layout builder by allocating a new buffer,
-      /// using `default_options` for initializing the buffer.
+      /// using `AWKWARD_LAYOUTBUILDER_DEFAULT_OPTIONS` for initializing the buffer.
       Numpy()
           : data_(
-                awkward::GrowableBuffer<PRIMITIVE>(default_options)) {
+                awkward::GrowableBuffer<PRIMITIVE>(AWKWARD_LAYOUTBUILDER_DEFAULT_OPTIONS)) {
         size_t id = 0;
         set_id(id);
       }
@@ -210,10 +210,10 @@ namespace awkward {
     class ListOffset {
     public:
       /// @brief Creates a new ListOffset layout builder by allocating a new `offset`
-      ///  buffer, using `default_options` for initializing the buffer.
+      ///  buffer, using `AWKWARD_LAYOUTBUILDER_DEFAULT_OPTIONS` for initializing the buffer.
       ListOffset()
           : offsets_(
-                awkward::GrowableBuffer<PRIMITIVE>(default_options)) {
+                awkward::GrowableBuffer<PRIMITIVE>(AWKWARD_LAYOUTBUILDER_DEFAULT_OPTIONS)) {
         offsets_.append(0);
         size_t id = 0;
         set_id(id);
@@ -1034,10 +1034,10 @@ namespace awkward {
     class IndexedOption {
     public:
       /// @brief Creates a new IndexedOption layout builder by allocating a new `index`
-      /// buffer, using `default_options` for initializing the buffer.
+      /// buffer, using `AWKWARD_LAYOUTBUILDER_DEFAULT_OPTIONS` for initializing the buffer.
       IndexedOption()
           : index_(
-                awkward::GrowableBuffer<PRIMITIVE>(default_options)),
+                awkward::GrowableBuffer<PRIMITIVE>(AWKWARD_LAYOUTBUILDER_DEFAULT_OPTIONS)),
             last_valid_(-1) {
         size_t id = 0;
         set_id(id);
@@ -1358,9 +1358,9 @@ namespace awkward {
     class ByteMasked {
     public:
       /// @brief Creates a new ByteMasked layout builder by allocating a new `mask`
-      ///  buffer, using `default_options` for initializing the buffer.
+      ///  buffer, using `AWKWARD_LAYOUTBUILDER_DEFAULT_OPTIONS` for initializing the buffer.
       ByteMasked()
-          : mask_(awkward::GrowableBuffer<int8_t>(default_options)) {
+          : mask_(awkward::GrowableBuffer<int8_t>(AWKWARD_LAYOUTBUILDER_DEFAULT_OPTIONS)) {
         size_t id = 0;
         set_id(id);
       }
@@ -1571,9 +1571,9 @@ namespace awkward {
     class BitMasked {
     public:
       /// @brief Creates a new BitMasked layout builder by allocating a new `mask`
-      /// buffer, using `default_options` for initializing the buffer.
+      /// buffer, using `AWKWARD_LAYOUTBUILDER_DEFAULT_OPTIONS` for initializing the buffer.
       BitMasked()
-          : mask_(awkward::GrowableBuffer<uint8_t>(default_options)),
+          : mask_(awkward::GrowableBuffer<uint8_t>(AWKWARD_LAYOUTBUILDER_DEFAULT_OPTIONS)),
             current_byte_(uint8_t(0)),
             current_byte_ref_(mask_.append_and_get_ref(current_byte_)),
             current_index_(0) {
@@ -1877,10 +1877,10 @@ namespace awkward {
       using ContentType = std::tuple_element_t<I, Contents>;
 
       /// @brief Creates a new Union layout builder by allocating new tags and
-      /// index buffers, using `default_options` for initializing the buffer.
+      /// index buffers, using `AWKWARD_LAYOUTBUILDER_DEFAULT_OPTIONS` for initializing the buffer.
       Union()
-          : tags_(awkward::GrowableBuffer<TAGS>(default_options)),
-            index_(awkward::GrowableBuffer<INDEX>(default_options)) {
+          : tags_(awkward::GrowableBuffer<TAGS>(AWKWARD_LAYOUTBUILDER_DEFAULT_OPTIONS)),
+            index_(awkward::GrowableBuffer<INDEX>(AWKWARD_LAYOUTBUILDER_DEFAULT_OPTIONS)) {
         size_t id = 0;
         set_id(id);
         for (size_t i = 0; i < contents_count_; i++)
