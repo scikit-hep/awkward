@@ -460,7 +460,8 @@ test_Empty() {
 
   assert(builder.form() ==
   "{ "
-      "\"class\": \"EmptyArray\" "
+      "\"class\": \"EmptyArray\", "
+      "\"parameters\": {} "
   "}");
 
   clear_buffers(buffers);
@@ -531,7 +532,8 @@ test_ListOffset_Empty() {
           "\"class\": \"ListOffsetArray\", "
           "\"offsets\": \"i64\", "
           "\"content\": { "
-              "\"class\": \"EmptyArray\" "
+              "\"class\": \"EmptyArray\", "
+              "\"parameters\": {} "
           "}, "
           "\"form_key\": \"node1\" "
       "}, "
