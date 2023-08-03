@@ -17,6 +17,7 @@ import awkward._do
 import awkward._slicing
 import awkward._broadcasting
 import awkward._reducers
+import awkward._ext  # strictly for unpickling from Awkward 1
 
 # internal
 import awkward._util
