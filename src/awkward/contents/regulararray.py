@@ -1091,7 +1091,7 @@ class RegularArray(Content):
                     nplike=index_nplike,
                 )
             else:
-                assert nextlen == 0
+                assert nextlen is unknown_length or nextlen == 0
                 nextstarts = ak.index.Index64(
                     index_nplike.zeros(nextlen, dtype=np.int64),
                     nplike=index_nplike,
