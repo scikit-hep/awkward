@@ -75,6 +75,8 @@ def _awkward_1_rewrite_partition_form(form, partition: int, template: str = "par
                 contents=[transform(c) for c in form.contents],
                 form_key=rename_form_key(form.form_key),
             )
+        else:
+            raise AssertionError
 
     return transform(form)
 
