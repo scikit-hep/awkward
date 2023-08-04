@@ -18,9 +18,9 @@ def is_alpha(array, *, highlevel=True, behavior=None):
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
-    Replaces any string-valued data with True iff the string is non-empty and consists only of alphabetic Unicode characters.
+    Replaces any string-valued data with True if the string is non-empty and consists only of alphabetic Unicode characters, False otherwise.
 
-    Replaces any bytestring-valued data with True iff the string is non-empty and consists only of alphabetic ASCII characters.
+    Replaces any bytestring-valued data with True if the string is non-empty and consists only of alphabetic ASCII characters, False otherwise.
 
     Note: this function does not raise an error if the `array` does
     not contain any string or bytestring data.

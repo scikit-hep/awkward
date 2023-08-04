@@ -124,3 +124,16 @@ def test_is_space():
         [],
         [False, False, False],
     ]
+
+
+def test_is_upper():
+    assert ak.str.is_space(string).tolist() == [
+        [False, False],
+        [],
+        [False, False, False],
+    ]
+    assert ak.str.is_space(bytestring).tolist() == [
+        [False, False],
+        [],
+        [False, False, False],
+    ]

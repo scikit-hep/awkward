@@ -1,5 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+# https://arrow.apache.org/docs/python/api/compute.html#string-predicates
+
+# string predicates
 from awkward.operations.str.ak_is_alnum import *
 from awkward.operations.str.ak_is_alpha import *
 from awkward.operations.str.ak_is_decimal import *
@@ -8,6 +11,7 @@ from awkward.operations.str.ak_is_lower import *
 from awkward.operations.str.ak_is_numeric import *
 from awkward.operations.str.ak_is_printable import *
 from awkward.operations.str.ak_is_space import *
+from awkward.operations.str.ak_is_upper import *
 
 
 def _get_action(utf8_function, ascii_function, *, bytestring_to_string=False):

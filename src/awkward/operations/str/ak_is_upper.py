@@ -1,6 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-__all__ = ("is_numeric",)
+__all__ = ("is_upper",)
 
 import awkward as ak
 from awkward._behavior import behavior_of
@@ -9,7 +9,7 @@ from awkward._layout import wrap_layout
 
 
 @high_level_function
-def is_numeric(array, *, highlevel=True, behavior=None):
+def is_upper(array, *, highlevel=True, behavior=None):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
@@ -18,20 +18,18 @@ def is_numeric(array, *, highlevel=True, behavior=None):
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
-    Replaces any string-valued data true if the string is non-empty and consists only of numeric Unicode characters, False otherwise.
+    Replaces any string-valued data True if the string is non-empty and consists only of uppercase Unicode characters, False otherwise.
 
-    Replaces any bytestring-valued data true if the string is non-empty and consists only of numeric Unicode characters, False otherwise.
+    Replaces any bytestring-valued data True if the string is non-empty and consists only of uppercase ASCII characters, False otherwise.
 
     Note: this function does not raise an error if the `array` does
     not contain any string or bytestring data.
 
     Requires the pyarrow library and calls
-    [pyarrow.compute.utf8_isalpha](https://arrow.apache.org/docs/python/generated/pyarrow.compute.utf8_is_numeric.html)
+    [pyarrow.compute.utf8_isalpha](https://arrow.apache.org/docs/python/generated/pyarrow.compute.utf8_is_upper.html)
     or
-    [pyarrow.compute.utf8_isalpha](https://arrow.apache.org/docs/python/generated/pyarrow.compute.utf8_is_numeric.html)
+    [pyarrow.compute.ascii_isalpha](https://arrow.apache.org/docs/python/generated/pyarrow.compute.ascii_is_upper.html)
     on strings and bytestrings, respectively.
-
-    (Arrow's compute module does not have an `ascii_is_numeric`.)
     """
     # Dispatch
     yield (array,)
@@ -50,7 +48,10 @@ def _impl(array, highlevel, behavior):
     out = ak._do.recursively_apply(
         ak.operations.to_layout(array),
         ak.operations.str._get_action(
-            pc.utf8_is_numeric, pc.utf8_is_numeric, bytestring_to_string=True
+            pc.utf8_is_upper,
+            pc.ascii_is_upper,
+            # pc.ascii_is_upper is defined on binary, but for consistency with lower...
+            bytestring_to_string=True,
         ),
         behavior,
     )
