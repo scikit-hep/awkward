@@ -111,3 +111,16 @@ def test_is_printable():
         [],
         [False, False, True],
     ]
+
+
+def test_is_space():
+    assert ak.str.is_space(string).tolist() == [
+        [False, False],
+        [],
+        [False, False, False],
+    ]
+    assert ak.str.is_space(bytestring).tolist() == [
+        [False, False],
+        [],
+        [False, False, False],
+    ]
