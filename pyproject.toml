@@ -85,7 +85,7 @@ include = [
     "/README.md",
     "/requirements-test.txt"
 ]
-artefacts = [
+artifacts = [
     "/tests-cuda-kernels",
 ]
 
