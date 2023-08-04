@@ -1,6 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-__all__ = ("is_alnum",)
+__all__ = ("is_alpha",)
 
 import awkward as ak
 from awkward._behavior import behavior_of
@@ -9,7 +9,7 @@ from awkward._layout import wrap_layout
 
 
 @high_level_function
-def is_alnum(array, *, highlevel=True, behavior=None):
+def is_alpha(array, *, highlevel=True, behavior=None):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
@@ -24,9 +24,9 @@ def is_alnum(array, *, highlevel=True, behavior=None):
     not contain any string data.
 
     Requires the pyarrow library and calls
-    [pyarrow.compute.utf8_isalnum](https://arrow.apache.org/docs/python/generated/pyarrow.compute.utf8_is_alnum.html)
+    [pyarrow.compute.utf8_isalpha](https://arrow.apache.org/docs/python/generated/pyarrow.compute.utf8_is_alpha.html)
     or
-    [pyarrow.compute.ascii_isalnum](https://arrow.apache.org/docs/python/generated/pyarrow.compute.ascii_is_alnum.html)
+    [pyarrow.compute.ascii_isalpha](https://arrow.apache.org/docs/python/generated/pyarrow.compute.ascii_is_alpha.html)
     on strings and bytestrings, respectively.
     """
     # Dispatch
@@ -46,7 +46,7 @@ def _impl(array, highlevel, behavior):
     out = ak._do.recursively_apply(
         ak.operations.to_layout(array),
         ak.operations.str._get_action(
-            pc.utf8_is_alnum, pc.ascii_is_alnum, bytestring_to_string=True
+            pc.utf8_is_alpha, pc.ascii_is_alpha, bytestring_to_string=True
         ),
         behavior,
     )

@@ -1,6 +1,10 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+import pytest
+
 import awkward as ak
+
+pytest.importorskip("pyarrow")
 
 string = ak.Array(
     [
@@ -24,9 +28,21 @@ def test_is_alnum():
         [],
         [False, False, True],
     ]
-    # ArrowNotImplementedError
-    # assert ak.str.is_alnum(bytestring).tolist() == [
-    #     [False, False],
-    #     [],
-    #     [False, False, True],
-    # ]
+    assert ak.str.is_alnum(bytestring).tolist() == [
+        [False, False],
+        [],
+        [False, False, True],
+    ]
+
+
+def test_is_alpha():
+    assert ak.str.is_alpha(string).tolist() == [
+        [True, False],
+        [],
+        [False, False, True],
+    ]
+    assert ak.str.is_alpha(bytestring).tolist() == [
+        [False, False],
+        [],
+        [False, False, True],
+    ]
