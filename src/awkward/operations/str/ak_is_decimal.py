@@ -26,9 +26,9 @@ def is_decimal(array, *, highlevel=True, behavior=None):
     not contain any string or bytestring data.
 
     Requires the pyarrow library and calls
-    [pyarrow.compute.utf8_isalpha](https://arrow.apache.org/docs/python/generated/pyarrow.compute.utf8_is_decimal.html)
+    [pyarrow.compute.utf8_is_decimal](https://arrow.apache.org/docs/python/generated/pyarrow.compute.utf8_is_decimal.html)
     or
-    [pyarrow.compute.ascii_isalpha](https://arrow.apache.org/docs/python/generated/pyarrow.compute.ascii_is_decimal.html)
+    [pyarrow.compute.ascii_is_decimal](https://arrow.apache.org/docs/python/generated/pyarrow.compute.ascii_is_decimal.html)
     on strings and bytestrings, respectively.
     """
     # Dispatch

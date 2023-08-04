@@ -26,9 +26,9 @@ def is_alnum(array, *, highlevel=True, behavior=None):
     not contain any string or bytestring data.
 
     Requires the pyarrow library and calls
-    [pyarrow.compute.utf8_isalnum](https://arrow.apache.org/docs/python/generated/pyarrow.compute.utf8_is_alnum.html)
+    [pyarrow.compute.utf8_is_alnum](https://arrow.apache.org/docs/python/generated/pyarrow.compute.utf8_is_alnum.html)
     or
-    [pyarrow.compute.ascii_isalnum](https://arrow.apache.org/docs/python/generated/pyarrow.compute.ascii_is_alnum.html)
+    [pyarrow.compute.ascii_is_alnum](https://arrow.apache.org/docs/python/generated/pyarrow.compute.ascii_is_alnum.html)
     on strings and bytestrings, respectively.
     """
     # Dispatch

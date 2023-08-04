@@ -150,3 +150,16 @@ def test_is_title():
         [],
         [False, False, False],
     ]
+
+
+def test_is_ascii():
+    assert ak.str.is_ascii(string).tolist() == [
+        [False, True],
+        [],
+        [False, False, True],
+    ]
+    assert ak.str.is_ascii(bytestring).tolist() == [
+        [False, True],
+        [],
+        [False, False, True],
+    ]

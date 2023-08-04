@@ -26,9 +26,9 @@ def is_printable(array, *, highlevel=True, behavior=None):
     not contain any string or bytestring data.
 
     Requires the pyarrow library and calls
-    [pyarrow.compute.utf8_isalpha](https://arrow.apache.org/docs/python/generated/pyarrow.compute.utf8_is_printable.html)
+    [pyarrow.compute.utf8_is_printable](https://arrow.apache.org/docs/python/generated/pyarrow.compute.utf8_is_printable.html)
     or
-    [pyarrow.compute.ascii_isalpha](https://arrow.apache.org/docs/python/generated/pyarrow.compute.ascii_is_printable.html)
+    [pyarrow.compute.ascii_is_printable](https://arrow.apache.org/docs/python/generated/pyarrow.compute.ascii_is_printable.html)
     on strings and bytestrings, respectively.
     """
     # Dispatch

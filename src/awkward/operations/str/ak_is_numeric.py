@@ -26,9 +26,9 @@ def is_numeric(array, *, highlevel=True, behavior=None):
     not contain any string or bytestring data.
 
     Requires the pyarrow library and calls
-    [pyarrow.compute.utf8_isalpha](https://arrow.apache.org/docs/python/generated/pyarrow.compute.utf8_is_numeric.html)
+    [pyarrow.compute.utf8_is_numeric](https://arrow.apache.org/docs/python/generated/pyarrow.compute.utf8_is_numeric.html)
     or
-    [pyarrow.compute.utf8_isalpha](https://arrow.apache.org/docs/python/generated/pyarrow.compute.utf8_is_numeric.html)
+    [pyarrow.compute.utf8_is_numeric](https://arrow.apache.org/docs/python/generated/pyarrow.compute.utf8_is_numeric.html)
     on strings and bytestrings, respectively.
 
     (Arrow's compute module does not have an `ascii_is_numeric`.)
