@@ -15,6 +15,13 @@ def test_numpyarray():
         assert pickle.loads(pickle.dumps(array)).layout.form == array.layout.form
 
 
+def test_partitioned_numpyarray():
+    with open(SAMPLES_DIR / "awkward1-partitioned-numpyarray.pkl", "rb") as file:
+        array = pickle.load(file)
+        assert array.to_list() == [1, 2, 3, 4, 5, 6]
+        assert pickle.loads(pickle.dumps(array)).layout.form == array.layout.form
+
+
 def test_listoffsetarray():
     with open(SAMPLES_DIR / "awkward1-listoffsetarray.pkl", "rb") as file:
         array = pickle.load(file)

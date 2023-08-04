@@ -10,7 +10,7 @@ import itertools
 import keyword
 import re
 import sys
-from collections.abc import Iterable, Mapping, Sized
+from collections.abc import Iterable, Mapping, Sequence, Sized
 
 from awkward_cpp.lib import _ext
 
@@ -33,6 +33,50 @@ _dir_pattern = re.compile(r"^[a-zA-Z_]\w*$")
 
 
 T = TypeVar("T", bound=ak.contents.Content)
+
+
+def _awkward_1_rewrite_partition_form(form, partition: int, template: str = "part{}"):
+    """Rewrite partition i as partition 0 for a given container.
+
+    This routine is a helper function for reading awkward1 pickles
+    """
+    default_prefix = f"{template.format(0)}-"
+    part_prefix = f"{template.format(partition)}-"
+
+    def rename_form_key(key: str) -> str:
+        suffix = key[len(default_prefix) :]
+
+        return f"{part_prefix}{suffix}"
+
+    def transform(form):
+        if isinstance(form, (ak.forms.NumpyForm, ak.forms.EmptyForm)):
+            return form.copy(form_key=rename_form_key(form.form_key))
+        elif isinstance(
+            form,
+            (
+                ak.forms.ListForm,
+                ak.forms.ListOffsetForm,
+                ak.forms.RegularForm,
+                ak.forms.IndexedForm,
+                ak.forms.IndexedOptionForm,
+                ak.forms.ByteMaskedForm,
+                ak.forms.BitMaskedForm,
+            ),
+        ):
+            return form.copy(
+                content=transform(form.content),
+                form_key=rename_form_key(form.form_key),
+            )
+        elif isinstance(
+            form,
+            (ak.forms.UnionForm, ak.forms.RecordForm),
+        ):
+            return form.copy(
+                contents=[transform(c) for c in form.contents],
+                form_key=rename_form_key(form.form_key),
+            )
+
+    return transform(form)
 
 
 def prepare_layout(layout: T) -> T | str | bytes:
@@ -1400,14 +1444,33 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
     def __setstate__(self, state):
         form, length, container, behavior, *_ = state
-        layout = ak.operations.from_buffers(
-            form,
-            length,
-            container,
-            highlevel=False,
-            buffer_key="{form_key}-{attribute}",
-            byteorder="<",
-        )
+        # If length is a sequence, we have awkward1
+        if isinstance(length, Sequence):
+            part_layouts = [
+                # Load partition
+                ak.operations.from_buffers(
+                    _awkward_1_rewrite_partition_form(form, i),
+                    part_length,
+                    container,
+                    highlevel=False,
+                    buffer_key="{form_key}-{attribute}",
+                    byteorder="<",
+                )
+                for i, part_length in enumerate(length)
+            ]
+
+            # Fuse partitions
+            layout = ak.concatenate(part_layouts, axis=0, highlevel=False)
+        # Otherwise, we have either awkward1 or awkward2
+        else:
+            layout = ak.operations.from_buffers(
+                form,
+                length,
+                container,
+                highlevel=False,
+                buffer_key="{form_key}-{attribute}",
+                byteorder="<",
+            )
         self.layout = layout
         self.behavior = behavior
 
