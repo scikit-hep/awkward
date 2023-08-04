@@ -2109,6 +2109,7 @@ class Record(NDArrayOperatorsMixin):
         )
 
     def __setstate__(self, state):
+        # awkward1 records cannot contain partitioned arrays, so we don't need to handle such a case here.
         form, length, container, behavior, at, *_ = state
         layout = ak.operations.from_buffers(
             form,
