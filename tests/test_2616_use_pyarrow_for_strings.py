@@ -46,3 +46,16 @@ def test_is_alpha():
         [],
         [False, False, True],
     ]
+
+
+def test_is_decimal():
+    assert ak.str.is_decimal(string).tolist() == [
+        [False, False],
+        [],
+        [False, False, False],
+    ]
+    assert ak.str.is_decimal(bytestring).tolist() == [
+        [False, False],
+        [],
+        [False, False, False],
+    ]

@@ -2,6 +2,7 @@
 
 from awkward.operations.str.ak_is_alnum import *
 from awkward.operations.str.ak_is_alpha import *
+from awkward.operations.str.ak_is_decimal import *
 
 
 def _get_action(utf8_function, ascii_function, *, bytestring_to_string=False):
