@@ -202,3 +202,16 @@ def test_lower():
         [],
         ["→δε←", "ζz zζ", "abc"],
     ]
+
+
+def test_upper():
+    assert ak.str.upper(string).tolist() == [
+        ["ΑΒΓ", ""],
+        [],
+        ["→ΔΕ←", "ΖZ ZΖ", "ABC"],  # noqa: RUF001, RUF003 (we care about Ζ vs Z)
+    ]
+    assert ak.str.upper(bytestring).tolist() == [
+        ["αβγ", ""],
+        [],
+        ["→δε←", "ζZ Zζ", "ABC"],
+    ]
