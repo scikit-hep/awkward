@@ -515,7 +515,8 @@ def _impl(
             return None
         elif expect_return_value and not transformer_did_terminate:
             raise RuntimeError(
-                "the transformation function was expected to terminate by returning a Content, but instead only returned None."
+                "the transformation function was expected to terminate by returning a Content, "
+                "but instead only returned None."
             )
         else:
             return wrap_layout(out, behavior, highlevel)
@@ -537,7 +538,8 @@ def _impl(
                 for x in out:
                     if not isinstance(x, ak.contents.Content):
                         raise TypeError(
-                            f"transformation must return a Content, tuple of Contents, or None, not a tuple containing {type(x)}\n\n{x!r}"
+                            f"transformation must return a Content, tuple of Contents, or None, "
+                            f"not a tuple containing {type(x)}\n\n{x!r}"
                         )
                 return out
 
@@ -572,8 +574,7 @@ def _impl(
                 "the transformation function was expected to terminate by returning a Content, "
                 "or tuple of Contents, but instead only returned None."
             )
+        elif len(out) == 1:
+            return wrap_layout(out[0], behavior, highlevel)
         else:
-            if len(out) == 1:
-                return wrap_layout(out[0], behavior, highlevel)
-            else:
-                return tuple(wrap_layout(x, behavior, highlevel) for x in out)
+            return tuple(wrap_layout(x, behavior, highlevel) for x in out)
