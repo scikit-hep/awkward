@@ -61,6 +61,19 @@ def test_is_decimal():
     ]
 
 
+def test_is_digit():
+    assert ak.str.is_digit(string).tolist() == [
+        [False, False],
+        [],
+        [False, False, False],
+    ]
+    assert ak.str.is_digit(bytestring).tolist() == [
+        [False, False],
+        [],
+        [False, False, False],
+    ]
+
+
 def test_is_lower():
     assert ak.str.is_lower(string).tolist() == [
         [True, False],

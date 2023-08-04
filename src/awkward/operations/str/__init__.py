@@ -3,6 +3,7 @@
 from awkward.operations.str.ak_is_alnum import *
 from awkward.operations.str.ak_is_alpha import *
 from awkward.operations.str.ak_is_decimal import *
+from awkward.operations.str.ak_is_digit import *
 from awkward.operations.str.ak_is_lower import *
 
 
