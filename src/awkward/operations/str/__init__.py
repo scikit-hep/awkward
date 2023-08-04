@@ -36,7 +36,7 @@ def _get_action(utf8_function, ascii_function, *, bytestring_to_string=False):
 
         elif layout.is_list and layout.parameter("__array__") == "bytestring":
             if bytestring_to_string:
-                return from_arrow(
+                out = from_arrow(
                     ascii_function(
                         to_arrow(
                             layout.copy(
@@ -50,6 +50,13 @@ def _get_action(utf8_function, ascii_function, *, bytestring_to_string=False):
                     ),
                     highlevel=False,
                 )
+                if out.is_list and out.parameter("__array__") == "string":
+                    out = out.copy(
+                        content=out.content.copy(parameters={"__array__": "byte"}),
+                        parameters={"__array__": "bytestring"},
+                    )
+                return out
+
             else:
                 return from_arrow(
                     ascii_function(to_arrow(layout, extensionarray=False)),

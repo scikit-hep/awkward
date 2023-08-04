@@ -172,9 +172,9 @@ def test_capitalize():
         ["→δε←", "Ζz zζ", "Abc"],  # noqa: RUF001, RUF003 (we care about Ζ vs Z)
     ]
     assert ak.str.capitalize(bytestring).tolist() == [
-        ["αβγ", ""],
+        ["αβγ".encode(), b""],
         [],
-        ["→δε←", "ζz zζ", "Abc"],
+        ["→δε←".encode(), "ζz zζ".encode(), b"Abc"],
     ]
 
 
@@ -198,9 +198,9 @@ def test_lower():
         ["→δε←", "ζz zζ", "abc"],
     ]
     assert ak.str.lower(bytestring).tolist() == [
-        ["αβγ", ""],
+        ["αβγ".encode(), b""],
         [],
-        ["→δε←", "ζz zζ", "abc"],
+        ["→δε←".encode(), "ζz zζ".encode(), b"abc"],
     ]
 
 
@@ -211,9 +211,9 @@ def test_swapcase():
         ["→ΔΕ←", "ΖZ ZΖ", "ABC"],  # noqa: RUF001, RUF003 (we care about Ζ vs Z)
     ]
     assert ak.str.swapcase(bytestring).tolist() == [
-        ["αβγ", ""],
+        ["αβγ".encode(), b""],
         [],
-        ["→δε←", "ζZ Zζ", "ABC"],
+        ["→δε←".encode(), "ζZ Zζ".encode(), b"ABC"],
     ]
 
 
@@ -224,9 +224,9 @@ def test_title():
         ["→Δε←", "Ζz Zζ", "Abc"],  # noqa: RUF001, RUF003 (we care about Ζ vs Z)
     ]
     assert ak.str.title(bytestring).tolist() == [
-        ["αβγ", ""],
+        ["αβγ".encode(), b""],
         [],
-        ["→δε←", "ζZ Zζ", "Abc"],
+        ["→δε←".encode(), "ζZ Zζ".encode(), b"Abc"],
     ]
 
 
@@ -237,7 +237,7 @@ def test_upper():
         ["→ΔΕ←", "ΖZ ZΖ", "ABC"],  # noqa: RUF001, RUF003 (we care about Ζ vs Z)
     ]
     assert ak.str.upper(bytestring).tolist() == [
-        ["αβγ", ""],
+        ["αβγ".encode(), b""],
         [],
-        ["→δε←", "ζZ Zζ", "ABC"],
+        ["→δε←".encode(), "ζZ Zζ".encode(), b"ABC"],
     ]
