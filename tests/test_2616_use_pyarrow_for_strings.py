@@ -85,3 +85,16 @@ def test_is_lower():
         [],
         [False, True, True],
     ]
+
+
+def test_is_numeric():
+    assert ak.str.is_numeric(string).tolist() == [
+        [False, False],
+        [],
+        [False, False, False],
+    ]
+    assert ak.str.is_numeric(bytestring).tolist() == [
+        [False, False],
+        [],
+        [False, False, False],
+    ]
