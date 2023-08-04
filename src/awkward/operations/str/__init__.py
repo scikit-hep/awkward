@@ -11,6 +11,7 @@ from awkward.operations.str.ak_is_lower import *
 from awkward.operations.str.ak_is_numeric import *
 from awkward.operations.str.ak_is_printable import *
 from awkward.operations.str.ak_is_space import *
+from awkward.operations.str.ak_is_title import *
 from awkward.operations.str.ak_is_upper import *
 
 

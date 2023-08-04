@@ -18,9 +18,9 @@ def is_upper(array, *, highlevel=True, behavior=None):
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
-    Replaces any string-valued data True if the string is non-empty and consists only of uppercase Unicode characters, False otherwise.
+    Replaces any string-valued data with True if the string is non-empty and consists only of uppercase Unicode characters, False otherwise.
 
-    Replaces any bytestring-valued data True if the string is non-empty and consists only of uppercase ASCII characters, False otherwise.
+    Replaces any bytestring-valued data with True if the string is non-empty and consists only of uppercase ASCII characters, False otherwise.
 
     Note: this function does not raise an error if the `array` does
     not contain any string or bytestring data.
@@ -50,7 +50,7 @@ def _impl(array, highlevel, behavior):
         ak.operations.str._get_action(
             pc.utf8_is_upper,
             pc.ascii_is_upper,
-            # pc.ascii_is_upper is defined on binary, but for consistency with lower...
+            # pc.ascii_is_upper is defined on binary, but for consistency with is_lower and is_title...
             bytestring_to_string=True,
         ),
         behavior,
