@@ -5,11 +5,11 @@ from collections.abc import Mapping
 
 from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of
-from awkward._errors import AxisError
 from awkward._nplikes.dispatch import nplike_of
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward.errors import AxisError
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
