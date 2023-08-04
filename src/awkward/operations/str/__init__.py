@@ -19,6 +19,7 @@ from awkward.operations.str.ak_is_ascii import *
 from awkward.operations.str.ak_capitalize import *
 from awkward.operations.str.ak_length import *
 from awkward.operations.str.ak_lower import *
+from awkward.operations.str.ak_swapcase import *
 from awkward.operations.str.ak_upper import *
 
 

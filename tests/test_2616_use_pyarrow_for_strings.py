@@ -204,6 +204,19 @@ def test_lower():
     ]
 
 
+def test_swapcase():
+    assert ak.str.swapcase(string).tolist() == [
+        ["ΑΒΓ", ""],
+        [],
+        ["→ΔΕ←", "ΖZ ZΖ", "ABC"],  # noqa: RUF001, RUF003 (we care about Ζ vs Z)
+    ]
+    assert ak.str.swapcase(bytestring).tolist() == [
+        ["αβγ", ""],
+        [],
+        ["→δε←", "ζZ Zζ", "ABC"],
+    ]
+
+
 def test_upper():
     assert ak.str.upper(string).tolist() == [
         ["ΑΒΓ", ""],
