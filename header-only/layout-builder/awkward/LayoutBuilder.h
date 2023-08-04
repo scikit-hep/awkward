@@ -415,7 +415,7 @@ namespace awkward {
       /// contents in the form of a JSON-like string.
       std::string
       form() const noexcept {
-        return "{ \"class\": \"EmptyArray\", \"parameters\": {} }";
+        return "{ \"class\": \"EmptyArray\" }";
       }
 
     private:
