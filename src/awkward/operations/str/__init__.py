@@ -5,15 +5,18 @@
 # string predicates
 from awkward.operations.str.ak_is_alnum import *
 from awkward.operations.str.ak_is_alpha import *
-from awkward.operations.str.ak_is_ascii import *
 from awkward.operations.str.ak_is_decimal import *
 from awkward.operations.str.ak_is_digit import *
 from awkward.operations.str.ak_is_lower import *
 from awkward.operations.str.ak_is_numeric import *
 from awkward.operations.str.ak_is_printable import *
 from awkward.operations.str.ak_is_space import *
-from awkward.operations.str.ak_is_title import *
 from awkward.operations.str.ak_is_upper import *
+from awkward.operations.str.ak_is_title import *
+from awkward.operations.str.ak_is_ascii import *
+
+# string transforms
+from awkward.operations.str.ak_capitalize import *
 
 
 def _get_action(utf8_function, ascii_function, *, bytestring_to_string=False):

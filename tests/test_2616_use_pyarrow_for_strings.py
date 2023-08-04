@@ -163,3 +163,18 @@ def test_is_ascii():
         [],
         [False, False, True],
     ]
+
+
+def test_capitalize():
+    print(ak.str.capitalize(string))
+
+    assert ak.str.capitalize(string).tolist() == [
+        ["Αβγ", ""],
+        [],
+        ["→δε←", "Ζz zζ", "Abc"],  # noqa: RUF001, RUF003 (we care about Ζ vs Z)
+    ]
+    assert ak.str.capitalize(bytestring).tolist() == [
+        ["αβγ", ""],
+        [],
+        ["→δε←", "ζz zζ", "Abc"],
+    ]
