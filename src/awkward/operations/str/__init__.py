@@ -17,6 +17,8 @@ from awkward.operations.str.ak_is_ascii import *
 
 # string transforms
 from awkward.operations.str.ak_capitalize import *
+from awkward.operations.str.ak_length import *
+from awkward.operations.str.ak_lower import *
 
 
 def _get_action(utf8_function, ascii_function, *, bytestring_to_string=False):

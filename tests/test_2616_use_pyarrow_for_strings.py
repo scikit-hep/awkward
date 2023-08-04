@@ -166,8 +166,6 @@ def test_is_ascii():
 
 
 def test_capitalize():
-    print(ak.str.capitalize(string))
-
     assert ak.str.capitalize(string).tolist() == [
         ["Αβγ", ""],
         [],
@@ -177,4 +175,30 @@ def test_capitalize():
         ["αβγ", ""],
         [],
         ["→δε←", "ζz zζ", "Abc"],
+    ]
+
+
+def test_length():
+    assert ak.str.length(string).tolist() == [
+        [3, 0],
+        [],
+        [4, 5, 3],
+    ]
+    assert ak.str.length(bytestring).tolist() == [
+        [6, 0],
+        [],
+        [10, 7, 3],
+    ]
+
+
+def test_lower():
+    assert ak.str.lower(string).tolist() == [
+        ["αβγ", ""],
+        [],
+        ["→δε←", "ζz zζ", "abc"],
+    ]
+    assert ak.str.lower(bytestring).tolist() == [
+        ["αβγ", ""],
+        [],
+        ["→δε←", "ζz zζ", "abc"],
     ]
