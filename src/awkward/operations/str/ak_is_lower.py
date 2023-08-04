@@ -1,6 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-__all__ = ("is_decimal",)
+__all__ = ("is_lower",)
 
 import awkward as ak
 from awkward._behavior import behavior_of
@@ -9,7 +9,7 @@ from awkward._layout import wrap_layout
 
 
 @high_level_function
-def is_decimal(array, *, highlevel=True, behavior=None):
+def is_lower(array, *, highlevel=True, behavior=None):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
@@ -18,17 +18,17 @@ def is_decimal(array, *, highlevel=True, behavior=None):
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
-    Replaces any string-valued data True iff the string is non-empty and consists only of decimal Unicode characters.
+    Replaces any string-valued data True iff the string is non-empty and consists only of lowercase Unicode characters.
 
-    Replaces any bytestring-valued data True iff the string is non-empty and consists only of decimal ASCII characters.
+    Replaces any bytestring-valued data True iff the string is non-empty and consists only of lowercase ASCII characters.
 
     Note: this function does not raise an error if the `array` does
     not contain any string or bytestring data.
 
     Requires the pyarrow library and calls
-    [pyarrow.compute.utf8_isalpha](https://arrow.apache.org/docs/python/generated/pyarrow.compute.utf8_is_decimal.html)
+    [pyarrow.compute.utf8_isalpha](https://arrow.apache.org/docs/python/generated/pyarrow.compute.utf8_is_lower.html)
     or
-    [pyarrow.compute.ascii_isalpha](https://arrow.apache.org/docs/python/generated/pyarrow.compute.ascii_is_decimal.html)
+    [pyarrow.compute.ascii_isalpha](https://arrow.apache.org/docs/python/generated/pyarrow.compute.ascii_is_lower.html)
     on strings and bytestrings, respectively.
     """
     # Dispatch
@@ -48,7 +48,7 @@ def _impl(array, highlevel, behavior):
     out = ak._do.recursively_apply(
         ak.operations.to_layout(array),
         ak.operations.str._get_action(
-            pc.utf8_is_decimal, pc.ascii_is_decimal, bytestring_to_string=True
+            pc.utf8_is_lower, pc.ascii_is_lower, bytestring_to_string=True
         ),
         behavior,
     )

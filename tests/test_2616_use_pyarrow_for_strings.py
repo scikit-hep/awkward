@@ -59,3 +59,16 @@ def test_is_decimal():
         [],
         [False, False, False],
     ]
+
+
+def test_is_lower():
+    assert ak.str.is_lower(string).tolist() == [
+        [True, False],
+        [],
+        [True, True, True],
+    ]
+    assert ak.str.is_lower(bytestring).tolist() == [
+        [False, False],
+        [],
+        [False, True, True],
+    ]
