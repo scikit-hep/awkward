@@ -98,3 +98,16 @@ def test_is_numeric():
         [],
         [False, False, False],
     ]
+
+
+def test_is_printable():
+    assert ak.str.is_printable(string).tolist() == [
+        [True, True],
+        [],
+        [True, True, True],
+    ]
+    assert ak.str.is_printable(bytestring).tolist() == [
+        [False, True],
+        [],
+        [False, False, True],
+    ]

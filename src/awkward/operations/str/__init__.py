@@ -6,6 +6,7 @@ from awkward.operations.str.ak_is_decimal import *
 from awkward.operations.str.ak_is_digit import *
 from awkward.operations.str.ak_is_lower import *
 from awkward.operations.str.ak_is_numeric import *
+from awkward.operations.str.ak_is_printable import *
 
 
 def _get_action(utf8_function, ascii_function, *, bytestring_to_string=False):
