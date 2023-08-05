@@ -22,6 +22,7 @@ from awkward.operations.str.ak_lower import *
 from awkward.operations.str.ak_swapcase import *
 from awkward.operations.str.ak_title import *
 from awkward.operations.str.ak_upper import *
+from awkward.operations.str.ak_repeat import *
 
 
 def _get_action(utf8_function, ascii_function, *, bytestring_to_string=False):

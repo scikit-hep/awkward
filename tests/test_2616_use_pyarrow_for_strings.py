@@ -241,3 +241,27 @@ def test_upper():
         [],
         ["→δε←".encode(), "ζZ Zζ".encode(), b"ABC"],
     ]
+
+
+def test_repeat():
+    assert ak.str.repeat(string, 3).tolist() == [
+        ["αβγαβγαβγ", ""],
+        [],
+        ["→δε←→δε←→δε←", "ζz zζζz zζζz zζ", "abcabcabc"],
+    ]
+    assert ak.str.repeat(bytestring, 3).tolist() == [
+        ["αβγαβγαβγ".encode(), b""],
+        [],
+        ["→δε←→δε←→δε←".encode(), "ζz zζζz zζζz zζ".encode(), b"abcabcabc"],
+    ]
+
+    assert ak.str.repeat(string, [[3, 3], [], [2, 0, 1]]).tolist() == [
+        ["αβγαβγαβγ", ""],
+        [],
+        ["→δε←→δε←", "", "abc"],
+    ]
+    assert ak.str.repeat(bytestring, [[3, 3], [], [2, 0, 1]]).tolist() == [
+        ["αβγαβγαβγ".encode(), b""],
+        [],
+        ["→δε←→δε←".encode(), b"", b"abc"],
+    ]
