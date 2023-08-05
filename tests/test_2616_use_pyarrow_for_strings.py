@@ -456,6 +456,19 @@ def test_rtrim():
     ]
 
 
+def test_rtrim_whitespace():
+    assert ak.str.rtrim_whitespace(string_padded).tolist() == [
+        ["      αβγ", ""],
+        [],
+        ["     →δε←", "     ζz zζ", "      abc"],
+    ]
+    assert ak.str.rtrim_whitespace(bytestring_padded).tolist() == [
+        ["    αβγ".encode(), b""],
+        [],
+        ["  →δε←".encode(), "    ζz zζ".encode(), b"      abc"],
+    ]
+
+
 def test_trim():
     assert ak.str.trim(string_padded, " ").tolist() == [
         ["αβγ", ""],
