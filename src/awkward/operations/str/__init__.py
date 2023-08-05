@@ -33,6 +33,9 @@ from awkward.operations.str.ak_center import *
 from awkward.operations.str.ak_lpad import *
 from awkward.operations.str.ak_rpad import *
 
+# string trimming
+from awkward.operations.str.ak_trim import *
+
 
 def _get_action(
     utf8_function, ascii_function, *args, bytestring_to_string=False, **kwargs
