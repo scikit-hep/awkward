@@ -430,26 +430,6 @@ def test_rpad():
     ]
 
 
-# string_padded = ak.Array(
-#     [
-#         ["      αβγ      ", "               "],
-#         [],
-#         ["     →δε←      ", "     ζz zζ     ", "      abc      "],
-#     ]
-# )
-# bytestring_padded = ak.Array(
-#     [
-#         [b"    \xce\xb1\xce\xb2\xce\xb3     ", b"               "],
-#         [],
-#         [
-#             b"  \xe2\x86\x92\xce\xb4\xce\xb5\xe2\x86\x90   ",
-#             b"    \xce\xb6z z\xce\xb6    ",
-#             b"      abc      ",
-#         ],
-#     ]
-# )
-
-
 def test_ltrim():
     assert ak.str.ltrim(string_padded, " ").tolist() == [
         ["αβγ      ", ""],
@@ -460,6 +440,19 @@ def test_ltrim():
         ["αβγ     ".encode(), b""],
         [],
         ["→δε←   ".encode(), "ζz zζ    ".encode(), b"abc      "],
+    ]
+
+
+def test_rtrim():
+    assert ak.str.rtrim(string_padded, " ").tolist() == [
+        ["      αβγ", ""],
+        [],
+        ["     →δε←", "     ζz zζ", "      abc"],
+    ]
+    assert ak.str.rtrim(bytestring_padded, b" ").tolist() == [
+        ["    αβγ".encode(), b""],
+        [],
+        ["  →δε←".encode(), "    ζz zζ".encode(), b"      abc"],
     ]
 
 
