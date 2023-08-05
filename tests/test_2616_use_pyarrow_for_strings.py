@@ -291,3 +291,16 @@ def test_reverse():
         [],
         ["→δε←".encode()[::-1], "ζz zζ".encode()[::-1], b"abc"[::-1]],
     ]
+
+
+def test_replace_substring():
+    assert ak.str.replace_substring(string, "βγ", "HELLO").tolist() == [
+        ["αHELLO", ""],  # noqa: RUF001
+        [],
+        ["→δε←", "ζz zζ", "abc"],
+    ]
+    assert ak.str.replace_substring(bytestring, "βγ".encode(), b"HELLO").tolist() == [
+        ["αHELLO".encode(), b""],  # noqa: RUF001
+        [],
+        ["→δε←".encode(), "ζz zζ".encode(), b"abc"],
+    ]

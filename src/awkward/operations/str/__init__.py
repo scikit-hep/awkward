@@ -25,16 +25,19 @@ from awkward.operations.str.ak_upper import *
 from awkward.operations.str.ak_repeat import *
 from awkward.operations.str.ak_replace_slice import *
 from awkward.operations.str.ak_reverse import *
+from awkward.operations.str.ak_replace_substring import *
 
 
-def _get_action(utf8_function, ascii_function, *args, bytestring_to_string=False):
+def _get_action(
+    utf8_function, ascii_function, *args, bytestring_to_string=False, **kwargs
+):
     from awkward.operations.ak_from_arrow import from_arrow
     from awkward.operations.ak_to_arrow import to_arrow
 
-    def action(layout, **kwargs):
+    def action(layout, **absorb):
         if layout.is_list and layout.parameter("__array__") == "string":
             return from_arrow(
-                utf8_function(to_arrow(layout, extensionarray=False), *args),
+                utf8_function(to_arrow(layout, extensionarray=False), *args, **kwargs),
                 highlevel=False,
             )
 
@@ -52,6 +55,7 @@ def _get_action(utf8_function, ascii_function, *args, bytestring_to_string=False
                             extensionarray=False,
                         ),
                         *args,
+                        **kwargs,
                     ),
                     highlevel=False,
                 )
@@ -64,7 +68,9 @@ def _get_action(utf8_function, ascii_function, *args, bytestring_to_string=False
 
             else:
                 return from_arrow(
-                    ascii_function(to_arrow(layout, extensionarray=False), *args),
+                    ascii_function(
+                        to_arrow(layout, extensionarray=False), *args, **kwargs
+                    ),
                     highlevel=False,
                 )
 
