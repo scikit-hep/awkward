@@ -30,6 +30,8 @@ from awkward.operations.str.ak_replace_substring_regex import *
 
 # string padding
 from awkward.operations.str.ak_center import *
+from awkward.operations.str.ak_lpad import *
+from awkward.operations.str.ak_rpad import *
 
 
 def _get_action(

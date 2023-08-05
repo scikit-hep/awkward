@@ -1,6 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-__all__ = ("center",)
+__all__ = ("rpad",)
 
 
 import awkward as ak
@@ -10,7 +10,7 @@ from awkward._layout import wrap_layout
 
 
 @high_level_function
-def center(array, width, padding=" ", *, highlevel=True, behavior=None):
+def rpad(array, width, padding=" ", *, highlevel=True, behavior=None):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
@@ -21,7 +21,7 @@ def center(array, width, padding=" ", *, highlevel=True, behavior=None):
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
-    Replaces any string or bytestring-valued data with centered strings/bytestrings of a given `width`, padding both sides with the given `padding` codepoint or byte.
+    Replaces any string or bytestring-valued data with left-aligned strings/bytestrings of a given `width`, padding the right side with the given `padding` codepoint or byte.
 
     If the data are strings, `width` is measured in codepoints and `padding` must be one codepoint.
 
@@ -31,9 +31,9 @@ def center(array, width, padding=" ", *, highlevel=True, behavior=None):
     not contain any string or bytestring data.
 
     Requires the pyarrow library and calls
-    [pyarrow.compute.utf8_center](https://arrow.apache.org/docs/python/generated/pyarrow.compute.utf8_center.html)
+    [pyarrow.compute.utf8_rpad](https://arrow.apache.org/docs/python/generated/pyarrow.compute.utf8_rpad.html)
     or
-    [pyarrow.compute.ascii_center](https://arrow.apache.org/docs/python/generated/pyarrow.compute.ascii_center.html)
+    [pyarrow.compute.ascii_rpad](https://arrow.apache.org/docs/python/generated/pyarrow.compute.ascii_rpad.html)
     on strings and bytestrings, respectively.
     """
     # Dispatch
@@ -53,7 +53,7 @@ def _impl(array, width, padding, highlevel, behavior):
     out = ak._do.recursively_apply(
         ak.operations.to_layout(array),
         ak.operations.str._get_action(
-            pc.utf8_center, pc.ascii_center, width, padding, bytestring_to_string=True
+            pc.utf8_rpad, pc.ascii_rpad, width, padding, bytestring_to_string=True
         ),
         behavior,
     )

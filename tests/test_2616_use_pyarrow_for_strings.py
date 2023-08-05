@@ -369,3 +369,43 @@ def test_center():
             b"      abc      ",
         ],
     ]
+
+
+def test_lpad():
+    assert ak.str.lpad(string, 15, " ").tolist() == [
+        ["            αβγ", "               "],
+        [],
+        ["           →δε←", "          ζz zζ", "            abc"],
+    ]
+
+    print(ak.str.lpad(bytestring, 15, " ").tolist())
+
+    assert ak.str.lpad(bytestring, 15, b" ").tolist() == [
+        [b"         \xce\xb1\xce\xb2\xce\xb3", b"               "],
+        [],
+        [
+            b"     \xe2\x86\x92\xce\xb4\xce\xb5\xe2\x86\x90",
+            b"        \xce\xb6z z\xce\xb6",
+            b"            abc",
+        ],
+    ]
+
+
+def test_rpad():
+    assert ak.str.rpad(string, 15, " ").tolist() == [
+        ["αβγ            ", "               "],
+        [],
+        ["→δε←           ", "ζz zζ          ", "abc            "],
+    ]
+
+    print(ak.str.rpad(bytestring, 15, " ").tolist())
+
+    assert ak.str.rpad(bytestring, 15, b" ").tolist() == [
+        [b"\xce\xb1\xce\xb2\xce\xb3         ", b"               "],
+        [],
+        [
+            b"\xe2\x86\x92\xce\xb4\xce\xb5\xe2\x86\x90     ",
+            b"\xce\xb6z z\xce\xb6        ",
+            b"abc            ",
+        ],
+    ]
