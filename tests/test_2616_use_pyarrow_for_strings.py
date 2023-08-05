@@ -267,6 +267,19 @@ def test_repeat():
     ]
 
 
+def test_replace_slice():
+    assert ak.str.replace_slice(string[:, :1], 1, 2, "qj").tolist() == [
+        ["αqjγ"],  # noqa: RUF001
+        [],
+        ["→qjε←"],
+    ]
+    assert ak.str.replace_slice(bytestring[:, :1], 1, 2, b"qj").tolist() == [
+        [b"\xceqj\xce\xb2\xce\xb3"],
+        [],
+        [b"\xe2qj\x92\xce\xb4\xce\xb5\xe2\x86\x90"],
+    ]
+
+
 def test_reverse():
     assert ak.str.reverse(string).tolist() == [
         ["αβγ"[::-1], ""],

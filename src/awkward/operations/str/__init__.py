@@ -23,17 +23,19 @@ from awkward.operations.str.ak_swapcase import *
 from awkward.operations.str.ak_title import *
 from awkward.operations.str.ak_upper import *
 from awkward.operations.str.ak_repeat import *
+from awkward.operations.str.ak_replace_slice import *
 from awkward.operations.str.ak_reverse import *
 
 
-def _get_action(utf8_function, ascii_function, *, bytestring_to_string=False):
+def _get_action(utf8_function, ascii_function, *args, bytestring_to_string=False):
     from awkward.operations.ak_from_arrow import from_arrow
     from awkward.operations.ak_to_arrow import to_arrow
 
     def action(layout, **kwargs):
         if layout.is_list and layout.parameter("__array__") == "string":
             return from_arrow(
-                utf8_function(to_arrow(layout, extensionarray=False)), highlevel=False
+                utf8_function(to_arrow(layout, extensionarray=False), *args),
+                highlevel=False,
             )
 
         elif layout.is_list and layout.parameter("__array__") == "bytestring":
@@ -48,7 +50,8 @@ def _get_action(utf8_function, ascii_function, *, bytestring_to_string=False):
                                 parameters={"__array__": "string"},
                             ),
                             extensionarray=False,
-                        )
+                        ),
+                        *args,
                     ),
                     highlevel=False,
                 )
@@ -61,7 +64,7 @@ def _get_action(utf8_function, ascii_function, *, bytestring_to_string=False):
 
             else:
                 return from_arrow(
-                    ascii_function(to_arrow(layout, extensionarray=False)),
+                    ascii_function(to_arrow(layout, extensionarray=False), *args),
                     highlevel=False,
                 )
 

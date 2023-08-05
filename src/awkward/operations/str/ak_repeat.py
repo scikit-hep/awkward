@@ -59,7 +59,6 @@ def _impl(array, num_repeats, highlevel, behavior):
             raise TypeError(
                 "num_repeats must be an integer or broadcastable to integers"
             )
-        num_repeats = int(num_repeats)
 
         def action(layout, **kwargs):
             if layout.is_list and layout.parameter("__array__") in (
