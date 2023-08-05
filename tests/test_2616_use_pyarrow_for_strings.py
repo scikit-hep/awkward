@@ -265,3 +265,16 @@ def test_repeat():
         [],
         ["→δε←→δε←".encode(), b"", b"abc"],
     ]
+
+
+def test_reverse():
+    assert ak.str.reverse(string).tolist() == [
+        ["αβγ"[::-1], ""],
+        [],
+        ["→δε←"[::-1], "ζz zζ"[::-1], "abc"[::-1]],
+    ]
+    assert ak.str.reverse(bytestring).tolist() == [
+        ["αβγ".encode()[::-1], b""],
+        [],
+        ["→δε←".encode()[::-1], "ζz zζ".encode()[::-1], b"abc"[::-1]],
+    ]
