@@ -28,6 +28,9 @@ from awkward.operations.str.ak_reverse import *
 from awkward.operations.str.ak_replace_substring import *
 from awkward.operations.str.ak_replace_substring_regex import *
 
+# string padding
+from awkward.operations.str.ak_center import *
+
 
 def _get_action(
     utf8_function, ascii_function, *args, bytestring_to_string=False, **kwargs

@@ -16,7 +16,7 @@ def replace_slice(array, start, stop, replacement, *, highlevel=True, behavior=N
         array: Array-like data (anything #ak.to_layout recognizes).
         start (int): Index to start slicing at (inclusive).
         stop (int): Index to stop slicing at (exclusive).
-        replacement (str): What to replace the slice with.
+        replacement (str or bytes): What to replace the slice with.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if

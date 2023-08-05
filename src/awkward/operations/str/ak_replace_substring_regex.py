@@ -17,7 +17,7 @@ def replace_substring_regex(
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         pattern (str): Regular expression pattern to look for inside input values.
-        replacement (str): What to replace the pattern with.
+        replacement (str or bytes): What to replace the pattern with.
         max_replacements (None or int): If not None and not -1, limits the
             maximum number of replacements per string/bytestring, counting from
             the left.
