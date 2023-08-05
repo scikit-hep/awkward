@@ -41,6 +41,18 @@ from awkward.operations.str.ak_rtrim_whitespace import *
 from awkward.operations.str.ak_trim import *
 from awkward.operations.str.ak_trim_whitespace import *
 
+# string splitting
+
+# string component extraction
+
+# string joining
+
+# string slicing
+
+from awkward.operations.str.ak_slice import *
+
+# containment tests
+
 
 def _get_action(
     utf8_function, ascii_function, *args, bytestring_to_string=False, **kwargs
