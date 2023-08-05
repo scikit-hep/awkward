@@ -304,3 +304,18 @@ def test_replace_substring():
         [],
         ["→δε←".encode(), "ζz zζ".encode(), b"abc"],
     ]
+
+    assert ak.str.replace_substring(
+        string, "βγ", "HELLO", max_replacements=0
+    ).tolist() == [
+        ["αβγ", ""],
+        [],
+        ["→δε←", "ζz zζ", "abc"],
+    ]
+    assert ak.str.replace_substring(
+        bytestring, "βγ".encode(), b"HELLO", max_replacements=0
+    ).tolist() == [
+        ["αβγ".encode(), b""],
+        [],
+        ["→δε←".encode(), "ζz zζ".encode(), b"abc"],
+    ]
