@@ -26,6 +26,7 @@ from awkward.operations.str.ak_repeat import *
 from awkward.operations.str.ak_replace_slice import *
 from awkward.operations.str.ak_reverse import *
 from awkward.operations.str.ak_replace_substring import *
+from awkward.operations.str.ak_replace_substring_regex import *
 
 
 def _get_action(

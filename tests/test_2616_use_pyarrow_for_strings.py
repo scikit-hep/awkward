@@ -319,3 +319,33 @@ def test_replace_substring():
         [],
         ["→δε←".encode(), "ζz zζ".encode(), b"abc"],
     ]
+
+
+def test_replace_substring_regex():
+    assert ak.str.replace_substring_regex(string, "βγ", "HELLO").tolist() == [
+        ["αHELLO", ""],  # noqa: RUF001
+        [],
+        ["→δε←", "ζz zζ", "abc"],
+    ]
+    assert ak.str.replace_substring_regex(
+        bytestring, "βγ".encode(), b"HELLO"
+    ).tolist() == [
+        ["αHELLO".encode(), b""],  # noqa: RUF001
+        [],
+        ["→δε←".encode(), "ζz zζ".encode(), b"abc"],
+    ]
+
+    assert ak.str.replace_substring_regex(
+        string, "βγ", "HELLO", max_replacements=0
+    ).tolist() == [
+        ["αβγ", ""],
+        [],
+        ["→δε←", "ζz zζ", "abc"],
+    ]
+    assert ak.str.replace_substring_regex(
+        bytestring, "βγ".encode(), b"HELLO", max_replacements=0
+    ).tolist() == [
+        ["αβγ".encode(), b""],
+        [],
+        ["→δε←".encode(), "ζz zζ".encode(), b"abc"],
+    ]
