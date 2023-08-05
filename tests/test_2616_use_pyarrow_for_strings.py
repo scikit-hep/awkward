@@ -443,6 +443,19 @@ def test_ltrim():
     ]
 
 
+def test_ltrim_whitespace():
+    assert ak.str.ltrim_whitespace(string_padded).tolist() == [
+        ["αβγ      ", ""],
+        [],
+        ["→δε←      ", "ζz zζ     ", "abc      "],
+    ]
+    assert ak.str.ltrim_whitespace(bytestring_padded).tolist() == [
+        ["αβγ     ".encode(), b""],
+        [],
+        ["→δε←   ".encode(), "ζz zζ    ".encode(), b"abc      "],
+    ]
+
+
 def test_rtrim():
     assert ak.str.rtrim(string_padded, " ").tolist() == [
         ["      αβγ", ""],

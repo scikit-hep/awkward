@@ -35,6 +35,7 @@ from awkward.operations.str.ak_rpad import *
 
 # string trimming
 from awkward.operations.str.ak_ltrim import *
+from awkward.operations.str.ak_ltrim_whitespace import *
 from awkward.operations.str.ak_rtrim import *
 from awkward.operations.str.ak_rtrim_whitespace import *
 from awkward.operations.str.ak_trim import *
