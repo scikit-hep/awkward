@@ -441,3 +441,16 @@ def test_trim():
         [],
         ["→δε←".encode(), "ζz zζ".encode(), b"abc"],
     ]
+
+
+def test_trim_whitespace():
+    assert ak.str.trim_whitespace(string_padded).tolist() == [
+        ["αβγ", ""],
+        [],
+        ["→δε←", "ζz zζ", "abc"],
+    ]
+    assert ak.str.trim_whitespace(bytestring_padded).tolist() == [
+        ["αβγ".encode(), b""],
+        [],
+        ["→δε←".encode(), "ζz zζ".encode(), b"abc"],
+    ]
