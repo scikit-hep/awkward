@@ -6,6 +6,7 @@ from awkward._parameters import type_parameters_equal
 from awkward._regularize import is_integer
 from awkward._typing import JSONSerializable, final
 from awkward._util import UNSET
+from awkward.errors import FieldNotFoundError
 from awkward.forms.form import Form
 
 
@@ -115,7 +116,7 @@ class RecordForm(Form):
                 pass
             else:
                 return i
-        raise ak._errors.FieldNotFoundError(
+        raise FieldNotFoundError(
             f"no field {field!r} in record with {len(self._contents)} fields"
         )
 

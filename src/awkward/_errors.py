@@ -8,7 +8,7 @@ import warnings
 from collections.abc import Callable, Collection, Iterable, Mapping
 from functools import wraps
 
-import numpy  # noqa: TID251
+import numpy
 
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._typing import Any, TypeVar
@@ -418,13 +418,6 @@ Issue: {}.""".format(
         version, date, will_be, message
     )
     warnings.warn(warning, category, stacklevel=stacklevel + 1)
-
-
-class FieldNotFoundError(IndexError):
-    ...
-
-
-AxisError = numpy.AxisError
 
 
 T = TypeVar("T", bound=Callable)

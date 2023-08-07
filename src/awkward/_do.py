@@ -7,10 +7,10 @@ from numbers import Integral
 
 import awkward as ak
 from awkward._backends.backend import Backend
-from awkward._errors import AxisError
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._typing import Any, AxisMaybeNone, Literal
 from awkward.contents.content import ActionType, Content
+from awkward.errors import AxisError
 from awkward.forms import form
 from awkward.record import Record
 
