@@ -61,6 +61,9 @@ from awkward.operations.str.ak_slice import *
 
 # containment tests
 
+from awkward.operations.str.ak_count_substring import *
+from awkward.operations.str.ak_count_substring_regex import *
+
 
 def _get_ufunc_action(
     utf8_function,

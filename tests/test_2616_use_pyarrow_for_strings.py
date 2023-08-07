@@ -764,3 +764,69 @@ def test_join_element_wise():
         [],
         ["four←444".encode(), "five←555".encode()],
     ]
+
+
+def test_count_substring():
+    assert ak.str.count_substring(string_repeats, "BA").tolist() == [
+        [0, 0, 0],
+        [0, 0, 0],
+        [],
+    ]
+    assert ak.str.count_substring(string_repeats, "BA", ignore_case=True).tolist() == [
+        [2, 0, 1],
+        [0, 1, 1],
+        [],
+    ]
+
+    # Bytestrings
+    assert ak.str.count_substring(bytestring_repeats, b"BA").tolist() == [
+        [0, 0, 0],
+        [0, 0, 0],
+        [],
+    ]
+    assert ak.str.count_substring(
+        bytestring_repeats, b"BA", ignore_case=True
+    ).tolist() == [
+        [2, 0, 1],
+        [0, 1, 1],
+        [],
+    ]
+
+
+def test_count_substring_regex():
+    assert ak.str.count_substring_regex(string_repeats, r"BA\d*").tolist() == [
+        [0, 0, 0],
+        [0, 0, 0],
+        [],
+    ]
+    assert ak.str.count_substring_regex(
+        string_repeats, r"BA\d*", ignore_case=True
+    ).tolist() == [
+        [2, 0, 1],
+        [0, 1, 1],
+        [],
+    ]
+    assert ak.str.count_substring_regex(string_repeats, r"\d{1,}").tolist() == [
+        [2, 0, 0],
+        [1, 1, 1],
+        [],
+    ]
+
+    # Bytestrings
+    assert ak.str.count_substring_regex(bytestring_repeats, rb"BA\d*").tolist() == [
+        [0, 0, 0],
+        [0, 0, 0],
+        [],
+    ]
+    assert ak.str.count_substring_regex(
+        bytestring_repeats, rb"BA\d*", ignore_case=True
+    ).tolist() == [
+        [2, 0, 1],
+        [0, 1, 1],
+        [],
+    ]
+    assert ak.str.count_substring_regex(bytestring_repeats, rb"\d{1,}").tolist() == [
+        [2, 0, 0],
+        [1, 1, 1],
+        [],
+    ]
