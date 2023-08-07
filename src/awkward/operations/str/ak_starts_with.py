@@ -26,7 +26,7 @@ def starts_with(array, pattern, *, ignore_case=False, highlevel=True, behavior=N
     Note: this function does not raise an error if the `array` does not contain any string or bytestring data.
 
     Requires the pyarrow library and calls
-    [pyarrow.compute.count_substring](https://arrow.apache.org/docs/python/generated/pyarrow.compute.count_substring.html).
+    [pyarrow.compute.starts_with](https://arrow.apache.org/docs/python/generated/pyarrow.compute.starts_with.html).
     """
     # Dispatch
     yield (array,)
