@@ -22,7 +22,7 @@ def find_substring(array, pattern, *, ignore_case=False, highlevel=True, behavio
             high-level.
 
     For each string in the array, determine the index at which the first occurrence of the given literal pattern is
-    found. If the literay pattern is not found inside the string, the index is taken to be -1.
+    found. If the literal pattern is not found inside the string, the index is taken to be -1.
 
     Note: this function does not raise an error if the `array` does not contain any string or bytestring data.
 
