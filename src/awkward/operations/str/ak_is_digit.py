@@ -49,7 +49,7 @@ def _impl(array, highlevel, behavior):
 
     out = ak._do.recursively_apply(
         ak.operations.to_layout(array),
-        ak.operations.str._get_action(
+        ak.operations.str._get_ufunc_action(
             pc.utf8_is_digit, pc.utf8_is_digit, bytestring_to_string=True
         ),
         behavior,

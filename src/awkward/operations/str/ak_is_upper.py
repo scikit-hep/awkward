@@ -47,7 +47,7 @@ def _impl(array, highlevel, behavior):
 
     out = ak._do.recursively_apply(
         ak.operations.to_layout(array),
-        ak.operations.str._get_action(
+        ak.operations.str._get_ufunc_action(
             pc.utf8_is_upper,
             pc.ascii_is_upper,
             # pc.ascii_is_upper is defined on binary, but for consistency with is_lower and is_title...

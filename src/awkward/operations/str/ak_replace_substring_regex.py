@@ -55,7 +55,7 @@ def _impl(array, pattern, replacement, max_replacements, highlevel, behavior):
 
     out = ak._do.recursively_apply(
         ak.operations.to_layout(array),
-        ak.operations.str._get_action(
+        ak.operations.str._get_ufunc_action(
             pc.replace_substring_regex,
             pc.replace_substring_regex,
             pattern,

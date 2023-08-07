@@ -16,7 +16,7 @@ def split_pattern(
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
-        pattern (str or bytes): Individual characters to be trimmed from the string.
+        pattern (str or bytes): Pattern of characters/bytes to split on.
         max_splits (None or int): Maximum number of splits for each input value. If None, unlimited.
         reverse (bool): If True, start splitting from the end of each input value; otherwise, start splitting
             from the beginning of each value. This flag only has an effect if `max_splits` is not None.
@@ -45,13 +45,13 @@ def _impl(array, pattern, max_splits, reverse, highlevel, behavior):
     import pyarrow.compute as pc
 
     behavior = behavior_of(array, behavior=behavior)
-    action = ak.operations.str._get_action(
+    action = ak.operations.str._get_split_action(
         pc.split_pattern,
         pc.split_pattern,
         pattern=pattern,
         max_splits=max_splits,
         reverse=reverse,
-        bytestring_to_string=True,
+        bytestring_to_string=False,
     )
     out = ak._do.recursively_apply(ak.operations.to_layout(array), action, behavior)
 

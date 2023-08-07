@@ -51,7 +51,7 @@ def _impl(array, characters, highlevel, behavior):
 
     out = ak._do.recursively_apply(
         ak.operations.to_layout(array),
-        ak.operations.str._get_action(
+        ak.operations.str._get_ufunc_action(
             pc.utf8_rtrim, pc.ascii_rtrim, characters, bytestring_to_string=True
         ),
         behavior,

@@ -53,7 +53,7 @@ def _impl(array, start, stop, replacement, highlevel, behavior):
 
     out = ak._do.recursively_apply(
         ak.operations.to_layout(array),
-        ak.operations.str._get_action(
+        ak.operations.str._get_ufunc_action(
             pc.utf8_replace_slice, pc.binary_replace_slice, start, stop, replacement
         ),
         behavior,

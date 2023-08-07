@@ -56,8 +56,13 @@ from awkward.operations.str.ak_slice import *
 # containment tests
 
 
-def _get_action(
-    utf8_function, ascii_function, *args, bytestring_to_string=False, **kwargs
+def _get_ufunc_action(
+    utf8_function,
+    ascii_function,
+    *args,
+    bytestring_to_string=False,
+    drop_unmasked_option=False,
+    **kwargs,
 ):
     from awkward.operations.ak_from_arrow import from_arrow
     from awkward.operations.ak_to_arrow import to_arrow
@@ -100,6 +105,84 @@ def _get_action(
                         to_arrow(layout, extensionarray=False), *args, **kwargs
                     ),
                     highlevel=False,
+                )
+
+    return action
+
+
+def _erase_list_option(layout):
+    from awkward.contents.unmaskedarray import UnmaskedArray
+
+    assert layout.is_list
+    if layout.content.is_option:
+        assert isinstance(layout.content, UnmaskedArray)
+        return layout.copy(content=layout.content.content)
+    else:
+        return layout
+
+
+def _get_split_action(
+    utf8_function, ascii_function, *args, bytestring_to_string=False, **kwargs
+):
+    from awkward.operations.ak_from_arrow import from_arrow
+    from awkward.operations.ak_to_arrow import to_arrow
+
+    def action(layout, **absorb):
+        if layout.is_list and layout.parameter("__array__") == "string":
+            return _erase_list_option(
+                from_arrow(
+                    utf8_function(
+                        to_arrow(layout, extensionarray=False),
+                        *args,
+                        **kwargs,
+                    ),
+                    highlevel=False,
+                )
+            )
+
+        elif layout.is_list and layout.parameter("__array__") == "bytestring":
+            if bytestring_to_string:
+                out = _erase_list_option(
+                    from_arrow(
+                        ascii_function(
+                            to_arrow(
+                                layout.copy(
+                                    content=layout.content.copy(
+                                        parameters={"__array__": "char"}
+                                    ),
+                                    parameters={"__array__": "string"},
+                                ),
+                                extensionarray=False,
+                            ),
+                            *args,
+                            **kwargs,
+                        ),
+                        highlevel=False,
+                    )
+                )
+                assert out.is_list
+
+                assert (
+                    out.content.is_list
+                    and out.content.parameter("__array__") == "string"
+                )
+                return out.copy(
+                    content=out.content.copy(
+                        content=out.content.content.copy(
+                            parameters={"__array__": "byte"}
+                        ),
+                        parameters={"__array__": "bytestring"},
+                    ),
+                )
+
+            else:
+                return _erase_list_option(
+                    from_arrow(
+                        ascii_function(
+                            to_arrow(layout, extensionarray=False), *args, **kwargs
+                        ),
+                        highlevel=False,
+                    )
                 )
 
     return action

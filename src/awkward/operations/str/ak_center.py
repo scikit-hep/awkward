@@ -52,7 +52,7 @@ def _impl(array, width, padding, highlevel, behavior):
 
     out = ak._do.recursively_apply(
         ak.operations.to_layout(array),
-        ak.operations.str._get_action(
+        ak.operations.str._get_ufunc_action(
             pc.utf8_center, pc.ascii_center, width, padding, bytestring_to_string=True
         ),
         behavior,
