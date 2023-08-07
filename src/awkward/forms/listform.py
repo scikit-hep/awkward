@@ -209,3 +209,20 @@ class ListForm(Form):
             return ("string",)
         else:
             return self._content._column_types()
+
+    def __setstate__(self, state):
+        if isinstance(state, dict):
+            # read data pickled in Awkward 2.x
+            self.__dict__.update(state)
+        else:
+            # read data pickled in Awkward 1.x
+
+            # https://github.com/scikit-hep/awkward/blob/main-v1/src/python/forms.cpp#L374-L381
+            has_identities, parameters, form_key, starts, stops, content = state
+
+            if form_key is not None:
+                form_key = "part0-" + form_key  # only the first partition
+
+            self.__init__(
+                starts, stops, content, parameters=parameters, form_key=form_key
+            )

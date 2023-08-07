@@ -11,5 +11,6 @@ ak.jax.register_and_check()
 
 def test():
     ak.nan_to_num(
-        ak.Array([1, 2, 3], backend="jax"), nan=ak.Array([1, 2, 3], backend="jax")
+        ak.Array([1.1, 2.2, 3.3], backend="jax"),
+        nan=ak.Array([1.1, 2.2, 3.3], backend="jax"),
     )

@@ -22,6 +22,7 @@ import awkward._reducers
 import awkward._util
 import awkward._errors
 import awkward._lookup
+import awkward._ext  # strictly for unpickling from Awkward 1
 
 # third-party connectors
 import awkward._connect.numpy
