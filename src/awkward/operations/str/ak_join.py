@@ -27,6 +27,8 @@ def join(array, separator, *, highlevel=True, behavior=None):
 
     Requires the pyarrow library and calls
     [pyarrow.compute.binary_join](https://arrow.apache.org/docs/python/generated/pyarrow.compute.binary_join.html).
+
+    See also: #ak.str.join_element_wise.
     """
     # Dispatch
     yield (array, separator)

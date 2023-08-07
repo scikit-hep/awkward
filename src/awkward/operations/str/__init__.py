@@ -53,6 +53,7 @@ from awkward.operations.str.ak_extract_regex import *
 # string joining
 
 from awkward.operations.str.ak_join import *
+from awkward.operations.str.ak_join_element_wise import *
 
 # string slicing
 

@@ -742,3 +742,25 @@ def test_join():
         b"",
         "foo←bar←baz".encode(),
     ]
+
+
+def test_join_element_wise():
+    array1 = ak.Array([["one", "two", "three"], [], ["four", "five"]])
+    array2 = ak.Array([["111", "222", "333"], [], ["444", "555"]])
+    separator = ak.Array(["→", "↑", "←"])
+
+    assert ak.str.join_element_wise(array1, array2, separator).tolist() == [
+        ["one→111", "two→222", "three→333"],
+        [],
+        ["four←444", "five←555"],
+    ]
+
+    array1 = ak.Array([[b"one", b"two", b"three"], [], [b"four", b"five"]])
+    array2 = ak.Array([[b"111", b"222", b"333"], [], [b"444", b"555"]])
+    separator = ak.Array(["→".encode(), "↑".encode(), "←".encode()])
+
+    assert ak.str.join_element_wise(array1, array2, separator).tolist() == [
+        ["one→111".encode(), "two→222".encode(), "three→333".encode()],
+        [],
+        ["four←444".encode(), "five←555".encode()],
+    ]
