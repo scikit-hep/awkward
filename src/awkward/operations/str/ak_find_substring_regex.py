@@ -29,7 +29,7 @@ def find_substring_regex(
     Note: this function does not raise an error if the `array` does not contain any string or bytestring data.
 
     Requires the pyarrow library and calls
-    [pyarrow.compute.find_substring](https://arrow.apache.org/docs/python/generated/pyarrow.compute.find_substring.html).
+    [pyarrow.compute.find_substring_regex](https://arrow.apache.org/docs/python/generated/pyarrow.compute.find_substring_regex.html).
     """
     # Dispatch
     yield (array,)
