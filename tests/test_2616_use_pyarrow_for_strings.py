@@ -684,3 +684,31 @@ def test_split_pattern_regex():
         [[b"", b"foo"], [b"", b"bar"], [b"foo", b"", b"bar"]],
         [],
     ]
+
+
+def test_extract_regex():
+    assert ak.str.extract_regex(
+        ak.Array([["one1", "two2", "three3"], [], ["four4", "five5"]]),
+        "(?P<vowel>[aeiou])(?P<number>[0-9]+)",
+    ).tolist() == [
+        [
+            {"vowel": "e", "number": "1"},
+            {"vowel": "o", "number": "2"},
+            {"vowel": "e", "number": "3"},
+        ],
+        [],
+        [None, {"vowel": "e", "number": "5"}],
+    ]
+
+    assert ak.str.extract_regex(
+        ak.Array([[b"one1", b"two2", b"three3"], [], [b"four4", b"five5"]]),
+        b"(?P<vowel>[aeiou])(?P<number>[0-9]+)",
+    ).tolist() == [
+        [
+            {"vowel": b"e", "number": b"1"},
+            {"vowel": b"o", "number": b"2"},
+            {"vowel": b"e", "number": b"3"},
+        ],
+        [],
+        [None, {"vowel": b"e", "number": b"5"}],
+    ]

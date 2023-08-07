@@ -48,6 +48,8 @@ from awkward.operations.str.ak_split_pattern_regex import *
 
 # string component extraction
 
+from awkward.operations.str.ak_extract_regex import *
+
 # string joining
 
 # string slicing
