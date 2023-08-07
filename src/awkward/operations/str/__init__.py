@@ -67,6 +67,8 @@ from awkward.operations.str.ak_ends_with import *
 from awkward.operations.str.ak_find_substring import *
 from awkward.operations.str.ak_find_substring_regex import *
 from awkward.operations.str.ak_match_like import *
+from awkward.operations.str.ak_match_substring import *
+from awkward.operations.str.ak_match_substring_regex import *
 from awkward.operations.str.ak_starts_with import *
 
 

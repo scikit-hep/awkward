@@ -965,3 +965,59 @@ def test_match_like():
         [False, False, True],
         [],
     ]
+
+
+def test_match_substring():
+    assert ak.str.match_substring(string_repeats, "FOO").tolist() == [
+        [False, False, False],
+        [False, False, False],
+        [],
+    ]
+    assert ak.str.match_substring(string_repeats, "FOO", ignore_case=True).tolist() == [
+        [True, True, False],
+        [True, False, True],
+        [],
+    ]
+
+    # Bytestrings
+    assert ak.str.match_substring(bytestring_repeats, b"FOO").tolist() == [
+        [False, False, False],
+        [False, False, False],
+        [],
+    ]
+    assert ak.str.match_substring(
+        bytestring_repeats, b"FOO", ignore_case=True
+    ).tolist() == [
+        [True, True, False],
+        [True, False, True],
+        [],
+    ]
+
+
+def test_match_substring_regex():
+    assert ak.str.match_substring_regex(string_repeats, r"FOO\d+").tolist() == [
+        [False, False, False],
+        [False, False, False],
+        [],
+    ]
+    assert ak.str.match_substring_regex(
+        string_repeats, r"FOO\d+", ignore_case=True
+    ).tolist() == [
+        [True, False, False],
+        [False, False, True],
+        [],
+    ]
+
+    # Bytestrings
+    assert ak.str.match_substring_regex(bytestring_repeats, rb"FOO\d+").tolist() == [
+        [False, False, False],
+        [False, False, False],
+        [],
+    ]
+    assert ak.str.match_substring_regex(
+        bytestring_repeats, rb"FOO\d+", ignore_case=True
+    ).tolist() == [
+        [True, False, False],
+        [False, False, True],
+        [],
+    ]
