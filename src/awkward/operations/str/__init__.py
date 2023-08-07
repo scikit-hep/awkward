@@ -43,6 +43,7 @@ from awkward.operations.str.ak_trim_whitespace import *
 
 # string splitting
 from awkward.operations.str.ak_split_whitespace import *
+from awkward.operations.str.ak_split_pattern import *
 
 # string component extraction
 
