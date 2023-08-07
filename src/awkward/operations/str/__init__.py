@@ -52,6 +52,8 @@ from awkward.operations.str.ak_extract_regex import *
 
 # string joining
 
+from awkward.operations.str.ak_join import *
+
 # string slicing
 
 from awkward.operations.str.ak_slice import *

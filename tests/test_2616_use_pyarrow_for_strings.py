@@ -712,3 +712,33 @@ def test_extract_regex():
         [],
         [None, {"vowel": b"e", "number": b"5"}],
     ]
+
+
+def test_join():
+    array1 = ak.Array(
+        [
+            ["this", "that"],
+            [],
+            ["foo", "bar", "baz"],
+        ]
+    )
+    assert ak.str.join(array1, "-").tolist() == ["this-that", "", "foo-bar-baz"]
+
+    separator = ak.Array(["→", "↑", "←"])
+    assert ak.str.join(array1, separator).tolist() == ["this→that", "", "foo←bar←baz"]
+
+    array2 = ak.Array(
+        [
+            [b"this", b"that"],
+            [],
+            [b"foo", b"bar", b"baz"],
+        ]
+    )
+    assert ak.str.join(array2, b"-").tolist() == [b"this-that", b"", b"foo-bar-baz"]
+
+    separator = ak.Array(["→".encode(), "↑".encode(), "←".encode()])
+    assert ak.str.join(array2, separator).tolist() == [
+        "this→that".encode(),
+        b"",
+        "foo←bar←baz".encode(),
+    ]
