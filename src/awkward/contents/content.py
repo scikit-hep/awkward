@@ -266,9 +266,7 @@ class Content:
         out = []
         if self._parameters is not None:
             for k, v in self._parameters.items():
-                out.append(
-                    f"\n{indent}<parameter name={k!r}>{v!r}</parameter>"
-                )
+                out.append(f"\n{indent}<parameter name={k!r}>{v!r}</parameter>")
         return out
 
     def maybe_to_NumpyArray(self):
