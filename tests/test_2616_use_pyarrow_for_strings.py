@@ -1021,3 +1021,135 @@ def test_match_substring_regex():
         [False, False, True],
         [],
     ]
+
+
+def test_is_in():
+    assert ak.str.is_in(string_repeats, ["123foo", "foo"]).tolist() == [
+        [False, True, False],
+        [True, False, False],
+        [],
+    ]
+    assert ak.str.is_in(
+        [
+            ["foo123bar123baz", "foo", "bar"],
+            ["123foo", "456bar", "foo123456bar"],
+            [None],
+        ],
+        ["123foo", "foo", None],
+    ).tolist() == [
+        [False, True, False],
+        [True, False, False],
+        [True],
+    ]
+    assert ak.str.is_in(
+        [
+            ["foo123bar123baz", "foo", "bar"],
+            ["123foo", "456bar", "foo123456bar"],
+            [None],
+        ],
+        ["123foo", "foo", None],
+        skip_nones=True,
+    ).tolist() == [
+        [False, True, False],
+        [True, False, False],
+        [False],
+    ]
+
+    # Bytestrings
+
+    assert ak.str.is_in(string_repeats, [b"123foo", b"foo"]).tolist() == [
+        [False, True, False],
+        [True, False, False],
+        [],
+    ]
+    assert ak.str.is_in(
+        [
+            [b"foo123bar123baz", b"foo", b"bar"],
+            [b"123foo", b"456bar", b"foo123456bar"],
+            [None],
+        ],
+        [b"123foo", b"foo", None],
+    ).tolist() == [
+        [False, True, False],
+        [True, False, False],
+        [True],
+    ]
+    assert ak.str.is_in(
+        [
+            [b"foo123bar123baz", b"foo", b"bar"],
+            [b"123foo", b"456bar", b"foo123456bar"],
+            [None],
+        ],
+        [b"123foo", b"foo", None],
+        skip_nones=True,
+    ).tolist() == [
+        [False, True, False],
+        [True, False, False],
+        [False],
+    ]
+
+
+def test_index_in():
+    assert ak.str.index_in(string_repeats, ["123foo", "foo"]).tolist() == [
+        [None, 1, None],
+        [0, None, None],
+        [],
+    ]
+    assert ak.str.index_in(
+        [
+            ["foo123bar123baz", "foo", "bar"],
+            ["123foo", "456bar", "foo123456bar"],
+            [None],
+        ],
+        ["123foo", "foo", None],
+    ).tolist() == [
+        [None, 1, None],
+        [0, None, None],
+        [2],
+    ]
+    assert ak.str.index_in(
+        [
+            ["foo123bar123baz", "foo", "bar"],
+            ["123foo", "456bar", "foo123456bar"],
+            [None],
+        ],
+        ["123foo", "foo", None],
+        skip_nones=True,
+    ).tolist() == [
+        [None, 1, None],
+        [0, None, None],
+        [None],
+    ]
+
+    # Bytestrings
+
+    assert ak.str.index_in(string_repeats, [b"123foo", b"foo"]).tolist() == [
+        [None, 1, None],
+        [0, None, None],
+        [],
+    ]
+    assert ak.str.index_in(
+        [
+            [b"foo123bar123baz", b"foo", b"bar"],
+            [b"123foo", b"456bar", b"foo123456bar"],
+            [None],
+        ],
+        [b"123foo", b"foo", None],
+    ).tolist() == [
+        [None, 1, None],
+        [0, None, None],
+        [2],
+    ]
+    assert ak.str.index_in(
+        [
+            [b"foo123bar123baz", b"foo", b"bar"],
+            [b"123foo", b"456bar", b"foo123456bar"],
+            [None],
+        ],
+        [b"123foo", b"foo", None],
+        skip_nones=True,
+    ).tolist() == [
+        [None, 1, None],
+        [0, None, None],
+        [None],
+    ]
