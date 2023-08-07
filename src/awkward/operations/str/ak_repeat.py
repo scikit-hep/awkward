@@ -36,7 +36,7 @@ def repeat(array, num_repeats, *, highlevel=True, behavior=None):
     on strings and bytestrings, respectively.
     """
     # Dispatch
-    yield (array,)
+    yield (array, num_repeats)
 
     # Implementation
     return _impl(array, num_repeats, highlevel, behavior)
