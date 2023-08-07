@@ -855,3 +855,30 @@ def test_ends_with():
         [False, True, True],
         [],
     ]
+
+
+def test_starts_with():
+    assert ak.str.starts_with(string_repeats, "FOO").tolist() == [
+        [False, False, False],
+        [False, False, False],
+        [],
+    ]
+    assert ak.str.starts_with(string_repeats, "FOO", ignore_case=True).tolist() == [
+        [True, True, False],
+        [False, False, True],
+        [],
+    ]
+
+    # Bytestrings
+    assert ak.str.starts_with(bytestring_repeats, b"FOO").tolist() == [
+        [False, False, False],
+        [False, False, False],
+        [],
+    ]
+    assert ak.str.starts_with(
+        bytestring_repeats, b"FOO", ignore_case=True
+    ).tolist() == [
+        [True, True, False],
+        [False, False, True],
+        [],
+    ]
