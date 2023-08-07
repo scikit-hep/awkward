@@ -12,9 +12,9 @@ def test():
             {"x": 300, "y": 400},
         ]
     )
-    with pytest.raises(ak._errors.FieldNotFoundError):
+    with pytest.raises(ak.errors.FieldNotFoundError):
         array["z"]
-    with pytest.raises(ak._errors.FieldNotFoundError):
+    with pytest.raises(ak.errors.FieldNotFoundError):
         array[["z", "k"]]
-    with pytest.raises(ak._errors.FieldNotFoundError):
+    with pytest.raises(ak.errors.FieldNotFoundError):
         array[0, "z"]
