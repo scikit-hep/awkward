@@ -554,19 +554,31 @@ def test_split_whitespace():
 
     # Bytestrings
     assert ak.str.split_whitespace(bytestring_padded, max_splits=1).tolist() == [
-        [["", "αβγ     "], ["", ""]],
+        [[b"", "αβγ     ".encode()], [b"", b""]],
         [],
-        [["", "→δε←   "], ["", "ζz zζ    "], ["", "abc      "]],
+        [
+            [b"", "→δε←   ".encode()],
+            [b"", "ζz zζ    ".encode()],
+            [b"", b"abc      "],
+        ],
     ]
     assert ak.str.split_whitespace(
         bytestring_padded, max_splits=1, reverse=True
     ).tolist() == [
-        [["    αβγ", ""], ["", ""]],
+        [["    αβγ".encode(), b""], [b"", b""]],
         [],
-        [["  →δε←", ""], ["    ζz zζ", ""], ["      abc", ""]],
+        [
+            ["  →δε←".encode(), b""],
+            ["    ζz zζ".encode(), b""],
+            [b"      abc", b""],
+        ],
     ]
     assert ak.str.split_whitespace(bytestring_padded, max_splits=None).tolist() == [
-        [["", "αβγ", ""], ["", ""]],
+        [[b"", "αβγ".encode(), b""], [b"", b""]],
         [],
-        [["", "→δε←", ""], ["", "ζz", "zζ", ""], ["", "abc", ""]],
+        [
+            [b"", "→δε←".encode(), b""],
+            [b"", "ζz".encode(), "zζ".encode(), b""],
+            [b"", b"abc", b""],
+        ],
     ]
