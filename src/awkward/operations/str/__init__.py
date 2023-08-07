@@ -66,7 +66,6 @@ def _get_ufunc_action(
     ascii_function,
     *args,
     bytestring_to_string=False,
-    drop_unmasked_option=False,
     **kwargs,
 ):
     from awkward.operations.ak_from_arrow import from_arrow
