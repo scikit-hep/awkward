@@ -938,3 +938,30 @@ def test_find_substring_regex():
         [-1, -1, 0],
         [],
     ]
+
+
+def test_match_like():
+    assert ak.str.match_like(string_repeats, "FOO%").tolist() == [
+        [False, False, False],
+        [False, False, False],
+        [],
+    ]
+    assert ak.str.match_like(string_repeats, "FOO%", ignore_case=True).tolist() == [
+        [True, True, False],
+        [False, False, True],
+        [],
+    ]
+
+    # Bytestrings
+    assert ak.str.match_like(bytestring_repeats, b"FOO%").tolist() == [
+        [False, False, False],
+        [False, False, False],
+        [],
+    ]
+    assert ak.str.match_like(
+        bytestring_repeats, b"FOO%", ignore_case=True
+    ).tolist() == [
+        [True, True, False],
+        [False, False, True],
+        [],
+    ]
