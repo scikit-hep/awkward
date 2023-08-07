@@ -491,7 +491,7 @@ class UnmaskedArray(Content):
             return [self]
 
     def _drop_none(self) -> Content:
-        return self.content[:0]
+        return self.content
 
     def _recursively_apply(
         self, action, behavior, depth, depth_context, lateral_context, options
