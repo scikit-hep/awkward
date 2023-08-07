@@ -63,6 +63,7 @@ from awkward.operations.str.ak_slice import *
 
 from awkward.operations.str.ak_count_substring import *
 from awkward.operations.str.ak_count_substring_regex import *
+from awkward.operations.str.ak_ends_with import *
 
 
 def _get_ufunc_action(

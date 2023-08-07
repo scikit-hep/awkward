@@ -830,3 +830,28 @@ def test_count_substring_regex():
         [1, 1, 1],
         [],
     ]
+
+
+def test_ends_with():
+    assert ak.str.ends_with(string_repeats, "BAR").tolist() == [
+        [False, False, False],
+        [False, False, False],
+        [],
+    ]
+    assert ak.str.ends_with(string_repeats, "BAR", ignore_case=True).tolist() == [
+        [False, False, True],
+        [False, True, True],
+        [],
+    ]
+
+    # Bytestrings
+    assert ak.str.ends_with(bytestring_repeats, b"BAR").tolist() == [
+        [False, False, False],
+        [False, False, False],
+        [],
+    ]
+    assert ak.str.ends_with(bytestring_repeats, b"BAR", ignore_case=True).tolist() == [
+        [False, False, True],
+        [False, True, True],
+        [],
+    ]
