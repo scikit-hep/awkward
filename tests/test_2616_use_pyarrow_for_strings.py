@@ -909,3 +909,32 @@ def test_find_substring():
         [3, -1, 0],
         [],
     ]
+
+
+def test_find_substring_regex():
+    assert ak.str.find_substring_regex(string_repeats, r"FOO\d+").tolist() == [
+        [-1, -1, -1],
+        [-1, -1, -1],
+        [],
+    ]
+    assert ak.str.find_substring_regex(
+        string_repeats, r"FOO\d+", ignore_case=True
+    ).tolist() == [
+        [0, -1, -1],
+        [-1, -1, 0],
+        [],
+    ]
+
+    # Bytestrings
+    assert ak.str.find_substring_regex(bytestring_repeats, rb"FOO\d+").tolist() == [
+        [-1, -1, -1],
+        [-1, -1, -1],
+        [],
+    ]
+    assert ak.str.find_substring_regex(
+        bytestring_repeats, rb"FOO\d+", ignore_case=True
+    ).tolist() == [
+        [0, -1, -1],
+        [-1, -1, 0],
+        [],
+    ]
