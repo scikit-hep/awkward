@@ -37,9 +37,7 @@ class RecordForm(Form):
                 )
         if fields is not None and not isinstance(fields, Iterable):
             raise TypeError(
-                "{} 'fields' must be iterable, not {}".format(
-                    type(self).__name__, repr(contents)
-                )
+                f"{type(self).__name__} 'fields' must be iterable, not {contents!r}"
             )
 
         self._fields = None if fields is None else list(fields)
@@ -99,9 +97,7 @@ class RecordForm(Form):
                 return self._fields[index]
         else:
             raise IndexError(
-                "no index {} in record with {} fields".format(
-                    index, len(self._contents)
-                )
+                f"no index {index} in record with {len(self._contents)} fields"
             )
 
     def field_to_index(self, field):
@@ -121,9 +117,7 @@ class RecordForm(Form):
             else:
                 return i
         raise FieldNotFoundError(
-            "no field {} in record with {} fields".format(
-                repr(field), len(self._contents)
-            )
+            f"no field {field!r} in record with {len(self._contents)} fields"
         )
 
     def has_field(self, field):

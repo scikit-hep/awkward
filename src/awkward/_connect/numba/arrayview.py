@@ -239,9 +239,7 @@ def repr_behavior(behavior):
 class ArrayViewType(numba.types.IterableType, numba.types.Sized):
     def __init__(self, type, behavior, fields):
         super().__init__(
-            name="ak.ArrayView({}, {}, {})".format(
-                type.name, repr_behavior(behavior), repr(fields)
-            )
+            name=f"ak.ArrayView({type.name}, {repr_behavior(behavior)}, {fields!r})"
         )
         self.type = type
         self.behavior = behavior

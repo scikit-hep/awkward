@@ -50,9 +50,7 @@ class RecordType(Type):
                 )
         if fields is not None and not isinstance(fields, Iterable):
             raise TypeError(
-                "{} 'fields' must be iterable, not {}".format(
-                    type(self).__name__, repr(contents)
-                )
+                f"{type(self).__name__} 'fields' must be iterable, not {contents!r}"
             )
         if parameters is not None and not isinstance(parameters, dict):
             raise TypeError(

@@ -21,9 +21,7 @@ class ByteMaskedForm(Form):
     ):
         if not isinstance(mask, str):
             raise TypeError(
-                "{} 'mask' must be of type str, not {}".format(
-                    type(self).__name__, repr(mask)
-                )
+                f"{type(self).__name__} 'mask' must be of type str, not {mask!r}"
             )
         if not isinstance(content, Form):
             raise TypeError(

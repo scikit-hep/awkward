@@ -965,9 +965,7 @@ class IndexedArray(Content):
                     errors="surrogateescape"
                 ).lstrip("\n").lstrip("(")
             message = error.str.decode(errors="surrogateescape")
-            return 'at {} ("{}"): {} at i={}{}'.format(
-                path, type(self), message, error.id, filename
-            )
+            return f'at {path} ("{type(self)}"): {message} at i={error.id}{filename}'
 
         else:
             return self._content._validity_error(path + ".content")
