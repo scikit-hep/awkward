@@ -304,6 +304,8 @@ mccabe.max-complexity = 100
 [tool.ruff.per-file-ignores]
 "dev/*" = ["T20", "TID251"]
 "src/awkward/numba/*" = ["TID251"]
+"src/awkward/_errors.py" = ["TID251"]
+"src/awkward/errors.py" = ["TID251"]
 "src/awkward/_connect/*" = ["TID251"]
 "src/awkward/__init__.py" = ["E402", "F401", "F403", "I001"]
 "src/awkward/operations/__init__.py" = ["F403"]
