@@ -882,3 +882,30 @@ def test_starts_with():
         [False, False, True],
         [],
     ]
+
+
+def test_find_substring():
+    assert ak.str.find_substring(string_repeats, "FOO").tolist() == [
+        [-1, -1, -1],
+        [-1, -1, -1],
+        [],
+    ]
+    assert ak.str.find_substring(string_repeats, "FOO", ignore_case=True).tolist() == [
+        [0, 0, -1],
+        [3, -1, 0],
+        [],
+    ]
+
+    # Bytestrings
+    assert ak.str.find_substring(bytestring_repeats, b"FOO").tolist() == [
+        [-1, -1, -1],
+        [-1, -1, -1],
+        [],
+    ]
+    assert ak.str.find_substring(
+        bytestring_repeats, b"FOO", ignore_case=True
+    ).tolist() == [
+        [0, 0, -1],
+        [3, -1, 0],
+        [],
+    ]
