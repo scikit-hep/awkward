@@ -38,7 +38,7 @@ def replace_slice(array, start, stop, replacement, *, highlevel=True, behavior=N
     on strings and bytestrings, respectively.
     """
     # Dispatch
-    yield (array,)
+    yield (array, start, stop, replacement)
 
     # Implementation
     return _impl(array, start, stop, replacement, highlevel, behavior)

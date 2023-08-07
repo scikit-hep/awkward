@@ -37,7 +37,7 @@ def rpad(array, width, padding=" ", *, highlevel=True, behavior=None):
     on strings and bytestrings, respectively.
     """
     # Dispatch
-    yield (array,)
+    yield (array, width, padding)
 
     # Implementation
     return _impl(array, width, padding, highlevel, behavior)

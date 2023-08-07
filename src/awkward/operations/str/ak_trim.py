@@ -36,7 +36,7 @@ def trim(array, characters, *, highlevel=True, behavior=None):
     on strings and bytestrings, respectively.
     """
     # Dispatch
-    yield (array,)
+    yield (array, characters)
 
     # Implementation
     return _impl(array, characters, highlevel, behavior)
