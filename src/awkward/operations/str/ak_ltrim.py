@@ -36,7 +36,7 @@ def ltrim(array, characters, *, highlevel=True, behavior=None):
     on strings and bytestrings, respectively.
     """
     # Dispatch
-    yield (array, characters)
+    yield (array,)
 
     # Implementation
     return _impl(array, characters, highlevel, behavior)

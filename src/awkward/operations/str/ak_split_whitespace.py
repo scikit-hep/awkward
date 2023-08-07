@@ -11,7 +11,7 @@ from awkward._layout import wrap_layout
 
 @high_level_function
 def split_whitespace(
-    array, max_splits=None, reverse=False, *, highlevel=True, behavior=None
+    array, *, max_splits=None, reverse=False, highlevel=True, behavior=None
 ):
     """
     Args:
@@ -41,7 +41,7 @@ def split_whitespace(
     on strings and bytestrings, respectively.
     """
     # Dispatch
-    yield (array, max_splits, reverse)
+    yield (array,)
 
     # Implementation
     return _impl(array, max_splits, reverse, highlevel, behavior)

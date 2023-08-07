@@ -11,7 +11,7 @@ from awkward._layout import wrap_layout
 
 @high_level_function
 def split_pattern_regex(
-    array, pattern, max_splits=None, reverse=False, *, highlevel=True, behavior=None
+    array, pattern, *, max_splits=None, reverse=False, highlevel=True, behavior=None
 ):
     """
     Args:
@@ -33,7 +33,7 @@ def split_pattern_regex(
     [pyarrow.compute.split_pattern](https://arrow.apache.org/docs/python/generated/pyarrow.compute.split_pattern.html).
     """
     # Dispatch
-    yield (array, pattern, max_splits, reverse)
+    yield (array,)
 
     # Implementation
     return _impl(array, pattern, max_splits, reverse, highlevel, behavior)

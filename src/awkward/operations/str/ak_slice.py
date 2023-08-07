@@ -37,7 +37,7 @@ def slice(array, start, stop=None, step=1, *, highlevel=True, behavior=None):
     or performs a literal slice on strings and bytestrings, respectively.
     """
     # Dispatch
-    yield (array, start, stop, step)
+    yield (array,)
 
     # Implementation
     return _impl(array, start, stop, step, highlevel, behavior)

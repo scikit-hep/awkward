@@ -11,7 +11,7 @@ from awkward._layout import wrap_layout
 
 @high_level_function
 def replace_substring(
-    array, pattern, replacement, max_replacements=None, *, highlevel=True, behavior=None
+    array, pattern, replacement, *, max_replacements=None, highlevel=True, behavior=None
 ):
     """
     Args:
@@ -40,7 +40,7 @@ def replace_substring(
     on strings and bytestrings, respectively.
     """
     # Dispatch
-    yield (array, pattern, replacement, max_replacements)
+    yield (array,)
 
     # Implementation
     return _impl(array, pattern, replacement, max_replacements, highlevel, behavior)

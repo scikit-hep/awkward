@@ -37,7 +37,7 @@ def center(array, width, padding=" ", *, highlevel=True, behavior=None):
     on strings and bytestrings, respectively.
     """
     # Dispatch
-    yield (array, width, padding)
+    yield (array,)
 
     # Implementation
     return _impl(array, width, padding, highlevel, behavior)

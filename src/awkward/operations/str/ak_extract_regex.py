@@ -54,7 +54,7 @@ def extract_regex(array, pattern, *, highlevel=True, behavior=None):
     on strings and bytestrings, respectively.
     """
     # Dispatch
-    yield (array, pattern)
+    yield (array,)
 
     # Implementation
     return _impl(array, pattern, highlevel, behavior)
