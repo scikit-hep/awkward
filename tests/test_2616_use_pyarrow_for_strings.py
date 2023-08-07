@@ -4,7 +4,7 @@ import pytest
 
 import awkward as ak
 
-pytest.importorskip("pyarrow")
+pyarrow = pytest.importorskip("pyarrow")
 
 string = ak.Array(
     [
@@ -38,6 +38,14 @@ bytestring_padded = ak.Array(
             b"      abc      ",
         ],
     ]
+)
+
+string_repeats = ak.Array(
+    [["foo123bar123baz", "foo", "bar"], ["123foo", "456bar", "foo123456bar"], []]
+)
+
+bytestring_repeats = ak.Array(
+    [[b"foo123bar123baz", b"foo", b"bar"], [b"123foo", b"456bar", b"foo123456bar"], []]
 )
 
 
@@ -581,4 +589,98 @@ def test_split_whitespace():
             [b"", "ζz".encode(), "zζ".encode(), b""],
             [b"", b"abc", b""],
         ],
+    ]
+
+
+def test_split_pattern():
+    assert ak.str.split_pattern(string_repeats, "123", max_splits=1).tolist() == [
+        [["foo", "bar123baz"], ["foo"], ["bar"]],
+        [["", "foo"], ["456bar"], ["foo", "456bar"]],
+        [],
+    ]
+    assert ak.str.split_pattern(
+        string_repeats, "123", max_splits=1, reverse=True
+    ).tolist() == [
+        [["foo123bar", "baz"], ["foo"], ["bar"]],
+        [["", "foo"], ["456bar"], ["foo", "456bar"]],
+        [],
+    ]
+    assert ak.str.split_pattern(string_repeats, "123", max_splits=None).tolist() == [
+        [["foo", "bar", "baz"], ["foo"], ["bar"]],
+        [["", "foo"], ["456bar"], ["foo", "456bar"]],
+        [],
+    ]
+
+    # Bytestrings
+    assert ak.str.split_pattern(bytestring_repeats, b"123", max_splits=1).tolist() == [
+        [[b"foo", b"bar123baz"], [b"foo"], [b"bar"]],
+        [[b"", b"foo"], [b"456bar"], [b"foo", b"456bar"]],
+        [],
+    ]
+    assert ak.str.split_pattern(
+        bytestring_repeats, b"123", max_splits=1, reverse=True
+    ).tolist() == [
+        [[b"foo123bar", b"baz"], [b"foo"], [b"bar"]],
+        [[b"", b"foo"], [b"456bar"], [b"foo", b"456bar"]],
+        [],
+    ]
+    assert ak.str.split_pattern(
+        bytestring_repeats, b"123", max_splits=None
+    ).tolist() == [
+        [[b"foo", b"bar", b"baz"], [b"foo"], [b"bar"]],
+        [[b"", b"foo"], [b"456bar"], [b"foo", b"456bar"]],
+        [],
+    ]
+
+
+def test_split_pattern_regex():
+    assert ak.str.split_pattern_regex(
+        string_repeats, r"\d{3}", max_splits=1
+    ).tolist() == [
+        [["foo", "bar123baz"], ["foo"], ["bar"]],
+        [["", "foo"], ["", "bar"], ["foo", "456bar"]],
+        [],
+    ]
+    with pytest.raises(
+        pyarrow.ArrowNotImplementedError, match=r"split in reverse with regex"
+    ):
+        assert ak.str.split_pattern_regex(
+            string_repeats, r"\d{3}", max_splits=1, reverse=True
+        ).tolist() == [
+            [["foo123bar", "baz"], ["foo"], ["bar"]],
+            [["", "foo"], ["", "bar"], ["foo", "456bar"]],
+            [],
+        ]
+    assert ak.str.split_pattern_regex(
+        string_repeats, r"\d{3}", max_splits=None
+    ).tolist() == [
+        [["foo", "bar", "baz"], ["foo"], ["bar"]],
+        [["", "foo"], ["", "bar"], ["foo", "", "bar"]],
+        [],
+    ]
+
+    # Bytestrings
+    assert ak.str.split_pattern_regex(
+        bytestring_repeats, rb"\d{3}", max_splits=1
+    ).tolist() == [
+        [[b"foo", b"bar123baz"], [b"foo"], [b"bar"]],
+        [[b"", b"foo"], [b"", b"bar"], [b"foo", b"456bar"]],
+        [],
+    ]
+    with pytest.raises(
+        pyarrow.ArrowNotImplementedError, match=r"split in reverse with regex"
+    ):
+        assert ak.str.split_pattern_regex(
+            bytestring_repeats, rb"\d{3}", max_splits=1, reverse=True
+        ).tolist() == [
+            [[b"foo123bar", b"baz"], [b"foo"], [b"bar"]],
+            [[b"", b"foo"], [b"", b"bar"], [b"foo", b"456bar"]],
+            [],
+        ]
+    assert ak.str.split_pattern_regex(
+        bytestring_repeats, rb"\d{3}", max_splits=None
+    ).tolist() == [
+        [[b"foo", b"bar", b"baz"], [b"foo"], [b"bar"]],
+        [[b"", b"foo"], [b"", b"bar"], [b"foo", b"", b"bar"]],
+        [],
     ]
