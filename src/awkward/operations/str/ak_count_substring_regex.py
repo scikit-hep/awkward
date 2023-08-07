@@ -23,12 +23,12 @@ def count_substring_regex(
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
-    For each string in the count the number of occurrences of the given regular expression pattern.
+    For each string in the array, count the number of occurrences of the given regular expression pattern.
 
     Note: this function does not raise an error if the `array` does not contain any string or bytestring data.
 
     Requires the pyarrow library and calls
-    [pyarrow.compute.count_substring](https://arrow.apache.org/docs/python/generated/pyarrow.compute.count_substring.html).
+    [pyarrow.compute.count_substring_regex](https://arrow.apache.org/docs/python/generated/pyarrow.compute.count_substring_regex.html).
     """
     # Dispatch
     yield (array,)

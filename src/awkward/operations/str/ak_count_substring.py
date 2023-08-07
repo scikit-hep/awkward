@@ -23,7 +23,7 @@ def count_substring(
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
-    For each string in the count the number of occurrences of the given literal pattern.
+    For each string in the array, count the number of occurrences of the given literal pattern.
 
     Note: this function does not raise an error if the `array` does not contain any string or bytestring data.
 
