@@ -24,15 +24,11 @@ class UnionForm(Form):
     ):
         if not isinstance(tags, str):
             raise TypeError(
-                "{} 'tags' must be of type str, not {}".format(
-                    type(self).__name__, repr(tags)
-                )
+                f"{type(self).__name__} 'tags' must be of type str, not {tags!r}"
             )
         if not isinstance(index, str):
             raise TypeError(
-                "{} 'index' must be of type str, not {}".format(
-                    type(self).__name__, repr(index)
-                )
+                f"{type(self).__name__} 'index' must be of type str, not {index!r}"
             )
         if not isinstance(contents, Iterable):
             raise TypeError(

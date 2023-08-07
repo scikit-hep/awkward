@@ -22,9 +22,7 @@ class BitMaskedForm(Form):
     ):
         if not isinstance(mask, str):
             raise TypeError(
-                "{} 'mask' must be of type str, not {}".format(
-                    type(self).__name__, repr(mask)
-                )
+                f"{type(self).__name__} 'mask' must be of type str, not {mask!r}"
             )
         if not isinstance(content, Form):
             raise TypeError(
@@ -40,9 +38,7 @@ class BitMaskedForm(Form):
             )
         if not isinstance(lsb_order, bool):
             raise TypeError(
-                "{} 'lsb_order' must be bool, not {}".format(
-                    type(self).__name__, repr(lsb_order)
-                )
+                f"{type(self).__name__} 'lsb_order' must be bool, not {lsb_order!r}"
             )
 
         self._mask = mask

@@ -116,9 +116,7 @@ class ListOffsetArray(Content):
             )
         if offsets.length is not unknown_length and offsets.length == 0:
             raise ValueError(
-                "{} len(offsets) ({}) must be >= 1".format(
-                    type(self).__name__, offsets.length
-                )
+                f"{type(self).__name__} len(offsets) ({offsets.length}) must be >= 1"
             )
 
         if parameters is not None and parameters.get("__array__") == "string":
@@ -1758,9 +1756,7 @@ class ListOffsetArray(Content):
                     errors="surrogateescape"
                 ).lstrip("\n").lstrip("(")
             message = error.str.decode(errors="surrogateescape")
-            return 'at {} ("{}"): {} at i={}{}'.format(
-                path, type(self), message, error.id, filename
-            )
+            return f'at {path} ("{type(self)}"): {message} at i={error.id}{filename}'
         else:
             return self._content._validity_error(path + ".content")
 

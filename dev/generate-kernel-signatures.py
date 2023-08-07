@@ -130,7 +130,7 @@ def include_kernels_h(specification):
         "w",
     ) as header:
         header.write(
-            """// AUTO GENERATED ON {0}
+            f"""// AUTO GENERATED ON {reproducible_datetime()}
 // DO NOT EDIT BY HAND!
 //
 // To regenerate file, run
@@ -146,9 +146,7 @@ def include_kernels_h(specification):
 
 extern "C" {{
 
-""".format(
-                reproducible_datetime()
-            )
+"""
         )
         for spec in specification["kernels"]:
             for childfunc in spec["specializations"]:
@@ -217,7 +215,7 @@ def kernel_signatures_py(specification):
         "w",
     ) as file:
         file.write(
-            """# AUTO GENERATED ON {0}
+            f"""# AUTO GENERATED ON {reproducible_datetime()}
 # DO NOT EDIT BY HAND!
 #
 # To regenerate file, run
@@ -272,9 +270,7 @@ class ERROR(Structure):
 
 def by_signature(lib):
     out = {{}}
-""".format(
-                reproducible_datetime()
-            )
+"""
         )
 
         for spec in specification["kernels"]:

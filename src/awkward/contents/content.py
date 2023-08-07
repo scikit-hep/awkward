@@ -218,9 +218,7 @@ class Content:
 
         else:
             raise TypeError(
-                "form_key must be None, a string, or a callable, not {}".format(
-                    type(form_key)
-                )
+                f"form_key must be None, a string, or a callable, not {type(form_key)}"
             )
 
         return self._form_with_key(getkey)
@@ -268,11 +266,7 @@ class Content:
         out = []
         if self._parameters is not None:
             for k, v in self._parameters.items():
-                out.append(
-                    "\n{}<parameter name={}>{}</parameter>".format(
-                        indent, repr(k), repr(v)
-                    )
-                )
+                out.append(f"\n{indent}<parameter name={k!r}>{v!r}</parameter>")
         return out
 
     def maybe_to_NumpyArray(self):

@@ -166,7 +166,7 @@ def metadata(
         actual_paths = []
         for select in row_groups:
             path = rgs_path[select]
-            path2 = [_ for _ in all_paths if _.endswith(path)][0]
+            path2 = next(_ for _ in all_paths if _.endswith(path))
             if path2 not in actual_paths:
                 actual_paths.append(path2)
                 subrg.append([path_rgs[path].index(select)])

@@ -193,7 +193,6 @@ def test_numpy():
         for cuts in itertools.permutations(
             ([2, 0, 0, 1], [1, -2, 0, -1], slice(1, None), slice(None, -1)), depth
         ):
-            cuts = cuts
             while len(cuts) > 0 and isinstance(cuts[0], slice):
                 cuts = cuts[1:]
             while len(cuts) > 0 and isinstance(cuts[-1], slice):
@@ -228,7 +227,6 @@ def test_numpy():
         for cuts in itertools.permutations(
             (-1, 0, [1, 0, 0, 1], [0, 1, -1, 1], slice(None, -1)), depth
         ):
-            cuts = cuts
             while len(cuts) > 0 and isinstance(cuts[0], slice):
                 cuts = cuts[1:]
             while len(cuts) > 0 and isinstance(cuts[-1], slice):

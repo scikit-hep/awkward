@@ -105,7 +105,6 @@ def test_listoffsetarrayA64():
         for cuts in itertools.permutations(
             ([2, 0, 0, 1], [1, -2, 0, -1], slice(1, None), slice(None, -1)), depth
         ):
-            cuts = cuts
             while len(cuts) > 0 and isinstance(cuts[0], slice):
                 cuts = cuts[1:]
             while len(cuts) > 0 and isinstance(cuts[-1], slice):
@@ -167,7 +166,6 @@ def test_listoffsetarrayA32():
         for cuts in itertools.permutations(
             ([2, 0, 0, 1], [1, -2, 0, -1], slice(1, None), slice(None, -1)), depth
         ):
-            cuts = cuts
             while len(cuts) > 0 and isinstance(cuts[0], slice):
                 cuts = cuts[1:]
             while len(cuts) > 0 and isinstance(cuts[-1], slice):
@@ -225,7 +223,6 @@ def test_listarrayA64():
         for cuts in itertools.permutations(
             ([2, 0, 0, 1], [1, -2, 0, -1], slice(1, None), slice(None, -1)), depth
         ):
-            cuts = cuts
             while len(cuts) > 0 and isinstance(cuts[0], slice):
                 cuts = cuts[1:]
             while len(cuts) > 0 and isinstance(cuts[-1], slice):
@@ -282,7 +279,6 @@ def test_listarrayA32():
         for cuts in itertools.permutations(
             ([2, 0, 0, 1], [1, -2, 0, -1], slice(1, None), slice(None, -1)), depth
         ):
-            cuts = cuts
             while len(cuts) > 0 and isinstance(cuts[0], slice):
                 cuts = cuts[1:]
             while len(cuts) > 0 and isinstance(cuts[-1], slice):
@@ -321,7 +317,6 @@ def test_listoffsetarrayB64():
         for cuts in itertools.permutations(
             (-1, 0, [1, 0, 0, 1], [0, 1, -1, 1], slice(None, -1)), depth
         ):
-            cuts = cuts
             while len(cuts) > 0 and isinstance(cuts[0], slice):
                 cuts = cuts[1:]
             while len(cuts) > 0 and isinstance(cuts[-1], slice):
@@ -361,7 +356,6 @@ def test_listoffsetarrayB32():
         for cuts in itertools.permutations(
             (-1, 0, [1, 0, 0, 1], [0, 1, -1, 1], slice(None, -1)), depth
         ):
-            cuts = cuts
             while len(cuts) > 0 and isinstance(cuts[0], slice):
                 cuts = cuts[1:]
             while len(cuts) > 0 and isinstance(cuts[-1], slice):
@@ -399,7 +393,6 @@ def test_listarrayB64():
         for cuts in itertools.permutations(
             (-1, 0, [1, 0, 0, 1], [0, 1, -1, 1], slice(None, -1)), depth
         ):
-            cuts = cuts
             while len(cuts) > 0 and isinstance(cuts[0], slice):
                 cuts = cuts[1:]
             while len(cuts) > 0 and isinstance(cuts[-1], slice):
@@ -436,7 +429,6 @@ def test_listarrayB32():
         for cuts in itertools.permutations(
             (-1, 0, [1, 0, 0, 1], [0, 1, -1, 1], slice(None, -1)), depth
         ):
-            cuts = cuts
             while len(cuts) > 0 and isinstance(cuts[0], slice):
                 cuts = cuts[1:]
             while len(cuts) > 0 and isinstance(cuts[-1], slice):
