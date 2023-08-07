@@ -58,20 +58,14 @@ def _impl(array, value_set, skip_nones, highlevel, behavior):
     behavior = behavior_of(array, value_set, behavior=behavior)
 
     def apply(layout, **kwargs):
-        if (
-            layout.is_list
-            and layout.purelist_depth == 2
-            and _is_maybe_optional_list_of_string(layout.content)
-        ):
-            return layout.copy(
-                content=ak.from_arrow(
-                    pc.is_in(
-                        ak.to_arrow(layout.content, extensionarray=False),
-                        ak.to_arrow(value_set_layout, extensionarray=False),
-                        skip_nulls=skip_nones,
-                    ),
-                    highlevel=False,
-                )
+        if _is_maybe_optional_list_of_string(layout) and layout.purelist_depth == 1:
+            return ak.from_arrow(
+                pc.is_in(
+                    ak.to_arrow(layout, extensionarray=False),
+                    ak.to_arrow(value_set_layout, extensionarray=False),
+                    skip_nulls=skip_nones,
+                ),
+                highlevel=False,
             )
 
     out = ak._do.recursively_apply(layout, apply, behavior=behavior)
