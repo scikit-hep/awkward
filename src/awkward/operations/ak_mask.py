@@ -9,7 +9,7 @@ from awkward._nplikes.numpylike import NumpyMetadata
 np = NumpyMetadata.instance()
 
 
-@high_level_function
+@high_level_function()
 def mask(array, mask, *, valid_when=True, highlevel=True, behavior=None):
     """
     Args:

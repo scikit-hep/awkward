@@ -12,7 +12,7 @@ np = NumpyMetadata.instance()
 numpy = Numpy.instance()
 
 
-@high_level_function
+@high_level_function()
 def to_categorical(array, *, highlevel=True, behavior=None):
     """
     Args:

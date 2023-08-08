@@ -12,7 +12,7 @@ from awkward._regularize import is_non_string_like_iterable
 np = NumpyMetadata.instance()
 
 
-@high_level_function
+@high_level_function()
 def to_list(array):
     """
     Args:

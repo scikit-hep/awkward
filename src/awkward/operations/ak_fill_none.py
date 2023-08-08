@@ -16,7 +16,7 @@ np = NumpyMetadata.instance()
 cpu = NumpyBackend.instance()
 
 
-@high_level_function
+@high_level_function()
 def fill_none(array, value, axis=-1, *, highlevel=True, behavior=None):
     """
     Args:

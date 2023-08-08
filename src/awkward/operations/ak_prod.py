@@ -11,7 +11,7 @@ from awkward._regularize import regularize_axis
 np = NumpyMetadata.instance()
 
 
-@high_level_function
+@high_level_function()
 def prod(
     array,
     axis=None,
@@ -60,7 +60,7 @@ def prod(
     return _impl(array, axis, keepdims, mask_identity, highlevel, behavior)
 
 
-@high_level_function
+@high_level_function()
 def nanprod(
     array,
     axis=None,

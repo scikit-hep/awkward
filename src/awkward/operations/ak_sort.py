@@ -10,7 +10,7 @@ from awkward._regularize import regularize_axis
 np = NumpyMetadata.instance()
 
 
-@high_level_function
+@high_level_function()
 def sort(array, axis=-1, *, ascending=True, stable=True, highlevel=True, behavior=None):
     """
     Args:

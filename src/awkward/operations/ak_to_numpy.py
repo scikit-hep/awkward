@@ -5,7 +5,7 @@ from awkward._backends.numpy import NumpyBackend
 from awkward._dispatch import high_level_function
 
 
-@high_level_function
+@high_level_function()
 def to_numpy(array, *, allow_missing=True):
     """
     Args:

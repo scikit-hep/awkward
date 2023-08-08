@@ -10,7 +10,7 @@ from awkward._nplikes.numpylike import NumpyMetadata
 np = NumpyMetadata.instance()
 
 
-@high_level_function
+@high_level_function()
 def copy(array):
     """
     Args:

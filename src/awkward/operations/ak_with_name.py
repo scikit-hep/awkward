@@ -9,7 +9,7 @@ from awkward._nplikes.numpylike import NumpyMetadata
 np = NumpyMetadata.instance()
 
 
-@high_level_function
+@high_level_function()
 def with_name(array, name, *, highlevel=True, behavior=None):
     """
     Args:

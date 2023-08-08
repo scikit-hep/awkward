@@ -17,7 +17,7 @@ from awkward.types.numpytype import primitive_to_dtype
 np = NumpyMetadata.instance()
 
 
-@high_level_function
+@high_level_function()
 def enforce_type(array, type, *, highlevel=True, behavior=None):
     """
     Args:

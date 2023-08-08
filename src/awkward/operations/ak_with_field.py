@@ -17,7 +17,7 @@ np = NumpyMetadata.instance()
 cpu = NumpyBackend.instance()
 
 
-@high_level_function
+@high_level_function()
 def with_field(array, what, where=None, *, highlevel=True, behavior=None):
     """
     Args:

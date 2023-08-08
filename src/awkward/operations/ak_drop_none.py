@@ -10,7 +10,7 @@ from awkward.errors import AxisError
 np = NumpyMetadata.instance()
 
 
-@high_level_function
+@high_level_function()
 def drop_none(array, axis=None, highlevel=True, behavior=None):
     """
     Args:

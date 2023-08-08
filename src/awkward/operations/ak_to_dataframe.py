@@ -13,7 +13,7 @@ def _default_levelname(index: int) -> str:
     return "sub" * index + "entry"
 
 
-@high_level_function
+@high_level_function()
 def to_dataframe(
     array, *, how="inner", levelname=_default_levelname, anonymous="values"
 ):

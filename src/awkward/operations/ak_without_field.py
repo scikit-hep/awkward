@@ -11,7 +11,7 @@ from awkward._nplikes.numpylike import NumpyMetadata
 np = NumpyMetadata.instance()
 
 
-@high_level_function
+@high_level_function()
 def without_field(array, where, *, highlevel=True, behavior=None):
     """
     Args:

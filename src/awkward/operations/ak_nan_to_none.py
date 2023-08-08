@@ -9,7 +9,7 @@ from awkward._nplikes.numpylike import NumpyMetadata
 np = NumpyMetadata.instance()
 
 
-@high_level_function
+@high_level_function()
 def nan_to_none(array, *, highlevel=True, behavior=None):
     """
     Args:

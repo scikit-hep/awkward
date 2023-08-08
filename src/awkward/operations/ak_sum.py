@@ -11,7 +11,7 @@ from awkward._regularize import regularize_axis
 np = NumpyMetadata.instance()
 
 
-@high_level_function
+@high_level_function()
 def sum(
     array,
     axis=None,
@@ -204,7 +204,7 @@ def sum(
     return _impl(array, axis, keepdims, mask_identity, highlevel, behavior)
 
 
-@high_level_function
+@high_level_function()
 def nansum(
     array,
     axis=None,

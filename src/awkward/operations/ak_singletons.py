@@ -11,7 +11,7 @@ from awkward.errors import AxisError
 np = NumpyMetadata.instance()
 
 
-@high_level_function
+@high_level_function()
 def singletons(array, axis=0, *, highlevel=True, behavior=None):
     """
     Args:
