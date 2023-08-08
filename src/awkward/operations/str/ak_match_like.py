@@ -9,7 +9,7 @@ from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 
 
-@high_level_function
+@high_level_function()
 def match_like(array, pattern, *, ignore_case=False, highlevel=True, behavior=None):
     """
     Args:
