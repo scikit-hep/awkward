@@ -3,75 +3,75 @@
 # https://arrow.apache.org/docs/python/api/compute.html#string-predicates
 
 # string predicates
-from awkward.operations.str.ak_is_alnum import *
-from awkward.operations.str.ak_is_alpha import *
-from awkward.operations.str.ak_is_decimal import *
-from awkward.operations.str.ak_is_digit import *
-from awkward.operations.str.ak_is_lower import *
-from awkward.operations.str.ak_is_numeric import *
-from awkward.operations.str.ak_is_printable import *
-from awkward.operations.str.ak_is_space import *
-from awkward.operations.str.ak_is_upper import *
-from awkward.operations.str.ak_is_title import *
-from awkward.operations.str.ak_is_ascii import *
+from awkward.operations.str.akstr_is_alnum import *
+from awkward.operations.str.akstr_is_alpha import *
+from awkward.operations.str.akstr_is_decimal import *
+from awkward.operations.str.akstr_is_digit import *
+from awkward.operations.str.akstr_is_lower import *
+from awkward.operations.str.akstr_is_numeric import *
+from awkward.operations.str.akstr_is_printable import *
+from awkward.operations.str.akstr_is_space import *
+from awkward.operations.str.akstr_is_upper import *
+from awkward.operations.str.akstr_is_title import *
+from awkward.operations.str.akstr_is_ascii import *
 
 # string transforms
-from awkward.operations.str.ak_capitalize import *
-from awkward.operations.str.ak_length import *
-from awkward.operations.str.ak_lower import *
-from awkward.operations.str.ak_swapcase import *
-from awkward.operations.str.ak_title import *
-from awkward.operations.str.ak_upper import *
-from awkward.operations.str.ak_repeat import *
-from awkward.operations.str.ak_replace_slice import *
-from awkward.operations.str.ak_reverse import *
-from awkward.operations.str.ak_replace_substring import *
-from awkward.operations.str.ak_replace_substring_regex import *
+from awkward.operations.str.akstr_capitalize import *
+from awkward.operations.str.akstr_length import *
+from awkward.operations.str.akstr_lower import *
+from awkward.operations.str.akstr_swapcase import *
+from awkward.operations.str.akstr_title import *
+from awkward.operations.str.akstr_upper import *
+from awkward.operations.str.akstr_repeat import *
+from awkward.operations.str.akstr_replace_slice import *
+from awkward.operations.str.akstr_reverse import *
+from awkward.operations.str.akstr_replace_substring import *
+from awkward.operations.str.akstr_replace_substring_regex import *
 
 # string padding
-from awkward.operations.str.ak_center import *
-from awkward.operations.str.ak_lpad import *
-from awkward.operations.str.ak_rpad import *
+from awkward.operations.str.akstr_center import *
+from awkward.operations.str.akstr_lpad import *
+from awkward.operations.str.akstr_rpad import *
 
 # string trimming
-from awkward.operations.str.ak_ltrim import *
-from awkward.operations.str.ak_ltrim_whitespace import *
-from awkward.operations.str.ak_rtrim import *
-from awkward.operations.str.ak_rtrim_whitespace import *
-from awkward.operations.str.ak_trim import *
-from awkward.operations.str.ak_trim_whitespace import *
+from awkward.operations.str.akstr_ltrim import *
+from awkward.operations.str.akstr_ltrim_whitespace import *
+from awkward.operations.str.akstr_rtrim import *
+from awkward.operations.str.akstr_rtrim_whitespace import *
+from awkward.operations.str.akstr_trim import *
+from awkward.operations.str.akstr_trim_whitespace import *
 
 # string splitting
-from awkward.operations.str.ak_split_whitespace import *
-from awkward.operations.str.ak_split_pattern import *
-from awkward.operations.str.ak_split_pattern_regex import *
+from awkward.operations.str.akstr_split_whitespace import *
+from awkward.operations.str.akstr_split_pattern import *
+from awkward.operations.str.akstr_split_pattern_regex import *
 
 # string component extraction
 
-from awkward.operations.str.ak_extract_regex import *
+from awkward.operations.str.akstr_extract_regex import *
 
 # string joining
 
-from awkward.operations.str.ak_join import *
-from awkward.operations.str.ak_join_element_wise import *
+from awkward.operations.str.akstr_join import *
+from awkward.operations.str.akstr_join_element_wise import *
 
 # string slicing
 
-from awkward.operations.str.ak_slice import *
+from awkward.operations.str.akstr_slice import *
 
 # containment tests
 
-from awkward.operations.str.ak_count_substring import *
-from awkward.operations.str.ak_count_substring_regex import *
-from awkward.operations.str.ak_ends_with import *
-from awkward.operations.str.ak_find_substring import *
-from awkward.operations.str.ak_find_substring_regex import *
-from awkward.operations.str.ak_index_in import *
-from awkward.operations.str.ak_is_in import *
-from awkward.operations.str.ak_match_like import *
-from awkward.operations.str.ak_match_substring import *
-from awkward.operations.str.ak_match_substring_regex import *
-from awkward.operations.str.ak_starts_with import *
+from awkward.operations.str.akstr_count_substring import *
+from awkward.operations.str.akstr_count_substring_regex import *
+from awkward.operations.str.akstr_ends_with import *
+from awkward.operations.str.akstr_find_substring import *
+from awkward.operations.str.akstr_find_substring_regex import *
+from awkward.operations.str.akstr_index_in import *
+from awkward.operations.str.akstr_is_in import *
+from awkward.operations.str.akstr_match_like import *
+from awkward.operations.str.akstr_match_substring import *
+from awkward.operations.str.akstr_match_substring_regex import *
+from awkward.operations.str.akstr_starts_with import *
 
 
 def _get_ufunc_action(
