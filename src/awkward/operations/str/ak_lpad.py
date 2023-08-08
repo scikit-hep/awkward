@@ -15,20 +15,25 @@ def lpad(array, width, padding=" ", *, highlevel=True, behavior=None):
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         width (int): Desired string length.
-        padding (str or bytes): What to pad the string with. Should be one codepoint or byte.
+        padding (str or bytes): What to pad the string with. Should be one
+            codepoint or byte.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
-    Replaces any string or bytestring-valued data with right-aligned strings/bytestrings of a given `width`, padding the left side with the given `padding` codepoint or byte.
+    Replaces any string or bytestring-valued data with right-aligned
+    strings/bytestrings of a given `width`, padding the left side with the
+    given `padding` codepoint or byte.
 
-    If the data are strings, `width` is measured in codepoints and `padding` must be one codepoint.
+    If the data are strings, `width` is measured in codepoints and `padding`
+    must be one codepoint.
 
-    If the data are bytestrings, `width` is measured in bytes and `padding` must be one byte.
+    If the data are bytestrings, `width` is measured in bytes and `padding`
+    must be one byte.
 
-    Note: this function does not raise an error if the `array` does
-    not contain any string or bytestring data.
+    Note: this function does not raise an error if the `array` does not
+    contain any string or bytestring data.
 
     Requires the pyarrow library and calls
     [pyarrow.compute.utf8_lpad](https://arrow.apache.org/docs/python/generated/pyarrow.compute.utf8_lpad.html)

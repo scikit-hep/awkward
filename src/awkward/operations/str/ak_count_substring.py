@@ -16,16 +16,21 @@ def count_substring(
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
-        pattern (str, or bytes): Substring pattern to look for inside the given array.
-        ignore_case (bool): If True, perform a case-insensitive match; otherwise, the match is case-sensitive.
+        pattern (str or bytes): Substring pattern to count for each string in
+            `array`.
+        ignore_case (bool): If True, perform a case-insensitive match;
+            otherwise, the match is case-sensitive.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
-    For each string in the array, count the number of occurrences of the given literal pattern.
+    Counts the number of occurrences of the given literal `pattern` in every
+    string in `array`. Depending upon the value of `ignore_case`, the matching
+    function will be case-insensitive.
 
-    Note: this function does not raise an error if the `array` does not contain any string or bytestring data.
+    Note: this function does not raise an error if the `array` does not
+    contain any string or bytestring data.
 
     Requires the pyarrow library and calls
     [pyarrow.compute.count_substring](https://arrow.apache.org/docs/python/generated/pyarrow.compute.count_substring.html).

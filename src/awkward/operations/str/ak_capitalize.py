@@ -18,12 +18,15 @@ def capitalize(array, *, highlevel=True, behavior=None):
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
-    Replaces any string-valued data with a capitalized version (correctly transforming Unicode characters), with the first character uppercased and the others lowercased.
+    Replaces any string-valued data with a capitalized version
+    (correctly transforming Unicode characters), with the first character
+    uppercased and the others lowercased.
 
-    Replaces any bytestring-valued data with a capitalized version (transforming ASCII characters only).
+    Replaces any bytestring-valued data with a capitalized version
+    (transforming ASCII characters only).
 
-    Note: this function does not raise an error if the `array` does
-    not contain any string or bytestring data.
+    Note: this function does not raise an error if the `array` does not
+    contain any string or bytestring data.
 
     Requires the pyarrow library and calls
     [pyarrow.compute.utf8_capitalize](https://arrow.apache.org/docs/python/generated/pyarrow.compute.utf8_capitalize.html)

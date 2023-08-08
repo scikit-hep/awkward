@@ -22,14 +22,18 @@ def replace_slice(array, start, stop, replacement, *, highlevel=True, behavior=N
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
-    Replaces slices of any string or bytestring-valued data with `replacement` between `start` and `stop` indexes; `start` is inclusive and `stop` is exclusive and both are 0-indexed.
+    Replaces slices of any string or bytestring-valued data with `replacement`
+    between `start` and `stop` indexes; `start` is inclusive and `stop` is
+    exclusive and both are 0-indexed.
 
-    For strings, `start` and `stop` are measured in Unicode characters; for bytestrings, `start` and `stop` are measured in bytes.
+    For strings, `start` and `stop` are measured in Unicode characters; for
+    bytestrings, `start` and `stop` are measured in bytes.
 
-    The `start`, `stop`, and `replacement` are scalars; they cannot be different for each string/bytestring in the sample.
+    The `start`, `stop`, and `replacement` are scalars; they cannot be
+    different for each string/bytestring in the sample.
 
-    Note: this function does not raise an error if the `array` does
-    not contain any string or bytestring data.
+    Note: this function does not raise an error if the `array` does not
+    contain any string or bytestring data.
 
     Requires the pyarrow library and calls
     [pyarrow.compute.utf8_replace_slice](https://arrow.apache.org/docs/python/generated/pyarrow.compute.utf8_replace_slice.html)

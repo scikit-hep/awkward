@@ -14,16 +14,21 @@ def ends_with(array, pattern, *, ignore_case=False, highlevel=True, behavior=Non
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
-        pattern (str, or bytes): Substring pattern to look for inside the given array.
-        ignore_case (bool): If True, perform a case-insensitive match; otherwise, the match is case-sensitive.
+        pattern (str or bytes): Substring pattern to test against the ending
+            of each string in `array`.
+        ignore_case (bool): If True, perform a case-insensitive match;
+            otherwise, the match is case-sensitive.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
-    For each string in the array, determine whether it ends with the given literal suffix.
+    Returns True for every string in `array` if it ends with the given literal
+    suffix `pattern`. Depending upon the value of `ignore_case`, the matching
+    function will be case-insensitive.
 
-    Note: this function does not raise an error if the `array` does not contain any string or bytestring data.
+    Note: this function does not raise an error if the `array` does not
+    contain any string or bytestring data.
 
     Requires the pyarrow library and calls
     [pyarrow.compute.ends_with](https://arrow.apache.org/docs/python/generated/pyarrow.compute.ends_with.html).

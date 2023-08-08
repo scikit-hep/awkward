@@ -18,9 +18,11 @@ def join_element_wise(*arrays, highlevel=True, behavior=None):
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
-    Broadcasts and concatenates all but the last array of strings in `arrays`; the last is used as a separator.
+    Broadcasts and concatenates all but the last array of strings in `arrays`;
+    the last is used as a separator.
 
-    Note: this function does not raise an error if the `array` does not contain any string or bytestring data.
+    Note: this function does not raise an error if the `array` does not
+    contain any string or bytestring data.
 
     Requires the pyarrow library and calls
     [pyarrow.compute.binary_join_element_wise](https://arrow.apache.org/docs/python/generated/pyarrow.compute.binary_join_element_wise.html).

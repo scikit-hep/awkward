@@ -14,16 +14,20 @@ def is_in(array, value_set, *, skip_nones=False, highlevel=True, behavior=None):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
-        value_set: Array-like data (anything #ak.to_layout recognizes), set of values to search for.
-        skip_nones (bool): If True, None values in `array` are not matched against `value_set`; otherwise, they are.
+        value_set: Array-like data (anything #ak.to_layout recognizes), set of
+            values to search for in `array`.
+        skip_nones (bool): If True, None values in `array` are not matched
+            against `value_set`; otherwise, None is considered a legal value.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
-    For each string in the array, determine whether it is found within the given set of values.
+    Returns True for each string in `array` if it matches any pattern in
+    `value_set`; otherwise, returns False.
 
-    Note: this function does not raise an error if the `array` does not contain any string or bytestring data.
+    Note: this function does not raise an error if the `array` does not
+    contain any string or bytestring data.
 
     Requires the pyarrow library and calls
     [pyarrow.compute.is_in](https://arrow.apache.org/docs/python/generated/pyarrow.compute.is_in.html).

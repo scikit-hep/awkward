@@ -18,12 +18,13 @@ def lower(array, *, highlevel=True, behavior=None):
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
-    Replaces any string-valued data with a lowercase version (correctly transforming Unicode characters).
+    Replaces any string-valued data with a lowercase version (correctly
+    transforming Unicode characters).
 
     Replaces any bytestring-valued data with a lowercase version (transforming ASCII characters only).
 
-    Note: this function does not raise an error if the `array` does
-    not contain any string or bytestring data.
+    Note: this function does not raise an error if the `array` does not
+    contain any string or bytestring data.
 
     Requires the pyarrow library and calls
     [pyarrow.compute.utf8_lower](https://arrow.apache.org/docs/python/generated/pyarrow.compute.utf8_lower.html)

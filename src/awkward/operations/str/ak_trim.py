@@ -14,20 +14,24 @@ def trim(array, characters, *, highlevel=True, behavior=None):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
-        characters (str or bytes): Individual characters to be trimmed from the string.
+        characters (str or bytes): Individual characters to be trimmed from
+            the string.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
-    Removes any leading or trailing characters of `characters` from any string or bytestring-valued data.
+    Removes any leading or trailing characters of `characters` from any string
+    or bytestring-valued data.
 
-    If the data are strings, `characters` are interpreted as unordered, individual codepoints.
+    If the data are strings, `characters` are interpreted as unordered,
+    individual codepoints.
 
-    If the data are bytestrings, `characters` are interpreted as unordered, individual bytes.
+    If the data are bytestrings, `characters` are interpreted as unordered,
+    individual bytes.
 
-    Note: this function does not raise an error if the `array` does
-    not contain any string or bytestring data.
+    Note: this function does not raise an error if the `array` does not
+    contain any string or bytestring data.
 
     Requires the pyarrow library and calls
     [pyarrow.compute.utf8_trim](https://arrow.apache.org/docs/python/generated/pyarrow.compute.utf8_trim.html)

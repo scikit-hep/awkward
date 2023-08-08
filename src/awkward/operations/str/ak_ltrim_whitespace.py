@@ -21,8 +21,8 @@ def ltrim_whitespace(array, *, highlevel=True, behavior=None):
 
     Removes any leading whitespace from any string or bytestring-valued data.
 
-    Note: this function does not raise an error if the `array` does
-    not contain any string or bytestring data.
+    Note: this function does not raise an error if the `array` does not
+    contain any string or bytestring data.
 
     Requires the pyarrow library and calls
     [pyarrow.compute.utf8_ltrim_whitespace](https://arrow.apache.org/docs/python/generated/pyarrow.compute.utf8_ltrim_whitespace.html)

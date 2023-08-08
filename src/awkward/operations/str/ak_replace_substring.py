@@ -26,12 +26,14 @@ def replace_substring(
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
-    Replaces non-overlapping subsequences of any string or bytestring-valued data that match a literal `pattern` with `replacement`.
+    Replaces non-overlapping subsequences of any string or bytestring-valued
+    data that match a literal `pattern` with `replacement`.
 
-    The `pattern` and `replacement` are scalars; they cannot be different for each string/bytestring in the sample.
+    The `pattern` and `replacement` are scalars; they cannot be different for
+    each string/bytestring in the sample.
 
-    Note: this function does not raise an error if the `array` does
-    not contain any string or bytestring data.
+    Note: this function does not raise an error if the `array` does not
+    contain any string or bytestring data.
 
     Requires the pyarrow library and calls
     [pyarrow.compute.replace_substring](https://arrow.apache.org/docs/python/generated/pyarrow.compute.replace_substring.html)

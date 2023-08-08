@@ -18,12 +18,15 @@ def reverse(array, *, highlevel=True, behavior=None):
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
-    Reverses the order of Unicode characters in any string-valued data. (This function operates on Unicode codepoints, not grapheme clusters. Hence, it will not correctly reverse grapheme clusters composed of multiple codepoints.)
+    Reverses the order of Unicode characters in any string-valued data.
+    (This function operates on Unicode codepoints, not grapheme clusters.
+    Hence, it will not correctly reverse grapheme clusters composed of
+    multiple codepoints.)
 
     Reverses the order of bytes in any bytestring-valued data.
 
-    Note: this function does not raise an error if the `array` does
-    not contain any string or bytestring data.
+    Note: this function does not raise an error if the `array` does not
+    contain any string or bytestring data.
 
     Requires the pyarrow library and calls
     [pyarrow.compute.utf8_reverse](https://arrow.apache.org/docs/python/generated/pyarrow.compute.utf8_reverse.html)

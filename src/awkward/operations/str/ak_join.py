@@ -13,17 +13,20 @@ def join(array, separator, *, highlevel=True, behavior=None):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
-        separator (str, bytes, or array of them to broadcast): separator to insert
-            between strings. If array-like, `separator` is broadcast against `array`
-            which permits a unique separator for each list of strings.
+        separator (str, bytes, or array of them to broadcast): separator to
+            insert between strings. If array-like, `separator` is broadcast
+            against `array`.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
-    Concatenate the strings in `array`. The separator is inserted between each string.
+    Concatenate the strings in `array`. The `separator` is inserted between
+    each string. If array-like, `separator` is broadcast against `array` which
+    permits a unique separator for each list of strings in `array`.
 
-    Note: this function does not raise an error if the `array` does not contain any string or bytestring data.
+    Note: this function does not raise an error if the `array` does not
+    contain any string or bytestring data.
 
     Requires the pyarrow library and calls
     [pyarrow.compute.binary_join](https://arrow.apache.org/docs/python/generated/pyarrow.compute.binary_join.html).

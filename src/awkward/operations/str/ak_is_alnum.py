@@ -18,12 +18,14 @@ def is_alnum(array, *, highlevel=True, behavior=None):
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
-    Replaces any string-valued data with True if the string is non-empty and consists only of alphanumeric Unicode characters, False otherwise.
+    Replaces any string-valued data with True if the string is non-empty and
+    consists only of alphanumeric Unicode characters, False otherwise.
 
-    Replaces any bytestring-valued data with True if the string is non-empty and consists only of alphanumeric ASCII characters, False otherwise.
+    Replaces any bytestring-valued data with True if the string is non-empty
+    and consists only of alphanumeric ASCII characters, False otherwise.
 
-    Note: this function does not raise an error if the `array` does
-    not contain any string or bytestring data.
+    Note: this function does not raise an error if the `array` does not
+    contain any string or bytestring data.
 
     Requires the pyarrow library and calls
     [pyarrow.compute.utf8_is_alnum](https://arrow.apache.org/docs/python/generated/pyarrow.compute.utf8_is_alnum.html)

@@ -20,7 +20,9 @@ def extract_regex(array, pattern, *, highlevel=True, behavior=None):
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
-    Replaces any string-valued data with None if the `pattern` does not match or records whose fields are named capture groups and the substrings they've captured if `pattern` does match.
+    Returns None for every string in `array` if it does not match `pattern`;
+    otherwise, a record whose fields are named capture groups and whose
+    contents are the substrings they've captured.
 
     Uses [Google RE2](https://github.com/google/re2/wiki/Syntax), and `pattern` must
     contain named groups. The syntax for a named group is `(?P<...>...)` in which
@@ -44,14 +46,11 @@ def extract_regex(array, pattern, *, highlevel=True, behavior=None):
 
     Regular expressions with unnamed groups or features not implemented by RE2 raise an error.
 
-    Note: this function does not raise an error if the `array` does
-    not contain any string or bytestring data.
+    Note: this function does not raise an error if the `array` does not
+    contain any string or bytestring data.
 
     Requires the pyarrow library and calls
-    [pyarrow.compute.extract_regex](https://arrow.apache.org/docs/python/generated/pyarrow.compute.extract_regex.html)
-    or
-    [pyarrow.compute.extract_regex](https://arrow.apache.org/docs/python/generated/pyarrow.compute.extract_regex.html)
-    on strings and bytestrings, respectively.
+    [pyarrow.compute.extract_regex](https://arrow.apache.org/docs/python/generated/pyarrow.compute.extract_regex.html).
     """
     # Dispatch
     yield (array,)

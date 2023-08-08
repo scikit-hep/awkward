@@ -17,17 +17,21 @@ def split_pattern(
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         pattern (str or bytes): Pattern of characters/bytes to split on.
-        max_splits (None or int): Maximum number of splits for each input value. If None, unlimited.
-        reverse (bool): If True, start splitting from the end of each input value; otherwise, start splitting
-            from the beginning of each value. This flag only has an effect if `max_splits` is not None.
+        max_splits (None or int): Maximum number of splits for each input
+            value. If None, unlimited.
+        reverse (bool): If True, start splitting from the end of each input
+            value; otherwise, start splitting from the beginning of each
+            value. This flag only has an effect if `max_splits` is not None.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
-    Splits any string or bytestring-valued data into a list of substrings according to the given separator.
+    Splits any string or bytestring-valued data into a list of substrings
+    according to the given separator.
 
-    Note: this function does not raise an error if the `array` does not contain any string or bytestring data.
+    Note: this function does not raise an error if the `array` does not
+    contain any string or bytestring data.
 
     Requires the pyarrow library and calls
     [pyarrow.compute.split_pattern](https://arrow.apache.org/docs/python/generated/pyarrow.compute.split_pattern.html).

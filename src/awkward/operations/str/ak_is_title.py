@@ -18,12 +18,18 @@ def is_title(array, *, highlevel=True, behavior=None):
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
-    Replaces any string-valued data with True if the string is title-cased, i.e. it has at least one cased character, each uppercase character follows an uncased character, and each lowercase character follows an uppercase character, otherwise False.
+    Replaces any string-valued data with True if the string is title-cased,
+    i.e. it has at least one cased character, each uppercase character follows
+    an uncased character, and each lowercase character follows an uppercase
+    character, otherwise False.
 
-    Replaces any bytestring-valued data with True if the string is title-cased, i.e. it has at least one cased character, each uppercase character follows an uncased character, and each lowercase character follows an uppercase character, otherwise False.
+    Replaces any bytestring-valued data with True if the string is
+    title-cased, i.e. it has at least one cased character, each uppercase
+    character follows an uncased character, and each lowercase character
+    follows an uppercase character, otherwise False.
 
-    Note: this function does not raise an error if the `array` does
-    not contain any string or bytestring data.
+    Note: this function does not raise an error if the `array` does not
+    contain any string or bytestring data.
 
     Requires the pyarrow library and calls
     [pyarrow.compute.utf8_is_title](https://arrow.apache.org/docs/python/generated/pyarrow.compute.utf8_is_title.html)

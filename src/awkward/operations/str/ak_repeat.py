@@ -24,10 +24,12 @@ def repeat(array, num_repeats, *, highlevel=True, behavior=None):
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
-    Replaces any string-valued or bytestring-valued data with the same value repeated `num_repeats` times, which can be a scalar integer or a (broadcasted) array of integers.
+    Replaces any string-valued or bytestring-valued data with the same value
+    repeated `num_repeats` times, which can be a scalar integer or a
+    (broadcasted) array of integers.
 
-    Note: this function does not raise an error if the `array` does
-    not contain any string or bytestring data.
+    Note: this function does not raise an error if the `array` does not
+    contain any string or bytestring data.
 
     Requires the pyarrow library and calls
     [pyarrow.compute.binary_repeat](https://arrow.apache.org/docs/python/generated/pyarrow.compute.binary_repeat.html)

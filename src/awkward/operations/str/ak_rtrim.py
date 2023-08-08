@@ -20,14 +20,17 @@ def rtrim(array, characters, *, highlevel=True, behavior=None):
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
-    Removes any trailing characters of `characters` from any string or bytestring-valued data.
+    Removes any trailing characters of `characters` from any string or
+    bytestring-valued data.
 
-    If the data are strings, `characters` are interpreted as unordered, individual codepoints.
+    If the data are strings, `characters` are interpreted as unordered,
+    individual codepoints.
 
-    If the data are bytestrings, `characters` are interpreted as unordered, individual bytes.
+    If the data are bytestrings, `characters` are interpreted as unordered,
+    individual bytes.
 
-    Note: this function does not raise an error if the `array` does
-    not contain any string or bytestring data.
+    Note: this function does not raise an error if the `array` does not
+    contain any string or bytestring data.
 
     Requires the pyarrow library and calls
     [pyarrow.compute.utf8_rtrim](https://arrow.apache.org/docs/python/generated/pyarrow.compute.utf8_rtrim.html)

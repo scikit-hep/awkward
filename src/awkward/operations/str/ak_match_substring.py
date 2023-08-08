@@ -16,16 +16,19 @@ def match_substring(
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
-        pattern (str, or bytes): Substring pattern to look for inside the given array.
-        ignore_case (bool): If True, perform a case-insensitive match; otherwise, the match is case-sensitive.
+        pattern (str or bytes): Substring pattern to look for inside `array`.
+        ignore_case (bool): If True, perform a case-insensitive match;
+            otherwise, the match is case-sensitive.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
-    For each string in the array, determine whether it contains the given literal pattern.
+    For each string in the array, determine whether it contains the given
+    literal `pattern`.
 
-    Note: this function does not raise an error if the `array` does not contain any string or bytestring data.
+    Note: this function does not raise an error if the `array` does not
+    contain any string or bytestring data.
 
     Requires the pyarrow library and calls
     [pyarrow.compute.match_substring](https://arrow.apache.org/docs/python/generated/pyarrow.compute.match_substring.html).

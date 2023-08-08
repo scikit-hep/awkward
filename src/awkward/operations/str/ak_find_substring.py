@@ -14,17 +14,21 @@ def find_substring(array, pattern, *, ignore_case=False, highlevel=True, behavio
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
-        pattern (str, or bytes): Substring pattern to look for inside the given array.
-        ignore_case (bool): If True, perform a case-insensitive match; otherwise, the match is case-sensitive.
+        pattern (str or bytes): Substring pattern to find inside each string
+            in `array`.
+        ignore_case (bool): If True, perform a case-insensitive match;
+            otherwise, the match is case-sensitive.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
-    For each string in the array, determine the index at which the first occurrence of the given literal pattern is
-    found. If the literal pattern is not found inside the string, the index is taken to be -1.
+    Returns the index of the first occurrence of the given literal `pattern`
+    for each string in `array`. If the literal pattern is not found inside the
+    string, the index is taken to be -1.
 
-    Note: this function does not raise an error if the `array` does not contain any string or bytestring data.
+    Note: this function does not raise an error if the `array` does not
+    contain any string or bytestring data.
 
     Requires the pyarrow library and calls
     [pyarrow.compute.find_substring](https://arrow.apache.org/docs/python/generated/pyarrow.compute.find_substring.html).

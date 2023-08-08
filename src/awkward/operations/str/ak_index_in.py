@@ -14,17 +14,21 @@ def index_in(array, value_set, *, skip_nones=False, highlevel=True, behavior=Non
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
-        value_set: Array-like data (anything #ak.to_layout recognizes), set of values to search for.
-        skip_nones (bool): If True, None values in `array` are not matched against `value_set`; otherwise, they are.
+        value_set: Array-like data (anything #ak.to_layout recognizes), set of
+            values to search for in `array`.
+        skip_nones (bool): If True, None values in `array` are not matched
+            against `value_set`; otherwise, None is considered a legal value.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
-    For each string in the array, determine where it is found within the given set of values. If the string is
-    not found within the value set, the index is set to None.
+    Returns the index of the first pattern in `value_set` that each string in
+    `array` matches. If the string is not found within `value_set`, then the
+    index is set to None.
 
-    Note: this function does not raise an error if the `array` does not contain any string or bytestring data.
+    Note: this function does not raise an error if the `array` does not
+    contain any string or bytestring data.
 
     Requires the pyarrow library and calls
     [pyarrow.compute.index_in](https://arrow.apache.org/docs/python/generated/pyarrow.compute.index_in.html).
