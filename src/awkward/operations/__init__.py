@@ -1,6 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-# ruff: noqa: F401
 
+import awkward.operations.str
 from awkward.operations.ak_all import *
 from awkward.operations.ak_almost_equal import *
 from awkward.operations.ak_any import *
