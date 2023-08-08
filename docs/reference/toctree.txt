@@ -146,6 +146,79 @@
     generated/ak.argcombinations
 
 .. toctree::
+    :caption: String predicates
+
+    generated/ak.str.is_alnum
+    generated/ak.str.is_alpha
+    generated/ak.str.is_ascii
+    generated/ak.str.is_decimal
+    generated/ak.str.is_digit
+    generated/ak.str.is_lower
+    generated/ak.str.is_numeric
+    generated/ak.str.is_printable
+    generated/ak.str.is_space
+    generated/ak.str.is_title
+    generated/ak.str.is_upper
+
+.. toctree::
+    :caption: String transforms
+
+    generated/ak.str.capitalize
+    generated/ak.str.length
+    generated/ak.str.lower
+    generated/ak.str.repeat
+    generated/ak.str.replace_slice
+    generated/ak.str.replace_substring
+    generated/ak.str.replace_substring_regex
+    generated/ak.str.reverse
+    generated/ak.str.swapcase
+    generated/ak.str.title
+    generated/ak.str.upper
+
+.. toctree::
+    :caption: String padding and trimming
+
+    generated/ak.str.center
+    generated/ak.str.lpad
+    generated/ak.str.rpad
+    generated/ak.str.ltrim
+    generated/ak.str.ltrim_whitespace
+    generated/ak.str.rtrim
+    generated/ak.str.rtrim_whitespace
+    generated/ak.str.trim
+    generated/ak.str.trim_whitespace
+
+.. toctree::
+    :caption: String splitting and joining
+
+    generated/ak.str.split_pattern
+    generated/ak.str.split_pattern_regex
+    generated/ak.str.split_whitespace
+    generated/ak.str.join
+    generated/ak.str.join_element_wise
+
+.. toctree::
+    :caption: String slicing and decomposition
+
+    generated/ak.str.slice
+    generated/ak.str.extract_regex
+
+.. toctree::
+    :caption: String containment tests
+
+    generated/ak.str.count_substring
+    generated/ak.str.count_substring_regex
+    generated/ak.str.ends_with
+    generated/ak.str.find_substring
+    generated/ak.str.find_substring_regex
+    generated/ak.str.index_in
+    generated/ak.str.is_in
+    generated/ak.str.match_like
+    generated/ak.str.match_substring
+    generated/ak.str.match_substring_regex
+    generated/ak.str.starts_with
+
+.. toctree::
     :caption: Value and type conversions
 
     generated/ak.enforce_type
