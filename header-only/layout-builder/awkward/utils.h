@@ -30,7 +30,7 @@ namespace awkward {
 
   /// @brief Returns the name of a primitive type as a string.
   template <typename T>
-  const std::string
+  inline const std::string
   type_to_name() {
     if (is_integral_v<T>) {
       if (is_signed_v<T>) {
@@ -81,7 +81,7 @@ namespace awkward {
   }
 
   template <>
-  const std::string
+  inline const std::string
   type_to_name<bool>() {
     // This takes precedence over the unspecialized template, and therefore any
     // 8-bit data that is not named bool will be mapped to "int8" or "uint8".
@@ -89,7 +89,7 @@ namespace awkward {
   }
 
   template <>
-  const std::string
+  inline const std::string
   type_to_name<char>() {
     // This takes precedence over the unspecialized template, and therefore any
     // 8-bit data that is not named char will be mapped to "int8" or "uint8".
@@ -100,7 +100,7 @@ namespace awkward {
   /// @brief Returns `char` string when the primitive type
   /// is a character.
   template <typename T>
-  const std::string
+  inline const std::string
   type_to_numpy_like() {
     return type_to_name<T>();
   }
@@ -108,7 +108,7 @@ namespace awkward {
   /// @brief Returns numpy-like character code of a primitive
   /// type as a string.
   template <>
-  const std::string
+  inline const std::string
   type_to_numpy_like<uint8_t>() {
     return "u8";
   }
@@ -116,7 +116,7 @@ namespace awkward {
   /// @brief Returns numpy-like character code `i8`, when the
   /// primitive type is an 8-bit signed integer.
   template <>
-  const std::string
+  inline const std::string
   type_to_numpy_like<int8_t>() {
     return "i8";
   }
@@ -124,7 +124,7 @@ namespace awkward {
   /// @brief Returns numpy-like character code `u32`, when the
   /// primitive type is a 32-bit unsigned integer.
   template <>
-  const std::string
+  inline const std::string
   type_to_numpy_like<uint32_t>() {
     return "u32";
   }
@@ -132,7 +132,7 @@ namespace awkward {
   /// @brief Returns numpy-like character code `i32`, when the
   /// primitive type is a 32-bit signed integer.
   template <>
-  const std::string
+  inline const std::string
   type_to_numpy_like<int32_t>() {
     return "i32";
   }
@@ -140,7 +140,7 @@ namespace awkward {
   /// @brief Returns numpy-like character code `i64`, when the
   /// primitive type is a 64-bit signed integer.
   template <>
-  const std::string
+  inline const std::string
   type_to_numpy_like<int64_t>() {
     return "i64";
   }
