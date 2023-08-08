@@ -52,7 +52,7 @@ subtrees:
                       - file: user-guide/how-to-create-strings
                         title: "Arrays of strings"
                       - file: user-guide/how-to-create-unflatten-group
-                        title: "Unflattening and grouping [todo]"
+                        title: "Unflattening and grouping"
                       - file: user-guide/how-to-create-arraybuilder
                         title: "ArrayBuilder (easy & general)"
                       - file: user-guide/how-to-create-constructors
