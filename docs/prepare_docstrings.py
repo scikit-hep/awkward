@@ -303,7 +303,7 @@ for filename in glob.glob("../src/awkward/**/*.py", recursive=True):
         .replace(".behaviors.string", "")
     )
     shortname = re.sub(r"\.operations\.ak_\w+", "", shortname)
-    shortname = re.sub(r"\.operations\.str\.ak_\w+", ".str", shortname)
+    shortname = re.sub(r"\.operations\.str\.akstr_\w+", ".str", shortname)
     shortname = re.sub(r"\.(contents|types|forms)\.\w+", r".\1", shortname)
 
     if (
