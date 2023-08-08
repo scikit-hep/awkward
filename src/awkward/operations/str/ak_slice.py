@@ -9,7 +9,7 @@ from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 
 
-@high_level_function()
+@high_level_function(module="ak.str")
 def slice(array, start, stop=None, step=1, *, highlevel=True, behavior=None):
     """
     Args:

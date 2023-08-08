@@ -9,7 +9,7 @@ from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 
 
-@high_level_function()
+@high_level_function(module="ak.str")
 def split_whitespace(
     array, *, max_splits=None, reverse=False, highlevel=True, behavior=None
 ):
