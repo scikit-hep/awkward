@@ -57,12 +57,12 @@ def _impl(array, value_set, skip_nones, highlevel, behavior):
     value_set_layout = ak.to_layout(value_set, allow_record=False, allow_other=True)
 
     if not _is_maybe_optional_list_of_string(value_set_layout):
-        raise TypeError("`value_set` must be 1D array of (maybe missing) strings")
+        raise TypeError("`value_set` must be 1D array of (possibly missing) strings")
 
     behavior = behavior_of(array, value_set, behavior=behavior)
 
     def apply(layout, **kwargs):
-        if _is_maybe_optional_list_of_string(layout) and layout.purelist_depth == 1:
+        if _is_maybe_optional_list_of_string(layout):
             return ak.from_arrow(
                 pc.is_in(
                     ak.to_arrow(layout, extensionarray=False),

@@ -48,11 +48,11 @@ def _impl(arrays, highlevel, behavior):
 
     import pyarrow.compute as pc
 
-    layouts = [ak.to_layout(x) for x in arrays]
-    behavior = behavior_of(*arrays, behavior=behavior)
-
     if len(arrays) < 1:
         raise TypeError("at least one array is required")
+
+    layouts = [ak.to_layout(x) for x in arrays]
+    behavior = behavior_of(*arrays, behavior=behavior)
 
     def action(layouts, **kwargs):
         if all(

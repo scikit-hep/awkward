@@ -57,13 +57,8 @@ def _impl(array, separator, highlevel, behavior):
     import pyarrow.compute as pc
 
     def apply_unary(layout, **kwargs):
-        if not (layout.is_list and layout.purelist_depth == 2):
+        if not (layout.is_list and _is_maybe_optional_list_of_string(layout.content)):
             return
-
-        if not _is_maybe_optional_list_of_string(layout.content):
-            return
-
-        # We have (maybe option/indexed type wrapping) strings
 
         arrow_array = to_arrow(
             # Arrow needs an option type here
@@ -80,15 +75,12 @@ def _impl(array, separator, highlevel, behavior):
 
     def apply_binary(layouts, **kwargs):
         layout, separator_layout = layouts
-        if not (layout.is_list and layout.purelist_depth == 2):
-            return
-
-        if not _is_maybe_optional_list_of_string(layout.content):
+        if not (layout.is_list and _is_maybe_optional_list_of_string(layout.content)):
             return
 
         if not _is_maybe_optional_list_of_string(separator_layout):
             raise TypeError(
-                f"separator must be a list of strings, not {type(separator_layout)}"
+                f"`separator` must be a list of (possibly missing) strings, not {ak.type(separator_layout)}"
             )
 
         # We have (maybe option/indexed type wrapping) strings
