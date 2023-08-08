@@ -34,6 +34,8 @@ def find_substring_regex(
 
     Requires the pyarrow library and calls
     [pyarrow.compute.find_substring](https://arrow.apache.org/docs/python/generated/pyarrow.compute.find_substring.html).
+
+    See also: #ak.str.find_substring.
     """
     # Dispatch
     yield (array,)

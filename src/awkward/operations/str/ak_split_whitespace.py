@@ -44,6 +44,8 @@ def split_whitespace(
     [pyarrow.compute.utf8_split_whitespace](https://arrow.apache.org/docs/python/generated/pyarrow.compute.utf8_split_whitespace.html)
     or [pyarrow.compute.ascii_split_whitespace](https://arrow.apache.org/docs/python/generated/pyarrow.compute.ascii_split_whitespace.html)
     on strings and bytestrings, respectively.
+
+    See also: #ak.str.split_pattern, #ak.str.split_pattern_regex.
     """
     # Dispatch
     yield (array,)

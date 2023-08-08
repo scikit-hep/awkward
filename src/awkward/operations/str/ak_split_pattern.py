@@ -35,6 +35,8 @@ def split_pattern(
 
     Requires the pyarrow library and calls
     [pyarrow.compute.split_pattern](https://arrow.apache.org/docs/python/generated/pyarrow.compute.split_pattern.html).
+
+    See also: #ak.str.split_whitespace, #ak.str.split_pattern_regex.
     """
     # Dispatch
     yield (array,)

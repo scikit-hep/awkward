@@ -34,6 +34,8 @@ def count_substring(
 
     Requires the pyarrow library and calls
     [pyarrow.compute.count_substring](https://arrow.apache.org/docs/python/generated/pyarrow.compute.count_substring.html).
+
+    See also: #ak.str.count_substring_regex.
     """
     # Dispatch
     yield (array,)

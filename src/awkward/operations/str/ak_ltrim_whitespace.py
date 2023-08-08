@@ -29,6 +29,8 @@ def ltrim_whitespace(array, *, highlevel=True, behavior=None):
     or
     [pyarrow.compute.ascii_ltrim_whitespace](https://arrow.apache.org/docs/python/generated/pyarrow.compute.ascii_ltrim_whitespace.html)
     on strings and bytestrings, respectively.
+
+    See also: #ak.str.ltrim.
     """
     # Dispatch
     yield (array,)

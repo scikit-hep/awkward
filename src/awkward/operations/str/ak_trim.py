@@ -38,6 +38,8 @@ def trim(array, characters, *, highlevel=True, behavior=None):
     or
     [pyarrow.compute.ascii_trim](https://arrow.apache.org/docs/python/generated/pyarrow.compute.ascii_trim.html)
     on strings and bytestrings, respectively.
+
+    See also: #ak.str.trim_whitespace.
     """
     # Dispatch
     yield (array,)

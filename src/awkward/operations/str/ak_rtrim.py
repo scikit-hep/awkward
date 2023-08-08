@@ -37,6 +37,8 @@ def rtrim(array, characters, *, highlevel=True, behavior=None):
     or
     [pyarrow.compute.ascii_rtrim](https://arrow.apache.org/docs/python/generated/pyarrow.compute.ascii_rtrim.html)
     on strings and bytestrings, respectively.
+
+    See also: #ak.str.rtrim_whitespace.
     """
     # Dispatch
     yield (array,)

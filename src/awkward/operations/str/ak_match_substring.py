@@ -32,6 +32,8 @@ def match_substring(
 
     Requires the pyarrow library and calls
     [pyarrow.compute.match_substring](https://arrow.apache.org/docs/python/generated/pyarrow.compute.match_substring.html).
+
+    See also: #ak.str.match_substring_regex.
     """
     # Dispatch
     yield (array,)

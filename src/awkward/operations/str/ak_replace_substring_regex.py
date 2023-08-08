@@ -40,6 +40,8 @@ def replace_substring_regex(
     or
     [pyarrow.compute.replace_substring_regex](https://arrow.apache.org/docs/python/generated/pyarrow.compute.replace_substring_regex.html)
     on strings and bytestrings, respectively.
+
+    See also: #ak.str.replace_substring_regex.
     """
     # Dispatch
     yield (array,)
