@@ -45,10 +45,9 @@ def replace_slice(array, start, stop, replacement, *, highlevel=True, behavior=N
 
 
 def _impl(array, start, stop, replacement, highlevel, behavior):
-    import awkward._connect.pyarrow  # noqa: F401, I001
+    from awkward._connect.pyarrow import import_pyarrow_compute
 
-    import pyarrow.compute as pc
-
+    pc = import_pyarrow_compute("ak.str.replace_slice")
     behavior = behavior_of(array, behavior=behavior)
 
     out = ak._do.recursively_apply(

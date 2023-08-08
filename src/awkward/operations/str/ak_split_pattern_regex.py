@@ -40,10 +40,9 @@ def split_pattern_regex(
 
 
 def _impl(array, pattern, max_splits, reverse, highlevel, behavior):
-    import awkward._connect.pyarrow  # noqa: F401, I001
+    from awkward._connect.pyarrow import import_pyarrow_compute
 
-    import pyarrow.compute as pc
-
+    pc = import_pyarrow_compute("ak.str.split_pattern_regex")
     behavior = behavior_of(array, behavior=behavior)
     action = ak.operations.str._get_split_action(
         pc.split_pattern_regex,

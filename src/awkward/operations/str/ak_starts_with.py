@@ -36,10 +36,9 @@ def starts_with(array, pattern, *, ignore_case=False, highlevel=True, behavior=N
 
 
 def _impl(array, pattern, ignore_case, highlevel, behavior):
-    import awkward._connect.pyarrow  # noqa: F401, I001
+    from awkward._connect.pyarrow import import_pyarrow_compute
 
-    import pyarrow.compute as pc
-
+    pc = import_pyarrow_compute("ak.str.starts_with")
     layout = ak.to_layout(array, allow_record=False, allow_other=True)
     behavior = behavior_of(array, behavior=behavior)
     apply = ak.operations.str._get_ufunc_action(

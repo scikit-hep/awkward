@@ -38,10 +38,9 @@ def trim_whitespace(array, *, highlevel=True, behavior=None):
 
 
 def _impl(array, highlevel, behavior):
-    import awkward._connect.pyarrow  # noqa: F401, I001
+    from awkward._connect.pyarrow import import_pyarrow_compute
 
-    import pyarrow.compute as pc
-
+    pc = import_pyarrow_compute("ak.str.trim_whitespace")
     behavior = behavior_of(array, behavior=behavior)
 
     out = ak._do.recursively_apply(

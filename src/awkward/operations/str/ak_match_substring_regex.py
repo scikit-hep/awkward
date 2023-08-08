@@ -38,9 +38,9 @@ def match_substring_regex(
 
 
 def _impl(array, pattern, ignore_case, highlevel, behavior):
-    import awkward._connect.pyarrow  # noqa: F401, I001
+    from awkward._connect.pyarrow import import_pyarrow_compute
 
-    import pyarrow.compute as pc
+    pc = import_pyarrow_compute("ak.str.match_substring_regex")
 
     layout = ak.to_layout(array, allow_record=False, allow_other=True)
     behavior = behavior_of(array, behavior=behavior)

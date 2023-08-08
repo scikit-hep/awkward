@@ -48,9 +48,9 @@ def split_whitespace(
 
 
 def _impl(array, max_splits, reverse, highlevel, behavior):
-    import awkward._connect.pyarrow  # noqa: F401, I001
-    import pyarrow.compute as pc
+    from awkward._connect.pyarrow import import_pyarrow_compute
 
+    pc = import_pyarrow_compute("ak.str.split_whitespace")
     behavior = behavior_of(array, behavior=behavior)
     action = ak.operations.str._get_split_action(
         pc.utf8_split_whitespace,

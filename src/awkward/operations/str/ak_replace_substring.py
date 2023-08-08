@@ -47,10 +47,9 @@ def replace_substring(
 
 
 def _impl(array, pattern, replacement, max_replacements, highlevel, behavior):
-    import awkward._connect.pyarrow  # noqa: F401, I001
+    from awkward._connect.pyarrow import import_pyarrow_compute
 
-    import pyarrow.compute as pc
-
+    pc = import_pyarrow_compute("ak.str.replace_substring")
     behavior = behavior_of(array, behavior=behavior)
 
     out = ak._do.recursively_apply(
