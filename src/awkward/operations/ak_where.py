@@ -13,7 +13,7 @@ cpu = NumpyBackend.instance()
 
 
 @ak._connect.numpy.implements("where")
-@high_level_function
+@high_level_function()
 def where(condition, *args, mergebool=True, highlevel=True, behavior=None):
     """
     Args:

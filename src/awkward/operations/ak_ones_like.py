@@ -8,7 +8,7 @@ from awkward._nplikes.numpylike import NumpyMetadata
 np = NumpyMetadata.instance()
 
 
-@high_level_function
+@high_level_function()
 def ones_like(
     array, *, dtype=None, including_unknown=False, highlevel=True, behavior=None
 ):

@@ -12,7 +12,7 @@ from awkward._regularize import regularize_axis
 np = NumpyMetadata.instance()
 
 
-@high_level_function
+@high_level_function()
 def linear_fit(x, y, weight=None, axis=None, *, keepdims=False, mask_identity=False):
     """
     Args:

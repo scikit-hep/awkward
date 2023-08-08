@@ -15,7 +15,7 @@ ParquetMetadata = collections.namedtuple(
 )
 
 
-@high_level_function
+@high_level_function()
 def metadata_from_parquet(
     path,
     *,

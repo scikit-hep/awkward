@@ -12,7 +12,7 @@ from awkward._regularize import regularize_axis
 np = NumpyMetadata.instance()
 
 
-@high_level_function
+@high_level_function()
 def std(x, weight=None, ddof=0, axis=None, *, keepdims=False, mask_identity=False):
     """
     Args:
@@ -64,7 +64,7 @@ def std(x, weight=None, ddof=0, axis=None, *, keepdims=False, mask_identity=Fals
     return _impl(x, weight, ddof, axis, keepdims, mask_identity)
 
 
-@high_level_function
+@high_level_function()
 def nanstd(x, weight=None, ddof=0, axis=None, *, keepdims=False, mask_identity=True):
     """
     Args:

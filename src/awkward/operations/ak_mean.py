@@ -11,7 +11,7 @@ from awkward._regularize import regularize_axis
 np = NumpyMetadata.instance()
 
 
-@high_level_function
+@high_level_function()
 def mean(x, weight=None, axis=None, *, keepdims=False, mask_identity=False):
     """
     Args:
@@ -82,7 +82,7 @@ def mean(x, weight=None, axis=None, *, keepdims=False, mask_identity=False):
     return _impl(x, weight, axis, keepdims, mask_identity)
 
 
-@high_level_function
+@high_level_function()
 def nanmean(x, weight=None, axis=None, *, keepdims=False, mask_identity=True):
     """
     Args:

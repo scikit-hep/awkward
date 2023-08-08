@@ -4,7 +4,7 @@ from awkward._backends.dispatch import backend_of
 from awkward._dispatch import high_level_function
 
 
-@high_level_function
+@high_level_function()
 def backend(*arrays):
     """
     Args:

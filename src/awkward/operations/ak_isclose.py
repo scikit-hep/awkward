@@ -9,7 +9,7 @@ from awkward._nplikes.numpylike import NumpyMetadata
 np = NumpyMetadata.instance()
 
 
-@high_level_function
+@high_level_function()
 def isclose(
     a, b, rtol=1e-05, atol=1e-08, equal_nan=False, *, highlevel=True, behavior=None
 ):

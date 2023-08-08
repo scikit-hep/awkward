@@ -12,7 +12,7 @@ from awkward._regularize import is_integer_like, regularize_axis
 np = NumpyMetadata.instance()
 
 
-@high_level_function
+@high_level_function()
 def unflatten(array, counts, axis=0, *, highlevel=True, behavior=None):
     """
     Args:

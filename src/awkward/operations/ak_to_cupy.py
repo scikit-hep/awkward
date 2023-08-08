@@ -5,7 +5,7 @@ from awkward._backends.cupy import CupyBackend
 from awkward._dispatch import high_level_function
 
 
-@high_level_function
+@high_level_function()
 def to_cupy(array):
     """
     Args:

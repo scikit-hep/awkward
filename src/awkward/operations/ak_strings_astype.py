@@ -11,7 +11,7 @@ np = NumpyMetadata.instance()
 numpy = Numpy.instance()
 
 
-@high_level_function
+@high_level_function()
 def strings_astype(array, to, *, highlevel=True, behavior=None):
     """
     Args:

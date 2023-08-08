@@ -9,7 +9,7 @@ from awkward._dispatch import high_level_function
 cpu = NumpyBackend.instance()
 
 
-@high_level_function
+@high_level_function()
 def to_rdataframe(arrays, *, flatlist_as_rvec=True):
     """
     Args:

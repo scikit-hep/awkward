@@ -9,7 +9,7 @@ from awkward._regularize import regularize_axis
 np = NumpyMetadata.instance()
 
 
-@high_level_function
+@high_level_function()
 def local_index(array, axis=-1, *, highlevel=True, behavior=None):
     """
     Args:

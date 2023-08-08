@@ -4,7 +4,7 @@ import awkward as ak
 from awkward._dispatch import high_level_function
 
 
-@high_level_function
+@high_level_function()
 def is_valid(array, *, exception=False):
     """
     Args:

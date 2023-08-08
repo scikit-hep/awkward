@@ -13,7 +13,7 @@ np = NumpyMetadata.instance()
 cpu = NumpyBackend.instance()
 
 
-@high_level_function
+@high_level_function()
 def merge_union_of_records(array, axis=-1, *, highlevel=True, behavior=None):
     """
     Args:

@@ -9,7 +9,7 @@ from awkward._regularize import regularize_axis
 np = NumpyMetadata.instance()
 
 
-@high_level_function
+@high_level_function()
 def covar(x, y, weight=None, axis=None, *, keepdims=False, mask_identity=False):
     """
     Args:

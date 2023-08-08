@@ -13,7 +13,7 @@ np = NumpyMetadata.instance()
 cpu = NumpyBackend.instance()
 
 
-@high_level_function
+@high_level_function()
 def run_lengths(array, *, highlevel=True, behavior=None):
     """
     Args:
