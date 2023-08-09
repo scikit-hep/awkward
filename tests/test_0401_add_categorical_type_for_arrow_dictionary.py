@@ -209,7 +209,10 @@ def test_option_two_extra():
 def test_to_categorical_numbers():
     array = ak.Array([1.1, 2.2, 3.3, 1.1, 2.2, 3.3, 1.1, 2.2, 3.3])
     assert not ak.operations.ak_is_categorical.is_categorical(array)
-    categorical = ak.operations.ak_to_categorical.to_categorical(array)
+    with pytest.warns(
+        DeprecationWarning, match=r"has been replaced by.*ak\.str\.to_categorical"
+    ):
+        categorical = ak.operations.ak_to_categorical.to_categorical(array)
     assert ak.operations.ak_is_categorical.is_categorical(categorical)
     assert to_list(array) == categorical.to_list()
     assert to_list(categorical.layout.content) == [1.1, 2.2, 3.3]
@@ -225,7 +228,10 @@ def test_to_categorical_numbers():
 def test_to_categorical_nested():
     array = ak.Array([["one", "two", "three"], [], ["one", "two"], ["three"]])
     assert not ak.operations.ak_is_categorical.is_categorical(array)
-    categorical = ak.operations.ak_to_categorical.to_categorical(array)
+    with pytest.warns(
+        DeprecationWarning, match=r"has been replaced by.*ak\.str\.to_categorical"
+    ):
+        categorical = ak.operations.ak_to_categorical.to_categorical(array)
     assert ak.operations.ak_is_categorical.is_categorical(categorical)
     assert to_list(array) == categorical.to_list()
     not_categorical = ak.operations.ak_from_categorical.from_categorical(categorical)
@@ -242,7 +248,10 @@ def test_to_categorical():
         ["one", "two", "three", "one", "two", "three", "one", "two", "three"]
     )
     assert not ak.operations.ak_is_categorical.is_categorical(array)
-    categorical = ak.operations.ak_to_categorical.to_categorical(array)
+    with pytest.warns(
+        DeprecationWarning, match=r"has been replaced by.*ak\.str\.to_categorical"
+    ):
+        categorical = ak.operations.ak_to_categorical.to_categorical(array)
     assert ak.operations.ak_is_categorical.is_categorical(categorical)
     assert to_list(array) == categorical.to_list()
     assert to_list(categorical.layout.content) == ["one", "two", "three"]
@@ -273,7 +282,10 @@ def test_to_categorical_none():
         ]
     )
     assert not ak.operations.ak_is_categorical.is_categorical(array)
-    categorical = ak.operations.ak_to_categorical.to_categorical(array)
+    with pytest.warns(
+        DeprecationWarning, match=r"has been replaced by.*ak\.str\.to_categorical"
+    ):
+        categorical = ak.operations.ak_to_categorical.to_categorical(array)
     assert ak.operations.ak_is_categorical.is_categorical(categorical)
     assert to_list(array) == categorical.to_list()
     assert to_list(categorical.layout.content) == ["one", "two", "three"]
@@ -323,7 +335,10 @@ def test_to_categorical_masked():
     )
     array = ak.Array(ak.contents.ByteMaskedArray(mask, content, valid_when=False))
     assert not ak.operations.ak_is_categorical.is_categorical(array)
-    categorical = ak.operations.ak_to_categorical.to_categorical(array)
+    with pytest.warns(
+        DeprecationWarning, match=r"has been replaced by.*ak\.str\.to_categorical"
+    ):
+        categorical = ak.operations.ak_to_categorical.to_categorical(array)
     assert ak.operations.ak_is_categorical.is_categorical(categorical)
     assert to_list(array) == categorical.to_list()
     assert to_list(categorical.layout.content) == ["one", "two", "three"]
@@ -366,7 +381,10 @@ def test_to_categorical_masked_again():
         ak.contents.ByteMaskedArray.simplified(mask, indexedarray, valid_when=False)
     )
     assert not ak.operations.ak_is_categorical.is_categorical(array)
-    categorical = ak.operations.ak_to_categorical.to_categorical(array)
+    with pytest.warns(
+        DeprecationWarning, match=r"has been replaced by.*ak\.str\.to_categorical"
+    ):
+        categorical = ak.operations.ak_to_categorical.to_categorical(array)
     assert ak.operations.ak_is_categorical.is_categorical(categorical)
     assert to_list(array) == categorical.to_list()
     assert to_list(categorical.layout.content) == ["one", "two", "three"]
@@ -381,46 +399,59 @@ def test_to_categorical_masked_again():
 
 @pytest.mark.skip(reason="Fix issues for categorical type")
 def test_typestr():
-    assert (
-        str(
-            ak.operations.type(
-                ak.operations.ak_to_categorical.to_categorical(
-                    ak.Array([1.1, 2.2, 2.2, 3.3])
+    with pytest.warns(
+        DeprecationWarning, match=r"has been replaced by.*ak\.str\.to_categorical"
+    ):
+        assert (
+            str(
+                ak.operations.type(
+                    ak.operations.ak_to_categorical.to_categorical(
+                        ak.Array([1.1, 2.2, 2.2, 3.3])
+                    )
                 )
             )
+            == "4 * categorical[type=float64]"
         )
-        == "4 * categorical[type=float64]"
-    )
-    assert (
-        str(
-            ak.operations.type(
-                ak.operations.ak_to_categorical.to_categorical(
-                    ak.Array([1.1, 2.2, None, 2.2, 3.3])
+
+    with pytest.warns(
+        DeprecationWarning, match=r"has been replaced by.*ak\.str\.to_categorical"
+    ):
+        assert (
+            str(
+                ak.operations.type(
+                    ak.operations.ak_to_categorical.to_categorical(
+                        ak.Array([1.1, 2.2, None, 2.2, 3.3])
+                    )
                 )
             )
+            == "5 * categorical[type=?float64]"
         )
-        == "5 * categorical[type=?float64]"
-    )
-    assert (
-        str(
-            ak.operations.type(
-                ak.operations.ak_to_categorical.to_categorical(
-                    ak.Array(["one", "two", "two", "three"])
+    with pytest.warns(
+        DeprecationWarning, match=r"has been replaced by.*ak\.str\.to_categorical"
+    ):
+        assert (
+            str(
+                ak.operations.type(
+                    ak.operations.ak_to_categorical.to_categorical(
+                        ak.Array(["one", "two", "two", "three"])
+                    )
                 )
             )
+            == "4 * categorical[type=string]"
         )
-        == "4 * categorical[type=string]"
-    )
-    assert (
-        str(
-            ak.operations.type(
-                ak.operations.ak_to_categorical.to_categorical(
-                    ak.Array(["one", "two", None, "two", "three"])
+    with pytest.warns(
+        DeprecationWarning, match=r"has been replaced by.*ak\.str\.to_categorical"
+    ):
+        assert (
+            str(
+                ak.operations.type(
+                    ak.operations.ak_to_categorical.to_categorical(
+                        ak.Array(["one", "two", None, "two", "three"])
+                    )
                 )
             )
+            == "5 * categorical[type=?string]"
         )
-        == "5 * categorical[type=?string]"
-    )
 
 
 def test_zip():
@@ -431,7 +462,10 @@ def test_zip():
         {"x": 2.2, "y": "two"},
         {"x": 3.3, "y": "three"},
     ]
-    y = ak.operations.ak_to_categorical.to_categorical(y)
+    with pytest.warns(
+        DeprecationWarning, match=r"has been replaced by.*ak\.str\.to_categorical"
+    ):
+        y = ak.operations.ak_to_categorical.to_categorical(y)
     assert ak.zip({"x": x, "y": y}).to_list() == [
         {"x": 1.1, "y": "one"},
         {"x": 2.2, "y": "two"},

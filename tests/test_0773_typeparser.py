@@ -235,22 +235,28 @@ def test_arraytype_bytestring():
 
 
 def test_arraytype_categorical_1():
-    text = str(
-        ak.operations.ak_to_categorical.to_categorical(
-            ak.Array(["one", "one", "two", "three", "one", "three"])
-        ).type
-    )
+    with pytest.warns(
+        DeprecationWarning, match=r"has been replaced by.*ak\.str\.to_categorical"
+    ):
+        text = str(
+            ak.operations.ak_to_categorical.to_categorical(
+                ak.Array(["one", "one", "two", "three", "one", "three"])
+            ).type
+        )
     parsedtype = ak.types.from_datashape(text, highlevel=True)
     assert isinstance(parsedtype, ak.types.ArrayType)
     assert str(parsedtype) == text
 
 
 def test_arraytype_categorical_2():
-    text = str(
-        ak.operations.ak_to_categorical.to_categorical(
-            ak.Array([1.1, 1.1, 2.2, 3.3, 1.1, 3.3])
-        ).type
-    )
+    with pytest.warns(
+        DeprecationWarning, match=r"has been replaced by.*ak\.str\.to_categorical"
+    ):
+        text = str(
+            ak.operations.ak_to_categorical.to_categorical(
+                ak.Array([1.1, 1.1, 2.2, 3.3, 1.1, 3.3])
+            ).type
+        )
     parsedtype = ak.types.from_datashape(text, highlevel=True)
     assert isinstance(parsedtype, ak.types.ArrayType)
     assert str(parsedtype) == text
