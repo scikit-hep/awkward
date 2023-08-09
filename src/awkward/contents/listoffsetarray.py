@@ -1986,10 +1986,61 @@ class ListOffsetArray(Content):
 
     def _to_backend_array(self, allow_missing, backend):
         array_param = self.parameter("__array__")
-        if array_param in {"bytestring", "string"}:
-            # As our array-of-strings _may_ be empty, we should pass the dtype
-            dtype = np.str_ if array_param == "string" else np.bytes_
-            return backend.nplike.asarray(self.to_list(), dtype=dtype)
+        if array_param == "string":
+            # Determine the widest string (in code points)
+            _max_code_points = backend.index_nplike.empty(1, dtype=np.int64)
+            backend[
+                "awkward_NumpyArray_prepare_utf8_to_utf32_padded",
+                self._content.dtype.type,
+                self._offsets.dtype.type,
+                _max_code_points.dtype.type,
+            ](
+                self._content.data,
+                self._offsets.data,
+                self._offsets.length,
+                _max_code_points,
+            )
+            max_code_points = backend.index_nplike.index_as_shape_item(
+                _max_code_points[0]
+            )
+
+            # Allocate the correct size buffer
+            total_code_points = max_code_points * self.length
+            buffer = backend.index_nplike.empty(total_code_points, dtype=np.uint32)
+
+            # Fill buffer with new uint32_t
+            self.backend[
+                "awkward_NumpyArray_utf8_to_utf32_padded",
+                self._content.dtype.type,
+                self._offsets.dtype.type,
+                buffer.dtype.type,
+            ](
+                self._content.data,
+                self._offsets.data,
+                self._offsets.length,
+                max_code_points,
+                buffer,
+            )
+            return buffer.view(np.dtype(("U", max_code_points)))
+        elif array_param == "bytestring":
+            max_count = backend.index_nplike.index_as_shape_item(
+                backend.index_nplike.max(self.stops.data - self.starts.data)
+            )
+            buffer = backend.index_nplike.empty(max_count * self.length, dtype=np.uint8)
+
+            self.backend[
+                "awkward_NumpyArray_pad_zero_to_length",
+                self._content.dtype.type,
+                self._offsets.dtype.type,
+                buffer.dtype.type,
+            ](
+                self._content.data,
+                self._offsets.data,
+                self._offsets.length,
+                max_count,
+                buffer,
+            )
+            return buffer.view(np.dtype(("S", max_count)))
         else:
             return self.to_RegularArray()._to_backend_array(allow_missing, backend)
 

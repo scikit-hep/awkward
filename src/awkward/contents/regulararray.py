@@ -1230,10 +1230,45 @@ class RegularArray(Content):
 
     def _to_backend_array(self, allow_missing, backend):
         array_param = self.parameter("__array__")
-        if array_param in {"bytestring", "string"}:
-            # As our array-of-strings _may_ be empty, we should pass the dtype
-            dtype = np.str_ if array_param == "string" else np.bytes_
-            return backend.nplike.asarray(self.to_list(), dtype=dtype)
+        if array_param == "string":
+            offsets = self._compact_offsets64(True)
+            # Determine the widest string (in code points)
+            _max_code_points = backend.index_nplike.empty(1, dtype=np.int64)
+            backend[
+                "awkward_NumpyArray_prepare_utf8_to_utf32_padded",
+                self._content.dtype.type,
+                offsets.dtype.type,
+                _max_code_points.dtype.type,
+            ](
+                self._content.data,
+                offsets.data,
+                offsets.length,
+                _max_code_points,
+            )
+            max_code_points = backend.index_nplike.index_as_shape_item(
+                _max_code_points[0]
+            )
+
+            # Allocate the correct size buffer
+            total_code_points = max_code_points * self.length
+            buffer = backend.index_nplike.empty(total_code_points, dtype=np.uint32)
+
+            # Fill buffer with new uint32_t
+            self.backend[
+                "awkward_NumpyArray_utf8_to_utf32_padded",
+                self._content.dtype.type,
+                offsets.dtype.type,
+                buffer.dtype.type,
+            ](
+                self._content.data,
+                offsets.data,
+                offsets.length,
+                max_code_points,
+                buffer,
+            )
+            return buffer.view(np.dtype(("U", max_code_points)))
+        elif array_param == "bytestring":
+            return self._content.data.view(np.dtype(("S", self._size)))
         else:
             out = self._content._to_backend_array(allow_missing, backend)
             shape = (self._length, self._size) + out.shape[1:]
