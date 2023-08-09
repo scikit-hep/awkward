@@ -1,6 +1,16 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+# This set of string-manipulation routines is strongly inspired by Arrow:
 # https://arrow.apache.org/docs/python/api/compute.html#string-predicates
+# https://arrow.apache.org/docs/python/api/compute.html#string-transforms
+# https://arrow.apache.org/docs/python/api/compute.html#string-padding
+# https://arrow.apache.org/docs/python/api/compute.html#string-trimming
+# https://arrow.apache.org/docs/python/api/compute.html#string-splitting
+# https://arrow.apache.org/docs/python/api/compute.html#string-component-extraction
+# https://arrow.apache.org/docs/python/api/compute.html#string-joining
+# https://arrow.apache.org/docs/python/api/compute.html#string-slicing
+# https://arrow.apache.org/docs/python/api/compute.html#containment-tests
+
 
 # string predicates
 from awkward.operations.str.akstr_is_alnum import *
@@ -72,6 +82,9 @@ from awkward.operations.str.akstr_match_like import *
 from awkward.operations.str.akstr_match_substring import *
 from awkward.operations.str.akstr_match_substring_regex import *
 from awkward.operations.str.akstr_starts_with import *
+
+# dictionary-encoding (exclusively for strings)
+from awkward.operations.str.akstr_to_categorical import *
 
 
 def _get_ufunc_action(
