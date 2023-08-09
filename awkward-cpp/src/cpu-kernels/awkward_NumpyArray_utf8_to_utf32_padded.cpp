@@ -14,7 +14,7 @@ ERROR awkward_NumpyArray_utf8_to_utf32_padded(
       uint32_t *toptr) {
 
   int64_t i_code_unit = fromoffsets[0];
-  int64_t cp_size;
+  int64_t code_point_width;
   int64_t n_code_point = 0;
 
   // For each sublist of code units
@@ -25,8 +25,8 @@ ERROR awkward_NumpyArray_utf8_to_utf32_padded(
     // Repeat until we exhaust the code units within this sublist
     for (auto j_code_unit_last = i_code_unit + n_code_units; i_code_unit < j_code_unit_last;) {
       // Parse a single codepoint
-      cp_size = utf8_codepoint_size(fromptr[i_code_unit]);
-      switch (cp_size) {
+      code_point_width = utf8_codepoint_size(fromptr[i_code_unit]);
+      switch (code_point_width) {
       case 1:
         toptr[n_code_point] = ((uint32_t) fromptr[i_code_unit] & ~UTF8_ONE_BYTE_MASK);
         break;
@@ -50,13 +50,13 @@ ERROR awkward_NumpyArray_utf8_to_utf32_padded(
           ((uint32_t) fromptr[i_code_unit + 3] & ~UTF8_CONTINUATION_MASK);
         break;
       default:
-        return failure("utf8_to_utf32: invalid byte in UTF8 string", kSliceNone, fromptr[i_code_unit], FILENAME(__LINE__));
+        return failure("could not convert UTF8 code point to UTF32: invalid byte in UTF8 string", kSliceNone, fromptr[i_code_unit], FILENAME(__LINE__));
       }
       // Increment the code-point counter
       n_code_point++;
 
       // Shift the code-unit start index
-      i_code_unit += cp_size;
+      i_code_unit += code_point_width;
 
       // Increment the code-point counter for this sublist
       n_code_point_sublist += 1;

@@ -14,7 +14,7 @@ ERROR awkward_NumpyArray_prepare_utf8_to_utf32_padded(
 
   *outmaxcodepoints = 0;
   int64_t i_code_unit = fromoffsets[0];
-  int64_t cp_size;
+  int64_t code_point_width;
 
   // For each sublist of code units
   for (auto k_sublist = 0; k_sublist < offsetslength - 1; k_sublist++) {
@@ -23,10 +23,10 @@ ERROR awkward_NumpyArray_prepare_utf8_to_utf32_padded(
 
     // Repeat until we exhaust the code units within this sublist
     for (auto j_code_unit_last = i_code_unit + n_code_units; i_code_unit < j_code_unit_last;) {
-      cp_size = utf8_codepoint_size(fromptr[i_code_unit]);
+      code_point_width = utf8_codepoint_size(fromptr[i_code_unit]);
 
       // Shift the code-unit start index
-      i_code_unit += cp_size;
+      i_code_unit += code_point_width;
 
       // Increment the code-point counter for this sublist
       n_code_point_sublist += 1;
