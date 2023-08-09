@@ -12,14 +12,18 @@ ERROR awkward_NumpyArray_pad_zero_to_length(
     int64_t offsetslength,
     int64_t target,
     T* toptr) {
-    int64_t l = 0;
-    for (auto k = 0; k < offsetslength-1; k++) {
-        for (int64_t j=fromoffsets[k]; j<fromoffsets[k+1]; j++) {
-            toptr[l++] = fromptr[j];
+    int64_t l_to_char = 0;
+
+    // For each sublist
+    for (auto k_sublist = 0; k_sublist < offsetslength-1; k_sublist++) {
+        // Copy from src to dst
+        for (int64_t j_from_char=fromoffsets[k_sublist]; j_from_char<fromoffsets[k_sublist+1]; j_from_char++) {
+            toptr[l_to_char++] = fromptr[j_from_char];
         }
-        auto n_to_pad = target - (fromoffsets[k+1] - fromoffsets[k]);
-        for (int64_t j=0; j<n_to_pad; j++){
-            toptr[l++] = 0;
+        // Pad to remaining width
+        auto n_to_pad = target - (fromoffsets[k_sublist+1] - fromoffsets[k_sublist]);
+        for (int64_t j_from_char=0; j_from_char<n_to_pad; j_from_char++){
+            toptr[l_to_char++] = 0;
         }
     }
 

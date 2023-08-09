@@ -7,30 +7,34 @@
 
 
 ERROR awkward_NumpyArray_prepare_utf8_to_utf32_padded(
-    const uint8_t* fromptr,
-    const int64_t* fromoffsets,
-    int64_t offsetslength,
-    int64_t* outmaxcodepoints) {
+  const uint8_t *fromptr,
+    const int64_t *fromoffsets,
+      int64_t offsetslength,
+      int64_t *outmaxcodepoints) {
 
-    *outmaxcodepoints = 0;
-	int64_t i = fromoffsets[0];
-    int64_t cp_size;
+  *outmaxcodepoints = 0;
+  int64_t i_code_unit = fromoffsets[0];
+  int64_t cp_size;
 
-    // For each sublist of code units
-    for (auto k = 0; k < offsetslength-1; k++) {
-        auto n_code_units = fromoffsets[k+1] - fromoffsets[k];
-        auto n_sublist_code_points = 0;
+  // For each sublist of code units
+  for (auto k_sublist = 0; k_sublist < offsetslength - 1; k_sublist++) {
+    auto n_code_units = fromoffsets[k_sublist + 1] - fromoffsets[k_sublist];
+    auto n_code_point_sublist = 0;
 
-        // Parse one code point at a time, until we exhaust the code units
-        for (auto i_last=i+n_code_units; i<i_last;) {
-            cp_size = utf8_codepoint_size(fromptr[i]);
-            i += cp_size;
-            n_sublist_code_points += 1;
-        }
+    // Repeat until we exhaust the code units within this sublist
+    for (auto j_code_unit_last = i_code_unit + n_code_units; i_code_unit < j_code_unit_last;) {
+      cp_size = utf8_codepoint_size(fromptr[i_code_unit]);
 
-        // Set largest substring length (in code points)
-        *outmaxcodepoints = (*outmaxcodepoints < n_sublist_code_points) ? n_sublist_code_points : *outmaxcodepoints;
+      // Shift the code-unit start index
+      i_code_unit += cp_size;
+
+      // Increment the code-point counter for this sublist
+      n_code_point_sublist += 1;
     }
 
-    return success();
+    // Set largest substring length (in code points)
+    *outmaxcodepoints = ( *outmaxcodepoints < n_code_point_sublist) ? n_code_point_sublist : *outmaxcodepoints;
+  }
+
+  return success();
 }
