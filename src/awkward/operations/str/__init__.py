@@ -1,8 +1,10 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-# https://arrow.apache.org/docs/python/api/compute.html#string-predicates
+# This set of string-manipulation routines is strongly inspired by Arrow:
+
 
 # string predicates
+# https://arrow.apache.org/docs/python/api/compute.html#string-predicates
 from awkward.operations.str.akstr_is_alnum import *
 from awkward.operations.str.akstr_is_alpha import *
 from awkward.operations.str.akstr_is_decimal import *
@@ -16,6 +18,7 @@ from awkward.operations.str.akstr_is_title import *
 from awkward.operations.str.akstr_is_ascii import *
 
 # string transforms
+# https://arrow.apache.org/docs/python/api/compute.html#string-transforms
 from awkward.operations.str.akstr_capitalize import *
 from awkward.operations.str.akstr_length import *
 from awkward.operations.str.akstr_lower import *
@@ -29,11 +32,13 @@ from awkward.operations.str.akstr_replace_substring import *
 from awkward.operations.str.akstr_replace_substring_regex import *
 
 # string padding
+# https://arrow.apache.org/docs/python/api/compute.html#string-padding
 from awkward.operations.str.akstr_center import *
 from awkward.operations.str.akstr_lpad import *
 from awkward.operations.str.akstr_rpad import *
 
 # string trimming
+# https://arrow.apache.org/docs/python/api/compute.html#string-trimming
 from awkward.operations.str.akstr_ltrim import *
 from awkward.operations.str.akstr_ltrim_whitespace import *
 from awkward.operations.str.akstr_rtrim import *
@@ -42,25 +47,26 @@ from awkward.operations.str.akstr_trim import *
 from awkward.operations.str.akstr_trim_whitespace import *
 
 # string splitting
+# https://arrow.apache.org/docs/python/api/compute.html#string-splitting
 from awkward.operations.str.akstr_split_whitespace import *
 from awkward.operations.str.akstr_split_pattern import *
 from awkward.operations.str.akstr_split_pattern_regex import *
 
 # string component extraction
-
+# https://arrow.apache.org/docs/python/api/compute.html#string-component-extraction
 from awkward.operations.str.akstr_extract_regex import *
 
 # string joining
-
+# https://arrow.apache.org/docs/python/api/compute.html#string-joining
 from awkward.operations.str.akstr_join import *
 from awkward.operations.str.akstr_join_element_wise import *
 
 # string slicing
-
+# https://arrow.apache.org/docs/python/api/compute.html#string-slicing
 from awkward.operations.str.akstr_slice import *
 
 # containment tests
-
+# https://arrow.apache.org/docs/python/api/compute.html#containment-tests
 from awkward.operations.str.akstr_count_substring import *
 from awkward.operations.str.akstr_count_substring_regex import *
 from awkward.operations.str.akstr_ends_with import *
@@ -72,6 +78,10 @@ from awkward.operations.str.akstr_match_like import *
 from awkward.operations.str.akstr_match_substring import *
 from awkward.operations.str.akstr_match_substring_regex import *
 from awkward.operations.str.akstr_starts_with import *
+
+# dictionary-encoding (exclusively for strings)
+# https://arrow.apache.org/docs/python/api/compute.html#associative-transforms
+from awkward.operations.str.akstr_to_categorical import *
 
 
 def _get_ufunc_action(
