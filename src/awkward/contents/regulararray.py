@@ -1248,10 +1248,13 @@ class RegularArray(Content):
             max_code_points = backend.index_nplike.index_as_shape_item(
                 _max_code_points[0]
             )
+            # Ensure that we have at-least length-1 bytestrings
+            if max_code_points is not unknown_length:
+                max_code_points = max(1, max_code_points)
 
             # Allocate the correct size buffer
             total_code_points = max_code_points * self.length
-            buffer = backend.index_nplike.empty(total_code_points, dtype=np.uint32)
+            buffer = backend.nplike.empty(total_code_points, dtype=np.uint32)
 
             # Fill buffer with new uint32_t
             self.backend[
@@ -1268,7 +1271,14 @@ class RegularArray(Content):
             )
             return buffer.view(np.dtype(("U", max_code_points)))
         elif array_param == "bytestring":
-            return self._content.data.view(np.dtype(("S", self._size)))
+            # Ensure that we have at-least length-1 bytestrings
+            if self._size is not unknown_length and self._size == 0:
+                # Create new empty-buffer
+                return backend.nplike.zeros(self.length, dtype=np.uint8).view(
+                    np.dtype(("S", 1))
+                )
+            else:
+                return self._content.data.view(np.dtype(("S", self._size)))
         else:
             out = self._content._to_backend_array(allow_missing, backend)
             shape = (self._length, self._size) + out.shape[1:]

@@ -2003,10 +2003,13 @@ class ListOffsetArray(Content):
             max_code_points = backend.index_nplike.index_as_shape_item(
                 _max_code_points[0]
             )
+            # Ensure that we have at-least length-1 bytestrings
+            if max_code_points is not unknown_length:
+                max_code_points = max(1, max_code_points)
 
             # Allocate the correct size buffer
             total_code_points = max_code_points * self.length
-            buffer = backend.index_nplike.empty(total_code_points, dtype=np.uint32)
+            buffer = backend.nplike.empty(total_code_points, dtype=np.uint32)
 
             # Fill buffer with new uint32_t
             self.backend[
@@ -2023,10 +2026,19 @@ class ListOffsetArray(Content):
             )
             return buffer.view(np.dtype(("U", max_code_points)))
         elif array_param == "bytestring":
-            max_count = backend.index_nplike.index_as_shape_item(
-                backend.index_nplike.max(self.stops.data - self.starts.data)
-            )
-            buffer = backend.index_nplike.empty(max_count * self.length, dtype=np.uint8)
+            # Handle length=0 case
+            if self.starts.length is not unknown_length and self.starts.length == 0:
+                max_count = 0
+            else:
+                max_count = backend.index_nplike.index_as_shape_item(
+                    backend.index_nplike.max(self.stops.data - self.starts.data)
+                )
+
+            # Ensure that we have at-least length-1 bytestrings
+            if max_count is not unknown_length:
+                max_count = max(1, max_count)
+
+            buffer = backend.nplike.empty(max_count * self.length, dtype=np.uint8)
 
             self.backend[
                 "awkward_NumpyArray_pad_zero_to_length",
