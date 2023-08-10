@@ -90,6 +90,17 @@ subtrees:
                       - file: user-guide/how-to-math-gpu
                         title: "On GPUs [todo]"
 
+              - file: user-guide/how-to-strings
+                title: "Working with strings"
+                subtrees:
+                  - entries:
+                      - file: user-guide/how-to-strings-read-binary
+                        title: "Reading UTF-8 binary streams"
+                      - file: user-guide/how-to-strings-extract-substrings
+                        title: "Extracting substrings with regex"
+                      - file: user-guide/how-to-strings-split-and-join
+                        title: "Splitting and joining"
+
               - file: user-guide/how-to-filter
                 title: "Filtering data"
                 subtrees:
