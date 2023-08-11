@@ -133,7 +133,7 @@ def _impl(array, counts, axis, highlevel, behavior):
             if (
                 counts is not unknown_length
                 and layout.length is not unknown_length
-                and not 0 <= counts < layout.length
+                and not 0 <= counts <= layout.length
             ):
                 raise ValueError("too large counts for array or negative counts")
             out = ak.contents.RegularArray(layout, counts)

@@ -1021,9 +1021,7 @@ class Content:
                 ](index.data, target, self.length)
             )
 
-        return ak.contents.IndexedOptionArray.simplified(
-            index, self, parameters=self._parameters
-        )
+        return ak.contents.IndexedOptionArray.simplified(index, self)
 
     def _pad_none(self, target: int, axis: int, depth: int, clip: bool) -> Content:
         raise NotImplementedError

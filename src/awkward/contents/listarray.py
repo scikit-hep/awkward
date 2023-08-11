@@ -1424,11 +1424,15 @@ class ListArray(Content):
                     )
 
                     index = ak.index.Index64.empty(tolength, self._backend.index_nplike)
-                    starts_ = ak.index.Index64.empty(
-                        self._starts.length, self._backend.index_nplike
+                    starts_ = ak.index.Index.empty(
+                        self._starts.length,
+                        self._backend.index_nplike,
+                        dtype=self._starts.dtype,
                     )
-                    stops_ = ak.index.Index64.empty(
-                        self._stops.length, self._backend.index_nplike
+                    stops_ = ak.index.Index.empty(
+                        self._stops.length,
+                        self._backend.index_nplike,
+                        dtype=self._stops.dtype,
                     )
                     assert (
                         index.nplike is self._backend.index_nplike
