@@ -6,9 +6,9 @@ import awkward as ak
 
 
 def test_string():
-    source = ak.Array(["$", "¢", "€", "💰"])
+    source = ak.Array(["abc$¢€", "d¢#", "€e¢", "💰💰"])
     result = source.to_numpy(False)
-    expected = np.array(["$", "¢", "€", "💰"])
+    expected = np.array(["abc$¢€", "d¢#", "€e¢", "💰💰"])
     assert result.dtype == expected.dtype
     np.testing.assert_equal(result, expected)
 
