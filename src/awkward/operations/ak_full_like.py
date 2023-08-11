@@ -12,7 +12,7 @@ from awkward.operations.ak_zeros_like import _ZEROS
 np = NumpyMetadata.instance()
 
 
-@high_level_function
+@high_level_function()
 def full_like(
     array,
     fill_value,

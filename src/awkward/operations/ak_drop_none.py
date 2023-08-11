@@ -2,15 +2,15 @@
 __all__ = ("drop_none",)
 import awkward as ak
 from awkward._dispatch import high_level_function
-from awkward._errors import AxisError
 from awkward._layout import maybe_posaxis, wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
+from awkward.errors import AxisError
 
 np = NumpyMetadata.instance()
 
 
-@high_level_function
+@high_level_function()
 def drop_none(array, axis=None, highlevel=True, behavior=None):
     """
     Args:

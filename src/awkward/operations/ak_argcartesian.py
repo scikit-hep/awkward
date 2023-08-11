@@ -15,7 +15,7 @@ np = NumpyMetadata.instance()
 cpu = NumpyBackend.instance()
 
 
-@high_level_function
+@high_level_function()
 def argcartesian(
     arrays,
     axis=1,

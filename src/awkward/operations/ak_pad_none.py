@@ -9,7 +9,7 @@ from awkward._regularize import regularize_axis
 np = NumpyMetadata.instance()
 
 
-@high_level_function
+@high_level_function()
 def pad_none(array, target, axis=1, *, clip=False, highlevel=True, behavior=None):
     """
     Args:

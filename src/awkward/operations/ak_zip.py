@@ -11,7 +11,7 @@ from awkward._nplikes.numpylike import NumpyMetadata
 np = NumpyMetadata.instance()
 
 
-@high_level_function
+@high_level_function()
 def zip(
     arrays,
     depth_limit=None,
@@ -213,14 +213,7 @@ def _impl(
         parameters["__record__"] = with_name
 
     def action(inputs, depth, **ignore):
-        if depth_limit == depth or all(
-            x.purelist_depth == 1
-            or (
-                x.purelist_depth == 2
-                and x.purelist_parameter("__array__") in ("string", "bytestring")
-            )
-            for x in inputs
-        ):
+        if depth_limit == depth or all(x.purelist_depth == 1 for x in inputs):
             # If we want to zip after option types at this depth
             if optiontype_outside_record and any(x.is_option for x in inputs):
                 return None

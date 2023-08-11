@@ -173,7 +173,7 @@ AttributeError: no field named 'distance'
 ```
 
 To add `distance` as a method on arrays of points, create a subclass of
-{class}`ak.Array` and attach that as `ak.behavior[".", "point"]` for
+{class}`ak.Array` and attach that as `ak.behavior["*", "point"]` for
 "array of points."
 
 ```python
@@ -181,7 +181,7 @@ class PointArray(ak.Array):
     def distance(self, other):
         return np.sqrt((self.x - other.x)**2 + (self.y - other.y)**2)
 
-ak.behavior[".", "point"] = PointArray
+ak.behavior["*", "point"] = PointArray
 ```
 
 Now `one[0]` is a `PointArray` and can compute `distance` on arrays at a
@@ -197,20 +197,17 @@ once and used by both `Point` and `PointArray`).
 <Array [0.141, 0, 0.316] type='3 * float64'>
 ```
 
-But `one` itself is an `Array` of `PointArrays`, and does not apply.
+`one` itself is also a `PointArray`, and the same applies.
 
 ```python
 >>> one
 <Array [[{x: 1, y: 1.1}, ... x: 9, y: 9.9}]] type='5 * var * point["x": int64, "...'>
 >>> one.distance(two)
-AttributeError: no field named 'distance'
-```
-
-We can make the assignment work at all levels of list-depth by using a `"*"`
-instead of a `"."`.
-
-```python
-ak.behavior["*", "point"] = PointArray
+[[0.141, 0, 0.316],
+ [],
+ [0.412, 0],
+ [0.608],
+ [0.707, 0, 0.906]]
 ```
 
 One last caveat: our `one` array was created *before* this behavior was

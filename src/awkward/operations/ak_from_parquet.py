@@ -6,7 +6,7 @@ from awkward._layout import wrap_layout
 from awkward._regularize import is_integer
 
 
-@high_level_function
+@high_level_function()
 def from_parquet(
     path,
     *,
@@ -76,7 +76,7 @@ def from_parquet(
     )
 
 
-@high_level_function
+@high_level_function()
 def metadata(
     path,
     storage_options=None,
@@ -166,7 +166,7 @@ def metadata(
         actual_paths = []
         for select in row_groups:
             path = rgs_path[select]
-            path2 = [_ for _ in all_paths if _.endswith(path)][0]
+            path2 = next(_ for _ in all_paths if _.endswith(path))
             if path2 not in actual_paths:
                 actual_paths.append(path2)
                 subrg.append([path_rgs[path].index(select)])

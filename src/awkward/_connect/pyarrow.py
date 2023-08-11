@@ -1,7 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+from __future__ import annotations
 
 import json
 from collections.abc import Iterable, Sized
+from types import ModuleType
 
 from packaging.version import parse as parse_version
 
@@ -36,13 +38,13 @@ else:
         error_message = "pyarrow 7.0.0 or later required for {0}"
 
 
-def import_pyarrow(name):
+def import_pyarrow(name: str) -> ModuleType:
     if pyarrow is None:
         raise ImportError(error_message.format(name))
     return pyarrow
 
 
-def import_pyarrow_parquet(name):
+def import_pyarrow_parquet(name: str) -> ModuleType:
     if pyarrow is None:
         raise ImportError(error_message.format(name))
 
@@ -51,7 +53,16 @@ def import_pyarrow_parquet(name):
     return out
 
 
-def import_fsspec(name):
+def import_pyarrow_compute(name: str) -> ModuleType:
+    if pyarrow is None:
+        raise ImportError(error_message.format(name))
+
+    import pyarrow.compute as out
+
+    return out
+
+
+def import_fsspec(name: str) -> ModuleType:
     try:
         import fsspec
 

@@ -11,7 +11,7 @@ np = NumpyMetadata.instance()
 _ZEROS = object()
 
 
-@high_level_function
+@high_level_function()
 def zeros_like(
     array, *, dtype=None, including_unknown=False, highlevel=True, behavior=None
 ):

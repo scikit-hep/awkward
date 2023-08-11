@@ -10,7 +10,7 @@ from awkward._layout import wrap_layout
 cpu = NumpyBackend.instance()
 
 
-@high_level_function
+@high_level_function()
 def broadcast_fields(*arrays, highlevel=True, behavior=None):
     """
     Args:

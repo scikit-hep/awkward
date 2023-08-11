@@ -128,3 +128,18 @@ class EmptyForm(Form):
 
     def _length_one_buffer_lengths(self) -> Iterator[ShapeItem]:
         yield 0
+
+    def __setstate__(self, state):
+        if isinstance(state, dict):
+            # read data pickled in Awkward 2.x
+            self.__dict__.update(state)
+        else:
+            # read data pickled in Awkward 1.x
+
+            # https://github.com/scikit-hep/awkward/blob/main-v1/src/python/forms.cpp#L240-L244
+            has_identities, parameters, form_key = state
+
+            if form_key is not None:
+                form_key = "part0-" + form_key  # only the first partition
+
+            self.__init__(form_key=form_key)

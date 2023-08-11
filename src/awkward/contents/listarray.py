@@ -1357,9 +1357,7 @@ class ListArray(Content):
                     errors="surrogateescape"
                 ).lstrip("\n").lstrip("(")
             message = error.str.decode(errors="surrogateescape")
-            return 'at {} ("{}"): {} at i={}{}'.format(
-                path, type(self), message, error.id, filename
-            )
+            return f'at {path} ("{type(self)}"): {message} at i={error.id}{filename}'
         else:
             return self._content._validity_error(path + ".content")
 
@@ -1426,11 +1424,15 @@ class ListArray(Content):
                     )
 
                     index = ak.index.Index64.empty(tolength, self._backend.index_nplike)
-                    starts_ = ak.index.Index64.empty(
-                        self._starts.length, self._backend.index_nplike
+                    starts_ = ak.index.Index.empty(
+                        self._starts.length,
+                        self._backend.index_nplike,
+                        dtype=self._starts.dtype,
                     )
-                    stops_ = ak.index.Index64.empty(
-                        self._stops.length, self._backend.index_nplike
+                    stops_ = ak.index.Index.empty(
+                        self._stops.length,
+                        self._backend.index_nplike,
+                        dtype=self._stops.dtype,
                     )
                     assert (
                         index.nplike is self._backend.index_nplike
@@ -1486,9 +1488,9 @@ class ListArray(Content):
     def _to_backend_array(self, allow_missing, backend):
         array_param = self.parameter("__array__")
         if array_param in {"bytestring", "string"}:
-            # As our array-of-strings _may_ be empty, we should pass the dtype
-            dtype = np.str_ if array_param == "string" else np.bytes_
-            return backend.nplike.asarray(self.to_list(), dtype=dtype)
+            return self.to_ListOffsetArray64(False)._to_backend_array(
+                allow_missing, backend
+            )
         else:
             return self.to_RegularArray()._to_backend_array(allow_missing, backend)
 

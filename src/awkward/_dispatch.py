@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from collections.abc import Callable, Collection, Generator
 from functools import wraps
 from inspect import isgenerator
@@ -10,13 +12,28 @@ DispatcherType: TypeAlias = "Callable[..., Generator[Collection[Any], None, T]]"
 HighLevelType: TypeAlias = "Callable[..., T]"
 
 
-def high_level_function(func: DispatcherType) -> HighLevelType:
+def high_level_function(
+    module: str = "ak", name: str | None = None
+) -> Callable[[DispatcherType], HighLevelType]:
     """Decorate a high-level function such that it may be overloaded by third-party array objects"""
+
+    def capture_func(func: DispatcherType) -> HighLevelType:
+        if name is None:
+            captured_name = func.__qualname__
+        else:
+            captured_name = name
+        return named_high_level_function(func, f"{module}.{captured_name}")
+
+    return capture_func
+
+
+def named_high_level_function(func: DispatcherType, name: str) -> HighLevelType:
+    """Decorate a named high-level function such that it may be overloaded by third-party array objects"""
 
     @wraps(func)
     def dispatch(*args, **kwargs):
         # NOTE: this decorator assumes that the operation is exposed under `ak.`
-        with OperationErrorContext(f"ak.{func.__qualname__}", args, kwargs):
+        with OperationErrorContext(name, args, kwargs):
             gen_or_result = func(*args, **kwargs)
             if isgenerator(gen_or_result):
                 array_likes = next(gen_or_result)

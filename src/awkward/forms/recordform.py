@@ -6,6 +6,7 @@ from awkward._parameters import type_parameters_equal
 from awkward._regularize import is_integer
 from awkward._typing import JSONSerializable, final
 from awkward._util import UNSET
+from awkward.errors import FieldNotFoundError
 from awkward.forms.form import Form
 
 
@@ -36,9 +37,7 @@ class RecordForm(Form):
                 )
         if fields is not None and not isinstance(fields, Iterable):
             raise TypeError(
-                "{} 'fields' must be iterable, not {}".format(
-                    type(self).__name__, repr(contents)
-                )
+                f"{type(self).__name__} 'fields' must be iterable, not {contents!r}"
             )
 
         self._fields = None if fields is None else list(fields)
@@ -98,9 +97,7 @@ class RecordForm(Form):
                 return self._fields[index]
         else:
             raise IndexError(
-                "no index {} in record with {} fields".format(
-                    index, len(self._contents)
-                )
+                f"no index {index} in record with {len(self._contents)} fields"
             )
 
     def field_to_index(self, field):
@@ -119,10 +116,8 @@ class RecordForm(Form):
                 pass
             else:
                 return i
-        raise ak._errors.FieldNotFoundError(
-            "no field {} in record with {} fields".format(
-                repr(field), len(self._contents)
-            )
+        raise FieldNotFoundError(
+            f"no field {field!r} in record with {len(self._contents)} fields"
         )
 
     def has_field(self, field):
@@ -289,3 +284,20 @@ class RecordForm(Form):
 
     def _column_types(self):
         return sum((x._column_types() for x in self._contents), ())
+
+    def __setstate__(self, state):
+        if isinstance(state, dict):
+            # read data pickled in Awkward 2.x
+            self.__dict__.update(state)
+        else:
+            # read data pickled in Awkward 1.x
+
+            # https://github.com/scikit-hep/awkward/blob/main-v1/src/python/forms.cpp#L624-L643
+            has_identities, parameters, form_key, recordlookup, contents = state
+
+            if form_key is not None:
+                form_key = "part0-" + form_key  # only the first partition
+
+            self.__init__(
+                contents, recordlookup, parameters=parameters, form_key=form_key
+            )

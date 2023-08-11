@@ -13,7 +13,7 @@ np = NumpyMetadata.instance()
 cpu = NumpyBackend.instance()
 
 
-@high_level_function
+@high_level_function()
 def broadcast_arrays(
     *arrays,
     depth_limit=None,

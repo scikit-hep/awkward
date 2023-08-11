@@ -22,9 +22,7 @@ class BitMaskedForm(Form):
     ):
         if not isinstance(mask, str):
             raise TypeError(
-                "{} 'mask' must be of type str, not {}".format(
-                    type(self).__name__, repr(mask)
-                )
+                f"{type(self).__name__} 'mask' must be of type str, not {mask!r}"
             )
         if not isinstance(content, Form):
             raise TypeError(
@@ -40,9 +38,7 @@ class BitMaskedForm(Form):
             )
         if not isinstance(lsb_order, bool):
             raise TypeError(
-                "{} 'lsb_order' must be bool, not {}".format(
-                    type(self).__name__, repr(lsb_order)
-                )
+                f"{type(self).__name__} 'lsb_order' must be bool, not {lsb_order!r}"
             )
 
         self._mask = mask
@@ -225,3 +221,33 @@ class BitMaskedForm(Form):
 
     def _column_types(self):
         return self._content._column_types()
+
+    def __setstate__(self, state):
+        if isinstance(state, dict):
+            # read data pickled in Awkward 2.x
+            self.__dict__.update(state)
+        else:
+            # read data pickled in Awkward 1.x
+
+            # https://github.com/scikit-hep/awkward/blob/main-v1/src/python/forms.cpp#L155-L163
+            (
+                has_identities,
+                parameters,
+                form_key,
+                mask,
+                content,
+                valid_when,
+                lsb_order,
+            ) = state
+
+            if form_key is not None:
+                form_key = "part0-" + form_key  # only the first partition
+
+            self.__init__(
+                mask,
+                content,
+                valid_when,
+                lsb_order,
+                parameters=parameters,
+                form_key=form_key,
+            )

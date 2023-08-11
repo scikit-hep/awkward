@@ -12,7 +12,7 @@ from awkward.operations.ak_to_layout import to_layout
 np = NumpyMetadata.instance()
 
 
-@high_level_function
+@high_level_function()
 def almost_equal(
     left,
     right,

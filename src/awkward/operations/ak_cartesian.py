@@ -7,16 +7,16 @@ from awkward._backends.dispatch import backend_of
 from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of
 from awkward._dispatch import high_level_function
-from awkward._errors import AxisError
 from awkward._layout import maybe_posaxis, wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
+from awkward.errors import AxisError
 
 np = NumpyMetadata.instance()
 cpu = NumpyBackend.instance()
 
 
-@high_level_function
+@high_level_function()
 def cartesian(
     arrays,
     axis=1,

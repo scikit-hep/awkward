@@ -17,7 +17,7 @@ np = NumpyMetadata.instance()
 numpy = Numpy.instance()
 
 
-@high_level_function
+@high_level_function()
 def to_json(
     array,
     file=None,

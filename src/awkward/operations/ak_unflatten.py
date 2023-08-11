@@ -12,7 +12,7 @@ from awkward._regularize import is_integer_like, regularize_axis
 np = NumpyMetadata.instance()
 
 
-@high_level_function
+@high_level_function()
 def unflatten(array, counts, axis=0, *, highlevel=True, behavior=None):
     """
     Args:
@@ -133,7 +133,7 @@ def _impl(array, counts, axis, highlevel, behavior):
             if (
                 counts is not unknown_length
                 and layout.length is not unknown_length
-                and not 0 <= counts < layout.length
+                and not 0 <= counts <= layout.length
             ):
                 raise ValueError("too large counts for array or negative counts")
             out = ak.contents.RegularArray(layout, counts)

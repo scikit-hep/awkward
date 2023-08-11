@@ -220,3 +220,67 @@ class NumpyForm(Form):
 
     def _column_types(self):
         return (ak.types.numpytype.primitive_to_dtype(self._primitive),)
+
+    def __setstate__(self, state):
+        if isinstance(state, dict):
+            # read data pickled in Awkward 2.x
+            self.__dict__.update(state)
+        else:
+            # read data pickled in Awkward 1.x
+
+            # https://github.com/scikit-hep/awkward/blob/main-v1/src/python/forms.cpp#L530-L537
+            has_identities, parameters, form_key, inner_shape, itemsize, format = state
+
+            # https://github.com/scikit-hep/awkward/blob/main-v1/src/libawkward/util.cpp#L131-L145
+            format = format.lstrip("<").lstrip(">").lstrip("=")
+
+            # https://github.com/scikit-hep/awkward/blob/main-v1/src/libawkward/util.cpp#L147-L222
+            if format == "?":
+                dtype = np.dtype(np.bool_)
+            elif format in ("b", "h", "i", "l", "q"):
+                if itemsize == 1:
+                    dtype = np.dtype(np.int8)
+                elif itemsize == 2:
+                    dtype = np.dtype(np.int16)
+                elif itemsize == 4:
+                    dtype = np.dtype(np.int32)
+                elif itemsize == 8:
+                    dtype = np.dtype(np.int64)
+                else:
+                    raise AssertionError(format)
+            elif format in ("c", "B", "H", "I", "L", "Q"):
+                if itemsize == 1:
+                    dtype = np.dtype(np.uint8)
+                elif itemsize == 2:
+                    dtype = np.dtype(np.uint16)
+                elif itemsize == 4:
+                    dtype = np.dtype(np.uint32)
+                elif itemsize == 8:
+                    dtype = np.dtype(np.uint64)
+                else:
+                    raise AssertionError(format)
+            elif format == "e":
+                dtype = np.dtype(np.float16)
+            elif format == "f":
+                dtype = np.dtype(np.float32)
+            elif format == "d":
+                dtype = np.dtype(np.float64)
+            elif format == "g":
+                dtype = np.dtype(np.float128)
+            elif format == "Zf":
+                dtype = np.dtype(np.complex64)
+            elif format == "Zd":
+                dtype = np.dtype(np.complex128)
+            elif format == "Zg":
+                dtype = np.dtype(np.complex256)
+            else:
+                dtype = np.dtype(format)  # datetime or timedelta with units
+
+            primitive = ak.types.numpytype.dtype_to_primitive(dtype)
+
+            if form_key is not None:
+                form_key = "part0-" + form_key  # only the first partition
+
+            self.__init__(
+                primitive, inner_shape, parameters=parameters, form_key=form_key
+            )

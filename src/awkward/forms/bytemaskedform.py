@@ -21,9 +21,7 @@ class ByteMaskedForm(Form):
     ):
         if not isinstance(mask, str):
             raise TypeError(
-                "{} 'mask' must be of type str, not {}".format(
-                    type(self).__name__, repr(mask)
-                )
+                f"{type(self).__name__} 'mask' must be of type str, not {mask!r}"
             )
         if not isinstance(content, Form):
             raise TypeError(
@@ -200,3 +198,20 @@ class ByteMaskedForm(Form):
 
     def _column_types(self):
         return self._content._column_types()
+
+    def __setstate__(self, state):
+        if isinstance(state, dict):
+            # read data pickled in Awkward 2.x
+            self.__dict__.update(state)
+        else:
+            # read data pickled in Awkward 1.x
+
+            # https://github.com/scikit-hep/awkward/blob/main-v1/src/python/forms.cpp#L206-L213
+            has_identities, parameters, form_key, mask, content, valid_when = state
+
+            if form_key is not None:
+                form_key = "part0-" + form_key  # only the first partition
+
+            self.__init__(
+                mask, content, valid_when, parameters=parameters, form_key=form_key
+            )

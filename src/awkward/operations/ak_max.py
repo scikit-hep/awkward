@@ -11,7 +11,7 @@ from awkward._regularize import regularize_axis
 np = NumpyMetadata.instance()
 
 
-@high_level_function
+@high_level_function()
 def max(
     array,
     axis=None,
@@ -76,7 +76,7 @@ def max(
     )
 
 
-@high_level_function
+@high_level_function()
 def nanmax(
     array,
     axis=None,

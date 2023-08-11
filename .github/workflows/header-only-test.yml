@@ -2,9 +2,6 @@ name: Header-only Tests
 
 on:
   pull_request:
-    # paths:
-      # - 'header-only'
-
   workflow_dispatch:
 
 

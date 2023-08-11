@@ -13,15 +13,16 @@ import awkward.contents
 import awkward.record
 import awkward.types
 import awkward.forms
+
+# internal
 import awkward._do
 import awkward._slicing
 import awkward._broadcasting
 import awkward._reducers
-
-# internal
 import awkward._util
 import awkward._errors
 import awkward._lookup
+import awkward._ext  # strictly for unpickling from Awkward 1
 
 # third-party connectors
 import awkward._connect.numpy
@@ -43,6 +44,9 @@ from awkward.behaviors.mixins import *
 # exports
 import awkward.builder
 import awkward.forth
+
+# errors
+import awkward.errors
 
 behavior: dict = {}
 

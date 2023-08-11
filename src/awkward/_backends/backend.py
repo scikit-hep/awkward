@@ -14,7 +14,7 @@ np = NumpyMetadata.instance()
 numpy = Numpy.instance()
 
 
-T = TypeVar("T", covariant=True)
+T_co = TypeVar("T_co", covariant=True)
 KernelKeyType: TypeAlias = Tuple[str, Unpack[Tuple[np.dtype, ...]]]
 KernelType: TypeAlias = "Callable[..., KernelError | None]"
 
