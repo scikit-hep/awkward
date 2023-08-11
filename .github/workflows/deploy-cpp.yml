@@ -54,7 +54,7 @@ jobs:
 
   build_wheels:
     needs: [determine-source-date-epoch]
-    name: "Wheel: ${{ matrix.type }} ${{ matrix.arch }} on ${{ matrix.os }}"
+    name: "Wheel: ${{ matrix.type }} ${{ matrix.arch }} on ${{ matrix.os }} with ${{ matrix.build }}"
     runs-on: ${{ matrix.os }}
     env:
       SOURCE_DATE_EPOCH: ${{ needs.determine-source-date-epoch.outputs.source-date-epoch }}
@@ -63,6 +63,8 @@ jobs:
         os: [ubuntu-latest, macos-latest]
         arch: [auto64]
         build: ["cp*", "pp*"]
+        exclude:
+        - build: "cp312-*"   # not supported by NumPy
 
         include:
         - os: macos-latest
