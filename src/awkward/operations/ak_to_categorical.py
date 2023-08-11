@@ -4,6 +4,7 @@ import awkward as ak
 from awkward._behavior import behavior_of
 from awkward._categorical import as_hashable
 from awkward._dispatch import high_level_function
+from awkward._errors import deprecate
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
@@ -92,6 +93,11 @@ def to_categorical(array, *, highlevel=True, behavior=None):
 
 
 def _impl(array, highlevel, behavior):
+    deprecate(
+        "The general purpose `ak.to_categorical` has been replaced by `ak.str.to_categorical`",
+        "2.5.0",
+    )
+
     def action(layout, **kwargs):
         if layout.purelist_depth == 1:
             if layout.is_indexed and layout.is_option:
