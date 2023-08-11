@@ -20,27 +20,27 @@ Awkward Array implements support for ragged strings as ragged lists of [code-uni
 Let's imagine that we want to read some logging output that is stored in a text file. For example, [a subset of logs from the Android Application framework](https://zenodo.org/record/8196385).
 
 ```{code-cell} ipython3
-%%bash --out path
-pushd $(mktemp -d) >/dev/null 2>&1
-wget https://zenodo.org/record/8196385/files/Android_v1.zip >/dev/null 2>&1
-unzip Android_v1.zip >/dev/null 2>&1
-realpath Android.log
+import gzip
+import itertools
+import pathlib
+
+# Preview logs
+log_path = pathlib.Path("..", "samples", "Android.head.log.gz")
+with gzip.open(log_path, "rt") as f:
+    for line in itertools.islice(f, 8):
+        print(line, end="")
 ```
 
-What do these logs look like?
-
-```{code-cell} ipython3
-!head {path}
-```
-
-To begin with, we can open these logs as an array of {data}`np.uint8` dtype using NumPy, and convert the resulting array to an Awkward Array
+To begin with, we can read the decompressed log-files as an array of {data}`np.uint8` dtype using NumPy, and convert the resulting array to an Awkward Array
 
 ```{code-cell} ipython3
 import awkward as ak
 import numpy as np
 
-with open(path.strip(), "rb") as f:
-    arr = np.fromfile(f, dtype=np.uint8)
+with gzip.open(log_path, "rb") as f:
+    # `gzip.open` doesn't return a true file descriptor that NumPy can ingest
+    # So, instead we read into memory.
+    arr = np.frombuffer(f.read(), dtype=np.uint8)
 
 raw_bytes = ak.from_numpy(arr)
 raw_bytes.type.show()
