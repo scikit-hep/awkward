@@ -62,9 +62,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest]
         arch: [auto64]
-        build: ["cp*", "pp*"]
-        exclude:
-        - build: "cp312-*"   # not supported by NumPy
+        build: ["cp{38,39,310,311}-*", "pp*"]
 
         include:
         - os: macos-latest
