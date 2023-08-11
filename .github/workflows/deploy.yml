@@ -112,7 +112,7 @@ jobs:
         name: distributions
         path: dist
 
-    - uses: pypa/gh-action-pypi-publish@v1.8.8
+    - uses: pypa/gh-action-pypi-publish@v1.8.9
 
   publish-headers:
     name: "Publish header-only libraries alongside release"
