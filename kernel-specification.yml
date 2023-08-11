@@ -3357,6 +3357,50 @@ kernels:
     automatic-tests: false
     manual-tests: []
 
+  - name: awkward_NumpyArray_prepare_utf8_to_utf32_padded
+    specializations:
+      - name: awkward_NumpyArray_prepare_utf8_to_utf32_padded
+        args:
+          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: default}
+          - {name: fromoffsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: outmaxcodepoints, type: "List[int64_t]", dir: out}
+    description: null
+    definition: |
+      Insert Python definition here
+    automatic-tests: false
+    manual-tests: []
+
+  - name: awkward_NumpyArray_utf8_to_utf32_padded
+    specializations:
+      - name: awkward_NumpyArray_utf8_to_utf32_padded
+        args:
+          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: default}
+          - {name: fromoffsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: maxcodepoints, type: "int64_t", dir: in,  role: default}
+          - {name: toptr, type: "List[uint32_t]", dir: out}
+    description: null
+    definition: |
+      Insert Python definition here
+    automatic-tests: false
+    manual-tests: []
+
+  - name: awkward_NumpyArray_pad_zero_to_length
+    specializations:
+      - name: awkward_NumpyArray_pad_zero_to_length_uint8
+        args:
+          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: default}
+          - {name: fromoffsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: target, type: "int64_t", dir: in,  role: default}
+          - {name: toptr, type: "List[uint8_t]", dir: out}
+    description: null
+    definition: |
+      Insert Python definition here
+    automatic-tests: false
+    manual-tests: []
+
   - name: awkward_NumpyArray_subrange_equal
     specializations:
       - name: awkward_NumpyArray_subrange_equal_bool
