@@ -49,7 +49,7 @@ jobs:
     runs-on: windows-2019
 
     env:
-      PIP_ONLY_BINARY: cmake,numpy
+      PIP_ONLY_BINARY: cmake,numpy,pandas
       PIP_PRE: "1"
 
     steps:
