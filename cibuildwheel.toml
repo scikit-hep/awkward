@@ -15,11 +15,11 @@ test-skip = [
     "pp*",
     "*musllinux*",
 ]
-manylinux-x86_64-image = "manylinux2014"
 build-verbosity = 1
-overrides = [
-    { select = "cp3?-*", manylinux-x86_64-image = "manylinux2014" },
-]
 
 [tool.cibuildwheel.environment]
 PIP_ONLY_BINARY = "cmake,numpy"
+
+[[tool.cibuildwheel.overrides]]
+select = "cp312-*"
+environment.PIP_PRE = "1"

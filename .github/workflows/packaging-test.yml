@@ -67,7 +67,7 @@ jobs:
     - uses: pypa/cibuildwheel@v2.15.0
       if: matrix.os == 'ubuntu-latest'
       env:
-        CIBW_BUILD: cp311-manylinux_x86_64
+        CIBW_BUILD: cp312-manylinux_x86_64
       with:
         config-file: cibuildwheel.toml
         package-dir: awkward-cpp
