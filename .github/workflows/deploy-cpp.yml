@@ -62,17 +62,17 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest]
         arch: [auto64]
-        build: ["cp{38,39,310,311}-*", "pp*"]
+        build: ["cp*", "pp*"]
 
         include:
         - os: macos-latest
           type: "Universal"
           arch: universal2
-          build: "cp{38,39,310,311}-*"
+          build: "cp*"
 
         - os: windows-latest
           arch: auto64
-          build: "cp{38,39,310,311}-*"
+          build: "cp*"
 
         - os: windows-latest
           arch: auto32
