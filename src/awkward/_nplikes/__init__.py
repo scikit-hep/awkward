@@ -30,7 +30,9 @@ def to_nplike(
         )
 
     # Copy to host memory
-    if isinstance(from_nplike, awkward._nplikes.cupy.Cupy):
+    if isinstance(from_nplike, awkward._nplikes.cupy.Cupy) and not isinstance(
+        nplike, awkward._nplikes.cupy.Cupy
+    ):
         array = array.get()
 
     return nplike.asarray(array)
