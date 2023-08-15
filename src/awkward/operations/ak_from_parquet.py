@@ -218,13 +218,8 @@ def _load(
             )
         )
 
-    if len(arrays) == 0:
-        return wrap_layout(
-            subform.length_zero_array(highlevel=False),
-            highlevel=highlevel,
-            behavior=behavior,
-        )
-    elif len(arrays) == 1:
+    assert len(arrays) != 0
+    if len(arrays) == 1:
         # make high-level
         if isinstance(arrays[0], ak.record.Record):
             return ak.Record(arrays[0])
