@@ -4,7 +4,6 @@ from __future__ import annotations
 __all__ = ("DLPackDevice", "get_layout_device", "to_dlpack")
 from enum import IntEnum
 
-from awkward._do import recursively_apply
 from awkward._typing import Any
 from awkward.contents import Content
 
@@ -23,27 +22,18 @@ class DLPackDevice(IntEnum):
 
 
 def get_layout_device(layout: Content) -> tuple[int, int]:
-    device: tuple[int, int] | None = None
-
-    def apply(layout, **kwargs):
-        nonlocal device
+    while True:
         if layout.is_numpy:
-            device = layout.data.__dlpack_device__()
+            break
+        elif layout.is_regular:
+            layout = layout.content
+        else:
+            raise TypeError(
+                "Cannot determine the DLPack device for this array layout."
+                "DLPack is only supported for regular arrays."
+            )
 
-    recursively_apply(
-        layout,
-        apply,
-        return_simplified=False,
-        numpy_to_regular=False,
-        return_array=False,
-    )
-
-    if device is None:
-        raise TypeError(
-            "Cannot determine the DLPack device for an array "
-            "without any NumpyArray layout nodes"
-        )
-    return device
+    return layout.data.__dlpack_device__()
 
 
 def to_dlpack(layout: Content, stream: Any = None) -> Any:
