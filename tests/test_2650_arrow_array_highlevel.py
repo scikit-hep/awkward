@@ -6,6 +6,7 @@ import pytest
 import awkward as ak
 
 pyarrow = pytest.importorskip("pyarrow")
+pyarrow_types = pytest.importorskip("pyarrow.types")
 
 
 def test():
@@ -21,3 +22,12 @@ def test():
     arrow_array = pyarrow.array(array)
 
     assert arrow_array.tolist() == array.to_list()
+
+
+def test_type():
+    array = ak.mask(np.array([1, 2, 3], dtype=np.uint8), [True, False, False])
+    arrow_array = pyarrow.array(array, type=pyarrow.float64())
+    assert pyarrow_types.is_float64(arrow_array.type)
+
+    arrow_array = pyarrow.array(array)
+    assert pyarrow_types.is_uint8(arrow_array.type)
