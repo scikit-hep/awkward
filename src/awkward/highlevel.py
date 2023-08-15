@@ -1325,6 +1325,14 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         with ak._errors.OperationErrorContext("numpy.asarray", (self, *args), kwargs):
             return ak._connect.numpy.convert_to_array(self._layout, args, kwargs)
 
+    def __arrow_array__(self, *args, **kwargs):
+        with ak._errors.OperationErrorContext(
+            f"{type(self).__name__}.__arrow_array__", (self, *args), kwargs
+        ):
+            from awkward._connect.pyarrow import convert_to_array
+
+            return convert_to_array(self._layout, args, kwargs)
+
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         """
         Intercepts attempts to pass this Array to a NumPy
@@ -2416,6 +2424,14 @@ class ArrayBuilder(Sized):
         """
         with ak._errors.OperationErrorContext("numpy.asarray", (self, *args), kwargs):
             return ak._connect.numpy.convert_to_array(self.snapshot(), args, kwargs)
+
+    def __arrow_array__(self, *args, **kwargs):
+        with ak._errors.OperationErrorContext(
+            f"{type(self).__name__}.__arrow_array__", (self, *args), kwargs
+        ):
+            from awkward._connect.pyarrow import convert_to_array
+
+            return convert_to_array(self.snapshot(), args, kwargs)
 
     @property
     def numba_type(self):
