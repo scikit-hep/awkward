@@ -193,7 +193,6 @@ jobs:
           - python-version: '3.8'
             numpy-package: "numpy==1.18.0"
             pyarrow-package: "pyarrow"
-        include:
           - python-version: '3.8'
             numpy-package: "numpy"
             pyarrow-package: "pyarrow==7.0.0"
