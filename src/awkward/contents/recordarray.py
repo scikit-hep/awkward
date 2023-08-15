@@ -1115,6 +1115,13 @@ class RecordArray(Content):
         contents = [x._to_backend_array(allow_missing, backend) for x in self._contents]
         if any(len(x.shape) != 1 for x in contents):
             raise ValueError(f"cannot convert {self} into np.ndarray")
+
+        if not backend.nplike.supports_structured_dtypes:
+            raise TypeError(
+                f"backend {backend.name!r} does not support structured "
+                f"dtypes required for converting {type(self).__name__} "
+                f"into a backend array"
+            )
         out = backend.nplike.empty(
             self.length,
             dtype=[(str(n), x.dtype) for n, x in zip(self.fields, contents)],

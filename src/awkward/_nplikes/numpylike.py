@@ -165,6 +165,12 @@ class ArrayLike(Protocol):
     def __invert__(self) -> Self:
         ...
 
+    def __dlpack_device__(self) -> tuple[int, int]:
+        ...
+
+    def __dlpack__(self, stream: Any = None) -> Any:
+        ...
+
 
 class NumpyMetadata(Singleton):
     bool_ = numpy.bool_
@@ -233,6 +239,11 @@ if hasattr(numpy, "timedelta64"):
 
 class NumpyLike(Singleton, Protocol):
     ############################ Awkward features
+
+    @property
+    @abstractmethod
+    def supports_structured_dtypes(self) -> bool:
+        ...
 
     @property
     @abstractmethod

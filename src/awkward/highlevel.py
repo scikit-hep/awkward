@@ -19,6 +19,7 @@ import awkward._connect.hist
 from awkward._backends.dispatch import register_backend_lookup_factory
 from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of, get_array_class, get_record_class
+from awkward._connect.dlpack import get_layout_device, to_dlpack
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
@@ -1313,6 +1314,15 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             array = ak.operations.to_numpy(self)
             return array.__array_interface__
 
+    def __dlpack_device__(self):
+        with ak._errors.OperationErrorContext(
+            f"{type(self).__name__}.__dlpack_device__", (self,), {}
+        ):
+            return get_layout_device(self._layout)
+
+    def __dlpack__(self, stream=None):
+        return to_dlpack(self._layout, stream)
+
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         """
         Intercepts attempts to pass this Array to a NumPy
@@ -2409,6 +2419,12 @@ class ArrayBuilder(Sized):
         ):
             array = ak.operations.to_numpy(self)
             return array.__array_interface__
+
+    def __dlpack_device__(self):
+        with ak._errors.OperationErrorContext(
+            f"{type(self).__name__}.__dlpack_device__", (self,), {}
+        ):
+            return get_layout_device(self.snapshot())
 
     @property
     def numba_type(self):

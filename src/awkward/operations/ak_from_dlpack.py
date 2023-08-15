@@ -1,25 +1,12 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("from_dlpack",)
-from enum import IntEnum
 
+from awkward._connect.dlpack import DLPackDevice
 from awkward._dispatch import high_level_function
 from awkward._layout import from_arraylib, wrap_layout
 from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyLike
-
-
-class DLPackDevice(IntEnum):
-    CPU = 1  # CPU
-    CUDA = 2  # GPU
-    CUDA_PINNED = 3  # GPU & CPU
-    OPENCL = 4  # UNSUPPORTED
-    VULKAN = 7  # UNSUPPORTED
-    METAL = 8  # UNSUPPORTED
-    VPI = 9  # UNSUPPORTED
-    ROCM = 10  # GPU
-    ROCM_PINNED = 11  # GPU & CPU
-    CUDA_MANAGED = 13  # GPU & CPU
 
 
 @high_level_function()
