@@ -46,6 +46,9 @@ def get_layout_device(layout: Content) -> tuple[int, int]:
     return device
 
 
-def to_dlpack(layout: Content, stream: Any) -> Any:
+def to_dlpack(layout: Content, stream: Any = None) -> Any:
     array = layout.to_backend_array(allow_missing=False)
-    return array.__dlpack__(stream)
+    if stream is None:
+        return array.__dlpack__()
+    else:
+        return array.__dlpack__(stream)
