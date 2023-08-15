@@ -101,17 +101,19 @@ def _impl(
     else:
         record_is_scalar = False
 
-    check = [layout]
-    while check[-1].is_option or check[-1].is_indexed:
-        check.append(check[-1].content)
+    wrapper_layouts = [layout]
+    while wrapper_layouts[-1].is_option or wrapper_layouts[-1].is_indexed:
+        wrapper_layouts.append(wrapper_layouts[-1].content)
 
     parameters = None
     paarrays, pafields = [], []
-    if check[-1].is_record and not check[-1].is_tuple:
+    if wrapper_layouts[-1].is_record and not wrapper_layouts[-1].is_tuple:
+        record_content = wrapper_layouts[-1]
         optiontype_fields = []
-        for name in check[-1].fields:
+        for name in record_content.fields:
+            outer_field_content = layout[name]
             paarrays.append(
-                layout[name].to_arrow(
+                outer_field_content.to_arrow(
                     list_to32=list_to32,
                     string_to32=string_to32,
                     bytestring_to32=bytestring_to32,
@@ -124,17 +126,20 @@ def _impl(
             )
             pafields.append(
                 pyarrow.field(name, paarrays[-1].type).with_nullable(
-                    layout[name].is_option
+                    outer_field_content.is_option
                 )
             )
-            if check[-1].contents[check[-1].field_to_index(name)].is_option:
+            if record_content.contents[record_content.field_to_index(name)].is_option:
                 optiontype_fields.append(name)
 
         parameters = [
             {"optiontype_fields": optiontype_fields},
             {"record_is_scalar": record_is_scalar},
         ]
-        for x in check:
+
+        # We build a table from the _contents_ of the record layout. Therefore,
+        # we must explicitly include the parameters of each layout above and including the record
+        for x in wrapper_layouts:
             parameters.append({direct_Content_subclass(x).__name__: x._parameters})
 
     else:
@@ -151,7 +156,9 @@ def _impl(
             )
         )
         pafields.append(
-            pyarrow.field("", paarrays[-1].type).with_nullable(layout.is_option)
+            pyarrow.field("", paarrays[-1].type).with_nullable(
+                layout.is_option or layout.is_identity_like
+            )
         )
 
     batch = pyarrow.RecordBatch.from_arrays(paarrays, schema=pyarrow.schema(pafields))
