@@ -14,7 +14,7 @@ from awkward._nplikes.numpylike import (
 )
 from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
-from awkward._typing import Final, Literal
+from awkward._typing import Any, Final, Literal
 
 np = NumpyMetadata.instance()
 
@@ -58,6 +58,9 @@ class ArrayModuleNumpyLike(NumpyLike):
         assert not isinstance(buffer, PlaceholderArray)
         assert not isinstance(count, PlaceholderArray)
         return self._module.frombuffer(buffer, dtype=dtype, count=count)
+
+    def from_dlpack(self, x: Any) -> ArrayLike:
+        return self._module.from_dlpack(x)
 
     def zeros(
         self, shape: int | tuple[int, ...], *, dtype: np.dtype | None = None

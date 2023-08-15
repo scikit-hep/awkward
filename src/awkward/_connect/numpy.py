@@ -30,14 +30,6 @@ from awkward.contents.numpyarray import NumpyArray
 UNSUPPORTED = Sentinel("UNSUPPORTED", __name__)
 
 
-def convert_to_array(layout, args, kwargs):
-    out = ak.operations.to_numpy(layout, allow_missing=False)
-    if args == () and kwargs == {}:
-        return out
-    else:
-        return numpy.array(out, *args, **kwargs)
-
-
 implemented = {}
 
 

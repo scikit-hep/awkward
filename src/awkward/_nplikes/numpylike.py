@@ -8,6 +8,7 @@ import numpy
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._singleton import Singleton
 from awkward._typing import (
+    Any,
     Literal,
     NamedTuple,
     Protocol,
@@ -263,6 +264,10 @@ class NumpyLike(Singleton, Protocol):
     def frombuffer(
         self, buffer, *, dtype: numpy.dtype | None = None, count: int = -1
     ) -> ArrayLike:
+        ...
+
+    @abstractmethod
+    def from_dlpack(self, x: Any) -> ArrayLike:
         ...
 
     @abstractmethod

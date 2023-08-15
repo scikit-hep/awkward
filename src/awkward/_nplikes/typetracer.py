@@ -652,6 +652,11 @@ class TypeTracer(NumpyLike):
             try_touch_data(x)
         raise NotImplementedError
 
+    def from_dlpack(self, x: Any) -> TypeTracerArray:
+        assert not isinstance(x, PlaceholderArray)
+        try_touch_data(x)
+        raise NotImplementedError
+
     def zeros(
         self, shape: ShapeItem | tuple[ShapeItem, ...], *, dtype: np.dtype | None = None
     ) -> TypeTracerArray:
