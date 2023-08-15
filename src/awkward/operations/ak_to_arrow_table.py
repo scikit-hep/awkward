@@ -1,10 +1,13 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+from __future__ import annotations
+
 __all__ = ("to_arrow_table",)
 import json
 
 import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._typing import Any
 
 np = NumpyMetadata.instance()
 
@@ -101,17 +104,21 @@ def _impl(
     else:
         record_is_scalar = False
 
-    check = [layout]
-    while check[-1].is_option or check[-1].is_indexed:
-        check.append(check[-1].content)
+    # If we're building a table from an array of records, we need to keep track
+    # of the "wrapper" layouts above the record
+    wrapper_layouts = [layout]
+    while wrapper_layouts[-1].is_option or wrapper_layouts[-1].is_indexed:
+        wrapper_layouts.append(wrapper_layouts[-1].content)
 
-    parameters = None
-    paarrays, pafields = [], []
-    if check[-1].is_record and not check[-1].is_tuple:
-        optiontype_fields = []
-        for name in check[-1].fields:
-            paarrays.append(
-                layout[name].to_arrow(
+    schema_parameters: list[dict[str, Any]] | None = None
+    arrow_arrays, arrow_fields = [], []
+    if wrapper_layouts[-1].is_record and not wrapper_layouts[-1].is_tuple:
+        record_content = wrapper_layouts[-1]
+        optiontype_fields: list[str] = []
+        for name in record_content.fields:
+            outer_field_content = layout[name]
+            arrow_arrays.append(
+                outer_field_content.to_arrow(
                     list_to32=list_to32,
                     string_to32=string_to32,
                     bytestring_to32=bytestring_to32,
@@ -122,23 +129,39 @@ def _impl(
                     record_is_scalar=record_is_scalar,
                 )
             )
-            pafields.append(
-                pyarrow.field(name, paarrays[-1].type).with_nullable(
-                    layout[name].is_option
+            # The nullability of this arrow field is determined by whether
+            # the field is considered an option w.r.t to the root, i.e.
+            # accounting for options above the record layout.
+            arrow_fields.append(
+                pyarrow.field(name, arrow_arrays[-1].type).with_nullable(
+                    outer_field_content.is_option
                 )
             )
-            if check[-1].contents[check[-1].field_to_index(name)].is_option:
+
+            # Is this field layout directly an option-type?
+            record_field_content = record_content.contents[
+                record_content.field_to_index(name)
+            ]
+            if record_field_content.is_option:
                 optiontype_fields.append(name)
 
-        parameters = [
+        schema_parameters = [
             {"optiontype_fields": optiontype_fields},
             {"record_is_scalar": record_is_scalar},
         ]
-        for x in check:
-            parameters.append({direct_Content_subclass(x).__name__: x._parameters})
+
+        # The parameters that _may_ be serialised in the Arrow schema
+        # (depending upon the value of `extensionarray`) will not include those
+        # that are defined on nodes above the record; slicing a RecordArray
+        # drops parameters above the record. As such, we need to explicitly
+        # track these in order to rebuild the layouts above the record.
+        for content in wrapper_layouts:
+            schema_parameters.append(
+                {direct_Content_subclass(content).__name__: content._parameters}
+            )
 
     else:
-        paarrays.append(
+        arrow_arrays.append(
             layout.to_arrow(
                 list_to32=list_to32,
                 string_to32=string_to32,
@@ -150,14 +173,20 @@ def _impl(
                 record_is_scalar=record_is_scalar,
             )
         )
-        pafields.append(
-            pyarrow.field("", paarrays[-1].type).with_nullable(layout.is_option)
+        arrow_fields.append(
+            # Arrow tables must contain at-least one field. To store a
+            # non-record layout, we create an un-named field.
+            pyarrow.field("", arrow_arrays[-1].type).with_nullable(layout.is_option)
         )
 
-    batch = pyarrow.RecordBatch.from_arrays(paarrays, schema=pyarrow.schema(pafields))
+    batch = pyarrow.RecordBatch.from_arrays(
+        arrow_arrays, schema=pyarrow.schema(arrow_fields)
+    )
     out = pyarrow.Table.from_batches([batch])
 
-    if parameters is None:
+    if schema_parameters is None:
         return out
     else:
-        return out.replace_schema_metadata({"ak:parameters": json.dumps(parameters)})
+        return out.replace_schema_metadata(
+            {"ak:parameters": json.dumps(schema_parameters)}
+        )
