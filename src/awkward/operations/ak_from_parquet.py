@@ -220,13 +220,15 @@ def _load(
 
     if len(arrays) == 0:
         return wrap_layout(
-            subform.length_zero_array(highlevel=False), behavior=behavior
+            subform.length_zero_array(highlevel=False),
+            highlevel=highlevel,
+            behavior=behavior,
         )
     elif len(arrays) == 1:
         # make high-level
         if isinstance(arrays[0], ak.record.Record):
             return ak.Record(arrays[0])
-        return ak.Array(arrays[0])
+        return wrap_layout(arrays[0], highlevel=highlevel, behavior=behavior)
     else:
         # TODO: if each array is a record?
         return ak.operations.ak_concatenate._impl(
