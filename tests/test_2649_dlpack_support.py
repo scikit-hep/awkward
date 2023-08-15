@@ -38,3 +38,27 @@ def test_to_dlpack_cupy():
     array = ak.from_cupy(cp_array, regulararray=True)
     cp_from_ak = cp.from_dlpack(array)
     assert cp.shares_memory(cp_array, cp_from_ak)
+
+
+class DLPackOf:
+    def __init__(self, array):
+        self._array = array
+
+    def __dlpack__(self, stream=None):
+        if stream is None:
+            return self._array.__dlpack__()
+        else:
+            return self._array.__dlpack__(stream)
+
+    def __dlpack_device__(self):
+        return self._array.__dlpack_device__()
+
+
+def test_to_layout():
+    np_array = np.arange(2 * 3 * 4 * 5).reshape(2, 3, 4, 5)
+    dlpack_array = DLPackOf(np_array)
+    layout = ak.to_layout(dlpack_array)
+    assert layout.is_numpy
+
+    np_from_ak = ak.to_numpy(layout)
+    assert np.shares_memory(np_array, np_from_ak)
