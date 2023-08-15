@@ -119,6 +119,9 @@ def _get_ufunc_action(
                     ),
                     highlevel=False,
                 )
+
+                if out.is_option:
+                    out = out.content
                 if out.is_list and out.parameter("__array__") == "string":
                     out = out.copy(
                         content=out.content.copy(parameters={"__array__": "byte"}),
@@ -139,6 +142,9 @@ def _get_ufunc_action(
 
 def _erase_list_option(layout):
     from awkward.contents.unmaskedarray import UnmaskedArray
+
+    if layout.is_option:
+        layout = layout.content
 
     assert layout.is_list
     if layout.content.is_option:
