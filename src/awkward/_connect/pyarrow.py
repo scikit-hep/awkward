@@ -1116,9 +1116,9 @@ def form_handle_arrow(schema, pass_empty_field=False):
             return out
 
 
-def convert_to_array(layout, args, kwargs):
+def convert_to_array(layout, type=None):
     out = ak.operations.to_arrow(layout, extensionarray=False)
-    if args == () and kwargs == {}:
+    if type is None:
         return out
     else:
-        return pyarrow.array(out, *args, **kwargs)
+        return pyarrow.array(out, type=type)
