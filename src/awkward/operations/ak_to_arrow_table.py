@@ -174,9 +174,9 @@ def _impl(
             )
         )
         arrow_fields.append(
-            pyarrow.field("", arrow_arrays[-1].type).with_nullable(
-                layout.is_option or layout.is_identity_like
-            )
+            # Arrow tables must contain at-least one field. To store a
+            # non-record layout, we create an un-named field.
+            pyarrow.field("", arrow_arrays[-1].type).with_nullable(layout.is_option)
         )
 
     batch = pyarrow.RecordBatch.from_arrays(
