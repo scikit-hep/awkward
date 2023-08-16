@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-from collections.abc import Collection
 from itertools import chain
 
-from awkward._typing import Any, JSONMapping, JSONSerializable, Set
+from awkward._typing import JSONMapping, Set
 
 TYPE_PARAMETERS = ("__array__", "__list__", "__record__", "__categorical__")
 
@@ -81,13 +80,13 @@ def parameters_intersect(
     left: JSONMapping | None,
     right: JSONMapping | None,
     *,
-    exclude: Collection[tuple[str, JSONSerializable]] = (),
+    exclude: Set[str] = frozenset(),
 ) -> JSONMapping | None:
     """
     Args:
         left: first parameters mapping
         right: second parameters mapping
-        exclude: collection of (key, value) items to exclude
+        exclude: collection of keys to exclude
 
     Returns the intersected key-value pairs of `left` and `right` as a dictionary.
     """
@@ -95,18 +94,13 @@ def parameters_intersect(
         return None
 
     common_keys = iter(left.keys() & right.keys())
-    has_no_exclusions = len(exclude) == 0
 
     # Avoid creating `result` unless we have to
     result = None
     for key in common_keys:
         left_value = left[key]
         # Do our keys match?
-        if (
-            left_value is not None
-            and left_value == right[key]
-            and (has_no_exclusions or (key, left_value) not in exclude)
-        ):
+        if left_value is not None and left_value == right[key] and key not in exclude:
             # Exit, indicating that we want to create `result`
             if result is None:
                 result = {key: left_value}
@@ -119,7 +113,7 @@ def parameters_union(
     left: JSONMapping | None,
     right: JSONMapping | None,
     *,
-    exclude: Set[tuple[str, Any]] = frozenset(),
+    exclude: Set[str] = frozenset(),
 ) -> JSONMapping | None:
     """
     Args:
@@ -142,7 +136,7 @@ def parameters_union(
         key, value = item
         if value is None:
             continue
-        if has_exclusions and item in exclude:
+        if has_exclusions and key in exclude:
             continue
         if parameters is None:
             parameters = {key: value}
