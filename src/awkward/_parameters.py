@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections.abc import Collection
 from itertools import chain
 
-from awkward._typing import Any, JSONMapping
+from awkward._typing import JSONMapping, JSONSerializable
 
 TYPE_PARAMETERS = ("__array__", "__list__", "__record__", "__categorical__")
 
@@ -81,7 +81,7 @@ def parameters_intersect(
     left: JSONMapping | None,
     right: JSONMapping | None,
     *,
-    exclude: Collection[tuple[str, Any]] | None = None,
+    exclude: Collection[tuple[str, JSONSerializable]] | None = None,
 ) -> JSONMapping | None:
     """
     Args:
@@ -121,7 +121,7 @@ def parameters_union(
     left: JSONMapping | None,
     right: JSONMapping | None,
     *,
-    exclude: Collection[tuple[str, Any]] | None = None,
+    exclude: Collection[tuple[str, JSONSerializable]] | None = None,
 ) -> JSONMapping | None:
     """
     Args:
