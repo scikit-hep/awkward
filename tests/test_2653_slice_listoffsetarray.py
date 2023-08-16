@@ -7,20 +7,34 @@ import awkward as ak
 
 
 def test():
-    array = ak.zip({"x": [[1, 2, 3]], "y": [[4, 5]]}, depth_limit=1)
-    sliced = array[..., np.newaxis]
-    assert sliced.layout.is_equal_to(
+    layout = ak.contents.RecordArray(
+        [
+            ak.contents.ListOffsetArray(
+                ak.index.Index64([0, 3]),
+                ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.uint16)),
+            ),
+            ak.contents.ListOffsetArray(
+                ak.index.Index64([0, 2]),
+                ak.contents.NumpyArray(np.array([4, 5], dtype=np.uint16)),
+            ),
+        ],
+        ["x", "y"],
+    )
+    sliced = layout[..., np.newaxis]
+    assert sliced.is_equal_to(
         ak.contents.RecordArray(
             [
                 ak.contents.RegularArray(
                     ak.contents.ListOffsetArray(
-                        ak.index.Index64([0, 3]), ak.contents.NumpyArray([1, 2, 3])
+                        ak.index.Index64([0, 3]),
+                        ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.uint16)),
                     ),
                     1,
                 ),
                 ak.contents.RegularArray(
                     ak.contents.ListOffsetArray(
-                        ak.index.Index64([0, 2]), ak.contents.NumpyArray([4, 5])
+                        ak.index.Index64([0, 2]),
+                        ak.contents.NumpyArray(np.array([4, 5], dtype=np.uint16)),
                     ),
                     1,
                 ),
