@@ -95,7 +95,7 @@ def parameters_intersect(
         return None
 
     common_keys = iter(left.keys() & right.keys())
-    has_exclusions = bool(exclude)
+    has_exclusions = exclude is not None and len(exclude) > 0
 
     # Avoid creating `result` unless we have to
     result = None
@@ -132,7 +132,7 @@ def parameters_union(
     Returns the merged key-value pairs of `left` and `right` as a dictionary.
 
     """
-    has_exclusions = bool(exclude)
+    has_exclusions = exclude is not None and len(exclude) > 0
     items = []
     if left is not None:
         items.append(left.items())
