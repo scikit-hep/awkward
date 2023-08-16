@@ -15,6 +15,7 @@ np = NumpyMetadata.instance()
 @register_nplike
 class Numpy(ArrayModuleNumpyLike):
     is_eager: Final = True
+    supports_structured_dtypes: Final = True
 
     def __init__(self):
         self._module = numpy

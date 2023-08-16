@@ -8,6 +8,7 @@ import numpy
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._singleton import Singleton
 from awkward._typing import (
+    Any,
     Literal,
     NamedTuple,
     Protocol,
@@ -164,6 +165,12 @@ class ArrayLike(Protocol):
     def __invert__(self) -> Self:
         ...
 
+    def __dlpack_device__(self) -> tuple[int, int]:
+        ...
+
+    def __dlpack__(self, stream: Any = None) -> Any:
+        ...
+
 
 class NumpyMetadata(Singleton):
     bool_ = numpy.bool_
@@ -235,6 +242,11 @@ class NumpyLike(Singleton, Protocol):
 
     @property
     @abstractmethod
+    def supports_structured_dtypes(self) -> bool:
+        ...
+
+    @property
+    @abstractmethod
     def known_data(self) -> bool:
         ...
 
@@ -263,6 +275,10 @@ class NumpyLike(Singleton, Protocol):
     def frombuffer(
         self, buffer, *, dtype: numpy.dtype | None = None, count: int = -1
     ) -> ArrayLike:
+        ...
+
+    @abstractmethod
+    def from_dlpack(self, x: Any) -> ArrayLike:
         ...
 
     @abstractmethod

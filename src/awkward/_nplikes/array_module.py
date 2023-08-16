@@ -14,7 +14,7 @@ from awkward._nplikes.numpylike import (
 )
 from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
-from awkward._typing import Final, Literal
+from awkward._typing import Any, Final, Literal
 
 np = NumpyMetadata.instance()
 
@@ -58,6 +58,9 @@ class ArrayModuleNumpyLike(NumpyLike):
         assert not isinstance(buffer, PlaceholderArray)
         assert not isinstance(count, PlaceholderArray)
         return self._module.frombuffer(buffer, dtype=dtype, count=count)
+
+    def from_dlpack(self, x: Any) -> ArrayLike:
+        return self._module.from_dlpack(x)
 
     def zeros(
         self, shape: int | tuple[int, ...], *, dtype: np.dtype | None = None
@@ -180,8 +183,23 @@ class ArrayModuleNumpyLike(NumpyLike):
         `_getitem_range` (if step == 1). Normalize lengths to fit length of array,
         and for arrays with unknown lengths, these offsets become none.
         """
-        start, stop, step = slice_.indices(length)
+        # We have known_data (therefore known shape), so we can safely convert to int
+        slice_as_shape = slice(
+            slice_.start
+            if slice_.start is None
+            else self.index_as_shape_item(slice_.start),
+            slice_.stop
+            if slice_.stop is None
+            else self.index_as_shape_item(slice_.stop),
+            slice_.step
+            if slice_.step is None
+            else self.index_as_shape_item(slice_.step),
+        )
+        start, stop, step = slice_as_shape.indices(length)
         slice_length = math.ceil((stop - start) / step)
+
+        # Shape items are already valid indices, so we don't need to invoke
+        # `shape_item_as_index`
         return start, stop, step, slice_length
 
     def regularize_index_for_length(
