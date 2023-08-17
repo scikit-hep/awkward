@@ -1346,7 +1346,10 @@ class NumpyArray(Content):
     def _is_equal_to(self, other, index_dtype, numpyarray):
         if numpyarray:
             return (
-                self._backend.nplike.array_equal(self.data, other.data)
+                (
+                    not self._backend.nplike.known_data
+                    or self._backend.nplike.array_equal(self.data, other.data)
+                )
                 and self.dtype == other.dtype
                 and self.shape == other.shape
             )

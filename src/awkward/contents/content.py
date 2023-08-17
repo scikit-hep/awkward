@@ -1284,7 +1284,11 @@ class Content:
     ) -> bool:
         return (
             self.__class__ is other.__class__
-            and len(self) == len(other)
+            and (
+                self.length is unknown_length
+                or other.length is unknown_length
+                or self.length == other.length
+            )
             and type_parameters_equal(self._parameters, other._parameters)
             and self._is_equal_to(other, index_dtype, numpyarray)
         )
