@@ -106,14 +106,14 @@ def broadcast_pack(inputs: Sequence, isscalar: list[bool]) -> list:
     return nextinputs
 
 
-def broadcast_unpack(x, isscalar: list[bool], backend: Backend):
+def broadcast_unpack(x, isscalar: list[bool]):
     if all(isscalar):
-        if not backend.nplike.known_data or x.length == 0:
+        if x.length is not unknown_length and x.length == 0:
             return x._getitem_nothing()._getitem_nothing()
         else:
             return x[0][0]
     else:
-        if not backend.nplike.known_data or x.length == 0:
+        if x.length is not unknown_length and x.length == 0:
             return x._getitem_nothing()
         else:
             return x[0]
@@ -1045,4 +1045,4 @@ def broadcast_and_apply(
         },
     )
     assert isinstance(out, tuple)
-    return tuple(broadcast_unpack(x, isscalar, backend) for x in out)
+    return tuple(broadcast_unpack(x, isscalar) for x in out)
