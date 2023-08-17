@@ -1114,3 +1114,11 @@ def form_handle_arrow(schema, pass_empty_field=False):
 
         else:
             return out
+
+
+def convert_to_array(layout, type=None):
+    out = ak.operations.to_arrow(layout, extensionarray=False)
+    if type is None:
+        return out
+    else:
+        return pyarrow.array(out, type=type)

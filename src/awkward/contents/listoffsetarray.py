@@ -417,7 +417,6 @@ class ListOffsetArray(Content):
         tail: tuple[SliceItem, ...],
         advanced: Index | None,
     ) -> Content:
-        advanced = advanced.to_nplike(self._backend.nplike)
         if head is NO_HEAD:
             return self
 

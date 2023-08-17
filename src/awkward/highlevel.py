@@ -3,6 +3,7 @@ from __future__ import annotations
 
 __all__ = ("Array", "ArrayBuilder", "Record")
 
+import builtins
 import copy
 import html
 import io
@@ -19,6 +20,7 @@ import awkward._connect.hist
 from awkward._backends.dispatch import register_backend_lookup_factory
 from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of, get_array_class, get_record_class
+from awkward._connect.dlpack import get_layout_device, to_dlpack
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
@@ -1297,33 +1299,38 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             "text/plain": repr(self),
         }
 
-    def __array__(self, *args, **kwargs):
-        """
-        Intercepts attempts to convert this Array into a NumPy array and
-        either performs a zero-copy conversion or raises an error.
+    @property
+    def __cuda_array_interface__(self):
+        with ak._errors.OperationErrorContext(
+            f"{type(self).__name__}.__cuda_array_interface__", (self,), {}
+        ):
+            array = ak.operations.to_cupy(self)
+            return array.__cuda_array_interface__
 
-        This function is also called by the
-        [np.asarray](https://docs.scipy.org/doc/numpy/reference/generated/numpy.asarray.html)
-        family of functions, which have `copy=False` by default.
+    @property
+    def __array_interface__(self):
+        with ak._errors.OperationErrorContext(
+            f"{type(self).__name__}.__array_interface__", (self,), {}
+        ):
+            array = ak.operations.to_numpy(self)
+            return array.__array_interface__
 
-            >>> np.asarray(ak.Array([[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]))
-            array([[1.1, 2.2, 3.3],
-                   [4.4, 5.5, 6.6]])
+    def __dlpack_device__(self):
+        with ak._errors.OperationErrorContext(
+            f"{type(self).__name__}.__dlpack_device__", (self,), {}
+        ):
+            return get_layout_device(self._layout)
 
-        If the data are numerical and regular (nested lists have equal lengths
-        in each dimension, as described by the #type), they can be losslessly
-        converted to a NumPy array and this function returns without an error.
+    def __dlpack__(self, stream=None):
+        return to_dlpack(self._layout, stream)
 
-        Otherwise, the function raises an error. It does not create a NumPy
-        array with dtype `"O"` for `np.object_` (see the
-        [note on object_ type](https://docs.scipy.org/doc/numpy/reference/arrays.scalars.html#arrays-scalars-built-in))
-        since silent conversions to dtype `"O"` arrays would not only be a
-        significant performance hit, but would also break functionality, since
-        nested lists in a NumPy `"O"` array are severed from the array and
-        cannot be sliced as dimensions.
-        """
-        with ak._errors.OperationErrorContext("numpy.asarray", (self, *args), kwargs):
-            return ak._connect.numpy.convert_to_array(self._layout, args, kwargs)
+    def __arrow_array__(self, type=None):
+        with ak._errors.OperationErrorContext(
+            f"{builtins.type(self).__name__}.__arrow_array__", (self,), {"type": type}
+        ):
+            from awkward._connect.pyarrow import convert_to_array
+
+            return convert_to_array(self._layout, type=type)
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         """
@@ -2406,16 +2413,35 @@ class ArrayBuilder(Sized):
             limit_rows=limit_rows, limit_cols=limit_cols, type=type, stream=stream
         )
 
-    def __array__(self, *args, **kwargs):
-        """
-        Intercepts attempts to convert a #snapshot of this array into a
-        NumPy array and either performs a zero-copy conversion or raises
-        an error.
+    @property
+    def __cuda_array_interface__(self):
+        with ak._errors.OperationErrorContext(
+            f"{type(self).__name__}.__cuda_array_interface__", (self,), {}
+        ):
+            array = ak.operations.to_cupy(self)
+            return array.__cuda_array_interface__
 
-        See #ak.Array.__array__ for a more complete description.
-        """
-        with ak._errors.OperationErrorContext("numpy.asarray", (self, *args), kwargs):
-            return ak._connect.numpy.convert_to_array(self.snapshot(), args, kwargs)
+    @property
+    def __array_interface__(self):
+        with ak._errors.OperationErrorContext(
+            f"{type(self).__name__}.__array_interface__", (self,), {}
+        ):
+            array = ak.operations.to_numpy(self)
+            return array.__array_interface__
+
+    def __dlpack_device__(self):
+        with ak._errors.OperationErrorContext(
+            f"{type(self).__name__}.__dlpack_device__", (self,), {}
+        ):
+            return get_layout_device(self.snapshot())
+
+    def __arrow_array__(self, type=None):
+        with ak._errors.OperationErrorContext(
+            f"{builtins.type(self).__name__}.__arrow_array__", (self,), {"type": type}
+        ):
+            from awkward._connect.pyarrow import convert_to_array
+
+            return convert_to_array(self.snapshot(), type=type)
 
     @property
     def numba_type(self):

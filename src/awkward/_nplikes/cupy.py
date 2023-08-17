@@ -14,6 +14,7 @@ from awkward._typing import Final
 @register_nplike
 class Cupy(ArrayModuleNumpyLike):
     is_eager: Final = False
+    supports_structured_dtypes: Final = False
 
     def __init__(self):
         import awkward._connect.cuda  # noqa: F401

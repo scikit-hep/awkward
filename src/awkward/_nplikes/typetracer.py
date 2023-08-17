@@ -500,6 +500,7 @@ def try_touch_shape(array):
 class TypeTracer(NumpyLike):
     known_data: Final = False
     is_eager: Final = True
+    supports_structured_dtypes: Final = True
 
     def _apply_ufunc(self, ufunc, *inputs):
         for x in inputs:
@@ -650,6 +651,11 @@ class TypeTracer(NumpyLike):
         for x in (buffer, count):
             assert not isinstance(x, PlaceholderArray)
             try_touch_data(x)
+        raise NotImplementedError
+
+    def from_dlpack(self, x: Any) -> TypeTracerArray:
+        assert not isinstance(x, PlaceholderArray)
+        try_touch_data(x)
         raise NotImplementedError
 
     def zeros(
@@ -1377,6 +1383,12 @@ class TypeTracer(NumpyLike):
     def is_c_contiguous(self, x: ArrayLike) -> bool:
         assert not isinstance(x, PlaceholderArray)
         return True
+
+    def __dlpack_device__(self) -> tuple[int, int]:
+        raise NotImplementedError
+
+    def __dlpack__(self, stream=None):
+        raise NotImplementedError
 
 
 def _attach_report(
