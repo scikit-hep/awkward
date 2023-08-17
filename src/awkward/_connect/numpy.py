@@ -374,8 +374,6 @@ def array_ufunc(ufunc, method: str, inputs, kwargs: dict[str, Any]):
             isinstance(x, NumpyArray) or not isinstance(x, ak.contents.Content)
             for x in inputs
         ):
-            nplike = backend.nplike
-
             # Broadcast parameters against one another, with the default
             # parameters taken from the first content
             it_parameters = (c._parameters for c in contents)
@@ -384,12 +382,7 @@ def array_ufunc(ufunc, method: str, inputs, kwargs: dict[str, Any]):
                 parameters_intersect, it_parameters, first_parameters
             )
 
-            args = []
-            for x in inputs:
-                if isinstance(x, NumpyArray):
-                    args.append(x._raw(nplike))
-                else:
-                    args.append(x)
+            args = [x.data if isinstance(x, NumpyArray) else x for x in inputs]
 
             # Give backend a chance to change the ufunc implementation
             impl = backend.prepare_ufunc(ufunc)
