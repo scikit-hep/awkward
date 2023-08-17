@@ -319,6 +319,7 @@ def array_ufunc(ufunc, method: str, inputs, kwargs: dict[str, Any]):
 
     def action(inputs, **ignore):
         contents = [x for x in inputs if isinstance(x, ak.contents.Content)]
+        assert len(contents) >= 1
 
         signature = _array_ufunc_signature(ufunc, inputs)
         # Do we have a custom ufunc (an override of the given ufunc)?
@@ -374,12 +375,9 @@ def array_ufunc(ufunc, method: str, inputs, kwargs: dict[str, Any]):
             isinstance(x, NumpyArray) or not isinstance(x, ak.contents.Content)
             for x in inputs
         ):
-            # Broadcast parameters against one another, with the default
-            # parameters taken from the first content
-            it_parameters = (c._parameters for c in contents)
-            first_parameters = next(it_parameters, None)
+            # Broadcast parameters against one another
             parameters = functools.reduce(
-                parameters_intersect, it_parameters, first_parameters
+                parameters_intersect, (c._parameters for c in contents)
             )
 
             args = [x.data if isinstance(x, NumpyArray) else x for x in inputs]
