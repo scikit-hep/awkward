@@ -319,6 +319,7 @@ def array_ufunc(ufunc, method: str, inputs, kwargs: dict[str, Any]):
 
     def action(inputs, **ignore):
         contents = [x for x in inputs if isinstance(x, ak.contents.Content)]
+        assert len(contents) >= 1
 
         signature = _array_ufunc_signature(ufunc, inputs)
         # Do we have a custom ufunc (an override of the given ufunc)?
@@ -374,19 +375,12 @@ def array_ufunc(ufunc, method: str, inputs, kwargs: dict[str, Any]):
             isinstance(x, NumpyArray) or not isinstance(x, ak.contents.Content)
             for x in inputs
         ):
-            nplike = backend.nplike
-
             # Broadcast parameters against one another
             parameters = functools.reduce(
-                parameters_intersect, [x._parameters for x in contents]
+                parameters_intersect, (c._parameters for c in contents)
             )
 
-            args = []
-            for x in inputs:
-                if isinstance(x, NumpyArray):
-                    args.append(x._raw(nplike))
-                else:
-                    args.append(x)
+            args = [x.data if isinstance(x, NumpyArray) else x for x in inputs]
 
             # Give backend a chance to change the ufunc implementation
             impl = backend.prepare_ufunc(ufunc)
@@ -394,7 +388,13 @@ def array_ufunc(ufunc, method: str, inputs, kwargs: dict[str, Any]):
             # Invoke ufunc
             result = impl(*args, **kwargs)
 
-            return (NumpyArray(result, backend=backend, parameters=parameters),)
+            if isinstance(result, tuple):
+                return tuple(
+                    NumpyArray(x, backend=backend, parameters=parameters)
+                    for x in result
+                )
+            else:
+                return (NumpyArray(result, backend=backend, parameters=parameters),)
 
         # Do we have exclusively nominal types without custom overloads?
         if all(
@@ -420,41 +420,14 @@ def array_ufunc(ufunc, method: str, inputs, kwargs: dict[str, Any]):
 
         return None
 
-    if sum(int(isinstance(x, ak.contents.Content)) for x in inputs) == 1:
-        where = None
-        for i, x in enumerate(inputs):
-            if isinstance(x, ak.contents.Content):
-                where = i
-                break
-        assert where is not None
+    out = ak._broadcasting.broadcast_and_apply(
+        inputs, action, behavior, allow_records=False, function_name=ufunc.__name__
+    )
 
-        nextinputs = list(inputs)
-
-        def unary_action(layout, **ignore):
-            nextinputs[where] = layout
-            result = action(tuple(nextinputs), **ignore)
-            if result is None:
-                return None
-            else:
-                assert isinstance(result, tuple) and len(result) == 1
-                return result[0]
-
-        out = ak._do.recursively_apply(
-            inputs[where],
-            unary_action,
-            behavior,
-            function_name=ufunc.__name__,
-            allow_records=False,
-        )
-
+    if len(out) == 1:
+        return wrap_layout(out[0], behavior)
     else:
-        out = ak._broadcasting.broadcast_and_apply(
-            inputs, action, behavior, allow_records=False, function_name=ufunc.__name__
-        )
-        assert isinstance(out, tuple) and len(out) == 1
-        out = out[0]
-
-    return wrap_layout(out, behavior)
+        return tuple(wrap_layout(o, behavior) for o in out)
 
 
 def action_for_matmul(inputs):

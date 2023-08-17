@@ -57,20 +57,27 @@ class BroadcastOptions(TypedDict):
 
 
 def length_of_broadcast(inputs: Sequence) -> int | type[unknown_length]:
-    maxlen = 1
-
+    max_length: int | None = None
     has_seen_unknown_length: bool = False
     for x in inputs:
-        if isinstance(x, Content):
-            if x.length is unknown_length:
-                has_seen_unknown_length = True
-                continue
-            maxlen = max(maxlen, x.length)
+        if not isinstance(x, Content):
+            continue
+        if x.length is unknown_length:
+            has_seen_unknown_length = True
+        elif max_length is None:
+            max_length = x.length
+        else:
+            max_length = max(max_length, x.length)
 
     if has_seen_unknown_length:
-        return unknown_length
+        if max_length is None:
+            return unknown_length
+        else:
+            return max_length
+    elif max_length is None:
+        return 1
     else:
-        return maxlen
+        return max_length
 
 
 def broadcast_pack(inputs: Sequence, isscalar: list[bool]) -> list:
@@ -99,14 +106,14 @@ def broadcast_pack(inputs: Sequence, isscalar: list[bool]) -> list:
     return nextinputs
 
 
-def broadcast_unpack(x, isscalar: list[bool], backend: Backend):
+def broadcast_unpack(x, isscalar: list[bool]):
     if all(isscalar):
-        if not backend.nplike.known_data or x.length == 0:
+        if x.length is not unknown_length and x.length == 0:
             return x._getitem_nothing()._getitem_nothing()
         else:
             return x[0][0]
     else:
-        if not backend.nplike.known_data or x.length == 0:
+        if x.length is not unknown_length and x.length == 0:
             return x._getitem_nothing()
         else:
             return x[0]
@@ -1038,4 +1045,4 @@ def broadcast_and_apply(
         },
     )
     assert isinstance(out, tuple)
-    return tuple(broadcast_unpack(x, isscalar, backend) for x in out)
+    return tuple(broadcast_unpack(x, isscalar) for x in out)

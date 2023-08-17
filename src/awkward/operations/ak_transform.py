@@ -6,6 +6,13 @@ import awkward as ak
 from awkward._backends.dispatch import backend_of
 from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of
+from awkward._broadcasting import (
+    apply_step as apply_broadcasting_step,
+)
+from awkward._broadcasting import (
+    broadcast_pack,
+    broadcast_unpack,
+)
 from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 
@@ -554,9 +561,9 @@ def _impl(
 
         inputs = [layout, *more_layouts]
         isscalar = []
-        out = ak._broadcasting.apply_step(
+        out = apply_broadcasting_step(
             backend,
-            ak._broadcasting.broadcast_pack(inputs, isscalar),
+            broadcast_pack(inputs, isscalar),
             action,
             0,
             copy.copy(depth_context),
@@ -565,7 +572,7 @@ def _impl(
             options,
         )
         assert isinstance(out, tuple)
-        out = [ak._broadcasting.broadcast_unpack(x, isscalar, backend) for x in out]
+        out = [broadcast_unpack(x, isscalar) for x in out]
 
         if return_value == "none":
             return
