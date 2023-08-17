@@ -376,9 +376,12 @@ def array_ufunc(ufunc, method: str, inputs, kwargs: dict[str, Any]):
         ):
             nplike = backend.nplike
 
-            # Broadcast parameters against one another
+            # Broadcast parameters against one another, with the default
+            # parameters taken from the first content
+            it_parameters = (c._parameters for c in contents)
+            first_parameters = next(it_parameters, None)
             parameters = functools.reduce(
-                parameters_intersect, [x._parameters for x in contents]
+                parameters_intersect, it_parameters, first_parameters
             )
 
             args = []
