@@ -1,7 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-
-from numba import types
+import numba
 
 import awkward as ak
 from awkward._backends.cupy import CupyBackend
@@ -14,7 +13,7 @@ class ArrayViewArgHandler:
         if isinstance(val, ak.Array):
             if isinstance(val.layout.backend, CupyBackend):
                 # Use uint64 for pos, start, stop, the array pointers values, and the pylookup value
-                tys = types.UniTuple(types.uint64, 5)
+                tys = numba.types.UniTuple(numba.types.uint64, 5)
 
                 start = val._numbaview.start
                 stop = val._numbaview.stop
@@ -24,7 +23,7 @@ class ArrayViewArgHandler:
 
                 return tys, (pos, start, stop, arrayptrs, pylookup)
             else:
-                raise TypeError(
+                raise numba.TypingError(
                     '`ak.to_backend` should be called with `backend="cuda"` to put '
                     "the array on the GPU before using it: "
                     'ak.to_backend(array, backend="cuda")'

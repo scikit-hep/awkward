@@ -420,7 +420,7 @@ class type_getitem(numba.core.typing.templates.AbstractTemplate):
                     viewtype, wheretype
                 )
             else:
-                raise TypeError(
+                raise numba.TypingError(
                     "only an integer, start:stop range, or a *constant* "
                     "field name string may be used as ak.Array "
                     "slices in compiled code"
@@ -708,7 +708,7 @@ class type_getitem_record(numba.core.typing.templates.AbstractTemplate):
                 )(recordviewtype, wheretype)
 
             else:
-                raise TypeError(
+                raise numba.TypingError(
                     "only a *constant* field name string may be used as a "
                     "record slice in compiled code"
                 )

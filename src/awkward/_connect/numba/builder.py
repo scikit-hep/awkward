@@ -143,14 +143,14 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
         if len(args) == 0 and len(kwargs) == 0:
             return numba.types.none()
         else:
-            raise TypeError("wrong number of arguments for ArrayBuilder.clear")
+            raise numba.TypingError("wrong number of arguments for ArrayBuilder.clear")
 
     @numba.core.typing.templates.bound_function("null")
     def resolve_null(self, arraybuildertype, args, kwargs):
         if len(args) == 0 and len(kwargs) == 0:
             return numba.types.none()
         else:
-            raise TypeError("wrong number of arguments for ArrayBuilder.null")
+            raise numba.TypingError("wrong number of arguments for ArrayBuilder.null")
 
     @numba.core.typing.templates.bound_function("boolean")
     def resolve_boolean(self, arraybuildertype, args, kwargs):
@@ -161,7 +161,7 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
         ):
             return numba.types.none(args[0])
         else:
-            raise TypeError(
+            raise numba.TypingError(
                 "wrong number or types of arguments for ArrayBuilder.boolean"
             )
 
@@ -174,7 +174,7 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
         ):
             return numba.types.none(args[0])
         else:
-            raise TypeError(
+            raise numba.TypingError(
                 "wrong number or types of arguments for ArrayBuilder.integer"
             )
 
@@ -187,7 +187,9 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
         ):
             return numba.types.none(args[0])
         else:
-            raise TypeError("wrong number or types of arguments for ArrayBuilder.real")
+            raise numba.TypingError(
+                "wrong number or types of arguments for ArrayBuilder.real"
+            )
 
     @numba.core.typing.templates.bound_function("complex")
     def resolve_complex(self, arraybuildertype, args, kwargs):
@@ -200,7 +202,7 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
         ):
             return numba.types.none(args[0])
         else:
-            raise TypeError(
+            raise numba.TypingError(
                 "wrong number or types of arguments for ArrayBuilder.complex"
             )
 
@@ -213,7 +215,7 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
         ):
             return numba.types.none(args[0])
         else:
-            raise TypeError(
+            raise numba.TypingError(
                 "wrong number or types of arguments for ArrayBuilder.datetime"
             )
 
@@ -226,7 +228,7 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
         ):
             return numba.types.none(args[0])
         else:
-            raise TypeError(
+            raise numba.TypingError(
                 "wrong number or types of arguments for ArrayBuilder.timedelta"
             )
 
@@ -239,7 +241,7 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
         ):
             return numba.types.none(args[0])
         else:
-            raise TypeError(
+            raise numba.TypingError(
                 "wrong number or types of arguments for ArrayBuilder.string"
             )
 
@@ -248,14 +250,18 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
         if len(args) == 0 and len(kwargs) == 0:
             return numba.types.none()
         else:
-            raise TypeError("wrong number of arguments for ArrayBuilder.begin_list")
+            raise numba.TypingError(
+                "wrong number of arguments for ArrayBuilder.begin_list"
+            )
 
     @numba.core.typing.templates.bound_function("end_list")
     def resolve_end_list(self, arraybuildertype, args, kwargs):
         if len(args) == 0 and len(kwargs) == 0:
             return numba.types.none()
         else:
-            raise TypeError("wrong number of arguments for ArrayBuilder.end_list")
+            raise numba.TypingError(
+                "wrong number of arguments for ArrayBuilder.end_list"
+            )
 
     @numba.core.typing.templates.bound_function("begin_tuple")
     def resolve_begin_tuple(self, arraybuildertype, args, kwargs):
@@ -266,7 +272,7 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
         ):
             return numba.types.none(args[0])
         else:
-            raise TypeError(
+            raise numba.TypingError(
                 "wrong number or types of arguments for ArrayBuilder.begin_tuple"
             )
 
@@ -279,14 +285,18 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
         ):
             return arraybuildertype(args[0])
         else:
-            raise TypeError("wrong number or types of arguments for ArrayBuilder.index")
+            raise numba.TypingError(
+                "wrong number or types of arguments for ArrayBuilder.index"
+            )
 
     @numba.core.typing.templates.bound_function("end_tuple")
     def resolve_end_tuple(self, arraybuildertype, args, kwargs):
         if len(args) == 0 and len(kwargs) == 0:
             return numba.types.none()
         else:
-            raise TypeError("wrong number of arguments for ArrayBuilder.end_tuple")
+            raise numba.TypingError(
+                "wrong number of arguments for ArrayBuilder.end_tuple"
+            )
 
     @numba.core.typing.templates.bound_function("begin_record")
     def resolve_begin_record(self, arraybuildertype, args, kwargs):
@@ -299,7 +309,7 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
         ):
             return numba.types.none(args[0])
         else:
-            raise TypeError(
+            raise numba.TypingError(
                 "wrong number or types of arguments for ArrayBuilder.begin_record"
             )
 
@@ -312,14 +322,18 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
         ):
             return arraybuildertype(args[0])
         else:
-            raise TypeError("wrong number or types of arguments for ArrayBuilder.field")
+            raise numba.TypingError(
+                "wrong number or types of arguments for ArrayBuilder.field"
+            )
 
     @numba.core.typing.templates.bound_function("end_record")
     def resolve_end_record(self, arraybuildertype, args, kwargs):
         if len(args) == 0 and len(kwargs) == 0:
             return numba.types.none()
         else:
-            raise TypeError("wrong number of arguments for ArrayBuilder.end_record")
+            raise numba.TypingError(
+                "wrong number of arguments for ArrayBuilder.end_record"
+            )
 
     @numba.core.typing.templates.bound_function("append")
     def resolve_append(self, arraybuildertype, args, kwargs):
@@ -386,7 +400,7 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
                         )(lower)
                         return numba.types.none(args[0])
 
-            raise TypeError(
+            raise numba.TypingError(
                 "wrong number or types of arguments for ArrayBuilder.append"
             )
 
@@ -399,7 +413,7 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
         ):
             return numba.types.none(args[0])
         else:
-            raise TypeError(
+            raise numba.TypingError(
                 "wrong number or types of arguments for ArrayBuilder.extend"
             )
 
