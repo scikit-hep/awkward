@@ -5,7 +5,9 @@ __all__ = ("Array", "ArrayBuilder", "Record")
 
 import builtins
 import copy
+import functools
 import html
+import inspect
 import io
 import itertools
 import keyword
@@ -35,6 +37,23 @@ _dir_pattern = re.compile(r"^[a-zA-Z_]\w*$")
 
 
 T = TypeVar("T", bound=ak.contents.Content)
+
+
+def non_inspectable_property(impl):
+    """property factory that ensures IPython does not call the property during inspection"""
+
+    @functools.wraps(impl)
+    def wrapper(self):
+        if hasattr(builtins, "__IPYTHON__"):
+            from IPython.utils.wildcard import dict_dir
+
+            caller_frame = inspect.currentframe().f_back
+            if caller_frame.f_code is dict_dir.__code__:
+                return
+
+        return impl(self)
+
+    return property(wrapper)
 
 
 def _awkward_1_rewrite_partition_form(form, partition: int, template: str = "part{}"):
@@ -1299,7 +1318,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             "text/plain": repr(self),
         }
 
-    @property
+    @non_inspectable_property
     def __cuda_array_interface__(self):
         with ak._errors.OperationErrorContext(
             f"{type(self).__name__}.__cuda_array_interface__", (self,), {}
@@ -1307,7 +1326,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             array = ak.operations.to_cupy(self)
             return array.__cuda_array_interface__
 
-    @property
+    @non_inspectable_property
     def __array_interface__(self):
         with ak._errors.OperationErrorContext(
             f"{type(self).__name__}.__array_interface__", (self,), {}
@@ -1419,7 +1438,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             func, types, args, kwargs, behavior=self._behavior
         )
 
-    @property
+    @non_inspectable_property
     def numba_type(self):
         """
         The type of this Array when it is used in Numba. It contains enough
@@ -1501,7 +1520,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                 "use ak.any() or ak.all()"
             )
 
-    @property
+    @non_inspectable_property
     def cpp_type(self):
         """
         The C++ type of this Array when it is used in cppyy.
