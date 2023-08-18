@@ -226,3 +226,10 @@ class ListForm(Form):
             self.__init__(
                 starts, stops, content, parameters=parameters, form_key=form_key
             )
+
+    def _expected_from_buffers(self, getkey):
+        from awkward.operations.ak_from_buffers import _index_to_dtype
+
+        yield (getkey(self, "starts"), _index_to_dtype[self._starts])
+        yield (getkey(self, "stops"), _index_to_dtype[self._stops])
+        yield from self._content._expected_from_buffers(getkey)

@@ -116,23 +116,31 @@ def _impl(
             "'form' argument must be a Form or its Python dict/JSON string representation"
         )
 
+    getkey = _regularize_buffer_key(buffer_key)
+
+    out = _reconstitute(form, length, container, getkey, backend, byteorder, simplify)
+    return wrap_layout(out, behavior, highlevel)
+
+
+def _regularize_buffer_key(buffer_key):
     if isinstance(buffer_key, str):
 
         def getkey(form, attribute):
             return buffer_key.format(form_key=form.form_key, attribute=attribute)
+
+        return getkey
 
     elif callable(buffer_key):
 
         def getkey(form, attribute):
             return buffer_key(form_key=form.form_key, attribute=attribute, form=form)
 
+        return getkey
+
     else:
         raise TypeError(
             f"buffer_key must be a string or a callable, not {type(buffer_key)}"
         )
-
-    out = _reconstitute(form, length, container, getkey, backend, byteorder, simplify)
-    return wrap_layout(out, behavior, highlevel)
 
 
 _index_to_dtype = {

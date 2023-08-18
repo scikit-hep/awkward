@@ -251,3 +251,9 @@ class BitMaskedForm(Form):
                 parameters=parameters,
                 form_key=form_key,
             )
+
+    def _expected_from_buffers(self, getkey):
+        from awkward.operations.ak_from_buffers import _index_to_dtype
+
+        yield (getkey(self, "mask"), _index_to_dtype[self._mask])
+        yield from self._content._expected_from_buffers(getkey)

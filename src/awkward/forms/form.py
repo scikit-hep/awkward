@@ -630,3 +630,17 @@ class Form:
             behavior=behavior,
             simplify=False,
         )
+
+    def expected_from_buffers(self, buffer_key="{form_key}-{attribute}"):
+        """
+        Args:
+            buffer_key (str or callable): Python format string containing
+                `"{form_key}"` and/or `"{attribute}"` or a function that takes these
+                as keyword arguments and returns a string to use as a key for a buffer
+                in the `container`.
+        """
+        from awkward.operations.ak_from_buffers import _regularize_buffer_key
+
+        getkey = _regularize_buffer_key(buffer_key)
+
+        return dict(self._expected_from_buffers(getkey))

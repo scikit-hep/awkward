@@ -287,3 +287,11 @@ class UnionForm(Form):
             self.__init__(
                 tags, index, contents, parameters=parameters, form_key=form_key
             )
+
+    def _expected_from_buffers(self, getkey):
+        from awkward.operations.ak_from_buffers import _index_to_dtype
+
+        yield (getkey(self, "tags"), _index_to_dtype[self._tags])
+        yield (getkey(self, "index"), _index_to_dtype[self._index])
+        for content in self._contents:
+            yield from content._expected_from_buffers(getkey)

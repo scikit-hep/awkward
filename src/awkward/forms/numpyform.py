@@ -284,3 +284,8 @@ class NumpyForm(Form):
             self.__init__(
                 primitive, inner_shape, parameters=parameters, form_key=form_key
             )
+
+    def _expected_from_buffers(self, getkey):
+        from awkward.types.numpytype import primitive_to_dtype
+
+        yield (getkey(self, "data"), primitive_to_dtype(self.primitive))

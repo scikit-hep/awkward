@@ -189,3 +189,9 @@ class ListOffsetForm(Form):
                 form_key = "part0-" + form_key  # only the first partition
 
             self.__init__(offsets, content, parameters=parameters, form_key=form_key)
+
+    def _expected_from_buffers(self, getkey):
+        from awkward.operations.ak_from_buffers import _index_to_dtype
+
+        yield (getkey(self, "offsets"), _index_to_dtype[self._offsets])
+        yield from self._content._expected_from_buffers(getkey)

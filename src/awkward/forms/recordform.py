@@ -301,3 +301,7 @@ class RecordForm(Form):
             self.__init__(
                 contents, recordlookup, parameters=parameters, form_key=form_key
             )
+
+    def _expected_from_buffers(self, getkey):
+        for content in self._contents:
+            yield from content._expected_from_buffers(getkey)

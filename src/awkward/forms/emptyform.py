@@ -143,3 +143,6 @@ class EmptyForm(Form):
                 form_key = "part0-" + form_key  # only the first partition
 
             self.__init__(form_key=form_key)
+
+    def _expected_from_buffers(self, getkey):
+        yield from ()

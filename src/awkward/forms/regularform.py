@@ -183,3 +183,6 @@ class RegularForm(Form):
                 form_key = "part0-" + form_key  # only the first partition
 
             self.__init__(content, size, parameters=parameters, form_key=form_key)
+
+    def _expected_from_buffers(self, getkey):
+        yield from self._content._expected_from_buffers(getkey)
