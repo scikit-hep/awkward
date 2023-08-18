@@ -2505,6 +2505,7 @@ class ArrayBuilder(Sized):
                 highlevel=True,
                 behavior=self._behavior,
                 simplify=True,
+                form_keys_to_parameters=False,
             )
 
     def null(self):

@@ -510,7 +510,12 @@ class Form:
         raise NotImplementedError
 
     def length_zero_array(
-        self, *, backend=numpy_backend, highlevel=True, behavior=None
+        self,
+        *,
+        backend=numpy_backend,
+        form_keys_to_parameters=False,
+        highlevel=True,
+        behavior=None,
     ):
         if highlevel:
             deprecate(
@@ -528,9 +533,17 @@ class Form:
             highlevel=highlevel,
             behavior=behavior,
             simplify=False,
+            form_keys_to_parameters=form_keys_to_parameters,
         )
 
-    def length_one_array(self, *, backend=numpy_backend, highlevel=True, behavior=None):
+    def length_one_array(
+        self,
+        *,
+        backend=numpy_backend,
+        form_keys_to_parameters=False,
+        highlevel=True,
+        behavior=None,
+    ):
         # The naive implementation of a length-1 array requires that we have a sufficiently
         # large buffer to be able to build _any_ subtree.
         def max_prefer_unknown(this: ShapeItem, that: ShapeItem) -> ShapeItem:
@@ -629,4 +642,5 @@ class Form:
             highlevel=highlevel,
             behavior=behavior,
             simplify=False,
+            form_keys_to_parameters=form_keys_to_parameters,
         )

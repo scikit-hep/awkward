@@ -10,6 +10,8 @@ __all__ = [
     "unknown_length",
 ]
 
+from typing import Callable
+
 from awkward._backends.typetracer import TypeTracerBackend
 from awkward._behavior import behavior_of
 from awkward._errors import deprecate
@@ -30,7 +32,9 @@ from awkward.operations.ak_to_layout import to_layout
 T = TypeVar("T", Array, Record)
 
 
-def _length_0_1_if_typetracer(array: T, function):
+def _length_0_1_if_typetracer(
+    array: T, function: Callable, form_keys_to_parameters: bool
+):
     typetracer_backend = TypeTracerBackend.instance()
 
     layout = to_layout(array, allow_other=False)
@@ -38,7 +42,11 @@ def _length_0_1_if_typetracer(array: T, function):
 
     if layout.backend is typetracer_backend:
         layout._touch_data(True)
-        layout = function(layout.form, highlevel=False)
+        layout = function(
+            layout.form,
+            form_keys_to_parameters=form_keys_to_parameters,
+            highlevel=False,
+        )
 
     return wrap_layout(layout, behavior=behavior)
 
@@ -52,9 +60,13 @@ def empty_if_typetracer(array: T) -> T:
     return length_zero_if_typetracer(array)
 
 
-def length_zero_if_typetracer(array: T) -> T:
-    return _length_0_1_if_typetracer(array, Form.length_zero_array)
+def length_zero_if_typetracer(array: T, form_keys_to_parameters: bool = False) -> T:
+    return _length_0_1_if_typetracer(
+        array, Form.length_zero_array, form_keys_to_parameters
+    )
 
 
-def length_one_if_typetracer(array: T) -> T:
-    return _length_0_1_if_typetracer(array, Form.length_one_array)
+def length_one_if_typetracer(array: T, form_keys_to_parameters: bool = False) -> T:
+    return _length_0_1_if_typetracer(
+        array, Form.length_one_array, form_keys_to_parameters
+    )
