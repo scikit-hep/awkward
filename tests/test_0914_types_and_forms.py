@@ -1186,13 +1186,6 @@ def test_EmptyForm():
     "class": "EmptyArray"
 }"""
     )
-    assert (
-        str(ak.forms.emptyform.EmptyForm(form_key="hello"))
-        == """{
-    "class": "EmptyArray",
-    "form_key": "hello"
-}"""
-    )
     assert repr(ak.forms.emptyform.EmptyForm()) == "EmptyForm()"
     with pytest.raises(TypeError):
         ak.forms.emptyform.EmptyForm(parameters={"x": 123}, form_key="hello")
@@ -1205,9 +1198,8 @@ def test_EmptyForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak.forms.emptyform.EmptyForm(form_key="hello").to_dict(verbose=False) == {
-        "class": "EmptyArray",
-        "form_key": "hello",
+    assert ak.forms.emptyform.EmptyForm().to_dict(verbose=False) == {
+        "class": "EmptyArray"
     }
     assert ak.forms.from_dict({"class": "EmptyArray"}).to_dict() == {
         "class": "EmptyArray",

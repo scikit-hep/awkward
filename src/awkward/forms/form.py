@@ -50,7 +50,7 @@ def from_dict(input: Mapping) -> Form:
         )
 
     elif input["class"] == "EmptyArray":
-        return ak.forms.EmptyForm(parameters=parameters, form_key=form_key)
+        return ak.forms.EmptyForm(parameters=parameters)  # ignore form_key
 
     elif input["class"] == "RegularArray":
         return ak.forms.RegularForm(

@@ -19,6 +19,8 @@ class EmptyForm(Form):
     def __init__(self, *, parameters: JSONMapping | None = None, form_key=None):
         if not (parameters is None or len(parameters) == 0):
             raise TypeError(f"{type(self).__name__} cannot contain parameters")
+        if form_key is not None:
+            deprecate(f"{type(self).__name__} cannot have a form_key", version="2.5.0")
         self._init(parameters=parameters, form_key=form_key)
 
     def copy(
@@ -26,6 +28,8 @@ class EmptyForm(Form):
     ) -> EmptyForm:
         if not (parameters is UNSET or parameters is None or len(parameters) == 0):
             raise TypeError(f"{type(self).__name__} cannot contain parameters")
+        if form_key is not None:
+            deprecate(f"{type(self).__name__} cannot have a form_key", version="2.5.0")
         return EmptyForm(
             form_key=self._form_key if form_key is UNSET else form_key,
         )
@@ -34,11 +38,19 @@ class EmptyForm(Form):
     def simplified(cls, *, parameters=None, form_key=None) -> Form:
         if not (parameters is None or len(parameters) == 0):
             raise TypeError(f"{cls.__name__} cannot contain parameters")
+        if form_key is not None:
+            deprecate(f"{type(cls).__name__} cannot have a form_key", version="2.5.0")
         return cls(parameters=parameters, form_key=form_key)
 
     def __repr__(self):
         args = self._repr_args()
         return "{}({})".format(type(self).__name__, ", ".join(args))
+
+    def _to_dict_extra(self, out, verbose):
+        if verbose:
+            out["parameters"] = {}
+            out["form_key"] = None
+        return out
 
     def _to_dict_part(self, verbose, toplevel):
         return self._to_dict_extra({"class": "EmptyArray"}, verbose)
@@ -48,7 +60,7 @@ class EmptyForm(Form):
         return ak.types.UnknownType()
 
     def __eq__(self, other) -> bool:
-        return isinstance(other, EmptyForm) and self._form_key == other._form_key
+        return isinstance(other, EmptyForm)  # ignore form_key in equality check
 
     def to_NumpyForm(self, *args, **kwargs):
         def legacy_impl(dtype):
@@ -138,8 +150,4 @@ class EmptyForm(Form):
 
             # https://github.com/scikit-hep/awkward/blob/main-v1/src/python/forms.cpp#L240-L244
             has_identities, parameters, form_key = state
-
-            if form_key is not None:
-                form_key = "part0-" + form_key  # only the first partition
-
-            self.__init__(form_key=form_key)
+            self.__init__()

@@ -101,7 +101,8 @@ class EmptyArray(Content):
         return cls(backend=backend)
 
     def _form_with_key(self, getkey: Callable[[Content], str | None]) -> EmptyForm:
-        return self.form_cls(form_key=getkey(self))
+        getkey(self)  # skip a number but don't add a form_key to EmptyForm
+        return self.form_cls()
 
     def _to_buffers(
         self,

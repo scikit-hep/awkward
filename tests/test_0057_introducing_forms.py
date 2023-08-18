@@ -101,21 +101,16 @@ def test_forms():
             parameters={"hey": ["you"]},
             form_key="yowzers",
         )
-    form = ak.forms.EmptyForm(
-        form_key="yowzers",
-    )
+    form = ak.forms.EmptyForm()
     assert form == form
     assert pickle.loads(pickle.dumps(form, -1)) == form
     assert ak.forms.from_json(form.to_json()) == form
     assert json.loads(form.to_json()) == {
         "class": "EmptyArray",
         "parameters": {},
-        "form_key": "yowzers",
+        "form_key": None,
     }
-    assert json.loads(str(form)) == {
-        "class": "EmptyArray",
-        "form_key": "yowzers",
-    }
+    assert json.loads(str(form)) == {"class": "EmptyArray"}
 
     form = ak.forms.IndexedForm(
         "i64",

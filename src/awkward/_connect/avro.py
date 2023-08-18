@@ -222,7 +222,7 @@ class ReadAvroFT:
         if file["type"] == "null":
             aform = ak.forms.IndexedOptionForm(
                 "i64",
-                ak.forms.EmptyForm(form_key=f"node{form_next_id+1}"),
+                ak.forms.EmptyForm(),
                 form_key=f"node{form_next_id}",
             )
             declarations.append(f"output node{form_next_id+1}-data uint8 \n")
