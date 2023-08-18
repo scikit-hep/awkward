@@ -192,6 +192,31 @@ class Content:
     def form(self) -> Form:
         return self.form_with_key(None)
 
+    @property
+    def form_with_key_from_parameter(self) -> Form:
+        def getkey(layout):
+            return layout.parameter("__form_key__")
+
+        def remove_parameter(form):
+            if form._parameters is not None and "__form_key__" in form._parameters:
+                if len(form._parameters) == 1:
+                    form._parameters = None
+                else:
+                    form._parameters = {
+                        k: v for k, v in form._parameters.items() if k != "__form_key__"
+                    }
+
+            if hasattr(form, "_content"):
+                remove_parameter(form._content)
+
+            elif hasattr(form, "_contents"):
+                for x in form._contents:
+                    remove_parameter(x)
+
+        out = self._form_with_key(getkey)
+        remove_parameter(out)
+        return out
+
     def form_with_key(
         self, form_key: str | None | Callable = "node{id}", id_start: int = 0
     ) -> Form:
