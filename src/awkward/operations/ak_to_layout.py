@@ -102,6 +102,9 @@ def _impl(array, allow_record, allow_other, regulararray):
     elif ak._util.in_module(array, "pyarrow"):
         return ak.operations.from_arrow(array, highlevel=False)
 
+    elif hasattr(array, "__dlpack__") and hasattr(array, "__dlpack_device__"):
+        return ak.operations.from_dlpack(array, highlevel=False)
+
     elif isinstance(array, (str, bytes)):
         return ak.operations.from_iter([array], highlevel=False)[0]
 

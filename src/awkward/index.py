@@ -220,18 +220,19 @@ class Index:
     def is_equal_to(self, other, index_dtype=True, numpyarray=True):
         if index_dtype:
             return (
-                self.nplike.array_equal(self.data, other.data)
-                and self._data.dtype == other.data.dtype
-            )
+                not self._nplike.known_data
+                or self._nplike.array_equal(self.data, other.data)
+            ) and self._data.dtype == other.data.dtype
+
         else:
-            return self.nplike.array_equal(self.data, other.data)
+            return self._nplike.array_equal(self.data, other.data)
 
     def _touch_data(self):
-        if not self.nplike.known_data:
+        if not self._nplike.known_data:
             self._data.touch_data()
 
     def _touch_shape(self):
-        if not self.nplike.known_data:
+        if not self._nplike.known_data:
             self._data.touch_shape()
 
 

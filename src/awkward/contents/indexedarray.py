@@ -473,7 +473,7 @@ class IndexedArray(Content):
                 parameters=parameters_union(
                     next._parameters,
                     self._parameters,
-                    exclude={("__array__", "categorical")},
+                    exclude=(("__array__", "categorical"),),
                 )
             )
 

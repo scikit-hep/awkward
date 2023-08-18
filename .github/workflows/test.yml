@@ -193,11 +193,15 @@ jobs:
           - '3.8'
         numpy-package:
           - "numpy"
+        pyarrow-package:
+          - "pyarrow"
         include:
           - python-version: '3.8'
             numpy-package: "numpy==1.18.0"
+            pyarrow-package: "pyarrow==7.0.0"
           - python-version: '3.12'
             numpy-package: "numpy>=1.26.0b1"
+            pyarrow-package: "pyarrow"
 
     runs-on: ubuntu-22.04
 
@@ -232,7 +236,7 @@ jobs:
           python -m build -w ./awkward-cpp
 
       - name: Install awkward-cpp
-        run: python -m pip install -v ./awkward-cpp/dist/*.whl "${{ matrix.numpy-package }}"
+        run: python -m pip install -v ./awkward-cpp/dist/*.whl "${{ matrix.numpy-package }}" "${{ matrix.pyarrow-package }}"
 
       - name: Build & install awkward
         run: python -m pip install -v .
