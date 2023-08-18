@@ -27,7 +27,7 @@ _dtype_to_form: Final = {
 _form_to_dtype: Final = {v: k for k, v in _dtype_to_form.items()}
 
 
-def _form_to_zero_length(form: str) -> Index:
+def _form_to_length_zero(form: str) -> Index:
     try:
         dtype = _form_to_dtype[form]
     except KeyError:
