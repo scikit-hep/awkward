@@ -10,7 +10,7 @@ from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyLike, NumpyMetadata
 from awkward._nplikes.typetracer import TypeTracer
-from awkward._typing import Final, Self
+from awkward._typing import Any, Final, Self
 
 np: Final = NumpyMetadata.instance()
 numpy: Final = Numpy.instance()
@@ -144,6 +144,15 @@ class Index:
     @property
     def __array_interface__(self):
         return self._data.__array_interface__
+
+    def __dlpack__(self) -> tuple[int, int]:
+        return self._data.__dlpack_device__()
+
+    def __dlpack_device__(self, stream: Any = None) -> Any:
+        if stream is None:
+            return self._data.__dlpack__()
+        else:
+            return self._data.__dlpack__(stream)
 
     def __repr__(self):
         return self._repr("", "", "")
