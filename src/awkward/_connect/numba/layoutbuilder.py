@@ -6,6 +6,7 @@ import math
 import numba
 import numba.core.typing.npydecl
 import numpy as np
+from numba.core.errors import NumbaTypeError
 
 import awkward as ak
 from awkward._connect.numba.growablebuffer import GrowableBufferType
@@ -62,9 +63,7 @@ class LayoutBuilderType(numba.types.Type):
         if name in self._parameters:
             return numba.types.StringLiteral(self._parameters[name])
         else:
-            raise numba.TypingError(
-                f"LayoutBuilder.parameters does not have a {name!r}"
-            )
+            raise NumbaTypeError(f"LayoutBuilder.parameters does not have a {name!r}")
 
     @property
     def length(self):

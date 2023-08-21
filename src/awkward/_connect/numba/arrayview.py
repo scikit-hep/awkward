@@ -5,6 +5,7 @@ import numba
 import numba.core.typing
 import numba.core.typing.ctypes_utils
 import numpy
+from numba.core.errors import NumbaTypeError
 
 import awkward as ak
 from awkward._behavior import behavior_of, overlay_behavior
@@ -420,7 +421,7 @@ class type_getitem(numba.core.typing.templates.AbstractTemplate):
                     viewtype, wheretype
                 )
             else:
-                raise numba.TypingError(
+                raise NumbaTypeError(
                     "only an integer, start:stop range, or a *constant* "
                     "field name string may be used as ak.Array "
                     "slices in compiled code"
@@ -708,7 +709,7 @@ class type_getitem_record(numba.core.typing.templates.AbstractTemplate):
                 )(recordviewtype, wheretype)
 
             else:
-                raise numba.TypingError(
+                raise NumbaTypeError(
                     "only a *constant* field name string may be used as a "
                     "record slice in compiled code"
                 )
