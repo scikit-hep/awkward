@@ -1,11 +1,13 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 from __future__ import annotations
 
+__all__ = ("from_dict", "from_type", "from_json", "reserved_nominal_parameters", "Form")
+
 import itertools
 import json
 import re
 from collections import defaultdict
-from collections.abc import Iterable, Mapping
+from collections.abc import Callable, Iterable, Mapping
 from fnmatch import fnmatchcase
 from glob import escape as escape_glob
 
@@ -15,7 +17,7 @@ from awkward._errors import deprecate
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._parameters import parameters_union
-from awkward._typing import Final, JSONMapping, JSONSerializable, Self
+from awkward._typing import Final, Iterator, JSONMapping, JSONSerializable, Self
 
 np = NumpyMetadata.instance()
 numpy_backend = NumpyBackend.instance()
@@ -332,6 +334,36 @@ class _SpecifierMatcher:
             return
 
 
+def regularize_buffer_key(buffer_key: str | callable) -> Callable[[Form, str], str]:
+    if isinstance(buffer_key, str):
+
+        def getkey(form, attribute):
+            return buffer_key.format(form_key=form.form_key, attribute=attribute)
+
+        return getkey
+
+    elif callable(buffer_key):
+
+        def getkey(form, attribute):
+            return buffer_key(form_key=form.form_key, attribute=attribute, form=form)
+
+        return getkey
+
+    else:
+        raise TypeError(
+            f"buffer_key must be a string or a callable, not {type(buffer_key)}"
+        )
+
+
+index_to_dtype: Final[dict[str, np.dtype]] = {
+    "i8": np.dtype("<i1"),
+    "u8": np.dtype("<u1"),
+    "i32": np.dtype("<i4"),
+    "u32": np.dtype("<u4"),
+    "i64": np.dtype("<i8"),
+}
+
+
 class Form:
     is_numpy = False
     is_unknown = False
@@ -631,6 +663,11 @@ class Form:
             simplify=False,
         )
 
+    def _expected_from_buffers(
+        self, getkey: Callable[[Form, str], str]
+    ) -> Iterator[tuple[str, np.dtype]]:
+        raise NotImplementedError
+
     def expected_from_buffers(self, buffer_key="{form_key}-{attribute}"):
         """
         Args:
@@ -639,8 +676,6 @@ class Form:
                 as keyword arguments and returns a string to use as a key for a buffer
                 in the `container`.
         """
-        from awkward.operations.ak_from_buffers import _regularize_buffer_key
-
-        getkey = _regularize_buffer_key(buffer_key)
+        getkey = regularize_buffer_key(buffer_key)
 
         return dict(self._expected_from_buffers(getkey))

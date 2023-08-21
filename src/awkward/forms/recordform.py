@@ -1,13 +1,19 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-from collections.abc import Iterable
+from __future__ import annotations
+
+__all__ = ("RecordForm",)
+from collections.abc import Callable, Iterable, Iterator
 
 import awkward as ak
+from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._parameters import type_parameters_equal
 from awkward._regularize import is_integer
 from awkward._typing import JSONSerializable, final
 from awkward._util import UNSET
 from awkward.errors import FieldNotFoundError
 from awkward.forms.form import Form
+
+np = NumpyMetadata.instance()
 
 
 @final
@@ -302,6 +308,8 @@ class RecordForm(Form):
                 contents, recordlookup, parameters=parameters, form_key=form_key
             )
 
-    def _expected_from_buffers(self, getkey):
+    def _expected_from_buffers(
+        self, getkey: Callable[[Form, str], str]
+    ) -> Iterator[tuple[str, np.dtype]]:
         for content in self._contents:
             yield from content._expected_from_buffers(getkey)

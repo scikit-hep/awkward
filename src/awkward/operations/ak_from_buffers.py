@@ -11,6 +11,7 @@ from awkward._layout import wrap_layout
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import is_integer
+from awkward.forms.form import index_to_dtype, regularize_buffer_key
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
@@ -116,40 +117,10 @@ def _impl(
             "'form' argument must be a Form or its Python dict/JSON string representation"
         )
 
-    getkey = _regularize_buffer_key(buffer_key)
+    getkey = regularize_buffer_key(buffer_key)
 
     out = _reconstitute(form, length, container, getkey, backend, byteorder, simplify)
     return wrap_layout(out, behavior, highlevel)
-
-
-def _regularize_buffer_key(buffer_key):
-    if isinstance(buffer_key, str):
-
-        def getkey(form, attribute):
-            return buffer_key.format(form_key=form.form_key, attribute=attribute)
-
-        return getkey
-
-    elif callable(buffer_key):
-
-        def getkey(form, attribute):
-            return buffer_key(form_key=form.form_key, attribute=attribute, form=form)
-
-        return getkey
-
-    else:
-        raise TypeError(
-            f"buffer_key must be a string or a callable, not {type(buffer_key)}"
-        )
-
-
-_index_to_dtype = {
-    "i8": np.dtype("<i1"),
-    "u8": np.dtype("<u1"),
-    "i32": np.dtype("<i4"),
-    "u32": np.dtype("<u4"),
-    "i64": np.dtype("<i8"),
-}
 
 
 def _from_buffer(nplike, buffer, dtype, count, byteorder):
@@ -215,7 +186,7 @@ def _reconstitute(form, length, container, getkey, backend, byteorder, simplify)
         mask = _from_buffer(
             backend.index_nplike,
             raw_array,
-            dtype=_index_to_dtype[form.mask],
+            dtype=index_to_dtype[form.mask],
             count=excess_length,
             byteorder=byteorder,
         )
@@ -240,7 +211,7 @@ def _reconstitute(form, length, container, getkey, backend, byteorder, simplify)
         mask = _from_buffer(
             backend.index_nplike,
             raw_array,
-            dtype=_index_to_dtype[form.mask],
+            dtype=index_to_dtype[form.mask],
             count=length,
             byteorder=byteorder,
         )
@@ -263,7 +234,7 @@ def _reconstitute(form, length, container, getkey, backend, byteorder, simplify)
         index = _from_buffer(
             backend.index_nplike,
             raw_array,
-            dtype=_index_to_dtype[form.index],
+            dtype=index_to_dtype[form.index],
             count=length,
             byteorder=byteorder,
         )
@@ -288,7 +259,7 @@ def _reconstitute(form, length, container, getkey, backend, byteorder, simplify)
         index = _from_buffer(
             backend.index_nplike,
             raw_array,
-            dtype=_index_to_dtype[form.index],
+            dtype=index_to_dtype[form.index],
             count=length,
             byteorder=byteorder,
         )
@@ -318,14 +289,14 @@ def _reconstitute(form, length, container, getkey, backend, byteorder, simplify)
         starts = _from_buffer(
             backend.index_nplike,
             raw_array1,
-            dtype=_index_to_dtype[form.starts],
+            dtype=index_to_dtype[form.starts],
             count=length,
             byteorder=byteorder,
         )
         stops = _from_buffer(
             backend.index_nplike,
             raw_array2,
-            dtype=_index_to_dtype[form.stops],
+            dtype=index_to_dtype[form.stops],
             count=length,
             byteorder=byteorder,
         )
@@ -346,7 +317,7 @@ def _reconstitute(form, length, container, getkey, backend, byteorder, simplify)
         offsets = _from_buffer(
             backend.index_nplike,
             raw_array,
-            dtype=_index_to_dtype[form.offsets],
+            dtype=index_to_dtype[form.offsets],
             count=length + 1,
             byteorder=byteorder,
         )
@@ -392,14 +363,14 @@ def _reconstitute(form, length, container, getkey, backend, byteorder, simplify)
         tags = _from_buffer(
             backend.index_nplike,
             raw_array1,
-            dtype=_index_to_dtype[form.tags],
+            dtype=index_to_dtype[form.tags],
             count=length,
             byteorder=byteorder,
         )
         index = _from_buffer(
             backend.index_nplike,
             raw_array2,
-            dtype=_index_to_dtype[form.index],
+            dtype=index_to_dtype[form.index],
             count=length,
             byteorder=byteorder,
         )
