@@ -4,6 +4,7 @@ import json
 
 import llvmlite.ir
 import numba
+from numba.core.errors import NumbaTypeError, NumbaValueError
 
 import awkward as ak
 from awkward._behavior import overlay_behavior
@@ -144,7 +145,7 @@ def find_numba_record_lower(layouttype, behavior):
 @numba.extending.typeof_impl.register(ak.index.Index)
 @numba.extending.typeof_impl.register(ak.record.Record)
 def fake_typeof(obj, c):
-    raise TypeError(
+    raise NumbaTypeError(
         "{} objects cannot be passed directly into Numba-compiled functions; "
         "construct a high-level ak.Array or ak.Record instead".format(
             type(obj).__name__
@@ -206,7 +207,7 @@ class ContentType(numba.types.Type):
                 self, viewtype, (*viewtype.fields, key)
             )
         else:
-            raise TypeError(f"array does not have a field with key {key!r}")
+            raise NumbaTypeError(f"array does not have a field with key {key!r}")
 
     def lower_getitem_at_check(
         self,
@@ -1224,13 +1225,13 @@ class RecordArrayType(ContentType, ak._lookup.RecordLookup):
             index = self.fieldindex(key)
             if index is None:
                 if self.fields is None:
-                    raise ValueError(
+                    raise NumbaValueError(
                         "no field {} in tuples with {} fields".format(
                             repr(key), len(self.contenttypes)
                         )
                     )
                 else:
-                    raise ValueError(
+                    raise NumbaValueError(
                         "no field {} in records with fields: [{}]".format(
                             repr(key), ", ".join(repr(x) for x in self.fields)
                         )
@@ -1245,13 +1246,13 @@ class RecordArrayType(ContentType, ak._lookup.RecordLookup):
         index = self.fieldindex(key)
         if index is None:
             if self.fields is None:
-                raise ValueError(
+                raise NumbaValueError(
                     "no field {} in tuples with {} fields".format(
                         repr(key), len(self.contenttypes)
                     )
                 )
             else:
-                raise ValueError(
+                raise NumbaValueError(
                     "no field {} in records with fields: [{}]".format(
                         repr(key), ", ".join(repr(x) for x in self.fields)
                     )
@@ -1264,13 +1265,13 @@ class RecordArrayType(ContentType, ak._lookup.RecordLookup):
         index = self.fieldindex(key)
         if index is None:
             if self.fields is None:
-                raise ValueError(
+                raise NumbaValueError(
                     "no field {} in tuple with {} fields".format(
                         repr(key), len(self.contenttypes)
                     )
                 )
             else:
-                raise ValueError(
+                raise NumbaValueError(
                     "no field {} in record with fields: [{}]".format(
                         repr(key), ", ".join(repr(x) for x in self.fields)
                     )
@@ -1482,15 +1483,15 @@ class UnionArrayType(ContentType, ak._lookup.UnionLookup):
 
     def getitem_at(self, viewtype):
         if not all(isinstance(x, RecordArrayType) for x in self.contenttypes):
-            raise TypeError("union types cannot be accessed in Numba")
+            raise NumbaTypeError("union types cannot be accessed in Numba")
 
     def getitem_range(self, viewtype):
         if not all(isinstance(x, RecordArrayType) for x in self.contenttypes):
-            raise TypeError("union types cannot be accessed in Numba")
+            raise NumbaTypeError("union types cannot be accessed in Numba")
 
     def getitem_field(self, viewtype, key):
         if not all(isinstance(x, RecordArrayType) for x in self.contenttypes):
-            raise TypeError("union types cannot be accessed in Numba")
+            raise NumbaTypeError("union types cannot be accessed in Numba")
 
     def lower_getitem_at(
         self,
