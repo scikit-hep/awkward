@@ -24,7 +24,7 @@ class PlaceholderArray(ArrayLike):
         return self._dtype
 
     @property
-    def shape(self) -> tuple[ShapeItem, ...]:
+    def shape(self) -> tuple[int, ...]:
         return self._shape
 
     @property
@@ -32,15 +32,15 @@ class PlaceholderArray(ArrayLike):
         return len(self._shape)
 
     @property
-    def size(self) -> ShapeItem:
+    def size(self) -> int:
         return reduce(mul, self._shape)
 
     @property
-    def nbytes(self) -> ShapeItem:
+    def nbytes(self) -> int:
         return self.size * self._dtype.itemsize
 
     @property
-    def strides(self) -> tuple[ShapeItem, ...]:
+    def strides(self) -> tuple[int, ...]:
         out = (self._dtype.itemsize,)
         for item in reversed(self._shape):
             out = (item * out[0], *out)
