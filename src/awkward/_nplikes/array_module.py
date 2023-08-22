@@ -84,23 +84,23 @@ class ArrayModuleNumpyLike(NumpyLike):
 
     def zeros_like(self, x: ArrayLike, *, dtype: np.dtype | None = None) -> ArrayLike:
         if isinstance(x, PlaceholderArray):
-            return PlaceholderArray(self, x.shape, dtype or x.dtype)
-
-        return self._module.zeros_like(x, dtype=dtype)
+            return self.zeros(x.shape, dtype=dtype or x.dtype)
+        else:
+            return self._module.zeros_like(x, dtype=dtype)
 
     def ones_like(self, x: ArrayLike, *, dtype: np.dtype | None = None) -> ArrayLike:
         if isinstance(x, PlaceholderArray):
-            return PlaceholderArray(self, x.shape, dtype or x.dtype)
-
-        return self._module.ones_like(x, dtype=dtype)
+            return self.ones(x.shape, dtype=dtype or x.dtype)
+        else:
+            return self._module.ones_like(x, dtype=dtype)
 
     def full_like(
         self, x: ArrayLike, fill_value, *, dtype: np.dtype | None = None
     ) -> ArrayLike:
         if isinstance(x, PlaceholderArray):
-            return PlaceholderArray(self, x.shape, dtype or x.dtype)
-
-        return self._module.full_like(x, fill_value, dtype=dtype)
+            return self.full(x.shape, fill_value, dtype=dtype or x.dtype)
+        else:
+            return self._module.full_like(x, fill_value, dtype=dtype)
 
     def arange(
         self,
