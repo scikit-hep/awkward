@@ -893,8 +893,8 @@ def overload_contains(obj, element):
             elif arraytype.ndim == 1 and not arraytype.is_recordtype:
                 if arraytype.is_optiontype:
                     statements.append(
-                        indent + "if (element is None and {0} is None) or "
-                        "({0} is not None and element == {0}): return True".format(name)
+                        indent + f"if (element is None and {name} is None) or "
+                        f"({name} is not None and element == {name}): return True"
                     )
                 else:
                     statements.append(indent + f"if element == {name}: return True")
@@ -902,8 +902,8 @@ def overload_contains(obj, element):
             else:
                 if arraytype.is_optiontype:
                     statements.append(
-                        indent + "if (element is None and {0} is None) or "
-                        "({0} is not None and element in {0}): return True".format(name)
+                        indent + f"if (element is None and {name} is None) or "
+                        f"({name} is not None and element in {name}): return True"
                     )
                 else:
                     statements.append(indent + f"if element in {name}: return True")
@@ -973,7 +973,7 @@ def overload_np_array(array, dtype=None):
                     "subarray lengths are not regular')".format("    " * i)
                 )
                 specify_shape.append(f"shape{i}")
-                ensure_shape.append("if shape{0} == -1: shape{0} = 0".format(i))
+                ensure_shape.append(f"if shape{i} == -1: shape{i} = 0")
                 array_name = f"x{i}"
 
             fill_array = []

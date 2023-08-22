@@ -61,8 +61,8 @@ def where(condition, *args, mergebool=True, highlevel=True, behavior=None):
 
     else:
         raise TypeError(
-            "where() takes from 1 to 3 positional arguments but {} were "
-            "given".format(len(args) + 1)
+            f"where() takes from 1 to 3 positional arguments but {len(args) + 1} were "
+            "given"
         )
 
 
