@@ -11,6 +11,7 @@ import inspect
 import io
 import itertools
 import keyword
+import pickle
 import re
 import sys
 from collections.abc import Iterable, Mapping, Sequence, Sized
@@ -1456,14 +1457,18 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         return numba.typeof(self._numbaview)
 
-    def __reduce__(self):
-        packed = ak.operations.to_packed(self._layout, highlevel=False)
+    def __reduce_ex__(self, protocol: int) -> tuple:
         form, length, container = ak.operations.to_buffers(
-            packed,
+            self._layout,
             buffer_key="{form_key}-{attribute}",
             form_key="node{id}",
             byteorder="<",
         )
+
+        # For pickle >= 5, we can avoid copying the buffers
+        if protocol >= 5:
+            container = {k: pickle.PickleBuffer(v) for k, v in container.items()}
+
         if self._behavior is ak.behavior:
             behavior = None
         else:
@@ -2118,14 +2123,17 @@ class Record(NDArrayOperatorsMixin):
 
         return numba.typeof(self._numbaview)
 
-    def __reduce__(self):
-        packed = ak.operations.to_packed(self._layout, highlevel=False)
+    def __reduce_ex__(self, protocol: int) -> tuple:
         form, length, container = ak.operations.to_buffers(
-            packed.array,
+            self._layout.array,
             buffer_key="{form_key}-{attribute}",
             form_key="node{id}",
             byteorder="<",
         )
+
+        # For pickle >= 5, we can avoid copying the buffers
+        if protocol >= 5:
+            container = {k: pickle.PickleBuffer(v) for k, v in container.items()}
         if self._behavior is ak.behavior:
             behavior = None
         else:
@@ -2133,7 +2141,7 @@ class Record(NDArrayOperatorsMixin):
         return (
             object.__new__,
             (Record,),
-            (form.to_dict(), length, container, behavior, packed.at),
+            (form.to_dict(), length, container, behavior, self._layout.at),
         )
 
     def __setstate__(self, state):
