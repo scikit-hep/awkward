@@ -289,7 +289,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                 elif length != contents[-1].length:
                     raise ValueError(
                         "dict of arrays in ak.Array constructor must have arrays "
-                        "of equal length ({} vs {})".format(length, contents[-1].length)
+                        f"of equal length ({length} vs {contents[-1].length})"
                     )
             layout = ak.contents.RecordArray(contents, fields)
 
@@ -1168,8 +1168,8 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                     return self[where]
                 except Exception as err:
                     raise AttributeError(
-                        "while trying to get field {}, an exception "
-                        "occurred:\n{}: {}".format(repr(where), type(err), str(err))
+                        f"while trying to get field {where!r}, an exception "
+                        f"occurred:\n{type(err)}: {err!s}"
                     ) from err
             else:
                 raise AttributeError(f"no field named {where!r}")
@@ -1935,8 +1935,8 @@ class Record(NDArrayOperatorsMixin):
                     return self[where]
                 except Exception as err:
                     raise AttributeError(
-                        "while trying to get field {}, an exception "
-                        "occurred:\n{}: {}".format(repr(where), type(err), str(err))
+                        f"while trying to get field {where!r}, an exception "
+                        f"occurred:\n{type(err)}: {err!s}"
                     ) from err
             else:
                 raise AttributeError(f"no field named {where!r}")

@@ -1397,13 +1397,13 @@ class IndexedOptionArray(Content):
                     "reduce_next with unbranching depth > negaxis is only "
                     "expected to return RegularArray or ListOffsetArray or "
                     "IndexedOptionArray; "
-                    "instead, it returned {}".format(type(out).__name__)
+                    f"instead, it returned {type(out).__name__}"
                 )
 
             if starts.nplike.known_data and starts.length > 0 and starts[0] != 0:
                 raise AssertionError(
                     "reduce_next with unbranching depth > negaxis expects a "
-                    "ListOffsetArray whose offsets start at zero ({})".format(starts[0])
+                    f"ListOffsetArray whose offsets start at zero ({starts[0]})"
                 )
             # In this branch, we're above the axis at which the reduction takes place.
             # `next._reduce_next` is therefore expected to return a list/regular layout
