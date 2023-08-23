@@ -57,20 +57,27 @@ class BroadcastOptions(TypedDict):
 
 
 def length_of_broadcast(inputs: Sequence) -> int | type[unknown_length]:
-    maxlen = 1
-
+    max_length: int | None = None
     has_seen_unknown_length: bool = False
     for x in inputs:
-        if isinstance(x, Content):
-            if x.length is unknown_length:
-                has_seen_unknown_length = True
-                continue
-            maxlen = max(maxlen, x.length)
+        if not isinstance(x, Content):
+            continue
+        if x.length is unknown_length:
+            has_seen_unknown_length = True
+        elif max_length is None:
+            max_length = x.length
+        else:
+            max_length = max(max_length, x.length)
 
     if has_seen_unknown_length:
-        return unknown_length
+        if max_length is None:
+            return unknown_length
+        else:
+            return max_length
+    elif max_length is None:
+        return 1
     else:
-        return maxlen
+        return max_length
 
 
 def broadcast_pack(inputs: Sequence, isscalar: list[bool]) -> list:
@@ -99,14 +106,14 @@ def broadcast_pack(inputs: Sequence, isscalar: list[bool]) -> list:
     return nextinputs
 
 
-def broadcast_unpack(x, isscalar: list[bool], backend: Backend):
+def broadcast_unpack(x, isscalar: list[bool]):
     if all(isscalar):
-        if not backend.nplike.known_data or x.length == 0:
+        if x.length is not unknown_length and x.length == 0:
             return x._getitem_nothing()._getitem_nothing()
         else:
             return x[0][0]
     else:
-        if not backend.nplike.known_data or x.length == 0:
+        if x.length is not unknown_length and x.length == 0:
             return x._getitem_nothing()
         else:
             return x[0]
@@ -466,44 +473,46 @@ def apply_step(
         if not options["allow_records"]:
             raise ValueError(f"cannot broadcast records{in_function(options)}")
 
-        fields: list[str] | None = UNSET
-        frozen_fields: frozenset[str] | None = UNSET
-
-        is_tuple: bool = True
+        frozen_record_fields: frozenset[str] | None = UNSET
+        first_record = next(c for c in contents if c.is_record)
         nextparameters = []
 
         for x in contents:
             if x.is_record:
                 nextparameters.append(x._parameters)
 
-                if x.is_tuple:
-                    continue
-
-                # Check fields match
-                if fields is UNSET:
-                    fields = x._fields
-                    frozen_fields = frozenset(x._fields)
-                elif frozen_fields != frozenset(x.fields):
-                    raise ValueError(
-                        "cannot broadcast records because fields don't "
-                        "match{}:\n    {}\n    {}".format(
-                            in_function(options),
-                            ", ".join(sorted(fields)),
-                            ", ".join(sorted(x.fields)),
-                        )
+                # Ensure all records are tuples, or all records are records
+                if x.is_tuple != first_record.is_tuple:
+                    raise TypeError(
+                        f"cannot broadcast a tuple against a record{in_function(options)}"
                     )
-                # Records win over tuples
-                is_tuple = False
+
+                # Check fields match for records
+                if not x.is_tuple:
+                    if frozen_record_fields is UNSET:
+                        frozen_record_fields = frozenset(x.fields)
+                    elif frozen_record_fields != frozenset(x.fields):
+                        raise ValueError(
+                            "cannot broadcast records because fields don't "
+                            "match{}:\n    {}\n    {}".format(
+                                in_function(options),
+                                ", ".join(sorted(first_record.fields)),
+                                ", ".join(sorted(x.fields)),
+                            )
+                        )
             else:
                 nextparameters.append(NO_PARAMETERS)
 
         numoutputs = None
         outcontents = []
-        for field in fields:
+        for field in first_record.fields:
             outcontents.append(
                 apply_step(
                     backend,
-                    [x[field] if isinstance(x, RecordArray) else x for x in inputs],
+                    [
+                        x.content(field) if isinstance(x, RecordArray) else x
+                        for x in inputs
+                    ],
                     action,
                     depth,
                     copy.copy(depth_context),
@@ -523,7 +532,8 @@ def apply_step(
         return tuple(
             RecordArray(
                 [x[i] for x in outcontents],
-                None if is_tuple else fields,
+                # Explicitly set fields to None if this is a tuple
+                None if first_record.is_tuple else first_record.fields,
                 length,
                 parameters=p,
             )
@@ -1038,4 +1048,4 @@ def broadcast_and_apply(
         },
     )
     assert isinstance(out, tuple)
-    return tuple(broadcast_unpack(x, isscalar, backend) for x in out)
+    return tuple(broadcast_unpack(x, isscalar) for x in out)

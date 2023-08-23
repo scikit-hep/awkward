@@ -10,7 +10,7 @@ from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyLike, NumpyMetadata
 from awkward._nplikes.typetracer import TypeTracer
-from awkward._typing import Final, Self
+from awkward._typing import Any, Final, Self
 
 np: Final = NumpyMetadata.instance()
 numpy: Final = Numpy.instance()
@@ -145,6 +145,15 @@ class Index:
     def __array_interface__(self):
         return self._data.__array_interface__
 
+    def __dlpack__(self) -> tuple[int, int]:
+        return self._data.__dlpack_device__()
+
+    def __dlpack_device__(self, stream: Any = None) -> Any:
+        if stream is None:
+            return self._data.__dlpack__()
+        else:
+            return self._data.__dlpack__(stream)
+
     def __repr__(self):
         return self._repr("", "", "")
 
@@ -220,18 +229,19 @@ class Index:
     def is_equal_to(self, other, index_dtype=True, numpyarray=True):
         if index_dtype:
             return (
-                self.nplike.array_equal(self.data, other.data)
-                and self._data.dtype == other.data.dtype
-            )
+                not self._nplike.known_data
+                or self._nplike.array_equal(self.data, other.data)
+            ) and self._data.dtype == other.data.dtype
+
         else:
-            return self.nplike.array_equal(self.data, other.data)
+            return self._nplike.array_equal(self.data, other.data)
 
     def _touch_data(self):
-        if not self.nplike.known_data:
+        if not self._nplike.known_data:
             self._data.touch_data()
 
     def _touch_shape(self):
-        if not self.nplike.known_data:
+        if not self._nplike.known_data:
             self._data.touch_shape()
 
 

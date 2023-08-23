@@ -208,8 +208,11 @@ def _impl(array, counts, axis, highlevel, behavior):
                     )
                     - 1
                 )
-                if not backend.index_nplike.array_equal(
-                    inneroffsets[positions], outeroffsets
+                if (
+                    backend.index_nplike.known_data
+                    and not backend.index_nplike.array_equal(
+                        inneroffsets[positions], outeroffsets
+                    )
                 ):
                     raise ValueError(
                         "structure imposed by 'counts' does not fit in the array or partition "
