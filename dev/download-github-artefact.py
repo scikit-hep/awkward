@@ -12,7 +12,9 @@ import requests
 
 
 def get_sha_head():
-    result = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True)
+    result = subprocess.run(
+        ["git", "rev-parse", "HEAD"], capture_output=True, check=True
+    )
     if result.returncode:
         raise RuntimeError
     return result.stdout.decode().strip()

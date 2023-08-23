@@ -373,9 +373,7 @@ def genspectests(specdict):
                                     )
                                 )
                             else:
-                                f.write(
-                                    " " * 4 + f"assert {arg} == pytest_{arg}\n"
-                                )
+                                f.write(" " * 4 + f"assert {arg} == pytest_{arg}\n")
                     else:
                         f.write(" " * 4 + "with pytest.raises(Exception):\n")
                         f.write(" " * 8 + "funcPy(" + args + ")\n")
@@ -742,9 +740,7 @@ def gencudakerneltests(specdict):
                                     )
                                 )
                             else:
-                                f.write(
-                                    " " * 4 + f"assert {arg} == pytest_{arg}\n"
-                                )
+                                f.write(" " * 4 + f"assert {arg} == pytest_{arg}\n")
                     f.write("\n")
 
 

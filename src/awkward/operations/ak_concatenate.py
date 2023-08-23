@@ -170,8 +170,7 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
                         length = x.length
                     elif length != x.length:
                         raise ValueError(
-                            "all arrays must have the same length for "
-                            f"axis={axis}"
+                            f"all arrays must have the same length for axis={axis}"
                         )
             assert length is not None
 
