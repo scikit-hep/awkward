@@ -24,7 +24,7 @@ class PlaceholderArray(ArrayLike):
         return self._dtype
 
     @property
-    def shape(self) -> tuple[ShapeItem, ...]:
+    def shape(self) -> tuple[int, ...]:
         return self._shape
 
     @property
@@ -32,19 +32,19 @@ class PlaceholderArray(ArrayLike):
         return len(self._shape)
 
     @property
-    def size(self) -> ShapeItem:
+    def size(self) -> int:
         return reduce(mul, self._shape)
 
     @property
-    def strides(self) -> tuple[ShapeItem, ...]:
+    def nbytes(self) -> int:
+        return self.size * self._dtype.itemsize
+
+    @property
+    def strides(self) -> tuple[int, ...]:
         out = (self._dtype.itemsize,)
         for item in reversed(self._shape):
             out = (item * out[0], *out)
         return out
-
-    @property
-    def itemsize(self) -> int:
-        return self._dtype.itemsize
 
     @property
     def T(self):
@@ -53,7 +53,9 @@ class PlaceholderArray(ArrayLike):
     def view(self, dtype: dtype) -> Self:
         dtype = np.dtype(dtype)
         if len(self._shape) >= 1:
-            last, remainder = divmod(self._shape[-1] * self.itemsize, dtype.itemsize)
+            last, remainder = divmod(
+                self._shape[-1] * self._dtype.itemsize, dtype.itemsize
+            )
             if remainder is not unknown_length and remainder != 0:
                 raise ValueError(
                     "new size of array with larger dtype must be a "

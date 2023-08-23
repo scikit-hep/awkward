@@ -51,6 +51,11 @@ class ArrayLike(Protocol):
 
     @property
     @abstractmethod
+    def nbytes(self) -> ShapeItem:
+        ...
+
+    @property
+    @abstractmethod
     def T(self) -> Self:
         ...
 
