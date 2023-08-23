@@ -39,8 +39,10 @@ def from_dlpack(
     """
     try:
         dlpack_info_func = array.__dlpack_device__
-    except AttributeError:
-        ...
+    except AttributeError as err:
+        raise TypeError(
+            f"Expected an object that implements the DLPack protocol, received {type(array)}"
+        ) from err
     device_type, device_id = dlpack_info_func()
 
     # Only a subset of known devices are supported.

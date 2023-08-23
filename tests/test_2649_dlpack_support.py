@@ -62,3 +62,10 @@ def test_to_layout():
 
     np_from_ak = ak.to_numpy(layout)
     assert np.shares_memory(np_array, np_from_ak)
+
+
+def test_invalid_argument():
+    with pytest.raises(
+        TypeError, match=r"Expected an object that implements the DLPack protocol"
+    ):
+        ak.from_dlpack([1, 2, 3])
