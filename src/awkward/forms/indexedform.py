@@ -1,10 +1,18 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+from __future__ import annotations
+
+__all__ = ("IndexedForm",)
+
+from collections.abc import Callable
 
 import awkward as ak
+from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._parameters import parameters_union, type_parameters_equal
-from awkward._typing import JSONSerializable, Self, final
+from awkward._typing import Iterator, JSONSerializable, Self, final
 from awkward._util import UNSET
-from awkward.forms.form import Form
+from awkward.forms.form import Form, index_to_dtype
+
+np = NumpyMetadata.instance()
 
 
 @final
@@ -219,3 +227,9 @@ class IndexedForm(Form):
                 form_key = "part0-" + form_key  # only the first partition
 
             self.__init__(index, content, parameters=parameters, form_key=form_key)
+
+    def _expected_from_buffers(
+        self, getkey: Callable[[Form, str], str]
+    ) -> Iterator[tuple[str, np.dtype]]:
+        yield (getkey(self, "index"), index_to_dtype[self._index])
+        yield from self._content._expected_from_buffers(getkey)

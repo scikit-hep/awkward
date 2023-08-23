@@ -24,8 +24,9 @@ from awkward.index import Index
 if TYPE_CHECKING:
     from awkward._slicing import SliceItem
 
-np = NumpyMetadata.instance()
 numpy = Numpy.instance()
+
+np = NumpyMetadata.instance()
 
 
 @final
