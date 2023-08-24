@@ -115,7 +115,7 @@ def metadata(
     for column_metadata in parquetfile_for_metadata.schema:
         if (
             column_metadata.max_repetition_level > 0
-            and ".list.element." in column_metadata.path
+            and ".list.element" in column_metadata.path
         ):
             list_indicator = "list.element"
             break
