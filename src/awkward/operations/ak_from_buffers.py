@@ -32,7 +32,7 @@ def from_buffers(
     """
     Args:
         form (#ak.forms.Form or str/dict equivalent): The form of the Awkward
-            Array to _reconstitute from named buffers.
+            Array to reconstitute from named buffers.
         length (int): Length of the array. (The output of this function is always
             single-partition.)
         container (Mapping, such as dict): The str \u2192 Python buffers that
