@@ -147,3 +147,32 @@ def typetracer_with_report(
         )
     layout, report = _typetracer_with_report(form, forget_length=forget_length)
     return wrap_layout(layout, behavior=behavior, highlevel=highlevel), report
+
+
+def typetracer_from_form(form, *, highlevel: bool = False, behavior=None):
+    """
+    Args:
+        form (#ak.forms.Form or str/dict equivalent): The form of the Awkward
+            Array to build a typetracer-backed array from.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.contents.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+
+    Returns a typetracer array built from a form.
+    """
+    if isinstance(form, str):
+        if is_primitive(form):
+            form = awkward.forms.NumpyForm(form)
+        else:
+            form = awkward.forms.from_json(form)
+    elif isinstance(form, dict):
+        form = awkward.forms.from_dict(form)
+    elif not isinstance(form, awkward.forms.Form):
+        raise TypeError(
+            "'form' argument must be a Form or its Python dict/JSON string representation"
+        )
+
+    layout = form.length_zero_array(highlevel=False).to_typetracer(forget_length=True)
+
+    return wrap_layout(layout, behavior=behavior, highlevel=highlevel)

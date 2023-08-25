@@ -6,6 +6,7 @@ import numpy as np  # noqa: F401
 import pytest  # noqa: F401
 
 import awkward as ak
+from awkward._nplikes.shape import unknown_length
 
 form_dict = {
     "class": "RecordArray",
@@ -112,3 +113,17 @@ def test_form_str():
     ak.sum(y)
     assert set(report.data_touched) == {"y.list.offsets", "y.list.content"}
     assert set(report.shape_touched) == {"y.list.offsets", "y.list.content"}
+
+
+def test_typetracer_from_form_highlevel_false():
+    layout = ak.typetracer.typetracer_from_form(form_dict, highlevel=False)
+    assert isinstance(layout, ak.contents.Content)
+    assert layout.backend.name == "typetracer"
+    assert layout.length is unknown_length
+
+
+def test_typetracer_from_form_highlevel_true():
+    array = ak.typetracer.typetracer_from_form(form_dict, highlevel=True)
+    assert isinstance(array, ak.Array)
+    assert ak.backend(array) == "typetracer"
+    assert array.layout.length is unknown_length
