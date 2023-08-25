@@ -423,3 +423,11 @@ def sort(
     starts = ak.index.Index64.zeros(1, nplike=layout.backend.index_nplike)
     parents = ak.index.Index64.zeros(layout.length, nplike=layout.backend.index_nplike)
     return layout._sort_next(negaxis, starts, parents, 1, ascending, stable)
+
+
+def touch_data(layout: Content, recursive: bool = True):
+    layout._touch_data(recursive)
+
+
+def touch_shape(layout: Content, recursive: bool = True):
+    layout._touch_shape(recursive)
