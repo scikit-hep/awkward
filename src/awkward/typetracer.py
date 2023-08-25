@@ -8,6 +8,7 @@ __all__ = [
     "typetracer_with_report",
     "PlaceholderArray",
     "unknown_length",
+    "touch_data",
 ]
 
 from awkward._backends.typetracer import TypeTracerBackend
