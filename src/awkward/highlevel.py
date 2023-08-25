@@ -5,10 +5,13 @@ __all__ = ("Array", "ArrayBuilder", "Record")
 
 import builtins
 import copy
+import functools
 import html
+import inspect
 import io
 import itertools
 import keyword
+import pickle
 import re
 import sys
 from collections.abc import Iterable, Mapping, Sequence, Sized
@@ -35,6 +38,23 @@ _dir_pattern = re.compile(r"^[a-zA-Z_]\w*$")
 
 
 T = TypeVar("T", bound=ak.contents.Content)
+
+
+def non_inspectable_property(impl):
+    """property factory that ensures IPython does not call the property during inspection"""
+
+    @functools.wraps(impl)
+    def wrapper(self):
+        if hasattr(builtins, "__IPYTHON__"):
+            from IPython.utils.wildcard import dict_dir
+
+            caller_frame = inspect.currentframe().f_back
+            if caller_frame.f_code is dict_dir.__code__:
+                return
+
+        return impl(self)
+
+    return property(wrapper)
 
 
 def _awkward_1_rewrite_partition_form(form, partition: int, template: str = "part{}"):
@@ -270,7 +290,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                 elif length != contents[-1].length:
                     raise ValueError(
                         "dict of arrays in ak.Array constructor must have arrays "
-                        "of equal length ({} vs {})".format(length, contents[-1].length)
+                        f"of equal length ({length} vs {contents[-1].length})"
                     )
             layout = ak.contents.RecordArray(contents, fields)
 
@@ -1149,8 +1169,8 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                     return self[where]
                 except Exception as err:
                     raise AttributeError(
-                        "while trying to get field {}, an exception "
-                        "occurred:\n{}: {}".format(repr(where), type(err), str(err))
+                        f"while trying to get field {where!r}, an exception "
+                        f"occurred:\n{type(err)}: {err!s}"
                     ) from err
             else:
                 raise AttributeError(f"no field named {where!r}")
@@ -1299,7 +1319,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             "text/plain": repr(self),
         }
 
-    @property
+    @non_inspectable_property
     def __cuda_array_interface__(self):
         with ak._errors.OperationErrorContext(
             f"{type(self).__name__}.__cuda_array_interface__", (self,), {}
@@ -1307,7 +1327,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             array = ak.operations.to_cupy(self)
             return array.__cuda_array_interface__
 
-    @property
+    @non_inspectable_property
     def __array_interface__(self):
         with ak._errors.OperationErrorContext(
             f"{type(self).__name__}.__array_interface__", (self,), {}
@@ -1419,7 +1439,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             func, types, args, kwargs, behavior=self._behavior
         )
 
-    @property
+    @non_inspectable_property
     def numba_type(self):
         """
         The type of this Array when it is used in Numba. It contains enough
@@ -1437,14 +1457,19 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         return numba.typeof(self._numbaview)
 
-    def __reduce__(self):
-        packed = ak.operations.to_packed(self._layout, highlevel=False)
+    def __reduce_ex__(self, protocol: int) -> tuple:
+        packed_layout = ak.operations.to_packed(self._layout, highlevel=False)
         form, length, container = ak.operations.to_buffers(
-            packed,
+            packed_layout,
             buffer_key="{form_key}-{attribute}",
             form_key="node{id}",
             byteorder="<",
         )
+
+        # For pickle >= 5, we can avoid copying the buffers
+        if protocol >= 5:
+            container = {k: pickle.PickleBuffer(v) for k, v in container.items()}
+
         if self._behavior is ak.behavior:
             behavior = None
         else:
@@ -1501,7 +1526,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                 "use ak.any() or ak.all()"
             )
 
-    @property
+    @non_inspectable_property
     def cpp_type(self):
         """
         The C++ type of this Array when it is used in cppyy.
@@ -1916,8 +1941,8 @@ class Record(NDArrayOperatorsMixin):
                     return self[where]
                 except Exception as err:
                     raise AttributeError(
-                        "while trying to get field {}, an exception "
-                        "occurred:\n{}: {}".format(repr(where), type(err), str(err))
+                        f"while trying to get field {where!r}, an exception "
+                        f"occurred:\n{type(err)}: {err!s}"
                     ) from err
             else:
                 raise AttributeError(f"no field named {where!r}")
@@ -2099,14 +2124,18 @@ class Record(NDArrayOperatorsMixin):
 
         return numba.typeof(self._numbaview)
 
-    def __reduce__(self):
-        packed = ak.operations.to_packed(self._layout, highlevel=False)
+    def __reduce_ex__(self, protocol: int) -> tuple:
+        packed_layout = ak.operations.to_packed(self._layout, highlevel=False)
         form, length, container = ak.operations.to_buffers(
-            packed.array,
+            packed_layout.array,
             buffer_key="{form_key}-{attribute}",
             form_key="node{id}",
             byteorder="<",
         )
+
+        # For pickle >= 5, we can avoid copying the buffers
+        if protocol >= 5:
+            container = {k: pickle.PickleBuffer(v) for k, v in container.items()}
         if self._behavior is ak.behavior:
             behavior = None
         else:
@@ -2114,7 +2143,7 @@ class Record(NDArrayOperatorsMixin):
         return (
             object.__new__,
             (Record,),
-            (form.to_dict(), length, container, behavior, packed.at),
+            (form.to_dict(), length, container, behavior, packed_layout.at),
         )
 
     def __setstate__(self, state):

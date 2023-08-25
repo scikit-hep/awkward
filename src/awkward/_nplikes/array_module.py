@@ -83,18 +83,24 @@ class ArrayModuleNumpyLike(NumpyLike):
         return self._module.full(shape, fill_value, dtype=dtype)
 
     def zeros_like(self, x: ArrayLike, *, dtype: np.dtype | None = None) -> ArrayLike:
-        assert not isinstance(x, PlaceholderArray)
-        return self._module.zeros_like(x, dtype=dtype)
+        if isinstance(x, PlaceholderArray):
+            return self.zeros(x.shape, dtype=dtype or x.dtype)
+        else:
+            return self._module.zeros_like(x, dtype=dtype)
 
     def ones_like(self, x: ArrayLike, *, dtype: np.dtype | None = None) -> ArrayLike:
-        assert not isinstance(x, PlaceholderArray)
-        return self._module.ones_like(x, dtype=dtype)
+        if isinstance(x, PlaceholderArray):
+            return self.ones(x.shape, dtype=dtype or x.dtype)
+        else:
+            return self._module.ones_like(x, dtype=dtype)
 
     def full_like(
         self, x: ArrayLike, fill_value, *, dtype: np.dtype | None = None
     ) -> ArrayLike:
-        assert not isinstance(x, PlaceholderArray)
-        return self._module.full_like(x, fill_value, dtype=dtype)
+        if isinstance(x, PlaceholderArray):
+            return self.full(x.shape, fill_value, dtype=dtype or x.dtype)
+        else:
+            return self._module.full_like(x, fill_value, dtype=dtype)
 
     def arange(
         self,
@@ -144,10 +150,30 @@ class ArrayModuleNumpyLike(NumpyLike):
         assert not any(isinstance(x, PlaceholderArray) for x in arrays)
         return self._module.broadcast_arrays(*arrays)
 
+    def _compute_compatible_shape(
+        self, shape: tuple[ShapeItem, ...], existing_shape: tuple[ShapeItem, ...]
+    ) -> tuple[ShapeItem, ...]:
+        next_shape = list(shape)
+        j = None
+        length_factor = 1
+        for i, item in enumerate(shape):
+            if item != -1:
+                length_factor *= item
+            elif j is not None:
+                raise ValueError("can only have one unknown dimension")
+            else:
+                j = i
+        if j is not None:
+            next_shape[j] = math.prod(existing_shape) // length_factor
+        return tuple(next_shape)
+
     def reshape(
         self, x: ArrayLike, shape: tuple[ShapeItem, ...], *, copy: bool | None = None
     ) -> ArrayLike:
-        assert not isinstance(x, PlaceholderArray)
+        if isinstance(x, PlaceholderArray):
+            next_shape = self._compute_compatible_shape(shape, x.shape)
+            return PlaceholderArray(self, next_shape, x.dtype)
+
         if copy is None:
             return self._module.reshape(x, shape)
         elif copy:
@@ -323,6 +349,13 @@ class ArrayModuleNumpyLike(NumpyLike):
         return self._module.broadcast_to(x, shape)
 
     def strides(self, x: ArrayLike) -> tuple[ShapeItem, ...]:
+        if isinstance(x, PlaceholderArray):
+            # Assume contiguous
+            strides = (x.itemsize,)
+            for item in x.shape[-1:0:-1]:
+                strides = (item * strides[0], *strides)
+            return strides
+
         return x.strides
 
     ############################ ufuncs

@@ -30,7 +30,7 @@ or
             if parse_version(numexpr.__version__) < parse_version("2.7.1"):
                 warnings.warn(
                     "Awkward Array is only known to work with numexpr 2.7.1 or later"
-                    "(you have version {})".format(numexpr.__version__),
+                    f"(you have version {numexpr.__version__})",
                     RuntimeWarning,
                     stacklevel=1,
                 )

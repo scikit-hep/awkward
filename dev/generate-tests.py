@@ -373,9 +373,7 @@ def genspectests(specdict):
                                     )
                                 )
                             else:
-                                f.write(
-                                    " " * 4 + "assert {0} == pytest_{0}\n".format(arg)
-                                )
+                                f.write(" " * 4 + f"assert {arg} == pytest_{arg}\n")
                     else:
                         f.write(" " * 4 + "with pytest.raises(Exception):\n")
                         f.write(" " * 8 + "funcPy(" + args + ")\n")
@@ -493,9 +491,7 @@ def gencpukerneltests(specdict):
                         if count == 1:
                             f.write(
                                 " " * 4
-                                + "{0} = (ctypes.c_{1}*len({0}))(*{0})\n".format(
-                                    arg, typename
-                                )
+                                + f"{arg} = (ctypes.c_{typename}*len({arg}))(*{arg})\n"
                             )
                         elif count == 2:
                             f.write(
@@ -525,7 +521,7 @@ def gencpukerneltests(specdict):
                                 )
                             )
                         else:
-                            f.write(" " * 4 + "assert {0} == pytest_{0}\n".format(arg))
+                            f.write(" " * 4 + f"assert {arg} == pytest_{arg}\n")
                     f.write(" " * 4 + "assert not ret_pass.str\n")
                 else:
                     f.write(" " * 4 + f"assert funcC({args}).str\n")
@@ -744,9 +740,7 @@ def gencudakerneltests(specdict):
                                     )
                                 )
                             else:
-                                f.write(
-                                    " " * 4 + "assert {0} == pytest_{0}\n".format(arg)
-                                )
+                                f.write(" " * 4 + f"assert {arg} == pytest_{arg}\n")
                     f.write("\n")
 
 

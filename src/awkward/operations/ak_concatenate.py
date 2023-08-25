@@ -94,15 +94,15 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
     )
     if posaxis is None or not 0 <= posaxis < maxdepth:
         raise ValueError(
-            "axis={} is beyond the depth of this array or the depth of this array "
-            "is ambiguous".format(axis)
+            f"axis={axis} is beyond the depth of this array or the depth of this array "
+            "is ambiguous"
         )
     for x in content_or_others:
         if isinstance(x, ak.contents.Content):
             if maybe_posaxis(x, axis, 1) != posaxis:
                 raise ValueError(
                     "arrays to concatenate do not have the same depth for negative "
-                    "axis={}".format(axis)
+                    f"axis={axis}"
                 )
 
     if posaxis == 0:
@@ -143,7 +143,7 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
             ):
                 raise ValueError(
                     "at least one array is not deep enough to concatenate at "
-                    "axis={}".format(axis)
+                    f"axis={axis}"
                 )
 
             if depth != posaxis:
@@ -170,8 +170,7 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
                         length = x.length
                     elif length != x.length:
                         raise ValueError(
-                            "all arrays must have the same length for "
-                            "axis={}".format(axis)
+                            f"all arrays must have the same length for axis={axis}"
                         )
             assert length is not None
 

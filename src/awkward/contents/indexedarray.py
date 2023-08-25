@@ -860,9 +860,7 @@ class IndexedArray(Content):
                 if starts.nplike.known_data and starts.length > 0 and starts[0] != 0:
                     raise AssertionError(
                         "reduce_next with unbranching depth > negaxis expects a "
-                        "ListOffsetArray64 whose offsets start at zero ({})".format(
-                            starts[0]
-                        )
+                        f"ListOffsetArray64 whose offsets start at zero ({starts[0]})"
                     )
 
                 outoffsets = ak.index.Index64.empty(

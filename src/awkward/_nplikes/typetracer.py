@@ -251,10 +251,16 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         self.touch_shape()
         return len(self._shape)
 
+    @property
+    def nbytes(self) -> ShapeItem:
+        return self.size * self._dtype.itemsize
+
     def view(self, dtype: np.dtype) -> Self:
         dtype = np.dtype(dtype)
         if len(self._shape) >= 1:
-            last, remainder = divmod(self._shape[-1] * self.itemsize, dtype.itemsize)
+            last, remainder = divmod(
+                self._shape[-1] * self._dtype.itemsize, dtype.itemsize
+            )
             if remainder is not unknown_length and remainder != 0:
                 raise ValueError(
                     "new size of array with larger dtype must be a "
@@ -284,10 +290,6 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         raise AssertionError(
             "bug in Awkward Array: attempt to convert TypeTracerArray into a concrete array"
         )
-
-    @property
-    def itemsize(self) -> int:
-        return self._dtype.itemsize
 
     class _CTypes:
         data = 0

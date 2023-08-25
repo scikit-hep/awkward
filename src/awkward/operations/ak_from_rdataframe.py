@@ -73,7 +73,7 @@ def _impl(
     ):
         raise TypeError(
             "'offsets_type' must be a string in (int32, uint32, int64), "
-            "not {}".format(repr(offsets_type))
+            f"not {offsets_type!r}"
         )
     else:
         offsets_type = f"{offsets_type}_t"
