@@ -22,9 +22,13 @@ from awkward._nplikes.typetracer import (
     TypeTracerReport,
     is_unknown_array,
     is_unknown_scalar,
-    typetracer_with_report,
+)
+from awkward._nplikes.typetracer import (
+    typetracer_with_report as _typetracer_with_report,
 )
 from awkward._typing import TypeVar
+from awkward._util import UNSET
+from awkward.contents import Content
 from awkward.forms import Form
 from awkward.highlevel import Array, Record
 from awkward.operations.ak_to_layout import to_layout
@@ -101,3 +105,18 @@ def touch_data(array, *, highlevel: bool = True, behavior=None) -> T:
     layout = to_layout(array, allow_other=False)
     _touch_data(layout)
     return wrap_layout(layout, behavior=behavior, highlevel=highlevel)
+
+
+def typetracer_with_report(
+    form: Form, forget_length: bool = UNSET
+) -> tuple[Content, TypeTracerReport]:
+    if forget_length is UNSET:
+        forget_length = True
+    else:
+        deprecate(
+            "passing `forget_length` to typetracer_with_report is deprecated. "
+            "In future, this argument will be removed, and the function will "
+            "always forget lengths",
+            "2.5.0",
+        )
+    return _typetracer_with_report(form, forget_length=forget_length)
