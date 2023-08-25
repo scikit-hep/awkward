@@ -149,7 +149,7 @@ def typetracer_with_report(
     return wrap_layout(layout, behavior=behavior, highlevel=highlevel), report
 
 
-def typetracer_from_form(form, *, highlevel: bool = False, behavior=None):
+def typetracer_from_form(form, *, highlevel: bool = True, behavior=None):
     """
     Args:
         form (#ak.forms.Form or str/dict equivalent): The form of the Awkward
