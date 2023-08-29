@@ -89,33 +89,39 @@ def _impl1(condition, mergebool, highlevel, behavior):
 def _impl3(condition, x, y, mergebool, highlevel, behavior):
     behavior = behavior_of(condition, x, y, behavior=behavior)
     backend = backend_of(condition, x, y, default=cpu, coerce_to_common=True)
-    akcondition = ak.operations.to_layout(
+
+    condition_layout = ak.operations.to_layout(
         condition, allow_record=False, allow_other=False
     ).to_backend(backend)
 
-    left = ak.operations.to_layout(x, allow_record=False, allow_other=True)
-    right = ak.operations.to_layout(y, allow_record=False, allow_other=True)
+    x_layout = ak.operations.to_layout(x, allow_record=False, allow_other=True)
+    if isinstance(x_layout, ak.contents.Content):
+        x_layout = x_layout.to_backend(backend)
+
+    y_layout = ak.operations.to_layout(y, allow_record=False, allow_other=True)
+    if isinstance(y_layout, ak.contents.Content):
+        y_layout = y_layout.to_backend(backend)
 
     def action(inputs, **kwargs):
-        akcondition, left, right = inputs
-        if isinstance(akcondition, ak.contents.NumpyArray):
-            npcondition = backend.index_nplike.asarray(akcondition)
+        condition, x, y = inputs
+        if isinstance(condition, ak.contents.NumpyArray):
+            npcondition = backend.index_nplike.asarray(condition)
             tags = ak.index.Index8((npcondition == 0).view(np.int8))
             index = ak.index.Index64(
                 backend.index_nplike.arange(tags.length, dtype=np.int64),
                 nplike=backend.index_nplike,
             )
-            if not isinstance(left, ak.contents.Content):
-                left = ak.contents.NumpyArray(
+            if not isinstance(x, ak.contents.Content):
+                x = ak.contents.NumpyArray(
                     backend.nplike.repeat(
-                        backend.nplike.asarray(left),
+                        backend.nplike.asarray(x),
                         backend.nplike.shape_item_as_index(tags.length),
                     )
                 )
-            if not isinstance(right, ak.contents.Content):
-                right = ak.contents.NumpyArray(
+            if not isinstance(y, ak.contents.Content):
+                y = ak.contents.NumpyArray(
                     backend.nplike.repeat(
-                        backend.nplike.asarray(right),
+                        backend.nplike.asarray(y),
                         backend.nplike.shape_item_as_index(tags.length),
                     )
                 )
@@ -123,7 +129,7 @@ def _impl3(condition, x, y, mergebool, highlevel, behavior):
                 ak.contents.UnionArray.simplified(
                     tags,
                     index,
-                    [left, right],
+                    [x, y],
                     mergebool=mergebool,
                 ),
             )
@@ -131,7 +137,7 @@ def _impl3(condition, x, y, mergebool, highlevel, behavior):
             return None
 
     out = ak._broadcasting.broadcast_and_apply(
-        [akcondition, left, right],
+        [condition_layout, x_layout, y_layout],
         action,
         behavior,
         numpy_to_regular=True,
