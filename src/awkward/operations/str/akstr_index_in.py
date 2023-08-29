@@ -5,9 +5,12 @@ __all__ = ("index_in",)
 
 import awkward as ak
 from awkward._backends.dispatch import backend_of
+from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of
 from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
+
+cpu = NumpyBackend.instance()
 
 
 @high_level_function(module="ak.str")
@@ -56,7 +59,7 @@ def _impl(array, value_set, skip_nones, highlevel, behavior):
     import pyarrow.compute as pc
 
     behavior = behavior_of(array, value_set, behavior=behavior)
-    backend = backend_of(array, value_set, coerce_to_common=True)
+    backend = backend_of(array, value_set, coerce_to_common=True, default=cpu)
 
     layout = ak.to_layout(array, allow_record=False).to_backend(backend)
     value_set_layout = ak.to_layout(value_set, allow_record=False).to_backend(backend)

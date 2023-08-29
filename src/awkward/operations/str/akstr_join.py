@@ -4,9 +4,12 @@ __all__ = ("join",)
 
 import awkward as ak
 from awkward._backends.dispatch import backend_of
+from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of
 from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
+
+cpu = NumpyBackend.instance()
 
 
 @high_level_function(module="ak.str")
@@ -58,7 +61,7 @@ def _impl(array, separator, highlevel, behavior):
     import pyarrow.compute as pc
 
     behavior = behavior_of(array, separator, behavior=behavior)
-    backend = backend_of(array, separator, coerce_to_common=True)
+    backend = backend_of(array, separator, coerce_to_common=True, default=cpu)
 
     layout = ak.to_layout(array, allow_record=False).to_backend(backend)
     if isinstance(separator, (bytes, str)):

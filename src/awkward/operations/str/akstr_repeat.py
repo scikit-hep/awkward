@@ -6,10 +6,13 @@ import numbers
 
 import awkward as ak
 from awkward._backends.dispatch import backend_of
+from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of
 from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
+
+cpu = NumpyBackend.instance()
 
 np = NumpyMetadata.instance()
 
@@ -56,7 +59,7 @@ def _impl(array, num_repeats, highlevel, behavior):
     layout = ak.operations.to_layout(array)
 
     behavior = behavior_of(array, num_repeats, behavior=behavior)
-    backend = backend_of(array, num_repeats, coerce_to_common=True)
+    backend = backend_of(array, num_repeats, coerce_to_common=True, default=cpu)
 
     num_repeats_layout = ak.operations.to_layout(num_repeats)
     if isinstance(num_repeats_layout, ak.contents.Content):
