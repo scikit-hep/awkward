@@ -48,7 +48,7 @@ def _impl(array, pattern, ignore_case, highlevel, behavior):
     from awkward._connect.pyarrow import import_pyarrow_compute
 
     pc = import_pyarrow_compute("ak.str.count_substring")
-    layout = ak.to_layout(array, allow_record=False, allow_other=True)
+    layout = ak.to_layout(array, allow_record=False)
     behavior = behavior_of(array, behavior=behavior)
     apply = ak.operations.str._get_ufunc_action(
         pc.count_substring,

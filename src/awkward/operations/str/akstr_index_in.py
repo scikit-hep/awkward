@@ -4,6 +4,7 @@ __all__ = ("index_in",)
 
 
 import awkward as ak
+from awkward._backends.dispatch import backend_of
 from awkward._behavior import behavior_of
 from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
@@ -54,13 +55,14 @@ def _impl(array, value_set, skip_nones, highlevel, behavior):
 
     import pyarrow.compute as pc
 
-    layout = ak.to_layout(array, allow_record=False, allow_other=True)
-    value_set_layout = ak.to_layout(value_set, allow_record=False, allow_other=True)
+    behavior = behavior_of(array, value_set, behavior=behavior)
+    backend = backend_of(array, value_set, coerce_to_common=True)
+
+    layout = ak.to_layout(array, allow_record=False).to_backend(backend)
+    value_set_layout = ak.to_layout(value_set, allow_record=False).to_backend(backend)
 
     if not _is_maybe_optional_list_of_string(value_set_layout):
         raise TypeError("`value_set` must be 1D array of (possibly missing) strings")
-
-    behavior = behavior_of(array, value_set, behavior=behavior)
 
     def apply(layout, **kwargs):
         if _is_maybe_optional_list_of_string(layout):
