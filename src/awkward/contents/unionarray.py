@@ -1404,7 +1404,7 @@ class UnionArray(Content):
 
         # Check triangular pairs (i, j) are not mergeable
         for i, content_i in enumerate(self._contents):
-            for j in range(0, i):
+            for j in range(i):
                 content_j = self._contents[j]
                 if ak._do.mergeable(content_i, content_j, mergebool=False):
                     return f"at {path}: content({i}) is mergeable with content({j})"
