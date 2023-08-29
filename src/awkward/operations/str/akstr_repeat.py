@@ -5,10 +5,14 @@ __all__ = ("repeat",)
 import numbers
 
 import awkward as ak
+from awkward._backends.dispatch import backend_of
+from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of
 from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
+
+cpu = NumpyBackend.instance()
 
 np = NumpyMetadata.instance()
 
@@ -18,7 +22,8 @@ def repeat(array, num_repeats, *, highlevel=True, behavior=None):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
-        num_repeats: Array-like data (anything #ak.to_layout recognizes).
+        num_repeats: (int, or an array of them to broadcast): number of times
+            to repeat each element
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
@@ -52,31 +57,13 @@ def _impl(array, num_repeats, highlevel, behavior):
     import pyarrow.compute as pc
 
     layout = ak.operations.to_layout(array)
-    behavior = behavior_of(array, behavior=behavior)
+
+    behavior = behavior_of(array, num_repeats, behavior=behavior)
+    backend = backend_of(array, num_repeats, coerce_to_common=True, default=cpu)
 
     num_repeats_layout = ak.operations.to_layout(num_repeats, allow_other=True)
-
-    if not isinstance(num_repeats_layout, ak.contents.Content):
-        if not isinstance(num_repeats, numbers.Integral):
-            raise TypeError(
-                "num_repeats must be an integer or broadcastable to integers"
-            )
-
-        def action(layout, **kwargs):
-            if layout.is_list and layout.parameter("__array__") in (
-                "string",
-                "bytestring",
-            ):
-                return from_arrow(
-                    pc.binary_repeat(
-                        to_arrow(layout, extensionarray=False), num_repeats
-                    ),
-                    highlevel=False,
-                )
-
-        out = ak._do.recursively_apply(layout, action, behavior)
-
-    else:
+    if isinstance(num_repeats_layout, ak.contents.Content):
+        num_repeats_layout = num_repeats_layout.to_backend(backend)
 
         def action(inputs, **kwargs):
             if inputs[0].is_list and inputs[0].parameter("__array__") in (
@@ -104,5 +91,25 @@ def _impl(array, num_repeats, highlevel, behavior):
         )
         assert isinstance(out, tuple) and len(out) == 1
         out = out[0]
+
+    else:
+        if not isinstance(num_repeats, numbers.Integral):
+            raise TypeError(
+                "num_repeats must be an integer or broadcastable to integers"
+            )
+
+        def action(layout, **kwargs):
+            if layout.is_list and layout.parameter("__array__") in (
+                "string",
+                "bytestring",
+            ):
+                return from_arrow(
+                    pc.binary_repeat(
+                        to_arrow(layout, extensionarray=False), num_repeats
+                    ),
+                    highlevel=False,
+                )
+
+        out = ak._do.recursively_apply(layout, action, behavior)
 
     return wrap_layout(out, behavior, highlevel)

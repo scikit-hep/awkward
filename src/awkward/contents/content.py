@@ -546,7 +546,7 @@ class Content:
                 return self
 
             # Backend may change if index contains typetracers
-            backend = backend_of(self, *where)
+            backend = backend_of(self, *where, coerce_to_common=True)
             this = self.to_backend(backend)
 
             # Normalise valid indices onto well-defined basis
@@ -576,7 +576,7 @@ class Content:
             isinstance(where, ak.contents.Content)
             and where.backend is not self._backend
         ):
-            backend = backend_of(self, where)
+            backend = backend_of(self, where, coerce_to_common=True)
             return self.to_backend(backend)._getitem(where.to_backend(backend))
 
         elif isinstance(where, ak.contents.NumpyArray):

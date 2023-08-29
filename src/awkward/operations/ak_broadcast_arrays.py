@@ -206,7 +206,7 @@ def _impl(
     if len(arrays) == 0:
         return []
 
-    backend = backend_of(*arrays, default=cpu)
+    backend = backend_of(*arrays, default=cpu, coerce_to_common=True)
 
     inputs = []
     for x in arrays:

@@ -56,7 +56,7 @@ def broadcast_fields(*arrays, highlevel=True, behavior=None):
 
 
 def _impl(arrays, highlevel, behavior):
-    backend = backend_of(*arrays, default=cpu)
+    backend = backend_of(*arrays, default=cpu, coerce_to_common=True)
     layouts = [ak.to_layout(x).to_backend(backend) for x in arrays]
     behavior = behavior_of(*arrays, behavior=behavior)
 
