@@ -2,6 +2,7 @@
 __all__ = ("linear_fit",)
 import awkward as ak
 from awkward._backends.dispatch import backend_of
+from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of
 from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
@@ -9,6 +10,7 @@ from awkward._nplikes import ufuncs
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
 
+cpu = NumpyBackend.instance()
 np = NumpyMetadata.instance()
 
 
@@ -76,7 +78,7 @@ def linear_fit(x, y, weight=None, axis=None, *, keepdims=False, mask_identity=Fa
 def _impl(x, y, weight, axis, keepdims, mask_identity):
     axis = regularize_axis(axis)
     behavior = behavior_of(x, y, weight)
-    backend = backend_of(x, y, weight, coerce_to_common=True)
+    backend = backend_of(x, y, weight, coerce_to_common=True, default=cpu)
     x = ak.highlevel.Array(
         ak.operations.to_layout(x, allow_record=False, allow_other=False).to_backend(
             backend
