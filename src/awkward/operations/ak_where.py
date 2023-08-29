@@ -87,19 +87,14 @@ def _impl1(condition, mergebool, highlevel, behavior):
 
 
 def _impl3(condition, x, y, mergebool, highlevel, behavior):
+    behavior = behavior_of(condition, x, y, behavior=behavior)
+    backend = backend_of(condition, x, y, default=cpu, coerce_to_common=True)
     akcondition = ak.operations.to_layout(
         condition, allow_record=False, allow_other=False
-    )
+    ).to_backend(backend)
 
     left = ak.operations.to_layout(x, allow_record=False, allow_other=True)
     right = ak.operations.to_layout(y, allow_record=False, allow_other=True)
-
-    good_arrays = [akcondition]
-    if isinstance(left, ak.contents.Content):
-        good_arrays.append(left)
-    if isinstance(right, ak.contents.Content):
-        good_arrays.append(right)
-    backend = backend_of(*good_arrays, default=cpu)
 
     def action(inputs, **kwargs):
         akcondition, left, right = inputs
@@ -135,7 +130,6 @@ def _impl3(condition, x, y, mergebool, highlevel, behavior):
         else:
             return None
 
-    behavior = behavior_of(condition, x, y, behavior=behavior)
     out = ak._broadcasting.broadcast_and_apply(
         [akcondition, left, right],
         action,

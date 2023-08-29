@@ -313,7 +313,7 @@ def array_ufunc(ufunc, method: str, inputs, kwargs: dict[str, Any]):
         return NotImplemented
 
     behavior = behavior_of(*inputs)
-    backend = backend_of(*inputs)
+    backend = backend_of(*inputs, coerce_to_common=True)
 
     inputs = _array_ufunc_custom_cast(inputs, behavior, backend)
 
