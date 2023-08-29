@@ -87,7 +87,9 @@ def array_function(func, types, args, kwargs: dict[str, Any], behavior: Mapping 
         return function(*args, **kwargs)
     # Use NumPy's implementation
     else:
-        backend = common_backend(_find_backends(chain(args, kwargs.values())))
+        all_arguments = chain(args, kwargs.values())
+        unique_backends = frozenset(_find_backends(all_arguments))
+        backend = common_backend(unique_backends)
 
         rectilinear_args = tuple(_to_rectilinear(x, backend) for x in args)
         rectilinear_kwargs = {k: _to_rectilinear(v, backend) for k, v in kwargs.items()}
