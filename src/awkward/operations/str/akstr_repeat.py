@@ -61,7 +61,7 @@ def _impl(array, num_repeats, highlevel, behavior):
     behavior = behavior_of(array, num_repeats, behavior=behavior)
     backend = backend_of(array, num_repeats, coerce_to_common=True, default=cpu)
 
-    num_repeats_layout = ak.operations.to_layout(num_repeats)
+    num_repeats_layout = ak.operations.to_layout(num_repeats, allow_other=True)
     if isinstance(num_repeats_layout, ak.contents.Content):
         num_repeats_layout = num_repeats_layout.to_backend(backend)
 
