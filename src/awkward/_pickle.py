@@ -19,24 +19,19 @@ class PickleReducer(Protocol):
         ...
 
 
-@runtime_checkable
-class PickleReducerPlugin(PickleReducer, Protocol):
-    rank: int
-
-
 _register_lock = threading.Lock()
-_plugins: tuple[PickleReducerPlugin, ...] | None = None
+_plugin: PickleReducer | None = None
 _is_registered = False
 
 
-def _load_reduce_plugins() -> tuple[PickleReducerPlugin, ...]:
-    plugins: list[PickleReducerPlugin] = []
+def _load_reduce_plugin():
+    best_plugin = None
 
     for entry_point in importlib_metadata.entry_points(group="awkward.pickle.reduce"):
         plugin = entry_point.load()
 
         try:
-            assert isinstance(plugin, PickleReducerPlugin)
+            assert isinstance(plugin, PickleReducer)
         except AssertionError:
             warnings.warn(
                 f"Couldn't load `awkward.pickle.reduce` plugin: {entry_point}",
@@ -44,30 +39,35 @@ def _load_reduce_plugins() -> tuple[PickleReducerPlugin, ...]:
             )
             continue
 
-        plugins.append(plugin)
+        if best_plugin is not None:
+            raise RuntimeError(
+                "Encountered multiple Awkward pickle reducers under the `awkward.pickle.reduce` entrypoint"
+            )
+        best_plugin = plugin
 
-    plugins.sort(key=lambda x: x.rank, reverse=True)
-    return tuple(plugins)
+    return best_plugin
 
 
-def get_custom_reducers() -> tuple[PickleReducer, ...] | None:
+def get_custom_reducer() -> PickleReducer | None:
     """
     Returns the implementation of a custom __reduce_ex__ function for Awkward
     highlevel objects, or None if none provided
     """
-    global _is_registered, _plugins
+    global _is_registered, _plugin
 
     with _register_lock:
         if not _is_registered:
-            _plugins = _load_reduce_plugins()
+            _plugin = _load_reduce_plugin()
             _is_registered = True
 
-    return _plugins
+        if _plugin is None:
+            return None
+        else:
+            return _plugin
 
 
-def custom_reduce(obj, protocol: int) -> tuple | NotImplemented:
-    for plugin in get_custom_reducers():
-        result = plugin(obj, protocol)
-        if result is not NotImplemented:
-            return result
-    return NotImplemented
+def custom_reduce(obj, protocol) -> tuple | NotImplemented:
+    plugin = get_custom_reducer()
+    if plugin is None:
+        return NotImplemented
+    return plugin(obj, protocol)
