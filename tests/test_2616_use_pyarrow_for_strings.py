@@ -547,6 +547,14 @@ def test_slice():
         [],
         ["→δε←".encode()[1:3], "ζz zζ".encode()[1:3], b"abc"[1:3]],
     ]
+    assert (
+        ak.str.slice(string, 1, 3).layout.form
+        == ak.str.slice(ak.to_backend(string, "typetracer"), 1, 3).layout.form
+    )
+    assert (
+        ak.str.slice(bytestring, 1, 3).layout.form
+        == ak.str.slice(ak.to_backend(bytestring, "typetracer"), 1, 3).layout.form
+    )
 
     # ArrowInvalid: Negative buffer resize: -40 (looks like an Arrow bug)
     # assert ak.str.slice(string, 1).tolist() == [
@@ -554,11 +562,19 @@ def test_slice():
     #     [],
     #     ["→δε←"[1:], "ζz zζ"[1:], "abc"[1:]],
     # ]
+    # assert (
+    #     ak.str.slice(string, 1).layout.form
+    #     == ak.str.slice(ak.to_backend(string, "typetracer"), 1).layout.form
+    # )
     assert ak.str.slice(bytestring, 1).tolist() == [
         ["αβγ".encode()[1:], b""[1:]],
         [],
         ["→δε←".encode()[1:], "ζz zζ".encode()[1:], b"abc"[1:]],
     ]
+    assert (
+        ak.str.slice(bytestring, 1).layout.form
+        == ak.str.slice(ak.to_backend(bytestring, "typetracer"), 1).layout.form
+    )
 
 
 def test_split_whitespace():
