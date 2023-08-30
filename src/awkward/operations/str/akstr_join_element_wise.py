@@ -5,11 +5,13 @@ __all__ = ("join_element_wise",)
 import awkward as ak
 from awkward._backends.dispatch import backend_of
 from awkward._backends.numpy import NumpyBackend
+from awkward._backends.typetracer import TypeTracerBackend
 from awkward._behavior import behavior_of
 from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 
 cpu = NumpyBackend.instance()
+typetracer = TypeTracerBackend.instance()
 
 
 @high_level_function(module="ak.str")
@@ -46,11 +48,11 @@ def join_element_wise(*arrays, highlevel=True, behavior=None):
 
 
 def _impl(arrays, highlevel, behavior):
-    import awkward._connect.pyarrow  # noqa: F401, I001
+    from awkward._connect.pyarrow import import_pyarrow_compute
     from awkward.operations.ak_from_arrow import from_arrow
     from awkward.operations.ak_to_arrow import to_arrow
 
-    import pyarrow.compute as pc
+    pc = import_pyarrow_compute("ak.str.join_element_wise")
 
     if len(arrays) < 1:
         raise TypeError("at least one array is required")
@@ -64,14 +66,30 @@ def _impl(arrays, highlevel, behavior):
             x.is_list and x.parameter("__array__") in ("string", "bytestring")
             for x in layouts
         ):
-            return (
-                from_arrow(
-                    pc.binary_join_element_wise(
-                        *[to_arrow(x, extensionarray=False) for x in layouts]
+            if layouts[0].backend is typetracer:
+                return (
+                    from_arrow(
+                        pc.binary_join_element_wise(
+                            *[
+                                to_arrow(
+                                    x.form.length_zero_array(highlevel=False),
+                                    extensionarray=False,
+                                )
+                                for x in layouts
+                            ]
+                        ),
+                        highlevel=False,
+                    ).to_typetracer(forget_length=True),
+                )
+            else:
+                return (
+                    from_arrow(
+                        pc.binary_join_element_wise(
+                            *[to_arrow(x, extensionarray=False) for x in layouts]
+                        ),
+                        highlevel=False,
                     ),
-                    highlevel=False,
-                ),
-            )
+                )
 
     (out,) = ak._broadcasting.broadcast_and_apply(layouts, action, behavior)
 

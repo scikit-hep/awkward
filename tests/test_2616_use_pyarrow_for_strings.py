@@ -924,25 +924,41 @@ def test_join():
 
 
 def test_join_element_wise():
-    array1 = ak.Array([["one", "two", "three"], [], ["four", "five"]])
-    array2 = ak.Array([["111", "222", "333"], [], ["444", "555"]])
-    separator = ak.Array(["→", "↑", "←"])
+    first1 = ak.Array([["one", "two", "three"], [], ["four", "five"]])
+    second1 = ak.Array([["111", "222", "333"], [], ["444", "555"]])
+    separator1 = ak.Array(["→", "↑", "←"])
 
-    assert ak.str.join_element_wise(array1, array2, separator).tolist() == [
+    assert ak.str.join_element_wise(first1, second1, separator1).tolist() == [
         ["one→111", "two→222", "three→333"],
         [],
         ["four←444", "five←555"],
     ]
+    assert (
+        ak.str.join_element_wise(first1, second1, separator1).layout.form
+        == ak.str.join_element_wise(
+            ak.to_backend(first1, "typetracer"),
+            ak.to_backend(second1, "typetracer"),
+            ak.to_backend(separator1, "typetracer"),
+        ).layout.form
+    )
 
-    array1 = ak.Array([[b"one", b"two", b"three"], [], [b"four", b"five"]])
-    array2 = ak.Array([[b"111", b"222", b"333"], [], [b"444", b"555"]])
-    separator = ak.Array(["→".encode(), "↑".encode(), "←".encode()])
+    first2 = ak.Array([[b"one", b"two", b"three"], [], [b"four", b"five"]])
+    second2 = ak.Array([[b"111", b"222", b"333"], [], [b"444", b"555"]])
+    separator2 = ak.Array(["→".encode(), "↑".encode(), "←".encode()])
 
-    assert ak.str.join_element_wise(array1, array2, separator).tolist() == [
+    assert ak.str.join_element_wise(first2, second2, separator2).tolist() == [
         ["one→111".encode(), "two→222".encode(), "three→333".encode()],
         [],
         ["four←444".encode(), "five←555".encode()],
     ]
+    assert (
+        ak.str.join_element_wise(first2, second2, separator2).layout.form
+        == ak.str.join_element_wise(
+            ak.to_backend(first2, "typetracer"),
+            ak.to_backend(second2, "typetracer"),
+            ak.to_backend(separator2, "typetracer"),
+        ).layout.form
+    )
 
 
 def test_count_substring():
