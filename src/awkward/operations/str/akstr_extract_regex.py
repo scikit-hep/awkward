@@ -68,7 +68,11 @@ def _impl(array, pattern, highlevel, behavior):
     out = ak._do.recursively_apply(
         ak.operations.to_layout(array),
         ak.operations.str._get_ufunc_action(
-            pc.extract_regex, pc.extract_regex, pattern, bytestring_to_string=False
+            pc.extract_regex,
+            pc.extract_regex,
+            pattern,
+            generate_bitmasks=True,
+            bytestring_to_string=False,
         ),
         behavior,
     )

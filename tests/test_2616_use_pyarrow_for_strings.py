@@ -699,6 +699,19 @@ def test_extract_regex():
         [],
         [None, {"vowel": "e", "number": "5"}],
     ]
+    assert (
+        ak.str.extract_regex(
+            ak.Array([["one1", "two2", "three3"], [], ["four4", "five5"]]),
+            "(?P<vowel>[aeiou])(?P<number>[0-9]+)",
+        ).layout.form
+        == ak.str.extract_regex(
+            ak.Array(
+                [["one1", "two2", "three3"], [], ["four4", "five5"]],
+                backend="typetracer",
+            ),
+            "(?P<vowel>[aeiou])(?P<number>[0-9]+)",
+        ).layout.form
+    )
 
     assert ak.str.extract_regex(
         ak.Array([[b"one1", b"two2", b"three3"], [], [b"four4", b"five5"]]),
@@ -712,6 +725,19 @@ def test_extract_regex():
         [],
         [None, {"vowel": b"e", "number": b"5"}],
     ]
+    assert (
+        ak.str.extract_regex(
+            ak.Array([[b"one1", b"two2", b"three3"], [], [b"four4", b"five5"]]),
+            b"(?P<vowel>[aeiou])(?P<number>[0-9]+)",
+        ).layout.form
+        == ak.str.extract_regex(
+            ak.Array(
+                [[b"one1", b"two2", b"three3"], [], [b"four4", b"five5"]],
+                backend="typetracer",
+            ),
+            b"(?P<vowel>[aeiou])(?P<number>[0-9]+)",
+        ).layout.form
+    )
 
 
 def test_join():
