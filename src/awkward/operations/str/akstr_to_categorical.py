@@ -52,16 +52,14 @@ def to_categorical(array, *, highlevel=True, behavior=None):
 
 def _impl(array, highlevel, behavior):
     from awkward._connect.pyarrow import import_pyarrow_compute
+    from awkward.operations.str import _apply_through_arrow
 
     pc = import_pyarrow_compute("ak.str.to_categorical")
     behavior = behavior_of(array, behavior=behavior)
 
     def action(layout, **kwargs):
         if layout.is_list and layout.parameter("__array__") in {"string", "bytestring"}:
-            result = ak.from_arrow(
-                pc.dictionary_encode(ak.to_arrow(layout, extensionarray=False)),
-                highlevel=False,
-            )
+            result = _apply_through_arrow(pc.dictionary_encode, layout)
             # Arrow _always_ adds an option here, even though we know that
             # no values are null. Therefore, we can safely replace the indexed
             # option-type with an indexed type.
