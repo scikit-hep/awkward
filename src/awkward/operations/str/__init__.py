@@ -118,36 +118,31 @@ def _get_ufunc_action(
     utf8_function,
     ascii_function,
     *args,
+    generate_bitmasks=False,
     bytestring_to_string=False,
     **kwargs,
 ):
-    from awkward.operations.ak_from_arrow import from_arrow
-    from awkward.operations.ak_to_arrow import to_arrow
-
     def action(layout, **absorb):
         if layout.is_list and layout.parameter("__array__") == "string":
-            return from_arrow(
-                utf8_function(to_arrow(layout, extensionarray=False), *args, **kwargs),
-                highlevel=False,
+            return _apply_through_arrow(
+                utf8_function,
+                layout,
+                *args,
+                generate_bitmasks=generate_bitmasks,
+                **kwargs,
             )
 
         elif layout.is_list and layout.parameter("__array__") == "bytestring":
             if bytestring_to_string:
-                out = from_arrow(
-                    ascii_function(
-                        to_arrow(
-                            layout.copy(
-                                content=layout.content.copy(
-                                    parameters={"__array__": "char"}
-                                ),
-                                parameters={"__array__": "string"},
-                            ),
-                            extensionarray=False,
-                        ),
-                        *args,
-                        **kwargs,
+                out = _apply_through_arrow(
+                    ascii_function,
+                    layout.copy(
+                        content=layout.content.copy(parameters={"__array__": "char"}),
+                        parameters={"__array__": "string"},
                     ),
-                    highlevel=False,
+                    *args,
+                    generate_bitmasks=generate_bitmasks,
+                    **kwargs,
                 )
 
                 if out.is_option:
@@ -160,11 +155,12 @@ def _get_ufunc_action(
                 return out
 
             else:
-                return from_arrow(
-                    ascii_function(
-                        to_arrow(layout, extensionarray=False), *args, **kwargs
-                    ),
-                    highlevel=False,
+                return _apply_through_arrow(
+                    ascii_function,
+                    layout,
+                    *args,
+                    generate_bitmasks=generate_bitmasks,
+                    **kwargs,
                 )
 
     return action
@@ -185,42 +181,39 @@ def _erase_list_option(layout):
 
 
 def _get_split_action(
-    utf8_function, ascii_function, *args, bytestring_to_string=False, **kwargs
+    utf8_function,
+    ascii_function,
+    *args,
+    generate_bitmasks=False,
+    bytestring_to_string=False,
+    **kwargs,
 ):
-    from awkward.operations.ak_from_arrow import from_arrow
-    from awkward.operations.ak_to_arrow import to_arrow
-
     def action(layout, **absorb):
         if layout.is_list and layout.parameter("__array__") == "string":
             return _erase_list_option(
-                from_arrow(
-                    utf8_function(
-                        to_arrow(layout, extensionarray=False),
-                        *args,
-                        **kwargs,
-                    ),
-                    highlevel=False,
+                _apply_through_arrow(
+                    utf8_function,
+                    layout,
+                    *args,
+                    generate_bitmasks=generate_bitmasks,
+                    **kwargs,
                 )
             )
 
         elif layout.is_list and layout.parameter("__array__") == "bytestring":
             if bytestring_to_string:
                 out = _erase_list_option(
-                    from_arrow(
-                        ascii_function(
-                            to_arrow(
-                                layout.copy(
-                                    content=layout.content.copy(
-                                        parameters={"__array__": "char"}
-                                    ),
-                                    parameters={"__array__": "string"},
-                                ),
-                                extensionarray=False,
+                    _apply_through_arrow(
+                        ascii_function,
+                        layout.copy(
+                            content=layout.content.copy(
+                                parameters={"__array__": "char"}
                             ),
-                            *args,
-                            **kwargs,
+                            parameters={"__array__": "string"},
                         ),
-                        highlevel=False,
+                        *args,
+                        generate_bitmasks=generate_bitmasks,
+                        **kwargs,
                     )
                 )
                 assert out.is_list
@@ -240,11 +233,12 @@ def _get_split_action(
 
             else:
                 return _erase_list_option(
-                    from_arrow(
-                        ascii_function(
-                            to_arrow(layout, extensionarray=False), *args, **kwargs
-                        ),
-                        highlevel=False,
+                    _apply_through_arrow(
+                        ascii_function,
+                        layout,
+                        *args,
+                        generate_bitmasks=generate_bitmasks,
+                        **kwargs,
                     )
                 )
 
