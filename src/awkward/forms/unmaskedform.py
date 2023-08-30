@@ -5,6 +5,7 @@ __all__ = ("UnmaskedForm",)
 from collections.abc import Callable, Iterator
 
 import awkward as ak
+from awkward._errors import deprecate
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._parameters import parameters_union, type_parameters_equal
 from awkward._typing import JSONSerializable, Self, final
@@ -25,6 +26,11 @@ class UnmaskedForm(Form):
         parameters=None,
         form_key=None,
     ):
+        if form_key is not None:
+            deprecate(
+                f"A non-None form_key parameter is deprecated for {type(self).__name__}",
+                version="2.5.0",
+            )
         if not isinstance(content, Form):
             raise TypeError(
                 "{} all 'contents' must be Form subclasses, not {}".format(
