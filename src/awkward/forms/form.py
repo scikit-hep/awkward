@@ -52,7 +52,7 @@ def from_dict(input: Mapping) -> Form:
         )
 
     elif input["class"] == "EmptyArray":
-        return ak.forms.EmptyForm(parameters=parameters, form_key=form_key)
+        return ak.forms.EmptyForm()
 
     elif input["class"] == "RegularArray":
         return ak.forms.RegularForm(
@@ -103,10 +103,7 @@ def from_dict(input: Mapping) -> Form:
             contents = [from_dict(content) for content in input["contents"]]
             fields = None
         return ak.forms.RecordForm(
-            contents=contents,
-            fields=fields,
-            parameters=parameters,
-            form_key=form_key,
+            contents=contents, fields=fields, parameters=parameters
         )
 
     elif input["class"] in (
@@ -155,9 +152,7 @@ def from_dict(input: Mapping) -> Form:
 
     elif input["class"] == "UnmaskedArray":
         return ak.forms.UnmaskedForm(
-            content=from_dict(input["content"]),
-            parameters=parameters,
-            form_key=form_key,
+            content=from_dict(input["content"]), parameters=parameters
         )
 
     elif input["class"] in (
