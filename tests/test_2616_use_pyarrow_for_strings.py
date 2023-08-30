@@ -281,6 +281,14 @@ def test_repeat():
         [],
         ["→δε←→δε←→δε←".encode(), "ζz zζζz zζζz zζ".encode(), b"abcabcabc"],
     ]
+    assert (
+        ak.str.repeat(string, 3).layout.form
+        == ak.str.repeat(ak.to_backend(string, "typetracer"), 3).layout.form
+    )
+    assert (
+        ak.str.repeat(bytestring, 3).layout.form
+        == ak.str.repeat(ak.to_backend(bytestring, "typetracer"), 3).layout.form
+    )
 
     assert ak.str.repeat(string, [[3, 3], [], [2, 0, 1]]).tolist() == [
         ["αβγαβγαβγ", ""],
@@ -292,6 +300,18 @@ def test_repeat():
         [],
         ["→δε←→δε←".encode(), b"", b"abc"],
     ]
+    assert (
+        ak.str.repeat(string, [[3, 3], [], [2, 0, 1]]).layout.form
+        == ak.str.repeat(
+            ak.to_backend(string, "typetracer"), [[3, 3], [], [2, 0, 1]]
+        ).layout.form
+    )
+    assert (
+        ak.str.repeat(bytestring, [[3, 3], [], [2, 0, 1]]).layout.form
+        == ak.str.repeat(
+            ak.to_backend(bytestring, "typetracer"), [[3, 3], [], [2, 0, 1]]
+        ).layout.form
+    )
 
 
 def test_replace_slice():
