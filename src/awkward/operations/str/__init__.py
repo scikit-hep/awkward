@@ -84,6 +84,36 @@ from awkward.operations.str.akstr_starts_with import *
 from awkward.operations.str.akstr_to_categorical import *
 
 
+def _apply_through_arrow(
+    operation, /, layout, *args, generate_bitmasks=False, **kwargs
+):
+    from awkward.operations.ak_from_arrow import from_arrow
+    from awkward.operations.ak_to_arrow import to_arrow
+    from awkward._backends.typetracer import TypeTracerBackend
+
+    typetracer = TypeTracerBackend.instance()
+    if layout.backend is typetracer:
+        out = from_arrow(
+            operation(
+                to_arrow(
+                    layout.form.length_zero_array(highlevel=False), extensionarray=False
+                ),
+                *args,
+                **kwargs,
+            ),
+            generate_bitmasks=generate_bitmasks,
+            highlevel=False,
+        )
+        return out.to_typetracer(forget_length=True)
+
+    else:
+        return from_arrow(
+            operation(to_arrow(layout, extensionarray=False), *args, **kwargs),
+            generate_bitmasks=generate_bitmasks,
+            highlevel=False,
+        )
+
+
 def _get_ufunc_action(
     utf8_function,
     ascii_function,
