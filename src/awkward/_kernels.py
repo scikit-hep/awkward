@@ -118,18 +118,19 @@ class CupyKernel(BaseKernel):
         return max_length
 
     def calc_grid(self, length):
-        if length > 1024:
-            return -(length // -1024), 1, 1
-        return 1, 1, 1
+        # CUDA blocks are limited to 1024 threads per block, so to
+        # have more than one block, we have at least `length // 1024` blocks
+        # of size 1024.
+        return (length // 1024) + 1, 1, 1
 
     def calc_blocks(self, length):
-        if length > 1024:
-            return 1024, 1, 1
-        return length, 1, 1
+        # CUDA blocks are limited to 1024 threads per block
+        # Number of threads are given by `length`
+        return min(length, 1024), 1, 1
 
     def _cast(self, x, t):
         if t:
-            # Do we have a NumPy-owned array?
+            # Do we have a CuPy-owned array?
             if self._cupy.is_own_array(x):
                 assert self._cupy.is_c_contiguous(x)
             return x

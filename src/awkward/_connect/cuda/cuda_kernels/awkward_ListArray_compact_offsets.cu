@@ -14,7 +14,7 @@ enum class LISTARRAY_COMPACT_OFFSETS_ERRORS {
 
 template <typename T, typename C, typename U>
 __global__ void
-awkward_ListArray_compact_offsets_a(T* tooffsets,
+awkward_ListArray_compact_offsets(T* tooffsets,
                                     const C* fromstarts,
                                     const U* fromstops,
                                     int64_t length,

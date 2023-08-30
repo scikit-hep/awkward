@@ -8,6 +8,11 @@ import pytest
 
 import awkward as ak
 
+try:
+    ak.numba.register_and_check()
+except ImportError:
+    pytest.skip(reason="too old Numba version", allow_module_level=True)
+
 
 @pytest.mark.xfail(reason="unimplemented CUDA Kernels (awkward_ByteMaskedArray_numnull")
 def test_num_1():

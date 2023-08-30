@@ -9,6 +9,11 @@ import pytest
 import awkward as ak
 import awkward._connect.cuda
 
+try:
+    ak.numba.register_and_check()
+except ImportError:
+    pytest.skip(reason="too old Numba version", allow_module_level=True)
+
 
 def test():
     v2_array = ak.Array([1, 2, 3, 4, 5]).layout

@@ -4,11 +4,16 @@ from __future__ import annotations
 
 import cupy as cp
 import numpy as np
-import pytest  # noqa: F401
+import pytest
 
 import awkward as ak
 from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.numpy import Numpy
+
+try:
+    ak.numba.register_and_check()
+except ImportError:
+    pytest.skip(reason="too old Numba version", allow_module_level=True)
 
 
 def test_cupy_interop():

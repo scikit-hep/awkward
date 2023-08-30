@@ -15,6 +15,12 @@ nb.config.CUDA_LOW_OCCUPANCY_WARNINGS = False
 nb.config.CUDA_WARN_ON_IMPLICIT_COPY = False
 
 
+try:
+    ak.numba.register_and_check()
+except ImportError:
+    pytest.skip(reason="too old Numba version", allow_module_level=True)
+
+
 @nb_cuda.jit(extensions=[ak.numba.cuda])
 def multiply(array, n, out):
     tid = nb_cuda.grid(1)
@@ -91,7 +97,7 @@ def test_array_on_cpu_multiply():
     # allocate the result:
     results = nb_cuda.to_device(np.empty(4, dtype=np.int32))
 
-    with pytest.raises(TypeError):
+    with pytest.raises(nb.errors.NumbaTypeError):
         multiply[1, 4](array, 3, results)
 
     multiply[1, 4](ak.to_backend(array, backend="cuda"), 3, results)
