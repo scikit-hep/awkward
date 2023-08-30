@@ -634,6 +634,13 @@ def test_split_pattern():
         [["", "foo"], ["456bar"], ["foo", "456bar"]],
         [],
     ]
+    assert (
+        ak.str.split_pattern(string_repeats, "123", max_splits=1).layout.form
+        == ak.str.split_pattern(
+            ak.to_backend(string_repeats, "typetracer"), "123", max_splits=1
+        ).layout.form
+    )
+
     assert ak.str.split_pattern(
         string_repeats, "123", max_splits=1, reverse=True
     ).tolist() == [
@@ -641,11 +648,28 @@ def test_split_pattern():
         [["", "foo"], ["456bar"], ["foo", "456bar"]],
         [],
     ]
+    assert (
+        ak.str.split_pattern(
+            string_repeats, "123", max_splits=1, reverse=True
+        ).layout.form
+        == ak.str.split_pattern(
+            ak.to_backend(string_repeats, "typetracer"),
+            "123",
+            max_splits=1,
+            reverse=True,
+        ).layout.form
+    )
     assert ak.str.split_pattern(string_repeats, "123", max_splits=None).tolist() == [
         [["foo", "bar", "baz"], ["foo"], ["bar"]],
         [["", "foo"], ["456bar"], ["foo", "456bar"]],
         [],
     ]
+    assert (
+        ak.str.split_pattern(string_repeats, "123", max_splits=None).layout.form
+        == ak.str.split_pattern(
+            ak.to_backend(string_repeats, "typetracer"), "123", max_splits=None
+        ).layout.form
+    )
 
     # Bytestrings
     assert ak.str.split_pattern(bytestring_repeats, b"123", max_splits=1).tolist() == [
@@ -653,6 +677,13 @@ def test_split_pattern():
         [[b"", b"foo"], [b"456bar"], [b"foo", b"456bar"]],
         [],
     ]
+    assert (
+        ak.str.split_pattern(bytestring_repeats, b"123", max_splits=1).layout.form
+        == ak.str.split_pattern(
+            ak.to_backend(bytestring_repeats, "typetracer"), b"123", max_splits=1
+        ).layout.form
+    )
+
     assert ak.str.split_pattern(
         bytestring_repeats, b"123", max_splits=1, reverse=True
     ).tolist() == [
@@ -660,6 +691,18 @@ def test_split_pattern():
         [[b"", b"foo"], [b"456bar"], [b"foo", b"456bar"]],
         [],
     ]
+    assert (
+        ak.str.split_pattern(
+            bytestring_repeats, b"123", max_splits=1, reverse=True
+        ).layout.form
+        == ak.str.split_pattern(
+            ak.to_backend(bytestring_repeats, "typetracer"),
+            b"123",
+            max_splits=1,
+            reverse=True,
+        ).layout.form
+    )
+
     assert ak.str.split_pattern(
         bytestring_repeats, b"123", max_splits=None
     ).tolist() == [
@@ -667,6 +710,12 @@ def test_split_pattern():
         [[b"", b"foo"], [b"456bar"], [b"foo", b"456bar"]],
         [],
     ]
+    assert (
+        ak.str.split_pattern(bytestring_repeats, b"123", max_splits=None).layout.form
+        == ak.str.split_pattern(
+            ak.to_backend(bytestring_repeats, "typetracer"), b"123", max_splits=None
+        ).layout.form
+    )
 
 
 def test_split_pattern_regex():
