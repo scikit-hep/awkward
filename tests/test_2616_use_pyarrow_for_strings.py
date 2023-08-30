@@ -2186,3 +2186,12 @@ def test_index_in():
             skip_nones=True,
         ).layout.form
     )
+
+
+def test_to_categorical():
+    assert (
+        ak.str.to_categorical(["foo", "bar", "bar", "fee"]).layout.form
+        == ak.str.to_categorical(
+            ak.to_backend(["foo", "bar", "bar", "fee"], "typetracer")
+        ).layout.form
+    )
