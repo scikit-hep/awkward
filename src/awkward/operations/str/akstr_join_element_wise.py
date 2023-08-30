@@ -3,9 +3,13 @@
 __all__ = ("join_element_wise",)
 
 import awkward as ak
+from awkward._backends.dispatch import backend_of
+from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of
 from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
+
+cpu = NumpyBackend.instance()
 
 
 @high_level_function(module="ak.str")
@@ -51,8 +55,9 @@ def _impl(arrays, highlevel, behavior):
     if len(arrays) < 1:
         raise TypeError("at least one array is required")
 
-    layouts = [ak.to_layout(x) for x in arrays]
     behavior = behavior_of(*arrays, behavior=behavior)
+    backend = backend_of(*arrays, coerce_to_common=True, default=cpu)
+    layouts = [ak.to_layout(x).to_backend(backend) for x in arrays]
 
     def action(layouts, **kwargs):
         if all(
