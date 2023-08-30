@@ -726,6 +726,13 @@ def test_split_pattern_regex():
         [["", "foo"], ["", "bar"], ["foo", "456bar"]],
         [],
     ]
+    assert (
+        ak.str.split_pattern_regex(string_repeats, r"\d{3}", max_splits=1).layout.form
+        == ak.str.split_pattern_regex(
+            ak.to_backend(string_repeats, "typetracer"), r"\d{3}", max_splits=1
+        ).layout.form
+    )
+
     with pytest.raises(
         pyarrow.ArrowNotImplementedError, match=r"split in reverse with regex"
     ):
@@ -736,6 +743,16 @@ def test_split_pattern_regex():
             [["", "foo"], ["", "bar"], ["foo", "456bar"]],
             [],
         ]
+    with pytest.raises(
+        pyarrow.ArrowNotImplementedError, match=r"split in reverse with regex"
+    ):
+        ak.str.split_pattern_regex(
+            ak.to_backend(string_repeats, "typetracer"),
+            r"\d{3}",
+            max_splits=1,
+            reverse=True,
+        )
+
     assert ak.str.split_pattern_regex(
         string_repeats, r"\d{3}", max_splits=None
     ).tolist() == [
@@ -743,6 +760,14 @@ def test_split_pattern_regex():
         [["", "foo"], ["", "bar"], ["foo", "", "bar"]],
         [],
     ]
+    assert (
+        ak.str.split_pattern_regex(
+            string_repeats, r"\d{3}", max_splits=None
+        ).layout.form
+        == ak.str.split_pattern_regex(
+            ak.to_backend(string_repeats, "typetracer"), r"\d{3}", max_splits=None
+        ).layout.form
+    )
 
     # Bytestrings
     assert ak.str.split_pattern_regex(
@@ -752,6 +777,15 @@ def test_split_pattern_regex():
         [[b"", b"foo"], [b"", b"bar"], [b"foo", b"456bar"]],
         [],
     ]
+    assert (
+        ak.str.split_pattern_regex(
+            bytestring_repeats, r"\d{3}", max_splits=1
+        ).layout.form
+        == ak.str.split_pattern_regex(
+            ak.to_backend(bytestring_repeats, "typetracer"), r"\d{3}", max_splits=1
+        ).layout.form
+    )
+
     with pytest.raises(
         pyarrow.ArrowNotImplementedError, match=r"split in reverse with regex"
     ):
@@ -762,6 +796,16 @@ def test_split_pattern_regex():
             [[b"", b"foo"], [b"", b"bar"], [b"foo", b"456bar"]],
             [],
         ]
+    with pytest.raises(
+        pyarrow.ArrowNotImplementedError, match=r"split in reverse with regex"
+    ):
+        ak.str.split_pattern_regex(
+            ak.to_backend(bytestring_repeats, "typetracer"),
+            r"\d{3}",
+            max_splits=1,
+            reverse=True,
+        )
+
     assert ak.str.split_pattern_regex(
         bytestring_repeats, rb"\d{3}", max_splits=None
     ).tolist() == [
@@ -769,6 +813,14 @@ def test_split_pattern_regex():
         [[b"", b"foo"], [b"", b"bar"], [b"foo", b"", b"bar"]],
         [],
     ]
+    assert (
+        ak.str.split_pattern_regex(
+            bytestring_repeats, r"\d{3}", max_splits=None
+        ).layout.form
+        == ak.str.split_pattern_regex(
+            ak.to_backend(bytestring_repeats, "typetracer"), r"\d{3}", max_splits=None
+        ).layout.form
+    )
 
 
 def test_extract_regex():
