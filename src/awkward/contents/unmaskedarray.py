@@ -123,11 +123,8 @@ class UnmaskedArray(Content):
             return cls(content, parameters=parameters)
 
     def _form_with_key(self, getkey: Callable[[Content], str | None]) -> UnmaskedForm:
-        form_key = getkey(self)
         return self.form_cls(
-            self._content._form_with_key(getkey),
-            parameters=self._parameters,
-            form_key=form_key,
+            self._content._form_with_key(getkey), parameters=self._parameters
         )
 
     def _to_buffers(
