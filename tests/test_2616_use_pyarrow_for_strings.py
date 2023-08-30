@@ -60,6 +60,14 @@ def test_is_alnum():
         [],
         [False, False, True],
     ]
+    assert (
+        ak.str.is_alnum(string).layout.form
+        == ak.str.is_alnum(ak.to_backend(string, "typetracer")).layout.form
+    )
+    assert (
+        ak.str.is_alnum(bytestring).layout.form
+        == ak.str.is_alnum(ak.to_backend(bytestring, "typetracer")).layout.form
+    )
 
 
 def test_is_alpha():
@@ -73,6 +81,14 @@ def test_is_alpha():
         [],
         [False, False, True],
     ]
+    assert (
+        ak.str.is_alpha(string).layout.form
+        == ak.str.is_alpha(ak.to_backend(string, "typetracer")).layout.form
+    )
+    assert (
+        ak.str.is_alpha(bytestring).layout.form
+        == ak.str.is_alpha(ak.to_backend(bytestring, "typetracer")).layout.form
+    )
 
 
 def test_is_decimal():
@@ -86,6 +102,14 @@ def test_is_decimal():
         [],
         [False, False, False],
     ]
+    assert (
+        ak.str.is_decimal(string).layout.form
+        == ak.str.is_decimal(ak.to_backend(string, "typetracer")).layout.form
+    )
+    assert (
+        ak.str.is_decimal(bytestring).layout.form
+        == ak.str.is_decimal(ak.to_backend(bytestring, "typetracer")).layout.form
+    )
 
 
 def test_is_digit():
@@ -100,6 +124,15 @@ def test_is_digit():
         [False, False, False],
     ]
 
+    assert (
+        ak.str.is_digit(string).layout.form
+        == ak.str.is_digit(ak.to_backend(string, "typetracer")).layout.form
+    )
+    assert (
+        ak.str.is_digit(bytestring).layout.form
+        == ak.str.is_digit(ak.to_backend(bytestring, "typetracer")).layout.form
+    )
+
 
 def test_is_lower():
     assert ak.str.is_lower(string).tolist() == [
@@ -112,6 +145,14 @@ def test_is_lower():
         [],
         [False, True, True],
     ]
+    assert (
+        ak.str.is_lower(string).layout.form
+        == ak.str.is_lower(ak.to_backend(string, "typetracer")).layout.form
+    )
+    assert (
+        ak.str.is_lower(bytestring).layout.form
+        == ak.str.is_lower(ak.to_backend(bytestring, "typetracer")).layout.form
+    )
 
 
 def test_is_numeric():
@@ -125,6 +166,14 @@ def test_is_numeric():
         [],
         [False, False, False],
     ]
+    assert (
+        ak.str.is_numeric(string).layout.form
+        == ak.str.is_numeric(ak.to_backend(string, "typetracer")).layout.form
+    )
+    assert (
+        ak.str.is_numeric(bytestring).layout.form
+        == ak.str.is_numeric(ak.to_backend(bytestring, "typetracer")).layout.form
+    )
 
 
 def test_is_printable():
@@ -138,6 +187,14 @@ def test_is_printable():
         [],
         [False, False, True],
     ]
+    assert (
+        ak.str.is_printable(string).layout.form
+        == ak.str.is_printable(ak.to_backend(string, "typetracer")).layout.form
+    )
+    assert (
+        ak.str.is_printable(bytestring).layout.form
+        == ak.str.is_printable(ak.to_backend(bytestring, "typetracer")).layout.form
+    )
 
 
 def test_is_space():
@@ -151,6 +208,14 @@ def test_is_space():
         [],
         [False, False, False],
     ]
+    assert (
+        ak.str.is_space(string).layout.form
+        == ak.str.is_space(ak.to_backend(string, "typetracer")).layout.form
+    )
+    assert (
+        ak.str.is_space(bytestring).layout.form
+        == ak.str.is_space(ak.to_backend(bytestring, "typetracer")).layout.form
+    )
 
 
 def test_is_upper():
@@ -164,6 +229,14 @@ def test_is_upper():
         [],
         [False, False, False],
     ]
+    assert (
+        ak.str.is_upper(string).layout.form
+        == ak.str.is_upper(ak.to_backend(string, "typetracer")).layout.form
+    )
+    assert (
+        ak.str.is_upper(bytestring).layout.form
+        == ak.str.is_upper(ak.to_backend(bytestring, "typetracer")).layout.form
+    )
 
 
 def test_is_title():
@@ -177,6 +250,14 @@ def test_is_title():
         [],
         [False, False, False],
     ]
+    assert (
+        ak.str.is_title(string).layout.form
+        == ak.str.is_title(ak.to_backend(string, "typetracer")).layout.form
+    )
+    assert (
+        ak.str.is_title(bytestring).layout.form
+        == ak.str.is_title(ak.to_backend(bytestring, "typetracer")).layout.form
+    )
 
 
 def test_is_ascii():
@@ -190,6 +271,14 @@ def test_is_ascii():
         [],
         [False, False, True],
     ]
+    assert (
+        ak.str.is_ascii(string).layout.form
+        == ak.str.is_ascii(ak.to_backend(string, "typetracer")).layout.form
+    )
+    assert (
+        ak.str.is_ascii(bytestring).layout.form
+        == ak.str.is_ascii(ak.to_backend(bytestring, "typetracer")).layout.form
+    )
 
 
 def test_capitalize():
@@ -203,6 +292,14 @@ def test_capitalize():
         [],
         ["→δε←".encode(), "ζz zζ".encode(), b"Abc"],
     ]
+    assert (
+        ak.str.capitalize(string).layout.form
+        == ak.str.capitalize(ak.to_backend(string, "typetracer")).layout.form
+    )
+    assert (
+        ak.str.capitalize(bytestring).layout.form
+        == ak.str.capitalize(ak.to_backend(bytestring, "typetracer")).layout.form
+    )
 
 
 def test_length():
@@ -216,6 +313,14 @@ def test_length():
         [],
         [10, 7, 3],
     ]
+    assert (
+        ak.str.length(string).layout.form
+        == ak.str.length(ak.to_backend(string, "typetracer")).layout.form
+    )
+    assert (
+        ak.str.length(bytestring).layout.form
+        == ak.str.length(ak.to_backend(bytestring, "typetracer")).layout.form
+    )
 
 
 def test_lower():
@@ -229,6 +334,14 @@ def test_lower():
         [],
         ["→δε←".encode(), "ζz zζ".encode(), b"abc"],
     ]
+    assert (
+        ak.str.lower(string).layout.form
+        == ak.str.lower(ak.to_backend(string, "typetracer")).layout.form
+    )
+    assert (
+        ak.str.lower(bytestring).layout.form
+        == ak.str.lower(ak.to_backend(bytestring, "typetracer")).layout.form
+    )
 
 
 def test_swapcase():
@@ -242,6 +355,14 @@ def test_swapcase():
         [],
         ["→δε←".encode(), "ζZ Zζ".encode(), b"ABC"],
     ]
+    assert (
+        ak.str.swapcase(string).layout.form
+        == ak.str.swapcase(ak.to_backend(string, "typetracer")).layout.form
+    )
+    assert (
+        ak.str.swapcase(bytestring).layout.form
+        == ak.str.swapcase(ak.to_backend(bytestring, "typetracer")).layout.form
+    )
 
 
 def test_title():
@@ -255,6 +376,14 @@ def test_title():
         [],
         ["→δε←".encode(), "ζZ Zζ".encode(), b"Abc"],
     ]
+    assert (
+        ak.str.title(string).layout.form
+        == ak.str.title(ak.to_backend(string, "typetracer")).layout.form
+    )
+    assert (
+        ak.str.title(bytestring).layout.form
+        == ak.str.title(ak.to_backend(bytestring, "typetracer")).layout.form
+    )
 
 
 def test_upper():
@@ -268,6 +397,14 @@ def test_upper():
         [],
         ["→δε←".encode(), "ζZ Zζ".encode(), b"ABC"],
     ]
+    assert (
+        ak.str.upper(string).layout.form
+        == ak.str.upper(ak.to_backend(string, "typetracer")).layout.form
+    )
+    assert (
+        ak.str.upper(bytestring).layout.form
+        == ak.str.upper(ak.to_backend(bytestring, "typetracer")).layout.form
+    )
 
 
 def test_repeat():
@@ -325,6 +462,18 @@ def test_replace_slice():
         [],
         [b"\xe2qj\x92\xce\xb4\xce\xb5\xe2\x86\x90"],
     ]
+    assert (
+        ak.str.replace_slice(string[:, :1], 1, 2, "qj").layout.form
+        == ak.str.replace_slice(
+            ak.to_backend(string, "typetracer")[:, :1], 1, 2, "qj"
+        ).layout.form
+    )
+    assert (
+        ak.str.replace_slice(bytestring[:, :1], 1, 2, b"qj").layout.form
+        == ak.str.replace_slice(
+            ak.to_backend(bytestring, "typetracer")[:, :1], 1, 2, b"qj"
+        ).layout.form
+    )
 
 
 def test_reverse():
@@ -338,6 +487,14 @@ def test_reverse():
         [],
         ["→δε←".encode()[::-1], "ζz zζ".encode()[::-1], b"abc"[::-1]],
     ]
+    assert (
+        ak.str.reverse(string).layout.form
+        == ak.str.reverse(ak.to_backend(string, "typetracer")).layout.form
+    )
+    assert (
+        ak.str.reverse(bytestring).layout.form
+        == ak.str.reverse(ak.to_backend(bytestring, "typetracer")).layout.form
+    )
 
 
 def test_replace_substring():
@@ -351,6 +508,18 @@ def test_replace_substring():
         [],
         ["→δε←".encode(), "ζz zζ".encode(), b"abc"],
     ]
+    assert (
+        ak.str.replace_substring(string, "βγ", "HELLO").layout.form
+        == ak.str.replace_substring(
+            ak.to_backend(string, "typetracer"), "βγ", "HELLO"
+        ).layout.form
+    )
+    assert (
+        ak.str.replace_substring(bytestring, "βγ".encode(), b"HELLO").layout.form
+        == ak.str.replace_substring(
+            ak.to_backend(bytestring, "typetracer"), "βγ".encode(), b"HELLO"
+        ).layout.form
+    )
 
     assert ak.str.replace_substring(
         string, "βγ", "HELLO", max_replacements=0
@@ -366,6 +535,23 @@ def test_replace_substring():
         [],
         ["→δε←".encode(), "ζz zζ".encode(), b"abc"],
     ]
+    assert (
+        ak.str.replace_substring(string, "βγ", "HELLO", max_replacements=0).layout.form
+        == ak.str.replace_substring(
+            ak.to_backend(string, "typetracer"), "βγ", "HELLO", max_replacements=0
+        ).layout.form
+    )
+    assert (
+        ak.str.replace_substring(
+            bytestring, "βγ".encode(), b"HELLO", max_replacements=0
+        ).layout.form
+        == ak.str.replace_substring(
+            ak.to_backend(bytestring, "typetracer"),
+            "βγ".encode(),
+            b"HELLO",
+            max_replacements=0,
+        ).layout.form
+    )
 
 
 def test_replace_substring_regex():
@@ -381,6 +567,18 @@ def test_replace_substring_regex():
         [],
         ["→δε←".encode(), "ζz zζ".encode(), b"abc"],
     ]
+    assert (
+        ak.str.replace_substring(string, "βγ", "HELLO").layout.form
+        == ak.str.replace_substring(
+            ak.to_backend(string, "typetracer"), "βγ", "HELLO"
+        ).layout.form
+    )
+    assert (
+        ak.str.replace_substring(bytestring, "βγ".encode(), b"HELLO").layout.form
+        == ak.str.replace_substring(
+            ak.to_backend(bytestring, "typetracer"), "βγ".encode(), b"HELLO"
+        ).layout.form
+    )
 
     assert ak.str.replace_substring_regex(
         string, "βγ", "HELLO", max_replacements=0
@@ -396,6 +594,51 @@ def test_replace_substring_regex():
         [],
         ["→δε←".encode(), "ζz zζ".encode(), b"abc"],
     ]
+    assert (
+        ak.str.replace_substring(string, "βγ", "HELLO", max_replacements=0).layout.form
+        == ak.str.replace_substring(
+            ak.to_backend(string, "typetracer"), "βγ", "HELLO", max_replacements=0
+        ).layout.form
+    )
+    assert (
+        ak.str.replace_substring(
+            bytestring, "βγ".encode(), b"HELLO", max_replacements=0
+        ).layout.form
+        == ak.str.replace_substring(
+            ak.to_backend(bytestring, "typetracer"),
+            "βγ".encode(),
+            b"HELLO",
+            max_replacements=0,
+        ).layout.form
+    )
+
+    # Check regex
+    assert ak.str.replace_substring_regex(
+        [["aaaa1bb1c2ddddd"], ["fff"], []], r"[a-zA-Z]+", "FOO"
+    ).tolist() == [["FOO1FOO1FOO2FOO"], ["FOO"], []]
+    assert ak.str.replace_substring_regex(
+        [[b"aaaa1bb1c2ddddd"], [b"fff"], []], rb"[a-zA-Z]+", b"FOO"
+    ).tolist() == [[b"FOO1FOO1FOO2FOO"], [b"FOO"], []]
+    assert (
+        ak.str.replace_substring_regex(
+            [["aaaa1bb1c2ddddd"], ["fff"], []], r"[a-zA-Z]+", "FOO"
+        ).layout.form
+        == ak.str.replace_substring_regex(
+            ak.to_backend([["aaaa1bb1c2ddddd"], ["fff"], []], "typetracer"),
+            r"[a-zA-Z]+",
+            "FOO",
+        ).layout.form
+    )
+    assert (
+        ak.str.replace_substring_regex(
+            [[b"aaaa1bb1c2ddddd"], [b"fff"], []], rb"[a-zA-Z]+", b"FOO"
+        ).layout.form
+        == ak.str.replace_substring_regex(
+            ak.to_backend([[b"aaaa1bb1c2ddddd"], [b"fff"], []], "typetracer"),
+            rb"[a-zA-Z]+",
+            b"FOO",
+        ).layout.form
+    )
 
 
 def test_center():
@@ -404,9 +647,6 @@ def test_center():
         [],
         ["     →δε←      ", "     ζz zζ     ", "      abc      "],
     ]
-
-    print(ak.str.center(bytestring, 15, " ").tolist())
-
     assert ak.str.center(bytestring, 15, b" ").tolist() == [
         [b"    \xce\xb1\xce\xb2\xce\xb3     ", b"               "],
         [],
@@ -416,6 +656,14 @@ def test_center():
             b"      abc      ",
         ],
     ]
+    assert (
+        ak.str.center(string, 15, " ").layout.form
+        == ak.str.center(ak.to_backend(string, "typetracer"), 15, " ").layout.form
+    )
+    assert (
+        ak.str.center(bytestring, 15, b" ").layout.form
+        == ak.str.center(ak.to_backend(bytestring, "typetracer"), 15, b" ").layout.form
+    )
 
 
 def test_lpad():
@@ -424,9 +672,6 @@ def test_lpad():
         [],
         ["           →δε←", "          ζz zζ", "            abc"],
     ]
-
-    print(ak.str.lpad(bytestring, 15, " ").tolist())
-
     assert ak.str.lpad(bytestring, 15, b" ").tolist() == [
         [b"         \xce\xb1\xce\xb2\xce\xb3", b"               "],
         [],
@@ -436,6 +681,14 @@ def test_lpad():
             b"            abc",
         ],
     ]
+    assert (
+        ak.str.lpad(string, 15, " ").layout.form
+        == ak.str.lpad(ak.to_backend(string, "typetracer"), 15, " ").layout.form
+    )
+    assert (
+        ak.str.lpad(bytestring, 15, b" ").layout.form
+        == ak.str.lpad(ak.to_backend(bytestring, "typetracer"), 15, b" ").layout.form
+    )
 
 
 def test_rpad():
@@ -444,9 +697,6 @@ def test_rpad():
         [],
         ["→δε←           ", "ζz zζ          ", "abc            "],
     ]
-
-    print(ak.str.rpad(bytestring, 15, " ").tolist())
-
     assert ak.str.rpad(bytestring, 15, b" ").tolist() == [
         [b"\xce\xb1\xce\xb2\xce\xb3         ", b"               "],
         [],
@@ -456,6 +706,14 @@ def test_rpad():
             b"abc            ",
         ],
     ]
+    assert (
+        ak.str.rpad(string, 15, " ").layout.form
+        == ak.str.rpad(ak.to_backend(string, "typetracer"), 15, " ").layout.form
+    )
+    assert (
+        ak.str.rpad(bytestring, 15, b" ").layout.form
+        == ak.str.rpad(ak.to_backend(bytestring, "typetracer"), 15, b" ").layout.form
+    )
 
 
 def test_ltrim():
@@ -469,6 +727,16 @@ def test_ltrim():
         [],
         ["→δε←   ".encode(), "ζz zζ    ".encode(), b"abc      "],
     ]
+    assert (
+        ak.str.ltrim(string_padded, " ").layout.form
+        == ak.str.ltrim(ak.to_backend(string_padded, "typetracer"), " ").layout.form
+    )
+    assert (
+        ak.str.ltrim(bytestring_padded, b" ").layout.form
+        == ak.str.ltrim(
+            ak.to_backend(bytestring_padded, "typetracer"), b" "
+        ).layout.form
+    )
 
 
 def test_ltrim_whitespace():
@@ -482,6 +750,18 @@ def test_ltrim_whitespace():
         [],
         ["→δε←   ".encode(), "ζz zζ    ".encode(), b"abc      "],
     ]
+    assert (
+        ak.str.ltrim_whitespace(string_padded).layout.form
+        == ak.str.ltrim_whitespace(
+            ak.to_backend(string_padded, "typetracer")
+        ).layout.form
+    )
+    assert (
+        ak.str.ltrim_whitespace(bytestring_padded).layout.form
+        == ak.str.ltrim_whitespace(
+            ak.to_backend(bytestring_padded, "typetracer")
+        ).layout.form
+    )
 
 
 def test_rtrim():
@@ -495,6 +775,16 @@ def test_rtrim():
         [],
         ["  →δε←".encode(), "    ζz zζ".encode(), b"      abc"],
     ]
+    assert (
+        ak.str.rtrim(string_padded, " ").layout.form
+        == ak.str.rtrim(ak.to_backend(string_padded, "typetracer"), " ").layout.form
+    )
+    assert (
+        ak.str.rtrim(bytestring_padded, b" ").layout.form
+        == ak.str.rtrim(
+            ak.to_backend(bytestring_padded, "typetracer"), b" "
+        ).layout.form
+    )
 
 
 def test_rtrim_whitespace():
@@ -508,6 +798,18 @@ def test_rtrim_whitespace():
         [],
         ["  →δε←".encode(), "    ζz zζ".encode(), b"      abc"],
     ]
+    assert (
+        ak.str.rtrim_whitespace(string_padded).layout.form
+        == ak.str.rtrim_whitespace(
+            ak.to_backend(string_padded, "typetracer")
+        ).layout.form
+    )
+    assert (
+        ak.str.rtrim_whitespace(bytestring_padded).layout.form
+        == ak.str.rtrim_whitespace(
+            ak.to_backend(bytestring_padded, "typetracer")
+        ).layout.form
+    )
 
 
 def test_trim():
@@ -521,6 +823,14 @@ def test_trim():
         [],
         ["→δε←".encode(), "ζz zζ".encode(), b"abc"],
     ]
+    assert (
+        ak.str.trim(string_padded, " ").layout.form
+        == ak.str.trim(ak.to_backend(string_padded, "typetracer"), " ").layout.form
+    )
+    assert (
+        ak.str.trim(bytestring_padded, b" ").layout.form
+        == ak.str.trim(ak.to_backend(bytestring_padded, "typetracer"), b" ").layout.form
+    )
 
 
 def test_trim_whitespace():
@@ -534,6 +844,20 @@ def test_trim_whitespace():
         [],
         ["→δε←".encode(), "ζz zζ".encode(), b"abc"],
     ]
+    assert (
+        ak.str.trim_whitespace(string_padded).layout.form
+        == ak.str.trim_whitespace(
+            ak.to_backend(string_padded, "typetracer")
+        ).layout.form
+    )
+
+
+assert (
+    ak.str.trim_whitespace(bytestring_padded).layout.form
+    == ak.str.trim_whitespace(
+        ak.to_backend(bytestring_padded, "typetracer")
+    ).layout.form
+)
 
 
 def test_slice():
@@ -1009,11 +1333,24 @@ def test_count_substring():
         [0, 0, 0],
         [],
     ]
+    assert (
+        ak.str.count_substring(string_repeats, "BA").layout.form
+        == ak.str.count_substring(
+            ak.to_backend(string_repeats, "typetracer"), "BA"
+        ).layout.form
+    )
+
     assert ak.str.count_substring(string_repeats, "BA", ignore_case=True).tolist() == [
         [2, 0, 1],
         [0, 1, 1],
         [],
     ]
+    assert (
+        ak.str.count_substring(string_repeats, "BA", ignore_case=True).layout.form
+        == ak.str.count_substring(
+            ak.to_backend(string_repeats, "typetracer"), "BA", ignore_case=True
+        ).layout.form
+    )
 
     # Bytestrings
     assert ak.str.count_substring(bytestring_repeats, b"BA").tolist() == [
@@ -1021,6 +1358,13 @@ def test_count_substring():
         [0, 0, 0],
         [],
     ]
+    assert (
+        ak.str.count_substring(bytestring_repeats, b"BA").layout.form
+        == ak.str.count_substring(
+            ak.to_backend(bytestring_repeats, "typetracer"), b"BA"
+        ).layout.form
+    )
+
     assert ak.str.count_substring(
         bytestring_repeats, b"BA", ignore_case=True
     ).tolist() == [
@@ -1028,6 +1372,12 @@ def test_count_substring():
         [0, 1, 1],
         [],
     ]
+    assert (
+        ak.str.count_substring(bytestring_repeats, b"BA", ignore_case=True).layout.form
+        == ak.str.count_substring(
+            ak.to_backend(bytestring_repeats, "typetracer"), b"BA", ignore_case=True
+        ).layout.form
+    )
 
 
 def test_count_substring_regex():
@@ -1036,6 +1386,13 @@ def test_count_substring_regex():
         [0, 0, 0],
         [],
     ]
+    assert (
+        ak.str.count_substring_regex(string_repeats, r"BA\d*").layout.form
+        == ak.str.count_substring_regex(
+            ak.to_backend(string_repeats, "typetracer"), r"BA\d*"
+        ).layout.form
+    )
+
     assert ak.str.count_substring_regex(
         string_repeats, r"BA\d*", ignore_case=True
     ).tolist() == [
@@ -1043,11 +1400,26 @@ def test_count_substring_regex():
         [0, 1, 1],
         [],
     ]
+    assert (
+        ak.str.count_substring_regex(
+            string_repeats, r"BA\d*", ignore_case=True
+        ).layout.form
+        == ak.str.count_substring_regex(
+            ak.to_backend(string_repeats, "typetracer"), r"BA\d*", ignore_case=True
+        ).layout.form
+    )
+
     assert ak.str.count_substring_regex(string_repeats, r"\d{1,}").tolist() == [
         [2, 0, 0],
         [1, 1, 1],
         [],
     ]
+    assert (
+        ak.str.count_substring_regex(string_repeats, r"\d{1,}").layout.form
+        == ak.str.count_substring_regex(
+            ak.to_backend(string_repeats, "typetracer"), r"\d{1,}"
+        ).layout.form
+    )
 
     # Bytestrings
     assert ak.str.count_substring_regex(bytestring_repeats, rb"BA\d*").tolist() == [
@@ -1055,6 +1427,13 @@ def test_count_substring_regex():
         [0, 0, 0],
         [],
     ]
+    assert (
+        ak.str.count_substring_regex(bytestring_repeats, rb"BA\d*").layout.form
+        == ak.str.count_substring_regex(
+            ak.to_backend(bytestring_repeats, "typetracer"), rb"BA\d*"
+        ).layout.form
+    )
+
     assert ak.str.count_substring_regex(
         bytestring_repeats, rb"BA\d*", ignore_case=True
     ).tolist() == [
@@ -1062,11 +1441,26 @@ def test_count_substring_regex():
         [0, 1, 1],
         [],
     ]
+    assert (
+        ak.str.count_substring_regex(
+            bytestring_repeats, rb"BA\d*", ignore_case=True
+        ).layout.form
+        == ak.str.count_substring_regex(
+            ak.to_backend(bytestring_repeats, "typetracer"), rb"BA\d*", ignore_case=True
+        ).layout.form
+    )
+
     assert ak.str.count_substring_regex(bytestring_repeats, rb"\d{1,}").tolist() == [
         [2, 0, 0],
         [1, 1, 1],
         [],
     ]
+    assert (
+        ak.str.count_substring_regex(bytestring_repeats, rb"\d{1,}").layout.form
+        == ak.str.count_substring_regex(
+            ak.to_backend(bytestring_repeats, "typetracer"), rb"\d{1,}"
+        ).layout.form
+    )
 
 
 def test_ends_with():
@@ -1075,11 +1469,24 @@ def test_ends_with():
         [False, False, False],
         [],
     ]
+    assert (
+        ak.str.ends_with(string_repeats, "BAR").layout.form
+        == ak.str.ends_with(
+            ak.to_backend(string_repeats, "typetracer"), "BAR"
+        ).layout.form
+    )
+
     assert ak.str.ends_with(string_repeats, "BAR", ignore_case=True).tolist() == [
         [False, False, True],
         [False, True, True],
         [],
     ]
+    assert (
+        ak.str.ends_with(string_repeats, "BAR", ignore_case=True).layout.form
+        == ak.str.ends_with(
+            ak.to_backend(string_repeats, "typetracer"), "BAR", ignore_case=True
+        ).layout.form
+    )
 
     # Bytestrings
     assert ak.str.ends_with(bytestring_repeats, b"BAR").tolist() == [
@@ -1087,11 +1494,24 @@ def test_ends_with():
         [False, False, False],
         [],
     ]
+    assert (
+        ak.str.ends_with(bytestring_repeats, b"BAR").layout.form
+        == ak.str.ends_with(
+            ak.to_backend(bytestring_repeats, "typetracer"), b"BAR"
+        ).layout.form
+    )
+
     assert ak.str.ends_with(bytestring_repeats, b"BAR", ignore_case=True).tolist() == [
         [False, False, True],
         [False, True, True],
         [],
     ]
+    assert (
+        ak.str.ends_with(bytestring_repeats, b"BAR", ignore_case=True).layout.form
+        == ak.str.ends_with(
+            ak.to_backend(bytestring_repeats, "typetracer"), b"BAR", ignore_case=True
+        ).layout.form
+    )
 
 
 def test_starts_with():
@@ -1100,11 +1520,24 @@ def test_starts_with():
         [False, False, False],
         [],
     ]
+    assert (
+        ak.str.starts_with(string_repeats, "FOO").layout.form
+        == ak.str.starts_with(
+            ak.to_backend(string_repeats, "typetracer"), "FOO"
+        ).layout.form
+    )
+
     assert ak.str.starts_with(string_repeats, "FOO", ignore_case=True).tolist() == [
         [True, True, False],
         [False, False, True],
         [],
     ]
+    assert (
+        ak.str.starts_with(string_repeats, "FOO", ignore_case=True).layout.form
+        == ak.str.starts_with(
+            ak.to_backend(string_repeats, "typetracer"), "FOO", ignore_case=True
+        ).layout.form
+    )
 
     # Bytestrings
     assert ak.str.starts_with(bytestring_repeats, b"FOO").tolist() == [
@@ -1112,6 +1545,13 @@ def test_starts_with():
         [False, False, False],
         [],
     ]
+    assert (
+        ak.str.starts_with(bytestring_repeats, b"FOO").layout.form
+        == ak.str.starts_with(
+            ak.to_backend(bytestring_repeats, "typetracer"), b"FOO"
+        ).layout.form
+    )
+
     assert ak.str.starts_with(
         bytestring_repeats, b"FOO", ignore_case=True
     ).tolist() == [
@@ -1119,6 +1559,12 @@ def test_starts_with():
         [False, False, True],
         [],
     ]
+    assert (
+        ak.str.starts_with(bytestring_repeats, b"FOO", ignore_case=True).layout.form
+        == ak.str.starts_with(
+            ak.to_backend(bytestring_repeats, "typetracer"), b"FOO", ignore_case=True
+        ).layout.form
+    )
 
 
 def test_find_substring():
@@ -1127,11 +1573,24 @@ def test_find_substring():
         [-1, -1, -1],
         [],
     ]
+    assert (
+        ak.str.find_substring(string_repeats, "FOO").layout.form
+        == ak.str.find_substring(
+            ak.to_backend(string_repeats, "typetracer"), "FOO"
+        ).layout.form
+    )
+
     assert ak.str.find_substring(string_repeats, "FOO", ignore_case=True).tolist() == [
         [0, 0, -1],
         [3, -1, 0],
         [],
     ]
+    assert (
+        ak.str.find_substring(string_repeats, "FOO", ignore_case=True).layout.form
+        == ak.str.find_substring(
+            ak.to_backend(string_repeats, "typetracer"), "FOO", ignore_case=True
+        ).layout.form
+    )
 
     # Bytestrings
     assert ak.str.find_substring(bytestring_repeats, b"FOO").tolist() == [
@@ -1139,6 +1598,13 @@ def test_find_substring():
         [-1, -1, -1],
         [],
     ]
+    assert (
+        ak.str.find_substring(bytestring_repeats, b"FOO").layout.form
+        == ak.str.find_substring(
+            ak.to_backend(bytestring_repeats, "typetracer"), b"FOO"
+        ).layout.form
+    )
+
     assert ak.str.find_substring(
         bytestring_repeats, b"FOO", ignore_case=True
     ).tolist() == [
@@ -1146,6 +1612,12 @@ def test_find_substring():
         [3, -1, 0],
         [],
     ]
+    assert (
+        ak.str.find_substring(bytestring_repeats, b"FOO", ignore_case=True).layout.form
+        == ak.str.find_substring(
+            ak.to_backend(bytestring_repeats, "typetracer"), b"FOO", ignore_case=True
+        ).layout.form
+    )
 
 
 def test_find_substring_regex():
@@ -1154,6 +1626,13 @@ def test_find_substring_regex():
         [-1, -1, -1],
         [],
     ]
+    assert (
+        ak.str.find_substring_regex(string_repeats, r"FOO\d+").layout.form
+        == ak.str.find_substring_regex(
+            ak.to_backend(string_repeats, "typetracer"), r"FOO\d+"
+        ).layout.form
+    )
+
     assert ak.str.find_substring_regex(
         string_repeats, r"FOO\d+", ignore_case=True
     ).tolist() == [
@@ -1161,6 +1640,14 @@ def test_find_substring_regex():
         [-1, -1, 0],
         [],
     ]
+    assert (
+        ak.str.find_substring_regex(
+            string_repeats, r"FOO\d+", ignore_case=True
+        ).layout.form
+        == ak.str.find_substring_regex(
+            ak.to_backend(string_repeats, "typetracer"), r"FOO\d+", ignore_case=True
+        ).layout.form
+    )
 
     # Bytestrings
     assert ak.str.find_substring_regex(bytestring_repeats, rb"FOO\d+").tolist() == [
@@ -1168,6 +1655,13 @@ def test_find_substring_regex():
         [-1, -1, -1],
         [],
     ]
+    assert (
+        ak.str.find_substring_regex(bytestring_repeats, rb"FOO\d+").layout.form
+        == ak.str.find_substring_regex(
+            ak.to_backend(bytestring_repeats, "typetracer"), rb"FOO\d+"
+        ).layout.form
+    )
+
     assert ak.str.find_substring_regex(
         bytestring_repeats, rb"FOO\d+", ignore_case=True
     ).tolist() == [
@@ -1175,6 +1669,16 @@ def test_find_substring_regex():
         [-1, -1, 0],
         [],
     ]
+    assert (
+        ak.str.find_substring_regex(
+            bytestring_repeats, rb"FOO\d+", ignore_case=True
+        ).layout.form
+        == ak.str.find_substring_regex(
+            ak.to_backend(bytestring_repeats, "typetracer"),
+            rb"FOO\d+",
+            ignore_case=True,
+        ).layout.form
+    )
 
 
 def test_match_like():
@@ -1183,11 +1687,24 @@ def test_match_like():
         [False, False, False],
         [],
     ]
+    assert (
+        ak.str.match_like(string_repeats, "FOO%BA%").layout.form
+        == ak.str.match_like(
+            ak.to_backend(string_repeats, "typetracer"), "FOO%BA%"
+        ).layout.form
+    )
+
     assert ak.str.match_like(string_repeats, "FOO%BA%", ignore_case=True).tolist() == [
         [True, False, False],
         [False, False, True],
         [],
     ]
+    assert (
+        ak.str.match_like(string_repeats, "FOO%BA%", ignore_case=True).layout.form
+        == ak.str.match_like(
+            ak.to_backend(string_repeats, "typetracer"), "FOO%BA%", ignore_case=True
+        ).layout.form
+    )
 
     # Bytestrings
     assert ak.str.match_like(bytestring_repeats, b"FOO%BA%").tolist() == [
@@ -1195,6 +1712,13 @@ def test_match_like():
         [False, False, False],
         [],
     ]
+    assert (
+        ak.str.match_like(bytestring_repeats, b"FOO%BA%").layout.form
+        == ak.str.match_like(
+            ak.to_backend(bytestring_repeats, "typetracer"), b"FOO%BA%"
+        ).layout.form
+    )
+
     assert ak.str.match_like(
         bytestring_repeats, b"FOO%BA%", ignore_case=True
     ).tolist() == [
@@ -1202,6 +1726,14 @@ def test_match_like():
         [False, False, True],
         [],
     ]
+    assert (
+        ak.str.match_like(bytestring_repeats, b"FOO%BA^", ignore_case=True).layout.form
+        == ak.str.match_like(
+            ak.to_backend(bytestring_repeats, "typetracer"),
+            b"FOO%BA^",
+            ignore_case=True,
+        ).layout.form
+    )
 
 
 def test_match_substring():
@@ -1210,11 +1742,24 @@ def test_match_substring():
         [False, False, False],
         [],
     ]
+    assert (
+        ak.str.match_substring(string_repeats, "FOO").layout.form
+        == ak.str.match_substring(
+            ak.to_backend(string_repeats, "typetracer"), "FOO"
+        ).layout.form
+    )
+
     assert ak.str.match_substring(string_repeats, "FOO", ignore_case=True).tolist() == [
         [True, True, False],
         [True, False, True],
         [],
     ]
+    assert (
+        ak.str.match_substring(string_repeats, "FOO", ignore_case=True).layout.form
+        == ak.str.match_substring(
+            ak.to_backend(string_repeats, "typetracer"), "FOO", ignore_case=True
+        ).layout.form
+    )
 
     # Bytestrings
     assert ak.str.match_substring(bytestring_repeats, b"FOO").tolist() == [
@@ -1222,6 +1767,13 @@ def test_match_substring():
         [False, False, False],
         [],
     ]
+    assert (
+        ak.str.match_substring(bytestring_repeats, b"FOO").layout.form
+        == ak.str.match_substring(
+            ak.to_backend(bytestring_repeats, "typetracer"), b"FOO"
+        ).layout.form
+    )
+
     assert ak.str.match_substring(
         bytestring_repeats, b"FOO", ignore_case=True
     ).tolist() == [
@@ -1229,6 +1781,12 @@ def test_match_substring():
         [True, False, True],
         [],
     ]
+    assert (
+        ak.str.match_substring(bytestring_repeats, b"FOO", ignore_case=True).layout.form
+        == ak.str.match_substring(
+            ak.to_backend(bytestring_repeats, "typetracer"), b"FOO", ignore_case=True
+        ).layout.form
+    )
 
 
 def test_match_substring_regex():
@@ -1237,6 +1795,13 @@ def test_match_substring_regex():
         [False, False, False],
         [],
     ]
+    assert (
+        ak.str.match_substring_regex(string_repeats, r"FOO\d+").layout.form
+        == ak.str.match_substring_regex(
+            ak.to_backend(string_repeats, "typetracer"), r"FOO\d+"
+        ).layout.form
+    )
+
     assert ak.str.match_substring_regex(
         string_repeats, r"FOO\d+", ignore_case=True
     ).tolist() == [
@@ -1244,6 +1809,14 @@ def test_match_substring_regex():
         [False, False, True],
         [],
     ]
+    assert (
+        ak.str.match_substring_regex(
+            string_repeats, r"FOO\d+", ignore_case=True
+        ).layout.form
+        == ak.str.match_substring_regex(
+            ak.to_backend(string_repeats, "typetracer"), r"FOO\d+", ignore_case=True
+        ).layout.form
+    )
 
     # Bytestrings
     assert ak.str.match_substring_regex(bytestring_repeats, rb"FOO\d+").tolist() == [
@@ -1251,6 +1824,13 @@ def test_match_substring_regex():
         [False, False, False],
         [],
     ]
+    assert (
+        ak.str.match_substring_regex(bytestring_repeats, rb"FOO\d+").layout.form
+        == ak.str.match_substring_regex(
+            ak.to_backend(bytestring_repeats, "typetracer"), rb"FOO\d+"
+        ).layout.form
+    )
+
     assert ak.str.match_substring_regex(
         bytestring_repeats, rb"FOO\d+", ignore_case=True
     ).tolist() == [
@@ -1258,6 +1838,16 @@ def test_match_substring_regex():
         [False, False, True],
         [],
     ]
+    assert (
+        ak.str.match_substring_regex(
+            bytestring_repeats, rb"FOO\d+", ignore_case=True
+        ).layout.form
+        == ak.str.match_substring_regex(
+            ak.to_backend(bytestring_repeats, "typetracer"),
+            rb"FOO\d+",
+            ignore_case=True,
+        ).layout.form
+    )
 
 
 def test_is_in():
