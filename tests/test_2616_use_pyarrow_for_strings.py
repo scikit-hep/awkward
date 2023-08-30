@@ -1224,6 +1224,13 @@ def test_index_in():
         [0, None, None],
         [],
     ]
+    assert (
+        ak.str.index_in(string_repeats, ["123foo", "foo"]).layout.form
+        == ak.str.index_in(
+            ak.to_backend(string_repeats, "typetracer"), ["123foo", "foo"]
+        ).layout.form
+    )
+
     assert ak.str.index_in(
         [
             ["foo123bar123baz", "foo", "bar"],
@@ -1236,6 +1243,28 @@ def test_index_in():
         [0, None, None],
         [2],
     ]
+    assert (
+        ak.str.index_in(
+            [
+                ["foo123bar123baz", "foo", "bar"],
+                ["123foo", "456bar", "foo123456bar"],
+                [None],
+            ],
+            ["123foo", "foo", None],
+        ).layout.form
+        == ak.str.index_in(
+            ak.to_backend(
+                [
+                    ["foo123bar123baz", "foo", "bar"],
+                    ["123foo", "456bar", "foo123456bar"],
+                    [None],
+                ],
+                "typetracer",
+            ),
+            ["123foo", "foo", None],
+        ).layout.form
+    )
+
     assert ak.str.index_in(
         [
             ["foo123bar123baz", "foo", "bar"],
@@ -1249,14 +1278,43 @@ def test_index_in():
         [0, None, None],
         [None],
     ]
+    assert (
+        ak.str.index_in(
+            [
+                ["foo123bar123baz", "foo", "bar"],
+                ["123foo", "456bar", "foo123456bar"],
+                [None],
+            ],
+            ["123foo", "foo", None],
+            skip_nones=True,
+        ).layout.form
+        == ak.str.index_in(
+            ak.to_backend(
+                [
+                    ["foo123bar123baz", "foo", "bar"],
+                    ["123foo", "456bar", "foo123456bar"],
+                    [None],
+                ],
+                "typetracer",
+            ),
+            ["123foo", "foo", None],
+            skip_nones=True,
+        ).layout.form
+    )
 
     # Bytestrings
-
     assert ak.str.index_in(string_repeats, [b"123foo", b"foo"]).tolist() == [
         [None, 1, None],
         [0, None, None],
         [],
     ]
+    assert (
+        ak.str.index_in(bytestring_repeats, [b"123foo", b"foo"]).layout.form
+        == ak.str.index_in(
+            ak.to_backend(bytestring_repeats, "typetracer"), [b"123foo", b"foo"]
+        ).layout.form
+    )
+
     assert ak.str.index_in(
         [
             [b"foo123bar123baz", b"foo", b"bar"],
@@ -1269,6 +1327,28 @@ def test_index_in():
         [0, None, None],
         [2],
     ]
+    assert (
+        ak.str.index_in(
+            [
+                [b"foo123bar123baz", b"foo", b"bar"],
+                [b"123foo", b"456bar", b"foo123456bar"],
+                [None],
+            ],
+            [b"123foo", b"foo", None],
+        ).layout.form
+        == ak.str.index_in(
+            ak.to_backend(
+                [
+                    [b"foo123bar123baz", b"foo", b"bar"],
+                    [b"123foo", b"456bar", b"foo123456bar"],
+                    [None],
+                ],
+                "typetracer",
+            ),
+            [b"123foo", b"foo", None],
+        ).layout.form
+    )
+
     assert ak.str.index_in(
         [
             [b"foo123bar123baz", b"foo", b"bar"],
@@ -1282,3 +1362,26 @@ def test_index_in():
         [0, None, None],
         [None],
     ]
+    assert (
+        ak.str.index_in(
+            [
+                [b"foo123bar123baz", b"foo", b"bar"],
+                [b"123foo", b"456bar", b"foo123456bar"],
+                [None],
+            ],
+            [b"123foo", b"foo", None],
+            skip_nones=True,
+        ).layout.form
+        == ak.str.index_in(
+            ak.to_backend(
+                [
+                    [b"foo123bar123baz", b"foo", b"bar"],
+                    [b"123foo", b"456bar", b"foo123456bar"],
+                    [None],
+                ],
+                "typetracer",
+            ),
+            [b"123foo", b"foo", None],
+            skip_nones=True,
+        ).layout.form
+    )
