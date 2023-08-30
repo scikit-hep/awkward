@@ -583,6 +583,13 @@ def test_split_whitespace():
         [],
         [["", "→δε←      "], ["", "ζz zζ     "], ["", "abc      "]],
     ]
+    assert (
+        ak.str.split_whitespace(string_padded, max_splits=1).layout.form
+        == ak.str.split_whitespace(
+            ak.to_backend(string_padded, "typetracer"), max_splits=1
+        ).layout.form
+    )
+
     assert ak.str.split_whitespace(
         string_padded, max_splits=1, reverse=True
     ).tolist() == [
@@ -590,11 +597,24 @@ def test_split_whitespace():
         [],
         [["     →δε←", ""], ["     ζz zζ", ""], ["      abc", ""]],
     ]
+    assert (
+        ak.str.split_whitespace(string_padded, max_splits=1, reverse=True).layout.form
+        == ak.str.split_whitespace(
+            ak.to_backend(string_padded, "typetracer"), max_splits=1, reverse=True
+        ).layout.form
+    )
+
     assert ak.str.split_whitespace(string_padded, max_splits=None).tolist() == [
         [["", "αβγ", "", ""], ["", "", ""]],
         [],
         [["", "→δε←", "", ""], ["", "ζz", "zζ", "", ""], ["", "abc", "", ""]],
     ]
+    assert (
+        ak.str.split_whitespace(string_padded, max_splits=None).layout.form
+        == ak.str.split_whitespace(
+            ak.to_backend(string_padded, "typetracer"), max_splits=None
+        ).layout.form
+    )
 
     # Bytestrings
     assert ak.str.split_whitespace(bytestring_padded, max_splits=1).tolist() == [
@@ -606,6 +626,13 @@ def test_split_whitespace():
             [b"", b"abc      "],
         ],
     ]
+    assert (
+        ak.str.split_whitespace(bytestring_padded, max_splits=1).layout.form
+        == ak.str.split_whitespace(
+            ak.to_backend(bytestring_padded, "typetracer"), max_splits=1
+        ).layout.form
+    )
+
     assert ak.str.split_whitespace(
         bytestring_padded, max_splits=1, reverse=True
     ).tolist() == [
@@ -617,6 +644,15 @@ def test_split_whitespace():
             [b"      abc", b""],
         ],
     ]
+    assert (
+        ak.str.split_whitespace(
+            bytestring_padded, max_splits=1, reverse=True
+        ).layout.form
+        == ak.str.split_whitespace(
+            ak.to_backend(bytestring_padded, "typetracer"), max_splits=1, reverse=True
+        ).layout.form
+    )
+
     assert ak.str.split_whitespace(bytestring_padded, max_splits=None).tolist() == [
         [[b"", "αβγ".encode(), b""], [b"", b""]],
         [],
@@ -626,6 +662,12 @@ def test_split_whitespace():
             [b"", b"abc", b""],
         ],
     ]
+    assert (
+        ak.str.split_whitespace(bytestring_padded, max_splits=None).layout.form
+        == ak.str.split_whitespace(
+            ak.to_backend(bytestring_padded, "typetracer"), max_splits=None
+        ).layout.form
+    )
 
 
 def test_split_pattern():
