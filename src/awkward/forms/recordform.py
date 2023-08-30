@@ -5,6 +5,7 @@ __all__ = ("RecordForm",)
 from collections.abc import Callable, Iterable, Iterator
 
 import awkward as ak
+from awkward._errors import deprecate
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._parameters import type_parameters_equal
 from awkward._regularize import is_integer
@@ -28,6 +29,12 @@ class RecordForm(Form):
         parameters=None,
         form_key=None,
     ):
+        if form_key is not None:
+            deprecate(
+                f"A non-None form_key parameter is deprecated for {type(self).__name__}",
+                version="2.5.0",
+            )
+
         if not isinstance(contents, Iterable):
             raise TypeError(
                 "{} 'contents' must be iterable, not {}".format(
