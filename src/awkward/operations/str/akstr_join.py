@@ -5,10 +5,12 @@ __all__ = ("join",)
 import awkward as ak
 from awkward._backends.dispatch import backend_of
 from awkward._backends.numpy import NumpyBackend
+from awkward._backends.typetracer import TypeTracerBackend
 from awkward._behavior import behavior_of
 from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 
+typetracer = TypeTracerBackend.instance()
 cpu = NumpyBackend.instance()
 
 
@@ -54,11 +56,11 @@ def _is_maybe_optional_list_of_string(layout):
 
 
 def _impl(array, separator, highlevel, behavior):
-    import awkward._connect.pyarrow  # noqa: F401, I001
+    from awkward._connect.pyarrow import import_pyarrow_compute
     from awkward.operations.ak_from_arrow import from_arrow
     from awkward.operations.ak_to_arrow import to_arrow
 
-    import pyarrow.compute as pc
+    pc = import_pyarrow_compute("ak.str.join")
 
     behavior = behavior_of(array, separator, behavior=behavior)
     backend = backend_of(array, separator, coerce_to_common=True, default=cpu)
@@ -72,20 +74,39 @@ def _impl(array, separator, highlevel, behavior):
             ):
                 return
 
-            arrow_array = to_arrow(
-                # Arrow needs an option type here
-                layout.copy(
-                    content=ak.contents.UnmaskedArray.simplified(layout.content)
-                ),
-                extensionarray=False,
-                # This kernel requires non-large string/bytestrings
-                string_to32=True,
-                bytestring_to32=True,
-            )
-            return from_arrow(
-                pc.binary_join(arrow_array, separator),
-                highlevel=False,
-            )
+            if layout.backend is typetracer:
+                layout_concrete = layout.form.length_zero_array(highlevel=False)
+                arrow_array = to_arrow(
+                    # Arrow needs an option type here
+                    layout_concrete.copy(
+                        content=ak.contents.UnmaskedArray.simplified(
+                            layout_concrete.content
+                        )
+                    ),
+                    extensionarray=False,
+                    # This kernel requires non-large string/bytestrings
+                    string_to32=True,
+                    bytestring_to32=True,
+                )
+                return from_arrow(
+                    pc.binary_join(arrow_array, separator),
+                    highlevel=False,
+                ).to_typetracer(forget_length=True)
+            else:
+                arrow_array = to_arrow(
+                    # Arrow needs an option type here
+                    layout.copy(
+                        content=ak.contents.UnmaskedArray.simplified(layout.content)
+                    ),
+                    extensionarray=False,
+                    # This kernel requires non-large string/bytestrings
+                    string_to32=True,
+                    bytestring_to32=True,
+                )
+                return from_arrow(
+                    pc.binary_join(arrow_array, separator),
+                    highlevel=False,
+                )
 
         out = ak._do.recursively_apply(layout, apply_unary, behavior=behavior)
     else:
@@ -105,30 +126,57 @@ def _impl(array, separator, highlevel, behavior):
                     f"`separator` must be a list of (possibly missing) strings, not {ak.type(separator_layout)}"
                 )
 
-            # We have (maybe option/indexed type wrapping) strings
-            layout_arrow = to_arrow(
-                # Arrow needs an option type here
-                layout.copy(
-                    content=ak.contents.UnmaskedArray.simplified(layout.content)
-                ),
-                extensionarray=False,
-                # This kernel requires non-large string/bytestrings
-                string_to32=True,
-                bytestring_to32=True,
-            )
-            separator_arrow = to_arrow(
-                separator_layout,
-                extensionarray=False,
-                # This kernel requires non-large string/bytestrings
-                string_to32=True,
-                bytestring_to32=True,
-            )
-            return (
-                from_arrow(
-                    pc.binary_join(layout_arrow, separator_arrow),
-                    highlevel=False,
-                ),
-            )
+            if layout.backend is typetracer:
+                # We have (maybe option/indexed type wrapping) strings
+                layout_arrow = to_arrow(
+                    # Arrow needs an option type here
+                    layout.copy(
+                        content=ak.contents.UnmaskedArray.simplified(layout.content)
+                    ).form.length_zero_array(highlevel=False),
+                    extensionarray=False,
+                    # This kernel requires non-large string/bytestrings
+                    string_to32=True,
+                    bytestring_to32=True,
+                )
+                separator_arrow = to_arrow(
+                    separator_layout.form.length_zero_array(highlevel=False),
+                    extensionarray=False,
+                    # This kernel requires non-large string/bytestrings
+                    string_to32=True,
+                    bytestring_to32=True,
+                )
+
+                return (
+                    from_arrow(
+                        pc.binary_join(layout_arrow, separator_arrow),
+                        highlevel=False,
+                    ).to_typetracer(forget_length=True),
+                )
+            else:
+                # We have (maybe option/indexed type wrapping) strings
+                layout_arrow = to_arrow(
+                    # Arrow needs an option type here
+                    layout.copy(
+                        content=ak.contents.UnmaskedArray.simplified(layout.content)
+                    ),
+                    extensionarray=False,
+                    # This kernel requires non-large string/bytestrings
+                    string_to32=True,
+                    bytestring_to32=True,
+                )
+                separator_arrow = to_arrow(
+                    separator_layout,
+                    extensionarray=False,
+                    # This kernel requires non-large string/bytestrings
+                    string_to32=True,
+                    bytestring_to32=True,
+                )
+                return (
+                    from_arrow(
+                        pc.binary_join(layout_arrow, separator_arrow),
+                        highlevel=False,
+                    ),
+                )
 
         (out,) = ak._broadcasting.broadcast_and_apply(
             (layout, separator_layout),

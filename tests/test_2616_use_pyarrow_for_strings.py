@@ -749,9 +749,17 @@ def test_join():
         ]
     )
     assert ak.str.join(array1, "-").tolist() == ["this-that", "", "foo-bar-baz"]
+    assert (
+        ak.str.join(array1, "-").layout.form
+        == ak.str.join(ak.to_backend(array1, "typetracer"), "-").layout.form
+    )
 
     separator = ak.Array(["→", "↑", "←"])
     assert ak.str.join(array1, separator).tolist() == ["this→that", "", "foo←bar←baz"]
+    assert (
+        ak.str.join(array1, separator).layout.form
+        == ak.str.join(ak.to_backend(array1, "typetracer"), separator).layout.form
+    )
 
     array2 = ak.Array(
         [
@@ -761,13 +769,21 @@ def test_join():
         ]
     )
     assert ak.str.join(array2, b"-").tolist() == [b"this-that", b"", b"foo-bar-baz"]
+    assert (
+        ak.str.join(array2, b"-").layout.form
+        == ak.str.join(ak.to_backend(array2, "typetracer"), b"-").layout.form
+    )
 
-    separator = ak.Array(["→".encode(), "↑".encode(), "←".encode()])
-    assert ak.str.join(array2, separator).tolist() == [
+    separator2 = ak.Array(["→".encode(), "↑".encode(), "←".encode()])
+    assert ak.str.join(array2, separator2).tolist() == [
         "this→that".encode(),
         b"",
         "foo←bar←baz".encode(),
     ]
+    assert (
+        ak.str.join(array2, separator2).layout.form
+        == ak.str.join(ak.to_backend(array2, "typetracer"), separator2).layout.form
+    )
 
 
 def test_join_element_wise():
