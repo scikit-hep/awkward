@@ -23,6 +23,11 @@ class EmptyForm(Form):
     is_unknown = True
 
     def __init__(self, *, parameters: JSONMapping | None = None, form_key=None):
+        if form_key is not None:
+            deprecate(
+                f"A non-None form_key parameter is deprecated for {type(self).__name__}",
+                version="2.5.0",
+            )
         if not (parameters is None or len(parameters) == 0):
             raise TypeError(f"{type(self).__name__} cannot contain parameters")
         self._init(parameters=parameters, form_key=form_key)
@@ -30,6 +35,11 @@ class EmptyForm(Form):
     def copy(
         self, *, parameters: JSONMapping | None = UNSET, form_key=UNSET
     ) -> EmptyForm:
+        if form_key is not None:
+            deprecate(
+                f"A non-None form_key parameter is deprecated for {type(self).__name__}",
+                version="2.5.0",
+            )
         if not (parameters is UNSET or parameters is None or len(parameters) == 0):
             raise TypeError(f"{type(self).__name__} cannot contain parameters")
         return EmptyForm(
@@ -38,6 +48,11 @@ class EmptyForm(Form):
 
     @classmethod
     def simplified(cls, *, parameters=None, form_key=None) -> Form:
+        if form_key is not None:
+            deprecate(
+                f"A non-None form_key parameter is deprecated for {cls.__name__}",
+                version="2.5.0",
+            )
         if not (parameters is None or len(parameters) == 0):
             raise TypeError(f"{cls.__name__} cannot contain parameters")
         return cls(parameters=parameters, form_key=form_key)
@@ -54,7 +69,7 @@ class EmptyForm(Form):
         return ak.types.UnknownType()
 
     def __eq__(self, other) -> bool:
-        return isinstance(other, EmptyForm) and self._form_key == other._form_key
+        return isinstance(other, EmptyForm)
 
     def to_NumpyForm(self, *args, **kwargs):
         def legacy_impl(dtype):
@@ -136,19 +151,7 @@ class EmptyForm(Form):
         yield 0
 
     def __setstate__(self, state):
-        if isinstance(state, dict):
-            # read data pickled in Awkward 2.x
-            self.__dict__.update(state)
-        else:
-            # read data pickled in Awkward 1.x
-
-            # https://github.com/scikit-hep/awkward/blob/main-v1/src/python/forms.cpp#L240-L244
-            has_identities, parameters, form_key = state
-
-            if form_key is not None:
-                form_key = "part0-" + form_key  # only the first partition
-
-            self.__init__(form_key=form_key)
+        pass
 
     def _expected_from_buffers(
         self, getkey: Callable[[Form, str], str]
