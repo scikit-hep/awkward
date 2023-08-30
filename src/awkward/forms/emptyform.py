@@ -28,33 +28,21 @@ class EmptyForm(Form):
                 f"A non-None form_key parameter is deprecated for {type(self).__name__}",
                 version="2.5.0",
             )
-        if not (parameters is None or len(parameters) == 0):
+        if parameters is not None or len(parameters) != 0:
             raise TypeError(f"{type(self).__name__} cannot contain parameters")
+
         self._init(parameters=parameters, form_key=form_key)
 
     def copy(
         self, *, parameters: JSONMapping | None = UNSET, form_key=UNSET
     ) -> EmptyForm:
-        if form_key is not None:
-            deprecate(
-                f"A non-None form_key parameter is deprecated for {type(self).__name__}",
-                version="2.5.0",
-            )
-        if not (parameters is UNSET or parameters is None or len(parameters) == 0):
-            raise TypeError(f"{type(self).__name__} cannot contain parameters")
         return EmptyForm(
+            parameters=self._parameters if parameters is UNSET else parameters,
             form_key=self._form_key if form_key is UNSET else form_key,
         )
 
     @classmethod
     def simplified(cls, *, parameters=None, form_key=None) -> Form:
-        if form_key is not None:
-            deprecate(
-                f"A non-None form_key parameter is deprecated for {cls.__name__}",
-                version="2.5.0",
-            )
-        if not (parameters is None or len(parameters) == 0):
-            raise TypeError(f"{cls.__name__} cannot contain parameters")
         return cls(parameters=parameters, form_key=form_key)
 
     def __repr__(self):
