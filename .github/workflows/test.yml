@@ -48,7 +48,7 @@ jobs:
     runs-on: windows-2019
 
     env:
-      PIP_ONLY_BINARY: cmake
+      PIP_ONLY_BINARY: cmake pandas
 
     steps:
       - uses: actions/checkout@v3
