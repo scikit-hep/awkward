@@ -315,12 +315,10 @@ class RecordArray(Content):
         )
 
     def _form_with_key(self, getkey: Callable[[Content], str | None]) -> RecordForm:
-        form_key = getkey(self)
         return self.form_cls(
             [x._form_with_key(getkey) for x in self._contents],
             self._fields,
             parameters=self._parameters,
-            form_key=form_key,
         )
 
     def _to_buffers(
