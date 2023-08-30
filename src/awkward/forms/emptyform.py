@@ -28,7 +28,7 @@ class EmptyForm(Form):
                 f"A non-None form_key parameter is deprecated for {type(self).__name__}",
                 version="2.5.0",
             )
-        if parameters is not None or len(parameters) != 0:
+        if parameters is not None and len(parameters) != 0:
             raise TypeError(f"{type(self).__name__} cannot contain parameters")
 
         self._init(parameters=parameters, form_key=form_key)
