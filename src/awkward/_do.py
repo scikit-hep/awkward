@@ -322,8 +322,8 @@ def reduce(
                 negaxis += depth
             if not 0 < negaxis <= depth:
                 raise ValueError(
-                    "axis={} exceeds the depth of the nested list structure "
-                    "(which is {})".format(axis, depth)
+                    f"axis={axis} exceeds the depth of the nested list structure "
+                    f"(which is {depth})"
                 )
 
         starts = ak.index.Index64.zeros(1, layout.backend.index_nplike)
@@ -375,8 +375,8 @@ def argsort(
             negaxis = negaxis + depth
         if not 0 < negaxis <= depth:
             raise ValueError(
-                "axis={} exceeds the depth of the nested list structure "
-                "(which is {})".format(axis, depth)
+                f"axis={axis} exceeds the depth of the nested list structure "
+                f"(which is {depth})"
             )
 
     starts = ak.index.Index64.zeros(1, nplike=layout.backend.index_nplike)
@@ -416,10 +416,18 @@ def sort(
             negaxis = negaxis + depth
         if not 0 < negaxis <= depth:
             raise ValueError(
-                "axis={} exceeds the depth of the nested list structure "
-                "(which is {})".format(axis, depth)
+                f"axis={axis} exceeds the depth of the nested list structure "
+                f"(which is {depth})"
             )
 
     starts = ak.index.Index64.zeros(1, nplike=layout.backend.index_nplike)
     parents = ak.index.Index64.zeros(layout.length, nplike=layout.backend.index_nplike)
     return layout._sort_next(negaxis, starts, parents, 1, ascending, stable)
+
+
+def touch_data(layout: Content, recursive: bool = True):
+    layout._touch_data(recursive)
+
+
+def touch_shape(layout: Content, recursive: bool = True):
+    layout._touch_shape(recursive)

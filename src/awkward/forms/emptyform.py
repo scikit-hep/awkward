@@ -1,14 +1,20 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 from __future__ import annotations
 
+__all__ = ("EmptyForm",)
+
+from collections.abc import Callable
 from inspect import signature
 
 import awkward as ak
 from awkward._errors import deprecate
+from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import ShapeItem
 from awkward._typing import Iterator, JSONSerializable, Self, final
 from awkward._util import UNSET
 from awkward.forms.form import Form, JSONMapping
+
+np = NumpyMetadata.instance()
 
 
 @final
@@ -143,3 +149,8 @@ class EmptyForm(Form):
                 form_key = "part0-" + form_key  # only the first partition
 
             self.__init__(form_key=form_key)
+
+    def _expected_from_buffers(
+        self, getkey: Callable[[Form, str], str]
+    ) -> Iterator[tuple[str, np.dtype]]:
+        yield from ()

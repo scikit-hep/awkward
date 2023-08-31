@@ -82,7 +82,7 @@ def _impl(base, what, where, highlevel, behavior):
             where = where[0]
 
         behavior = behavior_of(base, what, behavior=behavior)
-        backend = backend_of(base, what, default=cpu)
+        backend = backend_of(base, what, default=cpu, coerce_to_common=True)
 
         base = ak.operations.to_layout(
             base, allow_record=True, allow_other=False

@@ -1,9 +1,17 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+from __future__ import annotations
+
+__all__ = ("ListForm",)
+from collections.abc import Callable
+
 import awkward as ak
+from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._parameters import type_parameters_equal
-from awkward._typing import JSONSerializable, final
+from awkward._typing import Iterator, JSONSerializable, final
 from awkward._util import UNSET
-from awkward.forms.form import Form
+from awkward.forms.form import Form, index_to_dtype
+
+np = NumpyMetadata.instance()
 
 
 @final
@@ -226,3 +234,10 @@ class ListForm(Form):
             self.__init__(
                 starts, stops, content, parameters=parameters, form_key=form_key
             )
+
+    def _expected_from_buffers(
+        self, getkey: Callable[[Form, str], str]
+    ) -> Iterator[tuple[str, np.dtype]]:
+        yield (getkey(self, "starts"), index_to_dtype[self._starts])
+        yield (getkey(self, "stops"), index_to_dtype[self._stops])
+        yield from self._content._expected_from_buffers(getkey)

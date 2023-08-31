@@ -28,6 +28,6 @@ Note that this must be in a different venv or conda environment from ROOT, if yo
         if ak._util.parse_version(cppyy.__version__) < ak._util.parse_version("3.0.1"):
             raise ImportError(
                 "Awkward Array can only work with cppyy 3.0.1 or later "
-                "(you have version {})".format(cppyy.__version__)
+                f"(you have version {cppyy.__version__})"
             )
         _has_checked_version = True

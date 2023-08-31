@@ -80,6 +80,6 @@ class Jax(ArrayModuleNumpyLike):
     def strides(self, x: ArrayLike) -> tuple[ShapeItem, ...]:
         x.touch_shape()
         out = (x._dtype.itemsize,)
-        for item in reversed(x._shape):
+        for item in x._shape[-1:0:-1]:
             out = (item * out[0], *out)
         return out

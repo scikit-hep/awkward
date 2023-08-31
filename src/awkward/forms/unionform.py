@@ -1,12 +1,18 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+from __future__ import annotations
+
+__all__ = ("UnionForm",)
 from collections import Counter
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 
 import awkward as ak
+from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._parameters import type_parameters_equal
-from awkward._typing import JSONSerializable, Self, final
+from awkward._typing import Iterator, JSONSerializable, Self, final
 from awkward._util import UNSET
-from awkward.forms.form import Form
+from awkward.forms.form import Form, index_to_dtype
+
+np = NumpyMetadata.instance()
 
 
 @final
@@ -287,3 +293,11 @@ class UnionForm(Form):
             self.__init__(
                 tags, index, contents, parameters=parameters, form_key=form_key
             )
+
+    def _expected_from_buffers(
+        self, getkey: Callable[[Form, str], str]
+    ) -> Iterator[tuple[str, np.dtype]]:
+        yield (getkey(self, "tags"), index_to_dtype[self._tags])
+        yield (getkey(self, "index"), index_to_dtype[self._index])
+        for content in self._contents:
+            yield from content._expected_from_buffers(getkey)

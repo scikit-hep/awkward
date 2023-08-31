@@ -583,7 +583,7 @@ def test_unbox():
 def test_unbox_for_loop():
     @numba.njit
     def f2(x):
-        for i in range(0, 10):
+        for i in range(10):
             x.append(i)
         return
 

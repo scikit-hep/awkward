@@ -57,9 +57,8 @@ def concatenate(arrays, axis=0, *, mergebool=True, highlevel=True, behavior=None
 
 def _impl(arrays, axis, mergebool, highlevel, behavior):
     axis = regularize_axis(axis)
-    # Simple single-array, axis=0 fast-path
-    backend = backend_of(*arrays, default=cpu)
     behavior = behavior_of(*arrays, behavior=behavior)
+    # Simple single-array, axis=0 fast-path
     if (
         # Is an array with a known backend
         backend_of(arrays, default=None)
@@ -72,6 +71,8 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
         if maybe_posaxis(content, axis, 1) == 0:
             return ak.operations.ak_flatten._impl(content, 1, highlevel, behavior)
 
+    # Now that we're sure `arrays` is not a singular array
+    backend = backend_of(*arrays, default=cpu, coerce_to_common=True)
     content_or_others = [
         x.to_backend(backend) if isinstance(x, ak.contents.Content) else x
         for x in (
@@ -94,15 +95,15 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
     )
     if posaxis is None or not 0 <= posaxis < maxdepth:
         raise ValueError(
-            "axis={} is beyond the depth of this array or the depth of this array "
-            "is ambiguous".format(axis)
+            f"axis={axis} is beyond the depth of this array or the depth of this array "
+            "is ambiguous"
         )
     for x in content_or_others:
         if isinstance(x, ak.contents.Content):
             if maybe_posaxis(x, axis, 1) != posaxis:
                 raise ValueError(
                     "arrays to concatenate do not have the same depth for negative "
-                    "axis={}".format(axis)
+                    f"axis={axis}"
                 )
 
     if posaxis == 0:
@@ -143,7 +144,7 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
             ):
                 raise ValueError(
                     "at least one array is not deep enough to concatenate at "
-                    "axis={}".format(axis)
+                    f"axis={axis}"
                 )
 
             if depth != posaxis:
@@ -170,8 +171,7 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
                         length = x.length
                     elif length != x.length:
                         raise ValueError(
-                            "all arrays must have the same length for "
-                            "axis={}".format(axis)
+                            f"all arrays must have the same length for axis={axis}"
                         )
             assert length is not None
 

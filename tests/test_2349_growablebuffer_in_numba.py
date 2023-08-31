@@ -18,7 +18,7 @@ def test_python_append():
     assert len(growablebuffer._panels) == 1
 
     # within the first panel
-    for x in range(0, 5):
+    for x in range(5):
         growablebuffer.append(x)
     assert growablebuffer.snapshot().tolist() == list(range(5))
     assert len(growablebuffer._panels) == 1
@@ -63,7 +63,7 @@ def test_python_extend():
     assert len(growablebuffer._panels) == 1
 
     # within the first panel
-    growablebuffer.extend(np.array(range(0, 5)))
+    growablebuffer.extend(np.array(range(5)))
     assert growablebuffer.snapshot().tolist() == list(range(5))
     assert len(growablebuffer._panels) == 1
 
