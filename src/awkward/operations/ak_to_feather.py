@@ -2,7 +2,6 @@
 __all__ = ("to_feather",)
 from os import fsdecode
 
-import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._nplikes.numpylike import NumpyMetadata
 
@@ -71,20 +70,20 @@ def to_feather(
     pyarrow_feather = awkward._connect.pyarrow.import_pyarrow_feather("ak.to_feather")
     fsspec = awkward._connect.pyarrow.import_fsspec("ak.to_feather")
 
-    layout = ak.operations.ak_to_layout._impl(
-        data, allow_record=True, allow_other=False, regulararray=True
-    )
+    # layout = ak.operations.ak_to_layout._impl(
+    #     data, allow_record=True, allow_other=False, regulararray=True
+    # )
 
-    table = ak.operations.ak_to_arrow_table._impl(
-        layout,
-        list_to32,
-        string_to32,
-        bytestring_to32,
-        emptyarray_to,
-        categorical_as_dictionary,
-        extensionarray,
-        count_nulls,
-    )
+    # table = ak.operations.ak_to_arrow_table._impl(
+    #     layout,
+    #     list_to32,
+    #     string_to32,
+    #     bytestring_to32,
+    #     emptyarray_to,
+    #     categorical_as_dictionary,
+    #     extensionarray,
+    #     count_nulls,
+    # )
 
     if compression is True:
         compression = "zstd"
