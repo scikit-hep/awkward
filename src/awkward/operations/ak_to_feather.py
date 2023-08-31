@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("to_feather",)
-from collections.abc import Mapping, Sequence
 from os import fsdecode
 
 import awkward as ak
@@ -9,6 +8,7 @@ from awkward._nplikes.numpylike import NumpyMetadata
 
 metadata = NumpyMetadata.instance()
 # from pyarrow import feather
+
 
 @high_level_function()
 def to_feather(
@@ -26,38 +26,38 @@ def to_feather(
     compression_level=None,
     chunksize=None,
     feather_version="2.0",
-    storage_options = None,
+    storage_options=None,
 ):
     """
-    Args:
-        df: pandas.DataFrame or pyarrow.Table
-        Data to write out as Feather format.
-f
-        dest: str
-        Local destination path.
+        Args:
+            df: pandas.DataFrame or pyarrow.Table
+            Data to write out as Feather format.
+    f
+            dest: str
+            Local destination path.
 
-        compression: str, default None
-        Can be one of {“zstd”, “lz4”, “uncompressed”}. The default of None uses LZ4 for V2 files if it is available, otherwise uncompressed.
+            compression: str, default None
+            Can be one of {“zstd”, “lz4”, “uncompressed”}. The default of None uses LZ4 for V2 files if it is available, otherwise uncompressed.
 
-        compression_level: int, default None
-        Use a compression level particular to the chosen compressor. If None use the default compression level
+            compression_level: int, default None
+            Use a compression level particular to the chosen compressor. If None use the default compression level
 
-        chunksize: int, default None
-        For V2 files, the internal maximum size of Arrow RecordBatch chunks when writing the Arrow IPC file format. None means use the default, which is currently 64K
+            chunksize: int, default None
+            For V2 files, the internal maximum size of Arrow RecordBatch chunks when writing the Arrow IPC file format. None means use the default, which is currently 64K
 
-        version: int, default 2
-        Feather file version. Version 2 is the current. Version 1 is the more limited legacy format
- 
-        
-    If the `array` does not contain records at top-level, the Arrow table will consist
-    of one field whose name is `""` iff. `extensionarray` is False.
+            version: int, default 2
+            Feather file version. Version 2 is the current. Version 1 is the more limited legacy format
 
-    If `extensionarray` is True`, use a custom Arrow extension to store this array.
-    Otherwise, generic Arrow arrays are used, and if the `array` does not
-    contain records at top-level, the Arrow table will consist of one field whose
-    name is `""`. See #ak.to_arrow_table for more details.
 
-    See also #ak.to_arrow, which is used as an intermediate step.
+        If the `array` does not contain records at top-level, the Arrow table will consist
+        of one field whose name is `""` iff. `extensionarray` is False.
+
+        If `extensionarray` is True`, use a custom Arrow extension to store this array.
+        Otherwise, generic Arrow arrays are used, and if the `array` does not
+        contain records at top-level, the Arrow table will consist of one field whose
+        name is `""`. See #ak.to_arrow_table for more details.
+
+        See also #ak.to_arrow, which is used as an intermediate step.
     """
 
     # Dispatch
@@ -74,7 +74,7 @@ f
     layout = ak.operations.ak_to_layout._impl(
         data, allow_record=True, allow_other=False, regulararray=True
     )
-    
+
     table = ak.operations.ak_to_arrow_table._impl(
         layout,
         list_to32,
@@ -100,4 +100,6 @@ f
 
     destination = fsspec.core.url_to_fs(destination)
 
-    pyarrow_feather.write_feather(data, destination, compression, compression_level, chunksize, feather_version)
+    pyarrow_feather.write_feather(
+        data, destination, compression, compression_level, chunksize, feather_version
+    )
