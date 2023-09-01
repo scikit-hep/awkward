@@ -38,18 +38,6 @@ target_link_libraries(growable-buffer INTERFACE builder-options)
 add_component(layout-builder)
 target_link_libraries(layout-builder INTERFACE growable-buffer builder-options)
 
-# Set target compile properties
-set_target_properties(
-  layout-builder
-  PROPERTIES CXX_STANDARD 17
-             CXX_STANDARD_REQUIRED YES
-             CXX_EXTENSIONS NO)
-set_target_properties(
-  builder-options growable-buffer
-  PROPERTIES CXX_STANDARD 11
-             CXX_STANDARD_REQUIRED YES
-             CXX_EXTENSIONS NO)
-
 # Build test suite?
 if(BUILD_TESTS)
   add_subdirectory(tests)
