@@ -48,21 +48,17 @@ def slice(array, start, stop=None, step=1, *, highlevel=True, behavior=None):
 
 
 def _impl(array, start, stop, step, highlevel, behavior):
-    import awkward._connect.pyarrow  # noqa: F401, I001
-    from awkward.operations.ak_from_arrow import from_arrow
-    from awkward.operations.ak_to_arrow import to_arrow
+    from awkward._connect.pyarrow import import_pyarrow_compute
+    from awkward.operations.str import _apply_through_arrow
 
-    import pyarrow.compute as pc
+    pc = import_pyarrow_compute("ak.str.slice")
 
     behavior = behavior_of(array, behavior=behavior)
 
     def action(layout, **absorb):
         if layout.is_list and layout.parameter("__array__") == "string":
-            return from_arrow(
-                pc.utf8_slice_codeunits(
-                    to_arrow(layout, extensionarray=False), start, stop, step
-                ),
-                highlevel=False,
+            return _apply_through_arrow(
+                pc.utf8_slice_codeunits, layout, start, stop, step
             )
 
         elif layout.is_list and layout.parameter("__array__") == "bytestring":
