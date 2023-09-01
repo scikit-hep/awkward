@@ -24,6 +24,8 @@ macro(add_component name)
   target_include_directories(
     ${name} INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${name}>
                       $<INSTALL_INTERFACE:include/${name}>)
+  set_target_properties(${name} PROPERTIES CXX_EXTENSIONS NO)
+  target_compile_features(${name} INTERFACE cxx_std_17)
 
   install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${name}/awkward"
           DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${name}")
