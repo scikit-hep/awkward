@@ -103,7 +103,9 @@ def _drop_option_preserving_form(layout):
             ), "did not expect option type, but arrow returned a non-erasable option"
             # Re-write indexed options as indexed
             if isinstance(this, IndexedOptionArray):
-                return IndexedArray(this.index, this.content)
+                return IndexedArray(
+                    this.index, this.content, parameters=this._parameters
+                )
             else:
                 return this.content
 
@@ -201,20 +203,6 @@ def _get_ufunc_action(
                 )
 
     return action
-
-
-def _erase_list_option(layout):
-    from awkward.contents.unmaskedarray import UnmaskedArray
-
-    if layout.is_option:
-        layout = layout.content
-
-    assert layout.is_list
-    if layout.content.is_option:
-        assert isinstance(layout.content, UnmaskedArray)
-        return layout.copy(content=layout.content.content)
-    else:
-        return layout
 
 
 def _get_split_action(
