@@ -67,7 +67,6 @@ target_link_libraries(awkward-parent INTERFACE awkward::growable-buffer)
 add_library(awkward-cpu-kernels-objects OBJECT ${CPU_KERNEL_SOURCES})
 set_target_properties(awkward-cpu-kernels-objects PROPERTIES POSITION_INDEPENDENT_CODE ON)
 target_link_libraries(awkward-cpu-kernels-objects PUBLIC awkward-parent)
-target_compile_features(awkward-cpu-kernels-objects PUBLIC cxx_std_17)
 set_target_properties(
   awkward-cpu-kernels-objects
   PROPERTIES CXX_VISIBILITY_PRESET hidden
@@ -77,7 +76,6 @@ set_target_properties(
 add_library(awkward-cpu-kernels-static STATIC $<TARGET_OBJECTS:awkward-cpu-kernels-objects>)
 set_property(TARGET awkward-cpu-kernels-static PROPERTY POSITION_INDEPENDENT_CODE ON)
 target_link_libraries(awkward-cpu-kernels-static PUBLIC awkward-parent)
-target_compile_features(awkward-cpu-kernels-static PUBLIC cxx_std_17)
 set_target_properties(
   awkward-cpu-kernels-static
   PROPERTIES CXX_VISIBILITY_PRESET hidden
@@ -107,7 +105,6 @@ if(${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
             -Wunused)
 endif()
 target_link_libraries(awkward-objects PUBLIC awkward-parent)
-target_compile_features(awkward-objects PUBLIC cxx_std_17)
 set_target_properties(
   awkward-objects
   PROPERTIES CXX_VISIBILITY_PRESET hidden
@@ -131,7 +128,6 @@ find_package(pybind11 CONFIG REQUIRED)
 file(GLOB LAYOUT_SOURCES "src/python/*.cpp")
 pybind11_add_module(_ext ${LAYOUT_SOURCES})
 target_link_libraries(_ext PRIVATE awkward-static)
-target_compile_features(_ext PRIVATE cxx_std_17)
 set_target_properties(
   _ext
   PROPERTIES CXX_VISIBILITY_PRESET hidden
