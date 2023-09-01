@@ -73,6 +73,7 @@ def _impl(array, pattern, highlevel, behavior):
             pattern,
             generate_bitmasks=True,
             bytestring_to_string=False,
+            expect_option_type=True,
         ),
         behavior,
     )

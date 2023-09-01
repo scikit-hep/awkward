@@ -54,7 +54,10 @@ def _impl(array, num_repeats, highlevel, behavior):
     from awkward._connect.pyarrow import import_pyarrow_compute
     from awkward.operations.ak_from_arrow import from_arrow
     from awkward.operations.ak_to_arrow import to_arrow
-    from awkward.operations.str import _apply_through_arrow
+    from awkward.operations.str import (
+        _apply_through_arrow,
+        _drop_option_preserving_form,
+    )
 
     pc = import_pyarrow_compute("ak.str.repeat")
 
@@ -71,8 +74,8 @@ def _impl(array, num_repeats, highlevel, behavior):
                 "string",
                 "bytestring",
             ):
-                if not inputs[1].is_numpy or not issubclass(
-                    inputs[1].dtype.type, np.integer
+                if not (
+                    inputs[1].is_numpy and np.issubdtype(inputs[1].dtype, np.integer)
                 ):
                     raise TypeError(
                         "num_repeats must be an integer or broadcastable to integers"
@@ -80,28 +83,36 @@ def _impl(array, num_repeats, highlevel, behavior):
 
                 if inputs[0].backend is typetracer:
                     return (
-                        from_arrow(
-                            pc.binary_repeat(
-                                to_arrow(
-                                    inputs[0].form.length_zero_array(highlevel=False),
-                                    extensionarray=False,
+                        _drop_option_preserving_form(
+                            from_arrow(
+                                pc.binary_repeat(
+                                    to_arrow(
+                                        inputs[0].form.length_zero_array(
+                                            highlevel=False
+                                        ),
+                                        extensionarray=False,
+                                    ),
+                                    to_arrow(
+                                        inputs[1].form.length_zero_array(
+                                            highlevel=False
+                                        ),
+                                        extensionarray=False,
+                                    ),
                                 ),
-                                to_arrow(
-                                    inputs[1].form.length_zero_array(highlevel=False),
-                                    extensionarray=False,
-                                ),
-                            ),
-                            highlevel=False,
-                        ).to_typetracer(forget_length=True),
+                                highlevel=False,
+                            ).to_typetracer(forget_length=True)
+                        ),
                     )
                 else:
                     return (
-                        from_arrow(
-                            pc.binary_repeat(
-                                to_arrow(inputs[0], extensionarray=False),
-                                to_arrow(inputs[1], extensionarray=False),
-                            ),
-                            highlevel=False,
+                        _drop_option_preserving_form(
+                            from_arrow(
+                                pc.binary_repeat(
+                                    to_arrow(inputs[0], extensionarray=False),
+                                    to_arrow(inputs[1], extensionarray=False),
+                                ),
+                                highlevel=False,
+                            )
                         ),
                     )
 

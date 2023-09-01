@@ -4,12 +4,9 @@ __all__ = ("split_pattern",)
 
 
 import awkward as ak
-from awkward._backends.typetracer import TypeTracerBackend
 from awkward._behavior import behavior_of
 from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
-
-typetracer = TypeTracerBackend.instance()
 
 
 @high_level_function(module="ak.str")
@@ -55,52 +52,14 @@ def _impl(array, pattern, max_splits, reverse, highlevel, behavior):
     behavior = behavior_of(array, behavior=behavior)
     layout = ak.to_layout(array)
 
-    if layout.backend is typetracer:
-        # FIXME: this workaround for typetracer is required because
-        #        split_whitespace does not support length-zero arrays
-        #        c.f. https://github.com/apache/arrow/issues/37437
-        def action(layout, **kwargs):
-            if layout.is_list and layout.parameter("__array__") == "string":
-                return (
-                    ak.forms.ListOffsetForm(
-                        "i32",
-                        ak.forms.ListOffsetForm(
-                            layout.form.offsets,
-                            ak.forms.NumpyForm(
-                                "uint8", parameters={"__array__": "char"}
-                            ),
-                            parameters={"__array__": "string"},
-                        ),
-                    )
-                    .length_zero_array(highlevel=False)
-                    .to_typetracer(forget_length=True)
-                )
-
-            elif layout.is_list and layout.parameter("__array__") == "bytestring":
-                return (
-                    ak.forms.ListOffsetForm(
-                        "i32",
-                        ak.forms.ListOffsetForm(
-                            layout.form.offsets,
-                            ak.forms.NumpyForm(
-                                "uint8", parameters={"__array__": "byte"}
-                            ),
-                            parameters={"__array__": "bytestring"},
-                        ),
-                    )
-                    .length_zero_array(highlevel=False)
-                    .to_typetracer(forget_length=True)
-                )
-
-    else:
-        action = ak.operations.str._get_split_action(
-            pc.split_pattern,
-            pc.split_pattern,
-            pattern=pattern,
-            max_splits=max_splits,
-            reverse=reverse,
-            bytestring_to_string=False,
-        )
+    action = ak.operations.str._get_split_action(
+        pc.split_pattern,
+        pc.split_pattern,
+        pattern=pattern,
+        max_splits=max_splits,
+        reverse=reverse,
+        bytestring_to_string=False,
+    )
     out = ak._do.recursively_apply(layout, action, behavior)
 
     return wrap_layout(out, behavior, highlevel)

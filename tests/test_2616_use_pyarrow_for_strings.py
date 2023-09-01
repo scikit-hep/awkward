@@ -851,13 +851,12 @@ def test_trim_whitespace():
         ).layout.form
     )
 
-
-assert (
-    ak.str.trim_whitespace(bytestring_padded).layout.form
-    == ak.str.trim_whitespace(
-        ak.to_backend(bytestring_padded, "typetracer")
-    ).layout.form
-)
+    assert (
+        ak.str.trim_whitespace(bytestring_padded).layout.form
+        == ak.str.trim_whitespace(
+            ak.to_backend(bytestring_padded, "typetracer")
+        ).layout.form
+    )
 
 
 def test_slice():
@@ -1099,9 +1098,7 @@ def test_split_pattern_regex():
         ).layout.form
     )
 
-    with pytest.raises(
-        pyarrow.ArrowNotImplementedError, match=r"split in reverse with regex"
-    ):
+    with pytest.raises(ValueError, match=r"split in reverse with regex"):
         assert ak.str.split_pattern_regex(
             string_repeats, r"\d{3}", max_splits=1, reverse=True
         ).tolist() == [
@@ -1109,9 +1106,7 @@ def test_split_pattern_regex():
             [["", "foo"], ["", "bar"], ["foo", "456bar"]],
             [],
         ]
-    with pytest.raises(
-        pyarrow.ArrowNotImplementedError, match=r"split in reverse with regex"
-    ):
+    with pytest.raises(ValueError, match=r"split in reverse with regex"):
         ak.str.split_pattern_regex(
             ak.to_backend(string_repeats, "typetracer"),
             r"\d{3}",
@@ -1152,9 +1147,7 @@ def test_split_pattern_regex():
         ).layout.form
     )
 
-    with pytest.raises(
-        pyarrow.ArrowNotImplementedError, match=r"split in reverse with regex"
-    ):
+    with pytest.raises(ValueError, match=r"split in reverse with regex"):
         assert ak.str.split_pattern_regex(
             bytestring_repeats, rb"\d{3}", max_splits=1, reverse=True
         ).tolist() == [
@@ -1162,9 +1155,7 @@ def test_split_pattern_regex():
             [[b"", b"foo"], [b"", b"bar"], [b"foo", b"456bar"]],
             [],
         ]
-    with pytest.raises(
-        pyarrow.ArrowNotImplementedError, match=r"split in reverse with regex"
-    ):
+    with pytest.raises(ValueError, match=r"split in reverse with regex"):
         ak.str.split_pattern_regex(
             ak.to_backend(bytestring_repeats, "typetracer"),
             r"\d{3}",
