@@ -46,7 +46,7 @@ set_target_properties(
              CXX_EXTENSIONS NO)
 set_target_properties(
   builder-options growable-buffer
-  PROPERTIES CXX_STANDARD 11
+  PROPERTIES CXX_STANDARD 17
              CXX_STANDARD_REQUIRED YES
              CXX_EXTENSIONS NO)
 
