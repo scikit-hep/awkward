@@ -52,12 +52,7 @@ def repeat(array, num_repeats, *, highlevel=True, behavior=None):
 
 def _impl(array, num_repeats, highlevel, behavior):
     from awkward._connect.pyarrow import import_pyarrow_compute
-    from awkward.operations.ak_from_arrow import from_arrow
-    from awkward.operations.ak_to_arrow import to_arrow
-    from awkward.operations.str import (
-        _apply_through_arrow,
-        _drop_option_preserving_form,
-    )
+    from awkward.operations.str import _apply_through_arrow
 
     pc = import_pyarrow_compute("ak.str.repeat")
 
@@ -81,46 +76,11 @@ def _impl(array, num_repeats, highlevel, behavior):
                         "num_repeats must be an integer or broadcastable to integers"
                     )
 
-                if inputs[0].backend is typetracer:
-                    return (
-                        _drop_option_preserving_form(
-                            from_arrow(
-                                pc.binary_repeat(
-                                    to_arrow(
-                                        inputs[0].form.length_zero_array(
-                                            highlevel=False
-                                        ),
-                                        extensionarray=False,
-                                    ),
-                                    to_arrow(
-                                        inputs[1].form.length_zero_array(
-                                            highlevel=False
-                                        ),
-                                        extensionarray=False,
-                                    ),
-                                ),
-                                highlevel=False,
-                            ).to_typetracer(forget_length=True)
-                        ),
-                    )
-                else:
-                    return (
-                        _drop_option_preserving_form(
-                            from_arrow(
-                                pc.binary_repeat(
-                                    to_arrow(inputs[0], extensionarray=False),
-                                    to_arrow(inputs[1], extensionarray=False),
-                                ),
-                                highlevel=False,
-                            )
-                        ),
-                    )
+                return (_apply_through_arrow(pc.binary_repeat, *inputs),)
 
-        out = ak._broadcasting.broadcast_and_apply(
+        (out,) = ak._broadcasting.broadcast_and_apply(
             (layout, num_repeats_layout), action, behavior
         )
-        assert isinstance(out, tuple) and len(out) == 1
-        out = out[0]
 
     else:
         if not isinstance(num_repeats, numbers.Integral):

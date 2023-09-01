@@ -57,8 +57,7 @@ def _is_maybe_optional_list_of_string(layout):
 
 def _impl(array, separator, highlevel, behavior):
     from awkward._connect.pyarrow import import_pyarrow_compute
-    from awkward.operations.ak_from_arrow import from_arrow
-    from awkward.operations.ak_to_arrow import to_arrow
+    from awkward.operations.str import _apply_through_arrow
 
     pc = import_pyarrow_compute("ak.str.join")
 
@@ -74,39 +73,17 @@ def _impl(array, separator, highlevel, behavior):
             ):
                 return
 
-            if layout.backend is typetracer:
-                layout_concrete = layout.form.length_zero_array(highlevel=False)
-                arrow_array = to_arrow(
-                    # Arrow needs an option type here
-                    layout_concrete.copy(
-                        content=ak.contents.UnmaskedArray.simplified(
-                            layout_concrete.content
-                        )
-                    ),
-                    extensionarray=False,
-                    # This kernel requires non-large string/bytestrings
-                    string_to32=True,
-                    bytestring_to32=True,
-                )
-                return from_arrow(
-                    pc.binary_join(arrow_array, separator),
-                    highlevel=False,
-                ).to_typetracer(forget_length=True)
-            else:
-                arrow_array = to_arrow(
-                    # Arrow needs an option type here
-                    layout.copy(
-                        content=ak.contents.UnmaskedArray.simplified(layout.content)
-                    ),
-                    extensionarray=False,
-                    # This kernel requires non-large string/bytestrings
-                    string_to32=True,
-                    bytestring_to32=True,
-                )
-                return from_arrow(
-                    pc.binary_join(arrow_array, separator),
-                    highlevel=False,
-                )
+            return _apply_through_arrow(
+                pc.binary_join,
+                # Arrow needs an option type here
+                layout.copy(
+                    content=ak.contents.UnmaskedArray.simplified(layout.content)
+                ),
+                separator,
+                # This kernel requires non-large string/bytestrings
+                string_to32=True,
+                bytestring_to32=True,
+            )
 
         out = ak._do.recursively_apply(layout, apply_unary, behavior=behavior)
     else:
@@ -115,68 +92,30 @@ def _impl(array, separator, highlevel, behavior):
         )
 
         def apply_binary(layouts, **kwargs):
-            layout, separator_layout = layouts
             if not (
-                layout.is_list and _is_maybe_optional_list_of_string(layout.content)
+                layouts[0].is_list
+                and _is_maybe_optional_list_of_string(layouts[0].content)
             ):
                 return
 
-            if not _is_maybe_optional_list_of_string(separator_layout):
+            if not _is_maybe_optional_list_of_string(layouts[1]):
                 raise TypeError(
-                    f"`separator` must be a list of (possibly missing) strings, not {ak.type(separator_layout)}"
+                    f"`separator` must be a list of (possibly missing) strings, not {ak.type(layouts[1])}"
                 )
 
-            if layout.backend is typetracer:
-                # We have (maybe option/indexed type wrapping) strings
-                layout_arrow = to_arrow(
+            return (
+                _apply_through_arrow(
+                    pc.binary_join,
                     # Arrow needs an option type here
-                    layout.copy(
-                        content=ak.contents.UnmaskedArray.simplified(layout.content)
-                    ).form.length_zero_array(highlevel=False),
-                    extensionarray=False,
-                    # This kernel requires non-large string/bytestrings
-                    string_to32=True,
-                    bytestring_to32=True,
-                )
-                separator_arrow = to_arrow(
-                    separator_layout.form.length_zero_array(highlevel=False),
-                    extensionarray=False,
-                    # This kernel requires non-large string/bytestrings
-                    string_to32=True,
-                    bytestring_to32=True,
-                )
-
-                return (
-                    from_arrow(
-                        pc.binary_join(layout_arrow, separator_arrow),
-                        highlevel=False,
-                    ).to_typetracer(forget_length=True),
-                )
-            else:
-                # We have (maybe option/indexed type wrapping) strings
-                layout_arrow = to_arrow(
-                    # Arrow needs an option type here
-                    layout.copy(
-                        content=ak.contents.UnmaskedArray.simplified(layout.content)
+                    layouts[0].copy(
+                        content=ak.contents.UnmaskedArray.simplified(layouts[0].content)
                     ),
-                    extensionarray=False,
+                    layouts[1],
                     # This kernel requires non-large string/bytestrings
                     string_to32=True,
                     bytestring_to32=True,
-                )
-                separator_arrow = to_arrow(
-                    separator_layout,
-                    extensionarray=False,
-                    # This kernel requires non-large string/bytestrings
-                    string_to32=True,
-                    bytestring_to32=True,
-                )
-                return (
-                    from_arrow(
-                        pc.binary_join(layout_arrow, separator_arrow),
-                        highlevel=False,
-                    ),
-                )
+                ),
+            )
 
         (out,) = ak._broadcasting.broadcast_and_apply(
             (layout, separator_layout),

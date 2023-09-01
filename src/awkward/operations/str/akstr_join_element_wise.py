@@ -49,8 +49,7 @@ def join_element_wise(*arrays, highlevel=True, behavior=None):
 
 def _impl(arrays, highlevel, behavior):
     from awkward._connect.pyarrow import import_pyarrow_compute
-    from awkward.operations.ak_from_arrow import from_arrow
-    from awkward.operations.ak_to_arrow import to_arrow
+    from awkward.operations.str import _apply_through_arrow
 
     pc = import_pyarrow_compute("ak.str.join_element_wise")
 
@@ -66,30 +65,7 @@ def _impl(arrays, highlevel, behavior):
             x.is_list and x.parameter("__array__") in ("string", "bytestring")
             for x in layouts
         ):
-            if layouts[0].backend is typetracer:
-                return (
-                    from_arrow(
-                        pc.binary_join_element_wise(
-                            *[
-                                to_arrow(
-                                    x.form.length_zero_array(highlevel=False),
-                                    extensionarray=False,
-                                )
-                                for x in layouts
-                            ]
-                        ),
-                        highlevel=False,
-                    ).to_typetracer(forget_length=True),
-                )
-            else:
-                return (
-                    from_arrow(
-                        pc.binary_join_element_wise(
-                            *[to_arrow(x, extensionarray=False) for x in layouts]
-                        ),
-                        highlevel=False,
-                    ),
-                )
+            return (_apply_through_arrow(pc.binary_join_element_wise, *layouts),)
 
     (out,) = ak._broadcasting.broadcast_and_apply(layouts, action, behavior)
 
