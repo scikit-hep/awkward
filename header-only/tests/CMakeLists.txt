@@ -8,7 +8,7 @@ macro(addtest_nolibs name filename)
     PROPERTIES CXX_VISIBILITY_PRESET hidden
                VISIBILITY_INLINES_HIDDEN ON
                CXX_STANDARD 14)
-  target_compile_features(${name} INTERFACE cxx_std_14)
+  target_compile_features(${name} INTERFACE cxx_std_17)
   add_test(${name} ${name})
 endmacro(addtest_nolibs)
 

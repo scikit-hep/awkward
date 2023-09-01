@@ -39,7 +39,7 @@ classifiers = [
     "Topic :: Utilities",
 ]
 dependencies = [
-    "awkward_cpp==22",
+    "awkward_cpp==23",
     "importlib_resources;python_version < \"3.9\"",
     "numpy>=1.18.0",
     "packaging",
