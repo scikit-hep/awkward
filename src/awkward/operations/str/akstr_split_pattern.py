@@ -50,6 +50,8 @@ def _impl(array, pattern, max_splits, reverse, highlevel, behavior):
 
     pc = import_pyarrow_compute("ak.str.split_pattern")
     behavior = behavior_of(array, behavior=behavior)
+    layout = ak.to_layout(array)
+
     action = ak.operations.str._get_split_action(
         pc.split_pattern,
         pc.split_pattern,
@@ -58,6 +60,6 @@ def _impl(array, pattern, max_splits, reverse, highlevel, behavior):
         reverse=reverse,
         bytestring_to_string=False,
     )
-    out = ak._do.recursively_apply(ak.operations.to_layout(array), action, behavior)
+    out = ak._do.recursively_apply(layout, action, behavior)
 
     return wrap_layout(out, behavior, highlevel)

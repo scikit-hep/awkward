@@ -7,13 +7,14 @@ import numbers
 import awkward as ak
 from awkward._backends.dispatch import backend_of
 from awkward._backends.numpy import NumpyBackend
+from awkward._backends.typetracer import TypeTracerBackend
 from awkward._behavior import behavior_of
 from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 
 cpu = NumpyBackend.instance()
-
+typetracer = TypeTracerBackend.instance()
 np = NumpyMetadata.instance()
 
 
@@ -50,16 +51,14 @@ def repeat(array, num_repeats, *, highlevel=True, behavior=None):
 
 
 def _impl(array, num_repeats, highlevel, behavior):
-    import awkward._connect.pyarrow  # noqa: F401, I001
-    from awkward.operations.ak_from_arrow import from_arrow
-    from awkward.operations.ak_to_arrow import to_arrow
+    from awkward._connect.pyarrow import import_pyarrow_compute
+    from awkward.operations.str import _apply_through_arrow
 
-    import pyarrow.compute as pc
-
-    layout = ak.operations.to_layout(array)
+    pc = import_pyarrow_compute("ak.str.repeat")
 
     behavior = behavior_of(array, num_repeats, behavior=behavior)
     backend = backend_of(array, num_repeats, coerce_to_common=True, default=cpu)
+    layout = ak.operations.to_layout(array).to_backend(backend)
 
     num_repeats_layout = ak.operations.to_layout(num_repeats, allow_other=True)
     if isinstance(num_repeats_layout, ak.contents.Content):
@@ -70,27 +69,18 @@ def _impl(array, num_repeats, highlevel, behavior):
                 "string",
                 "bytestring",
             ):
-                if not inputs[1].is_numpy or not issubclass(
-                    inputs[1].dtype.type, np.integer
+                if not (
+                    inputs[1].is_numpy and np.issubdtype(inputs[1].dtype, np.integer)
                 ):
                     raise TypeError(
                         "num_repeats must be an integer or broadcastable to integers"
                     )
-                return (
-                    from_arrow(
-                        pc.binary_repeat(
-                            to_arrow(inputs[0], extensionarray=False),
-                            to_arrow(inputs[1], extensionarray=False),
-                        ),
-                        highlevel=False,
-                    ),
-                )
 
-        out = ak._broadcasting.broadcast_and_apply(
+                return (_apply_through_arrow(pc.binary_repeat, *inputs),)
+
+        (out,) = ak._broadcasting.broadcast_and_apply(
             (layout, num_repeats_layout), action, behavior
         )
-        assert isinstance(out, tuple) and len(out) == 1
-        out = out[0]
 
     else:
         if not isinstance(num_repeats, numbers.Integral):
@@ -103,12 +93,7 @@ def _impl(array, num_repeats, highlevel, behavior):
                 "string",
                 "bytestring",
             ):
-                return from_arrow(
-                    pc.binary_repeat(
-                        to_arrow(layout, extensionarray=False), num_repeats
-                    ),
-                    highlevel=False,
-                )
+                return _apply_through_arrow(pc.binary_repeat, layout, num_repeats)
 
         out = ak._do.recursively_apply(layout, action, behavior)
 

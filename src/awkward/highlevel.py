@@ -28,6 +28,7 @@ from awkward._layout import wrap_layout
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._operators import NDArrayOperatorsMixin
+from awkward._pickle import custom_reduce
 from awkward._regularize import is_non_string_like_iterable
 from awkward._typing import TypeVar
 
@@ -1458,6 +1459,10 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         return numba.typeof(self._numbaview)
 
     def __reduce_ex__(self, protocol: int) -> tuple:
+        result = custom_reduce(self, protocol)
+        if result is not NotImplemented:
+            return result
+
         packed_layout = ak.operations.to_packed(self._layout, highlevel=False)
         form, length, container = ak.operations.to_buffers(
             packed_layout,
@@ -2125,6 +2130,11 @@ class Record(NDArrayOperatorsMixin):
         return numba.typeof(self._numbaview)
 
     def __reduce_ex__(self, protocol: int) -> tuple:
+        # Allow third-party libraries to customise pickling
+        result = custom_reduce(self, protocol)
+        if result is not NotImplemented:
+            return result
+
         packed_layout = ak.operations.to_packed(self._layout, highlevel=False)
         form, length, container = ak.operations.to_buffers(
             packed_layout.array,
@@ -2136,6 +2146,7 @@ class Record(NDArrayOperatorsMixin):
         # For pickle >= 5, we can avoid copying the buffers
         if protocol >= 5:
             container = {k: pickle.PickleBuffer(v) for k, v in container.items()}
+
         if self._behavior is ak.behavior:
             behavior = None
         else:
