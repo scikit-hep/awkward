@@ -14,7 +14,7 @@ np = NumpyMetadata.instance()
 
 
 class Type:
-    def copy(self, *, parameters=UNSET, typestr=UNSET) -> Self:
+    def copy(self, *, parameters=UNSET) -> Self:
         raise NotImplementedError
 
     @property
@@ -28,10 +28,6 @@ class Type:
             return None
         else:
             return self._parameters.get(key)
-
-    @property
-    def typestr(self):
-        return self._typestr
 
     def __str__(self):
         return "".join(self._str("", True, None))
@@ -77,9 +73,6 @@ class Type:
 
         if self._parameters is not None and len(self._parameters) > 0:
             out.append("parameters=" + repr(self._parameters))
-
-        if self._typestr is not None:
-            out.append("typestr=" + repr(self._typestr))
 
         return out
 
