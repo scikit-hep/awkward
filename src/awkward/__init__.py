@@ -37,6 +37,8 @@ import awkward._typetracer  # todo: remove this after "deprecation" period
 from awkward.highlevel import *
 
 # behaviors
+import awkward.behaviors.categorical
+import awkward.behaviors.string
 from awkward.behaviors.mixins import *
 
 # exports
