@@ -24,7 +24,6 @@ macro(add_component name)
   target_include_directories(
     ${name} INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${name}>
                       $<INSTALL_INTERFACE:include/${name}>)
-  set_target_properties(${name} PROPERTIES CXX_EXTENSIONS NO)
   target_compile_features(${name} INTERFACE cxx_std_17)
 
   install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${name}/awkward"
@@ -39,18 +38,6 @@ target_link_libraries(growable-buffer INTERFACE builder-options)
 # Component: Layout Builder
 add_component(layout-builder)
 target_link_libraries(layout-builder INTERFACE growable-buffer builder-options)
-
-# Set target compile properties
-set_target_properties(
-  layout-builder
-  PROPERTIES CXX_STANDARD 17
-             CXX_STANDARD_REQUIRED YES
-             CXX_EXTENSIONS NO)
-set_target_properties(
-  builder-options growable-buffer
-  PROPERTIES CXX_STANDARD 17
-             CXX_STANDARD_REQUIRED YES
-             CXX_EXTENSIONS NO)
 
 # Build test suite?
 if(BUILD_TESTS)
