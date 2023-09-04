@@ -3,7 +3,6 @@ from __future__ import annotations
 __all__ = [
     "is_unknown_array",
     "is_unknown_scalar",
-    "empty_if_typetracer",
     "TypeTracerReport",
     "typetracer_with_report",
     "PlaceholderArray",
@@ -49,15 +48,6 @@ def _length_0_1_if_typetracer(array, function, highlevel: bool, behavior) -> T:
         layout = function(layout.form, highlevel=False)
 
     return wrap_layout(layout, behavior=behavior, highlevel=highlevel)
-
-
-def empty_if_typetracer(array) -> T:
-    deprecate(
-        "'empty_if_typetracer' is being replaced by 'length_zero_if_typetracer' (change name)",
-        "2.4.0",
-    )
-
-    return length_zero_if_typetracer(array)
 
 
 def length_zero_if_typetracer(array, *, highlevel: bool = True, behavior=None) -> T:

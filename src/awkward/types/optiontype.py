@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 from awkward._behavior import find_array_typestr
-from awkward._errors import deprecate
 from awkward._parameters import (
     parameters_are_equal,
     parameters_union,
@@ -18,14 +17,13 @@ from awkward.types.uniontype import UnionType
 
 @final
 class OptionType(Type):
-    def copy(self, *, content: Type = UNSET, parameters=UNSET, typestr=UNSET) -> Self:
+    def copy(self, *, content: Type = UNSET, parameters=UNSET) -> Self:
         return OptionType(
             self._content if content is UNSET else content,
             parameters=self._parameters if parameters is UNSET else parameters,
-            typestr=self._typestr if typestr is UNSET else typestr,
         )
 
-    def __init__(self, content, *, parameters=None, typestr=None):
+    def __init__(self, content, *, parameters=None):
         if not isinstance(content, Type):
             raise TypeError(
                 "{} 'content' must be a Type subclass, not {}".format(
@@ -38,25 +36,15 @@ class OptionType(Type):
                     type(self).__name__, repr(parameters)
                 )
             )
-        if typestr is not None and not isinstance(typestr, str):
-            raise TypeError(
-                "{} 'typestr' must be of type string or None, not {}".format(
-                    type(self).__name__, repr(typestr)
-                )
-            )
         self._content = content
         self._parameters = parameters
-        self._typestr = typestr
 
     @property
     def content(self):
         return self._content
 
     def _str(self, indent, compact, behavior):
-        if self._typestr is not None:
-            deprecate("typestr argument is deprecated", "2.4.0")
-
-        typestr = find_array_typestr(behavior, self._parameters, self._typestr)
+        typestr = find_array_typestr(behavior, self._parameters)
 
         head = []
         tail = []
@@ -101,31 +89,19 @@ class OptionType(Type):
             contents = []
             for content in self._content.contents:
                 if isinstance(content, OptionType):
-                    typestr = (
-                        content._typestr if self._typestr is None else self._typestr
-                    )
                     contents.append(
                         OptionType(
                             content.content,
                             parameters=parameters_union(
                                 self._parameters, content._parameters
                             ),
-                            typestr=typestr,
                         )
                     )
 
                 else:
-                    contents.append(
-                        OptionType(
-                            content, parameters=self._parameters, typestr=self._typestr
-                        )
-                    )
+                    contents.append(OptionType(content, parameters=self._parameters))
 
-            return UnionType(
-                contents,
-                parameters=self._content.parameters,
-                typestr=self._content.typestr,
-            )
+            return UnionType(contents, parameters=self._content.parameters)
 
         else:
             return self
