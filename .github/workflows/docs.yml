@@ -23,7 +23,7 @@ jobs:
     outputs:
       python-version: ${{ steps.retrieve-python-version.outputs.python-version }}
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: true
 
@@ -63,7 +63,7 @@ jobs:
     runs-on: ubuntu-22.04
     needs: [pyodide-python-version]
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: true
 
@@ -126,7 +126,7 @@ jobs:
         # Ensure conda env is activated
         shell: "bash -l {0}"
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: true
 
@@ -177,7 +177,7 @@ jobs:
     runs-on: ubuntu-22.04
     name: Build Python
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: true
 
@@ -205,7 +205,7 @@ jobs:
     env:
         DOCS_CANONICAL_VERSION: main
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
       # TODO: remove this once mamba-org/mamba#1726 is fixed
       #       and replace with `-r requirements.txt` in a
@@ -314,7 +314,7 @@ jobs:
       name: docs-preview
       url: ${{ env.DEPLOY_URL }}/${{ github.head_ref }}
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v3.0.1
       with:
@@ -346,7 +346,7 @@ jobs:
       name: docs-prod
       url: ${{ env.PRODUCTION_URL }}${{ steps.sync-main.outputs.path || steps.sync-stable.outputs.path }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v3
         with:
