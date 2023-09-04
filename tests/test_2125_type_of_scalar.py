@@ -22,11 +22,8 @@ def test():
     )
     assert ak.type(["int16"]) == ak.types.ArrayType(
         ak.types.ListType(
-            ak.types.NumpyType(
-                "uint8", parameters={"__array__": "char"}, typestr="char"
-            ),
+            ak.types.NumpyType("uint8", parameters={"__array__": "char"}),
             parameters={"__array__": "string"},
-            typestr="string",
         ),
         1,
     )

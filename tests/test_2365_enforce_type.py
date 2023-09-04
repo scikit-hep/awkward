@@ -497,11 +497,8 @@ def test_union():
             [
                 ak.types.NumpyType("int64"),
                 ak.types.ListType(
-                    ak.types.NumpyType(
-                        "uint8", parameters={"__array__": "char"}, typestr="char"
-                    ),
+                    ak.types.NumpyType("uint8", parameters={"__array__": "char"}),
                     parameters={"__array__": "string", "foo": "bar"},
-                    typestr="string",
                 ),
             ]
         ),
@@ -555,11 +552,8 @@ def test_union():
             [
                 ak.types.NumpyType("float32"),
                 ak.types.ListType(
-                    ak.types.NumpyType(
-                        "uint8", parameters={"__array__": "char"}, typestr="char"
-                    ),
+                    ak.types.NumpyType("uint8", parameters={"__array__": "char"}),
                     parameters={"__array__": "string", "foo": "bar"},
-                    typestr="string",
                 ),
             ]
         ),

@@ -60,31 +60,25 @@ def test_unknown():
 
 def test_bare_string():
     assert ak.type("hello") == ak.types.ArrayType(
-        ak.types.NumpyType("uint8", parameters={"__array__": "char"}, typestr="char"), 5
+        ak.types.NumpyType("uint8", parameters={"__array__": "char"}), 5
     )
     assert ak.type(b"hello") == ak.types.ArrayType(
-        ak.types.NumpyType("uint8", parameters={"__array__": "byte"}, typestr="byte"), 5
+        ak.types.NumpyType("uint8", parameters={"__array__": "byte"}), 5
     )
 
 
 def test_array_string():
     assert ak.type(["hello"]) == ak.types.ArrayType(
         ak.types.ListType(
-            ak.types.NumpyType(
-                "uint8", parameters={"__array__": "char"}, typestr="char"
-            ),
+            ak.types.NumpyType("uint8", parameters={"__array__": "char"}),
             parameters={"__array__": "string"},
-            typestr="string",
         ),
         1,
     )
     assert ak.type([b"hello"]) == ak.types.ArrayType(
         ak.types.ListType(
-            ak.types.NumpyType(
-                "uint8", parameters={"__array__": "byte"}, typestr="byte"
-            ),
+            ak.types.NumpyType("uint8", parameters={"__array__": "byte"}),
             parameters={"__array__": "bytestring"},
-            typestr="bytes",
         ),
         1,
     )

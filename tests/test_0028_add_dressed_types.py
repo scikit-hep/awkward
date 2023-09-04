@@ -80,7 +80,6 @@ def test_string2():
     a = ak.highlevel.Array(listoffsetarray, check_valid=True)
 
     assert isinstance(a, ak.highlevel.Array)
-    assert not isinstance(a, ak.behaviors.string.StringBehavior)
     assert to_list(a) == [[104, 101, 121], [], [116, 104, 101, 114, 101]]
 
     assert str(ak.operations.type(a)) == "3 * var * uint8"

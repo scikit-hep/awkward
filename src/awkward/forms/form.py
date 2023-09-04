@@ -476,16 +476,6 @@ class Form:
     def type(self):
         raise NotImplementedError
 
-    def type_from_behavior(self, behavior):
-        deprecate(
-            "low level types produced by forms do not hold references to behaviors. "
-            "Use a high-level type (e.g. ak.types.ArrayType or ak.types.ScalarType) to"
-            "associate a type with behavior information, or simply access the low-level"
-            "type from Form.type",
-            version="2.4.0",
-        )
-        return self.type
-
     def columns(self, list_indicator=None, column_prefix=()):
         output = []
         self._columns(column_prefix, output, list_indicator)

@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 from awkward._behavior import find_array_typestr
-from awkward._errors import deprecate
 from awkward._parameters import parameters_are_equal, type_parameters_equal
 from awkward._typing import Self, final
 from awkward._util import UNSET
@@ -11,14 +10,13 @@ from awkward.types.type import Type
 
 @final
 class ListType(Type):
-    def copy(self, *, content: Type = UNSET, parameters=UNSET, typestr=UNSET) -> Self:
+    def copy(self, *, content: Type = UNSET, parameters=UNSET) -> Self:
         return ListType(
             self._content if content is UNSET else content,
             parameters=self._parameters if parameters is UNSET else parameters,
-            typestr=self._typestr if typestr is UNSET else typestr,
         )
 
-    def __init__(self, content, *, parameters=None, typestr=None):
+    def __init__(self, content, *, parameters=None):
         if not isinstance(content, Type):
             raise TypeError(
                 "{} 'content' must be a Type subtype, not {}".format(
@@ -31,22 +29,15 @@ class ListType(Type):
                     type(self).__name__, repr(parameters)
                 )
             )
-        if typestr is not None and not isinstance(typestr, str):
-            raise TypeError(
-                "{} 'typestr' must be of type string or None, not {}".format(
-                    type(self).__name__, repr(typestr)
-                )
-            )
         self._content = content
         self._parameters = parameters
-        self._typestr = typestr
 
     @property
     def content(self):
         return self._content
 
     def _get_typestr(self, behavior) -> str | None:
-        typestr = find_array_typestr(behavior, self._parameters, self._typestr)
+        typestr = find_array_typestr(behavior, self._parameters)
         if typestr is not None:
             return typestr
 
@@ -62,9 +53,6 @@ class ListType(Type):
             return None
 
     def _str(self, indent, compact, behavior):
-        if self._typestr is not None:
-            deprecate("typestr argument is deprecated", "2.4.0")
-
         typestr = self._get_typestr(behavior)
         if typestr is not None:
             out = [typestr]
