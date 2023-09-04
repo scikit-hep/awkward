@@ -7,6 +7,9 @@
         "name": "main",
         "url": "https://awkward-array.org/doc/main/"
     },
+        "version": "2.4",
+        "url": "https://awkward-array.org/doc/2.4/"
+    },
     {
         "version": "2.3",
         "url": "https://awkward-array.org/doc/2.3/"
