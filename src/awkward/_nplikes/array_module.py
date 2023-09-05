@@ -55,9 +55,13 @@ class ArrayModuleNumpyLike(NumpyLike):
     def frombuffer(
         self, buffer, *, dtype: np.dtype | None = None, count: int = -1
     ) -> ArrayLike:
-        assert not isinstance(buffer, PlaceholderArray)
-        assert not isinstance(count, PlaceholderArray)
-        return self._module.frombuffer(buffer, dtype=dtype, count=count)
+        if isinstance(buffer, PlaceholderArray):
+            if count == -1:
+                return self.asarray(buffer)
+            else:
+                return self.asarray(buffer[:count])
+        else:
+            return self._module.frombuffer(buffer, dtype=dtype, count=count)
 
     def from_dlpack(self, x: Any) -> ArrayLike:
         return self._module.from_dlpack(x)

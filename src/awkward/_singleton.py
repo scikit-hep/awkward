@@ -9,6 +9,9 @@ class Singleton(Protocol):
     def __new__(cls, *args, **kwargs):
         return super().__new__(cls, *args, **kwargs)
 
+    def __reduce__(self):
+        return type(self).instance, ()
+
     @classmethod
     def instance(cls) -> Self:
         try:
