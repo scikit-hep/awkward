@@ -2,11 +2,11 @@
 __all__ = ("to_feather",)
 from os import fsdecode
 
+import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._nplikes.numpylike import NumpyMetadata
 
 metadata = NumpyMetadata.instance()
-# from pyarrow import feather
 
 
 @high_level_function()
@@ -14,18 +14,10 @@ def to_feather(
     array,
     destination,
     *,
-    list_to32=False,
-    string_to32=True,
-    bytestring_to32=True,
-    emptyarray_to=None,
-    categorical_as_dictionary=False,
-    extensionarray=True,
-    count_nulls=True,
     compression="zstd",
     compression_level=None,
     chunksize=None,
-    feather_version="2.0",
-    storage_options=None,
+    feather_version=2,
 ):
     """
         Args:
@@ -61,29 +53,28 @@ def to_feather(
 
     # Dispatch
     yield (array,)
+    return _impl(
+        array,
+        destination,
+        compression,
+        compression_level,
+        chunksize,
+        feather_version,
+    )
 
+
+def _impl(
+    array,
+    destination,
+    compression,
+    compression_level,
+    chunksize,
+    feather_version,
+):
     # Implementation
-    import awkward._connect.pyarrow
 
     data = array
-
-    pyarrow_feather = awkward._connect.pyarrow.import_pyarrow_feather("ak.to_feather")
-    fsspec = awkward._connect.pyarrow.import_fsspec("ak.to_feather")
-
-    # layout = ak.operations.ak_to_layout._impl(
-    #     data, allow_record=True, allow_other=False, regulararray=True
-    # )
-
-    # table = ak.operations.ak_to_arrow_table._impl(
-    #     layout,
-    #     list_to32,
-    #     string_to32,
-    #     bytestring_to32,
-    #     emptyarray_to,
-    #     categorical_as_dictionary,
-    #     extensionarray,
-    #     count_nulls,
-    # )
+    import pyarrow.feather
 
     if compression is True:
         compression = "zstd"
@@ -97,8 +88,8 @@ def to_feather(
             f"'destination' argument of 'ak.to_feather' must be a path-like, not {type(destination).__name__} ('array' argument is first; 'destination' second)"
         ) from None
 
-    destination = fsspec.core.url_to_fs(destination)
+    table = ak.to_dataframe(data)
 
-    pyarrow_feather.write_feather(
-        data, destination, compression, compression_level, chunksize, feather_version
+    pyarrow.feather.write_feather(
+        table, destination, compression, compression_level, chunksize, feather_version
     )
