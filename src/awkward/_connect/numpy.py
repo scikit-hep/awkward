@@ -434,3 +434,11 @@ def array_ufunc(ufunc, method: str, inputs, kwargs: dict[str, Any]):
 
 def action_for_matmul(inputs):
     raise NotImplementedError
+
+
+def convert_to_array(layout, dtype=None):
+    out = ak.operations.to_numpy(layout, allow_missing=False)
+    if dtype is None:
+        return out
+    else:
+        return numpy.array(out, dtype=dtype)
