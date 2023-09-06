@@ -2473,7 +2473,13 @@ class ArrayBuilder(Sized):
         with ak._errors.OperationErrorContext(
             f"{type(self).__name__}.__dlpack_device__", (self,), {}
         ):
-            return get_layout_device(self.snapshot())
+            # Rather than snapshotting, use knowledge that these arrays all
+            # live on the same backed
+            trivial_array = ak.contents.NumpyArray(numpy.empty(0, dtype=np.uint8))
+            return get_layout_device(trivial_array)
+
+    def __dlpack__(self, stream=None):
+        return to_dlpack(self.snapshot(), stream)
 
     def __arrow_array__(self, type=None):
         with ak._errors.OperationErrorContext(
