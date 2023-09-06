@@ -5,10 +5,6 @@ project(
   LANGUAGES CXX
   VERSION ${SKBUILD_PROJECT_VERSION})
 
-# Set required standards
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
 # Download headers
 include(FetchContent)
 set(AWKWARD_VERSION "v2.0.10")

@@ -5,7 +5,6 @@ from collections.abc import Iterable
 from itertools import permutations
 
 from awkward._behavior import find_array_typestr
-from awkward._errors import deprecate
 from awkward._parameters import parameters_are_equal, type_parameters_equal
 from awkward._typing import Self, final
 from awkward._util import UNSET
@@ -14,16 +13,13 @@ from awkward.types.type import Type
 
 @final
 class UnionType(Type):
-    def copy(
-        self, *, contents: list[Type] = UNSET, parameters=UNSET, typestr=UNSET
-    ) -> Self:
+    def copy(self, *, contents: list[Type] = UNSET, parameters=UNSET) -> Self:
         return UnionType(
             self._contents if contents is UNSET else contents,
             parameters=self._parameters if parameters is UNSET else parameters,
-            typestr=self._typestr if typestr is UNSET else typestr,
         )
 
-    def __init__(self, contents, *, parameters=None, typestr=None):
+    def __init__(self, contents, *, parameters=None):
         if not isinstance(contents, Iterable):
             raise TypeError(
                 "{} 'contents' must be iterable, not {}".format(
@@ -45,25 +41,15 @@ class UnionType(Type):
                     type(self).__name__, repr(parameters)
                 )
             )
-        if typestr is not None and not isinstance(typestr, str):
-            raise TypeError(
-                "{} 'typestr' must be of type string or None, not {}".format(
-                    type(self).__name__, repr(typestr)
-                )
-            )
         self._contents = contents
         self._parameters = parameters
-        self._typestr = typestr
 
     @property
     def contents(self):
         return self._contents
 
     def _str(self, indent, compact, behavior):
-        if self._typestr is not None:
-            deprecate("typestr argument is deprecated", "2.4.0")
-
-        typestr = find_array_typestr(behavior, self._parameters, self._typestr)
+        typestr = find_array_typestr(behavior, self._parameters)
         if typestr is not None:
             out = [typestr]
 

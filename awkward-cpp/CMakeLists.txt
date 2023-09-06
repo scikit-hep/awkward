@@ -24,12 +24,7 @@ Please check https://github.com/scikit-hep/awkward#installation-for-developers t
 ")
 endif()
 
-# Defaults for properties in this directory (and below)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_CXX_VISIBILITY_PRESET hidden)
-set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
-
+# Setup the RPATH for built libraries
 if(CMAKE_SYSTEM_NAME STREQUAL Emscripten)
   message(STATUS "Using Emscripten")
   set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
@@ -50,7 +45,7 @@ file(GLOB_RECURSE LIBAWKWARD_SOURCES CONFIGURE_DEPENDS "src/libawkward/*.cpp")
 add_library(awkward-parent INTERFACE)
 target_compile_definitions(awkward-parent INTERFACE VERSION_INFO="${SKBUILD_PROJECT_VERSION}")
 target_include_directories(awkward-parent INTERFACE include)
-target_compile_features(awkward-parent INTERFACE cxx_std_11)
+target_compile_features(awkward-parent INTERFACE cxx_std_17)
 
 # C++ dependencies (header-only): RapidJSON
 target_include_directories(awkward-parent INTERFACE rapidjson/include)
@@ -63,6 +58,11 @@ target_link_libraries(awkward-parent INTERFACE awkward::growable-buffer)
 add_library(awkward-cpu-kernels-objects OBJECT ${CPU_KERNEL_SOURCES})
 set_target_properties(awkward-cpu-kernels-objects PROPERTIES POSITION_INDEPENDENT_CODE ON)
 target_link_libraries(awkward-cpu-kernels-objects PUBLIC awkward-parent)
+set_target_properties(
+  awkward-cpu-kernels-objects
+  PROPERTIES CXX_VISIBILITY_PRESET hidden
+             VISIBILITY_INLINES_HIDDEN ON
+             CXX_EXTENSIONS NO)
 
 add_library(awkward-cpu-kernels-static STATIC $<TARGET_OBJECTS:awkward-cpu-kernels-objects>)
 set_property(TARGET awkward-cpu-kernels-static PROPERTY POSITION_INDEPENDENT_CODE ON)
@@ -91,6 +91,11 @@ if(${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
             -Wunused)
 endif()
 target_link_libraries(awkward-objects PUBLIC awkward-parent)
+set_target_properties(
+  awkward-objects
+  PROPERTIES CXX_VISIBILITY_PRESET hidden
+             VISIBILITY_INLINES_HIDDEN ON
+             CXX_EXTENSIONS NO)
 
 add_library(awkward-static STATIC $<TARGET_OBJECTS:awkward-objects>)
 set_property(TARGET awkward-static PROPERTY POSITION_INDEPENDENT_CODE ON)
@@ -109,6 +114,11 @@ find_package(pybind11 CONFIG REQUIRED)
 file(GLOB LAYOUT_SOURCES "src/python/*.cpp")
 pybind11_add_module(_ext ${LAYOUT_SOURCES})
 target_link_libraries(_ext PRIVATE awkward-static)
+set_target_properties(
+  _ext
+  PROPERTIES CXX_VISIBILITY_PRESET hidden
+             VISIBILITY_INLINES_HIDDEN ON
+             CXX_EXTENSIONS NO)
 
 # Install pure-python files
 file(GLOB_RECURSE PYTHON_SOURCES "src/${SKBUILD_PROJECT_NAME}/*.py")

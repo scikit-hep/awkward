@@ -5,10 +5,12 @@ __all__ = ("join",)
 import awkward as ak
 from awkward._backends.dispatch import backend_of
 from awkward._backends.numpy import NumpyBackend
+from awkward._backends.typetracer import TypeTracerBackend
 from awkward._behavior import behavior_of
 from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 
+typetracer = TypeTracerBackend.instance()
 cpu = NumpyBackend.instance()
 
 
@@ -54,11 +56,10 @@ def _is_maybe_optional_list_of_string(layout):
 
 
 def _impl(array, separator, highlevel, behavior):
-    import awkward._connect.pyarrow  # noqa: F401, I001
-    from awkward.operations.ak_from_arrow import from_arrow
-    from awkward.operations.ak_to_arrow import to_arrow
+    from awkward._connect.pyarrow import import_pyarrow_compute
+    from awkward.operations.str import _apply_through_arrow
 
-    import pyarrow.compute as pc
+    pc = import_pyarrow_compute("ak.str.join")
 
     behavior = behavior_of(array, separator, behavior=behavior)
     backend = backend_of(array, separator, coerce_to_common=True, default=cpu)
@@ -72,19 +73,16 @@ def _impl(array, separator, highlevel, behavior):
             ):
                 return
 
-            arrow_array = to_arrow(
+            return _apply_through_arrow(
+                pc.binary_join,
                 # Arrow needs an option type here
                 layout.copy(
                     content=ak.contents.UnmaskedArray.simplified(layout.content)
                 ),
-                extensionarray=False,
+                separator,
                 # This kernel requires non-large string/bytestrings
                 string_to32=True,
                 bytestring_to32=True,
-            )
-            return from_arrow(
-                pc.binary_join(arrow_array, separator),
-                highlevel=False,
             )
 
         out = ak._do.recursively_apply(layout, apply_unary, behavior=behavior)
@@ -94,39 +92,28 @@ def _impl(array, separator, highlevel, behavior):
         )
 
         def apply_binary(layouts, **kwargs):
-            layout, separator_layout = layouts
             if not (
-                layout.is_list and _is_maybe_optional_list_of_string(layout.content)
+                layouts[0].is_list
+                and _is_maybe_optional_list_of_string(layouts[0].content)
             ):
                 return
 
-            if not _is_maybe_optional_list_of_string(separator_layout):
+            if not _is_maybe_optional_list_of_string(layouts[1]):
                 raise TypeError(
-                    f"`separator` must be a list of (possibly missing) strings, not {ak.type(separator_layout)}"
+                    f"`separator` must be a list of (possibly missing) strings, not {ak.type(layouts[1])}"
                 )
 
-            # We have (maybe option/indexed type wrapping) strings
-            layout_arrow = to_arrow(
-                # Arrow needs an option type here
-                layout.copy(
-                    content=ak.contents.UnmaskedArray.simplified(layout.content)
-                ),
-                extensionarray=False,
-                # This kernel requires non-large string/bytestrings
-                string_to32=True,
-                bytestring_to32=True,
-            )
-            separator_arrow = to_arrow(
-                separator_layout,
-                extensionarray=False,
-                # This kernel requires non-large string/bytestrings
-                string_to32=True,
-                bytestring_to32=True,
-            )
             return (
-                from_arrow(
-                    pc.binary_join(layout_arrow, separator_arrow),
-                    highlevel=False,
+                _apply_through_arrow(
+                    pc.binary_join,
+                    # Arrow needs an option type here
+                    layouts[0].copy(
+                        content=ak.contents.UnmaskedArray.simplified(layouts[0].content)
+                    ),
+                    layouts[1],
+                    # This kernel requires non-large string/bytestrings
+                    string_to32=True,
+                    bytestring_to32=True,
                 ),
             )
 

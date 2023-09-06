@@ -8,7 +8,6 @@ from itertools import permutations
 import awkward as ak
 import awkward._prettyprint
 from awkward._behavior import find_record_typestr
-from awkward._errors import deprecate
 from awkward._parameters import parameters_are_equal, type_parameters_equal
 from awkward._typing import Self, final
 from awkward._util import UNSET
@@ -23,16 +22,14 @@ class RecordType(Type):
         contents: list[Type] = UNSET,
         fields: list[str] | None = UNSET,
         parameters=UNSET,
-        typestr=UNSET,
     ) -> Self:
         return RecordType(
             self._contents if contents is UNSET else contents,
             self._fields if fields is UNSET else fields,
             parameters=self._parameters if parameters is UNSET else parameters,
-            typestr=self._typestr if typestr is UNSET else typestr,
         )
 
-    def __init__(self, contents, fields, *, parameters=None, typestr=None):
+    def __init__(self, contents, fields, *, parameters=None):
         if not isinstance(contents, Iterable):
             raise TypeError(
                 "{} 'contents' must be iterable, not {}".format(
@@ -58,16 +55,9 @@ class RecordType(Type):
                     type(self).__name__, repr(parameters)
                 )
             )
-        if typestr is not None and not isinstance(typestr, str):
-            raise TypeError(
-                "{} 'typestr' must be of type string or None, not {}".format(
-                    type(self).__name__, repr(typestr)
-                )
-            )
         self._contents = contents
         self._fields = fields
         self._parameters = parameters
-        self._typestr = typestr
 
     @property
     def contents(self):
@@ -84,10 +74,7 @@ class RecordType(Type):
     _str_parameters_exclude = ("__categorical__", "__record__")
 
     def _str(self, indent, compact, behavior):
-        if self._typestr is not None:
-            deprecate("typestr argument is deprecated", "2.4.0")
-
-        typestr = find_record_typestr(behavior, self._parameters, self._typestr)
+        typestr = find_record_typestr(behavior, self._parameters)
         if typestr is not None:
             out = [typestr]
 

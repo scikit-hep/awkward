@@ -51,6 +51,11 @@ def _impl(array, pattern, max_splits, reverse, highlevel, behavior):
 
     pc = import_pyarrow_compute("ak.str.split_pattern_regex")
     behavior = behavior_of(array, behavior=behavior)
+    layout = ak.to_layout(array)
+
+    if reverse:
+        raise ValueError("Cannot split in reverse with regex")
+
     action = ak.operations.str._get_split_action(
         pc.split_pattern_regex,
         pc.split_pattern_regex,
@@ -59,6 +64,6 @@ def _impl(array, pattern, max_splits, reverse, highlevel, behavior):
         reverse=reverse,
         bytestring_to_string=False,
     )
-    out = ak._do.recursively_apply(ak.operations.to_layout(array), action, behavior)
+    out = ak._do.recursively_apply(layout, action, behavior)
 
     return wrap_layout(out, behavior, highlevel)
