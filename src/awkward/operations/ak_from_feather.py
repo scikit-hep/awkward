@@ -40,8 +40,9 @@ def from_feather(
 
 
 def _impl(path, columns, use_threads, memory_map, generate_bitmasks):
-    import awkward._connect.pyarrow
     import pyarrow.feather
+
+    import awkward._connect.pyarrow
 
     fsspec = awkward._connect.pyarrow.import_fsspec("ak.from_feather")
 
