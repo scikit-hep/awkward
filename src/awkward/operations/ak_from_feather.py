@@ -12,34 +12,40 @@ def from_feather(
     use_threads=True,
     memory_map=False,  # storage_options?
     generate_bitmasks=False,
+    highlevel=True,
+    behavior=None,
 ):
     """
     Args:
-        path: str file path, or file-like object.
-        Can be a MemoryMappedFile
-        as source, for explicitly use memory map.
+        path (str file path, or file-like object): Can be a MemoryMappedFile as
+            source, for explicitly use memory map.
+        columns (sequence): Only read a specific set of columns. If not provided,
+            all columns are read.
+        use_threads (bool): If True, parallelize reading using multiple threads.
+        memory_map (bool): If True, use memory mapping when opening file on disk,
+            when source is a string.
+        generate_bitmasks (bool): If enabled and Arrow/Parquet does not have Awkward
+            metadata, `generate_bitmasks=True` creates empty bitmasks for nullable
+            types that don't have bitmasks in the Arrow/Parquet data, so that the
+            Form (BitMaskedForm vs UnmaskedForm) is predictable.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.contents.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
-        columns: sequence, optional
-        Only read a specific set of columns. If not provided, all columns are read.
-
-        use_threads: bool, default True
-        Whether to parallelize reading using multiple threads.
-
-        memory_map: bool, default False
-        Use memory mapping when opening file on disk, when source is a str
-
-    Returns:
-        df: pandas.dataframe
-        The contents of the Feather file as a pyarrow.Table
-
+    Main docs go here (FIXME).
 
     See also #ak.to_feather
     """
 
-    return _impl(path, columns, use_threads, memory_map, generate_bitmasks)
+    return _impl(
+        path, columns, use_threads, memory_map, generate_bitmasks, highlevel, behavior
+    )
 
 
-def _impl(path, columns, use_threads, memory_map, generate_bitmasks):
+def _impl(
+    path, columns, use_threads, memory_map, generate_bitmasks, highlevel, behavior
+):
     import pyarrow.feather
 
     # fsspec = awkward._connect.pyarrow.import_fsspec("ak.from_feather")
@@ -52,13 +58,11 @@ def _impl(path, columns, use_threads, memory_map, generate_bitmasks):
     # with open(path, 'rb') as f:
     #     df = pyarrow_feather.read_feather(f, use_threads, memory_map)
 
-    df_pandas = pyarrow.feather.read_feather(path, columns, use_threads, memory_map)
-    arrow_table = pyarrow.Table.from_pandas(df_pandas)
-    df = ak.operations.ak_from_arrow._impl(
+    arrow_table = pyarrow.feather.read_table(path, columns, use_threads, memory_map)
+
+    return ak.operations.ak_from_arrow._impl(
         arrow_table,
         generate_bitmasks,
-        # why is high-level False here?
-        False,
-        None,
+        highlevel,
+        behavior,
     )
-    return df

@@ -61,6 +61,7 @@ def to_feather(
 
     # Dispatch
     yield (array,)
+
     return _impl(
         array,
         list_to32,
