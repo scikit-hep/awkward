@@ -93,13 +93,10 @@ def _impl(
     chunksize,
     feather_version,
 ):
-    # Implementation
-
-    data = array
     import pyarrow.feather
 
     layout = ak.operations.ak_to_layout._impl(
-        data, allow_record=True, allow_other=False, regulararray=True
+        array, allow_record=True, allow_other=False, regulararray=True
     )
 
     table = ak.operations.ak_to_arrow_table._impl(
@@ -124,8 +121,6 @@ def _impl(
         raise TypeError(
             f"'destination' argument of 'ak.to_feather' must be a path-like, not {type(destination).__name__} ('array' argument is first; 'destination' second)"
         ) from None
-
-    table = ak.to_dataframe(data)
 
     pyarrow.feather.write_feather(
         table, destination, compression, compression_level, chunksize, feather_version
