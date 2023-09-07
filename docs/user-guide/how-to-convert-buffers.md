@@ -170,7 +170,7 @@ group.attrs["form"]
 ```
 
 ```{code-cell} ipython3
-group.attrs["length"] = json.dumps(length)  # JSON-encode it because it might be a list
+group.attrs["length"] = length
 group.attrs["length"]
 ```
 
@@ -184,7 +184,7 @@ The group can't be used as a `container` as-is, since subscripting it returns {c
 ```{code-cell} ipython3
 reconstituted = ak.from_buffers(
     ak.forms.from_json(group.attrs["form"]),
-    json.loads(group.attrs["length"]),
+    group.attrs["length"],
     {k: np.asarray(v) for k, v in group.items()},
 )
 reconstituted
