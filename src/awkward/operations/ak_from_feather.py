@@ -11,7 +11,7 @@ def from_feather(
     columns=None,
     use_threads=True,
     memory_map=False,  # storage_options?
-    generate_bitmasks,
+    generate_bitmasks=False,
 ):
     """
     Args:
@@ -42,14 +42,12 @@ def from_feather(
 def _impl(path, columns, use_threads, memory_map, generate_bitmasks):
     import pyarrow.feather
 
-    import awkward._connect.pyarrow
+    # fsspec = awkward._connect.pyarrow.import_fsspec("ak.from_feather")
 
-    fsspec = awkward._connect.pyarrow.import_fsspec("ak.from_feather")
-
-    fs = fsspec.open(path)  # fsspec.core.url_to_fs(destination)
-    if not fs.endswith((".fea", ".feather")):
-        # if
-        raise ValueError(f"no *.feather or *.fea matches for path {path!r}")
+    # fs = fsspec.open(path)  # fsspec.core.url_to_fs(destination)
+    # if not fs.endswith((".fea", ".feather")):
+    #     # if
+    #     raise ValueError(f"no *.feather or *.fea matches for path {path!r}")
 
     # with open(path, 'rb') as f:
     #     df = pyarrow_feather.read_feather(f, use_threads, memory_map)

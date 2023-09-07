@@ -14,10 +14,18 @@ def to_feather(
     array,
     destination,
     *,
+    list_to32=False,
+    string_to32=True,
+    bytestring_to32=True,
+    emptyarray_to=None,
+    categorical_as_dictionary=False,
+    extensionarray=True,
+    count_nulls=True,
     compression="zstd",
     compression_level=None,
     chunksize=None,
     feather_version=2,
+    # storage_options=None,
 ):
     """
         Args:
@@ -55,6 +63,13 @@ def to_feather(
     yield (array,)
     return _impl(
         array,
+        list_to32,
+        string_to32,
+        bytestring_to32,
+        emptyarray_to,
+        categorical_as_dictionary,
+        extensionarray,
+        count_nulls,
         destination,
         compression,
         compression_level,
@@ -65,6 +80,13 @@ def to_feather(
 
 def _impl(
     array,
+    list_to32,
+    string_to32,
+    bytestring_to32,
+    emptyarray_to,
+    categorical_as_dictionary,
+    extensionarray,
+    count_nulls,
     destination,
     compression,
     compression_level,
@@ -75,6 +97,21 @@ def _impl(
 
     data = array
     import pyarrow.feather
+
+    layout = ak.operations.ak_to_layout._impl(
+        data, allow_record=True, allow_other=False, regulararray=True
+    )
+
+    table = ak.operations.ak_to_arrow_table._impl(
+        layout,
+        list_to32,
+        string_to32,
+        bytestring_to32,
+        emptyarray_to,
+        categorical_as_dictionary,
+        extensionarray,
+        count_nulls,
+    )
 
     if compression is True:
         compression = "zstd"
