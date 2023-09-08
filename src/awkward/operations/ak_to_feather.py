@@ -28,35 +28,38 @@ def to_feather(
     # storage_options=None,
 ):
     """
-        Args:
-            df: pandas.DataFrame or pyarrow.Table
-            Data to write out as Feather format.
-    f
-            dest: str
-            Local destination path.
+    Args:
+        array (pandas.DataFrame, or pyarrow.Table): Data to write out as Feather format,
+            passed to [pyarrow.feather.write_feather](https://arrow.apache.org/docs/python/generated/pyarrow.feather.write_feather.html#pyarrow.feather.write_feather).
+        destination (str): Local destination path, passed to [pyarrow.feather.write_feather](https://arrow.apache.org/docs/python/generated/pyarrow.feather.write_feather.html#pyarrow.feather.write_feather).
+        compression (str): Can be one of {“zstd”, “lz4”, “uncompressed”}. The
+            default of None uses LZ4 for V2 files if it is available, otherwise
+            uncompressed. Passed to [pyarrow.feather.write_feather](https://arrow.apache.org/docs/python/generated/pyarrow.feather.write_feather.html#pyarrow.feather.write_feather).
+        compression_level (int): Use a compression level particular to the chosen
+            compressor. If None use the default compression level. Passed to [pyarrow.feather.write_feather](https://arrow.apache.org/docs/python/generated/pyarrow.feather.write_feather.html#pyarrow.feather.write_feather).
+        chunksize (int): For V2 files, the internal maximum size of Arrow RecordBatch
+            chunks when writing the Arrow IPC file format. None means use the
+            default, which is currently 64K. Passed to [pyarrow.feather.write_feather](https://arrow.apache.org/docs/python/generated/pyarrow.feather.write_feather.html#pyarrow.feather.write_feather).
+        version (int): Feather file version, passed to [pyarrow.feather.write_feather](https://arrow.apache.org/docs/python/generated/pyarrow.feather.write_feather.html#pyarrow.feather.write_feather).
+            Version 2 is the current. Version 1 is the more limited legacy format. If not
+            provided, version 2 is used.
 
-            compression: str, default None
-            Can be one of {“zstd”, “lz4”, “uncompressed”}. The default of None uses LZ4 for V2 files if it is available, otherwise uncompressed.
+        Writes an Awkward Array to a Feather file (through pyarrow).
 
-            compression_level: int, default None
-            Use a compression level particular to the chosen compressor. If None use the default compression level
-
-            chunksize: int, default None
-            For V2 files, the internal maximum size of Arrow RecordBatch chunks when writing the Arrow IPC file format. None means use the default, which is currently 64K
-
-            version: int, default 2
-            Feather file version. Version 2 is the current. Version 1 is the more limited legacy format
+            >>> import awkward as ak
+            >>> array = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
+            >>> ak.to_feather(array, "filename.feather")
 
 
-        If the `array` does not contain records at top-level, the Arrow table will consist
-        of one field whose name is `""` iff. `extensionarray` is False.
+        If the `array` does not contain records at top-level, the Arrow table will
+        consist of one field whose name is `""` iff. `extensionarray` is False.
 
         If `extensionarray` is True`, use a custom Arrow extension to store this array.
         Otherwise, generic Arrow arrays are used, and if the `array` does not
         contain records at top-level, the Arrow table will consist of one field whose
         name is `""`. See #ak.to_arrow_table for more details.
 
-        See also #ak.to_arrow, which is used as an intermediate step.
+        See also #ak.from_feather.
     """
 
     # Dispatch
