@@ -58,6 +58,11 @@ def from_non_simplified_buffers(
     representations, e.g. `option[option[...]]` → `option[...]`. As such, this
     function may produce an array whose form differs from the input form.
 
+    The non-simplified forms that this function accepts can be produced by the
+    low-level ArrayBuilder `snapshot()` method. In order for a non-simplified
+    form to be considered valid, it should be one that the #ak.contents.Content
+    layout classes could produce iff. the simplification rules were removed.
+
     For a complete description of the other arguments of this function, see
     #ak.from_buffers.
 
