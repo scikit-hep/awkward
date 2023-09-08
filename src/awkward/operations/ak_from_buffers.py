@@ -26,6 +26,7 @@ def from_buffers(
     *,
     backend="cpu",
     byteorder="<",
+    allow_noncanonical_form=False,
     highlevel=True,
     behavior=None,
 ):
@@ -49,6 +50,9 @@ def from_buffers(
         byteorder (`"<"`, `">"`): Endianness of buffers read from `container`.
             If the byteorder does not match the current system byteorder, the
             arrays will be copied.
+        allow_noncanonical_form (bool): If True, non-canonical forms will be
+            simplified to produce arrays with canonical layouts; otherwise,
+            an exception will be thrown for such forms.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
@@ -73,6 +77,19 @@ def from_buffers(
 
     The `buffer_key` should be the same as the one used in #ak.to_buffers.
 
+    When `allow_noncanonical_form` is set to True, this function readily accepts
+    non-simplified forms, i.e. forms which will be simplified by Awkward Array
+    into "canonical" representations, e.g. `option[option[...]]` → `option[...]`.
+    Such forms can be produced by the low-level ArrayBuilder `snapshot()` method.
+    Given that Awkward Arrays must have canonical layouts, it follows that
+    invoking this function with `allow_noncanonical_form` may produce arrays
+    whose forms differ to the input form.
+
+    In order for a non-simplified form to be considered valid, it should be one
+    that the #ak.contents.Content layout classes could produce iff. the
+    simplification rules were removed.
+
+
     See #ak.to_buffers for examples.
     """
     return _impl(
@@ -84,7 +101,7 @@ def from_buffers(
         byteorder,
         highlevel,
         behavior,
-        False,
+        allow_noncanonical_form,
     )
 
 
