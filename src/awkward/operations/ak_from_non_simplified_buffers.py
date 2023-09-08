@@ -6,7 +6,7 @@ __all__ = ("from_non_simplified_buffers",)
 from awkward._dispatch import high_level_function
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
-from awkward.operations.ak_from_buffers import from_buffers as from_buffers_impl
+from awkward.operations.ak_from_buffers import _impl as from_buffers_impl
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
