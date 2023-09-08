@@ -25,7 +25,6 @@ def to_feather(
     compression_level=None,
     chunksize=None,
     feather_version=2,
-    # storage_options=None,
 ):
     """
     Args:
@@ -44,22 +43,22 @@ def to_feather(
             Version 2 is the current. Version 1 is the more limited legacy format. If not
             provided, version 2 is used.
 
-        Writes an Awkward Array to a Feather file (through pyarrow).
+    Writes an Awkward Array to a Feather file (through pyarrow).
 
-            >>> import awkward as ak
-            >>> array = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
-            >>> ak.to_feather(array, "filename.feather")
+        >>> import awkward as ak
+        >>> array = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
+        >>> ak.to_feather(array, "filename.feather")
 
 
-        If the `array` does not contain records at top-level, the Arrow table will
-        consist of one field whose name is `""` iff. `extensionarray` is False.
+    If the `array` does not contain records at top-level, the Arrow table will
+    consist of one field whose name is `""` iff. `extensionarray` is False.
 
-        If `extensionarray` is True`, use a custom Arrow extension to store this array.
-        Otherwise, generic Arrow arrays are used, and if the `array` does not
-        contain records at top-level, the Arrow table will consist of one field whose
-        name is `""`. See #ak.to_arrow_table for more details.
+    If `extensionarray` is True`, use a custom Arrow extension to store this array.
+    Otherwise, generic Arrow arrays are used, and if the `array` does not
+    contain records at top-level, the Arrow table will consist of one field whose
+    name is `""`. See #ak.to_arrow_table for more details.
 
-        See also #ak.from_feather.
+    See also #ak.from_feather.
     """
 
     # Dispatch

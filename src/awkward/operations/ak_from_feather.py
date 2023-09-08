@@ -33,15 +33,15 @@ def from_feather(
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
-        Reads an Feather file as an Awkward Array (through pyarrow).
+    Reads an Feather file as an Awkward Array (through pyarrow).
 
-            >>> import awkward as ak
-            >>> array1 = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
-            >>> ak.to_feather(array1, "file_name.feather")
-
-            # Result is an Awkward Array.
-            >>> array = ak.from_feather("file_name.feather")
-            <Array [[1.1, 2.2, 3.3], [], [4.4, 5.5]] type='3 * var * float64'>
+        >>> import awkward as ak
+        >>> array1 = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
+        >>> ak.to_feather(array1, "file_name.feather")
+        # Result is an Awkward Array.
+        >>> array = ak.from_feather("file_name.feather")
+        <Array [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
+            type='3 * var * float64'>
 
 
     See also #ak.to_feather.
