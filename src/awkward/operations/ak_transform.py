@@ -462,7 +462,7 @@ def _impl(
     highlevel,
 ):
     behavior = behavior_of(array, *more_arrays, behavior=behavior)
-    backend = backend_of(array, *more_arrays, default=cpu)
+    backend = backend_of(array, *more_arrays, default=cpu, coerce_to_common=True)
     layout = ak.operations.ak_to_layout._impl(
         array, allow_record=False, allow_other=False, regulararray=True
     ).to_backend(backend)

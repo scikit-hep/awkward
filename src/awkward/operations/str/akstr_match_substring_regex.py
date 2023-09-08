@@ -47,7 +47,7 @@ def _impl(array, pattern, ignore_case, highlevel, behavior):
 
     pc = import_pyarrow_compute("ak.str.match_substring_regex")
 
-    layout = ak.to_layout(array, allow_record=False, allow_other=True)
+    layout = ak.to_layout(array, allow_record=False)
     behavior = behavior_of(array, behavior=behavior)
     apply = ak.operations.str._get_ufunc_action(
         pc.match_substring_regex,

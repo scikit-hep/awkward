@@ -1006,6 +1006,11 @@ def apply_step(
     )
 
     if isinstance(result, tuple) and all(isinstance(x, Content) for x in result):
+        if any(content.backend is not backend for content in result):
+            raise ValueError(
+                "broadcasting action returned layouts with different backends: ",
+                ", ".join([content.backend.name for content in result]),
+            )
         return result
     elif result is None:
         return continuation()
@@ -1017,8 +1022,8 @@ def broadcast_and_apply(
     inputs,
     action,
     behavior,
-    depth_context=None,
-    lateral_context=None,
+    depth_context: dict[str, Any] | None = None,
+    lateral_context: dict[str, Any] | None = None,
     allow_records: bool = True,
     left_broadcast: bool = True,
     right_broadcast: bool = True,

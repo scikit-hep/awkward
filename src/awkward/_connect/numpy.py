@@ -87,7 +87,9 @@ def array_function(func, types, args, kwargs: dict[str, Any], behavior: Mapping 
         return function(*args, **kwargs)
     # Use NumPy's implementation
     else:
-        backend = common_backend(_find_backends(chain(args, kwargs.values())))
+        all_arguments = chain(args, kwargs.values())
+        unique_backends = frozenset(_find_backends(all_arguments))
+        backend = common_backend(unique_backends)
 
         rectilinear_args = tuple(_to_rectilinear(x, backend) for x in args)
         rectilinear_kwargs = {k: _to_rectilinear(v, backend) for k, v in kwargs.items()}
@@ -313,7 +315,7 @@ def array_ufunc(ufunc, method: str, inputs, kwargs: dict[str, Any]):
         return NotImplemented
 
     behavior = behavior_of(*inputs)
-    backend = backend_of(*inputs)
+    backend = backend_of(*inputs, coerce_to_common=True)
 
     inputs = _array_ufunc_custom_cast(inputs, behavior, backend)
 
@@ -432,3 +434,11 @@ def array_ufunc(ufunc, method: str, inputs, kwargs: dict[str, Any]):
 
 def action_for_matmul(inputs):
     raise NotImplementedError
+
+
+def convert_to_array(layout, dtype=None):
+    out = ak.operations.to_numpy(layout, allow_missing=False)
+    if dtype is None:
+        return out
+    else:
+        return numpy.array(out, dtype=dtype)

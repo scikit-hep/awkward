@@ -19,6 +19,9 @@ def backend(*arrays):
     * None if the objects are not Awkward, NumPy, JAX, CuPy, or typetracer arrays (e.g.
       Python numbers, booleans, strings).
 
+    If there are multiple, compatible backends (e.g. NumPy & typetracer) amongst the given arrays, the
+    coercible backend is returned.
+
     See #ak.to_backend.
     """
     # Dispatch
@@ -29,5 +32,5 @@ def backend(*arrays):
 
 
 def _impl(arrays) -> str:
-    backend_impl = backend_of(*arrays, default=None)
+    backend_impl = backend_of(*arrays, default=None, coerce_to_common=True)
     return backend_impl.name

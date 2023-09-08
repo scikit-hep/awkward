@@ -106,8 +106,8 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
     axis = regularize_axis(axis)
 
     if isinstance(arrays, dict):
-        backend = backend_of(*arrays.values(), default=cpu)
         behavior = behavior_of(*arrays.values(), behavior=behavior)
+        backend = backend_of(*arrays.values(), default=cpu, coerce_to_common=True)
         layouts = {
             n: ak._do.local_index(
                 ak.operations.to_layout(x, allow_record=False, allow_other=False),
@@ -117,8 +117,8 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
         }
     else:
         arrays = list(arrays)
-        backend = backend_of(*arrays, default=cpu)
         behavior = behavior_of(*arrays, behavior=behavior)
+        backend = backend_of(*arrays, default=cpu, coerce_to_common=True)
         layouts = [
             ak._do.local_index(
                 ak.operations.to_layout(x, allow_record=False, allow_other=False),

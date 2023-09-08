@@ -1,7 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 from __future__ import annotations
 
-from collections.abc import Iterable
+from collections.abc import Set
 
 from awkward._backends.backend import Backend
 from awkward._nplikes.numpy import Numpy
@@ -46,18 +46,17 @@ def register_backend(primary_nplike_cls: type[NumpyLike]):
     return wrapper
 
 
-def common_backend(backends: Iterable[Backend]) -> Backend:
-    unique_backends = frozenset(backends)
+def common_backend(backends: Set[Backend]) -> Backend:
     # Either we have one nplike, or one + typetracer
-    if len(unique_backends) == 1:
-        return next(iter(unique_backends))
+    if len(backends) == 1:
+        return next(iter(backends))
     else:
         # We allow typetracers to mix with other nplikes, and take precedence
-        for backend in unique_backends:
+        for backend in backends:
             if not backend.nplike.known_data:
                 return backend
 
-        if len(unique_backends) > 1:
+        if len(backends) > 1:
             raise ValueError(
                 "cannot operate on arrays with incompatible backends. Use #ak.to_backend to coerce the arrays "
                 "to the same backend"
@@ -88,26 +87,38 @@ def _backend_of(obj, default: D = UNSET) -> Backend | D:
         return maybe_lookup(obj)
 
 
-def backend_of(*objects, default: D = UNSET) -> Backend | D:
+def backend_of(
+    *objects, default: D = UNSET, coerce_to_common: bool = False
+) -> Backend | D:
     """
     Args:
         objects: objects for which to find a suitable backend
         default: value to return if no backend is found.
+        coerce_to_common: try to coerce to a single backend if multiple backends found
 
     Return the most suitable backend for the given objects (e.g. arrays, layouts). If no
     suitable backend is found, return the `default` value, or raise a `ValueError` if
     no default is given.
     """
-    backends = [
+    unique_backends = frozenset(
         b for b in (_backend_of(o, default=None) for o in objects) if b is not None
-    ]
+    )
 
-    if backends:
-        return common_backend(backends)
-    elif default is UNSET:
-        raise ValueError("could not find backend for", objects)
+    if len(unique_backends) == 0:
+        if default is UNSET:
+            raise ValueError("could not find backend for", objects)
+        else:
+            return default
+    elif len(unique_backends) == 1:
+        return next(iter(unique_backends))
+    elif coerce_to_common:
+        return common_backend(unique_backends)
     else:
-        return default
+        raise ValueError(
+            "could not find singular backend for",
+            objects,
+            "and coercion is not permitted",
+        )
 
 
 def regularize_backend(backend: str | Backend) -> Backend:

@@ -8,7 +8,6 @@ from collections.abc import Iterable, MutableMapping, Sequence
 
 import awkward as ak
 from awkward._backends.backend import Backend
-from awkward._errors import deprecate
 from awkward._layout import maybe_posaxis
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import ArrayLike, IndexType, NumpyMetadata
@@ -228,17 +227,8 @@ class UnionArray(Content):
         contents,
         *,
         parameters=None,
-        merge=UNSET,
         mergebool=False,
     ):
-        if merge is UNSET:
-            merge = True
-        else:
-            deprecate(
-                "The `merge` argument to UnionArray.simplified(...) is deprecated; "
-                "it is no longer possible to construct UnionArrays with mergeable contents.",
-                version="2.4.0",
-            )
         self_index = index
         self_tags = tags
         self_contents = contents
@@ -282,7 +272,7 @@ class UnionArray(Content):
                     # For each "final" outer union content
                     for k in range(len(contents)):
                         # Try and merge inner union content with running outer-union contentca
-                        if merge and contents[k]._mergeable_next(inner_cont, mergebool):
+                        if contents[k]._mergeable_next(inner_cont, mergebool):
                             backend.maybe_kernel_error(
                                 backend[
                                     "awkward_UnionArray_simplify",
@@ -362,7 +352,7 @@ class UnionArray(Content):
                         unmerged = False
                         break
 
-                    elif merge and contents[k]._mergeable_next(self_cont, mergebool):
+                    elif contents[k]._mergeable_next(self_cont, mergebool):
                         backend.maybe_kernel_error(
                             backend[
                                 "awkward_UnionArray_simplify_one",
@@ -1404,7 +1394,7 @@ class UnionArray(Content):
 
         # Check triangular pairs (i, j) are not mergeable
         for i, content_i in enumerate(self._contents):
-            for j in range(0, i):
+            for j in range(i):
                 content_j = self._contents[j]
                 if ak._do.mergeable(content_i, content_j, mergebool=False):
                     return f"at {path}: content({i}) is mergeable with content({j})"

@@ -209,7 +209,7 @@ def cartesian(
 def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
     axis = regularize_axis(axis)
     if isinstance(arrays, dict):
-        backend = backend_of(*arrays.values(), default=cpu)
+        backend = backend_of(*arrays.values(), default=cpu, coerce_to_common=True)
         behavior = behavior_of(*arrays.values(), behavior=behavior)
         array_layouts = {
             name: ak.operations.to_layout(
@@ -222,7 +222,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
 
     else:
         arrays = list(arrays)
-        backend = backend_of(*arrays, default=cpu)
+        backend = backend_of(*arrays, default=cpu, coerce_to_common=True)
         behavior = behavior_of(*arrays, behavior=behavior)
         array_layouts = [
             ak.operations.to_layout(
