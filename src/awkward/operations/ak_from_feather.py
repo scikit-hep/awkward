@@ -36,8 +36,7 @@ def from_feather(
     Reads an Feather file as an Awkward Array (through pyarrow).
 
         >>> import awkward as ak
-        >>> array1 = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
-        >>> ak.to_feather(array1, "file_name.feather")
+
         # Result is an Awkward Array.
         >>> array = ak.from_feather("file_name.feather")
         <Array [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
