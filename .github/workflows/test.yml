@@ -201,7 +201,7 @@ jobs:
             pyarrow-package: "pyarrow==7.0.0"
           - python-version: '3.12'
             numpy-package: "numpy>=1.26.0b1"
-            pyarrow-package: "pyarrow;python_version<\"3.12\""
+            pyarrow-package: 'pyarrow;python_version<\\"3.12\\"'
 
     runs-on: ubuntu-22.04
 
