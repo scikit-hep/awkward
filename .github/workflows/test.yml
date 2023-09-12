@@ -201,6 +201,9 @@ jobs:
         include:
           - python-version: '3.8'
             numpy-package: "numpy==1.18.0"
+            pyarrow-package: "pyarrow"
+          - python-version: '3.8'
+            numpy-package: "numpy"
             pyarrow-package: "pyarrow==7.0.0"
           - python-version: '3.12'
             numpy-package: "numpy>=1.26.0b1"
