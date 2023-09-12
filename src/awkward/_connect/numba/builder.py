@@ -5,7 +5,7 @@ import numba.core.typing
 import numba.core.typing.ctypes_utils
 import numpy
 from awkward_cpp import libawkward
-from numba.core.errors import NumbaAssertionError, NumbaTypeError
+from numba.core.errors import NumbaTypeError
 
 import awkward as ak
 
@@ -824,7 +824,7 @@ def lower_append_optional(context, builder, sig, args):
                     (arraybuilderval, optproxy.data),
                 )
             else:
-                raise NumbaAssertionError(repr(opttype.type))
+                raise AssertionError(repr(opttype.type))
 
         with is_not_valid:
             lower_null(
