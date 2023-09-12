@@ -137,6 +137,9 @@ jobs:
           python-version: '${{ matrix.python-version }}'
           allow-prereleases: true
 
+      - name: Debug wheel tags
+        run: python -m pip debug --verbose
+
       - name: Generate build files
         run: pipx run nox -s prepare -- --headers --signatures --tests
 
