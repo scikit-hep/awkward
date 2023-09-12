@@ -4,12 +4,7 @@ import json
 
 import llvmlite.ir
 import numba
-from numba.core.errors import (
-    NumbaAssertionError,
-    NumbaNotImplementedError,
-    NumbaTypeError,
-    NumbaValueError,
-)
+from numba.core.errors import NumbaTypeError, NumbaValueError
 
 import awkward as ak
 from awkward._behavior import overlay_behavior
@@ -172,7 +167,7 @@ class ContentType(numba.types.Type):
         elif index_string == "i64":
             return numba.types.Array(numba.int64, 1, "C")
         else:
-            raise NumbaAssertionError(f"unrecognized Form index type: {index_string!r}")
+            raise AssertionError(f"unrecognized Form index type: {index_string!r}")
 
     def IndexOf(self, arraytype):
         if arraytype.dtype.bitwidth == 8 and arraytype.dtype.signed:
@@ -186,7 +181,7 @@ class ContentType(numba.types.Type):
         elif arraytype.dtype.bitwidth == 64:
             return ak.index.Index64
         else:
-            raise NumbaAssertionError(f"no Index* type for array: {arraytype}")
+            raise AssertionError(f"no Index* type for array: {arraytype}")
 
     def getitem_at_check(self, viewtype):
         typer = find_numba_array_typer(viewtype.type, viewtype.behavior)
@@ -331,7 +326,7 @@ def castint(context, builder, fromtype, totype, val):
         elif fromtype.width == 64:
             fromtype = numba.int64
     if not isinstance(fromtype, numba.types.Integer):
-        raise NumbaAssertionError(f"unrecognized integer type: {fromtype!r}")
+        raise AssertionError(f"unrecognized integer type: {fromtype!r}")
 
     if fromtype.bitwidth < totype.bitwidth:
         if fromtype.signed:
@@ -1511,7 +1506,7 @@ class UnionArrayType(ContentType, ak._lookup.UnionLookup):
         wrapneg,
         checkbounds,
     ):
-        raise NumbaNotImplementedError(
+        raise NotImplementedError(
             type(self).__name__ + ".lower_getitem_at not implemented"
         )
 
@@ -1527,12 +1522,12 @@ class UnionArrayType(ContentType, ak._lookup.UnionLookup):
         stop,
         wrapneg,
     ):
-        raise NumbaNotImplementedError(
+        raise NotImplementedError(
             type(self).__name__ + ".lower_getitem_range not implemented"
         )
 
     def lower_getitem_field(self, context, builder, viewtype, viewval, viewproxy, key):
-        raise NumbaNotImplementedError(
+        raise NotImplementedError(
             type(self).__name__ + ".lower_getitem_field not implemented"
         )
 
@@ -1603,7 +1598,7 @@ def inner_dtype_of_form(form):
         return context.unify_types(*[inner_dtype_of_form(x) for x in form.contents])
 
     else:
-        raise NumbaAssertionError(f"unrecognized Form type: {type(form)}")
+        raise AssertionError(f"unrecognized Form type: {type(form)}")
 
 
 def optiontype_of_form(form):
@@ -1639,7 +1634,7 @@ def optiontype_of_form(form):
         return any(optiontype_of_form(x) for x in form.contents)
 
     else:
-        raise NumbaAssertionError(f"unrecognized Form type: {type(form)}")
+        raise AssertionError(f"unrecognized Form type: {type(form)}")
 
 
 def recordtype_of_form(form):
@@ -1677,4 +1672,4 @@ def recordtype_of_form(form):
         return any(recordtype_of_form(x) for x in form.contents)
 
     else:
-        raise NumbaAssertionError(f"unrecognized Form type: {type(form)}")
+        raise AssertionError(f"unrecognized Form type: {type(form)}")

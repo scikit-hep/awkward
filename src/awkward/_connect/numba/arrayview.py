@@ -5,7 +5,7 @@ import numba
 import numba.core.typing
 import numba.core.typing.ctypes_utils
 import numpy
-from numba.core.errors import NumbaAssertionError, NumbaTypeError
+from numba.core.errors import NumbaTypeError
 
 import awkward as ak
 from awkward._behavior import behavior_of, overlay_behavior
@@ -143,7 +143,7 @@ def to_numbatype(form):
         return ak._connect.numba.layout.UnionArrayType.from_form(form)
 
     else:
-        raise NumbaAssertionError(f"unrecognized Form: {type(form)}")
+        raise AssertionError(f"unrecognized Form: {type(form)}")
 
 
 ########## Lookup
