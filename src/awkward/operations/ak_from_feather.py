@@ -10,7 +10,7 @@ def from_feather(
     *,
     columns=None,
     use_threads=True,
-    memory_map=False,  # storage_options?
+    memory_map=False,
     generate_bitmasks=False,
     highlevel=True,
     behavior=None,
@@ -35,10 +35,7 @@ def from_feather(
 
     Reads an Feather file as an Awkward Array (through pyarrow).
 
-        >>> import awkward as ak
-
-        # Result is an Awkward Array.
-        >>> array = ak.from_feather("file_name.feather")
+        >>> ak.from_feather("file_name.feather")
         <Array [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
             type='3 * var * float64'>
 
@@ -55,16 +52,6 @@ def _impl(
     path, columns, use_threads, memory_map, generate_bitmasks, highlevel, behavior
 ):
     import pyarrow.feather
-
-    # fsspec = awkward._connect.pyarrow.import_fsspec("ak.from_feather")
-
-    # fs = fsspec.open(path)  # fsspec.core.url_to_fs(destination)
-    # if not fs.endswith((".fea", ".feather")):
-    #     # if
-    #     raise ValueError(f"no *.feather or *.fea matches for path {path!r}")
-
-    # with open(path, 'rb') as f:
-    #     df = pyarrow_feather.read_feather(f, use_threads, memory_map)
 
     arrow_table = pyarrow.feather.read_table(path, columns, use_threads, memory_map)
 
