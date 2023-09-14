@@ -10,6 +10,8 @@ from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.placeholder import PlaceholderArray
+from awkward._nplikes.shape import unknown_length
 from awkward._regularize import is_integer
 from awkward.forms.form import index_to_dtype, regularize_buffer_key
 
@@ -124,11 +126,15 @@ def _impl(
 
 
 def _from_buffer(nplike, buffer, dtype, count, byteorder):
-    if nplike.is_own_array(buffer):
+    if isinstance(buffer, PlaceholderArray) or nplike.is_own_array(buffer):
+        # Require 1D buffers
         array = nplike.reshape(buffer.view(dtype), shape=(-1,), copy=False)
 
-        # Require 1D
-        if array.size < count:
+        if (
+            array.size is not unknown_length
+            and count is not unknown_length
+            and array.size < count
+        ):
             raise TypeError(
                 f"size of array ({array.size}) is less than size of form ({count})"
             )
