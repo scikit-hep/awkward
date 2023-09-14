@@ -8,11 +8,7 @@ ShapeItem: TypeAlias = "int | type[unknown_length]"
 
 
 class _UnknownLength(PrivateSingleton):
-    _name: str
-
-    @classmethod
-    def _get_singleton_instance(cls) -> Self:
-        return cls._instance
+    _instance_name: str
 
     def __add__(self, other) -> Self | NotImplemented:
         if isinstance(other, int) or other is self:
@@ -59,7 +55,7 @@ class _UnknownLength(PrivateSingleton):
         return "##"
 
     def __repr__(self):
-        return f"{__name__}.{self._name}"
+        return self._instance_name
 
     def __eq__(self, other) -> bool:
         if other is self:
@@ -84,4 +80,8 @@ class _UnknownLength(PrivateSingleton):
     __lt__ = __gt__
 
 
-unknown_length = _UnknownLength._new("unknown_length")
+# Inform the singleton if its module name
+_UnknownLength._instance_name = f"{__name__}.unknown_length"
+
+# Ensure we have a single instance
+unknown_length = _UnknownLength._new()
