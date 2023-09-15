@@ -37,7 +37,7 @@ class PlaceholderArray(ArrayLike):
 
     @property
     def nbytes(self) -> int:
-        return self.size * self._dtype.itemsize
+        return 0
 
     @property
     def strides(self) -> tuple[int, ...]:
