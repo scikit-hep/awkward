@@ -1212,9 +1212,9 @@ namespace awkward {
 
         // checklist consists of a 1 bit for each field that has not been seen yet
         std::vector<uint64_t> checklist_init(num_checklist_chunks, 0);
-        for (int64_t i = 0;  i < num_items;  i++) {
-          int64_t chunki = i >> 6;                               // i / 64
-          uint64_t chunkmask = record_field_bitmask_[i & 0x3f];  // i % 64
+        for (int64_t j = 0;  j < num_items;  j++) {
+          int64_t chunki = j >> 6;                               // j / 64
+          uint64_t chunkmask = record_field_bitmask_[j & 0x3f];  // j % 64
           checklist_init[chunki] |= chunkmask;
         }
         std::vector<uint64_t> checklist_copy = checklist_init;   // copied (not shared)
