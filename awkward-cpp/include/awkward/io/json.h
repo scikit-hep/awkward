@@ -140,29 +140,29 @@ namespace awkward {
       int64_t stop;
       // optimistic: fields in data are in the order specified by the schema
       if (argument1() != 0) {
-        int64_t i = record_first_try_[argument2()];
+        // increment the current (last seen) field with wrap-around
+        record_current_field_[argument2()]++;
+        if (record_current_field_[argument2()] == argument1()) {
+          record_current_field_[argument2()] = 0;
+        }
+        // use it
+        int64_t i = current_instruction_ + 1 + record_current_field_[argument2()];
         stringi = instructions_.data()[i * 4 + 1];
         start = offsets[stringi];
         stop = offsets[stringi + 1];
         if (strncmp(str, &chars[start], (size_t)(stop - start)) == 0) {
-          record_first_try_[argument2()]++;
-          if (record_first_try_[argument2()] > current_instruction_ + argument1()) {
-            record_first_try_[argument2()] = current_instruction_ + 1;
-          }
           return instructions_.data()[i * 4 + 2];
         }
       }
       // pessimistic: try all field names, starting from the first
       for (int64_t i = current_instruction_ + 1;  i <= current_instruction_ + argument1();  i++) {
-        if (i != record_first_try_[argument2()]) {
+        // not including the one optimistic trial
+        if (i != current_instruction_ + 1 + record_current_field_[argument2()]) {
           stringi = instructions_.data()[i * 4 + 1];
           start = offsets[stringi];
           stop = offsets[stringi + 1];
           if (strncmp(str, &chars[start], (size_t)(stop - start)) == 0) {
-            record_first_try_[argument2()]++;
-            if (record_first_try_[argument2()] > current_instruction_ + argument1()) {
-              record_first_try_[argument2()] = current_instruction_ + 1;
-            }
+            record_current_field_[argument2()] = i - (current_instruction_ + 1);
             return instructions_.data()[i * 4 + 2];
           }
         }
@@ -298,7 +298,6 @@ namespace awkward {
     std::vector<char> characters_;
     std::vector<int64_t> string_offsets_;
 
-    std::vector<int64_t> record_first_try_;
     std::vector<int64_t> record_current_field_;
     std::vector<std::vector<uint64_t>> record_checklist_init_;
     std::vector<std::vector<uint64_t>> record_checklist_;

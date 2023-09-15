@@ -1197,10 +1197,10 @@ namespace awkward {
         instruction_stack_max_depth++;
         instructions_.push_back(KeyTableHeader);
         instructions_.push_back(item[1].GetInt64());
-        instructions_.push_back(record_first_try_.size());  // record identifier
+        instructions_.push_back(record_current_field_.size());  // record identifier
         instructions_.push_back(-1);
 
-        record_first_try_.push_back(instructions_.size() / 4);
+        record_current_field_.push_back(-1);  // the first find_key will increase this to zero
       }
 
       else if (std::string("KeyTableItem") == item[0].GetString()) {
