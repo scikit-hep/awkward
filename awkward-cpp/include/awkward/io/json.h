@@ -135,6 +135,8 @@ namespace awkward {
     inline int64_t find_key(const char* str) noexcept {
       int64_t* offsets = string_offsets_.data();
       char* chars = characters_.data();
+      int64_t i;
+      int64_t j;
       int64_t stringi;
       int64_t start;
       int64_t stop;
@@ -145,29 +147,61 @@ namespace awkward {
         if (record_current_field_[argument2()] == argument1()) {
           record_current_field_[argument2()] = 0;
         }
-        // use it
-        int64_t i = current_instruction_ + 1 + record_current_field_[argument2()];
+        j = record_current_field_[argument2()];
+        // use the record_current_field_ (as j)
+        i = current_instruction_ + 1 + j;
         stringi = instructions_.data()[i * 4 + 1];
         start = offsets[stringi];
         stop = offsets[stringi + 1];
         if (strncmp(str, &chars[start], (size_t)(stop - start)) == 0) {
+          // set the checklist bit to 0
+          record_checklist_[argument2()][j >> 6] &= record_field_bitmask_[j & 0x3f];
           return instructions_.data()[i * 4 + 2];
         }
       }
       // pessimistic: try all field names, starting from the first
-      for (int64_t i = current_instruction_ + 1;  i <= current_instruction_ + argument1();  i++) {
+      for (i = current_instruction_ + 1;  i <= current_instruction_ + argument1();  i++) {
         // not including the one optimistic trial
         if (i != current_instruction_ + 1 + record_current_field_[argument2()]) {
           stringi = instructions_.data()[i * 4 + 1];
           start = offsets[stringi];
           stop = offsets[stringi + 1];
           if (strncmp(str, &chars[start], (size_t)(stop - start)) == 0) {
-            record_current_field_[argument2()] = i - (current_instruction_ + 1);
+            // set the record_current_field_
+            j = i - (current_instruction_ + 1);
+            record_current_field_[argument2()] = j;
+            // set the checklist bit to 0
+            record_checklist_[argument2()][j >> 6] &= record_field_bitmask_[j & 0x3f];
             return instructions_.data()[i * 4 + 2];
           }
         }
       }
       return -1;
+    }
+
+    /// @brief HERE
+    inline void start_object(int64_t keytableheader_instruction) noexcept {
+      int64_t record_identifier = instructions_.data()[keytableheader_instruction * 4 + 2];
+      record_checklist_[record_identifier].assign(
+          record_checklist_init_[record_identifier].begin(),
+          record_checklist_init_[record_identifier].end()
+      );
+    }
+
+    /// @brief HERE
+    inline bool end_object(int64_t keytableheader_instruction) noexcept {
+      int64_t record_identifier = instructions_.data()[keytableheader_instruction * 4 + 2];
+      uint64_t should_be_zero = 0;
+      for (uint64_t chunk : record_checklist_[record_identifier]) {
+        should_be_zero |= chunk;
+      }
+      if (should_be_zero == 0) {
+        return true;
+      }
+      else {
+        // deal with missing fields
+        return false;
+      }
     }
 
     /// @brief HERE
@@ -317,6 +351,7 @@ namespace awkward {
     int64_t length_;
 
     static uint64_t record_field_bitmask_[64];
+    static uint64_t record_field_antibitmask_[64];
   };
 
 }
