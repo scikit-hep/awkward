@@ -527,7 +527,7 @@ def test_array_array_integer():
 
 def test_record():
     result = ak.operations.from_json(
-        ' [ { "x" :1 ,"y":1.1},{"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}]',
+        ' [ { "x" :1 ,"y":1.1},{"y": 2.2, "x": 2}, {"x": 3, "y": 3.3}]',
         schema={
             "type": "array",
             "items": {
@@ -545,7 +545,7 @@ def test_record():
     assert str(result.type) == "3 * {x: int64, y: float64}"
 
     result = ak.operations.from_json(
-        ' [ { "x" :1 ,"y":1.1},{"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}]' * 2,
+        ' [ { "x" :1 ,"y":1.1},{"y": 2.2, "x": 2}, {"x": 3, "y": 3.3}]' * 2,
         schema={
             "type": "array",
             "items": {

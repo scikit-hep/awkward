@@ -138,12 +138,33 @@ namespace awkward {
       int64_t stringi;
       int64_t start;
       int64_t stop;
-      for (int64_t i = current_instruction_ + 1;  i <= current_instruction_ + argument1();  i++) {
+      // optimistic: fields in data are in the order specified by the schema
+      if (argument1() != 0) {
+        int64_t i = record_first_try_[argument2()];
         stringi = instructions_.data()[i * 4 + 1];
         start = offsets[stringi];
         stop = offsets[stringi + 1];
         if (strncmp(str, &chars[start], (size_t)(stop - start)) == 0) {
+          record_first_try_[argument2()]++;
+          if (record_first_try_[argument2()] > current_instruction_ + argument1()) {
+            record_first_try_[argument2()] = current_instruction_ + 1;
+          }
           return instructions_.data()[i * 4 + 2];
+        }
+      }
+      // pessimistic: try all field names, starting from the first
+      for (int64_t i = current_instruction_ + 1;  i <= current_instruction_ + argument1();  i++) {
+        if (i != record_first_try_[argument2()]) {
+          stringi = instructions_.data()[i * 4 + 1];
+          start = offsets[stringi];
+          stop = offsets[stringi + 1];
+          if (strncmp(str, &chars[start], (size_t)(stop - start)) == 0) {
+            record_first_try_[argument2()]++;
+            if (record_first_try_[argument2()] > current_instruction_ + argument1()) {
+              record_first_try_[argument2()] = current_instruction_ + 1;
+            }
+            return instructions_.data()[i * 4 + 2];
+          }
         }
       }
       return -1;
@@ -277,6 +298,11 @@ namespace awkward {
     std::vector<char> characters_;
     std::vector<int64_t> string_offsets_;
 
+    std::vector<int64_t> record_first_try_;
+    std::vector<int64_t> record_current_field_;
+    std::vector<std::vector<uint64_t>> record_checklist_init_;
+    std::vector<std::vector<uint64_t>> record_checklist_;
+
     std::vector<std::string> output_names_;
     std::vector<util::dtype> output_dtypes_;
     std::vector<int64_t> output_which_;
@@ -290,6 +316,8 @@ namespace awkward {
     std::vector<int64_t> counters_;
 
     int64_t length_;
+
+    static uint64_t record_field_bitmask_[64];
   };
 
 }
