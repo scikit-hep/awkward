@@ -71,7 +71,7 @@ class PlaceholderArray(ArrayLike):
         if isinstance(index, slice):
             length = self._shape[0]
 
-            # Unknown-length placeholders never need a known shape, so return unknown!
+            # Unknown-length placeholders should not be sliced (as their shapes would be touched(
             if length is unknown_length:
                 raise AssertionError(
                     "placeholder arrays that are sliced should have known shapes"
