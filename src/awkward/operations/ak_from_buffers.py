@@ -178,10 +178,8 @@ def _reconstitute(form, length, container, getkey, backend, byteorder, simplify)
             byteorder=byteorder,
         )
         if form.inner_shape != ():
-            if data.shape[0] is unknown_length or data.shape[0] != 0:
-                data = backend.nplike.reshape(data, (length, *form.inner_shape))
-            else:
-                data = backend.nplike.reshape(data, (-1, *form.inner_shape))
+            data = backend.nplike.reshape(data, (length, *form.inner_shape))
+
         return ak.contents.NumpyArray(
             data, parameters=form._parameters, backend=backend
         )
