@@ -1,6 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+
 __all__ = ("to_feather",)
-from os import fsdecode
+
+import os
 
 import awkward as ak
 from awkward._dispatch import high_level_function
@@ -28,9 +30,9 @@ def to_feather(
 ):
     """
     Args:
-        array (pandas.DataFrame, or pyarrow.Table): Data to write out as Feather format,
-            passed to [pyarrow.feather.write_feather](https://arrow.apache.org/docs/python/generated/pyarrow.feather.write_feather.html#pyarrow.feather.write_feather).
-        destination (str): Local destination path, passed to [pyarrow.feather.write_feather](https://arrow.apache.org/docs/python/generated/pyarrow.feather.write_feather.html#pyarrow.feather.write_feather).
+        array: Array-like data (anything #ak.to_layout recognizes).
+        destination (str): Local destination path, passed to
+            [pyarrow.feather.write_feather](https://arrow.apache.org/docs/python/generated/pyarrow.feather.write_feather.html#pyarrow.feather.write_feather).
         list_to32 (bool): If True, convert Awkward lists into 32-bit Arrow lists
             if they're small enough, even if it means an extra conversion. Otherwise,
             signed 32-bit #ak.types.ListType maps to Arrow `ListType`,
@@ -57,12 +59,12 @@ def to_feather(
         count_nulls (bool): If True, count the number of missing values at each level
             and include these in the resulting Arrow array, which makes some downstream
             applications faster. If False, skip the up-front cost of counting them.
-        compression (str): Can be one of {“zstd”, “lz4”, “uncompressed”}. The
-            default of None uses LZ4 for V2 files if it is available, otherwise
+        compression (None or str): Can be one of {“zstd”, “lz4”, “uncompressed”}. The
+            default of None uses LZ4 for `feather_version=2` files if it is available, otherwise
             uncompressed. Passed to [pyarrow.feather.write_feather](https://arrow.apache.org/docs/python/generated/pyarrow.feather.write_feather.html#pyarrow.feather.write_feather).
-        compression_level (int): Use a compression level particular to the chosen
+        compression_level (None or int): Use a compression level particular to the chosen
             compressor. If None use the default compression level. Passed to [pyarrow.feather.write_feather](https://arrow.apache.org/docs/python/generated/pyarrow.feather.write_feather.html#pyarrow.feather.write_feather).
-        chunksize (int): For V2 files, the internal maximum size of Arrow RecordBatch
+        chunksize (None or int): For `feather_version=2` files, this is the internal maximum size of Arrow RecordBatch
             chunks when writing the Arrow IPC file format. None means use the
             default, which is currently 64K. Passed to [pyarrow.feather.write_feather](https://arrow.apache.org/docs/python/generated/pyarrow.feather.write_feather.html#pyarrow.feather.write_feather).
         feather_version (int): Feather file version, passed to [pyarrow.feather.write_feather](https://arrow.apache.org/docs/python/generated/pyarrow.feather.write_feather.html#pyarrow.feather.write_feather).
@@ -143,7 +145,7 @@ def _impl(
         compression = "none"
 
     try:
-        destination = fsdecode(destination)
+        destination = os.fsdecode(destination)
     except TypeError:
         raise TypeError(
             f"'destination' argument of 'ak.to_feather' must be a path-like, not {type(destination).__name__} ('array' argument is first; 'destination' second)"

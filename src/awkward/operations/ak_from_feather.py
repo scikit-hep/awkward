@@ -1,5 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+
 __all__ = ("from_feather",)
+
 import awkward as ak
 from awkward._dispatch import high_level_function
 
@@ -17,8 +19,8 @@ def from_feather(
 ):
     """
     Args:
-        path (str file path, or file-like object): Can be a MemoryMappedFile as
-            source, for explicitly use memory map.
+        path (str or file-like object): Feather file to read as an Awkward Array,
+            passed directly to [pyarrow.feather.read_table](https://arrow.apache.org/docs/python/generated/pyarrow.feather.read_table.html).
         columns (sequence): Only read a specific set of columns. If not provided,
             all columns are read.
         use_threads (bool): If True, parallelize reading using multiple threads.
@@ -36,8 +38,7 @@ def from_feather(
     Reads an Feather file as an Awkward Array (through pyarrow).
 
         >>> ak.from_feather("file_name.feather")
-        <Array [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
-            type='3 * var * float64'>
+        <Array [[1.1, 2.2, 3.3], [], [4.4, 5.5]] type='3 * var * float64'>
 
 
     See also #ak.to_feather.
