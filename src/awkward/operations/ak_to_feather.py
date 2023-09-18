@@ -24,7 +24,7 @@ def to_feather(
     compression="zstd",
     compression_level=None,
     chunksize=None,
-    version=2,
+    feather_version=2,
 ):
     """
     Args:
@@ -65,7 +65,7 @@ def to_feather(
         chunksize (int): For V2 files, the internal maximum size of Arrow RecordBatch
             chunks when writing the Arrow IPC file format. None means use the
             default, which is currently 64K. Passed to [pyarrow.feather.write_feather](https://arrow.apache.org/docs/python/generated/pyarrow.feather.write_feather.html#pyarrow.feather.write_feather).
-        version (int): Feather file version, passed to [pyarrow.feather.write_feather](https://arrow.apache.org/docs/python/generated/pyarrow.feather.write_feather.html#pyarrow.feather.write_feather).
+        feather_version (int): Feather file version, passed to [pyarrow.feather.write_feather](https://arrow.apache.org/docs/python/generated/pyarrow.feather.write_feather.html#pyarrow.feather.write_feather).
             Version 2 is the current. Version 1 is the more limited legacy format. If not
             provided, version 2 is used.
 
@@ -101,7 +101,7 @@ def to_feather(
         compression,
         compression_level,
         chunksize,
-        version,
+        feather_version,
     )
 
 
@@ -118,7 +118,7 @@ def _impl(
     compression,
     compression_level,
     chunksize,
-    version,
+    feather_version,
 ):
     import pyarrow.feather
 
@@ -150,5 +150,5 @@ def _impl(
         ) from None
 
     pyarrow.feather.write_feather(
-        table, destination, compression, compression_level, chunksize, version
+        table, destination, compression, compression_level, chunksize, feather_version
     )
