@@ -406,7 +406,7 @@ def _reconstitute(form, length, container, getkey, backend, byteorder, simplify)
             count=length,
             byteorder=byteorder,
         )
-        if isinstance(index, PlaceholderArray):
+        if isinstance(index, PlaceholderArray) or isinstance(tags, PlaceholderArray):
             lengths = [unknown_length] * len(form.contents)
         else:
             lengths = []

@@ -17,7 +17,7 @@ class PlaceholderArray(ArrayLike):
     ):
         self._nplike = nplike
         self._shape = shape
-        self._dtype = dtype
+        self._dtype = np.dtype(dtype)
 
     @property
     def dtype(self) -> np.dtype:
