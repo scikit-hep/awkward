@@ -47,10 +47,8 @@ def from_dict(input: Mapping) -> Form:
     if input["class"] == "NumpyArray":
         primitive = input["primitive"]
         inner_shape = tuple(
-            [
-                unknown_length if item is None else item
-                for item in input.get("inner_shape", [])
-            ]
+            unknown_length if item is None else item
+            for item in input.get("inner_shape", [])
         )
         return ak.forms.NumpyForm(
             primitive, inner_shape, parameters=parameters, form_key=form_key
