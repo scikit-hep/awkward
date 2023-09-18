@@ -33,6 +33,7 @@ jobs:
     strategy:
       matrix:
         python-version:
+          - '3.12'
           - '3.11'
           - '3.10'
           - '3.9'
@@ -48,7 +49,8 @@ jobs:
     runs-on: windows-2019
 
     env:
-      PIP_ONLY_BINARY: cmake
+      PIP_ONLY_BINARY: cmake,numpy,pandas
+      PIP_PRE: "1"
 
     steps:
       - uses: actions/checkout@v4
@@ -60,6 +62,7 @@ jobs:
         with:
           python-version: '${{ matrix.python-version }}'
           architecture: '${{ matrix.python-architecture }}'
+          allow-prereleases: true
 
       - name: Generate build files
         run: pipx run nox -s prepare -- --headers --signatures --tests
@@ -111,6 +114,7 @@ jobs:
     strategy:
       matrix:
         python-version:
+          - '3.12'
           - '3.11'
           - '3.10'
           - '3.9'
@@ -119,7 +123,8 @@ jobs:
     runs-on: macOS-11
 
     env:
-      PIP_ONLY_BINARY: cmake
+      PIP_ONLY_BINARY: cmake,numpy
+      PIP_PRE: "1"
 
     steps:
       - uses: actions/checkout@v4
@@ -130,6 +135,10 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '${{ matrix.python-version }}'
+          allow-prereleases: true
+
+      - name: Debug wheel tags
+        run: python -m pip debug --verbose
 
       - name: Generate build files
         run: pipx run nox -s prepare -- --headers --signatures --tests
@@ -196,8 +205,11 @@ jobs:
           - python-version: '3.8'
             numpy-package: "numpy"
             pyarrow-package: "pyarrow==7.0.0"
+          - python-version: '3.12'
+            numpy-package: "numpy>=1.26.0b1"
+            pyarrow-package: "pyarrow;python_version<'3.12'"
 
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     env:
       PIP_ONLY_BINARY: cmake
@@ -211,6 +223,7 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '${{ matrix.python-version }}'
+          allow-prereleases: true
 
       - name: Oldest supported CMake
         uses: jwlawson/actions-setup-cmake@v1.14

@@ -7,7 +7,7 @@ import awkward as ak
 from awkward._kernels import KernelError
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import ArrayLike, NumpyLike, NumpyMetadata
-from awkward._singleton import Singleton
+from awkward._singleton import PublicSingleton
 from awkward._typing import Callable, Protocol, Tuple, TypeAlias, TypeVar, Unpack
 
 np = NumpyMetadata.instance()
@@ -24,7 +24,7 @@ class UfuncLike(Protocol):
         ...
 
 
-class Backend(Singleton, ABC):
+class Backend(PublicSingleton, ABC):
     name: str
 
     @property
