@@ -7,6 +7,7 @@ from collections.abc import Callable, Iterable, Iterator
 import awkward as ak
 from awkward._errors import deprecate
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.shape import unknown_length
 from awkward._parameters import type_parameters_equal
 from awkward._typing import JSONSerializable, Self, final
 from awkward._util import UNSET
@@ -139,7 +140,10 @@ class NumpyForm(Form):
                 "primitive": self._primitive,
             }
             if verbose or len(self._inner_shape) > 0:
-                out["inner_shape"] = list(self._inner_shape)
+                out["inner_shape"] = [
+                    None if item is unknown_length else item
+                    for item in self._inner_shape
+                ]
             return self._to_dict_extra(out, verbose)
 
     @property
