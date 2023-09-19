@@ -17,6 +17,7 @@
     generated/ak.from_avro_file
     generated/ak.from_buffers
     generated/ak.from_cupy
+    generated/ak.from_feather
     generated/ak.from_iter
     generated/ak.from_jax
     generated/ak.from_json
@@ -34,6 +35,7 @@
     generated/ak.to_buffers
     generated/ak.to_cupy
     generated/ak.to_dataframe
+    generated/ak.to_feather
     generated/ak.to_jax
     generated/ak.to_json
     generated/ak.to_list
