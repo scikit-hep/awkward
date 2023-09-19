@@ -797,8 +797,6 @@ namespace awkward {
 
     bool
     StartObject() {
-      std::cout << "StartObject" << std::endl;
-
       moved_ = true;
       // std::cout << "startobject " << specializedjson_->debug() << std::endl;
 
@@ -828,8 +826,6 @@ namespace awkward {
 
     bool
     EndObject(rj::SizeType /* numfields */) {
-      std::cout << "EndObject" << std::endl;
-
       moved_ = true;
       // std::cout << "endobject " << specializedjson_->debug() << std::endl;
       // std::cout << "  ignore state " << ignore_ << std::endl;
