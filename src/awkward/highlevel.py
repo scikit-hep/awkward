@@ -2515,16 +2515,16 @@ class ArrayBuilder(Sized):
         form = ak.forms.from_json(formstr)
 
         with ak._errors.OperationErrorContext("ak.ArrayBuilder.snapshot", [], {}):
-            return ak.operations.ak_from_buffers._impl(
+            return ak.operations.from_buffers(
                 form,
                 length,
                 container,
                 buffer_key="{form_key}-{attribute}",
                 backend="cpu",
                 byteorder=ak._util.native_byteorder,
+                allow_noncanonical_form=True,
                 highlevel=True,
                 behavior=self._behavior,
-                simplify=True,
             )
 
     def null(self):

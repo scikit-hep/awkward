@@ -17,7 +17,7 @@ class PlaceholderArray(ArrayLike):
     ):
         self._nplike = nplike
         self._shape = shape
-        self._dtype = dtype
+        self._dtype = np.dtype(dtype)
 
     @property
     def dtype(self) -> np.dtype:
@@ -37,7 +37,7 @@ class PlaceholderArray(ArrayLike):
 
     @property
     def nbytes(self) -> int:
-        return self.size * self._dtype.itemsize
+        return 0
 
     @property
     def strides(self) -> tuple[int, ...]:
@@ -67,13 +67,29 @@ class PlaceholderArray(ArrayLike):
         return type(self)(self._nplike, shape, dtype)
 
     def __getitem__(self, index):
+        # Typetracers permit slices that don't touch data or shapes
         if isinstance(index, slice):
-            if self._shape[0] is unknown_length:
-                return type(self)(self._nplike, self._shape, self._dtype)
+            length = self._shape[0]
+
+            # Unknown-length placeholders should not be sliced (as their shapes would be touched(
+            if length is unknown_length:
+                raise AssertionError(
+                    "placeholder arrays that are sliced should have known shapes"
+                )
+            # Known-length placeholders *always* need a known shape
+            elif (
+                index.start is unknown_length
+                or index.stop is unknown_length
+                or index.step is unknown_length
+            ):
+                raise AssertionError(
+                    "known-length placeholders should never encounter unknown lengths in slices"
+                )
             else:
-                start, stop, step = index.indices(self._shape[0])
-                new_shape = ((stop - start) // step,)
-                return type(self)(self._nplike, new_shape, self._dtype)
+                start, stop, step = index.indices(length)
+                new_length = (stop - start) // step
+
+            return type(self)(self._nplike, (new_length,), self._dtype)
         else:
             raise TypeError(
                 f"{type(self).__name__} supports only trivial slices, not {type(index).__name__}"

@@ -1,24 +1,14 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 from __future__ import annotations
 
+from awkward._singleton import PrivateSingleton
 from awkward._typing import Self, TypeAlias
 
 ShapeItem: TypeAlias = "int | type[unknown_length]"
 
 
-class _UnknownLength:
-    _name: str
-
-    @classmethod
-    def _new(cls, name: str) -> Self:
-        self = super().__new__(cls)
-        self._name = name
-        return self
-
-    def __new__(cls, *args, **kwargs):
-        raise TypeError(
-            "internal_error: the _UnknownLength class should never be directly instantiated"
-        )
+class _UnknownLength(PrivateSingleton):
+    _instance_name: str
 
     def __add__(self, other) -> Self | NotImplemented:
         if isinstance(other, int) or other is self:
@@ -65,7 +55,7 @@ class _UnknownLength:
         return "##"
 
     def __repr__(self):
-        return f"{__name__}.{self._name}"
+        return self._instance_name
 
     def __eq__(self, other) -> bool:
         if other is self:
@@ -90,4 +80,8 @@ class _UnknownLength:
     __lt__ = __gt__
 
 
-unknown_length = _UnknownLength._new("unknown_length")
+# Inform the singleton if its module name
+_UnknownLength._instance_name = f"{__name__}.unknown_length"
+
+# Ensure we have a single instance
+unknown_length = _UnknownLength._new()

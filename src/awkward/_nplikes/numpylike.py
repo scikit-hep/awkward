@@ -6,7 +6,7 @@ from abc import abstractmethod
 import numpy
 
 from awkward._nplikes.shape import ShapeItem, unknown_length
-from awkward._singleton import Singleton
+from awkward._singleton import PublicSingleton
 from awkward._typing import (
     Any,
     Literal,
@@ -177,7 +177,7 @@ class ArrayLike(Protocol):
         ...
 
 
-class NumpyMetadata(Singleton):
+class NumpyMetadata(PublicSingleton):
     bool_ = numpy.bool_
     int8 = numpy.int8
     int16 = numpy.int16
@@ -242,7 +242,7 @@ if hasattr(numpy, "timedelta64"):
     NumpyMetadata.timedelta64 = numpy.timedelta64
 
 
-class NumpyLike(Singleton, Protocol):
+class NumpyLike(PublicSingleton, Protocol):
     ############################ Awkward features
 
     @property
