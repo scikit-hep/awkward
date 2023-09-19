@@ -140,6 +140,7 @@ namespace awkward {
       int64_t stringi;
       int64_t start;
       int64_t stop;
+      uint64_t chunkmask;
       // optimistic: fields in data are in the order specified by the schema
       if (argument1() != 0) {
         // increment the current (last seen) field with wrap-around
@@ -154,8 +155,13 @@ namespace awkward {
         start = offsets[stringi];
         stop = offsets[stringi + 1];
         if (strncmp(str, &chars[start], (size_t)(stop - start)) == 0) {
+          // ensure that the checklist bit is 1
+          chunkmask = (uint64_t)1 << (j & 0x3f);
+          if ((record_checklist_[argument2()][j >> 6] & chunkmask) == 0) {
+            return -1;  // ignore the value of a duplicate key
+          }
           // set the checklist bit to 0
-          record_checklist_[argument2()][j >> 6] &= ~((uint64_t)1 << (j & 0x3f));
+          record_checklist_[argument2()][j >> 6] &= ~chunkmask;
           return instructions_.data()[i * 4 + 2];
         }
       }
@@ -170,8 +176,13 @@ namespace awkward {
             // set the record_current_field_
             j = i - (current_instruction_ + 1);
             record_current_field_[argument2()] = j;
+            // ensure that the checklist bit is 1
+            chunkmask = (uint64_t)1 << (j & 0x3f);
+            if ((record_checklist_[argument2()][j >> 6] & chunkmask) == 0) {
+              return -1;  // ignore the value of a duplicate key
+            }
             // set the checklist bit to 0
-            record_checklist_[argument2()][j >> 6] &= ~((uint64_t)1 << (j & 0x3f));
+            record_checklist_[argument2()][j >> 6] &= ~chunkmask;
             return instructions_.data()[i * 4 + 2];
           }
         }

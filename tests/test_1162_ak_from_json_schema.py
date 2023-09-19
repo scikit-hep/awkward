@@ -926,3 +926,23 @@ def test_option_ignore_between():
         )
         assert array.to_list() == [{"x": 1, "z": True}, {"x": 3, "z": False}]
         assert str(array.type) == "2 * ?{z: bool, x: int64}"
+
+
+def test_duplicate_keys():
+    result = ak.operations.from_json(
+        ' [ { "x" :1 ,"y":1.1, "x": 999},{"y": 2.2, "y": 999, "x": 2}, {"x": 3, "x": 999, "y": 3.3}]',
+        schema={
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {"x": {"type": "integer"}, "y": {"type": "number"}},
+                "required": ["x", "y"],
+            },
+        },
+    )
+    assert result.to_list() == [
+        {"x": 1, "y": 1.1},
+        {"x": 2, "y": 2.2},
+        {"x": 3, "y": 3.3},
+    ]
+    assert str(result.type) == "3 * {x: int64, y: float64}"
