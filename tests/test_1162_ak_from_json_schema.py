@@ -946,3 +946,26 @@ def test_duplicate_keys():
         {"x": 3, "y": 3.3},
     ]
     assert str(result.type) == "3 * {x: int64, y: float64}"
+
+
+def test_missing_optional_fields():
+    result = ak.operations.from_json(
+        ' [ { "y":1.1},{"y": 2.2, "x": 2}, {"x": 3}]',
+        schema={
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "x": {"type": ["integer", "null"]},
+                    "y": {"type": ["number", "null"]},
+                },
+                "required": ["x", "y"],
+            },
+        },
+    )
+    assert result.to_list() == [
+        {"x": None, "y": 1.1},
+        {"x": 2, "y": 2.2},
+        {"x": 3, "y": None},
+    ]
+    assert str(result.type) == "3 * {x: ?int64, y: ?float64}"
