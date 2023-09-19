@@ -155,7 +155,7 @@ namespace awkward {
         stop = offsets[stringi + 1];
         if (strncmp(str, &chars[start], (size_t)(stop - start)) == 0) {
           // set the checklist bit to 0
-          record_checklist_[argument2()][j >> 6] &= record_field_antibitmask_[j & 0x3f];
+          record_checklist_[argument2()][j >> 6] &= ~((uint64_t)1 << (j & 0x3f));
           return instructions_.data()[i * 4 + 2];
         }
       }
@@ -171,7 +171,7 @@ namespace awkward {
             j = i - (current_instruction_ + 1);
             record_current_field_[argument2()] = j;
             // set the checklist bit to 0
-            record_checklist_[argument2()][j >> 6] &= record_field_antibitmask_[j & 0x3f];
+            record_checklist_[argument2()][j >> 6] &= ~((uint64_t)1 << (j & 0x3f));
             return instructions_.data()[i * 4 + 2];
           }
         }
@@ -349,9 +349,6 @@ namespace awkward {
     std::vector<int64_t> counters_;
 
     int64_t length_;
-
-    static uint64_t record_field_bitmask_[64];
-    static uint64_t record_field_antibitmask_[64];
   };
 
 }
