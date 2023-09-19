@@ -53,15 +53,11 @@ class ArrayModuleNumpyLike(NumpyLike):
             return self._module.ascontiguousarray(x)
 
     def frombuffer(
-        self, buffer, *, dtype: np.dtype | None = None, count: int = -1
+        self, buffer, *, dtype: np.dtype | None = None, count: ShapeItem = -1
     ) -> ArrayLike:
         if isinstance(buffer, PlaceholderArray):
-            if count == -1:
-                return self.asarray(buffer)
-            else:
-                return self.asarray(buffer[:count])
-        else:
-            return self._module.frombuffer(buffer, dtype=dtype, count=count)
+            raise TypeError("placeholder arrays are not supported in `frombuffer`")
+        return self._module.frombuffer(buffer, dtype=dtype, count=count)
 
     def from_dlpack(self, x: Any) -> ArrayLike:
         return self._module.from_dlpack(x)
