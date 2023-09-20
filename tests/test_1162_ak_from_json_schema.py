@@ -1,11 +1,15 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+import os
 import json
 
 import numpy as np
 import pytest
 
 import awkward as ak
+
+DIR = os.path.dirname(__file__)
+SAMPLES_DIR = os.path.join(os.path.abspath(DIR), "samples")
 
 
 def test_boolean():
@@ -1053,7 +1057,7 @@ def test_complex_nested():
         },
     }
 
-    with open("tests/samples/complex-nested.json", "rb") as file:
+    with open(os.path.join(SAMPLES_DIR, "complex-nested.json"), "rb") as file:
         array = ak.from_json(file, line_delimited=True, schema=schema)
 
     assert array["payload", "pull_request", "merged_at"][:5].to_list() == [
