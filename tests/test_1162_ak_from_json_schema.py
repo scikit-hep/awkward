@@ -982,7 +982,7 @@ def test_100_fields():
         "items": {
             "type": "object",
             "properties": {
-                **{f"x{i:02d}": {"type": "integer"} for i in range(0, 50)},
+                **{f"x{i:02d}": {"type": "integer"} for i in range(50)},
                 **{f"x{i:02d}": {"type": ["integer", "null"]} for i in range(50, 100)},
             },
             "required": ["x", "y"],
