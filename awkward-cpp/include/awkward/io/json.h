@@ -191,13 +191,13 @@ namespace awkward {
     }
 
     /// @brief HERE
-    inline bool key_already_filled(int64_t record_identifier, int64_t j) noexcept {
+    inline bool key_already_filled(int64_t record_identifier, int64_t j) const noexcept {
       uint64_t chunkmask = (uint64_t)1 << (j & 0x3f);
       return (record_checklist_[record_identifier][j >> 6] & chunkmask) == 0;
     }
 
     /// @brief HERE
-    inline int64_t key_instruction_at(int64_t i) noexcept {
+    inline int64_t key_instruction_at(int64_t i) const noexcept {
       return instructions_.data()[i * 4 + 2];
     }
 
@@ -211,7 +211,7 @@ namespace awkward {
     }
 
     /// @brief HERE
-    inline bool end_object(int64_t keytableheader_instruction) noexcept {
+    inline bool end_object(int64_t keytableheader_instruction) const noexcept {
       int64_t record_identifier = instructions_.data()[keytableheader_instruction * 4 + 2];
       uint64_t should_be_zero = 0;
       for (uint64_t chunk : record_checklist_[record_identifier]) {

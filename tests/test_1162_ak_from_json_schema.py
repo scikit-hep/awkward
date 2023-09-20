@@ -948,7 +948,6 @@ def test_duplicate_keys():
     assert str(result.type) == "3 * {x: int64, y: float64}"
 
 
-@pytest.mark.skip(reason="FIXME: is this causing the test failures?")
 def test_missing_optional_fields():
     result = ak.operations.from_json(
         ' [ { "y":1.1},{"y": 2.2, "x": 2}, {"x": 3}]',

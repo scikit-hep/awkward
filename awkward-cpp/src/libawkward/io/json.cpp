@@ -862,23 +862,20 @@ namespace awkward {
 
     bool
     nulls_for_optiontype() {
-      // simulate StartObject without resetting checklist (specializedjson_->start_object)
-      int64_t keytableheader_instruction;
       switch (specializedjson_->instruction()) {
         case FillIndexedOptionArray:
           specializedjson_->push_stack(specializedjson_->current_instruction() + 1);
         case KeyTableHeader:
           specializedjson_->push_stack(specializedjson_->current_instruction());
       }
-
+      int64_t keytableheader_instruction = specializedjson_->current_instruction();
       int64_t num_fields = specializedjson_->argument1();
       int64_t record_identifier = specializedjson_->argument2();
+      specializedjson_->pop_stack();
 
-      // simulate finding each not-already-filled key and filling it with null
-      for (int64_t i = specializedjson_->current_instruction() + 1;
-           i <= specializedjson_->current_instruction() + num_fields;
-           i++) {
-        int64_t j = i - (specializedjson_->current_instruction() + 1);
+      // for each not-already-filled key, fill it if it's option-type, error otherwise
+      for (int64_t i = keytableheader_instruction + 1;  i <= keytableheader_instruction + num_fields;  i++) {
+        int64_t j = i - (keytableheader_instruction + 1);
         if (!specializedjson_->key_already_filled(record_identifier, j)) {
           int64_t jump_to = specializedjson_->key_instruction_at(i);
 
@@ -895,14 +892,10 @@ namespace awkward {
           specializedjson_->pop_stack();
 
           if (!schema_okay_) {
-            specializedjson_->pop_stack();  // EndObject's pop for early return
             return false;
           }
         }
       }
-
-      // simulate EndObject
-      specializedjson_->pop_stack();
 
       return true;
     }
