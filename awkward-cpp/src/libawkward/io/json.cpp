@@ -895,6 +895,7 @@ namespace awkward {
           specializedjson_->pop_stack();
 
           if (!schema_okay_) {
+            specializedjson_->pop_stack();  // EndObject's pop for early return
             return false;
           }
         }
