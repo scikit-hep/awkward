@@ -17,10 +17,19 @@ def test():
     assert left.shape == right.shape
 
 
-def test_zeros_like():
+def test_zeros_like_numeric():
     source = ak.Array([[1, 2, 3]], backend="typetracer")
     result = ak.zeros_like(source)
 
     # Known lengths and dtypes should match
     assert result.layout.content.dtype == source.layout.content.dtype
     assert result.layout.content.length == source.layout.content.length
+
+
+def test_zeros_like_strings():
+    # Check strings!
+    source = ak.Array(["hello", "world"], backend="typetracer")
+    result = ak.zeros_like(source)
+    assert result.layout.content.dtype == source.layout.content.dtype
+    # zeros_like for strings means empty-string!
+    assert result.layout.content.length == 0
