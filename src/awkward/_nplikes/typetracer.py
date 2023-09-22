@@ -1431,7 +1431,7 @@ def _attach_report(
 
     elif isinstance(layout, ak.contents.NumpyArray):
         assert isinstance(form, ak.forms.NumpyForm)
-        layout.data.form_key = form.form_key
+        layout.data.form_key = getkey(form.form_key, "data")
         layout.data.report = report
 
     elif isinstance(layout, ak.contents.RecordArray):
