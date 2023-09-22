@@ -49,5 +49,5 @@ def test_with_attribute():
     assert set(report.data_touched) == {
         "x.list-starts",
         "x.list-stops",
-        "x.list.content",
+        "x.list.content-data",
     }
