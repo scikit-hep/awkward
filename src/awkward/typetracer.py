@@ -30,6 +30,7 @@ from awkward._typing import TypeVar
 from awkward._util import UNSET
 from awkward.contents import Content
 from awkward.forms import Form
+from awkward.forms.form import regularize_buffer_key
 from awkward.highlevel import Array, Record
 from awkward.operations.ak_to_layout import to_layout
 from awkward.types.numpytype import is_primitive
@@ -100,12 +101,21 @@ def touch_data(array, *, highlevel: bool = True, behavior=None) -> T:
 
 
 def typetracer_with_report(
-    form, forget_length: bool = UNSET, *, highlevel: bool = False, behavior=None
+    form,
+    forget_length: bool = UNSET,
+    *,
+    buffer_key="{form_key}",
+    highlevel: bool = False,
+    behavior=None,
 ) -> tuple[Content, TypeTracerReport]:
     """
     Args:
         form (#ak.forms.Form or str/dict equivalent): The form of the Awkward
             Array to build a typetracer-backed array from.
+        buffer_key (str or callable): Python format string containing
+            `"{form_key}"` and/or `"{attribute}"` or a function that takes these
+            as keyword arguments and returns a string to use as a `form_key`
+            for low-level typetracer buffers.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
@@ -135,7 +145,12 @@ def typetracer_with_report(
             "always forget lengths",
             "2.5.0",
         )
-    layout, report = _typetracer_with_report(form, forget_length=forget_length)
+
+    getkey = regularize_buffer_key(buffer_key)
+
+    layout, report = _typetracer_with_report(
+        form, getkey=getkey, forget_length=forget_length
+    )
     return wrap_layout(layout, behavior=behavior, highlevel=highlevel), report
 
 
