@@ -6,10 +6,8 @@ import math
 import numba
 import numba.core.typing.npydecl
 import numpy as np
-from numba.core.errors import NumbaTypeError
 
-import awkward as ak
-from awkward._connect.numba.growablebuffer import GrowableBufferType
+# from awkward._connect.numba.growablebuffer import GrowableBufferType
 from awkward.numba.layoutbuilder import (
     BitMasked,
     ByteMasked,
@@ -63,7 +61,7 @@ class LayoutBuilderType(numba.types.Type):
         if name in self._parameters:
             return numba.types.StringLiteral(self._parameters[name])
         else:
-            raise NumbaTypeError(f"LayoutBuilder.parameters does not have a {name!r}")
+            raise TypeError(f"LayoutBuilder.parameters does not have a {name!r}")
 
     @property
     def length(self):
@@ -110,7 +108,12 @@ class NumpyType(LayoutBuilderType):
 
     @property
     def data(self):
-        return ak.numba.GrowableBufferType(self._dtype)
+        return numba.types.ListType(self.dtype)
+
+
+@numba.extending.typeof_impl.register(NumpyType)
+def typeof_NumpyType(val, c):
+    return NumpyType(numba.from_dtype(val.dtype))
 
 
 @numba.extending.register_model(NumpyType)
@@ -124,6 +127,14 @@ class NumpyModel(numba.extending.models.StructModel):
 
 for member in ("data",):
     numba.extending.make_attribute_wrapper(NumpyType, member, "_" + member)
+
+
+@numba.extending.overload_attribute(NumpyType, "dtype")
+def NumpyType_dtype(builder):
+    def getter(builder):
+        return builder._data._dtype
+
+    return getter
 
 
 @numba.extending.unbox(NumpyType)
@@ -175,13 +186,13 @@ def _from_buffer():
 @numba.extending.type_callable(_from_buffer)
 def Numpy_from_buffer_typer(context):
     def typer(buffer):
-        if isinstance(buffer, GrowableBufferType):
+        if isinstance(buffer, numba.types.ListType):
             return NumpyType(buffer.dtype, parameters=None)
 
     return typer
 
 
-@numba.extending.lower_builtin(_from_buffer, GrowableBufferType)
+@numba.extending.lower_builtin(_from_buffer, numba.types.ListType)
 def Numpy_from_buffer_impl(context, builder, sig, args):
     out = numba.core.cgutils.create_struct_proxy(sig.return_type)(context, builder)
     out.data = args[0]
@@ -193,7 +204,7 @@ def Numpy_from_buffer_impl(context, builder, sig, args):
 
 
 @numba.extending.overload(Numpy)
-def Numpy_ctor(dtype, parameters=None, initial=1024, resize=8.0):
+def Numpy_ctor(dtype, parameters=None):
     if isinstance(dtype, numba.types.StringLiteral):
         dt = np.dtype(dtype.literal_value)
 
@@ -203,11 +214,10 @@ def Numpy_ctor(dtype, parameters=None, initial=1024, resize=8.0):
     else:
         return
 
-    def ctor_impl(dtype, parameters=None, initial=1024, resize=8.0):
-        panels = numba.typed.List([np.empty((initial,), dt)])
-        length_pos = np.zeros((2,), dtype=np.int64)
-        data = ak._connect.numba.growablebuffer._from_data(panels, length_pos, resize)
-
+    def ctor_impl(dtype, parameters=None):
+        data = numba.typed.List()
+        data.append(dt(0))
+        data.pop()
         return _from_buffer(data)
 
     return ctor_impl
@@ -216,7 +226,7 @@ def Numpy_ctor(dtype, parameters=None, initial=1024, resize=8.0):
 @numba.extending.overload_method(NumpyType, "_length_get", inline="always")
 def Numpy_length(builder):
     def getter(builder):
-        return builder.data._length_pos[0]
+        return len(builder._data)
 
     return getter
 
@@ -224,7 +234,7 @@ def Numpy_length(builder):
 @numba.extending.overload_attribute(NumpyType, "dtype", inline="always")
 def Numpy_dtype(builder):
     def get(builder):
-        return builder._data.dtype
+        return builder._data._dtype
 
     return get
 
@@ -242,7 +252,7 @@ def Numpy_append(builder, datum):
     if isinstance(builder, NumpyType):
 
         def append(builder, datum):
-            builder.data.append(datum)
+            builder.data.append(builder.data._dtype(datum))  # FIXME
 
         return append
 
@@ -250,7 +260,8 @@ def Numpy_append(builder, datum):
 @numba.extending.overload_method(NumpyType, "extend")
 def Numpy_extend(builder, data):
     def extend(builder, data):
-        builder.data.extend(data)
+        for x in data:
+            builder.data.append(x)
 
     return extend
 
@@ -308,15 +319,19 @@ def Empty_length(builder):
 class ListOffsetType(LayoutBuilderType):
     def __init__(self, dtype, content, parameters):
         super().__init__(
-            name=f"ak.lb.ListOffset({dtype}, {content.numbatype()}, parameters={parameters!r})"
+            name=f"ak.lb.ListOffset({dtype!r}, {content.numbatype()}, parameters={parameters!r})"
         )
         self._dtype = dtype
         self._content = content
         self._init(parameters)
 
     @property
+    def dtype(self):
+        return self._dtype
+
+    @property
     def offsets(self):
-        return ak.numba.GrowableBufferType(self._dtype)
+        return numba.types.ListType(self.dtype)
 
     @property
     def content(self):
@@ -338,6 +353,14 @@ for member in (
     "content",
 ):
     numba.extending.make_attribute_wrapper(ListOffsetType, member, "_" + member)
+
+
+@numba.extending.overload_attribute(ListOffsetType, "dtype")
+def ListOffsetType_dtype(builder):
+    def getter(builder):
+        return builder._offsets._dtype
+
+    return getter
 
 
 @numba.extending.unbox(ListOffsetType)
@@ -364,6 +387,7 @@ def ListOffsetType_unbox(typ, obj, c):
 def ListOffsetType_box(typ, val, c):
     # get PyObject of the ListOffset class
     ListOffset_obj = c.pyapi.unserialize(c.pyapi.serialize_object(ListOffset))
+    dtype_obj = c.pyapi.object_getattr_string(ListOffset_obj, "dtype")
 
     builder = numba.core.cgutils.create_struct_proxy(typ)(
         c.context, c.builder, value=val
@@ -374,14 +398,14 @@ def ListOffsetType_box(typ, val, c):
     out = c.pyapi.call_function_objargs(
         ListOffset_obj,
         (
-            offsets_obj,
+            dtype_obj,
             content_obj,
         ),
     )
 
     # decref PyObjects
     c.pyapi.decref(ListOffset_obj)
-
+    c.pyapi.decref(dtype_obj)
     c.pyapi.decref(offsets_obj)
     c.pyapi.decref(content_obj)
 
@@ -391,7 +415,7 @@ def ListOffsetType_box(typ, val, c):
 @numba.extending.overload_method(ListOffsetType, "_length_get", inline="always")
 def ListOffset_length(builder):
     def getter(builder):
-        return builder._offsets._length_pos[0] - 1
+        return len(builder._offsets) - 1
 
     return getter
 
@@ -552,15 +576,19 @@ def Regular_end_list(builder):
 class IndexedOptionType(LayoutBuilderType):
     def __init__(self, dtype, content, parameters):
         super().__init__(
-            name=f"ak.lb.IndexedOption({dtype}, {content.numbatype()}, parameters={parameters!r})"
+            name=f"ak.lb.IndexedOption({dtype!r}, {content.numbatype()}, parameters={parameters!r})"
         )
         self._dtype = dtype
         self._content = content
         self._init(parameters)
 
     @property
+    def dtype(self):
+        return self._dtype
+
+    @property
     def index(self):
-        return ak.numba.GrowableBufferType(self._dtype)
+        return numba.types.ListType(self.dtype)
 
     @property
     def content(self):
@@ -582,6 +610,14 @@ for member in (
     "content",
 ):
     numba.extending.make_attribute_wrapper(IndexedOptionType, member, "_" + member)
+
+
+@numba.extending.overload_attribute(IndexedOptionType, "dtype")
+def IndexedOptionType_dtype(builder):
+    def getter(builder):
+        return builder._index._dtype
+
+    return getter
 
 
 @numba.extending.unbox(IndexedOptionType)
@@ -608,6 +644,7 @@ def IndexedOptionType_unbox(typ, obj, c):
 def IndexedOptionType_box(typ, val, c):
     # get PyObject of the Indexed class
     IndexedOption_obj = c.pyapi.unserialize(c.pyapi.serialize_object(IndexedOption))
+    dtype_obj = c.pyapi.object_getattr_string(IndexedOption_obj, "dtype")
 
     builder = numba.core.cgutils.create_struct_proxy(typ)(
         c.context, c.builder, value=val
@@ -618,14 +655,14 @@ def IndexedOptionType_box(typ, val, c):
     out = c.pyapi.call_function_objargs(
         IndexedOption_obj,
         (
-            index_obj,
+            dtype_obj,
             content_obj,
         ),
     )
 
     # decref PyObjects
     c.pyapi.decref(IndexedOption_obj)
-
+    c.pyapi.decref(dtype_obj)
     c.pyapi.decref(index_obj)
     c.pyapi.decref(content_obj)
 
@@ -635,7 +672,7 @@ def IndexedOptionType_box(typ, val, c):
 @numba.extending.overload_method(IndexedOptionType, "_length_get", inline="always")
 def IndexedOption_length(builder):
     def getter(builder):
-        return builder._index._length_pos[0]
+        return len(builder._index)
 
     return getter
 
@@ -664,7 +701,8 @@ def IndexedOption_extend_valid(builder, size):
     def extend_valid(builder, size):
         start = len(builder._content)
         stop = start + size
-        builder._index.extend(list(range(start, stop)))
+        for x in range(start, stop):
+            builder._index.append(builder._index._dtype(x))
         return builder._content
 
     return extend_valid
@@ -675,7 +713,7 @@ def IndexedOption_append_invalid(builder):
     if isinstance(builder, IndexedOptionType):
 
         def append_invalid(builder):
-            builder._index.append(-1)
+            builder._index.append(builder._index._dtype(-1))
 
         return append_invalid
 
@@ -683,7 +721,8 @@ def IndexedOption_append_invalid(builder):
 @numba.extending.overload_method(IndexedOptionType, "extend_invalid")
 def IndexedOption_extend_invalid(builder, size):
     def extend_invalid(builder, size):
-        builder._index.extend([-1] * size)
+        for _ in range(size):
+            builder._index.append(builder._index._dtype(-1))
 
     return extend_invalid
 
@@ -706,7 +745,7 @@ class ByteMaskedType(LayoutBuilderType):
 
     @property
     def mask(self):
-        return ak.numba.GrowableBufferType(numba.types.boolean)
+        return numba.types.ListType(numba.types.boolean)
 
     @property
     def content(self):
@@ -847,8 +886,12 @@ class BitMaskedType(LayoutBuilderType):
         self._init(parameters)
 
     @property
+    def dtype(self):
+        return self._dtype
+
+    @property
     def mask(self):
-        return ak.numba.GrowableBufferType(self._dtype)
+        return numba.types.ListType(self.dtype)
 
     @property
     def valid_when(self):
@@ -1017,14 +1060,10 @@ def BitMasked_append_end(builder):
         builder._current_byte_index[1] += 1
         if builder._valid_when:
             # 0 indicates null, 1 indicates valid
-            builder._mask._panels[-1][
-                builder._mask._length_pos[1] - 1
-            ] = builder._current_byte_index[0]
+            builder._mask[-1] = builder._current_byte_index[0]
         else:
             # 0 indicates valid, 1 indicates null
-            builder._mask._panels[-1][
-                builder._mask._length_pos[1] - 1
-            ] = ~builder._current_byte_index[0]
+            builder._mask[-1] = ~builder._current_byte_index[0]
 
     return append_end
 
@@ -1386,17 +1425,19 @@ class UnionType(LayoutBuilderType):
             name=f"ak.lb.Union({tags_dtype}, {index_dtype}, {contents},  parameters={parameters!r})"
         )
         self._tags_dtype = tags_dtype
+        self._tags = numba.typed.List().empty_list(tags_dtype)
         self._index_dtype = index_dtype
+        self._index = numba.typed.List().empty_list(index_dtype)
         self._contents = contents
         self._init(parameters)
 
     @property
     def tags(self):
-        return ak.numba.GrowableBufferType(self._tags_dtype)
+        return numba.types.ListType(self._tags._dtype)
 
     @property
     def index(self):
-        return ak.numba.GrowableBufferType(self._index_dtype)
+        return numba.types.ListType(self._index._dtype)
 
     @property
     def contents(self):
@@ -1488,14 +1529,32 @@ def Union_length(builder):
         return getter
 
 
+@numba.extending.overload_method(UnionType, "_tags", inline="always")
+def Union_tags(builder):
+    def getter(builder):
+        return builder._tags
+
+    return getter
+
+
+@numba.extending.overload_method(UnionType, "_index", inline="always")
+def Union_index(builder):
+    def getter(builder):
+        return builder._index
+
+    return getter
+
+
 @numba.extending.overload_method(UnionType, "append_content")
 def Union_append_content(builder, tag):
     if isinstance(builder, UnionType) and isinstance(tag, numba.types.Integer):
 
         def append_content(builder, tag):
             content = builder._contents[numba.literally(tag)]
-            builder._tags.append(tag)
-            builder._index.append(len(content))
+            # FIXME: cast to avoid
+            # numba.core.errors.NumbaTypeSafetyWarning: unsafe cast from int64 to int8. Precision may be lost.
+            builder._tags.append(builder._tags._dtype(tag))
+            builder._index.append(builder._index._dtype(len(content)))
             return content
 
         return append_content
