@@ -664,7 +664,7 @@ def _build_assembly(schema, container, instructions):
 
         else:
             if is_optional:
-                mask = f"node{container}"
+                mask = f"node{len(container)}"
                 container[mask + "-mask"] = None
                 instructions.append(["FillByteMaskedArray", mask + "-mask", "int8"])
 

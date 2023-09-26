@@ -342,7 +342,7 @@ namespace awkward {
   #define FillNullEnumString 8      // arg1: index output, arg2: strings start, arg3: strings stop
   #define VarLengthList 9           // arg1: offsets output
   #define FixedLengthList 10        // arg1: expected length
-  #define KeyTableHeader 11         // arg1: number of items
+  #define KeyTableHeader 11         // arg1: number of items, arg2: record identifier
   #define KeyTableItem 12           // arg1: string index, arg2: jump to instruction
 
   class HandlerSchema: public rj::BaseReaderHandler<rj::UTF8<>, HandlerSchema> {
@@ -812,9 +812,11 @@ namespace awkward {
             specializedjson_->argument1(),
             specializedjson_->get_and_increment(specializedjson_->argument2())
           );
+          specializedjson_->start_object(specializedjson_->current_instruction() + 1);
           specializedjson_->push_stack(specializedjson_->current_instruction() + 1);
           return true;
         case KeyTableHeader:
+          specializedjson_->start_object(specializedjson_->current_instruction());
           specializedjson_->push_stack(specializedjson_->current_instruction());
           return true;
         default:
@@ -844,12 +846,58 @@ namespace awkward {
 
       switch (specializedjson_->instruction()) {
         case FillIndexedOptionArray:
+          if (!specializedjson_->end_object(specializedjson_->current_instruction() + 1)) {
+            return nulls_for_optiontype();
+          }
           return true;
         case KeyTableHeader:
+          if (!specializedjson_->end_object(specializedjson_->current_instruction())) {
+            return nulls_for_optiontype();
+          }
           return true;
         default:
           return schema_okay_ = false;
       }
+    }
+
+    bool
+    nulls_for_optiontype() {
+      switch (specializedjson_->instruction()) {
+        case FillIndexedOptionArray:
+          specializedjson_->push_stack(specializedjson_->current_instruction() + 1);
+        case KeyTableHeader:
+          specializedjson_->push_stack(specializedjson_->current_instruction());
+      }
+      int64_t keytableheader_instruction = specializedjson_->current_instruction();
+      int64_t num_fields = specializedjson_->argument1();
+      int64_t record_identifier = specializedjson_->argument2();
+      specializedjson_->pop_stack();
+
+      // for each not-already-filled key, fill it if it's option-type, error otherwise
+      for (int64_t i = keytableheader_instruction + 1;  i <= keytableheader_instruction + num_fields;  i++) {
+        int64_t j = i - (keytableheader_instruction + 1);
+        if (!specializedjson_->key_already_filled(record_identifier, j)) {
+          int64_t jump_to = specializedjson_->key_instruction_at(i);
+
+          specializedjson_->push_stack(jump_to);
+          switch (specializedjson_->instruction()) {
+            case FillByteMaskedArray:
+            case FillIndexedOptionArray:
+            case FillNullEnumString:
+              Null();
+              break;
+            default:
+              schema_okay_ = false;
+          }
+          specializedjson_->pop_stack();
+
+          if (!schema_okay_) {
+            return false;
+          }
+        }
+      }
+
+      return true;
     }
 
     bool
@@ -1194,11 +1242,30 @@ namespace awkward {
             "KeyTableHeader arguments: num_items:int" + FILENAME(__LINE__)
           );
         }
+        int64_t num_items = item[1].GetInt64();
+        int64_t num_checklist_chunks = num_items / 64;
+        if (num_items % 64 != 0) {
+          num_checklist_chunks++;
+        }
+
         instruction_stack_max_depth++;
         instructions_.push_back(KeyTableHeader);
-        instructions_.push_back(item[1].GetInt64());
+        instructions_.push_back(num_items);
+        instructions_.push_back(record_current_field_.size());  // record identifier
         instructions_.push_back(-1);
-        instructions_.push_back(-1);
+
+        record_current_field_.push_back(-1);  // the first find_key will increase this to zero
+
+        // checklist consists of a 1 bit for each field that has not been seen yet
+        std::vector<uint64_t> checklist_init(num_checklist_chunks, 0);
+        for (int64_t j = 0;  j < num_items;  j++) {
+          int64_t  chunki    = j >> 6;                      // j / 64
+          uint64_t chunkmask = (uint64_t)1 << (j & 0x3f);   // j % 64
+          checklist_init[chunki] |= chunkmask;
+        }
+        std::vector<uint64_t> checklist_copy = checklist_init;   // copied (not shared)
+        record_checklist_init_.push_back(checklist_init);
+        record_checklist_.push_back(checklist_copy);
       }
 
       else if (std::string("KeyTableItem") == item[0].GetString()) {
