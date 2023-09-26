@@ -111,9 +111,11 @@ class NumpyType(LayoutBuilderType):
         return numba.types.ListType(self.dtype)
 
 
-@numba.extending.typeof_impl.register(NumpyType)
-def typeof_NumpyType(val, c):
-    return NumpyType(numba.from_dtype(val.dtype))
+#
+# @numba.extending.typeof_impl.register(NumpyType)
+# def typeof_NumpyType(val, c):
+#     return NumpyType(numba.from_dtype(val.dtype))
+#
 
 
 @numba.extending.register_model(NumpyType)
@@ -1068,10 +1070,10 @@ def BitMasked_append_end(builder):
         builder._current_byte_index[1] += np.uint8(1)
         if builder._valid_when:
             # 0 indicates null, 1 indicates valid
-            builder._mask[-1] = builder._current_byte_index[0]
+            builder._mask[-1] = np.uint8(builder._current_byte_index[0])
         else:
             # 0 indicates valid, 1 indicates null
-            builder._mask[-1] = ~builder._current_byte_index[0]
+            builder._mask[-1] = np.uint8(~builder._current_byte_index[0])
 
     return append_end
 
