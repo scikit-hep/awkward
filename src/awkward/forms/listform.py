@@ -236,8 +236,9 @@ class ListForm(Form):
             )
 
     def _expected_from_buffers(
-        self, getkey: Callable[[Form, str], str]
+        self, getkey: Callable[[Form, str], str], recursive: bool
     ) -> Iterator[tuple[str, np.dtype]]:
         yield (getkey(self, "starts"), index_to_dtype[self._starts])
         yield (getkey(self, "stops"), index_to_dtype[self._stops])
-        yield from self._content._expected_from_buffers(getkey)
+        if recursive:
+            yield from self._content._expected_from_buffers(getkey, recursive)

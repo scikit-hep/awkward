@@ -210,7 +210,8 @@ class IndexedOptionForm(Form):
             self.__init__(index, content, parameters=parameters, form_key=form_key)
 
     def _expected_from_buffers(
-        self, getkey: Callable[[Form, str], str]
+        self, getkey: Callable[[Form, str], str], recursive: bool
     ) -> Iterator[tuple[str, np.dtype]]:
         yield (getkey(self, "index"), index_to_dtype[self._index])
-        yield from self._content._expected_from_buffers(getkey)
+        if recursive:
+            yield from self._content._expected_from_buffers(getkey, recursive)

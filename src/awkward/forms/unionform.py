@@ -295,7 +295,7 @@ class UnionForm(Form):
             )
 
     def _expected_from_buffers(
-        self, getkey: Callable[[Form, str], str]
+        self, getkey: Callable[[Form, str], str], recursive: bool
     ) -> Iterator[tuple[str, np.dtype]]:
         yield (getkey(self, "tags"), index_to_dtype[self._tags])
         yield (getkey(self, "index"), index_to_dtype[self._index])

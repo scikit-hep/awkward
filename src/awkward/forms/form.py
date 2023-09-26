@@ -657,18 +657,25 @@ class Form:
         )
 
     def _expected_from_buffers(
-        self, getkey: Callable[[Form, str], str]
+        self, getkey: Callable[[Form, str], str], recursive: bool
     ) -> Iterator[tuple[str, np.dtype]]:
         raise NotImplementedError
 
-    def expected_from_buffers(self, buffer_key="{form_key}-{attribute}"):
+    def expected_from_buffers(
+        self, buffer_key="{form_key}-{attribute}", recursive=True
+    ):
         """
         Args:
             buffer_key (str or callable): Python format string containing
                 `"{form_key}"` and/or `"{attribute}"` or a function that takes these
                 as keyword arguments and returns a string to use as a key for a buffer
                 in the `container`.
+            recursive (bool): If True, recurse into subforms; otherwise, yield
+                only the (buffer_key, dtype) pairs for this form object.
+
+        Yield (buffer_key, dtype) pairs describing the expected buffer keys,
+        and their corresponding dtypes, that a call to #ak.from_buffers would
+        be expected to find from the `container` object.
         """
         getkey = regularize_buffer_key(buffer_key)
-
-        return dict(self._expected_from_buffers(getkey))
+        return dict(self._expected_from_buffers(getkey, recursive))

@@ -293,7 +293,7 @@ class NumpyForm(Form):
             )
 
     def _expected_from_buffers(
-        self, getkey: Callable[[Form, str], str]
+        self, getkey: Callable[[Form, str], str], recursive: bool
     ) -> Iterator[tuple[str, np.dtype]]:
         from awkward.types.numpytype import primitive_to_dtype
 

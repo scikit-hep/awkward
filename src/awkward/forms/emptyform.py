@@ -151,6 +151,6 @@ class EmptyForm(Form):
             self.__init__(form_key=form_key)
 
     def _expected_from_buffers(
-        self, getkey: Callable[[Form, str], str]
+        self, getkey: Callable[[Form, str], str], recursive: bool
     ) -> Iterator[tuple[str, np.dtype]]:
         yield from ()
