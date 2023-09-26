@@ -933,6 +933,14 @@ for member in (
     numba.extending.make_attribute_wrapper(BitMaskedType, member, "_" + member)
 
 
+@numba.extending.overload_attribute(BitMaskedType, "dtype")
+def BitMaskedType_dtype(builder):
+    def getter(builder):
+        return builder._mask._dtype
+
+    return getter
+
+
 @numba.extending.unbox(BitMaskedType)
 def BitMaskedType_unbox(typ, obj, c):
     # get PyObjects
@@ -1046,10 +1054,10 @@ def BitMasked_length(builder):
 @numba.extending.overload_method(BitMaskedType, "_append_begin", inline="always")
 def BitMasked_append_begin(builder):
     def append_begin(builder):
-        if builder._current_byte_index[1] == 8:
+        if builder._current_byte_index[1] == np.uint8(8):
             builder._current_byte_index[0] = np.uint8(0)
             builder._mask.append(np.uint8(0))
-            builder._current_byte_index[1] = 0
+            builder._current_byte_index[1] = np.uint8(0)
 
     return append_begin
 
@@ -1057,7 +1065,7 @@ def BitMasked_append_begin(builder):
 @numba.extending.overload_method(BitMaskedType, "_append_end", inline="always")
 def BitMasked_append_end(builder):
     def append_end(builder):
-        builder._current_byte_index[1] += 1
+        builder._current_byte_index[1] += np.uint8(1)
         if builder._valid_when:
             # 0 indicates null, 1 indicates valid
             builder._mask[-1] = builder._current_byte_index[0]
@@ -1425,19 +1433,17 @@ class UnionType(LayoutBuilderType):
             name=f"ak.lb.Union({tags_dtype}, {index_dtype}, {contents},  parameters={parameters!r})"
         )
         self._tags_dtype = tags_dtype
-        self._tags = numba.typed.List().empty_list(tags_dtype)
         self._index_dtype = index_dtype
-        self._index = numba.typed.List().empty_list(index_dtype)
         self._contents = contents
         self._init(parameters)
 
     @property
     def tags(self):
-        return numba.types.ListType(self._tags._dtype)
+        return numba.types.ListType(self._tags_dtype)
 
     @property
     def index(self):
-        return numba.types.ListType(self._index._dtype)
+        return numba.types.ListType(self._index_dtype)
 
     @property
     def contents(self):

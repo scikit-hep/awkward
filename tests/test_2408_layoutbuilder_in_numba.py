@@ -727,8 +727,8 @@ def test_len():
     builder = lb.ByteMasked(lb.Numpy(np.float64), valid_when=True)
     assert f4(builder) == 0
 
-    # builder = lb.BitMasked(np.uint8, lb.Numpy(np.float64), True, True)
-    # assert f4(builder) == 0
+    builder = lb.BitMasked(np.uint8, lb.Numpy(np.float64), True, True)
+    assert f4(builder) == 0
 
     builder = lb.Unmasked(lb.Numpy(np.int64))
     assert f4(builder) == 0

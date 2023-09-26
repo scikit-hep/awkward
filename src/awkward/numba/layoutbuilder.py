@@ -58,6 +58,9 @@ _numba_dtype_to_form = {
 
 
 def _empty_typed_list_of(dtype=None):
+    if isinstance(dtype, numba.typed.List):
+        return dtype
+
     empty_list = numba.typed.List()
     # Small hack to define its type before returning it:
     empty_list.append(dtype(0))
@@ -495,7 +498,7 @@ class BitMasked(LayoutBuilder):
         *,
         parameters=None,
     ):
-        self._mask = _empty_typed_list_of(dtype=dtype)
+        self._mask = _empty_typed_list_of(dtype=np.uint8)  # FIXME
         self._content = content
         self._valid_when = valid_when
         self._lsb_order = lsb_order
@@ -573,16 +576,16 @@ class BitMasked(LayoutBuilder):
         """
         Private helper function.
         """
-        if self._current_byte_index[1] == 8:
+        if self._current_byte_index[1] == np.uint8(8):
             self._current_byte_index[0] = np.uint8(0)
             self._mask.append(self._current_byte_index[0])
-            self._current_byte_index[1] = 0
+            self._current_byte_index[1] = np.uint8(0)
 
     def _append_end(self):
         """
         Private helper function.
         """
-        self._current_byte_index[1] += 1
+        self._current_byte_index[1] += np.uint8(1)
         if self._valid_when:
             # 0 indicates null, 1 indicates valid
             self._mask[-1] = self._current_byte_index[0]
