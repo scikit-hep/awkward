@@ -87,8 +87,8 @@ py::object create_demo_array() {
                     NumpyBuilder<int32_t>>>
     > builder(fields_map);
 
-    auto &one_builder = builder.field<Field::one>();
-    auto &two_builder = builder.field<Field::two>();
+    auto &one_builder = builder.content<Field::one>();
+    auto &two_builder = builder.content<Field::two>();
 
     one_builder.append(1.1);
 
