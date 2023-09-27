@@ -654,7 +654,11 @@ class TypeTracer(NumpyLike):
         for x in (buffer, count):
             assert not isinstance(x, PlaceholderArray)
             try_touch_data(x)
-        raise NotImplementedError
+
+        if isinstance(buffer, TypeTracerArray) or is_unknown_scalar(count):
+            raise NotImplementedError
+        else:
+            return self.asarray(numpy.frombuffer(buffer, dtype=dtype, count=count))
 
     def from_dlpack(self, x: Any) -> TypeTracerArray:
         assert not isinstance(x, PlaceholderArray)
