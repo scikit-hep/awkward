@@ -311,5 +311,6 @@ class RecordForm(Form):
     def _expected_from_buffers(
         self, getkey: Callable[[Form, str], str], recursive: bool
     ) -> Iterator[tuple[str, np.dtype]]:
-        for content in self._contents:
-            yield from content._expected_from_buffers(getkey)
+        if recursive:
+            for content in self._contents:
+                yield from content._expected_from_buffers(getkey, recursive)
