@@ -2069,7 +2069,7 @@ class ListOffsetArray(Content):
                     return [
                         ak.contents.RegularArray(
                             c,
-                            size=backend.index_nplike.shape_item_as_index(c.length),
+                            size=c.length,
                             zeros_length=1,
                             parameters=self._parameters,
                         )
