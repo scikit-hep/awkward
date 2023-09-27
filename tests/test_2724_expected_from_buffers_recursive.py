@@ -7,8 +7,10 @@ import awkward as ak
 
 # 6.6 and 7.7 are inaccessible
 layout = ak.contents.listoffsetarray.ListOffsetArray(
-    ak.index.Index(np.array([1, 4, 4, 6])),
-    ak.contents.numpyarray.NumpyArray(np.array([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7])),
+    ak.index.Index(np.array([1, 4, 4, 6], dtype=np.int64)),
+    ak.contents.numpyarray.NumpyArray(
+        np.array([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7], dtype=np.float64)
+    ),
 )
 
 
