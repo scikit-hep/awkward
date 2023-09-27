@@ -18,9 +18,8 @@ if(NOT awkward-headers_POPULATED)
                    EXCLUDE_FROM_ALL)
 endif()
 
+find_package(Python REQUIRED COMPONENTS Interpreter Development.Module NumPy)
 find_package(Cython REQUIRED)
-find_package(PythonInterp REQUIRED)
-find_package(PythonLibs REQUIRED)
 find_package(PythonExtensions REQUIRED)
 
 # Build demo module
@@ -33,6 +32,7 @@ add_python_library(
   demo_impl.cpp
   LINK_LIBRARIES
   awkward::layout-builder
+  Python::NumPy
   INCLUDE_DIRECTORIES
   include)
 python_extension_module(_demo)
