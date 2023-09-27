@@ -4,7 +4,7 @@ project(demo LANGUAGES CXX C)
 
 # Download headers
 include(FetchContent)
-set(AWKWARD_VERSION "v2.0.10")
+set(AWKWARD_VERSION "v2.4.3")
 FetchContent_Declare(
   awkward-headers
   URL https://github.com/scikit-hep/awkward/releases/download/${AWKWARD_VERSION}/header-only.zip
@@ -18,11 +18,9 @@ if(NOT awkward-headers_POPULATED)
                    EXCLUDE_FROM_ALL)
 endif()
 
+find_package(Python REQUIRED COMPONENTS Interpreter Development.Module NumPy)
 find_package(Cython REQUIRED)
-find_package(PythonInterp REQUIRED)
-find_package(PythonLibs REQUIRED)
 find_package(PythonExtensions REQUIRED)
-include(UsePythonExtensions)
 
 # Build demo module
 add_cython_target(_demo _demo.pyx PY3 CXX)
@@ -34,6 +32,7 @@ add_python_library(
   demo_impl.cpp
   LINK_LIBRARIES
   awkward::layout-builder
+  Python::NumPy
   INCLUDE_DIRECTORIES
   include)
 python_extension_module(_demo)
