@@ -201,6 +201,7 @@ def remove_structure(
     drop_nones: bool = True,
     keepdims: bool = False,
     allow_records: bool = False,
+    list_to_regular: bool = False,
 ):
     if isinstance(layout, Record):
         return remove_structure(
@@ -224,6 +225,7 @@ def remove_structure(
                 "drop_nones": drop_nones,
                 "keepdims": keepdims,
                 "allow_records": allow_records,
+                "list_to_regular": list_to_regular,
             },
         )
         return tuple(arrays)
@@ -272,6 +274,7 @@ def reduce(
             drop_nones=False,
             keepdims=keepdims,
             allow_records=True,
+            list_to_regular=True,
         )
 
         if len(parts) > 1:
