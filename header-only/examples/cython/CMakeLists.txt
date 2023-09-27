@@ -4,7 +4,7 @@ project(demo LANGUAGES CXX C)
 
 # Download headers
 include(FetchContent)
-set(AWKWARD_VERSION "v2.0.10")
+set(AWKWARD_VERSION "v2.4.3")
 FetchContent_Declare(
   awkward-headers
   URL https://github.com/scikit-hep/awkward/releases/download/${AWKWARD_VERSION}/header-only.zip
