@@ -22,7 +22,6 @@ find_package(Cython REQUIRED)
 find_package(PythonInterp REQUIRED)
 find_package(PythonLibs REQUIRED)
 find_package(PythonExtensions REQUIRED)
-include(UsePythonExtensions)
 
 # Build demo module
 add_cython_target(_demo _demo.pyx PY3 CXX)
