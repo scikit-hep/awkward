@@ -1,9 +1,15 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+import json
+import os
+
 import numpy as np
 import pytest
 
 import awkward as ak
+
+DIR = os.path.dirname(__file__)
+SAMPLES_DIR = os.path.join(os.path.abspath(DIR), "samples")
 
 
 def test_boolean():
@@ -527,7 +533,7 @@ def test_array_array_integer():
 
 def test_record():
     result = ak.operations.from_json(
-        ' [ { "x" :1 ,"y":1.1},{"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}]',
+        ' [ { "x" :1 ,"y":1.1},{"y": 2.2, "x": 2}, {"x": 3, "y": 3.3}]',
         schema={
             "type": "array",
             "items": {
@@ -545,7 +551,7 @@ def test_record():
     assert str(result.type) == "3 * {x: int64, y: float64}"
 
     result = ak.operations.from_json(
-        ' [ { "x" :1 ,"y":1.1},{"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}]' * 2,
+        ' [ { "x" :1 ,"y":1.1},{"y": 2.2, "x": 2}, {"x": 3, "y": 3.3}]' * 2,
         schema={
             "type": "array",
             "items": {
@@ -926,3 +932,150 @@ def test_option_ignore_between():
         )
         assert array.to_list() == [{"x": 1, "z": True}, {"x": 3, "z": False}]
         assert str(array.type) == "2 * ?{z: bool, x: int64}"
+
+
+def test_duplicate_keys():
+    result = ak.operations.from_json(
+        ' [ { "x" :1 ,"y":1.1, "x": 999},{"y": 2.2, "y": 999, "x": 2}, {"x": 3, "x": 999, "y": 3.3}]',
+        schema={
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {"x": {"type": "integer"}, "y": {"type": "number"}},
+                "required": ["x", "y"],
+            },
+        },
+    )
+    assert result.to_list() == [
+        {"x": 1, "y": 1.1},
+        {"x": 2, "y": 2.2},
+        {"x": 3, "y": 3.3},
+    ]
+    assert str(result.type) == "3 * {x: int64, y: float64}"
+
+
+def test_missing_optional_fields():
+    result = ak.operations.from_json(
+        ' [ { "y":1.1},{"y": 2.2, "x": 2}, {"x": 3}]',
+        schema={
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "x": {"type": ["integer", "null"]},
+                    "y": {"type": ["number", "null"]},
+                },
+                "required": ["x", "y"],
+            },
+        },
+    )
+    assert result.to_list() == [
+        {"x": None, "y": 1.1},
+        {"x": 2, "y": 2.2},
+        {"x": 3, "y": None},
+    ]
+    assert str(result.type) == "3 * {x: ?int64, y: ?float64}"
+
+
+def test_100_fields():
+    # The bitwise checklist is defined in terms of 64-bit chunks (uint64_t),
+    # and 100 > 64.
+
+    schema = {
+        "type": "array",
+        "items": {
+            "type": "object",
+            "properties": {
+                **{f"x{i:02d}": {"type": "integer"} for i in range(50)},
+                **{f"x{i:02d}": {"type": ["integer", "null"]} for i in range(50, 100)},
+            },
+            "required": ["x", "y"],
+        },
+    }
+
+    indata = [
+        {f"x{i:02d}": 1 for i in range(100)},
+        {f"x{i:02d}": 2 for i in range(100)},
+        {f"x{i:02d}": 3 for i in range(100)},
+    ]
+    outdata = [
+        {f"x{i:02d}": 1 for i in range(100)},
+        {f"x{i:02d}": 2 for i in range(100)},
+        {f"x{i:02d}": 3 for i in range(100)},
+    ]
+    assert ak.from_json(json.dumps(indata), schema=schema).to_list() == outdata
+
+    del indata[1]["x57"]
+    outdata[1]["x57"] = None
+    assert ak.from_json(json.dumps(indata), schema=schema).to_list() == outdata
+
+    del indata[1]["x99"]
+    outdata[1]["x99"] = None
+    assert ak.from_json(json.dumps(indata), schema=schema).to_list() == outdata
+
+    del indata[0]["x75"]
+    outdata[0]["x75"] = None
+    assert ak.from_json(json.dumps(indata), schema=schema).to_list() == outdata
+
+    del indata[2]["x57"]
+    outdata[2]["x57"] = None
+    assert ak.from_json(json.dumps(indata), schema=schema).to_list() == outdata
+
+    del indata[1]["x25"]
+    outdata[1]["x25"] = None
+    with pytest.raises(ValueError) as err:
+        ak.from_json(json.dumps(indata), schema=schema)
+    assert "JSON schema mismatch" in str(err)
+
+    del indata[1]["x49"]
+    outdata[1]["x49"] = None
+    with pytest.raises(ValueError) as err:
+        ak.from_json(json.dumps(indata), schema=schema)
+    assert "JSON schema mismatch" in str(err)
+
+    del indata[2]["x00"]
+    outdata[2]["x00"] = None
+    with pytest.raises(ValueError) as err:
+        ak.from_json(json.dumps(indata), schema=schema)
+    assert "JSON schema mismatch" in str(err)
+
+
+def test_complex_nested():
+    # Multiple records have to manage different missing field checklists, so this tests that.
+    schema = {
+        "type": "object",
+        "properties": {
+            "payload": {
+                "type": "object",
+                "properties": {
+                    "pull_request": {
+                        "type": ["object", "null"],
+                        "properties": {"merged_at": {"type": ["string", "null"]}},
+                    }
+                },
+            }
+        },
+    }
+
+    with open(os.path.join(SAMPLES_DIR, "complex-nested.json"), "rb") as file:
+        array = ak.from_json(file, line_delimited=True, schema=schema)
+
+    assert array["payload", "pull_request", "merged_at"][:5].to_list() == [
+        None,
+        None,
+        None,
+        None,
+        None,
+    ]
+
+    assert array["payload", "pull_request", "merged_at"][
+        [77, 169, 170, 172, 186, 207, 208]
+    ].to_list() == [
+        "2015-01-01T10:00:32Z",
+        "2015-01-01T10:01:07Z",
+        "2015-01-01T10:01:08Z",
+        "2015-01-01T10:01:08Z",
+        "2015-01-01T10:01:11Z",
+        "2015-01-01T10:01:23Z",
+        "2015-01-01T10:01:25Z",
+    ]
