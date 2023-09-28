@@ -21,3 +21,9 @@ def test():
         ),
         check_regular=True,
     )
+
+
+def test_original_problem():
+    array = ak.Array([[[1, 2], [1]], [[1], [1], [1]]])
+    assert ak.mean(array) == pytest.approx(1.1666666666666667)
+    assert ak.var(array) == pytest.approx(0.13888888888888887)
