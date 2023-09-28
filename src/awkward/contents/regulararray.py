@@ -1085,7 +1085,7 @@ class RegularArray(Content):
                 )
             )
 
-            if self._size > 0:
+            if self._size is not unknown_length and self._size > 0:
                 nextstarts = ak.index.Index64(
                     index_nplike.arange(0, nextlen, self._size),
                     nplike=index_nplike,
@@ -1151,7 +1151,11 @@ class RegularArray(Content):
                     )
 
                     trimmed = outcontent.content._getitem_range(start, stop)
-                    assert len(trimmed) == self._size * outcontent.length
+                    assert (
+                        trimmed.length is unknown_length
+                        or outcontent.length is unknown_length
+                        or trimmed.length == self._size * outcontent.length
+                    )
 
                     outcontent = ak.contents.RegularArray(
                         trimmed,

@@ -2065,18 +2065,34 @@ class ListOffsetArray(Content):
             content = self._content[self._offsets[0] : self._offsets[-1]]
             contents = content._remove_structure(backend, options)
             if options["keepdims"]:
-                return [
-                    ListOffsetArray(
-                        Index64(
-                            backend.index_nplike.asarray(
-                                [0, backend.index_nplike.shape_item_as_index(c.length)]
-                            )
-                        ),
-                        c,
-                        parameters=self._parameters,
-                    )
-                    for c in contents
-                ]
+                if options["list_to_regular"]:
+                    return [
+                        ak.contents.RegularArray(
+                            c,
+                            size=c.length,
+                            zeros_length=1,
+                            parameters=self._parameters,
+                        )
+                        for c in contents
+                    ]
+                else:
+                    return [
+                        ListOffsetArray(
+                            Index64(
+                                backend.index_nplike.asarray(
+                                    [
+                                        0,
+                                        backend.index_nplike.shape_item_as_index(
+                                            c.length
+                                        ),
+                                    ]
+                                )
+                            ),
+                            c,
+                            parameters=self._parameters,
+                        )
+                        for c in contents
+                    ]
             else:
                 return contents
 
