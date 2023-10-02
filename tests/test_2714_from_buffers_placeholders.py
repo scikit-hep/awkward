@@ -31,13 +31,13 @@ def test_numpyarray():
         )
 
     # Unknown length content at top-level
-    with pytest.raises(AssertionError, match=r"Encountered unknown length"):
-        ak.from_buffers(
-            {"class": "NumpyArray", "primitive": "int64", "form_key": "node0"},
-            10,
-            {"node0-data": PlaceholderArray(numpy, (unknown_length,), np.int64)},
-            highlevel=False,
-        )
+    layout = ak.from_buffers(
+        {"class": "NumpyArray", "primitive": "int64", "form_key": "node0"},
+        10,
+        {"node0-data": PlaceholderArray(numpy, (unknown_length,), np.int64)},
+        highlevel=False,
+    )
+    assert layout.length == 10
 
 
 def test_listoffsetarray_numpyarray():
@@ -63,7 +63,7 @@ def test_listoffsetarray_numpyarray():
     assert layout.length == 2
     assert layout.content.length == 2
 
-    # Unknown offsets
+    # Unknown offsets above known data
     with pytest.raises(AssertionError, match=r"Encountered unknown length"):
         ak.from_buffers(
             {
@@ -101,6 +101,28 @@ def test_listoffsetarray_numpyarray():
         2,
         {
             "node0-offsets": PlaceholderArray(numpy, (3,), dtype=np.int64),
+            "node1-data": PlaceholderArray(numpy, (10,), dtype=np.int64),
+        },
+        highlevel=False,
+    )
+    assert layout.length == 2
+    assert layout.content.length is unknown_length
+
+    # Unknown offsets and unknown data with unknown offset length
+    layout = ak.from_buffers(
+        {
+            "class": "ListOffsetArray",
+            "content": {
+                "class": "NumpyArray",
+                "primitive": "int64",
+                "form_key": "node1",
+            },
+            "offsets": "i64",
+            "form_key": "node0",
+        },
+        2,
+        {
+            "node0-offsets": PlaceholderArray(numpy, (unknown_length,), dtype=np.int64),
             "node1-data": PlaceholderArray(numpy, (10,), dtype=np.int64),
         },
         highlevel=False,
@@ -183,6 +205,30 @@ def test_listarray_numpyarray():
     assert layout.length == 2
     assert layout.content.length is unknown_length
 
+    # Unknown starts, stops, and data with unknown starts lengths
+    layout = ak.from_buffers(
+        {
+            "class": "ListArray",
+            "content": {
+                "class": "NumpyArray",
+                "primitive": "int64",
+                "form_key": "node1",
+            },
+            "starts": "i64",
+            "stops": "i64",
+            "form_key": "node0",
+        },
+        2,
+        {
+            "node0-starts": PlaceholderArray(numpy, (unknown_length,), dtype=np.int64),
+            "node0-stops": PlaceholderArray(numpy, (2,), dtype=np.int64),
+            "node1-data": PlaceholderArray(numpy, (10,), dtype=np.int64),
+        },
+        highlevel=False,
+    )
+    assert layout.length == 2
+    assert layout.content.length is unknown_length
+
 
 def test_indexedoptionarray():
     # Unknown data
@@ -228,7 +274,7 @@ def test_indexedoptionarray():
             highlevel=False,
         )
 
-    # Unknown data
+    # Unknown index and data
     layout = ak.from_buffers(
         {
             "class": "IndexedOptionArray",
@@ -243,6 +289,28 @@ def test_indexedoptionarray():
         3,
         {
             "node0-index": PlaceholderArray(numpy, (3,), np.int64),
+            "node1-data": PlaceholderArray(numpy, (6,), np.int64),
+        },
+        highlevel=False,
+    )
+    assert layout.length == 3
+    assert layout.content.length is unknown_length
+
+    # Unknown index and data with unknown index length
+    layout = ak.from_buffers(
+        {
+            "class": "IndexedOptionArray",
+            "index": "i64",
+            "content": {
+                "class": "NumpyArray",
+                "primitive": "int64",
+                "form_key": "node1",
+            },
+            "form_key": "node0",
+        },
+        3,
+        {
+            "node0-index": PlaceholderArray(numpy, (unknown_length,), np.int64),
             "node1-data": PlaceholderArray(numpy, (6,), np.int64),
         },
         highlevel=False,
@@ -310,6 +378,28 @@ def test_indexedarray():
         3,
         {
             "node0-index": PlaceholderArray(numpy, (3,), np.int64),
+            "node1-data": PlaceholderArray(numpy, (6,), np.int64),
+        },
+        highlevel=False,
+    )
+    assert layout.length == 3
+    assert layout.content.length is unknown_length
+
+    # Unknown index and data, with unknown index length
+    layout = ak.from_buffers(
+        {
+            "class": "IndexedArray",
+            "index": "i64",
+            "content": {
+                "class": "NumpyArray",
+                "primitive": "int64",
+                "form_key": "node1",
+            },
+            "form_key": "node0",
+        },
+        3,
+        {
+            "node0-index": PlaceholderArray(numpy, (unknown_length,), np.int64),
             "node1-data": PlaceholderArray(numpy, (6,), np.int64),
         },
         highlevel=False,
@@ -419,32 +509,67 @@ def test_unionarray():
         )
 
     # Unknown content length
-    with pytest.raises(AssertionError, match=r"Encountered unknown length"):
-        ak.from_buffers(
-            {
-                "class": "UnionArray",
-                "tags": "i8",
-                "index": "i64",
-                "contents": [
-                    {
-                        "class": "NumpyArray",
-                        "primitive": "int64",
-                        "form_key": "node1",
-                    },
-                    {
-                        "class": "NumpyArray",
-                        "primitive": "datetime64[D]",
-                        "form_key": "node2",
-                    },
-                ],
-                "form_key": "node0",
-            },
-            3,
-            {
-                "node0-tags": np.array([0, 0, 1], dtype=np.int8),
-                "node0-index": np.array([0, 1, 0], dtype=np.int64),
-                "node1-data": PlaceholderArray(numpy, (unknown_length,), np.int64),
-                "node2-data": PlaceholderArray(numpy, (6,), np.dtype("datetime64[D]")),
-            },
-            highlevel=False,
-        )
+    layout = ak.from_buffers(
+        {
+            "class": "UnionArray",
+            "tags": "i8",
+            "index": "i64",
+            "contents": [
+                {
+                    "class": "NumpyArray",
+                    "primitive": "int64",
+                    "form_key": "node1",
+                },
+                {
+                    "class": "NumpyArray",
+                    "primitive": "datetime64[D]",
+                    "form_key": "node2",
+                },
+            ],
+            "form_key": "node0",
+        },
+        3,
+        {
+            "node0-tags": np.array([0, 0, 1], dtype=np.int8),
+            "node0-index": np.array([0, 1, 0], dtype=np.int64),
+            "node1-data": PlaceholderArray(numpy, (unknown_length,), np.int64),
+            "node2-data": PlaceholderArray(numpy, (6,), np.dtype("datetime64[D]")),
+        },
+        highlevel=False,
+    )
+    assert layout.length == 3
+    assert layout.contents[0].length == 2
+    assert layout.contents[1].length == 1
+
+    # Unknown tags, index, and data
+    layout = ak.from_buffers(
+        {
+            "class": "UnionArray",
+            "tags": "i8",
+            "index": "i64",
+            "contents": [
+                {
+                    "class": "NumpyArray",
+                    "primitive": "int64",
+                    "form_key": "node1",
+                },
+                {
+                    "class": "NumpyArray",
+                    "primitive": "datetime64[D]",
+                    "form_key": "node2",
+                },
+            ],
+            "form_key": "node0",
+        },
+        3,
+        {
+            "node0-tags": PlaceholderArray(numpy, (3,), np.int8),
+            "node0-index": PlaceholderArray(numpy, (3,), np.int64),
+            "node1-data": PlaceholderArray(numpy, (3,), np.int64),
+            "node2-data": PlaceholderArray(numpy, (6,), np.dtype("datetime64[D]")),
+        },
+        highlevel=False,
+    )
+    assert layout.length == 3
+    assert layout.contents[0].length is unknown_length
+    assert layout.contents[1].length is unknown_length
