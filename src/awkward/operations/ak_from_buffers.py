@@ -149,20 +149,19 @@ def _from_buffer(
     # for the parent of this node. Thus, this node and its children *must* only
     # contain placeholders
     if count is unknown_length:
+        # Only placeholders can have unknown lengths
         if not isinstance(buffer, PlaceholderArray):
             raise AssertionError("Encountered unknown length for concrete buffer")
         return PlaceholderArray(nplike, (unknown_length,), dtype)
     # Known-length information implies that we should have known-length buffers here
-    # Therefore, placeholders without shape information are not permitted
+    # We could choose to make this an error, and have the caller re-implement some
+    # of #ak.from_buffers, or we can just introduce the known lengths where possible
+    elif isinstance(buffer, PlaceholderArray) and buffer.size is unknown_length:
+        return PlaceholderArray(nplike, (count,), dtype)
     elif isinstance(buffer, PlaceholderArray) or nplike.is_own_array(buffer):
         # Require 1D buffers
         array = nplike.reshape(buffer.view(dtype), shape=(-1,), copy=False)
 
-        # Raise if the buffer we encountered isn't definitely-sized
-        if array.size is unknown_length:
-            raise AssertionError(
-                "Encountered unknown length for placeholder in context where length should be known"
-            )
         if array.size < count:
             raise TypeError(
                 f"size of array ({array.size}) is less than size of form ({count})"
