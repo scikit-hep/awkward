@@ -120,28 +120,21 @@ class RegularArray(Content):
                         type(self).__name__
                     )
                 )
-        else:
-            if not (is_integer(size) and size >= 0):
-                raise TypeError(
-                    "{} 'size' must be a non-negative integer, not {}".format(
-                        type(self).__name__, size
-                    )
+        elif not (is_integer(size) and size >= 0):
+            raise TypeError(
+                "{} 'size' must be a non-negative integer, not {}".format(
+                    type(self).__name__, size
                 )
+            )
 
-        if zeros_length is unknown_length:
-            if content.backend.index_nplike.known_data:
-                raise TypeError(
-                    "{} 'zeros_length' must be a non-negative integer for backends with known shapes, not None".format(
-                        type(self).__name__
-                    )
+        if zeros_length is not unknown_length and not (
+            is_integer(zeros_length) and zeros_length >= 0
+        ):
+            raise TypeError(
+                "{} 'zeros_length' must be a non-negative integer, not {}".format(
+                    type(self).__name__, zeros_length
                 )
-        else:
-            if not (is_integer(zeros_length) and zeros_length >= 0):
-                raise TypeError(
-                    "{} 'zeros_length' must be a non-negative integer, not {}".format(
-                        type(self).__name__, zeros_length
-                    )
-                )
+            )
 
         if parameters is not None and parameters.get("__array__") == "string":
             if not content.is_numpy or not content.parameter("__array__") == "char":

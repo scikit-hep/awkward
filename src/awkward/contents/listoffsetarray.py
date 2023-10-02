@@ -114,7 +114,11 @@ class ListOffsetArray(Content):
                     type(self).__name__, repr(content)
                 )
             )
-        if offsets.length is not unknown_length and offsets.length == 0:
+        if (
+            content.backend.index_nplike.known_data
+            and offsets.length is not unknown_length
+            and offsets.length == 0
+        ):
             raise ValueError(
                 f"{type(self).__name__} len(offsets) ({offsets.length}) must be >= 1"
             )

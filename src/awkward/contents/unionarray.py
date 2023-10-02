@@ -148,16 +148,6 @@ class UnionArray(Content):
                 "try {0}.simplified instead".format(type(self).__name__)
             )
 
-        if (
-            not (tags.length is unknown_length or index.length is unknown_length)
-            and tags.length > index.length
-        ):
-            raise ValueError(
-                "{} len(tags) ({}) must be <= len(index) ({})".format(
-                    type(self).__name__, tags.length, index.length
-                )
-            )
-
         backend = None
         for content in contents:
             if backend is None:
@@ -170,6 +160,18 @@ class UnionArray(Content):
                         type(content.backend).__name__,
                     )
                 )
+
+        if (
+            backend.index_nplike.known_data
+            and tags.length is not unknown_length
+            and index.length is not unknown_length
+            and tags.length > index.length
+        ):
+            raise ValueError(
+                "{} len(tags) ({}) must be <= len(index) ({})".format(
+                    type(self).__name__, tags.length, index.length
+                )
+            )
 
         assert tags.nplike is backend.index_nplike
         assert index.nplike is backend.index_nplike

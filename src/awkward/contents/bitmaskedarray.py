@@ -147,13 +147,12 @@ class BitMaskedArray(Content):
                     type(self).__name__, repr(valid_when)
                 )
             )
-        if length is not unknown_length:
-            if not (is_integer(length) and length >= 0):
-                raise TypeError(
-                    "{} 'length' must be a non-negative integer, not {}".format(
-                        type(self).__name__, length
-                    )
+        if length is not unknown_length and not (is_integer(length) and length >= 0):
+            raise TypeError(
+                "{} 'length' must be a non-negative integer, not {}".format(
+                    type(self).__name__, length
                 )
+            )
         if not isinstance(lsb_order, bool):
             raise TypeError(
                 "{} 'lsb_order' must be boolean, not {}".format(
@@ -161,7 +160,9 @@ class BitMaskedArray(Content):
                 )
             )
         if (
-            not (length is unknown_length or mask.length is unknown_length)
+            content.backend.index_nplike.known_data
+            and length is not unknown_length
+            and mask.length is not unknown_length
             and length > mask.length * 8
         ):
             raise ValueError(
@@ -170,7 +171,9 @@ class BitMaskedArray(Content):
                 )
             )
         if (
-            not (length is unknown_length or content.length is unknown_length)
+            content.backend.index_nplike.known_data
+            and length is not unknown_length
+            and mask.length is not unknown_length
             and length > content.length * 8
         ):
             raise ValueError(
