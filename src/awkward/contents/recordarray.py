@@ -18,7 +18,6 @@ from awkward._parameters import (
     parameters_intersect,
     type_parameters_equal,
 )
-from awkward._regularize import is_integer
 from awkward._slicing import NO_HEAD
 from awkward._typing import TYPE_CHECKING, Callable, Final, Self, SupportsIndex, final
 from awkward._util import UNSET
@@ -145,8 +144,15 @@ class RecordArray(Content):
         parameters=None,
         backend=None,
     ):
-        if not (length is None or length is unknown_length):
-            length = int(length)  # TODO: this should not happen!
+        if length is not None and length is not unknown_length:
+            try:
+                length = int(length)  # TODO: this should not happen!
+            except TypeError:
+                raise TypeError(
+                    "{} 'length' must be a non-negative integer or None, not {}".format(
+                        type(self).__name__, repr(length)
+                    )
+                ) from None
         if not isinstance(contents, Iterable):
             raise TypeError(
                 "{} 'contents' must be iterable, not {}".format(
@@ -156,6 +162,7 @@ class RecordArray(Content):
         if not isinstance(contents, list):
             contents = list(contents)
 
+        # Take backend from contents
         for content in contents:
             if not isinstance(content, Content):
                 raise TypeError(
@@ -179,6 +186,7 @@ class RecordArray(Content):
             backend = NumpyBackend.instance()
 
         if length is None:
+            # Require a length if we have no contents
             if len(contents) == 0:
                 raise TypeError(
                     "{} if len(contents) == 0, a 'length' must be specified".format(
@@ -186,45 +194,41 @@ class RecordArray(Content):
                     )
                 )
 
-            if backend.nplike.known_data:
-                for content in contents:
-                    assert content.length is not unknown_length
-                    # First time we're setting length, and content.length is not unknown_length
-                    if length is None:
-                        length = content.length
-                    # length is not unknown_length, content.length is not unknown_length
-                    else:
-                        length = min(length, content.length)
-            else:
-                for content in contents:
-                    # First time we're setting length, and content.length is not unknown_length
-                    if length is None:
-                        length = content.length
-                        # Any unknown_length means all unknown_length
-                        if length is unknown_length:
-                            break
-                    # `length` is set, can't be unknown_length
-                    elif content.length is unknown_length:
-                        length = unknown_length
+            # Take length as minimum length of contents. This will touch shapes
+            it_contents = iter(contents)
+            for content in it_contents:
+                # First time we're setting length, and content.length is not unknown_length
+                if length is None:
+                    length = content.length
+                    # Any unknown_length means all unknown_length
+                    if length is unknown_length:
                         break
-                    # `length` is set, can't be unknown_length
-                    else:
-                        length = min(length, content.length)
+                # `length` is set, can't be unknown_length
+                elif content.length is unknown_length:
+                    length = unknown_length
+                    break
+                # `length` is set, can't be unknown_length
+                else:
+                    length = min(length, content.length)
+
+            # Touch everything else
+            for content in it_contents:
+                content._touch_shape(False)
+
+        # Otherwise
         elif length is not unknown_length:
+            # Ensure lengths are not smaller than given length.
             for content in contents:
-                if content.length is not unknown_length and content.length < length:
+                if (
+                    backend.index_nplike.known_data
+                    and content.length is not unknown_length
+                    and content.length < length
+                ):
                     raise ValueError(
                         "{} len(content) ({}) must be >= length ({}) for all 'contents'".format(
                             type(self).__name__, content.length, length
                         )
                     )
-
-            if not (is_integer(length) and length >= 0):
-                raise TypeError(
-                    "{} 'length' must be a non-negative integer or None, not {}".format(
-                        type(self).__name__, repr(length)
-                    )
-                )
 
         if isinstance(fields, Iterable):
             if not isinstance(fields, list):
@@ -250,6 +254,8 @@ class RecordArray(Content):
 
         self._contents = contents
         self._fields = fields
+        # TODO: maybe need to store original `length` arg separately to the
+        #       computed version (for typetracer conversions)
         self._length = length
         self._init(parameters, backend)
 
