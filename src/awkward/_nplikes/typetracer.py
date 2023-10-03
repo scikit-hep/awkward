@@ -249,7 +249,6 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
 
     @property
     def ndim(self) -> int:
-        self.touch_shape()
         return len(self._shape)
 
     @property

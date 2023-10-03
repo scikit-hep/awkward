@@ -126,11 +126,7 @@ class ListArray(Content):
                     type(self).__name__, repr(content)
                 )
             )
-        if (
-            starts.nplike.known_data
-            and stops.nplike.known_data
-            and starts.length > stops.length
-        ):
+        if content.backend.index_nplike.known_data and starts.length > stops.length:
             raise ValueError(
                 "{} len(starts) ({}) must be <= len(stops) ({})".format(
                     type(self).__name__, starts.length, stops.length

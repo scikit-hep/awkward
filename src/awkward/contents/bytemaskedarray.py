@@ -121,7 +121,9 @@ class ByteMaskedArray(Content):
                 )
             )
         if (
-            not (mask.length is unknown_length or content.length is unknown_length)
+            content.backend.index_nplike.known_data
+            and mask.length is not unknown_length
+            and content.length is not unknown_length
             and mask.length > content.length
         ):
             raise ValueError(
