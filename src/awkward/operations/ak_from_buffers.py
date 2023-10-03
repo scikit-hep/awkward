@@ -149,9 +149,8 @@ def _from_buffer(
     # for the parent of this node. Thus, this node and its children *must* only
     # contain placeholders
     if count is unknown_length:
-        # Only placeholders can have unknown lengths
-        if not isinstance(buffer, PlaceholderArray):
-            raise AssertionError("Encountered unknown length for concrete buffer")
+        # We may actually have a known buffer here, but as we do not know the length,
+        # we cannot safely trim it. Thus, introduce a placeholder anyway
         return PlaceholderArray(nplike, (unknown_length,), dtype)
     # Known-length information implies that we should have known-length buffers here
     # We could choose to make this an error, and have the caller re-implement some
