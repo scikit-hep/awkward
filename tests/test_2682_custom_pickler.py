@@ -1,4 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+import importlib.metadata
 import multiprocessing
 import os
 import pickle
@@ -8,6 +9,16 @@ from concurrent.futures import ProcessPoolExecutor
 import pytest
 
 import awkward as ak
+
+
+def has_entry_point():
+    return bool(importlib.metadata.entry_points(group="awkward.pickle.reduce").names)
+
+
+pytestmark = pytest.mark.skipif(
+    has_entry_point(),
+    reason="Custom pickler is already registered!",
+)
 
 
 def _init_process_with_pickler(pickler_source: str, tmp_path):
