@@ -12,4 +12,4 @@ def test_iterator():
     array = ak.contents.ListOffsetArray(offsets, content)
 
     assert list(content) == [1.1, 2.2, 3.3]
-    assert [np.asarray(x).tolist() for x in array] == [[1.1, 2.2], [], [3.3]]
+    assert [ak.to_numpy(x).tolist() for x in array] == [[1.1, 2.2], [], [3.3]]

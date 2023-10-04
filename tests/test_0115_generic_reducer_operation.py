@@ -1411,11 +1411,11 @@ def test_sumprod_types_FIXME():
     depth1 = ak.contents.ListOffsetArray(offsets3, content2)
     assert (
         np.sum(array, axis=-1).dtype
-        == np.asarray(ak.sum(depth1, axis=-1, highlevel=False)).dtype
+        == ak.to_numpy(ak.sum(depth1, axis=-1, highlevel=False)).dtype
     )
     assert (
         np.prod(array, axis=-1).dtype
-        == np.asarray(ak.prod(depth1, axis=-1, highlevel=False)).dtype
+        == ak.to_numpy(ak.prod(depth1, axis=-1, highlevel=False)).dtype
     )
 
 
@@ -1445,11 +1445,11 @@ def test_sumprod_types():
 
     assert (
         np.sum(array, axis=-1).dtype
-        == np.asarray(ak.sum(depth1, axis=-1, highlevel=False)).dtype
+        == ak.to_numpy(ak.sum(depth1, axis=-1, highlevel=False)).dtype
     )
     assert (
         np.prod(array, axis=-1).dtype
-        == np.asarray(ak.prod(depth1, axis=-1, highlevel=False)).dtype
+        == ak.to_numpy(ak.prod(depth1, axis=-1, highlevel=False)).dtype
     )
     assert sum(to_list(np.sum(array, axis=-1))) == sum(
         to_list(ak.sum(depth1, axis=-1, highlevel=False))
@@ -1465,11 +1465,11 @@ def test_sumprod_types():
 
     assert (
         np.sum(array, axis=-1).dtype
-        == np.asarray(ak.sum(depth1, axis=-1, highlevel=False)).dtype
+        == ak.to_numpy(ak.sum(depth1, axis=-1, highlevel=False)).dtype
     )
     assert (
         np.prod(array, axis=-1).dtype
-        == np.asarray(ak.prod(depth1, axis=-1, highlevel=False)).dtype
+        == ak.to_numpy(ak.prod(depth1, axis=-1, highlevel=False)).dtype
     )
     assert sum(to_list(np.sum(array, axis=-1))) == sum(
         to_list(ak.sum(depth1, axis=-1, highlevel=False))
@@ -1485,11 +1485,11 @@ def test_sumprod_types():
 
     assert (
         np.sum(array, axis=-1).dtype
-        == np.asarray(ak.sum(depth1, axis=-1, highlevel=False)).dtype
+        == ak.to_numpy(ak.sum(depth1, axis=-1, highlevel=False)).dtype
     )
     assert (
         np.prod(array, axis=-1).dtype
-        == np.asarray(ak.prod(depth1, axis=-1, highlevel=False)).dtype
+        == ak.to_numpy(ak.prod(depth1, axis=-1, highlevel=False)).dtype
     )
     assert sum(to_list(np.sum(array, axis=-1))) == sum(
         to_list(ak.sum(depth1, axis=-1, highlevel=False))
@@ -1505,11 +1505,11 @@ def test_sumprod_types():
 
     assert (
         np.sum(array, axis=-1).dtype
-        == np.asarray(ak.sum(depth1, axis=-1, highlevel=False)).dtype
+        == ak.to_numpy(ak.sum(depth1, axis=-1, highlevel=False)).dtype
     )
     assert (
         np.prod(array, axis=-1).dtype
-        == np.asarray(ak.prod(depth1, axis=-1, highlevel=False)).dtype
+        == ak.to_numpy(ak.prod(depth1, axis=-1, highlevel=False)).dtype
     )
     assert sum(to_list(np.sum(array, axis=-1))) == sum(
         to_list(ak.sum(depth1, axis=-1, highlevel=False))
@@ -1525,11 +1525,11 @@ def test_sumprod_types():
 
     assert (
         np.sum(array, axis=-1).dtype
-        == np.asarray(ak.sum(depth1, axis=-1, highlevel=False)).dtype
+        == ak.to_numpy(ak.sum(depth1, axis=-1, highlevel=False)).dtype
     )
     assert (
         np.prod(array, axis=-1).dtype
-        == np.asarray(ak.prod(depth1, axis=-1, highlevel=False)).dtype
+        == ak.to_numpy(ak.prod(depth1, axis=-1, highlevel=False)).dtype
     )
     assert sum(to_list(np.sum(array, axis=-1))) == sum(
         to_list(ak.sum(depth1, axis=-1, highlevel=False))
@@ -1545,11 +1545,11 @@ def test_sumprod_types():
 
     assert (
         np.sum(array, axis=-1).dtype
-        == np.asarray(ak.sum(depth1, axis=-1, highlevel=False)).dtype
+        == ak.to_numpy(ak.sum(depth1, axis=-1, highlevel=False)).dtype
     )
     assert (
         np.prod(array, axis=-1).dtype
-        == np.asarray(ak.prod(depth1, axis=-1, highlevel=False)).dtype
+        == ak.to_numpy(ak.prod(depth1, axis=-1, highlevel=False)).dtype
     )
     assert sum(to_list(np.sum(array, axis=-1))) == sum(
         to_list(ak.sum(depth1, axis=-1, highlevel=False))
@@ -1565,11 +1565,11 @@ def test_sumprod_types():
 
     assert (
         np.sum(array, axis=-1).dtype
-        == np.asarray(ak.sum(depth1, axis=-1, highlevel=False)).dtype
+        == ak.to_numpy(ak.sum(depth1, axis=-1, highlevel=False)).dtype
     )
     assert (
         np.prod(array, axis=-1).dtype
-        == np.asarray(ak.prod(depth1, axis=-1, highlevel=False)).dtype
+        == ak.to_numpy(ak.prod(depth1, axis=-1, highlevel=False)).dtype
     )
     assert sum(to_list(np.sum(array, axis=-1))) == sum(
         to_list(ak.sum(depth1, axis=-1, highlevel=False))
@@ -1585,11 +1585,11 @@ def test_sumprod_types():
 
     assert (
         np.sum(array, axis=-1).dtype
-        == np.asarray(ak.sum(depth1, axis=-1, highlevel=False)).dtype
+        == ak.to_numpy(ak.sum(depth1, axis=-1, highlevel=False)).dtype
     )
     assert (
         np.prod(array, axis=-1).dtype
-        == np.asarray(ak.prod(depth1, axis=-1, highlevel=False)).dtype
+        == ak.to_numpy(ak.prod(depth1, axis=-1, highlevel=False)).dtype
     )
     assert sum(to_list(np.sum(array, axis=-1))) == sum(
         to_list(ak.sum(depth1, axis=-1, highlevel=False))

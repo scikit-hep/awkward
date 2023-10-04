@@ -220,8 +220,8 @@ def _array_ufunc_categorical(
         assert method == "__call__"
         one, two = inputs
 
-        one_index = numpy.asarray(one.index)
-        two_index = numpy.asarray(two.index)
+        one_index = numpy.asarray(one.index.data)
+        two_index = numpy.asarray(two.index.data)
         one_content = wrap_layout(one.content, behavior)
         two_content = wrap_layout(two.content, behavior)
 
@@ -280,12 +280,17 @@ def _array_ufunc_string_likes(
         right = ak.without_parameters(right, highlevel=False)
 
         # first condition: string lengths must be the same
-        counts1 = nplike.asarray(
-            ak._do.reduce(left, ak._reducers.Count(), axis=-1, mask=False)
+        left_counts_layout = ak._do.reduce(
+            left, ak._reducers.Count(), axis=-1, mask=False
         )
-        counts2 = nplike.asarray(
-            ak._do.reduce(right, ak._reducers.Count(), axis=-1, mask=False)
+        assert left_counts_layout.is_numpy
+        right_counts_layout = ak._do.reduce(
+            right, ak._reducers.Count(), axis=-1, mask=False
         )
+        assert right_counts_layout.is_numpy
+
+        counts1 = nplike.asarray(left_counts_layout.data)
+        counts2 = nplike.asarray(right_counts_layout.data)
 
         out = counts1 == counts2
 

@@ -244,7 +244,7 @@ def test_numpyarray_sort():
     v2_array = ak.operations.from_numpy(
         np.array([3.3, 2.2, 1.1, 5.5, 4.4]), regulararray=True, highlevel=False
     )
-    assert to_list(np.sort(np.asarray(v2_array))) == [
+    assert to_list(np.sort(ak.to_numpy(v2_array))) == [
         1.1,
         2.2,
         3.3,
@@ -265,7 +265,7 @@ def test_numpyarray_sort():
 
 
 def test_3d():
-    array = ak.Array(
+    array = ak.to_layout(
         np.array(
             [
                 # axis 2:    0       1       2       3       4         # axis 1:
@@ -285,18 +285,18 @@ def test_3d():
 
     assert to_list(
         ak.operations.argsort(array, axis=2, ascending=True, stable=False)
-    ) == to_list(np.argsort(array, 2))
+    ) == to_list(np.argsort(ak.to_numpy(array), 2))
     assert to_list(
         ak.operations.sort(array, axis=2, ascending=True, stable=False)
-    ) == to_list(np.sort(np.asarray(array), 2))
+    ) == to_list(np.sort(ak.to_numpy(array), 2))
     assert to_list(
         ak.operations.argsort(array, axis=1, ascending=True, stable=False)
-    ) == to_list(np.argsort(np.asarray(array), 1))
+    ) == to_list(np.argsort(ak.to_numpy(array), 1))
     assert to_list(
         ak.operations.sort(array, axis=1, ascending=True, stable=False)
-    ) == to_list(np.sort(np.asarray(array), 1))
+    ) == to_list(np.sort(ak.to_numpy(array), 1))
     assert to_list(
-        ak.operations.sort(np.asarray(array), axis=1, ascending=False, stable=False)
+        ak.operations.sort(ak.to_numpy(array), axis=1, ascending=False, stable=False)
     ) == [
         [
             [11.11, 12.12, 13.13, 14.14, 15.15],
@@ -311,10 +311,10 @@ def test_3d():
     ]
     assert to_list(
         ak.operations.sort(array, axis=0, ascending=True, stable=False)
-    ) == to_list(np.sort(np.asarray(array), 0))
+    ) == to_list(np.sort(ak.to_numpy(array), 0))
     assert to_list(
         ak.operations.argsort(array, axis=0, ascending=True, stable=False)
-    ) == to_list(np.argsort(np.asarray(array), 0))
+    ) == to_list(np.argsort(ak.to_numpy(array), 0))
 
 
 def test_bool_sort():
