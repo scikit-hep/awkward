@@ -145,10 +145,10 @@ class Index:
     def __array_interface__(self):
         return self._data.__array_interface__
 
-    def __dlpack__(self) -> tuple[int, int]:
+    def __dlpack_device__(self) -> tuple[int, int]:
         return self._data.__dlpack_device__()
 
-    def __dlpack_device__(self, stream: Any = None) -> Any:
+    def __dlpack__(self, stream: Any = None) -> Any:
         if stream is None:
             return self._data.__dlpack__()
         else:
