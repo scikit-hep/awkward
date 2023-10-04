@@ -282,7 +282,7 @@ jobs:
         uses: codecov/codecov-action@v3
         if: matrix.python-version == '3.9'
 
-  Linux-ROOT:
+  Linux-ROOT-dask-awkward:
     strategy:
       matrix:
         python-version:
@@ -337,6 +337,9 @@ jobs:
 
       - name: Build & install awkward
         run: python3 -m pip install -v .
+
+      - name: Also install dask-awkward
+        run: python3 -m pip install dask-awkward
 
       - name: Print versions
         run: python -m pip list
