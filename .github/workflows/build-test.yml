@@ -44,7 +44,7 @@ jobs:
           - python-version: '3.9'
             python-architecture: x86
 
-    runs-on: windows-2019
+    runs-on: windows-latest
 
     env:
       PIP_ONLY_BINARY: cmake
