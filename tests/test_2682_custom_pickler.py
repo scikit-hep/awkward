@@ -1,10 +1,16 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-import importlib.metadata
+
+
 import multiprocessing
 import os
 import pickle
 import sys
 from concurrent.futures import ProcessPoolExecutor
+
+if sys.version_info < (3, 12):
+    import importlib_metadata
+else:
+    import importlib.metadata as importlib_metadata
 
 import pytest
 
@@ -12,7 +18,7 @@ import awkward as ak
 
 
 def has_entry_point():
-    return bool(importlib.metadata.entry_points(group="awkward.pickle.reduce").names)
+    return bool(importlib_metadata.entry_points(group="awkward.pickle.reduce").names)
 
 
 pytestmark = pytest.mark.skipif(
