@@ -5,6 +5,7 @@
 import numba
 import numba.core.typing
 import numba.core.typing.ctypes_utils
+from numba.core.errors import NumbaTypeError
 
 import awkward as ak
 
@@ -145,7 +146,7 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
         if len(args) == 0 and len(kwargs) == 0:
             return numba.types.none()
         else:
-            raise TypeError(
+            raise NumbaTypeError(
                 "wrong number of arguments for ArrayBuilder.clear"
                 + ak._util.exception_suffix(__file__)
             )
@@ -155,7 +156,7 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
         if len(args) == 0 and len(kwargs) == 0:
             return numba.types.none()
         else:
-            raise TypeError(
+            raise NumbaTypeError(
                 "wrong number of arguments for ArrayBuilder.null"
                 + ak._util.exception_suffix(__file__)
             )
@@ -169,7 +170,7 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
         ):
             return numba.types.none(args[0])
         else:
-            raise TypeError(
+            raise NumbaTypeError(
                 "wrong number or types of arguments for ArrayBuilder.boolean"
                 + ak._util.exception_suffix(__file__)
             )
@@ -183,7 +184,7 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
         ):
             return numba.types.none(args[0])
         else:
-            raise TypeError(
+            raise NumbaTypeError(
                 "wrong number or types of arguments for ArrayBuilder.integer"
                 + ak._util.exception_suffix(__file__)
             )
@@ -197,7 +198,7 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
         ):
             return numba.types.none(args[0])
         else:
-            raise TypeError(
+            raise NumbaTypeError(
                 "wrong number or types of arguments for ArrayBuilder.real"
                 + ak._util.exception_suffix(__file__)
             )
@@ -207,7 +208,7 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
         if len(args) == 0 and len(kwargs) == 0:
             return numba.types.none()
         else:
-            raise TypeError(
+            raise NumbaTypeError(
                 "wrong number of arguments for ArrayBuilder.begin_list"
                 + ak._util.exception_suffix(__file__)
             )
@@ -217,7 +218,7 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
         if len(args) == 0 and len(kwargs) == 0:
             return numba.types.none()
         else:
-            raise TypeError(
+            raise NumbaTypeError(
                 "wrong number of arguments for ArrayBuilder.end_list"
                 + ak._util.exception_suffix(__file__)
             )
@@ -231,7 +232,7 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
         ):
             return numba.types.none(args[0])
         else:
-            raise TypeError(
+            raise NumbaTypeError(
                 "wrong number or types of arguments for ArrayBuilder.begin_tuple"
                 + ak._util.exception_suffix(__file__)
             )
@@ -245,7 +246,7 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
         ):
             return arraybuildertype(args[0])
         else:
-            raise TypeError(
+            raise NumbaTypeError(
                 "wrong number or types of arguments for ArrayBuilder.index"
                 + ak._util.exception_suffix(__file__)
             )
@@ -255,7 +256,7 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
         if len(args) == 0 and len(kwargs) == 0:
             return numba.types.none()
         else:
-            raise TypeError(
+            raise NumbaTypeError(
                 "wrong number of arguments for ArrayBuilder.end_tuple"
                 + ak._util.exception_suffix(__file__)
             )
@@ -271,7 +272,7 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
         ):
             return numba.types.none(args[0])
         else:
-            raise TypeError(
+            raise NumbaTypeError(
                 "wrong number or types of arguments for ArrayBuilder.begin_record"
                 + ak._util.exception_suffix(__file__)
             )
@@ -285,7 +286,7 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
         ):
             return arraybuildertype(args[0])
         else:
-            raise TypeError(
+            raise NumbaTypeError(
                 "wrong number or types of arguments for ArrayBuilder.field"
                 + ak._util.exception_suffix(__file__)
             )
@@ -295,7 +296,7 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
         if len(args) == 0 and len(kwargs) == 0:
             return numba.types.none()
         else:
-            raise TypeError(
+            raise NumbaTypeError(
                 "wrong number of arguments for ArrayBuilder.end_record"
                 + ak._util.exception_suffix(__file__)
             )

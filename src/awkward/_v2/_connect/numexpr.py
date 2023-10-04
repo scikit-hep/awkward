@@ -72,7 +72,7 @@ def evaluate(
 ):
     numexpr = import_numexpr()
 
-    context = numexpr.necompiler.getContext(kwargs, frame_depth=1)
+    context = numexpr.necompiler.getContext(kwargs)
     expr_key = (expression, tuple(sorted(context.items())))
     if expr_key not in numexpr.necompiler._names_cache:
         numexpr.necompiler._names_cache[expr_key] = numexpr.necompiler.getExprNames(

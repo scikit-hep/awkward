@@ -2922,7 +2922,7 @@ def _from_arrow(
             batches = obj.combine_chunks().to_batches()
             if len(batches) == 0:
                 # zero-length array with the right type
-                return from_buffers(_parquet_schema_to_form(obj.schema), 0, {})
+                return from_buffers(_parquet_schema_to_form(obj.schema, "item"), 0, {})
             elif len(batches) == 1:
                 return handle_arrow(batches[0])
             else:
@@ -3172,7 +3172,7 @@ def _from_parquet_key():
     return out
 
 
-def _parquet_schema_to_form(schema):
+def _parquet_schema_to_form(schema, list_indicator):
     pyarrow = _import_pyarrow("ak.from_parquet")
 
     def lst(path):
@@ -3224,7 +3224,7 @@ def _parquet_schema_to_form(schema):
         elif isinstance(arrow_type, pyarrow.ListType):
             field = arrow_type.value_field
             content = maybe_nullable(
-                field, recurse(field.type, path + ("list", "item"))
+                field, recurse(field.type, path + ("list", list_indicator))
             )
             form_key = None if contains_record(content) else lst(path)
             return ak.forms.ListOffsetForm("i32", content, form_key=form_key)
@@ -3232,7 +3232,7 @@ def _parquet_schema_to_form(schema):
         elif isinstance(arrow_type, pyarrow.LargeListType):
             field = arrow_type.value_field
             content = maybe_nullable(
-                field, recurse(field.type, path + ("list", "item"))
+                field, recurse(field.type, path + ("list", list_indicator))
             )
             form_key = None if contains_record(content) else lst(path)
             return ak.forms.ListOffsetForm("i64", content, form_key=form_key)
@@ -3463,8 +3463,9 @@ class _LazyDatasetGenerator:
 
 
 class _Dataset:
-    def __init__(self, schema, row_groups, columns, partition_columns):
+    def __init__(self, schema, list_indicator, row_groups, columns, partition_columns):
         self.schema = schema
+        self.list_indicator = list_indicator
         self.row_groups = row_groups
         self.columns = columns
         self.partition_columns = partition_columns
@@ -3511,7 +3512,17 @@ class _ParquetFileDataset(_Dataset):
 
         self._use_threads = use_threads
 
-        super().__init__(schema, row_groups, columns, partition_columns=[])
+        if any(
+            x.max_repetition_level > 0 and ".list.element" in x.path
+            for x in self._file.schema
+        ):
+            list_indicator = "element"
+        else:
+            list_indicator = "item"
+
+        super().__init__(
+            schema, list_indicator, row_groups, columns, partition_columns=[]
+        )
 
     @property
     def row_group_metadata(self):
@@ -3564,7 +3575,15 @@ class _ParquetDataset(_Dataset):
         self._lookup = self._build_row_group_lookup(directory, self._metadata_file)
         self._options = options
 
-        super().__init__(schema, row_groups, columns, partition_columns)
+        if any(
+            x.max_repetition_level > 0 and ".list.element" in x.path
+            for x in self._metadata_file.schema
+        ):
+            list_indicator = "element"
+        else:
+            list_indicator = "item"
+
+        super().__init__(schema, list_indicator, row_groups, columns, partition_columns)
 
     @staticmethod
     def _build_row_group_lookup(directory, metadata_file):
@@ -3637,7 +3656,7 @@ class _ParquetMultiFileDataset(_Dataset):
         include_partition_columns=True,
         options=None,
     ):
-        schema, lookup, paths_and_counts = self._get_dataset_metadata(
+        parquet_schema, schema, lookup, paths_and_counts = self._get_dataset_metadata(
             source, relative_to, options
         )
         if row_groups is None:
@@ -3654,7 +3673,16 @@ class _ParquetMultiFileDataset(_Dataset):
 
         self._lookup = lookup
         self._use_threads = use_threads
-        super().__init__(schema, row_groups, columns, partition_columns)
+
+        if any(
+            x.max_repetition_level > 0 and ".list.element" in x.path
+            for x in parquet_schema
+        ):
+            list_indicator = "element"
+        else:
+            list_indicator = "item"
+
+        super().__init__(schema, list_indicator, row_groups, columns, partition_columns)
 
     @staticmethod
     def _get_dataset_metadata(source, relative_to, options):
@@ -3666,6 +3694,7 @@ class _ParquetMultiFileDataset(_Dataset):
         for filename in source:
             single_file = pyarrow.parquet.ParquetFile(filename, **options)
             if schema is None:
+                parquet_schema = single_file.schema
                 schema = single_file.schema_arrow
                 first_filename = filename
             elif schema != single_file.schema_arrow:
@@ -3680,7 +3709,7 @@ class _ParquetMultiFileDataset(_Dataset):
             paths_and_counts.append(
                 (os.path.relpath(filename, relative_to), single_file.metadata.num_rows)
             )
-        return schema, lookup, paths_and_counts
+        return parquet_schema, schema, lookup, paths_and_counts
 
     @property
     def row_group_metadata(self):
@@ -3963,7 +3992,7 @@ def from_parquet(
         lengths = [r.num_rows for r in dataset.row_group_metadata]
         state = _LazyDatasetGenerator(dataset)
 
-        form = _parquet_schema_to_form(dataset.schema)
+        form = _parquet_schema_to_form(dataset.schema, dataset.list_indicator)
         out = _create_partitioned_array_from_form(
             form,
             state,
@@ -3980,7 +4009,7 @@ def from_parquet(
         batches = dataset.read_row_group_batches()
 
         if len(batches) == 0:
-            form = _parquet_schema_to_form(dataset.schema)
+            form = _parquet_schema_to_form(dataset.schema, dataset.list_indicator)
             out = from_buffers(form, 0, {}, highlevel=False)
 
         else:

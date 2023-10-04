@@ -7,6 +7,7 @@ import operator
 import numba
 import numba.core.typing
 import numba.core.typing.ctypes_utils
+from numba.core.errors import NumbaTypeError
 
 import awkward as ak
 
@@ -586,7 +587,7 @@ class type_getitem(numba.core.typing.templates.AbstractTemplate):
                     viewtype, wheretype
                 )
             else:
-                raise TypeError(
+                raise NumbaTypeError(
                     "only an integer, start:stop range, or a *constant* "
                     "field name string may be used as ak.Array "
                     "slices in compiled code" + ak._util.exception_suffix(__file__)
@@ -874,7 +875,7 @@ class type_getitem_record(numba.core.typing.templates.AbstractTemplate):
                     recordviewtype, wheretype.literal_value
                 )(recordviewtype, wheretype)
             else:
-                raise TypeError(
+                raise NumbaTypeError(
                     "only a *constant* field name string may be used as "
                     "ak.Record slices in compiled code"
                     + ak._util.exception_suffix(__file__)
@@ -1504,7 +1505,7 @@ class type_getitem_partitioned(numba.core.typing.templates.AbstractTemplate):
                 return rettype(partviewtype, wheretype)
 
             else:
-                raise TypeError(
+                raise NumbaTypeError(
                     "only an integer, start:stop range, or a *constant* "
                     "field name string may be used as ak.Array "
                     "slices in compiled code" + ak._util.exception_suffix(__file__)

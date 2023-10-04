@@ -8,6 +8,7 @@ import ctypes
 import numba
 
 import awkward as ak
+from numba.core.errors import NumbaTypeError, NumbaValueError
 
 np = ak.nplike.NumpyMetadata.instance()
 numpy = ak.nplike.Numpy.instance()
@@ -41,7 +42,7 @@ numpy = ak.nplike.Numpy.instance()
 @numba.extending.typeof_impl.register(ak.layout.Index64)
 @numba.extending.typeof_impl.register(ak.layout.Record)
 def fake_typeof(obj, c):
-    raise TypeError(
+    raise NumbaTypeError(
         "{} objects cannot be passed directly into Numba-compiled functions; "
         "construct a high-level ak.Array or ak.Record instead".format(
             type(obj).__name__
@@ -334,7 +335,7 @@ class ContentType(numba.types.Type):
                 self, viewtype, viewtype.fields + (key,)
             )
         else:
-            raise TypeError(
+            raise NumbaTypeError(
                 f"array does not have a field with key {key!r}"
                 + ak._util.exception_suffix(__file__)
             )
@@ -2018,14 +2019,14 @@ class RecordArrayType(ContentType):
             index = self.fieldindex(key)
             if index is None:
                 if self.recordlookup is None:
-                    raise ValueError(
+                    raise NumbaValueError(
                         "no field {} in tuples with {} fields".format(
                             repr(key), len(self.contenttypes)
                         )
                         + ak._util.exception_suffix(__file__)
                     )
                 else:
-                    raise ValueError(
+                    raise NumbaValueError(
                         "no field {} in records with "
                         "fields: [{}]".format(
                             repr(key), ", ".join(repr(x) for x in self.recordlookup)
@@ -2042,14 +2043,14 @@ class RecordArrayType(ContentType):
         index = self.fieldindex(key)
         if index is None:
             if self.recordlookup is None:
-                raise ValueError(
+                raise NumbaValueError(
                     "no field {} in tuples with {} fields".format(
                         repr(key), len(self.contenttypes)
                     )
                     + ak._util.exception_suffix(__file__)
                 )
             else:
-                raise ValueError(
+                raise NumbaValueError(
                     "no field {} in records with fields: [{}]".format(
                         repr(key), ", ".join(repr(x) for x in self.recordlookup)
                     )
@@ -2063,14 +2064,14 @@ class RecordArrayType(ContentType):
         index = self.fieldindex(key)
         if index is None:
             if self.recordlookup is None:
-                raise ValueError(
+                raise NumbaValueError(
                     "no field {} in tuple with {} fields".format(
                         repr(key), len(self.contenttypes)
                     )
                     + ak._util.exception_suffix(__file__)
                 )
             else:
-                raise ValueError(
+                raise NumbaValueError(
                     "no field {} in record with fields: [{}]".format(
                         repr(key), ", ".join(repr(x) for x in self.recordlookup)
                     )
@@ -2391,21 +2392,21 @@ class UnionArrayType(ContentType):
 
     def getitem_at(self, viewtype):
         if not all(isinstance(x, RecordArrayType) for x in self.contenttypes):
-            raise TypeError(
+            raise NumbaTypeError(
                 "union types cannot be accessed in Numba"
                 + ak._util.exception_suffix(__file__)
             )
 
     def getitem_range(self, viewtype):
         if not all(isinstance(x, RecordArrayType) for x in self.contenttypes):
-            raise TypeError(
+            raise NumbaTypeError(
                 "union types cannot be accessed in Numba"
                 + ak._util.exception_suffix(__file__)
             )
 
     def getitem_field(self, viewtype, key):
         if not all(isinstance(x, RecordArrayType) for x in self.contenttypes):
-            raise TypeError(
+            raise NumbaTypeError(
                 "union types cannot be accessed in Numba"
                 + ak._util.exception_suffix(__file__)
             )
@@ -2605,7 +2606,7 @@ class VirtualArrayType(ContentType):
                 elif form.primitive == "bool":
                     return numba.boolean
                 else:
-                    raise ValueError(
+                    raise NumbaValueError(
                         "unrecognized NumpyForm.primitive type: {}".format(
                             form.primitive
                         )
@@ -2641,7 +2642,7 @@ class VirtualArrayType(ContentType):
                 return arrayview.type.getitem_at(arrayview)
 
             elif isinstance(form, ak.forms.UnionForm):
-                raise TypeError(
+                raise NumbaTypeError(
                     "union types cannot be accessed in Numba"
                     + ak._util.exception_suffix(__file__)
                 )
