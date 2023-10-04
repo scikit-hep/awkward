@@ -141,8 +141,13 @@ def re_evaluate(local_dict=None):
             or not isinstance(x, ak.contents.Content)
             for x in inputs
         ):
+            input_primitives = [
+                x.data if isinstance(x, ak.contents.NumpyArray) else x for x in inputs
+            ]
             return (
-                ak.contents.NumpyArray(numexpr.re_evaluate(dict(zip(names, inputs)))),
+                ak.contents.NumpyArray(
+                    numexpr.re_evaluate(dict(zip(names, input_primitives)))
+                ),
             )
         else:
             return None
