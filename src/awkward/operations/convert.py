@@ -3520,7 +3520,9 @@ class _ParquetFileDataset(_Dataset):
         else:
             list_indicator = "item"
 
-        super().__init__(schema, list_indicator, row_groups, columns, partition_columns=[])
+        super().__init__(
+            schema, list_indicator, row_groups, columns, partition_columns=[]
+        )
 
     @property
     def row_group_metadata(self):

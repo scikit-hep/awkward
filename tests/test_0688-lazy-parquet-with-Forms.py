@@ -371,7 +371,9 @@ def test_14(one, two, three, tmp_path):
     array = ak.from_parquet(filename, lazy=True, lazy_cache_key="tmp")
     assert set(array.caches[0].keys()) == set()
     array.layout.field("x").array
-    assert set(array.caches[0].keys()) == {f"tmp:off:x.list.{list_indicator}.y.list.{list_indicator}:x[0]"}
+    assert set(array.caches[0].keys()) == {
+        f"tmp:off:x.list.{list_indicator}.y.list.{list_indicator}:x[0]"
+    }
     array.layout.field("x").array.content.field("z").array
     assert set(array.caches[0].keys()) == {
         f"tmp:off:x.list.{list_indicator}.y.list.{list_indicator}:x[0]",
@@ -387,7 +389,9 @@ def test_14(one, two, three, tmp_path):
     array = ak.from_parquet(filename, lazy=True, lazy_cache_key="tmp")
     assert set(array.caches[0].keys()) == set()
     array.layout.field("x").array
-    assert set(array.caches[0].keys()) == {f"tmp:off:x.list.{list_indicator}.y.list.{list_indicator}:x[0]"}
+    assert set(array.caches[0].keys()) == {
+        f"tmp:off:x.list.{list_indicator}.y.list.{list_indicator}:x[0]"
+    }
     array.layout.field("x").array.content.field("y").array
     assert set(array.caches[0].keys()) == {
         f"tmp:off:x.list.{list_indicator}.y.list.{list_indicator}:x[0]",
