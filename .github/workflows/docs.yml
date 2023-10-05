@@ -310,7 +310,7 @@ jobs:
       S3_BUCKET: "preview.awkward-array.org"
       DEPLOY_URL: "http://preview.awkward-array.org.s3-website.us-east-1.amazonaws.com"
     environment:
-      name: docs-preview
+      name: docs
       url: "${{ env.DEPLOY_URL }}/${{ github.head_ref }}"
     steps:
     - uses: actions/checkout@v4
