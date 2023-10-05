@@ -273,9 +273,6 @@ class NumpyArray(Content):
     def maybe_to_NumpyArray(self) -> Self:
         return self
 
-    def __array__(self, dtype=None):
-        return self._backend.nplike.asarray(self._data, dtype=dtype)
-
     def __iter__(self):
         return iter(self._data)
 

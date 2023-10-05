@@ -156,10 +156,12 @@ def _impl(array, highlevel, behavior):
                 nextcontent, _ = lengths_of(ak.highlevel.Array(layout), None)
                 return ak.contents.NumpyArray(nextcontent)
 
-            if not isinstance(layout, (ak.contents.NumpyArray, ak.contents.EmptyArray)):
+            if layout.is_unknown:
+                layout = layout.to_NumpyArray(np.float64)
+            elif not layout.is_numpy:
                 raise NotImplementedError("run_lengths on " + type(layout).__name__)
 
-            nextcontent, _ = lengths_of(backend.nplike.asarray(layout), None)
+            nextcontent, _ = lengths_of(backend.nplike.asarray(layout.data), None)
             return ak.contents.NumpyArray(nextcontent)
 
         elif layout.branch_depth == (False, 2):
@@ -197,9 +199,9 @@ def _impl(array, highlevel, behavior):
             if content.is_indexed:
                 content = content.project()
 
-            if not isinstance(
-                content, (ak.contents.NumpyArray, ak.contents.EmptyArray)
-            ):
+            if content.is_unknown:
+                content = content.to_NumpyArray(np.float64)
+            elif not content.is_numpy:
                 raise NotImplementedError(
                     "run_lengths on "
                     + type(layout).__name__
@@ -208,7 +210,7 @@ def _impl(array, highlevel, behavior):
                 )
 
             nextcontent, nextoffsets = lengths_of(
-                backend.nplike.asarray(content), offsets - offsets[0]
+                backend.nplike.asarray(content.data), offsets - offsets[0]
             )
             return ak.contents.ListOffsetArray(
                 ak.index.Index64(nextoffsets),

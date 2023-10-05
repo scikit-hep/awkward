@@ -430,8 +430,8 @@ def _record_to_complex(layout, complex_record_fields):
                     ):
                         with numpy._module.errstate(invalid="ignore"):
                             return ak.contents.NumpyArray(
-                                node.backend.nplike.asarray(real)
-                                + node.backend.nplike.asarray(imag) * 1j
+                                node.backend.nplike.asarray(real.data)
+                                + node.backend.nplike.asarray(imag.data) * 1j
                             )
                     else:
                         raise ValueError(
