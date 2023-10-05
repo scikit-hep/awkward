@@ -169,7 +169,8 @@ jobs:
     permissions:
       id-token: write
     environment:
-      name: "deploy-cpp-pypi"
+      name: "pypi"
+      url: "https://pypi.org/project/awkward-cpp/"
     steps:
     - uses: actions/download-artifact@v3
       with:
