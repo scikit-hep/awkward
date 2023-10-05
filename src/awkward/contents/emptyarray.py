@@ -151,9 +151,6 @@ class EmptyArray(Content):
             backend=backend,
         )
 
-    def __array__(self, **kwargs):
-        return numpy.empty(0, dtype=np.float64)
-
     def __iter__(self):
         return iter([])
 

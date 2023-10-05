@@ -10,7 +10,7 @@ def test():
     data = np.array([0, 2, 2, 3], dtype="i8")
     offsets = ak.index.Index64(data)
 
-    assert np.asarray(offsets).tolist() == [0, 2, 2, 3]
+    assert np.asarray(offsets.data).tolist() == [0, 2, 2, 3]
     assert offsets[0] == 0
     assert offsets[1] == 2
     assert offsets[2] == 2
@@ -21,7 +21,7 @@ def test():
     data = np.array([0, 2, 2, 3], dtype="i4")
     offsets = ak.index.Index32(data)
 
-    assert np.asarray(offsets).tolist() == [0, 2, 2, 3]
+    assert np.asarray(offsets.data).tolist() == [0, 2, 2, 3]
     assert offsets[0] == 0
     assert offsets[1] == 2
     assert offsets[2] == 2
@@ -34,12 +34,12 @@ def test():
     offsets = ak.index.Index32(data)
     array = ak.contents.ListOffsetArray(offsets, content)
 
-    assert np.asarray(content).tolist() == [[0, 1, 2, 3], [4, 5, 6, 7], [8, 9, 10, 11]]
-    assert np.asarray(content[0]).tolist() == [0, 1, 2, 3]
+    assert ak.to_numpy(content).tolist() == [[0, 1, 2, 3], [4, 5, 6, 7], [8, 9, 10, 11]]
+    assert ak.to_numpy(content[0]).tolist() == [0, 1, 2, 3]
     assert content.to_typetracer()[0].form == content[0].form
-    assert np.asarray(content[1]).tolist() == [4, 5, 6, 7]
+    assert ak.to_numpy(content[1]).tolist() == [4, 5, 6, 7]
     assert content.to_typetracer()[1].form == content[1].form
-    assert np.asarray(content[2]).tolist() == [8, 9, 10, 11]
+    assert ak.to_numpy(content[2]).tolist() == [8, 9, 10, 11]
     assert content.to_typetracer()[2].form == content[2].form
     assert [content[i][j] for i in range(3) for j in range(4)] == [
         0,
@@ -56,17 +56,17 @@ def test():
         11,
     ]
 
-    assert np.asarray(array[0]).tolist() == [[0, 1, 2, 3], [4, 5, 6, 7]]
+    assert ak.to_numpy(array[0]).tolist() == [[0, 1, 2, 3], [4, 5, 6, 7]]
     assert array.to_typetracer()[0].form == array[0].form
-    assert np.asarray(array[1]).tolist() == []
+    assert ak.to_numpy(array[1]).tolist() == []
     assert array.to_typetracer()[1].form == array[1].form
-    assert np.asarray(array[2]).tolist() == [[8, 9, 10, 11]]
+    assert ak.to_numpy(array[2]).tolist() == [[8, 9, 10, 11]]
     assert array.to_typetracer()[2].form == array[2].form
-    assert np.asarray(array[1:3][0]).tolist() == []
+    assert ak.to_numpy(array[1:3][0]).tolist() == []
     assert array.to_typetracer()[1:3][0].form == array[1:3][0].form
-    assert np.asarray(array[1:3][1]).tolist() == [[8, 9, 10, 11]]
+    assert ak.to_numpy(array[1:3][1]).tolist() == [[8, 9, 10, 11]]
     assert array.to_typetracer()[1:3][1].form == array[1:3][1].form
-    assert np.asarray(array[2:3][0]).tolist() == [[8, 9, 10, 11]]
+    assert ak.to_numpy(array[2:3][0]).tolist() == [[8, 9, 10, 11]]
     assert array.to_typetracer()[2:3][0].form == array[2:3][0].form
 
 
@@ -85,16 +85,16 @@ def test_members():
     array = ak.contents.ListOffsetArray(offsets, content)
     new = ak.contents.ListOffsetArray(offsets, array)
 
-    assert np.asarray(array.offsets).tolist() == [0, 2, 2, 3]
-    assert np.asarray(array.content).tolist() == [
+    assert np.asarray(array.offsets.data).tolist() == [0, 2, 2, 3]
+    assert ak.to_numpy(array.content).tolist() == [
         [0, 1, 2, 3],
         [4, 5, 6, 7],
         [8, 9, 10, 11],
     ]
 
-    assert np.asarray(new.offsets).tolist() == [0, 2, 2, 3]
-    assert np.asarray(new.content.offsets).tolist() == [0, 2, 2, 3]
-    assert np.asarray(new.content.content).tolist() == [
+    assert np.asarray(new.offsets.data).tolist() == [0, 2, 2, 3]
+    assert np.asarray(new.content.offsets.data).tolist() == [0, 2, 2, 3]
+    assert ak.to_numpy(new.content.content).tolist() == [
         [0, 1, 2, 3],
         [4, 5, 6, 7],
         [8, 9, 10, 11],

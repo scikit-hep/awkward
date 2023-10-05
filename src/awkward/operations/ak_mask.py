@@ -100,8 +100,8 @@ def mask(array, mask, *, valid_when=True, highlevel=True, behavior=None):
 def _impl(array, mask, valid_when, highlevel, behavior):
     def action(inputs, backend, **kwargs):
         layoutarray, layoutmask = inputs
-        if isinstance(layoutmask, ak.contents.NumpyArray):
-            m = backend.nplike.asarray(layoutmask)
+        if layoutmask.is_numpy:
+            m = backend.nplike.asarray(layoutmask.data)
             if not issubclass(m.dtype.type, (bool, np.bool_)):
                 raise ValueError(f"mask must have boolean type, not {m.dtype!r}")
             bytemask = ak.index.Index8(m.view(np.int8))

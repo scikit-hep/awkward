@@ -264,8 +264,7 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
 
                 for x in nextinputs:
                     o, f = x._offsets_and_flattened(1, 1)
-                    o = backend.index_nplike.asarray(o)
-                    c = o[1:] - o[:-1]
+                    c = o.data[1:] - o.data[:-1]
                     backend.index_nplike.add(counts, c, maybe_out=counts)
                     all_counts.append(c)
                     all_flatten.append(f)
