@@ -193,7 +193,6 @@ jobs:
         name: awkward
         path: dist/awkward*.whl
 
-
   build-docs:
     runs-on: ubuntu-22.04
     needs: [awkward-cpp-wasm, awkward-cpp-x86-64, awkward]
@@ -311,8 +310,8 @@ jobs:
       S3_BUCKET: "preview.awkward-array.org"
       DEPLOY_URL: "http://preview.awkward-array.org.s3-website.us-east-1.amazonaws.com"
     environment:
-      name: docs-preview
-      url: ${{ env.DEPLOY_URL }}/${{ github.head_ref }}
+      name: docs
+      url: "${{ env.DEPLOY_URL }}/${{ github.head_ref }}"
     steps:
     - uses: actions/checkout@v4
     - name: Configure AWS credentials
@@ -343,7 +342,7 @@ jobs:
       PRODUCTION_URL: "http://awkward-array.org"
       CLOUDFRONT_ID: "EFM4QVENUIXHS"
     environment:
-      name: docs-prod
+      name: docs
       url: ${{ env.PRODUCTION_URL }}${{ steps.sync-main.outputs.path || steps.sync-stable.outputs.path }}
     steps:
       - uses: actions/checkout@v4

@@ -120,7 +120,7 @@ jobs:
           - '3.9'
           - '3.8'
 
-    runs-on: macOS-11
+    runs-on: macos-11
 
     env:
       PIP_ONLY_BINARY: cmake,numpy
