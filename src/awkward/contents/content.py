@@ -289,7 +289,7 @@ class Content:
             "do not apply NumPy functions to low-level layouts (Content subclasses); put them in ak.highlevel.Array"
         )
 
-    def __array__(self, **kwargs):
+    def __array__(self, dtype=None):
         raise TypeError(
             "do not try to convert low-level layouts (Content subclasses) into NumPy arrays; put them in ak.highlevel.Array"
         )
