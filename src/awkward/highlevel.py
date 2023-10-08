@@ -1548,9 +1548,11 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         See [cppyy documentation](https://cppyy.readthedocs.io/en/latest/index.html)
         on types and signatures.
         """
-        ak.cppyy.register_and_check()
+        ak.cppyy.register_and_check()  # noqa: F823
 
         import cppyy
+
+        import awkward._connect.cling  # noqa: F401
 
         if self._cpp_type is None:
             self._generator = ak._connect.cling.togenerator(
